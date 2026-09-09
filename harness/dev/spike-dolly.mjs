@@ -1,6 +1,6 @@
-// scripts/dev/spike-dolly.mjs, PHASE 0 SPIKE: can the CAMERA travel past a tilted layer?
+// harness/dev/spike-dolly.mjs, PHASE 0 SPIKE: can the CAMERA travel past a tilted layer?
 //
-// scripts/dev/spike-3d.mjs settled where the lens goes (`perspective` as a PROPERTY, on the tilted
+// harness/dev/spike-3d.mjs settled where the lens goes (`perspective` as a PROPERTY, on the tilted
 // layer's DIRECT parent) and shipped `tilt`. It left the other half open: with the lens on #cam and the
 // camera's own s/x/y written as a 2D transform ON #cam, the projection has already happened by the time
 // the camera moves. Panning #cam slides a finished picture, so a tilted card's vanishing point travels
@@ -24,7 +24,7 @@
 //   3. does translateZ dolly (scale up) without changing the foreshortening? (a dolly is not a zoom.)
 //   4. does the rig leave an UNTILTED, unmoved camera exactly where the flat path put it? (byte-identity)
 //
-//   node scripts/dev/spike-dolly.mjs
+//   node harness/dev/spike-dolly.mjs
 import puppeteer from 'puppeteer';
 
 const W = 1080, H = 1920;

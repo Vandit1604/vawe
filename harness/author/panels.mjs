@@ -1,4 +1,4 @@
-// scripts/author/panels.mjs: the storyboard stop, as a picture.
+// harness/author/panels.mjs: the storyboard stop, as a picture.
 //
 // docs/CRAFT/APPROVAL-STOPS.md states the rule: "a stop is a picture, not a report." The storyboard
 // stop was the one with no picture. A storyboard here is prose, so a reviewer was asked to approve a
@@ -27,8 +27,8 @@
 // where the thing a reviewer needs is the comparison: five beats declaring one treatment is a film
 // shot at one volume, and that is only visible with the five lines side by side.
 //
-//   node scripts/author/panels.mjs <STORYBOARD.md> [--out /tmp/panels]
-//   node scripts/author/panels.mjs --self-test        # the region/area arithmetic, asserted
+//   node harness/author/panels.mjs <STORYBOARD.md> [--out /tmp/panels]
+//   node harness/author/panels.mjs --self-test        # the region/area arithmetic, asserted
 //   make panels SB=formats/scene/<name>.storyboard.md
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';

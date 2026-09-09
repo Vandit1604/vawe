@@ -331,7 +331,7 @@ the lens goes on the stage and `#cam`
 stands inside it in `preserve-3d`. Then a pan is a **truck past** the subject and `s` is a real **dolly**.
 The vanishing point stays nailed to the frame while the world crosses it, so a tilted card *turns* as the
 camera travels instead of merely sliding. That is the move the flat form cannot make, and
-`scripts/dev/spike-dolly.mjs` measures both: the flat form changes a tilted card's projected shape by
+`harness/dev/spike-dolly.mjs` measures both: the flat form changes a tilted card's projected shape by
 0.00%, the rig by 9%+ over a 300px truck.
 
 **Depth and cuts share a node.** `opacity < 1`, `filter` and a clip flatten the element they sit on, and a
@@ -550,7 +550,7 @@ centre in 3D; `x`/`y`/`z` are degrees. Every tilted layer sharing a parent is pr
 camera**, so a row of cards recedes toward one vanishing point instead of each leaning at its own
 (`docs/MISTAKES.md` #59 rejected per-layer 3D on exactly that failure, having used the `perspective()`
 transform *function*, which puts the camera on each layer; the *property* on the shared parent is the fix,
-proved by `scripts/dev/spike-3d.mjs`). `dist` is that camera's distance in px (default 1600, smaller = a
+proved by `harness/dev/spike-3d.mjs`). `dist` is that camera's distance in px (default 1600, smaller = a
 wider lens) and `origin` its vanishing point (`"center"` or `[x, y]` in canvas px); siblings that disagree
 about either are a hard error, because one parent is one camera. On a **group child** the camera belongs
 to the group, so tilted children share a vanishing point local to the group and `origin` defaults to the
@@ -573,7 +573,7 @@ Parallax is a *difference* of depth and cannot exist while there is only one dep
 rig a layer at `z` is projected by `lens / (lens - z)`, so a near layer crosses the frame faster than a
 far one: at the default 1600px lens a 600px truck moves `z = +300` by 738px, `z = 0` by 600px and
 `z = -900` by 384px. Those are measured, not derived,
-`node scripts/dev/spike-depth.mjs` renders the real engine and reports them.
+`node harness/dev/spike-depth.mjs` renders the real engine and reports them.
 
 It **turns the rig on by itself**, exactly as a top-level `tilt` does, because without the rig
 `translate: 0 0 z` lands in a flat parent and moves the layer by zero pixels. The layer **changes

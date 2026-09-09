@@ -1,4 +1,4 @@
-// scripts/dev/previews.mjs: one rendered preview per beat blueprint, so an author picks a finished part
+// harness/dev/previews.mjs: one rendered preview per beat blueprint, so an author picks a finished part
 // by SEEING it (another engine' registry carries a preview per item; its frame presets ship a rendered
 // showcase sheet). Companion to `make blueprints`, which lists beats but shows nothing.
 //
@@ -8,7 +8,7 @@
 //   site/public/blocklib/beats/<id>/{preview.mp4, poster.png, sheet.png}
 //   site/public/blocklib/beats/index.json   (id, blurb, role, duration, dims, files)
 //
-//   node scripts/dev/previews.mjs [--only=<id>]   ·   make previews [ONLY=<id>]
+//   node harness/dev/previews.mjs [--only=<id>]   ·   make previews [ONLY=<id>]
 //
 // Renders are DRAFT, 2 workers, one beat at a time: this repo's renderer is CPU-heavy and other agents
 // render concurrently, so a previews run must stay small per scene rather than fast in aggregate.

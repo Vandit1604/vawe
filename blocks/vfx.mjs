@@ -139,7 +139,7 @@ function parallaxBoard({ x, y, w = 1200, h = 760, title = '', caption = '', tile
     // so the same n came back two different pictures. Measured mid-ramp (frame 45, --p 0.79) over 16
     // separate browser launches: 4 of 15 differed from the first by a MAX CHANNEL DELTA OF 83, all of
     // it on the two lines of hero type, and the noise floor this repo compares against is 1
-    // (scripts/lib/png-diff.mjs). With the hint, 0 of 15 differ. It pins the majority rendering, not
+    // (harness/lib/png-diff.mjs). With the hint, 0 of 15 differ. It pins the majority rendering, not
     // the odd one out: the fixed output is byte-identical to the variant 12 of the 16 launches drew.
     // ONE element, deliberately. Spraying this over the eight ring cards is the mistake
     // core/lightfield/index.js:393 records, where 400 promotion hints Chrome could not honour made a

@@ -1,4 +1,4 @@
-// scripts/lib/layers.mjs: walking a scene's layer TREE, once.
+// harness/lib/layers.mjs: walking a scene's layer TREE, once.
 //
 // `layers` is a tree: a group carries `children`, and a gate that reasons about "every layer" has to
 // flatten it first. Five gates did, in four slightly different ways, and the differences were all

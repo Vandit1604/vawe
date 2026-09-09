@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// scripts/dev/demo.mjs: scaffold a SPECIMEN scene, so that the default shape of a demo is a SHOT.
+// harness/dev/demo.mjs: scaffold a SPECIMEN scene, so that the default shape of a demo is a SHOT.
 //
-//   node scripts/dev/demo.mjs --q "what this shows" [--name <slug>] [--fx <key>] [--subject <path>]
+//   node harness/dev/demo.mjs --q "what this shows" [--name <slug>] [--fx <key>] [--subject <path>]
 //   make demo Q="what this shows" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]
 //
 // WHY IT EXISTS. 27 of the 35 `formats/scene/_*.json` scratch scenes are contact-sheet shaped: four or
@@ -89,7 +89,7 @@ const die = (msg) => { console.error(msg); process.exit(2); };
 
 const q = (flag('q', '') || '').trim();
 if (!q) {
-  die(`usage: node scripts/dev/demo.mjs --q "what this shows" [--name <slug>] [--fx <key>] [--subject <path>]
+  die(`usage: node harness/dev/demo.mjs --q "what this shows" [--name <slug>] [--fx <key>] [--subject <path>]
 
   --q        the caption: one line of real copy naming what the viewer is looking at.
              At most ${SERIES.maxCaptionChars} characters, because the caption size is fixed for the series.
@@ -130,7 +130,7 @@ const C = SERIES.cut;
 const r3 = (v) => +Number(v).toFixed(3);
 
 // THE SUBJECT'S TRACK, hand-placed rather than named. Its shape is brew's four-key punctuation from
-// scripts/author/track.mjs: arrive over-size, settle, hold with a drift so the beat is not a still,
+// harness/author/track.mjs: arrive over-size, settle, hold with a drift so the beat is not a still,
 // then leave THROUGH the frame instead of dimming in place. It spans the WHOLE film and changes state
 // across the cut, so the same object stands on both sides of the joint.
 // Every key states every property it animates: core/sequence.js reads an omitted `scale` as 1 and an

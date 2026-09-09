@@ -1,7 +1,7 @@
 ---
 name: paired-directional-exit
 when: choosing anim/out for a layer that slides
-holds: eye (live hook scripts/live/craft-live.mjs on Claude Code; check by hand elsewhere)
+holds: eye (live hook harness/live/craft-live.mjs on Claude Code; check by hand elsewhere)
 answers: "why an entrance and its exit must travel in one continuous direction, never enter-and-retreat"
 group: look
 ---

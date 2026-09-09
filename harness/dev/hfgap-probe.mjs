@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// scripts/dev/hfgap-probe.mjs: writes formats/scene/_probe-hfgap.json.
+// harness/dev/hfgap-probe.mjs: writes formats/scene/_probe-hfgap.json.
 //
 // It BAKES the blocks/vfx.mjs factories to concrete layers rather than emitting `{"type":"block"}`
 // sugar, because vfx.mjs is not wired into blocks/index.mjs yet (a registry refactor owns that file).
 // `make expand` resolves a block name through index.mjs, so the sugar would not resolve; baking here
 // stages exactly the layers a wired-up expansion would produce.
 //
-//   node scripts/dev/hfgap-probe.mjs [theme]
+//   node harness/dev/hfgap-probe.mjs [theme]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

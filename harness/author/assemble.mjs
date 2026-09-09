@@ -5,7 +5,7 @@
 //     names a placement
 //   - the continuous object: ONE layer with a hand-keyed `motion` track built from every beat's
 //     object_in/object_out, resolved to px through the ENGINE's own resolveCoords
-//     (scripts/lib/placement-resolve.mjs), never a second copy of that math. Drawn as a rect UNLESS
+//     (harness/lib/placement-resolve.mjs), never a second copy of that math. Drawn as a rect UNLESS
 //     the storyboard's `object:` line names a source ("the input bar -> path/to/bar.html"), in which
 //     case it is that source's own layer type instead of the placeholder
 //   - one `bg` window per beat, cycling the theme's own look.backdrop rotation
@@ -42,7 +42,7 @@ import { boundaryMechanism } from '../../core/transitions/lower.js';
 // worse than dropping it was, so each one is reported by name and any whose window falls outside the
 // new film is warned about.
 // `camera` sits here beside `cameraMove` because the DIRECT stage writes it and the ASSEMBLE stage
-// used to destroy it. scripts/author/motion-director.mjs emits a resolved `camera` track (stage 6
+// used to destroy it. harness/author/motion-director.mjs emits a resolved `camera` track (stage 6
 // of the eight), and re-running assemble (stage 5) dropped it without a word, so going back one
 // step to fix a fragment silently threw away every camera move that had been directed. This file
 // generates no camera of its own (see the header: kept thin on purpose), so it has no claim on the
@@ -51,7 +51,7 @@ const PRESERVED_FILM_FIELDS = ['cameraMove', 'camera'];
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv[2];
-if (!film || !fs.existsSync(film)) { console.error('usage: node scripts/author/assemble.mjs <film.json>'); process.exit(1); }
+if (!film || !fs.existsSync(film)) { console.error('usage: node harness/author/assemble.mjs <film.json>'); process.exit(1); }
 
 const scene = JSON.parse(fs.readFileSync(film, 'utf8'));
 const sbPath = storyboardPathFor(film);
@@ -98,7 +98,7 @@ const dir = path.dirname(film);
 // ---- STAGING: a documented cause becomes a mechanical stagger, inserted, not carved out -----------
 // `trigger:` on beat i already answers WHAT MADE it happen (storyboard-check.mjs's causal chain); this
 // is the one place that answer gets built instead of reported and discarded. `stagedSchedule`
-// (scripts/lib/contract.mjs) is the ONE shifted timeline every block below builds from (bg, transitions,
+// (harness/lib/contract.mjs) is the ONE shifted timeline every block below builds from (bg, transitions,
 // the object's keys, the total duration) and the ONE `storyboard-check.mjs` re-derives to grade this
 // film against: two independent copies of "when does beat i really start" is exactly the drift
 // CLAUDE.md calls a fork. A caused junction gets STAGE_S of REAL time INSERTED before it (every beat
@@ -154,7 +154,7 @@ const htmlLayers = runs.map(([i, j]) => {
 
   // A PLACEMENT CHANGE INSIDE A SHARED RUN becomes a `motion` key on this ONE layer, never a second
   // layer: the whole point of the run is that the DOM never gets torn down. Keyed the same way the
-  // continuous object is (scripts/lib/placement-resolve.mjs resolvePx, x/y as OFFSETS from the layer's
+  // continuous object is (harness/lib/placement-resolve.mjs resolvePx, x/y as OFFSETS from the layer's
   // own base box, w/h absolute only when the box's size actually changes).
   let motionKeys;
   if (merged) {
@@ -209,7 +209,7 @@ const htmlLayers = runs.map(([i, j]) => {
   // its own scene layer, the SAME `select`/`anim` vocabulary a hand-authored parts block already takes
   // (core/motion/parts.js), so this is not a second motion mechanism, it is the storyboard filling in
   // the one the engine already has. `each`/`exitDur` come from the named speed band
-  // (scripts/lib/contract.mjs SPEED_BAND), never a raw second written here.
+  // (harness/lib/contract.mjs SPEED_BAND), never a raw second written here.
   //
   // SPREAD WITHIN A BEAT, OFFSET ACROSS A RUN. Two separate timing problems, and both are solved with
   // the `delay` that `parts[]` already has (formats/scene/scene.js reads it as `layer.start + delay`,

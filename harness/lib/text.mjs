@@ -1,4 +1,4 @@
-// scripts/lib/text.mjs: what a layer's copy READS AS, which is not what it is authored as.
+// harness/lib/text.mjs: what a layer's copy READS AS, which is not what it is authored as.
 //
 // The RULE lives in core/on-screen-text.js, because core/validate.mjs and core/captions.js need it too
 // and they ship to the browser, so they cannot import out of scripts/. This file is the tooling front

@@ -160,7 +160,7 @@ The effect budget flexes with the video's REGISTER, not with a fixed count. Two 
 sourced in [`MOTION-REGISTERS.md`](MOTION-REGISTERS.md): **quiet** (UI-adjacent, explainer, talking-head:
 motion is a cost the viewer pays, so one loud moment against a still field is correct), and **kinetic**
 (launch, sting, hype promo, continuous title: sustained motion is the content, so a still beat is the
-cost). `scripts/author/type-spines.mjs` carries `register` per type so this is picked, not guessed.
+cost). `harness/author/type-spines.mjs` carries `register` per type so this is picked, not guessed.
 "An effects showreel is allowed to be dense" was the old hedge for what a kinetic register actually is;
 the director gate judges busyness against the film's own register rather than a fixed count.
 

@@ -1,9 +1,9 @@
-// scripts/author/llms-txt.mjs: GENERATE formats/llms.txt, a portable vocabulary primer for any agent
+// harness/author/llms-txt.mjs: GENERATE formats/llms.txt, a portable vocabulary primer for any agent
 // (this one or a fresh one with no repo access) that has to write a vawe scene JSON from scratch.
 // Modeled on another engine's own llms.txt: About -> a runnable skeleton -> one rule + one snippet per
 // capability, escalating -> the hard rules -> the command loop.
 //
-//   node scripts/author/llms-txt.mjs   ·   make llms-txt (wired by the caller)
+//   node harness/author/llms-txt.mjs   ·   make llms-txt (wired by the caller)
 //
 // WHY GENERATED, NOT HAND-WRITTEN. Every vocabulary here already lives in a `defineRegistry` (the layer
 // types in core/layers/index.js, the 693 effects behind `catalogued()`), and every entry there already
@@ -190,6 +190,6 @@ async function main() {
   console.error(`✓ llms-txt: wrote ${path.relative(ROOT, OUT)} (${text.split('\n').length} lines)`);
 }
 
-// Run only when invoked directly (`node scripts/author/llms-txt.mjs`), never on import, so the test
+// Run only when invoked directly (`node harness/author/llms-txt.mjs`), never on import, so the test
 // self-check can import buildLlmsTxt/OUT without writing a file as a side effect of loading the module.
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

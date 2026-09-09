@@ -19,7 +19,7 @@
 // one that grew its own guard would be a second copy of the same fact, drifting. core/fx/mix-blend.js
 // already carried one such guard, correctly, for exactly one pair. This file is that fact, once.
 //
-// EVERY ROW IS MEASURED, NOT READ OFF A SPEC. `node scripts/dev/probe-ancestor-kills.mjs` renders the
+// EVERY ROW IS MEASURED, NOT READ OFF A SPEC. `node harness/dev/probe-ancestor-kills.mjs` renders the
 // pair, once with the capability declared and once without, and reports how much the declaration
 // actually changed. Re-run it before trusting a row; a browser update is allowed to move one.
 
@@ -117,7 +117,7 @@ export function checkCuts({ cuts, layers, sceneUnits }) {
           + `layer keeps the declaration and silently stops doing anything, which no still frame shows. `
           + `Either use a cut that does not write ${hit.map(nameOf).join('/')} `
           + `(${alts.join(', ')}), move the cut off this layer's window (${l0}s to ${l1 === Infinity ? 'the end' : l1 + 's'}), `
-          + `or drop ${via} for this beat. Measured: node scripts/dev/probe-ancestor-kills.mjs`);
+          + `or drop ${via} for this beat. Measured: node harness/dev/probe-ancestor-kills.mjs`);
       }
     }
   }

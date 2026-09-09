@@ -12,20 +12,20 @@
 //
 //   node quality/gates/seam-forensics.mjs formats/scene/<file>.json     ·     make forensics D=<file>
 //
-// Reads the real rendered pixels via ffmpeg (scripts/lib/frame-forensics.mjs), the same reason
+// Reads the real rendered pixels via ffmpeg (harness/lib/frame-forensics.mjs), the same reason
 // seam-snap.mjs gives: a seam is composited during the render, so it exists only in the mp4. Boxes come
-// from scripts/lib/layer-boxes.mjs, which calls the engine's OWN `resolveCoords` rather than
+// from harness/lib/layer-boxes.mjs, which calls the engine's OWN `resolveCoords` rather than
 // re-deriving pin/percent/column arithmetic a second time.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadScene } from '../../core/engine/expand.js';
-import { layerBoxes, sceneDims } from '../../scripts/lib/layer-boxes.mjs';
+import { layerBoxes, sceneDims } from '../../harness/lib/layer-boxes.mjs';
 import { gradeable } from './tile.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 import {
   requireTool, probeFps, probeTotalFrames, edgeReadingAt, diffBoxes, meanColorAt, savePNG, median,
-} from '../../scripts/lib/frame-forensics.mjs';
+} from '../../harness/lib/frame-forensics.mjs';
 
 const f = gateFindings();
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

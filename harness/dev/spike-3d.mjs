@@ -1,4 +1,4 @@
-// scripts/dev/spike-3d.mjs, PHASE 0 SPIKE: can sibling layers tilt in 3D and share one vanishing point?
+// harness/dev/spike-3d.mjs, PHASE 0 SPIKE: can sibling layers tilt in 3D and share one vanishing point?
 //
 // docs/MISTAKES.md #59 rejected per-layer 3D and concluded "there is no per-layer angle that composes
 // correctly". Its diagnosis is right about the construction it considered: CSS `perspective()` takes its
@@ -29,7 +29,7 @@
 // camera), and they must land on the analytically predicted point (that is the camera being the one we
 // asked for).
 //
-//   node scripts/dev/spike-3d.mjs
+//   node harness/dev/spike-3d.mjs
 import puppeteer from 'puppeteer';
 
 const W = 1080, H = 1920;

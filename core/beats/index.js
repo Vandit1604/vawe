@@ -3,7 +3,7 @@
 //
 // core/beats/detect.js (was core/beats.js) has computed a grid since it was written, `make
 // beatmap` has written the sidecar,
-// and NOTHING on the render path ever read either: the comment in scripts/media/beatmap.mjs told
+// and NOTHING on the render path ever read either: the comment in harness/media/beatmap.mjs told
 // authors to snap cut times "by hand". That is the `cameraMove` failure again (docs/MISTAKES.md
 // #424) (a value produced and never consumed) so the repair has the same shape: the binding
 // happens once, at boot, on the one path every render goes through, and a scene that ASKS to be
@@ -15,14 +15,14 @@
 
 import { snapToBeat } from './detect.js';
 
-// Below this the pulse is not a pulse. Same threshold scripts/media/beatmap.mjs prints as
+// Below this the pulse is not a pulse. Same threshold harness/media/beatmap.mjs prints as
 // "WEAK, ambient/rubato, do not snap to this"; snapping to a grid that weak scatters cuts at
 // times that mean nothing, which is worse than leaving them where the author put them.
 const MIN_CONFIDENCE = 1.6;
 
 // HOW FAR A JOINT MAY TRAVEL, and there is one answer. `snapToBeat` in core/beats.js already carries
 // this as its own default, with the reason: past this the time the author wrote means more than the
-// grid does. `scripts/media/beatsync.mjs` used to hold a second opinion (half a beat, capped at
+// grid does. `harness/media/beatsync.mjs` used to hold a second opinion (half a beat, capped at
 // 0.18s), which at any tempo above 60 BPM is wider than the gap between beats, so nothing was ever
 // left alone and the tool's own "left as-is" report could not fire. A scene overrides per film with
 // `audio.beatSync.maxShift`; the CLI with `SNAP=`.

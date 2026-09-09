@@ -1,4 +1,4 @@
-// scripts/author/styleframes.mjs: the LOOK, settled and signed off, before the motion is trusted.
+// harness/author/styleframes.mjs: the LOOK, settled and signed off, before the motion is trusted.
 //
 // Stage 5 of the studio pipeline, and the one this repo never had. A studio designs three to five
 // frames to final quality and gets them approved BEFORE anyone animates, because animation is the
@@ -16,7 +16,7 @@
 //   · the frames are written full size, one file each, because a style frame is a deliverable you open
 //     and stare at, not a cell in a contact sheet.
 //
-//   node scripts/author/styleframes.mjs <scene.json> [--n 4] [--scale 2]
+//   node harness/author/styleframes.mjs <scene.json> [--n 4] [--scale 2]
 //   make styleframes D=formats/scene/<name>.json [N=4]
 import fs from 'node:fs';
 import path from 'node:path';

@@ -1,7 +1,7 @@
 ---
 name: blur-out-dense
 when: exiting a face, a card, or a dense grid of elements
-holds: eye (live hook scripts/live/craft-live.mjs on Claude Code; check by hand elsewhere)
+holds: eye (live hook harness/live/craft-live.mjs on Claude Code; check by hand elsewhere)
 answers: "why a dense or face-bearing layer should exit through defocus, not through a slide"
 group: look
 ---

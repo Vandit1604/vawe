@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/vocabulary.mjs - a NEW named vocabulary should be a registry, and you should be told
+// harness/live/vocabulary.mjs - a NEW named vocabulary should be a registry, and you should be told
 // while you are still in the file.
 //
 // WHY AT THE KEYSTROKE. This engine's discovery problem was never that capabilities were hard to find.
@@ -12,7 +12,7 @@
 // ONE edit in ONE file. This hook exists to say so at the only moment the choice is still cheap.
 // quality/gates/arsenal-check.mjs still refuses at push time and is the real enforcement; a push-time
 // rule gets satisfied by a waiver, and a keystroke-time rule gets satisfied by writing the registry.
-// That argument is scripts/live/code-quality.mjs's, and this file is deliberately its twin.
+// That argument is harness/live/code-quality.mjs's, and this file is deliberately its twin.
 //
 // IT ONLY EVER COMPLAINS ABOUT WHAT YOU ADDED. 131 bare vocabularies exist across 78 files in core/, and
 // most of them are correct: a props table, an interaction matrix, a constant set nobody picks from. A

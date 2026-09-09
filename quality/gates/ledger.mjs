@@ -13,8 +13,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fingerprint, similarity, verdict } from './similarity.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
-import { readReceipt } from '../../scripts/lib/receipt.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
+import { readReceipt } from '../../harness/lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const LEDGER = path.join(ROOT, 'quality', 'ledger', 'ledger.json');

@@ -32,7 +32,7 @@ scale, the theme's own type scale (hook/headline/body/caption), a shadow, and th
 global, set by `applyTheme`) a fragment may reference without redeclaring.
 
 Because the block is pasted verbatim, it is CHECKABLE: `make stagekit D=<film> --check` (or
-`node scripts/author/stagekit.mjs <film> --check`) reads every `<film>.sceneN.html` fragment and
+`node harness/author/stagekit.mjs <film> --check`) reads every `<film>.sceneN.html` fragment and
 asserts its kit block is byte-identical to the one `make stagekit` generated. Drift between three
 agents' fragments becomes impossible to ship silently rather than merely discouraged.
 
@@ -42,7 +42,7 @@ The contract is not a second planning artefact. It is two fields the storyboard 
 already writes now carries on every beat: `object_in` and `object_out`, each
 `"<placement>@<w>x<h>"`, a name from the safe-area placement registry (`core/layout/safe.js`
 `PLACEMENT`) plus a size in px. `object_in` is the continuous object's state at the start of the
-beat; `object_out` is its state at the end. `make contract D=<film>` (`scripts/lib/contract.mjs`)
+beat; `object_out` is its state at the end. `make contract D=<film>` (`harness/lib/contract.mjs`)
 reads the storyboard and refuses to proceed if beat *i*'s `object_out` does not equal beat *i+1*'s
 `object_in`, naming both values:
 
@@ -75,7 +75,7 @@ headline that pushes in, a card that pops, had no contract at all: a fragment ag
 entrances after the markup was written, `assemble.mjs` never built them, and a storyboard that said
 "the headline slides in hard" produced a film where nothing moved.
 
-A beat's `motion:` field (also `scripts/lib/contract.mjs`) is one or more `;`-separated entries,
+A beat's `motion:` field (also `harness/lib/contract.mjs`) is one or more `;`-separated entries,
 `<selector>@<kind>:<inBand>[/<outBand>]`. `<selector>` is a CSS selector into the fragment's own
 markup, the same selector a hand-authored `parts[].select` already takes (`core/motion/parts.js`);
 `<kind>` is one of the engine's named part entrances (`growUp`, `fadeUp`, `slide-left`, …); the bands
@@ -123,14 +123,14 @@ Two things it gets right that are easy to get wrong by hand:
   real two-scene GPU blend.
 - **A caused junction is staged, not fired flat.** Every html layer carries an `id` (`scene1`,
   `scene2`, …), and `assemble` keeps one SHIFTED schedule the whole file is built from. When beat *i*'s
-  `trigger:` names a real cause (`scripts/lib/contract.mjs isCausedTrigger`, the same test
+  `trigger:` names a real cause (`harness/lib/contract.mjs isCausedTrigger`, the same test
   `storyboard-check`'s causal-chain report already uses), 0.05s of REAL time is inserted before that
   beat: every beat keeps its full planned duration (nothing is shrunk to make room), so the film runs
   0.05s longer per caused junction. 0.05s is evidence, not a guess: higgsfield-recreation's own three
   key events land roughly 30ms and 150ms apart. A junction with no stated trigger is left exactly where
   it always was: staging an undocumented cause would be inventing one. `layers[].start` also legally
   accepts a live relative reference (`"otherId.end+0.5"`, 2 of 120 films used it); `assemble` resolves
-  it to a real second instead, because `quality/gates/beat-check` and `scripts/author/motion-director.mjs`
+  it to a real second instead, because `quality/gates/beat-check` and `harness/author/motion-director.mjs`
   both read `start` as a number in places a string breaks (measured: one of them crashes).
 
 `assemble` deliberately does nothing else: no camera, no captions, no authored `cuts`/`sceneUnits`

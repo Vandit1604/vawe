@@ -17,15 +17,15 @@
 //
 // WHAT THIS IS NOT. It does not grade the answers, and it must not pretend to. It proves the chain was
 // PUT IN FRONT OF SOMEBODY for this version of this scene, which is the same thing `make beats` proves
-// about a contact sheet, using the same mechanism (scripts/lib/receipt.mjs, stage-agnostic by design).
+// about a contact sheet, using the same mechanism (harness/lib/receipt.mjs, stage-agnostic by design).
 // Whether the decisions are any good is `make judge` and your eyes.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
-import { readReceipt, writeReceipt, receiptPath } from '../../scripts/lib/receipt.mjs';
-import { nearestExemplars } from '../../scripts/lib/exemplars.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
+import { readReceipt, writeReceipt, receiptPath } from '../../harness/lib/receipt.mjs';
+import { nearestExemplars } from '../../harness/lib/exemplars.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const STAGE = 'preflight';
@@ -160,7 +160,7 @@ if (missed.length) {
 // available", never "what does excellent look like". `examples.json`'s goldSet holds the films this
 // repo is proudest of; `nearestExemplars` picks the 2-3 whose register is closest to what THIS film
 // says it is, so an agent studying it has something to imitate, not only rules to avoid. Retrieval
-// lives in scripts/lib/exemplars.mjs so `make scaffold` composes from the SAME ranking (one owner).
+// lives in harness/lib/exemplars.mjs so `make scaffold` composes from the SAME ranking (one owner).
 const feelForExemplars = [scene.note, scene.spectacle && scene.spectacle.of, sb && fs.readFileSync(sb, 'utf8')]
   .filter(Boolean).join(' ');
 const gold = nearestExemplars(feelForExemplars, 3);
@@ -176,7 +176,7 @@ if (gold.length) {
 const feel = [scene.note, scene.spectacle && scene.spectacle.of, sb && fs.readFileSync(sb, 'utf8').slice(0, 600)]
   .filter(Boolean).join(' ');
 if (feel.trim()) {
-  const r = spawnSync('node', [path.join(repoRoot, 'scripts/author/arsenal.mjs'), feel, '--n', '5'],
+  const r = spawnSync('node', [path.join(repoRoot, 'harness/author/arsenal.mjs'), feel, '--n', '5'],
     { encoding: 'utf8', cwd: repoRoot });
   const out = (r.stdout || '').trim();
   if (out) { console.log(`\n  THE ARSENAL, ranked against what this film says it is:`); console.log(out.split('\n').slice(1).join('\n')); }
@@ -186,7 +186,7 @@ if (feel.trim()) {
   // Aimed at nothing, the arsenal is 397 entries and a wall of names is the same non-event as printing
   // none. What is still worth showing with no plan to rank against is the part an author CANNOT have
   // searched for, because it did not exist last time they looked.
-  const r = spawnSync('node', [path.join(repoRoot, 'scripts/author/arsenal.mjs'), '--new'],
+  const r = spawnSync('node', [path.join(repoRoot, 'harness/author/arsenal.mjs'), '--new'],
     { encoding: 'utf8', cwd: repoRoot });
   const out = (r.stdout || '').trim();
   if (out) console.log(`\n${out}`);

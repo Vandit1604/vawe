@@ -1,6 +1,6 @@
 // beatmap.mjs: detect a track's pulse and write it beside the audio.
 //
-//   node scripts/media/beatmap.mjs assets/music/calm.wav
+//   node harness/media/beatmap.mjs assets/music/calm.wav
 //   make beatmap MUSIC=assets/music/calm.wav
 //
 // Writes assets/music/<name>.beats.json = { bpm, confidence, beats[], downbeats[] }.
@@ -14,7 +14,7 @@ import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, downbeats } from
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv[2];
-if (!file) { console.error('usage: node scripts/media/beatmap.mjs <file.wav>'); process.exit(2); }
+if (!file) { console.error('usage: node harness/media/beatmap.mjs <file.wav>'); process.exit(2); }
 const abs = path.resolve(repoRoot, file);
 if (!fs.existsSync(abs)) { console.error(`no such file: ${file}`); process.exit(1); }
 

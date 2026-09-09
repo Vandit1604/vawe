@@ -5,7 +5,7 @@
 # finds 41 scenes instead of 149 and reports a confident green, which is the exact shape of every gate
 # bug logged this week.
 #
-# Kept SMALL on purpose. The heavy directories are handled by scripts/dev/worktree.sh instead:
+# Kept SMALL on purpose. The heavy directories are handled by harness/dev/worktree.sh instead:
 # node_modules (106M) and site/node_modules (338M) are shared read-only, and .venv-tools (457M) and
 # refs/ (27M) are not needed to run a gate. Copying half a gigabyte per agent is the cost that makes
 # people abandon worktrees.

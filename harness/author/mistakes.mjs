@@ -1,9 +1,9 @@
-// scripts/author/mistakes.mjs: ASK the mistake log instead of reading it.
+// harness/author/mistakes.mjs: ASK the mistake log instead of reading it.
 //
-//   node scripts/author/mistakes.mjs                     # the census, and why you cannot read it whole
-//   node scripts/author/mistakes.mjs "silent fallback"   # the entries that match, one line each
-//   node scripts/author/mistakes.mjs --n 496             # one entry's title + lesson + what holds it
-//   node scripts/author/mistakes.mjs --n 496 --full      # the ORIGINAL prose, from git history
+//   node harness/author/mistakes.mjs                     # the census, and why you cannot read it whole
+//   node harness/author/mistakes.mjs "silent fallback"   # the entries that match, one line each
+//   node harness/author/mistakes.mjs --n 496             # one entry's title + lesson + what holds it
+//   node harness/author/mistakes.mjs --n 496 --full      # the ORIGINAL prose, from git history
 //   make mistakes [Q="…"] [N=496] [FULL=1]
 //
 // WHY THIS FILE CHANGED SHAPE. docs/MISTAKES.md was 17,797 lines and 569 entries, 45% of every word of
@@ -14,7 +14,7 @@
 // a repeat. That argument is superseded: a full-text entry nobody reads preserves nothing either, and
 // git already preserves the reasoning without asking a working file to carry both jobs at once.
 //
-// THE CURRENT SHAPE. `scripts/author/mistakes-compact.mjs` rewrote docs/MISTAKES.md to three lines
+// THE CURRENT SHAPE. `harness/author/mistakes-compact.mjs` rewrote docs/MISTAKES.md to three lines
 // per entry: the title, one lesson sentence, and what holds it now (a gate or live check, by file, or
 // "none"). The full write-up, root cause and all, is unchanged and un-lost: it lives in git at
 // ARCHIVE_HASH below, the commit taken immediately before that migration. `--full` fetches it with

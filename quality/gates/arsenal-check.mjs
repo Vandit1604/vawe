@@ -34,7 +34,7 @@ import { registries } from '../../core/registry/registry.js';
 // file for its export would report every derived vocabulary as missing. Reading `sections` asks the
 // stronger question anyway: not "is the word in the file" but "is this vocabulary in the document".
 import { sections } from '../../scripts/site/effects-catalog.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CATALOG = 'scripts/site/effects-catalog.mjs';

@@ -1,15 +1,15 @@
-// scripts/author/scrub.mjs: the PREVIEW LOOP. Extract N frames evenly across a rendered video into one
+// harness/author/scrub.mjs: the PREVIEW LOOP. Extract N frames evenly across a rendered video into one
 // contact sheet, so the author (or agent) sees the WHOLE film at a glance and can spot dead/weak
 // beats without scrubbing a timeline. This is the automated stand-in for another engine's Studio scrub.
 //
-// Usage: node scripts/author/scrub.mjs <mp4> [--n 24] [--cols 6] [--out /tmp/scrub.png]
+// Usage: node harness/author/scrub.mjs <mp4> [--n 24] [--cols 6] [--out /tmp/scrub.png]
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const mp4 = process.argv[2];
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i + 1] : d; };
-if (!mp4) { console.error('usage: node scripts/author/scrub.mjs <mp4> [--n 24] [--cols 6] [--out sheet.png]'); process.exit(2); }
+if (!mp4) { console.error('usage: node harness/author/scrub.mjs <mp4> [--n 24] [--cols 6] [--out sheet.png]'); process.exit(2); }
 const n = parseInt(arg('--n', '24'), 10);
 const cols = parseInt(arg('--cols', '6'), 10);
 const out = arg('--out', '/tmp/scrub.png');

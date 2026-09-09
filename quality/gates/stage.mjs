@@ -12,14 +12,14 @@
 // STATE IS DERIVED FROM ARTIFACTS, NEVER STORED. A state file drifts from the repo the moment someone
 // deletes a fragment by hand, and then it is a confident liar. A storyboard that exists cannot lie
 // about existing. The one thing not derivable is APPROVAL, which is a human act, so it is a line a
-// human writes (`/vawe-approve`) and that scripts/live/stage-gate.mjs refuses to let an agent write.
+// human writes (`/vawe-approve`) and that harness/live/stage-gate.mjs refuses to let an agent write.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../scripts/author/storyboard-parse.mjs';
-import { population, LIBRARY } from '../../scripts/lib/census.mjs';
-import { route } from '../../scripts/author/route.mjs';
+import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../harness/author/storyboard-parse.mjs';
+import { population, LIBRARY } from '../../harness/lib/census.mjs';
+import { route } from '../../harness/author/route.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -77,7 +77,7 @@ export function stageOf(arg) {
       why: missingFrags.length
         ? `${missingFrags.length} fragment(s) the plan names do not exist yet: ${missingFrags.join(', ')}`
         : 'the fragments exist and do not match what their beats planned: run frame-check and read it.',
-      next: missingFrags.length ? `node scripts/author/stagekit.mjs ${p.base}.json, then author each fragment: stage kit → the reference's grammar → the smallest useful ui-skills set (command npx -y ui-skills categories) → make preview HTML=<frag> THEME=<theme> → look at it` : `make frame-check D=${p.base}.json` },
+      next: missingFrags.length ? `node harness/author/stagekit.mjs ${p.base}.json, then author each fragment: stage kit → the reference's grammar → the smallest useful ui-skills set (command npx -y ui-skills categories) → make preview HTML=<frag> THEME=<theme> → look at it` : `make frame-check D=${p.base}.json` },
     { id: 'assemble', done: layers > 0,
       why: 'the frames are approved and the scene JSON has no layers, so there is no film yet.',
       next: `make assemble D=${p.base}.json` },
@@ -97,7 +97,7 @@ export function stageOf(arg) {
 }
 
 /**
- * Every film in the library, staged. Reuses scripts/lib/census.mjs's LIBRARY filter rather than a
+ * Every film in the library, staged. Reuses harness/lib/census.mjs's LIBRARY filter rather than a
  * second walk of formats/scene/: one owner for "which files count as a film" (docs/MISTAKES.md #391).
  * A film that errors while staging (unparseable storyboard, say) is reported, not thrown, because one
  * bad film should not blind the roster to the rest.
@@ -123,7 +123,7 @@ export function roster({ all = false, cap = 12 } = {}) {
 }
 
 // Stage 1 has no film yet, so stageOf() has nothing to read. What DOES exist is the same deliverable
-// router the planning skill uses (scripts/author/route.mjs), reachable so far only by an agent that
+// router the planning skill uses (harness/author/route.mjs), reachable so far only by an agent that
 // already knew it existed. Q= runs it and states the same brief-stage answer stageOf() would once a
 // storyboard exists: what this film is, and the one command that starts it.
 function briefFor(q) {

@@ -12,7 +12,7 @@
 //	VAWE_KEEP_FRAMES=1 VAWE_FRAME_MAP=/tmp/mapA.txt ./bin/vawe formats/scene/brew-launch.json
 //	cp -R /tmp/frames_brew-launch /tmp/runA   # the render deletes nothing, but the next one overwrites
 //	... repeat for run B ...
-//	go run ./scripts/dev/framediff -a /tmp/runA -b /tmp/runB -mapa /tmp/mapA.txt -mapb /tmp/mapB.txt -crops /tmp/crops
+//	go run ./harness/dev/framediff -a /tmp/runA -b /tmp/runB -mapa /tmp/mapA.txt -mapb /tmp/mapB.txt -crops /tmp/crops
 package main
 
 import (

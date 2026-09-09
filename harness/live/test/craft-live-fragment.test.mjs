@@ -1,6 +1,6 @@
-// node scripts/live/test/craft-live-fragment.test.mjs
+// node harness/live/test/craft-live-fragment.test.mjs
 //
-// The fragment branch of scripts/live/craft-live.mjs, fed exactly as Claude Code's PostToolUse feeds
+// The fragment branch of harness/live/craft-live.mjs, fed exactly as Claude Code's PostToolUse feeds
 // it (stdin JSON, stderr on exit 2). Two of the three cases are REAL files in formats/scene/, because
 // a fixture that drifts from the fragments in the repo would pass while the hook stops working. The
 // third is written to disk for the length of the test, since the repo deliberately holds no fragment

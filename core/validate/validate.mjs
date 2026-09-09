@@ -786,7 +786,7 @@ export function authoredJunctionErrors(cfg) {
     if (Array.isArray(cfg?.[key]) && cfg[key].length)
       out.push(`${key}[] is no longer an authored key, it is the INTERNAL lowered output of `
         + `transitions[] (mech:"${mech}"). Write transitions[] instead, then run `
-        + `\`node scripts/author/migrate-junctions.mjs <file>\` to convert an old scene automatically.`);
+        + `\`node harness/author/migrate-junctions.mjs <file>\` to convert an old scene automatically.`);
   }
   return out;
 }
@@ -1324,11 +1324,11 @@ if (isMain) {
         if (!n.endsWith('.json') || n === 'schema.json') continue;
         // `.animatic.json` and `.template.json` are never a scene to validate on their own, the same
         // family quality/gates/audit-scenes.mjs already skips by name (its own `/\.(intent|animatic|
-        // template)\.json$/`). `.animatic.json` (scripts/author/animatic.mjs) is a disposable pacing
+        // template)\.json$/`). `.animatic.json` (harness/author/animatic.mjs) is a disposable pacing
         // clock that embeds scratch VO paths under /tmp, regenerated every run and never a
         // deliverable. `.template.json` carries unsubstituted `{{placeholders}}` as raw JSON text,
         // some of them outside a string (e.g. a bare `{{loudcount}}` as a number value), so it is not
-        // valid JSON until scripts/author/batch.mjs fills it in, by design, not a defect to repair.
+        // valid JSON until harness/author/batch.mjs fills it in, by design, not a defect to repair.
         // Other derivative suffixes (`.beatsync.`, `.captioned.`, `.directed.`) stay OUT of this list
         // on purpose: those files still declare `module` and validate cleanly, so excluding them would
         // just shrink coverage.

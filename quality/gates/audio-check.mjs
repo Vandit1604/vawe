@@ -44,8 +44,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { population, LIBRARY } from '../../scripts/lib/census.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { population, LIBRARY } from '../../harness/lib/census.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 import { lowerScene } from '../../core/transitions/lower.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -123,7 +123,7 @@ const reasonOf = (a) => {
 //
 // This gate printed a real verdict for months and nothing anywhere read it: it was not one of
 // author-check's steps, and it stated each finding as a tuple in a local array, so
-// scripts/lib/finding-codes.mjs could not see a single code it emits either. A gate that emits no code
+// harness/lib/finding-codes.mjs could not see a single code it emits either. A gate that emits no code
 // cannot be cited, ratcheted, waived or routed to a doc, and quality/gates/rung.mjs calls a tag that
 // names one a FALSE TAG for exactly that reason. Two failures with one cause: the fact lived in a
 // shape only this file understood.
@@ -248,7 +248,7 @@ if (all) {
   const dir = path.join(ROOT, 'formats/scene');
   const tally = { [OMITTED]: [], [SILENT]: [], [HOLLOW]: [], [SOUNDED]: [] };
   let reasoned = 0;
-  // Population through scripts/lib/census.mjs: it states N and refuses a checkout that cannot see the
+  // Population through harness/lib/census.mjs: it states N and refuses a checkout that cannot see the
   // library, instead of reporting "everybody ships silent" over a third of it.
   const pop = population('sound census', { filter: LIBRARY, quiet: true });
   for (const f of pop.names) {

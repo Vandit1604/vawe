@@ -60,10 +60,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { sceneTiming, spanOf, num, SPECK, sceneView, inView } from './scene-timing.mjs';
-import { readReceipt } from '../../scripts/lib/receipt.mjs';
-import { snippet } from '../../scripts/lib/text.mjs';
+import { readReceipt } from '../../harness/lib/receipt.mjs';
+import { snippet } from '../../harness/lib/text.mjs';
 import { loadScene } from '../../core/engine/expand.js';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -276,7 +276,7 @@ if (heldOpen.length) {
 // `make beats` and `make reveal` render a contact sheet a human or agent has to LOOK at. No gate can score
 // that image, so the only checkable fact is whether anyone looked at THIS version. Both tools write a
 // receipt carrying the scene's content hash; a hash that no longer matches means the scene moved on.
-// The hashing and the path live in scripts/lib/receipt.mjs now, so every stage can be signed off the
+// The hashing and the path live in harness/lib/receipt.mjs now, so every stage can be signed off the
 // same way. This reader is unchanged in behaviour: same code, same severity, same two wordings for the
 // two genuinely different states (nobody looked at all, versus somebody looked at an older version).
 //

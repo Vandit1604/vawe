@@ -17,12 +17,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { flattenLayers } from '../../scripts/lib/layers.mjs';
+import { flattenLayers } from '../../harness/lib/layers.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { inferCuts } from '../../core/timeline/junctions.js';
 
 import { gradeable } from './tile.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 const f = gateFindings();
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.argv[2];

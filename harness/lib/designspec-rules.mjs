@@ -1,4 +1,4 @@
-// scripts/lib/designspec-rules.mjs: OUR anti-slop rules. A table we own, not a list we borrow.
+// harness/lib/designspec-rules.mjs: OUR anti-slop rules. A table we own, not a list we borrow.
 //
 // WHY THIS EXISTS. `make slop` shells out to the vendored impeccable detector (41 rules, Apache-2.0,
 // `skills/impeccable/`). It is good work and it is not ours, in three ways that cost us:

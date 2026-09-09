@@ -1,7 +1,7 @@
 // core/spectrum.js: per-frame band energy, so a scene can move ON the music instead of near it.
 //
 // Pure maths, no deps, no I/O. The same arrangement as core/beats.js, and for the same reason: the
-// analysis runs ONCE offline (scripts/media/spectrum.mjs writes a sidecar) and the render only ever
+// analysis runs ONCE offline (harness/media/spectrum.mjs writes a sidecar) and the render only ever
 // reads a lookup table. That is what keeps audio-reactivity inside the determinism claim. Reacting to
 // audio LIVE would mean the frame depends on a decoder's state; reacting to a baked table means
 // renderFrame(412) reads row 412 and nothing else, which is as pure as a constant.

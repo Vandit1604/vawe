@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# scripts/dev/worktree.sh: make a git worktree usable by an agent, in about a second.
+# harness/dev/worktree.sh: make a git worktree usable by an agent, in about a second.
 #
-#   scripts/dev/worktree.sh add <name>     → .claude/worktrees/<name>, ready to run gates
-#   scripts/dev/worktree.sh rm  <name>
+#   harness/dev/worktree.sh add <name>     → .claude/worktrees/<name>, ready to run gates
+#   harness/dev/worktree.sh rm  <name>
 #
 # WHY THIS EXISTS. `git worktree add` checks out tracked files only. This repo keeps 444M of
 # node_modules, an 11M bin/, and 108 of its 149 scenes out of git, so a bare worktree cannot run a

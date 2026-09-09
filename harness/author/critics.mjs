@@ -1,4 +1,4 @@
-// scripts/author/critics.mjs: THE CRITIC PANEL, as an invokable, recorded step.
+// harness/author/critics.mjs: THE CRITIC PANEL, as an invokable, recorded step.
 //
 // docs/CRAFT/SUBAGENTS.md defines six standing critics (beat · bg-motion · reveal · fidelity · copy ·
 // seam), each with one job, one input path, one verdict shape, and says to run them in parallel and
@@ -12,9 +12,9 @@
 // this only composes what to hand each one and records what came back. Pure fs + JSON, no side effects
 // on import.
 //
-//   node scripts/author/critics.mjs formats/scene/x.json                 # emit the six critic prompts
-//   node scripts/author/critics.mjs formats/scene/x.json --deciders      # emit the decider roster, in order
-//   node scripts/author/critics.mjs formats/scene/x.json --record p.json # write the panel receipt
+//   node harness/author/critics.mjs formats/scene/x.json                 # emit the six critic prompts
+//   node harness/author/critics.mjs formats/scene/x.json --deciders      # emit the decider roster, in order
+//   node harness/author/critics.mjs formats/scene/x.json --record p.json # write the panel receipt
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -237,7 +237,7 @@ function main() {
   const recordIdx = process.argv.indexOf('--record');
   const recordFile = recordIdx >= 0 ? process.argv[recordIdx + 1] : null;
   if (!file) {
-    console.error('usage: node scripts/author/critics.mjs <scene.json> [--record <panels.json>]');
+    console.error('usage: node harness/author/critics.mjs <scene.json> [--record <panels.json>]');
     process.exit(2);
   }
   const abs = path.resolve(repoRoot, file);
@@ -261,7 +261,7 @@ function main() {
       console.log('');
     });
     console.log('  Then the critic panel, in ONE parallel message:');
-    console.log(`    node scripts/author/critics.mjs ${file}\n`);
+    console.log(`    node harness/author/critics.mjs ${file}\n`);
     return;
   }
 
@@ -277,7 +277,7 @@ function main() {
     }
     console.log(`  When all six report, collect their verdicts into one JSON file`);
     console.log(`  ({ "<critic>": <verdict> } per name) and record it:`);
-    console.log(`    node scripts/author/critics.mjs ${file} --record <panels.json>\n`);
+    console.log(`    node harness/author/critics.mjs ${file} --record <panels.json>\n`);
     return;
   }
 

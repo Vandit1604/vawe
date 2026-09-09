@@ -20,7 +20,7 @@ out/**/*.fonts.json
 # from `out/flight/` reached main inside an unrelated commit exactly that way (docs/MISTAKES.md #424).
 out/**/*.mp4
 # `out/*.mp4` above misses a SUBDIRECTORY, which is the exact `**/` lesson the note above records.
-# scripts/dev/candidates.mjs writes out/candidates/<scene>-<axis>-<t>s/ full of proposal clips and
+# harness/dev/candidates.mjs writes out/candidates/<scene>-<axis>-<t>s/ full of proposal clips and
 # the patched scene copies they were rendered from. Every one is scratch: the panel applies a patch
 # to the real scene, and nothing downstream reads these.
 out/candidates/
@@ -47,7 +47,7 @@ quality/baselines/approved/
 
 # make evals: every timestamped run + compare dir is scratch, mp4s included. quality/runs/evals/baseline/ is
 # the one committed run, and only its sheets + manifest.json, never its mp4s (they are gigabytes across
-# a library; see docs/CRAFT/EVALS.md and scripts/dev/evals.mjs saveBaseline()).
+# a library; see docs/CRAFT/EVALS.md and harness/dev/evals.mjs saveBaseline()).
 quality/runs/evals/runs/
 quality/runs/evals/baseline/*.mp4
 
@@ -107,7 +107,7 @@ formats/scene/*.json
 formats/scene/*.expanded.json
 !formats/scene/site-backdrop.json
 # gh-wrapped is a TEMPLATE, not a video: it carries {{placeholders}} and renders nothing on its own.
-# scripts/media/gh-wrapped.mjs is tracked, and an untracked template would leave a clean clone holding
+# harness/media/gh-wrapped.mjs is tracked, and an untracked template would leave a clean clone holding
 # a generator with no consumer, which is the "not reproducible from the repo" case this section exists
 # to prevent. The RENDERED instance (formats/scene/_batch/) stays ignored, because that is content.
 !formats/scene/gh-wrapped.template.json
@@ -191,7 +191,7 @@ refs/
 .venv-tools/
 assets/cutouts/
 
-# agent worktrees (scripts/dev/worktree.sh)
+# agent worktrees (harness/dev/worktree.sh)
 .claude/worktrees/
 
 # npm pack output — a build artifact, never committed

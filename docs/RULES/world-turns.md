@@ -1,7 +1,7 @@
 ---
 name: world-turns
 when: authoring the bg block of any scene
-holds: live (scripts/live/scene-live.mjs warns on one bg window for the whole runtime)
+holds: live (harness/live/scene-live.mjs warns on one bg window for the whole runtime)
 answers: "why the backdrop must change tone per beat, and the 82% of the library that ships one window"
 group: look
 ---

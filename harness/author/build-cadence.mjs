@@ -141,7 +141,7 @@ const scene = {
   authoringNote: 'A made-up product (Cadence), authored from scratch in the keyed-motion register: one '
     + 'continuous action, no cuts, and the COMPOSE button as the object that becomes the loading dot. '
     + 'Uses panWith for the shared page drift, morphButton for the transform and typedHook for the '
-    + 'self-erasing opener. Built by scripts/author/build-cadence.mjs.',
+    + 'self-erasing opener. Built by harness/author/build-cadence.mjs.',
   layers: [
     typedHook({ text: 'Any scene.', x: 244, y: 424, w: 1400, size: 132, cps: 26, start: 0.08, dur: 1.5 })[0],
     { type: 'rect', id: 'scrim', x: 0, y: 0, w: W, h: 1080, bg: 'var(--bg)',

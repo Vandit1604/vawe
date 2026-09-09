@@ -14,7 +14,7 @@
 //
 //   make measure VIDEO=twitter.mp4 FROM=47.4 TO=48.7          # what is the "Send" transition?
 //   make measure VIDEO=out/brew.mp4 FROM=9.7 TO=10.3 EXPECT=snappy   # did my cut render as snappy?
-//   node scripts/author/measure-motion.mjs <video> <from_s> <to_s> [expectPreset]
+//   node harness/author/measure-motion.mjs <video> <from_s> <to_s> [expectPreset]
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';

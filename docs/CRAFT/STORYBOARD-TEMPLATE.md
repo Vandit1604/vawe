@@ -132,7 +132,7 @@ not: "the defaults this film refuses, in your own words"
   THE ARITHMETIC. Measuring a picture's SIZE is what killed the `visual-vocabulary` gate, whose helper
   squared a 590x18 rule into 590x590 and credited a hairline with a tenth of the frame. Area is width
   times height and nothing else, and a share stated on ONE axis stays on that axis and produces no area
-  at all. `node scripts/author/panels.mjs --self-test` asserts both against that same hairline.
+  at all. `node harness/author/panels.mjs --self-test` asserts both against that same hairline.
 
   EVERY BEAT DECLARES ITS STYLE AND ITS REST. Be clear about what reads which, because a field nobody
   reads is worse than no field. `rest:` is consumed. `layout:` is consumed by `make panels`, as above,
@@ -189,7 +189,7 @@ not: "the defaults this film refuses, in your own words"
   why films read as slideshows: more entrances, spread further apart, travelling further, all change
   WHEN the stillness happens and never WHETHER it does. The one axis that worked is a keyed track that
   never stops moving for the whole beat, and `move:` is how a beat asks for it: `<shape>:<band>`, a
-  `SHAPES` key from `scripts/author/track.mjs` (`make arsenal SHAPE=pan`, the same named, hand-keyed
+  `SHAPES` key from `harness/author/track.mjs` (`make arsenal SHAPE=pan`, the same named, hand-keyed
   tracks `motion:` above already draws its vocabulary from, never a new mechanism) and a speed band, the
   same four words (`energy`, `professional`, `gravity`, `cinematic`) `motion:`'s bands already use.
   `move: pan:cinematic` on the headline beat, `move: drift:gravity` on a held one. The band scales how
@@ -229,7 +229,7 @@ not: "the defaults this film refuses, in your own words"
   no static gate can see here: docs/CRAFT/FILM-STRUCTURE.md Part 5.
 
   A DOCUMENTED CAUSE IS NOW A MECHANICAL STAGGER, not just a line in the chain report. `make assemble`
-  reads the same "is this a real cause" test the gate does (scripts/lib/contract.mjs isCausedTrigger)
+  reads the same "is this a real cause" test the gate does (harness/lib/contract.mjs isCausedTrigger)
   and, for every junction that passes it, INSERTS a small stagger of real time before the next beat
   (0.05s, resolved to its own real second, not carved out of either beat's planned duration) instead of
   firing every junction at the flat absolute second every junction used to, regardless of cause. 0.05s is
@@ -237,7 +237,7 @@ not: "the defaults this film refuses, in your own words"
   apart. An UNSTATED junction is left exactly as it was: staging a cause the storyboard never wrote down
   would be inventing one, not reading one off it. (`layers[].start` also legally accepts a live relative
   reference, `"otherId.end+0.5"`; measured trying it here, `quality/gates/beat-check` and
-  `scripts/author/motion-director.mjs` both read `start` as a number in places that string breaks, one
+  `harness/author/motion-director.mjs` both read `start` as a number in places that string breaks, one
   of them a crash, so `make assemble` resolves the reference itself rather than leaving it live.)
 
   TWO MORE FIELDS, TWO MORE QUESTIONS. `mechanism:` is HOW it moves (count-up, slow push, kinetic reveal).

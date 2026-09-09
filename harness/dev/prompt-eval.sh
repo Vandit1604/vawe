@@ -6,7 +6,7 @@
 # the smallest thing that can say. It is NOT an ablation harness: it runs ONE section, ONE arm each
 # way, and n=1 is n=1. Read docs/RESEARCH/PROMPT-EVAL.md before you quote any number it prints.
 #
-#   scripts/dev/prompt-eval.sh "## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE" out/prompt-eval
+#   harness/dev/prompt-eval.sh "## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE" out/prompt-eval
 #
 # Arg 1 is the EXACT `## ` heading line to remove for the ablated arm. Arg 2 is where the two scene
 # JSONs land. Run it from a WORKTREE: it edits AGENTS.md in place and restores it, and a second agent
@@ -29,7 +29,7 @@ trap restore EXIT
 read -r -d '' TASK <<'TASKEOF' || true
 Scaffold a specimen demo scene in this repo, then extend it.
 
-1. Run exactly: node scripts/dev/demo.mjs --print-path --q "how a thermal blur reads heat off a
+1. Run exactly: node harness/dev/demo.mjs --print-path --q "how a thermal blur reads heat off a
    product shot" --name heatread --fx thermalBlur
 2. Edit ONLY the JSON file it wrote. Extend it so the film runs about 14 seconds and covers three
    moments: the subject plain, the effect arriving, the effect at full strength.
@@ -53,4 +53,4 @@ for ARM in with without; do
 done
 restore
 
-node scripts/dev/library-stats.mjs --files "$OUT/with.json" "$OUT/without.json"
+node harness/dev/library-stats.mjs --files "$OUT/with.json" "$OUT/without.json"

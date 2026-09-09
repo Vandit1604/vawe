@@ -1,4 +1,4 @@
-// scripts/author/directions.mjs: THE CREATIVE DIRECTIONS a brief can be taken in.
+// harness/author/directions.mjs: THE CREATIVE DIRECTIONS a brief can be taken in.
 //
 // A direction commits to three things at once: the THREAD that holds the film across its cuts
 // (docs/CRAFT/FILM-STRUCTURE.md), the PACE (median beat length, which decides the beat count for a fixed

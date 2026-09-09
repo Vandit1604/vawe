@@ -40,7 +40,7 @@ export function dialogueAccumulate({ pairs = [], bloomLine, x = 160, y = 260, w 
   ].filter(Boolean) }));
   // First row at start+0.15, inside the first-arrival window (docs/RULES/first-arrival.md, 0.1-0.3s),
   // not the 0.3s hold this beat used to give before anything appeared: as a hook (this beat opens the
-  // `explainer` type spine, scripts/author/type-spines.mjs), frame 1 needs a ramp, not an empty hold.
+  // `explainer` type spine, harness/author/type-spines.mjs), frame 1 needs a ramp, not an empty hold.
   const FIRST = 0.15;
   const bloomStart = start + FIRST + pairs.length * stagger + 0.4;
   const bloomY = y + pairs.length * (size + rowGap);

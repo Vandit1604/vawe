@@ -3,9 +3,9 @@
 // `make beats` and `make reveal` answer two halves of the same question (where a beat lands, and how it
 // arrives) and used to cost two of everything: two HTTP servers, two puppeteer launches, two scene boots,
 // two full passes of renderFrame. Nearly 27s for a pair of images that share every expensive step. Here
-// the scene is opened once (scripts/author/scene-page.mjs) and both sheets are built off that one page.
+// the scene is opened once (harness/author/scene-page.mjs) and both sheets are built off that one page.
 //
-//   node scripts/author/sheets.mjs <scene.json> [--vs brand]
+//   node harness/author/sheets.mjs <scene.json> [--vs brand]
 //   make sheets D=formats/scene/x.json
 //   make dev / make ship                       run this after the render (NOSHEETS=1 opts out)
 //
@@ -61,7 +61,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const argv = process.argv.slice(2);
   const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
   const dataArg = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
-  if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/author/sheets.mjs <scene.json> [--vs brand]'); process.exit(1); }
+  if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node harness/author/sheets.mjs <scene.json> [--vs brand]'); process.exit(1); }
   // `--read` is the explicit-look form: same sheets, but the receipt says a person asked for them.
   const auto = !argv.includes('--read');
   // No top-level await here: beats.mjs and reveal.mjs import `drawtext` from this module, and a module

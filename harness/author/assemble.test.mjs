@@ -1,8 +1,8 @@
-// scripts/author/assemble.test.mjs: assemble owns what it GENERATES (html layers by `id: scene<N>`,
+// harness/author/assemble.test.mjs: assemble owns what it GENERATES (html layers by `id: scene<N>`,
 // the one continuous-object layer by `id: object`) and nothing else. A hand-authored layer or
 // film-level field it has no vocabulary for survives a re-assemble byte-identically, is REPORTED by
 // name, and is WARNED about once its time window no longer lands inside the film.
-//   node scripts/author/assemble.test.mjs
+//   node harness/author/assemble.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -64,7 +64,7 @@ fs.writeFileSync(path.join(dir, 'v.scene2.html'), '<div>b</div>');
 fs.writeFileSync(path.join(dir, 'v.scene3.html'), '<div>c</div>');
 
 const node = process.execPath;
-const assemble = (f = film) => execFileSync(node, [path.join(ROOT, 'scripts/author/assemble.mjs'), f], { encoding: 'utf8' });
+const assemble = (f = film) => execFileSync(node, [path.join(ROOT, 'harness/author/assemble.mjs'), f], { encoding: 'utf8' });
 
 try {
   // ---- 1. a first build: every html layer stamped id: scene<N>, nothing to preserve --------------
@@ -157,7 +157,7 @@ not: "no centred text default"
 - why: land
 - duration: 3s
 `);
-  execFileSync(node, [path.join(ROOT, 'scripts/author/assemble.mjs'), film2], { encoding: 'utf8' });
+  execFileSync(node, [path.join(ROOT, 'harness/author/assemble.mjs'), film2], { encoding: 'utf8' });
   const scene = JSON.parse(fs.readFileSync(film2, 'utf8'));
   const obj = scene.layers.find((l) => l.id === 'object');
   assert.equal(obj.type, 'html', 'a declared .html object source draws as an html layer, not a rect');
@@ -204,7 +204,7 @@ not: "no centred text default"
 - why: land
 - duration: 3s
 `);
-  execFileSync(node, [path.join(ROOT, 'scripts/author/assemble.mjs'), film3], { encoding: 'utf8' });
+  execFileSync(node, [path.join(ROOT, 'harness/author/assemble.mjs'), film3], { encoding: 'utf8' });
   const scene = JSON.parse(fs.readFileSync(film3, 'utf8'));
   assert.deepEqual(scene.layers.map((l) => l.id), ['scene1'], 'two beats sharing one fragment file assemble into ONE layer, never two');
   const layer = scene.layers[0];

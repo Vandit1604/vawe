@@ -1,5 +1,5 @@
-// scripts/lib/stagekit.test.mjs: the kit-identity check actually catches drift.
-//   node scripts/lib/stagekit.test.mjs
+// harness/lib/stagekit.test.mjs: the kit-identity check actually catches drift.
+//   node harness/lib/stagekit.test.mjs
 import assert from 'node:assert/strict';
 import { buildKit, kitCheck, extractKitBlock } from './stagekit.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';

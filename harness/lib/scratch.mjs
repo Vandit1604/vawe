@@ -1,4 +1,4 @@
-// scripts/lib/scratch.mjs: ONE answer to "where does a review artifact go", and one that fails loudly.
+// harness/lib/scratch.mjs: ONE answer to "where does a review artifact go", and one that fails loudly.
 //
 // The tools that write contact sheets each decided this for themselves, and two of them decided it
 // twice in the same file: the frames directory honoured CLAUDE_JOB_DIR while the sheet path stayed a

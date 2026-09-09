@@ -5,7 +5,7 @@
 // popularity BAND and by recency, with the used and the obvious names removed, makes the default
 // unreachable and forces a real choice.
 //
-//   node scripts/author/fonts-discover.mjs --seed 7 [--count 12] [--category serif] [--json]
+//   node harness/author/fonts-discover.mjs --seed 7 [--count 12] [--category serif] [--json]
 //   make fonts-discover SEED=7 COUNT=12 CATEGORY=display
 //
 // Distinct from `make fonts` (DOWNLOADS a fixed vendored set) and `make font-audit` (verifies the

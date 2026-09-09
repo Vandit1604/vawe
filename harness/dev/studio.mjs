@@ -1,9 +1,9 @@
-// scripts/dev/studio.mjs: a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an
+// harness/dev/studio.mjs: a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an
 // mp4. Starts a local static server and serves a wrapper page: the real scene.html in an iframe, plus a
 // scrubber + play/pause + frame/time readout that drive `__engine.renderFrame(n)` directly (the same pure
 // function the Go renderer seeks). Edit the JSON, hit reload, scrub, no 30-60s render round-trip.
 //
-// The shell is scripts/dev/studio-page.mjs: a left rail of panels, the preview and its transport in the
+// The shell is harness/dev/studio-page.mjs: a left rail of panels, the preview and its transport in the
 // centre, the timeline full width along the bottom, and a draggable divider between them. This file owns
 // the server, the gate run behind the timeline model, and the write side.
 //
@@ -190,12 +190,12 @@ const run = (name, args, done) => {
 // composited during the encode and exists nowhere else. The half that needs a render must never gate the
 // half that does not, so they are three buttons and not one.
 const SHEETS = {
-  beats: { file: () => scratch('beats', `${SLUG}.png`), args: ['scripts/author/beats.mjs', dataArg],
+  beats: { file: () => scratch('beats', `${SLUG}.png`), args: ['harness/author/beats.mjs', dataArg],
            what: 'every beat, in · mid · out' },
   // preview.mjs names its sheet after the FORMAT, not the scene (/tmp/preview_scene.png), so two studios
   // on two scenes would overwrite each other's. Copied to a per-scene path the moment it lands, which
   // narrows that to the width of one run rather than the width of a session.
-  frames: { file: () => scratch('look', `${SLUG}.png`), args: ['scripts/author/preview.mjs', 'scene', '--data', dataArg],
+  frames: { file: () => scratch('look', `${SLUG}.png`), args: ['harness/author/preview.mjs', 'scene', '--data', dataArg],
             what: 'the key frames of the whole film',
             after: () => { const src = '/tmp/preview_scene.png';
               if (fs.existsSync(src)) fs.copyFileSync(src, scratch('look', `${SLUG}.png`)); } },
@@ -449,7 +449,7 @@ const studioRoutes = (req, res) => {
     withBody(req, res, (body, reply) => {
       let at = 0, n = 6;
       try { const q = JSON.parse(body || '{}'); at = +q.at || 0; n = Math.max(1, Math.min(8, +q.n || 6)); } catch { /* defaults */ }
-      run('candidates', ['scripts/dev/candidates.mjs', dataArg, '--at', String(+at.toFixed(2)), '--axis', 'bg', '--n', String(n)],
+      run('candidates', ['harness/dev/candidates.mjs', dataArg, '--at', String(+at.toFixed(2)), '--axis', 'bg', '--n', String(n)],
         (err, stdout, stderr) => {
           if (err) return reply({ ok: false, error: String(stderr || stdout || err.message).trim().slice(0, 700) });
           try { reply({ ok: true, ...JSON.parse(stdout) }); }
@@ -460,7 +460,7 @@ const studioRoutes = (req, res) => {
   }
 
   // ---- accepting one: the patch it came with, applied to the file ---------------------------------
-  // As TEXT (scripts/author/patch-motion.mjs), for the reason the keyframe writer is: these scenes are
+  // As TEXT (harness/author/patch-motion.mjs), for the reason the keyframe writer is: these scenes are
   // hand formatted and a parse/stringify round trip would turn a one-word choice into a whole-file diff.
   if (req.method === 'POST' && url === '/api/apply') {
     withBody(req, res, (body, reply) => {

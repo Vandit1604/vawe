@@ -1,4 +1,4 @@
-// scripts/dev/sound-vary.mjs: generate variations of a cue, judge them by ear, keep what survives.
+// harness/dev/sound-vary.mjs: generate variations of a cue, judge them by ear, keep what survives.
 //
 // WHY VARY THE SPEC AND NOT THE SEED. A seed only redraws the noise; two seeds of one spec are the same
 // sound twice. What makes a cue different is its shape: where it starts, how fast it moves, how long it
@@ -10,7 +10,7 @@
 // verdicts against specs, not out of anybody's opinion. This tool exists to run that loop again on a
 // wider field: generate many, listen, keep few, then look at what the survivors have in common.
 //
-//   node scripts/dev/sound-vary.mjs [--n 8] [--open]
+//   node harness/dev/sound-vary.mjs [--n 8] [--open]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

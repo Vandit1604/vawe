@@ -86,7 +86,7 @@ The **ambiguous basics** (`fade`/`slide`/`wipe`/`dissolve`/`push`/`uncover`) res
 This lowers to the raw `cuts`/`stings`/`seams` fields at load, so everything above (easing, direction,
 the decision procedure) applies unchanged. `transitions` is now the ONLY authored form: the raw fields
 are the INTERNAL shape it lowers to, and a scene that still authors `cuts`/`stings`/`seams` directly is
-refused at `make validate` with a pointer to `scripts/author/migrate-junctions.mjs`, which converts an
+refused at `make validate` with a pointer to `harness/author/migrate-junctions.mjs`, which converts an
 old scene automatically. An `fx` that names nothing, or a layer-only anim used as a boundary (`pop`), is
 rejected at validate with the catalog, never silently coerced.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/stage-say.mjs: a UserPromptSubmit hook that says, every turn, which stage the film in
+// harness/live/stage-say.mjs: a UserPromptSubmit hook that says, every turn, which stage the film in
 // flight is at and the ONE next command.
 //
 // THIS IS THE CONTEXT-ROT FIX, and it is the half a gate cannot do. A gate refuses a wrong write; it

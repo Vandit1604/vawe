@@ -184,7 +184,7 @@ scrub to a frame, and drag the layer on the stage: that writes a motion keyframe
 keys show as ticks on the bar. `undo` walks back through the session.
 
 Why it works on tracked files: edits are **surgical text patches**, never a re-serialise
-(`scripts/author/patch-motion.mjs`). A save that changes nothing is a zero-byte diff, moving one key
+(`harness/author/patch-motion.mjs`). A save that changes nothing is a zero-byte diff, moving one key
 changes one line, and the file's hand formatting, including which of the three keyframe layouts it
 uses: survives. `lib-test` holds that invariant across four scenes.
 
@@ -274,7 +274,7 @@ Three rules, all enforced:
 3. **An image needs `radius` or `ken`** or the photograph stretches with the box instead of re-cropping
    inside it. `radius: 0` is enough; it is what switches the `<img>` to cover-fit. Flagged at validate.
 
-Working example: `scripts/author/build-zerochrome.mjs` → `formats/scene/zerochrome.json`.
+Working example: `harness/author/build-zerochrome.mjs` → `formats/scene/zerochrome.json`.
 
 ### A reflow has a speed floor
 

@@ -1,4 +1,4 @@
-// scripts/dev/sound-lab.mjs: hear every cue the engine can make, and say which ones are any good.
+// harness/dev/sound-lab.mjs: hear every cue the engine can make, and say which ones are any good.
 //
 // WHY THIS EXISTS. core/audio-kit.mjs synthesises 20 cues from parameters, and until now the only way
 // to hear one was to put it in a film and render the film. So the voicings have never been judged as
@@ -9,8 +9,8 @@
 // person actually liked, per cue, with a note. That is the input a tuning pass needs and has never had:
 // without it, "the sounds are bad" is one sentence covering twenty different sounds.
 //
-//   node scripts/dev/sound-lab.mjs            # bake the wavs, write the page, print the path
-//   node scripts/dev/sound-lab.mjs --open     # and open it
+//   node harness/dev/sound-lab.mjs            # bake the wavs, write the page, print the path
+//   node harness/dev/sound-lab.mjs --open     # and open it
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -161,8 +161,8 @@ if (process.argv.includes('--open')) execFileSync('open', [path.join(OUT, 'index
 // harder than a linear-mean centroid does, so treat it as a brightness INDEX that must MOVE, never as
 // a frequency you could tune a filter to.
 //
-//   node scripts/dev/sound-lab.mjs --measure          # every cue
-//   node scripts/dev/sound-lab.mjs --measure whoosh   # one
+//   node harness/dev/sound-lab.mjs --measure          # every cue
+//   node harness/dev/sound-lab.mjs --measure whoosh   # one
 function measure(x, slices = 8) {
   const n = x.length, per = Math.floor(n / slices);
   const rmsOf = (a, i0, i1) => { let s = 0; for (let i = i0; i < i1; i++) s += a[i] * a[i]; return Math.sqrt(s / Math.max(1, i1 - i0)); };

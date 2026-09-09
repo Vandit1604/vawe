@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-// scripts/dev/motion-lab.mjs: does a motion change actually raise the local-motion floor, or is it an
+// harness/dev/motion-lab.mjs: does a motion change actually raise the local-motion floor, or is it an
 // opinion. Renders a BASE storyboard's named VARIANTS the same way and reports one table, so "I think
 // this motion helps" becomes a number instead of a feeling.
 //
-//   node scripts/dev/motion-lab.mjs <base.storyboard.md> --variants <variants.json> [--keep]
-//   node scripts/dev/motion-lab.mjs --self-test
+//   node harness/dev/motion-lab.mjs <base.storyboard.md> --variants <variants.json> [--keep]
+//   node harness/dev/motion-lab.mjs --self-test
 //   make motion-lab D=<base.storyboard.md> VARIANTS=<variants.json>
 //
 // variants.json: { "<name>": { "<beat number>": "<selector>@<kind>:<band>", ... }, ... }. A variant
-// touches ONLY the named beats' `motion:` line (scripts/lib/contract.mjs parseMotion), because that is
+// touches ONLY the named beats' `motion:` line (harness/lib/contract.mjs parseMotion), because that is
 // the one knob docs/MISTAKES.md #608 did NOT already rule out: it proved structure (a shared fragment,
 // a keyed object chain) moves the floor by nothing, so what is left to test is density, the number and
 // placement of keyed reveals per second. An implicit "base" variant (no edits) always runs first, so
@@ -130,12 +130,12 @@ async function runVariant({ name, tag, dir, storyboardText, jsonSeed, extraFiles
     const check = run('node', ['quality/gates/storyboard-check.mjs', sbPath]);
     if (check.status !== 0) return { name, error: `storyboard-check: ${(check.stdout + check.stderr).trim()}` };
 
-    const asm = run('node', ['scripts/author/assemble.mjs', jsonPath]);
+    const asm = run('node', ['harness/author/assemble.mjs', jsonPath]);
     if (asm.status !== 0) return { name, error: `assemble: ${(asm.stdout + asm.stderr).trim()}` };
 
     const key = path.basename(jsonPath, '.json');
     const render = run('sh', ['-c',
-      `. scripts/dev/chrome-pin.sh motion-lab >/dev/null 2>&1; scripts/dev/render-lock.sh "${key}" ./bin/vawe "${jsonPath}" --draft`]);
+      `. harness/dev/chrome-pin.sh motion-lab >/dev/null 2>&1; harness/dev/render-lock.sh "${key}" ./bin/vawe "${jsonPath}" --draft`]);
     if (render.status !== 0) return { name, error: `render: ${(render.stdout + render.stderr).trim().slice(-800)}` };
 
     const stats = await measure(mp4);
@@ -285,8 +285,8 @@ async function main() {
   const sbArg = args.find((a) => !a.startsWith('--'));
   const variantsArg = args.includes('--variants') ? args[args.indexOf('--variants') + 1] : null;
   if (!sbArg || !fs.existsSync(sbArg)) {
-    console.error('usage: node scripts/dev/motion-lab.mjs <base.storyboard.md> --variants <variants.json> [--keep]');
-    console.error('       node scripts/dev/motion-lab.mjs --self-test');
+    console.error('usage: node harness/dev/motion-lab.mjs <base.storyboard.md> --variants <variants.json> [--keep]');
+    console.error('       node harness/dev/motion-lab.mjs --self-test');
     process.exit(2);
   }
   const baseSb = fs.readFileSync(sbArg, 'utf8');

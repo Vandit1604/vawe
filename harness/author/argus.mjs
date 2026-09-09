@@ -1,7 +1,7 @@
-// scripts/author/argus.mjs: composes the argushq.cc launch teaser (landscape 16:9) from the taste library +
+// harness/author/argus.mjs: composes the argushq.cc launch teaser (landscape 16:9) from the taste library +
 // the brand's signature details (pixel-eye mascot, hand-drawn cobalt underline, X-native surfaces).
 // Colours come from themes/argus.json via CSS vars (theme-aware blocks), so everything is cobalt-on-white.
-// Writes formats/scene/argus-launch.json. Run: node scripts/author/argus.mjs
+// Writes formats/scene/argus-launch.json. Run: node harness/author/argus.mjs
 import fs from 'node:fs';
 // Named off BLOCKS: index.mjs is the registry now, not a barrel of 200 re-exported names.
 import { BLOCKS } from '../../blocks/index.mjs';

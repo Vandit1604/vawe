@@ -32,7 +32,7 @@ const has = (n) => argv.includes(n) || process.env[n.replace(/^--/, '').toUpperC
 
 const D = flag('--data') || flag('-d') || argv.find((a) => a.endsWith('.json'));
 const MUSIC = flag('--music') || flag('-m');
-if (!D || !fs.existsSync(D)) { console.error('usage: node scripts/media/beatsync.mjs <scene.json> --music <track.wav> [--grid beat|downbeat] [--snap 0.12] [--layers] [--write]'); process.exit(2); }
+if (!D || !fs.existsSync(D)) { console.error('usage: node harness/media/beatsync.mjs <scene.json> --music <track.wav> [--grid beat|downbeat] [--snap 0.12] [--layers] [--write]'); process.exit(2); }
 if (!MUSIC || !fs.existsSync(MUSIC)) { console.error(`✗ MUSIC track not found: ${MUSIC || '(none)'}, pass MUSIC=assets/music/<track>.wav`); process.exit(2); }
 const GRID = (flag('--grid') || process.env.GRID || 'beat').toLowerCase();
 const WRITE = has('--write') || process.env.WRITE === '1';
@@ -42,7 +42,7 @@ const SNAP_LAYERS = has('--layers') || process.env.LAYERS === '1';
 const beatsFile = MUSIC.replace(/\.(wav|mp3|m4a|aac)$/i, '.beats.json');
 if (!fs.existsSync(beatsFile)) {
   process.stderr.write(`  no ${path.basename(beatsFile)} yet, running beatmap…\n`);
-  const r = spawnSync('node', [path.join(ROOT, 'scripts/media/beatmap.mjs'), MUSIC], { stdio: 'inherit' });
+  const r = spawnSync('node', [path.join(ROOT, 'harness/media/beatmap.mjs'), MUSIC], { stdio: 'inherit' });
   if (r.status !== 0 || !fs.existsSync(beatsFile)) { console.error('✗ beatmap failed, cannot sync'); process.exit(1); }
 }
 const bm = JSON.parse(fs.readFileSync(beatsFile, 'utf8'));

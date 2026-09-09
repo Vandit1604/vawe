@@ -7,7 +7,7 @@
 // nothing renders it twice. The source here is site/og/card.html, it reads the SITE's own tokens and
 // the SITE's own vendored fonts, and regenerating is one command.
 //
-// It serves the repo through scripts/lib/render-harness.mjs rather than standing up another server:
+// It serves the repo through harness/lib/render-harness.mjs rather than standing up another server:
 // that module exists because this file's job had been copy-pasted 22 times (docs/MISTAKES.md #509).
 import fs from 'node:fs';
 import path from 'node:path';

@@ -193,7 +193,7 @@ func main() {
 		}
 	}
 	name := strings.TrimSuffix(filepath.Base(dataPath), filepath.Ext(dataPath))
-	// `.expanded` is a BUILD artifact (scripts/author/expand-blocks.mjs writes <name>.expanded.json
+	// `.expanded` is a BUILD artifact (harness/author/expand-blocks.mjs writes <name>.expanded.json
 	// from <name>.json), not part of what the video is called. Without this every block-authored
 	// scene ships as "search-demo.expanded.mp4": the pipeline's internals leaking into the
 	// deliverable's filename, which is the one string a human actually reads (docs/MISTAKES.md #54).

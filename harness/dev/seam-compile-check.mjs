@@ -1,7 +1,7 @@
-// scripts/dev/seam-compile-check.mjs: compile EVERY seam unit's shader in a real headless-Chrome WebGL
+// harness/dev/seam-compile-check.mjs: compile EVERY seam unit's shader in a real headless-Chrome WebGL
 // context and report pass/fail + the driver log. This is the definitive check that a vendored
 // gl-transitions port actually compiles (the runner degrades a failed unit to `fade`, silently, so a
-// visual sheet cannot tell a subtle effect from a fallback; this can). Run: node scripts/dev/seam-compile-check.mjs
+// visual sheet cannot tell a subtle effect from a fallback; this can). Run: node harness/dev/seam-compile-check.mjs
 import puppeteer from 'puppeteer';
 import fs from 'node:fs';
 import { UNITS } from '../../core/transitions/units.js';

@@ -82,7 +82,7 @@ const scene = {
     + 'film and ONE expressive cinematicZoom seam is earned at the 10s payoff (docs/CRAFT/TRANSITIONS.md). '
     + 'The sound-form is the spine: a flat bar, then four stems, then one merged waveform, all one SVG '
     + 'driven by var(--t), so it survives both transitions and CHANGES at each. Built by '
-    + 'scripts/author/build-cadence-film.mjs; the cut easings are verified with `make measure`.',
+    + 'harness/author/build-cadence-film.mjs; the cut easings are verified with `make measure`.',
   // NO cuts and NO seams, deliberately. A cut transforms one root and never touches the second scene;
   // a seam blends two frozen stills. Both are something laid OVER a boundary. Here the boundary is
   // BUILT: at 5s the input bar hands its pose to the stem panel (`becomes`) while the form opens from

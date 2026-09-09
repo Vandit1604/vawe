@@ -1,4 +1,4 @@
-// scripts/author/build-glass.mjs: generate formats/scene/glass.json.
+// harness/author/build-glass.mjs: generate formats/scene/glass.json.
 //
 // THE CONCEPT, because the first version of this file did not have one. That draft was four frosted
 // rectangles drifting over a gradient: the stock result anyone gets from typing "glassmorphism" into

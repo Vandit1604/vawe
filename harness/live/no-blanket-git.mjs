@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/no-blanket-git.mjs - refuse the four git commands that destroyed work in this repo.
+// harness/live/no-blanket-git.mjs - refuse the four git commands that destroyed work in this repo.
 //
 // PreToolUse on Bash. Exit 2 blocks the call and returns stderr to the model.
 //
@@ -49,7 +49,7 @@ process.stdin.on('end', () => {
   for (const [re, name, why] of BANNED) {
     if (parts.some((p) => re.test(p))) {
       process.stderr.write(`BLOCKED: ${name}\n\n${why}\n\n`
-        + 'Refused by scripts/live/no-blanket-git.mjs, because this command has already caused real\n'
+        + 'Refused by harness/live/no-blanket-git.mjs, because this command has already caused real\n'
         + 'data loss in this repo with several agents sharing one tree. See docs/MISTAKES.md.\n');
       process.exit(2);
     }

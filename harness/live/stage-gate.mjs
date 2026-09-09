@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/live/stage-gate.mjs: a PreToolUse DENY on the three writes that skip a stage.
+// harness/live/stage-gate.mjs: a PreToolUse DENY on the three writes that skip a stage.
 //
 // Wired on Write|Edit in .claude/settings.json. It answers with
 // `hookSpecificOutput.permissionDecision: "deny"` and a reason naming the command to run instead. A
@@ -13,7 +13,7 @@
 //
 // THREE DENIALS, ONE PER MISTAKE ACTUALLY MADE. It is not a policy engine and must not grow into one:
 // every rule here has a real entry in docs/MISTAKES.md behind it. Anything softer belongs in
-// scripts/live/craft-live.mjs, which speaks and never blocks.
+// harness/live/craft-live.mjs, which speaks and never blocks.
 //
 // THE WAY OUT IS THE SAME AS EVERY GATE HERE. Make the missing artefact. There is no flag, because a
 // flag on this would be a way to skip the step, which is the thing being prevented.

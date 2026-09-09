@@ -16,7 +16,7 @@ group: crosscutting
   unknown bg preset, or an unknown transition refuses with the near word (`core/validate/validate.mjs`
   `validateTheme`, checked for every `themes/*.json` pack by `make validate`).
 - `make scaffold TYPE=<type> THEME=<name>` reads `theme.look` and merges it OVER the type spine
-  (`scripts/author/type-spines.mjs`): the brand's own fixed look wins, the type spine is only a
+  (`harness/author/type-spines.mjs`): the brand's own fixed look wins, the type spine is only a
   fallback for a theme with none.
 - `make theme-sheet THEME=<name>` renders one contact sheet so a brand's look is a picture, not JSON.
 
@@ -111,7 +111,7 @@ old `cues` check did.
 
 ## How the scaffold uses it
 
-`make scaffold TYPE=<type> THEME=<name>` (`scripts/author/scaffold.mjs`) loads `themes/<name>.json`
+`make scaffold TYPE=<type> THEME=<name>` (`harness/author/scaffold.mjs`) loads `themes/<name>.json`
 once, at the top, and merges its `look` over everything the generic rotation / the type spine would
 otherwise pick:
 
@@ -150,7 +150,7 @@ and (when `marks.logo` resolves to a real file) holds the mark at both `headline
 `endCardSize` on the closing window. Writes `site/public/blocklib/themes/<name>/sheet.png` (a tiled
 contact sheet, one frame per backdrop window) and `sheet.mp4`. Reuses
 `quality/gates/tile.mjs`'s `frameTile`/`tileGrid`/`tileBox`/`renderOf`, the exact machinery
-`scripts/dev/preset-sheets.mjs` already uses for the six reference profiles, rather than a second
+`harness/dev/preset-sheets.mjs` already uses for the six reference profiles, rather than a second
 render-and-tile pipeline.
 
 Refuses by name, rather than rendering a blank sheet, when the theme has no `look` at all.
@@ -218,10 +218,10 @@ reason.
 each joint, so a fixed per-theme cue list was a second, disagreeing owner of the same fact rather than
 something worth computing a default for.)
 
-`scripts/author/scaffold.mjs` reads `computedLook(themeObj)` as its own last-resort fallback (in place
+`harness/author/scaffold.mjs` reads `computedLook(themeObj)` as its own last-resort fallback (in place
 of the literal `{default:"fade",accent:"cinematicZoom"}` and `margin ?? 160` it used to hold as a second
 copy), so the scaffold and the engine cannot drift on the same numbers the way two copies of
-`scripts/lib/theme-bg.mjs`'s `bgBlock` once did. The scaffold's own priority is unchanged: an authored
+`harness/lib/theme-bg.mjs`'s `bgBlock` once did. The scaffold's own priority is unchanged: an authored
 `theme.look` still wins over the `--type` spine, which still wins over this house default.
 
 `core/engine/produce.js`'s `produceBaseline(data, theme, frame, look)` now takes the resolved look as

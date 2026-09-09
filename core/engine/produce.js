@@ -37,7 +37,7 @@ import { anticipateFromMotion } from '../motion/motion.js';
 // can read the brand's own scale/layout/cuts/field defaults from the ONE place a scene's produced
 // baseline is decided, instead of a second call site somewhere else. Nothing reads it yet: this phase
 // only wires it through, phases 2-5 add the actual defaults inside this function.
-// Same walk as scripts/lib/layers.mjs flattenLayers, duplicated rather than imported because core/
+// Same walk as harness/lib/layers.mjs flattenLayers, duplicated rather than imported because core/
 // never imports scripts/ (a Node-tooling directory) and this pass must stay pure JS the browser can
 // run. Parents before children, a non-object skipped rather than thrown on.
 function flattenLayers(list, out = []) {
@@ -211,7 +211,7 @@ export function applyAnticipateDefault(data, theme) {
 }
 
 // THE ONE FUNNEL. `cameraMove` is sugar; nothing at render time reads it (formats/scene/scene.js reads
-// `data.camera`). It used to be resolved only by scripts/author/expand-blocks.mjs, at AUTHOR time, so the
+// `data.camera`). It used to be resolved only by harness/author/expand-blocks.mjs, at AUTHOR time, so the
 // baseline push produce.js injects at BOOT time, after expansion, was written and never once read: a static
 // scene rendered identically at frame 2 and frame 170. Resolving it HERE, on the one path every render goes
 // through, means the field cannot be written and ignored again. Runs even under `produced: false`, because

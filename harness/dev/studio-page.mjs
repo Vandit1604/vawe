@@ -1,4 +1,4 @@
-// scripts/dev/studio-page.mjs: the studio SHELL, as one served page. Split out of studio.mjs so the
+// harness/dev/studio-page.mjs: the studio SHELL, as one served page. Split out of studio.mjs so the
 // server (routes, the gate run, the write side) and the interface stop sharing one 600-line file.
 //
 // THE SURROUND IS ACHROMATIC, chroma zero, on purpose. A colourist grades in a neutral grey room because

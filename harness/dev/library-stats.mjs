@@ -1,4 +1,4 @@
-// scripts/dev/library-stats.mjs: the library figures CLAUDE.md argues from, all measured in one run.
+// harness/dev/library-stats.mjs: the library figures CLAUDE.md argues from, all measured in one run.
 //
 // WHY THIS EXISTS. CLAUDE.md quotes about a dozen numbers about the scene library ("112 of the 134
 // scenes paint ONE bg window", "110 ship mute", "the median film gives 6% of its layers to picture")
@@ -9,10 +9,10 @@
 // A hand-measured figure has no owner, so it cannot be re-run and cannot be checked. This is the owner.
 // Run it, read the numbers off it, and quote THOSE.
 //
-//   node scripts/dev/library-stats.mjs            # the table
-//   node scripts/dev/library-stats.mjs --json     # the same, for a gate to compare against
+//   node harness/dev/library-stats.mjs            # the table
+//   node harness/dev/library-stats.mjs --json     # the same, for a gate to compare against
 //
-// THE POPULATION IS NOT DEFINED HERE. It comes from scripts/lib/census.mjs, the same helper
+// THE POPULATION IS NOT DEFINED HERE. It comes from harness/lib/census.mjs, the same helper
 // waiver-drift uses, which REFUSES a checkout that cannot see the library rather than counting what is
 // left (docs/MISTAKES.md #391). Two definitions of "the library" is the drift this file exists to end.
 import fs from 'node:fs';
@@ -33,7 +33,7 @@ const SCENES = path.join(ROOT, 'formats/scene');
 const PICTORIAL = new Set(['image', 'html', 'component', 'svg', 'video', 'clip', 'lottie', 'board', 'doc']);
 
 // --files a.json b.json: measure the named scenes instead of the population, and print the per-file
-// counts a prompt ablation compares (scripts/dev/prompt-eval.sh). Same definitions, one owner.
+// counts a prompt ablation compares (harness/dev/prompt-eval.sh). Same definitions, one owner.
 const fileArgs = process.argv.indexOf('--files');
 if (fileArgs !== -1) {
   const files = process.argv.slice(fileArgs + 1).filter((a) => !a.startsWith('--'));

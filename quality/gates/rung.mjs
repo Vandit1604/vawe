@@ -63,8 +63,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { codesEmitted } from '../../scripts/lib/finding-codes.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { codesEmitted } from '../../harness/lib/finding-codes.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATCHET = path.join(ROOT, 'quality/baselines/rung-ratchet.json');
@@ -98,7 +98,7 @@ function makeTargets() {
 /**
  * Does `script` emit `code`?
  *
- * scripts/lib/finding-codes.mjs is the owner of that fact and is used first, because it is DERIVED and
+ * harness/lib/finding-codes.mjs is the owner of that fact and is used first, because it is DERIVED and
  * a hand-kept map would rot the first time a rule moved file. But it is deliberately precision-first:
  * it matches four emission shapes, and `critique.mjs` uses a fifth (a local `F('warn', 'code', …)`
  * helper), so `scattered-beat`, `unbacked-claim` and `false-claim` are real codes it does not see. A

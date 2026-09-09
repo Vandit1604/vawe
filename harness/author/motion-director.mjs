@@ -1,4 +1,4 @@
-// scripts/author/motion-director.mjs: the MOTION DIRECTOR. Picks the right cut/sting per beat-transition from
+// harness/author/motion-director.mjs: the MOTION DIRECTOR. Picks the right cut/sting per beat-transition from
 // the brand's motion personality (theme.motion) + the MOTION-CRAFT ruleset, so effects are chosen with
 // restraint instead of the author over-reaching. Suggest-first: prints a director's report; WRITE=1 (or
 // --write) applies the picks into <file>.directed.json. Deterministic (pure mapping, no Date/random).
@@ -21,8 +21,8 @@
 // became a target would push every film toward one rhythm and that is a worse library, not a better one
 // (the same reasoning that keeps pace-check's floor at the tenth percentile instead of the median).
 //
-// Usage: node scripts/author/motion-director.mjs <scene.json> [--write]   ·   make direct D=<file> [WRITE=1]
-//        node scripts/author/motion-director.mjs, the library census, no verdict
+// Usage: node harness/author/motion-director.mjs <scene.json> [--write]   ·   make direct D=<file> [WRITE=1]
+//        node harness/author/motion-director.mjs, the library census, no verdict
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

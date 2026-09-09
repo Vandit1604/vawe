@@ -1,8 +1,8 @@
 // arsenal.mjs: ask the arsenal for the thing you mean, in plain English.
 //
-//   node scripts/author/arsenal.mjs "a page scrolling under a static tilt"
-//   node scripts/author/arsenal.mjs "leave the frame" --kind "gsap fx"
-//   node scripts/author/arsenal.mjs --census            # what is built and never used
+//   node harness/author/arsenal.mjs "a page scrolling under a static tilt"
+//   node harness/author/arsenal.mjs "leave the frame" --kind "gsap fx"
+//   node harness/author/arsenal.mjs --census            # what is built and never used
 //
 // WHY. The census that prompted this is not close: the `{type:"beat"}` blueprint mechanism, which
 // CLAUDE.md names as the #1 defence against a plain slideshow, is used by 2 of 153 scenes, and 11 of
@@ -239,7 +239,7 @@ function usage() {
     count: (name) => texts.reduce((c, t) => c + (t.includes(`"${name}"`) ? 1 : 0), 0),
     // What "used in N films" means, and the command that reproduces N without trusting this tool's word.
     note: () => `usage counted across ${n} shipped scene(s) in formats/scene, reproducible via `
-      + `\`node scripts/lib/census.mjs\`${blind ? ` (PARTIAL: ${blind.split('\n')[0]})` : ''}`,
+      + `\`node harness/lib/census.mjs\`${blind ? ` (PARTIAL: ${blind.split('\n')[0]})` : ''}`,
   };
   return CACHE.counts;
 }
@@ -374,7 +374,7 @@ export function snippet(entry) {
   return Object.entries(obj).map(([k, v]) => `"${k}": ${jsonish(v)}`).join(', ');
 }
 
-/** The rank order itself. Exported so scripts/dev/blurb-retrieval.mjs measures THIS, not a copy of it. */
+/** The rank order itself. Exported so harness/dev/blurb-retrieval.mjs measures THIS, not a copy of it. */
 export function score(entry, qt) {
   const name = entry.name.toLowerCase();
   const hay = toks(corpusOf(entry));
@@ -474,19 +474,19 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const r = spawnSync(process.execPath, [path.join(repoRoot, rel), ...args], { stdio: 'inherit' });
     process.exit(r.status ?? 0);
   };
-  if (flag('at') !== null) await runScript('scripts/author/schema-at.mjs', [flag('at') || '']);
+  if (flag('at') !== null) await runScript('harness/author/schema-at.mjs', [flag('at') || '']);
   if (argv.includes('--blueprints')) await runScript('scripts/site/blueprints-catalog.mjs', []);
   if (argv.includes('--previews')) {
     const only = flag('only');
-    await runScript('scripts/dev/previews.mjs', only ? [`--only=${only}`] : []);
+    await runScript('harness/dev/previews.mjs', only ? [`--only=${only}`] : []);
   }
   if (argv.includes('--presets')) {
     const only = flag('only');
-    await runScript('scripts/dev/preset-sheets.mjs', only ? [`--only=${only}`] : []);
+    await runScript('harness/dev/preset-sheets.mjs', only ? [`--only=${only}`] : []);
   }
-  if (flag('theme') !== null) await runScript('scripts/dev/theme-sheet.mjs', [`--theme=${flag('theme')}`]);
+  if (flag('theme') !== null) await runScript('harness/dev/theme-sheet.mjs', [`--theme=${flag('theme')}`]);
   if (argv.includes('--mistakes')) {
-    await runScript('scripts/author/mistakes.mjs', argv.filter((a) => a !== '--mistakes'));
+    await runScript('harness/author/mistakes.mjs', argv.filter((a) => a !== '--mistakes'));
   }
   if (flag('shape') !== null) {
     const pass = [flag('shape') || 'pan'];
@@ -494,7 +494,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       const v = flag(n);
       if (v !== null) pass.push(opt || `--${n}`, v);
     }
-    await runScript('scripts/author/track.mjs', pass);
+    await runScript('harness/author/track.mjs', pass);
   }
 
   // ---- --for <scene.json>: the vocabularies this film is already using, and has barely touched ------
@@ -620,16 +620,16 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 
   if (!query) {
     const kinds = [...new Set(all.map((e) => e.kind))].sort();
-    console.error(`usage: node scripts/author/arsenal.mjs "<what you want, in plain english>" [--kind <kind>] [--n 8]
-         node scripts/author/arsenal.mjs --census
-         node scripts/author/arsenal.mjs --new
-         node scripts/author/arsenal.mjs --at 'layers[].motion[]'         # what may I write there (was: make schema)
-         node scripts/author/arsenal.mjs --shape pan [--to -600] [...]    # a hand-keyed track     (was: make track)
-         node scripts/author/arsenal.mjs --mistakes "<words>"             # ask the mistake log     (was: make mistakes)
-         node scripts/author/arsenal.mjs --blueprints                     # the beat catalog        (was: make blueprints)
-         node scripts/author/arsenal.mjs --previews [--only=<id>]         # open the preview sheet  (was: make previews)
-         node scripts/author/arsenal.mjs --presets [--only=<name>]        # preset showcases        (was: make preset-sheets)
-         node scripts/author/arsenal.mjs --theme=<name>                   # one theme's look        (was: make theme-sheet)
+    console.error(`usage: node harness/author/arsenal.mjs "<what you want, in plain english>" [--kind <kind>] [--n 8]
+         node harness/author/arsenal.mjs --census
+         node harness/author/arsenal.mjs --new
+         node harness/author/arsenal.mjs --at 'layers[].motion[]'         # what may I write there (was: make schema)
+         node harness/author/arsenal.mjs --shape pan [--to -600] [...]    # a hand-keyed track     (was: make track)
+         node harness/author/arsenal.mjs --mistakes "<words>"             # ask the mistake log     (was: make mistakes)
+         node harness/author/arsenal.mjs --blueprints                     # the beat catalog        (was: make blueprints)
+         node harness/author/arsenal.mjs --previews [--only=<id>]         # open the preview sheet  (was: make previews)
+         node harness/author/arsenal.mjs --presets [--only=<name>]        # preset showcases        (was: make preset-sheets)
+         node harness/author/arsenal.mjs --theme=<name>                   # one theme's look        (was: make theme-sheet)
 
     ${all.length} named things across ${kinds.length} vocabularies, read live from the registries:
     ${kinds.join(' · ')}`);

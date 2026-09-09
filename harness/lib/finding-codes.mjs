@@ -1,4 +1,4 @@
-// scripts/lib/finding-codes.mjs: which finding codes do the gates actually EMIT?
+// harness/lib/finding-codes.mjs: which finding codes do the gates actually EMIT?
 //
 // One derived fact, one owner. Two consumers needed this and neither could answer it:
 //
@@ -33,7 +33,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const ROOTS = ['quality/gates', 'scripts/author', 'verify'];
+const ROOTS = ['quality/gates', 'harness/author', 'verify'];
 
 const PATTERNS = [
   /\b(?:fail|warn)\(\s*'([a-z][a-z0-9-]{2,})'/g,          // the shared gate convention

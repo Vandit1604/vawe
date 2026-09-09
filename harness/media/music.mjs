@@ -1,7 +1,7 @@
 // music.mjs: fetch a real soundtrack for a launch video, and record where it came from.
 //
-//   node scripts/media/music.mjs ambient 0 calm      genre, rank, local name
-//   node scripts/media/music.mjs --id 738 calm       a specific Mixkit track id
+//   node harness/media/music.mjs ambient 0 calm      genre, rank, local name
+//   node harness/media/music.mjs --id 738 calm       a specific Mixkit track id
 //   make music GENRE=ambient N=0 NAME=calm
 //
 // LICENSING, read this before shipping a video publicly. Tracks come from Mixkit's free stock music

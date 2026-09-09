@@ -36,7 +36,7 @@ requirement to be tracked):
   displacement over total path length: a straight move scores near 1, a wobble scores low); on area
   when it does not (a steady grow or shrink scores near 1, a grow-then-shrink pulse scores low,
   which is what a wind-up looks like in this number). Mirrors the peak+curve reasoning in
-  `scripts/media/study.mjs:306-311`: a mean, or one peak number, cannot tell a held-then-launch beat
+  `harness/media/study.mjs:306-311`: a mean, or one peak number, cannot tell a held-then-launch beat
   from a steady drift, so the shape rides beside the peak here too.
 
 ## Sampling, stated
@@ -68,7 +68,7 @@ board: a card that drags reads as jelly.
 The caveat is not decorative: `lag`'s own schema note is "wrong on a rigid board, a card that drags
 reads as jelly", and this trace cannot tell a card from a token. It names the candidate and the
 caveat in the same breath and leaves the call to whoever is reading it, the same shape
-`scripts/live/scene-live.mjs` uses for `unusedPresets`. No pass/fail here either: a film with no
+`harness/live/scene-live.mjs` uses for `unusedPresets`. No pass/fail here either: a film with no
 candidates said nothing wrong, and a film with one is not required to act on it.
 
 ## What it cannot show

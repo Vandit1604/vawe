@@ -1,5 +1,5 @@
 #!/bin/sh
-# scripts/dev/render-lock.sh <key> <command...>: refuse a SECOND render racing the same output.
+# harness/dev/render-lock.sh <key> <command...>: refuse a SECOND render racing the same output.
 #
 # THE ACTUAL CAUSE, not a symptom. Two `./bin/vawe` runs to the same out/<name>.mp4 raced: both
 # processes' encode+mux pipelines wrote the same path, and the result was a 0.87s file for a 17.5s

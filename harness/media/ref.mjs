@@ -1,6 +1,6 @@
-// scripts/media/ref.mjs: fetch a reference film from a link, and study it.
+// harness/media/ref.mjs: fetch a reference film from a link, and study it.
 //
-//   node scripts/media/ref.mjs <url> [name] [more urls…]
+//   node harness/media/ref.mjs <url> [name] [more urls…]
 //   make ref URL=https://…/pin/123/ NAME=some-name
 //
 // WHY THIS IS A SCRIPT. The technique is three lines of curl and it has now been re-derived from
@@ -28,7 +28,7 @@ const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1] : d; };
 const NAME_ARG = flag('name', null);
 const urls = argv.filter((a) => /^https?:\/\//.test(a));
-if (!urls.length) { console.error('usage: node scripts/media/ref.mjs <url> [--name x] [more urls…]'); process.exit(2); }
+if (!urls.length) { console.error('usage: node harness/media/ref.mjs <url> [--name x] [more urls…]'); process.exit(2); }
 if (NAME_ARG && urls.length > 1) { console.error('✗ --name with more than one url: they cannot all have it. Run them one at a time.'); process.exit(2); }
 fs.mkdirSync(REFS, { recursive: true });
 
@@ -70,7 +70,7 @@ for (const url of urls) {
     continue;
   }
   console.log(`  → refs/${name}.mp4  (${(fs.statSync(dest).size / 1e6).toFixed(1)}MB)`);
-  const r = spawnSync('node', [path.join(ROOT, 'scripts/media/study.mjs'), path.relative(ROOT, dest), name],
+  const r = spawnSync('node', [path.join(ROOT, 'harness/media/study.mjs'), path.relative(ROOT, dest), name],
     { cwd: ROOT, encoding: 'utf8' });
   const line = String(r.stdout).split('\n').find((l) => l.startsWith('✓')) || String(r.stderr).slice(0, 200);
   console.log(`  ${line.trim()}`);

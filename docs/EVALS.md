@@ -65,7 +65,7 @@ a seventh deliberately widens what the harness watches; do not grow them into fu
 make evals                                        # render all 6, assert liveness, print the run dir
 make evals-compare BEFORE=quality/runs/evals/baseline    # against the committed baseline, fresh AFTER run
 make evals-compare BEFORE=<run-a> AFTER=<run-b>    # two specific runs
-node scripts/dev/evals.mjs --save-baseline         # render + commit sheets/manifest as the new baseline
+node harness/dev/evals.mjs --save-baseline         # render + commit sheets/manifest as the new baseline
 ```
 
 The renderer refuses a path under `verify/`: to render one brief by hand (not through `make evals`),

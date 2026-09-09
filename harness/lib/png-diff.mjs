@@ -1,4 +1,4 @@
-// scripts/lib/png-diff.mjs: are two PNGs the same picture, allowing for rasteriser noise.
+// harness/lib/png-diff.mjs: are two PNGs the same picture, allowing for rasteriser noise.
 //
 // WHY THIS EXISTS AND WHY IT IS NOT A BROWSER. `renderFrame(n)` is pure in the DOM, and the block
 // posters' crop rects are stable, but a GPU-backed block does not rasterise byte-identically run to

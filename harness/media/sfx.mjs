@@ -10,8 +10,8 @@
 // and every non-silent scene gets scored automatically. No binary is committed (same policy as
 // fonts). Source: Mixkit Free License (free for commercial use, no attribution, no API key).
 //
-//   node scripts/media/sfx.mjs           download any missing sounds
-//   node scripts/media/sfx.mjs --force   redownload everything
+//   node harness/media/sfx.mjs           download any missing sounds
+//   node harness/media/sfx.mjs --force   redownload everything
 //
 // Each entry maps an ENGINE CUE NAME to a Mixkit category + which ranked result to take. Mixkit
 // orders categories by popularity, so a low index is a well-regarded sound. Chosen ids are pinned

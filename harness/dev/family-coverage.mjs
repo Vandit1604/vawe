@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/dev/family-coverage.mjs · does the labeled eval have a plain-English query for every family?
+// harness/dev/family-coverage.mjs · does the labeled eval have a plain-English query for every family?
 //
 // WHY THIS EXISTS. Coverage of the SEARCH is closed: every entry carries a blurb (checkBlurb refuses a
 // bare one at load) and the discovery ratchet is at 0. That guarantees a thing is IN the index. It does
@@ -12,7 +12,7 @@
 // labeled query that resolves to it confidently, the same way every entry must carry a blurb. A family
 // that authors reach for by MECHANISM rather than by describing a look (an easing curve, a blend mode,
 // a keyframe handle) is exempt, because there is no plain-English request for it to answer; those are
-// still covered per-entry by scripts/dev/blurb-retrieval.mjs (their own words find them).
+// still covered per-entry by harness/dev/blurb-retrieval.mjs (their own words find them).
 //
 // The eval lives as inline arrays in lib-test.mjs. Importing that module would run the whole suite, so
 // the two labeled arrays are read out of its SOURCE. That is a parse, and a parse can rot, so

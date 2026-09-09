@@ -1,6 +1,6 @@
-// scripts/author/claims.mjs: check this repo's doctrine against the films it claims to describe.
+// harness/author/claims.mjs: check this repo's doctrine against the films it claims to describe.
 //
-//   node scripts/author/claims.mjs          # every claim, with its verdict and its evidence
+//   node harness/author/claims.mjs          # every claim, with its verdict and its evidence
 //   make claims
 //
 // WHY. The CRAFT docs and CLAUDE.md make quantitative claims about how good films behave: how long a

@@ -1,4 +1,4 @@
-// scripts/author/build-refstudy.mjs: a shot-for-shot study of refs/pin-522769469268499616.mp4.
+// harness/author/build-refstudy.mjs: a shot-for-shot study of refs/pin-522769469268499616.mp4.
 //
 // THIS IS A RECREATION EXERCISE (docs/CRAFT/RECREATION.md). The point is to reproduce the reference's
 // STRUCTURE exactly and see what our engine cannot do, so the gaps become the roadmap. Everything

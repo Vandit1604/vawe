@@ -7,7 +7,7 @@
 //   * `perspective()` as a TRANSFORM FUNCTION takes its vanishing point from the element it is written
 //     on. Every layer that used it got its OWN camera at its OWN centre, so two tilted siblings leaned
 //     toward two different points and the composition came apart. That is #59's failure, reproduced
-//     deliberately as the `naive` case in scripts/dev/spike-3d.mjs.
+//     deliberately as the `naive` case in harness/dev/spike-3d.mjs.
 //   * `perspective` as a PROPERTY applies to an element's CHILDREN. Written ONCE on the shared parent,
 //     every layer inside is projected through ONE camera while still rotating about its own centre,
 //     which is what a prop in a scene actually does.

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/dev/worktree-prune.mjs: retire agent worktrees once their work has landed.
+// harness/dev/worktree-prune.mjs: retire agent worktrees once their work has landed.
 //   make worktrees            report only (default; touches nothing)
 //   make worktrees PRUNE=1    remove the SAFE ones + their branches
 //

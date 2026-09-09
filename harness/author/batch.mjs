@@ -1,8 +1,8 @@
-// scripts/author/batch.mjs: DATA-DRIVEN VARIANTS. One template scene + an array of data rows → N rendered
+// harness/author/batch.mjs: DATA-DRIVEN VARIANTS. One template scene + an array of data rows → N rendered
 // videos. Deterministic per row. `{{key}}` placeholders in any string field are substituted from each
 // row; `expand-blocks` runs automatically so templates can use {type:"block"} layers.
 //
-// Usage: node scripts/author/batch.mjs <template.json> <data.json> [--render]
+// Usage: node harness/author/batch.mjs <template.json> <data.json> [--render]
 //   data.json = [ { "name":"acme", "stat":42 }, { "name":"globex", "stat":88 } ]
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -11,7 +11,7 @@ import * as B from '../../blocks/index.mjs';
 
 const [tpl, dataPath] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const doRender = process.argv.includes('--render');
-if (!tpl || !dataPath) { console.error('usage: node scripts/author/batch.mjs <template.json> <data.json> [--render]'); process.exit(2); }
+if (!tpl || !dataPath) { console.error('usage: node harness/author/batch.mjs <template.json> <data.json> [--render]'); process.exit(2); }
 
 const template = fs.readFileSync(tpl, 'utf8');
 const rows = JSON.parse(fs.readFileSync(dataPath, 'utf8'));

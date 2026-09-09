@@ -16,7 +16,7 @@
 // A control row with no ancestor style proves the probe can see the capability at all; if a control
 // ever reports KILLED the probe is broken, not the browser.
 //
-//   node scripts/dev/probe-ancestor-kills.mjs
+//   node harness/dev/probe-ancestor-kills.mjs
 import zlib from 'node:zlib';
 import puppeteer from 'puppeteer';
 

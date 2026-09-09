@@ -113,7 +113,7 @@ Effects to move over these surfaces: [EFFECTS.md](../EFFECTS.md) · skills: `vaw
 order the film turns, give none of them a `from`/`to`, and the engine binds window `i` to the joint
 after it (`core/timeline/junctions.js`), so the cuts you already wrote own the numbers. Judge motion
 across 4+ frame timestamps, never on one still: a still hides speed, scale and direction
-([`../MISTAKES.md`](../MISTAKES.md) #155). `node scripts/dev/library-stats.mjs` prints how many
+([`../MISTAKES.md`](../MISTAKES.md) #155). `node harness/dev/library-stats.mjs` prints how many
 gate-visible scenes still paint one window for the whole runtime; never quote that count from memory.
 
 ## `ruled-grid`: opt in, don't default into one

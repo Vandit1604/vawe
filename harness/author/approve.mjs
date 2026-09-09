@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-// scripts/author/approve.mjs: write the USER's signature onto a film's plan.
+// harness/author/approve.mjs: write the USER's signature onto a film's plan.
 //
 //   /vawe-approve <film>          (the slash command, which is how a human runs it)
-//   node scripts/author/approve.mjs <film> [--revoke]
+//   node harness/author/approve.mjs <film> [--revoke]
 //
 // The one piece of state in this pipeline that cannot be derived from artifacts, because it is not a
 // fact about the repo, it is a decision by a person. It lives in the storyboard's own frontmatter so
 // it travels with the plan it approves and shows up in any diff of it.
 //
-// An agent calling this directly is not the hole it looks like. The deny in scripts/live/stage-gate.mjs
+// An agent calling this directly is not the hole it looks like. The deny in harness/live/stage-gate.mjs
 // covers the write an agent would actually reach for, and a script a user is told to run is a
 // different act from an edit an agent makes while writing something else. The gate that matters is
 // that the plan was SHOWN and a person said yes; nothing in a repo can prove that happened, so this
@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = process.argv.slice(2).find((a) => !a.startsWith('--'));
-if (!arg) { console.error('usage: node scripts/author/approve.mjs <film>   (or /vawe-approve <film>)'); process.exit(2); }
+if (!arg) { console.error('usage: node harness/author/approve.mjs <film>   (or /vawe-approve <film>)'); process.exit(2); }
 const revoke = process.argv.includes('--revoke');
 
 const base = arg.replace(/\.(json|storyboard\.md)$/, '');

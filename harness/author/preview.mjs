@@ -1,10 +1,10 @@
 // preview.mjs, FAST iteration: render the key frames of a format directly (no encode),
 // into one labeled contact sheet. ~5s, not a full render.
-//   node scripts/author/preview.mjs higherlower            (storyboard)
-//   node scripts/author/preview.mjs higherlower 560         (single exact frame)
-//   node scripts/author/preview.mjs higherlower b3          (single frame: the START of beat 3)
-//   node scripts/author/preview.mjs higherlower 560 mydata.json   (custom data file)
-//   node scripts/author/preview.mjs higherlower --data mydata.json          (any position)
+//   node harness/author/preview.mjs higherlower            (storyboard)
+//   node harness/author/preview.mjs higherlower 560         (single exact frame)
+//   node harness/author/preview.mjs higherlower b3          (single frame: the START of beat 3)
+//   node harness/author/preview.mjs higherlower 560 mydata.json   (custom data file)
+//   node harness/author/preview.mjs higherlower --data mydata.json          (any position)
 //
 // `--data` exists because the positional slot is THIRD, so `make look M=scene D=x.json` had nowhere
 // to put it and the Makefile silently dropped it: both targets rendered sample.json while reporting
@@ -46,7 +46,7 @@ if (dataArg && !fs.existsSync(path.resolve(dataArg))) {
   process.exit(1);
 }
 if (!format || !fs.existsSync(path.join(repoRoot, 'formats', format, 'scene.html'))) {
-  console.error('usage: node scripts/author/preview.mjs <format> [frame] [data.json | --data f.json]');
+  console.error('usage: node harness/author/preview.mjs <format> [frame] [data.json | --data f.json]');
   console.error('formats:', fs.readdirSync(path.join(repoRoot, 'formats')).join(', '));
   process.exit(1);
 }

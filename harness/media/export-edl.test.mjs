@@ -1,5 +1,5 @@
-// scripts/media/export-edl.test.mjs: house-rule self-check, no framework.
-//   node scripts/media/export-edl.test.mjs
+// harness/media/export-edl.test.mjs: house-rule self-check, no framework.
+//   node harness/media/export-edl.test.mjs
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCRIPT = path.join(ROOT, 'scripts/media/export-edl.mjs');
+const SCRIPT = path.join(ROOT, 'harness/media/export-edl.mjs');
 
 const scene = {
   module: 'scene',

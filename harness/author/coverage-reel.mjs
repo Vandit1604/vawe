@@ -1,6 +1,6 @@
 // coverage-reel.mjs: build a reel that renders whatever nothing else renders.
 //
-//   node scripts/author/coverage-reel.mjs          write formats/scene/_coverage-reel.json
+//   node harness/author/coverage-reel.mjs          write formats/scene/_coverage-reel.json
 //   make coverage-reel                             write it, then render it
 //
 // `make coverage` says which vocabulary no authored scene exercises. Conformance already proves those
@@ -36,7 +36,7 @@ if (!fs.existsSync(path.join(CLIP_DIR, 'manifest.json'))) {
   execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-f', 'lavfi', '-i',
     'gradients=s=640x360:c0=0x0f1620:c1=0x2563eb:c2=0xf6f8fb:x0=0:y0=0:x1=640:y1=360:d=4:speed=0.25:n=3',
     '-t', '2.5', '-r', '30', '-pix_fmt', 'yuv420p', tmp], { cwd: repoRoot });
-  execFileSync('node', ['scripts/media/gen-clip.mjs', path.relative(repoRoot, tmp), 'sweep', '--fps', '30', '--w', '640'], { cwd: repoRoot, stdio: 'ignore' });
+  execFileSync('node', ['harness/media/gen-clip.mjs', path.relative(repoRoot, tmp), 'sweep', '--fps', '30', '--w', '640'], { cwd: repoRoot, stdio: 'ignore' });
   fs.rmSync(tmp, { force: true });
   console.log('  · synthesized the clip fixture (assets/gen/sweep), it is gitignored, so this self-heals');
 }

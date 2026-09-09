@@ -22,7 +22,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { LOOK_NAMES } from '../../core/looks/index.js';
 import { SHADER_FX } from '../../core/stings/index.js';
 import { run as runDocMap } from './doc-map.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CRAFT = path.join(ROOT, 'docs', 'CRAFT');

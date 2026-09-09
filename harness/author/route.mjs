@@ -1,9 +1,9 @@
-// scripts/author/route.mjs: DELIVERABLE-AWARE ROUTING. A request maps to one of a few vawe
+// harness/author/route.mjs: DELIVERABLE-AWARE ROUTING. A request maps to one of a few vawe
 // deliverables (docs/CRAFT/routes/*.md) before any brief-collection or authoring starts. Adapted from
 // another engine' route model (~/.claude/skills/another engine/SKILL.md § 2): a small priority table picks
 // the deliverable, then only that deliverable's route file is read, never the whole doctrine at once.
 //
-//   node scripts/author/route.mjs "<what the user asked, plain english>"
+//   node harness/author/route.mjs "<what the user asked, plain english>"
 //   make route Q="market our launch from hinge.co"
 //
 // Deterministic keyword/priority match, same table as docs/CRAFT/ROUTING.md. Never an LLM call: a
@@ -115,7 +115,7 @@ function readSection(file, heading) {
 function main() {
   const request = process.argv.slice(2).join(' ').trim();
   if (!request) {
-    console.error('usage: node scripts/author/route.mjs "<what the user asked, plain english>"');
+    console.error('usage: node harness/author/route.mjs "<what the user asked, plain english>"');
     process.exit(2);
   }
   const matched = route(request);

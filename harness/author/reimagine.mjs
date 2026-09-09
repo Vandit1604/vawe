@@ -1,4 +1,4 @@
-// scripts/author/reimagine.mjs: rebuild the flagged beats through the taste library. Run once.
+// harness/author/reimagine.mjs: rebuild the flagged beats through the taste library. Run once.
 import fs from 'node:fs';
 // index.mjs is the registry, not a barrel of 200 re-exported names. Alias it back to the `B.<factory>`
 // shape this file was written in; `TOKENS` rides along because the colours here come from the kit.

@@ -5,7 +5,7 @@
 // the tokens a real fan-out costs.
 //
 // Refuses to print anything if the storyboard's continuous-object contract does not chain
-// (scripts/lib/contract.mjs), because a broken contract handed to three parallel agents is three
+// (harness/lib/contract.mjs), because a broken contract handed to three parallel agents is three
 // disagreeing instructions, not three that will assemble into one film.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,7 +19,7 @@ import { buildKit } from '../lib/stagekit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv[2];
-if (!film || !fs.existsSync(film)) { console.error('usage: node scripts/author/scenes.mjs <film.json>'); process.exit(1); }
+if (!film || !fs.existsSync(film)) { console.error('usage: node harness/author/scenes.mjs <film.json>'); process.exit(1); }
 
 const scene = JSON.parse(fs.readFileSync(film, 'utf8'));
 const sbPath = storyboardPathFor(film);
@@ -66,7 +66,7 @@ beats.forEach((b, i) => {
   console.log(`SCENE ${n}/${beats.length}: ${b.name}  (${b.start}s–${b.end}s)`);
   console.log('═'.repeat(78));
   console.log(`Write: ${path.relative(ROOT, fragPath)}`);
-  console.log(`Kit:   paste ${path.relative(ROOT, kitPath)}'s block verbatim at the top (regenerate: node scripts/author/stagekit.mjs ${film})`);
+  console.log(`Kit:   paste ${path.relative(ROOT, kitPath)}'s block verbatim at the top (regenerate: node harness/author/stagekit.mjs ${film})`);
   console.log(`Copy (exact words, do not paraphrase): ${b.onscreen.length ? b.onscreen.map((l) => JSON.stringify(l)).join(' / ') : '(none stated: REPLACE the storyboard\'s onscreen: line first)'}`);
   if (b.object_in || b.object_out) {
     // WHAT THE OBJECT DOES, not only that it exists. `make assemble` draws the object itself; what the
@@ -102,5 +102,5 @@ beats.forEach((b, i) => {
 
 console.log('Kit block to hand every agent:\n');
 console.log(kitBlock);
-console.log(`\nWhen every fragment is written: node scripts/author/stagekit.mjs ${film} --check   (byte-identity)`);
+console.log(`\nWhen every fragment is written: node harness/author/stagekit.mjs ${film} --check   (byte-identity)`);
 console.log(`Then: make assemble D=${film}`);

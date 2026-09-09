@@ -1,11 +1,11 @@
-// scripts/author/profiles.mjs: THE REFERENCE PROFILES, as data.
+// harness/author/profiles.mjs: THE REFERENCE PROFILES, as data.
 //
 // docs/CRAFT/SELECTION.md Part 2 says why they exist: "An adjective is vague; a brand is a spec." Name
 // the one reference a video should feel like and every family is chosen at once, coherently. A scene
 // opts in with a top-level `"profile": "apple"`.
 //
 // It lives in its own file because it had exactly ONE reader. The table sat inside
-// scripts/author/motion-director.mjs and was consumed on the next line, so nothing else in the repo
+// harness/author/motion-director.mjs and was consumed on the next line, so nothing else in the repo
 // could ask what a profile means, not the quiz that needs to offer them, not `vawe_capabilities`, not a
 // catalog. A shared vocabulary with a single private reader is a table, not a vocabulary.
 //

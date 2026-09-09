@@ -30,11 +30,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// Sampled at 30fps because that is the rate `scripts/media/study.mjs` reads every reference in
+// Sampled at 30fps because that is the rate `harness/media/study.mjs` reads every reference in
 // grammar/ at, and `Stillness()` normalises to. A frame difference is a measurement of the GAP between
 // frames, so comparing a 60fps sample to a 30fps reference would report us half as alive as we are.
 export const SAMPLE_FPS = 30;
@@ -165,7 +165,7 @@ export function profile(frames, { fps = SAMPLE_FPS, windowS = WINDOW_S } = {}) {
 // ── the CLI. Guarded, so importing this module for a test does not run the gate and exit. The
 // self-test lives INSIDE this guard for the same reason: it used to sit at module scope, so any
 // script that imported this file while its own `--self-test` flag was on process.argv ran THIS
-// gate's self-test and exited before its own code began. scripts/dev/motion-lab.mjs hit exactly
+// gate's self-test and exited before its own code began. harness/dev/motion-lab.mjs hit exactly
 // that and had to hide the flag around the import. A guard that covers only half a file is not
 // a guard.
 if (import.meta.url === `file://${process.argv[1]}`) {
