@@ -69,7 +69,7 @@ JSON *is* the video.
 | `out` | string | driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONT. One of: `fade` `up` `rise` `pop` `scale` `lift` `defocus` `slide-left` `slide-right` `slide-up` `slide-down` `wipe` `wipe-right` `wipe-left` `wipe-down` `wipe-up` `iris` `clock` `none` |
 | `enterDur` | number|string | Enter window (s, cut layers), or a duration word (core/registry/vocab.js): ins |
 | `exitDur` | number|string | Exit window (s; 0 = hold to end), or a duration word (core/registry/vocab.js): |
-| `pin` | string | Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds. One of: `center` `top` `bottom` `left` `right` `top-left` `top-right` `bottom-left` `bottom-right` `thirds-tl` `thirds-tr` `thirds-bl` `thirds-br` `thirds-t` `thirds-b` `thirds-l` `thirds-r` |
+| `pin` | string | Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds. One of: `center` `top` `bottom` `left` `right` `top-left` `top-right` `bottom-left` `bottom-right` `thirds-tl` `thirds-tr` `thirds-bl` `thirds-br` `thirds-t` `thirds-b` `thirds-l` `thirds-r` `stage` `text-band` `lower-band` |
 | `critical` | boolean | Force include/exclude from layout audit |
 | `track` | number | z-order track |
 | `to` | number | Count end value (count) |
@@ -116,9 +116,9 @@ A sting is punctuation: put it **on** a reveal or a cut, never as decoration.
 Use the texture the brand actually has. A flat brand gets `plain`. A pattern is a seasoning for one
 beat, never the wallpaper.
 
-## Themes (42)
+## Themes (45)
 
-`a24` · `ab-control` · `ab-skill` · `ab2-control` · `ab2-skill` · `ab3-nogate` · `ab4-a-ledgerline` · `ab4-b-ledgerline` · `apple` · `argus` · `bloomberg` · `brew` · `brew-dark` · `cadence` · `default` · `ditherkit` · `duolingo` · `emberyear` · `glassatmos` · `ledgerline-cyber` · `ledgerline-neon` · `lumen` · `mercury` · `merged-ignition` · `neutral` · `nike` · `northwind` · `plainyear` · `plinth` · `plinth-auto` · `preface` · `satara` · `threadcite` · `tpot` · `vawe` · `vawe-dark` · `vawe-inter` · `vawe-night` · `vawe-paper` · `vawe-site` · `vercel`
+`a24` · `ab-control` · `ab-skill` · `ab2-control` · `ab2-skill` · `ab3-nogate` · `ab4-a-ledgerline` · `ab4-b-ledgerline` · `apple` · `argus` · `bloomberg` · `brew` · `brew-dark` · `cadence` · `default` · `ditherkit` · `duolingo` · `emberyear` · `fathom` · `glassatmos` · `hi-vandit` · `ledgerline-cyber` · `ledgerline-neon` · `lumen` · `mercury` · `merged-ignition` · `neutral` · `nike` · `northwind` · `plainyear` · `plinth` · `plinth-auto` · `preface` · `satara` · `threadcite` · `together-chat` · `tpot` · `vawe` · `vawe-dark` · `vawe-film` · `vawe-inter` · `vawe-night` · `vawe-paper` · `vawe-site` · `vercel`
 
 Colours come from the theme, never hardcoded: `var(--text)` `var(--text-2)` `var(--dim)`
 `var(--accent)` `var(--surface)` `var(--line)`. `<b>` inside `text` renders in the accent.

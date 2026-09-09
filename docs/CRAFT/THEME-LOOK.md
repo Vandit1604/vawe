@@ -157,14 +157,15 @@ Refuses by name, rather than rendering a blank sheet, when the theme has no `loo
 
 ## Where a theme's `look` lives today
 
-`themes/vawe.json` (the real brand, derived from `site/app/globals.css`) and all six
-`themes/presets/*.json` (the taste-anchor profiles: a24, apple, bloomberg, duolingo, nike, vercel)
-carry one. `themes/default.json` and `themes/linear.json`/`themes/stripe.json` do not yet; a theme
-with no `look` is not an error, it is a theme that has not been given one.
+`themes/vawe.json` (the real brand, derived from `site/app/globals.css`), `themes/together-chat.json`,
+`themes/vawe-film.json`, and all six `themes/presets/*.json` (the taste-anchor profiles: a24, apple,
+bloomberg, duolingo, nike, vercel) carry one. `themes/default.json` and `themes/linear.json`/
+`themes/stripe.json` do not yet; a theme with no `look` is not an error, it is a theme that has not
+been given one.
 
-## The computed look, for the other 37
+## The computed look, for the other 36
 
-Only 1 of the 42 themes in the registry carries an authored `look`, so an engine default reading
+Only 9 of the 45 themes in the registry carry an authored `look`, so an engine default reading
 `theme.look` alone would do nothing for nearly all of them, `themes/default.json` included. `computedLook(theme, { isLightBg })` and `resolveLook(theme,
 opts)` (`core/registry/theme-contract.js`, beside `lookErrors`) close that gap: `resolveLook` returns
 `{...computedLook(theme), ...(theme.look||{})}`, so an authored key always wins over the computed one,
