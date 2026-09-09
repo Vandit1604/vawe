@@ -712,7 +712,13 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    const p=pal||{}, bg=p.bg||'#171717', surface=p.surface||'rgba(255,255,255,.08)',
      edge=p.lineStrong||p.line||'rgba(255,255,255,.3)', accent=p.accent||'#2563eb',
      text=p.text||'#fff', dim=p.text2||p.dim||'rgba(255,255,255,.6)';
-   const boxes=archBoxes(b.archetype), label=(b.picture||b.object||'').trim(), onscreen=(b.onscreen||[]).filter(Boolean);
+   // A STORYBOARD SAYS "NO COPY" IN PROSE, and the sketch used to draw that prose as the film's own
+  // words: beat 1 of hi-vandit reads "onscreen: (none, the mark itself is the only mark)" and the
+  // panel rendered that whole parenthetical as large white type, so the approval surface showed a
+  // line that will never be in the film. A parenthesised note, or a bare "none", is the author
+  // declining the slot, not filling it.
+  const declined=(l)=>/^\s*\(?\s*none\b/i.test(l) || /^\s*\(.*\)\s*$/.test(l);
+  const boxes=archBoxes(b.archetype), label=(b.picture||b.object||'').trim(), onscreen=(b.onscreen||[]).filter(Boolean).filter((l)=>!declined(l));
    const copyBoxes=boxes.filter((x)=>x[4]==='copy');
    let s='<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg" font-family="Anybody,system-ui,sans-serif">'
      +'<rect width="1920" height="1080" fill="'+bg+'"/>';
