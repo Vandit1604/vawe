@@ -10,9 +10,9 @@
   "aspect": "736:414",
   "hasAudio": true,
   "shotDetection": "fixed-sampling",
-  "threshold": 0.3,
+  "threshold": 0.12,
   "peakSceneScore": 0.113,
-  "nearMisses": 0,
+  "nearMisses": 1,
   "shots": 10,
   "medianShot": 1.98,
   "cutsPerMinute": 30.3
