@@ -7,7 +7,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe
+.PHONY: motion-floor frame-check stage worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -629,6 +629,15 @@ waivers: ## [preflight] every blocking gate can be waived, and a waiver costs no
 # THIS film, plus the arsenal ranked against what the film says it is, then a receipt. It records only
 # with --record: a bare run would otherwise certify the whole library by accident (it did, once, for
 # all 134).
+motion-floor: ## [check] DOES THE FILM EVER STOP: local (content) motion per 0.5s window, ambient reported apart and never counted (D=<film>, needs a render)
+	@node scripts/gates/motion-floor.mjs $(D) $(if $(JSON),--json,)
+
+frame-check: ## [check] THE PLAN vs THE FRAMES: archetype rotation, one measurable peak, and every size on the kit ramp (D=<film>)
+	@node scripts/gates/frame-check.mjs $(D) $(if $(JSON),--json,)
+
+stage: ## [preflight] WHERE IS THIS FILM: the stage it is in and the ONE next command (D=<film>)
+	@node scripts/gates/stage.mjs $(D) $(if $(JSON),--json,)
+
 preflight: ## [preflight] the decisions that belong BEFORE the JSON, recorded for this version of the scene
 	node scripts/gates/preflight.mjs $(D) --record
 
@@ -835,7 +844,7 @@ sfx-catalog: ## [engine] REGENERATE docs/CRAFT/SFX-CATALOG.md from core/audio/ki
 # stage. That writes a motion keyframe into the scene at that frame, surgically, the file's hand
 # formatting survives and a save that changes nothing is a zero-byte diff (scripts/author/patch-motion.mjs).
 # `undo` walks back through the session. docs/CRAFT/KEYED-MOTION.md is what you are authoring toward.
-studio: ## [dev] LIVE scrubbable preview (no mp4 render).
+studio: ## [dev] LIVE scrubbable preview (no mp4 render). Its `plan` state shows the storyboard with every beat's real fragment live in it.
 	node scripts/dev/studio.mjs $(D)
 
 # make seam-check D=formats/x/video.json, SAMPLE THE SEAMS: pull the frames straddling every transition

@@ -35,9 +35,14 @@ await client.connect(transport);
 const { tools } = await client.listTools();
 const names = tools.map((t) => t.name).sort();
 console.log(`✓ connected · tools: ${names.join(', ')}`);
-for (const want of ['vawe_draft', 'vawe_export', 'vawe_guide', 'vawe_status']) {
+for (const want of ['vawe_draft', 'vawe_export', 'vawe_guide', 'vawe_status', 'vawe_next']) {
   if (!names.includes(want)) { console.error(`✗ missing tool ${want}`); process.exit(1); }
 }
+
+const next = await client.callTool({ name: 'vawe_next', arguments: {} });
+const nextText = next.content[0].text;
+if (!nextText.trim()) { console.error('✗ vawe_next with no film returned nothing'); process.exit(1); }
+console.log(`✓ vawe_next (no film) → ${nextText.split('\n')[0]}`);
 
 const guide = await client.callTool({ name: 'vawe_guide', arguments: {} });
 const guideLen = guide.content[0].text.length;

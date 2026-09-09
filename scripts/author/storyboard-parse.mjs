@@ -4,7 +4,28 @@
 // PLAYS it. Two parsers would drift, and the drift would be invisible in the worst way, the gate
 // passing a beat the animatic silently drops. The regexes below are lifted verbatim from
 // storyboard-check.mjs so the reader is unchanged, only shared.
+// The closed vocabularies. Exported so storyboard-check, frame-check and the template all read ONE
+// list: three copies of a vocabulary is three vocabularies as soon as anyone adds to one of them.
+export const ARCHETYPES = ['centred', 'split', 'hero-object', 'asymmetric-baseline', 'full-bleed-row',
+  'symmetric-pair', 'lockup'];
+export const WEIGHTS = ['peak', 'strong', 'quiet'];
+/** `other (a reason)` is legal, the same waiver shape every rule here has. */
+export const isArchetype = (v) => !v || ARCHETYPES.includes(String(v).trim().split(/\s+\(/)[0])
+  || /^other\s*\(.+\)/.test(String(v).trim());
+
 export const RANGE = /\(([\d.]+)\s*s\s*[–: -]\s*([\d.]+)\s*s\)/;
+
+// THE REFERENCE, DECODED INTO ITS PARTS. A `### Reference devices` table, kept out of `blocksOf`'s way
+// by its heading level. It exists because the first pass at this film took three of the reference's
+// twelve moves and nobody could see which nine were missing: the catalogue lived in a chat message,
+// and a decision that lives in a transcript cannot be checked tomorrow (docs/MISTAKES.md #599).
+export function referenceDevices(src) {
+  const m = /^###\s+Reference devices\s*$([\s\S]*?)(?=^##\s|\Z)/m.exec(src || '');
+  if (!m) return [];
+  return [...m[1].matchAll(/^\|\s*(D\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|/gm)]
+    .map(([, id, device, use]) => ({ id, device, use,
+      dropped: /\bdropped\b/i.test(use) }));
+}
 
 export function frontmatter(src) {
   const fm = /^---\n([\s\S]*?)\n---/.exec(src);
@@ -22,6 +43,16 @@ export const fieldIn = (block, k) => {
 };
 
 export const blocksOf = (src) => src.split(/^##\s+/m).slice(1);
+
+// The film-level `object:` line names the noun ("the input bar"), same as always, and MAY carry a
+// source after an arrow ("the input bar -> formats/scene/_together.bar.html"): the real layer to draw
+// it as, instead of assemble.mjs's placeholder rect. Splitting it here, once, keeps `object` itself
+// unchanged for the many readers (docs, panels, the animatic) that only ever wanted the name.
+export function parseObjectLine(raw) {
+  if (!raw) return { name: raw, src: null };
+  const m = /^(.*?)\s*->\s*(\S+)\s*$/.exec(raw);
+  return m ? { name: m[1].trim(), src: m[2] } : { name: raw, src: null };
+}
 
 // seconds from a `duration:` value that may say "29s", "1.5 min", or a bare number
 export function durSec(raw) {
@@ -95,18 +126,34 @@ export function parseStoryboard(src) {
       // firing it at the exact same instant as the cut, the way every OTHER field on this beat already
       // reaches assemble through this one parser.
       trigger: f('trigger'),
+      // THE PICTURE'S OWN DECISIONS, from CLOSED vocabularies so a gate can compare them rather than
+      // admire them. `picture:` and `style:` are prose and always were: an author can describe the
+      // wrong object in fluent English and pass every check (docs/MISTAKES.md #596). These three cannot
+      // be written vaguely.
+      //   archetype: the composition, so "no archetype twice in a row" is checkable
+      //   weight:    peak | strong | quiet, so exactly one beat is the loudest and it is measurable
+      //   borrows:   "<reference device> -> <our object>", so a borrowed SHAPE must name its ROLE here
+      archetype: f('archetype'), weight: f('weight'), borrows: f('borrows'),
+      // WHICH FILE, AND WHERE. Optional; assemble.mjs's own convention (`<base>.scene<N>.html`) is
+      // unchanged when this is unset. `scripts/lib/contract.mjs parseFragmentSpec` reads the raw
+      // string, so this parser stays a raw-field reader like every field above it.
+      fragment: f('fragment'),
     };
   });
+  const { name: objectName, src: objectSrc } = parseObjectLine(field('object'));
   return {
     hasFrontmatter: present, field, duration: total,
     message: field('message'), audience: field('audience'), arc: field('arc'),
     framework: field('framework'), theme: field('theme'), format: field('format'),
-    object: field('object'), beats,
+    object: objectName, objectSrc, beats,
     // pace is a GENRE decision, made before any beat is written rather than discovered while animating.
     // spectacle names the one exaggerated moment and is two-sided: naming it promises every other beat
     // stays restrained. not is the exclusion line, because most generic output is not a wrong decision,
     // it is an un-excluded default.
     pace: field('pace'), spectacle: field('spectacle'), not: field('not'),
+    // The type ramp, decided ONCE for the film. Seven frames that each invent their own scale are
+    // seven films, and the ramp was being decided eight times in seven files before this existed.
+    ramp: field('ramp'),
   };
 }
 
