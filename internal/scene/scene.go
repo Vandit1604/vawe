@@ -46,6 +46,13 @@ type Meta struct {
 	// informational, and it only reaches an author because it is DECLARED here: encoding/json drops
 	// an unknown key without a word, which is how it went missing (docs/MISTAKES.md #477).
 	BeatSync string `json:"beatSync"`
+	// FrameWorker is Go-only (json:"-": there is nothing on the JS side to mirror), set by Capture
+	// after the shoot finishes. FrameWorker[f] names which worker tab actually drew the pixels shown
+	// at displayed frame f, chasing a deduped frame to the worker that drew its representative. It
+	// exists so a caller can measure motion on a sharded render without repeating the mistake
+	// StillnessAcrossShards was written to avoid: comparing two frames that were never drawn by the
+	// same browser.
+	FrameWorker []int32 `json:"-"`
 }
 
 // served is the ONLY prefix set the render page may fetch. A render needs the engine (core), the
@@ -845,11 +852,17 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 			return meta, e
 		}
 	}
+	// Same lookup the VAWE_FRAME_MAP debug dump below does (a deduped frame is drawn by whichever
+	// worker drew its representative), kept on Meta so a caller can measure motion without re-deriving
+	// it: see StillnessAcrossShards.
+	meta.FrameWorker = make([]int32, total)
+	for f := 0; f < total; f++ {
+		meta.FrameWorker[f] = frameMap[rep[f]]
+	}
 	if mp := os.Getenv("VAWE_FRAME_MAP"); mp != "" {
 		var sb strings.Builder
 		for f := 0; f < total; f++ {
-			// A deduped frame is drawn by whichever worker drew its representative.
-			fmt.Fprintf(&sb, "%d %d %d\n", f, rep[f], frameMap[rep[f]])
+			fmt.Fprintf(&sb, "%d %d %d\n", f, rep[f], meta.FrameWorker[f])
 		}
 		if err := os.WriteFile(mp, []byte(sb.String()), 0644); err != nil {
 			return meta, err
@@ -941,68 +954,67 @@ const (
 // value for the same reason: a floor on a raw delta means a different thing at every frame rate.
 const normFPS = 30.0
 
-func Stillness(framesDir string, total int, ext string, fps float64) (stillPct float64, median float64, peak float64, ok bool) {
-	if total < 4 {
-		return 0, 0, 0, false
+// stillGray reads one captured frame and reduces it to the same per-cell luma grid the ffmpeg probe
+// this was calibrated against reads (see the AREA-AVERAGE comment below). Shared by Stillness and
+// StillnessAcrossShards so the two only ever differ in which PAIRS of frames they compare, never in
+// how a single frame is read.
+func stillGray(framesDir, ext string, n int) []float64 {
+	b, err := os.ReadFile(filepath.Join(framesDir, fmt.Sprintf("%05d%s", n, ext)))
+	if err != nil {
+		return nil
 	}
-	step := total / stillPairs
-	if step < 1 {
-		step = 1
+	img, _, err := image.Decode(bytes.NewReader(b))
+	if err != nil {
+		return nil
 	}
-	readGray := func(n int) []float64 {
-		b, err := os.ReadFile(filepath.Join(framesDir, fmt.Sprintf("%05d%s", n, ext)))
-		if err != nil {
-			return nil
-		}
-		img, _, err := image.Decode(bytes.NewReader(b))
-		if err != nil {
-			return nil
-		}
-		r := img.Bounds()
-		out := make([]float64, 0, 16384)
-		// AREA-AVERAGE each cell, do not point-sample it. The first cut read one pixel per 12x12 block
-		// and disagreed with the ffmpeg probe these numbers are compared against by twenty points
-		// (58% still vs 77% on the same file), because a single pixel lands on a glyph edge or a grain
-		// speck and reports change where the eye sees none. `scale=160:90` box-filters, so this has to.
-		// An instrument that does not agree with the measurement it is quoted beside is worse than none.
-		for y := r.Min.Y; y < r.Max.Y; y += stillGrid {
-			for x := r.Min.X; x < r.Max.X; x += stillGrid {
-				sum, n := 0.0, 0.0
-				for dy := 0; dy < stillGrid && y+dy < r.Max.Y; dy += stillSub {
-					for dx := 0; dx < stillGrid && x+dx < r.Max.X; dx += stillSub {
-						cr, cg, cb, _ := img.At(x+dx, y+dy).RGBA()
-						// Rec. 601 luma on the 0-255 scale, which is what signalstats YAVG reports.
-						sum += (0.299*float64(cr) + 0.587*float64(cg) + 0.114*float64(cb)) / 257
-						n++
-					}
-				}
-				if n > 0 {
-					out = append(out, sum/n)
+	r := img.Bounds()
+	out := make([]float64, 0, 16384)
+	// AREA-AVERAGE each cell, do not point-sample it. The first cut read one pixel per 12x12 block
+	// and disagreed with the ffmpeg probe these numbers are compared against by twenty points
+	// (58% still vs 77% on the same file), because a single pixel lands on a glyph edge or a grain
+	// speck and reports change where the eye sees none. `scale=160:90` box-filters, so this has to.
+	// An instrument that does not agree with the measurement it is quoted beside is worse than none.
+	for y := r.Min.Y; y < r.Max.Y; y += stillGrid {
+		for x := r.Min.X; x < r.Max.X; x += stillGrid {
+			sum, n := 0.0, 0.0
+			for dy := 0; dy < stillGrid && y+dy < r.Max.Y; dy += stillSub {
+				for dx := 0; dx < stillGrid && x+dx < r.Max.X; dx += stillSub {
+					cr, cg, cb, _ := img.At(x+dx, y+dy).RGBA()
+					// Rec. 601 luma on the 0-255 scale, which is what signalstats YAVG reports.
+					sum += (0.299*float64(cr) + 0.587*float64(cg) + 0.114*float64(cb)) / 257
+					n++
 				}
 			}
-		}
-		return out
-	}
-	deltas := make([]float64, 0, stillPairs)
-	for n := 0; n+1 < total; n += step {
-		a, b := readGray(n), readGray(n+1)
-		if a == nil || b == nil || len(a) != len(b) || len(a) == 0 {
-			continue // a gap in the sequence is the encoder's error to report, not this measurement's
-		}
-		sum := 0.0
-		for i := range a {
-			d := a[i] - b[i]
-			if d < 0 {
-				d = -d
+			if n > 0 {
+				out = append(out, sum/n)
 			}
-			sum += d
 		}
-		d := sum / float64(len(a))
-		if fps > 0 {
-			d *= fps / normFPS // change per 1/30s, whatever this film was rendered at
-		}
-		deltas = append(deltas, d)
 	}
+	return out
+}
+
+// stillMeanAbsDelta is the per-cell mean |luma delta| between two already-read grids, or -1 if they
+// cannot be compared (a gap in the capture sequence, which is the encoder's error to report, not this
+// measurement's).
+func stillMeanAbsDelta(a, b []float64) float64 {
+	if a == nil || b == nil || len(a) != len(b) || len(a) == 0 {
+		return -1
+	}
+	sum := 0.0
+	for i := range a {
+		d := a[i] - b[i]
+		if d < 0 {
+			d = -d
+		}
+		sum += d
+	}
+	return sum / float64(len(a))
+}
+
+// stillStats turns a bag of already-normalised per-pair deltas into the (still%, median, peak) triple
+// both Stillness functions return. Order-independent, so it does not matter whether the caller built
+// the slice in frame order (Stillness) or worker-by-worker (StillnessAcrossShards).
+func stillStats(deltas []float64) (stillPct, median, peak float64, ok bool) {
 	if len(deltas) < 3 {
 		return 0, 0, 0, false
 	}
@@ -1016,10 +1028,100 @@ func Stillness(framesDir string, total int, ext string, fps float64) (stillPct f
 		}
 	}
 	sorted := append([]float64(nil), deltas...)
-	for i := 1; i < len(sorted); i++ { // insertion sort: the slice is at most stillPairs long
+	for i := 1; i < len(sorted); i++ { // insertion sort: the slice is at most a few hundred long
 		for j := i; j > 0 && sorted[j] < sorted[j-1]; j-- {
 			sorted[j], sorted[j-1] = sorted[j-1], sorted[j]
 		}
 	}
 	return 100 * float64(still) / float64(len(deltas)), sorted[len(sorted)/2], top, true
+}
+
+func Stillness(framesDir string, total int, ext string, fps float64) (stillPct float64, median float64, peak float64, ok bool) {
+	if total < 4 {
+		return 0, 0, 0, false
+	}
+	step := total / stillPairs
+	if step < 1 {
+		step = 1
+	}
+	deltas := make([]float64, 0, stillPairs)
+	for n := 0; n+1 < total; n += step {
+		d := stillMeanAbsDelta(stillGray(framesDir, ext, n), stillGray(framesDir, ext, n+1))
+		if d < 0 {
+			continue
+		}
+		if fps > 0 {
+			d *= fps / normFPS // change per 1/30s, whatever this film was rendered at
+		}
+		deltas = append(deltas, d)
+	}
+	return stillStats(deltas)
+}
+
+// StillnessAcrossShards is Stillness for a render captured across more than one worker tab.
+//
+// render.go used to print an apology instead of a number here, because Stillness's own pairing
+// (frame n against frame n+1) is exactly wrong on a sharded render: Capture deals frames to workers
+// ROUND-ROBIN ("DEAL THE FRAMES", above), so for `workers` > 1 two frames adjacent by NUMBER are
+// almost always drawn by two different browser tabs, and two tabs do not paint byte-identical pixels
+// for a held frame (docs/MISTAKES.pending-worker.md). A delta between them measures the gap between
+// tabs, not the gap between instants, exactly like comparing the six-worker row in the comment on
+// render.go's apology to the one-worker row: same film, same frames, wildly different number.
+//
+// The fix is not a different frame pair, it is the SAME kind of pair Stillness already trusts: two
+// frames drawn by one browser, in the order that one browser drew them. workerOf (Meta.FrameWorker)
+// says which worker drew each displayed frame, so grouping displayed frames by workerOf and comparing
+// each worker's frames to the next ONE THAT WORKER OWNS reproduces the single-tab guarantee
+// scripts/gates/motion-split.mjs relies on, without re-rendering anything or touching capture.
+//
+// The one thing this changes versus Stillness: two frames owned by the same worker are `gap` native
+// frames apart, not one (round-robin means a worker only draws every `workers`th frame, skipping over
+// whatever dedup already removed). stillMeanAbsDelta still measures the raw change over that whole
+// gap, so it is divided by gap before the fps normalisation, the same move that normalisation already
+// makes for frame rate: turn "change over some span" into "change per native frame" before turning
+// that into "change per 1/30s". A held frame still measures near zero either way; a moving one is
+// compared over more real time, which is exactly what the gap division corrects for.
+func StillnessAcrossShards(framesDir string, total int, ext string, fps float64, workerOf []int32) (stillPct, median, peak float64, ok bool) {
+	if total < 4 || len(workerOf) != total {
+		return 0, 0, 0, false
+	}
+	byWorker := map[int32][]int{}
+	for f := 0; f < total; f++ {
+		if w := workerOf[f]; w >= 0 {
+			byWorker[w] = append(byWorker[w], f) // Capture assigns each worker's jobs in increasing frame order, so this stays sorted
+		}
+	}
+	if len(byWorker) == 0 {
+		return 0, 0, 0, false
+	}
+	// same total sample budget as Stillness (stillPairs), split evenly across the workers that
+	// actually drew frames, so a sharded render costs no more decode time than an unsharded one.
+	perWorker := stillPairs / len(byWorker)
+	if perWorker < 1 {
+		perWorker = 1
+	}
+	deltas := make([]float64, 0, stillPairs)
+	for _, frames := range byWorker {
+		step := len(frames) / perWorker
+		if step < 1 {
+			step = 1
+		}
+		for i := 0; i+1 < len(frames); i += step {
+			n, m := frames[i], frames[i+1]
+			gap := m - n
+			if gap < 1 {
+				continue
+			}
+			d := stillMeanAbsDelta(stillGray(framesDir, ext, n), stillGray(framesDir, ext, m))
+			if d < 0 {
+				continue
+			}
+			d /= float64(gap) // change over `gap` native frames -> change per native frame
+			if fps > 0 {
+				d *= fps / normFPS // change per 1/30s, whatever this film was rendered at
+			}
+			deltas = append(deltas, d)
+		}
+	}
+	return stillStats(deltas)
 }

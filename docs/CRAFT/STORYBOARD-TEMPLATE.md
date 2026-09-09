@@ -4,13 +4,14 @@ audience: "Who it is for (role, context)."
 arc: "hook → build → proof → payoff → CTA"
 framework: "PAS | BAB | AIDA | FAB | Star-Story-Solution, CHOSEN, with a reason, not defaulted"
 threads: "what holds this film across its cuts. Two devices from docs/CRAFT/FILM-STRUCTURE.md"
-object: "ONLY if a continuous object is one of them: the noun that survives every cut"
+object: "ONLY if a continuous object is one of them: the noun that survives every cut. Optional source after an arrow: 'the input bar -> formats/scene/_together.bar.html' draws that file instead of assemble.mjs's placeholder rect"
 object_t0: "what it looks like before anything happens"
 object_states: "what it becomes at each cut, in order"
 object_last: "the last frame: the payoff, or the moment just before it"
 format: 1920x1080
 theme: "themes/<brand>.json (or: preset <name> remixed via make theme-remix)"
 duration: 29s
+ramp: "the kit roles this film uses, decided ONCE. e.g. kit-display for the wordmark, kit-hook for every beat sentence, kit-caption for every label. No fourth size anywhere."
 pace: "showreel | explainer | held, CHOSEN before any beat is written, with a seconds-per-idea budget"
 spectacle: "beat N · which layer · which device · what the moment is for, the ONE loud moment"
 not: "the defaults this film refuses, in your own words"
@@ -20,6 +21,9 @@ not: "the defaults this film refuses, in your own words"
 
 - Copy this file, fill every field, then run `make storyboard-check SB=<file>` and get sign-off
   BEFORE writing any scene JSON.
+- Name each beat's `archetype:` and `weight:` (exactly one `peak`), and a `borrows:` line whenever
+  a reference device is in play, written as `<their device> -> <our object>`. `make frame-check`
+  measures the peak against the frames actually built.
 - Two lines are required and gate-checked for PRESENCE only, never for quality: `spectacle:` (the one
   loud moment, named: beat, layer, device, why) and `not:` (the defaults this film refuses).
 - Fill `pace:` (showreel 1.5-4s/idea, explainer 3-8s, held 6s+), `threads:`/`object:` (what holds the
@@ -74,6 +78,38 @@ not: "the defaults this film refuses, in your own words"
   written into the line ("2.5s per idea") wins over the band. It counts the PLAN's ideas against the
   RENDER's clock, so it catches a film that grew past its budget and cannot see two ideas crowded into one
   beat. That one is yours.
+
+  DECODE THE REFERENCE INTO A TABLE, IN THIS FILE. A film with a reference gets a
+  `### Reference devices` section (a `###`, so it is not parsed as a beat): one row per device, what it
+  is, and which beat uses it or why it was refused. Without it a study lives in whoever did it, and the
+  first pass at one film here took three of its reference's twelve moves with nobody able to see which
+  nine were missing (docs/MISTAKES.md #599). Keep a dropped device's row and strike it: refusing a
+  device is a decision, and an absent row reads as an oversight. Each beat's `borrows:` then names the
+  ids it uses. `make studio D=<film>.json` renders the table beside the spine.
+
+  THE PICTURE'S OWN DECISIONS, AND WHY THEY ARE CLOSED LISTS. `picture:` and `style:` are prose, and
+  prose is where the wrong object hides: a beat that described "a white pill bar with a round cobalt run
+  button" passed every check while drawing an AI chat input into a film about a command line
+  (docs/MISTAKES.md #596). Three fields fix that, and all three are checkable BECAUSE they are closed.
+
+  `archetype:` is the composition, one of: centred · split · hero-object · asymmetric-baseline ·
+  full-bleed-row · symmetric-pair · lockup, or `other (what it is)` with the reason travelling with it.
+  Closed so that "no archetype twice in a row" is a gate rather than a hope, and two beats running with
+  one composition is the flat film: nothing about the cut between them reads as a change.
+
+  `weight:` is peak · strong · quiet, and EXACTLY ONE beat in a film is the peak. This is `spectacle:`
+  made per beat and made measurable: `make frame-check D=<film>` renders every fragment and reports the
+  largest object in each, so a film whose quietest beat holds its biggest object fails instead of
+  shipping. Ours did: the declared payoff was the fifth-largest object in its own film.
+
+  `borrows:` is `<their device> -> <our object>`, required whenever a reference is in play. Writing that
+  arrow is the whole point: a shape copied without its role is how a chat input ends up in a film about
+  a command line, because their hero object is a chat box for a reason that is not ours. A `borrows:`
+  line with no right-hand side FAILS.
+
+  `ramp:` sits in the frontmatter and names the kit type roles the film uses, once. Seven frames that
+  each invent their own scale are seven films; before this field existed one film carried eight sizes
+  across seven fragments.
 
   LAYOUT IS A BEAT DECISION, NOT A LAYER DECISION. Their beat formula has five slots, Element · Motion ·
   Layout · Style · Timing, and ours had no Layout: composition was decided per layer at JSON time and
@@ -147,6 +183,16 @@ not: "the defaults this film refuses, in your own words"
   parts block already takes, so this is not a second motion mechanism, it is the storyboard filling in
   the one the engine already has. Optional, and delete the line if nothing but the continuous object
   moves in a beat.
+
+    `fragment:` IS OPTIONAL, AND BOTH ITS HALVES ARE. `make assemble`'s own convention
+  (`<film>.scene<N>.html`) is unchanged when this line is unset. Two forms, either half omittable:
+  `fragment: _together.card.html @ center@900x520` names the file AND boxes it; `fragment:
+  _together.card.html` alone names the file, still full-bleed; `fragment: @ center@900x520` boxes the
+  default file. The placement clause reuses `object_in`/`object_out`'s own grammar above
+  (`<placement>@<w>x<h>`), never a second one to learn. TWO CONSECUTIVE BEATS NAMING THE SAME FILE keep
+  ONE component alive across the cut instead of tearing it down and rebuilding it, which is the cheapest
+  way to stop a shared panel reading as a slideshow. A placement change between them is keyed as that
+  one layer's own `motion`, not a second layer.
 
   either answer. `threads:` names the devices carrying this film from docs/CRAFT/FILM-STRUCTURE.md, a
   match cut, a camera travel, a motif, a bookend, a metric cut rate, an unfinished sentence, an open
@@ -239,6 +285,8 @@ not: "the defaults this film refuses, in your own words"
 
 ## Beat 1: Hook (0s-6s)
 - type: hook
+- archetype: centred
+- weight: quiet
 - object: not born yet. The stage is being cleared for it.
 - shot: wide (establishing, the frame is mostly empty)
 - camera: slowPush
@@ -294,6 +342,9 @@ not: "the defaults this film refuses, in your own words"
 
 ## Beat 4: Payoff (19s-25s)
 - type: benefit_highlight
+- archetype: hero-object
+- weight: peak
+- borrows: the reference's big centred statement -> our hero number, at the size the claim deserves
 - object: transformed by that act into the result
 - blueprint: statReveal (Adapt: the hero number the hook set up)
 - onscreen: "the shocker line" / "the payoff figure"

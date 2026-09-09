@@ -114,3 +114,102 @@ try {
 } finally {
   fs.rmSync(dir, { recursive: true, force: true });
 }
+
+// ---- (b) object: <name> -> <source> draws the source's own layer type, not the placeholder rect ----
+{
+  const dir2 = fs.mkdtempSync(path.join(os.tmpdir(), 'assemble-test-object-'));
+  const film2 = path.join(dir2, 'v.json');
+  const sb2 = path.join(dir2, 'v.storyboard.md');
+  fs.writeFileSync(film2, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9' }));
+  fs.writeFileSync(path.join(dir2, 'v.objsrc.html'), '<div>bar</div>');
+  fs.writeFileSync(path.join(dir2, 'v.scene1.html'), '<div>a</div>');
+  fs.writeFileSync(path.join(dir2, 'v.scene2.html'), '<div>b</div>');
+  const objSrcAbs = path.join(dir2, 'v.objsrc.html');
+  fs.writeFileSync(sb2, `---
+message: "test film"
+audience: "ci"
+arc: "hook -> payoff"
+framework: "AIDA"
+object: "the input bar -> ${objSrcAbs}"
+format: 1920x1080
+theme: "themes/default.json"
+duration: 6s
+pace: "held, 3s/idea"
+spectacle: "beat 2"
+not: "no centred text default"
+---
+
+## Beat 1: Hook (0s-3s)
+- type: hook
+- object_in: center@100x40
+- object_out: center@100x40
+- onscreen: "hi"
+- becomes: a
+- why: open
+- duration: 3s
+
+## Beat 2: Payoff (3s-6s)
+- type: benefit_highlight
+- object_in: center@100x40
+- object_out: center@100x40
+- onscreen: "the payoff"
+- becomes: b
+- why: land
+- duration: 3s
+`);
+  execFileSync(node, [path.join(ROOT, 'scripts/author/assemble.mjs'), film2], { encoding: 'utf8' });
+  const scene = JSON.parse(fs.readFileSync(film2, 'utf8'));
+  const obj = scene.layers.find((l) => l.id === 'object');
+  assert.equal(obj.type, 'html', 'a declared .html object source draws as an html layer, not a rect');
+  assert.equal(obj.src, path.relative(ROOT, objSrcAbs), 'src is the repo-relative path to the declared source');
+  assert.equal(obj.fill, undefined, 'the rect-only `fill` prop does not survive onto the real layer type');
+  fs.rmSync(dir2, { recursive: true, force: true });
+  console.log('✓ assemble.test.mjs: a declared object: source draws as its own layer type');
+}
+
+// ---- (c) two consecutive beats naming the same fragment: merge into ONE layer, not two -------------
+{
+  const dir3 = fs.mkdtempSync(path.join(os.tmpdir(), 'assemble-test-shared-'));
+  const film3 = path.join(dir3, 'v.json');
+  const sb3 = path.join(dir3, 'v.storyboard.md');
+  fs.writeFileSync(film3, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9' }));
+  fs.writeFileSync(path.join(dir3, 'shared.html'), '<div>card</div>');
+  fs.writeFileSync(sb3, `---
+message: "test film"
+audience: "ci"
+arc: "hook -> payoff"
+framework: "AIDA"
+object: "none"
+format: 1920x1080
+theme: "themes/default.json"
+duration: 6s
+pace: "held, 3s/idea"
+spectacle: "beat 2"
+not: "no centred text default"
+---
+
+## Beat 1: Hook (0s-3s)
+- type: hook
+- fragment: shared.html
+- onscreen: "hi"
+- becomes: a
+- why: open
+- duration: 3s
+
+## Beat 2: Payoff (3s-6s)
+- type: benefit_highlight
+- fragment: shared.html
+- onscreen: "the payoff"
+- becomes: b
+- why: land
+- duration: 3s
+`);
+  execFileSync(node, [path.join(ROOT, 'scripts/author/assemble.mjs'), film3], { encoding: 'utf8' });
+  const scene = JSON.parse(fs.readFileSync(film3, 'utf8'));
+  assert.deepEqual(scene.layers.map((l) => l.id), ['scene1'], 'two beats sharing one fragment file assemble into ONE layer, never two');
+  const layer = scene.layers[0];
+  assert.equal(layer.duration, 6, 'the merged layer spans both beats, start to the last beat\'s end');
+  assert.equal(layer.acrossBeats, true, 'a layer spanning more than its own beat must opt out of the per-beat unit wrapper');
+  fs.rmSync(dir3, { recursive: true, force: true });
+  console.log('✓ assemble.test.mjs: two consecutive beats sharing a fragment: file merge into one layer');
+}
