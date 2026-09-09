@@ -184,6 +184,19 @@ not: "the defaults this film refuses, in your own words"
   the one the engine already has. Optional, and delete the line if nothing but the continuous object
   moves in a beat.
 
+    THE MOVE. `motion:` above is always a one-shot ENTRANCE: an element arrives and lands, and the frame
+  is still again the moment it does. Measured across four swept axes (docs/MISTAKES.md #610), that is
+  why films read as slideshows: more entrances, spread further apart, travelling further, all change
+  WHEN the stillness happens and never WHETHER it does. The one axis that worked is a keyed track that
+  never stops moving for the whole beat, and `move:` is how a beat asks for it: `<shape>:<band>`, a
+  `SHAPES` key from `scripts/author/track.mjs` (`make arsenal SHAPE=pan`, the same named, hand-keyed
+  tracks `motion:` above already draws its vocabulary from, never a new mechanism) and a speed band, the
+  same four words (`energy`, `professional`, `gravity`, `cinematic`) `motion:`'s bands already use.
+  `move: pan:cinematic` on the headline beat, `move: drift:gravity` on a held one. The band scales how
+  FAR/BIG the shape's own measured move is, `professional` reproducing it untouched; it never scales
+  duration, because the track always spans the WHOLE beat, that is the point of the field. Optional, and
+  a beat with no `move:` assembles exactly as it did before this field existed.
+
     `fragment:` IS OPTIONAL, AND BOTH ITS HALVES ARE. `make assemble`'s own convention
   (`<film>.scene<N>.html`) is unchanged when this line is unset. Two forms, either half omittable:
   `fragment: _together.card.html @ center@900x520` names the file AND boxes it; `fragment:

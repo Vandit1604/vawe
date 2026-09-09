@@ -110,6 +110,11 @@ export function parseStoryboard(src) {
       // the one continuous object above. "<selector>@<kind>:<inBand>[/<outBand>]", `;`-separated for
       // more than one moving element. Only meaningful once a beat names one.
       motion: f('motion'),
+      // SUSTAINED MOTION (scripts/lib/contract.mjs parseMove): a hand-keyed track on this beat's OWN
+      // layer, spanning the whole beat, so the beat never goes still after an entrance lands.
+      // "<shape>:<band>", a scripts/author/track.mjs SHAPES key and a SPEED_BAND name. Only meaningful
+      // once a beat names one.
+      move: f('move'),
       // style · layout · rest: the three slots their beat formula has (Element · Motion · Layout ·
       // Style · Timing) and ours did not. Parsed here for the same reason `placement` above is: a slot
       // an author is told to fill and nothing reads is worse than no slot, because the storyboard looks
