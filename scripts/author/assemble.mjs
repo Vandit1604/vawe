@@ -16,7 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../gates/craft-checklist.mjs';
-import { parseStoryboard, timeline } from './storyboard-parse.mjs';
+import { parseStoryboard, timeline, fieldIn, blocksOf } from './storyboard-parse.mjs';
 import { chainErrors, edges, parseMotion, motionErrors, SPEED_BAND, stagedSchedule, STAGE_S } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
@@ -46,7 +46,9 @@ if (!film || !fs.existsSync(film)) { console.error('usage: node scripts/author/a
 const scene = JSON.parse(fs.readFileSync(film, 'utf8'));
 const sbPath = storyboardPathFor(film);
 if (!fs.existsSync(sbPath)) { console.error(`assemble: no storyboard at ${sbPath}`); process.exit(1); }
-const sb = parseStoryboard(fs.readFileSync(sbPath, 'utf8'));
+const sbSrc = fs.readFileSync(sbPath, 'utf8');
+const sb = parseStoryboard(sbSrc);
+const blocks = blocksOf(sbSrc);
 const { beats } = timeline(sb);
 
 const errs = chainErrors(beats);
@@ -89,7 +91,14 @@ const staged = caused.filter(Boolean).length;
 const [canvasW, canvasH] = sceneDims({ aspect });
 const missing = [];
 const htmlLayers = beats.map((b, i) => {
-  const fragPath = path.join(dir, `${base}.scene${i + 1}.html`);
+  // THE STORYBOARD NAMES THE FRAGMENT. `<film>.sceneN.html` is the convention `make scenes` writes and
+  // it stays the fallback, but a beat carrying an explicit `fragment:` wins: the plan is where the
+  // beat-to-surface mapping was decided, and re-deriving it from a filename here means a film whose
+  // fragments are named anything else (`_<film>.<beat>.html`, the other convention in this repo) is
+  // reported as seven missing files that are all sitting on disk. Two ways to answer one question is
+  // the drift this repo warns about; the plan is the answer.
+  const named = (fieldIn(blocks[i] || '', 'fragment') || '').split(/\s+\(/)[0].trim();
+  const fragPath = named ? path.resolve(ROOT, named) : path.join(dir, `${base}.scene${i + 1}.html`);
   if (!fs.existsSync(fragPath)) missing.push(path.relative(ROOT, fragPath));
   // track:1, NEVER 0: direction-floor.mjs (and other gates) treat any track-0 layer as the backdrop
   // lane, invisible to the content-coverage checks (feature-poverty, empty-beat, ends-on-nothing all
