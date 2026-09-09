@@ -15,11 +15,15 @@
 // cutStyle ALWAYS returns the full style set (identity values in the steady state) so a property
 // written during the cut can never stick, byte-identical DOM for any render order.
 import { defineRegistry } from '../registry/registry.js';
-import { PRESENTATIONS, CUT_BLURBS, IDENT, DIRS, SOLO_BLIND, cutWrites, HIDE_CHANNELS } from './presentations.js';
+import { PRESENTATIONS, CUT_BLURBS, IDENT, DIRS, SOLO_BLIND, cutWrites, HIDE_CHANNELS,
+  wipe, circleWipe, clockWipe } from './presentations.js';
 import { TIMINGS, TIMING_BLURBS, TIMING_REGISTRY } from './timings.js';
 
 export { PRESENTATIONS, CUT_BLURBS, IDENT, DIRS, SOLO_BLIND, cutWrites };
 export { TIMINGS, TIMING_BLURBS, TIMING_REGISTRY };
+// wipe/circleWipe/clockWipe: the junction-wipe transition helpers, moved from core/motion/motion.js.
+// Exported here so an importer can take the barrel instead of reaching into presentations.js.
+export { wipe, circleWipe, clockWipe };
 
 // soloCutStyle: cutStyle for the single-root path. Same closed-form styles, visibility pinned open.
 export function soloCutStyle(name, seqState, opts) {
