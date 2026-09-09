@@ -1,9 +1,9 @@
 import { boot } from '/core/engine/boot.js';
 import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions } from '/core/timeline/junctions.js';
 import { PART_REGISTRY, PARTS } from '/core/motion/parts.js';
-import { icon, clamp01, lerp, fitText, fitBox, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, isLightBg, stepClock } from '/core/motion/motion.js';
+import { icon, clamp01, lerp, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, isLightBg, stepClock } from '/core/motion/motion.js';
 import { collectClips, driveClips, clipStyleAt, enterDurOf, exitDurOf, seekAll, entranceWarp, BASE_ENTER, BASE_EXIT } from '/core/timeline/clips.js';
-import { splitText, circleText, decodeText, gsapStagger } from '/core/type/type.js';
+import { splitText, circleText, decodeText, gsapStagger, fitText, fitBox } from '/core/type/type.js';
 import { buildMorph } from '/core/motion/morph.js';
 import { GSAP_REGISTRY } from '/core/engine/gsap-effects.js';
 import { ransomStyle } from '/core/type/ransom.js';
