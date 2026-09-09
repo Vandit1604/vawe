@@ -103,10 +103,35 @@ const htmlLayers = beats.map((b, i) => {
   // (core/motion/parts.js), so this is not a second motion mechanism, it is the storyboard filling in
   // the one the engine already has. `each`/`exitDur` come from the named speed band
   // (scripts/lib/contract.mjs SPEED_BAND), never a raw second written here.
+  //
+  // SPREAD, NOT ADDED. Measured against a real launch film, an assembled beat goes still after its
+  // first second: every `motion:` line fires at once because `parts[].delay` (formats/scene/scene.js,
+  // `p.delay ?? 0.1`) was never set, so every entry lands within that default. `delay` already exists
+  // for exactly this ("when does this part start, relative to the layer"), so this is the same lever a
+  // hand-authored parts block already has, not a new one. The last entry starts near the beat's own
+  // end rather than beside the first, proportional to `beatDuration`, and it costs nothing amplitude-
+  // or duration-wise: `each`/`exitDur` are untouched, so no motion is invented, only re-timed.
+  // A single entry has nothing to spread against and is left exactly as before (no `delay` key,
+  // scene.js's own 0.1s default applies, matching every pre-existing assembled film byte for byte).
+  // `rest:` (docs/CRAFT/STORYBOARD-TEMPLATE.md, parsed by storyboard-parse.mjs) was considered for this
+  // and rejected: it names ambient HOLD motion ("a 1-2% breathing scale, a slow drift"), the exact
+  // "nothing ever fully stops" idle the user explicitly ruled out here. Wiring it would auto-add a new
+  // idle track to every beat that already has `rest:` prose written (most of them; `rest: none` is the
+  // deliberate exception, not the default), which is inventing motion, not re-timing motion the
+  // storyboard already declared. This pass only ever moves a `delay` already implied by `motion:`.
   const motion = parseMotion(b.motion);
-  const parts = motion.length ? motion.map((m) => ({
-    select: m.selector, anim: m.kind, each: SPEED_BAND[m.inBand], out: true, exitDur: SPEED_BAND[m.outBand],
-  })) : undefined;
+  const beatDuration = +(b.end - b.start).toFixed(3);
+  const parts = motion.length ? motion.map((m, mi) => {
+    const each = SPEED_BAND[m.inBand];
+    const exitDur = SPEED_BAND[m.outBand];
+    // The latest a part can start and still finish its own entrance before its own exit begins
+    // (scene.js anchors `out:true` to `beatDuration - exitDur` regardless of when the part entered).
+    // A beat too short for that budget collapses every delay to 0: the pre-existing, unstaggered
+    // behaviour, never a negative or invented number.
+    const maxDelay = Math.max(0, beatDuration - each - exitDur);
+    const delay = motion.length > 1 ? +((mi / (motion.length - 1)) * maxDelay).toFixed(3) : null;
+    return { select: m.selector, anim: m.kind, each, out: true, exitDur, ...(delay != null ? { delay } : {}) };
+  }) : undefined;
   // STAGING: `start` is the SHIFTED, fully-resolved second (shiftedStart[i]), not the raw `b.start` a
   // flat build would have used, and not the relative-start STRING form ("scene1.end+0.05")
   // layers[].start also legally accepts. Measured trying it: `make beats`'s own coverage check and
@@ -116,7 +141,7 @@ const htmlLayers = beats.map((b, i) => {
   // the number is the same "one source of truth" the relative form buys a hand-author, without a
   // representation the rest of the toolchain cannot yet read. `id` stays on every layer regardless:
   // it is what a human (or a future resolver) uses to name "this scene's cause" when reading the film.
-  return { id: `scene${i + 1}`, type: 'html', src: path.relative(ROOT, fragPath), start: shiftedStart[i], duration: +(b.end - b.start).toFixed(3), track: 1, x: 0, y: 0, w: canvasW, h: canvasH, ...(parts ? { parts } : {}) };
+  return { id: `scene${i + 1}`, type: 'html', src: path.relative(ROOT, fragPath), start: shiftedStart[i], duration: beatDuration, track: 1, x: 0, y: 0, w: canvasW, h: canvasH, ...(parts ? { parts } : {}) };
 });
 if (missing.length) {
   console.error(`assemble: missing fragment(s), run \`make scenes D=${film}\` for the briefs and write them first:`);
