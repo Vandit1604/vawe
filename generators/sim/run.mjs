@@ -1,7 +1,7 @@
-// scripts/sim/run.mjs: bake a stateful simulation to a deterministic PNG frame sequence.
+// generators/sim/run.mjs: bake a stateful simulation to a deterministic PNG frame sequence.
 //
-//   node scripts/sim/run.mjs sims/ember-burst.mjs            (dry run: report, write nothing)
-//   node scripts/sim/run.mjs sims/ember-burst.mjs --write     (bake → assets/baked/ember-burst/)
+//   node generators/sim/run.mjs sims/ember-burst.mjs            (dry run: report, write nothing)
+//   node generators/sim/run.mjs sims/ember-burst.mjs --write     (bake → assets/baked/ember-burst/)
 //   make sim D=sims/ember-burst.mjs WRITE=1
 //
 // WHY THIS EXISTS. `renderFrame(n)` is a pure function of n, eight workers, arbitrary order,
@@ -22,7 +22,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sourceHash } from './provenance.mjs';
-import { serveRepo } from '../lib/render-harness.mjs';
+import { serveRepo } from '../../scripts/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const BAKE_ROOT = path.join(repoRoot, 'assets/baked');
@@ -51,7 +51,7 @@ export async function bake(entry, { write = false, onFrame = null } = {}) {
     const page = await browser.newPage();
     const errs = [];
     page.on('pageerror', (e) => errs.push(String(e)));
-    await page.goto(`http://127.0.0.1:${port}/scripts/sim/host.html`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/generators/sim/host.html`, { waitUntil: 'load' });
     const spec = await page.evaluate((src) => window.__simLoad(src), rel);
     if (spec.error) throw new Error(`sim failed to load: ${spec.error}`);
 
@@ -83,7 +83,7 @@ export async function bake(entry, { write = false, onFrame = null } = {}) {
       sourceHash: prov.hash, sources: prov.files,
       // the digest of the FRAMES themselves: two bakes of the same source are equal iff this matches
       framesHash: crypto.createHash('sha256').update(frames.map((f) => f.sha).join('')).digest('hex'),
-      bakedBy: 'scripts/sim/run.mjs',
+      bakedBy: 'generators/sim/run.mjs',
     };
     if (write) {
       fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
@@ -102,7 +102,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const entry = args.find((a) => !a.startsWith('--'));
   const write = args.includes('--write');
   if (!entry) {
-    console.error('usage: node scripts/sim/run.mjs sims/<name>.mjs [--write]');
+    console.error('usage: node generators/sim/run.mjs sims/<name>.mjs [--write]');
     const dir = path.join(repoRoot, 'sims');
     if (fs.existsSync(dir)) console.error('sims:', fs.readdirSync(dir).filter((f) => f.endsWith('.mjs')).join(', '));
     process.exit(1);

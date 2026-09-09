@@ -7,7 +7,7 @@
 //
 // PROJECTION HAPPENS HERE, ONCE, AT FACTORY TIME. d3-geo runs in Node while the scene is being
 // authored and what reaches the page is a finished `d` string. This is the same trade
-// scripts/media/globe-dots.mjs already made and for the same reason: nothing that owns a clock, and no
+// generators/media/globe-dots.mjs already made and for the same reason: nothing that owns a clock, and no
 // library, goes near the render loop. `renderFrame(n)` stays a pure function of n.
 //
 // THE GEOMETRY IS BAKED, NOT FETCHED. assets/geo/us-states.js and assets/geo/world.js are generated

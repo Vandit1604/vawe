@@ -1,7 +1,7 @@
 // audio-bake.mjs: bake every sound the engine can use, from parameters, with no network.
 //
-//   node scripts/media/audio-bake.mjs            bake cues + the default beds
-//   node scripts/media/audio-bake.mjs --list     print the cue table
+//   node generators/media/audio-bake.mjs            bake cues + the default beds
+//   node generators/media/audio-bake.mjs --list     print the cue table
 //   make audio
 //
 // Synthesis lives in core/audio-kit.mjs. This file is the CATALOGUE: which cues exist, which
@@ -87,7 +87,7 @@ for (const [name, opts] of Object.entries(BEDS)) {
   const dur = writeWav(path.join(MUSIC, `${name}.wav`), normalize(musicBed(opts), 0.34));
   if (credits[name]?.source && !credits[name].generated)
     console.log(`  ⚠ ${name}: credits.json described a downloaded track (${credits[name].source}). This bake replaced that file, so the entry is being corrected.`);
-  credits[name] = { generated: 'scripts/media/audio-bake.mjs', genre: 'synth pad',
+  credits[name] = { generated: 'generators/media/audio-bake.mjs', genre: 'synth pad',
     licence: 'none, synthesized from parameters, carries no rights', licenceVerified: true,
     seconds: +dur.toFixed(2) };
   total += dur; n++;

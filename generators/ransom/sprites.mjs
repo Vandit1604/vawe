@@ -1,4 +1,4 @@
-// scripts/ransom/sprites.mjs: turn a pack of real cut-out letter images into a sprite set the
+// generators/ransom/sprites.mjs: turn a pack of real cut-out letter images into a sprite set the
 // engine can compose notes from.  make ransom-sprites  [SRC=assets/ransom-src] [H=220]
 //
 // IN:  assets/ransom-src/<CHAR>/<anything>.png    (a folder per character, preferred)

@@ -1,7 +1,7 @@
 // glyphs.mjs: turn a vendored woff2 into a three.js "typeface JSON" of glyph OUTLINES.
 //
-//   node scripts/fonts/glyphs.mjs Anybody
-//   node scripts/fonts/glyphs.mjs assets/fonts/Fraunces.woff2 --weight 900
+//   node generators/fonts/glyphs.mjs Anybody
+//   node generators/fonts/glyphs.mjs assets/fonts/Fraunces.woff2 --weight 900
 //   make glyphs FONT=Anybody WEIGHT=700
 //
 // three.js TextGeometry extrudes vector outlines, so it cannot read a woff2 the way the browser
@@ -68,7 +68,7 @@ function parseArgs(argv) {
     else if (a.startsWith('--')) die(`unknown flag ${a}`);
     else positional.push(a);
   }
-  if (!positional.length) die('usage: node scripts/fonts/glyphs.mjs <Name|path.woff2> [--weight N] [--charset ascii|latin1] [--chars "ABC123"]');
+  if (!positional.length) die('usage: node generators/fonts/glyphs.mjs <Name|path.woff2> [--weight N] [--charset ascii|latin1] [--chars "ABC123"]');
   return { source: positional[0], ...opts };
 }
 
@@ -178,7 +178,7 @@ const typeface = {
   // Provenance. Without it a stale artifact is undetectable: the JSON stays syntactically perfect
   // forever while the woff2 underneath it changes. scripts/gates/glyphs-audit.mjs reads this.
   vawe: {
-    generator: 'scripts/fonts/glyphs.mjs',
+    generator: 'generators/fonts/glyphs.mjs',
     source: sourceRel,
     sourceSha256,
     weight,

@@ -251,7 +251,7 @@ have. It keeps its teeth in `.githooks/pre-push`, where the author has the conte
 used to say the comparison could not work at all, for two structural reasons, and both have since been
 answered, in opposite ways.
 
-The font half is simply fixed. `scripts/media/fonts.mjs` now carries an exact version AND a sha256 for
+The font half is simply fixed. `generators/media/fonts.mjs` now carries an exact version AND a sha256 for
 every face (`scripts/media/fonts.lock.json`), and a mismatch FAILS rather than warns, so two machines
 hold identical bytes. One pin is deliberately behind the others: GeistMono sits on 5.2.8 because 5.3.0
 re-subset the face and the baselines were not saved against it.
