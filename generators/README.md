@@ -1,3 +1,9 @@
+---
+when: deciding whether a script belongs in generators/ or somewhere else
+answers: "what generators/ is: it bakes an asset a film later loads, as opposed to core/ which assembles a frame"
+group: engine
+---
+
 # generators/
 
 Everything here bakes an asset a film later loads: fonts (`fonts/`, plus `media/fonts.mjs`), the
