@@ -24,6 +24,7 @@ import * as uploads from './uploads.mjs';
 import * as pipe from './pipeline.mjs';
 import * as fetchers from './fetchers.mjs';
 import * as catalog from './catalog.mjs';
+import { stageOf, filePaths, ROOT as STAGE_ROOT } from '../scripts/gates/stage.mjs';
 
 // THE INVENTORY GOES IN THE DESCRIPTION, NOT THE REPLY. A calling model reads every tool's description
 // before it calls anything and reads a tool's output only if it chooses to call. So "the full block and
@@ -263,6 +264,70 @@ server.registerTool('vawe_capabilities', {
     `blocks (${c.blocks.length} across ${c.blockFamilies.length} families):`,
     ...c.blocks.map((b) => `  ${b.name.padEnd(18)} ${b.blurb}`),
   ].join('\n'));
+});
+
+// ── vawe_next ────────────────────────────────────────────────────────────────────────────────────
+// The one question an agent outside this repo could never ask before: what stage is this film in,
+// and what is the ONE next thing to do. scripts/gates/stage.mjs already answers it from the files on
+// disk, never from stored state, so this tool calls straight into stageOf() rather than keeping a
+// second copy of the eight-stage order.
+function listFilms() {
+  const dir = path.join(STAGE_ROOT, 'formats/scene');
+  const skip = new Set(['schema', 'sample']);
+  const names = new Set();
+  if (fs.existsSync(dir)) {
+    for (const f of fs.readdirSync(dir)) {
+      // A leading underscore is this repo's own scratch convention (throwaway fanout/probe files);
+      // surfacing those as "films" would bury the real ones under noise.
+      if (f.startsWith('_')) continue;
+      const m = f.match(/^(.+?)\.(json|storyboard\.md|brief\.md)$/);
+      if (m && !skip.has(m[1])) names.add(m[1]);
+    }
+  }
+  return [...names].sort();
+}
+
+server.registerTool('vawe_next', {
+  title: 'What stage this film is in, and the one next step',
+  description: 'The authoring ladder has eight stages (brief, plan, approval, design, assemble, '
+    + 'direct, render, judge) and this is the only question an agent outside the repo could not ask '
+    + 'before: where is this film, and what is the ONE next command. Pass a film name (same as you\'d '
+    + 'give `make stage D=`) or omit it to list films on disk and whether each has shipped. Approval '
+    + 'is a human act: this tool can tell you a plan is waiting on it, but nothing can grant it.',
+  inputSchema: {
+    film: z.string().optional().describe('Film name or path, e.g. "launch" or "formats/scene/launch.json". Omit to list films.'),
+  },
+}, async ({ film }) => {
+  if (!film) {
+    const names = listFilms();
+    if (!names.length) return text('no films yet. Start one: vawe_guide, then vawe_draft with a scene.');
+    // Capped, not paged: this reads a shared, ever-growing scratch directory (formats/scene/*.json is
+    // gitignored, so a long-lived worktree accumulates hundreds of throwaway scenes). A caller asking
+    // "what films exist" wants a usable answer, not the whole directory dumped into its context.
+    const CAP = 40;
+    const lines = names.slice(0, CAP).map((n) => {
+      const p = filePaths(n);
+      const shipped = fs.existsSync(p.mp4) ? 'rendered' : fs.existsSync(p.sb) ? 'has a storyboard' : 'scene only';
+      return `  ${n.padEnd(28)} ${shipped}`;
+    });
+    const more = names.length > CAP ? [``, `…and ${names.length - CAP} more. Name one directly to see its stage.`] : [];
+    return text(['films on disk (pass a name for its exact stage):', ...lines, ...more].join('\n'));
+  }
+
+  const st = stageOf(film);
+  const line = st.order.map((id) => (id === st.stage ? `[${id}]` : id)).join(' → ');
+  const out = [
+    `${st.name} is at stage ${st.stage.toUpperCase()}`,
+    line,
+    ``,
+    `why: ${st.why}`,
+    `do:  ${st.next}`,
+  ];
+  if (st.stage === 'approval') {
+    out.push('', 'approval is a human act: no tool, including this one, can grant it. A person has to '
+      + 'look at the plan and run /vawe-approve themselves.');
+  }
+  return text(out.join('\n'));
 });
 
 // ── vawe_draft ───────────────────────────────────────────────────────────────────────────────────
