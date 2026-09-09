@@ -251,7 +251,7 @@ export function validateData(schema, data) {
   errors.push(...staggerErrors(data || {})); // a stagger object names three dials, in both slots that take one
   errors.push(...countEaseErrors(data || {})); // a counter must never overshoot its own value
   errors.push(...bgErrors(data || {}));     // each bg window names one backdrop, and can be rendered purely
-  errors.push(...htmlLayerErrors(data || {})); // hand-authored layers hit the same dead-CSS trap
+    errors.push(...htmlLayerErrors(data || {})); // hand-authored layers hit the same dead-CSS trap
   errors.push(...cssErrors(data || {}));    // css passthrough must not name a prop the engine rewrites every frame
   errors.push(...captionErrors(data || {})); // a caption the renderer would silently never draw
   errors.push(...idleErrors(data || {}, IDLE)); // a scaling idle re-rasterises glyphs every frame
@@ -366,6 +366,51 @@ export function captionErrors(cfg) {
 //
 // A GROUP's children were invisible to this: the walk was a flat pass over cfg.layers, so the identical
 // fragment was checked at the top level and unchecked one nesting deep. Nesting is not an exemption.
+// SCENE UNITS AND THE LAYER THAT LOSES MOST OF ITSELF. With `sceneUnits:true` a layer is assigned to a
+// beat BY ITS START TIME (formats/scene/scene.js `beatIndexOf`) and its wrapper is only on screen for
+// that beat, so a layer that begins just before a boundary is truncated to the sliver between its start
+// and that boundary. It does not error and it does not warn: the beat simply renders empty.
+//
+// Measured: formats/scene/together-recreation.json had a layer at 2.55s to 6.70s with a boundary at
+// 2.65s. Ten of its four thousand one hundred and fifty milliseconds survived. Four beats of a finished
+// film rendered pure white, and finding it took a single-layer probe scene because every fragment
+// previewed perfectly on its own (docs/MISTAKES.md #603).
+//
+// `acrossBeats: true` is the documented opt-out and the check respects it: that flag says the layer
+// belongs to the FILM rather than to a beat, which is exactly what a continuous object is.
+//
+// A WARNING, not an error, and deliberately. Eleven of this repo's 182 scenes trip it today, mostly
+// full-film rects and counters that never declared `acrossBeats`. Some of those may be latent bugs and
+// some may be fine; blocking them on the day this check arrives would be asserting an answer nobody has
+// checked. It says what the engine will do and names the flag that changes it.
+export function sceneUnitWarnings(cfg) {
+  const d = cfg || {};
+  if (d.sceneUnits !== true) return [];
+  const cuts = [...(d.transitions || []), ...(d.cuts || []), ...(d.seams || [])]
+    .map((t) => (typeof t === 'object' ? (t.at ?? t.t) : t))
+    .filter((n) => typeof n === 'number').sort((a, b) => a - b);
+  if (!cuts.length) return [];
+  const out = [];
+  for (const [i, L] of (Array.isArray(d.layers) ? d.layers : []).entries()) {
+    if (!isObj(L) || L.acrossBeats === true) continue;
+    const a = +L.start || 0;
+    const dur = (+L.duration || +L.dur || 0);
+    if (!(dur > 0)) continue;
+    const boundary = cuts.find((c) => c > a + 1e-6 && c < a + dur - 1e-6);
+    if (boundary == null) continue;
+    const kept = (boundary - a) / dur;
+    // Under a fifth surviving is not a judgement call. Above it, the author may well have meant a
+    // layer that hands off at the cut, and this stays quiet about it.
+    if (kept > 0.2) continue;
+    out.push(`layers[${i}]${L.id ? ` (#${L.id})` : ''} starts at ${a}s and runs ${dur}s, but a sceneUnits `
+      + `boundary at ${boundary}s ends its beat: only ${(kept * 100).toFixed(0)}% of it will ever be on `
+      + 'screen, and the rest of the beat renders EMPTY with no other symptom. Either end this layer at '
+      + `${boundary}s and start its continuation there, or set \`"acrossBeats": true\` if it is meant to `
+      + 'belong to the film rather than to one beat.');
+  }
+  return out;
+}
+
 export function htmlLayerErrors(cfg) {
   const out = [];
   const visit = (L, at) => {
@@ -1485,7 +1530,7 @@ if (isMain) {
       console.log(`✓ ${path.relative(root, file)} (${mod})`);
     }
     // lint warnings (non-failing unless --strict): authoring smells the schema can't express
-    const warns = [...lintData(data), ...audioWarns, ...htmlFileWarns];
+    const warns = [...lintData(data), ...audioWarns, ...htmlFileWarns, ...sceneUnitWarnings(data)];
     if (warns.length) {
       if (strict) failed++;
       for (const w of warns) console.error(`    ⚠ ${w}`);
