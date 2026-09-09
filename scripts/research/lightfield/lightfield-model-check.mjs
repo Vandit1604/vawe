@@ -1,7 +1,7 @@
-// tools/lightfield/lightfield-model-check.mjs: is lightfield-model.mjs a model of the field, or just
+// scripts/research/lightfield/lightfield-model-check.mjs: is lightfield-model.mjs a model of the field, or just
 // plausible arithmetic?
 //
-//   node tools/lightfield/lightfield-model-check.mjs
+//   node scripts/research/lightfield/lightfield-model-check.mjs
 //
 // The model predicts the colour field from geometry alone, and two fitting tools rank layouts by what
 // it says. A model that is quietly wrong does not crash: it returns confident numbers and the search
@@ -15,11 +15,11 @@
 // one painted pixel, so a row summing to less has lost light and a row summing to more has invented
 // it, and either way the palette solved against it is paying for a picture nobody renders.
 import puppeteer from 'puppeteer';
-import { paintField } from '../../core/lightfield/index.js';
-import { resolve } from '../../core/lightfield/options.js';
-import { PRESETS } from '../../core/lightfield/presets.js';
+import { paintField } from '../../../core/lightfield/index.js';
+import { resolve } from '../../../core/lightfield/options.js';
+import { PRESETS } from '../../../core/lightfield/presets.js';
 import { gridPoints, fieldWeights, W, H, ROLES } from './lightfield-model.mjs';
-import { toRgb } from '../../core/lightfield/colour.js';
+import { toRgb } from '../../../core/lightfield/colour.js';
 import { execFileSync } from 'node:child_process';
 
 const BW = 24, BH = 14;

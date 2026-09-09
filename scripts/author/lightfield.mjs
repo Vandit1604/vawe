@@ -94,7 +94,7 @@ if (shot) {
   // A shot always lands in out/, never beside the fragment: formats/scene/ holds markup, not PNGs.
   const target = out ? (path.isAbsolute(out) ? out : path.join(ROOT, out)) : path.join(ROOT, 'out/lightfield.html');
   if (!out) { fs.mkdirSync(path.dirname(target), { recursive: true }); fs.writeFileSync(target, html + '\n'); }
-  const { shoot } = await import('../../tools/lightfield/lightfield-shot.mjs');
+  const { shoot } = await import('../research/lightfield/lightfield-shot.mjs');
   const png = await shoot(target, path.join(ROOT, 'out', path.basename(target).replace(/\.html$/, '.png')));
   console.log(`shot ${path.relative(ROOT, png)}`);
 }
