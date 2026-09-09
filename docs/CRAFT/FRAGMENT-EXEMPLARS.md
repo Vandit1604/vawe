@@ -90,6 +90,6 @@ format invented for this fragment (the mono face and `tabular-nums` come from th
 
 None of them share a layout. All four share: one hero decision per frame, an unequal split where a
 split exists, at most one accent colour doing work, and a named refusal. A kit that produced four
-identical-looking fragments, one per brand, would have failed at the one thing it exists for: 42 themes
-need 41 kits, not one kit in 41 colours, and a fragment built from the kit should still look like a
+identical-looking fragments, one per brand, would have failed at the one thing it exists for: 45 themes
+need 45 kits, not one kit in 45 colours, and a fragment built from the kit should still look like a
 decision, not an assembly.
