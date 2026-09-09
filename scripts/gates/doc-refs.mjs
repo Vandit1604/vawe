@@ -79,8 +79,8 @@ function makeTargets() {
  *      reports a failure looks like it is working. Nobody reads a red check twice.
  */
 function selfRefs() {
-  const RUN = /\bnode\s+((?:scripts|core|verify|blocks|tools)\/[A-Za-z0-9_./-]+\.(?:mjs|js))/g;
-  const QUOTED = /['"`]((?:scripts|verify|blocks|tools)\/[A-Za-z0-9_./-]+\.(?:mjs|js))['"`]/g;
+  const RUN = /\bnode\s+((?:scripts|harness|generators|core|verify|blocks|tools|scene|films)\/[A-Za-z0-9_./-]+\.(?:mjs|js))/g;
+  const QUOTED = /['"`]((?:scripts|harness|generators|verify|blocks|tools|scene|films)\/[A-Za-z0-9_./-]+\.(?:mjs|js))['"`]/g;
   const out = [];
   // This file QUOTES the patterns it hunts, in the comment above and in the header. Excluded by
   // reason, never by convenience: `dead-branch.mjs` carries the identical exclusion for the identical
@@ -120,7 +120,7 @@ function makeRecipes() {
     if (t) { target = t[1]; return; }
     if (!/^\t/.test(line)) { if (line.trim()) target = null; return; }
     if (!target) return;
-    for (const m of line.matchAll(/\bnode\s+((?:scripts|core|verify|blocks|tools)\/[A-Za-z0-9_./-]+\.(?:mjs|js))/g)) {
+    for (const m of line.matchAll(/\bnode\s+((?:scripts|harness|generators|core|verify|blocks|tools|scene|films)\/[A-Za-z0-9_./-]+\.(?:mjs|js))/g)) {
       out.push({ target, script: m[1], line: i + 1 });
     }
   });
