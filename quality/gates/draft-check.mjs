@@ -1,4 +1,4 @@
-// scripts/gates/draft-check.mjs: IS THIS AN 85% DRAFT OR A 95% ONE? Say which, and say what is missing.
+// quality/gates/draft-check.mjs: IS THIS AN 85% DRAFT OR A 95% ONE? Say which, and say what is missing.
 //
 // The last missing studio stage. A studio does not hand over "the film"; it hands over a draft at a
 // declared level of finish, and everyone reviews against that declaration. Without it, review is a
@@ -18,7 +18,7 @@
 // it. A draft that says "85%, with placeholder photography and two off-palette colours" is reviewable.
 // A draft that just says "here" is not.
 //
-//   node scripts/gates/draft-check.mjs <scene.json> --stage 85|95
+//   node quality/gates/draft-check.mjs <scene.json> --stage 85|95
 //   make draft D=<scene.json> STAGE=85
 import fs from 'node:fs';
 import path from 'node:path';
@@ -55,7 +55,7 @@ const checks = [];
 const need = (label, bar, res, hint) => checks.push({ label, bar, ...res, hint });
 
 // ---- the 85% bar: what is expensive to change late ----
-const ac = run('scripts/gates/author-check.mjs');
+const ac = run('quality/gates/author-check.mjs');
 need('author-check', 85, { ok: ac.ok, codes: codes(ac.out), out: ac.out, cmd: ac.cmd }, 'structure, timing and value. The things a late fix is expensive for');
 
 const beats = readReceipt('beats', file);
@@ -68,11 +68,11 @@ if (STAGE === '95') {
   if (!fs.existsSync(mp4)) {
     need('rendered', 95, { ok: false, codes: ['not-rendered'] }, `out/${NAME}.mp4 does not exist. A 95% draft is a thing you can watch`);
   } else {
-    const seam = run('scripts/gates/seam-snap.mjs');
+    const seam = run('quality/gates/seam-snap.mjs');
     need('seams', 95, { ok: seam.ok, codes: codes(seam.out), out: seam.out, cmd: seam.cmd }, 'a luminance flash at a cut, which centre-sampling gates structurally cannot see');
-    const audit = run('verify/audit.mjs');
+    const audit = run('quality/audit.mjs');
     need('audit', 95, { ok: audit.ok, codes: codes(audit.out), out: audit.out, cmd: audit.cmd }, 'overlap, clipping, safe zones, contrast');
-    const led = run('scripts/gates/ledger.mjs', [], ['check']);
+    const led = run('quality/gates/ledger.mjs', [], ['check']);
     need('ledger', 95, { ok: led.ok, codes: codes(led.out), out: led.out, cmd: led.cmd }, 'is this a repeat of a film already shipped');
   }
   const judged = readReceipt('judge', file);

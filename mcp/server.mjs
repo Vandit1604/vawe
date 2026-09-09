@@ -24,7 +24,7 @@ import * as uploads from './uploads.mjs';
 import * as pipe from './pipeline.mjs';
 import * as fetchers from './fetchers.mjs';
 import * as catalog from './catalog.mjs';
-import { stageOf, filePaths, ROOT as STAGE_ROOT } from '../scripts/gates/stage.mjs';
+import { stageOf, filePaths, ROOT as STAGE_ROOT } from '../quality/gates/stage.mjs';
 
 // THE INVENTORY GOES IN THE DESCRIPTION, NOT THE REPLY. A calling model reads every tool's description
 // before it calls anything and reads a tool's output only if it chooses to call. So "the full block and
@@ -268,7 +268,7 @@ server.registerTool('vawe_capabilities', {
 
 // ── vawe_next ────────────────────────────────────────────────────────────────────────────────────
 // The one question an agent outside this repo could never ask before: what stage is this film in,
-// and what is the ONE next thing to do. scripts/gates/stage.mjs already answers it from the files on
+// and what is the ONE next thing to do. quality/gates/stage.mjs already answers it from the files on
 // disk, never from stored state, so this tool calls straight into stageOf() rather than keeping a
 // second copy of the eight-stage order.
 function listFilms() {

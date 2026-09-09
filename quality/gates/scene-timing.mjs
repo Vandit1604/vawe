@@ -1,4 +1,4 @@
-// scripts/gates/scene-timing.mjs: ONE model of when a scene's layers are actually on screen.
+// quality/gates/scene-timing.mjs: ONE model of when a scene's layers are actually on screen.
 //
 // A scene JSON does not say when its layers are visible. `start` + `duration` are what the AUTHOR wrote;
 // the renderer then rewrites them. core/engine/produce.js turns `sceneUnits` on for any cut film that is not

@@ -1,8 +1,8 @@
-// scripts/gates/rung.mjs · which rules are only PROSE, and which ones something actually enforces?
+// quality/gates/rung.mjs · which rules are only PROSE, and which ones something actually enforces?
 //
-//   node scripts/gates/rung.mjs            ·   make rung
-//   node scripts/gates/rung.mjs --list     ·   the [eye] worklist, the rules nothing but the sentence holds
-//   node scripts/gates/rung.mjs --stamp    ·   record today's [eye] count as the new ceiling
+//   node quality/gates/rung.mjs            ·   make rung
+//   node quality/gates/rung.mjs --list     ·   the [eye] worklist, the rules nothing but the sentence holds
+//   node quality/gates/rung.mjs --stamp    ·   record today's [eye] count as the new ceiling
 //
 // WHY THIS EXISTS. CLAUDE.md states, in capital letters, with its own measurement inside the sentence,
 // that a film's background must move. 82% of films paint one window. A recorded ablation
@@ -28,7 +28,7 @@
 // claim, so it is checked the same way, and an unverifiable tag is a build failure rather than a nice
 // idea somebody had once.
 //
-//   ## Waivers, legacy, and the difference  `[gated: scripts/gates/author-check.mjs]`
+//   ## Waivers, legacy, and the difference  `[gated: quality/gates/author-check.mjs]`
 //   ## REACH FOR HTML FIRST                 `[ref: make arsenal]`
 //   ## THE BACKGROUND MUST MOVE             `[eye]`
 //
@@ -57,7 +57,7 @@
 // most of what makes a film good is not decidable from the JSON, and a rule that demanded a mechanism
 // for taste would be a rule people turn off. What a ratchet says is the only true rule here, which is
 // the DIRECTION: prose is the fallback, and the number of rules held up by prose alone goes down. Lower
-// it deliberately with --stamp, the same argument as verify/arsenal-ratchet.json and `make legacy STAMP=1`.
+// it deliberately with --stamp, the same argument as quality/baselines/arsenal-ratchet.json and `make legacy STAMP=1`.
 //
 // Pure: reads markdown, the Makefile and the gate sources. No render, no network.
 import fs from 'node:fs';
@@ -67,7 +67,7 @@ import { codesEmitted } from '../lib/finding-codes.mjs';
 import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const RATCHET = path.join(ROOT, 'verify/rung-ratchet.json');
+const RATCHET = path.join(ROOT, 'quality/baselines/rung-ratchet.json');
 
 export const RUNGS = ['built', 'gated', 'live', 'ref', 'eye'];
 
@@ -228,7 +228,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     eye: 'nothing but the sentence',
   };
   for (const g of RUNGS) console.log(`   [${g}]`.padEnd(10) + `${String(r.dist[g]).padStart(width)}  ${BLURB[g]}`);
-  console.log(`\n   the [eye] list: node scripts/gates/rung.mjs --list`);
+  console.log(`\n   the [eye] list: node quality/gates/rung.mjs --list`);
 
   for (const s of r.bad) {
     f.fail('bad-rung-tag',
@@ -264,13 +264,13 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
       'docs/RESEARCH/PROMPT-EVAL.md is what that costs: deleting the loudest prose rule in ' +
       'this repo changed the behaviour it governs by zero. ' +
       'Give it a default, a gate, a hook or a command. If it genuinely cannot have one, ' +
-      'raise the bar on purpose: node scripts/gates/rung.mjs --stamp');
+      'raise the bar on purpose: node quality/gates/rung.mjs --stamp');
     console.error();
     f.emit();
     process.exit(1);
   } else if (prior && r.eye < prior.eye) {
     console.log(`  ~ ${prior.eye - r.eye} fewer [eye] rule(s) than the ratchet allows. Lower it:`
-      + ' node scripts/gates/rung.mjs --stamp');
+      + ' node quality/gates/rung.mjs --stamp');
   }
   console.log('');
 }

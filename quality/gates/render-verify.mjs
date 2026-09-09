@@ -1,4 +1,4 @@
-// scripts/gates/render-verify.mjs: does the RENDERED mp4 match what the scene declares?
+// quality/gates/render-verify.mjs: does the RENDERED mp4 match what the scene declares?
 //
 // Measured tonight: two renders to the same out/<name>.mp4 raced (scripts/dev/render-lock.sh now
 // refuses that outright), and the loser's half-written file was left behind, reported as SUCCESS by
@@ -12,7 +12,7 @@
 // rule: scene-timing.mjs already owns it and two copies is how a gate goes stale (see that file's
 // own header).
 //
-//   node scripts/gates/render-verify.mjs formats/scene/<file>.json     ·     make render-verify D=<file>
+//   node quality/gates/render-verify.mjs formats/scene/<file>.json     ·     make render-verify D=<file>
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -25,7 +25,7 @@ const f = gateFindings();
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.argv[2];
 if (!dataArg || !fs.existsSync(dataArg)) {
-  console.error('usage: node scripts/gates/render-verify.mjs <scene.json>');
+  console.error('usage: node quality/gates/render-verify.mjs <scene.json>');
   process.exit(2);
 }
 

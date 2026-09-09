@@ -87,9 +87,9 @@ export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
 // Uses Stripe's real product hexes. The "reads a site → rebuilds its look" payoff.
 // `amount` is a prop because it is the only figure on the card and it reaches every caller. It was
 // baked, so every video that used this block published the same invented number (MISTAKES #67).
-// LEFT NATIVE, not a candidate after all: scripts/gates/lib-test.mjs asserts the bar chart's total
+// LEFT NATIVE, not a candidate after all: quality/gates/lib-test.mjs asserts the bar chart's total
 // width off `card.children[2].children` directly ("the bar chart spans the card's content box"), and
-// this pass is not permitted to touch scripts/gates/**. A native `group` of `box()` bars is the form
+// this pass is not permitted to touch quality/gates/**. A native `group` of `box()` bars is the form
 // that invariant can still be read off.
 export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = {}) {
   const bars = [38, 52, 44, 66, 58, 80, 72];

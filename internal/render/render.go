@@ -215,7 +215,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	// here), so it costs no second decode of the mp4 and no extra ffmpeg pass.
 	//
 	// THE CODEC IS PART OF THE NUMBER. The reference spread above was measured on decoded H.264 frames;
-	// these frames are JPEG by default (scene.CaptureExt), and scripts/gates/motion-split.mjs measured a
+	// these frames are JPEG by default (scene.CaptureExt), and quality/gates/motion-split.mjs measured a
 	// JPEG quantisation floor around 0.9 against 0.05 for a lossless PNG of the same instant. So the
 	// printed line below names its own codec rather than implying an exact comparison.
 	// A NUMBER THAT COMPARES TWO WORKERS' PIXELS IS NOT A PROPERTY OF THE FILM, so it used to print

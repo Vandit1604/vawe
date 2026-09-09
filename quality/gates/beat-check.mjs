@@ -1,4 +1,4 @@
-// scripts/gates/beat-check.mjs . THE TIMELINE GATE: is there something on screen, all the way through?
+// quality/gates/beat-check.mjs . THE TIMELINE GATE: is there something on screen, all the way through?
 //
 // Every other static gate reads the scene as a BAG of layers (does it have kinetic type, is the palette
 // locked, is the copy strong). None of them reads it as a TIMELINE. So a scene could ship with half a
@@ -49,12 +49,12 @@
 // shipped scenes are exactly that, including every white-first launch film, where a flat paper field is
 // the correct answer and the motion lives in the content. One flat window is never flagged either way.
 //
-//   node scripts/gates/beat-check.mjs <scene.json> [--strict]   ·   make beat-check D=<file>
+//   node quality/gates/beat-check.mjs <scene.json> [--strict]   ·   make beat-check D=<file>
 // FAIL (blocks): dead-air · ends-on-nothing · empty-beat · static-bg (the dead-markup tier).
 // WARN: static-bg (the flat-film tier) · beats-wrapped-as-units · beats-held-open · beats-unseen.
 // The flat-film tier of static-bg is a HARD_CODES entry in author-check.mjs: it stays a warn here, but
 // blocks in the ladder unless the scene waives it. The 68 films that were flat when this was adopted
-// (2026-09-05) were folded into an explicit per-scene waiver by scripts/gates/legacy-fold.mjs. All
+// (2026-09-05) were folded into an explicit per-scene waiver by quality/gates/legacy-fold.mjs. All
 // block under --strict.
 // Waive a deliberate break with {"authoring":{"allow":["dead-air", ...]}}.
 import fs from 'node:fs';
@@ -67,7 +67,7 @@ import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
-if (!file) { console.error('usage: node scripts/gates/beat-check.mjs <scene.json> [--strict]'); process.exit(2); }
+if (!file) { console.error('usage: node quality/gates/beat-check.mjs <scene.json> [--strict]'); process.exit(2); }
 if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
 
 const raw = fs.readFileSync(file, 'utf8');
@@ -87,7 +87,7 @@ const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.auth
 // ---------- the clock ----------
 // SCENE UNITS extend a layer's life, so the gate has to model them or it reads holes that are not there
 // (and misses ones that are). That model is shared with plan-vs-render and lives in ONE place:
-// scripts/gates/scene-timing.mjs. What it corrects for, and why, is documented there.
+// quality/gates/scene-timing.mjs. What it corrects for, and why, is documented there.
 const DEAD_AIR = 0.4;   // seconds of nothing that stops reading as a breath
 const TAIL = 0.2;       // the closing plate: it must hold something
 const T = sceneTiming(d);

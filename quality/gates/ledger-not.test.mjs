@@ -1,8 +1,8 @@
-// scripts/gates/ledger-not.test.mjs: deriveNotLine, the ledger's forward query ("what has recent work
+// quality/gates/ledger-not.test.mjs: deriveNotLine, the ledger's forward query ("what has recent work
 // leant on, so a new brief can exclude it by name"). Three cases: an empty ledger produces no line
 // rather than a fabricated one; a corpus of one film excludes exactly what that film used; a mixed
 // corpus only excludes what a strict majority of it agrees on.
-//   node scripts/gates/ledger-not.test.mjs
+//   node quality/gates/ledger-not.test.mjs
 import assert from 'node:assert/strict';
 import { deriveNotLine } from './ledger.mjs';
 

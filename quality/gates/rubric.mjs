@@ -1,4 +1,4 @@
-// scripts/gates/rubric.mjs: the criteria a vision judge is scored against.
+// quality/gates/rubric.mjs: the criteria a vision judge is scored against.
 //
 // Two rubrics, deliberately different.
 //

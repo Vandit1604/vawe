@@ -10,7 +10,7 @@ import "./arsenal.css";
  * Every number on this page is read out of site/lib/arsenal.json, which is generated from the two
  * registries (scripts/site/arsenal-json.mjs). None of them is typed. The page this replaces had its
  * block count hardcoded at 156 against a registry holding 176, which is the whole reason
- * scripts/gates/site-counts.mjs exists.
+ * quality/gates/site-counts.mjs exists.
  */
 
 const D = data as Data;

@@ -1,6 +1,6 @@
-// scripts/gates/silent-fallback.mjs: is any named vocabulary still resolved with a silent default?
+// quality/gates/silent-fallback.mjs: is any named vocabulary still resolved with a silent default?
 //
-//   node scripts/gates/silent-fallback.mjs        ·        make silent-check
+//   node quality/gates/silent-fallback.mjs        ·        make silent-check
 //
 // WHY THIS IS A CHECK AND NOT FRAMEWORK. `core/registry/registry.js` removes the ability to BUILD a registry with
 // a fallback: `pick()` takes no such parameter. What it cannot do is stop somebody writing a fresh plain
@@ -35,7 +35,7 @@ const PATTERN = /\b([A-Za-z_$][\w$]*)\s*\??\.?\s*\[\s*([A-Za-z_$][\w$.?]*)\s*\]\
 const POSITIONAL = /^(i|j|k|n|idx|index|len|[0-9]+)$/;
 
 // Each waiver states WHY, because an unexplained waiver list becomes the place the next real one hides.
-// The same rule scripts/gates/arsenal-check.mjs applies to the catalogue.
+// The same rule quality/gates/arsenal-check.mjs applies to the catalogue.
 const WAIVED = new Map(Object.entries({
   // ABSENCE answers, each true about the thing being asked:
   'core/backgrounds.js:_pcache[key]': 'a memo cache keyed by dimensions, not a vocabulary, a miss BUILDS the value',

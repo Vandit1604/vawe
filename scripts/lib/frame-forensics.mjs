@@ -6,7 +6,7 @@
 // several extra frames past its own declared transition (a ghost), and a background that steps instead
 // of blending while the layers on top of it dissolve (a split seam). All three are local to a REGION and
 // a WINDOW a flash check never opens. This module is the crop-and-measure primitive the three checks in
-// scripts/gates/seam-forensics.mjs share, so each stays a short function over real pixels.
+// quality/gates/seam-forensics.mjs share, so each stays a short function over real pixels.
 //
 // Every measurement here is `spawnSync('ffmpeg', …)`, real decoded pixels, never renderFrame: a seam is
 // composited during the render (core/timeline/seams.js), so it exists only in the mp4 (seam-snap.mjs's

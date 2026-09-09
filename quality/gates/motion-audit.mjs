@@ -1,4 +1,4 @@
-// scripts/gates/motion-audit.mjs: check ANIMATION OVER TIME without rendering video. Renders every frame
+// quality/gates/motion-audit.mjs: check ANIMATION OVER TIME without rendering video. Renders every frame
 // headless (no encode, no screenshots), builds a per-element time series ({effective opacity, position,
 // text}) for every timed layer (selected on `[data-start]`, see the note above `captureSeries`), and
 // asserts the motion contract per segment:
@@ -26,7 +26,7 @@
 // TIER: MOTION_TIER=enforce makes the FAIL tier block. It reports by default, because it fires on 53 of
 // the 127 buildable scenes in this library and a rule waived by reflex has already been repealed.
 //
-//   node scripts/gates/motion-audit.mjs [format ...] [--stride N] [--data path.json] [--json]
+//   node quality/gates/motion-audit.mjs [format ...] [--stride N] [--data path.json] [--json]
 //   make motion [M=<format>] [STRIDE=2]
 //
 // --trace: an INSTRUMENT, not a check (no pass/fail, always exits 0). An agent cannot watch a video, it
@@ -36,7 +36,7 @@
 // whether its motion is monotonic (one direction) or oscillating. Sampled, not rendered whole: default
 // stride auto-scales to ~200 samples over the film so a trace costs seconds. See docs/CRAFT/MOTION-TRACE.md.
 //
-//   node scripts/gates/motion-audit.mjs scene --data formats/scene/x.json --trace [--stride N] [--json]
+//   node quality/gates/motion-audit.mjs scene --data formats/scene/x.json --trace [--stride N] [--json]
 //   make motion-trace M=scene D=formats/scene/x.json
 import fs from 'node:fs';
 import path from 'node:path';

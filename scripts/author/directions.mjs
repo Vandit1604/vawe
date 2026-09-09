@@ -3,7 +3,7 @@
 // A direction commits to three things at once: the THREAD that holds the film across its cuts
 // (docs/CRAFT/FILM-STRUCTURE.md), the PACE (median beat length, which decides the beat count for a fixed
 // duration), and the LOOK (one of the design systems in presets/). `make concept` generates N of these
-// from one storyboard and MEASURES their divergence with scripts/gates/similarity.mjs.
+// from one storyboard and MEASURES their divergence with quality/gates/similarity.mjs.
 //
 // It lives in its own file for the same reason PROFILES does: it was defined inside concept.mjs AFTER
 // that file's usage guard, so importing it without CLI arguments exited before the table existed. A

@@ -112,7 +112,7 @@ const labelOf = (L) => {
 };
 
 // deadProps: the decision itself, and the only copy of it. `audited` is the set of names this caller
-// is asking about, so the prober (scripts/gates/prop-probe.mjs) can ask about a prop this audit's own
+// is asking about, so the prober (quality/gates/prop-probe.mjs) can ask about a prop this audit's own
 // scope excludes without owning a second version of the rule.
 export function deadProps(p, audited) {
   const reads = READS.get(p);

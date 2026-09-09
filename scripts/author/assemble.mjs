@@ -365,7 +365,7 @@ if (chain.length) {
     start: objStart, duration: +(shiftedEnd[chain.length - 1] - objStart).toFixed(3),
     // `sceneUnits: true` wraps each beat as its own unit, so nothing survives a cut unless it opts
     // out: `acrossBeats` attaches this layer to the camera instead of its beat wrapper
-    // (scripts/gates/direction-floor.mjs), which is exactly what a continuous object needs to be.
+    // (quality/gates/direction-floor.mjs), which is exactly what a continuous object needs to be.
     acrossBeats: true,
     motion: keys,
   };

@@ -1,7 +1,7 @@
-// scripts/gates/sweep-static.test.mjs: assert self-check for the metric + verdict logic in
+// quality/gates/sweep-static.test.mjs: assert self-check for the metric + verdict logic in
 // sweep-static.mjs. No render needed: synthesize the tiny grayscale buffers by hand.
 //
-//   node scripts/gates/sweep-static.test.mjs
+//   node quality/gates/sweep-static.test.mjs
 import assert from 'node:assert/strict';
 import { meanAbsDiff, verdict } from './sweep-static.mjs';
 

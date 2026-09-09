@@ -1,7 +1,7 @@
-// scripts/gates/critique.mjs: the VALUE GATE. Static critic over a scene JSON that fires on the failure
+// quality/gates/critique.mjs: the VALUE GATE. Static critic over a scene JSON that fires on the failure
 // modes a human otherwise catches per-scene: placeholder words, unbacked claims, static lists,
 // illegible transitions, lonely low-value beats. Not taste-complete, but it makes the recurring
-// mistakes un-shippable. Run: node scripts/gates/critique.mjs <scene.json> [--strict]
+// mistakes un-shippable. Run: node quality/gates/critique.mjs <scene.json> [--strict]
 //
 // Modeled on another engine' per-frame red-flags + our docs/skill "every frame fights for its value".
 import fs from 'node:fs';
@@ -12,7 +12,7 @@ import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
-if (!file) { console.error('usage: node scripts/gates/critique.mjs <scene.json> [--strict]'); process.exit(2); }
+if (!file) { console.error('usage: node quality/gates/critique.mjs <scene.json> [--strict]'); process.exit(2); }
 // The unified `transitions` surface is SUGAR: the engine lowers it to cuts/seams/stings before it
 // renders anything (core/transitions/lower.js), and until this line the gates did not, so a scene
 // that declared its boundaries the documented way was read as a film with no boundaries at all.
@@ -129,7 +129,7 @@ for (const l of layers) {
 //
 // THE STAGE MUST BE FLAT for any of this to mean anything, and the camera's own angles are only half of
 // that test. A top-level `tilt` or `plane` modifier builds the same 3D rig with no camera angle at all.
-// Both halves, and the reason, now live in `sceneView` (scripts/gates/scene-timing.mjs), because
+// Both halves, and the reason, now live in `sceneView` (quality/gates/scene-timing.mjs), because
 // beat-check became a second consumer and a rule split across two files gets remembered by half.
 for (const b of beats) {
   // the camera at the instant the finding NAMES. A beat's own start is when the viewer is looking at

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/gates/craft-checklist.mjs · did this film actually VISIT the CRAFT doctrine relevant to it?
+// quality/gates/craft-checklist.mjs · did this film actually VISIT the CRAFT doctrine relevant to it?
 //
 // WHY THIS EXISTS. The CRAFT docs (docs/CRAFT/*.md, docs/TASTE.md, docs/MOTION-CRAFT.md) each carry a
 // `when:` line that says when to read them, but reading is voluntary and leaves no trace. An author can
@@ -23,7 +23,7 @@
 // a fabricated one-liner defeats it, and a gate that pretended to grade prose would manufacture verdicts.
 // What it can hold an author to is whether the decision was written down at all.
 //
-//   node scripts/gates/craft-checklist.mjs <scene.json>   ·   make craft-check D=<file>
+//   node quality/gates/craft-checklist.mjs <scene.json>   ·   make craft-check D=<file>
 // Not wired into author-check.mjs yet: standalone until the ladder adopts it.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -195,7 +195,7 @@ const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
   const file = process.argv.slice(2).find((a) => !a.startsWith('--'));
   if (!file || !fs.existsSync(file)) {
-    console.error('usage: node scripts/gates/craft-checklist.mjs <scene.json>  |  make craft-check D=<file>');
+    console.error('usage: node quality/gates/craft-checklist.mjs <scene.json>  |  make craft-check D=<file>');
     process.exit(2);
   }
   run(file);

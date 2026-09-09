@@ -80,7 +80,7 @@ carrying real information, or is the whole film type on a field (`docs/CRAFT/SHO
 
 ## The worked example
 
-`verify/evals/briefs/explainer.json` (12s, 16:9). Shows: four real facts about this engine (24 layer
+`quality/runs/evals/briefs/explainer.json` (12s, 16:9). Shows: four real facts about this engine (24 layer
 types, 703 effects across 56 families, 29 beat blueprints), a live `count` layer animating to 693, and
 the payoff ("no templates: every beat is composed") landing last. A thin accent rule tracks the active
 line as the continuous object.

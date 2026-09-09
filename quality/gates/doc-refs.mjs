@@ -1,6 +1,6 @@
-// scripts/gates/doc-refs.mjs · every command and every file path the docs NAME must exist.
+// quality/gates/doc-refs.mjs · every command and every file path the docs NAME must exist.
 //
-//   node scripts/gates/doc-refs.mjs      ·   make doc-refs
+//   node quality/gates/doc-refs.mjs      ·   make doc-refs
 //
 // WHY THIS EXISTS: docs are read as instructions. A wrong instruction is worse than a missing one,
 // because an author trusts it, types it, gets "No rule to make target", and learns to distrust the

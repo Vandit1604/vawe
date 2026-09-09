@@ -1,7 +1,7 @@
 // scripts/dev/theme-sheet.mjs: ONE rendered contact sheet for ONE theme's `look` (W8,
 // core/registry/theme-contract.js), so a brand's look is a picture an author can glance at, not a JSON they have
 // to read. Same machinery as scripts/dev/preset-sheets.mjs (frameTile/tileGrid/tileBox/renderOf from
-// scripts/gates/tile.mjs), reused rather than reimplemented: a second render-and-tile pipeline is a
+// quality/gates/tile.mjs), reused rather than reimplemented: a second render-and-tile pipeline is a
 // second thing to drift.
 //
 // Reads the RESOLVED look (`resolveLook`), not the authored one: `computedLook` now derives scale/cuts/

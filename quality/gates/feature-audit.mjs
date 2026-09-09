@@ -1,10 +1,10 @@
-// scripts/gates/feature-audit.mjs, static utilization report: what the framework OFFERS vs what the
+// quality/gates/feature-audit.mjs, static utilization report: what the framework OFFERS vs what the
 // authored videos actually USE. No browser, no render. Pure JSON walk. This is the another engine
 // `lint`/`inspect` analogue: keep authored content honest against the framework's real capability,
 // and surface the newest/best primitives (group layout, spring easing, multi-line fit) that videos
 // haven't adopted yet. WARN-tier: always exits 0 (a coaching report, not a blocker).
 //
-// Run: node scripts/gates/feature-audit.mjs   (make feature-audit)
+// Run: node quality/gates/feature-audit.mjs   (make feature-audit)
 import fs from 'fs';
 import path from 'path';
 import { PRESETS } from '../../core/type/type.js';

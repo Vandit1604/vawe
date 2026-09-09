@@ -360,7 +360,7 @@ composition · brand + asset fidelity · produced-not-generated · value). If yo
 FIX, never rationalize one you noticed. This is the gate the static ladder above structurally can't be. See
 `docs/JUDGE.md`.
 After the user approves the shipped video: `make ledger-add D=<file>` logs it to the design
-memory (`dna/ledger.json`) so future videos are checked against it.
+memory (`quality/ledger/ledger.json`) so future videos are checked against it.
 
 ## Differentiation rules (why outputs differ per user/brand)
 

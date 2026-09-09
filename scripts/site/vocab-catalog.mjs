@@ -9,7 +9,7 @@
 // FAILS the generator rather than rendering a blank, for the reason effects-catalog gives at its own
 // gaps check: a catalogue that silently renders a dash is how 379 of 476 rows came to be blank.
 //
-// The doc carries its own frontmatter, emitted below, because scripts/gates/doc-map.mjs holds the
+// The doc carries its own frontmatter, emitted below, because quality/gates/doc-map.mjs holds the
 // frontmatter for exactly two generated docs and says to keep it at two.
 import fs from 'node:fs';
 import path from 'node:path';

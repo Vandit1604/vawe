@@ -136,7 +136,7 @@ export function shotWindows(table, duration) {
 }
 
 // GAP (seconds) that promotes a beat-layer start into an inferred cut. Lifted verbatim from
-// scripts/gates/seam-snap.mjs, which shipped this heuristic first (a gate reasoning about a fact the
+// quality/gates/seam-snap.mjs, which shipped this heuristic first (a gate reasoning about a fact the
 // engine itself never derived, MISTAKES #159/#358). Tune here if a slow film over-cuts.
 export const CUT_INFER_GAP_S = 1.2;
 const CUT_INFER_FLOOR_S = 0.3; // a start this close to 0 is the opening beat, not a cut into it

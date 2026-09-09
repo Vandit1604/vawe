@@ -17,7 +17,7 @@
 // Neither owns a list. Everything below is read from formats/scene/schema.json at runtime, and the one
 // thing that is not (which vocabulary an enum belongs to) is read from core/registry.js, live.
 //
-// THIS IS NOT A GATE. It checks nothing and blocks nothing. scripts/gates/schema-drift.mjs already
+// THIS IS NOT A GATE. It checks nothing and blocks nothing. quality/gates/schema-drift.mjs already
 // holds the schema against the code, both directions, and its `layers.item.motion.item` block is
 // exactly the fact this tool serves. Adding a second opinion about the contract would be a fork.
 import fs from 'node:fs';
@@ -35,7 +35,7 @@ export const loadSchema = () => JSON.parse(fs.readFileSync(SCHEMA_PATH, 'utf8'))
 // TWO SPELLINGS, ONE MEANING, and the rule is stated here because it is the only thing about this tool
 // somebody has to learn. `[]` says "into the element of this array": `layers[].motion[]` is the shape
 // of one keyframe. The schema's own spelling for that step is the literal key `item`
-// (`layers.item.motion.item`, which is how scripts/gates/schema-drift.mjs addresses the same node), so
+// (`layers.item.motion.item`, which is how quality/gates/schema-drift.mjs addresses the same node), so
 // a bare `item` segment is accepted and means the same thing, and a bare `fields` segment is accepted
 // and means nothing at all, because descending into an object's fields already happens by name.
 //
@@ -226,7 +226,7 @@ function printNode(trail, node, regs) {
 }
 
 // ---- the CLI --------------------------------------------------------------------------------------
-// Guarded the way arsenal.mjs is, because everything above is a library: scripts/gates/lib-test.mjs
+// Guarded the way arsenal.mjs is, because everything above is a library: quality/gates/lib-test.mjs
 // imports `resolve`, `steps` and `kindsOfEnum` and would otherwise print a schema map on import.
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const schema = loadSchema();

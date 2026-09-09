@@ -1,6 +1,6 @@
-// scripts/gates/audit-scenes.mjs, run the LAYOUT AUDIT over every shipped scene, not just the open one.
+// quality/gates/audit-scenes.mjs, run the LAYOUT AUDIT over every shipped scene, not just the open one.
 //
-// WHY THIS EXISTS. `verify/audit.mjs` is a good check and it was never the problem. It samples the bg
+// WHY THIS EXISTS. `quality/audit.mjs` is a good check and it was never the problem. It samples the bg
 // canvas under a text element's own ink box, computes WCAG against it, and reports `1.0:1 (want 3:1)`
 // with the layer named. What it could not do is find a defect that was already in the library: `make
 // audit` takes ONE scene, it is a post-render step rather than part of `make author-check`, so it only
@@ -11,7 +11,7 @@
 // A check that only ever runs against the file you are editing is a check against NEW defects. This one
 // runs against the library, so it is a check against OLD ones too.
 //
-//   node scripts/gates/audit-scenes.mjs [<name-substring>] [--aspect 16:9,9:16]
+//   node quality/gates/audit-scenes.mjs [<name-substring>] [--aspect 16:9,9:16]
 //
 // Exits 1 if any scene has a HARD issue. Slow on purpose (it renders sampled frames per scene); this is
 // an on-demand sweep, never part of the per-edit ladder.
@@ -67,7 +67,7 @@ if (!scenes.length) {
 const rows = [];
 for (const f of scenes) {
   const file = path.join(DIR, f);
-  const args = ['verify/audit.mjs', file, ...(aspect ? ['--aspect', aspect] : [])];
+  const args = ['quality/audit.mjs', file, ...(aspect ? ['--aspect', aspect] : [])];
   let out = '', code = 0;
   try {
     out = execFileSync('node', args, { encoding: 'utf8', maxBuffer: 32 << 20, stdio: ['ignore', 'pipe', 'pipe'] });

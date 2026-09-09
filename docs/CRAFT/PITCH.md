@@ -15,7 +15,7 @@ group: crosscutting
 - Present all five as three lines each (concept, visual world, opening hook), THEN recommend one with
   a reason. The chosen concept becomes the storyboard's `angle:` and answers every downstream question
   it settles.
-- Enforced today by `[ref: node scripts/author/pitch.mjs]`, a receipt under `verify/approved/pitch/`,
+- Enforced today by `[ref: node scripts/author/pitch.mjs]`, a receipt under `quality/baselines/approved/pitch/`,
   and your own judgement; no gate blocks on it yet.
 
 ## Why this exists
@@ -135,7 +135,7 @@ questions as prompts, the five path labels, the 0.10 rule restated, the three-li
 compute the probabilities itself, that is your judgement to make, not a thing a script can grade.
 
 `node scripts/author/pitch.mjs <name> --chose "<angle>" [--left "<median left behind>"]` records the
-decision as a receipt under `verify/approved/pitch/<name>.json`, hashed against the subject the same
+decision as a receipt under `quality/baselines/approved/pitch/<name>.json`, hashed against the subject the same
 way `make preflight` and `make beats` record theirs (`scripts/lib/receipt.mjs`). Edit the subject and
 the receipt goes stale, the same property that makes every other receipt in this repo worth trusting.
 It also prints the `angle:` line ready to paste into the storyboard frontmatter.

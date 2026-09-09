@@ -378,7 +378,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
     tool. Everything around it is the same panel/line/muted set every other pane is built from. */
  /* THE STAGE STRIP. Always on, under the state tabs, because "where is this film" is the question the
     whole tool is an answer to and it used to live only in a terminal. It is READ-ONLY: the stage comes
-    from the files on disk (scripts/gates/stage.mjs), so the strip cannot claim a stage the repo is not
+    from the files on disk (quality/gates/stage.mjs), so the strip cannot claim a stage the repo is not
     in, and clicking it does nothing but jump to the pane that stage happens in. */
  #stage{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--panel);
    border-bottom:1px solid var(--line);font-size:12px;flex:none}

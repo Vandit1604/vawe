@@ -46,14 +46,14 @@ const PORT = Number(process.env.PORT) || 8799;
 // ---------- the timeline model ----------
 // Where "dead air" comes from. The definition (which layers count as content: a full-canvas opaque rect
 // is a blackout, a box under 8% of the canvas is a speck, track:0 is backdrop) lives in
-// scripts/gates/beat-check.mjs. That file is a SCRIPT, not a module, it reads process.argv and calls
+// quality/gates/beat-check.mjs. That file is a SCRIPT, not a module, it reads process.argv and calls
 // process.exit at top level, so it cannot be imported into a long-lived server. Restating its rules here
 // would give the timeline a second definition free to drift from the gate that blocks the build, which is
 // the one thing this band must never do. So the gate is RUN and its findings are read back. If it is ever
 // split into an importable core, import it and delete this.
 const beatCheck = (file) => {
   let out = '';
-  try { out = execFileSync(process.execPath, [path.join(repoRoot, 'scripts/gates/beat-check.mjs'), file], { encoding: 'utf8' }); }
+  try { out = execFileSync(process.execPath, [path.join(repoRoot, 'quality/gates/beat-check.mjs'), file], { encoding: 'utf8' }); }
   catch (e) { out = String(e.stdout || '') + String(e.stderr || ''); } // the gate exits 1 when it finds something
   const finding = (code) => (out.match(new RegExp(`[✗~] \\[${code}\\] ([^\\n]*)`)) || [])[1] || '';
   const spans = (s, re) => [...s.matchAll(re)].map((m) => [+m[1], +m[2]]);
@@ -143,7 +143,7 @@ const timelineModel = (file) => {
 // is the iteration loop, and the loop is not where a gate gets teeth.
 const directionFloorFindings = (file) => {
   let out = '';
-  try { out = execFileSync(process.execPath, [path.join(repoRoot, 'scripts/gates/direction-floor.mjs'), file], { encoding: 'utf8' }); }
+  try { out = execFileSync(process.execPath, [path.join(repoRoot, 'quality/gates/direction-floor.mjs'), file], { encoding: 'utf8' }); }
   catch (e) { out = String(e.stdout || '') + String(e.stderr || ''); } // the gate exits 1 on a FAIL
   return out.split('\n').map((l) => l.trim()).filter((l) => /^[^[]*\[[a-z-]+\]/.test(l));
 };
@@ -199,7 +199,7 @@ const SHEETS = {
             what: 'the key frames of the whole film',
             after: () => { const src = '/tmp/preview_scene.png';
               if (fs.existsSync(src)) fs.copyFileSync(src, scratch('look', `${SLUG}.png`)); } },
-  seams: { file: () => `/tmp/seams/${SLUG}.png`, args: ['scripts/gates/seam-snap.mjs', dataArg],
+  seams: { file: () => `/tmp/seams/${SLUG}.png`, args: ['quality/gates/seam-snap.mjs', dataArg],
            what: 'the frames straddling every transition, out of the rendered mp4',
            // seam-snap reads PIXELS, so it cannot run without one. Said plainly rather than drawn as
            // an empty grid, and the page offers the render.
@@ -354,7 +354,7 @@ const studioRoutes = (req, res) => {
           borrows: (fieldIn(blocks[i], 'borrows') || '').trim() };
       });
       let gateOut = '';
-      try { gateOut = execFileSync(process.execPath, [path.join(REPO_ROOT, 'scripts/gates/storyboard-check.mjs'), sbPath], { encoding: 'utf8' }); }
+      try { gateOut = execFileSync(process.execPath, [path.join(REPO_ROOT, 'quality/gates/storyboard-check.mjs'), sbPath], { encoding: 'utf8' }); }
       catch (e) { gateOut = String(e.stdout || '') + String(e.stderr || ''); }
       // A fragment-less beat is still drawn, from its storyboard fields, on the film's own colours
       // (docs/CRAFT/STORYBOARD-TEMPLATE.md archetypes): a grey box says nothing about what a beat

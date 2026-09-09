@@ -147,11 +147,11 @@ came from a secondary summary, not from Block's own sentences.** Nothing in `doc
 today, and this is the one canonical idea in the set that our doctrine does not already carry in some
 form.
 
-**What the engine expresses today.** `scripts/gates/motion-split.mjs` samples consecutive frame pairs
+**What the engine expresses today.** `quality/gates/motion-split.mjs` samples consecutive frame pairs
 across the whole film and reports how much of the motion is the GROUND and how much is the FILM, and it
 runs inside `make ship`. `docs/CRAFT/GRAMMAR.md` records a per-shot motion range for 16 reference films
 ("a shot in work that reads well measures 0.37 to 13.49"). Both are BOUNDS. Neither reads the SHAPE. The
-nearest existing finding, `front-loaded` (`scripts/gates/direction-floor.mjs:393`), counts where reveals
+nearest existing finding, `front-loaded` (`quality/gates/direction-floor.mjs:393`), counts where reveals
 land, not how intensity moves.
 
 **The concrete change.** A doc rule, not a gate: `motion-split` already has the per-sample series in

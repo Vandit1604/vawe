@@ -1,4 +1,4 @@
-// scripts/gates/transitions-catalog.mjs: print THE TRANSITION DATABASE (core/transitions.js).
+// quality/gates/transitions-catalog.mjs: print THE TRANSITION DATABASE (core/transitions.js).
 //   make transitions            → the full catalog, grouped by mechanism, basics marked ★
 //   make transitions BASIC=1    → just the basics (the fundamentals every tool has)
 // The catalog is DERIVED from the four source registries, so this is always in sync, its only failure

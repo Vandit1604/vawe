@@ -8,8 +8,8 @@
 //
 // IT ONLY EVER COMPLAINS ABOUT WHAT YOU MADE WORSE. The repo carries 334 known findings across 126
 // files. Blocking every edit that touches an already-tangled file would make the hook noise, and noise
-// is how a rule gets turned off. So this compares the file against verify/code-quality-baseline.json,
-// the same ratchet scripts/gates/code-quality.mjs uses. Touching a bad file is fine. Making it worse is
+// is how a rule gets turned off. So this compares the file against quality/baselines/code-quality-baseline.json,
+// the same ratchet quality/gates/code-quality.mjs uses. Touching a bad file is fine. Making it worse is
 // not, and fixing it is rewarded with silence.
 //
 // It is affordable because oxlint is Rust: a single file measures in a few milliseconds, and the whole
@@ -20,7 +20,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
-const BASELINE = path.join(ROOT, 'verify/code-quality-baseline.json');
+const BASELINE = path.join(ROOT, 'quality/baselines/code-quality-baseline.json');
 const BIN = path.join(ROOT, 'node_modules/.bin/oxlint');
 const CFG = path.join(ROOT, '.oxlintrc.json');
 

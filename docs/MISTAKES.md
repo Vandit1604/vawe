@@ -30,7 +30,7 @@ holds: none
 
 ## 3. Patterned backgrounds SPAMMED across the whole video
 What: when a patterned bg was used, it ran through most beats ,  the pattern became the wallpaper. Root cause: treating the bg preset as a global constant, not a per-beat choice. Fix doctrine...
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 4. Used a stock image, untastefully
 prefer real captured UI (`make capture`) or a clean gradient over a generic photo.
@@ -38,7 +38,7 @@ holds: none
 
 ## 5. Sounds added before the audio system is real
 videos are silent by default (`audio: {silent: true}`) until the audio system is built properly.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 6. `group` primitive doesn't render image children (engine bug)
 What: logos placed as `image` children inside a `group` rendered invisible. Root cause: the group compositor doesn't walk image leaves (only text/rect).
@@ -78,7 +78,7 @@ holds: none
 
 ## 15. Authored from imagination + hand-math instead of the real asset + the composition tools (argus)
 What: three flaws shipped in the first argus pass: (a) the pixel-eye mascot was recreated from memory (a made-up almond) when the real one is a moth-eye creature with antennae + a spiral iris ,  I...
-holds: scripts/gates/critique.mjs
+holds: quality/gates/critique.mjs
 
 ## 16. The SITE cropped the videos it was selling (`object-fit: cover`)
 What went wrong: every `<video>` on the marketing site used `object-fit:cover`, so any clip whose container ratio didn't match its file got cropped.
@@ -97,7 +97,7 @@ Tools are accurate for MECHANICAL/precise data (exact hexes, geometry, pixel his
 
 ## 19. `radius` on an image was silently ignored unless `ken` was set (engine bug)
 radius now clips ANY image (`L.ken || L.radius != null`), and brings `object-fit: cover` with it so a non-square source fills the shape instead of distorting.
-holds: scripts/gates/conformance.mjs
+holds: quality/gates/conformance.mjs
 
 ## 20. Captured components pointed at REMOTE images → blank cards in an offline render
 capture now LOCALIZES every remote asset into `components/media/` and rewrites the html to local paths.
@@ -105,7 +105,7 @@ holds: none
 
 ## 21. Schema advertised an anim name that does not exist (`slideL`)
 the schema now carries the exact enum from the registry and states that unknown names fall back to fade silently. Rule: a prop label is documentation.
-holds: scripts/gates/conformance.mjs, scripts/gates/schema-drift.mjs
+holds: quality/gates/conformance.mjs, quality/gates/schema-drift.mjs
 
 ## 22. Fonts substituted silently ,  twice ,  because the load list was hand-maintained
 (1) the load set is now DERIVED from the `@font-face` rules in the CSS (`core/engine/fonts.js`), so vendoring is the only step; (2) `make font-audit` fails the build on any family that is not vendored +...
@@ -113,19 +113,19 @@ holds: none
 
 ## 23. Auto sound-design ignored the `cuts` array (so a scored film was silent at every cut)
 `cuts` are now a cue source, and the mapping is style-aware (`CUT_CUE`): a `punch` snaps (`press`), a `softwipe` breathes (`whisper`), a `rise` blooms.
-holds: scripts/gates/coverage.mjs
+holds: quality/gates/coverage.mjs
 
 ## 24. A group image child silently dropped `radius` (same bug as #19, one level down)
 group image children clip too, with cover-fit when both `w` and `h` are given. Rule: when you fix "a prop is silently ignored", grep for EVERY path that builds that primitive.
-holds: scripts/gates/conformance.mjs, scripts/gates/lib-test.mjs
+holds: quality/gates/conformance.mjs, quality/gates/lib-test.mjs
 
 ## 25. The layout audit called a cross-dissolve a collision
 overlap is skipped only for a genuine hand-off ,  one layer inside its exit window, the other inside its enter window, and BOTH below full opacity.
-holds: scripts/gates/author-check.mjs, scripts/gates/blocks-audit.mjs, scripts/gates/direction-floor.mjs, scripts/gates/gate-mutation.mjs
+holds: quality/gates/author-check.mjs, quality/gates/blocks-audit.mjs, quality/gates/direction-floor.mjs, quality/gates/gate-mutation.mjs
 
 ## 26. Two more silent-ignore traps found while auditing the first one
 `b.height > 1` skipped collapsed images. The image legibility floor only considered images TALLER than 1px, so an image that laid out at zero ,  visible layer, no pixels ,  was the one case it...
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 27. Sound was a downloaded sample library, not part of the framework
 `core/audio/kit.mjs` ,  the engine now SYNTHESIZES its own audio: oscillators, seeded noise, RBJ biquads, envelopes, a feedback-delay shimmer, a WAV writer, and a parameterized music-bed generator.
@@ -133,7 +133,7 @@ holds: none
 
 ## 28. `tracking` was applied and then overwritten one statement later
 the guard now honours both names. Found by: `make conformance` (phase 2) ,  not by reading the code, which looks correct at both sites. ---.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 29. The `cuts` array renders NOTHING (the engine's largest silent-ignore)
 scene cuts now render. A cut treats the beat LEAVING as an exit and the beat ARRIVING as an enter, applied to the camera root (`#cam`) so the whole beat moves as one.
@@ -176,7 +176,7 @@ holds: none
 
 ## 38. Every fade in the engine was linear (and the obvious fix broke cross-dissolves)
 What: entrances and exits felt slightly wrong in a way that is hard to point at. Root cause: `core/timeline/clips.js` composed opacity as `clamp01(enterT) * exitMul` ,  two linear ramps ,  while the...
-holds: scripts/gates/scene-snap.mjs
+holds: quality/gates/scene-snap.mjs
 
 ## 39. `make snap` reported IDENTICAL after every fade curve in the engine changed
 frames are now derived from where the motion IS ,  mid-entrance and mid-exit of every layer, read from the same `data-*` attributes `driveClips` uses, plus cut windows and stings, plus the even...
@@ -188,7 +188,7 @@ holds: none
 
 ## 41. A blur left behind by an exit stuck to frames rendered later
 `driveClips` now writes the resting values of the layer's own enter+exit animations before applying the active one.
-holds: scripts/gates/lib-test.mjs, scripts/gates/probe-purity.mjs
+holds: quality/gates/lib-test.mjs, quality/gates/probe-purity.mjs
 
 ## 42. `blur(0px)` is not free, and identity values are written every frame
 `defocus` returns `filter: 'none'` at u >= 1. Rule: an animation's identity must be genuinely free, because it is the value the scene spends almost all of its frames at.
@@ -200,19 +200,19 @@ holds: none
 
 ## 44. The headline bar rejected a brand's own button colour
 the bar is 3:1 when an opaque sibling shape sits under the text (a structural test, not a colour heuristic), 7:1 otherwise. Gate: two `make gate-test` cases, pinned in both directions ,  a grey...
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 45. The layout audit sampled 14 uniform frames and missed a whole beat
 sampling is content-aware ,  the resting midpoint of every layer is sampled, not just uniform ticks.
-holds: scripts/gates/sim-audit.mjs
+holds: quality/gates/sim-audit.mjs
 
 ## 46. Five tools rendered every landscape scene into a portrait viewport
 `sceneDims(cfg, key?)` in `core/layout/safe.js` ,  dimensions and the safe area are the same question asked twice, so they live together.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 47. `make motion D=...` audited a different file and said nothing
 the target forwards `D` to `--data`, and the report line names the data file it read. Rule: same class as #19 and #28 ,  input accepted and silently ignored.
-holds: scripts/gates/motion-audit.mjs
+holds: quality/gates/motion-audit.mjs
 
 ## 48. `make validate` with no arguments validated one file out of sixty
 no arguments now means every scene that declares a `module` (which naturally excludes planning artifacts like `*.intent.json`) plus every `themes/*.json` checked directly. What it found on the...
@@ -228,7 +228,7 @@ holds: none
 
 ## 51. A sound effect named `click` was 19.6 seconds long
 keystrokes are now GENERATED, not downloaded ,  `key1/key2/key3/keyspace/keyenter` in core/audio/kit.mjs are ~15-35ms bandpassed noise transients, which is physically what a key click is.
-holds: scripts/gates/sfx-audit.mjs
+holds: quality/gates/sfx-audit.mjs
 
 ## 52. The demo was silently scored
 What: every window of the search demo measured ~-23dB, including the stretches that should have been silent ,  which made it impossible to tell whether the keystroke fix had worked. Root cause:...
@@ -264,7 +264,7 @@ holds: none
 
 ## 60. A block silently swallowed the prop that carried its sound
 the block forwards keyCue/keyGain onto the typing layer, AND `make expand` now warns when a block layer carries a prop its factory does not accept ,  the parameter names are readable off the...
-holds: scripts/gates/blocks-audit.mjs, scripts/gates/layer-props.mjs
+holds: quality/gates/blocks-audit.mjs, quality/gates/layer-props.mjs
 
 ## 61. Auto-derived cues had no volume dial
 `audio.sfxGain` scales every effect cue, derived ones included.
@@ -280,7 +280,7 @@ holds: none
 
 ## 64. `make probe` cannot see inside a canvas
 both layer types clear when off-window. New gate `make canvas-purity` hashes the actual pixels, pinned in gate-test by reverting the clear. Rule: the sixth time this session (#39, #41, #45, #48, #56).
-holds: scripts/gates/canvas-purity.mjs
+holds: quality/gates/canvas-purity.mjs
 
 ## 65. `make coverage` reported 15 layer types as 14/14
 `core/layers/index.js` exports `LAYER_TYPES` from the registry; coverage imports it.
@@ -292,11 +292,11 @@ holds: none
 
 ## 67. Block factories were exempt from the rules the videos obey
 `make blocks-audit` ,  invented figures, brand defaults, superlatives, dead props, and prop-surface divergence across a family.
-holds: scripts/gates/blocks-audit.mjs
+holds: quality/gates/blocks-audit.mjs
 
 ## 68. The gate audited the factories and missed the manifest
 the gate walks every string in every catalog row's `props`, with a reasoned exemption list (`FIGURE_IS_THE_POINT`) so a price on a pricing card is a specimen and a render time in a terminal is a...
-holds: scripts/gates/blocks-audit.mjs, scripts/gates/sim-audit.mjs
+holds: quality/gates/blocks-audit.mjs, quality/gates/sim-audit.mjs
 
 ## 69. `delay` never delayed anything, and I signed it off from a settled frame
 `addGroupChild` writes the child's timing dataset, handing it to the same driver as a top-level layer.
@@ -320,7 +320,7 @@ holds: none
 
 ## 74. Every block could only enter, because the engine could only move a box
 `vars: { '--p': [0, 1] }` interpolates a CSS custom property across the layer's window.
-holds: scripts/gates/conformance.mjs, scripts/gates/gate-mutation.mjs
+holds: quality/gates/conformance.mjs, quality/gates/gate-mutation.mjs
 
 ## 75. The conformance sweep cannot detect two identical values (OPEN)
 Status: real defect, evidenced, NOT fixed.
@@ -340,7 +340,7 @@ holds: none
 
 ## 79. Non-block layers get no unknown-prop check at all
 What: a scene wrote `{"type":"glow","r":620,"opacity":0.5}` and got no glow.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 80. `ls` was declared, documented, used 18 times, and never applied
 `ls` is honoured as a synonym for `tracking`.
@@ -348,15 +348,15 @@ holds: none
 
 ## 81. Three composition defects the gates structurally could not see ,  now two of them can
 Closing #78, and the third stays open on purpose. (a) Overlap only compared "critical" layers. Text under 60px was invisible to it, so a headline that WRAPPED onto a second line and landed on the...
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 82. A decision that decides nothing
 What: `deploySuccess` shipped `i === last ?
-holds: scripts/gates/dead-branch.mjs, scripts/gates/lint-test.mjs
+holds: quality/gates/dead-branch.mjs, quality/gates/lint-test.mjs
 
 ## 83. A test that hardcodes a count is edited by whoever breaks it
 counts derived (`length > 0 && new Set(x).size === x.length`), so appending an effect can never fail the test for the wrong reason, and the per-effect branch-coverage check still fails loudly if...
-holds: scripts/gates/docs-drift.mjs
+holds: quality/gates/docs-drift.mjs
 
 ## 84. A positional assertion silently changed what it was testing
 `branchOf(name)` locates a branch by the effect's own name, and the check now runs over matrixDecode, nebula and dotCrawl.
@@ -364,7 +364,7 @@ holds: none
 
 ## 85. A gate flagged its own test fixture
 exclude the mutation harness too. Worth stating plainly because the cost is asymmetric ,  a gate that cries wolf about itself trains people to skim its output, which is exactly how a real finding...
-holds: scripts/gates/dead-branch.mjs, scripts/gates/lint-test.mjs
+holds: quality/gates/dead-branch.mjs, quality/gates/lint-test.mjs
 
 ## 86. An incomplete GL texture samples as opaque black, and says nothing
 `naturalWidth ?? width`, and a failed source now THROWS with the offending URL rather than returning early.
@@ -380,7 +380,7 @@ holds: none
 
 ## 89. The gate that proves every other gate can fire silently stopped proving one
 Editing `core/surfaces/paint.js` for resample changed the off-window line that `gate-mutation` patches to prove `canvas-purity` works.
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 90. The roadmap decayed again, in the exact way its own closing warning describes
 `make docs-drift`, registered in the mutation harness (37/37).
@@ -388,7 +388,7 @@ holds: none
 
 ## 91. The distinctness check decided its own answer, and the fix for it nearly did too
 Keep frameSig's exact hash and redact its input instead.
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 92. The dataflow half of dead-branch, and the rule I had to cut
 #82 shipped `make dead-branch` catching one shape ,  `cond ?
@@ -408,7 +408,7 @@ holds: none
 
 ## 96. Coverage lists that do not grow cover less every time you ship
 derive from the registry, exempt by name.
-holds: scripts/gates/sim-audit.mjs
+holds: quality/gates/sim-audit.mjs
 
 ## 97. The docs decayed identically, one file over from the gate watching them
 generalized to `make docs-drift`, covering ROADMAP prose claims and PRIMITIVES heading counts.
@@ -467,7 +467,7 @@ holds: none
 holds: none
 
 ## 111. The layout audit called Ken Burns a bug, so authors learned to ignore it
-the overflow rule skips `.hs-img-wrap`. Its stated purpose (`verify/audit.mjs:4`) is *clipped text*; an image box exists in order to clip, so it can never be evidence there. The lesson: a false...
+the overflow rule skips `.hs-img-wrap`. Its stated purpose (`quality/audit.mjs:4`) is *clipped text*; an image box exists in order to clip, so it can never be evidence there. The lesson: a false...
 holds: none
 
 ## 112. `make photos` wrote WebP bytes into files named `.jpg`
@@ -479,7 +479,7 @@ Both found while running the ladder on one film; neither is fixed in the gate th
 holds: none
 
 ## 114. The site quoted nine capability numbers, and the registry had moved past all of them
-`scripts/gates/site-counts.mjs` (`make site-counts`) reads the registries, scans the site copy for both shapes counts appear in (`148 blocks`, `Kinetic presets (25)`), and fails with file:line,...
+`quality/gates/site-counts.mjs` (`make site-counts`) reads the registries, scans the site copy for both shapes counts appear in (`148 blocks`, `Kinetic presets (25)`), and fails with file:line,...
 holds: none
 
 ## 115. Every "glow" in the engine was a drop-shadow, which glows the wrong channel
@@ -524,7 +524,7 @@ holds: none
 
 ## 125. seams ran at LINEAR speed while cuts were eased: every two-scene transition felt mechanical
 Seams take a `timing` field (the same `TIMINGS` curves as cuts), applied in scene.html as `p = TIMINGS[s.timing]((t - s.t)/s.dur)`.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 126. neon bloomed a flat FLOOD colour, not the image's own colours (not how neon works)
 What. The luminance-bloom refactor (#115) thresholds luminance for the highlight mask (correct), but then FLOODED a single colour through that mask (`feFlood` + `feComposite operator=in`),...
@@ -552,7 +552,7 @@ holds: none
 
 ## 132. built a sparse TYPE-TEASER when the brief wanted a dense PRODUCT DEMO (told, didn't show)
 What. Asked for a launch film with the density of a real reference, I shipped 6 big-type-on-black beats in 21s ("On brand.", "in minutes.") and used ONE of 15 captured product surfaces.
-holds: scripts/gates/audio-check.mjs
+holds: quality/gates/audio-check.mjs
 
 ## 133. our motion read FLOATY, not because we lacked snap but because the snap was never wired or defaulted
 Wired `motionDefaults(theme)` into scene.html (durationScale scales enter/exit, stagger feeds split-text, applied as the fallback only ,  a layer's own values still win).
@@ -560,7 +560,7 @@ holds: none
 
 ## 134. the music bed BUZZED because it was synthesized oscillators, and it was auto-selected
 Nothing auto-selects a synth bed anymore.
-holds: scripts/gates/lint-test.mjs
+holds: quality/gates/lint-test.mjs
 
 ## 135. a bare bed NAME in `audio.music` shipped SILENT: the Go mixer and the validator disagreed on resolution
 Made the two agree. The Go mixer now resolves a bare bed name (no separator, no extension) to `assets/music/<name>.wav` via the existing `resolve` fallback arg (internal/audio/audio.go) ,  a named...
@@ -572,7 +572,7 @@ holds: none
 
 ## 137. Named GSAP fx typos degraded silently; two splitters could fight
 `validate.mjs` gained `fxErrors(cfg)`: it checks every `fx`/`fxOut` name against the real `GSAP_FX`/`EXIT_FX` exports (with a `nearest()` "did you mean" pointer), and rejects a layer that declares...
-holds: scripts/gates/schema-drift.mjs
+holds: quality/gates/schema-drift.mjs
 
 ## 138. resolveEasing swallowed unknown easing names
 `resolveEasing` now checks membership explicitly and WARNS once per unknown name (listing the valid ones) before falling back.
@@ -583,7 +583,7 @@ holds: none
 holds: none
 
 ## 140. every authoring-QUALITY gate was opt-in and WARN-tier, so effect-soup passed everything that ran
-`scripts/gates/author-check.mjs` (`make author-check`) chains validate · critique · direct · slop · inspect into one command, and `make video` runs it before rendering unless `NOCHECK=1`...
+`quality/gates/author-check.mjs` (`make author-check`) chains validate · critique · direct · slop · inspect into one command, and `make video` runs it before rendering unless `NOCHECK=1`...
 holds: none
 
 ## 141. no from-scratch "author a good video" walkthrough existed, so a blank page regressed to priors
@@ -600,7 +600,7 @@ holds: none
 
 ## 144. seams flashed BLACK on every white-first scene without an explicit bg window
 `core/timeline/seams.js stageToCanvas` ,  in the no-canvas-bg branch, fill the theme base bg (read `--bg` off `.hs-stage`, fall back to computed background-color, then `#fff`) BEFORE drawing the DOM, so...
-holds: scripts/gates/seam-snap.mjs
+holds: quality/gates/seam-snap.mjs
 
 ## 145. the killer per-frame effects were missing (border-beam, aurora, meteor, flash-bloom)
 `core/layers/beam.js` (new: border-beam + shine, DOM conic ring masked to the border, re-emitted each frame + dataset-stamped).
@@ -620,7 +620,7 @@ holds: none
 
 ## 149. a new valid prop (`fill`) silently disarmed a meta-gate that used it as its "unknown prop"
 Point the mutation at `notARealProp` ,  a name no layer will ever accept ,  and match on it.
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 150. ported the another engine craft: seam-QA, anti-front-load floor, author-the-frame, the spec contract
 What. Studied a real another engine-built promo (its storyboard, `frame.md` design spec, per-beat HTML+GSAP compositions, rendered frames, and the build session trace) to find what set its output...
@@ -640,11 +640,11 @@ holds: none
 
 ## 154. the composition path (per-beat GSAP timeline), and TWO framework bugs it surfaced
 What. Adopted another engine' "one worker hand-writes a GSAP timeline per beat" model ,  but SAFELY.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 155. direction-floor nagged "no-camera" on scenes that HAVE a cameraMove (pre-expand blind spot)
 direction-floor now also credits `d.cameraMove` directly: a cameraMove that names a `move` or changes scale/position (from!==to, or a tx/ty target) counts as the `camera` technique.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 156. first-class scene-unit transitions (A slides out, B slides in) ,  the missing scene swap
 Opt-in `"sceneUnits": true`: partition layers into BEATS by the `cuts` times, wrap each beat's layers in a `.hs-beat` div, and at each boundary move the OUTGOING wrapper (exit) against the...
@@ -652,7 +652,7 @@ holds: none
 
 ## 157. the produced baseline: force rich-by-default at the ENGINE, additively (go all-in like another engine)
 What. The engine was capability-oriented (composition/parts/sceneUnits/camera all opt-in) so authors defaulted to thin videos.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 158. glow.frame() left a STALE inner value outside its window; sceneUnits exposed it as non-determinism
 glow.frame() now sets the inner DETERMINISTICALLY for every t ,  no early return.
@@ -660,7 +660,7 @@ holds: none
 
 ## 159. the engine PICKED the background, so nobody ever designed one
 `bg` is now required in `formats/scene/schema.json` (`required` + `minItems: 1`), and the injection is gone from `core/engine/produce.js`.
-holds: scripts/gates/author-check.mjs, scripts/gates/gate-mutation.mjs, scripts/gates/lib-test.mjs, scripts/gates/scene-snap.mjs, scripts/gates/snap-signature.mjs
+holds: quality/gates/author-check.mjs, quality/gates/gate-mutation.mjs, quality/gates/lib-test.mjs, quality/gates/scene-snap.mjs, quality/gates/snap-signature.mjs
 
 ## 160. hand-authored CSS animation renders a DEAD STILL, and said nothing
 `timeCssUsed()` in the new shared `core/type/sanitize-html.js` detects `animation` / `@keyframes` / `transition`; validate rejects them by name in BOTH a bg window and an `html` layer, and the message...
@@ -676,7 +676,7 @@ holds: none
 
 ## 163. `anim: "none"` was a valid schema value the engine did not have
 `"none"` is a real no-op entry in `ANIM` now. Lesson. `schema-drift` compares the schema against the registries it copies, and it reported this enum as in sync while it carried a value the engine...
-holds: scripts/gates/direction-floor.mjs, scripts/gates/gate-mutation.mjs
+holds: quality/gates/direction-floor.mjs, quality/gates/gate-mutation.mjs
 
 ## 164. four shipped scenes had been cross-fading against their own instructions
 What. Fixing #163 (`anim:"none"` was a schema value the engine did not have) changed the output of four tracked scenes: `showcase-cuts`, `brew-launch-act1`, `showcase-vawe`, `showcase-vawe-reel`.
@@ -684,11 +684,11 @@ holds: none
 
 ## 165. a gate went blind in a refactor and spent months shouting at everything
 The shared path is now named by DIRECTORY, not by file, so a future split cannot blind it.
-holds: scripts/gates/audit-scenes.mjs, scripts/gates/lib-test.mjs, scripts/gates/motion-audit.mjs
+holds: quality/gates/audit-scenes.mjs, quality/gates/lib-test.mjs, quality/gates/motion-audit.mjs
 
 ## 166. every short film in the library was a slideshow, and nothing said so
 The tell blocks, and the 18 carry explicit waivers so the gate holds new work without breaking `make video` for scenes it did not cause.
-holds: scripts/gates/beat-check.mjs, scripts/gates/gate-mutation.mjs, scripts/gates/lib-test.mjs
+holds: quality/gates/beat-check.mjs, quality/gates/gate-mutation.mjs, quality/gates/lib-test.mjs
 
 ## 167. the continuity skill was A/B tested, won on structure, and lost the hook
 Step 3b added to the skill: the continuity rule sits UNDER the house hook rule, not in place of it.
@@ -708,26 +708,26 @@ holds: none
 
 ## 171. dead-air counted a black scrim and a 60px dot as "content on screen"
 `content` now drops both. A blackout is a rect at or over the canvas on both axes with an opaque bare-hex fill; a speck is a declared box under 8% of the canvas on both axes (under two thousandths...
-holds: scripts/gates/author-check.mjs, scripts/gates/dissolve-check.mjs
+holds: quality/gates/author-check.mjs, quality/gates/dissolve-check.mjs
 
 ## 172. a global `cut` blanked the whole frame, and the timeline gate called the hole a transition
 `core/cuts/index.js` gains `soloCutStyle` for the single-root path: same closed-form styles, every VISIBILITY channel (opacity, clip, mask) pinned at identity, so the transition rides on transform and...
-holds: scripts/gates/scene-timing.mjs
+holds: quality/gates/scene-timing.mjs
 
 ## 173. the storyboard promised a change, the film never built one, and every gate stayed green
-`scripts/gates/plan-vs-render.mjs`, wired into `author-check` after `inspect` (it reads the same `.intent.json` sidecar, which already carried `span` and `becomes`) and standalone as `make...
+`quality/gates/plan-vs-render.mjs`, wired into `author-check` after `inspect` (it reads the same `.intent.json` sidecar, which already carried `span` and `becomes`) and standalone as `make...
 holds: none
 
 ## 174. six gate fixtures were passing on the fixture's own filename
 Anchor on the printed FINDING shape (`[plan-has-no-spans]`, `stub-why , `), which a filename cannot produce.
-holds: scripts/gates/author-check.mjs, scripts/gates/dissolve-check.mjs
+holds: quality/gates/author-check.mjs, quality/gates/dissolve-check.mjs
 
 ## 175. the anti-slop detector read every ISO date as an `01 / 02 / 03` section scaffold
 `(?<![\w\-/:.])(0[1-9]|1[0-2])(?![\w\-/:.])` in `skills/impeccable/scripts/detector/engines/regex/detect-text.mjs`.
 holds: none
 
 ## 176. the layout audit was the one gate you could not waive, so a deliberate composition failed it
-`verify/audit.mjs` reads `authoring.allow` the same way every other gate does.
+`quality/audit.mjs` reads `authoring.allow` the same way every other gate does.
 holds: none
 
 ## 177. a dissolve between two text states is illegible at its midpoint, and nothing checks it
@@ -735,7 +735,7 @@ What. Raised by the user as "settled states are good but during the animation th
 holds: none
 
 ## 178. every film was type in a box, and no gate had an opinion about it
-`scripts/gates/visual-vocabulary.mjs`, blocking, wired into `author-check` beside the ambition floor and standalone as `make visuals`.
+`quality/gates/visual-vocabulary.mjs`, blocking, wired into `author-check` beside the ambition floor and standalone as `make visuals`.
 holds: none
 
 ## 179. the mutation harness edits tracked source in place with no lock
@@ -751,12 +751,12 @@ What. #177 named a mechanically detectable defect and said the fix was a gate. #
 holds: none
 
 ## 182. the gate measured area as `w * h` and reported 0% with total confidence
-`boxOf(L)` in `scripts/gates/scene-timing.mjs` resolves size in five honest tiers: `explicit`, `size`, `intrinsic` (read the asset's own header, PNG IHDR / JPEG SOFn / SVG viewBox, no...
+`boxOf(L)` in `quality/gates/scene-timing.mjs` resolves size in five honest tiers: `explicit`, `size`, `intrinsic` (read the asset's own header, PNG IHDR / JPEG SOFn / SVG viewBox, no...
 holds: none
 
 ## 183. the tool for comparing two cuts could not hold two cuts
 `/tmp/judge/<basename>/`. Every path the tool prints now names the film. The related duplication, fixed at the same time. The beat clustering, the ffmpeg tiling graph, and the craft rubric each...
-holds: scripts/gates/direction-floor.mjs
+holds: quality/gates/direction-floor.mjs
 
 ## 184. three ways to make a picture that isn't there, found in one afternoon
 The show-don't-tell campaign's first two scenes each shipped a graphic that was, at some point, silently not drawing.
@@ -768,7 +768,7 @@ holds: none
 
 ## 186. the fake waveform three judges believed
 The beat-grid drawn under "on the beat." used `abs(sin(i * 1.7))` for its background bars, as filler behind the real cut marks.
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 187. the A/B sampler landed mid-entrance and three judges scored the still as broken
 When only one arm has a scene, that scene's beat table is used for BOTH arms.
@@ -776,11 +776,11 @@ holds: none
 
 ## 188. three gates were blind to motion authored in CSS, and one of them demanded it
 `hero-site`'s new graphic is an inline `<svg>` whose every shape is a function of `var(--t)`: eighteen bars, each with its own delay, that hold as raw numbers through beat 1 and grow into an...
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 189. the continuity gate passed a spine the renderer had already cut in half
 A cut film that wraps beats as units now fails `beats-wrapped-as-units` and is told the one fact that unblocks it: set `"sceneUnits": false`.
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 190. the layout audit forgave a headline it could not see
 A new HARD finding, `buried`: for each `[data-layer="critical"]` layer (>=60px display text), sample a 9x9 grid over its ink and hit-test each point; if more than 40% of it sits under opaque...
@@ -800,11 +800,11 @@ holds: none
 
 ## 194. 37 references to a custom property nothing defines
 All 37 repointed, generators included. A new `dead-token` finding in the design-spec lock reads every `var(--x)` in a scene and checks it against the tokens the ENGINE actually defines, derived...
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 195. the renderer painted nothing rather than refusing, and looked like the lenient one
 Dispatch goes through `pick(L)`. A missing `type` still means text, the documented default.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 196. eight render workers starved raster, and words blinked out
 A user watching `showcase-flight` said "words are flickering".
@@ -812,7 +812,7 @@ holds: none
 
 ## 197. a card scaled about a box that did not exist yet
 Scale about the card's own centre stated in user units (`transform-box: view-box` plus an explicit `transform-origin` in px).
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 198. three craft decisions were opt-in, so the library never made them
 `higgsfield-recreation` is the exemplar and the rest of the library does not move like it.
@@ -832,7 +832,7 @@ holds: none
 
 ## 202. two elements that mean the same thing, and the dead tail under both gates
 The waveform now draws until ~4.6s instead of ~4.08s, then settles for 0.4s.
-holds: scripts/gates/motion-audit.mjs
+holds: quality/gates/motion-audit.mjs
 
 ## 203. multiPhase's "hold" leg panned the camera home
 Found by prediction, not by watching. The method: take the bug shapes from #199-#202, enumerate every site in the engine that has the same shape, and probe each one.
@@ -848,14 +848,14 @@ holds: none
 
 ## 206. a frozen span is a fraction of the runtime, and the gate could not see inside a layer
 Class D: the gap between two gates' thresholds. `motion-audit` warned on a frozen span over a flat 2s.
-holds: scripts/gates/motion-audit.mjs
+holds: quality/gates/motion-audit.mjs
 
 ## Class B and Class C: what the hunt did NOT find
 Recorded because a negative result from a systematic sweep is worth as much as a hit, and because the next person to have this idea should know the yield. Class C (identity-vs-absent defaults) has...
 
 ## 207. four things between the capture tools and a real brand
 All four found in the first twenty minutes of trying to make a film for an actual company, which is the point: they had been in the repo for months and no amount of engine work would have surfaced...
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 208. the rules audit: nine of thirty-four rules are not doing what they claim
 `scripts/dev/rules-audit.mjs` asks every gate finding the three questions the gates ask films: does it > Cut on 2026-08-05 in `cc2dfc2`. The audit below is the one run it produced.
@@ -863,7 +863,7 @@ holds: none
 
 ## 209. the library was already disposable, and I nearly deleted it permanently
 What happened. Asked to clear out the scene library so the rules stop being calibrated against it, I triaged 108 scenes into keep/drop and said, in as many words, that deletion was safe because...
-holds: scripts/gates/author-check.mjs
+holds: quality/gates/author-check.mjs
 
 ## 210. rendering at 60fps silently threw away motion blur
 The floor is now `AUTO_BLUR_FLOOR_PER_SEC = 480`, divided by the frame rate at use.
@@ -871,7 +871,7 @@ holds: none
 
 ## 211. the 60fps default, and the two gates that would have read it wrong
 The policy. A final render is 60fps, an iteration render is 30.
-holds: scripts/gates/seam-snap.mjs
+holds: quality/gates/seam-snap.mjs
 
 ## 212. the engine could move a box and scale a box, but never resize one
 `w`/`h` are keyable. `core/timeline/sequence.js` gains `resolveBoxes()` and `motionAt` returns `w`/`h`.
@@ -891,11 +891,11 @@ holds: none
 
 ## 216. an html layer's `h` was accepted, set, and then ignored by everything inside it
 `build()` now sets `height` from `L.h` alongside `width`, and the wrapper carries `height:100%`.
-holds: scripts/gates/lib-test.mjs, scripts/gates/lint-test.mjs
+holds: quality/gates/lib-test.mjs, quality/gates/lint-test.mjs
 
 ## 217. the layout audit measured a rotating layer's empty corners, not the ink it draws
-`verify/audit.mjs` samples SVG outlines for a true rotated bound, uses geometry ink on both axes, and CLAMPS the result to the border box.
-holds: scripts/gates/lib-test.mjs, scripts/gates/lint-test.mjs
+`quality/audit.mjs` samples SVG outlines for a true rotated bound, uses geometry ink on both axes, and CLAMPS the result to the border box.
+holds: quality/gates/lib-test.mjs, quality/gates/lint-test.mjs
 
 ## 218. the script gate called kinetic typography an echo
 The distinction is frequency, and it is the one a human makes without thinking.
@@ -903,11 +903,11 @@ holds: none
 
 ## 219. a rect's `fill` was accepted and thrown away, because the unknown-prop check is type-agnostic
 `rect` now honours `fill` as an alias for `bg`.
-holds: scripts/gates/plan-vs-render.mjs
+holds: quality/gates/plan-vs-render.mjs
 
 ## 220. the layout audit called a label on a card a collision
-`verify/audit.mjs` now treats a layer as a SURFACE when it, or any descendant filling at least 85% of it, paints a background, and excludes surfaces from the text-overlap set.
-holds: scripts/gates/lib-test.mjs, scripts/gates/lint-test.mjs
+`quality/audit.mjs` now treats a layer as a SURFACE when it, or any descendant filling at least 85% of it, paints a background, and excludes surfaces from the text-overlap set.
+holds: quality/gates/lib-test.mjs, quality/gates/lint-test.mjs
 
 ## 221. a single `--aspect` silently overwrote the render it was not asked to replace
 Tag whenever `--aspect` is passed at all.
@@ -963,11 +963,11 @@ holds: none
 
 ## 234. the per-frame pipeline's order was the order of nine statements, and three of them were load-bearing in ways nothing said
 `core/tracks/` ,  one file per job exporting `slot` and `frame()`, with the running order in a single `SLOTS` list resolved ONCE at module load into a flat array of functions.
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 235. schema-drift had been reading a 20-line shell and calling it the engine
 The scan is now the orchestrator (`scene.js`, and `scene.html` for as long as it may hold anything) plus the three registry DIRECTORIES walked whole: `core/layers`, `core/fx`, `core/tracks`.
-holds: scripts/gates/schema-drift.mjs
+holds: quality/gates/schema-drift.mjs
 
 ## 236. four layer types were one primitive in four copies, and the copies had already drifted apart
 `core/layers/canvas.js` is the one primitive; `core/surfaces/` is a registry of backends in the shape of `core/layers/`, `core/fx/` and `core/tracks/` ,  a `REGISTRY`, an exported `SURFACE_TYPES`,...
@@ -990,12 +990,12 @@ The `proxy` tier is gone: `boxOf` returns `{w:0,h:0,how:'unknown'}` for a single
 holds: none
 
 ## 241. a determinism sweep reported regressions that had not happened, because it shared one browser
-`scripts/gates/snap-scenes.mjs` recycles the browser every 10 scenes.
+`quality/gates/snap-scenes.mjs` recycles the browser every 10 scenes.
 holds: none
 
 ## 242. a factual finding was filed in the taste bucket, and a cull carried it out of sight
-Moved to `scripts/gates/beat-check.mjs`, which is always on, walks the clock rather than the layer list, and already owns `dead-air` ,  the same class of finding, the same reader.
-holds: scripts/gates/lint-test.mjs
+Moved to `quality/gates/beat-check.mjs`, which is always on, walks the clock rather than the layer list, and already owns `dead-air` ,  the same class of finding, the same reader.
+holds: quality/gates/lint-test.mjs
 
 ## 243. sound by default was never decided, it was inherited from a bug fix
 Doctrine reversed. `audio._why` added, matching `authoring._why` including its 12-character floor.
@@ -1007,7 +1007,7 @@ holds: none
 
 ## 245. The design-spec lock knew three type roles; the engine has four
 What happened. `onefilm` sets `"font": "num"` on its count layer, which is what the vawe theme's `type.num` (JetBrains Mono) exists for: tabular figures under a rolling number.
-holds: scripts/gates/designspec-check.mjs
+holds: quality/gates/designspec-check.mjs
 
 ## 246. the provenance table described a file that was no longer there, and could not survive a clone
 `audio-bake.mjs` writes a credits row for every bed it bakes ,  generated-by, no licence, verified true ,  and says out loud when it is correcting an entry that claimed a download.
@@ -1070,7 +1070,7 @@ holds: none
 holds: none
 
 ## 261. the schema and the engine compared layer props BY NAME, so a name could mean two things
-`formats/scene/schema.json` now carries a generated `layerProps` block, written by `node scripts/gates/schema-drift.mjs --write` from the `PROPS` declarations and checked in.
+`formats/scene/schema.json` now carries a generated `layerProps` block, written by `node quality/gates/schema-drift.mjs --write` from the `PROPS` declarations and checked in.
 holds: none
 
 ## 262. `hue` was live in the engine and missing from the schema, because the scan only matched `L.`
@@ -1090,11 +1090,11 @@ One union, `SHARED_PROPS` in `core/layers/vocabulary.js`.
 holds: none
 
 ## 266. the docs named commands and files the repo did not have, and two gates that would have said so were red and ignored
-`scripts/gates/doc-refs.mjs` (`make doc-refs`), wired into `make review`.
+`quality/gates/doc-refs.mjs` (`make doc-refs`), wired into `make review`.
 holds: none
 
 ## 267. the gates measured the box the author asked for, not the ink the frame carries (a fifth #214)
-- `verify/audit.mjs`: the ink helpers (`paintsBox` … `inkRect`) move above their consumers, and `info` (which feeds overlap · tight · top-heavy · display-type contrast · image contrast) is built...
+- `quality/audit.mjs`: the ink helpers (`paintsBox` … `inkRect`) move above their consumers, and `info` (which feeds overlap · tight · top-heavy · display-type contrast · image contrast) is built...
 holds: none
 
 ## 268. a load-bearing comment claimed the capture was byte-stable, and it never was
@@ -1169,7 +1169,7 @@ holds: none
 holds: none
 
 ## The block option contract, and two dead props it exposed
-70 block families now declare what they accept (`blocks/schema.mjs`, gate `scripts/gates/block-schema.mjs`).
+70 block families now declare what they accept (`blocks/schema.mjs`, gate `quality/gates/block-schema.mjs`).
 
 ## 285. `loadingBar` accepts `color` and never reads it
 What. `blocks/dev.mjs`: export function loadingBar({ …, color = T.greenBright, settle = T.green, label, done = true } = {}) The fill paints with `settle`.
@@ -1356,7 +1356,7 @@ holds: none
 
 ## 327. `inspect` cannot see through `<b>`, so it fails every film that uses emphasis
 Strip markup before matching: const plain = (s) => String(s || '').replace(/<[^>]+>/g, ''); const textOf = (l) => (l.type === 'text' ? plain(l.text) : '') + (l.block ?
-holds: scripts/gates/inspect.mjs
+holds: quality/gates/inspect.mjs
 
 ## 328. `make assets` plans image cards for audio cue names
 Skip `audio` (and `captions`) when collecting subjects.
@@ -1372,7 +1372,7 @@ holds: none
 
 ## 331. A missing typeface substitutes silently in a fresh worktree
 At boot, resolve every `@font-face` src the active theme's roles depend on and fail (or at minimum warn once, loudly, in the render log) when one 404s.
-holds: scripts/gates/asset-check.mjs
+holds: quality/gates/asset-check.mjs
 
 ## Waivers for `doc-refs`
 `make doc-refs` checks that every command and path a doc names exists.
@@ -1390,20 +1390,20 @@ Pass all six vectors; use the engine's converter.
 holds: none
 
 ## 335. The catalogue that exists so nobody misses a capability was missing the biggest one
-`scripts/gates/arsenal-check.mjs`. It walks `core/`, imports each module, and treats an export as a vocabulary by its VALUE (an array of two or more strings, or an object keyed by names) rather...
-holds: scripts/gates/arsenal-check.mjs
+`quality/gates/arsenal-check.mjs`. It walks `core/`, imports each module, and treats an export as a vocabulary by its VALUE (an array of two or more strings, or an object keyed by names) rather...
+holds: quality/gates/arsenal-check.mjs
 
 ## 336. Two films authored as improvements, both slower than the one they replaced
-`scripts/gates/pace-check.mjs`, in the TASTE half of `author-check` and runnable as `make pace-check` (no argument prints a census over the library).
-holds: scripts/gates/author-check.mjs, scripts/gates/pace-check.mjs
+`quality/gates/pace-check.mjs`, in the TASTE half of `author-check` and runnable as `make pace-check` (no argument prints a census over the library).
+holds: quality/gates/author-check.mjs, quality/gates/pace-check.mjs
 
 ## 337. A gate that names the exact drift, and is only a warning
 It blocks under `TASTE=1`, not only under `STRICT=1`.
-holds: scripts/gates/author-check.mjs
+holds: quality/gates/author-check.mjs
 
 ## 338. The anti-slop detector cannot read SVG text, and invented 21 findings on the first fragment it was ever pointed at
 One helper, `textPaintCss(el, style)`, applied at every text-colour site in all three files ,  the SVG namespace means `fill` is the paint, `currentColor` is the one case where the two agree, and...
-holds: scripts/gates/designspec-check.mjs
+holds: quality/gates/designspec-check.mjs
 
 ## 339. Moving markup into a file moved it out of the hash that proves somebody looked at it
 `hashOf` folds in the bytes of every html fragment the subject NAMES, path first so pointing at a different file with identical contents still counts, in sorted order so the digest is stable.
@@ -1411,7 +1411,7 @@ holds: none
 
 ## 340. The anti-slop gate ran 41 rules over three CSS properties, and its silence read as a pass
 What. `make slop` rendered a scene, dumped the DOM and ran the vendored 41-rule detector over it.
-holds: scripts/gates/author-check.mjs
+holds: quality/gates/author-check.mjs
 
 ## 341. A background parameter one level out of place: accepted, dropped, and a byte-identical render
 `bgErrors` in `core/validate/validate.mjs` now flags any key at the top level of a bg window that is a real parameter of that window's preset (`bgOptKeys`) and not one of the window's own keys, and prints...
@@ -1426,7 +1426,7 @@ One parser in `core/motion/motion.js`, accepting the union and anchored at both 
 holds: none
 
 ## 344. A git worktree silently removes the thing that proves a change is safe
-Any worktree agent whose brief includes verification must first run `make fonts` and copy `verify/snap/` from the main tree, and the merge must be re-verified in the main tree regardless ,  three...
+Any worktree agent whose brief includes verification must first run `make fonts` and copy `quality/baselines/snap/` from the main tree, and the merge must be re-verified in the main tree regardless ,  three...
 holds: none
 
 ## 345. Stripping tags eight times with three answers, and the two common answers were both wrong
@@ -1455,19 +1455,19 @@ holds: none
 
 ## 351. `make preview` clipped every fragment at 1080px, because a portrait default outlived its page
 Both harnesses that link tokens.css without booting now state their own geometry, each with the reason in place: - `preview-fragment.mjs` sets `:root{--vw:1920px;--vh:1080px}` (the canvas it...
-holds: scripts/gates/snap-signature.mjs
+holds: quality/gates/snap-signature.mjs
 
 ## 352. The one gate that blocks on structure read six of the eight channels its own source returns
 `poseAt` folds all nine, with `null` (this track does not drive that property) printed as `-` so it compares equal to itself.
-holds: scripts/gates/direction-floor.mjs
+holds: quality/gates/direction-floor.mjs
 
 ## 353. The camera sugar accepted a typo, a missing target and the wrong frame, and said nothing to all three
 Adding `travel` (the station-to-station journey) meant reading `core/camera-moves/index.js` closely, and the module had three silent failures sitting under the one it was asked for.
-holds: scripts/gates/unused.mjs
+holds: quality/gates/unused.mjs
 
 ## 354. Every static gate measured against the canvas origin, so a film whose transition is the camera was graded on a frame nobody was looking at
 A film can lay its beats out as STATIONS on a canvas far larger than the frame and travel between them with the camera, which is how `linear-journey` (5760x2160, 12 camera keys, zero cuts) and...
-holds: scripts/gates/unused.mjs
+holds: quality/gates/unused.mjs
 
 ## 355. Six camera generators would run their clock backward, and the reviewer that found it named two
 Two helpers, `span` (positive, for anything that advances the clock) and `hold` (zero allowed, negative never), used by all six generators plus `travel`'s stations.
@@ -1495,7 +1495,7 @@ holds: none
 
 ## 361. `vawe_capabilities` shipped names and kept the meanings at home
 An MCP client asking what this engine can do got `looks (31): neon dreamyHaze crt …` and `cuts (26): none fade slide …` ,  bare strings.
-holds: scripts/gates/direction-floor.mjs, scripts/gates/lib-test.mjs, scripts/gates/silent-fallback.mjs
+holds: quality/gates/direction-floor.mjs, quality/gates/lib-test.mjs, quality/gates/silent-fallback.mjs
 
 ## 362. Describing the looks found four bugs in the looks
 Writing one line per composite look meant reading all 31 recipes.
@@ -1507,15 +1507,15 @@ holds: none
 
 ## 364. A flat dark backdrop escaped the flat-backdrop warning
 `beat-check` warns `static-bg` on a film built entirely from flat presets, because CLAUDE.md's rule is that the backdrop is always a decision and a still field must be a deliberate one.
-holds: scripts/gates/arsenal-check.mjs, scripts/gates/lib-test.mjs
+holds: quality/gates/arsenal-check.mjs, quality/gates/lib-test.mjs
 
 ## 365. Five of the six documented look knobs did nothing, and the guard for exactly that was scoped to one family
 A public knob NAMES the private arguments it controls (`KNOB_ROUTES`) and is written after the fixed bag.
-holds: scripts/gates/knobs-audit.mjs, scripts/gates/lib-test.mjs
+holds: quality/gates/knobs-audit.mjs, quality/gates/lib-test.mjs
 
 ## 366. The engine's defaults were another brand's colours, and nobody had ever chosen them
 `bgPaletteFrom(palette)` derives the whole background palette from the theme's own, and `scene.js` uses it whenever a theme authors no `bg`.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 367. `--p` was frozen at 0 for every backdrop that spans its film, and a sentinel is why
 Told that reaching for framework presets caps what you can build, the fix was to stop picking a background off a list and hand-author one.
@@ -1527,7 +1527,7 @@ holds: none
 
 ## 369. Nine name→thing maps, each with its own silent fallback, and one film that never played as written
 F1 of the framework plan: stop writing gates for the silent-substitution class and remove the ability to express it.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 370. A colour default is a decision about the theme, or a deliberate constant, and nothing could tell them apart
 F3 of the framework plan. Twice this week a brand's colours turned out to be the engine's defaults: `PAL_PLINTH` painted every unthemed background in plinthai.xyz blue (#366), and `inkflash`...
@@ -1539,15 +1539,15 @@ holds: none
 
 ## 372. Every background boundary was written twice, and nothing kept the two equal
 F4 of the framework plan. `brew-launch-act1` cuts its backdrop per beat ,  paper, dark, paper, accent, paper ,  and that is the film's main structural device.
-holds: scripts/gates/motion-audit.mjs
+holds: quality/gates/motion-audit.mjs
 
 ## 373. F5, and what measuring "unused" actually showed
 The last item of the framework plan, and the one whose premise did not survive contact.
-holds: scripts/gates/lib-test.mjs, scripts/gates/unused.mjs
+holds: quality/gates/lib-test.mjs, quality/gates/unused.mjs
 
 ## 374. The review found the fix I had recorded but never made
 Two reviewers were run over the framework plan (`c49ea03..f70358d`).
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 375. Seven vocabularies still answered a wrong name with a plausible substitute
 The review that produced #374 prompted a full sweep: probe every named vocabulary in the engine with a nonsense name, then read what each CALLER does with the result. The sweep corrected a claim I...
@@ -1559,7 +1559,7 @@ holds: none
 
 ## 377. The gate written to catch blind spots had one, and its waiver list hid it
 A reviewer over `25746ee..08d9c36` cleared the three things that could have gone badly: no new throw fires on an ABSENT value, none sits on a per-frame path (every one is scene-build-time),...
-holds: scripts/gates/silent-fallback.mjs
+holds: quality/gates/silent-fallback.mjs
 
 ## 378. Eighty-nine words for one idea, and the answer to "should we remove every default?"
 Three things, from one planning pass. The first is a question I was asked and answered with a measurement rather than an opinion. "Should we remove every default colour, so nothing default ever...
@@ -1567,15 +1567,15 @@ holds: none
 
 ## 379. `author-check` read as the safety net, and it is not one
 B2, and the smallest change of the run with the clearest reason.
-holds: scripts/gates/author-check.mjs
+holds: quality/gates/author-check.mjs
 
 ## 380. Sixteen looks declared a colour that never rendered, and the test for it asked the wrong question
 Chasing the `make unused` census, which names itself a test backlog: three never-used effects had turned out to be BROKEN the moment anything exercised them, so the never-named vocabulary is...
-holds: scripts/gates/beat-check.mjs, scripts/gates/critique.mjs, scripts/gates/direction-floor.mjs, scripts/gates/lib-test.mjs, scripts/gates/pace-check.mjs
+holds: quality/gates/beat-check.mjs, quality/gates/critique.mjs, quality/gates/direction-floor.mjs, quality/gates/lib-test.mjs, quality/gates/pace-check.mjs
 
 ## 381. A warning printed once, from one of eight workers, into a log nobody reads
 Found while reporting #380, in `lib-test`'s own output: `ease: unknown easing "nope" ,  using easeOutCubic`.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 382. The gate for hand-authored fragments painted the brand colour black
 Building a GitHub-wrapped heatmap, I previewed the fragment and every cell came out grey.
@@ -1583,7 +1583,7 @@ holds: none
 
 ## 383. A bar chart rendered white, because `color` is the third name for a rect's fill
 Authoring a GitHub-wrapped, I wrote the obvious thing: { "type": "rect", "w": 820, "h": 76, "color": "var(--accent)" } The bars rendered white.
-holds: scripts/gates/plan-vs-render.mjs
+holds: quality/gates/plan-vs-render.mjs
 
 ## 384. The same frame paints differently depending on which worker tab drew it
 The user said the contribution grid was blinking.
@@ -1599,11 +1599,11 @@ holds: none
 
 ## 387. Dark text on a dark backdrop, because the token name lied
 The first film built on per-beat backdrops (#385) rendered three beats over paper, dark and accent.
-holds: scripts/gates/audit-scenes.mjs, scripts/gates/plan-vs-render.mjs
+holds: quality/gates/audit-scenes.mjs, quality/gates/plan-vs-render.mjs
 
 ## 388. A check that only grades the file you have open
 `make audit` is a good check. It samples the bg canvas under a text element's own ink box, computes WCAG against it, and names the layer.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 389. The colour wave settled to invisible, one level under #373
 #387 fixed the ink a layer inherits from its bg window.
@@ -1611,11 +1611,11 @@ holds: none
 
 ## 390. The contrast gate graded frames 0.067s into their entrance
 `make audit-all` (#388) reported 33 scenes with hard contrast failures.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 391. A worktree fan-out over films silently throws the work away
 Four agents were sent to fix contrast findings across 32 scenes, one worktree each, split so no two shared a file.
-holds: scripts/gates/author-check.mjs, scripts/gates/snap-blocks.mjs, scripts/gates/waiver-drift.mjs
+holds: quality/gates/author-check.mjs, quality/gates/snap-blocks.mjs, quality/gates/waiver-drift.mjs
 
 ## 392. Two swatches in the ransom palette were never readable
 `ransomColorSwatches` is a HOUSE table: every ransom-note scene draws from it.
@@ -1626,8 +1626,8 @@ Unknown is per axis, not per layer: when `boxOf` cannot derive the extent, `inVi
 holds: none
 
 ## 394. The documented way to declare a transition was invisible to every gate
-`lowerScene()` at the point of parse in `beat-check`, `critique`, `direction-floor`, `pace-check`, `beats`, `reveal`, `motion-director` and `verify/audit.mjs`.
-holds: scripts/gates/plan-vs-render.mjs, scripts/gates/scene-timing.mjs, scripts/gates/seam-snap.mjs
+`lowerScene()` at the point of parse in `beat-check`, `critique`, `direction-floor`, `pace-check`, `beats`, `reveal`, `motion-director` and `quality/audit.mjs`.
+holds: quality/gates/plan-vs-render.mjs, quality/gates/scene-timing.mjs, quality/gates/seam-snap.mjs
 
 ## 395. A slot swap that cross-faded two words in the same box
 `over = 0`. Passes butt. The payload slot, which does pop, blinks for its `payload` offset, and a slot visibly re-filling is what this beat is a picture of.
@@ -1647,15 +1647,15 @@ holds: none
 
 ## 399. The doctrine told authors to render a false number
 `docs/MOTION-CRAFT.md` recommended, twice, that "a value that should feel physical (number, bar, camera)" use `ease:"spring"`.
-holds: scripts/gates/snap-signature.mjs
+holds: quality/gates/snap-signature.mjs
 
 ## 400. A `SPECTACLE` field was added to the brief, read by the parser, and consumed by nothing
 A scene-level block, `"spectacle": { at, of, device, why }`, resolved by `core/timeline/spectacle.js` before any DOM exists.
-holds: scripts/gates/lib-test.mjs, scripts/gates/plan-vs-render.mjs, scripts/gates/schema-drift.mjs, scripts/gates/snap-signature.mjs
+holds: quality/gates/lib-test.mjs, quality/gates/plan-vs-render.mjs, quality/gates/schema-drift.mjs, quality/gates/snap-signature.mjs
 
 ## 401. A documented `--json` flag whose output could not be parsed, and a test that pinned a repealed rule
 Two bugs found by an agent doing unrelated work.
-holds: scripts/gates/arsenal-check.mjs, scripts/gates/audio-check.mjs, scripts/gates/author-check.mjs, scripts/gates/beat-check.mjs, scripts/gates/copy-check.mjs, scripts/gates/designspec-check.mjs, scripts/gates/direction-floor.mjs, scripts/gates/discovery.mjs, scripts/gates/dissolve-check.mjs, scripts/gates/generated-check.mjs, scripts/gates/lib-test.mjs, scripts/gates/motion-audit.mjs, scripts/gates/pace-check.mjs, scripts/gates/plan-vs-render.mjs, scripts/gates/read-check.mjs, scripts/gates/rung.mjs
+holds: quality/gates/arsenal-check.mjs, quality/gates/audio-check.mjs, quality/gates/author-check.mjs, quality/gates/beat-check.mjs, quality/gates/copy-check.mjs, quality/gates/designspec-check.mjs, quality/gates/direction-floor.mjs, quality/gates/discovery.mjs, quality/gates/dissolve-check.mjs, quality/gates/generated-check.mjs, quality/gates/lib-test.mjs, quality/gates/motion-audit.mjs, quality/gates/pace-check.mjs, quality/gates/plan-vs-render.mjs, quality/gates/read-check.mjs, quality/gates/rung.mjs
 
 ## 402. `make reveal` crashed on any single-beat film, and sampled every layer window a third too wide
 Two pre-existing bugs in `scripts/author/reveal.mjs`, found by an agent adding a ghost mode and verified against `git show HEAD:` before either was touched. It crashed on a one-beat film. ffmpeg...
@@ -1679,15 +1679,15 @@ holds: none
 
 ## 407. The ninth consumer of a defect that was declared closed
 #394 fixed eight readers of the unified `transitions` surface one at a time, and that is the bug. `beat-check`, `critique`, `direction-floor`, `pace-check`, `beats`, `reveal`, `motion-director`...
-holds: scripts/gates/plan-vs-render.mjs, scripts/gates/scene-timing.mjs, scripts/gates/seam-snap.mjs
+holds: quality/gates/plan-vs-render.mjs, quality/gates/scene-timing.mjs, quality/gates/seam-snap.mjs
 
 ## 408. SEVEN more consumers still do not lower `transitions`, and one is `make seam-check`
 #407 closed the ninth consumer. The grep it was required to run before closing found seven more, which is the point of that rule and the reason #394's "eight consumers, fixed" was wrong. The sharp...
-holds: scripts/gates/coverage.mjs, scripts/gates/seam-snap.mjs, scripts/gates/similarity.mjs
+holds: quality/gates/coverage.mjs, quality/gates/seam-snap.mjs, quality/gates/similarity.mjs
 
 ## 409. Burnt-in captions rendered underneath the platform's own caption strip
 `core/engine/boot.js:325` writes `--safe-bottom` from `safeArea(w, h, destination)`.
-holds: scripts/gates/arsenal-check.mjs, scripts/gates/lib-test.mjs
+holds: quality/gates/arsenal-check.mjs, quality/gates/lib-test.mjs
 
 ## 410. `letterSpacing` had two writers, and now it has one that cannot become two
 #403 recorded that one statement in `core/layers/text.js` had silently discarded two upstream decisions: the author's own `tracking` (#28, in 12 shipped scenes) and the dark-ground polarity.
@@ -1719,7 +1719,7 @@ holds: none
 
 ## 417. `gradient` + `split` painted nothing, and a comment said it could not happen
 A `text` layer with `gradient` AND `split` rendered an INVISIBLE line.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 418. The determinism net could not see a single kinetic type reveal
 `snap-signature.mjs` captured `[id], [data-layer="critical"], [data-start]`.
@@ -1751,7 +1751,7 @@ holds: none
 
 ## 425. `<b>` around a caption word was accepted, rendered, and had no effect
 Emphasis is a fact about the DOM and not about t, so it is read ONCE at build (`u.closest('b, strong, em, i')`) rather than thirty times a second, and the apply loop swaps the colour for...
-holds: scripts/gates/motion-audit.mjs
+holds: quality/gates/motion-audit.mjs
 
 ## 426. Four caption mechanisms were reported reachable, and not one of them was callable
 Four caption-native styles, each satisfying the doctrine rather than being exempted from it: `flipUp` (hinges from -90deg, invisible without being dim, the same argument `typeOn` makes for...
@@ -1786,7 +1786,7 @@ The token. Every theme ships `up` and `down`, so `blocks/kit.mjs` TONES could pa
 holds: none
 
 ## And the brief defect, which is mine
-The literal-conversion agent was told its change "must stay 105 identical on `snap-scenes`, or justify each change one by one". It could not run that check at all. `verify/snap/` is gitignored...
+The literal-conversion agent was told its change "must stay 105 identical on `snap-scenes`, or justify each change one by one". It could not run that check at all. `quality/baselines/snap/` is gitignored...
 
 ## 434. CLOSED: the frozen counter, fixed and shown
 `blueprints/kit.mjs` `dollyNumber` wrote `countStart: start + 0.1`.
@@ -1802,7 +1802,7 @@ holds: none
 
 ## 437. the `paints-nothing` gate, and the sweep that was checking the wrong files
 What it is for. An `html` layer whose content was masked away rendered as a blank white card, and the agent that built it said the truest thing anyone said this week: "the mask bug that blanked...
-holds: scripts/gates/snap-scenes.mjs
+holds: quality/gates/snap-scenes.mjs
 
 ## 438. `css` on a layer, and the eleven properties it refuses
 The layer vocabulary is a wrapper over HTML, so a box gradient, a `mask-image`, a `clip-path` and an inset `box-shadow` were unreachable while the DOM underneath could do all four.
@@ -1814,7 +1814,7 @@ holds: none
 
 ## 440. the determinism gate exits green on a fresh clone, having compared nothing
 Fail only on the all-empty case: if (!identical.length && !changed.length && nobaseline.length) { ...exit(1) } A FEW no-baseline scenes stay soft, deliberately: that is a newly authored film...
-holds: scripts/gates/snap-blocks.mjs
+holds: quality/gates/snap-blocks.mjs
 
 ## 441. retiring 35 agent worktrees, and the five files that nearly went with them
 What. Agent worktrees had reached 35, at 9.1G.
@@ -1826,11 +1826,11 @@ holds: none
 
 ## 443. the layout audit graded a camera that was not there
 Found by chasing a regression I thought I had caused, which turned out to be this. `core/engine/produce.js` injects a camera push into any un-choreographed scene, and #444 below made that push real.
-holds: scripts/gates/site-counts.mjs
+holds: quality/gates/site-counts.mjs
 
 ## 444. the produced camera push had never once run
 `core/engine/produce.js` gives any scene that declares no camera a gentle slow push, so the frame stays alive.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 445. an array's ORDER was a shader API, and nothing could have caught it
 `core/stings/index.js:22` declared `SHADER_FX` as a flat list of names.
@@ -1858,7 +1858,7 @@ holds: none
 
 ## 451. `make beats --vs` printed a tick and wrote nothing (MISTAKES #245, half-fixed)
 Both tools now adopt `openScene`, `scratch()` and `ffmpegOrDie`, and share one exported `drawtext()` escape in the new `scripts/author/sheets.mjs`.
-holds: scripts/gates/gate-mutation.mjs
+holds: quality/gates/gate-mutation.mjs
 
 ## 452. producing a contact sheet is not looking at one
 The receipt records `auto: true` when a sheet was produced by the loop.
@@ -1870,7 +1870,7 @@ holds: none
 
 ## 454. a look naming a pass that does not exist rendered without that effect, silently
 Both throw, naming the vocabulary. Verified: all 31 shipped looks resolve cleanly, and a probe look carrying `sepiaa` and `corner: 'top-right'` is refused by name. What was checked and left alone,...
-holds: scripts/gates/silent-fallback.mjs
+holds: quality/gates/silent-fallback.mjs
 
 ## 455. the npm package shipped one CPU architecture and claimed to be cross-platform
 The host's own identity picks the file (`vawe-<platform>-<arch>`), and the file's MAGIC BYTES are read back before spawning: ELF / Mach-O / MZ against `process.platform`.
@@ -1893,12 +1893,12 @@ The imports. And the probe that proves it: expanding a scene that declares `came
 holds: none
 
 ## 460. the determinism net could not see a single block, and nobody noticed for the whole library
-`scripts/gates/snap-blocks.mjs` + `make snap-blocks [SAVE=1] [BLOCK=<name>]`.
+`quality/gates/snap-blocks.mjs` + `make snap-blocks [SAVE=1] [BLOCK=<name>]`.
 holds: none
 
 ## 461. `pad` on an unpainted layer was accepted and discarded
 Padding is not paint, so it is written BEFORE the guard.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 462. schema.json enums were hand-copied, and two had already drifted
 `--write` now regenerates the registry-owned enums in place, and the table grew from 16 to 19: `cutTiming`, the per-layer `cut`, and `bg.item.preset` were registry copies nobody had listed.
@@ -1906,15 +1906,15 @@ holds: none
 
 ## 463. a font axis the docs promised and the shipped subset does not have
 The comment now states what the file actually holds and says to re-subset before reaching for `wdth`.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 464. a scene past the browser's WebGL cap renders completely blank and exits 0
 `core/engine/webgl.js` is the one owner. It counts live contexts, so the error can say how many, which is the fact that makes it actionable and which no call site could know.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 465. one scene differs between main and every worktree, and four agents each rediscovered it
 What. `react-demo` renders consistently in every worktree and consistently differently on main.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 466. the camera's lens was keyable, reached nothing, and said nothing
 `cameraAt` has interpolated a `p` keyframe (the lens, `persp`) since the rig landed, and `drawCameraAndCut` writes it to `#root` every frame, but only under the RIG, and the rig turns on for a...
@@ -1941,8 +1941,8 @@ holds: none
 holds: none
 
 ## 472. the motion contract's windows came from a field nobody writes, and one of its clauses was measuring the camera
-`scripts/gates/motion-audit.mjs` scores five FAIL-tier clauses (i final-hold · ii monotonic · iii settle · iv count-up · v typing) against a WINDOW.
-holds: scripts/gates/motion-audit.mjs
+`quality/gates/motion-audit.mjs` scores five FAIL-tier clauses (i final-hold · ii monotonic · iii settle · iv count-up · v typing) against a WINDOW.
+holds: quality/gates/motion-audit.mjs
 
 ## 473. the engine found the beat and no scene could ask it to use it
 `core/beats/index.js`, and a scene declares its grid: "audio": { "music": "beat", "beatSync": true } `true` derives the sidecar from the bed the way the mixer derives the bed itself...
@@ -1962,7 +1962,7 @@ holds: none
 
 ## 477. two owners of "which beat does this joint land on", and neither imported the other
 `core/beats/index.js` owns the policy and exports it: `snapJoints(data, grid, maxShift)` and `unrollGrid(pulse, period, dur)`, with `DEFAULT_MAX_SHIFT` beside them.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 478. the default push and the safe margin were one piece of geometry, written down twice
 What. `core/engine/produce.js` gives any scene declaring no camera a `slowPush` from `1` to `1.06` spanning the whole runtime.
@@ -2002,7 +2002,7 @@ holds: none
 
 ## 487. the GSAP trigger list was a hand-kept second source of truth, and #148 was one of its failures
 What. `core/engine/preload.js` decides whether the tween engine is fetched at all, from the props a scene names.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 488. `no-continuous-object` could not see a match cut, and a match cut is what it asked for
 The gate now reads both surfaces that declare a handover: layer-level `becomes`, and the junction-bound `matches` array.
@@ -2038,11 +2038,11 @@ holds: none
 
 ## 496. beatSync moved the cuts and left the stings behind, so a sting drifted off the cut it punctuates
 A sting rides the joint it punctuates: it is moved by the SAME delta as the nearest cut or seam within half a beat, so an authored offset is preserved to the millisecond and a sting written ON a...
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 497. a sting tint was read as a hex, so a theme token silently painted it black
 What. `stings[].color` and `stings[].colors[]` reach a WebGL uniform through `formats/scene/scene.js`, which converted them with `parseInt(String(h).replace('#',''), 16)`.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 498. beatSync reports what it moved, and the render log could not hear it
 The value now travels the channel that already exists rather than a new one.
@@ -2073,7 +2073,7 @@ One `htmlOf(o)` reader in the gate returns `o.html`, or the file `o.src` names (
 holds: none
 
 ## 505. the clipped-text rule read every mask as a mistake
-`verify/audit.mjs` hard-failed any film using the `tabBar.switch` block: `[clipped-text] DesignMotionExpo: mask is 329px too narrow for the glyphs`.
+`quality/audit.mjs` hard-failed any film using the `tabBar.switch` block: `[clipped-text] DesignMotionExpo: mask is 329px too narrow for the glyphs`.
 holds: none
 
 ## 506. the validator's lint was one 225-line body, so adding a rule was surgery
@@ -2094,14 +2094,14 @@ holds: none
 
 ## 510. two `html` layers, one document, and the later stylesheet silently won
 The symptom. Authoring `preface-launch`, the hero file pane was set to `.h { font-size: 40px }` and rendered at about 25px.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 511. the engine wrote 7,345 em dashes, and its own error message told you not to
 Every occurrence in `core/` `blocks/` `scripts/` `formats/` `verify/` `blueprints/` `cli/` `docs/` plus the Makefile and the markdown at the root now reads as a colon, a comma, a full stop or a...
 holds: none
 
 ## 512. the audit's one function did eleven jobs, because puppeteer only ships one
-`auditFrameFn` in `verify/audit.mjs` was 927 lines with a cyclomatic complexity of 166: the hardest function to change in this repo, and the gate that grades every film in the library.
+`auditFrameFn` in `quality/audit.mjs` was 927 lines with a cyclomatic complexity of 166: the hardest function to change in this repo, and the gate that grades every film in the library.
 holds: none
 
 ## 513. the validator passed a scene the engine refuses at boot, and studio hid the reason
@@ -2170,7 +2170,7 @@ holds: none
 
 ## 529. `cuts[].cx`/`cy` were documented 0-1 and read as per cent
 The schema now says per cent, with `max: 100`, matching both the code and its own sibling entries.
-holds: scripts/gates/lib-test.mjs, scripts/gates/prop-probe.mjs
+holds: quality/gates/lib-test.mjs, quality/gates/prop-probe.mjs
 
 ## 530. `glass` was a frosted panel because nobody asked whether backdrop-filter takes a url()
 `glass: "refract"` and `glass: "refractThin"`, a named recipe built once in `core/layers/util.js`: a lens height map as a `data:` `feImage` (a red x-ramp plus a green y-ramp, screened, with the...
@@ -2218,7 +2218,7 @@ holds: none
 
 ## 542. an ANCESTOR's style silently disables a DESCENDANT's capability, and CSS never says so
 What. `formats/scene/vawe-glass-hero.json` is a film about one thing: a refracting lens crossing a hard black horizon.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 543. a camera that arrives on time can still leave early, and the same shot fails both ways
 The hold now runs PAST the press it framed, by `dwell` where there is room and by half the gap where there is not, and the reframe takes what is left (`core/camera-moves/index.js`, followCursor's...
@@ -2234,7 +2234,7 @@ holds: none
 
 ## 548. the multiplane scale correction was written down, in an error message, and never applied
 `hold` is a key on the plane spec and writes the `scale` longhand with `(lens - z) / lens`.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 547. a device that ignored the two dials it declared, and a plane that assumed every capture was 1.6:1
 `roughness: L.roughness ?? 0.34, metalness: L.metalness ??
@@ -2246,7 +2246,7 @@ holds: none
 
 ## 548. `presetOpts` on a `decode` layer was accepted and then read by nobody
 `decodeText(el, u, i, { ...popts, each })`, and `decodeText` now takes `{ chars, rate, revealDelay, each }`.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 549. the text scramble refreshed a fixed COUNT per window, so its speed tracked its duration
 `rate`, in refreshes per second, default 48, with `each` passed in: `step = floor(u * each * rate)`.
@@ -2258,11 +2258,11 @@ holds: none
 
 ## 551. five capabilities shipped in one day, and none was reachable at the moment it mattered
 `scripts/author/recency.mjs` answers one question, "did this name exist 14 days ago", by reading git.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 552. a canvas layer kept its build-time size, so a folding shader showed a CROP of a bigger field
 The element owns the box (`el.style.width/height`) and the canvas fills it (`width:100%;height:100%`).
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 553. the engine's idle default breathes, and a breathing terminal reads as fake
 What. The terminal panel in the shader film crept: measured off the rendered frames, it was 1230px wide at 4.33s and 1267px at 6.33s, so every line of typed text drifted about seven pixels out and...
@@ -2273,8 +2273,8 @@ the schema entry now says per cent, `max: 100`, and names `core/cuts/index.js` a
 holds: none
 
 ## 555. `sceneUnits` held EVERY layer of a beat alive through the cut, so a long beat rendered its whole history at once
-FIXED. `beatIsCurrent` in `formats/scene/scene.js`, mirrored in `scripts/gates/scene-timing.mjs`, which is the one model of this rule outside the renderer.
-holds: scripts/gates/lib-test.mjs, scripts/gates/scene-timing.mjs
+FIXED. `beatIsCurrent` in `formats/scene/scene.js`, mirrored in `quality/gates/scene-timing.mjs`, which is the one model of this rule outside the renderer.
+holds: quality/gates/lib-test.mjs, quality/gates/scene-timing.mjs
 
 ## 556. a scene-level `matchCut` cannot match three subjects, and the closed state proves it
 authoring, not engine. A graphic match needs ONE subject in the shape; a beat that ends on three equal panels has no single form to hand over.
@@ -2306,15 +2306,15 @@ holds: none
 
 ## 563. a fold sprang back to full size, because a later keyframe mentioned only `scale`
 What happened. A terminal panel folds from 1240x620 down to a 564x404 tile over one bar, holds there, then takes a 1.07 scale punch when its contents swap.
-holds: scripts/gates/lib-test.mjs
+holds: quality/gates/lib-test.mjs
 
 ## 564. `schema-drift --write` looked like it deleted the whole `shared` prop list, and had not
 `renderVocabulary` now emits one name per line at the indent it reads off the file, so a `--write` over a current file is byte-identical and a one-prop addition is a 3-line diff.
-holds: scripts/gates/lib-test.mjs, scripts/gates/schema-drift.mjs
+holds: quality/gates/lib-test.mjs, quality/gates/schema-drift.mjs
 
 ## 565. the dead-prop audit could only judge props somebody had already written, so a declared dial waited for an author to find it
-`scripts/gates/prop-probe.mjs`, blocking in `.githooks/pre-push` (`make prop-probe`).
-holds: scripts/gates/prop-probe.mjs
+`quality/gates/prop-probe.mjs`, blocking in `.githooks/pre-push` (`make prop-probe`).
+holds: quality/gates/prop-probe.mjs
 
 ## 566. every seam shifted its text to the top of the frame, because the bake dropped a linked stylesheet
 `core/resample/raster.js` `buildInlinedCss` now inlines EVERY same-origin `<link rel="stylesheet">`, not just tokens.css: it loops `document.querySelectorAll('link[rel="stylesheet"]')`, skips cross-origin...
@@ -2326,11 +2326,11 @@ holds: none
 
 ## 568. a fresh scaffold could never pass author-check, because two gates mishandled the expanded path
 the fix is verified end to end: a fresh scaffold, after `make preflight D=<file>`, now passes `make author-check` (exit 0).
-holds: scripts/gates/pace-check.mjs
+holds: quality/gates/pace-check.mjs
 
 ## 569. a film rendered portrait and every "bug" for an hour was the canvas, plus a 404 that blamed the wrong thing
 none new yet; both classes are named above with their write-site fix.
-holds: scripts/gates/lint-test.mjs
+holds: quality/gates/lint-test.mjs
 
 ## 570. `screenDive`'s own `image` layer carries `border`, which `core/layers/image.js` never reads
 An image layer never consumes `border` (rect/text/group/html do, through kit.chipBox), so the prop-audit refused the render and the blueprint had never painted one; the same defect sat in viewportTrio. Fixed at the write site: `border` dropped from both recipes.
@@ -2338,7 +2338,7 @@ holds: core/prop-audit.js (refuses a prop set and never read); blueprints/beats.
 
 ## 571. the theme palette key is `surface2`; the CSS variable it becomes is `--surface-2`, and using the key's own spelling paints nothing, silently
 A `var(--surface2)` resolves to an undefined custom property and the box renders transparent with no render-time warning; the hyphenated `--surface-2` (and `--text-2`) is what boot sets from the palette key. The designspec lock catches it before render as `dead-token`, with a did-you-mean; the film was authored without running it.
-holds: scripts/gates/designspec-check.mjs (dead-token, inside author-check)
+holds: quality/gates/designspec-check.mjs (dead-token, inside author-check)
 
 ## 572. a group's children fell back to the 0.26s default exit, so every dissolve over a group-built beat crossed an empty field
 `addGroupChild` in core/layers/util.js computed a child's clock from the parent but never passed the parent's `exitDur` down, so a child with none of its own faded out over the last quarter second of its window, exactly at the beat boundary; a hard cut hid it, a dissolve found nothing to cross. A child now inherits the group's `exitDur` when it states none, and blueprint layers hold to the beat end.
@@ -2346,7 +2346,7 @@ holds: core/layers/util.js (childExitDur), blueprints/kit.mjs (exitDur 0 by defa
 
 ## 573. a migration script read the file the same change deleted, so it could run exactly once
 legacy-fold.mjs folded the legacy manifest into scene waivers and the manifest was deleted in the same commit; on any machine whose gitignored library was not folded yet the script crashed on ENOENT. A one-shot script that owns its input reads it from the last commit that carried it (`git show <sha>:<path>`) when the file is gone.
-holds: scripts/gates/legacy-fold.mjs (MANIFEST_LAST_COMMIT)
+holds: quality/gates/legacy-fold.mjs (MANIFEST_LAST_COMMIT)
 
 ## 574. a beat wrapper stretched a layer's `data-duration` past its own life, and the primitive that stopped driving at its authored end rendered its resting pose instead of holding
 sceneUnits credited a layer as the beat's "current state" (and therefore stretched its visibility to the cut) whenever nothing else in the beat started after it, even when the layer's OWN end fell well short of the cut. The stretch widened `data-duration` on the DOM only; every primitive's `frame()` still measured against `L.start`/`L.duration`, the untouched authored numbers, so a `cursor` past its own path (or any layer past its own end) hit its shared `if (!(t>=start&&t<end)) return` guard and left whatever `driveClips` had written moments earlier: the resting transform, i.e. the origin. A pointer that finished its path at 6.1s and a caption that finished at 7.1s both reappeared, unmoved, from 6.9s to the cut at 7.2s. Fixed two ways: `beatIsCurrent` now credits only a layer whose own end reaches the beat's end (the "nothing replaced it" clause is gone, so a layer that truly ended early is simply gone, same as outside sceneUnits), and `renderFrame`'s per-layer loop clamps the `t` handed to every primitive at `L.start + L.duration` regardless of what the DOM's stretched `data-duration` says, so a still-visible layer's own clock never runs past what it was authored for and its last real pose holds by construction.
@@ -2366,11 +2366,11 @@ holds: formats/scene/scene.js (`bgCutAt`)
 
 ## 578. 101 of 181 films had no joint at all, because the only code that ever inferred one lived inside a GATE, not the engine
 `seam-snap.mjs` derived a film's likely beat boundaries (a track-bearing layer's start landing >1.2s after the previous one) to know where to sample for a flash, and never told the engine. So `sceneUnits`, `bindWindowsToJunctions`, audio-bridge cues and `shotWindows` all stayed off by default on any film that hadn't hand-authored a cut, which is most of them. The loop moved to `core/timeline/junctions.js` as `inferCuts(layers, duration)`, beside `shotWindows` for the same reason that one is there (a second copy of "where does this film turn" is this exact class of drift, #159/#358); `seam-snap.mjs` now imports it instead of keeping its own copy. `produceBaseline` injects the inferred boundaries as real `data.cuts` (absent-only: a film with a cut, a seam, or a `motion` track is untouched) styled with `look.cuts.default`, and does so BEFORE the existing `sceneUnits` default so a freshly-cut film turns its beats into cross-fading units in the same pass, not after: a `fade` cut with no scene-unit wrapper is a whole-frame fade with nothing under it, refused at render. An author who wrote `sceneUnits: false` is left alone rather than overridden, so an explicit "no" cannot be silently followed by a cut the render then refuses.
-holds: core/timeline/junctions.js (`inferCuts`), core/engine/produce.js (`produceBaseline`), scripts/gates/seam-snap.mjs
+holds: core/timeline/junctions.js (`inferCuts`), core/engine/produce.js (`produceBaseline`), quality/gates/seam-snap.mjs
 
 ## 579. an inferred cut styled every joint the same way, whether or not anything actually crossed it
 `inferCuts` (#578) told the engine WHERE a film likely turns, and `produceBaseline` styled every one of those joints with the same `look.cuts.default`, purely from the gap between beat starts. On `showcase-lumen.json` that meant a whole-frame fade wrapped a joint a layer's own window straddled (the wrapper truncates a non-`acrossBeats` layer at the beat boundary regardless of its authored duration) and a second joint where the outgoing card's box overlapped the incoming headline's box (a dissolve there reads as a muddy double-exposure, exactly what `seam-forensics` exists to catch). `chooseCutStyles`/`classifyJoint` (`core/timeline/junctions.js`) now read the relationship at each joint before picking a style: a straddling window or a `becomes` handover rules out every style but the hard cut; overlapping boxes rule out the fade-family name; only a moving layer, a medium change, or a backdrop turn promotes past the hard cut, and the accent is spent at most once per film. The distinction that keeps this from repeating #159 (the engine picking the BACKGROUND itself): ruling a name OUT is a structural fact about the two beats, never a taste call, and the names left to choose among are still only the theme's own two (`look.cuts.default`/`accent`) plus the doctrine's unconditional hard cut.
-holds: core/timeline/junctions.js (`classifyJoint`, `chooseCutStyles`), core/engine/produce.js (`produceBaseline`), scripts/gates/seam-forensics.mjs (now clean on showcase-lumen.json)
+holds: core/timeline/junctions.js (`classifyJoint`, `chooseCutStyles`), core/engine/produce.js (`produceBaseline`), quality/gates/seam-forensics.mjs (now clean on showcase-lumen.json)
 
 ## 580. `size ?? 96` sat at five separate call sites, so a named text scale had five places to teach the same lesson
 Nothing let an author write `size: "headline"` and mean "this theme's headline size": `size` was always a raw px number or the same hardcoded 96 fallback, spelled out five times in `core/layers/text.js` (build's fit path, its auto-fit safety path, and `microType`). Worse, `resolveCoords` (`core/engine/boot.js`) reads `L.size` directly to estimate a text layer's height for a bottom pin, so a role string reaching that arithmetic before it lowered would have become `NaN` with no error. `bakeTextSizeRoles` (`core/engine/produce.js`) now lowers `size: "<role>"` against `look.scale` (`hook`/`headline`/`body`/`caption`) at boot, in the one gap between resolving `look` and calling `resolveCoords`; an unknown role throws and names the real ones, copying `resolveJunction`'s own refusal shape rather than silently landing on 96. `core/layers/text.js`'s five sites collapsed onto one `sizeOf(L)` default, now only reached when a layer names no size at all.
@@ -2378,14 +2378,14 @@ holds: core/engine/produce.js (`resolveTextSize`, `bakeTextSizeRoles`), core/eng
 
 ## 581. an svg `draw` reveal painted a stray dot at the arc seam, because `pathLength="1"` asked the browser to measure an arc it measures wrong
 `post-halyard.json`'s mark is one path, a line into two arcs forming a loop. At u=0 a round-cap dot appeared not at the path's true start but at the line-to-arc seam (35x34px, matching the stroke width); one frame later it vanished and a disconnected 109px blob appeared back near the true start; only by u≈0.13 did the two join into one continuous stroke. `applyDraw` (`core/layers/svg.js`) set `pathLength="1"` and dashed in that normalised unit so the offset stayed "a pure function of u, no measuring" (the comment's own words), but Chromium's rescale from real geometry to that unit uses its own arc-flattening length estimate, which disagrees with the true length right at a line-to-arc command boundary, and the disagreement paints a spurious cap there for the first frame or two. `path-morph.js`'s `resamplePath` already measures the same kind of arc-bearing path correctly with `getTotalLength()` (a build-time DOM read, a different and accurate code path from the pathLength rescale), so `applyDraw` now calls it once at build and dashes in the path's REAL length units; `frame()`'s dashoffset is a new pure function, `drawOffset(total, u)`, monotonic from `total` to `0`, tested with no DOM in `core/layers/svg.test.mjs`. `curve` (`Q`/`T`) paths, e.g. `vawe-explainer-v2.json`'s end-card squiggle, never showed the seam artefact and render unchanged.
-holds: core/layers/svg.js (`applyDraw`, `drawOffset`, `frame`), core/layers/svg.test.mjs, scripts/gates/lib-test.mjs (the svg draw mock DOM gained `getTotalLength`)
+holds: core/layers/svg.js (`applyDraw`, `drawOffset`, `frame`), core/layers/svg.test.mjs, quality/gates/lib-test.mjs (the svg draw mock DOM gained `getTotalLength`)
 
 ## 582. a reference band was quoted in four places for months, and the tool that would have caught it existed the whole time
 `internal/scene/scene.go`, `internal/render/render.go` (twice) and `scripts/media/study.mjs` all printed "reference films are still for 13% to 24% of their frames", sourced from CLAUDE.md and a motion plan, never from the grammar corpus itself. `node scripts/author/claims.mjs` (grammar/_claims.json id `ref-still-share`) already reported this CONTRADICTED: the measured spread is 11% to 77% still, median 29%, with the two Arc product films (the closest genre to a launch film) at 71% and 77%, both of which the renderer's own 60%-still warning would have flagged as a problem. A number that ships from a plan file and is never run against the corpus it claims to describe gets quoted downstream faster than it gets checked, and four call sites repeated it without one of them running the check. Fixed by updating the claim to the measured spread (now SUPPORTED, 15/17) and quoting the real numbers at every call site; the 60%-still warning moved to 80% for the same reason, since 60% would fire on films doing exactly what the doctrine asks for.
 holds: grammar/_claims.json (`ref-still-share`), internal/scene/scene.go, internal/render/render.go, scripts/media/study.mjs
 
 ## 583. two stillness readings of the same film disagreed because they were never the same codec
-The reference band lives in grammar/*.json, measured by `scripts/media/study.mjs` reading ffmpeg's `signalstats.YAVG` off decoded H.264 frames; the renderer's own `Stillness` (`internal/scene/scene.go`) reads the JPEG screenshots it captures by default (`CaptureExt`). `scripts/gates/motion-split.mjs` had already measured the gap this causes: a JPEG carries a quantisation noise floor around 0.9, above `stillFloor` (0.5), while a lossless PNG of the same instant reads 0.05, so "the render reports 25% still where this file reports 67% on the same film". Comparing the renderer's JPEG-floor number against the reference's H.264-decoded number was comparing two different measurements as if they were one. Neither side's number was wrong; printing them beside each other without saying which codec each came from was. Fixed by naming the codec in every printed line (`"25% still on jpg"`) rather than by trying to make the two measurements identical, since the codec floor is a real property of the format, not a bug to patch away, and `VAWE_CAPTURE=png` remains the way to get a codec-comparable reading.
+The reference band lives in grammar/*.json, measured by `scripts/media/study.mjs` reading ffmpeg's `signalstats.YAVG` off decoded H.264 frames; the renderer's own `Stillness` (`internal/scene/scene.go`) reads the JPEG screenshots it captures by default (`CaptureExt`). `quality/gates/motion-split.mjs` had already measured the gap this causes: a JPEG carries a quantisation noise floor around 0.9, above `stillFloor` (0.5), while a lossless PNG of the same instant reads 0.05, so "the render reports 25% still where this file reports 67% on the same film". Comparing the renderer's JPEG-floor number against the reference's H.264-decoded number was comparing two different measurements as if they were one. Neither side's number was wrong; printing them beside each other without saying which codec each came from was. Fixed by naming the codec in every printed line (`"25% still on jpg"`) rather than by trying to make the two measurements identical, since the codec floor is a real property of the format, not a bug to patch away, and `VAWE_CAPTURE=png` remains the way to get a codec-comparable reading.
 holds: internal/scene/scene.go (`Stillness`, `CaptureExt`), internal/render/render.go
 
 ## 584. 48 evenly spaced probes measured velocity at 48 random instants, so a burst-and-hold film scored the same as a film that never moved
@@ -2397,8 +2397,8 @@ holds: internal/scene/scene.go (`Stillness`), internal/render/render.go, interna
 holds: core/motion/parts.js (`PARTS.drawOn`)
 
 ## 586. a layer's authored `id` never reached the DOM, so the one instrument built to measure motion could see two layers out of eight
-`scripts/gates/motion-audit.mjs --trace` selected `[id], [data-layer="critical"]` and reported 2 tracked elements on `formats/scene/higgsfield-recreation.json`, a film with 8 layers and 6 keyed motion tracks. The cause is that a layer carries TWO identities and only one of them is real in the browser: `formats/scene/scene.js:922` sets `g.id = L.id` on the JS-side geometry object, which `becomes`, `anchor` and every error message read, and nothing anywhere assigns `el.id`. So `[id]` matched only the four literal ids in `scene.html`'s own static markup (`stage`, `root`, `cv`, `cam`) and never an authored layer, while `[data-layer="critical"]` fires only for text layers at 60px or more, which is why the two it did find were both big text: every non-text layer, every small text layer and every group child was structurally invisible, and widening the selector could not have helped because the attribute was never written. The one attribute every timed element does carry is `[data-start]`, stamped by `setLayerTiming` (scene.js:585) and `addGroupChild` (core/layers/util.js:589), and it is already what the engine's own clip driver means by "every timed element" (core/timeline/clips.js:213). The trace now selects on it and recovers a readable name from `data-idx` back to the authored JSON, since the authored id still does not reach the DOM. Tracked elements on that film went 2 to 8, and the trace's own numbers then independently confirmed a frame-by-frame luma measurement of the same render: the scrim moves at 3.07-3.13s, which is the single-frame world flood measured at f93.
-holds: scripts/gates/motion-audit.mjs
+`quality/gates/motion-audit.mjs --trace` selected `[id], [data-layer="critical"]` and reported 2 tracked elements on `formats/scene/higgsfield-recreation.json`, a film with 8 layers and 6 keyed motion tracks. The cause is that a layer carries TWO identities and only one of them is real in the browser: `formats/scene/scene.js:922` sets `g.id = L.id` on the JS-side geometry object, which `becomes`, `anchor` and every error message read, and nothing anywhere assigns `el.id`. So `[id]` matched only the four literal ids in `scene.html`'s own static markup (`stage`, `root`, `cv`, `cam`) and never an authored layer, while `[data-layer="critical"]` fires only for text layers at 60px or more, which is why the two it did find were both big text: every non-text layer, every small text layer and every group child was structurally invisible, and widening the selector could not have helped because the attribute was never written. The one attribute every timed element does carry is `[data-start]`, stamped by `setLayerTiming` (scene.js:585) and `addGroupChild` (core/layers/util.js:589), and it is already what the engine's own clip driver means by "every timed element" (core/timeline/clips.js:213). The trace now selects on it and recovers a readable name from `data-idx` back to the authored JSON, since the authored id still does not reach the DOM. Tracked elements on that film went 2 to 8, and the trace's own numbers then independently confirmed a frame-by-frame luma measurement of the same render: the scrim moves at 3.07-3.13s, which is the single-frame world flood measured at f93.
+holds: quality/gates/motion-audit.mjs
 
 ## 587. a layer could travel and resize but never change shape, because the pose table never had a radius row
 `core/timeline/sequence.js:134` declares `POSE`, the one table mapping an authored keyframe name to its pose slot and its identity, and it carried x, y, scale, rot, opacity, blur, w, h, track, ox and oy. It did not carry `radius`, and that single omission is why every continuous object in this library could move and resize and never become a different shape. The reference film this repo argues from goes rectangle to pill to circle, and measured frame by frame those three states are `{w:39,h:22,radius:4}`, `{w:39,h:22,radius:11}` and `{w:22,h:22,radius:11}`: two of the three properties were already keyable, since a pill is a rectangle whose radius reached half its height and a circle is a pill whose width reached its height. So nothing was invented to fix this, a forgotten row was added. Identity is `null` rather than a number, following `w`/`h`/`track`, so a track that never mentions radius leaves the layer's authored corner exactly as it was instead of quietly writing one. `KEYFRAME_PROPS` is generated from `POSE`, so the boot-time refusal for stray keyframe keys covered the new name for free rather than needing a second refusal. The write goes through `chipBox` (core/layers/util.js), which already owned a layer's resting radius and whose own comment records the earlier bug where an absent radius silently rendered square. THE TRAP THAT MAKES THE OBVIOUS TEST WORTHLESS: a radius larger than half the box is legal CSS and clamps silently, so a track can interpolate through wrong values and report nothing, which is why the test asserts the RENDERED radius on real frames rather than the authored number.
@@ -2434,19 +2434,19 @@ The kit is pasted as `buildKit().block`, which wraps the CSS in `STAGEKIT:start`
 holds: formats/scene/_vawe-oblique.*.html, scripts/lib/stagekit.mjs
 
 ## 595. the authoring order was written, printed, and still run backwards, so it stopped being written and became a refusal
-Three rules were broken in one session by an author who could quote all three: the decider roster (#591), the ui-skills route, and the file a rule named by filename (#593). Every one sat at `[eye]`, which `make rung` defines as "nothing but the sentence: you have to remember", and `make critics DECIDERS=1` had already printed `! no storyboard ... Step 1 is not optional` to a reader who worked around it. The first fix attempted was another paragraph of doctrine, which is the same mechanism that had already failed and would have been a ninth sentence to not follow. What replaced it: `scripts/gates/stage.mjs` derives which of eight stages a film is in FROM ITS ARTIFACTS (a stored state file would be free to disagree with the repo); `scripts/live/stage-gate.mjs` answers `PreToolUse` with `permissionDecision: "deny"` on the three writes that skip a stage, which is evaluated before any permission-mode check and so holds under bypass; and `scripts/live/stage-say.mjs` re-states the open stage at every `UserPromptSubmit`, because reasoning quality falls as a session lengthens and a rule read once at session start is a rule that fails late in the work, which is when it matters. Approval is the one piece of state nothing can derive, so it is a line only the user's `/vawe-approve` writes and the gate denies to everyone else. Three denials only, one per mistake actually made, and no flag to skip them: a flag on this would be the thing it prevents.
-holds: scripts/gates/stage.mjs, scripts/live/stage-gate.mjs, scripts/live/stage-say.mjs, scripts/author/approve.mjs, .claude/settings.json
+Three rules were broken in one session by an author who could quote all three: the decider roster (#591), the ui-skills route, and the file a rule named by filename (#593). Every one sat at `[eye]`, which `make rung` defines as "nothing but the sentence: you have to remember", and `make critics DECIDERS=1` had already printed `! no storyboard ... Step 1 is not optional` to a reader who worked around it. The first fix attempted was another paragraph of doctrine, which is the same mechanism that had already failed and would have been a ninth sentence to not follow. What replaced it: `quality/gates/stage.mjs` derives which of eight stages a film is in FROM ITS ARTIFACTS (a stored state file would be free to disagree with the repo); `scripts/live/stage-gate.mjs` answers `PreToolUse` with `permissionDecision: "deny"` on the three writes that skip a stage, which is evaluated before any permission-mode check and so holds under bypass; and `scripts/live/stage-say.mjs` re-states the open stage at every `UserPromptSubmit`, because reasoning quality falls as a session lengthens and a rule read once at session start is a rule that fails late in the work, which is when it matters. Approval is the one piece of state nothing can derive, so it is a line only the user's `/vawe-approve` writes and the gate denies to everyone else. Three denials only, one per mistake actually made, and no flag to skip them: a flag on this would be the thing it prevents.
+holds: quality/gates/stage.mjs, scripts/live/stage-gate.mjs, scripts/live/stage-say.mjs, scripts/author/approve.mjs, .claude/settings.json
 
 ## 596. the storyboard planned the story and never planned the picture, so the wrong object passed every gate
-Beat 3 of `formats/scene/vawe-oblique.json` shipped a rounded pill with a circular accent send button: the together.ai chat input, copied off the reference shape-first, in a film about a command line. Its own storyboard said `blueprint: terminalReveal` and its own `picture:` line said "a white pill bar holding the command, with a round cobalt run button", the two contradicting each other in the same beat, and nothing compared them. `make preview` was clean, correctly: the detector reads craft tells and cannot know that a well-made object is the wrong object. Worse, the `picture:` line had been EDITED to agree with the wrong drawing rather than the drawing corrected to the plan. The same hole produced three more defects in one session: eight invented type sizes across seven fragments (no field decided the film's ramp), seven identical centred stacks (`layout:` is prose only `make panels` reads), and a declared peak that measured fifth-largest in its own film (`spectacle:` names a beat and nothing compared beat sizes). Four closed-vocabulary fields now carry those decisions (`archetype:`, `weight:`, `borrows:`, and film-level `ramp:`), and `scripts/gates/frame-check.mjs` is the check nothing was doing: it reads the storyboard AND the fragments together, renders each at 1920x1080 through the same wrapper `make preview` photographs, and measures the largest painted object per beat. Two measurement bugs were found and fixed while writing it, both worth keeping: transparent flex wrappers spanning the margins reported as the largest "object" on three beats at an identical 83%, and a plane bleeding off two edges was credited with its off-screen half. An object PAINTS or is a text leaf, and only the part inside the canvas is in the picture.
-holds: scripts/gates/frame-check.mjs, scripts/author/storyboard-parse.mjs, scripts/gates/storyboard-check.mjs, docs/CRAFT/STORYBOARD-TEMPLATE.md
+Beat 3 of `formats/scene/vawe-oblique.json` shipped a rounded pill with a circular accent send button: the together.ai chat input, copied off the reference shape-first, in a film about a command line. Its own storyboard said `blueprint: terminalReveal` and its own `picture:` line said "a white pill bar holding the command, with a round cobalt run button", the two contradicting each other in the same beat, and nothing compared them. `make preview` was clean, correctly: the detector reads craft tells and cannot know that a well-made object is the wrong object. Worse, the `picture:` line had been EDITED to agree with the wrong drawing rather than the drawing corrected to the plan. The same hole produced three more defects in one session: eight invented type sizes across seven fragments (no field decided the film's ramp), seven identical centred stacks (`layout:` is prose only `make panels` reads), and a declared peak that measured fifth-largest in its own film (`spectacle:` names a beat and nothing compared beat sizes). Four closed-vocabulary fields now carry those decisions (`archetype:`, `weight:`, `borrows:`, and film-level `ramp:`), and `quality/gates/frame-check.mjs` is the check nothing was doing: it reads the storyboard AND the fragments together, renders each at 1920x1080 through the same wrapper `make preview` photographs, and measures the largest painted object per beat. Two measurement bugs were found and fixed while writing it, both worth keeping: transparent flex wrappers spanning the margins reported as the largest "object" on three beats at an identical 83%, and a plane bleeding off two edges was credited with its off-screen half. An object PAINTS or is a text leaf, and only the part inside the canvas is in the picture.
+holds: quality/gates/frame-check.mjs, scripts/author/storyboard-parse.mjs, quality/gates/storyboard-check.mjs, docs/CRAFT/STORYBOARD-TEMPLATE.md
 
 ## 597. a flat white theme cannot show depth, so every modern effect it was given rendered as nothing
 A glass shine was added to the peak frame of `formats/scene/vawe-oblique.json` as a light band whose x is a formula on `--t`, the scene clock. It rendered INVISIBLE, and the reason is not a bug in the shine: `themes/vawe.json` puts a `#ffffff` surface on a `#ffffff` ground, and a white highlight on a white plate has nothing to catch. The same absence of tonal range is why the frames read "too simple" for several rounds while the compositions, the type ramp and the elevation ramp were each fixed in turn: with no tone between ground and surface, depth cannot exist, so layout was carrying the whole film alone. `themes/vawe.json` was NOT changed, because it mirrors the real landing page and Anybody is the site's actual face, a fact this repo already corrected once. Films get `themes/vawe-film.json` instead: Geist and Geist Mono (a matched pair, because a film alternating statements and code every other beat reads as two design systems under two unrelated families), a cool `#f4f6fa` ground against a `#ffffff` surface, and a moving backdrop by default because a flat white FILM is what `direction-floor` already calls `no-bg-motion`. The motion budget that came with it is the half worth keeping: an ambient backdrop belongs on every beat because it is the ground, and a shine belongs on exactly one, the beat the plan already named as the peak.
 holds: themes/vawe-film.json, docs/CRAFT/HTML-FRAGMENTS.md, formats/scene/_vawe-oblique.frame.html
 
 ## 598. a vendored third-party skill was used like house tooling: reached past its entry point, and credited nowhere
-`skills/impeccable` is not this repo's work. It is pbakaus's `impeccable`, v3.5.0, Apache 2.0, vendored whole with its LICENSE, and its detector is the only check here that opens a browser and measures what actually RENDERED. Two things were wrong with how it was used. First, `scripts/author/preview-fragment.mjs` imported `skills/impeccable/scripts/detector/detect-antipatterns.mjs` by hard-coded path, while the skill's OWN entry point (its own entry point one directory up) tries two layouts before giving up: a skill update that moved the detector would have broken the check silently, and every run after it would have reported a clean preview because the catch returned `skipped` and the caller printed on. Second, the Apache 2.0 attribution existed only in a LICENSE file three directories down, while `AGENTS.md`, `HTML-FRAGMENTS.md` and the tool's own output all said "impeccable" in the same voice they use for `make preview`, so a reader had no way to tell a vendored dependency from a house gate. It matters beyond politeness: this repo's own anti-slop is `scripts/live/craft-live.mjs` (a fragment's SOURCE, for sizes and shadows off the kit ramp) and `scripts/gates/frame-check.mjs` (the plan against the frames), and calling those "impeccable" would credit a third party with what they catch and hide that the rendered-page check is the one thing we did not write. The resolution order now mirrors the skill's own, and every place the name appears says vendored, third-party and Apache 2.0.
+`skills/impeccable` is not this repo's work. It is pbakaus's `impeccable`, v3.5.0, Apache 2.0, vendored whole with its LICENSE, and its detector is the only check here that opens a browser and measures what actually RENDERED. Two things were wrong with how it was used. First, `scripts/author/preview-fragment.mjs` imported `skills/impeccable/scripts/detector/detect-antipatterns.mjs` by hard-coded path, while the skill's OWN entry point (its own entry point one directory up) tries two layouts before giving up: a skill update that moved the detector would have broken the check silently, and every run after it would have reported a clean preview because the catch returned `skipped` and the caller printed on. Second, the Apache 2.0 attribution existed only in a LICENSE file three directories down, while `AGENTS.md`, `HTML-FRAGMENTS.md` and the tool's own output all said "impeccable" in the same voice they use for `make preview`, so a reader had no way to tell a vendored dependency from a house gate. It matters beyond politeness: this repo's own anti-slop is `scripts/live/craft-live.mjs` (a fragment's SOURCE, for sizes and shadows off the kit ramp) and `quality/gates/frame-check.mjs` (the plan against the frames), and calling those "impeccable" would credit a third party with what they catch and hide that the rendered-page check is the one thing we did not write. The resolution order now mirrors the skill's own, and every place the name appears says vendored, third-party and Apache 2.0.
 holds: scripts/author/preview-fragment.mjs, AGENTS.md, docs/CRAFT/HTML-FRAGMENTS.md
 
 ## 599. the reference was decoded into twelve devices and the catalogue lived in a chat message
@@ -2468,24 +2468,24 @@ holds: core/validate/validate.mjs, formats/scene/scene.js
 
 ## 604. the whole mechanism existed, and the paved road drew it as an orange box
 `scripts/author/assemble.mjs` read `object_in`/`object_out` from the storyboard, built ONE layer with a motion track spanning every beat, resolved every edge through the engine's own coordinate math, and set `acrossBeats: true`, the flag whose own comment calls it "the whole mechanism by which a continuous object can exist in a cut film". Then it emitted that layer as `type: 'rect', fill: 'var(--accent)'`. The most structural decision a film can make travelled the entire pipeline correctly and came out a placeholder, so every film built this way was a slideshow no matter how well it was planned. The lesson is not about this rect. It is that a capability with no path to it is indistinguishable from a missing capability, and the engine had twenty-four layer types, keyframes, parenting, precomps and time remapping the whole time. Look for the placeholder at the END of a correct mechanism before concluding the mechanism is absent.
-holds: scripts/author/assemble.mjs, scripts/gates/frame-check.mjs
+holds: scripts/author/assemble.mjs, quality/gates/frame-check.mjs
 
 ## 605. a test that borrows a live film as its fixture fails the day someone approves that film
 `scripts/live/test/stage-gate.test.mjs` proved three denials against `vawe-oblique`, whose plan passed and which nobody had signed. That is a state a real film LEAVES. The day the user approved it, all three cases broke. The test survived its own trap only because it had asserted its precondition out loud ("the fixture film is unapproved, or these cases prove nothing"), so it failed clearly instead of passing vacuously, which is the only reason anyone noticed. A fixture must be BUILT and removed by the test, never borrowed from the working library, whenever the property under test is one the library can change. Assert the precondition anyway: it is what turns a silent hole into a loud failure.
-holds: scripts/live/test/stage-gate.test.mjs, scripts/gates/stage.test.mjs
+holds: scripts/live/test/stage-gate.test.mjs, quality/gates/stage.test.mjs
 
 ## 606. a gate keyed on the broadest promise convicts the films that keep it a different way
 A new `frame-as-surface` finding fired when a storyboard claimed continuity and every beat was still a full-bleed frame. It keyed on `object:` OR `threads:`, and it convicted `hinge`, which is authored correctly. Its `threads:` names a hand-drawn ink underline that draws on under one word per beat, plus a line of reasoning: a motif and an argument, both kept honestly INSIDE each beat's own fragment, neither needing a layer that travels. `threads:` answers "what holds the film across cuts", a film under 15s hard-errors without one, so nearly every storyboard carries one and most promise something no positioned layer could satisfy. `object:` is the narrow promise, a thing that TRAVELS, and only it can be contradicted by frames that give it nowhere to go. Swept all 40 films with a storyboard and a scene: 1 fires, and it is the film with the defect. Same shape as #603 and the second time in one session: a check written against the broad field, corrected by running it over the library BEFORE shipping it.
-holds: scripts/gates/frame-check.mjs
+holds: quality/gates/frame-check.mjs
 
 ## 607. a worktree fan-out inherits the last COMMIT, not the tree you are looking at
-Three agents were sent into git worktrees to change files that were still uncommitted in the main checkout. A worktree branches from HEAD, so one agent's worktree did not contain `scripts/gates/frame-check.mjs` at all, and it spent a third of its run rebuilding a four-hundred-line file that already existed, from a copy it found in the parent's working tree. Another could not read the approved plan, because `.claude/` is gitignored. A third resolved `fragment:` against the film's own directory, a bug the parent caught only because it re-ran the check itself: every real storyboard writes that path relative to the repo root. COMMIT THE BASE FIRST, then fan out, and inline into the brief anything that lives in an ignored path. The parent's own verification is not ceremony: two of the three reports in that round were accurate and the third was confidently wrong in a way only a re-run could show.
+Three agents were sent into git worktrees to change files that were still uncommitted in the main checkout. A worktree branches from HEAD, so one agent's worktree did not contain `quality/gates/frame-check.mjs` at all, and it spent a third of its run rebuilding a four-hundred-line file that already existed, from a copy it found in the parent's working tree. Another could not read the approved plan, because `.claude/` is gitignored. A third resolved `fragment:` against the film's own directory, a bug the parent caught only because it re-ran the check itself: every real storyboard writes that path relative to the repo root. COMMIT THE BASE FIRST, then fan out, and inline into the brief anything that lives in an ignored path. The parent's own verification is not ceremony: two of the three reports in that round were accurate and the third was confidently wrong in a way only a re-run could show.
 holds: docs/CRAFT/SUBAGENT-BUDGET.md, docs/CRAFT/SUBAGENTS.md
 
 
 ## 608. a persistent object does not create motion, it only makes motion possible
 The object path was built to fix films that read as slideshows, and the fix was proved by three throwaway films that differ only in structure. A, the old way: two beats, a fragment each, torn down and rebuilt at the cut. B: the same two beats sharing one fragment, so the DOM survives, one layer with `acrossBeats`. C: B plus a keyed object chain across the cut. `make motion-floor` on all three, same theme, same copy, same 6 seconds: A is 9 of 10 windows dead, B is 9 of 10 dead, and C is 10 of 10 dead with a LOWER peak than either. The structural change is real and the before/after is unambiguous (the old assembler drew the object as `type: rect, fill: var(--accent)` on the identical storyboard) but it moved the motion floor by nothing at all. What the floor measures is the RATE of localised change, and all three films key one reveal per three-second beat, so each holds still for two and a half seconds no matter who owns the DOM. C measured worst on that film, and the reason I gave for it was wrong. I wrote that its slow 900x420 to 760x360 drift was "spread and gentle, the definition of the ambient motion the gate refuses to count". It is not: a size-only key on a solid object changes a thin ring at its edge, which pairProfile's share metric reads as LOCAL, the opposite classification. Rebuilt to the same description by scripts/dev/motion-lab.mjs, the C variant measures BETTER than B, not worse, and a variant with real translation better still. The original films were thrown away, so the two runs cannot be reconciled and the C number is fixture-dependent. What survives is the half that reproduces and is load-bearing: A and B measure the same, so structure alone buys nothing. Two different problems were being treated as one: the PATH (can a thing survive a cut and be drawn as itself) and the DENSITY (how many overlapping keyed events per second). This work fixed the first. The second is the motion decider's, and no amount of the first substitutes for it.
-holds: scripts/author/assemble.mjs, scripts/gates/motion-floor.mjs
+holds: scripts/author/assemble.mjs, quality/gates/motion-floor.mjs
 
 ## 609. a prop set and never read fails the render, and a comment naming the prop is not proof it is read
 The new object layer carried `radius: chain[0].in.radius ?? 4`, a default inherited from the placeholder rect. As an `html` layer that refused to render at all: `core/registry/prop-audit.js` stops a build where a documented prop is accepted and then dropped (#428), which is the engine being right. The check that missed it was mine. `grep radius core/layers/html.js` returned a line, so it was called read; the line was a COMMENT explaining that these box props are shared, and the builder consumes radius only through `chipBox`, which paints nothing without a surface prop beside it. Reading a match instead of the code around it is how a two-second check produces a confident wrong answer. The rect keeps its historic default so every existing film assembles byte-identically; a non-rect object now carries a radius only when the contract names one.
@@ -2496,12 +2496,12 @@ holds: scripts/author/assemble.mjs, core/registry/prop-audit.js
 Three sweeps, one variable each, every variant assembled and rendered identically and measured by the same gate. STRUCTURE: two films differing only in whether a layer survived the cut measured the same. DENSITY: one to eight moves per beat cut dead windows from 86% to 57% and never moved the median off 0.02, against a reference median of 0.66. OVERLAP: four moves fired together measured 80% dead and a median of 0.000, the same four spread sequentially 60% and 0.106, which is the opposite of the advice the gate itself was printing. MAGNITUDE: travel distance and duration moved nothing either, every `parts` variant sitting at 0.01 to 0.03 whether the move was 24px or 40px, 0.22s or 1.2s.
 The one axis that moved the number was SUSTAINED motion: a keyed layer track that is never finished, always mid-travel, took the median from 0.02 to between 0.17 and 1.61 and the peak to 4.13 against a target of 4.71. Everything else in the vocabulary is a one-shot entrance, and a one-shot entrance lands. Once it has landed the frame is still again, so stacking more of them, spacing them out, or making each travel further changes when the stillness happens and never whether it happens. The film does not stop because too little was asked for. It stops because everything that was asked for finishes.
 And the storyboard cannot ask for the thing that works: `motion:` compiles only to `parts[]` on the html layer, and a keyed x/y/scale track on the layer exists only in hand-written JSON and in the one `object_in`/`object_out` chain.
-holds: scripts/gates/motion-floor.mjs, scripts/author/assemble.mjs, scripts/lib/contract.mjs
+holds: quality/gates/motion-floor.mjs, scripts/author/assemble.mjs, scripts/lib/contract.mjs
 
 ## 611. the motion gate scores a whole frame sliding off its stage higher than real content arriving
 `pairProfile` separates LOCAL motion (change concentrated in under 8% of the frame, meaning content arriving) from GLOBAL (spread, meaning ambience), and only local counts, so that idle and breathing cannot satisfy the floor. That much works. What it cannot see is a large UNIFORM region moving rigidly: the interior of a sliding block is the same colour before and after, so only its edges change, the share stays under the threshold, and it is counted as content. Measured directly: a uniform block shifted two cells reads share 0.021 amount 4.99, while a genuine small reveal reads share 0.014 amount 2.26. The glitch scores DOUBLE the real thing.
 Found by looking, not by measuring. The highest scoring variant of the magnitude sweep reached a median of 1.61 and it looked like a rendering fault: the entire scene, background and text together, drifting inside the canvas and exposing the edge. The number said it was the best film of the sweep. This is why the plan's rule is that every phase ends with the mp4 looked at and not only the table, and it is why the instrument gets fixed BEFORE it is promoted to a blocking gate. A gate with this hole, made binding, would teach every author to slide the frame.
-holds: scripts/gates/motion-floor.mjs
+holds: quality/gates/motion-floor.mjs
 
 ## 612. going back one stage to fix a fragment silently deleted every directed camera move
 `make assemble` is stage 5 of eight and `make direct` is stage 6. The director writes a resolved `camera` track into the film; assemble's `PRESERVED_FILM_FIELDS` listed `cameraMove` and not `camera`, so re-running assemble to pick up an edited fragment dropped the whole camera track without a word. The stages are documented as an order, and the order is real, but nothing said that stepping back through it destroys the work of the stage in front. Found while checking byte-identity after an unrelated merge: the film lost a five-key camera array and the diff was the only thing that said so. assemble generates no camera of its own, its own header says it is kept thin on purpose with no camera, so it never had a claim on the field. The same file already reports every preserved LAYER by name; film-level fields now go through the same report, so a preserved field is visible rather than assumed. Re-assembling a film is now idempotent, which it was not.
@@ -2511,24 +2511,24 @@ holds: scripts/author/assemble.mjs, scripts/author/motion-director.mjs
 The gate separates LOCAL motion (content arriving) from GLOBAL (ambience) by how concentrated the change is, and counts only local, so that idle cannot satisfy the floor. FIRST BUG: a large uniform region moving rigidly changes only at its edges, so it scored as content, and a film whose whole frame slid off the canvas measured as the best in its sweep. FIRST FIX: look for a whole-frame translation that explains the changed pixels, and call it global when one does. SECOND BUG, caused by that fix: a card sliding across a static ground is ALSO a rigid translation explained by a shift, so it was thrown away too, and a card sliding in is the reference film's core vocabulary. Measured: a card sliding on a plain ground read share 1.000, identical to the whole frame sliding.
 The discriminator is not WHETHER a shift explains the change, it is HOW MUCH OF THE FRAME MOVED. Both a card and the whole frame change only at their edges, so the changed-pixel count cannot separate them; the bounding box of the change can. A card's swept box is 0.11 of the frame, a full-bleed slide's is 0.95. Rigid motion is now global only when the moving box covers at least half the frame.
 The self-test fixture had to change with it, and that is worth recording rather than quietly editing: it used a 60x34 block, 41% of the frame, as the proxy for "camera". Once a bounded object had to keep counting, a 41% block was on the wrong side of the line, because a panel that size is a design element and not a camera move. The fixture is now the full-bleed case that actually failed in a real film. The proxy was wrong, not the threshold, and the honest way to say that is to say which one moved and why.
-holds: scripts/gates/motion-floor.mjs
+holds: quality/gates/motion-floor.mjs
 
 ## 614. sustained motion and bounded layers are one fix, and neither half works alone
 Three films, identical but for two flags, measured with the corrected meter. Full-bleed layer and no sustained move: 18 of 21 windows dead, median 0.01, peak 0.66. Full-bleed layer WITH `move: pan:cinematic`: 17 of 21 dead, median 0.01, peak 0.99, which is nothing, because moving a layer that IS the whole frame moves the whole picture and that is the camera, not content. The same move on a layer bounded to a 1100x600 box inside the frame: 12 of 21 dead, median 0.04, peak 2.50, against a reference of 5 of 37 dead, median 0.55, peak 3.49.
 So the two pieces built separately are one mechanism. `move:` gives a beat motion that never lands, and `fragment: @ <placement>` gives it something to move that is not the entire frame. A film where every layer is full-bleed has no motion available to it except moving the frame, which is why "every beat is a whole separate page" and "the film reads as a slideshow" were never two problems. The first frame of the full-bleed `move:` test is empty: the pan slid the content clean off the canvas.
-holds: scripts/author/assemble.mjs, scripts/gates/motion-floor.mjs, docs/CRAFT/STORYBOARD-TEMPLATE.md
+holds: scripts/author/assemble.mjs, quality/gates/motion-floor.mjs, docs/CRAFT/STORYBOARD-TEMPLATE.md
 
 ## 615. a new top-level directory is invisible to every gate that lists its scan surface
-Moving the lightfield research rig out of `scripts/author/` into a new `tools/` directory was a pure `git mv`, and it silently took 1,622 lines out of the reach of three checks at once. Five files hardcode which directories they walk, and a new one is not in any of them until somebody says so: `scripts/gates/doc-refs.mjs` matched `scripts|core|verify|blocks` in two regexes, so every `node tools/...` reference in a doc simply stopped being verified; `scripts/gates/code-quality.mjs` and `scripts/dev/complexity.mjs` and `scripts/dev/no-emdash.mjs` each carry their own array. Nothing failed. Three gates just went quiet about a tenth of the code they were meant to cover.
-`scripts/gates/dead-branch.mjs` is the counter-example and the fix worth copying: its scan surface is DISCOVERED rather than listed, and its own comment says why, that the old array was "a map of where the code lived the day the gate was written" and that `formats/`, `sims/`, `mcp/` and `site/` were invisible by construction until it changed. Four files still have the map. Before any further directory moves, they either learn the new name or learn to discover it.
+Moving the lightfield research rig out of `scripts/author/` into a new `tools/` directory was a pure `git mv`, and it silently took 1,622 lines out of the reach of three checks at once. Five files hardcode which directories they walk, and a new one is not in any of them until somebody says so: `quality/gates/doc-refs.mjs` matched `scripts|core|verify|blocks` in two regexes, so every `node tools/...` reference in a doc simply stopped being verified; `quality/gates/code-quality.mjs` and `scripts/dev/complexity.mjs` and `scripts/dev/no-emdash.mjs` each carry their own array. Nothing failed. Three gates just went quiet about a tenth of the code they were meant to cover.
+`quality/gates/dead-branch.mjs` is the counter-example and the fix worth copying: its scan surface is DISCOVERED rather than listed, and its own comment says why, that the old array was "a map of where the code lived the day the gate was written" and that `formats/`, `sims/`, `mcp/` and `site/` were invisible by construction until it changed. Four files still have the map. Before any further directory moves, they either learn the new name or learn to discover it.
 A second lesson about reading: grepping for the hardcoded list matched `dead-branch.mjs` too, because the array survives IN THE COMMENT that records its removal. A search result is not the code, which is the same mistake as reading `radius` in a comment and calling the prop read (#609).
-holds: scripts/gates/doc-refs.mjs, scripts/dev/no-emdash.mjs, scripts/dev/complexity.mjs, scripts/gates/dead-branch.mjs
+holds: quality/gates/doc-refs.mjs, scripts/dev/no-emdash.mjs, scripts/dev/complexity.mjs, quality/gates/dead-branch.mjs
 
 ## 616. the file's header said what it WAS, and two of us moved it on that sentence
-`scripts/gates/lib-test.mjs` is 7,485 lines and its first line reads "fast pure-JS asserts for the motion primitives in core/motion/motion.js. No browser needed (the primitives are pure)." On that sentence it was called a core unit test filed under gates, named the single largest and least ambiguous correction available, and moved into `core/motion/`. The move failed on the first run: the file also imports eight modules from `scripts/author/` (`arsenal`, `track`, `profiles`, `recency`, `schema-at`, `patch-motion`, `migrate-junctions`), plus `blocks/` and `blueprints/`. Inside `core/` those resolve to `core/author/...`, which does not exist, and even if the paths were rewritten the result would be core depending on scripts, which is the dependency direction this repo exists to keep one-way.
+`quality/gates/lib-test.mjs` is 7,485 lines and its first line reads "fast pure-JS asserts for the motion primitives in core/motion/motion.js. No browser needed (the primitives are pure)." On that sentence it was called a core unit test filed under gates, named the single largest and least ambiguous correction available, and moved into `core/motion/`. The move failed on the first run: the file also imports eight modules from `scripts/author/` (`arsenal`, `track`, `profiles`, `recency`, `schema-at`, `patch-motion`, `migrate-junctions`), plus `blocks/` and `blueprints/`. Inside `core/` those resolve to `core/author/...`, which does not exist, and even if the paths were rewritten the result would be core depending on scripts, which is the dependency direction this repo exists to keep one-way.
 The header was true when it was written. The file then grew for months and nobody updated the sentence, which is the ordinary life of a header comment. What was avoidable is trusting it: a two-line check (`grep "from '\.\."` and look at the roots) was available to me, to the architect that recommended the move, and to the agent that was briefed to make it, and none of the three ran it before the file was in flight.
 Third time in one session that a comment was read instead of the code: #609 read `radius` in a comment and called the prop read, #615 grepped a hardcoded directory list and matched the comment recording its own removal. The rule that would have caught all three: a claim about what a file DEPENDS ON is answered by its imports, never by its prose.
-holds: scripts/gates/lib-test.mjs, docs/CODEMAPS/SCRIPTS.md
+holds: quality/gates/lib-test.mjs, docs/CODEMAPS/SCRIPTS.md
 
 ## 617. the biggest move of the restructure was made against a tree 30 hours out of date
 The `harness/` move was the largest single change in the restructure: six folders, 259 files, 204 more files rewired, ~937 references. The agent reported it complete, with `make check` passing end to end on a real film. Its branch forked from `ca0ecd43` and contained NONE of the day's 60 commits. It had moved `scripts/` as it existed before any of the session's work, and merging it would have silently reverted the eight-stage machinery, the motion fixes, the meter corrections and three earlier moves.
@@ -2550,12 +2550,12 @@ holds: docs/CRAFT/SUBAGENT-BUDGET.md, docs/CRAFT/SUBAGENTS.md
 <!-- doc-refs-allow: core/shaders.js · #266 quotes a path that moved two refactors ago -->
 <!-- doc-refs-allow: core/layers/shader.js · #266 quotes a path that moved into core/surfaces/ -->
 <!-- doc-refs-allow: core/layers/paint.js · #266 quotes a path that moved into core/surfaces/ -->
-<!-- doc-refs-allow: scripts/gates/copy.mjs · quoted from a film pass; the copy gate runs inside author-check, not as its own file -->
+<!-- doc-refs-allow: quality/gates/copy.mjs · quoted from a film pass; the copy gate runs inside author-check, not as its own file -->
 <!-- doc-refs-allow: make visuals · #NNN records a gate that was later culled -->
-<!-- doc-refs-allow: scripts/gates/visual-vocabulary.mjs · the entry records this gate's own deletion -->
+<!-- doc-refs-allow: quality/gates/visual-vocabulary.mjs · the entry records this gate's own deletion -->
 <!-- doc-refs-allow: make flicker-check · cut in cc2dfc2 with five other engine-only tools -->
 <!-- doc-refs-allow: scripts/dev/predict.mjs · cut in cc2dfc2 with five other engine-only tools -->
 <!-- doc-refs-allow: scripts/dev/rules-audit.mjs · cut in cc2dfc2 with five other engine-only tools -->
 <!-- doc-refs-allow: formats/scene/tokenjam-launch.json · the entry records this scene's deletion -->
 <!-- doc-refs-allow: make slop · retired in #340; the entries that cite it are records of what it did -->
-<!-- doc-refs-allow: scripts/gates/slop.mjs · the script #340 records the retirement of -->
+<!-- doc-refs-allow: quality/gates/slop.mjs · the script #340 records the retirement of -->

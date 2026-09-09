@@ -113,13 +113,13 @@ explicit `transitions[]` boundary at every beat start.
 Two things it gets right that are easy to get wrong by hand:
 
 - **`acrossBeats: true` on the object layer.** `sceneUnits: true` wraps every beat as its own unit, so
-  nothing survives a cut unless it opts out (`scripts/gates/direction-floor.mjs`
+  nothing survives a cut unless it opts out (`quality/gates/direction-floor.mjs`
   `no-continuous-object`'s own wrap note). Miss this and the gate reports no continuous object even
   though the layer is right there with a real motion track.
 - **`mech: "seam"` on the transitions, not the "cut" a bare `fx` name defaults to.** A `cut` only
   transforms the scene ROOT (one opacity ramp over the whole stack), so two beats with different `bg`
   presets swap hard mid-ramp instead of blending, the exact "hard swap disguised inside a soft
-  transition" `scripts/gates/seam-forensics.mjs`'s `seam-split` check exists to catch. `seam` is the
+  transition" `quality/gates/seam-forensics.mjs`'s `seam-split` check exists to catch. `seam` is the
   real two-scene GPU blend.
 - **A caused junction is staged, not fired flat.** Every html layer carries an `id` (`scene1`,
   `scene2`, …), and `assemble` keeps one SHIFTED schedule the whole file is built from. When beat *i*'s
@@ -130,7 +130,7 @@ Two things it gets right that are easy to get wrong by hand:
   key events land roughly 30ms and 150ms apart. A junction with no stated trigger is left exactly where
   it always was: staging an undocumented cause would be inventing one. `layers[].start` also legally
   accepts a live relative reference (`"otherId.end+0.5"`, 2 of 120 films used it); `assemble` resolves
-  it to a real second instead, because `scripts/gates/beat-check` and `scripts/author/motion-director.mjs`
+  it to a real second instead, because `quality/gates/beat-check` and `scripts/author/motion-director.mjs`
   both read `start` as a number in places a string breaks (measured: one of them crashes).
 
 `assemble` deliberately does nothing else: no camera, no captions, no authored `cuts`/`sceneUnits`
@@ -165,7 +165,7 @@ beyond position, say), it belongs back in the per-beat fields, not hand-maintain
 
 ## The film against the plan
 
-`storyboard-check SB=<file>` (`scripts/gates/storyboard-check.mjs`) reads the sibling `<film>.json` if
+`storyboard-check SB=<file>` (`quality/gates/storyboard-check.mjs`) reads the sibling `<film>.json` if
 one already exists and compares it against the storyboard's own motion plan and continuous-object
 contract, advisory, never a blocker (the film may legitimately not exist yet, or be mid-edit). A beat
 whose `motion:` entry names a selector/kind the built layer's `parts[]` does not carry is reported by

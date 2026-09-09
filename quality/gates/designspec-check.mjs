@@ -1,11 +1,11 @@
-// scripts/gates/designspec-check.mjs: THE DESIGN-SPEC LOCK (the visual twin of the storyboard gate).
+// quality/gates/designspec-check.mjs: THE DESIGN-SPEC LOCK (the visual twin of the storyboard gate).
 // The storyboard locks the story; this locks the LOOK. A video's design system is its theme
 // (themes/<name>.json: the 15-key palette + type roles + motion). This gate treats the theme as the locked
 // spec and flags any layer that reaches OUTSIDE it: an off-palette chromatic colour, or a font that isn't
 // one of the theme's roles. That is the "looks off but I can't say why" failure, one stray colour, a
 // random face, caught before it ships, the same way the direction floor catches flat motion.
 //
-//   node scripts/gates/designspec-check.mjs <scene.json> [--strict]   ·   make designspec-check D=<file>
+//   node quality/gates/designspec-check.mjs <scene.json> [--strict]   ·   make designspec-check D=<file>
 // WARN by default (coaching); --strict blocks. What's allowed: any `var(--token)` / color-mix of one;
 // near-NEUTRAL tints (white/black/grey scrims: legitimate glass/vignette); a raw colour within tolerance
 // of a palette colour (it IS a palette colour, just hardcoded). Flagged: a CHROMATIC colour far from every
@@ -98,7 +98,7 @@ if (process.argv.includes('--census')) {
   process.exit(0);
 }
 
-if (!file || !fs.existsSync(file)) { console.error('usage: node scripts/gates/designspec-check.mjs <scene.json> [--strict] | --self-test | --census'); process.exit(2); }
+if (!file || !fs.existsSync(file)) { console.error('usage: node quality/gates/designspec-check.mjs <scene.json> [--strict] | --self-test | --census'); process.exit(2); }
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 
 let theme = {};

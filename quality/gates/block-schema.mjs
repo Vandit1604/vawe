@@ -1,7 +1,7 @@
-// scripts/gates/block-schema.mjs · does every block family DECLARE its options, and does the
+// quality/gates/block-schema.mjs · does every block family DECLARE its options, and does the
 // declaration match the code?
 //
-//   node scripts/gates/block-schema.mjs
+//   node quality/gates/block-schema.mjs
 //
 // WHY: a JS default is a value, not a contract. `w = 560` carries no floor, `color = SERIES[0]`
 // carries no "this is a colour", `tone = 'info'` carries no list of the spellings that paint. So no

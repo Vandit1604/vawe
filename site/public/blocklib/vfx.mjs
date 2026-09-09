@@ -163,10 +163,10 @@ function parallaxBoard({ x, y, w = 1200, h = 760, title = '', caption = '', tile
 //
 // These were `(o = {}) => parallaxBoard({ ...o, reverse })`, which works and hides the contract: a
 // factory's SIGNATURE is what `paramsOf` reads (core/camera-moves.js:216) and what
-// scripts/gates/block-schema.mjs checks a declared option table against. Forwarding an opaque bag left
+// quality/gates/block-schema.mjs checks a declared option table against. Forwarding an opaque bag left
 // the gate unable to see fourteen real props and it called every one of them dead, correctly, because
 // from the outside they were unverifiable. A contract nothing can read is not a contract.
-// EXPORTED so scripts/gates/block-schema.mjs can evaluate the defaults that reference it: its SCOPE
+// EXPORTED so quality/gates/block-schema.mjs can evaluate the defaults that reference it: its SCOPE
 // spreads the registry's own exports, and a module-private constant is unreadable from there.
 // Same reason blocks/diagram.mjs exports FLOW_DEFAULT.
 export const BOARD = { w: 1200, h: 760, gap: SPACE.md, travel: 0.55, dur: 5 };

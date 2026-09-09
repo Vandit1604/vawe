@@ -1,4 +1,4 @@
-// scripts/gates/docs-drift.mjs: a doc is a claim about the PAST as much as the future, and
+// quality/gates/docs-drift.mjs: a doc is a claim about the PAST as much as the future, and
 // nothing checked it. Twice now it listed shipped work as missing and routed a planning pass at
 // effects that already existed (see its own closing warning, and MISTAKES #83).
 //
@@ -160,13 +160,13 @@ if (fs.existsSync(LAYERS_MDX)) {
   const effects = /(\d+) effects across (\d+) families/.exec(
     fs.readFileSync(path.join(repoRoot, 'docs/EFFECTS.md'), 'utf8'));
   const census = ask('scripts/author/arsenal.mjs', ['--census'], /ARSENAL CENSUS · (\d+) named things/);
-  const scenes = ask('scripts/gates/waiver-drift.mjs', [], /WAIVER CENSUS · (\d+) scenes/);
+  const scenes = ask('quality/gates/waiver-drift.mjs', [], /WAIVER CENSUS · (\d+) scenes/);
 
   const CLAIMS = [
     { re: /(\d+) effects across (\d+) families/, want: effects && effects.slice(1),
       src: 'docs/EFFECTS.md, which `make effects` generates' },
     { re: /(\d+) named things/, want: census, src: 'scripts/author/arsenal.mjs --census' },
-    { re: /(\d+) gate-visible scenes/, want: scenes, src: 'scripts/gates/waiver-drift.mjs' },
+    { re: /(\d+) gate-visible scenes/, want: scenes, src: 'quality/gates/waiver-drift.mjs' },
   ];
   for (const { re, want, src } of CLAIMS) {
     if (!want) { f.fail('claim-unreachable', `CLAUDE.md: could not reach ${src} to check its count, so it was NOT checked`); continue; }

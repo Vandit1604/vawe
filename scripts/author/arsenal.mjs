@@ -271,7 +271,7 @@ export const corpusOf = (e) => `${e.name} ${e.kind} ${e.blurb} ${(e.aka || []).j
 // The weak prefix credit inside score() deliberately does not count as a hit, because `travel` lending
 // a point to `travelling` is a nudge for ranking and not evidence that the thing was found.
 
-// Calibrated, not picked. Two query sets live in scripts/gates/lib-test.mjs: twelve with a known-good
+// Calibrated, not picked. Two query sets live in quality/gates/lib-test.mjs: twelve with a known-good
 // answer in this engine, and five the engine genuinely has no answer to. This is the MIDPOINT of the
 // gap between them, and lib-test asserts both ends plus the fact that the threshold still sits between
 // them, which is what stops a later loosening of the matcher from quietly turning the honesty off.

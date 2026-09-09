@@ -1,6 +1,6 @@
 // font-audit.mjs: fail the build if any text renders in a font we did not intend.
 //
-//   node scripts/gates/font-audit.mjs scene formats/scene/tpot-launch.json
+//   node quality/gates/font-audit.mjs scene formats/scene/tpot-launch.json
 //   make fonts D=formats/scene/tpot-launch.json
 //
 // Writes a deterministic sidecar next to the render: out/<name>.fonts.json.

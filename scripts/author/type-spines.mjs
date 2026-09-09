@@ -23,7 +23,7 @@
 // transition-light (56% zero, avg 1.34); the break happens right at 15s, where 15-18s drops to 36% zero
 // and avg 2.57, and 18-25s to 18% zero and avg 4.47. The library itself treats a film under ~15s as
 // naturally cut-light; past it, cuts become the norm. This is also the exact value
-// `scripts/gates/storyboard-check.mjs`'s own `SPINE_MAX_S` already uses to decide when a plan must name
+// `quality/gates/storyboard-check.mjs`'s own `SPINE_MAX_S` already uses to decide when a plan must name
 // what holds the film (`threads:`/`object:`), so 15s was already a load-bearing number in this repo
 // before this file used it, not a new one picked to match `vawe-continuous-action/SKILL.md`'s "~15s".
 export const CONTINUOUS_ACTION_MAX_S = 15;

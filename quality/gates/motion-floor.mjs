@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// scripts/gates/motion-floor.mjs: DOES THE FILM EVER STOP, and is what fills the gaps real?
+// quality/gates/motion-floor.mjs: DOES THE FILM EVER STOP, and is what fills the gaps real?
 //
-//   make motion-floor D=formats/scene/<film>.json   ·   node scripts/gates/motion-floor.mjs <film> [--json]
+//   make motion-floor D=formats/scene/<film>.json   ·   node quality/gates/motion-floor.mjs <film> [--json]
 //
 // WHY THIS AND NOT THE THREE GATES THAT ALREADY TOUCH MOTION. `direction-floor` counts FAMILIES, so a
 // film with four families and six dead seconds passes it. `sweep-static` asks whether the WHOLE film is

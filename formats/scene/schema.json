@@ -3,7 +3,7 @@
  "description": "Generic data-driven composition. The JSON is the video. Layers (text/image/component/rect) with timed windows, kinetic splits, the cut kit (whip/punch/iris/...), WebGL shader stings (flash/burn/leak/grain/dissolve), theme bg-preset windows on canvas, global camera, captions.",
  "note": "data.theme drives palette/fonts/bg colours. Coordinates are px in the chosen orientation space (1080\u00d71920 portrait, 1920\u00d71080 landscape).",
  "layerProps": {
-  "_generated": "node scripts/gates/schema-drift.mjs --write - do not hand-edit",
+  "_generated": "node quality/gates/schema-drift.mjs --write - do not hand-edit",
   "_source": "the PROPS declarations beside each read (core/registry/props.js - core/layers/vocabulary.js)",
   "shared": [
    "acrossBeats",

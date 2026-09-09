@@ -34,7 +34,7 @@ Scaffold a specimen demo scene in this repo, then extend it.
 2. Edit ONLY the JSON file it wrote. Extend it so the film runs about 14 seconds and covers three
    moments: the subject plain, the effect arriving, the effect at full strength.
 3. Do NOT render. Do NOT run make. Do NOT edit any other file. Do NOT create any other file.
-4. Run: node scripts/gates/author-check.mjs <the file> and fix whatever it blocks on.
+4. Run: node quality/gates/author-check.mjs <the file> and fix whatever it blocks on.
 
 Stop when author-check no longer blocks. Report the file path and nothing else.
 TASKEOF

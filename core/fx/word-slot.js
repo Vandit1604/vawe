@@ -29,7 +29,7 @@ import { clamp01, easeOutCubic } from '../motion/motion.js';
 import { INK_PAD_EM } from '../type/type.js';
 
 // NOT EXPORTED. It is this modifier's own key list, used twice in the two throws below, and nothing
-// outside this file reads it. Exported, it read as a NAMED VOCABULARY and scripts/gates/arsenal-check
+// outside this file reads it. Exported, it read as a NAMED VOCABULARY and quality/gates/arsenal-check
 // correctly refused it: a capability the engine offers that the catalogue never mentions, which an
 // author told to "see the whole arsenal, then choose" cannot choose. `wordSlot` itself IS in the
 // catalogue, with a blurb, through FX_BLURBS. This was an exported local wearing a vocabulary's

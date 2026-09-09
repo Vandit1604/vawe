@@ -767,7 +767,7 @@ Confine AI music to internal comps, pitch boards and animatics. Never a client d
    (`buildSfx`) derives a cue for every cut, sting and seam unless a scene says `audio.auto: false`.
    Measured before/after: scenes that resolve at least one cue went from 18 to 68. §4 records the
    mickey-mousing objection to this and why it was overridden anyway, plus what the objection still
-   gets right. `scripts/gates/audio-check.mjs` reads the same fact (`hasScoredJunction`, via the same
+   gets right. `quality/gates/audio-check.mjs` reads the same fact (`hasScoredJunction`, via the same
    `lowerScene`) so its census counts what the engine will actually render, not what a scene declared.
 3. **`direction-floor` still cannot see a bridge as a continuous object.** `audio.bridges` (§2) authors
    J-cuts and L-cuts, but a film held together by sound alone still trips `no-continuous-object` and

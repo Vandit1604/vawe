@@ -1,4 +1,4 @@
-// scripts/gates/read-check.mjs: CAN A VIEWER READ IT, IN THE SECONDS IT IS THERE?
+// quality/gates/read-check.mjs: CAN A VIEWER READ IT, IN THE SECONDS IT IS THERE?
 //
 // Every other gate that touches on-screen words grades the WORDS. `copy-check` asks whether a line is
 // well written and flags one over 14 words as too long "to read in a beat", but it never looks at the
@@ -7,7 +7,7 @@
 // This gate joins the copy to the clock: for every line of prose, how long is it STILL, and is that
 // long enough to read it.
 //
-//   node scripts/gates/read-check.mjs <scene.json> [--strict]
+//   node quality/gates/read-check.mjs <scene.json> [--strict]
 //
 // ── THE CONSTANTS, EVERY ONE WITH ITS SOURCE AND ITS 30fps CONVERSION ──────────────────────────────
 // We render at 30fps. Subtitling publishes its numbers in 24fps frames, so each one is converted here
@@ -288,7 +288,7 @@ if (process.argv[1] && process.argv[1].endsWith('read-check.mjs')) {
   const file = process.argv[2];
   const strict = process.argv.includes('--strict');
   if (!file || !fs.existsSync(file)) {
-    console.error('usage: node scripts/gates/read-check.mjs <scene.json> [--strict]');
+    console.error('usage: node quality/gates/read-check.mjs <scene.json> [--strict]');
     process.exit(2);
   }
   const scene = JSON.parse(fs.readFileSync(file, 'utf8'));

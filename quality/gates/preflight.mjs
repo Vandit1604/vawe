@@ -1,7 +1,7 @@
 // preflight.mjs: the decisions that belong BEFORE the JSON, as a step that happened.
 //
-//   node scripts/gates/preflight.mjs formats/scene/x.json --record  # print the chain, record it
-//   node scripts/gates/preflight.mjs formats/scene/x.json           # did it happen for THIS version?
+//   node quality/gates/preflight.mjs formats/scene/x.json --record  # print the chain, record it
+//   node quality/gates/preflight.mjs formats/scene/x.json           # did it happen for THIS version?
 //
 // WHY. CLAUDE.md's authoring ladder numbers "compose from blueprints" and "see the whole arsenal" as
 // steps 0 and 0a, and PRINTS them eleventh and twelfth, inside a section called "After writing a JSON".
@@ -40,7 +40,7 @@ const STAGE = 'preflight';
 const file = process.argv.find((a) => a.endsWith('.json'));
 const record = process.argv.includes('--record');
 const check = !record;
-if (!file) { console.error('usage: node scripts/gates/preflight.mjs <scene.json> [--record]'); process.exit(2); }
+if (!file) { console.error('usage: node quality/gates/preflight.mjs <scene.json> [--record]'); process.exit(2); }
 const abs = path.resolve(repoRoot, file);
 if (!fs.existsSync(abs)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
 
@@ -99,10 +99,10 @@ else {
 
 // ---- THE NOT LINE, DERIVED --------------------------------------------------------------------------
 // AGENTS.md's brief asks for a NOT line "from memory", which excludes whatever the author happens to
-// think of. The ledger already knows what recent films actually used (scripts/gates/ledger.mjs `not`);
+// think of. The ledger already knows what recent films actually used (quality/gates/ledger.mjs `not`);
 // asking it here, before the JSON is written, turns that memory into a line the author can paste.
 {
-  const r = spawnSync('node', [path.join(repoRoot, 'scripts/gates/ledger.mjs'), 'not', scene.theme || ''],
+  const r = spawnSync('node', [path.join(repoRoot, 'quality/gates/ledger.mjs'), 'not', scene.theme || ''],
     { encoding: 'utf8', cwd: repoRoot });
   const out = (r.stdout || '').trim();
   if (out) { console.log(`\n  THE NOT LINE, derived from what recent films already used:\n`); console.log(`   ${out}`); }

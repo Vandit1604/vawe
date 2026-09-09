@@ -8,7 +8,7 @@ export { build } from './text.js';
 // its own frame(), so nothing in text.js's frame ever runs on a count layer: the typing reveal and its
 // caret/untype family live there, and the auto-fit branch that reads `maxLines` is restricted to
 // `type === "text"` at text.js:36. Merging the whole text vocabulary advertised all five on a count
-// layer, where they were accepted and read by nothing (found by scripts/gates/prop-probe.mjs; no scene
+// layer, where they were accepted and read by nothing (found by quality/gates/prop-probe.mjs; no scene
 // in the library sets one). `typing` itself stays: the keyclick generator reads it for any layer
 // (formats/scene/scene.js:1529). `fit`/`fitH` stay too, they are read in the shared BUILD.
 const TEXT_FRAME_ONLY = ['caret', 'caretHold', 'untype', 'untypeRate', 'maxLines'];

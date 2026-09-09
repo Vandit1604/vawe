@@ -13,7 +13,7 @@
 //   node scripts/dev/evals.mjs                                    render every brief, write a run, assert liveness
 //   node scripts/dev/evals.mjs --compare --before <run-dir> [--after <run-dir>]
 //                                                                  before/after sheets + an html side-by-side (opens it)
-//   node scripts/dev/evals.mjs --save-baseline [--run <run-dir>]  copy sheets + manifest into verify/evals/baseline/
+//   node scripts/dev/evals.mjs --save-baseline [--run <run-dir>]  copy sheets + manifest into quality/runs/evals/baseline/
 //                                                                  (mp4s excluded: see .gitignore). No --run renders fresh.
 //
 // make evals / make evals-compare BEFORE=... [AFTER=...] are the Makefile forms.
@@ -23,9 +23,9 @@ import path from 'node:path';
 import { frameTile, tileGrid } from '../gates/tile.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 
-const BRIEFS_DIR = 'verify/evals/briefs';
-const RUNS_DIR = 'verify/evals/runs';
-const BASELINE_DIR = 'verify/evals/baseline';
+const BRIEFS_DIR = 'quality/runs/evals/briefs';
+const RUNS_DIR = 'quality/runs/evals/runs';
+const BASELINE_DIR = 'quality/runs/evals/baseline';
 // The per-brief sheet: 6 evenly spaced frames (the in/mid/out points and 3 more between them), laid
 // out 3 across. A fixed shape so a sheet from one run always tiles against the matching sheet from
 // another (`evals-compare` stacks them and needs identical geometry to not lie about what moved).
@@ -250,7 +250,7 @@ ${rows.map(row).join('\n')}
 }
 
 /** Commit sheets + manifest (never mp4s: too big) as the checked-in baseline, rewriting every path in
- *  the manifest to live under BASELINE_DIR so a later `--compare --before verify/evals/baseline` reads
+ *  the manifest to live under BASELINE_DIR so a later `--compare --before quality/runs/evals/baseline` reads
  *  paths that actually exist on a fresh checkout. */
 function saveBaseline() {
   const runDir = arg('--run', null);

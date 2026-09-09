@@ -1,4 +1,4 @@
-// scripts/gates/paints-nothing.mjs: did this layer actually paint anything, in its own box?
+// quality/gates/paints-nothing.mjs: did this layer actually paint anything, in its own box?
 //
 // A terminal card was hand-authored as an `html` layer: a CSS mask-image on an auto-height wrapper whose
 // children were all absolutely positioned. That masks EVERYTHING to nothing, the card rendered as a
@@ -31,13 +31,13 @@
 // severities"). `--strict` promotes a finding to a failing exit code, for whenever this gate earns a seat
 // in the mandatory ladder.
 //
-// WAIVERS need a reason, the identical mechanism `dead-air` uses today (scripts/gates/author-check.mjs):
+// WAIVERS need a reason, the identical mechanism `dead-air` uses today (quality/gates/author-check.mjs):
 //   { "authoring": { "allow": ["paints-nothing"], "_why": { "paints-nothing": "…" } } }
 // A waiver with no `_why` (or one under 12 characters) is treated as no waiver, the finding still prints
 // and --strict still fails on it.
 //
-//   node scripts/gates/paints-nothing.mjs <scene.json> [--strict]
-//   node scripts/gates/paints-nothing.mjs                 (census: every formats/scene/*.json)
+//   node quality/gates/paints-nothing.mjs <scene.json> [--strict]
+//   node quality/gates/paints-nothing.mjs                 (census: every formats/scene/*.json)
 //   make paints-nothing [D=scene.json] [STRICT=1]
 import fs from 'node:fs';
 import path from 'node:path';

@@ -1,8 +1,8 @@
-// scripts/gates/code-quality.mjs: the codebase may get simpler, never more tangled.
+// quality/gates/code-quality.mjs: the codebase may get simpler, never more tangled.
 //
-//   node scripts/gates/code-quality.mjs           # check
-//   node scripts/gates/code-quality.mjs --write   # accept the current state as the new baseline
-//   node scripts/gates/code-quality.mjs --top     # what is worst right now
+//   node quality/gates/code-quality.mjs           # check
+//   node quality/gates/code-quality.mjs --write   # accept the current state as the new baseline
+//   node quality/gates/code-quality.mjs --top     # what is worst right now
 //
 // WHY A RATCHET AND NOT A THRESHOLD. This repo has 5615 functions and 333 of them break one of the
 // size rules today. Turning that into a blocking threshold would fail every build on day one, and
@@ -25,7 +25,7 @@ import { fileURLToPath } from 'node:url';
 import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const BASELINE = path.join(ROOT, 'verify/code-quality-baseline.json');
+const BASELINE = path.join(ROOT, 'quality/baselines/code-quality-baseline.json');
 const SCAN = ['core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'formats', 'scene', 'verify', 'cli', 'tools'];
 const write = process.argv.includes('--write');
 const top = process.argv.includes('--top');

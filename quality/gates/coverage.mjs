@@ -1,6 +1,6 @@
 // coverage.mjs, which parts of the engine has nothing ever exercised?
 //
-//   node scripts/gates/coverage.mjs        report
+//   node quality/gates/coverage.mjs        report
 //   make coverage
 //
 // Conformance proves a value WORKS. This asks a different question: is anyone USING it? Vocabulary

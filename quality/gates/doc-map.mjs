@@ -1,7 +1,7 @@
-// scripts/gates/doc-map.mjs. The doc map: one source of truth, every index generated from it.
+// quality/gates/doc-map.mjs. The doc map: one source of truth, every index generated from it.
 //
-//   node scripts/gates/doc-map.mjs            verify (used by craft-coverage / make craft-coverage)
-//   node scripts/gates/doc-map.mjs --write    regenerate every index view (make doc-index)
+//   node quality/gates/doc-map.mjs            verify (used by craft-coverage / make craft-coverage)
+//   node quality/gates/doc-map.mjs --write    regenerate every index view (make doc-index)
 //
 // WHY THIS EXISTS. This repo carries ~120 markdown files and ~1.5 MB of written knowledge. An agent
 // could only reach it through CLAUDE.md, which is loaded in full on every session, so CLAUDE.md kept
@@ -172,12 +172,12 @@ export function docMap() {
     const fm = frontmatter(text) || {};
 
     if (GENERATED[f]) {
-      if (fm.when) problems.push({ kind: 'fail', msg: `${f} is listed as GENERATED but carries \`when\` frontmatter. Move the line into the doc and drop it from GENERATED in scripts/gates/doc-map.mjs` });
+      if (fm.when) problems.push({ kind: 'fail', msg: `${f} is listed as GENERATED but carries \`when\` frontmatter. Move the line into the doc and drop it from GENERATED in quality/gates/doc-map.mjs` });
       entries.push({ file: f, source: 'generated', ...GENERATED[f] });
       continue;
     }
     if (PENDING[f]) {
-      if (fm.when) problems.push({ kind: 'fail', msg: `${f} is listed as PENDING but now carries its own frontmatter. Delete its PENDING entry in scripts/gates/doc-map.mjs` });
+      if (fm.when) problems.push({ kind: 'fail', msg: `${f} is listed as PENDING but now carries its own frontmatter. Delete its PENDING entry in quality/gates/doc-map.mjs` });
       else problems.push({ kind: 'pending', msg: `${f}. Frontmatter NOT applied (another agent owns the file). Its line is held in PENDING; the index is incomplete here on purpose.` });
       entries.push({ file: f, source: 'pending', ...PENDING[f] });
       continue;
@@ -189,7 +189,7 @@ export function docMap() {
       continue;
     }
     if (!fm.when || !fm.answers || !fm.group) {
-      problems.push({ kind: 'fail', msg: `${f}: missing doc-map frontmatter. Add \`when:\` (reach for this when…), \`answers:\` (what it settles) and \`group:\` (one of ${GROUPS.map((g) => g[0]).join(' · ')}), or add the path to EXCLUDE in scripts/gates/doc-map.mjs with a reason.` });
+      problems.push({ kind: 'fail', msg: `${f}: missing doc-map frontmatter. Add \`when:\` (reach for this when…), \`answers:\` (what it settles) and \`group:\` (one of ${GROUPS.map((g) => g[0]).join(' · ')}), or add the path to EXCLUDE in quality/gates/doc-map.mjs with a reason.` });
       continue;
     }
     if (!GROUPS.some((g) => g[0] === fm.group)) { problems.push({ kind: 'fail', msg: `${f}: group "${fm.group}" is not one of ${GROUPS.map((g) => g[0]).join(' · ')}` }); continue; }
@@ -300,7 +300,7 @@ function indexBody(entries) {
     out.push('---');
     out.push('');
     out.push(`⚠ ${pend.length} doc${pend.length > 1 ? 's' : ''} above carr${pend.length > 1 ? 'y' : 'ies'} no frontmatter of its own; the line shown is held in`);
-    out.push('`scripts/gates/doc-map.mjs` PENDING because another agent owned the file when the map was built.');
+    out.push('`quality/gates/doc-map.mjs` PENDING because another agent owned the file when the map was built.');
     out.push('`make craft-coverage` names them on every run.');
     out.push('');
   }

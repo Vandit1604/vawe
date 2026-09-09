@@ -10,7 +10,7 @@
 // corrupt the file. Escapes are handled for the same reason.
 //
 // Pure and dependency-free so it can be tested without a browser, the editor in scripts/dev/studio.mjs
-// calls it, and scripts/gates/lib-test.mjs proves it.
+// calls it, and quality/gates/lib-test.mjs proves it.
 
 // scan forward from `i` (which must sit on the opening bracket) to the matching close, skipping strings.
 export function matchBracket(src, i) {

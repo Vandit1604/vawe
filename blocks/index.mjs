@@ -39,7 +39,7 @@
 //
 // Nothing else changes. Every refusal below still fires at load: a family with no CATEGORY, a family
 // with no option table, two families exporting one factory name, a factory with no catalog row. The
-// only thing lost is auto-discovery of a NEW file, and `scripts/gates/lib-test.mjs` asserts this map
+// only thing lost is auto-discovery of a NEW file, and `quality/gates/lib-test.mjs` asserts this map
 // against the real directory listing, so a family added and not imported here fails a test rather
 // than disappearing quietly.
 import * as appFam from './app.mjs';
@@ -101,7 +101,7 @@ const FAMILY_FILES = Object.keys(FAMILY_MODULES).sort();
 
 // Every named export of every family module, merged. Identifier-safe keys only (BLOCKS also holds
 // namespaced `family.variant` names, which are not identifiers), so this is the object to spread when
-// something needs a SCOPE to evaluate a factory default in, scripts/gates/block-schema.mjs does.
+// something needs a SCOPE to evaluate a factory default in, quality/gates/block-schema.mjs does.
 export const EXPORTS = {};
 // family → its module's CATEGORY. What the site groups the browsing rail by.
 export const CATEGORY_OF = {};
@@ -130,7 +130,7 @@ for (const file of FAMILY_FILES) {
     throw new Error(`blocks/${file} exports ${factories.length} factor(y/ies) but declares no option `
       + `table. Add \`export const ${file.slice(0, -4).replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '').toUpperCase()}_SCHEMAS = { <family>: { … } }\` `
       + `(shape: blocks/schema.mjs). Without it every option this module takes is undeclared and `
-      + `scripts/gates/block-schema.mjs fails with no-schema, long after the render that needed it.`);
+      + `quality/gates/block-schema.mjs fails with no-schema, long after the render that needed it.`);
   }
 
   for (const name of factories) {

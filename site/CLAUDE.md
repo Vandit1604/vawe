@@ -33,7 +33,7 @@ Match that register or beat it.
 
 ## The numbers on this site are never typed
 
-`scripts/gates/site-counts.mjs` fails a hardcoded count and has caught one twice. Every figure in
+`quality/gates/site-counts.mjs` fails a hardcoded count and has caught one twice. Every figure in
 copy or in a comment is read from a registry through `site/lib/*.json`, which is generated. Do not
 hand-edit those files; run the generator.
 

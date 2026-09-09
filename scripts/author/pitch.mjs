@@ -10,7 +10,7 @@
 // the protocol's shape in front of the agent every time (so the four questions and the five paths are
 // never re-derived from memory), and make the outcome auditable the same way every other stage-gate in
 // this repo is: a receipt, hashed against the subject, that goes stale the moment the subject changes.
-// See scripts/lib/receipt.mjs and scripts/gates/preflight.mjs for the pattern this mirrors.
+// See scripts/lib/receipt.mjs and quality/gates/preflight.mjs for the pattern this mirrors.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

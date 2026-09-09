@@ -1,7 +1,7 @@
 ---
 name: continuous-object
 when: deciding what holds a film together across its cuts
-holds: gated (scripts/gates/direction-floor.mjs#no-continuous-object; BLOCKS)
+holds: gated (quality/gates/direction-floor.mjs#no-continuous-object; BLOCKS)
 answers: "the continuous-object device, the acrossBeats/becomes mechanism, and the waiver a real alternative device needs"
 group: crosscutting
 ---

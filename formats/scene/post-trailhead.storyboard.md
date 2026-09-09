@@ -11,7 +11,7 @@ object_last: the same thumbnail, bottom-right@258x300, holding under the close c
 duration: 24.1s
 format: 1080x1920 (9:16)
 destination: reels
-source: rebuilt from the 15s/16:9 worked example at verify/evals/briefs/demo.json for a postable vertical feed: same one mechanism, longer hold so the draw and the click both get room to read, real sound instead of silence
+source: rebuilt from the 15s/16:9 worked example at quality/runs/evals/briefs/demo.json for a postable vertical feed: same one mechanism, longer hold so the draw and the click both get room to read, real sound instead of silence
 theme: satara: warm off-white paper, one trail-orange accent, geometric rounded sans (Plus Jakarta Sans), snappy easeOutBack motion; the only theme in themes/ that reads as paper-and-sunlight (outdoor, warm, spatial) rather than a dashboard or a night mode, confirmed against `make theme-sheet THEME=satara`
 spectacle: the click at 13.8s on the panel (layer id `panel`), a `ripple` sting on the click, immediately followed by the stat pill ("1,180 ft climb · 5.4 mi") at 14.1s; every other beat (the bounce-in arrival, the draw, the shrink to a corner) stays a plain eased move with no sting of its own
 not: no narration, no captured product screenshot (Trailhead is invented), no dashboard chrome overload (one card, one route, one chart strip), no gradient hero on the hook/payoff text, no ruled grid on the map (contour lines only), no second click and no second consequence, no zoom-and-push (the panel is already large enough full-bleed that a push would add motion without adding legibility)

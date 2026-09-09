@@ -6,7 +6,7 @@
 // entry here, never touching the runner.
 //
 // EVERY blurb says whether the field MOVES, because that is the fact an author cannot read off a still
-// and scripts/gates/beat-check.mjs warns on a whole film built from flat ones. FLAT = base gradient +
+// and quality/gates/beat-check.mjs warns on a whole film built from flat ones. FLAT = base gradient +
 // film grain and no moving fx: `plain` `paper` `accentPlain` `dark` `deep`. Everything else animates.
 export const PRESETS = [
   // ---- LIGHT-FIRST presets (for white/editorial brands: paper bg + accent on top) ----

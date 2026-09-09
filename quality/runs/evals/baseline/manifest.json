@@ -1,9 +1,9 @@
 {
  "when": "2026-09-07T17:52:54.882Z",
  "commit": "e818b2cb",
- "briefsDir": "verify/evals/briefs",
- "runDir": "verify/evals/baseline",
- "sheet": "verify/evals/baseline/sheet.png",
+ "briefsDir": "quality/runs/evals/briefs",
+ "runDir": "quality/runs/evals/baseline",
+ "sheet": "quality/runs/evals/baseline/sheet.png",
  "briefs": [
   {
    "name": "demo",
@@ -18,8 +18,8 @@
     "w": 1920,
     "h": 1080
    },
-   "mp4": "verify/evals/baseline/demo.mp4",
-   "sheet": "verify/evals/baseline/demo.sheet.png"
+   "mp4": "quality/runs/evals/baseline/demo.mp4",
+   "sheet": "quality/runs/evals/baseline/demo.sheet.png"
   },
   {
    "name": "explainer",
@@ -34,8 +34,8 @@
     "w": 1920,
     "h": 1080
    },
-   "mp4": "verify/evals/baseline/explainer.mp4",
-   "sheet": "verify/evals/baseline/explainer.sheet.png"
+   "mp4": "quality/runs/evals/baseline/explainer.mp4",
+   "sheet": "quality/runs/evals/baseline/explainer.sheet.png"
   },
   {
    "name": "launch",
@@ -50,8 +50,8 @@
     "w": 1920,
     "h": 1080
    },
-   "mp4": "verify/evals/baseline/launch.mp4",
-   "sheet": "verify/evals/baseline/launch.sheet.png"
+   "mp4": "quality/runs/evals/baseline/launch.mp4",
+   "sheet": "quality/runs/evals/baseline/launch.sheet.png"
   },
   {
    "name": "recreation",
@@ -66,8 +66,8 @@
     "w": 1920,
     "h": 1080
    },
-   "mp4": "verify/evals/baseline/recreation.mp4",
-   "sheet": "verify/evals/baseline/recreation.sheet.png"
+   "mp4": "quality/runs/evals/baseline/recreation.mp4",
+   "sheet": "quality/runs/evals/baseline/recreation.sheet.png"
   },
   {
    "name": "sting",
@@ -82,8 +82,8 @@
     "w": 1920,
     "h": 1080
    },
-   "mp4": "verify/evals/baseline/sting.mp4",
-   "sheet": "verify/evals/baseline/sting.sheet.png"
+   "mp4": "quality/runs/evals/baseline/sting.mp4",
+   "sheet": "quality/runs/evals/baseline/sting.sheet.png"
   },
   {
    "name": "talking-head",
@@ -98,8 +98,8 @@
     "w": 1080,
     "h": 1920
    },
-   "mp4": "verify/evals/baseline/talking-head.mp4",
-   "sheet": "verify/evals/baseline/talking-head.sheet.png"
+   "mp4": "quality/runs/evals/baseline/talking-head.mp4",
+   "sheet": "quality/runs/evals/baseline/talking-head.sheet.png"
   }
  ]
 }

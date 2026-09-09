@@ -1,7 +1,7 @@
 ---
 name: banned-defaults
 when: choosing type, colour, or layout for any hand-authored surface
-holds: gated (scripts/gates/designspec-check.mjs; off-colour, ruled-grid, and the generic-tell checks)
+holds: gated (quality/gates/designspec-check.mjs; off-colour, ruled-grid, and the generic-tell checks)
 answers: "the banned-defaults list and the escape valve for when the content genuinely calls for one"
 group: look
 ---

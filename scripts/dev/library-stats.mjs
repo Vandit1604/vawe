@@ -90,5 +90,5 @@ row('  ...and say WHY they are silent', s.silentWithWhy, `of the ${s.silentDecla
 row('use a {type:"beat"} blueprint', s.beatBlueprint, 'the mechanism is there; almost nobody reaches for it');
 row('carry ZERO pictorial layers', s.zeroPictorial, `of any size (${[...PICTORIAL].join(' ')})`);
 row('median share of layers that are picture', `${s.medianPictorialShare}%`, 'a COUNT of layers, never a share of the frame');
-console.log('\n  Quote these, not a number typed by hand. scripts/gates/docs-drift.mjs checks the three');
+console.log('\n  Quote these, not a number typed by hand. quality/gates/docs-drift.mjs checks the three');
 console.log('  headline counts CLAUDE.md cites; the rest are yours to re-run before you cite them.\n');

@@ -2,9 +2,9 @@
 //
 // One derived fact, one owner. Two consumers needed this and neither could answer it:
 //
-//   • scripts/gates/doc-map.mjs routes a finding to the doc that settles it, and has to refuse a doc
+//   • quality/gates/doc-map.mjs routes a finding to the doc that settles it, and has to refuse a doc
 //     that claims a code nothing emits, or the pointer rots silently the day a gate is deleted.
-//   • scripts/gates/waiver-drift.mjs reports DEAD WAIVERS off a HAND-KEPT `RETIRED` map, and its own
+//   • quality/gates/waiver-drift.mjs reports DEAD WAIVERS off a HAND-KEPT `RETIRED` map, and its own
 //     comment names the failure that costs: "when a gate is deleted its codes have to be named here,
 //     or the census keeps counting ghosts". That list is a second owner of this fact.
 //
@@ -22,7 +22,7 @@
 //   sev: 'code'                         designspec-check's finding objects
 //   allow.has('code')                   a gate checking its own waiver, which names a real code
 //
-// Plus verify/audit.mjs's HARD set, read by name: audit builds findings as `{kind}` objects, so it has
+// Plus quality/audit.mjs's HARD set, read by name: audit builds findings as `{kind}` objects, so it has
 // no textual marker of its own and would otherwise be invisible to all four.
 //
 // The consequence of a miss is bounded ON PURPOSE, and doc-map is written to match: a code this misses
@@ -42,10 +42,10 @@ const PATTERNS = [
   /\ballow(?:ed)?\.has\('([a-z][a-z0-9-]{2,})'\)/g,       // a gate reading its own waiver
 ];
 
-// verify/audit.mjs composes findings as `{ kind: 'overlap', … }`, so no marker above sees it. Its
+// quality/audit.mjs composes findings as `{ kind: 'overlap', … }`, so no marker above sees it. Its
 // severity sets ARE the list, so read those rather than inventing a fifth pattern that would have to
 // tell a finding kind from a paint kind.
-const SET_DECLS = [['verify/audit.mjs', /^const (?:HARD|SOFT)\s*=\s*new Set\(\[([^\]]*)\]/gm]];
+const SET_DECLS = [['quality/audit.mjs', /^const (?:HARD|SOFT)\s*=\s*new Set\(\[([^\]]*)\]/gm]];
 
 /** codesEmitted() -> Map<code, Set<file>>, computed from the gate sources on every call. */
 export function codesEmitted() {

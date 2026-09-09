@@ -20,7 +20,7 @@
 // asked to resolve against a file that was never written.
 //
 // EVERY VARIANT IS BUILT, RENDERED AND MEASURED THE SAME WAY, on purpose: `assemble.mjs` then
-// `./bin/vawe --draft` then `scripts/gates/motion-floor.mjs`'s own `pullFrames`/`profile` (imported, not
+// `./bin/vawe --draft` then `quality/gates/motion-floor.mjs`'s own `pullFrames`/`profile` (imported, not
 // reimplemented) on the resulting out/<name>.mp4. If the variants were not rendered identically the
 // comparison would be worthless, which is the whole reason this file exists instead of eyeballing three
 // renders.
@@ -127,7 +127,7 @@ async function runVariant({ name, tag, dir, storyboardText, jsonSeed, extraFiles
     fs.writeFileSync(sbPath, storyboardText);
     fs.writeFileSync(jsonPath, JSON.stringify(jsonSeed, null, 1) + '\n');
 
-    const check = run('node', ['scripts/gates/storyboard-check.mjs', sbPath]);
+    const check = run('node', ['quality/gates/storyboard-check.mjs', sbPath]);
     if (check.status !== 0) return { name, error: `storyboard-check: ${(check.stdout + check.stderr).trim()}` };
 
     const asm = run('node', ['scripts/author/assemble.mjs', jsonPath]);

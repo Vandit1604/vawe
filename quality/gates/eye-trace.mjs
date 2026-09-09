@@ -1,9 +1,9 @@
-// scripts/gates/eye-trace.mjs, WHERE IS THE VIEWER LOOKING WHEN A CUT LANDS, and where does the next
+// quality/gates/eye-trace.mjs, WHERE IS THE VIEWER LOOKING WHEN A CUT LANDS, and where does the next
 // shot make them look? The first gate in this engine that measures Murch's fourth priority.
 //
-//   node scripts/gates/eye-trace.mjs <scene.json> [--strict] [--json]
-//   node scripts/gates/eye-trace.mjs --selftest        the scorer's own fixtures, run these first
-//   node scripts/gates/eye-trace.mjs --census          the library distribution the threshold came from
+//   node quality/gates/eye-trace.mjs <scene.json> [--strict] [--json]
+//   node quality/gates/eye-trace.mjs --selftest        the scorer's own fixtures, run these first
+//   node quality/gates/eye-trace.mjs --census          the library distribution the threshold came from
 //
 // TIER: REPORT, and the ranking is the reason. Murch puts eye-trace fourth of six, at 7%, under
 // emotion (51%), story (23%) and rhythm (10%), and his instruction is to sacrifice UPWARD from the
@@ -507,7 +507,7 @@ if (args.includes('--census')) {
 }
 
 if (!file || !fs.existsSync(file)) {
-  console.error('usage: node scripts/gates/eye-trace.mjs <scene.json> [--strict] [--json] | --selftest | --census [--worst]');
+  console.error('usage: node quality/gates/eye-trace.mjs <scene.json> [--strict] [--json] | --selftest | --census [--worst]');
   process.exit(2);
 }
 const r = report(file);

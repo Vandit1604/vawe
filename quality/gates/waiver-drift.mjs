@@ -1,4 +1,4 @@
-// scripts/gates/waiver-drift.mjs: IS THIS WAIVER A DECISION, OR A HABIT?
+// quality/gates/waiver-drift.mjs: IS THIS WAIVER A DECISION, OR A HABIT?
 //
 // Every blocking gate here can be waived with {"authoring":{"allow":["code"]}} and a `_why`. That is
 // correct: a rule worth having is worth breaking deliberately, and forcing an author to argue for the
@@ -19,7 +19,7 @@
 //
 // It never blocks. A gate that blocked on this would itself be waived, which is the joke.
 //
-//   node scripts/gates/waiver-drift.mjs [<scene.json>]     ·   make waivers [D=<file>]
+//   node quality/gates/waiver-drift.mjs [<scene.json>]     ·   make waivers [D=<file>]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,8 +33,8 @@ const file = process.argv.slice(2).find((a) => !a.startsWith('--'));
 // here is a WARN or a NOTE, never an error, so the exit code stays 0.
 const f = gateFindings();
 
-// LEGACY IS RETIRED. `scripts/gates/legacy-manifest.json` used to grandfather films that predated a
-// rule "by the calendar"; `scripts/gates/legacy-fold.mjs` folded every one of its rows into an explicit
+// LEGACY IS RETIRED. `quality/gates/legacy-manifest.json` used to grandfather films that predated a
+// rule "by the calendar"; `quality/gates/legacy-fold.mjs` folded every one of its rows into an explicit
 // `authoring.allow` + `_why` on the scene itself, and the manifest and the ratchet engine that read it
 // were deleted (author-check.mjs). So this file no longer has to tell legacy and waived apart: every
 // exception counted below is a real, per-scene, `_why`-carrying decision. `ratchet` stays as an empty

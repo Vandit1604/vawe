@@ -7,7 +7,7 @@ group: engine
 # FRAMEWORK-AUDIT: the scene engine, benchmarked against another engine & another engine
 
 Audited July 2026. Scope = the **permanent** engine (not videos): `formats/scene/scene.html`,
-`core/*.js`, `formats/scene/schema.json`, the gates (`verify/audit.mjs`, `scripts/{motion-audit,
+`core/*.js`, `formats/scene/schema.json`, the gates (`quality/audit.mjs`, `scripts/{motion-audit,
 slop,validate,probe-purity,similarity}.mjs`), `core/tokens.css`, `core/registry/theme-contract.js`.
 
 Method: inline code audit of our engine + source reads of another engine (`packages/core`, `layout-utils`,
@@ -101,7 +101,7 @@ registered it; validation passes only because unknown props are allowed. No auto
 and engine in sync.
 **Them:** another engine's props are typed (TS) so drift is a compile error; HF parsers validate against a
 typed IR.
-**Fix (quick win):** add `motion` (+ its keyframe shape) to the schema, and a `scripts/gates/schema-drift.mjs`
+**Fix (quick win):** add `motion` (+ its keyframe shape) to the schema, and a `quality/gates/schema-drift.mjs`
 (`make schema-check`) asserting every `L.<prop>` the engine reads exists in the schema.
 
 ---

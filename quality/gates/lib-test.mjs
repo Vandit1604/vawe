@@ -1,5 +1,5 @@
-// scripts/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion/motion.js.
-// No browser needed (the primitives are pure). Run: node scripts/gates/lib-test.mjs  (make lib-test)
+// quality/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion/motion.js.
+// No browser needed (the primitives are pure). Run: node quality/gates/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
   sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
@@ -114,7 +114,7 @@ const r2gain = (v) => Math.round(v * 1000) / 1000;
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
 const ok = (name, cond) => { if (cond) { pass++; } else { fail++; console.error('✗ ' + name); } };
 
-// `node scripts/gates/lib-test.mjs --colours` prints what the ONE parser now does with the colours
+// `node quality/gates/lib-test.mjs --colours` prints what the ONE parser now does with the colours
 // the four old copies disagreed about. The asserts below are the gate; this is how you READ it.
 if (process.argv.includes('--colours')) {
   const rows = [
@@ -1411,7 +1411,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // frameOf() is the one builder every consumer RECEIVES from, so what matters is that it agrees with
 // the two functions it is made of, at every ratio and every destination. outOfFrame() is the check at
 // the placement funnel, and the assert that earns its place is the third one: a layer MID-ENTRANCE is
-// legitimately off-frame and must never be reported (the rule verify/audit.mjs learned in #376).
+// legitimately off-frame and must never be reported (the rule quality/audit.mjs learned in #376).
 {
   const ratios = ['16:9', '9:16', '1:1', '4:5', '4:3'];
   const wrong = [];
@@ -1623,7 +1623,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // THE ONE COLOUR PARSER (core/motion/motion.js). Four copies with four grammars became one, and this is
   // the falsifiable half of that claim: for each old copy, a colour it REJECTED and a colour it
   // ACCEPTED, run through the shared parser now. If the union ever narrows, or the anchor is
-  // dropped again, one of these flips. `node scripts/gates/lib-test.mjs --colours` prints the table.
+  // dropped again, one of these flips. `node quality/gates/lib-test.mjs --colours` prints the table.
   const J = (v) => JSON.stringify(parseColor(v));
   // filters.js rejected every hex that was not 3 or 6 digits, so an 8-digit brand colour read null
   // and the grade silently fell back to white.
@@ -3053,7 +3053,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 }
 
 // ---- a gate's own FIX INSTRUCTION must be a command that runs ----
-// `scripts/gates/audio-check.mjs` told an author to run `make sfx` in two places and printed it inside
+// `quality/gates/audio-check.mjs` told an author to run `make sfx` in two places and printed it inside
 // the finding, in the tone of the fix. There is no such target; the bake is `make audio`. So following
 // a gate's own advice failed with "No rule to make target `sfx`", which is worse than no advice: it
 // teaches the reader that the gates do not know their own repo, and the next real instruction gets
@@ -4357,7 +4357,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 // ---- knobErrors: a dial on a preset that does not read it is a REFUSAL, not a warning --------------
-// It was a warning printed by `scripts/gates/knobs-audit.mjs` if you remembered to run it, while an
+// It was a warning printed by `quality/gates/knobs-audit.mjs` if you remembered to run it, while an
 // unknown layer PROP of the same shape has thrown at boot for a long time. These say the two agree now.
 {
   const { knobErrors } = await import('../../core/validate/validate.mjs');
@@ -5531,7 +5531,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 // ---- ARSENAL SWEEP: the two shapes the gate used to be blind to --------------------------------
 //
-// `scripts/gates/arsenal-check.mjs` reports how many capabilities the engine exports, and that number
+// `quality/gates/arsenal-check.mjs` reports how many capabilities the engine exports, and that number
 // was a FLOOR rather than a census, in two ways that a green tick hid. It has no importable surface
 // (it runs and exits), so this drives its `--list` dump, which prints one `file::NAME` per export the
 // sweep sees.
@@ -5549,7 +5549,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const { execFileSync } = await import('node:child_process');
   let keys = [];
   try {
-    keys = execFileSync('node', [path.join(repoRoot, 'scripts/gates/arsenal-check.mjs'), '--list'],
+    keys = execFileSync('node', [path.join(repoRoot, 'quality/gates/arsenal-check.mjs'), '--list'],
       { encoding: 'utf8' }).split('\n').map((l) => l.replace(/^\w+\s+/, '').split('\t')[0]);
   } catch { /* asserted as empty below */ }
   ok('arsenal --list: the sweep dumps what it saw', keys.length > 100);
@@ -5816,7 +5816,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // PRESENT and PLAIN prove specific capabilities answer. They leave a silent gap: a whole FAMILY that
   // nobody ever queried, so "a drifting background" reaching an `aurora` was never checked. This holds
   // one plain-English query for every family an author DESCRIBES rather than names, and every one must
-  // resolve to its family confidently and in the top three. scripts/gates/discovery.mjs check 5 reads
+  // resolve to its family confidently and in the top three. quality/gates/discovery.mjs check 5 reads
   // these (through scripts/dev/family-coverage.mjs) and FAILS when a searchable family has no query
   // here, so a new vocabulary cannot land findable only by someone who already knows its name. Families
   // reached by MECHANISM (an easing, a blend mode, a keyframe handle) are exempt and named in
@@ -6177,7 +6177,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 
-// ---- prop-probe: the exhaustive input to the prop audit (scripts/gates/prop-probe.mjs) ----
+// ---- prop-probe: the exhaustive input to the prop audit (quality/gates/prop-probe.mjs) ----
 //
 // The prober's TABLE is produced in a browser and cannot be asserted here. These two things can, and
 // they are the two that decide whether the table means anything: that a guarded prop is probed with its
@@ -6569,14 +6569,14 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
      ['t', 'x', 'y', 'scale', 'ox', 'oy'].every((f) => kfFields.includes(f)));
 
   // IT READS THE SCHEMA, NOT A SECOND LIST. Every field it printed above is a key of the schema node
-  // that scripts/gates/schema-drift.mjs holds against core/timeline/sequence.js KEYFRAME_PROPS. Compared to that
+  // that quality/gates/schema-drift.mjs holds against core/timeline/sequence.js KEYFRAME_PROPS. Compared to that
   // same node here: if the tool ever grew a list of its own, these two sets would stop being equal.
   const owner = schema.fields.layers.item.motion.item;
   ok('schema AT: what it lists at a path IS the schema node at that path, with nothing added or hidden',
      kfFields.slice().sort().join(',') === Object.keys(owner).sort().join(','));
 
   // BOTH SPELLINGS OF ONE PATH. `[]` is what an author writes; `item` is the schema's own key, and the
-  // spelling scripts/gates/schema-drift.mjs addresses the same node by.
+  // spelling quality/gates/schema-drift.mjs addresses the same node by.
   ok('schema AT: `layers.item.motion.item` and `layers[].motion[]` are one path',
      atFmt(at('layers.item.motion.item').trail) === atFmt(kf.trail));
 
@@ -6613,7 +6613,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 // ---- gradeable: a render that exists is not a render that is CURRENT -----------------------------
 //
-// scripts/gates/tile.mjs already carried this bug's near twin in its own comment: a wrongly-resolved
+// quality/gates/tile.mjs already carried this bug's near twin in its own comment: a wrongly-resolved
 // name once made the judge grade a leftover mp4 and "report a clean run on a video the author never
 // made". The NAME was fixed and the FRESHNESS was not, so out/x.mp4 could still be the right name for
 // a film since rewritten, and every consumer checked only existsSync. An author edits a scene, runs
@@ -6647,7 +6647,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // they did not make; a seam sheet cut from the previous render reports clean seams for a film whose
   // cuts have moved, which is the one class that gate exists to catch.
   for (const g of ['judge.mjs', 'seam-snap.mjs']) {
-    ok(`gradeable: scripts/gates/${g} asks it before grading`,
+    ok(`gradeable: quality/gates/${g} asks it before grading`,
       /gradeable\(/.test(fs.readFileSync(path.join(repoRoot, 'scripts/gates', g), 'utf8')));
   }
   fs.rmSync(dir, { recursive: true, force: true });
@@ -6663,7 +6663,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // crashed. These asserts hold the contract that replaced it.
 {
   const findingsSrc = fs.readFileSync(path.join(repoRoot, 'scripts/lib/findings.mjs'), 'utf8');
-  const acSrc = fs.readFileSync(path.join(repoRoot, 'scripts/gates/author-check.mjs'), 'utf8');
+  const acSrc = fs.readFileSync(path.join(repoRoot, 'quality/gates/author-check.mjs'), 'utf8');
   // Comments quote the regex that was removed, on purpose: the incident is the reason the rule exists.
   // Strip them, so this asserts about CODE and cannot be satisfied by deleting the history.
   const acCode = acSrc.replace(/^\s*\/\/.*$/gm, '');
@@ -6683,11 +6683,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   // EVERY CONVERTED GATE, BY NAME. A gate that goes back to printing its findings by hand is the whole
   // bug returning, and it would return quietly, so it is named here rather than counted.
-  const CONVERTED = ['scripts/gates/preflight.mjs', 'scripts/gates/beat-check.mjs',
-    'scripts/gates/direction-floor.mjs', 'scripts/gates/dissolve-check.mjs',
-    'scripts/gates/designspec-check.mjs', 'scripts/gates/copy-check.mjs', 'scripts/gates/read-check.mjs',
-    'scripts/gates/pace-check.mjs', 'scripts/gates/eye-trace.mjs', 'scripts/gates/plan-vs-render.mjs',
-    'scripts/author/motion-director.mjs', 'verify/audit.mjs'];
+  const CONVERTED = ['quality/gates/preflight.mjs', 'quality/gates/beat-check.mjs',
+    'quality/gates/direction-floor.mjs', 'quality/gates/dissolve-check.mjs',
+    'quality/gates/designspec-check.mjs', 'quality/gates/copy-check.mjs', 'quality/gates/read-check.mjs',
+    'quality/gates/pace-check.mjs', 'quality/gates/eye-trace.mjs', 'quality/gates/plan-vs-render.mjs',
+    'scripts/author/motion-director.mjs', 'quality/audit.mjs'];
   for (const g of CONVERTED) {
     const src = fs.readFileSync(path.join(repoRoot, g), 'utf8');
     ok(`findings: ${g} records its findings through the shared emitter`,
@@ -6704,7 +6704,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     layers: [{ type: 'html', id: 'mud', at: 0, dur: 4,
       html: '<div style="position:absolute;left:10%;top:20%;opacity:var(--t)">AFTER</div>'
           + '<div style="position:absolute;left:10%;top:20%;opacity:calc(1 - var(--t))">BEFORE</div>' }] }));
-  const gate = path.join(repoRoot, 'scripts/gates/dissolve-check.mjs');
+  const gate = path.join(repoRoot, 'quality/gates/dissolve-check.mjs');
 
   const asJson = spawnSync('node', [gate, scene, '--json'], { encoding: 'utf8', cwd: repoRoot });
   ok('findings: --json exits with the same code the prose run does', asJson.status === 1);
@@ -6739,7 +6739,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const cleanOut = path.join(dir, 'clean-recs.json');
   // copy-check, not the dissolve gate: it returns at `process.exit(0)` the moment it has nothing to
   // say, several blocks above its report, which is exactly the path the exit flush exists for.
-  spawnSync('node', [path.join(repoRoot, 'scripts/gates/copy-check.mjs'), clean], { encoding: 'utf8', cwd: repoRoot,
+  spawnSync('node', [path.join(repoRoot, 'quality/gates/copy-check.mjs'), clean], { encoding: 'utf8', cwd: repoRoot,
     env: { ...process.env, VAWE_FINDINGS_OUT: cleanOut } });
   ok('findings: a gate that finds nothing still writes an empty result',
     (() => { try { return JSON.stringify(JSON.parse(fs.readFileSync(cleanOut, 'utf8'))) === '[]'; } catch { return false; } })());
@@ -6880,7 +6880,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // FILES is now walked rather than typed, so the thing to assert is the RESOLVED list: a walk that
 // silently returns nothing looks exactly like a clean run, which is how the blind spot survived.
 {
-  const gate = path.join(repoRoot, 'scripts/gates/site-counts.mjs');
+  const gate = path.join(repoRoot, 'quality/gates/site-counts.mjs');
   const files = spawnSync('node', [gate, '--files'], { encoding: 'utf8', cwd: repoRoot })
     .stdout.split('\n').filter(Boolean);
   ok('site-counts: the resolved surface list reaches docs-site/content/docs',
@@ -6928,12 +6928,12 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // class as `make sfx` in audio-check (the make-target test above), and nothing checked it either.
   // `make arsenal` is the shape to copy: it prints `all.length`, so it cannot be wrong.
   ok('site-counts: the resolved surface list reaches the author-facing tools',
-    files.includes('scripts/author/arsenal.mjs') && files.includes('scripts/gates/audio-check.mjs'));
+    files.includes('scripts/author/arsenal.mjs') && files.includes('quality/gates/audio-check.mjs'));
   {
     // The extension is joined rather than written, because `make doc-refs` reads this file too and a
-    // literal `scripts/gates/*.mjs` in it is a script path the repo does not have. A probe that exists
+    // literal `quality/gates/*.mjs` in it is a script path the repo does not have. A probe that exists
     // for a hundred milliseconds is not a promise to a reader, so it must not read as one.
-    const probe = path.join(repoRoot, 'scripts/gates', ['_lib-test-count', 'mjs'].join('.'));
+    const probe = path.join(repoRoot, 'quality/gates', ['_lib-test-count', 'mjs'].join('.'));
     try {
       // A CLAIM IN CODE and the SAME CLAIM IN A COMMENT, in one file, because the second is what makes
       // this check survivable. Every gate header in this repo discusses counts that were wrong once,
@@ -6947,7 +6947,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       ].join('\n'));
       let r = spawnSync('node', [gate], { encoding: 'utf8', cwd: repoRoot });
       ok('site-counts: a wrong count printed by a script is caught, with its file and line',
-        r.status === 1 && /scripts\/gates\/_lib-test-count\.mjs:2\b/.test(r.stderr));
+        r.status === 1 && /quality\/gates\/_lib-test-count\.mjs:2\b/.test(r.stderr));
       ok('site-counts: and the identical claim on line 1 is not, because it is a comment',
         !/_lib-test-count\.mjs:1\b/.test(r.stderr));
       // `cuts` is the one subject the code surface drops, and it is dropped on measurement rather than
@@ -6981,8 +6981,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // duration and camera words merge into one table) and several sections have no registry behind them yet.
 {
   const { execFileSync } = await import('node:child_process');
-  const gate = path.join(repoRoot, 'scripts/gates/arsenal-check.mjs');
-  const ratchet = path.join(repoRoot, 'verify/arsenal-ratchet.json');
+  const gate = path.join(repoRoot, 'quality/gates/arsenal-check.mjs');
+  const ratchet = path.join(repoRoot, 'quality/baselines/arsenal-ratchet.json');
   const saved = fs.readFileSync(ratchet, 'utf8');
   const run = () => { try { return { code: 0, out: execFileSync('node', [gate], { encoding: 'utf8', cwd: repoRoot }) }; }
     catch (e) { return { code: e.status, out: `${e.stdout || ''}${e.stderr || ''}` }; } };
@@ -7016,8 +7016,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // renamed, an [eye] count that creeps up while nobody watches, and a heading whose tag stops parsing.
 {
   const { execFileSync } = await import('node:child_process');
-  const gate = path.join(repoRoot, 'scripts/gates/rung.mjs');
-  const ratchet = path.join(repoRoot, 'verify/rung-ratchet.json');
+  const gate = path.join(repoRoot, 'quality/gates/rung.mjs');
+  const ratchet = path.join(repoRoot, 'quality/baselines/rung-ratchet.json');
   const claude = path.join(repoRoot, 'AGENTS.md');
   const savedRatchet = fs.readFileSync(ratchet, 'utf8');
   const savedClaude = fs.readFileSync(claude, 'utf8');
@@ -7031,8 +7031,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // A GATE THAT DOES NOT EXIST. The tag reads exactly as authoritative as a true one, which is why
     // this has to be mechanical: nobody re-checks a path in a heading they have read fifty times.
     fs.writeFileSync(claude, savedClaude.replace(
-      '`[gated: scripts/gates/author-check.mjs#no-storyboard]`',
-      '`[gated: scripts/gates/no-such-gate.mjs]`'));
+      '`[gated: quality/gates/author-check.mjs#no-storyboard]`',
+      '`[gated: quality/gates/no-such-gate.mjs]`'));
     const ghost = run();
     ok('rungs: a tag naming a gate that does not exist is REFUSED', ghost.code === 1);
     ok('rungs: and the refusal names the gate it could not find', /no-such-gate\.mjs/.test(ghost.out));
@@ -7042,8 +7042,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // real prose about silence, emitting no finding code at all. It emits them now (see the sound-gate
     // block below), which is what let the SILENCE section leave [eye].
     fs.writeFileSync(claude, savedClaude.replace(
-      '`[gated: scripts/gates/author-check.mjs#no-storyboard]`',
-      '`[gated: scripts/gates/author-check.mjs#no-such-code]`'));
+      '`[gated: quality/gates/author-check.mjs#no-storyboard]`',
+      '`[gated: quality/gates/author-check.mjs#no-such-code]`'));
     const wrongCode = run();
     ok('rungs: a gate named for a code it never emits is REFUSED', wrongCode.code === 1);
     ok('rungs: and the refusal says so in those words', /does not emit/.test(wrongCode.out));
@@ -7147,7 +7147,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
         cap.code === 2 && /CAPTURE PATH/.test(cap.out) && /wall-clock/.test(cap.out));
       ok('craft-live: an edit to core/ is not the capture path and is silent',
         fire(path.join(repoRoot, 'core/timeline/clips.js')).code === 0);
-      ok('craft-live: an EXISTING gate is not a new gate', fire(path.join(repoRoot, 'scripts/gates/rung.mjs')).code === 0);
+      ok('craft-live: an EXISTING gate is not a new gate', fire(path.join(repoRoot, 'quality/gates/rung.mjs')).code === 0);
       // Assembled rather than written whole: a literal path here reads to doc-refs as a repo path the
       // docs promise, and the file exists for four lines.
       const fresh = path.join(repoRoot, 'scripts/gates', `_craft-live-probe-gate.${'mjs'}`);
@@ -7180,11 +7180,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 //
 // This gate ran for months and nothing read it. It was not one of author-check's steps, and it stated
 // each finding as a tuple in a local array, so scripts/lib/finding-codes.mjs saw no code from it and
-// scripts/gates/rung.mjs would have called a tag naming it a FALSE TAG. Both halves are asserted here,
+// quality/gates/rung.mjs would have called a tag naming it a FALSE TAG. Both halves are asserted here,
 // because both halves failed silently and either one alone leaves the rule unenforced again.
 {
   const { execFileSync } = await import('node:child_process');
-  const gate = path.join(repoRoot, 'scripts/gates/audio-check.mjs');
+  const gate = path.join(repoRoot, 'quality/gates/audio-check.mjs');
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sound-gate-'));
   const outFile = path.join(tmp, 'findings.json');
   const run = (audio) => {
@@ -7221,18 +7221,18 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   // THE WIRING IS THE OTHER HALF. A gate nothing runs is a gate that does not exist, and this one was
   // in that state while its prose read as enforcement.
-  const ladder = fs.readFileSync(path.join(repoRoot, 'scripts/gates/author-check.mjs'), 'utf8');
+  const ladder = fs.readFileSync(path.join(repoRoot, 'quality/gates/author-check.mjs'), 'utf8');
   // The PATH, in the CALL. Matching the path anywhere in the file passes on the comment above the call,
   // which is the whole failure again: prose reading as a mechanism.
   ok('sound gate: author-check runs it as one of its steps',
-    /styleGate\('sound',[^\n]*'scripts\/gates\/audio-check\.mjs'/.test(ladder));
+    /styleGate\('sound',[^\n]*'quality\/gates\/audio-check\.mjs'/.test(ladder));
   ok('sound gate: and declares it in the ladder it prints before it runs', /\['sound', 'reports'/.test(ladder));
   // The tag in CLAUDE.md cites a code. rung.mjs checks the citation; this checks the citation is the
   // one the gate actually fires on, which is the difference between a rung and a plausible neighbour.
   const { codesEmitted } = await import('../lib/finding-codes.mjs');
   const codes = codesEmitted();
   ok('sound gate: finding-codes.mjs can SEE its codes, so the [gated] tag verifies against the derived map',
-    (codes.get('silence-without-a-reason') || new Set()).has('scripts/gates/audio-check.mjs'));
+    (codes.get('silence-without-a-reason') || new Set()).has('quality/gates/audio-check.mjs'));
 }
 
 // ---- `make sections` has to ANSWER the rule that cites it, not merely relate to it ------------
@@ -7317,7 +7317,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const sceneFile = path.join(tmp, 'demo.json');
   fs.writeFileSync(sceneFile, JSON.stringify({ module: 'scene', duration: 6, layers: scene.layers, cuts: scene.cuts, audio: scene.audio }));
 
-  const runGate = () => spawnSync(process.execPath, [path.join(repoRoot, 'scripts/gates/craft-checklist.mjs'), sceneFile], { encoding: 'utf8' });
+  const runGate = () => spawnSync(process.execPath, [path.join(repoRoot, 'quality/gates/craft-checklist.mjs'), sceneFile], { encoding: 'utf8' });
 
   // no storyboard sidecar at all: no separate code any more (folded into no-storyboard, which the main
   // ladder already owns); the craft map is just empty, so every relevant doc reads as craft-unvisited.
@@ -7471,7 +7471,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 //
 // A FLOOR AND NOT AN EXACT COUNT, deliberately: this file gains assertions most days, so an exact match
 // would fail on every honest addition and be edited to fit within a week. The floor is raised when it is
-// comfortably passed, the same way verify/arsenal-ratchet.json is stamped, and it is a number in the
+// comfortably passed, the same way quality/baselines/arsenal-ratchet.json is stamped, and it is a number in the
 // source rather than a file because a floor you can see while adding a test is a floor you remember.
 const FLOOR = 1800;
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

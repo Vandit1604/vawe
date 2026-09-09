@@ -50,7 +50,7 @@ jobs:
           cache: npm
 
       # author-check's hero step opens a browser, and it opens puppeteer's OWN Chromium, not the
-      # google-chrome that ubuntu-latest ships: every launch site in scripts/gates/ calls
+      # google-chrome that ubuntu-latest ships: every launch site in quality/gates/ calls
       # puppeteer.launch() with no executablePath. Caching the download keyed on the lockfile is what
       # keeps that honest and fast at the same time.
       - uses: actions/cache@v4

@@ -8,8 +8,8 @@ group: process
 
 ## AGENT SUMMARY
 
-- `make evals` renders a fixed set of small brief scenes (`verify/evals/briefs/*.json`) into a
-  timestamped run under `verify/evals/runs/`, with a contact sheet per brief and one combined sheet.
+- `make evals` renders a fixed set of small brief scenes (`quality/runs/evals/briefs/*.json`) into a
+  timestamped run under `quality/runs/evals/runs/`, with a contact sheet per brief and one combined sheet.
 - The only thing it asserts by machine is **liveness**: every brief produced an mp4 of the duration and
   dimensions the scene declared. It never scores a film's quality. A human compares the sheets.
 - `make evals-compare BEFORE=<run-dir> [AFTER=<run-dir>]` stacks the before/after sheet per brief and
@@ -28,7 +28,7 @@ this repo already asks for (`make judge`, `docs/JUDGE.md`).
 
 ## The six briefs
 
-`verify/evals/briefs/` holds six small (6-13s) real scenes, each exercising a different deliverable so a
+`quality/runs/evals/briefs/` holds six small (6-13s) real scenes, each exercising a different deliverable so a
 change that only affects one family still shows up somewhere. Every one is **HTML-first**: wherever the
 brief used to hand-stack a group of `rect`/`text` for a card, a row of chips, or a stat panel, it is now
 one `html` layer with `parts` driving the reveal (`docs/CRAFT/HTML-FRAGMENTS.md`). What stays native is
@@ -63,7 +63,7 @@ a seventh deliberately widens what the harness watches; do not grow them into fu
 
 ```bash
 make evals                                        # render all 6, assert liveness, print the run dir
-make evals-compare BEFORE=verify/evals/baseline    # against the committed baseline, fresh AFTER run
+make evals-compare BEFORE=quality/runs/evals/baseline    # against the committed baseline, fresh AFTER run
 make evals-compare BEFORE=<run-a> AFTER=<run-b>    # two specific runs
 node scripts/dev/evals.mjs --save-baseline         # render + commit sheets/manifest as the new baseline
 ```
@@ -71,6 +71,6 @@ node scripts/dev/evals.mjs --save-baseline         # render + commit sheets/mani
 The renderer refuses a path under `verify/`: to render one brief by hand (not through `make evals`),
 copy it to `formats/scene/_eval-<name>.json`, render/gate that copy, then delete it.
 
-`verify/evals/runs/` is gitignored (mp4s, scratch). `verify/evals/baseline/` is committed, sheets and
+`quality/runs/evals/runs/` is gitignored (mp4s, scratch). `quality/runs/evals/baseline/` is committed, sheets and
 `manifest.json` only: mp4s are too big to carry per change, so a compare against the baseline shows the
 "before" side as sheets with a note in place of the missing video, never a broken player.

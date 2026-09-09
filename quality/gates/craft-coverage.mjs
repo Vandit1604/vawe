@@ -1,4 +1,4 @@
-// scripts/gates/craft-coverage.mjs, keep the docs honest: against the engine, and against each other.
+// quality/gates/craft-coverage.mjs, keep the docs honest: against the engine, and against each other.
 //
 //   make craft-coverage
 //
@@ -9,7 +9,7 @@
 //   2. PHANTOMS. A doc names a look/sting the engine no longer has (a rename left a dead reference).
 //   3. LINKS + INDEX. A CRAFT cross-link points at a missing file, or a CRAFT guide is orphaned
 //      (not linked from README's index, so nobody finds it).
-//   4. THE DOC MAP (scripts/gates/doc-map.mjs), repo-wide, not CRAFT-only: every indexed doc carries
+//   4. THE DOC MAP (quality/gates/doc-map.mjs), repo-wide, not CRAFT-only: every indexed doc carries
 //      the `when:`/`answers:` frontmatter the map is generated from, every generated view is current,
 //      every markdown link anywhere resolves, and nothing is written and left unreachable. Checks 3
 //      and 4 overlap on purpose: 3 is the CRAFT-local rule, 4 is the same rule for the other 90 docs.

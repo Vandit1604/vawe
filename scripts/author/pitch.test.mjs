@@ -8,11 +8,11 @@ import { writeReceipt, readReceipt } from '../lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const STAGE = 'pitch';
-// The subject lives OUTSIDE verify/approved/pitch/ on purpose: the receipt for a subject named
-// "x" is written to verify/approved/pitch/x.json, so a subject placed in that same directory would
+// The subject lives OUTSIDE quality/baselines/approved/pitch/ on purpose: the receipt for a subject named
+// "x" is written to quality/baselines/approved/pitch/x.json, so a subject placed in that same directory would
 // collide with its own receipt.
 const subject = path.join(ROOT, 'formats/scene/_pitch-selfcheck.json');
-const receiptFile = path.join(ROOT, 'verify/approved/pitch/_pitch-selfcheck.json');
+const receiptFile = path.join(ROOT, 'quality/baselines/approved/pitch/_pitch-selfcheck.json');
 
 fs.mkdirSync(path.dirname(subject), { recursive: true });
 fs.writeFileSync(subject, JSON.stringify({ module: 'scene', duration: 5 }, null, 1) + '\n');

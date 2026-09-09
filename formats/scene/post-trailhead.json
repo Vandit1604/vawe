@@ -1,6 +1,6 @@
 {
  "module": "scene",
- "note": "POSTABLE film. Trailhead, a fictional hiker's route planner. Proves ONE mechanism: a person draws a route on a map and the elevation profile fills in underneath the drawn line as it is drawn, so the climb is visible before the walk. Fictional and self-contained, invented figures. Built as the 9:16 reels-length successor to the 15s worked example at verify/evals/briefs/demo.json: same mechanism, more room to breathe, real sound.",
+ "note": "POSTABLE film. Trailhead, a fictional hiker's route planner. Proves ONE mechanism: a person draws a route on a map and the elevation profile fills in underneath the drawn line as it is drawn, so the climb is visible before the walk. Fictional and self-contained, invented figures. Built as the 9:16 reels-length successor to the 15s worked example at quality/runs/evals/briefs/demo.json: same mechanism, more room to breathe, real sound.",
  "theme": "satara",
  "aspect": "9:16",
  "destination": "reels",

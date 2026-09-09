@@ -254,7 +254,7 @@ function applyNoStudy({ a, fm, name, out }) {
     L.push('');
   }
   fs.writeFileSync(dest, L.join('\n'));
-  const g = spawnSync(process.execPath, [path.join(ROOT, 'scripts/gates/storyboard-check.mjs'), dest], { encoding: 'utf8' });
+  const g = spawnSync(process.execPath, [path.join(ROOT, 'quality/gates/storyboard-check.mjs'), dest], { encoding: 'utf8' });
   return { dest, fm, draft: `✓ wrote ${dest}, ${n} beat skeleton from the brief (no site study)`, warnings: '',
     gate: `${(g.stdout || '').trim()}\n${(g.stderr || '').trim()}`.trim(), gateOk: g.status === 0 };
 }
@@ -290,7 +290,7 @@ function apply({ answersPath, name, slug, out }) {
     + `the brief's decision was lost between here and storyboard-parse.mjs.` };
   // …and run the gate rather than telling the author to. It never claims a green plan: whatever the gate
   // says is passed straight through, blockers included.
-  const g = spawnSync(process.execPath, [path.join(ROOT, 'scripts/gates/storyboard-check.mjs'), dest], { encoding: 'utf8' });
+  const g = spawnSync(process.execPath, [path.join(ROOT, 'quality/gates/storyboard-check.mjs'), dest], { encoding: 'utf8' });
   // The child's WARNINGS go to stderr, and printing only stdout swallowed them: the draft warns when the
   // sections cannot fit the duration, which is the single most useful thing it says to a short film, and
   // this function was eating it. A wrapper that hides its child's warnings is worse than no wrapper.

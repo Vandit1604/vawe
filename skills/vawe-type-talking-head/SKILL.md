@@ -83,7 +83,7 @@ a finished asset?
 
 ## The worked example
 
-`verify/evals/briefs/talking-head.json` (12s, 9:16, `destination: shorts`). No real VO exists for this
+`quality/runs/evals/briefs/talking-head.json` (12s, 9:16, `destination: shorts`). No real VO exists for this
 example: the circle is the FACE-SAFE PLACEHOLDER (labelled as such in the scene `note`, not on screen),
 the three caption lines are hand-timed to stand in for a real `voWords` track, and the film cuts away to
 a stat card (a real `count` layer) and back, the B-roll rhythm this type needs and others do not.

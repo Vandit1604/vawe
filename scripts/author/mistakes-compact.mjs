@@ -85,7 +85,7 @@ const lessonOf = (e) => {
   );
 };
 
-// "holds": every scripts/gates/*.mjs or scripts/live/*.mjs that cites this entry by number, found
+// "holds": every quality/gates/*.mjs or scripts/live/*.mjs that cites this entry by number, found
 // by grep so this never drifts into a hand-kept second list. `mistakes-dupes.mjs` and its own test
 // fixtures are excluded from being cited targets, not from citing: this is a straight text search.
 const GATE_DIRS = ['scripts/gates', 'scripts/live'];

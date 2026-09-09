@@ -126,7 +126,7 @@ const scene = {
     + 'The photograph is the continuous object; what changes is how much of it you can see.',
   authoring: {
     // The first draft of this file waived `no-visual-vocabulary`, and that waiver was the 31st in a
-    // library of 96 (scripts/gates/waiver-drift.mjs). That gate is gone now; the reason for the rewrite
+    // library of 96 (quality/gates/waiver-drift.mjs). That gate is gone now; the reason for the rewrite
     // was never the gate. This film has a subject because a film needs one.
     allow: ['no-transition'],
     _why: {

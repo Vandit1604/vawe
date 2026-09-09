@@ -1,10 +1,10 @@
-// scripts/gates/output-contract.mjs: every REPORTING gate renders its findings through
+// quality/gates/output-contract.mjs: every REPORTING gate renders its findings through
 // scripts/lib/findings.mjs, so it gets tight prose by default and --json for free. This gate counts the
 // ones that still print ad-hoc prose and ratchets that number down. See docs/CRAFT/COMMAND-OUTPUT.md.
 //
 // WHY A RATCHET, NOT A REFUSAL AT THE WRITE SITE. The 52 non-conforming gates predate the contract, and
 // rewriting all of them at once is the big-bang break the migration plan warns against. A ratchet lets
-// the number fall one batch at a time and never rise, which is the same shape as verify/rung-ratchet.json.
+// the number fall one batch at a time and never rise, which is the same shape as quality/baselines/rung-ratchet.json.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +12,7 @@ import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const GATES = path.join(ROOT, 'scripts/gates');
-const RATCHET = path.join(ROOT, 'verify/output-contract-ratchet.json');
+const RATCHET = path.join(ROOT, 'quality/baselines/output-contract-ratchet.json');
 
 // Named, not silently skipped: a test runner tallies pass/fail (not finding-shaped), and this gate
 // measures the others so it does not measure itself.
@@ -45,7 +45,7 @@ const n = targets.length;
 const f = gateFindings({ line: (r) => r.summary });
 for (const file of targets) {
   f.warn('ad-hoc-output', `${file} prints its own prose; render through findings.mjs (tight prose + --json)`, {
-    at: `scripts/gates/${file}`,
+    at: `quality/gates/${file}`,
     doc: 'docs/CRAFT/COMMAND-OUTPUT.md',
   });
 }
@@ -64,11 +64,11 @@ if (process.argv.includes('--stamp')) {
 if (prior && n > prior.adHoc) {
   console.error(`  ✗ ${n} gate(s) print ad-hoc prose, up from ${prior.adHoc}. A new reporting gate must`);
   console.error('    render through findings.mjs (docs/CRAFT/COMMAND-OUTPUT.md), so it gets --json for free.');
-  console.error('    If this is deliberate, raise the bar on purpose: node scripts/gates/output-contract.mjs --stamp\n');
+  console.error('    If this is deliberate, raise the bar on purpose: node quality/gates/output-contract.mjs --stamp\n');
   process.exit(1);
 }
 if (prior && n < prior.adHoc) {
   console.error(`  ~ ${prior.adHoc - n} fewer ad-hoc gate(s) than the ratchet allows. Lower it:`
-    + ' node scripts/gates/output-contract.mjs --stamp\n');
+    + ' node quality/gates/output-contract.mjs --stamp\n');
 }
 console.error('  ✓ no new ad-hoc reporting gate\n');

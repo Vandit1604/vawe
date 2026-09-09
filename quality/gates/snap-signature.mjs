@@ -1,4 +1,4 @@
-// scripts/gates/snap-signature.mjs: the ONE definition of a snap signature, shared by both snap gates.
+// quality/gates/snap-signature.mjs: the ONE definition of a snap signature, shared by both snap gates.
 //
 // snap-scenes.mjs (whole library) and scene-snap.mjs (one format) both prove "this refactor changed no
 // pixels" by diffing a per-frame signature. They used to carry two hand-kept copies of the capture and
@@ -72,7 +72,7 @@ function capture(frames) {
   // per-pixel noise) and quantise each channel to 64 levels before hashing. That is coarse enough to be
   // stable run to run and still fine enough to move when a preset, colour, speed or direction changes.
   //
-  // Baselines live in verify/snap/, which is GITIGNORED and therefore local-only, so the fingerprint
+  // Baselines live in quality/baselines/snap/, which is GITIGNORED and therefore local-only, so the fingerprint
   // never has to survive a different machine's GPU, cross-machine variance is acceptable here.
   const bgFingerprint = () => {
     const cv = document.querySelector('canvas#cv') || document.querySelector('canvas');

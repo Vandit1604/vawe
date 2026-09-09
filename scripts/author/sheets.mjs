@@ -9,7 +9,7 @@
 //   make sheets D=formats/scene/x.json
 //   make dev / make ship                       run this after the render (NOSHEETS=1 opts out)
 //
-// THE RECEIPT SPLIT, which is the whole reason this file is careful. `verify/beats-seen/` exists to
+// THE RECEIPT SPLIT, which is the whole reason this file is careful. `quality/runs/beats-seen/` exists to
 // prove a PERSON LOOKED at a sheet, and beat-check fires `beats-unseen` when no receipt matches the
 // scene's hash. Producing sheets automatically inside the iteration loop would make every receipt
 // permanently fresh, so the gate could never fire again and would report green for scenes nobody has

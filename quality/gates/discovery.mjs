@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/gates/discovery.mjs · can an author still FIND what this engine can do?
+// quality/gates/discovery.mjs · can an author still FIND what this engine can do?
 //
 // WHY THIS IS ITS OWN GATE. Discovery broke three separate ways in one week, and each break was
 // invisible until somebody went looking:
@@ -19,7 +19,7 @@
 // which is what the search actually answers from, so it sees every source at once and cannot be
 // fooled by one of them being clean.
 //
-// WHAT IT DOES NOT DO. It does not judge whether a blurb is GOOD. scripts/gates/lib-test.mjs owns
+// WHAT IT DOES NOT DO. It does not judge whether a blurb is GOOD. quality/gates/lib-test.mjs owns
 // that: the blurb self-retrieval floor, the PRESENT/ABSENT confidence calibration, and the plain
 // English question set. Two owners for one question is how they drift apart. This gate owns
 // presence: is the thing in the index, does it have words, and is its family asked for (check 5).
@@ -40,7 +40,7 @@ import { CATALOG } from '../../blocks/catalog.mjs';
 import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const RATCHET = path.join(ROOT, 'verify/discovery-ratchet.json');
+const RATCHET = path.join(ROOT, 'quality/baselines/discovery-ratchet.json');
 const stamp = process.argv.includes('--stamp');
 // The printed line is rendered FROM the record (docs/MISTAKES.md #401): each record's `summary`
 // already carries the full multi-line advice a human reads, so the custom renderer prints it verbatim,
@@ -99,7 +99,7 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
       `\n    An entry with no blurb is findable only by someone who already knows its name, which is` +
       `\n    the definition of undiscoverable. Give it a blurb where it is written. If its vocabulary` +
       `\n    is not a registry yet, making it one is the real fix: it buys the load-time refusal too.` +
-      `\n    Lower the bar deliberately only with: node scripts/gates/discovery.mjs --stamp\n`);
+      `\n    Lower the bar deliberately only with: node quality/gates/discovery.mjs --stamp\n`);
   } else if (prior && bare.length < prior.unfindable) {
     console.log(`  ~ ${prior.unfindable - bare.length} fewer unfindable than the ratchet allows. Lower it: --stamp`);
   } else console.log(`  ✓ ${bare.length} entr(ies) without a blurb, at the ratchet (${summary})`);
@@ -171,7 +171,7 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
     `\n  ✗ ${uncovered.length} searchable famil(ies) have no author-phrased query in the eval: ` +
     `\n    ${uncovered.map((u) => u.family).slice(0, 8).join(', ')} ` +
     `\n    An author who cannot phrase a family in plain English cannot find it, whatever its blurbs say.` +
-    `\n    Add one query per family to PRESENT/PLAIN in scripts/gates/lib-test.mjs that resolves to it,` +
+    `\n    Add one query per family to PRESENT/PLAIN in quality/gates/lib-test.mjs that resolves to it,` +
     `\n    and close any miss with \`aka\` at the write site. Worklist: node scripts/dev/family-coverage.mjs` +
     `\n    If a family is genuinely reached only by mechanism, exempt it in scripts/dev/family-coverage.mjs.`);
   else console.log(`  ✓ all ${covered.size} searchable families are asked for by the eval`);

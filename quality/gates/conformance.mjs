@@ -1,9 +1,9 @@
 // conformance.mjs: does the engine actually DO what it says it accepts?
 //
-//   node scripts/gates/conformance.mjs            everything
-//   node scripts/gates/conformance.mjs enums      only the vocabulary sweep
-//   node scripts/gates/conformance.mjs props      only the prop-effect sweep
-//   node scripts/gates/conformance.mjs paths      only the cross-path sweep
+//   node quality/gates/conformance.mjs            everything
+//   node quality/gates/conformance.mjs enums      only the vocabulary sweep
+//   node quality/gates/conformance.mjs props      only the prop-effect sweep
+//   node quality/gates/conformance.mjs paths      only the cross-path sweep
 //   make conformance
 //
 // WHY THIS EXISTS. Nine framework bugs were found by hand while authoring (docs/MISTAKES.md #19-27)

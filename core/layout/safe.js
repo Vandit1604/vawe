@@ -4,7 +4,7 @@
 // disagreed:
 //   core/boot.js      min(W,H)*0.06 on every side          → PLACED content (pin/col/edge keywords)
 //   core/tokens.css   240/580/60/180 keyed on data-orient  → drew the ?debug=safe overlay
-//   verify/audit.mjs  60/240/900/1340                      → CHECKED content
+//   quality/audit.mjs  60/240/900/1340                      → CHECKED content
 //   verify/run.js     the same box again                   → checked it again
 // So the engine placed `pin:"bottom"` 550px inside the zone the audit called unsafe, and `pin:"top"`
 // and `pin:"right"` failed too. The engine told you where the bottom was and the gate failed you for
@@ -40,7 +40,7 @@ import { defineRegistry } from '../registry/registry.js';
 // them from two tables is precisely how the engine and its gate drifted apart.
 //
 // A REGISTRY, AND THE VALUE IT CARRIES IS THE PIXELS. Every other vocabulary here maps a name to an
-// implementation; this one maps a name to `[w, h]`, which is what boot.js and verify/audit.mjs read.
+// implementation; this one maps a name to `[w, h]`, which is what boot.js and quality/audit.mjs read.
 // That is what a registry's `entries` map already is, so ASPECTS below IS the entries map: the object
 // keeps its shape, its keys and its values, and nothing that reads it changes.
 //
@@ -74,7 +74,7 @@ export const ASPECT_REGISTRY = defineRegistry('output target', {
 });
 
 // The name → pixels table itself, which is the registry's own entries map. boot.js and
-// verify/audit.mjs both import this; neither keeps a copy.
+// quality/audit.mjs both import this; neither keeps a copy.
 export const ASPECTS = ASPECT_REGISTRY.entries;
 
 /**
@@ -124,7 +124,7 @@ export const MARGIN = 0.06;
  * THE SAFE BOX IS A PLACEMENT BOX, READ AT REST, and that is the honest reading of the invariant
  * below. ANY zoom above 1 carries a safe-edge layer out of the safe box: at 1.06 on 1920x1080 it ends
  * 28px past the line. That is not a defect the margin can be widened out of, because the overshoot
- * scales with the margin it is eating. It is why `verify/audit.mjs` grades the safe zone in scene
+ * scales with the margin it is eating. It is why `quality/audit.mjs` grades the safe zone in scene
  * space AND screen space and reports only when the two agree (#454). What this constant guards is the
  * harder line: past `MAX_ZOOM` the same layer is off the FRAME, cropped, and no reading of any space
  * makes that acceptable.
@@ -310,7 +310,7 @@ export const captionSkin = (cfg = {}) =>
  * and the band becomes the union of where the captions ACTUALLY sit. Omit it and the answer is
  * exactly what it was before placement existed, which is why no existing caller moves.
  *
- * WHY THIS MATTERS MORE THAN IT LOOKS. verify/audit.mjs reserves this strip and warns when other
+ * WHY THIS MATTERS MORE THAN IT LOOKS. quality/audit.mjs reserves this strip and warns when other
  * content lands in it. The moment a caption can be pinned to the top, a band that still describes
  * the bottom is wrong in both directions at once: it holds empty space nothing needs, and it misses
  * the collision that is really there. A keep-out that reports the wrong strip is worse than none.
@@ -377,7 +377,7 @@ export function frameOf(cfg = {}, aspectKey = '') {
 
 // ── SETTLED, NOT MID-FLIGHT ─────────────────────────────────────────────────────────────────────
 // A layer that SLIDES IN from off-frame is a legitimate entrance; a layer that SETTLES off-frame is a
-// bug. Grading the first produces constant false failures, which is what verify/audit.mjs learned
+// bug. Grading the first produces constant false failures, which is what quality/audit.mjs learned
 // (docs/MISTAKES.md #376): it grades only ARRIVED content, through midMove() and ARRIVED, after
 // grading mid-entrance boxes reported a correct frame as broken.
 //

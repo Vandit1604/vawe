@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/gates/generated-check.mjs · is every generated file current?
+// quality/gates/generated-check.mjs · is every generated file current?
 //
 // THE FAILURE THIS EXISTS FOR, and it is not hypothetical. `site/lib/arsenal.json` is derived from the
 // registries by scripts/site/arsenal-json.mjs. Nobody ran it for weeks. It went 67 items stale and was
@@ -14,8 +14,8 @@
 // what the file should contain, so "regenerate and diff" cannot go out of date the way a hand-written
 // list of expected outputs would.
 //
-//   node scripts/gates/generated-check.mjs           fail if any generated file is stale
-//   node scripts/gates/generated-check.mjs --write   regenerate and say what moved, exit 0
+//   node quality/gates/generated-check.mjs           fail if any generated file is stale
+//   node quality/gates/generated-check.mjs --write   regenerate and say what moved, exit 0
 //
 // It leaves the regenerated files IN PLACE on failure. The fix is then `git add`, not a second command
 // to remember, which is the whole complaint that produced this file.
@@ -37,7 +37,7 @@ const GENERATORS = [
     ['docs/EFFECTS.md', 'site/lib/effects.json', 'site/lib/effects-counts.json', 'site/lib/effects-body.json']],
   ['arsenal index', ['scripts/site/arsenal-json.mjs'],
     ['site/lib/arsenal.json', 'site/lib/blocks.json']],
-  ['doc map', ['scripts/gates/doc-map.mjs', '--write'],
+  ['doc map', ['quality/gates/doc-map.mjs', '--write'],
     ['docs/INDEX.md', 'docs/CRAFT/README.md', 'skills/vawe-docs/SKILL.md']],
   // registry/ is 216 generated files with its own `--check` mode that nothing ran. It went stale the
   // same way arsenal.json did: block blurbs changed, the tree carried the old `description`, and only

@@ -176,7 +176,7 @@ const typeface = {
   cssFontWeight: weight == null ? 'normal' : String(weight),
   cssFontStyle: 'normal',
   // Provenance. Without it a stale artifact is undetectable: the JSON stays syntactically perfect
-  // forever while the woff2 underneath it changes. scripts/gates/glyphs-audit.mjs reads this.
+  // forever while the woff2 underneath it changes. quality/gates/glyphs-audit.mjs reads this.
   vawe: {
     generator: 'generators/fonts/glyphs.mjs',
     source: sourceRel,

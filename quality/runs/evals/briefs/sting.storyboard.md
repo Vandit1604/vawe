@@ -25,7 +25,7 @@ craft:
     typography: "wordmark at weight 560, intermediate rather than bold, because mercury's own note says the theme's type never goes bold; the descriptor drops to the theme mono at low emphasis"
 ---
 
-<!-- verify/evals/briefs/sting.json: the thinnest of the six eval briefs (docs/EVALS.md), and the
+<!-- quality/runs/evals/briefs/sting.json: the thinnest of the six eval briefs (docs/EVALS.md), and the
      worked example skills/vawe-type-sting/SKILL.md points to. One beat, on purpose. -->
 
 ## Beat 1: the move (0s-6s)

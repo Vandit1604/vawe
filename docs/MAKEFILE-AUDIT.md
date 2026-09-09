@@ -28,7 +28,7 @@ description of what the file is. Every one of those targets is a command with a 
 The build-system half of what a Makefile is for is not present here at all.
 
 **2. Pure aliases: 204 of 214 at the time of the audit** (after the changes below; 200 before). A pure alias is a recipe of
-one or two lines that passes variables through to one script (`node scripts/gates/X.mjs $(D)
+one or two lines that passes variables through to one script (`node quality/gates/X.mjs $(D)
 $(if $(STRICT),--strict)`), with no shell logic of its own. This is the catalogue half, and it is
 the honest majority of the file. `make list` exists because a 200-plus-line catalogue needs an
 index; it reads the Makefile itself so the index cannot drift from the real target list.

@@ -167,7 +167,7 @@ parameters from the generator's own signature, so no list can drift.</p>
 <tr><td>things <span class="m">make arsenal</span> searches</td><td class="num">337</td><td class="m">scripts/author/arsenal.mjs</td></tr>
 <tr><td>build-time blocks</td><td class="num">21 families</td><td class="m">blocks/</td></tr>
 <tr><td>brand themes</td><td class="num">38</td><td class="m">themes/</td></tr>
-<tr><td>gates</td><td class="num">65</td><td class="m">scripts/gates/</td></tr>
+<tr><td>gates</td><td class="num">65</td><td class="m">quality/gates/</td></tr>
 </table></div>
 
 <h2><span class="n">Stage four</span>The library, as it actually is</h2>
@@ -253,7 +253,7 @@ resort: if the bad value has a write site, the refusal goes there and the class 
 <div class="find done">
   <h3>CI can compare snapshots now <span class="tag">fixed</span></h3>
   <p>The ceiling was written down as permanent and it was a size problem. 20MB of full signatures cannot
-  be committed; 4.2KB of sha256 can. <code>verify/snap/digest.json</code> is the one tracked file in a
+  be committed; 4.2KB of sha256 can. <code>quality/baselines/snap/digest.json</code> is the one tracked file in a
   gitignored directory, and a checkout without the baselines falls back to it for a
   whether-it-moved verdict, saying so rather than implying the full net ran. The what stays local, where
   the 20MB lives and a person can read a diff.</p>
@@ -304,8 +304,8 @@ resort: if the bad value has a write site, the refusal goes there and the class 
 <tr><td>Every render reports how much of it moves</td><td class="m">internal/scene · internal/render</td><td><span class="m">78% still, motion 0.30</span> beside the duration. It refuses nothing.</td></tr>
 <tr><td>A new layer type: <span class="m">adjust</span></td><td class="m">core/layers/adjust.js</td><td>One grade over everything with a lower <code>track</code>. Five kinds plus a raw filter, keyed through the existing <code>vars</code> track.</td></tr>
 <tr><td>Relative time, three holes closed</td><td class="m">formats/scene/scene.js · core/validate/validate.mjs</td><td>The resolver walks the whole tree, two invented defaults became refusals, and a group child's discarded window is warned.</td></tr>
-<tr><td>A tracked snapshot digest</td><td class="m">verify/snap/digest.json</td><td>4.2KB of sha256, so CI can answer whether a scene moved.</td></tr>
-<tr><td><span class="m">make census</span> · preflight's NOT REACHED FOR</td><td class="m">scripts/lib/census.mjs · scripts/gates/preflight.mjs</td><td>Populations by name; capabilities this film declines, with the library's share beside each.</td></tr>
+<tr><td>A tracked snapshot digest</td><td class="m">quality/baselines/snap/digest.json</td><td>4.2KB of sha256, so CI can answer whether a scene moved.</td></tr>
+<tr><td><span class="m">make census</span> · preflight's NOT REACHED FOR</td><td class="m">scripts/lib/census.mjs · quality/gates/preflight.mjs</td><td>Populations by name; capabilities this film declines, with the library's share beside each.</td></tr>
 </table></div>
 <p class="note">The stillness figure measures change between consecutive frames, which is why a breath
 does not move it: a 1.5% scale over 4.6 seconds is a sub-pixel step per frame. It reads grounds and

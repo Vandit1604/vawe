@@ -5,7 +5,7 @@
  "aspect": "16:9",
  "duration": 15,
  "energy": "brand",
- "storyboard": "verify/evals/briefs/demo.storyboard.md",
+ "storyboard": "quality/runs/evals/briefs/demo.storyboard.md",
  "audio": { "silent": true, "_why": "worked example: proving the draw+click+fill mechanism, not a mix" },
  "authoring": { "allow": ["no-preflight", "craft-unvisited"], "_why": {
    "no-preflight": "a small worked-example fixture (docs/EVALS.md) with a locked storyboard beside it; the 9-step decision chain is for a commissioned film with a requester to sign a lock sheet",

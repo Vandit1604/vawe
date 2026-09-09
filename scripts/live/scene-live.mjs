@@ -2,7 +2,7 @@
 // scripts/live/scene-live.mjs - the four numbers CLAUDE.md argues from, measured on the film you just
 // saved, at the moment the JSON is still open.
 //
-// WHY THIS EXISTS, AS A NUMBER. `node scripts/gates/rung.mjs` reports the enforcement ladder over this
+// WHY THIS EXISTS, AS A NUMBER. `node quality/gates/rung.mjs` reports the enforcement ladder over this
 // repo's own doctrine, and it reads:
 //
 //     [built] 2   the engine makes it true
@@ -48,7 +48,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 // `rect` are deliberately absent there and absent here: a mark is not a picture.
 const PICTORIAL = new Set(['image', 'html', 'component', 'svg', 'video', 'clip', 'lottie', 'board', 'doc']);
 
-// STABLE PER FILE, VARIED BETWEEN FILES. The same string→int hash scripts/gates/motion-audit.mjs uses
+// STABLE PER FILE, VARIED BETWEEN FILES. The same string→int hash quality/gates/motion-audit.mjs uses
 // to pick a deterministic ancestor chain. Two saves of the same film pick the same three presets; two
 // different films almost never do. That is the whole point: advice that churns between saves is noise
 // an author learns to skip, and advice that is identical for every film converges the library instead
@@ -167,7 +167,7 @@ process.stdin.on('end', () => {
   }
   if (j.audio && j.audio.silent && !j.audio._why) {
     say.push(`  \`audio.silent\` with no \`_why\`. 119 scenes declare the silence and only 40 justify it.`);
-    say.push(`  scripts/gates/audio-check.mjs will stop you at ship; a sentence here settles it now.`);
+    say.push(`  quality/gates/audio-check.mjs will stop you at ship; a sentence here settles it now.`);
   }
   if (!say.length) process.exit(0);              // the reward for a film doing fine is silence
 

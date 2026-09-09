@@ -14,7 +14,7 @@ import { catalogued } from '../../core/registry/registry.js';
 // glyph units and not about a layer at all. A family-scoped map cannot make that mistake. The 32
 // registry-backed families no longer appear here at all: they carry their own blurbs and their own
 // section, and are read off `catalogued()` below.
-// `scripts/gates/arsenal-check.mjs` fails when a vocabulary the engine exports reaches none of these
+// `quality/gates/arsenal-check.mjs` fails when a vocabulary the engine exports reaches none of these
 // sections. The catalogue is what CLAUDE.md sends an author to before they choose, and it once did not
 // contain the three.js layer at all: a whole scene-graph capability with four registered scenes, a
 // written determinism contract and a purity gate, invisible to the one document whose job is to list it.
@@ -131,7 +131,7 @@ walkCore('core');
 // blueprints/index.mjs is NOT under core/ and holds the beat registry. It used to reach this file
 // through an import line for BEATS and BEAT_BLURBS; the section derives itself now, so deleting that
 // import as "no longer needed" would have made the whole beat family vanish from docs/EFFECTS.md in
-// silence. Named here for the same reason scripts/gates/arsenal-check.mjs names it in its own walk.
+// silence. Named here for the same reason quality/gates/arsenal-check.mjs names it in its own walk.
 CORE.push('blueprints/index.mjs');
 for (const f of CORE) { try { await import(path.join(root, f)); } catch { /* browser-only; arsenal-check reports it */ } }
 

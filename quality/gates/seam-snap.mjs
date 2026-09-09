@@ -1,4 +1,4 @@
-// scripts/gates/seam-snap.mjs: SAMPLE THE SEAMS, NOT THE CENTERS.
+// quality/gates/seam-snap.mjs: SAMPLE THE SEAMS, NOT THE CENTERS.
 //
 // The another engine lesson (and our own docs/MISTAKES.md #144): the highest-value render bugs, a black
 // flash on a transition, a morph that reads as a collision. Live INSIDE the transition overlap, which
@@ -8,7 +8,7 @@
 // beat's start cluster), it pulls the frames straddling the boundary out of the RENDERED mp4 and flags a
 // luminance DIP that is present at the seam but not just outside it, the signature of a flash.
 //
-//   node scripts/gates/seam-snap.mjs formats/scene/<file>.json     ·     make seam-check D=<file>
+//   node quality/gates/seam-snap.mjs formats/scene/<file>.json     ·     make seam-check D=<file>
 //
 // It reads the real rendered pixels (not renderFrame) because a seam is composited during the render
 // (core/timeline/seams.js), so it only exists in the mp4, which is the whole reason a DOM-signature gate can't
@@ -26,7 +26,7 @@ import { gateFindings } from '../lib/findings.mjs';
 const f = gateFindings();
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.argv[2];
-if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node scripts/gates/seam-snap.mjs <scene.json>'); process.exit(2); }
+if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node quality/gates/seam-snap.mjs <scene.json>'); process.exit(2); }
 // LOWERED, because `transitions: [{at, fx}]` is the documented way to declare a boundary and it lowers
 // to cuts/seams/stings only at render time. Reading the raw file found NO boundaries on the three films
 // that declare them that way, so this gate ran and reported nothing on the exemplar it exists to protect
@@ -35,7 +35,7 @@ const data = loadScene(structuredClone(JSON.parse(fs.readFileSync(dataArg, 'utf8
 const name = path.basename(dataArg).replace(/\.(expanded\.)?json$/, '');
 const mp4 = path.join(ROOT, 'out', `${name}.mp4`);
 // EXISTS IS NOT FRESH. A seam sheet cut from the previous render reports clean seams for a film whose
-// cuts have moved, which is the one class this gate exists to catch. `gradeable` (scripts/gates/tile.mjs)
+// cuts have moved, which is the one class this gate exists to catch. `gradeable` (quality/gates/tile.mjs)
 // asks both halves and is the single owner of that question.
 const ready = gradeable(dataArg, mp4);
 if (!ready.ok) { console.error(`✗ ${ready.why}.\n  fix: ${ready.fix}`); process.exit(1); }

@@ -9,7 +9,7 @@
   "allow": ["sparse-beats", "linear-motion"],
   "_why": {
    "sparse-beats": "held pace, deliberately: this brief's own corrected pacing research (VO maths, 130-150wpm across 60s implies ~5-7.5s/beat) says the explainer type's old 2.5-4.0s band undershoots, so 7 beats average 6.1s each rather than the ~12 beats direction-floor's 3.5s-per-beat heuristic expects. Each beat carries a real artifact (a code line, a tile grid, a worker diagram, a file-size proof), not a bare card, so it is a held idea, not an empty slide.",
-   "linear-motion": "the frame-index readout's count VALUE is deliberately ease:linear because it displays the film's own real elapsed frames (30fps x its own duration): an eased curve would make the number lie about the clock it is reading. The continuous object's on-screen position/size still eases (easeInOutSine/easeOutExpo on its motion track); only the numeric value is linear, on purpose, same reasoning as verify/evals/briefs/explainer.json's own t-readout."
+   "linear-motion": "the frame-index readout's count VALUE is deliberately ease:linear because it displays the film's own real elapsed frames (30fps x its own duration): an eased curve would make the number lie about the clock it is reading. The continuous object's on-screen position/size still eases (easeInOutSine/easeOutExpo on its motion track); only the numeric value is linear, on purpose, same reasoning as quality/runs/evals/briefs/explainer.json's own t-readout."
   }
  },
  "sceneUnits": true,

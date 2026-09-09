@@ -22,7 +22,7 @@ watching somebody DECIDE, rather than from a named effect: where the cut goes, w
 what a range selector is really for.
 
 **Read the fifth field before you touch anything.** Ten of the twelve are options. A changed default has
-to survive `scripts/gates/snap-scenes.mjs`, which asserts shipped scenes are byte-identical, so a default
+to survive `quality/gates/snap-scenes.mjs`, which asserts shipped scenes are byte-identical, so a default
 change is an argued piece of work and never a line edit.
 
 ---
@@ -288,7 +288,7 @@ the shift inside a motion the viewer reads as intentional.
 **ENGINE MAPPING** Absent as such. `filter: "morph"` (`core/looks/filters.js`) is dilate and erode on pixels,
 not a font swap, and `morphButton` is a blueprint beat. This is a new `core/type/type.js` preset, `fontMorph`,
 and it needs one thing the engine has: `trackingFor` is already exported from `core/motion/motion.js` (it is
-asserted in `scripts/gates/lib-test.mjs`).
+asserted in `quality/gates/lib-test.mjs`).
 
 **DEFAULT OR OPTION** Option. It is a spectacle device, and a film should have one of those, not four.
 
@@ -385,7 +385,7 @@ radial gradients plus a filter chain is reachable today, since `filter` applies 
 any other. Worth adding as a background preset only if a film needs the colours keyed to its own brand.
 
 **DEFAULT OR OPTION** Option. Note that most gate-visible scenes paint one background window for the
-whole runtime (112 of 134, last measured; run `node scripts/gates/waiver-drift.mjs` for the current
+whole runtime (112 of 134, last measured; run `node quality/gates/waiver-drift.mjs` for the current
 count), so the real lever is binding windows to cuts, not a richer single window.
 
 ---
@@ -466,7 +466,7 @@ contents do not, which is the whole claim.
 decision against. A rig usually wants most children upright and one deliberately tumbling, and neither
 a changed inheritance default nor a group-level switch can say that: both are all children or none.
 Turning it on by default would also have had to be proven byte-identical across the library by
-`scripts/gates/snap-scenes.mjs`, and it cannot be, because the whole point is that it changes pixels.
+`quality/gates/snap-scenes.mjs`, and it cannot be, because the whole point is that it changes pixels.
 
 ---
 

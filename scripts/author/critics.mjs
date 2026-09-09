@@ -302,7 +302,7 @@ function main() {
 
   const rec = writeReceipt('panels', abs, { critics, ranAt: new Date().toISOString() });
   if (!rec) { console.error(`✗ could not write the panel receipt (is ${file} readable?)`); process.exit(1); }
-  console.log(`  ✓ ${passCount} of ${ran} critics pass · verify/approved/panels/${path.basename(file, '.json')}.json`);
+  console.log(`  ✓ ${passCount} of ${ran} critics pass · quality/baselines/approved/panels/${path.basename(file, '.json')}.json`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main();

@@ -1,4 +1,4 @@
-// scripts/gates/beats-of.mjs, WHERE ARE THE BEATS, and which frame represents each one.
+// quality/gates/beats-of.mjs, WHERE ARE THE BEATS, and which frame represents each one.
 //
 // A scene does not declare its beats. They are inferred from where content layers START: a cluster of
 // starts within ~1.6s is one beat. Three things must be excluded or the clustering invents beats that

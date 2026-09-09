@@ -57,7 +57,7 @@ export async function capabilities() {
     import(path.join(repoRoot, 'core/looks/index.js')),
     import(path.join(repoRoot, 'core/type/type.js')),
     import(path.join(repoRoot, 'core/cuts/index.js')),
-    import(path.join(repoRoot, 'scripts/gates/craft-coverage.mjs')),
+    import(path.join(repoRoot, 'quality/gates/craft-coverage.mjs')),
     import(path.join(repoRoot, 'blocks/catalog.mjs')),
     import(path.join(repoRoot, 'core/stings/index.js')),
     import(path.join(repoRoot, 'core/timeline/seams.js')),

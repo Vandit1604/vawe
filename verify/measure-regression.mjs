@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const audit = (fixture) => {
-  try { return execFileSync('node', ['verify/audit.mjs', fixture], { cwd: root, encoding: 'utf8' }); }
+  try { return execFileSync('node', ['quality/audit.mjs', fixture], { cwd: root, encoding: 'utf8' }); }
   catch (e) { return (e.stdout || '') + (e.stderr || ''); } // the audit exits 1 on a HARD fail
 };
 
@@ -29,7 +29,7 @@ const ok = (cond, msg, out) => {
 //    over that empty slack are not touching on screen. The fixture is a 1200px-wide layer reading "Hi"
 //    beside a neighbour 700px away, which reported `[overlap] 400x50px`.
 {
-  const out = audit('verify/fixtures/measure-slack-overlap.json');
+  const out = audit('quality/fixtures/measure-slack-overlap.json');
   ok(!out.includes('[overlap]'), 'overlap is measured on the glyphs, not on the declared `w`', out);
 }
 
@@ -37,7 +37,7 @@ const ok = (cond, msg, out) => {
 //    painted in it, so a group declaring h:400 around a 30px label reported a 400px-tall extent and
 //    hard-failed safe-zone on 360px of empty air.
 {
-  const out = audit('verify/fixtures/measure-group-box.json');
+  const out = audit('quality/fixtures/measure-group-box.json');
   ok(!out.includes('[safe]'), 'a group is measured by its drawn children, not by its declared `h`', out);
 }
 
@@ -45,7 +45,7 @@ const ok = (cond, msg, out) => {
 //    single largest text, so an 80px headline at 3.3:1 was a hard fail when it was the biggest thing
 //    on screen and reported by nothing at all once a 90px sibling arrived. Same paint, same ratio.
 {
-  const out = audit('verify/fixtures/measure-two-headlines.json');
+  const out = audit('quality/fixtures/measure-two-headlines.json');
   ok(/\[weak-headline\].*Washed headline/.test(out),
     'the washed-out headline is judged even though a bigger sibling shares the frame', out);
 }

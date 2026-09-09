@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// scripts/gates/stage.mjs: WHERE IS THIS FILM, and what is the ONE next thing to do.
+// quality/gates/stage.mjs: WHERE IS THIS FILM, and what is the ONE next thing to do.
 //
-//   make stage D=formats/scene/<film>.json   ·   node scripts/gates/stage.mjs <film> [--json]
+//   make stage D=formats/scene/<film>.json   ·   node quality/gates/stage.mjs <film> [--json]
 //   make stage                                  · no film yet: the roster, and the one furthest from done
 //   make stage Q="make a launch video for x"    · no film yet EITHER: what to even start
 //
@@ -67,13 +67,13 @@ export function stageOf(arg) {
     { id: 'brief', done: fs.existsSync(p.brief) || sbExists,
       why: 'nobody has asked what this film is about. A brief is five lines and any of them missing changes the film.',
       next: `make quiz NAME=${p.name} URL=<the product site>   (no site? docs/CRAFT/AUTHORING-WALKTHROUGH.md, and write ${path.relative(ROOT, p.brief)} by hand)` },
-    { id: 'plan', done: sbExists && gatePasses('scripts/gates/storyboard-check.mjs', p.sb),
+    { id: 'plan', done: sbExists && gatePasses('quality/gates/storyboard-check.mjs', p.sb),
       why: sbExists ? 'the storyboard exists and does not pass its own gate yet.' : 'there is no storyboard. Every role that writes into the film transcribes it, so a gap here becomes an invention further down.',
       next: sbExists ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}` : `make scaffold OUT=${p.base}.json THEME=<theme> DUR=<seconds>` },
     { id: 'approval', done: !!approved,
       why: 'the plan passes and nobody has signed it off. Nothing is rendered until the plan is LOCKED and the user signs off.',
       next: `make studio D=${p.base}.json   (press 1 for the plan, then the USER runs /vawe-approve ${p.name})` },
-    { id: 'design', done: sbExists && missingFrags.length === 0 && gatePasses('scripts/gates/frame-check.mjs', p.scene),
+    { id: 'design', done: sbExists && missingFrags.length === 0 && gatePasses('quality/gates/frame-check.mjs', p.scene),
       why: missingFrags.length
         ? `${missingFrags.length} fragment(s) the plan names do not exist yet: ${missingFrags.join(', ')}`
         : 'the fragments exist and do not match what their beats planned: run frame-check and read it.',

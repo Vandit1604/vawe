@@ -2,7 +2,7 @@ name: "snap-all: baseline the library (MANUAL, never scheduled)"
 
 # READ THIS BEFORE STARTING IT. Two facts decide what this job can honestly do.
 #
-# 1. THERE ARE NO BASELINES IN A CLONE. `verify/snap/` is gitignored, so a runner starts with an empty
+# 1. THERE ARE NO BASELINES IN A CLONE. `quality/baselines/snap/` is gitignored, so a runner starts with an empty
 #    baseline set every time. Diff mode has nothing to diff against: it would print "no-baseline" for
 #    every scene and prove nothing. That is why this job runs SAVE=1.
 #
@@ -82,6 +82,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: snap-baselines
-          path: verify/snap/scenes
+          path: quality/baselines/snap/scenes
           retention-days: 14
           if-no-files-found: warn

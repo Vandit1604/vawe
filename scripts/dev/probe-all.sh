@@ -4,5 +4,5 @@
 set -e
 for d in formats/*/scene.html; do
   f=$(basename "$(dirname "$d")")
-  node scripts/gates/probe-purity.mjs "$f"
+  node quality/gates/probe-purity.mjs "$f"
 done

@@ -1,4 +1,4 @@
-// node --test scripts/gates/frame-check.test.mjs
+// node --test quality/gates/frame-check.test.mjs
 //
 // The arithmetic first, then the gate against a real film. The arithmetic case is not decoration: this
 // repo deleted a gate for squaring a 590x18 rule into 590x590 and crediting a hairline with a tenth of

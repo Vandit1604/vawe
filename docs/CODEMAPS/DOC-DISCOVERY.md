@@ -276,7 +276,7 @@ and never edited:
 | `skills/vawe-docs/SKILL.md` | Claude Code, which surfaces it automatically | ~100 tokens (its description) |
 | the table inside `docs/CRAFT/README.md` | the craft index that already existed | zero |
 
-`scripts/gates/doc-map.mjs` builds all three. `make doc-index` writes them; `make craft-coverage`
+`quality/gates/doc-map.mjs` builds all three. `make doc-index` writes them; `make craft-coverage`
 fails if any is stale, if an indexed doc has no frontmatter, if a markdown link anywhere in the
 indexed set does not resolve, or if a doc is not linked from the map.
 
@@ -310,7 +310,7 @@ paid on every session by every agent whether or not the task touches videos at a
 - The gate proves a doc is indexed, linked and described. It cannot prove the description is *true*.
   A one-line description that has quietly stopped matching its doc passes.
 - Five docs were owned by other agents when this landed, so their frontmatter is held in a `PENDING`
-  map inside `scripts/gates/doc-map.mjs` instead of in the doc. The gate names all five on every run.
+  map inside `quality/gates/doc-map.mjs` instead of in the doc. The gate names all five on every run.
   That is deliberate: an incomplete index must announce itself. The entries want deleting once the
   frontmatter moves into the docs, and the gate fails if a PENDING doc turns out to already have it.
 - Two generated docs (`docs/EFFECTS.md`, `docs/vawe-rules.md`) hold their line in the gate rather than
