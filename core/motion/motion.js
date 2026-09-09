@@ -848,37 +848,6 @@ export function sequence(n, fps, segments, { transition = 0.4, holdLast = true }
   return { ...cur, enter, exit, active: enter * (1 - exit) };
 }
 
-// transition helpers → {clipPath, WebkitClipPath} (compositor-friendly; t: 0 hidden → 1 revealed).
-// wipe: directional inset reveal. circleWipe: iris from a point. clockWipe: radial sweep from 12 o'clock.
-export function wipe(t, dir = 'left') {
-  const p = (1 - clamp01(t)) * 100;
-  const m = { left: `inset(0 ${p}% 0 0)`, right: `inset(0 0 0 ${p}%)`, up: `inset(0 0 ${p}% 0)`, down: `inset(${p}% 0 0 0)` };
-  // `m[dir] || m.left` silently wiped leftward for any unrecognised direction. core/cuts.js owns the
-  // vocabulary; this is the same rule at the other call site (docs/MISTAKES.md #360).
-  const c = m[dir];
-  if (!c) throw new Error(`wipe: unknown direction "${dir}", one of: ${Object.keys(m).join(', ')}`);
-  return { clipPath: c, WebkitClipPath: c };
-}
-export function circleWipe(t, cx = 50, cy = 50) {
-  const c = `circle(${(clamp01(t) * 72).toFixed(1)}% at ${cx}% ${cy}%)`;
-  return { clipPath: c, WebkitClipPath: c };
-}
-function boxEdge(aDeg) { // point on the 100×100 box perimeter at angle aDeg (0 = up, clockwise)
-  const rad = (aDeg * Math.PI) / 180, dx = Math.sin(rad), dy = -Math.cos(rad);
-  const tx = dx === 0 ? Infinity : (dx > 0 ? 50 / dx : -50 / dx);
-  const ty = dy === 0 ? Infinity : (dy > 0 ? 50 / dy : -50 / dy);
-  const t = Math.min(tx, ty);
-  return [50 + t * dx, 50 + t * dy];
-}
-export function clockWipe(t) {
-  const a = clamp01(t) * 360;
-  const pts = [[50, 50], [50, 0]];
-  for (const c of [45, 135, 225, 315]) if (c <= a) pts.push(boxEdge(c));
-  if (a > 0 && a < 360) pts.push(boxEdge(a)); else if (a >= 360) pts.push([50, 0]);
-  const poly = 'polygon(' + pts.map(([x, y]) => `${x.toFixed(1)}% ${y.toFixed(1)}%`).join(', ') + ')';
-  return { clipPath: poly, WebkitClipPath: poly };
-}
-
 // deterministic per-data duration in [58,62]s so uploads vary but a given video is stable
 export function seedFrom(str) {
   let h = 2166136261 >>> 0; const s = String(str);
