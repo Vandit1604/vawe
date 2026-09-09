@@ -93,7 +93,11 @@
 .tm-cmd{margin:0;font:400 64px/1.2 var(--font-mono);color:var(--text);white-space:nowrap}
 .tm-prompt{color:var(--accent)}
 /* --typed clips the command left to right in whole characters, so it can never stop mid-glyph. */
-.tm-typed{display:inline-block;overflow:hidden;vertical-align:bottom;width:calc(var(--typed,1) * 42ch)}
+.tm-typed{display:inline-block;overflow:hidden;vertical-align:bottom;width:calc(var(--typed,1) * 42ch);
+  /* The clip box is the PADDING box, and a 1.2 line box on this mono face is 2px short of the
+     descenders, so `make audit` read the tails of g/y/p as cut. The padding gives them room and the
+     matching negative margin keeps every neighbour where it was. */
+  padding-bottom:.16em;margin-bottom:-.16em}
 .tm-run{display:flex;flex-direction:column;gap:var(--kit-space-4);align-items:flex-start}
 .tm-out{display:flex;flex-direction:column;gap:var(--kit-space-1);font-family:var(--font-mono);color:var(--dim)}
 .tm-line{white-space:pre}
