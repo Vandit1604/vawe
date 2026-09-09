@@ -15,8 +15,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-import { population } from '../lib/census.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { population } from '../../scripts/lib/census.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 const f = gateFindings();
 const SFX = path.join(repoRoot, 'assets/sfx');
 

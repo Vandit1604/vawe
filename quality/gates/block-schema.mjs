@@ -21,7 +21,7 @@
 //   6. every `def` passes its own rule, and every example row in the catalog passes the whole table
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { EXPORTS } from '../../blocks/index.mjs';

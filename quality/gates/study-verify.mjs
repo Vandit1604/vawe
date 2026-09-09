@@ -25,7 +25,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv.find((a) => a.endsWith('.json'));

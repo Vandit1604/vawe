@@ -21,7 +21,7 @@ import { GRADIENT_RECIPE_REGISTRY } from '../../core/backgrounds/gradient-recipe
 import { RESAMPLE_BLURBS } from '../../core/resample/effects.js';
 import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/type/captions.js';
 import { COMPOSITION_NAMES, COMPOSITION_BLURBS } from '../../core/compositions/index.js';
-import { PROFILES } from '../author/profiles.mjs';
+import { PROFILES } from '../../scripts/author/profiles.mjs';
 import { createKit, GLYPH_PAINTERS, paintsOwnGlyphs, childExitDur } from '../../core/layers/util.js';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt, keyHandleErrors } from '../../core/timeline/sequence.js';
 import { frame as squashFrame, build as squashBuild } from '../../core/fx/squash.js';
@@ -29,8 +29,8 @@ import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
 import { frame as matteFrame, build as matteBuild } from '../../core/fx/matte.js';
 import { frame as uprightFrame, build as uprightBuild } from '../../core/fx/upright.js';
 import { mergePan } from '../../core/layout/pan-resolve.mjs';
-import { patchMotion, upsertKey, layerSpan, matchBracket, applyOps } from '../author/patch-motion.mjs';
-import { SHAPES as TRACK_SHAPES } from '../author/track.mjs';
+import { patchMotion, upsertKey, layerSpan, matchBracket, applyOps } from '../../scripts/author/patch-motion.mjs';
+import { SHAPES as TRACK_SHAPES } from '../../scripts/author/track.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -41,9 +41,9 @@ import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, fram
 import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilterDef } from '../../core/looks/filters.js';
 import fsMod from 'node:fs';
 import { defineRegistry, registries, catalogued, checkBlurb, searchWords } from '../../core/registry/registry.js';
-import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../author/recency.mjs';
-import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks, score as arsenalScore } from '../author/arsenal.mjs';
-import { loadSchema, steps as atSteps, resolve as atResolve, allPaths as atPaths, childrenOf as atChildren, kindsOfEnum, fmtPath as atFmt } from '../author/schema-at.mjs';
+import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../../scripts/author/recency.mjs';
+import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks, score as arsenalScore } from '../../scripts/author/arsenal.mjs';
+import { loadSchema, steps as atSteps, resolve as atResolve, allPaths as atPaths, childrenOf as atChildren, kindsOfEnum, fmtPath as atFmt } from '../../scripts/author/schema-at.mjs';
 import { token, literal, lit, resolveColor } from '../../core/color/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions } from '../../core/timeline/junctions.js';
@@ -58,7 +58,7 @@ import { BEATS } from '../../blueprints/index.mjs';
 import { ACCENT } from '../../blueprints/kit.mjs';
 import { produceBaseline } from '../../core/engine/produce.js';
 import { easeErrors, bgErrors, durationWordErrors, cssErrors, authoredJunctionErrors } from '../../core/validate/validate.mjs';
-import { raise as raiseJunction, deepEqual as junctionDeepEqual, migrateOne } from '../author/migrate-junctions.mjs';
+import { raise as raiseJunction, deepEqual as junctionDeepEqual, migrateOne } from '../../scripts/author/migrate-junctions.mjs';
 import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/registry/vocab.js';
 import { BASE_ENTER } from '../../core/timeline/clips.js';
 import { CUT_REGISTRY } from '../../core/cuts/index.js';
@@ -88,7 +88,7 @@ import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liv
 import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas/effects.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { FAMILY_MODULES, NOT_A_FAMILY } from '../../blocks/index.mjs';
-import { collect as collectArsenal } from '../author/arsenal.mjs';
+import { collect as collectArsenal } from '../../scripts/author/arsenal.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, osc, SR } from '../../core/audio/kit.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats/detect.js';
 import { beatSyncOf, beatGridPath, bindBeats, snapJoints, unrollGrid, beatPeriod, DEFAULT_MAX_SHIFT } from '../../core/beats/index.js';
@@ -2005,7 +2005,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const thrown = (fn) => { try { fn(); return false; } catch { return true; } };
   // ── layer copy vs authored markup ──────────────────────────────────────────────────────────────
   {
-    const { onScreenText, glyphText, layerText, snippet } = await import('../lib/text.mjs');
+    const { onScreenText, glyphText, layerText, snippet } = await import('../../scripts/lib/text.mjs');
     ok('text: markup is stripped, which is what a viewer reads',
       onScreenText('Nothing came near the <b>edge.</b>') === 'Nothing came near the edge.');
     ok('text: a needle from the storyboard now matches the layer that emphasises a word',
@@ -2051,7 +2051,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // ── the layer TREE, walked once ────────────────────────────────────────────────────────────────
   {
-    const { flattenLayers, flattenLayer } = await import('../lib/layers.mjs');
+    const { flattenLayers, flattenLayer } = await import('../../scripts/lib/layers.mjs');
     const tree = [{ id: 'a', children: [{ id: 'b' }, { id: 'c', children: [{ id: 'd' }] }] }, { id: 'e' }];
     ok('layers: parents come before their children, depth first',
       flattenLayers(tree).map((l) => l.id).join('') === 'abcde');
@@ -3062,7 +3062,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 {
   const mk = fs.readFileSync(path.join(repoRoot, 'Makefile'), 'utf8');
   const targets = new Set([...mk.matchAll(/^([a-zA-Z][\w-]*)\s*:/gm)].map((m) => m[1]));
-  const dir = path.join(repoRoot, 'scripts/gates');
+  const dir = path.join(repoRoot, 'quality/gates');
   const bad = [];
   for (const f of fs.readdirSync(dir)) {
     if (!f.endsWith('.mjs')) continue;
@@ -3249,7 +3249,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   });
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
   const offenders = [];
-  for (const fp of [...scan(path.join(root, 'scripts')), ...scan(path.join(root, 'verify')), ...scan(path.join(root, 'core'))]) {
+  for (const fp of [...scan(path.join(root, 'scripts')), ...scan(path.join(root, 'verify')), ...scan(path.join(root, 'quality')), ...scan(path.join(root, 'core'))]) {
     if (fp.endsWith(path.join('core', 'safe.js')) || fp.endsWith(path.join('gates', 'lib-test.mjs'))) continue;
     const src = fs.readFileSync(fp, 'utf8');
     if (/landscape\s*\?\s*(1920\s*:\s*1080|\[1920)/.test(src)) offenders.push(path.relative(root, fp));
@@ -3634,7 +3634,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // own title, slot label, prose and names. A regression here is silent otherwise, because a section
 // that vanishes takes its rows out of docs/EFFECTS.md and the doc still regenerates cleanly.
 {
-  const { sections } = await import('../site/effects-catalog.mjs');
+  const { sections } = await import('../../scripts/site/effects-catalog.mjs');
   // Minus this file's own fixture on both sides: the `catalog widget` built a few hundred lines up is
   // a real registry in this process, so `catalogued()` publishes it and the catalogue then derives a
   // section for it. That IS the mechanism working; it just is not one of the engine's vocabularies.
@@ -4675,7 +4675,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // waiver-drift printed 135 and audio-check printed 150 for the same thing, because each caller wrote
 // its own rule. These four assertions are what stops the two from drifting apart again.
 {
-  const { LIBRARY, LIBRARY_WITH_DERIVATIVES, SCENE_DIR, ROOT } = await import('../lib/census.mjs');
+  const { LIBRARY, LIBRARY_WITH_DERIVATIVES, SCENE_DIR, ROOT } = await import('../../scripts/lib/census.mjs');
   const abs = (f) => path.join(ROOT, SCENE_DIR, f);
   const names = fs.readdirSync(path.join(ROOT, SCENE_DIR)).filter((f) => f.endsWith('.json')).sort();
   const lib = names.filter((f) => LIBRARY(f, abs(f)));
@@ -4843,7 +4843,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 // ---- the render harness: the one path guard 22 scripts used to hand-roll ----
 {
-  const { insideRoot, MIME, REPO_ROOT } = await import('../lib/render-harness.mjs');
+  const { insideRoot, MIME, REPO_ROOT } = await import('../../scripts/lib/render-harness.mjs');
   const root = '/repo';
   ok('a file under the root is served', insideRoot(root, '/repo/core/engine/boot.js'));
   ok('the root itself is inside itself', insideRoot(root, '/repo'));
@@ -5410,7 +5410,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const { execFileSync } = await import('node:child_process');
   let built = true, why = '';
   try {
-    execFileSync(process.execPath, [new URL('../site/effects-json.mjs', import.meta.url).pathname, '--check'],
+    execFileSync(process.execPath, [new URL('../../scripts/site/effects-json.mjs', import.meta.url).pathname, '--check'],
       { stdio: 'pipe', cwd: new URL('../..', import.meta.url).pathname });
   } catch (e) { built = false; why = String(e.stderr || e.message).trim().split('\n').slice(0, 6).join(' · '); }
   ok(`the effects catalogue still builds: every family has a usage form and a preview or a reason${built ? '' : ' → ' + why}`, built);
@@ -6066,7 +6066,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // the key it names, and that the six options are visibly DIFFERENT from each other. Both are pure and
 // neither needs a browser, so both are asserted here rather than by looking at six clips.
 {
-  const { look: bgLook, patchOps, applyPatch, pickForVariety } = await import('../dev/candidates.mjs');
+  const { look: bgLook, patchOps, applyPatch, pickForVariety } = await import('../../scripts/dev/candidates.mjs');
 
   // ---- the patch ----
   ok('candidates: the patch replaces the preset of the window it names, and nothing else',
@@ -6368,7 +6368,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // the other 26 are a real omission rather than a guess.
 {
   const { registries } = await import('../../core/registry/registry.js');
-  await import('../author/arsenal.mjs').catch(() => {});
+  await import('../../scripts/author/arsenal.mjs').catch(() => {});
   const cut = registries().find((r) => r.kind === 'cut');
   ok('arsenal --for: the cut vocabulary is reachable from the registry list', !!cut && cut.names.length > 20);
   const { execFileSync } = await import('node:child_process');
@@ -6432,7 +6432,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ok(`generated: site-check verifies ${gen}`,
       new RegExp(`node scripts/site/${gen}\\.mjs --check`).test(mk));
     ok(`generated: scripts/site/${gen}.mjs reads --check`,
-      /--check/.test(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), `../site/${gen}.mjs`), 'utf8')));
+      /--check/.test(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), `../../scripts/site/${gen}.mjs`), 'utf8')));
   }
 }
 // ---- dialsOf + bindDials: one owner for a kinetic default (core/registry/props.js, core/registry/knobs.js) ---------
@@ -6648,7 +6648,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // cuts have moved, which is the one class that gate exists to catch.
   for (const g of ['judge.mjs', 'seam-snap.mjs']) {
     ok(`gradeable: quality/gates/${g} asks it before grading`,
-      /gradeable\(/.test(fs.readFileSync(path.join(repoRoot, 'scripts/gates', g), 'utf8')));
+      /gradeable\(/.test(fs.readFileSync(path.join(repoRoot, 'quality/gates', g), 'utf8')));
   }
   fs.rmSync(dir, { recursive: true, force: true });
 }
@@ -6756,8 +6756,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // NOTHING HERE CLEARLY MATCHES, over a sentence claiming 445 things had been searched. True about the
 // corpus, false about the engine, and the worse kind of wrong because it reads as an answer.
 {
-  const { collect } = await import('../author/arsenal.mjs');
-  const { sections } = await import('../site/effects-catalog.mjs');
+  const { collect } = await import('../../scripts/author/arsenal.mjs');
+  const { sections } = await import('../../scripts/site/effects-catalog.mjs');
   const corpus = await collect();
   const catalogued = new Set(sections.flatMap(([, , names]) => (names || [])
     .map((e) => (typeof e === 'string' ? e : e && e.name)).filter(Boolean)));
@@ -7150,7 +7150,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       ok('craft-live: an EXISTING gate is not a new gate', fire(path.join(repoRoot, 'quality/gates/rung.mjs')).code === 0);
       // Assembled rather than written whole: a literal path here reads to doc-refs as a repo path the
       // docs promise, and the file exists for four lines.
-      const fresh = path.join(repoRoot, 'scripts/gates', `_craft-live-probe-gate.${'mjs'}`);
+      const fresh = path.join(repoRoot, 'quality/gates', `_craft-live-probe-gate.${'mjs'}`);
       fs.writeFileSync(fresh, 'export const probe = 1;\n');
       const newGate = fire(fresh);
       fs.unlinkSync(fresh);
@@ -7229,7 +7229,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('sound gate: and declares it in the ladder it prints before it runs', /\['sound', 'reports'/.test(ladder));
   // The tag in CLAUDE.md cites a code. rung.mjs checks the citation; this checks the citation is the
   // one the gate actually fires on, which is the difference between a rung and a plausible neighbour.
-  const { codesEmitted } = await import('../lib/finding-codes.mjs');
+  const { codesEmitted } = await import('../../scripts/lib/finding-codes.mjs');
   const codes = codesEmitted();
   ok('sound gate: finding-codes.mjs can SEE its codes, so the [gated] tag verifies against the derived map',
     (codes.get('silence-without-a-reason') || new Set()).has('quality/gates/audio-check.mjs'));

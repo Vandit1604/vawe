@@ -13,8 +13,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadScene } from '../../core/engine/expand.js';
-import { population, SCENE_DIR } from '../lib/census.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { population, SCENE_DIR } from '../../scripts/lib/census.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 

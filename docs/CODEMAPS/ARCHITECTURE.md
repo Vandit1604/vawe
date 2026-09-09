@@ -117,7 +117,7 @@ it, so both obvious checks say it is absent. It is not.
 
 Counted from the real import graph, not from intent:
 
-- `scripts/gates` imports from **14 different `core/` subsystems** (timeline 26, engine 19, layers 19,
+- `quality/gates` imports from **14 different `core/` subsystems** (timeline 26, engine 19, layers 19,
   layout 16, surfaces 15, registry 13, and eight more). The checks know the engine's private anatomy,
   which is how `docs/MISTAKES.md` #229, #232 and #242 happened three times to the same gate.
 - **`author` and `gates` are a two-way dependency.** Seven files under `scripts/author/` import from

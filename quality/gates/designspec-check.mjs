@@ -14,16 +14,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import cp from 'node:child_process';
-import { snippet, onScreenText as plainText } from '../lib/text.mjs';
-import { flattenLayers } from '../lib/layers.mjs';
-import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
+import { snippet, onScreenText as plainText } from '../../scripts/lib/text.mjs';
+import { flattenLayers } from '../../scripts/lib/layers.mjs';
+import { population, LIBRARY, SCENE_DIR } from '../../scripts/lib/census.mjs';
 // THE RULE TABLE IS OURS (scripts/lib/designspec-rules.mjs). This gate is the design-spec lock, the
 // theme is the locked look, and the rules there are the second half of the same question: not only
 // "is this colour on the spec", but "is this copy, and this effect dose, the thing we would choose".
 // They live in one gate under one name because an author should run one command, not two.
-import { RULES, runRules } from '../lib/designspec-rules.mjs';
+import { RULES, runRules } from '../../scripts/lib/designspec-rules.mjs';
 import { parseColorRGB } from '../../core/motion/motion.js';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 /** A scene's text as UNITS. One per layer, one per named fragment. Never joined: a joined blob let a
  *  pattern match across eight layers and invent a finding (see runRules). Fragments are read off

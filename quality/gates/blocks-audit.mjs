@@ -16,7 +16,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import * as B from '../../blocks/index.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // BOTH files, because the shared primitives moved to blocks/kit.mjs and a rule that stops at a file

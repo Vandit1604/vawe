@@ -30,8 +30,8 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 // `beats` keeps its original home. Twenty-odd receipts already sit in quality/runs/beats-seen/ and
 // beat-check.mjs reads that path; moving them would silently un-approve every scene in the library,
 // which is exactly the failure this module exists to prevent.
-const LEGACY = { beats: path.join(ROOT, 'verify', 'beats-seen') };
-export const dirFor = (stage) => LEGACY[stage] || path.join(ROOT, 'verify', 'approved', stage);
+const LEGACY = { beats: path.join(ROOT, 'quality', 'runs', 'beats-seen') };
+export const dirFor = (stage) => LEGACY[stage] || path.join(ROOT, 'quality', 'baselines', 'approved', stage);
 
 const keyOf = (subject) => path.basename(subject).replace(/\.(json|md|markdown)$/i, '');
 export const receiptPath = (stage, subject) => path.join(dirFor(stage), `${keyOf(subject)}.json`);

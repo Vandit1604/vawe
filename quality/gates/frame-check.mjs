@@ -21,10 +21,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../author/storyboard-parse.mjs';
-import { extractKitBlock } from '../lib/stagekit.mjs';
-import { KIT_ROLE, offRampSizes, offRampShadows } from '../lib/kit-ramp.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../scripts/author/storyboard-parse.mjs';
+import { extractKitBlock } from '../../scripts/lib/stagekit.mjs';
+import { KIT_ROLE, offRampSizes, offRampShadows } from '../../scripts/lib/kit-ramp.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -106,8 +106,8 @@ async function measure() {
   let puppeteer, serveRepo, fragPage, FULLBLEED_RE, INSET_RE;
   try {
     puppeteer = (await import('puppeteer')).default;
-    ({ serveRepo } = await import('../lib/render-harness.mjs'));
-    ({ fragPage, FULLBLEED_RE, INSET_RE } = await import('../lib/frag-page.mjs'));
+    ({ serveRepo } = await import('../../scripts/lib/render-harness.mjs'));
+    ({ fragPage, FULLBLEED_RE, INSET_RE } = await import('../../scripts/lib/frag-page.mjs'));
   } catch { return null; }                       // no browser here: the static half above still ran
   const themeName = sb.theme ? (/themes\/([\w.-]+)\.json/.exec(sb.theme) || [])[1] || sb.theme.trim() : 'default';
   const themeFile = path.join(ROOT, 'themes', themeName + '.json');

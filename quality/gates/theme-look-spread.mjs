@@ -29,7 +29,7 @@ import { fileURLToPath } from 'node:url';
 import { resolveLook, lookErrors } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/motion/motion.js';
 import { TRANSITIONS } from '../../core/transitions/catalog.js';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const f = gateFindings();

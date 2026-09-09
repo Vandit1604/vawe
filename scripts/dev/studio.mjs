@@ -30,7 +30,7 @@ import { scratch } from '../lib/scratch.mjs';
 import { studioPage } from './studio-page.mjs';
 import { parseStoryboard, timeline, fieldIn, blocksOf, referenceDevices } from '../author/storyboard-parse.mjs';
 import { fragPage, FULLBLEED_RE, INSET_RE } from '../lib/frag-page.mjs';
-import { stageOf } from '../gates/stage.mjs';
+import { stageOf } from '../../quality/gates/stage.mjs';
 import { extractKitBlock } from '../lib/stagekit.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

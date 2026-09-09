@@ -17,9 +17,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../author/storyboard-parse.mjs';
-import { population, LIBRARY } from '../lib/census.mjs';
-import { route } from '../author/route.mjs';
+import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../scripts/author/storyboard-parse.mjs';
+import { population, LIBRARY } from '../../scripts/lib/census.mjs';
+import { route } from '../../scripts/author/route.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 

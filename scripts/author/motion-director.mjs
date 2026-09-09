@@ -33,7 +33,7 @@ import { DENSE_KEY_SEC } from '../../core/timeline/sequence.js';
 import { cutVelocityAdvice } from '../../core/timeline/velocity-cut.js';
 import { population, LIBRARY, SCENE_DIR } from '../lib/census.mjs';
 import { glyphText, snippet } from '../lib/text.mjs';
-import { sceneTiming } from '../gates/scene-timing.mjs';
+import { sceneTiming } from '../../quality/gates/scene-timing.mjs';
 import { gateFindings } from '../lib/findings.mjs';
 // Generators write authored scenes, and an authored scene carries transitions[] only (the validator
 // refuses cuts/stings/seams); the same converter the migration uses runs at the write site.

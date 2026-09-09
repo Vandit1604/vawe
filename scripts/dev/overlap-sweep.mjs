@@ -77,7 +77,7 @@ function buildVariants() {
 function run(cmd, args) { return spawnSync(cmd, args, { cwd: ROOT, encoding: 'utf8' }); }
 
 async function measure(mp4) {
-  const { pullFrames, profile, DEAD } = await import('../gates/motion-floor.mjs');
+  const { pullFrames, profile, DEAD } = await import('../../quality/gates/motion-floor.mjs');
   const frames = pullFrames(mp4);
   if (!frames) return { error: 'ffmpeg returned no frames' };
   const prof = profile(frames);

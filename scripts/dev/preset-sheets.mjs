@@ -15,7 +15,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { PROFILES, PROFILE_NAMES } from '../author/profiles.mjs';
-import { frameTile, tileGrid, tileBox, renderOf } from '../gates/tile.mjs';
+import { frameTile, tileGrid, tileBox, renderOf } from '../../quality/gates/tile.mjs';
 // Generators write authored scenes, and an authored scene carries transitions[] only (the validator
 // refuses cuts/stings/seams); the same converter the migration uses runs at the write site.
 import { migrateOne } from '../author/migrate-junctions.mjs';

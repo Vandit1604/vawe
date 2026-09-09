@@ -3,7 +3,7 @@
 // broken handoff is visible before `make scenes`/`make assemble` refuse to run it for you.
 import fs from 'node:fs';
 import path from 'node:path';
-import { storyboardPathFor } from '../gates/craft-checklist.mjs';
+import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
 import { chainErrors, edges, motionErrors, parseMotion } from '../lib/contract.mjs';
 

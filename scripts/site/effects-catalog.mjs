@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { registersOf } from '../gates/craft-coverage.mjs';
+import { registersOf } from '../../quality/gates/craft-coverage.mjs';
 import { catalogued } from '../../core/registry/registry.js';
 // The blurb maps of the families that have no registry, each still living beside the vocabulary it
 // describes (the pattern blocks/catalog.mjs proves at 70/70). They take PRECEDENCE over DESC below, and

@@ -32,8 +32,8 @@ import { ANIM_NAMES } from '../../core/timeline/clips.js';
 import { PRESETS } from '../../core/type/type.js';
 import { LOOK_NAMES } from '../../core/looks/index.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas/effects.js';
-import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { serveRepo, waitForEngine } from '../../scripts/lib/render-harness.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A flag (only `--json` today) is not the phase selector: `process.argv[2]` used to be that unconditionally,

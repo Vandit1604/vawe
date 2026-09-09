@@ -45,7 +45,7 @@ async function loadMotionFloor() {
   const real = process.argv;
   process.argv = real.filter((a) => a !== '--self-test');
   try {
-    motionFloor = await import('../gates/motion-floor.mjs');
+    motionFloor = await import('../../quality/gates/motion-floor.mjs');
   } finally {
     process.argv = real;
   }

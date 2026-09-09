@@ -16,7 +16,7 @@ is for, which is itself the finding.
 
 | folder | files | lines | role |
 |---|---|---|---|
-| `scripts/gates` | 89 | 26299 | REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a ladder; the rest are on-demand or CI. A gate reports a finding; only some block. |
+| `quality/gates` | 89 | 26299 | REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a ladder; the rest are on-demand or CI. A gate reports a finding; only some block. |
 | `scripts/author` | 72 | 13562 | WRITE. Everything that produces or edits a film: the brief, the storyboard, the stage kit, the fragments' briefs, assemble, the motion director. |
 | `scripts/dev` | 37 | 6390 | LOOK. Nothing here changes a film. The studio, the previews, the contact sheets, the experiment rigs. |
 | `scripts/site` | 24 | 3370 | PUBLISH. The public website and docs site, and the checks that keep their numbers true. |
@@ -33,7 +33,7 @@ of `scripts/media` (`geo-bake.mjs`, `globe-dots.mjs`, `gradients.mjs`, `audio-ba
 bake an asset a film loads, which is a different job from the rest of this tree.
 
 
-## `scripts/gates`
+## `quality/gates`
 
 REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a ladder; the rest are on-demand or CI. A gate reports a finding; only some block.
 

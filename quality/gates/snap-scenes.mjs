@@ -26,17 +26,17 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/layout/safe.js';
-import { population } from '../lib/census.mjs';
+import { population } from '../../scripts/lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 // ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
 // for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
 import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
-import { serveRepo, waitForEngine, bootPathFor } from '../lib/render-harness.mjs';
+import { serveRepo, waitForEngine, bootPathFor } from '../../scripts/lib/render-harness.mjs';
 import { loadScene } from '../../core/engine/expand.js';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SNAP = path.join(repoRoot, 'verify', 'snap', 'scenes');
+const SNAP = path.join(repoRoot, 'quality', 'baselines', 'snap', 'scenes');
 fs.mkdirSync(SNAP, { recursive: true });
 const args = process.argv.slice(2);
 const f = gateFindings();
@@ -80,7 +80,7 @@ const STAMP = path.join(SNAP, '.font-state.json');
 // and a sha256 for every one of them, so two machines hold identical bytes and a hash mismatch is
 // evidence about the code. Under the unversioned URLs this file used to fetch, the same comparison
 // would have been noise wearing a regression's clothes.
-const DIGEST = path.join(repoRoot, 'verify', 'snap', 'digest.json');
+const DIGEST = path.join(repoRoot, 'quality', 'baselines', 'snap', 'digest.json');
 const sha = (v) => crypto.createHash('sha256').update(v).digest('hex').slice(0, 16);
 let digest = null;
 try { digest = JSON.parse(fs.readFileSync(DIGEST, 'utf8')); } catch { /* no digest yet */ }

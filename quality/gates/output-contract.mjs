@@ -8,10 +8,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const GATES = path.join(ROOT, 'scripts/gates');
+const GATES = path.join(ROOT, 'quality/gates');
 const RATCHET = path.join(ROOT, 'quality/baselines/output-contract-ratchet.json');
 
 // Named, not silently skipped: a test runner tallies pass/fail (not finding-shaped), and this gate

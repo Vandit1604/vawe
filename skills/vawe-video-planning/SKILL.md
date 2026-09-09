@@ -361,6 +361,8 @@ FIX, never rationalize one you noticed. This is the gate the static ladder above
 `docs/JUDGE.md`.
 After the user approves the shipped video: `make ledger-add D=<file>` logs it to the design
 memory (`quality/ledger/ledger.json`) so future videos are checked against it.
+<!-- doc-refs-allow: quality/ledger/ledger.json · gitignored, written on first `make ledger-add` -->
+
 
 ## Differentiation rules (why outputs differ per user/brand)
 

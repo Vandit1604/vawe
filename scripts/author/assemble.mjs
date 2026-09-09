@@ -19,7 +19,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { storyboardPathFor } from '../gates/craft-checklist.mjs';
+import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
 import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMove, moveErrors, moveKeys } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';

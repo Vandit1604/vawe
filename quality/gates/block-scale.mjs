@@ -21,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { SPACE_STEPS, TYPE_STEPS, R_STEPS } from '../../blocks/kit.mjs';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const STRICT = process.argv.includes('--strict');

@@ -60,10 +60,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { sceneTiming, spanOf, num, SPECK, sceneView, inView } from './scene-timing.mjs';
-import { readReceipt } from '../lib/receipt.mjs';
-import { snippet } from '../lib/text.mjs';
+import { readReceipt } from '../../scripts/lib/receipt.mjs';
+import { snippet } from '../../scripts/lib/text.mjs';
 import { loadScene } from '../../core/engine/expand.js';
-import { gateFindings } from '../lib/findings.mjs';
+import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
