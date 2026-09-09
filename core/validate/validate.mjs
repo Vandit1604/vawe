@@ -24,7 +24,7 @@ import { TRANSITIONS } from '../transitions/catalog.js';
 import { nearMisses } from '../registry/registry.js';
 // parseColor is handed to themeErrors so a palette value that is not a COLOUR is refused, not just an
 // absent one. theme-contract.js stays import-free on purpose (node + browser); see its note.
-import { parseColor, contrastRatio } from '../motion/motion.js';
+import { parseColor, contrastRatio } from '../color/engine.js';
 import { ASPECTS, PLACEMENT } from '../layout/safe.js';
 import { boundaryMechanism, lowerScene } from '../transitions/lower.js';
 import { junctionTable, marksOf, bindWindowsToJunctions } from '../timeline/junctions.js';

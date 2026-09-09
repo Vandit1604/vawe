@@ -2,13 +2,13 @@
 // core/boot.js. The scene RUNTIME lifted out of core/motion.js: theme resolution + CSS apply,
 // the deterministic virtual clock, image/component preload, and boot() (fetch data → validate →
 // build → expose window.__engine). Imports pure helpers from ./motion.js. DOM/fetch live here only.
-import { FPS, isLightBg } from '../motion/motion.js';
+import { FPS } from '../motion/motion.js';
 import { bakeResamples } from '../resample/index.js';
 import { glLive } from './webgl.js';
 import '../layers/frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
 import { canvasKind } from '../canvas/kind.js'; // records each canvas's context kind at creation
 import { themeErrors, resolveLook, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from '../registry/theme-contract.js';
-import { parseColor, contrastRatio, ensureContrast } from '../motion/motion.js';
+import { isLightBg, parseColor, contrastRatio, ensureContrast } from '../color/engine.js';
 import { validateAll } from '../validate/validate.mjs';
 import { produceBaseline, bakeCameraMove, bakeDepth, bakeFocus, bakeTextSizeRoles } from './produce.js';
 

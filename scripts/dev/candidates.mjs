@@ -27,7 +27,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { BG_NAMES, BG_BLURBS, bgPreset, bgPaletteFrom, bgOptKeys, bgOverErrors } from '../../core/backgrounds/index.js';
-import { isLightBg } from '../../core/motion/motion.js';
+import { isLightBg } from '../../core/color/engine.js';
 import { junctionTable, marksOf, bindWindowsToJunctions } from '../../core/timeline/junctions.js';
 import { bgErrors } from '../../core/validate/validate.mjs';
 import { checkCuts } from '../../core/fx/ancestor-kills.js';

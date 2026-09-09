@@ -22,7 +22,7 @@ import { population, LIBRARY, SCENE_DIR } from '../../scripts/lib/census.mjs';
 // "is this colour on the spec", but "is this copy, and this effect dose, the thing we would choose".
 // They live in one gate under one name because an author should run one command, not two.
 import { RULES, runRules } from '../../scripts/lib/designspec-rules.mjs';
-import { parseColorRGB } from '../../core/motion/motion.js';
+import { parseColorRGB } from '../../core/color/engine.js';
 import { gateFindings } from '../../scripts/lib/findings.mjs';
 
 /** A scene's text as UNITS. One per layer, one per named fragment. Never joined: a joined blob let a

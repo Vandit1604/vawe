@@ -27,7 +27,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolveLook, lookErrors } from '../../core/registry/theme-contract.js';
-import { isLightBg } from '../../core/motion/motion.js';
+import { isLightBg } from '../../core/color/engine.js';
 import { TRANSITIONS } from '../../core/transitions/catalog.js';
 import { gateFindings } from '../../scripts/lib/findings.mjs';
 

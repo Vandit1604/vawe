@@ -92,7 +92,7 @@
  "core/validate/validate.mjs::no-useless-escape": 2,
  "core/validate/validate.mjs::complexity": 5,
  "core/validate/validate.mjs::max-depth": 17,
- "core/motion/motion.js::unicorn(no-useless-spread)": 1,
+ "core/color/engine.js::unicorn(no-useless-spread)": 1,
  "quality/gates/layer-props.mjs::no-unused-vars": 1,
  "scripts/lib/png-diff.mjs::complexity": 1,
  "core/timeline/sequence.js::no-unused-vars": 1,

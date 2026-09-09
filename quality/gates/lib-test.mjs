@@ -70,7 +70,7 @@ import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorA
 import { cutVelocityAdvice, layerSpeedAt, cameraSpeedAt } from '../../core/timeline/velocity-cut.js';
 import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
 import { bgPaletteFrom } from '../../core/backgrounds/index.js';
-import { parseColorRGB } from '../../core/motion/motion.js';
+import { parseColorRGB } from '../../core/color/engine.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
 import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/layers/path-morph.js';
@@ -130,7 +130,7 @@ if (process.argv.includes('--colours')) {
     ['foo rgb(1,2,3)', 'was motion-only: the missing anchor, now null'],
     [[1, 2, 3], 'was motion-only (array passthrough)'],
   ];
-  console.log('\n  the one colour parser · core/motion/motion.js\n');
+  console.log('\n  the one colour parser · core/color/engine.js\n');
   for (const [v, why] of rows) {
     const t = parseColor(v), o = parseColorRGB(v);
     let lf; try { lf = JSON.stringify(lightfieldToRgb(v)); } catch { lf = 'refused'; }
@@ -1621,7 +1621,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('filter: parseColor hex3 + rgb + junk', JSON.stringify(parseColor('#7cf')) === '[119,204,255]' && JSON.stringify(parseColor('rgb(1, 2, 3)')) === '[1,2,3]' && parseColor('nope') === null);
   ok('filter: all six presets exist', ['duotone','tritone','gradientMap','posterize','sepia','vignette'].every((k) => FILTER_PRESETS[k]));
 
-  // THE ONE COLOUR PARSER (core/motion/motion.js). Four copies with four grammars became one, and this is
+  // THE ONE COLOUR PARSER (core/color/engine.js). Four copies with four grammars became one, and this is
   // the falsifiable half of that claim: for each old copy, a colour it REJECTED and a colour it
   // ACCEPTED, run through the shared parser now. If the union ever narrows, or the anchor is
   // dropped again, one of these flips. `node quality/gates/lib-test.mjs --colours` prints the table.
