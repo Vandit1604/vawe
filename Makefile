@@ -7,7 +7,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor frame-check stage worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe
+.PHONY: motion-floor motion-lab frame-check stage worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -631,6 +631,14 @@ waivers: ## [preflight] every blocking gate can be waived, and a waiver costs no
 # all 134).
 motion-floor: ## [check] DOES THE FILM EVER STOP: local (content) motion per 0.5s window, ambient reported apart and never counted (D=<film>, needs a render)
 	@node scripts/gates/motion-floor.mjs $(D) $(if $(JSON),--json,)
+
+# make motion-lab D=<storyboard.md> VARIANTS=<variants.json>: does a motion change actually raise the
+# local-motion floor, or is it a feeling. Assembles, renders and motion-floors the base storyboard plus
+# every named variant (each one a mutation of the beats' `motion:` lines) THE SAME WAY, one table:
+# moves/beat, dead windows, local median, local peak. `make motion-lab --self-test` (no D=) instead
+# reproduces docs/MISTAKES.md #608's A/B/C structural experiment end to end.
+motion-lab: ## [dev] does a motion change raise the local-motion floor: one table over a base + named variants (D=<storyboard.md> VARIANTS=<variants.json>, or SELFTEST=1)
+	@node scripts/dev/motion-lab.mjs $(if $(filter 1,$(SELFTEST)),--self-test,$(D) --variants $(VARIANTS)) $(if $(KEEP),--keep,)
 
 frame-check: ## [check] THE PLAN vs THE FRAMES: archetype rotation, one measurable peak, and every size on the kit ramp (D=<film>)
 	@node scripts/gates/frame-check.mjs $(D) $(if $(JSON),--json,)
