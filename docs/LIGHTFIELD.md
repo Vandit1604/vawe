@@ -407,10 +407,10 @@ node scripts/author/lightfield.mjs --preset ember --out formats/scene/_lightfiel
 make lightfield PRESET=tide                      # one preset
 make lightfield ARGS='--seed 91 --pattern.kind shards --bloom "#ffd166" --out /tmp/f.html --shot'
 
-node scripts/author/lightfield-test.mjs                  # determinism + fail-early, as assertions
-node scripts/author/lightfield-compare.mjs A.jpg B.png   # measured fidelity, not an opinion
-node scripts/author/lightfield-seeds.mjs ref.jpg 4000000  # rank millions of layouts, arithmetically
-SEEDLIST=<its output> node scripts/author/lightfield-fit.mjs ref.jpg   # confirm the shortlist for real
+node tools/lightfield/lightfield-test.mjs                  # determinism + fail-early, as assertions
+node tools/lightfield/lightfield-compare.mjs A.jpg B.png   # measured fidelity, not an opinion
+node tools/lightfield/lightfield-seeds.mjs ref.jpg 4000000  # rank millions of layouts, arithmetically
+SEEDLIST=<its output> node tools/lightfield/lightfield-fit.mjs ref.jpg   # confirm the shortlist for real
 ```
 
 Every flag is derived from the option table, so the CLI cannot drift from the generator. Group keys
@@ -450,7 +450,7 @@ the API. Nothing about them is special-cased inside the generator: a preset is o
 
 ## How it is measured, and why the old number was wrong
 
-`node scripts/author/lightfield-compare.mjs <reference> <render>` prints four things, and the first
+`node tools/lightfield/lightfield-compare.mjs <reference> <render>` prints four things, and the first
 two exist because the other two passed a picture a human rejected.
 
 **Tonal bands.** An 8x5 grid, split into shadow, mid and highlight by the REFERENCE's own luma, never
@@ -570,7 +570,7 @@ before and after, and comparing the hashes rather than the pictures.
 ### Where `spectrum` stops, measured against `refs/colonnade/c6.jpg`
 
 Mean per-channel error **14.2 out of 255** at the reference's own 9:16, on a 120x214 grid, which is
-the same measurement `scripts/author/lightfield-check.mjs` uses one size up.
+the same measurement `tools/lightfield/lightfield-check.mjs` uses one size up.
 
 The construction is right: eleven bands, evenly spaced, mirror-symmetric, the band edges within a
 pixel of the reference's, a spectrum falling down the frame, and each band out from the middle

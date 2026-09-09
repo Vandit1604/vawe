@@ -26,7 +26,7 @@ import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const BASELINE = path.join(ROOT, 'verify/code-quality-baseline.json');
-const SCAN = ['core', 'blocks', 'scripts', 'formats', 'verify', 'cli'];
+const SCAN = ['core', 'blocks', 'scripts', 'formats', 'verify', 'cli', 'tools'];
 const write = process.argv.includes('--write');
 const top = process.argv.includes('--top');
 
