@@ -18,7 +18,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
-import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline } from '../author/storyboard-parse.mjs';
+import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../author/storyboard-parse.mjs';
 import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
@@ -34,6 +34,31 @@ const gf = gateFindings();
 const errs = [], warns = [];
 const err = (code, msg, extra) => { errs.push(msg); gf.fail(code, msg, extra); };
 const warn = (code, msg, extra) => { warns.push(msg); gf.warn(code, msg, extra); };
+// ── THE PICTURE, ACROSS THE FILM ────────────────────────────────────────────────────────────────
+// Two rules that only exist between beats, so no per-beat check can see them. Both silent on a
+// storyboard that declares neither field, for the reason the per-beat versions are.
+function pictureAcrossFilm(blocks) {
+  const arch = blocks.map((b) => (fieldIn(b, 'archetype') || '').trim().split(/\s+\(/)[0]);
+  const wts = blocks.map((b) => (fieldIn(b, 'weight') || '').trim());
+  const titles = blocks.map((b) => b.split('\n')[0].trim());
+  if (arch.some(Boolean)) {
+    for (let i = 1; i < arch.length; i++) {
+      if (arch[i] && arch[i] === arch[i - 1]) {
+        warn('archetype-repeat', `beats "${titles[i - 1]}" and "${titles[i]}" both use the "${arch[i]}" archetype. `
+          + 'Two beats running with the same composition is the flat film: nothing about the cut between them '
+          + 'reads as a change. Rotate it, or say why this pair is the exception.');
+      }
+    }
+  }
+  if (wts.some(Boolean)) {
+    const peaks = wts.filter((w) => w === 'peak').length;
+    if (peaks === 0) warn('no-peak', 'no beat declares `weight: peak`. A film that names no peak has not chosen '
+      + 'restraint, it has chosen one flat volume for its whole runtime.');
+    if (peaks > 1) err('two-peaks', `${peaks} beats declare \`weight: peak\`. One. Naming the loudest moment is at the `
+      + 'same time a promise that every other beat stays quieter, and two peaks is no promise at all.');
+  }
+}
+
 // ── frontmatter: the video's spine ──────────────────────────────────────────────────────────────
 const fm = /^---\n([\s\S]*?)\n---/.exec(src);
 const head = fm ? fm[1] : '';
@@ -131,6 +156,7 @@ const RANGE = SB_RANGE;
 const spans = [];
 
 let n = 0;
+pictureAcrossFilm(blocks);
 for (const b of blocks) {
   n++;
   const title = b.split('\n')[0].trim();
@@ -162,6 +188,36 @@ for (const b of blocks) {
     if (span.start != null && span.end - span.start >= 3.0 && changes.length <= 1) {
       warn('held-state-too-long', `beat "${title}": held-state-too-long, ${(span.end - span.start).toFixed(2)}s spent on one change. The reference film never holds a single state longer than about 1.5 seconds, so a 3s+ beat with one change is a 3s hold. Either name the second change or split the beat.`);
     }
+    // ── THE PICTURE'S OWN DECISIONS ──────────────────────────────────────────────────────────────
+    // `picture:` and `style:` are prose, and prose is where the wrong object hides: a beat that
+    // described "a white pill bar with a round cobalt run button" passed every check while drawing an
+    // AI chat input into a film about a command line (docs/MISTAKES.md #596). These three fields are
+    // closed vocabularies precisely so a gate can disagree with them.
+    //
+    // PRESENCE ONLY, AND ONLY WHEN DECLARED. A film written before these existed still passes: this
+    // gate grades the plan against itself, and inventing a failure for eight older storyboards would
+    // teach nobody anything. What is DECLARED must be legal, and `frame-check` is where a declared
+    // value meets the frame that was built from it.
+    const arch = fieldIn(b, 'archetype');
+    if (arch && !isArchetype(arch)) {
+      err('archetype-unknown', `beat "${title}": archetype "${arch}" is not one of ${ARCHETYPES.join(' · ')}. `
+        + 'The list is closed so that "no archetype twice in a row" is checkable rather than hoped for. '
+        + 'If the composition genuinely is not one of these, write `other (what it is)` and the reason travels with it.');
+    }
+    const wt = fieldIn(b, 'weight');
+    if (wt && !WEIGHTS.includes(String(wt).trim())) {
+      err('weight-unknown', `beat "${title}": weight "${wt}" is not one of ${WEIGHTS.join(' · ')}. `
+        + 'Exactly one beat in a film is the peak; naming it per beat is what makes the promise measurable '
+        + 'against the frames actually built.');
+    }
+    const borrows = fieldIn(b, 'borrows');
+    if (borrows && !/(->|→)\s*\S/.test(borrows)) {
+      err('borrows-without-role', `beat "${title}": \`borrows: ${borrows}\` names a reference device and not what it `
+        + 'BECOMES here. Write it as "<their device> -> <our object>". A shape copied without its role is how a '
+        + 'chat input ends up in a film about a command line: their hero object is a chat box because their '
+        + 'product is chat, and ours is not.');
+    }
+
     // ends-on-a-claim. The last beat puts a sentence on screen and nothing changes under it, so the
     // film's final act is a line of copy appearing. Three of our recreations closed exactly this way:
     // the closing line named a capability, the reference spent the same seconds performing it, and

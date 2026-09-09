@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { serveRepo } from '../lib/render-harness.mjs';
 import { extractKitBlock } from '../lib/stagekit.mjs';
+import { fragPage, FULLBLEED_RE, INSET_RE } from '../lib/frag-page.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -39,8 +40,6 @@ const tSec = parseFloat(flag('--t', '0'));
 // including a 140x640 box that never referenced that class. `extractKitBlock` finds the exact pasted
 // bytes (the STAGEKIT:start/:end markers are unambiguous) and they are cut out before either regex
 // runs, so the detector answers what the fragment's OWN markup uses, not what the kit merely defines.
-const FULLBLEED_RE = /position\s*:\s*(?:absolute|fixed)/i;
-const INSET_RE = /inset\s*:\s*0|(?:top|left|right|bottom)\s*:\s*0\s*(?:;|})/i;
 // THE THEME IS APPLIED, NOT SAMPLED. This used to read `palette.bg` and nothing else, so `--theme`
 // was accepted and then 14 of the 15 palette entries were ignored: a fragment written against
 // var(--accent) previewed BLACK, because an undefined custom property makes the declaration invalid
@@ -84,31 +83,7 @@ const kitBlock = extractKitBlock(raw);
 const ownMarkup = kitBlock ? raw.replace(kitBlock, '') : raw;
 const fullBleed = FULLBLEED_RE.test(ownMarkup) && INSET_RE.test(ownMarkup);
 
-const page$html = `<!doctype html><html><head><meta charset="utf-8">
-<link rel="stylesheet" href="/core/tokens.css">
-<style>*{box-sizing:border-box}
-/* tokens.css is linked for its fonts, but it also sets html,body{width:var(--vw);overflow:hidden} and
-   its default --vw is PORTRAIT 1080px. This page never boots, so nothing ever rewrites that default.
-   Every fragment wider than 1080px was silently cut at x=1080 while the tool printed "box 1900px
-   centred" (docs/MISTAKES.md #351). Undo both: the vars carry the landscape canvas this harness really
-   photographs, and html/body grow rather than clip, so --serve still scrolls and the PNG path clips
-   through the screenshot rect as the comment below says. */
-:root{--vw:1920px;--vh:1080px}
-/* color was hard-coded #f7f8f8, which is exactly what made the missing palette invisible: text kept
-   looking right while every var(--…) colour resolved to nothing. It follows the theme now. */
-html,body{margin:0;background:${bg};color:var(--text);width:auto;height:auto;overflow:visible}
-/* min-height (not fixed) + no overflow:hidden → the page SCROLLS when served; the PNG path clips to
-   1920x1080 via the screenshot clip, so it's unaffected. */
-#stage{min-width:1920px;min-height:1080px;display:flex;align-items:center;justify-content:center}
-#frag{--t:${tSec};--p:0;${fullBleed ? 'width:1920px;height:1080px' : `width:${boxW}px`};position:relative;font-family:'Inter',system-ui,sans-serif}</style></head>
-<body><div id="stage"><div id="frag">${raw}</div></div>
-<script type="module">
-  // ONE definition of what a theme means. Importing the engine's own applyTheme is the point: a second
-  // copy of the palette-to-token mapping here is how it drifted the first time (#159, #368).
-  import { applyTheme } from '/core/engine/boot.js';
-  try { applyTheme(${JSON.stringify(theme)}); window.__themed = true; }
-  catch (e) { window.__themed = 'error: ' + e.message; }
-</script></body></html>`;
+const page$html = fragPage({ raw, theme, bg, boxW, tSec, fullBleed });
 
 const { server, port } = await serveRepo({
   route: (req, res) => {
@@ -172,10 +147,28 @@ console.log(`✓ ${path.relative(ROOT, src)}  →  ${out}   (theme ${themeName},
 // this repo does not carry, and its own fallback when they are missing is to quietly downgrade to a
 // regex pass that reports nothing. A green result meaning "not checked" is the failure mode this repo
 // least wants in an approval stop.
+// THIRD-PARTY, AND SAID SO. `impeccable` is not house tooling: it is a vendored skill (v3.5.0,
+// Apache 2.0, LICENSE at skills/impeccable/LICENSE) and its detector is the only thing in this repo
+// that opens a browser and measures what actually rendered. Our OWN anti-slop is elsewhere and is
+// named for itself: scripts/live/craft-live.mjs reads a fragment's source for off-ramp sizes and
+// shadows, and scripts/gates/frame-check.mjs compares the plan with the frames. Neither is impeccable
+// and neither should ever be called it.
+//
+// RESOLVED THE WAY THE SKILL RESOLVES IT. skills/impeccable/scripts/detect.mjs is its own entry point
+// and it tries TWO layouts before giving up. Hard-coding one of them, which this did, means a skill
+// update that moves the detector breaks the check silently and the run still reports a clean preview.
 async function detect(url, browser) {
-  let detectUrl;
-  try { ({ detectUrl } = await import('../../skills/impeccable/scripts/detector/detect-antipatterns.mjs')); }
-  catch (e) { return { skipped: `the impeccable skill is not vendored at skills/impeccable (${e.code || e.message})` }; }
+  // Inside the function on purpose: `detect` is hoisted and called from the top of this file, so a
+  // module-level const here is in its temporal dead zone at call time and throws.
+  const candidates = [
+    '../../skills/impeccable/scripts/detector/detect-antipatterns.mjs',
+    '../../skills/impeccable/cli/engine/detect-antipatterns.mjs',
+  ];
+  let detectUrl, why = '';
+  for (const cand of candidates) {
+    try { ({ detectUrl } = await import(cand)); break; } catch (e) { why = e.code || e.message; }
+  }
+  if (!detectUrl) return { skipped: `the impeccable skill is not vendored at skills/impeccable (${why})` };
   try { return { findings: await detectUrl(url, { browser, waitUntil: 'load', settleMs: 100, viewport: { width: 1920, height: 1080 } }) }; }
   catch (e) { return { skipped: `the detector threw, ${e.message}` }; }
 }
@@ -183,7 +176,9 @@ async function detect(url, browser) {
 function report(r) {
   if (!r) return;  // --no-detect: the caller said so, so there is nothing to report either way
   if (r.skipped) { console.log(`\n  ⚠ anti-pattern check SKIPPED, so this fragment is unchecked, not clean: ${r.skipped}`); return; }
-  if (!r.findings.length) { console.log('\n  ✓ impeccable: no anti-patterns detected (it reads craft tells, not whether the idea is right)'); return; }
-  console.log(`\n  impeccable · ${r.findings.length} anti-pattern(s). Each is a fix or a reason, never a shrug:`);
+  if (!r.findings.length) { console.log('\n  ✓ impeccable v3.5.0 (vendored third-party, Apache 2.0): no anti-patterns detected.'
+    + '\n    It reads craft tells in the RENDERED page, never whether the idea is right.'); return; }
+  console.log(`\n  impeccable v3.5.0 (vendored, Apache 2.0) · ${r.findings.length} anti-pattern(s).`
+    + ' Each is a fix or a reason, never a shrug:');
   for (const f of r.findings) console.log(`    [${f.antipattern}] ${String(f.snippet || '').slice(0, 120)}\n      → ${f.description}`);
 }

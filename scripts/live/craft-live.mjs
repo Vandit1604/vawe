@@ -21,6 +21,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { extractKitBlock } from '../lib/stagekit.mjs';
+import { KIT_ROLE, offRampSizes, offRampShadows } from '../lib/kit-ramp.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
@@ -108,6 +110,67 @@ function scene(rel, file) {
  * at boot, the extension primitives, the post-render harvest) are not decidable from a filename, and
  * saying nothing about them is better than guessing at them.
  */
+// ── a hand-written FRAGMENT, at the moment it is saved ────────────────────────────────────────────
+// Two rules that were held up by nothing but a sentence, and that the sentence did not hold. Both were
+// broken on `formats/scene/_vawe-oblique.*.html` by an author who had read them (docs/MISTAKES.md #591,
+// and the type/elevation ramps in docs/CRAFT/HTML-FRAGMENTS.md). A rule at [eye] is a rule you can
+// agree with and not follow; these two are cheap to check syntactically, so they move to [live].
+//
+// The ceiling, said rather than dressed up: this reads BYTES. It cannot tell a considered 34px from a
+// careless one, and it does not try. It reports that a number was written where a role exists, and
+// that a fragment exists before its film has a plan. Both are facts about the file.
+function fragment(rel, file) {
+  const out = [];
+  const raw = fs.readFileSync(file, 'utf8');
+  const kit = extractKitBlock(raw);
+  // 0. THE KIT BLOCK IS INTACT. Said first because everything below is measured against it, and said
+  //    at the keystroke because this one recurs: the FIRST `</style>` in a fragment is the kit's own
+  //    closing tag, so `replace('</style>', css + '</style>')` appends the fragment's CSS INSIDE the
+  //    generated block and corrupts the markers. Made twice in one session by the same author, both
+  //    times caught only later by a gate (docs/MISTAKES.md #594).
+  if (!kit && /STAGEKIT:start/.test(raw)) {
+    out.push('  the STAGEKIT markers are present but the block no longer parses, so some CSS was written',
+      '  INSIDE it. The first `</style>` in a fragment closes the KIT, not your own styles: append to the',
+      '  SECOND one. Every tool that strips the kit before judging a fragment is now judging the kit.');
+  } else if (!kit) {
+    out.push('  no STAGEKIT block. Paste `buildKit().block` verbatim, markers and all, not the generated',
+      '  `<film>.kit.css` sidecar: the markers are the boundary between what you wrote and what the',
+      '  generator did, and four separate checks depend on that boundary (docs/MISTAKES.md #594).');
+  }
+  const own = kit ? raw.replace(kit, '') : raw;          // never complain about the pasted kit's own CSS
+  const body = own.replace(/\/\*[\s\S]*?\*\//g, '');      // nor about a comment quoting a size
+
+  // 1. THE ROSTER ORDER. The scene decider is third, after storyboard and subject. A fragment written
+  //    before the beat table exists is a guess at the count and an invented set of motion handles.
+  const film = rel.replace(/\/_?([^/]+?)(\.[^./]+)?\.html$/, '/$1');
+  const near = fs.existsSync(path.join(ROOT, 'formats/scene'))
+    ? fs.readdirSync(path.join(ROOT, 'formats/scene')).filter((f) => f.endsWith('.storyboard.md')) : [];
+  if (!near.length) {
+    out.push(`  no storyboard anywhere in formats/scene/. AGENTS.md orders the deciders storyboard (1),`,
+      `  subject (2), scene (3), and scene is the role that writes THIS file. Written first, the fragment`,
+      `  count is a guess and the motion handles are invented after the fact rather than read off the`,
+      `  plan's own \`motion:\` line. docs/MISTAKES.md #591.`);
+  }
+
+  // 2. THE RAMPS. Every size is a kit role and every shadow a kit elevation level, or seven frames of
+  //    one film carry seven type scales and stop reading as one film.
+  const literal = offRampSizes(body);
+  if (literal.length >= 3 && !KIT_ROLE.test(body)) {
+    out.push(`  ${literal.length} literal type size(s) (${literal.slice(0, 6).join(', ')}) and no .kit- role in this`,
+      `  fragment. The kit ships the ramp: .kit-display .kit-hook .kit-headline .kit-body .kit-caption`,
+      `  .kit-eyebrow .kit-stat. Where a role needs a second voice, change weight, tone or tracking,`,
+      `  never size alone. docs/CRAFT/HTML-FRAGMENTS.md, "Beautiful, not merely correct".`);
+  }
+  const shadows = offRampShadows(body).length;
+  if (shadows) {
+    out.push(`  ${shadows} box-shadow(s) that name no kit elevation. Elevation is a ramp with three named jobs:`,
+      `  var(--kit-elev-1) a pill or control, -2 a card or panel, -3 the one hero surface. One level per`,
+      `  element, neutral black. A two-stop shadow reads as a smudge and a tinted one puts a hue in the`,
+      `  surround that no palette decision put there.`);
+  }
+  return out;
+}
+
 function engine(rel, file) {
   if (/^internal\/(scene|render)\//.test(rel)) {
     return [`  ${rel} is the CAPTURE PATH. docs/CRAFT/ENGINE-CHANGES.md: render one film before and`,
@@ -136,8 +199,9 @@ process.stdin.on('end', () => {
   const rel = path.relative(ROOT, file);
   if (rel.startsWith('..')) process.exit(0);
 
-  const say = rel.startsWith('formats/scene/') && rel.endsWith('.json') && fs.existsSync(file)
-    ? scene(rel, file)
+  const inScenes = rel.startsWith('formats/scene/') && fs.existsSync(file);
+  const say = inScenes && rel.endsWith('.json') ? scene(rel, file)
+    : inScenes && rel.endsWith('.html') ? fragment(rel, file)
     : engine(rel, file);
   if (!say.length) process.exit(0);                    // the reward for work doing fine is silence
 

@@ -4,7 +4,28 @@
 // PLAYS it. Two parsers would drift, and the drift would be invisible in the worst way, the gate
 // passing a beat the animatic silently drops. The regexes below are lifted verbatim from
 // storyboard-check.mjs so the reader is unchanged, only shared.
+// The closed vocabularies. Exported so storyboard-check, frame-check and the template all read ONE
+// list: three copies of a vocabulary is three vocabularies as soon as anyone adds to one of them.
+export const ARCHETYPES = ['centred', 'split', 'hero-object', 'asymmetric-baseline', 'full-bleed-row',
+  'symmetric-pair', 'lockup'];
+export const WEIGHTS = ['peak', 'strong', 'quiet'];
+/** `other (a reason)` is legal, the same waiver shape every rule here has. */
+export const isArchetype = (v) => !v || ARCHETYPES.includes(String(v).trim().split(/\s+\(/)[0])
+  || /^other\s*\(.+\)/.test(String(v).trim());
+
 export const RANGE = /\(([\d.]+)\s*s\s*[–: -]\s*([\d.]+)\s*s\)/;
+
+// THE REFERENCE, DECODED INTO ITS PARTS. A `### Reference devices` table, kept out of `blocksOf`'s way
+// by its heading level. It exists because the first pass at this film took three of the reference's
+// twelve moves and nobody could see which nine were missing: the catalogue lived in a chat message,
+// and a decision that lives in a transcript cannot be checked tomorrow (docs/MISTAKES.md #599).
+export function referenceDevices(src) {
+  const m = /^###\s+Reference devices\s*$([\s\S]*?)(?=^##\s|\Z)/m.exec(src || '');
+  if (!m) return [];
+  return [...m[1].matchAll(/^\|\s*(D\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|/gm)]
+    .map(([, id, device, use]) => ({ id, device, use,
+      dropped: /\bdropped\b/i.test(use) }));
+}
 
 export function frontmatter(src) {
   const fm = /^---\n([\s\S]*?)\n---/.exec(src);
@@ -95,6 +116,14 @@ export function parseStoryboard(src) {
       // firing it at the exact same instant as the cut, the way every OTHER field on this beat already
       // reaches assemble through this one parser.
       trigger: f('trigger'),
+      // THE PICTURE'S OWN DECISIONS, from CLOSED vocabularies so a gate can compare them rather than
+      // admire them. `picture:` and `style:` are prose and always were: an author can describe the
+      // wrong object in fluent English and pass every check (docs/MISTAKES.md #596). These three cannot
+      // be written vaguely.
+      //   archetype: the composition, so "no archetype twice in a row" is checkable
+      //   weight:    peak | strong | quiet, so exactly one beat is the loudest and it is measurable
+      //   borrows:   "<reference device> -> <our object>", so a borrowed SHAPE must name its ROLE here
+      archetype: f('archetype'), weight: f('weight'), borrows: f('borrows'),
     };
   });
   return {
@@ -107,6 +136,9 @@ export function parseStoryboard(src) {
     // stays restrained. not is the exclusion line, because most generic output is not a wrong decision,
     // it is an un-excluded default.
     pace: field('pace'), spectacle: field('spectacle'), not: field('not'),
+    // The type ramp, decided ONCE for the film. Seven frames that each invent their own scale are
+    // seven films, and the ramp was being decided eight times in seven files before this existed.
+    ramp: field('ramp'),
   };
 }
 

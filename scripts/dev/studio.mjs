@@ -28,11 +28,18 @@ import { sceneDims } from '../../core/layout/safe.js';
 import { resolveBridges } from '../../core/audio/bridges.js';
 import { scratch } from '../lib/scratch.mjs';
 import { studioPage } from './studio-page.mjs';
+import { parseStoryboard, timeline, fieldIn, blocksOf, referenceDevices } from '../author/storyboard-parse.mjs';
+import { fragPage, FULLBLEED_RE, INSET_RE } from '../lib/frag-page.mjs';
+import { stageOf } from '../gates/stage.mjs';
+import { extractKitBlock } from '../lib/stagekit.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.env.D || process.argv[2];
 if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: make studio D=formats/scene/<file>.json [PORT=8799]'); process.exit(2); }
 const dataUrl = '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/');
+// The film's theme, read once. The plan pane previews every fragment on it, and a fragment previewed
+// on the wrong palette is a different picture with no warning (docs/MISTAKES.md #382).
+const THEME_NAME = (() => { try { return JSON.parse(fs.readFileSync(dataArg, 'utf8')).theme || 'default'; } catch { return 'default'; } })();
 const PORT = Number(process.env.PORT) || 8799;
 
 
@@ -309,41 +316,69 @@ const studioRoutes = (req, res) => {
   // response Chrome cached it heuristically and a reload showed the previous version of the tool.
   if (url === '/' || url === '/studio') { res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' }); res.end(page()); return true; }
   // rebuilt per request (and the gate re-run), so an edit + reload shows the new timeline
-  // ---- the PLAN, drawn ---------------------------------------------------------------------------
-  // A film has two artefacts and studio only ever showed one. The storyboard is where the beats were
-  // decided and `make panels` renders it as a sheet, but that sheet lived in /tmp and nobody opened
-  // it: the gate that asks for it has been warning "no panels have been drawn" on this very film.
-  // Putting it behind a button in the tool that shows the RESULT is the whole point, because the
-  // question worth asking is whether the result matches the plan.
-  if (url === '/__panels') {
-    // Same resolution order as author-check: an explicit `storyboard` field, then a sibling file.
-    let sbPath = null;
+  // ---- the PLAN, as the film rather than as grey boxes -------------------------------------------
+  // A film has two artefacts and studio only ever showed one. This used to serve `make panels`, one
+  // grey still per beat sized from `shot:`, which answers how big and where and nothing about what is
+  // in the frame, so nobody could approve a plan from it (docs/MISTAKES.md #592). The real pictures
+  // were on disk the whole time: every beat that names a `fragment:` has hand-written markup that
+  // renders instantly. So the plan is served as DATA and the page draws it in the studio's own room,
+  // with each beat's real fragment live beside its reasoning.
+  const storyboardPath = () => {
+    const named = (() => { try { const d = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
+      return typeof d.storyboard === 'string' ? path.join(REPO_ROOT, d.storyboard) : null; } catch { return null; } })();
+    return [named, dataArg.replace(/\.json$/, '.storyboard.md')].find((f) => f && fs.existsSync(f)) || null;
+  };
+  // WHERE THE FILM IS, in the tool that shows the film. `make stage` answers this in a terminal, and a
+  // terminal is not where anyone is looking while they work on a film.
+  if (url === '/api/stage') {
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    try { res.end(JSON.stringify({ ok: true, ...stageOf(dataArg) })); }
+    catch (e) { res.end(JSON.stringify({ ok: false, error: String(e.message) })); }
+    return true;
+  }
+  if (url === '/api/plan') {
+    const reply = (o, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(o)); };
+    const sbPath = storyboardPath();
+    if (!sbPath) return reply({ ok: false, error: 'no storyboard for this scene: add a top-level "storyboard" field, or put <name>.storyboard.md beside it' }, 404), true;
     try {
-      const d = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
-      const named = typeof d.storyboard === 'string' ? path.join(REPO_ROOT, d.storyboard) : null;
-      const sibling = dataArg.replace(/\.json$/, '.storyboard.md');
-      sbPath = [named, sibling].find((f) => f && fs.existsSync(f)) || null;
-    } catch (e) {
-      // NOT swallowed. A bare catch here returned "no storyboard for this scene" over a
-      // ReferenceError and sent me looking at path resolution for ten minutes.
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
-      return res.end('could not resolve the storyboard: ' + e.message), true;
+      const src = fs.readFileSync(sbPath, 'utf8');
+      const sb = parseStoryboard(src);
+      const blocks = blocksOf(src);
+      // `fragment:` is the studio's own field, so it is read off the raw block; everything else comes
+      // from the shared reader, because a second storyboard parser is the drift that reader prevents.
+      const beats = timeline(sb).beats.map((b, i) => {
+        const frag = (fieldIn(blocks[i], 'fragment') || '').split(/\s+\(/)[0].trim();
+        return { ...b, fragment: frag && fs.existsSync(path.join(REPO_ROOT, frag)) ? frag : null,
+          archetype: (fieldIn(blocks[i], 'archetype') || '').trim(),
+          weight: (fieldIn(blocks[i], 'weight') || '').trim(),
+          borrows: (fieldIn(blocks[i], 'borrows') || '').trim() };
+      });
+      let gateOut = '';
+      try { gateOut = execFileSync(process.execPath, [path.join(REPO_ROOT, 'scripts/gates/storyboard-check.mjs'), sbPath], { encoding: 'utf8' }); }
+      catch (e) { gateOut = String(e.stdout || '') + String(e.stderr || ''); }
+      reply({ ok: true, file: path.relative(REPO_ROOT, sbPath), theme: THEME_NAME,
+        message: sb.message, audience: sb.audience, pace: sb.pace, spectacle: sb.spectacle, not: sb.not,
+        format: sb.format, duration: sb.duration, beats, devices: referenceDevices(src),
+        findings: [...gateOut.matchAll(/^\s*([✗~✓])\s+(.+)$/gm)].map((m) => ({ kind: m[1], line: m[2].trim() })) });
+    } catch (e) { reply({ ok: false, error: 'could not read the storyboard: ' + e.message }, 500); }
+    return true;
+  }
+  // One fragment, on the film's theme, in the SAME wrapper `make preview` photographs. Sharing that
+  // wrapper is the point: two copies would drift, and the drift shows a fragment clean in one tool and
+  // wrong in the other with nothing saying which is lying.
+  if (url === '/__frag') {
+    const rel = new URL(req.url, 'http://x').searchParams.get('src') || '';
+    const file = path.join(REPO_ROOT, rel);
+    const themeFile = path.join(REPO_ROOT, 'themes', THEME_NAME + '.json');
+    if (!file.startsWith(REPO_ROOT) || !fs.existsSync(file) || !fs.existsSync(themeFile)) {
+      res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('no such fragment'); return true;
     }
-    if (!sbPath) { res.writeHead(404, { 'Content-Type': 'text/plain' });
-      return res.end('no storyboard for this scene: add a top-level "storyboard" field, or put <name>.storyboard.md beside it'), true; }
-    const out = path.join('/tmp/panels', path.basename(sbPath).replace(/\.storyboard\.md$/, ''), '..');
-    const png = path.join('/tmp/panels', path.basename(sbPath).replace(/\.storyboard\.md$/, '') + '.png');
-    // Redrawn when the storyboard is NEWER than the sheet, so the plan on screen is never stale.
-    const stale = !fs.existsSync(png) || fs.statSync(sbPath).mtimeMs > fs.statSync(png).mtimeMs;
-    if (stale) {
-      const r = spawnSync(process.execPath, [path.join(REPO_ROOT, 'scripts/author/panels.mjs'), sbPath],
-        { cwd: REPO_ROOT, encoding: 'utf8' });
-      if (!fs.existsSync(png)) { res.writeHead(500, { 'Content-Type': 'text/plain' });
-        return res.end('panels failed:\n' + String(r.stderr || r.stdout).slice(0, 900)), true; }
-    }
-    res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-store',
-                         'X-Dim': pngDim(png), 'X-Storyboard': path.relative(REPO_ROOT, sbPath) });
-    fs.createReadStream(png).pipe(res);
+    const theme = JSON.parse(fs.readFileSync(themeFile, 'utf8'));
+    const raw = fs.readFileSync(file, 'utf8');
+    const kit = extractKitBlock(raw);
+    const own = kit ? raw.replace(kit, '') : raw;
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+    res.end(fragPage({ raw, theme, bg: theme.palette.bg, fullBleed: FULLBLEED_RE.test(own) && INSET_RE.test(own) }));
     return true;
   }
 

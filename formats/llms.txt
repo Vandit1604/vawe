@@ -72,15 +72,15 @@ Full props per type: `formats/scene/schema.json`. What each type is FOR, in pros
 
 ## The vocabulary: effect families
 
-Do not try to memorise all 786 named things the engine can do; reach for them by family, then
-search within the family. Each of these 52 families is a dial you put ON a layer, a cut,
+Do not try to memorise all 810 named things the engine can do; reach for them by family, then
+search within the family. Each of these 53 families is a dial you put ON a layer, a cut,
 the camera, or the scene:
 
 - **Drawn icons** (16, `asset`): `svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists.
 - **Motion voices (tactile sound)** (7, `audio`): The film SOUNDS its own motion.
 - **Backgrounds** (23, `background`): `bg:[{preset,from,to}]`.
 - **Gradient recipes** (24, `background`): named colour+kind(+angle) combos for the `gradient` background preset: `{"preset":"gradient","opts":{"recipe":"NAME"}}`.
-- **Beat blueprints** (29, `blueprint`): `{ "type":"beat", "beat":"<name>", ...
+- **Beat blueprints** (34, `blueprint`): `{ "type":"beat", "beat":"<name>", ...
 - **Camera dials** (1, `camera`): Top-level scene keys that change what the camera DOES rather than where it goes.
 - **Camera moves** (13, `camera`): `"cameraMove": { "move":"<name>", ...
 - **Destinations (platform safe area)** (6, `canvas`): `"destination": "<name>"`.
@@ -113,6 +113,7 @@ the camera, or the scene:
 - **Per-layer modifiers** (14, `per-layer`): `"modifiers"` on a layer, applied in array order after every motion track.
 - **Idles (ambient hold motion)** (3, `per-layer/scene`): `idle` on a layer, or scene-level `idle` for the whole cast.
 - **GSAP named effects** (30, `per-layer/text`): `fx` on a layer, pair with `anim:"none"` so GSAP owns the transform.
+- **Placement** (20, `pin`): `"pin": "<name>"` on a layer or a caption.
 - **Spectacle devices** (12, `scene`): `"spectacle": { "at", "of", "device", "why" }`.
 - **Canvas image passes (baked)** (8, `static`): `canvasFx`: a one-time baked image pass (cannot move).
 - **Composite looks (static)** (31, `static`): `filter:"<look>"`.
@@ -121,7 +122,7 @@ the camera, or the scene:
 - **Ransom faces** (8, `text`): `ransom` on a text layer: per-glyph face mixing, from this fixed set.
 - **Scramble charsets (`chars`)** (7, `text`): What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "presetOpts": { "chars":"numbers", "rate":48, "revealDelay":0.25 } }`.
 - **Stagger order (`from`)** (5, `text/parts`): The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`.
-- **Theme look keys** (7, `theme`): A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (docs/CRAFT/THEME-LOOK.md).
+- **Theme look keys** (6, `theme`): A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (docs/CRAFT/THEME-LOOK.md).
 - **Easings** (42, `timing`): `ease` on a motion key, a count, a camera leg.
 - **Time remaps (the layer's own clock)** (4, `timing`): `timeRemap` on a layer.
 - **Film energy** (4, `top-level`): One word at the top of the scene sets the default speed curve for every cut and seam that names no `timing`.
@@ -130,7 +131,7 @@ the camera, or the scene:
 - **Shader stings** (35, `transition`): `stings:[{t,fx}]`.
 
 **Discovery, not memorisation:** `make arsenal Q="a page scrolling under a static tilt"` searches all
-786 named things (layer types, every family above, blueprints, blocks, sound cues) by plain-English
+810 named things (layer types, every family above, blueprints, blocks, sound cues) by plain-English
 description and returns the exact key to write. `make schema AT="layers[].motion[]"` answers the other
 half: what fields are legal to write at one JSON path, read live off `formats/scene/schema.json`.
 
@@ -159,7 +160,7 @@ make judge D=formats/scene/x.json   # the one step that SEES: composition and fi
 
 ## Discovery
 
-- `make arsenal Q="<what you mean, in plain english>"` searches all 786 named things at once and
+- `make arsenal Q="<what you mean, in plain english>"` searches all 810 named things at once and
   prints the JSON key that means it.
 - `make schema AT="<json path>"` answers what is legal to write at that path, with every field's type.
 - `make list` shows the scene module's schema and a sample scene end to end.
