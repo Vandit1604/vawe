@@ -43,9 +43,37 @@ const spaceUnit = (hook) => Math.min(14, Math.max(6, Math.round(hook / 11.5)));
 // light/dark, theme-contract.js DEFAULT_FIELD_LIGHT/DARK) scales the dark tier's depth: a theme with a
 // deeper vignette gets a deeper card shadow, so the card and its own backdrop agree on how dramatic the
 // brand is instead of the card carrying a flat default no theme chose.
-const shadowFor = (light, vignette) => (light
-  ? '0 1px 2px rgba(15,18,15,.06), 0 14px 34px rgba(15,18,15,.10)'
-  : `0 2px 10px rgba(0,0,0,.4), 0 18px 44px rgba(0,0,0,${(0.32 + vignette * 0.7).toFixed(2)})`);
+// ELEVATION IS A RAMP, NOT A SHADOW. Two stops read as a smudge under a card; what makes a shadow read
+// as DISTANCE is many small offsets at low alpha, each roughly doubling the blur of the one before, so
+// the falloff is closer to how light actually leaves a surface. Three levels, one per job, and never two
+// of them on one element.
+//
+// NEUTRAL BLACK ONLY, and this is a real refusal rather than a default. The old light ramp tinted its
+// shadow rgba(15,18,15), a green-black, and a tinted shadow puts a hue in the surround that no palette
+// decision put there. `mengto/beautiful-shadows` (ui-skills) refuses the same thing, and so does this
+// repo's own studio chrome, which says it in its tokens: "a tinted shadow is a hue in the surround.
+// Refused." Three independent sources agreeing is enough.
+//
+// What was REJECTED from that skill: its `0 0 0 1px` contact ring. A ring is a border wearing a
+// shadow's clothes, and a fragment that wants a visible edge should ask for `.kit-card`, which has one.
+const ELEV = {
+  light: {
+    1: '0 1px 1px rgba(0,0,0,.04), 0 2px 4px -2px rgba(0,0,0,.06)',
+    2: '0 1px 1px -.5px rgba(0,0,0,.04), 0 3px 3px -1.5px rgba(0,0,0,.04), 0 7px 7px -3.5px rgba(0,0,0,.045), 0 16px 16px -8px rgba(0,0,0,.05)',
+    3: '0 2px 2px rgba(0,0,0,.03), 0 6px 5px rgba(0,0,0,.045), 0 13px 10px rgba(0,0,0,.055), 0 22px 18px rgba(0,0,0,.07), 0 42px 34px rgba(0,0,0,.085), 0 100px 80px rgba(0,0,0,.12)',
+  },
+  dark: {
+    1: '0 1px 2px rgba(0,0,0,.5)',
+    2: '0 2px 6px rgba(0,0,0,.45), 0 8px 18px rgba(0,0,0,.4)',
+    3: '0 2px 10px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.42), 0 28px 60px rgba(0,0,0,.48)',
+  },
+};
+// A dark room swallows a wide soft shadow, so the vignette buys back the deepest stop's opacity there
+// and nowhere else: on light the ramp is already the whole separation.
+const elevFor = (light, vignette) => (light ? ELEV.light : {
+  ...ELEV.dark,
+  3: ELEV.dark[3].replace(/rgba\(0,0,0,\.48\)$/, `rgba(0,0,0,${(0.48 + vignette * 0.3).toFixed(2)})`),
+});
 
 /**
  * buildKit(theme) → { css, block }
@@ -66,11 +94,13 @@ export function buildKit(theme, resolveLook, isLightBg) {
   const light = isLightBg && bg != null ? isLightBg(bg) : true;
   const rf = radiusFactor(look.cuts);
   const radius = { sm: Math.round(RADIUS_BASE.sm * rf), md: Math.round(RADIUS_BASE.md * rf), lg: Math.round(RADIUS_BASE.lg * rf) };
-  const shadow = shadowFor(light, (look.field && look.field.vignette) || 0);
+  const elev = elevFor(light, (look.field && look.field.vignette) || 0);
+  const shadow = elev[2];
   const unit = spaceUnit(s.hook);
   const margin = (look.layout && look.layout.margin) || 160;
   const eyebrow = Math.max(14, Math.round(s.caption * 0.92));
   const stat = Math.round(s.hook * 1.15);
+  const display = Math.round(s.hook * 2.4);
 
   const spaceVars = SPACE_STEPS.map((mul, i) => `--kit-space-${i + 1}:${mul * unit}px;`).join('');
   const gridCols = Array.from({ length: 12 }, (_, i) => `.kit-col-${i + 1}{grid-column:span ${i + 1}}`).join('\n');
@@ -100,9 +130,114 @@ export function buildKit(theme, resolveLook, isLightBg) {
     `.kit-radius-md{border-radius:${radius.md}px}`,
     `.kit-radius-lg{border-radius:${radius.lg}px}`,
     `.kit-shadow{box-shadow:${shadow}}`,
+    // --- elevation, as three named jobs -------------------------------------------------------------
+    // 1 a pill or a control · 2 a card or panel, the ordinary lift · 3 the one hero surface in a frame.
+    // One level per element, never two: stacking them is what makes a shadow read as dirt.
+    `:scope{--kit-elev-1:${elev[1]};--kit-elev-2:${elev[2]};--kit-elev-3:${elev[3]}}`,
+    '.kit-elev-1{box-shadow:var(--kit-elev-1)}',
+    '.kit-elev-2{box-shadow:var(--kit-elev-2)}',
+    '.kit-elev-3{box-shadow:var(--kit-elev-3)}',
+    // --- a PLANE: fill + lift + a large radius, and deliberately NO border ---------------------------
+    // The third surface treatment, and the one a film frame usually wants. `.kit-card` draws an edge,
+    // which reads as a control in a product UI; a plane is a piece of a larger surface caught mid-shot,
+    // separated from the ground by depth alone. It is what every reference film full of floating UI is
+    // actually doing, and a frame that reached for `.kit-card` instead got a hairline nothing in the
+    // reference has.
+    // The radius scales with the CANVAS (`.kit-root` sets container-type:size, so 1.8cqw is 34px on a
+    // 1920 frame and 19px on a 1080 one) and never falls under the theme's own large radius. A plane
+    // is a big surface: a fixed 25px corner on a 1080px-wide plate reads as a sharp corner.
+    `.kit-plane{background:var(--surface);border-radius:max(${radius.lg}px, 1.8cqw);
+      box-shadow:var(--kit-elev-3), inset 0 1px 0 rgba(255,255,255,.9), 0 0 0 1px ${light ? 'rgba(15,22,32,.045)' : 'rgba(255,255,255,.06)'}}`,
+    // --- THE DOUBLE BEZEL: a plate sitting in a tray, the way machined hardware is built -------------
+    // The single biggest difference between a surface that reads CLEAN and one that reads PREMIUM, and
+    // this kit had no way to express it. One flat card on a ground is a sticker; a card nested inside a
+    // slightly larger tray with its own fill and its own hairline reads as an object with an edge.
+    //   .kit-bezel   the outer tray: a faint fill, a hairline ring, and padding
+    //   .kit-core    the inner plate, with its OWN top highlight and a concentric radius
+    // The inner radius is the outer radius MINUS the padding, which is what makes the two curves
+    // concentric. Any other number and the corners visibly disagree, which is the tell.
+    `.kit-bezel{--kit-bezel-pad:${Math.round(unit * 1.5)}px;padding:var(--kit-bezel-pad);
+      background:${light ? 'rgba(15,22,32,.035)' : 'rgba(255,255,255,.05)'};
+      border-radius:max(${radius.lg + Math.round(unit * 1.5)}px, 2.4cqw);
+      box-shadow:0 0 0 2px ${light ? 'rgba(15,22,32,.07)' : 'rgba(255,255,255,.11)'}, var(--kit-elev-3)}`,
+    `.kit-core{background:var(--surface);
+      border-radius:calc(max(${radius.lg + Math.round(unit * 1.5)}px, 2.4cqw) - var(--kit-bezel-pad));
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 0 0 1px ${light ? 'rgba(15,22,32,.05)' : 'rgba(255,255,255,.06)'}}`,
+    // --- a chip: the eyebrow as a pill, which is what the role wants to be on a hero -----------------
+    `.kit-chip{display:inline-block;padding:${Math.round(unit * 0.75)}px ${Math.round(unit * 1.75)}px;
+      border-radius:999px;background:var(--kit-chip-bg, var(--accent-dim));color:var(--kit-chip-fg, var(--accent));
+      box-shadow:0 0 0 1px ${light ? 'rgba(37,99,235,.10)' : 'rgba(255,255,255,.08)'}}`,
+    // --- GROUNDS: the strongest colour OWNS a frame, it does not sprinkle ---------------------------
+    // A film where every beat sits on one ground is a film with no tonal rhythm, and an accent that
+    // appears as one word on all seven beats has been scattered rather than spent (ui-skills
+    // pbakaus/colorize: "let the strongest color own a deliberate region or role"). The theme already
+    // declared a `look.backdrop` ROTATION and nothing used it.
+    //
+    // A ground REMAPS THE SEMANTIC TOKENS rather than repainting children. That is the whole trick: a
+    // fragment written once against --text and --surface renders correctly on paper, on ink and on the
+    // accent without a single conditional, because the meaning of "text" changed, not the markup.
+    // NOT a mechanical inversion. Each ground states its own elevation and its own accent, because an
+    // inverted light theme is how a dark surface ends up with grey text nobody can read.
+    `.kit-ground-paper{background:var(--bg);--kit-chip-bg:#e6edfc;--kit-chip-fg:#1a46c0}`,
+    // Ice blue, not cobalt, and this is measured rather than preferred: #2563eb on #0f1620 is about
+    // 2.5:1 and unreadable. The theme's own two-surface rule.
+    `.kit-ground-ink{background:var(--ink);--text:#f2f5f9;--text-2:#aab6c6;--dim:#7d8b9e;
+      --surface:#182231;--surface-2:#131c28;--line:#26313f;--line-strong:#33404f;
+      --accent:#8fc0ff;--accent-dim:rgba(143,192,255,.16);--kit-chip-bg:#1d2a3c;--kit-chip-fg:#b4d5ff}`,
+    // On a flooded accent the secondary text comes from the SURFACE hue, not from a generic grey: a
+    // washed grey on cobalt reads as a rendering fault. White at 78% is still white, just quieter.
+    // The flood is the THEME's accent as a literal, not `var(--accent)`. This rule redefines --accent
+    // for its children, and a var() on the same element reads that redefinition, so `background:
+    // var(--accent)` painted the frame white with the value it was about to set. Self-reference, and
+    // silent: the frame simply rendered as another white one.
+    `.kit-ground-accent{background:${(theme && theme.palette && theme.palette.accent) || '#2563eb'};--text:#ffffff;--text-2:rgba(255,255,255,.78);
+      --dim:rgba(255,255,255,.62);--surface:#ffffff;--surface-2:rgba(255,255,255,.14);
+      --line:rgba(255,255,255,.22);--line-strong:rgba(255,255,255,.34);
+      --accent:#ffffff;--accent-dim:rgba(255,255,255,.18);--kit-chip-bg:#1e46b8;--kit-chip-fg:#ffffff}`,
+    // --- A PICTURE IS NOT A SURFACE OF THIS FRAME --------------------------------------------------
+    // The counterpart to the grounds, and the bug they cause without it. A ground remaps the semantic
+    // tokens so a fragment written once renders on paper, ink or the accent unchanged. But some things
+    // inside a frame are PICTURES OF ANOTHER FRAME: a rendered still, a screenshot, a captured UI. Those
+    // must not inherit the ground, or a cobalt beat paints white type onto a white plate and an ink beat
+    // paints dark type onto a dark one. `.kit-picture` restores the theme's own paper values, so any
+    // surface that depicts something else stays legible on every ground, and no fragment hand-rolls it.
+    // It is also what a CAPTURED component needs: real UI lifted off a live site was designed against a
+    // page's own palette and must keep it.
+    `.kit-picture{--text:${(theme.palette && theme.palette.text) || '#0f1620'};
+      --text-2:${(theme.palette && theme.palette.text2) || '#454f5e'};
+      --dim:${(theme.palette && theme.palette.dim) || '#697182'};
+      --surface:${(theme.palette && theme.palette.surface) || '#ffffff'};
+      --line:${(theme.palette && theme.palette.line) || '#e7eaf0'};
+      --accent:${(theme.palette && theme.palette.accent) || '#2563eb'}}`,
+    // --- MATERIAL, AT VIDEO STRENGTH. A flat field is a dead field, and a LIGHT field is the worst
+    // case: with nothing to catch, it reads as a blank slide. The number is not a web number. Every
+    // decorative value in this kit is set from the video table in the vendored another engine reference
+    // (`references/video-composition.md`), which is blunt about it: decorative opacity is 3-8% on the
+    // web and 12-25% on video, borders are 1px on the web and 2-4px on video, and anything under those
+    // floors is invisible once the frame is encoded. Designing a frame at web values and rendering it
+    // at 1920x1080 is why a set of frames reads thin (docs/MISTAKES.md #600).
+    `.kit-grain{position:absolute;inset:0;pointer-events:none;opacity:.055;mix-blend-mode:multiply;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}`,
     // --- a hairline divider: the structural rule LAYOUT.md §0 asks for, distinct from a card's border --
-    '.kit-divider{height:1px;background:var(--line);border:0}',
+    // A divider is 1px on a web page and invisible on video, and it is also one of the few elements
+    // that animates cleanly (scaleX 0 to 1), so it earns its weight twice.
+    '.kit-divider{height:2px;background:var(--line-strong);border:0}',
+    // --- FOREGROUND ACCENTS: the third role. Background treatment, midground content and foreground
+    // detail are what make a frame read as PRODUCED rather than generated, and a frame carrying only
+    // the first two is the thin frame. Registration marks are the cheapest honest version: they are
+    // what a frame of film actually has on it.
+    `.kit-regmark{position:absolute;width:${Math.round(unit * 3)}px;height:${Math.round(unit * 3)}px;
+      border:2px solid var(--line-strong);opacity:.55}`,
+    '.kit-regmark-tl{top:var(--kit-space-5);left:var(--kit-space-5);border-right:0;border-bottom:0}',
+    '.kit-regmark-tr{top:var(--kit-space-5);right:var(--kit-space-5);border-left:0;border-bottom:0}',
+    '.kit-regmark-bl{bottom:var(--kit-space-5);left:var(--kit-space-5);border-right:0;border-top:0}',
+    '.kit-regmark-br{bottom:var(--kit-space-5);right:var(--kit-space-5);border-left:0;border-top:0}',
     // --- type scale (unchanged shape) plus an eyebrow/kicker and a tabular stat number ----------------
+    // DISPLAY is the role above hook: a wordmark or a single word carrying a whole frame. It existed in
+    // every film as a literal (236px here, 200 there) because the ramp stopped at `hook`, which is the
+    // "collection of arbitrary values" a type system is supposed to remove. Derived, so 41 themes get
+    // 41 display sizes rather than one number this file picked.
+    `.kit-display{font:700 ${display}px var(--font-sans);letter-spacing:-0.05em;color:var(--text);margin:0}`,
     `.kit-hook{font:700 ${s.hook}px var(--font-sans);color:var(--text);margin:0}`,
     `.kit-headline{font:700 ${s.headline}px var(--font-sans);color:var(--text);margin:0}`,
     `.kit-body{font:400 ${s.body}px var(--font-sans);color:var(--text-2);margin:0}`,

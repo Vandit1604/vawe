@@ -40,8 +40,15 @@ const ON_HANDLER = /\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi;
 // unstyled text on nothing, with no error anywhere (docs/MISTAKES.md #548). Comments paint no pixels,
 // so dropping them first is free, and it disarms EMBED and ESCAPING_URL in the same stroke.
 const COMMENT = /<!--[\s\S]*?-->/g;
+// A CSS BLOCK COMMENT IS PROSE TOO, and the same argument applies to it exactly. `timeCssUsed` strips
+// comments before looking for `animation`/`transition` precisely so a note explaining the rule is not
+// read as a breach of it, and it did that only for HTML comments: a fragment whose stylesheet carried
+// `/* ... never a CSS animation: mod() gives a square wave ... */` was refused by the validator FOR THE
+// SENTENCE SAYING IT DOES NOT DO THE THING (docs/MISTAKES.md #602). Stripped here rather than at each
+// call site, because every reader of this file wants the same thing: the declarations, not the prose.
+const CSS_COMMENT = /\/\*[\s\S]*?\*\//g;
 /** A fragment's markup with its author notes removed. ONE owner: the three readers below share it. */
-export const stripComments = (src) => String(src || '').replace(COMMENT, '');
+export const stripComments = (src) => String(src || '').replace(COMMENT, '').replace(CSS_COMMENT, '');
 
 export function sanitizeHtml(src) {
   return stripComments(src)

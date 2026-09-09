@@ -244,3 +244,27 @@ Elevation and hairlines are complements, not alternatives. Hairlines do the ever
 **Don't** fade text below `#697182` to make a page feel calm. Resize or reweight instead.
 
 **Don't** let the chrome start performing. If the page is more interesting than the video playing inside it, the design has inverted its own thesis.
+
+## ui-skills: what was used on this repo's frames, and what was refused
+
+Consulted 2026-09-09 while building `formats/scene/_vawe-oblique.*.html`.
+
+**Used, both refiners rather than builders, so neither competes with the vendored `impeccable`:**
+
+- **`pbakaus/typeset`** (typography). Took: state the roles and their intended contrast BEFORE editing;
+  the fewest roles that make hierarchy unmistakable; combine size, weight, space and tone rather than
+  asking size to do all the work; keep repeated roles identical across screens; tabular numerals where
+  digits line up; tune leading to the face and the measure, not a universal ratio. Refused: its web
+  reading floors (16px body, a 45-75ch measure). A 1920x1080 frame read from across a room is not a
+  reading surface, and its body role is 38px.
+- **`mengto/beautiful-shadows`** (elevation). Took: the layered ramp shape, three named levels, one
+  level per element, and neutral black only, never a tinted shadow. Refused: its Tailwind class syntax
+  (this repo writes CSS), and its `0 0 0 1px` contact ring, which is a border wearing a shadow's
+  clothes. A frame that wants an edge asks for `.kit-card`, which has one.
+
+**Refused outright:** `zeke/swiss-design`, `ericzakariasson/scandinavian-design`, `leonxlnx/soft-skill`
+and every other whole-look skill. A film already has an art direction, from its theme and from its
+reference, and importing a second one is how a brand's video stops looking like the brand.
+
+**Already vendored, so never fetched:** `pbakaus/impeccable`. It runs inside `make preview` as the
+detector. Do not fetch the skill version alongside it.

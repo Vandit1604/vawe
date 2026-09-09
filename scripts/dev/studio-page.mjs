@@ -365,11 +365,85 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  #pickhead{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line)}
  #pickname{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  #pickjson{margin:0;padding:11px;overflow:auto;user-select:text;white-space:pre-wrap;color:var(--ink-2)}
- /* the storyboard is a WHITE sheet, so it keeps its own ground rather than inheriting the grey room */
+ /* THE PLAN, in this room's own materials. The film's frames are white and the room is grey, so the
+    only place white appears here is inside a beat's stage, where it belongs to the film and not to the
+    tool. Everything around it is the same panel/line/muted set every other pane is built from. */
+ /* THE STAGE STRIP. Always on, under the state tabs, because "where is this film" is the question the
+    whole tool is an answer to and it used to live only in a terminal. It is READ-ONLY: the stage comes
+    from the files on disk (scripts/gates/stage.mjs), so the strip cannot claim a stage the repo is not
+    in, and clicking it does nothing but jump to the pane that stage happens in. */
+ #stage{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--panel);
+   border-bottom:1px solid var(--line);font-size:12px;flex:none}
+ #stagedots{display:flex;align-items:center;gap:5px}
+ #stagedots b{font:600 10px/1 'JetBrains Mono',ui-monospace,monospace;color:var(--muted);
+   padding:4px 7px;border-radius:5px;background:var(--panel-2);text-transform:uppercase;letter-spacing:.06em}
+ #stagedots b.done{color:var(--ink-2)}
+ #stagedots b.at{background:var(--accent);color:#fff}
+ #stagedots i{width:8px;height:1px;background:var(--line-2);font-style:normal}
+ #stagenext{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+ #stagenext code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:var(--ink)}
+ #stagewhy{color:var(--muted);flex:none}
  #planpath{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px}
- #planview{display:flex;align-items:flex-start;justify-content:center}
- #planview.sheet{background:#fff;justify-content:center}
- #planview:not(.sheet){justify-content:flex-start}
+ #planview{display:block;overflow:auto;padding:0}
+ #planhead{padding:14px 16px 16px;border-bottom:1px solid var(--line)}
+ #planmsg{margin:0 0 10px;font-size:17px;font-weight:600;line-height:1.35;max-width:70ch}
+ #planfacts{display:flex;flex-wrap:wrap;gap:4px 18px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:var(--muted)}
+ #planfacts b{color:var(--ink);font-weight:600}
+ .planspine{margin:12px 0 0;padding:9px 11px;background:var(--panel-2);border-left:2px solid var(--accent);border-radius:0 var(--r-in) var(--r-in) 0}
+ .planspine p{margin:0 0 5px;font-size:12px;line-height:1.5;color:var(--ink-2)}
+ .planspine p:last-child{margin:0}
+ .planspine b{color:var(--ink);font-weight:600}
+ /* THE REFERENCE, DECODED. Collapsed by default: it is read once when the plan is reviewed and never
+    again, so it must be present and must not sit between the reader and the beats. A dropped device
+    keeps its row on purpose, because "we looked at this and refused it" is a decision and an absent
+    row reads as an oversight. */
+ #plandev{margin:12px 0 0}
+ #plandev summary{cursor:pointer;font:600 11px/1.6 'JetBrains Mono',ui-monospace,monospace;
+   letter-spacing:.06em;text-transform:uppercase;color:var(--muted);list-style:none}
+ #plandev summary::-webkit-details-marker{display:none}
+ #plandev summary::before{content:'▸ ';color:var(--accent)}
+ #plandev[open] summary::before{content:'▾ '}
+ #plandev table{border-collapse:collapse;margin-top:8px;width:100%;font-size:12px}
+ #plandev td{padding:5px 10px 5px 0;border-top:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+ #plandev td:first-child{width:34px;color:var(--accent);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px}
+ #plandev td:nth-child(2){width:38%;color:var(--ink)}
+ #plandev tr.dropped td{color:var(--muted)}
+ #plandev tr.dropped td:first-child{color:var(--muted);text-decoration:line-through}
+ #plangate{margin:12px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;line-height:1.7}
+ #plangate div{padding-left:15px;text-indent:-15px;color:var(--muted)}
+ #plangate .ok{color:var(--accent)}
+ /* One beat is one row: the picture on the left at the film's real ratio, the reasoning on the right.
+    The number is the address, so a reviewer can say "beat 4" and mean one row. */
+ .pbeat{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;
+   padding:16px;border-bottom:1px solid var(--line)}
+ .pbeat > header{grid-column:1/-1;display:flex;align-items:center;gap:9px}
+ .pbeat .pn{width:19px;height:19px;flex:none;display:grid;place-items:center;border-radius:5px;
+   background:var(--accent);color:#fff;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:600}
+ .pbeat h3{margin:0;font-size:14px;font-weight:600}
+ .pbeat .pmeta{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:var(--muted)}
+ .pbeat .pdur{color:var(--ink-2)}
+ /* The two decisions that decide whether the film reads flat, shown where the review happens. An
+    archetype repeated on the beat before is marked here, because a repeat is only visible when the
+    two beats are read together and a per-beat card is the one place that never happens. */
+ .ptag{font:600 10px/1 'JetBrains Mono',ui-monospace,monospace;text-transform:uppercase;
+   letter-spacing:.06em;padding:4px 7px;border-radius:5px;background:var(--panel-2);color:var(--muted)}
+ .ptag.peak{background:var(--accent);color:#fff}
+ .ptag.repeat{background:var(--bad-bg);color:var(--bad)}
+ .pstage{position:relative;aspect-ratio:var(--par,1.7778);background:#fff;border-radius:var(--r-in);
+   overflow:hidden;box-shadow:var(--sh-2)}
+ .pstage iframe{position:absolute;top:0;left:0;width:1920px;height:1080px;border:0;transform-origin:top left}
+ .pstage.none{display:grid;place-items:center;background:var(--panel-2);box-shadow:none;
+   border:1px dashed var(--line-2);text-align:center;padding:16px}
+ .pstage.none b{display:block;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;color:var(--accent);margin-bottom:6px}
+ .pstage.none s{display:block;text-decoration:none;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px}
+ .pstage.none p{margin:0;font-size:12px;line-height:1.5;color:var(--ink-2);max-width:44ch}
+ .psrc{margin:6px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+ .pcopy{margin:0 0 12px;padding:0;list-style:none}
+ .pcopy li{font-size:16px;font-weight:600;line-height:1.3;margin-bottom:3px}
+ .pcopy li + li{font-weight:400;font-size:14px;color:var(--ink-2)}
+ .prow{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;padding:5px 0;border-top:1px solid var(--line)}
+ .prow dt{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;color:var(--muted);line-height:1.6}
+ .prow dd{margin:0;font-size:12px;line-height:1.5;color:var(--ink-2)}
  /* the boot failure, said out loud: core/boot.js parks the reason on window.__engineError */
  #err{position:absolute;z-index:6;max-width:min(920px,86%);max-height:80%;overflow:auto;
    background:var(--bad-bg);border:1px solid var(--bad);border-radius:var(--r-out);box-shadow:var(--sh-3);
@@ -433,6 +507,7 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
     <button id=tgl aria-expanded=true aria-controls=tl><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>timeline</button>
     <button id=theme><svg viewBox="0 0 16 16"><circle cx=8 cy=8 r="5.5"/><path d="M8 2.5v11"/></svg>theme: <span id=themetxt>light</span></button>
    </div>
+   <div id=stage role=status aria-label="which stage this film is at"><span id=stagedots></span><span id=stagenext></span></div>
    <div id=centre>
     <div id=stage><iframe id=sc title="scene preview" src="/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30"></iframe><div id=selbox><i class=tl></i><i class=tr></i><i class=bl></i><i class=br></i><b></b></div><div id=drag></div><div id=err role=alert hidden></div></div>
     <div id=bar>
@@ -444,8 +519,8 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    </div>
    <div id=pane>
     <section id=planpane>
-     <div class=panehead><b>the plan</b><span id=planpath>the storyboard this film was written from</span><span class=sp></span><button id=planredraw>redraw</button></div>
-     <div class=paneview id=planview><img id=planimg hidden alt="storyboard panels" style="max-width:100%;width:auto;height:auto;display:block"><div class=empty id=plannote hidden></div></div>
+     <div class=panehead><b>the plan</b><span id=planpath>the storyboard this film was written from</span><span class=sp></span><button id=planredraw>reload</button></div>
+     <div class=paneview id=planview><div id=planbody></div><div class=empty id=plannote hidden></div></div>
     </section>
     <section id=lookpane>
      <div class=panehead>
@@ -581,37 +656,102 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  document.querySelectorAll('#states button').forEach(b=>b.addEventListener('click',()=>setState(b.dataset.state)));
 
  // ---- PLAN: the storyboard the beats were decided in ---------------------------------------------
- // A STUB, and honest about it: preflight's nine decisions are not here. What IS here is the artefact
- // that already existed and that nobody opened, because \`make panels\` wrote it to /tmp.
- const planImg=$('planimg'), planPath=$('planpath'), planNote=$('plannote'), planView=$('planview');
+ // ---- PLAN: the film as its own frames, not as grey boxes ---------------------------------------
+ // This used to show \`make panels\`, one grey still per beat sized from \`shot:\`. That answers how big
+ // and where and nothing at all about what is in the frame, which is the only question the person
+ // signing a plan off can answer (docs/MISTAKES.md #592). Every beat that names a \`fragment:\` has real
+ // hand-written markup on disk, so the beat shows THAT, live, on the film's theme.
+ const planPath=$('planpath'), planNote=$('plannote'), planBody=$('planbody');
  let planDrawn=false;
- // WHAT PLAN IS NOT, said in the state itself. An empty white pane with one line of error at the top
- // is honest by accident; this says what belongs here, what is missing, and the command that makes it.
+ const PFIELDS=[['why','why'],['becomes','the change'],['trigger','caused by'],['shot','shot'],
+   ['camera','camera'],['layout','layout'],['style','style'],['rest','in the hold'],
+   ['mechanism','mechanism'],['motion','motion plan'],['borrows','borrows'],['transition_in','cut in']];
  function planEmpty(why){
-   planImg.hidden=true; planImg.removeAttribute('src');
-   planNote.hidden=false; planView.classList.remove('sheet');
-   planNote.innerHTML='<h2>the plan is not here yet</h2>'
-     +'<p>'+esc(why)+'</p>'
-     +'<p>Two things belong in this state and neither is wired: the nine decisions that come BEFORE the '
-     +'JSON, and the lock sheet the beats were agreed in. Both run in the terminal today:</p>'
-     +'<ul><li><code>make preflight D='+esc((model&&model.file)||'')+'</code></li>'
-     +'<li>a <code>&lt;name&gt;.storyboard.md</code> beside the scene, or a top-level <code>"storyboard"</code> field</li></ul>'
-     +'<p>What studio can already show is the drawn sheet, the moment one of those exists.</p>';
+   planBody.innerHTML=''; planNote.hidden=false;
+   planNote.innerHTML='<h2>the plan is not here yet</h2><p>'+esc(why)+'</p>'
+     +'<p>The storyboard is where the beats were decided, and every role that writes into the film '
+     +'transcribes it. Write one before the JSON:</p>'
+     +'<ul><li>a <code>&lt;name&gt;.storyboard.md</code> beside the scene, or a top-level <code>"storyboard"</code> field</li>'
+     +'<li><code>make storyboard-check SB=&lt;file&gt;</code></li></ul>';
  }
+ // 1920x1080 is wider than this pane, so each fragment is SCALED rather than resized: a fragment
+ // reflowed to a narrow viewport is a different picture, and this pane exists to show the real one.
+ function fitPlan(){ planBody.querySelectorAll('.pstage iframe').forEach(f=>{
+   f.style.transform='scale('+(f.parentElement.clientWidth/1920)+')'; }); }
+ addEventListener('resize',fitPlan);
  function drawPlan(force){
    if(planDrawn&&!force) return;
-   planDrawn=true; planPath.textContent='drawing the panels…';
-   // cache-busted: the server redraws when the storyboard is newer than the sheet
-   fetch('/__panels?t='+Date.now()).then(r=>{
-     if(!r.ok) return r.text().then(t=>{ planPath.textContent=''; planEmpty(t.split(String.fromCharCode(10))[0]); });
-     planPath.textContent=r.headers.get('X-Storyboard')||'';
-     const d=dimOf(r.headers.get('X-Dim'));
-     return r.blob().then(b=>{ planNote.hidden=true; planImg.hidden=false; planView.classList.add('sheet');
-       if(d){ planImg.width=d[0]; planImg.height=d[1]; }
-       planImg.src=URL.createObjectURL(b); say('the storyboard panels are drawn'); }); })
-    .catch(e=>{ planPath.textContent=''; planEmpty('could not draw the panels: '+e.message); });
+   planDrawn=true; planPath.textContent='reading the storyboard…';
+   fetch('/api/plan?t='+Date.now()).then(r=>r.json()).then(d=>{
+     if(!d.ok){ planPath.textContent=''; return planEmpty(d.error||'no storyboard'); }
+     planNote.hidden=true; planPath.textContent=d.file;
+     const frags=new Set(d.beats.map(b=>b.fragment).filter(Boolean));
+     let h='<div id=planhead><p id=planmsg>'+esc(d.message||'no message: this film has no spine yet')+'</p>'
+       +'<div id=planfacts><span><b>'+esc(d.duration||'?')+'s</b></span>'
+       +'<span><b>'+Math.round((d.duration||0)*30)+'</b> frames</span>'
+       +'<span><b>'+d.beats.length+'</b> beats</span>'
+       +'<span><b>'+frags.size+'</b> fragments</span>'
+       +'<span><b>'+esc(d.format||'')+'</b></span><span>theme <b>'+esc(d.theme||'')+'</b></span></div>';
+     if(d.pace||d.spectacle||d.not){ h+='<div class=planspine>'
+       +(d.pace?'<p><b>pace</b> '+esc(d.pace)+'</p>':'')
+       +(d.spectacle?'<p><b>spectacle</b> '+esc(d.spectacle)+'</p>':'')
+       +(d.not?'<p><b>not</b> '+esc(d.not)+'</p>':'')+'</div>'; }
+     if(d.devices&&d.devices.length){
+       const used=d.devices.filter(x=>!x.dropped).length;
+       h+='<details id=plandev><summary>the reference, decoded &middot; '+used+' of '+d.devices.length
+         +' devices used</summary><table>'
+         +d.devices.map(x=>'<tr class="'+(x.dropped?'dropped':'')+'"><td>'+esc(x.id)+'</td><td>'
+           +esc(x.device)+'</td><td>'+esc(x.use)+'</td></tr>').join('')
+         +'</table></details>'; }
+     if(d.findings&&d.findings.length){ h+='<div id=plangate>'
+       +d.findings.map(f=>'<div class="'+(f.kind==='✓'?'ok':'')+'">'+f.kind+' '+esc(f.line)+'</div>').join('')+'</div>'; }
+     h+='</div>';
+     let prevArch='';
+     d.beats.forEach((b,i)=>{
+       const stage=b.fragment
+         ? '<div><div class=pstage><iframe loading=lazy title="'+esc(b.name)+'" src="/__frag?src='+encodeURIComponent(b.fragment)+'"></iframe></div>'
+           +'<p class=psrc>'+esc(b.fragment)+'</p></div>'
+         : '<div class="pstage none"><div><s>no fragment, a blueprint draws it</s>'
+           +'<b>'+esc(String(b.blueprint||'not decided').split(' (')[0])+'</b>'
+           +'<p>'+esc(b.picture||'')+'</p></div></div>';
+       const copy=(b.onscreen||[]).length
+         ? '<ul class=pcopy>'+b.onscreen.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>' : '';
+       const rows=PFIELDS.filter(f=>b[f[0]]).map(f=>'<div class=prow><dt>'+f[1]+'</dt><dd>'+esc(b[f[0]])+'</dd></div>').join('');
+       h+='<section class=pbeat id="pbeat-'+(i+1)+'"><header><span class=pn>'+(i+1)+'</span>'
+         +'<h3>'+esc(b.name)+'</h3>'
+         +'<span class=pmeta>'+(+b.start).toFixed(1)+'s to '+(+b.end).toFixed(1)+'s</span>'
+         +'<span class="pmeta pdur">'+(b.end-b.start).toFixed(1)+'s</span>'
+         +'<span class=sp></span>'
+         +(b.archetype?'<span class="ptag'+(prevArch&&prevArch===b.archetype?' repeat':'')+'" title="composition">'+esc(b.archetype)+'</span>':'')
+         +(b.weight?'<span class="ptag'+(b.weight==='peak'?' peak':'')+'" title="how loud this beat is">'+esc(b.weight)+'</span>':'')
+         +'<span class=pmeta>'+esc(b.type||'')+'</span></header>'
+         +stage+'<div>'+copy+'<dl>'+rows+'</dl></div></section>';
+       prevArch=b.archetype||'';
+     });
+     planBody.innerHTML=h;
+     // The iframes have no layout until the pane is visible, so fit twice: now, and once they load.
+     fitPlan(); planBody.querySelectorAll('.pstage iframe').forEach(f=>f.addEventListener('load',fitPlan));
+     say('the plan is drawn, '+d.beats.length+' beats');
+   }).catch(e=>{ planPath.textContent=''; planEmpty('could not read the plan: '+e.message); });
  }
  $('planredraw').addEventListener('click',()=>drawPlan(true));
+
+ // ---- the stage strip, filled from the same reader that make stage prints ---------------------------
+ // Which pane a stage happens in. A stage with no pane here (brief, assemble, direct) still shows; it
+ // just says the command, because pretending every stage has a screen would be the lie this strip is
+ // for removing.
+ const STAGE_PANE={plan:'plan',approval:'plan',design:'plan',render:'ship',judge:'look'};
+ fetch('/api/stage').then(r=>r.json()).then(d=>{
+   if(!d||!d.ok) return;
+   const at=d.order.indexOf(d.stage);
+   $('stagedots').innerHTML=d.order.map((id,i)=>
+     '<b class="'+(i<at?'done':i===at?'at':'')+'">'+esc(id)+'</b>').join('<i></i>');
+   $('stagenext').innerHTML='<code>'+esc(d.next)+'</code>';
+   $('stagenext').title=d.why;
+   const pane=STAGE_PANE[d.stage];
+   if(pane) $('stagedots').querySelector('b.at').style.cursor='pointer';
+   if(pane) $('stagedots').addEventListener('click',(e)=>{ if(e.target.classList.contains('at')) setState(pane); });
+ }).catch(()=>{});
 
  // ---- LOOK: the film as a STRIP, which is a different question from a frame ----------------------
  // Scrubbing tells you what a frame IS. A strip tells you whether the film WORKS, and the two sheets
