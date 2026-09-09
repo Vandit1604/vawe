@@ -10,7 +10,7 @@ export const PRESETS = {
   // The reference reproduction. Orange bloom high and left of centre, magenta below it, red body,
   // black falling off to the right, seen through a backlit blind.
   ref: {
-    // Every number here was FITTED, not chosen: tools/lightfield/lightfield-seeds.mjs ranked four
+    // Every number here was FITTED, not chosen: scripts/research/lightfield/lightfield-seeds.mjs ranked four
     // million layouts against the image, and lightfield-fit.mjs confirmed the shortlist through the
     // real renderer, on the colour field AND on the striping. depth 0 is a result, not an oversight:
     // the colour field already drains to the ground, and every second fall on top measured worse.

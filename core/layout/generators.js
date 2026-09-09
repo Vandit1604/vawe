@@ -58,7 +58,7 @@ import { PRESETS as LIGHTFIELD_PRESETS } from '../lightfield/presets.js';
 // ONE ENTRY PER LOOK, not one entry with five presets. `slats`, `rings` and `shards` are different
 // pictures with different dials and different references, and folding them together meant one averaged
 // fidelity score that could not say which look regressed. Each look now carries its own reference and
-// is measured on its own (tools/lightfield/lightfield-check.mjs).
+// is measured on its own (scripts/research/lightfield/lightfield-check.mjs).
 //
 // One implementation underneath. A look is a name, a preset, a reference, and a NARROWED VIEW of the
 // same schema.
