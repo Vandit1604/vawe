@@ -70,7 +70,7 @@ void main(){ gl_FragColor = vec4(transition(v_uv).rgb, 1.0); }
 // Each unit is its own program, so a helper or uniform in one can never collide with another, which is
 // what lets the library grow to many vendored gl-transitions shaders without one giant shader.
 // The exact fragment source a unit compiles to: preamble + its transition() + main. Exported so an
-// offline compile-check (scripts/dev/seam-compile-check.mjs) tests the SAME source the runner builds.
+// offline compile-check (harness/dev/seam-compile-check.mjs) tests the SAME source the runner builds.
 export const seamFrag = (unit) => PREAMBLE + '\n' + unit.glsl + '\n' + MAIN;
 export const SEAM_VERT = VERT;
 

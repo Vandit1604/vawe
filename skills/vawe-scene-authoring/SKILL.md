@@ -119,7 +119,7 @@ copyrighted media (posters/stills/album art) in a published video.
 - **Auto-source:** `make assets D=formats/<fmt>/<topic>.json`, fills missing icons: country→flag
   (flagcdn, PD), brand→logo (simple-icons, free), else a generated topic card. Dry-run by default;
   `WRITE=1` to apply.
-- **Topic cards (any subject):** `node scripts/media/cards.mjs "Quantum Computing" --sub "…"` → a designed
+- **Topic cards (any subject):** `node harness/media/cards.mjs "Quantum Computing" --sub "…"` → a designed
   SVG (deterministic per-title palette, grain, vignette, frame). Use when no clean image exists.
 - **`icon(value, fallback)`** turns an image path into `<img class="icon-img">`, else renders the
   fallback (emoji/monogram). Always pass a monogram fallback: `icon(c.icon, name[0].toUpperCase())`.

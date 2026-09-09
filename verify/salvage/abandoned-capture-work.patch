@@ -13,7 +13,7 @@ index 558c6dc2..d71e81bd 100644
 +# taken while something else was on the cores, because a neighbour's render reads exactly like a
 +# regression. The baseline it writes is what `docs/PERF-BASELINE.md` is for.
 +bench: build
-+	@node scripts/dev/render-bench.mjs $(if $(FILMS),--films $(FILMS)) $(if $(RUNS),--runs $(RUNS)) $(if $(WRITE),--write $(WRITE)) $(if $(VAWEFLAGS),-- $(VAWEFLAGS))
++	@node harness/dev/render-bench.mjs $(if $(FILMS),--films $(FILMS)) $(if $(RUNS),--runs $(RUNS)) $(if $(WRITE),--write $(WRITE)) $(if $(VAWEFLAGS),-- $(VAWEFLAGS))
 +
  # make look M=scene [D=<file.json>]: storyboard (key frames) for visual review
  # D forwards to --data; without it both targets silently previewed sample.json while naming your scene.

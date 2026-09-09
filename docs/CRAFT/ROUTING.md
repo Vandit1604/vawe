@@ -13,7 +13,7 @@ group: crosscutting
 - Read ONLY the matched route file. Each is ~50 lines: Input / Output / Trigger / Intake / which
   blueprints and CRAFT docs to load next. Do not read every route file to decide; the table below is
   enough to pick one, and the intake questions live in the file, not here.
-- `node scripts/author/route.mjs "<what the user asked, plain english>"` runs this same table by
+- `node harness/author/route.mjs "<what the user asked, plain english>"` runs this same table by
   keyword match and prints the matched deliverable plus its intake questions. Use it before
   `vawe-video-planning`'s interview, or when unsure which route file to open.
 - This table decides the DELIVERABLE. It does not replace the planning contract: `vawe-video-planning`
@@ -48,7 +48,7 @@ presenter video is not one of the five deliverables above); reach it directly on
 
 **The route picks the deliverable; the DURATION picks the shape.** Every type skill above now states
 which shape it takes at which length, right under its own `## The spine` heading: under
-`CONTINUOUS_ACTION_MAX_S` (`scripts/author/type-spines.mjs`, 15s) most types are ONE CONTINUOUS ACTION
+`CONTINUOUS_ACTION_MAX_S` (`harness/author/type-spines.mjs`, 15s) most types are ONE CONTINUOUS ACTION
 (`skills/vawe-continuous-action/SKILL.md`), not the multi-beat spine the route file's Output section
 describes for a longer film. `talking-head` and `recreation` are the two exceptions and say so in their
 own skill. `make scaffold TYPE=<type> DUR=<n>` makes this decision for you; it is not something to

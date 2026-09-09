@@ -1,8 +1,8 @@
 // core/on-screen-text.js: THE definition of "what does this string READ AS on screen".
 //
-// It lives in core/, not scripts/lib/, for one reason: core/validate.mjs and core/captions.js both
+// It lives in core/, not harness/lib/, for one reason: core/validate.mjs and core/captions.js both
 // need it and both ship to the BROWSER with the rest of core/. Engine code cannot reach into
-// scripts/, so a definition parked there could never be the only one. scripts/lib/text.mjs re-exports
+// scripts/, so a definition parked there could never be the only one. harness/lib/text.mjs re-exports
 // this module, so tooling and engine read one rule. Zero imports here on purpose: anything core/ or a
 // gate or a browser can load.
 //

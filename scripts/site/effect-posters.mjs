@@ -32,7 +32,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { serveRepo, launchPage, waitForEngine } from '../lib/render-harness.mjs';
+import { serveRepo, launchPage, waitForEngine } from '../../harness/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const EFFECTS_JSON = path.join(repoRoot, 'site/lib/effects.json');

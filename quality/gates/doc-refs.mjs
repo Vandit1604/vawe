@@ -28,7 +28,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -71,9 +71,9 @@ function makeTargets() {
  *
  *   1. `node scripts/x.mjs` in a usage string, a header comment, a runbook line. A usage string is
  *      what a tool prints when you get its arguments wrong, so it is read at the exact moment the
- *      author is already unsure. Moving the scripts into `scripts/author|brand|gates|media|site/`
+ *      author is already unsure. Moving the scripts into `harness/author|brand|gates|media|site/`
  *      left 111 of these naming a path that had not existed since the move.
- *   2. A QUOTED path handed to a child process: `spawnSync('node', ['scripts/lib-test.mjs'])`.
+ *   2. A QUOTED path handed to a child process: `spawnSync('node', ['harness/lib-test.mjs'])`.
  *      `verify/review.mjs` had two, so `make review` had been failing two of its three checks on
  *      ERR_MODULE_NOT_FOUND. That is the worst version of this defect, because a health command that
  *      reports a failure looks like it is working. Nobody reads a red check twice.
@@ -107,7 +107,7 @@ function selfRefs() {
  *
  * A target that EXISTS and runs a script that does not is worse than a missing target: `make` prints
  * no error of its own, node prints ERR_MODULE_NOT_FOUND, and the author reads it as their mistake.
- * `cut six tools that never produced a frame` deleted `scripts/author/animatic.mjs` and left the
+ * `cut six tools that never produced a frame` deleted `harness/author/animatic.mjs` and left the
  * `animatic` target standing, so the docs pointed at a live target that could not run. Checking the
  * target name alone would have called that green.
  */

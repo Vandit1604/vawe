@@ -10,11 +10,11 @@
 // `d3-geo` by bare specifier, resolvable only through an import map the render page does not carry)
 // sits outside that allowlist on purpose. So `formats/scene/scene.js` never imports this file: a scene
 // using this vocabulary is expanded SERVER-SIDE instead, in Node (internal/render/expand.go shells out
-// to `scripts/author/expand-blocks.mjs`, the debug CLI this file now backs), before the browser ever
+// to `harness/author/expand-blocks.mjs`, the debug CLI this file now backs), before the browser ever
 // sees the JSON. Every OTHER consumer of a scene, every gate and script, is plain Node and imports
 // `loadScene` from here directly, `core/transitions/lower.js` untouched by this dependency.
 //
-// Was scripts/author/expand-blocks.mjs, a Node-only CLI that wrote a second file (`<name>.expanded.json`)
+// Was harness/author/expand-blocks.mjs, a Node-only CLI that wrote a second file (`<name>.expanded.json`)
 // nothing but this same expansion could produce, so every author worked in a two-file world: write the
 // JSON, remember to expand it, render the derivative, keep both current. That CLI is now a thin wrapper
 // around this module (still useful standalone, to eyeball what a beat/block resolves to), and every

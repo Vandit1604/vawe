@@ -164,7 +164,7 @@ parameters from the generator's own signature, so no list can drift.</p>
 <tr><td>per-frame tracks</td><td class="num">14 slots / 16 files</td><td class="m">core/tracks/</td></tr>
 <tr><td>modifiers (post fx)</td><td class="num">12</td><td class="m">core/fx/</td></tr>
 <tr><td>named effects, all families</td><td class="num">566</td><td class="m">make effects → docs/EFFECTS.md</td></tr>
-<tr><td>things <span class="m">make arsenal</span> searches</td><td class="num">337</td><td class="m">scripts/author/arsenal.mjs</td></tr>
+<tr><td>things <span class="m">make arsenal</span> searches</td><td class="num">337</td><td class="m">harness/author/arsenal.mjs</td></tr>
 <tr><td>build-time blocks</td><td class="num">21 families</td><td class="m">blocks/</td></tr>
 <tr><td>brand themes</td><td class="num">38</td><td class="m">themes/</td></tr>
 <tr><td>gates</td><td class="num">65</td><td class="m">quality/gates/</td></tr>
@@ -257,7 +257,7 @@ resort: if the bad value has a write site, the refusal goes there and the class 
   gitignored directory, and a checkout without the baselines falls back to it for a
   whether-it-moved verdict, saying so rather than implying the full net ran. The what stays local, where
   the 20MB lives and a person can read a diff.</p>
-  <p>Only honest because the faces are pinned: <code>scripts/media/fonts.mjs</code> carries an exact
+  <p>Only honest because the faces are pinned: <code>harness/media/fonts.mjs</code> carries an exact
   version and a sha256 per face, and refuses a mismatch. This page said that was still unpinned. It has
   not been for some time, and one of the pins carries a comment explaining why GeistMono sits on 5.2.8
   rather than 5.3.0.</p>
@@ -305,7 +305,7 @@ resort: if the bad value has a write site, the refusal goes there and the class 
 <tr><td>A new layer type: <span class="m">adjust</span></td><td class="m">core/layers/adjust.js</td><td>One grade over everything with a lower <code>track</code>. Five kinds plus a raw filter, keyed through the existing <code>vars</code> track.</td></tr>
 <tr><td>Relative time, three holes closed</td><td class="m">formats/scene/scene.js · core/validate/validate.mjs</td><td>The resolver walks the whole tree, two invented defaults became refusals, and a group child's discarded window is warned.</td></tr>
 <tr><td>A tracked snapshot digest</td><td class="m">quality/baselines/snap/digest.json</td><td>4.2KB of sha256, so CI can answer whether a scene moved.</td></tr>
-<tr><td><span class="m">make census</span> · preflight's NOT REACHED FOR</td><td class="m">scripts/lib/census.mjs · quality/gates/preflight.mjs</td><td>Populations by name; capabilities this film declines, with the library's share beside each.</td></tr>
+<tr><td><span class="m">make census</span> · preflight's NOT REACHED FOR</td><td class="m">harness/lib/census.mjs · quality/gates/preflight.mjs</td><td>Populations by name; capabilities this film declines, with the library's share beside each.</td></tr>
 </table></div>
 <p class="note">The stillness figure measures change between consecutive frames, which is why a breath
 does not move it: a 1.5% scale over 4.6 seconds is a sub-pixel step per frame. It reads grounds and

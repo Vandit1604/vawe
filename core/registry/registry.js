@@ -78,7 +78,7 @@ export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog, pitf
   if (catalog) checkCatalog(kind, catalog);
   if (aka) checkAka(kind, entries, aka);
   if (pitfalls) checkPitfalls(kind, entries, pitfalls);
-  // The blurb IS the retrieval index (scripts/author/arsenal.mjs ranks on name + kind + blurb + aka and
+  // The blurb IS the retrieval index (harness/author/arsenal.mjs ranks on name + kind + blurb + aka and
   // nothing else), so the same refusal blurbsOf applies is applied to a blurbs map handed in directly.
   // Most registries do not go through blurbsOf; without this the rule would cover a third of them.
   if (blurbs) for (const [n, b] of Object.entries(blurbs)) checkBlurb(kind, n, b);
@@ -173,7 +173,7 @@ function checkPitfalls(kind, entries, pitfalls) {
 
 // The stopwords and the tokenizer the SEARCH uses, owned here because the refusal below has to grade a
 // blurb by exactly the words the search will index it under, and two tokenizers would eventually
-// disagree about that. scripts/author/arsenal.mjs re-exports this as `toks` rather than keeping a copy.
+// disagree about that. harness/author/arsenal.mjs re-exports this as `toks` rather than keeping a copy.
 const STOP = new Set(['a', 'an', 'the', 'of', 'to', 'in', 'on', 'and', 'or', 'is', 'it', 'that', 'with', 'for', 'as']);
 // Collapse the common English inflections so the INDEX and the QUERY agree on a word's stem: a blurb
 // saying "melting" and a query typed as "melt" or "melts" all become `melt`. Without this the index
@@ -223,7 +223,7 @@ const nameWords = (name) => new Set(String(name)
  *
  * What it CANNOT do, so nobody reads a clean load as an endorsement: it measures distinctiveness, never
  * accuracy. A confidently wrong blurb full of rare words passes this and always will. The distribution
- * that shows how well the whole vocabulary retrieves itself is `scripts/dev/blurb-retrieval.mjs`.
+ * that shows how well the whole vocabulary retrieves itself is `harness/dev/blurb-retrieval.mjs`.
  */
 export function checkBlurb(kind, name, blurb) {
   if (typeof blurb !== 'string' || !blurb.trim())

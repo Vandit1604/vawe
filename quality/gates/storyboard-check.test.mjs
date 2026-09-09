@@ -81,8 +81,8 @@ const check = () => {
   catch (e) { return { out: (e.stdout || '') + (e.stderr || ''), code: e.status }; }
 };
 
-run('scripts/author/contract.mjs', [film]);
-run('scripts/author/assemble.mjs', [film]);
+run('harness/author/contract.mjs', [film]);
+run('harness/author/assemble.mjs', [film]);
 
 // ---- 1. a clean build: no divergence line -----------------------------------------------------
 {
@@ -116,7 +116,7 @@ run('scripts/author/assemble.mjs', [film]);
   // beat 3 must now start at the same pose beat 2 ends at, or the chain itself breaks first
   const withBeat3 = fs.readFileSync(sb, 'utf8').replace('object_in: top-right@120x40\n- object_out: top-right@120x40', 'object_in: top-right@140x60/rot:8\n- object_out: top-right@140x60/rot:8');
   fs.writeFileSync(sb, withBeat3);
-  run('scripts/author/assemble.mjs', [film]); // rebuild with the OLD storyboard's pose (no rot/size) baked in... then drift the source and re-check without rebuilding
+  run('harness/author/assemble.mjs', [film]); // rebuild with the OLD storyboard's pose (no rot/size) baked in... then drift the source and re-check without rebuilding
   const scene = JSON.parse(fs.readFileSync(film, 'utf8'));
   const obj = scene.layers.find((l) => l.acrossBeats);
   // simulate a build that pre-dates the pose the storyboard NOW declares: strip w/h/rot back off the keys
@@ -126,26 +126,26 @@ run('scripts/author/assemble.mjs', [film]);
   assert.match(out, /storyboard says the object leaves sized 140x60/, 'a declared size the built key does not carry is named');
   assert.match(out, /storyboard says the object leaves rotated 8deg/, 'a declared rotation the built key does not carry is named');
   fs.writeFileSync(sb, SB('slide-left')); // restore
-  run('scripts/author/assemble.mjs', [film]);
+  run('harness/author/assemble.mjs', [film]);
 }
 
 // ---- 5. staging: a `trigger:` that names a real cause moves the next beat's start off a flat second --
 {
   const causedSB = SB('slide-left').replace('## Beat 2: Build (3s-6s)\n- type: product_intro', '## Beat 2: Build (3s-6s)\n- type: product_intro\n- trigger: the headline finishes sliding into place');
   fs.writeFileSync(sb, causedSB);
-  run('scripts/author/assemble.mjs', [film]);
+  run('harness/author/assemble.mjs', [film]);
   const scene = JSON.parse(fs.readFileSync(film, 'utf8'));
   const scene1 = scene.layers.find((l) => l.id === 'scene1');
   const scene2 = scene.layers.find((l) => l.id === 'scene2');
   // Resolved to a real second, not left as the string "scene1.end+0.05": quality/gates/beat-check and
-  // scripts/author/motion-director.mjs both read `layers[].start` as a number and mishandle a string
+  // harness/author/motion-director.mjs both read `layers[].start` as a number and mishandle a string
   // one (measured directly: one crashes), so `make assemble` resolves its own reference.
   assert.equal(typeof scene2.start, 'number', 'a caused junction is still a plain number, never an unresolved relative-start string');
   assert.equal(scene2.start, +(scene1.start + scene1.duration + 0.05).toFixed(3), 'a caused junction is staggered 0.05s AFTER the causing scene ends, real time inserted, nothing shrunk');
   const scene3 = scene.layers.find((l) => l.id === 'scene3');
   assert.equal(scene3.start, 6.05, 'beat 3\'s own junction is unstaged, but it still carries the ONE earlier stagger inserted before it (6s + 0.05s), not a second, independent clock');
   fs.writeFileSync(sb, SB('slide-left')); // restore
-  run('scripts/author/assemble.mjs', [film]);
+  run('harness/author/assemble.mjs', [film]);
 }
 
 fs.rmSync(dir, { recursive: true, force: true });

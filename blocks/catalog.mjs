@@ -101,7 +101,7 @@ export const CATALOG = [
     props: { w: 520, h: 260, series: [{}, {}], data: [
       { label: 'Mon', values: [24, 18] }, { label: 'Tue', values: [30, 22] }, { label: 'Wed', values: [20, 28] }, { label: 'Thu', values: [36, 24] }] } },
   // THESE THREE FAMILIES ARE UNSEARCHABLE AND A BLURB CANNOT FIX IT. `pricingCard`, `statCard` and
-  // `profileCard` have only `family.variant` rows, and scripts/author/arsenal.mjs indexes BARE rows
+  // `profileCard` have only `family.variant` rows, and harness/author/arsenal.mjs indexes BARE rows
   // only, on purpose: a variant's blurb describes the same subject in fewer words, and the two then
   // split the words they share (the retrieval floor fell 97% → 95% the day all 185 rows went in). So
   // the family is in NO search corpus, and `make arsenal Q="a pricing plan card"` answers ABSENT about

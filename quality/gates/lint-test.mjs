@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { lintData, fxErrors, validateData } from '../../core/validate/validate.mjs';
 import { resolveEasing, easeOutCubic } from '../../core/motion/motion.js';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
@@ -98,7 +98,7 @@ const blockErrs = validateData(sceneSchema, blockScene).filter((e) => /\.to must
 ok(blockErrs.length === 0, `block props exempt from base-layer type checks (got ${blockErrs.join('; ') || 'none'})`, 'block-layer-exempt');
 
 // --- direction gate: the book-grounded motion tells still fire, and a clean scene stays silent (#134) ---
-const direct = (rel) => { try { return execFileSync('node', [path.join(root, 'scripts/author/motion-director.mjs'), path.join(root, rel)], { encoding: 'utf8' }); } catch (e) { return `${e.stdout || ''}${e.stderr || ''}`; } };
+const direct = (rel) => { try { return execFileSync('node', [path.join(root, 'harness/author/motion-director.mjs'), path.join(root, rel)], { encoding: 'utf8' }); } catch (e) { return `${e.stdout || ''}${e.stderr || ''}`; } };
 const badDir = direct('quality/fixtures/direction-bad.json');
 ok(/\[linear-motion\]/.test(badDir), 'direct: linear-motion tell fires (ease:"linear" on a move)', 'direct-linear-motion');
 ok(/\[monotone-timing\]/.test(badDir), 'direct: monotone-timing tell fires (6 identical enterDur)', 'direct-monotone-timing');

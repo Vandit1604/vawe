@@ -4,11 +4,11 @@
   "type": "module",
   "description": "Deterministic motion-graphics engine: one self-describing JSON in, one video out. Renders frame-by-frame in Chrome, encodes with ffmpeg.",
   "scripts": {
-    "setup:audio": "node scripts/media/gen-audio.mjs",
+    "setup:audio": "node harness/media/gen-audio.mjs",
     "verify": "node verify/run.js",
-    "look": "node scripts/author/preview.mjs",
-    "prepublishOnly": "node scripts/dev/pack-check.mjs",
-    "pack-check": "node scripts/dev/pack-check.mjs"
+    "look": "node harness/author/preview.mjs",
+    "prepublishOnly": "node harness/dev/pack-check.mjs",
+    "pack-check": "node harness/dev/pack-check.mjs"
   },
   "//": "Rendering is the Go service: `make render M=<format>` / `make all` (see Makefile).",
   "dependencies": {
@@ -57,7 +57,7 @@
     "assets/vendor/",
     "formats/scene/schema.json",
     "formats/scene/sample.json",
-    "scripts/author/expand-blocks.mjs",
+    "harness/author/expand-blocks.mjs",
     "generators/media/fonts.mjs",
     "assets/fonts/",
     "bin/",
@@ -67,5 +67,5 @@
   "optionalDependencies": {
     "ffmpeg-static": "^5.2.0"
   },
-  "//oxlint-note": "Code-quality enforcement: complexity, function length, nesting depth. Rust, so a whole-repo sweep runs in under a second and a single-file check is instant. That speed is what lets it run on every file WRITE (scripts/live/code-quality.mjs) rather than only at push, which is the difference between a rule that shapes code and a rule that scolds after the fact. A comment key must stay at the ROOT of this file: npm parses every key inside devDependencies as a package name, and a `//name` entry there breaks `npm install` outright."
+  "//oxlint-note": "Code-quality enforcement: complexity, function length, nesting depth. Rust, so a whole-repo sweep runs in under a second and a single-file check is instant. That speed is what lets it run on every file WRITE (harness/live/code-quality.mjs) rather than only at push, which is the difference between a rule that shapes code and a rule that scolds after the fact. A comment key must stay at the ROOT of this file: npm parses every key inside devDependencies as a package name, and a `//name` entry there breaks `npm install` outright."
 }

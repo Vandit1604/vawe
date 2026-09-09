@@ -42,7 +42,7 @@ const decodeImage = (src, crossOrigin) => new Promise((res, rej) => {
   im.src = srcUrl(src);
 });
 
-// AUDIO-REACTIVITY: `audio.spectrum` names a sidecar written offline by scripts/media/spectrum.mjs;
+// AUDIO-REACTIVITY: `audio.spectrum` names a sidecar written offline by harness/media/spectrum.mjs;
 // the render reads row n and never touches a decoder. A missing sidecar is a warning, not a throw.
 // The scene still renders, the reactive layers simply hold still.
 export async function preloadSpectrum(data) {

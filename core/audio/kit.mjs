@@ -14,7 +14,7 @@
 // envelope -> feedback delay) is reimplemented here as offline DSP. The parameter tables are its
 // design work; the DSP below is our implementation of the same signal path.
 //
-// Used by scripts/media/gen-audio.mjs (`make audio`) to bake assets/sfx/*.wav + assets/music/*.wav,
+// Used by harness/media/gen-audio.mjs (`make audio`) to bake assets/sfx/*.wav + assets/music/*.wav,
 // which the Go mixer (internal/audio/audio.go) beds under the render.
 
 import fs from 'node:fs';
@@ -193,7 +193,7 @@ export function writeWav(file, samples, { stereo = false } = {}) {
 // (docs/MISTAKES.md #58). Do not hand-edit these; re-extract from the library if it versions up.
 // TEN CUES WERE REMOVED AFTER A LISTENING PASS, and the reason is measurable rather than a matter of
 // taste. All twenty were baked and judged by ear (verify/sound-verdicts.json, via
-// `node scripts/dev/sound-lab.mjs`), and sorting the verdicts against their own specs found one clean
+// `node harness/dev/sound-lab.mjs`), and sorting the verdicts against their own specs found one clean
 // rule: EVERY cue that was kept has ZERO noise layers, and the chance of rejection rises with the
 // noise-layer count (keep 0.00, weak 1.00, reject 1.40). Attack and peak barely differ between the
 // groups, so the recurring note "too sharp and loud" was describing a symptom. Filtered white noise is
@@ -270,7 +270,7 @@ export const CUES = {
   // Punctuation. A small element, a counter digit. Quiet on purpose: this is the one that becomes a
   // machine gun if it is loud, and the density rules exist because of it.
   // PROMOTED FROM A VARIANT, round 5 (`compose('pluck', 1)` in
-  // scripts/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
+  // harness/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
   // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
   pluck: {"masterGain": 0.3, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 876.7927313027903, "attack": 0.002, "decay": 0.14, "peak": 0.15, "offset": 0}]},
 
@@ -278,21 +278,21 @@ export const CUES = {
   sparkle: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1760, "offset":0, "attack":0.003, "decay":0.09, "peak":0.045}, {"kind":"tone","waveform":"sine","frequency":2217, "offset":0.045, "attack":0.003, "decay":0.09, "peak":0.04}, {"kind":"tone","waveform":"sine","frequency":2637, "offset":0.09, "attack":0.003, "decay":0.1, "peak":0.038}, {"kind":"tone","waveform":"sine","frequency":3520, "offset":0.135, "attack":0.003, "decay":0.12, "peak":0.032}], "shimmer":{"delay":0.07, "feedback":0.35, "wet":0.22, "lowpass":6000.0}},
   // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
   // (verify/sound-verdicts.json round 3). Numbers look arbitrary because they are a measured
-  // preference rather than a designed one: `compose('droplet', 3)` in scripts/dev/sound-vary.mjs
+  // preference rather than a designed one: `compose('droplet', 3)` in harness/dev/sound-vary.mjs
   // reproduces them exactly.
   droplet: {"masterGain": 0.55, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 1319.452355839312, "attack": 0.006, "decay": 0.26, "peak": 0.09374999999999999, "offset": 0}, {"kind": "tone", "waveform": "sine", "frequency": 1662.5099683575331, "attack": 0.0084, "decay": 0.2028, "peak": 0.05769230769230769, "offset": 0.008726843487471343}]},
   // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
   // (verify/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
-  // preference rather than a designed one: `vary('bloom', 3)` in scripts/dev/sound-vary.mjs
+  // preference rather than a designed one: `vary('bloom', 3)` in harness/dev/sound-vary.mjs
   // reproduces them exactly.
   bloom: {"masterGain": 0.5, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 597.135335543789, "attack": 0.06768921516090631, "decay": 0.14823116605728864, "peak": 0.07345559132331983}, {"kind": "tone", "waveform": "sine", "frequency": 426.59458829540756, "detune": 12, "attack": 0.14212638809904457, "decay": 0.48715202256059276, "peak": 0.05493165752501228}], "shimmer": {"delay": 0.15, "feedback": 0.2, "wet": 0.12, "lowpass": 2500}},
   success: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":880, "attack":0.004, "decay":0.09, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1108.73, "offset":0.06, "attack":0.004, "decay":0.1, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1318.51, "offset":0.12, "attack":0.004, "decay":0.18, "peak":0.07}], "shimmer":{"delay":0.1, "feedback":0.22, "wet":0.16, "lowpass":4500}},
   // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
   // (verify/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
-  // preference rather than a designed one: `vary('ready', 7)` in scripts/dev/sound-vary.mjs
+  // preference rather than a designed one: `vary('ready', 7)` in harness/dev/sound-vary.mjs
   // reproduces them exactly.
   // PROMOTED FROM A VARIANT, round 5 (`compose('ready', 3)` in
-  // scripts/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
+  // harness/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
   // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
   ready: {"masterGain": 0.45, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 917.5537402621779, "attack": 0.02, "decay": 0.2, "peak": 0.11249999999999999, "offset": 0}, {"kind": "tone", "waveform": "sine", "frequency": 1376.3306103932669, "attack": 0.02, "decay": 0.15600000000000003, "peak": 0.06923076923076922, "offset": 0.0017744631562381984}]},
   // ---- MOVEMENT and WEIGHT: built here, not ported ------------------------------------------------
@@ -317,7 +317,7 @@ export const CUES = {
   // 0.13s at 2 metres. A near miss is a SPIKE on a long approach, not a symmetric swell, which is why
   // the approach here is a slow attack and the departure is a fast one.
   // PROMOTED FROM A VARIANT, round 5 (`composeMovement('whoosh', 1)` in
-  // scripts/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
+  // harness/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
   // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
   whoosh: {"masterGain": 0.55, "layers": [{"kind": "noise", "filterType": "bandpass", "filterFrequency": 149.0597651153803, "filterGlideTo": 1192.378900758922, "filterGlideTime": 0.31445293996017426, "filterQ": 2.251940276939422, "attack": 0.26445293996017427, "decay": 0.05, "peak": 0.5, "offset": 0}, {"kind": "noise", "filterType": "bandpass", "filterFrequency": 1192.378900758922, "filterGlideTo": 223.58964767307043, "filterGlideTime": 0.2729367252625525, "filterQ": 2.251940276939422, "attack": 0.03, "decay": 0.2429367252625525, "peak": 0.44, "offset": 0.23800764596415686}, {"kind": "tone", "waveform": "sine", "frequency": 66.72627971391194, "attack": 0.21156235196813944, "decay": 0.12, "peak": 0.16}]},
 
@@ -340,7 +340,7 @@ export const CUES = {
   // of it, not because the riser got loud. That is a mixer decision, not a cue parameter, so place the
   // riser to END on the beat and leave the frame before it quiet.
   // PROMOTED FROM A VARIANT, round 5 (`composeMovement('riser', 1)` in
-  // scripts/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
+  // harness/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
   // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
   riser: {"masterGain": 0.5, "layers": [{"kind": "noise", "filterType": "bandpass", "filterFrequency": 195.73031682521105, "filterGlideTo": 1544.9892224743962, "filterGlideTime": 1.2672377136303112, "filterQ": 2.2324799145571887, "attack": 1.1672377136303111, "decay": 0.1, "peak": 0.5, "offset": 0}, {"kind": "tone", "waveform": "sine", "frequency": 87.19948236714117, "glideTo": 45.71554599236697, "glideTime": 1.1672377136303111, "attack": 0.52525697113364, "decay": 0.16, "peak": 0.26}]},
 
@@ -357,7 +357,7 @@ export const CUES = {
   // 40 to 60ms and is a different event entirely (https://vadisound.com/cinematic-sound-design-series-
   // how-to-create-sub-downs-low-booms-and-whooshes/). If you want the knock, shorten glideTime to 0.05.
   // PROMOTED FROM A VARIANT, round 5 (`composeMovement('drop', 1)` in
-  // scripts/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
+  // harness/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
   // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
   drop: {"masterGain": 0.6, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 153.7799136294052, "glideTo": 28.852913435082883, "glideTime": 1.1724788748426362, "attack": 0.01, "decay": 0.8207352123898454, "peak": 0.5}, {"kind": "noise", "filterType": "bandpass", "filterFrequency": 637.1601055376232, "filterGlideTo": 75.12447983492166, "filterGlideTime": 0.8407352123898454, "filterQ": 2.3792260268703105, "attack": 0.02, "decay": 0.8207352123898454, "peak": 0.22, "offset": 0}]},
 
@@ -378,7 +378,7 @@ export const CUES = {
   // three offsets are within 10ms. The 1-3kHz layer is the one a naive build leaves out, and without it
   // an impact is a click stapled to a thump with a hole between them.
   // PROMOTED FROM A VARIANT, round 5 (`composeMovement('impact', 1)` in
-  // scripts/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
+  // harness/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
   // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
   impact: {"masterGain": 0.55, "layers": [{"kind": "noise", "filterType": "bandpass", "filterFrequency": 3650.2522726543248, "filterGlideTo": 2301.765531376004, "filterGlideTime": 0.013000000000000001, "filterQ": 0.9149462981149554, "attack": 0.001, "decay": 0.012, "peak": 0.42, "offset": 0}, {"kind": "tone", "waveform": "sine", "frequency": 65.33652698271908, "glideTo": 39.50297371437773, "glideTime": 0.14, "attack": 0.004, "decay": 0.15, "peak": 0.5}, {"kind": "noise", "filterType": "bandpass", "filterFrequency": 954.8293723957613, "filterGlideTo": 515.7418805547059, "filterGlideTime": 0.136, "filterQ": 0.9149462981149554, "attack": 0.006, "decay": 0.13, "peak": 0.2, "offset": 0.008}]},
 
@@ -398,7 +398,7 @@ export const CUES = {
   // enough that the stack collapses within about 90ms of the last one landing. Measured: the level
   // peaks at 70% of the cue's length and the brightness climbs 637Hz to 4.4kHz across it.
   // PROMOTED FROM A VARIANT, round 5 (`composeMovement('swell', 1)` in
-  // scripts/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
+  // harness/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
   // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
   swell: {"masterGain": 0.5, "layers": [{"kind": "noise", "filterType": "bandpass", "filterFrequency": 274.12175975739956, "filterGlideTo": 961.1819964135066, "filterGlideTime": 0.7306436157366262, "filterQ": 2.2556555460207166, "attack": 0.7106436157366262, "decay": 0.02, "peak": 0.5, "offset": 0}]},
 
@@ -421,7 +421,7 @@ export const CUES = {
   // resonator, so this is the shape of a braam at a fraction of its density. Treat it as the low
   // sustained weight in the library, not as the trailer horn.
   // PROMOTED FROM A VARIANT, round 5 (`composeMovement('braam', 1)` in
-  // scripts/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
+  // harness/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
   // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
   braam: {"masterGain": 0.42, "layers": [{"kind": "tone", "waveform": "tri", "frequency": 74.52258396847174, "detune": -22.92972768098116, "attack": 0.3493133140960708, "decay": 0.9, "peak": 0.2142857142857143}, {"kind": "tone", "waveform": "saw", "frequency": 111.7838759527076, "detune": 29.808645985275508, "attack": 0.37931331409607083, "decay": 0.9, "peak": 0.125}, {"kind": "tone", "waveform": "tri", "frequency": 149.04516793694347, "detune": -36.687564289569856, "attack": 0.4093133140960708, "decay": 0.9, "peak": 0.08823529411764706}, {"kind": "tone", "waveform": "saw", "frequency": 223.5677519054152, "detune": 43.5664825938642, "attack": 0.4393133140960708, "decay": 0.9, "peak": 0.06818181818181818}, {"kind": "noise", "filterType": "bandpass", "filterFrequency": 857.5214679539204, "filterGlideTo": 2744.068697452545, "filterGlideTime": 1.1093133140960707, "filterQ": 1.0484928160905838, "attack": 0.4093133140960708, "decay": 0.7, "peak": 0.2838631074968726, "offset": 0}]},
 };

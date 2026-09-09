@@ -7,11 +7,11 @@
 // nothing renders it twice. The source here is site/og/card.html, it reads the SITE's own tokens and
 // the SITE's own vendored fonts, and regenerating is one command.
 //
-// It serves the repo through scripts/lib/render-harness.mjs rather than standing up another server:
+// It serves the repo through harness/lib/render-harness.mjs rather than standing up another server:
 // that module exists because this file's job had been copy-pasted 22 times (docs/MISTAKES.md #509).
 import fs from 'node:fs';
 import path from 'node:path';
-import { serveRepo, launchPage, REPO_ROOT } from '../lib/render-harness.mjs';
+import { serveRepo, launchPage, REPO_ROOT } from '../../harness/lib/render-harness.mjs';
 
 const OUT = path.join(REPO_ROOT, 'site/public/assets/og.png');
 // 1200x630 is the Open Graph standard and what X, Slack, LinkedIn and iMessage all crop against.

@@ -12,7 +12,7 @@ the table at `core/layout/safe.js:35`; an unnamed ratio is still honoured, fit t
 (`ls core/layers/`) plus camera · transitions · captions. `html` counts as a picture: hand-authored
 markup is a picture too, not just text.
 
-## THE EIGHT STAGES, IN ORDER  `[gated: scripts/live/stage-gate.mjs]` `[live: scripts/live/stage-say.mjs]`
+## THE EIGHT STAGES, IN ORDER  `[gated: harness/live/stage-gate.mjs]` `[live: harness/live/stage-say.mjs]`
 
 **Read this first.** `make stage D=<film>` says which stage a film is in and the ONE next command.
 Read from the files on disk, never from a stored state, so it cannot disagree with the repo.
@@ -30,12 +30,12 @@ Read from the files on disk, never from a stored state, so it cannot disagree wi
 
 **Three of those transitions are refused rather than requested**, because this order was written here,
 printed by `make critics`, and still run backwards by an author who could quote it
-(`docs/MISTAKES.md` #591, #595). `scripts/live/stage-gate.mjs` denies, at `PreToolUse`, before any
+(`docs/MISTAKES.md` #591, #595). `harness/live/stage-gate.mjs` denies, at `PreToolUse`, before any
 permission mode: writing a fragment no storyboard claims · writing `layers` into an unapproved film ·
 writing `approved:` at all, which is the user's signature and never an agent's. The way out of each is
 the missing artefact, and there is no flag, because a flag would be a way to skip the step.
 
-**And the order is re-stated every turn**, not read once: `scripts/live/stage-say.mjs` names the open
+**And the order is re-stated every turn**, not read once: `harness/live/stage-say.mjs` names the open
 stage and its one next command at `UserPromptSubmit`. A rule read at session start is a rule that fails
 late in a long session, which is exactly when it matters. `make next D=<film>` runs a stage's one step.
 
@@ -68,7 +68,7 @@ the real content in every row.
 | Captions, a phone feed, or a theme's whole-film default | n/a | [`docs/CRAFT/CAPTIONS.md`](docs/CRAFT/CAPTIONS.md) · [`docs/CRAFT/THEME-LOOK.md`](docs/CRAFT/THEME-LOOK.md) |
 
 **Anti-slop (non-negotiable).** Hand-authored HTML is where generic "AI slop" enters. Three checks
-answer it and only ONE of them is this repo's: `scripts/live/craft-live.mjs` reads a fragment's source
+answer it and only ONE of them is this repo's: `harness/live/craft-live.mjs` reads a fragment's source
 for sizes and shadows that do not trace to the stage kit, and `quality/gates/frame-check.mjs` compares
 the plan with the frames built from it. **`impeccable` is neither.** It is a vendored third-party skill
 (v3.5.0, Apache 2.0, `skills/impeccable/LICENSE`) and it is the only thing here that opens a browser
@@ -217,7 +217,7 @@ can, waived in the scene with `_why`.
 
 **Do not hand-author a film from a blank JSON.** Compose from `make blueprints`; pick one by SEEING it
 (`make previews`). Never quote a library statistic from memory: run `node
-scripts/dev/library-stats.mjs` and cite what it prints. Content spine: hook → suspense → payoff.
+harness/dev/library-stats.mjs` and cite what it prints. Content spine: hook → suspense → payoff.
 Never spoil the payoff; order beats toward the most counterintuitive moment; be honest, on-screen
 copy must be true, and a specific fact beats a dry number.
 
@@ -228,7 +228,7 @@ copy must be true, and a specific fact beats a dry number.
   black, unlike every other dark preset, which carries a tint or wash.
 - Author a boundary through `transitions[]` only. `cuts`, `stings` and `seams` are its lowered
   internal form and the validator refuses them when written directly;
-  `scripts/author/migrate-junctions.mjs` converts an old scene.
+  `harness/author/migrate-junctions.mjs` converts an old scene.
 
 ## Stage 4, design: craft rules the gates can't fully see  `[eye]`
 
@@ -278,17 +278,17 @@ quality/gates/rung.mjs --list` prints the worklist. Highest rung wins:
 
 | the harness does | this engine does | where |
 |---|---|---|
-| PostToolUse hooks that speak mid-task | a hook reads what you just saved and answers | `scripts/live/*.mjs` |
-| a PreToolUse deny, evaluated before permission mode | the authoring ORDER refuses a write that skips a stage | `scripts/live/stage-gate.mjs` |
-| UserPromptSubmit context injection | the open stage and its next command, re-stated every turn | `scripts/live/stage-say.mjs` |
-| deferred tools, fetched by search | `make arsenal Q="…"`, `make schema AT=…` | `scripts/author/` |
+| PostToolUse hooks that speak mid-task | a hook reads what you just saved and answers | `harness/live/*.mjs` |
+| a PreToolUse deny, evaluated before permission mode | the authoring ORDER refuses a write that skips a stage | `harness/live/stage-gate.mjs` |
+| UserPromptSubmit context injection | the open stage and its next command, re-stated every turn | `harness/live/stage-say.mjs` |
+| deferred tools, fetched by search | `make arsenal Q="…"`, `make schema AT=…` | `harness/author/` |
 | skills loaded only when needed | `docs/CRAFT/*.md`; a finding NAMES the doc that settles it | `docs/TASTE.md` |
 | refusing an invalid call at the boundary | refusing at the WRITE SITE, so a bad state is unrepresentable | `core/registry/registry.js` |
 
 A gate is the LAST resort: if the bad value has a write site, the refusal goes there. Where a clean
 state can't be reached today, the number goes in a ratchet (`quality/baselines/*-ratchet.json`), never rising.
 
-## Changing the ENGINE, not a film?  `[live: scripts/live/craft-live.mjs]`
+## Changing the ENGINE, not a film?  `[live: harness/live/craft-live.mjs]`
 
 Five rules govern any change to `core/`, `internal/`, a gate, or the capture path:
 [`docs/CRAFT/ENGINE-CHANGES.md`](docs/CRAFT/ENGINE-CHANGES.md). Two are decidable from a path, and the

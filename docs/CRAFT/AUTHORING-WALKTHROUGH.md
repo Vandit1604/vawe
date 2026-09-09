@@ -127,7 +127,7 @@ Under `TASTE=1` the ladder **blocks** on value (placeholder / unbacked / thin be
 (≥3 cut families, profile contradictions), on crossfade mud, on the designspec colour and font lock, and
 on the **ambition floor** (`plain-slideshow`, too little motion; the inverse of effect-soup). **The four
 book tells do NOT block.** `linear-motion`, `monotone-timing`, `enter-and-retreat` and `effect-soup` are
-every one of them `warn()` in `scripts/author/motion-director.mjs`, which exits only on FAIL-tier codes
+every one of them `warn()` in `harness/author/motion-director.mjs`, which exits only on FAIL-tier codes
 and has no `--strict` path. Directed lives between soup and slideshow. WARN-tier findings
 you read and reach past. A deliberate rule break you stand behind → waive it in the scene, **with its
 reason**, because a bare `allow` array blocks in the always-on half (`author-check.mjs:74-83` wants a
@@ -190,5 +190,5 @@ order → **`make author-check`** → `beats`/`reveal` → `make video` → **`m
 ## Provenance
 
 **Do not re-add:** a claim that `linear-motion`, `monotone-timing`, `enter-and-retreat` or `effect-soup`
-block under `TASTE=1`. All four are `warn()`-tier in `scripts/author/motion-director.mjs` and have no
+block under `TASTE=1`. All four are `warn()`-tier in `harness/author/motion-director.mjs` and have no
 `--strict` path; only value, direction, dissolve, designspec and the ambition floor block.

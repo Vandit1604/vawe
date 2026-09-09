@@ -1,7 +1,7 @@
 // node --test quality/gates/stage.test.mjs
 //
 // Every one of the eight stages, derived by stageOf() from fixture films this file builds and removes
-// itself. THIS MATTERS: scripts/live/test/stage-gate.test.mjs used to borrow a real film,
+// itself. THIS MATTERS: harness/live/test/stage-gate.test.mjs used to borrow a real film,
 // vawe-oblique, as its "unapproved" fixture, and it broke the day that film was approved (the state it
 // needed to test stopped existing). The fix there, and the rule here, is the same: never borrow a real
 // film's CURRENT state as a fixture, because a real film's state is the one thing this repo promises
@@ -195,8 +195,8 @@ test('next: keeps only the first half of a ", then" chain, never the second comm
 
 test('next: a compound "run this, then do this by hand" line also keeps only the runnable half', () => {
   assert.equal(
-    firstCommand('node scripts/author/stagekit.mjs x.json, then author each fragment: stage kit → look at it'),
-    'node scripts/author/stagekit.mjs x.json',
+    firstCommand('node harness/author/stagekit.mjs x.json, then author each fragment: stage kit → look at it'),
+    'node harness/author/stagekit.mjs x.json',
   );
 });
 

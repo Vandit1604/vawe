@@ -95,7 +95,7 @@ films grows from its own centre. Logged in `grammar/_gaps.json`.
 **The strong ease-out is not the default.** See above.
 
 **`linear` is 26% of our keyed easings** (317 of 1,216). Part of that is correct and deliberate:
-`scripts/author/track.mjs` emits linear interiors for a measured shape, and `core/timeline/sequence.js`
+`harness/author/track.mjs` emits linear interiors for a measured shape, and `core/timeline/sequence.js`
 interpolates a sub-0.14s segment linearly anyway. The rest is unexamined, and their rule is that
 linear is for constant motion only. `make claims` tracks the split.
 

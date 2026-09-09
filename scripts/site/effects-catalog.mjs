@@ -63,7 +63,7 @@ const DESC = {
 
 // The two pseudo-name sections (a MODE of a layer type, not a registry) keep their blurbs scoped to
 // their own section, the way a family does, so `make arsenal` indexes them. They used to sit in the
-// flat DESC above, which `d()` reads for docs/EFFECTS.md but scripts/author/arsenal.mjs does not: the
+// flat DESC above, which `d()` reads for docs/EFFECTS.md but harness/author/arsenal.mjs does not: the
 // search reads each section's own `blurbs` map. So four capabilities rendered a description in the docs
 // and were unfindable by the tool CLAUDE.md sends you to before inventing anything (discovery.mjs).
 const BEAM_BLURBS = {

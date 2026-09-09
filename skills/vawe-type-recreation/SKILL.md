@@ -68,7 +68,7 @@ is the only artefact this type keeps.
 make scaffold OUT=formats/scene/<name>.json TYPE=recreation DUR=11
 ```
 
-Composes a minimal `kineticHook -> statReveal -> ctaEnd` fallback spine (`scripts/author/
+Composes a minimal `kineticHook -> statReveal -> ctaEnd` fallback spine (`harness/author/
 type-spines.mjs`): deliberately generic, since a real recreation's beat shapes come from the studied
 grammar, not from a table. Treat the scaffold as a starting skeleton to REPLACE with the studied shape,
 not as the recreation itself.

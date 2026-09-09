@@ -7,12 +7,12 @@
 // Usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]   ·   make judge D=<file> [VS=<brand>]
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
-import { writeReceipt, readReceipt } from '../../scripts/lib/receipt.mjs';
+import { writeReceipt, readReceipt } from '../../harness/lib/receipt.mjs';
 import path from 'node:path';
 import { beatsOf, evenSamples } from './beats-of.mjs';
 import { frameTile, tileGrid, tileBox, baseOf, renderOf, gradeable } from './tile.mjs';
 import { craftRubric } from './rubric.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 // judge.mjs is a PREP step, not a pass/fail check: its product is a rendered sheet + rubric for the
 // agent to score, so there is nothing to emit under --json when it succeeds. The one real finding is

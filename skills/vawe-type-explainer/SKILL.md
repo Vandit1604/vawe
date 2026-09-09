@@ -12,7 +12,7 @@ counts, so it holds pace longer per idea than a launch film does.
 ## The spine changes shape with length
 
 **Under ~15s: ONE CONTINUOUS ACTION**, not the multi-beat spine below. `make scaffold TYPE=explainer
-DUR=<n>` switches automatically at `CONTINUOUS_ACTION_MAX_S` (`scripts/author/type-spines.mjs`, 15s): a
+DUR=<n>` switches automatically at `CONTINUOUS_ACTION_MAX_S` (`harness/author/type-spines.mjs`, 15s): a
 held FIGURE (the one number this film proves) counts up from zero and holds at its final value, no cut.
 Read `skills/vawe-continuous-action/SKILL.md` first at this length. A single counted fact genuinely IS a
 continuous action; do not force the four-beat build below into 10s just because the type is explainer.
@@ -68,7 +68,7 @@ make scaffold OUT=formats/scene/<name>.json TYPE=explainer DUR=20   # >= 15s: th
 ```
 
 At DUR>=15 it composes `kineticHook -> containerFill -> listBuildRows -> chipGrid -> statReveal -> ctaEnd`
-(`scripts/author/type-spines.mjs`), cycling `paper/soft/dotmatrix` bg presets and a
+(`harness/author/type-spines.mjs`), cycling `paper/soft/dotmatrix` bg presets and a
 dissolve-then-punch cut family. This is the one type whose beat-spine scaffold needs no captured asset
 at all, so it is also the fastest `--type` to validate clean out of the box at that length.
 

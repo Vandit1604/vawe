@@ -21,9 +21,9 @@ const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 
 // ── colour maths (self-contained, pure) ───────────────────────────────────────────────────────────
-// The shared half lives in scripts/lib/theme-bg.mjs, because invent-look.mjs writes themes too and a
+// The shared half lives in harness/lib/theme-bg.mjs, because invent-look.mjs writes themes too and a
 // second copy of the bg mapping is how a theme gains a missing key.
-import { parseHex as parse, mix, lighten, darken, rgbStr, relLum, contrast, bgBlock } from '../lib/theme-bg.mjs';
+import { parseHex as parse, mix, lighten, darken, rgbStr, relLum, contrast, bgBlock } from '../../harness/lib/theme-bg.mjs';
 const rgbaOf = (c, a) => { const [r, g, b] = parse(c); return `rgba(${r},${g},${b},${a})`; };
 const isLight = (c) => relLum(c) > 0.4;
 

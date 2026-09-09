@@ -466,7 +466,7 @@ The peak measured frame is something LEAVING, or the frame flooding with flat co
 
 **Why it works.** It is the opposite reflex to ours. framer-hero is the counter-example where all four peaks are arrivals, so both work, but an emptying is available and we never use it.
 
-**In our engine.** A keyed `exit` track (scripts/author/track.mjs exit), or an `adjust`/rect flooding the frame for a few frames.
+**In our engine.** A keyed `exit` track (harness/author/track.mjs exit), or an `adjust`/rect flooding the frame for a few frames.
 
 ### A container that holds while its contents change
 

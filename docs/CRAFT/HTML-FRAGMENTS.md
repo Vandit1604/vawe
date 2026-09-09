@@ -105,7 +105,7 @@ guard, because a mismatch is invisible until someone writes it down:
 20s film · 600 frames · 7 beats · 3 fragments
 ```
 
-This was worth a bug. `scripts/author/critics.mjs` set `beats: fragments.length`, so a five-beat film
+This was worth a bug. `harness/author/critics.mjs` set `beats: fragments.length`, so a five-beat film
 that hand-wrote no HTML was described to every decider in the roster as **"0 beat(s)"**, and a
 seven-beat film with three fragments was described as a three-beat film. Every brief downstream
 inherited the wrong shape of the film. The counts are now derived separately and PRINTED together, and
@@ -267,7 +267,7 @@ committed non-generic face** (the real brand font when reflecting a brand; never
 anything generic). Then gate it two ways, and know which one sees what.
 **`make preview HTML=<frag>`** runs the vendored impeccable detector over the FRAGMENT, in a real browser
 with real computed styles. That is where it works, and it is the only place it is still wired.
-**`make designspec-check D=<file>`** runs OUR rule table (`scripts/lib/designspec-rules.mjs`) over the
+**`make designspec-check D=<file>`** runs OUR rule table (`harness/lib/designspec-rules.mjs`) over the
 scene: the theme colour/font lock plus the copy and effect-dose rules. Both must be clean before you render.
 
 <!-- doc-refs-allow: make slop · this line records the target's retirement -->
@@ -283,7 +283,7 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
 
 ## The stage kit: a foundation, not a reset
 
-`node scripts/author/stagekit.mjs <film.json>` (`make stagekit D=<film>`) prints one `<style>` block
+`node harness/author/stagekit.mjs <film.json>` (`make stagekit D=<film>`) prints one `<style>` block
 every scene fragment in a per-scene fan-out pastes VERBATIM (`node ... --check` asserts byte identity,
 `docs/CRAFT/PER-SCENE-FANOUT.md`). It is generated from the FILM's theme, so it is not one fixed
 stylesheet: 45 themes get 45 different kits, never one kit in 45 colours. Every number in it traces back

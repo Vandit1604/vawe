@@ -18,8 +18,8 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/layout/safe.js';
 import { marksOf } from '../../core/timeline/junctions.js';
-import { serveRepo, waitForEngine } from '../../scripts/lib/render-harness.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { serveRepo, waitForEngine } from '../../harness/lib/render-harness.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv.find((a) => a.endsWith('.json'));
@@ -113,7 +113,7 @@ async function series(nobg) {
   return { pairs: deltas, step, total };
 }
 
-const { decode } = await import('../../scripts/lib/png-diff.mjs');
+const { decode } = await import('../../harness/lib/png-diff.mjs');
 const cells = (buf) => {
   const { w, h, ch, data } = decode(buf);
   const out = [];

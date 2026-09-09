@@ -35,12 +35,12 @@ import { typedLen } from '../../core/layers/text.js';
 import { clamp01 } from '../../core/motion/motion.js';
 import { sceneDims } from '../../core/layout/safe.js';
 import { sceneTiming } from './scene-timing.mjs';
-import { glyphText, snippet } from '../../scripts/lib/text.mjs';
-import { flattenLayers } from '../../scripts/lib/layers.mjs';
+import { glyphText, snippet } from '../../harness/lib/text.mjs';
+import { flattenLayers } from '../../harness/lib/layers.mjs';
 import { loadScene } from '../../core/engine/expand.js';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/timeline/junctions.js';
-import { population, LIBRARY } from '../../scripts/lib/census.mjs';
+import { population, LIBRARY } from '../../harness/lib/census.mjs';
 
 // ── THE 15 EXPRESSIVE FAMILIES, named once ──────────────────────────────────────────────────────
 // Both the per-film `vocab` (below, from `sig`) and the library-wide census (`libraryProfile`) key on
@@ -369,7 +369,7 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
       warn('library-top5-only', `this film's whole motion vocabulary (${vocab.join(', ')}) is barely `
         + `touched (≤2 uses each) and sits entirely inside ${[...prof.top5].join(', ')}, the 5 families `
         + `the other ${prof.n} films this checkout can see already reach for most `
-        + `(\`node scripts/lib/census.mjs\` reproduces the population${prof.blind ? `, PARTIAL checkout: ${prof.blind.split('\n')[0]}` : ''}). `
+        + `(\`node harness/lib/census.mjs\` reproduces the population${prof.blind ? `, PARTIAL checkout: ${prof.blind.split('\n')[0]}` : ''}). `
         + `Same tool, same primitives, same shape as the last twenty.`
         + `${rare.length ? ` Reach outside it: ${rare.join(' · ')}.` : ''}`);
     }

@@ -18,19 +18,19 @@ and the "what next" list at the bottom says what would.
 ## The procedure
 
 ```bash
-scripts/dev/worktree.sh add prompt-eval          # it edits CLAUDE.md in place, so do it in a worktree
+harness/dev/worktree.sh add prompt-eval          # it edits CLAUDE.md in place, so do it in a worktree
 cd .claude/worktrees/prompt-eval
-scripts/dev/prompt-eval.sh "## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE" out/prompt-eval
+harness/dev/prompt-eval.sh "## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE" out/prompt-eval
 ```
 
 The script does three things and nothing else. It removes the named `## ` section from `CLAUDE.md` for
 one arm and restores the file afterwards. It runs the SAME task through `claude -p` in both arms. It
-measures the two scene JSONs with `node scripts/dev/library-stats.mjs --files a.json b.json`, which
+measures the two scene JSONs with `node harness/dev/library-stats.mjs --files a.json b.json`, which
 reuses the population script's own definition of a picture rather than inventing a second one.
 
 The task is fixed in the script and starts both arms from identical bytes:
 
-> Run `node scripts/dev/demo.mjs --print-path --q "how a thermal blur reads heat off a product shot"
+> Run `node harness/dev/demo.mjs --print-path --q "how a thermal blur reads heat off a product shot"
 > --name heatread --fx thermalBlur`, then extend that JSON to about 14 seconds across three moments.
 > Do not render. Do not edit any other file. Then clear `quality/gates/author-check.mjs`.
 
@@ -42,7 +42,7 @@ everything the agent ADDS on top of it is the measurement.
 `THE BACKGROUND MUST MOVE` is the only section in the file whose instruction lands as a countable
 property of the JSON. It asks for more than one `bg` window and it asks for those windows to carry no
 `from`/`to`, so the cuts own the timing (`core/timeline/junctions.js`). Both are one `jq` away. The population
-baseline already exists and has an owner: `node scripts/dev/library-stats.mjs` reports how many
+baseline already exists and has an owner: `node harness/dev/library-stats.mjs` reports how many
 gate-visible scenes paint a single window, so the arms can be read against the library rather than
 against an impression. No other section is that cheap to falsify.
 

@@ -106,11 +106,11 @@
 // gate-visible scenes carry an `unreadable-hold` finding, the same written condition, not a wish,
 // that the storyboard step uses. Until then `TASTE=1` gives it teeth for one run.
 import fs from 'node:fs';
-import { onScreenText } from '../../scripts/lib/text.mjs';
+import { onScreenText } from '../../harness/lib/text.mjs';
 import { sceneTiming, num, spanOf } from './scene-timing.mjs';
 import { settleWindow } from '../../core/layout/safe.js';
 import { BASE_ENTER, BASE_EXIT } from '../../core/timeline/clips.js';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 export const FPS = 30;
 export const HOLD_PER_WORD = 0.6;

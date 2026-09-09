@@ -35,7 +35,7 @@ the [`../MISTAKES.md`](../MISTAKES.md) numbers in the margin are the receipts.
   continuously moving field it is the exact frame where a wrong speed looks right (#155). Sample
   the **entrance** (high fps, first ~0.5s): is the word oversized + blurred, settling (a dolly-in)?
   the **exit**: does it scale UP + blur to leave (a dolly-out)? a **zoomed crop of the text**: flat
-  fill or a GRADIENT / colour-wave? For OUR renders, [`make reveal`](../../scripts/author/reveal.mjs)
+  fill or a GRADIENT / colour-wave? For OUR renders, [`make reveal`](../../harness/author/reveal.mjs)
   does this automatically per beat.
 - **Measure the signature motion.** `make measure VIDEO=ref.mp4 FROM=… TO=…` → duration + nearest
   engine preset ([MEASURE.md](MEASURE.md)). A tight fit is an authorable number; a loose fit means it

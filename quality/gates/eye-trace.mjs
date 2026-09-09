@@ -63,14 +63,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sceneTiming, boxOf, sceneView, num } from './scene-timing.mjs';
-import { flattenLayers } from '../../scripts/lib/layers.mjs';
-import { population, LIBRARY, SCENE_DIR } from '../../scripts/lib/census.mjs';
+import { flattenLayers } from '../../harness/lib/layers.mjs';
+import { population, LIBRARY, SCENE_DIR } from '../../harness/lib/census.mjs';
 import { resolveCoords } from '../../core/engine/boot.js';
 import { safeArea } from '../../core/layout/safe.js';
 import { motionAt } from '../../core/timeline/sequence.js';
 import { bgPreset, bgPaletteFrom } from '../../core/backgrounds/index.js';
 import { parseColorRGB } from '../../core/motion/motion.js';
-import { gateFindings, emitJson } from '../../scripts/lib/findings.mjs';
+import { gateFindings, emitJson } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FPS = 30;

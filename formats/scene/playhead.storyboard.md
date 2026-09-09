@@ -105,7 +105,7 @@ destination: web
   So the caret and the playhead are now ONE layer inside the coplanar group, resizing from the caret's
   box to the playhead's box with keyed `w`/`h`. There is no hand-off to hide, because there is no
   hand-off: it is the same mark the whole way, which is what this storyboard claimed from line 6.
-  Proof is a pixel count, never an eye: `node scripts/dev/bar-probe.mjs formats/scene/playhead.json`
+  Proof is a pixel count, never an eye: `node harness/dev/bar-probe.mjs formats/scene/playhead.json`
   paints the subject a colour used nowhere else, renders, and fails on any frame that has none of it.
 
   THE CAPTURE THIS FILM DEPENDS ON. SETTLED, with numbers. The subject is

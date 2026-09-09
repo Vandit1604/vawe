@@ -18,11 +18,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
-import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../../scripts/author/storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY } from '../../scripts/lib/contract.mjs';
-import { resolvePx } from '../../scripts/lib/placement-resolve.mjs';
-import { readReceipt } from '../../scripts/lib/receipt.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../../harness/author/storyboard-parse.mjs';
+import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY } from '../../harness/lib/contract.mjs';
+import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
+import { readReceipt } from '../../harness/lib/receipt.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const f = process.argv.slice(2).find((a) => !a.startsWith('--'));
 if (!f || !fs.existsSync(f)) { console.error('usage: storyboard-check <STORYBOARD.md>  (template: docs/CRAFT/STORYBOARD-TEMPLATE.md)'); process.exit(2); }
@@ -147,7 +147,7 @@ const CHANGE_VERB = /(becomes?|turns? into|opens? into|collapses?|morphs?|splits
 // post hoc is not propter hoc: a trigger that only says WHEN is a sequence, and a slideshow already
 // has one of those.
 //
-// TRIGGER_SEQUENCE/TRIGGER_EMPTY/isCausedTrigger now live in scripts/lib/contract.mjs (imported above):
+// TRIGGER_SEQUENCE/TRIGGER_EMPTY/isCausedTrigger now live in harness/lib/contract.mjs (imported above):
 // assemble.mjs needs the exact same "is this a real cause" test to decide what to stage, and two copies
 // of it is exactly the drift MISTAKES.md #159 already names.
 
@@ -307,7 +307,7 @@ if (timed.length && timed.length < spans.length) {
 // ADVISORY (warn, never a blocker): a storyboard is legitimately checked before `make assemble` has
 // ever run, and the film beside it may simply not exist yet, or may be mid-edit. What this reports is
 // PRESENCE of the declared motion in the built layers, read the same way `edges`/`parseMotion`
-// (scripts/lib/contract.mjs) already read the storyboard, never a second parser.
+// (harness/lib/contract.mjs) already read the storyboard, never a second parser.
 const filmPath = /\.storyboard\.md$/.test(f) ? f.replace(/\.storyboard\.md$/, '.json') : null;
 if (filmPath && fs.existsSync(filmPath)) {
   const full = parseStoryboard(src);
@@ -316,7 +316,7 @@ if (filmPath && fs.existsSync(filmPath)) {
   const sceneLayers = Array.isArray(scene.layers) ? scene.layers : [];
   const near = (a, b, tol) => a != null && b != null && Math.abs(a - b) <= tol;
   // assemble.mjs writes exactly one `html` layer per beat, IN BEAT ORDER (scene1, scene2, …), so beat i
-  // is html layer i by position. A staged junction (scripts/lib/contract.mjs STAGE_S) now legitimately
+  // is html layer i by position. A staged junction (harness/lib/contract.mjs STAGE_S) now legitimately
   // writes a RELATIVE `start` ("scene1.end+0.05"), which `near()` on a raw number can no longer match,
   // so position is the one lookup that survives a start being either a number or a junction reference.
   const htmlLayersBuilt = sceneLayers.filter((l) => l.type === 'html');
@@ -354,7 +354,7 @@ if (filmPath && fs.existsSync(filmPath)) {
         const tt = +(t - layerStart).toFixed(3);
         return objLayer.motion.find((k) => near(k.t, tt, 0.05));
       };
-      // A staged junction (scripts/lib/contract.mjs stagedSchedule, the SAME schedule assemble.mjs
+      // A staged junction (harness/lib/contract.mjs stagedSchedule, the SAME schedule assemble.mjs
       // builds the film from) moves where a beat's pose really lands: comparing against the storyboard's
       // raw beat.start/end here would flag every staged handoff as "diverges" even on a clean build.
       const { shiftedStart, shiftedEnd } = stagedSchedule(tBeats);

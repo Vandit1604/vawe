@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Full history: scripts/author/recency.mjs reads `git log --before=N.days` to compute registry
+          # Full history: harness/author/recency.mjs reads `git log --before=N.days` to compute registry
           # newness. A shallow checkout has no history, so two newness lib-tests fail on CI while passing
           # on a full local clone. scene-check.yml does this for the same reason.
           fetch-depth: 0

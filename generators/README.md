@@ -13,5 +13,5 @@ touches these again until the source changes.
 
 This is different from `scripts/`, which is repo maintenance and gates (checks, hooks, the studio,
 capture tools that serve one film at a time), and different from the film-making tools that stay under
-`scripts/media/` and `scripts/author/` (VO, captions, beat sync, per-film asset wiring): those read or
+`harness/media/` and `harness/author/` (VO, captions, beat sync, per-film asset wiring): those read or
 shape one film's data, they do not bake a standing asset for every film to reuse.

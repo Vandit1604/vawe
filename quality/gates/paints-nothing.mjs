@@ -45,10 +45,10 @@ import cp from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneTiming, spanOf } from './scene-timing.mjs';
-import { population, SCENE_DIR } from '../../scripts/lib/census.mjs';
-import { serveRepo, waitForEngine, bootPathFor } from '../../scripts/lib/render-harness.mjs';
+import { population, SCENE_DIR } from '../../harness/lib/census.mjs';
+import { serveRepo, waitForEngine, bootPathFor } from '../../harness/lib/render-harness.mjs';
 import { loadScene } from '../../core/engine/expand.js';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);

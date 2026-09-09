@@ -56,7 +56,7 @@ export const LAYER_BLURBS = blurbsOf('layer type', REGISTRY);
 // would move frames, so it is left exactly as it was and this sits beside it.
 //
 // What it buys: the section below used to be hand-listed in scripts/site/effects-catalog.mjs with its
-// usage form and its no-preview reason in a third file, and `scripts/author/arsenal.mjs` carried a
+// usage form and its no-preview reason in a third file, and `harness/author/arsenal.mjs` carried a
 // hardcoded special case reading LAYER_TYPES + LAYER_BLURBS because layer types were not a registry
 // (docs/MISTAKES.md #551: `beam`, whose blurb says "a light that travels the rounded-rect border", was
 // invisible to a query naming exactly that). All of it is one declaration now.

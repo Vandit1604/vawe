@@ -70,7 +70,7 @@ recording; either way, get its word-timing sidecar before writing captions by ha
 make scaffold OUT=formats/scene/<name>.json TYPE=talking-head DUR=12
 ```
 
-Composes `blurResolveHook -> containerFill -> statReveal -> ctaEnd` (`scripts/author/type-spines.mjs`),
+Composes `blurResolveHook -> containerFill -> statReveal -> ctaEnd` (`harness/author/type-spines.mjs`),
 a deliberately short spine since the real content is the VO and captions the scaffold cannot author for
 you, on `ink/deep` bg presets with a quiet fade-only cut family.
 
