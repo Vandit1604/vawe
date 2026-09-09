@@ -2483,6 +2483,15 @@ Three agents were sent into git worktrees to change files that were still uncomm
 holds: docs/CRAFT/SUBAGENT-BUDGET.md, docs/CRAFT/SUBAGENTS.md
 
 
+## 608. a persistent object does not create motion, it only makes motion possible
+The object path was built to fix films that read as slideshows, and the fix was proved by three throwaway films that differ only in structure. A, the old way: two beats, a fragment each, torn down and rebuilt at the cut. B: the same two beats sharing one fragment, so the DOM survives, one layer with `acrossBeats`. C: B plus a keyed object chain across the cut. `make motion-floor` on all three, same theme, same copy, same 6 seconds: A is 9 of 10 windows dead, B is 9 of 10 dead, and C is 10 of 10 dead with a LOWER peak than either. The structural change is real and the before/after is unambiguous (the old assembler drew the object as `type: rect, fill: var(--accent)` on the identical storyboard) but it moved the motion floor by nothing at all. What the floor measures is the RATE of localised change, and all three films key one reveal per three-second beat, so each holds still for two and a half seconds no matter who owns the DOM. C is worst because its one object move is a slow 900x420 to 760x360 drift over six seconds, spread and gentle, which is the definition of the ambient motion the gate refuses to count. Two different problems were being treated as one: the PATH (can a thing survive a cut and be drawn as itself) and the DENSITY (how many overlapping keyed events per second). This work fixed the first. The second is the motion decider's, and no amount of the first substitutes for it.
+holds: scripts/author/assemble.mjs, scripts/gates/motion-floor.mjs
+
+## 609. a prop set and never read fails the render, and a comment naming the prop is not proof it is read
+The new object layer carried `radius: chain[0].in.radius ?? 4`, a default inherited from the placeholder rect. As an `html` layer that refused to render at all: `core/registry/prop-audit.js` stops a build where a documented prop is accepted and then dropped (#428), which is the engine being right. The check that missed it was mine. `grep radius core/layers/html.js` returned a line, so it was called read; the line was a COMMENT explaining that these box props are shared, and the builder consumes radius only through `chipBox`, which paints nothing without a surface prop beside it. Reading a match instead of the code around it is how a two-second check produces a confident wrong answer. The rect keeps its historic default so every existing film assembles byte-identically; a non-rect object now carries a radius only when the contract names one.
+holds: scripts/author/assemble.mjs, core/registry/prop-audit.js
+
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.

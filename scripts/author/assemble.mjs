@@ -308,7 +308,15 @@ if (chain.length) {
     // `fill` is a rect-only prop (formats/scene/schema.json byType.rect); an html/image layer refuses
     // an unknown prop, so the placeholder's fill is dropped the moment a real source replaces it.
     ...(objectType === 'rect' ? { fill: 'var(--accent)' } : { src: objectSrcRel }),
-    radius: chain[0].in.radius ?? 4,
+    // RADIUS IS ONLY WRITTEN WHERE SOMETHING READS IT. The rect keeps its historic `?? 4` default, so
+    // every film that had a placeholder object assembles byte-identically. An html layer consumes
+    // radius only through chipBox, which paints nothing without a surface prop beside it, so a
+    // fabricated default there is a prop set and never read: core/registry/prop-audit.js refuses the
+    // render outright rather than let it look accepted and be dropped (docs/MISTAKES.md #428). So a
+    // non-rect object carries a radius only when the contract actually names one.
+    ...(objectType === 'rect'
+      ? { radius: chain[0].in.radius ?? 4 }
+      : (chain[0].in.radius != null ? { radius: chain[0].in.radius } : {})),
     start: objStart, duration: +(shiftedEnd[chain.length - 1] - objStart).toFixed(3),
     // `sceneUnits: true` wraps each beat as its own unit, so nothing survives a cut unless it opts
     // out: `acrossBeats` attaches this layer to the camera instead of its beat wrapper
