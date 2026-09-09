@@ -47,13 +47,21 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
    --sh-2:0 1px 1px -.5px rgba(0,0,0,.04),0 3px 3px -1.5px rgba(0,0,0,.04),0 7px 7px -3.5px rgba(0,0,0,.045),0 16px 16px -8px rgba(0,0,0,.05);
    --sh-3:0 2px 3px -1.5px rgba(0,0,0,.06),0 6px 9px -4px rgba(0,0,0,.08),0 16px 22px -10px rgba(0,0,0,.10),0 34px 46px -20px rgba(0,0,0,.13);
    --shadow:var(--sh-2)}
- /* the grey room. The stage sits at #2E2E2E, the value the brief names, and everything around it is
-    darker so the picture is the brightest thing in the frame. */
+ /* the black room. The ground is true black (#000000, not a dark grey), because a grey ground still
+    reads as a tint in the achromatic surround this pane is built to remove. The stage sits at #2E2E2E,
+    the value the brief names, so the picture stays the brightest thing in the frame. Panel/panel-2/
+    field step up from #000 in small, deliberate jumps: on true black a shadow ramp casts no visible
+    shadow (there is no light to fall short of), so LINE CONTRAST carries separation instead, and
+    --line/--line-2 are bumped a step darker-ground demands to stay legible (measured below). */
  :root[data-theme=dark]{color-scheme:dark;
-   --bg:#161616;--panel:#1C1C1C;--panel-2:#232323;--field:#111111;--stage:#2E2E2E;
-   --line:rgba(255,255,255,.09);--line-2:rgba(255,255,255,.18);
+   --bg:#000000;--panel:#0D0D0D;--panel-2:#161616;--field:#080808;--stage:#2E2E2E;
+   /* Measured against #000000, the darkest this room gets: rgba(255,255,255,.16) is 1.44:1, a soft
+      hairline; .35 is 3.00:1, WCAG 1.4.11's floor for a UI boundary that has to actually read as one
+      (a beat border, the stage strip). The light theme's .10/.20 read fine on #F2F2F2; this ground is
+      #000, so the same alpha draws a line nobody can see. */
+   --line:rgba(255,255,255,.16);--line-2:rgba(255,255,255,.35);
    --ink:#E8E8E8;--ink-2:#B4B4B4;--muted:#8A8A8A;
-   /* the engine's #2563eb lifted one step for the dark room: same hue, readable on #1C1C1C */
+   /* the engine's #2563eb lifted one step for the dark room: same hue, readable on #0D0D0D */
    --accent:#3d7bf5;--accent-soft:#1a2740;
    --bad:#e0787f;--bad-bg:#2A1B1D;--hz:#e0505f;--hz-beat:#d69a30;--hz-mute:#8A8A8A;
    --wash:#000;--wash-a:.42;
@@ -432,6 +440,14 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  .pstage{position:relative;aspect-ratio:var(--par,1.7778);background:#fff;border-radius:var(--r-in);
    overflow:hidden;box-shadow:var(--sh-2)}
  .pstage iframe{position:absolute;top:0;left:0;width:1920px;height:1080px;border:0;transform-origin:top left}
+ /* the sketch: an svg drawn from the storyboard, not a render, so it never claims to be one. The
+    dashed edge is the same "not a real frame" signal .pstage.none already used; the tag makes the
+    same claim in words for anyone who can't see the dashed line. */
+ .pstage.sketch{border:1px dashed var(--line-2);box-shadow:none}
+ .pstage.sketch svg{position:absolute;inset:0;width:100%;height:100%}
+ .psketchtag{position:absolute;top:8px;left:8px;font:600 9px/1 'JetBrains Mono',ui-monospace,monospace;
+   text-transform:uppercase;letter-spacing:.08em;padding:4px 7px;border-radius:4px;
+   background:rgba(0,0,0,.55);color:#fff;pointer-events:none}
  .pstage.none{display:grid;place-items:center;background:var(--panel-2);box-shadow:none;
    border:1px dashed var(--line-2);text-align:center;padding:16px}
  .pstage.none b{display:block;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;color:var(--accent);margin-bottom:6px}
@@ -666,6 +682,55 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
  const PFIELDS=[['why','why'],['becomes','the change'],['trigger','caused by'],['shot','shot'],
    ['camera','camera'],['layout','layout'],['style','style'],['rest','in the hold'],
    ['mechanism','mechanism'],['motion','motion plan'],['borrows','borrows'],['transition_in','cut in']];
+ // ---- the SKETCH: what a fragment-less beat still shows -----------------------------------------
+ // A beat with no fragment used to draw a grey box and a struck-through label (docs/MISTAKES.md #592
+ // again, one layer down: an html beat got a real picture, everything else still got nothing). The
+ // storyboard already decided a composition (archetype:) and often the exact words (onscreen:), so a
+ // beat with no fragment still has a picture to draw, just not a hand-written one. Each archetype
+ // (docs/CRAFT/STORYBOARD-TEMPLATE.md, the same closed list storyboard-check enforces) gets a fixed
+ // box layout on the film's own 1920x1080 canvas; the box carries the beat's own words, not a caption
+ // beside an empty rectangle, and the real onscreen line renders as real type because that IS the beat.
+ const ARCH_BOXES={
+   centred:[[560,210,800,660,'object']],
+   split:[[110,240,800,600,'object'],[1010,240,800,600,'object']],
+   'hero-object':[[260,90,1400,660,'object'],[260,820,1400,190,'copy']],
+   'asymmetric-baseline':[[130,520,880,420,'object']],
+   'full-bleed-row':[[0,380,1920,320,'object']],
+   'symmetric-pair':[[300,290,560,500,'object'],[1060,290,560,500,'object']],
+   lockup:[[560,150,500,520,'object'],[460,730,900,180,'copy']],
+ };
+ // an archetype the closed list does not name (blank, or "other (a reason)") still gets ONE centred
+ // box: a picture with a vague composition beats no picture at all.
+ const archBoxes=(name)=>ARCH_BOXES[String(name||'').trim().split(/\\s+\\(/)[0]]||[[460,240,1000,600,'object']];
+ const wrapWords=(s,max)=>{ const out=[]; let cur='';
+   for(const w of String(s||'').split(/\\s+/)){ const t=cur?cur+' '+w:w;
+     if(t.length>max&&cur){ out.push(cur); cur=w; } else cur=t; } if(cur) out.push(cur); return out; };
+ // WHY sketchable: any one of these is a real authoring decision, so drawing from it is honest. Their
+ // absence together is the only case with truly nothing to draw.
+ const hasPicture=(b)=>!!(b.picture||b.object||b.archetype||(b.onscreen&&b.onscreen.length)||b.mechanism||b.becomes);
+ function sketchSvg(b,pal){
+   const p=pal||{}, bg=p.bg||'#171717', surface=p.surface||'rgba(255,255,255,.08)',
+     edge=p.lineStrong||p.line||'rgba(255,255,255,.3)', accent=p.accent||'#2563eb',
+     text=p.text||'#fff', dim=p.text2||p.dim||'rgba(255,255,255,.6)';
+   const boxes=archBoxes(b.archetype), label=(b.picture||b.object||'').trim(), onscreen=(b.onscreen||[]).filter(Boolean);
+   const copyBoxes=boxes.filter((x)=>x[4]==='copy');
+   let s='<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg" font-family="Anybody,system-ui,sans-serif">'
+     +'<rect width="1920" height="1080" fill="'+bg+'"/>';
+   boxes.filter((x)=>x[4]==='object').forEach(([x,y,w,h])=>{
+     s+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="18" fill="'+surface+'" stroke="'+edge+'" stroke-width="3" stroke-dasharray="14 10"/>';
+     if(label){ const lines=wrapWords(label,Math.max(14,Math.floor(w/26))), startY=y+h/2-(lines.length-1)*26;
+       s+='<text x="'+(x+w/2)+'" y="'+startY+'" text-anchor="middle" fill="'+dim+'" font-size="34" font-weight="600">'
+         +lines.map((l,i)=>'<tspan x="'+(x+w/2)+'" dy="'+(i===0?0:52)+'">'+esc(l)+'</tspan>').join('')+'</text>'; }
+   });
+   // onscreen renders as real type: it is not a description of the beat, it IS the beat's own words.
+   // A copy slot the archetype names gets it; an archetype with none still gets it, lower third, because
+   // dropping decided words for want of a layout slot is a worse lie than an imprecise position.
+   if(onscreen.length){ const [cx,cyBox]=copyBoxes.length?[960,copyBoxes[0][1]+copyBoxes[0][3]/2]:[960,940];
+     const startY=cyBox-(onscreen.length-1)*30;
+     s+='<text x="'+cx+'" y="'+startY+'" text-anchor="middle" fill="'+text+'" font-size="52" font-weight="700">'
+       +onscreen.map((l,i)=>'<tspan x="'+cx+'" dy="'+(i===0?0:60)+'">'+esc(l)+'</tspan>').join('')+'</text>'; }
+   return s+'</svg>';
+ }
  function planEmpty(why){
    planBody.innerHTML=''; planNote.hidden=false;
    planNote.innerHTML='<h2>the plan is not here yet</h2><p>'+esc(why)+'</p>'
@@ -711,9 +776,15 @@ export const studioPage = ({ fmt, dataUrl, title, theme }) => `<!doctype html><h
        const stage=b.fragment
          ? '<div><div class=pstage><iframe loading=lazy title="'+esc(b.name)+'" src="/__frag?src='+encodeURIComponent(b.fragment)+'"></iframe></div>'
            +'<p class=psrc>'+esc(b.fragment)+'</p></div>'
-         : '<div class="pstage none"><div><s>no fragment, a blueprint draws it</s>'
-           +'<b>'+esc(String(b.blueprint||'not decided').split(' (')[0])+'</b>'
-           +'<p>'+esc(b.picture||'')+'</p></div></div>';
+         : hasPicture(b)
+         ? '<div><div class="pstage sketch">'+sketchSvg(b,d.palette)
+             +'<span class=psketchtag title="no hand-written fragment yet: drawn from the storyboard&#39;s own archetype/picture/onscreen">sketch</span></div>'
+           +'<p class=psrc>'+(b.blueprint?'blueprint: '+esc(String(b.blueprint).split(' (')[0]):'no fragment yet, drawn from the storyboard')+'</p></div>'
+         : '<div class="pstage none"><div><s>nothing to show yet</s><b>no picture decided</b>'
+           +'<p>This beat names no archetype, picture, object, or onscreen line, so there is nothing honest '
+           +'to draw. Add one of those to the storyboard, or write a <code>fragment:</code> and author it: '
+           +'stage kit &rarr; the reference&#39;s grammar &rarr; the smallest useful <code>ui-skills</code> set '
+           +'&rarr; <code>make preview</code>.</p></div></div>';
        const copy=(b.onscreen||[]).length
          ? '<ul class=pcopy>'+b.onscreen.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>' : '';
        const rows=PFIELDS.filter(f=>b[f[0]]).map(f=>'<div class=prow><dt>'+f[1]+'</dt><dd>'+esc(b[f[0]])+'</dd></div>').join('');
