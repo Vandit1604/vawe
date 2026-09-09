@@ -94,8 +94,8 @@ if (!bad.length) { console.log('✓ every sound effect is the shape its role cla
 for (const b of bad) {
   console.log(`  ✗ ${b.name}: ${b.why}`);
   f.fail('sfx-shape', `${b.name}: ${b.why}`, { at: `assets/sfx/${b.name}.wav`,
-    fix: 're-fetch it (`make audio` with `--force`) or bake the synthesized voicing (`node scripts/media/audio-bake.mjs --force`)' });
+    fix: 're-fetch it (`make audio` with `--force`) or bake the synthesized voicing (`node generators/media/audio-bake.mjs --force`)' });
 }
-console.log('\nRe-fetch it (`make audio` with `--force`) or bake the synthesized voicing (`node scripts/media/audio-bake.mjs --force`).');
+console.log('\nRe-fetch it (`make audio` with `--force`) or bake the synthesized voicing (`node generators/media/audio-bake.mjs --force`).');
 f.emit();
 process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

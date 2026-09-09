@@ -1,10 +1,6 @@
-// scripts/media/geo-bake.mjs: regenerate assets/geo/us-states.js and assets/geo/world.js.
+// generators/media/geo-bake.mjs: regenerate assets/geo/us-states.js and assets/geo/world.js.
 //
-//   node assets/geo/bake.mjs
-//
-// LIVES BESIDE ITS OUTPUT because the agent that wrote it was scoped to blocks/geo.mjs and assets/geo/.
-// It belongs in scripts/media/ with the other bakers (globe-dots.mjs is the same shape and the same
-// argument); moving it needs the two relative paths below changed and nothing else.
+//   node generators/media/geo-bake.mjs
 //
 // WHY BAKE AT ALL: see the header of blocks/geo.mjs. d3-geo runs at authoring time and ships nothing to
 // the page; this script drops the part of the source geometry no 1080p frame can resolve.
@@ -81,7 +77,7 @@ for (const g of topo.objects.states.geometries) {
 us.sort((a, b) => a.c < b.c ? -1 : 1);
 const HDR = (src, cmd) => `// GENERATED. DO NOT EDIT BY HAND.\n// source: ${src}\n// bake: ${cmd}\n`;
 fs.writeFileSync(`${ROOT}/assets/geo/us-states.js`,
-  HDR('us-atlas@3 states-10m.json (US Census TIGER, public domain)', 'node assets/geo/bake.mjs')
+  HDR('us-atlas@3 states-10m.json (US Census TIGER, public domain)', 'node generators/media/geo-bake.mjs')
   + `// 51 states + DC. Outer rings only, Douglas-Peucker at 0.09 deg, lon/lat to 3dp.\n`
   + `export const US_STATES = ${JSON.stringify(us)};\n`);
 
@@ -106,7 +102,7 @@ for (const f of world.features) {
 }
 wc.sort((a, b) => a.c < b.c ? -1 : 1);
 fs.writeFileSync(`${ROOT}/assets/geo/world.js`,
-  HDR('assets/globe/countries.geojson: Natural Earth 110m admin-0 (public domain)', 'node assets/geo/bake.mjs')
+  HDR('assets/globe/countries.geojson: Natural Earth 110m admin-0 (public domain)', 'node generators/media/geo-bake.mjs')
   + `// ${wc.length} countries. Outer rings only, Douglas-Peucker at 0.4 deg, lon/lat to 3dp.\n`
   + `export const WORLD_COUNTRIES = ${JSON.stringify(wc)};\n`);
 

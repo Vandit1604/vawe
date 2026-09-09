@@ -1726,7 +1726,7 @@ holds: scripts/gates/lib-test.mjs
 holds: none
 
 ## 419. Every font came from an unversioned URL, so the whole library measured differently by the day
-`scripts/media/fonts.mjs` fetched 16 faces from `cdn.jsdelivr.net/npm/<pkg>/files/…` with no version in any URL.
+`generators/media/fonts.mjs` fetched 16 faces from `cdn.jsdelivr.net/npm/<pkg>/files/…` with no version in any URL.
 holds: none
 
 ## 420. A caption style could be added to the registry and stay unreachable, and one shipped style had two states where it claims three
