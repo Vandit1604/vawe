@@ -2,6 +2,8 @@
 // scripts/gates/stage.mjs: WHERE IS THIS FILM, and what is the ONE next thing to do.
 //
 //   make stage D=formats/scene/<film>.json   ·   node scripts/gates/stage.mjs <film> [--json]
+//   make stage                                  · no film yet: the roster, and the one furthest from done
+//   make stage Q="make a launch video for x"    · no film yet EITHER: what to even start
 //
 // Every stage below already had a command. What did not exist was anything that knew which stage a
 // film was IN, so the order lived only in prose in AGENTS.md, and prose is a suggestion. An author who
@@ -16,8 +18,14 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../author/storyboard-parse.mjs';
+import { population, LIBRARY } from '../lib/census.mjs';
+import { route } from '../author/route.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+// Same order stageOf() builds S in. A second copy, not a derived one, because ranking the roster needs
+// the order BEFORE any single film's stageOf() has run.
+export const STAGE_ORDER = ['brief', 'plan', 'approval', 'design', 'assemble', 'direct', 'render', 'judge'];
 
 /** Every path a film owns, resolved the same way author-check and studio resolve them. */
 export function filePaths(arg) {
@@ -88,11 +96,66 @@ export function stageOf(arg) {
     approved: approved || null, fragments: [...new Set(fragments)], missingFrags, layers, sbExists, sceneExists };
 }
 
+/**
+ * Every film in the library, staged. Reuses scripts/lib/census.mjs's LIBRARY filter rather than a
+ * second walk of formats/scene/: one owner for "which files count as a film" (docs/MISTAKES.md #391).
+ * A film that errors while staging (unparseable storyboard, say) is reported, not thrown, because one
+ * bad film should not blind the roster to the rest.
+ */
+export function roster() {
+  const pop = population('stage roster', { filter: LIBRARY, quiet: true });
+  const rows = pop.names.map((f) => {
+    const base = f.replace(/\.json$/, '');
+    try { const st = stageOf(base); return { name: st.name, stage: st.stage, next: st.next, ok: true }; }
+    catch (err) { return { name: base, stage: 'error', next: String(err && err.message || err), ok: false }; }
+  });
+  rows.sort((a, b) => STAGE_ORDER.indexOf(a.stage) - STAGE_ORDER.indexOf(b.stage));
+  const worst = rows.find((r) => r.ok) || rows[0] || null;
+  return { n: rows.length, rows, worst };
+}
+
+// Stage 1 has no film yet, so stageOf() has nothing to read. What DOES exist is the same deliverable
+// router the planning skill uses (scripts/author/route.mjs), reachable so far only by an agent that
+// already knew it existed. Q= runs it and states the same brief-stage answer stageOf() would once a
+// storyboard exists: what this film is, and the one command that starts it.
+function briefFor(q) {
+  const matched = route(q);
+  const next = `make quiz NAME=<name> URL=<the product site>   (no site? docs/CRAFT/AUTHORING-WALKTHROUGH.md)`;
+  return { stage: 'brief', request: q, deliverable: matched.name, intake: matched.intake, next };
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const arg = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
-  if (!arg) { console.error('usage: make stage D=formats/scene/<film>.json'); process.exit(2); }
+  const argv = process.argv.slice(2);
+  const json = argv.includes('--json');
+  const qIdx = argv.indexOf('--q');
+  const q = qIdx >= 0 ? argv[qIdx + 1] : null;
+  const skip = qIdx >= 0 ? [qIdx, qIdx + 1] : [];
+  const arg = argv.filter((a, i) => a !== '--json' && !skip.includes(i) && a).find((a) => !a.startsWith('--')) || process.env.D || null;
+
+  if (q) {
+    const b = briefFor(q);
+    if (json) { console.log(JSON.stringify(b, null, 2)); process.exit(0); }
+    console.log(`\n  "${q}" is at stage BRIEF: no film exists yet.`);
+    console.log(`  deliverable: ${b.deliverable}`);
+    console.log('  intake:');
+    for (const line of b.intake) console.log(`    - ${line}`);
+    console.log(`\n  do:  ${b.next}\n`);
+    process.exit(0);
+  }
+
+  if (!arg) {
+    const r = roster();
+    if (json) { console.log(JSON.stringify(r, null, 2)); process.exit(0); }
+    console.log(`\n  ${r.n} film(s) in the library\n`);
+    for (const row of r.rows) console.log(`  ${row.stage.toUpperCase().padEnd(9)} ${row.name}`);
+    if (r.worst) console.log(`\n  furthest from done: ${r.worst.name} (${r.worst.stage.toUpperCase()})`
+      + `\n  do:  ${r.worst.next}\n`);
+    else console.log('');
+    process.exit(0);
+  }
+
   const st = stageOf(arg);
-  if (process.argv.includes('--json')) { console.log(JSON.stringify(st, null, 2)); process.exit(0); }
+  if (json) { console.log(JSON.stringify(st, null, 2)); process.exit(0); }
   const line = st.order.map((id) => (id === st.stage ? `[${id}]` : id)).join(' → ');
   console.log(`\n  ${st.name} is at stage ${st.stage.toUpperCase()}`);
   console.log(`  ${line}`);
