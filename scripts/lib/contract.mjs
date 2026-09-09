@@ -39,6 +39,7 @@
 import { PLACEMENT } from '../../core/layout/safe.js';
 import { nearMisses } from '../../core/registry/registry.js';
 import { PART_NAMES } from '../../core/motion/parts.js';
+import { SHAPES } from '../author/track.mjs';
 
 const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*((?:\/[a-z]+\s*[:=]\s*-?[\d.]+\s*)*)$/i;
 const POSE_TOKEN_RE = /\/([a-z]+)\s*[:=]\s*(-?[\d.]+)/gi;
@@ -266,4 +267,83 @@ export function stagedSchedule(beats) {
     shiftedEnd.push(+(b.end + shift).toFixed(3));
   });
   return { caused, shiftedStart, shiftedEnd };
+}
+
+// ── THE MOVE: sustained motion on a beat's own layer, not a one-shot entrance ──────────────────────
+//
+// docs/MISTAKES.md #610: three swept axes (entrance density, overlap, travel/duration) all failed to
+// stop a film going still, because every one of them is still a one-shot ENTRANCE that lands and holds.
+// The one axis that worked, measured median motion 0.17-1.61 against a 0.66 reference, is a keyed x/y/
+// scale track on the LAYER that never stops moving for the length of the beat. `move:` is that decision,
+// named on the beat the same way `motion:` (parts entrances, above) and `object_in`/`object_out`
+// (the continuous object) already are, and it reads the SAME vocabulary as both: a `SHAPES` key from
+// scripts/author/track.mjs (`make arsenal SHAPE=pan`, never a new motion mechanism) and a `SPEED_BAND`
+// name (the four words `motion:` already uses).
+//
+//   move: pan:cinematic     the higgsfield beat-2 scroll rhythm, at the "cinematic" scale
+//   move: drift:gravity     an ambient hold that keeps moving, never sitting still
+//
+// A beat that names no `move:` builds nothing here and assembles exactly as it did before this field
+// existed (byte-identical, scripts/author/assemble.test.mjs).
+//
+// WHY BAND SCALES MAGNITUDE AND NEVER DURATION. The requirement this field exists to meet is that the
+// track spans the WHOLE beat, so nothing goes still inside it; if a band shortened the track, the beat
+// would hold still for whatever was left over, which is the exact bug this field closes. So `dur` is
+// always the beat's own duration, never negotiable, and band instead scales how FAR/BIG the shape's own
+// measured motion is: `professional` reproduces the shape's own default untouched (the neutral point
+// `motion:` already treats every band relative to), `energy` shrinks it, `gravity`/`cinematic` grow it.
+const MOVE_RE = /^\s*([a-z-]+)\s*:\s*([a-z]+)\s*$/i;
+
+// The props a "how far/big" scale actually means something for, paired with their identity (the value
+// that means "no movement"), so scaling never invents a magic number per shape: it grows or shrinks the
+// DISTANCE from identity that the shape itself already chose. `opacity`/`ease` are left alone on
+// purpose, a band changes how much a layer travels, never how much it fades.
+const MOVE_SCALABLE = { x: 0, y: 0, scale: 1, rot: 0 };
+const r3 = (v) => +Number(v).toFixed(3);
+
+/** scaleMove(keys, factor) → keys with x/y/scale/rot pulled toward or away from identity by `factor`. */
+function scaleMove(keys, factor) {
+  if (factor === 1) return keys;
+  return keys.map((k) => {
+    const out = { ...k };
+    for (const [prop, identity] of Object.entries(MOVE_SCALABLE)) {
+      if (typeof out[prop] === 'number') out[prop] = r3(identity + (out[prop] - identity) * factor);
+    }
+    return out;
+  });
+}
+
+/** parseMove("pan:cinematic") → {shape,band} | {error} | null (null = the beat names no move). */
+export function parseMove(raw) {
+  if (raw == null) return null;
+  const s = String(raw).trim().replace(/^["']|["']$/g, '');
+  if (!s || /^<fill:/i.test(s) || /^none$/i.test(s)) return null;
+  const m = MOVE_RE.exec(s);
+  if (!m) return { error: `"${s}" is not "<shape>:<band>" (e.g. "pan:cinematic"). Known shapes: ${Object.keys(SHAPES).join(', ')}. Known bands: ${Object.keys(SPEED_BAND).join(', ')}` };
+  const [, shape, band] = m;
+  if (!SHAPES[shape]) {
+    const near = nearMisses(shape, Object.keys(SHAPES));
+    return { error: `"${shape}" is not a known move shape${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SHAPES).join(', ')}` };
+  }
+  if (!SPEED_BAND[band]) {
+    const near = nearMisses(band, Object.keys(SPEED_BAND));
+    return { error: `"${band}" is not a speed band${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SPEED_BAND).join(', ')}` };
+  }
+  return { shape, band };
+}
+
+/** moveErrors(beats) → string[] naming every beat whose `move:` does not parse. */
+export function moveErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    const m = parseMove(b.move);
+    if (m && m.error) errs.push(`beat ${i + 1} (${b.name}) move: ${m.error}`);
+  });
+  return errs;
+}
+
+/** moveKeys({shape,band}, dur) → the named shape's own keyframes, scaled by the band, spanning `dur`. */
+export function moveKeys({ shape, band }, dur) {
+  const factor = SPEED_BAND[band] / SPEED_BAND.professional;
+  return scaleMove(SHAPES[shape]({ dur }), factor);
 }

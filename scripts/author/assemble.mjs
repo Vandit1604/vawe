@@ -21,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S } from '../lib/contract.mjs';
+import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMove, moveErrors, moveKeys } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/motion/motion.js';
@@ -70,6 +70,12 @@ const fragmentErrs = fragmentErrors(beats);
 if (fragmentErrs.length) {
   console.error(`assemble: a fragment: placement does not parse:`);
   for (const e of fragmentErrs) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
+const moveErrs = moveErrors(beats);
+if (moveErrs.length) {
+  console.error(`assemble: a move: does not parse (\`make arsenal SHAPE=<name>\` lists the shapes):`);
+  for (const e of moveErrs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }
 
@@ -132,6 +138,8 @@ for (let i = 0; i < beats.length; ) {
 }
 
 const missing = [];
+const moveConflicts = [];
+const movesBuilt = [];
 const htmlLayers = runs.map(([i, j]) => {
   const merged = j > i;
   const fragPath = fragPathOf(i);
@@ -154,6 +162,32 @@ const htmlLayers = runs.map(([i, j]) => {
       prev = bx;
     }
     if (keys.length > 1) motionKeys = keys;
+  }
+
+  // THE MOVE: a beat's `move:` builds a sustained track on THIS layer, spanning that beat's own
+  // duration, keyed on the RUN's own clock (offset from the run's start, never the film's absolute
+  // time) so a merged run's later beat still lands its move at the right wall-clock second. At most one
+  // `move:` per run: two would both want to own the same `motion` field, and there is no rule yet for
+  // which wins, so both are refused rather than one silently picked.
+  const moveDecls = [];
+  for (let k = i; k <= j; k++) {
+    const mv = parseMove(beats[k].move);
+    if (mv) moveDecls.push({ k, mv });
+  }
+  let moveTrack;
+  if (moveDecls.length > 1) {
+    moveConflicts.push(`scene${i + 1}: beats ${moveDecls.map((d) => d.k + 1).join(' and ')} each declare a move:, but only one move: per shared-fragment run is supported. Pick one.`);
+  } else if (moveDecls.length === 1) {
+    if (motionKeys) {
+      moveConflicts.push(`scene${i + 1} (beat ${moveDecls[0].k + 1}) declares move:, but this run's fragment placement already changes across beats (a hand-keyed position track); combining move: with a placement change in the same run is not supported yet.`);
+    } else {
+      const { k, mv } = moveDecls[0];
+      const beatDur = +(beats[k].end - beats[k].start).toFixed(3);
+      const offset = merged ? +(shiftedStart[k] - shiftedStart[i]).toFixed(3) : 0;
+      const raw = moveKeys(mv, beatDur);
+      moveTrack = offset ? raw.map((kf) => ({ ...kf, t: +(kf.t + offset).toFixed(3) })) : raw;
+      movesBuilt.push(`scene${i + 1} (beat ${k + 1}, ${mv.shape}:${mv.band})`);
+    }
   }
 
   // track:1, NEVER 0: direction-floor.mjs (and other gates) treat any track-0 layer as the backdrop
@@ -237,11 +271,16 @@ const htmlLayers = runs.map(([i, j]) => {
   return {
     id: `scene${i + 1}`, type: 'html', src: path.relative(ROOT, fragPath), start: shiftedStart[i], duration, track: 1,
     x: box.x, y: box.y, w: box.w, h: box.h,
-    ...(motionKeys ? { motion: motionKeys } : {}),
+    ...(motionKeys || moveTrack ? { motion: motionKeys || moveTrack } : {}),
     ...(merged ? { acrossBeats: true } : {}),
     ...(parts.length ? { parts } : {}),
   };
 });
+if (moveConflicts.length) {
+  console.error(`assemble: a move: cannot be built:`);
+  for (const e of moveConflicts) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
 if (missing.length) {
   console.error(`assemble: missing fragment(s), run \`make scenes D=${film}\` for the briefs and write them first:`);
   for (const m of missing) console.error(`  ✗ ${m}`);
@@ -400,6 +439,7 @@ if (mergedRuns.length) console.log(`  ${mergedRuns.length} shared-fragment run(s
 console.log(`  ${transitions.length} transition(s), bg turns through: ${backdrop.slice(0, beats.length).join(' → ')}`);
 const motionCount = htmlLayers.reduce((n, l) => n + (l.parts ? l.parts.length : 0), 0);
 console.log(`  ${motionCount} motion-plan entr${motionCount === 1 ? 'y' : 'ies'} from the storyboard (\`motion:\`), built into ${htmlLayers.filter((l) => l.parts).length} scene(s)' \`parts\``);
+console.log(`  ${movesBuilt.length} sustained move(s) from the storyboard (\`move:\`)${movesBuilt.length ? `: ${movesBuilt.join(', ')}` : ', no beat asked for one'}`);
 if (chain.length) {
   const poseBits = [usesSize && 'size', usesRot && 'rotation', usesOpacity && 'opacity', usesRadius && 'radius'].filter(Boolean);
   console.log(`  pose: ${poseBits.length ? poseBits.join(' + ') + ' keyed alongside position' : 'position only (no beat declared a size/rot/op change)'}`);

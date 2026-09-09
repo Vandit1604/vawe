@@ -64,7 +64,7 @@ fs.writeFileSync(path.join(dir, 'v.scene2.html'), '<div>b</div>');
 fs.writeFileSync(path.join(dir, 'v.scene3.html'), '<div>c</div>');
 
 const node = process.execPath;
-const assemble = () => execFileSync(node, [path.join(ROOT, 'scripts/author/assemble.mjs'), film], { encoding: 'utf8' });
+const assemble = (f = film) => execFileSync(node, [path.join(ROOT, 'scripts/author/assemble.mjs'), f], { encoding: 'utf8' });
 
 try {
   // ---- 1. a first build: every html layer stamped id: scene<N>, nothing to preserve --------------
@@ -212,4 +212,77 @@ not: "no centred text default"
   assert.equal(layer.acrossBeats, true, 'a layer spanning more than its own beat must opt out of the per-beat unit wrapper');
   fs.rmSync(dir3, { recursive: true, force: true });
   console.log('✓ assemble.test.mjs: two consecutive beats sharing a fragment: file merge into one layer');
+}
+
+// ---- (d)/(e)/(f) `move:` builds a sustained track, an unset move: is byte-identical, an unknown ------
+// shape is refused (docs/MISTAKES.md #610: a slideshow stops when a moves ENDS, not when it starts).
+{
+  const dir4 = fs.mkdtempSync(path.join(os.tmpdir(), 'assemble-test-move-'));
+  const film4 = path.join(dir4, 'v.json');
+  const sb4 = path.join(dir4, 'v.storyboard.md');
+  fs.writeFileSync(path.join(dir4, 'v.scene1.html'), '<div>a</div>');
+  fs.writeFileSync(path.join(dir4, 'v.scene2.html'), '<div>b</div>');
+
+  const SB4 = (moveLine) => `---
+message: "test film"
+audience: "ci"
+arc: "hook -> payoff"
+framework: "AIDA"
+object: "none"
+format: 1920x1080
+theme: "themes/default.json"
+duration: 6s
+pace: "held, 3s/idea"
+spectacle: "beat 2"
+not: "no centred text default"
+---
+
+## Beat 1: Hook (0s-3s)
+- type: hook
+${moveLine ? `- move: ${moveLine}\n` : ''}- onscreen: "hi"
+- becomes: a
+- why: open
+- duration: 3s
+
+## Beat 2: Payoff (3s-6s)
+- type: benefit_highlight
+- onscreen: "the payoff"
+- becomes: b
+- why: land
+- duration: 3s
+`;
+
+  // (d) a beat naming a move: emits a motion track on its own layer, spanning the beat's duration
+  fs.writeFileSync(film4, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9' }));
+  fs.writeFileSync(sb4, SB4('pan:cinematic'));
+  assemble(film4);
+  const withMove = JSON.parse(fs.readFileSync(film4, 'utf8'));
+  const moved = withMove.layers.find((l) => l.id === 'scene1');
+  assert.ok(Array.isArray(moved.motion) && moved.motion.length > 1, 'a `move:` beat carries a multi-key motion track on its own layer');
+  assert.equal(moved.motion[0].t, 0, 'the track starts at the layer\'s own t:0');
+  assert.equal(moved.motion[moved.motion.length - 1].t, 3, 'the track spans exactly the beat\'s own duration (3s), never more or less');
+  const untouched = withMove.layers.find((l) => l.id === 'scene2');
+  assert.equal(untouched.motion, undefined, 'a beat naming no move: gets no motion track');
+
+  // (e) a storyboard with no move: at all assembles byte-identically to one that never had the field
+  fs.writeFileSync(film4, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9' }));
+  fs.writeFileSync(sb4, SB4(null));
+  assemble(film4);
+  const withoutMove1 = fs.readFileSync(film4, 'utf8');
+  assemble(film4);
+  const withoutMove2 = fs.readFileSync(film4, 'utf8');
+  assert.equal(withoutMove2, withoutMove1, 'no move: anywhere reassembles byte-identically');
+  const noMoveScene = JSON.parse(withoutMove1);
+  assert.equal(noMoveScene.layers.find((l) => l.id === 'scene1').motion, undefined, 'no beat asked for a move, so no layer carries one');
+
+  // (f) an unknown shape is refused, names what is legal, exits non-zero
+  fs.writeFileSync(film4, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9' }));
+  fs.writeFileSync(sb4, SB4('teleport:cinematic'));
+  assert.throws(() => assemble(film4), (e) => {
+    const msg = e.stderr ? e.stderr.toString() : String(e);
+    return /not a known move shape/.test(msg) && /Known:/.test(msg);
+  }, 'an unknown move shape is refused, names what is legal, and exits non-zero');
+
+  fs.rmSync(dir4, { recursive: true, force: true });
+  console.log('✓ assemble.test.mjs: move: builds a sustained per-beat track, an unset move: is byte-identical, and an unknown shape is refused');
 }
