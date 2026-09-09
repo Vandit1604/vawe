@@ -66,7 +66,7 @@ and it is the highest-value item on this page.
 exit is over.
 
 `exitRatio` exists in `motionDefaults` for exactly this and defaults to 1, meaning symmetric.
-**11 of 42 themes declare it.** So 31 brands leave everything exiting at the speed it arrived.
+**14 of 45 themes declare it.** So 31 brands leave everything exiting at the speed it arrived.
 
 ### Physicality: kept, and by accident
 
