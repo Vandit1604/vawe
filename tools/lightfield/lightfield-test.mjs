@@ -1,6 +1,6 @@
-// scripts/author/lightfield-test.mjs: the contract, as runnable assertions.
+// tools/lightfield/lightfield-test.mjs: the contract, as runnable assertions.
 //
-//   node scripts/author/lightfield-test.mjs
+//   node tools/lightfield/lightfield-test.mjs
 //
 // Determinism and failing early are claims, and a claim nobody runs is a comment. These are the two
 // properties the generator is for, so they are checked first and loudest.

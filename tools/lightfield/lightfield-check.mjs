@@ -1,7 +1,7 @@
-// scripts/author/lightfield-check.mjs: one row per LOOK, not one averaged number.
+// tools/lightfield/lightfield-check.mjs: one row per LOOK, not one averaged number.
 //
-//   node scripts/author/lightfield-check.mjs          every look that has a reference
-//   node scripts/author/lightfield-check.mjs blinds   just one
+//   node tools/lightfield/lightfield-check.mjs          every look that has a reference
+//   node tools/lightfield/lightfield-check.mjs blinds   just one
 //
 // WHY THIS EXISTS. `lightfield` was one generator with five presets and one fidelity score, taken
 // against one photograph. That score said 12.7 while a human said "that is not it" (docs/MISTAKES.md

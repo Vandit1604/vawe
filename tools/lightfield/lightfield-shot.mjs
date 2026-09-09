@@ -1,4 +1,4 @@
-// scripts/author/lightfield-shot.mjs: screenshot a generated field at a fixed frame.
+// tools/lightfield/lightfield-shot.mjs: screenshot a generated field at a fixed frame.
 //
 // `make preview` centres a fragment in a 1400px box, which is the wrong page for a full-bleed field:
 // the field is `position:absolute;inset:0` and needs a sized parent. This gives it one, sets
@@ -35,10 +35,10 @@ export async function shoot(htmlFile, outPng, { w = W, h = H, t = 0 } = {}) {
   return outPng;
 }
 
-// Run directly: node scripts/author/lightfield-shot.mjs <fragment.html> [out.png]
+// Run directly: node tools/lightfield/lightfield-shot.mjs <fragment.html> [out.png]
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const src = process.argv[2];
-  if (!src) { console.error('usage: node scripts/author/lightfield-shot.mjs <fragment.html> [out.png]'); process.exit(1); }
+  if (!src) { console.error('usage: node tools/lightfield/lightfield-shot.mjs <fragment.html> [out.png]'); process.exit(1); }
   const out = process.argv[3] || path.join(ROOT, 'out', path.basename(src).replace(/\.html$/, '.png'));
   console.log(await shoot(src, out));
 }

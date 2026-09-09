@@ -1,7 +1,7 @@
-// scripts/author/lightfield-fit.mjs: find the option set that best matches a reference.
+// tools/lightfield/lightfield-fit.mjs: find the option set that best matches a reference.
 //
-//   SEEDLIST=<from lightfield-seeds.mjs> node scripts/author/lightfield-fit.mjs refs/lightfield-ref.jpg
-//   EXTRA=2 node scripts/author/lightfield-fit.mjs      # how many accent stops the palette may use
+//   SEEDLIST=<from lightfield-seeds.mjs> node tools/lightfield/lightfield-fit.mjs refs/lightfield-ref.jpg
+//   EXTRA=2 node tools/lightfield/lightfield-fit.mjs      # how many accent stops the palette may use
 //
 // Two objectives, and knowing which one a pass is allowed to use is the whole point.
 //

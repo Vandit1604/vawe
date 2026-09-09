@@ -1,7 +1,7 @@
-// scripts/author/lightfield-model-check.mjs: is lightfield-model.mjs a model of the field, or just
+// tools/lightfield/lightfield-model-check.mjs: is lightfield-model.mjs a model of the field, or just
 // plausible arithmetic?
 //
-//   node scripts/author/lightfield-model-check.mjs
+//   node tools/lightfield/lightfield-model-check.mjs
 //
 // The model predicts the colour field from geometry alone, and two fitting tools rank layouts by what
 // it says. A model that is quietly wrong does not crash: it returns confident numbers and the search

@@ -1,4 +1,4 @@
-// scripts/author/lightfield-metrics.mjs: the measurements, defined once.
+// tools/lightfield/lightfield-metrics.mjs: the measurements, defined once.
 //
 // The compare tool prints these and the fit tool optimises against them. They live here so a fitted
 // option set and a reported number can never be answers to two different questions.
