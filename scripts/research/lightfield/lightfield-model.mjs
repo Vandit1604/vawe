@@ -1,4 +1,4 @@
-// tools/lightfield/lightfield-model.mjs: the colour field, evaluated on the CPU, and the palette
+// scripts/research/lightfield/lightfield-model.mjs: the colour field, evaluated on the CPU, and the palette
 // that best fits a photograph under it.
 //
 // WHY THIS EXISTS. `lightfield-seeds.mjs` and `lightfield-fit.mjs` both import this file. Neither has
@@ -22,9 +22,9 @@
 // filter. It also composites in sRGB while the real gradients interpolate `in oklab`. It is a RANKING
 // model. `lightfield-fit.mjs` already knows this and runs it as a correction loop against real
 // renders, which is where any number you report comes from.
-import { fieldBlobs, RAMP, rampEnd } from '../../core/lightfield/index.js';
-import { toRgb } from '../../core/lightfield/colour.js';
-import { resolve } from '../../core/lightfield/options.js';
+import { fieldBlobs, RAMP, rampEnd } from '../../../core/lightfield/index.js';
+import { toRgb } from '../../../core/lightfield/colour.js';
+import { resolve } from '../../../core/lightfield/options.js';
 
 // THE BOX THE FIELD IS EVALUATED IN. It lives here, and lightfield-render.mjs re-exports it, rather
 // than the other way round. Percent coordinates hide the aspect and the base gradient's angle needs

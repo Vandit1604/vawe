@@ -1388,7 +1388,7 @@ deck: ## [site] publish docs/animation.html to the site as /deck (site/public/de
 # alone, with no pattern or shadow to hide behind, and fails if the prediction drifts.
 .PHONY: lightfield-model
 lightfield-model: ## [engine] check the CPU colour-field model against the renderer
-	node tools/lightfield/lightfield-model-check.mjs
+	node scripts/research/lightfield/lightfield-model-check.mjs
 
 # make lightfield [PRESET=ref|tide|fern] [ARGS='--seed 9 --pattern.kind rings ...']  generate a light
 # field: a seeded, palette-driven backdrop. No PRESET rebuilds all three committed fields into
@@ -1401,7 +1401,7 @@ ifdef PRESET
 else ifdef ARGS
 	node scripts/author/lightfield.mjs $(ARGS)
 else
-	@node tools/lightfield/lightfield-test.mjs
+	@node scripts/research/lightfield/lightfield-test.mjs
 	@for p in $$(node -e "import('./core/lightfield/presets.js').then(m=>console.log(Object.keys(m.PRESETS).join(' ')))"); do node scripts/author/lightfield.mjs --preset $$p --out formats/scene/_lightfield-$$p.html --shot; done
-	@node tools/lightfield/lightfield-compare.mjs refs/lightfield-ref.jpg out/_lightfield-ref.png
+	@node scripts/research/lightfield/lightfield-compare.mjs refs/lightfield-ref.jpg out/_lightfield-ref.png
 endif
