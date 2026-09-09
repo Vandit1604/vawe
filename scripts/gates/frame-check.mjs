@@ -217,8 +217,14 @@ const beatLocatesObject = blocks.some((b) => fieldIn(b, 'object') || fieldIn(b, 
 // anthology says so on purpose (docs/CRAFT/FILM-STRUCTURE.md), and full-bleed beats are the honest
 // shape of that. `claimsContinuity` is true only once the plan itself says something should carry
 // across the cuts, which is the fact that makes an unmet promise a defect rather than a valid style.
-const threads = frontmatter(src).field('threads');
-const claimsContinuity = !!(sb.object || threads);
+// `threads:` is deliberately NOT part of this. It answers "what holds the film across cuts" and a
+// film under 15s hard-errors without one, so nearly every storyboard has one, and what it promises is
+// often a MOTIF or an ARGUMENT rather than a travelling thing. `hinge` declares a plum ink underline
+// that draws on under one word per beat, plus a line of reasoning: both are kept honestly INSIDE each
+// beat's own full-bleed fragment, and convicting that film of a structural defect is exactly the
+// false positive docs/MISTAKES.md #603 was written about. Only `object:` promises a thing that
+// travels, so only `object:` can be broken by frames that give it nowhere to travel.
+const claimsContinuity = !!sb.object;
 if (scene && sb.object && !beatLocatesObject) {
   const layers = Array.isArray(scene.layers) ? scene.layers : [];
   const objectLayer = layers.find((l) => l && l.id === 'object');
@@ -241,8 +247,8 @@ if (scene && sb.object && !beatLocatesObject) {
 // stays right for a film that never claimed continuity at all: a manifesto or an anthology names no
 // `object:` and no `threads:` on purpose, and seven independent full frames is that film done correctly
 // (docs/CRAFT/FILM-STRUCTURE.md, `vawe-continuous-action`'s own "do not use it for a manifesto"). What
-// this fires on is narrower: a plan that DOES claim something carries across the cuts (`object:` or
-// `threads:`) and then never locates it in a single beat, so the claim and the frames disagree. A film
+// this fires on is narrower: a plan that names an `object:`, a thing that should TRAVEL, and then
+// never locates it in a single beat, so the claim and the frames disagree. A film
 // that locates the object per beat (vawe-oblique's own device: the same prop, described as changing
 // state at each cut, drawn fresh inside each full-bleed fragment) is answering the claim the narrative
 // way and must not be flagged for choosing that over a positioned cross-beat layer.
@@ -254,7 +260,7 @@ if (scene && claimsContinuity && !beatLocatesObject) {
     err('frame-as-surface',
       `all ${htmlLayers.length} html layer(s) are full-bleed (0,0,${canvasW}x${canvasH}), so every beat swaps the `
       + 'entire canvas rather than a piece of it, yet the storyboard claims something carries across the cuts '
-      + `(\`${sb.object ? 'object' : 'threads'}: "${sb.object || threads}"\`) and no beat ever locates it. `
+      + `(\`object: "${sb.object}"\`) and no beat ever locates it. `
       + 'Either write a per-beat `object:` naming what it becomes at each cut, or give at least one element a '
       + 'real position and size a later beat can pick up, instead of every beat swapping the whole canvas.');
   }
