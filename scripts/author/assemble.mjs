@@ -1,9 +1,13 @@
 // assemble.mjs: `make assemble D=<film>`: ASSEMBLE. Writes the scene JSON from the storyboard's
 // per-beat contract + the fragment files a scene fan-out (or one agent) already wrote:
-//   - one `html` layer per scene, `src`-loaded, timed at the contract's start/end
+//   - one `html` layer per scene (or per RUN of consecutive scenes sharing a `fragment:` file, see
+//     below), `src`-loaded, timed at the contract's start/end, boxed full-bleed unless `fragment:`
+//     names a placement
 //   - the continuous object: ONE layer with a hand-keyed `motion` track built from every beat's
 //     object_in/object_out, resolved to px through the ENGINE's own resolveCoords
-//     (scripts/lib/placement-resolve.mjs), never a second copy of that math
+//     (scripts/lib/placement-resolve.mjs), never a second copy of that math. Drawn as a rect UNLESS
+//     the storyboard's `object:` line names a source ("the input bar -> path/to/bar.html"), in which
+//     case it is that source's own layer type instead of the placeholder
 //   - one `bg` window per beat, cycling the theme's own look.backdrop rotation
 //   - explicit `transitions[]` at each beat boundary (look.cuts.default): produce.js's own cuts/
 //     sceneUnits auto-injection (core/engine/produce.js) SKIPS any scene that already carries a
@@ -17,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, motionErrors, SPEED_BAND, stagedSchedule, STAGE_S } from '../lib/contract.mjs';
+import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/motion/motion.js';
@@ -61,6 +65,12 @@ if (motionErrs.length) {
   for (const e of motionErrs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }
+const fragmentErrs = fragmentErrors(beats);
+if (fragmentErrs.length) {
+  console.error(`assemble: a fragment: placement does not parse:`);
+  for (const e of fragmentErrs) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
 
 const themeName = typeof scene.theme === 'string' ? scene.theme : (scene.theme && scene.theme.name) || 'default';
 const themeFile = typeof scene.theme === 'object' ? null : path.join(ROOT, 'themes', `${themeName}.json`);
@@ -85,28 +95,92 @@ const dir = path.dirname(film);
 const { caused, shiftedStart, shiftedEnd } = stagedSchedule(beats);
 const staged = caused.filter(Boolean).length;
 
-// ---- one html layer per beat ------------------------------------------------------------------
+// ---- one html layer per beat, or per RUN of consecutive beats sharing a `fragment:` file -----------
 const [canvasW, canvasH] = sceneDims({ aspect });
+const FULL_BLEED = { x: 0, y: 0, w: canvasW, h: canvasH };
+const fragSpecs = beats.map((b) => parseFragmentSpec(b.fragment));
+// The DEFAULT convention, unchanged: `<base>.scene<N>.html`. `fragment:` overrides it per beat; two
+// consecutive beats naming the SAME override are a RUN (below), never two beats that merely happen to
+// share the default (which never collide, one file per index).
+const fragPathOf = (i) => path.join(dir, fragSpecs[i].path || `${base}.scene${i + 1}.html`);
+// `fragment: @ <placement>@<w>x<h>` boxes the layer instead of full-bleed. `parseEdge`'s own error
+// case is already refused above (fragmentErrors), so a present edge here is always clean.
+const boxOf = (i) => (fragSpecs[i].edge ? resolvePx(fragSpecs[i].edge, { aspect, destination }) : FULL_BLEED);
+
+// RUNS: a shared `fragment:` file across consecutive beats is ONE component, alive across the cut, not
+// torn down and rebuilt as two layers (that destroy/recreate is the measured cause of a film reading as
+// a slideshow, docs/MISTAKES.md #603 for the truncation failure mode of the fix below). A run needs
+// BOTH beats to name the SAME explicit override: the default path is unique per index and can never
+// collide on its own.
+const runs = [];
+for (let i = 0; i < beats.length; ) {
+  let j = i;
+  while (j + 1 < beats.length && fragSpecs[i].path && fragSpecs[j + 1].path && fragPathOf(i) === fragPathOf(j + 1)) j++;
+  runs.push([i, j]);
+  i = j + 1;
+}
+
 const missing = [];
-const htmlLayers = beats.map((b, i) => {
-  const fragPath = path.join(dir, `${base}.scene${i + 1}.html`);
+const htmlLayers = runs.map(([i, j]) => {
+  const merged = j > i;
+  const fragPath = fragPathOf(i);
   if (!fs.existsSync(fragPath)) missing.push(path.relative(ROOT, fragPath));
+  const box = boxOf(i);
+
+  // A PLACEMENT CHANGE INSIDE A SHARED RUN becomes a `motion` key on this ONE layer, never a second
+  // layer: the whole point of the run is that the DOM never gets torn down. Keyed the same way the
+  // continuous object is (scripts/lib/placement-resolve.mjs resolvePx, x/y as OFFSETS from the layer's
+  // own base box, w/h absolute only when the box's size actually changes).
+  let motionKeys;
+  if (merged) {
+    const usesSize = Array.from({ length: j - i }, (_, k) => boxOf(i + 1 + k)).some((bx) => bx.w !== box.w || bx.h !== box.h);
+    let prev = box;
+    const keys = [{ t: 0, x: 0, y: 0, ...(usesSize ? { w: box.w, h: box.h } : {}) }];
+    for (let k = i + 1; k <= j; k++) {
+      const bx = boxOf(k);
+      if (bx.x === prev.x && bx.y === prev.y && bx.w === prev.w && bx.h === prev.h) continue;
+      keys.push({ t: +(shiftedStart[k] - shiftedStart[i]).toFixed(3), x: bx.x - box.x, y: bx.y - box.y, ...(usesSize ? { w: bx.w, h: bx.h } : {}) });
+      prev = bx;
+    }
+    if (keys.length > 1) motionKeys = keys;
+  }
+
   // track:1, NEVER 0: direction-floor.mjs (and other gates) treat any track-0 layer as the backdrop
   // lane, invisible to the content-coverage checks (feature-poverty, empty-beat, ends-on-nothing all
   // read as "no content" against a track-0 fragment even though it fills the frame).
-  // w/h/x/y = the full canvas: an `html` layer with no declared box stays its wrapper's default
-  // (near-zero), so a fragment written full-bleed (`position:absolute;inset:0`, the shape scenes.mjs's
-  // briefs and preview-fragment.mjs both assume) would collapse to nothing at real render time even
-  // though it previewed correctly (core/layers/html.js build(): w/h are the only thing that sizes it).
+  // w/h/x/y default to the full canvas: an `html` layer with no declared box stays its wrapper's
+  // default (near-zero), so a fragment written full-bleed (`position:absolute;inset:0`, the shape
+  // scenes.mjs's briefs and preview-fragment.mjs both assume) would collapse to nothing at real render
+  // time even though it previewed correctly (core/layers/html.js build(): w/h are the only thing that
+  // sizes it). `fragment: @ <placement>` (boxOf above) is the one way to ask for less than that.
+  //
   // THE MOTION PLAN, consumed here and nowhere else: a beat's `motion:` entries become `parts[]` on
-  // its own html layer, the SAME `select`/`anim` vocabulary a hand-authored parts block already takes
+  // its own scene layer, the SAME `select`/`anim` vocabulary a hand-authored parts block already takes
   // (core/motion/parts.js), so this is not a second motion mechanism, it is the storyboard filling in
   // the one the engine already has. `each`/`exitDur` come from the named speed band
   // (scripts/lib/contract.mjs SPEED_BAND), never a raw second written here.
-  const motion = parseMotion(b.motion);
-  const parts = motion.length ? motion.map((m) => ({
-    select: m.selector, anim: m.kind, each: SPEED_BAND[m.inBand], out: true, exitDur: SPEED_BAND[m.outBand],
-  })) : undefined;
+  //
+  // A RUN'S LATER BEATS still need their `motion:` to fire at their OWN wall-clock second, not at the
+  // run's start: `parts[].delay` is read as `layer.start + delay` (formats/scene/scene.js), so a later
+  // beat's entries get an explicit delay of (that beat's own shifted start minus the run's) + the
+  // engine's own 0.1s default lead, landing exactly where a lone beat's layer would have put them.
+  // WHAT THIS CANNOT DO: a part's `out` exit is anchored to the LAYER's own end
+  // (`layer.start + (layer.duration - exitDur)`, same file), which for a merged run is the run's last
+  // beat, not each beat's own. So only the LAST beat in a run keeps its exit; an earlier beat's part
+  // stays on screen (no false exit at the wrong second) rather than exiting at the wrong time. See the
+  // report: this is the one piece of the contract this file cannot express without an engine change.
+  const parts = [];
+  for (let k = i; k <= j; k++) {
+    const motion = parseMotion(beats[k].motion);
+    if (!motion.length) continue;
+    for (const m of motion) {
+      if (!merged) { parts.push({ select: m.selector, anim: m.kind, each: SPEED_BAND[m.inBand], out: true, exitDur: SPEED_BAND[m.outBand] }); continue; }
+      const entry = { select: m.selector, anim: m.kind, each: SPEED_BAND[m.inBand], exitDur: SPEED_BAND[m.outBand], delay: +((shiftedStart[k] - shiftedStart[i]) + 0.1).toFixed(3) };
+      if (k === j) entry.out = true;
+      parts.push(entry);
+    }
+  }
+
   // STAGING: `start` is the SHIFTED, fully-resolved second (shiftedStart[i]), not the raw `b.start` a
   // flat build would have used, and not the relative-start STRING form ("scene1.end+0.05")
   // layers[].start also legally accepts. Measured trying it: `make beats`'s own coverage check and
@@ -116,12 +190,44 @@ const htmlLayers = beats.map((b, i) => {
   // the number is the same "one source of truth" the relative form buys a hand-author, without a
   // representation the rest of the toolchain cannot yet read. `id` stays on every layer regardless:
   // it is what a human (or a future resolver) uses to name "this scene's cause" when reading the film.
-  return { id: `scene${i + 1}`, type: 'html', src: path.relative(ROOT, fragPath), start: shiftedStart[i], duration: +(b.end - b.start).toFixed(3), track: 1, x: 0, y: 0, w: canvasW, h: canvasH, ...(parts ? { parts } : {}) };
+  // A run's `duration` runs shiftedEnd[j]-shiftedStart[i] (spans every beat it merged); a lone beat
+  // keeps the ORIGINAL `b.end - b.start` formula rather than the algebraically-equal shifted-minus-
+  // shifted form, because each side of that subtraction is independently rounded to 3dp and the two
+  // paths can differ by a thousandth of a second on an unstaged, non-round beat, which would break
+  // the byte-identical contract for every existing film that names no new syntax.
+  const duration = merged ? +(shiftedEnd[j] - shiftedStart[i]).toFixed(3) : +(beats[i].end - beats[i].start).toFixed(3);
+  return {
+    id: `scene${i + 1}`, type: 'html', src: path.relative(ROOT, fragPath), start: shiftedStart[i], duration, track: 1,
+    x: box.x, y: box.y, w: box.w, h: box.h,
+    ...(motionKeys ? { motion: motionKeys } : {}),
+    ...(merged ? { acrossBeats: true } : {}),
+    ...(parts.length ? { parts } : {}),
+  };
 });
 if (missing.length) {
   console.error(`assemble: missing fragment(s), run \`make scenes D=${film}\` for the briefs and write them first:`);
   for (const m of missing) console.error(`  ✗ ${m}`);
   process.exit(1);
+}
+
+// ---- WHAT THE OBJECT IS DRAWN AS. `object: <name> -> <src>` (storyboard-parse.mjs) names the real
+// layer to build instead of assemble's own placeholder rect. `.html`/`.htm` becomes an `html` layer,
+// `src`-loaded like every scene fragment; anything else (a raster, or an `.svg`) becomes an `image`
+// layer: the `svg` LAYER TYPE has no `src` field at all (formats/scene/schema.json: it takes `d` and
+// `viewBox`, a shape baked into the JSON, never a file), so a vector file loads the same way a raster
+// does, through an `<img>` tag, which renders an .svg source correctly. Getting a REAL `svg`-type layer
+// (draw-on, morph) out of a vector file would mean extracting its path data at assemble time, a second
+// feature this task did not ask for and this file does not attempt.
+let objectSrcRel = null, objectType = 'rect';
+if (sb.objectSrc) {
+  const objectSrcAbs = path.isAbsolute(sb.objectSrc) ? sb.objectSrc : path.join(ROOT, sb.objectSrc);
+  if (!fs.existsSync(objectSrcAbs)) {
+    console.error(`assemble: object: names a source that does not exist, write it first: ${sb.objectSrc}`);
+    process.exit(1);
+  }
+  objectSrcRel = path.relative(ROOT, objectSrcAbs);
+  const ext = path.extname(objectSrcAbs).toLowerCase();
+  objectType = (ext === '.html' || ext === '.htm') ? 'html' : 'image';
 }
 
 // ---- the continuous object: one layer, a keyed motion track derived from the contract's edges -----
@@ -160,8 +266,11 @@ if (chain.length) {
   };
   chain.forEach((e, i) => { pushKey(shiftedStart[i], e.in); pushKey(shiftedEnd[i], e.out); });
   objectLayer = {
-    id: 'object', type: 'rect', track: 5, x: base0.x, y: base0.y, w: base0.w, h: base0.h,
-    fill: 'var(--accent)', radius: chain[0].in.radius ?? 4,
+    id: 'object', type: objectType, track: 5, x: base0.x, y: base0.y, w: base0.w, h: base0.h,
+    // `fill` is a rect-only prop (formats/scene/schema.json byType.rect); an html/image layer refuses
+    // an unknown prop, so the placeholder's fill is dropped the moment a real source replaces it.
+    ...(objectType === 'rect' ? { fill: 'var(--accent)' } : { src: objectSrcRel }),
+    radius: chain[0].in.radius ?? 4,
     start: objStart, duration: +(shiftedEnd[chain.length - 1] - objStart).toFixed(3),
     // `sceneUnits: true` wraps each beat as its own unit, so nothing survives a cut unless it opts
     // out: `acrossBeats` attaches this layer to the camera instead of its beat wrapper
@@ -239,7 +348,9 @@ const out = {
 
 fs.writeFileSync(film, JSON.stringify(out, null, 1) + '\n');
 console.log(`✓ assemble: ${beats.length} scene(s) → ${film}`);
-console.log(`  ${htmlLayers.length} html fragment(s), ${objectLayer ? '1 continuous-object layer (' + chain[0].in.placement + ' → ' + chain[chain.length - 1].out.placement + ')' : 'no continuous object (film named none)'}`);
+console.log(`  ${htmlLayers.length} html fragment(s), ${objectLayer ? `1 continuous-object layer (${chain[0].in.placement} → ${chain[chain.length - 1].out.placement}, drawn as ${objectType}${objectSrcRel ? ': ' + objectSrcRel : ''})` : 'no continuous object (film named none)'}`);
+const mergedRuns = runs.filter(([i, j]) => j > i);
+if (mergedRuns.length) console.log(`  ${mergedRuns.length} shared-fragment run(s) kept alive across a cut: ${mergedRuns.map(([i, j]) => `scene${i + 1} (beats ${i + 1}-${j + 1})`).join(', ')}`);
 console.log(`  ${transitions.length} transition(s), bg turns through: ${backdrop.slice(0, beats.length).join(' → ')}`);
 const motionCount = htmlLayers.reduce((n, l) => n + (l.parts ? l.parts.length : 0), 0);
 console.log(`  ${motionCount} motion-plan entr${motionCount === 1 ? 'y' : 'ies'} from the storyboard (\`motion:\`), built into ${htmlLayers.filter((l) => l.parts).length} scene(s)' \`parts\``);

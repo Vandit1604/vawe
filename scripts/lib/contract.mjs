@@ -120,6 +120,41 @@ export function edges(beats) {
     .filter((e) => e.in && e.out && !e.in.error && !e.out.error);
 }
 
+// ── THE FRAGMENT LINE: which file backs a beat, and where it sits ──────────────────────────────────
+//
+// `fragment:` on a beat is OPTIONAL and answers two questions assemble.mjs otherwise answers by
+// convention alone: which HTML file backs this beat (default `<base>.scene<N>.html`) and where in the
+// canvas it sits (default full-bleed, x:0 y:0 w:canvasW h:canvasH). Two forms, either half omittable:
+//   fragment: _together.card.html @ center@900x520     file AND placement
+//   fragment: _together.card.html                       file only, still full-bleed
+//   fragment: @ center@900x520                          placement only, default file
+// The placement clause reuses parseEdge above: the SAME "<placement>@<w>x<h>" grammar object_in/
+// object_out already speak, never a second copy of the keyword math. Two CONSECUTIVE beats naming the
+// SAME file is how assemble.mjs keeps one shared component alive across a cut instead of tearing it
+// down and rebuilding it (docs/CRAFT/STORYBOARD-TEMPLATE.md).
+const FRAGMENT_SEP_RE = /^(?:(.+?)\s+)?@\s*(.+)$/;
+
+/** parseFragmentSpec("_together.card.html @ center@900x520") → {path, edge}. path/edge are null when unstated; edge carries {error} the same way parseEdge does. */
+export function parseFragmentSpec(raw) {
+  if (raw == null) return { path: null, edge: null };
+  const s = String(raw).trim().replace(/^["']|["']$/g, '');
+  if (!s) return { path: null, edge: null };
+  const m = FRAGMENT_SEP_RE.exec(s);
+  if (!m) return { path: s, edge: null };   // no "@": a plain file override, no placement stated
+  const [, pathPart, placementRaw] = m;
+  return { path: pathPart || null, edge: parseEdge(placementRaw) };
+}
+
+/** fragmentErrors(beats) → string[] naming every beat whose `fragment:` placement clause does not parse. */
+export function fragmentErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    const { edge } = parseFragmentSpec(b.fragment);
+    if (edge && edge.error) errs.push(`beat ${i + 1} (${b.name}) fragment: ${edge.error}`);
+  });
+  return errs;
+}
+
 // ── THE MOTION PLAN: what moves in a beat, beyond the one continuous object above ──────────────────
 //
 // object_in/object_out say where the ONE thing that survives every cut is. Everything ELSE in a beat
