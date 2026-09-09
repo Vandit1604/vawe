@@ -2524,6 +2524,12 @@ Moving the lightfield research rig out of `scripts/author/` into a new `tools/` 
 A second lesson about reading: grepping for the hardcoded list matched `dead-branch.mjs` too, because the array survives IN THE COMMENT that records its removal. A search result is not the code, which is the same mistake as reading `radius` in a comment and calling the prop read (#609).
 holds: scripts/gates/doc-refs.mjs, scripts/dev/no-emdash.mjs, scripts/dev/complexity.mjs, scripts/gates/dead-branch.mjs
 
+## 616. the file's header said what it WAS, and two of us moved it on that sentence
+`scripts/gates/lib-test.mjs` is 7,485 lines and its first line reads "fast pure-JS asserts for the motion primitives in core/motion/motion.js. No browser needed (the primitives are pure)." On that sentence it was called a core unit test filed under gates, named the single largest and least ambiguous correction available, and moved into `core/motion/`. The move failed on the first run: the file also imports eight modules from `scripts/author/` (`arsenal`, `track`, `profiles`, `recency`, `schema-at`, `patch-motion`, `migrate-junctions`), plus `blocks/` and `blueprints/`. Inside `core/` those resolve to `core/author/...`, which does not exist, and even if the paths were rewritten the result would be core depending on scripts, which is the dependency direction this repo exists to keep one-way.
+The header was true when it was written. The file then grew for months and nobody updated the sentence, which is the ordinary life of a header comment. What was avoidable is trusting it: a two-line check (`grep "from '\.\."` and look at the roots) was available to me, to the architect that recommended the move, and to the agent that was briefed to make it, and none of the three ran it before the file was in flight.
+Third time in one session that a comment was read instead of the code: #609 read `radius` in a comment and called the prop read, #615 grepped a hardcoded directory list and matched the comment recording its own removal. The rule that would have caught all three: a claim about what a file DEPENDS ON is answered by its imports, never by its prose.
+holds: scripts/gates/lib-test.mjs, docs/CODEMAPS/SCRIPTS.md
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
