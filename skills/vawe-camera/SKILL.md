@@ -56,7 +56,7 @@ travels 656 → -848). Both hand-typed their keyframes because `travel` did not 
 a camera trucking past a flat plane moves every layer by exactly the same amount: a picture of a scene, not a
 scene. Parallax is a DIFFERENCE of depth, so it cannot exist while there is only one depth to have. Stand
 layers apart with the `plane` modifier, `"modifiers": [{ "plane": -600 }]` behind, `{ "plane": { "z": 240 } }`
-in front. Sign is the CSS one. Measured under a 600px truck at a 1600px lens (`scripts/dev/spike-depth.mjs`):
+in front. Sign is the CSS one. Measured under a 600px truck at a 1600px lens (`harness/dev/spike-depth.mjs`):
 
 | layer | z | moves |
 |---|---|---|

@@ -1,6 +1,6 @@
 // quality/gates/render-verify.mjs: does the RENDERED mp4 match what the scene declares?
 //
-// Measured tonight: two renders to the same out/<name>.mp4 raced (scripts/dev/render-lock.sh now
+// Measured tonight: two renders to the same out/<name>.mp4 raced (harness/dev/render-lock.sh now
 // refuses that outright), and the loser's half-written file was left behind, reported as SUCCESS by
 // `./bin/vawe` (exit 0) because the renderer only checks that ffmpeg exited clean, never that the
 // file it produced matches the duration the scene actually asked for. A 17.5s film shipped as an
@@ -19,7 +19,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadScene } from '../../core/engine/expand.js';
 import { sceneTiming } from './scene-timing.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const f = gateFindings();
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -72,7 +72,7 @@ for (const file of candidates) {
 
 if (worst) {
   console.error(`✗ render-verify: ${worst.file} looks truncated (${worst.actual.toFixed(2)}s of ${declared.toFixed(2)}s declared).`);
-  console.error('  A likely cause: two renders to this output path raced (scripts/dev/render-lock.sh now refuses that). Re-render and try again.');
+  console.error('  A likely cause: two renders to this output path raced (harness/dev/render-lock.sh now refuses that). Re-render and try again.');
   f.emit();
   process.exit(1);
 }

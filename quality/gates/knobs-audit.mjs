@@ -17,7 +17,7 @@ import { KNOBS } from '../../core/registry/knobs.js';
 import { PRESETS } from '../../core/type/type.js';
 import { decodeText } from '../../core/kinetic/presets.js';
 import { resolveComposite, LOOK_NAMES } from '../../core/looks/index.js';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 // COVERAGE, stated so nobody reads a pass as more than it is. core/knobs.js has SIX families and this
 // guard can only prove the ones whose resolution is a pure function: `kinetic` (u, opts → keyframes)

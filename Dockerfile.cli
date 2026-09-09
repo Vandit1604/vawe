@@ -54,7 +54,7 @@ COPY blocks ./blocks
 COPY blueprints ./blueprints
 COPY themes ./themes
 COPY assets/vendor ./assets/vendor
-COPY scripts/author/expand-blocks.mjs ./scripts/author/expand-blocks.mjs
+COPY harness/author/expand-blocks.mjs ./harness/author/expand-blocks.mjs
 COPY generators/media/fonts.mjs ./generators/media/fonts.mjs
 COPY formats/scene/scene.html formats/scene/scene.js formats/scene/props.js \
      formats/scene/scene.css formats/scene/schema.json formats/scene/sample.json ./formats/scene/

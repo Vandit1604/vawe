@@ -22,8 +22,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { codesEmitted } from '../../scripts/lib/finding-codes.mjs';
-import { readFindings } from '../../scripts/lib/findings.mjs';
+import { codesEmitted } from '../../harness/lib/finding-codes.mjs';
+import { readFindings } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENE_DIR = path.join(repoRoot, 'formats', 'scene');
@@ -61,7 +61,7 @@ function gateForCode(code) {
   const files = codesEmitted().get(code);
   if (!files) return null;
   const cands = [...files].filter((f) => f !== 'quality/gates/author-check.mjs');
-  return cands.find((f) => f.startsWith('quality/gates/')) || cands.find((f) => f.startsWith('scripts/author/')) || cands[0] || null;
+  return cands.find((f) => f.startsWith('quality/gates/')) || cands.find((f) => f.startsWith('harness/author/')) || cands[0] || null;
 }
 let seq = 0;
 const tmpDir = path.join('/tmp/.legacy-fold', String(process.pid));

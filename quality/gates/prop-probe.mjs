@@ -28,13 +28,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { serveRepo, waitForEngine } from '../../scripts/lib/render-harness.mjs';
+import { serveRepo, waitForEngine } from '../../harness/lib/render-harness.mjs';
 import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
 import { SHARED_PROPS } from '../../core/layers/vocabulary.js';
 import { auditedProps } from '../../core/registry/prop-audit.js';
 import { KNOBS } from '../../core/registry/knobs.js';
 import { guardsOf } from '../../core/registry/props.js';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 

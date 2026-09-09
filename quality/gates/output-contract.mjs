@@ -1,5 +1,5 @@
 // quality/gates/output-contract.mjs: every REPORTING gate renders its findings through
-// scripts/lib/findings.mjs, so it gets tight prose by default and --json for free. This gate counts the
+// harness/lib/findings.mjs, so it gets tight prose by default and --json for free. This gate counts the
 // ones that still print ad-hoc prose and ratchets that number down. See docs/CRAFT/COMMAND-OUTPUT.md.
 //
 // WHY A RATCHET, NOT A REFUSAL AT THE WRITE SITE. The 52 non-conforming gates predate the contract, and
@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const GATES = path.join(ROOT, 'quality/gates');

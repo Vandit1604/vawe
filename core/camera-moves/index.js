@@ -96,7 +96,7 @@ const targetsAPoint = (name, params) => TARGETING.has(name)
     || (Array.isArray(params.stations) && params.stations.some((s) => s && (s.tx != null || s.ty != null))));
 
 // buildCameraMove(spec, canvas). The sugar resolver: { move, ...params } → a camera-keyframe array.
-// `canvas` is [W, H] from the scene's own aspect (scripts/author/expand-blocks.mjs passes sceneDims(d)).
+// `canvas` is [W, H] from the scene's own aspect (harness/author/expand-blocks.mjs passes sceneDims(d)).
 export function buildCameraMove(spec, canvas = null) {
   if (!spec || !spec.move) throw new Error('cameraMove needs a "move" name');
   // A SHOT WORD resolves to a move name first ("pull back" → workspaceZoomOut), so the description a

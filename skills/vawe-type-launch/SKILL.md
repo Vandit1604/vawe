@@ -12,7 +12,7 @@ step-by-step orchestrated pipeline if you want the full gated flow instead of au
 ## The spine changes shape with length
 
 **Under ~15s: ONE CONTINUOUS ACTION, not the six-beat spine below.** `make scaffold TYPE=launch DUR=<n>`
-switches automatically at `CONTINUOUS_ACTION_MAX_S` (`scripts/author/type-spines.mjs`, 15s): the primary
+switches automatically at `CONTINUOUS_ACTION_MAX_S` (`harness/author/type-spines.mjs`, 15s): the primary
 action control (the button or field the viewer would press) is named once, carries a hand-keyed track
 across the whole film, and never cuts. Read `skills/vawe-continuous-action/SKILL.md` first at this
 length; the six-beat spine below is the wrong shape for it, not a shorter version of it.
@@ -73,7 +73,7 @@ make scaffold OUT=formats/scene/<name>.json TYPE=launch DUR=13
 ```
 
 Composes `kineticHook -> screenDive -> cardCascade -> statReveal -> logoLockup -> ctaEnd`
-(`scripts/author/type-spines.mjs`), cycling `soft/mesh/spotlight/accent` bg presets and a
+(`harness/author/type-spines.mjs`), cycling `soft/mesh/spotlight/accent` bg presets and a
 fade-then-cinematicZoom cut family. `screenDive`/`logoLockup` need real `image`/`mark` paths: the
 scaffold marks them `REPLACE:` since it cannot invent an asset for you.
 

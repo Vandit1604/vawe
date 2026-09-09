@@ -39,7 +39,7 @@ import { staggerStep } from '../type/type.js';
 // whenever a film writes `audio.tactile`. Every one of those films was therefore scored with sounds
 // nobody had ever listened to, because the only way to hear a cue was to render a film with it in.
 //
-// A listening pass over all twenty (verify/sound-verdicts.json, via `node scripts/dev/sound-lab.mjs`)
+// A listening pass over all twenty (verify/sound-verdicts.json, via `node harness/dev/sound-lab.mjs`)
 // rejected `travel` and `sweep` outright and called `thud` and `riser` weak. So four of the five sounds
 // this engine reached for BY DEFAULT were ones a person did not want, and a film shipped that way today.
 //

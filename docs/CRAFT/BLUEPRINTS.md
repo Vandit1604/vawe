@@ -260,5 +260,5 @@ the same as any other beat: it expands at load, no separate step.
 
 `make mine` is a CLUSTERING tool, not a code generator: it scores every studied shot's `onScreen` /
 `moves` / `trigger` text against a fixed keyword dictionary and prints which grammar + shot backs each
-shape (`scripts/author/mine.mjs`). The factories themselves are hand-authored, like every other
+shape (`harness/author/mine.mjs`). The factories themselves are hand-authored, like every other
 `beats-*.mjs` file, because choreography is a judgement call no keyword match should make silently.

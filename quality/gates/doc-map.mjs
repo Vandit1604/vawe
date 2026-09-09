@@ -28,8 +28,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { codesEmitted } from '../../scripts/lib/finding-codes.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { codesEmitted } from '../../harness/lib/finding-codes.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -215,7 +215,7 @@ export function docMap() {
 // as an error and the other way as a report, and the asymmetry is deliberate. A doc claiming a code no
 // gate emits is a DEAD POINTER: it sends an author to a page about a rule that no longer runs, which is
 // the exact rot `waiver-drift`'s hand-kept RETIRED map exists to catch and keeps having to be told
-// about. That fails. A code with no doc is merely UNROUTED, and since scripts/lib/finding-codes.mjs
+// about. That fails. A code with no doc is merely UNROUTED, and since harness/lib/finding-codes.mjs
 // chooses precision over recall, a recall gap there would otherwise block every build over a pointer
 // nobody had written yet. That reports.
 const parseCodes = (v) => (v == null ? [] : String(v).replace(/^\[|\]$/g, '')

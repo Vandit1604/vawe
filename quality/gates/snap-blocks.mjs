@@ -27,8 +27,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
-import { population } from '../../scripts/lib/census.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { population } from '../../harness/lib/census.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'quality', 'baselines', 'snap', 'blocks');

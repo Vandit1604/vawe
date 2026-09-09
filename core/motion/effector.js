@@ -47,7 +47,7 @@ export const FALLOFFS = {
 };
 
 // EVERY BLURB SAYS WHAT THE FAMILY IS FOR, not just how its own curve bends, because a blurb is the
-// only text `make arsenal` searches (scripts/author/arsenal.mjs ranks name + kind + blurb, nothing
+// only text `make arsenal` searches (harness/author/arsenal.mjs ranks name + kind + blurb, nothing
 // else). These four described a CURVE and never said "elements react to a moving point by distance",
 // so that exact question returned NOTHING HERE CLEARLY MATCHES over the family that answers it, and
 // offered a three.js point cloud instead. A capability nobody can find is a capability nobody has.

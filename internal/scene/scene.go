@@ -188,7 +188,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		//	  and its 118-line DOM dump (rects to six decimals, transform, filter, font) is line-for-line
 		//	  the same on both tabs. Same display list, different raster.
 		//
-		// Measured on plinth-ad, 900 frames at ss=2, byte-different frames (scripts/dev/framediff):
+		// Measured on plinth-ad, 900 frames at ss=2, byte-different frames (harness/dev/framediff):
 		//
 		//	                 with GPU raster    with this flag
 		//	1 worker twice        19 of 900        0 of 900
@@ -238,7 +238,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 	}
 	// VAWE_CHROME_FLAGS: extra Chrome flags on the REAL capture path, comma separated, "k=v" or bare
 	// "k" for a boolean. It exists so a flag question is answered by a render instead of by reasoning.
-	// scripts/dev/tabprobe already had -flags for two tabs; this is the same lever for a whole film,
+	// harness/dev/tabprobe already had -flags for two tabs; this is the same lever for a whole film,
 	// and it is how the GPU question was settled (docs/MISTAKES.md #551).
 	for _, f := range strings.Split(os.Getenv("VAWE_CHROME_FLAGS"), ",") {
 		if f = strings.TrimSpace(f); f == "" {
@@ -898,7 +898,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 // viewer answers instantly: is anything happening right now.
 //
 // Measured against the reference films the owner keeps (refs/) and reported by `node
-// scripts/author/claims.mjs`, the real spread is 11% to 77% still, median 29%: the "13% to 24%" figure
+// harness/author/claims.mjs`, the real spread is 11% to 77% still, median 29%: the "13% to 24%" figure
 // this comment carried before was CONTRADICTED by the corpus it claimed to summarise (grammar/_claims.json
 // id ref-still-share), sourced from a plan file and never checked. It sent authors chasing a target their
 // films did not have. A launch film of ours that passed the whole ladder was still for 84%, still above
@@ -907,7 +907,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 // never sees it optimises for the gates that do print.
 //
 // THE COMPARISON IS STILL LOOSE, EVEN CORRECTED, and the renderer says so when it prints: the reference
-// spread above was measured on decoded H.264 frames (scripts/media/study.mjs, via ffmpeg signalstats),
+// spread above was measured on decoded H.264 frames (harness/media/study.mjs, via ffmpeg signalstats),
 // while this film's own frames are JPEG screenshots by default (CaptureExt). quality/gates/motion-split.mjs
 // measured a JPEG quantisation floor around 0.9, well above `stillFloor` below, against 0.05 for a
 // lossless PNG of the same instant: two codecs read the same held frame as two different numbers. Render
@@ -938,7 +938,7 @@ const (
 // shape our own doctrine tells authors to build (AGENTS.md, THE FILM'S ENERGY OVER TIME). 48 evenly
 // spaced probes measure velocity at 48 random instants, not motion over time: a shot that holds for
 // most of its length and then explodes for a few frames lands most of its probes inside the hold and
-// reports mostly-still, same as a shot that never moves at all. scripts/media/study.mjs solved this for
+// reports mostly-still, same as a shot that never moves at all. harness/media/study.mjs solved this for
 // references by keeping `peak` (the loudest single frame) beside `held` (the still share) for exactly
 // this reason: "a shot that holds for three seconds and then explodes has the same mean as one that
 // moves steadily". A burst-and-hold film and a genuinely static one now read differently: both can
@@ -950,7 +950,7 @@ const (
 // alive as it is, against the only numbers there are to compare it to.
 //
 // Normalised to change-per-thirtieth-of-a-second, which is the rate the references were read at and
-// the rate `scripts/media/study.mjs` still reads them at. `stillFloor` is applied to the NORMALISED
+// the rate `harness/media/study.mjs` still reads them at. `stillFloor` is applied to the NORMALISED
 // value for the same reason: a floor on a raw delta means a different thing at every frame rate.
 const normFPS = 30.0
 

@@ -10,9 +10,9 @@ import path from 'path';
 import { PRESETS } from '../../core/type/type.js';
 import { PRESENTATIONS } from '../../core/cuts/index.js';
 import { SHADER_FX } from '../../core/stings/index.js';
-import { population, LIBRARY_WITH_DERIVATIVES } from '../../scripts/lib/census.mjs';
+import { population, LIBRARY_WITH_DERIVATIVES } from '../../harness/lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const f = gateFindings();
 

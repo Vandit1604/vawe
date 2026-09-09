@@ -36,10 +36,10 @@ import { resolveCoords } from '../core/engine/boot.js';
 // The SOURCE-side twin of the in-page `inkText()` below. That helper already refuses to read a
 // <style> body as glyphs (docs/MISTAKES.md #222/#217); this file went on doing exactly that when it
 // labelled a finding straight off the authored string. Same rule, both sides of the browser boundary.
-import { snippet } from '../scripts/lib/text.mjs';
-import { gateFindings } from '../scripts/lib/findings.mjs';
+import { snippet } from '../harness/lib/text.mjs';
+import { gateFindings } from '../harness/lib/findings.mjs';
 import { loadScene } from '../core/engine/expand.js';
-import { bootPathFor } from '../scripts/lib/render-harness.mjs';
+import { bootPathFor } from '../harness/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');

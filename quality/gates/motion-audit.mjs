@@ -45,13 +45,13 @@ import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/layout/safe.js';
 import { junctionTable, marksOf, shotWindows } from '../../core/timeline/junctions.js';
 import { loadScene } from '../../core/engine/expand.js';
-import { serveRepo, waitForEngine } from '../../scripts/lib/render-harness.mjs';
+import { serveRepo, waitForEngine } from '../../harness/lib/render-harness.mjs';
 // This gate already owns a rich --json payload (a whole report object, not a flat finding list), the
 // exact docs/MISTAKES.md #401 case findings.mjs was built to name. `emitJson` is the one door that lets
-// it keep that payload verbatim while still routing through the shared module (scripts/lib/findings.mjs,
+// it keep that payload verbatim while still routing through the shared module (harness/lib/findings.mjs,
 // docs/CRAFT/COMMAND-OUTPUT.md): it writes to the real stdout captured before any --json redirect, so it
 // cannot become a second writer on the same stream.
-import { emitJson } from '../../scripts/lib/findings.mjs';
+import { emitJson } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -593,7 +593,7 @@ function layerTrace(row, F, dt) {
   if (cur !== null) spans.push({ state: cur, from: +(F[start] / FPS).toFixed(2), to: +(F[states.length] / FPS).toFixed(2) });
   // SHAPE, not just a peak: net travel over total path length. A layer that moves straight from A to B
   // scores near 1; one that wobbles in place scores low. Mirrors study.mjs's peak+curve reasoning
-  // (scripts/media/study.mjs:306-311): a mean (or one peak number) cannot tell a held-then-launch beat
+  // (harness/media/study.mjs:306-311): a mean (or one peak number) cannot tell a held-then-launch beat
   // from a steady drift, so the shape rides beside the peak. Judged on POSITION when the layer travels
   // (posPath >= 2px); else on AREA, because a wind-up or a punch-in moves no pixel of its own centre and
   // grow-then-shrink-back is exactly what "oscillating" (net near zero over a real path) already means.
@@ -616,7 +616,7 @@ function layerTrace(row, F, dt) {
 // worth naming: a leader that snaps to a hard stop, and no OTHER tracked layer answers it nearby. It is
 // used by 0 of 187 films in this library (`morph` by 1, `follow` by 1), which does not mean it belongs
 // on any of these three: it means the instrument had never once said where it might.
-// A finding that only names the problem changes nothing (scripts/live/scene-live.mjs's own argument);
+// A finding that only names the problem changes nothing (harness/live/scene-live.mjs's own argument);
 // naming the candidate is the whole point, and naming the caveat beside it is what keeps this honest,
 // since the schema's own note is blunt: "wrong on a rigid board: a card that drags reads as jelly."
 // This never claims to know a board from a token, so it says both and leaves the call to the author.

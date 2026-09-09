@@ -47,7 +47,7 @@ real `/tmp/beats/<name>.png`, `/tmp/reveal/<name>.png`, `/tmp/seams/<name>.png` 
 strings for `copy`). Copy the six prompts into six parallel `Agent` calls. Once they report,
 `make critics D=<file> RECORD=<panels.json>` writes the panel's findings to
 `quality/baselines/approved/panels/<name>.json`, hashed to this version of the scene, so the doc below and the tool
-point at each other: `scripts/author/critics.mjs` is the source of the prompts, this table is the source
+point at each other: `harness/author/critics.mjs` is the source of the prompts, this table is the source
 of the roster.
 
 ## The roster
@@ -142,7 +142,7 @@ attributes a fix to a named critic. So the honest statement is a method, not a f
 from one panel run would be worse than none.
 
 **Record these fields, one row per finding, and the number becomes computable later.** Nothing here
-needs a tool: a JSON file beside the render will do, and `../../scripts/lib/receipt.mjs` already writes
+needs a tool: a JSON file beside the render will do, and `../../harness/lib/receipt.mjs` already writes
 stage-keyed, hash-stamped records under `quality/baselines/approved/<stage>/` if you want one that goes stale when
 the scene moves on.
 

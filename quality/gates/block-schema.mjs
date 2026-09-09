@@ -21,7 +21,7 @@
 //   6. every `def` passes its own rule, and every example row in the catalog passes the whole table
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { EXPORTS } from '../../blocks/index.mjs';
@@ -241,7 +241,7 @@ for (const family of Object.keys(SCHEMA)) {
 
 // ── 7. x and y are the block's TOP-LEFT, and until now that was a convention, not a contract ──────
 // site/app/blocks/[name]/page.tsx told every reader "Coordinates are the block's centre", and it was
-// false for 154 of 155 factories. Nothing enforced either reading: scripts/author/expand-blocks.mjs
+// false for 154 of 155 factories. Nothing enforced either reading: harness/author/expand-blocks.mjs
 // passes x and y straight through, so the rule was 155 hand-written implementations agreeing by
 // habit. A block that quietly disagrees puts itself half a card away from where the author asked,
 // which is exactly how a terminal ended up in the corner of a frame and got mis-diagnosed as a bug

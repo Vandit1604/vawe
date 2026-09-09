@@ -114,7 +114,7 @@ export function propSentence({ items = [], x = 120, y = 250, w = 1680, gap = 44,
 // slots are never empty. brew left a 0.3s hole between its passes; pass `hold` to reproduce that
 // deliberately, and know that `make beat-check` calls an unfilled frame `dead-air`.
 //
-// `offsets` takes no `= {}` default on purpose: scripts/author/expand-blocks.mjs reads a factory's prop
+// `offsets` takes no `= {}` default on purpose: harness/author/expand-blocks.mjs reads a factory's prop
 // names off the source with a regex that stops at the first `}`, so a brace in the signature hides every
 // prop after it and the expander warns that `start` and `dur` are not accepted. A wrong warning trains an
 // author to ignore the right ones.

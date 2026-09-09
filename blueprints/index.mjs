@@ -70,7 +70,7 @@ export const BEATS = {
 
 // The descriptions used to be TRAILING `//` COMMENTS on the lines above, parsed back out of this file's
 // own source by a regex in scripts/site/blueprints-catalog.mjs and by a second one in
-// scripts/author/arsenal.mjs. Two parsers over one file, each of which silently found nothing for a beat
+// harness/author/arsenal.mjs. Two parsers over one file, each of which silently found nothing for a beat
 // whose line was formatted differently: the catalogue's pattern named `Beats.` alone and reported the
 // beats declared from the three other modules as undocumented while they sat correctly commented two
 // lines below. A comment is not a data structure. `withBlurb` puts the same sentence where the code can

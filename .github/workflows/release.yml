@@ -5,7 +5,7 @@ name: release
 #
 # The three jobs are deliberately independent. A registry outage should not be able to hold back the
 # binaries, and a broken package should not take the image with it. What DOES gate the npm half is
-# `prepublishOnly` → scripts/dev/pack-check.mjs, which reads the real `npm pack` file list and refuses
+# `prepublishOnly` → harness/dev/pack-check.mjs, which reads the real `npm pack` file list and refuses
 # a tarball that cannot render — so a broken package fails the job instead of reaching the registry.
 
 on:

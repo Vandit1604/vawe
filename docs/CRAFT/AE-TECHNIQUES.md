@@ -87,7 +87,7 @@ Read the third row before reaching for the second: the DEFAULT is steeper than `
 `ramp` to make a move snappier makes it softer.
 
 *The placement.* `core/timeline/velocity-cut.js` reads `velocityAt` at each junction and reports a cut sitting
-in a velocity trough; `scripts/author/motion-director.mjs` prints it. It reads authored handles for
+in a velocity trough; `harness/author/motion-director.mjs` prints it. It reads authored handles for
 free, because it derives from the one velocity owner rather than re-implementing it. It reads the
 CAMERA too, and it used to not: a seam whose whole move lived on the null scored 0 px/s, so the
 advisory called this technique's own construction a dead frame.

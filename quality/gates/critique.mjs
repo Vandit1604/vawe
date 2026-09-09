@@ -6,9 +6,9 @@
 // Modeled on another engine' per-frame red-flags + our docs/skill "every frame fights for its value".
 import fs from 'node:fs';
 import { canvasShare, sceneTiming, boxOf, sceneView, inView, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
-import { onScreenText, glyphText, snippet } from '../../scripts/lib/text.mjs';
+import { onScreenText, glyphText, snippet } from '../../harness/lib/text.mjs';
 import { loadScene } from '../../core/engine/expand.js';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');

@@ -28,7 +28,7 @@
 // its space carrying the camera's own transform, so a layer at z is projected by lens/(lens - z - dolly)
 // about a vanishing point that does not travel with it. Move the camera and a near layer crosses the
 // frame faster than a far one, which is the whole point and is measurable
-// (scripts/dev/spike-depth.mjs reports the per-layer displacement). Written on a layer with no rig, the
+// (harness/dev/spike-depth.mjs reports the per-layer displacement). Written on a layer with no rig, the
 // same property would land in a flat parent, produce no projection at all, and move nothing, so a
 // scene containing one turns the rig ON, exactly as a tilt does, and the two cases that cannot are
 // refused by name rather than rendered as a no-op.

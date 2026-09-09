@@ -77,7 +77,7 @@
    ],
    "what": "The peak measured frame is something LEAVING, or the frame flooding with flat colour, rather than something arriving.",
    "why": "It is the opposite reflex to ours. framer-hero is the counter-example where all four peaks are arrivals, so both work, but an emptying is available and we never use it.",
-   "ours": "A keyed `exit` track (scripts/author/track.mjs exit), or an `adjust`/rect flooding the frame for a few frames."
+   "ours": "A keyed `exit` track (harness/author/track.mjs exit), or an `adjust`/rect flooding the frame for a few frames."
   },
   {
    "name": "A container that holds while its contents change",

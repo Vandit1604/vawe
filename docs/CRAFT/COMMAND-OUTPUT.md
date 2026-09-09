@@ -14,7 +14,7 @@ codes: ad-hoc-output
 - `[gated: ad-hoc-output]` `quality/gates/output-contract.mjs` ratchets non-compliant reporting gates down; a new one that prints ad-hoc prose is refused.
 
 A reporting command (a gate, a check, an audit) must not invent its own print style. It follows the
-house contract in `scripts/lib/findings.mjs`, which `docs/MISTAKES.md #401` paid for.
+house contract in `harness/lib/findings.mjs`, which `docs/MISTAKES.md #401` paid for.
 
 ## The rule
 

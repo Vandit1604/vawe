@@ -15,7 +15,7 @@ group: look
   never a headline: most effects need real tonal detail to act on, and a line of type gives them none.
 - The archetype's constants (one ground: aurora then mesh, no ruled grid, one label treatment, one
   type scale, one motion personality read off the theme, one 9s runtime with one cut at 4.4s) are
-  fixed in `scripts/dev/demo.mjs` and never overridden per-demo, so a row of demos reads as a series.
+  fixed in `harness/dev/demo.mjs` and never overridden per-demo, so a row of demos reads as a series.
 - Enforced by `[ref: make demo]`; no gate. Every scaffolded demo carries four waivers as properties
   of the archetype: `no-storyboard`, `no-preflight`, `slow-pace`, `text-overstays`.
 - Confirm: is the subject a real picture, not a line of type, and did you change the CONSTANT, not
@@ -76,7 +76,7 @@ A specimen whose whole subject is a sentence in large type is a slide.
 
 The second job of a design system here is not the single frame, it is the ROW: several demos must read
 as a series rather than as N unrelated experiments. So the decisions below live as named constants at
-the top of `scripts/dev/demo.mjs`, and **nothing lets a caller override one**. The moment one demo
+the top of `harness/dev/demo.mjs`, and **nothing lets a caller override one**. The moment one demo
 picks its own ground or parks its label somewhere else, two demos cut together jump.
 
 | constant | why it is fixed |

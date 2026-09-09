@@ -292,7 +292,7 @@ tells. That is what the default looks like when it is measured.
    beat types, and how much of it is a picture rather than words. Two concepts with the same silhouette
    are one concept wearing two palettes, so the round is rejected and one of them is replaced.
 
-The candidate pool is the direction table in `scripts/author/directions.mjs`, so "regenerate" means take
+The candidate pool is the direction table in `harness/author/directions.mjs`, so "regenerate" means take
 a **different subset of it**, not re-roll a random. The table's own order is tried first, so the default
 round is unchanged whenever it is good enough. Every rejection is printed with the scores that caused it:
 

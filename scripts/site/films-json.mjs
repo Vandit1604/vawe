@@ -20,7 +20,7 @@
 // Every one of those passed the duration check or was invisible to it. A film is stale the moment its
 // scene moves on, and the only fact that sees that is the scene's own bytes.
 //
-// The mechanism is the repo's existing one, not a new one: scripts/lib/receipt.mjs hashes a subject
+// The mechanism is the repo's existing one, not a new one: harness/lib/receipt.mjs hashes a subject
 // plus the html fragments it names, and `make beats` already uses it to prove somebody LOOKED at a
 // sheet. Here the same hash proves a film was rendered from the scene that is on disk today.
 //
@@ -31,7 +31,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { hashOf } from '../lib/receipt.mjs';
+import { hashOf } from '../../harness/lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FILMS = path.join(ROOT, 'site/public/assets/films');

@@ -21,7 +21,7 @@ for (const it of reg.examples || []) {
     if (!music) { console.warn(`  ⚠ ${it.title}: registry says beatsync but source has no audio.music, rendering source instead.`); }
     else {
       console.log(`▶ ${it.title}: beatsync onto ${music}`);
-      run('node', ['scripts/media/beatsync.mjs', source, '--music', music, '--write']);
+      run('node', ['harness/media/beatsync.mjs', source, '--music', music, '--write']);
       target = source.replace(/\.json$/, '.beatsync.json');
     }
   }
@@ -42,7 +42,7 @@ for (const it of reg.examples || []) {
       target = build;
     }
     console.log(`▶ ${it.title}: expand blocks → ${target}`);
-    run('node', ['scripts/author/expand-blocks.mjs', target, target]);
+    run('node', ['harness/author/expand-blocks.mjs', target, target]);
   }
 
   console.log(`▶ ${it.title}: render ${target}`);

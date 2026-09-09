@@ -2,7 +2,7 @@
 // unit-tested without a browser. Every export is a pure function of time (→ pure in frame n),
 // with zero DOM access. Mirrors another engine' packages/engine split (pure (config,t)→value math
 // beside the DOM/capture layer, not entangled with it). scene.html imports these and does the
-// DOM writes; the math lives here and is asserted by scripts/lib-test.mjs.
+// DOM writes; the math lives here and is asserted by harness/lib-test.mjs.
 import { clamp01, lerp, easeInOutCubic, resolveEasing, handleCurve,
   resolveHandle as resolveHandleSide } from '../motion/motion.js';
 

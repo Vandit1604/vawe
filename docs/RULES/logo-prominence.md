@@ -1,7 +1,7 @@
 ---
 name: logo-prominence
 when: placing a brand mark beside a headline, or on the end card
-holds: eye (live hook scripts/live/craft-live.mjs on Claude Code; check by hand elsewhere)
+holds: eye (live hook harness/live/craft-live.mjs on Claude Code; check by hand elsewhere)
 answers: "the minimum logo size beside a title and on an end card, so it reads as an element, not punctuation"
 group: look
 ---

@@ -17,7 +17,7 @@
 // `object` / `becomes` carry the other two across the bridge. They are RECORDED, not machine-checked.
 // See the honesty note in quality/gates/inspect.mjs.
 import fs from 'node:fs';
-import { onScreenText } from '../lib/text.mjs';
+import { onScreenText } from '../../harness/lib/text.mjs';
 import path from 'node:path';
 
 const SB = process.env.SB || process.argv[2];

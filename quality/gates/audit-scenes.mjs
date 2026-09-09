@@ -18,8 +18,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { population } from '../../scripts/lib/census.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { population } from '../../harness/lib/census.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const argv = process.argv.slice(2);
 const aspectAt = argv.indexOf('--aspect');

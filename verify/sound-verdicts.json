@@ -1,5 +1,5 @@
 {
- "_why": "Judged by ear in the sound lab (node scripts/dev/sound-lab.mjs). Twenty cues, one listener, one sitting. This is the input a voicing pass needs: 'the sounds are bad' is one sentence covering twenty different sounds.",
+ "_why": "Judged by ear in the sound lab (node harness/dev/sound-lab.mjs). Twenty cues, one listener, one sitting. This is the input a voicing pass needs: 'the sounds are bad' is one sentence covering twenty different sounds.",
  "thud": {
   "verdict": "weak",
   "note": "didnt like it the timbre of it"

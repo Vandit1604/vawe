@@ -207,7 +207,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	// STILLNESS RIDES OUT WITH THE DURATION, on every render, for every caller. Both are facts about the
 	// film rather than opinions about it, and this one answers the question no static gate can: is
 	// anything happening. The reference films in refs/ measure 11% to 77% still, median 29% (`node
-	// scripts/author/claims.mjs`, grammar/_claims.json id ref-still-share): not the "13% to 24%" this
+	// harness/author/claims.mjs`, grammar/_claims.json id ref-still-share): not the "13% to 24%" this
 	// comment quoted before, which was the doctrine's own CONTRADICTED figure, sourced from a plan file
 	// and never checked against the corpus it claimed to summarise. A film of ours that passed the whole
 	// ladder measured 84%, still above the real spread. An author who never sees the number optimises for

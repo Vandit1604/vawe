@@ -26,14 +26,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneDims } from '../../core/layout/safe.js';
-import { population } from '../../scripts/lib/census.mjs';
+import { population } from '../../harness/lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 // ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
 // for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
 import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
-import { serveRepo, waitForEngine, bootPathFor } from '../../scripts/lib/render-harness.mjs';
+import { serveRepo, waitForEngine, bootPathFor } from '../../harness/lib/render-harness.mjs';
 import { loadScene } from '../../core/engine/expand.js';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'quality', 'baselines', 'snap', 'scenes');
@@ -133,7 +133,7 @@ for (const scene of scenes) {
   try { raw = fs.readFileSync(path.join(dir, scene), 'utf8'); cfg = JSON.parse(raw); } catch {}
   // `formats/scene/scene.js` never expands `block`/`beat`/`comp` sugar itself (deliberate, its own
   // banner says why); boot the already-expanded form instead, the same trick every browser-side sweep
-  // in this repo now uses (scripts/lib/render-harness.mjs `bootPathFor`).
+  // in this repo now uses (harness/lib/render-harness.mjs `bootPathFor`).
   const dataPath = `/${bootPathFor(repoRoot, raw, loadScene(structuredClone(cfg)), `${SCENE_DIR}/${scene}`)}`;
   const [w, h] = sceneDims(cfg);
   await freshBrowser();

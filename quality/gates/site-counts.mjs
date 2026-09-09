@@ -39,7 +39,7 @@ import { AMBIENT_FX } from '../../core/surfaces/shaders-ambient.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { LAYER_TYPES } from '../../core/layers/index.js';
 import { validateAll } from '../../core/validate/validate.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const size = (o) => (Array.isArray(o) ? o.length : Object.keys(o).length);
@@ -111,7 +111,7 @@ const FILES = [
   // feature-audit told an author to vary an entrance because "21 presets" were available over 31. An
   // author is told to trust these, and a wrong number here is worse than a wrong number in the copy:
   // it is inside the fix instruction, which is the same failure `make sfx` was (lib-test:2929).
-  ...walk('scripts/author').filter((f) => f.endsWith('.mjs')),
+  ...walk('harness/author').filter((f) => f.endsWith('.mjs')),
   ...walk('quality/gates').filter((f) => f.endsWith('.mjs')),
 ];
 
@@ -203,7 +203,7 @@ for (const rel of FILES) {
   // it was quoted inside a comment. Whole-line comments only, matching that precedent: a trailing
   // stripper eats the `//` in a URL inside a string, which is a claim going quiet rather than a false
   // one being reported. Line numbers are preserved so a finding still names the line a human opens.
-  const isCode = rel.startsWith('scripts/') || rel.startsWith('quality/');
+  const isCode = rel.startsWith('scripts/') || rel.startsWith('harness/') || rel.startsWith('quality/');
   const text = !isCode ? lines
     : fs.readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
         .split('\n').map((l) => (/^\s*(\/\/|\*)/.test(l) ? '' : l));

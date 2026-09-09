@@ -24,8 +24,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { population } from '../../scripts/lib/census.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { population } from '../../harness/lib/census.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A report, never a rule (see header): always exits 0, so every finding here is INFO.

@@ -23,8 +23,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { population, LIBRARY } from '../../scripts/lib/census.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { population, LIBRARY } from '../../harness/lib/census.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENES = path.join(ROOT, 'formats', 'scene');
@@ -46,7 +46,7 @@ const legacyHolder = () => false;
 // ---- the census ----
 const tally = new Map();      // code -> [scene names]
 let total = 0;
-// The population comes from scripts/lib/census.mjs, which states N and REFUSES a checkout that cannot
+// The population comes from harness/lib/census.mjs, which states N and REFUSES a checkout that cannot
 // see the library rather than counting what is left (docs/MISTAKES.md #391). `quiet` because the census
 // header below is the line CLAUDE.md quotes, and two counts would invite the drift this gate is about.
 const pop = population('waiver census', { filter: LIBRARY, quiet: true });

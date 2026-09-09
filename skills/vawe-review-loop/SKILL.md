@@ -81,7 +81,7 @@ A receipt makes "somebody looked" checkable, and hashes the scene so editing it 
 sign-off:
 
 ```js
-import { writeReceipt } from './scripts/lib/receipt.mjs';
+import { writeReceipt } from './harness/lib/receipt.mjs';
 writeReceipt('review', 'formats/scene/<film>.json', { round: 3, lowest: 4, stopped: 'done' });
 ```
 

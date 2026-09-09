@@ -77,7 +77,7 @@ of its beats moving is not effect soup if every beat moves differently; a hype f
 beats moving the *same way* is still monotone. The register changes the restraint target, not the
 variety requirement.
 
-**Where the split lives now: `scripts/author/type-spines.mjs`.** Each type spine carries a `register`
+**Where the split lives now: `harness/author/type-spines.mjs`.** Each type spine carries a `register`
 field (`'kinetic'` or `'quiet'`) so the register is SELECTED by the type at scaffold time, not
 remembered by the author on every film. `make scaffold --type launch` starts kinetic; `make scaffold
 --type explainer` starts quiet. See §5 of `DIRECTION.md` and the per-type `SKILL.md` files for the
@@ -188,7 +188,7 @@ to a field with no accepted quality metric, not a workaround for one this repo h
 
 ## 5. Provenance correction: `make track`'s shapes are measured off THIS repo's own films
 
-`scripts/author/track.mjs` emits a hand-keyed `motion` track from one of five shapes
+`harness/author/track.mjs` emits a hand-keyed `motion` track from one of five shapes
 (`pan`/`blast`/`drift`/`enter`/`exit`). Its own header states the source plainly:
 
 > `higgsfield-recreation` carries a keyed track on 6 of its 8 layers... higgsfield beat 2, whose
@@ -214,4 +214,4 @@ who reads "measured off a real film" and reasonably wonders which one.
 - Google, [Material Design 3: Easing and Duration](https://m3.material.io/styles/motion/easing-and-duration/tokens-specs): the four curves, the duration tokens.
 - Emil Kowalski, [`review-animations` STANDARDS](https://github.com/emilkowalski/skills/blob/main/skills/review-animations/STANDARDS.md): vendored and already cited in `MOTION-STANDARDS.md`.
 - Cinemetrics, [cinemetrics.lv](http://www.cinemetrics.lv/): the ~15,000-film ASL corpus.
-- `scripts/author/track.mjs`: the primary source for §5, read directly.
+- `harness/author/track.mjs`: the primary source for §5, read directly.

@@ -17,7 +17,7 @@
 // the library moves with the font set, and `snap-scenes` stamps its baselines with a hash of that set,
 // so an unpinned face turns a cross-machine comparison into noise that reads as a code regression.
 // The versions below are the ones the CURRENT snap baselines were saved against; the hashes are in
-// scripts/media/fonts.lock.json. A mismatch FAILS rather than warns, because a warning about a font is
+// harness/media/fonts.lock.json. A mismatch FAILS rather than warns, because a warning about a font is
 // exactly the line a person scrolls past on the way to the gate result they came for.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -105,7 +105,7 @@ if (RELOCK) {
     _why: 'sha256 of every face `make fonts` fetches. Pinned so two machines hold identical bytes and a snap baseline means something across them. Regenerate with `node generators/media/fonts.mjs --relock` ONLY when a version bump is intended, and re-save the snap baselines in the same pass.',
     faces,
   }, null, 2) + '\n');
-  console.log(`✓ relocked ${Object.keys(faces).length} faces → scripts/media/fonts.lock.json`);
+  console.log(`✓ relocked ${Object.keys(faces).length} faces → harness/media/fonts.lock.json`);
   process.exit(0);
 }
 

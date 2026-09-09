@@ -19,7 +19,7 @@
 // A another engine block IS a file: one .html composition, and `target` says where to copy it. A vawe
 // block is not a file. It is a named factory in blocks/index.mjs, reached from scene JSON as
 //   { "type": "block", "block": "card", "x": …, "y": …, "start": …, "dur": …, …props }
-// and expanded at build time by scripts/author/expand-blocks.mjs. There is no per-block file to copy,
+// and expanded at build time by harness/author/expand-blocks.mjs. There is no per-block file to copy,
 // and inventing one (a .mjs extracted per block) would fork the library into copies that drift.
 //
 // So "install" here has two honest meanings, and the item carries both:
@@ -143,7 +143,7 @@ function blockItem(entry) {
   const safe = safeName(entry.name);
   // The FAMILY factory, not BLOCKS[entry.name]: a namespaced entry resolves to a wrapper whose own
   // signature is (opts), so introspecting it would report the block as taking no props at all. Same
-  // resolution scripts/author/expand-blocks.mjs uses to decide what props a block ignores.
+  // resolution harness/author/expand-blocks.mjs uses to decide what props a block ignores.
   const spec = BLOCKS[entry.family] ? propSpec(BLOCKS[entry.family]) : { required: [], optional: [] };
   const layer = { type: 'block', block: entry.name,
     ...placement([...spec.required, ...spec.optional]), ...(entry.props || {}) };

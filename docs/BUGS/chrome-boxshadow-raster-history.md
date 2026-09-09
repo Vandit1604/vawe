@@ -30,7 +30,7 @@ is what was painted into that tab before.
 From the repo root, with the engine's own instrument:
 
 ```
-go run ./scripts/dev/tabprobe -root . -data /formats/scene/higgsfield-recreation.json \
+go run ./harness/dev/tabprobe -root . -data /formats/scene/higgsfield-recreation.json \
   -tabs 2 -frame 114 -pre 0,6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108 -pre1 0-113
 tab 0  sha=b76078e918fa84091d61b1fcd39e7dff80a69c8551880a73164478eeb222867d  bytes=97038
 tab 1  sha=1b75eecba8698bb04aa76849ed449e0950c03257c19fbf87919d1871902952e1  bytes=97026
@@ -58,7 +58,7 @@ So the condition is TWO things together, and neither alone: **a blurred `box-sha
 that MOVES to sub-pixel positions under a sub-pixel scale.** #531 had already shown the fragment's
 gradient, its border-radius and its changing size are all irrelevant.
 
-The derived scenes are `_`-prefixed scratch and gitignored; `scripts/dev/tabprobe` plus the table above
+The derived scenes are `_`-prefixed scratch and gitignored; `harness/dev/tabprobe` plus the table above
 regenerates any of them in one `node -e`.
 
 ## Where it stops, honestly
@@ -68,7 +68,7 @@ at the same sub-pixel left, the same uniform scale and the same shadow, over a f
 shimmed so the same `tabprobe` command drives it.
 
 ```
-go run ./scripts/dev/tabprobe -tabs 2 -frame 114 \
+go run ./harness/dev/tabprobe -tabs 2 -frame 114 \
   -url "file://$PWD/docs/BUGS/chrome-boxshadow-raster-history.html" \
   -pre 0,6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108 -pre1 0-113
 ```

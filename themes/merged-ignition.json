@@ -1,6 +1,6 @@
 {
   "name": "merged-ignition",
-  "note": "INVENTED (not selected) by scripts/author/invent-look.mjs from formats/scene/_concepts/gh-wrapped.storyboard.md, seed 7. Stance \"ignition\": merged starts cold and catches fire, so the one warm colour IS the event. Texture: halation: the accent bleeds a little light into the ground, and nothing else glows.",
+  "note": "INVENTED (not selected) by harness/author/invent-look.mjs from formats/scene/_concepts/gh-wrapped.storyboard.md, seed 7. Stance \"ignition\": merged starts cold and catches fire, so the one warm colour IS the event. Texture: halation: the accent bleeds a little light into the ground, and nothing else glows.",
   "palette": {
     "bg": "#170c0d",
     "bg2": "#1f1414",
@@ -96,7 +96,7 @@
     "--accent-soft": "rgba(255,115,96,0.16)"
   },
   "invented": {
-    "tool": "scripts/author/invent-look.mjs",
+    "tool": "harness/author/invent-look.mjs",
     "storyboard": "formats/scene/_concepts/gh-wrapped.storyboard.md",
     "subject": "GitHub wrapped, Vandit1604 · 20 Aug 2025 to 20 Aug 2026",
     "seed": 7,

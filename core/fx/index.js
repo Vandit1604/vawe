@@ -64,7 +64,7 @@ export const FX_BLURBS = {
 };
 
 // SEARCHABLE, and it was not. `make arsenal` collects every `*_REGISTRY` export under core/, core/fx
-// and core/layers (scripts/author/arsenal.mjs), and this family exported FX_TYPES and FX_BLURBS and no
+// and core/layers (harness/author/arsenal.mjs), and this family exported FX_TYPES and FX_BLURBS and no
 // registry, so ALL FOURTEEN modifiers were invisible to the one tool an author uses to find the thing
 // they cannot name: `make arsenal Q="matte"` answered "nothing matched". Declared from the SAME two
 // objects the dispatch below reads, so the search cannot advertise a vocabulary the engine does not

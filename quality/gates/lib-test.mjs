@@ -21,7 +21,7 @@ import { GRADIENT_RECIPE_REGISTRY } from '../../core/backgrounds/gradient-recipe
 import { RESAMPLE_BLURBS } from '../../core/resample/effects.js';
 import { CAP_STYLE_NAMES, CAPTION_BLURBS } from '../../core/type/captions.js';
 import { COMPOSITION_NAMES, COMPOSITION_BLURBS } from '../../core/compositions/index.js';
-import { PROFILES } from '../../scripts/author/profiles.mjs';
+import { PROFILES } from '../../harness/author/profiles.mjs';
 import { createKit, GLYPH_PAINTERS, paintsOwnGlyphs, childExitDur } from '../../core/layers/util.js';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt, keyHandleErrors } from '../../core/timeline/sequence.js';
 import { frame as squashFrame, build as squashBuild } from '../../core/fx/squash.js';
@@ -29,8 +29,8 @@ import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
 import { frame as matteFrame, build as matteBuild } from '../../core/fx/matte.js';
 import { frame as uprightFrame, build as uprightBuild } from '../../core/fx/upright.js';
 import { mergePan } from '../../core/layout/pan-resolve.mjs';
-import { patchMotion, upsertKey, layerSpan, matchBracket, applyOps } from '../../scripts/author/patch-motion.mjs';
-import { SHAPES as TRACK_SHAPES } from '../../scripts/author/track.mjs';
+import { patchMotion, upsertKey, layerSpan, matchBracket, applyOps } from '../../harness/author/patch-motion.mjs';
+import { SHAPES as TRACK_SHAPES } from '../../harness/author/track.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -41,9 +41,9 @@ import { safeArea, DESTINATION_NAMES, nativeAspect, sceneDims, captionBand, fram
 import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilterDef } from '../../core/looks/filters.js';
 import fsMod from 'node:fs';
 import { defineRegistry, registries, catalogued, checkBlurb, searchWords } from '../../core/registry/registry.js';
-import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../../scripts/author/recency.mjs';
-import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks, score as arsenalScore } from '../../scripts/author/arsenal.mjs';
-import { loadSchema, steps as atSteps, resolve as atResolve, allPaths as atPaths, childrenOf as atChildren, kindsOfEnum, fmtPath as atFmt } from '../../scripts/author/schema-at.mjs';
+import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../../harness/author/recency.mjs';
+import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks, score as arsenalScore } from '../../harness/author/arsenal.mjs';
+import { loadSchema, steps as atSteps, resolve as atResolve, allPaths as atPaths, childrenOf as atChildren, kindsOfEnum, fmtPath as atFmt } from '../../harness/author/schema-at.mjs';
 import { token, literal, lit, resolveColor } from '../../core/color/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
 import { junctionTable, resolveJunction, isJunctionRef, marksOf, bindWindowsToJunctions } from '../../core/timeline/junctions.js';
@@ -58,7 +58,7 @@ import { BEATS } from '../../blueprints/index.mjs';
 import { ACCENT } from '../../blueprints/kit.mjs';
 import { produceBaseline } from '../../core/engine/produce.js';
 import { easeErrors, bgErrors, durationWordErrors, cssErrors, authoredJunctionErrors } from '../../core/validate/validate.mjs';
-import { raise as raiseJunction, deepEqual as junctionDeepEqual, migrateOne } from '../../scripts/author/migrate-junctions.mjs';
+import { raise as raiseJunction, deepEqual as junctionDeepEqual, migrateOne } from '../../harness/author/migrate-junctions.mjs';
 import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/registry/vocab.js';
 import { BASE_ENTER } from '../../core/timeline/clips.js';
 import { CUT_REGISTRY } from '../../core/cuts/index.js';
@@ -88,7 +88,7 @@ import { resolveComposite, LOOKS, LOOK_NAMES, isLook, lookName, KNOB_ROUTES, liv
 import { luma, BAYER4, bayerAt, cellAverage, hash01, canvasFxKey, CANVAS_FX_NAMES, resolveFxSpec, CANVAS_FX_PRESETS } from '../../core/canvas/effects.js';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { FAMILY_MODULES, NOT_A_FAMILY } from '../../blocks/index.mjs';
-import { collect as collectArsenal } from '../../scripts/author/arsenal.mjs';
+import { collect as collectArsenal } from '../../harness/author/arsenal.mjs';
 import { CUES, renderCue, musicBed, normalize, biquad, osc, SR } from '../../core/audio/kit.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, snapToBeat, downbeats } from '../../core/beats/detect.js';
 import { beatSyncOf, beatGridPath, bindBeats, snapJoints, unrollGrid, beatPeriod, DEFAULT_MAX_SHIFT } from '../../core/beats/index.js';
@@ -313,7 +313,7 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
 
   // `transitions[]` is the ONLY authored junction form now; `cuts`/`stings`/`seams` are the internal
   // shape it lowers to (core/transitions/lower.js). An author who still writes one directly is refused
-  // at validate, not silently accepted (scripts/author/migrate-junctions.mjs converts an old scene).
+  // at validate, not silently accepted (harness/author/migrate-junctions.mjs converts an old scene).
   ok('validate: an authored cuts[] is refused, naming the migration script', (() => {
     const e = authoredJunctionErrors({ cuts: [{ t: 2, style: 'fade' }] });
     return e.length === 1 && /cuts\[\]/.test(e[0]) && /migrate-junctions\.mjs/.test(e[0]);
@@ -1157,7 +1157,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 }
 
 // ANCESTOR KILLS (core/ancestor-kills.js): an ancestor style that silently disables a descendant
-// capability. Every row is measured by scripts/dev/probe-ancestor-kills.mjs; these assert that the
+// capability. Every row is measured by harness/dev/probe-ancestor-kills.mjs; these assert that the
 // table stays wired to the cut vocabulary, not that the browser still behaves that way.
 {
   // cutWrites is DERIVED from the presentations, so it must agree with what each one visibly does.
@@ -2005,7 +2005,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const thrown = (fn) => { try { fn(); return false; } catch { return true; } };
   // ── layer copy vs authored markup ──────────────────────────────────────────────────────────────
   {
-    const { onScreenText, glyphText, layerText, snippet } = await import('../../scripts/lib/text.mjs');
+    const { onScreenText, glyphText, layerText, snippet } = await import('../../harness/lib/text.mjs');
     ok('text: markup is stripped, which is what a viewer reads',
       onScreenText('Nothing came near the <b>edge.</b>') === 'Nothing came near the edge.');
     ok('text: a needle from the storyboard now matches the layer that emphasises a word',
@@ -2051,7 +2051,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // ── the layer TREE, walked once ────────────────────────────────────────────────────────────────
   {
-    const { flattenLayers, flattenLayer } = await import('../../scripts/lib/layers.mjs');
+    const { flattenLayers, flattenLayer } = await import('../../harness/lib/layers.mjs');
     const tree = [{ id: 'a', children: [{ id: 'b' }, { id: 'c', children: [{ id: 'd' }] }] }, { id: 'e' }];
     ok('layers: parents come before their children, depth first',
       flattenLayers(tree).map((l) => l.id).join('') === 'abcde');
@@ -2869,7 +2869,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // THE MOVEMENT CUES ARE A MOVING SPECTRAL BAND, and nothing else about them matters. A whoosh whose
   // brightness never moves is a burst of static, which is what the deleted `sweep` and `travel` were.
   // Brightness here is the RMS frequency, RMS(dx/dt)/(2*pi*RMS(x)), the same measure printed by
-  // `node scripts/dev/sound-lab.mjs --measure`. These assert the SHAPE, not a tuning: a whoosh arches
+  // `node harness/dev/sound-lab.mjs --measure`. These assert the SHAPE, not a tuning: a whoosh arches
   // (it passes), a riser only climbs (it arrives), and neither may sit still.
   const brightness = (x, s, e) => {
     let sx = 0, sd = 0;
@@ -3139,7 +3139,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('beat-bind: a pulseless track is refused, not snapped to', throws(() => bindBeats(sc(), { ...G, confidence: 1.2 }), /confidence/));
   ok('beat-bind: an empty grid is refused', throws(() => bindBeats(sc(), { ...G, beats: [] }), /carries no/));
   ok('beat-bind: beatSync with no track to read names the fix', throws(() => beatGridPath({ audio: { beatSync: true, music: 'auto' } }), /audio\.music/));
-  // ONE POLICY (docs/MISTAKES.md #477). scripts/media/beatsync.mjs calls snapJoints/unrollGrid too, so
+  // ONE POLICY (docs/MISTAKES.md #477). harness/media/beatsync.mjs calls snapJoints/unrollGrid too, so
   // these pin the contract the CLI used to hold a second, wider opinion about.
   ok('beat-bind: the default tolerance IS snapToBeat\'s own', snapToBeat(1.04, bts) === snapToBeat(1.04, bts, DEFAULT_MAX_SHIFT));
   const s6 = { cuts: [{ t: 0.54 }], seams: [{ t: 1.75, dur: 0.5 }], stings: [{ t: 0.54, fx: 'flash' }] };
@@ -3249,7 +3249,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   });
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
   const offenders = [];
-  for (const fp of [...scan(path.join(root, 'scripts')), ...scan(path.join(root, 'verify')), ...scan(path.join(root, 'quality')), ...scan(path.join(root, 'core'))]) {
+  for (const fp of [...scan(path.join(root, 'scripts')), ...scan(path.join(root, 'harness')), ...scan(path.join(root, 'verify')), ...scan(path.join(root, 'quality')), ...scan(path.join(root, 'core'))]) {
     if (fp.endsWith(path.join('core', 'safe.js')) || fp.endsWith(path.join('gates', 'lib-test.mjs'))) continue;
     const src = fs.readFileSync(fp, 'utf8');
     if (/landscape\s*\?\s*(1920\s*:\s*1080|\[1920)/.test(src)) offenders.push(path.relative(root, fp));
@@ -3700,7 +3700,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     cautioned.length === blind.length && blind.every((n, i) => n === cautioned[i]));
 }
 
-// ---- reference profiles (scripts/author/profiles.mjs) --------------------------------------------
+// ---- reference profiles (harness/author/profiles.mjs) --------------------------------------------
 // Every name a profile BANS or PREFERS has to exist in the registry it comes from, or the rule is
 // decoration. Two did not: a24 banned `pop` and vercel banned `bounce`, both sitting in `banCuts` and
 // both compared only against cut styles, so neither ever fired. Split into banCuts (cut styles) and
@@ -4671,11 +4671,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   globalThis.document = priorDoc;
 }
 
-// ---- scripts/lib/census.mjs: ONE definition of "the library" ----
+// ---- harness/lib/census.mjs: ONE definition of "the library" ----
 // waiver-drift printed 135 and audio-check printed 150 for the same thing, because each caller wrote
 // its own rule. These four assertions are what stops the two from drifting apart again.
 {
-  const { LIBRARY, LIBRARY_WITH_DERIVATIVES, SCENE_DIR, ROOT } = await import('../../scripts/lib/census.mjs');
+  const { LIBRARY, LIBRARY_WITH_DERIVATIVES, SCENE_DIR, ROOT } = await import('../../harness/lib/census.mjs');
   const abs = (f) => path.join(ROOT, SCENE_DIR, f);
   const names = fs.readdirSync(path.join(ROOT, SCENE_DIR)).filter((f) => f.endsWith('.json')).sort();
   const lib = names.filter((f) => LIBRARY(f, abs(f)));
@@ -4843,7 +4843,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 // ---- the render harness: the one path guard 22 scripts used to hand-roll ----
 {
-  const { insideRoot, MIME, REPO_ROOT } = await import('../../scripts/lib/render-harness.mjs');
+  const { insideRoot, MIME, REPO_ROOT } = await import('../../harness/lib/render-harness.mjs');
   const root = '/repo';
   ok('a file under the root is served', insideRoot(root, '/repo/core/engine/boot.js'));
   ok('the root itself is inside itself', insideRoot(root, '/repo'));
@@ -5505,7 +5505,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     })());
 }
 
-// ---- ARSENAL RECENCY (scripts/author/recency.mjs) ------------------------------------------------
+// ---- ARSENAL RECENCY (harness/author/recency.mjs) ------------------------------------------------
 // The census cannot tell "undiscoverable" from "unwanted", and age is what tells them apart. These
 // assert the two halves that can be wrong: the tree read, and the join onto the census.
 {
@@ -5523,7 +5523,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('the window is a fixed number of days, so a quiet fortnight is allowed to be empty',
      Number.isInteger(WINDOW_DAYS) && WINDOW_DAYS > 0);
   // The join the preflight output rests on: new AND unused is the pair worth surfacing, and each half
-  // is measured by a different owner (recency here, the census in scripts/author/arsenal.mjs).
+  // is measured by a different owner (recency here, the census in harness/author/arsenal.mjs).
   ok('newness and usage are independent reads, so an old entry with users is neither',
      (() => { const fresh = newSince(['wipe', 'zzNotARealArsenalEntry']);
               return fresh.size === 1 && fresh.has('zzNotARealArsenalEntry'); })());
@@ -5561,7 +5561,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     keys.includes('core/lightfield/presets.js::PRESETS') && keys.includes('core/kinetic/presets.js::PRESETS'));
 }
 
-// ---- ARSENAL HONESTY (scripts/author/arsenal.mjs) ------------------------------------------------
+// ---- ARSENAL HONESTY (harness/author/arsenal.mjs) ------------------------------------------------
 // The search an author is told to reach for before inventing anything returned its nearest match even
 // when it had none, twice in one day (docs/MISTAKES.md #551). Two things are asserted here and they are
 // different failures: RECALL, that it holds what it holds, and CONFIDENCE, that it can say it does not
@@ -5679,11 +5679,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   //               `wordFlash` on melts/melting alone. Written as "melting" it wins at 1.00, but the
   //               BLURB IS NOT THE REAL FIX: the index does not stem, `cycles`/`cycling` and
   //               `changes`/`changing` collide the same way, and rewriting one blurb per collision
-  //               pays for the same bug over and over. Stemming belongs in scripts/author/arsenal.mjs.
+  //               pays for the same bug over and over. Stemming belongs in harness/author/arsenal.mjs.
   //
   // FIVE ARE IN NO SEARCH CORPUS AT ALL, and no blurb can reach them. `pricingCard`, `statCard`,
   // `profileCard`, `lowerThird` and `searchEngine` have only `family.variant` rows in the manifest,
-  // and scripts/author/arsenal.mjs indexes BARE rows only, deliberately (a variant and its family
+  // and harness/author/arsenal.mjs indexes BARE rows only, deliberately (a variant and its family
   // split their shared words; the retrieval floor fell 97% → 95% the day all 185 rows went in). So
   // `make arsenal Q="a pricing plan card"` answers ABSENT about something the engine has, which is
   // the failure this whole corpus exists to end. Their blurbs were stubs too and are rewritten, but
@@ -5817,7 +5817,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // nobody ever queried, so "a drifting background" reaching an `aurora` was never checked. This holds
   // one plain-English query for every family an author DESCRIBES rather than names, and every one must
   // resolve to its family confidently and in the top three. quality/gates/discovery.mjs check 5 reads
-  // these (through scripts/dev/family-coverage.mjs) and FAILS when a searchable family has no query
+  // these (through harness/dev/family-coverage.mjs) and FAILS when a searchable family has no query
   // here, so a new vocabulary cannot land findable only by someone who already knows its name. Families
   // reached by MECHANISM (an easing, a blend mode, a keyframe handle) are exempt and named in
   // family-coverage.mjs; they stay covered per-entry by blurb self-retrieval. A miss is fixed with `aka`
@@ -5941,7 +5941,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // This measures DISTINCTIVENESS, never accuracy: a confidently wrong blurb full of rare words passes.
 // Rank 1 is not the bar, because near-identical siblings legitimately cannot separate: `rise` and `up`
 // are ALIASES with one sentence between them, and `scale` beaten by `punch` is two names for one move.
-// TOP 3 is the bar. The report is scripts/dev/blurb-retrieval.mjs; 98.1% clear it today.
+// TOP 3 is the bar. The report is harness/dev/blurb-retrieval.mjs; 98.1% clear it today.
 {
   const corpus = await arsenalCollect();
   const own = (name) => new Set(String(name).replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().match(/[a-z0-9]+/g) || []);
@@ -6060,13 +6060,13 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 // ---------------------------------------------------------------------------------------------------
-// THE CHOOSER'S CANDIDATES (scripts/dev/candidates.mjs): what gets offered, and what a choice becomes.
+// THE CHOOSER'S CANDIDATES (harness/dev/candidates.mjs): what gets offered, and what a choice becomes.
 //
 // The panel that shows the strip depends on exactly two things: that the patch it is handed applies to
 // the key it names, and that the six options are visibly DIFFERENT from each other. Both are pure and
 // neither needs a browser, so both are asserted here rather than by looking at six clips.
 {
-  const { look: bgLook, patchOps, applyPatch, pickForVariety } = await import('../../scripts/dev/candidates.mjs');
+  const { look: bgLook, patchOps, applyPatch, pickForVariety } = await import('../../harness/dev/candidates.mjs');
 
   // ---- the patch ----
   ok('candidates: the patch replaces the preset of the window it names, and nothing else',
@@ -6368,13 +6368,13 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // the other 26 are a real omission rather than a guess.
 {
   const { registries } = await import('../../core/registry/registry.js');
-  await import('../../scripts/author/arsenal.mjs').catch(() => {});
+  await import('../../harness/author/arsenal.mjs').catch(() => {});
   const cut = registries().find((r) => r.kind === 'cut');
   ok('arsenal --for: the cut vocabulary is reachable from the registry list', !!cut && cut.names.length > 20);
   const { execFileSync } = await import('node:child_process');
   let out = '', ranClean = true;
   try {
-    out = execFileSync('node', [path.join(repoRoot, 'scripts/author/arsenal.mjs'), '--for',
+    out = execFileSync('node', [path.join(repoRoot, 'harness/author/arsenal.mjs'), '--for',
       path.join(repoRoot, 'formats/scene/sample.json')], { encoding: 'utf8' });
   } catch { ranClean = false; }
   // sample.json is the reference scene every author reads first, so it is the one file guaranteed to
@@ -6397,7 +6397,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // ABSTENTION. The craft verdict grammar had two values, PASS and FIX, so a judge asked about a
   // dimension a STILL cannot carry had to guess, and the guess came back in the same shape as a real
   // finding. docs/MISTAKES.md #155 is the archetype: a background "matched" on one frame that was 2.5x
-  // too fast in motion. scripts/author/arsenal.mjs solved the identical problem with CONFIDENT and a
+  // too fast in motion. harness/author/arsenal.mjs solved the identical problem with CONFIDENT and a
   // WEAK GUESS heading (#552) and it was never carried to the judge.
   ok('rubric: the craft judge can decline a dimension a still cannot answer',
     craft.includes('CANNOT TELL'));
@@ -6547,7 +6547,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     shredded.length === 0);
 }
 
-// ---- `make schema AT=` (scripts/author/schema-at.mjs) --------------------------------------------
+// ---- `make schema AT=` (harness/author/schema-at.mjs) --------------------------------------------
 //
 // The tool that answers "what may I write HERE" from formats/scene/schema.json. Every assert below is
 // about the ANSWER being read out of the schema, never about a list this test or that tool keeps: the
@@ -6662,7 +6662,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // payload made the documented machine-readable output unparseable and a sweep called all 154 scenes
 // crashed. These asserts hold the contract that replaced it.
 {
-  const findingsSrc = fs.readFileSync(path.join(repoRoot, 'scripts/lib/findings.mjs'), 'utf8');
+  const findingsSrc = fs.readFileSync(path.join(repoRoot, 'harness/lib/findings.mjs'), 'utf8');
   const acSrc = fs.readFileSync(path.join(repoRoot, 'quality/gates/author-check.mjs'), 'utf8');
   // Comments quote the regex that was removed, on purpose: the incident is the reason the rule exists.
   // Strip them, so this asserts about CODE and cannot be satisfied by deleting the history.
@@ -6687,7 +6687,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     'quality/gates/direction-floor.mjs', 'quality/gates/dissolve-check.mjs',
     'quality/gates/designspec-check.mjs', 'quality/gates/copy-check.mjs', 'quality/gates/read-check.mjs',
     'quality/gates/pace-check.mjs', 'quality/gates/eye-trace.mjs', 'quality/gates/plan-vs-render.mjs',
-    'scripts/author/motion-director.mjs', 'quality/audit.mjs'];
+    'harness/author/motion-director.mjs', 'quality/audit.mjs'];
   for (const g of CONVERTED) {
     const src = fs.readFileSync(path.join(repoRoot, g), 'utf8');
     ok(`findings: ${g} records its findings through the shared emitter`,
@@ -6756,7 +6756,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // NOTHING HERE CLEARLY MATCHES, over a sentence claiming 445 things had been searched. True about the
 // corpus, false about the engine, and the worse kind of wrong because it reads as an answer.
 {
-  const { collect } = await import('../../scripts/author/arsenal.mjs');
+  const { collect } = await import('../../harness/author/arsenal.mjs');
   const { sections } = await import('../../scripts/site/effects-catalog.mjs');
   const corpus = await collect();
   const catalogued = new Set(sections.flatMap(([, , names]) => (names || [])
@@ -6785,7 +6785,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // codebase that stopped making the mistake.
 {
   const { execFileSync } = await import('node:child_process');
-  const hook = path.join(repoRoot, 'scripts/live/vocabulary.mjs');
+  const hook = path.join(repoRoot, 'harness/live/vocabulary.mjs');
   const run = (file) => {
     try {
       execFileSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: file } }), encoding: 'utf8' });
@@ -6810,7 +6810,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   } finally { fs.writeFileSync(probe, original); }
 
   // The hook WIRING lives in .claude/settings.json, which is Claude-local and gitignored now, so it is
-  // not a tracked repo invariant. That the hook SCRIPT exists at scripts/live/ is covered by its [live]
+  // not a tracked repo invariant. That the hook SCRIPT exists at harness/live/ is covered by its [live]
   // rung tag (rung.mjs). Here we only check the baseline the hook reads.
   const base = JSON.parse(fs.readFileSync(path.join(repoRoot, 'verify/vocabulary-baseline.json'), 'utf8'));
   ok('vocab hook: the baseline records what already exists, so the hook only judges what you add',
@@ -6928,7 +6928,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // class as `make sfx` in audio-check (the make-target test above), and nothing checked it either.
   // `make arsenal` is the shape to copy: it prints `all.length`, so it cannot be wrong.
   ok('site-counts: the resolved surface list reaches the author-facing tools',
-    files.includes('scripts/author/arsenal.mjs') && files.includes('quality/gates/audio-check.mjs'));
+    files.includes('harness/author/arsenal.mjs') && files.includes('quality/gates/audio-check.mjs'));
   {
     // The extension is joined rather than written, because `make doc-refs` reads this file too and a
     // literal `quality/gates/*.mjs` in it is a script path the repo does not have. A probe that exists
@@ -7051,7 +7051,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // AN UNTAGGED SECTION. [eye] is the honest default and costs one word, so the only reason a section
     // of CLAUDE.md carries no rung is that nobody asked the question.
     fs.writeFileSync(claude, savedClaude.replace(
-      '## Changing the ENGINE, not a film?  `[live: scripts/live/craft-live.mjs]`',
+      '## Changing the ENGINE, not a film?  `[live: harness/live/craft-live.mjs]`',
       '## Changing the ENGINE, not a film?'));
     const bare = run();
     ok('rungs: an untagged section of CLAUDE.md is REFUSED', bare.code === 1);
@@ -7061,7 +7061,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // fires on everything gets turned off, so silence on a film doing fine is as much the contract as
     // speech on a thin one, and both are checked.
     {
-      const hook = path.join(repoRoot, 'scripts/live/scene-live.mjs');
+      const hook = path.join(repoRoot, 'harness/live/scene-live.mjs');
       const fire = (scene) => {
         const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: scene } }), encoding: 'utf8' });
         return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
@@ -7094,7 +7094,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     // launch-video pair rules, the emoji-last ladder, and the two engine triggers a path can decide.
     // Both halves are asserted for each, because a hook that only ever speaks is a hook nobody keeps.
     {
-      const hook = path.join(repoRoot, 'scripts/live/craft-live.mjs');
+      const hook = path.join(repoRoot, 'harness/live/craft-live.mjs');
       const fire = (f) => {
         const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: f } }), encoding: 'utf8' });
         return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
@@ -7179,7 +7179,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // ---- the sound gate: silence has to be a decision, and the decision has to be READABLE ---------
 //
 // This gate ran for months and nothing read it. It was not one of author-check's steps, and it stated
-// each finding as a tuple in a local array, so scripts/lib/finding-codes.mjs saw no code from it and
+// each finding as a tuple in a local array, so harness/lib/finding-codes.mjs saw no code from it and
 // quality/gates/rung.mjs would have called a tag naming it a FALSE TAG. Both halves are asserted here,
 // because both halves failed silently and either one alone leaves the rule unenforced again.
 {
@@ -7229,7 +7229,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('sound gate: and declares it in the ladder it prints before it runs', /\['sound', 'reports'/.test(ladder));
   // The tag in CLAUDE.md cites a code. rung.mjs checks the citation; this checks the citation is the
   // one the gate actually fires on, which is the difference between a rung and a plausible neighbour.
-  const { codesEmitted } = await import('../../scripts/lib/finding-codes.mjs');
+  const { codesEmitted } = await import('../../harness/lib/finding-codes.mjs');
   const codes = codesEmitted();
   ok('sound gate: finding-codes.mjs can SEE its codes, so the [gated] tag verifies against the derived map',
     (codes.get('silence-without-a-reason') || new Set()).has('quality/gates/audio-check.mjs'));
@@ -7433,7 +7433,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   // 4. RULE POSITION: the scaffold's continuous-object rect sits in the lower safe margin (below the
   // text band every beat factory defaults into), not at y:900 where it read as an underline.
-  const scaffoldSrc = fs.readFileSync(path.join(repoRoot, 'scripts/author/scaffold.mjs'), 'utf8');
+  const scaffoldSrc = fs.readFileSync(path.join(repoRoot, 'harness/author/scaffold.mjs'), 'utf8');
   ok('rule position: the scaffold continuous object no longer sits at y:900 (the old text-band clash)',
     !/y: 900,\s*\n\s*fill: 'var\(--accent\)'/.test(scaffoldSrc));
   ok('rule position: it sits at y:1010, in the lower safe margin (MARGIN 0.06 of 1080 leaves 1015)',

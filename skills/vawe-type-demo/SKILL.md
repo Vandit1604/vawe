@@ -13,7 +13,7 @@ timer regardless of the click, is decoration wearing a demo's clothes.
 
 **Under ~15s (the common case: paceBand tops out at 4.5s/beat, so a 4-beat demo is already borderline):
 ONE CONTINUOUS ACTION.** `make scaffold TYPE=demo DUR=<n>` switches at `CONTINUOUS_ACTION_MAX_S`
-(`scripts/author/type-spines.mjs`, 15s): the control the cursor drives IS the one object, idle then
+(`harness/author/type-spines.mjs`, 15s): the control the cursor drives IS the one object, idle then
 clicked then showing its consequence, no cut needed because a click-and-response is already one
 uninterrupted action. Read `skills/vawe-continuous-action/SKILL.md` first at this length.
 
@@ -69,7 +69,7 @@ make scaffold OUT=formats/scene/<name>.json TYPE=demo DUR=18   # >= 15s: the bea
 ```
 
 At DUR>=15 it composes `kineticHook -> recordedPan -> verdictProof -> ctaEnd`
-(`scripts/author/type-spines.mjs`) on `soft/ink` bg presets. `recordedPan` needs a real
+(`harness/author/type-spines.mjs`) on `soft/ink` bg presets. `recordedPan` needs a real
 `image`/`capture`/`html` surface: the scaffold marks it `REPLACE:` since it cannot invent one for you;
 swap in a plain UI panel + `cursor` layer instead if the proof is a click rather than a pan.
 

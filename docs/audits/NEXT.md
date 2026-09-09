@@ -86,7 +86,7 @@ Per-layer 3D tilt · occlusion masking · shadows keyed to a light direction.
 
 Phase 0 already proved the 3D construction: camera on the layers' DIRECT parent, since any intervening
 element flattens (`transform-style: flat` is the default, not overflow or filter as first assumed).
-Spike lives at `scripts/dev/spike-3d.mjs` and self-checks.
+Spike lives at `harness/dev/spike-3d.mjs` and self-checks.
 
 Build them as `modifiers`, not as new types. Doing them before item 2 entrenches exactly the problem
 item 2 exists to fix.

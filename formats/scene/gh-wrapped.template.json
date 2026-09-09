@@ -2,7 +2,7 @@
   "module": "scene",
   "theme": "vawe-dark",
   "duration": 28.0,
-  "_note": "TEMPLATE. Render with: make batch TPL=formats/scene/gh-wrapped.template.json DATA=formats/scene/_data/gh-wrapped.json. Every {{key}} comes from scripts/media/gh-wrapped.mjs, which reads the GitHub API. No figure here is typed by hand.",
+  "_note": "TEMPLATE. Render with: make batch TPL=formats/scene/gh-wrapped.template.json DATA=formats/scene/_data/gh-wrapped.json. Every {{key}} comes from harness/media/gh-wrapped.mjs, which reads the GitHub API. No figure here is typed by hand.",
   "audio": {
     "silent": true,
     "_why": "the contribution map is read, not watched, and a bed under a 28s stat film competes with the counters for the same attention. A voice track is the right next pass, not a bed."

@@ -17,18 +17,18 @@ is for, which is itself the finding.
 | folder | files | lines | role |
 |---|---|---|---|
 | `quality/gates` | 89 | 26299 | REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a ladder; the rest are on-demand or CI. A gate reports a finding; only some block. |
-| `scripts/author` | 72 | 13562 | WRITE. Everything that produces or edits a film: the brief, the storyboard, the stage kit, the fragments' briefs, assemble, the motion director. |
-| `scripts/dev` | 37 | 6390 | LOOK. Nothing here changes a film. The studio, the previews, the contact sheets, the experiment rigs. |
+| `harness/author` | 72 | 13562 | WRITE. Everything that produces or edits a film: the brief, the storyboard, the stage kit, the fragments' briefs, assemble, the motion director. |
+| `harness/dev` | 37 | 6390 | LOOK. Nothing here changes a film. The studio, the previews, the contact sheets, the experiment rigs. |
 | `scripts/site` | 24 | 3370 | PUBLISH. The public website and docs site, and the checks that keep their numbers true. |
-| `scripts/media` | 20 | 2311 | CAPTURE. Real pixels from the outside world: screenshots of live sites, video probes, image work. |
-| `scripts/lib` | 24 | 2545 | SHARED. One definition of a thing several tools need: the contract grammar, placement resolution, findings, the census. |
+| `harness/media` | 20 | 2311 | CAPTURE. Real pixels from the outside world: screenshots of live sites, video probes, image work. |
+| `harness/lib` | 24 | 2545 | SHARED. One definition of a thing several tools need: the contract grammar, placement resolution, findings, the census. |
 | `scripts/brand` | 12 | 1325 | STUDY A BRAND. Read a real site and turn it into a theme: sections, palette, fonts, DNA. |
-| `scripts/live` | 7 | 768 | SPEAK WHILE YOU WORK. Claude Code hooks: they fire on a save or a prompt and either refuse or comment. |
-| `scripts/live/test` | 4 | 270 | Tests for the hooks. |
+| `harness/live` | 7 | 768 | SPEAK WHILE YOU WORK. Claude Code hooks: they fire on a save or a prompt and either refuse or comment. |
+| `harness/live/test` | 4 | 270 | Tests for the hooks. |
 | `scripts/hooks` | 1 | 131 | One hook helper. |
 
 The asset bakers that used to live at `scripts/ransom`, `scripts/fonts`, `scripts/sim`, and six files out
-of `scripts/media` (`geo-bake.mjs`, `globe-dots.mjs`, `gradients.mjs`, `audio-bake.mjs`, `fonts.mjs`,
+of `harness/media` (`geo-bake.mjs`, `globe-dots.mjs`, `gradients.mjs`, `audio-bake.mjs`, `fonts.mjs`,
 `watermark.mjs`) moved to `generators/`, see [`generators/README.md`](../../generators/README.md): they
 bake an asset a film loads, which is a different job from the rest of this tree.
 
@@ -129,127 +129,127 @@ REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a 
 | `compare.mjs` | 40 | yes | quality/gates/compare.mjs: VARIANT SELECTION. Render/extract a frame from each candidate and tile them |
 | `paths.mjs` | 7 | no | quality/gates/paths.mjs: ONE source of truth for where the scene format lives. Gates that enumerate |
 
-## `scripts/author`
+## `harness/author`
 
 WRITE. Everything that produces or edits a film: the brief, the storyboard, the stage kit, the fragments' briefs, assemble, the motion director.
 
 | file | lines | make | what it says it does |
 |---|---|---|---|
-| `motion-director.mjs` | 770 | yes | scripts/author/motion-director.mjs: the MOTION DIRECTOR. Picks the right cut/sting per beat-transition from |
+| `motion-director.mjs` | 770 | yes | harness/author/motion-director.mjs: the MOTION DIRECTOR. Picks the right cut/sting per beat-transition from |
 | `invent-look.mjs` | 706 | yes | invent-look.mjs: the THIRD move. Every other look tool here either REFLECTS a real brand |
 | `arsenal.mjs` | 685 | yes | arsenal.mjs: ask the arsenal for the thing you mean, in plain English. |
-| `scaffold.mjs` | 600 | yes | scripts/author/scaffold.mjs: THE DEFAULT START. Blank JSON is the #1 authoring failure this repo |
-| `concept.mjs` | 544 | yes | scripts/author/concept.mjs: N DIRECTIONS FOR ONE BRIEF, before any of them is built. |
-| `panels.mjs` | 538 | yes | scripts/author/panels.mjs: the storyboard stop, as a picture. |
+| `scaffold.mjs` | 600 | yes | harness/author/scaffold.mjs: THE DEFAULT START. Blank JSON is the #1 authoring failure this repo |
+| `concept.mjs` | 544 | yes | harness/author/concept.mjs: N DIRECTIONS FOR ONE BRIEF, before any of them is built. |
+| `panels.mjs` | 538 | yes | harness/author/panels.mjs: the storyboard stop, as a picture. |
 | `assemble.mjs` | 467 | yes | assemble.mjs: `make assemble D=<film>`: ASSEMBLE. Writes the scene JSON from the storyboard's |
-| `quiz.mjs` | 407 | yes | scripts/author/quiz.mjs: THE BRIEF, asked before anything is authored. |
-| `critics.mjs` | 309 | yes | scripts/author/critics.mjs: THE CRITIC PANEL, as an invokable, recorded step. |
-| `grammar.mjs` | 299 | yes | scripts/author/grammar.mjs: what we have learned about how good films are BUILT. |
+| `quiz.mjs` | 407 | yes | harness/author/quiz.mjs: THE BRIEF, asked before anything is authored. |
+| `critics.mjs` | 309 | yes | harness/author/critics.mjs: THE CRITIC PANEL, as an invokable, recorded step. |
+| `grammar.mjs` | 299 | yes | harness/author/grammar.mjs: what we have learned about how good films are BUILT. |
 | `schema-at.mjs` | 296 | yes | schema-at.mjs: what may I WRITE at this path in a scene JSON? |
-| `assemble.test.mjs` | 289 | no | scripts/author/assemble.test.mjs: assemble owns what it GENERATES (html layers by `id: scene<N>`, |
+| `assemble.test.mjs` | 289 | no | harness/author/assemble.test.mjs: assemble owns what it GENERATES (html layers by `id: scene<N>`, |
 | `reveal.mjs` | 279 | yes | reveal.mjs: see how each beat ANIMATES IN, not just where it lands. `make beats` samples a beat's |
-| `build-refstudy.mjs` | 260 | no | scripts/author/build-refstudy.mjs: a shot-for-shot study of refs/pin-522769469268499616.mp4. |
+| `build-refstudy.mjs` | 260 | no | harness/author/build-refstudy.mjs: a shot-for-shot study of refs/pin-522769469268499616.mp4. |
 | `patch-motion.mjs` | 254 | yes | patch-motion.mjs: SURGICAL edits to a scene's `motion` tracks, as TEXT. |
-| `mistakes.mjs` | 244 | yes | scripts/author/mistakes.mjs: ASK the mistake log instead of reading it. |
-| `animatic.mjs` | 224 | yes | scripts/author/animatic.mjs: cut the picture to the sound, before building the film. |
+| `mistakes.mjs` | 244 | yes | harness/author/mistakes.mjs: ASK the mistake log instead of reading it. |
+| `animatic.mjs` | 224 | yes | harness/author/animatic.mjs: cut the picture to the sound, before building the film. |
 | `fonts-discover.mjs` | 221 | yes | fonts-discover.mjs: surface typefaces this repo has never used. A pure data query over the Google |
-| `build-thread.mjs` | 206 | no | scripts/author/build-thread.mjs: generate formats/scene/thread.json. |
-| `sfx-catalog.mjs` | 198 | yes | scripts/author/sfx-catalog.mjs: generate docs/CRAFT/SFX-CATALOG.md from core/audio-kit.mjs's own |
+| `build-thread.mjs` | 206 | no | harness/author/build-thread.mjs: generate formats/scene/thread.json. |
+| `sfx-catalog.mjs` | 198 | yes | harness/author/sfx-catalog.mjs: generate docs/CRAFT/SFX-CATALOG.md from core/audio-kit.mjs's own |
 | `build-cadence.mjs` | 196 | no | build-cadence.mjs: a 5-second launch clip for a made-up product, authored in the higgsfield |
-| `llms-txt.mjs` | 196 | yes | scripts/author/llms-txt.mjs: GENERATE formats/llms.txt, a portable vocabulary primer for any agent |
+| `llms-txt.mjs` | 196 | yes | harness/author/llms-txt.mjs: GENERATE formats/llms.txt, a portable vocabulary primer for any agent |
 | `storyboard-parse.mjs` | 195 | no | storyboard-parse: ONE reader for the storyboard contract (docs/CRAFT/STORYBOARD-TEMPLATE.md). |
-| `build-onefile.mjs` | 185 | no | scripts/author/build-onefile.mjs: generate formats/scene/onefile.json. |
+| `build-onefile.mjs` | 185 | no | harness/author/build-onefile.mjs: generate formats/scene/onefile.json. |
 | `preview-fragment.mjs` | 185 | yes | preview-fragment.mjs: the "is this HTML doing what I want?" loop. Author a hand-written fragment |
-| `claims.mjs` | 172 | yes | scripts/author/claims.mjs: check this repo's doctrine against the films it claims to describe. |
+| `claims.mjs` | 172 | yes | harness/author/claims.mjs: check this repo's doctrine against the films it claims to describe. |
 | `build-cadence-film.mjs` | 167 | no | build-cadence-film.mjs: 15s, three dense 5s beats joined by TWO transitions, one invisible and one |
-| `migrate-junctions.mjs` | 166 | no | scripts/author/migrate-junctions.mjs: ONE-TIME (but re-runnable) migration. `transitions[]` is now |
+| `migrate-junctions.mjs` | 166 | no | harness/author/migrate-junctions.mjs: ONE-TIME (but re-runnable) migration. `transitions[]` is now |
 | `track.mjs` | 164 | yes | track.mjs: emit a hand-keyed `motion` track from a MEASURED shape, and optionally patch it in. |
-| `mistakes-compact.mjs` | 163 | no | scripts/author/mistakes-compact.mjs: ONE-TIME migration, kept for the record. |
+| `mistakes-compact.mjs` | 163 | no | harness/author/mistakes-compact.mjs: ONE-TIME migration, kept for the record. |
 | `capture-component.mjs` | 155 | yes | capture-component.mjs: lift a REAL UI component off a live site into a self-contained, animatable |
 | `measure-motion.mjs` | 154 | yes | measure-motion.mjs: MEASURE a transition's real motion from a video, and name it in OUR vocabulary. |
-| `script.mjs` | 154 | yes | scripts/author/script.mjs: the WORDS, as a two-column AV script, checked before a picture exists. |
-| `styleframes.mjs` | 153 | yes | scripts/author/styleframes.mjs: the LOOK, settled and signed off, before the motion is trusted. |
-| `build-glass.mjs` | 148 | no | scripts/author/build-glass.mjs: generate formats/scene/glass.json. |
+| `script.mjs` | 154 | yes | harness/author/script.mjs: the WORDS, as a two-column AV script, checked before a picture exists. |
+| `styleframes.mjs` | 153 | yes | harness/author/styleframes.mjs: the LOOK, settled and signed off, before the motion is trusted. |
+| `build-glass.mjs` | 148 | no | harness/author/build-glass.mjs: generate formats/scene/glass.json. |
 | `beats.mjs` | 146 | yes | beats.mjs: verify a video BEAT BY BEAT before you trust it. Renders the first / mid / last frame of |
-| `route.mjs` | 142 | yes | scripts/author/route.mjs: DELIVERABLE-AWARE ROUTING. A request maps to one of a few vawe |
+| `route.mjs` | 142 | yes | harness/author/route.mjs: DELIVERABLE-AWARE ROUTING. A request maps to one of a few vawe |
 | `capture-scene.mjs` | 141 | yes | capture-scene.mjs: capture an ANIMATED site section as PARTS, so the engine can re-stage the |
-| `type-spines.mjs` | 141 | no | scripts/author/type-spines.mjs: one beat spine per VIDEO TYPE, read by `scaffold.mjs --type <type>`. |
-| `build-zerochrome.mjs` | 137 | no | scripts/author/build-zerochrome.mjs: generate formats/scene/zerochrome.json. |
+| `type-spines.mjs` | 141 | no | harness/author/type-spines.mjs: one beat spine per VIDEO TYPE, read by `scaffold.mjs --type <type>`. |
+| `build-zerochrome.mjs` | 137 | no | harness/author/build-zerochrome.mjs: generate formats/scene/zerochrome.json. |
 | `transition-preview.mjs` | 131 | yes | transition-preview.mjs: SEE a transition before you author it. Renders a canned two-beat scene |
-| `treatment.mjs` | 128 | yes | scripts/author/treatment.mjs: WHY THIS FILM LOOKS LIKE THIS, written down while the answer is known. |
+| `treatment.mjs` | 128 | yes | harness/author/treatment.mjs: WHY THIS FILM LOOKS LIKE THIS, written down while the answer is known. |
 | `coverage-reel.mjs` | 127 | yes | coverage-reel.mjs: build a reel that renders whatever nothing else renders. |
-| `pitch.mjs` | 127 | yes | scripts/author/pitch.mjs: THE PITCH ROUND, before the storyboard converges. |
+| `pitch.mjs` | 127 | yes | harness/author/pitch.mjs: THE PITCH ROUND, before the storyboard converges. |
 | `showcase-build.mjs` | 122 | no | showcase-build.mjs: emits the six capability clips the site's showcase rows play. |
 | `preview.mjs` | 121 | yes | preview.mjs, FAST iteration: render the key frames of a format directly (no encode), |
-| `mine.mjs` | 116 | yes | scripts/author/mine.mjs · MINE beat blueprints out of the studied reference corpus (grammar/*.json). |
+| `mine.mjs` | 116 | yes | harness/author/mine.mjs · MINE beat blueprints out of the studied reference corpus (grammar/*.json). |
 | `scenes.mjs` | 107 | yes | scenes.mjs: `make scenes D=<film>`: THE FAN-OUT. PRINTS one agent brief per scene: the kit block, |
-| `recreate.mjs` | 103 | yes | scripts/author/recreate.mjs: turn a studied reference into a scene SKELETON. |
-| `reimagine.mjs` | 102 | no | scripts/author/reimagine.mjs: rebuild the flagged beats through the taste library. Run once. |
-| `lightfield.mjs` | 101 | yes | scripts/author/lightfield.mjs: generate a light field from the command line. |
-| `profiles.mjs` | 93 | no | scripts/author/profiles.mjs: THE REFERENCE PROFILES, as data. |
+| `recreate.mjs` | 103 | yes | harness/author/recreate.mjs: turn a studied reference into a scene SKELETON. |
+| `reimagine.mjs` | 102 | no | harness/author/reimagine.mjs: rebuild the flagged beats through the taste library. Run once. |
+| `lightfield.mjs` | 101 | yes | harness/author/lightfield.mjs: generate a light field from the command line. |
+| `profiles.mjs` | 93 | no | harness/author/profiles.mjs: THE REFERENCE PROFILES, as data. |
 | `build-keyframe.mjs` | 88 | no | Builds formats/scene/keyframe.json: a film about keyed motion that IS keyed motion. |
 | `cinematic.mjs` | 81 | yes | cinematic.mjs. The CINEMATIC MOTION director. Real launch films are never static: a continuous |
 | `sheets.mjs` | 80 | yes | sheets.mjs, BOTH review contact sheets from ONE browser, and the rule that keeps them honest. |
 | `recency.mjs` | 79 | no | recency.mjs: which named things are NEW? Read out of git, never out of a list. |
 | `stagekit.mjs` | 79 | yes | stagekit.mjs: `make stagekit D=<film>`: THE STAGE KIT for a per-scene HTML-fragment fan-out. |
-| `argus.mjs` | 75 | no | scripts/author/argus.mjs: composes the argushq.cc launch teaser (landscape 16:9) from the taste library + |
+| `argus.mjs` | 75 | no | harness/author/argus.mjs: composes the argushq.cc launch teaser (landscape 16:9) from the taste library + |
 | `filmstrip.mjs` | 75 | yes | filmstrip.mjs, SEE a whole video efficiently: extract frames and pack them into a few dense, |
 | `capture-motion.mjs` | 74 | yes | capture-motion.mjs: WATCH a real element animate and emit a motion track our engine can replay. |
-| `build-orbit.mjs` | 68 | no | scripts/author/build-orbit.mjs: generate formats/scene/orbit-proof.json. |
-| `scene-page.mjs` | 57 | no | scripts/author/scene-page.mjs: open a scene in a headless browser and hand back a frame grabber. |
-| `approve.mjs` | 53 | yes | scripts/author/approve.mjs: write the USER's signature onto a film's plan. |
+| `build-orbit.mjs` | 68 | no | harness/author/build-orbit.mjs: generate formats/scene/orbit-proof.json. |
+| `scene-page.mjs` | 57 | no | harness/author/scene-page.mjs: open a scene in a headless browser and hand back a frame grabber. |
+| `approve.mjs` | 53 | yes | harness/author/approve.mjs: write the USER's signature onto a film's plan. |
 | `captions.mjs` | 52 | yes | captions.mjs: burn muted-social subtitles onto a video with zero hand-timing. Splits a script into |
-| `pitch.test.mjs` | 45 | no | scripts/author/pitch.test.mjs: does the pitch receipt round-trip, and does it go stale? |
+| `pitch.test.mjs` | 45 | no | harness/author/pitch.test.mjs: does the pitch receipt round-trip, and does it go stale? |
 | `contract.mjs` | 41 | yes | contract.mjs CLI: `make contract D=<film>`: validate the per-beat continuous-object contract a |
-| `directions.mjs` | 38 | no | scripts/author/directions.mjs: THE CREATIVE DIRECTIONS a brief can be taken in. |
-| `llms-txt.test.mjs` | 37 | no | scripts/author/llms-txt.test.mjs: the runnable self-check for llms-txt.mjs. |
-| `scrub.mjs` | 36 | yes | scripts/author/scrub.mjs: the PREVIEW LOOP. Extract N frames evenly across a rendered video into one |
-| `batch.mjs` | 33 | yes | scripts/author/batch.mjs: DATA-DRIVEN VARIANTS. One template scene + an array of data rows → N rendered |
-| `route.test.mjs` | 22 | no | scripts/author/route.test.mjs: does route() send a real request to the deliverable a human would |
-| `expand-blocks.mjs` | 15 | yes | scripts/author/expand-blocks.mjs: DEBUGGING command only. `{type:"block"}`, `{type:"beat"}` and |
+| `directions.mjs` | 38 | no | harness/author/directions.mjs: THE CREATIVE DIRECTIONS a brief can be taken in. |
+| `llms-txt.test.mjs` | 37 | no | harness/author/llms-txt.test.mjs: the runnable self-check for llms-txt.mjs. |
+| `scrub.mjs` | 36 | yes | harness/author/scrub.mjs: the PREVIEW LOOP. Extract N frames evenly across a rendered video into one |
+| `batch.mjs` | 33 | yes | harness/author/batch.mjs: DATA-DRIVEN VARIANTS. One template scene + an array of data rows → N rendered |
+| `route.test.mjs` | 22 | no | harness/author/route.test.mjs: does route() send a real request to the deliverable a human would |
+| `expand-blocks.mjs` | 15 | yes | harness/author/expand-blocks.mjs: DEBUGGING command only. `{type:"block"}`, `{type:"beat"}` and |
 
-## `scripts/dev`
+## `harness/dev`
 
 LOOK. Nothing here changes a film. The studio, the previews, the contact sheets, the experiment rigs.
 
 | file | lines | make | what it says it does |
 |---|---|---|---|
-| `studio-page.mjs` | 1467 | no | scripts/dev/studio-page.mjs: the studio SHELL, as one served page. Split out of studio.mjs so the |
-| `studio.mjs` | 555 | yes | scripts/dev/studio.mjs: a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an |
-| `sound-vary.mjs` | 395 | no | scripts/dev/sound-vary.mjs: generate variations of a cue, judge them by ear, keep what survives. |
-| `candidates.mjs` | 357 | no | scripts/dev/candidates.mjs: SIX VERSIONS OF YOUR OWN FRAME, so a choice can be pointed at. |
-| `motion-lab.mjs` | 317 | yes | scripts/dev/motion-lab.mjs: does a motion change actually raise the local-motion floor, or is it an |
-| `evals.mjs` | 278 | yes | scripts/dev/evals.mjs: THE EVAL HARNESS (another engine's skills-evals, adapted; W6 of the motion-design |
-| `demo.mjs` | 235 | yes | scripts/dev/demo.mjs: scaffold a SPECIMEN scene, so that the default shape of a demo is a SHOT. |
-| `sound-lab.mjs` | 198 | no | scripts/dev/sound-lab.mjs: hear every cue the engine can make, and say which ones are any good. |
-| `previews.mjs` | 174 | yes | scripts/dev/previews.mjs: one rendered preview per beat blueprint, so an author picks a finished part |
-| `spike-dolly.mjs` | 164 | no | scripts/dev/spike-dolly.mjs, PHASE 0 SPIKE: can the CAMERA travel past a tilted layer? |
-| `spike-3d.mjs` | 159 | no | scripts/dev/spike-3d.mjs, PHASE 0 SPIKE: can sibling layers tilt in 3D and share one vanishing point? |
-| `preset-sheets.mjs` | 142 | yes | scripts/dev/preset-sheets.mjs: a rendered showcase per REFERENCE PROFILE (docs/CRAFT/SELECTION.md |
-| `render-time.mjs` | 135 | no | scripts/dev/render-time.mjs: THE STOPWATCH. How long does a render take, and did that change? |
-| `worktree-prune.mjs` | 132 | yes | scripts/dev/worktree-prune.mjs: retire agent worktrees once their work has landed. |
-| `complexity.mjs` | 128 | no | scripts/dev/complexity.mjs, where is this codebase hard to change? |
-| `theme-sheet.mjs` | 128 | yes | scripts/dev/theme-sheet.mjs: ONE rendered contact sheet for ONE theme's `look` (W8, |
+| `studio-page.mjs` | 1467 | no | harness/dev/studio-page.mjs: the studio SHELL, as one served page. Split out of studio.mjs so the |
+| `studio.mjs` | 555 | yes | harness/dev/studio.mjs: a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an |
+| `sound-vary.mjs` | 395 | no | harness/dev/sound-vary.mjs: generate variations of a cue, judge them by ear, keep what survives. |
+| `candidates.mjs` | 357 | no | harness/dev/candidates.mjs: SIX VERSIONS OF YOUR OWN FRAME, so a choice can be pointed at. |
+| `motion-lab.mjs` | 317 | yes | harness/dev/motion-lab.mjs: does a motion change actually raise the local-motion floor, or is it an |
+| `evals.mjs` | 278 | yes | harness/dev/evals.mjs: THE EVAL HARNESS (another engine's skills-evals, adapted; W6 of the motion-design |
+| `demo.mjs` | 235 | yes | harness/dev/demo.mjs: scaffold a SPECIMEN scene, so that the default shape of a demo is a SHOT. |
+| `sound-lab.mjs` | 198 | no | harness/dev/sound-lab.mjs: hear every cue the engine can make, and say which ones are any good. |
+| `previews.mjs` | 174 | yes | harness/dev/previews.mjs: one rendered preview per beat blueprint, so an author picks a finished part |
+| `spike-dolly.mjs` | 164 | no | harness/dev/spike-dolly.mjs, PHASE 0 SPIKE: can the CAMERA travel past a tilted layer? |
+| `spike-3d.mjs` | 159 | no | harness/dev/spike-3d.mjs, PHASE 0 SPIKE: can sibling layers tilt in 3D and share one vanishing point? |
+| `preset-sheets.mjs` | 142 | yes | harness/dev/preset-sheets.mjs: a rendered showcase per REFERENCE PROFILE (docs/CRAFT/SELECTION.md |
+| `render-time.mjs` | 135 | no | harness/dev/render-time.mjs: THE STOPWATCH. How long does a render take, and did that change? |
+| `worktree-prune.mjs` | 132 | yes | harness/dev/worktree-prune.mjs: retire agent worktrees once their work has landed. |
+| `complexity.mjs` | 128 | no | harness/dev/complexity.mjs, where is this codebase hard to change? |
+| `theme-sheet.mjs` | 128 | yes | harness/dev/theme-sheet.mjs: ONE rendered contact sheet for ONE theme's `look` (W8, |
 | `probe-ancestor-kills.mjs` | 127 | no | probe-ancestor-kills.mjs: MEASURE the cross-product behind core/ancestor-kills.js. |
-| `overlap-sweep.mjs` | 125 | no | scripts/dev/overlap-sweep.mjs: does OVERLAP (when the next reveal starts, relative to the last |
-| `family-coverage.mjs` | 115 | no | scripts/dev/family-coverage.mjs · does the labeled eval have a plain-English query for every family? |
-| `spike-depth.mjs` | 108 | no | scripts/dev/spike-depth.mjs: DOES `plane` PRODUCE PARALLAX, OR ONLY A SCALE? |
+| `overlap-sweep.mjs` | 125 | no | harness/dev/overlap-sweep.mjs: does OVERLAP (when the next reveal starts, relative to the last |
+| `family-coverage.mjs` | 115 | no | harness/dev/family-coverage.mjs · does the labeled eval have a plain-English query for every family? |
+| `spike-depth.mjs` | 108 | no | harness/dev/spike-depth.mjs: DOES `plane` PRODUCE PARALLAX, OR ONLY A SCALE? |
 | `blurb-retrieval.mjs` | 99 | yes | blurb-retrieval.mjs: does an entry's own description find that entry? |
-| `library-stats.mjs` | 95 | no | scripts/dev/library-stats.mjs: the library figures CLAUDE.md argues from, all measured in one run. |
-| `worktree.sh` | 85 | no | scripts/dev/worktree.sh: make a git worktree usable by an agent, in about a second. |
-| `bar-probe.mjs` | 78 | no | scripts/dev/bar-probe.mjs: PROVE the continuous subject is actually drawn, by counting pixels. |
-| `pack-check.mjs` | 78 | no | scripts/dev/pack-check.mjs: refuse to publish a package that cannot render, or that carries the |
-| `hfgap-probe.mjs` | 71 | no | scripts/dev/hfgap-probe.mjs: writes formats/scene/_probe-hfgap.json. |
-| `no-emdash.mjs` | 68 | yes | scripts/dev/no-emdash.mjs: refuse the em dash anywhere the repo writes prose. |
-| `chrome-pin.sh` | 62 | yes | scripts/dev/chrome-pin.sh <target-name>: resolve, pin, and RECORD the Chrome build a render uses. |
+| `library-stats.mjs` | 95 | no | harness/dev/library-stats.mjs: the library figures CLAUDE.md argues from, all measured in one run. |
+| `worktree.sh` | 85 | no | harness/dev/worktree.sh: make a git worktree usable by an agent, in about a second. |
+| `bar-probe.mjs` | 78 | no | harness/dev/bar-probe.mjs: PROVE the continuous subject is actually drawn, by counting pixels. |
+| `pack-check.mjs` | 78 | no | harness/dev/pack-check.mjs: refuse to publish a package that cannot render, or that carries the |
+| `hfgap-probe.mjs` | 71 | no | harness/dev/hfgap-probe.mjs: writes formats/scene/_probe-hfgap.json. |
+| `no-emdash.mjs` | 68 | yes | harness/dev/no-emdash.mjs: refuse the em dash anywhere the repo writes prose. |
+| `chrome-pin.sh` | 62 | yes | harness/dev/chrome-pin.sh <target-name>: resolve, pin, and RECORD the Chrome build a render uses. |
 | `prompt-eval.sh` | 57 | no | prompt-eval.sh: ablate ONE section of AGENTS.md and measure what the JSON does differently. |
-| `scale-sweep.mjs` | 49 | no | scripts/dev/scale-sweep.mjs: snap off-scale literals in blocks/*.mjs to the nearest scale step. |
-| `seam-compile-check.mjs` | 49 | no | scripts/dev/seam-compile-check.mjs: compile EVERY seam unit's shader in a real headless-Chrome WebGL |
-| `ref-fetch.mjs` | 44 | no | scripts/dev/ref-fetch.mjs: download a reference video for STUDY (refs/, gitignored, never shipped). |
-| `seam-c-proto.mjs` | 39 | no | scripts/dev/seam-c-proto.mjs: does the Seam C technique hold renderFrame(n) purity? |
+| `scale-sweep.mjs` | 49 | no | harness/dev/scale-sweep.mjs: snap off-scale literals in blocks/*.mjs to the nearest scale step. |
+| `seam-compile-check.mjs` | 49 | no | harness/dev/seam-compile-check.mjs: compile EVERY seam unit's shader in a real headless-Chrome WebGL |
+| `ref-fetch.mjs` | 44 | no | harness/dev/ref-fetch.mjs: download a reference video for STUDY (refs/, gitignored, never shipped). |
+| `seam-c-proto.mjs` | 39 | no | harness/dev/seam-c-proto.mjs: does the Seam C technique hold renderFrame(n) purity? |
 | `build-all.sh` | 25 | yes | Cross-compile a render binary for every shipped platform, named for the machine that runs it. |
-| `grab-beats.mjs` | 22 | no | scripts/dev/grab-beats.mjs: grab an explicit list of timestamps from a scene. |
-| `render-lock.sh` | 21 | yes | scripts/dev/render-lock.sh <key> <command...>: refuse a SECOND render racing the same output. |
+| `grab-beats.mjs` | 22 | no | harness/dev/grab-beats.mjs: grab an explicit list of timestamps from a scene. |
+| `render-lock.sh` | 21 | yes | harness/dev/render-lock.sh <key> <command...>: refuse a SECOND render racing the same output. |
 | `probe-all.sh` | 9 | yes | Assert renderFrame(n) is PURE in n (byte-identical regardless of render order), for every format. |
 
 ## `scripts/site`
@@ -283,7 +283,7 @@ PUBLISH. The public website and docs site, and the checks that keep their number
 | `og-image.mjs` | 31 | yes | scripts/site/og-image.mjs: the social card, rendered from one HTML file. |
 | `catalog-render.sh` | 15 | yes | Render only the block-catalogue pages whose JSON changed since their mp4: the renderer's |
 
-## `scripts/media`
+## `harness/media`
 
 CAPTURE. Real pixels from the outside world: screenshots of live sites, video probes, image work.
 
@@ -292,51 +292,51 @@ CAPTURE. Real pixels from the outside world: screenshots of live sites, video pr
 | `study.mjs` | 615 | yes | study.mjs, READ A REFERENCE FILM. The film-side twin of `make sections`. |
 | `kie.mjs` | 212 | yes | kie.mjs: kie.ai generation client (shared by tts/music/gen-image/gen-video/transcribe). |
 | `gh-wrapped.mjs` | 173 | no | gh-wrapped.mjs: a GitHub year in review, as DATA. Pulls one account's real contribution record and |
-| `export-edl.mjs` | 130 | yes | scripts/media/export-edl.mjs: A RENDERED SCENE IS CURRENTLY A DEAD END. An editor can only get at |
+| `export-edl.mjs` | 130 | yes | harness/media/export-edl.mjs: A RENDERED SCENE IS CURRENTLY A DEAD END. An editor can only get at |
 | `gen-audio.mjs` | 130 | no | gen-audio.mjs: synthesize license-free audio (no deps, deterministic). |
-| `vo-captions.mjs` | 107 | yes | scripts/media/vo-captions.mjs: VO CAPTION BUILDER. Turns a voiceover word-timing sidecar |
-| `assets.mjs` | 103 | yes | scripts/media/assets.mjs: make integrating images easy. Given a data JSON, fill every item that has a |
+| `vo-captions.mjs` | 107 | yes | harness/media/vo-captions.mjs: VO CAPTION BUILDER. Turns a voiceover word-timing sidecar |
+| `assets.mjs` | 103 | yes | harness/media/assets.mjs: make integrating images easy. Given a data JSON, fill every item that has a |
 | `music.mjs` | 97 | yes | music.mjs: fetch a real soundtrack for a launch video, and record where it came from. |
 | `beatsync.mjs` | 93 | yes | beatsync.mjs: align a scene's joints to the music's beat grid, at AUTHOR time. |
 | `sfx.mjs` | 92 | yes | RETIRED: the sound library is SYNTHESIZED now (`make audio`, core/audio-kit.mjs). This fetcher is |
-| `tts.mjs` | 89 | yes | scripts/media/tts.mjs, LOCAL narration: synthesize a voiceover WAV + word-timing sidecar from a script, |
-| `ref.mjs` | 79 | yes | scripts/media/ref.mjs: fetch a reference film from a link, and study it. |
-| `cards.mjs` | 78 | no | scripts/media/cards.mjs: parametric, copyright-safe topic cards (designed SVGs) for ANY topic. |
-| `cutout.mjs` | 63 | yes | scripts/media/cutout.mjs. A photograph becomes a PROP: background removed, alpha kept. |
+| `tts.mjs` | 89 | yes | harness/media/tts.mjs, LOCAL narration: synthesize a voiceover WAV + word-timing sidecar from a script, |
+| `ref.mjs` | 79 | yes | harness/media/ref.mjs: fetch a reference film from a link, and study it. |
+| `cards.mjs` | 78 | no | harness/media/cards.mjs: parametric, copyright-safe topic cards (designed SVGs) for ANY topic. |
+| `cutout.mjs` | 63 | yes | harness/media/cutout.mjs. A photograph becomes a PROP: background removed, alpha kept. |
 | `beatmap.mjs` | 60 | yes | beatmap.mjs: detect a track's pulse and write it beside the audio. |
-| `export-edl.test.mjs` | 50 | no | scripts/media/export-edl.test.mjs: house-rule self-check, no framework. |
+| `export-edl.test.mjs` | 50 | no | harness/media/export-edl.test.mjs: house-rule self-check, no framework. |
 | `wav-read.mjs` | 45 | no | wav-read.mjs: ONE PCM WAV reader. Walks the chunk table rather than assuming a 44-byte header |
-| `pace-from-vo.mjs` | 44 | yes | scripts/media/pace-from-vo.mjs: SCRIPT-FIRST PACING. Write the narration first (make tts), then pace the |
+| `pace-from-vo.mjs` | 44 | yes | harness/media/pace-from-vo.mjs: SCRIPT-FIRST PACING. Write the narration first (make tts), then pace the |
 | `gen-clip.mjs` | 37 | yes | gen-clip.mjs: turn a video (a kie.ai generation, or any mp4) into a DETERMINISTIC clip the engine |
 | `spectrum.mjs` | 34 | yes | spectrum.mjs: bake a track's per-frame band energy beside the audio. |
 
-## `scripts/lib`
+## `harness/lib`
 
 SHARED. One definition of a thing several tools need: the contract grammar, placement resolution, findings, the census.
 
 | file | lines | make | what it says it does |
 |---|---|---|---|
-| `designspec-rules.mjs` | 376 | yes | scripts/lib/designspec-rules.mjs: OUR anti-slop rules. A table we own, not a list we borrow. |
+| `designspec-rules.mjs` | 376 | yes | harness/lib/designspec-rules.mjs: OUR anti-slop rules. A table we own, not a list we borrow. |
 | `contract.mjs` | 350 | yes | contract.mjs: THE PER-BEAT CONTRACT for a fan-out of per-scene HTML-fragment agents. |
 | `stagekit.mjs` | 286 | yes | stagekit.mjs: THE STAGE KIT. A small CSS block, derived from a theme's own resolveLook(), that every |
-| `census.mjs` | 210 | yes | scripts/lib/census.mjs: ONE owner for "which files does this sweep walk, and can it see them all?" |
-| `findings.mjs` | 144 | yes | scripts/lib/findings.mjs: a gate returns a typed RESULT, never a paragraph the caller re-reads. |
-| `contract.test.mjs` | 132 | no | scripts/lib/contract.test.mjs: the per-beat continuous-object contract chains, and a broken handoff |
-| `frame-forensics.mjs` | 128 | no | scripts/lib/frame-forensics.mjs: read PIXELS inside one authored BOX, at one frame. |
-| `render-harness.mjs` | 112 | no | scripts/lib/render-harness.mjs: ONE owner for the three things every browser-side tool in this |
-| `receipt.mjs` | 110 | no | scripts/lib/receipt.mjs: STAGE APPROVAL, as a content hash. |
+| `census.mjs` | 210 | yes | harness/lib/census.mjs: ONE owner for "which files does this sweep walk, and can it see them all?" |
+| `findings.mjs` | 144 | yes | harness/lib/findings.mjs: a gate returns a typed RESULT, never a paragraph the caller re-reads. |
+| `contract.test.mjs` | 132 | no | harness/lib/contract.test.mjs: the per-beat continuous-object contract chains, and a broken handoff |
+| `frame-forensics.mjs` | 128 | no | harness/lib/frame-forensics.mjs: read PIXELS inside one authored BOX, at one frame. |
+| `render-harness.mjs` | 112 | no | harness/lib/render-harness.mjs: ONE owner for the three things every browser-side tool in this |
+| `receipt.mjs` | 110 | no | harness/lib/receipt.mjs: STAGE APPROVAL, as a content hash. |
 | `make-help.mjs` | 94 | yes | make-help.mjs: `make list` and `make help` read straight from the Makefile itself, so this can |
-| `png-diff.mjs` | 91 | no | scripts/lib/png-diff.mjs: are two PNGs the same picture, allowing for rasteriser noise. |
-| `finding-codes.mjs` | 75 | no | scripts/lib/finding-codes.mjs: which finding codes do the gates actually EMIT? |
-| `exemplars.mjs` | 58 | no | scripts/lib/exemplars.mjs: the ONE owner of exemplar retrieval. `examples.json`'s goldSet names the |
-| `stagekit.test.mjs` | 51 | no | scripts/lib/stagekit.test.mjs: the kit-identity check actually catches drift. |
-| `scratch.mjs` | 41 | no | scripts/lib/scratch.mjs: ONE answer to "where does a review artifact go", and one that fails loudly. |
-| `layer-boxes.mjs` | 40 | no | scripts/lib/layer-boxes.mjs: a layer's AUTHORED box, in canvas px, the way the engine itself places it. |
+| `png-diff.mjs` | 91 | no | harness/lib/png-diff.mjs: are two PNGs the same picture, allowing for rasteriser noise. |
+| `finding-codes.mjs` | 75 | no | harness/lib/finding-codes.mjs: which finding codes do the gates actually EMIT? |
+| `exemplars.mjs` | 58 | no | harness/lib/exemplars.mjs: the ONE owner of exemplar retrieval. `examples.json`'s goldSet names the |
+| `stagekit.test.mjs` | 51 | no | harness/lib/stagekit.test.mjs: the kit-identity check actually catches drift. |
+| `scratch.mjs` | 41 | no | harness/lib/scratch.mjs: ONE answer to "where does a review artifact go", and one that fails loudly. |
+| `layer-boxes.mjs` | 40 | no | harness/lib/layer-boxes.mjs: a layer's AUTHORED box, in canvas px, the way the engine itself places it. |
 | `theme-bg.mjs` | 39 | no | theme-bg.mjs: the `bg` block every background preset reads (core/backgrounds.js), derived from a |
 | `frag-page.mjs` | 38 | no | frag-page: ONE definition of the standalone page a hand-written fragment is previewed on. |
-| `layers.mjs` | 36 | no | scripts/lib/layers.mjs: walking a scene's layer TREE, once. |
-| `text.mjs` | 36 | yes | scripts/lib/text.mjs: what a layer's copy READS AS, which is not what it is authored as. |
-| `exemplars.test.mjs` | 31 | no | scripts/lib/exemplars.test.mjs: the runnable self-check for exemplars.mjs. Retrieval and signature |
+| `layers.mjs` | 36 | no | harness/lib/layers.mjs: walking a scene's layer TREE, once. |
+| `text.mjs` | 36 | yes | harness/lib/text.mjs: what a layer's copy READS AS, which is not what it is authored as. |
+| `exemplars.test.mjs` | 31 | no | harness/lib/exemplars.test.mjs: the runnable self-check for exemplars.mjs. Retrieval and signature |
 | `kit-ramp.mjs` | 26 | no | kit-ramp: ONE definition of "does this fragment's CSS trace to the stage kit". |
 | `ensure-preflight.mjs` | 25 | yes | ensure-preflight.mjs: the hidden prerequisite `make check`/`make ship` used to leave to memory. |
 | `placement-resolve.mjs` | 16 | no | placement-resolve.mjs: turn a contract edge ({placement,w,h}) into real px, by calling the ENGINE'S |
@@ -360,30 +360,30 @@ STUDY A BRAND. Read a real site and turn it into a theme: sections, palette, fon
 | `photos.mjs` | 69 | yes | photos.mjs: fetch openly-licensed photos for image layers, with attribution RECORDED. |
 | `lookbook.mjs` | 42 | yes | lookbook.mjs, capture a site's LOOK for art direction: full-page screenshot + viewport shots |
 
-## `scripts/live`
+## `harness/live`
 
 SPEAK WHILE YOU WORK. Claude Code hooks: they fire on a save or a prompt and either refuse or comment.
 
 | file | lines | make | what it says it does |
 |---|---|---|---|
-| `craft-live.mjs` | 212 | no | scripts/live/craft-live.mjs - three rules of CLAUDE.md that were held up by nothing but the |
-| `scene-live.mjs` | 179 | no | scripts/live/scene-live.mjs - the four numbers CLAUDE.md argues from, measured on the film you just |
-| `stage-gate.mjs` | 113 | no | scripts/live/stage-gate.mjs: a PreToolUse DENY on the three writes that skip a stage. |
-| `vocabulary.mjs` | 84 | no | scripts/live/vocabulary.mjs - a NEW named vocabulary should be a registry, and you should be told |
-| `code-quality.mjs` | 77 | yes | scripts/live/code-quality.mjs - tell the author about a tangled function while they are still in it. |
-| `no-blanket-git.mjs` | 59 | no | scripts/live/no-blanket-git.mjs - refuse the four git commands that destroyed work in this repo. |
-| `stage-say.mjs` | 44 | no | scripts/live/stage-say.mjs: a UserPromptSubmit hook that says, every turn, which stage the film in |
+| `craft-live.mjs` | 212 | no | harness/live/craft-live.mjs - three rules of CLAUDE.md that were held up by nothing but the |
+| `scene-live.mjs` | 179 | no | harness/live/scene-live.mjs - the four numbers CLAUDE.md argues from, measured on the film you just |
+| `stage-gate.mjs` | 113 | no | harness/live/stage-gate.mjs: a PreToolUse DENY on the three writes that skip a stage. |
+| `vocabulary.mjs` | 84 | no | harness/live/vocabulary.mjs - a NEW named vocabulary should be a registry, and you should be told |
+| `code-quality.mjs` | 77 | yes | harness/live/code-quality.mjs - tell the author about a tangled function while they are still in it. |
+| `no-blanket-git.mjs` | 59 | no | harness/live/no-blanket-git.mjs - refuse the four git commands that destroyed work in this repo. |
+| `stage-say.mjs` | 44 | no | harness/live/stage-say.mjs: a UserPromptSubmit hook that says, every turn, which stage the film in |
 
-## `scripts/live/test`
+## `harness/live/test`
 
 Tests for the hooks.
 
 | file | lines | make | what it says it does |
 |---|---|---|---|
-| `stage-gate.test.mjs` | 95 | no | node --test scripts/live/test/stage-gate.test.mjs |
-| `scene-live.test.mjs` | 89 | no | node scripts/live/test/scene-live.test.mjs |
-| `craft-live-fragment.test.mjs` | 59 | no | node scripts/live/test/craft-live-fragment.test.mjs |
-| `no-blanket-git.test.mjs` | 27 | no | node scripts/live/test/no-blanket-git.test.mjs |
+| `stage-gate.test.mjs` | 95 | no | node --test harness/live/test/stage-gate.test.mjs |
+| `scene-live.test.mjs` | 89 | no | node harness/live/test/scene-live.test.mjs |
+| `craft-live-fragment.test.mjs` | 59 | no | node harness/live/test/craft-live-fragment.test.mjs |
+| `no-blanket-git.test.mjs` | 27 | no | node harness/live/test/no-blanket-git.test.mjs |
 
 ## `scripts/hooks`
 

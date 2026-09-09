@@ -11,7 +11,7 @@ the same bytes. Nothing was downloaded, so nothing can be claimed. This is the s
 repo and it is safe by construction, not by permission.
 
 **`assets/music/*.wav`: DOWNLOADED third-party tracks.** `make music` / `make music-pack`
-(`scripts/media/music.mjs`) fetch these from **Mixkit** and record provenance in
+(`harness/media/music.mjs`) fetch these from **Mixkit** and record provenance in
 `assets/music/credits.json`.
 
 Mixkit's own terms for the free tier: use in **commercial and personal projects, YouTube, social

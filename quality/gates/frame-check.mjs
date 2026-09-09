@@ -21,10 +21,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../scripts/author/storyboard-parse.mjs';
-import { extractKitBlock } from '../../scripts/lib/stagekit.mjs';
-import { KIT_ROLE, offRampSizes, offRampShadows } from '../../scripts/lib/kit-ramp.mjs';
-import { gateFindings } from '../../scripts/lib/findings.mjs';
+import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../harness/author/storyboard-parse.mjs';
+import { extractKitBlock } from '../../harness/lib/stagekit.mjs';
+import { KIT_ROLE, offRampSizes, offRampShadows } from '../../harness/lib/kit-ramp.mjs';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -65,7 +65,7 @@ const err = (code, msg, extra) => { errs.push(msg); gf.fail(code, msg, extra); }
 const warn = (code, msg, extra) => { warns.push(msg); gf.warn(code, msg, extra); };
 
 // ── 1. every size and every shadow in a fragment traces to the kit ─────────────────────────────────
-// Live at the keystroke already (scripts/live/craft-live.mjs), and a gate too, because the live hook
+// Live at the keystroke already (harness/live/craft-live.mjs), and a gate too, because the live hook
 // speaks to whoever is typing and says nothing to whoever is reviewing a branch.
 for (const b of beats) {
   if (!b.fragment) continue;
@@ -106,8 +106,8 @@ async function measure() {
   let puppeteer, serveRepo, fragPage, FULLBLEED_RE, INSET_RE;
   try {
     puppeteer = (await import('puppeteer')).default;
-    ({ serveRepo } = await import('../../scripts/lib/render-harness.mjs'));
-    ({ fragPage, FULLBLEED_RE, INSET_RE } = await import('../../scripts/lib/frag-page.mjs'));
+    ({ serveRepo } = await import('../../harness/lib/render-harness.mjs'));
+    ({ fragPage, FULLBLEED_RE, INSET_RE } = await import('../../harness/lib/frag-page.mjs'));
   } catch { return null; }                       // no browser here: the static half above still ran
   const themeName = sb.theme ? (/themes\/([\w.-]+)\.json/.exec(sb.theme) || [])[1] || sb.theme.trim() : 'default';
   const themeFile = path.join(ROOT, 'themes', themeName + '.json');

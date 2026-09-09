@@ -8,8 +8,8 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { ffprobe } from './extract.js';
 import { safeArea, ASPECTS, sceneDims } from '../core/layout/safe.js';
-import { population } from '../scripts/lib/census.mjs';
-import { serveRepo, waitForEngine } from '../scripts/lib/render-harness.mjs';
+import { population } from '../harness/lib/census.mjs';
+import { serveRepo, waitForEngine } from '../harness/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
