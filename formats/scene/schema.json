@@ -2015,7 +2015,19 @@
       },
       "rot": {
        "type": "number",
-       "label": "Rotation (deg)"
+       "label": "Rotation (deg), about the picture plane's own axis (CSS `rotateZ`)."
+      },
+      "z": {
+       "type": "number",
+       "label": "Depth (px) at this key, toward (positive) or away from (negative) the eye, same axis and sign as the camera's own dolly. Animates a layer's DISTANCE, so unlike the static `plane` modifier a track can move a layer through depth over time. Needs the camera rig: keying it turns the rig on, the same way a `tilt` or `plane` fx does, because at z=0 with a flat parent it is projected by no lens and moves nothing."
+      },
+      "rotX": {
+       "type": "number",
+       "label": "Rotation (deg) about the horizontal axis (CSS `rotateX`), a layer tipping toward or away from the eye. Needs the rig; see `z`."
+      },
+      "rotY": {
+       "type": "number",
+       "label": "Rotation (deg) about the vertical axis (CSS `rotateY`), a layer turning like a swinging door. Needs the rig; see `z`."
       },
       "opacity": {
        "type": "number",
