@@ -4,7 +4,7 @@ audience: "Who it is for (role, context)."
 arc: "hook → build → proof → payoff → CTA"
 framework: "PAS | BAB | AIDA | FAB | Star-Story-Solution, CHOSEN, with a reason, not defaulted"
 threads: "what holds this film across its cuts. Two devices from docs/CRAFT/FILM-STRUCTURE.md"
-object: "ONLY if a continuous object is one of them: the noun that survives every cut"
+object: "ONLY if a continuous object is one of them: the noun that survives every cut. Optional source after an arrow: 'the input bar -> formats/scene/_together.bar.html' draws that file instead of assemble.mjs's placeholder rect"
 object_t0: "what it looks like before anything happens"
 object_states: "what it becomes at each cut, in order"
 object_last: "the last frame: the payoff, or the moment just before it"
@@ -183,6 +183,16 @@ not: "the defaults this film refuses, in your own words"
   parts block already takes, so this is not a second motion mechanism, it is the storyboard filling in
   the one the engine already has. Optional, and delete the line if nothing but the continuous object
   moves in a beat.
+
+    `fragment:` IS OPTIONAL, AND BOTH ITS HALVES ARE. `make assemble`'s own convention
+  (`<film>.scene<N>.html`) is unchanged when this line is unset. Two forms, either half omittable:
+  `fragment: _together.card.html @ center@900x520` names the file AND boxes it; `fragment:
+  _together.card.html` alone names the file, still full-bleed; `fragment: @ center@900x520` boxes the
+  default file. The placement clause reuses `object_in`/`object_out`'s own grammar above
+  (`<placement>@<w>x<h>`), never a second one to learn. TWO CONSECUTIVE BEATS NAMING THE SAME FILE keep
+  ONE component alive across the cut instead of tearing it down and rebuilding it, which is the cheapest
+  way to stop a shared panel reading as a slideshow. A placement change between them is keyed as that
+  one layer's own `motion`, not a second layer.
 
   either answer. `threads:` names the devices carrying this film from docs/CRAFT/FILM-STRUCTURE.md, a
   match cut, a camera travel, a motif, a bookend, a metric cut rate, an unfinished sentence, an open
