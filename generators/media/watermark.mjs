@@ -1,4 +1,4 @@
-// scripts/media/watermark.mjs: bake the DRAFT watermark to a transparent PNG.
+// generators/media/watermark.mjs: bake the DRAFT watermark to a transparent PNG.
 //   make watermark  [TEXT="VAWE DRAFT"] [OPACITY=0.1]
 //
 // WHY A BAKED PNG AND NOT ffmpeg drawtext: drawtext needs a TTF/OTF on disk and every font this repo

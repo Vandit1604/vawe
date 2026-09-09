@@ -1360,7 +1360,7 @@ if (isMain) {
     const ss = readJSON(path.join(root, 'formats/scene/schema.json'));
     const el = ss?.fields?.audio?.fields?.cues?.item?.name?.enum || [];
     // Superset guard: every live CUE must be documented. The enum MAY also carry baked ALIASES
-    // (whoosh/reveal/click/pop, scripts/media/audio-bake.mjs) that are not CUES keys, so only a CUE
+    // (whoosh/reveal/click/pop, generators/media/audio-bake.mjs) that are not CUES keys, so only a CUE
     // the enum OMITS is drift, extra alias names are legal.
     const missing = CUE_NAMES.filter((n) => !el.includes(n));
     if (el.length && missing.length) { console.error(`✗ schema drift: formats/scene/schema.json audio.cues enum omits live CUES (${missing.join(', ')}), add them.`); failed++; }

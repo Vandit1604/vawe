@@ -12,7 +12,7 @@
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
 fonts: ## [engine] download the free, openly-licensed faces into the gitignored assets/fonts/ (no font binary is
-	node scripts/media/fonts.mjs
+	node generators/media/fonts.mjs
 
 # make fonts-discover SEED=7 [COUNT=12] [CATEGORY=serif|sans-serif|display|monospace|handwriting] [JSON=1]:
 # sample the live Google Fonts catalogue by popularity band and by recency, minus every family already
@@ -36,7 +36,7 @@ invent-look: ## [preflight] AUTHOR a look instead of picking one.
 # make audio: bake every cue + music bed from PARAMETERS (core/audio/kit.mjs). No network, no
 # licence, deterministic: same params -> same bytes. Replaces downloading a sample library.
 audio: ## [engine] bake every cue + music bed from PARAMETERS (core/audio/kit.mjs).
-	node scripts/media/audio-bake.mjs
+	node generators/media/audio-bake.mjs
 
 # make audio-bed D=<file> [WRITE=1]: resolve `audio.music:"auto"` to a concrete bed from the scene's
 # profile (docs/CRAFT/SOUND.md via core/audio/select.js). Prints by default; WRITE bakes it in place,
@@ -481,7 +481,7 @@ coverage-reel: ## [check] generate + render a reel of whatever `make coverage` s
 # make watermark [TEXT="VAWE DRAFT"] [OPACITY=0.1]: bake the draft watermark sheet. Offline, once;
 # the render only reads the finished PNG. Pass it with ./bin/vawe <scene> --watermark assets/watermark/draft.png
 watermark: ## [ship] bake the draft watermark sheet.
-	node scripts/media/watermark.mjs
+	node generators/media/watermark.mjs
 
 # make site-counts: every capability number written on the SITE, checked against the registry it
 # describes. The copy claimed 96 blocks / 44 families / 22 presets / 32 stings long after the
@@ -1150,7 +1150,7 @@ effect-posters: ## [engine] regenerate the /showcase/effects poster stills (site
 # the spacing or the source changes; the output is committed and the runtime never fetches anything.
 .PHONY: globe-dots
 globe-dots: ## [engine] re-bake core/globe-dots.js from Natural Earth (SPACING=2.2)
-	node scripts/media/globe-dots.mjs $(if $(SPACING),--spacing $(SPACING))
+	node generators/media/globe-dots.mjs $(if $(SPACING),--spacing $(SPACING))
 
 # make pace-check [D=scene.json]: events per second, and the longest stretch where nothing arrives or
 # leaves. No D prints a census across the committed library.
@@ -1318,10 +1318,10 @@ site-assets: ## [site] engine renders -> site/public/assets (+posters). [RENDER=
 # Every face here is a VARIABLE font, so the weight is baked explicitly, the default master of
 # Anybody is Thin, and baking it silently would ship the brand headline in a hairline.
 glyphs: ## [engine] woff2 -> 3D typeface JSON (FONT=<Name> [WEIGHT=700] [CHARSET=ascii])
-	node scripts/fonts/glyphs.mjs $(FONT) $(if $(WEIGHT),--weight $(WEIGHT)) $(if $(CHARSET),--charset $(CHARSET))
+	node generators/fonts/glyphs.mjs $(FONT) $(if $(WEIGHT),--weight $(WEIGHT)) $(if $(CHARSET),--charset $(CHARSET))
 
 glyphs-verify: ## [engine] render a baked typeface with three.js next to the real woff2 -> /tmp/glyphs-<Name>.png (LOOK AT IT)
-	node scripts/fonts/verify-render.mjs $(FONT) $(TEXT)
+	node generators/fonts/verify-render.mjs $(FONT) $(TEXT)
 
 glyphs-audit: ## [engine] fail if any baked 3D typeface is stale against its woff2 or has charset gaps
 	@node scripts/gates/glyphs-audit.mjs $(if $(JSON),--json,)
@@ -1333,7 +1333,7 @@ glyphs-audit: ## [engine] fail if any baked 3D typeface is stale against its wof
 # layer. Non-determinism is confined to bake time. Same shape as canvas-fx (baked once at boot) and
 # `make spectrum` (FFT baked to a per-frame table). Contract: sims/README.md.
 sim: ## [engine] bake a simulation to frames: D=sims/<name>.mjs [WRITE=1] -> assets/baked/<name>/
-	node scripts/sim/run.mjs $(D) $(if $(WRITE),--write)
+	node generators/sim/run.mjs $(D) $(if $(WRITE),--write)
 
 # It is confined, not abolished: same source + same seed must still give the same PNGs. This fails a
 # sim that reaches for Math.random or the clock, a bake whose sim has been edited since (the frames
@@ -1351,12 +1351,12 @@ docker-context: ## [maintenance] does the docker build context still fit its bud
 # Bake a pack of REAL cut-out letter images into the sprite set the `ransom` layer composes from.
 # Unzip your pack into assets/ransom-src/ (a folder per character is ideal), then run this once.
 ransom-sprites: ## [engine] bake assets/ransom-src/ -> assets/ransom/ + manifest.json
-	node scripts/ransom/sprites.mjs
+	node generators/ransom/sprites.mjs
 
 # Bake a gradient-background pack into a render-ready library (4K -> 1920, indexed).
 # Royalty-free to use, NOT to redistribute: assets/gradients is gitignored. SRC=<zip|folder>
 gradients: ## [engine] bake a gradient pack -> assets/gradients/ + index.json
-	node scripts/media/gradients.mjs
+	node generators/media/gradients.mjs
 
 # make filmstrip VIDEO=<file> [FPS=2] [COLS=8] [DEDUP=1] [FROM= TO=], SEE a whole video efficiently:
 # extract frames and pack them into a few dense timestamped contact sheets (the whole piece in a small

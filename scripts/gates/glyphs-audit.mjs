@@ -43,7 +43,7 @@ for (const f of files) {
   const m = data.vawe;
   if (!m?.source || !m?.sourceSha256) {
     // Without provenance the artifact is unauditable forever after, so absence is itself the failure.
-    f_.fail('no-provenance', `${rel}: no vawe.source/sourceSha256 block`, { at: rel, fix: 'node scripts/fonts/glyphs.mjs <Name>' });
+    f_.fail('no-provenance', `${rel}: no vawe.source/sourceSha256 block`, { at: rel, fix: 'node generators/fonts/glyphs.mjs <Name>' });
     continue;
   }
 
@@ -56,7 +56,7 @@ for (const f of files) {
   if (actual !== m.sourceSha256) {
     f_.fail('stale', `${rel}: ${m.source} has changed since this was baked`
       + ` (baked from sha256:${m.sourceSha256.slice(0, 16)}, file is now sha256:${actual.slice(0, 16)})`, {
-      at: rel, fix: `node scripts/fonts/glyphs.mjs ${path.basename(m.source, '.woff2')}${m.weight ? ` --weight ${m.weight}` : ''}`,
+      at: rel, fix: `node generators/fonts/glyphs.mjs ${path.basename(m.source, '.woff2')}${m.weight ? ` --weight ${m.weight}` : ''}`,
     });
     continue;
   }
