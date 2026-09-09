@@ -1,0 +1,67 @@
+{
+  "name": "together-chat",
+  "note": "EYEDROPPED from refs/together-chat.mp4, not invented. This is a RECREATION theme: the reference film's own palette, sampled off its real frames so the recreation can be compared against it pixel for pixel. Accent #066bfe is the send button and the one blue word, measured at 6.9s and 16.5s; the ground is #fdfdfd, a near-pure white that is NOT #ffffff and reads warmer than our own; ink is #171c25, sampled from the input bar's own type. It exists to benchmark the engine against a real film. It is not a vawe brand theme.",
+  "palette": {
+    "bg": "#fdfdfd",
+    "bg2": "#f7f8fa",
+    "surface": "#ffffff",
+    "surface2": "#f4f6f9",
+    "line": "#e9eaee",
+    "lineStrong": "#d6d8de",
+    "text": "#171c25",
+    "ink": "#171c25",
+    "text2": "#54565c",
+    "dim": "#8b8b8d",
+    "accent": "#066bfe",
+    "accentDim": "rgba(6,107,254,0.10)",
+    "up": "#2f7d55",
+    "down": "#a3282d",
+    "accentGlow": "rgba(6,107,254,0.30)"
+  },
+  "type": {
+    "sans": "Geist",
+    "serif": "Geist",
+    "mono": "Geist Mono",
+    "num": "Geist Mono"
+  },
+  "motion": {
+    "easing": "easeOutExpo",
+    "bounce": 0.0,
+    "settle": 0.55,
+    "enter": 30,
+    "durationScale": 0.9,
+    "stagger": 0.05,
+    "exitRatio": 0.35
+  },
+  "bgDefault": {
+    "preset": "plain"
+  },
+  "look": {
+    "backdrop": [
+      "paper"
+    ],
+    "scale": {
+      "hook": 92,
+      "headline": 64,
+      "body": 34,
+      "caption": 22
+    },
+    "layout": {
+      "anchor": "center",
+      "margin": 150
+    },
+    "cuts": {
+      "default": "fade",
+      "accent": "fade"
+    },
+    "field": {
+      "grain": 0,
+      "vignette": 0
+    }
+  },
+  "gradient": [
+    "#066bfe",
+    "#4a94ff",
+    "#e8f1ff"
+  ]
+}
