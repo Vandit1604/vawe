@@ -1,4 +1,4 @@
-// scripts/sim/provenance.mjs: what produced a bake, as a hash.
+// generators/sim/provenance.mjs: what produced a bake, as a hash.
 //
 // Kept apart from run.mjs deliberately: the baker needs puppeteer, and the GATE that checks bakes
 // does not. A gate that has to boot a browser to answer "is this stale?" is a gate people stop
