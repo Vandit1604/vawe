@@ -17,7 +17,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { frameTile, tileGrid, tileBox, renderOf } from '../../quality/gates/tile.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
-import { isLightBg } from '../../core/motion/motion.js';
+import { isLightBg } from '../../core/color/engine.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCRATCH = path.join(ROOT, 'formats/scene/_batch/theme-sheets');

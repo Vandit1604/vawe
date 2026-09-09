@@ -17,7 +17,7 @@
 // every scene in the library. Removed rather than kept as a second way to say `anim`/`out` (#gsap-audit).
 import { TRANSITIONS } from './catalog.js';
 import { resolveSeconds } from '../registry/vocab.js';
-import { parseColor } from '../motion/motion.js';
+import { parseColor } from '../color/engine.js';
 import { ENERGY, okEnergy } from './energy.js';
 
 export const PROPS = {};

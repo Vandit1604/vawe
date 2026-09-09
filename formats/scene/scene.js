@@ -1,7 +1,8 @@
 import { boot } from '/core/engine/boot.js';
 import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions } from '/core/timeline/junctions.js';
 import { PART_REGISTRY, PARTS } from '/core/motion/parts.js';
-import { icon, clamp01, lerp, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, isLightBg, stepClock } from '/core/motion/motion.js';
+import { icon, clamp01, lerp, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, stepClock } from '/core/motion/motion.js';
+import { isLightBg } from '/core/color/engine.js';
 import { collectClips, driveClips, clipStyleAt, enterDurOf, exitDurOf, seekAll, entranceWarp, BASE_ENTER, BASE_EXIT } from '/core/timeline/clips.js';
 import { splitText, circleText, decodeText, gsapStagger, fitText, fitBox } from '/core/type/type.js';
 import { buildMorph } from '/core/motion/morph.js';
@@ -304,7 +305,7 @@ boot((data, fps, theme, canvas) => {
   // warned. The same invisible-output class as #213 and #369, and Phase-4 per-beat backdrops make it
   // the common case rather than the rare one. So ask the palette instead of trusting the token name:
   // use `--text` when it really is light, and otherwise the theme's own light ground.
-  // isLightBg is core/motion/motion.js's single definition of light-versus-dark, in linear light, the same
+  // isLightBg is core/color/engine.js's single definition of light-versus-dark, in linear light, the same
   // one backgrounds.js and produce.js ask. A second hand-kept copy of that question is MISTAKES #159.
   const P = (theme && theme.palette) || {};
   const ON_DARK = isLightBg(P.text) ? 'var(--text)'

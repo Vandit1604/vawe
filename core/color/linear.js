@@ -1,9 +1,9 @@
 // core/color/linear.js: sRGB <-> linear light conversion, plus WCAG relative luminance/contrast.
-// srgbToLinear/linearToSrgb/relativeLuminance are hand-rolled here because core/motion.js's own
+// srgbToLinear/linearToSrgb/relativeLuminance are hand-rolled here because ./engine.js's own
 // copy of this maths (inside isLightBg) is a private, unexported closure. contrastRatio and
 // readableOn are NOT a second implementation of the WCAG threshold: they delegate to
-// core/motion.js's canonical contrastRatio/isLightBg, so a colour never grades differently twice.
-import { contrastRatio as engineContrastRatio, isLightBg as engineIsLightBg } from '../motion/motion.js';
+// ./engine.js's canonical contrastRatio/isLightBg, so a colour never grades differently twice.
+import { contrastRatio as engineContrastRatio, isLightBg as engineIsLightBg } from './engine.js';
 import { asColor } from './parse.js';
 
 /** srgbToLinear(v): one 0..255 sRGB channel -> 0..1 linear light (IEC 61966-2-1). */

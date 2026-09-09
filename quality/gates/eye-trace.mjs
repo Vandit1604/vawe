@@ -69,7 +69,7 @@ import { resolveCoords } from '../../core/engine/boot.js';
 import { safeArea } from '../../core/layout/safe.js';
 import { motionAt } from '../../core/timeline/sequence.js';
 import { bgPreset, bgPaletteFrom } from '../../core/backgrounds/index.js';
-import { parseColorRGB } from '../../core/motion/motion.js';
+import { parseColorRGB } from '../../core/color/engine.js';
 import { gateFindings, emitJson } from '../../scripts/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

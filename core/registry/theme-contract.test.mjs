@@ -1,14 +1,14 @@
 // core/registry/theme-contract.test.mjs: the runnable self-check for `computedLook`/`resolveLook`
 // (W8 phase 1, docs/CRAFT/THEME-LOOK.md "The computed look, for the other 37"). Pure-JS: this file
 // stays node+browser importable on purpose (see the file header), so the test injects `isLightBg`
-// the same way `core/engine/boot.js` does, rather than importing `core/motion/motion.js` itself here.
+// the same way `core/engine/boot.js` does, rather than importing `core/color/engine.js` itself here.
 //   node core/registry/theme-contract.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { computedLook, resolveLook, lookErrors, LOOK_KEYS } from './theme-contract.js';
-import { isLightBg } from '../motion/motion.js';
+import { isLightBg } from '../color/engine.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 

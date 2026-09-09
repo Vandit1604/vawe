@@ -1,9 +1,9 @@
 // core/color/parse.js: string -> {r,g,b,a} object, the shape authoring tools want to read named
-// channels off. Reuses the engine's one colour grammar (core/motion.js's parseColor/colorAlpha)
+// channels off. Reuses the engine's one colour grammar (./engine.js's parseColor/colorAlpha)
 // rather than a second regex; this file only adds the alpha channel in one object and a THROW on
 // garbage, which the engine's own parser deliberately skips (it returns null so a caller can fall
 // back). This package refuses instead: a silent bad colour is the exact failure this engine avoids.
-import { parseColor as parseColorRGB, colorAlpha } from '../motion/motion.js';
+import { parseColor as parseColorRGB, colorAlpha } from './engine.js';
 
 /** parse(str): hex (#rgb/#rrggbb/#rgba/#rrggbbaa) or rgb()/rgba() -> {r,g,b,a}. Throws on garbage. */
 export function parse(c) {
