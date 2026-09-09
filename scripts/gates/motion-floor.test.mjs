@@ -41,6 +41,20 @@ test('a reveal in one region is content, however small', () => {
   assert.ok(p.share <= LOCAL_SHARE, `a local reveal must read as content, got share ${p.share}`);
 });
 
+test('a large uniform block sliding rigidly is not content, even though only its edges change', () => {
+  // Interior is the same colour before and after, so the raw share test alone sees only the thin
+  // edge sliver and scores it as local (measured: share=0.032, amount=4.72). A whole-frame shift
+  // search must catch that the edge is fully explained by translating the block.
+  const block = (shiftX) => {
+    const f = new Uint8Array(GW * GH).fill(80);
+    for (let y = 10; y < 44; y++) for (let x = 10 + shiftX; x < 70 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 200;
+    return f;
+  };
+  const p = pairProfile(block(0), block(3));
+  assert.ok(p.amount > 0, 'the slide did move pixels');
+  assert.ok(p.share > LOCAL_SHARE, `a rigid slide must be reclassified as global, got share ${p.share}`);
+});
+
 test('the gate does not crash or block when there is no render', () => {
   const r = spawnSync('node', [join(here, 'motion-floor.mjs'), 'formats/scene/_no-such-film.json'],
     { cwd: ROOT, encoding: 'utf8' });
