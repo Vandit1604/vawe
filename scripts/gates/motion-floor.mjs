@@ -60,6 +60,13 @@ export const LOCAL_SHARE = 0.08;
 export const SHIFT_RANGE = 8;      // cells; enough for a half-second pan/push at this window size
 export const RIGID_EXPLAIN = 0.5;  // a shift must cut the residual on the changed pixels at least this much
 const NOISE_FLOOR = 2;             // grayscale levels; ignores encoder/scale noise, not real change
+// How much of the frame the moving thing covers. A rigid shift alone does NOT make motion global:
+// a card sliding across a static ground is a rigid shift and it is exactly what content motion
+// looks like. What separates it from a camera move is EXTENT. Both change only at their edges, so
+// the changed-pixel count cannot tell them apart, but their bounding boxes can: a card's swept box
+// is a small part of the frame, a whole-frame slide's box is the frame. Measured on the real
+// function: a card sliding 3 cells covers 0.11 of the frame, the whole frame sliding covers 0.95.
+export const RIGID_EXTENT = 0.5;   // above this share of the frame, a rigid shift is the camera
 
 /** One pass of ffmpeg, the whole film as grayscale cells. One call, not one call per frame. */
 export function pullFrames(mp4, { fps = SAMPLE_FPS, w = GW, h = GH } = {}) {
@@ -84,7 +91,15 @@ export function pullFrames(mp4, { fps = SAMPLE_FPS, w = GW, h = GH } = {}) {
 export function rigidExplainRatio(a, b, d, total, w, h, range) {
   const idx = [];
   for (let i = 0; i < d.length; i++) if (d[i] > NOISE_FLOOR) idx.push(i);
-  if (idx.length === 0) return 1;
+  if (idx.length === 0) return { ratio: 1, extent: 0 };
+  // the bounding box of everything that changed, as a share of the frame
+  let x0 = w, x1 = -1, y0 = h, y1 = -1;
+  for (const i of idx) {
+    const y = (i / w) | 0, x = i - y * w;
+    if (x < x0) x0 = x; if (x > x1) x1 = x;
+    if (y < y0) y0 = y; if (y > y1) y1 = y;
+  }
+  const extent = ((x1 - x0 + 1) * (y1 - y0 + 1)) / (w * h);
   const cost0 = total / idx.length;
   let best = cost0;
   for (let dy = -range; dy <= range; dy++) {
@@ -101,7 +116,7 @@ export function rigidExplainRatio(a, b, d, total, w, h, range) {
       if (cost < best) best = cost;
     }
   }
-  return best / cost0;
+  return { ratio: best / cost0, extent };
 }
 
 /**
@@ -121,8 +136,12 @@ export function pairProfile(a, b, { w = GW, h = GH } = {}) {
   let run = 0, k = 0;
   for (const v of sorted) { run += v; k++; if (run >= total * 0.8) break; }
   const share = k / n;
-  if (share <= LOCAL_SHARE && rigidExplainRatio(a, b, d, total, w, h, SHIFT_RANGE) <= RIGID_EXPLAIN) {
-    return { amount, share: 1 };
+  if (share <= LOCAL_SHARE) {
+    // A rigid shift is only the CAMERA when it takes most of the frame with it. A bounded object
+    // travelling across a static ground is also a rigid shift, and it is the thing we are trying to
+    // measure, not the thing we are trying to reject.
+    const { ratio, extent } = rigidExplainRatio(a, b, d, total, w, h, SHIFT_RANGE);
+    if (ratio <= RIGID_EXPLAIN && extent >= RIGID_EXTENT) return { amount, share: 1 };
   }
   return { amount, share };
 }
@@ -159,17 +178,34 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     if (!(r.share <= LOCAL_SHARE)) { console.error(`a small reveal must read as local (share ${r.share})`); process.exit(1); }
     if (!(pairProfile(flat, flat).amount === 0)) { console.error('two identical frames must measure zero'); process.exit(1); }
 
-    // A large uniform block sliding rigidly: interior unchanged, only the leading/trailing edges differ.
-    // Measured directly: share=0.032, amount=4.72, which the share test alone reads as local content.
+    // THE CASE THAT FAILED IN A REAL FILM: a full-bleed layer sliding, so the whole picture moves and
+    // the canvas edge is exposed. Interior unchanged, only the leading and trailing edges differ, which the
+    // share test alone reads as local content. This fixture is deliberately the WHOLE frame and not a large
+    // block: a large block is still a design element, and rejecting one would reject the card-travelling
+    // case below with it.
     const block = (shiftX) => {
       const f = new Uint8Array(GW * GH).fill(80);
-      for (let y = 10; y < 44; y++) for (let x = 10 + shiftX; x < 70 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 200;
+      for (let y = 1; y < GH - 1; y++) for (let x = 1 + shiftX; x < GW - 1 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 200;
       return f;
     };
     const slide = pairProfile(block(0), block(3));
     if (!(slide.share > LOCAL_SHARE)) { console.error(`a rigid block slide must NOT read as local content (share ${slide.share})`); process.exit(1); }
 
-    console.log('  ✓ motion-floor self-test: a drift reads global, a reveal reads local, stillness reads zero, a rigid slide reads global');
+    // THE CASE THE FIRST FIX BROKE. A bounded object travelling across a static ground is also a rigid
+    // shift, and it is the reference film's core vocabulary: a card sliding in IS content arriving. The
+    // first version of the rigid test rejected it along with the camera, which would have taught authors
+    // to avoid the one device that works. Extent is what separates them: this card's swept box is a small
+    // part of the frame, the block above takes most of it.
+    const card = (shiftX) => {
+      const f = new Uint8Array(GW * GH).fill(240);
+      for (let y = 18; y < 36; y++) for (let x = 30 + shiftX; x < 58 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 40;
+      return f;
+    };
+    const travel = pairProfile(card(0), card(3));
+    if (!(travel.share <= LOCAL_SHARE)) { console.error(`a bounded object travelling must read as local content (share ${travel.share})`); process.exit(1); }
+
+    console.log('  ✓ motion-floor self-test: a drift reads global, a reveal reads local, stillness reads zero,');
+    console.log('    a whole-frame slide reads global, and a bounded object travelling reads local');
     process.exit(0);
   }
 

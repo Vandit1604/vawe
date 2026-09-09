@@ -47,7 +47,7 @@ test('a large uniform block sliding rigidly is not content, even though only its
   // search must catch that the edge is fully explained by translating the block.
   const block = (shiftX) => {
     const f = new Uint8Array(GW * GH).fill(80);
-    for (let y = 10; y < 44; y++) for (let x = 10 + shiftX; x < 70 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 200;
+    for (let y = 1; y < GH - 1; y++) for (let x = 1 + shiftX; x < GW - 1 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 200;
     return f;
   };
   const p = pairProfile(block(0), block(3));
