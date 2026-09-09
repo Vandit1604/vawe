@@ -2530,6 +2530,13 @@ The header was true when it was written. The file then grew for months and nobod
 Third time in one session that a comment was read instead of the code: #609 read `radius` in a comment and called the prop read, #615 grepped a hardcoded directory list and matched the comment recording its own removal. The rule that would have caught all three: a claim about what a file DEPENDS ON is answered by its imports, never by its prose.
 holds: scripts/gates/lib-test.mjs, docs/CODEMAPS/SCRIPTS.md
 
+## 617. the biggest move of the restructure was made against a tree 30 hours out of date
+The `harness/` move was the largest single change in the restructure: six folders, 259 files, 204 more files rewired, ~937 references. The agent reported it complete, with `make check` passing end to end on a real film. Its branch forked from `ca0ecd43` and contained NONE of the day's 60 commits. It had moved `scripts/` as it existed before any of the session's work, and merging it would have silently reverted the eight-stage machinery, the motion fixes, the meter corrections and three earlier moves.
+The tell was in its own report, and it read as diligence rather than as an alarm. It said `make stage` does not exist, `.claude/settings.json` does not exist, `stage.mjs` does not exist under gates, and three directory-list gates still lack a `harness` entry "verified directly, and it is not already handled as the brief stated". Every one of those is true of `ca0ecd43` and false of main. A stale base does not produce obviously wrong output; it produces confident, specific, internally consistent output about a repository that no longer exists.
+The brief said to run `git merge main` first. Saying it is not enough, and this is the fourth time a stale worktree has cost real work in one session (#607). What is needed is a check the agent must PASS and quote, not an instruction it can believe it followed: name a commit that must be an ancestor, and require `git merge-base --is-ancestor <sha> HEAD` to be shown in the report before any file moves.
+Nothing was lost except the agent's run: the work was caught before merge by comparing the branch's merge base against main and by testing three of its factual claims against the current tree.
+holds: docs/CRAFT/SUBAGENT-BUDGET.md, docs/CRAFT/SUBAGENTS.md
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
