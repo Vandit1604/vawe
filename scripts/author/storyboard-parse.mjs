@@ -44,6 +44,16 @@ export const fieldIn = (block, k) => {
 
 export const blocksOf = (src) => src.split(/^##\s+/m).slice(1);
 
+// The film-level `object:` line names the noun ("the input bar"), same as always, and MAY carry a
+// source after an arrow ("the input bar -> formats/scene/_together.bar.html"): the real layer to draw
+// it as, instead of assemble.mjs's placeholder rect. Splitting it here, once, keeps `object` itself
+// unchanged for the many readers (docs, panels, the animatic) that only ever wanted the name.
+export function parseObjectLine(raw) {
+  if (!raw) return { name: raw, src: null };
+  const m = /^(.*?)\s*->\s*(\S+)\s*$/.exec(raw);
+  return m ? { name: m[1].trim(), src: m[2] } : { name: raw, src: null };
+}
+
 // seconds from a `duration:` value that may say "29s", "1.5 min", or a bare number
 export function durSec(raw) {
   if (!raw) return null;
@@ -124,13 +134,18 @@ export function parseStoryboard(src) {
       //   weight:    peak | strong | quiet, so exactly one beat is the loudest and it is measurable
       //   borrows:   "<reference device> -> <our object>", so a borrowed SHAPE must name its ROLE here
       archetype: f('archetype'), weight: f('weight'), borrows: f('borrows'),
+      // WHICH FILE, AND WHERE. Optional; assemble.mjs's own convention (`<base>.scene<N>.html`) is
+      // unchanged when this is unset. `scripts/lib/contract.mjs parseFragmentSpec` reads the raw
+      // string, so this parser stays a raw-field reader like every field above it.
+      fragment: f('fragment'),
     };
   });
+  const { name: objectName, src: objectSrc } = parseObjectLine(field('object'));
   return {
     hasFrontmatter: present, field, duration: total,
     message: field('message'), audience: field('audience'), arc: field('arc'),
     framework: field('framework'), theme: field('theme'), format: field('format'),
-    object: field('object'), beats,
+    object: objectName, objectSrc, beats,
     // pace is a GENRE decision, made before any beat is written rather than discovered while animating.
     // spectacle names the one exaggerated moment and is two-sided: naming it promises every other beat
     // stays restrained. not is the exclusion line, because most generic output is not a wrong decision,
