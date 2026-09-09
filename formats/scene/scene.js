@@ -1104,7 +1104,16 @@ const boxOf = (id) => boxes.get(id) || null;
   // the rig `translate: 0 0 z` lands in a flat parent, is projected by no lens, and moves the layer by
   // exactly zero pixels, input accepted and then ignored. core/fx/plane.js refuses that case rather than
   // rendering it, so this is what keeps a depth from ever reaching it.
-  const RIG = tiltFx.length > 0 || topFx('plane').length > 0
+  //
+  // A KEYED `z`/`rotX`/`rotY` is the SAME failure mode one level down: core/tracks/motion.js writes
+  // `translateZ`/`rotateX`/`rotateY` for a layer whose track authors any of the three, and under a flat
+  // parent those land with no lens to project through and no eye to tilt the picture toward, moving or
+  // turning the layer by exactly zero pixels. Unlike `plane`/`tilt`, `motion` is not a top-level-only fx
+  // (a group child keys its own track too), so this scans every layer this scene ever built, not just
+  // the top ones `topFx` narrows to.
+  const has3DMotion = layers.some(({ L }) => Array.isArray(L.motion)
+    && L.motion.some((k) => k && (k.z != null || k.rotX != null || k.rotY != null)));
+  const RIG = tiltFx.length > 0 || topFx('plane').length > 0 || has3DMotion
     || camKf.some((k) => Math.abs(k.rx || 0) > 1e-3 || Math.abs(k.ry || 0) > 1e-3 || Math.abs(k.roll || 0) > 1e-3);
   // THE LENS HAS ONE OWNER. `tilt.dist` and the camera's `p` are the same focal distance, and under the
   // rig only one of them can be on the stage, so a scene that states both is refused with both values
