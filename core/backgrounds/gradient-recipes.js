@@ -4,7 +4,7 @@
 // `opts` win field by field over whatever a recipe names (see gradientFill). This is the whole
 // replacement for the 43MB baked JPG pack the old external gradient asset directory held: text instead
 // of pixels, and it renders deterministically at whatever resolution the frame asks for rather than
-// one fixed size (scripts/media/gradients.mjs is the deprecated baker for that pack).
+// one fixed size (generators/media/gradients.mjs is the deprecated baker for that pack).
 import { defineRegistry } from '../registry/registry.js';
 
 const RECIPES = {

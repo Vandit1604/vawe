@@ -29,8 +29,11 @@
 # only the page put a dead engine in production behind a 200.
 !formats/scene
 # The site COPYs scripts/ whole (site-engine.mjs vendors the engine into public/); the CLI image takes
-# two files out of it (expand-blocks.mjs, fonts.mjs). One negation covers both.
+# expand-blocks.mjs out of it. One negation covers both.
 !scripts
+# generators/ bakes the standing assets. Both images RUN generators/media/fonts.mjs to fetch the
+# faces, so the directory has to survive the `**` above or COPY fails at build and nowhere else.
+!generators
 
 # ── the Go renderer (Dockerfile.cli builder stage) ───────────────────────────────────────────────
 !go.mod
