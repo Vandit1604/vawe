@@ -12,16 +12,46 @@ the table at `core/layout/safe.js:35`; an unnamed ratio is still honoured, fit t
 (`ls core/layers/`) plus camera · transitions · captions. `html` counts as a picture: hand-authored
 markup is a picture too, not just text.
 
+## THE EIGHT STAGES, IN ORDER  `[gated: scripts/live/stage-gate.mjs]` `[live: scripts/live/stage-say.mjs]`
+
+**Read this first.** `make stage D=<film>` says which stage a film is in and the ONE next command.
+Read from the files on disk, never from a stored state, so it cannot disagree with the repo.
+
+| # | stage | what happens | the command |
+|---|---|---|---|
+| 1 | **brief** | ask what the product is, and the four other things a site would have given | `make quiz NAME= URL=` |
+| 2 | **plan** | the beat table, the through-line, the spectacle, the exclusions | `make scaffold` → `make storyboard-check` |
+| 3 | **approval** | the plan is SHOWN and a person says yes | `make studio D=` (press `1`), then the USER runs `/vawe-approve` |
+| 4 | **design** | the theme is settled and every frame the plan named is drawn | stage kit → the reference's grammar → the smallest useful `ui-skills` set → `make preview` → look at it |
+| 5 | **assemble** | the frames become a scene | `make assemble D=` |
+| 6 | **direct** | motion, then transitions, then sound, in that order | `make critics D= DECIDERS=1` |
+| 7 | **render** | | `make ship D=` |
+| 8 | **judge** | the only step that SEES | `make judge D=` → `make ledger D=` |
+
+**Three of those transitions are refused rather than requested**, because this order was written here,
+printed by `make critics`, and still run backwards by an author who could quote it
+(`docs/MISTAKES.md` #591, #595). `scripts/live/stage-gate.mjs` denies, at `PreToolUse`, before any
+permission mode: writing a fragment no storyboard claims · writing `layers` into an unapproved film ·
+writing `approved:` at all, which is the user's signature and never an agent's. The way out of each is
+the missing artefact, and there is no flag, because a flag would be a way to skip the step.
+
+**And the order is re-stated every turn**, not read once: `scripts/live/stage-say.mjs` names the open
+stage and its one next command at `UserPromptSubmit`. A rule read at session start is a rule that fails
+late in a long session, which is exactly when it matters. `make next D=<film>` runs a stage's one step.
+
+Everything below is reference. Each heading names the stage that sends you there.
+
 **No templates.** You do not pour data into a canned layout; you compose each video from the
 vocabulary in `docs/PRIMITIVES.md`. Your job when asked to "make a video about X" is to **write a
 scene JSON** (and capture the real assets it needs), then render it. You do **not** edit `scene.html`
 or the Go renderer unless explicitly asked.
 
-> **Reflecting a brand/website?** `make sections` + `make palette` builds the colours pack + fonts +
-> favicon. Design knowledge: `docs/DESIGN-DATABASE.md`; primitives: `docs/PRIMITIVES.md`; motion:
-> `docs/MOTION-CRAFT.md`. **Use ONLY the site's colours** and respect dominance (white-first vs dark).
+> **Reflecting a brand/website?** (stages 2, 4) `make sections` + `make palette` builds the colours
+> pack + fonts + favicon. Design knowledge: `docs/DESIGN-DATABASE.md`; primitives:
+> `docs/PRIMITIVES.md`; motion: `docs/MOTION-CRAFT.md`. **Use ONLY the site's colours** and respect
+> dominance (white-first vs dark).
 
-## Skill router  `[eye]`
+## Skill router (stages 1, 2, 4)  `[eye]`
 
 Skills live in `skills/` as plain docs any agent can read. Claude Code loads them on demand with the
 Skill tool; any other agent opens the doc in the last column and follows it as a checklist, which is
@@ -57,7 +87,7 @@ plan-vs-render, always on; the style gates report only, `TASTE=1` makes them blo
 [`docs/TASTE.md`](docs/TASTE.md)). Then the eye rungs: `make probe` → `make audit` → `make beats` →
 `make ledger` → **`make judge`** (the gate that SEES, required post-render; `docs/JUDGE.md`).
 
-## The loop  `[ref: make list]`
+## The full command list (stages 2, 5, 7, 8)  `[ref: make list]`
 
 Every target belongs to one of ten phases (preflight → dev → check → ship → judge → ledger → study →
 engine → site → maintenance); `make list` (alias `make help`) reads the Makefile itself and prints
@@ -77,8 +107,7 @@ make judge D=path/to/video.json  # the eye, MANDATORY post-render, the only step
 make ledger D=path/to/video.json # prove it is not a repeat; ledger-add after the user approves
 ```
 
-`make ship` DECLARES its own ladder before it runs; every other doc names these same phases the same
-way. Reaching `make judge` is not the stop: load `vawe-review-loop` for when to stop iterating.
+Reaching `make judge` is not the stop: load `vawe-review-loop` for when to stop iterating.
 
 Single-shot: `./bin/vawe path/to/video.json` (JSON → `out/<name>.mp4`, `--draft` = fast); `make video
 D=<file>` (author-check → render → audit; `NOCHECK=1`/`NOAUDIT=1` skip a half). Every JSON **must**
@@ -100,7 +129,7 @@ print where they moved) for one release. `make demo Q="…"` writes a ten-second
 
 > Making something good: read [`docs/TASTE.md`](docs/TASTE.md) first.
 
-## HOW A REAL FILM GETS MADE: DECIDERS WRITE, CRITICS REPORT  `[ref: make critics]`
+## Direction: deciders write, critics report (stage 6)  `[ref: make critics]`
 
 One agent holding the whole film does every part of it worse. Authoring needs several DIFFERENT
 judgements (what this beat shows, what moves, what a cut means, what the copy earns) and they do not
@@ -147,34 +176,7 @@ a full authoring pass, any recreation, anything you intend to ship.** Below that
 Full roster, verdict shapes, and the six brief lines a fan-out pays for by omitting:
 [`docs/CRAFT/SUBAGENTS.md`](docs/CRAFT/SUBAGENTS.md).
 
-## THE EIGHT STAGES, IN ORDER  `[gated: scripts/live/stage-gate.mjs]` `[live: scripts/live/stage-say.mjs]`
-
-**`make stage D=<film>` says which stage a film is in and the ONE next command.** Read from the files
-on disk, never from a stored state, so it cannot disagree with the repo.
-
-| # | stage | what happens | the command |
-|---|---|---|---|
-| 1 | **brief** | ask what the product is, and the four other things a site would have given | `make quiz NAME= URL=` |
-| 2 | **plan** | the beat table, the through-line, the spectacle, the exclusions | `make scaffold` → `make storyboard-check` |
-| 3 | **approval** | the plan is SHOWN and a person says yes | `make studio D=` (press `1`), then the USER runs `/vawe-approve` |
-| 4 | **design** | the theme is settled and every frame the plan named is drawn | stage kit → the reference's grammar → the smallest useful `ui-skills` set → `make preview` → look at it |
-| 5 | **assemble** | the frames become a scene | `make assemble D=` |
-| 6 | **direct** | motion, then transitions, then sound, in that order | `make critics D= DECIDERS=1` |
-| 7 | **render** | | `make ship D=` |
-| 8 | **judge** | the only step that SEES | `make judge D=` → `make ledger D=` |
-
-**Three of those transitions are refused rather than requested**, because this order was written here,
-printed by `make critics`, and still run backwards by an author who could quote it
-(`docs/MISTAKES.md` #591, #595). `scripts/live/stage-gate.mjs` denies, at `PreToolUse`, before any
-permission mode: writing a fragment no storyboard claims · writing `layers` into an unapproved film ·
-writing `approved:` at all, which is the user's signature and never an agent's. The way out of each is
-the missing artefact, and there is no flag, because a flag would be a way to skip the step.
-
-**And the order is re-stated every turn**, not read once: `scripts/live/stage-say.mjs` names the open
-stage and its one next command at `UserPromptSubmit`. A rule read at session start is a rule that fails
-late in a long session, which is exactly when it matters.
-
-## "LET'S MAKE A VIDEO" IS A REQUEST TO ASK QUESTIONS  `[gated: scripts/gates/author-check.mjs#no-storyboard]`
+## Stage 1, brief: ask before you build  `[gated: scripts/gates/author-check.mjs#no-storyboard]`
 
 Claude Code loads `vawe-video-planning`; other agents read
 [`docs/CRAFT/AUTHORING-WALKTHROUGH.md`](docs/CRAFT/AUTHORING-WALKTHROUGH.md). Do not open a JSON file
@@ -186,8 +188,6 @@ treatment, cuts, CTA) is the artefact, not the storyboard: present it and wait.
 beat beside its real hand-written fragment, live. Not loose html files opened out of `/tmp`, and not
 grey boxes: `make panels` sizes a box from `shot:` and cannot say what is in the frame, which is the
 only question the person signing off can answer (MISTAKES #592).
-
-## THE BRIEF: what the requester says, and what is YOUR job  `[eye]`
 
 The requester should never have to name a colour, an easing, a layer type or a preset. Their whole
 request is five lines, and any may be missing:
@@ -221,7 +221,7 @@ scripts/dev/library-stats.mjs` and cite what it prints. Content spine: hook → 
 Never spoil the payoff; order beats toward the most counterintuitive moment; be honest, on-screen
 copy must be true, and a specific fact beats a dry number.
 
-## Built-in rules  `[built: core/validate/validate.mjs:764]`
+## Built-in rules (checked everywhere)  `[built: core/validate/validate.mjs:764]`
 - No em-dashes (U+2014) in any on-screen text: the validator rejects them. Use a comma, period, or ·.
 - First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
 - `{"preset": "black"}` (`core/backgrounds/presets.js:117`) is solid `#000000`, no grain: it means
@@ -230,14 +230,7 @@ copy must be true, and a specific fact beats a dry number.
   internal form and the validator refuses them when written directly;
   `scripts/author/migrate-junctions.mjs` converts an old scene.
 
-## Launch-video rules  `[eye]`
-
-Crawl EVERY page, not the homepage. Give the logo real size (~100px+ beside a title, 150px+ on the
-end card). Pair entrances with exits directionally (`slide-right` leaves `slide-left`). Blur out
-(`out:"defocus"`) when moving would fight dense content. Put a changing word in a fixed-width chip so
-nothing after it reflows.
-
-## Craft rules the gates can't fully see  `[eye]`
+## Stage 4, design: craft rules the gates can't fully see  `[eye]`
 
 - **HTML first.** If CSS already does the thing, write the CSS. No CSS `animation`/`transition`/
   `opacity`/`filter` (the engine owns the clock); use `parts`, a selector giving every matched element
@@ -250,8 +243,12 @@ nothing after it reflows.
   it and improves the frame, it was never working. [`docs/CRAFT/LAYOUT.md`](docs/CRAFT/LAYOUT.md).
 - **Real assets first, emoji last.** `make capture` for real UI, `make assets` for logos (never a bare
   `curl`, a 404 writes a zero-byte file). Never embed copyrighted material. [`docs/CRAFT/IMAGERY.md`](docs/CRAFT/IMAGERY.md).
+- **Launch videos:** crawl EVERY page, not the homepage. Give the logo real size (~100px+ beside a
+  title, 150px+ on the end card). Pair entrances with exits directionally (`slide-right` leaves
+  `slide-left`). Blur out (`out:"defocus"`) when moving would fight dense content. Put a changing
+  word in a fixed-width chip so nothing after it reflows.
 
-## Waivers  `[gated: scripts/gates/author-check.mjs]`
+## Stage 7, render: waivers  `[gated: scripts/gates/author-check.mjs]`
 
 A rule you deliberately break is waived IN THE SCENE, with a reason. A waiver with no `_why` blocks:
 
