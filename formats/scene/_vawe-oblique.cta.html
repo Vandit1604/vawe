@@ -114,7 +114,14 @@
 
 <div class="g-root kit-ground-paper">
   <div class="ct-stage">
-    <div class="ct-halo"><img class="ct-mark" src="/site/public/assets/favicon.svg" alt="vawe"></div>
+    <!-- The mark is INLINE, not an <img src>. It was `/site/public/assets/favicon.svg`, a leading slash,
+     which resolves to the filesystem root and 404s, so the last frame of the film ended on a broken
+     image icon inside the halo. A renderer should not depend on a file load it cannot see fail: this
+     is 678 bytes and it is the same cobalt tile and white wave the site's own favicon draws. -->
+    <div class="ct-halo"><svg class="ct-mark" viewBox="0 0 32 32" role="img" aria-label="vawe">
+      <rect width="32" height="32" rx="7" fill="#2563eb"/>
+      <path d="M4 19 Q9 8 14 19 T24 19 Q27 14 29 10" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>
+    </svg></div>
     <p class="kit-hook say"><span class="w">Write</span> <span class="w">it.</span>
        <span class="w">Run</span> <span class="w">it.</span> <span class="w w-accent">Ship</span> <span class="w">it.</span></p>
     <p class="kit-caption ct-url">vawe.dev</p>
