@@ -93,6 +93,64 @@ call order and the accumulator set from the source text. It cannot prove a track
 rather than a stale one: that is a runtime property of one scene at one t, and the things that do see
 it are `make probe`, `make canvas-purity` and `make snap-all`.
 
+## The seven subsystems, and who owns what
+
+Mapped by reading the code, not the docs. Every claim below cites a file; go there before trusting it.
+
+| # | subsystem | owns | the one thing to know |
+|---|---|---|---|
+| 1 | render pipeline | `internal/`, `cmd/`, `cli/`, `core/engine/` | workers are TABS on one browser (`internal/scene/scene.go:260`), and block sugar expands server-side in Node BEFORE the browser sees the JSON (`internal/render/expand.go`) |
+| 2 | scene compiler + timeline | `formats/scene/scene.js`, `core/timeline/`, `core/tracks/`, `core/motion/` | boxes are resolved for ALL layers before ANY track runs, which is why `follow` cannot chain and says so by name (`core/tracks/follow.js:52`) |
+| 3 | what can be drawn | `core/layers/`, `core/surfaces/`, `core/type/`, `core/fx/`, `core/stings/`, `core/backgrounds/` | 24 author-facing layer types, but six of them (`shader`, `paint`, `raymarch`, `three`, `globe`, `particles`) are ONE primitive with backends in `core/surfaces/` (`core/layers/index.js:30-38`) |
+| 4 | look and layout | `core/looks/`, `core/color/`, `core/layout/`, `core/registry/`, `themes/`, `presets/` | `resolveLook` DERIVES scale and cuts from the theme's motion by regression over seven real themes; `layout` is a deliberate constant because no signal was found (`core/registry/theme-contract.js:243`) |
+| 5 | cuts, camera, audio | `core/transitions/`, `core/cuts/`, `core/camera-moves/`, `core/audio/`, `core/beats/` | the 3D rig is a FILM-WIDE switch: one tilted layer or one non-zero camera angle puts the whole film on it (`formats/scene/scene.js:1107`) |
+| 6 | authoring | `scripts/author/`, `scripts/lib/`, `scripts/dev/` | `assemble` owns only the ids it generates and preserves everything else through an explicit allowlist; it is idempotent by that list, not by nature (`scripts/author/assemble.mjs:44-50`) |
+| 7 | verification | `scripts/gates/`, `scripts/live/`, `verify/` | the ladder always runs every step; `TASTE=1` changes severity, not membership, and `HARD_CODES` escalates by FINDING CODE regardless of which step produced it (`scripts/gates/author-check.mjs:146`) |
+
+**`three` is native, and this is where people miss it.** `core/layers/index.js:36` registers a real
+three.js scene graph, implemented in `core/surfaces/three-fx.js` with eleven effects including
+`extrudeText` (`:700`), which builds extruded type from the repo's own baked font and THROWS rather
+than substituting a different face. `ls core/layers/` does not show it and `scene.html` does not import
+it, so both obvious checks say it is absent. It is not.
+
+## Coupling, measured
+
+Counted from the real import graph, not from intent:
+
+- `scripts/gates` imports from **14 different `core/` subsystems** (timeline 26, engine 19, layers 19,
+  layout 16, surfaces 15, registry 13, and eight more). The checks know the engine's private anatomy,
+  which is how `docs/MISTAKES.md` #229, #232 and #242 happened three times to the same gate.
+- **`author` and `gates` are a two-way dependency.** Seven files under `scripts/author/` import from
+  `scripts/gates/`; five gate files import back into `scripts/author/`. `storyboard-parse.mjs` is the
+  single storyboard reader and lives in `author/` although `gates/` depends on it just as much.
+- `scripts/lib` is the hub: 131 imports from gates, 37 from author. That is one shared definition
+  rather than many, and it exists because `craft-live` and `frame-check` once drifted on one rule.
+
+## Traps: what a careful reader still gets wrong
+
+Each of these cost someone real time. Each cites the file that settles it.
+
+- **A missing `type` means `text`; an unknown `type` throws.** Same-looking inputs, opposite outcomes
+  (`core/layers/index.js:104-110`).
+- **JPEG capture is not byte-stable across renders.** Only `renderFrame(n)` purity and the DOM are
+  guaranteed, never pixel bytes (`internal/scene/scene.go:575`). Any pixel measurement needs a noise floor.
+- **Stillness is a report, never a gate**, and its numbers do not compare across worker counts unless
+  `StillnessAcrossShards` is used (`scene.go:917`, `:1061`).
+- **A part's exit is anchored to the LAYER's end**, not to when it entered (`formats/scene/scene.js:549-556`).
+  So in a merged run only the last beat keeps its exit.
+- **`look.backdrop` is scaffold-only and never read at render** (`core/registry/theme-contract.js:106`).
+  The film's own `bg[]` is what draws.
+- **`contrastRatio` and `isLightBg` live in `core/motion/motion.js`**, not in `core/color/`, which only
+  re-exports them.
+- **Safe-area margin and platform chrome combine with `max()`, never addition** (`core/layout/safe.js:193`).
+- **A waiver needs a reason of at least 12 characters and nothing checks that it is a GOOD reason**
+  (`scripts/gates/author-check.mjs:231`).
+- **`NOCHECK=1` does not skip validation.** `ENGINE_REFUSES` holds `validate` because the engine runs
+  the same validator at boot (`author-check.mjs:668`).
+- **Never reorder the sting unit imports**: import order IS the numeric shader id (`core/stings/index.js:88`).
+- **"Beat" means three different things**: a musical pulse (`core/beats/`), a narrative unit (the
+  storyboard), and a keyframe array shape. Say which one you mean.
+
 ## Directory map
 
 | Path | What | Notes |
