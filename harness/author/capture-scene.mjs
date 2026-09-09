@@ -14,7 +14,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
-import { localizeCapture, mediaTargetFor } from '../brand/localize-assets.mjs';
+import { localizeCapture, mediaTargetFor } from '../../scripts/brand/localize-assets.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const argv = process.argv.slice(2);

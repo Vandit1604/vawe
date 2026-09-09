@@ -203,7 +203,7 @@ for (const rel of FILES) {
   // it was quoted inside a comment. Whole-line comments only, matching that precedent: a trailing
   // stripper eats the `//` in a URL inside a string, which is a claim going quiet rather than a false
   // one being reported. Line numbers are preserved so a finding still names the line a human opens.
-  const isCode = rel.startsWith('scripts/') || rel.startsWith('quality/');
+  const isCode = rel.startsWith('scripts/') || rel.startsWith('harness/') || rel.startsWith('quality/');
   const text = !isCode ? lines
     : fs.readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
         .split('\n').map((l) => (/^\s*(\/\/|\*)/.test(l) ? '' : l));

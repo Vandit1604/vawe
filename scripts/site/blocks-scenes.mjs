@@ -18,12 +18,12 @@
 // the live player scales the same 1920x1080 iframe and offsets it by the same rect (see BlockLive).
 // So the frame rect is not a rendering detail, it is shared geometry, and it ships as data.
 import fs from 'node:fs';
-import { sameWithinNoise } from '../lib/png-diff.mjs';
+import { sameWithinNoise } from '../../harness/lib/png-diff.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
-import { serveRepo, launchPage, waitForEngine } from '../lib/render-harness.mjs';
+import { serveRepo, launchPage, waitForEngine } from '../../harness/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(repoRoot, 'site/public/assets/blocks');
