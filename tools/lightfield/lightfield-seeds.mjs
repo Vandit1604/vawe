@@ -1,7 +1,7 @@
-// scripts/author/lightfield-seeds.mjs: search the seed space for the layout closest to a reference.
+// tools/lightfield/lightfield-seeds.mjs: search the seed space for the layout closest to a reference.
 //
-//   node scripts/author/lightfield-seeds.mjs refs/lightfield-ref.jpg [howMany]
-//   EXTRA=2 node scripts/author/lightfield-seeds.mjs        # how many accent stops the palette may use
+//   node tools/lightfield/lightfield-seeds.mjs refs/lightfield-ref.jpg [howMany]
+//   EXTRA=2 node tools/lightfield/lightfield-seeds.mjs        # how many accent stops the palette may use
 //
 // The seed decides where the light sits, and that is ten numbers at once. Searching it through the
 // browser costs about a second a candidate, so a few hundred tries is all you get, and a few hundred
