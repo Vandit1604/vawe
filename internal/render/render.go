@@ -218,32 +218,34 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	// these frames are JPEG by default (scene.CaptureExt), and scripts/gates/motion-split.mjs measured a
 	// JPEG quantisation floor around 0.9 against 0.05 for a lossless PNG of the same instant. So the
 	// printed line below names its own codec rather than implying an exact comparison.
-	// A NUMBER MEASURED ACROSS WORKERS IS NOT A PROPERTY OF THE FILM, so it is not printed.
-	//
-	// The capture shards across o.Workers tabs and adjacent frames can come from different ones. Those
-	// tabs do not produce identical pixels, so a frame pair that straddles a worker boundary reports a
-	// large change with nothing on screen having moved. Measured on vawe-teaser, same JSON, same
-	// metric, same frame indices, only -workers differing:
+	// A NUMBER THAT COMPARES TWO WORKERS' PIXELS IS NOT A PROPERTY OF THE FILM, so it used to print
+	// nothing at all above -workers 1. The capture shards across o.Workers tabs and adjacent frames
+	// can come from different ones. Those tabs do not produce identical pixels, so a frame pair that
+	// straddles a worker boundary reports a large change with nothing on screen having moved. Measured
+	// on vawe-teaser, same JSON, same metric, same frame indices, only -workers differing:
 	//
 	//   1 worker    3.19 2.53 2.40 2.37 2.45 1.01 1.05 0.96 0.86 0.97 0.95 0.46   median 1.06
 	//   6 workers   2.47 1.94 3.71 1.26 4.54 4.39 0.49 4.23 0.51 4.41 4.36 4.41   median 4.23
 	//
 	// The one-worker row is the film: high through the entrance settle, about 1.0 across the hold,
 	// falling at the end. The six-worker row swings between 0.49 and 4.54 with no relation to what is
-	// on screen. It is measuring worker boundaries. The printed figure moved 2.47 to 0.97 on a flag
-	// that changes nothing about the film, which is the definition of a number that cannot be quoted.
+	// on screen. It is measuring worker boundaries.
 	//
-	// This does not fix the underlying difference between tabs, which is a real determinism defect and
-	// is bigger than this line. It stops the engine stating a measurement it cannot make. `make
-	// motion-split` measures from a single page and is the number to use.
+	// scene.StillnessAcrossShards fixes this without touching capture: it never compares two frames
+	// unless Meta.FrameWorker says the same tab drew both of them, which is the one guarantee
+	// `make motion-split` also relies on (a single page, seeked in order). See its doc comment in
+	// internal/scene/scene.go for how a same-worker pair is found and why its delta is divided by the
+	// frame gap before the usual fps normalisation. This does not fix the underlying difference
+	// between tabs, which is a real determinism defect and is bigger than this line; it only stops the
+	// number that difference corrupts from ever being the number reported.
+	var still, med, peak float64
+	var ok bool
 	if o.Workers > 1 {
-		fmt.Printf("✓ done → %s  (%.1fs, %d frames)\n", out, meta.Duration, meta.TotalFrames)
-		fmt.Printf("  · motion not measured: the capture sharded across %d workers, and adjacent frames from\n", o.Workers)
-		fmt.Printf("    different tabs differ in pixels the film never changed. Use `make motion-split D=<scene>`,\n")
-		fmt.Printf("    or re-render with -workers 1 if you want this line to carry a figure.\n")
-		return nil
+		still, med, peak, ok = scene.StillnessAcrossShards(framesDir, meta.TotalFrames, scene.CaptureExt(transparent), meta.FPS, meta.FrameWorker)
+	} else {
+		still, med, peak, ok = scene.Stillness(framesDir, meta.TotalFrames, scene.CaptureExt(transparent), meta.FPS)
 	}
-	if still, med, peak, ok := scene.Stillness(framesDir, meta.TotalFrames, scene.CaptureExt(transparent), meta.FPS); ok {
+	if ok {
 		codec := strings.TrimPrefix(scene.CaptureExt(transparent), ".")
 		fmt.Printf("✓ done → %s  (%.1fs, %d frames · %.0f%% still on %s, motion %.2f, peak %.2f)\n",
 			out, meta.Duration, meta.TotalFrames, still, codec, med, peak)
@@ -257,5 +259,9 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 		return nil
 	}
 	fmt.Printf("✓ done → %s  (%.1fs, %d frames)\n", out, meta.Duration, meta.TotalFrames)
+	if o.Workers > 1 {
+		fmt.Printf("  · motion not measured: too few frames landed on any one worker to compare. Use\n")
+		fmt.Printf("    `make motion-split D=<scene>`, or re-render with -workers 1.\n")
+	}
 	return nil
 }
