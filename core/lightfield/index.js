@@ -46,7 +46,7 @@ function tag(opts) {
 // between the lobes, and those lanes are most of what the eye reads as depth. The seed places the
 // cluster, so two fields sharing a palette are still two fields.
 // The CSS below is built from this, and so is the search in
-// scripts/research/lightfield/lightfield-fit.mjs. One source, so a fitted seed cannot mean two different layouts.
+// research/lightfield/lightfield-fit.mjs. One source, so a fitted seed cannot mean two different layouts.
 // How a blob fades. It is here, exported, because the arithmetic search in lightfield-seeds.mjs
 // composites the same blobs by hand: two copies of these numbers is two different layouts wearing
 // one seed.

@@ -1,7 +1,7 @@
-// scripts/research/lightfield/lightfield-check.mjs: one row per LOOK, not one averaged number.
+// research/lightfield/lightfield-check.mjs: one row per LOOK, not one averaged number.
 //
-//   node scripts/research/lightfield/lightfield-check.mjs          every look that has a reference
-//   node scripts/research/lightfield/lightfield-check.mjs blinds   just one
+//   node research/lightfield/lightfield-check.mjs          every look that has a reference
+//   node research/lightfield/lightfield-check.mjs blinds   just one
 //
 // WHY THIS EXISTS. `lightfield` was one generator with five presets and one fidelity score, taken
 // against one photograph. That score said 12.7 while a human said "that is not it" (docs/MISTAKES.md
@@ -17,10 +17,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { ALL_GENERATORS, defaultsOf } from '../../../core/layout/generators.js';
+import { ALL_GENERATORS, defaultsOf } from '../../core/layout/generators.js';
 import { shoot } from './lightfield-shot.mjs';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const only = process.argv[2];
 
 const merge = (base, patch) => {
