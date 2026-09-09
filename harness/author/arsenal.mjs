@@ -201,7 +201,7 @@ export async function collect() {
   // A REGISTRY ENTRY WINS where both know a name, because it carries `slot` and `aka` and the section
   // does not. The section only ever fills gaps.
   try {
-    const { sections } = await import('../site/effects-catalog.mjs');
+    const { sections } = await import('../../scripts/site/effects-catalog.mjs');
     for (const [title, , names, slot, opts = {}] of sections) {
       const kind = opts.kind || title.replace(/\s*\(.*\)\s*$/, '').replace(/s$/, '').toLowerCase();
       for (const entry of names || []) {

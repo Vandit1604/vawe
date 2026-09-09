@@ -31,7 +31,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { hashOf } from '../lib/receipt.mjs';
+import { hashOf } from '../../harness/lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FILMS = path.join(ROOT, 'site/public/assets/films');
