@@ -1,5 +1,5 @@
 // core/motion.js: pure motion math + scene helpers (easing, spring, interpolate,
-// transforms, text-fit, colour). No DOM, no fetch, safe to import in node (lib-test).
+// transforms, colour). No DOM, no fetch, safe to import in node (lib-test).
 // The theme/clock/boot RUNTIME lives in core/boot.js.
 // just time->data transforms + the scene boot.
 
@@ -715,36 +715,6 @@ export const trackingFor = (px, dark = false) => {
 export function kenBurns(t, dur, { from = 1.0, to = 1.07, fx = 0.5, fy = 0.42, easing = easeInOutCubic } = {}) {
   const p = easing(clamp01(dur > 0 ? t / dur : 1));
   return { transform: `scale(${lerp(from, to, p).toFixed(4)})`, transformOrigin: `${(fx * 100).toFixed(1)}% ${(fy * 100).toFixed(1)}%` };
-}
-
-// ---------- text measuring (another engine measureText/fitText parity, browser only) ----------
-// measureText: pixel width of `text` in CSS `font` shorthand. fitText: largest px size (stepping
-// down) whose rendered width fits maxWidth. Call at build time (fonts already loaded in boot).
-let _measureCtx;
-export function measureText(text, font) {
-  if (!_measureCtx) _measureCtx = document.createElement('canvas').getContext('2d');
-  _measureCtx.font = font;
-  return _measureCtx.measureText(text).width;
-}
-export function fitText(text, maxWidth, { font = (px) => `800 ${px}px Inter`, max = 168, min = 24, step = 2 } = {}) {
-  let px = max;
-  while (px > min && measureText(text, font(px)) > maxWidth) px -= step;
-  return px;
-}
-// fitBox(el, {maxW, maxH, max, min}): MULTI-LINE overflow-safe fit (another engine fitTextOnNLines parity).
-// `el` must be in-DOM. Binary-searches the largest font-size where the element (wrapping at maxW) fits
-// within maxH AND no word overflows the width. Layout-only → deterministic at build time. Sets + returns px.
-export function fitBox(el, { maxW, maxH, max = 168, min = 24 }) {
-  el.style.width = maxW + 'px';
-  let lo = min, hi = max, best = min;
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1;
-    el.style.fontSize = mid + 'px';
-    if (el.scrollHeight <= maxH + 1 && el.scrollWidth <= maxW + 1) { best = mid; lo = mid + 1; }
-    else hi = mid - 1;
-  }
-  el.style.fontSize = best + 'px';
-  return best;
 }
 
 // ---------- sequencing (another engine Sequence/TransitionSeries parity), pure in n ----------
