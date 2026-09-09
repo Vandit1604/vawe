@@ -93,20 +93,25 @@ export function profile(frames, { fps = SAMPLE_FPS, windowS = WINDOW_S } = {}) {
   return out;
 }
 
-if (process.argv.includes('--self-test')) {
-  const flat = new Uint8Array(GW * GH).fill(120);
-  const drift = Uint8Array.from(flat, (v) => v + 3);                       // every cell moves a little
-  const reveal = Uint8Array.from(flat); for (let i = 0; i < 90; i++) reveal[i] = 250;  // one small region
-  const d = pairProfile(flat, drift), r = pairProfile(flat, reveal);
-  if (!(d.share > LOCAL_SHARE)) { console.error(`a whole-frame drift must NOT read as local (share ${d.share})`); process.exit(1); }
-  if (!(r.share <= LOCAL_SHARE)) { console.error(`a small reveal must read as local (share ${r.share})`); process.exit(1); }
-  if (!(pairProfile(flat, flat).amount === 0)) { console.error('two identical frames must measure zero'); process.exit(1); }
-  console.log('  ✓ motion-floor self-test: a drift reads global, a reveal reads local, stillness reads zero');
-  process.exit(0);
-}
-
-// ── the CLI. Guarded, so importing this module for a test does not run the gate and exit. ──────
+// ── the CLI. Guarded, so importing this module for a test does not run the gate and exit. The
+// self-test lives INSIDE this guard for the same reason: it used to sit at module scope, so any
+// script that imported this file while its own `--self-test` flag was on process.argv ran THIS
+// gate's self-test and exited before its own code began. scripts/dev/motion-lab.mjs hit exactly
+// that and had to hide the flag around the import. A guard that covers only half a file is not
+// a guard.
 if (import.meta.url === `file://${process.argv[1]}`) {
+  if (process.argv.includes('--self-test')) {
+    const flat = new Uint8Array(GW * GH).fill(120);
+    const drift = Uint8Array.from(flat, (v) => v + 3);                       // every cell moves a little
+    const reveal = Uint8Array.from(flat); for (let i = 0; i < 90; i++) reveal[i] = 250;  // one small region
+    const d = pairProfile(flat, drift), r = pairProfile(flat, reveal);
+    if (!(d.share > LOCAL_SHARE)) { console.error(`a whole-frame drift must NOT read as local (share ${d.share})`); process.exit(1); }
+    if (!(r.share <= LOCAL_SHARE)) { console.error(`a small reveal must read as local (share ${r.share})`); process.exit(1); }
+    if (!(pairProfile(flat, flat).amount === 0)) { console.error('two identical frames must measure zero'); process.exit(1); }
+    console.log('  ✓ motion-floor self-test: a drift reads global, a reveal reads local, stillness reads zero');
+    process.exit(0);
+  }
+
   const arg = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
   if (!arg) { console.error('usage: make motion-floor D=formats/scene/<film>.json'); process.exit(2); }
   const base = String(arg).replace(/\.json$/, '');
