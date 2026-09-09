@@ -1,13 +1,13 @@
-// scripts/research/lightfield/lightfield-test.mjs: the contract, as runnable assertions.
+// research/lightfield/lightfield-test.mjs: the contract, as runnable assertions.
 //
-//   node scripts/research/lightfield/lightfield-test.mjs
+//   node research/lightfield/lightfield-test.mjs
 //
 // Determinism and failing early are claims, and a claim nobody runs is a comment. These are the two
 // properties the generator is for, so they are checked first and loudest.
 
 import { createHash } from 'node:crypto';
-import { lightfield, PATTERNS, MOTIONS, DIRECTIONS } from '../../../core/lightfield/index.js';
-import { PRESETS } from '../../../core/lightfield/presets.js';
+import { lightfield, PATTERNS, MOTIONS, DIRECTIONS } from '../../core/lightfield/index.js';
+import { PRESETS } from '../../core/lightfield/presets.js';
 
 let failures = 0;
 const sha = (s) => createHash('sha256').update(s).digest('hex').slice(0, 16);

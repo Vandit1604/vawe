@@ -1110,11 +1110,11 @@ Not applied. `_lightfall.html` was out of scope for this pass and is hand-baked,
 holds: none
 
 ## 271. `make preview` is the wrong page for a full-bleed fragment
-`scripts/research/lightfield/lightfield-shot.mjs` gives one: a stage at the exact output size with `--t` set explicitly.
+`research/lightfield/lightfield-shot.mjs` gives one: a stage at the exact output size with `--t` set explicitly.
 holds: none
 
 ## 272. a fidelity metric that averages away the thing it is grading
-`scripts/research/lightfield/lightfield-metrics.mjs` now defines both, once, and both are printed: `blockError` for the colour field, `striping` for the pattern (`edge`, the mean absolute horizontal step;...
+`research/lightfield/lightfield-metrics.mjs` now defines both, once, and both are printed: `blockError` for the colour field, `striping` for the pattern (`edge`, the mean absolute horizontal step;...
 holds: none
 
 ## 273. four abandoned search processes, all appending to one log
@@ -1165,7 +1165,7 @@ The generator playground went up so people could turn the dials in a browser.
 holds: none
 
 ## 284. a screenshot taken at `load` is a picture of the browser's timing
-`stableShot` (`scripts/research/lightfield/lightfield-render.mjs`) shoots until two consecutive frames are byte-identical, and throws when that never happens.
+`stableShot` (`research/lightfield/lightfield-render.mjs`) shoots until two consecutive frames are byte-identical, and throws when that never happens.
 holds: none
 
 ## The block option contract, and two dead props it exposed
@@ -1204,7 +1204,7 @@ What happened. Two of three reference photographs came out with three hard-edged
 What happened. The new band-counting metric reported 292 bands for a picture with twelve panels. Root cause. It counts local maxima in a column-luma profile and collapses the extrema chain until...
 
 ## Also found, not fixed
-`scripts/research/lightfield/lightfield-fit.mjs` imported `open`, `W` and `H` from `lightfield-render.mjs`, which exported none of them, so the tool could not run at all and nothing said so.
+`research/lightfield/lightfield-fit.mjs` imported `open`, `W` and `H` from `lightfield-render.mjs`, which exported none of them, so the tool could not run at all and nothing said so.
 
 ## 290. the silhouette is per-element, and the reference's is one landscape
 Attempted and reverted, twice, and recorded so the next attempt starts past it.
@@ -1271,7 +1271,7 @@ holds: none
 holds: none
 
 ## 306. unrelated, found on the way: lightfield-seeds.mjs cannot run
-`scripts/research/lightfield/lightfield-seeds.mjs` cannot run: it imports `scripts/research/lightfield/lightfield-model.mjs`, which is not in the repository.
+`research/lightfield/lightfield-seeds.mjs` cannot run: it imports `research/lightfield/lightfield-model.mjs`, which is not in the repository.
 holds: none
 
 ## 307. the randomiser made ugly pictures, and the presets said exactly why

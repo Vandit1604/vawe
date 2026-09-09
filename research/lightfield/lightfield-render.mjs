@@ -1,4 +1,4 @@
-// scripts/research/lightfield/lightfield-render.mjs, take a screenshot that is the same picture every time.
+// research/lightfield/lightfield-render.mjs, take a screenshot that is the same picture every time.
 //
 // `page.screenshot()` right after `load` is a lie waiting to happen. A lightfield is dozens of blended,
 // masked elements, and the compositor is free to hand back a frame before they have all rastered: the
@@ -15,7 +15,7 @@
 // page writes a fixed `--t`), so "settled" here means rastered, not motionless.
 
 import puppeteer from 'puppeteer';
-import { lightfield } from '../../../core/lightfield/index.js';
+import { lightfield } from '../../core/lightfield/index.js';
 import { pixels } from './lightfield-metrics.mjs';
 import { W, H } from './lightfield-model.mjs';
 

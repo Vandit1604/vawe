@@ -1,6 +1,6 @@
-// scripts/research/lightfield/lightfield-compare.mjs: measure a generated field against the reference.
+// research/lightfield/lightfield-compare.mjs: measure a generated field against the reference.
 //
-//   node scripts/research/lightfield/lightfield-compare.mjs refs/lightfield-ref.jpg out/lightfield-ref.png
+//   node research/lightfield/lightfield-compare.mjs refs/lightfield-ref.jpg out/lightfield-ref.png
 //
 // "Looks close" is not a claim anybody can check, so this prints numbers:
 //   - mean luma and mean R, G, B over the whole frame
@@ -56,7 +56,7 @@ const SAMPLES = [
 
 const [refFile, genFile] = process.argv.slice(2);
 if (!refFile || !genFile) {
-  console.error('usage: node scripts/research/lightfield/lightfield-compare.mjs <reference> <generated>');
+  console.error('usage: node research/lightfield/lightfield-compare.mjs <reference> <generated>');
   process.exit(1);
 }
 
