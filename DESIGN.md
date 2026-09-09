@@ -268,3 +268,25 @@ reference, and importing a second one is how a brand's video stops looking like 
 
 **Already vendored, so never fetched:** `pbakaus/impeccable`. It runs inside `make preview` as the
 detector. Do not fetch the skill version alongside it.
+
+**Consulted 2026-09-09 for the studio "every beat shows a picture" fix** (`scripts/dev/studio.mjs`,
+`scripts/dev/studio-page.mjs`). Read `ui-skills categories`, then `color` and `visual`.
+
+**Rejected, both:**
+- **`accesslint/contrast-checker`** (color, accessibility). Read the whole skill: it drives a live
+  browser through a full WCAG audit protocol, built for auditing a shipped product surface. This task
+  was one token pair (`--bg`, `--line`) in a dev tool nobody but an author ever opens. The repo's own
+  convention already measures contrast inline as a comment next to the token (e.g. `--muted:#6E6E6E`,
+  "5.1:1 on the panel. Measured, not guessed"), so the fix computed WCAG relative-luminance ratios by
+  hand and kept the same comment style, rather than importing a heavier audit workflow for one number.
+- Every whole-look/color-system skill in `visual` and `color` (`ericzakariasson/scandinavian-design`,
+  `pbakaus/colorize`, the OKLCH palette generators). This room is deliberately achromatic (studio-page.mjs's
+  own header: "any hue in the surround skews the judgement of the picture"), so a fetched palette
+  system would import hue or a different elevation model into a surface that has to stay grey-scale by
+  design. The local system, not the default, wins here.
+
+**What the fix actually is:** a fragment-less beat now draws an inline SVG sketch from its own
+storyboard fields (`archetype:`, `picture:`/`object:`, `onscreen:`) instead of a grey box, and the dark
+theme's ground moved from `#161616` to true `#000000`, with `--line`/`--line-2` alpha raised (0.09→0.16,
+0.18→0.35) so a panel boundary still reads a non-text contrast ratio against pure black (measured:
+0.16 alpha is 1.44:1, 0.35 alpha is 3.00:1, WCAG 1.4.11's floor for a UI boundary).
