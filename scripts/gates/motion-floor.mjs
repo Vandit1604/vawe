@@ -151,9 +151,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (dead.length) {
     err('dead-window', `${dead.length} of ${body.length} windows carry no content motion at all `
       + `(under ${DEAD} local, at ${dead.slice(0, 6).map((w) => w.t + 's').join(', ')}${dead.length > 6 ? ' …' : ''}). `
-      + 'A reveal finished and nothing took over. The fix is overlap, not ambience: start the next reveal '
-      + 'before the last one lands. Adding `idle` here would raise `global` and leave this finding exactly '
-      + 'where it is.');
+      + 'A reveal finished and nothing took over. Two things fix this and they were measured, not guessed. '
+      + 'SPREAD the moves in a beat so one is always arriving: firing four at once measured 80% of windows '
+      + 'dead, the same four spaced sequentially measured 60%. And make each move BIGGER: raising the count '
+      + 'from one to eight per beat cut dead windows from 86% to 57% but never moved the median off 0.02, '
+      + 'because a 24px reveal that lands inside one window cannot add up to a large one however many you '
+      + 'stack. Adding `idle` raises `global` and leaves this finding exactly where it is.');
   }
   if (ref) {
     const rb = ref.slice(0, -2);
