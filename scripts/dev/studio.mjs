@@ -149,7 +149,7 @@ const directionFloorFindings = (file) => {
 };
 
 // LIGHT IS STILL THE DEFAULT, and the dark room is the better of the two. Vawe is a white-first product,
-// so the instrument you photograph beside the site stays light; the grey room behind the toggle is where
+// so the instrument you photograph beside the site stays light; the black room behind the toggle is where
 // frames get judged, because an achromatic surround is the only one that does not skew the picture.
 const THEME0 = (process.env.THEME || 'light').toLowerCase() === 'dark' ? 'dark' : 'light';
 const page = () => studioPage({ fmt: 'scene', dataUrl, title: path.basename(dataArg), theme: THEME0 });
@@ -356,7 +356,12 @@ const studioRoutes = (req, res) => {
       let gateOut = '';
       try { gateOut = execFileSync(process.execPath, [path.join(REPO_ROOT, 'scripts/gates/storyboard-check.mjs'), sbPath], { encoding: 'utf8' }); }
       catch (e) { gateOut = String(e.stdout || '') + String(e.stderr || ''); }
-      reply({ ok: true, file: path.relative(REPO_ROOT, sbPath), theme: THEME_NAME,
+      // A fragment-less beat is still drawn, from its storyboard fields, on the film's own colours
+      // (docs/CRAFT/STORYBOARD-TEMPLATE.md archetypes): a grey box says nothing about what a beat
+      // SHOWS, and this repo's whole point is that the picture is the only thing worth approving.
+      let palette = null;
+      try { palette = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'themes', THEME_NAME + '.json'), 'utf8')).palette; } catch { /* sketch falls back to studio's own greys */ }
+      reply({ ok: true, file: path.relative(REPO_ROOT, sbPath), theme: THEME_NAME, palette,
         message: sb.message, audience: sb.audience, pace: sb.pace, spectacle: sb.spectacle, not: sb.not,
         format: sb.format, duration: sb.duration, beats, devices: referenceDevices(src),
         findings: [...gateOut.matchAll(/^\s*([✗~✓])\s+(.+)$/gm)].map((m) => ({ kind: m[1], line: m[2].trim() })) });
@@ -535,7 +540,7 @@ console.log(`    open  http://127.0.0.1:${PORT}/studio`);
 console.log(`    scrub the slider · ← → a frame · shift+← → a second · home/end the ends · space plays`);
 console.log(`    timeline below: drag it to seek · hazard bands are dead air (beat-check) · hover a bar for its ramps`);
 console.log(`    drag the divider to trade preview height for timeline height (it sticks)`);
-console.log(`    theme: light · the toggle switches to the grey room and it sticks · start dark with THEME=dark`);
+console.log(`    theme: light · the toggle switches to the black room and it sticks · start dark with THEME=dark`);
 console.log(`    Ctrl-C to stop.\n`);
 
 // Never fatal: a gate crash here must not take the server down with it.
