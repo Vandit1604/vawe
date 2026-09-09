@@ -8,7 +8,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import test from 'node:test';
+import test, { before, after } from 'node:test';
 import assert from 'node:assert';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -24,13 +24,38 @@ function run(rel, content = '') {
   return { denied: d.permissionDecision === 'deny', reason: d.permissionDecisionReason || '' };
 }
 
-// The film these cases lean on has a storyboard that passes and is NOT approved, which is the state
-// every one of the three rules is about. Asserted, so a later approval turns this into a clear failure
-// rather than three silently vacuous tests.
-const SB = 'formats/scene/vawe-oblique.storyboard.md';
+// THE FIXTURE IS BUILT, NOT BORROWED. These cases need a film whose plan passes and which nobody has
+// signed, and that is a state a real film LEAVES the moment the user approves it: leaning on
+// vawe-oblique broke all three the day it was signed. So the fixture is written here, under
+// formats/scene/ because the hook resolves a film's owner among the real films in that directory, and
+// removed again afterwards.
+const SB = 'formats/scene/stage-gate-fixture.storyboard.md';
+const FILM = 'formats/scene/stage-gate-fixture.json';
+const FRAG = 'formats/scene/_stage-gate-fixture.hook.html';
+const abs = (rel) => path.join(ROOT, rel);
+const FIXTURES = [SB, FILM, FRAG];
+
+before(() => {
+  fs.writeFileSync(abs(SB), [
+    '---',
+    'message: "A fixture film, so the denials have an unapproved plan to deny against."',
+    'audience: "the test runner"',
+    'threads: "one object, carried"',
+    '---',
+    '',
+    '## 1. hook (0.0-2.0)',
+    '- fragment: formats/scene/_stage-gate-fixture.hook.html',
+    '- onscreen: "one line"',
+    '',
+  ].join('\n'));
+  fs.writeFileSync(abs(FILM), JSON.stringify({ module: 'scene', layers: [] }, null, 1) + '\n');
+  fs.writeFileSync(abs(FRAG), '<div></div>\n');
+});
+after(() => { for (const f of FIXTURES) { try { fs.unlinkSync(abs(f)); } catch { /* already gone */ } } });
+
 test('the fixture film is unapproved, or these cases prove nothing', () => {
-  assert.ok(fs.existsSync(path.join(ROOT, SB)));
-  assert.doesNotMatch(fs.readFileSync(path.join(ROOT, SB), 'utf8'), /^approved\s*:/m);
+  assert.ok(fs.existsSync(abs(SB)));
+  assert.doesNotMatch(fs.readFileSync(abs(SB), 'utf8'), /^approved\s*:/m);
 });
 
 test('an agent may not sign off a plan', () => {
@@ -44,16 +69,16 @@ test('a storyboard is otherwise always writable, since it is the way out of ever
 });
 
 test('layers may not be written into an unapproved film', () => {
-  const r = run('formats/scene/vawe-oblique.json', JSON.stringify({ module: 'scene', layers: [{ type: 'text' }] }));
+  const r = run(FILM, JSON.stringify({ module: 'scene', layers: [{ type: 'text' }] }));
   assert.ok(r.denied);
   assert.match(r.reason, /not approved/);
   // the empty shell stays writable: it is not the film, it is the file the film will go in
-  assert.equal(run('formats/scene/vawe-oblique.json', JSON.stringify({ module: 'scene', layers: [] })).denied, false);
+  assert.equal(run(FILM, JSON.stringify({ module: 'scene', layers: [] })).denied, false);
 });
 
 test('a fragment no storyboard claims is denied, and one with a plan behind it is not', () => {
   assert.ok(run('formats/scene/_nothing-claims-this.hook.html', '<div></div>').denied);
-  assert.equal(run('formats/scene/_vawe-oblique.hook.html', '<div></div>').denied, false);
+  assert.equal(run(FRAG, '<div></div>').denied, false);
 });
 
 test('both fragment naming conventions resolve to the right film', () => {
