@@ -24,6 +24,9 @@ const dir = path.join(ROOT, 'formats/scene');
 let best = null;
 for (const f of (fs.existsSync(dir) ? fs.readdirSync(dir) : [])) {
   if (!f.endsWith('.storyboard.md')) continue;
+  // Same scratch convention roster() already applies (scripts/gates/stage.mjs): a leading underscore
+  // marks a throwaway rig fixture, never a film, so it must not be announced as one in flight.
+  if (f.startsWith('_')) continue;
   const m = fs.statSync(path.join(dir, f)).mtimeMs;
   if (Date.now() - m > DAY) continue;
   if (!best || m > best.m) best = { m, film: f.slice(0, -'.storyboard.md'.length) };
