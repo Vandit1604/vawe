@@ -1,0 +1,32 @@
+{
+ "density2": {
+  "1": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional",
+  "2": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional",
+  "3": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional",
+  "4": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional"
+ },
+ "density3": {
+  "1": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional",
+  "2": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional",
+  "3": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional",
+  "4": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional"
+ },
+ "density4": {
+  "1": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional",
+  "2": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional",
+  "3": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional",
+  "4": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional"
+ },
+ "density6": {
+  "1": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional; [data-part=\"row5\"]@fadeUp:professional; [data-part=\"row6\"]@fadeUp:professional",
+  "2": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional; [data-part=\"row5\"]@fadeUp:professional; [data-part=\"row6\"]@fadeUp:professional",
+  "3": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional; [data-part=\"row5\"]@fadeUp:professional; [data-part=\"row6\"]@fadeUp:professional",
+  "4": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional; [data-part=\"row5\"]@fadeUp:professional; [data-part=\"row6\"]@fadeUp:professional"
+ },
+ "density8": {
+  "1": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional; [data-part=\"row5\"]@fadeUp:professional; [data-part=\"row6\"]@fadeUp:professional; [data-part=\"row7\"]@fadeUp:professional; [data-part=\"row8\"]@fadeUp:professional",
+  "2": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional; [data-part=\"row5\"]@fadeUp:professional; [data-part=\"row6\"]@fadeUp:professional; [data-part=\"row7\"]@fadeUp:professional; [data-part=\"row8\"]@fadeUp:professional",
+  "3": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional; [data-part=\"row5\"]@fadeUp:professional; [data-part=\"row6\"]@fadeUp:professional; [data-part=\"row7\"]@fadeUp:professional; [data-part=\"row8\"]@fadeUp:professional",
+  "4": "[data-part=\"row1\"]@fadeUp:professional; [data-part=\"row2\"]@fadeUp:professional; [data-part=\"row3\"]@fadeUp:professional; [data-part=\"row4\"]@fadeUp:professional; [data-part=\"row5\"]@fadeUp:professional; [data-part=\"row6\"]@fadeUp:professional; [data-part=\"row7\"]@fadeUp:professional; [data-part=\"row8\"]@fadeUp:professional"
+ }
+}
