@@ -2503,6 +2503,10 @@ holds: scripts/gates/motion-floor.mjs, scripts/author/assemble.mjs, scripts/lib/
 Found by looking, not by measuring. The highest scoring variant of the magnitude sweep reached a median of 1.61 and it looked like a rendering fault: the entire scene, background and text together, drifting inside the canvas and exposing the edge. The number said it was the best film of the sweep. This is why the plan's rule is that every phase ends with the mp4 looked at and not only the table, and it is why the instrument gets fixed BEFORE it is promoted to a blocking gate. A gate with this hole, made binding, would teach every author to slide the frame.
 holds: scripts/gates/motion-floor.mjs
 
+## 612. going back one stage to fix a fragment silently deleted every directed camera move
+`make assemble` is stage 5 of eight and `make direct` is stage 6. The director writes a resolved `camera` track into the film; assemble's `PRESERVED_FILM_FIELDS` listed `cameraMove` and not `camera`, so re-running assemble to pick up an edited fragment dropped the whole camera track without a word. The stages are documented as an order, and the order is real, but nothing said that stepping back through it destroys the work of the stage in front. Found while checking byte-identity after an unrelated merge: the film lost a five-key camera array and the diff was the only thing that said so. assemble generates no camera of its own, its own header says it is kept thin on purpose with no camera, so it never had a claim on the field. The same file already reports every preserved LAYER by name; film-level fields now go through the same report, so a preserved field is visible rather than assumed. Re-assembling a film is now idempotent, which it was not.
+holds: scripts/author/assemble.mjs, scripts/author/motion-director.mjs
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
