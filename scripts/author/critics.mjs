@@ -111,6 +111,9 @@ export const DECIDERS = [
       'You cannot watch the film. A description of the motion written from the JSON is a restatement of what you just wrote, so it proves nothing.',
       'Measure instead: sample the element across frames and report the numbers. A claimed wind-up that measures 3% variance where 24% was claimed is absent, whatever the JSON says.',
       'You carry a budget. The register split (docs/CRAFT/MOTION-REGISTERS.md) licenses sustained motion for kinetic work, and that licence is the door effect soup comes through. One named peak, and every other moving thing able to say what it is for.',
+      'THE FILM MAY NOT STOP, and this is measured, not judged. `make motion-floor D=<file>` reports content motion per half second against the film\'s reference when it declares one. A window with nothing arriving in it is a hole the viewer feels, and the commonest cause is every reveal in a beat firing at once and landing inside its first second.',
+      'THE FIX FOR A HOLE IS OVERLAP, NEVER AMBIENCE. Do not reach for `idle`, `breathe` or `drift` to raise a number: motion-floor counts only change concentrated in a small region, so ambient motion cannot satisfy it, and it was TESTED that way (idle on every layer of a real film changed the finding by nothing at all). Start the next reveal before the last one lands instead.',
+      'AND NEVER ONE THING AT A TIME. Measured on a real launch film: at 9.5s its card is scaling AND its rows are arriving, and at 0.4s its word is travelling WHILE it types. Every moment carries an object in transit and content appearing inside it. A beat that scales an object in silence, or reveals text on a frozen frame, is doing half of what the frame can do.',
     ],
   },
   {
@@ -138,16 +141,25 @@ export function buildRoster(scenePath) {
   const D = path.relative(repoRoot, abs);
   const dir = path.dirname(D);
   const storyboard = `${dir}/${name}.storyboard.md`;
-  const fragments = flatLayers(scene.layers)
+  const flat = flatLayers(scene.layers);
+  const fragments = flat
     .filter((L) => L.type === 'html' && typeof L.src === 'string')
     .map((L) => L.src);
+  // A BEAT and a FRAGMENT are different counts and conflating them told every decider brief that a
+  // 5-beat film with no html had "0 beat(s)". A beat is a unit of story; a fragment is one hand-written
+  // surface, and one fragment can serve several beats (the same rendered card, shown once then five
+  // times). Read the beat count from what actually marks a beat, in order of directness.
+  const beatBlocks = flat.filter((L) => L.type === 'beat').length;
+  const beats = beatBlocks
+    || ((scene.transitions || []).length ? scene.transitions.length + 1 : 0)
+    || (scene.layers || []).length;
   const ctx = {
     scene: D,
     name,
     storyboard,
     hasStoryboard: fs.existsSync(path.resolve(repoRoot, storyboard)),
     fragments,
-    beats: fragments.length,
+    beats,
     transitions: (scene.transitions || []).length,
     hasAudio: !!scene.audio,
     theme: scene.theme || '(none)',
@@ -161,7 +173,10 @@ export function buildRoster(scenePath) {
       `Your job: ${d.job}.`,
       `You exist because ${d.why}.`,
       '',
-      `The film: ${ctx.beats} beat(s), ${ctx.duration}s, ${ctx.aspect}, theme ${ctx.theme}, ${ctx.transitions} authored transition(s).`,
+      `The film: ${ctx.beats} beat(s), ${ctx.fragments.length} html fragment(s), ${ctx.duration}s, ${ctx.aspect}, theme ${ctx.theme}, ${ctx.transitions} authored transition(s).`,
+      ctx.fragments.length && ctx.fragments.length !== ctx.beats
+        ? `Those two counts differ on purpose: ${ctx.fragments.length} hand-written surface(s) serve ${ctx.beats} beat(s). A fragment reused across beats is the continuity plan working, not a gap.`
+        : null,
       ctx.hasStoryboard
         ? `Read the storyboard first: ${ctx.storyboard}. It is the source; you transcribe it, you do not re-decide it.`
         : `There is NO storyboard at ${ctx.storyboard}. Nothing below you can start until the storyboard decider writes one.`,
@@ -176,7 +191,7 @@ export function buildRoster(scenePath) {
       'Standing rules: no em-dashes anywhere. Stage explicit paths. Do not block on a background render.',
       'Do not delegate to sub-agents. Report what you wrote and what you deliberately left alone.',
     );
-    return { name: d.name, scope: d.scope, prompt: lines.join('\n') };
+    return { name: d.name, scope: d.scope, prompt: lines.filter((l) => l !== null).join('\n') };
   });
   return { ...ctx, roster };
 }

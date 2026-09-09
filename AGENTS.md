@@ -33,12 +33,21 @@ the real content in every row.
 | Plan a new video, or one from scratch | **vawe-video-planning** | storyboard/ledger; [`docs/CRAFT/AUTHORING-WALKTHROUGH.md`](docs/CRAFT/AUTHORING-WALKTHROUGH.md) if there's no brand site |
 | Make a specific TYPE (launch, explainer, talking-head, sting, demo, recreation) | **vawe-type-`<type>`** | `docs/CRAFT/ROUTING.md` maps a request to its type |
 | Fix "not directed", or decide what holds a film across cuts | n/a | [`docs/CRAFT/DIRECTION.md`](docs/CRAFT/DIRECTION.md) · [`docs/CRAFT/FILM-STRUCTURE.md`](docs/CRAFT/FILM-STRUCTURE.md) |
-| **Hand-write any HTML**, or judge/fix "looks AI" | **taste-skill** → **impeccable** | design read + 3 dials, then the 41-rule detector |
+| **Hand-write any HTML**, or judge/fix "looks AI" | **taste-skill** → **impeccable** (vendored third-party, Apache 2.0) | design read + 3 dials, then its rendered-page detector |
 | Reflect a website or a film | n/a | `make sections` → [`docs/CRAFT/RECREATION.md`](docs/CRAFT/RECREATION.md); `make study` → [`docs/CRAFT/REFERENCE-STUDY.md`](docs/CRAFT/REFERENCE-STUDY.md) |
 | Captions, a phone feed, or a theme's whole-film default | n/a | [`docs/CRAFT/CAPTIONS.md`](docs/CRAFT/CAPTIONS.md) · [`docs/CRAFT/THEME-LOOK.md`](docs/CRAFT/THEME-LOOK.md) |
 
-**Anti-slop (non-negotiable).** Hand-authored HTML is where generic "AI slop" enters. Claude Code
+**Anti-slop (non-negotiable).** Hand-authored HTML is where generic "AI slop" enters. Three checks
+answer it and only ONE of them is this repo's: `scripts/live/craft-live.mjs` reads a fragment's source
+for sizes and shadows that do not trace to the stage kit, and `scripts/gates/frame-check.mjs` compares
+the plan with the frames built from it. **`impeccable` is neither.** It is a vendored third-party skill
+(v3.5.0, Apache 2.0, `skills/impeccable/LICENSE`) and it is the only thing here that opens a browser
+and measures what actually RENDERED. Do not call our own checks by its name, and do not credit it with
+what they catch. Claude Code
 loads **taste-skill** and sets the three dials (`DESIGN_VARIANCE`/`MOTION_INTENSITY`/`VISUAL_DENSITY`);
+**every hand-written frame takes ONE route: stage kit → the reference's grammar → the smallest useful
+`ui-skills` set → `make preview` → your own eye** ([`docs/CRAFT/HTML-FRAGMENTS.md`](docs/CRAFT/HTML-FRAGMENTS.md);
+`DESIGN.md` records which skills were used and which were refused);
 other agents read the same dials by hand. Prefer to **capture** a real surface over inventing one, then
 gate it clean: `make designspec-check D=<file>`. Name ONE art direction ("clean modern SaaS" is
 banned); asymmetry and scale contrast are defaults; type is distinctive.
@@ -111,8 +120,8 @@ backdrop all resolve from the theme, so a decider there re-decides what the bran
 |---|---|---|---|
 | 1 | **storyboard** | the storyboard file | it decides the film as a whole. Every role below transcribes it |
 | 2 | **subject** | a beat's subject slot | what a beat SHOWS is the one thing the engine must never choose alone (`docs/MISTAKES.md` #159) |
-| 3 | **scene** (one per scene) | one fragment file | HTML renders instantly, so the agent iterates against its own work with no render |
-| 4 | **motion** | `motion[]` and `idle` | nothing moves that nobody asked to move, so every keyed track is a decision |
+| 3 | **scene** (one per scene) | one fragment file | HTML renders instantly, so the agent iterates against its own work with no render. It runs THIRD, never first: the beat table decides how many fragments exist and names the selectors they must expose (MISTAKES #591) |
+| 4 | **motion** | `motion[]` and `idle` | nothing moves that nobody asked to move, so every keyed track is a decision. **The film may not stop**: `make motion-floor D=<file>` measures content motion per half second, and the fix for a hole is OVERLAP, never `idle` (the gate counts only small-region change, so ambience cannot satisfy it, and that was tested) |
 | 5 | **transition** | `transitions[]` | the engine narrows the cut by structure; the rhetorical relationship between two beats is not in the data |
 | 6 | **sound** | the audio block | cue punctuation is automatic; choosing a bed is a register decision |
 
@@ -138,6 +147,33 @@ a full authoring pass, any recreation, anything you intend to ship.** Below that
 Full roster, verdict shapes, and the six brief lines a fan-out pays for by omitting:
 [`docs/CRAFT/SUBAGENTS.md`](docs/CRAFT/SUBAGENTS.md).
 
+## THE EIGHT STAGES, IN ORDER  `[gated: scripts/live/stage-gate.mjs]` `[live: scripts/live/stage-say.mjs]`
+
+**`make stage D=<film>` says which stage a film is in and the ONE next command.** Read from the files
+on disk, never from a stored state, so it cannot disagree with the repo.
+
+| # | stage | what happens | the command |
+|---|---|---|---|
+| 1 | **brief** | ask what the product is, and the four other things a site would have given | `make quiz NAME= URL=` |
+| 2 | **plan** | the beat table, the through-line, the spectacle, the exclusions | `make scaffold` → `make storyboard-check` |
+| 3 | **approval** | the plan is SHOWN and a person says yes | `make studio D=` (press `1`), then the USER runs `/vawe-approve` |
+| 4 | **design** | the theme is settled and every frame the plan named is drawn | stage kit → the reference's grammar → the smallest useful `ui-skills` set → `make preview` → look at it |
+| 5 | **assemble** | the frames become a scene | `make assemble D=` |
+| 6 | **direct** | motion, then transitions, then sound, in that order | `make critics D= DECIDERS=1` |
+| 7 | **render** | | `make ship D=` |
+| 8 | **judge** | the only step that SEES | `make judge D=` → `make ledger D=` |
+
+**Three of those transitions are refused rather than requested**, because this order was written here,
+printed by `make critics`, and still run backwards by an author who could quote it
+(`docs/MISTAKES.md` #591, #595). `scripts/live/stage-gate.mjs` denies, at `PreToolUse`, before any
+permission mode: writing a fragment no storyboard claims · writing `layers` into an unapproved film ·
+writing `approved:` at all, which is the user's signature and never an agent's. The way out of each is
+the missing artefact, and there is no flag, because a flag would be a way to skip the step.
+
+**And the order is re-stated every turn**, not read once: `scripts/live/stage-say.mjs` names the open
+stage and its one next command at `UserPromptSubmit`. A rule read at session start is a rule that fails
+late in a long session, which is exactly when it matters.
+
 ## "LET'S MAKE A VIDEO" IS A REQUEST TO ASK QUESTIONS  `[gated: scripts/gates/author-check.mjs#no-storyboard]`
 
 Claude Code loads `vawe-video-planning`; other agents read
@@ -145,6 +181,11 @@ Claude Code loads `vawe-video-planning`; other agents read
 first. Nothing renders until the plan is LOCKED and the user signs off; if you find yourself trying
 things in the JSON, the plan was not locked. The lock sheet (per-beat copy, colours, fonts, layout,
 treatment, cuts, CTA) is the artefact, not the storyboard: present it and wait.
+
+**Present it as `make studio D=<file>.json`, in its `plan` state**, one page on the studio server carrying each
+beat beside its real hand-written fragment, live. Not loose html files opened out of `/tmp`, and not
+grey boxes: `make panels` sizes a box from `shot:` and cannot say what is in the frame, which is the
+only question the person signing off can answer (MISTAKES #592).
 
 ## THE BRIEF: what the requester says, and what is YOUR job  `[eye]`
 
@@ -241,6 +282,8 @@ scripts/gates/rung.mjs --list` prints the worklist. Highest rung wins:
 | the harness does | this engine does | where |
 |---|---|---|
 | PostToolUse hooks that speak mid-task | a hook reads what you just saved and answers | `scripts/live/*.mjs` |
+| a PreToolUse deny, evaluated before permission mode | the authoring ORDER refuses a write that skips a stage | `scripts/live/stage-gate.mjs` |
+| UserPromptSubmit context injection | the open stage and its next command, re-stated every turn | `scripts/live/stage-say.mjs` |
 | deferred tools, fetched by search | `make arsenal Q="…"`, `make schema AT=…` | `scripts/author/` |
 | skills loaded only when needed | `docs/CRAFT/*.md`; a finding NAMES the doc that settles it | `docs/TASTE.md` |
 | refusing an invalid call at the boundary | refusing at the WRITE SITE, so a bad state is unrepresentable | `core/registry/registry.js` |
