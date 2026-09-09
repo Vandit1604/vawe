@@ -50,6 +50,17 @@ export const DEAD = 0.13;
 // is spread and the motion is ambient. Both real films measured 3-4%; 8% is a wide margin around that.
 export const LOCAL_SHARE = 0.08;
 
+// A large uniform region sliding rigidly has the SAME share signature as a reveal: its interior matches
+// before/after, so only its edges differ, and that edge sliver is a small share of the frame. Measured
+// directly (see the self-test): a 60x34-cell block shifted 3 cells scores share=0.032, amount=4.72,
+// which is inside the "content" band by the share test alone. The fix is a second, cheaper test that
+// runs ONLY when the share test already said "local": search a small range of whole-frame translations
+// and see whether one of them explains the changed pixels. A reveal cannot be explained this way because
+// the new content did not exist anywhere in the previous frame to be shifted from.
+export const SHIFT_RANGE = 8;      // cells; enough for a half-second pan/push at this window size
+export const RIGID_EXPLAIN = 0.5;  // a shift must cut the residual on the changed pixels at least this much
+const NOISE_FLOOR = 2;             // grayscale levels; ignores encoder/scale noise, not real change
+
 /** One pass of ffmpeg, the whole film as grayscale cells. One call, not one call per frame. */
 export function pullFrames(mp4, { fps = SAMPLE_FPS, w = GW, h = GH } = {}) {
   const r = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vf', `fps=${fps},scale=${w}:${h},format=gray`,
@@ -61,10 +72,45 @@ export function pullFrames(mp4, { fps = SAMPLE_FPS, w = GW, h = GH } = {}) {
 }
 
 /**
+ * Does a single whole-frame translation explain the pixels that changed? Tested only against the
+ * pixels that actually changed (not the whole frame): a flat background matches itself at ANY shift,
+ * so scoring the full frame lets an unrelated shift look like a fit for free. Restricting to the
+ * changed set removes that: a reveal's new pixels do not exist anywhere in `a`, so no shift helps them
+ * and the ratio stays at 1; a rigid slide's edge pixels are exactly `a` read from `dx,dy` away, so the
+ * true shift drives the ratio to ~0.
+ * Returns the ratio of best-shift residual to the zero-shift residual on that same pixel set (1 = no
+ * shift helps, 0 = a shift fully explains it).
+ */
+export function rigidExplainRatio(a, b, d, total, w, h, range) {
+  const idx = [];
+  for (let i = 0; i < d.length; i++) if (d[i] > NOISE_FLOOR) idx.push(i);
+  if (idx.length === 0) return 1;
+  const cost0 = total / idx.length;
+  let best = cost0;
+  for (let dy = -range; dy <= range; dy++) {
+    for (let dx = -range; dx <= range; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      let sum = 0;
+      for (const i of idx) {
+        const y = (i / w) | 0, x = i - y * w;
+        const sx = x - dx, sy = y - dy;
+        // out of range: this pixel isn't tested under this shift, so it keeps its own unexplained diff
+        sum += (sx >= 0 && sx < w && sy >= 0 && sy < h) ? Math.abs(a[sy * w + sx] - b[i]) : d[i];
+      }
+      const cost = sum / idx.length;
+      if (cost < best) best = cost;
+    }
+  }
+  return best / cost0;
+}
+
+/**
  * For one consecutive pair: the mean absolute change, and what share of the frame carries 80% of it.
  * Returns { amount, share }. `share` is the locality: small means content arrived, large means drift.
+ * A share that looks local is downgraded to global (share forced to 1) when a rigid whole-frame shift
+ * explains the change: that is camera or frame motion wearing a reveal's signature.
  */
-export function pairProfile(a, b) {
+export function pairProfile(a, b, { w = GW, h = GH } = {}) {
   const n = a.length;
   const d = new Uint8Array(n);
   let total = 0;
@@ -74,7 +120,11 @@ export function pairProfile(a, b) {
   const sorted = Array.from(d).sort((x, y) => y - x);
   let run = 0, k = 0;
   for (const v of sorted) { run += v; k++; if (run >= total * 0.8) break; }
-  return { amount, share: k / n };
+  const share = k / n;
+  if (share <= LOCAL_SHARE && rigidExplainRatio(a, b, d, total, w, h, SHIFT_RANGE) <= RIGID_EXPLAIN) {
+    return { amount, share: 1 };
+  }
+  return { amount, share };
 }
 
 /** Per-window: local motion (content arriving) and global motion (ambience), kept apart. */
@@ -108,7 +158,18 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     if (!(d.share > LOCAL_SHARE)) { console.error(`a whole-frame drift must NOT read as local (share ${d.share})`); process.exit(1); }
     if (!(r.share <= LOCAL_SHARE)) { console.error(`a small reveal must read as local (share ${r.share})`); process.exit(1); }
     if (!(pairProfile(flat, flat).amount === 0)) { console.error('two identical frames must measure zero'); process.exit(1); }
-    console.log('  ✓ motion-floor self-test: a drift reads global, a reveal reads local, stillness reads zero');
+
+    // A large uniform block sliding rigidly: interior unchanged, only the leading/trailing edges differ.
+    // Measured directly: share=0.032, amount=4.72, which the share test alone reads as local content.
+    const block = (shiftX) => {
+      const f = new Uint8Array(GW * GH).fill(80);
+      for (let y = 10; y < 44; y++) for (let x = 10 + shiftX; x < 70 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 200;
+      return f;
+    };
+    const slide = pairProfile(block(0), block(3));
+    if (!(slide.share > LOCAL_SHARE)) { console.error(`a rigid block slide must NOT read as local content (share ${slide.share})`); process.exit(1); }
+
+    console.log('  ✓ motion-floor self-test: a drift reads global, a reveal reads local, stillness reads zero, a rigid slide reads global');
     process.exit(0);
   }
 
