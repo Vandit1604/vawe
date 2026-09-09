@@ -1,4 +1,4 @@
-// node --test scripts/gates/motion-floor.test.mjs
+// node --test quality/gates/motion-floor.test.mjs
 //
 // The one test that matters here is the NEGATIVE one: a film padded with ambient motion must not pass.
 // If it can, the gate is a motion-score generator and every author will reach for `idle` first.

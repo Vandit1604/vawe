@@ -1,6 +1,6 @@
 // sfx-audit.mjs: is a sound effect the SHAPE its role claims?
 //
-//   node scripts/gates/sfx-audit.mjs        check assets/sfx
+//   node quality/gates/sfx-audit.mjs        check assets/sfx
 //   make sfx-check
 //
 // assets/sfx/click.wav was 19.6 SECONDS. The Mixkit fetcher asked for "the 4th ranked result in the

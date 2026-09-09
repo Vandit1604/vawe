@@ -59,7 +59,7 @@ jobs:
           mkdir -p /tmp/findings
           # The findings-based gates emit a JSON array under --json (empty [] when clean).
           for g in discovery arsenal-check generated-check craft-coverage output-contract; do
-            node "scripts/gates/$g.mjs" --json > "/tmp/findings/$g.json" 2>/dev/null || true
+            node "quality/gates/$g.mjs" --json > "/tmp/findings/$g.json" 2>/dev/null || true
           done
           node -e '
             const fs = require("fs"), d = "/tmp/findings";
@@ -74,7 +74,7 @@ jobs:
           '
           # lib-test is a test runner (no --json): surface its REAL failures, minus the rung-fixture noise
           # (the rung block deliberately injects bad tags to prove the gate catches them).
-          libfail=$(node scripts/gates/lib-test.mjs 2>&1 \
+          libfail=$(node quality/gates/lib-test.mjs 2>&1 \
             | grep -E "✗|[0-9]+ failed" \
             | grep -viE "no-such-gate|no-such-code|untagged: THE BACKGROUND|up from|held up by prose|does not emit|decoration|claim an owner|catalogued by hand" \
             || true)

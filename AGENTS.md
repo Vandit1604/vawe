@@ -69,7 +69,7 @@ the real content in every row.
 
 **Anti-slop (non-negotiable).** Hand-authored HTML is where generic "AI slop" enters. Three checks
 answer it and only ONE of them is this repo's: `scripts/live/craft-live.mjs` reads a fragment's source
-for sizes and shadows that do not trace to the stage kit, and `scripts/gates/frame-check.mjs` compares
+for sizes and shadows that do not trace to the stage kit, and `quality/gates/frame-check.mjs` compares
 the plan with the frames built from it. **`impeccable` is neither.** It is a vendored third-party skill
 (v3.5.0, Apache 2.0, `skills/impeccable/LICENSE`) and it is the only thing here that opens a browser
 and measures what actually RENDERED. Do not call our own checks by its name, and do not credit it with
@@ -176,7 +176,7 @@ a full authoring pass, any recreation, anything you intend to ship.** Below that
 Full roster, verdict shapes, and the six brief lines a fan-out pays for by omitting:
 [`docs/CRAFT/SUBAGENTS.md`](docs/CRAFT/SUBAGENTS.md).
 
-## Stage 1, brief: ask before you build  `[gated: scripts/gates/author-check.mjs#no-storyboard]`
+## Stage 1, brief: ask before you build  `[gated: quality/gates/author-check.mjs#no-storyboard]`
 
 Claude Code loads `vawe-video-planning`; other agents read
 [`docs/CRAFT/AUTHORING-WALKTHROUGH.md`](docs/CRAFT/AUTHORING-WALKTHROUGH.md). Do not open a JSON file
@@ -211,7 +211,7 @@ NOT        what this film explicitly does not do (no narration, no stock photos,
 Naming the spectacle is also a promise every other beat stays restrained. The `NOT` line is cheap
 insurance: most generic output is an un-excluded default, not a wrong decision. Do not write it from
 memory: `make preflight D=<file>` derives it from what recent films actually used
-(`node scripts/gates/ledger.mjs not <theme>`), so it excludes the real pattern, not whatever the author
+(`node quality/gates/ledger.mjs not <theme>`), so it excludes the real pattern, not whatever the author
 happens to think of. It is a constraint, not a ban: a beat with a real reason to repeat a value still
 can, waived in the scene with `_why`.
 
@@ -248,7 +248,7 @@ copy must be true, and a specific fact beats a dry number.
   `slide-left`). Blur out (`out:"defocus"`) when moving would fight dense content. Put a changing
   word in a fixed-width chip so nothing after it reflows.
 
-## Stage 7, render: waivers  `[gated: scripts/gates/author-check.mjs]`
+## Stage 7, render: waivers  `[gated: quality/gates/author-check.mjs]`
 
 A rule you deliberately break is waived IN THE SCENE, with a reason. A waiver with no `_why` blocks:
 
@@ -266,7 +266,7 @@ out is a reason written in the scene.
 
 Several Claude Code mechanisms answer problems this repo also has, adopted one at a time. When you
 adopt another, add its row and give it a rung. `make rung` prints the current distribution; `node
-scripts/gates/rung.mjs --list` prints the worklist. Highest rung wins:
+quality/gates/rung.mjs --list` prints the worklist. Highest rung wins:
 
 ```
 [built]  the engine makes it true          a wrong value cannot be written
@@ -286,7 +286,7 @@ scripts/gates/rung.mjs --list` prints the worklist. Highest rung wins:
 | refusing an invalid call at the boundary | refusing at the WRITE SITE, so a bad state is unrepresentable | `core/registry/registry.js` |
 
 A gate is the LAST resort: if the bad value has a write site, the refusal goes there. Where a clean
-state can't be reached today, the number goes in a ratchet (`verify/*-ratchet.json`), never rising.
+state can't be reached today, the number goes in a ratchet (`quality/baselines/*-ratchet.json`), never rising.
 
 ## Changing the ENGINE, not a film?  `[live: scripts/live/craft-live.mjs]`
 

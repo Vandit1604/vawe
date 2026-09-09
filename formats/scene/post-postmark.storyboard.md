@@ -23,7 +23,7 @@ craft:
 <!-- THE DESIGN STUDY (stands in for `make sections`: no real Postmark Studio exists, so this is
      written first as though it had been crawled, per docs/EVALS.md's ruling that these fictional
      briefs study themselves. Company facts (letterpress + type foundry, points/picas, registration
-     marks, zero shadow) are carried over from the sibling eval fixture verify/evals/briefs/recreation.json
+     marks, zero shadow) are carried over from the sibling eval fixture quality/runs/evals/briefs/recreation.json
      so both films describe the same shop; the ANGLE here is deliberately narrower and different: one
      order, followed start to finish, instead of a six-section site tour. Fidelity cannot be scored:
      there is no real site to compare frames against. This film is a postable piece testing whether the

@@ -1,10 +1,10 @@
-// scripts/gates/scene-snap.mjs: check scenes WITHOUT rendering video. Captures a per-frame DOM signature
+// quality/gates/scene-snap.mjs: check scenes WITHOUT rendering video. Captures a per-frame DOM signature
 // (bbox + transform + opacity + font-size + color + text + clip-path of every id'd / critical element,
 // plus a fingerprint of the background canvas) headless,
 // with NO encode and NO screenshot. Save a baseline before a refactor, then diff after to prove the
 // rendered frames are unchanged (or see exactly what moved).
-//   node scripts/gates/scene-snap.mjs <format> --save     # write baseline → verify/snap/<format>.json
-//   node scripts/gates/scene-snap.mjs <format>            # diff current vs baseline
+//   node quality/gates/scene-snap.mjs <format> --save     # write baseline → quality/baselines/snap/<format>.json
+//   node quality/gates/scene-snap.mjs <format>            # diff current vs baseline
 //   make snap M=<format> [SAVE=1]
 import fs from 'node:fs';
 import path from 'node:path';
@@ -24,7 +24,7 @@ fs.mkdirSync(SNAP, { recursive: true });
 const args = process.argv.slice(2);
 const m = args.find((a) => !a.startsWith('--'));
 const SAVE = args.includes('--save');
-if (!m) { console.error('usage: node scripts/gates/scene-snap.mjs <format> [--save]'); process.exit(1); }
+if (!m) { console.error('usage: node quality/gates/scene-snap.mjs <format> [--save]'); process.exit(1); }
 // FAIL on an extra positional arg. This gate always snapshots the FORMAT's sample.json, but it used
 // to accept `scene-snap.mjs scene formats/scene/paint-demo.json` and silently ignore the second
 // argument, reporting "IDENTICAL" about a file it never opened. That is a gate answering a question
@@ -84,7 +84,7 @@ const sig = await captureSig(page, frames);
 await browser.close(); server.close();
 
 const file = path.join(SNAP, `${m}.json`);
-if (SAVE) { fs.writeFileSync(file, JSON.stringify(sig)); console.log(`✓ baseline saved → verify/snap/${m}.json  (${frames.length} frames)`); process.exit(0); }
+if (SAVE) { fs.writeFileSync(file, JSON.stringify(sig)); console.log(`✓ baseline saved → quality/baselines/snap/${m}.json  (${frames.length} frames)`); process.exit(0); }
 
 if (!fs.existsSync(file)) { console.error(`no baseline for ${m}, run with --save first`); process.exit(2); }
 const base = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -99,9 +99,9 @@ if (diffs.length > 60) console.log(`  … +${diffs.length - 60} more`);
 // determinism gates here (snap-scenes, snap-blocks, canvas-purity, probe-purity) all exit non-zero on a
 // diff; this one alone reported the change and then certified the render. An INTENDED change is
 // re-baselined with --save, which is the author saying so; it is not the gate's to assume.
-console.error(`\n△ ${diffs.length} change(s): the sampled frames no longer match verify/snap/${m}.json.`);
+console.error(`\n△ ${diffs.length} change(s): the sampled frames no longer match quality/baselines/snap/${m}.json.`);
 console.error('  If every change is intended, re-baseline it deliberately: '
-  + `node scripts/gates/scene-snap.mjs ${m} --save`);
-for (const d of diffs) f.fail('scene-snap-diff', d, { at: m, fix: `intended? re-baseline: node scripts/gates/scene-snap.mjs ${m} --save` });
+  + `node quality/gates/scene-snap.mjs ${m} --save`);
+for (const d of diffs) f.fail('scene-snap-diff', d, { at: m, fix: `intended? re-baseline: node quality/gates/scene-snap.mjs ${m} --save` });
 f.emit();
 process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

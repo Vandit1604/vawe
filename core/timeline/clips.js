@@ -61,7 +61,7 @@ export const ANIM = {
 // and therefore silently resolved to fade (MISTAKES #21).
 
 // One line per enter/exit anim, beside the registry itself. docs/EFFECTS.md renders these, and
-// scripts/gates/lib-test.mjs fails when a name has no blurb, a name with no description is a
+// quality/gates/lib-test.mjs fails when a name has no blurb, a name with no description is a
 // vocabulary an author cannot choose from. The DIRECTIONS below are read off the registry above, not
 // off the names: `slide-*` names the EDGE the layer travels from (and an `out` sends it back to that
 // same edge), while `wipe-*` names the edge the reveal travels TOWARD. Those two conventions are

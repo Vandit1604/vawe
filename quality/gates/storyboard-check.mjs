@@ -1,4 +1,4 @@
-// scripts/gates/storyboard-check.mjs: the STORYBOARD-AS-PROPOSAL gate (another engine Step 3, adapted).
+// quality/gates/storyboard-check.mjs: the STORYBOARD-AS-PROPOSAL gate (another engine Step 3, adapted).
 // A great video is planned on paper and approved BEFORE the JSON. This gate enforces that the plan is a
 // real proposal, not a vibe: a one-sentence MESSAGE + audience + arc up front, and per beat a type, the
 // on-screen cues, and a WHY (its narrative role / persuasion). A beat with no "why" is decoration; a video
@@ -12,7 +12,7 @@
 // names the one device the scene-side gate can also see. It used to demand `object:` and nothing else,
 // which enforced the register Murch ranks last and made every other way of holding a film unwritable.
 //
-//   node scripts/gates/storyboard-check.mjs path/to/STORYBOARD.md   ·   make storyboard-check SB=<file>
+//   node quality/gates/storyboard-check.mjs path/to/STORYBOARD.md   ·   make storyboard-check SB=<file>
 //   Template: docs/CRAFT/STORYBOARD-TEMPLATE.md
 import fs from 'node:fs';
 import path from 'node:path';
@@ -104,7 +104,7 @@ if (shortFilm && hasObject) for (const k of ['object_t0', 'object_states', 'obje
 // it, evenly", which is the flat register everything here comes out in by default. `not:` is the exclusion
 // line, because most generic output is not a wrong decision, it is an un-excluded default.
 //
-// The film-side half is `make plan-check D=<file>` (scripts/gates/plan-vs-render.mjs): it reads the same
+// The film-side half is `make plan-check D=<file>` (quality/gates/plan-vs-render.mjs): it reads the same
 // `spectacle:` line and warns when the scene builds no `spectacle` block, or builds one in another beat.
 // Writing the peak down is not building it, exactly as with `becomes:`.
 const spectacle = field('spectacle');

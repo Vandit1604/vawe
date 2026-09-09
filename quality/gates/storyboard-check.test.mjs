@@ -1,7 +1,7 @@
-// scripts/gates/storyboard-check.test.mjs: the film-vs-plan divergence check. Builds a real three-beat
+// quality/gates/storyboard-check.test.mjs: the film-vs-plan divergence check. Builds a real three-beat
 // film with `assemble.mjs`, then asserts storyboard-check stays quiet on a clean build and NAMES the
 // divergence once the storyboard or the built JSON is edited out from under it.
-//   node scripts/gates/storyboard-check.test.mjs
+//   node quality/gates/storyboard-check.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -77,7 +77,7 @@ fs.writeFileSync(path.join(dir, 'v.scene3.html'), '<div><div class="figure">c</d
 const node = process.execPath;
 const run = (script, args) => execFileSync(node, [path.join(ROOT, script), ...args], { encoding: 'utf8' });
 const check = () => {
-  try { return { out: execFileSync(node, [path.join(ROOT, 'scripts/gates/storyboard-check.mjs'), sb], { encoding: 'utf8' }), code: 0 }; }
+  try { return { out: execFileSync(node, [path.join(ROOT, 'quality/gates/storyboard-check.mjs'), sb], { encoding: 'utf8' }), code: 0 }; }
   catch (e) { return { out: (e.stdout || '') + (e.stderr || ''), code: e.status }; }
 };
 
@@ -137,7 +137,7 @@ run('scripts/author/assemble.mjs', [film]);
   const scene = JSON.parse(fs.readFileSync(film, 'utf8'));
   const scene1 = scene.layers.find((l) => l.id === 'scene1');
   const scene2 = scene.layers.find((l) => l.id === 'scene2');
-  // Resolved to a real second, not left as the string "scene1.end+0.05": scripts/gates/beat-check and
+  // Resolved to a real second, not left as the string "scene1.end+0.05": quality/gates/beat-check and
   // scripts/author/motion-director.mjs both read `layers[].start` as a number and mishandle a string
   // one (measured directly: one crashes), so `make assemble` resolves its own reference.
   assert.equal(typeof scene2.start, 'number', 'a caused junction is still a plain number, never an unresolved relative-start string');

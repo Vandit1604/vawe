@@ -81,7 +81,7 @@ wordmark, verbatim copy)? Does the honesty check name what could not be matched?
 
 ## The worked example
 
-`verify/evals/briefs/recreation.json` (11s, 16:9). Takes the grammar studied off
+`quality/runs/evals/briefs/recreation.json` (11s, 16:9). Takes the grammar studied off
 `grammar/framer-hero.json`: a prompt types, the generated artefact builds in beside it with no hard cut,
 and the SAME artefact is later shown from a different angle (three viewports at once, the reference's
 own "it is really finished" payoff). The content (a generic made-up pricing page) is invented; only the

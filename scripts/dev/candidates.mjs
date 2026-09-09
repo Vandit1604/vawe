@@ -40,7 +40,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 
 // ---------------------------------------------------------------------------------------------------
 // THE PURE HALF: what gets picked, and what a choice becomes. Exported and asserted by
-// scripts/gates/lib-test.mjs, because these are the two things the panel depends on and neither needs
+// quality/gates/lib-test.mjs, because these are the two things the panel depends on and neither needs
 // a browser to be wrong.
 // ---------------------------------------------------------------------------------------------------
 

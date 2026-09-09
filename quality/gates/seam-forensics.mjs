@@ -1,6 +1,6 @@
-// scripts/gates/seam-forensics.mjs: the three defects a LUMINANCE flash never touches.
+// quality/gates/seam-forensics.mjs: the three defects a LUMINANCE flash never touches.
 //
-// scripts/gates/seam-snap.mjs proved the value of living inside the transition overlap instead of
+// quality/gates/seam-snap.mjs proved the value of living inside the transition overlap instead of
 // stepping over it, and then found nothing on a film that had three real defects at its two joints (a
 // hand frame-by-frame read of out/demo.mp4, docs/MISTAKES.md-worthy but not yet logged there): a layer
 // that had already ended, redrawn at the canvas origin (a RESURRECTION); the outgoing card still
@@ -10,7 +10,7 @@
 // layer's box, and a split seam is a property of the field OUTSIDE every layer, which a flash check
 // never samples on its own.
 //
-//   node scripts/gates/seam-forensics.mjs formats/scene/<file>.json     ·     make forensics D=<file>
+//   node quality/gates/seam-forensics.mjs formats/scene/<file>.json     ·     make forensics D=<file>
 //
 // Reads the real rendered pixels via ffmpeg (scripts/lib/frame-forensics.mjs), the same reason
 // seam-snap.mjs gives: a seam is composited during the render, so it exists only in the mp4. Boxes come
@@ -31,7 +31,7 @@ const f = gateFindings();
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dataArg = process.argv[2];
 if (!dataArg || !fs.existsSync(dataArg)) {
-  console.error('usage: node scripts/gates/seam-forensics.mjs <scene.json>');
+  console.error('usage: node quality/gates/seam-forensics.mjs <scene.json>');
   process.exit(2);
 }
 const data = loadScene(structuredClone(JSON.parse(fs.readFileSync(dataArg, 'utf8'))));

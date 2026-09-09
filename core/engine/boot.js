@@ -611,7 +611,7 @@ export async function boot(build) {
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
     window.__engine = {
       // `segments: scene.segments || []` was here and no scene has ever set it: there is one format and
-      // formats/scene/scene.js never returns the key. Its one reader, scripts/gates/motion-audit.mjs,
+      // formats/scene/scene.js never returns the key. Its one reader, quality/gates/motion-audit.mjs,
       // took the empty array as "this film declares no windows" and disabled its whole FAIL tier. The
       // film's joints are its cuts and seams, core/junctions.js owns reading them, and a second way to
       // say that is the drift MISTAKES #159 and #358 are both about. docs/MISTAKES.md #425.

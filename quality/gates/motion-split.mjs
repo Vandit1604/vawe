@@ -1,6 +1,6 @@
-// scripts/gates/motion-split.mjs: how much of a film's motion is the GROUND, and how much is the FILM.
+// quality/gates/motion-split.mjs: how much of a film's motion is the GROUND, and how much is the FILM.
 //
-//   node scripts/gates/motion-split.mjs formats/scene/x.json
+//   node quality/gates/motion-split.mjs formats/scene/x.json
 //   make motion-split D=formats/scene/x.json
 //
 // WHY. `./bin/vawe` prints one motion figure and it is a property of the FRAME, so a moving backdrop
@@ -23,7 +23,7 @@ import { gateFindings } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv.find((a) => a.endsWith('.json'));
-if (!file) { console.error('usage: node scripts/gates/motion-split.mjs <scene.json>'); process.exit(2); }
+if (!file) { console.error('usage: node quality/gates/motion-split.mjs <scene.json>'); process.exit(2); }
 const abs = path.resolve(ROOT, file);
 if (!fs.existsSync(abs)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
 const cfg = JSON.parse(fs.readFileSync(abs, 'utf8'));
@@ -68,7 +68,7 @@ const GRID = 12, SUB = 3;  // the same cell size and sub-step internal/scene/sce
 const { server, port } = await serveRepo();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--force-device-scale-factor=1'] });
 
-// SEEK SYNCHRONOUSLY, the way every other gate here does (scripts/gates/snap-signature.mjs:129).
+// SEEK SYNCHRONOUSLY, the way every other gate here does (quality/gates/snap-signature.mjs:129).
 // The first version awaited a double requestAnimationFrame inside the page to let a frame settle, and
 // it hung: `Runtime.callFunctionOn timed out`. renderFrame(n) is synchronous by contract, so there is
 // nothing to wait for, and screenshotting afterwards is what forces the paint.

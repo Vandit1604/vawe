@@ -1,7 +1,7 @@
-// scripts/gates/arsenal-check.mjs: is every capability the engine offers actually IN the catalogue
+// quality/gates/arsenal-check.mjs: is every capability the engine offers actually IN the catalogue
 // an author is told to read?
 //
-//   node scripts/gates/arsenal-check.mjs
+//   node quality/gates/arsenal-check.mjs
 //
 // WHY THIS EXISTS. CLAUDE.md step 0a says "see the whole arsenal, then choose: make effects →
 // docs/EFFECTS.md". A film was authored around a hand-built SVG chart while `core/surfaces/three-fx.js` sat in
@@ -335,7 +335,7 @@ console.log(`    ${found.size} are not a registry: ${waived} waived · ${covered
 // Lower it deliberately with --stamp, never to quiet a complaint. That is `make legacy STAMP=1`'s
 // argument, in the gate one directory over.
 {
-  const RATCHET = path.join(ROOT, 'verify/arsenal-ratchet.json');
+  const RATCHET = path.join(ROOT, 'quality/baselines/arsenal-ratchet.json');
   const prior = (() => { try { return JSON.parse(fs.readFileSync(RATCHET, 'utf8')); } catch { return null; } })();
   if (process.argv.includes('--stamp')) {
     fs.mkdirSync(path.dirname(RATCHET), { recursive: true });
@@ -349,12 +349,12 @@ console.log(`    ${found.size} are not a registry: ${waived} waived · ${covered
       'for it, in three files, keyed by a slug of its own title. Give it a registry with a ' +
       '`catalog` block instead and it publishes all three itself, from one edit. ' +
       'If it genuinely cannot be a registry, lower the bar on purpose: ' +
-      'node scripts/gates/arsenal-check.mjs --stamp');
+      'node quality/gates/arsenal-check.mjs --stamp');
     f.emit();
     process.exit(1);
   } else if (prior && covered < prior.handCatalogued) {
     console.log(`    ~ ${prior.handCatalogued - covered} fewer hand-catalogued than the ratchet allows.`
-      + ' Lower it: node scripts/gates/arsenal-check.mjs --stamp');
+      + ' Lower it: node quality/gates/arsenal-check.mjs --stamp');
   }
 }
 // ---- THE SECOND RATCHET: `bare` MAY FALL AND MAY NEVER RISE --------------------------------------
@@ -371,7 +371,7 @@ console.log(`    ${found.size} are not a registry: ${waived} waived · ${covered
 // acceleration being worse than one feel table, and it only holds because the FEEL words now carry the
 // plain English an author would actually type. Zero is therefore not the target; not-more is.
 {
-  const RATCHET = path.join(ROOT, 'verify/blurb-ratchet.json');
+  const RATCHET = path.join(ROOT, 'quality/baselines/blurb-ratchet.json');
   const bare = [];
   for (const reg of Object.values(REGS)) {
     const names = Object.keys(reg.entries || {});
@@ -399,12 +399,12 @@ console.log(`    ${found.size} are not a registry: ${waived} waived · ${covered
       'so `make arsenal Q="..."` will report it ABSENT. Write one where the entry is: ' +
       'blurbs: { <name>: "what it does, in one line" }  beside the defineRegistry call. ' +
       'If it genuinely should carry none, lower the bar on purpose: ' +
-      'node scripts/gates/arsenal-check.mjs --stamp');
+      'node quality/gates/arsenal-check.mjs --stamp');
     f.emit();
     process.exit(1);
   } else if (prior && bare.length < prior.unblurbed) {
     console.log(`    ~ ${prior.unblurbed - bare.length} fewer unblurbed than the ratchet allows.`
-      + ' Lower it: node scripts/gates/arsenal-check.mjs --stamp');
+      + ' Lower it: node quality/gates/arsenal-check.mjs --stamp');
   } else if (!prior) {
     console.log(`    ~ ${bare.length} unblurbed entr(ies), no ratchet yet. Stamp it: --stamp`);
   }

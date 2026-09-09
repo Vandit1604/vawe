@@ -82,7 +82,7 @@ merges them into one `SCHEMA` map and owns the checker.
 `x` · `y` · `start` · `dur` appear in **no** table. They are placement and timing the scene supplies,
 never content an author dials, and `resolve` passes them through untouched.
 
-**The gate:** `node scripts/gates/block-schema.mjs`. It reads the factory source, so a table cannot
+**The gate:** `node quality/gates/block-schema.mjs`. It reads the factory source, so a table cannot
 drift from the code it describes: every catalog family has a table, every declared key is a parameter
 the factory really destructures, every parameter is declared or listed in `OMIT` with a reason, every
 `def` deep-equals the real default, and every example row in `blocks/catalog.mjs` passes its table.

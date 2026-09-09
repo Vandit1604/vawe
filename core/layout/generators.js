@@ -50,7 +50,7 @@ import { handleCurve } from '../motion/motion.js';
 import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise, HONOURS } from '../lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from '../lightfield/presets.js';
 // The playground lists FIELD GENERATORS only. The 70 block families keep their declared schemas and
-// their gate (blocks/schema.mjs, scripts/gates/block-schema.mjs), because a contract is worth having
+// their gate (blocks/schema.mjs, quality/gates/block-schema.mjs), because a contract is worth having
 // whether or not a page renders it. They are not here because a block is a scene FRAGMENT rather than a
 // picture: previewing one means booting a whole scene around it, and a picker of 71 entries buried the
 // thing people came to turn.

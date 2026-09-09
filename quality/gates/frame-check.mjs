@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// scripts/gates/frame-check.mjs: THE PLAN, COMPARED WITH THE FRAMES BUILT FROM IT.
+// quality/gates/frame-check.mjs: THE PLAN, COMPARED WITH THE FRAMES BUILT FROM IT.
 //
-//   make frame-check D=formats/scene/<film>.json   ·   node scripts/gates/frame-check.mjs <film> [--json]
+//   make frame-check D=formats/scene/<film>.json   ·   node quality/gates/frame-check.mjs <film> [--json]
 //
 // Nothing in this repo did this. `storyboard-check` grades the plan against itself; `critique` and
 // `eye-trace` read the scene JSON after assembly; `make preview` judges one fragment with no idea which

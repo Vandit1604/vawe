@@ -126,7 +126,7 @@ spawnSync('ffmpeg', ['-v', 'error', '-y', ...inputs, '-filter_complex', `${chain
 // never a finding, so resolve it first and say so loudly.
 const look = [];
 for (const g of ['designspec-check']) {
-  const script = `scripts/gates/${g}.mjs`;
+  const script = `quality/gates/${g}.mjs`;
   if (!fs.existsSync(script)) { console.error(`✗ styleframes: gate script ${script} does not exist. Fix the list, do not report it as a failing gate.`); process.exit(2); }
   const r = spawnSync('node', [script, D], { encoding: 'utf8' });
   look.push({ gate: g, code: r.status, out: (r.stdout || '') + (r.stderr || '') });

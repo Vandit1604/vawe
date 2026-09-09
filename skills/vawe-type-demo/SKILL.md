@@ -81,6 +81,6 @@ push where the detail is small enough to need one?
 
 ## The worked example
 
-`verify/evals/briefs/demo.json` (10s, 16:9). Shows: a `cursor` layer following a real path onto a
+`quality/runs/evals/briefs/demo.json` (10s, 16:9). Shows: a `cursor` layer following a real path onto a
 button, a click ripple, and an "Exported." chip that appears only after the click, not on its own timer.
 No captured site here, a plain panel stands in for one (named in the scene `note`).

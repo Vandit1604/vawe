@@ -1,7 +1,7 @@
 // kit-ramp: ONE definition of "does this fragment's CSS trace to the stage kit".
 //
 // Two things ask it and they must never disagree: scripts/live/craft-live.mjs says it at the keystroke,
-// and scripts/gates/frame-check.mjs blocks on it in review. They HAD two copies, and the copies drifted
+// and quality/gates/frame-check.mjs blocks on it in review. They HAD two copies, and the copies drifted
 // the moment the double bezel arrived: the gate learned that a hairline ring may ride along with a kit
 // elevation and the hook did not, so the same file was clean in one and wrong in the other. That is the
 // second-definition failure this repo warns about, caught in its own tooling.

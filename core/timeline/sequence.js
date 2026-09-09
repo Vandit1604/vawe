@@ -90,7 +90,7 @@ export function cameraView(camKf, t, CW, CH) {
   const c = cameraAt(camKf, t);
   if (!c) return null;
   // A ROTATED STAGE has no axis-aligned preimage: the frame maps back to a projected quad, and that quad's
-  // AABB is not the shape. verify/audit.mjs refuses to measure through exactly this and says why at length:
+  // AABB is not the shape. quality/audit.mjs refuses to measure through exactly this and says why at length:
   // a projection MANUFACTURES findings on the very frames a film is doing its most deliberate camera
   // work, and the only way to clear one is to make the film worse. A gate must not guess through it.
   if (Math.abs(c.rx) > 1e-3 || Math.abs(c.ry) > 1e-3 || Math.abs(c.roll) > 1e-3) return null;

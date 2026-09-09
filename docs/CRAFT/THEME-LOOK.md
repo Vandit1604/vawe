@@ -149,7 +149,7 @@ Renders one scene that shows a headline on every `backdrop` window, names the `c
 and (when `marks.logo` resolves to a real file) holds the mark at both `headlineSize` and
 `endCardSize` on the closing window. Writes `site/public/blocklib/themes/<name>/sheet.png` (a tiled
 contact sheet, one frame per backdrop window) and `sheet.mp4`. Reuses
-`scripts/gates/tile.mjs`'s `frameTile`/`tileGrid`/`tileBox`/`renderOf`, the exact machinery
+`quality/gates/tile.mjs`'s `frameTile`/`tileGrid`/`tileBox`/`renderOf`, the exact machinery
 `scripts/dev/preset-sheets.mjs` already uses for the six reference profiles, rather than a second
 render-and-tile pipeline.
 
@@ -174,7 +174,7 @@ for the rest.
 
 **`scale` and `cuts` are DERIVED, not constants.** A first cut of this function filled every theme
 with `themes/vawe.json`'s own numbers, so a calm brand and a loud one computed the identical type
-scale and the identical cuts. `scripts/gates/theme-look-spread.mjs` (`make theme-look-spread`) exists
+scale and the identical cuts. `quality/gates/theme-look-spread.mjs` (`make theme-look-spread`) exists
 because nothing caught that: it counts distinct values per derived key across every shipped theme and fails
 by name if one collapses.
 

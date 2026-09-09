@@ -1,4 +1,4 @@
-// scripts/gates/inspect.mjs: INTENT VERIFICATION. Checks a scene against a declared `.intent.json`
+// quality/gates/inspect.mjs: INTENT VERIFICATION. Checks a scene against a declared `.intent.json`
 // sidecar: for each beat you state the artifact that earns it + what must show + whether it must
 // animate. inspect confirms the render actually delivers it. This is the another engine motion-verify
 // idea: the agent verifies its OWN output against intent before a human sees it.
@@ -22,7 +22,7 @@
 //   Do not add a check for `becomes` that tests, say, "a layer exists in both beats" and call it
 //     verified. That is silent substitution wearing a tick, the exact bug class this repo hates most.
 //
-// Usage: node scripts/gates/inspect.mjs <scene.json> [--intent path] [--strict]
+// Usage: node quality/gates/inspect.mjs <scene.json> [--intent path] [--strict]
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import { flattenLayer } from '../lib/layers.mjs';
@@ -32,7 +32,7 @@ const file = process.argv[2];
 const strict = process.argv.includes('--strict');
 const intentPath = (() => { const i = process.argv.indexOf('--intent'); return i >= 0 ? process.argv[i + 1] : file.replace(/\.json$/, '.intent.json'); })();
 const f = gateFindings();
-if (!file) { console.error('usage: node scripts/gates/inspect.mjs <scene.json> [--intent p] [--strict]'); process.exit(2); }
+if (!file) { console.error('usage: node quality/gates/inspect.mjs <scene.json> [--intent p] [--strict]'); process.exit(2); }
 if (!fs.existsSync(intentPath)) { console.log(`  (no intent sidecar at ${intentPath}. Nothing to verify)`); f.emit(); process.exit(0); }
 
 const d = JSON.parse(fs.readFileSync(file, 'utf8'));

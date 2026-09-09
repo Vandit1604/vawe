@@ -129,7 +129,7 @@ it.
 
 `make studio` today: the real engine in an iframe driven by its own `renderFrame(n)`, a scrubber, a
 timeline of one bar per layer with cuts and seams and stings on the ruler, enter and exit ramps shaded
-off the settled middle, dead-air holes painted as hazard bands from the real `scripts/gates/beat-check.mjs`
+off the settled middle, dead-air holes painted as hazard bands from the real `quality/gates/beat-check.mjs`
 findings, a picker that hit-tests the frame and hands back the exact authored JSON, and one write:
 drag a selected layer and a motion key lands on disk through the surgical text patcher in
 `scripts/author/patch-motion.mjs`, with a whole-file undo stack.
@@ -158,7 +158,7 @@ The plan and the film are still in two places. `make panels` renders the storybo
 | COPY | a per-layer hide toggle | another engine eye icon | Answers "what is under that" without editing the file. Ours stays preview-only (see the REJECT row). |
 | COPY | onion-skin proof of a move | another engine `--ghost` / `--layout strip` | `make reveal` proves this reads well as a sheet. On a selected layer in the studio it is the thing that makes a keyed track legible. |
 | COPY | search by intent, not a browse grid | another engine `catalog --query` | 566 effects and 217 blocks cannot be browsed. Rank them against a plain-English description of the beat. `docs/EFFECTS.md` and `blocks/index.mjs` are already the index. |
-| COPY | one implementation, two surfaces | another engine audio graph | Studio's write path must call the same functions the CLI authoring scripts call, exactly as it re-runs `scripts/gates/beat-check.mjs` rather than restating its rules. A second definition drifts. |
+| COPY | one implementation, two surfaces | another engine audio graph | Studio's write path must call the same functions the CLI authoring scripts call, exactly as it re-runs `quality/gates/beat-check.mjs` rather than restating its rules. A second definition drifts. |
 | COPY | stop at the preview and wait for approval | another engine | Already our doctrine (`make judge`). Any render button added to the studio must not become a reason to skip the eye. |
 | REJECT | a schema-generated prop form | another engine Zod editor | It exists because props live in TypeScript and cannot be edited as text. Ours are JSON. The picker shows the authored object; a generated form would be a second, lossier view of the same bytes. |
 | REJECT | greyed-out controls and an "edit-friendly code" style guide | another engine static analysis | That limit is a tax on write-back into a program. Writing into JSON has no such tax, so importing the UI that apologises for it would import a problem we do not have. |

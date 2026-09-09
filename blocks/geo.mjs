@@ -25,7 +25,7 @@
 // Math.random, no I/O at call time.
 import { geoAlbersUsa, geoNaturalEarth1, geoPath } from 'd3-geo';
 import { TOKENS as T, HAIR, R, TYPE, SPACE, r2 } from './kit.mjs';
-// EVERY LABEL IS TYPE.body, NOT TYPE.fine. `verify/audit.mjs` floors readable text at 1.3% of frame
+// EVERY LABEL IS TYPE.body, NOT TYPE.fine. `quality/audit.mjs` floors readable text at 1.3% of frame
 // height (14.04px at 1080) and TYPE.fine is 14, so a map labelled at the small step fails the floor
 // by four hundredths of a pixel on every single label. The next step up is the only one that passes.
 import { US_STATES } from '../assets/geo/us-states.js';

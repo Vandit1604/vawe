@@ -4,7 +4,7 @@
 // WHY THIS EXISTS. Coverage of the SEARCH is closed: every entry carries a blurb (checkBlurb refuses a
 // bare one at load) and the discovery ratchet is at 0. That guarantees a thing is IN the index. It does
 // not guarantee the index answers the words a person actually types. The labeled eval in
-// scripts/gates/lib-test.mjs (PRESENT + PLAIN) is what measures that, and its blind spot is silent: a
+// quality/gates/lib-test.mjs (PRESENT + PLAIN) is what measures that, and its blind spot is silent: a
 // whole FAMILY can have no author-phrased query at all, so nobody ever checks that "a drifting colour
 // background" reaches an `aurora`. This lists the families the eval never asks about.
 //
@@ -46,7 +46,7 @@ export const MECHANISM_NAMED = new Set([
 
 /** The two labeled arrays in lib-test.mjs, read from source: the (query, want) pairs the eval asserts. */
 export function evalWants() {
-  const src = fs.readFileSync(path.join(ROOT, 'scripts/gates/lib-test.mjs'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'quality/gates/lib-test.mjs'), 'utf8');
   const block = (marker) => { const i = src.indexOf(marker); if (i < 0) return ''; return src.slice(i, src.indexOf('];', i)); };
   const wants = new Set();
   for (const blk of [block('const PRESENT = ['), block('const PLAIN = ['), block('const FAMILY = [')]) {
@@ -106,7 +106,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   if (uncovered.length) {
     console.log(`\n  ${uncovered.length} SEARCHABLE families with NO author-phrased query in the eval:`);
     for (const { family, size } of uncovered) console.log(`    ${family.padEnd(28)} ${size}`);
-    console.log('\n  Each needs one plain-English query in PRESENT/PLAIN (scripts/gates/lib-test.mjs) that');
+    console.log('\n  Each needs one plain-English query in PRESENT/PLAIN (quality/gates/lib-test.mjs) that');
     console.log('  resolves to it confidently. Fix a miss with `aka` at the write site, never by rewording.\n');
     process.exit(1);
   }

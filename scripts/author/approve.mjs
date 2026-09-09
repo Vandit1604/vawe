@@ -30,7 +30,7 @@ if (!sb) { console.error(`no storyboard for "${arg}". Looked for ${base}.storybo
 
 // A plan that does not pass its own gate is not a plan yet, and approving one would make the signature
 // worthless. This is the only precondition, and it is the gate's verdict, not a second opinion.
-try { execFileSync(process.execPath, [path.join(ROOT, 'scripts/gates/storyboard-check.mjs'), sb], { stdio: 'pipe' }); }
+try { execFileSync(process.execPath, [path.join(ROOT, 'quality/gates/storyboard-check.mjs'), sb], { stdio: 'pipe' }); }
 catch (e) {
   console.error(`${path.relative(ROOT, sb)} does not pass storyboard-check, so there is nothing to approve yet.\n`);
   console.error(String(e.stdout || e.stderr || '').trim().split('\n').slice(-12).join('\n'));
@@ -48,5 +48,5 @@ if (revoke) {
   fs.writeFileSync(sb, stripped.replace(/^---\n/, `---\napproved: ${stamp}\n`));
   console.log(`  ✓ ${path.relative(ROOT, sb)} approved ${stamp}`);
 }
-const st = execFileSync(process.execPath, [path.join(ROOT, 'scripts/gates/stage.mjs'), path.basename(base)], { encoding: 'utf8' });
+const st = execFileSync(process.execPath, [path.join(ROOT, 'quality/gates/stage.mjs'), path.basename(base)], { encoding: 'utf8' });
 console.log(st);

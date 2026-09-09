@@ -1,4 +1,4 @@
-// node --test scripts/gates/stage.test.mjs
+// node --test quality/gates/stage.test.mjs
 //
 // Every one of the eight stages, derived by stageOf() from fixture films this file builds and removes
 // itself. THIS MATTERS: scripts/live/test/stage-gate.test.mjs used to borrow a real film,
@@ -207,7 +207,7 @@ test('next: a plain command with neither separator passes through unchanged', ()
 test('next: refuses to run anything at the approval stage, and runs nothing else instead', () => {
   passingStoryboard('stagetest-next-refuses');
   assert.equal(stageOf('stagetest-next-refuses').stage, 'approval');
-  const r = spawnSync('node', [path.join(ROOT, 'scripts/gates/next.mjs'), 'stagetest-next-refuses'],
+  const r = spawnSync('node', [path.join(ROOT, 'quality/gates/next.mjs'), 'stagetest-next-refuses'],
     { cwd: ROOT, encoding: 'utf8' });
   assert.notEqual(r.status, 0, 'a refusal is a failing exit, not a silent success');
   assert.match(r.stderr, /only the user can give it/);

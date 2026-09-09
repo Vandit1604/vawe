@@ -13,7 +13,7 @@ func TestAllowed(t *testing.T) {
 	}
 	deny := []string{
 		"docs/MISTAKES.md", "blocks/index.mjs", "LICENSE", ".git/config",
-		"scripts/gates/ledger.mjs", "internal/scene/scene.go", "package.json",
+		"quality/gates/ledger.mjs", "internal/scene/scene.go", "package.json",
 		".vawe-data/records/vid_abc.json", // records hold owner data; never served
 		"../../etc/passwd", "core/../docs/MISTAKES.md", "core/../../etc/passwd",
 		"", "/", "\x00core/boot.js",

@@ -121,7 +121,7 @@ const AREAS = [
   [/\bcore\/fx\//g, 'core/fx'],
   [/\bcore\/surfaces\//g, 'core/surfaces'],
   [/\bcore\/[a-z-]+\.js/g, 'core (top level)'],
-  [/\bscripts\/gates\//g, 'scripts/gates'],
+  [/\bquality\/gates\//g, 'quality/gates'],
   [/\bscripts\/(author|media|site|lib|dev)\//g, 'scripts (tooling)'],
   [/\bformats\/scene\/scene\.(js|html)/g, 'formats/scene engine'],
   [/\bformats\/scene\/[a-z0-9_-]+\.json/g, 'a scene file'],

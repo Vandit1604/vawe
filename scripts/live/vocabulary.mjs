@@ -10,7 +10,7 @@
 //
 // `defineRegistry` now carries its own catalogue entry (core/registry.js), so the correct thing costs
 // ONE edit in ONE file. This hook exists to say so at the only moment the choice is still cheap.
-// scripts/gates/arsenal-check.mjs still refuses at push time and is the real enforcement; a push-time
+// quality/gates/arsenal-check.mjs still refuses at push time and is the real enforcement; a push-time
 // rule gets satisfied by a waiver, and a keystroke-time rule gets satisfied by writing the registry.
 // That argument is scripts/live/code-quality.mjs's, and this file is deliberately its twin.
 //

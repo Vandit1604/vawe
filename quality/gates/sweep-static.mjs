@@ -1,4 +1,4 @@
-// scripts/gates/sweep-static.mjs: does the film's PIXELS ever move, mechanically checked.
+// quality/gates/sweep-static.mjs: does the film's PIXELS ever move, mechanically checked.
 //
 // Adapted from another engine' `check` sweep_static. Every other gate that touches motion reads the JSON:
 // static-bg (beat-check.mjs) asks whether a DECLARED bg window carries `var(--t)`/`var(--p)` so it CAN
@@ -6,7 +6,7 @@
 // cuts and content all sit frozen for the whole runtime still passes it clean. This gate reads the
 // rendered mp4 instead and asks the only question that matters at the end: did the pixels change.
 //
-//   node scripts/gates/sweep-static.mjs formats/scene/<file>.json   ·   make sweep-static D=<file>
+//   node quality/gates/sweep-static.mjs formats/scene/<file>.json   ·   make sweep-static D=<file>
 //
 // Requires out/<name>.mp4 (render first; the pixels only exist after render, same reason seam-snap.mjs
 // needs the mp4 and not renderFrame). Missing or stale render: reported, not a crash, exit 0, because
@@ -68,7 +68,7 @@ if (isMain) {
 
   const dataArg = process.argv[2];
   if (!dataArg || !fs.existsSync(dataArg)) {
-    console.error('usage: node scripts/gates/sweep-static.mjs <scene.json>');
+    console.error('usage: node quality/gates/sweep-static.mjs <scene.json>');
     process.exit(2);
   }
 

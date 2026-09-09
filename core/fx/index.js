@@ -39,7 +39,7 @@ const REGISTRY = { alongPath, ghost, kick, lag, matte, mixBlend, occlude, plane,
 export const FX_TYPES = Object.keys(REGISTRY);
 
 // One line per modifier, beside the registry, each condensed from that module's own header. docs/EFFECTS.md
-// renders these and scripts/gates/lib-test.mjs fails when one is missing.
+// renders these and quality/gates/lib-test.mjs fails when one is missing.
 //
 // This family is here because it was the LAST place the flat name-keyed map in effects-catalog.mjs could
 // still lie: with no map of its own, `tilt` fell through to the KINETIC TEXT PRESET called `tilt` and the

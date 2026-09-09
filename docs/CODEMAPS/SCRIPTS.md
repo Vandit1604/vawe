@@ -39,95 +39,95 @@ REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a 
 
 | file | lines | make | what it says it does |
 |---|---|---|---|
-| `lib-test.mjs` | 7486 | yes | scripts/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion/motion.js. |
+| `lib-test.mjs` | 7486 | yes | quality/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion/motion.js. |
 | `gate-mutation.mjs` | 1154 | yes | gate-mutation.mjs, who checks the checkers? |
-| `author-check.mjs` | 766 | yes | scripts/gates/author-check.mjs: THE MANDATORY AUTHORING-QUALITY LADDER. |
-| `motion-audit.mjs` | 752 | yes | scripts/gates/motion-audit.mjs: check ANIMATION OVER TIME without rendering video. Renders every frame |
-| `direction-floor.mjs` | 687 | yes | scripts/gates/direction-floor.mjs: THE AMBITION FLOOR. The inverse of effect-soup. |
-| `eye-trace.mjs` | 564 | no | scripts/gates/eye-trace.mjs, WHERE IS THE VIEWER LOOKING WHEN A CUT LANDS, and where does the next |
+| `author-check.mjs` | 766 | yes | quality/gates/author-check.mjs: THE MANDATORY AUTHORING-QUALITY LADDER. |
+| `motion-audit.mjs` | 752 | yes | quality/gates/motion-audit.mjs: check ANIMATION OVER TIME without rendering video. Renders every frame |
+| `direction-floor.mjs` | 687 | yes | quality/gates/direction-floor.mjs: THE AMBITION FLOOR. The inverse of effect-soup. |
+| `eye-trace.mjs` | 564 | no | quality/gates/eye-trace.mjs, WHERE IS THE VIEWER LOOKING WHEN A CUT LANDS, and where does the next |
 | `schema-drift.mjs` | 447 | yes | schema-drift.mjs: keep the DATA CONTRACT honest. The engine (scene.html) reads layer props as |
-| `arsenal-check.mjs` | 441 | yes | scripts/gates/arsenal-check.mjs: is every capability the engine offers actually IN the catalogue |
-| `doc-map.mjs` | 436 | yes | scripts/gates/doc-map.mjs. The doc map: one source of truth, every index generated from it. |
-| `storyboard-check.mjs` | 432 | yes | scripts/gates/storyboard-check.mjs: the STORYBOARD-AS-PROPOSAL gate (another engine Step 3, adapted). |
+| `arsenal-check.mjs` | 441 | yes | quality/gates/arsenal-check.mjs: is every capability the engine offers actually IN the catalogue |
+| `doc-map.mjs` | 436 | yes | quality/gates/doc-map.mjs. The doc map: one source of truth, every index generated from it. |
+| `storyboard-check.mjs` | 432 | yes | quality/gates/storyboard-check.mjs: the STORYBOARD-AS-PROPOSAL gate (another engine Step 3, adapted). |
 | `prop-probe.mjs` | 417 | yes | prop-probe.mjs: exercise EVERY declared layer prop against EVERY type that declares it, so a prop |
-| `plan-vs-render.mjs` | 408 | yes | scripts/gates/plan-vs-render.mjs: DOES THE FILM DO WHAT THE PLAN SAID? |
+| `plan-vs-render.mjs` | 408 | yes | quality/gates/plan-vs-render.mjs: DOES THE FILM DO WHAT THE PLAN SAID? |
 | `conformance.mjs` | 335 | yes | conformance.mjs: does the engine actually DO what it says it accepts? |
-| `designspec-check.mjs` | 330 | yes | scripts/gates/designspec-check.mjs: THE DESIGN-SPEC LOCK (the visual twin of the storyboard gate). |
-| `scene-timing.mjs` | 325 | no | scripts/gates/scene-timing.mjs: ONE model of when a scene's layers are actually on screen. |
-| `beat-check.mjs` | 322 | yes | scripts/gates/beat-check.mjs . THE TIMELINE GATE: is there something on screen, all the way through? |
-| `doc-refs.mjs` | 318 | yes | scripts/gates/doc-refs.mjs · every command and every file path the docs NAME must exist. |
-| `read-check.mjs` | 315 | no | scripts/gates/read-check.mjs: CAN A VIEWER READ IT, IN THE SECONDS IT IS THERE? |
-| `motion-floor.mjs` | 306 | yes | scripts/gates/motion-floor.mjs: DOES THE FILM EVER STOP, and is what fills the gaps real? |
-| `block-schema.mjs` | 298 | no | scripts/gates/block-schema.mjs · does every block family DECLARE its options, and does the |
-| `audio-check.mjs` | 294 | yes | scripts/gates/audio-check.mjs. THE SOUND GATE: is this film's silence a decision, or an omission? |
-| `site-counts.mjs` | 289 | yes | scripts/gates/site-counts.mjs: assert every capability count written on the SITE still matches the |
-| `frame-check.mjs` | 282 | yes | scripts/gates/frame-check.mjs: THE PLAN, COMPARED WITH THE FRAMES BUILT FROM IT. |
-| `snap-scenes.mjs` | 282 | yes | scripts/gates/snap-scenes.mjs: the WHOLE-LIBRARY determinism + regression net. scene-snap.mjs |
-| `rung.mjs` | 277 | yes | scripts/gates/rung.mjs · which rules are only PROSE, and which ones something actually enforces? |
-| `seam-forensics.mjs` | 267 | yes | scripts/gates/seam-forensics.mjs: the three defects a LUMINANCE flash never touches. |
-| `snap-signature.mjs` | 234 | no | scripts/gates/snap-signature.mjs: the ONE definition of a snap signature, shared by both snap gates. |
-| `critique.mjs` | 230 | yes | scripts/gates/critique.mjs: the VALUE GATE. Static critic over a scene JSON that fires on the failure |
-| `dissolve-check.mjs` | 226 | yes | scripts/gates/dissolve-check.mjs: IS ANY TRANSITION A DOUBLE EXPOSURE? |
-| `stage.test.mjs` | 218 | no | node --test scripts/gates/stage.test.mjs |
-| `paints-nothing.mjs` | 215 | yes | scripts/gates/paints-nothing.mjs: did this layer actually paint anything, in its own box? |
-| `motion-split.mjs` | 210 | yes | scripts/gates/motion-split.mjs: how much of a film's motion is the GROUND, and how much is the FILM. |
-| `craft-checklist.mjs` | 203 | yes | scripts/gates/craft-checklist.mjs · did this film actually VISIT the CRAFT doctrine relevant to it? |
+| `designspec-check.mjs` | 330 | yes | quality/gates/designspec-check.mjs: THE DESIGN-SPEC LOCK (the visual twin of the storyboard gate). |
+| `scene-timing.mjs` | 325 | no | quality/gates/scene-timing.mjs: ONE model of when a scene's layers are actually on screen. |
+| `beat-check.mjs` | 322 | yes | quality/gates/beat-check.mjs . THE TIMELINE GATE: is there something on screen, all the way through? |
+| `doc-refs.mjs` | 318 | yes | quality/gates/doc-refs.mjs · every command and every file path the docs NAME must exist. |
+| `read-check.mjs` | 315 | no | quality/gates/read-check.mjs: CAN A VIEWER READ IT, IN THE SECONDS IT IS THERE? |
+| `motion-floor.mjs` | 306 | yes | quality/gates/motion-floor.mjs: DOES THE FILM EVER STOP, and is what fills the gaps real? |
+| `block-schema.mjs` | 298 | no | quality/gates/block-schema.mjs · does every block family DECLARE its options, and does the |
+| `audio-check.mjs` | 294 | yes | quality/gates/audio-check.mjs. THE SOUND GATE: is this film's silence a decision, or an omission? |
+| `site-counts.mjs` | 289 | yes | quality/gates/site-counts.mjs: assert every capability count written on the SITE still matches the |
+| `frame-check.mjs` | 282 | yes | quality/gates/frame-check.mjs: THE PLAN, COMPARED WITH THE FRAMES BUILT FROM IT. |
+| `snap-scenes.mjs` | 282 | yes | quality/gates/snap-scenes.mjs: the WHOLE-LIBRARY determinism + regression net. scene-snap.mjs |
+| `rung.mjs` | 277 | yes | quality/gates/rung.mjs · which rules are only PROSE, and which ones something actually enforces? |
+| `seam-forensics.mjs` | 267 | yes | quality/gates/seam-forensics.mjs: the three defects a LUMINANCE flash never touches. |
+| `snap-signature.mjs` | 234 | no | quality/gates/snap-signature.mjs: the ONE definition of a snap signature, shared by both snap gates. |
+| `critique.mjs` | 230 | yes | quality/gates/critique.mjs: the VALUE GATE. Static critic over a scene JSON that fires on the failure |
+| `dissolve-check.mjs` | 226 | yes | quality/gates/dissolve-check.mjs: IS ANY TRANSITION A DOUBLE EXPOSURE? |
+| `stage.test.mjs` | 218 | no | node --test quality/gates/stage.test.mjs |
+| `paints-nothing.mjs` | 215 | yes | quality/gates/paints-nothing.mjs: did this layer actually paint anything, in its own box? |
+| `motion-split.mjs` | 210 | yes | quality/gates/motion-split.mjs: how much of a film's motion is the GROUND, and how much is the FILM. |
+| `craft-checklist.mjs` | 203 | yes | quality/gates/craft-checklist.mjs · did this film actually VISIT the CRAFT doctrine relevant to it? |
 | `dead-branch.mjs` | 200 | yes | dead-branch.mjs: a branch that can never be taken, or two branches that do the same thing. |
 | `preflight.mjs` | 198 | yes | preflight.mjs: the decisions that belong BEFORE the JSON, as a step that happened. |
-| `docs-drift.mjs` | 193 | yes | scripts/gates/docs-drift.mjs: a doc is a claim about the PAST as much as the future, and |
-| `seam-snap.mjs` | 192 | yes | scripts/gates/seam-snap.mjs: SAMPLE THE SEAMS, NOT THE CENTERS. |
+| `docs-drift.mjs` | 193 | yes | quality/gates/docs-drift.mjs: a doc is a claim about the PAST as much as the future, and |
+| `seam-snap.mjs` | 192 | yes | quality/gates/seam-snap.mjs: SAMPLE THE SEAMS, NOT THE CENTERS. |
 | `blocks-audit.mjs` | 187 | yes | blocks-audit.mjs: do the block FACTORIES obey the rules the videos are held to? |
-| `discovery.mjs` | 185 | yes | scripts/gates/discovery.mjs · can an author still FIND what this engine can do? |
-| `craft-coverage.mjs` | 179 | yes | scripts/gates/craft-coverage.mjs, keep the docs honest: against the engine, and against each other. |
-| `stage.mjs` | 175 | yes | scripts/gates/stage.mjs: WHERE IS THIS FILM, and what is the ONE next thing to do. |
-| `waiver-drift.mjs` | 168 | yes | scripts/gates/waiver-drift.mjs: IS THIS WAIVER A DECISION, OR A HABIT? |
-| `frame-check.test.mjs` | 167 | no | node --test scripts/gates/frame-check.test.mjs |
-| `snap-blocks.mjs` | 161 | yes | scripts/gates/snap-blocks.mjs: the REGRESSION NET FOR THE BLOCK LIBRARY. snap-scenes sweeps the |
-| `sim-audit.mjs` | 160 | yes | scripts/gates/sim-audit.mjs: is the offline tier still deterministic, and is what shipped |
-| `asset-check.mjs` | 159 | yes | scripts/gates/asset-check.mjs: ASSET-READINESS PREFLIGHT. A scene that names a logo / icon / captured |
-| `sweep-static.mjs` | 156 | yes | scripts/gates/sweep-static.mjs: does the film's PIXELS ever move, mechanically checked. |
-| `storyboard-check.test.mjs` | 153 | no | scripts/gates/storyboard-check.test.mjs: the film-vs-plan divergence check. Builds a real three-beat |
+| `discovery.mjs` | 185 | yes | quality/gates/discovery.mjs · can an author still FIND what this engine can do? |
+| `craft-coverage.mjs` | 179 | yes | quality/gates/craft-coverage.mjs, keep the docs honest: against the engine, and against each other. |
+| `stage.mjs` | 175 | yes | quality/gates/stage.mjs: WHERE IS THIS FILM, and what is the ONE next thing to do. |
+| `waiver-drift.mjs` | 168 | yes | quality/gates/waiver-drift.mjs: IS THIS WAIVER A DECISION, OR A HABIT? |
+| `frame-check.test.mjs` | 167 | no | node --test quality/gates/frame-check.test.mjs |
+| `snap-blocks.mjs` | 161 | yes | quality/gates/snap-blocks.mjs: the REGRESSION NET FOR THE BLOCK LIBRARY. snap-scenes sweeps the |
+| `sim-audit.mjs` | 160 | yes | quality/gates/sim-audit.mjs: is the offline tier still deterministic, and is what shipped |
+| `asset-check.mjs` | 159 | yes | quality/gates/asset-check.mjs: ASSET-READINESS PREFLIGHT. A scene that names a logo / icon / captured |
+| `sweep-static.mjs` | 156 | yes | quality/gates/sweep-static.mjs: does the film's PIXELS ever move, mechanically checked. |
+| `storyboard-check.test.mjs` | 153 | no | quality/gates/storyboard-check.test.mjs: the film-vs-plan divergence check. Builds a real three-beat |
 | `lint-test.mjs` | 142 | yes | lint-test.mjs: regression asserts for validate.mjs lintData (make lint-test). Each rule below maps |
 | `ledger.mjs` | 138 | yes | ledger.mjs. The DESIGN LEDGER: cross-video memory that makes anti-sameness enforceable. |
-| `legacy-fold.mjs` | 135 | yes | scripts/gates/legacy-fold.mjs · ONE-TIME (but re-runnable) migration: fold legacy-manifest.json rows |
-| `draft-check.mjs` | 132 | yes | scripts/gates/draft-check.mjs: IS THIS AN 85% DRAFT OR A 95% ONE? Say which, and say what is missing. |
+| `legacy-fold.mjs` | 135 | yes | quality/gates/legacy-fold.mjs · ONE-TIME (but re-runnable) migration: fold legacy-manifest.json rows |
+| `draft-check.mjs` | 132 | yes | quality/gates/draft-check.mjs: IS THIS AN 85% DRAFT OR A 95% ONE? Say which, and say what is missing. |
 | `probe-purity.mjs` | 131 | yes | probe-purity.mjs: assert renderFrame(n) is PURE in n. |
-| `code-quality.mjs` | 125 | yes | scripts/gates/code-quality.mjs: the codebase may get simpler, never more tangled. |
-| `pace-check.mjs` | 125 | yes | scripts/gates/pace-check.mjs: is anything actually HAPPENING, and how often? |
+| `code-quality.mjs` | 125 | yes | quality/gates/code-quality.mjs: the codebase may get simpler, never more tangled. |
+| `pace-check.mjs` | 125 | yes | quality/gates/pace-check.mjs: is anything actually HAPPENING, and how often? |
 | `similarity.mjs` | 125 | yes | similarity.mjs: the SAMENESS AUDIT. Two videos that share too much motion vocabulary, |
-| `study-verify.mjs` | 125 | yes | scripts/gates/study-verify.mjs: does `make study` measure correctly? Check it against a film whose |
-| `knobs-audit.mjs` | 121 | yes | scripts/gates/knobs-audit.mjs, ONE job: the manifest DRIFT GUARD. |
+| `study-verify.mjs` | 125 | yes | quality/gates/study-verify.mjs: does `make study` measure correctly? Check it against a film whose |
+| `knobs-audit.mjs` | 121 | yes | quality/gates/knobs-audit.mjs, ONE job: the manifest DRIFT GUARD. |
 | `coverage.mjs` | 117 | yes | coverage.mjs, which parts of the engine has nothing ever exercised? |
 | `layer-props.mjs` | 116 | yes | layer-props.mjs: does the engine READ the props a layer sets, and will it read them on THIS layer? |
-| `rubric.mjs` | 116 | no | scripts/gates/rubric.mjs: the criteria a vision judge is scored against. |
+| `rubric.mjs` | 116 | no | quality/gates/rubric.mjs: the criteria a vision judge is scored against. |
 | `mistakes-dupes.mjs` | 115 | yes | Gate: flags docs/MISTAKES.md entries whose HEADINGS look like duplicates of an |
-| `audit-scenes.mjs` | 114 | yes | scripts/gates/audit-scenes.mjs, run the LAYOUT AUDIT over every shipped scene, not just the open one. |
-| `scene-snap.mjs` | 108 | yes | scripts/gates/scene-snap.mjs: check scenes WITHOUT rendering video. Captures a per-frame DOM signature |
-| `judge.mjs` | 104 | yes | scripts/gates/judge.mjs: the VISION JUDGE (prep half). Static gates (validate/critique/slop/audit) can't SEE |
-| `block-scale.mjs` | 102 | no | scripts/gates/block-scale.mjs: how much of the block library sits on the shared scales. |
+| `audit-scenes.mjs` | 114 | yes | quality/gates/audit-scenes.mjs, run the LAYOUT AUDIT over every shipped scene, not just the open one. |
+| `scene-snap.mjs` | 108 | yes | quality/gates/scene-snap.mjs: check scenes WITHOUT rendering video. Captures a per-frame DOM signature |
+| `judge.mjs` | 104 | yes | quality/gates/judge.mjs: the VISION JUDGE (prep half). Static gates (validate/critique/slop/audit) can't SEE |
+| `block-scale.mjs` | 102 | no | quality/gates/block-scale.mjs: how much of the block library sits on the shared scales. |
 | `sfx-audit.mjs` | 102 | yes | sfx-audit.mjs: is a sound effect the SHAPE its role claims? |
-| `silent-fallback.mjs` | 102 | yes | scripts/gates/silent-fallback.mjs: is any named vocabulary still resolved with a silent default? |
-| `copy-check.mjs` | 97 | yes | scripts/gates/copy-check.mjs: THE COPY GATE. On-screen words regress to the mean the same way |
+| `silent-fallback.mjs` | 102 | yes | quality/gates/silent-fallback.mjs: is any named vocabulary still resolved with a silent default? |
+| `copy-check.mjs` | 97 | yes | quality/gates/copy-check.mjs: THE COPY GATE. On-screen words regress to the mean the same way |
 | `glyphs-audit.mjs` | 97 | yes | glyphs-audit.mjs: fail the build if a 3D typeface JSON no longer matches the font it came from. |
-| `theme-look-spread.mjs` | 97 | yes | scripts/gates/theme-look-spread.mjs: DOES THE COMPUTED LOOK ACTUALLY VARY? |
-| `feature-audit.mjs` | 96 | yes | scripts/gates/feature-audit.mjs, static utilization report: what the framework OFFERS vs what the |
-| `tile.mjs` | 95 | no | scripts/gates/tile.mjs: lay PNG tiles into one contact sheet. |
-| `inspect.mjs` | 91 | yes | scripts/gates/inspect.mjs: INTENT VERIFICATION. Checks a scene against a declared `.intent.json` |
-| `generated-check.mjs` | 89 | yes | scripts/gates/generated-check.mjs · is every generated file current? |
-| `unused.mjs` | 87 | yes | scripts/gates/unused.mjs, which registered effects has no shipped scene ever named? |
-| `render-verify.mjs` | 82 | yes | scripts/gates/render-verify.mjs: does the RENDERED mp4 match what the scene declares? |
+| `theme-look-spread.mjs` | 97 | yes | quality/gates/theme-look-spread.mjs: DOES THE COMPUTED LOOK ACTUALLY VARY? |
+| `feature-audit.mjs` | 96 | yes | quality/gates/feature-audit.mjs, static utilization report: what the framework OFFERS vs what the |
+| `tile.mjs` | 95 | no | quality/gates/tile.mjs: lay PNG tiles into one contact sheet. |
+| `inspect.mjs` | 91 | yes | quality/gates/inspect.mjs: INTENT VERIFICATION. Checks a scene against a declared `.intent.json` |
+| `generated-check.mjs` | 89 | yes | quality/gates/generated-check.mjs · is every generated file current? |
+| `unused.mjs` | 87 | yes | quality/gates/unused.mjs, which registered effects has no shipped scene ever named? |
+| `render-verify.mjs` | 82 | yes | quality/gates/render-verify.mjs: does the RENDERED mp4 match what the scene declares? |
 | `canvas-purity.mjs` | 79 | yes | canvas-purity.mjs: do the CANVAS PIXELS depend only on n? |
 | `docker-context.mjs` | 77 | yes | WHAT IS LEFT OF THIS GATE, AND WHY IT NO LONGER OWNS A MATCHER. |
-| `output-contract.mjs` | 75 | yes | scripts/gates/output-contract.mjs: every REPORTING gate renders its findings through |
+| `output-contract.mjs` | 75 | yes | quality/gates/output-contract.mjs: every REPORTING gate renders its findings through |
 | `font-audit.mjs` | 68 | yes | font-audit.mjs: fail the build if any text renders in a font we did not intend. |
-| `motion-floor.test.mjs` | 64 | no | node --test scripts/gates/motion-floor.test.mjs |
-| `sweep-static.test.mjs` | 60 | no | scripts/gates/sweep-static.test.mjs: assert self-check for the metric + verdict logic in |
-| `ledger-not.test.mjs` | 57 | no | scripts/gates/ledger-not.test.mjs: deriveNotLine, the ledger's forward query ("what has recent work |
-| `beats-of.mjs` | 52 | no | scripts/gates/beats-of.mjs, WHERE ARE THE BEATS, and which frame represents each one. |
-| `next.mjs` | 49 | yes | scripts/gates/next.mjs: RUN THE ONE COMMAND THE STAGE NAMES. Nothing more. |
-| `transitions-catalog.mjs` | 46 | yes | scripts/gates/transitions-catalog.mjs: print THE TRANSITION DATABASE (core/transitions.js). |
-| `compare.mjs` | 40 | yes | scripts/gates/compare.mjs: VARIANT SELECTION. Render/extract a frame from each candidate and tile them |
-| `paths.mjs` | 7 | no | scripts/gates/paths.mjs: ONE source of truth for where the scene format lives. Gates that enumerate |
+| `motion-floor.test.mjs` | 64 | no | node --test quality/gates/motion-floor.test.mjs |
+| `sweep-static.test.mjs` | 60 | no | quality/gates/sweep-static.test.mjs: assert self-check for the metric + verdict logic in |
+| `ledger-not.test.mjs` | 57 | no | quality/gates/ledger-not.test.mjs: deriveNotLine, the ledger's forward query ("what has recent work |
+| `beats-of.mjs` | 52 | no | quality/gates/beats-of.mjs, WHERE ARE THE BEATS, and which frame represents each one. |
+| `next.mjs` | 49 | yes | quality/gates/next.mjs: RUN THE ONE COMMAND THE STAGE NAMES. Nothing more. |
+| `transitions-catalog.mjs` | 46 | yes | quality/gates/transitions-catalog.mjs: print THE TRANSITION DATABASE (core/transitions.js). |
+| `compare.mjs` | 40 | yes | quality/gates/compare.mjs: VARIANT SELECTION. Render/extract a frame from each candidate and tile them |
+| `paths.mjs` | 7 | no | quality/gates/paths.mjs: ONE source of truth for where the scene format lives. Gates that enumerate |
 
 ## `scripts/author`
 

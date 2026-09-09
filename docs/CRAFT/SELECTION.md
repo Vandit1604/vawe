@@ -242,7 +242,7 @@ itself. So `p` comes from three places the generator does not control, all of th
 
 | Term | Weight | Measured from |
 |---|---|---|
-| **pace echo** | 0.40 of the library term | the share of shipped scenes cutting at roughly this direction's rate, read through `scripts/gates/beats-of.mjs`, the beat model the judge already uses |
+| **pace echo** | 0.40 of the library term | the share of shipped scenes cutting at roughly this direction's rate, read through `quality/gates/beats-of.mjs`, the beat model the judge already uses |
 | **look echo** | 0.30 | the share of shipped scenes whose theme background is this direction's dominance, from the measured luminance of `themes/<name>.json` `palette.bg` |
 | **thread echo** | 0.30 | the share of the hand-written storyboard corpus already using this thread |
 | **round echo** | 0.20 of `p` | how much shape this concept shares with the OTHER concepts in the same round |

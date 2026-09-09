@@ -32,7 +32,7 @@ The task is fixed in the script and starts both arms from identical bytes:
 
 > Run `node scripts/dev/demo.mjs --print-path --q "how a thermal blur reads heat off a product shot"
 > --name heatread --fx thermalBlur`, then extend that JSON to about 14 seconds across three moments.
-> Do not render. Do not edit any other file. Then clear `scripts/gates/author-check.mjs`.
+> Do not render. Do not edit any other file. Then clear `quality/gates/author-check.mjs`.
 
 The scaffold is the constant. [`../CRAFT/SPECIMEN.md`](../CRAFT/SPECIMEN.md) fixes what it writes, so
 everything the agent ADDS on top of it is the measurement.

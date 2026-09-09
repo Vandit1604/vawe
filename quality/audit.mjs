@@ -1,4 +1,4 @@
-// verify/audit.mjs, the layout audit: catches what eyes catch but checklists miss.
+// quality/audit.mjs, the layout audit: catches what eyes catch but checklists miss.
 // Renders each format's sample headless across sampled frames and flags, on [data-layer="critical"]:
 //   • overlap: two TEXT inks intersect (any size, not just critical)  (HARD fail)
 //   • overflow: text clipped (scrollW/H > clientW/H)    (HARD fail)
@@ -12,8 +12,8 @@
 //                 frame reaches out past it (a split frame is exempt)     (warn)
 //   • tight: sibling boxes closer than MIN_GAP px    (warn)
 // Writes an annotated screenshot of the worst frame per format to /tmp/audit/<format>.png.
-//   node verify/audit.mjs [format ...]      (default: all)   ·   make audit
-//   node verify/audit.mjs <scene.json> --hero    thin-hero alone, no screenshots, exit 0. This is the
+//   node quality/audit.mjs [format ...]      (default: all)   ·   make audit
+//   node quality/audit.mjs <scene.json> --hero    thin-hero alone, no screenshots, exit 0. This is the
 //     slice `author-check` runs BEFORE the render under TASTE=1, so a hero set at web scale is caught
 //     while it is still cheap to fix. Same frames and same numbers as the full run, proven on three
 //     scenes; it just skips the contrast pictures and the overlay. 1.44s vs 4.60s on argus-launch.

@@ -131,7 +131,7 @@ const RCX = HERO.x + HERO.w / 2, RCY = HERO.y + HERO.h / 2;
 // the viewBox to the ink keeps the ring the same size on screen and the box inside the canvas.
 // Large enough to pass AROUND the hero rather than across it. At 680 the ring was smaller than the card
 // and its arcs cut through the wordmark; that size existed only to satisfy an audit measuring the empty
-// rotating square this layer's arc is inscribed in, rather than the arc (fixed in verify/audit.mjs).
+// rotating square this layer's arc is inscribed in, rather than the arc (fixed in quality/audit.mjs).
 const RING = 950;
 const ribbon = (id, d, color, t0, t1) => ({
   type: 'svg', id, d, viewBox: '122 122 756 756', fill: 'none', stroke: color, strokeWidth: 16,

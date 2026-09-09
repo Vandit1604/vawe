@@ -13,7 +13,7 @@ of a pass/fail.
 
 ```
 make motion-trace M=scene D=formats/scene/<file>.json [STRIDE=N] [JSON=1]
-node scripts/gates/motion-audit.mjs scene --data formats/scene/<file>.json --trace [--stride N] [--json]
+node quality/gates/motion-audit.mjs scene --data formats/scene/<file>.json --trace [--stride N] [--json]
 ```
 
 ## What it shows
@@ -45,7 +45,7 @@ A trace an agent will actually run has to cost seconds, so it does not render ev
 stride auto-scales to land near 200 samples over the film's runtime (override with `--stride`/
 `STRIDE=`), and the report always prints what it used: `sampled every N frame(s) = Xms`. A number
 whose sampling is unstated is how this repo got a false reference band once already
-(`scripts/gates/motion-split.mjs`'s header). Read the stated interval before trusting a peak: a
+(`quality/gates/motion-split.mjs`'s header). Read the stated interval before trusting a peak: a
 burst shorter than the sample interval can be missed or its true peak underestimated.
 
 ## Candidates: a fast stop with nothing trailing it

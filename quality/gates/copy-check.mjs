@@ -1,11 +1,11 @@
-// scripts/gates/copy-check.mjs: THE COPY GATE. On-screen words regress to the mean the same way
+// quality/gates/copy-check.mjs: THE COPY GATE. On-screen words regress to the mean the same way
 // hand-written HTML does: a hook that buries its strong word, marketing jargon ("seamless", "leverage"),
 // a vague quantifier where a real number belongs, a headline that just restates the one before it, a big
 // number set as flat text instead of counting up. `validate` catches the em-dash; this catches the WRITING.
 // It reads the on-screen text layers and coaches toward the CLAUDE.md copy rules (hook ≤ ~12 words,
 // front-load the strong word, be specific, numbers are heroes).
 //
-//   node scripts/gates/copy-check.mjs <scene.json> [--strict]   ·   make copy-check D=<file>
+//   node quality/gates/copy-check.mjs <scene.json> [--strict]   ·   make copy-check D=<file>
 // WARN by default (coaching); --strict blocks. Not taste-policing, it flags the specific tells that make
 // copy read as generated, so you reach past them.
 import fs from 'node:fs';
@@ -15,7 +15,7 @@ import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
-if (!file || !fs.existsSync(file)) { console.error('usage: node scripts/gates/copy-check.mjs <scene.json> [--strict]'); process.exit(2); }
+if (!file || !fs.existsSync(file)) { console.error('usage: node quality/gates/copy-check.mjs <scene.json> [--strict]'); process.exit(2); }
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 
 // marketing filler + AI-slop vocabulary: each reads as "someone who had nothing specific to say".

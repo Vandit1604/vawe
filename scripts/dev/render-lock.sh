@@ -3,7 +3,7 @@
 #
 # THE ACTUAL CAUSE, not a symptom. Two `./bin/vawe` runs to the same out/<name>.mp4 raced: both
 # processes' encode+mux pipelines wrote the same path, and the result was a 0.87s file for a 17.5s
-# film that still exited 0. render-verify.mjs (scripts/gates/render-verify.mjs) catches the DAMAGE
+# film that still exited 0. render-verify.mjs (quality/gates/render-verify.mjs) catches the DAMAGE
 # after the fact; this stops the race from happening at all, which is cheaper and more honest than
 # detecting a corrupt file once it already exists. `mkdir` is the lock primitive because it is
 # atomic on every filesystem this engine runs on, unlike a check-then-write on a plain file.

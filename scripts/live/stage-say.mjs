@@ -14,7 +14,7 @@
 //
 // THE FILM IN FLIGHT is the most recently modified storyboard in formats/scene/, within a day. Not a
 // stored "current film": that is a second source of truth, free to disagree with the repo, and this
-// whole design refuses those (see scripts/gates/stage.mjs, state is derived).
+// whole design refuses those (see quality/gates/stage.mjs, state is derived).
 import fs from 'node:fs';
 import path from 'node:path';
 import { stageOf, ROOT } from '../gates/stage.mjs';
@@ -24,7 +24,7 @@ const dir = path.join(ROOT, 'formats/scene');
 let best = null;
 for (const f of (fs.existsSync(dir) ? fs.readdirSync(dir) : [])) {
   if (!f.endsWith('.storyboard.md')) continue;
-  // Same scratch convention roster() already applies (scripts/gates/stage.mjs): a leading underscore
+  // Same scratch convention roster() already applies (quality/gates/stage.mjs): a leading underscore
   // marks a throwaway rig fixture, never a film, so it must not be announced as one in flight.
   if (f.startsWith('_')) continue;
   const m = fs.statSync(path.join(dir, f)).mtimeMs;

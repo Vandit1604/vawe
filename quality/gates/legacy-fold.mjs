@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/gates/legacy-fold.mjs · ONE-TIME (but re-runnable) migration: fold legacy-manifest.json rows
+// quality/gates/legacy-fold.mjs · ONE-TIME (but re-runnable) migration: fold legacy-manifest.json rows
 // into the scene's own `authoring.allow` + `_why`, so this repo keeps exactly ONE excuse mechanism.
 //
 // WHY. Three systems said "this rule does not apply here": `authoring.allow` + `_why` in the scene (a
@@ -17,7 +17,7 @@
 // Scenes are gitignored, so this must be RE-RUNNABLE on a machine that has never run it: it is pure
 // data-shape migration, safe to run twice (a scene that already has the entry is left alone).
 //
-//   node scripts/gates/legacy-fold.mjs [--dry-run]
+//   node quality/gates/legacy-fold.mjs [--dry-run]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,7 +27,7 @@ import { readFindings } from '../lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENE_DIR = path.join(repoRoot, 'formats', 'scene');
-const MANIFEST = path.join(repoRoot, 'scripts/gates/legacy-manifest.json');
+const MANIFEST = path.join(repoRoot, 'quality/gates/legacy-manifest.json');
 const dryRun = process.argv.includes('--dry-run');
 
 // RATCHET_RULES' pure predicates, copied rather than imported: author-check.mjs is losing this
@@ -60,8 +60,8 @@ const PURE_FAILS = {
 function gateForCode(code) {
   const files = codesEmitted().get(code);
   if (!files) return null;
-  const cands = [...files].filter((f) => f !== 'scripts/gates/author-check.mjs');
-  return cands.find((f) => f.startsWith('scripts/gates/')) || cands.find((f) => f.startsWith('scripts/author/')) || cands[0] || null;
+  const cands = [...files].filter((f) => f !== 'quality/gates/author-check.mjs');
+  return cands.find((f) => f.startsWith('quality/gates/')) || cands.find((f) => f.startsWith('scripts/author/')) || cands[0] || null;
 }
 let seq = 0;
 const tmpDir = path.join('/tmp/.legacy-fold', String(process.pid));
@@ -86,7 +86,7 @@ const DELETED_RULES = new Set(['sparse-beats']);
 const MANIFEST_LAST_COMMIT = '49e62765';
 const manifestText = fs.existsSync(MANIFEST)
   ? fs.readFileSync(MANIFEST, 'utf8')
-  : spawnSync('git', ['show', `${MANIFEST_LAST_COMMIT}:scripts/gates/legacy-manifest.json`], { encoding: 'utf8', cwd: repoRoot }).stdout;
+  : spawnSync('git', ['show', `${MANIFEST_LAST_COMMIT}:quality/gates/legacy-manifest.json`], { encoding: 'utf8', cwd: repoRoot }).stdout;
 if (!manifestText) { console.error('legacy-fold: no manifest on disk and none in git history'); process.exit(2); }
 const manifest = JSON.parse(manifestText);
 let written = 0, dropped = 0, alreadyCovered = 0, skippedDeleted = 0;

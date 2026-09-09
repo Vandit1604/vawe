@@ -335,10 +335,10 @@ export function glassHome({ x, y, tiles = [], cols = 4, size = 132, gap = SPACE.
 // The dock is a row of unequal boxes, so it is asymmetric by construction.
 // BACKDROP: `gradientWash` or `metallicSheen`. The strip is short and wide; it wants lateral movement.
 //
-// LEFT NATIVE, not a candidate after all: scripts/gates/lib-test.mjs asserts the per-tile corner
+// LEFT NATIVE, not a candidate after all: quality/gates/lib-test.mjs asserts the per-tile corner
 // fraction directly off `dock.children[i].radius / .w` (the "every tile's corner is the same fraction
 // of its own size" invariant). That is a real check worth keeping, and this pass is not permitted to
-// touch scripts/gates/**, so a native `group` of `box()` tiles is the form the invariant can still be
+// touch quality/gates/**, so a native `group` of `box()` tiles is the form the invariant can still be
 // read off. The label chip and running dot already worked in html/native as appropriate; only the
 // dock strip itself stayed a group, for this one reason.
 export function glassDock({ x, y, items = [], magnify = -1, size = 76, peak = 1.62, gap = SPACE.sm,

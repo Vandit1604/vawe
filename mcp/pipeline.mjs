@@ -81,9 +81,9 @@ export async function gates(scenePath) {
   // `slop` (the vendored 41-rule detector over a DOM dump) was retired: it inlined three CSS
   // properties, so most of its rules had no evidence and its silence read as a pass
   // (docs/MISTAKES.md #340). designspec-check is the replacement and reads the scene directly.
-  const designspec = await step('node', ['scripts/gates/designspec-check.mjs', target], 60_000);
-  const ledger = await step('node', ['scripts/gates/ledger.mjs', 'check', target], 120_000);
-  const knobs = await step('node', ['scripts/gates/knobs-audit.mjs', scenePath], 30_000);
+  const designspec = await step('node', ['quality/gates/designspec-check.mjs', target], 60_000);
+  const ledger = await step('node', ['quality/gates/ledger.mjs', 'check', target], 120_000);
+  const knobs = await step('node', ['quality/gates/knobs-audit.mjs', scenePath], 30_000);
   return {
     target,
     report: {
@@ -117,7 +117,7 @@ export async function render(scenePath, outFile, { watermark = true, aspect } = 
 
 /** Audit the RENDERED scene (contrast, overlap, safe zone). Advisory, returned to the caller. */
 export async function audit(scenePath) {
-  const r = await step('node', ['verify/audit.mjs', scenePath], 300_000);
+  const r = await step('node', ['quality/audit.mjs', scenePath], 300_000);
   return r.out;
 }
 

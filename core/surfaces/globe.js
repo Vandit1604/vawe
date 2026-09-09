@@ -27,7 +27,7 @@ export const resamplable = false;
 
 // `globe: true` used to be declared here and was read by nothing: the layer's TYPE is `globe`, and the
 // surface is chosen from that (core/layers/canvas.js). One scene carried the marker, and it painted
-// exactly the same picture with it deleted. Found by scripts/gates/prop-probe.mjs.
+// exactly the same picture with it deleted. Found by quality/gates/prop-probe.mjs.
 export const PROPS = {
   colors: {}, phi: {}, phiTo: {}, phiDur: {}, theta: {},
   origin: {}, dest: {}, arcHeight: {}, arcWidth: {}, drawStart: {}, drawDur: {},

@@ -29,8 +29,8 @@ not: "the defaults this film refuses, in your own words"
 - Fill `pace:` (showreel 1.5-4s/idea, explainer 3-8s, held 6s+), `threads:`/`object:` (what holds the
   film across its cuts), and per-beat `shot:`/`layout:`/`becomes:`/`trigger:`/`picture:`, then watch
   `make animatic SB=<file>` before writing any JSON.
-- Enforced by `[gated: scripts/gates/storyboard-check.mjs]` (presence of `spectacle:`/`not:`, plus
-  `pace-not-chosen` and `timeline-hole`) and `[gated: scripts/gates/plan-vs-render.mjs]` once a scene
+- Enforced by `[gated: quality/gates/storyboard-check.mjs]` (presence of `spectacle:`/`not:`, plus
+  `pace-not-chosen` and `timeline-hole`) and `[gated: quality/gates/plan-vs-render.mjs]` once a scene
   exists; `[ref: make panels]` / `[ref: make animatic]` draw what each field means but check nothing.
 - Confirm: are `spectacle:` and `not:` both filled, and have you watched `make animatic` before
   writing any scene JSON?
@@ -236,7 +236,7 @@ not: "the defaults this film refuses, in your own words"
   evidence, not a guess: higgsfield-recreation stages its own three key events roughly 30ms and 150ms
   apart. An UNSTATED junction is left exactly as it was: staging a cause the storyboard never wrote down
   would be inventing one, not reading one off it. (`layers[].start` also legally accepts a live relative
-  reference, `"otherId.end+0.5"`; measured trying it here, `scripts/gates/beat-check` and
+  reference, `"otherId.end+0.5"`; measured trying it here, `quality/gates/beat-check` and
   `scripts/author/motion-director.mjs` both read `start` as a number in places that string breaks, one
   of them a crash, so `make assemble` resolves the reference itself rather than leaving it live.)
 
@@ -257,7 +257,7 @@ not: "the defaults this film refuses, in your own words"
   So keep the field and hold it to its real job. It feeds the intent sidecar, and it lets a failure
   name what was supposed to happen. It does not make a film better, and a storyboard full of them is
   not evidence about anything but the storyboard. Writing the change down is not building it. The
-  gate that checks the film is `make plan-check D=<file>` (scripts/gates/plan-vs-render.mjs): it lays
+  gate that checks the film is `make plan-check D=<file>` (quality/gates/plan-vs-render.mjs): it lays
   these beat spans over the render's clock and fails a junction the plan promised and the JSON left
   empty. Run it, and read what it says about the beats you were surest of.
 

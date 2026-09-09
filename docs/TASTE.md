@@ -135,13 +135,13 @@ checked and what it found. What is not uniform is what a finding **costs**:
 | **REPORTS** | storyboard · critique · direct · floor · dissolve · designspec · copy · pace · hero · treatment · waiver-drift | printed in full, never a wall; `TASTE=1` promotes them |
 
 `storyboard` is one of several exceptions in that second row with their own mechanism: `HARD_CODES` in
-`scripts/gates/author-check.mjs` names a set of codes that BLOCK whenever they fire and the scene has
+`quality/gates/author-check.mjs` names a set of codes that BLOCK whenever they fire and the scene has
 not waived them, in every mode, whatever tier their own step sits in. See "Hard codes, and waivers, not
 legacy" below.
 
 **Why the second row is not a lowered bar.** Measured on this library the day the split was written:
 give the REPORTS tier teeth and **116 of 141 scenes fail** (last measured; run
-`node scripts/gates/waiver-drift.mjs` for the current count). Four films in five. `CLAUDE.md` already
+`node quality/gates/waiver-drift.mjs` for the current count). Four films in five. `CLAUDE.md` already
 names what happens next, and it has happened here twice: a rule that fires on most of the library gets
 waived by reflex, and a rule waived by reflex has already been repealed with nobody writing it down.
 So the step became mandatory and the severity did not move. Making a step optional protected the rule
@@ -159,17 +159,17 @@ scene, then `_concepts/<base>.storyboard.md`. Find one and it runs `storyboard-c
 none and it reports `no-storyboard`.
 
 ### Hard codes, and waivers, not legacy
-<!-- doc-refs-allow: scripts/gates/legacy-manifest.json · this section records that the file is gone -->
+<!-- doc-refs-allow: quality/gates/legacy-manifest.json · this section records that the file is gone -->
 
 There used to be a RATCHET here: a rule that fires on most of the library on day one was recorded as
-**LEGACY** in a generated manifest (`scripts/gates/legacy-manifest.json`), with the rule and the date, so
+**LEGACY** in a generated manifest (`quality/gates/legacy-manifest.json`), with the rule and the date, so
 new work had to comply while the past was excused "by the calendar". That was a THIRD excuse mechanism
 sitting beside `authoring.allow` + `_why` (a person decided, and wrote why) and the ratchet engine that
 read the manifest (`RATCHET_CODES` / `RATCHET_RULES` / `gateForCode` / `codeFiresOn`, ~340 lines in
-`scripts/gates/author-check.mjs`). Two systems saying "this rule does not apply here" is exactly the
+`quality/gates/author-check.mjs`). Two systems saying "this rule does not apply here" is exactly the
 drift the rest of this repo's doctrine warns against, and an audit measured what it cost:
 
-**Measured, before any cut (164 gate-visible scenes, 2026-09-07; `node scripts/gates/waiver-drift.mjs`
+**Measured, before any cut (164 gate-visible scenes, 2026-09-07; `node quality/gates/waiver-drift.mjs`
 for the current count).** `fires` is legacy-or-new together (the rule's true trip rate); `unwaived-new`
 is what was actually, live, blocking a real render on that day:
 
@@ -202,11 +202,11 @@ had already stopped meaning anything:
 - **`sparse-beats`**: fires on 58% of the library and every single occurrence was already legacy or
   waived (0 unwaived-new). A rule with zero live enforcement anywhere is not excused, it is decoration.
   Removed from `HARD_CODES`; `direction-floor.mjs` still emits the finding as a plain report.
-- **`no-plan-for-craft`**: folded into `craft-unvisited` instead, in `scripts/gates/craft-checklist.mjs`.
+- **`no-plan-for-craft`**: folded into `craft-unvisited` instead, in `quality/gates/craft-checklist.mjs`.
   No storyboard now just means every relevant CRAFT doc reads as unanswered, which `craft-unvisited`
   already measured correctly; the duplicate exit path is gone.
 
-**Every other row folded.** `scripts/gates/legacy-fold.mjs` walked every row the manifest held and, for
+**Every other row folded.** `quality/gates/legacy-fold.mjs` walked every row the manifest held and, for
 each scene that still fires the rule, wrote it into that scene's own `authoring.allow` + `_why`:
 
 ```json
@@ -215,7 +215,7 @@ each scene that still fires the rule, wrote it into that scene's own `authoring.
 
 563 waivers were written across 157 scenes this way (9 rows dropped because the scene now complies or
 was deleted; 12 already covered by a real waiver). The manifest and the ratchet engine that read it were
-then deleted from `author-check.mjs`, and `scripts/gates/legacy-manifest.json` itself was deleted.
+then deleted from `author-check.mjs`, and `quality/gates/legacy-manifest.json` itself was deleted.
 
 **One excuse mechanism now.** `HARD_CODES` names the same codes the ratchet used to (minus the two
 retired above): a code fires, the scene has not waived it, the run stops. No manifest, no census, no
@@ -235,7 +235,7 @@ ladder's own steps already produced for THIS scene. `scripts/lib/finding-codes.m
 gate owns a code, so a hand-kept map cannot rot the first time a rule moves file.
 
 **Re-running the fold.** Scenes are gitignored, so a fresh clone has never run
-`scripts/gates/legacy-fold.mjs` and does not need to: there is no manifest left to fold FROM. The script
+`quality/gates/legacy-fold.mjs` and does not need to: there is no manifest left to fold FROM. The script
 stays in the repo as the record of how the migration was done, and because a future rule that goes
 straight to `HARD_CODES` after a maintenance sweep can use the same shape by hand: write the waiver into
 the scene, with a `_why` a person could have written.
@@ -269,7 +269,7 @@ A gate is worth having when it tells the truth cheaply. Two things were found to
 repo's style gates at once, and they pull in opposite directions from "be stricter".
 
 **`visual-vocabulary` was DELETED.** It asked whether a film shows anything or is only type, and it
-answered with an area. The area came from `boxOf` in `scripts/gates/scene-timing.mjs`, which had a
+answered with an area. The area came from `boxOf` in `quality/gates/scene-timing.mjs`, which had a
 `proxy` tier: a layer declaring one axis and carrying no readable intrinsic aspect was **squared**.
 A 590x18 decorative underline was measured as 590x590 and credited with about a tenth of the frame.
 So the gate passed the exact defect it existed to catch, on the exact quantity it existed to measure.
@@ -277,7 +277,7 @@ It was also waived by 30 of 130 films at the time of the cull. Making the measur
 made the rule true and then failed dozens of films nobody is going to rebuild, which is another way of
 saying the rule was already repealed and nobody wrote it down. The `proxy` tier went with it. Both
 figures are HISTORICAL and neither can be re-run: the gate is gone and the scenes were cleaned, so
-`node scripts/gates/waiver-drift.mjs` finds one `no-visual-vocabulary` waiver left today, flagged DEAD.
+`node quality/gates/waiver-drift.mjs` finds one `no-visual-vocabulary` waiver left today, flagged DEAD.
 
 **Seven gates were switched OFF BY DEFAULT, not deleted:** `critique`, `direct` (motion-director),
 `floor` (direction-floor), `dissolve`, `designspec`, `copy`, `pace`.
@@ -286,14 +286,14 @@ again. What did not come back is their teeth: their findings report, and `TASTE=
 cull's reasoning was about severity and it had been applied to existence, which is a different and
 worse thing: a step nobody runs is a step nobody reads, and the seven had been silent for weeks. See
 "One process, two severities" above for the measured cost of promoting them (116 of 141 scenes fail,
-last measured; run `node scripts/gates/waiver-drift.mjs` for the current count).
-<!-- doc-refs-allow: scripts/gates/slop.mjs · this line records that the script is gone -->
-`slop` is not among them: it was RETIRED, not switched off, its script `scripts/gates/slop.mjs` was
+last measured; run `node quality/gates/waiver-drift.mjs` for the current count).
+<!-- doc-refs-allow: quality/gates/slop.mjs · this line records that the script is gone -->
+`slop` is not among them: it was RETIRED, not switched off, its script `quality/gates/slop.mjs` was
 deleted, and this list named it as a live opt-in step for months.
 Nothing about them is dishonest. They are *fitted*, to a library this
 repo's own doctrine calls debt, and a fitted rule left switched on stops raising the floor and starts
 teaching the waiver keyword. `direction-floor` blocked 38 of 130 shipped scenes (last measured; run
-`node scripts/gates/waiver-drift.mjs` for the current count).
+`node quality/gates/waiver-drift.mjs` for the current count).
 
 **Nothing that catches BROKEN was touched:** `validate`, `beat-check`, `asset-check`, `probe` /
 `scene-snap` / `canvas-purity`, `seam-check`, `audit`, `schema-drift`, `gate-mutation`, plan-vs-render.

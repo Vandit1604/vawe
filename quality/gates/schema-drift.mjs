@@ -3,8 +3,8 @@
 // primitive ships a prop that never gets registered (e.g. `motion` did), validation silently passes and
 // it drifts. This asserts every prop the engine reads is defined somewhere in the schema.
 //
-//   node scripts/gates/schema-drift.mjs            (make schema-check), exits 1 on drift
-//   node scripts/gates/schema-drift.mjs --write    (make schema-write) regenerate EVERY derived part,
+//   node quality/gates/schema-drift.mjs            (make schema-check), exits 1 on drift
+//   node quality/gates/schema-drift.mjs --write    (make schema-write) regenerate EVERY derived part,
 //                                                  layerProps AND the registry-owned enums, then
 //                                                  re-run with no flag to verify. A write that would
 //                                                  DROP a prop name is refused; --force overrides.
@@ -79,7 +79,7 @@ const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, 'utf8'));
 // (`preset` needs `split`) stay live in the declarations, where `make layer-props` reads them, because
 // a guard is a question about one layer's other props and a static vocabulary cannot answer it.
 const vocabulary = {
-  _generated: 'node scripts/gates/schema-drift.mjs --write - do not hand-edit',
+  _generated: 'node quality/gates/schema-drift.mjs --write - do not hand-edit',
   _source: 'the PROPS declarations beside each read (core/registry/props.js - core/layers/vocabulary.js)',
   shared: Object.keys(SHARED_PROPS).sort(),
   byType: Object.fromEntries(LAYER_TYPES.map((t) => [t, Object.keys(LAYER_PROPS[t]).sort()])),
@@ -305,7 +305,7 @@ if (process.argv.includes('--write')) {
     };
     cmp('shared', hv.shared, vocabulary.shared);
     for (const t of new Set([...Object.keys(hv.byType || {}), ...LAYER_TYPES])) cmp(t, (hv.byType || {})[t], vocabulary.byType[t]);
-    lines.push('  fix: node scripts/gates/schema-drift.mjs --write');
+    lines.push('  fix: node quality/gates/schema-drift.mjs --write');
     f.fail('schema-layerprops-stale', lines.join('\n'));
     process.exit(1);
   }
@@ -346,7 +346,7 @@ if (process.argv.includes('--write')) {
 
 // props the engine reads off a layer/child object (L.<prop>, LL.<prop> or C.<prop>). `LL` is the same
 // layer under an inner name where `L` is already taken, core/three-fx.js has always done it, and
-// core/surfaces does it in the per-frame draw. scripts/gates/layer-props.mjs has matched all three
+// core/surfaces does it in the per-frame draw. quality/gates/layer-props.mjs has matched all three
 // since it shipped; this pattern matched two, so a prop read only as `LL.` counted as read nowhere.
 const engineProps = new Set();
 for (const m of engineSrc.matchAll(/\b(?:LL?|C)\.([a-zA-Z][a-zA-Z0-9]*)/g)) engineProps.add(m[1]);
@@ -441,6 +441,6 @@ console.log(`✓ schema in sync: all ${engineProps.size} engine props are define
     }
   }
 
-  if (bad) { console.error('  fix (the enums above): node scripts/gates/schema-drift.mjs --write  (those are GENERATED)'); process.exit(1); }
+  if (bad) { console.error('  fix (the enums above): node quality/gates/schema-drift.mjs --write  (those are GENERATED)'); process.exit(1); }
   console.log(`\u2713 ${checked} schema enum(s) derived from the registries they copy, in sync`);
 }

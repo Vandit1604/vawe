@@ -45,7 +45,7 @@ const FILMS: Film[] = [
 
 /* THE ARSENAL WALL, read off what actually ships rather than typed.
  *
- * scripts/gates/site-counts.mjs exists because hand-typed counts about a growing registry go stale
+ * quality/gates/site-counts.mjs exists because hand-typed counts about a growing registry go stale
  * by default. The same logic applies to a hand-picked list of examples: it rots the first time a
  * preview is renamed. So the wall is the preview directory, sorted, one entry per family, capped.
  * Add an effect family and it appears here; delete one and it leaves. Sorting keeps the build
@@ -69,7 +69,7 @@ const WALL = (() => {
   }
   // Every family that has a preview, not a slice of them. A cut list needs a number in the copy to
   // stay honest, and a number in the copy about a growing registry is the exact failure
-  // scripts/gates/site-counts.mjs exists to catch. The wall is 5 / 3 columns, which fills every row
+  // quality/gates/site-counts.mjs exists to catch. The wall is 5 / 3 columns, which fills every row
   // at the fifteen families that ship previews today; a sixteenth would leave a short last row,
   // which is cosmetic, not broken.
   return [...best.values()]

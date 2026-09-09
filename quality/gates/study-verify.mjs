@@ -1,7 +1,7 @@
-// scripts/gates/study-verify.mjs: does `make study` measure correctly? Check it against a film whose
+// quality/gates/study-verify.mjs: does `make study` measure correctly? Check it against a film whose
 // answers we already know.
 //
-//   node scripts/gates/study-verify.mjs formats/scene/brew-launch-act1.json
+//   node quality/gates/study-verify.mjs formats/scene/brew-launch-act1.json
 //   make study-verify D=formats/scene/<scene>.json
 //
 // WHY THIS IS POSSIBLE AT ALL, and why it is the right gate. `make study` reads someone else's film and
@@ -31,7 +31,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const file = process.argv.find((a) => a.endsWith('.json'));
 const RENDER = !process.argv.includes('--no-render');
 const f = gateFindings();
-if (!file) { console.error('usage: node scripts/gates/study-verify.mjs <scene.json> [--no-render]'); process.exit(2); }
+if (!file) { console.error('usage: node quality/gates/study-verify.mjs <scene.json> [--no-render]'); process.exit(2); }
 const abs = path.resolve(ROOT, file);
 if (!fs.existsSync(abs)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
 const name = path.basename(abs, '.json');

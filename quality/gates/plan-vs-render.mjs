@@ -1,4 +1,4 @@
-// scripts/gates/plan-vs-render.mjs: DOES THE FILM DO WHAT THE PLAN SAID?
+// quality/gates/plan-vs-render.mjs: DOES THE FILM DO WHAT THE PLAN SAID?
 //
 // storyboard-check reads the plan and grades it against ITSELF: are the beats timed, does each one name
 // what it becomes, does the last one end on a change. Every one of those can pass on a plan for a film
@@ -29,7 +29,7 @@
 // they are fields an author fills and no code reads, which is worse than no field at all, the plan looks
 // complete and the film is unchanged (docs/MISTAKES.md #219, #383, #387, #400).
 //
-//   node scripts/gates/plan-vs-render.mjs <scene.json> [--intent p] [--sb storyboard.md] [--strict]
+//   node quality/gates/plan-vs-render.mjs <scene.json> [--intent p] [--sb storyboard.md] [--strict]
 //   make plan-check D=<file>
 // FAIL: plan-overruns-render · junction-is-static.
 // WARN: held-through-the-change · beat-holds-still · unplanned-junction · plan-has-no-spans ·
@@ -51,7 +51,7 @@ import { gateFindings } from '../lib/findings.mjs';
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
 const intentPath = (() => { const i = process.argv.indexOf('--intent'); return i >= 0 ? process.argv[i + 1] : String(file || '').replace(/\.json$/, '.intent.json'); })();
-if (!file) { console.error('usage: node scripts/gates/plan-vs-render.mjs <scene.json> [--intent p] [--strict]'); process.exit(2); }
+if (!file) { console.error('usage: node quality/gates/plan-vs-render.mjs <scene.json> [--intent p] [--strict]'); process.exit(2); }
 if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
 
 let d;

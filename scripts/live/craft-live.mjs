@@ -2,7 +2,7 @@
 // scripts/live/craft-live.mjs - three rules of CLAUDE.md that were held up by nothing but the
 // sentence, said at the moment the file is still open.
 //
-// WHY A SECOND LIVE HOOK. `node scripts/gates/rung.mjs` reports how each rule in CLAUDE.md is
+// WHY A SECOND LIVE HOOK. `node quality/gates/rung.mjs` reports how each rule in CLAUDE.md is
 // enforced, and thirteen of them sat at [eye]: a rule an author can read, agree with, and not follow,
 // with nothing anywhere noticing. scripts/live/scene-live.mjs took the first three of those and this
 // file takes three more. It is deliberately its twin, and it inherits the whole contract:
@@ -11,7 +11,7 @@
 //   IT IS SILENT WHEN THE WORK IS FINE. A hook that speaks every time is a hook that gets turned off.
 //   IT ONLY COMPLAINS ABOUT WHAT THE AUTHOR WROTE. Generated derivatives are skipped, as there.
 //   EVERY NUMBER IS A MEASUREMENT. The counts below come from the gate-visible library (149 scenes
-//   here, `node scripts/gates/waiver-drift.mjs` prints the census), never from a preference. Each one
+//   here, `node quality/gates/waiver-drift.mjs` prints the census), never from a preference. Each one
 //   is quoted so an author can disagree with a real position instead of with an opinion.
 //
 // WHAT IT CANNOT SEE, said rather than dressed up. Every check here is SYNTACTIC. It knows that
@@ -106,7 +106,7 @@ function scene(rel, file) {
  * CLAUDE.md · "Changing the ENGINE, not a film?" Two of its five triggers are decidable from a path.
  *
  * The capture path is named in the rule itself: `internal/scene` and `internal/render`. A new gate is
- * a file under scripts/gates/ that git has never seen. The other three triggers (sugar that resolves
+ * a file under quality/gates/ that git has never seen. The other three triggers (sugar that resolves
  * at boot, the extension primitives, the post-render harvest) are not decidable from a filename, and
  * saying nothing about them is better than guessing at them.
  */
@@ -177,7 +177,7 @@ function engine(rel, file) {
       `  after, and put BOTH wall-clock times in the commit body. A correctness fix may cost speed;`,
       `  not knowing what it cost is the failure the rule exists for.`];
   }
-  if (/^scripts\/gates\/[^/]+\.mjs$/.test(rel)) {
+  if (/^quality\/gates\/[^/]+\.mjs$/.test(rel)) {
     let tracked = true;
     try { execFileSync('git', ['ls-files', '--error-unmatch', rel], { cwd: ROOT, stdio: 'ignore' }); }
     catch { tracked = false; }

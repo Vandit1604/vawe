@@ -1,4 +1,4 @@
-// scripts/gates/tile.mjs: lay PNG tiles into one contact sheet.
+// quality/gates/tile.mjs: lay PNG tiles into one contact sheet.
 //
 // The xstack + pad + fill=white graph was written twice (compare.mjs, judge.mjs) with small differences
 // that were accidents rather than decisions. One implementation, so a sheet from one tool reads the same
@@ -54,7 +54,7 @@ export const baseOf = (p) => path.basename(p).replace(/\.[^.]+$/, '');
 // `make judge D=<x>.expanded.json` looked for a file the renderer never writes. Normally that is a
 // clean "render first" error; when a stale `x.expanded.mp4` from an earlier film is lying in out/, the
 // judge grades THAT and reports a clean run on a video the author never made. Observed exactly once,
-// on a rewritten film whose predecessor's render was still on disk. scripts/gates/seam-snap.mjs had
+// on a rewritten film whose predecessor's render was still on disk. quality/gates/seam-snap.mjs had
 // the right rule all along; this is that rule, in one place, for every consumer.
 export const renderOf = (scenePath) =>
   path.join('out', `${path.basename(scenePath).replace(/\.(expanded\.)?json$/, '')}.mp4`);

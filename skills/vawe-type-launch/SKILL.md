@@ -85,7 +85,7 @@ not just texture? Is the payoff a real fact, not a slogan?
 
 ## The worked example
 
-`verify/evals/briefs/launch.json` (13s, 16:9). Shows: a real captured still
+`quality/runs/evals/briefs/launch.json` (13s, 16:9). Shows: a real captured still
 (`assets/brands/vawe/stills/glass-hero.png`) carrying the build beat, a real engine fact (5 canvases)
 as the payoff instead of a slogan, the wave mark's own beat (drawn on, not a bullet), and a wordmark
 that travels bottom-left across every cut as the continuous object.

@@ -1,4 +1,4 @@
-// scripts/gates/site-counts.mjs: assert every capability count written on the SITE still matches the
+// quality/gates/site-counts.mjs: assert every capability count written on the SITE still matches the
 // registry it describes.  make site-counts
 //
 // AMBIGUOUS NOUNS ARE SCOPED BY SURFACE, and that is the fix this file's own KNOWN LIMIT used to ask

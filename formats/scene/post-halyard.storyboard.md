@@ -30,12 +30,12 @@ craft:
 ---
 
 <!-- formats/scene/post-halyard.json: a postable sting for the fictional studio Halyard. Keeps the
-     eval fixture's eye-splice mark (verify/evals/briefs/sting.json) because it is a genuinely apt
+     eval fixture's eye-splice mark (quality/runs/evals/briefs/sting.json) because it is a genuinely apt
      rope-studio mark, but corrects the eval's own missing anticipation (School of Motion's twelfth
      animation principle, standard in logo reveals) and gives the landing a real sound cue instead of
      staying mute. One continuous shot, no cut: these two beats are the same take's two narrative
      halves (the JSON authors no transition between them), not two shots stitched together.
-     Do not edit verify/evals/**: that fixture is the frozen measuring instrument. -->
+     Do not edit quality/runs/evals/**: that fixture is the frozen measuring instrument. -->
 
 ## Beat 1: the gather (0s-1.2s)
 - type: sting

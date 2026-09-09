@@ -90,7 +90,7 @@ another mid-shot. What has no form here is the draughtsmanship half: nobody is d
   eye-trace (7%) · screen plane (5%) · spatial continuity (4%)**. Emotion dominates; spatial logic is
   nearly worthless. → Cut/transition to serve the feeling and the beat first. When a move and the
   meaning fight, keep the meaning. `[eye]` The 7% item is now MEASURED, and only reported, see
-  [`EYE-TRACE.md`](EYE-TRACE.md) and `node scripts/gates/eye-trace.mjs <scene.json>`.
+  [`EYE-TRACE.md`](EYE-TRACE.md) and `node quality/gates/eye-trace.mjs <scene.json>`.
 - **Cut on motion / the blink**: the eye accepts a cut on a movement or a natural attention-blink. →
   Change beats on an action (a word lands, a count finishes), never in a dead hold. `[eye]`
 - **Rhythm variety**: uniform beat lengths deaden. → Alternate short punchy beats (0.8-1.5s) with
@@ -102,7 +102,7 @@ another mid-shot. What has no form here is the draughtsmanship half: nobody is d
   Shorten beats through the middle; the final held frame is the release. `[gated]` direct: `dead-final-frame`
 
 **Look at the shape, do not only feel it.** The rule above is a judgement and until now it had nothing
-to look at. `node scripts/gates/motion-split.mjs <scene.json>` now prints the film's energy over time as
+to look at. `node quality/gates/motion-split.mjs <scene.json>` now prints the film's energy over time as
 a sparkline of the LAYERS alone, with the cuts and seams ruled under the column they land in:
 
 ```

@@ -1,7 +1,7 @@
-// scripts/gates/pace-check.mjs: is anything actually HAPPENING, and how often?
+// quality/gates/pace-check.mjs: is anything actually HAPPENING, and how often?
 //
-//   node scripts/gates/pace-check.mjs <scene.json> [--strict]
-//   node scripts/gates/pace-check.mjs            (census across the committed library)
+//   node quality/gates/pace-check.mjs <scene.json> [--strict]
+//   node quality/gates/pace-check.mjs            (census across the committed library)
 //
 // WHY THIS EXISTS. Two films were authored as a deliberate improvement on showcase-flight.json and both
 // came out SLOWER than the thing they replaced: 0.85 and 0.95 events per second against its 1.79, and

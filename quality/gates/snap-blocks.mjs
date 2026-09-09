@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/gates/snap-blocks.mjs: the REGRESSION NET FOR THE BLOCK LIBRARY. snap-scenes sweeps the
+// quality/gates/snap-blocks.mjs: the REGRESSION NET FOR THE BLOCK LIBRARY. snap-scenes sweeps the
 // shipped films; this sweeps the 179 catalog entries in blocks/, and it exists because snap-scenes
 // cannot see a block at all.
 //
@@ -19,8 +19,8 @@
 //   gate green. That is snap-scenes' and the theme gates' subject, not this one's. A gate that claimed
 //   both would be the `make slop` mistake again: confidence over evidence it never had.
 //
-//   node scripts/gates/snap-blocks.mjs --save   # write baselines → verify/snap/blocks/<name>.json
-//   node scripts/gates/snap-blocks.mjs          # diff current vs baselines
+//   node quality/gates/snap-blocks.mjs --save   # write baselines → quality/baselines/snap/blocks/<name>.json
+//   node quality/gates/snap-blocks.mjs          # diff current vs baselines
 //   make snap-blocks [SAVE=1] [BLOCK=<name>]
 import fs from 'node:fs';
 import path from 'node:path';
@@ -132,7 +132,7 @@ if (!SAVE) {
 }
 console.log(`\n==== SNAP-BLOCKS · ${entries.length} catalog entr${entries.length === 1 ? 'y' : 'ies'} from ${mods.n} block module(s) ====`);
 if (SAVE) {
-  console.log(`✓ ${saved.length} baseline(s) saved → verify/snap/blocks/`);
+  console.log(`✓ ${saved.length} baseline(s) saved → quality/baselines/snap/blocks/`);
   if (nondeterministic.length) { console.log(`\n✗ ${nondeterministic.length} NON-DETERMINISTIC (NOT baselined):`); for (const q of nondeterministic) { console.log(`  ${q.name}`); for (const s of q.sample) console.log(`      ${s}`); } }
   if (errored.length) { console.log(`\n⚠ ${errored.length} errored (skipped):`); for (const e of errored) console.log(`  ✗ ${e}`); }
   process.exit(nondeterministic.length || errored.length ? 1 : 0);
@@ -145,7 +145,7 @@ if (nobaseline.length) {
 if (nondeterministic.length) { console.log(`\n✗ NON-DETERMINISTIC:`); for (const q of nondeterministic) { console.log(`  ${q.name}`); for (const s of q.sample) console.log(`      ${s}`); } }
 for (const c of changed) { console.log(`\n△ ${c.name} (${c.diffs.length} change(s)):`); for (const d of c.diffs.slice(0, 10)) console.log(`    ${d}`); if (c.diffs.length > 10) console.log(`    … +${c.diffs.length - 10} more`); }
 if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) console.log(`  ${e}`); }
-// A GATE THAT COMPARED NOTHING MUST NOT EXIT GREEN. verify/snap/ is gitignored (.gitignore:32), so a
+// A GATE THAT COMPARED NOTHING MUST NOT EXIT GREEN. quality/baselines/snap/ is gitignored (.gitignore:32), so a
 // fresh clone has no baselines and every block lands in `nobaseline`. snap-scenes learned this the hard
 // way (docs/MISTAKES.md #391, #440): a green tick over zero comparisons is the strongest-sounding
 // statement the repo makes and it would be checking nothing. A FEW no-baseline entries stay soft.
@@ -153,7 +153,7 @@ if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) co
 // breaking the build.
 if (!identical.length && !changed.length && nobaseline.length) {
   console.error(`\n✗ nothing to compare: all ${nobaseline.length} block(s) lack a baseline, so this gate checked NOTHING.`);
-  console.error('  verify/snap/ is gitignored, so a fresh clone starts here. Run `make snap-blocks SAVE=1` to record');
+  console.error('  quality/baselines/snap/ is gitignored, so a fresh clone starts here. Run `make snap-blocks SAVE=1` to record');
   console.error('  the baselines for THIS tree first, then re-run to diff against them.');
   process.exit(1);
 }

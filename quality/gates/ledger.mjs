@@ -2,10 +2,10 @@
 // Every shipped video logs its fingerprint; every new design is checked against history BEFORE
 // shipping. Per-video QA can't see repetition, this can.
 //
-//   node scripts/gates/ledger.mjs check formats/x/brand-video.json   # compare vs all logged designs
-//   node scripts/gates/ledger.mjs add   formats/x/brand-video.json   # log it (after it ships)
-//   node scripts/gates/ledger.mjs list
-//   node scripts/gates/ledger.mjs not [theme]                        # the FORWARD query: see deriveNotLine
+//   node quality/gates/ledger.mjs check formats/x/brand-video.json   # compare vs all logged designs
+//   node quality/gates/ledger.mjs add   formats/x/brand-video.json   # log it (after it ships)
+//   node quality/gates/ledger.mjs list
+//   node quality/gates/ledger.mjs not [theme]                        # the FORWARD query: see deriveNotLine
 //   make ledger D=… (check) · make ledger-add D=…
 //
 // Rules enforced by `check`: cross-brand SAME (>0.75) exits 1; cross-brand CLOSE (>0.55) warns;
@@ -17,13 +17,13 @@ import { gateFindings } from '../lib/findings.mjs';
 import { readReceipt } from '../lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
-const LEDGER = path.join(ROOT, 'dna', 'ledger.json');
+const LEDGER = path.join(ROOT, 'quality', 'ledger', 'ledger.json');
 
 export const load = () => (fs.existsSync(LEDGER) ? JSON.parse(fs.readFileSync(LEDGER, 'utf8')) : []);
 
 // THE FORWARD QUERY. `check` asks "does this finished design repeat history"; an author staring at a
 // blank brief needs the opposite direction: "what has recent work already leant on, so I can exclude it
-// BY NAME instead of guessing". Same corpus (dna/ledger.json), same fingerprint, read the other way.
+// BY NAME instead of guessing". Same corpus (quality/ledger/ledger.json), same fingerprint, read the other way.
 //
 // A NOT line is a constraint, never a ban: it names what recent films used, it never tells the author
 // what to use instead (that is `make arsenal`'s job), and a film with a real reason to repeat a value
@@ -84,7 +84,7 @@ if (process.argv[1] && process.argv[1].endsWith('ledger.mjs')) {
     process.exit(0);
   }
   if (!cmd || !file || !['check', 'add'].includes(cmd)) {
-    console.error('usage: node scripts/gates/ledger.mjs check|add|list|not [formats/x/video.json | theme]');
+    console.error('usage: node quality/gates/ledger.mjs check|add|list|not [formats/x/video.json | theme]');
     process.exit(1);
   }
 

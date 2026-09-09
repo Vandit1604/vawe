@@ -629,7 +629,7 @@ export function fxErrors(cfg) {
 // A KNOB SET ON A PRESET THAT IGNORES IT. Same bug class as an unknown layer PROP, which
 // core/layers/vocabulary.js has thrown on for a long time: a value written, accepted, and then read by
 // nobody. The two were graded differently for no reason anybody could defend, the prop was refused at
-// boot, the knob was a warning from `scripts/gates/knobs-audit.mjs` that only appeared if you ran it.
+// boot, the knob was a warning from `quality/gates/knobs-audit.mjs` that only appeared if you ran it.
 // So it moved here, beside every other refusal, and the gate kept only its manifest half.
 //
 // `knobsFor(family, preset)` (core/registry/knobs.js) already answers which dials a preset reads; this is the
@@ -1323,7 +1323,7 @@ if (isMain) {
       for (const n of fs.readdirSync(dir)) {
         if (!n.endsWith('.json') || n === 'schema.json') continue;
         // `.animatic.json` and `.template.json` are never a scene to validate on their own, the same
-        // family scripts/gates/audit-scenes.mjs already skips by name (its own `/\.(intent|animatic|
+        // family quality/gates/audit-scenes.mjs already skips by name (its own `/\.(intent|animatic|
         // template)\.json$/`). `.animatic.json` (scripts/author/animatic.mjs) is a disposable pacing
         // clock that embeds scratch VO paths under /tmp, regenerated every run and never a
         // deliverable. `.template.json` carries unsubstituted `{{placeholders}}` as raw JSON text,

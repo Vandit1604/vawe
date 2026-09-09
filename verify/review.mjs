@@ -15,12 +15,12 @@ const run = (label, cmd, args) => {
 };
 
 const results = [];
-results.push(run('motion primitives (lib-test)', 'node', ['scripts/gates/lib-test.mjs']));
-results.push(run('layout audit (overlap/spacing)', 'node', ['verify/audit.mjs']));
-results.push(run('motion audit (animation over time)', 'node', ['scripts/gates/motion-audit.mjs', '--stride', '2']));
+results.push(run('motion primitives (lib-test)', 'node', ['quality/gates/lib-test.mjs']));
+results.push(run('layout audit (overlap/spacing)', 'node', ['quality/audit.mjs']));
+results.push(run('motion audit (animation over time)', 'node', ['quality/gates/motion-audit.mjs', '--stride', '2']));
 // Doc-only work runs no authoring gate, so a command or path that rotted out of the docs is invisible
 // until an author types it. This is pure file reads and costs about a second.
-results.push(run('doc refs (commands + paths the docs name)', 'node', ['scripts/gates/doc-refs.mjs']));
+results.push(run('doc refs (commands + paths the docs name)', 'node', ['quality/gates/doc-refs.mjs']));
 // The site boots the engine out of site/public/, and site-engine.mjs has always known how to publish
 // it. What was missing is that NOTHING RAN ITS CHECK outside a site build, so between builds the page
 // served a frozen engine while saying it was the real one (docs/MISTAKES.md #271).

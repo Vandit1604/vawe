@@ -1,7 +1,7 @@
 // lint-test.mjs: regression asserts for validate.mjs lintData (make lint-test). Each rule below maps
 // to a bug that shipped this session and slipped every other gate; this pins that the rule still fires,
 // so a future refactor can't silently un-catch it. Pure, no browser.
-//   node scripts/gates/lint-test.mjs
+//   node quality/gates/lint-test.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,7 +20,7 @@ let fail = 0;
 const ok = (cond, msg, code) => { if (!cond) { fail++; f.fail(code, msg); } else console.log(`✓ ${msg}`); };
 
 // known-bad fixture must fire one of each rule
-const bad = lintData(read('verify/fixtures/lint-bad.json'));
+const bad = lintData(read('quality/fixtures/lint-bad.json'));
 ok(bad.some((w) => /no "duration"/.test(w)), 'rule 1: missing-duration (the "+" that leaked 53s)', 'missing-duration-rule');
 // rule 2 was RETIRED: typing is HTML-safe since core/layers/text.js gained revealHtml (#85). Pinned the
 // other way round now. A typed line carrying <b> must produce NO warning, so the stale rule cannot
@@ -99,7 +99,7 @@ ok(blockErrs.length === 0, `block props exempt from base-layer type checks (got 
 
 // --- direction gate: the book-grounded motion tells still fire, and a clean scene stays silent (#134) ---
 const direct = (rel) => { try { return execFileSync('node', [path.join(root, 'scripts/author/motion-director.mjs'), path.join(root, rel)], { encoding: 'utf8' }); } catch (e) { return `${e.stdout || ''}${e.stderr || ''}`; } };
-const badDir = direct('verify/fixtures/direction-bad.json');
+const badDir = direct('quality/fixtures/direction-bad.json');
 ok(/\[linear-motion\]/.test(badDir), 'direct: linear-motion tell fires (ease:"linear" on a move)', 'direct-linear-motion');
 ok(/\[monotone-timing\]/.test(badDir), 'direct: monotone-timing tell fires (6 identical enterDur)', 'direct-monotone-timing');
 ok(/\[enter-and-retreat\]/.test(badDir), 'direct: enter-and-retreat tell fires (anim+out same side)', 'direct-enter-and-retreat');
@@ -107,10 +107,10 @@ const cleanDir = direct('formats/scene/sample.json');
 ok(!/\[(linear-motion|monotone-timing|enter-and-retreat)\]/.test(cleanDir), 'direct: clean sample.json trips none of the new tells', 'direct-clean-silent');
 
 // --- direction floor: fails a plain slideshow, passes a directed (blueprint) scene (the ambition floor) ---
-const floor = (rel) => { try { execFileSync('node', [path.join(root, 'scripts/gates/direction-floor.mjs'), path.join(root, rel)], { encoding: 'utf8' }); return 0; } catch (e) { return e.status ?? 1; } };
-const floorOut = (rel) => { try { return execFileSync('node', [path.join(root, 'scripts/gates/direction-floor.mjs'), path.join(root, rel)], { encoding: 'utf8' }); } catch (e) { return `${e.stdout || ''}${e.stderr || ''}`; } };
-ok(floor('verify/fixtures/plain-slideshow.json') === 1 && /\[plain-slideshow\]/.test(floorOut('verify/fixtures/plain-slideshow.json')), 'direction-floor: FAILS a plain slideshow (rise/fade only)', 'floor-plain-slideshow-fails');
-ok(floor('verify/fixtures/directed-beat.json') === 0, 'direction-floor: PASSES a directed blueprint scene', 'floor-directed-beat-passes');
+const floor = (rel) => { try { execFileSync('node', [path.join(root, 'quality/gates/direction-floor.mjs'), path.join(root, rel)], { encoding: 'utf8' }); return 0; } catch (e) { return e.status ?? 1; } };
+const floorOut = (rel) => { try { return execFileSync('node', [path.join(root, 'quality/gates/direction-floor.mjs'), path.join(root, rel)], { encoding: 'utf8' }); } catch (e) { return `${e.stdout || ''}${e.stderr || ''}`; } };
+ok(floor('quality/fixtures/plain-slideshow.json') === 1 && /\[plain-slideshow\]/.test(floorOut('quality/fixtures/plain-slideshow.json')), 'direction-floor: FAILS a plain slideshow (rise/fade only)', 'floor-plain-slideshow-fails');
+ok(floor('quality/fixtures/directed-beat.json') === 0, 'direction-floor: PASSES a directed blueprint scene', 'floor-directed-beat-passes');
 
 // --- blueprints: a beat expands into richly-animated layers (kinetic reveal present), pure ---
 const { BEATS } = await import('../../blueprints/index.mjs');

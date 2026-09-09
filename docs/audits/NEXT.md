@@ -129,7 +129,7 @@ dedup and audio mixing all remain unverified in practice.
 ## 7. Widen `schema-drift`'s scan surface  ·  its own job, with a library diff
 
 `schema-drift` scans the `scene.html` shell plus `core/layers/*.js` and nothing else
-(`scripts/gates/schema-drift.mjs:27-30`). It does NOT scan `core/fx/*.js`, so every prop a MODIFIER
+(`quality/gates/schema-drift.mjs:27-30`). It does NOT scan `core/fx/*.js`, so every prop a MODIFIER
 reads sits outside drift detection, and it does not scan `formats/scene/scene.js`, which reads ~59 props
 of its own. Silent substitution is the most frequent bug class in this repo, and this gate is the thing
 meant to catch it.

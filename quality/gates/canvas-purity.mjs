@@ -1,6 +1,6 @@
 // canvas-purity.mjs: do the CANVAS PIXELS depend only on n?
 //
-//   node scripts/gates/canvas-purity.mjs <format> [data.json]
+//   node quality/gates/canvas-purity.mjs <format> [data.json]
 //   make canvas-purity
 //
 // `make probe` compares a DOM SIGNATURE, so it can only see attributes and computed styles. The two

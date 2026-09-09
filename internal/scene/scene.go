@@ -908,7 +908,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 //
 // THE COMPARISON IS STILL LOOSE, EVEN CORRECTED, and the renderer says so when it prints: the reference
 // spread above was measured on decoded H.264 frames (scripts/media/study.mjs, via ffmpeg signalstats),
-// while this film's own frames are JPEG screenshots by default (CaptureExt). scripts/gates/motion-split.mjs
+// while this film's own frames are JPEG screenshots by default (CaptureExt). quality/gates/motion-split.mjs
 // measured a JPEG quantisation floor around 0.9, well above `stillFloor` below, against 0.05 for a
 // lossless PNG of the same instant: two codecs read the same held frame as two different numbers. Render
 // with `VAWE_CAPTURE=png` for a codec-comparable reading, or read the codec printed beside the percentage
@@ -1072,7 +1072,7 @@ func Stillness(framesDir string, total int, ext string, fps float64) (stillPct f
 // frames drawn by one browser, in the order that one browser drew them. workerOf (Meta.FrameWorker)
 // says which worker drew each displayed frame, so grouping displayed frames by workerOf and comparing
 // each worker's frames to the next ONE THAT WORKER OWNS reproduces the single-tab guarantee
-// scripts/gates/motion-split.mjs relies on, without re-rendering anything or touching capture.
+// quality/gates/motion-split.mjs relies on, without re-rendering anything or touching capture.
 //
 // The one thing this changes versus Stillness: two frames owned by the same worker are `gap` native
 // frames apart, not one (round-robin means a worker only draws every `workers`th frame, skipping over

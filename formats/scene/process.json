@@ -156,7 +156,7 @@
   },
   {
    "type": "text",
-   "text": "verify/audit.mjs  ·  safe-zone check",
+   "text": "quality/audit.mjs  ·  safe-zone check",
    "font": "mono",
    "track": 2,
    "size": 26,
@@ -175,7 +175,7 @@
   },
   {
    "type": "text",
-   "text": "verify/audit.mjs  ·  safe-zone check",
+   "text": "quality/audit.mjs  ·  safe-zone check",
    "font": "mono",
    "track": 2,
    "size": 26,

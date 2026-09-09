@@ -1,8 +1,8 @@
-// scripts/gates/block-scale.mjs: how much of the block library sits on the shared scales.
+// quality/gates/block-scale.mjs: how much of the block library sits on the shared scales.
 //
-//   node scripts/gates/block-scale.mjs           report adoption, exit 0
-//   node scripts/gates/block-scale.mjs --strict  exit 1 on any off-scale value
-//   node scripts/gates/block-scale.mjs --sites   print every off-scale site, worst family first
+//   node quality/gates/block-scale.mjs           report adoption, exit 0
+//   node quality/gates/block-scale.mjs --strict  exit 1 on any off-scale value
+//   node quality/gates/block-scale.mjs --sites   print every off-scale site, worst family first
 //
 // WHY THIS EXISTS. 155 blocks were each made to look right on their own, so improving the library cost
 // 155 separate decisions and every new block started from nothing. Measured before the scales landed:

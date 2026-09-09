@@ -16,7 +16,7 @@ group: look
   during a hold (screensaver).
 - After rendering, QA the SEAMS not the centres: `make seam-check D=<file>` pulls the frames
   straddling every transition and flags a luminance flash or a bad morph.
-- Enforced by `[gated: scripts/gates/author-check.mjs#front-loaded]` (+ `motion-monotony`, same gate)
+- Enforced by `[gated: quality/gates/author-check.mjs#front-loaded]` (+ `motion-monotony`, same gate)
   for the reveal-model floor; `[ref: make seam-check]` for the seam QA; the two locked artifacts
   themselves are `[eye]`, checked by sign-off before authoring.
 - Confirm: is every on-screen cue weighted into the back half of its beat, and did you run

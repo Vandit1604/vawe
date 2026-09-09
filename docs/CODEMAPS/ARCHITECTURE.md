@@ -105,7 +105,7 @@ Mapped by reading the code, not the docs. Every claim below cites a file; go the
 | 4 | look and layout | `core/looks/`, `core/color/`, `core/layout/`, `core/registry/`, `themes/`, `presets/` | `resolveLook` DERIVES scale and cuts from the theme's motion by regression over a fixed sample of real theme files; `layout` is a deliberate constant because no signal was found (`core/registry/theme-contract.js:243`) |
 | 5 | cuts, camera, audio | `core/transitions/`, `core/cuts/`, `core/camera-moves/`, `core/audio/`, `core/beats/` | the 3D rig is a FILM-WIDE switch: one tilted layer or one non-zero camera angle puts the whole film on it (`formats/scene/scene.js:1107`) |
 | 6 | authoring | `scripts/author/`, `scripts/lib/`, `scripts/dev/` | `assemble` owns only the ids it generates and preserves everything else through an explicit allowlist; it is idempotent by that list, not by nature (`scripts/author/assemble.mjs:44-50`) |
-| 7 | verification | `scripts/gates/`, `scripts/live/`, `verify/` | the ladder always runs every step; `TASTE=1` changes severity, not membership, and `HARD_CODES` escalates by FINDING CODE regardless of which step produced it (`scripts/gates/author-check.mjs:146`) |
+| 7 | verification | `quality/gates/`, `scripts/live/`, `verify/` | the ladder always runs every step; `TASTE=1` changes severity, not membership, and `HARD_CODES` escalates by FINDING CODE regardless of which step produced it (`quality/gates/author-check.mjs:146`) |
 
 **`three` is native, and this is where people miss it.** `core/layers/index.js:36` registers a real
 three.js scene graph, implemented in `core/surfaces/three-fx.js` with eleven effects including
@@ -121,7 +121,7 @@ Counted from the real import graph, not from intent:
   layout 16, surfaces 15, registry 13, and eight more). The checks know the engine's private anatomy,
   which is how `docs/MISTAKES.md` #229, #232 and #242 happened three times to the same gate.
 - **`author` and `gates` are a two-way dependency.** Seven files under `scripts/author/` import from
-  `scripts/gates/`; five gate files import back into `scripts/author/`. `storyboard-parse.mjs` is the
+  `quality/gates/`; five gate files import back into `scripts/author/`. `storyboard-parse.mjs` is the
   single storyboard reader and lives in `author/` although `gates/` depends on it just as much.
 - `scripts/lib` is the hub: 131 imports from gates, 37 from author. That is one shared definition
   rather than many, and it exists because `craft-live` and `frame-check` once drifted on one rule.
@@ -144,7 +144,7 @@ Each of these cost someone real time. Each cites the file that settles it.
   re-exports them.
 - **Safe-area margin and platform chrome combine with `max()`, never addition** (`core/layout/safe.js:193`).
 - **A waiver needs a reason of at least 12 characters and nothing checks that it is a GOOD reason**
-  (`scripts/gates/author-check.mjs:231`).
+  (`quality/gates/author-check.mjs:231`).
 - **`NOCHECK=1` does not skip validation.** `ENGINE_REFUSES` holds `validate` because the engine runs
   the same validator at boot (`author-check.mjs:668`).
 - **Never reorder the sting unit imports**: import order IS the numeric shader id (`core/stings/index.js:88`).
@@ -181,7 +181,7 @@ Each of these cost someone real time. Each cites the file that settles it.
 | `internal/encode` (Go) | ffmpeg wrapper | H.264 + grain; `Mux` adds audio. |
 | `internal/audio` (Go) | PCM mixer | music loop + named sfx at cue times + **VO ducking** + sting + limiter. |
 | `internal/queue` (Go) | concurrency runner | foundation for batch (wired to `--all`). |
-| `scripts/` | authoring tools + gates | `scripts/author/` (preview/storyboards/captions), `scripts/media/` (assets/audio/music/beatsync), `scripts/site/` (gallery). **Gates live in `scripts/gates/`**: `probe-purity`, `lib-test`, `lint-test`, `snap-scenes` (`make snap-all`), `canvas-purity`, `schema-drift`, `blocks-audit`, `motion-audit`, `dead-branch`, `docs-drift`. |
+| `scripts/` | authoring tools + gates | `scripts/author/` (preview/storyboards/captions), `scripts/media/` (assets/audio/music/beatsync), `scripts/site/` (gallery). **Gates live in `quality/gates/`**: `probe-purity`, `lib-test`, `lint-test`, `snap-scenes` (`make snap-all`), `canvas-purity`, `schema-drift`, `blocks-audit`, `motion-audit`, `dead-branch`, `docs-drift`. |
 | `verify/` | review tooling | `run.js` (`make verify`: integrity + safe-zone + contact sheets), `audit.mjs` (`make audit`: overlap/overflow/spacing), `review.mjs` (`make review`: fast snapshot). |
 | `scripts/media/kie.mjs` | **planned AI-media client** (kie.ai) | createTask → poll → download for `tts / music / gen-image / gen-video / transcribe`. **Intentional future infra** for another engine-level output (sound, vocals, generated imagery). No consumers yet; do not delete as "dead code". |
 | `.githooks/pre-push` | pre-push gate | runs `make schema-check lib-test`; install with `make install-hooks`. |
@@ -235,7 +235,7 @@ from billing for every one of them.
 
 Nothing renders video. `make all` is the two-hour job and no workflow starts it.
 
-**The browser is puppeteer's own Chromium, not the runner's.** Every launch site in `scripts/gates/`
+**The browser is puppeteer's own Chromium, not the runner's.** Every launch site in `quality/gates/`
 calls `puppeteer.launch()` with no `executablePath`, so `npm ci` fetches the browser and the workflows
 cache it against `package-lock.json`. `CHROME_BIN` steers `allocOpts` in `internal/scene/scene.go`, and
 that path belongs to the Go renderer, which no workflow invokes.
@@ -258,7 +258,7 @@ re-subset the face and the baselines were not saved against it.
 
 The baseline half was a SIZE problem wearing a structural one's clothes. A full signature is ~170KB per
 scene and the set is 20MB, most of it describing films that are themselves gitignored, so the baselines
-cannot be committed. A hash can. `verify/snap/digest.json` is one sha256 per scene plus the font state,
+cannot be committed. A hash can. `quality/baselines/snap/digest.json` is one sha256 per scene plus the font state,
 about 4KB, and it is the single tracked file inside a gitignored directory (`.gitignore` re-includes it
 by name). A checkout with no local baselines falls back to it and gets a real verdict.
 

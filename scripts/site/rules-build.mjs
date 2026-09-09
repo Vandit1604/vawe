@@ -31,7 +31,7 @@ const EASE_NAMES = Object.keys(EASINGS);
 // THEMES THAT SHIP, not themes on this disk. readdirSync counts local working files too: 38 here, 35
 // tracked. This file is pasted into a model as the engine's contract, so it must name what a READER of
 // the repo can actually use - a theme that exists only on my machine is a promise their clone cannot
-// keep. scripts/gates/site-counts.mjs counts the tracked set and was already flagging the mismatch.
+// keep. quality/gates/site-counts.mjs counts the tracked set and was already flagging the mismatch.
 const THEMES = execFileSync('git', ['ls-files', 'themes/*.json'], { cwd: root, encoding: 'utf8' })
   .split('\n').filter(Boolean).map((f) => path.basename(f, '.json')).sort();
 

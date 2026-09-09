@@ -35,7 +35,7 @@ export const ON_INK = [
 // ON_INK IS OUR OWN DATA, and that is the one place a wrong name can live forever: no author will ever
 // type `fill: 'upp'` and report it. So the table is checked against the contract at IMPORT, and neither
 // the writer nor the validator below ever has to answer a wrong name with a default, they answer only
-// ABSENCE, which is the line scripts/gates/silent-fallback.mjs draws.
+// ABSENCE, which is the line quality/gates/silent-fallback.mjs draws.
 for (const e of ON_INK) {
   if (e.fallback == null && !REQUIRED.palette.includes(e.fill))
     throw new Error(`ON_INK entry "${e.on}" names palette.${e.fill}, which is neither in REQUIRED.palette nor defaulted`);

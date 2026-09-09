@@ -10,11 +10,11 @@ codes: camera-aimed-at-nothing, eye-trace
 ## AGENT SUMMARY
 
 - At each cut, put the incoming subject at or near the screen point the eye was on before the cut. Do not make the eye cross the frame at a junction.
-- `[ref: node scripts/gates/eye-trace.mjs <scene.json>]` (codes: `camera-aimed-at-nothing`, `eye-trace`). It REPORTS only and never blocks: Murch ranks eye-trace 4th of 6, at 7%, below emotion/story/rhythm, so a cut that serves the story is allowed to cost the eye a journey.
+- `[ref: node quality/gates/eye-trace.mjs <scene.json>]` (codes: `camera-aimed-at-nothing`, `eye-trace`). It REPORTS only and never blocks: Murch ranks eye-trace 4th of 6, at 7%, below emotion/story/rhythm, so a cut that serves the story is allowed to cost the eye a journey.
 - Checkable action: where is the eye at the start of this shot, where should it be at the end, and what moves it?
 
 Murch ranks eye-trace fourth of six, at 7%, under emotion (51%), story (23%) and rhythm (10%).
-`scripts/gates/eye-trace.mjs` measures it.
+`quality/gates/eye-trace.mjs` measures it.
 
 Read the ranking before you read anything else here. Murch's instruction is to **sacrifice upward from
 the bottom**: a cut that serves the story is allowed to cost the eye a journey. So this is a REPORT.
@@ -22,9 +22,9 @@ It prints a number and stops nobody. A gate that blocked on the 7% item would ma
 film cannot spend, which inverts the ranking it came from.
 
 ```bash
-node scripts/gates/eye-trace.mjs formats/scene/<topic>.json     # one film
-node scripts/gates/eye-trace.mjs --selftest                     # the scorer's own fixtures
-node scripts/gates/eye-trace.mjs --census [--worst]             # the whole library
+node quality/gates/eye-trace.mjs formats/scene/<topic>.json     # one film
+node quality/gates/eye-trace.mjs --selftest                     # the scorer's own fixtures
+node quality/gates/eye-trace.mjs --census [--worst]             # the whole library
 ```
 
 ## The rule, in one sentence

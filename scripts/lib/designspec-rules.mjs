@@ -169,7 +169,7 @@ export const RULES = [
     needs: 'scene',
     // THE COLOUR FAMILY WAS ALMOST ENTIRELY ALREADY OURS, and better. Four of the five rules we went
     // to port were dropped after measuring what this repo has:
-    //   low-contrast    → verify/audit.mjs already computes WCAG contrast on the RENDERED scene, walks
+    //   low-contrast    → quality/audit.mjs already computes WCAG contrast on the RENDERED scene, walks
     //                     for the effective background, and samples the bg canvas underneath. It also
     //                     parses `color(srgb …)`, which is what Chromium returns for every color-mix()
     //                     this library uses. Strictly more than a detector reading one element's style.
@@ -208,7 +208,7 @@ export const RULES = [
     // a measurement of what this repo already does better:
     //   overused-font  → designspec-check asks whether the face is a ROLE the theme declares. A global
     //                    list of 17 "overused" faces cannot know that a brand owns one of them.
-    //   tiny-text      → verify/audit.mjs:389 already has a floor, and it is FRAME-RELATIVE (1.3% of
+    //   tiny-text      → quality/audit.mjs:389 already has a floor, and it is FRAME-RELATIVE (1.3% of
     //                    frame height) rather than a fixed 12px, so it scales with the canvas. It is
     //                    what caught a 17px footer on the flight film.
     //   wide-tracking  → would fire on nearly every film here and be wrong every time. Our labels are

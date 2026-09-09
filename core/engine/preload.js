@@ -245,7 +245,7 @@ const GSAP_PLUGINS = {
 // The plugin fields derive from GSAP_PLUGINS above, so that half cannot drift at all. The other four are
 // read in modules this one does not import (applyGsapHooks in formats/scene/scene.js for morph, fx,
 // parts, and core/layers/composition.js for comp) and are stated here instead. Stating them is safe only
-// because scripts/gates/lib-test.mjs RE-DERIVES the whole set from the source that does the reading and
+// because quality/gates/lib-test.mjs RE-DERIVES the whole set from the source that does the reading and
 // fails when the two disagree; the list on its own is exactly what #148 was.
 //
 // `gsap` was the ninth name and is gone: the `gsap:{from,to}` field was removed in #208 and no code has

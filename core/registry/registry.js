@@ -49,7 +49,7 @@ const ALL = [];   // every registry built here, so a failed pick can ask the oth
  * with `/* film burn *\/` written beside it. A search that reports ABSENT about something present is
  * worse than one that stays quiet, because it ends the looking.
  *
- * 131 entries across eight registries were in that state, and a ratchet in scripts/gates/arsenal-check.mjs
+ * 131 entries across eight registries were in that state, and a ratchet in quality/gates/arsenal-check.mjs
  * caught it only AFTER the fact, on a push. This repo's own rule says a gate is the last resort: if the
  * bad value has a write site, the refusal goes there and the whole class ends. `defineRegistry` is that
  * write site, so adding an effect without a blurb now fails the moment the module loads.

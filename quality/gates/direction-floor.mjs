@@ -1,4 +1,4 @@
-// scripts/gates/direction-floor.mjs: THE AMBITION FLOOR. The inverse of effect-soup.
+// quality/gates/direction-floor.mjs: THE AMBITION FLOOR. The inverse of effect-soup.
 //
 // effect-soup (motion-director) is the UPPER bound: too many effects, undirected. Nothing was the LOWER
 // bound, so a video that is all `rise`+`fade`, no camera, no kinetic type, no transitions (a plain
@@ -10,7 +10,7 @@
 // cursors, custom motion tracks, fx, background motion, and blueprint beats, and fails a video that
 // uses almost none of it. A scene composed from blueprints (`{type:"beat"}`) is directed by construction.
 //
-//   node scripts/gates/direction-floor.mjs <scene.json> [--strict]   ·   make direction-floor D=<file>
+//   node quality/gates/direction-floor.mjs <scene.json> [--strict]   ·   make direction-floor D=<file>
 // It also reads the scene as a CONTINUITY: on a short film, one content object must survive each cut
 // and CHANGE there (`no-continuous-object`). A film whose every beat is an island is a slideshow no
 // matter how much motion each island contains. Boundaries come from two places, DECLARED (`cuts` /
@@ -152,7 +152,7 @@ const aeRecipeFor = (key) => {
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
-if (!file) { console.error('usage: node scripts/gates/direction-floor.mjs <scene.json> [--strict]'); process.exit(2); }
+if (!file) { console.error('usage: node quality/gates/direction-floor.mjs <scene.json> [--strict]'); process.exit(2); }
 // The floor coaches on the RAW AUTHORED scene (what you wrote), NOT the produced one, the engine injects
 // the baseline at render (core/engine/produce.js), so these WARNs read as "author this deliberately instead of
 // leaning on the injected default." Judging the produced scene would mask the very conditions this gate

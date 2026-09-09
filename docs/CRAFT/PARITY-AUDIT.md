@@ -617,7 +617,7 @@ missing entirely, and it is why `draw` was an outline effect here rather than a 
 
 `logoReveal` (`blueprints/beats.mjs`) now passes both, so its draw branch ends as the mark exactly as
 its morph branch always did. That is what makes the fix reachable rather than merely present.
-`docs/MISTAKES.md` #545. Eleven assertions in `scripts/gates/lib-test.mjs`, proved by breaking the fill
+`docs/MISTAKES.md` #545. Eleven assertions in `quality/gates/lib-test.mjs`, proved by breaking the fill
 write and watching two of them fail.
 
 ### Deliberately left, and why

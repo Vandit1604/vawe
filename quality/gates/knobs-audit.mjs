@@ -1,4 +1,4 @@
-// scripts/gates/knobs-audit.mjs, ONE job: the manifest DRIFT GUARD.
+// quality/gates/knobs-audit.mjs, ONE job: the manifest DRIFT GUARD.
 //   make knobs-audit  → every knob core/knobs.js advertises must actually change the render, or the
 //                       manifest is lying to authors.
 //

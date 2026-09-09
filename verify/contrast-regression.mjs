@@ -8,9 +8,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const fixture = 'verify/fixtures/emphasis-contrast.json';
+const fixture = 'quality/fixtures/emphasis-contrast.json';
 let out = '';
-try { out = execFileSync('node', ['verify/audit.mjs', fixture], { cwd: root, encoding: 'utf8' }); }
+try { out = execFileSync('node', ['quality/audit.mjs', fixture], { cwd: root, encoding: 'utf8' }); }
 catch (e) { out = (e.stdout || '') + (e.stderr || ''); } // audit exits 1 on a HARD fail, that's the expected path
 
 if (out.includes('[contrast]') && out.includes('invisible')) {

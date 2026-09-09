@@ -16,7 +16,7 @@ codes: no-bg-motion, off-radius, off-shadow, ruled-grid, static-bg
   (`make designspec-check D=<file>`), only then drop it into the scene.
 - Lock the one-page design spec (colours, typography, rounded, borders, shadows, spacing, motion,
   components) before authoring a bespoke surface; every block/fragment obeys it.
-- Enforced by `[gated: scripts/gates/designspec-check.mjs]` (codes: `no-bg-motion`, `off-radius`,
+- Enforced by `[gated: quality/gates/designspec-check.mjs]` (codes: `no-bg-motion`, `off-radius`,
   `off-shadow`, `ruled-grid`, `static-bg`), which automates colours and typography of the post-build
   check; corners, spacing, depth and the negative list are `[eye]`.
 - Confirm: did you build and gate the fragment BEFORE dropping it into the scene, and does every

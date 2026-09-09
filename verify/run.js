@@ -16,7 +16,7 @@ const formatsDir = path.join(repoRoot, 'formats');
 const OUT = path.join(repoRoot, 'verify', 'out');
 fs.mkdirSync(OUT, { recursive: true });
 // The canvas and the safe box come from the SAMPLE, via core/safe.js, the same function boot.js
-// places against and verify/audit.mjs checks with. This file used to hardcode a portrait 1080x1920
+// places against and quality/audit.mjs checks with. This file used to hardcode a portrait 1080x1920
 // viewport, a portrait safe box, and a 1080x1920 integrity assert, so it could only ever be right for
 // one of the five aspects the engine renders, and it was a fourth independent opinion on "safe".
 const dimsFor = (cfg) => sceneDims(cfg);

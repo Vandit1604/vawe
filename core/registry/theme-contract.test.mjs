@@ -68,7 +68,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 }
 
 // ---- computedLook is DERIVED, not a constant: a real spread across the themes with no authored look ----
-// (docs/CRAFT/THEME-LOOK.md, scripts/gates/theme-look-spread.mjs is the fuller version of this check,
+// (docs/CRAFT/THEME-LOOK.md, quality/gates/theme-look-spread.mjs is the fuller version of this check,
 // run over the whole library on every `make theme-look-spread`.) This is the sibling assertion the
 // engine change instructions asked for: computedLook must not collapse back to one value per key.
 {

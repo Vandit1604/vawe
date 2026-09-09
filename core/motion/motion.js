@@ -767,7 +767,7 @@ export function fitBox(el, { maxW, maxH, max = 168, min = 24 }) {
 //   · core/motion.js           the same, plus an array passthrough, and its rgb() form was
 //                              UNANCHORED, so "foo rgb(1,2,3)" parsed and filters.js said null
 //   · core/lightfield/colour.js 6-digit hex ONLY, deliberately (see that file)
-//   · scripts/gates/designspec-check.mjs  #rgb · #rgba · #rrggbb · #rrggbbaa · rgb()/rgba() with
+//   · quality/gates/designspec-check.mjs  #rgb · #rgba · #rrggbb · #rrggbbaa · rgb()/rgba() with
 //                              FLOAT parts → {r,g,b}. The gate alone understood 8-digit hex, so a
 //                              scene could carry "#0b0b0fcc", be graded against the palette, and
 //                              then reach a grade or a glow that read null and silently fell back.

@@ -1,10 +1,10 @@
-// scripts/gates/asset-check.mjs: ASSET-READINESS PREFLIGHT. A scene that names a logo / icon / captured
+// quality/gates/asset-check.mjs: ASSET-READINESS PREFLIGHT. A scene that names a logo / icon / captured
 // UI / photo / VO that isn't on disk renders a BROKEN image or a silent gap, and you find out at render,
 // or worse, in the mp4. This walks the scene for every asset REFERENCE (image/component/lottie src, audio
 // vo/music/spectrum, any assets|formats path) and confirms the file exists, so you fetch what's missing
 // BEFORE authoring around it. Remote http(s)/data: refs are noted, not failed (can't check offline).
 //
-//   node scripts/gates/asset-check.mjs <scene.json> [--strict]   ·   make asset-check D=<file>
+//   node quality/gates/asset-check.mjs <scene.json> [--strict]   ·   make asset-check D=<file>
 // WARN by default (with the command to get each asset); --strict blocks.
 //
 // DO NOT DELETE THIS AS REDUNDANT. `preloadImages` in core/boot.js now THROWS on a repo-local image
@@ -30,7 +30,7 @@ const strict = process.argv.includes('--strict');
 // caller flag rather than a fixed severity, so the finding's severity is computed from it directly.
 const sev = () => (strict ? 'error' : 'warn');
 const f = gateFindings();
-if (!file || !fs.existsSync(file)) { console.error('usage: node scripts/gates/asset-check.mjs <scene.json> [--strict]'); process.exit(2); }
+if (!file || !fs.existsSync(file)) { console.error('usage: node quality/gates/asset-check.mjs <scene.json> [--strict]'); process.exit(2); }
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 const sceneDir = path.dirname(path.resolve(file));
 

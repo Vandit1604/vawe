@@ -167,7 +167,7 @@ export const KNOBS = {
 // was told 0.4, wrote 0.4 to KEEP the default, and got a frame the engine would never have rendered on
 // its own. No error, no gate, just a wrong picture.
 //
-// A gate cannot close this and one was already trying: scripts/gates/knobs-audit.mjs proves an
+// A gate cannot close this and one was already trying: quality/gates/knobs-audit.mjs proves an
 // advertised dial CHANGES the output, and it probes with `(Number(k.default) || 1) * 2 + 3`, so a dial
 // whose stated default is wrong still moves the frame and still passes. The refusal has to sit at the
 // write site, which is here.

@@ -33,18 +33,18 @@ typeface.
 **`renderFrame(n)` is a pure function of `n`.** The same frame number must produce the same pixels
 regardless of what was rendered before it, because frames are captured across six parallel workers.
 Anything that breaks that is a bug even if it looks right. `make probe` and
-`node scripts/gates/probe-purity.mjs scene` check it.
+`node quality/gates/probe-purity.mjs scene` check it.
 
 ## Before you open a PR
 
 ```bash
-node scripts/gates/lib-test.mjs        # the unit suite
+node quality/gates/lib-test.mjs        # the unit suite
 node core/validate/validate.mjs                 # every scene still validates
-node scripts/gates/code-quality.mjs    # nothing got more tangled
+node quality/gates/code-quality.mjs    # nothing got more tangled
 ```
 
 The last one is a **ratchet, not a threshold**. The repo has known complexity debt recorded in
-`verify/code-quality-baseline.json`; the gate fails only if your change makes a file worse than that
+`quality/baselines/code-quality-baseline.json`; the gate fails only if your change makes a file worse than that
 line. Fixing something and running `make code-quality WRITE=1` lowers the line permanently.
 
 If you touch a **gate**, run it over the whole scene library before and after and diff the results. The

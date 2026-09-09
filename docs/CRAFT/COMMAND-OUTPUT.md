@@ -11,7 +11,7 @@ codes: ad-hoc-output
 
 - Any reporting command (gate, check, audit) must build a finding as a record `{code, severity, summary, at?, fix?, doc?}` first, then render prose from it, never print ad-hoc text.
 - `--json` emits ONLY the records on stdout, everything else (header, verdict, advice) goes to stderr, same exit code both modes.
-- `[gated: ad-hoc-output]` `scripts/gates/output-contract.mjs` ratchets non-compliant reporting gates down; a new one that prints ad-hoc prose is refused.
+- `[gated: ad-hoc-output]` `quality/gates/output-contract.mjs` ratchets non-compliant reporting gates down; a new one that prints ad-hoc prose is refused.
 
 A reporting command (a gate, a check, an audit) must not invent its own print style. It follows the
 house contract in `scripts/lib/findings.mjs`, which `docs/MISTAKES.md #401` paid for.
@@ -32,7 +32,7 @@ house contract in `scripts/lib/findings.mjs`, which `docs/MISTAKES.md #401` paid
 ## How
 
 Use `gateFindings()` to render and `emitJson()` under `--json` (see the 14 gates that already do, e.g.
-`scripts/gates/discovery.mjs`). The aggregator reads records via `VAWE_FINDINGS_OUT`, so a gate writes
+`quality/gates/discovery.mjs`). The aggregator reads records via `VAWE_FINDINGS_OUT`, so a gate writes
 its records there while printing prose to stdout exactly as before.
 
 ## Reaching JSON from a command
@@ -47,10 +47,10 @@ make discovery JSON=1        # JSON-only on stdout, same exit code as prose
 
 - Test runners (`lib-test`) tally pass/fail; they are not finding-shaped and stay prose.
 - Pure libraries and non-printing helpers report nothing, so they have nothing to render.
-Both are exempt in `scripts/gates/output-contract.mjs`, named rather than silently skipped.
+Both are exempt in `quality/gates/output-contract.mjs`, named rather than silently skipped.
 
 ## The gate
 
-`scripts/gates/output-contract.mjs` counts reporting gates not yet on this contract and ratchets the
-number down (`verify/output-contract-ratchet.json`, falls but never rises). A new reporting gate that
+`quality/gates/output-contract.mjs` counts reporting gates not yet on this contract and ratchets the
+number down (`quality/baselines/output-contract-ratchet.json`, falls but never rises). A new reporting gate that
 prints ad-hoc prose raises the count and is refused. Migrate one, lower the ratchet with `--stamp`.

@@ -1,4 +1,4 @@
-// scripts/gates/snap-scenes.mjs: the WHOLE-LIBRARY determinism + regression net. scene-snap.mjs
+// quality/gates/snap-scenes.mjs: the WHOLE-LIBRARY determinism + regression net. scene-snap.mjs
 // snapshots one format's sample.json; this sweeps EVERY shipped scene (formats/scene/*.json), and for
 // each does two things the single-scene gate never did across the library:
 //
@@ -17,8 +17,8 @@
 //      of every film and this gate reported 109 identical, correctly, because no element moved. When
 //      the question is whether the PICTURE changed, diff rendered frames. See docs/MISTAKES.md.
 //
-//   node scripts/gates/snap-scenes.mjs --save   # write baselines → verify/snap/scenes/<name>.json
-//   node scripts/gates/snap-scenes.mjs          # diff current vs baselines
+//   node quality/gates/snap-scenes.mjs --save   # write baselines → quality/baselines/snap/scenes/<name>.json
+//   node quality/gates/snap-scenes.mjs          # diff current vs baselines
 //   make snap-all [SAVE=1]
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -219,7 +219,7 @@ if (!SAVE) {
   // two halves left `else if (was.hash …)` reachable with `was === null`, so a tree with NO stamp
   // crashed on a null dereference AFTER the whole sweep had run, trading a computed 106-scene verdict
   // for a stack trace. That is the first-run path for every fresh clone and every new worktree, because
-  // verify/snap/ is gitignored. Independent conditions, never a chain: the notes are not alternatives to
+  // quality/baselines/snap/ is gitignored. Independent conditions, never a chain: the notes are not alternatives to
   // each other, and writing them as if they were is what made one of them able to break the others.
   if (!was) console.log(`  ~ these baselines carry no font-state stamp, so a text-width difference cannot be told from a code one. Re-save with \`make snap-all SAVE=1\` to stamp them.`);
   // WHICH CHECKOUT RECORDED THESE. A baseline saved in one tree and compared in another can differ for
@@ -244,7 +244,7 @@ if (SAVE) {
   // Sorted, because an unsorted map re-orders itself on every save and the tracked file would show a
   // diff on a run that changed nothing. Deterministic output is the same rule the renders obey.
   fs.writeFileSync(DIGEST, JSON.stringify({ font: fsNow, scenes: Object.fromEntries(Object.keys(digestNow).sort().map((k) => [k, digestNow[k]])) }, null, 1) + '\n');
-  console.log(`✓ ${saved.length} baselines saved → verify/snap/scenes/  (font state ${fsNow.hash}, ${fsNow.n} face(s))`);
+  console.log(`✓ ${saved.length} baselines saved → quality/baselines/snap/scenes/  (font state ${fsNow.hash}, ${fsNow.n} face(s))`);
   if (quarantined.length) { console.log(`\n⚠ ${quarantined.length} QUARANTINED (non-deterministic, NOT baselined):`); for (const q of quarantined) { console.log(`  ✗ ${q.name}`); for (const s of q.sample) console.log(`      order-diff: ${s}`); } }
   if (errored.length) { console.log(`\n⚠ ${errored.length} errored (skipped):`); for (const e of errored) console.log(`  ✗ ${e}`); }
   process.exit(quarantined.length || errored.length ? 1 : 0);
@@ -260,7 +260,7 @@ if (nobaseline.length) {
 if (quarantined.length) { console.log(`\n✗ NON-DETERMINISTIC (quarantined):`); for (const q of quarantined) { console.log(`  ${q.name}`); for (const s of q.sample) console.log(`      ${s}`); } }
 for (const c of changed) { console.log(`\n△ ${c.name} (${c.diffs.length} change(s)):`); for (const d of c.diffs.slice(0, 12)) console.log(`    ${d}`); if (c.diffs.length > 12) console.log(`    … +${c.diffs.length - 12} more`); }
 if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) console.log(`  ${e}`); }
-// A GATE THAT COMPARED NOTHING MUST NOT EXIT GREEN. `verify/snap/` is gitignored (.gitignore:32),
+// A GATE THAT COMPARED NOTHING MUST NOT EXIT GREEN. `quality/baselines/snap/` is gitignored (.gitignore:32),
 // so a fresh clone has no baselines at all: every scene lands in `nobaseline`, the loop above prints
 // them, and the exit below used to return 0. The first thing a new contributor runs would therefore
 // pass while checking not one pixel, and this is the engine's flagship determinism gate, so a green
@@ -273,7 +273,7 @@ if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) co
 // pass, it is a gate that never ran.
 if (!identical.length && !changed.length && nobaseline.length) {
   console.error(`\n✗ nothing to compare: all ${nobaseline.length} scene(s) lack a baseline, so this gate checked NOTHING.`);
-  console.error('  verify/snap/ is gitignored, so a fresh clone starts here. Run `make snap-all SAVE=1` to record');
+  console.error('  quality/baselines/snap/ is gitignored, so a fresh clone starts here. Run `make snap-all SAVE=1` to record');
   console.error('  the baselines for THIS machine first, then re-run to diff against them.');
   process.exit(1);
 }

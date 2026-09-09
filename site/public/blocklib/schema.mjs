@@ -30,7 +30,7 @@
 //
 // x · y · start · dur appear in NO table. They are placement and timing the scene supplies (a
 // container injects them, `make expand` writes them), never content an author dials. The check in
-// scripts/gates/block-schema.mjs holds every table to that, and to the defaults the code really has.
+// quality/gates/block-schema.mjs holds every table to that, and to the defaults the code really has.
 
 // The tables themselves are DISCOVERED, not imported: blocks/index.mjs reads the family modules and
 // merges every `<FAM>_SCHEMAS` export it finds. This file used to carry one import line per family

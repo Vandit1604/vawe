@@ -1,4 +1,4 @@
-// scripts/gates/audio-check.mjs. THE SOUND GATE: is this film's silence a decision, or an omission?
+// quality/gates/audio-check.mjs. THE SOUND GATE: is this film's silence a decision, or an omission?
 //
 // WHY THIS EXISTS. `docs/CRAFT/FILM-STRUCTURE.md` found that shipping mute closes a whole family of
 // structural device: the sound bridge, music-led structure, the unfinished sentence all need a track
@@ -37,8 +37,8 @@
 // verified licence under a commercial product film is a Content ID claim waiting to land, so it warns
 // loudly and names the file. See docs/CRAFT/SOUND.md §Licensing.
 //
-//   node scripts/gates/audio-check.mjs <scene.json> [--strict]   ·   make audio-check D=<file>
-//   node scripts/gates/audio-check.mjs --all                     ·   make audio-check
+//   node quality/gates/audio-check.mjs <scene.json> [--strict]   ·   make audio-check D=<file>
+//   node quality/gates/audio-check.mjs --all                     ·   make audio-check
 // WARN by default; --strict blocks. The library census (--all) never blocks.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -124,7 +124,7 @@ const reasonOf = (a) => {
 // This gate printed a real verdict for months and nothing anywhere read it: it was not one of
 // author-check's steps, and it stated each finding as a tuple in a local array, so
 // scripts/lib/finding-codes.mjs could not see a single code it emits either. A gate that emits no code
-// cannot be cited, ratcheted, waived or routed to a doc, and scripts/gates/rung.mjs calls a tag that
+// cannot be cited, ratcheted, waived or routed to a doc, and quality/gates/rung.mjs calls a tag that
 // names one a FALSE TAG for exactly that reason. Two failures with one cause: the fact lived in a
 // shape only this file understood.
 //
@@ -271,7 +271,7 @@ if (all) {
 }
 
 if (!file || !fs.existsSync(file)) {
-  console.error('usage: node scripts/gates/audio-check.mjs <scene.json> [--strict]  |  --all');
+  console.error('usage: node quality/gates/audio-check.mjs <scene.json> [--strict]  |  --all');
   process.exit(2);
 }
 const scene = readJSON(file);

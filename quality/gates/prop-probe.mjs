@@ -11,8 +11,8 @@
 // fire on (docs/MISTAKES.md #529, PARITY-AUDIT). This file supplies the missing input and reuses the
 // whole mechanism: `watchProps` records the reads, `deadProps` decides, `auditedProps` scopes.
 //
-//   node scripts/gates/prop-probe.mjs              every type, table + exit 1 on an unwaived death
-//   node scripts/gates/prop-probe.mjs three text   just those types
+//   node quality/gates/prop-probe.mjs              every type, table + exit 1 on an unwaived death
+//   node quality/gates/prop-probe.mjs three text   just those types
 //
 // ONE PROP PER LAYER, and that is not a style choice. A layer carrying all 46 of its type's props at
 // once is not a layer any author would write; it takes branches nothing takes together and throws for
@@ -39,7 +39,7 @@ import { gateFindings } from '../lib/findings.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 // ---------------------------------------------------------------------------------------------
-// WAIVERS. Keyed `type.prop`, every entry carrying a reason, the shape scripts/gates/arsenal-check.mjs
+// WAIVERS. Keyed `type.prop`, every entry carrying a reason, the shape quality/gates/arsenal-check.mjs
 // uses and for its reason: an unexplained list becomes a dumping ground, and a waiver nobody can read
 // is indistinguishable from a bug nobody fixed. A waiver here says "this prop IS read, on a path this
 // prober cannot reach", never "we gave up".
@@ -397,7 +397,7 @@ for (const f of live) byType.set(f.type, [...(byType.get(f.type) || []), label(f
 for (const [t, ps] of [...byType].sort()) console.log(`  ${t.padEnd(13)} ${ps.join(', ')}`);
 for (const f of live) findingsOut.fail('dead-prop', `${f.type}: ${label(f)} set and never read`, {
   at: `${f.type}.${f.prop}${f.at ? `@${f.at}` : ''}`,
-  fix: 'fix the reader, delete the declaration, or waive it with a reason in WAIVERS (scripts/gates/prop-probe.mjs)',
+  fix: 'fix the reader, delete the declaration, or waive it with a reason in WAIVERS (quality/gates/prop-probe.mjs)',
 });
 for (const e of errors) console.log(`  ! ${e.type}: ${e.error}`);
 for (const e of errors) findingsOut.fail('probe-boot-error', `${e.type}: ${e.error}`, {
@@ -408,7 +408,7 @@ if (errors.length) console.log('\nA type whose probe scene did not boot was NOT 
 if (live.length) {
   console.log(`\n${live.length} prop${live.length === 1 ? '' : 's'} set and never read. Each one is a value the`
     + ` engine accepts and ignores: fix the reader, delete the declaration, or waive it with a reason`
-    + ` in WAIVERS (scripts/gates/prop-probe.mjs).`);
+    + ` in WAIVERS (quality/gates/prop-probe.mjs).`);
 }
 findingsOut.emit();
 process.exit(findingsOut.records.some((r) => r.severity === 'error') ? 1 : 0);

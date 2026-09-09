@@ -41,9 +41,9 @@ if (!fs.existsSync(path.join(CLIP_DIR, 'manifest.json'))) {
   console.log('  · synthesized the clip fixture (assets/gen/sweep), it is gitignored, so this self-heals');
 }
 
-// ---- what is currently unexercised (same scan as scripts/gates/coverage.mjs) ----
+// ---- what is currently unexercised (same scan as quality/gates/coverage.mjs) ----
 const scenes = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'schema.json' && f !== '_coverage-reel.json')
-  // Lowered, for the same reason `scripts/gates/coverage.mjs` lowers: a cut style or sting fx declared
+  // Lowered, for the same reason `quality/gates/coverage.mjs` lowers: a cut style or sting fx declared
   // through the unified `transitions` surface is exercised by a real scene, and counting it as a gap
   // would put an already-covered effect back in the reel (docs/MISTAKES.md #408).
   .map((f) => { try { return loadScene(JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))); } catch { return null; } })

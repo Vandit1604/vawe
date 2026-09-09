@@ -4,7 +4,7 @@
 // a whip is loud air. These maps name the Cuelume voicing (see core/audio-kit.mjs) each transition
 // mechanism gets under `audio.auto`. They live here, imported by all three consumers, so they cannot
 // drift: the render path (formats/scene/scene.html), the bake catalogue (generators/media/audio-bake.mjs),
-// and the coverage gate (scripts/gates/lib-test.mjs). Previously scene.html hand-mirrored these and had
+// and the coverage gate (quality/gates/lib-test.mjs). Previously scene.html hand-mirrored these and had
 // already lost `push` from CUT_CUE and had no SEAM_CUE at all (every seam rendered silent).
 
 // Cut style -> cue. Consumed for layer `cut` and top-level `cuts`.

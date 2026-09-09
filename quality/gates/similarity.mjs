@@ -2,8 +2,8 @@
 // beat structure, and layout are the template problem re-emerging; this turns that taste
 // judgment into a failing check (same philosophy as the contrast + motion audits).
 //
-//   node scripts/gates/similarity.mjs a.json b.json [...]   # score the given files pairwise
-//   node scripts/gates/similarity.mjs                       # scan all authored data JSONs
+//   node quality/gates/similarity.mjs a.json b.json [...]   # score the given files pairwise
+//   node quality/gates/similarity.mjs                       # scan all authored data JSONs
 //   make similar [D="a.json b.json"]
 //
 // Fingerprint = motion vocabulary (cuts/stings/anims/presets/bgs) + beat-structure skeleton +
@@ -20,7 +20,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 
 // ---------- fingerprint ----------
 export function fingerprint(input) {
-  // Lowered HERE rather than at each caller, so `make ledger` (scripts/gates/ledger.mjs imports this)
+  // Lowered HERE rather than at each caller, so `make ledger` (quality/gates/ledger.mjs imports this)
   // inherits it. A film that declares its boundaries as `transitions` fingerprinted with no stings at
   // all, so two films could share a sting vocabulary and the ledger would score them as further apart
   // than they are (docs/MISTAKES.md #408). Cloned: loadScene mutates and deletes what it is handed,
@@ -28,7 +28,7 @@ export function fingerprint(input) {
   const data = loadScene(structuredClone(input));
   const vocab = new Set(), structure = [], layout = [], colors = new Set();
   // Category-tagged vocabulary, kept ALONGSIDE the merged `vocab` set (not instead of it): the ledger's
-  // forward-looking "not" query (scripts/gates/ledger.mjs) needs to say WHICH kind of thing a value is
+  // forward-looking "not" query (quality/gates/ledger.mjs) needs to say WHICH kind of thing a value is
   // (a background preset vs. a cut) to write a useful NOT line; the merged set alone can't tell them
   // apart. Purely additive, so it never touches the existing SAME/CLOSE scoring in similarity()/verdict().
   const cats = { bg: new Set(), entrance: new Set(), exit: new Set(), cut: new Set() };

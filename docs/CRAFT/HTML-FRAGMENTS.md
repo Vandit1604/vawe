@@ -311,7 +311,7 @@ to `resolveLook` (`core/registry/theme-contract.js`), never a literal the kit au
   panels… they create paths for the eye"), distinct from a card's own border.
 - **A ground for a full-bleed root**: `.kit-root` (`position:absolute;inset:0`) fills itself with a
   faint tint of the theme's own `--line`, so a full-bleed fragment is never one giant transparent text
-  box to `verify/audit.mjs` and never collides with a sibling layer underneath it.
+  box to `quality/audit.mjs` and never collides with a sibling layer underneath it.
 
 ## Beautiful, not merely correct
 

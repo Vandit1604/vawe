@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// `beats` keeps its original home. Twenty-odd receipts already sit in verify/beats-seen/ and
+// `beats` keeps its original home. Twenty-odd receipts already sit in quality/runs/beats-seen/ and
 // beat-check.mjs reads that path; moving them would silently un-approve every scene in the library,
 // which is exactly the failure this module exists to prevent.
 const LEGACY = { beats: path.join(ROOT, 'verify', 'beats-seen') };

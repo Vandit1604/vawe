@@ -117,7 +117,7 @@ const shift = (keys, by) => keys.map((k) => ({ ...k, t: r3(k.t + by) }));
 
 // RUN AS A COMMAND, IMPORTABLE AS A MODULE. The CLI used to be straight-line at the top level, so
 // `import { SHAPES }` printed the usage text and exited 2, and the shapes could therefore be asserted
-// by nothing. A generator no gate can read is a generator that drifts (scripts/gates/lib-test.mjs now
+// by nothing. A generator no gate can read is a generator that drifts (quality/gates/lib-test.mjs now
 // measures the velocity of what `exit` emits).
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const argv = process.argv.slice(2);

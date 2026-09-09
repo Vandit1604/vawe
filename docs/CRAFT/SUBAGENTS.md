@@ -46,7 +46,7 @@ handed.
 real `/tmp/beats/<name>.png`, `/tmp/reveal/<name>.png`, `/tmp/seams/<name>.png` paths, and the on-screen
 strings for `copy`). Copy the six prompts into six parallel `Agent` calls. Once they report,
 `make critics D=<file> RECORD=<panels.json>` writes the panel's findings to
-`verify/approved/panels/<name>.json`, hashed to this version of the scene, so the doc below and the tool
+`quality/baselines/approved/panels/<name>.json`, hashed to this version of the scene, so the doc below and the tool
 point at each other: `scripts/author/critics.mjs` is the source of the prompts, this table is the source
 of the roster.
 
@@ -135,15 +135,15 @@ the one critic handed no artifact the author had not already seen.
 
 **That number cannot be computed today and nothing on disk gets close.** A critic returns its findings
 in an agent message. The main thread reads them, edits the scene, and the link between the finding and
-the edit is never written anywhere. `verify/judged/` records A/B judge verdicts, which is a different
-mechanism; `verify/beats-seen/` records that somebody looked, not what they found; `../MISTAKES.md`
+the edit is never written anywhere. `quality/runs/judged/` records A/B judge verdicts, which is a different
+mechanism; `quality/runs/beats-seen/` records that somebody looked, not what they found; `../MISTAKES.md`
 records fixes without saying which critic asked for them. Searched, all three: not one entry
 attributes a fix to a named critic. So the honest statement is a method, not a figure, and a figure
 from one panel run would be worse than none.
 
 **Record these fields, one row per finding, and the number becomes computable later.** Nothing here
 needs a tool: a JSON file beside the render will do, and `../../scripts/lib/receipt.mjs` already writes
-stage-keyed, hash-stamped records under `verify/approved/<stage>/` if you want one that goes stale when
+stage-keyed, hash-stamped records under `quality/baselines/approved/<stage>/` if you want one that goes stale when
 the scene moves on.
 
 | field | why this one |

@@ -1,5 +1,5 @@
 // scripts/brand/intent-from-storyboard.mjs: export a STORYBOARD.md's whys into a `.intent.json` sidecar,
-// so `inspect` (scripts/gates/inspect.mjs) VERIFIES the render delivers what each beat promised. The
+// so `inspect` (quality/gates/inspect.mjs) VERIFIES the render delivers what each beat promised. The
 // storyboard already names, per beat, the on-screen cue + the WHY (the artifact that earns the frame); this
 // turns that plan into a machine-checkable contract instead of doctrine. Closes the "a beat occupies time
 // without earning it" gap: after rendering, author-check's inspect step confirms each beat's mustShow text
@@ -15,7 +15,7 @@
 // each junction (`becomes:`), and WHY the beat lands. Only the third used to survive into the intent, so
 // the contract could be satisfied by nine unrelated islands. The top-level `spine` and the per-beat
 // `object` / `becomes` carry the other two across the bridge. They are RECORDED, not machine-checked.
-// See the honesty note in scripts/gates/inspect.mjs.
+// See the honesty note in quality/gates/inspect.mjs.
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';

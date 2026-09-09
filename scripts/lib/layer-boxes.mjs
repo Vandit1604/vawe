@@ -2,7 +2,7 @@
 //
 // `x`/`y`/`w`/`h` may be a keyword ("center"), a percent ("50%"), a `pin`, or a column span, and the one
 // place that already turns all of that into real pixels is `resolveCoords` (core/engine/boot.js), which
-// the renderer and verify/audit.mjs both already run. Re-deriving that arithmetic a second time here is
+// the renderer and quality/audit.mjs both already run. Re-deriving that arithmetic a second time here is
 // exactly the duplicate-vocabulary drift AGENTS.md warns about, so this calls the same function on a
 // clone (resolveCoords mutates in place) rather than re-reading `x`/`y`/`w`/`h` itself.
 import { resolveCoords } from '../../core/engine/boot.js';

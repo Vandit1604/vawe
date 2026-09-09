@@ -1,4 +1,4 @@
-// scripts/gates/dissolve-check.mjs: IS ANY TRANSITION A DOUBLE EXPOSURE?
+// quality/gates/dissolve-check.mjs: IS ANY TRANSITION A DOUBLE EXPOSURE?
 //
 // A crossfade is the reflex for "A becomes B". For TEXT it is the wrong move: two strings at half
 // opacity on top of each other are not a transition, they are a double exposure, and the midpoint of
@@ -33,14 +33,14 @@
 // separate LAYERS rather than inside one. It says nothing about a pair whose opacities move the SAME
 // way (both fading out, or both in): that is a group fade, not one state replacing another.
 //
-//   node scripts/gates/dissolve-check.mjs <scene.json> [--strict]   ·   make dissolve D=<file>
+//   node quality/gates/dissolve-check.mjs <scene.json> [--strict]   ·   make dissolve D=<file>
 // FAIL: crossfade-mud.   Waive with {"authoring":{"allow":["crossfade-mud"]}}.
 import fs from 'node:fs';
 import { gateFindings } from '../lib/findings.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
-if (!file) { console.error('usage: node scripts/gates/dissolve-check.mjs <scene.json> [--strict]'); process.exit(2); }
+if (!file) { console.error('usage: node quality/gates/dissolve-check.mjs <scene.json> [--strict]'); process.exit(2); }
 if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
 let d;
 try { d = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.error(`✗ ${file} is not valid JSON: ${e.message}`); process.exit(1); }
@@ -215,7 +215,7 @@ for (const f of findings) F.finding({
 F.emit();
 for (const u of unreadable) {
   console.log(`  ⚠ layer "${u.layer}": a same-point opacity pair this gate could NOT evaluate, so it is unjudged, not cleared.`);
-  console.log(`      "${u.oa}"  vs  "${u.ob}"   (extend evalCss in ${'scripts/gates/dissolve-check.mjs'} if this shape should be measurable)\n`);
+  console.log(`      "${u.oa}"  vs  "${u.ob}"   (extend evalCss in ${'quality/gates/dissolve-check.mjs'} if this shape should be measurable)\n`);
 }
 if (!findings.length && !unreadable.length) console.log('  ✓ no transition dissolves one text state into another in place.');
 else if (!findings.length) console.log('  ✓ nothing measurable dissolves, but see the unjudged pair(s) above.');

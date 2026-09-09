@@ -1,4 +1,4 @@
-// scripts/gates/theme-look-spread.mjs: DOES THE COMPUTED LOOK ACTUALLY VARY?
+// quality/gates/theme-look-spread.mjs: DOES THE COMPUTED LOOK ACTUALLY VARY?
 //
 // `computedLook(theme)` (core/registry/theme-contract.js) exists so the 37 of 44 themes with no
 // authored `look` still get a whole-film default, one derived from what THAT theme's own `motion`
@@ -15,14 +15,14 @@
 // brand cannot be told apart, and the gate names the key and prints the collapsed value(s).
 //
 // Floors are not round numbers picked in advance: each one is the actual spread this derivation
-// achieves today (measured on 2026-09-07, node scripts/gates/theme-look-spread.mjs), so the gate
+// achieves today (measured on 2026-09-07, node quality/gates/theme-look-spread.mjs), so the gate
 // catches a REGRESSION (someone flattens the formula back to a constant) rather than policing a target
 // nobody has hit yet. `layout` is excluded on purpose: it is a documented constant (see the comment
 // beside `DEFAULT_LAYOUT` in theme-contract.js, "no field any theme carries correlates with anchor or
 // margin"), so counting it here would fail a decision that was made, not missed. `backdrop` and `marks`
 // are never computed at all (see the same file) and are not in `LOOK_KEYS`'s derived set either.
 //
-//   node scripts/gates/theme-look-spread.mjs [--json]     ·   make theme-look-spread
+//   node quality/gates/theme-look-spread.mjs [--json]     ·   make theme-look-spread
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

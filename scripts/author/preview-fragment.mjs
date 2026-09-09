@@ -151,7 +151,7 @@ console.log(`✓ ${path.relative(ROOT, src)}  →  ${out}   (theme ${themeName},
 // Apache 2.0, LICENSE at skills/impeccable/LICENSE) and its detector is the only thing in this repo
 // that opens a browser and measures what actually rendered. Our OWN anti-slop is elsewhere and is
 // named for itself: scripts/live/craft-live.mjs reads a fragment's source for off-ramp sizes and
-// shadows, and scripts/gates/frame-check.mjs compares the plan with the frames. Neither is impeccable
+// shadows, and quality/gates/frame-check.mjs compares the plan with the frames. Neither is impeccable
 // and neither should ever be called it.
 //
 // RESOLVED THE WAY THE SKILL RESOLVES IT. skills/impeccable/scripts/detect.mjs is its own entry point

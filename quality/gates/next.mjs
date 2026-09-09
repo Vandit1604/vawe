@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// scripts/gates/next.mjs: RUN THE ONE COMMAND THE STAGE NAMES. Nothing more.
+// quality/gates/next.mjs: RUN THE ONE COMMAND THE STAGE NAMES. Nothing more.
 //
-//   make next D=formats/scene/<film>.json   ·   node scripts/gates/next.mjs <film>
+//   make next D=formats/scene/<film>.json   ·   node quality/gates/next.mjs <film>
 //
-// scripts/gates/stage.mjs already knows which stage a film is in and stores the ONE command that moves
+// quality/gates/stage.mjs already knows which stage a film is in and stores the ONE command that moves
 // it forward. Knowing that command is not running it: an agent still has to read it, notice it is a
 // `make` invocation, and type it. This closes that gap and stops there.
 //

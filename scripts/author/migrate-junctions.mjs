@@ -24,7 +24,7 @@ import { okEnergy } from '../../core/transitions/energy.js';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENE_DIR = path.join(repoRoot, 'formats', 'scene');
 
-// PRESERVE THE FILE'S OWN INDENT (scripts/gates/legacy-fold.mjs already established why: a chunk of
+// PRESERVE THE FILE'S OWN INDENT (quality/gates/legacy-fold.mjs already established why: a chunk of
 // these scenes are git-tracked, and re-serializing with a fixed indent turns a one-key rewrite into a
 // full-file diff that buries the real change).
 function indentOf(raw) {
