@@ -1,6 +1,6 @@
 // verify-render.mjs: prove a generated typeface JSON actually EXTRUDES, in the right typeface.
 //
-//   node scripts/fonts/verify-render.mjs Anybody
+//   node generators/fonts/verify-render.mjs Anybody
 //   make glyphs-verify FONT=Anybody
 //
 // Writes /tmp/glyphs-<Name>.png, to be LOOKED AT. Inspecting the JSON proves nothing: a file full of
@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
-import { serveRepo } from '../lib/render-harness.mjs';
+import { serveRepo } from '../../scripts/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const name = process.argv[2] || 'Anybody';
@@ -24,7 +24,7 @@ const text = process.argv[3] || 'Handgloves 123';
 const typefaceRel = `assets/fonts/3d/${name}.typeface.json`;
 const typefacePath = path.join(repoRoot, typefaceRel);
 if (!fs.existsSync(typefacePath)) {
-  console.error(`\n✗ ${typefaceRel} does not exist. Run: node scripts/fonts/glyphs.mjs ${name}\n`);
+  console.error(`\n✗ ${typefaceRel} does not exist. Run: node generators/fonts/glyphs.mjs ${name}\n`);
   process.exit(1);
 }
 const meta = JSON.parse(fs.readFileSync(typefacePath, 'utf8')).vawe;
