@@ -41,7 +41,13 @@ import { boundaryMechanism } from '../../core/transitions/lower.js';
 // layer that was correct before a re-assemble can now point at nothing. Carrying it silently would be
 // worse than dropping it was, so each one is reported by name and any whose window falls outside the
 // new film is warned about.
-const PRESERVED_FILM_FIELDS = ['cameraMove'];
+// `camera` sits here beside `cameraMove` because the DIRECT stage writes it and the ASSEMBLE stage
+// used to destroy it. scripts/author/motion-director.mjs emits a resolved `camera` track (stage 6
+// of the eight), and re-running assemble (stage 5) dropped it without a word, so going back one
+// step to fix a fragment silently threw away every camera move that had been directed. This file
+// generates no camera of its own (see the header: kept thin on purpose), so it has no claim on the
+// field and no business deleting it.
+const PRESERVED_FILM_FIELDS = ['cameraMove', 'camera'];
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv[2];
