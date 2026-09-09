@@ -2492,6 +2492,17 @@ The new object layer carried `radius: chain[0].in.radius ?? 4`, a default inheri
 holds: scripts/author/assemble.mjs, core/registry/prop-audit.js
 
 
+## 610. the film stops because its moves END, not because there are too few of them
+Three sweeps, one variable each, every variant assembled and rendered identically and measured by the same gate. STRUCTURE: two films differing only in whether a layer survived the cut measured the same. DENSITY: one to eight moves per beat cut dead windows from 86% to 57% and never moved the median off 0.02, against a reference median of 0.66. OVERLAP: four moves fired together measured 80% dead and a median of 0.000, the same four spread sequentially 60% and 0.106, which is the opposite of the advice the gate itself was printing. MAGNITUDE: travel distance and duration moved nothing either, every `parts` variant sitting at 0.01 to 0.03 whether the move was 24px or 40px, 0.22s or 1.2s.
+The one axis that moved the number was SUSTAINED motion: a keyed layer track that is never finished, always mid-travel, took the median from 0.02 to between 0.17 and 1.61 and the peak to 4.13 against a target of 4.71. Everything else in the vocabulary is a one-shot entrance, and a one-shot entrance lands. Once it has landed the frame is still again, so stacking more of them, spacing them out, or making each travel further changes when the stillness happens and never whether it happens. The film does not stop because too little was asked for. It stops because everything that was asked for finishes.
+And the storyboard cannot ask for the thing that works: `motion:` compiles only to `parts[]` on the html layer, and a keyed x/y/scale track on the layer exists only in hand-written JSON and in the one `object_in`/`object_out` chain.
+holds: scripts/gates/motion-floor.mjs, scripts/author/assemble.mjs, scripts/lib/contract.mjs
+
+## 611. the motion gate scores a whole frame sliding off its stage higher than real content arriving
+`pairProfile` separates LOCAL motion (change concentrated in under 8% of the frame, meaning content arriving) from GLOBAL (spread, meaning ambience), and only local counts, so that idle and breathing cannot satisfy the floor. That much works. What it cannot see is a large UNIFORM region moving rigidly: the interior of a sliding block is the same colour before and after, so only its edges change, the share stays under the threshold, and it is counted as content. Measured directly: a uniform block shifted two cells reads share 0.021 amount 4.99, while a genuine small reveal reads share 0.014 amount 2.26. The glitch scores DOUBLE the real thing.
+Found by looking, not by measuring. The highest scoring variant of the magnitude sweep reached a median of 1.61 and it looked like a rendering fault: the entire scene, background and text together, drifting inside the canvas and exposing the edge. The number said it was the best film of the sweep. This is why the plan's rule is that every phase ends with the mp4 looked at and not only the table, and it is why the instrument gets fixed BEFORE it is promoted to a blocking gate. A gate with this hole, made binding, would teach every author to slide the frame.
+holds: scripts/gates/motion-floor.mjs
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
