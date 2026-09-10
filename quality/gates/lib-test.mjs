@@ -108,6 +108,8 @@ import { RESAMPLE_FX } from '../../core/resample/effects.js';
 import { RAYMARCH_FX } from '../../core/surfaces/raymarch-fx.js';
 import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { pairActs, parsePairs, verdictOf, isPlaceholderSurface } from './content-check.mjs';
+import { evenSamples } from './beats-of.mjs';
+import { gradeable, tileBox, baseOf } from './tile.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -7548,6 +7550,58 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('content-check: a real dense act (band slightly) is not a placeholder', !isPlaceholderSurface({ fill: 0.43, band: 'slightly', photo: 0.23, detail: 14.1 }));
   ok('content-check: a large flat colourless mock IS a placeholder', isPlaceholderSurface({ fill: 0.5, band: 'not', photo: 0, detail: 1 }));
   ok('content-check: a small flat colourless patch is not (too little of the frame to be the subject)', !isPlaceholderSurface({ fill: 0.1, band: 'not', photo: 0, detail: 1 }));
+}
+
+// ---- every MEASURING tool ships a known-answer test, run HERE so a broken one fails the same gate
+// everything else fails, instead of carrying a `--self-test`/`--selftest` flag nobody ever calls. Before
+// this block: motion-floor, frame-check, harness/media/content.mjs, harness/media/study.mjs and
+// quality/gates/screen-readiness.test.mjs each had a known-answer check written and NEVER RUN by
+// anything (found by grepping the repo for each script's own name: zero hits outside itself). The
+// audit's own example ("agents reported a screen passed while clipped") is exactly what an unrun
+// self-test buys nobody. ----
+{
+  const runSelftest = (label, script, args) => {
+    const r = spawnSync('node', [path.join(repoRoot, script), ...args], { encoding: 'utf8', cwd: repoRoot });
+    ok(label, r.status === 0);
+    if (r.status !== 0) console.error(`  (${script} ${args.join(' ')}): ${(r.stderr || r.stdout || '').trim().slice(0, 300)}`);
+  };
+  runSelftest('known-answer: motion-floor --self-test (still=0, drift=global, reveal=local)',
+    'quality/gates/motion-floor.mjs', ['--self-test']);
+  runSelftest('known-answer: frame-check --self-test (area = width*height, never a square)',
+    'quality/gates/frame-check.mjs', ['--self-test']);
+  runSelftest('known-answer: harness/media/content.mjs --selftest', 'harness/media/content.mjs', ['--selftest']);
+  runSelftest('known-answer: harness/media/study.mjs --selftest', 'harness/media/study.mjs', ['--selftest']);
+  runSelftest('known-answer: screen-readiness.test.mjs (readiness() against fixed markup)',
+    'quality/gates/screen-readiness.test.mjs', []);
+}
+
+// ---- the judge prep (quality/gates/judge.mjs), on its own pure halves: which frame stands for which
+// beat (beats-of.mjs), and whether a render is fresh enough to grade (tile.mjs). Neither had a test
+// before this. A bare mp4 with no scene JSON falls back to evenSamples: n slices of the duration,
+// centred in each slice, so the exact times are computable by hand and asserted here rather than eyeballed. ----
+{
+  const s5 = evenSamples(10, 5);
+  ok('judge prep: evenSamples(10, 5) centres each of 5 slices of a 10s film',
+    JSON.stringify(s5.map((s) => s.t)) === JSON.stringify([1, 3, 5, 7, 9]));
+  ok('judge prep: evenSamples labels and indexes each sample', s5[2].i === 2 && s5[2].label === '@5.0s');
+
+  ok('judge prep: tileBox is scrutiny-sized landscape, not a thumbnail', JSON.stringify(tileBox(true)) === JSON.stringify({ tw: 600, th: 338 }));
+  ok('judge prep: tileBox flips to a tall box for a portrait render', JSON.stringify(tileBox(false)) === JSON.stringify({ tw: 340, th: 604 }));
+  ok('judge prep: baseOf strips the extension, keeps the rest of the name', baseOf('out/madera.v2.mp4') === 'madera.v2');
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gradeable-'));
+  const scenePath = path.join(dir, 'x.json'), mp4Path = path.join(dir, 'x.mp4');
+  fs.writeFileSync(scenePath, '{}');
+  ok('judge prep: gradeable refuses a scene with no render at all', gradeable(scenePath, mp4Path).ok === false);
+  fs.writeFileSync(mp4Path, 'not a real mp4, only mtime matters here');
+  const now = Date.now();
+  fs.utimesSync(scenePath, now / 1000, now / 1000);
+  fs.utimesSync(mp4Path, now / 1000 + 5, now / 1000 + 5);
+  ok('judge prep: gradeable passes a render newer than the scene it came from', gradeable(scenePath, mp4Path).ok === true);
+  fs.utimesSync(mp4Path, now / 1000 - 60, now / 1000 - 60);
+  ok('judge prep: gradeable refuses a render OLDER than the scene: a stale grade of an edited film',
+    gradeable(scenePath, mp4Path).ok === false);
+  fs.rmSync(dir, { recursive: true, force: true });
 }
 
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter

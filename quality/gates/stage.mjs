@@ -24,6 +24,7 @@ import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS } from '../../core/camera-moves/i
 import { TRANSITIONS } from '../../core/transitions/catalog.js';
 import { PRESETS as KINETIC_PRESETS, PRESET_BLURBS as KINETIC_BLURBS } from '../../core/type/type.js';
 import { EASINGS } from '../../core/motion/motion.js';
+import { scratchBase } from '../../harness/lib/scratch.mjs';
 // score/toks/coverageIn: the SAME ranker `make arsenal` uses (harness/author/arsenal.mjs), never a
 // second one. `score` alone has no ceiling (it ranks the best of N whether any of them answers the
 // query), which is exactly how "up"/"out"/"focus" (ordinary English, substring-contained in half the
@@ -239,6 +240,40 @@ export function adoptionReport(film) {
   ];
 }
 
+// THE AUDIT THIS ANSWERS: agents reported a screen done, a measure read, a camera framed, all three
+// wrong, because nothing showed them a frame before the render. design and direct are exactly the two
+// stages where an agent writes HTML/motion with no eyes on it yet, so this is a WORKLIST of commands
+// that already exist, aimed at THIS film's own fragments/theme/reference, never invented and never a
+// gate: `make stage` prints it, nothing here blocks anything.
+/**
+ * lookBlock(film) -> null (no storyboard yet) | { fragments, theme, reference, screens[], dev,
+ * sheets: {beats, reveal}, contentCheck | addReference }. Every field is read off THIS film's own
+ * storyboard/scene files, the same way stageOf() does.
+ */
+export function lookBlock(film) {
+  const p = filePaths(film);
+  if (!fs.existsSync(p.sb)) return null;
+  const sbSrc = fs.readFileSync(p.sb, 'utf8');
+  const fm = frontmatter(sbSrc);
+  const fragments = [...new Set(blocksOf(sbSrc)
+    .map((b) => (fieldIn(b, 'fragment') || '').split(/\s+\(/)[0].trim()).filter(Boolean))];
+  const scene = fs.existsSync(p.scene) ? (() => { try { return JSON.parse(fs.readFileSync(p.scene, 'utf8')); } catch { return null; } })() : null;
+  const rawTheme = (scene && scene.theme) || fm.field('theme');
+  // `themes/vawe.json` (a storyboard's frontmatter shape) vs `default` (a scene's own field): make
+  // screen/preview want the bare name either way.
+  const theme = rawTheme ? String(rawTheme).replace(/^themes\//, '').replace(/\.json$/, '') : null;
+  const reference = fm.field('reference');
+  const screens = fragments.map((f) => `make screen F=${f}`
+    + (reference ? ` REF=${reference} ACT=<n>` : '') + (theme ? ` THEME=${theme}` : ''));
+  const dev = `make dev D=${p.base}.json`;
+  const sheets = { beats: path.join(scratchBase(), 'beats', `${p.name}.png`), reveal: path.join(scratchBase(), 'reveal', `${p.name}.png`) };
+  const contentCheck = reference ? `make content-check D=${p.base}.json REF=${reference}` : null;
+  const addReference = reference ? null
+    : `no reference named. Studied one already? add \`reference: "<name>"\` to ${path.relative(ROOT, p.sb)}'s `
+      + `frontmatter, matching grammar/<name>.json. Not studied yet: make study VIDEO=<clip> NAME=<name>, then add the field.`;
+  return { fragments, theme, reference, screens, dev, sheets, contentCheck, addReference };
+}
+
 // Stage 1 has no film yet, so stageOf() has nothing to read. What DOES exist is the same deliverable
 // router the planning skill uses (harness/author/route.mjs), reachable so far only by an agent that
 // already knew it existed. Q= runs it and states the same brief-stage answer stageOf() would once a
@@ -286,12 +321,21 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // design (writing fragments) and direct (motion/transition/sound). Earlier stages have nothing to
   // adopt yet; later stages have already made the calls this is meant to prompt, not re-litigate.
   const adoption = ['design', 'direct'].includes(st.stage) ? adoptionReport(st.base) : null;
-  if (json) { console.log(JSON.stringify({ ...st, adoption }, null, 2)); process.exit(0); }
+  const look = ['design', 'direct'].includes(st.stage) ? lookBlock(st.base) : null;
+  if (json) { console.log(JSON.stringify({ ...st, adoption, look }, null, 2)); process.exit(0); }
   const line = st.order.map((id) => (id === st.stage ? `[${id}]` : id)).join(' → ');
   console.log(`\n  ${st.name} is at stage ${st.stage.toUpperCase()}`);
   console.log(`  ${line}`);
   console.log(`\n  why: ${st.why}`);
   console.log(`  do:  ${st.next}\n`);
+  if (look) {
+    console.log(`  LOOK (frames now, not after render):`);
+    for (const s of look.screens) console.log(`    ${s}`);
+    console.log(`    ${look.dev}   (draft render; writes the sheets below)`);
+    console.log(`    ${look.contentCheck || look.addReference}`);
+    console.log(`    sheets: ${look.sheets.beats}  ·  ${look.sheets.reveal}`);
+    console.log('');
+  }
   if (adoption) {
     console.log(`  adoption (this film's storyboard, against what the core has):`);
     for (const r of adoption) {

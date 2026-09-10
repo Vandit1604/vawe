@@ -65,6 +65,13 @@ reported its silence as a pass. **A gate is another thing that can be quietly wr
 worse than no gate** because it manufactures confidence. Before adding one, read `docs/TASTE.md` on that
 cull.
 
+**Every tool that measures a frame ships a known-answer test, and `quality/gates/lib-test.mjs` runs
+it.** A `--self-test` flag nobody calls is the same failure as no test: five of them
+(`motion-floor.mjs`, `frame-check.mjs`, `harness/media/content.mjs`, `harness/media/study.mjs`,
+`quality/gates/screen-readiness.test.mjs`) sat unrun until lib-test.mjs wired each one in, which is how
+a screen passed while clipped and a fill measure read a real hero crop as 0.02: the check that would
+have caught the bug already existed and nothing ever ran it.
+
 ## SUGAR MUST NEVER SILENTLY NO-OP
 
 An authoring convenience that needs a build step to work is a trap: the author writes something real,
