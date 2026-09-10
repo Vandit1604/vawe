@@ -7,6 +7,7 @@
 // Usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]   ·   make judge D=<file> [VS=<brand>]
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import { writeReceipt, readReceipt } from '../../harness/lib/receipt.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +17,14 @@ import { craftRubric } from './rubric.mjs';
 import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+// sha256 of the RENDERED FILE ITSELF, not the scene JSON. receipt.mjs's own hash already covers the
+// scene changing; this covers the render changing under an unchanged scene (a re-render on a fixed
+// encoder, a swapped-out asset, a different worktree's `out/`). A receipt that ignores it can outlive
+// the exact video it claims to have looked at, which is the stale-artefact class this repo has hit
+// before. Missing/unreadable mp4 hashes to null rather than throwing: the caller already refused a
+// missing render via `gradeable` before this ever runs.
+const renderHashOf = (file) => { try { return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'); } catch { return null; } };
 
 // judge.mjs is a PREP step, not a pass/fail check: its product is a rendered sheet + rubric for the
 // agent to score, so there is nothing to emit under --json when it succeeds. The one real finding is
@@ -68,8 +77,17 @@ if (verdictArg) {
     console.error(`✗ no sheet to judge${prep.exists && prep.stale ? ' for this cut (the prep is for an older edit)' : ''}. Run \`make judge D=${inp}\` first to render the key frames, LOOK at them against the rubric, then record the verdict.`);
     process.exit(1);
   }
+  // The prep receipt's own render hash must still match `out/<name>.mp4` on disk RIGHT NOW: the scene
+  // JSON hash alone cannot catch a re-render that changed the video without touching the JSON (a
+  // reprint on a different machine, a corrupted/truncated write). Without this, `--verdict PASS` could
+  // be recorded against a sheet made from a video that is no longer the one sitting in out/.
+  const renderHash = renderHashOf(mp4);
+  if (!renderHash || prep.receipt.renderHash !== renderHash) {
+    console.error(`✗ ${mp4} has changed since the sheet was made (its content no longer matches). Re-run \`make judge D=${inp}\` first.`);
+    process.exit(1);
+  }
   const fixes = arg('--fixes', '');
-  writeReceipt('judge', inp, { verdict: v, fixes, sheet, at: new Date().toISOString().slice(0, 10) });
+  writeReceipt('judge', inp, { verdict: v, fixes, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
   console.log(v === 'PASS'
     ? `  ✓ judge verdict recorded: PASS. The eye is satisfied, this cut is done (make ledger-add D=${inp}).`
     : `  ✓ judge verdict recorded: FIX${fixes ? ` (${fixes})` : ''}. Fix it, re-render, and re-judge before shipping. The loop is not done until the eye stops finding fixes.`);
@@ -122,6 +140,7 @@ console.log(`  → rubric: ${dir}/rubric.md  (house-style + 7 craft dimensions +
 console.log(`  → measured: ${measured.length} finding(s) from audit.mjs + sweep-static.mjs, folded into the rubric`);
 console.log(`\n  AGENT: Read ${dir}/sheet.png AGAINST the rubric, score each frame per dimension, return PASS/FIX + fixes.`);
 // Same contract as the beats receipt: producing the sheet for THIS scene content is the checkable
-// proxy for having looked at it. Editing the scene withdraws it, which is the whole point.
-writeReceipt('judge', inp, { sheet: `${dir}/sheet.png` });
+// proxy for having looked at it. Editing the scene withdraws it, which is the whole point. renderHash
+// pins it to THIS render's bytes too, so `--verdict` above can refuse a video that moved under it.
+writeReceipt('judge', inp, { sheet: `${dir}/sheet.png`, renderHash: renderHashOf(mp4), mp4 });
 console.log(`  Be adversarial: this is the gate that SEES what validate/critique/slop/audit cannot.\n`);
