@@ -791,6 +791,12 @@ quiz-look: ## [preflight] THE LOOK, SETTLED BY PICTURE.
 storyboard-check: ## [preflight] The storyboard-as-PROPOSAL gate: a one-sentence message + audience/arc/format/duration, and per
 	@node quality/gates/storyboard-check.mjs $(SB) $(if $(JSON),--json,)
 
+# make surface D=formats/scene/<film>.storyboard.md: the neutral, on-demand front door to
+# harness/live/beat-surfacer.mjs, for an agent with no PostToolUse hook. Claude Code runs the same
+# check automatically after every save; everyone else runs this by hand after writing a beat.
+surface: ## [preflight] PUSH the one unused rich capability a storyboard beat could reach for (the neutral form of the beat-surfacer hook)
+	@echo '{"tool_input":{"file_path":"$(D)"}}' | node harness/live/beat-surfacer.mjs; true
+
 # make storyboard-draft NAME=<brand> [MSG="one sentence" DUR=30 FORMAT=landscape], auto-draft a
 # STORYBOARD.md skeleton from a captured sections.json (one beat per real section, in the site's order,
 # pre-wired with type + capture command + suggested blueprint). Fill the <…> fields, then storyboard-check.
