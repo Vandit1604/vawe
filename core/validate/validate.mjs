@@ -412,6 +412,67 @@ export function sceneUnitWarnings(cfg) {
   return out;
 }
 
+// seamMotionFreezeWarnings(cfg): a boundary transition that lowers to a SEAM (core/transitions/lower.js
+// boundaryMechanism) bakes the OUTGOING and INCOMING beat to two still rasters once (formats/scene/
+// scene.js bakeSeams, ~1613-1649) and blends between those two stills for the whole window
+// (drawSeams, ~1593-1611): the live DOM underneath is fully covered. That is a deliberate determinism
+// trade (a seam has to composite two frames it can hold onto, not the moving stage), and it stays: the
+// bug this warns about is that nothing SAYS it, so a layer's `motion` track, an `acrossBeats` layer, or
+// a camera keyframe placed inside the window plays right up to the seam, freezes for its whole
+// duration, then jumps to wherever it was "supposed" to be the moment the window ends.
+export function seamMotionFreezeWarnings(cfg) {
+  const d = cfg || {};
+  const windows = [];
+  for (const t of Array.isArray(d.transitions) ? d.transitions : []) {
+    if (!isObj(t) || typeof t.fx !== 'string') continue;
+    const at = t.at ?? t.t;
+    const dur = +t.dur || 0;
+    if (typeof at !== 'number' || !(dur > 0)) continue;
+    let mech;
+    try { mech = boundaryMechanism(t.fx, t.mech); } catch { continue; } // unknown fx: reported elsewhere
+    if (mech === 'seam') windows.push({ at, end: at + dur, fx: t.fx });
+  }
+  // Legacy scenes can still author `seams[]` directly; every entry there is a seam by definition.
+  for (const s of Array.isArray(d.seams) ? d.seams : []) {
+    if (!isObj(s)) continue;
+    const at = s.at ?? s.t;
+    const dur = +s.dur || 0;
+    if (typeof at === 'number' && dur > 0) windows.push({ at, end: at + dur, fx: s.fx || s.style || 'seam' });
+  }
+  if (!windows.length) return [];
+
+  const inWin = (w, x) => x > w.at + 1e-6 && x < w.end - 1e-6;
+  const overlapsWin = (w, a, b) => a < w.end - 1e-6 && b > w.at + 1e-6;
+  const FREEZE_FIX = 'a seam bakes two still frames and blends between them, so nothing inside its '
+    + 'window can move: it freezes for the window, then jumps once the window ends. Use a cut, a '
+    + 'flow-seam recipe, or move the motion outside the window.';
+
+  const out = [];
+  const walk = (ls, path) => (Array.isArray(ls) ? ls : []).forEach((L, i) => {
+    if (!isObj(L)) return;
+    const label = `${path}[${i}]${L.id ? ` #${L.id}` : ''}`;
+    const start = +L.start || 0;
+    const dur = +L.duration || +L.dur || 0;
+    for (const w of windows) {
+      if (Array.isArray(L.motion) && L.motion.some((k) => isObj(k) && inWin(w, start + (+k.t || 0)))) {
+        out.push(`${label} has a \`motion\` key inside the seam at ${w.at}s-${w.end}s ("${w.fx}"): ${FREEZE_FIX}`);
+      }
+      if (L.acrossBeats === true && dur > 0 && overlapsWin(w, start, start + dur)) {
+        out.push(`${label} is \`acrossBeats\` and runs through the seam at ${w.at}s-${w.end}s ("${w.fx}"): ${FREEZE_FIX}`);
+      }
+    }
+    if (Array.isArray(L.children)) walk(L.children, `${path}[${i}].children`);
+  });
+  walk(d.layers, 'layers');
+
+  const cam = Array.isArray(d.camera) ? d.camera : Array.isArray(d.cam) ? d.cam : null;
+  if (cam) for (const w of windows) {
+    if (cam.some((k) => isObj(k) && inWin(w, +k.t || 0)))
+      out.push(`camera has a keyframe inside the seam at ${w.at}s-${w.end}s ("${w.fx}"): ${FREEZE_FIX}`);
+  }
+  return out;
+}
+
 export function htmlLayerErrors(cfg) {
   const out = [];
   const visit = (L, at) => {
@@ -1538,7 +1599,8 @@ if (isMain) {
       console.log(`✓ ${path.relative(root, file)} (${mod})`);
     }
     // lint warnings (non-failing unless --strict): authoring smells the schema can't express
-    const warns = [...lintData(data), ...audioWarns, ...htmlFileWarns, ...sceneUnitWarnings(data)];
+    const warns = [...lintData(data), ...audioWarns, ...htmlFileWarns, ...sceneUnitWarnings(data),
+      ...seamMotionFreezeWarnings(data)];
     if (warns.length) {
       if (strict) failed++;
       for (const w of warns) console.error(`    ⚠ ${w}`);
