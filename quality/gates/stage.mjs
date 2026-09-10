@@ -20,23 +20,19 @@ import { fileURLToPath } from 'node:url';
 import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../harness/author/storyboard-parse.mjs';
 import { population, LIBRARY } from '../../harness/lib/census.mjs';
 import { route } from '../../harness/author/route.mjs';
-import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS } from '../../core/camera-moves/index.js';
-import { TRANSITIONS } from '../../core/transitions/catalog.js';
-import { PRESETS as KINETIC_PRESETS, PRESET_BLURBS as KINETIC_BLURBS } from '../../core/type/type.js';
-import { EASINGS } from '../../core/motion/motion.js';
 import { scratchBase } from '../../harness/lib/scratch.mjs';
-// score/toks/coverageIn: the SAME ranker `make arsenal` uses (harness/author/arsenal.mjs), never a
-// second one. `score` alone has no ceiling (it ranks the best of N whether any of them answers the
-// query), which is exactly how "up"/"out"/"focus" (ordinary English, substring-contained in half the
-// vocabulary's camelCase names) used to outrank a real match; coverageIn's idf weighting is arsenal's
-// own fix for that. NOT `arsenal.mjs collect()`: it walks every `core/<pkg>/*.js`, dynamically
-// IMPORTING each one to find its registry, and `.test.mjs` sits in those same directories (this repo's
-// own convention, core/camera-moves/*.test.mjs) - importing one runs its `node:test` cases as a side
-// effect. `make stage` is read every turn (AGENTS.md), so a call that silently re-runs the engine's
-// test suite on every invocation is not an acceptable cost here, whatever `make arsenal` can afford
-// once, on demand. CONFIDENT (arsenal's own 0.47 cutoff) is calibrated for that ~700-entry corpus and is
-// not reused here for the same reason: on the combined ~176-name pool below it is not the same number.
-import { score, toks, coverageIn } from '../../harness/author/arsenal.mjs';
+// score/toks/coverageIn/CONFIDENT: the SAME ranker `make arsenal` uses (harness/author/arsenal.mjs),
+// never a second one, and the SAME confidence cutoff, never a re-derived one. `score` alone has no
+// ceiling (it ranks the best of N whether any of them answers the query), which is exactly how
+// "up"/"out"/"focus" (ordinary English, substring-contained in half the vocabulary's camelCase names)
+// used to outrank a real match; coverageIn's idf weighting is arsenal's own fix for that.
+import { score, toks, coverageIn, CONFIDENT } from '../../harness/author/arsenal.mjs';
+// GROUPS: every authorable kind, discovered by importing each covered registry BY NAME rather than
+// arsenal.mjs collect()'s readdir-and-import-everything, which would run every core/<pkg>/*.test.mjs
+// file's node:test cases as a side effect of building this corpus. `make stage` is read every turn
+// (AGENTS.md), so that cost is not acceptable here the way it is for `make arsenal`, run once, on
+// demand. See harness/author/discovery.mjs for the full accounting.
+import { GROUPS, usedNames, pasteLine, ambiguousNames, tokenGroupsOf, bestWindowMatch } from '../../harness/author/discovery.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -139,105 +135,77 @@ export function roster({ all = false, cap = 12 } = {}) {
   return { n: rows.length, total: pop.names.length, rows: shown, hidden: rows.length - shown.length, worst };
 }
 
-// ADOPTION: a WORKLIST, never a gate. Measured (AGENTS.md's build brief): the core carries 14 camera
-// moves, a wide transition catalog, 31 kinetic presets, 42 easings, and across 42 authored films almost
-// none of it is reached for. `make stage` is where an author already looks every turn, so this is the
-// one place a film's own worklist can be pushed rather than left for `make arsenal` to be asked about.
+// ADOPTION: a WORKLIST, never a gate. Measured (AGENTS.md's build brief): the core carries 790 named
+// capabilities across 62 kinds, and 42 authored films reach for a thin slice of it (0 named camera
+// moves before this, `anim: "fade"` 256 times). `make stage` is where an author already looks every
+// turn, so this is the one place a film's own worklist can be pushed rather than left for
+// `make arsenal` to be asked about.
 //
-// GROUNDED IN THIS FILM, NOT THE WHOLE MARKDOWN. The first cut matched against the storyboard's raw
-// text, headers and all, so `up`/`rise`/`slide`/`blur`/`flash`/`ink` (transitions) and
-// `weight`/`type`/`focus`/`gradient` (kinetic presets) came back "used" purely because those English
-// words happen to sit inside a `why:`/`style:`/`weight:` line somewhere in the file: measured on
-// vawe-flow, none of its 9 beats declares a `camera:`, `move:`, `motion:` or `transition_in:` field at
-// all, so a "6/89 used" transitions count had nothing real behind it (harness/lib/contract.mjs's own
-// parsers confirm every one of those fields is null on every beat). The fix is to read only the fields
-// a beat could plausibly reach one of these names FROM: the four structured fields this repo just gave
-// a real grammar (camera, move, motion, transition_in) for the USED count, plus the free-prose fields
-// that describe intent (mechanism, becomes, trigger, onscreen) for the SUGGESTION corpus only, since
-// prose naming a technique is not the same claim as a field that reaches the engine.
-const USED_FIELDS = ['camera', 'move', 'motion', 'transition_in'];
-const SUGGEST_FIELDS = [...USED_FIELDS, 'mechanism', 'becomes', 'trigger'];
-
-const fieldBlob = (beats, keys, withOnscreen) => beats.map((b) => {
-  const parts = keys.map((k) => b[k]).filter(Boolean);
-  if (withOnscreen && Array.isArray(b.onscreen) && b.onscreen.length) parts.push(b.onscreen.join(' '));
-  return parts.join(' ');
-}).join(' ');
-
-// Never worth suggesting: the absence of the family's own effect (a hard cut with no visual, no
-// easing at all) is not a capability an author "tries". `cut none`/`slide none` in the coordinator's
-// own words are the SAME entry as bare `none` (core/transitions/catalog.js emits one row per name, not
-// per mechanism), so excluding the name once already covers every mechanism it appears under.
-const IDENTITY = new Set(['none', 'linear', 'hold']);
-
-// THE CORPUS coverageIn's idf weighting needs a real population to measure a word's rarity against:
-// too small and almost every word looks "common" (one hit in 14 camera moves alone already clears the
-// 6% filler floor, so coverage never leaves 0); too MISMATCHED (arsenal's own ~700-entry collect()) and
-// the number is calibrated for a corpus this file cannot afford to build (see the import comment: it
-// dynamically imports every core/<pkg>/*.js, running this repo's own core/camera-moves/*.test.mjs files
-// as a side effect). The fix is the corpus this worklist ALREADY has for free: all four families
-// combined, ~176 names. `ADOPTION_CONFIDENT` is calibrated the same way arsenal's own CONFIDENT was
-// (docs comment, core's arsenal.mjs): the midpoint between a measured real answer and a measured
-// near-miss, on THIS corpus. Measured on vawe-flow: cameraShake (a real blurb match on "shake"/impact
-// language) sits at 0.055, followCursor (matches "cursor"/"click") at 0.045, followLayer at 0.096;
-// softiris/slide-left/easeInOutElastic (no blurb text at all to match against, only a bare name) sit at
-// 0.015/0.016/0.007. 0.03 sits in the gap.
-const ADOPTION_CONFIDENT = 0.03;
+// GROUNDED IN THIS FILM, NOT THE WHOLE MARKDOWN. Measured on vawe-flow: none of its 9 beats declares a
+// `camera:`, `move:`, `motion:` or `transition_in:` field at all, so scanning the WHOLE storyboard text
+// for an English word a name happens to share (`up`/`rise`/`slide` as "transitions", `weight`/`type` as
+// "kinetic presets") reports "used" with nothing real behind it. The fix, unchanged from the version
+// this replaced: `used` reads only the fields a beat could plausibly reach a name FROM (the five
+// structured fields, plus a real `use:` line for everything else); the SUGGESTION corpus is the
+// free-prose fields that describe intent (harness/author/discovery.mjs PROSE_FIELDS), since prose
+// naming a technique is not the same claim as a field that reaches the engine. `usedNames` and
+// `fieldBlob` are the one shared owner of both, reused by beat-surfacer.mjs so the two speak of the
+// same beat the same way.
+//
+// THE CONFIDENCE CUTOFF IS ARSENAL'S OWN, reused rather than re-derived (the build brief this answers
+// asks for exactly that): CONFIDENT was calibrated against arsenal.mjs collect()'s own ~790-entry
+// corpus, so the corpus here is built the same way collect() would see it (every covered registry,
+// unfiltered) rather than a smaller bespoke pool a different threshold would have to be re-measured
+// against.
 
 /**
- * familyRow(label, names, blurbOf, beats, corpus) -> {label, used, total, suggestions}. `used` counts a
- * name present in one of the FOUR structured fields on any beat (the fields harness/lib/contract.mjs
- * now gives a real grammar); `suggestions` ranks the rest against the wider prose corpus, scored and
- * covered against `corpus` (all four families combined, so the idf weighting reflects a real
- * population) then filtered back down to this family's own names, past ADOPTION_CONFIDENT. Each
- * suggestion carries the matched words, so the print can show its own evidence rather than assert one.
+ * groupRow(label, entries, isUsed, coverage, tokenGroups, ambiguous) -> {label, used, total,
+ * suggestions}. `suggestions` ranks the entries this film has NOT already reached for against the
+ * whole corpus's idf weighting, past CONFIDENT on their single best-matching span
+ * (harness/author/discovery.mjs bestWindowMatch), each carrying the exact line to paste and the words
+ * that matched it.
  */
-function familyRow(label, names, beats, corpus, coverage, qt) {
-  const usedBlob = fieldBlob(beats, USED_FIELDS, false);
-  const used = new Set(names.filter((n) => new RegExp(`\\b${n}\\b`).test(usedBlob)));
-  const nameSet = new Set(names);
-  const familyEntries = corpus.filter((e) => nameSet.has(e.name) && !used.has(e.name) && !IDENTITY.has(e.name));
-  // A word every entry in the family shares ("camera" on every camera move's own blurb) proves nothing
+function groupRow(label, entries, isUsed, coverage, tokenGroups, ambiguous) {
+  // A word every entry in the group shares ("camera" on every camera move's own blurb) proves nothing
   // next to a name: the SAME restates() logic core/registry/registry.js checkBlurb uses to keep a blurb
   // from padding itself with its own kind, reused here to keep a PRINTED match from doing the same.
   const labelWords = new Set(toks(label));
-  const suggestions = familyEntries
-    .map((e) => ({ ...e, s: score(e, qt), c: coverage(e, qt) }))
-    .filter((e) => e.s > 0 && e.c >= ADOPTION_CONFIDENT)
+  const remaining = entries.filter((e) => !isUsed(e));
+  const suggestions = remaining
+    .map((e) => ({ ...e, ...bestWindowMatch(e, tokenGroups, coverage) }))
+    .filter((e) => e.s > 0 && e.c >= CONFIDENT)
     .sort((a, b) => b.c - a.c || b.s - a.s)
-    .slice(0, 3)
     .map((e) => {
       const entryToks = new Set(toks(`${e.name} ${e.blurb}`));
       // The print is evidence a person reads, not the full token overlap the scorer used: a short word
       // shared with dozens of blurbs ("at", "one", "by") proves nothing next to a name, so only words
-      // of 4+ letters are shown, never the family's own kind word, capped to the 4 most distinctive.
-      const matched = [...new Set(qt.filter((t) => entryToks.has(t) && t.length >= 4 && !labelWords.has(t)))]
+      // of 4+ letters are shown, never the group's own kind word, capped to the 4 most distinctive.
+      const matched = [...new Set(e.qt.filter((t) => entryToks.has(t) && t.length >= 4 && !labelWords.has(t)))]
         .sort((a, b) => b.length - a.length).slice(0, 4);
-      return { name: e.name, matched };
-    });
-  return { label, used: used.size, total: names.length, suggestions };
+      return { name: e.name, kind: e.kind, matched, line: pasteLine(e, ambiguous) };
+    })
+    // A suggestion with no displayable evidence is one this print cannot justify: the words that
+    // cleared CONFIDENT were themselves too short or too common to show (score() counts a 4-point hit
+    // for `hay.includes(q)` even at 3 letters, coverageIn's idf floor is not a length floor), and a
+    // line with nothing beside it reads as arbitrary rather than grounded.
+    .filter((e) => e.matched.length > 0)
+    .slice(0, 3);
+  return { label, used: entries.length - remaining.length, total: entries.length, suggestions };
 }
 
 /** adoptionReport(film) -> rows[] | null (no storyboard yet). Exported for `--json`. */
 export function adoptionReport(film) {
   const p = filePaths(film);
   if (!fs.existsSync(p.sb)) return null;
-  const sb = parseStoryboard(fs.readFileSync(p.sb, 'utf8'));
-  const transitionNames = [...new Set(TRANSITIONS.map((t) => t.name))];
-  const corpus = [
-    ...CAMERA_MOVE_NAMES.map((n) => ({ name: n, kind: 'camera moves', blurb: CAMERA_MOVE_BLURBS[n] || '' })),
-    ...transitionNames.map((n) => ({ name: n, kind: 'transitions', blurb: '' })),
-    ...Object.keys(KINETIC_PRESETS).map((n) => ({ name: n, kind: 'kinetic presets', blurb: KINETIC_BLURBS[n] || '' })),
-    ...Object.keys(EASINGS).map((n) => ({ name: n, kind: 'easings', blurb: '' })),
-  ];
-  const coverage = coverageIn(corpus);
-  const qt = toks(fieldBlob(sb.beats, SUGGEST_FIELDS, true));
-  return [
-    familyRow('camera moves', CAMERA_MOVE_NAMES, sb.beats, corpus, coverage, qt),
-    familyRow('transitions', transitionNames, sb.beats, corpus, coverage, qt),
-    familyRow('kinetic presets', Object.keys(KINETIC_PRESETS), sb.beats, corpus, coverage, qt),
-    familyRow('easings', Object.keys(EASINGS), sb.beats, corpus, coverage, qt),
-  ];
+  const sbSrc = fs.readFileSync(p.sb, 'utf8');
+  const sb = parseStoryboard(sbSrc);
+  const isUsed = usedNames(sbSrc, sb.beats);
+  const groups = GROUPS.map(([label, entries]) => [label, entries()]);
+  const all = groups.flatMap(([, entries]) => entries);
+  const coverage = coverageIn(all);
+  const ambiguous = ambiguousNames(all);
+  const tokenGroups = sb.beats.flatMap((b) => tokenGroupsOf(b));
+  return groups.map(([label, entries]) => groupRow(label, entries, isUsed, coverage, tokenGroups, ambiguous));
 }
 
 // THE AUDIT THIS ANSWERS: agents reported a screen done, a measure read, a camera framed, all three
@@ -338,13 +306,20 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   if (adoption) {
     console.log(`  adoption (this film's storyboard, against what the core has):`);
-    for (const r of adoption) {
-      // No suggestion clears CONFIDENT: printing nothing here is the honest answer, not a guess this
-      // film never asked for (the exact defect the old, whole-document word-collision version had).
-      const sug = r.suggestions.length
-        ? ` · try: ${r.suggestions.map((s) => `${s.name}${s.matched.length ? ` (${s.matched.join(', ')})` : ''}`).join(', ')}`
-        : '';
-      console.log(`    ${r.label.padEnd(16)} ${r.used}/${r.total} used${sug}`);
+    // Groups with a real suggestion print first, since a ~25-line budget cannot always afford all
+    // eight: a matched group is the one an author can act on right now, a bare used/total on its own
+    // is context. No suggestion clears CONFIDENT for a group -> nothing prints under it, the honest
+    // answer, not a guess this film never asked for (the defect the old whole-document version had).
+    const ordered = [...adoption].sort((a, b) => b.suggestions.length - a.suggestions.length);
+    let budget = 25;
+    for (const r of ordered) {
+      if (budget <= 0) break;
+      console.log(`    ${r.label.padEnd(16)} ${r.used}/${r.total} used`);
+      budget--;
+      for (const s of r.suggestions.slice(0, budget)) {
+        console.log(`        ${s.line}${s.matched.length ? `   (${s.matched.join(', ')})` : ''}`);
+        budget--;
+      }
     }
     console.log('');
   }
