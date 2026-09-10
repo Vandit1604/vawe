@@ -27,6 +27,11 @@ import { SHAPES } from '../../core/motion/shapes.js';
 import { CURVE_NAMES } from '../../core/motion/path-curves.js';
 import { SPEED_BAND } from '../lib/contract.mjs';
 import { RECIPES } from '../../recipes/index.mjs';
+// GROUPS/usedNames/pasteLine/tokenGroupsOf/bestWindowMatch: the SAME corpus and the SAME windowed
+// match `make stage`'s adoption block uses (harness/author/discovery.mjs, quality/gates/stage.mjs), so
+// a beat nudged here and a film audited there never disagree about what counts as a match.
+import { GROUPS, usedNames, pasteLine, ambiguousNames, tokenGroupsOf, bestWindowMatch } from '../author/discovery.mjs';
+import { coverageIn, CONFIDENT } from '../author/arsenal.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
@@ -67,13 +72,82 @@ function seamCandidates(sb) {
   return sb.beats.filter((b) => !b.recipe && (BOUNDARY_RE.test(b.mechanism || '') || BOUNDARY_RE.test(b.becomes || '')));
 }
 
+// A CORPUS-WIDE PUSH, not just the sustained-motion one above: `move:`/`recipe:` are two of 62 kinds,
+// and an author who never suspects a capability exists cannot search for it (`make arsenal` is
+// on-demand; this fires at the one moment a gap is provably visible, the beat's own prose already
+// describing it). Built once per save, not per beat: the corpus and its idf weighting are a property
+// of the whole engine, never of one beat.
+let CORPUS = null;
+function corpus() {
+  if (!CORPUS) {
+    const all = GROUPS.flatMap(([, entries]) => entries());
+    CORPUS = { all, coverage: coverageIn(all), ambiguous: ambiguousNames(all) };
+  }
+  return CORPUS;
+}
+
+/** capabilityCandidates(sb, sbSrc, skip) -> up to 2 {beat, name, kind, blurb, line}, one per beat, the
+ * single best-matching capability this film has not already reached for anywhere (dedicated field or a
+ * real `use:` line), confident past arsenal's own CONFIDENT on that beat's own prose. `skip` is the set
+ * of `kind:name` keys another nudge in this same save already covers, so nothing is said twice. */
+function capabilityCandidates(sb, sbSrc, skip) {
+  const { all, coverage, ambiguous } = corpus();
+  const isUsed = usedNames(sbSrc, sb.beats);
+  const remaining = all.filter((e) => !isUsed(e) && !skip.has(`${e.kind}:${e.name}`));
+  const perBeat = sb.beats.map((b) => {
+    const tokenGroups = tokenGroupsOf(b);
+    if (!tokenGroups.length) return null;
+    let best = null;
+    for (const e of remaining) {
+      const m = bestWindowMatch(e, tokenGroups, coverage);
+      if (m.s > 0 && m.c >= CONFIDENT && (!best || m.c > best.m.c)) best = { e, m };
+    }
+    return best && { beat: b, entry: best.e, line: pasteLine(best.e, ambiguous), c: best.m.c };
+  }).filter(Boolean);
+  // One capability said once: two beats independently matching the same effect keep only the
+  // stronger beat, the same "never twice" rule `skip` enforces against the OTHER nudge above.
+  const seen = new Set();
+  const deduped = perBeat.sort((a, b) => b.c - a.c).filter((c) => {
+    const key = `${c.entry.kind}:${c.entry.name}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return deduped.slice(0, 2);
+}
+
+/** alreadyNudgedKeys(found, seams) -> the `kind:name` keys the move-shape and seam-recipe nudges above
+ * already cover, so the corpus-wide push never repeats either as a "new" find. */
+function alreadyNudgedKeys(found, seams) {
+  const keys = new Set();
+  if (found.length) {
+    const shape = bestShape();
+    keys.add(`${shape.path ? 'path curve' : 'move shape'}:${shape.name}`);
+  }
+  const seamEntry = Object.entries(RECIPES).find(([, r]) => r.kind === 'seam');
+  if (seams.length && seamEntry) keys.add(`recipe:${seamEntry[0]}`);
+  return keys;
+}
+
+/** capabilityLines(capFound) -> the print lines for the corpus-wide push, one block per beat. */
+function capabilityLines(capFound) {
+  const lines = [];
+  for (const { beat, entry, line } of capFound) {
+    lines.push(`  "${beat.name}" reads like it wants ${entry.kind} \`${entry.name}\`, which this film has`);
+    lines.push(`  not reached for yet. Add: \`${line}\`.`);
+    if (entry.blurb) lines.push(`  ${entry.blurb}`);
+  }
+  return lines;
+}
+
 function say(rel, file) {
   const raw = fs.readFileSync(file, 'utf8');
   const sb = parseStoryboard(raw);
   if (!sb.beats.length) return [];
   const found = candidates(sb);
   const seams = seamCandidates(sb);
-  if (!found.length && !seams.length) return [];
+  const capFound = capabilityCandidates(sb, raw, alreadyNudgedKeys(found, seams));
+  if (!found.length && !seams.length && !capFound.length) return [];
 
   const film = rel.replace(/\.storyboard\.md$/, '.json');
   const lines = [];
@@ -107,6 +181,7 @@ function say(rel, file) {
       lines.push(`  ${r.blurb} (${src.ref}@${src.t}s).`);
     }
   }
+  lines.push(...capabilityLines(capFound));
   return lines;
 }
 
