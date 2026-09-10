@@ -42,6 +42,17 @@ export const fieldIn = (block, k) => {
   return m ? m[1].trim() : null;
 };
 
+// `use:` is the one field a beat may write more than once (harness/lib/contract.mjs parseUseLine): a
+// beat can pull several arsenal entries onto itself in one plan. Every other field above stays
+// single-valued (fieldIn's first match), so this is a second, list-returning reader rather than a
+// change to fieldIn that would silently make every field multi-valued.
+export const fieldAllIn = (block, k) => {
+  const re = new RegExp(`(?:^|\\n)\\s*[-*]?\\s*${k}\\s*:\\s*(.+)`, 'gi');
+  const out = [];
+  let m; while ((m = re.exec(block))) out.push(m[1].trim());
+  return out;
+};
+
 export const blocksOf = (src) => src.split(/^##\s+/m).slice(1);
 
 // The film-level `object:` line names the noun ("the input bar"), same as always, and MAY carry a
@@ -155,6 +166,11 @@ export function parseStoryboard(src) {
       // in=tagline axis=x". `harness/lib/contract.mjs parseRecipeLine` reads the raw string; this
       // parser stays a raw-field reader like every field above it.
       recipe: f('recipe'),
+      // THE GENERAL DOOR (harness/lib/contract.mjs parseUseLine/resolvedUses): "use: <name> [on=<layer
+      // id>] [key=value …]" or "use: <kind>:<name> …", one line per arsenal entry a beat pulls onto
+      // itself. A beat may write several, so this is `fieldAllIn`, not `f`, the one field on this
+      // object that is a list rather than a single string.
+      uses: fieldAllIn(b, 'use'),
     };
   });
   const { name: objectName, src: objectSrc } = parseObjectLine(field('object'));
