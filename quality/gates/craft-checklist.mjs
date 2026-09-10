@@ -24,12 +24,21 @@
 // What it can hold an author to is whether the decision was written down at all.
 //
 //   node quality/gates/craft-checklist.mjs <scene.json>   ·   make craft-check D=<file>
-// Not wired into author-check.mjs yet: standalone until the ladder adopts it.
+// Wired into author-check.mjs (HARD_CODES, ~line 152): `craft-unvisited` blocks a ship.
+//
+// A DOC ADDED TODAY MUST NOT RETROACTIVELY BLOCK A FILM APPROVED BEFORE IT EXISTED. A doc is relevant
+// only if its `applies-when:`/`confirm:` frontmatter existed at the time the film's storyboard was
+// approved (`approved:` frontmatter). A doc whose `confirm:` line first appeared, in git history, AFTER
+// that date is reported as `craft-new-doc` (info, never blocks): the author could not have answered a
+// question that did not exist yet. An unapproved film (no `approved:`), or a doc git cannot date, gets
+// every applicable doc as always: without a real timestamp on both sides there is nothing to compare.
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { frontmatter as sbFrontmatter, blocksOf, fieldIn } from '../../harness/author/storyboard-parse.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CRAFT_DIR = path.join(ROOT, 'docs/CRAFT');
@@ -47,7 +56,27 @@ function walkLayers(layers, fn) {
   }
 }
 
-export function computeFeatures(scene) {
+// A "product screen" is the specific `hasHtml` case SCREENS.md is actually about (an editor, a results
+// grid, a dashboard, a chat, a card, per `make screen KIND=`), not any hand-authored fragment: a title
+// card or a kinetic-type beat is also `html` and SCREENS.md's confirm question ("does the screen fill
+// most of the frame…") does not apply to either. There is no structural flag for this on the layer
+// (docs/CRAFT/SCREENS.md is answered by an author, not computed), so the same noun vocabulary
+// storyboard-check.mjs already uses for its `plain-content` warning (CONTENT_NOUN_RE) is reused here,
+// scoped the SAME WAY that check scopes it: per beat, over the fields a beat actually describes its
+// picture in (`onscreen`/`picture`/`mechanism`/`object`), never the whole storyboard's prose. A whole-
+// text scan matched "ui" inside unrelated sentences (a craft note mentioning "ui-skills") and made
+// CONTENT.md fire on 32 of 41 films instead of the handful that actually plan a screen; measured,
+// then scoped to beats the same way storyboard-check.mjs already had to learn this.
+const SCREEN_NOUN_RE = /\b(screen|editor|dashboard|grid|chat|card|window|ui)\b/i;
+function beatNamesScreen(storyboardText) {
+  for (const b of blocksOf(storyboardText)) {
+    const text = ['onscreen', 'picture', 'mechanism', 'object'].map((k) => fieldIn(b, k) || '').join(' ');
+    if (SCREEN_NOUN_RE.test(text)) return true;
+  }
+  return false;
+}
+
+export function computeFeatures(scene, storyboardText) {
   const dur = Number(scene?.duration ?? scene?.dur);
   let hasImages = false, hasTextBeats = false, hasHtml = false, hasKinetic = false;
   walkLayers(scene?.layers, (L) => {
@@ -66,11 +95,15 @@ export function computeFeatures(scene) {
   const hasAudio = !silent && !!((typeof a.music === 'string' && a.music)
     || (typeof a.vo === 'string' && a.vo) || a.auto === true
     || (Array.isArray(a.cues) && a.cues.length > 0));
+  // No storyboard yet to read (unplanned film): keep the broad, conservative reading so an unapproved
+  // film still gets every applicable doc, exactly as it did before this feature existed.
+  const hasProductScreen = hasHtml && (storyboardText == null || beatNamesScreen(storyboardText));
   return {
     always: true,
     short: Number.isFinite(dur) && dur < 15,
     long: Number.isFinite(dur) && dur >= 15,
     hasImages, hasTextBeats, hasHtml, hasKinetic,
+    hasProductScreen,
     hasBoundaries: boundaries >= 1,
     hasAudio,
     silent,
@@ -142,20 +175,29 @@ export function storyboardPathFor(sceneFile) {
   return path.join(dir, `${base}.storyboard.md`);
 }
 
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+// git-dates a doc's `confirm:` line, cached per process so a run over the whole library (the measure
+// harness, or lib-test.mjs) shells out once per doc, not once per doc per film.
+const docDateCache = new Map();
+export function docConfirmDate(rel) {
+  if (docDateCache.has(rel)) return docDateCache.get(rel);
+  let date = null;
+  try {
+    // -S finds commits that CHANGE the string's occurrence count, i.e. add or remove a `confirm:` line;
+    // --format=%cs is the committer date, YYYY-MM-DD; oldest-first ([-1]) is the line's first appearance.
+    const out = execFileSync('git', ['log', '--format=%cs', '--follow', '-S', 'confirm:', '--', rel],
+      { cwd: ROOT, encoding: 'utf8' }).trim();
+    const dates = out ? out.split('\n') : [];
+    if (dates.length) date = dates[dates.length - 1];
+  } catch { /* no git, or no history for this path: date stays null, caller falls back to blocking */ }
+  docDateCache.set(rel, date);
+  return date;
+}
+
 // ---- CLI -----------------------------------------------------------------------------------------
 function run(file) {
   const scene = JSON.parse(fs.readFileSync(file, 'utf8'));
   loadScene(scene);
-  const features = computeFeatures(scene);
-  const docs = docRegistry();
-  const relevant = docs.filter((d) => features[d.appliesWhen] === true);
-
-  const F = gateFindings({
-    scene: file,
-    line: (r, g) => `    ${g} [${r.code}] ${r.summary}\n        → ${r.fix}`,
-  });
-
-  console.log(`\n  craft checklist · ${file}`);
 
   // NO SEPARATE "no plan" CODE. This used to fail its own `no-plan-for-craft` here, checking only the
   // sibling-file naming convention (not a scene's declared `storyboard` field, so it could fire on a
@@ -165,19 +207,59 @@ function run(file) {
   // this film have a plan" and blocks on it. With no storyboard the craft map is simply empty, so every
   // relevant doc reads as unanswered below, which `craft-unvisited` already measures correctly.
   const sbPath = storyboardPathFor(file);
-  const craft = fs.existsSync(sbPath) ? craftMapFrom(fs.readFileSync(sbPath, 'utf8')) : {};
+  const storyboardText = fs.existsSync(sbPath) ? fs.readFileSync(sbPath, 'utf8') : null;
+  const features = computeFeatures(scene, storyboardText);
+  const docs = docRegistry();
+  const relevant = docs.filter((d) => features[d.appliesWhen] === true);
+
+  const F = gateFindings({
+    scene: file,
+    line: (r, g) => `    ${g} [${r.code}] ${r.summary}` + (r.fix ? `\n        → ${r.fix}` : ''),
+  });
+
+  console.log(`\n  craft checklist · ${file}`);
+
+  const craft = storyboardText ? craftMapFrom(storyboardText) : {};
+  const approvedRaw = storyboardText ? sbFrontmatter(storyboardText).field('approved') : null;
+  const approvedDate = approvedRaw && ISO_DATE_RE.test(approvedRaw) ? approvedRaw : null;
+  if (storyboardText && !approvedDate) {
+    console.log('    (no dated `approved:` on this storyboard: every relevant doc applies, as always)');
+  }
+
   let missing = 0;
   for (const d of relevant) {
     const answer = craft[d.slug];
     const answered = typeof answer === 'string' && answer.trim().length > 0;
-    if (!answered) {
+    if (answered) { console.log(`    ✓ ${d.slug.padEnd(16)} ${d.confirm}`); continue; }
+
+    // A doc added AFTER this film's approval could not have been answered when the plan was signed
+    // off: report it, don't block a film for missing a question that did not exist yet. Both dates are
+    // day-granularity (git's %cs, the storyboard's `approved:`), so a doc committed the SAME DAY as the
+    // approval cannot be proven to have existed before it; that tie goes to `>=`, i.e. treated as new.
+    // Measured against the actual case this fix exists for: vawe-flow approved 2026-09-10, CONTENT.md's
+    // `confirm:` line landed the same day. A same-day false "new doc" excuses a question for one day at
+    // most; the failure this gate exists to prevent, a doc silently re-blocking already-approved work,
+    // has no such ceiling, so the tie favours not blocking.
+    let newDoc = false;
+    if (approvedDate) {
+      const docDate = docConfirmDate(d.rel);
+      if (docDate) newDoc = docDate >= approvedDate;
+      else console.log(`    (no git history dates ${d.rel}'s confirm: line: treating it as pre-existing)`);
+    }
+
+    if (newDoc) {
+      F.note('craft-new-doc',
+        `${d.rel}: added after this film's approval (${approvedDate}), not required, "${d.confirm}"`,
+        { doc: d.rel });
+      console.log(`    · ${d.slug.padEnd(16)} (new since approval) ${d.confirm}`);
+    } else {
       missing++;
       F.fail('craft-unvisited',
         `${d.rel}: unanswered, "${d.confirm}"`,
         { fix: `Answer it in ${path.relative(ROOT, sbPath)}'s craft: map:\n` +
           `        craft:\n          ${d.slug}: "<your one-line answer>"`, doc: d.rel });
+      console.log(`    ✗ ${d.slug.padEnd(16)} ${d.confirm}`);
     }
-    console.log(`    ${answered ? '✓' : '✗'} ${d.slug.padEnd(16)} ${d.confirm}`);
   }
   if (!relevant.length) console.log('    (no CRAFT doc is relevant to this scene)');
 

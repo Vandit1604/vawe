@@ -41,6 +41,7 @@ import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/timeline/junctions.js';
 import { population, AUTHORED } from '../../harness/lib/census.mjs';
+import { pickRecipe } from '../../recipes/index.mjs';
 
 // ── THE 15 EXPRESSIVE FAMILIES, named once ──────────────────────────────────────────────────────
 // Both the per-film `vocab` (below, from `sig`) and the library-wide census (`libraryProfile`) key on
@@ -163,7 +164,22 @@ if (!file) { console.error('usage: node quality/gates/direction-floor.mjs <scene
 // renders anything (core/transitions/lower.js), and until this line the gates did not, so a scene
 // that declared its boundaries the documented way was read as a film with no boundaries at all.
 // Lowering here is idempotent and a no-op for a scene that already writes raw `cuts`. MISTAKES #380.
-const d = loadScene(JSON.parse(fs.readFileSync(file, 'utf8')));
+//
+// A `recipes[]` line of kind `seam` (recipes/index.mjs) is ALSO a declared boundary, and it is the one
+// the expanded scene `d` below cannot show: recipes/expand.mjs compiles a seam straight to plain
+// `motion` keys on the layers it names (there is no single named primitive for "travel derived from
+// these two layers' own boxes"), and deletes `recipes` in the same pass. So `sig.transition` below,
+// read off `d.seams`/`d.cuts`, counted zero for a film whose every joint is a seam recipe, and
+// `no-transition` fired on a film that had in fact earned several real seams. Count seam recipes on
+// the RAW scene, before expandScene deletes them, same as `d` is still read post-expansion for every
+// other signal (nothing else this gate reads is hidden by recipe expansion; verified against vawe-flow,
+// whose five `flow-seam` lines were the film that exposed this).
+const rawText = fs.readFileSync(file, 'utf8');
+const rawRecipes = (JSON.parse(rawText).recipes) || [];
+const seamRecipeCount = rawRecipes.filter((r) => {
+  try { return pickRecipe(r.recipe).kind === 'seam'; } catch { return false; }
+}).length;
+const d = loadScene(JSON.parse(rawText));
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
 // FIX 6: the two SLIDESHOW waivers must be BACKED BY A PLAN. `no-continuous-object` and `plain-slideshow`
@@ -249,7 +265,7 @@ const sig = {
   kineticText: texts.filter(isExpressiveText).length,
   countup: flat.filter((l) => l.type === 'count').length,
   camera: camMoves ? 1 : 0,
-  transition: (d.seams || []).length + (d.cuts || []).length + flat.filter((l) => l.cut).length,
+  transition: (d.seams || []).length + (d.cuts || []).length + flat.filter((l) => l.cut).length + seamRecipeCount,
   ken: flat.filter((l) => l.ken).length,
   cursor: flat.filter((l) => l.type === 'cursor').length,
   motionTrack: flat.filter((l) => Array.isArray(l.motion) && l.motion.length > 1).length,

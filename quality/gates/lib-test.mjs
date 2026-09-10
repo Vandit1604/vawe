@@ -7257,7 +7257,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // The gate's whole contract is "a relevant doc with no storyboard answer blocks". Asserted here rather
 // than left to the two sample renders in the repo, which can both go stale or be deleted.
 {
-  const { computeFeatures, craftMapFrom, storyboardPathFor } = await import('./craft-checklist.mjs');
+  const { computeFeatures, craftMapFrom, storyboardPathFor, docConfirmDate } = await import('./craft-checklist.mjs');
 
   // A tiny synthetic scene exercising every feature at once: short, with an image, a text layer with
   // split+preset (kinetic), an html layer, one cut, and real (non-silent) audio.
@@ -7336,7 +7336,61 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('craft-checklist: a storyboard answering every relevant doc passes clean',
     answered.status === 0 && !/craft-unvisited/.test(answered.stdout));
 
+  // DATE-GATED craft-new-doc: a doc added after a film's approval must not retroactively block it
+  // (this is the DEFECT the owner measured: a doc added today re-blocked 34 approved films). Anchor
+  // on the real git-dated confirm: line of an 'always' doc so the test tracks reality, not a date
+  // that a later edit to the doc could silently invalidate.
+  const densityDate = docConfirmDate('docs/CRAFT/DENSITY.md');
+  ok('craft-checklist: docConfirmDate finds a real YYYY-MM-DD date for an existing doc',
+    typeof densityDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(densityDate));
+
+  // approved BEFORE every doc's confirm: line existed: nothing is required, only reported.
+  fs.writeFileSync(path.join(tmp, 'demo.storyboard.md'), '---\nmessage: "x"\napproved: "1970-01-01"\n---\n');
+  const approvedBefore = runGate();
+  ok('craft-checklist: approved before every doc existed passes, reporting craft-new-doc only',
+    approvedBefore.status === 0 && /craft-new-doc/.test(approvedBefore.stdout)
+      && !/craft-unvisited/.test(approvedBefore.stdout));
+
+  // approved AFTER every doc's confirm: line existed: today's behaviour, unanswered docs still block.
+  fs.writeFileSync(path.join(tmp, 'demo.storyboard.md'), '---\nmessage: "x"\napproved: "2099-01-01"\n---\n');
+  const approvedAfter = runGate();
+  ok('craft-checklist: approved after every doc existed blocks with craft-unvisited, same as today',
+    approvedAfter.status !== 0 && /craft-unvisited/.test(approvedAfter.stdout)
+      && !/craft-new-doc/.test(approvedAfter.stdout));
+
+  // no `approved:` at all (unapproved film): every applicable doc is still required, same as today.
+  fs.writeFileSync(path.join(tmp, 'demo.storyboard.md'), '---\nmessage: "x"\n---\n');
+  const unapproved = runGate();
+  ok('craft-checklist: an unapproved film still requires every applicable doc',
+    unapproved.status !== 0 && /craft-unvisited/.test(unapproved.stdout));
+
   fs.rmSync(tmp, { recursive: true, force: true });
+}
+
+// ---- direction-floor: a seam recipe is a declared transition, read before recipe expansion --------
+// DEFECT: direction-floor reads `sig.transition` off the EXPANDED scene, where recipes/expand.mjs has
+// already compiled a `recipes[]` seam line to plain `motion` keys and deleted `recipes`. A film whose
+// every joint is a seam recipe (no raw `seams`/`cuts`/`transitions`) then measured zero transitions and
+// fired `no-transition` on a film that had in fact earned several. Fixed by counting seam-kind recipe
+// lines on the RAW scene, before expansion.
+{
+  const seamScene = {
+    module: 'scene', duration: 4,
+    layers: [
+      { id: 'a', type: 'text', text: 'Hello', size: 60, w: 400, start: 0 },
+      { id: 'b', type: 'text', text: 'World', size: 60, w: 400, start: 1.4 },
+    ],
+    recipes: [{ recipe: 'flow-seam', at: 1, out: 'a', in: 'b' }],
+  };
+  const tmp2 = fs.mkdtempSync(path.join(os.tmpdir(), 'direction-floor-seam-'));
+  const seamFile = path.join(tmp2, 'seam.json');
+  fs.writeFileSync(seamFile, JSON.stringify(seamScene));
+  const seamRun = spawnSync(process.execPath, [path.join(repoRoot, 'quality/gates/direction-floor.mjs'), seamFile], { encoding: 'utf8' });
+  ok('direction-floor: a seam recipe counts as a transition (transition×1 in the vocabulary line)',
+    /transition×1/.test(seamRun.stdout));
+  ok('direction-floor: a seam recipe means no-transition does not fire',
+    !/no-transition/.test(seamRun.stdout));
+  fs.rmSync(tmp2, { recursive: true, force: true });
 }
 
 // ---- beats-of: a film's storyboard beat table wins over the layer-start guess ----------------------
