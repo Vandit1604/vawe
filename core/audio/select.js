@@ -76,8 +76,11 @@ export function resolveAudio(scene) {
 // ── CLI: `node core/audio/select.js <scene.json> [--write]`. Prints the resolved audio block;
 //    --write bakes it back INTO the scene (in place), turning `music:"auto"` into a concrete bed so
 //    the render path (a Go binary with no JS pre-pass) never sees the "auto" sentinel. `make audio-bed`.
-import { pathToFileURL } from 'node:url';
-if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
+// Both node: imports below are dynamic and load only inside this CLI-only branch, so core/ (fetched
+// and evaluated by a browser) never carries a static node:* import.
+if (typeof process !== 'undefined' && process.argv && process.argv[1]) {
+  const { pathToFileURL } = await import('node:url');
+  if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const { readFileSync, writeFileSync } = await import('node:fs');
   const args = process.argv.slice(2);
   const file = args.find((a) => !a.startsWith('--'));
@@ -93,5 +96,6 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     else { scene.audio = resolved; writeFileSync(file, JSON.stringify(scene, null, 2) + '\n'); console.log(`  ✓ ${file}: resolved audio.music "auto" → ${JSON.stringify(resolved.music ?? '(silent)')}`); }
   } else {
     console.log(JSON.stringify(resolved, null, 2));
+  }
   }
 }

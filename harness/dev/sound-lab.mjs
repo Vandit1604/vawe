@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { CUES, renderCue, normalize, writeWav, SR } from '../../core/audio/kit.mjs';
+import { CUES, renderCue, normalize, encodeWav, SR } from '../../core/audio/kit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(ROOT, 'out/sound-lab');
@@ -23,7 +23,7 @@ const VERDICTS = 'verify/sound-verdicts.json';
 
 fs.mkdirSync(OUT, { recursive: true });
 const names = Object.keys(CUES).sort();
-for (const n of names) writeWav(path.join(OUT, `${n}.wav`), normalize(renderCue(CUES[n], 1)));
+for (const n of names) fs.writeFileSync(path.join(OUT, `${n}.wav`), encodeWav(normalize(renderCue(CUES[n], 1))));
 
 // A cue's own family, so the page groups sounds that should be judged against each other rather than
 // against the whole set: a `thud` and a `sparkle` are not competing for the same slot.
