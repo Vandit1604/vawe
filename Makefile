@@ -624,6 +624,21 @@ mine: ## [study] cluster every studied grammar/*.json shot by device into named 
 preview: ## [dev] render a single hand-written fragment (or a captured component JSON) STANDALONE on the theme bg →
 	node harness/author/preview-fragment.mjs $(HTML) $(if $(THEME),--theme $(THEME)) $(if $(BG),--bg $(BG)) $(if $(W),--w $(W)) $(if $(SERVE),--serve)
 
+# make screen F=<fragment.html> [THEME=<name>] [REF=<ref> ACT=<n>] [W=1920 H=1080]: the design route for
+# a PRODUCT SCREEN in a film. Renders it standalone through `make preview`'s own path, runs impeccable's
+# bundled anti-slop detector over the source, measures the PNG against a reference act's own content
+# numbers (fill/detail/photo, harness/media/content.mjs), and prints a VIDEO-READINESS list (smallest
+# text size, element count, theme tokens vs raw colour, real-image paths). Report-only, exit 0.
+screen: ## [dev] the design route for a product screen: preview + impeccable + content measure + readiness (F= [THEME=] [REF= ACT=] [W= H=])
+	node harness/author/screen.mjs $(F) $(if $(THEME),--theme $(THEME)) $(if $(REF),--ref $(REF)) $(if $(ACT),--act $(ACT)) $(if $(W),--w $(W)) $(if $(H),--h $(H))
+
+# make screen-new NAME=<film>-<screen> KIND=editor|grid|dashboard|chat|card [THEME=<name>] [INVENT=1]:
+# writes a STARTING fragment that is already video-ready (theme tokens, display-size type, real image
+# slots), never a grey box. INVENT=1 with no THEME prints an impeccable palette seed to compose a theme
+# from, rather than a default. See docs/CRAFT/SCREENS.md.
+screen-new: ## [dev] write a video-ready starting fragment for one screen kind (NAME= KIND= [THEME=] [INVENT=1])
+	node harness/author/screen-new.mjs $(NAME) $(KIND) $(if $(THEME),--theme $(THEME)) $(if $(INVENT),--invent)
+
 # make beats D=formats/x/video.json [VS=brand]: first/mid/last frame of every beat in one contact
 # sheet → /tmp/beats/$(notdir $(basename $(D))).png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
 # make cutout SRC=<photo> NAME=<name>: remove a photograph's background so it becomes a PROP.
