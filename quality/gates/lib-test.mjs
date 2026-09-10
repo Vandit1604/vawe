@@ -7933,6 +7933,45 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('sceneTiming beatMotion: staggered starts name both channels', staggered.beatMotion[0].kinds.includes('position') && staggered.beatMotion[0].kinds.includes('scale'));
 }
 
+// ---- quality/gates/scene-timing.mjs cameraStillHeldAt: the camera holds its end pose (owner's
+// decision, docs/MOTION-CRAFT.md) and this is the scene-side warning that names a later beat's
+// full-frame content sitting under a hold nothing has returned. ------------------------------------
+{
+  // a diveIn-shaped leg (baked `camera[]`, as bakeCameraMove would produce) ending at 1.5s pushed to
+  // s:1.6, then a full-frame layer's beat starting at 2s: the leg has already ended (not a live move
+  // across the beat start) and the layer covers ~97% of the canvas, so this is exactly the defect.
+  const held = sceneTiming({
+    module: 'scene', duration: 6, aspect: '16:9',
+    camera: [{ t: 0, s: 1, x: 0, y: 0 }, { t: 1.5, s: 1.6, x: -200, y: -100 }],
+    layers: [{ type: 'rect', id: 'full', w: 1900, h: 1060, start: 2, duration: 4, bg: '#111' }],
+  });
+  const flagged = held.cameraStillHeldAt(2, 6);
+  ok('cameraStillHeldAt: a full-frame beat after an unreturned push is flagged', flagged && flagged.layer === 'full');
+  ok('cameraStillHeldAt: names the pose it is still held at', flagged && approx(flagged.pose.s, 1.6));
+  ok('cameraStillHeldAt: names the leg that left it there', flagged && approx(flagged.legEndT, 1.5));
+
+  // the same push, queried WHILE it is still live (before the leg's own end): not a hold yet, it is
+  // just the move itself running, so this must not fire mid-move.
+  ok('cameraStillHeldAt: a beat inside the still-live leg is not a hold', held.cameraStillHeldAt(0, 1.5) === null);
+
+  // the same held pose, but this beat's own content is a small corner element, not a full-frame
+  // composition: the hold is real but nothing here reads as "the plan expected the normal frame".
+  const heldSmall = sceneTiming({
+    module: 'scene', duration: 6, aspect: '16:9',
+    camera: [{ t: 0, s: 1, x: 0, y: 0 }, { t: 1.5, s: 1.6, x: -200, y: -100 }],
+    layers: [{ type: 'rect', id: 'chip', x: 40, y: 40, w: 120, h: 40, start: 2, duration: 4, bg: '#111' }],
+  });
+  ok('cameraStillHeldAt: a small, non-full-frame beat is not flagged', heldSmall.cameraStillHeldAt(2, 6) === null);
+
+  // a camera that already sits at rest by this beat: no finding, nothing to return from.
+  const atRest = sceneTiming({
+    module: 'scene', duration: 6, aspect: '16:9',
+    camera: [{ t: 0, s: 1, x: 0, y: 0 }, { t: 1.5, s: 1, x: 0, y: 0 }],
+    layers: [{ type: 'rect', id: 'full2', w: 1900, h: 1060, start: 2, duration: 4, bg: '#111' }],
+  });
+  ok('cameraStillHeldAt: a camera already at rest is not flagged', atRest.cameraStillHeldAt(2, 6) === null);
+}
+
 // ---- quality/gates/choreo.mjs exitEmphasis: owner rule, "exits read faster than entrances" --------
 {
   // symmetric: the exit takes exactly as long as the entrance, and eases with no accelerating curve.
