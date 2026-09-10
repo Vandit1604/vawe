@@ -1,9 +1,9 @@
 ---
-when: you are about to author a product screen (an editor, a results grid, a dashboard, a chat, a card) for a film, or a screen previews as a grey box with tiny type
-answers: "why a product screen is designed for the video, not a plain mock · the make screen and make screen-new commands · what the video-readiness list checks and why · how a screen is measured against a reference act · where a theme comes from when the user has none, and which ui-skills were used"
+when: you are about to author a product screen (an editor, a results grid, a dashboard, a chat, a card) for a film, or a screen previews as a grey box, with tiny type, or with something clipped
+answers: "why a product screen is designed for the video, not a plain mock · the one make screen command · what the video-readiness and clipping checks catch and why · how a screen is measured against a reference act · where a theme comes from when the user has none, and which ui-skills were used"
 group: look
 applies-when: hasHtml
-confirm: "does the screen fill most of the frame with display-size type, real images, and one accent, and does `make screen` report no anti-patterns, no text under 28px, and fill/detail at or above 80% of the reference act?"
+confirm: "does the screen fill most of the frame with display-size type, real images shown whole, and one accent, and does `make screen` report no anti-patterns, no text under 28px, nothing clipped, and fill/detail at or above 80% of the reference act?"
 ---
 
 # Product screens: designed for the video, not a plain mock
@@ -12,12 +12,11 @@ confirm: "does the screen fill most of the frame with display-size type, real im
 
 - The owner's ruling: "use a ui design harness to build beautiful mocks, not plain by default. You can
   invent colours and themes beautifully when asked." A product screen in a film is DESIGNED, by default.
-- `make screen F=<fragment.html> [THEME=] [REF=<ref> ACT=<n>] [W= H=]`: renders it through the existing
-  `make preview` path, runs impeccable's bundled detector over the source, measures the PNG against a
-  reference act's own content numbers, and prints a video-readiness list. Report-only, never blocks.
-- `make screen-new NAME=<film>-<screen> KIND=editor|grid|dashboard|chat|card [THEME=] [INVENT=1]` writes
-  a STARTING fragment that is already video-ready: theme tokens, display-size type, a layout that fills
-  most of the frame, real image slots marked so they cannot render unfilled.
+- ONE command: `make screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [THEME=] [INVENT=1]
+  [REF=<ref> ACT=<n>] [W= H=]`. If `F` does not exist, `KIND` is required and writes a video-ready
+  starting fragment there first; if `F` exists, passing `KIND` refuses rather than overwrite an authored
+  screen. Either way it then always renders, runs impeccable's detector, measures content against a
+  reference act, and checks the LAID-OUT page for anything clipped. Report-only, never blocks.
 - Theme source (content-richness.plan.md, Update 1): a brand site gives the theme; a prompt with no
   brand means ASK for one; "you choose" means INVENT one (impeccable's `palette.mjs` seed), never
   default to plain.
@@ -33,13 +32,25 @@ subject filling the frame. A hand-written mock defaults to the opposite: a grey 
 sparse grid, because that is what "a UI" looks like in the training data. Naming the gap is not enough;
 the fix is a route every screen takes, and a command that measures whether it actually closed the gap.
 
-## `make screen`: the design route
+## `make screen`: ONE command, write-if-new then always check
 
 ```
-make screen F=formats/scene/vawe-flow-editor.html THEME=vawe REF=example-madera ACT=1
+make screen F=formats/scene/vawe-flow-editor.html THEME=vawe REF=example-madera ACT=1        # check an existing screen
+make screen F=formats/scene/new-results.html KIND=grid THEME=vawe                             # write, then check
 ```
 
-Four things, in order, always report-only (exit 0):
+The owner: "why two? not single one." There used to be a separate `screen-new` target; it is gone.
+`make screen` decides which half of the job is needed from whether `F` exists:
+
+- **`F` does not exist:** `KIND` is required. Writes `<F>` and `<F minus .html>.kit.css`
+  (`harness/lib/stagekit.mjs`'s `buildKit`, the same function `make stagekit` uses, so the pasted block
+  is never a second, drifting copy of the ramp), full-bleed, theme tokens only, display-size type, a
+  layout that fills most of the frame. `THEME=` with no matching `themes/<name>.json` refuses unless
+  `INVENT=1` is also passed (see below).
+- **`F` exists:** passing `KIND` REFUSES rather than overwrite an authored screen. Drop `KIND` to just
+  check it.
+
+Either way, five things happen next, always report-only (exit 0):
 
 1. **Render.** Reuses `make preview`'s own script (`harness/author/preview-fragment.mjs`), never a
    second renderer: the real theme applied, screenshotted at 1920x1080. A fragment carrying an unfilled
@@ -58,24 +69,23 @@ Four things, in order, always report-only (exit 0):
    path (`/assets/`, `/.vawe-data/uploads/`, `/core/`, `/themes/`, `/formats/`). A RELATIVE `<img src>`
    is the known trap: it resolves against the preview page's own base, not the fragment's, and paints
    nothing while the fragment still "looks right" in the markup.
+5. **Clipped**, read off the RENDERED page, not the source: `preview-fragment.mjs --boxes-out` dumps
+   every element's real, laid-out bounding box (a percentage width, a grid track, an `object-fit` crop
+   all resolve only once the browser lays the page out, which is exactly why this cannot be a source
+   parse). Each box is checked against the 1920x1080 frame and the safe margin
+   (`core/layout/safe.js` `MARGIN`, 0.06 of the short edge, 65px at this size). An element outside the
+   frame is `OFF FRAME`; inside the frame but inside the margin is `in margin`; a clean screen prints
+   `none: every element sits inside the frame and its margin.`
 
 `W=`/`H=` size the centred box; the reused preview path currently screenshots a fixed 1920x1080 canvas
 regardless (a real multi-aspect screen route waits on `make preview` itself carrying one).
 
-## `make screen-new`: start video-ready, not grey
-
-```
-make screen-new NAME=vawe-flow-editor KIND=editor THEME=vawe
-```
-
-Writes `formats/scene/<name>.html` and `<name>.kit.css` (`harness/lib/stagekit.mjs`'s `buildKit`, the
-same function `make stagekit` uses, so the pasted block is never a second, drifting copy of the ramp).
-The starter is full-bleed, uses ONLY the kit's own type roles and tokens, and fills most of the frame:
+**Screen kinds** (modelled on madera's grammar):
 
 | `KIND=` | what it draws | modelled on |
 |---|---|---|
 | `editor` | a typed prompt as the one focal element, in a bezelled window | madera's agent/editor act |
-| `grid` | a hero image plus small tiles, real `<img>` slots marked to fill | madera's results act |
+| `grid` | real `<img>` slots marked to fill, one per cell | madera's results act |
 | `dashboard` | a stat panel beside a queue panel | a product's own metrics screen |
 | `chat` | a sent bubble and a reply, on a dark ground | an agent conversation |
 | `card` | one large photo card, centred | a swipe/result card |
@@ -83,10 +93,9 @@ The starter is full-bleed, uses ONLY the kit's own type roles and tokens, and fi
 A `<fill: image path>` marker is left where a real image belongs; `make screen` refuses to render a
 fragment that still carries one, so a screen cannot ship with a silently blank slot.
 
-**THEME=** with no matching `themes/<name>.json` refuses, unless `INVENT=1` is also passed. Inventing
-never fabricates a full theme file mechanically: it runs impeccable's `palette.mjs --from <name>`,
-which returns one seed colour and a mood in prose by design (composing the other five roles is a
-judgement call against the brief, not a mechanical fill, per that script's own header). The caller
+**`INVENT=1`** never fabricates a full theme file mechanically: it runs impeccable's `palette.mjs --from
+<name>`, which returns one seed colour and a mood in prose by design (composing the other five roles is
+a judgement call against the brief, not a mechanical fill, per that script's own header). The caller
 composes `themes/<name>-invented.json` from the printed guidance, in the theme contract shape,
 validated by the repo's own theme contract test, then re-runs with `--theme <name>-invented`.
 
@@ -112,16 +121,39 @@ Built for the `vawe` theme against `example-madera`:
 
 - `formats/scene/vawe-flow-editor.html`, `KIND=editor`, the typed prompt "Make a 12 second launch
   film" in a bezelled window on a dark ground. `make screen ... REF=example-madera ACT=1`: fill 0.45
-  (ref 0.52, ok), detail 11.6 (ref 3.75, ok), colourfulness 12 (ref 12.05, ok), smallest text 38px, no
-  impeccable findings.
+  (ref 0.52, ok), detail 11.6 (ref 3.75, ok), colourfulness 12 (ref 12.05, ok), smallest text 38px,
+  nothing clipped, no impeccable findings.
 - `formats/scene/vawe-flow-results.html`, `KIND=grid`, six real stills from
-  `/.vawe-data/uploads/vawe-flow/` (argus-launch, preface-launch, product-feature-tour,
-  saas-hero-launch, vawe-launch, threadcite-open), one hero tile plus five smaller, asymmetric.
-  `make screen ... REF=example-madera ACT=5`: fill 0.51 (ref 0.27, ok), detail 13 (ref 11.43, ok),
-  smallest text 38px, no impeccable findings.
+  `/.vawe-data/uploads/vawe-flow/` in a 3x2 grid, each cell at `aspect-ratio:16/9` (the source stills'
+  own aspect), so `object-fit:cover` neither crops nor letterboxes: every still shows its own
+  composition whole. `make screen ... REF=example-madera ACT=5`: fill 0.22 (ref 0.27, ok), detail 9.5
+  (ref 11.43, ok), smallest text 38px, nothing clipped, no impeccable findings.
 
-Before: a hand-written mock with a flat grey window and 22-24px labels reads as "a UI", not a screen
-built for a moving frame. After: display-size type (the smallest text role, `.kit-eyebrow` at 22px, is
-never used as the smallest text on screen; every label that would be the smallest text is set in
-`.kit-body`, 38px, instead), a bezelled device frame or a filled photo grid, one accent. Neither screen
-is wired into `formats/scene/vawe-flow.json`; that rebuild is a separate pass.
+**A caught regression, worth stating because the eye missed it and a gate did not exist to catch it
+either.** The first version of the results screen passed `make screen` (fill/detail both "ok") while
+badly broken: the title "SIX FILMS SHIPPED THIS WEEK" was clipped by the top edge, the bottom row ran
+off the bottom, and cropped stills cut their own on-screen text ("...M" for "4.8M", "...ers ask
+Reddit." for "Buyers ask Reddit."). Content measurement (fill/detail/photo) cannot see this: a title cut
+in half and a title fully on screen can score identically, because the metric reads pixel statistics,
+not composition. Two fixes: the title was ALSO untrue ("six films shipped this week" when nobody had);
+replaced with the storyboard's own beat-8 copy, "Your films". And the CLIPPED check above was added:
+a static source parse cannot see a percentage width or an `object-fit` crop resolve, so it reads the
+LAID-OUT page instead (`preview-fragment.mjs --boxes-out`), which is the only way to catch it.
+
+Before (`make screen` on the broken version):
+```
+· clipped ·
+  [OFF FRAME] <p> "SIX FILMS SHIPPED THIS WEEK": 13px past the top edge
+  [in margin] <img> ".../vawe-launch.jpg": 3px into the top margin
+  [in margin] <img> ".../argus-launch.jpg": 3px into the top margin
+  [in margin] <img> ".../preface-launch.jpg": 3px into the top margin
+  [OFF FRAME] <img> ".../product-feature-tour.jpg": 12px past the bottom edge
+```
+
+After:
+```
+· clipped ·
+  none: every element sits inside the frame and its margin.
+```
+
+Neither screen is wired into `formats/scene/vawe-flow.json`; that rebuild is a separate pass.
