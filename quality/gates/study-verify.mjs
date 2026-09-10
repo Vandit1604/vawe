@@ -26,6 +26,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { pickRecipe } from '../../recipes/index.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const file = process.argv.find((a) => a.endsWith('.json'));
@@ -40,7 +41,13 @@ const mp4 = path.join(ROOT, 'out', `${name}.mp4`);
 
 if (RENDER || !fs.existsSync(mp4)) {
   console.log(`  rendering ${name} (draft)…`);
-  const r = spawnSync(path.join(ROOT, 'bin/vawe'), [path.relative(ROOT, abs), '--draft'], { cwd: ROOT, encoding: 'utf8' });
+  // VAWE_SERVE_ALL=1: this gate's own scenes are not always under the render server's default
+  // allowlist (the ground-truth fixture lives in quality/fixtures/, alongside its siblings, not
+  // formats/scene/ — .gitignore keeps formats/scene/*.json out of the repo for anything that is
+  // authored content rather than the framework itself). Safe to set unconditionally: it only widens
+  // what the dev server will fetch, never narrows a normal formats/scene/ render.
+  const r = spawnSync(path.join(ROOT, 'bin/vawe'), [path.relative(ROOT, abs), '--draft'],
+    { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VAWE_SERVE_ALL: '1' } });
   if (!fs.existsSync(mp4)) { console.error(`✗ render produced no ${path.relative(ROOT, mp4)}\n${r.stderr || r.stdout}`); process.exit(1); }
 }
 
@@ -54,10 +61,24 @@ const g = JSON.parse(fs.readFileSync(gp, 'utf8'));
 // ---- the declared truth -------------------------------------------------------------------------
 // Every mechanism that produces a visual boundary, in one list, because the author may have used any
 // of them and they are the same fact to a viewer.
+// `recipes[]` (a flow-seam, say) is a boundary too: it is expanded into motion keys at render time,
+// never into `scene.seams` (that field is the ENGINE's own seam mechanism's lowered form, see
+// AGENTS.md "Author a boundary through transitions[] only"), but the file on disk still names it, so
+// the raw scene JSON read here still has it. `at` is the slot's OWN meaning, "the first frame of empty
+// ground" (recipes/README.md), which is not what a study reports: `measureSeam` names the joint at the
+// gap's CORE MIDPOINT, so the expected boundary is `at + gap/2`, `gap` read off the recipe's own params
+// (an author override, else its measured default) the same way expand.mjs resolves it.
+function recipeJointTime(r) {
+  if (r.recipe !== 'flow-seam') return r.at;
+  const recipe = pickRecipe(r.recipe);
+  const gap = (r.params && r.params.gap != null) ? r.params.gap : recipe.params.gap.default;
+  return r.at + gap / 2;
+}
 const declaredCuts = [
   ...(scene.cuts || []).map((c) => c.t),
   ...(scene.transitions || []).map((t) => t.at),
   ...(scene.seams || []).map((x) => x.t),
+  ...(scene.recipes || []).map(recipeJointTime),
 ].filter((t) => typeof t === 'number').sort((a, b) => a - b);
 const measuredCuts = (g.shots || []).slice(1).map((x) => x.t0);
 
@@ -81,6 +102,46 @@ if (declaredCuts.length && !missed.length)
   ok.push(`all ${declaredCuts.length} declared boundary(ies) found, within ${TOL}s: ${declaredCuts.map((t, i) => `${t}→${measuredCuts.find((m) => near(m, t))}`).join(', ')}`);
 if (!declaredCuts.length) ok.push('the scene declares no boundary');
 
+// ---- GROUND TRUTH: within ONE FRAME, and the right kind and axis --------------------------------
+// The 0.12s tolerance above is generous (a cut's detected frame can smear either side of its own
+// start). For a scene we built to KNOW the answer, that is not good enough: this checks every declared
+// boundary lands within one frame of the film's own rate, names the right KIND (a `recipes[]` flow-seam
+// must measure as a seam, on the axis it declared) and that a long, undeclared tail (a deliberate still
+// hold) carries no spurious joint at all.
+const FRAME_TOL = 1 / (g.measured.fps || 30);
+for (const t of declaredCuts) {
+  const m = measuredCuts.find((x) => near(x, t));
+  if (m == null) continue;   // already reported as `cut-missed` above
+  if (Math.abs(m - t) > FRAME_TOL) {
+    findings.push(['ground-truth-frame', `boundary at ${t}s measured at ${m}s, ${Math.abs(m - t).toFixed(3)}s off: more than one frame (${FRAME_TOL.toFixed(3)}s)`]);
+    f.fail('ground-truth-frame', `boundary at ${t}s measured at ${m}s, ${Math.abs(m - t).toFixed(3)}s off: more than one frame (${FRAME_TOL.toFixed(3)}s)`);
+  } else ok.push(`boundary at ${t}s measured within one frame (${m}s, ${Math.abs(m - t).toFixed(3)}s)`);
+}
+for (const r of scene.recipes || []) {
+  if (r.recipe !== 'flow-seam') continue;
+  const axis = (r.params && r.params.axis) || 'x';
+  const expected = recipeJointTime(r);
+  const sm = (g.seams || []).find((s) => Math.abs(s.t - expected) < 0.6);
+  if (!sm) {
+    findings.push(['ground-truth-seam-missing', `recipe "flow-seam" at ${r.at}s (axis "${axis}") was not measured as a seam`]);
+    f.fail('ground-truth-seam-missing', `recipe "flow-seam" at ${r.at}s (axis "${axis}") was not measured as a seam`);
+  } else if (sm.axis !== axis) {
+    findings.push(['ground-truth-axis', `recipe "flow-seam" at ${r.at}s declares axis "${axis}", measured "${sm.axis}"`]);
+    f.fail('ground-truth-axis', `recipe "flow-seam" at ${r.at}s declares axis "${axis}", measured "${sm.axis}"`);
+  } else ok.push(`recipe seam at ${r.at}s measured axis "${sm.axis}" (${sm.direction}), matching`);
+}
+// A "still hold" is not authored as a fact anywhere in the scene format; it is what a long enough gap
+// after the last declared boundary MEANS. Long enough that it cannot be end-of-film framing: 1.5s.
+const lastBoundary = declaredCuts.length ? Math.max(...declaredCuts) : 0;
+const tailLen = g.measured.duration - lastBoundary;
+if (tailLen > 1.5) {
+  const spurious = measuredCuts.filter((m) => m > lastBoundary + FRAME_TOL);
+  if (spurious.length) {
+    findings.push(['ground-truth-spurious', `no boundary is declared after ${lastBoundary}s (a ${tailLen.toFixed(2)}s still hold) but the study found ${spurious.join(', ')}`]);
+    f.fail('ground-truth-spurious', `no boundary is declared after ${lastBoundary}s (a ${tailLen.toFixed(2)}s still hold) but the study found ${spurious.join(', ')}`);
+  } else ok.push(`the ${tailLen.toFixed(2)}s tail after the last declared boundary (${lastBoundary}s) carries no spurious joint`);
+}
+
 // ---- the backdrop -------------------------------------------------------------------------------
 // A window's LIGHTNESS is knowable from its preset name only for the unambiguous ones, so this checks
 // the shape it can check: how many distinct grounds the film shows, against how many distinct
@@ -101,13 +162,16 @@ ok.push(groundNote);
 // silently: brew's accent window measured 128.4 against a light/mid edge at 128 and was called light.
 // The knife-edge case is now handled where the value is written (study.mjs marks it `light?`), so this
 // only checks that the marking survived. A bucket that lost its doubt on the way here is a real defect.
+// `ground` now buckets `groundLuma` (the border ring, see study.mjs), not the whole-frame `luma`: a
+// centred card no longer drags a coloured wash into the wrong bucket. The edge-doubt check follows it.
 for (const sh of g.shots || []) {
-  const nearEdge = [60, 128].some((e) => Math.abs(sh.luma - e) < 4);
+  const gl = sh.groundLuma ?? sh.luma;
+  const nearEdge = [60, 128].some((e) => Math.abs(gl - e) < 4);
   if (nearEdge && !String(sh.ground).endsWith('?')) {
-    findings.push(['ground-false-confidence', `shot ${sh.i} measured luma ${sh.luma}, within 4 of a bucket edge, and was named "${sh.ground}" with no doubt marker.`]);
-    f.fail('ground-false-confidence', `shot ${sh.i} measured luma ${sh.luma}, within 4 of a bucket edge, and was named "${sh.ground}" with no doubt marker.`);
+    findings.push(['ground-false-confidence', `shot ${sh.i} measured groundLuma ${gl}, within 4 of a bucket edge, and was named "${sh.ground}" with no doubt marker.`]);
+    f.fail('ground-false-confidence', `shot ${sh.i} measured groundLuma ${gl}, within 4 of a bucket edge, and was named "${sh.ground}" with no doubt marker.`);
   }
-  if (nearEdge) ok.push(`shot ${sh.i} luma ${sh.luma} sits on a bucket edge and says so: "${sh.ground}"`);
+  if (nearEdge) ok.push(`shot ${sh.i} groundLuma ${gl} sits on a bucket edge and says so: "${sh.ground}"`);
 }
 
 console.log(`\n  STUDY-VERIFY · ${name}\n`);

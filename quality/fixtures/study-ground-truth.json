@@ -1,0 +1,22 @@
+{
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 10,
+ "audio": { "silent": true },
+ "bg": [
+  { "preset": "dark", "from": 0, "to": "cut@0" },
+  { "preset": "paper", "from": "cut@0", "to": 10 }
+ ],
+ "transitions": [
+  { "at": 3, "fx": "none", "dur": 0.1 }
+ ],
+ "recipes": [
+  { "recipe": "flow-seam", "at": 6.5, "out": "midtitle", "in": "endtitle", "params": { "axis": "x", "gap": 0.15 } }
+ ],
+ "layers": [
+  { "type": "text", "id": "title1", "text": "Act one", "x": 100, "y": 460, "w": 900, "size": 90, "weight": 800, "anim": "fade", "start": 0.2, "duration": 2.5 },
+  { "type": "text", "id": "midtitle", "text": "Act two", "x": 100, "y": 460, "w": 800, "size": 90, "weight": 800, "anim": "fade", "start": 3.2, "duration": 0.5 },
+  { "type": "text", "id": "endtitle", "text": "Act three, held", "x": 100, "y": 460, "w": 900, "size": 90, "weight": 800, "anim": "fade", "start": 6.65, "duration": 3.35 }
+ ]
+}
