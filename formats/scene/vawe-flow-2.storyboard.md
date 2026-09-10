@@ -40,7 +40,6 @@ craft:
 - becomes: the bare ink ground becomes a wide terminal window, then a closer one framing the space the prompt bar will fill
 - why: open on the thing itself, shown whole, so the eye already knows what kind of software this is before the camera decides where to look
 - duration: 2.20s
-- camera: travel
 - recipe: window-dolly from=0 to=2.2 target=terminal
 - object_in: center@1920x1080
 - object_out: center@640x160
@@ -56,14 +55,13 @@ craft:
 - shot: close on the prompt bar, lower third
 - onscreen: "make a 12 second launch film"
 - trigger: the camera arrives at the prompt bar, so the caret is free to start
-- mechanism: the request types in word by word (not letter by letter, the owner's own choice to "control the eye" one phrase at a time), each word flashing its own accent colour through `vars` before settling to ink, a return glyph waiting at the bar's right edge
+- mechanism: the request types in, and each word flashes its own accent colour through `vars` before settling to ink, a return glyph waiting at the bar's right edge
 - becomes: the empty prompt bar becomes a typed request, one word landing at a time
 - why: the request IS the product demonstration, and word-by-word colour reads as intent arriving, not just text appearing
 - duration: 1.40s
 - object_in: center@640x160
 - object_out: center@640x160
 - motion: [data-part="prompt-word"]@fadeUp:energy
-- trigger: the camera's arrival at the prompt bar frees the caret to begin
 - archetype: asymmetric-baseline
 - weight: quiet
 - picture: the prompt bar mid-type, several words already settled to ink, the current word still in its accent colour
@@ -80,7 +78,6 @@ craft:
 - duration: 0.94s
 - object_in: center@640x160
 - object_out: center@40x40/op:0
-- trigger: the last word of the typed request settling frees the cursor to press send
 - archetype: hero-object
 - weight: quiet
 - picture: the return glyph under the cursor, the output line pulsing green
@@ -98,7 +95,6 @@ craft:
 - recipe: flow-seam at=4.54 out=terminal in=timeline axis=x
 - object_in: center@40x40/op:0
 - object_out: center@480x270
-- trigger: the send pulse fires the exit that this beat's arrival completes
 - archetype: full-bleed-row
 - weight: quiet
 - borrows: "example-madera's flow-seam (axis x, right-entry) -> vawe-flow-2's flow-seam (axis x, left-entry, direction named by the owner)"
@@ -118,7 +114,6 @@ craft:
 - object_in: center@480x270
 - object_out: center@1600x820
 - motion: [data-part="clip"]@popIn:energy
-- trigger: the first clip's landing frees each following clip to arrive in turn
 - archetype: asymmetric-baseline
 - weight: strong
 - picture: the fully assembled timeline, several tracks deep, real clip thumbnails and labels
@@ -137,7 +132,6 @@ craft:
 - object_in: center@1600x820
 - object_out: center@160x160
 - motion: [data-part="film-card"]@fadeUp:professional
-- trigger: the timeline's completed build frees the ring of films to enter
 - archetype: full-bleed-row
 - weight: peak
 - borrows: "example-madera's card-ground-retint (a swipe deck picking between options) -> vawe-flow-2's films-ring ground (playing, not picking)"
@@ -165,7 +159,6 @@ craft:
 - object_in: center@160x160
 - object_out: center@640x180
 - motion: [data-part="mark-stroke"]@drawOn:gravity; [data-part="wordmark-letter"]@popIn:energy
-- trigger: the last film's exit frees the frame for the mark to gather in
 - archetype: lockup
 - weight: quiet
 - picture: the drawn mark with the wordmark grown out beside it, held centred
