@@ -2,7 +2,7 @@
 // is refused with BOTH values named.
 //   node harness/lib/contract.test.mjs
 import assert from 'node:assert/strict';
-import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, parseMoveEntry, parseMoveEntries, moveErrors, moveKeys, SPEED_BAND, isCausedTrigger, STAGE_S, parseUseLine, resolveUse, useErrors, useWarnings, resolvedUses, useSlotPath } from './contract.mjs';
+import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, parseMoveEntry, parseMoveEntries, moveErrors, moveKeys, SPEED_BAND, isCausedTrigger, STAGE_S, parseUseLine, resolveUse, useErrors, useWarnings, resolvedUses, useSlotPath, cameraStillHeldWarnings, normalCameraEvidence, isRestCameraPose } from './contract.mjs';
 
 // parseEdge: the happy path, quotes stripped (storyboard-parse.mjs's fieldIn does not strip them).
 // rot/opacity default to 0/1 (no pose stated = no pose change), same "no opinion" convention as before.
@@ -256,4 +256,49 @@ assert.deepEqual(useSlotPath({ name: 'plain', slot: 'bg[].preset' }), { bg: [{ p
 assert.deepEqual(useSlotPath({ name: 'alongPath', slot: 'modifiers[]' }), { modifiers: [{ alongPath: {} }] });
 assert.equal(useSlotPath({ name: 'file', slot: 'svgIcon()' }), null, 'a slot that is prose, not a path, has no writable skeleton');
 
-console.log('✓ contract.test.mjs: use: resolves exact/aka/kind-prefixed names, refuses ambiguous/dedicated/internal ones, warns free prose with ready lines, and its slot skeleton reuses pasteOf');
+// ── THE CAMERA HOLDS ITS END POSE: cameraStillHeldWarnings, isRestCameraPose, normalCameraEvidence ────
+
+// isRestCameraPose: identity is rest; a real push is not.
+assert.equal(isRestCameraPose({ s: 1, x: 0, y: 0, rx: 0, ry: 0, roll: 0 }), true);
+assert.equal(isRestCameraPose({ s: 1.6, x: 0, y: 0, rx: 0, ry: 0, roll: 0 }), false);
+assert.equal(isRestCameraPose(null), true, 'no pose at all is "no opinion", never a false hold');
+
+// normalCameraEvidence: each of the four signals fires on its own, and a decisive close/tight shot
+// or an unresolved beat fires none of them.
+assert.match(normalCameraEvidence({ name: 'A', shot: 'wide' }), /shot: "wide"/);
+assert.equal(normalCameraEvidence({ name: 'A', shot: 'close up' }), null);
+assert.match(normalCameraEvidence({ name: 'A', object_in: 'center@1920x1080' }), /object_in/);
+assert.equal(normalCameraEvidence({ name: 'A', object_in: 'top-left@120x40' }), null, 'a small corner object is not a full frame');
+assert.match(normalCameraEvidence({ name: 'A', eye: 'the whole frame -> a slow push -> the logo' }), /eye:/);
+assert.match(normalCameraEvidence({ name: 'A', picture: 'the app fills the frame' }), /full composition/);
+assert.equal(normalCameraEvidence({ name: 'A', camera: 'slowPush', picture: 'the app fills the frame' }),
+  null, 'a beat that already names its own camera does not fall back to prose');
+
+// cameraStillHeldWarnings: a push, then a wide beat with no return, warns; the same pair with a return
+// beat IN BETWEEN does not (the hold is fixed before the wide beat is judged); a push then a CLOSE beat
+// (not a normal-camera shot) does not warn either, even though the camera is still just as pushed in.
+// The push beat's own shot is never graded against its own not-yet-applied end pose (docs/MOTION-CRAFT.md).
+{
+  const pushed = { name: 'push', camera: 'diveIn tx=960 ty=540 to=1.6' };
+  const wide = { name: 'wide', shot: 'wide' };
+  const returns = { name: 'return', camera: 'slowPush to=1' };
+  const close = { name: 'close', shot: 'close up' };
+
+  const warnsNoReturn = cameraStillHeldWarnings([pushed, wide]);
+  assert.equal(warnsNoReturn.length, 1);
+  assert.match(warnsNoReturn[0], /camera-still-held: beat 2 \(wide\)/);
+  assert.match(warnsNoReturn[0], /shot: "wide"/);
+  assert.match(warnsNoReturn[0], /beat 1's `camera: diveIn/);
+  assert.match(warnsNoReturn[0], /add a return: camera: slowPush to=1/);
+
+  assert.deepEqual(cameraStillHeldWarnings([pushed, returns, wide]), [],
+    'a return beat in between fixes the hold before the wide beat is judged');
+
+  assert.deepEqual(cameraStillHeldWarnings([pushed, close]), [],
+    'a close shot is not the normal camera, so an inherited push is not a defect here');
+
+  assert.deepEqual(cameraStillHeldWarnings([{ name: 'wide-only', shot: 'wide' }]), [],
+    'a lone wide beat with no earlier push at all has nothing held against it');
+}
+
+console.log('✓ contract.test.mjs: use: resolves exact/aka/kind-prefixed names, refuses ambiguous/dedicated/internal ones, warns free prose with ready lines, and its slot skeleton reuses pasteOf; cameraStillHeldWarnings flags an unreturned push into a later normal-camera beat and clears on a return or a non-normal shot');
