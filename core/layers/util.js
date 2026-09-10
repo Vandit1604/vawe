@@ -12,6 +12,29 @@ import { isLightBg, parseColor } from '../color/engine.js';
 // The frame authority. One builder, so a kit that has to derive a frame derives the SAME one boot did.
 import { frameOf } from '../layout/safe.js';
 
+// REFUSE A VALUE THE BROWSER WOULD DROP, at every named style write, not only the `css` catch-all
+// (applyCss below already does this for `L.css`; this is the same check, same mechanism, extended to
+// the direct `el.style.X = L.Y` writes that named props use instead of the passthrough). Assigning an
+// invalid value to `el.style` is a silent no-op: the property keeps its unset value, nothing throws,
+// and the layer renders as if the author never asked (`"color": "accent"` instead of
+// `"color": "var(--accent)"` is the reported case: valid JSON, invalid CSS, and the browser's own
+// parser is the only thing that ever sees the failure). `droppedProps` is core/type/sanitize-html.js's
+// scratch-element round-trip, already imported above: it asks the browser rather than re-implementing
+// a second CSS grammar that drifts from the real one.
+export function checkDropped(L, obj) {
+  const bad = droppedProps(obj);
+  if (!bad.length) return;
+  // A bare identifier ("accent") is never a CSS value on its own; it is almost always a theme token
+  // typed without its var() wrapper, so name the fix rather than just the failure.
+  const hinted = bad.map((b) => {
+    const val = b.slice(b.indexOf(': ') + 2);
+    return /^[a-zA-Z][\w-]*$/.test(val) ? `${b} (did you mean \`var(--${val})\`?)` : b;
+  });
+  throw new Error(`layer${L.id ? ` "${L.id}"` : ''} (type "${L.type || 'text'}"): the browser drops `
+    + `${bad.length === 1 ? 'this css declaration' : 'these css declarations'}, ${hinted.join(' · ')}. `
+    + `It would keep the rest and render on, so nothing would fail and the layer would simply never do it.`);
+}
+
 // hexA('#5e6ad2', .25) → rgba string (glow/beam colours come as brand hex)
 export function hexA(hex, a) {
   const m = /^#([0-9a-f]{6})$/i.exec(hex || '');
@@ -181,8 +204,8 @@ export function createKit(ctx) {
     el.style.letterSpacing = trackingCss(L, midT);
     el.style.fontSize = (L.size ?? 96) + 'px';
     if (L.w != null) el.style.width = L.w + 'px';
-    if (L.align) el.style.textAlign = L.align;
-    if (L.color) el.style.color = L.color; else if (auto) el.style.color = auto;
+    if (L.align) { checkDropped(L, { textAlign: L.align }); el.style.textAlign = L.align; }
+    if (L.color) { checkDropped(L, { color: L.color }); el.style.color = L.color; } else if (auto) el.style.color = auto;
     // <b> emphasis colour: explicit emColor wins; else the brand accent for the POP, EXCEPT over an
     // accent-coloured field, where accent-on-accent vanishes, so emphasis falls back to the layer's OWN
     // colour (bold, always visible). Guard against blue-on-blue. (Must be a real colour, not `inherit`.)
@@ -220,12 +243,16 @@ export function createKit(ctx) {
     // because padding on an unpainted box is meaningful (it moves the content) and costs nothing.
     if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
     if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow && !(L.css && L.radius != null)) return;
-    if (L.bg) el.style.background = L.bg; else if (L.elevation) el.style.background = 'var(--surface)';
+    if (L.bg) { checkDropped(L, { background: L.bg }); el.style.background = L.bg; } else if (L.elevation) el.style.background = 'var(--surface)';
     // The RESTING radius, written once at build. A keyed `radius` (core/timeline/sequence.js POSE)
     // overwrites this per frame from formats/scene/scene.js resolveBoxes, the same split box.js already
     // makes for w/h beside their own build-time write: this stays the one place the default lives.
     el.style.borderRadius = (L.radius ?? 16) + 'px';
-    if (L.border && !L.elevation) el.style.border = L.border === true ? '1px solid var(--line)' : L.border;
+    if (L.border && !L.elevation) {
+      const b = L.border === true ? '1px solid var(--line)' : L.border;
+      if (L.border !== true) checkDropped(L, { border: b });
+      el.style.border = b;
+    }
     // `glow` used to be reachable ONLY from inside the elevation branch, so a layer that asked for a
     // glow and no elevation got silently nothing, schema.json advertises it as a standalone prop.
     // It composes now: elevation (or `shadow`) writes the depth stack, glow appends the bloom.
@@ -379,6 +406,7 @@ export function createKit(ctx) {
     const { filter, background } = crtSpec(typeof L.crt === 'object' ? L.crt : {});
     if (filter) { el.style.backdropFilter = filter; el.style.webkitBackdropFilter = filter; }
     // A backdrop-filter needs the element to paint something, exactly as progressiveBlur notes above.
+    if (background) checkDropped(L, { backgroundImage: background });
     el.style.backgroundImage = background || 'none';
     if (!background && !el.style.background && !el.style.backgroundColor) el.style.background = 'rgba(0,0,0,0.001)';
     el.style.pointerEvents = 'none';
@@ -417,6 +445,7 @@ export function createKit(ctx) {
         + `("40px 12px") or percentages ("0% 50%"). Got ${JSON.stringify(L.origin)}. It decides which point `
         + `a scale or rotation grows out of; written wrong it would silently stay at the centre. `
         + `(On a \`three\` globe, \`origin\` is a different prop entirely: the [lon, lat] of a route's start.)`);
+    checkDropped(L, { transformOrigin: L.origin });
     el.style.transformOrigin = L.origin;
   }
 
@@ -426,7 +455,7 @@ export function createKit(ctx) {
     applyCrt(el, L);
     applyProgressiveBlur(el, L);
     applyBorderTrail(el, L);
-    if (L.mask) { el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
+    if (L.mask) { checkDropped(L, { maskImage: L.mask }); el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
     applyFade(el, L);   // resolves L.filter / named looks / L.lookOpts too
     if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;
     if (L.logotype) el.setAttribute('data-logotype', '1');
@@ -484,14 +513,19 @@ export function createKit(ctx) {
       el.style.gridTemplateColumns = `repeat(${L.gridCols ?? 2}, ${L.colw ? L.colw + 'px' : '1fr'})`;
       el.style.columnGap = (L.colGap ?? L.gap ?? 24) + 'px';
       el.style.rowGap = (L.rowGap ?? L.gap ?? 24) + 'px';
-      el.style.justifyItems = L.items || L.align2 || 'stretch';
+      const gridItems = L.items || L.align2 || 'stretch';
+      checkDropped(L, { justifyItems: gridItems });
+      el.style.justifyItems = gridItems;
     } else {
       el.style.display = 'flex';
       el.style.flexDirection = (L.layout || L.direction) === 'column' ? 'column' : 'row';
       el.style.gap = (L.gap ?? 24) + 'px';
       el.style.flexWrap = L.wrap ? 'wrap' : 'nowrap';
-      el.style.alignItems = L.items || L.align2 || 'center';
-      el.style.justifyContent = L.justify || 'flex-start';
+      const items = L.items || L.align2 || 'center';
+      const justify = L.justify || 'flex-start';
+      checkDropped(L, { alignItems: items, justifyContent: justify });
+      el.style.alignItems = items;
+      el.style.justifyContent = justify;
     }
     if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
     if (L.h != null) el.style.height = L.h + 'px';
