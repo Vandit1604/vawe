@@ -756,6 +756,9 @@ for (const l of preserved) {
   }
 }
 const preservedFilmFields = PRESERVED_FILM_FIELDS.filter((k) => scene[k] !== undefined);
+// The report names every film-level field kept as-is. `cameraMove` is kept when no beat declares its own
+// `camera:` line (see the out object below), so it belongs in the report then, even though it is not in
+// PRESERVED_FILM_FIELDS: that list is what is copied, this is what the author is told was kept.
 
 // ---- USE: the general door onto the arsenal's 790-entry corpus, resolved once (harness/lib/contract.mjs,
 // the SAME corpus `make arsenal` searches) and written by ONE table below, split only by helper
@@ -816,7 +819,7 @@ if (chain.length) {
 }
 console.log(`  ${staged} of ${htmlLayers.length - 1} junction(s) staged (\`trigger:\` names a cause): ${staged ? `+${STAGE_S}s each, inserted (film runs ${(staged * STAGE_S).toFixed(2)}s longer), not carved out of a beat` : 'none: no junction states a real cause'}.`);
 if (staged) console.log(`  (resolved to real seconds, not left as "sceneN.end+${STAGE_S}": beats-check/motion-director read \`start\` as a number)`);
-if (preservedFilmFields.length) console.log(`  preserved film-level field(s): ${preservedFilmFields.join(", ")}`);
+if ([...preservedFilmFields, ...(!cameraSpecs.length && scene.cameraMove !== undefined ? ['cameraMove'] : [])].length) console.log(`  preserved film-level field(s): ${[...preservedFilmFields, ...(!cameraSpecs.length && scene.cameraMove !== undefined ? ['cameraMove'] : [])].join(", ")}`);
 if (!preserved.length) console.log("  no hand-authored layers to preserve: everything in this film is generated from the storyboard.");
 if (preserved.length) {
   console.log(`  preserved ${preserved.length} hand-authored layer(s) this contract has no vocabulary for: ${preserved.map(nameOf).join(", ")}`);
