@@ -2,6 +2,7 @@
 when: the render is done and something must actually LOOK at it
 answers: the 7 scoring dimensions · the verdict contract · why the static gates cannot replace this
 group: process
+codes: judge-not-ready, no-judge
 ---
 
 # The vision judge: the gate that SEES
