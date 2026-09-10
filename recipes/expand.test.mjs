@@ -3,13 +3,13 @@ import { expandRecipes } from './expand.mjs';
 
 function scene(overrides = {}) {
   return {
-    module: 'scene', duration: 4.2,
+    module: 'scene', aspect: '16:9', duration: 4.2,
     recipes: [{ recipe: 'flow-seam', at: 1.9, out: 'window', in: 'tagline', ground: ['g1', 'g2'] }],
     layers: [
       { type: 'image', id: 'g1', start: 0, duration: 2.05, opacity: 0.7, modifiers: [{ plane: -2000 }] },
       { type: 'image', id: 'g2', start: 1.55, duration: 2.65, opacity: 0.32, modifiers: [{ plane: -2000 }] },
-      { type: 'html', id: 'window', start: 0, duration: 1.95, motion: [{ t: 1.0, rotX: 7, rotY: -7 }] },
-      { type: 'text', id: 'tagline', start: 1.8, duration: 2.18 },
+      { type: 'html', id: 'window', x: 150, y: 90, w: 1500, h: 900, start: 0, duration: 1.95, motion: [{ t: 1.0, rotX: 7, rotY: -7 }] },
+      { type: 'text', id: 'tagline', x: 90, y: 480, size: 92, start: 1.8, duration: 2.18 },
     ],
     ...overrides,
   };
@@ -31,14 +31,14 @@ function scene(overrides = {}) {
   const tag = out.layers.find((l) => l.id === 'tagline');
   const g1 = out.layers.find((l) => l.id === 'g1');
   const g2 = out.layers.find((l) => l.id === 'g2');
-  assert.equal(win.motion.at(-1).x, -2500);
+  assert.equal(win.motion.at(-1).x, -(150 + 1500 + 192));  // far edge clears the frame plus 10%
   assert.equal(win.motion.at(-1).ease, 'easeInCubic');
   assert.equal(win.motion.at(-2).x, 60);
-  assert.equal(tag.start, 1.9 + 0.12);
-  assert.equal(tag.motion[0].x, 2300);
+  assert.equal(tag.start, 1.9 + 0.067);
+  assert.equal(tag.motion[0].x, 1920 - 90);  // near edge starts on the frame edge
   assert.equal(tag.motion[1].x, 0);
   assert.ok(g1.motion.some((k) => k.opacity === 0));
-  assert.ok(g2.motion.some((k) => k.opacity === 0.32));
+  assert.ok(g2.motion.some((k) => k.opacity === 1), 'ground keys multiply the layer opacity, so they end at 1');
 }
 
 // axis override reads the y-axis measured defaults.
@@ -46,7 +46,14 @@ function scene(overrides = {}) {
   const s = scene({ recipes: [{ recipe: 'flow-seam', at: 1.9, out: 'window', in: 'tagline', params: { axis: 'y' } }] });
   const out = expandRecipes(s);
   const win = out.layers.find((l) => l.id === 'window');
-  assert.equal(win.motion.at(-1).y, -1400);
+  assert.equal(win.motion.at(-1).y, -(90 + 900 + 108));
+}
+
+// a layer with no width cannot be told when it has left the frame
+{
+  const s = scene();
+  delete s.layers.find((l) => l.id === 'window').w;
+  assert.throws(() => expandRecipes(s), /states no w/);
 }
 
 // unknown recipe name

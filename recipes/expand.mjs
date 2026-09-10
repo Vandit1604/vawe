@@ -8,6 +8,7 @@
 // expands, so a scene carrying `recipes[]` renders through every existing path (`./bin/vawe`, `make
 // dev`, the Node gates, the Go server's expand-blocks.mjs shell-out) with no second expansion site.
 import { pickRecipe } from './index.mjs';
+import { sceneDims } from '../core/layout/safe.js';
 
 const AXIS_PROP = { x: 'x', y: 'y' };
 
@@ -46,10 +47,21 @@ function expandSeamLine(scene, line) {
   const exitDur = paramOf(name, recipe, 'exitDur', line.params);
   const enterDur = paramOf(name, recipe, 'enterDur', line.params);
   const groundFade = paramOf(name, recipe, 'groundFade', line.params);
-  const exitPx = paramOf(name, recipe, 'exitPx', line.params)[axis];
-  const enterPx = paramOf(name, recipe, 'enterPx', line.params)[axis];
   const driftPx = paramOf(name, recipe, 'driftPx', line.params)[axis];
   const prop = AXIS_PROP[axis];
+  // Travel comes from the layers' own boxes and the canvas, not a distance measured off one film: the
+  // outgoing layer rushes until its far edge has cleared the frame, the incoming one starts with its near
+  // edge on the frame edge, so the ground is empty for `gap` whatever the layout.
+  const [W, H] = sceneDims(scene);
+  const span = axis === 'x' ? W : H;
+  const extent = (L) => {
+    const v = axis === 'x' ? L.w : (L.h ?? (L.type === 'text' && L.size ? L.size * 1.25 : null));
+    if (v == null) bad(`"${L.id}" states no ${axis === 'x' ? 'w' : 'h'}, so the recipe cannot tell when it has left the frame`);
+    return v;
+  };
+  // ponytail: a 10% margin covers a tilt and the blur trail; a rotated box's true extent needs projection.
+  const exitPx = (outLayer[prop] ?? 0) + extent(outLayer) + 0.1 * span;
+  const enterPx = span - (inLayer[prop] ?? 0);
   const at = line.at;
   const outStart = outLayer.start ?? 0;
 
@@ -94,25 +106,24 @@ function expandSeamLine(scene, line) {
     { t: enterDur, [prop]: 0, ease: 'easeOutCubic' },
     ...(inLayer.motion || [])];
 
-  // GROUND: outgoing fades to 0, incoming fades in, both centred on `at` over groundFade.
+  // GROUND: outgoing fades to 0, incoming fades in, both centred on `at` over groundFade. The keys run
+  // 0 to 1 because a motion opacity multiplies the layer's own `opacity`, which stays the author's.
   if (line.ground) {
     const [outGid, inGid] = line.ground;
     const half = groundFade / 2;
     const og = outGid && findLayer(scene, outGid);
     if (og) {
-      const base = og.opacity ?? 1;
       const gStart = og.start ?? 0;
       og.motion = [...(og.motion || []),
-        { t: (at - half) - gStart, opacity: base },
+        { t: (at - half) - gStart, opacity: 1 },
         { t: (at + half) - gStart, opacity: 0, ease: 'easeInOutCubic' }];
     }
     const ig = inGid && findLayer(scene, inGid);
     if (ig) {
-      const base = ig.opacity ?? 1;
       const gStart = ig.start ?? 0;
       ig.motion = [...(ig.motion || []),
         { t: (at - half) - gStart, opacity: 0 },
-        { t: (at + half) - gStart, opacity: base, ease: 'easeInOutCubic' }];
+        { t: (at + half) - gStart, opacity: 1, ease: 'easeInOutCubic' }];
     }
   }
 }
