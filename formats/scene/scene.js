@@ -34,7 +34,7 @@ import { createTrackKit, runTracks } from '/core/tracks/index.js';
 import { resolveCameraBlur, resolveShutter } from '/core/tracks/motion.js';
 import { normalizeIdle } from '/core/engine/idle.js';
 import { resolveSpectacle } from '/core/timeline/spectacle.js';
-import { followOffset } from '/core/camera-moves/follow.js';
+import { followOffset, followVelocity } from '/core/camera-moves/follow.js';
 const $ = (id) => document.getElementById(id);
 
 // resolveRelativeStarts: a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
@@ -1018,6 +1018,20 @@ const boxOf = (id) => boxes.get(id) || null;
     const { s, x, y } = followOffset(b, spec, W, H);
     return { s, x, y, rx: 0, ry: 0, roll: 0, persp: 1600, focus: null, aperture: 0 };
   }
+  // followVelocityAt(spec, t, dt): the follow camera's speed, for the SAME reason cameraVelocityAt
+  // exists for a keyed one, motionAt (core/tracks/motion.js) reads cam.vel to decide the shutter smear
+  // regardless of which move produced the camera. A keyed camera has one track to sample twice; this
+  // move has none, its pose at any time is the target's box AT THAT TIME, so the two samples this needs
+  // are two boxes. resolveBoxes(t) is already pure in t (see its own header), so sampling it a second
+  // time at t-dt and putting it back is cheap and correct, never a second box implementation.
+  function followVelocityAt(spec, t, dt) {
+    const boxNow = boxOf(spec.id);
+    const prevT = Math.max(0, t - dt); // CLAMPED at t=0 like cameraVelocityAt: not moved yet, no speed
+    resolveBoxes(prevT);
+    const boxPrev = boxOf(spec.id);
+    resolveBoxes(t); // restore: everything after this point reads boxOf expecting THIS frame's boxes
+    return followVelocity(boxNow, boxPrev, spec, W, H, dt);
+  }
 
   // ---- THE REST OF THE VIEW: identity, the clock, the locked look, the backdrop, the joints ----
   // Geometry alone was not enough to write real effects against. An effect could ask WHERE another
@@ -1378,7 +1392,7 @@ const boxOf = (id) => boxes.get(id) || null;
     // number, so re-deriving it per layer would evaluate the camera track fifty times for one answer,
     // which is the fact-with-many-owners shape this repo logs most. Attached to the camera the view
     // already carries, so the motion track reads the camera's speed off the camera.
-    if (camNow) camNow.vel = cameraVelocityAt(camKf, t, 1 / fps);
+    if (camNow) camNow.vel = CAM_FOLLOW ? followVelocityAt(CAM_FOLLOW, t, 1 / fps) : cameraVelocityAt(camKf, t, 1 / fps);
     // THE CLOCK. A layer was handed t and nothing to measure it against, so "how far through the film
     // am I" could only be answered by the author restating the runtime inside the layer, a second
     // copy of a number the scene already owns, which stops being true the moment the film is re-cut.
