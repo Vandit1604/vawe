@@ -37,7 +37,26 @@ const DIMENSIONS = [
 
 const numbered = (list) => list.map((d, i) => `${i + 1}. ${d}`).join('\n');
 
-export function craftRubric({ name, frames, landscape, brand, dir = '/tmp/judge' }) {
+// The eye is not the first check to look at these pixels. quality/audit.mjs and sweep-static.mjs
+// already measured 19 kinds of defect against this SAME render before this rubric was written; a
+// finding here is a FACT about the frames, not a lead to re-verify by squinting. Grouped by severity so
+// a HARD (ship-blocking) finding cannot hide among warnings, and a waived one still shows, the same
+// "still printed, tagged, and counted separately" rule audit.mjs itself holds for a waiver.
+function measuredSection(findings) {
+  if (!findings.length) {
+    return `## Measured findings (quality/audit.mjs + sweep-static.mjs)\nNone. Both scripts ran against this render and found nothing to report.\n`;
+  }
+  const line = (r) => `- \`${r.code}\` [${r.severity === 'error' ? 'HARD' : r.severity.toUpperCase()}]` +
+    `${r.waived ? ' (waived)' : ''}: ${r.summary}`;
+  return `## Measured findings (quality/audit.mjs + sweep-static.mjs)
+These were measured on the rendered pixels, not guessed. Treat each as true unless the frame you are
+looking at plainly disagrees; a waived one is a known, deliberate exception, not a bug to re-report.
+
+${findings.map(line).join('\n')}
+`;
+}
+
+export function craftRubric({ name, frames, landscape, brand, dir = '/tmp/judge', findings = [] }) {
   return `# Judge sheet, ${name} (${frames} key frames, ${landscape ? 'landscape' : 'portrait'})
 
 READ \`${dir}/sheet.png\` and score EACH labeled frame against the rubric below. Be adversarial:
@@ -46,6 +65,7 @@ your job is to catch what the static gates can't SEE. Do NOT rationalize a flaw 
 ## The brand's house style (the scoring key)
 ${houseStyleFor(brand)}
 
+${measuredSection(findings)}
 ## Craft rubric: score each frame 1-5 per dimension, name the issue + the fix
 ${numbered(DIMENSIONS)}
 
