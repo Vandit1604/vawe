@@ -1,5 +1,5 @@
  const $=(id)=>document.getElementById(id);
- const sc=$('sc'),scrub=$('scrub'),read=$('read'),play=$('play');
+ const sc=$('sc'),read=$('read'),play=$('play');
  const lanes=$('lanes'),ruler=$('ruler'),rows=$('rows'),ph=$('ph');
  let fps=30,total=0,n=0,playing=false,W=1920,H=1080,dur=1,model=null;
  // ---- GEOMETRY IS MEASURED ONCE PER CHANGE, NEVER PER EVENT ---------------------------------------
@@ -15,13 +15,8 @@
    stageBox=$('stage').getBoundingClientRect(); scBox=sc.getBoundingClientRect();
    tlTop=$('tl').getBoundingClientRect().top;
  }
- // A RANGE IS NOT TEXT ENTRY. This used to treat every INPUT as typing, and the frame scrubber IS an
- // input[type=range], so the moment you touched the slider (the studio's own first instruction) the
- // state keys 1-4 went dead and the plan view became unreachable by keyboard. Arrows still stand back
- // for the range, which is the double-step this guard was actually written for.
  const el=()=>document.activeElement||document.body;
- const onRange=()=>el().tagName==='INPUT'&&el().type==='range';
- const typing=()=>/^(INPUT|TEXTAREA|SELECT)$/.test(el().tagName)&&!onRange();
+ const typing=()=>/^(INPUT|TEXTAREA|SELECT)$/.test(el().tagName);
  // THE ONE LIVE REGION. The chooser's status line used to be aria-live and carried a seconds counter
  // ticking four times a second, so a screen reader read the whole panel again every 250ms for fifteen
  // seconds. The ticking figure is for the eye; this is for the ear, and it is written twice: once when
@@ -42,9 +37,9 @@
    const v=Math.max(96,Math.min(max,Math.round(px)));
    document.documentElement.style.setProperty('--tlh',v+'px');
    split.setAttribute('aria-valuenow',String(v)); split.setAttribute('aria-valuemax',String(max));
-   try{ localStorage.setItem(TLH_KEY,String(v)); }catch(_){}
+   try{ localStorage.setItem(TLH_KEY,String(v)); }catch{}
    fit(); measureBoxes(); }
- try{ const s=+localStorage.getItem(TLH_KEY); if(s) setTlh(s); }catch(_){}
+ try{ const s=+localStorage.getItem(TLH_KEY); if(s) setTlh(s); }catch{}
  // GRAB OFFSET, not a snap. Dragging from the bottom of the 9px handle used to jerk the divider up to
    // put the pointer at its middle; the timeline now keeps the size it had when you took hold of it.
  let splitGrab=0;
@@ -73,42 +68,37 @@
      h+='<span class=sep>/</span><button aria-current=page>comp: '+esc((L&&L.raw&&L.raw.comp)||'?')+'</button>'; }
    else if(comps.length) h+='<span class=sep>/</span>'+comps.map(L=>
      '<button data-comp="'+L.i+'">'+esc((L.raw&&L.raw.comp)||('layer '+L.i))+'</button>').join('<span class=sep>·</span>');
-   else h+='<span class=none>no compositions in this scene</span>';
    c.innerHTML=h;
    c.querySelectorAll('[data-comp]').forEach(b=>b.addEventListener('click',()=>enterComp(+b.dataset.comp)));
    c.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>{ crumbAt=null; drawCrumbs(); })); }
- function enterComp(i){ crumbAt=i; drawCrumbs(); setSel(i);
-   const L=model.layers.find(x=>x.i===i);
-   showPick('comp','layers['+i+']  composition',L?L.raw:{},
-     '// a composition is FIRST-PARTY JS, core/compositions/'+((L&&L.raw&&L.raw.comp)||'?')+'.js.'+String.fromCharCode(10)+
-     '// It has no nested layer tree to open: what the JSON carries is the name and its props.'); }
+ function enterComp(i){ crumbAt=i; drawCrumbs(); setSel(i); }
 
  // ---------- keyframing ----------
  // ONE interaction, end to end: pick a layer, scrub to a frame, drag it. That writes a motion key at
  // that frame. Everything else an editor eventually needs sits on top of this loop.
  let FITS=1, keyMode=false, selIdx=-1, selStart=0, selLabel='', dragging=null;
  const dragEl=$('drag'), keyBtn=$('key'), selOut=$('sel');
- function setSel(i){ selIdx=i; const L=model&&model.layers.find(l=>l.i===i);
+ function setSel(i){ if(i!==selIdx) selOut.textContent='';
+   selIdx=i; const L=model&&model.layers.find(l=>l.i===i);
    selStart=L?L.start:0; selLabel=L?(L.type+' '+(L.label||'')):'';
-   selReadout();
+   layerProps(i); selReadout();
    [...rows.querySelectorAll('.bar')].forEach(b=>b.classList.toggle('sel',+b.dataset.i===i));
    drawSelBox(); }
  // ---- THE FOUR STATES ----------------------------------------------------------------------------
  // One scene, one playhead, four things you might be doing with them. Nothing here touches sc.src: the
  // centre is hidden and shown, so the engine stays booted and the frame you left is the frame you
  // return to. Entering a state does its work LAZILY, because two of them cost seconds of rendering.
- let state='make';
  function setState(s){
-   state=s; document.body.dataset.state=s;
+   document.body.dataset.state=s;
    keepFocus(document.querySelector('#states button[data-state="'+s+'"]'));
-   [...document.querySelectorAll('#states button')].forEach(b=>
+   [...document.querySelectorAll('#states button[data-state]')].forEach(b=>
      b.setAttribute('aria-pressed',String(b.dataset.state===s)));
    if(s==='make') fit();
    if(s==='plan') drawPlan();
    if(s==='look') showSheet(sheetKind);
    if(s==='ship') drawShip();
  }
- document.querySelectorAll('#states button').forEach(b=>b.addEventListener('click',()=>setState(b.dataset.state)));
+ document.querySelectorAll('#states button[data-state]').forEach(b=>b.addEventListener('click',()=>setState(b.dataset.state)));
 
  // ---- PLAN: the storyboard the beats were decided in ---------------------------------------------
  // ---- PLAN: the film as its own frames, not as grey boxes ---------------------------------------
@@ -149,7 +139,7 @@
  const hasPicture=(b)=>!!(b.picture||b.object||b.archetype||(b.onscreen&&b.onscreen.length)||b.mechanism||b.becomes);
  function sketchSvg(b,pal){
    const p=pal||{}, bg=p.bg||'#171717', surface=p.surface||'rgba(255,255,255,.08)',
-     edge=p.lineStrong||p.line||'rgba(255,255,255,.3)', accent=p.accent||'#2563eb',
+     edge=p.lineStrong||p.line||'rgba(255,255,255,.3)',
      text=p.text||'#fff', dim=p.text2||p.dim||'rgba(255,255,255,.6)';
    // A STORYBOARD SAYS "NO COPY" IN PROSE, and the sketch used to draw that prose as the film's own
   // words: beat 1 of hi-vandit reads "onscreen: (none, the mark itself is the only mark)" and the
@@ -178,10 +168,8 @@
  }
  function planEmpty(why){
    planBody.innerHTML=''; planNote.hidden=false;
-   planNote.innerHTML='<h2>the plan is not here yet</h2><p>'+esc(why)+'</p>'
-     +'<p>The storyboard is where the beats were decided, and every role that writes into the film '
-     +'transcribes it. Write one before the JSON:</p>'
-     +'<ul><li>a <code>&lt;name&gt;.storyboard.md</code> beside the scene, or a top-level <code>"storyboard"</code> field</li>'
+   planNote.innerHTML='<h2>No storyboard</h2><p>'+esc(why)+'</p>'
+     +'<ul><li><code>&lt;name&gt;.storyboard.md</code></li>'
      +'<li><code>make storyboard-check SB=&lt;file&gt;</code></li></ul>';
  }
  // 1920x1080 is wider than this pane, so each fragment is SCALED rather than resized: a fragment
@@ -208,8 +196,8 @@
        +(d.not?'<p><b>not</b> '+esc(d.not)+'</p>':'')+'</div>'; }
      if(d.devices&&d.devices.length){
        const used=d.devices.filter(x=>!x.dropped).length;
-       h+='<details id=plandev><summary>the reference, decoded &middot; '+used+' of '+d.devices.length
-         +' devices used</summary><table>'
+       h+='<details id=plandev><summary>Reference devices &middot; '+used+' of '+d.devices.length
+         +' used</summary><table>'
          +d.devices.map(x=>'<tr class="'+(x.dropped?'dropped':'')+'"><td>'+esc(x.id)+'</td><td>'
            +esc(x.device)+'</td><td>'+esc(x.use)+'</td></tr>').join('')
          +'</table></details>'; }
@@ -224,12 +212,8 @@
          : hasPicture(b)
          ? '<div><div class="pstage sketch">'+sketchSvg(b,d.palette)
              +'<span class=psketchtag title="no hand-written fragment yet: drawn from the storyboard&#39;s own archetype/picture/onscreen">sketch</span></div>'
-           +'<p class=psrc>'+(b.blueprint?'blueprint: '+esc(String(b.blueprint).split(' (')[0]):'no fragment yet, drawn from the storyboard')+'</p></div>'
-         : '<div class="pstage none"><div><s>nothing to show yet</s><b>no picture decided</b>'
-           +'<p>This beat names no archetype, picture, object, or onscreen line, so there is nothing honest '
-           +'to draw. Add one of those to the storyboard, or write a <code>fragment:</code> and author it: '
-           +'stage kit &rarr; the reference&#39;s grammar &rarr; the smallest useful <code>ui-skills</code> set '
-           +'&rarr; <code>make preview</code>.</p></div></div>';
+           +'<p class=psrc>'+(b.blueprint?'blueprint: '+esc(String(b.blueprint).split(' (')[0]):'no fragment')+'</p></div>'
+         : '<div class="pstage none"><b>No picture decided</b></div>';
        const copy=(b.onscreen||[]).length
          ? '<ul class=pcopy>'+b.onscreen.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>' : '';
        const rows=PFIELDS.filter(f=>b[f[0]]).map(f=>'<div class=prow><dt>'+f[1]+'</dt><dd>'+esc(b[f[0]])+'</dd></div>').join('');
@@ -252,28 +236,28 @@
  }
  $('planredraw').addEventListener('click',()=>drawPlan(true));
 
- // ---- the stage strip, filled from the same reader that make stage prints ---------------------------
- // Which pane a stage happens in. A stage with no pane here (brief, assemble, direct) still shows; it
- // just says the command, because pretending every stage has a screen would be the lie this strip is
- // for removing.
- const STAGE_PANE={plan:'plan',approval:'plan',design:'plan',render:'ship',judge:'look'};
+ // ---- the stage chip, filled from the same reader that make stage prints ----------------------------
+ // READ-ONLY: the stage comes from the files on disk (quality/gates/stage.mjs), so the chip cannot claim
+ // a stage the repo is not in. Clicking it copies the one next command.
  fetch('/api/stage').then(r=>r.json()).then(d=>{
    if(!d||!d.ok) return;
-   const at=d.order.indexOf(d.stage);
-   $('stagedots').innerHTML=d.order.map((id,i)=>
-     '<b class="'+(i<at?'done':i===at?'at':'')+'">'+esc(id)+'</b>').join('<i></i>');
-   $('stagenext').innerHTML='<code>'+esc(d.next)+'</code>';
-   $('stagenext').title=d.why;
-   const pane=STAGE_PANE[d.stage];
-   if(pane) $('stagedots').querySelector('b.at').style.cursor='pointer';
-   if(pane) $('stagedots').addEventListener('click',(e)=>{ if(e.target.classList.contains('at')) setState(pane); });
+   const chip=$('stagechip'), name=$('stagename'), at=d.order.indexOf(d.stage), label=cap(d.stage);
+   name.textContent=label;
+   chip.title='Stage '+(at+1)+' of '+d.order.length+': '+d.order.map((id,i)=>i===at?id.toUpperCase():id).join(' · ')
+     +String.fromCharCode(10)+'Next: '+d.next;
+   chip.setAttribute('aria-label','stage '+d.stage+', copy the next command');
+   chip.hidden=false;
+   chip.addEventListener('click',()=>{
+     const back=()=>setTimeout(()=>{ name.textContent=label; },1400);
+     navigator.clipboard.writeText(d.next).then(()=>{ name.textContent='Copied'; say('copied: '+d.next); back(); },
+       ()=>{ name.textContent='Copy failed'; back(); }); });
  }).catch(()=>{});
 
  // ---- LOOK: the film as a STRIP, which is a different question from a frame ----------------------
  // Scrubbing tells you what a frame IS. A strip tells you whether the film WORKS, and the two sheets
  // here are the ones this repo already makes and least often reads: every beat in · mid · out, and
  // both sides of every transition pulled out of the rendered mp4. Neither needs new engine work.
- const sheetImg=$('sheet'), sheetBtn=$('sheetzoom'), sheetNote=$('sheetnote'), lookStat=$('lookstat'), lookWhat=$('lookwhat');
+ const sheetImg=$('sheet'), sheetBtn=$('sheetzoom'), sheetNote=$('sheetnote'), lookStat=$('lookstat');
  // THE SHEET'S REAL SIZE, SENT WITH IT. The server reads the PNG's IHDR and answers X-Dim; the page
  // writes it to the width/height ATTRIBUTES, so the box is the right shape before a byte is decoded.
  // The CSS keeps both axes auto, which is the guard against the scar this repo already has: a mapped
@@ -285,9 +269,6 @@
    sheetImg.src=u; sheetBtn.hidden=false; sheetNote.hidden=true; }
  // The first two need NO RENDER: both seek renderFrame in a headless page, exactly as the scrubber does,
  // so a scene that has never been rendered can still be judged as a strip. Only the seams need an mp4.
- const SHEETWHAT={beats:'every beat: in · mid · out. No render needed',
-                  frames:'the key frames of the whole film. No render needed',
-                  seams:'both sides of every transition, out of the rendered mp4'};
  let sheetKind='beats', sheetHave={};
  let renderPoll=null;
  function lookBusy(msg){ lookStat.innerHTML='<span class=work><i></i>'+esc(msg)+'</span>'; }
@@ -296,9 +277,8 @@
  function showSheet(kind,force){
    sheetKind=kind;
    [...document.querySelectorAll('[data-sheet]')].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sheet===kind)));
-   lookWhat.textContent=SHEETWHAT[kind]||'';
    if(sheetHave[kind]&&!force){ setSheet(sheetHave[kind].u,sheetHave[kind].dim); lookStat.textContent=''; return; }
-   const busy=kind==='seams'?'decoding the seams out of the mp4, this takes a few seconds':'rendering every beat, this takes a few seconds';
+   const busy={beats:'rendering beats',frames:'rendering key frames',seams:'decoding seams'}[kind]||'rendering';
    lookBusy(busy); say(busy);
    sheetBtn.hidden=true; sheetNote.hidden=true;
    // EACH SHEET COSTS SECONDS, so two can be in flight and the slower one used to land last and
@@ -309,8 +289,7 @@
      const dim=r.headers.get('X-Dim');
      if(r.status===409&&r.headers.get('X-Needs-Render')) return r.text().then(t=>{ lookStat.textContent=''; say('there are no seam frames yet');
        // SAY IT, never draw an empty grid. And offer the one thing that would fix it.
-       note('there are no seam frames to look at yet','<p>'+esc(t)+'</p><p>A render takes minutes and runs '
-         +'<code>make video</code> with the gates off.</p><p><button id=dorender>render it now</button></p>');
+       note('No seam frames yet','<p>'+esc(t)+'</p><p><button id=dorender>Render</button></p>');
        $('dorender').addEventListener('click',startRender); });
      if(!r.ok) return r.text().then(t=>{ lookStat.textContent=''; say('that sheet could not be drawn'); note('that sheet could not be drawn','<pre style="white-space:pre-wrap;user-select:text;font:11px/1.5 ui-monospace,monospace">'+esc(t)+'</pre>'); });
      return r.blob().then(b=>{ const u=URL.createObjectURL(b); sheetHave[kind]={u,dim};
@@ -339,8 +318,8 @@
  function drawJump(){
    const j=$('jump'); if(!model) return;
    const ms=(model.marks||[]).map(k=>[k.t,k.kind]);
-   j.innerHTML=ms.length?ms.map(([t,k])=>'<button data-t="'+t+'">'+esc(k)+' '+(+t).toFixed(2)+'s</button>').join('')
-     :'<span class=stub><i></i>this film declares no cuts, seams or stings to jump to</span>';
+   j.hidden=!ms.length;
+   j.innerHTML=ms.map(([t,k])=>'<button data-t="'+t+'">'+esc(k)+' '+(+t).toFixed(2)+'s</button>').join('');
    j.querySelectorAll('[data-t]').forEach(b=>b.addEventListener('click',()=>{
      setState('make'); go(Math.round(+b.dataset.t*fps)); }));
  }
@@ -352,15 +331,9 @@
  function drawShip(){
    const g=(model&&model.gate)||{codes:[]};
    const codes=g.codes||[];
-   $('shipstat').textContent=codes.length?codes.length+' beat-check finding(s)':'beat-check is clean';
-   $('shipbody').innerHTML='<h2>not wired: this is one gate of twenty</h2>'
-     +'<p>The ladder that says a film is done is <code>make ship D='+esc((model&&model.file)||'')+'</code>. '
-     +'It declares every step before it runs, and nothing here runs any of them.</p>'
-     +'<p>What studio already knows is <b>beat-check</b>, because the timeline\'s hazard bands come from it:</p>'
-     +(codes.length?'<ul>'+codes.map(c=>'<li><code>'+esc(c)+'</code></li>').join('')+'</ul>'
-       :'<ul><li>no findings on this scene</li></ul>')
-     +'<p>Waivers, legacy debt and what actually blocks are not shown, and a clean panel here is not a '
-     +'film cleared to go out.</p>';
+   $('shipstat').textContent=codes.length?codes.length+' finding'+(codes.length===1?'':'s'):'no findings';
+   $('shipbody').innerHTML=(codes.length?'<h2>Findings</h2><ul>'+codes.map(c=>'<li><code>'+esc(c)+'</code></li>').join('')+'</ul>':'')
+     +'<h2>Full ladder</h2><ul><li><code>make ship D='+esc((model&&model.file)||'')+'</code></li></ul>';
  }
  // ---- THE CHOOSER: six takes of this film, at this frame ------------------------------------------
  // IT NEVER ASKS FOR A WORD. There is no search box here and there will not be one: the person this
@@ -404,8 +377,7 @@
  function drawCands(d){
    const w=d.window||{}, cs=(d.candidates||[]).filter(c=>c.clip);
    clearInterval(candTick);
-   candStat.innerHTML=esc('bg['+w.index+'], now \u201c'+w.current+'\u201d, at '+d.at+'s · '+cs.length+' takes in '+Math.round((d.ms||0)/1000)+'s')
-     +'<br>click one to apply it, <kbd>undo</kbd> above puts it back.';
+   candStat.textContent=('bg['+w.index+'], now \u201c'+w.current+'\u201d, at '+d.at+'s · '+cs.length+' takes in '+Math.round((d.ms||0)/1000)+'s');
    // SIX AUTOPLAYING LOOPS IS EXACTLY THE MOTION SOMEBODY MAY HAVE ASKED TO BE SPARED, so under
    // prefers-reduced-motion they load paused and the panel offers one control that starts them all.
    // Not silently replaced by stills: a still hides speed, scale and direction, which is the whole
@@ -414,20 +386,18 @@
    // a <button> takes phrasing content, so the card is spans: a <p> inside a button is invalid markup
    // and the parser closes the button around it, which is why the cards were one hit target on paper
    // and several in the tree.
-   cands.innerHTML=cs.map((c,i)=>'<button class=cand data-i="'+i+'">'
+   cands.innerHTML=cs.map((c,i)=>'<button class=cand data-i="'+i+'" title="'+esc(c.blurb||c.name)+'">'
      +'<video src="/'+esc(c.clip)+'" loop muted playsinline preload=metadata'+(still?'':' autoplay')+'></video>'
      +'<span class=t><b>'+esc(c.name)+'</b><s>'+(c.new?'new':(c.scenes+' film'+(c.scenes===1?'':'s')))+'</s></span>'
-     +'<span class=d>'+esc(c.blurb||'')+'</span>'
      +(c.warnings||[]).map(w2=>'<span class="d warn">'+esc(w2)+'</span>').join('')
      +'</button>').join('');
    cands.querySelectorAll('.cand').forEach(b=>b.addEventListener('click',()=>applyCand(cs[+b.dataset.i])));
    // SIX LOOPS THAT NEVER STOP IS AN AUTOPLAY NOBODY CAN INTERRUPT. The control was only drawn under
    // prefers-reduced-motion, which reads the setting as the only reason to want them still. It is one
    // button either way, and it says which state it is about to move you to.
-   if(!$('candplay')) candGo.insertAdjacentHTML('beforebegin',
-     '<button id=candplay style="width:100%;margin-top:8px"></button>');
+   if(!$('candplay')) cands.insertAdjacentHTML('afterend','<button id=candplay class=wide></button>');
    const cp=$('candplay'); let running=!still;
-   const label=()=>{ cp.textContent=running?'pause the six clips':'play the six clips'; };
+   const label=()=>{ cp.textContent=running?'Pause takes':'Play takes'; };
    label();
    cp.onclick=()=>{ running=!running;
      cands.querySelectorAll('video').forEach(v=>{ if(running) v.play(); else v.pause(); }); label(); };
@@ -437,16 +407,15 @@
    fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ops:c.patch})})
     .then(r=>r.json()).then(r=>{
       if(!r.ok){ candStat.innerHTML='<span style="color:var(--bad)">'+esc(r.error)+'</span>'; return; }
-      candStat.textContent=r.changed?('applied \u201c'+c.name+'\u201d to the scene. undo is in the top bar.')
-        :('the scene already used \u201c'+c.name+'\u201d, nothing changed.');
+      candStat.textContent=r.changed?('applied \u201c'+c.name+'\u201d'):('already \u201c'+c.name+'\u201d, no change');
       say(candStat.textContent);
       if(r.changed) reloadScene();
     });
  }
  candGo.addEventListener('click',askCandidates);
 
- // ---- THE PICKER: click the picture, get the JSON that made it -----------------------------------
- const pick=$('pick'), pickName=$('pickname'), pickJson=$('pickjson');
+ // ---- THE PROPERTY PANEL: what you clicked, as rows, and the JSON that made it -------------------
+ const pickJson=$('pickjson'), propsEl=$('props');
  function bgAt(t){ if(!model) return null;
    const bg=model.bg||[]; if(!bg.length) return null;
    let i=0; for(let k=0;k<bg.length;k++){ const w=bg[k]; if(w&&w.from!=null&&t>=w.from) i=k; }
@@ -456,14 +425,41 @@
      const joints=(model.marks||[]).filter(m=>m.kind!=='sting').map(m=>m.t).sort((a,b)=>a-b);
      i=0; for(let k=0;k<joints.length && t>=joints[k];k++) i=Math.min(k+1,bg.length-1); }
    return { i, win: bg[i], count: bg.length }; }
- function showPick(kind, name, obj, extra){
-   pick.classList.add('on'); pickName.textContent=name;
-   pickJson.textContent=(extra?extra+String.fromCharCode(10):'')+JSON.stringify(obj,null,2); }
- $('pickclose').addEventListener('click',()=>pick.classList.remove('on'));
+ const cap=(s)=>{ s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1); };
+ const fld=(v,tag,id)=>'<span class="fld'+(tag?'':' txt')+'">'+(tag?'<i>'+tag+'</i>':'')+'<b'+(id?' id='+id:'')+'>'+esc(v)+'</b></span>';
+ const prow=(label,...cells)=>'<div class=pr><span class=lab>'+label+'</span><div class=flds>'+cells.join('')+'</div></div>';
+ function showProps(title,html,obj){
+   $('proptitle').textContent=title;
+   $('propempty').hidden=!!obj; propsEl.hidden=!obj; $('propjson').hidden=!obj;
+   propsEl.innerHTML=obj?html:'';
+   pickJson.textContent=obj?JSON.stringify(obj,null,2):'';
+ }
+ function layerProps(i){
+   const L=model&&model.layers.find(l=>l.i===i);
+   if(!L) return showProps('Layer','',null);
+   const raw=L.raw||{};
+   showProps(cap(L.type),
+     prow('Type',fld(L.type))+prow('ID',fld(raw.id!=null?raw.id:'layers['+i+']'))
+     +(L.type==='composition'?prow('Comp',fld(raw.comp||'?')):'')
+     +prow('Time',fld((+L.start).toFixed(2),'S'),fld((+L.dur).toFixed(2),'D'))
+     +'<div id=pbox class=psub hidden>'+prow('Position',fld('','X','pX'),fld('','Y','pY'))+prow('Size',fld('','W','pW'),fld('','H','pH'))+'</div>'
+     +prow('Key at',fld('','T','pK')), raw);
+ }
+ function bgProps(b){
+   setSel(-1);
+   const w=b.win||{};
+   showProps('Backdrop',prow('Type',fld('backdrop'))+prow('ID',fld('bg['+b.i+']'))+prow('Window',fld((b.i+1)+' of '+b.count))
+     +(w.preset?prow('Preset',fld(w.preset)):'')
+     +(w.from!=null?prow('Time',fld((+w.from).toFixed(2),'S'),fld((+(w.to!=null?w.to:dur)).toFixed(2),'E')):''), w);
+ }
+ // the box the selection outline measures, in the film's own pixels
+ function boxRows(r){ const pb=$('pbox'); if(!pb) return; pb.hidden=!r; if(!r) return;
+   $('pX').textContent=Math.round(r.left); $('pY').textContent=Math.round(r.top);
+   $('pW').textContent=Math.round(r.width); $('pH').textContent=Math.round(r.height); }
  $('pickcopy').addEventListener('click',()=>{
-   const b=$('pickcopy');
-   navigator.clipboard.writeText(pickJson.textContent).then(()=>{
-     b.textContent='copied'; say('the JSON is on the clipboard'); setTimeout(()=>b.textContent='copy JSON',1200); }); });
+   const b=$('pickcopy'), back=()=>setTimeout(()=>{ b.textContent='Copy JSON'; },1200);
+   navigator.clipboard.writeText(pickJson.textContent).then(()=>{ b.textContent='Copied'; say('the JSON is on the clipboard'); back(); },
+     ()=>{ b.textContent='Copy failed'; back(); }); });
  sc.addEventListener('load',()=>{ try{
    const doc=sc.contentDocument; if(!doc) return;
    doc.addEventListener('click',(ev)=>{
@@ -472,31 +468,24 @@
      // clicked on" means when layers overlap.
      const hit=(doc.elementsFromPoint(ev.clientX,ev.clientY)||[])
        .map(el=>el.closest && el.closest('.hs-layer')).find(Boolean);
-     const t=n/fps;
-     if(hit && hit.dataset.idx!=null){
-       const i=+hit.dataset.idx, m=model.layers.find(l=>l.i===i), L=m&&m.raw;
-       if(L){ setSel(i);
-         showPick('layer','layers['+i+']  '+(L.type||'?'),L,
-           '// frame '+n+' ('+t.toFixed(2)+'s) of '+total+'   layers['+i+']'); return; } }
-     const b=bgAt(t);
-     if(b) showPick('bg','bg['+b.i+']  backdrop',b.win,
-       '// frame '+n+' ('+t.toFixed(2)+'s)   bg window '+(b.i+1)+' of '+b.count+
-       ', bound to the film'+String.fromCharCode(39)+'s own cuts');
+     const i=hit&&hit.dataset.idx!=null?+hit.dataset.idx:-1;
+     if(i>=0&&model.layers.some(l=>l.i===i)){ selOut.textContent=''; return setSel(i); }
+     const b=bgAt(n/fps);
+     if(b) bgProps(b);
    },true);
- }catch(err){ /* a cross-origin doc cannot be picked; the timeline still selects */ } });
- const SEL_HINT='click a layer in the picture, or a bar in the timeline, to select it';
- function selReadout(){ if(selIdx<0){ selOut.textContent=SEL_HINT; return; }
+ }catch{ /* a cross-origin doc cannot be picked; the timeline still selects */ } });
+ function selReadout(){ const k=$('pK'); if(!k||selIdx<0) return;
    const lt=n/fps-selStart;
-   selOut.textContent='selected '+selLabel+'  ·  key at '+lt.toFixed(2)+'s'+(lt<0?'  (before it starts)':''); }
+   k.textContent=lt.toFixed(2)+'s'+(lt<0?' (before start)':''); }
  keyBtn.addEventListener('click',()=>{ keyMode=!keyMode; keyBtn.setAttribute('aria-pressed',String(keyMode));
    dragEl.classList.toggle('on',keyMode); });
  $('undo').addEventListener('click',async()=>{
    const r=await fetch('/api/undo',{method:'POST'}).then(x=>x.json());
    if(r.ok) reloadScene(); else selOut.textContent='could not undo: '+r.error; });
- function reloadScene(){ const keep=n; sc.src=sc.src; sc.addEventListener('load',()=>{ ready(); setTimeout(()=>{ n=Math.min(keep,total); draw(); },120); },{once:true}); }
+ function reloadScene(){ const keep=n; sc.contentWindow.location.reload(); sc.addEventListener('load',()=>{ ready(); setTimeout(()=>{ n=Math.min(keep,total); draw(); },120); },{once:true}); }
  dragEl.addEventListener('pointerdown',e=>{
    if(!keyMode) return;
-   if(selIdx<0){ selOut.textContent='click a layer bar first'; return; }
+   if(selIdx<0){ selOut.textContent='no layer selected'; return; }
    dragEl.setPointerCapture(e.pointerId); dragEl.classList.add('dragging');
    dragging={x0:e.clientX,y0:e.clientY,dx:0,dy:0}; });
  dragEl.addEventListener('pointermove',e=>{
@@ -504,7 +493,7 @@
    dragging.dx=(e.clientX-dragging.x0)/FITS; dragging.dy=(e.clientY-dragging.y0)/FITS;
    selOut.textContent='drag  '+Math.round(dragging.dx)+', '+Math.round(dragging.dy)+' px'; });
  dragEl.addEventListener('pointercancel',()=>{ dragging=null; dragEl.classList.remove('dragging'); });
- dragEl.addEventListener('pointerup',async e=>{
+ dragEl.addEventListener('pointerup',async()=>{
    if(!dragging) return;
    const d=dragging; dragging=null; dragEl.classList.remove('dragging');
    if(Math.abs(d.dx)<1&&Math.abs(d.dy)<1) return;
@@ -519,20 +508,18 @@
  function offsetAt(i,lt){ try{ const e=sc.contentWindow.__engine; const L=(e&&e.data&&e.data.layers)||[];
    const m=L[i]&&L[i].motion; if(!m||!m.length) return {x:0,y:0};
    let a=m[0]; for(const k of m){ if((k.t??0)<=lt) a=k; }
-   return {x:a.x??0,y:a.y??0}; }catch(_){ return {x:0,y:0}; } }
+   return {x:a.x??0,y:a.y??0}; }catch{ return {x:0,y:0}; } }
  function fit(){ // scale the iframe to fit the stage, preserving the canvas aspect
-   const st=$('stage'),pad=32; const s=Math.min((st.clientWidth-pad)/W,(st.clientHeight-pad)/H);
+   const st=$('stage'),pad=64; const s=Math.min((st.clientWidth-pad)/W,(st.clientHeight-pad)/H);
    sc.style.width=W+'px';sc.style.height=H+'px';sc.style.transform='scale('+s+')';sc.style.transformOrigin='center';
    FITS=s;
    measureBoxes();
  }
  function draw(){ const e=sc.contentWindow.__engine; if(!e)return; e.renderFrame(n);
-   read.innerHTML='frame <b>'+n+'</b> / '+total+' · '+(n/fps).toFixed(2)+'s'; scrub.value=n;
+   read.innerHTML=stamp(n/fps)+'<s>/</s><span>'+stamp(dur)+'</span><em>'+n+'f</em>';
    // measured off the RULER, which is the element the times are drawn on. A percentage of the lanes
    // box was 12px out at the end of the film and moved again when a scrollbar appeared.
    ph.style.transform='translateX('+atX(n/fps)+'px)';
-   // the range announces "0", not "frame 0 of 420": a bare number is not a position in a film
-   scrub.setAttribute('aria-valuetext','frame '+n+' of '+total+', '+(n/fps).toFixed(2)+' seconds');
    if(selIdx>=0&&!dragging)selReadout();
    drawSelBox(); }
  // THE SELECTED LAYER, OUTLINED ON THE PICTURE. Redrawn every frame because the layer MOVES: a box
@@ -555,7 +542,8 @@
      selBox.style.height=(r.height*FITS)+'px';
      selBox.querySelector('b').textContent=selLabel.trim()||('layer '+selIdx);
      selBox.classList.add('on');
-   }catch(_){ selBox.classList.remove('on'); }   // a cross-origin document cannot be measured
+     boxRows(r);
+   }catch{ selBox.classList.remove('on'); }   // a cross-origin document cannot be measured
  }
  const errBox=$('err');
  // AN ERROR YOU CANNOT COPY IS AN ERROR YOU RETYPE BY HAND. The text is selectable, one button copies
@@ -569,7 +557,7 @@
    btn.onclick=()=>{ navigator.clipboard.writeText(title+String.fromCharCode(10)+detail).then(()=>{btn.textContent='copied';setTimeout(()=>btn.textContent='copy',1200);}); };
    read.textContent='scene did not load';
    try{ fetch('/__err',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({title:title,detail:detail})}); }catch(e){}
+        body:JSON.stringify({title:title,detail:detail})}); }catch{}
  }
  function ready(deadline){ const w=sc.contentWindow;
    if(w.__engineError) return fail('this scene does not render',String(w.__engineError));
@@ -579,7 +567,7 @@
        'No __engineReady and no __engineError after 20s. The page failed before core/boot.js could report, open '+sc.src+' directly and read the console.');
      return setTimeout(()=>ready(dl),80); }
    errBox.hidden=true;
-   const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; scrub.max=total; fit(); timeline(); n=0; draw(); }
+   const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; fit(); timeline(); n=0; draw(); }
  sc.addEventListener('load',()=>ready()); addEventListener('resize',fit);
  // A LABEL MEASURED IN THE FALLBACK FACE IS THE WRONG WIDTH. The first paint can land before
  // JetBrains Mono has loaded, and the ruler then chose a 1s stride the real face has no room for:
@@ -590,25 +578,36 @@
  // the stage resizes without the WINDOW resizing (the divider moves, a hazard band wraps), and a scale
  // computed against the old height overflows and clips the frame
  if(window.ResizeObserver) new ResizeObserver(()=>fit()).observe($('stage'));
- scrub.addEventListener('input',()=>{ n=+scrub.value; draw(); });
+ // 00:07.00, the reference editor's clock: minutes, seconds, hundredths
+ const stamp=(t)=>{ const c=Math.round(Math.max(0,t)*100), p=(v)=>String(v).padStart(2,'0');
+   return p(Math.floor(c/6000))+':'+p(Math.floor(c/100)%60)+'.'+p(c%100); };
  function loop(){ if(!playing)return; n=(n+1)%(total+1); draw(); setTimeout(()=>requestAnimationFrame(loop),1000/fps); }
  function setPlaying(p){ playing=p;
-   play.innerHTML=(p?'<svg class=solid viewBox="0 0 16 16"><rect x=3.5 y=2.5 width=3.5 height=11 rx=.6/><rect x=9 y=2.5 width=3.5 height=11 rx=.6/></svg>pause'
-                     :'<svg class=solid viewBox="0 0 16 16"><path d="M4 2.5l9 5.5-9 5.5z"/></svg>play');
+   play.innerHTML=p?'<svg class=solid viewBox="0 0 20 20"><rect x=5 y=4 width=3.5 height=12 rx=1 /><rect x=11.5 y=4 width=3.5 height=12 rx=1 /></svg>'
+                   :'<svg class=solid viewBox="0 0 20 20"><path d="M6 3.8v12.4L16 10z"/></svg>';
+   play.setAttribute('aria-label',p?'pause':'play'); play.title=p?'Pause':'Play';
    if(p)loop(); }
  play.addEventListener('click',()=>setPlaying(!playing));
  const go=(v)=>{ n=Math.max(0,Math.min(total,v)); draw(); };
- // A SCRUBBER YOU CAN ONLY DRAG IS HALF A TOOL. Arrows step a frame, shift+arrow a second, home/end the
- // ends, space plays. The range input handles its own arrows, so we stand back when it has focus rather
- // than stepping the frame twice.
+ $('prev').addEventListener('click',()=>go(n-1));
+ $('next').addEventListener('click',()=>go(n+1));
+ $('fs').addEventListener('click',()=>{ if(document.fullscreenElement) document.exitFullscreen(); else $('stage').requestFullscreen().catch(()=>{}); });
+ // THE PANEL COLLAPSES and the picture takes the width; the timeline re-measures its ruler for the new width
+ function setProp(open){ document.body.classList.toggle('propoff',!open);
+   $('propopen').hidden=open;
+   (open?$('propclose'):$('propopen')).focus();
+   requestAnimationFrame(()=>{ fit(); if(model) paint(model); draw(); }); }
+ $('propclose').addEventListener('click',()=>setProp(false));
+ $('propopen').addEventListener('click',()=>setProp(true));
+ // Arrows step a frame, shift+arrow a second, home/end the ends, space plays.
  addEventListener('keydown',e=>{
-   if(e.key==='Escape'){ pick.classList.remove('on'); return; }
+   // Escape closes an open popover first; only a second press clears the selection
+   if(e.key==='Escape'){ if(!document.querySelector(':popover-open')&&(selIdx>=0||!propsEl.hidden)) setSel(-1); return; }
    if(typing()||e.metaKey||e.ctrlKey||e.altKey) return;
    // the states, in the order they are asked. Cheap to move between, so they are one keystroke apart.
    const st={'1':'plan','2':'make','3':'look','4':'ship'}[e.key];
    if(st){ e.preventDefault(); setState(st); return; }
    const step=e.shiftKey?fps:1;
-   if(onRange()&&/^Arrow|^Home$|^End$/.test(e.key)) return;   // the range steps itself
    if(e.key==='ArrowRight'){ e.preventDefault(); go(n+step); }
    else if(e.key==='ArrowLeft'){ e.preventDefault(); go(n-step); }
    else if(e.key==='Home'){ e.preventDefault(); go(0); }
@@ -647,30 +646,16 @@
  function measure(html){ const el=document.createElement('s');
    el.style.cssText='position:absolute;left:0;top:0;visibility:hidden;white-space:nowrap';
    el.innerHTML=html; ruler.appendChild(el); const w=el.offsetWidth; el.remove(); return w; }
- // THE BARS ARE CHROME, SO THEY ARE GREY. A hue per layer type would put fifteen colours in the surround
- // the eye is meant to judge the picture against, and the type is already written on every bar, so the
- // colour was redundant coding. What is left is a lightness ramp: enough to tell one row from the next,
- // achromatic, and legible in both rooms. Colour on this page means the film, the playhead, or danger.
- const RAMP={
-  dark:[['#E8E8E8','#1C1C1C'],['#CFCFCF','#1C1C1C'],['#B6B6B6','#1C1C1C'],['#9D9D9D','#1C1C1C'],
-        ['#848484','#141414'],['#6E6E6E','#F0F0F0'],['#5A5A5A','#F0F0F0'],['#494949','#E8E8E8']],
-  light:[['#2E2E2E','#F5F5F5'],['#414141','#F5F5F5'],['#545454','#F5F5F5'],['#676767','#F5F5F5'],
-         ['#7A7A7A','#FFFFFF'],['#8D8D8D','#1C1C1C'],['#A0A0A0','#1C1C1C'],['#B3B3B3','#1C1C1C']],
- };
- // A stable step per type, so a bar does not change shade when the layer order does.
- const STEP={text:0,type:0,count:1,beat:1,image:2,video:2,lottie:2,clip:2,html:3,component:3,canvas:3,composition:3,
-   rect:4,cursor:4,group:5,board:5,doc:5,glow:6,svg:6,paint:6,shader:6,beam:6};
- let ramp=RAMP.light;
- const shade=(t)=>ramp[STEP[t]!=null?STEP[t]:7];
- const themeBtn=$('theme'), themeTxt=$('themetxt');
- function applyTheme(t){ document.documentElement.dataset.theme=t;
-   ramp=RAMP[t]; themeTxt.textContent=t; try{ localStorage.setItem('vawe-studio-theme',t); }catch(_){}
-   // the browser paints its own chrome behind this page, so it is told which room it is standing in
-   $('tcol').setAttribute('content',getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#F2F2F2');
-   if(model) paint(model); }
- themeBtn.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
- applyTheme((()=>{ try{ return localStorage.getItem('vawe-studio-theme')||document.documentElement.dataset.theme; }
-   catch(_){ return document.documentElement.dataset.theme; } })());
+ // Clip colour by kind, the reference editor's roles: text purple, media grey, anything else a neutral
+ // pill. Captions (blue) and sound (green) are drawn by their own rows.
+ const KIND={text:'text',type:'text',count:'text',beat:'text',image:'media',video:'media',lottie:'media',clip:'media'};
+ const kindOf=(t)=>KIND[t]||'layer';
+ const ICON={
+   text:'<svg viewBox="0 0 16 16"><path d="M3.5 3.5h9M8 3.5v9"/></svg>',
+   media:'<svg viewBox="0 0 16 16"><rect x=2.5 y=3 width=11 height=10 rx=1.5 /><path d="M2.5 10.5l3-3 3 3 2-2 3 3"/></svg>',
+   layer:'<svg viewBox="0 0 16 16"><rect x=3 y=3 width=10 height=10 rx=2 /></svg>',
+   cap:'<svg viewBox="0 0 16 16"><rect x=2 y=3.5 width=12 height=9 rx=1.5 /><path d="M4.5 9.5h2M8.5 9.5h3"/></svg>',
+   sound:'<svg viewBox="0 0 16 16"><path d="M6 12V3.5l6.5-1.5v8.5"/><circle cx=4.5 cy=12 r=1.6 /><circle cx=11 cy=10.5 r=1.6 /></svg>' };
  // The bars come from the LIVE DOM, not from the JSON: the engine writes each clip's real window and ramp
  // into data-start/duration/enter/exitDur (core/clips.js reads exactly these), and that survives the theme's
  // durationScale, sceneUnits rewrites and the produced baseline. The JSON only supplies the label.
@@ -689,132 +674,132 @@
  const CLS={'img-wrap':'image','comp-wrap':'component','rect':'rect','group':'group','text':'text'};
  // ---- the filmstrip ------------------------------------------------------------------------------
  // NEVER BLOCKS THE FIRST PAINT. The timeline draws, then this asks for the strip and fills the band in
- // when it arrives; the band is display:none until it has something, so nothing reserves a grey hole.
- // Built once per scene on the server and cached there, so this is one request and then free.
- let stripDone=false;
+ // when it arrives; the band is display:none until it has something, so nothing reserves a hole.
+ let stripDone=false, stripNote='';
+ function markStill(s){
+   const still=new Set(s.still||[]);
+   if(!still.size) return;
+   [...rows.querySelectorAll('.bar')].forEach(b=>{ if(still.has(+b.dataset.i)){ b.classList.add('still');
+     b.title+='  ·  unchanged across '+s.frames.length+' sampled instants'; } });
+   stripNote=still.size+' layer'+(still.size===1?'':'s')+' never change'+(still.size===1?'s':'');
+   $('tlkey').textContent=stripNote;
+ }
  function filmstrip(){
    if(stripDone) return; stripDone=true;
    const band=$('film');
    fetch('/api/strip').then(r=>r.json()).then(s=>{
      if(!s||!s.frames||!s.frames.length){ stripDone=false;
-       if(s&&s.error) $('tlkey').textContent+='  ·  no strip: '+s.error; return; }
+       if(s&&s.error){ stripNote='no strip: '+s.error; $('tlkey').textContent=stripNote; } return; }
      const w=100*s.stride/dur;
      stripFrames=s.frames;
      band.innerHTML=s.frames.map(f=>'<div class=fr style="left:'+pc(f.t-s.stride/2)+';width:'+w+'%;background-image:url('+f.src+')"></div>').join('');
-     // A LAYER THAT NEVER CHANGED at any instant we looked at. A NOTE, never a block: a held frame is
-     // sometimes the beat. Marked on the bar and counted once in the header.
-     const still=new Set(s.still||[]);
-     if(still.size){
-       [...rows.querySelectorAll('.bar')].forEach(b=>{ if(still.has(+b.dataset.i)){ b.classList.add('still');
-         b.title+='  ·  nothing about this layer changed at any of the '+s.frames.length+' instants sampled'; } });
-       $('tlkey').textContent+='  ·  '+still.size+' layer'+(still.size===1?'':'s')+' never change';
-     }
+     markStill(s);
    }).catch(()=>{ stripDone=false; });
  }
  function timeline(){
    fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; drawCrumbs(); paint(m); drawJump(); })
      .catch(e=>{ $('tlwhat').textContent='timeline unavailable: '+e; });
  }
- function paint(m){
-   const bars=domBars();
-   // name each bar: consume the first unclaimed JSON layer that starts at the same instant. A layer the
-   // produced baseline added has no JSON entry and falls back to what the DOM says it is.
+ // name each bar: consume the first unclaimed JSON layer that starts at the same instant. A layer the
+ // produced baseline added has no JSON entry and falls back to what the DOM says it is. Returns the
+ // windows the engine held open past what the JSON declares.
+ function nameBars(m,bars){
    const pool=m.layers.slice();
    for(const b of bars){ const i=pool.findIndex(L=>Math.abs(L.start-b.s)<1e-3); const L=i>=0?pool.splice(i,1)[0]:null;
      b.type=L?L.type:(CLS[b.cls]||'text'); b.name=(L&&L.label)||b.txt||'';
-     // the JSON index, when this bar could be paired with a declared layer. A bar the produced baseline
-     // invented has none, and must not be selectable: there is nothing on disk to write a key into.
+     // a bar the produced baseline invented has no JSON index and must not be selectable
      b.i=L?L.i:-1; b.keys=(L&&L.keys)||[];
-     // the engine can hold a layer open past its declared window; it says so itself, per layer, so take
-     // its word rather than pairing a bar to a JSON layer by start time.
      b.grew=b.aw!=null?Math.max(0,b.w-b.aw):(L?Math.max(0,(b.s+b.w)-(L.start+L.dur)):0); }
-   const grown=bars.filter(b=>b.grew>0.01).map(b=>[b.s+ (b.w-b.grew), b.s+b.w]);
-   bars.sort((a,b)=>a.s-b.s||a.w-b.w);
-   // ruler: a tick per beat of the clock, labelled in seconds AND frames
-   const step=dur<=6?.5:dur<=16?1:dur<=45?2:5;
-   let r='';
-   // LABELS ARE DROPPED BY MEASUREMENT. The old rule dropped the second-to-last label whenever a tick was
-   // narrower than a guessed 96px, which at 1440 threw away a label that fitted and at 1100 still let
-   // "13s 390f" collide with the pinned end label. So the widest label (the last one, biggest numbers) is
-   // rendered offscreen in the real face at the real size, and the stride is however many ticks it takes
-   // to clear that width. Nothing here knows what the window is.
+   return bars.filter(b=>b.grew>0.01).map(b=>[b.s+(b.w-b.grew), b.s+b.w]);
+ }
+ const clock=(t)=>{ const s=Math.round(t*10)/10, f=Math.round((s%1)*10);
+   return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')+(f?'.'+f:''); };
+ // LABELS ARE DROPPED BY MEASUREMENT: the widest label is rendered offscreen in the real face, and the
+ // stride is however many ticks it takes to clear that width.
+ function rulerHtml(m,step){
    const ticks=[]; for(let t=0;t<=dur+1e-6;t+=step) ticks.push(+t.toFixed(4));
-   const lab=(t)=>(+t.toFixed(2))+'s<em>'+Math.round(t*fps)+'f</em>';
-   const labW=measure(lab(ticks[ticks.length-1]))+14;   // +14: the gap a label needs before the next tick
+   const labW=measure(clock(ticks[ticks.length-1]))+18;
    const rw=ruler.clientWidth||1, stride=Math.max(1,Math.ceil(labW/(rw*step/dur)));
-   ticks.forEach((t,k)=>{ const end=k===ticks.length-1, x=rw*Math.min(1,t/dur);
-     // the last tick owns the right edge and its label reads leftward, so anything whose text would run
-     // into that label goes, whatever the stride says
+   let r=ticks.map((t,k)=>{ const end=k===ticks.length-1, x=rw*Math.min(1,t/dur);
      const show=end||(k%stride===0&&x+labW<=rw-labW-6);
-     r+='<div class="t'+(end?' end':'')+'" style="left:'+pc(t)+'">'+(show?'<s>'+lab(t)+'</s>':'')+'</div>'; });
+     return '<div class="t'+(end?' end':'')+'" style="left:'+pc(t)+'">'+(show?'<s>'+clock(t)+'</s>':'')+'</div>'; }).join('');
+   // a transition is a moment, not a layer: it lives on the ruler, above every track
    for(const k of m.marks){
      r+='<div class=ms style="left:'+pc(k.t)+';width:'+(100*k.dur/dur)+'%"></div>'
        +'<div class=m style="left:'+pc(k.t)+'" title="'+esc(k.kind+' '+k.t+'s'+(k.name?' '+k.name:''))+'">'+k.kind.charAt(0).toUpperCase()+'</div>'; }
-   ruler.innerHTML=r;
-   let h='', H=bars.length*18;
+   return r;
+ }
+ function captionRow(caps){
+   if(!caps.length) return '';
+   return '<div class="row cap">'+caps.map(c=>'<b style="left:'+pc(c.t0)+';width:'+(100*Math.max(0,c.t1-c.t0)/dur)+'%" title="'+esc(c.text)+'">'
+     +'<span>'+ICON.cap+esc(c.text)+'</span></b>').join('')+'</div>';
+ }
+ // the beat grid, because a seam is supposed to LAND on it. A grid denser than a tick every 3px is a
+ // wash, not a grid, so it is dropped and said so.
+ function beatGrid(B){
+   const bts=((B&&B.beats)||[]).filter(t=>t<=dur), dbs=new Set(((B&&B.downbeats)||[]).map(x=>+x.toFixed(3)));
+   const dense=bts.length>0&&(ruler.clientWidth/bts.length<3);
+   if(dense) return {html:'',dense};
+   return {html:bts.map(t=>'<i class="bt'+(dbs.has(+t.toFixed(3))?' db':'')+'" style="left:'+pc(t)+'"></i>').join(''),dense};
+ }
+ function soundExtras(A){
+   let a='';
+   if(A.fade&&A.fade.in) a+='<div class=fade style="left:0;width:'+(100*A.fade.in/dur)+'%"></div>';
+   if(A.fade&&A.fade.out) a+='<div class=fade style="right:0;width:'+(100*A.fade.out/dur)+'%"></div>';
+   for(const b of (A.bridges||[])) a+='<div class=br style="left:'+pc(b.start)+';width:'+(100*(b.end-b.start)/dur)+'%" title="'+esc((b.sound||'bridge')+' at '+b.at)+'"></div>';
+   // two cues a tenth of a second apart would print on top of each other, so the labels alternate
+   (A.cues||[]).forEach((c,i)=>{ a+='<div class=cue style="left:'+pc(c.t)+'"><s style="top:'+(i%2?16:1)+'px">'+esc(c.name)+'</s></div>'; });
+   return a;
+ }
+ function soundRows(A){
+   if(A.none) return '';
+   // A DECLARED SILENCE IS A DEVICE, and an undeclared one is a hole. The lane says which.
+   if(A.silent) return '<div class=lane-note><span>'+esc(A.why?'silent: '+A.why:'silent, no reason given')+'</span></div>';
+   const grid=beatGrid(A.beats);
+   const name=A.music?esc(A.music.split('/').pop()):(A.auto?'auto':'no bed');
+   const meta=[A.gain!=null?'gain '+A.gain:'',A.beats?Math.round(A.beats.bpm)+' bpm':'',grid.dense?'grid hidden':''].filter(Boolean).join(' · ');
+   let h='<div class="row aud"><div class=bed>'+grid.html+soundExtras(A)
+     +'<span class=name>'+ICON.sound+name+(meta?' <s>'+esc(meta)+'</s>':'')+'</span></div></div>';
+   if(A.bridgeError) h+='<div class=lane-note><span>bridges did not resolve: '+esc(A.bridgeError)+'</span></div>';
+   return h;
+ }
+ const barTitle=(b)=>b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s to '+(b.s+b.w).toFixed(2)+'s · enter '+b.enter+'s / exit '+b.exit+'s'
+   +(b.anim?' · '+b.anim:'')+(b.out?' then '+b.out:'')+(b.grew>0.005?' · held '+b.grew.toFixed(2)+'s past '+(b.s+b.w-b.grew).toFixed(2)+'s':'');
+ function barHtml(b){
+   const wpc=100*b.w/dur, inp=b.w?100*Math.min(b.enter,b.w)/b.w:0, outp=b.w?100*Math.min(b.exit,b.w)/b.w:0;
+   const heldp=b.grew>0.005&&b.w?100*Math.min(b.grew,b.w)/b.w:0, k=kindOf(b.type);
+   return '<div class=row><div class="bar k-'+k+'" data-i="'+b.i+'" data-t="'+b.s+'" style="left:'+pc(b.s)+';width:'+wpc+'%" title="'+esc(barTitle(b))+'">'
+     +(heldp?'<div class=held style="width:'+heldp+'%"></div>':'')
+     +'<i class=in style="width:'+inp+'%"></i><i class=out style="width:'+outp+'%"></i>'
+     +b.keys.map(kt=>'<u style="left:'+(b.w?100*Math.max(0,Math.min(1,kt/b.w)):0)+'%"></u>').join('')
+     +'<span style="left:calc('+inp+'% + 10px)">'+ICON[k]+esc(b.type)+' <em>'+esc(b.name)+'</em></span></div></div>';
+ }
+ // the hazard bands stretch the whole track stack, so a hole is impossible to miss
+ const holesOf=(g)=>[...(g.deadAir||[]).map(x=>[x[0],x[1],'dead air','']),
+   ...(g.tail?[[g.tail,g.duration||dur,'ends on nothing','']]:[]),
+   ...(g.emptyBeat||[]).map(x=>[x[0],x[1],'empty beat','beat'])];
+ const disputed=(grown,a,b)=>grown.some(([x,y])=>x<b-1e-9&&y>a+1e-9);
+ const hazardHtml=(holes,grown)=>holes.map(([a,b,lab,cls])=>{ const dis=disputed(grown,a,b);
+   return '<div class="hz '+(dis?'disputed':cls)+'" style="left:'+pc(a)+';width:'+(100*(b-a)/dur)+'%"><b>'+(dis?'disputed ':'')+lab+' '+(b-a).toFixed(2)+'s</b></div>'; }).join('');
+ const alertsHtml=(holes,grown)=>holes.map(([a,b,lab])=>{ const dis=disputed(grown,a,b);
+   return '<span'+(dis?' class=dis title="the engine holds a window open here that the JSON does not declare"':'')+'>'
+     +(dis?'disputed ':'')+lab+' '+a.toFixed(2)+'s to '+b.toFixed(2)+'s</span>'; }).join('');
+ function paint(m){
+   const bars=domBars(), grown=nameBars(m,bars);
+   bars.sort((a,b)=>a.s-b.s||a.w-b.w);
+   const step=dur<=6?.5:dur<=16?1:dur<=45?2:5;
+   ruler.innerHTML=rulerHtml(m,step);
+   let h='';
    for(let t=step;t<=dur+1e-6;t+=step) h+='<div class=grid style="left:'+pc(t)+'"></div>';
-   // ---- THE OTHER KINDS OF ROW, and they come FIRST -------------------------------------------------
-   // Captions and sound are FEW and FIXED; the layer stack is unbounded. Drawn under it, a 76-layer film
-   // buries its whole soundtrack below the fold of a scrolling list, which is where it was on the first
-   // build of this. Above the layers they are always the first thing under the strip, and the stack that
-   // can be any length scrolls beneath them.
-   const caps=m.captions||[];
-   if(caps.length){
-     h+='<div class=lane-h><span>captions<em>'+caps.length+'</em></span></div>'; H+=21;
-     for(const c of caps){ const w=Math.max(0,c.t1-c.t0);
-       h+='<div class="row cap"><b style="left:'+pc(c.t0)+';width:'+(100*w/dur)+'%" title="'+esc(c.text)+'">'+esc(c.text)+'</b></div>'; H+=16; }
-   }
-   const A=m.audio||{};
-   if(!A.none){
-     h+='<div class=lane-h><span>sound'+(A.silent?'<em>silent</em>':(A.music?'<em>'+esc(A.music.split('/').pop())+(A.gain!=null?' · gain '+A.gain:'')+'</em>':'<em>no bed</em>'))+'</span></div>'; H+=21;
-     if(A.silent){
-       // A DECLARED SILENCE IS A DEVICE, and an undeclared one is a hole. The lane says which.
-       h+='<div class=lane-note><span>'+(A.why?esc('silent: '+A.why):'silent, and no reason given: audio._why is where the device gets declared')+'</span></div>'; H+=16;
-     } else {
-       let a='<div class=bed>';
-       const bts=(A.beats&&A.beats.beats)||[], dbs=new Set(((A.beats&&A.beats.downbeats)||[]).map(x=>+x.toFixed(3)));
-       // a grid denser than a tick every 3px is a grey wash, not a grid, so it is dropped and said so
-       const inRange=bts.filter(t=>t<=dur).length||1;
-       const dense=bts.length&&(ruler.clientWidth/inRange<3);
-       if(!dense) for(const t of bts){ if(t>dur) break;
-         a+='<i class="bt'+(dbs.has(+t.toFixed(3))?' db':'')+'" style="left:'+pc(t)+'"></i>'; }
-       if(A.fade&&A.fade.in) a+='<div class=fade style="left:0;width:'+(100*A.fade.in/dur)+'%"></div>';
-       if(A.fade&&A.fade.out) a+='<div class=fade style="right:0;width:'+(100*A.fade.out/dur)+'%"></div>';
-       for(const b of (A.bridges||[])) a+='<div class=br style="left:'+pc(b.start)+';width:'+(100*(b.end-b.start)/dur)+'%" title="'+esc((b.sound||'bridge')+' at '+b.at)+'"></div>';
-       // two cues a tenth of a second apart printed their names on top of each other, so the labels
-       // alternate high and low. The ticks stay where they are: it is the TIME that is being read.
-       (A.cues||[]).forEach((c,i)=>{ a+='<div class=cue style="left:'+pc(c.t)+'"><s style="top:'+(i%2?12:-1)+'px">'+esc(c.name)+'</s></div>'; });
-       a+='<span class=name>'+(A.beats?esc(Math.round(A.beats.bpm)+' bpm'+(dense?', grid too dense to draw':'')):(A.auto?'auto':''))+'</span></div>';
-       h+='<div class="row aud">'+a+'</div>'; H+=30;
-       if(A.bridgeError){ h+='<div class=lane-note><span>bridges did not resolve: '+esc(A.bridgeError)+'</span></div>'; H+=16; }
-     }
-     h+='<div class=lane-h><span>layers<em>'+bars.length+'</em></span></div>'; H+=21;
-   }
-   for(const b of bars){ const sh=shade(b.type), wpc=100*b.w/dur, inp=b.w?100*Math.min(b.enter,b.w)/b.w:0, outp=b.w?100*Math.min(b.exit,b.w)/b.w:0;
-     const heldp=b.grew>0.005&&b.w?100*Math.min(b.grew,b.w)/b.w:0;
-     h+='<div class=row><div class=bar data-i="'+(b.i??-1)+'" data-t="'+b.s+'" style="left:'+pc(b.s)+';width:'+wpc+'%;background:'+sh[0]+';color:'+sh[1]+'" title="'+esc(b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s to '+(b.s+b.w).toFixed(2)+'s · enter '+b.enter+'s / exit '+b.exit+'s'+(b.anim?' · '+b.anim:'')+(b.out?' then '+b.out:'')+(heldp?' · authored to '+(b.s+b.w-b.grew).toFixed(2)+'s, held '+b.grew.toFixed(2)+'s longer by beat wrapping':''))+'">'
-       +(heldp?'<div class=held style="width:'+heldp+'%"></div>':'')
-       +'<i class=in style="width:'+inp+'%"></i><i class=out style="width:'+outp+'%"></i>'
-       +(b.keys||[]).map(kt=>'<u style="left:'+(b.w?100*Math.max(0,Math.min(1,kt/b.w)):0)+'%"></u>').join('')
-       +'<span style="left:calc('+inp+'% + 4px)">'+esc(b.type)+' <em>'+esc(b.name)+'</em></span></div></div>'; }
-   // the hazard bands stretch the whole track stack, so a hole is impossible to miss
-   const holes=[...m.gate.deadAir.map(x=>[x[0],x[1],'dead air','']),
-                ...(m.gate.tail?[[m.gate.tail,m.gate.duration||dur,'ends on nothing','']]:[]),
-                ...m.gate.emptyBeat.map(x=>[x[0],x[1],'empty beat','beat'])];
-   for(const [a,b,lab,cls] of holes){
-     const dis=grown.some(([x,y])=>x<b-1e-9&&y>a+1e-9);
-     h+='<div class="hz '+(dis?'disputed':cls)+'" style="left:'+pc(a)+';width:'+(100*(b-a)/dur)+'%"><b>'+(dis?'disputed ':'')+lab+' '+(b-a).toFixed(2)+'s</b></div>'; }
+   // Sound and captions are FEW and FIXED; the layer stack is unbounded, so they come first and the
+   // stack that can be any length scrolls beneath them.
+   const holes=holesOf(m.gate||{});
+   h+=soundRows(m.audio||{})+captionRow(m.captions||[])+bars.map(barHtml).join('')+hazardHtml(holes,grown);
    rows.innerHTML=h;
-   rows.style.height=H+'px';
    filmstrip();
-   $('tlwhat').textContent=m.file+' · '+bars.length+' layers · '+dur.toFixed(2)+'s / '+total+'f';
-   // no colour key: the bars are a grey ramp, not a code, and each one prints its own type. What is
-   // worth naming here is WHICH types the film is made of.
-   $('tlkey').textContent=[...new Set(bars.map(b=>b.type))].join(' · ');
-   $('alerts').innerHTML=holes.map(([a,b,lab])=>{
-     const dis=grown.some(([x,y])=>x<b-1e-9&&y>a+1e-9);
-     return '<span'+(dis?' class=dis':'')+'>'+(dis?'? ':'')+lab+' '+a.toFixed(2)+'s to '+b.toFixed(2)+'s'
-       +(dis?': the engine holds a window open here that the JSON does not declare, so beat-check may be reading a hole that does not render':'')+'</span>'; }).join('');
+   $('tlwhat').textContent=bars.length+' layer'+(bars.length===1?'':'s');
+   $('tlkey').textContent=stripNote;
+   $('alerts').innerHTML=alertsHtml(holes,grown);
    if(selIdx>=0) setSel(selIdx);
    measureBoxes();
  }
@@ -850,7 +835,7 @@
  function peekDraw(){
    peekPending=false;
    if(peekWant==null||!peekReady) return;
-   try{ peekFrame.contentWindow.__engine.renderFrame(Math.round(peekWant*fps)); }catch(_){ }
+   try{ peekFrame.contentWindow.__engine.renderFrame(Math.round(peekWant*fps)); }catch{ }
  }
  // the nearest thumbnail the strip already holds, painted behind the live frame so the box is never
  // empty: instant first, exact a frame later.
@@ -888,18 +873,15 @@
    setSel(+to.dataset.i); to.scrollIntoView({block:'nearest'});
    say(selLabel.trim()||('layer '+selIdx)); });
 
- // drag anywhere in the lanes to seek; the playhead and the scrubber are the same value
+ // drag anywhere in the lanes to seek
  const seek=(e)=>{ n=Math.max(0,Math.min(total,Math.round((e.clientX-rulerL)/rulerW*dur*fps))); draw(); };
  lanes.addEventListener('pointerdown',e=>{
    // BEFORE the capture: setPointerCapture retargets everything that follows to the lanes element, so
    // a click handler on the bar never sees its own bar and selection silently did nothing.
    const bar=e.target&&e.target.closest&&e.target.closest('.bar');
    if(bar){ const i=+bar.dataset.i;
-     if(i<0) selOut.textContent='that bar has no JSON layer (the produced baseline added it)';
+     if(i<0) selOut.textContent='no JSON layer: the produced baseline added this bar';
      else setSel(i); }
    lanes.setPointerCapture(e.pointerId); seek(e); });
  lanes.addEventListener('pointermove',e=>{ if(e.buttons&1) seek(e); });
- $('tgl').addEventListener('click',()=>{ const off=tl.classList.toggle('off');
-   $('tgl').setAttribute('aria-expanded',String(!off)); document.body.classList.toggle('tloff',off);
-   keepFocus($('tgl')); fit(); measureBoxes(); });
  drawCrumbs(); setState('make');
