@@ -117,11 +117,6 @@ const WAIVED = new Map(Object.entries({
   // prints. A second entry naming the mechanism would be the same fact filed under a word nobody
   // searches for.
   CAP_STYLE_SHAPE: 'how the renderer treats a style (one-word / per-character); the scene names the STYLE, and each shaped style says so in its own blurb',
-  // A scene names a BEAT, and every beat is already catalogued by `make blueprints`. REQUESTS is the
-  // prose sentence for asking for one in a STORYBOARD, which is a plan and not a scene, so there is
-  // nothing here for a scene to write. It is surfaced where it is used: `make blueprints` prints an
-  // `ask:` line per beat and refuses to run if any beat lacks one.
-  REQUESTS: 'the plain-language ask line per beat, printed by `make blueprints`; a storyboard names it, a scene never does',
   PAL: 'the colour tables the background presets draw from, and those ARE catalogued',
   PAL_PLINTH: 'as PAL, for one brand',
   SCHEMA: 'the lightfield option schema. It drives narrow() and the playground panel; its user-facing dials are PATTERNS/SHAPES/ANCHORS/DIRECTIONS/MOTIONS, which ARE catalogued',

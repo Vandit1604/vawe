@@ -55,8 +55,6 @@ import { SPECTACLE_GAIN, attenuated, attenuatedKick, KNOBS, bindDials } from '..
 import { dialsOf } from '../../core/registry/props.js';
 import { resolveSpectacle } from '../../core/timeline/spectacle.js';
 import { okDir as seamDir } from '../../core/timeline/seams.js';
-import { BEATS } from '../../blueprints/index.mjs';
-import { ACCENT } from '../../blueprints/kit.mjs';
 import { produceBaseline } from '../../core/engine/produce.js';
 import { easeErrors, bgErrors, durationWordErrors, cssErrors, authoredJunctionErrors } from '../../core/validate/validate.mjs';
 import { raise as raiseJunction, deepEqual as junctionDeepEqual, migrateOne } from '../../harness/author/migrate-junctions.mjs';
@@ -2625,19 +2623,6 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     + `${missing.length ? ', missing: ' + missing.join(', ') : ''}`, missing.length === 0);
 }
 
-// ---- blueprints: a HELD element needs idle motion (docs/MISTAKES.md #373) ----
-{
-  const cta = BEATS.ctaEnd({ mark: '/a.svg', command: 'npm i', sub: 's', url: 'u' });
-  const mark = cta.find((l) => l.type === 'image');
-  ok('blueprints: the end card\'s mark carries an idle loop, not a freeze', LOOP_FX.includes(mark.fx));
-  // The measurement behind it: across the 12 beats, 33 layers are held >=2.5s and only 3 had ANY idle
-  // motion. This asserts the one that is unambiguous. A mark on a held end card. It deliberately does
-  // NOT assert the other 30: most are TEXT, and drifting type is harder to read, so "add idle
-  // everywhere" would be the wrong lesson drawn from a true measurement.
-  ok('blueprints: idle is on the MARK, not on the copy around it',
-    cta.filter((l) => l.type === 'text').every((l) => !l.fx));
-}
-
 // ---- every vocabulary refuses a WRONG name and keeps its default for an ABSENT one (#361) ----
 {
   const refuses = (label, fn) => ok(`vocab: ${label} refuses an unknown name`, (() => {
@@ -3662,7 +3647,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // the only source was a FLAT 68-key map in the generator whose own comment called the notes "a bonus,
 // never a second source of truth". A name with no description is a vocabulary nobody can choose from.
 // Each family now keeps its blurbs next to its registry, and a missing one fails HERE, the same shape
-// as blueprints-catalog.mjs, which exits 1 when a beat has no trailing comment.
+// recipes/index.mjs checkRecipe uses: refuse at load rather than ship a name nobody can choose from.
 {
   const families = [
     ['PRESETS', Object.keys(PRESETS), PRESET_BLURBS],
@@ -5607,13 +5592,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // the first set passes would break the second, which is the point of asserting both.
   const PRESENT = [
     ['a light that travels around the border of a card', 'beam'],
-    ['a page scrolling under a static tilt', 'scrollStory'],
     ['count up to a big number', 'count'],
     ['a dotted planet with tapered route arcs', 'globe'],
     ['a fast radial flash of sparks', 'sparks'],
     ['grade everything beneath this layer', 'adjust'],
     ['thermal blur', 'thermalBlur'],
-    ['show the feature set as cards that pop in one after another', 'cardCascade'],
     ['a sheen that sweeps across the box', 'beam'],
     ['capture a real product surface', 'component'],
     ['a full-frame generative webgl field', 'shader'],
@@ -6754,7 +6737,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 // ---- the search corpus and the catalogue are one population ------------------------------------
 //
-// The corpus read `*_REGISTRY` exports plus two hardcoded special cases (blueprints, layer types), each
+// The corpus read `*_REGISTRY` exports plus two hardcoded special cases (recipes, layer types), each
 // added because its subject is not a registry. So a capability with no registry was invisible to the
 // search this repo tells you to run before inventing anything: docs/EFFECTS.md carried 639 effects and
 // the corpus carried 445. `easeOutExpo`, `tiktok`, `wordFlash`, `refract` and `commaSplit` all returned
@@ -7382,125 +7365,6 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     beatStarts(scene, 20).beats.length === 0);
 
   fs.rmSync(tmp, { recursive: true, force: true });
-}
-
-// ---- beat-seams acceptance run (2026-09): five fixes to blueprints/*.mjs, one assert each -----------
-// formats/scene/vawe-explainer-v2.json's seam-check showed a blank field at every `dissolve` boundary
-// (3.67s/7.33s/11.0s): a blueprint's own exitDur faded its content to nothing before the beat's own
-// `start+dur`, and the arriving beat's first content began well after `start`, so a dissolve crossed
-// two already-empty frames. docs/RULES/first-arrival.md.
-{
-  // 1. SEAM OVERLAP: a beat's terminal content holds to its own end (exitDur 0) rather than fading
-  // itself out before the dissolve gets there. Checked on one beat from each of the four files this
-  // pass touched: beats-mined.mjs (the beat actually on the broken seam), beats.mjs, beats-collage.mjs
-  // and beats-track.mjs (both via their factory defaults, since neither is on the acceptance film).
-  const hook = BEATS.blurResolveHook({ text: 'x', dur: 2 });
-  ok('seam overlap: blurResolveHook (beats-mined.mjs) holds its headline to the beat end (exitDur 0)',
-    hook[0].exitDur === 0);
-  // containerFill/listBuildRows/cardCascade/chipGrid were rect+text stacks; they now emit ONE `html`
-  // layer with `parts` driving the per-item reveal (docs/CRAFT/HTML-FRAGMENTS.md `parts`). The shape
-  // that matters is "one html layer, held to the beat end, with `parts` reaching the items", not the
-  // old internal rect/text tree, so that is what these assert now.
-  const fill = BEATS.containerFill({ items: ['a', 'b'], dur: 2 });
-  const fillHtml = fill.find((l) => l.type === 'html');
-  ok('seam overlap: containerFill (beats-mined.mjs, the beat on the broken 3.67s/7.33s seams) emits '
-    + 'one html layer holding to the beat end (exitDur 0)', !!fillHtml && fillHtml.exitDur === 0);
-  ok('containerFill: parts reveals every item, and the fragment carries both chips',
-    fillHtml.parts[0].select === '.chip' && fillHtml.html.includes('>a<') && fillHtml.html.includes('>b<'));
-  const rows = BEATS.listBuildRows({ items: ['a', 'b'], dur: 2 });
-  ok('seam overlap: listBuildRows (beats-mined.mjs, the beat on the broken 11.0s seam) emits one html '
-    + 'layer holding to the beat end (exitDur 0)', rows.length === 1 && rows[0].type === 'html' && rows[0].exitDur === 0);
-  ok('listBuildRows: parts reveals every row, and the fragment carries both labels',
-    rows[0].parts[0].select === '.row' && rows[0].html.includes('>a<') && rows[0].html.includes('>b<'));
-  const cascade = BEATS.cardCascade({ title: 'x', cards: [{ name: 'a' }], dur: 2 });
-  const cascadeHtml = cascade.find((l) => l.type === 'html');
-  ok('seam overlap: cardCascade (beats.mjs) emits one html layer holding to the beat end (exitDur 0)',
-    !!cascadeHtml && cascadeHtml.exitDur === 0);
-  ok('cardCascade: parts reveals every card, and the fragment carries the card name',
-    cascadeHtml.parts[0].select === '.card' && cascadeHtml.html.includes('>a<'));
-  const gridBeat = BEATS.chipGrid({ title: 'x', chips: ['a'], dur: 2 });
-  const gridHtml = gridBeat.find((l) => l.type === 'html');
-  ok('chipGrid emits one html layer holding to the beat end (exitDur 0), parts reveals every chip',
-    !!gridHtml && gridHtml.exitDur === 0 && gridHtml.parts[0].select === '.chip' && gridHtml.html.includes('>a<'));
-  // cardFan/chipConverge/cellMosaic/propSentence/slotSwap key each ITEM's own motion track, which
-  // `parts` cannot express (it stages the children of one clock; these are independently timed
-  // siblings). So each item stays its own layer, `html` instead of rect/group/text, its motion track
-  // unchanged.
-  const fan = BEATS.cardFan({ cards: [{ title: 'a' }, { title: 'b' }], dur: 2 });
-  ok('cardFan: each card is its own html layer (the card is markup) with its own motion track',
-    fan.every((c) => c.type === 'html' && Array.isArray(c.motion)) && fan[0].html.includes('>a<'));
-  const conv = BEATS.chipConverge({ chips: ['a', 'b'], dur: 2 });
-  ok('chipConverge: each chip is its own html layer with its own scatter/converge motion track',
-    conv.every((c) => c.type === 'html' && Array.isArray(c.motion)) && conv[0].html.includes('>a<'));
-  const mosaic = BEATS.cellMosaic({ cells: [{ text: 'a' }, { image: 'x.png' }], dur: 2 });
-  const mosaicGroup = mosaic.find((l) => l.type === 'group');
-  ok('cellMosaic: the group keeps ONE shared motion track (the grid travels as one object)',
-    Array.isArray(mosaicGroup.motion) && mosaicGroup.motion.length === 2);
-  ok('cellMosaic: a text cell becomes html (drawn UI); an image cell stays a real image (already a picture)',
-    mosaicGroup.children[0].type === 'html' && mosaicGroup.children[1].type === 'image');
-  const sentence = BEATS.propSentence({ items: [{ word: 'x' }, { chip: 'c' }] });
-  ok('seam overlap: propSentence (beats-collage.mjs) defaults exitDur to 0 on its items',
-    sentence[0].children[0].exitDur === 0);
-  ok('propSentence: a word item stays text (colorWave needs a text layer); a chip item becomes html',
-    sentence[0].children[0].type === 'text' && sentence[0].children[1].type === 'html'
-    && sentence[0].children[1].exitDur === 0 && sentence[0].children[1].html.includes('>c<'));
-  const swap = BEATS.slotSwap({ passes: [{ label: 'l', icon: 'i.svg', payload: { chip: 'p' } }], dur: 2 });
-  ok('slotSwap: the badge tile is html (drawn UI); the icon stays a real image; the payload chip is html',
-    swap.find((l) => l.type === 'html' && l.html.includes('border-radius:34px')) != null
-    && swap.some((l) => l.type === 'image')
-    && swap.find((l) => l.type === 'html' && l.html.includes('>p<')) != null);
-  const pan = BEATS.recordedPan({ image: 'x.png' });
-  ok('seam overlap: recordedPan (beats-track.mjs) defaults exitDur to 0', pan[0].exitDur === 0);
-
-  // 2. NO WRAP: wordBlast fits its text to `w` the same way a plain `text` layer does (`fit: true`,
-  // core/layers/text.js), instead of the generic auto-fit-safety path (which only guards clipping up
-  // to 5 lines and never fires on a two-line wrap that still has vertical room).
-  const blast = BEATS.wordBlast({ text: 'One JSON.' });
-  ok('no wrap: wordBlast sets `fit: true` on its text layer, so a headline that would wrap shrinks '
-    + 'to one line instead (core/layers/text.js kit.fitText)', blast[0].fit === true);
-  ok('no wrap: wordBlast still accepts an explicit `size` unchanged (the acceptance film passes 250)',
-    BEATS.wordBlast({ text: 'x', size: 250 })[0].size === 250);
-
-  // 3. STROKE: logoReveal's mark-only default (no `morphFrom`) draws the path with a stroke (`draw`)
-  // rather than a flat fill, settling into the fill once drawn (docs' "ends filled rather than as an
-  // outline" note on the branch itself).
-  const reveal = BEATS.logoReveal({ mark: 'M0 0 L1 1', wordmark: 'x' });
-  const markLayer = reveal.find((l) => l.type === 'svg');
-  ok('stroke: logoReveal draws the mark-only default with a stroke (`draw`), not a flat fill',
-    !!markLayer.draw && markLayer.stroke === ACCENT);
-  ok('stroke: logoReveal still fills for the morph (blob-melt) path, which has no stroke draw-on',
-    !BEATS.logoReveal({ mark: 'M0 0 L1 1', morphFrom: 'M0 0 L2 2' }).find((l) => l.type === 'svg').draw);
-
-  // 4. RULE POSITION: the scaffold's continuous-object rect sits in the lower safe margin (below the
-  // text band every beat factory defaults into), not at y:900 where it read as an underline.
-  const scaffoldSrc = fs.readFileSync(path.join(repoRoot, 'harness/author/scaffold.mjs'), 'utf8');
-  ok('rule position: the scaffold continuous object no longer sits at y:900 (the old text-band clash)',
-    !/y: 900,\s*\n\s*fill: 'var\(--accent\)'/.test(scaffoldSrc));
-  ok('rule position: it sits at y:1010, in the lower safe margin (MARGIN 0.06 of 1080 leaves 1015)',
-    /y: 1010,\s*\n\s*fill: 'var\(--accent\)'/.test(scaffoldSrc));
-
-  // 5. SCALE KWARG: look.scale.body/.caption reach the remaining beat factories the same optional-kwarg,
-  // unchanged-default way heroSize already reaches kineticHook/statReveal.
-  // cardCascade/chipGrid now write the size straight into the card/chip fragment's own inline CSS
-  // (`font:500 <size>px …`), not a nested layer's `.size` prop, so the kwarg is asserted the same way:
-  // read off the html layer's own `html` string.
-  const plainCascade = BEATS.cardCascade({ title: 'x', cards: [{ name: 'a', desc: 'd' }], dur: 2 });
-  ok('scale kwarg: cardCascade keeps its default body size (26px) in the card fragment when heroSize is absent',
-    /font:500 26px/.test(plainCascade.find((l) => l.type === 'html').html));
-  const scaledCascade = BEATS.cardCascade({ title: 'x', cards: [{ name: 'a', desc: 'd' }], heroSize: 30, dur: 2 });
-  ok('scale kwarg: cardCascade honours heroSize (look.scale.body) for the card body text when given',
-    /font:500 30px/.test(scaledCascade.find((l) => l.type === 'html').html));
-  const grid = BEATS.chipGrid({ title: 'x', chips: ['a'], footer: 'f', bodySize: 20, captionSize: 22, dur: 2 });
-  ok('scale kwarg: chipGrid honours bodySize (look.scale.body) for its chip fragment',
-    /font:500 20px/.test(grid.find((l) => l.type === 'html').html));
-  ok('scale kwarg: chipGrid honours captionSize (look.scale.caption) for its footer',
-    grid.find((l) => l !== undefined && l.color === ACCENT && l.text === 'f').size === 22);
-  ok('scale kwarg: kineticHook keeps its default sub size (74) when captionSize is absent',
-    BEATS.kineticHook({ sub: 'x', dur: 2 })[0].size === 74);
-  ok('scale kwarg: kineticHook honours captionSize (look.scale.caption) for its subline',
-    BEATS.kineticHook({ sub: 'x', captionSize: 30, dur: 2 })[0].size === 30);
-  ok('scale kwarg: wordBlast honours bodySize (look.scale.body) when no explicit size is given',
-    BEATS.wordBlast({ text: 'x', bodySize: 200 })[0].size === 200);
 }
 
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter

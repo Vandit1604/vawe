@@ -70,7 +70,7 @@ L.push('');
 L.push(`# ${nice(NAME)}: storyboard DRAFT (auto-generated from sections.json)`);
 L.push('');
 L.push('> One beat per real section, in the site\'s order. This is a SKELETON: sharpen every `why:` and the');
-L.push('> `message:` above, then present it for sign-off before authoring the JSON. Blueprints: `make blueprints`.');
+L.push('> `message:` above, then present it for sign-off before authoring the JSON. Motion: `make arsenal Q="…"`.');
 L.push('');
 for (const b of beats) {
   // `title` is the site's own heading; `label` is its 28-char filename slug. Titling a beat from the slug

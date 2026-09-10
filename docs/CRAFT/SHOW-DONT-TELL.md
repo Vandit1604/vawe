@@ -121,7 +121,7 @@ and defended. It is not an answer to "I could not think of one".
   layers at load, no separate step; run `make expand D=<file>` (prints to stdout) when you want to see
   what the film actually draws.
 - **Captured UI**: `make capture` on the live product, previewed standalone with `make preview`.
-- **Blueprints** (`make blueprints`): count-ups, cascades, dashboard dives already choreographed.
+- **Recipes** (`make arsenal Q="…"`): count-ups, cascades, camera moves already measured off a real film.
 - **Bespoke SVG**: [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md) for a diagram no block covers, including
   draw-on and morph.
 - **Photos and logos**: [IMAGERY.md](IMAGERY.md) for sourcing, treatment and licensing. Never embed

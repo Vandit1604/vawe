@@ -586,7 +586,7 @@ mark ends as itself. A write-on that ends as an outline has not revealed the log
 (`:48`). `morph` is a true point-lerp: both paths resampled to `morph.points ?? 180`, aligned by
 `bestRotation`, with an optional `spin` (`core/layers/svg.js:57-68`).
 
-`logoReveal` (`blueprints/beats.mjs:111`) wraps that: a bloom at attack 0.55 / decay 1.5 / peak 0.4
+`logoReveal` (retired with blueprints, docs/MISTAKES.md) wrapped that: a bloom at attack 0.55 / decay 1.5 / peak 0.4
 starting at +0.6s, then either a 1.5s morph or a 1.3s draw at weight 3 starting at +0.3s, then a wordmark
 cascade at +1.7s with `each: 0.42, stagger: 0.05`.
 
@@ -615,7 +615,7 @@ missing entirely, and it is why `draw` was an outline effect here rather than a 
    goes through `resolveEasing` (`core/motion/motion.js`), so absent still means `easeOutCubic` and a wrong
    name throws instead of substituting. `easeInOutCubic` is the AE Easy Ease the recipe asks for.
 
-`logoReveal` (`blueprints/beats.mjs`) now passes both, so its draw branch ends as the mark exactly as
+`logoReveal` (retired with blueprints) passed both, so its draw branch ends as the mark exactly as
 its morph branch always did. That is what makes the fix reachable rather than merely present.
 `docs/MISTAKES.md` #545. Eleven assertions in `quality/gates/lib-test.mjs`, proved by breaking the fill
 write and watching two of them fail.

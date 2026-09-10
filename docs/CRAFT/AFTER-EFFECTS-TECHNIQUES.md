@@ -23,8 +23,9 @@ this repo has. **The verdict column is the point.** It decides what gets built. 
 needs no work and needs to be USED; one marked PARTLY usually means the engine can do the shape and
 not the dial; one marked LACK is a real hole.
 
-Read [`EFFECTS.md`](../EFFECTS.md) for the inventory, [`BLUEPRINTS.md`](BLUEPRINTS.md) for the beats,
-[`KEYED-MOTION.md`](KEYED-MOTION.md) for how the exemplar actually moves, and
+Read [`EFFECTS.md`](../EFFECTS.md) for the inventory, [`recipes/README.md`](../../recipes/README.md)
+for motion measured off a real film, [`KEYED-MOTION.md`](KEYED-MOTION.md) for how the exemplar actually
+moves, and
 [`MOTION-CRAFT.md`](../MOTION-CRAFT.md) for the doctrine. This file sits under all of them: it is the
 vocabulary those docs assume you already speak.
 
@@ -809,12 +810,12 @@ who writes it.
    motion relationship between two layers, so it is the most expensive of the six and still worth it: it
    is half of what makes motion read as animated rather than moved.
 
-**A blueprint. A whole beat, in `docs/CRAFT/BLUEPRINTS.md` terms.**
+**A recipe (recipes/README.md). Motion measured off a real film, applied to layers the author names.**
 
-8. **`odometerStat`** (#15, PARTLY). The digit-roll counter as a beat: digits in slots, right column
-   rolling faster than left, landing together with a bar or ring whose length is the same number. The
-   engine already has `wordSlot` and `slotSwap` for the non-numeric case, so this fills an obvious gap in
-   an established pattern, and `statReveal` is the beat it upgrades.
+8. **`odometerStat`** (#15, PARTLY). The digit-roll counter: digits in slots, right column rolling
+   faster than left, landing together with a bar or ring whose length is the same number. The engine
+   already has `wordSlot` for the non-numeric case, so this fills an obvious gap in an established
+   pattern, and needs a real source clip measured (`make study`) before it can become a recipe.
 
 **A composition. A bespoke overlapping timeline in `core/compositions/index.js`, which has only two
 entries and should have more.**
@@ -835,8 +836,8 @@ distances where the bow would be invisible.
 ## Provenance
 
 Each recipe carries its own source links inline. Read alongside [`EFFECTS.md`](../EFFECTS.md) (the
-inventory), [`BLUEPRINTS.md`](BLUEPRINTS.md) (the beats), [`KEYED-MOTION.md`](KEYED-MOTION.md) and
-[`MOTION-CRAFT.md`](../MOTION-CRAFT.md) (the doctrine).
+inventory), [`recipes/README.md`](../../recipes/README.md) (structure measured off real video),
+[`KEYED-MOTION.md`](KEYED-MOTION.md) and [`MOTION-CRAFT.md`](../MOTION-CRAFT.md) (the doctrine).
 
 **Do not re-add:** recipe #24 (Animate on twos) as LACK, or a note that its verdict disagreed with the
 summary table. Both now say HAVE (`step`). Recipe #4 (Motion blur) as PARTLY / opt-in / requiring an

@@ -23,7 +23,7 @@ it is generated from the engine registries, so every effect that exists is liste
 | A full-canvas animated field | `{"type":"paint","paint":"aurora｜meteor｜matrix｜starfield｜waves"}` |
 | A one-shot light bloom on a beat | a `glow` with `"flash":{attack,decay,peak}` (peak ≤0.45) |
 | A logo to APPEAR | the `logoReveal` beat, or `{"type":"svg","draw":{...}}` (draws on) / `"morph":{"to":…}` (melts) |
-| A whole beat, directed | a `{"type":"beat"}` blueprint (see `vawe-creative` + BLUEPRINTS.md) |
+| directed motion for a beat | a recipe (see `vawe-creative` + recipes/README.md) |
 
 ## The three per-frame mechanisms (know which one moves)
 
