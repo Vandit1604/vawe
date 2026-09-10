@@ -240,7 +240,9 @@ export function diff({ x, y, w = 620, lines = [], start = 0, dur = 4 } = {}) {
   // mono; the band makes the shape of the change visible before a single word is. `--up` and `--down`
   // are spent here on real direction (added / removed), which is the one thing they are for.
   const band = { '+': tint(T.green, TINT.chip), '-': tint(T.down, TINT.chip) };
-  const rows = lines.map((ln) => `<div style="font:400 ${TYPE.lead}px var(--font-mono);color:${col[ln.sign] || T.ink};`
+  for (const ln of lines) if (!(ln.sign in col)) throw new Error(`blocks/dev.mjs diff: unknown sign `
+    + `"${ln.sign}". Known: ${Object.keys(col).map((k) => JSON.stringify(k)).join(', ')}`);
+  const rows = lines.map((ln) => `<div style="font:400 ${TYPE.lead}px var(--font-mono);color:${col[ln.sign]};`
     + `padding:${SPACE.tight}px ${SPACE.snug}px${band[ln.sign] ? `;background:${band[ln.sign]};border-radius:${R.micro}px` : ''};`
     + `white-space:pre">${ln.sign} ${ln.text}</div>`).join('');
   const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.hair}px;padding:${SPACE.lg}px;`

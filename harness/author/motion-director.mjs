@@ -111,7 +111,10 @@ function resolveFamily(d) {
   // Reference profiles (docs/CRAFT/SELECTION.md Part 2): a named target picks the whole look at once.
   // A scene opts in with a top-level "profile":"apple". `bounceOk` and the banned lists are the
   // contradiction rules. A bounce preset on `apple` is wrong by rule, not by taste.
-  const profile = PROFILES[d.profile] || null;
+  if (d.profile != null && !(d.profile in PROFILES)) {
+    throw new Error(`motion-director: unknown profile "${d.profile}". Known: ${Object.keys(PROFILES).join(', ')}`);
+  }
+  const profile = d.profile != null ? PROFILES[d.profile] : null;
   if (profile) { FAMILY.cuts = profile.cuts.length ? profile.cuts : FAMILY.cuts; FAMILY.stings = profile.stings; }
 
   return { personality, settle, bounce, FAMILY, profile };

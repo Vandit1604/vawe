@@ -85,11 +85,13 @@ export function settingsRow({ x, y, w = 520, label = '', sub = '', control = 'ch
     chevron: `<span style="font:600 26px var(--font-sans);color:${T.dim};flex:none">›</span>`,
     value: `<span style="font:400 18px var(--font-sans);color:${T.sub};flex:none">${String(value)}</span>`,
   };
+  if (!(control in CONTROLS)) throw new Error(`blocks/app.mjs settingsRow: unknown control "${control}". `
+    + `Known: ${Object.keys(CONTROLS).join(', ')}`);
   const html = `<div style="display:flex;align-items:center;gap:16px;padding:16px 24px;box-sizing:border-box;width:${w}px">`
     + `<div style="display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0">`
     + `<span style="font:600 20px var(--font-sans);color:${T.ink}">${label}</span>`
     + (sub ? `<span style="font:400 16px var(--font-sans);color:${T.sub}">${sub}</span>` : '') + '</div>'
-    + (CONTROLS[control] || CONTROLS.chevron) + '</div>';
+    + CONTROLS[control] + '</div>';
   return [{ ...surface({ x, y, w, start, dur }), html }];
 }
 

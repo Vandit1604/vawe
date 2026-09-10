@@ -113,7 +113,9 @@ const LAYOUTS = {
   numeric: [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['.', '0', '<']],
 };
 export function keyboard({ x, y, w = 420, layout = 'qwerty', start = 0, dur = 4 } = {}) {
-  const rows = LAYOUTS[layout] || LAYOUTS.qwerty;
+  if (!(layout in LAYOUTS)) throw new Error(`blocks/interact.mjs keyboard: unknown layout "${layout}". `
+    + `Known: ${Object.keys(LAYOUTS).join(', ')}`);
+  const rows = LAYOUTS[layout];
   const PAD = 10, GAP = 8, H = layout === 'numeric' ? 56 : 46;
   // one key width for the WHOLE keyboard, derived from the widest row: keys that resize per row are
   // the tell of a drawn keyboard rather than a real one.
