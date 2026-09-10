@@ -109,7 +109,6 @@ REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a 
 | `silent-fallback.mjs` | 102 | yes | quality/gates/silent-fallback.mjs: is any named vocabulary still resolved with a silent default? |
 | `copy-check.mjs` | 97 | yes | quality/gates/copy-check.mjs: THE COPY GATE. On-screen words regress to the mean the same way |
 | `glyphs-audit.mjs` | 97 | yes | glyphs-audit.mjs: fail the build if a 3D typeface JSON no longer matches the font it came from. |
-| `theme-look-spread.mjs` | 97 | yes | quality/gates/theme-look-spread.mjs: DOES THE COMPUTED LOOK ACTUALLY VARY? |
 | `feature-audit.mjs` | 96 | yes | quality/gates/feature-audit.mjs, static utilization report: what the framework OFFERS vs what the |
 | `tile.mjs` | 95 | no | quality/gates/tile.mjs: lay PNG tiles into one contact sheet. |
 | `inspect.mjs` | 91 | yes | quality/gates/inspect.mjs: INTENT VERIFICATION. Checks a scene against a declared `.intent.json` |
