@@ -2,7 +2,7 @@
 when: a real video looks better than ours and you want to learn/copy why
 answers: "the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map"
 group: story
-codes: duration, cut-missed, ground-false-confidence
+codes: duration, cut-missed, ground-false-confidence, ground-truth-frame, ground-truth-axis, ground-truth-spurious, incomplete
 ---
 
 # REFERENCE STUDY: learn from great videos, then copy the feel (not just the frames)
@@ -11,6 +11,15 @@ codes: duration, cut-missed, ground-false-confidence
 
 - Run `make study VIDEO=refs/ref.mp4 NAME=ref` first, then the 5-step pipeline (map beats, measure
   motion, catalog motifs, map to primitives, author + verify) before copying any look.
+- A study is not done when the table is filled. It is done when `make study-check NAME=<name>` says
+  COMPLETE: every unique frame is on a page in `refs/<name>/pages/`, every line of `refs/<name>/pages.md`
+  is filled (not `<fill`), and every shot's `onScreen`/`moves`/`trigger` in `grammar/<name>.json` is
+  written. The film-prompt step reads `grammar/<name>.json`'s `coverage.ledger` and refuses an
+  incomplete study.
+- `make study` no longer falls back to an equal-slice sample when it finds no joint. A film with none
+  is reported as ONE SHOT, with the evidence (peak scene score, lowest edge content, whether a sustained
+  pan or crossfade held): read the pages before believing it, a joint of a kind this study does not
+  measure yet (a match cut, a whip pan too fast to hold, …) can still be there.
 - Never sample only a beat's middle frame: also sample the entrance (fps=12, first ~0.5s), the exit
   (fps=12, last ~0.5s) and a hard-zoomed crop of the text, or you miss the dolly, gradient fill or
   colour-wave.
@@ -77,6 +86,15 @@ video starts ahead.
    And check the END of a reference too. Density is usually front-loaded, and a film that opens at a
    move every 0.7s may hold its last two seconds almost still.
 
+0b. **Full coverage is the default, not an opt-in.** `STRIPS`/`STRIP_FPS` above are still worth reaching
+   for on the busiest shots, but every study now also writes `refs/<name>/pages/page-NNN.png`: every
+   UNIQUE frame in the film (held/duplicate frames collapsed and mapped to the frame that stands for
+   them, `refs/<name>/pages.json`), in order, stamped with its real timestamp and frame number, in cells
+   sized to read UI text. `refs/<name>/pages.md` is the ledger: one line per page, and the study is
+   INCOMPLETE (`make study-check NAME=<name>`) until every line says what happens, not `<fill`. Fill it
+   from the PAGES, not from the event sheet: the sheet samples delta peaks only, and a build, an overlap
+   or a held caret between two peaks is exactly what a peaks-only read has always missed.
+
 0. **Run `make study`, and get the structure for free.** `make study VIDEO=refs/ref.mp4 NAME=ref` is
    the film-side twin of `make sections`. It probes the file, detects the shot boundaries, cuts a
    contact sheet whose cells are chosen at the delta curve's local maxima (NOT in/mid/out, that comment is
@@ -93,9 +111,13 @@ video starts ahead.
    is exact (a synthetic three-colour film returns 2.00s and 4.00s to the frame) and a DISSOLVE scores
    almost nothing. `out/creed.mp4` peaks at 0.12 against a 0.30 default and therefore returns no cuts at
    all; `out/motion-reel.mp4` authors 14 cuts and the detector finds 3, because the rest cross-fade
-   between dark frames. When it finds nothing it says so and falls back to a fixed sample, and it never
-   calls that a cut list. When near-misses sit just under the threshold it names them and tells you what
-   to re-run. **Read the sheet before you trust the numbers.**
+   between dark frames. Four kinds of joint are measured now, not one: a hard CUT (scene score), an
+   empty-ground SEAM, a sustained flat PAN/whip and a sustained flat CROSSFADE, both read off the same
+   frame-delta series. **No silent fallback**: a film with none of the four is reported as ONE SHOT, with
+   the evidence named, never an invented equal-slice sample. When near-misses sit just under the
+   threshold it names them and tells you what to re-run. Two detectors landing on the same moment and
+   naming it differently is reported as a disagreement, never resolved silently. **Read the sheet AND the
+   pages before you trust the numbers.**
 
    **`refs/` is gitignored, and that is the boundary.** You are extracting the reference's grammar: shot
    length, cut rate, what carries across a junction. Throw away its UI, its copy and its colours. Never
