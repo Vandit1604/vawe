@@ -939,8 +939,19 @@ boot((data, fps, theme, canvas) => {
       // exactly as the browser composes them: driveClips writes this transform and the motion track
       // prepends to it, so the two are independent offsets of the same centre.
       const p = clipPose(el, t, visible);
-      const x = (L.x ?? 60) + (m ? m.dx : 0) + p.dx;
-      const y = (L.y ?? 240) + (m ? m.dy : 0) + p.dy;
+      let x = (L.x ?? 60) + (m ? m.dx : 0) + p.dx;
+      let y = (L.y ?? 240) + (m ? m.dy : 0) + p.dy;
+      // A `cursor` layer's on-screen point is not expressed through `motion` like every other layer:
+      // it is driven by `path` inside its own frame() (core/layers/cursor.js). `expose()` reports that
+      // same offset (one fact, one owner: both this file and the primitive's own frame() read `path`
+      // through the identical `motionAt`), resolved into `exposed` just above, so a `follow`ing layer
+      // (including a `carry` binding) can grab the pointer's LIVE point instead of chasing where the
+      // path started. cursor.js documents the one gap this leaves: a `snapTo` magnet is invisible
+      // here, because expose() never receives a live `scene`.
+      if (L.type === 'cursor' && L.id) {
+        const cur = exposed.get(L.id);
+        if (cur) { x += cur.dx; y += cur.dy; }
+      }
       // w/h are the UNSCALED layout box and `scale` is reported beside them, because CSS scales about
       // the element's centre: folding the scale into w/h would move the top-left corner and nothing
       // on screen moves with it (the same error that put a `becomes` handover 160px off, above).
@@ -1361,10 +1372,14 @@ const boxOf = (id) => boxes.get(id) || null;
     drawBg(t);
     driveClips(CLIPS, t); // declarative clip timing + enter/exit + z-order
     driveSceneUnits(t); // move whole-beat wrappers across a cut (sceneUnits), no-op otherwise
-    // EVERY box for this frame, before ANY layer's frame() runs, see resolveBoxes.
-    resolveBoxes(t);
-    // EVERY exposed value for this frame, same rule, same reason: see resolveExposed.
+    // EVERY exposed value for this frame, before ANY layer's frame() runs, see resolveExposed. Run
+    // BEFORE resolveBoxes: a `cursor` layer's box folds in its own exposed path offset (see
+    // resolveBoxes), and that value must already exist when resolveBoxes reads it. Safe because
+    // expose() never receives a live `scene` (core/layers/index.js hands it null on purpose), so
+    // nothing exposed here could have depended on a box in the first place.
     resolveExposed(t);
+    // EVERY box for this frame, same rule, same reason: see resolveBoxes.
+    resolveBoxes(t);
     // The camera is sampled ONCE and both consumers read that value: the view a layer sees and the
     // transform drawCameraAndCut writes cannot disagree about where the camera is on this frame.
     // `rig` and `lens` ride on the camera because a modifier asking about the frame's depth is asking
