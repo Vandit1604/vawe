@@ -1,6 +1,6 @@
 {
-  "total": 693,
-  "previewed": 332,
+  "total": 694,
+  "previewed": 333,
   "families": 58,
   "tags": [
     [
@@ -85,7 +85,7 @@
     ],
     [
       "text",
-      46
+      47
     ],
     [
       "text/parts",
@@ -3937,7 +3937,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 31,
+      "count": 32,
       "undescribed": 0,
       "entries": [
         {
@@ -3971,7 +3971,7 @@
         {
           "name": "colorWave",
           "stem": "kinetic-text-presets--colorwave",
-          "desc": "the accent sweeps word by word along a line, each unit lighting then settling to the resting colour",
+          "desc": "the accent sweeps word by word along a line, each unit lighting then settling to the resting colour · `colors` gives EACH unit its OWN arrival colour instead of one shared accent, per-word colour before the line settles to one ink",
           "scene": "/assets/effects/kinetic-text-presets--colorwave.json",
           "noPreview": null
         },
@@ -4001,6 +4001,13 @@
           "stem": "kinetic-text-presets--elastic",
           "desc": "elastic scale pop with visible wobble · playful brands only",
           "scene": "/assets/effects/kinetic-text-presets--elastic.json",
+          "noPreview": null
+        },
+        {
+          "name": "fade",
+          "stem": "kinetic-text-presets--fade",
+          "desc": "plain opacity fade, no motion at all · the neutral entrance, and the neutral exit reversed",
+          "scene": "/assets/effects/kinetic-text-presets--fade.json",
           "noPreview": null
         },
         {

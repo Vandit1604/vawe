@@ -49,6 +49,7 @@
    "elevation",
    "emColor",
    "enterDur",
+   "exit",
    "exitDur",
    "fade",
    "filter",
@@ -1583,7 +1584,7 @@
      ]
     },
     "preset": {
-      "enum": ["weight", "up", "down", "type", "scale", "blur", "bounce", "slide", "wave", "shimmerWave", "flip", "fall", "elastic", "skew", "focus", "decode", "tilt", "stretch", "gradient", "highlight", "colorWave", "underline", "shadow", "riseClip", "draw", "chroma", "swing", "unfold", "strike", "flap", "assemble", "bloom", "halation", "diffusion", "rimLight", "spotlight", "chromatic", "chromaCycle", "confetti", "sparks", "dust"],
+      "enum": ["weight", "up", "down", "fade", "type", "scale", "blur", "bounce", "slide", "wave", "shimmerWave", "flip", "fall", "elastic", "skew", "focus", "decode", "tilt", "stretch", "gradient", "highlight", "colorWave", "underline", "shadow", "riseClip", "draw", "chroma", "swing", "unfold", "strike", "flap", "assemble", "bloom", "halation", "diffusion", "rimLight", "spotlight", "chromatic", "chromaCycle", "confetti", "sparks", "dust"],
      "type": "string",
      "label": "Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/halation/diffusion/rimLight/spotlight/chromatic/chromaCycle on a glow layer)"
     },
@@ -1726,6 +1727,10 @@
     "phaseStep": {
      "type": "number",
      "label": "Per-unit phase offset for looping presets (wave/shimmerWave); ~0.12 = a crest travels the word"
+    },
+    "exit": {
+     "type": "object",
+     "label": "WORD-BY-WORD EXIT on a split text layer: { preset, at, each, stagger, from, ease, presetOpts }. `at` is seconds after this layer's OWN start when the units start leaving; `preset` reuses the kinetic preset vocabulary (any name `preset` takes) but plays it REVERSED, so `up` sinks back down and fades, `blur` resolves back into blur. Left unconfigured, `each`/`stagger` derive from this layer's own arrival timing at 0.6x (an exit reads faster than the entrance it mirrors) and `ease` defaults to `easeInCubic` (an accelerating departure); an author can still override any of them. Requires `split`. e.g. {\"at\":1.2,\"preset\":\"up\"}"
     },
     "ransom": {
      "type": "boolean|object",

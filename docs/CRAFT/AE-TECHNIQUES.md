@@ -233,7 +233,7 @@ because it is not an easing: it is whether the selector interpolates between sel
 `shape: ramp up` for a fall. Amount 50 percent on the duplicated animator, random seed 50. Melt example:
 position 140 down, rotation 45 on the first animator and -75 on the duplicate, tracking +50.
 
-**ENGINE MAPPING** Partly present. `core/type/type.js` PRESETS carries 31 kinetic presets, and `assemble` is
+**ENGINE MAPPING** Partly present. `core/type/type.js` PRESETS carries 32 kinetic presets, and `assemble` is
 described in the arsenal as the AE text-animator-plus-randomize-order reveal. What is missing is that
 `shape`, `smoothness` and `amount` are DIALS on the selector, and here they are baked into whichever
 preset you name. `splitText` and `unitProgress` in `core/type/type.js` are where the selection is computed,
