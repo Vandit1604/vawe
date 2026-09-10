@@ -41,6 +41,9 @@ import { nearMisses } from '../../core/registry/registry.js';
 import { PART_NAMES } from '../../core/motion/parts.js';
 import { SHAPES } from '../../core/motion/shapes.js';
 import { IDLE_NAMES } from '../../core/engine/idle.js';
+import { CURVES as PATH_CURVES } from '../../core/motion/path-curves.js';
+import { boundaryMechanism } from '../../core/transitions/lower.js';
+import { TRANSITIONS } from '../../core/transitions/catalog.js';
 
 const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*((?:\/[a-z]+\s*[:=]\s*-?[\d.]+\s*)*)$/i;
 const POSE_TOKEN_RE = /\/([a-z]+)\s*[:=]\s*(-?[\d.]+)/gi;
@@ -229,17 +232,22 @@ export function parseMoveEntry(raw) {
     return { scope: 'hold', name };
   }
   const m = LAYER_RE.exec(s);
-  if (!m) return { error: `"${s}" is not "<selector>@<kind>:<band>", "hold:<idle>", or "<shape>:<band>" (e.g. "pan:cinematic"). Known shapes: ${Object.keys(SHAPES).join(', ')}. Known idles: ${IDLE_NAMES.join(', ')}` };
+  if (!m) return { error: `"${s}" is not "<selector>@<kind>:<band>", "hold:<idle>", or "<shape>:<band>" (e.g. "pan:cinematic"). Known shapes: ${Object.keys(SHAPES).join(', ')}. Known curves: ${Object.keys(PATH_CURVES).join(', ')}. Known idles: ${IDLE_NAMES.join(', ')}` };
   const [, shape, band] = m;
-  if (!SHAPES[shape]) {
-    const near = nearMisses(shape, Object.keys(SHAPES));
-    return { error: `"${shape}" is not a known move shape${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SHAPES).join(', ')}` };
+  // A curve name (arc/dip/wave/ramp, the same catalog core/fx/along-path.js sets a caption's TYPE on)
+  // is the same "<word>:<band>" sentence as a move shape, resolved against a second registry: it flies
+  // the whole LAYER along the curve (MotionPathPlugin, formats/scene/scene.js `L.motionPath`) instead
+  // of keying x/y/scale, so it is scope PATH, not LAYER, but it costs no new syntax to say.
+  const isPath = !SHAPES[shape] && !!PATH_CURVES[shape];
+  if (!SHAPES[shape] && !isPath) {
+    const near = nearMisses(shape, [...Object.keys(SHAPES), ...Object.keys(PATH_CURVES)]);
+    return { error: `"${shape}" is not a known move shape or path curve${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${[...Object.keys(SHAPES), ...Object.keys(PATH_CURVES)].join(', ')}` };
   }
   if (!SPEED_BAND[band]) {
     const near = nearMisses(band, Object.keys(SPEED_BAND));
     return { error: `"${band}" is not a speed band${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SPEED_BAND).join(', ')}` };
   }
-  return { scope: 'layer', shape, band };
+  return isPath ? { scope: 'path', curve: shape, band } : { scope: 'layer', shape, band };
 }
 
 /** parseMoveEntries(raw) → [{...}|{error}], `;`-separated. Empty for unset ("no opinion", same convention as parseEdge). */
@@ -366,4 +374,75 @@ function scaleMove(keys, factor) {
 export function moveKeys({ shape, band }, dur) {
   const factor = SPEED_BAND[band] / SPEED_BAND.professional;
   return scaleMove(SHAPES[shape]({ dur }), factor);
+}
+
+// A curve's own box, at the neutral `professional` band. `MotionPathPlugin` reads only the `d` string
+// (no `align`, so it moves the layer's OWN x/y along it, never a DOM path element), so the "distance
+// from identity" a band scales is the curve's amplitude, exactly like MOVE_SCALABLE above: bigger box,
+// bigger swing, same shape.
+const PATH_BOX = { w: 500, h: 220 };
+
+/** pathMotion({curve,band}, dur) → the `layers[].motionPath` object a scope-'path' `move:` entry builds. */
+export function pathMotion({ curve, band }, dur) {
+  const factor = SPEED_BAND[band] / SPEED_BAND.professional;
+  const w = r3(PATH_BOX.w * factor), h = r3(PATH_BOX.h * factor);
+  return { path: PATH_CURVES[curve](w, h), dur };
+}
+
+// ── THE CUT IN: `transition_in` names the boundary a beat arrives ON, parsed per-beat since
+// storyboard-parse.mjs but never built (assemble.mjs derives every boundary from the theme's own
+// default, `look.cuts.default`, uniformly). Beat i+1's `transition_in` is the author's own opinion
+// about the cut BETWEEN beat i and beat i+1. Beat 1's own `transition_in` describes how the film OPENS,
+// not a boundary (there is no beat before it), so it is read everywhere else (the studio label) but
+// builds nothing here.
+//
+// THE FIELD IS MOSTLY PROSE, NOT A NAME, and that is measured, not assumed: across every shipped
+// storyboard, `transition_in` reads "cut (blur)", "dissolve 0.5s", "cut", "content turnover (no root
+// cut; the film is one take)", almost never a bare fx word the catalog itself would recognise ("cut"
+// is not one: the catalog's hard cut is "none"). That is the exact shape `rest:` (above) was found in
+// and deliberately NOT auto-built from: guessing a decision out of prose is a guess wearing a
+// migration's clothes, and `formats/scene/vawe-oblique.json` (this repo's own byte-identity contract)
+// already writes "cut" and "cinematicZoom" as documentary colour, never vetted against reaching a
+// render. Auto-building a bare word would silently change it, the one thing this whole file may not do.
+//
+// So the DECISIVE form is `fx:<name>` (mirrors `transitions[].fx`, the field it becomes), the same
+// "an entry already says which one it means" test `move:` uses for its three scopes and `trigger:`
+// (isCausedTrigger, above) uses to tell a real cause from a sequence marker: a shape no existing
+// storyboard has ever written cannot retroactively change one, so every already-committed film reads
+// exactly as it did. `transition_in: fx:cinematicZoom` is a decision; `transition_in: cinematicZoom` or
+// `cut` stays what it always was, prose for a human, read by nothing.
+const TRANSITION_NAMES = [...new Set(TRANSITIONS.map((t) => t.name))];
+const TRANSITION_FX_RE = /^fx\s*:\s*([A-Za-z-]+)$/i;
+
+/** parseTransitionIn(raw) → {fx} | null (prose, no decision stated) | {error}. */
+export function parseTransitionIn(raw) {
+  if (!raw) return null;
+  const m = TRANSITION_FX_RE.exec(String(raw).trim());
+  if (!m) return null; // prose ("cut", "cut (blur)", "dissolve 0.5s", ...): documentary only, unbuilt
+  const fx = m[1];
+  try { boundaryMechanism(fx); } catch (e) {
+    if (/^unknown transition fx/.test(e.message)) {
+      const near = nearMisses(fx, TRANSITION_NAMES);
+      return { error: `"${fx}" is not a known transition${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${TRANSITION_NAMES.join(', ')}` };
+    }
+    return { error: e.message };
+  }
+  return { fx };
+}
+
+/** transitionInErrors(beats) → string[] naming every beat (after the first) whose bare-word transition_in is not a real boundary fx. */
+export function transitionInErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    if (i === 0) return;
+    const p = parseTransitionIn(b.transition_in);
+    if (p && p.error) errs.push(`beat ${i + 1} (${b.name}) transition_in: ${p.error}`);
+  });
+  return errs;
+}
+
+/** resolvedTransitionIn(b) → {fx,mech} | null. `b.transition_in` already validated by transitionInErrors. */
+export function resolvedTransitionIn(b) {
+  const p = parseTransitionIn(b.transition_in);
+  return (p && !p.error) ? { fx: p.fx, mech: boundaryMechanism(p.fx) } : null;
 }

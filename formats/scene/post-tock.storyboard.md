@@ -58,7 +58,6 @@ claim, no specification, no rating.
 - style: one bright object on graphite, no card, no second focal point
 - rest: the arm never stops. It is a metronome
 - why: open on the thing every musician has done, setting a number and then not playing it
-- emotion: familiarity
 - duration: 3.4s
 - transition_in: cut
 
@@ -76,7 +75,6 @@ claim, no specification, no rating.
 - style: unchanged, so the change in tempo is the only thing to read
 - rest: THE NAMED PEAK. Everything else in the film is restrained so this reads as the one loud moment
 - why: this is the product working, and it is a motion, so it has to be shown as one
-- emotion: recognition
 - duration: 2.8s
 - transition_in: none
 
@@ -94,6 +92,5 @@ claim, no specification, no rating.
 - style: the one moment the film states a figure
 - rest: the arm keeps swinging through the last frame. A metronome that stops is a metronome that is off
 - why: pay off the loop by naming the tempo only after the film has shown it being found
-- emotion: settled
 - duration: 3.8s
 - transition_in: none

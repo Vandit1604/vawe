@@ -30,7 +30,6 @@ not: "no narration, no abstract particle field, no chart standing in for the cla
 - style: white ground, dot matrix, mono everywhere, one green dot as the only colour
 - rest: the dot matrix drifts; the chip holds still once it lands
 - why: put the evidence on screen before making any claim about it
-- emotion: attention
 - duration: 3.35s
 - transition_in: cut
 
@@ -48,7 +47,6 @@ not: "no narration, no abstract particle field, no chart standing in for the cla
 - style: the ground lifts to airier pools, the chips stay white, nothing else enters
 - rest: none. The arrival is the beat.
 - why: show the comparison instead of asserting it. Two strings side by side are the whole proof.
-- emotion: recognition
 - duration: 3.3s
 - transition_in: cut
 
@@ -66,6 +64,5 @@ not: "no narration, no abstract particle field, no chart standing in for the cla
 - style: spotlight ground, type is the only object
 - rest: none. The reveal runs to the last frame.
 - why: name the mechanism. A promise with a reason behind it is the thing an engineer can check.
-- emotion: trust
 - duration: 3.15s
 - transition_in: riseBlur

@@ -179,7 +179,6 @@ destination: web
 - becomes: an empty white field becomes a typed promise, and the promise collapses back into the single bar that wrote it
 - onscreen: See the film before you render it.
 - why: the viewer has to meet the bar as a caret before it can mean anything as a playhead, and a line that erases itself leaves the bar as the only thing on screen
-- emotion: curiosity
 - duration: 2.6s
 - transition_in: none
 
@@ -194,7 +193,6 @@ destination: web
 - becomes: the caret becomes the playhead of a real clock, and an empty rule becomes fourteen layer bars with a shape
 - onscreen: Every layer, on one clock.
 - why: the claim only lands if the viewer sees the actual product surface making it, so this beat spends its seconds on captured UI and four words
-- emotion: recognition
 - duration: 3.0s
 - transition_in: none
 
@@ -209,7 +207,6 @@ destination: web
 - becomes: a static plan becomes a film playing, and an even run of bars becomes a run with a hole in it
 - onscreen: Scrub it. No render.
 - why: this is the turn, and it has to arrive while the viewer is enjoying the smoothness so the hole reads as a problem rather than a feature
-- emotion: unease
 - duration: 3.2s
 - transition_in: none
 
@@ -224,7 +221,6 @@ destination: web
 - becomes: a stretch of timeline becomes a measured hole, and a film you thought was finished becomes 1.2 seconds of nothing
 - onscreen: 1.2 seconds of nothing.
 - why: the cost has to be a number the viewer can see the size of, so the band is measured on screen instead of described. The number is not written by hand: beat-check found this hole in a real scene and the studio drew it
-- emotion: sinking
 - duration: 3.6s
 - transition_in: none
 
@@ -239,6 +235,5 @@ destination: web
 - becomes: an empty span becomes a filled one, and the playhead becomes the leading edge of the render it just authorised
 - onscreen: Fixed here. Then rendered.
 - why: the film must end on the fix happening rather than on a sentence about fixing, so the last thing that moves is the render completing
-- emotion: relief
 - duration: 3.6s
 - transition_in: cut

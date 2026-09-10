@@ -25,7 +25,6 @@ not: "no narration, no gradient hero, no slogan on a black card, no stock photog
 - style: white ground, dot matrix, real product chrome at full fidelity
 - rest: the dot matrix drifts behind the window; nothing else moves through the hold
 - why: earn the doubt. If the viewer does not first believe it is a recording, the payoff has nothing to overturn.
-- emotion: recognition
 - duration: 3.4s
 - transition_in: cut
 
@@ -42,7 +41,6 @@ not: "no narration, no gradient hero, no slogan on a black card, no stock photog
 - style: the ground inverts to ink, the card stays white, the accent is the only colour on the bar
 - rest: none. The whole beat is the travel.
 - why: state the claim while the frame is doing the thing a capture cannot do, so the copy and the picture carry it together
-- emotion: surprise
 - duration: 3.3s
 - transition_in: cut
 
@@ -59,6 +57,5 @@ not: "no narration, no gradient hero, no slogan on a black card, no stock photog
 - style: spotlight ground, everything muted so the burn is the brightest thing on screen
 - rest: none. The dissolve is the motion.
 - why: name the thing. The whole film exists for this one sentence and it lands last.
-- emotion: conviction
 - duration: 3.9s
 - transition_in: riseBlur

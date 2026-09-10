@@ -28,7 +28,6 @@ format: 1920x1080
 - onscreen: One file.
 - narration: This is the whole video. One file.
 - why: establish the object at its smallest so every later shape reads as the same thing growing
-- emotion: curiosity
 - duration: 3.0s
 - transition_in: cut
 
@@ -43,7 +42,6 @@ format: 1920x1080
 - onscreen: Every frame it names, | rendered the same way twice.
 - narration: Change one number in here and the whole film re-cuts itself.
 - why: the claim is spoken while the object is doing the thing the claim describes
-- emotion: recognition
 - duration: 3.6s
 - transition_in: none (the object never leaves)
 
@@ -58,7 +56,6 @@ format: 1920x1080
 - onscreen: Six frames. One source.
 - narration: What comes out is not a preview. It is the film.
 - why: show the product of the claim rather than restate the claim in bigger type
-- emotion: proof
 - duration: 4.4s
 - transition_in: none
 
@@ -73,6 +70,5 @@ format: 1920x1080
 - onscreen: One video.
 - narration: No timeline. No re-export. Just the file.
 - why: the payoff lands on the thing the file made, so the last frame is output and not a promise
-- emotion: settled
 - duration: 3.6s
 - transition_in: none
