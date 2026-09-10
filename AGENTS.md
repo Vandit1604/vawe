@@ -250,6 +250,9 @@ copy must be true, and a specific fact beats a dry number.
   it and improves the frame, it was never working. [`docs/CRAFT/LAYOUT.md`](docs/CRAFT/LAYOUT.md).
 - **Real assets first, emoji last.** `make capture` for real UI, `make assets` for logos (never a bare
   `curl`, a 404 writes a zero-byte file). Never embed copyrighted material. [`docs/CRAFT/IMAGERY.md`](docs/CRAFT/IMAGERY.md).
+- **Content is measured against the reference, per act.** Dense where it is dense, quiet where it is
+  quiet, never a fixed bar; a screen/product beat with no real source is `plain-content`.
+  [`docs/CRAFT/CONTENT.md`](docs/CRAFT/CONTENT.md).
 - **Launch videos:** crawl EVERY page, not the homepage. Give the logo real size (~100px+ beside a
   title, 150px+ on the end card). Pair entrances with exits directionally (`slide-right` leaves
   `slide-left`). Blur out (`out:"defocus"`) when moving would fight dense content. Put a changing

@@ -143,6 +143,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 
 | Doc | Reach for it when… | It answers |
 |---|---|---|
+| [docs/CRAFT/CONTENT.md](CRAFT/CONTENT.md) | a beat draws a screen/window/product/photo, or a film reads as plain beside its reference | the four content numbers · dense-where-dense/quiet-where-quiet · theme source (R1) · screens (R2) · what real material means |
 | [docs/CRAFT/DENSITY.md](CRAFT/DENSITY.md) | a beat looks flat / slide-like | hero + support + metadata triad · the "produced" tell · thin-beat rule |
 | [docs/CRAFT/READING.md](CRAFT/READING.md) | a line is on screen and you do not know if anyone can read it | hold by word count · the flicker gap · what counts as prose · why the library reads once, not twice |
 | [docs/CRAFT/SHOW-DONT-TELL.md](CRAFT/SHOW-DONT-TELL.md) | the film is all type in boxes | decoration vs explanation · what each claim shape wants · the subject-size rule · no gate, your eyes |
