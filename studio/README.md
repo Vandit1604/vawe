@@ -35,7 +35,7 @@ the `Cache-Control: no-store` the shell has always needed, since they are edited
 ## Extending it
 
 A new left-rail panel or a timeline feature touches `ui/shell.html` (markup) and `ui/studio.js`
-(behaviour) without touching `server.mjs`, unless it needs a new server endpoint — those live in
+(behaviour) without touching `server.mjs`, unless it needs a new server endpoint. Those live in
 `studioRoutes` in `server.mjs`, one `if (url === ...)` block per route.
 
 `studio/` is dev tooling only: it does not touch the renderer or the determinism contract, and it is
