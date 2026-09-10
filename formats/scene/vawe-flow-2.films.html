@@ -88,13 +88,13 @@
   /* Ground wash: the first film's own measured colour, as a soft radial wash, so the resting
      frame already shows the device beat 6 turns on (AGENTS.md: "change bg colour according to
      each film's colour when browsing"). The engine crossfades this per film later; at rest it
-     shows the focused film's own tint (#2c66ed, sampled off out/vawe-launch.mp4 at 2s). The
+     shows the focused film's own tint (#2763ea, the measured accent of out/vawe-launch.mp4 at 12s, the poster frame). The
      focused card now covers most of the frame, so this wash is what's left of the tint: a
      thin border of ground around the card, not a background behind a small ring. */
   #films-ground{
     position:absolute;inset:0;
     background:
-      radial-gradient(ellipse 70% 60% at 50% 46%, color-mix(in srgb, #2c66ed 30%, var(--bg)) 0%, var(--bg) 72%);
+      radial-gradient(ellipse 80% 70% at 50% 46%, #2763ea 0%, color-mix(in srgb, #2763ea 62%, #000) 100%);
   }
   #films{
     position:absolute;inset:0;overflow:hidden;
@@ -136,7 +136,7 @@
      eyebrow, the scrub bar and the meta line all sit ON the card, over its own dark-gradient
      strips, the same technique the name/time caption already used. */
   .film-card[data-focus] .film-scrim{
-    background:linear-gradient(to top, rgba(8,12,20,.82) 0%, rgba(8,12,20,0) 40%);
+    background:linear-gradient(to top, rgba(8,12,20,1) 0%, rgba(8,12,20,1) 17%, rgba(8,12,20,0) 36%);
   }
   .film-card[data-focus] .film-top{
     position:absolute;left:0;right:0;top:0;height:16%;
@@ -182,7 +182,7 @@
         <p class="film-time kit-caption">0:06</p>
       </div>
     </div>
-    <div class="film-card" data-part="film-card" data-film="out/vawe-launch.mp4" data-tint="#2c66ed" data-focus>
+    <div class="film-card" data-part="film-card" data-film="out/vawe-launch.mp4" data-tint="#2763ea" data-focus>
       <img src="/assets/vawe-flow-2/vawe-launch-still.jpg" alt="">
       <div class="film-recede"></div>
       <div class="film-scrim"></div>
@@ -198,7 +198,6 @@
         </div>
         <div class="film-caption">
           <p class="film-name kit-body">vawe launch</p>
-          <p class="film-time kit-caption">0:20</p>
         </div>
       </div>
     </div>
