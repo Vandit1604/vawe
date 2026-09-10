@@ -612,6 +612,18 @@ A FALLOFF FROM A TRAVELLING POINT, driving the layer's own children. `effector: 
 | `wipe-right` | clip reveal grows rightward from the left edge |
 | `wipe-up` | clip reveal grows upward from the bottom edge, so a column grows upward instead of appearing |
 
+## Move shapes (measured keyframe tracks)  `[per-layer]`
+
+A storyboard's `move: <shape>:<band>` (harness/lib/contract.mjs, scope LAYER: a sustained track on the beat's own layer, never a one-shot entrance), or a hand-keyed `motion` built directly: `node harness/author/track.mjs pan --dur 1.25 --to -600`. Every shape is the normalised measurement of a real film in this repo, never invented, so a beat that names one keeps moving for its whole length instead of landing an entrance and holding still.
+
+| name | what / when |
+|---|---|
+| `blast` | four-key punctuation: arrives oversize, settles, drifts, then grows OUT through the frame. A hard pop, never a fade |
+| `drift` | a slow ambient hold on one axis that never returns to where it began, for a layer that should keep living through a beat |
+| `enter` | a keyed entrance track on the layer itself rather than a preset name: rises in, overshoots slightly, settles |
+| `exit` | a keyed departure that accelerates off-frame, opacity trailing the move: the layer is gone because it LEFT, not because it dimmed |
+| `pan` | an irregular multi-key horizontal (or vertical) pan, linear interior keys: surges then gives up, reads as a hand scrolling, not an animation of a page |
+
 ## Part entrances  `[per-layer]`
 
 THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select, anim, each, stagger, delay, out, exitDur }]` on a hand-authored html/svg layer. A CSS SELECTOR into your own markup, and every matched element gets an engine-driven, SEEKED entrance with a stagger, so a figure can grow its bars, then draw its line, then pop its dots. `out: true` gives each part its paired exit, anchored to the layer's end, so a hand-authored figure leaves piece by piece instead of fading as one card. That is the whole point on an `html` layer: the markup keeps the entire CSS surface AND the clock still owns each piece, which a hand-rolled `calc()` off `var(--t)` never gives back. A translate exit CONTINUES and a scale exit REVERSES, the same never-enter-and-retreat rule layers follow. Selectors default to `rect, circle, path, polyline, line, [data-part]`.
@@ -1145,4 +1157,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_716 effects across 57 families. Regenerate: `make effects`._
+_721 effects across 58 families. Regenerate: `make effects`._
