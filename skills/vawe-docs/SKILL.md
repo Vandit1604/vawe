@@ -184,6 +184,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [generators/README.md](../../generators/README.md) | deciding whether a script belongs in generators/ or somewhere else | what generators/ is: it bakes an asset a film later loads, as opposed to core/ which assembles a frame |
 | [mcp/README.md](../../mcp/README.md) | running or changing the MCP server that exposes this engine to other agents | the server layout: which tool does what, how a draft becomes a render, and where uploads and pricing live |
 | [sims/README.md](../../sims/README.md) | reaching for a physics or particle simulation inside a beat | the simulation harness, what it guarantees about determinism, and how a sim reaches the frame |
+| [studio/README.md](../../studio/README.md) | changing the studio UI, adding a panel, or working out where its code lives | what studio/ is: the author-facing local preview server and its shell, split into a server, a page assembler and real css/js files |
 
 ## Skills
 
