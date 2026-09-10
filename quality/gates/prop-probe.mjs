@@ -224,6 +224,13 @@ const declOf = (type, prop) => (LAYER_PROPS[type] || {})[prop] || SHARED_PROPS[p
 const AS = {
   // beam: the sheen mode only (core/layers/beam.js:23, :74). The default ring reads none of them.
   'beam.angle': { mode: 'shine' }, 'beam.intensity': { mode: 'shine' }, 'beam.period': { mode: 'shine' },
+  // resample: `angle` is read by ONE fx, `directionalBlur` (core/resample/index.js, core/resample/effects.js).
+  // The default guard value for `resample` is the first RESAMPLE_FX entry (`zoomBlur`), which never
+  // reads it, so `angle` reports dead against every resamplable type unless the probe is pointed at
+  // the one fx that does. `paint` already declares its own unrelated `angle` and needs no override.
+  'image.angle': { resample: { fx: 'directionalBlur' } },
+  'shader.angle': { resample: { fx: 'directionalBlur' } },
+  'particles.angle': { resample: { fx: 'directionalBlur' } },
   // paint: per-fx dials (core/paint-fx.js:43 matrix · :88 aurora · :143 waves).
   'paint.size': { paint: 'matrix' }, 'paint.tail': { paint: 'matrix' }, 'paint.rate': { paint: 'matrix' },
   'paint.hue': { paint: 'aurora' }, 'paint.hues': { paint: 'aurora' }, 'paint.amp': { paint: 'waves' },

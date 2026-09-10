@@ -1,5 +1,5 @@
 {
-  "total": 693,
+  "total": 694,
   "previewed": 332,
   "families": 58,
   "tags": [
@@ -57,7 +57,7 @@
     ],
     [
       "per-frame",
-      40
+      41
     ],
     [
       "per-layer",
@@ -2198,7 +2198,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "resampling reads the pixels of a layer that is already a raster, so it needs a real image to sample.",
-      "count": 8,
+      "count": 9,
       "undescribed": 0,
       "entries": [
         {
@@ -2212,6 +2212,13 @@
           "name": "chromaShift",
           "stem": "layer-as-texture-resample--chromashift",
           "desc": "radial RGB separation, the channels pulling apart from the centre outwards",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "directionalBlur",
+          "stem": "layer-as-texture-resample--directionalblur",
+          "desc": "a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS \"Directional Blur\" · a look an author SETS, not a byproduct of a layer's own travel speed (that one is automatic, see `docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4)",
           "scene": null,
           "noPreview": null
         },

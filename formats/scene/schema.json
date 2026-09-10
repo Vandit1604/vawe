@@ -10,6 +10,7 @@
    "align",
    "align2",
    "anchor",
+   "angle",
    "anim",
    "anticipate",
    "aspects",
@@ -181,6 +182,7 @@
     "weight"
    ],
    "image": [
+    "angle",
     "canvasFx",
     "edgeFade",
     "edgeFadeColor",
@@ -303,6 +305,7 @@
     "w"
    ],
    "shader": [
+    "angle",
     "colors",
     "h",
     "intensity",
@@ -352,6 +355,7 @@
     "weight"
    ],
    "raymarch": [
+    "angle",
     "colors",
     "h",
     "intensity",
@@ -366,6 +370,7 @@
    ],
    "three": [
     "amp",
+    "angle",
     "arcHeight",
     "bodyColor",
     "breakAt",
@@ -415,6 +420,7 @@
     "yaw"
    ],
    "globe": [
+    "angle",
     "arcHeight",
     "arcWidth",
     "colors",
@@ -440,6 +446,7 @@
     "w"
    ],
    "particles": [
+    "angle",
     "color",
     "colors",
     "count",
@@ -2352,7 +2359,8 @@
       "macroblock",
       "dissolve",
       "refract",
-      "chromaShift"
+      "chromaShift",
+      "directionalBlur"
      ]
     },
     "raymarch": {
