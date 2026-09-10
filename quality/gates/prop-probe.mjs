@@ -270,7 +270,15 @@ function probeLayer(type, prop, preset) {
   for (const pair of EXCLUSIVE) if (pair.includes(prop)) for (const k of pair) if (k !== prop) delete L[k];
   // The three code* scenes derive their whole layout from the snippet and refuse to build without it
   // (core/three-fx.js:179), so it is part of a minimal valid layer for those three presets.
-  if (preset) { L.three = preset; if (preset.startsWith('code')) L.lines = VALUES.lines; }
+  // litPlane is the same shape for a different input: it textures a real capture and refuses to render an
+  // undecoded one (core/surfaces/three-fx.js textureFrom), so without a real image every dial it reads
+  // would report dead for the wrong reason. A TRACKED capture, because assets/brands/** is gitignored and
+  // this probe also runs in worktrees and CI.
+  if (preset) {
+    L.three = preset;
+    if (preset.startsWith('code')) L.lines = VALUES.lines;
+    if (preset === 'litPlane') L.screen = '/assets/brands/ditherkit/sections/05-line.png';
+  }
   Object.assign(L, AS[`${type}.${prop}`] || {});
   for (const g of guardsOf(declOf(type, prop))) if (L[g] === undefined) L[g] = valueFor(g, type);
   L[prop] = valueFor(prop, type);

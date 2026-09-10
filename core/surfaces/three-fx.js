@@ -37,9 +37,10 @@ export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, 
   origin: {}, dest: {}, arcHeight: {}, drawStart: {}, drawDur: {},
   spinFrom: {}, spinTo: {}, spinDur: {}, sunFrom: {}, sunTo: {}, sunLat: {}, dawnWidth: {},
   // litPlane: `rise` is its resting height (the arrival is hardcoded, only the landing spot is a dial).
-  // `blur` opts a scene into the in-canvas shutter accumulation createThreeLayer can do (a tap count,
-  // or `true` for a sane default); see the comment on `taps` below for why this exists at all.
-  rise: {}, blur: {} };
+  // `motionBlur` opts a scene into the in-canvas shutter accumulation createThreeLayer can do, with the
+  // same meaning it has on every layer (true = half-shutter, 0..1 = strength); see the comment on `taps`
+  // below for why a three scene needs its own at all.
+  rise: {}, motionBlur: { when: 'three' } };
 
 export { THREE_FX };
 const T = () => {
@@ -1092,11 +1093,17 @@ export function createThreeLayer(w, h, L, colors) {
   // zero. The fast rise this scene poses is therefore invisible to the shared blur, and the fix is NOT
   // to teach the shared sampler about a three scene's internal state (that is core/tracks/motion.js and
   // core/fx/ghost.js's one shared owner, and a second one reading the same fact is the exact drift
-  // MISTAKES #423 already logged against). Instead: `blur` samples pose() at a few offsets around t,
+  // MISTAKES #423 already logged against). Instead: `motionBlur` samples pose() at a few offsets around t,
   // inside its own exposure window, and composites them translucently, the same shutter-accumulation
   // idea `smear()` approximates with a CSS filter, done for real because here the geometry is real.
   // Still pure in t: every tap is pose(t + offset), a fresh render with no memory of any other frame.
-  const taps = Math.max(1, Math.min(8, Math.round(L.blur === true ? 5 : (+L.blur || 0)) || 1));
+  // ONE WORD, ONE MEANING. This was briefly a layer-level `blur` tap count, which sat beside the keyframe
+  // `blur` (Gaussian px) on the same layer and meant something else. `motionBlur` is the word every other
+  // layer already uses (core/tracks/motion.js), with the same number: true = half-shutter, 0..1 = strength.
+  // The window below reproduces the old default exactly: true is 0.5, so 1.2 x 0.5 = 0.6 of a 30fps frame.
+  const mb = L.motionBlur;
+  const strength = mb === true ? 0.5 : (mb == null || mb === false) ? 0 : Math.max(0, Math.min(1, +mb));
+  const taps = strength > 0 ? 5 : 1;
   const outCanvas = taps > 1 ? document.createElement('canvas') : glCanvas;
   let octx = null;
   if (taps > 1) { outCanvas.width = w; outCanvas.height = h; octx = outCanvas.getContext('2d'); }
@@ -1105,7 +1112,9 @@ export function createThreeLayer(w, h, L, colors) {
     canvas: outCanvas,
     draw(t, LL) {
       if (taps <= 1) { built.pose(t, LL); renderer.render(scene, camera); return; }
-      const shutter = LL.shutterSecs ?? (1 / 30) * 0.6;
+      // NO SECOND SHUTTER. `shutterSecs` was a per-layer override for this window, a second number for the
+      // idea `motionBlur` already carries; core/tracks/motion.js refuses exactly that for the film dial.
+      const shutter = (1 / 30) * 1.2 * strength;
       octx.clearRect(0, 0, w, h);
       octx.globalAlpha = 1 / taps;
       for (let i = 0; i < taps; i++) {

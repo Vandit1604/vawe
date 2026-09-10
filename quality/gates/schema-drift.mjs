@@ -339,6 +339,7 @@ if (process.argv.includes('--write')) {
       for (const k of unread) lines.push(`    • ${k}  (an author can write it and nothing will read it)`);
       lines.push('    either declare it beside the code that reads it, or delete it from the schema.');
     }
+    for (const l of lines) console.error(l);   // f.fail RECORDS, it does not print: findings.mjs:70
     f.fail('schema-doc-mismatch', lines.join('\n'));
     process.exit(1);
   }
