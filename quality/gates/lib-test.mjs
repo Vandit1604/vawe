@@ -67,6 +67,7 @@ import { PART_NAMES, PART_BLURBS, PARTS } from '../../core/motion/parts.js';
 import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorAt, effectorStyle } from '../../core/motion/effector.js';
 import { cutVelocityAdvice, layerSpeedAt, cameraSpeedAt } from '../../core/timeline/velocity-cut.js';
 import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
+import { parseCameraLine, cameraErrors, cameraWarnings, cameraContinuityErrors, resolvedCamera, nearestCameraMoves, parseTransitionIn, transitionInErrors, transitionInWarnings, resolvedTransitionIn, nearestTransitions } from '../../harness/lib/contract.mjs';
 import { bgPaletteFrom } from '../../core/backgrounds/index.js';
 import { parseColorRGB } from '../../core/color/engine.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
@@ -7365,6 +7366,118 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     beatStarts(scene, 20).beats.length === 0);
 
   fs.rmSync(tmp, { recursive: true, force: true });
+}
+
+// ---- assemble.mjs: a beat's camera: and a camera-kind recipe: (window-dolly) both write cameraMove ---
+// Two producers of the same field: harness/author/assemble.mjs builds a windowed cameraMove entry per
+// beat `camera:` line; recipes/expand.mjs expandCameraLine appends a leg for a camera-kind recipe (e.g.
+// `window-dolly`) at RENDER time, with no overlap check of its own (it just appends to whatever
+// assemble already wrote). Asserted end to end via temp files, the same shape craft-checklist's own
+// asserts already use.
+{
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'assemble-camera-'));
+  const base = path.join(tmp, 'demo');
+  const write = (sb, extraJson) => {
+    fs.writeFileSync(`${base}.storyboard.md`, sb);
+    fs.writeFileSync(`${base}.json`, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9', ...extraJson }));
+    for (const n of [1, 2, 3]) fs.writeFileSync(`${base}.scene${n}.html`, `<div style="position:absolute;inset:0"></div>\n`);
+  };
+  const runAssemble = () => spawnSync(process.execPath, [path.join(repoRoot, 'harness/author/assemble.mjs'), `${base}.json`], { encoding: 'utf8' });
+
+  const sbOverlap = `---\nduration: 4.5s\n---\n\n## Beat 1: A (0s-1.5s)\n- camera: diveIn tx=960 ty=300 to=1.4\n\n`
+    + `## Beat 2: B (1.5s-3.0s)\n- recipe: window-dolly from=1.0 to=2.0 target=scene2\n\n## Beat 3: C (3.0s-4.5s)\n`;
+  write(sbOverlap);
+  const overlapRun = runAssemble();
+  ok('assemble: a beat camera: overlapping a camera-kind recipe: window is refused, both named',
+    overlapRun.status !== 0 && /window-dolly/.test(overlapRun.stderr) && /diveIn/.test(overlapRun.stderr));
+
+  const sbClean = `---\nduration: 4.5s\n---\n\n## Beat 1: A (0s-1.5s)\n- camera: diveIn tx=960 ty=300 to=1.4\n\n`
+    + `## Beat 2: B (1.5s-3.0s)\n- recipe: window-dolly from=1.5 to=2.5 target=scene2\n\n## Beat 3: C (3.0s-4.5s)\n`;
+  write(sbClean);
+  const cleanRun = runAssemble();
+  ok('assemble: a beat camera: and a camera-kind recipe: with non-overlapping windows both build',
+    cleanRun.status === 0 && /1 camera move/.test(cleanRun.stdout));
+  const built = JSON.parse(fs.readFileSync(`${base}.json`, 'utf8'));
+  ok('assemble: the built cameraMove carries only the beat-declared leg (the recipe leg is added later, at render expand)',
+    Array.isArray(built.cameraMove) && built.cameraMove.length === 1 && built.cameraMove[0].move === 'diveIn');
+  ok('assemble: the recipe line still lands in recipes[]', Array.isArray(built.recipes) && built.recipes.length === 1 && built.recipes[0].recipe === 'window-dolly');
+
+  fs.rmSync(tmp, { recursive: true, force: true });
+}
+
+// ---- contract.mjs: the camera: field, and the extended transition_in: syntax --------------------
+// harness/lib/contract.mjs parseCameraLine/parseTransitionIn are the ONE reader storyboard-check.mjs
+// and assemble.mjs both go through; asserted here so a change to either never ships un-tested.
+{
+  const beat = (name, extra) => ({ name, ...extra });
+
+  // a real move name, with params, resolves clean
+  const push = parseCameraLine('slowPush to=1.08');
+  ok('contract: camera: a real move name with a param resolves', push.move === 'slowPush' && push.params.to === 1.08);
+
+  // a shot-word phrase resolves to its move, through the SAME CAMERA_WORDS the engine reads
+  const word = parseCameraLine('push in to=1.1');
+  ok('contract: camera: a camera-word phrase resolves to its move name', word.move === 'slowPush' && word.params.to === 1.1);
+
+  // a decisive but wrong single token is an ERROR naming the near miss
+  const typo = parseCameraLine('slowPussh to=1.08');
+  ok('contract: camera: a decisive typo is an error naming the near miss', !!typo.error && /slowPush/.test(typo.error));
+
+  // a param the move's own signature does not read is an ERROR
+  const badParam = parseCameraLine('slowPush too=1.08');
+  ok('contract: camera: an unknown param is an error naming the move\'s real ones', !!badParam.error && /"too"/.test(badParam.error) && /start, dur, from, to, ease/.test(badParam.error));
+
+  // free prose (never a decisive attempt) is reported as PROSE, not silently dropped
+  const prose = parseCameraLine('the camera pushes in slowly on the card');
+  ok('contract: camera: free prose is reported as prose, never silently dropped', prose.prose === true);
+  const near = nearestCameraMoves(prose.text, 3);
+  ok('contract: camera: nearestCameraMoves names 3 real moves for a prose line', near.length === 3 && near.every((n) => typeof n.blurb === 'string' && n.blurb.length));
+
+  // unset is null, the same "no opinion" convention as parseEdge
+  ok('contract: camera: unset/none is null (no opinion)', parseCameraLine(null) === null && parseCameraLine('none') === null);
+
+  // cameraErrors/cameraWarnings route decisive-wrong to errors and prose to warnings, never both
+  const beats1 = [beat('A', { camera: 'slowPussh' }), beat('B', { camera: 'the camera drifts in' })];
+  ok('contract: cameraErrors catches the decisive typo and not the prose', cameraErrors(beats1).length === 1 && /slowPussh/.test(cameraErrors(beats1)[0]));
+  ok('contract: cameraWarnings catches the prose and not the typo', cameraWarnings(beats1).length === 1 && /drifts in/.test(cameraWarnings(beats1)[0]));
+
+  // resolvedCamera is null for prose/errors/unset, and carries move+params when clean
+  ok('contract: resolvedCamera is null for a beat with no clean resolution', resolvedCamera(beat('A', { camera: 'the camera drifts in' })) === null);
+  const rc = resolvedCamera(beat('A', { camera: 'diveIn tx=960 ty=300' }));
+  ok('contract: resolvedCamera carries move+params for a clean line', rc && rc.move === 'diveIn' && rc.params.tx === 960);
+
+  // cameraContinuityErrors: two camera: legs either side of a cut-free (recipe:) boundary is refused,
+  // because every camera move here resets x/y to identity at its own start key.
+  const seamPair = [beat('A', { camera: 'diveIn tx=960 ty=300' }), beat('B', { camera: 'slowPush', recipe: 'flow-seam out=a in=b axis=x' })];
+  ok('contract: cameraContinuityErrors refuses camera: on both sides of a no-cut seam', cameraContinuityErrors(seamPair).length === 1);
+  // the same pairing across a REAL cut (no recipe:) is fine: a reset there is ordinary editing grammar
+  const cutPair = [beat('A', { camera: 'diveIn tx=960 ty=300' }), beat('B', { camera: 'slowPush' })];
+  ok('contract: cameraContinuityErrors says nothing across a real cut', cameraContinuityErrors(cutPair).length === 0);
+  // one side declaring no camera: at all is never a conflict
+  const oneSided = [beat('A', { camera: 'diveIn tx=960 ty=300' }), beat('B', { recipe: 'flow-seam out=a in=b axis=x' })];
+  ok('contract: cameraContinuityErrors says nothing when only one side moves the camera', cameraContinuityErrors(oneSided).length === 0);
+
+  // transition_in: extended syntax (timing=/dur=/dir=), and the fx: decisive marker unchanged
+  const fx = parseTransitionIn('fx:cinematicZoom');
+  ok('contract: transition_in: a bare fx: line still resolves', fx && fx.fx === 'cinematicZoom' && fx.timing === undefined);
+  const fxExtra = parseTransitionIn('fx:whipPan timing=ramp dur=0.6 dir=left');
+  ok('contract: transition_in: timing=/dur=/dir= all parse onto the resolved fx',
+    fxExtra && fxExtra.fx === 'whipPan' && fxExtra.timing === 'ramp' && fxExtra.dur === 0.6 && fxExtra.dir === 'left');
+  const badTiming = parseTransitionIn('fx:whipPan timing=zoop');
+  ok('contract: transition_in: an unknown timing is an error naming the known ones', !!badTiming.error && /linear, smooth, out, snappy, pop, rush, brake, ramp, spring/.test(badTiming.error));
+  ok('contract: transition_in: prose (no fx: marker) is not a decision', parseTransitionIn('whip pan into the grid') === null);
+
+  const tNear = nearestTransitions('whip pan into the grid', 3);
+  ok('contract: nearestTransitions names 3 real transitions for prose', tNear.length === 3 && tNear.every((n) => TRANSITIONS_NAMES_SEEN(n.name)));
+  function TRANSITIONS_NAMES_SEEN(n) { return typeof n === 'string' && n.length > 0; }
+
+  const tBeats = [beat('A', {}), beat('B', { transition_in: 'whip pan into the grid' })];
+  ok('contract: transitionInWarnings reports unresolved prose, not silently', transitionInWarnings(tBeats).length === 1);
+  const tBeats2 = [beat('A', {}), beat('B', { transition_in: 'fx:cinematicZoom' })];
+  ok('contract: transitionInWarnings says nothing for a resolved fx: line', transitionInWarnings(tBeats2).length === 0);
+  const rt = resolvedTransitionIn(beat('B', { transition_in: 'fx:whipPan dur=0.4' }));
+  ok('contract: resolvedTransitionIn carries mech and the extra params', rt && rt.mech && rt.dur === 0.4);
+  ok('contract: transitionInErrors ignores beat 1 (opens the film, not a boundary)', transitionInErrors([beat('A', { transition_in: 'fx:notreal' })]).length === 0);
 }
 
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter

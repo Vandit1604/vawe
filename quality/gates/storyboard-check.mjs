@@ -19,7 +19,7 @@ import path from 'node:path';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
 import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../../harness/author/storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine } from '../../harness/lib/contract.mjs';
+import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, transitionInErrors, transitionInWarnings, moveErrors, motionErrors } from '../../harness/lib/contract.mjs';
 import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
@@ -118,6 +118,24 @@ const blocks = blocksOf(src);
 if (blocks.length < 2) err('too-few-beats', 'fewer than 2 beats: a video is a sequence of beats; storyboard each one as `## Beat N, title`.');
 const REQ = ['type', 'onscreen', 'why'];
 
+// ── THE CAMERA, THE CUT IN, THE MOVE: reached at plan time, never silently documentary ─────────────
+// `camera:`/`transition_in:`/`move:`/`motion:` are all fields a beat has always been able to write
+// and, until now, only `camera:`/`transition_in:` risked being pure prose nobody built. Checked HERE
+// (plan time, harness/lib/contract.mjs's own parsers, never a second copy of them) rather than only at
+// `make assemble`, so a wrong or unresolved line is visible before the JSON exists, the same "catch it
+// while it is still free to fix" this gate already does for the timeline (see below).
+const sbBeats = timeline(parseStoryboard(src)).beats;
+for (const e of cameraErrors(sbBeats)) err('camera-unknown', e);
+for (const w of cameraWarnings(sbBeats)) warn('camera-undecided', w);
+for (const e of cameraContinuityErrors(sbBeats)) err('camera-snap-at-seam', e);
+for (const e of transitionInErrors(sbBeats)) err('transition-in-unknown', e);
+for (const w of transitionInWarnings(sbBeats)) warn('transition-in-undecided', w);
+// `move:`/`motion:` are already a real grammar (never free prose): a bad line is a typo, not an
+// undecided sentence, so it is reported here the same way `recipe:` already is above, a plan-time
+// WARNING (assemble.mjs still blocks on it at JSON-build time; two gates, one parser).
+for (const e of moveErrors(sbBeats)) warn('move-unknown', e);
+for (const e of motionErrors(sbBeats)) warn('motion-unknown', e);
+
 // ── the vocabulary that separates a MECHANISM from a TRANSFORMATION ──────────────────────────────
 // `mechanism:` answers how the frame moves; `becomes:` answers what the thing turned into. They read
 // alike and are not the same question, and the cheap answer to the second is the first one again.
@@ -169,7 +187,18 @@ for (const b of blocks) {
   if (shortFilm && hasObject && !has('object')) err('beat-missing-object', `beat "${title}" is missing \`object:\`. This film declares \`object: "${field('object')}"\`, so say what it has become in this beat (or where it is, if it is not born yet). Every cut must read "the X becomes the Y". If the object is not really what holds this film, drop it and name the real devices in \`threads:\`.`);
   const missing = REQ.filter((k) => !has(k));
   if (missing.length) err('beat-missing-fields', `beat "${title}" is missing: ${missing.map((m) => `\`${m}\``).join(', ')} (every beat needs a type, its on-screen cues, and a WHY).`);
-  if (!/(^|\n)\s*[-*]?\s*(blueprint|mechanism)\s*:/i.test(b)) warn('beat-missing-blueprint', `beat "${title}": no \`blueprint:\` or \`mechanism:\`, name the shot shape / motion so the JSON transcribes it (make blueprints · docs/EFFECTS.md).`);
+  // A beat that names ANY of these has already said how it moves or arrived, so `blueprint:`/
+  // `mechanism:` are not the only way to satisfy this: `recipe:` names structure copied from a real
+  // film (recipes/README.md), and `camera:`/`move:`/`motion:` each reach a real engine capability
+  // (harness/lib/contract.mjs). `blueprint:` itself is legacy free-text prose kept for older
+  // storyboards; `make blueprints` no longer exists (the mechanism it drove was retired), so the fix
+  // this warning names is `mechanism:` prose, a `recipe:` line, or `make arsenal Q="…"` for a named
+  // core capability, never a dead command.
+  if (!/(^|\n)\s*[-*]?\s*(blueprint|mechanism|recipe|camera|move|motion)\s*:/i.test(b)) {
+    warn('beat-missing-blueprint', `beat "${title}": no \`mechanism:\`, \`recipe:\`, \`camera:\`, \`move:\` or `
+      + `\`motion:\`, name the shot shape / motion so the JSON transcribes it: write \`mechanism:\` prose, a `
+      + `\`recipe:\` line (recipes/README.md), or find a named capability with \`make arsenal Q="…"\`.`);
+  }
 
   // The transformation, as a field of its own. `object:` says where the thing IS; `becomes:` says what
   // it TURNED INTO here. Measured against the reference film, our recreations landed state-changes at

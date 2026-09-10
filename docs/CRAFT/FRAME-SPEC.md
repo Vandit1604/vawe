@@ -58,7 +58,8 @@ Author this as a table/list BEFORE the JSON. Every field maps to our vocabulary:
 | **mechanism** (per sub-scene) | a named effect from [EFFECTS.md](../EFFECTS.md) | pick the move, don't re-derive it (`svg` draw, `diveIn`, count-up, stat-bars) |
 | **persuasion** | the rhetorical job (negative contrast / category naming / risk reversal) | a beat with no persuasion is decoration |
 | **beat** (emotion) | curiosity / recognition / trust / urgency | the felt arc, not just the informational one |
-| **transition_in** | a `cut`/`seam`/`sting` | how this beat arrives (and it IS the prior beat's exit) |
+| **camera** | `<move> [key=value ...]` (a `cameraMove` name or a camera-word phrase, harness/lib/contract.mjs) | reaches a real camera move; prose narrates and never builds, and `make storyboard-check` warns and names the 3 nearest |
+| **transition_in** | `fx:<name> [timing=<t>] [dur=<s>] [dir=<d>]` (mirrors `transitions[]`) | how this beat arrives (and it IS the prior beat's exit); prose narrates and never builds, warned the same way |
 | **held vs developing** | duration + whether the camera/reveals keep moving | allocate held reads (Part 4) |
 
 **Reproduce vs Adapt** is the key discipline: for each beat, name the device's spine you keep ("keep the
