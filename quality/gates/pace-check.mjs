@@ -72,13 +72,26 @@ if (!file) {
   const files = population('pace census', { filter: LIBRARY })
     .names.map((f) => `${SCENE_DIR}/${f}`);
   const rows = [];
-  for (const f of files) { const m = measure(path.resolve(ROOT, f)); if (m) rows.push([f.split('/').pop().replace('.json', ''), m]); }
+  const broken = [];
+  // A scene that fails to LOAD (a stale/renamed effect name, e.g.) must not crash the whole census: the
+  // same bug class already killed this on an unreadable file once (see the note above); loadScene can
+  // throw too, and one bad film should be reported, not take down the verdict for the other 176.
+  for (const f of files) {
+    let m;
+    try { m = measure(path.resolve(ROOT, f)); }
+    catch (e) { broken.push([f, e.message]); continue; }
+    if (m) rows.push([f.split('/').pop().replace('.json', ''), m]);
+  }
   rows.sort((a, b) => a[1].eps - b[1].eps);
   console.log('\n  pace census · events per second · a film with copy should clear ' + FLOOR.toFixed(1) + '\n');
   for (const [n, m] of rows) {
     const flag = m.copy && m.eps < FLOOR ? '  ← asleep' : '';
     console.log(`  ${n.padEnd(30)} ${m.eps.toFixed(2).padStart(5)} ev/s   ${String(m.dur).padStart(5)}s   `
       + `${m.copy ? String(m.copy).padStart(3) + ' line(s)' : '  no copy'}   longest hold ${m.hold.toFixed(1)}s${flag}`);
+  }
+  if (broken.length) {
+    console.log(`\n  ${broken.length} scene(s) could not be measured (fix or drop them, they are not counted above):`);
+    for (const [f, msg] of broken) console.log(`    ✗ ${f}: ${msg}`);
   }
   process.exit(0);
 }

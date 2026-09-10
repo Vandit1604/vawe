@@ -322,6 +322,7 @@ help: list ## [maintenance] alias for `make list`
 
 # make render M=scene: render a format's bundled sample.json
 render: build ## [ship] render a format's bundled sample.json
+	$(eval M := $(if $(M),$(M),scene))
 	. harness/dev/chrome-pin.sh render && harness/dev/render-lock.sh "render-$(M)" ./bin/vawe --module $(M) --data formats/$(M)/sample.json --out out/$(M).mp4
 
 # make all: every format via the render queue

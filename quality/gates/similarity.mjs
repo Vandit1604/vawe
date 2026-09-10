@@ -102,7 +102,10 @@ if (process.argv[1] && process.argv[1].endsWith('similarity.mjs')) {
     let data;
     try { data = JSON.parse(fs.readFileSync(path.resolve(ROOT, ff), 'utf8')); }
     catch (e) { if (explicit) throw e; console.log(`   · skipped ${path.basename(ff)} (not parseable JSON)`); continue; }
-    fps.push({ f: ff, fp: fingerprint(data) });
+    let fp;
+    try { fp = fingerprint(data); }
+    catch (e) { if (explicit) throw e; console.log(`   · skipped ${path.basename(ff)} (${e.message})`); continue; }
+    fps.push({ f: ff, fp });
   }
   let hard = 0, warn = 0;
   console.log('==================== SIMILARITY AUDIT ====================');
