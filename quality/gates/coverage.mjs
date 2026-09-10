@@ -10,9 +10,16 @@
 //
 // WARN tier by design (always exits 0). Unused vocabulary is a fact to act on, not a build failure:
 // a brand-new effect is legitimately unused on the day it lands.
+//
+// `.claude/plans/unwired.plan.md` Phase 6: this walks AUTHORED (a `.storyboard.md` sidecar, a person
+// actually planned it), not the whole library, because a catalogue tile or a held-still demo using a
+// name is not an AUTHOR reaching for it (census.mjs). It also widens past schema props into the rest
+// of the named vocabulary the plan's register named as unwired: idle, part entrance, three scene, and
+// the storyboard-only `move:`/`motion:` grammar (shape/curve/hold), none of which is a scene-JSON key
+// so none of it was visible to the schema-prop scan at all.
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ANIM_NAMES } from '../../core/timeline/clips.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
 import { PAINT_FX_NAMES } from '../../core/surfaces/paint-fx.js';
@@ -21,14 +28,24 @@ import { LOOK_NAMES } from '../../core/looks/index.js';
 import { CANVAS_FX_NAMES } from '../../core/canvas/effects.js';
 import { PRESENTATIONS } from '../../core/cuts/index.js';
 import { SHADER_FX } from '../../core/stings/index.js';
-import { population, LIBRARY_WITH_DERIVATIVES } from '../../harness/lib/census.mjs';
+import { IDLE_REGISTRY } from '../../core/engine/idle.js';
+import { PART_NAMES } from '../../core/motion/parts.js';
+import { THREE_FX } from '../../core/surfaces/three-scenes.js';
+import { SHAPES } from '../../core/motion/shapes.js';
+import { CURVE_NAMES } from '../../core/motion/path-curves.js';
+import { MOTION_CUE_REGISTRY } from '../../core/audio/tactile.js';
+import { BEAT_REGISTRY } from '../../blueprints/index.mjs';
+import { BLOCKS } from '../../blocks/index.mjs';
+import { population, AUTHORED } from '../../harness/lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { parseStoryboard, timeline } from '../../harness/author/storyboard-parse.mjs';
+import { parseMoveEntries } from '../../harness/lib/contract.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dir = path.join(repoRoot, SCENE_DIR);
-const scenes = population('coverage · corpus', { filter: LIBRARY_WITH_DERIVATIVES, quiet: true }).names
+const scenes = population('coverage · corpus', { filter: AUTHORED, quiet: true }).names
   // Two views of the same scene. `j` is LOWERED, because a boundary declared as `transitions` carries a
   // cut style and a sting fx that this report otherwise scores as unexercised, so the library looked
   // like it used less of the engine than it does (docs/MISTAKES.md #408). `raw` is the authored file,
@@ -45,7 +62,11 @@ const layersOf = (j) => { const out = [];
   push(j.layers); return out; };
 
 const used = { anim: new Set(), preset: new Set(), cut: new Set(), sting: new Set(), look: new Set(),
-  canvasFx: new Set(), paint: new Set(), bg: new Set(), type: new Set(), prop: new Set() };
+  canvasFx: new Set(), paint: new Set(), bg: new Set(), type: new Set(), prop: new Set(),
+  idle: new Set(), part: new Set(), three: new Set(), cue: new Set(), beat: new Set(), block: new Set(),
+  moveShape: new Set(), pathCurve: new Set() };
+
+const idleNameOf = (v) => (v && typeof v === 'object' ? v.name : v);
 
 for (const { j, raw } of scenes) {
   // Props live on cuts/stings/bg/camera ITEMS too, not just layers. Collecting only layer keys made
@@ -57,6 +78,8 @@ for (const { j, raw } of scenes) {
   for (const c of j.cuts || []) if (c?.style) used.cut.add(c.style);
   for (const s of j.stings || []) if (s?.fx) used.sting.add(s.fx);
   for (const b of j.bg || []) if (b?.preset) used.bg.add(b.preset);
+  if (raw.idle) used.idle.add(idleNameOf(raw.idle));
+  for (const c of raw.audio?.cues || []) if (c?.name) used.cue.add(c.name);
   for (const l of layersOf(j)) {
     if (l.type) used.type.add(l.type);
     // `anim` and `out` draw from the SAME registry (core/timeline/clips.js ANIM), so counting only `anim`
@@ -68,10 +91,36 @@ for (const { j, raw } of scenes) {
     if (l.canvasFx) used.canvasFx.add(typeof l.canvasFx === 'string' ? l.canvasFx : l.canvasFx.fx);
     if (l.paint) used.paint.add(l.paint);
     if (l.filter) used.look.add(String(l.filter).split(':')[0].trim());
+    if (l.idle) used.idle.add(idleNameOf(l.idle));
+    if (l.three) used.three.add(l.three);
+    for (const p of l.parts || []) if (p?.anim) used.part.add(p.anim);
   }
   // Same split again: the vocabulary above is what the ENGINE renders (lowered), the props are what the
   // author wrote. A layer's `transition` is gone from the lowered copy by the time this runs.
-  for (const l of layersOf(raw)) for (const k of Object.keys(l)) used.prop.add(k);
+  // `beat`/`block` are read here too, before expand() consumes them: a raw `{type:"beat",beat:"x"}`
+  // is gone from `j` by the time this loop runs, replaced by the layers it expanded to.
+  for (const l of layersOf(raw)) {
+    for (const k of Object.keys(l)) used.prop.add(k);
+    if (l.type === 'beat' && l.beat) used.beat.add(l.beat);
+    if (l.type === 'block' && l.block) used.block.add(l.block);
+  }
+}
+
+// The storyboard-only `move:`/`motion:` grammar (harness/lib/contract.mjs): a shape or path curve here
+// never becomes a scene-JSON key (a `layer`-scope entry keys x/y/scale by hand; a `path`-scope entry
+// becomes `motionPath`, already caught by the schema-prop scan), so it is invisible to every loop
+// above. Read straight from the sidecar, the only place the choice survives.
+for (const f of scenes.map((s) => s.f)) {
+  const sbPath = path.join(dir, `${path.basename(f, '.json')}.storyboard.md`);
+  let sb; try { sb = parseStoryboard(fs.readFileSync(sbPath, 'utf8')); } catch { continue; }
+  const { beats } = timeline(sb);
+  for (const b of beats) for (const raw of [...parseMoveEntries(b.move), ...parseMoveEntries(b.motion)]) {
+    if (raw.error) continue;
+    if (raw.scope === 'layer') used.moveShape.add(raw.shape);
+    if (raw.scope === 'path') used.pathCurve.add(raw.curve);
+    if (raw.scope === 'part') used.part.add(raw.kind);
+    if (raw.scope === 'hold') used.idle.add(raw.name);
+  }
 }
 
 const schemaProps = (() => { const s = JSON.parse(fs.readFileSync(path.join(dir, 'schema.json'), 'utf8'));
@@ -89,28 +138,71 @@ const GROUPS = [
   ['composite look', LOOK_NAMES, used.look],
   ['canvas fx', CANVAS_FX_NAMES, used.canvasFx],
   ['paint fx', PAINT_FX_NAMES, used.paint],
+  ['idle', IDLE_REGISTRY.names, used.idle],
+  ['part entrance', PART_NAMES, used.part],
+  ['three scene', THREE_FX, used.three],
+  ['sound cue', MOTION_CUE_REGISTRY.names, used.cue],
+  ['beat blueprint', BEAT_REGISTRY.names, used.beat],
+  ['block', Object.keys(BLOCKS), used.block],
+  ['move shape (storyboard)', Object.keys(SHAPES), used.moveShape],
+  ['path curve (storyboard)', CURVE_NAMES, used.pathCurve],
 ];
 
-console.log(`── coverage across ${scenes.length} authored scene(s)\n`);
+// reach.json (`.claude/plans/subtraction.plan.md` Phase 1) already split 94 schema props into
+// unreachable / unwanted / unsure by hand. Reuse those verdicts rather than re-deriving them: a prop
+// with no verdict here is simply one this report finds newly dark since that census ran.
+const reachVerdicts = (() => { try {
+  const r = JSON.parse(fs.readFileSync(path.join(repoRoot, 'quality/baselines/reach.json'), 'utf8'));
+  return new Map(r.props.map((p) => [p.path, p.verdict])); } catch { return new Map(); } })();
+
 const gaps = [];
 for (const [label, all, seen] of GROUPS) {
   const unused = all.filter((v) => !seen.has(v));
-  const pct = Math.round(((all.length - unused.length) / all.length) * 100);
-  const bar = '█'.repeat(Math.round(pct / 5)).padEnd(20, '·');
-  console.log(`   ${label.padEnd(16)} ${bar} ${String(pct).padStart(3)}%  ${all.length - unused.length}/${all.length}`);
   if (unused.length) gaps.push([label, unused]);
 }
 
 // props the schema declares that NO scene sets: the surface most likely to rot unnoticed
 const unusedProps = [...schemaProps].filter((p) => !used.prop.has(p)).sort();
 
-console.log('\n── unexercised vocabulary (nothing renders these, so nothing would notice a regression)\n');
+/**
+ * darkVocabularySummary() -> total dark (never-used) names across every group above, plus the total
+ * named. For a one-line nudge elsewhere (`make scaffold`) that should not re-run this whole report or
+ * print anything itself.
+ */
+export function darkVocabularySummary() {
+  const total = GROUPS.reduce((n, [, all]) => n + all.length, 0);
+  const dark = gaps.reduce((n, [, unused]) => n + unused.length, 0);
+  return { total, dark, groups: gaps.length, unusedProps: unusedProps.length };
+}
 
-// WARN tier by design (always exits 0): unused vocabulary is a fact to act on, not a build failure.
-const f = gateFindings({ line: (r) => `   ${r.summary}` });
-for (const [label, unused] of gaps) f.warn('unexercised', `${label}: ${unused.length}\n      ${unused.join(', ')}\n`, { at: label });
-if (unusedProps.length) f.warn('unexercised-prop', `schema props no scene sets: ${unusedProps.length}\n      ${unusedProps.join(', ')}\n`);
-f.emit();
+// Only print the report (and only exit through the WARN-tier gate) when run directly. Importing this
+// module for `darkVocabularySummary()` (make scaffold) must be silent and side-effect-free.
+if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
+  console.log(`── coverage across ${scenes.length} AUTHORED scene(s) (a .storyboard.md sidecar exists)\n`);
+  for (const [label, all, seen] of GROUPS) {
+    const unused = all.filter((v) => !seen.has(v));
+    const pct = Math.round(((all.length - unused.length) / all.length) * 100);
+    const bar = '█'.repeat(Math.round(pct / 5)).padEnd(20, '·');
+    console.log(`   ${label.padEnd(24)} ${bar} ${String(pct).padStart(3)}%  ${all.length - unused.length}/${all.length}`);
+  }
 
-console.log('Conformance proves these WORK; coverage says nothing USES them. The audio path had zero of');
-console.log('both, which is why the cuts array produced no sound for as long as it existed (#23).');
+  // Never-used first within a group carries no real order (a Set has none), so sort dark props by
+  // whether reach.json already called them out as `unreachable` (a bug: nobody CAN reach this), because
+  // that is the actionable half of "never used" and should not be buried in a flat alphabetical dump.
+  const annotate = (p) => reachVerdicts.has(p) ? `${p} (${reachVerdicts.get(p)})` : p;
+  const byVerdict = (a, b) => (reachVerdicts.get(a) === 'unreachable' ? -1 : 0) - (reachVerdicts.get(b) === 'unreachable' ? -1 : 0);
+
+  console.log('\n── unexercised vocabulary (nothing renders these, so nothing would notice a regression)\n');
+
+  // WARN tier by design (always exits 0): unused vocabulary is a fact to act on, not a build failure.
+  const f = gateFindings({ line: (r) => `   ${r.summary}` });
+  for (const [label, unused] of gaps) f.warn('unexercised', `${label}: ${unused.length}\n      ${unused.join(', ')}\n`, { at: label });
+  if (unusedProps.length) {
+    const sorted = [...unusedProps].sort(byVerdict);
+    f.warn('unexercised-prop', `schema props no scene sets: ${unusedProps.length} (verdict from quality/baselines/reach.json where known)\n      ${sorted.map(annotate).join(', ')}\n`);
+  }
+  f.emit();
+
+  console.log('Conformance proves these WORK; coverage says nothing USES them. The audio path had zero of');
+  console.log('both, which is why the cuts array produced no sound for as long as it existed (#23).');
+}
