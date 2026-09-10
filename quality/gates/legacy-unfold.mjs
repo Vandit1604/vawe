@@ -97,6 +97,18 @@ for (const c of [...codes].sort()) {
   console.log(`  ${c.padEnd(30)} ${String(liveFires.get(c) || 0).padEnd(13)} ${nowFixed.get(c) || 0}`);
 }
 
+// A MIGRATION WITH NOTHING TO MIGRATE MUST NOT TOUCH THE BASELINE. `liveFires` only grows when this
+// run deletes a waiver, so once the migration has happened a second run counts zero and would stamp
+// `{}`, wiping the debt to nothing and letting every future violation pass. That is the same silent
+// shape this whole pass exists to remove, so it is refused here rather than checked somewhere else.
+if (!dryRun && !entriesRemoved && !deadRemoved) {
+  console.log('\n  nothing to unfold: no `legacy:` waiver is left in any scene.');
+  console.log(`  The ratchet is left exactly as it is. It records the debt the migration exposed,`);
+  console.log(`  and this script cannot re-derive it: it counts what it deletes, and there is nothing`);
+  console.log(`  left to delete. Lower it with quality/gates/waiver-drift.mjs, which measures instead.`);
+  process.exit(0);
+}
+
 const ratchet = Object.fromEntries([...liveFires.entries()].sort());
 if (!dryRun) {
   fs.mkdirSync(path.dirname(RATCHET), { recursive: true });
