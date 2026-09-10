@@ -32,9 +32,49 @@ video starts ahead.
 
 ## The pipeline: how to study any reference
 
+0a. **SAMPLING RATE DECIDES WHAT YOU LEARN. Read this before step 0.**
+
+   A contact sheet shows STATES. Motion lives between them, and a study samples too thinly by default
+   to see it. On one nine-second reference, three sampling rates produced three different films:
+
+   | rate | what the reader concluded |
+   |---|---|
+   | 1 fps | "it never changes composition" |
+   | 2 fps | it flips its ground, light to dark and back |
+   | 10 fps | the stacked echo BUILDS, rotates in 3D, motion-blurs into a cylinder and resolves; the closing phrase is ASSEMBLED WORD BY WORD with four separate cursor grabs |
+
+   Only the last is true. The first two are not partial readings, they are wrong ones, and both were
+   confident enough to design against. A film was planned off the 1 fps read and had to be replanned.
+
+   **The sheet cannot fix this, and picking smarter frames does not either.** `make study` chooses its
+   cells at the delta curve's local maxima, which is a real improvement over in/mid/out. A peak is still
+   where change is MAXIMAL, not the shape of the move around it. Four peaks of a nine-second film read
+   as four states and the reader invents the motion between them.
+
+   So when the question is HOW something moves rather than WHAT it shows:
+
+   ```bash
+   make study VIDEO=refs/_clips/ref.mp4 NAME=ref STRIPS=3 STRIPFPS=10
+   ```
+
+   `STRIPS=<n>` gives the n busiest shots a CONTIGUOUS strip at `STRIPFPS` (default 8). Contiguous is
+   the whole point: sampled in time, in order, so a move reads as a move. It is off by default because
+   a strip costs many times a sheet in tokens, and it is worth that only for the shots that carry the
+   motion you are trying to learn.
+
+   **Keep the clip OUT of `refs/<name>/`.** That directory is where a study WRITES, and the write clears
+   it first. `refs/_clips/` is the convention. A study now refuses rather than deleting its own source.
+
+   **What a dense read gives you that a sheet cannot**: whether an effect is a state or a BUILD, whether
+   two things overlap or follow each other, where a move accelerates and where it settles, and how often
+   the reference actually changes. That last one is the number to copy: hold time, not effect list.
+   And check the END of a reference too. Density is usually front-loaded, and a film that opens at a
+   move every 0.7s may hold its last two seconds almost still.
+
 0. **Run `make study`, and get the structure for free.** `make study VIDEO=refs/ref.mp4 NAME=ref` is
    the film-side twin of `make sections`. It probes the file, detects the shot boundaries, cuts a
-   contact sheet with the IN, MID and OUT frame of every shot, and writes `refs/<name>/study.md` for you
+   contact sheet whose cells are chosen at the delta curve's local maxima (NOT in/mid/out, that comment is
+   stale in places), and writes `refs/<name>/study.md` for you
    to fill in. Everything in step 1 below it does for you; read step 1 anyway, because it says WHY the
    sheet samples three frames per shot and not one.
 
