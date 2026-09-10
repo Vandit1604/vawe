@@ -32,11 +32,14 @@
 //   T.beatMotion   // per scene-timing beat (cut-segmented): { index, start, end, kinds, count, offsets }
 //   T.beatMotionAt(start, end) // the same for an ARBITRARY window, e.g. a storyboard beat's own times
 //   T.handoffs     // [{ from, to, gap, declared }] - an exit leading into another's entrance
+//   T.cameraStillHeldAt(start, end) // {pose, legEndT, layer} | null: the camera at a beat's start is
+//                  // away from rest because an EARLIER leg already ended, and this beat's own content
+//                  // fills the frame (skills/vawe-camera/SKILL.md: a camera move holds its end pose forever)
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sceneDims } from '../../core/layout/safe.js';
-import { cameraView } from '../../core/timeline/sequence.js';
+import { cameraView, cameraAt } from '../../core/timeline/sequence.js';
 import { loadScene } from '../../core/engine/expand.js';
 import { BASE_ENTER, BASE_EXIT } from '../../core/timeline/clips.js';
 
@@ -433,6 +436,32 @@ export function sceneTiming(input) {
   const beatEnds = [...cutTimes, duration];
   const beatMotion = edges.map((start, i) => ({ index: i, ...beatMotionAt(start, beatEnds[i]) }));
 
+  // THE CAMERA HOLDS ITS END POSE (OWNER'S DECISION, skills/vawe-camera/SKILL.md): `cameraAt` holds the
+  // last keyframe past its own window, by design, for every render. This is the scene-side twin of
+  // contract.mjs's `cameraStillHeldWarnings`: it reads the BAKED camera (`d.camera`, already resolved
+  // from every `cameraMove`/recipe leg) rather than re-parsing the plan, so it catches whatever actually
+  // reached the JSON, including a hand-authored `camera[]` array the plan-side gate never sees.
+  const FULL_FRAME_SHARE = 0.8;
+  const REST_S_EPS = 0.02, REST_PX_EPS = 1, REST_DEG_EPS = 1;
+  const restCam = (c) => !c || (Math.abs(c.s - 1) < REST_S_EPS && Math.abs(c.x) < REST_PX_EPS && Math.abs(c.y) < REST_PX_EPS
+    && Math.abs(c.rx) < REST_DEG_EPS && Math.abs(c.ry) < REST_DEG_EPS && Math.abs(c.roll) < REST_DEG_EPS);
+  /** cameraStillHeldAt(start, end) -> {pose, legEndT, layer} | null. `start` is a beat's own start
+   * (the pose the camera actually sits at when that beat begins): away from rest, held there since a
+   * LEG THAT ALREADY ENDED (never one still live across `start`, which is ordinary motion, not a hold),
+   * and this beat's own content fills the frame (a beat that itself frames a close/tight shot is not
+   * misled by an inherited push, it may well be using it). */
+  const cameraStillHeldAt = (start, end) => {
+    if (!camKfs.length) return null;
+    const maxT = Math.max(...camKfs.map((k) => num(k.t, 0)));
+    if (start < maxT - EPS) return null;                 // still inside a live leg
+    const pose = cameraAt(d.camera, start);
+    if (restCam(pose)) return null;
+    const active = content.filter((_, idx) => contentSpans[idx][0] <= start + EPS && contentSpans[idx][1] > start);
+    const full = active.find((L) => canvasShare(L, CANVAS_W, CANVAS_H).share >= FULL_FRAME_SHARE);
+    if (!full) return null;
+    return { pose, legEndT: maxT, layer: full.id || full.type || 'layer' };
+  };
+
   // HANDOFFS. Declared ones (flow-seam's out/in) are exact. Everything else is measured: an exit
   // ending within HANDOFF_WINDOW of another layer's entrance, in the SAME screen region. The window is
   // not an imported UI number; it is this film's own declared handoffs, which land at 0s gap by
@@ -475,6 +504,6 @@ export function sceneTiming(input) {
   return {
     scene: d, layers, content, spans, contentSpans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges,
     sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H],
-    lives, beatMotion, beatMotionAt, handoffs,
+    lives, beatMotion, beatMotionAt, handoffs, cameraStillHeldAt,
   };
 }

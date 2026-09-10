@@ -165,14 +165,29 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const missingHandoffs = T.lives.filter((L) => (L.exit || L.becomes) && !handoffFrom.has(L.id)
     && L.end < T.duration - 1e-6);
 
-  const rows = beats.map((b) => {
+  // the beat whose window a time falls in, so a held pose can be named "beat M's move" instead of a
+  // bare timestamp - falls back to the last beat for a leg that ends past every declared window.
+  const beatAtTime = (t) => beats.findIndex((b) => t >= b.start - 1e-6 && t < b.end + 1e-6);
+
+  const rows = beats.map((b, i) => {
     const scn = T.beatMotionAt(b.start, b.end);
     const frm = ourProf ? frameSummary(ourProf, b.start, b.end) : null;
     const ref = refProf ? frameSummary(refProf, b.start, b.end) : null;
     const entering = T.lives.filter((L) => L.start >= b.start && L.start < b.end);
     const refRatio = refProf ? lateEarlyRatio(refProf, b.start, b.end) : null;
     const eye = eyePlanCheck(ourFrames, b);
-    return { ...b, scn, frm, ref, refRatio, eye, entering: entering.map((L) => L.id) };
+    const held = T.cameraStillHeldAt(b.start, b.end);
+    let camStillHeld = null;
+    if (held) {
+      const heldSince = beatAtTime(held.legEndT);
+      const p = held.pose;
+      const poseStr = `s=${p.s.toFixed(2)}${(Math.abs(p.x) >= 1 || Math.abs(p.y) >= 1) ? `, x=${p.x.toFixed(0)} y=${p.y.toFixed(0)}` : ''}`;
+      camStillHeld = `camera-still-held: beat ${i + 1} (${b.name}) plans a full-frame layer ("${held.layer}") `
+        + `but the camera is still at ${poseStr} from ${heldSince >= 0 ? `beat ${heldSince + 1}'s` : 'a'} camera `
+        + `move (ended ${held.legEndT}s); add a return: camera: slowPush to=1, or a window-dolly with `
+        + `zoomTo=1, whichever the grammar supports.`;
+    }
+    return { ...b, scn, frm, ref, refRatio, eye, camStillHeld, entering: entering.map((L) => L.id) };
   });
 
   const exitChecks = T.lives.map(exitEmphasis).filter(Boolean);
@@ -207,6 +222,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         console.log(`    eye:    primary motion ends ${label}${verdict}`);
       }
     }
+    if (r.camStillHeld) console.log(`    ~ ${r.camStillHeld}`);
   }
 
   console.log('');

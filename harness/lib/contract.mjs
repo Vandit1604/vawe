@@ -45,7 +45,7 @@ import { CURVES as PATH_CURVES } from '../../core/motion/path-curves.js';
 import { boundaryMechanism } from '../../core/transitions/lower.js';
 import { TRANSITIONS } from '../../core/transitions/catalog.js';
 import { pickRecipe, RECIPES } from '../../recipes/index.mjs';
-import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS, cameraMoveParams } from '../../core/camera-moves/index.js';
+import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS, cameraMoveParams, buildCameraMove } from '../../core/camera-moves/index.js';
 import { CAMERA_WORDS, resolveCameraMove } from '../../core/registry/vocab.js';
 import { TIMINGS } from '../../core/cuts/timings.js';
 // score/toks: the SAME word-overlap ranker `make arsenal` uses (harness/author/arsenal.mjs), reused
@@ -398,6 +398,131 @@ export function cameraWarnings(beats) {
 export function resolvedCamera(b) {
   const p = parseCameraLine(b.camera);
   return (p && !p.error && !p.prose) ? p : null;
+}
+
+// ── THE CAMERA HOLDS ITS END POSE (OWNER'S DECISION, skills/vawe-camera/SKILL.md): every camera move keeps
+// its last keyframe until a LATER move changes it (core/timeline/sequence.js cameraAt holds the final
+// key; core/engine/produce.js bakeCameraMove never closes a leg). The engine keeps rendering that; this
+// is a report-only warning so a beat planned for the normal/rest framing is not silently shot pushed in.
+//
+// A REAL END POSE, not a second arithmetic: resolved through buildCameraMove, the same builder
+// bakeCameraMove calls at render time, so a move's actual endpoint (including the `ease`/leg math each
+// core/camera-moves/*.js file owns) is read once and never re-derived here.
+const REST_S_EPS = 0.02, REST_PX_EPS = 1, REST_DEG_EPS = 1;
+
+/** isRestCameraPose({s,x,y,rx,ry,roll}) -> true when every channel sits at its identity value. */
+export function isRestCameraPose(pose) {
+  if (!pose) return true;
+  return Math.abs(pose.s - 1) < REST_S_EPS && Math.abs(pose.x) < REST_PX_EPS && Math.abs(pose.y) < REST_PX_EPS
+    && Math.abs(pose.rx) < REST_DEG_EPS && Math.abs(pose.ry) < REST_DEG_EPS && Math.abs(pose.roll) < REST_DEG_EPS;
+}
+
+/** cameraMoveEndPose(move, params, dims) -> {s,x,y,rx,ry,roll} | null. Builds the move's real keyframes
+ * and reads the last one; null when the move cannot be built at plan time (a param this grammar cannot
+ * supply, e.g. `followCursor`'s cursor path) - unresolvable is reported as "no opinion", never as rest. */
+export function cameraMoveEndPose(move, params, dims = [1920, 1080]) {
+  try {
+    const kf = buildCameraMove({ move, ...params }, dims);
+    if (!Array.isArray(kf) || !kf.length) return null;
+    const last = kf.reduce((m, k) => (k.t > m.t ? k : m), kf[0]);
+    return { s: last.s ?? 1, x: last.x ?? 0, y: last.y ?? 0, rx: last.rx ?? 0, ry: last.ry ?? 0, roll: last.roll ?? 0 };
+  } catch { return null; }
+}
+
+// `window-dolly` (recipes/recipes.json, kind "camera") is the one non-hand-authored path onto the
+// camera: a diveIn-shaped push toward a named layer's box. Its target position is not known at plan
+// time (it depends on the target layer's real box), but a dolly-in NEVER ends at rest by construction
+// (`zoomTo` defaults to 1.3, and the recipe's whole point is "tightening the frame"), so the scale
+// alone already answers the only question this file asks: is the camera away from rest.
+function windowDollyEndPose(rp) {
+  const zoomTo = rp.params.zoomTo != null ? parseFloat(rp.params.zoomTo) : (rp.def.params?.zoomTo?.default ?? 1.3);
+  return { s: Number.isFinite(zoomTo) ? zoomTo : 1.3, x: 0, y: 0, rx: 0, ry: 0, roll: 0 };
+}
+
+/** beatCameraEndPose(b, dims) -> {pose, label} | null. Where THIS beat's own camera: line or
+ * camera-kind recipe leaves the camera, or null when the beat names no camera move at all (a beat that
+ * names one but cannot be resolved still returns {pose:null,...} so the caller can tell "no move" from
+ * "a move whose end pose is unknown"). */
+export function beatCameraEndPose(b, dims = [1920, 1080]) {
+  const cam = resolvedCamera(b);
+  if (cam) {
+    const paramStr = Object.entries(cam.params).map(([k, v]) => `${k}=${v}`).join(' ');
+    return { pose: cameraMoveEndPose(cam.move, cam.params, dims), label: `camera: ${cam.move}${paramStr ? ' ' + paramStr : ''}` };
+  }
+  if (b.recipe) {
+    const rp = parseRecipeLine(b.recipe);
+    if (!rp.error && rp.def && rp.def.kind === 'camera') {
+      return { pose: rp.name === 'window-dolly' ? windowDollyEndPose(rp) : null, label: `recipe: ${b.recipe}` };
+    }
+  }
+  return null;
+}
+
+// A beat "plans a normal camera" when the plan itself reads as the rest/full-frame composition, by any
+// ONE of four independent signals docs/CRAFT/STORYBOARD-TEMPLATE.md already gives a beat to state this
+// in. Kept as named, separately-testable regexes rather than one clever combined rule, per CLAUDE.md's
+// "fewer, clearer rules" - each is a fact about the plan's own words, not an inference about intent.
+const NORMAL_SHOT_RE = /\b(wide|full|establishing|rest|normal)\b/i;
+const NORMAL_EYE_START_RE = /\b(whole|full)\s+(frame|window|screen|app|composition)\b/i;
+// `picture:`/`onscreen:` prose read for a full-frame composition, and ONLY when the beat names no
+// camera/shot of its own: with either present, those are the decisive signal and prose is not asked
+// to guess past them.
+const NORMAL_PICTURE_RE = /\bfull(?:[\s-])?(?:frame|screen)\b|\bfills?\s+the\s+frame\b|\bwhole\s+(?:app|window|screen|frame)\b/i;
+// A "full frame" object_in: centred and covering most of a standard canvas, regardless of which of the
+// five aspect ratios (docs/AGENTS.md) is in play - 1,400,000px^2 clears every one of them (smallest is
+// 1080x1080 = 1,166,400) while still excluding a merely large card or panel.
+const FULL_FRAME_OBJECT_AREA = 1_400_000;
+
+/** normalCameraEvidence(b) -> the matched evidence string, or null. Exported (not just the boolean
+ * below) so a caller can NAME what it saw, which the warning message needs. */
+export function normalCameraEvidence(b) {
+  if (b.shot && NORMAL_SHOT_RE.test(b.shot)) return `shot: "${b.shot}"`;
+  const inEdge = parseEdge(b.object_in);
+  if (inEdge && !inEdge.error && inEdge.placement === 'center' && inEdge.w * inEdge.h >= FULL_FRAME_OBJECT_AREA)
+    return `object_in: "${b.object_in}" (full frame)`;
+  if (b.eye) {
+    const eyeStart = String(b.eye).split('->')[0].trim();
+    if (NORMAL_EYE_START_RE.test(eyeStart)) return `eye: "${eyeStart}" (the whole frame)`;
+  }
+  if (!b.camera && !b.shot) {
+    const text = `${b.picture || ''} ${(Array.isArray(b.onscreen) ? b.onscreen.join(' ') : b.onscreen || '')}`;
+    if (NORMAL_PICTURE_RE.test(text)) return 'a full composition (picture/onscreen)';
+  }
+  return null;
+}
+
+const fmtCameraPose = (pose) => {
+  const parts = [`s=${pose.s.toFixed(2)}`];
+  if (Math.abs(pose.x) >= REST_PX_EPS || Math.abs(pose.y) >= REST_PX_EPS) parts.push(`x=${pose.x.toFixed(0)} y=${pose.y.toFixed(0)}`);
+  for (const [k, v] of [['rx', pose.rx], ['ry', pose.ry], ['roll', pose.roll]]) if (Math.abs(v) >= REST_DEG_EPS) parts.push(`${k}=${v.toFixed(0)}°`);
+  return parts.join(', ');
+};
+
+/**
+ * cameraStillHeldWarnings(beats, dims) -> string[]. Walks beats in order, tracking whether the camera
+ * is currently held away from rest by an earlier `camera:`/camera-recipe leg. When a LATER beat plans
+ * the normal camera (normalCameraEvidence) while that hold is still open, warns and names the exact
+ * move and the return line to paste. Report-only (skills/vawe-camera/SKILL.md keeps the hold as the render):
+ * this exists so an author who did not intend the hold finds out before the render does.
+ */
+export function cameraStillHeldWarnings(beats, dims = [1920, 1080]) {
+  const warns = [];
+  let held = null; // {pose, label, beatIdx, isRecipe} | null once returned to rest
+  beats.forEach((b, i) => {
+    // Judged against the pose the camera carries ENTERING this beat, i.e. whatever an EARLIER beat left
+    // it at: this beat's own camera: line (a push starting from rest and ending pushed, say, over an
+    // establishing shot) is this beat's own decision, not an inherited defect, so it must not be graded
+    // against its own not-yet-applied end pose.
+    const evidence = normalCameraEvidence(b);
+    if (evidence && held) {
+      warns.push(`camera-still-held: beat ${i + 1} (${b.name}) plans ${evidence} but the camera is still `
+        + `at ${fmtCameraPose(held.pose)} from beat ${held.beatIdx + 1}'s \`${held.label}\`; add a return: `
+        + `camera: slowPush to=1 or a window-dolly with zoomTo=1, whichever the grammar supports.`);
+    }
+    const own = beatCameraEndPose(b, dims);
+    if (own && own.pose) held = isRestCameraPose(own.pose) ? null : { pose: own.pose, label: own.label, beatIdx: i };
+  });
+  return warns;
 }
 
 // ── THE EYE: every device points somewhere, and the plan has to say where ──────────────────────────
