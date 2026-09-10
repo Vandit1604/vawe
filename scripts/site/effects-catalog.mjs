@@ -124,7 +124,8 @@ const CORE = [];
 const walkCore = (d) => {
   for (const e of fs.readdirSync(path.join(root, d), { withFileTypes: true })) {
     const p = `${d}/${e.name}`;
-    if (e.isDirectory()) walkCore(p); else if (/\.(js|mjs)$/.test(e.name)) CORE.push(p);
+    // a test file runs its assertions on import and prints, so it is never a vocabulary to read
+    if (e.isDirectory()) walkCore(p); else if (/\.(js|mjs)$/.test(e.name) && !/\.test\.m?js$/.test(e.name)) CORE.push(p);
   }
 };
 walkCore('core');
