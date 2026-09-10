@@ -3,21 +3,9 @@
   "authoring": {
     "allow": [
       "ends-on-nothing",
-      "off-colour",
-      "no-storyboard",
-      "plain-slideshow",
-      "no-preflight",
-      "no-transition",
-      "feature-poverty"
+      "off-colour"
     ],
-    "_allow_why": "off-colour: a site backdrop tuned to the live page it sits behind, not to the film theme.",
-    "_why": {
-      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
-      "plain-slideshow": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film reaches past a slideshow: kinetic type, a camera move, or real transitions)",
-      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)",
-      "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)"
-    }
+    "_allow_why": "off-colour: a site backdrop tuned to the live page it sits behind, not to the film theme."
   },
   "authoringNote": "PRE-EXISTING empty closing plate, not a design choice: this scene was authored before beat-check existed and ends on a bare backdrop. Waived so it keeps rendering; fix the timing and drop this waiver.",
   "theme": "vawe",
