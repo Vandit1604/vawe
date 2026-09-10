@@ -2,6 +2,7 @@
 when: a real video looks better than ours and you want to learn/copy why
 answers: "the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map"
 group: story
+codes: duration, cut-missed, ground-false-confidence
 ---
 
 # REFERENCE STUDY: learn from great videos, then copy the feel (not just the frames)
