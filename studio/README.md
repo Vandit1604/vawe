@@ -1,3 +1,9 @@
+---
+when: changing the studio UI, adding a panel, or working out where its code lives
+answers: "what studio/ is: the author-facing local preview server and its shell, split into a server, a page assembler and real css/js files"
+group: engine
+---
+
 # studio/
 
 The live scrubbable preview for one scene: a static server, a plan/make/look/ship shell, and a
