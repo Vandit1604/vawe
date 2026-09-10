@@ -4,7 +4,7 @@ An AI agent window types a shopping prompt, a tagline names what the product und
 deck of product photos flicks by, a second tagline names what it finds, a results window rises with
 a grid of matched products, and the wordmark assembles from scattered shapes to close.
 
-duration: 13.03s · aspect: 1640:1080 (nearest canvas 4:3) · pace: median act 1.73s, 27.6 joints/min · ground: light → light → light → light → light → light
+duration: 13.03s · aspect: 1640:1080 (nearest canvas 4:3) · pace: median act 1.73s, 27.6 joints/min · ground: light grey → light grey → blurred photo wash, blue then olive then brick red → light grey → olive wash → light grey
 
 ## Act 1 (0s-4.54s)
 on screen: a tilted app window titled "New Agent" (macOS traffic-light dots, a sidebar with Search,
@@ -29,7 +29,7 @@ on screen: the line "MADERA understands your taste." enters word by word, each w
 (MADERA bold near-black, understands tan, your green, taste blue), settling to a single dark colour
 once the sentence completes; faint grey triangle/circle/square motifs drift in the background
 enters: from the right along the x axis (measured, gap 0.1s)
-leaves: the settled sentence holds, then defocuses/blurs as the whole frame pushes toward black
+leaves: the sentence slides off left word by word, the trailing words blurring as they go
 (measured: x axis, gap 0.05s, see refs/example-madera/ideate-strips/joint-2-3.png)
 ground: light (measured, luma 221.1)
 camera: static hold once the words settle, no push
@@ -45,9 +45,9 @@ on screen: a swipe-card deck (a Tinder-style card: a product photo of a room int
 buttons below it) cycles through several photos as a hand cursor drags each card off; the ground tints
 shift under each card (pale blue-grey, then olive, then brick red) as if lit by the photo on screen
 enters: from the right along the x axis (measured, gap 0.05s)
-leaves: the last card (a warm red-lit interior) swipes away and the frame blurs to a flat red-brown
-field before cutting (measured: x axis, gap 0.05s, see refs/example-madera/ideate-strips/joint-3-4.png)
-ground: light, #a48f76 (measured, luma 136); the true ground here is a blurred product photo, tinted
+leaves: the last card (a warm red-lit interior) exits left, the red photo ground fades to light
+grey under the empty frame, no cut (measured: x axis, gap 0.05s, see refs/example-madera/ideate-strips/joint-3-4.png)
+ground: mid, warm, #a48f76 (measured, luma 136); the true ground here is a blurred product photo, tinted
 blue then olive then red as the cards change, not a flat fill
 camera: a slight continuous push on the card stack, steady through each swipe
 type: none (photo cards + UI button labels only)
@@ -76,9 +76,10 @@ on screen: a tilted browser/app window rises from the bottom; its heading types 
 "Japandi and Modern Paper Lamps", while a grid of product photos (paper lamps: a floor lamp, a table
 lamp, a pendant, styled shots) fills in beneath it, ending at six photos in two rows
 enters: from the bottom along the y axis (measured, gap 0.05s)
-leaves: the settled window blurs and the frame washes toward the closing ground colour (measured: y
+leaves: the window rises straight up out of frame, blurring, while the olive ground fades to light
+grey (measured: y
 axis, gap 0.083s, see refs/example-madera/ideate-strips/joint-5-6.png)
-ground: light, #8c7c68 (measured, luma 175.6); an olive-brown wash behind the tilted white window
+ground: mid, olive, #8c7c68 (measured, luma 175.6); an olive-brown wash behind the tilted white window
 camera: a slow continuous dolly-in on the window as its content fills in
 type: the app's own UI type for the heading, plus small product captions under each photo
 
