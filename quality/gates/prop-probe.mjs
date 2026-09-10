@@ -159,6 +159,17 @@ const VALUES = {
   threeKeys: [{ t: 2, three: 'extrudeText' }],
 };
 
+// Props whose string is handed to CSS verbatim. The value has to PARSE, not merely be a string.
+const CSS_VALUED = {
+  background: 'rgb(1, 2, 3)', bg: 'rgb(1, 2, 3)', color: 'rgb(1, 2, 3)', fill: 'rgb(1, 2, 3)',
+  stroke: 'rgb(1, 2, 3)', border: '1px solid rgb(1, 2, 3)',
+  mask: 'linear-gradient(rgb(0, 0, 0), rgba(0, 0, 0, 0))',
+  maskImage: 'linear-gradient(rgb(0, 0, 0), rgba(0, 0, 0, 0))',
+  origin: '50% 50%', transformOrigin: '50% 50%',
+  items: 'center', justify: 'flex-start', align2: 'center', alignItems: 'center', justifyItems: 'center', justifyContent: 'center',
+  textAlign: 'left', direction: 'ltr', wrap: 'nowrap', flexWrap: 'nowrap',
+};
+
 function valueFor(prop, type) {
   if (`${type}.${prop}` in VALUES) return VALUES[`${type}.${prop}`];
   if (prop in VALUES) return VALUES[prop];
@@ -168,7 +179,11 @@ function valueFor(prop, type) {
   if (t.includes('boolean') && !t.includes('number')) return true;
   if (t.startsWith('array')) return [];
   if (t.startsWith('object')) return {};
-  if (t.includes('string') && !t.includes('number')) return 'probe';
+  // A CSS-VALUED PROP NEEDS A LEGAL CSS VALUE. 'probe' in `background` or `maskImage` is not a colour
+  // or an image, and this probe only ever worked there because the browser DISCARDED the declaration
+  // in silence. core/layers/util.js now refuses a dropped declaration by name, so the probe's own
+  // synthetic value became a boot error: the check depended on the silent fallback it exists beside.
+  if (t.includes('string') && !t.includes('number')) return CSS_VALUED[prop] ?? 'probe';
   // 0.5 is truthy, inside every 0..1 dial and harmless as a px count; the schema's own `min` wins
   // where there is one, because core/validate.mjs refuses the whole scene over a single out-of-range
   // number and one refused scene is a whole type unchecked.
