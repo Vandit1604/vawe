@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CUES, renderCue, musicBed, writeWav, normalize, SR } from '../../core/audio/kit.mjs';
+import { CUES, renderCue, musicBed, encodeWav, wavDuration, normalize, SR } from '../../core/audio/kit.mjs';
 import { CUT_CUE, SEAM_CUE } from '../../core/audio/cues.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -63,7 +63,9 @@ for (const [role, cue] of Object.entries(ROLES)) {
   // seed from the ROLE name so each file is stable and independent of table order
   const seed = [...role].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) >>> 0, 7);
   // Normalized to a common ceiling; per-cue balance is the mixer's job (sfxGain in audio.go).
-  const dur = writeWav(path.join(SFX, `${role}.wav`), normalize(renderCue(spec, seed), 0.8));
+  const buf = normalize(renderCue(spec, seed), 0.8);
+  fs.writeFileSync(path.join(SFX, `${role}.wav`), encodeWav(buf));
+  const dur = wavDuration(buf);
   total += dur; n++;
 }
 
@@ -84,7 +86,9 @@ const CREDITS = path.join(MUSIC, 'credits.json');
 const credits = fs.existsSync(CREDITS) ? JSON.parse(fs.readFileSync(CREDITS, 'utf8')) : {};
 for (const [name, opts] of Object.entries(BEDS)) {
   // A bed sits UNDER everything: a much lower ceiling than a cue, before musicGain.
-  const dur = writeWav(path.join(MUSIC, `${name}.wav`), normalize(musicBed(opts), 0.34));
+  const buf = normalize(musicBed(opts), 0.34);
+  fs.writeFileSync(path.join(MUSIC, `${name}.wav`), encodeWav(buf));
+  const dur = wavDuration(buf);
   if (credits[name]?.source && !credits[name].generated)
     console.log(`  ⚠ ${name}: credits.json described a downloaded track (${credits[name].source}). This bake replaced that file, so the entry is being corrected.`);
   credits[name] = { generated: 'generators/media/audio-bake.mjs', genre: 'synth pad',
