@@ -1,0 +1,1562 @@
+{
+  "generatedAt": "2026-09-10T16:59:47.129Z",
+  "films": [
+    "_glass-shapes",
+    "ab-skill-shotcode",
+    "ab2-skill-tenor",
+    "ab4-a-ledgerline",
+    "ab4-b-ledgerline",
+    "hi-vandit",
+    "one-word",
+    "onefile",
+    "onefilm",
+    "playhead",
+    "post-corva",
+    "post-determinism",
+    "post-fathom",
+    "post-halyard",
+    "post-ledgerline",
+    "post-postmark",
+    "post-tock",
+    "post-trailhead",
+    "preface-launch",
+    "process",
+    "product-feature-tour",
+    "rec3-skill",
+    "saas-hero-launch",
+    "sample",
+    "showcase-cuts",
+    "showcase-data",
+    "showcase-stings",
+    "showcase-type",
+    "showcase-type-labour",
+    "showcase-ui",
+    "thread",
+    "together-recreation",
+    "vawe-explainer",
+    "vawe-explainer-v2",
+    "vawe-flow",
+    "vawe-glass-hero",
+    "vawe-launch",
+    "vawe-oblique",
+    "vawe-shader-terminal",
+    "vawe-teaser",
+    "verbs"
+  ],
+  "results": [
+    {
+      "file": "arsenal-check.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 141,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "asset-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 4,
+      "filmsBlocked": 0,
+      "medianMs": 27,
+      "severities": {
+        "error": 0,
+        "warn": 17,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "audio-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 36,
+      "filmsBlocked": 0,
+      "medianMs": 36,
+      "severities": {
+        "error": 46,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "audit-scenes.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 1,
+      "medianMs": 15002,
+      "severities": {
+        "error": 0,
+        "warn": 4,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 1
+    },
+    {
+      "file": "author-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 41,
+      "medianMs": 2405,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "beat-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 41,
+      "filmsBlocked": 2,
+      "medianMs": 76,
+      "severities": {
+        "error": 4,
+        "warn": 48,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "beats-of.mjs",
+      "kind": "library-skip",
+      "note": "no CLI: exports only, not wired to any make target"
+    },
+    {
+      "file": "block-scale.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 0,
+      "medianMs": 400,
+      "severities": {
+        "error": 0,
+        "warn": 4,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "block-schema.mjs",
+      "kind": "library-skip",
+      "note": "no CLI: exports only, not wired to any make target"
+    },
+    {
+      "file": "blocks-audit.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 1,
+      "medianMs": 60,
+      "severities": {
+        "error": 6,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "canvas-purity.mjs",
+      "kind": "other-skip",
+      "note": "multi-file/baseline/probe CLI, not a per-film or repo check"
+    },
+    {
+      "file": "code-quality.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 1,
+      "medianMs": 29,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "compare.mjs",
+      "kind": "other-skip",
+      "note": "multi-file/baseline/probe CLI, not a per-film or repo check"
+    },
+    {
+      "file": "conformance.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 1,
+      "medianMs": 15044,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 1
+    },
+    {
+      "file": "content-check.mjs",
+      "kind": "other-skip",
+      "note": "owned by the harness/media authoring team (not touched per plan), needs --ref <brand> and a rendered draft; not a bare per-film check"
+    },
+    {
+      "file": "copy-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 5,
+      "filmsBlocked": 0,
+      "medianMs": 28,
+      "severities": {
+        "error": 0,
+        "warn": 6,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "coverage.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 1,
+      "medianMs": 145,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "coverage.test.mjs",
+      "kind": "test-skip",
+      "note": "run via lib-test.mjs, not censused directly"
+    },
+    {
+      "file": "craft-checklist.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 37,
+      "filmsBlocked": 37,
+      "medianMs": 70,
+      "severities": {
+        "error": 335,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "craft-coverage.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 0,
+      "medianMs": 97,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 1
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "critique.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 26,
+      "filmsBlocked": 0,
+      "medianMs": 62,
+      "severities": {
+        "error": 0,
+        "warn": 80,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "dead-branch.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 1,
+      "medianMs": 3563,
+      "severities": {
+        "error": 26,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "designspec-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 11,
+      "filmsBlocked": 0,
+      "medianMs": 32,
+      "severities": {
+        "error": 0,
+        "warn": 28,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "direction-floor.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 39,
+      "filmsBlocked": 26,
+      "medianMs": 129,
+      "severities": {
+        "error": 41,
+        "warn": 82,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "discovery.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 151,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "dissolve-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 27,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "doc-map.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 0,
+      "medianMs": 72,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 1
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "doc-refs.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 227,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "docker-context.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 1,
+      "medianMs": 351,
+      "severities": {
+        "error": 0,
+        "warn": 1,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "docs-drift.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 1,
+      "medianMs": 1223,
+      "severities": {
+        "error": 1,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "draft-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 41,
+      "filmsBlocked": 41,
+      "medianMs": 2007,
+      "severities": {
+        "error": 164,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "eye-trace.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 5,
+      "filmsBlocked": 0,
+      "medianMs": 84,
+      "severities": {
+        "error": 0,
+        "warn": 7,
+        "info": 0
+      },
+      "referencedBy": [
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "feature-audit.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 0,
+      "medianMs": 127,
+      "severities": {
+        "error": 0,
+        "warn": 20,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "font-audit.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 8,
+      "medianMs": 771,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "frame-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 1,
+      "filmsBlocked": 1,
+      "medianMs": 32,
+      "severities": {
+        "error": 2,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "frame-check.test.mjs",
+      "kind": "test-skip",
+      "note": "run via lib-test.mjs, not censused directly"
+    },
+    {
+      "file": "gate-mutation.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 1,
+      "medianMs": 15006,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 1
+    },
+    {
+      "file": "generated-check.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 1690,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "glyphs-audit.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 31,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "inspect.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 29,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "judge.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 41,
+      "filmsBlocked": 41,
+      "medianMs": 73,
+      "severities": {
+        "error": 41,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "knobs-audit.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 46,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "layer-props.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 1,
+      "medianMs": 115,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "ledger-not.test.mjs",
+      "kind": "test-skip",
+      "note": "run via lib-test.mjs, not censused directly"
+    },
+    {
+      "file": "ledger.mjs",
+      "kind": "other-skip",
+      "note": "multi-file/baseline/probe CLI, not a per-film or repo check"
+    },
+    {
+      "file": "legacy-fold.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 1,
+      "medianMs": 101,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "legacy-unfold.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 1,
+      "medianMs": 153,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "other-gate",
+        "harness"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "lib-test.mjs",
+      "kind": "other-skip",
+      "note": "the test runner itself (do-not-edit); run separately at validation, not a fire-rate candidate"
+    },
+    {
+      "file": "lint-test.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 706,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "mistakes-dupes.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 56,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "motion-audit.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 770,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "motion-floor.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 28,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "motion-floor.test.mjs",
+      "kind": "test-skip",
+      "note": "run via lib-test.mjs, not censused directly"
+    },
+    {
+      "file": "motion-split.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 1,
+      "filmsBlocked": 40,
+      "medianMs": 15042,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 3
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 33
+    },
+    {
+      "file": "next.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 39,
+      "medianMs": 208,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "no-judge.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 105,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "no-judge.test.mjs",
+      "kind": "test-skip",
+      "note": "run via lib-test.mjs, not censused directly"
+    },
+    {
+      "file": "no-silent-fallback-blocks.test.mjs",
+      "kind": "test-skip",
+      "note": "run via lib-test.mjs, not censused directly"
+    },
+    {
+      "file": "output-contract.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 1,
+      "medianMs": 30,
+      "severities": {
+        "error": 0,
+        "warn": 9,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "pace-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 17,
+      "filmsBlocked": 0,
+      "medianMs": 61,
+      "severities": {
+        "error": 0,
+        "warn": 21,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "paints-nothing.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 2,
+      "filmsBlocked": 0,
+      "medianMs": 1766,
+      "severities": {
+        "error": 0,
+        "warn": 2,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "paths.mjs",
+      "kind": "library-skip",
+      "note": "no CLI: exports only, not wired to any make target"
+    },
+    {
+      "file": "plan-vs-render.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 2,
+      "filmsBlocked": 0,
+      "medianMs": 67,
+      "severities": {
+        "error": 0,
+        "warn": 2,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "preflight.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 41,
+      "filmsBlocked": 41,
+      "medianMs": 30,
+      "severities": {
+        "error": 41,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "probe-purity.mjs",
+      "kind": "other-skip",
+      "note": "multi-file/baseline/probe CLI, not a per-film or repo check"
+    },
+    {
+      "file": "prop-probe.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 1,
+      "medianMs": 15049,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 1
+    },
+    {
+      "file": "read-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 22,
+      "filmsBlocked": 0,
+      "medianMs": 65,
+      "severities": {
+        "error": 0,
+        "warn": 82,
+        "info": 0
+      },
+      "referencedBy": [
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "render-verify.mjs",
+      "kind": "other-skip",
+      "note": "renders a full video per film; too expensive to run 41x in a census pass"
+    },
+    {
+      "file": "rubric.mjs",
+      "kind": "library-skip",
+      "note": "no CLI: exports only, not wired to any make target"
+    },
+    {
+      "file": "rung.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 65,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "scene-snap.mjs",
+      "kind": "other-skip",
+      "note": "multi-file/baseline/probe CLI, not a per-film or repo check"
+    },
+    {
+      "file": "scene-timing.mjs",
+      "kind": "library-skip",
+      "note": "no CLI: exports only, not wired to any make target"
+    },
+    {
+      "file": "schema-drift.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 70,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "screen-readiness.test.mjs",
+      "kind": "test-skip",
+      "note": "run via lib-test.mjs, not censused directly"
+    },
+    {
+      "file": "seam-forensics.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 41,
+      "medianMs": 77,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "seam-snap.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 41,
+      "medianMs": 66,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "sfx-audit.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 28,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "silent-fallback.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 1,
+      "medianMs": 54,
+      "severities": {
+        "error": 29,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "sim-audit.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 33,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "similarity.mjs",
+      "kind": "other-skip",
+      "note": "multi-file/baseline/probe CLI, not a per-film or repo check"
+    },
+    {
+      "file": "site-counts.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 235,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "snap-blocks.mjs",
+      "kind": "other-skip",
+      "note": "multi-file/baseline/probe CLI, not a per-film or repo check"
+    },
+    {
+      "file": "snap-scenes.mjs",
+      "kind": "other-skip",
+      "note": "multi-file/baseline/probe CLI, not a per-film or repo check"
+    },
+    {
+      "file": "snap-signature.mjs",
+      "kind": "library-skip",
+      "note": "no CLI: exports only, not wired to any make target"
+    },
+    {
+      "file": "stage.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 150,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "stage.test.mjs",
+      "kind": "test-skip",
+      "note": "run via lib-test.mjs, not censused directly"
+    },
+    {
+      "file": "storyboard-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 41,
+      "filmsBlocked": 26,
+      "medianMs": 64,
+      "severities": {
+        "error": 104,
+        "warn": 324,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "storyboard-check.test.mjs",
+      "kind": "test-skip",
+      "note": "run via lib-test.mjs, not censused directly"
+    },
+    {
+      "file": "study-check.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 41,
+      "medianMs": 28,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "study-verify.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 41,
+      "medianMs": 34,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "sweep-static.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 36,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "sweep-static.test.mjs",
+      "kind": "test-skip",
+      "note": "run via lib-test.mjs, not censused directly"
+    },
+    {
+      "file": "theme-look-spread.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 0,
+      "medianMs": 47,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "tile.mjs",
+      "kind": "library-skip",
+      "note": "no CLI: exports only, not wired to any make target"
+    },
+    {
+      "file": "transitions-catalog.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 1,
+      "filmsBlocked": 0,
+      "medianMs": 46,
+      "severities": {
+        "error": 0,
+        "warn": 1,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "unused.mjs",
+      "kind": "repo",
+      "filmsRun": 1,
+      "filmsFired": 0,
+      "filmsBlocked": 1,
+      "medianMs": 135,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    },
+    {
+      "file": "waiver-drift.mjs",
+      "kind": "film",
+      "filmsRun": 41,
+      "filmsFired": 0,
+      "filmsBlocked": 41,
+      "medianMs": 83,
+      "severities": {
+        "error": 0,
+        "warn": 0,
+        "info": 0
+      },
+      "referencedBy": [
+        "Makefile",
+        "other-gate",
+        "harness",
+        "docs"
+      ],
+      "timeouts": 0
+    }
+  ]
+}
