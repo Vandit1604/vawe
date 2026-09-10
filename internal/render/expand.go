@@ -1,7 +1,8 @@
 package render
 
-// expandSugar: `{"type":"block"}`, `{"type":"beat"}` and `{"type":"comp"}` are build-time sugar,
-// resolved by core/engine/expand.js `expandScene`. That function runs fine in a browser (it is pure ESM, no
+// expandSugar: `{"type":"block"}`, `{"type":"beat"}`, `{"type":"comp"}`, and a top-level `recipes[]`
+// are build-time sugar, resolved by core/engine/expand.js `expandScene` (recipes via recipes/expand.mjs,
+// called from inside it). That function runs fine in a browser (it is pure ESM, no
 // `fs`), but THIS browser cannot reach it: internal/scene's file server default-denies everything
 // outside core/themes/formats/assets/.vawe-data (scene.go `served`), by design, because this process
 // renders scenes from strangers over MCP, and `blocks/`/`blueprints/` (156+30 factories, one of which
@@ -23,7 +24,7 @@ import (
 	"regexp"
 )
 
-var sugarType = regexp.MustCompile(`"type"\s*:\s*"(block|beat|comp)"`)
+var sugarType = regexp.MustCompile(`"type"\s*:\s*"(block|beat|comp)"|"recipes"\s*:`)
 
 func hasSugar(raw []byte) bool { return sugarType.Match(raw) }
 
