@@ -16,7 +16,7 @@ group: crosscutting
 > (or re-run `make study`) and regenerate. The measured half comes off the film; the authored half
 > is written by a person into the JSON and merged forward on every re-study.
 
-17 reference film(s) measured. 16 carry a written reading.
+24 reference film(s) measured. 16 carry a written reading.
 
 ## The numbers, on one scale
 
@@ -27,7 +27,14 @@ every render**, so this table is a target and not a mood.
 |---|---|---|---|---|---|---|
 | arc-space-swiping | 3s | · | · | · | 0.71–1.41 | light → light |
 | arc-zero-chrome | 3s | · | · | · | 1.18–1.43 | light → light |
+| example-app-exists | 12.93s | · | · | · | 1.08–7.33 | light → mid → dark? → light → light → light → light |
+| example-madera | 13.03s | · | · | · | 0.3–9.67 | light → light → light → light → mid → light → light → light → light → light |
+| example-plants | 7.22s | 2 | 3.61s | 16.6 | 1.84–5.12 | mid? → dark |
 | framer-hero | 21.03s | 2 | 10.52s | 5.7 | 1.66–3.78 | dark → dark |
+| make-it-move | 8.98s | · | · | · | 1.5–18.28 | mid → mid → light → dark → light → mid |
+| mo1 | 8.98s | 4 | 1.99s | 26.7 | 5.39–18.28 | mid → mid? → light → mid |
+| ours-oblique | 20.3s | 4 | 5.57s | 11.8 | 0.15–1.08 | mid → light → light → light |
+| ours-tc | 19.8s | · | · | · | 0.09–6.65 | light → light → light → light → light → light → light → light → light → light |
 | pin-1119918632363453012 | 5.44s | 2 | 2.72s | 22.1 | 0.83–2.14 | dark → light |
 | pin-310748443060787071 | 30.86s | 3 | 9.01s | 5.8 | 1.23–10.21 | dark? → light → dark |
 | pin-333759022406760643 | 79.95s | 5 | 5.03s | 3.8 | 2.19–5.9 | dark → dark → dark → dark → dark |
@@ -43,13 +50,13 @@ every render**, so this table is a target and not a mood.
 | rebuilt | 29.23s | 5 | 4.07s | 10.3 | 0.41–6.04 | dark → light → dark → light → dark |
 | together-chat | 19.78s | · | · | · | 0.93–3.54 | light → light → light → light → light → light → light → light → light → light |
 
-**A shot in work that reads well measures 0.08 to 13.49.**
-Across the films whose cuts are measurable, the median shot runs **4.07s**.
+**A shot in work that reads well measures 0.08 to 18.28.**
+Across the films whose cuts are measurable, the median shot runs **3.61s**.
 
 **`·` means no hard cut was found** (peak scene score below threshold), so the tool fell back to
 fixed sampling. Ground and motion stay real: they are measured over spans and do not care where the
 spans came from. A shot count is not, so it is not printed. That is often the finding rather than a
-failure: `arc-space-swiping`, `arc-zero-chrome`, `pin-583145851797705243`, `pinref`, `together-chat` are built on travel and dissolves.
+failure: `arc-space-swiping`, `arc-zero-chrome`, `example-app-exists`, `example-madera`, `make-it-move`, `ours-tc`, `pin-583145851797705243`, `pinref`, `together-chat` are built on travel and dissolves.
 
 ## What each film does
 
@@ -87,6 +94,18 @@ KEPT AS A CAPTURE REFERENCE, NOT A FILM, for the same reason as its twin: no bea
 | 1 | 0s | 1.5s | light 173 | 1.18 | The panel slides away and the images take the whole frame. Peak 10.6 at 0.47s is that removal. | The boundary at 1.58s is the panel returning. |
 | 2 | 1.5s | 1.5s | light 177.7 | 1.43 | The reverse. Peak 6.9 is the panel's return. | Nothing: it loops. |
 
+### example-app-exists
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
+### example-madera
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
+### example-plants
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
 ### framer-hero
 
 **Takeaway.** A PRODUCT DEMO CAN BE ONE CONTINUOUS PROOF. Prompt, generation, result, and the result then re-shown from angles that each answer a different doubt. Only 2 hard cuts in 21s and a median beat of 10.5s, the longest in this store, yet its motion runs 1.66 to 3.78 because the SURFACES move even when the frame does not.
@@ -101,6 +120,22 @@ ITS PEAKS ARE ARRIVALS, NOT DEPARTURES. 28.1, 16.8, 30.8, 40.2 are all something
 |---|---|---|---|---|---|---|
 | 1 | 0s | 5.8s | dark 31 | 1.66 | The typing, and then the generated page building itself in a second pane. Peaks of 28.1 and 16.8 are the page appearing, not the type. | No hard cut: the detected boundary at 5.88s is the built page taking the full frame. |
 | 2 | 5.8s | 15.23s | dark 38.8 | 3.78 | The camera moves over real product surfaces and the surfaces themselves change. Peak 40.2 at 17.2s is the multi-viewport reveal. | Nothing: it ends on the three viewports held. |
+
+### make-it-move
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
+### mo1
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
+### ours-oblique
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
+
+### ours-tc
+
+_Measured, never read. The numbers above are real; nobody has written down what causes what._
 
 ### pin-1119918632363453012
 
