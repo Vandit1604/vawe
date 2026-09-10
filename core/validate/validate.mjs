@@ -27,6 +27,11 @@ import { nearMisses } from '../registry/registry.js';
 import { parseColor, contrastRatio } from '../color/engine.js';
 import { ASPECTS, PLACEMENT } from '../layout/safe.js';
 import { boundaryMechanism, lowerScene } from '../transitions/lower.js';
+// PRESENTATIONS (cut fx) and UNITS (seam fx) are the ground truth `dirWarnings` probes for whether a
+// fx actually reads `dir`, the same way core/cuts/presentations.js SOLO_BLIND/cutWrites already probe
+// a presentation's own output instead of trusting a hand-kept list.
+import { PRESENTATIONS } from '../cuts/index.js';
+import { UNITS } from '../transitions/units.js';
 import { junctionTable, marksOf, bindWindowsToJunctions } from '../timeline/junctions.js';
 import { resolveSpectacle } from '../timeline/spectacle.js';
 import { beatGridPath } from '../beats/index.js';
@@ -408,6 +413,138 @@ export function sceneUnitWarnings(cfg) {
       + 'screen, and the rest of the beat renders EMPTY with no other symptom. Either end this layer at '
       + `${boundary}s and start its continuation there, or set \`"acrossBeats": true\` if it is meant to `
       + 'belong to the film rather than to one beat.');
+  }
+  return out;
+}
+
+// seamMotionFreezeWarnings(cfg): a boundary transition that lowers to a SEAM (core/transitions/lower.js
+// boundaryMechanism) bakes the OUTGOING and INCOMING beat to two still rasters once (formats/scene/
+// scene.js bakeSeams, ~1613-1649) and blends between those two stills for the whole window
+// (drawSeams, ~1593-1611): the live DOM underneath is fully covered. That is a deliberate determinism
+// trade (a seam has to composite two frames it can hold onto, not the moving stage), and it stays: the
+// bug this warns about is that nothing SAYS it, so a layer's `motion` track, an `acrossBeats` layer, or
+// a camera keyframe placed inside the window plays right up to the seam, freezes for its whole
+// duration, then jumps to wherever it was "supposed" to be the moment the window ends.
+export function seamMotionFreezeWarnings(cfg) {
+  const d = cfg || {};
+  const windows = [];
+  for (const t of Array.isArray(d.transitions) ? d.transitions : []) {
+    if (!isObj(t) || typeof t.fx !== 'string') continue;
+    const at = t.at ?? t.t;
+    const dur = +t.dur || 0;
+    if (typeof at !== 'number' || !(dur > 0)) continue;
+    let mech;
+    try { mech = boundaryMechanism(t.fx, t.mech); } catch { continue; } // unknown fx: reported elsewhere
+    if (mech === 'seam') windows.push({ at, end: at + dur, fx: t.fx });
+  }
+  // Legacy scenes can still author `seams[]` directly; every entry there is a seam by definition.
+  for (const s of Array.isArray(d.seams) ? d.seams : []) {
+    if (!isObj(s)) continue;
+    const at = s.at ?? s.t;
+    const dur = +s.dur || 0;
+    if (typeof at === 'number' && dur > 0) windows.push({ at, end: at + dur, fx: s.fx || s.style || 'seam' });
+  }
+  if (!windows.length) return [];
+
+  const inWin = (w, x) => x > w.at + 1e-6 && x < w.end - 1e-6;
+  const overlapsWin = (w, a, b) => a < w.end - 1e-6 && b > w.at + 1e-6;
+  const FREEZE_FIX = 'a seam bakes two still frames and blends between them, so nothing inside its '
+    + 'window can move: it freezes for the window, then jumps once the window ends. Use a cut, a '
+    + 'flow-seam recipe, or move the motion outside the window.';
+
+  const out = [];
+  const walk = (ls, path) => (Array.isArray(ls) ? ls : []).forEach((L, i) => {
+    if (!isObj(L)) return;
+    const label = `${path}[${i}]${L.id ? ` #${L.id}` : ''}`;
+    const start = +L.start || 0;
+    const dur = +L.duration || +L.dur || 0;
+    for (const w of windows) {
+      if (Array.isArray(L.motion) && L.motion.some((k) => isObj(k) && inWin(w, start + (+k.t || 0)))) {
+        out.push(`${label} has a \`motion\` key inside the seam at ${w.at}s-${w.end}s ("${w.fx}"): ${FREEZE_FIX}`);
+      }
+      if (L.acrossBeats === true && dur > 0 && overlapsWin(w, start, start + dur)) {
+        out.push(`${label} is \`acrossBeats\` and runs through the seam at ${w.at}s-${w.end}s ("${w.fx}"): ${FREEZE_FIX}`);
+      }
+    }
+    if (Array.isArray(L.children)) walk(L.children, `${path}[${i}].children`);
+  });
+  walk(d.layers, 'layers');
+
+  const cam = Array.isArray(d.camera) ? d.camera : Array.isArray(d.cam) ? d.cam : null;
+  if (cam) for (const w of windows) {
+    if (cam.some((k) => isObj(k) && inWin(w, +k.t || 0)))
+      out.push(`camera has a keyframe inside the seam at ${w.at}s-${w.end}s ("${w.fx}"): ${FREEZE_FIX}`);
+  }
+  return out;
+}
+
+// dirCutFx / dirSeamFx: DERIVED, not hand-kept, sets of fx names whose rendered output actually changes
+// with `dir`. Probed exactly the way core/cuts/presentations.js already probes a cut (SOLO_BLIND,
+// cutWrites): call the real function/read the real shader and see whether the output depends on it,
+// so an fx added tomorrow classifies itself instead of drifting out of a maintained list.
+//
+// core/transitions/catalog.js's own DIRECTIONAL_CUT set was checked against this probe and does not
+// match it: `drop` is listed there but its enter/exit never touch `o.dir`, while `cube`, `squeeze`,
+// `roll` and `spin` all read it and are not listed. That set is used elsewhere (`make transitions`
+// listing) and is out of this change's ownership; this probe does not trust it.
+//
+// All four cardinal dirs, not just two: `sign()` in core/cuts/presentations.js is +1 for both `left`
+// and `up`, so a two-value probe ("left" vs "up") missed `roll`/`spin`, which only flip sign on
+// right/down. Four dirs, compared against each other, catches an axis-only OR a sign-only dependency.
+const dirCutFx = new Set(Object.keys(PRESENTATIONS).filter((name) => {
+  const P = PRESENTATIONS[name];
+  const outs = ['left', 'right', 'up', 'down'].map((dir) => {
+    const o = { dir, dist: 90, cx: 50, cy: 50 };
+    let s = '';
+    for (let i = 1; i < 10; i++) { const p = i / 10; s += JSON.stringify(P.enter(p, o)) + JSON.stringify(P.exit(p, o)); }
+    return s;
+  });
+  return outs.some((o) => o !== outs[0]);
+}));
+
+// A seam's GLSL has no JS function to call, but every "vawe" house unit is the SAME fixed preamble
+// wrapped around a body (core/transitions/units.js `vawe()`), and that preamble is the only place
+// `u_dir`/its `ax`/`sg` derivatives appear when the body itself never reads direction. Stripping the
+// fixed text back off (when present) isolates exactly what the unit itself wrote; a raw (non-`vawe`)
+// unit's own GLSL is used as-is. If the preamble text ever changes, the strip silently stops matching
+// and this falls back to scanning the whole shader, which only makes it warn MORE often than it should,
+// never less: false positives there resolve when someone reads the warning message and re-checks.
+const VAWE_DIR_PREAMBLE = 'vec4 transition(vec2 uv){\n  float p = clamp(u_p, 0.0, 1.0);\n'
+  + '  vec2 aspect = vec2(u_res.x/u_res.y, 1.0);\n  float ax = abs(u_dir.x) > 0.5 ? uv.x : uv.y;\n'
+  + '  float sg = u_dir.x + u_dir.y;\n  vec4 col;\n';
+const VAWE_DIR_SUFFIX = '\n  return vec4(col.rgb, 1.0);\n}';
+const dirSeamFx = new Set(UNITS.filter((u) => {
+  const g = u.glsl || '';
+  const body = g.startsWith(VAWE_DIR_PREAMBLE) && g.endsWith(VAWE_DIR_SUFFIX)
+    ? g.slice(VAWE_DIR_PREAMBLE.length, g.length - VAWE_DIR_SUFFIX.length) : g;
+  return /\bu_dir\b|\bax\b|\bsg\b/.test(body);
+}).map((u) => u.name));
+
+// dirWarnings(cfg): a `transitions[]` entry can set `dir`, but only some fx read it. A cut fx not in
+// `dirCutFx`, a seam fx not in `dirSeamFx`, or ANY sting (a generative overlay with no direction input
+// at all, core/stings/index.js) accepts `dir` as valid schema and then quietly never uses it: the
+// render is byte-identical for every `dir` value, and nothing else says so.
+export function dirWarnings(cfg) {
+  const d = cfg || {};
+  const out = [];
+  for (const [i, t] of (Array.isArray(d.transitions) ? d.transitions : []).entries()) {
+    if (!isObj(t) || t.dir == null || typeof t.fx !== 'string') continue;
+    let mech;
+    try { mech = boundaryMechanism(t.fx, t.mech); } catch { continue; } // unknown fx: reported elsewhere
+    const at = t.at ?? t.t;
+    const label = `transitions[${i}]${typeof at === 'number' ? ` (at ${at}s)` : ''} fx "${t.fx}"`;
+    if (mech === 'sting') {
+      out.push(`${label} sets \`dir\` but lowers to a STING: a sting is a generative overlay with no `
+        + 'direction input, and `dir` is silently dropped. Remove it, or use a cut/seam if direction matters.');
+    } else if (mech === 'cut' && !dirCutFx.has(t.fx)) {
+      out.push(`${label} sets \`dir\` but lowers to a CUT whose presentation never reads it `
+        + '(core/cuts/presentations.js): the transition renders identically for every `dir`. Directional '
+        + `cuts: ${[...dirCutFx].sort().join(', ')}.`);
+    } else if (mech === 'seam' && !dirSeamFx.has(t.fx)) {
+      out.push(`${label} sets \`dir\` but lowers to a SEAM whose shader never reads \`u_dir\` `
+        + '(core/transitions/units.js): the blend renders identically for every `dir`. Directional '
+        + `seams: ${[...dirSeamFx].sort().join(', ')}.`);
+    }
   }
   return out;
 }
@@ -1538,7 +1675,8 @@ if (isMain) {
       console.log(`✓ ${path.relative(root, file)} (${mod})`);
     }
     // lint warnings (non-failing unless --strict): authoring smells the schema can't express
-    const warns = [...lintData(data), ...audioWarns, ...htmlFileWarns, ...sceneUnitWarnings(data)];
+    const warns = [...lintData(data), ...audioWarns, ...htmlFileWarns, ...sceneUnitWarnings(data),
+      ...seamMotionFreezeWarnings(data), ...dirWarnings(data)];
     if (warns.length) {
       if (strict) failed++;
       for (const w of warns) console.error(`    ⚠ ${w}`);

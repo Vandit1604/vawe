@@ -41,10 +41,21 @@ else {
 }
 
 // 2. every unique frame is on a page, and every page's ledger line is filled.
+// refs/<name>/ is gitignored: a checkout that never ran `make study` here has a committed grammar but
+// no pages to re-check it against. Missing evidence must not be read as a WORSE verdict than the one
+// already on disk, so this stops here rather than falling through to "no page filled it in" below,
+// which would silently downgrade a committed "complete" to "incomplete" for a reason that has nothing
+// to do with the study itself.
 const pagesJsonFile = path.join(refDir, 'pages.json');
 const pagesMdFile = path.join(refDir, 'pages.md');
-if (!fs.existsSync(pagesJsonFile)) missing.push(`pages.json: missing (refs/${NAME}/pages.json). Re-run \`make study\``);
-else {
+const pagesMissing = !fs.existsSync(pagesJsonFile) || !fs.existsSync(pagesMdFile);
+if (pagesMissing) {
+  console.log(`\n  STUDY-CHECK · ${NAME}\n`);
+  console.log(`  ? cannot verify: pages missing (refs/${NAME}/pages.json and/or pages.md). Run \`make study VIDEO=… NAME=${NAME}\` to restore them, then re-run this check.`);
+  console.log(`  The committed grammar/${NAME}.json is left untouched: no evidence to check it against is not the same as a failed check.\n`);
+  process.exit(2);
+}
+{
   const pj = JSON.parse(fs.readFileSync(pagesJsonFile, 'utf8'));
   const paged = (pj.pages || []).reduce((n, p) => n + p.cells.length, 0);
   if (paged < pj.uniqueFrames)
@@ -52,8 +63,7 @@ else {
 }
 
 const unfilledPages = [];
-if (!fs.existsSync(pagesMdFile)) missing.push(`pages.md: missing (refs/${NAME}/pages.md). Re-run \`make study\``);
-else {
+{
   for (const line of fs.readFileSync(pagesMdFile, 'utf8').split('\n')) {
     // Non-greedy up to the FIRST "): ", not the last ": " in the line: the fill placeholder itself
     // contains a colon ("<fill: what happens…"), and a greedy match swallowed it into the prefix.
