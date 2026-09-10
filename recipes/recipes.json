@@ -3,23 +3,77 @@
     "kind": "seam",
     "blurb": "one act leaves fast on an axis with motion blur, a frame of empty ground, the next act arrives on the same axis and direction while the ground changes colour",
     "sources": [
-      { "ref": "example-madera", "t": 4.58, "note": "editor window exits left, 'MADERA understands' enters from the right, word by word" },
-      { "ref": "example-madera", "t": 5.98, "note": "tagline exits left word by word, product card enters from the right, ground darkens" },
-      { "ref": "example-madera", "t": 8.13, "note": "card exits left over a red blurred-photo ground, ground fades to light grey, 'find' enters from the right" },
-      { "ref": "example-madera", "t": 9.58, "note": "tagline exits up, ground turns olive, a tilted window rises from the bottom" },
-      { "ref": "example-madera", "t": 11.08, "note": "window exits up, ground returns to light grey, a shape rises from the bottom" }
+      {
+        "ref": "example-madera",
+        "t": 4.54,
+        "note": "editor window exits left, 'MADERA understands' enters from the right, word by word"
+      },
+      {
+        "ref": "example-madera",
+        "t": 6.0,
+        "note": "tagline exits left word by word, product card enters from the right, ground darkens"
+      },
+      {
+        "ref": "example-madera",
+        "t": 8.12,
+        "note": "card exits left over a red blurred-photo ground, ground fades to light grey, 'find' enters from the right"
+      },
+      {
+        "ref": "example-madera",
+        "t": 9.57,
+        "note": "tagline exits up, ground turns olive, a tilted window rises from the bottom"
+      },
+      {
+        "ref": "example-madera",
+        "t": 11.08,
+        "note": "window exits up, ground returns to light grey, a shape rises from the bottom"
+      }
     ],
-    "slots": { "at": "seconds: the first frame of empty ground", "out": "layer id", "in": "layer id", "ground": "[outgoing ground id, incoming ground id], optional" },
+    "slots": {
+      "at": "seconds: the first frame of empty ground",
+      "out": "layer id",
+      "in": "layer id",
+      "ground": "[outgoing ground id, incoming ground id], optional"
+    },
     "params": {
-      "axis": { "default": "x", "enum": ["x", "y"], "note": "x flows right to left, y flows bottom to top; madera changes axis once per film" },
-      "gap": { "default": 0.12, "unit": "s", "note": "empty ground measured 0.05 to 0.2 across the five seams" },
-      "exitDur": { "default": 0.4, "unit": "s" },
-      "enterDur": { "default": 0.45, "unit": "s" },
-      "stagger": { "default": 0.06, "unit": "s", "note": "words of an entering line lag each other; expand.mjs does not yet split a text layer into words, see recipes/README.md" },
-      "groundFade": { "default": 0.5, "unit": "s" },
-      "exitPx": { "default": { "x": 2500, "y": 1400 }, "one-source": true, "note": "distance the outgoing layer rushes before `at`" },
-      "enterPx": { "default": { "x": 2300, "y": 1300 }, "one-source": true, "note": "distance the incoming layer travels to arrive at 0" },
-      "driftPx": { "default": { "x": 60, "y": 40 }, "one-source": true, "note": "small anticipation pull the wrong way before the rush" }
+      "axis": {
+        "default": "x",
+        "enum": [
+          "x",
+          "y"
+        ],
+        "note": "x flows right to left, y flows bottom to top; madera changes axis once per film"
+      },
+      "gap": {
+        "default": 0.067,
+        "unit": "s",
+        "note": "measured by make study as the core of empty-ground frames: 0.10, 0.05, 0.05, 0.05, 0.083 s across the five seams"
+      },
+      "exitDur": {
+        "default": 0.4,
+        "unit": "s"
+      },
+      "enterDur": {
+        "default": 0.45,
+        "unit": "s"
+      },
+      "stagger": {
+        "default": 0.06,
+        "unit": "s",
+        "note": "words of an entering line lag each other; expand.mjs does not yet split a text layer into words, see recipes/README.md"
+      },
+      "groundFade": {
+        "default": 0.5,
+        "unit": "s"
+      },
+      "driftPx": {
+        "default": {
+          "x": 60,
+          "y": 40
+        },
+        "one-source": true,
+        "note": "small anticipation pull the wrong way before the rush"
+      }
     }
   }
 }
