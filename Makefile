@@ -390,6 +390,14 @@ study-verify: ## [check] prove `make study` measures correctly, by running it on
 study-check: ## [check] is a study COMPLETE: every unique frame paged, every page filled, every shot's prose written?
 	@node quality/gates/study-check.mjs $(NAME)
 
+# make content-check D=<film.json> REF=<ref>: is this film's CONTENT as rich as the reference it studied,
+# per act (never a global bar)? Pairs the film's storyboard beats (or its own recipes[] joints) with the
+# reference's studied shots by order, unless PAIRS=1:1,2:2 says otherwise; needs the film already
+# rendered (out/<film>.mp4) and the reference already carrying content (`make study ... --content-only`,
+# or a full study). Report-only: STRICT=1 exits 1 on an `under` or `placeholder-surface` finding.
+content-check: ## [check] is this film's content as rich as the reference it studied, per act (D=<film.json> REF=<ref>, [PAIRS=1:1,2:2] [STRICT=1])
+	@node quality/gates/content-check.mjs $(D) --ref $(REF) $(if $(PAIRS),--pairs $(PAIRS)) $(if $(STRICT),--strict)
+
 # make recreate NAME=<grammar> [THEME=vawe] [OUT=path]: a scene SKELETON from a studied reference.
 # Emits only what was MEASURED (duration, boundary times, backdrop lightness, a motion target per beat).
 # Every composition decision is left as a hole, on purpose: see the header for why.
