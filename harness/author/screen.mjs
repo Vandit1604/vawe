@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { extractKitBlock, buildKit } from '../lib/stagekit.mjs';
+import { extractKitBlock, buildKit, MIN_VIDEO_TEXT_PX } from '../lib/stagekit.mjs';
 import { measureFrame, measureVideo } from '../media/content.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
@@ -322,7 +322,7 @@ function main() {
   console.log(`\n· video readiness ·`);
   const rs = boxes ? smallestRendered(boxes) : null;
   const smallest = rs ?? r.smallest;
-  console.log(`  smallest text: ${smallest == null ? 'n/a (no sized text found)' : `${smallest}px${rs == null ? ' (read from source, not rendered)' : ''}` + (smallest < 28 ? '  ⚠ under 28px at 1920 wide: unreadable in a moving frame' : '  ok')}`);
+  console.log(`  smallest text: ${smallest == null ? 'n/a (no sized text found)' : `${smallest}px${rs == null ? ' (read from source, not rendered)' : ''}` + (smallest < MIN_VIDEO_TEXT_PX ? `  ⚠ under ${MIN_VIDEO_TEXT_PX}px at 1920 wide: unreadable in a moving frame` : '  ok')}`);
   console.log(`  elements: ${r.elementCount}`);
   console.log(`  colour: ${r.tokenUses} theme-token use(s), ${r.rawColorUses} raw hex/colour use(s)${r.rawColorUses && !r.tokenUses ? '  ⚠ no theme tokens used' : ''}`);
   if (!r.images.length) console.log('  images: none');
