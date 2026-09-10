@@ -174,7 +174,9 @@ export function classifyRegions(a, b, { w = GW, h = GH } = {}) {
     const globalExtent = ((gx1 - gx0 + 1) * (gy1 - gy0 + 1)) / (w * h);
     if (globalExtent >= RIGID_EXTENT) {
       const globalRatio = shiftCostOf(allIdx, a, b, d, w, h, SHIFT_RANGE) / (total / allIdx.length);
-      if (globalRatio <= RIGID_EXPLAIN) return [{ kind: 'camera', amount: 1, extent: globalExtent }];
+      // cx/cy: a whole-frame move has no single place the eye is pulled to more than another, so its
+      // centroid is the frame's own centre rather than a guess at a direction.
+      if (globalRatio <= RIGID_EXPLAIN) return [{ kind: 'camera', amount: 1, extent: globalExtent, cx: 0.5, cy: 0.5 }];
     }
   }
 
@@ -200,8 +202,30 @@ export function classifyRegions(a, b, { w = GW, h = GH } = {}) {
       const scaleRatio = scaleCostOf(cells, a, b, d, w, h, cx, cy) / cost0;
       kind = scaleRatio <= RIGID_EXPLAIN ? 'scale' : 'reveal';
     }
-    return { kind, amount: amount / total, extent };
+    // cx/cy: this region's own centroid, as a FRACTION of the frame (0..1 each axis), so a caller can
+    // bucket it into frame thirds without knowing GW/GH. Where the change actually sits, not just how
+    // much of it there is, is what `make choreo`'s eye-plan check reads this for.
+    return { kind, amount: amount / total, extent, cx: (x0 + x1) / 2 / w, cy: (y0 + y1) / 2 / h };
   });
+}
+
+/**
+ * primaryRegionAt(frames, {fps, start, end}) -> {cx, cy} in 0..1, the PRIMARY region's amount-weighted
+ * mean centroid across a time window, or `null` when nothing changed. "Primary" is the single
+ * largest-amount region of each frame pair, the same definition `profile()`'s own `primaryShare`
+ * already uses, so "the primary motion" means the same thing wherever this file reports it.
+ */
+export function primaryRegionAt(frames, { fps = SAMPLE_FPS, start, end } = {}) {
+  const i0 = Math.max(0, Math.round(start * fps));
+  const i1 = Math.min(frames.length - 1, Math.round(end * fps));
+  let sx = 0, sy = 0, sw = 0;
+  for (let i = i0; i < i1; i++) {
+    const regions = classifyRegions(frames[i], frames[i + 1]);
+    if (!regions.length) continue;
+    const primary = regions.reduce((m, r) => (r.amount > m.amount ? r : m), regions[0]);
+    sx += primary.cx * primary.amount; sy += primary.cy * primary.amount; sw += primary.amount;
+  }
+  return sw > 0 ? { cx: sx / sw, cy: sy / sw } : null;
 }
 
 /** One pass of ffmpeg, the whole film as grayscale cells. One call, not one call per frame. */
@@ -377,9 +401,38 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     };
     if (kindOf(square(6), square(10)) !== 'scale') { console.error(`a region growing about its own centre must classify as scale (got ${kindOf(square(6), square(10))})`); process.exit(1); }
 
+    // primaryRegionAt: the same square-growing-about-its-centre fixture as the `scale` kind above,
+    // held for several frames so a window has more than one pair to average across. Its centre sits at
+    // grid (48,27) of a 96x54 grid, i.e. (0.5, 0.5): the KNOWN-ANSWER fixture `make choreo`'s eye-plan
+    // check is built against, so a beat whose primary motion truly ends centred reads as centred here
+    // before that gate ever compares it to a plan.
+    const growing = [square(4), square(6), square(8), square(10)];
+    const centred = primaryRegionAt(growing, { fps: 1, start: 0, end: 3 });
+    if (!centred || Math.abs(centred.cx - 0.5) > 0.05 || Math.abs(centred.cy - 0.5) > 0.05) {
+      console.error(`primaryRegionAt must centre a region growing about the frame's own centre (got ${JSON.stringify(centred)})`); process.exit(1);
+    }
+    // the SAME fixture, this time OFF-CENTRE (near the frame's top-left), so the fixture pair proves
+    // the function reads WHERE as well as WHETHER: a beat whose plan says "lands centre" and whose
+    // primary motion actually ends top-left must read as MISSED, not as a coincidental pass.
+    const cornerSquare = (half) => {
+      const f = new Uint8Array(GW * GH).fill(240);
+      for (let y = 8 - half; y < 8 + half; y++) for (let x = 12 - half; x < 12 + half; x++) if (x >= 0 && y >= 0) f[y * GW + x] = 40;
+      return f;
+    };
+    const cornerGrowing = [cornerSquare(4), cornerSquare(6), cornerSquare(8)];
+    const cornered = primaryRegionAt(cornerGrowing, { fps: 1, start: 0, end: 2 });
+    if (!cornered || cornered.cx >= 1 / 3 || cornered.cy >= 1 / 3) {
+      console.error(`primaryRegionAt must land a top-left-growing region in the top-left third (got ${JSON.stringify(cornered)})`); process.exit(1);
+    }
+    // two identical frames: no change, so no primary region at all, never a guessed centroid.
+    if (primaryRegionAt([flat, flat], { fps: 1, start: 0, end: 1 }) !== null) {
+      console.error('primaryRegionAt must return null when nothing changed, never a guessed centroid'); process.exit(1);
+    }
+
     console.log('  ✓ motion-floor self-test: a drift reads global, a reveal reads local, stillness reads zero,');
-    console.log('    a whole-frame slide reads global, a bounded object travelling reads local, and the five');
-    console.log('    kinds (camera/move/scale/reveal/ambient) each classify their own clean fixture');
+    console.log('    a whole-frame slide reads global, a bounded object travelling reads local, the five');
+    console.log('    kinds (camera/move/scale/reveal/ambient) each classify their own clean fixture, and');
+    console.log('    primaryRegionAt centres a centred fixture and corners a cornered one');
     process.exit(0);
   }
 

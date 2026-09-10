@@ -20,8 +20,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sceneTiming } from './scene-timing.mjs';
-import { pullFrames, profile } from './motion-floor.mjs';
+import { pullFrames, profile, primaryRegionAt } from './motion-floor.mjs';
 import { parseStoryboard } from '../../harness/author/storyboard-parse.mjs';
+import { parseEyeLine } from '../../harness/lib/contract.mjs';
 import { EASINGS } from '../../core/motion/motion.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -67,6 +68,42 @@ export function exitEmphasis(life) {
   const accelerating = ACCEL_EASES.has(life.exit.ease);
   return { id: life.id, enterDur, exitDur, ease: life.exit.ease || null, ok: fastEnough || accelerating,
     suggestDur: +(enterDur * FAST_RATIO).toFixed(2) };
+}
+
+// ── THE EYE-PLAN CHECK: where the primary motion region actually ends, against what the storyboard's
+// own `eye:` line said would be there (docs/CRAFT/DIRECTION.md, "Directing the eye"). A REPORT, exactly
+// like the rest of this file: it names a measured fact and a stated intent, and leaves the verdict to a
+// human wherever the plan names a LAYER rather than a region ("the prompt bar" has no frame-thirds
+// reading without a layout lookup this file does not have); it verdicts only the beats whose `eye:`
+// line names a region word outright.
+const THIRD_WORDS = ['left', 'right', 'top', 'bottom', 'center', 'centre', 'middle'];
+
+/** thirdsLabel(cx,cy) -> "top-left"/"center"/... : which of the frame's nine thirds a centroid (0..1
+ * each axis) falls in, collapsing the dead centre to a single word. */
+export function thirdsLabel(cx, cy) {
+  const xl = cx < 1 / 3 ? 'left' : cx < 2 / 3 ? 'center' : 'right';
+  const yl = cy < 1 / 3 ? 'top' : cy < 2 / 3 ? 'middle' : 'bottom';
+  if (xl === 'center' && yl === 'middle') return 'center';
+  if (yl === 'middle') return xl;
+  if (xl === 'center') return yl;
+  return `${yl}-${xl}`;
+}
+
+/** eyePlanCheck(frames, beat) -> null (no `eye:`, or it names no region word, or nothing rendered) |
+ * {parsed, label, met}. `met` is null when the plan names a region word this label does not literally
+ * repeat, true/false once it does; either way `label` is printed, since a measured fact is worth
+ * reporting even where this file cannot judge it. */
+export function eyePlanCheck(frames, beat) {
+  if (!frames || !beat.eye) return null;
+  const parsed = parseEyeLine(beat.eye, beat);
+  if (!parsed || parsed.error) return null;
+  const region = primaryRegionAt(frames, { start: beat.start, end: beat.end });
+  if (!region) return { parsed, label: null, met: null };
+  const label = thirdsLabel(region.cx, region.cy);
+  const landLower = parsed.land.toLowerCase();
+  const named = THIRD_WORDS.filter((w) => landLower.includes(w === 'centre' ? 'center' : w) || landLower.includes(w));
+  const met = named.length ? named.some((w) => label.includes(w === 'centre' ? 'center' : w)) : null;
+  return { parsed, label, met, region };
 }
 
 /** Late-half vs early-half local motion inside one window, a frame-side PROXY for "does this act's
@@ -116,7 +153,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 
   const mp4 = path.join(ROOT, 'out', slug + '.mp4');
-  const ourProf = fs.existsSync(mp4) ? profile(pullFrames(mp4) || []) : null;
+  const ourFrames = fs.existsSync(mp4) ? pullFrames(mp4) : null;
+  const ourProf = ourFrames ? profile(ourFrames) : null;
   const refProf = refName ? loadRef(refName) : null;
 
   const unplanned = T.lives.filter((L) => !L.planned);
@@ -133,7 +171,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const ref = refProf ? frameSummary(refProf, b.start, b.end) : null;
     const entering = T.lives.filter((L) => L.start >= b.start && L.start < b.end);
     const refRatio = refProf ? lateEarlyRatio(refProf, b.start, b.end) : null;
-    return { ...b, scn, frm, ref, refRatio, entering: entering.map((L) => L.id) };
+    const eye = eyePlanCheck(ourFrames, b);
+    return { ...b, scn, frm, ref, refRatio, eye, entering: entering.map((L) => L.id) };
   });
 
   const exitChecks = T.lives.map(exitEmphasis).filter(Boolean);
@@ -145,7 +184,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   if (asJson) {
     console.log(JSON.stringify({
-      slug, refName, beats: rows, unplanned: unplanned.map((L) => L.id), missingHandoffs: missingHandoffs.map((L) => L.id),
+      slug, refName, beats: rows.map((r) => ({ ...r, eye: r.eye && { ...r.eye, region: r.eye.region || null } })),
+      unplanned: unplanned.map((L) => L.id), missingHandoffs: missingHandoffs.map((L) => L.id),
       handoffs: T.handoffs, exitNotEmphasised: notEmphasised, refExitRatioMedian: refMedian,
     }, null, 2));
     process.exit(0);
@@ -158,6 +198,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     if (r.entering.length) console.log(`    enters: ${r.entering.join(', ')}`);
     if (r.frm) console.log(`    frame:  ${r.frm.kinds.join(', ') || 'none'}  local ${r.frm.local}  global ${r.frm.global}  regions ${r.frm.regionCount}  primary-share ${r.frm.primaryShare}`);
     if (r.ref) console.log(`    ${refName}: ${r.ref.kinds.join(', ') || 'none'}  local ${r.ref.local}  global ${r.ref.global}  regions ${r.ref.regionCount}  primary-share ${r.ref.primaryShare}${r.refRatio != null ? `  late:early motion ${r.refRatio}x` : ''}`);
+    if (r.eye) {
+      const { parsed, label, met } = r.eye;
+      if (label == null) console.log(`    eye:    plan says land at "${parsed.land}" (device: ${parsed.device}), but nothing measured moved in this beat's render.`);
+      else {
+        const verdict = met == null ? '' : met ? `  -> eye plan MET: primary motion ends at ${label}, plan says land at "${parsed.land}"`
+          : `  -> eye plan MISSED: primary motion ends at ${label}, plan says land at "${parsed.land}"`;
+        console.log(`    eye:    primary motion ends ${label}${verdict}`);
+      }
+    }
   }
 
   console.log('');
