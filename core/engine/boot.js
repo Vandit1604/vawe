@@ -10,7 +10,7 @@ import { canvasKind } from '../canvas/kind.js'; // records each canvas's context
 import { themeErrors, resolveLook, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from '../registry/theme-contract.js';
 import { isLightBg, parseColor, contrastRatio, ensureContrast } from '../color/engine.js';
 import { validateAll } from '../validate/validate.mjs';
-import { produceBaseline, bakeCameraMove, bakeDepth, bakeFocus, bakeTextSizeRoles } from './produce.js';
+import { produceBaseline, bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, bakeTextSizeRoles } from './produce.js';
 
 // Every layer at every depth, for the survived-sugar check below. Local because it is two lines and
 // exists only to prove a bake ran; the render's own walks are elsewhere and read more than the type.
@@ -473,6 +473,9 @@ export async function boot(build) {
     // keys can be overridden per canvas like any hand-written one.
     bakeCameraMove(data, frame);
     if (data.camera) for (const k of data.camera) if (k && k.aspects && k.aspects[aspectKey]) Object.assign(k, k.aspects[aspectKey]);
+    // `carry` sugar (on a `cursor` layer) → a real `follow` on the dragged layer. Runs after the
+    // per-aspect override pass above so it sees the FINAL layer tree for this canvas.
+    bakeCursorCarry(data);
     // `?bounds` turns on the settled-off-frame REPORT inside resolveCoords. Read before it runs, and it
     // only prints: nothing about a render changes, so renderFrame(n) stays a pure function of n.
     // `?nobg=1` PAINTS NO BACKDROP, so the film's motion can be measured with the ground removed.

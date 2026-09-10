@@ -29,6 +29,9 @@ export const slot = 'follow';
 
 // `id` and x/y are read only to place a follower, and both are unconditional reads elsewhere.
 export const PROPS = { follow: {}, id: { when: 'follow' }, x: { when: 'follow' }, y: { when: 'follow' } };
+// `from`/`to` live INSIDE the `follow` object rather than as their own top-level props, so they carry
+// no separate declaration here beyond the one `follow` already has: propsOf/schema-drift only see
+// prop NAMES on the layer, and this pair is never read as `L.from`/`L.to`.
 
 const EDGES = ['center', 'above', 'below', 'left', 'right'];
 
@@ -38,6 +41,17 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   if (typeof spec !== 'object' || Array.isArray(spec) || typeof spec.id !== 'string')
     throw new Error(`\`follow\` is an object like { "id": "card", "edge": "below", "gap": 24 }, `
       + `got ${JSON.stringify(spec)}.`);
+  // `from`/`to`, optional: the pin only applies inside this window of the ABSOLUTE film clock (the
+  // same `t` every other track reads), so a layer can be placed by hand before a drag starts and after
+  // it ends and pinned only for the drag itself. Outside the window this track is simply a no-op, and
+  // whatever the box/motion tracks already wrote for this frame stands. `core/engine/produce.js`
+  // `bakeCursorCarry` is the one writer of this pair today, converting a cursor's `carry` list into
+  // exactly this shape on the dragged layer.
+  if (spec.from != null && typeof spec.from !== 'number')
+    throw new Error(`follow.from must be a number (seconds), got ${JSON.stringify(spec.from)}.`);
+  if (spec.to != null && typeof spec.to !== 'number')
+    throw new Error(`follow.to must be a number (seconds), got ${JSON.stringify(spec.to)}.`);
+  if ((spec.from != null && t < spec.from) || (spec.to != null && t >= spec.to)) return;
   const edge = spec.edge ?? 'center';
   if (!EDGES.includes(edge))
     throw new Error(`follow edge "${edge}", known: ${EDGES.join(', ')}.`);
