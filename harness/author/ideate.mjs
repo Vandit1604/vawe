@@ -30,6 +30,12 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { RECIPES } from '../../recipes/index.mjs';
 import { measureVideo } from '../media/content.mjs';
+// GROUPS/pasteLine/ambiguousNames/bestWindowMatch: the SAME corpus and the SAME windowed match
+// `make stage`'s adoption block and the beat-surfacer nudge use (harness/author/discovery.mjs), so a
+// route bracket here, a nudge at save time, and a worklist row at `make stage` never disagree about
+// what counts as a match. CONFIDENT/coverageIn: arsenal's own ranker, never a second one.
+import { GROUPS, pasteLine, ambiguousNames, bestWindowMatch, filteredToks } from './discovery.mjs';
+import { coverageIn, CONFIDENT } from './arsenal.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -156,6 +162,55 @@ export function routeCameraProse(text) {
   return '[unrouted: camera]';
 }
 
+// ── generic capability routing, for the four act lines camera/seam do not already own ──────────────
+//
+// routeSeamProse/routeCameraProse carry real domain knowledge (an axis-and-gap joint IS flow-seam; a
+// continuous push IS window-dolly) a generic ranker cannot replicate, so they are unchanged. `on
+// screen:`, `ground:`, `type:` and `content:` name no single dedicated field, but their prose can still
+// name a technique the core already has (a looping shader ground, a kinetic caption preset, a particle
+// system), so this asks the SAME corpus and the SAME cutoff every other discovery surface in this repo
+// uses (harness/author/discovery.mjs GROUPS, arsenal.mjs CONFIDENT), rather than leaving four of the
+// seven act lines with no route at all.
+let CAP_CORPUS = null;
+function capCorpus() {
+  if (!CAP_CORPUS) {
+    const all = GROUPS.flatMap(([, entries]) => entries());
+    CAP_CORPUS = { all, coverage: coverageIn(all), ambiguous: ambiguousNames(all) };
+  }
+  return CAP_CORPUS;
+}
+
+// Named techniques worth flagging as a GAP when nothing in the corpus confidently answers them: the
+// point of `[unrouted: ...]` is to say the engine has no path today, never to guess at one, so this
+// list is deliberately short and literal rather than a second ranker.
+const TECHNIQUE_RE = /\b(shaders?|particles?|glitch\w*|morph\w*|extrud\w*|wip(?:e|ing)|gradients?|textures?|grain|distort\w*|pixel\w*|raymarch\w*|kaleidoscope)\b/i;
+
+/** routeCapabilityProse(text) -> the bracket for an `on screen:`/`ground:`/`type:`/`content:` line: a
+ * confident match against the whole discovery corpus, `[unrouted: <word>]` when the prose names a
+ * technique this pass found no match for, or null when there is nothing to route yet (a `<look:>` /
+ * `<fill:>` placeholder still open, or prose naming no technique at all). */
+export function routeCapabilityProse(text) {
+  if (!text || /<look:|<fill:/.test(text)) return null;
+  // Every `ground:`/`camera:` line carries a `(measured, luma ...)`/`(measured, gap ...)` parenthetical
+  // this file itself appends (buildActs/actSection): machine annotation, never authored prose. Left in,
+  // its own word "measured" coincidentally shares a stem with unrelated blurbs ("measured at build
+  // with getTotalLength()"), and idf treats that coincidence as strong evidence for nothing real
+  // (found calibrating this exact router: "ground: light (measured, luma 209.1)" routed to `drawOn`,
+  // a part entrance with no relationship to ground colour at all). Strip it before ranking.
+  const prose = text.replace(/\(measured[^)]*\)/gi, '');
+  const { all, coverage, ambiguous } = capCorpus();
+  const qt = filteredToks(prose);
+  if (!qt.length) return null;
+  let best = null;
+  for (const e of all) {
+    const m = bestWindowMatch(e, [qt], coverage);
+    if (m.s > 0 && m.c >= CONFIDENT && (!best || m.c > best.c)) best = { ...m, e };
+  }
+  if (best) return `[${pasteLine(best.e, ambiguous)}]`;
+  const found = TECHNIQUE_RE.exec(text);
+  return found ? `[unrouted: ${found[0].toLowerCase()}]` : null;
+}
+
 // appendBracket(line, bracket): join only when a route was actually found. `act.onScreen`/`camera`
 // prose does not exist at fresh-generation time (it is a `<look:>` placeholder until a person fills
 // it), so every routing call here is best-effort and most resolve to null on a brand-new prompt; the
@@ -202,7 +257,28 @@ function actSection(act, ref, clip) {
 // routed as a plain flow-seam.
 const ENTRY_LABELS = ['on screen:', 'enters:', 'leaves:', 'camera:', 'type:', 'ground:'];
 const startsNewEntry = (line) => ENTRY_LABELS.some((lb) => line.startsWith(lb))
-  || /^##/.test(line) || /^recipe:|^measured:/.test(line) || line.trim() === '';
+  || line.startsWith('##') || line.startsWith('recipe:') || line.startsWith('measured:') || line.trim() === '';
+
+// A bracket a PREVIOUS pass wrote is stale evidence, not settled fact: the corpus this ranks against
+// grows (a new recipe, a new `use:` kind), so a re-run must be free to say something different. Strip
+// whatever trailing bracket is there before recomputing, so the diff shows only the bracket changing
+// (never a duplicate appended beside the old one) and never touches the hand-corrected prose in front
+// of it.
+const BRACKET_RE = /\s*\[[^\]]*\]\s*$/;
+const stripBracket = (s) => s.replace(BRACKET_RE, '');
+
+/** routeEntry(label, full, lastOnScreen) -> the bracket for one entry's already-stripped text.
+ * `enters:`/`leaves:`/`camera:` keep their domain-specific routers; every other label (on screen,
+ * ground, type) asks the generic corpus (routeCapabilityProse). */
+function routeEntry(label, full, lastOnScreen) {
+  if (label === 'enters:') return /film opens/.test(full) ? null : routeSeamProse('enter', `${lastOnScreen} ${full}`);
+  if (label === 'leaves:') return /film ends/.test(full) ? null : routeSeamProse('leave', full);
+  if (label === 'camera:') return routeCameraProse(full);
+  // The generic router ranks against a corpus keyed by KIND words too ("ground" is a background
+  // preset's own slot word, "type" a caption kind's), so leaving the field's own label in the text
+  // hands every entry of that kind a free, meaningless point of overlap. Strip it first.
+  return routeCapabilityProse(full.slice(label.length).trim());
+}
 
 export function annotateFilledPrompt(text) {
   const lines = text.split('\n');
@@ -218,14 +294,12 @@ export function annotateFilledPrompt(text) {
   const out = [...lines];
   let lastOnScreen = '';
   for (const e of entries) {
-    const full = lines.slice(e.start, e.end + 1).join('\n');
-    if (e.label === 'on screen:') { lastOnScreen = full; continue; }
-    if (/\[recipe:|\[camera:|\[unrouted:/.test(full)) continue;    // already routed, leave it
-    let bracket = null;
-    if (e.label === 'enters:') bracket = /film opens/.test(full) ? null : routeSeamProse('enter', `${lastOnScreen} ${full}`);
-    else if (e.label === 'leaves:') bracket = /film ends/.test(full) ? null : routeSeamProse('leave', full);
-    else if (e.label === 'camera:') bracket = routeCameraProse(full);
-    if (bracket) out[e.end] = appendBracket(out[e.end], bracket);
+    // Read off `out`, not the original `lines`: an earlier entry this same pass already rewrote (its
+    // bracket stripped and replaced) is what a later entry should compose with.
+    const full = stripBracket(out.slice(e.start, e.end + 1).join('\n'));
+    if (e.label === 'on screen:') lastOnScreen = full;
+    const bracket = routeEntry(e.label, full, lastOnScreen);
+    out[e.end] = appendBracket(stripBracket(out[e.end]), bracket);
   }
   return out.join('\n');
 }
@@ -448,6 +522,35 @@ function selfTest() {
   console.log('ideate.mjs self-test: ok (buildActs, buildJoints, recipeLineFor, recipeMenu, routing, annotateFilledPrompt, content)');
 }
 
+/** runFromRef(ref, clipArg): the `--ref` branch of the CLI, pulled out of main() so main's own
+ * complexity stays readable (main dispatches; this owns one path's own checks end to end). */
+function runFromRef(ref, clipArg) {
+  const grammarPath = path.join(ROOT, 'grammar', `${ref}.json`);
+  if (!fs.existsSync(grammarPath)) {
+    console.error(`ideate: no study for "${ref}" (${path.relative(ROOT, grammarPath)} does not exist).`);
+    console.error(`  Run this first: make study VIDEO=refs/_clips/${ref}.mp4 NAME=${ref} STRIPS=3 STRIPFPS=10`);
+    process.exit(1);
+  }
+  const grammar = JSON.parse(fs.readFileSync(grammarPath, 'utf8'));
+  if (!Array.isArray(grammar.seams) || !grammar.seams.length) {
+    console.error(`ideate: ${path.relative(ROOT, grammarPath)} has no measured seams yet. Re-run the study.`);
+    process.exit(1);
+  }
+  // Forward-compat with the fuller-coverage study (refs/<name>/pages*, grammar.coverage.ledger): once
+  // a study can say its frame coverage is incomplete, ideate refuses rather than building a prompt off
+  // a partial read. Inert today: no study writes `coverage` yet.
+  if (grammar.coverage && grammar.coverage.ledger && grammar.coverage.ledger !== 'complete') {
+    console.error(`ideate: ${ref}'s coverage ledger is "${grammar.coverage.ledger}", not "complete". Run: make study-check NAME=${ref}`);
+    process.exit(1);
+  }
+  const clip = resolveClip(ref, clipArg);
+  if (!clip) console.error(`  ! no clip found for "${ref}" (checked --clip, refs/_clips/, and the main tree). Every <look:> will point at ffmpeg you run by hand.`);
+  const prompt = buildRefPrompt(ref, grammar, clip);
+  const out = path.join(ROOT, 'grammar', `${ref}.prompt.md`);
+  fs.writeFileSync(out, prompt);
+  console.log(`ideate → ${path.relative(ROOT, out)}`);
+}
+
 // ── CLI ─────────────────────────────────────────────────────────────────────────────────────────────
 function main() {
   const args = process.argv.slice(2);
@@ -486,34 +589,7 @@ function main() {
     process.exit(2);
   }
 
-  if (ref && !name) {
-    // FROM A REFERENCE VIDEO.
-    const grammarPath = path.join(ROOT, 'grammar', `${ref}.json`);
-    if (!fs.existsSync(grammarPath)) {
-      console.error(`ideate: no study for "${ref}" (${path.relative(ROOT, grammarPath)} does not exist).`);
-      console.error(`  Run this first: make study VIDEO=refs/_clips/${ref}.mp4 NAME=${ref} STRIPS=3 STRIPFPS=10`);
-      process.exit(1);
-    }
-    const grammar = JSON.parse(fs.readFileSync(grammarPath, 'utf8'));
-    if (!Array.isArray(grammar.seams) || !grammar.seams.length) {
-      console.error(`ideate: ${path.relative(ROOT, grammarPath)} has no measured seams yet. Re-run the study.`);
-      process.exit(1);
-    }
-    // Forward-compat with the fuller-coverage study (refs/<name>/pages*, grammar.coverage.ledger):
-    // once a study can say its frame coverage is incomplete, ideate refuses rather than building a
-    // prompt off a partial read. Inert today: no study writes `coverage` yet.
-    if (grammar.coverage && grammar.coverage.ledger && grammar.coverage.ledger !== 'complete') {
-      console.error(`ideate: ${ref}'s coverage ledger is "${grammar.coverage.ledger}", not "complete". Run: make study-check NAME=${ref}`);
-      process.exit(1);
-    }
-    const clip = resolveClip(ref, clipArg);
-    if (!clip) console.error(`  ! no clip found for "${ref}" (checked --clip, refs/_clips/, and the main tree). Every <look:> will point at ffmpeg you run by hand.`);
-    const prompt = buildRefPrompt(ref, grammar, clip);
-    const out = path.join(ROOT, 'grammar', `${ref}.prompt.md`);
-    fs.writeFileSync(out, prompt);
-    console.log(`ideate → ${path.relative(ROOT, out)}`);
-    return;
-  }
+  if (ref && !name) { runFromRef(ref, clipArg); return; }
 
   // FROM AN IDEA.
   if (!idea && !ref) { console.error('ideate: --name needs --idea "..." (and optionally --ref <ref> for structure).'); process.exit(2); }
