@@ -4,6 +4,8 @@ answers: "26 named After Effects recipes with their real numbers · a HAVE/PARTL
 group: reference
 ---
 
+<!-- doc-refs-allow: make choreo · being built now by another agent from the choreography plan, not yet a Makefile target -->
+
 # AFTER EFFECTS RECIPES: the named procedures, and what this engine already does
 
 ## AGENT SUMMARY
@@ -116,6 +118,10 @@ representative items and bring the rest as one block.
 **Verdict: HAVE.** `stagger` and `each` on any `split` text layer, `stagger` on `parts` for hand-written
 markup, and `cardCascade` and `chipGrid` as whole beats. Worth noting the measured gap: only 6 of 161
 scenes used `parts` when it was audited, so this is under-used rather than missing.
+
+**Routed from the plan today.** The `word-by-word` recipe (`recipes/recipes.json`): a line arrives one
+word after another, each rising into place, in place of one block sliding in.
+**Measured on the reference.** `<measured on example-madera by make choreo>`
 
 **Sources:** https://www.svgator.com/blog/offset-delay-motion-design/ ·
 https://blog.frame.io/2023/12/13/insider-tips-how-to-create-a-staggered-layer-sequence-in-after-effects/
@@ -240,6 +246,11 @@ entrance on a SIBLING, follow-through makes a CHILD lag a parent's continuous mo
 stop. This engine has no parent-child motion relationship at all outside the camera and `plane`. The
 nearest thing is `kick`, which shoves a layer on the film's joints, but that fires off the edit, not off
 another layer's velocity.
+
+**Routed from the plan today.** Built since this verdict was written (see "The ten to build first," item
+7): `modifiers: [{ "lag": "card" }]` (`core/fx/lag.js`) makes one layer follow another's motion late and
+overrun its stop, `amp 0.05, freq 4, decay 8` after Ebberts. The table above now reads HAVE.
+**Measured on the reference.** `<measured on example-madera by make choreo>`
 
 **Sources:** https://motionscript.com/articles/bounce-and-overshoot.html ·
 https://archive.org/stream/TheAnimatorsSurvivalKitRichardWilliams/The%20Animator's%20Survival%20Kit%20-%20Richard%20Williams_djvu.txt
@@ -524,6 +535,11 @@ periods, and both run across the settled middle only so they never fight an entr
 camera-level version, a sub-12px Lissajous with x and y on different frequencies so it breathes instead of
 walking a diagonal. The engine's numbers agree with the practitioners' numbers, which is reassuring.
 
+**Routed from the plan today.** `idle: "breathe"`/`"drift"` on a layer, `cameraMove: "driftHold"` on the
+camera; this is the ambient layer in [`MOTION-CRAFT.md`](../MOTION-CRAFT.md#layering-life-and-handoffs),
+never the fix for a hole `motion-floor.mjs` finds (ambient padding does not satisfy it).
+**Measured on the reference.** `<measured on example-madera by make choreo>`
+
 **Sources:** https://aejuice.com/blog/how-to-hold-keyframe-in-after-effects/ ·
 https://www.jakeinmotion.com/animation-principles-for-motion-designers
 
@@ -629,6 +645,12 @@ a mark from a blob, so the single-layer morph exists. `morphButton` is the beat 
 the next thing. The multi-element case is `filter: "goo"`, a metaball morph on alpha: two shapes grow a
 bridge and snap apart. What is still missing is per-vertex control of the route.
 
+**Routed from the plan today.** `svg` layer `morph: { to: ... }` (`core/layers/svg.js`) for the graphic
+match/shape morph handoff; the object-becomes-the-next-shot case is `becomes` instead (see
+[`MOTION-CRAFT.md`](../MOTION-CRAFT.md#layering-life-and-handoffs)), a different mechanism for a
+different question, one shape versus one identity.
+**Measured on the reference.** `<measured on example-madera by make choreo>`
+
 **Sources:** https://lesterbanks.com/2017/10/morph-ae-create-nulls-paths/ ·
 https://helpx.adobe.com/in/after-effects/desktop/drawing-painting-and-paths/null-controllers/create-nulls-for-positional-properties-and-paths.html
 
@@ -655,6 +677,12 @@ asserting that falsely is the loudest way to confuse a viewer.
 structural devices, and `cuts[].style: "matchCut"` is now the device: both beats are clipped to the same
 shape at the junction, and the content swaps at the midpoint rather than crossfading, so the shape belongs
 to both shots. Nothing yet MEASURES whether two silhouettes line up; that judgement is still the author's.
+
+**Routed from the plan today.** `cuts[].style: "matchCut"`, the match-cut handoff in
+[`MOTION-CRAFT.md`](../MOTION-CRAFT.md#layering-life-and-handoffs). Cut on action, the neighbouring
+handoff in that same section, has no matching field: it is a plain hard cut placed on the action frame,
+unmeasured for alignment.
+**Measured on the reference.** `<measured on example-madera by make choreo>`
 
 **Source:** https://en.wikipedia.org/wiki/Match_cut
 

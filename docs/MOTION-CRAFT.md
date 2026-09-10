@@ -14,6 +14,9 @@ confirm: "is the motion hand-keyed with real physics, not a named preset firing 
 - Vary timing per beat by intent (ambient 0.8-1.2s, thesis 0.5s, payoff 0.25-0.35s); ease out on
   entrances, ease in on exits; stagger 60-120ms in hierarchy order; settle and hold before the exit;
   one hero motion per beat.
+- A beat layers primary (drives), secondary (reacts, quieter) and ambient (holds it alive) motion,
+  offset by intent, never all at once; every element has a designed enter, hold and exit, or a
+  `becomes` handoff, never a silent disappearance ("Layering, life and handoffs").
 - Enforced by codes: `enter-and-retreat`, `front-loaded`, `linear-motion`, `monotone-timing`,
   `motion-monotony`, `profile`, `shared-start`, `stagger-total`, `tempo-flat`, `uneven-cascade`, via
   `make direct` / `motion-audit`. All warn; none block.
@@ -48,6 +51,138 @@ gates enforces each rule: everything else is judgment the ledger can't save you 
 | 8 | **Velocity contrast between beats** | A fast beat earns a still one; the freeze after a rush is the joke landing. Speed-ramp inside a move (`ramp`), contrast between moves. | judgment |
 | 9 | **Cover the hard cut** | Background jumps (dark↔light) want a sting peaking AT the cut; same-bg scenes can whip/slide raw. | judgment (stings exist) |
 | 10 | **Type moves like it reads** | Text enters in reading order (L→R, top→down), rises from its own baseline, never crosses another line's path. The motion IS part of the meaning (kinetic-type first law). | judgment |
+
+## Layering, life and handoffs
+
+<!-- doc-refs-allow: make choreo · being built now by another agent from the choreography plan, not yet a Makefile target -->
+
+Rules 3, 4 and 6 above say a beat has one hero motion and everything else supports it. This section
+says how a motion designer actually reaches that state, in After Effects and here: not by adding
+effects until a frame feels busy, but by deciding, in order, what moves, what merely reacts, and what
+never moves at all.
+
+### How a designer decides what moves, in order
+
+1. **The message and the hierarchy first.** Before anything is keyed, one focal point per transition
+   is chosen and everything else is picked to serve it. Google's own choreography guide states this as
+   the rule under the whole system: *"Maintain a clear focal point during transitions by carefully
+   selecting the number and type of elements shared across the transitions."*
+   (https://m1.material.io/motion/choreography.html)
+2. **Boards, then an animatic.** The beats and their order are locked as still frames before anything
+   moves, so a bad idea is cheap to throw away. In this engine that step is the storyboard
+   (`make scaffold` → `make storyboard-check`), not the JSON.
+3. **Blocking, pose to pose.** The hero motion is keyed first, at its start and end pose only: does the
+   read work with nothing else moving. Only once that holds does a second layer get added.
+4. **Secondary, then ambient, last.** Support is added in decreasing order of loudness, never all at
+   once, and never before the primary read is proven.
+
+### Layering: primary, secondary, ambient
+
+Three kinds of motion can share a frame, and they are not interchangeable:
+
+- **Primary** drives the beat. It is Rule 6's one hero motion, the thing the cut or the copy is about.
+- **Secondary** reacts to the primary and stays quieter than it. Wikipedia's definition of secondary
+  animation: *"a flat motion generated as a reaction to the movement of primary motion by a character,"*
+  effects that "appear to be driven by the motion" rather than motion in their own right
+  (https://en.wikipedia.org/wiki/Secondary_animation). Prolific Studio's framing of the same idea
+  (search summary only, low confidence, not read directly) adds that secondary motion must never
+  compete with the primary for the eye.
+- **Ambient** keeps a held frame alive without asking to be watched: `idle: breathe/drift`,
+  `driftHold`. It is the smallest of the three by design (see "Distance and duration: measured here,
+  not imported" below: ambient drift is a third of the library's moves and runs nine times slower than
+  a followed move).
+
+**Timing them against each other is offset, not simultaneity.** Two or more motions sharing a beat
+start at different moments, in hierarchy order, the same principle Rule 3 already states for sibling
+layers. Material names a stagger interval for this: *"Begin each item's staggered entrance no more
+than 20ms apart"* (same URL as above). **That number is a name for what to measure, not a threshold to
+import**, exactly as "Distance and duration: measured here, not imported" already insists for
+px/s: a UI guide is answering how long a person will wait for an interface, not how a shot should feel.
+The same caution applies to 72Technologies' close-faster-than-open ratio below. Until the measuring
+agent's work lands, the working numbers stay the ones already in this file (Rule 3's 60-120ms stagger,
+the Speed dials table); the row below is the placeholder for what replaces them.
+
+| what to measure | UI number (a name, not a threshold) | measured on the reference |
+|---|---|---|
+| offset between concurrent motions in one beat | Material: 20ms (https://m1.material.io/motion/choreography.html) | `<measured on example-madera by make choreo>` |
+| exit duration vs entrance duration | 72Technologies: close is faster than open, "roughly a 2:3 ratio... the single highest-leverage rule in the whole system" (https://www.72technologies.com/blog/motion-ratios-ui-feel-cheap) | `<measured on example-madera by make choreo>` |
+
+### Element life: enter, hold, exit
+
+Every element that appears has a life, and the life is designed on purpose, the same way a beat's
+motion is: an entrance, a hold, and an exit or a handoff. Rule 2 already says exits accelerate; the
+point here is that the exit is its own designed move, never an afterthought left to a fade default.
+
+An element that is simply not there in the next frame, with no exit keyed and no `becomes`, is not
+"finished", it is dropped, and that is a finding, not a style. The measuring work in progress
+(`make choreo`, see below) will name this at the plan level; until it lands, treat a vanished element
+as a question to ask before shipping, not an assumption to make.
+
+**`becomes` already expresses the one handoff this engine names for a continuous object.** An incoming
+layer opens on the outgoing layer's final pose and animates into its own geometry, so the object is
+seen to travel rather than cut. The schema default (`becomesDur: 0.42`, `easeOutCubic`) is too fast to
+read as travel; [`docs/RULES/handover-glide.md`](RULES/handover-glide.md) sets it to 0.8-1.0s at
+`easeInOutCubic` instead.
+
+### Handoffs: one element's exit leads the eye to the next element's entrance
+
+School of Motion's six essential transitions name the vocabulary; each line below is verified against
+this engine as it stands, not as it is planned to be.
+
+- **Match cut**: *"a match cut is used to match a compositional element in one scene with that of the
+  next"* (https://schoolofmotion.com/blog/six-essential-motion-design-transitions-tutorial). **HAVE**:
+  `cuts[].style: "matchCut"` (`core/cuts/presentations.js`), both beats clipped to the same shape at
+  the junction so the shape belongs to both shots.
+- **Cut on action**: *"the cut on action transition, whereby you cut from one shot to another view
+  while matching the first shot's action"* (same source). **[unrouted]**: the mechanism is a plain hard
+  cut placed on the action frame (`cut:"none"`, `make beatsync` for on-the-beat timing), but nothing
+  checks that the two shots' action frames actually line up. The alignment is still the author's eye.
+- **Graphic match / shape morph**: **HAVE**: `svg` layers take `morph: { to: ... }`
+  (`core/layers/svg.js`), and `filter: "goo"` morphs several elements as a metaball. Per-vertex control
+  of the route is still missing (AFTER-EFFECTS-TECHNIQUES.md #21).
+- **Container transform**: an element's own shape grows to become the next screen's frame.
+  **[unrouted]**: no primitive reshapes one layer's box into a new layout. The nearest neighbours are
+  `screenDive`/`seam:"cinematicZoom"` (push the camera into a surface) and `becomes` (swap identity at
+  a point), and neither one grows a bounding box into a container.
+- **Object becomes the next shot**: **HAVE**: the `becomes` field, see "Element life" above.
+- **Zoom through**: **HAVE**: `seam:"cinematicZoom"` (`core/transitions/units.js`, family `zoom`), and
+  the `window-dolly` recipe (`recipes/recipes.json`), a continuous push measured off three acts of
+  `example-madera` with no cut across the shot.
+
+### Pitfalls
+
+- **Everything moving at once.** The opposite of a clear focal point (Material's quote above): three or
+  more top-level layers on one exact start read as a block, not a hierarchy. Already named here as
+  `shared-start`.
+- **Secondary competing with primary.** Rule 6 again: two things owning the motion is zero read, not
+  double the read.
+- **Uniform timing, in both directions.** Too many distinct durations reads as drift: *"the failure
+  mode of unsystematized motion is not ugliness, it is drift, five modals with five durations, each
+  defensible, collectively incoherent"* (Blake Crosley,
+  https://blakecrosley.com/blog/motion-grammar-when-animation-earns-its-frames), which is why the Speed
+  dials table above holds to three named bands rather than a free number per beat. Too few is the
+  opposite failure this file already names as `tempo-flat`: one duration on everything reads as
+  monotone narration, not restraint.
+- **Motion with no meaning.** *"Motion is information or it is noise"* (same source). A kind of motion
+  earns its place only when the storyboard can say what it is for; adding one because a frame feels
+  empty is the noise this line warns against.
+- **This repo's own measured pitfall: ambient padding used to pass a check.** `quality/gates/
+  motion-floor.mjs` exists because the obvious way to raise a motion score is wrong: *"The obvious way
+  to raise a motion score is to switch on `idle`/`breathe`/`drift` everywhere, which buys the number and
+  costs the film: it is motion for the metric, not for the viewer."* The gate measures LOCAL motion for
+  exactly this reason, so ambient padding cannot satisfy it.
+
+### What checks this
+
+- **`make choreo`** (in progress, built by another agent as this section was written): measures kinds of
+  motion at once, element lives, and handoffs against `example-madera`, extending `motion-floor.mjs` and
+  the scene timing reader. Not yet runnable; this doc names the doctrine ahead of the gate on purpose.
+- **`quality/gates/motion-floor.mjs`**: local motion holes over time, and the `ambient-padding` finding
+  above.
+- **`harness/author/motion-director.mjs`**: `enter-and-retreat`, `linear-motion`, `monotone-timing`
+  (see the AGENT SUMMARY and codes list at the top of this file).
+- **`quality/gates/eye-trace.mjs`**: where the eye lands at a cut, Murch's rule already cited in
+  [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md).
 
 ## Speed dials: the numbers, in one place
 
