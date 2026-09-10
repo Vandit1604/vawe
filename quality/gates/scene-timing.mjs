@@ -27,6 +27,8 @@
 //   T.unitEnd(L)   // where the engine actually drops the layer: unitCut + that cut's window
 //   T.scene        // the scene LOWERED (see sceneTiming below), read cuts/seams/stings from here
 //   T.lives        // per content layer: { id, enter, exit|null, becomes, cutOut, planned, channels }
+//                  // exit carries { kind, start, end, ease }: ease is the last motion key's own ease
+//                  // (or "rush" from `out:"rush"`), the authored answer to "does this exit accelerate"
 //   T.beatMotion   // per scene-timing beat (cut-segmented): { index, start, end, kinds, count, offsets }
 //   T.beatMotionAt(start, end) // the same for an ARBITRARY window, e.g. a storyboard beat's own times
 //   T.handoffs     // [{ from, to, gap, declared }] - an exit leading into another's entrance
@@ -362,6 +364,15 @@ export function sceneTiming(input) {
   // none), and whether that life is PLANNED: a real `out`, the beat wrapper sliding it out on a cut
   // (`unitCut`), a `flow-seam` naming it as the outgoing half of a handoff, or it simply holds to the
   // film's own end. Anything else is a layer that appears and is never designed to leave.
+  // the ease driving the LAST leg of a layer's own motion track, i.e. the move landing on its exit.
+  // `ease` and `easeIn` both name the curve a segment ARRIVES on (core/timeline/sequence.js's per-side
+  // comment); either is the authored answer to "does this layer's departure accelerate".
+  const lastKeyEase = (L) => {
+    if (!Array.isArray(L.motion) || !L.motion.length) return null;
+    const last = L.motion[L.motion.length - 1];
+    return (last && (last.ease || last.easeIn)) || null;
+  };
+
   const lives = content.map((L, idx) => {
     const [s, e] = contentSpans[idx];
     const channels = varyingChannels(L);
@@ -373,11 +384,14 @@ export function sceneTiming(input) {
     const becomesTo = L.id ? becomesMap.get(L.id) || null : null;
     const atFilmEnd = e >= duration - EPS;
     const planned = exitDeclared || uc != null || becomesTo != null || atFilmEnd;
+    // `rush` is the engine's own name for "accelerate away" (core/motion/motion.js), so an author who
+    // set `out:"rush"` with no separate keyframe ease still gets credit for an accelerating exit.
+    const exitEase = exitDeclared ? (lastKeyEase(L) || (L.out === 'rush' ? 'rush' : null)) : null;
     return {
       id: L.id || `${L.type || 'layer'}#${idx}`,
       start: s, end: e, channels: [...channels],
       enter: { kind: enterKind || 'none', start: s, end: +(s + enterDur).toFixed(3) },
-      exit: exitDeclared ? { kind: L.out, start: +(e - exitDur).toFixed(3), end: e } : null,
+      exit: exitDeclared ? { kind: L.out, start: +(e - exitDur).toFixed(3), end: e, ease: exitEase } : null,
       becomes: becomesTo, cutOut: uc, planned,
     };
   });

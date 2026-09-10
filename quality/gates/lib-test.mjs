@@ -113,6 +113,7 @@ import { evenSamples } from './beats-of.mjs';
 import { gradeable, tileBox, baseOf } from './tile.mjs';
 import { classifyRegions } from './motion-floor.mjs';
 import { sceneTiming } from './scene-timing.mjs';
+import { exitEmphasis } from './choreo.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -7929,6 +7930,43 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const off = staggered.beatMotion[0].offsets;
   ok('sceneTiming beatMotion: staggered starts report a non-zero offset', off.length > 0 && off.every((o) => o > 0));
   ok('sceneTiming beatMotion: staggered starts name both channels', staggered.beatMotion[0].kinds.includes('position') && staggered.beatMotion[0].kinds.includes('scale'));
+}
+
+// ---- quality/gates/choreo.mjs exitEmphasis: owner rule, "exits read faster than entrances" --------
+{
+  // symmetric: the exit takes exactly as long as the entrance, and eases with no accelerating curve.
+  // Flagged: neither half of the rule (shorter, or an accelerating ease) is true.
+  const slowSymmetric = sceneTiming({ module: 'scene', duration: 6, layers: [
+    { type: 'rect', id: 'slow', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, anim: 'fade', enterDur: 1,
+      out: 'fade', exitDur: 1, motion: [{ t: 0, opacity: 1 }, { t: 1, opacity: 0 }] },
+  ] });
+  const slowLife = slowSymmetric.lives.find((L) => L.id === 'slow');
+  const slowCheck = exitEmphasis(slowLife);
+  ok('exitEmphasis: a slow symmetric exit (no accel ease) is flagged', slowCheck && slowCheck.ok === false);
+
+  // a short exit, eased in: both halves of the rule hold (it is also clearly shorter than its entry).
+  const shortEaseIn = sceneTiming({ module: 'scene', duration: 6, layers: [
+    { type: 'rect', id: 'quick', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, anim: 'fade', enterDur: 1,
+      out: 'fade', exitDur: 0.2, motion: [{ t: 0, opacity: 1 }, { t: 1, opacity: 0, ease: 'easeInCubic' }] },
+  ] });
+  const quickLife = shortEaseIn.lives.find((L) => L.id === 'quick');
+  const quickCheck = exitEmphasis(quickLife);
+  ok('exitEmphasis: a short, ease-in exit passes', quickCheck && quickCheck.ok === true && quickCheck.ease === 'easeInCubic');
+
+  // a long exit that nonetheless EASES with an accelerating curve still passes: duration is not the
+  // only door, an accelerating ease earns it on its own (this is the case the "rush" alias exists for).
+  const longButAccel = sceneTiming({ module: 'scene', duration: 6, layers: [
+    { type: 'rect', id: 'rushed', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, anim: 'fade', enterDur: 1,
+      out: 'rush', exitDur: 1 },
+  ] });
+  const rushedCheck = exitEmphasis(longButAccel.lives.find((L) => L.id === 'rushed'));
+  ok('exitEmphasis: an equal-length exit with an accelerating ease (out:"rush") passes', rushedCheck && rushedCheck.ok === true);
+
+  // no exit declared at all: nothing to grade, exitEmphasis says so rather than inventing a verdict.
+  const noExitLife = sceneTiming({ module: 'scene', duration: 2, layers: [
+    { type: 'rect', id: 'bare', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 2 },
+  ] }).lives.find((L) => L.id === 'bare');
+  ok('exitEmphasis: a layer with no declared exit is not graded', exitEmphasis(noExitLife) === null);
 }
 
 const FLOOR = 1800;
