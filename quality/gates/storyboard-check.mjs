@@ -165,13 +165,11 @@ function plainContentWarning(b, title) {
       + '`make photos` (docs/CRAFT/IMAGERY.md), never an invented image.');
     return;
   }
-  // "make screen" (docs/CRAFT/SCREENS.md) is not backtick-wrapped here on purpose: it is landing on a
-  // parallel branch and is not yet a Makefile target on this one, and quality/gates/lib-test.mjs
-  // requires every backtick-wrapped `make <target>` a gate prints to already exist.
   warn('plain-content', `beat "${title}": names a ${noun.toLowerCase()} but no real source is stated (no `
     + '`fragment:` file that exists on disk, no assets/ or .vawe-data/uploads/ path, no capture/sections/screen '
     + 'mention). A real screen already exists? `make capture` or `make sections URL=<site>`. Otherwise design one '
-    + 'for this beat: make screen F=<fragment.html> [REF=<ref> ACT=<n>] [THEME=<name>] (docs/CRAFT/SCREENS.md).');
+    + 'for this beat: `make screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [REF=<ref> ACT=<n>] '
+    + '[THEME=<name>]` (docs/CRAFT/SCREENS.md).');
 }
 
 // ── the vocabulary that separates a MECHANISM from a TRANSFORMATION ──────────────────────────────
