@@ -16,6 +16,12 @@ codes: duration, cut-missed, ground-false-confidence
   colour-wave.
 - `refs/` is gitignored: extract the grammar (shot length, cut rate, what carries a junction), never
   keep the reference's frames, UI, copy or colours in a published film.
+- A study ends by writing recipe candidates, not by filling the table. `make study` finds joints of
+  BOTH kinds, a hard cut (scene-score delta) and an empty-ground seam (edge content near zero for one
+  or more frames, reported with its gap, axis and flow direction); either kind that is a pattern worth
+  reusing gets written to `grammar/<name>.recipes.json` in the `recipes.json` shape
+  ([`recipes/README.md`](../../recipes/README.md)). It is a candidate: a person still promotes it into
+  `recipes/recipes.json`.
 - Enforced by `[ref: make study]` / `[ref: make measure]`; no gate. A motif with no mapped primitive is
   a framework finding, log it to `docs/MISTAKES.md`, don't fake it.
 - Confirm: did you sample the entrance, the exit and a zoomed crop, not just the beat's middle frame?
@@ -123,8 +129,11 @@ video starts ahead.
 3. **Catalog the motifs.** List every recurring device (the habits below are the checklist).
 4. **Map to our primitives** (table at the bottom). If a motif has no primitive, that is a framework
    finding, log it (docs/MISTAKES.md), don't fake it.
-5. **Author → verify.** Build it, then `make measure VIDEO=out/ours.mp4 EXPECT=<preset>` to confirm the
-   render matches the reference's motion. `make beats`/`make audit`/`make judge` for the rest.
+5. **Author → verify → write it down.** Build it, then `make measure VIDEO=out/ours.mp4 EXPECT=<preset>`
+   to confirm the render matches the reference's motion. `make beats`/`make audit`/`make judge` for the
+   rest. Then write what you measured as a recipe candidate in `grammar/<name>.recipes.json`
+   ([`recipes/README.md`](../../recipes/README.md)), so the next film reuses the measurement instead of
+   re-eyeballing the reference.
 
 ## The habits that make it feel premium (the checklist)
 

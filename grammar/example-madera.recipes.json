@@ -1,0 +1,32 @@
+{
+  "flow-seam": {
+    "kind": "seam",
+    "blurb": "one act leaves on an axis, a frame of empty ground, the next arrives on the same axis, ground colour shifts",
+    "sources": [
+      { "ref": "example-madera", "t": 4.54, "note": "editor window exits left, 'MADERA understands' enters from the right" },
+      { "ref": "example-madera", "t": 6.0, "note": "tagline exits left, product card enters from the right, ground darkens" },
+      { "ref": "example-madera", "t": 8.12, "note": "card exits left over a warm brown ground, ground lightens back to grey, 'find' enters from the right" },
+      { "ref": "example-madera", "t": 9.57, "note": "tagline exits up, ground shifts olive-grey, a tilted window rises from the bottom" },
+      { "ref": "example-madera", "t": 11.08, "note": "window exits up, ground returns to light grey, a shape rises from the bottom" }
+    ],
+    "slots": { "at": "seconds: the seam's measured joint (core midpoint of the empty-ground frames)", "out": "layer id", "in": "layer id", "ground": "[outgoing ground id, incoming ground id], optional" },
+    "params": {
+      "axis": { "default": "x", "enum": ["x", "y"], "note": "measured per source: x on 3 of 5 (right-to-left), y on 2 of 5 (bottom-to-top). madera changes axis once, after its 3rd seam" },
+      "gap": { "default": 0.067, "unit": "s", "note": "core empty-ground span, measured 0.05s to 0.1s (3 to 6 frames @60fps) across the five seams" },
+      "groundFade": { "default": 0.5, "unit": "s", "one-source": true, "note": "not directly measured here (this study reads the seam, not the enter/exit tween durations); carried forward from the prior recipes.json entry" }
+    }
+  },
+  "flow-exit-enter": {
+    "kind": "enter",
+    "blurb": "the incoming element after a flow-seam arrives from the seam's own axis and direction, mirroring the outgoing element's exit",
+    "sources": [
+      { "ref": "example-madera", "t": 4.54, "note": "'MADERA understands' enters from the right (x axis) as the window exits left" },
+      { "ref": "example-madera", "t": 9.57, "note": "the tilted window enters from the bottom (y axis) as the tagline exits up" }
+    ],
+    "slots": { "at": "seconds: the seam's t", "in": "layer id" },
+    "params": {
+      "axis": { "default": "x", "enum": ["x", "y"], "note": "inherits the owning flow-seam's axis" },
+      "direction": { "default": "right-to-left", "enum": ["right-to-left", "left-to-right", "bottom-to-top", "top-to-bottom"], "note": "measured centroid comparison, ~0.25s either side of the seam's core" }
+    }
+  }
+}

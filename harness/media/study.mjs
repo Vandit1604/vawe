@@ -70,6 +70,17 @@ const FIXED = Number(flag('--fixed', 2));           // fallback sampling period,
 const STRIPS = Number(flag('--strips', 0));         // how many of the busiest shots get a dense strip
 const STRIP_FPS = Number(flag('--strip-fps', 8));   // samples per second inside a strip
 
+// SEAM DETECTION. A hard cut is a big FRAME DIFFERENCE, which is what detectCuts() below measures. A
+// no-cut film, one where every act is separated by a beat of empty ground instead of a cut, never trips
+// it: content fades OUT before it fades back IN, so no two consecutive frames differ enough to register,
+// and the film that motivated this read scores a peak of 0.27 against a 0.3 default. The joint is real,
+// it is just not a delta event, so a second measurement looks for it directly: EDGE CONTENT, near zero
+// exactly when the frame is empty ground. Threshold justified off measured numbers (see detectSeams).
+const SEAM_THRESHOLD = Number(flag('--seam-threshold', 0.3));
+const EDGE_LOW = Number(flag('--edge-low', 0.08));
+const EDGE_HIGH = Number(flag('--edge-high', 0.2));
+const SEAM_WINDOW = Number(flag('--seam-window', 0.25));  // seconds sampled each side of a seam, for flow direction
+
 const die = (msg, code = 2) => { console.error(`✗ ${msg}`); process.exit(code); };
 
 if (argv.includes('--selftest')) {
@@ -79,6 +90,27 @@ if (argv.includes('--selftest')) {
   eq(clusterCuts(run, 0.95, 0.4), [], 'nothing above the threshold is no cuts, not a guess');
   eq(clusterCuts([{ t: 0.1, score: 0.9 }], 0.3, 0.4), [], 'the first frames are never a cut');
   console.log('✓ study selftest: clusterCuts');
+
+  // Synthetic edge-content curve: two content spans (high YAVG) separated by a 3-frame empty-ground
+  // gap (YAVG 0, 0, 0.1), all <= a 0.3 threshold. Mirrors madera's own numbers (content 0.8-11, seams
+  // 0.00-0.24) without decoding a video.
+  const edge = [
+    { t: 0.10, v: 5.0 }, { t: 0.12, v: 4.5 }, { t: 0.14, v: 3.0 },
+    { t: 0.16, v: 0.00 }, { t: 0.18, v: 0.00 }, { t: 0.20, v: 0.10 },
+    { t: 0.22, v: 2.0 }, { t: 0.24, v: 4.0 }, { t: 0.26, v: 5.0 },
+  ];
+  const seams = detectSeams(edge, 0.3, 1.0);
+  eq(seams.length, 1, 'one gap in the middle is one seam');
+  eq(seams[0].t0, 0.16, 'the outer run starts at the first below-threshold frame');
+  eq(seams[0].t1, 0.20, 'the outer run ends at the last below-threshold frame');
+  eq(seams[0].core0, 0.16, 'the core starts at the first truly-empty frame');
+  eq(seams[0].core1, 0.18, 'the core ends at the last truly-empty frame, dropping the 0.10 tail');
+  eq(Number(seams[0].t.toFixed(3)), 0.17, 'the reported joint is the core midpoint');
+  eq(seams[0].frames.length, 2, 'the core carries only the frames at the run\'s own minimum');
+  eq(detectSeams(edge, -1, 1.0), [], 'nothing under an impossible threshold is no seams, not a guess');
+  eq(detectSeams([{ t: 0.02, v: 0 }, { t: 0.98, v: 0 }], 0.3, 1.0), [],
+    'a run touching the film\'s own start or end is framing, not a joint');
+  console.log('✓ study selftest: detectSeams');
   process.exit(0);
 }
 
@@ -119,6 +151,35 @@ if (!width || !height || !(duration > 0)) {
 }
 const hasAudio = !!String(spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'a:0',
   '-show_entries', 'stream=codec_name', '-of', 'default=nw=1:nk=1', VIDEO], { encoding: 'utf8' }).stdout).trim();
+
+// A CONTAINER'S DURATION IS NOT THE LAST DECODABLE FRAME, and two of thirteen references died on the
+// difference. `format=duration` is the stream's stated length; seeking to `duration - 0.08` can land
+// past the final frame, and ffmpeg then exits 0 having written nothing, which `ffmpegOrDie` correctly
+// refuses. The margin is in FRAMES rather than in seconds because that is the unit the problem is in.
+// The last frame's own start time, from the video stream's frame count where the file states one, and
+// otherwise a three-frame margin off the container. Never `duration` itself.
+// DERIVED WITHOUT fps AT ALL where the frame count is known, which is what makes it immune to the lie
+// above: the last frame is a FRACTION of the duration, and both numbers come off the same stream.
+// Moved up here (it used to sit beside `eventFrames`, further down) because the seam-flow measurement
+// below needs it too, to clamp a post-seam window that would otherwise seek past the last frame.
+const nbFrames = Number(fields.nb_frames) || 0;
+// THE LOWER OF TWO ESTIMATES, because each is wrong in a different direction and neither alone is safe.
+//   duration x (n-2)/n  is immune to a lying r_frame_rate (the VFR case above) and assumes the
+//                       container's duration IS the video's span. It is not when a container carries
+//                       audio padding: mo1's make-it-move holds 534 frames at 60fps, so its last frame
+//                       starts at 8.883s, while the container reports 8.981s. That formula returned
+//                       8.947s, four frames past the end, and every seek there wrote nothing while
+//                       ffmpeg exited 0, which is the exact failure the comment above this one
+//                       describes and this line then reproduced.
+//   (n-2)/avgFps        is immune to that padding and depends on the frame rate, which is why it is
+//                       avg_frame_rate and never r_frame_rate.
+// Whichever is smaller is inside both truths.
+const byDuration = nbFrames > 2 ? duration * ((nbFrames - 2) / nbFrames) : Infinity;
+const byRate = nbFrames > 2 && fps > 0 ? (nbFrames - 2) / fps : Infinity;
+const LAST_FRAME = Number.isFinite(Math.min(byDuration, byRate))
+  ? Math.min(byDuration, byRate)
+  : duration - 3 / (fps || 30);
+const seekable = (t) => Math.max(0, Math.min(t, LAST_FRAME));
 
 // THE SAME FILM UNDER TWO NAMES IS THE STORE'S OWN VERSION OF THE DRIFT IT EXISTS TO PREVENT, and it
 // happened on the first day: a reference arrived by link, was downloaded as `rebuilt.mp4`, studied, and
@@ -196,6 +257,40 @@ function detectCuts() {
   return { peak, near, cuts: clustered };
 }
 
+// ── ground seams: joints a luma-delta cut can't see ─────────────────────────────────────────────
+// `edgedetect` marks every pixel that belongs to an edge; its per-frame YAVG (the same signalstats
+// reading LUMA/DELTA use, just on the edge map instead of the picture) is near zero exactly when the
+// frame is empty ground and rises with every letterform, icon or UI edge on screen. On madera, content
+// frames run 0.8 to 11 and the five seams run 0.00 to 0.24, so SEAM_THRESHOLD=0.3 sits with margin
+// above every seam and below every content frame: a run of consecutive frames at or under it is a beat
+// of empty ground, with no cut in it for detectCuts() to find.
+//
+// A THRESHOLD RUN IS THE PENUMBRA, NOT THE GAP. The frames either side of true zero are the outgoing
+// shot fading OUT and the incoming shot fading IN, both still "ground" by the 0.3 test but not actually
+// empty: on madera one such run spans 18 frames while the deepest, truly-empty CORE of it (the frames
+// AT the run's own minimum) is only 5. So the reported joint is the CORE's midpoint, and the reported
+// gap is the CORE's span, which is what lands within "1 to 12 frames" on every one of madera's seams;
+// the outer run only decides WHERE to look for the core. `dur` is passed in rather than read off the
+// module-level `duration`, so the run-finding logic is testable on synthetic numbers (`--selftest`)
+// without decoding a video.
+export function detectSeams(edge, threshold, dur) {
+  const runs = [];
+  let cur = null;
+  for (const p of edge) {
+    if (p.v <= threshold) { if (cur) { cur.t1 = p.t; cur.pts.push(p); } else cur = { t0: p.t, t1: p.t, pts: [p] }; }
+    else { if (cur) runs.push(cur); cur = null; }
+  }
+  if (cur) runs.push(cur);
+  return runs.filter((r) => r.t0 > 0.05 && r.t1 < dur - 0.05).map((r) => {
+    const minv = Math.min(...r.pts.map((p) => p.v));
+    // 0.02 tolerance, not exact equality: ffmpeg's YAVG lands on a clean 0.000 for several consecutive
+    // frames on madera, but a noisier clip could sit at 0.01 vs 0.02 without a true tie.
+    const core = r.pts.filter((p) => p.v <= minv + 0.02);
+    return { t0: r.t0, t1: r.t1, core0: core[0].t, core1: core[core.length - 1].t,
+      t: (core[0].t + core[core.length - 1].t) / 2, frames: core.map((p) => p.v) };
+  });
+}
+
 // ── the film as two per-frame series, in two decodes ─────────────────────────────────────────────
 //
 // WHY THIS REPLACED PER-SHOT SAMPLING. The old shape asked ffmpeg a question per shot per statistic,
@@ -234,6 +329,9 @@ const LUMA = frameSeries('scale=160:90,signalstats');
 // The first difference frame is the frame against itself and reads 0. Dropped rather than averaged in,
 // because "how much did this change from the one before" has no answer for the first frame.
 const DELTA = frameSeries('scale=160:90,tblend=all_mode=difference,signalstats').slice(1);
+// Scaled bigger than LUMA/DELTA (410x270, not 160x90): edge detail is finer-grained than luma, and a
+// letterform that survives 410x270 can vanish at 160x90. Cost is one more decode of the same film.
+const EDGE = frameSeries(`scale=410:270,edgedetect=low=${EDGE_LOW}:high=${EDGE_HIGH},signalstats`);
 
 const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
 const between = (series, t0, t1) => series.filter((x) => x.t >= t0 && x.t < t1).map((x) => x.v);
@@ -315,6 +413,75 @@ const toneOf = (t0, len) => {
   return best;
 };
 
+// ── seam flow: which way the content moves through a joint ──────────────────────────────────────
+// A seam is empty ground for a beat, so neither shot's own delta curve says which way it travelled.
+// What does: WHERE the edge mass sits just before the gap opens (the outgoing shot's last visible
+// content) against where it sits just after the gap closes (the incoming shot's first). A centroid, not
+// a flow field: cheap, and in the ~0.25s either side of a seam the frame is either leaving toward one
+// edge or arriving from one, never both, so one weighted-average point per side is enough.
+function edgeCentroid(t0, len) {
+  const W = 160, H = 90;
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-ss', Math.max(0, t0).toFixed(3), '-t', Math.max(0.02, len).toFixed(3),
+    '-i', VIDEO, '-vf', `edgedetect=low=${EDGE_LOW}:high=${EDGE_HIGH},scale=${W}:${H},format=gray`,
+    '-pix_fmt', 'gray', '-f', 'rawvideo', '-'], { encoding: 'buffer', maxBuffer: 1 << 26 });
+  const buf = r.stdout;
+  const frame = W * H;
+  if (!buf || buf.length < frame) return null;
+  const n = Math.floor(buf.length / frame);
+  let sumW = 0, sumX = 0, sumY = 0;
+  for (let f = 0; f < n; f++) {
+    const base = f * frame;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const v = buf[base + y * W + x];
+      if (v > 32) { sumW += v; sumX += v * x; sumY += v * y; }
+    }
+  }
+  if (!sumW) return null;
+  return { cx: sumX / sumW / W, cy: sumY / sumW / H };
+}
+
+// The ground's own colour on each side of a seam: every pixel averaged, not the single most-saturated
+// one `toneOf` picks, because the seam is by definition carrying no accent, just the backdrop.
+function meanColorOf(t0, len) {
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-ss', Math.max(0, t0).toFixed(3), '-t', Math.max(0.02, len).toFixed(3),
+    '-i', VIDEO, '-vf', 'scale=8:8', '-pix_fmt', 'rgb24', '-f', 'rawvideo', '-'],
+    { encoding: 'buffer', maxBuffer: 1 << 24 });
+  const buf = r.stdout;
+  if (!buf || buf.length < 3) return null;
+  let R = 0, G = 0, B = 0, n = 0;
+  for (let i = 0; i + 2 < buf.length; i += 3) { R += buf[i]; G += buf[i + 1]; B += buf[i + 2]; n++; }
+  if (!n) return null;
+  const hex = (v) => Math.round(v / n).toString(16).padStart(2, '0');
+  return `#${hex(R)}${hex(G)}${hex(B)}`;
+}
+
+// AXIS AND DIRECTION FROM ONE COMPARISON. If the incoming side's centroid sits further right than the
+// outgoing side's did (cx grows), the frame is being entered from the right and left by the left, which
+// reads as "right-to-left" flow; the mirror holds on y ("bottom-to-top" when cy grows, content entering
+// low and having been leaving high). Whichever axis moved more is the seam's axis.
+function measureSeam(run) {
+  // The CORE (run.core0..run.core1), not the outer threshold run: that is the actual empty-ground span,
+  // see detectSeams above. Windows for flow/colour are measured off it, not off the wider penumbra.
+  const gap = Number((run.core1 - run.core0 + 1 / fps).toFixed(3));
+  const preT = Math.max(0, run.core0 - SEAM_WINDOW);
+  const postT = run.core1 + 1 / fps;
+  const pre = edgeCentroid(preT, run.core0 - preT);
+  const postLen = Math.min(SEAM_WINDOW, Math.max(0.02, LAST_FRAME - postT));
+  const post = edgeCentroid(postT, postLen);
+  let axis = null, direction = null;
+  if (pre && post) {
+    const dx = post.cx - pre.cx, dy = post.cy - pre.cy;
+    axis = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+    direction = axis === 'x' ? (dx >= 0 ? 'right-to-left' : 'left-to-right') : (dy >= 0 ? 'bottom-to-top' : 'top-to-bottom');
+  }
+  return {
+    t: Number(run.t.toFixed(2)), gap, frames: run.frames.length,
+    axis, direction,
+    groundBefore: meanColorOf(preT, run.core0 - preT),
+    groundAfter: meanColorOf(postT, postLen),
+  };
+}
+
 const GROUND_EDGES = [[60, 'dark', 'mid'], [128, 'mid', 'light']];
 const GROUND_DOUBT = 4;
 const bucket = (luma) => {
@@ -370,16 +537,40 @@ const measureShot = (s) => {
 };
 
 const { peak, near, cuts } = detectCuts();
-const detected = cuts.length > 0;
-// Fall back rather than ship a wrong cut list. A film built on dissolves scores nothing at any usable
-// threshold (creed.mp4 peaks at 0.12), and a one-shot film correctly scores nothing at all.
+const cutsDetected = cuts.length > 0;
+const seams = detectSeams(EDGE, SEAM_THRESHOLD, duration).map(measureSeam);
+
+// TWO KINDS OF JOINT, ONE BOUNDARY LIST. A cut and a seam within MIN_SHOT of each other are the same
+// joint measured two ways; the cut wins because it is the more exact of the two (an exact scene-score
+// peak vs. a run of low-edge frames). Sorted by time so `shots` still walks the film in order.
+function mergeJoints(cutHits, seamHits) {
+  const items = [
+    ...cutHits.map((c) => ({ t: c.t, kind: 'cut', score: c.score })),
+    ...seamHits.map((s) => ({ t: s.t, kind: 'seam', seam: s })),
+  ].sort((a, b) => a.t - b.t);
+  const out = [];
+  for (const it of items) {
+    const prev = out[out.length - 1];
+    if (prev && it.t - prev.t < MIN_SHOT) continue;   // keep the earlier joint, drop the duplicate
+    out.push(it);
+  }
+  return out;
+}
+const joints = mergeJoints(cuts, seams);
+const detected = joints.length > 0;
+// Fall back rather than ship a wrong cut list. A film built on dissolves AND has no empty-ground seams
+// scores nothing at any usable threshold, and a one-shot film correctly scores nothing at all.
 const bounds = detected
-  ? [0, ...cuts.map((c) => c.t)]
+  ? [0, ...joints.map((j) => j.t)]
   : Array.from({ length: Math.max(2, Math.ceil(duration / FIXED)) }, (_, i) => (i * duration) / Math.max(2, Math.ceil(duration / FIXED)));
-const shots = bounds.map((t0, i) => ({
-  i: i + 1, t0, t1: i + 1 < bounds.length ? bounds[i + 1] : duration,
-  score: detected ? (i === 0 ? null : cuts[i - 1].score) : null,
-})).filter((s) => s.t1 - s.t0 > 0.05).map((s) => ({ ...s, len: s.t1 - s.t0 }));
+const shots = bounds.map((t0, i) => {
+  const j = i === 0 ? null : joints[i - 1];
+  return {
+    i: i + 1, t0, t1: i + 1 < bounds.length ? bounds[i + 1] : duration,
+    score: j && j.kind === 'cut' ? j.score : null,
+    jointKind: j ? j.kind : null,
+  };
+}).filter((s) => s.t1 - s.t0 > 0.05).map((s) => ({ ...s, len: s.t1 - s.t0 }));
 
 // Measured once, here, so study.json, the sheet and the table all read the same numbers rather than
 // each asking ffmpeg its own question. One fact, one owner: the failure this repo logs most often.
@@ -405,33 +596,6 @@ const median = lens.length % 2 ? lens[(lens.length - 1) / 2] : (lens[lens.length
 // fraction of the shot rather than a constant: on a 1.2s shot 0.4s apart is three distinct moments,
 // and on an 11s shot it is the same instant three times.
 const CELLS = Number(flag('--cells', 4));       // frames per shot row, including the in and out frames
-
-// A CONTAINER'S DURATION IS NOT THE LAST DECODABLE FRAME, and two of thirteen references died on the
-// difference. `format=duration` is the stream's stated length; seeking to `duration - 0.08` can land
-// past the final frame, and ffmpeg then exits 0 having written nothing, which `ffmpegOrDie` correctly
-// refuses. The margin is in FRAMES rather than in seconds because that is the unit the problem is in.
-// The last frame's own start time, from the video stream's frame count where the file states one, and
-// otherwise a three-frame margin off the container. Never `duration` itself.
-// DERIVED WITHOUT fps AT ALL where the frame count is known, which is what makes it immune to the lie
-// above: the last frame is a FRACTION of the duration, and both numbers come off the same stream.
-const nbFrames = Number(fields.nb_frames) || 0;
-// THE LOWER OF TWO ESTIMATES, because each is wrong in a different direction and neither alone is safe.
-//   duration x (n-2)/n  is immune to a lying r_frame_rate (the VFR case above) and assumes the
-//                       container's duration IS the video's span. It is not when a container carries
-//                       audio padding: mo1's make-it-move holds 534 frames at 60fps, so its last frame
-//                       starts at 8.883s, while the container reports 8.981s. That formula returned
-//                       8.947s, four frames past the end, and every seek there wrote nothing while
-//                       ffmpeg exited 0, which is the exact failure the comment above this one
-//                       describes and this line then reproduced.
-//   (n-2)/avgFps        is immune to that padding and depends on the frame rate, which is why it is
-//                       avg_frame_rate and never r_frame_rate.
-// Whichever is smaller is inside both truths.
-const byDuration = nbFrames > 2 ? duration * ((nbFrames - 2) / nbFrames) : Infinity;
-const byRate = nbFrames > 2 && fps > 0 ? (nbFrames - 2) / fps : Infinity;
-const LAST_FRAME = Number.isFinite(Math.min(byDuration, byRate))
-  ? Math.min(byDuration, byRate)
-  : duration - 3 / (fps || 30);
-const seekable = (t) => Math.max(0, Math.min(t, LAST_FRAME));
 
 function eventFrames(s, n) {
   const inT = Math.min(s.t0 + 0.08, s.t1 - 0.01);
@@ -515,13 +679,16 @@ const study = {
   measured: {
     duration: fx(duration), width, height, fps: fx(fps, 3),
     aspect: `${width}:${height}`, hasAudio,
-    shotDetection: detected ? 'scene-score' : 'fixed-sampling',
+    shotDetection: cutsDetected && seams.length ? 'scene-score+ground-seam'
+      : cutsDetected ? 'scene-score' : seams.length ? 'ground-seam' : 'fixed-sampling',
     threshold: THRESHOLD, peakSceneScore: fx(peak, 3), nearMisses: near,
+    seamThreshold: SEAM_THRESHOLD, seamsFound: seams.length,
     shots: shots.length, medianShot: fx(median), cutsPerMinute: fx((shots.length / duration) * 60, 1),
   },
   shots: shots.map((s) => ({ i: s.i, t0: fx(s.t0), t1: fx(s.t1), len: fx(s.len),
-    score: s.score == null ? null : fx(s.score, 3),
+    score: s.score == null ? null : fx(s.score, 3), jointKind: s.jointKind,
     luma: s.luma, ground: s.ground, motion: s.motion, alive: s.alive, accent: s.accent, saturation: s.saturation })),
+  seams,
 };
 fs.writeFileSync(path.join(dir, 'study.json'), JSON.stringify(study, null, 2) + '\n');
 
@@ -574,7 +741,7 @@ function writeGrammar(study, shots) {
       // still floor, and `curve` is the change series itself at 4 samples a second: enough to see a
       // build, a stop and a burst, small enough that a whole film is a few dozen numbers.
       motion: s.motion, peak: s.peak, held: s.held, frames: s.frames, joint: s.joint,
-      curve: s.curve,
+      jointKind: s.jointKind, curve: s.curve,
       // authored, merged forward
       onScreen: priorShot(s.i).onScreen ?? null,
       moves: priorShot(s.i).moves ?? null,
@@ -587,6 +754,10 @@ function writeGrammar(study, shots) {
       const ms = shots.map((s) => s.motion).filter((m) => typeof m === 'number');
       return ms.length ? { lo: Math.min(...ms), hi: Math.max(...ms) } : null;
     })(),
+    // Empty-ground seams found between shots, measured (not merely detected): each one's gap duration,
+    // flow axis/direction and the ground colour on either side. This is what feeds a `recipes/*.json`
+    // seam candidate, see the grammar → recipes write-up below.
+    seams: study.seams,
     threads: (prior && prior.threads) ?? null,
     spectacle: (prior && prior.spectacle) ?? null,
     takeaway: (prior && prior.takeaway) ?? null,
@@ -597,8 +768,10 @@ function writeGrammar(study, shots) {
 
 const rel = (p) => path.relative(ROOT, p);
 const note = detected
-  ? `Shot boundaries are MEASURED (ffmpeg scene score > ${THRESHOLD}, peak ${fx(peak, 3)}). Check them against the sheet.`
-  : `NO hard cuts found (peak scene score ${fx(peak, 3)}, below ${THRESHOLD}). The film dissolves, or it is one shot. Rows below are a FIXED ${FIXED}s sample, not a cut list.`;
+  ? `Shot boundaries are MEASURED: ${cuts.length} hard cut(s) (scene score > ${THRESHOLD}, peak ${fx(peak, 3)})`
+    + ` and ${seams.length} empty-ground seam(s) (edge content <= ${SEAM_THRESHOLD}). Check them against the sheet.`
+  : `NO hard cuts (peak scene score ${fx(peak, 3)}, below ${THRESHOLD}) and NO empty-ground seams (nothing fell to <= ${SEAM_THRESHOLD}). `
+    + `The film dissolves, or it is one shot. Rows below are a FIXED ${FIXED}s sample, not a cut list.`;
 
 const md = `# Study · ${NAME}
 
@@ -635,7 +808,18 @@ before checking it against the corpus (\`node harness/author/claims.mjs\`, gramm
 <scene>\` prints the same still-share for our attempt, but on JPEG-captured frames against this figure's
 H.264-decoded ones: read the codec it prints beside the number before comparing the two directly.
 
-## Then cut it
+${seams.length ? `## Seams (empty-ground joints)
+
+Neither shot's own delta curve carries these: they are frames of empty ground between two acts, found
+by edge content falling to <= ${SEAM_THRESHOLD} for one or more frames, not by a luma-delta cut. \`axis\`/
+\`direction\` compare the edge centroid ${SEAM_WINDOW}s before the gap opens against ${SEAM_WINDOW}s after
+it closes: which way the content was leaving, and which way it arrives.
+
+| t | gap | frames | axis | direction | ground before | ground after |
+|---|-----|--------|------|-----------|----------------|----------------|
+${seams.map((s) => `| ${s.t}s | ${s.gap}s | ${s.frames} | ${s.axis ?? '?'} | ${s.direction ?? '?'} | ${s.groundBefore ?? '?'} | ${s.groundAfter ?? '?'} |`).join('\n')}
+
+` : ''}## Then cut it
 
 The method that produced this table cut a 31s film to 15s by REMOVING shots, never by speeding them
 up. One event per screen. Mark each row above KEEP or CUT before you write a storyboard.
@@ -651,22 +835,33 @@ answers in. The storyboard is where they turn into our film.
 
 Storyboard fields these feed: \`pace:\`, \`threads:\`/\`object:\`, \`spectacle:\`.
 See \`docs/CRAFT/STORYBOARD-TEMPLATE.md\` and \`docs/CRAFT/REFERENCE-STUDY.md\`.
+
+## Write recipe candidates
+
+A study is not finished at the table above. If a seam, spine, enter, exit, camera move or ground change
+here is a pattern worth reusing, write it to \`grammar/${NAME}.recipes.json\` in the \`recipes.json\` entry
+shape (\`kind\`, \`blurb\`, \`sources\`, \`slots\`, \`params\` with measured defaults, see \`recipes/README.md\`).
+It is a CANDIDATE, not a promotion: a person still moves it into \`recipes/recipes.json\`.
 `;
 fs.writeFileSync(path.join(dir, 'study.md'), md);
 
 // ── report ────────────────────────────────────────────────────────────────────────────────────────
 console.log(`✓ ${shots.length} ${detected ? 'shots' : 'fixed samples'} · ${study.measured.duration}s · ${width}x${height} · ${study.measured.fps}fps → ${rel(dir)}/`);
-if (!detected) {
-  console.log(`  ⚠ no hard cuts: peak scene score ${fx(peak, 3)} < ${THRESHOLD}. Dissolves or a single shot.`);
+if (!cutsDetected) {
+  console.log(`  ⚠ no hard cuts: peak scene score ${fx(peak, 3)} < ${THRESHOLD}. Dissolves, a no-cut film of empty-ground seams, or a single shot.`);
   console.log(`    Lower it with --threshold 0.15 if you believe there are cuts, then READ the sheet before trusting the list.`);
 }
-if (detected && near) {
+if (cutsDetected && near) {
   console.log(`  ⚠ ${near} frame(s) scored between ${THRESHOLD / 2} and ${THRESHOLD}: probably dissolves this list MISSES. Re-run with --threshold ${THRESHOLD / 2} and compare the sheets.`);
 }
+if (seams.length) {
+  console.log(`  ${seams.length} empty-ground seam(s) (edge content <= ${SEAM_THRESHOLD}):`);
+  for (const s of seams) console.log(`    ${s.t}s  gap ${s.gap}s (${s.frames}f)  axis ${s.axis ?? '?'} ${s.direction ?? '?'}  ${s.groundBefore ?? '?'} -> ${s.groundAfter ?? '?'}`);
+}
 for (const s of shots) {
-  console.log(`  ${String(s.i).padStart(2, ' ')}. ${fx(s.t0).toFixed(2)}s  ${fx(s.len).toFixed(2)}s${s.score == null ? '' : `  (score ${fx(s.score, 3)})`}`);
+  console.log(`  ${String(s.i).padStart(2, ' ')}. ${fx(s.t0).toFixed(2)}s  ${fx(s.len).toFixed(2)}s${s.score == null ? '' : `  (score ${fx(s.score, 3)})`}${s.jointKind ? `  [${s.jointKind}]` : ''}`);
 }
 console.log(`\n  median shot ${study.measured.medianShot}s · ${study.measured.cutsPerMinute}/min${hasAudio ? '' : ' · NO audio track: the sound column is empty by fact, not by omission'}`);
 const g = writeGrammar(study, shots);
 console.log(`  grammar → ${rel(g.file)}  (${g.filled}/${g.total} shots carry an authored reading; it is COMMITTED and outlives refs/)`);
-console.log(`  Read ${rel(sheet)}, fill the four authored columns in ${rel(dir)}/study.md, then storyboard.`);
+console.log(`  Read ${rel(sheet)}, fill the four authored columns in ${rel(dir)}/study.md, then storyboard and write recipe candidates.`);
