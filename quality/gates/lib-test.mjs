@@ -5794,6 +5794,9 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ["a card with a heading, body text and a button at the bottom", "card"],
     ["a word that changes colour again and again", "colorCycle"],
     ["one word melting into the next word", "morphText"],
+    // MOVE SHAPES (core/motion/shapes.js). An author reaches these through `move: <shape>:<band>`,
+    // so the plain question is about the FEELING of the travel, never the shape's name.
+    ["a scroll that surges then gives up, the way a hand scrolls", "pan"],
   ];
   {
     const top3 = (q, want) => { const qt = arsenalToks(q);
