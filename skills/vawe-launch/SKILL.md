@@ -50,11 +50,11 @@ VO=<topic>.vo.words.json` proposes each beat's start + duration from the narrati
 the beats in Step 4 so the reveals land on the words.
 **Gate:** VO generated, or the video is silent.
 
-## Step 4: Author from blueprints (obey the spec)
-Compose the scene JSON from `{type:"beat"}` blueprints (`make arsenal BLUEPRINTS=1`) + brand content, on the remixed
+## Step 4: Author the JSON (obey the spec)
+Compose the scene JSON from recipes (`make arsenal Q="…"`, recipes/README.md) + brand content, on the remixed
 theme, transcribing the storyboard exactly. Reach for the arsenal (`make effects` → `docs/EFFECTS.md`):
 kinetic reveals, a living bg, border-beam/paint, svg draw/morph, `cameraMove`, dense per-child figures via
-`parts`. For a **hero beat** whose choreography `parts`/blueprints can't express (overlapping tweens, a
+`parts`. For a **hero beat** whose choreography `parts`/recipes can't express (overlapping tweens, a
 token travelling a path while a counter ticks and a check draws), author a bespoke **`composition`**.
 A first-party hand-authored per-beat GSAP timeline in `core/compositions/index.js`, named from the JSON
 (`{type:"composition",comp:"…",props:{…}}`); see [AUTHOR-THE-FRAME.md](../../docs/CRAFT/AUTHOR-THE-FRAME.md).

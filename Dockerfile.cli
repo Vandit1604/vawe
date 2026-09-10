@@ -51,7 +51,6 @@ WORKDIR /engine
 COPY cli ./cli
 COPY core ./core
 COPY blocks ./blocks
-COPY blueprints ./blueprints
 COPY themes ./themes
 COPY assets/vendor ./assets/vendor
 COPY harness/author/expand-blocks.mjs ./harness/author/expand-blocks.mjs

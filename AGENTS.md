@@ -216,9 +216,11 @@ memory: `make preflight D=<file>` derives it from what recent films actually use
 happens to think of. It is a constraint, not a ban: a beat with a real reason to repeat a value still
 can, waived in the scene with `_why`.
 
-**Do not hand-author a film from a blank JSON.** Compose from `make blueprints`; pick one by SEEING it
-(`make previews`). Never quote a library statistic from memory: run `node
-harness/dev/library-stats.mjs` and cite what it prints. Content spine: hook → suspense → payoff.
+**Do not hand-author a film from a blank JSON.** Write the film's prompt first (`make ideate`), then
+<!-- doc-refs-allow: make ideate · being built in parallel with the blueprints retirement, not yet wired into the Makefile -->
+`make scaffold` writes the storyboard sidecar and an empty-layers scene shell; compose the motion from
+`recipes/` (recipes/README.md) or `make arsenal Q="…"`. Never quote a library statistic from memory: run
+`node harness/dev/library-stats.mjs` and cite what it prints. Content spine: hook → suspense → payoff.
 Never spoil the payoff; order beats toward the most counterintuitive moment; be honest, on-screen
 copy must be true, and a specific fact beats a dry number.
 

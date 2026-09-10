@@ -1734,7 +1734,7 @@ Three separate findings, all surfaced by adding four styles to `core/type/captio
 holds: none
 
 ## 421. Every count blueprint in the library is frozen at a non-zero start
-`blueprints/kit.mjs:31` writes `countStart` as an ABSOLUTE time.
+A count blueprint (retired with blueprints/kit.mjs) wrote `countStart` as an ABSOLUTE time.
 holds: none
 
 ## 422. A caption accepted three fields, so where it sat was a CSS constant no JSON could reach
@@ -1789,7 +1789,7 @@ holds: none
 The literal-conversion agent was told its change "must stay 105 identical on `snap-scenes`, or justify each change one by one". It could not run that check at all. `quality/baselines/snap/` is gitignored...
 
 ## 434. CLOSED: the frozen counter, fixed and shown
-`blueprints/kit.mjs` `dollyNumber` wrote `countStart: start + 0.1`.
+`dollyNumber` (retired with blueprints/kit.mjs) wrote `countStart: start + 0.1`.
 holds: none
 
 ## 435. /editor rendered a blank stage in production, and the engine had been saying why the whole time

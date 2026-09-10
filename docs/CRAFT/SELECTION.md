@@ -211,7 +211,7 @@ easing, one accent chip) to `site/public/blocklib/presets/<name>/{showcase.mp4, 
 their real, already-committed theme; the other six play in a minimal `themes/presets/<name>.json`
 written for this pass, since no existing theme is a real preset for them. Re-render one after tuning it:
 `make preset-sheets ONLY=<name>`. Picking a profile by its rendered look, not its adjective, is the same
-discipline `make previews` (docs/CRAFT/BLUEPRINTS.md) gives a beat.
+discipline `make study` gives a reference film's motion (recipes/README.md).
 
 ---
 

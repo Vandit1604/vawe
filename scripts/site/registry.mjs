@@ -1,6 +1,6 @@
 // scripts/site/registry.mjs: GENERATED, never hand-edited. `make registry` writes registry/;
 // `make registry CHECK=1` fails if what is on disk differs from what the sources say. Edit a row in
-// blocks/catalog.mjs (or a beat in blueprints/index.mjs) and re-run; editing registry/ by hand is
+// blocks/catalog.mjs and re-run; editing registry/ by hand is
 // undone by the next run.
 //
 // WHAT THIS IS FOR. An outside agent, in someone else's project, wants to start from one of our
@@ -10,7 +10,6 @@
 //
 // SOURCES (one each. Nothing here is re-derived and nothing is hand-typed):
 //   blocks/catalog.mjs          name · family · blurb · props · overlay      (the block manifest)
-//   blueprints/index.mjs        BEATS + REQUESTS                              (the beat registry)
 //   core/generators/generators.js          GENERATORS                                     (the playground registry)
 //   site/lib/block-frames.json  the measured ink rect of each block           (make blocks-scenes)
 //   site/public/assets/blocks/  a standalone scene + poster per block         (make blocks-scenes)
@@ -40,13 +39,10 @@
 // already serves it. Copying every scene into registry/ would put the same bytes in two places and
 // give them two chances to go stale, and blocks-scenes.mjs already owns them.
 //
-// ── DECISION 2: beats are in THIS registry; effects are not ──
-// A beat ({"type":"beat","beat":"kineticHook",…}) installs through the SAME expander, into the SAME
-// array position, with the same "no file to copy" shape. A separate registry would mean two indexes
-// an agent has to know about to answer one question ("what can I drop into a scene?"). They share the
-// index and are told apart by `type` (vawe:block vs vawe:beat) and by tags, which is what `type` is
-// for. Effects are NOT items: an effect is a prop value on a layer (anim, ease, a bg preset), not a
-// thing you place, so it has no install site and nothing to target. They stay in docs/EFFECTS.md.
+// ── DECISION 2: effects are not items ──
+// An effect is a prop value on a layer (anim, ease, a bg preset), not a thing you place, so it has no
+// install site and nothing to target. They stay in docs/EFFECTS.md, not here. (Beats installed through
+// this registry too, once; blueprints are retired, recipes/README.md.)
 //
 // -- DECISION 3: a generator is a THIRD kind of item, and its install differs by `produces` --
 // A generator is not a block and not a beat. Nothing in a scene ever NAMES one: the engine has no
@@ -83,7 +79,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
-import { BEATS, REQUESTS } from '../../blueprints/index.mjs';
 import { GENERATORS, controlsOf, defaultsOf } from '../../core/generators/generators.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -101,10 +96,10 @@ const frames = JSON.parse(fs.readFileSync(path.join(root, 'site/lib/block-frames
 const safeName = (name) => name.replace(/[^a-z0-9.]/gi, '_');
 
 // The destructured parameter names of a factory, brace-matched because a default can itself be an
-// array or object. Same job as propsOf() in scripts/site/blueprints-catalog.mjs, which cannot be
-// imported: that module runs its catalog on import and would print it into our output.
+// array or object. Same job as a block's own prop-spec walk elsewhere in this repo, which cannot be
+// imported: it runs its catalog on import and would print it into our output.
 // Also splits them by whether they carry a DEFAULT. A prop with no default may be required, and some
-// beats throw without theirs (focusRack refuses to run without `sharp` and `soft`), so a fragment that
+// some factories throw without theirs, so a fragment that
 // listed every prop as optional would hand a consumer a layer that cannot expand.
 function propSpec(fn) {
   const src = fn.toString();
@@ -181,33 +176,6 @@ function blockItem(entry) {
   };
 }
 
-function beatItem(name) {
-  const spec = propSpec(BEATS[name]);
-  // Required props are emitted as explicit nulls: the beat throws without them (focusRack does) and
-  // only the consumer knows what belongs there, so the fragment says so instead of looking complete.
-  const layer = {
-    type: 'beat', beat: name, start: PLACE.start, dur: PLACE.dur,
-    ...Object.fromEntries(spec.required.map((p) => [p, null])),
-  };
-  return {
-    $schema: `${SCHEMA}/registry-item.json`,
-    name,
-    type: 'vawe:beat',
-    title: name,
-    description: REQUESTS[name],
-    tags: ['beat', 'motion'],
-    dimensions: { width: 1920, height: 1080 },
-    install: {
-      kind: 'scene-layer',
-      target: 'layers[]',
-      requires: 'vawe engine (blueprints/index.mjs); expands automatically at load, no separate step',
-      layer,
-      requiredProps: spec.required.filter(timing),
-      props: spec.optional.filter(timing),
-    },
-  };
-}
-
 function generatorItem(g) {
   const preset = Object.keys(g.presets || {})[0] || null;
   const base = { ...defaultsOf(g.schema), ...(preset ? g.presets[preset] : {}) };
@@ -244,7 +212,6 @@ function generatorItem(g) {
 
 const items = [
   ...CATALOG.map(blockItem),
-  ...Object.keys(BEATS).map(beatItem),
   // GENERATORS, never ALL_GENERATORS: a look held back is not advertised. See DECISION 3.
   ...GENERATORS.map(generatorItem),
 ].sort((a, b) => (a.type === b.type

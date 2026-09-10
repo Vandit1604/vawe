@@ -14,7 +14,42 @@
 //
 // What it does NOT copy: the traced timings. There is no reference here, so these are chosen.
 import fs from 'node:fs';
-import { typedHook, morphButton } from '../../blueprints/index.mjs';
+import { glyphText } from '../../core/type/on-screen-text.js';
+
+// typedHook/morphButton: inlined from the retired blueprints/beats.mjs (docs/MISTAKES.md, the
+// retire-blueprints migration). Both are recipe CANDIDATES now (grammar/_blueprints.recipes.json,
+// "typed-erase-enter" and "morph-to-next-seam"), but this specimen calls them as plain literal-layer
+// factories, the same way it always did, not through the deleted `{type:"beat"}` sugar.
+function typedHook({ text, x = 368, y = 459, w = 1400, size = 126, weight = 700, color = 'var(--text)',
+  cps = 33, ls = '0.04em', start = 0, dur = 1.6 } = {}) {
+  const chars = glyphText(text).length;
+  const typeTime = chars / cps;
+  const untypeAt = Math.max(typeTime + 0.25, dur - Math.max(0.3, chars / (cps * 2)));
+  return [{
+    type: 'text', text, x, y, w, align: 'left', size, weight, color, ls,
+    typing: cps, untype: +untypeAt.toFixed(2), untypeRate: cps * 2, caret: true, caretHold: true,
+    start, duration: dur, exitDur: 0,
+  }];
+}
+
+function morphButton({ label = 'GENERATE', x = 764, y = 429, w = 392, h = 222,
+  fill = 'var(--accent)', ink = 'var(--on-light)', shrink = 205, at = 1.45, over = 0.4,
+  start = 0, dur = 2.7 } = {}) {
+  const inner = `width:calc(${w}px - (var(--p,0) * 0.35 + var(--p,0) * var(--p,0) * 0.65) * ${shrink}px);`
+    + `height:calc(${h}px - var(--p,0) * ${Math.round(h * 0.16)}px);`
+    + `border-radius:calc(30px + var(--p,0) * var(--p,0) * var(--p,0) * 900px);`
+    + `background:${fill};display:flex;align-items:center;justify-content:center`;
+  const span = `opacity:calc(1 - var(--p,0) * var(--p,0) * 3.2);color:${ink};`
+    + `font-family:var(--font-sans);font-size:30px;font-weight:800;letter-spacing:0.08em;white-space:nowrap`;
+  return [{
+    type: 'html', x, y, w,
+    html: `<div style="width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:center">`
+      + `<div style="${inner}"><span style="${span}">${String(label)}</span></div></div>`,
+    anim: 'fade', enterDur: 0.3, motionBlur: 0.16,
+    vars: { '--p': [0, 1] }, varsDelay: at, varsDur: over, varsEase: 'linear',
+    start, duration: dur,
+  }];
+}
 
 const W = 1920;
 const CHROME_AT = 1.46;                   // the app arrives

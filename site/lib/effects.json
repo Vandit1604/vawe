@@ -1,7 +1,7 @@
 {
-  "total": 727,
+  "total": 693,
   "previewed": 332,
-  "families": 59,
+  "families": 58,
   "tags": [
     [
       "asset",
@@ -14,10 +14,6 @@
     [
       "background",
       47
-    ],
-    [
-      "blueprint",
-      34
     ],
     [
       "camera",
@@ -651,257 +647,6 @@
           "stem": "gradient-recipes--warm-dusk",
           "desc": "orange into coral, a sunset ramp on a 40deg diagonal",
           "scene": "/assets/effects/gradient-recipes--warm-dusk.json",
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "beat-blueprints",
-      "title": "Beat blueprints",
-      "tag": "blueprint",
-      "intro": "`{ \"type\":\"beat\", \"beat\":\"<name>\", ... }`. A whole beat's directed motion, expanded at load. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.",
-      "mode": "table",
-      "note": null,
-      "noPreview": "a beat writes a whole cast of layers from content you supply. Run `make expand D=<file>` to see what it writes.",
-      "count": 34,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "blurResolveHook",
-          "stem": "beat-blueprints--blurresolvehook",
-          "desc": "a hook whose type arrives smeared with motion blur and snaps into focus, never sliding or fading",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "cardCascade",
-          "stem": "beat-blueprints--cardcascade",
-          "desc": "feature grid · kinetic title + cards that pop in one after another",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "cardFan",
-          "stem": "beat-blueprints--cardfan",
-          "desc": "cards arrive from one side and fan open in perspective around a fixed anchor",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "cellMosaic",
-          "stem": "beat-blueprints--cellmosaic",
-          "desc": "a grid of mixed cells that slides as one surface while each cell keeps its own content",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "chipConverge",
-          "stem": "beat-blueprints--chipconverge",
-          "desc": "chips scatter in from every side and then converge onto one point",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "chipGrid",
-          "stem": "beat-blueprints--chipgrid",
-          "desc": "named things (sources/tools) as pills that pop staggered + footer",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "containerFill",
-          "stem": "beat-blueprints--containerfill",
-          "desc": "a fixed frame that never moves while chips fill it in one at a time",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "ctaEnd",
-          "stem": "beat-blueprints--ctaend",
-          "desc": "held end card · mark + install chip + sub + url (exitDur 0)",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "dialogueAccumulate",
-          "stem": "beat-blueprints--dialogueaccumulate",
-          "desc": "sans answered by serif word pairs that accumulate on a held frame, a dot as the joint, ending in a bloom",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "echoRing",
-          "stem": "beat-blueprints--echoring",
-          "desc": "a stroked ring replaying another layer's path one beat late, fading as it grows",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "focusRack",
-          "stem": "beat-blueprints--focusrack",
-          "desc": "a rack focus · one plane pulls sharp on the layer blur channel while the other blurs AND dims",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "htmlBrowser",
-          "stem": "beat-blueprints--htmlbrowser",
-          "desc": "a browser-chrome frame (traffic dots + url bar) around your own page content",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "htmlCard",
-          "stem": "beat-blueprints--htmlcard",
-          "desc": "a hairline surface built from your own markup, revealed part by part via `parts`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "htmlChat",
-          "stem": "beat-blueprints--htmlchat",
-          "desc": "a chat log whose bubbles land one after another, not all at once",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "htmlPanel",
-          "stem": "beat-blueprints--htmlpanel",
-          "desc": "a plain low-contrast surface for content you draw yourself (a terminal, a dialog)",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "htmlTable",
-          "stem": "beat-blueprints--htmltable",
-          "desc": "a real data table that reveals row by row, never the whole grid at once",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "kineticHook",
-          "stem": "beat-blueprints--kinetichook",
-          "desc": "hook / open loop · eyebrow + hero count-up|word + kinetic subline",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "listBuildRows",
-          "stem": "beat-blueprints--listbuildrows",
-          "desc": "a vertical list that grows one row at a time under a fixed left rule",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "logoLockup",
-          "stem": "beat-blueprints--logolockup",
-          "desc": "brand · mark pops + wordmark travels + kinetic headline + sub",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "logoReveal",
-          "stem": "beat-blueprints--logoreveal",
-          "desc": "brand · mark DRAWS on / MELTS from a blob + bloom + wordmark cascade",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "morphButton",
-          "stem": "beat-blueprints--morphbutton",
-          "desc": "the object that BECOMES the next thing · button shrinks/rounds to a dot",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "propSentence",
-          "stem": "beat-blueprints--propsentence",
-          "desc": "a sentence whose NOUNS are pictures · word · photo · chip · card · word, on a rolling stagger",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "recordedPan",
-          "stem": "beat-blueprints--recordedpan",
-          "desc": "a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "screenDive",
-          "stem": "beat-blueprints--screendive",
-          "desc": "product surface · kinetic title + a real UI shot that KEN-pushes in",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "scrollStory",
-          "stem": "beat-blueprints--scrollstory",
-          "desc": "a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "slotSwap",
-          "stem": "beat-blueprints--slotswap",
-          "desc": "three fixed slots whose contents turn over N times; the right slot changes TYPE each pass",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "statReveal",
-          "stem": "beat-blueprints--statreveal",
-          "desc": "payoff · hero count-up + kinetic label",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "terminalReveal",
-          "stem": "beat-blueprints--terminalreveal",
-          "desc": "a CLI beat · typing command + cursor + rising output + accent result",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "typedHook",
-          "stem": "beat-blueprints--typedhook",
-          "desc": "hook that ERASES itself · types in, un-types ~2x faster, never fades",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "verdictProof",
-          "stem": "beat-blueprints--verdictproof",
-          "desc": "claim proven · typing command + note + tone verdict chip",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "viewportTrio",
-          "stem": "beat-blueprints--viewporttrio",
-          "desc": "the same subject shown at three sizes at once, the \"it is really finished\" payoff shot",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "wordBlast",
-          "stem": "beat-blueprints--wordblast",
-          "desc": "scale punctuation · arrives oversized, settles, drifts, leaves by growing THROUGH the frame",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "wordWipe",
-          "stem": "beat-blueprints--wordwipe",
-          "desc": "an oversized word crosses the whole frame motion-blurred, and its passage is the transition",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "wordmarkAssemble",
-          "stem": "beat-blueprints--wordmarkassemble",
-          "desc": "the brand mark settles from scattered letters while small tiles drift at a different depth behind it",
-          "scene": null,
           "noPreview": null
         }
       ]
@@ -1837,7 +1582,7 @@
         {
           "name": "composition",
           "stem": "layer-types--composition",
-          "desc": "names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and blueprints cannot express",
+          "desc": "names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and recipes cannot express",
           "scene": null,
           "noPreview": null
         },
@@ -2087,7 +1832,7 @@
         {
           "name": "litPlane",
           "stem": "three-js-scenes-real-geometry--litplane",
-          "desc": "a captured UI plane, LIT (MeshStandardMaterial under the studio rig, not MeshBasicMaterial), rising with a tilt and a rotation into a soft-shadowed ground with an overshoot settle; `blur` opts it into a shutter-accumulated smear on the fast rise",
+          "desc": "a captured UI plane, LIT (MeshStandardMaterial under the studio rig, not MeshBasicMaterial), rising with a tilt and a rotation into a soft-shadowed ground with an overshoot settle; `motionBlur` (true, or a 0..1 strength, the same word every layer uses) opts it into a shutter-accumulated smear on the fast rise",
           "scene": "/assets/effects/three-js-scenes-real-geometry--litplane.json",
           "noPreview": null
         },
