@@ -1166,7 +1166,7 @@ See \`docs/CRAFT/STORYBOARD-TEMPLATE.md\` and \`docs/CRAFT/REFERENCE-STUDY.md\`.
 ## Write recipe candidates
 
 A study is not finished at the table above. If a seam, spine, enter, exit, camera move or ground change
-here is a pattern worth reusing, write it to \`grammar/${NAME}.recipes.json\` in the \`recipes.json\` entry
+here is a pattern worth reusing, write it to \`grammar/_${NAME}.recipes.json\` in the \`recipes.json\` entry
 shape (\`kind\`, \`blurb\`, \`sources\`, \`slots\`, \`params\` with measured defaults, see \`recipes/README.md\`).
 It is a CANDIDATE, not a promotion: a person still moves it into \`recipes/recipes.json\`.
 `;
