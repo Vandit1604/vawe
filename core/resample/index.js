@@ -7,10 +7,14 @@
 //
 //   { type:'image', src:'x.png', w:900, h:600, resample:{ fx:'zoomBlur', amount:[0, 0.8] } }
 //   { type:'paint', paint:'waves', resample:'refract' }
+//   { type:'image', src:'x.png', w:900, h:600, resample:{ fx:'directionalBlur', amount:0.6, angle:15 } }
 //
 // `amount` may be a number (constant) or [from, to] (eased across the layer's own window), because
 // half of these effects are only interesting while they MOVE, a dissolve frozen at 0.5 is just a
 // hole. Interpolation is on the layer's local progress, so it stays a pure function of t.
+//
+// `angle` (degrees, 0 = rightward) is read only by `directionalBlur`: a smear axis an author SETS,
+// independent of the layer's own travel speed (that one is automatic motion blur, `core/tracks/motion.js`).
 //
 // A LAYER THAT OWNS NO RASTER IS BAKED INTO ONE. Until now this file refused every type that is not an
 // image or a canvas, so eight passes could be aimed at a photograph and at nothing we compose
@@ -45,7 +49,9 @@ function sourceOf(el) {
 }
 
 // `seed` falls back to the layer's own when the spec states none, so both spellings are read here.
-export const PROPS = { resample: {}, seed: { when: 'resample' } };
+// `angle` only means anything to `directionalBlur`, degrees, 0 = rightward, but it costs nothing to
+// declare for every fx: an author writing it on a different fx is a no-op, not a refusal.
+export const PROPS = { resample: {}, seed: { when: 'resample' }, angle: { when: 'resample' } };
 
 export function attachResample(kit, el, L) {
   if (!L.resample) return;
@@ -80,6 +86,7 @@ export function attachResample(kit, el, L) {
     amount: spec.amount ?? 0.5,
     speed: spec.speed ?? 1,
     seed: spec.seed ?? L.seed ?? 0,
+    angle: (spec.angle ?? L.angle ?? 0) * Math.PI / 180,
     isStatic: src.isStatic,
   });
 }
@@ -165,6 +172,7 @@ async function bakeOne(el, L, spec) {
     amount: spec.amount ?? 0.5,
     speed: spec.speed ?? 1,
     seed: spec.seed ?? L.seed ?? 0,
+    angle: (spec.angle ?? L.angle ?? 0) * Math.PI / 180,
     isStatic: true,   // a baked subtree is the same texels on every frame, upload once, like an <img>
   });
 }
@@ -184,7 +192,7 @@ export function tickResample(el, L, t, active) {
   const lt = (t - start) * s.speed;
 
   // `once` for a static <img>: the texels never change, so upload on the first draw only.
-  s.r.draw(s.src, s.fx, amt, lt, s.seed, s.isStatic);
+  s.r.draw(s.src, s.fx, amt, lt, s.seed, s.isStatic, s.angle);
   // Stamp the DOM so the renderer's static-frame dedup sees a resample-only frame as a change.
   // Without this a slow dissolve over a still image dedups to one frame and the effect vanishes.
   el.dataset.rs = amt.toFixed(4) + ':' + lt.toFixed(3);

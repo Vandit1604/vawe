@@ -468,6 +468,7 @@ Each resampled layer takes its own WebGL context and browsers cap those at rough
 |---|---|
 | `bitCrush` | quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration |
 | `chromaShift` | radial RGB separation, the channels pulling apart from the centre outwards |
+| `directionalBlur` | a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS "Directional Blur": a look an author SETS, not a byproduct of a layer's own travel speed (that one is automatic, see `docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4) |
 | `dissolve` | noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away |
 | `fisheye` | real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge |
 | `macroblock` | the flat blocks and dropped tiles of a starved codec. A glitch/degrade beat, never decoration |
@@ -1129,4 +1130,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_693 effects across 58 families. Regenerate: `make effects`._
+_694 effects across 58 families. Regenerate: `make effects`._
