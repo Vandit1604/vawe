@@ -26,7 +26,10 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const DEST = path.join(repoRoot, 'assets/fonts');
-const LOCK = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fonts.lock.json');
+// The lock did NOT move with this script. `harness/media/fonts.lock.json` is where it lives, which
+// the header comment above already said correctly while this line resolved beside the script instead,
+// to a file that has never existed there. Anchored to repoRoot so a future move cannot re-break it.
+const LOCK = path.join(repoRoot, 'harness/media/fonts.lock.json');
 const FORCE = process.argv.includes('--force');
 const RELOCK = process.argv.includes('--relock');
 const CDN = 'https://cdn.jsdelivr.net/npm';
@@ -59,7 +62,18 @@ const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
 // woff2 files start with the ASCII magic "wOF2"
 const isWoff2 = (buf) => buf.length > 4 && buf[0] === 0x77 && buf[1] === 0x4f && buf[2] === 0x46 && buf[3] === 0x32;
 
-const lock = (() => { try { return JSON.parse(fs.readFileSync(LOCK, 'utf8')).faces || {}; } catch { return {}; } })();
+// A MISSING LOCK IS NOT AN EMPTY LOCK. This used to swallow the read and return {}, so a wrong path
+// read as "no face is locked" and every font then failed as unlocked: a stale path hidden by a silent
+// catch, which is the pair of mistakes this repo logs most. --relock is the one caller allowed to
+// proceed without it, because writing the lock is its whole job.
+const lock = (() => {
+  try { return JSON.parse(fs.readFileSync(LOCK, 'utf8')).faces || {}; } catch (err) {
+    if (RELOCK) return {};
+    console.error(`fonts: cannot read the lock at ${path.relative(repoRoot, LOCK)}: ${err.message}`);
+    console.error('Every face would read as unlocked. Fix the path, or run --relock to write a new lock.');
+    process.exit(2);
+  }
+})();
 
 async function grab([name, pkg, ver, file]) {
   const dest = path.join(DEST, name);
