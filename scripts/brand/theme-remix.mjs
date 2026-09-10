@@ -70,7 +70,7 @@ const preset = JSON.parse(fs.readFileSync(presetPath, 'utf8'));
 const brand = { bg: flag('--bg'), accent: flag('--accent'), text: flag('--text') };
 const tokPath = path.join(ROOT, 'assets/brands', brandName, 'palette.json');
 if (fs.existsSync(tokPath) && (!brand.bg || !brand.accent)) {
-  try { const t = JSON.parse(fs.readFileSync(tokPath, 'utf8')); brand.bg = brand.bg || t.bg || (t.colors || [])[0]; brand.accent = brand.accent || t.accent || (t.colors || [])[1]; brand.text = brand.text || t.text; brand.sans = t.sans; brand.mono = t.mono; } catch {}
+  const t = JSON.parse(fs.readFileSync(tokPath, 'utf8')); brand.bg = brand.bg || t.bg || (t.colors || [])[0]; brand.accent = brand.accent || t.accent || (t.colors || [])[1]; brand.text = brand.text || t.text; brand.sans = t.sans; brand.mono = t.mono;
 }
 
 // ── assemble the theme ──────────────────────────────────────────────────────────────────────────────

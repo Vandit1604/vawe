@@ -102,7 +102,14 @@ if (!file || !fs.existsSync(file)) { console.error('usage: node quality/gates/de
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 
 let theme = {};
-try { theme = typeof data.theme === 'string' ? JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', data.theme + '.json'), 'utf8')) : (data.theme || {}); } catch {}
+if (typeof data.theme === 'string') {
+  const themePath = path.join(ROOT, 'themes', data.theme + '.json');
+  if (!fs.existsSync(themePath)) { console.error(`✗ unknown theme "${data.theme}" (looked for ${path.relative(ROOT, themePath)}). Available: ${fs.readdirSync(path.join(ROOT, 'themes')).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).join(', ')}`); process.exit(2); }
+  try { theme = JSON.parse(fs.readFileSync(themePath, 'utf8')); }
+  catch (e) { console.error(`✗ ${path.relative(ROOT, themePath)} is not valid JSON: ${e.message}`); process.exit(2); }
+} else {
+  theme = data.theme || {};
+}
 const themeName = typeof data.theme === 'string' ? data.theme : (theme.name || 'inline');
 
 // ---- colour maths ----
