@@ -13,7 +13,7 @@
 // ENDS rather than sustains. A beat with real duration, a real subject, and no `move:`/`motion:` field
 // is exactly that hole, and it is checkable from the storyboard alone, before a single layer exists.
 //
-// DEGRADES GRACEFULLY. `core/motion/shapes.js` SHAPES does not yet carry a motion-path shape (checked
+// DEGRADES GRACEFULLY. If `core/motion/path-curves.js` registers no curve (checked
 // live below, never hand-listed): a separate agent is adding one. Until it lands this names the
 // richest shape actually in SHAPES today (`pan`); the day a `*path*` shape appears, this starts naming
 // it instead, with no edit here.
@@ -24,6 +24,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseStoryboard, timeline } from '../author/storyboard-parse.mjs';
 import { SHAPES } from '../../core/motion/shapes.js';
+import { CURVE_NAMES } from '../../core/motion/path-curves.js';
 import { SPEED_BAND } from '../lib/contract.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
@@ -31,10 +32,13 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 // The one shape worth reaching for when nothing moves after the entrance: a `*path*` shape flies the
 // layer instead of parking it, and is named the instant one is registered; `pan` is the next-richest
 // shape SHAPES carries today (a multi-key travel, not a fade).
+// A path curve wins outright when one is registered: it defaults its duration to the layer's own span,
+// so it is sustained motion by construction, while a SHAPES track ends when its keys run out. `arc` is
+// the plainest of the four and the safest thing to put in front of an author who asked for nothing.
 function bestShape() {
+  if (CURVE_NAMES.length) return { name: CURVE_NAMES.includes('arc') ? 'arc' : CURVE_NAMES[0], path: true };
   const names = Object.keys(SHAPES);
-  const path = names.find((n) => /path/i.test(n));
-  return path || (names.includes('pan') ? 'pan' : names[0]);
+  return { name: names.includes('pan') ? 'pan' : names[0], path: false };
 }
 
 const bandFor = (weight) => (weight === 'peak' ? 'cinematic' : weight === 'quiet' ? 'energy' : 'professional');
@@ -58,8 +62,7 @@ function say(rel, file) {
   const found = candidates(sb);
   if (!found.length) return [];
 
-  const shape = bestShape();
-  const usesPath = /path/i.test(shape);
+  const { name: shape, path: usesPath } = bestShape();
   const lines = [];
   for (const { b, dur } of found) {
     const raw = b.object || b.picture || b.blueprint;
@@ -69,8 +72,8 @@ function say(rel, file) {
     lines.push(`  it lands its entrance and then sits still for the rest of the beat. Add this line to`);
     lines.push(`  the beat: \`move: ${shape}:${band}\`.${usesPath
       ? ' It flies the layer along a path for the whole beat, sustained motion by construction.'
-      : ` core/motion/shapes.js has no path shape yet; \`${shape}\` is the richest sustained track it`
-        + ` carries today, and this line starts naming a path shape the day one is registered.`}`);
+      : ` core/motion/path-curves.js registers no curve; \`${shape}\` is the richest sustained track`
+        + ` core/motion/shapes.js carries today.`}`);
   }
   return lines;
 }
