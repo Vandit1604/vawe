@@ -208,14 +208,22 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `route.test.mjs` | 22 | no | harness/author/route.test.mjs: does route() send a real request to the deliverable a human would |
 | `expand-blocks.mjs` | 15 | yes | harness/author/expand-blocks.mjs: DEBUGGING command only. `{type:"block"}`, `{type:"beat"}` and |
 
-## `harness/dev`
+## `studio`
 
-LOOK. Nothing here changes a film. The studio, the previews, the contact sheets, the experiment rigs.
+The studio, moved out of `harness/dev` into its own top-level folder: server, page shell and browser
+UI (`ui/shell.html`, `ui/studio.css`, `ui/studio.js`) as real files instead of one exported string.
 
 | file | lines | make | what it says it does |
 |---|---|---|---|
-| `studio-page.mjs` | 1467 | no | harness/dev/studio-page.mjs: the studio SHELL, as one served page. Split out of studio.mjs so the |
-| `studio.mjs` | 555 | yes | harness/dev/studio.mjs: a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an |
+| `server.mjs` | 561 | yes | studio/server.mjs: a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an |
+| `page.mjs` | 27 | no | studio/page.mjs: assembles the studio SHELL out of studio/ui/shell.html, studio.css and studio.js. |
+
+## `harness/dev`
+
+LOOK. Nothing here changes a film. The previews, the contact sheets, the experiment rigs.
+
+| file | lines | make | what it says it does |
+|---|---|---|---|
 | `sound-vary.mjs` | 395 | no | harness/dev/sound-vary.mjs: generate variations of a cue, judge them by ear, keep what survives. |
 | `candidates.mjs` | 357 | no | harness/dev/candidates.mjs: SIX VERSIONS OF YOUR OWN FRAME, so a choice can be pointed at. |
 | `motion-lab.mjs` | 317 | yes | harness/dev/motion-lab.mjs: does a motion change actually raise the local-motion floor, or is it an |

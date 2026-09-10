@@ -9,7 +9,7 @@
 // and `]`, and a brace counter that does not know it is inside a string will find the wrong layer and
 // corrupt the file. Escapes are handled for the same reason.
 //
-// Pure and dependency-free so it can be tested without a browser, the editor in harness/dev/studio.mjs
+// Pure and dependency-free so it can be tested without a browser, the editor in studio/server.mjs
 // calls it, and quality/gates/lib-test.mjs proves it.
 
 // scan forward from `i` (which must sit on the opening bracket) to the matching close, skipping strings.

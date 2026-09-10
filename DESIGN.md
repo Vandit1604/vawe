@@ -269,8 +269,8 @@ reference, and importing a second one is how a brand's video stops looking like 
 **Already vendored, so never fetched:** `pbakaus/impeccable`. It runs inside `make preview` as the
 detector. Do not fetch the skill version alongside it.
 
-**Consulted 2026-09-09 for the studio "every beat shows a picture" fix** (`harness/dev/studio.mjs`,
-`harness/dev/studio-page.mjs`). Read `ui-skills categories`, then `color` and `visual`.
+**Consulted 2026-09-09 for the studio "every beat shows a picture" fix** (`studio/server.mjs`,
+`studio/page.mjs`). Read `ui-skills categories`, then `color` and `visual`.
 
 **Rejected, both:**
 - **`accesslint/contrast-checker`** (color, accessibility). Read the whole skill: it drives a live

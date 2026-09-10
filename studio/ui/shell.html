@@ -1,0 +1,85 @@
+<!doctype html><html data-theme={{THEME}}><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><meta id=tcol name=theme-color content="#F2F2F2"><title>vawe studio · {{TITLE}}</title>
+<link rel=stylesheet href=/studio/ui/studio.css>
+</head><body data-state=make>
+ <h1 class=vh>vawe studio</h1>
+ <p id=say class=vh role=status aria-live=polite></p>
+ <div id=pick role=region aria-label="the JSON behind what you clicked"><div id=pickhead><b id=pickname>nothing selected</b><button id=pickcopy>copy JSON</button><button id=pickclose>close</button></div><pre id=pickjson></pre></div>
+ <div id=peek aria-hidden=true><div id=peekbox><span id=peekt></span></div></div>
+ <div id=shell>
+  <aside id=rail>
+   <section class="panel chooser">
+    <h2>chooser</h2>
+    <div class=body>
+     <p id=candstat>Six backdrops for this film, at the playhead. Each one is the real scene with one
+      key changed, rendered as a clip: a still hides speed, scale and direction.</p>
+     <div id=cands></div>
+     <button id=candgo style="width:100%;margin-top:8px">six takes at the playhead</button>
+    </div>
+   </section>
+   <section class="panel keys">
+    <h2>keys</h2>
+    <div class=body>
+     <p><kbd>space</kbd> play, pause</p>
+     <p><kbd>&larr;</kbd><kbd>&rarr;</kbd> a frame</p>
+     <p><kbd>shift</kbd>+<kbd>&larr;</kbd><kbd>&rarr;</kbd> a second</p>
+     <p><kbd>home</kbd><kbd>end</kbd> the ends</p>
+     <p><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> plan, make, look, ship</p>
+    </div>
+   </section>
+  </aside>
+  <div id=main>
+   <div id=top>
+    <div id=states role=group aria-label="what you are doing">
+     <button data-state=plan aria-pressed=false>plan</button><button data-state=make aria-pressed=true>make</button
+     ><button data-state=look aria-pressed=false>look</button><button data-state=ship aria-pressed=false>ship</button>
+    </div>
+    <nav id=crumbs aria-label="composition stack"></nav>
+    <span class=sp></span>
+    <button id=key aria-pressed=false title="drag the selected layer on the picture to write a motion key"><svg viewBox="0 0 16 16"><path d="M8 2l6 6-6 6-6-6z"/></svg>key</button>
+    <button id=undo><svg viewBox="0 0 16 16"><path d="M3 8h7a3 3 0 010 6H7"/><path d="M6 5L3 8l3 3"/></svg>undo</button>
+    <button id=tgl aria-expanded=true aria-controls=tl><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>timeline</button>
+    <button id=theme><svg viewBox="0 0 16 16"><circle cx=8 cy=8 r="5.5"/><path d="M8 2.5v11"/></svg>theme: <span id=themetxt>light</span></button>
+   </div>
+   <div id=stage role=status aria-label="which stage this film is at"><span id=stagedots></span><span id=stagenext></span></div>
+   <div id=centre>
+    <div id=stage><iframe id=sc title="scene preview" src="{{IFRAME_SRC}}"></iframe><div id=selbox><i class=tl></i><i class=tr></i><i class=bl></i><i class=br></i><b></b></div><div id=drag></div><div id=err role=alert hidden></div></div>
+    <div id=bar>
+     <button id=play aria-label="play or pause"><svg class=solid viewBox="0 0 16 16"><path d="M4 2.5l9 5.5-9 5.5z"/></svg>play</button>
+     <input id=scrub type=range min=0 max=100 value=0 step=1 aria-label="frame">
+     <span id=read>frame <b>0</b> <span class=of>/ 0</span> <span class=of>·</span> 0.00<span class=of>s</span></span>
+    </div>
+    <div id=sel>click a layer in the picture, or a bar in the timeline, to select it</div>
+   </div>
+   <div id=pane>
+    <section id=planpane>
+     <div class=panehead><b>the plan</b><span id=planpath>the storyboard this film was written from</span><span class=sp></span><button id=planredraw>reload</button></div>
+     <div class=paneview id=planview><div id=planbody></div><div class=empty id=plannote hidden></div></div>
+    </section>
+    <section id=lookpane>
+     <div class=panehead>
+      <button data-sheet=beats aria-pressed=true>beats</button>
+      <button data-sheet=frames aria-pressed=false>key frames</button>
+      <button data-sheet=seams aria-pressed=false>seams</button>
+      <span id=lookwhat></span><span class=sp></span><span id=lookstat></span><span class=muted>click the sheet for real pixels</span>
+     </div>
+     <div id=sheetwrap><button id=sheetzoom hidden aria-label="show the sheet at real pixels" aria-pressed=false><img id=sheet alt="contact sheet"></button><div id=sheetnote hidden></div></div>
+     <div id=jump></div>
+    </section>
+    <section id=shippane>
+     <div class=panehead><b>can it go out</b><span class=sp></span><span id=shipstat></span></div>
+     <div class=paneview><div class=empty id=shipbody></div></div>
+    </section>
+   </div>
+   <div id=split role=separator aria-orientation=horizontal aria-label="resize the timeline, arrow up and down"
+        tabindex=0 aria-valuemin=96 aria-valuenow=240></div>
+   <div id=tl>
+    <div id=tlhead><b id=tlwhat>timeline</b>
+     <span class=zoom><button id=zout aria-label="zoom out" title="zoom out">&minus;</button><button id=zfit aria-label="fit the whole film" title="fit the whole film">fit</button><button id=zin aria-label="zoom in" title="zoom in">+</button><s id=zlab>1.0x</s></span>
+     <span class=sp></span><span id=tlkey></span></div>
+    <div id=alerts></div>
+    <div id=tlbody><div id=lanes tabindex=0 role=group aria-label="timeline: left and right seek, up and down select a layer"><div id=ruler></div><div id=film></div><div id=rows></div></div><div id=ph></div><div id=hov></div></div>
+   </div>
+  </div>
+ </div>
+<script src=/studio/ui/studio.js></script>
+</body></html>

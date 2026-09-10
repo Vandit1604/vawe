@@ -1,11 +1,12 @@
-// harness/dev/studio.mjs: a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an
+// studio/server.mjs: a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an
 // mp4. Starts a local static server and serves a wrapper page: the real scene.html in an iframe, plus a
 // scrubber + play/pause + frame/time readout that drive `__engine.renderFrame(n)` directly (the same pure
 // function the Go renderer seeks). Edit the JSON, hit reload, scrub, no 30-60s render round-trip.
 //
-// The shell is harness/dev/studio-page.mjs: a left rail of panels, the preview and its transport in the
-// centre, the timeline full width along the bottom, and a draggable divider between them. This file owns
-// the server, the gate run behind the timeline model, and the write side.
+// The shell is studio/page.mjs + studio/ui/ (shell.html, studio.css, studio.js): a left rail of panels,
+// the preview and its transport in the centre, the timeline full width along the bottom, and a
+// draggable divider between them. This file owns the server, the gate run behind the timeline model,
+// and the write side.
 //
 // The timeline: one bar per top-level layer against a seconds/frames ruler, with the
 // cuts/seams/stings marked, the enter/exit ramps shaded off the settled middle, and every dead-air hole
@@ -18,22 +19,22 @@
 // DEV TOOLING ONLY. It does not touch the renderer or the determinism contract; it just calls the engine's
 // own renderFrame(n) from the parent frame (same-origin), exactly as the Go capture loop does per frame.
 import fs from 'node:fs';
-import { onScreenText } from '../lib/text.mjs';
+import { onScreenText } from '../harness/lib/text.mjs';
 import path from 'node:path';
 import { execFile, execFileSync, spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { patchMotion, upsertKey, applyOps } from '../author/patch-motion.mjs';
-import { serveRepo, REPO_ROOT, launchPage, waitForEngine } from '../lib/render-harness.mjs';
-import { sceneDims } from '../../core/layout/safe.js';
-import { resolveBridges } from '../../core/audio/bridges.js';
-import { scratch } from '../lib/scratch.mjs';
-import { studioPage } from './studio-page.mjs';
-import { parseStoryboard, timeline, fieldIn, blocksOf, referenceDevices } from '../author/storyboard-parse.mjs';
-import { fragPage, FULLBLEED_RE, INSET_RE } from '../lib/frag-page.mjs';
-import { stageOf } from '../../quality/gates/stage.mjs';
-import { extractKitBlock } from '../lib/stagekit.mjs';
+import { patchMotion, upsertKey, applyOps } from '../harness/author/patch-motion.mjs';
+import { serveRepo, REPO_ROOT, launchPage, waitForEngine } from '../harness/lib/render-harness.mjs';
+import { sceneDims } from '../core/layout/safe.js';
+import { resolveBridges } from '../core/audio/bridges.js';
+import { scratch } from '../harness/lib/scratch.mjs';
+import { studioPage } from './page.mjs';
+import { parseStoryboard, timeline, fieldIn, blocksOf, referenceDevices } from '../harness/author/storyboard-parse.mjs';
+import { fragPage, FULLBLEED_RE, INSET_RE } from '../harness/lib/frag-page.mjs';
+import { stageOf } from '../quality/gates/stage.mjs';
+import { extractKitBlock } from '../harness/lib/stagekit.mjs';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataArg = process.env.D || process.argv[2];
 if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: make studio D=formats/scene/<file>.json [PORT=8799]'); process.exit(2); }
 const dataUrl = '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/');
@@ -315,6 +316,15 @@ const studioRoutes = (req, res) => {
   // no-store, because this shell is edited while it is being looked at: with no validator on the
   // response Chrome cached it heuristically and a reload showed the previous version of the tool.
   if (url === '/' || url === '/studio') { res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' }); res.end(page()); return true; }
+  // studio.css and studio.js are edited right alongside the shell, so they get the same no-store: the
+  // static handler below has no validator either and Chrome cached the old JS the same way it once
+  // cached the old page.
+  if (url === '/studio/ui/studio.css' || url === '/studio/ui/studio.js') {
+    const file = path.join(REPO_ROOT, url.slice(1));
+    res.writeHead(200, { 'Content-Type': url.endsWith('.css') ? 'text/css' : 'text/javascript', 'Cache-Control': 'no-store' });
+    fs.createReadStream(file).pipe(res);
+    return true;
+  }
   // rebuilt per request (and the gate re-run), so an edit + reload shows the new timeline
   // ---- the PLAN, as the film rather than as grey boxes -------------------------------------------
   // A film has two artefacts and studio only ever showed one. This used to serve `make panels`, one
