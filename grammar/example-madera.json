@@ -9,15 +9,28 @@
   "fps": 60,
   "aspect": "1640:1080",
   "hasAudio": false,
-  "shotDetection": "ground-seam",
+  "shotDetection": "seam+crossfade",
   "threshold": 0.3,
   "peakSceneScore": 0.27,
   "nearMisses": 3,
   "seamThreshold": 0.3,
   "seamsFound": 5,
-  "shots": 6,
-  "medianShot": 1.73,
-  "cutsPerMinute": 27.6
+  "panFloor": 6,
+  "pansFound": 1,
+  "crossfadeBand": [
+   0.5,
+   5
+  ],
+  "crossfadesFound": 4,
+  "shots": 10,
+  "medianShot": 0.77,
+  "cutsPerMinute": 46
+ },
+ "coverage": {
+  "frames": 782,
+  "unique": 689,
+  "pages": 35,
+  "ledger": "incomplete"
  },
  "shots": [
   {
@@ -25,6 +38,8 @@
    "t0": 0,
    "len": 4.54,
    "ground": "light",
+   "groundLuma": 199.3,
+   "groundHex": "#d2d4ce",
    "luma": 209.1,
    "accent": "#def9fe",
    "motion": 1.61,
@@ -60,21 +75,44 @@
   {
    "i": 2,
    "t0": 4.54,
-   "len": 1.46,
+   "len": 0.74,
    "ground": "light",
-   "luma": 221.1,
+   "groundLuma": 222.5,
+   "groundHex": "#edefed",
+   "luma": 221.3,
    "accent": null,
-   "motion": 1.31,
-   "peak": 2.24,
+   "motion": 1.18,
+   "peak": 1.91,
    "held": 0.09,
-   "frames": 85,
+   "frames": 43,
    "joint": 0,
    "jointKind": "seam",
    "curve": [
     1,
     1.9,
-    1.8,
-    1.5,
+    1.7
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 3,
+   "t0": 5.28,
+   "len": 0.72,
+   "ground": "light",
+   "groundLuma": 222.5,
+   "groundHex": "#edeeed",
+   "luma": 220.9,
+   "accent": null,
+   "motion": 1.45,
+   "peak": 2.24,
+   "held": 0.1,
+   "frames": 40,
+   "joint": 1.3,
+   "jointKind": "crossfade",
+   "curve": [
+    1.6,
     2.2,
     1.8
    ],
@@ -83,21 +121,44 @@
    "trigger": null
   },
   {
-   "i": 3,
+   "i": 4,
    "t0": 6,
-   "len": 2.12,
+   "len": 0.53,
    "ground": "light",
-   "luma": 136,
-   "accent": "#a48f76",
-   "motion": 6.92,
+   "groundLuma": 166,
+   "groundHex": "#a1afb3",
+   "luma": 168.9,
+   "accent": "#7e949d",
+   "motion": 6.64,
    "peak": 27.84,
    "held": 0,
-   "frames": 126,
+   "frames": 30,
    "joint": 0.2,
    "jointKind": "seam",
    "curve": [
     27.8,
-    5.2,
+    5.2
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 5,
+   "t0": 6.53,
+   "len": 1.59,
+   "ground": "mid",
+   "groundLuma": 117.9,
+   "groundHex": "#7f7269",
+   "luma": 125,
+   "accent": "#7a4f46",
+   "motion": 7.1,
+   "peak": 27.37,
+   "held": 0,
+   "frames": 94,
+   "joint": 2.7,
+   "jointKind": "crossfade",
+   "curve": [
     5,
     11.1,
     6.5,
@@ -110,21 +171,44 @@
    "trigger": null
   },
   {
-   "i": 4,
+   "i": 6,
    "t0": 8.12,
-   "len": 1.45,
+   "len": 0.48,
    "ground": "light",
-   "luma": 219.7,
+   "groundLuma": 221,
+   "groundHex": "#ecedeb",
+   "luma": 220.2,
    "accent": null,
-   "motion": 1.57,
+   "motion": 1.33,
    "peak": 7.02,
-   "held": 0.07,
-   "frames": 85,
+   "held": 0.04,
+   "frames": 26,
    "joint": 54.4,
    "jointKind": "seam",
    "curve": [
     7,
-    1.6,
+    1.6
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 7,
+   "t0": 8.6,
+   "len": 0.97,
+   "ground": "light",
+   "groundLuma": 221.3,
+   "groundHex": "#ecedec",
+   "luma": 219.5,
+   "accent": null,
+   "motion": 1.68,
+   "peak": 6.44,
+   "held": 0.09,
+   "frames": 57,
+   "joint": 1.6,
+   "jointKind": "crossfade",
+   "curve": [
     1.6,
     0.9,
     1.9,
@@ -135,22 +219,45 @@
    "trigger": null
   },
   {
-   "i": 5,
+   "i": 8,
    "t0": 9.57,
-   "len": 1.51,
+   "len": 0.8,
    "ground": "light",
-   "luma": 175.6,
+   "groundLuma": 158.9,
+   "groundHex": "#a3a59b",
+   "luma": 174.1,
    "accent": "#8c7c68",
-   "motion": 7.32,
-   "peak": 18.46,
+   "motion": 5.32,
+   "peak": 13.23,
    "held": 0,
-   "frames": 88,
+   "frames": 45,
    "joint": 15.2,
    "jointKind": "seam",
    "curve": [
     13.2,
     6.8,
-    5,
+    4.9
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 9,
+   "t0": 10.37,
+   "len": 0.71,
+   "ground": "light",
+   "groundLuma": 164.4,
+   "groundHex": "#abada3",
+   "luma": 177.2,
+   "accent": "#ab967f",
+   "motion": 9.67,
+   "peak": 18.46,
+   "held": 0,
+   "frames": 41,
+   "joint": 4.3,
+   "jointKind": "crossfade",
+   "curve": [
     4.6,
     11.4,
     18.5
@@ -160,10 +267,12 @@
    "trigger": null
   },
   {
-   "i": 6,
+   "i": 10,
    "t0": 11.08,
    "len": 1.95,
    "ground": "light",
+   "groundLuma": 222.1,
+   "groundHex": "#eceeec",
    "luma": 221,
    "accent": null,
    "motion": 0.3,
@@ -188,13 +297,13 @@
   }
  ],
  "pace": {
-  "medianShot": 1.73,
-  "perMinute": 27.6
+  "medianShot": 0.77,
+  "perMinute": 46
  },
- "groundPattern": "light → light → light → light → light → light",
+ "groundPattern": "light → light → light → light → mid → light → light → light → light → light",
  "motionBand": {
   "lo": 0.3,
-  "hi": 7.32
+  "hi": 9.67
  },
  "seams": [
   {
@@ -241,6 +350,65 @@
    "direction": "bottom-to-top",
    "groundBefore": "#b9b9ae",
    "groundAfter": "#e8ece8"
+  }
+ ],
+ "pans": [
+  {
+   "t0": 10.683333,
+   "t1": 11.1,
+   "t": 10.8916665,
+   "mean": 13.4,
+   "peak": 18.46,
+   "flatness": 1.38,
+   "frames": 26
+  }
+ ],
+ "crossfades": [
+  {
+   "t0": 4.65,
+   "t1": 5.916667,
+   "t": 5.2833335,
+   "mean": 1.41,
+   "peak": 2.24,
+   "flatness": 1.58,
+   "frames": 77
+  },
+  {
+   "t0": 6.283333,
+   "t1": 6.783333,
+   "t": 6.533333,
+   "mean": 3.33,
+   "peak": 4.99,
+   "flatness": 1.5,
+   "frames": 31
+  },
+  {
+   "t0": 8.233333,
+   "t1": 8.966667,
+   "t": 8.6,
+   "mean": 1.09,
+   "peak": 1.63,
+   "flatness": 1.5,
+   "frames": 45
+  },
+  {
+   "t0": 10.1,
+   "t1": 10.633333,
+   "t": 10.366666500000001,
+   "mean": 4.26,
+   "peak": 4.88,
+   "flatness": 1.15,
+   "frames": 33
+  }
+ ],
+ "conflicts": [
+  {
+   "t": 10.89,
+   "kinds": [
+    "pan",
+    "seam"
+   ],
+   "detail": "pan@10.89s vs seam@11.08s, 0.19s apart"
   }
  ],
  "threads": null,

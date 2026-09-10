@@ -9,15 +9,28 @@
   "fps": 60,
   "aspect": "1920:1920",
   "hasAudio": true,
-  "shotDetection": "scene-score+ground-seam",
+  "shotDetection": "seam+cut",
   "threshold": 0.3,
   "peakSceneScore": 1,
   "nearMisses": 5,
   "seamThreshold": 0.3,
   "seamsFound": 3,
+  "panFloor": 6,
+  "pansFound": 0,
+  "crossfadeBand": [
+   0.5,
+   5
+  ],
+  "crossfadesFound": 0,
   "shots": 6,
   "medianShot": 1.35,
   "cutsPerMinute": 40.1
+ },
+ "coverage": {
+  "frames": 534,
+  "unique": 440,
+  "pages": 22,
+  "ledger": "incomplete"
  },
  "shots": [
   {
@@ -25,6 +38,8 @@
    "t0": 0,
    "len": 2.3,
    "ground": "mid",
+   "groundLuma": 108.8,
+   "groundHex": "#6a6b6a",
    "luma": 112.2,
    "accent": null,
    "motion": 6.62,
@@ -53,6 +68,8 @@
    "t0": 2.3,
    "len": 1.52,
    "ground": "mid",
+   "groundLuma": 82.4,
+   "groundHex": "#4b4c4b",
    "luma": 84.4,
    "accent": null,
    "motion": 5.6,
@@ -78,6 +95,8 @@
    "t0": 3.82,
    "len": 0.78,
    "ground": "light",
+   "groundLuma": 182.5,
+   "groundHex": "#bec0bf",
    "luma": 178.7,
    "accent": null,
    "motion": 1.5,
@@ -99,7 +118,9 @@
    "i": 4,
    "t0": 4.6,
    "len": 0.4,
-   "ground": "mid?",
+   "ground": "dark",
+   "groundLuma": 35.8,
+   "groundHex": "#161716",
    "luma": 60.8,
    "accent": null,
    "motion": 12.03,
@@ -121,6 +142,8 @@
    "t0": 5,
    "len": 1.18,
    "ground": "light",
+   "groundLuma": 175.8,
+   "groundHex": "#b7b9b7",
    "luma": 156.1,
    "accent": null,
    "motion": 18.28,
@@ -145,6 +168,8 @@
    "t0": 6.18,
    "len": 2.8,
    "ground": "mid",
+   "groundLuma": 117.2,
+   "groundHex": "#747574",
    "luma": 119.1,
    "accent": null,
    "motion": 6.92,
@@ -175,7 +200,7 @@
   "medianShot": 1.35,
   "perMinute": 40.1
  },
- "groundPattern": "mid → mid → light → mid? → light → mid",
+ "groundPattern": "mid → mid → light → dark → light → mid",
  "motionBand": {
   "lo": 1.5,
   "hi": 18.28
@@ -207,6 +232,18 @@
    "direction": "left-to-right",
    "groundBefore": "#bababb",
    "groundAfter": "#3e3e3e"
+  }
+ ],
+ "pans": [],
+ "crossfades": [],
+ "conflicts": [
+  {
+   "t": 4.6,
+   "kinds": [
+    "cut",
+    "seam"
+   ],
+   "detail": "cut@4.60s vs seam@4.63s, 0.03s apart"
   }
  ],
  "threads": null,
