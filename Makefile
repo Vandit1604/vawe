@@ -594,8 +594,8 @@ sections: ## [study] capture a website's real sections into assets/brands/<brand
 # REFERENCE video: shot boundaries (ffmpeg scene score), a contact sheet (in/mid/out per shot) and a
 # study.md whose four judgement columns you fill by eye. Writes refs/<name>/ (gitignored: study the
 # grammar, never ship the frames). docs/CRAFT/REFERENCE-STUDY.md
-study: ## [study] the film-side twin of `make sections`.
-	node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH))
+study: ## [study] the film-side twin of `make sections`. STRIPS=<n> adds a contiguous motion strip for the n busiest shots.
+	node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS))
 
 # make mine: cluster every studied grammar/*.json shot by device into named shapes, each with the
 # grammar + shot index that backs it, → grammar/_mined-shapes.json. The receipt beats-mined.mjs's
