@@ -1,0 +1,215 @@
+{
+ "name": "make-it-move",
+ "source": "make-it-move.mp4",
+ "hash": "9ff4ff975d278916",
+ "measured": {
+  "duration": 8.98,
+  "width": 1920,
+  "height": 1920,
+  "fps": 60,
+  "aspect": "1920:1920",
+  "hasAudio": true,
+  "shotDetection": "scene-score+ground-seam",
+  "threshold": 0.3,
+  "peakSceneScore": 1,
+  "nearMisses": 5,
+  "seamThreshold": 0.3,
+  "seamsFound": 3,
+  "shots": 6,
+  "medianShot": 1.35,
+  "cutsPerMinute": 40.1
+ },
+ "shots": [
+  {
+   "i": 1,
+   "t0": 0,
+   "len": 2.3,
+   "ground": "mid",
+   "luma": 112.2,
+   "accent": null,
+   "motion": 6.62,
+   "peak": 38.81,
+   "held": 0.29,
+   "frames": 136,
+   "joint": null,
+   "jointKind": null,
+   "curve": [
+    0,
+    0,
+    32.8,
+    23.1,
+    24.8,
+    24.1,
+    4.8,
+    38.8,
+    4.1
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 2,
+   "t0": 2.3,
+   "len": 1.52,
+   "ground": "mid",
+   "luma": 84.4,
+   "accent": null,
+   "motion": 5.6,
+   "peak": 37.71,
+   "held": 0.04,
+   "frames": 90,
+   "joint": 2.4,
+   "jointKind": "seam",
+   "curve": [
+    2.2,
+    1.9,
+    2.7,
+    37.7,
+    11.4,
+    5.7
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 3,
+   "t0": 3.82,
+   "len": 0.78,
+   "ground": "light",
+   "luma": 178.7,
+   "accent": null,
+   "motion": 1.5,
+   "peak": 4.28,
+   "held": 0,
+   "frames": 44,
+   "joint": 1.1,
+   "jointKind": "seam",
+   "curve": [
+    2.2,
+    1.2,
+    4.3
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 4,
+   "t0": 4.6,
+   "len": 0.4,
+   "ground": "mid?",
+   "luma": 60.8,
+   "accent": null,
+   "motion": 12.03,
+   "peak": 28.4,
+   "held": 0,
+   "frames": 22,
+   "joint": 164.3,
+   "jointKind": "cut",
+   "curve": [
+    28.4,
+    16.7
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 5,
+   "t0": 5,
+   "len": 1.18,
+   "ground": "light",
+   "luma": 156.1,
+   "accent": null,
+   "motion": 18.28,
+   "peak": 57.23,
+   "held": 0,
+   "frames": 69,
+   "joint": 98.8,
+   "jointKind": "cut",
+   "curve": [
+    3.3,
+    3.3,
+    29.2,
+    57.2,
+    32.9
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  },
+  {
+   "i": 6,
+   "t0": 6.18,
+   "len": 2.8,
+   "ground": "mid",
+   "luma": 119.1,
+   "accent": null,
+   "motion": 6.92,
+   "peak": 37.05,
+   "held": 0.39,
+   "frames": 161,
+   "joint": 141.8,
+   "jointKind": "cut",
+   "curve": [
+    3.7,
+    21,
+    28.5,
+    27.3,
+    37,
+    2.7,
+    2.8,
+    0.2,
+    0,
+    0,
+    0
+   ],
+   "onScreen": null,
+   "moves": null,
+   "trigger": null
+  }
+ ],
+ "pace": {
+  "medianShot": 1.35,
+  "perMinute": 40.1
+ },
+ "groundPattern": "mid → mid → light → mid? → light → mid",
+ "motionBand": {
+  "lo": 1.5,
+  "hi": 18.28
+ },
+ "seams": [
+  {
+   "t": 2.3,
+   "gap": 0.017,
+   "frames": 1,
+   "axis": null,
+   "direction": null,
+   "groundBefore": "#070707",
+   "groundAfter": "#020202"
+  },
+  {
+   "t": 3.82,
+   "gap": 0.017,
+   "frames": 1,
+   "axis": null,
+   "direction": null,
+   "groundBefore": "#bcbbbd",
+   "groundAfter": "#bebebf"
+  },
+  {
+   "t": 4.63,
+   "gap": 0.067,
+   "frames": 4,
+   "axis": "x",
+   "direction": "left-to-right",
+   "groundBefore": "#bababb",
+   "groundAfter": "#3e3e3e"
+  }
+ ],
+ "threads": null,
+ "spectacle": null,
+ "takeaway": null
+}
