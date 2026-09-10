@@ -34,7 +34,6 @@ not: "no narration, no logo lockup, no gradient, no cuts, no second element on t
 - style: no effect whatsoever. The plainness is load-bearing, because beat 2 only reads as a change if beat 1 had nothing on it
 - rest: none. Two seconds of a still white word is the restraint the spectacle line is paid for with
 - why: state the promise in the cheapest possible way, so the treatment that follows is clearly happening TO something
-- emotion: plain statement
 - duration: 2.4s
 - transition_in: cut
 
@@ -52,7 +51,6 @@ not: "no narration, no logo lockup, no gradient, no cuts, no second element on t
 - style: the one loud moment in the film. Everything either side of it is plain white type
 - rest: none. This beat is all change
 - why: the payoff has to be a REVEAL and not a caption, and the only way to reveal a word is to make it briefly unreadable
-- emotion: heat, then release
 - duration: 2s
 - transition_in: none, the beat is a state change of the same object
 
@@ -70,6 +68,5 @@ not: "no narration, no logo lockup, no gradient, no cuts, no second element on t
 - style: no effect. The film ends where it began, on plain white type, and only the word has changed
 - rest: none
 - why: the one thing to remember is the address, and it lands last, alone, with nothing competing
-- emotion: settled
 - duration: 1.6s
 - transition_in: none

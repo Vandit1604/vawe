@@ -75,7 +75,6 @@ craft:
 - becomes: a claim in type becomes a picture to check it against
 - onscreen: "ROUTE PLANNING" / "Draw the route. The climb comes with it."
 - why: the payoff line names the same idea AFTER it has been shown, so the hook is allowed to promise it
-- emotion: curiosity
 - duration: 5.3s
 - transition_in: none
 
@@ -93,7 +92,6 @@ craft:
 - becomes: an undrawn map becomes a saved route with real numbers attached to it
 - onscreen: none (the panel's own chrome: "Trailhead", "Ridge Loop · Sierra", "Save route", "1,180 ft climb · 5.4 mi")
 - why: this is the whole reason the film exists; it gets the most time and the only click
-- emotion: satisfaction
 - duration: 13.0s
 - transition_in: fade (cut mech: seam)
 
@@ -111,6 +109,5 @@ craft:
 - becomes: a mechanism becomes a claim you can now trust, because you watched it happen
 - onscreen: "The climb, visible before the first step." / "Trailhead" / "Plan the walk you can actually see."
 - why: the payoff names what beat 2 showed, and lands last, per the hook-suspense-payoff spine
-- emotion: resolve
 - duration: 5.8s
 - transition_in: cinematicZoom (mech: seam)
