@@ -74,6 +74,29 @@ export async function preloadThree(data) {
   try { window.THREE = await import('/assets/vendor/three.module.min.js'); }
   catch (e) { throw new Error('three.js failed to load from /assets/vendor/three.module.min.js: ' + e.message); }
   window.__typefaces = {};
+  // DECODED TEXTURES, OWNED HERE. textureFrom used to build its own `new Image()` from the raw path after
+  // preloadImages had decoded and discarded an identical one. A second load of the same URL still
+  // finishes asynchronously, so a render worker that seeks straight to a frame reached `ensure()` first:
+  // litPlane rendered in the single-tab preview and threw "not decoded" on the six-worker render. It
+  // also skipped srcUrl, so a bare `assets/x.png` would have loaded from /formats/scene/assets/ and 404d
+  // (docs/MISTAKES.md #569). The preloader decodes once, three-fx reads the decoded element: one owner,
+  // the same shape as window.__typefaces above. Every image-like string under a three layer is taken,
+  // not a list of prop names, so `screen`, `planes` and whatever the next scene adds are all covered.
+  window.__threeImages = {};
+  // The SAME test preloadImages uses (core/engine/boot.js): an image extension OR an http(s) URL, since web
+  // images can be extensionless. A narrower test here would refuse a screen boot had already loaded.
+  const isImg = (v) => typeof v === 'string' && (/\.(svg|png|jpe?g|webp|gif)$/i.test(v) || /^https?:\/\/\S+$/.test(v));
+  const texSrcs = new Set();
+  const collect = (o) => {
+    if (Array.isArray(o)) { o.forEach(collect); return; }
+    if (o && typeof o === 'object') { for (const v of Object.values(o)) collect(v); return; }
+    if (isImg(o)) texSrcs.add(o);
+  };
+  walkData(data, (o) => { if (o && typeof o === 'object' && typeof o.three === 'string') collect(o); });
+  await Promise.all([...texSrcs].map(async (src) => {
+    try { window.__threeImages[src] = await decodeImage(src, true); }
+    catch { throw new Error(`three texture "${src}" did not decode. preloadImages checks the path exists, so this is a file the browser cannot read as an image.`); }
+  }));
   const fonts = new Set();
   walkData(data, (o) => { if (o && typeof o === 'object' && o.three === 'extrudeText' && typeof o.font === 'string') fonts.add(o.font); });
   for (const f of fonts) {
