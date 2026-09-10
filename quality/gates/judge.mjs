@@ -78,8 +78,10 @@ const dims = execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '
 const landscape = dims[0] >= dims[1];
 const { tw: TW, th: TH } = tileBox(landscape);
 
-// KEY frames: each beat's MID (beats = layer-start clusters, like critique) + always the hook and the CTA.
-const mids = scene ? beatsOf(scene, dur) : evenSamples(dur);
+// KEY frames: the film's own storyboard beat table when it has one (harness/author/storyboard-parse.mjs),
+// else the layer-start clustering fallback (beats-of.mjs). `inp` is the scene JSON path when `scene` is
+// set, so the storyboard beside it (`<file>.storyboard.md`) is checked first.
+const mids = scene ? beatsOf(scene, dur, inp) : evenSamples(dur);
 
 // Per-scene directory. It used to be a bare /tmp/judge wiped on every run, so judging a second film
 // destroyed the first, which makes comparing two cuts, the entire point of a judging campaign, impossible.
