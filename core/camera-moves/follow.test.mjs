@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { bakeCameraMove } from '../engine/produce.js';
-import { followOffset } from './follow.js';
+import { followOffset, followVelocity } from './follow.js';
 
 const scene = (layers, cameraMove) => ({ layers, cameraMove });
 const FRAME = { W: 1920, H: 1080 };
@@ -57,4 +57,26 @@ test('retiming the followed layer changes the live box, and the SAME spec tracks
   assert.equal(centred.y, 0);
 });
 
-console.log('ok - camera follow: unknown-id refusal, follow-chain refusal, and live retracking all hold');
+// KNOWN-ANSWER TEST for the bug this move used to have: cam.vel stayed {0,0,0} under followLayer
+// because scene.js derived it from the (empty) keyframe array every camera has, not from this move's
+// own live box. A target moving at a known speed, held outside the deadzone on both samples so the
+// clamp does not absorb the motion, must report that exact speed back.
+test('followVelocity reports the target\'s own speed when it is outside the deadzone', () => {
+  const spec = { margin: 0.1, to: 1 };
+  const dt = 1 / 30;
+  const speed = 1000; // px/s
+  const boxPrev = { cx: 2000, cy: 540 };
+  const boxNow = { cx: boxPrev.cx + speed * dt, cy: 540 }; // both past the right-hand margin
+  const v = followVelocity(boxNow, boxPrev, spec, FRAME.W, FRAME.H, dt);
+  assert.ok(Math.abs(v.speed - speed) < 1e-6, `expected speed ${speed}, got ${v.speed}`);
+  assert.ok(Math.abs(v.vy) < 1e-9, 'no vertical motion in this fixture');
+});
+
+test('followVelocity is zero when the target sits still inside the deadzone', () => {
+  const spec = { margin: 0.2, to: 1 };
+  const box = { cx: FRAME.W / 2, cy: FRAME.H / 2 };
+  const v = followVelocity(box, box, spec, FRAME.W, FRAME.H, 1 / 30);
+  assert.equal(v.speed, 0);
+});
+
+console.log('ok - camera follow: unknown-id refusal, follow-chain refusal, live retracking, and velocity all hold');

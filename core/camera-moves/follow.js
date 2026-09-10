@@ -58,3 +58,18 @@ export function followOffset(box, spec, W, H) {
   const clampTo = (v, a, z) => Math.min(Math.max(v, a), z);
   return { s: spec.to, x: clampTo(box.cx, lo.x, hi.x) - box.cx, y: clampTo(box.cy, lo.y, hi.y) - box.cy };
 }
+
+// followVelocity(boxNow, boxPrev, spec, W, H, dt) -> {vx, vy, speed}, the follow camera's translation
+// over the window ending at "now", in the SAME shape and space core/timeline/sequence.js's
+// cameraVelocityAt reports for a keyed camera (px/s, x/y only: see that function's header for why s/
+// rx/ry/roll are excluded). A keyed camera derives both samples from one keyframe array; this move has
+// no keyframes; its pose at any time is `followOffset` of the target's box AT THAT TIME. So the two
+// samples this needs are the two boxes, not two reads of one track, and the caller (formats/scene/
+// scene.js) is the one that can produce a box at an arbitrary t, by re-running resolveBoxes there.
+// Kept here, beside followOffset, because both are the one place that knows what this move's pose IS.
+export function followVelocity(boxNow, boxPrev, spec, W, H, dt) {
+  if (!(dt > 0)) throw new Error(`followVelocity: dt must be a positive lookback in seconds, got ${JSON.stringify(dt)}.`);
+  const now = followOffset(boxNow, spec, W, H), prev = followOffset(boxPrev, spec, W, H);
+  const vx = (now.x - prev.x) / dt, vy = (now.y - prev.y) / dt;
+  return { vx, vy, speed: Math.hypot(vx, vy) };
+}
