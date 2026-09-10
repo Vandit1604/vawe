@@ -261,7 +261,7 @@ word at 24fps.
 **When it is wrong.** As a substitute for a picture. A film of pure kinetic type is still a film of type,
 and this repo's own doctrine is blunt about it: see [`SHOW-DONT-TELL.md`](SHOW-DONT-TELL.md).
 
-**Verdict: HAVE, generously.** 33 kinetic text presets with `split`, `preset`, `each` and `stagger`, plus
+**Verdict: HAVE, generously.** 31 kinetic text presets with `split`, `preset`, `each` and `stagger`, plus
 `wordBlast`, `kineticHook` and `propSentence` as whole beats. The engine is stronger here than a stock
 After Effects install.
 
