@@ -94,7 +94,7 @@ Two rules that decide whether this helps or hurts:
    layer the ramp's bottom stops land where the alpha has already gone. That limitation is written in
    the blurb, so nobody spends an afternoon rediscovering it.
 
-Then give it a card. A `core/layout/generators.js` entry puts the effect in the playground with its dial on
+Then give it a card. A `core/generators/generators.js` entry puts the effect in the playground with its dial on
 screen, which is the difference between an author knowing the name and an author knowing what the
 number does.
 

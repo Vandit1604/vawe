@@ -27,7 +27,7 @@ import { resolveBridges } from '/core/audio/bridges.js';
 import { cameraAt, cameraVelocityAt, dollyZ, motionAt, resolveKeyedProps } from '/core/timeline/sequence.js';
 import { layerTime } from '/core/timeline/time.js';
 import { specsOf } from '/core/fx/index.js';
-import { resolvePans } from '/core/layout/pan-resolve.mjs';
+import { resolvePans } from '/core/timeline/pan-resolve.mjs';
 import { watchProps, auditLayer, watchedTree } from '/core/registry/prop-audit.js';
 import { createRenderer } from '/core/layers/index.js';
 import { createTrackKit, runTracks } from '/core/tracks/index.js';

@@ -94,7 +94,7 @@ export const FILTER_REGISTRY = defineRegistry('filter', FILTER_PRESETS, { slot: 
     usage: (n, { j }) => j({ type: 'image', src: 'assets/shot.png', x: 160, y: 140, w: 1600, filter: n }),
     // MOSTLY TRUE AND NOT ENTIRELY, which is worth saying rather than leaving the blanket claim: most of
     // this family regrades a picture, but `thermalBlur` is built for TYPE and needs no photograph at all.
-    // Its card is in the playground (`core/layout/generators.js`), where its radius dial is on screen.
+    // Its card is in the playground (`core/generators/generators.js`), where its radius dial is on screen.
     noPreview: 'most of these regrade a photographic source, and the index ships no photographs. The exception is `thermalBlur`, which is a type effect: its live card with a radius dial is in the playground.',
   },
 });

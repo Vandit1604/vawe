@@ -17,7 +17,7 @@
 // Math.random, absolute coords on the 1920x1080 stage, `{x, y}` = the block's top-left.
 import { TOKENS as T, text, rect, box, stagger, R, SPACE, TYPE, E, r2 } from './kit.mjs';
 import { glassCard } from './sleek.mjs';
-import { svgIcon } from '../core/layout/icons.js';
+import { svgIcon } from '../core/icons/icons.js';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
 // declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.

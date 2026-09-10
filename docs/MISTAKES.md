@@ -1937,7 +1937,7 @@ Each gate now separates cannot-check from checked-and-clean.
 holds: none
 
 ## 471. eight resampling passes, and nothing we build ourselves could be fed to one
-- `core/resample/raster.js`: the serialiser moved out of `seams.js` with `buildInlinedCss`, `domToCanvas`, `isBlankRaster` and a new `rasterStats`.
+- `core/raster/raster.js`: the serialiser moved out of `seams.js` with `buildInlinedCss`, `domToCanvas`, `isBlankRaster` and a new `rasterStats`.
 holds: none
 
 ## 472. the motion contract's windows came from a field nobody writes, and one of its clauses was measuring the camera
@@ -2317,7 +2317,7 @@ holds: quality/gates/lib-test.mjs, quality/gates/schema-drift.mjs
 holds: quality/gates/prop-probe.mjs
 
 ## 566. every seam shifted its text to the top of the frame, because the bake dropped a linked stylesheet
-`core/resample/raster.js` `buildInlinedCss` now inlines EVERY same-origin `<link rel="stylesheet">`, not just tokens.css: it loops `document.querySelectorAll('link[rel="stylesheet"]')`, skips cross-origin...
+`core/raster/raster.js` `buildInlinedCss` now inlines EVERY same-origin `<link rel="stylesheet">`, not just tokens.css: it loops `document.querySelectorAll('link[rel="stylesheet"]')`, skips cross-origin...
 holds: none
 
 ## 567. the scaffold's default draft did not render, and the fix silently broke its continuous object
