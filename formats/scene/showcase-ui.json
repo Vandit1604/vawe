@@ -4,15 +4,11 @@
   "authoring": {
     "allow": [
       "off-colour",
-      "clipped-text",
-      "no-preflight",
-      "craft-unvisited"
+      "clipped-text"
     ],
     "_why": {
       "off-colour": "the browserFrame block paints the real macOS traffic-light dots, and window chrome that is not those three colours does not read as window chrome",
-      "clipped-text": "tabBar.switch reveals the selected label through a moving mask, so the pill's clientWidth (347px) is meant to be narrower than the label row inside it (1052px). Nothing is cut on screen: the audit reads a deliberate mask as a clipped glyph run.",
-      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-      "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
+      "clipped-text": "tabBar.switch reveals the selected label through a moving mask, so the pill's clientWidth (347px) is meant to be narrower than the label row inside it (1052px). Nothing is cut on screen: the audit reads a deliberate mask as a clipped glyph run."
     }
   },
   "aspect": "16:9",

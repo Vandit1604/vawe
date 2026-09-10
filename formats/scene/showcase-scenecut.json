@@ -2,20 +2,8 @@
   "module": "scene",
   "authoring": {
     "allow": [
-      "no-continuous-object",
-      "no-storyboard",
-      "no-authored-motion",
-      "no-preflight",
-      "feature-poverty",
-      "static-bg"
-    ],
-    "_why": {
-      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
-      "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
-      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-      "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)",
-      "static-bg": "legacy: grandfathered 2026-09-05, adopted 2026-09-05 (the backdrop moves, at least one beat is not a flat field asleep for the whole film)"
-    }
+      "no-continuous-object"
+    ]
   },
   "authoringNote": "PRE-EXISTING slideshow structure, not a design choice: this scene was authored before the continuity tell existed and no object survives its cuts. Waived so it keeps rendering; rebuild it on a continuous-object spine and drop this waiver.",
   "aspect": "16:9",

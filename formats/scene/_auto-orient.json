@@ -20,8 +20,7 @@
       "no-continuous-object",
       "static-bg",
       "no-storyboard",
-      "no-authored-motion",
-      "no-transition"
+      "no-authored-motion"
     ],
     "_why": {
       "dead-air": "the frame holds one rig on purpose: this measures whether the carried marks stay readable, so anything else moving would be a second variable",
@@ -29,8 +28,7 @@
       "no-continuous-object": "the rotating group IS the continuous object; the rule reads across cuts and this film has none",
       "static-bg": "a moving backdrop would compete with the one rotation being measured",
       "no-storyboard": "a mechanism demo, not a film. The whole plan is 'six marks orbit a rotating group', and it is written down in docs/CRAFT/AE-TECHNIQUES.md #12, which names this file as its worked example",
-      "no-authored-motion": "the group carries the only hand-keyed track in the film and every other layer is deliberately still",
-      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)"
+      "no-authored-motion": "the group carries the only hand-keyed track in the film and every other layer is deliberately still"
     }
   },
   "layers": [
