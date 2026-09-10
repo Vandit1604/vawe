@@ -334,7 +334,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `component` | a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` |
 | `composition` | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and recipes cannot express |
 | `count` | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9 |
-| `cursor` | a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time, the spine of a product demo |
+| `cursor` | a pointer that follows [{t,x,y}] keyframes (`path`) or eases magnetically onto another layer's live box (`snapTo`), fires a ripple at `clicks`, can change shape mid-move (`style`/`styleAt`: arrow/hand/ibeam/block), carry a name tag (`label`), and drag another layer along with it (`carry`) |
 | `doc` | a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height |
 | `globe` | a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector |
 | `glow` | soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight) |
@@ -512,6 +512,17 @@ Each resampled layer takes its own WebGL context and browsers cap those at rough
 | `saturation` | takes only the richness from the layer and keeps the backdrop's tint and brightness |
 | `screen` | lightens everything: black drops out and the rest brightens, the opposite of multiply, like two projectors on one wall |
 | `soft-light` | as if a diffuse lamp shone through the layer: a gentle wash rather than a hit |
+
+## Cursor styles  `[per-layer]`
+
+What shape a `cursor` layer draws (`"style": "hand"`), and how it can change mid-move (`styleAt`). Arrow is the pointer default; hand/ibeam/block read as hovering a control, hovering text, or a terminal caret.
+
+| name | what / when |
+|---|---|
+| `arrow` | the default macOS pointer arrow, unchanged pixels from before this registry existed |
+| `block` | a filled terminal cell that blinks on a fixed cadence, a block text cursor |
+| `hand` | a pointing hand, for hovering a clickable button or link in a product demo |
+| `ibeam` | a text-selection I-beam, for hovering editable or selectable text |
 
 ## Depths (parallax planes)  `[per-layer]`
 
@@ -1131,4 +1142,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_695 effects across 58 families. Regenerate: `make effects`._
+_699 effects across 59 families. Regenerate: `make effects`._
