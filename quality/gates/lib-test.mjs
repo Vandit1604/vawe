@@ -107,6 +107,7 @@ import { resolveBridges } from '../../core/audio/bridges.js';
 import { RESAMPLE_FX } from '../../core/resample/effects.js';
 import { RAYMARCH_FX } from '../../core/surfaces/raymarch-fx.js';
 import { THREE_FX } from '../../core/surfaces/three-scenes.js';
+import { pairActs, parsePairs, verdictOf, isPlaceholderSurface } from './content-check.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -7519,6 +7520,34 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const rt = resolvedTransitionIn(beat('B', { transition_in: 'fx:whipPan dur=0.4' }));
   ok('contract: resolvedTransitionIn carries mech and the extra params', rt && rt.mech && rt.dur === 0.4);
   ok('contract: transitionInErrors ignores beat 1 (opens the film, not a boundary)', transitionInErrors([beat('A', { transition_in: 'fx:notreal' })]).length === 0);
+}
+
+// ---- content-check.mjs: act pairing and the verdict function, on synthetic numbers ----------------
+{
+  const c = (fill, detail, photo, band = 'slightly', colorfulness = 20) => ({ fill, detail, photo, band, colorfulness });
+
+  // pairActs: by order when nothing is said, an explicit list otherwise, and it never invents a pair
+  // past whichever side is shorter.
+  ok('content-check: pairActs pairs by order up to the shorter side', JSON.stringify(pairActs(9, 10)) === JSON.stringify(Array.from({ length: 9 }, (_, i) => [i + 1, i + 1])));
+  ok('content-check: pairActs pairs by order the other way round too', pairActs(3, 10).length === 3);
+  ok('content-check: an explicit pairs list wins over order', JSON.stringify(pairActs(9, 10, [[1, 3], [2, 3]])) === JSON.stringify([[1, 3], [2, 3]]));
+  ok('content-check: parsePairs reads "1:1,2:2,3:4"', JSON.stringify(parsePairs('1:1,2:2,3:4')) === JSON.stringify([[1, 1], [2, 2], [3, 4]]));
+  ok('content-check: parsePairs drops a malformed entry rather than guessing it', JSON.stringify(parsePairs('1:1,nope,3:4')) === JSON.stringify([[1, 1], [3, 4]]));
+  ok('content-check: parsePairs of nothing is null, not an empty guess', parsePairs(undefined) === null);
+
+  // verdictOf: a quiet reference (band 'not') asks only whether ours is ALSO quiet; a busy reference
+  // asks whether ours clears 60% of it on fill/detail/photo.
+  ok('content-check: verdictOf reads "quiet ok" when both sides are quiet', verdictOf(c(0.02, 1.9, 0.01, 'not'), c(0.03, 1.7, 0.01, 'not')) === 'quiet ok');
+  ok('content-check: verdictOf reads "over" when ours is busy against a quiet reference', verdictOf(c(0.49, 2.4, 0.02, 'slightly'), c(0.03, 1.7, 0.01, 'not')) === 'over');
+  ok('content-check: verdictOf reads "under" when ours misses 60% of a busy reference on fill', verdictOf(c(0.15, 14, 0.23, 'slightly'), c(0.43, 14.1, 0.23, 'slightly')) === 'under');
+  ok('content-check: verdictOf reads "ok" when ours matches a busy reference', verdictOf(c(0.43, 14.1, 0.23, 'slightly'), c(0.4, 13, 0.2, 'slightly')) === 'ok');
+
+  // isPlaceholderSurface: the calibration in content-check.mjs itself (vawe-flow's real editor act,
+  // madera's real results shot) must NOT trip it; a large flat colourless act must.
+  ok('content-check: a real editor act (band slightly) is not a placeholder', !isPlaceholderSurface({ fill: 0.49, band: 'slightly', photo: 0.02, detail: 2.4 }));
+  ok('content-check: a real dense act (band slightly) is not a placeholder', !isPlaceholderSurface({ fill: 0.43, band: 'slightly', photo: 0.23, detail: 14.1 }));
+  ok('content-check: a large flat colourless mock IS a placeholder', isPlaceholderSurface({ fill: 0.5, band: 'not', photo: 0, detail: 1 }));
+  ok('content-check: a small flat colourless patch is not (too little of the frame to be the subject)', !isPlaceholderSurface({ fill: 0.1, band: 'not', photo: 0, detail: 1 }));
 }
 
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter

@@ -6,6 +6,7 @@
 // eye, once, and the study is lost. This writes the study down.
 //
 //   node harness/media/study.mjs <video> [name] [--threshold 0.3] [--min-shot 0.4] [--fixed 2] [--cells 4]
+//   node harness/media/study.mjs <video> [name] --content-only   # add content.mjs's numbers, nothing else
 //
 // NAME IT FOR A PERSON. The name becomes grammar/<name>.json, a row in docs/CRAFT/GRAMMAR.md and, if
 // the film earns a deep study, docs/CRAFT/REF-<name>.md. The first one written here was called
@@ -51,6 +52,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { drawtext } from '../author/sheets.mjs';
 import { ffmpegOrDie } from '../lib/scratch.mjs';
+import { measureSpan } from './content.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -175,6 +177,23 @@ for (const bin of ['ffprobe', 'ffmpeg']) {
   if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error) {
     die(`${bin} is not on PATH. \`make study\` reads the file with ffmpeg; install it (brew install ffmpeg) and re-run.`);
   }
+}
+
+// ── content-only: add content.mjs's four numbers to an EXISTING grammar, nothing else ──────────────
+// A full re-study overwrites the measured half and would also blow away the AUTHORED half's home
+// (refs/<name>/ is cleared below) for no reason: content per shot needs only the clip and the shot
+// bounds a study already wrote. This skips every other measurement (cuts, seams, pages, the sheet) and
+// merges one new field into shots[], leaving onScreen/moves/trigger/threads/spectacle/takeaway untouched.
+if (argv.includes('--content-only')) {
+  const name = positional[1] || path.basename(VIDEO).replace(/\.[^.]+$/, '');
+  const grammarFile = path.join(ROOT, 'grammar', `${name}.json`);
+  if (!fs.existsSync(grammarFile)) die(`no grammar/${name}.json to add content to. Run a full \`make study\` first.`);
+  const grammar = JSON.parse(fs.readFileSync(grammarFile, 'utf8'));
+  // t0/t1 are the shot's own joints; measureSpan already samples strictly inside them.
+  for (const s of grammar.shots || []) s.content = measureSpan(VIDEO, s.t0, s.t0 + s.len);
+  fs.writeFileSync(grammarFile, JSON.stringify(grammar, null, 1) + '\n');
+  console.log(`✓ content added to ${(grammar.shots || []).length} shot(s) in grammar/${name}.json`);
+  process.exit(0);
 }
 
 // ── probe: the facts that come off the file ──────────────────────────────────────────────────────
