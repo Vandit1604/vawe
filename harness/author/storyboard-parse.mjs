@@ -150,6 +150,11 @@ export function parseStoryboard(src) {
       // unchanged when this is unset. `harness/lib/contract.mjs parseFragmentSpec` reads the raw
       // string, so this parser stays a raw-field reader like every field above it.
       fragment: f('fragment'),
+      // A RECIPE: structure measured off a real film (recipes/recipes.json), applied to layers the
+      // author already named by `id`. "<name> <slot>=<value> ...", e.g. "flow-seam out=window
+      // in=tagline axis=x". `harness/lib/contract.mjs parseRecipeLine` reads the raw string; this
+      // parser stays a raw-field reader like every field above it.
+      recipe: f('recipe'),
     };
   });
   const { name: objectName, src: objectSrc } = parseObjectLine(field('object'));

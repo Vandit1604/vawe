@@ -44,6 +44,7 @@ import { IDLE_NAMES } from '../../core/engine/idle.js';
 import { CURVES as PATH_CURVES } from '../../core/motion/path-curves.js';
 import { boundaryMechanism } from '../../core/transitions/lower.js';
 import { TRANSITIONS } from '../../core/transitions/catalog.js';
+import { pickRecipe } from '../../recipes/index.mjs';
 
 const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*((?:\/[a-z]+\s*[:=]\s*-?[\d.]+\s*)*)$/i;
 const POSE_TOKEN_RE = /\/([a-z]+)\s*[:=]\s*(-?[\d.]+)/gi;
@@ -445,4 +446,57 @@ export function transitionInErrors(beats) {
 export function resolvedTransitionIn(b) {
   const p = parseTransitionIn(b.transition_in);
   return (p && !p.error) ? { fx: p.fx, mech: boundaryMechanism(p.fx) } : null;
+}
+
+// ── RECIPES: structure copied from real video (recipes/recipes.json, recipes/README.md) ────────────
+// A beat's `recipe:` line names one recipe and fills its slots/params, one grammar for both the plan
+// gate and assemble to read, so the two never drift the way two parsers of the same field always do:
+//   `<name> <key>=<value> ...`             e.g. "flow-seam out=window in=tagline axis=x"
+// A bracketed value is a list ("ground=[g1,g2]"); everything else is a bare token. Which field a key
+// lands in (slot vs param) is read off the recipe's own definition, never guessed: `out`/`in`/`ground`
+// are `flow-seam`'s slots, `axis`/`gap`/... are its params. `at` is never written here: it is the
+// beat's own start, already the film's clock, so restating it on the line would be a second copy of a
+// number the storyboard already carries once.
+const RECIPE_TOKEN_RE = /(\w+)=(\[[^\]]*\]|\S+)/g;
+
+/**
+ * parseRecipeLine("flow-seam out=window in=tagline axis=x") →
+ *   {name, def, slots, params, unknown, missingSlots} | {name, error}
+ */
+export function parseRecipeLine(raw) {
+  const s = String(raw || '').trim();
+  const m = /^(\S+)\s*(.*)$/.exec(s);
+  if (!m) return { name: s, error: `recipe line "${raw}" has no recipe name` };
+  const [, name, rest] = m;
+  let def;
+  try { def = pickRecipe(name); } catch (e) { return { name, error: e.message }; }
+  const slots = {}, params = {}, unknown = [];
+  for (const [, key, valRaw] of rest.matchAll(RECIPE_TOKEN_RE)) {
+    const val = valRaw.startsWith('[') ? valRaw.slice(1, -1).split(',').map((v) => v.trim()).filter(Boolean) : valRaw;
+    if (Object.hasOwn(def.slots, key)) slots[key] = val;
+    else if (def.params && Object.hasOwn(def.params, key)) params[key] = val;
+    else unknown.push(key);
+  }
+  // A slot's description marks itself optional with a trailing "?" (recipes/README.md's own example,
+  // "[layer id, layer id]?") or the word "optional" (recipes.json's own `ground` entry writes it out);
+  // `at` is never author-filled (see above).
+  const OPTIONAL_SLOT = /\?\s*$|\boptional\b/i;
+  const missingSlots = Object.keys(def.slots)
+    .filter((k) => k !== 'at' && !OPTIONAL_SLOT.test(String(def.slots[k])) && !Object.hasOwn(slots, k));
+  return { name, def, slots, params, unknown, missingSlots };
+}
+
+/** recipeErrors(beats) → string[] naming every beat whose `recipe:` line names an unknown recipe, an
+ * unknown slot/param, or leaves a required slot unfilled. */
+export function recipeErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    if (!b.recipe) return;
+    const p = parseRecipeLine(b.recipe);
+    if (p.error) { errs.push(`beat ${i + 1} (${b.name}) recipe: ${p.error}`); return; }
+    if (p.unknown.length) errs.push(`beat ${i + 1} (${b.name}) recipe "${p.name}" does not take ${p.unknown.join(', ')}. `
+      + `Slots: ${Object.keys(p.def.slots).join(', ')}. Params: ${Object.keys(p.def.params || {}).join(', ') || '(none)'}.`);
+    if (p.missingSlots.length) errs.push(`beat ${i + 1} (${b.name}) recipe "${p.name}" is missing slot(s): ${p.missingSlots.join(', ')}. recipes/README.md.`);
+  });
+  return errs;
 }

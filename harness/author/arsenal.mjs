@@ -213,6 +213,17 @@ export async function collect() {
       }
     }
   } catch { /* the catalogue is optional to search: a fresh clone can still find the registries */ }
+  // RECIPES: structure measured off real video (recipes/recipes.json), not a `defineRegistry` vocabulary
+  // (it names motion the ENGINE can already do, copied from a reference, never a new capability), so it
+  // needs the same small adapter as blueprints/blocks above rather than a fourth index.
+  try {
+    const { RECIPES } = await import('../../recipes/index.mjs');
+    for (const [name, r] of Object.entries(RECIPES)) {
+      const src = r.sources[0];
+      out.push({ name, kind: 'recipe', slot: 'recipe', blurb: r.blurb,
+        aka: [`${src.ref}@${src.t}s`], pitfall: '' });
+    }
+  } catch { /* recipes are optional to search */ }
   // Only the cues no registry already owns: MOTION_CUE_REGISTRY (core/audio-tactile.js) covers seven,
   // and a cue findable twice under two kinds is the drift this tool exists to remove. This fills the rest.
   out.push(...(await cueSource()).filter((c) => !out.some((e) => e.name === c.name && e.slot === c.slot)));

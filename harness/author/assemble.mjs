@@ -21,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMoveEntries, moveErrors, moveKeys, pathMotion, transitionInErrors, resolvedTransitionIn } from '../lib/contract.mjs';
+import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMoveEntries, moveErrors, moveKeys, pathMotion, transitionInErrors, resolvedTransitionIn, parseRecipeLine, recipeErrors } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
@@ -90,6 +90,12 @@ if (transitionInErrs.length) {
   for (const e of transitionInErrs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }
+const recipeErrs = recipeErrors(beats);
+if (recipeErrs.length) {
+  console.error(`assemble: a recipe: does not parse (recipes/README.md for the catalog):`);
+  for (const e of recipeErrs) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
 
 const themeName = typeof scene.theme === 'string' ? scene.theme : (scene.theme && scene.theme.name) || 'default';
 const themeFile = typeof scene.theme === 'object' ? null : path.join(ROOT, 'themes', `${themeName}.json`);
@@ -155,7 +161,15 @@ const movesBuilt = [];
 const htmlLayers = runs.map(([i, j]) => {
   const merged = j > i;
   const fragPath = fragPathOf(i);
-  if (!fs.existsSync(fragPath)) missing.push(path.relative(ROOT, fragPath));
+  const fragExists = fs.existsSync(fragPath);
+  // A beat whose only declared content is a recipe seam (no on-screen copy, no `fragment:` override)
+  // has nothing new to draw: the recipe moves layers that already exist elsewhere in the scene, and
+  // the beat is real time on the clock, not a scene of its own. Forcing an author to write an empty
+  // placeholder fragment just to satisfy this loop would be the requirement inventing content nobody
+  // asked for, so it is exempted from `missing` rather than blocked.
+  const recipeOnly = !merged && beats[i].recipe && !(beats[i].onscreen && beats[i].onscreen.length) && !fragSpecs[i].path && !fragExists;
+  if (!fragExists && !recipeOnly) missing.push(path.relative(ROOT, fragPath));
+  if (recipeOnly) return null;
   const box = boxOf(i);
 
   // A PLACEMENT CHANGE INSIDE A SHARED RUN becomes a `motion` key on this ONE layer, never a second
@@ -336,7 +350,7 @@ const htmlLayers = runs.map(([i, j]) => {
     ...(parts.length ? { parts } : {}),
     ...(idle ? { idle } : {}),
   };
-});
+}).filter(Boolean);
 if (moveConflicts.length) {
   console.error(`assemble: a move: cannot be built:`);
   for (const e of moveConflicts) console.error(`  ✗ ${e}`);
@@ -471,6 +485,21 @@ const transitions = beats.slice(1).map((b, i) => {
   return { at: shiftedStart[i + 1], fx: named.fx, ...(mech ? { mech } : {}) };
 });
 
+// ---- recipes: structure copied from real video, on the beat whose START is the seam --------------
+// `at` is the beat's own SHIFTED start (a staged junction moves it, same as bg/transitions above): a
+// recipe seam has to land where this beat's content actually arrives, not where a flat build would
+// have put it. Slots and params are read straight off the beat's `recipe:` line (already validated,
+// recipeErrors above); ids are layer ids the author already wrote elsewhere in this scene, never
+// generated here. Nothing downstream of this file reads `recipes[]` yet, the expander does
+// (recipes/README.md): assemble's whole job is making the line reachable from the plan.
+const recipes = beats
+  .map((b, i) => ({ b, i }))
+  .filter(({ b }) => b.recipe)
+  .map(({ b, i }) => {
+    const rp = parseRecipeLine(b.recipe);
+    return { recipe: rp.name, at: shiftedStart[i], ...rp.slots, ...(Object.keys(rp.params).length ? { params: rp.params } : {}) };
+  });
+
 // ---- ownership: what this pass generated, against what the last one (or a hand edit) left behind ----
 const newDuration = shiftedEnd[shiftedEnd.length - 1];
 const ownedIds = new Set(htmlLayers.map((l) => l.id).concat(objectLayer ? [objectLayer.id] : []));
@@ -499,6 +528,7 @@ const out = {
   ...Object.fromEntries(preservedFilmFields.map((k) => [k, scene[k]])),
   bg,
   transitions,
+  ...(recipes.length ? { recipes } : {}),
   layers: objectLayer ? [...htmlLayers, objectLayer, ...preserved] : [...htmlLayers, ...preserved],
 };
 
@@ -511,6 +541,7 @@ console.log(`  ${transitions.length} transition(s), bg turns through: ${backdrop
 const motionCount = htmlLayers.reduce((n, l) => n + (l.parts ? l.parts.length : 0), 0);
 console.log(`  ${motionCount} motion-plan entr${motionCount === 1 ? 'y' : 'ies'} from the storyboard (\`motion:\`), built into ${htmlLayers.filter((l) => l.parts).length} scene(s)' \`parts\``);
 console.log(`  ${movesBuilt.length} sustained move(s) from the storyboard (\`move:\`)${movesBuilt.length ? `: ${movesBuilt.join(', ')}` : ', no beat asked for one'}`);
+console.log(`  ${recipes.length} recipe(s) from the storyboard (\`recipe:\`)${recipes.length ? `: ${recipes.map((r) => `${r.recipe}@${r.at}s`).join(', ')}` : ', no beat asked for one'}`);
 if (chain.length) {
   const poseBits = [usesSize && 'size', usesRot && 'rotation', usesOpacity && 'opacity', usesRadius && 'radius'].filter(Boolean);
   console.log(`  pose: ${poseBits.length ? poseBits.join(' + ') + ' keyed alongside position' : 'position only (no beat declared a size/rot/op change)'}`);
