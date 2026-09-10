@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
 import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../../harness/author/storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, transitionInErrors, transitionInWarnings, moveErrors, motionErrors, parseFragmentSpec } from '../../harness/lib/contract.mjs';
+import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, transitionInErrors, transitionInWarnings, moveErrors, motionErrors, parseFragmentSpec, arsenalCorpus, useErrors, useWarnings } from '../../harness/lib/contract.mjs';
 import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
@@ -138,6 +138,13 @@ for (const w of transitionInWarnings(sbBeats)) warn('transition-in-undecided', w
 // WARNING (assemble.mjs still blocks on it at JSON-build time; two gates, one parser).
 for (const e of moveErrors(sbBeats)) warn('move-unknown', e);
 for (const e of motionErrors(sbBeats)) warn('motion-unknown', e);
+// `use:` is the general door onto the arsenal's 790-entry corpus (harness/lib/contract.mjs), checked
+// here the same way: ambiguous, refused, or decisive-but-unknown is an ERROR (a name that will not
+// build); free prose is a WARNING (documentary, never silently dropped). Top-level await: this file is
+// ESM and a gate run resolving one corpus import is cheap next to the render it precedes.
+const useCorpus = await arsenalCorpus();
+for (const e of useErrors(sbBeats, useCorpus)) err('use-unresolved', e);
+for (const w of useWarnings(sbBeats, useCorpus)) warn('use-prose', w);
 
 // ── PLAIN CONTENT: a beat that draws a screen/window/app/UI and names no real source for it ────────
 // docs/CRAFT/CONTENT.md: real content (a capture, a real photo, a screen designed for the video) is
@@ -148,6 +155,23 @@ for (const e of motionErrors(sbBeats)) warn('motion-unknown', e);
 const CONTENT_NOUN_RE = /\b(screen|window|app|ui|dashboard|grid|card|product|photo)\b/i;
 const REAL_ASSET_RE = /assets\/|\.vawe-data\/uploads\//;
 const REAL_COMMAND_RE = /\bmake\s+(capture|sections|screen)\b/i;
+
+// A RECIPE: structure measured off a real film (recipes/README.md), applied to layers the author
+// already named. One parser, shared with assemble.mjs (harness/lib/contract.mjs parseRecipeLine), so
+// an unknown name or an unfilled slot is caught here, before the JSON, not after. Its own function
+// (not inlined in the beat loop) so the recipe/slot/param checks nest against a fresh function body,
+// not against the loop's own depth.
+function recipeLineFindings(b, title) {
+  const recipe = fieldIn(b, 'recipe');
+  if (!recipe) return;
+  const rp = parseRecipeLine(recipe);
+  if (rp.error) { err('recipe-unknown', `beat "${title}": recipe: "${recipe}" - ${rp.error}`); return; }
+  if (rp.unknown.length) err('recipe-unknown-slot', `beat "${title}": recipe "${rp.name}" does not take `
+    + `${rp.unknown.join(', ')}. Slots: ${Object.keys(rp.def.slots).join(', ')}. `
+    + `Params: ${Object.keys(rp.def.params || {}).join(', ') || '(none)'}.`);
+  if (rp.missingSlots.length) err('recipe-missing-slots', `beat "${title}": recipe "${rp.name}" is missing `
+    + `slot(s): ${rp.missingSlots.join(', ')}. recipes/README.md.`);
+}
 
 function plainContentWarning(b, title) {
   const text = ['onscreen', 'picture', 'mechanism', 'object'].map((k) => fieldIn(b, k) || '').join(' ');
@@ -284,21 +308,7 @@ for (const b of blocks) {
         + 'product is chat, and ours is not.');
     }
 
-    // A RECIPE: structure measured off a real film (recipes/README.md), applied to layers the author
-    // already named. One parser, shared with assemble.mjs (harness/lib/contract.mjs parseRecipeLine),
-    // so an unknown name or an unfilled slot is caught here, before the JSON, not after.
-    const recipe = fieldIn(b, 'recipe');
-    if (recipe) {
-      const rp = parseRecipeLine(recipe);
-      if (rp.error) err('recipe-unknown', `beat "${title}": recipe: "${recipe}" - ${rp.error}`);
-      else {
-        if (rp.unknown.length) err('recipe-unknown-slot', `beat "${title}": recipe "${rp.name}" does not take `
-          + `${rp.unknown.join(', ')}. Slots: ${Object.keys(rp.def.slots).join(', ')}. `
-          + `Params: ${Object.keys(rp.def.params || {}).join(', ') || '(none)'}.`);
-        if (rp.missingSlots.length) err('recipe-missing-slots', `beat "${title}": recipe "${rp.name}" is missing `
-          + `slot(s): ${rp.missingSlots.join(', ')}. recipes/README.md.`);
-      }
-    }
+    recipeLineFindings(b, title);
 
     // ends-on-a-claim. The last beat puts a sentence on screen and nothing changes under it, so the
     // film's final act is a line of copy appearing. Three of our recreations closed exactly this way:
