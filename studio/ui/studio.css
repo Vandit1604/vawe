@@ -1,7 +1,8 @@
  @font-face{font-family:Anybody;src:url(/assets/fonts/Anybody.woff2) format('woff2');font-weight:100 900;font-display:swap}
  @font-face{font-family:'JetBrains Mono';src:url(/assets/fonts/JetBrainsMono.woff2) format('woff2');font-weight:100 800;font-display:swap}
  /* Tokens measured off the reference editor (studio-ref.jpg, sampled pixels + make palette), not guessed.
-    Surfaces step up in lightness only; inset fields drop back to the ground so they read as receiving. */
+    Surfaces step up in lightness only. As in the reference, the property panel sits on the ground and its
+    fields step up to the panel colour; wells inside a raised panel (sheet, segmented control) drop back. */
  :root{color-scheme:dark;
    --side:78px;--toph:52px;--rail:clamp(272px,20.8vw,360px);--tlh:clamp(220px,37vh,420px);--gap:12px;
    --r-out:12px;--r-in:8px;--r-pill:6px;
@@ -10,11 +11,11 @@
    --panel-2:#27262c;     /* lane track, raised block inside a panel */
    --raised:#2f2e35;      /* buttons, hover */
    --raised-2:#393840;
-   --field:#16151a;       /* inset field: darker than the panel it sits in */
+   --field:#16151a;       /* a well inside a raised panel */
    --line:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.13);
    --ink:#ffffff;--ink-2:#d8d8da;--ink-3:#97969b;--muted:#7c7b81;
    --accent:#0a87ff;--accent-soft:rgba(10,135,255,.16);
-   --c-text:#a67dff;--c-sound:#0eaf80;--c-cap:#3ea3ff;--c-media:#52525a;--c-layer:#3d3c44;
+   --c-text:#a67dff;--c-sound:#0eaf80;--c-cap:#3ea3ff;--c-media:#52525a;--c-shape:#e0714f;--c-comp:#cf5b98;
    --bad:#ff7a7a;--bad-bg:#2c1a1d;--hz:#ff5c6c;--hz-beat:#e8a23a;--hz-mute:#8a898f;
    --sh-2:0 0 0 1px rgba(255,255,255,.06),0 8px 24px -8px rgba(0,0,0,.5);
    --sh-3:0 0 0 1px rgba(255,255,255,.08),0 16px 40px -12px rgba(0,0,0,.7);
@@ -40,6 +41,7 @@
  .ib svg{width:20px;height:20px}
  .ib:hover{background:var(--raised);color:var(--ink)}
  .ib[aria-pressed=true]{background:var(--raised);color:var(--ink)}
+ .ib:disabled,.ib:disabled:hover{background:transparent;color:var(--ink-3)}
  button.wide{width:100%}
  kbd{font:11px/1 var(--mono);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:5px;padding:3px 5px;
    margin-right:3px;color:var(--ink-2);background:var(--panel-2);white-space:nowrap}
@@ -85,8 +87,8 @@
  body.propoff #rail{display:none!important}
 
  /* ---- property panel ---- */
- #rail{width:var(--rail);flex:none;flex-direction:column;margin-bottom:var(--gap);background:var(--panel);
-   border-radius:var(--r-out);box-shadow:inset 0 0 0 1px var(--line);overflow:auto;scrollbar-width:thin;scrollbar-color:var(--raised) transparent}
+ #rail{width:var(--rail);flex:none;flex-direction:column;margin-bottom:var(--gap);background:var(--bg);
+   border-radius:var(--r-out);border:1px solid var(--line);overflow:auto;scrollbar-width:thin;scrollbar-color:var(--raised) transparent}
  .phead{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 10px 20px;min-height:58px;
    border-bottom:1px solid var(--line);flex:none}
  .phead h2{font:500 17px/1.2 Anybody,system-ui,sans-serif;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -95,7 +97,7 @@
  .pr{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:8px}
  .pr .lab{color:var(--ink-2);font-size:13px}
  .pr .flds{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
- .fld{display:flex;align-items:center;gap:8px;min-width:0;height:36px;padding:0 10px;background:var(--field);border-radius:var(--r-in);
+ .fld{display:flex;align-items:center;gap:8px;min-width:0;height:36px;padding:0 10px;background:var(--panel);border-radius:var(--r-in);
    color:var(--ink);font-size:13px}
  .fld i{font-style:normal;color:var(--muted);font-size:12px;flex:none}
  .fld b{font-weight:400;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -105,7 +107,7 @@
  #propjson summary::-webkit-details-marker{display:none}
  #propjson summary svg{width:18px;height:18px;color:var(--ink-3)}
  #propjson details[open] summary svg path{d:path("M5 10h10")}
- #pickjson{margin:8px 0 0;padding:10px 12px;max-height:240px;overflow:auto;background:var(--field);border-radius:var(--r-in);
+ #pickjson{margin:8px 0 0;padding:10px 12px;max-height:240px;overflow:auto;background:var(--panel);border-radius:var(--r-in);
    color:var(--ink-2);font-size:11.5px;line-height:1.5;user-select:text;white-space:pre-wrap;scrollbar-width:thin}
  #sel{margin:0;padding:0 20px;color:var(--ink-3);font-size:12px;flex:none}
  #sel:not(:empty){padding:10px 20px;border-bottom:1px solid var(--line)}
@@ -115,8 +117,13 @@
  #cands{display:grid;grid-template-columns:1fr 1fr;gap:8px;--ar:16/9}
  #cands:empty{display:none}
  .cand{height:auto;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;text-align:left;overflow:hidden;white-space:normal;
-   background:var(--field);border-radius:var(--r-in);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink)}
- .cand:hover{background:var(--field);box-shadow:inset 0 0 0 1px var(--accent)}
+   background:var(--panel);border-radius:var(--r-in);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink)}
+ .cand:hover{background:var(--panel);box-shadow:inset 0 0 0 1px var(--accent)}
+ .candfail{display:flex;align-items:center;justify-content:space-between;gap:8px}
+ .candfail b{color:var(--bad);font-weight:500}
+ #candstat details summary{cursor:pointer;color:var(--ink-3);font-size:12px;margin-top:8px}
+ #candstat pre{margin:6px 0 0;padding:8px 10px;max-height:160px;overflow:auto;background:var(--panel);border-radius:var(--r-in);
+   font:11px/1.5 var(--mono);white-space:pre-wrap;color:var(--ink-2)}
  .cand video,.cand .sk{width:100%;aspect-ratio:var(--ar);object-fit:contain;background:#0d0d10;display:block}
  .cand .t{display:flex;align-items:baseline;gap:5px;padding:6px 8px 7px;width:100%}
  .cand .t b{font:500 12px/1.2 Anybody,system-ui,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -147,9 +154,11 @@
    box-shadow:inset 0 0 0 1px var(--bad);border-radius:var(--r-out);padding:16px 18px;color:var(--ink);white-space:pre-wrap;font-size:12.5px;line-height:1.55}
  #err b{display:block;margin-bottom:8px;color:var(--bad);font:600 15px/1.2 Anybody,system-ui,sans-serif}
 
- /* ---- the divider: 12px tall, so it is also the gap between preview and timeline ---- */
- #split{flex:none;height:var(--gap);margin-right:var(--gap);cursor:row-resize;display:flex;align-items:center;justify-content:center;
+ /* ---- the divider: 12px tall, so it is also the gap between preview and timeline. The hit area reaches
+    6px into each neighbour (24px in all), where neither has a control. ---- */
+ #split{position:relative;z-index:6;flex:none;height:var(--gap);margin-right:var(--gap);cursor:row-resize;display:flex;align-items:center;justify-content:center;
    touch-action:none;user-select:none;border-radius:4px}
+ #split::before{content:'';position:absolute;left:0;right:0;top:calc((var(--gap) - 24px) / 2);bottom:calc((var(--gap) - 24px) / 2)}
  #split::after{content:'';width:40px;height:3px;border-radius:2px;background:transparent}
  #split:hover::after,#split.on::after,#split:focus-visible::after{background:var(--line-2)}
 
@@ -187,7 +196,8 @@
  #ruler{position:sticky;top:0;z-index:4;height:30px;background:var(--panel)}
  #ruler .t{position:absolute;top:0;height:5px;border-left:1px solid var(--line-2)}
  #ruler .t s{position:absolute;left:-1px;top:9px;color:var(--muted);text-decoration:none;font-size:10px;line-height:1;transform:translateX(-50%)}
- #ruler .t:first-child s{transform:none;left:0}
+ /* the playhead rests on 0:00, so the first label starts clear of its handle */
+ #ruler .t:first-child s{transform:none;left:8px}
  #ruler .t.end s{left:auto;right:0;transform:none}
  #ruler .m{position:absolute;bottom:2px;height:13px;border-left:2px solid var(--ink-3);color:var(--ink-3);padding-left:3px;
    font:600 9.5px/13px var(--mono);white-space:nowrap}
@@ -196,7 +206,7 @@
  #film{position:sticky;top:30px;z-index:3;height:58px;background:var(--c-media);border-radius:var(--r-pill);overflow:hidden;
    box-shadow:0 0 0 4px var(--panel)}
  #film:empty{display:none}
- #film .fr{position:absolute;top:0;bottom:0;background-size:cover;background-position:center;box-shadow:inset -1px 0 0 rgba(0,0,0,.35)}
+ #film .fr{position:absolute;top:0;bottom:0;background-size:contain;background-repeat:no-repeat;background-position:center;box-shadow:inset -1px 0 0 rgba(0,0,0,.35)}
  #rows{position:relative;padding-top:4px}
  .grid{position:absolute;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.025);pointer-events:none}
  .row{position:relative;height:40px}
@@ -206,10 +216,13 @@
  /* one pill shape for every clip; the kind picks the colour */
  .bar,.cap b,.aud .bed{position:absolute;top:3px;height:34px;border-radius:var(--r-pill);overflow:hidden;white-space:nowrap}
  .bar{cursor:pointer;color:#fff;font:500 13px/34px Anybody,system-ui,sans-serif}
- .bar.k-text{background:var(--c-text)} .bar.k-media{background:var(--c-media)} .bar.k-layer{background:var(--c-layer);color:var(--ink-2)}
+ .bar{background:var(--pill)}
+ .bar.k-text{--pill:var(--c-text)} .bar.k-media{--pill:var(--c-media)} .bar.k-shape{--pill:var(--c-shape)} .bar.k-comp{--pill:var(--c-comp)}
  .bar span,.cap b span,.aud .name{position:absolute;top:0;display:flex;align-items:center;gap:7px;height:34px;pointer-events:none}
  .bar span svg,.cap b svg,.aud .name svg{width:16px;height:16px;flex:none;stroke-width:1.7}
  .bar span em{font-style:normal;font-weight:400;opacity:.85}
+ /* the label is solid pill colour and sits above the key ticks, so a tick never runs through a letter */
+ .bar span{z-index:1;background:var(--pill);padding-right:8px}
  /* the ramps are the point: an open window is not a readable frame. Darkened, so a label running into
     its own exit ramp still reads. */
  .bar i{position:absolute;top:0;bottom:0;background:rgba(0,0,0,.26)}
@@ -297,26 +310,16 @@
  #planview{display:block;overflow:auto;padding:0}
  #planhead{padding:20px;border-bottom:1px solid var(--line)}
  #planmsg{margin:0 0 12px;font-size:18px;font-weight:500;line-height:1.35;max-width:70ch;text-wrap:balance}
- #planfacts{display:flex;flex-wrap:wrap;gap:6px 20px;font:12px var(--mono);color:var(--ink-3);font-variant-numeric:tabular-nums}
- #planfacts b{color:var(--ink);font-weight:500}
- .planspine{margin:14px 0 0;padding:10px 14px;background:var(--field);border-radius:var(--r-in)}
- .planspine p{margin:0 0 5px;font-size:12.5px;line-height:1.5;color:var(--ink-2)}
- .planspine p:last-child{margin:0}
- .planspine b{color:var(--ink);font-weight:600}
- #plandev{margin:14px 0 0}
- #plandev summary{cursor:pointer;font:500 12px/1.8 Anybody,system-ui,sans-serif;color:var(--ink-3);list-style:none}
- #plandev summary::-webkit-details-marker{display:none}
- #plandev summary::before{content:'+ ';color:var(--ink-3);font-family:var(--mono)}
- #plandev[open] summary::before{content:'- '}
- #plandev table{border-collapse:collapse;margin-top:8px;width:100%;font-size:12.5px}
- #plandev td{padding:6px 10px 6px 0;border-top:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
- #plandev td:first-child{width:34px;color:var(--accent);font:11.5px var(--mono)}
- #plandev td:nth-child(2){width:38%;color:var(--ink)}
- #plandev tr.dropped td{color:var(--muted)}
- #plandev tr.dropped td:first-child{color:var(--muted);text-decoration:line-through}
- #plangate{margin:14px 0 0;font:11.5px/1.7 var(--mono)}
- #plangate div{padding-left:15px;text-indent:-15px;color:var(--ink-3)}
- #plangate .ok{color:var(--c-sound)}
+ #planfacts{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+ #planfacts b{color:var(--ink);font-weight:500;margin-left:4px}
+ .planspine{margin:14px 0 0;padding:4px 14px;background:var(--field);border-radius:var(--r-in)}
+ .planspine .prow:first-child{border-top:0}
+ #plangate{margin:14px 0 0;display:flex;flex-wrap:wrap;gap:6px}
+ #plangate span{font:500 12px/1 Anybody,system-ui,sans-serif;padding:6px 9px;border-radius:6px;background:rgba(232,162,58,.14);color:var(--hz-beat)}
+ #plangate span.err{background:var(--bad-bg);color:var(--bad)}
+ .copycmd{height:36px;gap:14px;padding:0 12px;background:var(--field);font:12.5px var(--mono);color:var(--ink)}
+ .copycmd:hover{background:var(--raised)}
+ .copycmd span{font:500 12px Anybody,system-ui,sans-serif;color:var(--ink-3)}
  .pbeat{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;padding:20px;border-bottom:1px solid var(--line)}
  .pbeat > header{grid-column:1/-1;display:flex;align-items:center;gap:10px}
  .pbeat header .sp{flex:1}
@@ -337,7 +340,6 @@
    background:rgba(0,0,0,.6);color:#fff;pointer-events:none}
  .pstage.none{display:grid;place-items:center;background:var(--field);box-shadow:none;text-align:center;padding:16px}
  .pstage.none b{display:block;font:500 14px Anybody,system-ui,sans-serif;color:var(--ink-3)}
- .psrc{margin:8px 0 0;font:11px var(--mono);color:var(--muted)}
  .pcopy{margin:0 0 12px;padding:0;list-style:none}
  .pcopy li{font-size:16px;font-weight:500;line-height:1.3;margin-bottom:4px}
  .pcopy li + li{font-weight:400;font-size:14px;color:var(--ink-2)}

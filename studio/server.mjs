@@ -118,6 +118,7 @@ const timelineModel = (file) => {
     .map((c) => ({ kind: key.replace(/s$/, ''), t: c.t, dur: c.dur ?? 0.5, name: c.fx || c.style || c.kind || '' }));
   return {
     file: path.basename(file),
+    path: path.relative(REPO_ROOT, path.resolve(file)),
     duration: d.duration || null,
     marks: [...marks('cuts'), ...marks('seams'), ...marks('stings')].sort((a, b) => a.t - b.t),
     layers: (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object')
@@ -149,6 +150,19 @@ const directionFloorFindings = (file) => {
 };
 
 const page = () => studioPage({ fmt: 'scene', dataUrl, title: path.basename(dataArg) });
+
+// stage.mjs writes the next step as one string: a command, sometimes followed by ", then ..." or a
+// "   (note)". The stage chip copies only what can be run, so the two are sent apart.
+const splitNext = (next) => {
+  const s = String(next || '');
+  const paren = /^(.*?)\s{2,}\((.*)\)\s*$/.exec(s);
+  const head = paren ? paren[1] : s;
+  const at = head.indexOf(', then ');
+  return {
+    command: (at >= 0 ? head.slice(0, at) : head).trim(),
+    note: [at >= 0 ? head.slice(at + 2).trim() : '', paren ? paren[2].trim() : ''].filter(Boolean).join('; '),
+  };
+};
 
 const SLUG = path.basename(dataArg, '.json');
 const MP4 = path.join(REPO_ROOT, 'out', `${SLUG}.mp4`);
@@ -337,7 +351,7 @@ const studioRoutes = (req, res) => {
   // terminal is not where anyone is looking while they work on a film.
   if (url === '/api/stage') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-    try { res.end(JSON.stringify({ ok: true, ...stageOf(dataArg) })); }
+    try { const st = stageOf(dataArg); res.end(JSON.stringify({ ok: true, ...st, ...splitNext(st.next) })); }
     catch (e) { res.end(JSON.stringify({ ok: false, error: String(e.message) })); }
     return true;
   }
@@ -489,7 +503,8 @@ const studioRoutes = (req, res) => {
     const text = (code, msg, headers = {}) => { res.writeHead(code, { 'Content-Type': 'text/plain', ...headers }); res.end(msg); };
     if (!S) return text(400, `no such sheet "${kind}". Known: ${Object.keys(SHEETS).join(', ')}`), true;
     const blocked = S.needs && S.needs();
-    if (blocked) return text(409, blocked, { 'X-Needs-Render': '1' }), true;
+    // 200, not 409: "no mp4 yet" is a state the page branches on by header, not a failed request
+    if (blocked) return text(200, blocked, { 'X-Needs-Render': '1' }), true;
     const png = S.file();
     const send = () => {
       if (!fs.existsSync(png)) return text(500, `${kind} reported success but wrote no sheet at ${png}`);
@@ -530,7 +545,7 @@ const studioRoutes = (req, res) => {
 
   if (url === '/api/timeline') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-    try { res.end(JSON.stringify(timelineModel(dataArg))); }
+    try { res.end(JSON.stringify({ ...timelineModel(dataArg), undo: undoStack.length })); }
     catch (e) { res.end(JSON.stringify({ file: path.basename(dataArg), marks: [], layers: [], gate: { deadAir: [], emptyBeat: [], codes: [], error: String(e.message) } })); }
     return true;
   }
