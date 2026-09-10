@@ -664,7 +664,7 @@ boot((data, fps, theme, canvas) => {
         // alone. data-duration stays what the renderer needs (driveClips must hold the layer through
         // the wrapper's slide, or it vanishes mid-move); data-authored-duration is what the author
         // asked for, so every tool that REPORTS timing can show both and name the substitution.
-        // KEPT (not deleted): harness/dev/studio-page.mjs reads it to show both numbers in the studio
+        // KEPT (not deleted): studio/page.mjs reads it to show both numbers in the studio
         // inspector. Its OWN pose is no longer at risk from this stretch: renderFrame's per-layer loop
         // clamps every primitive's clock to `L.start + L.duration` (the authored number, read straight
         // off this object, not off the dataset this stretches), so the substitution below only ever
