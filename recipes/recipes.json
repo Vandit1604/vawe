@@ -158,5 +158,82 @@
         "note": "per-word lag, measured off acts 2 and 4 the same way flow-seam's own stagger note was written before expand.mjs could split text: consecutive words visibly lag by 2 to 4 frames at 60fps"
       }
     }
+  },
+
+  "object-wipe": {
+    "kind": "seam",
+    "blurb": "a full-bleed page slides across the frame on a hard edge while the next page is already visible underneath it the whole time, no empty ground and no gap, both scenes live at once, like swiping between two app screens",
+    "sources": [
+      {
+        "ref": "arc-space-swiping",
+        "t": 0.08,
+        "note": "a warm-toned browser page fills the frame, then a cool blue page enters from the right and slides fully across it: at 0.50s the swipe peaks (curve value 9.5, the loudest frame in the shot), by 1.25s the hard edge sits near mid-frame with both pages simultaneously visible either side of it, by 1.77s the blue page has fully taken over. The browser chrome stays fixed and only recolours to match whichever page currently fills the frame. No empty frame ever appears between the two: unlike flow-seam, there is no ground gap, the outgoing and incoming pages are directly adjacent at every instant"
+      }
+    ],
+    "slots": {
+      "at": "seconds: swipe start",
+      "out": "layer id: the full-bleed page leaving",
+      "in": "layer id: the full-bleed page arriving"
+    },
+    "params": {
+      "axis": {
+        "default": "x",
+        "enum": ["x", "y"]
+      },
+      "direction": {
+        "default": "right-to-left",
+        "enum": ["left-to-right", "right-to-left", "top-to-bottom", "bottom-to-top"],
+        "note": "arc-space-swiping's incoming page enters from the right edge and travels left, pushing the outgoing page off the left edge"
+      },
+      "dur": {
+        "default": 0.5,
+        "unit": "s",
+        "one-source": true,
+        "note": "measured off the shot's own curve: it rises to its peak (9.5) at 0.50s into the 1.5s shot and has settled to near-zero (0.4, then 0) by 0.75-1.0s, so the visible swipe itself runs about half a second"
+      },
+      "ease": {
+        "default": "easeOutCubic",
+        "one-source": true,
+        "note": "the curve decelerates into its landing rather than running linear; not independently timed frame by frame, so this is a convention default matching the shape, not a fitted curve"
+      }
+    }
+  },
+
+  "colour-wipe": {
+    "kind": "seam",
+    "blurb": "a solid colour panel sweeps across the frame edge to edge in a hard fast wipe and becomes the next background, no fade, no empty frame, no gap, the panel's own colour IS the new ground rather than something removed once it arrives",
+    "sources": [
+      {
+        "ref": "make-it-move",
+        "t": 4.63,
+        "note": "the engine's own seam detector measured a 4-frame (0.067s @60fps) axis-x, left-to-right ground change from #bababb (light) to #3e3e3e (dark) at this timestamp (grammar/make-it-move.json seams[2]); frames extracted at 20fps either side of it show a dark rectangle sweeping left to right across the visible 'slide it up' line, covering the frame in well under a tenth of a second and leaving the dark ground and the next line ('wooh!') already in place behind it. The panel is not seen to fade or shrink afterward: it simply is the new ground from that point on"
+      }
+    ],
+    "slots": {
+      "at": "seconds: sweep start",
+      "shape": "layer id: a full-bleed solid-colour panel matching the incoming scene's ground colour",
+      "out": "layer id, optional: outgoing content to drop (opacity 0) once the panel has fully covered the frame, since the panel already occludes it visually and this only stops it rendering"
+    },
+    "params": {
+      "axis": {
+        "default": "x",
+        "enum": ["x", "y"]
+      },
+      "direction": {
+        "default": "left-to-right",
+        "enum": ["left-to-right", "right-to-left", "top-to-bottom", "bottom-to-top"]
+      },
+      "sweepDur": {
+        "default": 0.067,
+        "unit": "s",
+        "one-source": true,
+        "note": "the 4-frame @60fps gap the seam detector measured between groundBefore and groundAfter at make-it-move t=4.63"
+      },
+      "ease": {
+        "default": "easeOutCubic",
+        "one-source": true,
+        "note": "not independently measurable at 4 frames' resolution; a convention default so the sweep does not read as a linear mechanical slide"
+      }
+    }
   }
 }
