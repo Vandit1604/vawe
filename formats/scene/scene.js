@@ -848,6 +848,11 @@ boot((data, fps, theme, canvas) => {
     }
   }
   const boxes = new Map();
+  // Every named value a layer PUBLISHES about its own private state (core/layers/index.js `expose`),
+  // resolved fresh each frame beside `boxes` and for the same reason: rebuilt from nothing every call,
+  // holding no history, so renderFrame(n) stays pure in n (make probe samples out of order to catch a
+  // value that quietly closed over the previous frame).
+  const exposed = new Map();
   const topGeom = new Array(topCount);   // every top-level layer, id or not, a child needs its parent's
   // `reflowed` is the ONE field of a top-level layer's geometry that is not part of its box: it says the
   // build-time child offsets went stale, which is a fact about this frame's bookkeeping and not about
@@ -978,6 +983,23 @@ boot((data, fps, theme, canvas) => {
 // edge from cx/cy/w/h/scale/rot, and that belongs in core/tracks/follow.js beside the other edge modes,
 // not here. Recorded so the next author finds the gap rather than the symptom.
 const boxOf = (id) => boxes.get(id) || null;
+
+  // resolveExposed(t): every top-level, id'd layer's own `expose(L, t)` (core/layers/index.js),
+  // resolved BEFORE any layer's frame() runs, same reason and same place as resolveBoxes: a value
+  // published this frame must exist before anything can read it, and reading no DOM here keeps the
+  // per-frame loop's read order unable to change the answer. Not composed with the box (position,
+  // scale, rotation): `exposedOf` reports what the layer itself knows, exactly as `boxOf` reports
+  // unscaled geometry and leaves scale/rotation to the caller.
+  function resolveExposed(t) {
+    exposed.clear();
+    for (let i = 0; i < topCount; i++) {
+      const { L } = layers[i];
+      if (!L.id) continue;
+      const v = renderer.expose(L, t, null);
+      if (v) exposed.set(L.id, v);
+    }
+  }
+  const exposedOf = (id) => exposed.get(id) || null;
 
   // ---- THE REST OF THE VIEW: identity, the clock, the locked look, the backdrop, the joints ----
   // Geometry alone was not enough to write real effects against. An effect could ask WHERE another
@@ -1318,6 +1340,8 @@ const boxOf = (id) => boxes.get(id) || null;
     driveSceneUnits(t); // move whole-beat wrappers across a cut (sceneUnits), no-op otherwise
     // EVERY box for this frame, before ANY layer's frame() runs, see resolveBoxes.
     resolveBoxes(t);
+    // EVERY exposed value for this frame, same rule, same reason: see resolveExposed.
+    resolveExposed(t);
     // The camera is sampled ONCE and both consumers read that value: the view a layer sees and the
     // transform drawCameraAndCut writes cannot disagree about where the camera is on this frame.
     // `rig` and `lens` ride on the camera because a modifier asking about the frame's depth is asking
@@ -1340,7 +1364,7 @@ const boxOf = (id) => boxes.get(id) || null;
     // lands on the wrong side of the boundary for some fps. core/fx/punch.js compares frames for that
     // reason; core/fx/progress.js reads t and duration.
     const clock = Object.freeze({ t, frame: f, fps, duration });
-    const view = Object.freeze({ boxOf, specOf, ids: IDS, light: LIGHT, camera: camNow,
+    const view = Object.freeze({ boxOf, exposedOf, specOf, ids: IDS, light: LIGHT, camera: camNow,
       canvas: CANVAS, safe: SAFE, clock, theme: THEME, bg: bgAt(t), marks: MARKS });
     // A layer carrying `step` runs its whole track pipeline on a QUANTISED clock: same seconds, held
     // for the whole step, so the layer updates 15 times a second inside a 30fps film. Pure, because the

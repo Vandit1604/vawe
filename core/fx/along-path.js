@@ -116,6 +116,10 @@ function hash(s) {
   return h | 0;
 }
 
+// NOT WIRED YET, recorded so the next author finds the gap rather than the symptom: `p`'s position
+// along the curve (CURVES[curve], evaluable without measuring anything) is the same shape core/layers/
+// index.js `expose` wants, and belongs on it once something needs to know where the glyph actually
+// sits, the way core/layers/text.js exposes its caret.
 export function frame(kit, el, L, t, scene, spec) {
   const { from, to, dur, delay, ease } = resolve(spec);
   if (from === to) return;                 // a line that only bends writes nothing per frame

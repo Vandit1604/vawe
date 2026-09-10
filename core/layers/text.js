@@ -2,6 +2,7 @@
 // Also drives the `typing` per-frame effect. `count` reuses this build (styleText handles its content).
 import { isPainting } from '../engine/fonts.js';
 import { mergeProps, propsOf } from '../registry/props.js';
+import { measureText } from '../type/type.js';
 
 // The `fit` family is guarded because a fit with no width has nothing to fit INTO, and the typing
 // family because a caret with no `typing` has no reveal to trail. A guard has no spelling in a
@@ -25,6 +26,11 @@ const midT = (L) => (L.start ?? 0) + (L.duration ?? 2) / 2;
 // off the five separate `size ?? 96` spellings this file used to carry (build:38/39/45/47, microType).
 const TEXT_SIZE_DEFAULT = 96;
 const sizeOf = (L) => (typeof L.size === 'number' ? L.size : TEXT_SIZE_DEFAULT);
+
+// The one owner of "what font is this typing layer's caret actually measured against". Populated once
+// at build (see the end of build() below), read every frame by expose(). A WeakMap so it costs nothing
+// for the other 23 layer types and clears itself with the layer object.
+const FONT_CACHE = new WeakMap();
 
 // The props are read off this signature (propsOf, core/props.js), for what build() reads DIRECTLY.
 // `fitH` stays off it (guarded, see GUARDED above); `split`/`type` stay `L.x` (shared vocabulary,
@@ -52,6 +58,19 @@ export function build(kit, el, L, { fit, w, h, size, weight, text, maxLines } = 
     const lh = parseFloat(getComputedStyle(el).lineHeight) || sizeOf(L) * 1.15;
     const maxH = h ?? (maxLines ?? 5) * lh;
     if (el.scrollHeight > maxH + 2 || el.scrollWidth > w + 1) kit.fitBox(el, { maxW: w, maxH, max: sizeOf(L), min: 34 });
+    el.remove();
+  }
+  // CACHE THE RESTING FONT, ONCE, for `expose()` below to measure the caret against. `fitText`/`fitBox`
+  // above may have shrunk `fontSize` from what `L.size` says, and getComputedStyle only resolves the
+  // real cascade while `el` sits under a document (the same reason the fit branches attach-then-remove
+  // above), so this reads it the same way rather than re-deriving a font string from the raw JSON,
+  // which would silently disagree with the fit branches the moment either one changed alone. Keyed by
+  // L, not by id, matching `measured` in scene.js: an id names an AUTHOR'S layer, this is an internal
+  // fact about that same object regardless of whether it named itself.
+  if (L.typing) {
+    kit.cam.appendChild(el);
+    const cs = getComputedStyle(el);
+    FONT_CACHE.set(L, `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`);
     el.remove();
   }
 }
@@ -249,6 +268,31 @@ export function frame(kit, el, L, t, scene, { gradient, typing, text } = L) {
   if (/[<&]/.test(full)) el.innerHTML = revealHtml(full, n) + caret;
   else el.textContent = full.slice(0, n) + caret;
 }
+
+// expose(L, t, scene): the caret's LOCAL x (px from the text's own flow start, no chip padding, no
+// layer transform) and how far through the line typing has got, 0..1. `scene` is unread, kept only
+// for the shape every `expose` shares (core/layers/index.js).
+//
+// LOCAL ON PURPOSE, matching the split `boxOf` already makes between unscaled geometry and the
+// scale/rotation composed elsewhere: a consumer that wants a SCREEN position combines this with
+// `scene.boxOf(L.id).x`, rather than this file re-deriving the layer's own box a second way.
+//
+// Measured with the SAME reveal `frame()` just wrote (typedLen, then the tags stripped the same way
+// `stripLen` does), so a caret binding can never drift from what the eye actually sees: one owner of
+// "how much of the line is showing", read twice instead of computed twice.
+export function expose(L, t) {
+  if (!L.typing) return null;
+  const start = L.start ?? 0, end = start + (L.duration ?? 2);
+  if (!(t >= start && t < end)) return null;
+  const font = FONT_CACHE.get(L);
+  if (!font) return null; // build() only caches this for a typing layer; absence means expose ran before build
+  const cps = L.typing === true ? 24 : L.typing;
+  const full = L.text || '';
+  const visLen = /[<&]/.test(full) ? stripLen(full) : full.length;
+  const n = typedLen(t - start, { cps, visLen, untype: L.untype, untypeRate: L.untypeRate });
+  const shown = /[<&]/.test(full) ? plainPrefix(full, n) : full.slice(0, n);
+  return Object.freeze({ caretX: measureText(shown, font), progress: visLen ? n / visLen : 1 });
+}
 // visible-character length of an HTML string (text content only, not tags)
 function stripLen(html) { const d = document.createElement('div'); d.innerHTML = html; return (d.textContent || '').length; }
 // return the HTML with only the first `n` VISIBLE characters shown, tags preserved (empty tags kept.
@@ -270,6 +314,9 @@ function revealHtml(html, n) {
   walk(root);
   return root.innerHTML;
 }
+// the plain visible text of revealHtml's first n characters (tags stripped, for measureText: canvas
+// text has no tags to render, so measuring markup would count characters that never draw as pixels).
+function plainPrefix(html, n) { const d = document.createElement('div'); d.innerHTML = revealHtml(html, n); return d.textContent || ''; }
 
 // Both signatures declare, because a prop read only on the frame path is just as real as one read at
 // build time. `GUARDED` is unioned in alongside them: a guard has no spelling in a signature (mergeProps,
