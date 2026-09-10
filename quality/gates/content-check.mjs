@@ -40,7 +40,7 @@ export function parsePairs(spec) {
 }
 
 /** pairActs(filmCount, refCount, pairs?) -> [[filmIdx, refIdx], …] (1-based). An explicit `pairs` wins;
- * otherwise acts pair BY ORDER, stopping at whichever list is shorter, never inventing a pairing for
+ * otherwise acts pair BY ORDER, stopping at whichever list is shorter: never inventing a pairing for
  * the acts that run past the shorter side. */
 export function pairActs(filmCount, refCount, pairs = null) {
   if (pairs && pairs.length) return pairs;
@@ -63,18 +63,22 @@ export function verdictOf(ours, ref) {
   return 'ok';
 }
 
-// PLACEHOLDER-SURFACE THRESHOLDS. Calibrated against two real measurements (harness/media/content.mjs
-// measureSpan, over each act's own bounds, the fixed flood/wall fill described above), not guessed:
+// PLACEHOLDER-SURFACE THRESHOLDS. Recalibrated against two real measurements (harness/media/content.mjs
+// measureSpan, over each act's own bounds) on the flood-by-dominant-ground-colour fill (the fix for the
+// "border ring is not always ground" defect: a subject running off the frame edge, madera's own hero
+// crop, no longer floods away as background), not guessed:
 //   out/vawe-flow.mp4's editor act, 0-4.6s (a real captured window, NOT a mock): fill 0.49, band
 //     'slightly', photo 0.02, detail 2.4: real UI chrome fills half the frame, but a code editor's own
 //     content is legitimately quiet and low-detail.
-//   madera's shot 9, 10.37-11.08s, the "results" act (a real dense photo/UI act): fill 0.43, band
-//     'slightly', photo 0.23, detail 14.1: high fill AND high photo/detail.
+//   madera's shot 9, 10.37-11.08s, the "results" act (a real dense photo/UI act, its window running off
+//     every edge): fill 0.68 (was 0.43 under the old border-blind fill), band 'slightly', photo 0.23,
+//     detail 14.1: high fill AND high photo/detail.
 // Both are real material and neither may trip placeholder-surface. Both also band 'slightly', so
 // requiring band === 'not' already clears both on its own; FILL_MIN/PHOTO_MAX/DETAIL_MAX are set so a
 // GENUINELY flat, colourless mock (band 'not') still needs to ALSO be large, photo-free and low-detail
-// to trip it: FILL_MIN below vawe-flow's 0.49 catches a large mock, PHOTO_MAX/DETAIL_MAX sit below both
-// real examples' photo/detail (0.02-0.23, 2.4-14.1) so a mock has to read flatter than either to trip it.
+// to trip it: FILL_MIN sits well under either real example's fill (0.49, 0.68), and PHOTO_MAX/DETAIL_MAX
+// sit below both real examples' photo/detail (0.02-0.23, 2.4-14.1) so a mock has to read flatter than
+// either to trip it.
 export const PLACEHOLDER = { FILL_MIN: 0.3, PHOTO_MAX: 0.03, DETAIL_MAX: 3 };
 
 /** isPlaceholderSurface(content) -> true for a large, flat, photo-free, low-detail act: a grey mock

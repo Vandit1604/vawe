@@ -18,9 +18,11 @@
 //
 // CONTENT IS MEASURED THE SAME WAY: `harness/media/content.mjs` (one owner, shared with content-check
 // and the film's own render) reads fill/detail/photo off real frames. `--annotate` samples 4 points
-// inside each already-measured act's own clip and appends a `content:` line naming the median, in
-// words, so an author writing the storyboard can see per-act where the reference is dense and where it
-// is quiet (docs/CRAFT/CONTENT.md) without opening a video player. Never invented, never a fixed bar.
+// inside each act's own clip and SETS a `content:` line naming the median, in words, so an author
+// writing the storyboard can see per-act where the reference is dense and where it is quiet
+// (docs/CRAFT/CONTENT.md) without opening a video player. Never invented, never a fixed bar. A re-run
+// after content.mjs changes REPLACES a stale `content:` line rather than appending a second one beside
+// it: two readings for one act with no way to tell which is current is worse than the stale one alone.
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -253,20 +255,24 @@ export function wordsFromContent(readings) {
 
 const CONTENT_ACT_RE = /^## Act \d+ \(([\d.]+)s-([\d.]+)s\)/;
 
-/** addContentLines(text, clip, { measure }) → `text` with a `content:` line appended to every act
- * section that does not already carry one, sampled at 4 points inside the act (12.5/37.5/62.5/87.5%,
- * clear of both edges so a joint's crossfade never dominates the read) and reduced by wordsFromContent.
- * `measure` defaults to content.mjs's real measureVideo (shells to ffmpeg); the self-test below injects
- * a fake one so the reducer is checked without a video file. No clip, no content: lines: never a guess. */
+/** addContentLines(text, clip, { measure }) → `text` with a `content:` line set on every act section,
+ * sampled at 4 points inside the act (12.5/37.5/62.5/87.5%, clear of both edges so a joint's crossfade
+ * never dominates the read) and reduced by wordsFromContent. An act that already carries a `content:`
+ * line, stale numbers from an old content.mjs, or the unfilled `<fill: ...>` placeholder, gets that ONE
+ * line REPLACED, never a second one appended beside it: a re-measured film should read as re-measured,
+ * not as two readings for one act with no way to tell which is current. `measure` defaults to
+ * content.mjs's real measureVideo (shells to ffmpeg); the self-test below injects a fake one so the
+ * reducer is checked without a video file. No clip, no content: lines: never a guess. */
 export function addContentLines(text, clip, { measure = measureVideo } = {}) {
   if (!clip) return text;
   const chunks = text.split(/(?=^## )/m);
   return chunks.map((chunk) => {
     const m = CONTENT_ACT_RE.exec(chunk);
-    if (!m || /\ncontent:/.test(chunk)) return chunk;   // not an act, or already measured: leave it
+    if (!m) return chunk;   // not an act
     const t0 = +m[1], t1 = +m[2];
     const times = [0.125, 0.375, 0.625, 0.875].map((f) => +(t0 + (t1 - t0) * f).toFixed(2));
     const line = wordsFromContent(measure(clip, times));
+    if (/^content:.*$/m.test(chunk)) return chunk.replace(/^content:.*$/m, line);
     return chunk.replace(/\n+$/, '') + `\n${line}\n\n`;
   }).join('');
 }
@@ -419,7 +425,7 @@ function selfTest() {
   const dense = wordsFromContent([{ fill: 0.34, detail: 12.2, photo: 0.28 }, { fill: 0.3, detail: 11, photo: 0.25 }]);
   assert.match(dense, /^content: dense real material, fills about a third of the frame, photographic \(fill 0\.3\d, detail 1\d\.\d, photo 0\.2\d\)$/);
 
-  // addContentLines: no clip, no lines (never a guess); a clip appends one line per act, once, and a
+  // addContentLines: no clip, no lines (never a guess); a clip adds one line per act, once, and a
   // second pass over its own output is a no-op (the same idempotency annotateFilledPrompt already has).
   const twoActs = ['## Act 1 (0s-2s)', 'on screen: a headline', '', '## Act 2 (2s-4s)', 'on screen: a card', ''].join('\n');
   assert.equal(addContentLines(twoActs, null), twoActs);
@@ -427,6 +433,17 @@ function selfTest() {
   const withContent = addContentLines(twoActs, 'fake.mp4', { measure: fakeMeasure });
   assert.equal((withContent.match(/content:/g) || []).length, 2, 'one content: line per act');
   assert.equal(addContentLines(withContent, 'fake.mp4', { measure: fakeMeasure }), withContent, 'a second pass is a no-op');
+
+  // A stale content: line, from an old content.mjs or hand-filled as the <fill: ...> placeholder, is
+  // REPLACED in place, never left beside a second, fresher line for the same act.
+  const stale = ['## Act 1 (0s-2s)', 'on screen: a headline', 'content: quiet, type on ground only (fill 0.02, detail 3.0, photo 0.00)', '',
+    '## Act 2 (2s-4s)', 'on screen: a card', 'content: <fill: dense or quiet, what real material>', ''].join('\n');
+  const refreshed = addContentLines(stale, 'fake.mp4', { measure: fakeMeasure });
+  assert.equal((refreshed.match(/content:/g) || []).length, 2, 'still one content: line per act, not two');
+  assert.ok(!/quiet, type on ground only/.test(refreshed), 'the stale act 1 reading is gone');
+  assert.ok(!/<fill: dense or quiet/.test(refreshed), 'the unfilled act 2 placeholder is gone');
+  assert.deepEqual(refreshed.match(/^content:.*$/gm), withContent.match(/^content:.*$/gm),
+    'a stale or placeholder content: line refreshes to the same line a bare act would get');
 
   console.log('ideate.mjs self-test: ok (buildActs, buildJoints, recipeLineFor, recipeMenu, routing, annotateFilledPrompt, content)');
 }
@@ -448,8 +465,8 @@ function main() {
     // is the point: a prompt a person already hand-corrected (commit 01150c25) is text on disk, and
     // this reads that text, appends brackets to three line kinds, and writes it back byte-identical
     // everywhere else. --ref regenerates from the study and would discard the hand-fill; this does not.
-    // `content:` lines are added the same way, appended once per act rather than a bracket on an
-    // existing line, from the same clip resolveClip already finds for the <look:> strips.
+    // `content:` lines are set the same way, once per act, from the same clip resolveClip already
+    // finds for the <look:> strips; a re-run REPLACES a stale line rather than adding a second one.
     const promptPath = path.join(ROOT, 'grammar', `${annotateRef}.prompt.md`);
     if (!fs.existsSync(promptPath)) {
       console.error(`ideate --annotate: no prompt at ${path.relative(ROOT, promptPath)}.`);
