@@ -81,20 +81,21 @@
 .tl-play{width:16px;height:16px;background:var(--accent);clip-path:polygon(0 0, 100% 50%, 0 100%)}
 .tl-body{position:relative;display:flex;flex-direction:column;gap:var(--kit-space-3);flex:1;min-height:0;padding:var(--kit-space-4)}
 .tl-ruler{display:grid;grid-template-columns:180px 1fr;column-gap:var(--kit-space-3)}
-.tl-ruler-lane{position:relative;height:28px}
+.tl-ruler-lane{position:relative;height:40px}
 .tl-tick{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
-.tl-tick span{position:absolute;top:0;left:6px;font:600 18px var(--font-mono);color:var(--dim);letter-spacing:.02em}
+.tl-tick span{position:absolute;top:0;left:6px;font:600 28px var(--font-mono);color:var(--dim);letter-spacing:.02em}
 .tl-tracks{display:flex;flex-direction:column;gap:var(--kit-space-2);flex:1;min-height:0}
 .tl-track{display:grid;grid-template-columns:180px 1fr;column-gap:var(--kit-space-3)}
 .tl-tracklabel{display:flex;align-items:center;gap:10px;padding-inline-start:2px}
 .tl-tracklabel .dot{width:8px;height:8px;border-radius:50%}
 .tl-lane{position:relative;border-radius:10px;display:flex;flex-direction:column;gap:6px;padding:6px 0}
 .tl-row{position:relative;flex:1;min-height:0}
-.tl-clip{position:absolute;top:0;bottom:0;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--kit-elev-1)}
+.tl-clip{position:absolute;top:0;bottom:0;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--kit-elev-1);container-type:inline-size}
 .tl-clip img{flex:1;min-height:0;width:100%;object-fit:cover;display:block}
-.tl-clip .tag{flex:none;background:var(--ink, #0f1620);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:3px 10px}
-.tl-clip .tag b{font:600 17px var(--font-sans);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tl-clip .tag i{font:600 15px var(--font-mono);font-style:normal;font-variant-numeric:tabular-nums;opacity:.75;flex:none}
+.tl-clip .tag{flex:none;background:var(--ink, #0f1620);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 8px}
+.tl-clip .tag b{font:600 28px var(--font-sans);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@container (max-width:240px){.tl-clip .tag i{display:none}}
+.tl-clip .tag i{font:600 28px var(--font-mono);font-style:normal;font-variant-numeric:tabular-nums;opacity:.75;flex:none}
 </style>
 <div class="kit-root kit-ground-paper" id="timeline-root" style="position:absolute;inset:0">
   <div class="kit-stage" style="display:flex;flex-direction:column;padding-top:var(--kit-space-7);padding-bottom:var(--kit-space-4)">
