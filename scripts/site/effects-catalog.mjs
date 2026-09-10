@@ -206,7 +206,7 @@ function emit() {
   out.push('| One form to BECOME another across a cut (a match cut) | `matches:[{at:"cut@1", from:"<id>", to:"<id>"}]`. The joint owns the handover: the outgoing layer ends on it, the incoming one opens wearing its pose and settles into its own. The engine produces the alignment, so nothing is hand-aligned and nothing can drift (core/junctions.js) |');
   out.push('| To move BETWEEN two elements without cutting | `cameraMove:{move:"travel", stations:[…]}`. Lay the beats out as stations on a canvas bigger than the frame and fly between them. Pair with a `plane` modifier or every layer moves by the same amount and it reads as a slide |');
   out.push('| A living background | a moving `bg` preset (aurora/constellation/paperShapes), brand-appropriate |');
-  out.push('| A whole beat, directed | a `{type:"beat"}` blueprint |');
+  out.push('| A whole beat, directed | a `spine` recipe (`recipes/README.md`) |');
   out.push('| A border to glow / a sheen to sweep | the per-frame effects (border-beam / shine) |');
   out.push('| A logo to appear | the `logoReveal` beat / path draw-on / shape-morph |');
   out.push('| A figure to animate PIECE BY PIECE (default for charts/diagrams) | `parts` on the layer: stagger growUp/drawOn/popIn across its children (bars grow, line draws, dots pop) |');
