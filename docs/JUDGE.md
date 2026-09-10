@@ -79,6 +79,21 @@ For the same reason no score in this file is aggregated anywhere. A 1-5 per dime
 *reason*, uncalibrated between judges; averaging them across judges invents a precision none of them
 claimed. That was right, and it stays right.
 
+## The receipt, and the ratchet that reads it
+
+`node quality/gates/judge.mjs <file> --verdict PASS|FIX` is what actually records that the eye ran.
+It writes `quality/baselines/approved/judge/<name>.json`: the scene's own content hash (via
+`harness/lib/receipt.mjs`, so editing the scene withdraws it), a sha256 of the RENDERED mp4's own
+bytes (`renderHash`, so a re-render invalidates it even if the scene JSON never changed), the verdict,
+and the date. A receipt is valid only when both hashes still match what is on disk right now.
+
+`make no-judge` (`quality/gates/no-judge.mjs`) counts rendered films (an `out/<name>.mp4` exists) with
+no valid receipt, against a ratchet at `quality/baselines/no-judge-ratchet.json` that may only fall.
+It is deliberately NOT wired into `make ship` or CI: both `formats/scene/*.json` content and
+`out/*.mp4` are gitignored, so a thin checkout would report a number about itself, not the library
+(the same reason `doc-refs` stays out of CI). Run it on demand, or from `.githooks/pre-push` once an
+author wants it enforced there. `--stamp` lowers the ceiling after judging a batch.
+
 ## Where it sits
 Opt-in, but the **final taste check before shipping**, run it on the near-final cut, after the static
 ladder is green. It catches what the others structurally can't; on the argus film it flagged a stat with a

@@ -1177,6 +1177,15 @@ arsenal-check: ## [engine] fail if the engine exports a capability docs/EFFECTS.
 discovery: ## [engine] can an author still FIND what the engine can do?
 	@node quality/gates/discovery.mjs $(if $(JSON),--json,)
 
+# no-judge: has the eye actually looked at every film that shipped a render? make judge writes a
+# receipt (docs/JUDGE.md) hashing both the scene JSON and the rendered mp4's own bytes, so it goes
+# stale on either one changing; this ratchets the count of rendered films with no valid one. Not wired
+# into `make ship`/CI: formats/scene and out/*.mp4 are gitignored, so a small or fresh checkout would
+# report a number about its own thinness, not the library (the same reason doc-refs stays out of CI).
+# --stamp lowers the ceiling after judging a batch; it never rises unnoticed.
+no-judge: ## [judge] ratchet: rendered films with no valid judge receipt (--stamp to lower)
+	@node quality/gates/no-judge.mjs $(if $(STAMP),--stamp,) $(if $(JSON),--json,)
+
 # output-contract: every reporting gate renders through harness/lib/findings.mjs (tight prose + --json).
 # Ratchets the count of gates that still print ad-hoc prose DOWN. docs/CRAFT/COMMAND-OUTPUT.md.
 # JSON=1 emits the whole migration worklist as findings; --stamp lowers the ratchet after a batch.
