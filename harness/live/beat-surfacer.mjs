@@ -26,6 +26,7 @@ import { parseStoryboard, timeline } from '../author/storyboard-parse.mjs';
 import { SHAPES } from '../../core/motion/shapes.js';
 import { CURVE_NAMES } from '../../core/motion/path-curves.js';
 import { SPEED_BAND } from '../lib/contract.mjs';
+import { RECIPES } from '../../recipes/index.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
@@ -55,31 +56,57 @@ function candidates(sb) {
     .slice(0, 2);
 }
 
+// A beat's `mechanism:`/`becomes:` describing a boundary with NO CUT is exactly a recipe seam's job
+// (recipes/README.md, `kind: "seam"`), and an author has no reason to know one exists unless it is
+// named here, the same PUSH this file already does for a still beat. Presence only, never a match on
+// which recipe fits best: one seam recipe exists today, so naming the first IS naming the only one.
+const BOUNDARY_RE = /\b(exits?|leaves?|arrives?|no cut|crossfades?)\b/i;
+
+/** Beats describing a cut-free boundary with no `recipe:` already named. */
+function seamCandidates(sb) {
+  return sb.beats.filter((b) => !b.recipe && (BOUNDARY_RE.test(b.mechanism || '') || BOUNDARY_RE.test(b.becomes || '')));
+}
+
 function say(rel, file) {
   const raw = fs.readFileSync(file, 'utf8');
   const sb = parseStoryboard(raw);
   if (!sb.beats.length) return [];
   const found = candidates(sb);
-  if (!found.length) return [];
+  const seams = seamCandidates(sb);
+  if (!found.length && !seams.length) return [];
 
-  const { name: shape, path: usesPath } = bestShape();
   const film = rel.replace(/\.storyboard\.md$/, '.json');
   const lines = [];
-  for (const { b, dur } of found) {
-    const raw = b.object || b.picture || b.blueprint;
-    const subject = raw.length > 60 ? `${raw.slice(0, 57)}...` : raw;
-    const band = bandFor(b.weight);
-    lines.push(`  "${b.name}" (${dur.toFixed(1)}s) holds "${subject}" and names no \`move:\` or \`motion:\` -`);
-    lines.push(`  it lands its entrance and then sits still for the rest of the beat. Add this line to`);
-    lines.push(`  the beat: \`move: ${shape}:${band}\`.${usesPath
-      ? ' It flies the layer along a path for the whole beat, sustained motion by construction.'
-      : ` core/motion/path-curves.js registers no curve; \`${shape}\` is the richest sustained track`
-        + ` core/motion/shapes.js carries today.`}`);
+  if (found.length) {
+    const { name: shape, path: usesPath } = bestShape();
+    for (const { b, dur } of found) {
+      const raw = b.object || b.picture || b.blueprint;
+      const subject = raw.length > 60 ? `${raw.slice(0, 57)}...` : raw;
+      const band = bandFor(b.weight);
+      lines.push(`  "${b.name}" (${dur.toFixed(1)}s) holds "${subject}" and names no \`move:\` or \`motion:\` -`);
+      lines.push(`  it lands its entrance and then sits still for the rest of the beat. Add this line to`);
+      lines.push(`  the beat: \`move: ${shape}:${band}\`.${usesPath
+        ? ' It flies the layer along a path for the whole beat, sustained motion by construction.'
+        : ` core/motion/path-curves.js registers no curve; \`${shape}\` is the richest sustained track`
+          + ` core/motion/shapes.js carries today.`}`);
+    }
+    lines.push(`  \`move:\` reads any of four scopes off its own shape: \`<curve>:<band>\` flies the whole`);
+    lines.push(`  layer along a path, \`<shape>:<band>\` keys a layer track, \`<selector>@<kind>:<band>\` staggers`);
+    lines.push(`  parts inside one fragment, \`hold:<idle>\` breathes or drifts a still object. Or pick one by`);
+    lines.push(`  eye in \`make studio D=${film}\`, which writes the key for you as you drag.`);
   }
-  lines.push(`  \`move:\` reads any of four scopes off its own shape: \`<curve>:<band>\` flies the whole`);
-  lines.push(`  layer along a path, \`<shape>:<band>\` keys a layer track, \`<selector>@<kind>:<band>\` staggers`);
-  lines.push(`  parts inside one fragment, \`hold:<idle>\` breathes or drifts a still object. Or pick one by`);
-  lines.push(`  eye in \`make studio D=${film}\`, which writes the key for you as you drag.`);
+  const seam = Object.entries(RECIPES).find(([, r]) => r.kind === 'seam');
+  if (seams.length && seam) {
+    const [name, r] = seam;
+    const src = r.sources[0];
+    for (const b of seams) {
+      const said = b.mechanism || b.becomes;
+      lines.push(`  "${b.name}": "${said}" describes a boundary with no cut and names no \`recipe:\` -`);
+      lines.push(`  recipes/README.md already measures this move off a real film. Add: \`recipe: ${name}`);
+      lines.push(`  out=<fill: outgoing layer id> in=<fill: incoming layer id> axis=x\`.`);
+      lines.push(`  ${r.blurb} (${src.ref}@${src.t}s).`);
+    }
+  }
   return lines;
 }
 
