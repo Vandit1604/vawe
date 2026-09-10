@@ -64,7 +64,6 @@ destination: web
 - becomes: an undivided field becomes the two halves the whole film lives in
 - onscreen: scene.json · 1920 x 1080 · 30fps · {
 - why: the first cut of this beat held a blank white frame for two seconds, which is where a viewer decides to leave. The gutter states the whole shape of the file before a word of it exists, so the beat carries something and the next one arrives at 1.0s instead of 2.3s
-- emotion: quiet
 - duration: 1.0s
 - transition_in: none
 
@@ -78,7 +77,6 @@ destination: web
 - becomes: an empty right half becomes the first thing the file asked for
 - onscreen: "text": "Ship it"  ·  Ship it  ·  sans · weight 700
 - why: the smallest possible demonstration, and the one that teaches the law the other three obey. It has to LOOK smallest: the number that follows is twice its size and the picture eight times its area, and an escalation only reads if the first step is low
-- emotion: recognition
 - duration: 2.5s
 - transition_in: none
 
@@ -92,7 +90,6 @@ destination: web
 - becomes: one answer becomes a different kind of answer
 - onscreen: "count": 2500000000  ·  2.5B
 - why: the second subject has to be genuinely unlike the first, or the film is one demonstration repeated
-- emotion: widening
 - duration: 2.7s
 - transition_in: none
 
@@ -106,7 +103,6 @@ destination: web
 - becomes: a rendered answer becomes a photographed one
 - onscreen: "image": "/card.png"
 - why: type and numbers are things a slide can do. A real image is the first thing that is not
-- emotion: escalation
 - duration: 3.2s
 - transition_in: none
 
@@ -121,7 +117,6 @@ destination: web
 - becomes: two flat halves become a space with the film lying in it
 - onscreen: "camera": {"move": "diveIn"}
 - why: the escalation only pays if the last demonstration displaces the earlier ones, and this is the one that does
-- emotion: the click
 - duration: 6.1s
 - transition_in: none
 
@@ -135,6 +130,5 @@ destination: web
 - becomes: an empty file becomes the film it was describing all along
 - onscreen: One file. One video.
 - why: the first frame was an empty file and the last is the film it made, which is the bookend closing. The first cut snapped the plane flat at 15.8s and spent its last three seconds square, which threw away the only thing beat 5 had built
-- emotion: settled
 - duration: 1.5s
 - transition_in: none

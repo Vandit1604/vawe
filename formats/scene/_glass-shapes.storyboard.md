@@ -33,7 +33,6 @@ This video tells authors of this repo that the engine can make real 3D glass, be
 - style: black ground, two saturated bands, a fine white grid. Nothing soft anywhere
 - rest: none. The sphere never stops travelling
 - why: state the subject and prove it at the same time, so nobody has to take the claim on trust
-- emotion: curiosity
 - duration: 4.4s
 - transition_in: cut
 
@@ -51,7 +50,6 @@ This video tells authors of this repo that the engine can make real 3D glass, be
 - style: white-first, hard vertical bands, black type. The exact inverse of beat 1
 - rest: none
 - why: name the mechanism, and remove the easiest objection (that this is just a glow on black)
-- emotion: recognition
 - duration: 4.6s
 - transition_in: cut
 
@@ -69,7 +67,6 @@ This video tells authors of this repo that the engine can make real 3D glass, be
 - style: near-black with a dot field, one green band and one magenta band. The loudest frame
 - rest: none. This is the spectacle beat and the sweep IS the rest
 - why: dispersion is the step nobody guesses, so it gets the loudest shape and the highest contrast
-- emotion: surprise
 - duration: 4.4s
 - transition_in: cut
 
@@ -87,7 +84,6 @@ This video tells authors of this repo that the engine can make real 3D glass, be
 - style: pure black, one light pool, no bands and no grid. The quietest frame in the film
 - rest: a slow 6% scale drift on the sphere through the hold
 - why: name what it was actually built from, on the frame with nothing else competing
-- emotion: settled
 - duration: 3.6s
 - transition_in: cut
 

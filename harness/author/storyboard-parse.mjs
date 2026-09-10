@@ -92,7 +92,7 @@ export function parseStoryboard(src) {
       duration: durSec(declared),
       type: f('type'), object: f('object'), blueprint: f('blueprint'),
       onscreen: onscreenLines(f('onscreen')), mechanism: f('mechanism'),
-      becomes: f('becomes'), why: f('why'), emotion: f('emotion'),
+      becomes: f('becomes'), why: f('why'),
       transition_in: f('transition_in'),
       // the shot vocabulary: see docs/CRAFT/STORYBOARD-TEMPLATE.md. Optional so existing storyboards
       // keep parsing; the gate is what asks for them.
@@ -163,9 +163,6 @@ export function parseStoryboard(src) {
     // stays restrained. not is the exclusion line, because most generic output is not a wrong decision,
     // it is an un-excluded default.
     pace: field('pace'), spectacle: field('spectacle'), not: field('not'),
-    // The type ramp, decided ONCE for the film. Seven frames that each invent their own scale are
-    // seven films, and the ramp was being decided eight times in seven files before this existed.
-    ramp: field('ramp'),
   };
 }
 

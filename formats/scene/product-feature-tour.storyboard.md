@@ -26,7 +26,6 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - style: near-black, one accent, no chrome
 - rest: the constellation backdrop drifts under everything
 - why: name the thing, and let one line do the work of three
-- emotion: composure
 - duration: 4.4s
 - transition_in: cut
 - backdrop: constellation
@@ -44,7 +43,6 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - style: everything behind the hero card pushed to 38% brightness
 - rest: the backdrop drifts; the board holds
 - why: introduce the through-line issue the next two chapters follow
-- emotion: relief
 - duration: 4.8s
 - transition_in: cut (blur)
 - backdrop: deep
@@ -62,7 +60,6 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - style: the only symmetrical, centred chapter. It reads as the map
 - rest: the bars hold once wiped; the backdrop drifts
 - why: show the plan the issue now sits inside, and put the word Agents on screen before the agent exists
-- emotion: order
 - duration: 4.8s
 - transition_in: cut (riseBlur)
 - backdrop: ink
@@ -80,7 +77,6 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - style: the one beat with an emissive surface, glow bound to the panel
 - rest: the typing IS the rest motion
 - why: this is the spectacle. The plan does not describe the agent, it turns into it
-- emotion: surprise
 - duration: 4.6s
 - transition_in: hard cut (none, the match IS the transition)
 - backdrop: dark
@@ -98,7 +94,6 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - style: the first symmetrical frame since the roadmap
 - rest: the chips hold
 - why: close the through-line. The issue raised in chapter 1 is finished here
-- emotion: satisfaction
 - duration: 3.8s
 - transition_in: cut (blur)
 - backdrop: deep
@@ -116,7 +111,6 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - style: a spotlight ground, so the figure is lit and nothing else is
 - rest: none, the count carries it
 - why: scale. Three chapters showed one issue; this says how many there are
-- emotion: inevitability
 - duration: 4.2s
 - transition_in: cut (riseBlur)
 - backdrop: spotlight
@@ -134,7 +128,6 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - style: the constellation ground returns, so the film ends where it opened
 - rest: the backdrop drifts under a held frame
 - why: name the thesis once, at the end, where it can be believed
-- emotion: conviction
 - duration: 3s
 - transition_in: cut (blur)
 - backdrop: constellation
@@ -152,7 +145,6 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - style: an aurora ground, the one warm frame in the film
 - rest: the rail across the top reaches full width on the last frame
 - why: the film ends on the product name, not on a claim about it
-- emotion: invitation
 - duration: 4.4s
 - transition_in: cut (riseBlur)
 - backdrop: aurora

@@ -53,7 +53,6 @@ source: docs/MISTAKES.md #211 (the layout audit measured a rotating layer's empt
 - becomes: a correctly measured shape becomes a failing one without moving
 - onscreen: "Nothing came near the edge." / "The safe-zone audit failed it at every rotation."
 - why: the contradiction is the open loop, and the picture states it before the words do
-- emotion: unease
 - duration: 3.2s
 - transition_in: none
 
@@ -67,7 +66,6 @@ source: docs/MISTAKES.md #211 (the layout audit measured a rotating layer's empt
 - becomes: a passing measurement becomes a worse film
 - onscreen: "Shrink it 40 percent." / "The only change that passed. The film got worse."
 - why: the wrong answer has to be shown working, or the middle of the film has no cost
-- emotion: resignation
 - duration: 2.9s
 - transition_in: content turnover (no root cut; the film is one take)
 
@@ -81,7 +79,6 @@ source: docs/MISTAKES.md #211 (the layout audit measured a rotating layer's empt
 - becomes: a disagreement becomes a distance you can see
 - onscreen: "255px of clearance." / "Measured as 139px over the edge."
 - why: this is the payoff of the open question, and it is a quantity, so it is a length and not a numeral
-- emotion: recognition
 - duration: 3.1s
 - transition_in: content turnover (no root cut; the film is one take)
 
@@ -95,7 +92,6 @@ source: docs/MISTAKES.md #211 (the layout audit measured a rotating layer's empt
 - becomes: a partial fix becomes a bigger regression than the bug
 - onscreen: "Fix two of three. Nothing moves." / "Unclamped, one clean scene became seven failures."
 - why: the most counterintuitive moment goes last before the payoff, and the middle of a process is where it looks like a mistake
-- emotion: alarm
 - duration: 2.8s
 - transition_in: content turnover (no root cut; the film is one take)
 
@@ -109,6 +105,5 @@ source: docs/MISTAKES.md #211 (the layout audit measured a rotating layer's empt
 - becomes: a rectangle that was measuring the empty corners becomes one measuring the ink
 - onscreen: "Only fixing all three worked." / "Two scenes changed. Fail to pass. Zero regressions."
 - why: the bookend closes on the corrected shot, and the idea is what is left over rather than what is said
-- emotion: settling
 - duration: 3.0s
 - transition_in: content turnover (no root cut; the film is one take)

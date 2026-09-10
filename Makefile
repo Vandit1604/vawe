@@ -686,11 +686,13 @@ concept: ## [preflight] N DIRECTIONS FOR ONE BRIEF, before any of them is built.
 concept-pick: ## [preflight] promote one direction and record the rest.
 	node harness/author/concept.mjs $(SB) --pick $(OPTION)
 
-# make approve STAGE=<stage> D=<file>: SIGN OFF a stage for this exact file. Records a content hash, so
-# editing the file silently withdraws its own approval; an approval that outlives what it approved is
-# worse than none, because it reads as verified. Stages: beats · concept · treatment · draft.
-approve: ## [preflight] SIGN OFF a stage for this exact file.
-	@node harness/author/approve.mjs "$(STAGE)" "$(D)"
+# make approve D=<file>: SIGN OFF the plan for this exact film (harness/author/approve.mjs writes
+# `approved: <date>` into its storyboard's own frontmatter). Editing the storyboard after this silently
+# withdraws the signature (approve.mjs strips any stale `approved:` line before it re-checks), so an
+# approval never outlives what it approved. This is the USER's signature: an agent runs `make studio
+# D=` to show the plan, but only the user runs this command (or `/vawe-approve`).
+approve: ## [preflight] SIGN OFF the plan for this exact film (D=<file>; run by the USER, never an agent)
+	@node harness/author/approve.mjs "$(D)"
 
 beats: ## [judge] first/mid/last frame of every beat in one contact sheet (D=<file> [VS=brand])
 	node harness/author/beats.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(STRIDE),--stride $(STRIDE))
@@ -1182,6 +1184,15 @@ arsenal-check: ## [engine] fail if the engine exports a capability docs/EFFECTS.
 # entries for months with nothing noticing.
 discovery: ## [engine] can an author still FIND what the engine can do?
 	@node quality/gates/discovery.mjs $(if $(JSON),--json,)
+
+# no-judge: has the eye actually looked at every film that shipped a render? make judge writes a
+# receipt (docs/JUDGE.md) hashing both the scene JSON and the rendered mp4's own bytes, so it goes
+# stale on either one changing; this ratchets the count of rendered films with no valid one. Not wired
+# into `make ship`/CI: formats/scene and out/*.mp4 are gitignored, so a small or fresh checkout would
+# report a number about its own thinness, not the library (the same reason doc-refs stays out of CI).
+# --stamp lowers the ceiling after judging a batch; it never rises unnoticed.
+no-judge: ## [judge] ratchet: rendered films with no valid judge receipt (--stamp to lower)
+	@node quality/gates/no-judge.mjs $(if $(STAMP),--stamp,) $(if $(JSON),--json,)
 
 # output-contract: every reporting gate renders through harness/lib/findings.mjs (tight prose + --json).
 # Ratchets the count of gates that still print ad-hoc prose DOWN. docs/CRAFT/COMMAND-OUTPUT.md.
