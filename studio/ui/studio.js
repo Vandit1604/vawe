@@ -15,7 +15,13 @@
    stageBox=$('stage').getBoundingClientRect(); scBox=sc.getBoundingClientRect();
    tlTop=$('tl').getBoundingClientRect().top;
  }
- const typing=()=>/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+ // A RANGE IS NOT TEXT ENTRY. This used to treat every INPUT as typing, and the frame scrubber IS an
+ // input[type=range], so the moment you touched the slider (the studio's own first instruction) the
+ // state keys 1-4 went dead and the plan view became unreachable by keyboard. Arrows still stand back
+ // for the range, which is the double-step this guard was actually written for.
+ const el=()=>document.activeElement||document.body;
+ const onRange=()=>el().tagName==='INPUT'&&el().type==='range';
+ const typing=()=>/^(INPUT|TEXTAREA|SELECT)$/.test(el().tagName)&&!onRange();
  // THE ONE LIVE REGION. The chooser's status line used to be aria-live and carried a seconds counter
  // ticking four times a second, so a screen reader read the whole panel again every 250ms for fifteen
  // seconds. The ticking figure is for the eye; this is for the ear, and it is written twice: once when
@@ -134,9 +140,9 @@
  };
  // an archetype the closed list does not name (blank, or "other (a reason)") still gets ONE centred
  // box: a picture with a vague composition beats no picture at all.
- const archBoxes=(name)=>ARCH_BOXES[String(name||'').trim().split(/\\s+\\(/)[0]]||[[460,240,1000,600,'object']];
+ const archBoxes=(name)=>ARCH_BOXES[String(name||'').trim().split(/\s+\(/)[0]]||[[460,240,1000,600,'object']];
  const wrapWords=(s,max)=>{ const out=[]; let cur='';
-   for(const w of String(s||'').split(/\\s+/)){ const t=cur?cur+' '+w:w;
+   for(const w of String(s||'').split(/\s+/)){ const t=cur?cur+' '+w:w;
      if(t.length>max&&cur){ out.push(cur); cur=w; } else cur=t; } if(cur) out.push(cur); return out; };
  // WHY sketchable: any one of these is a real authoring decision, so drawing from it is honest. Their
  // absence together is the only case with truly nothing to draw.
@@ -350,7 +356,7 @@
    $('shipbody').innerHTML='<h2>not wired: this is one gate of twenty</h2>'
      +'<p>The ladder that says a film is done is <code>make ship D='+esc((model&&model.file)||'')+'</code>. '
      +'It declares every step before it runs, and nothing here runs any of them.</p>'
-     +'<p>What studio already knows is <b>beat-check</b>, because the timeline\\'s hazard bands come from it:</p>'
+     +'<p>What studio already knows is <b>beat-check</b>, because the timeline\'s hazard bands come from it:</p>'
      +(codes.length?'<ul>'+codes.map(c=>'<li><code>'+esc(c)+'</code></li>').join('')+'</ul>'
        :'<ul><li>no findings on this scene</li></ul>')
      +'<p>Waivers, legacy debt and what actually blocks are not shown, and a clean panel here is not a '
@@ -602,6 +608,7 @@
    const st={'1':'plan','2':'make','3':'look','4':'ship'}[e.key];
    if(st){ e.preventDefault(); setState(st); return; }
    const step=e.shiftKey?fps:1;
+   if(onRange()&&/^Arrow|^Home$|^End$/.test(e.key)) return;   // the range steps itself
    if(e.key==='ArrowRight'){ e.preventDefault(); go(n+step); }
    else if(e.key==='ArrowLeft'){ e.preventDefault(); go(n-step); }
    else if(e.key==='Home'){ e.preventDefault(); go(0); }
@@ -676,7 +683,7 @@
                 // what the AUTHOR wrote, when beat wrapping overruled it. The engine records both, so the
                 // bar draws the authored window and the held tail as two different things.
                 aw:d.authoredDuration!=null?+d.authoredDuration:null,
-                anim:d.anim||'', out:d.out||'', txt:(el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,44),
+                anim:d.anim||'', out:d.out||'', txt:(el.textContent||'').replace(/\s+/g,' ').trim().slice(0,44),
                 cls:(el.className.match(/hs-(img-wrap|rect|comp-wrap|group|text)/)||[])[1] }; });
  }
  const CLS={'img-wrap':'image','comp-wrap':'component','rect':'rect','group':'group','text':'text'};
