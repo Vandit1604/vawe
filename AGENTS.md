@@ -29,6 +29,10 @@ Read from the files on disk, never from a stored state, so it cannot disagree wi
 | 7 | **render** | | `make ship D=` |
 | 8 | **judge** | the only step that SEES | `make judge D=` → `make ledger D=` |
 
+**Into stage 2, when a reference or a raw idea exists but no storyboard yet:** `make ideate REF=<ref>`
+or `make ideate NAME= IDEA=` writes the film in plain words first, for the owner to read and edit
+(`docs/CRAFT/IDEATE.md`), before `make scaffold` turns it into a storyboard.
+
 **Three of those transitions are refused rather than requested**, because this order was written here,
 printed by `make critics`, and still run backwards by an author who could quote it
 (`docs/MISTAKES.md` #591, #595). `harness/live/stage-gate.mjs` denies, at `PreToolUse`, before any

@@ -88,6 +88,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 
 | Doc | Reach for it when… | It answers |
 |---|---|---|
+| [docs/CRAFT/IDEATE.md](CRAFT/IDEATE.md) | turning a reference video or a raw idea into a film, before any storyboard or JSON exists | what `make ideate` writes, the two ways to run it, and how to fill what it cannot measure |
 | [docs/CRAFT/MEASURE.md](CRAFT/MEASURE.md) | you need a transition's REAL numbers (a reference to reproduce, or to verify our own render) | `make measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop |
 | [docs/CRAFT/RECREATION.md](CRAFT/RECREATION.md) | recreating a specific reference video end to end ("make ours look like this"), or reflecting a real WEBSITE section by section | the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · one beat per section, in the site's order · the honest 1:1 ceiling |
 | [docs/CRAFT/REFERENCE-STUDY.md](CRAFT/REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn/copy why | the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map |
