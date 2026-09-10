@@ -191,6 +191,14 @@ shutter of 0.16 of a frame (about 58 degrees), the same physics as this recipe. 
 a layer out; a number overrides the shutter (`core/tracks/motion.js`). `ghost` in blur mode is the
 older, still-available per-layer sampler for layers with an authored `motion` track.
 
+That is a blur that only appears when a layer TRAVELS. The separate After Effects "Directional Blur"
+(the effects-panel one you drag onto a still photo, angle and length both set by hand, no motion
+required) had no equivalent here: `resample:{ "fx":"directionalBlur", "angle": 15, "amount": 0.6 }`
+closes that gap (`core/resample/effects.js`), a straight-line smear at a fixed angle in degrees, the
+same distance everywhere in the frame. It shares the `resample` family with `zoomBlur` (radiates from
+the centre) and `spinBlur` (an arc), so it needs a real raster to sample and costs a GL context like
+the rest of that family.
+
 **Sources:** https://www.provideocoalition.com/tip_create_cinematic_motion_blur_in_after_effects_and_in_life/ ·
 https://www.wipster.io/blog/debunking-the-180-degree-shutter-rule
 

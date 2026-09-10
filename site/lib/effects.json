@@ -1,6 +1,6 @@
 {
   "total": 694,
-  "previewed": 333,
+  "previewed": 332,
   "families": 58,
   "tags": [
     [
@@ -57,7 +57,7 @@
     ],
     [
       "per-frame",
-      40
+      41
     ],
     [
       "per-layer",
@@ -85,7 +85,7 @@
     ],
     [
       "text",
-      47
+      46
     ],
     [
       "text/parts",
@@ -2198,7 +2198,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "resampling reads the pixels of a layer that is already a raster, so it needs a real image to sample.",
-      "count": 8,
+      "count": 9,
       "undescribed": 0,
       "entries": [
         {
@@ -2212,6 +2212,13 @@
           "name": "chromaShift",
           "stem": "layer-as-texture-resample--chromashift",
           "desc": "radial RGB separation, the channels pulling apart from the centre outwards",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "directionalBlur",
+          "stem": "layer-as-texture-resample--directionalblur",
+          "desc": "a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS \"Directional Blur\" · a look an author SETS, not a byproduct of a layer's own travel speed (that one is automatic, see `docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4)",
           "scene": null,
           "noPreview": null
         },
@@ -3937,7 +3944,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 32,
+      "count": 31,
       "undescribed": 0,
       "entries": [
         {
@@ -3971,7 +3978,7 @@
         {
           "name": "colorWave",
           "stem": "kinetic-text-presets--colorwave",
-          "desc": "the accent sweeps word by word along a line, each unit lighting then settling to the resting colour · `colors` gives EACH unit its OWN arrival colour instead of one shared accent, per-word colour before the line settles to one ink",
+          "desc": "the accent sweeps word by word along a line, each unit lighting then settling to the resting colour",
           "scene": "/assets/effects/kinetic-text-presets--colorwave.json",
           "noPreview": null
         },
@@ -4001,13 +4008,6 @@
           "stem": "kinetic-text-presets--elastic",
           "desc": "elastic scale pop with visible wobble · playful brands only",
           "scene": "/assets/effects/kinetic-text-presets--elastic.json",
-          "noPreview": null
-        },
-        {
-          "name": "fade",
-          "stem": "kinetic-text-presets--fade",
-          "desc": "plain opacity fade, no motion at all · the neutral entrance, and the neutral exit reversed",
-          "scene": "/assets/effects/kinetic-text-presets--fade.json",
           "noPreview": null
         },
         {

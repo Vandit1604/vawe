@@ -22,7 +22,7 @@
 
 import { defineRegistry } from '../registry/registry.js';
 
-export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macroblock', 'dissolve', 'refract', 'chromaShift'];
+export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macroblock', 'dissolve', 'refract', 'chromaShift', 'directionalBlur'];
 
 // RESAMPLE_BLURBS: one line per fx, next to the list the shader switches on (the `blurb` pattern of
 // blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
@@ -44,6 +44,7 @@ export const RESAMPLE_BLURBS = {
   dissolve: 'noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away',
   refract: 'liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do',
   chromaShift: 'radial RGB separation, the channels pulling apart from the centre outwards',
+  directionalBlur: 'a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS "Directional Blur": a look an author SETS, not a byproduct of a layer\'s own travel speed (that one is automatic, see `docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4)',
 };
 
 // The registry, and with it the catalogue section that used to be hand-listed in
@@ -76,6 +77,7 @@ uniform int   u_fx;
 uniform float u_amt;    // 0..1, the effect's strength: the only dial most effects need
 uniform float u_time;   // local seconds, for the effects that move
 uniform float u_seed;
+uniform float u_angle;  // directionalBlur only: the smear axis, radians, 0 = rightward
 
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)) + u_seed) * 43758.5453123); }
 
@@ -175,13 +177,28 @@ void main(){
     col.a = texture2D(u_tex, uv + off).a;
     col.rgb += clamp(length(grad) * 0.06, 0.0, 1.0) * u_amt * 0.5 * col.a;      // specular glint along the ridges
 
-  } else {                                              // chromaShift, radial RGB separation
+  } else if (u_fx == 7) {                               // chromaShift, radial RGB separation
     vec2 d = uv - 0.5;
     float s = u_amt * 0.035;
     col.r = texture2D(u_tex, uv + d * s).r;
     col.g = texture2D(u_tex, uv).g;
     col.b = texture2D(u_tex, uv - d * s).b;
     col.a = texture2D(u_tex, uv).a;
+
+  } else {                                              // directionalBlur, a straight-line smear at a FIXED angle
+    // Unlike zoomBlur (which radiates from the centre) every pixel in the frame smears the same amount
+    // in the same direction, the AE "Directional Blur" / a linear motion blur an author sets by hand
+    // rather than one that only appears when a layer is actually travelling.
+    vec2 dir = vec2(cos(u_angle), -sin(u_angle));       // -sin: DOM y is flipped vs. a maths angle
+    dir.x /= ar;                                        // keep the smear a straight line, not an ellipse, off-square
+    vec2 step = dir * (u_amt * 0.05);
+    col = vec4(0.0); float wsum = 0.0;
+    for (int i = 0; i < 16; i++) {
+      float t = float(i) / 15.0 - 0.5;                  // sample BOTH sides of the pixel, centred
+      float w = 1.0 - abs(t) * 0.7;
+      col += texture2D(u_tex, uv + step * t) * w; wsum += w;
+    }
+    col /= wsum;
   }
 
   gl_FragColor = col;
@@ -214,6 +231,7 @@ export function createResampler(w, h) {
     tex: gl.getUniformLocation(prog, 'u_tex'), res: gl.getUniformLocation(prog, 'u_res'),
     fx: gl.getUniformLocation(prog, 'u_fx'), amt: gl.getUniformLocation(prog, 'u_amt'),
     time: gl.getUniformLocation(prog, 'u_time'), seed: gl.getUniformLocation(prog, 'u_seed'),
+    angle: gl.getUniformLocation(prog, 'u_angle'),
   };
 
   const tex = gl.createTexture();
@@ -236,7 +254,7 @@ export function createResampler(w, h) {
     canvas,
     // src: an HTMLImageElement or HTMLCanvasElement. `once` skips re-upload for static sources.
     // A still image is the same texels on every frame and re-uploading it 900 times is pure waste.
-    draw(src, fx, amount = 0.5, time = 0, seed = 0, once = false) {
+    draw(src, fx, amount = 0.5, time = 0, seed = 0, once = false, angle = 0) {
       const idx = RESAMPLE_FX.indexOf(fx);
       if (idx < 0) RESAMPLE_REGISTRY.pick(fx);   // throws, naming this vocabulary and any other the word lives in
       // An <img>'s .width is its LAYOUT width (set by our own CSS), not proof that pixels decoded.
@@ -256,6 +274,7 @@ export function createResampler(w, h) {
       gl.uniform1f(U.amt, amount);
       gl.uniform1f(U.time, time);
       gl.uniform1f(U.seed, seed);
+      gl.uniform1f(U.angle, angle);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
