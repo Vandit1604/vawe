@@ -41,9 +41,9 @@ beat**, the slowest of any type, because the voice track, not a blueprint, sets 
 - **B-roll cut rhythm.** Cut away from the face to the proof (a stat, a screen, a graphic) and back.
   This IS the type's cut family: presenter -> B-roll -> presenter, not a slideshow of unrelated shots.
 
-## The blueprints to reach for
+## The motion to reach for
 
-By role (`make arsenal BLUEPRINTS=1` for the full 29):
+By role (`make arsenal Q="…"` to search):
 - **hook / cold open**: `blurResolveHook`, `typedHook`
 - **B-roll proof**: `containerFill`, `statReveal`, `terminalReveal`, `verdictProof`
 - **close**: `ctaEnd`, or return to the presenter placeholder with no blueprint at all

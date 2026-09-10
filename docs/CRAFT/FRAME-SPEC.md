@@ -24,8 +24,8 @@ group: look
 
 The another engine lesson: a great video is not authored frame-first. Two artifacts are locked first and every
 frame then *obeys them line by line*: a **design-system spec** (their `frame.md`) and a **scene-by-scene
-storyboard** (their `STORYBOARD.md`) where each beat names its blueprint, its mechanism, its persuasion, and
-its emotion. Our engine already has the pieces (themes, blueprints, EFFECTS.md, the direction-floor); this
+storyboard** (their `STORYBOARD.md`) where each beat names its mechanism, its persuasion, and
+its emotion. Our engine already has the pieces (themes, recipes, EFFECTS.md, the direction-floor); this
 doc is the contract that ties them into a front-door you fill before writing a single layer.
 
 > This complements [`vawe-video-planning`](../../skills/vawe-video-planning/SKILL.md) (the lock-sheet)
@@ -53,7 +53,7 @@ Author this as a table/list BEFORE the JSON. Every field maps to our vocabulary:
 | Storyboard field | Our vocabulary | Why it matters |
 |---|---|---|
 | **arc** | the beat order (hook → build → proof → payoff → CTA) | outcome-first beats product-first; decide it here, cheaply |
-| **blueprint** + **Reproduce/Adapt** | a `{type:"beat"}` from the BEATS registry (`make blueprints`) | state the SIGNATURE to keep and the ONE thing you change |
+| **mechanism** + **Reproduce/Adapt** | a recipe measured off a real film (recipes/README.md) or a named effect | state the SIGNATURE to keep and the ONE thing you change |
 | **onscreen** (cues in order) | the layer `text`/`count` reveals, timed | each cue is its own reveal window (Part 3) |
 | **mechanism** (per sub-scene) | a named effect from [EFFECTS.md](../EFFECTS.md) | pick the move, don't re-derive it (`svg` draw, `diveIn`, count-up, stat-bars) |
 | **persuasion** | the rhetorical job (negative contrast / category naming / risk reversal) | a beat with no persuasion is decoration |
@@ -61,7 +61,7 @@ Author this as a table/list BEFORE the JSON. Every field maps to our vocabulary:
 | **transition_in** | a `cut`/`seam`/`sting` | how this beat arrives (and it IS the prior beat's exit) |
 | **held vs developing** | duration + whether the camera/reveals keep moving | allocate held reads (Part 4) |
 
-**Reproduce vs Adapt** is the key discipline: for each beat, name the blueprint's spine you keep ("keep the
+**Reproduce vs Adapt** is the key discipline: for each beat, name the device's spine you keep ("keep the
 push-THROUGH signature") and the single thing you change for this brand ("it lands inside the chart's gap").
 That is how you stay directed without re-deriving motion or copying a template.
 
@@ -93,7 +93,7 @@ preset ("no two beats move alike"). Reach past both.
 - **Vary the cut rhythm.** Set your fastest-cut beat *by contrast* with a slow one beside it.
 - **Bookend.** Let the payoff call back the hook (their F7 ROI echoes F1's diverging bands). Cohesion reads
   as intent.
-- **No two beats move alike.** Aim for a distinct blueprint/mechanism per beat across the film.
+- **No two beats move alike.** Aim for a distinct mechanism per beat across the film.
 
 ## Part 5: QA the SEAMS, not the centers
 
@@ -104,6 +104,6 @@ it pulls the frames straddling every transition out of the mp4 and flags a lumin
 
 ---
 
-**The loop:** lock Part 1 + Part 2 (get sign-off) → author the JSON from blueprints obeying the spec →
+**The loop:** lock Part 1 + Part 2 (get sign-off) → author the JSON obeying the spec →
 `make author-check` (floor now checks front-load + monotony) → render → `make seam-check` + `make judge`.
 Full authoring narrative: [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md). Bespoke frames: [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md).

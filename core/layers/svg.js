@@ -35,7 +35,8 @@ const SVGNS = 'http://www.w3.org/2000/svg';
 // one channel the engine does not already own on this element (`opacity` is the enter/exit envelope's).
 function applyDraw(el, p, draw, { fillIn, fill, stroke, strokeWidth }) {
   const want = draw.fill ?? fillIn;
-  const fillTo = want == null || want === false ? null : (want === true ? 'var(--accent)' : want);
+  // `"none"` is the SVG spelling of no fill, so it must not arm the resolve that fades the stroke out.
+  const fillTo = want == null || want === false || want === 'none' ? null : (want === true ? 'var(--accent)' : want);
   p.setAttribute('fill', fillTo ?? 'none');
   if (fillTo) p.style.fillOpacity = '0';
   p.setAttribute('stroke', stroke === 'none' ? (fill !== 'none' ? fill : 'var(--accent)') : stroke);
@@ -73,6 +74,10 @@ function applyMorph(el, svg, p, morph) {
 
 // The props are read off this signature (propsOf, core/props.js). No second list to drift from it.
 export function build(kit, el, L, { w, h, viewBox, d, fill: fillIn, stroke: strokeIn, strokeWidth, draw, morph } = L) {
+  // frame() plays `draw` OR `morph`, never both, so a layer carrying both would build a morph that
+  // never runs. Refused here, where it is written, instead of rendering the draw alone.
+  if (draw && morph) throw new Error(`svg${L.id ? ` "${L.id}"` : ''}: \`draw\` and \`morph\` on one layer play only the draw, `
+    + `so the morph never runs. Use two layers in the same box: one with \`draw\`, one with \`morph\`.`);
   if (w != null) el.style.width = w + 'px';
   if (h != null) el.style.height = h + 'px';
   el.style.pointerEvents = 'none';

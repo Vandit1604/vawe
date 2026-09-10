@@ -112,33 +112,12 @@ old `cues` check did.
 
 ## How the scaffold uses it
 
-`make scaffold TYPE=<type> THEME=<name>` (`harness/author/scaffold.mjs`) loads `themes/<name>.json`
-once, at the top, and merges its `look` over everything the generic rotation / the type spine would
-otherwise pick:
-
-- **`backdrop` → `bg[]`**: one window per beat, cycling the theme's own preset list. Wins over an
-  exemplar match (`--like`) and over the type spine's `bgPresets`.
-- **`cuts` → `transitions[].fx`**: wins over the type spine's `cutFamily`.
-- **`scale.hook` / `scale.headline` → the hook and payoff beats' `heroSize`**: `blueprints/beats.mjs`'s
-  `kineticHook` and `statReveal` both take an optional `heroSize` (unchanged default if omitted), so a
-  brand's hook/headline scale is real without every other caller of those two beats changing.
-- **`scale.body` / `scale.caption` → the remaining beats' own size kwargs**: `cardCascade` (`heroSize`,
-  the card body copy), `chipGrid` (`bodySize` for the chips, `captionSize` for the footer), `wordBlast`
-  (`bodySize`), `screenDive` (`captionSize`), `kineticHook`/`statReveal` (`captionSize`, alongside their
-  existing hook/headline `heroSize`), `containerFill` (`itemSize`), `listBuildRows` (`size`),
-  `terminalReveal` (`bodySize` for the command, `captionSize` for the output lines), `verdictProof`
-  (`bodySize` for the command, `captionSize` for the note), `logoLockup` (`bodySize` for the headline,
-  `captionSize` for the sub) and `logoReveal` (`bodySize` for the wordmark, `captionSize` for the sub).
-  Same shape as `scale.hook`/`scale.headline` above: an optional kwarg, current value as its default,
-  so a brand with no scale opinion renders byte-identical.
-- **`layout.margin` → `x`/`w` on every beat** except the three that name their own mark*/word* slots
-  instead of a generic box (`logoLockup`, `ctaEnd`, `logoReveal`).
-
-**Left undone, stated plainly rather than faked**: `recordedPan` has no text of its own (a bare
-surface, riders are the caller's own layers), so there is nothing for `scale.body`/`scale.caption` to
-reach; the keyed-track beats (`echoRing`, `scrollStory`, `focusRack`) still hardcode their own internal
-type sizes. Wiring those (where they have one) is the same shape of change (an optional kwarg, current
-value as its default) but touches more call sites than this slice covered.
+Blueprints are retired (recipes/README.md): `make scaffold TYPE=<type> THEME=<name>`
+(`harness/author/scaffold.mjs`) no longer writes a film's layers. It writes the storyboard sidecar and
+a scene shell (`layers: []`) at the shape an approved plan has before `make assemble`. `look` is not
+merged into that shell, because there are no layers yet to merge it onto; a theme's `backdrop`/`cuts`/
+`scale`/`layout` are still the fixed facts about the brand they always were, and the assembling author
+(or the recipe that composes a beat's motion) reads them at that later stage instead.
 
 ## Seeing it: `make theme-sheet`
 

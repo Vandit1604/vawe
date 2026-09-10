@@ -193,7 +193,7 @@ different output: this breaks the author's own habits.
 ## Step 3: Storyboard on paper before JSON
 
 **First, run `make scaffold OUT=formats/scene/<name>.json DUR=<n> THEME=<name>`.** It writes a scene
-composed entirely from directed `{type:"beat"}` blueprints, already tiled with transitions, a moving
+an empty-layers shell with the storyboard sidecar already tiled with placeholder beats, ready for
 backdrop and sound, plus its `.storyboard.md` sidecar with the frontmatter and per-beat fields
 storyboard-check and craft-checklist ask for. Every field the plan below still has to decide is marked
 `REPLACE:`/`<fill: ...>`; fill those in place of hand-writing JSON from blank, the #1 authoring failure.
@@ -213,12 +213,12 @@ There is ONE module: **scene** (the open canvas, layers/cuts/stings/bg windows/c
 `formats/scene/schema.json` is the contract). No templates. You compose every video from the
 primitive vocabulary in `docs/PRIMITIVES.md`; the JSON is the video.
 
-**Compose beats from BLUEPRINTS, not blank JSON.** `make arsenal BLUEPRINTS=1` lists directed-motion beat
-blueprints (`{type:"beat"}`, [`docs/CRAFT/BLUEPRINTS.md`](../../docs/CRAFT/BLUEPRINTS.md)), kineticHook,
-statReveal, cardCascade, screenDive, terminalReveal, verdictProof, ctaEnd, … Each bakes in kinetic
-reveals / count-ups / cascades / a dashboard dive so good motion is the DEFAULT. Authoring plain
-`rise`+`fade` from scratch is the #1 failure and `make direction-floor` (opt-in: `TASTE=1 make author-check`) FAILS it
-as a `plain-slideshow`. Reach for a blueprint per beat, then fill brand content.
+**Compose motion from RECIPES, not blank JSON.** Blueprints are retired ([`recipes/README.md`](../../recipes/README.md)
+is the live mechanism): `make arsenal Q="…"` finds a recipe measured off a real film, or a kinetic
+reveal / count-up / cascade / camera move directly. Each bakes in real motion so good motion is the
+DEFAULT. Authoring plain `rise`+`fade` from scratch is the #1 failure and `make direction-floor`
+(opt-in: `TASTE=1 make author-check`) FAILS it as a `plain-slideshow`. Reach for a real device per beat,
+then fill brand content.
 
 ## Step 3b: Choreography rules (anti-monotony)
 
