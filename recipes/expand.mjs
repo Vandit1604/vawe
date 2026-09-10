@@ -226,7 +226,12 @@ export function expandRecipes(scene) {
   if (!scene || typeof scene !== 'object' || !('recipes' in scene)) return scene;
   const { recipes, ...rest } = scene;
   const out = { ...rest, layers: (scene.layers || []).map((l) => ({ ...l })) };
-  for (const line of recipes || []) {
+  // Kinds run in a fixed order, not the order the author wrote them: a seam reads whether its "in" layer
+  // is already split by an enter recipe, so an enter line must land first whatever its place in the list.
+  const RANK = { enter: 0, camera: 1, seam: 2 };
+  const ordered = (recipes || []).map((line, i) => ({ line, i, rank: RANK[pickRecipe(line.recipe).kind] ?? 3 }))
+    .sort((a, b) => a.rank - b.rank || a.i - b.i).map((x) => x.line);
+  for (const line of ordered) {
     const kind = pickRecipe(line.recipe).kind;
     if (kind === 'seam') expandSeamLine(out, line);
     else if (kind === 'camera') expandCameraLine(out, line);

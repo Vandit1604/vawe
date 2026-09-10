@@ -191,4 +191,22 @@ assert.throws(() => expandRecipes(enterScene({
   assert.ok(!tag.motion, 'the split track owns the arrival; no whole-layer slide is written on top');
 }
 
+// the same two lines written seam-first compose identically: kinds run in a fixed order
+{
+  const s = {
+    module: 'scene', aspect: '16:9', duration: 6.5,
+    recipes: [
+      { recipe: 'flow-seam', at: 4.54, out: 'window', in: 'tagline' },
+      { recipe: 'word-by-word', at: 4.607, layer: 'tagline' },
+    ],
+    layers: [
+      { type: 'html', id: 'window', x: 150, y: 90, w: 1500, h: 900, start: 0, duration: 4.54 },
+      { type: 'text', id: 'tagline', x: 90, y: 480, size: 92, start: 0, duration: 1.46 },
+    ],
+  };
+  const tag = expandRecipes(s).layers.find((l) => l.id === 'tagline');
+  assert.equal(tag.split, 'word');
+  assert.ok(!tag.motion, 'seam written before word-by-word must still not slide the split layer');
+}
+
 console.log('ok - recipes/expand: keys and windows written on the named layers, every refusal named');
