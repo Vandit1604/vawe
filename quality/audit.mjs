@@ -312,10 +312,26 @@ const clampToBox = (r, el) => {
     ? { left, top, right, bottom, width: right - left, height: bottom - top, geometry: r.geometry }
     : { left: b.left, top: b.top, right: b.right, bottom: b.bottom, width: b.width, height: b.height, geometry: r.geometry };
 };
+// True when `el` carries a real word outside any <svg> it contains (an svg's own text nodes, if any,
+// don't count: svgInk already reads those via `others` below). Distinguishes a pure icon layer (svg
+// IS the whole layer) from a layer that happens to place an icon beside its own caption or headline.
+const hasTextOutsideSvg = (el) => {
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => (n.parentElement && n.parentElement.closest('style, script, svg, [data-ink="off"]'))
+      ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
+  });
+  while (w.nextNode()) if (w.currentNode.nodeValue.trim()) return true;
+  return false;
+};
 const inkRect = (el) => {
   if (el.querySelector('img')) return null;            // raster: the element box IS the ink
   const svgs = [...el.querySelectorAll('svg')];
-  if (svgs.length) {
+  // The svg-only path below reads path geometry, not layout, so it knows nothing about a sibling
+  // caption or headline sharing the layer (a CTA mark above a tagline, say). Taking it unconditionally
+  // discarded that text's ink entirely: the safe-zone/collision box became the small icon's box while
+  // the finding stayed labelled with the words next to it. Only take it when the svg IS the ink, no
+  // other real text in the layer; otherwise fall through and measure everything together below.
+  if (svgs.length && !hasTextOutsideSvg(el)) {
     const rects = svgs.map(svgInk).filter(Boolean);
     if (!rects.length) return null;
     const left = Math.min(...rects.map((r) => r.left)), right = Math.max(...rects.map((r) => r.right));
@@ -1236,7 +1252,7 @@ function restoreHiddenFn() {
 // other by name exactly as nested functions did, which is what lets them be separate functions at
 // all. Insertion order is the order below, so the bundle is byte-identical run to run.
 const PAGE_FNS = { vis, effOpacity, arrived, paintsOwnBox, inkText, maskedByDesign, paintsBox,
-  shapeInk, svgInk, clampToBox, inkRect, carriesContent, atRest, opaqueAt, parse, boxOf,
+  shapeInk, svgInk, hasTextOutsideSvg, clampToBox, inkRect, carriesContent, atRest, opaqueAt, parse, boxOf,
   frameContext, unCam, midMove, checkLayerBounds, overflowFinding, safeFinding, captionBandFinding,
   checkImageFloor, checkTinyText, checkClippedText, checkClippedComponent, checkVerticalMass,
   fading, crossDissolve, occluded, checkPairs, pairFinding, checkBuried, coverSample,
