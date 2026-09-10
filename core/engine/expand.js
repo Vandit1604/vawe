@@ -29,6 +29,7 @@ import { BEATS } from '../../blueprints/index.mjs';
 import { bakeCameraMove } from './produce.js';
 import { frameOf } from '../layout/safe.js';
 import { lowerScene } from '../transitions/lower.js';
+import { expandRecipes } from '../../recipes/expand.mjs';
 
 // An AUTHOR NOTE is not an unknown-prop finding. This repo writes notes as `_`-prefixed keys everywhere
 // (`_why`, `_template`, `_camera`); `note` is the one un-prefixed alias already in use.
@@ -117,6 +118,14 @@ export function expandScene(data) {
   }
 
   data.layers = (data.layers || []).flatMap((l) => expand(l, []));
+
+  // recipes[] sugar -> plain `motion` keys and layer windows on the layers they name (recipes/expand.mjs).
+  // Runs after block/beat/comp, so a recipe naming a layer id one of those produced still resolves.
+  if (data.recipes) {
+    const expanded = expandRecipes(data);
+    data.layers = expanded.layers;
+    delete data.recipes;
+  }
 
   // cameraMove sugar -> data.camera. ONE implementation, core/engine/produce.js. Idempotent (it deletes the
   // field), so calling it here after core/engine/boot.js already baked it for a browser render is a no-op.
