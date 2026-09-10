@@ -30,6 +30,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { RECIPES } from '../../recipes/index.mjs';
 import { measureVideo } from '../media/content.mjs';
+import { ask as ideateAsk, applyAnswers as ideateApplyAnswers, loadActs as ideateLoadActs } from './ideate-ask.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -458,6 +459,10 @@ function main() {
   const name = flag('name');
   const idea = flag('idea');
   const clipArg = flag('clip');
+  // ASK/ANSWERS: the detail brief harness/author/ideate-ask.mjs owns (docs/CRAFT/IDEATE.md "asking for
+  // detail"). Kept to this one seam so a second writer of the film prompt never grows in this file.
+  const askFlag = args.includes('--ask');
+  const answersPath = flag('answers');
 
   if (annotateRef) {
     // Adds routing brackets to an ALREADY-FILLED prompt in place, without going anywhere near the
@@ -506,12 +511,13 @@ function main() {
       console.error(`ideate: ${ref}'s coverage ledger is "${grammar.coverage.ledger}", not "complete". Run: make study-check NAME=${ref}`);
       process.exit(1);
     }
+    if (askFlag) { console.log(JSON.stringify(ideateAsk(ideateLoadActs({ ref })), null, 2)); return; }
     const clip = resolveClip(ref, clipArg);
     if (!clip) console.error(`  ! no clip found for "${ref}" (checked --clip, refs/_clips/, and the main tree). Every <look:> will point at ffmpeg you run by hand.`);
     const prompt = buildRefPrompt(ref, grammar, clip);
     const out = path.join(ROOT, 'grammar', `${ref}.prompt.md`);
-    fs.writeFileSync(out, prompt);
-    console.log(`ideate → ${path.relative(ROOT, out)}`);
+    fs.writeFileSync(out, answersPath ? ideateApplyAnswers(prompt, JSON.parse(fs.readFileSync(answersPath, 'utf8'))) : prompt);
+    console.log(`ideate → ${path.relative(ROOT, out)}${answersPath ? ' (answers applied)' : ''}`);
     return;
   }
 
@@ -526,11 +532,12 @@ function main() {
     }
     refGrammar = JSON.parse(fs.readFileSync(grammarPath, 'utf8'));
   }
+  if (askFlag) { console.log(JSON.stringify(ideateAsk(ideateLoadActs({ ref, name, idea })), null, 2)); return; }
   const prompt = buildIdeaPrompt(name, idea, { refGrammar });
   const out = path.join(ROOT, 'formats/scene', `${name}.prompt.md`);
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.writeFileSync(out, prompt);
-  console.log(`ideate → ${path.relative(ROOT, out)}`);
+  fs.writeFileSync(out, answersPath ? ideateApplyAnswers(prompt, JSON.parse(fs.readFileSync(answersPath, 'utf8'))) : prompt);
+  console.log(`ideate → ${path.relative(ROOT, out)}${answersPath ? ' (answers applied)' : ''}`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main();

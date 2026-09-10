@@ -228,8 +228,8 @@ scaffold: ## [preflight] write a directed, gate-passing scene + storyboard skele
 # study is missing). make ideate NAME=<film> IDEA="...": the same shape from an idea, acts left
 # `<fill:>` (formats/scene/<film>.prompt.md); add REF= alongside NAME= to copy a reference's act/joint
 # structure with the content left to fill. docs/CRAFT/IDEATE.md.
-ideate: ## [preflight] THE FILM, IN PLAIN WORDS, before any JSON: one prompt an owner reads and edits (REF=, or NAME= IDEA= [REF=])
-	node harness/author/ideate.mjs $(if $(REF),--ref $(REF)) $(if $(NAME),--name $(NAME)) $(if $(IDEA),--idea "$(IDEA)")
+ideate: ## [preflight] THE FILM, IN PLAIN WORDS, before any JSON: one prompt an owner reads and edits (REF=, or NAME= IDEA= [REF=]; ASK=1 asks the detail brief, ANSWERS=<file.json> applies it)
+	node harness/author/ideate.mjs $(if $(REF),--ref $(REF)) $(if $(NAME),--name $(NAME)) $(if $(IDEA),--idea "$(IDEA)") $(if $(ASK),--ask) $(if $(ANSWERS),--answers $(ANSWERS))
 
 # THE LOCK-STEP-BEFORE-FAN-OUT CHAIN, for per-scene HTML agents (docs/CRAFT/PER-SCENE-FANOUT.md):
 #   make stagekit D=<film>   the shared CSS block every fragment carries verbatim (fragments are @scope-isolated, cannot share a stylesheet)
