@@ -74,16 +74,14 @@ card/product/photo with no real source stated for it.
   `skills/impeccable/scripts/palette.mjs`, name a colour direction with `command npx -y ui-skills list
   --category color`, and record `theme: invented` in the lock sheet so the choice is not lost.
 
-<!-- doc-refs-allow: make screen · being built in parallel with this doc, not yet wired into the Makefile -->
-<!-- doc-refs-allow: docs/CRAFT/SCREENS.md · being written in parallel with this doc, lands beside `make screen` -->
 ## R2: screens (owner ruling)
 
 > "Use a UI design harness to build beautiful mocks, not plain by default."
 
 A product screen in a film is DESIGNED for the video by default: a real capture (`make capture` / `make
 sections URL=`) when a real, video-ready screen exists; otherwise a fragment built for the shot with
-`make screen F=<fragment.html> [REF=<ref> ACT=<n>] [THEME=<name>]` (docs/CRAFT/SCREENS.md, lands with
-that command). Never a plain grey window standing in for a screen nobody built.
+`make screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [REF=<ref> ACT=<n>] [THEME=<name>]`
+([`SCREENS.md`](SCREENS.md)). Never a plain grey window standing in for a screen nobody built.
 
 ## What "real material" means
 
@@ -95,5 +93,5 @@ that command). Never a plain grey window standing in for a screen nobody built.
 ## See also
 
 - [`IMAGERY.md`](IMAGERY.md): the image ladder, treatment, licensing.
-- docs/CRAFT/SCREENS.md (landing in parallel): `make screen`, the design-harness route for a mock.
+- [`SCREENS.md`](SCREENS.md): `make screen`, the design-harness route for a mock.
 - [`TASTE.md`](../TASTE.md): the value test every beat must pass regardless of content richness.

@@ -122,6 +122,32 @@ const overflow = await page.evaluate(() => {
   return { l: Math.round(r.left), t: Math.round(r.top), r: Math.round(r.right), b: Math.round(r.bottom) };
 });
 await page.screenshot({ path: out, clip: { x: 0, y: 0, width: 1920, height: 1080 } });
+  // --boxes-out <path>: dump every element's LAID-OUT bounding box as JSON. This is the one thing a
+  // static source parse cannot answer (a percentage width, a grid track, an object-fit crop all
+  // resolve only once the browser lays the page out), and `make screen`'s clipping check needs exactly
+  // that: whether an element the author put on screen actually landed inside the frame.
+  const boxesOut = flag('--boxes-out', null);
+  if (boxesOut) {
+    const boxes = await page.evaluate(() => {
+      const frag = document.getElementById('frag');
+      if (!frag) return [];
+      const out = [];
+      for (const el of frag.querySelectorAll('*')) {
+        const r = el.getBoundingClientRect();
+        if (r.width <= 0 || r.height <= 0) continue;
+        const cs = getComputedStyle(el);
+        if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) === 0) continue;
+        const isImg = el.tagName === 'IMG';
+        // own text only (not descendants'), so a wrapper div is not double-reported for its child's words
+        const ownText = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent.trim()).join(' ').trim();
+        if (!isImg && !ownText) continue;
+        out.push({ tag: el.tagName.toLowerCase(), text: isImg ? (el.getAttribute('alt') || el.getAttribute('src') || 'img') : ownText,
+          x: r.left, y: r.top, w: r.width, h: r.height });
+      }
+      return out;
+    });
+    fs.writeFileSync(boxesOut, JSON.stringify(boxes));
+  }
   // --no-detect: for a caller photographing many generated fragments (invent-look's candidate sheet),
   // where the craft tells belong to the generator, not to this run. Never pass it for a HAND-written
   // fragment, that is the one this check exists for.
