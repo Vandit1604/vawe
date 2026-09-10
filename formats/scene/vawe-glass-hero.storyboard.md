@@ -36,7 +36,6 @@ detail behind it, and a busy ground is the cheap way to supply it. Here the deta
 - style: warm paper, one weight of ink, no accent colour anywhere
 - rest: the ground drifts 1.15% per second under everything. Nothing else idles
 - why: state the Before in three words and let the lens walk into the claim
-- emotion: recognition
 - duration: 3.9s
 - transition_in: cut
 
@@ -54,7 +53,6 @@ detail behind it, and a busy ground is the cheap way to supply it. Here the deta
 - style: the ground turns from warm paper to cool. The only colour in the film is the dispersion fringe
 - rest: none on the spectacle. The slab holds dead still for 1.6s before it moves, so the surge has something to break
 - why: this is the whole claim, shown rather than described. Type is the densest detail on a white frame
-- emotion: surprise
 - duration: 4.3s
 - transition_in: blur
 
@@ -72,6 +70,5 @@ detail behind it, and a busy ground is the cheap way to supply it. Here the deta
 - style: the coolest of the three grounds, ink slab, one line of mono
 - rest: the lens drifts. The bend does not change
 - why: name the recipe while the proof is still in frame, so nobody has to take it on trust
-- emotion: conviction
 - duration: 2.7s
 - transition_in: blur

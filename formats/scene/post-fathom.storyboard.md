@@ -69,7 +69,6 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - style: one colour, mono type, the field is the only texture
 - rest: the depth rule keeps falling through the hold
 - why: open loop. A reading past where the viewer's own gear quits is a question, not a claim
-- emotion: unease
 - duration: 3.5s
 - transition_in: cut
 
@@ -88,7 +87,6 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - style: milled edges, no shadow, the bezel is drawn not floated
 - rest: the depth rule keeps falling
 - why: answer where the number came from before making any claim about it
-- emotion: recognition
 - duration: 3.5s
 - transition_in: whip
 
@@ -107,7 +105,6 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - style: exploded view, hairline leaders, nothing filled
 - rest: this is the peak. The depth rule keeps falling and nothing else is added
 - why: THE SPECTACLE. The only beat where the product opens, and the only one that earns a close shot
-- emotion: respect
 - duration: 4s
 - transition_in: whip
 
@@ -126,7 +123,6 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - style: the accent field arrives here, the only beat that is not near-black
 - rest: the depth rule reaches the bottom of the frame and stops. The descent is over
 - why: pay off the loop the hook opened, on the film's only bright frame
-- emotion: settled
 - duration: 3.5s
 - transition_in: whip
 
@@ -145,6 +141,5 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - style: near-black again, the accent only in the rule
 - rest: none. The rule has arrived and holding still is the point
 - why: close on the name, at the bottom of the descent
-- emotion: quiet
 - duration: 2.8s
 - transition_in: dissolve

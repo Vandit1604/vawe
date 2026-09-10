@@ -23,21 +23,13 @@
 // never on the layer, so the composition-order contract in core/fx/index.js holds.
 
 import { clamp01, resolveEasing } from '../motion/motion.js';
+import { CURVES, CURVE_NAMES as NAMES } from '../motion/path-curves.js';
 
 const KEYS = ['curve', 'd', 'w', 'h', 'from', 'to', 'dur', 'delay', 'ease', 'anchor'];
 const MARK = 'data-along-path';
 
-// The named curves, each written against the declared box so it scales with it. An author who wants
-// something else passes `d` and owns the coordinates.
-const CURVES = {
-  arc: (w, h) => `M 0 ${r(h * 0.94)} Q ${r(w / 2)} ${r(-h * 0.5)} ${w} ${r(h * 0.94)}`,
-  dip: (w, h) => `M 0 ${r(h * 0.12)} Q ${r(w / 2)} ${r(h * 1.5)} ${w} ${r(h * 0.12)}`,
-  wave: (w, h) => `M 0 ${r(h * 0.5)} C ${r(w * 0.18)} ${r(h * 0.04)} ${r(w * 0.32)} ${r(h * 0.04)} `
-    + `${r(w * 0.5)} ${r(h * 0.5)} S ${r(w * 0.82)} ${r(h * 0.96)} ${w} ${r(h * 0.5)}`,
-  ramp: (w, h) => `M 0 ${r(h * 0.9)} L ${w} ${r(h * 0.18)}`,
-};
-const r = (n) => Math.round(n * 100) / 100;
-const NAMES = Object.keys(CURVES);
+// The named curves live in core/motion/path-curves.js: one catalog, two consumers (a textPath here,
+// MotionPathPlugin flying a whole layer in the LAYER-scope `move:` "path" scope, harness/lib/contract.mjs).
 
 function resolve(spec) {
   const s = typeof spec === 'string' ? { curve: spec } : spec;

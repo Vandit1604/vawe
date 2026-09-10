@@ -11,7 +11,6 @@ object_last: "the last frame: the payoff, or the moment just before it"
 format: 1920x1080
 theme: "themes/<brand>.json (or: preset <name> remixed via make theme-remix)"
 duration: 29s
-ramp: "the kit roles this film uses, decided ONCE. e.g. kit-display for the wordmark, kit-hook for every beat sentence, kit-caption for every label. No fourth size anywhere."
 pace: "showreel | explainer | held, CHOSEN before any beat is written, with a seconds-per-idea budget"
 spectacle: "beat N · which layer · which device · what the moment is for, the ONE loud moment"
 not: "the defaults this film refuses, in your own words"
@@ -322,7 +321,6 @@ not: "the defaults this film refuses, in your own words"
 - style: hard contrast, one colour, type is the only object
 - rest: 1.5% breathing scale on the headline through the hold
 - why: open loop, pose the question the payoff answers (curiosity before any claim)
-- emotion: curiosity
 - duration: 6s
 - transition_in: cut
 
@@ -341,9 +339,8 @@ not: "the defaults this film refuses, in your own words"
 - style: the brand ground arrives, mark at full weight, everything else muted
 - rest: slow drift on the mark, 6px over the hold
 - why: name the thing, give the hook a cause with a name
-- emotion: clarity
 - duration: 6s
-- transition_in: zoom-through
+- transition_in: fx:zoom
 
 ## Beat 3: Proof (12s-19s)
 - type: feature_showcase
@@ -357,9 +354,8 @@ not: "the defaults this film refuses, in your own words"
 - style: the real UI at full fidelity, chrome dimmed so the claim reads
 - rest: 1% scale on the captured surface, nothing else moves
 - why: show-don't-tell, the product doing the thing, not a slogan about it
-- emotion: trust
 - duration: 7s
-- transition_in: cinematicZoom
+- transition_in: fx:cinematicZoom
 
 ## Beat 4: Payoff (19s-25s)
 - type: benefit_highlight
@@ -376,9 +372,8 @@ not: "the defaults this film refuses, in your own words"
 - style: the loudest frame of the film. THIS is the spectacle beat
 - rest: none, the spectacle carries it
 - why: land the counterintuitive result, pay off the open loop from Beat 1 (the bookend)
-- emotion: inevitability
 - duration: 6s
-- transition_in: crossfade
+- transition_in: fx:dissolve
 
 ## Beat 5: CTA (25s-29s)
 - type: cta
@@ -392,9 +387,8 @@ not: "the defaults this film refuses, in your own words"
 - style: quiet, one line, the mark and nothing competing
 - rest: 1% breathe on the mark only
 - why: one clear next step; remove the risk
-- emotion: urgency
 - duration: 4s
-- transition_in: zoom-through
+- transition_in: fx:zoom
 
 ### Budget the demonstrations, not just the claims
 

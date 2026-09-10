@@ -26,7 +26,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: dead flat paper, the world before the file exists
 - rest: nothing moves but the typing
 - why: name the pain in one frame and let the repetition do the arguing
-- emotion: recognition
 - duration: 5.2s
 - transition_in: open
 - backdrop: plain
@@ -44,7 +43,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: one card, hairline border, no shadow
 - rest: the card's rows are still arriving through the hold
 - why: state the thesis and show the artifact in the same frame
-- emotion: relief
 - duration: 5.8s
 - transition_in: cut (blur)
 - backdrop: paper
@@ -62,7 +60,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: the only two-column frame in the film
 - rest: sections keep arriving for eight seconds; nothing holds still
 - why: make the abstraction concrete before any claim is made about it
-- emotion: order
 - duration: 8.6s
 - transition_in: match (the card continues across the cut)
 - backdrop: paper
@@ -80,7 +77,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: the largest mono in the film, one accent tick
 - rest: the caret
 - why: show that the file is written by a person, not filled in from a form
-- emotion: intimacy
 - duration: 3.9s
 - transition_in: cut (blur)
 - backdrop: paper
@@ -98,7 +94,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: THE SPECTACLE. The only radial frame and the only sting in the film
 - rest: none, the ring is the motion
 - why: this is the whole argument, and it is the only beat allowed to be loud
-- emotion: surprise
 - duration: 3.5s
 - transition_in: cut (wipe)
 - backdrop: paperShapes
@@ -116,7 +111,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: split frame, two cards of equal weight
 - rest: the typing
 - why: prove the mechanism instead of asserting it
-- emotion: satisfaction
 - duration: 5.2s
 - transition_in: cut (wipe)
 - backdrop: paper
@@ -134,7 +128,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: the only green in the film, and the only accent-filled button
 - rest: the cursor's travel
 - why: the file grows only with permission, and that has to be shown, not stated
-- emotion: trust
 - duration: 6.6s
 - transition_in: cut (blur)
 - backdrop: soft
@@ -152,7 +145,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: the first frame in the film with more than three objects on it
 - rest: none, the count carries it
 - why: scale the single act of consent into a relationship
-- emotion: momentum
 - duration: 3.5s
 - transition_in: cut (wipe)
 - backdrop: paperDots
@@ -170,7 +162,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: the only circular form in the film besides the ring of agents
 - rest: the ring is still drawing through the hold
 - why: answer the obvious objection before the end card asks for anything
-- emotion: reassurance
 - duration: 5.1s
 - transition_in: cut (wipe)
 - backdrop: soft
@@ -188,7 +179,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: the motif returning at rest
 - rest: the backdrop shapes drift
 - why: put the whole argument back into one frame before asking
-- emotion: composure
 - duration: 2.6s
 - transition_in: cut (wipe)
 - backdrop: paperShapes
@@ -206,7 +196,6 @@ This video tells a developer that a file they write once is read by every agent 
 - style: the one washed ground in the film, the warmest frame
 - rest: the wash drifts under a held frame
 - why: end on the product, not on a claim about it
-- emotion: invitation
 - duration: 3s
 - transition_in: cut (blur)
 - backdrop: gradientWash

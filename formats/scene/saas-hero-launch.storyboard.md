@@ -26,7 +26,6 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - style: white-first, one accent, type is the only object
 - rest: the blob field never stops drifting, 14% scale over the beat
 - why: state the claim before anything has to be believed
-- emotion: confidence
 - duration: 5.2s
 - transition_in: cut
 - backdrop: dotmatrix
@@ -44,7 +43,6 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - style: quiet, no accent except the headline emphasis
 - rest: the field keeps drifting; nothing else moves
 - why: one line of borrowed credibility before the demo
-- emotion: reassurance
 - duration: 4.6s
 - transition_in: cut (rise)
 - backdrop: paper
@@ -62,7 +60,6 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - style: the product surface at full contrast, everything else muted
 - rest: the checklist rows arrive one at a time
 - why: show-don't-tell. The only beat that demonstrates anything
-- emotion: trust
 - duration: 5.4s
 - transition_in: cut (punch)
 - backdrop: soft
@@ -80,7 +77,6 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - style: one surface, one accent dot, nothing else
 - rest: the camera push IS the rest motion, and it is released at the cut
 - why: a rollout nobody can undo is a threat, not a feature
-- emotion: relief
 - duration: 4.8s
 - transition_in: cut (zoom)
 - backdrop: gradientWash
@@ -98,7 +94,6 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - style: the accent field lifts under the whole frame. THIS is the spectacle beat
 - rest: none, the count carries it
 - why: land the scale the demo implied, on the frame where the form changes
-- emotion: inevitability
 - duration: 5.4s
 - transition_in: hard cut (none, the match IS the transition)
 - backdrop: accentPlain
@@ -116,7 +111,6 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - style: even, deliberately quiet after the peak
 - rest: the chip turns over four times; the cards hold
 - why: name the surface area without demonstrating four more things
-- emotion: breadth
 - duration: 4.6s
 - transition_in: cut (punch)
 - backdrop: paperShapes
@@ -134,7 +128,6 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - style: the one dark frame in a white-first film, so the last shot is the one that looks different
 - rest: the mark bobs 12px twice across the beat
 - why: the bookend. The hero's button returns as the last thing on screen, on an inverted ground
-- emotion: invitation
 - duration: 5.0s
 - transition_in: cut (rise)
 - backdrop: ink

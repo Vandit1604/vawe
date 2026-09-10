@@ -35,7 +35,6 @@ destination: reels
 - onscreen: You built it <b>by hand</b>,
 - narration: You built it by hand,
 - why: open mid-thought so the first cut is a comma and not a door
-- emotion: recognition
 - duration: 2.8s
 - transition_in: cut
 
@@ -50,7 +49,6 @@ destination: reels
 - onscreen: and it <b>looked good</b>,
 - narration: and it looked good,
 - why: the setup has to be genuinely attractive or the reversal is not a reversal
-- emotion: satisfaction
 - duration: 2.6s
 - transition_in: cut
 
@@ -65,7 +63,6 @@ destination: reels
 - onscreen: until the <b>number moved</b>,
 - narration: until one number moved,
 - why: the turn, and it lands on a picture of the damage rather than a word for it
-- emotion: sinking
 - duration: 2.8s
 - transition_in: cut
 
@@ -80,7 +77,6 @@ destination: reels
 - onscreen: and now it is <b>Friday</b> again.
 - narration: and now it is Friday again.
 - why: the cost is repetition, so the frame has to repeat until it is uncomfortable
-- emotion: dread
 - duration: 3.0s
 - transition_in: cut
 
@@ -95,6 +91,5 @@ destination: reels
 - onscreen: <b>Describe it once.</b>
 - narration: So describe it once instead.
 - why: the sentence finally reaches a full stop, on the thing that ends the loop
-- emotion: relief
 - duration: 3.8s
 - transition_in: cut

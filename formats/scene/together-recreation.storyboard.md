@@ -12,7 +12,6 @@ object_last: "the closing line under the halo"
 format: 1920x1080
 theme: "themes/together-chat.json"
 duration: 19.8s
-ramp: "kit-hook for the sentences, kit-body for card titles, kit-caption for every subtitle. The reference uses one face at four sizes."
 pace: "showreel, 1.98s per idea, measured: the study reports a 1.98s median shot and 30.3 shots per minute"
 spectacle: "beat 5 · the input layer · the film pushes into the send button until it fills the frame · it is the reference's own loudest moment and its only extreme scale change"
 not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no third-party logos reproduced · no invented copy: every line is the reference's own"
@@ -51,7 +50,6 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - style: near-white ground, one face, nothing but type
 - rest: none, the typing fills it
 - why: the reference withholds the brand for two seconds and that withholding is the hook
-- emotion: anticipation
 - duration: 2.75s
 - transition_in: cut
 
@@ -71,7 +69,6 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - style: white cards on near-white, separated by depth alone
 - rest: neither surface ever stops travelling
 - why: show the product, then pick out of it the object the film will later push into
-- emotion: recognition
 - duration: 3.95s
 - transition_in: fade
 
@@ -91,7 +88,6 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - style: type only, the accent used once per word and then given up
 - rest: none
 - why: this is the reference's signature type move and the film is a test of whether we can do it
-- emotion: reassurance
 - duration: 2.4s
 - transition_in: fade
 
@@ -111,7 +107,6 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - style: one card, rows of bold over grey, a check on the selected row
 - rest: the card keeps settling through the whole beat
 - why: the proof behind the claim, named
-- emotion: substance
 - duration: 3.2s
 - transition_in: fade
 
@@ -131,7 +126,6 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - style: the loudest moment in the film, and its only extreme scale change
 - rest: none, the push carries it
 - why: the whole film exists to end on the act of asking
-- emotion: momentum
 - duration: 4.1s
 - transition_in: fade
 
@@ -151,6 +145,5 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - style: the quietest frame, one soft edge in a film with no others
 - rest: none
 - why: the reference closes on where the compute lives, and that is its actual differentiator
-- emotion: trust
 - duration: 3.6s
 - transition_in: fade
