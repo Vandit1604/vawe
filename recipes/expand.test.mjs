@@ -249,4 +249,100 @@ assert.throws(() => expandRecipes(enterScene({
   assert.ok(out.camera.some((k) => k.s > 1), 'the dolly pushes in (some key has scale above 1)');
 }
 
+// ---- object-wipe (kind "seam", live lockstep sweep, no gap) ----------------------------------------
+
+function wipeScene(overrides = {}) {
+  return {
+    module: 'scene', aspect: '16:9', duration: 3,
+    recipes: [{ recipe: 'object-wipe', at: 0.5, out: 'pageA', in: 'pageB' }],
+    layers: [
+      { type: 'html', id: 'pageA', x: 0, y: 0, w: 1920, h: 1080, start: 0, duration: 1.5 },
+      { type: 'html', id: 'pageB', x: 0, y: 0, w: 1920, h: 1080, start: 0.5, duration: 1.5 },
+    ],
+    ...overrides,
+  };
+}
+
+// both layers travel the full canvas span in lockstep, arriving together with no gap.
+{
+  const out = expandRecipes(wipeScene());
+  const a = out.layers.find((l) => l.id === 'pageA');
+  const b = out.layers.find((l) => l.id === 'pageB');
+  assert.equal(a.motion[0].x, 0);
+  assert.equal(a.motion[0].t, 0.5);
+  assert.equal(a.motion[1].x, -1920);        // right-to-left default: out leaves toward -x
+  assert.equal(a.motion[1].t, 0.5 + 0.5);    // measured default dur
+  assert.equal(b.start, 0.5);
+  assert.equal(b.motion[0].x, 1920);         // in starts fully off the entry edge
+  assert.equal(b.motion[1].x, 0);
+  assert.equal(b.motion[1].t, 0.5);          // dur, relative to its own (reset) start
+}
+
+// direction override flips the sign.
+{
+  const out = expandRecipes(wipeScene({
+    recipes: [{ recipe: 'object-wipe', at: 0.5, out: 'pageA', in: 'pageB', params: { direction: 'left-to-right' } }],
+  }));
+  const a = out.layers.find((l) => l.id === 'pageA');
+  const b = out.layers.find((l) => l.id === 'pageB');
+  assert.equal(a.motion[1].x, 1920);
+  assert.equal(b.motion[0].x, -1920);
+}
+
+// collision: an already-keyed x on either layer is refused, never overwritten.
+{
+  const s = wipeScene();
+  s.layers.find((l) => l.id === 'pageA').motion = [{ t: 0.2, x: -50 }];
+  assert.throws(() => expandRecipes(s), /already has "x" keys/);
+}
+
+// unknown layer id on either slot
+assert.throws(() => expandRecipes(wipeScene({ recipes: [{ recipe: 'object-wipe', at: 0.5, out: 'ghost', in: 'pageB' }] })), /no layer id "ghost"/);
+assert.throws(() => expandRecipes(wipeScene({ recipes: [{ recipe: 'object-wipe', at: 0.5, out: 'pageA', in: 'ghost' }] })), /no layer id "ghost"/);
+
+// ---- colour-wipe (kind "seam", panel becomes the next ground, no fade) -----------------------------
+
+function colourWipeScene(overrides = {}) {
+  return {
+    module: 'scene', aspect: '16:9', duration: 3,
+    recipes: [{ recipe: 'colour-wipe', at: 1.0, shape: 'panel', out: 'oldContent' }],
+    layers: [
+      { type: 'shape', id: 'panel', x: 0, y: 0, w: 1920, h: 1080, opacity: 1, duration: 2 },
+      { type: 'text', id: 'oldContent', x: 90, y: 480, size: 92, start: 0, duration: 1.5 },
+    ],
+    ...overrides,
+  };
+}
+
+// the panel sweeps in and lands at 0, and STAYS (no fade key written on it).
+{
+  const out = expandRecipes(colourWipeScene());
+  const panel = out.layers.find((l) => l.id === 'panel');
+  assert.equal(panel.start, 1.0);
+  assert.equal(panel.motion[0].x, -1920);    // left-to-right default: panel enters from the left
+  assert.equal(panel.motion[1].x, 0);
+  assert.equal(panel.motion[1].t, 0.067);    // measured default sweepDur
+  assert.ok(!panel.motion.some((k) => k.opacity != null), 'the panel becomes the ground, it never fades');
+}
+
+// the optional `out` layer drops to opacity 0 once the panel has fully covered the frame.
+{
+  const out = expandRecipes(colourWipeScene());
+  const old = out.layers.find((l) => l.id === 'oldContent');
+  assert.ok(old.motion.some((k) => k.opacity === 0 && Math.abs(k.t - (1.0 + 0.067)) < 1e-9));
+}
+
+// `out` is optional: omitting it still expands the panel alone.
+{
+  const out = expandRecipes(colourWipeScene({ recipes: [{ recipe: 'colour-wipe', at: 1.0, shape: 'panel' }] }));
+  const old = out.layers.find((l) => l.id === 'oldContent');
+  assert.ok(!old.motion, 'no `out` slot means no opacity key is written');
+}
+
+// unknown shape layer id
+assert.throws(() => expandRecipes(colourWipeScene({ recipes: [{ recipe: 'colour-wipe', at: 1.0, shape: 'ghost' }] })), /no layer id "ghost"/);
+
+// missing required slot
+assert.throws(() => expandRecipes(colourWipeScene({ recipes: [{ recipe: 'colour-wipe', shape: 'panel' }] })), /missing slot "at"/);
+
 console.log('ok - recipes/expand: keys and windows written on the named layers, every refusal named');

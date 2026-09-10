@@ -144,6 +144,105 @@ function expandSeamLine(scene, line, aspectKey) {
   }
 }
 
+// expandWipeLine: `object-wipe`. Both layers slide the SAME distance along the axis, in lockstep,
+// starting together at `at`: the outgoing layer travels from 0 to off-canvas, the incoming layer
+// travels from off-canvas to 0, so a hard edge sweeps the frame with both scenes live throughout.
+// This is NOT flow-seam's mechanism (sequential exit, an empty-ground gap, then a separate arrival):
+// arc-space-swiping's swipe never shows an empty frame, so there is no gap here at all.
+function expandWipeLine(scene, line, aspectKey) {
+  const name = line.recipe;
+  const bad = (why) => { throw new Error(`recipe "${name}": ${why}`); };
+  const recipe = pickRecipe(name);
+  if (recipe.kind !== 'seam') bad(`expand.mjs only expands kind "seam" here, got "${recipe.kind}"`);
+  for (const slot of ['at', 'out', 'in']) if (line[slot] == null) bad(`missing slot "${slot}"`);
+  const outLayer = findLayer(scene, line.out);
+  if (!outLayer) bad(`no layer id "${line.out}" (the "out" slot)`);
+  const inLayer = findLayer(scene, line.in);
+  if (!inLayer) bad(`no layer id "${line.in}" (the "in" slot)`);
+
+  const axis = paramOf(name, recipe, 'axis', line.params);
+  const direction = paramOf(name, recipe, 'direction', line.params);
+  const dur = paramOf(name, recipe, 'dur', line.params);
+  const ease = paramOf(name, recipe, 'ease', line.params);
+  const prop = AXIS_PROP[axis];
+  const sign = (direction === 'left-to-right' || direction === 'top-to-bottom') ? 1 : -1;
+
+  const [W, H] = sceneDims(scene, aspectKey);
+  const span = axis === 'x' ? W : H;
+
+  const at = line.at;
+  const outStart = outLayer.start ?? 0;
+  if (at < outStart) bad(`"at" (${at}) lands before "${line.out}" even starts (${outStart})`);
+
+  if ((outLayer.motion || []).some((k) => k[prop] != null))
+    bad(`"${line.out}" already has "${prop}" keys; the recipe would collide with them`);
+  if ((inLayer.motion || []).some((k) => k[prop] != null))
+    bad(`"${line.in}" already has "${prop}" keys; the recipe would collide with them`);
+
+  // OUT: slides from its resting position toward the sweep direction and off-canvas, arriving
+  // exactly at `at + dur`. "left-to-right" (sign +1) pushes it off the right edge; "right-to-left"
+  // (sign -1, arc-space-swiping's own measured direction) pushes it off the left edge.
+  outLayer.motion = [...(outLayer.motion || []),
+    { t: at - outStart, [prop]: 0 },
+    { t: (at + dur) - outStart, [prop]: sign * span, ease }];
+  outLayer.duration = Math.max(outLayer.duration ?? 0, (at + dur) - outStart);
+
+  // IN: starts at the same instant, positioned fully off-canvas on the edge the sweep travels FROM
+  // (the opposite side to where the outgoing layer exits), and lands at 0 together with it: the hard
+  // edge between the two never opens a gap.
+  inLayer.start = at;
+  inLayer.motion = [
+    { t: 0, [prop]: -sign * span },
+    { t: dur, [prop]: 0, ease },
+    ...(inLayer.motion || [])];
+}
+
+// expandColourWipeLine: `colour-wipe`. One panel layer sweeps from off-canvas to fully covering the
+// frame and then STAYS: it is the next ground, not a decoration removed once the cut lands (measured
+// off make-it-move t=4.63, where the ground itself changes colour across the same 4-frame window the
+// panel sweeps). An optional `out` layer is dropped to opacity 0 once covered, purely so it stops
+// rendering; the panel already occludes it visually before that.
+function expandColourWipeLine(scene, line, aspectKey) {
+  const name = line.recipe;
+  const bad = (why) => { throw new Error(`recipe "${name}": ${why}`); };
+  const recipe = pickRecipe(name);
+  if (recipe.kind !== 'seam') bad(`expand.mjs only expands kind "seam" here, got "${recipe.kind}"`);
+  for (const slot of ['at', 'shape']) if (line[slot] == null) bad(`missing slot "${slot}"`);
+  const shape = findLayer(scene, line.shape);
+  if (!shape) bad(`no layer id "${line.shape}" (the "shape" slot)`);
+
+  const axis = paramOf(name, recipe, 'axis', line.params);
+  const direction = paramOf(name, recipe, 'direction', line.params);
+  const dur = paramOf(name, recipe, 'sweepDur', line.params);
+  const ease = paramOf(name, recipe, 'ease', line.params);
+  const prop = AXIS_PROP[axis];
+  const sign = (direction === 'left-to-right' || direction === 'top-to-bottom') ? 1 : -1;
+
+  const [W, H] = sceneDims(scene, aspectKey);
+  const span = axis === 'x' ? W : H;
+
+  if ((shape.motion || []).some((k) => k[prop] != null))
+    bad(`"${line.shape}" already has "${prop}" keys; the recipe would collide with them`);
+
+  const at = line.at;
+  shape.start = at;
+  // The panel enters from the edge the sweep travels FROM: "left-to-right" (sign +1, make-it-move's
+  // own measured direction) starts it off-canvas on the left, sliding to 0 so the covering edge moves
+  // left to right as it arrives.
+  shape.motion = [
+    { t: 0, [prop]: -sign * span },
+    { t: dur, [prop]: 0, ease },
+    ...(shape.motion || [])];
+
+  if (line.out) {
+    const outLayer = findLayer(scene, line.out);
+    if (!outLayer) bad(`no layer id "${line.out}" (the "out" slot)`);
+    const outStart = outLayer.start ?? 0;
+    outLayer.motion = [...(outLayer.motion || []),
+      { t: (at + dur) - outStart, opacity: 0 }];
+  }
+}
+
 // boxCenter(L): the stage point a camera dollies toward. w/h fall back the same way the seam's own
 // `extent()` does for a text layer with no authored `h`, so a camera line can target a text layer
 // without the author restating its measured line-height.
@@ -245,7 +344,14 @@ export function expandRecipes(scene, aspectKey = '') {
     .sort((a, b) => a.rank - b.rank || a.i - b.i).map((x) => x.line);
   for (const line of ordered) {
     const kind = pickRecipe(line.recipe).kind;
-    if (kind === 'seam') expandSeamLine(out, line, aspectKey);
+    // Three recipes share kind "seam" but compile through different mechanisms (flow-seam's
+    // sequential exit-then-arrive with a ground gap vs. object-wipe/colour-wipe's lockstep sweep with
+    // none), so the seam branch dispatches on the recipe's own name rather than its kind alone.
+    if (kind === 'seam') {
+      if (line.recipe === 'object-wipe') expandWipeLine(out, line, aspectKey);
+      else if (line.recipe === 'colour-wipe') expandColourWipeLine(out, line, aspectKey);
+      else expandSeamLine(out, line, aspectKey);
+    }
     else if (kind === 'camera') expandCameraLine(out, line);
     else if (kind === 'enter') expandEnterLine(out, line);
     else throw new Error(`recipe "${line.recipe}": expand.mjs does not yet expand kind "${kind}"`);
