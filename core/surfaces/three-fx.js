@@ -104,13 +104,15 @@ function roundedSlab(w, h, d, r) {
 // silent-failure class this repo keeps getting bitten by, and a half-loaded texture would also make
 // the frame depend on network timing, which is a purity break rather than a cosmetic bug.
 function textureFrom(src, what) {
-  const img = new Image();
-  img.src = src;
+  // READ, NEVER LOAD. core/engine/preload.js preloadThree decoded this element before any layer was built.
+  // Building a second `new Image()` here is what raced the render workers; see the comment there.
+  const img = (typeof window !== 'undefined' && window.__threeImages) ? window.__threeImages[src] : null;
+  if (!img) throw new Error(`three ${what}: "${src}" was never preloaded. core/engine/preload.js preloadThree decodes every image string under a three layer, so this one was not in the scene data when boot ran.`);
   const tex = new (T().Texture)(img);
   tex.colorSpace = T().SRGBColorSpace;
   tex.anisotropy = 4;
   return { tex, img, ensure() {
-    if (!img.complete || !img.naturalWidth) throw new Error(`three ${what}: image not decoded at render time (${src}), boot preloads every image-like string, so this means the path is wrong or unreachable`);
+    if (!img.complete || !img.naturalWidth) throw new Error(`three ${what}: preloaded image "${src}" has no pixels at render time, which preloadThree's decode should have made impossible`);
     tex.needsUpdate = true;
   } };
 }
