@@ -7345,6 +7345,41 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   fs.rmSync(tmp, { recursive: true, force: true });
 }
 
+// ---- beats-of: a film's storyboard beat table wins over the layer-start guess ----------------------
+// judge.mjs sampled ONE key frame on a 7-beat film built from a few long full-frame fragments, because
+// beatStarts's clustering only counts layers with track>1 and duration<D*0.7, and a film like that has
+// almost none. The fix: read the declared beat table from `<scene>.storyboard.md` when one exists
+// beside the scene file, and fall back to the old heuristic only when there is none (or no file path
+// to check one against, e.g. a caller scanning many scenes with no single storyboard to read).
+{
+  const { beatStarts } = await import('./beats-of.mjs');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'beats-of-'));
+  const sceneFile = path.join(tmp, 'demo.json');
+  // A scene built from long full-frame fragments: every layer is track 0/1 or near-full-duration, so
+  // the heuristic infers zero beats from it.
+  const scene = { duration: 20, layers: [{ type: 'html', start: 0, duration: 20, track: 1 }] };
+  fs.writeFileSync(sceneFile, JSON.stringify(scene));
+
+  const noStoryboard = beatStarts(scene, 20, sceneFile);
+  ok('beats-of: no storyboard sidecar falls back to the heuristic (zero beats on an all-chrome scene)',
+    noStoryboard.beats.length === 0);
+
+  fs.writeFileSync(path.join(tmp, 'demo.storyboard.md'),
+    '---\nmessage: "x"\nduration: "20s"\n---\n\n' +
+    '## Beat 1: hook (0s-7s)\nobject: the thing\n\n' +
+    '## Beat 2: proof (7s-14s)\nobject: the thing\n\n' +
+    '## Beat 3: payoff (14s-20s)\nobject: the thing\n');
+  const withStoryboard = beatStarts(scene, 20, sceneFile);
+  ok('beats-of: a storyboard sidecar wins, reading its real 3-beat table instead of the heuristic\'s zero',
+    withStoryboard.beats.length === 3 &&
+    withStoryboard.beats[0] === 0 && withStoryboard.beats[1] === 7 && withStoryboard.beats[2] === 14);
+
+  ok('beats-of: omitting the file path (no storyboard to look up) keeps the old two-arg heuristic',
+    beatStarts(scene, 20).beats.length === 0);
+
+  fs.rmSync(tmp, { recursive: true, force: true });
+}
+
 // ---- beat-seams acceptance run (2026-09): five fixes to blueprints/*.mjs, one assert each -----------
 // formats/scene/vawe-explainer-v2.json's seam-check showed a blank field at every `dissolve` boundary
 // (3.67s/7.33s/11.0s): a blueprint's own exitDur faded its content to nothing before the beat's own
