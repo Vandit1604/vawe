@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -294,5 +295,34 @@ func TestCueWithNoBedIsUnchanged(t *testing.T) {
 	}
 	if cue := rmsAt(readWavMono(out), 2, 2.2); math.Abs(cue-0.5*0.45) > 2e-3 {
 		t.Fatalf("with no bed a tick must stay at its table gain 0.45, got %.4f", cue)
+	}
+}
+
+// (l) A cue that resolves to no file used to `continue` without a word (the same failure class the
+// music-bed warning above exists to close): a typo'd name or an unbaked voice cue played SILENCE and
+// nothing said so. It must now name the cue and the time on stderr, restoring the sound-cue doctrine
+// this repo's own comment at the call site cites (docs/MISTAKES.md #492: one synthesiser, in JS).
+func TestUnresolvedCueLogsWarning(t *testing.T) {
+	dir := t.TempDir()
+	out := filepath.Join(dir, "n.wav")
+
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("pipe: %v", err)
+	}
+	real := os.Stderr
+	os.Stderr = w
+	ok, rerr := Render(Config{}, 4, nil, []Cue{{T: 2.5, Name: "typo-name"}}, nil, dir, dir, out)
+	os.Stderr = real
+	w.Close()
+	var buf bytes.Buffer
+	buf.ReadFrom(r)
+	logged := buf.String()
+
+	if !ok || rerr != nil {
+		t.Fatalf("an unresolved cue must not fail the render, only warn: ok=%v err=%v", ok, rerr)
+	}
+	if !strings.Contains(logged, "typo-name") || !strings.Contains(logged, "2.50") {
+		t.Fatalf("stderr must name the cue and its time, got: %q", logged)
 	}
 }

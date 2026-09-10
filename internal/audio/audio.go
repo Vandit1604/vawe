@@ -298,6 +298,10 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 		label := cue.Name
 		clip := loadSfx(cue.Name)
 		if clip == nil {
+			// LOUD, not a silent continue: a cue that resolves to nothing used to drop without a word,
+			// the same class of bug as the music-bed warning above (a typo or an unbaked name plays
+			// SILENCE and nothing says so). Named cue + time, so the author can find it in the JSON.
+			fmt.Fprintf(os.Stderr, "⚠ audio cue %q at t=%.2f resolved to no sound (assets/sfx/%s.wav missing or unreadable): the cue plays SILENCE. Run `make audio`, or check the cue's name/voice.\n", label, cue.T, label)
 			continue
 		}
 		start := int(math.Round(cue.T * sr))

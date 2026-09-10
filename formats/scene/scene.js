@@ -1719,8 +1719,12 @@ const boxOf = (id) => boxes.get(id) || null;
     if (auto) for (const c of (data.cuts || [])) if (c && c.style !== 'none') cues.push({ t: +(+c.t).toFixed(2), name: cutCue(c.style) });
     if (auto) for (const s of stings) cues.push({ t: +(+s.t).toFixed(2), name: 'reveal' });
     if (auto) for (const s of (data.seams || [])) if (s && s.fx && s.fx !== 'none') cues.push({ t: +(+(s.t ?? s.at ?? 0)).toFixed(2), name: SEAM_CUE[s.fx] || 'whoosh' });
-    // author-placed cues always win: { audio: { cues: [{t, name, gain}] } }
-    for (const c of ((data.audio && data.audio.cues) || [])) cues.push({ t: +(+c.t).toFixed(2), name: c.name, gain: c.gain });
+    // author-placed cues always win: { audio: { cues: [{t, name, gain}] } }. `c._bakedName || c.name
+    // || c.voice`: a voice cue with `params` was synthesised server-side and left its cache filename
+    // in `_bakedName` (generators/media/voice-cue.mjs; never `name`, whose schema enum a generated
+    // key can never join); a param-less voice names a role the static bake already ships
+    // (assets/sfx/<voice>.wav) and resolves with no Node step at all.
+    for (const c of ((data.audio && data.audio.cues) || [])) cues.push({ t: +(+c.t).toFixed(2), name: c._bakedName || c.name || c.voice, gain: c.gain });
     cues.sort((a, b) => a.t - b.t || (a.name < b.name ? -1 : 1));
     for (const c of cues) if (!sfx.length || c.t - sfx[sfx.length - 1].t > 0.09) sfx.push(c); // merge simultaneous
     // The STRUCTURAL cues, snapshotted before the keystroke train joins. Read by the tactile pass
