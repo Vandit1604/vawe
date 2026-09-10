@@ -12,7 +12,7 @@ This repo turns **one self-describing JSON → one rendered video** (60fps mp4 f
 |---|---|---|---|
 | 1 | **brief** | ask what the product is, and the four other things a site would have given | `make quiz NAME= URL=` |
 | 2 | **plan** | the beat table, the through-line, the spectacle, the exclusions | `make ideate` → `make scaffold` → `make storyboard-check` |
-| 3 | **approval** | the plan is SHOWN and a person says yes | `make studio D=` (press `1`), then the USER runs `/vawe-approve` |
+| 3 | **approval** | the plan is SHOWN and a person says yes | `make studio D=`, share `http://127.0.0.1:8799/studio` with the approval request, then the USER runs `/vawe-approve` |
 | 4 | **design** | the theme is settled and every frame the plan named is drawn | stage kit → the reference's grammar → the smallest useful `ui-skills` set → `make preview` → look at it |
 | 5 | **assemble** | the frames become a scene | `make assemble D=` |
 | 6 | **direct** | motion, then transitions, then sound, in that order | `make critics D= DECIDERS=1` |
