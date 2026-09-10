@@ -44,7 +44,7 @@ const PURE_FAILS = {
   },
 };
 
-function gateForCode(code) {
+export function gateForCode(code) {
   const files = codesEmitted().get(code);
   if (!files) return null;
   const cands = [...files].filter((f) => f !== 'quality/gates/author-check.mjs');

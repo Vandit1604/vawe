@@ -19,13 +19,25 @@
 //
 // It never blocks. A gate that blocked on this would itself be waived, which is the joke.
 //
+// A BARE waiver ("dead-air") excuses its code for the WHOLE FILM, forever, whichever finding fires:
+// measured, a new 1.0:1 contrast defect on a NEW beat rode through as "(waived)" under an excuse
+// written for a different one. An entry may instead name the ONE instance it excuses, "dead-air@beat:3"
+// (harness/lib/waivers.mjs), matched against exactly what that code's own finding calls `at`. A bare
+// entry still works everywhere it always did; this file and author-check.mjs now also say, every time
+// one is active, how many live findings it is hiding, so a film-wide excuse cannot hide its own size.
+//
 //   node quality/gates/waiver-drift.mjs [<scene.json>]     ·   make waivers [D=<file>]
+//   node quality/gates/waiver-drift.mjs --suggest <scene.json>   the instance-scoped entries that
+//     would excuse exactly today's findings under each bare waiver this film carries, for migrating
+//     off a film-wide excuse without rewriting the film. Never rewrites the file itself.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { population, LIBRARY, AUTHORED } from '../../harness/lib/census.mjs';
-import { gateFindings } from '../../harness/lib/findings.mjs';
-import { codeFiresOn } from '../../harness/lib/code-fires.mjs';
+import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
+import { codeFiresOn, gateForCode } from '../../harness/lib/code-fires.mjs';
+import { splitWaiver, groupWaivers, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENES = path.join(ROOT, 'formats', 'scene');
@@ -44,6 +56,25 @@ let ratchet = { rules: {} };
 const legacyCount = () => 0;
 const legacyHolder = () => false;
 
+// Run the gate that owns `code` over one scene and hand back what it FOUND (not just whether it fired,
+// which is all codeFiresOn answers): the caller wants each finding's `at`, to name the instance a bare
+// waiver is hiding or to suggest the scoped entry that would replace it. `gateForCode` can point back
+// at this very file (someone waived one of waiver-drift's OWN codes, which excuses nothing real but is
+// not this function's problem to fix) or at author-check.mjs (`no-storyboard`, `no-authored-motion`,
+// checked from inside it and never spawnable on their own); both would either recurse or find nothing,
+// so both are refused here rather than spawned.
+let seq = 0;
+const spawnTmp = path.join('/tmp/.waiver-drift', String(process.pid));
+function spawnAndRead(gate, sceneFile) {
+  if (gate === 'quality/gates/waiver-drift.mjs' || gate === 'quality/gates/author-check.mjs') return [];
+  fs.mkdirSync(spawnTmp, { recursive: true });
+  const out = path.join(spawnTmp, `f-${++seq}.json`);
+  spawnSync('node', [path.join(ROOT, gate), sceneFile], {
+    encoding: 'utf8', cwd: ROOT, timeout: 60000, env: { ...process.env, VAWE_FINDINGS_OUT: out },
+  });
+  return readFindings(out) || [];
+}
+
 // ---- the census ----
 const tally = new Map();      // code -> [scene names]
 let total = 0;
@@ -51,12 +82,17 @@ let total = 0;
 // see the library rather than counting what is left (docs/MISTAKES.md #391). `quiet` because the census
 // header below is the line CLAUDE.md quotes, and two counts would invite the drift this gate is about.
 const pop = population('waiver census', { filter: LIBRARY, quiet: true });
+// The census counts by CODE, whatever shape the entry is written in: drift asks whether a RULE is
+// being repealed, and an instance-scoped waiver ("dead-air@beat:3") is still one film choosing to
+// break that rule, same as a bare one. The instance half matters to author-check (which finding it
+// excuses); it does not change whether the film is on this list.
 for (const f of pop.names) {
   let d; try { d = JSON.parse(fs.readFileSync(path.join(SCENES, f), 'utf8')); } catch { continue; }
   total++;
-  for (const c of (d.authoring?.allow || [])) {
-    if (!tally.has(c)) tally.set(c, []);
-    tally.get(c).push(path.basename(f, '.json'));
+  for (const entry of (d.authoring?.allow || [])) {
+    const { code } = splitWaiver(entry);
+    if (!tally.has(code)) tally.set(code, []);
+    tally.get(code).push(path.basename(f, '.json'));
   }
 }
 
@@ -79,6 +115,36 @@ const DRIFT = 0.15;
 const share = (c) => (tally.get(c)?.length || 0) / Math.max(1, total);
 
 // ---- one scene: is what you are about to do already a habit? ----
+// ---- the migration helper: what would replace a bare waiver, without rewriting the film ----
+if (process.argv.includes('--suggest')) {
+  if (!file) { console.error('usage: node quality/gates/waiver-drift.mjs --suggest <scene.json>'); process.exit(2); }
+  if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
+  let d; try { d = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.error(`✗ ${file} is not valid JSON: ${e.message}`); process.exit(1); }
+  const { bare } = groupWaivers(d.authoring?.allow || []);
+  console.log(`\n  WAIVER MIGRATION · ${path.basename(file)}\n`);
+  if (!bare.size) { console.log('  no bare (film-wide) waivers here. Nothing to suggest.\n'); process.exit(0); }
+  for (const c of bare) {
+    if (RETIRED.has(c)) { console.log(`  ${c}: DEAD WAIVER, delete it; nothing to migrate.`); continue; }
+    const gate = gateForCode(c);
+    if (!gate) { console.log(`  ${c}: no gate in the source is known to emit this code. Cannot check what it excuses.`); continue; }
+    const recs = spawnAndRead(gate, file).filter((r) => r.code === c);
+    if (!recs.length) { console.log(`  ${c}: does not fire on this film right now. The bare waiver excuses nothing today; delete it.`); continue; }
+    const named = recs.filter((r) => r.at !== undefined && r.at !== null);
+    if (named.length !== recs.length) {
+      console.log(`  ${c}: fires ${recs.length} time(s), but its gate (${gate}) names no instance (\`at\`) on the`);
+      console.log(`      finding, so there is no scoped form to suggest. Bare is the only shape this code has.`);
+      continue;
+    }
+    const instances = [...new Set(named.map((r) => String(r.at)))];
+    console.log(`  ${c}: replace the bare entry with ${instances.length} scoped one(s), matching today's ${recs.length} finding(s):`);
+    console.log(`      "allow": [${instances.map((i) => `"${c}@${i}"`).join(', ')}]`);
+    console.log(`      "_why": { ${instances.map((i) => `"${c}@${i}": "…"`).join(', ')} }`);
+  }
+  console.log(`\n  This only PRINTS the suggestion; edit the scene yourself. A film not listed above already\n`);
+  console.log(`  has no bare waiver worth narrowing, or narrows to nothing (delete it instead).\n`);
+  process.exit(0);
+}
+
 if (file) {
   if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process.exit(2); }
   let d; try { d = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { process.exit(0); }
@@ -91,28 +157,46 @@ if (file) {
     console.log(`  ✓ this film waives nothing. Census for scale: ${total} scene(s), ${liveCodes} live waiver code(s).\n`);
     process.exit(0);
   }
-  for (const c of mine) {
+  for (const entry of mine) {
+    const { code: c, instance } = splitWaiver(entry);
+    const scope = instance ? `@${instance}` : ' (film-wide)';
     if (RETIRED.has(c)) {
-      console.log(`  ✗ ${c}, DEAD WAIVER: no gate emits this code any more (${RETIRED.get(c)}).`);
+      console.log(`  ✗ ${entry}, DEAD WAIVER: no gate emits this code any more (${RETIRED.get(c)}).`);
       console.log(`      Delete it from "authoring.allow" (and its \`_why\`). It excuses nothing.`);
-      f.warn('dead-waiver', `${c}: no gate emits this code any more (${RETIRED.get(c)}), delete it from "authoring.allow"`, { at: c });
+      f.warn('dead-waiver', `${entry}: no gate emits this code any more (${RETIRED.get(c)}), delete it from "authoring.allow"`, { at: entry });
       continue;
     }
     const others = (tally.get(c) || []).filter((n) => n !== name);
     const pct = Math.round(share(c) * 100);
-    if (!others.length) { console.log(`  ✓ ${c}: waived here and nowhere else. That is a decision.`); continue; }
-    const why = d.authoring?._why?.[c];
-    const line = `${c}: also waived by ${others.length} other film(s) (${pct}% of the library): ${others.slice(0, 6).join(', ')}${others.length > 6 ? ', …' : ''}`;
+    if (!others.length) { console.log(`  ✓ ${entry}${scope}: waived here and nowhere else. That is a decision.`); continue; }
+    const why = d.authoring?._why?.[entry];
+    const line = `${entry}${scope}: also waived by ${others.length} other film(s) (${pct}% of the library, by code): ${others.slice(0, 6).join(', ')}${others.length > 6 ? ', …' : ''}`;
     if (share(c) >= DRIFT) {
       console.log(`  ~ ${line}`);
       console.log(`      At this share the rule is effectively repealed and nothing recorded that decision.`);
       console.log(`      Either fix the films, or change the gate honestly, but stop paying the toll.`);
-      f.warn('waiver-drift', `${line}. At this share the rule is effectively repealed.`, { at: c });
+      f.warn('waiver-drift', `${line}. At this share the rule is effectively repealed.`, { at: entry });
     } else {
       console.log(`  · ${line}`);
-      f.note('waiver-shared', line, { at: c });
+      f.note('waiver-shared', line, { at: entry });
     }
     if (!why) console.log(`      and it carries no \`_why\`, so the argument for breaking it does not exist.`);
+  }
+  // A BARE entry excuses its code film-wide; say how many LIVE findings that hides right now, the same
+  // notice author-check.mjs prints mid-ladder, so waiver-drift and the ladder never disagree about it.
+  {
+    const { bare } = groupWaivers(mine);
+    for (const c of bare) {
+      const gate = gateForCode(c);
+      if (!gate) continue;
+      const recs = spawnAndRead(gate, file);
+      const cov = bareWaiverCoverage(mine, c, recs.filter((r) => r.code === c).map((r) => ({ code: r.code, at: r.at })));
+      if (cov && cov.count > 1) {
+        console.log(`  ~ ${c} is a FILM-WIDE waiver and hides ${cov.count} live finding(s) right now`
+          + `${cov.hasInstanceData ? `: ${cov.instances.join(', ')}` : ', with no per-instance data to tell them apart'}.`);
+        f.warn('bare-waiver-hides-many', `${c}: a bare waiver on ${name} hides ${cov.count} live finding(s) at once`, { at: c });
+      }
+    }
   }
   for (const code of Object.keys(ratchet.rules || {})) {
     if (!legacyHolder(code, name)) continue;
@@ -229,5 +313,57 @@ if (process.argv.includes('--ratchet')) {
     process.exit(1);
   } else {
     console.log(`\n  ✓ within the ratchet. Lower it as films get fixed: node quality/gates/waiver-drift.mjs --ratchet --stamp`);
+  }
+
+  // ---- THE INSTANCE-COUNT RATCHET, same opt-in, a different question --------------------------
+  //
+  // The legacy ratchet above asks how many FILMS still fire a code. This asks something the instance
+  // syntax makes visible for the first time: of the films that waive a code BARE (film-wide, whichever
+  // instance fires), how many live findings does that waiver hide RIGHT NOW, summed across them? A bare
+  // waiver growing quieter as findings get fixed is fine; one growing louder as a NEW instance rides in
+  // under an old excuse is exactly the incident this phase exists to make visible (see header).
+  const INSTANCE_FILE = path.join(ROOT, 'quality/baselines/waiver-instance-ratchet.json');
+  const instanceBaseline = (() => { try { return JSON.parse(fs.readFileSync(INSTANCE_FILE, 'utf8')); } catch { return null; } })();
+  const bareCodes = rows.map(([c]) => c).filter((c) => (tally.get(c) || []).some((n) => {
+    let d; try { d = JSON.parse(fs.readFileSync(path.join(SCENES, `${n}.json`), 'utf8')); } catch { return false; }
+    return groupWaivers(d.authoring?.allow || []).bare.has(c);
+  }));
+  const instanceCurrent = {};
+  for (const c of bareCodes) {
+    const gate = gateForCode(c);
+    if (!gate) { instanceCurrent[c] = instanceBaseline?.[c] ?? 0; continue; } // unknown gate: cannot re-measure, carry the baseline forward rather than guess
+    let n = 0;
+    for (const name of tally.get(c)) {
+      const abs = path.join(SCENES, `${name}.json`);
+      let d; try { d = JSON.parse(fs.readFileSync(abs, 'utf8')); } catch { continue; }
+      if (!groupWaivers(d.authoring?.allow || []).bare.has(c)) continue; // this film scoped its waiver, not bare
+      n += spawnAndRead(gate, abs).filter((r) => r.code === c).length;
+    }
+    instanceCurrent[c] = n;
+  }
+  if (!instanceBaseline) {
+    fs.mkdirSync(path.dirname(INSTANCE_FILE), { recursive: true });
+    fs.writeFileSync(INSTANCE_FILE, `${JSON.stringify(instanceCurrent, null, 1)}\n`);
+    console.log(`\n  ✓ no instance-ratchet baseline yet: recorded the current count(s) to ${path.relative(ROOT, INSTANCE_FILE)}.`);
+  } else {
+    console.log(`\n  ${'code'.padEnd(30)} ${'baseline'.padEnd(9)} now (findings hidden by BARE waivers)`);
+    let grew = false;
+    for (const c of new Set([...Object.keys(instanceBaseline), ...bareCodes])) {
+      const before = instanceBaseline[c] ?? 0, now = instanceCurrent[c] ?? 0;
+      const mark = now > before ? '✗' : now < before ? '↓' : ' ';
+      if (now > before) grew = true;
+      console.log(`  ${mark} ${c.padEnd(28)} ${String(before).padEnd(9)} ${now}`);
+    }
+    if (stamp) {
+      fs.writeFileSync(INSTANCE_FILE, `${JSON.stringify(instanceCurrent, null, 1)}\n`);
+      console.log(`\n  ✓ instance ratchet stamped at the current count(s).`);
+    } else if (grew) {
+      console.log(`\n  ✗ a bare waiver hides MORE findings than the baseline recorded. A NEW instance rode in`);
+      console.log(`    under an old excuse: narrow the waiver (--suggest names the scoped form) or fix the film.`);
+      f.fail('waiver-instance-growth', 'a bare waiver hides more live findings than the recorded baseline; see the table above');
+      process.exit(1);
+    } else {
+      console.log(`\n  ✓ within the instance ratchet.`);
+    }
   }
 }
