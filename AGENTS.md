@@ -5,7 +5,8 @@ Claude Code, Cursor, Codex, or a human with no agent at all. Where a rule leans 
 mechanism (a hook, the Skill tool, a vendored skill), the neutral note beside it says what to do by hand
 instead. `CLAUDE.md` is a short pointer to this file, kept only so Claude Code auto-loads it.
 
-This repo turns **one self-describing JSON → one rendered video** (30fps mp4, at any of **five**
+This repo turns **one self-describing JSON → one rendered video** (60fps mp4 final, 30fps with
+`--draft`; unset `--fps` follows the scene's own `fps` first, `cmd/render/main.go:30`, at any of **five**
 canvases: `16:9` 1920×1080 · `9:16` 1080×1920 · `1:1` 1080×1080 · `4:5` 1080×1350 · `4:3` 1440×1080,
 the table at `core/layout/safe.js:35`; an unnamed ratio is still honoured, fit to the long edge at
 1920). There is exactly **one module: `scene`**, an open canvas of **24 composable layer types**
