@@ -20,7 +20,7 @@ at every duration instead of switching at `CONTINUOUS_ACTION_MAX_S` the way ever
 
 Cold open on the presenter (2-3s) -> VO builds the case, captions carry it (mid-film, 4-6s) -> B-roll
 cutaway to the proof (2-3s) -> back to the presenter for the close (2-3s). Pace band: **3.0-5.0s per
-beat**, the slowest of any type, because the voice track, not a blueprint, sets the rhythm.
+beat**, the slowest of any type, because the voice track, not a device, sets the rhythm.
 
 ## What this type needs that others do not
 
@@ -46,9 +46,9 @@ beat**, the slowest of any type, because the voice track, not a blueprint, sets 
 By role (`make arsenal Q="…"` to search):
 - **hook / cold open**: `blurResolveHook`, `typedHook`
 - **B-roll proof**: `containerFill`, `statReveal`, `terminalReveal`, `verdictProof`
-- **close**: `ctaEnd`, or return to the presenter placeholder with no blueprint at all
+- **close**: `ctaEnd`, or return to the presenter placeholder with no device at all
 
-There is no dedicated "face" blueprint: the presenter slot is always a placeholder rect or a real
+There is no dedicated "face" device: the presenter slot is always a placeholder rect or a real
 `video`/`component` layer, never invented UI.
 
 ## The rules that matter most

@@ -37,7 +37,7 @@ next starts, not to keep pace with a product tour.
   spoil it in the hook. `docs/RULES/payoff-last.md`.
 - **No product needed.** Resist the urge to bolt on a CTA or a brand lockup; an explainer that ends on
   "vawe.dev" when nothing was being sold reads as a bait-and-switch.
-- **A held pace.** Do not chain blueprints at launch-film speed; a fact needs room to be read and
+- **A held pace.** Do not chain devices at launch-film speed; a fact needs room to be read and
   understood before the cut.
 
 ## The motion to reach for
