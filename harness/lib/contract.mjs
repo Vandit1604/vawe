@@ -400,6 +400,116 @@ export function resolvedCamera(b) {
   return (p && !p.error && !p.prose) ? p : null;
 }
 
+// ── THE EYE: every device points somewhere, and the plan has to say where ──────────────────────────
+//
+// The owner's own framing: per-word colour is not decoration, it directs the eye onto the key word,
+// and the same is true of a camera push, a cursor, contrast, size, a blur-to-sharp focus pull. `eye:`
+// on a beat is the line that names the journey: "<where it starts> -> <what pulls it, naming the
+// device> -> <where it lands>", e.g. "eye: terminal title -> cursor travels and the caret blinks ->
+// the prompt bar". For a beat whose device is a word-by-word reveal, the start/land are the WORDS
+// themselves: "eye: \"make\" -> per-word cobalt flash walks the phrase -> \"launch film\"".
+//
+// THE DEVICE MUST BE REAL, the same test every other field on this file already applies to a bare
+// decisive token: it either names one of the words below (a device this repo actually has a mechanism
+// for) or overlaps a capability the beat ALREADY declares in camera:/move:/motion:/use:/recipe: (the
+// SAME word-overlap ranker `make arsenal` uses, score/toks, never a second ranker). A device invented
+// with no mechanism behind it is a promise the film cannot keep.
+export const EYE_DEVICE_WORDS = ['cursor', 'caret', 'camera', 'push', 'dolly', 'travel', 'pan',
+  'dive', 'zoom', 'colour', 'color', 'contrast', 'size', 'scale', 'blur', 'focus', 'motion',
+  'stagger', 'reveal', 'cut', 'draw', 'wordmark', 'flash', 'word-by-word', 'ground', 'type', 'typing'];
+
+const EYE_RE = /^\s*(.+?)\s*->\s*(.+?)\s*->\s*(.+?)\s*$/;
+
+/**
+ * parseEyeLine(raw, beat) -> {start, device, land} | null (unset, same convention as parseEdge) |
+ * {error}. `beat` (a storyboard-parse.mjs beat) is read only for its camera/move/motion/recipe/uses,
+ * the capability fallback the device may resolve against instead of the named list above.
+ */
+export function parseEyeLine(raw, beat) {
+  if (raw == null) return null;
+  const s = String(raw).trim().replace(/^["']|["']$/g, '');
+  if (!s || /^<fill:/i.test(s)) return null;
+  const m = EYE_RE.exec(s);
+  if (!m) return { error: `"${s}" is not "<where it starts> -> <what pulls it, naming the device> -> <where it lands>" (two "->" arrows).` };
+  const [, start, device, land] = m;
+  const dLower = device.toLowerCase();
+  const named = EYE_DEVICE_WORDS.some((w) => dLower.includes(w));
+  let capability = false;
+  if (!named && beat) {
+    const capText = [beat.camera, beat.move, beat.motion, beat.recipe, ...(beat.uses || [])].filter(Boolean).join(' ');
+    const dt = toks(device), ct = toks(capText);
+    capability = dt.some((t) => ct.includes(t));
+  }
+  if (!named && !capability) {
+    return { error: `"${device.trim()}" in "${s}" does not name a known device (${EYE_DEVICE_WORDS.slice(0, 8).join(', ')}, …) or overlap a capability this beat already declares in camera:/move:/motion:/use:/recipe:. Name the real device, or add it to one of those fields first.` };
+  }
+  return { start: start.trim(), device: device.trim(), land: land.trim() };
+}
+
+/** eyeErrors(beats) -> string[] naming every beat whose `eye:` line does not parse or names an unresolved device. */
+export function eyeErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    const p = parseEyeLine(b.eye, b);
+    if (p && p.error) errs.push(`beat ${i + 1} (${b.name}) eye: ${p.error}`);
+  });
+  return errs;
+}
+
+// A beat "has motion" when it declares anything the eye could plausibly be pulled by: a real camera,
+// a layer-scope move, a parts entrance, or a recipe (window-dolly/flow-seam and friends are all
+// motion). A beat with none of those has nothing an `eye:` line would even describe.
+export function hasEyeCandidateMotion(b) {
+  return !!(b.camera || b.move || b.motion || b.recipe || (b.uses && b.uses.length));
+}
+
+// Curated on purpose, narrower than EYE_DEVICE_WORDS above: these are the devices this repo can name
+// in a beat's OWN prose (mechanism:/recipe:/motion:/move:/uses) with little ambiguity. A generic word
+// like "motion" or "camera" appears in nearly every beat's mechanism and would make this check fire on
+// almost everything; these five do not, so a match here is a real, specific device declared and never
+// pointed anywhere.
+export const EYE_NAMED_DEVICE_HINTS = [
+  { re: /per-word|word-by-word|word.*colou?r|colou?r.*word/i, name: 'per-word colour' },
+  { re: /\bcursor\b/i, name: 'cursor' },
+  { re: /\bcaret\b/i, name: 'caret' },
+  { re: /drawOn|\bdraws?\b|\bdrawn\b|\btraces?\b/i, name: 'a drawn line' },
+];
+
+/** declaredEyeDevices(b) -> the names of EYE_NAMED_DEVICE_HINTS this beat's own fields (mechanism,
+ * recipe, move, motion, uses) actually mention. */
+export function declaredEyeDevices(b) {
+  const text = [b.mechanism, b.recipe, b.move, b.motion, ...(b.uses || [])].filter(Boolean).join(' ');
+  return EYE_NAMED_DEVICE_HINTS.filter((h) => h.re.test(text)).map((h) => h.name);
+}
+
+/** eyeUntargetedDevices(b) -> the declared devices (above) this beat's own `eye:` line never mentions.
+ * Empty when the beat names no such device, or its `eye:` line already covers everything it named. */
+export function eyeUntargetedDevices(b) {
+  const declared = declaredEyeDevices(b);
+  if (!declared.length || !b.eye) return [];
+  const p = parseEyeLine(b.eye, b);
+  if (!p || p.error) return [];
+  return declared.filter((name) => !EYE_NAMED_DEVICE_HINTS.find((h) => h.name === name).re.test(p.device));
+}
+
+// Multi-word phrases only, deliberately narrower than EYE_DEVICE_WORDS: a bare word like "travel" or
+// "push" is an ordinary verb as often as it is a device ("the cursor travels" names ONE device, the
+// cursor, not two), so counting single-word hits produced false "competing" findings on prose that was
+// naming one thing twice. A named PHRASE is unambiguous.
+export const EYE_DEVICE_PHRASES = ['per-word colour', 'per-word color', 'word-by-word', 'camera push',
+  'camera dolly', 'camera pan', 'camera dive', 'camera travel', 'blur-to-sharp', 'colour flash',
+  'color flash', 'cursor click', 'drawn line'];
+const EYE_ORDER_WORDS = /\bthen\b|\bfirst\b|\bbefore\b|\bafter\b|\bfollowed by\b|\bwhile\b/i;
+
+/** competingEyeDevices(device) -> the >=2 named phrases a beat's own `eye:` device text pulls toward
+ * at once with no stated order between them, or `null` when there is at most one, or an order is
+ * already stated (Material's one-focal-point-per-transition rule, docs/MOTION-CRAFT.md). */
+export function competingEyeDevices(device) {
+  const dLower = String(device || '').toLowerCase();
+  const hits = EYE_DEVICE_PHRASES.filter((p) => dLower.includes(p));
+  return (hits.length >= 2 && !EYE_ORDER_WORDS.test(dLower)) ? hits : null;
+}
+
 // A boundary description with no cut is a `flow-seam` recipe's job (recipes/README.md), and an author
 // has no reason to know one exists unless it is named. Shared with harness/live/beat-surfacer.mjs (the
 // same push, at storyboard-save time) so the "no cut here" test and the "which recipe to suggest" pick

@@ -149,6 +149,9 @@ export function parseStoryboard(src) {
       // firing it at the exact same instant as the cut, the way every OTHER field on this beat already
       // reaches assemble through this one parser.
       trigger: f('trigger'),
+      // THE EYE (harness/lib/contract.mjs parseEyeLine): where attention starts, what pulls it (naming
+      // the device), and where it lands. Read here the same raw-string way as every field above it.
+      eye: f('eye'),
       // THE PICTURE'S OWN DECISIONS, from CLOSED vocabularies so a gate can compare them rather than
       // admire them. `picture:` and `style:` are prose and always were: an author can describe the
       // wrong object in fluent English and pass every check (docs/MISTAKES.md #596). These three cannot
@@ -184,6 +187,9 @@ export function parseStoryboard(src) {
     // stays restrained. not is the exclusion line, because most generic output is not a wrong decision,
     // it is an un-excluded default.
     pace: field('pace'), spectacle: field('spectacle'), not: field('not'),
+    // THE ATTENTION PATH: one sentence naming where the eye travels across the WHOLE film, the
+    // film-level twin of each beat's own `eye:` line above.
+    attention: field('attention'),
   };
 }
 

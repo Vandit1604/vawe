@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
 import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../../harness/author/storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, transitionInErrors, transitionInWarnings, moveErrors, motionErrors, parseFragmentSpec, arsenalCorpus, useErrors, useWarnings } from '../../harness/lib/contract.mjs';
+import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, transitionInErrors, transitionInWarnings, moveErrors, motionErrors, parseFragmentSpec, arsenalCorpus, useErrors, useWarnings, eyeErrors, hasEyeCandidateMotion, eyeUntargetedDevices, competingEyeDevices, parseEyeLine } from '../../harness/lib/contract.mjs';
 import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
@@ -145,6 +145,32 @@ for (const e of motionErrors(sbBeats)) warn('motion-unknown', e);
 const useCorpus = await arsenalCorpus();
 for (const e of useErrors(sbBeats, useCorpus)) err('use-unresolved', e);
 for (const w of useWarnings(sbBeats, useCorpus)) warn('use-prose', w);
+
+// ── THE EYE: does the plan say where attention goes, per the owner's own framing (docs/CRAFT/
+// DIRECTION.md, "Directing the eye") - every device exists to point the eye somewhere, and naming the
+// device without naming its target is not a plan. WARN, never a blocker: `eye:` is a new field and a
+// blocker here would fail every storyboard written before it existed.
+for (const w of eyeErrors(sbBeats)) warn('eye-unresolved', w);
+sbBeats.forEach((b, i) => {
+  if (hasEyeCandidateMotion(b) && !b.eye) {
+    warn('eye-missing', `beat ${i + 1} (${b.name}) has motion (camera:/move:/motion:/recipe:) but no `
+      + '`eye:` line. Add "eye: <where it starts> -> <what pulls it, naming the device> -> <where it lands>".');
+  }
+  const untargeted = eyeUntargetedDevices(b);
+  for (const name of untargeted) {
+    warn('eye-device-untargeted', `beat ${i + 1} (${b.name}) names "${name}" but its \`eye:\` line does `
+      + `not use it: this device has no stated target. Either point \`eye:\` at what "${name}" pulls the `
+      + 'eye toward, or drop the device.');
+  }
+  const p = parseEyeLine(b.eye, b);
+  const competing = (p && !p.error) ? competingEyeDevices(p.device) : null;
+  if (competing) {
+    warn('eye-competing-focal-points', `beat ${i + 1} (${b.name}) eye: "${b.eye}" pulls toward `
+      + `${competing.join(' and ')} with no stated order between them. Material's own choreography rule: `
+      + '"maintain a clear focal point during transitions" (docs/MOTION-CRAFT.md). Say which pulls '
+      + 'first with "then"/"before"/"after", or drop one.');
+  }
+});
 
 // ── PLAIN CONTENT: a beat that draws a screen/window/app/UI and names no real source for it ────────
 // docs/CRAFT/CONTENT.md: real content (a capture, a real photo, a screen designed for the video) is
