@@ -7545,7 +7545,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // isPlaceholderSurface: the calibration in content-check.mjs itself (vawe-flow's real editor act,
   // madera's real results shot) must NOT trip it; a large flat colourless act must.
   ok('content-check: a real editor act (band slightly) is not a placeholder', !isPlaceholderSurface({ fill: 0.49, band: 'slightly', photo: 0.02, detail: 2.4 }));
-  ok('content-check: a real dense act (band slightly) is not a placeholder', !isPlaceholderSurface({ fill: 0.43, band: 'slightly', photo: 0.23, detail: 14.1 }));
+  ok('content-check: a real dense act (band slightly) is not a placeholder', !isPlaceholderSurface({ fill: 0.68, band: 'slightly', photo: 0.23, detail: 14.1 }));
   ok('content-check: a large flat colourless mock IS a placeholder', isPlaceholderSurface({ fill: 0.5, band: 'not', photo: 0, detail: 1 }));
   ok('content-check: a small flat colourless patch is not (too little of the frame to be the subject)', !isPlaceholderSurface({ fill: 0.1, band: 'not', photo: 0, detail: 1 }));
 }

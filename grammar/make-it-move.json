@@ -65,7 +65,7 @@
    "content": {
     "colorfulness": 0,
     "band": "not",
-    "fill": 0.13,
+    "fill": 0.57,
     "detail": 4,
     "photo": 0
    }
@@ -160,7 +160,7 @@
    "content": {
     "colorfulness": 0,
     "band": "not",
-    "fill": 0.45,
+    "fill": 0.61,
     "detail": 11.5,
     "photo": 0
    }
@@ -193,7 +193,7 @@
    "content": {
     "colorfulness": 10,
     "band": "not",
-    "fill": 0.41,
+    "fill": 0.44,
     "detail": 13,
     "photo": 0.01
    }
@@ -232,7 +232,7 @@
    "content": {
     "colorfulness": 7.9,
     "band": "not",
-    "fill": 0.16,
+    "fill": 0.3,
     "detail": 8,
     "photo": 0.02
    }
