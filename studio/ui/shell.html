@@ -1,85 +1,102 @@
-<!doctype html><html data-theme={{THEME}}><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><meta id=tcol name=theme-color content="#F2F2F2"><title>vawe studio · {{TITLE}}</title>
-<link rel=stylesheet href=/studio/ui/studio.css>
+<!doctype html><html lang=en><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=theme-color content="#16151a"><title>vawe studio · {{TITLE}}</title>
+<link rel=icon href="data:,"><link rel=stylesheet href=/studio/ui/studio.css>
 </head><body data-state=make>
  <h1 class=vh>vawe studio</h1>
  <p id=say class=vh role=status aria-live=polite></p>
- <div id=pick role=region aria-label="the JSON behind what you clicked"><div id=pickhead><b id=pickname>nothing selected</b><button id=pickcopy>copy JSON</button><button id=pickclose>close</button></div><pre id=pickjson></pre></div>
  <div id=peek aria-hidden=true><div id=peekbox><span id=peekt></span></div></div>
- <div id=shell>
-  <aside id=rail>
-   <section class="panel chooser">
-    <h2>chooser</h2>
-    <div class=body>
-     <p id=candstat>Six backdrops for this film, at the playhead. Each one is the real scene with one
-      key changed, rendered as a clip: a still hides speed, scale and direction.</p>
-     <div id=cands></div>
-     <button id=candgo style="width:100%;margin-top:8px">six takes at the playhead</button>
-    </div>
+
+ <header id=top>
+  <svg class=mark viewBox="0 0 32 32" aria-hidden=true><rect width=32 height=32 rx=8 /><path d="M7 13c2.2 0 2.2 6 4.5 6s2.2-6 4.5-6 2.2 6 4.5 6 2.3-6 4.5-6"/></svg>
+  <nav id=crumbs aria-label="composition stack"></nav>
+  <div class=tools>
+   <button id=key class=ib aria-pressed=false aria-label="motion key" title="Motion key"><svg viewBox="0 0 20 20"><path d="M10 3.5l6.5 6.5-6.5 6.5L3.5 10z"/></svg></button>
+   <span class=vr></span>
+   <button id=undo class=ib aria-label=undo title=Undo disabled><svg viewBox="0 0 20 20"><path d="M4.5 8h8a3.5 3.5 0 010 7H9"/><path d="M7.5 5l-3 3 3 3"/></svg></button>
+  </div>
+  <button id=stagechip hidden><span id=stagename></span><svg viewBox="0 0 20 20" aria-hidden=true><rect x=7 y=7 width=9 height=9 rx=2 /><path d="M13 4.5H6A1.5 1.5 0 004.5 6v7"/></svg></button>
+ </header>
+
+ <nav id=states aria-label=state>
+  <button data-state=plan aria-pressed=false title="Plan (1)"><svg viewBox="0 0 20 20"><rect x=3 y=4 width=14 height=12 rx=2 /><path d="M3 9h14M8 9v7"/></svg><span>Plan</span></button>
+  <button data-state=make aria-pressed=true title="Make (2)"><svg viewBox="0 0 20 20"><rect x=3 y=4 width=14 height=9 rx=2 /><path d="M3 16h14M6 16v-3M14 16v-3"/><path class=solid d="M9 6.8v3.4l2.8-1.7z"/></svg><span>Make</span></button>
+  <button data-state=look aria-pressed=false title="Look (3)"><svg viewBox="0 0 20 20"><rect x=3 y=3.5 width=6 height=5.5 rx=1.2 /><rect x=11 y=3.5 width=6 height=5.5 rx=1.2 /><rect x=3 y=11 width=6 height=5.5 rx=1.2 /><rect x=11 y=11 width=6 height=5.5 rx=1.2 /></svg><span>Look</span></button>
+  <button data-state=ship aria-pressed=false title="Ship (4)"><svg viewBox="0 0 20 20"><path d="M10 12.5V3.5M6.5 7L10 3.5 13.5 7"/><path d="M4 11v3.5A1.5 1.5 0 005.5 16h9a1.5 1.5 0 001.5-1.5V11"/></svg><span>Ship</span></button>
+  <button id=keyshelp class=ib popovertarget=keys aria-label="keyboard shortcuts" title=Keys><svg viewBox="0 0 20 20"><rect x=2.5 y=5.5 width=15 height=9 rx=2 /><path d="M5.5 8.5h1M9.5 8.5h1M13.5 8.5h1M7 11.5h6"/></svg></button>
+ </nav>
+ <div id=keys popover aria-label="keyboard shortcuts">
+  <dl>
+   <dt><kbd>space</kbd></dt><dd>Play, pause</dd>
+   <dt><kbd>&larr;</kbd><kbd>&rarr;</kbd></dt><dd>Frame</dd>
+   <dt><kbd>shift</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd></dt><dd>Second</dd>
+   <dt><kbd>home</kbd><kbd>end</kbd></dt><dd>Start, end</dd>
+   <dt><kbd>&uarr;</kbd><kbd>&darr;</kbd></dt><dd>Layer</dd>
+   <dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></dt><dd>Plan, make, look, ship</dd>
+   <dt><kbd>esc</kbd></dt><dd>Deselect</dd>
+  </dl>
+ </div>
+
+ <main id=main>
+  <aside id=rail aria-label=properties>
+   <div class=phead><h2 id=proptitle>Layer</h2>
+    <button id=propclose class=ib aria-label="collapse panel" title=Collapse aria-controls=rail><svg viewBox="0 0 20 20"><path d="M10 6l-4 4 4 4M15 6l-4 4 4 4"/></svg></button></div>
+   <section class=psec id=propempty><p>Select a layer</p></section>
+   <section class=psec id=props hidden></section>
+   <section class=psec id=propjson hidden>
+    <details><summary>JSON<svg viewBox="0 0 20 20" aria-hidden=true><path d="M10 5v10M5 10h10"/></svg></summary><pre id=pickjson></pre></details>
+    <button id=pickcopy class=wide>Copy JSON</button>
    </section>
-   <section class="panel keys">
-    <h2>keys</h2>
-    <div class=body>
-     <p><kbd>space</kbd> play, pause</p>
-     <p><kbd>&larr;</kbd><kbd>&rarr;</kbd> a frame</p>
-     <p><kbd>shift</kbd>+<kbd>&larr;</kbd><kbd>&rarr;</kbd> a second</p>
-     <p><kbd>home</kbd><kbd>end</kbd> the ends</p>
-     <p><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> plan, make, look, ship</p>
-    </div>
+   <p id=sel role=status></p>
+   <section class="psec chooser">
+    <div class=shead><span>Backdrops</span><button id=candgo>Six takes</button></div>
+    <div id=candstat></div>
+    <div id=cands></div>
    </section>
   </aside>
-  <div id=main>
-   <div id=top>
-    <div id=states role=group aria-label="what you are doing">
-     <button data-state=plan aria-pressed=false>plan</button><button data-state=make aria-pressed=true>make</button
-     ><button data-state=look aria-pressed=false>look</button><button data-state=ship aria-pressed=false>ship</button>
-    </div>
-    <nav id=crumbs aria-label="composition stack"></nav>
-    <span class=sp></span>
-    <button id=key aria-pressed=false title="drag the selected layer on the picture to write a motion key"><svg viewBox="0 0 16 16"><path d="M8 2l6 6-6 6-6-6z"/></svg>key</button>
-    <button id=undo><svg viewBox="0 0 16 16"><path d="M3 8h7a3 3 0 010 6H7"/><path d="M6 5L3 8l3 3"/></svg>undo</button>
-    <button id=tgl aria-expanded=true aria-controls=tl><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>timeline</button>
-    <button id=theme><svg viewBox="0 0 16 16"><circle cx=8 cy=8 r="5.5"/><path d="M8 2.5v11"/></svg>theme: <span id=themetxt>light</span></button>
-   </div>
-   <div id=stage role=status aria-label="which stage this film is at"><span id=stagedots></span><span id=stagenext></span></div>
+
+  <div id=work>
    <div id=centre>
     <div id=stage><iframe id=sc title="scene preview" src="{{IFRAME_SRC}}"></iframe><div id=selbox><i class=tl></i><i class=tr></i><i class=bl></i><i class=br></i><b></b></div><div id=drag></div><div id=err role=alert hidden></div></div>
     <div id=bar>
-     <button id=play aria-label="play or pause"><svg class=solid viewBox="0 0 16 16"><path d="M4 2.5l9 5.5-9 5.5z"/></svg>play</button>
-     <input id=scrub type=range min=0 max=100 value=0 step=1 aria-label="frame">
-     <span id=read>frame <b>0</b> <span class=of>/ 0</span> <span class=of>·</span> 0.00<span class=of>s</span></span>
+     <span class=l><button id=propopen class=ib aria-label="show panel" title="Show panel" aria-controls=rail hidden><svg viewBox="0 0 20 20"><path d="M5 6l4 4-4 4M10 6l4 4-4 4"/></svg></button></span>
+     <span class=c>
+      <button id=prev class=ib aria-label="previous frame" title="Previous frame"><svg class=solid viewBox="0 0 20 20"><rect x=4 y=4.5 width=2 height=11 rx=.8 /><path d="M15.5 4.8v10.4L7.5 10z"/></svg></button>
+      <button id=play class="ib big" aria-label=play title=Play><svg class=solid viewBox="0 0 20 20"><path d="M6 3.8v12.4L16 10z"/></svg></button>
+      <button id=next class=ib aria-label="next frame" title="Next frame"><svg class=solid viewBox="0 0 20 20"><rect x=14 y=4.5 width=2 height=11 rx=.8 /><path d="M4.5 4.8v10.4l8-5.2z"/></svg></button>
+     </span>
+     <span class=r><button id=fs class=ib aria-label=fullscreen title=Fullscreen><svg viewBox="0 0 20 20"><path d="M4 8V5a1 1 0 011-1h3M12 4h3a1 1 0 011 1v3M16 12v3a1 1 0 01-1 1h-3M8 16H5a1 1 0 01-1-1v-3"/></svg></button></span>
     </div>
-    <div id=sel>click a layer in the picture, or a bar in the timeline, to select it</div>
    </div>
-   <div id=pane>
-    <section id=planpane>
-     <div class=panehead><b>the plan</b><span id=planpath>the storyboard this film was written from</span><span class=sp></span><button id=planredraw>reload</button></div>
-     <div class=paneview id=planview><div id=planbody></div><div class=empty id=plannote hidden></div></div>
-    </section>
-    <section id=lookpane>
-     <div class=panehead>
-      <button data-sheet=beats aria-pressed=true>beats</button>
-      <button data-sheet=frames aria-pressed=false>key frames</button>
-      <button data-sheet=seams aria-pressed=false>seams</button>
-      <span id=lookwhat></span><span class=sp></span><span id=lookstat></span><span class=muted>click the sheet for real pixels</span>
-     </div>
-     <div id=sheetwrap><button id=sheetzoom hidden aria-label="show the sheet at real pixels" aria-pressed=false><img id=sheet alt="contact sheet"></button><div id=sheetnote hidden></div></div>
-     <div id=jump></div>
-    </section>
-    <section id=shippane>
-     <div class=panehead><b>can it go out</b><span class=sp></span><span id=shipstat></span></div>
-     <div class=paneview><div class=empty id=shipbody></div></div>
-    </section>
-   </div>
-   <div id=split role=separator aria-orientation=horizontal aria-label="resize the timeline, arrow up and down"
-        tabindex=0 aria-valuemin=96 aria-valuenow=240></div>
+   <div id=split role=separator aria-orientation=horizontal aria-label="resize the timeline"
+        tabindex=0 aria-valuemin=96 aria-valuenow=360></div>
    <div id=tl>
-    <div id=tlhead><b id=tlwhat>timeline</b>
-     <span class=zoom><button id=zout aria-label="zoom out" title="zoom out">&minus;</button><button id=zfit aria-label="fit the whole film" title="fit the whole film">fit</button><button id=zin aria-label="zoom in" title="zoom in">+</button><s id=zlab>1.0x</s></span>
-     <span class=sp></span><span id=tlkey></span></div>
+    <div id=tlhead>
+     <span class=l><b id=tlwhat></b><span id=tlkey></span></span>
+     <span id=read class=c></span>
+     <span class="r zoom"><button id=zout class=ib aria-label="zoom out" title="Zoom out" disabled><svg viewBox="0 0 20 20"><path d="M5 10h10"/></svg></button><button id=zin class=ib aria-label="zoom in" title="Zoom in"><svg viewBox="0 0 20 20"><path d="M10 5v10M5 10h10"/></svg></button><button id=zfit class=ib aria-label="fit the whole film" title=Fit disabled><svg viewBox="0 0 20 20"><path d="M2.5 10h5M5.5 8l2 2-2 2M17.5 10h-5M14.5 8l-2 2 2 2"/></svg></button><s id=zlab>1.0x</s></span>
+    </div>
     <div id=alerts></div>
-    <div id=tlbody><div id=lanes tabindex=0 role=group aria-label="timeline: left and right seek, up and down select a layer"><div id=ruler></div><div id=film></div><div id=rows></div></div><div id=ph></div><div id=hov></div></div>
+    <div id=tlbody><div id=lanes tabindex=0 role=group aria-label=Timeline><div id=ruler></div><div id=film></div><div id=rows></div></div><div id=ph></div><div id=hov></div></div>
    </div>
   </div>
- </div>
+
+  <div id=pane>
+   <section id=planpane>
+    <div class=panehead><b>Plan</b><span id=planpath></span><span class=sp></span><button id=planredraw>Reload</button></div>
+    <div class=paneview id=planview><div id=planbody></div><div class=empty id=plannote hidden></div></div>
+   </section>
+   <section id=lookpane>
+    <div class=panehead>
+     <div class=seg role=group aria-label=sheet><button data-sheet=beats aria-pressed=true>Beats</button><button data-sheet=frames aria-pressed=false>Key frames</button><button data-sheet=seams aria-pressed=false>Seams</button></div>
+     <span class=sp></span><span id=lookstat></span>
+    </div>
+    <div id=sheetwrap><button id=sheetzoom hidden aria-label="show the sheet at real pixels" aria-pressed=false><img id=sheet alt="contact sheet"></button><div id=sheetnote hidden></div></div>
+    <div id=jump hidden></div>
+   </section>
+   <section id=shippane>
+    <div class=panehead><b>Beat-check</b><span class=sp></span><span id=shipstat></span></div>
+    <div class=paneview><div class=empty id=shipbody></div></div>
+   </section>
+  </div>
+ </main>
 <script src=/studio/ui/studio.js></script>
 </body></html>
