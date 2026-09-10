@@ -90,6 +90,16 @@ const paramsOf = (f) => {
   return new Set(names.map((n) => n.split('=')[0].trim()).filter(Boolean));
 };
 
+/** cameraMoveParams(name) → the Set of param names this move's own signature reads, or null when the
+ * move is not a plain destructured (params)=>keys generator (nothing here isn't, but a future one
+ * might not be). Exported so a plan-time reader (harness/lib/contract.mjs, the `camera:` beat field)
+ * can validate a param name against the SAME source `buildCameraMove` already reads, rather than a
+ * second hand-kept list that drifts the first time a move gains a param. */
+export function cameraMoveParams(name) {
+  const f = CAMERA_MOVES[name];
+  return f ? paramsOf(f) : null;
+}
+
 // A move that centres a POINT needs to know the frame it is centring in. Landscape is only the default
 // because this module cannot see the scene; the sugar path can, so it must pass it.
 const TARGETING = new Set(['diveIn', 'workspaceZoomOut', 'travel', 'followCursor']);

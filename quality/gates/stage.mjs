@@ -20,6 +20,12 @@ import { fileURLToPath } from 'node:url';
 import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../harness/author/storyboard-parse.mjs';
 import { population, LIBRARY } from '../../harness/lib/census.mjs';
 import { route } from '../../harness/author/route.mjs';
+import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS } from '../../core/camera-moves/index.js';
+import { TRANSITIONS } from '../../core/transitions/catalog.js';
+import { PRESETS as KINETIC_PRESETS, PRESET_BLURBS as KINETIC_BLURBS } from '../../core/type/type.js';
+import { EASINGS } from '../../core/motion/motion.js';
+// score/toks: the SAME ranker `make arsenal` uses (harness/author/arsenal.mjs), never a second one.
+import { score, toks } from '../../harness/author/arsenal.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -122,6 +128,39 @@ export function roster({ all = false, cap = 12 } = {}) {
   return { n: rows.length, total: pop.names.length, rows: shown, hidden: rows.length - shown.length, worst };
 }
 
+// ADOPTION: a WORKLIST, never a gate. Measured (AGENTS.md's build brief): the core carries 14 camera
+// moves, a wide transition catalog, 31 kinetic presets, 42 easings, and across 42 authored films almost
+// none of it is reached for. `make stage` is where an author already looks every turn, so this is the
+// one place a film's own worklist can be pushed rather than left for `make arsenal` to be asked about.
+// Read off the STORYBOARD text (not the built scene): at `design` the scene has no layers yet, and a
+// single source keeps the count honest at both stages it prints for.
+function familyRow(label, names, blurbOf, text) {
+  const used = names.filter((n) => text.includes(`"${n}"`) || new RegExp(`\\b${n}\\b`).test(text));
+  const unused = names.filter((n) => !used.includes(n));
+  const qt = toks(text);
+  const suggestions = unused
+    .map((n) => ({ name: n, s: score({ name: n, kind: label, blurb: blurbOf(n) || '' }, qt) }))
+    .filter((e) => e.s > 0)
+    .sort((a, b) => b.s - a.s)
+    .slice(0, 3)
+    .map((e) => e.name);
+  return { label, used: used.length, total: names.length, suggestions };
+}
+
+/** adoptionReport(film) -> rows[] | null (no storyboard yet). Exported for `--json`. */
+export function adoptionReport(film) {
+  const p = filePaths(film);
+  if (!fs.existsSync(p.sb)) return null;
+  const text = fs.readFileSync(p.sb, 'utf8');
+  const transitionNames = [...new Set(TRANSITIONS.map((t) => t.name))];
+  return [
+    familyRow('camera moves', CAMERA_MOVE_NAMES, (n) => CAMERA_MOVE_BLURBS[n], text),
+    familyRow('transitions', transitionNames, () => '', text),
+    familyRow('kinetic presets', Object.keys(KINETIC_PRESETS), (n) => KINETIC_BLURBS[n], text),
+    familyRow('easings', Object.keys(EASINGS), () => '', text),
+  ];
+}
+
 // Stage 1 has no film yet, so stageOf() has nothing to read. What DOES exist is the same deliverable
 // router the planning skill uses (harness/author/route.mjs), reachable so far only by an agent that
 // already knew it existed. Q= runs it and states the same brief-stage answer stageOf() would once a
@@ -165,10 +204,22 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 
   const st = stageOf(arg);
-  if (json) { console.log(JSON.stringify(st, null, 2)); process.exit(0); }
+  // A worklist, printed only where an author is already about to REACH for one of these families:
+  // design (writing fragments) and direct (motion/transition/sound). Earlier stages have nothing to
+  // adopt yet; later stages have already made the calls this is meant to prompt, not re-litigate.
+  const adoption = ['design', 'direct'].includes(st.stage) ? adoptionReport(st.base) : null;
+  if (json) { console.log(JSON.stringify({ ...st, adoption }, null, 2)); process.exit(0); }
   const line = st.order.map((id) => (id === st.stage ? `[${id}]` : id)).join(' → ');
   console.log(`\n  ${st.name} is at stage ${st.stage.toUpperCase()}`);
   console.log(`  ${line}`);
   console.log(`\n  why: ${st.why}`);
   console.log(`  do:  ${st.next}\n`);
+  if (adoption) {
+    console.log(`  adoption (this film's storyboard, against what the core has):`);
+    for (const r of adoption) {
+      const sug = r.suggestions.length ? ` · try: ${r.suggestions.join(', ')}` : '';
+      console.log(`    ${r.label.padEnd(16)} ${r.used}/${r.total} used${sug}`);
+    }
+    console.log('');
+  }
 }

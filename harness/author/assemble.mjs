@@ -21,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMoveEntries, moveErrors, moveKeys, pathMotion, transitionInErrors, resolvedTransitionIn, parseRecipeLine, recipeErrors } from '../lib/contract.mjs';
+import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMoveEntries, moveErrors, moveKeys, pathMotion, transitionInErrors, resolvedTransitionIn, parseRecipeLine, recipeErrors, cameraErrors, resolvedCamera, cameraContinuityErrors } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
@@ -41,13 +41,19 @@ import { boundaryMechanism } from '../../core/transitions/lower.js';
 // layer that was correct before a re-assemble can now point at nothing. Carrying it silently would be
 // worse than dropping it was, so each one is reported by name and any whose window falls outside the
 // new film is warned about.
-// `camera` sits here beside `cameraMove` because the DIRECT stage writes it and the ASSEMBLE stage
-// used to destroy it. harness/author/motion-director.mjs emits a resolved `camera` track (stage 6
-// of the eight), and re-running assemble (stage 5) dropped it without a word, so going back one
-// step to fix a fragment silently threw away every camera move that had been directed. This file
-// generates no camera of its own (see the header: kept thin on purpose), so it has no claim on the
-// field and no business deleting it.
-const PRESERVED_FILM_FIELDS = ['cameraMove', 'camera'];
+// `camera` sits here because the DIRECT stage writes it and the ASSEMBLE stage used to destroy it.
+// harness/author/motion-director.mjs emits a resolved `camera` track (stage 6 of the eight), and
+// re-running assemble (stage 5) dropped it without a word, so going back one step to fix a fragment
+// silently threw away every camera move that had been directed. This file builds no `camera` keyframe
+// array of its own, so it has no claim on the field and no business deleting it.
+//
+// `cameraMove` is DIFFERENT since a beat can now declare `camera:` (harness/lib/contract.mjs
+// parseCameraLine/resolvedCamera): this pass DOES generate `cameraMove` entries, one per beat that
+// resolves one, windowed to that beat. So `cameraMove` is preserved-as-is only when NO beat declares a
+// `camera:` line (byte-identical for every film that never writes one); the moment one does, this pass
+// owns the field the same way it owns htmlLayers/objectLayer, regenerating it whole each run rather
+// than merging, so a re-assemble stays idempotent instead of appending a duplicate leg every time.
+const PRESERVED_FILM_FIELDS = ['camera'];
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv[2];
@@ -94,6 +100,18 @@ const recipeErrs = recipeErrors(beats);
 if (recipeErrs.length) {
   console.error(`assemble: a recipe: does not parse (recipes/README.md for the catalog):`);
   for (const e of recipeErrs) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
+const cameraErrs = cameraErrors(beats);
+if (cameraErrs.length) {
+  console.error(`assemble: a camera: does not parse (\`make arsenal Q="camera moves"\` for the catalog):`);
+  for (const e of cameraErrs) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
+const cameraContinuityErrs = cameraContinuityErrors(beats);
+if (cameraContinuityErrs.length) {
+  console.error(`assemble: a camera: pairing would snap at a cut-free (recipe:) seam:`);
+  for (const e of cameraContinuityErrs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }
 
@@ -477,13 +495,23 @@ const bg = rotation
 const cutFx = look.cuts.default || 'fade';
 let cutMech;
 try { cutMech = boundaryMechanism(cutFx, 'seam'); } catch { cutMech = undefined; }
+// A BOUNDARY WHOSE ARRIVING BEAT CARRIES `recipe:` GETS NO DEFAULT CUT. recipes/README.md's own seam
+// (e.g. `flow-seam`) IS the boundary: a continuous flow-through with no cut at all, measured off a real
+// film (madera, vawe-flow: zero `transitions[]` entries, every joint a recipe). Forcing the theme's
+// default cut/fade on top of that seam does not decorate it, it fights it: two mechanisms racing the
+// same boundary. An author who wants BOTH still can, by naming an explicit `transition_in:` on that
+// same beat (checked first, unchanged), the same "an explicit decision always wins" rule every other
+// field here already keeps.
 const transitions = beats.slice(1).map((b, i) => {
   const named = resolvedTransitionIn(b);
-  if (!named) return { at: shiftedStart[i + 1], fx: cutFx, ...(cutMech ? { mech: cutMech } : {}) };
-  let mech;
-  try { mech = boundaryMechanism(named.fx, 'seam'); } catch { mech = undefined; }
-  return { at: shiftedStart[i + 1], fx: named.fx, ...(mech ? { mech } : {}) };
-});
+  if (named) {
+    let mech;
+    try { mech = boundaryMechanism(named.fx, 'seam'); } catch { mech = undefined; }
+    return { at: shiftedStart[i + 1], fx: named.fx, ...(mech ? { mech } : {}) };
+  }
+  if (b.recipe) return null;   // the recipe seam IS the boundary; no default cut on top of it
+  return { at: shiftedStart[i + 1], fx: cutFx, ...(cutMech ? { mech: cutMech } : {}) };
+}).filter(Boolean);
 
 // ---- recipes: structure copied from real video, on the beat whose START is the seam --------------
 // `at` is the beat's own SHIFTED start (a staged junction moves it, same as bg/transitions above): a
@@ -499,6 +527,88 @@ const recipes = beats
     const rp = parseRecipeLine(b.recipe);
     return { recipe: rp.name, at: shiftedStart[i], ...rp.slots, ...(Object.keys(rp.params).length ? { params: rp.params } : {}) };
   });
+
+// ---- camera: a beat's `camera:` line, windowed to that beat's own SHIFTED start/duration -----------
+// `camera:` names a move (or a camera-word phrase), the same "name first, params after" grammar
+// `recipe:`/`move:` already use; harness/lib/contract.mjs parseCameraLine/resolvedCamera do the parsing
+// and the "is this move real" check (cameraErrors, refused above, prose left documentary). This pass's
+// own job is narrow: WINDOW it. Every move here reads `start`/`dur` off its own signature
+// (core/camera-moves/*.js), so the window is exactly the beat's own shifted start/duration UNLESS the
+// beat's own params already named one (an explicit override wins, never silently clobbered).
+const cameraSpecs = [];
+beats.forEach((b, i) => {
+  const r = resolvedCamera(b);
+  if (!r) return;
+  const beatStart = shiftedStart[i];
+  const beatDur = +(shiftedEnd[i] - shiftedStart[i]).toFixed(3);
+  cameraSpecs.push({ i, spec: { move: r.move, start: r.params.start ?? beatStart, dur: r.params.dur ?? beatDur, ...r.params } });
+});
+const cameraConflicts = [];
+// `followLayer` resolves at RENDER time off a live layer box (core/camera-moves/follow.js), not a
+// keyframe array, so it cannot be one leg among others: core/engine/produce.js bakeCameraMove refuses
+// a `cameraMove` array of length > 1 that contains it. Two beats naming camera: independently is
+// exactly how that array grows past 1, so it is caught HERE, with the beats named, rather than left to
+// surface as an opaque render-time throw with no storyboard line to point at.
+if (cameraSpecs.length > 1) {
+  const followLayerBeats = cameraSpecs.filter((c) => c.spec.move === 'followLayer');
+  if (followLayerBeats.length) {
+    console.error(`assemble: a camera: cannot be combined with another beat's camera::`);
+    console.error(`  ✗ beat ${followLayerBeats[0].i + 1} (${beats[followLayerBeats[0].i].name}) declares `
+      + `\`camera: followLayer ...\`, which tracks a live layer box at render time and cannot be one leg `
+      + `among others (core/engine/produce.js bakeCameraMove). It must be the ONLY beat this film gives a `
+      + `camera: line. Other beat(s) with a camera: line: ${cameraSpecs.filter((c) => c.spec.move !== 'followLayer').map((c) => c.i + 1).join(', ')}.`);
+    process.exit(1);
+  }
+}
+if (cameraSpecs.length) {
+  // A hand-keyed `camera[]` (stage 6, motion-director.mjs) is a SECOND way of building the same field
+  // this pass now writes. Both are legal on their own; both at once, overlapping the same seconds, is
+  // not a decision anybody made, it is two decisions racing. Refused with BOTH named, never silently
+  // picking one, the same rule chainErrors already enforces for the continuous object.
+  const handCamera = Array.isArray(scene.camera) ? scene.camera : null;
+  if (handCamera && handCamera.length) {
+    const times = handCamera.map((k) => k && k.t).filter((t) => typeof t === 'number');
+    const camMin = Math.min(...times), camMax = Math.max(...times);
+    for (const { i, spec } of cameraSpecs) {
+      const winEnd = +(spec.start + (spec.dur ?? 0)).toFixed(3);
+      if (spec.start <= camMax && winEnd >= camMin) {
+        cameraConflicts.push(`beat ${i + 1} (${beats[i].name}) camera: "${spec.move}" windows ${spec.start}s-${winEnd}s, `
+          + `and this film already carries a hand-keyed \`camera[]\` spanning ${camMin}s-${camMax}s. Keep one: `
+          + `drop the beat's camera: line, or remove/retime the hand-keyed camera.`);
+      }
+    }
+  }
+  // A `recipe:` of kind "camera" (e.g. `window-dolly`) ALSO writes into `cameraMove`, but not until
+  // render-time expand (recipes/expand.mjs expandCameraLine), which APPENDS its own leg to whatever
+  // this pass already wrote, with no ordering or overlap check of its own. `bakeCameraMove`
+  // (core/engine/produce.js) just CONCATENATES every spec's keyframes in array order, and `cameraAt`
+  // (core/timeline/sequence.js) walks that array assuming ascending time; two specs racing the same
+  // seconds, or landing out of order, is not a decision anybody made. `from`/`to` on a camera-kind
+  // recipe line are both author-filled seconds (recipeErrors already required them), so the window is
+  // knowable HERE, before either side is built, and is refused with both named.
+  for (let bi = 0; bi < beats.length; bi++) {
+    const b = beats[bi];
+    if (!b.recipe) continue;
+    const rp = parseRecipeLine(b.recipe);
+    if (rp.error || !rp.def || rp.def.kind !== 'camera') continue;
+    const rFrom = Number(rp.slots.from), rTo = Number(rp.slots.to);
+    if (!Number.isFinite(rFrom) || !Number.isFinite(rTo)) continue;   // recipeErrors already caught a missing/bad slot
+    for (const { i, spec } of cameraSpecs) {
+      const winEnd = +(spec.start + (spec.dur ?? 0)).toFixed(3);
+      if (spec.start < rTo && winEnd > rFrom) {
+        cameraConflicts.push(`beat ${i + 1} (${beats[i].name}) camera: "${spec.move}" windows ${spec.start}s-${winEnd}s, `
+          + `and beat ${bi + 1} (${b.name})'s \`recipe: ${rp.name}\` (kind camera) windows ${rFrom}s-${rTo}s. `
+          + `Both write into cameraMove, and the engine cannot referee two camera specs racing the same seconds `
+          + `(bakeCameraMove concatenates in array order, cameraAt assumes ascending time). Move one, or drop one.`);
+      }
+    }
+  }
+}
+if (cameraConflicts.length) {
+  console.error(`assemble: a camera: move conflicts with this film's existing hand-keyed camera:`);
+  for (const e of cameraConflicts) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
 
 // ---- ownership: what this pass generated, against what the last one (or a hand edit) left behind ----
 const newDuration = shiftedEnd[shiftedEnd.length - 1];
@@ -526,6 +636,8 @@ const out = {
   ...(scene.authoring ? { authoring: scene.authoring } : {}),   // preserve a hand-written waiver across re-assembles
   audio: scene.audio || { auto: true },
   ...Object.fromEntries(preservedFilmFields.map((k) => [k, scene[k]])),
+  ...(cameraSpecs.length ? { cameraMove: cameraSpecs.map((c) => c.spec) }
+    : (scene.cameraMove !== undefined ? { cameraMove: scene.cameraMove } : {})),
   bg,
   transitions,
   ...(recipes.length ? { recipes } : {}),
@@ -542,6 +654,7 @@ const motionCount = htmlLayers.reduce((n, l) => n + (l.parts ? l.parts.length : 
 console.log(`  ${motionCount} motion-plan entr${motionCount === 1 ? 'y' : 'ies'} from the storyboard (\`motion:\`), built into ${htmlLayers.filter((l) => l.parts).length} scene(s)' \`parts\``);
 console.log(`  ${movesBuilt.length} sustained move(s) from the storyboard (\`move:\`)${movesBuilt.length ? `: ${movesBuilt.join(', ')}` : ', no beat asked for one'}`);
 console.log(`  ${recipes.length} recipe(s) from the storyboard (\`recipe:\`)${recipes.length ? `: ${recipes.map((r) => `${r.recipe}@${r.at}s`).join(', ')}` : ', no beat asked for one'}`);
+console.log(`  ${cameraSpecs.length} camera move(s) from the storyboard (\`camera:\`)${cameraSpecs.length ? `: ${cameraSpecs.map((c) => `${c.spec.move}@${c.spec.start}s`).join(', ')}` : ', no beat asked for one'}`);
 if (chain.length) {
   const poseBits = [usesSize && 'size', usesRot && 'rotation', usesOpacity && 'opacity', usesRadius && 'radius'].filter(Boolean);
   console.log(`  pose: ${poseBits.length ? poseBits.join(' + ') + ' keyed alongside position' : 'position only (no beat declared a size/rot/op change)'}`);

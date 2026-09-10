@@ -44,7 +44,14 @@ import { IDLE_NAMES } from '../../core/engine/idle.js';
 import { CURVES as PATH_CURVES } from '../../core/motion/path-curves.js';
 import { boundaryMechanism } from '../../core/transitions/lower.js';
 import { TRANSITIONS } from '../../core/transitions/catalog.js';
-import { pickRecipe } from '../../recipes/index.mjs';
+import { pickRecipe, RECIPES } from '../../recipes/index.mjs';
+import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS, cameraMoveParams } from '../../core/camera-moves/index.js';
+import { CAMERA_WORDS, resolveCameraMove } from '../../core/registry/vocab.js';
+import { TIMINGS } from '../../core/cuts/timings.js';
+// score/toks: the SAME word-overlap ranker `make arsenal` uses (harness/author/arsenal.mjs), reused
+// rather than reimplemented so "nearest 3" here and "nearest 3" there can never rank a query
+// differently. Pure and sync (no registry discovery), safe to import from a gate.
+import { score, toks } from '../author/arsenal.mjs';
 
 const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*((?:\/[a-z]+\s*[:=]\s*-?[\d.]+\s*)*)$/i;
 const POSE_TOKEN_RE = /\/([a-z]+)\s*[:=]\s*(-?[\d.]+)/gi;
@@ -287,6 +294,154 @@ export function moveErrors(beats) {
   return errs;
 }
 
+// ── THE CAMERA: `camera:` names a move, reached the same way `move:`/`transition_in:` are ────────────
+//
+// Measured (see AGENTS.md's build brief): the core has 14 named camera moves plus a 14-phrase "camera
+// word" registry (core/registry/vocab.js CAMERA_WORDS, "push in" -> slowPush), and across 42 authored
+// films, ZERO use a named move: 13 hand-key `camera[]` and the rest say nothing at all. `camera:` on a
+// beat was already parsed (storyboard-parse.mjs) and read by NOTHING: a storyboard could describe the
+// exact shot the engine already has a name for and the film would render with no camera at all.
+//
+// SYNTAX: `<move> [key=value ...]`, the same "name first, params after" shape `parseRecipeLine` already
+// uses. `<move>` is either a real cameraMove name (core/camera-moves/index.js CAMERA_MOVE_NAMES) or a
+// shot phrase from the SAME `camera word` registry `make arsenal` already searches (resolveCameraMove);
+// there is deliberately no second phrase table here. Params are read straight off the resolved move's
+// own function signature (cameraMoveParams, core/camera-moves/index.js), never a hand-kept list, so a
+// move that gains a param is valid here the day it lands there.
+//
+// DECISIVE vs PROSE, the same test `transition_in:` uses one field down: a single token (or an exact
+// camera-word phrase) is an ATTEMPT at the grammar and a wrong one is an ERROR naming the near misses.
+// Anything else -- a sentence, "the camera pushes in slowly on the card" -- is read as what `camera:`
+// has always been, documentary prose, and is reported as a WARNING (never silently dropped) naming the
+// 3 nearest named moves by the SAME ranker `make arsenal` uses (harness/author/arsenal.mjs score/toks),
+// so a warning that cannot resolve a decision at least narrows the search.
+const CAMERA_PARAM_RE = /(\w+)\s*=\s*(-?[\w.]+)/g;
+const CAMERA_WORD_BY_LOWER = new Map(Object.keys(CAMERA_WORDS).map((w) => [w.toLowerCase(), w]));
+const DECISIVE_CAMERA_TOKEN_RE = /^[a-z][a-z0-9-]*$/i;
+
+/** nearestCameraMoves(text, n) -> the n camera moves whose name+blurb best answer `text`, via the same
+ * ranker `make arsenal` uses (never a second ranker). */
+export function nearestCameraMoves(text, n = 3) {
+  const qt = toks(text);
+  return CAMERA_MOVE_NAMES
+    .map((name) => ({ name, blurb: CAMERA_MOVE_BLURBS[name] }))
+    .map((e) => ({ ...e, s: score({ name: e.name, kind: 'camera move', blurb: e.blurb }, qt) }))
+    .sort((a, b) => b.s - a.s)
+    .slice(0, n);
+}
+
+/**
+ * parseCameraLine(raw) ->
+ *   null                       unset / no opinion (same convention as parseEdge)
+ *   {move, params}             a resolved cameraMove spec, ready to window and build
+ *   {error}                    a decisive attempt at the grammar that did not resolve
+ *   {prose: true, text}        free text: documentary, unbuilt, reported as a warning by the caller
+ */
+export function parseCameraLine(raw) {
+  if (raw == null) return null;
+  const s = String(raw).trim().replace(/^["']|["']$/g, '');
+  if (!s || /^<fill:/i.test(s) || /^none$/i.test(s)) return null;
+  const firstParam = s.search(/\b\w+\s*=/);
+  const moveRaw = (firstParam >= 0 ? s.slice(0, firstParam) : s).trim();
+  const paramsRaw = firstParam >= 0 ? s.slice(firstParam) : '';
+  if (!moveRaw) return { error: `"${s}" names no camera move. Syntax: "<move> [key=value ...]" (e.g. "slowPush to=1.08", "follow id=window").` };
+  const wordMatch = CAMERA_WORD_BY_LOWER.get(moveRaw.toLowerCase());
+  const decisive = DECISIVE_CAMERA_TOKEN_RE.test(moveRaw) || !!wordMatch;
+  const resolved = resolveCameraMove(wordMatch || moveRaw);
+  if (!CAMERA_MOVE_NAMES.includes(resolved)) {
+    if (!decisive) return { prose: true, text: s };
+    const near = nearMisses(moveRaw, [...CAMERA_MOVE_NAMES, ...Object.keys(CAMERA_WORDS)]);
+    return { error: `"${moveRaw}" is not a known camera move or camera word${near.length ? `, did you mean "${near[0]}"?` : ''}. `
+      + `Moves: ${CAMERA_MOVE_NAMES.join(', ')}. Words: ${Object.keys(CAMERA_WORDS).join(', ')}.` };
+  }
+  const params = {};
+  let pm; CAMERA_PARAM_RE.lastIndex = 0;
+  while ((pm = CAMERA_PARAM_RE.exec(paramsRaw))) {
+    const [, key, valRaw] = pm;
+    params[key] = /^-?[\d.]+$/.test(valRaw) ? +valRaw : valRaw;
+  }
+  const known = cameraMoveParams(resolved);
+  if (known) {
+    const unknown = Object.keys(params).filter((k) => !known.has(k));
+    if (unknown.length) return { error: `camera "${resolved}" does not read ${unknown.map((k) => `"${k}"`).join(', ')}. It accepts: ${[...known].join(', ')}.` };
+  }
+  return { move: resolved, params };
+}
+
+/** cameraErrors(beats) -> string[] naming every beat whose `camera:` is a decisive-but-wrong attempt. */
+export function cameraErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    const p = parseCameraLine(b.camera);
+    if (p && p.error) errs.push(`beat ${i + 1} (${b.name}) camera: ${p.error}`);
+  });
+  return errs;
+}
+
+/** cameraWarnings(beats) -> string[] naming every beat whose `camera:` is prose that resolves to nothing. */
+export function cameraWarnings(beats) {
+  const warns = [];
+  beats.forEach((b, i) => {
+    const p = parseCameraLine(b.camera);
+    if (p && p.prose) {
+      const near = nearestCameraMoves(p.text, 3);
+      warns.push(`beat ${i + 1} (${b.name}) camera: "${p.text}" reads as documentary prose, not a `
+        + `resolvable camera move, so it never reaches the engine. Nearest named moves: `
+        + `${near.map((n) => `${n.name} (${n.blurb})`).join(' · ')}. Write "camera: <move> [key=value ...]" `
+        + `to make it real, e.g. "camera: ${near[0] ? near[0].name : 'slowPush'}".`);
+    }
+  });
+  return warns;
+}
+
+/** resolvedCamera(b) -> {move,params} | null. `b.camera` already validated by cameraErrors. */
+export function resolvedCamera(b) {
+  const p = parseCameraLine(b.camera);
+  return (p && !p.error && !p.prose) ? p : null;
+}
+
+// A boundary description with no cut is a `flow-seam` recipe's job (recipes/README.md), and an author
+// has no reason to know one exists unless it is named. Shared with harness/live/beat-surfacer.mjs (the
+// same push, at storyboard-save time) so the "no cut here" test and the "which recipe to suggest" pick
+// have exactly one owner between the two call sites.
+export const BOUNDARY_NO_CUT_RE = /\b(exits?|leaves?|arrives?|no cut|crossfades?)\b/i;
+
+/** seamRecipeEntry() -> [name, def] for the first recipes/recipes.json entry whose kind is "seam", or null. */
+export function seamRecipeEntry() {
+  return Object.entries(RECIPES).find(([, r]) => r.kind === 'seam') || null;
+}
+
+// A boundary whose ARRIVING beat carries `recipe:` gets no default cut from assemble.mjs (the recipe
+// seam IS the boundary, measured off real films with zero `transitions[]` entries and every joint a
+// recipe: madera, vawe-flow). So a camera leg ending on one side of that boundary and a second leg
+// starting on the other are NOT separated by a real edit the way every other junction here is. Every
+// camera move in core/camera-moves/*.js resets x/y to an identity pose at its own `start` key (read
+// each file: slowPush/diveIn/orbit/panFollow/truck/workspaceZoomOut/punchIn/cameraShake/driftHold all
+// open `{x:0, y:0, ...}`; none accepts an arbitrary starting x/y), so two independent legs across a
+// seam with no cut to hide the reset would visibly SNAP mid-shot, the exact defect a real cut already
+// masks everywhere else in this film. Refused rather than silently built wrong.
+/** cameraContinuityErrors(beats) -> string[]: a camera: pairing across a boundary this film builds no cut for. */
+export function cameraContinuityErrors(beats) {
+  const errs = [];
+  for (let i = 0; i < beats.length - 1; i++) {
+    const next = beats[i + 1];
+    if (!next.recipe) continue;   // a real cut lands here; a reset at a cut is normal editing grammar
+    const cur = resolvedCamera(beats[i]);
+    const nxt = resolvedCamera(next);
+    if (cur && nxt) {
+      const rp = parseRecipeLine(next.recipe);
+      errs.push(`beat ${i + 1} (${beats[i].name}) and beat ${i + 2} (${next.name}) each declare camera:, `
+        + `and beat ${i + 2}'s \`recipe: ${rp.name || next.recipe}\` means this film builds NO cut between `
+        + `them (the recipe seam IS the boundary, a continuous flow-through). Every camera move here resets `
+        + `to an identity pose at its own start (core/camera-moves/*.js), so two independent legs across a `
+        + `cut-free boundary would visibly snap. Combine the two into one continuous journey instead `
+        + `(hand-author \`cameraMove: [{"move":"multiPhase", "legs":[...]}]\`, core/camera-moves/multi-phase.js), `
+        + `or move one beat's camera: to a boundary this film DOES cut at.`);
+    }
+  }
+  return errs;
+}
+
 // ── STAGING: a documented cause becomes a mechanical stagger ────────────────────────────────────────
 //
 // `trigger:` on a beat (docs/CRAFT/STORYBOARD-TEMPLATE.md, graded by storyboard-check.mjs) already
@@ -412,15 +567,25 @@ export function pathMotion({ curve, band }, dur) {
 // storyboard has ever written cannot retroactively change one, so every already-committed film reads
 // exactly as it did. `transition_in: fx:cinematicZoom` is a decision; `transition_in: cinematicZoom` or
 // `cut` stays what it always was, prose for a human, read by nothing.
+//
+// EXTRA SYNTAX: `fx:<name> timing=<timing> dur=<s> dir=<dir>`, the same three fields
+// `transitions[]` itself already carries (core/transitions/lower.js). `timing` is a cut timing
+// (core/cuts/timings.js TIMINGS, the SAME word `make arsenal` resolves for a `cutTiming`); `dur` is
+// seconds; `dir` is left/right/up/down or a number of degrees (a numeric dir means anything only for
+// `mech:"seam"`, and `boundaryMechanism` still decides that below, unchanged). Any of the three may be
+// omitted; an author who writes none of them gets exactly the plain `fx:<name>` this always was.
 const TRANSITION_NAMES = [...new Set(TRANSITIONS.map((t) => t.name))];
-const TRANSITION_FX_RE = /^fx\s*:\s*([A-Za-z-]+)$/i;
+const TIMING_NAMES = Object.keys(TIMINGS);
+const TRANSITION_LINE_RE = /^fx\s*:\s*([A-Za-z][A-Za-z0-9-]*)\s*((?:\s+\w+\s*=\s*\S+)*)\s*$/i;
+const TRANSITION_PARAM_RE = /(\w+)\s*=\s*(\S+)/g;
+const TRANSITION_DIR_WORDS = ['left', 'right', 'up', 'down'];
 
-/** parseTransitionIn(raw) → {fx} | null (prose, no decision stated) | {error}. */
+/** parseTransitionIn(raw) → {fx,timing?,dur?,dir?} | null (prose, no decision stated) | {error}. */
 export function parseTransitionIn(raw) {
   if (!raw) return null;
-  const m = TRANSITION_FX_RE.exec(String(raw).trim());
+  const m = TRANSITION_LINE_RE.exec(String(raw).trim());
   if (!m) return null; // prose ("cut", "cut (blur)", "dissolve 0.5s", ...): documentary only, unbuilt
-  const fx = m[1];
+  const [, fx, paramsRaw] = m;
   try { boundaryMechanism(fx); } catch (e) {
     if (/^unknown transition fx/.test(e.message)) {
       const near = nearMisses(fx, TRANSITION_NAMES);
@@ -428,7 +593,31 @@ export function parseTransitionIn(raw) {
     }
     return { error: e.message };
   }
-  return { fx };
+  const out = { fx };
+  let pm; TRANSITION_PARAM_RE.lastIndex = 0;
+  while ((pm = TRANSITION_PARAM_RE.exec(paramsRaw))) {
+    const [, key, valRaw] = pm;
+    if (!['timing', 'dur', 'dir'].includes(key)) {
+      return { error: `transition_in "${key}" is not a known param. Known: timing, dur, dir.` };
+    }
+    if (key === 'timing') {
+      if (!TIMING_NAMES.includes(valRaw)) {
+        const near = nearMisses(valRaw, TIMING_NAMES);
+        return { error: `transition_in timing "${valRaw}" is not a known cut timing${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${TIMING_NAMES.join(', ')}` };
+      }
+      out.timing = valRaw;
+    } else if (key === 'dur') {
+      const n = Number(valRaw);
+      if (!Number.isFinite(n) || n <= 0) return { error: `transition_in dur "${valRaw}" is not a positive number of seconds.` };
+      out.dur = n;
+    } else if (key === 'dir') {
+      const n = Number(valRaw);
+      if (TRANSITION_DIR_WORDS.includes(valRaw)) out.dir = valRaw;
+      else if (Number.isFinite(n)) out.dir = n;
+      else return { error: `transition_in dir "${valRaw}" is not left|right|up|down or a number of degrees.` };
+    }
+  }
+  return out;
 }
 
 /** transitionInErrors(beats) → string[] naming every beat (after the first) whose bare-word transition_in is not a real boundary fx. */
@@ -442,10 +631,53 @@ export function transitionInErrors(beats) {
   return errs;
 }
 
-/** resolvedTransitionIn(b) → {fx,mech} | null. `b.transition_in` already validated by transitionInErrors. */
+/** nearestTransitions(text, n) -> the n transitions whose name+family best answer `text`, via the SAME
+ * ranker `make arsenal` uses. `TRANSITIONS` carries no prose blurb of its own (core/transitions/catalog.js
+ * is an inventory, not a description layer), so the corpus is name+family+mechanism, thinner than a
+ * real blurb but the same ranker, never a second one. */
+export function nearestTransitions(text, n = 3) {
+  const qt = toks(text);
+  const seen = new Set();
+  const uniq = TRANSITIONS.filter((t) => (seen.has(t.name) ? false : (seen.add(t.name), true)));
+  return uniq
+    .map((t) => ({ ...t, s: score({ name: t.name, kind: t.mechanism, blurb: `${t.family} transition` }, qt) }))
+    .sort((a, b) => b.s - a.s)
+    .slice(0, n);
+}
+
+/** transitionInWarnings(beats) → string[]: a beat (after the first) whose transition_in is prose that
+ * resolves to nothing, reported rather than silently dropped, with the nearest named fx and, when the
+ * prose itself describes a cut-free boundary, the `flow-seam` recipe line that already answers it
+ * (the same push harness/live/beat-surfacer.mjs gives at save time, reused here rather than reinvented). */
+export function transitionInWarnings(beats) {
+  const warns = [];
+  beats.forEach((b, i) => {
+    if (i === 0 || !b.transition_in) return;
+    const text = String(b.transition_in).trim();
+    if (!text) return;
+    if (parseTransitionIn(text)) return; // resolved fx: line, or its own error, already reported above
+    const near = nearestTransitions(text, 3);
+    const seam = seamRecipeEntry();
+    let msg = `beat ${i + 1} (${b.name}) transition_in: "${text}" reads as documentary prose, not a `
+      + `resolvable transition, so it never reaches the engine. Nearest named fx: `
+      + `${near.map((n) => `${n.name} (${n.family}/${n.mechanism})`).join(' · ')}. `
+      + `Write "transition_in: fx:<name> [timing=<name>] [dur=<s>] [dir=<left|right|up|down>]" to make it real.`;
+    if (seam && BOUNDARY_NO_CUT_RE.test(text)) {
+      const [name, r] = seam;
+      msg += ` This also describes a boundary with no cut: recipes/README.md already measures that off `
+        + `a real film, add \`recipe: ${name} out=<fill: outgoing layer id> in=<fill: incoming layer id> axis=x\`.`;
+    }
+    warns.push(msg);
+  });
+  return warns;
+}
+
+/** resolvedTransitionIn(b) → {fx,mech,timing?,dur?,dir?} | null. `b.transition_in` already validated by transitionInErrors. */
 export function resolvedTransitionIn(b) {
   const p = parseTransitionIn(b.transition_in);
-  return (p && !p.error) ? { fx: p.fx, mech: boundaryMechanism(p.fx) } : null;
+  if (!p || p.error) return null;
+  const { fx, ...rest } = p;
+  return { fx, mech: boundaryMechanism(fx), ...rest };
 }
 
 // ── RECIPES: structure copied from real video (recipes/recipes.json, recipes/README.md) ────────────
