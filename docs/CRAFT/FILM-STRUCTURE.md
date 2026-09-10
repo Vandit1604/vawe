@@ -2,7 +2,7 @@
 when: "\"what holds this film together across its cuts\""
 answers: the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last
 group: crosscutting
-codes: continuity, no-continuous-object, no-continuous-object-inferred
+codes: continuity, no-continuous-object, no-continuous-object-inferred, becomes-is-preset, chain-breaks, missing-object-field, single-thread, stub-why, trigger-is-mechanism, trigger-is-sequence
 applies-when: short
 confirm: "what holds this film across its cuts?"
 ---

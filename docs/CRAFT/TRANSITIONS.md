@@ -2,7 +2,7 @@
 when: "choosing the CUT between two beats (you can't say why a transition is there)"
 answers: "the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure"
 group: story
-codes: crossfade-mud, cut-families, cut-velocity, dead-final-frame, no-transition, flat-seams
+codes: crossfade-mud, cut-families, cut-velocity, dead-final-frame, no-transition, flat-seams, seam-flash, seam-ghost, seam-resurrection, seam-split, seam-unread, unclassified-transition
 applies-when: hasBoundaries
 confirm: "does each cut serve the relationship between its two beats, chosen by theory not habit?"
 ---
