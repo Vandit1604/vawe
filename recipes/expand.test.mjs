@@ -155,16 +155,43 @@ function enterScene(overrides = {}) {
   assert.ok(!tag.motion, 'a named split preset is used, never hand-keyed motion');
 }
 
-// a single colour routes through colorWave as its flash; more than one is refused, named.
+// a single colour routes through colorWave as its flash.
 {
   const out = expandRecipes(enterScene({ recipes: [{ recipe: 'word-by-word', at: 4.58, layer: 'tagline', colors: ['#111'] }] }));
   const tag = out.layers.find((l) => l.id === 'tagline');
   assert.equal(tag.preset, 'colorWave');
   assert.equal(tag.presetOpts.flash, '#111');
 }
-assert.throws(() => expandRecipes(enterScene({
-  recipes: [{ recipe: 'word-by-word', at: 4.58, layer: 'tagline', colors: ['#111', '#c8a45c', '#3a7a4e', '#2f5aa8'] }],
-})), /no core capability holds more than one/);
+
+// two or more colours route through colorWave's `colors`, one per word, settling to the layer's own
+// ink by default (madera: "each word landing in its own colour before the line settles to one ink").
+{
+  const out = expandRecipes(enterScene({
+    recipes: [{ recipe: 'word-by-word', at: 4.58, layer: 'tagline', colors: ['#111', '#c8a45c', '#3a7a4e', '#2f5aa8'] }],
+  }));
+  const tag = out.layers.find((l) => l.id === 'tagline');
+  assert.equal(tag.preset, 'colorWave');
+  assert.deepEqual(tag.presetOpts.colors, ['#111', '#c8a45c', '#3a7a4e', '#2f5aa8']);
+  assert.equal(tag.presetOpts.settle, 'var(--layer-ink, var(--ink))');
+}
+
+// `settle: null` keeps each word its own colour forever instead of settling to one ink.
+{
+  const out = expandRecipes(enterScene({
+    recipes: [{ recipe: 'word-by-word', at: 4.58, layer: 'tagline', colors: ['#111', '#c8a45c'], settle: null }],
+  }));
+  const tag = out.layers.find((l) => l.id === 'tagline');
+  assert.equal(tag.presetOpts.settle, undefined);
+}
+
+// exit: copied straight onto the layer's own `exit`, the word-by-word twin of the arrival.
+{
+  const out = expandRecipes(enterScene({
+    recipes: [{ recipe: 'word-by-word', at: 4.58, layer: 'tagline', exit: { preset: 'down', at: 1.2, each: 0.3 } }],
+  }));
+  const tag = out.layers.find((l) => l.id === 'tagline');
+  assert.deepEqual(tag.exit, { preset: 'down', at: 1.2, each: 0.3 });
+}
 
 // a layer that already carries `split` is refused rather than overwritten
 assert.throws(() => expandRecipes(enterScene({

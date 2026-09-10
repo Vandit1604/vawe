@@ -21,7 +21,7 @@ Everything is pure in the frame number: same input, same bytes, any render order
 **Vocabulary size: 27 cut presentations × 8 timings × 4 directions,
 35 shader stings, 23 ambient shader looks, 31 composite looks,
 8 canvas passes, 8 resample effects (layer-as-texture),
-31 kinetic presets × 3 split modes, 42 easings (the velocity ramps among them),
+32 kinetic presets × 3 split modes, 42 easings (the velocity ramps among them),
 21 background presets (recolored by every brand theme),
 16 drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse.**
 That is millions of distinct combinations before copy, layout, and color even enter.

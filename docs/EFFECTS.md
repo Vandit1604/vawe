@@ -811,11 +811,12 @@ A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: fli
 | `blur` | resolve out of blur: calm, premium |
 | `bounce` | springy bounce in: playful brands only |
 | `chroma` | R/G/B ghosts split apart and converge to a crisp glyph |
-| `colorWave` | the accent sweeps word by word along a line, each unit lighting then settling to the resting colour |
+| `colorWave` | the accent sweeps word by word along a line, each unit lighting then settling to the resting colour · `colors` gives EACH unit its OWN arrival colour instead of one shared accent, per-word colour before the line settles to one ink |
 | `decode` | scramble→settle, techy |
 | `down` | words/chars drop into place from above: the mirror of `up` |
 | `draw` | stroke draw-on for SVG paths |
 | `elastic` | elastic scale pop with visible wobble: playful brands only |
+| `fade` | plain opacity fade, no motion at all: the neutral entrance, and the neutral exit reversed |
 | `fall` | falls from above under gravity and lands with a small squash |
 | `flap` | the glyph steps FORWARD through the board's alphabet one flap at a time and lands on its letter, hinging as it turns. An airport board, ordered where `decode` is random |
 | `flip` | 3D flip-up per unit, letters somersault into place: `axis` picks the hinge |
@@ -1129,4 +1130,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_693 effects across 58 families. Regenerate: `make effects`._
+_694 effects across 58 families. Regenerate: `make effects`._
