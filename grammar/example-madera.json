@@ -70,7 +70,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 13.2,
+    "band": "not",
+    "fill": 0.15,
+    "detail": 4.5,
+    "photo": 0.05
+   }
   },
   {
    "i": 2,
@@ -94,7 +101,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 3.9,
+    "band": "not",
+    "fill": 0.06,
+    "detail": 4.6,
+    "photo": 0.04
+   }
   },
   {
    "i": 3,
@@ -118,7 +132,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 0.1,
+    "band": "not",
+    "fill": 0.06,
+    "detail": 5.2,
+    "photo": 0.04
+   }
   },
   {
    "i": 4,
@@ -141,7 +162,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 25.4,
+    "band": "slightly",
+    "fill": 0.33,
+    "detail": 7.5,
+    "photo": 0.14
+   }
   },
   {
    "i": 5,
@@ -168,7 +196,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 26.3,
+    "band": "slightly",
+    "fill": 0.39,
+    "detail": 11.3,
+    "photo": 0.25
+   }
   },
   {
    "i": 6,
@@ -191,7 +226,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 2.7,
+    "band": "not",
+    "fill": 0.03,
+    "detail": 2.3,
+    "photo": 0.03
+   }
   },
   {
    "i": 7,
@@ -216,7 +258,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 6.1,
+    "band": "not",
+    "fill": 0.05,
+    "detail": 4.7,
+    "photo": 0.03
+   }
   },
   {
    "i": 8,
@@ -240,7 +289,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 15.5,
+    "band": "slightly",
+    "fill": 0.27,
+    "detail": 8.6,
+    "photo": 0.14
+   }
   },
   {
    "i": 9,
@@ -264,7 +320,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 18.8,
+    "band": "slightly",
+    "fill": 0.43,
+    "detail": 14.1,
+    "photo": 0.23
+   }
   },
   {
    "i": 10,
@@ -293,7 +356,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 1.5,
+    "band": "not",
+    "fill": 0.02,
+    "detail": 1.9,
+    "photo": 0
+   }
   }
  ],
  "pace": {
