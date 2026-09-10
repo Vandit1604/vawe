@@ -106,24 +106,88 @@ const look = (from, to, stripPath) => stripPath
 
 // ── prompt assembly ─────────────────────────────────────────────────────────────────────────────────
 
+// ── routing: name the resolved core capability beside a line, or say it has none ───────────────────
+//
+// A film prompt is where an author decides WHAT a beat does; a bracket beside that decision says
+// whether the core already HAS the capability that does it, so a read of the prompt also reads as a
+// coverage report of the engine against one real film (AGENTS.md, "every recipe line is also a route
+// into the core"). `[recipe: <name>]` names a recipes/recipes.json entry that compiles the line to a
+// named core capability; `[camera: <move>]` / `[cut: <name>]` names a bare core primitive when no
+// recipe wraps it; `[unrouted: <why>]` says the engine has no named path for it today, which is the
+// whole point of surfacing it here rather than silently hand-authoring around the gap.
+
+/** routeSeamProse(kind, text) -> the bracket for an act's `enters:`/`leaves:` line. Every measured
+ * joint in this film already carries an axis and a gap, which is exactly what `flow-seam` (the one
+ * promoted recipe of kind "seam") consumes, so the base route is always that recipe. Composed cases
+ * layer on top of it rather than replacing it: a word-by-word arrival still crosses through a seam, and
+ * a word-by-word EXIT and a shape-to-letterform assembly are true gaps (recipes/README.md; no recipe of
+ * kind "exit" or "spine" is promoted yet, and no split track here reveals a unit going OUT). */
+export function routeSeamProse(kind, text) {
+  if (!text) return null;
+  const wordByWord = /word by word/i.test(text);
+  const assembles = /scattered|land(s|ed)? as|letterform/i.test(text);
+  if (kind === 'enter') {
+    if (assembles) return '[recipe: flow-seam; unrouted: marks assembling into letterforms, no named core capability for shape-to-glyph landing]';
+    if (wordByWord) return '[recipe: flow-seam + word-by-word]';
+    return '[recipe: flow-seam]';
+  }
+  // kind === 'leave'
+  if (wordByWord) return '[recipe: flow-seam; unrouted: per-word exit, core/tracks/units.js splits text IN only, no staggered-out]';
+  return '[recipe: flow-seam]';
+}
+
+/** routeCameraProse(text) -> the bracket for an act's `camera:` line, once it has been looked at and
+ * filled by hand (a fresh `<look:>` placeholder routes to nothing: there is no prose yet to read). A
+ * continuous push toward a layer is `window-dolly` (core/camera-moves/dive-in.js under it); a static
+ * hold asks the engine for nothing, so it is not "unrouted", it is simply not a camera line at all. */
+export function routeCameraProse(text) {
+  if (!text || /<look:/.test(text)) return null;
+  if (/dolly-in|continuous push|continuous zoom|slow.{0,20}push/i.test(text)) return '[recipe: window-dolly]';
+  if (/static hold|no push/i.test(text)) return null;
+  return '[unrouted: camera]';
+}
+
+// appendBracket(line, bracket): join only when a route was actually found. `act.onScreen`/`camera`
+// prose does not exist at fresh-generation time (it is a `<look:>` placeholder until a person fills
+// it), so every routing call here is best-effort and most resolve to null on a brand-new prompt; the
+// real payoff is `--ref` re-run over an ALREADY-FILLED prompt (see annotateFilledPrompt below).
+const appendBracket = (line, bracket) => (bracket ? `${line} ${bracket}` : line);
+
 function actSection(act, ref, clip) {
   const stripAct = clip ? extractStrip(clip, ref, `act${act.i}`, act.t0, act.t1, act.len < 2 ? 20 : 12) : null;
   const lines = [`## Act ${act.i} (${act.t0}s-${act.t1}s)`];
   lines.push(`on screen: ${look(act.t0, act.t1, stripAct)}`);
   if (act.entersFrom) {
     const j = act.entersFrom;
-    lines.push(`enters: from the ${j.direction.split('-to-')[0]} along the ${j.axis} axis (measured, gap ${j.gap}s)`);
+    lines.push(appendBracket(`enters: from the ${j.direction.split('-to-')[0]} along the ${j.axis} axis (measured, gap ${j.gap}s)`, routeSeamProse('enter', act.onScreen)));
   } else lines.push('enters: (film opens, no prior joint)');
   if (act.leavesTo) {
     const j = act.leavesTo;
     const from = +Math.max(0, j.t - 0.3).toFixed(2), to = +(j.t + 0.3).toFixed(2);
     const stripJoint = clip ? extractStrip(clip, ref, `joint-${act.i}-${act.i + 1}`, from, to, 20) : null;
-    lines.push(`leaves: toward the ${j.direction.split('-to-')[1]} along the ${j.axis} axis (measured, gap ${j.gap}s). ${look(from, to, stripJoint)} for what exits`);
+    lines.push(appendBracket(`leaves: toward the ${j.direction.split('-to-')[1]} along the ${j.axis} axis (measured, gap ${j.gap}s). ${look(from, to, stripJoint)} for what exits`, routeSeamProse('leave', act.onScreen)));
   } else lines.push('leaves: (film ends, no next joint)');
   lines.push(`ground: ${act.ground}${act.accent ? `, ${act.accent}` : ''} (measured, luma ${act.luma})`);
-  lines.push(`camera: ${look(act.t0, act.t1, stripAct)}`);
+  lines.push(appendBracket(`camera: ${look(act.t0, act.t1, stripAct)}`, routeCameraProse(act.camera)));
   lines.push(`type: ${look(act.t0, act.t1, stripAct)}`);
   return lines.join('\n');
+}
+
+// annotateFilledPrompt(text): given a prompt.md ALREADY hand-filled (on screen/camera/type rewritten
+// from placeholders, enters/leaves/ground corrected against the frames), append a routing bracket to
+// every `enters:`/`leaves:`/`camera:` line that does not already carry one. Every other line, including
+// every word of hand-corrected prose, passes through byte for byte: this only ever appends, never edits
+// or removes. Regenerating a prompt from the study data (buildRefPrompt) would discard the hand-fill; a
+// person's own correction like commit 01150c25 is not something a second pass gets to overwrite.
+export function annotateFilledPrompt(text) {
+  return text.split('\n').map((line) => {
+    if (/\[recipe:|\[camera:|\[unrouted:/.test(line)) return line;    // already routed, leave it
+    let m;
+    if ((m = /^enters:\s*(.*)$/.exec(line))) return appendBracket(line, routeSeamProse('enter', m[1]));
+    if ((m = /^leaves:\s*(.*)$/.exec(line))) return appendBracket(line, routeSeamProse('leave', m[1]));
+    if ((m = /^camera:\s*(.*)$/.exec(line))) return appendBracket(line, routeCameraProse(m[1]));
+    return line;
+  }).join('\n');
 }
 
 function jointSection(joint) {

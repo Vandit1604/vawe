@@ -1,8 +1,15 @@
 // recipes/expand.mjs: expandRecipes(scene) -> scene, the one recipe expander. Turns a scene's
-// top-level `recipes: [{recipe, at, out, in, ground, params}]` into plain `motion` keys and layer
-// windows (start/duration) on the layers the author already named, then removes `recipes`. Pure:
-// returns a new scene, never mutates the one it was handed, so a scene with no `recipes` passes
-// through unchanged (same idempotence contract as core/engine/expand.js `expandScene`).
+// top-level `recipes: [{recipe, ...slots, params}]` into plain core capabilities on the layers (and
+// the scene root) the author already named, then removes `recipes`. Pure: returns a new scene, never
+// mutates the one it was handed, so a scene with no `recipes` passes through unchanged (same
+// idempotence contract as core/engine/expand.js `expandScene`).
+//
+// EVERY KIND COMPILES TO A NAMED CORE CAPABILITY, never to hand-typed motion keys where one exists:
+// `seam` writes plain `motion` keys because a seam's travel comes from the layers' own boxes and has
+// no single named primitive; `camera` writes a `cameraMove` sugar entry (core/camera-moves); `enter`
+// writes the text/html split-track sugar (`split`, `preset`, core/kinetic/presets.js). A recipe that
+// cannot reach a named capability for part of what it does REFUSES that part and says why, rather than
+// hand-keying it (recipes/README.md, AGENTS.md "the core's named capabilities").
 //
 // Called from expandScene itself (core/engine/expand.js), the one place `{type:"beat"}` sugar already
 // expands, so a scene carrying `recipes[]` renders through every existing path (`./bin/vawe`, `make
@@ -100,11 +107,20 @@ function expandSeamLine(scene, line) {
   // IN: starts at + gap (the measured empty-ground window), arrives decelerating over enterDur.
   // Any motion the author already keyed on the "in" layer describes what happens AFTER arrival
   // (madera's tagline keeps drifting once it lands) and rides along unshifted, still relative to start.
+  //
+  // COMPOSES WITH word-by-word: a layer already carrying `split: "word"` (written by a word-by-word
+  // recipe line elsewhere in the same `recipes[]` array, or authored by hand) arrives one word at a
+  // time on its own split track, not as one block sliding in from the seam's axis. Writing the
+  // whole-layer slide on top would move every word together AND stagger them individually, two
+  // competing arrivals nothing asked for. So the slide is skipped: the split track owns the reveal,
+  // and this recipe still owns the WHEN (`start`), which is the seam's real contribution here.
   inLayer.start = at + gap;
-  inLayer.motion = [
-    { t: 0, [prop]: enterPx },
-    { t: enterDur, [prop]: 0, ease: 'easeOutCubic' },
-    ...(inLayer.motion || [])];
+  if (inLayer.split !== 'word') {
+    inLayer.motion = [
+      { t: 0, [prop]: enterPx },
+      { t: enterDur, [prop]: 0, ease: 'easeOutCubic' },
+      ...(inLayer.motion || [])];
+  }
 
   // GROUND: outgoing fades to 0, incoming fades in, both centred on `at` over groundFade. The keys run
   // 0 to 1 because a motion opacity multiplies the layer's own `opacity`, which stays the author's.
@@ -128,10 +144,94 @@ function expandSeamLine(scene, line) {
   }
 }
 
+// boxCenter(L): the stage point a camera dollies toward. w/h fall back the same way the seam's own
+// `extent()` does for a text layer with no authored `h`, so a camera line can target a text layer
+// without the author restating its measured line-height.
+function boxCenter(L) {
+  const w = L.w;
+  const h = L.h ?? (L.type === 'text' && L.size ? L.size * 1.25 : null);
+  return { tx: (L.x ?? 0) + (w != null ? w / 2 : 0), ty: (L.y ?? 0) + (h != null ? h / 2 : 0), w, h };
+}
+
+// expandCameraLine: `{ recipe, from, to, target }` -> one `diveIn` leg appended to the scene's own
+// `cameraMove` sugar (core/camera-moves/dive-in.js). diveIn is the named move that aims at a POINT and
+// grows scale continuously toward it, which is exactly "a slow continuous dolly-in on a window or
+// card stack": no hand camera keys are written, only a spec the engine's own sugar resolver already
+// understands. `followLayer` (the other move that can aim at a layer) was NOT used: it holds zoom
+// fixed for the whole shot and cannot ramp scale, so it cannot express a push at all.
+function expandCameraLine(scene, line) {
+  const name = line.recipe;
+  const bad = (why) => { throw new Error(`recipe "${name}": ${why}`); };
+  const recipe = pickRecipe(name);
+  if (recipe.kind !== 'camera') bad(`expand.mjs only expands kind "camera" here, got "${recipe.kind}"`);
+  for (const slot of ['from', 'to', 'target']) if (line[slot] == null) bad(`missing slot "${slot}"`);
+  const target = findLayer(scene, line.target);
+  if (!target) bad(`no layer id "${line.target}" (the "target" slot)`);
+  if (!(line.to > line.from)) bad(`"to" (${line.to}) must be after "from" (${line.from})`);
+
+  const zoomTo = paramOf(name, recipe, 'zoomTo', line.params);
+  const headroom = paramOf(name, recipe, 'headroom', line.params);
+  const ease = paramOf(name, recipe, 'ease', line.params);
+
+  const { tx, ty, w, h } = boxCenter(target);
+  const spec = { move: 'diveIn', start: line.from, dur: line.to - line.from, tx, ty, to: zoomTo, headroom, ease };
+  // targetW/targetH are only passed when known, so diveIn's own headroom refusal (it would push the
+  // target past the frame) fires exactly where it already fires for a hand-written diveIn: nothing
+  // about routing this through a recipe should silence that check.
+  if (w != null) spec.targetW = w;
+  if (h != null) spec.targetH = h;
+
+  const existing = scene.cameraMove == null ? [] : (Array.isArray(scene.cameraMove) ? scene.cameraMove : [scene.cameraMove]);
+  scene.cameraMove = [...existing, spec];
+}
+
+// expandEnterLine: `{ recipe, at, layer, colors? }` -> the layer's own kinetic split-text sugar
+// (`split`, `preset`, `each`, `stagger`; core/kinetic/presets.js via core/tracks/units.js), never hand
+// keys per word. `colors` is refused past one distinct value: no named preset holds N different
+// resting colours (colorWave sweeps ONE accent through the units and settles every one of them to the
+// SAME resting colour), so a line asking for that is unroutable today and says so rather than faking
+// it with a hand-keyed workaround. A single colour routes through colorWave as its flash.
+function expandEnterLine(scene, line) {
+  const name = line.recipe;
+  const bad = (why) => { throw new Error(`recipe "${name}": ${why}`); };
+  const recipe = pickRecipe(name);
+  if (recipe.kind !== 'enter') bad(`expand.mjs only expands kind "enter" here, got "${recipe.kind}"`);
+  for (const slot of ['at', 'layer']) if (line[slot] == null) bad(`missing slot "${slot}"`);
+  const L = findLayer(scene, line.layer);
+  if (!L) bad(`no layer id "${line.layer}" (the "layer" slot)`);
+  if (L.split) bad(`"${line.layer}" already carries "split: ${JSON.stringify(L.split)}"; the recipe would overwrite it`);
+  const distinct = line.colors ? new Set(line.colors) : null;
+  if (distinct && distinct.size > 1)
+    bad(`"colors" names ${distinct.size} distinct colours, but no core capability holds more than one `
+      + `resting colour per split unit (core/kinetic/presets.js colorWave settles every unit to the SAME `
+      + `resting colour). Author the per-word colours in the layer's own markup/spans on an html layer `
+      + `instead, and drop "colors" from this line`);
+
+  const preset = paramOf(name, recipe, 'preset', line.params);
+  const each = paramOf(name, recipe, 'each', line.params);
+  const stagger = paramOf(name, recipe, 'stagger', line.params);
+
+  L.start = line.at;
+  L.split = 'word';
+  L.preset = preset;
+  L.each = each;
+  L.stagger = stagger;
+  if (distinct && distinct.size === 1) {
+    L.preset = 'colorWave';
+    L.presetOpts = { ...(L.presetOpts || {}), flash: line.colors[0] };
+  }
+}
+
 export function expandRecipes(scene) {
   if (!scene || typeof scene !== 'object' || !('recipes' in scene)) return scene;
   const { recipes, ...rest } = scene;
   const out = { ...rest, layers: (scene.layers || []).map((l) => ({ ...l })) };
-  for (const line of recipes || []) expandSeamLine(out, line);
+  for (const line of recipes || []) {
+    const kind = pickRecipe(line.recipe).kind;
+    if (kind === 'seam') expandSeamLine(out, line);
+    else if (kind === 'camera') expandCameraLine(out, line);
+    else if (kind === 'enter') expandEnterLine(out, line);
+    else throw new Error(`recipe "${line.recipe}": expand.mjs does not yet expand kind "${kind}"`);
+  }
   return out;
 }
