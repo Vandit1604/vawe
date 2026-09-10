@@ -368,7 +368,44 @@ export function bakeCameraMove(data, frame) {
   const dims = (frame && frame.W > 0 && frame.H > 0) ? [frame.W, frame.H] : sceneDims(data);
   // A cursor binding resolves HERE, inside the one funnel, so `cursor` cannot be a field an author
   // writes and nothing reads.
-  data.camera = specs.flatMap((s) => buildCameraMove(bindCursorCamera(s, data), dims));
+  const built = specs.map((s) => ({ spec: s, kf: buildCameraMove(bindCursorCamera(s, data), dims) }));
+
+  // THE ONE PLACE EVERY CAMERA SPEC MEETS, REGARDLESS OF WHO WROTE IT. `data.cameraMove` can be filled
+  // by hand, by harness/author/assemble.mjs (one entry per beat's `camera:` line), or by
+  // recipes/expand.mjs (a camera-kind recipe like `window-dolly`), and those three never see each
+  // other's work: assemble only knows about beats, the recipe expander only appends. This funnel is the
+  // only point that sees the FINAL array, so it is the only point that can referee it.
+  //
+  // A window is read off the spec's OWN built keyframes (min/max `t`), never assumed from `start`/`dur`
+  // alone: not every move keys a flat span (`travel` visits several stations with per-station dwells,
+  // `cameraShake` pre-samples one key per rendered frame), so the keyframes it actually produced are the
+  // only honest account of when it is live.
+  const windows = built.map(({ spec, kf }) => {
+    const ts = kf.map((k) => k.t);
+    return { move: spec.move, from: Math.min(...ts), to: Math.max(...ts) };
+  });
+  // Strict overlap, not touch: two specs sharing an endpoint (one ends exactly where the next begins,
+  // e.g. assemble's per-beat windows at a real cut) is ordinary editing grammar, not a race, and MUST
+  // stay legal, or every beat-cut film with more than one `camera:` line would refuse itself.
+  for (let i = 0; i < windows.length; i++) {
+    for (let j = i + 1; j < windows.length; j++) {
+      const a = windows[i], b = windows[j];
+      if (a.from < b.to && b.from < a.to) {
+        throw new Error(`cameraMove: "${a.move}" (${a.from}s-${a.to}s) and "${b.move}" (${b.from}s-${b.to}s) `
+          + `overlap. Two camera specs cannot race the same seconds, whichever mechanism wrote them (a `
+          + `hand-authored cameraMove, a beat's own camera:, a camera-kind recipe): the engine concatenates `
+          + `every spec's keyframes into one flat array and reads it assuming ascending time, so an overlap `
+          + `does not blend, it corrupts the read. Retime one, or combine them into a single continuous move.`);
+      }
+    }
+  }
+  // SORTED BY START, NOT TRUSTED IN ARRAY ORDER. `cameraAt` (core/timeline/sequence.js) walks the flat
+  // array assuming it is already ascending in time; a camera-kind recipe's leg is appended to whatever
+  // `cameraMove` already held (recipes/expand.mjs), which can land it BEFORE an earlier-written, later-
+  // starting spec in the array without landing before it in TIME. Sorting here, once, on the one array
+  // every source feeds, is cheaper than asking every writer to keep the array sorted by hand.
+  const order = built.map((_, i) => i).sort((i, j) => windows[i].from - windows[j].from);
+  data.camera = order.flatMap((i) => built[i].kf);
   delete data.cameraMove;
   return data;
 }
