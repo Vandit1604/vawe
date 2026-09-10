@@ -94,6 +94,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
+| [IDEATE.md](IDEATE.md) | turning a reference video or a raw idea into a film, before any storyboard or JSON exists | what `make ideate` writes, the two ways to run it, and how to fill what it cannot measure |
 | [MEASURE.md](MEASURE.md) | you need a transition's REAL numbers (a reference to reproduce, or to verify our own render) | `make measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop |
 | [RECREATION.md](RECREATION.md) | recreating a specific reference video end to end ("make ours look like this"), or reflecting a real WEBSITE section by section | the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · one beat per section, in the site's order · the honest 1:1 ceiling |
 | [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn/copy why | the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map |
