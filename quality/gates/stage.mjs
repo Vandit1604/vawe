@@ -85,7 +85,7 @@ export function stageOf(arg) {
       next: sbExists ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}` : `make scaffold OUT=${p.base}.json THEME=<theme> DUR=<seconds>   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, docs/CRAFT/IDEATE.md)` },
     { id: 'approval', done: !!approved,
       why: 'the plan passes and nobody has signed it off. Nothing is rendered until the plan is LOCKED and the user signs off.',
-      next: `make studio D=${p.base}.json   (press 1 for the plan, then the USER runs /vawe-approve ${p.name})` },
+      next: `make studio D=${p.base}.json, then share http://127.0.0.1:8799/studio (it opens on the plan) so anyone can see it, then the USER runs /vawe-approve ${p.name}` },
     { id: 'design', done: sbExists && missingFrags.length === 0 && gatePasses('quality/gates/frame-check.mjs', p.scene),
       why: missingFrags.length
         ? `${missingFrags.length} fragment(s) the plan names do not exist yet: ${missingFrags.join(', ')}`
