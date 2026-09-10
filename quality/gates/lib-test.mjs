@@ -7451,7 +7451,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ].join('\n'));
   try {
     const rows = adoptionReport('_lib-test-adoption');
-    const cam = rows.find((r) => r.label === 'camera moves');
+    const cam = rows.find((r) => r.label === 'camera');   // the group label discovery.mjs owns
     ok('stage adoption: a structural camera: field counts as used', cam.used === 1);
     ok('stage adoption: the used move is never re-suggested', !cam.suggestions.some((s) => s.name === 'slowPush'));
     ok('stage adoption: a real prose match (followCursor: cursor/click) is suggested with evidence',

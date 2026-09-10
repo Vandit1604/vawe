@@ -21,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMoveEntries, moveErrors, moveKeys, pathMotion, transitionInErrors, resolvedTransitionIn, parseRecipeLine, recipeErrors, cameraErrors, resolvedCamera, cameraContinuityErrors } from '../lib/contract.mjs';
+import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMoveEntries, moveErrors, moveKeys, pathMotion, transitionInErrors, resolvedTransitionIn, parseRecipeLine, recipeErrors, cameraErrors, resolvedCamera, cameraContinuityErrors, arsenalCorpus, useErrors, useWarnings, resolvedUses, useSlotPath } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
@@ -54,6 +54,137 @@ import { boundaryMechanism } from '../../core/transitions/lower.js';
 // owns the field the same way it owns htmlLayers/objectLayer, regenerating it whole each run rather
 // than merging, so a re-assemble stays idempotent instead of appending a duplicate leg every time.
 const PRESERVED_FILM_FIELDS = ['camera'];
+
+// ── USE: the general door onto the arsenal's 790-entry corpus (harness/lib/contract.mjs resolveUse),
+// written by ONE table keyed by slot SCOPE, never by family. Split into small functions, one job each,
+// rather than one long dispatch, so no single function outgrows this repo's own complexity ceiling
+// (`make code-quality`) the way a hand-rolled per-kind switch would.
+
+// STRUCTURAL: these two kinds resolve to fields assemble.mjs reads and freezes before any beat is
+// processed (`aspect`/`destination` decide every fragment's box, far above this point in the file), so
+// a beat's use: line naming one is too late to matter, not merely unwritten.
+const USE_TOO_LATE = {
+  'output target': 'aspect: set the film\'s top-level "aspect" (or --aspect on the CLI) before assemble runs, not per beat.',
+  destination: 'destination: set the film\'s top-level "destination" before assemble runs, not per beat.',
+};
+// Settable once for the whole film (task scope b), refused if a second beat disagrees. `camera dial`
+// (cameraBlur, a boolean toggle, not a name) is handled by kind instead, since its one entry has no
+// value to compare beats on.
+const USE_SCENE_LEVEL_SLOT = new Set(['energy', 'captionStyle']);
+
+/** ownLayerIdOf(runs) -> (beatIndex) -> the layer id THIS beat's own run built ("scene<run-start+1>"),
+ * the default `on=` target every beat always has exactly one of. */
+function ownLayerIdOf(runs) {
+  return (k) => {
+    const run = runs.find(([ri, rj]) => k >= ri && k <= rj);
+    return run ? `scene${run[0] + 1}` : null;
+  };
+}
+
+/** writeUseSlot(target, obj, params) -> error string | null. `obj` is useSlotPath(entry)'s skeleton,
+ * one of three shapes a per-layer prop ever takes: plain ({key: value}), one-level-nested
+ * ({key: {inner: value}}), or array-push ({key: [{inner: {}}]} or {key: [value]}). */
+function writeUseSlot(target, obj, params) {
+  const [topKey, topVal] = Object.entries(obj)[0];
+  if (Array.isArray(topVal)) {
+    if (!Array.isArray(target[topKey])) target[topKey] = [];
+    const item = topVal[0];
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      if (Object.keys(params).length) return `"${topKey}[]" takes no key=value params on a bare value.`;
+      target[topKey].push(item);
+      return null;
+    }
+    const [innerKey, innerVal] = Object.entries(item)[0];
+    target[topKey].push({ [innerKey]: { ...(innerVal && typeof innerVal === 'object' ? innerVal : {}), ...params } });
+    return null;
+  }
+  if (topVal && typeof topVal === 'object') {
+    if (!target[topKey] || typeof target[topKey] !== 'object') target[topKey] = {};
+    Object.assign(target[topKey], topVal, params);
+    return null;
+  }
+  if (Object.keys(params).length) return `"${topKey}: ${topVal}" is a plain value; it takes no key=value params.`;
+  target[topKey] = topVal;
+  return null;
+}
+
+/** applyLayerType(use, ctx) -> error string | null. `layer type` writes nothing (a layer's type is
+ * fixed at creation): it only checks the `on=` layer already IS that type, per the owner's own rule. */
+function applyLayerType({ entry, on }, ctx) {
+  const targetId = on || ctx.ownId(ctx.k);
+  const layer = ctx.layerById.get(targetId);
+  if (!layer) return `use: "${entry.name}" on=${targetId || '(none)'}: no layer with that id.`;
+  if (layer.type !== entry.name) {
+    return `use: layer type "${entry.name}" on=${targetId}: that layer is type "${layer.type}", not `
+      + `"${entry.name}". use: cannot change a layer's type; author it directly.`;
+  }
+  return null;
+}
+
+/** applySlotUse(use, obj, ctx) -> error string | null, for every kind reaching a real JSON slot: a bg
+ * window, an audio cue, a `three` scene, a scene-level field decided once, or a per-layer prop
+ * (default target: the beat's own run layer). */
+function applySlotUse({ entry, on, params }, obj, ctx) {
+  const topKey = Object.keys(obj)[0];
+  if (topKey === 'bg') { ctx.extraBg.push({ from: ctx.start, to: ctx.end, ...obj.bg[0], ...params }); return null; }
+  if (topKey === 'audio') { ctx.audioCues.push({ t: ctx.start, ...obj.audio.cues[0], ...params }); return null; }
+  const targetId = on || ctx.ownId(ctx.k);
+  if (topKey === 'three') {
+    const layer = ctx.layerById.get(targetId);
+    if (!layer) return `use: "${entry.name}" on=${targetId || '(none)'}: no layer with that id.`;
+    layer.three = obj.three;
+    return null;
+  }
+  if (!on && USE_SCENE_LEVEL_SLOT.has(topKey)) {
+    const val = obj[topKey];
+    const prev = ctx.sceneLevelSet[topKey];
+    if (prev && prev.value !== val) {
+      return `use: "${entry.name}" sets top-level ${topKey}="${val}", but beat ${prev.beat + 1} already set `
+        + `it to "${prev.value}". A film-level field is decided once.`;
+    }
+    ctx.sceneLevelSet[topKey] = { value: val, beat: ctx.k };
+    return null;
+  }
+  const layer = ctx.layerById.get(targetId);
+  if (!layer) {
+    return `use: "${entry.name}" on=${targetId || '(none)'}: no layer with that id. Known ids: `
+      + `${[...ctx.layerById.keys()].join(', ') || '(none)'}.`;
+  }
+  return writeUseSlot(layer, obj, params);
+}
+
+/** writeUses(beats, corpus, layers) -> {extraBg, audioCues, sceneLevelSet, cameraBlurSet, useConflicts}.
+ * The one call site every `use:` line's resolution reaches; each per-beat error is already impossible
+ * for a line useErrors passed (assemble re-validates before this runs, same as every other field). */
+function writeUses(beats, corpus, { htmlLayers, objectLayer, preserved, runs, shiftedStart, shiftedEnd, scene }) {
+  const allLayers = objectLayer ? [...htmlLayers, objectLayer, ...preserved] : [...htmlLayers, ...preserved];
+  const ctx = {
+    layerById: new Map(allLayers.filter((l) => l && l.id).map((l) => [l.id, l])),
+    ownId: ownLayerIdOf(runs),
+    extraBg: [], audioCues: Array.isArray(scene.audio && scene.audio.cues) ? [...scene.audio.cues] : [],
+    sceneLevelSet: {}, k: 0, start: 0, end: 0,
+  };
+  let cameraBlurSet = null;
+  const useConflicts = [];
+  beats.forEach((b, k) => {
+    ctx.k = k; ctx.start = shiftedStart[k]; ctx.end = shiftedEnd[k];
+    for (const use of resolvedUses(b, corpus)) {
+      const { entry } = use;
+      const prefix = `beat ${k + 1} (${b.name})`;
+      let e = null;
+      if (USE_TOO_LATE[entry.kind]) e = `${entry.name} (${entry.kind}): ${USE_TOO_LATE[entry.kind]}`;
+      else if (entry.kind === 'camera dial') cameraBlurSet = cameraBlurSet || { beat: k };
+      else if (entry.kind === 'layer type') e = applyLayerType(use, ctx);
+      else {
+        const obj = useSlotPath(entry);
+        e = obj ? applySlotUse(use, obj, ctx)
+          : `"${entry.name}" (${entry.kind}) has no plain JSON path (slot "${entry.slot}"): set it by hand where that field lives.`;
+      }
+      if (e) useConflicts.push(`${prefix} use: ${e}`);
+    }
+  });
+  return { extraBg: ctx.extraBg, audioCues: ctx.audioCues, sceneLevelSet: ctx.sceneLevelSet, cameraBlurSet, useConflicts };
+}
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv[2];
@@ -625,6 +756,30 @@ for (const l of preserved) {
   }
 }
 const preservedFilmFields = PRESERVED_FILM_FIELDS.filter((k) => scene[k] !== undefined);
+// The report names every film-level field kept as-is. `cameraMove` is kept when no beat declares its own
+// `camera:` line (see the out object below), so it belongs in the report then, even though it is not in
+// PRESERVED_FILM_FIELDS: that list is what is copied, this is what the author is told was kept.
+
+// ---- USE: the general door onto the arsenal's 790-entry corpus, resolved once (harness/lib/contract.mjs,
+// the SAME corpus `make arsenal` searches) and written by ONE table below, split only by helper
+// functions and never by family --------------------------------------------------------------------
+const useCorpus = await arsenalCorpus();
+const useErrs = useErrors(beats, useCorpus);
+if (useErrs.length) {
+  console.error(`assemble: a use: line does not resolve (\`make arsenal Q="…"\` to search):`);
+  for (const e of useErrs) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
+for (const w of useWarnings(beats, useCorpus)) console.log(`  ! ${w}`);
+
+const { extraBg, audioCues, sceneLevelSet, cameraBlurSet, useConflicts } =
+  writeUses(beats, useCorpus, { htmlLayers, objectLayer, preserved, runs, shiftedStart, shiftedEnd, scene });
+if (useConflicts.length) {
+  console.error(`assemble: a use: line cannot be written:`);
+  for (const e of useConflicts) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
+const audioOut = audioCues.length ? { ...(scene.audio || { auto: true }), cues: audioCues } : (scene.audio || { auto: true });
 
 const out = {
   module: 'scene',
@@ -634,11 +789,14 @@ const out = {
   duration: shiftedEnd[shiftedEnd.length - 1],
   sceneUnits: true,
   ...(scene.authoring ? { authoring: scene.authoring } : {}),   // preserve a hand-written waiver across re-assembles
-  audio: scene.audio || { auto: true },
+  audio: audioOut,
   ...Object.fromEntries(preservedFilmFields.map((k) => [k, scene[k]])),
   ...(cameraSpecs.length ? { cameraMove: cameraSpecs.map((c) => c.spec) }
     : (scene.cameraMove !== undefined ? { cameraMove: scene.cameraMove } : {})),
-  bg,
+  ...(sceneLevelSet.energy ? { energy: sceneLevelSet.energy.value } : {}),
+  ...(sceneLevelSet.captionStyle ? { captionStyle: sceneLevelSet.captionStyle.value } : {}),
+  ...(cameraBlurSet ? { cameraBlur: true } : {}),
+  bg: [...bg, ...extraBg],
   transitions,
   ...(recipes.length ? { recipes } : {}),
   layers: objectLayer ? [...htmlLayers, objectLayer, ...preserved] : [...htmlLayers, ...preserved],
@@ -661,7 +819,7 @@ if (chain.length) {
 }
 console.log(`  ${staged} of ${htmlLayers.length - 1} junction(s) staged (\`trigger:\` names a cause): ${staged ? `+${STAGE_S}s each, inserted (film runs ${(staged * STAGE_S).toFixed(2)}s longer), not carved out of a beat` : 'none: no junction states a real cause'}.`);
 if (staged) console.log(`  (resolved to real seconds, not left as "sceneN.end+${STAGE_S}": beats-check/motion-director read \`start\` as a number)`);
-if (preservedFilmFields.length) console.log(`  preserved film-level field(s): ${preservedFilmFields.join(", ")}`);
+if ([...preservedFilmFields, ...(!cameraSpecs.length && scene.cameraMove !== undefined ? ['cameraMove'] : [])].length) console.log(`  preserved film-level field(s): ${[...preservedFilmFields, ...(!cameraSpecs.length && scene.cameraMove !== undefined ? ['cameraMove'] : [])].join(", ")}`);
 if (!preserved.length) console.log("  no hand-authored layers to preserve: everything in this film is generated from the storyboard.");
 if (preserved.length) {
   console.log(`  preserved ${preserved.length} hand-authored layer(s) this contract has no vocabulary for: ${preserved.map(nameOf).join(", ")}`);

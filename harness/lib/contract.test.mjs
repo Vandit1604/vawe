@@ -2,7 +2,7 @@
 // is refused with BOTH values named.
 //   node harness/lib/contract.test.mjs
 import assert from 'node:assert/strict';
-import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, parseMoveEntry, parseMoveEntries, moveErrors, moveKeys, SPEED_BAND, isCausedTrigger, STAGE_S } from './contract.mjs';
+import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, parseMoveEntry, parseMoveEntries, moveErrors, moveKeys, SPEED_BAND, isCausedTrigger, STAGE_S, parseUseLine, resolveUse, useErrors, useWarnings, resolvedUses, useSlotPath } from './contract.mjs';
 
 // parseEdge: the happy path, quotes stripped (storyboard-parse.mjs's fieldIn does not strip them).
 // rot/opacity default to 0/1 (no pose stated = no pose change), same "no opinion" convention as before.
@@ -181,3 +181,79 @@ assert.equal(isCausedTrigger('the cursor clicks Send'), true, 'a real act on scr
 assert.ok(STAGE_S > 0 && STAGE_S < 0.2, 'the causal stagger is a small, evidence-based offset (higgsfield: ~30-150ms), never a whole beat');
 
 console.log('✓ contract.test.mjs: parseEdge (pose included), a clean chain, a broken handoff (named, both sides), the motion plan, and staging all behave');
+
+// ── use: the general door, against a small SYNTHETIC corpus (not the live 790-entry arsenal, so this
+// stays fast and never breaks when a real registry entry is renamed or added) ────────────────────────
+const USE_CORPUS = [
+  { name: 'plain', kind: 'background preset', slot: 'bg[].preset', blurb: 'flat field', aka: [] },
+  { name: 'weight', kind: 'kinetic preset', slot: 'preset', blurb: 'glyphs thicken into place', aka: [] },
+  { name: 'bloom', kind: 'glow preset', slot: 'preset', blurb: 'a soft halo', aka: [] },
+  { name: 'bloom', kind: 'filter', slot: 'filter', blurb: 'an over-bright wash', aka: [] },
+  { name: 'braam', kind: 'sfx cue', slot: 'audio.cues[].name', blurb: 'a cinematic hit', aka: ['weight'] },
+  { name: 'push in', kind: 'camera word', slot: 'cameraMove.move', blurb: 'the camera moves closer', aka: [] },
+  { name: 'colonnade', kind: 'generator', slot: 'generator', blurb: 'wide panels split by hairlines', aka: [] },
+  { name: 'alongPath', kind: 'modifier', slot: 'modifiers[]', blurb: 'rides a path', aka: [] },
+];
+
+// resolves exact
+assert.deepEqual(resolveUse(parseUseLine('plain'), USE_CORPUS).entry.name, 'plain');
+// resolves by aka (a "weight" cue exists as an aka of "braam", read alongside the real "weight" name)
+{
+  const r = resolveUse(parseUseLine('weight'), USE_CORPUS);
+  assert.ok(r.ambiguous, 'a bare name matching one entry\'s NAME and another entry\'s AKA is ambiguous, not silently resolved to either');
+  assert.deepEqual(new Set(r.ambiguous), new Set(['kinetic preset:weight', 'sfx cue:braam']));
+}
+// resolves kind-prefixed, disambiguating a name that collides on its own
+{
+  const r = resolveUse(parseUseLine('glow preset:bloom'), USE_CORPUS);
+  assert.equal(r.entry.kind, 'glow preset');
+}
+// on=<id> and key=value params parse off the line, numeric values coerced
+{
+  const p = parseUseLine('alongPath on=headline axis=x amount=0.5');
+  assert.equal(p.name, 'alongPath'); assert.equal(p.on, 'headline');
+  assert.deepEqual(p.params, { axis: 'x', amount: 0.5 });
+}
+// ambiguous: bare "bloom" exists in two kinds here, refused rather than guessed
+assert.ok(resolveUse(parseUseLine('bloom'), USE_CORPUS).ambiguous, 'a name in more than one kind is ambiguous');
+// dedicated-field refusal: a camera word already has camera:
+{
+  const r = resolveUse(parseUseLine('push in'), USE_CORPUS);
+  assert.equal(r.refusedField, 'camera:');
+}
+// internal refusal: a generator is never authored from a storyboard
+{
+  const r = resolveUse(parseUseLine('colonnade'), USE_CORPUS);
+  assert.match(r.refusedInternal, /lightfield generator/);
+}
+// prose: not decisive, reported as a warning naming ready `use: kind:name` lines, never silently dropped
+{
+  const beats = [{ name: 'A', uses: ['a soft halo around the title'] }];
+  const warns = useWarnings(beats, USE_CORPUS);
+  assert.equal(warns.length, 1);
+  assert.match(warns[0], /reads as free prose/);
+  assert.match(warns[0], /use: glow preset:bloom/, 'the warning offers a ready-to-paste use: line');
+}
+// useErrors: ambiguous, refused (dedicated + internal) and unknown all surface as errors
+{
+  const beats = [{ name: 'A', uses: ['bloom', 'push in', 'colonnade', 'not-a-real-name-at-all'] }];
+  const errs = useErrors(beats, USE_CORPUS);
+  assert.equal(errs.length, 4);
+  assert.match(errs[0], /names more than one kind/);
+  assert.match(errs[1], /already has a dedicated field/);
+  assert.match(errs[2], /not authored from a storyboard/);
+  assert.match(errs[3], /is not a known name/);
+}
+// resolvedUses: only the clean resolutions come back, carrying on=/params through
+{
+  const beats = [{ name: 'A', uses: ['glow preset:bloom on=card', 'push in', 'colonnade'] }];
+  const uses = resolvedUses(beats[0], USE_CORPUS);
+  assert.equal(uses.length, 1, 'the refused (dedicated/internal) lines are excluded, not half-applied');
+  assert.equal(uses[0].entry.name, 'bloom'); assert.equal(uses[0].on, 'card');
+}
+// useSlotPath: the slot writer's own JSON skeleton, reused from arsenal's pasteOf
+assert.deepEqual(useSlotPath({ name: 'plain', slot: 'bg[].preset' }), { bg: [{ preset: 'plain' }] });
+assert.deepEqual(useSlotPath({ name: 'alongPath', slot: 'modifiers[]' }), { modifiers: [{ alongPath: {} }] });
+assert.equal(useSlotPath({ name: 'file', slot: 'svgIcon()' }), null, 'a slot that is prose, not a path, has no writable skeleton');
+
+console.log('✓ contract.test.mjs: use: resolves exact/aka/kind-prefixed names, refuses ambiguous/dedicated/internal ones, warns free prose with ready lines, and its slot skeleton reuses pasteOf');
