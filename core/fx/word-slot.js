@@ -136,6 +136,10 @@ export function build(kit, el, L, spec) {
   if (rest.length) node.parentNode.insertBefore(document.createTextNode(rest.join(at)), slot.nextSibling);
 }
 
+// NOT WIRED YET, recorded so the next author finds the gap rather than the symptom: `idx` below is
+// exactly the shape core/layers/index.js `expose` wants (a pure fact this modifier already computes,
+// privately) and belongs on it the same way core/layers/text.js's caret does the moment something
+// needs to know which candidate word is showing.
 export function frame(kit, el, L, t, scene, spec) {
   const { words, every, swap, at, loop, delay, rise } = resolve(spec);
   const slot = el.querySelector(`[${MARK}]`);
