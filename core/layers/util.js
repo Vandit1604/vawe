@@ -241,13 +241,21 @@ export function createKit(ctx) {
     //
     // Silence, not a wrong value: the class CLAUDE.md says must fail loudly. Here it can simply WORK,
     // because padding on an unpainted box is meaningful (it moves the content) and costs nothing.
-    if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
+    if (L.pad != null) {
+      const pad = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
+      checkDropped(L, { padding: pad });
+      el.style.padding = pad;
+    }
     if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow && !(L.css && L.radius != null)) return;
     if (L.bg) { checkDropped(L, { background: L.bg }); el.style.background = L.bg; } else if (L.elevation) el.style.background = 'var(--surface)';
     // The RESTING radius, written once at build. A keyed `radius` (core/timeline/sequence.js POSE)
     // overwrites this per frame from formats/scene/scene.js resolveBoxes, the same split box.js already
     // makes for w/h beside their own build-time write: this stays the one place the default lives.
-    el.style.borderRadius = (L.radius ?? 16) + 'px';
+    {
+      const radius = typeof L.radius === 'number' || L.radius == null ? (L.radius ?? 16) + 'px' : L.radius;
+      checkDropped(L, { borderRadius: radius });
+      el.style.borderRadius = radius;
+    }
     if (L.border && !L.elevation) {
       const b = L.border === true ? '1px solid var(--line)' : L.border;
       if (L.border !== true) checkDropped(L, { border: b });
@@ -311,6 +319,7 @@ export function createKit(ctx) {
     const f = L.glass === true ? 'blur(14px) saturate(1.35)'
       : typeof L.glass === 'number' ? `blur(${L.glass}px) saturate(1.3)`
       : REFRACT[L.glass] ? `url(#${ensureRefractDef(L.glass)})` : String(L.glass);
+    checkDropped(L, { backdropFilter: f });
     el.style.backdropFilter = f;
     el.style.webkitBackdropFilter = f;
     // A GLASS LAYER IS A SHAPE, and `backdrop-filter` is clipped by the element's own border-radius.
@@ -318,7 +327,11 @@ export function createKit(ctx) {
     // pane of glass by definition does not, so `{"glass": true, "radius": 24}` used to round nothing
     // and there was no way to make a glass layer that was not a rectangle. Same class as `pad` above:
     // a documented prop accepted and then dropped in silence.
-    if (L.radius != null) el.style.borderRadius = (typeof L.radius === 'number' ? L.radius + 'px' : L.radius);
+    if (L.radius != null) {
+      const radius = typeof L.radius === 'number' ? L.radius + 'px' : L.radius;
+      checkDropped(L, { borderRadius: radius });
+      el.style.borderRadius = radius;
+    }
   }
 
   // progressiveBlur: a DIRECTIONAL blur fog on the backdrop that ramps toward an edge (motion-primitives
@@ -527,7 +540,11 @@ export function createKit(ctx) {
       el.style.alignItems = items;
       el.style.justifyContent = justify;
     }
-    if (L.pad != null) el.style.padding = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
+    if (L.pad != null) {
+      const pad = typeof L.pad === 'number' ? L.pad + 'px' : L.pad;
+      checkDropped(L, { padding: pad });
+      el.style.padding = pad;
+    }
     if (L.h != null) el.style.height = L.h + 'px';
   }
 

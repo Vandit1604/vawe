@@ -1326,6 +1326,12 @@ code-quality-top: ## [maintenance] the 25 most tangled functions in the repo
 no-emdash: ## [maintenance] refuse an em dash anywhere the house rule covers
 	node harness/dev/no-emdash.mjs
 
+# make style-drop-check: refuse a new core/layers/*.js write of `el.style.<prop> = <authorValue>` that
+# skips checkDropped. pad and radius both took a raw author string straight to el.style with no check
+# and rendered as if the prop had never been set; this is the standing gate against a third instance.
+style-drop-check: ## [maintenance] every core/layers write of an author value must guard against a dropped CSS value
+	node harness/dev/style-drop-check.mjs
+
 
 # make og: the social card. Its source is site/og/card.html, which reads the SITE's tokens and the
 # SITE's vendored fonts, so the card cannot drift from the site it advertises the way an exported PNG
