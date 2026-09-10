@@ -40,7 +40,7 @@ film needs no cuts, use none: `docs/RULES/one-cut-family.md`'s floor does not fi
 By role (`make arsenal Q="…"` to search):
 - **the one move**: `logoReveal` (draw-on + bloom + wordmark cascade), `wordmarkAssemble`, `wordBlast`,
   `wordWipe`, `morphButton`
-- Chained blueprints are almost always wrong here: `kineticHook` or `statReveal` alone, never combined
+- Chaining two devices is almost always wrong here: `kineticHook` or `statReveal` alone, never combined
   with a second beat, is the ceiling this type's route file (`docs/CRAFT/routes/motion-graphic.md`)
   already names.
 

@@ -1,6 +1,6 @@
 ---
 name: vawe-type-demo
-description: "Playbook for a product-mechanism demo in this engine: a cursor path, a real click, a visible consequence, a zoom. Load when the route table (docs/CRAFT/ROUTING.md) matches demo, or the request is to prove one mechanism, effect, or blueprint works, not to ship a full film."
+description: "Playbook for a product-mechanism demo in this engine: a cursor path, a real click, a visible consequence, a zoom. Load when the route table (docs/CRAFT/ROUTING.md) matches demo, or the request is to prove one mechanism or effect works, not to ship a full film."
 ---
 
 # vawe-type-demo: the cursor-and-proof playbook
@@ -43,7 +43,7 @@ can run longer than its neighbours: give the click room to read before the conse
 
 By role (`make arsenal Q="…"` to search):
 - **hook**: `kineticHook`, `typedHook`
-- **the mechanism itself**: no dedicated blueprint owns cursor+click; compose it from a real UI
+- **the mechanism itself**: nothing pre-built owns cursor+click; compose it from a real UI
   (`component`/`image`/`html`) plus a `cursor` layer, or reach for `recordedPan`/`scrollStory` when the
   proof is a captured surface wider or taller than the frame
 - **proof**: `verdictProof` (type a command, note the result, pop a verdict chip), `terminalReveal`
