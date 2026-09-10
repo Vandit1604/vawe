@@ -605,6 +605,14 @@ Layer types `text` (kinetic splits, `fit` auto-size, ink-aware color, `typing`) 
 `doc` · `html` · `clip` · `cursor` (pointer `path` + `clicks`) · `group` (layout box, see below). Per
 layer: window (`start/duration`), `track` z-order, `cut`+`dir`, `anim/out`, `motion[]` (keyframe track).
 Global `bg[]`, `stings[]`, `camera[]`, `captions[]`.
+
+**`cursor` in full.** Shape: `style` (arrow default · hand · ibeam · block, `make arsenal Q="cursor
+style"`), keyed mid-move with `styleAt: [{t, style}]`. A name tag: `label: {text, color}`, lower-right
+of the point in its own colour (the Figma multiplayer-cursor convention). Magnetism: `snapTo: [{t, id,
+edge, dur}]` eases onto a named layer's LIVE box, arriving exactly at `t` even if the target keeps
+moving; refused by name for an unknown `id`. Drag: `carry: [{from, to, id}]`, all on the cursor's own
+clock, bound at boot (`core/engine/produce.js`) onto the dragged layer's own `follow`, windowed to
+`[from, to]`; refused for an unknown `id` or one already following something else.
 Schema: `formats/scene/schema.json`. **Ask it what is legal at a path rather than reading it:**
 `make schema AT='layers[].motion[]'` prints every field there with its type, its written label and,
 where the field takes a named vocabulary, which registry owns it. No `AT` prints the top-level shape.
