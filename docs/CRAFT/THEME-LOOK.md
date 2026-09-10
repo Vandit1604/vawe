@@ -2,6 +2,7 @@
 when: a theme should carry more than colours and fonts, or a scaffold keeps re-deciding the same thing per film
 answers: "the `look` block's shape (backdrop/scale/layout/marks/cuts/field) · how it is validated · how the scaffold merges it over the type spine · how to see it as a picture"
 group: crosscutting
+codes: theme-look-collapsed, theme-look-invalid, theme-look-spread-parse
 ---
 
 # THEME LOOK: the whole-film default a theme fixes

@@ -2,7 +2,7 @@
 when: it "reads amateur" though every layer renders fine
 answers: "the direction spine, Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it"
 group: crosscutting
-codes: pace, pace-not-chosen, pace-not-kept, pacing, archetype-repeat, feature-poverty, library-top5-only, no-peak, peak-barely-leads, sparse-beats, uniform-cadence
+codes: pace, pace-not-chosen, pace-not-kept, pacing, archetype-repeat, feature-poverty, library-top5-only, no-peak, peak-barely-leads, sparse-beats, uniform-cadence, preset-monotony, never-adopted, similarity-same, similarity-close
 applies-when: always
 confirm: "where is the restraint, and what does the spectacle beat earn against it?"
 ---
