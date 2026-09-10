@@ -62,6 +62,7 @@ const EXCLUDE_SUFFIX = [
   ['.treatment.md', 'a per-video artifact, not guidance'],
   ['.lock.md', 'a per-video artifact, not guidance: the frozen spec one film was authored from'],
   ['.brief.md', 'a per-video artifact, not guidance: the five-line brief one film was authored from'],
+  ['.prompt.md', 'a per-video artifact, not guidance: the film prompt make ideate wrote for one film or reference'],
   ['LICENSES.md', 'a provenance/attribution table (author + license per vendored asset), not guidance'],
 ];
 
