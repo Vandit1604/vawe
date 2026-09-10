@@ -375,7 +375,11 @@ const TONES = {
   info: T.accent, accent: T.accent,
   warn: 'var(--warn)', danger: T.down, error: T.down,
 };
-export function toneColor(tone, fallback = T.accent) { return TONES[tone] || fallback; }
+export function toneColor(tone) {
+  if (!(tone in TONES)) throw new Error(`blocks/kit.mjs toneColor: unknown tone "${tone}". `
+    + `Known: ${Object.keys(TONES).join(', ')}`);
+  return TONES[tone];
+}
 // The accepted spellings, read off the map itself so a `tone` dial cannot drift from what paints.
 export const TONE_NAMES = Object.keys(TONES);
 

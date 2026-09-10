@@ -45,7 +45,9 @@ const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').
 // (export CODE_THEMES from dev.mjs) is the one taken: one table, read by both files, chrome derived
 // with the same isDark rule codeBlock itself applies.
 export function palette(theme = 'midnight') {
-  const P = CODE_THEMES[theme] || CODE_THEMES.midnight;
+  if (!(theme in CODE_THEMES)) throw new Error(`blocks/codeanim.mjs palette: unknown theme "${theme}". `
+    + `Known: ${Object.keys(CODE_THEMES).join(', ')}`);
+  const P = CODE_THEMES[theme];
   const isDark = !P.light;
   return {
     bg: P.bg, border: isDark ? '1px solid rgba(255,255,255,0.08)' : HAIR, elevation: isDark ? 0 : E.flat,

@@ -70,7 +70,9 @@ export const panel = ({ x, y, w, h, start, dur, glow = 0.22 }) => ({
 // verdictChip: a tone-coloured result badge (ok/warn/bad) that POPS after the reading it judges.
 const TONE = { ok: { fg: '#05683c', bg: '#e6f7ef', bd: '#0aa06a' }, warn: { fg: '#8a5a00', bg: '#fdf3e0', bd: '#f5a623' }, bad: { fg: '#a01212', bg: '#fdeaea', bd: '#ee0000' } };
 export const verdictChip = ({ text, tone = 'ok', x, y, w = 300, size = 40, start, dur }) => {
-  const t = TONE[tone] || TONE.ok;
+  if (!(tone in TONE)) throw new Error(`blueprints/kit.mjs verdictChip: unknown tone "${tone}". `
+    + `Known: ${Object.keys(TONE).join(', ')}`);
+  const t = TONE[tone];
   return { type: 'text', text, x, y, w, align: 'center', size, weight: 700, font: 'mono', color: t.fg,
     bg: t.bg, pad: '12px 26px', radius: 10, border: `1.5px solid ${t.bd}`, start, duration: dur, anim: 'pop', enterDur: 0.45 };
 };
