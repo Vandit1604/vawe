@@ -55,6 +55,11 @@
 //   { "authoring": { "allow": ["cut-families", "profile"] } }
 // Waivers apply only to blocking findings (critique errors, direct FAILs); validate is never waivable.
 //
+// An entry may also name the ONE instance it excuses, "<code>@<instance>" (harness/lib/waivers.mjs),
+// where instance is whatever the finding's own `at` already says (a beat's timestamp, a layer id): a
+// bare entry still excuses the code for the whole film, as it always has, but author-check now prints
+// how many live findings that hides, so a waiver written for one beat cannot silently cover a new one.
+//
 // Usage: node quality/gates/author-check.mjs <scene.json> [--strict] [--taste] [--vs <brand>]
 //        make author-check D=<file> [STRICT=1] [TASTE=1] [VS=<brand>]
 // TASTE=1 no longer decides WHETHER the style gates run. They always run. It decides whether their
@@ -68,6 +73,7 @@ import { codeDocMap, docMap } from './doc-map.mjs';
 import { readFindings } from '../../harness/lib/findings.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 import { LIBRARY } from '../../harness/lib/census.mjs';
+import { isWaivedBy, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -216,7 +222,12 @@ if (!fs.existsSync(file)) { console.error(`✗ no such scene: ${file}`); process
 
 let scene = {};
 try { scene = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.error(`✗ ${file} is not valid JSON: ${e.message}`); process.exit(1); }
-const allow = new Set((scene.authoring && Array.isArray(scene.authoring.allow)) ? scene.authoring.allow : []);
+// THE ALLOW LIST. `allowRaw` is the array as written, entries either bare ("dead-air") or
+// instance-scoped ("dead-air@beat:3"; harness/lib/waivers.mjs, "Waivers, legacy, and the difference"
+// in AGENTS.md points here). Every check below asks `isWaivedBy(allowRaw, code, at?)` rather than
+// testing a Set directly, so a code no gate here tags with an instance (still most of them: see the
+// report this phase left) is simply one whose only matching shape is the bare entry.
+const allowRaw = (scene.authoring && Array.isArray(scene.authoring.allow)) ? scene.authoring.allow : [];
 // A WAIVER MUST STATE ITS REASON. The doctrine has always said a waiver is a deliberate exception with
 // a written cause; the audit says otherwise. Across the tracked library `no-continuous-object` is
 // waived 6 times with 0 reasons and `dead-air` 3 times with 0, while `no-visual-vocabulary` carried a
@@ -225,19 +236,20 @@ const allow = new Set((scene.authoring && Array.isArray(scene.authoring.allow)) 
 //
 // Nothing here judges whether the reason is GOOD. It cannot. It only makes waiving cost one sentence,
 // which is the whole mechanism: the cost is what turns a reflex back into a decision, and a bad reason
-// written down is reviewable in a way that silence never is.
+// written down is reviewable in a way that silence never is. `_why` is keyed by the ENTRY string, so a
+// scoped waiver ("dead-air@beat:3") needs its own reason under that exact key, not under the bare code.
 {
   const why = (scene.authoring && (scene.authoring._why || scene.authoring.why || scene.authoring.reason)) || {};
-  const bare = [...allow].filter((k) => !(typeof why[k] === 'string' && why[k].trim().length >= 12));
-  if (bare.length) {
-    console.error(`\n✗ author-check · ${bare.length} waiver(s) with no stated reason: ${bare.join(', ')}`);
+  const bareNoReason = allowRaw.filter((k) => !(typeof why[k] === 'string' && why[k].trim().length >= 12));
+  if (bareNoReason.length) {
+    console.error(`\n✗ author-check · ${bareNoReason.length} waiver(s) with no stated reason: ${bareNoReason.join(', ')}`);
     console.error('  A waiver is a deliberate exception, and a deliberate exception has a cause someone can read.');
     console.error('  Add one line each under `authoring._why`, naming what the rule would have you do and why');
     console.error('  this film is right not to:\n');
     console.error('    "authoring": {');
-    console.error(`      "allow": [${[...allow].map((k) => `"${k}"`).join(', ')}],`);
+    console.error(`      "allow": [${allowRaw.map((k) => `"${k}"`).join(', ')}],`);
     console.error('      "_why": {');
-    console.error(bare.map((k) => `        "${k}": "why this film is the exception"`).join(',\n'));
+    console.error(bareNoReason.map((k) => `        "${k}": "why this film is the exception"`).join(',\n'));
     console.error('      }\n    }\n');
     process.exit(1);
   }
@@ -350,6 +362,9 @@ const runGate = (name, label, script, args, opts = {}) => {
   // by only matching ✗: the gates print `○` over a code the scene already excused.
   const live = (records || []).filter((f) => !f.waived);
   const blockCodes = live.filter((f) => f.severity === 'error').map((f) => f.code);
+  // blockRecords carries `at` alongside `code`, where the gate set one: the only place an instance-
+  // scoped waiver ("code@instance") can be matched against, since blockCodes above throws it away.
+  const blockRecords = live.filter((f) => f.severity === 'error').map((f) => ({ code: f.code, at: f.at }));
   // WHAT IS WRONG, AND WHERE THE ANSWER LIVES. A gate names a defect in a sentence it had to fit on one
   // line; the reasoning behind it is a page somebody already wrote and nobody opens. Measured before
   // this line existed: 10 of 64 gates cited a doc, and 12 of 33 CRAFT docs were reachable only by
@@ -371,19 +386,30 @@ const runGate = (name, label, script, args, opts = {}) => {
   process.stdout.write(findings === 0 && code === 0
     ? `  → nothing found.\n`
     : `  → ${findings} finding(s)${blockCodes.length ? `: ${[...new Set(blockCodes)].join(', ')}` : ''}.\n`);
-  return { code, out, blockCodes, warnCodes, findings };
+  return { code, out, blockCodes, blockRecords, warnCodes, findings };
 };
 
 const results = [];
 // tier decides what a finding COSTS, and it is the only thing TASTE=1 moves. `reports` steps still run,
 // still print and still land in the verdict table; they simply cannot fail the build unless asked to.
-const record = (name, { code, blockCodes, warnCodes = [], findings = 0 }, { waivable, exitMeansFail = true, tier = 'blocks' }) => {
+const record = (name, { code, blockCodes, blockRecords = blockCodes.map((c) => ({ code: c, at: undefined })), warnCodes = [], findings = 0 }, { waivable, exitMeansFail = true, tier = 'blocks' }) => {
   const teeth = tier === 'blocks' || taste;
   const failed = exitMeansFail && teeth ? code !== 0 : false;
-  // if the gate failed only on findings the scene explicitly allows, downgrade to a waiver.
-  const unwaived = waivable ? blockCodes.filter((c) => !allow.has(c)) : blockCodes;
-  const waived = waivable && failed && blockCodes.length > 0 && unwaived.length === 0;
+  // if the gate failed only on findings the scene explicitly allows, downgrade to a waiver. Matching is
+  // PER FINDING now (code + its instance, where the gate names one), not per code: a scoped waiver
+  // excuses only the instance it names, so a second finding of the same code is a new question.
+  const unwaivedRecords = waivable ? blockRecords.filter((r) => !isWaivedBy(allowRaw, r.code, r.at)) : blockRecords;
+  const unwaived = [...new Set(unwaivedRecords.map((r) => r.code))];
+  const waived = waivable && failed && blockRecords.length > 0 && unwaivedRecords.length === 0;
   const reported = tier === 'reports' && !teeth && code !== 0;
+  // A BARE waiver still excuses its code film-wide, on purpose (no existing film breaks). But it is
+  // invisible after the fact unless something says what it is hiding, which is the whole finding of
+  // this phase: print what each bare waiver is excusing THIS run, so the owner sees it every time.
+  if (waivable) for (const c of new Set(blockRecords.map((r) => r.code))) {
+    const cov = bareWaiverCoverage(allowRaw, c, blockRecords);
+    if (cov) process.stdout.write(`  film-wide waiver: ${c} (excuses ${cov.count} finding(s)`
+      + `${cov.hasInstanceData ? `: ${cov.instances.join(', ')}` : cov.count > 1 ? ', no instance data to name them' : ''})\n`);
+  }
   results.push({ name, tier, failed: failed && !waived, waived, reported, findings, unwaived, blockCodes, warnCodes });
 };
 
@@ -433,7 +459,7 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
     console.log(`      Write one from docs/CRAFT/STORYBOARD-TEMPLATE.md, then: make storyboard-check SB=<file>`);
     console.log(`      Then point this scene at it, so a rename cannot break the link:`);
     console.log(`        "storyboard": "formats/scene/${sbBase}.storyboard.md"`);
-    const excused = allow.has('no-storyboard');
+    const excused = isWaivedBy(allowRaw, 'no-storyboard'); // whole-film code, carries no instance
     if (!excused) {
       console.log(`        The rule blocks here. Write the plan, or waive it with a reason someone can read:`);
       console.log(`          {"authoring":{"allow":["no-storyboard"],"_why":{"no-storyboard":"…"}}}`);
@@ -735,7 +761,10 @@ console.log(`      If your eye catches a flaw, it is a FIX, never ship one you n
   const blocked = [];
   for (const [c, step] of seen) {
     if (!inLibrary) continue;
-    if (allow.has(c)) continue;                       // waived, with a `_why` the always-on half checks
+    // None of HARD_CODES sets `at` on its finding today (no gate that raises one names a beat, layer or
+    // value), so only a BARE waiver can ever match here; isWaivedBy(allowRaw, c) with no instance is
+    // exactly that. A scoped entry like "static-bg@beat:2" would parse but never match this code.
+    if (isWaivedBy(allowRaw, c)) continue;             // waived, with a `_why` the always-on half checks
     blocked.push([c, step]);
   }
   if (blocked.length) {
