@@ -1005,7 +1005,7 @@ const boxOf = (id) => boxes.get(id) || null;
   // instead of a keyframe. DEADZONE, not a rigid lock: the camera holds still while the target's
   // centre sits inside a `margin` band around frame centre, and moves only the minimum needed once it
   // would cross that band's edge (a clamp, so this is 1-Lipschitz in the target's own already-smooth
-  // position — the reason no separate damping pass sits on top; see core/camera-moves/follow.js for
+  // position, which is why no separate damping pass sits on top: see core/camera-moves/follow.js for
   // why a lerp-style damper would need the PREVIOUS frame's camera as state and break renderFrame(n)'s
   // purity). A rigid re-centre every frame would instead read as the BACKGROUND sliding under a still
   // subject, which is the failure this shape avoids. Zoom is HELD at `to`, not framed.
