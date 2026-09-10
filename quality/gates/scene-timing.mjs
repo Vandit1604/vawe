@@ -26,12 +26,17 @@
 //   T.unitCut(L)   // the cut that closes this layer's beat (null when the wrapper leaves it alone)
 //   T.unitEnd(L)   // where the engine actually drops the layer: unitCut + that cut's window
 //   T.scene        // the scene LOWERED (see sceneTiming below), read cuts/seams/stings from here
+//   T.lives        // per content layer: { id, enter, exit|null, becomes, cutOut, planned, channels }
+//   T.beatMotion   // per scene-timing beat (cut-segmented): { index, start, end, kinds, count, offsets }
+//   T.beatMotionAt(start, end) // the same for an ARBITRARY window, e.g. a storyboard beat's own times
+//   T.handoffs     // [{ from, to, gap, declared }] - an exit leading into another's entrance
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sceneDims } from '../../core/layout/safe.js';
 import { cameraView } from '../../core/timeline/sequence.js';
 import { loadScene } from '../../core/engine/expand.js';
+import { BASE_ENTER, BASE_EXIT } from '../../core/timeline/clips.js';
 
 export const num = (v, dflt) => (typeof v === 'number' && Number.isFinite(v) ? v : dflt);
 
@@ -318,7 +323,144 @@ export function sceneTiming(input) {
   // same duration rule the renderer uses (formats/scene/scene.js): declared, else the last layer plus a beat.
   const duration = num(d.duration, 0) || +(lastEnd + 0.4).toFixed(2);
 
+  // ── CHOREOGRAPHY: each layer's LIFE, what moves together per beat, and the handoffs between them ──
+  // `becomes`, here, is a DECLARED handoff: a `flow-seam` recipe names the outgoing layer (`out`) and
+  // the incoming one (`in`) at the boundary it joins, which is exactly an element's exit leading into
+  // another element's entrance. Read off the RAW input, before loadScene deletes `recipes` on its way
+  // to expanding them into motion/camera: this is authored intent, not a pixel inference.
+  const rawRecipes = Array.isArray(input?.recipes) ? input.recipes
+    : Array.isArray(input?.data?.recipes) ? input.data.recipes : [];
+  const becomesMap = new Map();
+  for (const r of rawRecipes) if (r && typeof r.out === 'string' && typeof r.in === 'string') becomesMap.set(r.out, r.in);
+
+  // which POSE channels a layer's own motion track actually MOVES, grouped the way a motion designer
+  // would name them, not by the engine's internal key names. A channel counts only when it VARIES
+  // across the track: `resolveKeyedProps` backfills every key with the layer's resting value the
+  // moment ONE key sets it, so presence alone would count a layer that keys nothing as keying
+  // everything. `parts`/`kinetic` are staggers, not POSE channels, so they are named separately.
+  const CHANNELS = {
+    position: ['x', 'y', 'ox', 'oy'], scale: ['scale', 'w', 'h'],
+    rotation: ['rot', 'rotX', 'rotY', 'z'], blur: ['blur'], opacity: ['opacity'],
+  };
+  const varyingChannels = (L) => {
+    const out = new Set();
+    if (Array.isArray(L.motion) && L.motion.length > 1) {
+      for (const [name, keys] of Object.entries(CHANNELS)) {
+        for (const p of keys) {
+          const vals = L.motion.map((k) => k && k[p]).filter((v) => v != null);
+          if (vals.length > 1 && new Set(vals).size > 1) { out.add(name); break; }
+        }
+      }
+    }
+    if (L.parts != null) out.add('parts-stagger');
+    if (L.kinetic != null) out.add('kinetic-stagger');
+    if (L.idle != null && L.idle !== 'none' && L.idle !== false) out.add('idle');
+    return out;
+  };
+
+  // LIFE: enter (anim/motion/parts/kinetic, else 'none' - it simply appears), hold, exit (`out`, else
+  // none), and whether that life is PLANNED: a real `out`, the beat wrapper sliding it out on a cut
+  // (`unitCut`), a `flow-seam` naming it as the outgoing half of a handoff, or it simply holds to the
+  // film's own end. Anything else is a layer that appears and is never designed to leave.
+  const lives = content.map((L, idx) => {
+    const [s, e] = contentSpans[idx];
+    const channels = varyingChannels(L);
+    const enterKind = L.anim || (channels.size ? [...channels][0] : null);
+    const enterDur = num(L.enterDur, enterKind ? BASE_ENTER : 0);
+    const exitDeclared = L.out != null;
+    const exitDur = num(L.exitDur, exitDeclared ? BASE_EXIT : 0);
+    const uc = unitCut(L);
+    const becomesTo = L.id ? becomesMap.get(L.id) || null : null;
+    const atFilmEnd = e >= duration - EPS;
+    const planned = exitDeclared || uc != null || becomesTo != null || atFilmEnd;
+    return {
+      id: L.id || `${L.type || 'layer'}#${idx}`,
+      start: s, end: e, channels: [...channels],
+      enter: { kind: enterKind || 'none', start: s, end: +(s + enterDur).toFixed(3) },
+      exit: exitDeclared ? { kind: L.out, start: +(e - exitDur).toFixed(3), end: e } : null,
+      becomes: becomesTo, cutOut: uc, planned,
+    };
+  });
+
+  // BEAT MOTION: which kinds move together in each beat (edges[i] .. its cut, or the end for the last
+  // beat), and the OFFSETS between their start times - a beat where everything starts on the same
+  // frame has one offset of 0; a beat with staggered arrivals has several small ones.
+  const camKfs = Array.isArray(d.camera) ? d.camera.filter((k) => k && typeof k === 'object' && num(k.t, null) != null) : [];
+  // Exported as a FUNCTION, not only the cut-segmented array below, because a film with no cuts (a
+  // continuous camera move, like a whole `flow-seam` film) has exactly one scene-timing beat but nine
+  // STORYBOARD beats, and it is the storyboard's beats a caller usually wants this measured against.
+  const beatMotionAt = (start, end) => {
+    const active = content.filter((_, idx) => contentSpans[idx][0] < end && contentSpans[idx][1] > start);
+    const kinds = new Set();
+    // ONE ENTRY PER MOTION INSTANCE, duplicates kept: two things starting on the same frame is an
+    // offset of ZERO, a real fact about the beat, not a start time to collapse away. A Set here would
+    // silently erase the "everything fires at once" case this measurement exists to catch.
+    const starts = [];
+    for (const L of active) {
+      const ch = varyingChannels(L);
+      for (const c of ch) kinds.add(c);
+      if (ch.size) starts.push(num(L.start, 0));
+    }
+    // a camera LEG (consecutive keyframes whose pose actually differs) overlapping this window.
+    const POSE_KEYS = ['x', 'y', 's', 'rx', 'ry', 'roll', 'z'];
+    for (let k = 0; k < camKfs.length - 1; k++) {
+      const a = camKfs[k], b = camKfs[k + 1];
+      if (num(a.t, 0) >= end || num(b.t, 0) <= start) continue;
+      if (POSE_KEYS.some((p) => a[p] != null && b[p] != null && a[p] !== b[p])) { kinds.add('camera'); starts.push(num(a.t, 0)); }
+    }
+    for (const r of rawRecipes) {
+      const at = num(r.at, num(r.from, null));
+      if (at != null && at >= start && at < end) { kinds.add('recipe'); starts.push(at); }
+    }
+    const sortedStarts = starts.sort((a, b) => a - b);
+    const offsets = sortedStarts.slice(1).map((t, i2) => +(t - sortedStarts[i2]).toFixed(3));
+    return { start, end, kinds: [...kinds], count: kinds.size, offsets };
+  };
+  const beatEnds = [...cutTimes, duration];
+  const beatMotion = edges.map((start, i) => ({ index: i, ...beatMotionAt(start, beatEnds[i]) }));
+
+  // HANDOFFS. Declared ones (flow-seam's out/in) are exact. Everything else is measured: an exit
+  // ending within HANDOFF_WINDOW of another layer's entrance, in the SAME screen region. The window is
+  // not an imported UI number; it is this film's own declared handoffs, which land at 0s gap by
+  // construction (a flow-seam boundary IS the shared instant), widened to half a motion-floor window
+  // (0.25s) so an entrance a few frames early or late still counts as the same handoff, not a miss.
+  const HANDOFF_WINDOW = 0.25;
+  const rectOf = (L) => {
+    const b = boxOf(L);
+    if (!b.w || !b.h) return null;
+    return { x: num(L.x, (CANVAS_W - b.w) / 2), y: num(L.y, (CANVAS_H - b.h) / 2), w: b.w, h: b.h };
+  };
+  const sameRegion = (a, b) => {
+    if (!a || !b) return false;
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  };
+  const byId = new Map(lives.map((L) => [L.id, L]));
+  const handoffs = [];
+  const covered = new Set(); // "fromId>toId" pairs already accounted for, declared or found
+  for (const [outId, inId] of becomesMap) {
+    const from = byId.get(outId), to = byId.get(inId);
+    if (!from?.exit || !to) continue;
+    handoffs.push({ from: outId, to: inId, gap: +(to.enter.start - from.exit.end).toFixed(3), declared: true });
+    covered.add(`${outId}>${inId}`);
+  }
+  const layerById = new Map(content.map((L, idx) => [lives[idx].id, L]));
+  for (const from of lives) {
+    if (!from.exit) continue;
+    for (const to of lives) {
+      if (to === from || covered.has(`${from.id}>${to.id}`)) continue;
+      const gap = to.enter.start - from.exit.end;
+      if (Math.abs(gap) > HANDOFF_WINDOW) continue;
+      if (!sameRegion(rectOf(layerById.get(from.id)), rectOf(layerById.get(to.id)))) continue;
+      handoffs.push({ from: from.id, to: to.id, gap: +gap.toFixed(3), declared: false });
+      covered.add(`${from.id}>${to.id}`);
+    }
+  }
+
   // `scene` is the LOWERED clone. A gate that reads `d.cuts` off its own copy is reading the authored
   // surface, not the rendered one; this is the same scene with the sugar already expanded.
-  return { scene: d, layers, content, spans, contentSpans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges, sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H] };
+  return {
+    scene: d, layers, content, spans, contentSpans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges,
+    sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H],
+    lives, beatMotion, beatMotionAt, handoffs,
+  };
 }

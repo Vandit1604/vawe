@@ -111,6 +111,8 @@ import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { pairActs, parsePairs, verdictOf, isPlaceholderSurface } from './content-check.mjs';
 import { evenSamples } from './beats-of.mjs';
 import { gradeable, tileBox, baseOf } from './tile.mjs';
+import { classifyRegions } from './motion-floor.mjs';
+import { sceneTiming } from './scene-timing.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -7825,6 +7827,108 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const printed = `console.log('reach for ${BT}make blueprints${BT} to see the full roster');`;
   ok('claims-truth: printOnly ignores a bare mention with no print call', findRetiredNames(bare, { printOnly: true }).length === 0);
   ok('claims-truth: printOnly catches the same name inside console.log(...)', findRetiredNames(printed, { printOnly: true }).length === 1);
+}
+
+// ---- quality/gates/motion-floor.mjs classifyRegions: one known-answer fixture per KIND ------------
+// GW/GH match motion-floor's own grid (96x54); fixtures reuse the exact same shapes its own
+// --self-test asserts against, so the two never drift into disagreeing about what a "clean camera
+// pan" looks like.
+{
+  const GW = 96, GH = 54;
+  const kindOf = (a, b) => classifyRegions(a, b).sort((x, y) => y.amount - x.amount)[0]?.kind;
+
+  const block = (shiftX) => {
+    const f = new Uint8Array(GW * GH).fill(80);
+    for (let y = 1; y < GH - 1; y++) for (let x = 1 + shiftX; x < GW - 1 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 200;
+    return f;
+  };
+  ok('classifyRegions: a whole-frame rigid pan reads as camera', kindOf(block(0), block(3)) === 'camera');
+
+  const card = (shiftX) => {
+    const f = new Uint8Array(GW * GH).fill(240);
+    for (let y = 18; y < 36; y++) for (let x = 30 + shiftX; x < 58 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 40;
+    return f;
+  };
+  ok('classifyRegions: a box translating reads as move', kindOf(card(0), card(3)) === 'move');
+
+  const square = (half) => {
+    const f = new Uint8Array(GW * GH).fill(240);
+    for (let y = 27 - half; y < 27 + half; y++) for (let x = 48 - half; x < 48 + half; x++) f[y * GW + x] = 40;
+    return f;
+  };
+  ok('classifyRegions: a box growing about its own centre reads as scale', kindOf(square(6), square(10)) === 'scale');
+
+  const flat = new Uint8Array(GW * GH).fill(120);
+  const reveal = Uint8Array.from(flat); for (let i = 0; i < 90; i++) reveal[i] = 250;
+  ok('classifyRegions: a small region appearing reads as reveal', kindOf(flat, reveal) === 'reveal');
+
+  const drift = Uint8Array.from(flat, (v) => v + 3);
+  ok('classifyRegions: a whole-frame low-amplitude drift reads as ambient', kindOf(flat, drift) === 'ambient');
+}
+
+// ---- quality/gates/scene-timing.mjs choreography: lives, beat motion, handoffs ---------------------
+// Known-answer SCENES, one per claim `make choreo` makes. Minimal on purpose: each fixture isolates
+// the one condition its name tests, so a failure here points at the one rule that broke rather than
+// requiring a real film to be re-read to find it.
+{
+  // a layer that enters and never exits: no `out`, no cut (`cuts` is empty so no unit wrapper), it
+  // ends well before the film's own end, and nothing names it as becoming something else.
+  const noExit = sceneTiming({ module: 'scene', duration: 6, layers: [
+    { type: 'rect', id: 'gone', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 2 },
+  ] });
+  const goneLife = noExit.lives.find((L) => L.id === 'gone');
+  ok('sceneTiming lives: a layer with no out, no cut and no becomes, ending before the film, is unplanned', goneLife && goneLife.planned === false);
+
+  // the same layer, held to the film's own end, is a planned life even with no `out`: it does not
+  // need to leave anywhere, the film simply stops.
+  const heldToEnd = sceneTiming({ module: 'scene', duration: 2, layers: [
+    { type: 'rect', id: 'held', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 2 },
+  ] });
+  ok('sceneTiming lives: a layer that holds to the film\'s own end is planned', heldToEnd.lives.find((L) => L.id === 'held').planned === true);
+
+  // an exit that hands to an entrance in the same screen region, close in time: a handoff, found even
+  // with no `flow-seam` recipe declaring it, because the two boxes overlap and the gap is small.
+  const handoff = sceneTiming({ module: 'scene', duration: 4, layers: [
+    { type: 'rect', id: 'out1', x: 100, y: 100, w: 200, h: 200, start: 0, duration: 2, out: 'fade', exitDur: 0.2 },
+    { type: 'rect', id: 'in1', x: 100, y: 100, w: 200, h: 200, start: 2, duration: 2 },
+  ] });
+  ok('sceneTiming handoffs: an exit and a same-region entrance close in time is found', handoff.handoffs.some((h) => h.from === 'out1' && h.to === 'in1'));
+
+  // the same shapes, far apart on screen: no overlap, so no handoff is invented from timing alone.
+  const noHandoff = sceneTiming({ module: 'scene', duration: 4, layers: [
+    { type: 'rect', id: 'out2', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 2, out: 'fade', exitDur: 0.2 },
+    { type: 'rect', id: 'in2', x: 1500, y: 900, w: 100, h: 100, start: 2, duration: 2 },
+  ] });
+  ok('sceneTiming handoffs: an exit and a FAR entrance is not a handoff', !noHandoff.handoffs.some((h) => h.from === 'out2'));
+
+  // a `flow-seam` recipe names the handoff directly (out/in): declared, and reported as such even
+  // when the two boxes do not overlap (the recipe already owns the ground crossfade between them).
+  const declared = sceneTiming({ module: 'scene', duration: 4, recipes: [
+    { recipe: 'flow-seam', at: 2, out: 'a3', in: 'b3' },
+  ], layers: [
+    { type: 'rect', id: 'a3', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 2, out: 'fade' },
+    { type: 'rect', id: 'b3', x: 1500, y: 900, w: 100, h: 100, start: 2, duration: 2 },
+  ] });
+  const dh = declared.handoffs.find((h) => h.from === 'a3' && h.to === 'b3');
+  ok('sceneTiming handoffs: a flow-seam recipe is a DECLARED handoff', dh && dh.declared === true);
+
+  // two motions starting on the same frame: a beat with a zero offset between concurrent motions.
+  // boxes are 300x300: motion-floor's SPECK threshold (8% of the canvas axis) would otherwise drop a
+  // small rect as a garnish (a dot, an icon) rather than counting it as content with a life of its own.
+  const zeroOffset = sceneTiming({ module: 'scene', duration: 2, layers: [
+    { type: 'rect', id: 'm1', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 2, motion: [{ t: 0, x: 0 }, { t: 1, x: 100 }] },
+    { type: 'rect', id: 'm2', x: 500, y: 500, w: 300, h: 300, start: 0, duration: 2, motion: [{ t: 0, y: 0 }, { t: 1, y: 100 }] },
+  ] });
+  ok('sceneTiming beatMotion: two motions starting together report a zero offset', zeroOffset.beatMotion[0].offsets.includes(0));
+
+  // staggered starts report a NON-zero offset, and both channels are named.
+  const staggered = sceneTiming({ module: 'scene', duration: 3, layers: [
+    { type: 'rect', id: 's1', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 3, motion: [{ t: 0, x: 0 }, { t: 1, x: 100 }] },
+    { type: 'rect', id: 's2', x: 500, y: 500, w: 300, h: 300, start: 1, duration: 2, motion: [{ t: 0, scale: 1 }, { t: 1, scale: 2 }] },
+  ] });
+  const off = staggered.beatMotion[0].offsets;
+  ok('sceneTiming beatMotion: staggered starts report a non-zero offset', off.length > 0 && off.every((o) => o > 0));
+  ok('sceneTiming beatMotion: staggered starts name both channels', staggered.beatMotion[0].kinds.includes('position') && staggered.beatMotion[0].kinds.includes('scale'));
 }
 
 const FLOOR = 1800;
