@@ -80,6 +80,7 @@ craft:
 - becomes: the typed request becomes a fired render, shown as the terminal's own success pulse
 - why: the cursor causes the send, so the change has a visible reason, and the terminal itself is the proof the render happened, no separate loading screen needed
 - duration: 0.94s
+- camera: slowPush from=1.3 to=1 start=3.6 dur=0.94
 - object_in: center@640x160
 - object_out: center@40x40/op:0
 - archetype: hero-object
@@ -116,7 +117,8 @@ craft:
 - becomes: the almost-empty timeline becomes vawe's own fully populated multi-track editor
 - why: "show timeline elements coming together and assemble from the left side" is the owner's own line, and a real multi-track build is the one thing this film can show that a home-page screenshot cannot
 - duration: 2.12s
-- recipe: window-dolly from=4.54 to=8.12 target=timeline
+- recipe: window-dolly from=6 to=7.6 target=timeline
+- camera: slowPush from=1.3 to=1 start=7.6 dur=0.52
 - object_in: center@480x270
 - object_out: center@1600x820
 - motion: [data-part="clip"]@popIn:energy
