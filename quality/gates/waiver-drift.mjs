@@ -314,4 +314,56 @@ if (process.argv.includes('--ratchet')) {
   } else {
     console.log(`\n  ✓ within the ratchet. Lower it as films get fixed: node quality/gates/waiver-drift.mjs --ratchet --stamp`);
   }
+
+  // ---- THE INSTANCE-COUNT RATCHET, same opt-in, a different question --------------------------
+  //
+  // The legacy ratchet above asks how many FILMS still fire a code. This asks something the instance
+  // syntax makes visible for the first time: of the films that waive a code BARE (film-wide, whichever
+  // instance fires), how many live findings does that waiver hide RIGHT NOW, summed across them? A bare
+  // waiver growing quieter as findings get fixed is fine; one growing louder as a NEW instance rides in
+  // under an old excuse is exactly the incident this phase exists to make visible (see header).
+  const INSTANCE_FILE = path.join(ROOT, 'quality/baselines/waiver-instance-ratchet.json');
+  const instanceBaseline = (() => { try { return JSON.parse(fs.readFileSync(INSTANCE_FILE, 'utf8')); } catch { return null; } })();
+  const bareCodes = rows.map(([c]) => c).filter((c) => (tally.get(c) || []).some((n) => {
+    let d; try { d = JSON.parse(fs.readFileSync(path.join(SCENES, `${n}.json`), 'utf8')); } catch { return false; }
+    return groupWaivers(d.authoring?.allow || []).bare.has(c);
+  }));
+  const instanceCurrent = {};
+  for (const c of bareCodes) {
+    const gate = gateForCode(c);
+    if (!gate) { instanceCurrent[c] = instanceBaseline?.[c] ?? 0; continue; } // unknown gate: cannot re-measure, carry the baseline forward rather than guess
+    let n = 0;
+    for (const name of tally.get(c)) {
+      const abs = path.join(SCENES, `${name}.json`);
+      let d; try { d = JSON.parse(fs.readFileSync(abs, 'utf8')); } catch { continue; }
+      if (!groupWaivers(d.authoring?.allow || []).bare.has(c)) continue; // this film scoped its waiver, not bare
+      n += spawnAndRead(gate, abs).filter((r) => r.code === c).length;
+    }
+    instanceCurrent[c] = n;
+  }
+  if (!instanceBaseline) {
+    fs.mkdirSync(path.dirname(INSTANCE_FILE), { recursive: true });
+    fs.writeFileSync(INSTANCE_FILE, `${JSON.stringify(instanceCurrent, null, 1)}\n`);
+    console.log(`\n  ✓ no instance-ratchet baseline yet: recorded the current count(s) to ${path.relative(ROOT, INSTANCE_FILE)}.`);
+  } else {
+    console.log(`\n  ${'code'.padEnd(30)} ${'baseline'.padEnd(9)} now (findings hidden by BARE waivers)`);
+    let grew = false;
+    for (const c of new Set([...Object.keys(instanceBaseline), ...bareCodes])) {
+      const before = instanceBaseline[c] ?? 0, now = instanceCurrent[c] ?? 0;
+      const mark = now > before ? '✗' : now < before ? '↓' : ' ';
+      if (now > before) grew = true;
+      console.log(`  ${mark} ${c.padEnd(28)} ${String(before).padEnd(9)} ${now}`);
+    }
+    if (stamp) {
+      fs.writeFileSync(INSTANCE_FILE, `${JSON.stringify(instanceCurrent, null, 1)}\n`);
+      console.log(`\n  ✓ instance ratchet stamped at the current count(s).`);
+    } else if (grew) {
+      console.log(`\n  ✗ a bare waiver hides MORE findings than the baseline recorded. A NEW instance rode in`);
+      console.log(`    under an old excuse: narrow the waiver (--suggest names the scoped form) or fix the film.`);
+      f.fail('waiver-instance-growth', 'a bare waiver hides more live findings than the recorded baseline; see the table above');
+      process.exit(1);
+    } else {
+      console.log(`\n  ✓ within the instance ratchet.`);
+    }
+  }
 }
