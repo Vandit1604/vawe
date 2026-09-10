@@ -18,7 +18,7 @@
 // early. A CSS property wants `var(--accent)`; an SVG presentation attribute cannot resolve var() at all
 // and needs literal components (core/filters.js has carried `glowRGB` for exactly this since bloom
 // shipped); a 2D canvas cannot read custom properties either. One marker, three renderings.
-import { parseColor } from '../motion/motion.js';
+import { parseColor } from './engine.js';
 
 const TOKEN = Symbol('token');
 const LITERAL = Symbol('literal');

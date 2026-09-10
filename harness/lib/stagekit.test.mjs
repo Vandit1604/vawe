@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { buildKit, kitCheck, extractKitBlock } from './stagekit.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
-import { isLightBg } from '../../core/motion/motion.js';
+import { isLightBg } from '../../core/color/engine.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

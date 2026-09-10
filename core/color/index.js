@@ -1,23 +1,28 @@
 // core/color/index.js: hand-rolled, dependency-free colour operations for the engine and authoring
 // tools. Pure functions, deterministic, no DOM, node-and-browser safe.
 //
-// core/motion.js already owns the engine's ONE colour grammar (parseColor/colorAlpha) and its
-// canonical WCAG contrast/lightness check (contrastRatio/isLightBg), both used across boot.js,
-// validate.mjs, layers/util.js, produce.js and palette.js. This package WRAPS those rather than
-// re-implementing them (see parse.js, linear.js) and adds what motion.js does not need for its own
-// callers: a {r,g,b,a} object shape that throws on garbage, linear-light mixing, HSL, and
-// hue-wheel harmonies.
+// engine.js owns the engine's ONE colour grammar (parseColor/colorAlpha/parseColorRGB) and its
+// canonical WCAG contrast/lightness check (isLightBg/contrastRatio/ensureContrast), used across
+// boot.js, validate.mjs, layers/util.js, produce.js and palette.js. It moved here from
+// core/motion/motion.js: colour is not motion. This package WRAPS it rather than re-implementing it
+// (see parse.js, linear.js) and adds what engine.js does not need for its own callers: a {r,g,b,a}
+// object shape that throws on garbage, linear-light mixing, HSL, and hue-wheel harmonies.
 //
 // color.js (root, W9) is a different thing entirely: the token()/literal()/lit() theme-resolution
 // markers, resolveColor() and its isToken/isLiteral/isMarked predicates. It moved into this
 // directory because the two shared a name and the root rule allows no orphaned root file, not
 // because they are one concern; its names do not overlap the ones below and it is exported
 // separately so a reader can still tell the two apart.
+//
+// engine.js's own `contrastRatio` is NOT re-exported here: linear.js already has one, taking a
+// different colour-like shape, and re-exporting both would silently drop one or the other from a
+// wildcard export. A caller that wants the raw array/string form imports it from './engine.js'.
 export { parse, format, asColor } from './parse.js';
 export { srgbToLinear, linearToSrgb, relativeLuminance, contrastRatio, readableOn } from './linear.js';
 export { mix, lighten, darken, withAlpha } from './mix.js';
 export { toHsl, fromHsl } from './hsl.js';
 export { complementary, analogous, triad } from './harmony.js';
+export { parseColor, colorAlpha, parseColorRGB, isLightBg, ensureContrast } from './engine.js';
 export * from './color.js';
 
 // ---------- self-check ----------

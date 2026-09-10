@@ -1,5 +1,5 @@
 // core/motion.js: pure motion math + scene helpers (easing, spring, interpolate,
-// transforms, text-fit, colour, formatters). No DOM, no fetch, safe to import in node (lib-test).
+// transforms). No DOM, no fetch, safe to import in node (lib-test).
 // The theme/clock/boot RUNTIME lives in core/boot.js.
 // just time->data transforms + the scene boot.
 
@@ -717,36 +717,6 @@ export function kenBurns(t, dur, { from = 1.0, to = 1.07, fx = 0.5, fy = 0.42, e
   return { transform: `scale(${lerp(from, to, p).toFixed(4)})`, transformOrigin: `${(fx * 100).toFixed(1)}% ${(fy * 100).toFixed(1)}%` };
 }
 
-// ---------- text measuring (another engine measureText/fitText parity, browser only) ----------
-// measureText: pixel width of `text` in CSS `font` shorthand. fitText: largest px size (stepping
-// down) whose rendered width fits maxWidth. Call at build time (fonts already loaded in boot).
-let _measureCtx;
-export function measureText(text, font) {
-  if (!_measureCtx) _measureCtx = document.createElement('canvas').getContext('2d');
-  _measureCtx.font = font;
-  return _measureCtx.measureText(text).width;
-}
-export function fitText(text, maxWidth, { font = (px) => `800 ${px}px Inter`, max = 168, min = 24, step = 2 } = {}) {
-  let px = max;
-  while (px > min && measureText(text, font(px)) > maxWidth) px -= step;
-  return px;
-}
-// fitBox(el, {maxW, maxH, max, min}): MULTI-LINE overflow-safe fit (another engine fitTextOnNLines parity).
-// `el` must be in-DOM. Binary-searches the largest font-size where the element (wrapping at maxW) fits
-// within maxH AND no word overflows the width. Layout-only → deterministic at build time. Sets + returns px.
-export function fitBox(el, { maxW, maxH, max = 168, min = 24 }) {
-  el.style.width = maxW + 'px';
-  let lo = min, hi = max, best = min;
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1;
-    el.style.fontSize = mid + 'px';
-    if (el.scrollHeight <= maxH + 1 && el.scrollWidth <= maxW + 1) { best = mid; lo = mid + 1; }
-    else hi = mid - 1;
-  }
-  el.style.fontSize = best + 'px';
-  return best;
-}
-
 // ---------- sequencing (another engine Sequence/TransitionSeries parity), pure in n ----------
 // sequence(n, fps, segments): like track() but with cross-segment transition windows. Each segment
 // = { name, dur, transition? }. Returns the active segment plus `enter` (0→1 over the leading
@@ -755,120 +725,6 @@ export function fitBox(el, { maxW, maxH, max = 168, min = 24 }) {
 // holdLast (default true): the LAST segment never exits, there is no next scene to hand off to,
 // so the ending (usually the CTA) holds at full visibility through the final frame.
 // Pass { holdLast: false } for looping content that should fade back out.
-// ---------- colour parsing (THE one parser) ----------
-// THE colour parser for the whole engine. Everything that reads a colour string reads it here:
-// core/filters.js (grade stops, glow flood), the WCAG maths below, core/lightfield/colour.js, and
-// the designspec gate. It is exported from motion.js because motion.js is the pure, DOM-free module
-// every other one may import without pulling in a browser.
-//
-// WHY IT LIVES IN ONE PLACE NOW. There used to be four copies with three axes of drift, and the
-// damage was the usual shape: a colour the GATE accepted, the ENGINE rejected, and nothing said so.
-//   · core/filters.js          #rgb · #rrggbb · rgb()/rgba() with INTEGER parts → [r,g,b]
-//   · core/motion.js           the same, plus an array passthrough, and its rgb() form was
-//                              UNANCHORED, so "foo rgb(1,2,3)" parsed and filters.js said null
-//   · core/lightfield/colour.js 6-digit hex ONLY, deliberately (see that file)
-//   · quality/gates/designspec-check.mjs  #rgb · #rgba · #rrggbb · #rrggbbaa · rgb()/rgba() with
-//                              FLOAT parts → {r,g,b}. The gate alone understood 8-digit hex, so a
-//                              scene could carry "#0b0b0fcc", be graded against the palette, and
-//                              then reach a grade or a glow that read null and silently fell back.
-// This accepts the UNION of those grammars and is ANCHORED at both ends. The unanchored form was a
-// bug, not a feature: it made a typo ("colour: #fff rgb(1,2,3)") parse as a colour instead of
-// failing, which is exactly the silent substitution docs/MISTAKES.md keeps warning about.
-//
-// Return shape is [r,g,b], because that is what the engine's own call sites already destructure.
-// Channels are NOT rounded: the gate measures palette distance on floats, and rounding here would
-// move its numbers. `parseColorRGB` is the thin {r,g,b} adapter for the gate and the lightfield.
-//
-// Grammar, exactly:
-//   [r,g,b]        passed through untouched (a caller that already resolved a colour)
-//   #rgb  #rgba    each digit doubled; the alpha digit is parsed and dropped
-//   #rrggbb  #rrggbbaa   the alpha pair is parsed and dropped
-//   rgb()/rgba()   3+ finite numbers separated by commas, whitespace or a slash; alpha dropped
-// Anything else → null. Alpha is dropped everywhere because every consumer wants opaque channels;
-// a caller that needs the alpha must read it off the source string itself.
-export function parseColor(c) {
-  if (Array.isArray(c)) return c;
-  const s = String(c ?? '').trim();
-  let m = /^#([0-9a-f]{3,8})$/i.exec(s);
-  if (m) {
-    let h = m[1];
-    if (h.length === 3 || h.length === 4) h = [...h.slice(0, 3)].map((d) => d + d).join('');
-    else if (h.length === 8) h = h.slice(0, 6);
-    if (h.length !== 6) return null; // 5 and 7 digits are a typo, not a colour
-    return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
-  }
-  m = /^rgba?\(([^)]*)\)$/i.exec(s);
-  if (m) {
-    const p = m[1].split(/[\s,/]+/).filter(Boolean).map(parseFloat);
-    if (p.length >= 3 && p.slice(0, 3).every(Number.isFinite)) return p.slice(0, 3);
-  }
-  return null;
-}
-
-// The alpha parseColor deliberately drops, for the one caller that needs it: an SVG filter cannot use
-// a CSS colour, so a tint written `rgba(255,60,60,0.75)` has to arrive as components AND a weight.
-// Same grammar as above, read off the source string exactly as that header instructs. 1 when absent.
-export function colorAlpha(c) {
-  const s = String(c ?? '').trim();
-  const hex = /^#([0-9a-f]{4}|[0-9a-f]{8})$/i.exec(s);
-  if (hex) {
-    const h = hex[1];
-    const a = h.length === 4 ? h[3] + h[3] : h.slice(6, 8);
-    return parseInt(a, 16) / 255;
-  }
-  const m = /^rgba?\(([^)]*)\)$/i.exec(s);
-  if (m) {
-    const p = m[1].split(/[\s,/]+/).filter(Boolean).map(parseFloat);
-    if (p.length >= 4 && Number.isFinite(p[3])) return Math.max(0, Math.min(1, p[3]));
-  }
-  return 1;
-}
-
-// {r,g,b} adapter. The gate and the lightfield read named channels; the engine reads the tuple.
-// One parser, two shapes, so neither side had to be rewritten to share the grammar.
-export function parseColorRGB(c) {
-  const t = parseColor(c);
-  return t ? { r: t[0], g: t[1], b: t[2] } : null;
-}
-
-// ---------- color contrast (WCAG) ----------
-// contrastRatio >= 1 (21 = black/white).
-// ensureContrast: keep fg if it clears min against bg, else return whichever of light/dark reads.
-/** Is this background LIGHT? One answer, in linear light, for every consumer that has to choose
- *  between dark ink and light ink.
- *
- *  There were two answers and they disagreed on 5.8% of the sRGB cube. `core/engine/boot.js` and
- *  `core/engine/produce.js` both weighted the GAMMA-ENCODED channels, `0.2126r + 0.7152g + 0.0722b` on the
- *  raw 0-1 values, while the four copies that grade contrast linearise first, as WCAG requires. The
- *  disagreement is concentrated exactly where it hurts: SATURATED colours. `#ef720b`, a hot orange,
- *  reads 0.522 gamma (dark) and 0.304 linear (light), so a brand shipping an orange backdrop got the
- *  producer choosing dark ink for a surface the auditor then graded as light. Neutrals agree, which is
- *  why nothing had surfaced: 0 of the 78 background colours across every theme in this repo changes
- *  classification under this fix.
- *
- *  The threshold is 0.26 because that is where the old ones already sat. Gamma 0.55 and 140/255 = 0.549
- *  are the same point, and 0.55 in sRGB linearises to ≈0.26, so this is the SAME line, drawn in the
- *  space where the weights mean something. */
-export const isLightBg = (c) => {
-  const rgb = parseColor(c);
-  return rgb ? relLum(rgb) > 0.26 : true;   // unreadable → light, the white-first common case
-};
-
-const relLum = ([r, g, b]) => {
-  const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
-  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
-};
-export function contrastRatio(fg, bg) {
-  const a = parseColor(fg), b = parseColor(bg);
-  if (!a || !b) return 21;
-  const [hi, lo] = relLum(a) > relLum(b) ? [relLum(a), relLum(b)] : [relLum(b), relLum(a)];
-  return (hi + 0.05) / (lo + 0.05);
-}
-export function ensureContrast(fg, bg, { min = 3, light = '#ffffff', dark = '#141414' } = {}) {
-  if (contrastRatio(fg, bg) >= min) return fg;
-  return contrastRatio(light, bg) >= contrastRatio(dark, bg) ? light : dark;
-}
-
 export function sequence(n, fps, segments, { transition = 0.4, holdLast = true } = {}) {
   const cur = track(n, fps, segments);
   const trans = segments[cur.index]?.transition ?? transition;
@@ -876,75 +732,6 @@ export function sequence(n, fps, segments, { transition = 0.4, holdLast = true }
   const enter = trans > 0 ? clamp01(cur.localT / trans) : 1;
   const exit = (trans > 0 && !(holdLast && isLast)) ? clamp01((cur.localT - (cur.dur - trans)) / trans) : 0;
   return { ...cur, enter, exit, active: enter * (1 - exit) };
-}
-
-// transition helpers → {clipPath, WebkitClipPath} (compositor-friendly; t: 0 hidden → 1 revealed).
-// wipe: directional inset reveal. circleWipe: iris from a point. clockWipe: radial sweep from 12 o'clock.
-export function wipe(t, dir = 'left') {
-  const p = (1 - clamp01(t)) * 100;
-  const m = { left: `inset(0 ${p}% 0 0)`, right: `inset(0 0 0 ${p}%)`, up: `inset(0 0 ${p}% 0)`, down: `inset(${p}% 0 0 0)` };
-  // `m[dir] || m.left` silently wiped leftward for any unrecognised direction. core/cuts.js owns the
-  // vocabulary; this is the same rule at the other call site (docs/MISTAKES.md #360).
-  const c = m[dir];
-  if (!c) throw new Error(`wipe: unknown direction "${dir}", one of: ${Object.keys(m).join(', ')}`);
-  return { clipPath: c, WebkitClipPath: c };
-}
-export function circleWipe(t, cx = 50, cy = 50) {
-  const c = `circle(${(clamp01(t) * 72).toFixed(1)}% at ${cx}% ${cy}%)`;
-  return { clipPath: c, WebkitClipPath: c };
-}
-function boxEdge(aDeg) { // point on the 100×100 box perimeter at angle aDeg (0 = up, clockwise)
-  const rad = (aDeg * Math.PI) / 180, dx = Math.sin(rad), dy = -Math.cos(rad);
-  const tx = dx === 0 ? Infinity : (dx > 0 ? 50 / dx : -50 / dx);
-  const ty = dy === 0 ? Infinity : (dy > 0 ? 50 / dy : -50 / dy);
-  const t = Math.min(tx, ty);
-  return [50 + t * dx, 50 + t * dy];
-}
-export function clockWipe(t) {
-  const a = clamp01(t) * 360;
-  const pts = [[50, 50], [50, 0]];
-  for (const c of [45, 135, 225, 315]) if (c <= a) pts.push(boxEdge(c));
-  if (a > 0 && a < 360) pts.push(boxEdge(a)); else if (a >= 360) pts.push([50, 0]);
-  const poly = 'polygon(' + pts.map(([x, y]) => `${x.toFixed(1)}% ${y.toFixed(1)}%`).join(', ') + ')';
-  return { clipPath: poly, WebkitClipPath: poly };
-}
-
-export function formatNumber(n, { currency = false, decimals = 0, compact = false } = {}) {
-  let s;
-  if (compact) {
-    const a = Math.abs(n);
-    if (a >= 1e12) s = (n / 1e12).toFixed(decimals === 0 ? 2 : decimals) + 'T';
-    else if (a >= 1e9) s = (n / 1e9).toFixed(decimals === 0 ? 1 : decimals) + 'B';
-    else if (a >= 1e6) s = (n / 1e6).toFixed(decimals === 0 ? 1 : decimals) + 'M';
-    else if (a >= 1e3) s = (n / 1e3).toFixed(decimals === 0 ? 1 : decimals) + 'K';
-    else s = n.toFixed(decimals);
-    s = s.replace(/\.0+([TBMK])$/, '$1'); // 40.0M -> 40M
-  } else {
-    s = Number(n).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-  }
-  return (currency ? '$' : '') + s;
-}
-
-// returns { num, unit } so the scene can style the unit smaller/dim
-export function formatValue(n, unit) {
-  if (unit === '$' || unit === 'USD') return { num: formatNumber(n, { currency: true, decimals: 0, compact: Math.abs(n) >= 1e6 }), unit: '' };
-  if (unit && unit.length > 1 && unit[0] === '$') return { num: '$' + formatNumber(n, { decimals: 0 }), unit: unit.slice(1) };
-  const compact = Math.abs(n) >= 1e6;
-  return { num: formatNumber(n, { decimals: 0, compact }), unit: unit || '' };
-}
-
-// deterministic digit scramble (redacted cold-open bait).
-// Large salted seed so frame 0 is already varied (never all-zeros / broken-looking).
-function lcg01(seed) { const s = (Math.imul(seed >>> 0, 1103515245) + 12345) & 0x7fffffff; return s / 0x7fffffff; }
-export function scrambleDigits(frame, sample) {
-  let out = '';
-  for (let i = 0; i < sample.length; i++) {
-    const ch = sample[i];
-    out += ch >= '0' && ch <= '9'
-      ? String(Math.floor(lcg01(0x9e3779b1 + frame * 2654435761 + (i + 1) * 40503) * 10))
-      : ch;
-  }
-  return out;
 }
 
 // deterministic per-data duration in [58,62]s so uploads vary but a given video is stable

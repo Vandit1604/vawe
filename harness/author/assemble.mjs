@@ -24,7 +24,7 @@ import { parseStoryboard, timeline } from './storyboard-parse.mjs';
 import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMove, moveErrors, moveKeys } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
-import { isLightBg } from '../../core/motion/motion.js';
+import { isLightBg } from '../../core/color/engine.js';
 import { sceneDims } from '../../core/layout/safe.js';
 import { boundaryMechanism } from '../../core/transitions/lower.js';
 
