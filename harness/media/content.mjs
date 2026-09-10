@@ -51,21 +51,49 @@ function wallMap(px, w, h) {
   return wall;
 }
 const NEIGHBORS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+// THE BORDER RING IS NOT ALWAYS GROUND. Seeding every border pixel unconditionally assumed the ring is
+// always the backdrop, and madera's own hero crop breaks that: its editor window runs off every edge of
+// the frame, so the ring is PART OF THE SUBJECT there, and seeding it as ground flooded the whole window
+// away (measured: fill 0.02 at 2.3s, when the window covers most of the frame). A border run that is a
+// different surface, a window, a card, a photo crossing the edge, is subject, not ground, so only the
+// ring's DOMINANT colour cluster (the most common quantised bucket among ring pixels, a tight tolerance
+// around its true mean) gets to seed the flood. A ring pixel that does not match it is left unseeded: it
+// floods in only if some genuine ground seed reaches it without crossing a wall, exactly like any other
+// pixel.
+const GROUND_TOL = 16;   // tight, and BELOW the #fafafa/#eef2fa case's diff of 20: that case is exactly
+// the subject this exists to catch, so a border run of it must not pass as ground moving fill.
+function dominantGroundColor(px, w, h, ring) {
+  const buckets = new Map();
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (!(x < ring || x >= w - ring || y < ring || y >= h - ring)) continue;
+    const k = (y * w + x) * 3;
+    const r = px[k], g = px[k + 1], b = px[k + 2];
+    const key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);   // 16 levels/channel
+    const e = buckets.get(key) || { count: 0, r: 0, g: 0, b: 0 };
+    e.count++; e.r += r; e.g += g; e.b += b;
+    buckets.set(key, e);
+  }
+  let best = null;
+  for (const e of buckets.values()) if (!best || e.count > best.count) best = e;
+  return best ? [best.r / best.count, best.g / best.count, best.b / best.count] : [128, 128, 128];
+}
 // ponytail: a windowed colour-jump heuristic, not a real edge detector; a genuinely noisy ground can still
 // throw an occasional false wall and fragment into stray subject pixels. Upgrade path: a real gradient
 // operator (Sobel) if that shows up on real footage.
 function floodFill(px, w, h, ring) {
   const n = w * h;
   const wall = wallMap(px, w, h);
+  const ground = dominantGroundColor(px, w, h, ring);
   const isGround = new Uint8Array(n);
   const qx = new Int32Array(n), qy = new Int32Array(n);
   let qt = 0;
   const seed = (x, y) => { const i = y * w + x; if (!isGround[i]) { isGround[i] = 1; qx[qt] = x; qy[qt] = y; qt++; } };
-  // The border ring is ground by definition, wall or not: a wash can legitimately be busy right at the
-  // frame edge, and refusing to seed it there would call the whole ring subject on nothing but its own
-  // local texture.
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++)
-    if (x < ring || x >= w - ring || y < ring || y >= h - ring) seed(x, y);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (!(x < ring || x >= w - ring || y < ring || y >= h - ring)) continue;
+    const k = (y * w + x) * 3;
+    const d = Math.abs(px[k] - ground[0]) + Math.abs(px[k + 1] - ground[1]) + Math.abs(px[k + 2] - ground[2]);
+    if (d <= GROUND_TOL) seed(x, y);
+  }
   for (let qh = 0; qh < qt; qh++) {
     const x = qx[qh], y = qy[qh];
     for (const [dx, dy] of NEIGHBORS) {
@@ -170,7 +198,32 @@ function selftest() {
   const whiteCard = measureFrame(frame((x, y) => (x > whiteRect.x0 && x < whiteRect.x1 && y > whiteRect.y0 && y < whiteRect.y1 ? [250, 250, 250] : [238, 242, 250])));
   if (Math.abs(whiteCard.fill - trueArea) > 0.03)
     throw new Error(`a white card on a pale blue ground should fill near its true area ${trueArea.toFixed(2)}, got ${JSON.stringify(whiteCard)}`);
-  console.log('ok - content: grey scores 0, an inset red block fills and is colourful, noise reads as photo, a pale mock is flat, a white-on-blue card fills its true area');
+
+  // THE DEFECT: seeding every border pixel unconditionally assumed the ring is always ground. A card
+  // running off the frame edge puts SUBJECT on part of the ring, and the old code seeded it as ground
+  // anyway, flooding the whole card away. Only the ring's dominant colour may seed now, so most of the
+  // ring (three full sides, the fourth only partly covered) still seeds correctly and floods around it.
+  const edgeRect = { x0: 280, x1: W, y0: 60, y1: 210 };
+  const edgeArea = ((edgeRect.x1 - edgeRect.x0) * (edgeRect.y1 - edgeRect.y0)) / (W * H);
+  const edgeCard = measureFrame(frame((x, y) => (x >= edgeRect.x0 && y > edgeRect.y0 && y < edgeRect.y1 ? [250, 250, 250] : [238, 242, 250])));
+  if (Math.abs(edgeCard.fill - edgeArea) > 0.05)
+    throw new Error(`a card running off the right edge should still fill near its true area ${edgeArea.toFixed(2)}, got ${JSON.stringify(edgeCard)}`);
+
+  // A full-bleed photo: no ring pixel repeats, so no colour dominates it, so almost nothing seeds the
+  // flood and almost the whole frame reads as subject, near 1.0.
+  let fbSeed = 11; const fbRnd = () => (fbSeed = (fbSeed * 16807) % 2147483647) / 2147483647;
+  const fullBleed = measureFrame(frame(() => [fbRnd() * 255, fbRnd() * 255, fbRnd() * 255]));
+  if (fullBleed.fill < 0.9) throw new Error(`a full-bleed photo should fill near 1.0, got ${JSON.stringify(fullBleed)}`);
+
+  // A plain ground, even a gentle wash rather than one flat colour, has no subject and must still fill
+  // near 0: the dominant-cluster seed only needs to catch PART of the ring, and a gradient carries no
+  // wall for the flood to cross.
+  const wash = measureFrame(frame((x) => { const t = x / W; return [230 - 30 * t, 235 - 30 * t, 245 - 30 * t]; }));
+  if (wash.fill > 0.05) throw new Error(`a gentle wash with no subject should fill near 0, got ${JSON.stringify(wash)}`);
+
+  console.log('ok - content: grey scores 0, an inset red block fills and is colourful, noise reads as photo, a pale mock is flat,');
+  console.log('  a white-on-blue card fills its true area, a card running off the edge still does, a full-bleed photo fills ~1.0,');
+  console.log('  a gentle wash fills ~0');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
