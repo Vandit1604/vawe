@@ -59,7 +59,8 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const dirsOf = (rel) => {
   try {
     return fs.readdirSync(path.join(repoRoot, rel))
-      .filter((f) => f.endsWith('.js') || f.endsWith('.mjs'))
+      // a test file runs its assertions on import and prints into this tool's stdout, so never a vocabulary
+      .filter((f) => (f.endsWith('.js') || f.endsWith('.mjs')) && !/\.test\.m?js$/.test(f))
       .map((f) => `${rel}/${f}`);
   } catch { return []; }
 };
