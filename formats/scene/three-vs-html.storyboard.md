@@ -15,7 +15,7 @@ not: "no text layer, no html layer, no camera move, no cut: one three layer, ful
 
 ## Beat 1: Arrival (0s-4s)
 - type: hook
-- mechanism: litPlane's own pose: rise (position.y) + tilt (rotation.x) + rotate (rotation.y), eased with an overshoot-settle (backOut), `blur` shutter-accumulated on the fast part of the rise
+- mechanism: litPlane's own pose: rise (position.y) + tilt (rotation.x) + rotate (rotation.y), eased with an overshoot-settle (backOut), `motionBlur` shutter-accumulated on the fast part of the rise
 - onscreen: none (no text/html layer in this film by design)
 - object: off-frame low, tilted, unlit-looking, becomes a level plane mid-rise, motion-blurred on the fastest part of the move
 - becomes: an unlit-looking, off-angle rectangle becomes a level, key-lit UI plane easing into its resting pose

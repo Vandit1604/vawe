@@ -367,7 +367,6 @@
    "three": [
     "amp",
     "arcHeight",
-    "blur",
     "bodyColor",
     "breakAt",
     "breakDur",
@@ -386,6 +385,7 @@
     "lines",
     "metalness",
     "morphSpeed",
+    "motionBlur",
     "origin",
     "pitch",
     "planes",
@@ -2069,7 +2069,7 @@
       "label": "PER-PROPERTY timing on the motion track: seconds to delay ONE property's sampling, so scale can finish after position and rotation can settle after the travel (follow-through). A number delays every property; a map delays by name with \"*\" as its own default: { \"rot\": 0.1, \"scale\": 0.06 }. It shifts WHEN a property is read off the same track and changes no value and no keyframe."
     },
     "motionBlur": {
-     "label": "Velocity motion blur on this layer's motion track (streak on fast moves; crisp when settled). true = half-shutter; a 0..1 number sets strength. Needs a motion track."
+     "label": "Velocity motion blur (streak on fast moves; crisp when settled). true = half-shutter; a 0..1 number sets strength. On most layers it reads the layer's own motion track, so it needs one. On a three layer it instead samples the scene's own pose inside the canvas (litPlane), because a three scene moves inside a still box."
     },
     "elevation": {
      "type": "number",
@@ -2443,6 +2443,9 @@
     },
     "travel": {
      "label": "three uiParallax: how far the camera dollies over the layer's window"
+    },
+    "rise": {
+     "label": "three litPlane: how far below its resting place the plane starts before it rises into frame"
     },
     "swing": {
      "label": "three uiParallax: gentle yaw amplitude"
