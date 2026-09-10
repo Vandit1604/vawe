@@ -212,3 +212,30 @@ Rules that make this real, not ceremonial:
   counts. The only acceptable shapes are "no scene changes" and "these N changed, FAIL to PASS, here is
   why each was a false positive". A single scene going PASS to FAIL is a regression, not a discovery,
   until you have proven otherwise: an unclamped bound in #211 turned one clean scene into 7 failures.
+
+## What this engine took from the agent harness  `[ref: make rung]`
+
+Several Claude Code mechanisms answer problems this repo also has, adopted one at a time. When you
+adopt another, add its row and give it a rung. `make rung` prints the current distribution; `node
+quality/gates/rung.mjs --list` prints the worklist. Highest rung wins:
+
+```
+[built]  the engine makes it true          a wrong value cannot be written
+[gated]  a gate refuses it                 the push stops
+[live]   something says it while you write a hook speaks at the keystroke (Claude Code; elsewhere, check by hand)
+[ref]    a command answers it on demand    you have to ask
+[eye]    nothing but the sentence          you have to remember
+```
+
+| the harness does | this engine does | where |
+|---|---|---|
+| PostToolUse hooks that speak mid-task | a hook reads what you just saved and answers | `harness/live/*.mjs` |
+| a PreToolUse deny, evaluated before permission mode | the authoring ORDER refuses a write that skips a stage | `harness/live/stage-gate.mjs` |
+| UserPromptSubmit context injection | the open stage and its next command, re-stated every turn | `harness/live/stage-say.mjs` |
+| `[live]` capability discovery, PUSHED instead of searched | a beat with real duration and no `move`/`motion` is named at the moment its storyboard is saved, and told the exact `move:` line to add; `make surface D=<storyboard>` is the neutral on-demand form | `harness/live/beat-surfacer.mjs` |
+| deferred tools, fetched by search | `make arsenal Q="…"`, `make schema AT=…` | `harness/author/` |
+| skills loaded only when needed | `docs/CRAFT/*.md`; a finding NAMES the doc that settles it | `docs/TASTE.md` |
+| refusing an invalid call at the boundary | refusing at the WRITE SITE, so a bad state is unrepresentable | `core/registry/registry.js` |
+
+A gate is the LAST resort: if the bad value has a write site, the refusal goes there. Where a clean
+state can't be reached today, the number goes in a ratchet (`quality/baselines/*-ratchet.json`), never rising.
