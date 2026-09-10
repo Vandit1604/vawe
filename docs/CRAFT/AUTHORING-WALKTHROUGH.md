@@ -77,11 +77,10 @@ counter, a real UI), not a word in a box.
 
 ## Step 3: Author the JSON (transcribe the lock sheet, don't explore)
 
-**Compose from directed beats first: don't re-derive motion.** `make blueprints` lists the beat
-blueprints ([`BLUEPRINTS.md`](BLUEPRINTS.md)); drop one per beat (`{type:"beat","beat":"kineticHook",…}`)
-and fill brand content, so kinetic reveals / count-ups / cascades / dashboard dives are the *default*, not
-something you remember. Hand-author only what no blueprint covers; a `{type:"beat"}` layer expands into
-its real layers at load, no separate step.
+**Compose from directed motion first: don't re-derive it.** `make arsenal Q="…"` finds a recipe
+([`../../recipes/README.md`](../../recipes/README.md)) measured off a real film, or a kinetic reveal /
+count-up / camera move directly, so kinetic type and real motion are the *default*, not something you
+remember. Hand-author only what nothing named already covers.
 
 Read `formats/scene/sample.json` and one shipped scene as structural references, then compose, never
 copy a structure wholesale (the ledger flags it). Build in the [`README.md`](README.md) layering order:

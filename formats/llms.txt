@@ -65,22 +65,21 @@ cannot go stale). Everything else in the vocabulary below is a dial ON one of th
 - `three`: a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud WHEN: a real geometry (a font extrusion, a device body, a captured UI plane) is needed, not just a field.
 - `globe`: a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector WHEN: a dotted-planet-with-routes beat; reach for `three:"globe"` only when a real sun vector matters.
 - `particles`: a deterministic particle emitter: `preset` picks confetti (a gravity-fed burst), sparks (a fast radial flash) or dust (a slow ambient drift). Closed-form per particle, seeded by `seed`, never a running sim WHEN: a burst, flash or drift of many identical small marks (confetti/sparks/dust), deterministic.
-- `composition`: names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and blueprints cannot express WHEN: the beat needs bespoke first-party choreography that `parts` and blueprints cannot express.
+- `composition`: names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and recipes cannot express WHEN: the beat needs bespoke first-party choreography that `parts` and recipes cannot express.
 - `adjust`: one grade over everything BENEATH it: blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust` WHEN: grade everything BENEATH one point in the stack (blur/darken/desaturate a whole background).
 
 Full props per type: `formats/scene/schema.json`. What each type is FOR, in prose: `docs/PRIMITIVES.md`.
 
 ## The vocabulary: effect families
 
-Do not try to memorise all 820 named things the engine can do; reach for them by family, then
-search within the family. Each of these 55 families is a dial you put ON a layer, a cut,
+Do not try to memorise all 788 named things the engine can do; reach for them by family, then
+search within the family. Each of these 54 families is a dial you put ON a layer, a cut,
 the camera, or the scene:
 
 - **Drawn icons** (16, `asset`): `svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists.
 - **Motion voices (tactile sound)** (7, `audio`): The film SOUNDS its own motion.
 - **Backgrounds** (23, `background`): `bg:[{preset,from,to}]`.
 - **Gradient recipes** (24, `background`): named colour+kind(+angle) combos for the `gradient` background preset: `{"preset":"gradient","opts":{"recipe":"NAME"}}`.
-- **Beat blueprints** (34, `blueprint`): `{ "type":"beat", "beat":"<name>", ...
 - **Camera dials** (1, `camera`): Top-level scene keys that change what the camera DOES rather than where it goes.
 - **Camera moves** (14, `camera`): `"cameraMove": { "move":"<name>", ...
 - **Destinations (platform safe area)** (6, `canvas`): `"destination": "<name>"`.
@@ -96,7 +95,7 @@ the camera, or the scene:
 - **Lightfield shadow directions** (11, `generator`): Which way "away" is: the bearing the light falls off along.
 - **Glow presets** (7, `glow layer`): `preset` on a `glow` layer, the same slot the kinetic presets use on a text layer and a different vocabulary, because a glow carries no split text.
 - **Raymarched surfaces** (6, `layer`): `{ "type":"raymarch", "raymarch":"<name>" }`.
-- **three.js scenes (real geometry)** (11, `layer`): `{ "type":"three", "three":"<name>" }`.
+- **three.js scenes (real geometry)** (12, `layer`): `{ "type":"three", "three":"<name>" }`.
 - **Interpolation modes (not easings)** (1, `motion key`): On a `motion` key's `ease`, but NOT a curve.
 - **Keyframe handles (the graph editor)** (5, `motion key`): On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING the key, `easeIn` the segment ARRIVING at it, so one segment is drawn by two handles.
 - **Particles presets** (3, `particles layer`): `preset` on a `particles` layer picks the emitter: `{ "type":"particles", "preset":"confetti" }`.
@@ -133,7 +132,7 @@ the camera, or the scene:
 - **Shader stings** (35, `transition`): `stings:[{t,fx}]`.
 
 **Discovery, not memorisation:** `make arsenal Q="a page scrolling under a static tilt"` searches all
-820 named things (layer types, every family above, blueprints, blocks, sound cues) by plain-English
+788 named things (layer types, every family above, recipes, blocks, sound cues) by plain-English
 description and returns the exact key to write. `make schema AT="layers[].motion[]"` answers the other
 half: what fields are legal to write at one JSON path, read live off `formats/scene/schema.json`.
 
@@ -162,7 +161,7 @@ make judge D=formats/scene/x.json   # the one step that SEES: composition and fi
 
 ## Discovery
 
-- `make arsenal Q="<what you mean, in plain english>"` searches all 820 named things at once and
+- `make arsenal Q="<what you mean, in plain english>"` searches all 788 named things at once and
   prints the JSON key that means it.
 - `make schema AT="<json path>"` answers what is legal to write at that path, with every field's type.
 - `make list` shows the scene module's schema and a sample scene end to end.

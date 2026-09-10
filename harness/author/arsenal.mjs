@@ -15,8 +15,8 @@
 // how sixteen layers ended up saying `preset: "up"`.
 //
 // THIS OWNS NO LIST, and that is the whole design. `defineRegistry` (core/registry/registry.js) already carries
-// `kind`, `slot`, `names` and `blurbs` for every vocabulary, and `blueprints/index.mjs` already carries
-// a description and a prose REQUEST per beat. A fourth copy of those names would drift from the three
+// `kind`, `slot`, `names` and `blurbs` for every vocabulary, and `recipes/index.mjs` already carries
+// a blurb and its measured sources per recipe. A fourth copy of those names would drift from the three
 // that exist, which is the failure this repo logs more than any other. Everything below is read at
 // runtime; adding an effect to a registry makes it searchable here with no edit.
 //
@@ -108,21 +108,7 @@ export async function collect() {
       }
     }
   }
-  // Blueprints ARE a registry now (BEAT_REGISTRY), so the walk above would find them if it looked
-  // outside core/. It does not, and blueprints/index.mjs is the only vocabulary that lives elsewhere,
-  // so it is imported by name rather than by widening the readdir over a directory of factories.
-  //
-  // REQUESTS rides along as `aka`. It is a storyboard SENTENCE, not a description, so it is not a blurb
-  // and never printed; but it is the best prose in the repo for the words a person actually types when
-  // reaching for a beat, and `aka` is exactly the searchable-but-unprinted half.
-  try {
-    const bp = await import('../../blueprints/index.mjs');
-    const reg = bp.BEAT_REGISTRY;
-    for (const name of reg.names) {
-      out.push({ name, kind: reg.kind, slot: reg.slot, blurb: reg.blurbs[name] || '',
-        aka: [(bp.REQUESTS && bp.REQUESTS[name]) || ''].filter(Boolean), pitfall: at(reg.pitfalls, name) });
-    }
-  } catch { /* blueprints are optional to search */ }
+  // Blueprints are retired; recipes/index.mjs (below) is now the one vocabulary that lives outside core/.
   // BLOCKS, AND THEY WERE THE LARGEST HOLE IN THIS CORPUS. Measured before this landed: 97 of 97 block
   // families were absent, so `make arsenal Q="a terminal window"` and even `Q="morphText"` answered
   // NOTHING HERE CLEARLY MATCHES and told the author to assume the engine does not have it. The engine
@@ -175,7 +161,7 @@ export async function collect() {
       out.push({ name: row.name, kind: 'block', slot: 'block',
         blurb: row.blurb || '', aka: [catOf[row.family] || ''].filter(Boolean), pitfall: row.pitfall || '' });
     }
-  } catch { /* the block library is optional to search, the same way blueprints are */ }
+  } catch { /* the block library is optional to search, the same way recipes are */ }
 
   // Layer types used to need a special case here, because they were LAYER_TYPES + LAYER_BLURBS and not
   // a registry, so `beam` was invisible to a query naming its own blurb (docs/MISTAKES.md #551). They
@@ -184,7 +170,7 @@ export async function collect() {
   // THE CATALOGUE KNOWS MORE THAN THE REGISTRIES DO, and the search was the last thing to hear about it.
   //
   // Everything above reads `*_REGISTRY` exports, plus the two hardcoded special cases sitting right
-  // there (blueprints, layer types), each added because its subject is not a registry. That is the
+  // there (recipes, layer types), each added because its subject is not a registry. That is the
   // whole shape of the bug: a capability the engine offers but has not been given a registry is
   // invisible to the search this repo tells you to run before inventing anything.
   //
@@ -215,7 +201,7 @@ export async function collect() {
   } catch { /* the catalogue is optional to search: a fresh clone can still find the registries */ }
   // RECIPES: structure measured off real video (recipes/recipes.json), not a `defineRegistry` vocabulary
   // (it names motion the ENGINE can already do, copied from a reference, never a new capability), so it
-  // needs the same small adapter as blueprints/blocks above rather than a fourth index.
+  // needs the same small adapter as blocks above rather than a fourth index.
   try {
     const { RECIPES } = await import('../../recipes/index.mjs');
     for (const [name, r] of Object.entries(RECIPES)) {
@@ -446,7 +432,7 @@ export function rankQuery(all, query, { kind = null, n = 8, guessN = 3 } = {}) {
   const shape = (e) => ({
     name: e.name, kind: e.kind, slot: e.slot, blurb: e.blurb, pitfall: e.pitfall || null,
     coverage: e.c, score: e.s, used: u.count(e.name), isNew: fresh.has(e.name),
-    snippet: e.kind === 'blueprint beat' ? null : snippet(e),
+    snippet: snippet(e),
   });
 
   return {
@@ -474,8 +460,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     return i < 0 ? null : argv[i + 1];
   };
 
-  // ---- W11: the ONE discovery front door. `make schema`, `make track`, `make blueprints`,
-  // `make previews`, `make preset-sheets`, `make mistakes` and `make theme-sheet` were seven
+  // ---- W11: the ONE discovery front door. `make schema`, `make track`,
+  // `make previews`, `make preset-sheets`, `make mistakes` and `make theme-sheet` were six
   // commands for "what can I say, and how do I ask for it". Each is now a flag here; each old
   // target is a one-line alias in the Makefile that still runs, so muscle memory survives one
   // release. This owns none of their logic, only dispatches to it, for the same reason `collect()`
@@ -486,11 +472,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     process.exit(r.status ?? 0);
   };
   if (flag('at') !== null) await runScript('harness/author/schema-at.mjs', [flag('at') || '']);
-  if (argv.includes('--blueprints')) await runScript('scripts/site/blueprints-catalog.mjs', []);
-  if (argv.includes('--previews')) {
-    const only = flag('only');
-    await runScript('harness/dev/previews.mjs', only ? [`--only=${only}`] : []);
-  }
   if (argv.includes('--presets')) {
     const only = flag('only');
     await runScript('harness/dev/preset-sheets.mjs', only ? [`--only=${only}`] : []);
@@ -637,8 +618,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
          node harness/author/arsenal.mjs --at 'layers[].motion[]'         # what may I write there (was: make schema)
          node harness/author/arsenal.mjs --shape pan [--to -600] [...]    # a hand-keyed track     (was: make track)
          node harness/author/arsenal.mjs --mistakes "<words>"             # ask the mistake log     (was: make mistakes)
-         node harness/author/arsenal.mjs --blueprints                     # the beat catalog        (was: make blueprints)
-         node harness/author/arsenal.mjs --previews [--only=<id>]         # open the preview sheet  (was: make previews)
          node harness/author/arsenal.mjs --presets [--only=<name>]        # preset showcases        (was: make preset-sheets)
          node harness/author/arsenal.mjs --theme=<name>                   # one theme's look        (was: make theme-sheet)
 
@@ -687,8 +666,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${e.used === 0 ? 'NEVER used in this library' : `${e.used} scene(s)`}`);
     if (e.blurb) console.log(`      ${e.blurb}`);
     if (e.pitfall) console.log(`      pitfall: ${e.pitfall}`);
-    if (e.kind === 'blueprint beat') console.log(`      {"type":"beat","beat":"${e.name}", …}   (expands at load; \`make expand D=<file>\` to eyeball it)`);
-    else if (e.snippet) console.log(`      ${e.snippet}`);
+    if (e.snippet) console.log(`      ${e.snippet}`);
     console.log('');
   }
 

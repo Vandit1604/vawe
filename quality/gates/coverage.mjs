@@ -34,7 +34,6 @@ import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { SHAPES } from '../../core/motion/shapes.js';
 import { CURVE_NAMES } from '../../core/motion/path-curves.js';
 import { MOTION_CUE_REGISTRY } from '../../core/audio/tactile.js';
-import { BEAT_REGISTRY } from '../../blueprints/index.mjs';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { population, AUTHORED } from '../../harness/lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
@@ -63,7 +62,7 @@ const layersOf = (j) => { const out = [];
 
 const used = { anim: new Set(), preset: new Set(), cut: new Set(), sting: new Set(), look: new Set(),
   canvasFx: new Set(), paint: new Set(), bg: new Set(), type: new Set(), prop: new Set(),
-  idle: new Set(), part: new Set(), three: new Set(), cue: new Set(), beat: new Set(), block: new Set(),
+  idle: new Set(), part: new Set(), three: new Set(), cue: new Set(), block: new Set(),
   moveShape: new Set(), pathCurve: new Set() };
 
 const idleNameOf = (v) => (v && typeof v === 'object' ? v.name : v);
@@ -97,11 +96,10 @@ for (const { j, raw } of scenes) {
   }
   // Same split again: the vocabulary above is what the ENGINE renders (lowered), the props are what the
   // author wrote. A layer's `transition` is gone from the lowered copy by the time this runs.
-  // `beat`/`block` are read here too, before expand() consumes them: a raw `{type:"beat",beat:"x"}`
+  // `block` is read here too, before expand() consumes them: a raw `{type:"block",block:"x"}`
   // is gone from `j` by the time this loop runs, replaced by the layers it expanded to.
   for (const l of layersOf(raw)) {
     for (const k of Object.keys(l)) used.prop.add(k);
-    if (l.type === 'beat' && l.beat) used.beat.add(l.beat);
     if (l.type === 'block' && l.block) used.block.add(l.block);
   }
 }
@@ -142,7 +140,6 @@ const GROUPS = [
   ['part entrance', PART_NAMES, used.part],
   ['three scene', THREE_FX, used.three],
   ['sound cue', MOTION_CUE_REGISTRY.names, used.cue],
-  ['beat blueprint', BEAT_REGISTRY.names, used.beat],
   ['block', Object.keys(BLOCKS), used.block],
   ['move shape (storyboard)', Object.keys(SHAPES), used.moveShape],
   ['path curve (storyboard)', CURVE_NAMES, used.pathCurve],

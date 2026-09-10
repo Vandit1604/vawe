@@ -192,7 +192,7 @@ function emit() {
   out.push('> cannot drift from the code. This is the "see everything, then choose" catalog: skim it before');
   out.push('> authoring so you reach for the range instead of defaulting to `rise`+`fade`. Depth + doctrine:');
   out.push('> [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md) · snippets: [`MOTION-SNIPPETS.md`](MOTION-SNIPPETS.md) ·');
-  out.push('> beats: [`CRAFT/BLUEPRINTS.md`](CRAFT/BLUEPRINTS.md). Determinism: every animated effect is a pure');
+  out.push('> recipes: [`../recipes/README.md`](../recipes/README.md). Determinism: every animated effect is a pure');
   out.push('> function of the frame (CSS `@keyframes` are killed), motion comes from the engine, not from CSS.');
   out.push('');
   out.push('## Pick by what you need (mechanism-choice)');

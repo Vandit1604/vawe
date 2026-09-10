@@ -39,9 +39,9 @@ can run longer than its neighbours: give the click room to read before the conse
 - **The subject is a picture, not a blank rectangle.** `docs/CRAFT/SPECIMEN.md`'s own rule: a demo
   proving nothing visual is not a demo, it is a slide with a caption.
 
-## The blueprints to reach for
+## The motion to reach for
 
-By role (`make arsenal BLUEPRINTS=1` for the full 29):
+By role (`make arsenal Q="…"` to search):
 - **hook**: `kineticHook`, `typedHook`
 - **the mechanism itself**: no dedicated blueprint owns cursor+click; compose it from a real UI
   (`component`/`image`/`html`) plus a `cursor` layer, or reach for `recordedPan`/`scrollStory` when the

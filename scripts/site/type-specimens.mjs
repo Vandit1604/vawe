@@ -8,11 +8,11 @@
 //
 // WHY IT IS GENERATED. A hand-kept list of kinetic presets goes stale the moment a preset is added,
 // and nothing says so (docs/MISTAKES.md #165). So the inventory here is read out of the code that
-// renders it: PRESETS + PRESET_BLURBS in core/type.js, BEATS + REQUESTS in blueprints/index.mjs, and
+// renders it: PRESETS + PRESET_BLURBS in core/type.js, and
 // the text-layer prop list the schema generates from the PROPS declarations. Add a preset and it
 // appears on the site with its own blurb and a working specimen, with no edit here.
 //
-// WHAT IS STILL AUTHORED, and why it has to be. A specimen needs CONTENT, a word, a size, a beat's
+// WHAT IS STILL AUTHORED, and why it has to be. A specimen needs CONTENT, a word, a size, a line's
 // props, and no registry carries that. So this file authors the content and derives everything else,
 // and every authored piece is checked against the registry it belongs to: a group that names a preset
 // which no longer exists FAILS, a preset in no group lands in `unfiled` (visible on the page, never
@@ -37,8 +37,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PRESETS, PRESET_BLURBS } from '../../core/type/type.js';
-import { BEATS, REQUESTS } from '../../blueprints/index.mjs';
-import { BEAT_BLURBS } from './blueprints-catalog.mjs';
 import { serveRepo, launchPage, waitForEngine } from '../../harness/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -248,19 +246,6 @@ const MECHANICS = [
     layer: { text: 'the draft', size: 190, weight: 800, w: 1500, align: 'center', morph: { to: 'the film', dur: 1.4 } } },
 ];
 
-// ── whole beats ───────────────────────────────────────────────────────────────────────────────────
-// Names are asserted against BEATS; the blurb and the "how to ask for it" sentence come from the
-// registry's own comments, never from a copy kept here. Beats not shown are reported as coverage.
-const BEAT_SPECIMENS = [
-  // The poster time is named here rather than derived: a beat expands into layers of its own, so the
-  // entrance this file could measure is not the one the viewer sees.
-  { id: 'typedHook', beat: 'typedHook', poster: 1.7, props: { text: 'Six months of nothing. Then June.' } },
-  // wordBlast defaults to 380px because it punctuates ONE word. Two words at that size wrap and fall
-  // out of the bottom of the frame, so the specimen sets the size its own copy needs.
-  { id: 'wordBlast', beat: 'wordBlast', poster: 1.0, props: { text: 'IT CAUGHT', size: 260, y: 400 } },
-  { id: 'propSentence', beat: 'propSentence', poster: 1.4, props: { items: [{ word: 'One' }, { chip: 'JSON' }, { word: 'in, one' }, { chip: 'video' }, { word: 'out.' }], y: 400 } },
-];
-
 // ── assemble ──────────────────────────────────────────────────────────────────────────────────────
 const fail = (msg) => { console.error(`✗ ${msg}`); process.exitCode = 1; };
 
@@ -353,34 +338,6 @@ function presetSpecimen(name) {
   var notShown = TEXT_PROPS.filter((p) => !shownProps.has(p));
 }
 
-// beats
-{
-  const rows = [];
-  for (const b of BEAT_SPECIMENS) {
-    const fn = BEATS[b.beat];
-    if (!fn) { fail(`beat specimen names "${b.beat}", which is not in blueprints/index.mjs BEATS`); continue; }
-    let layers;
-    try { layers = fn({ start: START, dur: DUR - START - 0.15, ...b.props }); }
-    catch (e) { fail(`beat "${b.beat}" would not expand: ${e.message.split('\n')[0]}`); continue; }
-    rows.push({
-      id: `beat-${b.id}`, label: b.beat, kind: 'beat',
-      source: 'blueprints/index.mjs · BEATS',
-      blurb: BEAT_BLURBS[b.beat],
-      ask: REQUESTS[b.beat],
-      caution: null,
-      poster: b.poster,
-      // what an author WRITES is the one-line beat call, not the expansion
-      layer: { type: 'beat', beat: b.beat, start: START, dur: DUR - START - 0.15, ...b.props },
-      scene: sceneOf(layers),
-    });
-  }
-  groups.push({
-    id: 'beats', title: 'A whole beat, in one line',
-    intent: 'A blueprint is not a preset, it is a directed beat: one line in the scene expands into the layers, the stagger and the exit that make the move work. These are the typographic ones.',
-    source: 'blueprints/index.mjs · BEATS', specimens: rows,
-  });
-}
-
 for (const g of groups) specimens.push(...g.specimens);
 if (process.exitCode) { console.error('\n✗ catalogue is inconsistent with the registries, nothing written'); process.exit(1); }
 
@@ -431,20 +388,16 @@ const catalogue = {
   _derivedFrom: [
     'core/type.js · PRESETS + PRESET_BLURBS',
     'core/layers/text.js · PROPS (through the generated formats/scene/schema.json)',
-    'blueprints/index.mjs · BEATS + REQUESTS (+ the registry comments, via blueprints-catalog.mjs)',
   ],
   counts: {
     specimens: specimens.length,
     presetsInEngine: Object.keys(PRESETS).length,
     presetsShown: specimens.filter((s) => s.kind === 'preset').length,
-    beatsInEngine: Object.keys(BEATS).length,
-    beatsShown: specimens.filter((s) => s.kind === 'beat').length,
   },
   // Said out loud on the page. A catalogue that shows a subset and does not say so is the same lie
   // as one that has gone stale, only harder to notice.
   coverage: {
     textPropsNotShown: notShown,
-    beatsNotShown: Object.keys(BEATS).filter((n) => !BEAT_SPECIMENS.some((b) => b.beat === n)),
   },
   groups: groups.map((g) => ({
     id: g.id, title: g.title, intent: g.intent, source: g.source,

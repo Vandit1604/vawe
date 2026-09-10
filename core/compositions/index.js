@@ -2,7 +2,7 @@
 // hand-writes a GSAP timeline per beat" model).
 //
 // A composition is a FIRST-PARTY builder that authors a bespoke, multi-tween GSAP timeline for one beat,
-// the expressiveness `parts` (per-child stagger) and blueprints (fixed shapes) cannot reach: overlapping
+// the expressiveness `parts` (per-child stagger) and recipes (measured motion) cannot reach: overlapping
 // tweens, cross-timed hand-offs, a token travelling a path while a counter ticks and a check draws. The
 // JSON only NAMES it (`{ "type":"composition", "comp":"pipelineFlow", "props":{…} }`) and passes DATA via
 // `props`; the CODE lives here, never in the JSON. That is the whole security boundary, untrusted MCP

@@ -33,11 +33,12 @@ $(if $(STRICT),--strict)`), with no shell logic of its own. This is the catalogu
 the honest majority of the file. `make list` exists because a 200-plus-line catalogue needs an
 index; it reads the Makefile itself so the index cannot drift from the real target list.
 
-Of the aliases, **7 explicitly moved and print where they moved**, matching the precedent AGENTS.md
-already names (`make arsenal` folding six targets into one): `mistakes`, `schema`, `blueprints`,
-`previews`, `preset-sheets`, `theme-sheet`, `track`. Each old name still works, each prints its new
+Of the aliases, **5 explicitly moved and print where they moved**, matching the precedent AGENTS.md
+already names (`make arsenal` folding six targets into one): `mistakes`, `schema`,
+`preset-sheets`, `theme-sheet`, `track`. Each old name still works, each prints its new
 `make arsenal <FLAG>=...` form on stdout before running the old script underneath. AGENTS.md says
-this holds "for one release"; it still does, and nothing here changed that promise.
+this holds "for one release"; it still does, and nothing here changed that promise. (`blueprints` and
+`previews` were retired outright, not aliased: blueprints are gone in favour of `recipes/`.)
 
 **3. Targets carrying real shell logic: was 10, now 6.** Ten targets had recipes with a loop, a
 conditional, or more than three command lines: `build-all` (a `for` loop cross-compiling five

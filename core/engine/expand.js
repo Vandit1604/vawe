@@ -3,7 +3,7 @@
 // lowerScene(expandScene(data)), the loader every Node gate and script calls to read a scene off disk.
 //
 // NODE-ONLY BY POLICY, NOT BY CONSTRAINT: expandScene itself is pure ESM (no `fs`) and boots fine in
-// any browser that can fetch `blocks/`/`blueprints/`. The render page cannot: internal/scene's file
+// any browser that can fetch `blocks/`. The render page cannot: internal/scene's file
 // server default-denies everything outside core/themes/formats/assets/.vawe-data
 // (internal/scene/scene.go `served`), by design, because it renders scenes from strangers over MCP,
 // and this module's dependency on ~186 block/beat factories (one of which, blocks/geo.mjs, imports
@@ -25,7 +25,6 @@
 // double-expands.
 import * as B from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
-import { BEATS } from '../../blueprints/index.mjs';
 import { bakeCameraMove } from './produce.js';
 import { frameOf } from '../layout/safe.js';
 import { lowerScene } from '../transitions/lower.js';
@@ -68,18 +67,17 @@ function expandBlock(layer) {
   return f(opts);
 }
 
-// expandBeat(layer) -> [rawLayer...], each tagged `_beat` (see the comment on the field below).
+// expandBeat(layer) -> refused. Blueprints are retired: `{type:"beat"}` was the sugar that expanded to
+// one, and every film that used it has been baked to its literal layers (docs/MISTAKES.md, the
+// retire-blueprints migration). A scene still authoring `{type:"beat"}` is either a stale draft or a
+// copy-paste from an old example; the fix is to compose from `recipes/` (recipes/README.md) or, for a
+// whole beat's worth of layers, to read `make arsenal Q="..."` for the nearest vocabulary that replaced
+// it, never to add a new blueprint.
 function expandBeat(layer) {
-  const f = BEATS[layer.beat];
-  if (!f) throw new Error(`unknown beat "${layer.beat}". known: ${Object.keys(BEATS).join(', ')}`);
-  const { type: _type, beat: _beatName, ...opts } = layer;
-  warnUnknown(f, opts, `beat "${layer.beat}"`);
-  // `_beat` names the blueprint a layer came from. Annotation-shaped (`_`-prefixed, the same
-  // convention `_why`/`_card` use), so it is invisible to prop checking, but it is the one thing
-  // direction-floor.mjs needs and lost when the raw `{type:"beat"}` layer stopped surviving to
-  // render: without it, a beat's own opaque-motion credit and "composed from blueprints" reading
-  // (docs/CRAFT/DIRECTION.md) has nothing left to recognise post-expansion.
-  return f(opts).map((l) => ({ ...l, _beat: layer.beat }));
+  throw new Error(`beat "${layer.beat}": blueprints are retired. Compose from recipes/ instead `
+    + '(recipes/README.md), or run `make arsenal Q="..."` to find the nearest replacement. '
+    + 'A shipped film should never author {type:"beat"}; every film that did has been baked to its '
+    + 'literal layers.');
 }
 
 // expandComp(layer, comps, stack) -> [rawLayer...], the comp's own layers shifted onto the instance's
@@ -107,7 +105,7 @@ export function expandScene(data) {
 
   function expand(layer, stack) {
     if (layer.type === 'block') return expandBlock(layer).flatMap((l) => expand(l, stack));
-    if (layer.type === 'beat') return expandBeat(layer).flatMap((l) => expand(l, stack));
+    if (layer.type === 'beat') return expandBeat(layer);
     if (layer.type === 'comp') return expandComp(layer, comps, stack).flatMap((l) => expand(l, [...stack, layer.ref]));
     // SLOTS: a container block/comp's `children` may themselves be sugar (a `listRow` block inside a
     // `phoneFrame` block). Descend through every nesting level; a non-sugar child passes through untouched.

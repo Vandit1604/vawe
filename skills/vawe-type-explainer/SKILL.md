@@ -40,9 +40,9 @@ next starts, not to keep pace with a product tour.
 - **A held pace.** Do not chain blueprints at launch-film speed; a fact needs room to be read and
   understood before the cut.
 
-## The blueprints to reach for
+## The motion to reach for
 
-By role (`make arsenal BLUEPRINTS=1` for the full 29):
+By role (`make arsenal Q="…"` to search):
 - **hook**: `kineticHook`, `dialogueAccumulate`, `wordWipe`
 - **named-things build**: `containerFill`, `chipGrid`, `listBuildRows`, `cardFan`
 - **counted proof**: `statReveal` (a `count` layer under a kinetic label)

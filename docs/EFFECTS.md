@@ -4,7 +4,7 @@
 > cannot drift from the code. This is the "see everything, then choose" catalog: skim it before
 > authoring so you reach for the range instead of defaulting to `rise`+`fade`. Depth + doctrine:
 > [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md) · snippets: [`MOTION-SNIPPETS.md`](MOTION-SNIPPETS.md) ·
-> beats: [`CRAFT/BLUEPRINTS.md`](CRAFT/BLUEPRINTS.md). Determinism: every animated effect is a pure
+> recipes: [`../recipes/README.md`](../recipes/README.md). Determinism: every animated effect is a pure
 > function of the frame (CSS `@keyframes` are killed), motion comes from the engine, not from CSS.
 
 ## Pick by what you need (mechanism-choice)
@@ -120,47 +120,6 @@ named colour+kind(+angle) combos for the `gradient` background preset: `{"preset
 | `steel-blue` | slate into charcoal-blue, a cool industrial ramp |
 | `sunset-strip` | red, magenta and amber drifting, a MOVING sunset mesh |
 | `warm-dusk` | orange into coral, a sunset ramp on a 40deg diagonal |
-
-## Beat blueprints  `[blueprint]`
-
-`{ "type":"beat", "beat":"<name>", ... }`. A whole beat's directed motion, expanded at load. See BLUEPRINTS.md, and `make blueprints` for the props each takes and the sentence that ASKS for it.
-
-| name | what / when |
-|---|---|
-| `blurResolveHook` | a hook whose type arrives smeared with motion blur and snaps into focus, never sliding or fading |
-| `cardCascade` | feature grid: kinetic title + cards that pop in one after another |
-| `cardFan` | cards arrive from one side and fan open in perspective around a fixed anchor |
-| `cellMosaic` | a grid of mixed cells that slides as one surface while each cell keeps its own content |
-| `chipConverge` | chips scatter in from every side and then converge onto one point |
-| `chipGrid` | named things (sources/tools) as pills that pop staggered + footer |
-| `containerFill` | a fixed frame that never moves while chips fill it in one at a time |
-| `ctaEnd` | held end card: mark + install chip + sub + url (exitDur 0) |
-| `dialogueAccumulate` | sans answered by serif word pairs that accumulate on a held frame, a dot as the joint, ending in a bloom |
-| `echoRing` | a stroked ring replaying another layer's path one beat late, fading as it grows |
-| `focusRack` | a rack focus: one plane pulls sharp on the layer blur channel while the other blurs AND dims |
-| `htmlBrowser` | a browser-chrome frame (traffic dots + url bar) around your own page content |
-| `htmlCard` | a hairline surface built from your own markup, revealed part by part via `parts` |
-| `htmlChat` | a chat log whose bubbles land one after another, not all at once |
-| `htmlPanel` | a plain low-contrast surface for content you draw yourself (a terminal, a dialog) |
-| `htmlTable` | a real data table that reveals row by row, never the whole grid at once |
-| `kineticHook` | hook / open loop: eyebrow + hero count-up|word + kinetic subline |
-| `listBuildRows` | a vertical list that grows one row at a time under a fixed left rule |
-| `logoLockup` | brand: mark pops + wordmark travels + kinetic headline + sub |
-| `logoReveal` | brand: mark DRAWS on / MELTS from a blob + bloom + wordmark cascade |
-| `morphButton` | the object that BECOMES the next thing: button shrinks/rounds to a dot |
-| `propSentence` | a sentence whose NOUNS are pictures: word · photo · chip · card · word, on a rolling stagger |
-| `recordedPan` | a surface wider than the frame scrolled on an IRREGULAR linear track, riders welded |
-| `screenDive` | product surface: kinetic title + a real UI shot that KEN-pushes in |
-| `scrollStory` | a taller-than-frame surface whose CONTENT scrolls under a static tilt, stop by stop |
-| `slotSwap` | three fixed slots whose contents turn over N times; the right slot changes TYPE each pass |
-| `statReveal` | payoff: hero count-up + kinetic label |
-| `terminalReveal` | a CLI beat: typing command + cursor + rising output + accent result |
-| `typedHook` | hook that ERASES itself: types in, un-types ~2x faster, never fades |
-| `verdictProof` | claim proven: typing command + note + tone verdict chip |
-| `viewportTrio` | the same subject shown at three sizes at once, the "it is really finished" payoff shot |
-| `wordBlast` | scale punctuation: arrives oversized, settles, drifts, leaves by growing THROUGH the frame |
-| `wordWipe` | an oversized word crosses the whole frame motion-blurred, and its passage is the transition |
-| `wordmarkAssemble` | the brand mark settles from scattered letters while small tiles drift at a different depth behind it |
 
 ## Camera dials  `[camera]`
 
@@ -373,7 +332,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `board` | a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip |
 | `clip` | a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders |
 | `component` | a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` |
-| `composition` | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and blueprints cannot express |
+| `composition` | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and recipes cannot express |
 | `count` | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9 |
 | `cursor` | a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time, the spine of a product demo |
 | `doc` | a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height |
@@ -1170,4 +1129,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_727 effects across 59 families. Regenerate: `make effects`._
+_693 effects across 58 families. Regenerate: `make effects`._

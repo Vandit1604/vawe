@@ -1,4 +1,93 @@
-{ "module":"scene","theme": "default","aspect":"16:9","duration":6,"audio":{"silent":true},
-  "camera":[{"t":0,"s":1.0},{"t":6,"s":1.05,"ease":"linear"}],
-  "seams":[{"t":0.3,"fx":"dissolve","dur":0.4}],
-  "layers":[ { "type":"beat","beat":"kineticHook","start":0.3,"dur":5.5,"eyebrow":"e","to":94,"unit":"%","sub":"a real subline here" } ] }
+{
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 6,
+ "audio": {
+  "silent": true
+ },
+ "camera": [
+  {
+   "t": 0,
+   "s": 1
+  },
+  {
+   "t": 6,
+   "s": 1.05,
+   "ease": "linear"
+  }
+ ],
+ "seams": [
+  {
+   "t": 0.3,
+   "fx": "dissolve",
+   "dur": 0.4
+  }
+ ],
+ "layers": [
+  {
+   "type": "text",
+   "text": "e",
+   "x": 160,
+   "y": 250,
+   "w": 1600,
+   "align": "center",
+   "size": 56,
+   "weight": 500,
+   "color": "var(--dim)",
+   "font": "mono",
+   "start": 0.3,
+   "duration": 5.5,
+   "anim": "fade",
+   "out": "fade",
+   "enterDur": 0.5,
+   "exitDur": 0,
+   "_beat": "kineticHook"
+  },
+  {
+   "type": "count",
+   "from": 0,
+   "to": 94,
+   "unit": "%",
+   "font": "sans",
+   "x": 160,
+   "y": 350,
+   "w": 1600,
+   "align": "center",
+   "size": 360,
+   "weight": 800,
+   "color": "var(--text)",
+   "ls": "-0.03em",
+   "countStart": 0.1,
+   "countDur": 1.5,
+   "ease": "easeOutExpo",
+   "start": 0.7,
+   "duration": 5.1,
+   "anim": "pop",
+   "enterDur": 0.55,
+   "out": "defocus",
+   "exitDur": 0,
+   "_beat": "kineticHook"
+  },
+  {
+   "type": "text",
+   "text": "a real subline here",
+   "x": 160,
+   "y": 780,
+   "w": 1600,
+   "align": "center",
+   "size": 74,
+   "weight": 700,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "up",
+   "each": 0.4,
+   "stagger": 0.045,
+   "start": 2.2,
+   "duration": 3.6,
+   "out": "fade",
+   "exitDur": 0,
+   "_beat": "kineticHook"
+  }
+ ]
+}
