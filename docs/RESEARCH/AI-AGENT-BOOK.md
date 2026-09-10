@@ -551,8 +551,9 @@ Measured against that, our stack is already at the top tier and in two respects 
   would be worse. The book has no argument against that shape and I am not proposing to change it.
 
 **So the catalogue plus the gate is right, and the census proves it is not the problem.**
-`arsenal.mjs`'s own header carries the evidence: the `{type:"beat"}` blueprint mechanism, which
-`CLAUDE.md` names as the number one defence against a slideshow, is used by 2 of 134 scenes; 12 of its
+`arsenal.mjs`'s own header carries the evidence: the `{type:"beat"}` blueprint mechanism (since
+retired), which `CLAUDE.md` named as the number one defence against a slideshow, was used by 2 of 134
+scenes; 12 of its
 19 beats have never been used; `EXIT_FX`, eleven named exits, has zero users while every film needs
 its layers to leave. The diagnosis is already written down: "That instruction has been given for
 months and obeyed twice, so the problem is not persuasion."

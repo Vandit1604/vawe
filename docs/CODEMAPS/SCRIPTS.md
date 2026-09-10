@@ -206,7 +206,7 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `scrub.mjs` | 36 | yes | harness/author/scrub.mjs: the PREVIEW LOOP. Extract N frames evenly across a rendered video into one |
 | `batch.mjs` | 33 | yes | harness/author/batch.mjs: DATA-DRIVEN VARIANTS. One template scene + an array of data rows → N rendered |
 | `route.test.mjs` | 22 | no | harness/author/route.test.mjs: does route() send a real request to the deliverable a human would |
-| `expand-blocks.mjs` | 15 | yes | harness/author/expand-blocks.mjs: DEBUGGING command only. `{type:"block"}`, `{type:"beat"}` and |
+| `expand-blocks.mjs` | 15 | yes | harness/author/expand-blocks.mjs: DEBUGGING command only. `{type:"block"}` and `{type:"comp"}` sugar |
 
 ## `studio`
 

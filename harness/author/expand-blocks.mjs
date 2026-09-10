@@ -1,7 +1,8 @@
-// harness/author/expand-blocks.mjs: DEBUGGING command only. `{type:"block"}`, `{type:"beat"}` and
-// `{type:"comp"}` sugar now expands at LOAD time (core/engine/expand.js `expandScene`, called from
-// core/transitions/lower.js `loadScene`), so `./bin/vawe scene.json` and every gate already read the
-// one file an author wrote. This script exists only so an author can eyeball what a beat/block resolves
+// harness/author/expand-blocks.mjs: DEBUGGING command only. `{type:"block"}` and `{type:"comp"}` sugar
+// expands at LOAD time (core/engine/expand.js `expandScene`, called from core/transitions/lower.js
+// `loadScene`), so `./bin/vawe scene.json` and every gate already read the one file an author wrote.
+// `{type:"beat"}` is retired: `expandScene` now refuses it (`expandBeat` throws), pointing the author
+// at `recipes/` instead. This script exists only so an author can eyeball what a block/comp resolves
 // to: it prints the expanded JSON to stdout and nothing else.
 //
 // Usage: node harness/author/expand-blocks.mjs <scene.json>   (make expand D=<scene.json>)

@@ -6,7 +6,7 @@ codes: canvas-order-dependent, purity-forward-mismatch, purity-render-order
 
 # Authoring Vawe scenes
 
-One self-describing JSON → one rendered Short (1080×1920, 30fps). Scenes are vanilla HTML/CSS/JS;
+One self-describing JSON → one rendered Short (1080×1920, 60fps final, 30fps `--draft`). Scenes are vanilla HTML/CSS/JS;
 a Go renderer (chromedp + ffmpeg) seeks to each frame and screenshots. **You almost never edit the
 Go renderer.** You write data JSON (most common) or a format's `scene.html`.
 
