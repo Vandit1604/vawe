@@ -58,6 +58,7 @@ import { okDir as seamDir } from '../../core/timeline/seams.js';
 import { produceBaseline } from '../../core/engine/produce.js';
 import { easeErrors, bgErrors, durationWordErrors, cssErrors, authoredJunctionErrors } from '../../core/validate/validate.mjs';
 import { raise as raiseJunction, deepEqual as junctionDeepEqual, migrateOne } from '../../harness/author/migrate-junctions.mjs';
+import { splitWaiver, waiverCovers, isWaivedBy, groupWaivers, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
 import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/registry/vocab.js';
 import { BASE_ENTER } from '../../core/timeline/clips.js';
 import { CUT_REGISTRY } from '../../core/cuts/index.js';
@@ -7548,6 +7549,40 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('content-check: a real dense act (band slightly) is not a placeholder', !isPlaceholderSurface({ fill: 0.43, band: 'slightly', photo: 0.23, detail: 14.1 }));
   ok('content-check: a large flat colourless mock IS a placeholder', isPlaceholderSurface({ fill: 0.5, band: 'not', photo: 0, detail: 1 }));
   ok('content-check: a small flat colourless patch is not (too little of the frame to be the subject)', !isPlaceholderSurface({ fill: 0.1, band: 'not', photo: 0, detail: 1 }));
+}
+
+// ---- harness/lib/waivers.mjs: a waiver excuses the instance it names, a bare one excuses the film ---
+{
+  ok('waivers: splitWaiver reads a bare code with no instance', JSON.stringify(splitWaiver('dead-air')) === JSON.stringify({ code: 'dead-air', instance: null }));
+  ok('waivers: splitWaiver splits code@instance on the FIRST @', JSON.stringify(splitWaiver('dead-air@beat:3')) === JSON.stringify({ code: 'dead-air', instance: 'beat:3' }));
+  ok('waivers: an instance may itself contain @ (an asset path); only the first @ is the separator', splitWaiver('missing-font@fonts/A@2x.woff2').instance === 'fonts/A@2x.woff2');
+
+  // BARE still excuses every instance, unchanged behaviour: no existing film's waivers stop working.
+  ok('waivers: a bare entry covers any instance of its code', waiverCovers('crossfade-mud', 'crossfade-mud', 'layer:3'));
+  ok('waivers: a bare entry covers a finding with NO instance too', waiverCovers('crossfade-mud', 'crossfade-mud', undefined));
+  ok('waivers: a bare entry never covers a different code', !waiverCovers('crossfade-mud', 'dead-air', undefined));
+
+  // SCOPED excuses only the instance it names: a second instance of the SAME code is a new question.
+  ok('waivers: a scoped entry covers its own instance', waiverCovers('dead-air@beat:3', 'dead-air', 'beat:3'));
+  ok('waivers: a scoped entry does not cover a different instance of the same code', !waiverCovers('dead-air@beat:3', 'dead-air', 'beat:4'));
+  ok('waivers: a scoped entry does not cover a finding with no instance at all', !waiverCovers('dead-air@beat:3', 'dead-air', undefined));
+
+  ok('waivers: isWaivedBy is true when ANY entry in the list covers the finding', isWaivedBy(['off-font', 'dead-air@beat:3'], 'dead-air', 'beat:3'));
+  ok('waivers: isWaivedBy is false when no entry covers the finding', !isWaivedBy(['off-font', 'dead-air@beat:3'], 'dead-air', 'beat:4'));
+  ok('waivers: isWaivedBy of an empty list excuses nothing', !isWaivedBy([], 'dead-air', 'beat:3'));
+
+  const g = groupWaivers(['off-font', 'dead-air@beat:3', 'dead-air@beat:5']);
+  ok('waivers: groupWaivers separates bare codes', g.bare.has('off-font') && !g.bare.has('dead-air'));
+  ok('waivers: groupWaivers collects every scoped instance under its code', [...g.scoped.get('dead-air')].sort().join(',') === 'beat:3,beat:5');
+
+  // bareWaiverCoverage: what a BARE waiver hides, from the run's own finding records, never invented.
+  const recs = [{ code: 'placeholder-word', at: '0.0s' }, { code: 'placeholder-word', at: '3.0s' }, { code: 'off-font', at: 'headline' }];
+  const covBare = bareWaiverCoverage(['placeholder-word'], 'placeholder-word', recs);
+  ok('waivers: bareWaiverCoverage counts every finding of the bare-waived code', covBare.count === 2);
+  ok('waivers: bareWaiverCoverage names the instances when the gate provides them', covBare.instances.join(',') === '0.0s,3.0s' && covBare.hasInstanceData);
+  ok('waivers: bareWaiverCoverage returns null when the code is not waived bare', bareWaiverCoverage(['placeholder-word@0.0s'], 'placeholder-word', recs) === null);
+  const covNoAt = bareWaiverCoverage(['dead-air'], 'dead-air', [{ code: 'dead-air', at: undefined }, { code: 'dead-air', at: undefined }]);
+  ok('waivers: a code whose gate names no instance still counts, honestly, with no instances to list', covNoAt.count === 2 && !covNoAt.hasInstanceData);
 }
 
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter

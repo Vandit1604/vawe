@@ -229,6 +229,41 @@ alike:
 
 Only one glyph now. `▪ LEGACY` (nobody has looked yet) is retired along with the mechanism it named.
 
+**A waiver can now name the ONE instance it excuses.** A bare entry, `"dead-air"`, still excuses that
+code for the WHOLE FILM, forever, whatever finding fires under it, unchanged from everything above. That
+was measured to cost something real: a new 1.0:1 contrast defect on a NEW beat rode through as
+`(waived)` under an excuse written for a different beat, because a bare waiver cannot tell one finding
+of its code from another. An entry may instead write `"<code>@<instance>"`, where instance is exactly
+what that code's own finding already calls `at` (`harness/lib/findings.mjs`): a beat's timestamp
+(critique, inspect), a layer or asset path (asset-check), whatever the gate already names. Nothing here
+invents an identifier a finding cannot produce, so a code whose gate never sets `at` (most of
+`HARD_CODES` today: `plain-slideshow`, `static-bg`, `no-continuous-object`, `crossfade-mud` and the
+rest, none of them tag an instance yet) can only be waived bare, and `harness/lib/waivers.mjs` says so
+rather than pretending the scoped form did something:
+
+```json
+"authoring": {
+  "allow": ["placeholder-word@0.0s"],
+  "_why": { "placeholder-word@0.0s": "the opening slate is deliberately a stand-in title card" }
+}
+```
+
+`_why` keys the ENTRY, bare or scoped, never the bare code underneath a scoped one. A second
+`placeholder-word` at `3.0s` is then a NEW finding, unwaived, exactly as if nothing had been written for
+the first.
+
+Because a bare waiver still hides everything, `author-check` prints what it is hiding every time one is
+live:
+
+```
+  film-wide waiver: craft-unvisited (excuses 10 finding(s), no instance data to name them)
+```
+
+`quality/gates/waiver-drift.mjs` reports the same thing per scene, and `--suggest <scene.json>` prints
+the scoped entries that would replace a bare waiver with exactly today's findings, for the codes whose
+gate already names an instance; for the rest it says plainly that bare is the only shape the code has.
+It never rewrites the file.
+
 **Any rule can join `HARD_CODES`.** No probe needs to be cheap and pure any more, because nothing
 re-evaluates the whole library at check time: a code's severity is a Set lookup against the codes the
 ladder's own steps already produced for THIS scene. `harness/lib/finding-codes.mjs` still derives which
