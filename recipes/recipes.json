@@ -60,7 +60,7 @@
       "stagger": {
         "default": 0.06,
         "unit": "s",
-        "note": "words of an entering line lag each other; expand.mjs does not yet split a text layer into words, see recipes/README.md"
+        "note": "words of an entering line lag each other. When the \"in\" layer already carries `split: \"word\"` (authored by a word-by-word line), the whole-layer slide this recipe would otherwise write is skipped and the words arrive on their own split track instead; this value then has no effect unless the word-by-word line's own `stagger` param is left at its default, which happens to be the same measured number"
       },
       "groundFade": {
         "default": 0.5,
@@ -73,6 +73,87 @@
         },
         "one-source": true,
         "note": "small anticipation pull the wrong way before the rush"
+      }
+    }
+  },
+  "window-dolly": {
+    "kind": "camera",
+    "blurb": "a slow continuous dolly-in that zooms the camera toward a named layer's box, tightening the frame across the whole shot with no cut",
+    "sources": [
+      {
+        "ref": "example-madera",
+        "t": 0,
+        "note": "act 1 (0s-4.54s): the agent window fills the frame steadily, the sidebar and prompt bar both growing larger frame to frame; boundary-pixel estimate off 3 sampled frames puts the push at roughly 1.9x by the cut"
+      },
+      {
+        "ref": "example-madera",
+        "t": 6.0,
+        "note": "act 3 (6s-8.12s): a slight continuous push on the swipe-card stack, steady through each swipe; card-width estimate off 2 sampled frames puts it at roughly 1.25x, visibly gentler than act 1"
+      },
+      {
+        "ref": "example-madera",
+        "t": 9.57,
+        "note": "act 5 (9.57s-11.08s): a slow dolly-in on the results window as its product grid fills in; sidebar-width estimate off 2 sampled frames puts it at roughly 1.15x, the shortest act of the three so the smallest push"
+      }
+    ],
+    "slots": {
+      "from": "seconds: push start",
+      "to": "seconds: push end",
+      "target": "layer id: the layer the camera dollies toward (its box gives the point the camera centres on)"
+    },
+    "params": {
+      "zoomTo": {
+        "default": 1.3,
+        "one-source": true,
+        "note": "measured scale reached by push end: act 1 ~1.9 over 4.54s, act 3 ~1.25 over 2.12s, act 5 ~1.15 over 1.51s (boundary-pixel triangulation off sampled frames per act, moderate confidence, one source each). 1.3 is a rounded cross-act default; an author should usually override with a figure scaled to their own push's duration rather than trust the default blind"
+      },
+      "headroom": {
+        "default": 0.88,
+        "note": "diveIn's own frame-fill cap, unchanged: the target may fill at most 88% of the canvas on either axis"
+      },
+      "ease": {
+        "default": "easeOutQuart",
+        "enum": [
+          "easeOutQuart"
+        ],
+        "note": "diveIn's own built-in feel (fast in, long settle); matches the measured deceleration into every madera push. Not yet measured to differ, so not offered as a real choice"
+      }
+    }
+  },
+  "word-by-word": {
+    "kind": "enter",
+    "blurb": "a line arrives one word after another, each word rising into place, for a tagline or headline entrance instead of the whole line sliding in as one block",
+    "sources": [
+      {
+        "ref": "example-madera",
+        "t": 4.58,
+        "note": "act 2: 'MADERA understands your taste.' enters word by word from the right, each word landing in its own colour before the line settles to one ink"
+      },
+      {
+        "ref": "example-madera",
+        "t": 8.17,
+        "note": "act 4: 'MADERA find items you love.' enters the same way"
+      }
+    ],
+    "slots": {
+      "at": "seconds: the line's arrival start",
+      "layer": "layer id: a text layer carrying the line",
+      "colors": "[hex, ...]? one colour per word, optional. No named core capability compiles more than one distinct settle colour per line today (core/kinetic/presets.js colorWave sweeps a single accent through the units, it does not hold N different resting colours); passing more than one throws, naming that gap, rather than hand-keying colours per word"
+    },
+    "params": {
+      "preset": {
+        "default": "up",
+        "note": "core/kinetic/presets.js PRESETS.up: rise + fade per split unit, the engine's default kinetic reveal and the closest named match to madera's word-by-word rise"
+      },
+      "each": {
+        "default": 0.35,
+        "unit": "s",
+        "note": "per-unit reveal duration; matches flow-seam's enterDur, the closest measured entrance timing in this film"
+      },
+      "stagger": {
+        "default": 0.06,
+        "unit": "s",
+        "note": "per-word lag, measured off acts 2 and 4 the same way flow-seam's own stagger note was written before expand.mjs could split text: consecutive words visibly lag by 2 to 4 frames at 60fps"
       }
     }
   }
