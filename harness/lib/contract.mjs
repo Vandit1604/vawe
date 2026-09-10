@@ -51,7 +51,7 @@ import { TIMINGS } from '../../core/cuts/timings.js';
 // score/toks: the SAME word-overlap ranker `make arsenal` uses (harness/author/arsenal.mjs), reused
 // rather than reimplemented so "nearest 3" here and "nearest 3" there can never rank a query
 // differently. Pure and sync (no registry discovery), safe to import from a gate.
-import { score, toks } from '../author/arsenal.mjs';
+import { score, toks, collect as arsenalCollect, pasteOf } from '../author/arsenal.mjs';
 
 const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*((?:\/[a-z]+\s*[:=]\s*-?[\d.]+\s*)*)$/i;
 const POSE_TOKEN_RE = /\/([a-z]+)\s*[:=]\s*(-?[\d.]+)/gi;
@@ -731,4 +731,183 @@ export function recipeErrors(beats) {
     if (p.missingSlots.length) errs.push(`beat ${i + 1} (${b.name}) recipe "${p.name}" is missing slot(s): ${p.missingSlots.join(', ')}. recipes/README.md.`);
   });
   return errs;
+}
+
+// ── USE: the general door onto the arsenal's 790-entry corpus (harness/author/arsenal.mjs collect()),
+// the SAME index `make arsenal Q="…"` already searches. A beat may carry several `use:` lines
+// (storyboard-parse.mjs fieldAllIn collects them as a list, unlike every single-valued field above).
+// Syntax: "use: <name> [on=<layer id>] [key=value …]", or "use: <kind>:<name> …" when a bare name
+// exists in more than one kind (`preset` alone is kinetic/glow/particles; `kinetic preset:weight`
+// picks one).
+//
+// NO SECOND MECHANISM. A kind that already has a dedicated field (camera:, transition_in:, move:,
+// motion:, recipe:) reaches the engine there; `use:` refuses it and names the field, rather than
+// becoming a second spelling of the same decision. `idle` is refused the same way: its names are
+// already reachable as `move: hold:<idle>` (core/engine/idle.js IDLE_NAMES, the exact set
+// parseMoveEntry's HOLD_RE branch reads), so a `use:` door onto it would be a second HOLD mechanism.
+export const USE_DEDICATED_FIELD = {
+  'camera move': 'camera:', 'camera word': 'camera:',
+  cut: 'transition_in:', 'seam fx': 'transition_in:', 'sting fx': 'transition_in:', 'cut timing': 'transition_in:',
+  'move shape': 'move:', 'path curve': 'move:',
+  idle: 'move: hold:<idle>',
+  'part entrance': 'motion:',
+  recipe: 'recipe:',
+};
+
+// INTERNAL: engine machinery an author never names from a storyboard. Each is refused naming the doc
+// or field that actually sets it, decided by reading its slot text and catalog tag (never a per-family
+// guess): all thirteen are either an implementation detail no beat has a reason to pick (a generator, a
+// keyframe handle, an interpolation mode, a scramble charset), a value derived from something else on
+// the layer rather than chosen (a shadow direction, field motion, an envelope shape/anchor, a lightfield
+// pattern, an effector drive/falloff), owned by a different file entirely (a theme look key, themes/*.json),
+// or a slot that is not a plain value at all (`ransom.faces`, a LIST of {family, weight} records).
+export const USE_INTERNAL_KIND = {
+  generator: 'a lightfield generator is chosen by the field\'s own config (core/generators/generators.js), never named per beat.',
+  'envelope shape': 'an envelope shape is an internal keyframe-shaping detail (envelope.kind), not authored from a storyboard.',
+  'envelope anchor': 'an envelope anchor is an internal keyframe-shaping detail (envelope.anchor), not authored from a storyboard.',
+  'field motion': 'field motion is a lightfield internal (motion.kind), not authored per beat.',
+  'lightfield pattern': 'a lightfield pattern is set inside the lightfield\'s own config (pattern.kind), not from a storyboard.',
+  'shadow direction': 'a shadow direction is computed from the layer\'s own light (shadow.direction), not authored.',
+  'effector drive': 'an effector drive is an internal particle-system detail (effector.drives), not authored per beat.',
+  'effector falloff': 'an effector falloff is an internal particle-system detail (effector.falloff), not authored per beat.',
+  'keyframe handle': 'a keyframe handle is an internal easing-curve detail (easeOut), not authored per beat.',
+  'interpolation mode': 'interpolation mode is an internal path-easing detail, not authored per beat.',
+  'scramble charset': 'a scramble charset is an internal text-fx detail (presetOpts.chars), not authored per beat.',
+  'theme look key': 'a theme look key belongs to the theme file (themes/*.json), never a per-beat use:.',
+  'ransom face': 'a ransom face is a text layer\'s own `ransom.faces`, a LIST of {family, weight} records, not a single name a use: line can write.',
+};
+
+let _arsenalCorpus = null;
+/** arsenalCorpus() -> Promise<entry[]>, the collect() corpus, cached for the process: a gate run
+ * resolves every beat's `use:` line against one import pass of the arsenal, not one per line. */
+export function arsenalCorpus() { return _arsenalCorpus || (_arsenalCorpus = arsenalCollect()); }
+
+const USE_PARAM_RE = /([\w.]+)\s*=\s*(\S+)/g;
+
+/** parseUseLine(raw) -> {kindHint, name, on, params} | {error} */
+export function parseUseLine(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return { error: 'use: line is empty. Syntax: "use: <name> [on=<layer id>] [key=value …]" or "use: <kind>:<name> …" when a name exists in more than one kind.' };
+  const firstParam = s.search(/(?:^|\s)[\w.]+\s*=/);
+  const head = (firstParam >= 0 ? s.slice(0, firstParam) : s).trim();
+  const paramsRaw = firstParam >= 0 ? s.slice(firstParam) : '';
+  if (!head) return { error: `"${s}" names nothing to use. Syntax: "use: <name> [on=<layer id>] [key=value …]".` };
+  const colon = head.indexOf(':');
+  const kindHint = colon > 0 ? head.slice(0, colon).trim().toLowerCase() : null;
+  const name = (colon > 0 ? head.slice(colon + 1) : head).trim();
+  if (!name) return { error: `"${s}" names a kind ("${kindHint}") but no name after the colon.` };
+  const params = {};
+  let pm; USE_PARAM_RE.lastIndex = 0;
+  while ((pm = USE_PARAM_RE.exec(paramsRaw))) {
+    const [, key, valRaw] = pm;
+    params[key] = /^-?[\d.]+$/.test(valRaw) ? +valRaw : valRaw;
+  }
+  const on = params.on; delete params.on;
+  return { kindHint, name, on: on || null, params };
+}
+
+/**
+ * resolveUse(p, corpus) -> one of:
+ *   {entry}                          exact name (or aka), in exactly one kind
+ *   {entry, refusedField}            that kind already has a dedicated field (USE_DEDICATED_FIELD)
+ *   {entry, refusedInternal}         that kind is engine-internal (USE_INTERNAL_KIND)
+ *   {ambiguous: ['kind:name', …]}    the bare name exists in more than one kind
+ *   {prose: true, text}              not decisive: free text, reported as a warning, never dropped
+ *   {error}                          a decisive-looking token that names nothing real, or a bad kind:
+ */
+export function resolveUse(p, corpus) {
+  if (p.error) return p;
+  const nameLc = p.name.toLowerCase();
+  const matches = corpus.filter((e) => {
+    if (p.kindHint && e.kind.toLowerCase() !== p.kindHint) return false;
+    return e.name.toLowerCase() === nameLc || (e.aka || []).some((a) => String(a).toLowerCase() === nameLc);
+  });
+  if (p.kindHint) {
+    const kindsKnown = [...new Set(corpus.map((e) => e.kind))];
+    if (!kindsKnown.includes(p.kindHint)) {
+      const near = nearMisses(p.kindHint, kindsKnown);
+      return { error: `use: "${p.kindHint}" is not a known kind${near.length ? `, did you mean "${near[0]}"?` : ''}. Known kinds: ${kindsKnown.join(', ')}.` };
+    }
+  }
+  if (matches.length > 1) return { ambiguous: matches.map((e) => `${e.kind}:${e.name}`) };
+  if (matches.length === 1) {
+    const entry = matches[0];
+    if (USE_DEDICATED_FIELD[entry.kind]) return { entry, refusedField: USE_DEDICATED_FIELD[entry.kind] };
+    if (USE_INTERNAL_KIND[entry.kind]) return { entry, refusedInternal: USE_INTERNAL_KIND[entry.kind] };
+    return { entry };
+  }
+  // No exact/aka match anywhere. A single bare word (or hyphenated word) is a DECISIVE attempt at the
+  // grammar, the same test `camera:`/`transition_in:` use one field up: anything else is read as what
+  // `use:` free text has always been able to be, prose, and reported as a warning naming the 3 nearest
+  // entries, never silently dropped.
+  const decisive = /^[a-z][a-z0-9-]*$/i.test(p.name);
+  if (!decisive) return { prose: true, text: p.name };
+  const near = nearMisses(p.name, corpus.map((e) => e.name));
+  return { error: `use: "${p.name}" is not a known name${near.length ? `, did you mean "${near[0]}"?` : ''}. Run \`make arsenal Q="${p.name}"\` to search.` };
+}
+
+/** useErrors(beats, corpus) -> string[]: every beat's `use:` line that is ambiguous, refused (a
+ * dedicated field or an internal kind), or a decisive-but-unknown name. */
+export function useErrors(beats, corpus) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    for (const raw of b.uses || []) {
+      const p = parseUseLine(raw);
+      const r = resolveUse(p, corpus);
+      if (r.error) { errs.push(`beat ${i + 1} (${b.name}) use: ${r.error}`); continue; }
+      if (r.ambiguous) { errs.push(`beat ${i + 1} (${b.name}) use: "${p.name}" names more than one kind: ${r.ambiguous.join(', ')}. Write "use: <kind>:<name>" to pick one.`); continue; }
+      if (r.refusedField) { errs.push(`beat ${i + 1} (${b.name}) use: "${p.name}" (${r.entry.kind}) already has a dedicated field: write "${r.refusedField}" instead of use:.`); continue; }
+      if (r.refusedInternal) errs.push(`beat ${i + 1} (${b.name}) use: "${p.name}" is not authored from a storyboard: ${r.refusedInternal}`);
+    }
+  });
+  return errs;
+}
+
+/** useWarnings(beats, corpus) -> string[]: a `use:` line that reads as free prose, with the 3
+ * best-ranked entries it might have meant, via the SAME ranker `make arsenal` uses (score/toks), never
+ * a second one. */
+export function useWarnings(beats, corpus) {
+  const warns = [];
+  beats.forEach((b, i) => {
+    for (const raw of b.uses || []) {
+      const p = parseUseLine(raw);
+      if (p.error) continue;
+      const r = resolveUse(p, corpus);
+      if (!r.prose) continue;
+      const qt = toks(r.text);
+      const ranked = corpus.map((e) => ({ e, s: score(e, qt) })).filter((x) => x.s > 0)
+        .sort((a, z) => z.s - a.s).slice(0, 3);
+      const near = ranked.map(({ e }) => `${e.name} (${e.kind}: ${e.blurb})`).join(' · ') || '(nothing clearly matches)';
+      const lines = ranked.map(({ e }) => `use: ${e.kind}:${e.name}`).join(' · ');
+      warns.push(`beat ${i + 1} (${b.name}) use: "${r.text}" reads as free prose, not a resolvable name, so it never `
+        + `reaches the engine. Nearest: ${near}.${lines ? ` Try: ${lines}.` : ''}`);
+    }
+  });
+  return warns;
+}
+
+/** resolvedUses(b, corpus) -> [{entry, on, params}], the beat's `use:` lines that resolve cleanly
+ * (already validated by useErrors: a caller reads only the clean resolutions). */
+export function resolvedUses(b, corpus) {
+  const out = [];
+  for (const raw of b.uses || []) {
+    const p = parseUseLine(raw);
+    if (p.error) continue;
+    const r = resolveUse(p, corpus);
+    if (r.entry && !r.refusedField && !r.refusedInternal) out.push({ entry: r.entry, on: p.on, params: p.params });
+  }
+  return out;
+}
+
+/** useSlotPath(entry) -> the pasteOf() skeleton for this entry's slot, or null when the slot is prose
+ * or has a segment that is not a plain field name (e.g. "per-frame", "svgIcon()"): assemble.mjs's slot
+ * writer refuses those rather than guessing a path, reusing pasteOf (harness/author/arsenal.mjs) rather
+ * than a second slot parser. */
+export function useSlotPath(entry) {
+  const obj = pasteOf(entry);
+  if (!obj) return null;
+  const flat = JSON.stringify(obj);
+  const segs = (entry.slot || '').replace(/\[\]|\{\}/g, '').replace(/\(.*\)/, '').split('.');
+  if (segs.some((s) => s && !/^[A-Za-z_$][\w$]*$/.test(s))) return null;
+  return flat ? obj : null;
 }

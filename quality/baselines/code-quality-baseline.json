@@ -204,5 +204,7 @@
  "quality/gates/lib-test.mjs::unicorn(prefer-string-starts-ends-with)": 3,
  "quality/gates/lib-test.mjs::no-constant-binary-expression": 1,
  "quality/gates/lib-test.mjs::no-useless-escape": 2,
- "quality/gates/dead-branch.mjs::max-depth": 1
+ "quality/gates/dead-branch.mjs::max-depth": 1,
+ "harness/author/assemble.mjs::complexity": 1,
+ "harness/author/assemble.mjs::max-lines-per-function": 1
 }

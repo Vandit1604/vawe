@@ -204,6 +204,31 @@ not: "the defaults this film refuses, in your own words"
   `;`-separated for more than one entry. Optional, and a beat with no `move:` assembles exactly as it
   did before this field existed.
 
+    `use:` IS THE GENERAL DOOR onto everything the engine can name (55 registries, 790 entries across
+  62 kinds, the same corpus `make arsenal Q="…"` searches): a background preset, a kinetic preset, a
+  look/filter, an ambient shader or glow preset, a caption style, an energy, a modifier, a motion voice
+  cue, and more (`make arsenal --census` lists every kind). A beat may write several:
+    `use: <name> [on=<layer id>] [key=value …]`
+    `use: <kind>:<name> [on=<layer id>] [key=value …]`   when a bare name exists in more than one kind
+      (`preset` alone collides across kinetic/glow/particles presets; write `use: kinetic preset:weight`
+      to pick one). `on=` names the layer the write lands on; a beat with exactly one layer of its own
+      (its `scene<N>` fragment) defaults to it, so `on=` is only needed to aim at a different layer.
+    Resolution (`harness/lib/contract.mjs` `parseUseLine`/`resolveUse`): an exact name (or a registry's
+  own `aka`) in exactly one kind resolves and is written by scope (a per-layer prop, a `bg[]` window
+  spanning the beat, an `audio.cues[]` entry at the beat's start, or a film-level field decided once).
+  An ambiguous name is an ERROR listing every `kind:name` choice. A decisive-looking but unknown token
+  is an ERROR naming the nearest real names. Free prose is a WARNING, never silently dropped, naming
+  the 3 best-ranked entries as ready `use:` lines.
+    A KIND WITH ITS OWN FIELD IS REFUSED, NOT A SECOND SPELLING OF IT: a camera move or camera word
+  belongs on `camera:`; a cut, a seam fx, a sting fx, or a cut timing belongs on `transition_in:`; a
+  move shape or a path curve belongs on `move:`; a part entrance belongs on `motion:`; an idle belongs
+  on `move: hold:<idle>`; a recipe belongs on `recipe:`. Each is refused naming the field to use instead.
+  ENGINE INTERNALS ARE ALSO REFUSED, never authored from a storyboard: a generator, an envelope
+  shape/anchor, field motion, a lightfield pattern, a shadow direction, an effector drive/falloff, a
+  keyframe handle, an interpolation mode, a scramble charset, a theme look key, and a ransom face list
+  (`ransom.faces`, a list of records, not a single name) each name the doc or field that actually sets
+  them.
+
     `fragment:` IS OPTIONAL, AND BOTH ITS HALVES ARE. `make assemble`'s own convention
   (`<film>.scene<N>.html`) is unchanged when this line is unset. Two forms, either half omittable:
   `fragment: _together.card.html @ center@900x520` names the file AND boxes it; `fragment:
