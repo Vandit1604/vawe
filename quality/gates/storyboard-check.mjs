@@ -277,6 +277,16 @@ for (const b of blocks) {
   const missing = REQ.filter((k) => !has(k));
   if (missing.length) err('beat-missing-fields', `beat "${title}" is missing: ${missing.map((m) => `\`${m}\``).join(', ')} (every beat needs a type, its on-screen cues, and a WHY).`);
   plainContentWarning(b, title);
+  // A beat that plans its frame with `make screen F=` and no matching `fragment:` has a frame no reader
+  // can see: the stage, frame-check and the studio read `fragment:` only, so the film skips design.
+  const screenFile = (/\bmake\s+screen\s+F=(\S+)/i.exec(b) || [])[1];
+  const fragNamed = (fieldIn(b, 'fragment') || '').split(/\s+\(/)[0].trim();
+  if (screenFile && path.basename(fragNamed) !== path.basename(screenFile)) {
+    err('screen-without-fragment', `beat "${title}": plans \`make screen F=${screenFile}\` but `
+      + (fragNamed ? `its \`fragment:\` is ${fragNamed}` : 'has no `fragment:` line')
+      + `. The stage, frame-check and the studio read \`fragment:\`, so this frame is invisible and the film `
+      + `skips design. Add \`- fragment: ${screenFile}\`.`);
+  }
   // A beat that names ANY of these has already said how it moves or arrived, so `blueprint:`/
   // `mechanism:` are not the only way to satisfy this: `recipe:` names structure copied from a real
   // film (recipes/README.md), and `camera:`/`move:`/`motion:` each reach a real engine capability
