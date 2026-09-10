@@ -1,0 +1,22 @@
+{
+  "flow-seam": {
+    "kind": "seam",
+    "blurb": "one act leaves fast on an axis with motion blur, a frame of empty ground, the next act arrives on the same axis and direction while the ground changes colour",
+    "sources": [
+      { "ref": "example-madera", "t": 4.58, "note": "editor window exits left, 'MADERA understands' enters from the right, word by word" },
+      { "ref": "example-madera", "t": 5.98, "note": "tagline exits left word by word, product card enters from the right, ground darkens" },
+      { "ref": "example-madera", "t": 8.13, "note": "card exits left over a red blurred-photo ground, ground fades to light grey, 'find' enters from the right" },
+      { "ref": "example-madera", "t": 9.58, "note": "tagline exits up, ground turns olive, a tilted window rises from the bottom" },
+      { "ref": "example-madera", "t": 11.08, "note": "window exits up, ground returns to light grey, a shape rises from the bottom" }
+    ],
+    "slots": { "at": "seconds: the first frame of empty ground", "out": "layer id", "in": "layer id", "ground": "[outgoing ground id, incoming ground id], optional" },
+    "params": {
+      "axis": { "default": "x", "enum": ["x", "y"], "note": "x flows right to left, y flows bottom to top; madera changes axis once per film" },
+      "gap": { "default": 0.12, "unit": "s", "note": "empty ground measured 0.05 to 0.2 across the five seams" },
+      "exitDur": { "default": 0.4, "unit": "s" },
+      "enterDur": { "default": 0.45, "unit": "s" },
+      "stagger": { "default": 0.06, "unit": "s", "note": "words of an entering line lag each other" },
+      "groundFade": { "default": 0.5, "unit": "s" }
+    }
+  }
+}
