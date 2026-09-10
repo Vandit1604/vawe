@@ -14,7 +14,8 @@
 // same film.
 //   make study VIDEO=refs/brew.mp4 NAME=brew
 //
-// It writes refs/<name>/: sheet.png (one row per shot: in · mid · out), study.json (the measured
+// It writes refs/<name>/: sheet.png (one row per shot, frames chosen at the delta curve's local
+// maxima, NOT in/mid/out), strip*.png (a busy shot sampled contiguously, --strips), study.json (the measured
 // facts) and study.md (the table an author fills in). refs/ is gitignored, which is the point below.
 //
 // WHAT IT MEASURES, AND WHERE THAT STOPS. Duration, resolution, fps and shot boundaries come off the
@@ -57,6 +58,17 @@ const VIDEO = positional[0];
 const THRESHOLD = Number(flag('--threshold', 0.3));
 const MIN_SHOT = Number(flag('--min-shot', 0.4));   // two detections closer than this are one cut
 const FIXED = Number(flag('--fixed', 2));           // fallback sampling period, seconds
+// STRIPS. The event sheet answers "what happens"; it cannot answer "HOW does it move", because a peak
+// is where change is MAXIMAL, not the shape of the move around it. Four frames chosen at four peaks of
+// a nine-second reference read as four states, and a reader then invents the motion between them. That
+// misread is on the record: studying refs/mo1 at 1fps produced "it never changes composition", and at
+// 2fps the same film plainly flips its ground. The motion lives between the samples.
+//
+// So: for the shots that MOVE most, a contiguous strip at a real rate. Rate, not count, because the
+// question is about time. Off by default; a strip is many more tokens than a sheet and is worth it only
+// when the question is how something moves rather than what it shows.
+const STRIPS = Number(flag('--strips', 0));         // how many of the busiest shots get a dense strip
+const STRIP_FPS = Number(flag('--strip-fps', 8));   // samples per second inside a strip
 
 const die = (msg, code = 2) => { console.error(`✗ ${msg}`); process.exit(code); };
 
@@ -123,6 +135,19 @@ const NAME = positional[1] || path.basename(VIDEO).replace(/\.[^.]+$/, '');
 const dir = path.join(ROOT, 'refs', NAME);
 // Clear first, same reason as sections.mjs: shot files are numbered from the detection, so a re-run at
 // a different threshold leaves the old numbering beside the new one and the sheet stops matching the doc.
+//
+// REFUSE TO EAT THE INPUT. The natural place to keep a reference clip is refs/<name>/, which is also
+// where this writes, so a `study refs/mo1/x.mp4 mo1` used to delete its own source and then fail with
+// ffmpeg's "No such file or directory" pointing at a file that existed a moment earlier. It happened
+// twice here and cost a re-download both times. The clear is still right; eating the argument is not.
+const videoAbs = path.resolve(VIDEO);
+if (videoAbs.startsWith(dir + path.sep)) {
+  die(`the video lives inside refs/${NAME}/, which is exactly where this study WRITES, and the write
+`
+    + `  clears that directory first. Studying it would delete the source.
+`
+    + `  Move the clip out (refs/_clips/ is a good home) or study it under a different NAME.`);
+}
 fs.rmSync(dir, { recursive: true, force: true });
 fs.mkdirSync(dir, { recursive: true });
 
@@ -390,8 +415,21 @@ const CELLS = Number(flag('--cells', 4));       // frames per shot row, includin
 // DERIVED WITHOUT fps AT ALL where the frame count is known, which is what makes it immune to the lie
 // above: the last frame is a FRACTION of the duration, and both numbers come off the same stream.
 const nbFrames = Number(fields.nb_frames) || 0;
-const LAST_FRAME = nbFrames > 2
-  ? duration * ((nbFrames - 2) / nbFrames)
+// THE LOWER OF TWO ESTIMATES, because each is wrong in a different direction and neither alone is safe.
+//   duration x (n-2)/n  is immune to a lying r_frame_rate (the VFR case above) and assumes the
+//                       container's duration IS the video's span. It is not when a container carries
+//                       audio padding: mo1's make-it-move holds 534 frames at 60fps, so its last frame
+//                       starts at 8.883s, while the container reports 8.981s. That formula returned
+//                       8.947s, four frames past the end, and every seek there wrote nothing while
+//                       ffmpeg exited 0, which is the exact failure the comment above this one
+//                       describes and this line then reproduced.
+//   (n-2)/avgFps        is immune to that padding and depends on the frame rate, which is why it is
+//                       avg_frame_rate and never r_frame_rate.
+// Whichever is smaller is inside both truths.
+const byDuration = nbFrames > 2 ? duration * ((nbFrames - 2) / nbFrames) : Infinity;
+const byRate = nbFrames > 2 && fps > 0 ? (nbFrames - 2) / fps : Infinity;
+const LAST_FRAME = Number.isFinite(Math.min(byDuration, byRate))
+  ? Math.min(byDuration, byRate)
   : duration - 3 / (fps || 30);
 const seekable = (t) => Math.max(0, Math.min(t, LAST_FRAME));
 
@@ -416,7 +454,7 @@ function eventFrames(s, n) {
   return [inT, ...picked.sort((a, b) => a - b), outT];
 }
 
-// ── contact sheet: one row per shot, in · mid · out ───────────────────────────────────────────────
+// ── contact sheet: one row per shot, frames chosen by EVENT (see above), not by position ─────────
 // Same shape as make beats, and for the same reason: the middle of a shot is the frame that hides the
 // entrance, which is exactly what a study is looking for (docs/CRAFT/REFERENCE-STUDY.md, MISTAKES #124).
 const frames = path.join(dir, 'frames');
@@ -448,6 +486,26 @@ for (const s of shots) {
 const sheet = path.join(dir, 'sheet.png');
 ffmpegOrDie(['-v', 'error', '-y', ...rows.flatMap((r) => ['-i', r]),
   '-filter_complex', `vstack=inputs=${rows.length}`, '-frames:v', '1', sheet], sheet, 'contact sheet');
+
+// ── motion strips: how a shot MOVES, contiguously ────────────────────────────────────────────────
+// One PNG per studied shot, sampled every 1/STRIP_FPS second across the whole shot and tiled in
+// reading order. Busiest first, measured by the shot's own mean delta, because a strip of a still shot
+// is a wall of identical frames and teaches nothing.
+if (STRIPS > 0) {
+  const busiest = [...shots].sort((a, b) => (b.motion || 0) - (a.motion || 0)).slice(0, STRIPS);
+  for (const s2 of busiest) {
+    const n = Math.max(2, Math.min(48, Math.round(s2.len * STRIP_FPS)));
+    const cols = Math.min(8, n);
+    const cellW = 240, cellH = Math.round((cellW * height) / width);
+    const out = path.join(dir, `strip${String(s2.i).padStart(2, '0')}.png`);
+    // -ss before -i seeks fast; fps= then resamples the decoded span, so the strip is contiguous in
+    // TIME rather than a set of independent seeks that can each land on a different keyframe.
+    ffmpegOrDie(['-v', 'error', '-y', '-ss', s2.t0.toFixed(3), '-t', Math.max(0.05, s2.len).toFixed(3),
+      '-i', VIDEO, '-vf', `fps=${STRIP_FPS},scale=${cellW}:${cellH},tile=${cols}x${Math.ceil(n / cols)}`,
+      '-frames:v', '1', out], out, `strip ${s2.i}`);
+    console.log(`  strip ${s2.i}: ${s2.len.toFixed(2)}s at ${STRIP_FPS}fps -> ${n} frames -> ${path.relative(ROOT, out)}`);
+  }
+}
 
 // ── the study ─────────────────────────────────────────────────────────────────────────────────────
 const fx = (n, d = 2) => Number(n.toFixed(d));
