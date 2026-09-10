@@ -68,6 +68,7 @@ import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorA
 import { cutVelocityAdvice, layerSpeedAt, cameraSpeedAt } from '../../core/timeline/velocity-cut.js';
 import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
 import { parseCameraLine, cameraErrors, cameraWarnings, cameraContinuityErrors, resolvedCamera, nearestCameraMoves, parseTransitionIn, transitionInErrors, transitionInWarnings, resolvedTransitionIn, nearestTransitions } from '../../harness/lib/contract.mjs';
+import { adoptionReport } from './stage.mjs';
 import { bgPaletteFrom } from '../../core/backgrounds/index.js';
 import { parseColorRGB } from '../../core/color/engine.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
@@ -7366,6 +7367,46 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     beatStarts(scene, 20).beats.length === 0);
 
   fs.rmSync(tmp, { recursive: true, force: true });
+}
+
+// ---- stage.mjs: the `make stage` adoption block is grounded in THIS film, not the whole markdown ----
+// Regression for the defect measured on vawe-flow: a whole-document word match let `up`/`rise`/`slide`
+// (transitions) and `weight`/`type`/`focus` (kinetic presets) count as "used" from unrelated prose
+// anywhere in the file (a `weight:` line, a `why:`), and let bare, blurb-less names (`none`,
+// `easeInOutElastic`) outrank a real match on pure substring luck. A tiny synthetic storyboard, one
+// beat naming a real capability in prose and one declaring `camera:` structurally.
+{
+  const sbPath = path.join(repoRoot, 'formats/scene/_lib-test-adoption.storyboard.md');
+  fs.writeFileSync(sbPath, [
+    '---',
+    'duration: 6s',
+    '---',
+    '',
+    '## Beat 1: A (0s-3s)',
+    '- mechanism: the camera follows the cursor, arriving just before each click',
+    '- onscreen: "watch it click"',
+    '',
+    '## Beat 2: B (3s-6s)',
+    '- camera: slowPush to=1.05',
+    '',
+  ].join('\n'));
+  try {
+    const rows = adoptionReport('_lib-test-adoption');
+    const cam = rows.find((r) => r.label === 'camera moves');
+    ok('stage adoption: a structural camera: field counts as used', cam.used === 1);
+    ok('stage adoption: the used move is never re-suggested', !cam.suggestions.some((s) => s.name === 'slowPush'));
+    ok('stage adoption: a real prose match (followCursor: cursor/click) is suggested with evidence',
+      cam.suggestions.some((s) => s.name === 'followCursor' && s.matched.length > 0));
+    const trans = rows.find((r) => r.label === 'transitions');
+    ok('stage adoption: no `transition_in:`/`camera:`/`move:`/`motion:` field anywhere means 0 transitions used '
+      + '(not inflated by an unrelated word like "up" or "rise" sitting in prose)', trans.used === 0);
+    for (const r of rows) {
+      ok(`stage adoption: ${r.label} never suggests an identity entry (none/linear/hold)`,
+        !r.suggestions.some((s) => ['none', 'linear', 'hold'].includes(s.name)));
+    }
+  } finally {
+    fs.rmSync(sbPath, { force: true });
+  }
 }
 
 // ---- assemble.mjs: a beat's camera: and a camera-kind recipe: (window-dolly) both write cameraMove ---
