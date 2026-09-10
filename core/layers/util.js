@@ -14,7 +14,7 @@ import { frameOf } from '../layout/safe.js';
 
 // REFUSE A VALUE THE BROWSER WOULD DROP, at every named style write, not only the `css` catch-all
 // (applyCss below already does this for `L.css`; this is the same check, same mechanism, extended to
-// the direct `el.style.X = L.Y` writes that named props use instead of the passthrough). Assigning an
+// the direct `a named write of the shape el.style.<css> = L.<prop>` writes that named props use instead of the passthrough). Assigning an
 // invalid value to `el.style` is a silent no-op: the property keeps its unset value, nothing throws,
 // and the layer renders as if the author never asked (`"color": "accent"` instead of
 // `"color": "var(--accent)"` is the reported case: valid JSON, invalid CSS, and the browser's own

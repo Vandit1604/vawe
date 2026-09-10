@@ -306,6 +306,7 @@ if (process.argv.includes('--write')) {
     cmp('shared', hv.shared, vocabulary.shared);
     for (const t of new Set([...Object.keys(hv.byType || {}), ...LAYER_TYPES])) cmp(t, (hv.byType || {})[t], vocabulary.byType[t]);
     lines.push('  fix: node quality/gates/schema-drift.mjs --write');
+    for (const l of lines) console.error(l);   // f.fail RECORDS, it does not print: findings.mjs:70
     f.fail('schema-layerprops-stale', lines.join('\n'));
     process.exit(1);
   }
@@ -370,6 +371,7 @@ if (missing.length) {
   const lines = [`✗ schema drift: engine reads ${missing.length} prop(s) not in schema.json:`];
   for (const p of missing) lines.push(`    • L.${p}`);
   lines.push('  add them to formats/scene/schema.json (or to INTERNAL in this script if truly computed).');
+  for (const l of lines) console.error(l);   // f.fail RECORDS, it does not print: findings.mjs:70
   f.fail('schema-engine-prop-missing', lines.join('\n'));
   process.exit(1);
 }
