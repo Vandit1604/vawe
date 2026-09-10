@@ -171,7 +171,7 @@ if (gold.length) {
   }
 }
 
-// The arsenal, aimed at this film. `make blueprints` lists 19 beats and 12 have never been used, so
+// The arsenal, aimed at this film. `make arsenal Q="…"` finds directed motion, so
 // listing them all again would be the same non-event. Rank them against what the film SAYS it is.
 const feel = [scene.note, scene.spectacle && scene.spectacle.of, sb && fs.readFileSync(sb, 'utf8').slice(0, 600)]
   .filter(Boolean).join(' ');

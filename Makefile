@@ -1087,17 +1087,6 @@ beat-check: ## [check] timeline gate: dead air, empty last frame, empty cut wind
 impeccable: ## [check] impeccable detector on raw HTML fragment(s) (D=<file...>)
 	node skills/impeccable/scripts/detect.mjs --json $(D)
 
-blueprints: ## [site] MOVED into `make arsenal BLUEPRINTS=1` (W11); still works, one release
-	@echo "  · make blueprints moved: use make arsenal BLUEPRINTS=1"
-	node scripts/site/blueprints-catalog.mjs
-
-# make previews [ONLY=<id>]: one rendered preview per beat blueprint (site/public/blocklib/beats/), so
-# `make blueprints` shows a picture beside each name instead of only a sentence. Draft, 2 workers: this
-# renders every blueprint back to back and other agents render too.
-previews: ## [site] MOVED into `make arsenal PREVIEWS=1` (W11); still works, one release
-	@echo "  · make previews moved: use make arsenal PREVIEWS=1 $(if $(ONLY),ONLY=$(ONLY))"
-	node harness/dev/previews.mjs $(if $(ONLY),--only=$(ONLY))
-
 # make preset-sheets [ONLY=<name>]: one rendered showcase per reference profile (SELECTION.md Part 2),
 # site/public/blocklib/presets/. "an adjective is vague; a brand is a spec" made visible, not just named.
 preset-sheets: ## [site] MOVED into `make arsenal PRESETS=1` (W11); still works, one release
@@ -1112,16 +1101,15 @@ theme-sheet: ## [site] MOVED into `make arsenal THEME=...` (W11); still works, o
 
 # make arsenal Q="a page scrolling under a tilt", THE ONE DISCOVERY FRONT DOOR (W11): ranked search
 # across every vocabulary the engine names, plus every question a separate `make <x>` used to answer
-# ("what may I write here", "emit a track", "show me the blueprint catalog", "what did we already get
-# wrong"). It owns no list itself; `defineRegistry` already carries each name's kind, slot and blurb,
-# and every folded flag below dispatches straight to the script that used to be its own target - a
-# thin front door, not a fourth copy of the answer. Old targets (schema/track/blueprints/previews/
-# preset-sheets/mistakes/theme-sheet) still work, printing where they moved, for one release.
-arsenal: ## [site] the ONE discovery command: Q= search, AT= what's legal, SHAPE= a track, MISTAKES=1/BLUEPRINTS=1/PREVIEWS=1/PRESETS=1/THEME= the rest, CENSUS=1/NEW=1
+# ("what may I write here", "emit a track", "what did we already get wrong"). It owns no list itself;
+# `defineRegistry` already carries each name's kind, slot and blurb, and every folded flag below
+# dispatches straight to the script that used to be its own target - a thin front door, not a fourth
+# copy of the answer. Old targets (schema/track/preset-sheets/mistakes/theme-sheet) still work,
+# printing where they moved, for one release.
+arsenal: ## [site] the ONE discovery command: Q= search, AT= what's legal, SHAPE= a track, MISTAKES=1/PRESETS=1/THEME= the rest, CENSUS=1/NEW=1
 	node harness/author/arsenal.mjs "$(Q)" $(if $(KIND),--kind "$(KIND)") $(if $(N),--n $(N)) \
 	  $(if $(filter 1,$(CENSUS)),--census) $(if $(filter 1,$(NEW)),--new) \
 	  $(if $(AT),--at '$(AT)') $(if $(THEME),--theme=$(THEME)) $(if $(ONLY),--only=$(ONLY)) \
-	  $(if $(filter 1,$(BLUEPRINTS)),--blueprints) $(if $(filter 1,$(PREVIEWS)),--previews) \
 	  $(if $(filter 1,$(PRESETS)),--presets) $(if $(filter 1,$(MISTAKES)),--mistakes) \
 	  $(if $(SHAPE),--shape $(SHAPE)) $(if $(TO),--to $(TO)) $(if $(DUR),--dur $(DUR)) \
 	  $(if $(FROM),--from $(FROM)) $(if $(AMP),--amp $(AMP)) $(if $(AXIS),--axis $(AXIS)) \

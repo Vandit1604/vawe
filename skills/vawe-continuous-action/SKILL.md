@@ -57,9 +57,8 @@ that is evidence about the rule, not about the films.
 
 > **One object. One action. Every cut is a state change of that object.**
 
-`BLUEPRINTS.md` gives you excellent *beats*, and beats are independent units by design. That
-independence is exactly why a from-scratch plan comes out as a slideshow: three good beats with
-nothing travelling between them. Blueprints are still how you author the motion inside a beat.
+A beat rotation gives you independent chapters, and that independence is exactly why a from-scratch
+plan comes out as a slideshow: three good beats with nothing travelling between them.
 This skill decides what survives *across* the cuts: **when the answer is an object.** Carry a second
 thread from the catalogue anyway: a single thread has to be literal and obvious to work, which is how a
 film ends up as a rectangle that resizes four times.
@@ -395,8 +394,8 @@ Then, and only then, write JSON.
 - [`vawe-video-planning`](../vawe-video-planning/SKILL.md) collects the brief, studies the brand
   and locks the palette, fonts, copy and lock sheet. Run it first. This skill replaces its Step 3
   storyboard for any film under ~15s **whose subject is one thing changing**.
-- [`docs/CRAFT/BLUEPRINTS.md`](../../docs/CRAFT/BLUEPRINTS.md) gives the motion *inside* a beat.
-  Use it after the spine is fixed, never to choose the spine.
+- [`recipes/README.md`](../../recipes/README.md) gives the motion *inside* a beat, measured off a
+  real film. Use it after the spine is fixed, never to choose the spine.
 - [`docs/CRAFT/TRANSITIONS.md`](../../docs/CRAFT/TRANSITIONS.md) picks the seam once you know
   the relationship. Here the relationship is always "the X becomes the Y".
 - [`docs/CRAFT/DIRECTION.md`](../../docs/CRAFT/DIRECTION.md) is the cross-cutting spine, and

@@ -35,9 +35,9 @@ film needs no cuts, use none: `docs/RULES/one-cut-family.md`'s floor does not fi
 - **Black means black.** If the brief calls for a true-black bumper, write `{"preset":"black"}`
   (`#000000`, no tint) rather than a themed dark preset, which carries a colour wash.
 
-## The blueprints to reach for
+## The motion to reach for
 
-By role (`make arsenal BLUEPRINTS=1` for the full 29):
+By role (`make arsenal Q="…"` to search):
 - **the one move**: `logoReveal` (draw-on + bloom + wordmark cascade), `wordmarkAssemble`, `wordBlast`,
   `wordWipe`, `morphButton`
 - Chained blueprints are almost always wrong here: `kineticHook` or `statReveal` alone, never combined

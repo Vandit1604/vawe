@@ -110,10 +110,11 @@ find out when it is already in someone else's timeline.
 
 ---
 
-## 5. `make blueprints` has never run  ·  one word
+## 5. `make blueprints` has never run  ·  DONE, moot: blueprints retired
 
-Not in `.PHONY`, so the `blueprints/` directory shadows it and make reports "up to date". CLAUDE.md
-calls it step 0 of the authoring ladder.
+Was: not in `.PHONY`, so the `blueprints/` directory shadowed it and make reported "up to date". Moot
+now: blueprints/ and the `blueprints` target are both gone, retired in favour of `recipes/`
+(recipes/README.md).
 
 ---
 

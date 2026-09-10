@@ -32,5 +32,5 @@ group: crosscutting
   `SHOW-DONT-TELL.md` (the product must be shown working, not only claimed).
 - Launch-specific standing rules live in `AGENTS.md` under "Launch-video rules": logo prominence,
   paired directional enter/exit, blur-out for dense UI, a changing word in a fixed box.
-- Blueprints: `cardCascade` / `statReveal` for feature and proof beats; reach for `make blueprints`
+- Motion: a feature-grid and a statement recipe/device for feature and proof beats; reach for `make arsenal Q="…"`
   before hand-authoring motion.
