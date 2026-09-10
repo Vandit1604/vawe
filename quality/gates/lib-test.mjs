@@ -2,11 +2,12 @@
 // No browser needed (the primitives are pure). Run: node quality/gates/lib-test.mjs  (make lib-test)
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
-  sequence, wipe, circleWipe, clockWipe, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
+  sequence, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
   anticipateEase, overshootEase, stepClock } from '../../core/motion/motion.js';
 import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/timeline/time.js';
 import { unitProgress, PRESETS, PRESET_BLURBS, wght, staggerOffset, staggerStep, gsapStagger, decodeText, DECODE_CHARS, STAGGER_FROM } from '../../core/type/type.js';
-import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites, TIMINGS } from '../../core/cuts/index.js';
+import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites, TIMINGS,
+  wipe, circleWipe, clockWipe } from '../../core/cuts/index.js';
 import { PRESENTATIONS as CUT_PRESENTATIONS_AK } from '../../core/cuts/index.js';
 import { dirVec as seamDirVec, featherFor as seamFeatherFor } from '../../core/timeline/seams.js';
 import { killedBy, capabilitiesOf, checkCuts } from '../../core/fx/ancestor-kills.js';
@@ -69,7 +70,7 @@ import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorA
 import { cutVelocityAdvice, layerSpeedAt, cameraSpeedAt } from '../../core/timeline/velocity-cut.js';
 import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
 import { bgPaletteFrom } from '../../core/backgrounds/index.js';
-import { parseColorRGB } from '../../core/motion/motion.js';
+import { parseColorRGB } from '../../core/color/engine.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
 import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/layers/path-morph.js';
@@ -129,7 +130,7 @@ if (process.argv.includes('--colours')) {
     ['foo rgb(1,2,3)', 'was motion-only: the missing anchor, now null'],
     [[1, 2, 3], 'was motion-only (array passthrough)'],
   ];
-  console.log('\n  the one colour parser · core/motion/motion.js\n');
+  console.log('\n  the one colour parser · core/color/engine.js\n');
   for (const [v, why] of rows) {
     const t = parseColor(v), o = parseColorRGB(v);
     let lf; try { lf = JSON.stringify(lightfieldToRgb(v)); } catch { lf = 'refused'; }
@@ -447,7 +448,7 @@ ok('clockWipe deterministic', clockWipe(0.33).clipPath === clockWipe(0.33).clipP
 // The DIRECTION of every named wipe in the layer registry (core/timeline/clips.js ANIM). Counting names cannot
 // see this: `wipe-right` was registered as wipe(t,'right') and therefore revealed right-to-left, against
 // its own name and the comment beside it, and no gate could tell. A wipe is named for the edge its
-// reveal TRAVELS TOWARD; motion.js `wipe(dir)` names the edge it grows FROM, so each pair is crossed.
+// reveal TRAVELS TOWARD; core/cuts `wipe(dir)` names the edge it grows FROM, so each pair is crossed.
 // inset(top right bottom left): the side whose inset SHRINKS is the side the reveal moves toward.
 ok('wipe-right grows rightward from the left edge', ANIM['wipe-right'](0.5).clipPath === 'inset(0 50% 0 0)');
 ok('wipe-left grows leftward from the right edge', ANIM['wipe-left'](0.5).clipPath === 'inset(0 0 0 50%)');
@@ -1620,7 +1621,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('filter: parseColor hex3 + rgb + junk', JSON.stringify(parseColor('#7cf')) === '[119,204,255]' && JSON.stringify(parseColor('rgb(1, 2, 3)')) === '[1,2,3]' && parseColor('nope') === null);
   ok('filter: all six presets exist', ['duotone','tritone','gradientMap','posterize','sepia','vignette'].every((k) => FILTER_PRESETS[k]));
 
-  // THE ONE COLOUR PARSER (core/motion/motion.js). Four copies with four grammars became one, and this is
+  // THE ONE COLOUR PARSER (core/color/engine.js). Four copies with four grammars became one, and this is
   // the falsifiable half of that claim: for each old copy, a colour it REJECTED and a colour it
   // ACCEPTED, run through the shared parser now. If the union ever narrows, or the anchor is
   // dropped again, one of these flips. `node quality/gates/lib-test.mjs --colours` prints the table.

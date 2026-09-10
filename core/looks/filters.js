@@ -28,7 +28,7 @@
 //   "vignette" | "vignette:0.6" | "vignette:#001a33,0.5" → strength 0..1 (+ optional colour)
 //   anything else                  → passed through as a raw CSS filter string.
 
-import { parseColor, colorAlpha } from '../motion/motion.js';
+import { parseColor, colorAlpha } from '../color/engine.js';
 import { defineRegistry } from '../registry/registry.js';
 
 const LUMA = '0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0.2126 0.7152 0.0722 0 0  0 0 0 1 0';

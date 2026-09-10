@@ -1,7 +1,7 @@
 // Colour helpers. Six-digit hex only, on purpose: one accepted form means one way to be wrong,
 // and the validator can say exactly what it wanted.
 
-import { parseColorRGB } from '../motion/motion.js';
+import { parseColorRGB } from '../color/engine.js';
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 

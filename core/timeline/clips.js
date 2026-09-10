@@ -4,8 +4,9 @@
 // Both are PURE in the time input: driveClips(clips, t) is a deterministic function of t; seeking a
 // paused timeline to t is deterministic. This lets a scene be authored declaratively (fill HTML with
 // timed clips) OR bring its own animation runtime, exactly like another engine' adapter model.
-import { clamp01, easeOutCubic, defocus, rise, fade, pop, lift, slide, wipe, circleWipe, clockWipe,
+import { clamp01, easeOutCubic, defocus, rise, fade, pop, lift, slide,
   anticipateEase, overshootEase, stepClock, FPS } from '../motion/motion.js';
+import { wipe, circleWipe, clockWipe } from '../cuts/presentations.js';
 import { defineRegistry } from '../registry/registry.js';
 
 // enter/exit animation registry: data-anim / data-out name → (t)=>styleObject.

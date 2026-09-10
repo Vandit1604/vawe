@@ -14,7 +14,7 @@ import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
 import { chainErrors, parseMotion, motionErrors, parseEdge } from '../lib/contract.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
-import { isLightBg } from '../../core/motion/motion.js';
+import { isLightBg } from '../../core/color/engine.js';
 import { buildKit } from '../lib/stagekit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

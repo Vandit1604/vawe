@@ -8,7 +8,7 @@ import { isLook, applyComposite } from '../looks/index.js';
 // isLightBg is core/motion.js's single definition of light-versus-dark, in linear light. Every part of
 // this engine that has to tell a light ground from a dark one asks THAT function; a second hand-kept
 // copy of the question is docs/MISTAKES.md #159.
-import { isLightBg, parseColor } from '../motion/motion.js';
+import { isLightBg, parseColor } from '../color/engine.js';
 // The frame authority. One builder, so a kit that has to derive a frame derives the SAME one boot did.
 import { frameOf } from '../layout/safe.js';
 

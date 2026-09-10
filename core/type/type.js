@@ -232,3 +232,53 @@ export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.
     }
   });
 }
+
+// formatNumber(n, {currency, decimals, compact}): on-screen number formatting. compact abbreviates
+// to K/M/B/T; currency prefixes '$'. Moved from core/motion/motion.js (was grouped with the other
+// scene helpers there; it is text formatting, so it lives with the rest of the type package).
+export function formatNumber(n, { currency = false, decimals = 0, compact = false } = {}) {
+  let s;
+  if (compact) {
+    const a = Math.abs(n);
+    if (a >= 1e12) s = (n / 1e12).toFixed(decimals === 0 ? 2 : decimals) + 'T';
+    else if (a >= 1e9) s = (n / 1e9).toFixed(decimals === 0 ? 1 : decimals) + 'B';
+    else if (a >= 1e6) s = (n / 1e6).toFixed(decimals === 0 ? 1 : decimals) + 'M';
+    else if (a >= 1e3) s = (n / 1e3).toFixed(decimals === 0 ? 1 : decimals) + 'K';
+    else s = n.toFixed(decimals);
+    s = s.replace(/\.0+([TBMK])$/, '$1'); // 40.0M -> 40M
+  } else {
+    s = Number(n).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+  return (currency ? '$' : '') + s;
+}
+
+// ---------- text measuring (another engine measureText/fitText parity, browser only) ----------
+// measureText: pixel width of `text` in CSS `font` shorthand. fitText: largest px size (stepping
+// down) whose rendered width fits maxWidth. Call at build time (fonts already loaded in boot).
+// Moved from core/motion/motion.js: this is text layout, not motion.
+let _measureCtx;
+export function measureText(text, font) {
+  if (!_measureCtx) _measureCtx = document.createElement('canvas').getContext('2d');
+  _measureCtx.font = font;
+  return _measureCtx.measureText(text).width;
+}
+export function fitText(text, maxWidth, { font = (px) => `800 ${px}px Inter`, max = 168, min = 24, step = 2 } = {}) {
+  let px = max;
+  while (px > min && measureText(text, font(px)) > maxWidth) px -= step;
+  return px;
+}
+// fitBox(el, {maxW, maxH, max, min}): MULTI-LINE overflow-safe fit (another engine fitTextOnNLines parity).
+// `el` must be in-DOM. Binary-searches the largest font-size where the element (wrapping at maxW) fits
+// within maxH AND no word overflows the width. Layout-only → deterministic at build time. Sets + returns px.
+export function fitBox(el, { maxW, maxH, max = 168, min = 24 }) {
+  el.style.width = maxW + 'px';
+  let lo = min, hi = max, best = min;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    el.style.fontSize = mid + 'px';
+    if (el.scrollHeight <= maxH + 1 && el.scrollWidth <= maxW + 1) { best = mid; lo = mid + 1; }
+    else hi = mid - 1;
+  }
+  el.style.fontSize = best + 'px';
+  return best;
+}
