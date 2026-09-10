@@ -7,7 +7,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor motion-lab frame-check stage worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary
+.PHONY: motion-floor motion-lab frame-check stage worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -625,6 +625,13 @@ cutout: ## [dev] remove a photograph's background so it becomes a PROP (SRC=<pho
 # this would itself be waived.
 waivers: ## [preflight] every blocking gate can be waived, and a waiver costs nothing and is invisible afterwards.
 	@node quality/gates/waiver-drift.mjs $(D) $(if $(JSON),--json,)
+
+# make waiver-ratchet: the debt that the 562 machine-written `legacy:` waivers were hiding, as one
+# number per code. It may only FALL. Nothing called --ratchet until now: the number was recorded and
+# the checker existed and no command reached either, which is the same capability-with-no-path shape
+# the waiver work exists to remove. `--stamp` lowers it, deliberately, when films actually get fixed.
+waiver-ratchet: ## [check] the waived-rule debt per code, a number that may only fall
+	@node quality/gates/waiver-drift.mjs --ratchet $(if $(STAMP),--stamp,)
 
 # make preflight D=<scene.json>, the nine decisions from docs/CRAFT/README.md put in front of you for
 # THIS film, plus the arsenal ranked against what the film says it is, then a receipt. It records only
