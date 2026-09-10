@@ -34,6 +34,7 @@ import { createTrackKit, runTracks } from '/core/tracks/index.js';
 import { resolveCameraBlur, resolveShutter } from '/core/tracks/motion.js';
 import { normalizeIdle } from '/core/engine/idle.js';
 import { resolveSpectacle } from '/core/timeline/spectacle.js';
+import { followOffset } from '/core/camera-moves/follow.js';
 const $ = (id) => document.getElementById(id);
 
 // resolveRelativeStarts: a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
@@ -979,6 +980,24 @@ boot((data, fps, theme, canvas) => {
 // not here. Recorded so the next author finds the gap rather than the symptom.
 const boxOf = (id) => boxes.get(id) || null;
 
+  // followCameraAt(spec) -> the same shape cameraAt returns, computed from the target's LIVE box
+  // instead of a keyframe. DEADZONE, not a rigid lock: the camera holds still while the target's
+  // centre sits inside a `margin` band around frame centre, and moves only the minimum needed once it
+  // would cross that band's edge (a clamp, so this is 1-Lipschitz in the target's own already-smooth
+  // position — the reason no separate damping pass sits on top; see core/camera-moves/follow.js for
+  // why a lerp-style damper would need the PREVIOUS frame's camera as state and break renderFrame(n)'s
+  // purity). A rigid re-centre every frame would instead read as the BACKGROUND sliding under a still
+  // subject, which is the failure this shape avoids. Zoom is HELD at `to`, not framed.
+  function followCameraAt(spec) {
+    const b = boxOf(spec.id);
+    // Not a refusal: bindFollowCamera (core/engine/produce.js) already proved the id exists among the
+    // scene's OWN layers at build time, and resolveBoxes writes a box for every id'd top-level layer on
+    // every frame regardless of visibility. A miss here would mean the box pass itself regressed, not
+    // an authoring error, so it fails the same way a null box would fail without this file's help.
+    const { s, x, y } = followOffset(b, spec, W, H);
+    return { s, x, y, rx: 0, ry: 0, roll: 0, persp: 1600, focus: null, aperture: 0 };
+  }
+
   // ---- THE REST OF THE VIEW: identity, the clock, the locked look, the backdrop, the joints ----
   // Geometry alone was not enough to write real effects against. An effect could ask WHERE another
   // layer is and nothing else: not what it is, not what else exists, not how far through the film it
@@ -1065,6 +1084,11 @@ const boxOf = (id) => boxes.get(id) || null;
   // bare list of eighteen caption styles.
   if (capStyle) CAP_STYLE_REGISTRY.pick(capStyle);
   const camKf = data.camera || []; // cameraAt/motionAt now live in /core/timeline/sequence.js (pure, tested)
+  // `cameraFollow` (core/camera-moves/follow.js): unlike camKf above, this cannot be a keyframe array,
+  // because the target's on-screen box does not exist until resolveBoxes(t) has run for THIS frame.
+  // Computed inside renderFrame, right after resolveBoxes(t), off the same `boxOf` accessor
+  // core/tracks/follow.js reads a live box through, so it stays pure in t (a Map lookup plus a clamp).
+  const CAM_FOLLOW = data.cameraFollow || null;
 
   // ---- THE CAMERA RIG: one model, two emissions ----
   //
@@ -1323,7 +1347,7 @@ const boxOf = (id) => boxes.get(id) || null;
     // `rig` and `lens` ride on the camera because a modifier asking about the frame's depth is asking
     // about the CAMERA, and core/fx/tilt.js reads exactly this to know whether the lens is already on
     // the stage or whether it has to put one on its own parent.
-    const keyed = cameraAt(camKf, t);
+    const keyed = CAM_FOLLOW ? followCameraAt(CAM_FOLLOW) : cameraAt(camKf, t);
     const camNow = RIG
       ? { ...CAM_REST, ...keyed, rig: true, lens: rigLens ?? (keyed || CAM_REST).persp }
       : keyed;

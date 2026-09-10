@@ -20,8 +20,9 @@
 // `"produced": false` disables the whole pass. Applies to the `scene` module only. Pure JS → runs in the
 // browser AND in node gates, so the gates evaluate the SAME produced scene the renderer does.
 
-import { buildCameraMove } from '../camera-moves/index.js';
+import { buildCameraMove, followCamera } from '../camera-moves/index.js';
 import { resolveCameraMove } from '../registry/vocab.js';
+import { nearMisses } from '../registry/registry.js';
 import { sceneDims } from '../layout/safe.js';
 import { depthZ } from '../fx/plane.js';
 import { inferCuts, chooseCutStyles } from '../timeline/junctions.js';
@@ -298,12 +299,70 @@ function bindCursorCamera(spec, data) {
   return { ...rest, path: hit.path, clicks: hit.clicks, base, start: hit.start ?? 0 };
 }
 
+// bindFollowCamera(spec, data): `{ move: "follow", id: "<layer>", margin, to }` -> the validated
+// descriptor stored on `data.cameraFollow`. Two refusals live here rather than in follow.js itself,
+// because both need the FULL layer tree, which a pure (params) generator never sees:
+//
+//   UNKNOWN ID, by name, with near-miss hints, the same shape validate.mjs already gives a bad
+//   `panWith` (validate.mjs:83-89): list every id the scene actually has and, where one is close,
+//   name it, instead of a bare "no such layer".
+//
+//   THE CHAIN. `follow` (core/tracks/follow.js) pins a LAYER to another's box resolved BEFORE any
+//   track runs, so a layer that itself carries `follow` reports its UNPINNED position; that file
+//   refuses being asked to chain through one for exactly that reason. The camera reads boxes through
+//   the identical accessor (`scene.boxOf`), so pointing it at a layer that is itself pinned would read
+//   that same stale, unpinned box in silence. Refused here rather than let it render a technically
+//   legal but quietly wrong shot.
+function bindFollowCamera(spec, data) {
+  const { move: _m, ...params } = spec;
+  const ids = [];
+  const walk = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (typeof L.id === 'string') ids.push(L.id);
+    walk(L.children);
+  } };
+  walk(data.layers);
+  if (!ids.includes(params.id)) {
+    const near = nearMisses(String(params.id), ids);
+    throw new Error(`cameraMove "followLayer": no layer with id ${JSON.stringify(params.id)}.`
+      + `${near.length ? ` Did you mean ${near.map((n) => `"${n}"`).join(', ')}?` : ''} `
+      + `Known ids: ${ids.length ? ids.join(', ') : '(this scene has none)'}.`);
+  }
+  const target = (() => { let hit = null; const find = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (L.id === params.id) { hit = L; return; }
+    find(L.children);
+  } }; find(data.layers); return hit; })();
+  if (target && target.follow)
+    throw new Error(`cameraMove "followLayer": "${params.id}" is itself following "${target.follow.id}". `
+      + `A box is resolved before any track runs, so "${params.id}" would report its UNPINNED `
+      + `position and the camera would track a place nothing is on screen. Point the camera at `
+      + `"${target.follow.id}" directly, or give "${params.id}" the motion instead of a pin.`);
+  return followCamera(params);
+}
+
 export function bakeCameraMove(data, frame) {
   if (!data || !data.cameraMove) return data;
   const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
   if (Array.isArray(data.camera) && data.camera.length)
     throw new Error('scene declares BOTH `camera` keyframes and `cameraMove` sugar, one would silently'
       + ' overwrite the other. Keep one: the sugar, or the keys it builds.');
+  // `follow` cannot become a keyframe array (see core/camera-moves/follow.js: the target's live box
+  // does not exist until resolveBoxes(t) runs, per frame). It resolves onto its OWN field,
+  // `data.cameraFollow`, which the keyframe pipeline (`cameraAt`, `assertKeyHandles`, …) never reads,
+  // and it cannot be one leg among others: there is no keyframe array to splice it into.
+  if (specs.some((s) => s && resolveCameraMove(s.move) === 'followLayer')) {
+    if (specs.length > 1)
+      throw new Error('cameraMove "followLayer" tracks a live layer box at RENDER time, not at build time '
+        + 'like every other move, so it is not a keyframe array a second leg can be spliced into. '
+        + 'Give the scene one `cameraMove: {move:"followLayer", id:"<layer>"}` with nothing else in the list.');
+    if (data.cameraFollow)
+      throw new Error('scene declares BOTH `cameraFollow` and `cameraMove: {move:"followLayer"}`, one would'
+        + ' silently overwrite the other. Keep one.');
+    data.cameraFollow = bindFollowCamera(specs[0], data);
+    delete data.cameraMove;
+    return data;
+  }
   // sceneDims so a move that centres a point centres it in the REAL canvas (core/camera-moves.js can only
   // default to landscape). Same call expand-blocks.mjs makes; the math stays in camera-moves.js.
   const dims = (frame && frame.W > 0 && frame.H > 0) ? [frame.W, frame.H] : sceneDims(data);
