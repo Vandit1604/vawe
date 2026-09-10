@@ -278,3 +278,18 @@ site/public/blocklib/**/*.png
 !formats/scene/post-*.storyboard.md
 !formats/scene/post-*.html
 !formats/scene/post-*.kit.css
+
+# GENERATED MEDIA IS NOT SOURCE. 181 mp3/wav/mp4 files under out/ were tracked, about 28MB, every one
+# of them the output of a command in this repo. A render is reproducible; storing it is storing a
+# cache. site/public/assets stays tracked: the marketing site SERVES those, so they are content.
+out/**/*.mp4
+out/**/*.mov
+out/**/*.webm
+out/**/*.wav
+out/**/*.mp3
+
+# Per-brand demo imagery, the same rule assets/brands/** already applies, for two directories that
+# predate it and escaped it. 4MB of one brand's hero art. The only scenes referencing them are
+# untracked, so nothing tracked breaks.
+assets/plinth/
+assets/higgsfield/
