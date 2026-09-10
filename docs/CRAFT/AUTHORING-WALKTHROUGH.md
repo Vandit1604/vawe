@@ -89,7 +89,7 @@ copy a structure wholesale (the ledger flags it). Build in the [`README.md`](REA
 1. **Beats**: layer `start`/`duration` per the lock sheet's timing.
 2. **Anchor**: placement via `pin`/`col`/`align`, never eyeballed `x` (a text layer with `w` needs
    `align` or it reads off-centre, [`../MISTAKES.md`](../MISTAKES.md) #15).
-3. **Per-beat motion**, from [`MOTION-RECIPES.md`](../MOTION-RECIPES.md): entrances ease-out, the
+3. **Per-beat motion**, from [`MOTION-SNIPPETS.md`](../MOTION-SNIPPETS.md): entrances ease-out, the
    hero moves last/most, ONE motion idea per beat. Vary durations ([`DIRECTION.md`](DIRECTION.md) §2).
 4. **Support = blocks.** The hero's claim is proved by a block (the strength meter, a chart), plus a
    dim mono metadata readout ([`DENSITY.md`](DENSITY.md): hero + support + metadata).

@@ -794,7 +794,7 @@ export const exitRatioFromMotion = (durationScale) => Math.min(0.7, Math.max(0.3
 // rather than a word an author has to remember. DERIVED, same shape as exitRatioFromMotion above: reads
 // `theme.motion.bounce`, the axis `core/registry/theme-contract.js` already reads for the accent-cut
 // tier, so a calm brand and a bouncy one wind up by different amounts instead of all getting one
-// constant. docs/CRAFT/AFTER-EFFECTS-RECIPES.md states the practitioner band directly ("roughly 10 to
+// constant. docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md states the practitioner band directly ("roughly 10 to
 // 20% of the total move"): the engine default (bounce 0) sits at the floor, and the bounciest theme
 // shipped today (threadcite, 0.42) lands at the ceiling; clamped so a still-bouncier future theme
 // cannot wind up past the band the recipe names.

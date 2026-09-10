@@ -1,6 +1,6 @@
 // core/fx/matte.js: LUMA MATTE. Another layer's brightness becomes this layer's alpha.
 //
-// The twentieth recipe in docs/CRAFT/AFTER-EFFECTS-RECIPES.md, and the general case of the whole wipe
+// The twentieth recipe in docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md, and the general case of the whole wipe
 // family: a wipe is a hard edge travelling across a layer, and this is any shape at all, moving however
 // the source layer moves. A gradient sweeping across a headline IS a wipe. A logo over a paint field
 // puts the field inside the logo. A radial fade over a photograph is a vignette that can travel.

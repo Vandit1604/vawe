@@ -132,7 +132,7 @@ export function terminalReveal({ x = 360, y = 330, w = 1200, h = 470, title, pro
 
 // screenDive. The payoff PRODUCT surface: a kinetic title, then the real UI capture/screenshot that
 // KEN-PUSHES in (zoom into the dashboard, not a static card), plus a mono caption. Pair with a
-// `cinematicZoom` seam at `start` for the dive-in (docs/MOTION-RECIPES.md dive-in).
+// `cinematicZoom` seam at `start` for the dive-in (docs/MOTION-SNIPPETS.md dive-in).
 // `captionSize` overrides the mono caption under the shot (36 unchanged if omitted), from
 // `look.scale.caption`. Same optional-kwarg, unchanged-default shape as `kineticHook`'s `heroSize`.
 export function screenDive({ x = 626, y = 195, w = 668, title, image, caption: cap, zoom = [1.0, 1.28],

@@ -1,13 +1,13 @@
 ---
 when: you know the motion you want and need the exact keys to type
-answers: "copy-paste atomic recipes keyed to the schema: entrances · overshoot/spring · counts · cameras"
+answers: "copy-paste atomic snippets keyed to the schema: entrances · overshoot/spring · counts · cameras"
 group: reference
 ---
 
-# MOTION-RECIPES: the atomic recipe index (copy-paste motion, keyed to the schema)
+# MOTION-SNIPPETS: the atomic snippet index (copy-paste motion, keyed to the schema)
 
-The fastest way to author snappy, directed motion instead of default fades. Each recipe is **one line**:
-a slug, what it does and WHEN, the exact JSON to paste, and tags. Compose **2-4 recipes per beat**.
+The fastest way to author snappy, directed motion instead of default fades. Each snippet is **one line**:
+a slug, what it does and WHEN, the exact JSON to paste, and tags. Compose **2-4 snippets per beat**.
 An entrance + a rhythm + a transition, never one uniform fade on everything.
 
 - Inspired by another engine' `rules-index.md`, but every mechanism here is a REAL vawe field
@@ -193,6 +193,6 @@ A product-feature beat = an entrance + a rhythm + a backing surface + an earned 
 { "type": "text", "text": "Idea to inbox.", "anim": "rise", "enterDur": 0.3, "out": "defocus", "exitDur": 0.28 }   // snap-in + blur-out
 ```
 plus the real UI it proves (a `component` capture with `lift-in` + `wave-stagger`), a `slow-push` camera
-over the whole film, `auto-sfx`, and a `dissolve` only when the next beat changes place. That is 4 recipes,
+over the whole film, `auto-sfx`, and a `dissolve` only when the next beat changes place. That is 4 snippets,
 not one fade. See `formats/scene/motion-test.json` for the snap A/B, and the `showcase-*.json` scenes for
 feature demos.
