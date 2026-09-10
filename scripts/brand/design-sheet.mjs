@@ -20,7 +20,8 @@ const brand = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').st
 if (!brand) { console.error('usage: node scripts/brand/design-sheet.mjs <brand> [--theme name] [--serve]'); process.exit(1); }
 const themeName = flag('--theme', brand);
 let bg = '#0a0a0c';
-try { bg = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', themeName + '.json'), 'utf8')).palette.bg; } catch {}
+const themePath = path.join(ROOT, 'themes', themeName + '.json');
+if (fs.existsSync(themePath)) bg = JSON.parse(fs.readFileSync(themePath, 'utf8')).palette.bg; // no per-brand theme yet: keep the default bg
 
 const dir = path.join(ROOT, 'assets/brands', brand, 'components');
 if (!fs.existsSync(dir)) { console.error(`✗ no components for "${brand}", run: make capture …  (dir: ${path.relative(ROOT, dir)})`); process.exit(1); }
@@ -72,7 +73,7 @@ const url = `http://127.0.0.1:${port}/__sheet`;
 if (argv.includes('--serve')) {
   console.log(`▶ ${brand} design sheet (${files.length} elements) live at  ${url}`);
   console.log('  open it, review each element, Ctrl-C to stop. fix a capture, re-run to refresh.');
-  try { await import('node:child_process').then((cp) => cp.exec(`open "${url}"`)); } catch {}
+  try { await import('node:child_process').then((cp) => cp.exec(`open "${url}"`)); } catch {} // best-effort auto-open (macOS only); the printed URL above is the real fallback
 } else {
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
   const page = await browser.newPage();

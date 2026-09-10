@@ -90,7 +90,13 @@ const nothing = { metrics: {}, findings: [] };
 // and the cut/sting family that personality speaks in.
 function resolveFamily(d) {
   let motion = {};
-  try { motion = typeof d.theme === 'string' ? (JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', d.theme + '.json'), 'utf8')).motion || {}) : (d.theme?.motion || {}); } catch {}
+  if (typeof d.theme === 'string') {
+    const themePath = path.join(ROOT, 'themes', d.theme + '.json');
+    if (!fs.existsSync(themePath)) throw new Error(`unknown theme "${d.theme}" (looked for ${path.relative(ROOT, themePath)})`);
+    motion = JSON.parse(fs.readFileSync(themePath, 'utf8')).motion || {};
+  } else {
+    motion = d.theme?.motion || {};
+  }
   const settle = motion.settle ?? 0.5, bounce = motion.bounce ?? 0;
   const personality = (bounce > 0.1 || settle < 0.4) ? 'punchy' : (settle >= 0.55 && bounce < 0.05) ? 'calm' : 'neutral';
 

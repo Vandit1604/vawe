@@ -1670,7 +1670,7 @@ for (const aspectKey of askedAspects) {
 }
 }
 await browser.close(); server.close();
-for (const f of bootScratch) { try { fs.unlinkSync(f); } catch { } }
+for (const f of bootScratch) { try { fs.unlinkSync(f); } catch {} } // scratch boot file: may already be gone, cleanup only
 
 // --hero prints its own short report and exits 0. It is ONE warning out of this file's 18 kinds, so
 // printing the full LAYOUT AUDIT banner under it would claim a sweep that did not happen.

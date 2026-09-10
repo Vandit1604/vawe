@@ -99,7 +99,7 @@ if (argv.includes('--serve')) {
   const url = `http://127.0.0.1:${port}/__frag`;
   console.log(`▶ serving ${path.relative(ROOT, src)} at  ${url}   (theme ${themeName})`);
   console.log('  open that URL in your browser. Ctrl-C to stop.');
-  try { await import('node:child_process').then((cp) => cp.exec(`open "${url}"`)); } catch {}
+  try { await import('node:child_process').then((cp) => cp.exec(`open "${url}"`)); } catch {} // best-effort auto-open (macOS only); the printed URL above is the real fallback
 } else {
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
