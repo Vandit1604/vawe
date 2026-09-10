@@ -9,13 +9,10 @@
 // Colours are semantic theme vars; coordinates are the 1920x1080 stage. Pure: props in, layers out.
 import { INK } from './kit.mjs';
 import { motionAt } from '../core/timeline/sequence.js';
-
-// The scroll rhythm measured off `higgsfield-recreation` beat 2, normalised: [fraction of the pan's
-// duration, fraction of its travel]. Nothing about it is regular, and that is the whole point. The gaps
-// run 0.25, 0.16, 0.21, 0.21, 0.16 and the per-segment SPEED runs 1.03, 1.35, 1.29, 0.75, 0.59 of the
-// average: the page surges, then gives up. Even keys with a curve over them read as an animation of a
-// page; these read as somebody's hand.
-export const SCROLL_RHYTHM = [[0.25, 0.258], [0.4125, 0.48], [0.625, 0.745], [0.8375, 0.903], [1, 1]];
+// SCROLL_RHYTHM moved to core/motion/shapes.js (it is core vocabulary now, `SHAPES.pan`'s own data),
+// re-exported here so nothing that imported it from this file has to change.
+import { SCROLL_RHYTHM } from '../core/motion/shapes.js';
+export { SCROLL_RHYTHM };
 
 // The bloom envelope of the exemplar's `ring`, normalised: [fraction of life, fraction of the growth,
 // opacity]. It arrives almost instantly and leaves slowly, which is why it reads as a wake left behind

@@ -144,11 +144,13 @@ not: "the defaults this film refuses, in your own words"
   `style:` is the visual treatment for THIS beat, the slot the reference system's beat formula has
   (Element · Motion · Layout · Style · Timing) and ours did not. Without it, style is decided once for
   the whole film and every beat inherits it, which is how a film ends up looking like one long shot.
-  `rest:` says what moves during the HOLD. Their films are near-static 41% of the runtime against our
-  20%, and that is not stillness, it is authored idle: "Nothing ever fully stops. Every hold carries a
-  little ambient idle motion, a 1-2% breathing scale, a slow drift." We had a gate that BLOCKS a held
-  frame (`dead-air`) and nothing on the other side, so the cheap answer was always more motion rather
-  than better motion. `rest: none` is a legal answer and it is the right one on the spectacle beat.
+  `rest:` says what moves during the HOLD, IN PROSE. Their films are near-static 41% of the runtime
+  against our 20%, and that is not stillness, it is authored idle: "Nothing ever fully stops. Every hold
+  carries a little ambient idle motion, a 1-2% breathing scale, a slow drift." We had a gate that BLOCKS
+  a held frame (`dead-air`) and nothing on the other side, so the cheap answer was always more motion
+  rather than better motion. `rest: none` is a legal answer and it is the right one on the spectacle
+  beat. `rest:` stays narration only, nothing builds it: when a hold really should breathe or drift, say
+  so where it reaches the engine, `move: hold:<idle>` (THE MOVE, below), on the same beat.
 
     THE OBJECT'S POSE, NOT ONLY ITS POSITION. `object_in`/`object_out` say where the ONE continuous
   object is: `<placement>@<w>x<h>`, a safe-area PLACEMENT name (never a raw pixel) and its size in px.
@@ -187,15 +189,21 @@ not: "the defaults this film refuses, in your own words"
     THE MOVE. `motion:` above is always a one-shot ENTRANCE: an element arrives and lands, and the frame
   is still again the moment it does. Measured across four swept axes (docs/MISTAKES.md #610), that is
   why films read as slideshows: more entrances, spread further apart, travelling further, all change
-  WHEN the stillness happens and never WHETHER it does. The one axis that worked is a keyed track that
-  never stops moving for the whole beat, and `move:` is how a beat asks for it: `<shape>:<band>`, a
-  `SHAPES` key from `harness/author/track.mjs` (`make arsenal SHAPE=pan`, the same named, hand-keyed
-  tracks `motion:` above already draws its vocabulary from, never a new mechanism) and a speed band, the
-  same four words (`energy`, `professional`, `gravity`, `cinematic`) `motion:`'s bands already use.
-  `move: pan:cinematic` on the headline beat, `move: drift:gravity` on a held one. The band scales how
-  FAR/BIG the shape's own measured move is, `professional` reproducing it untouched; it never scales
-  duration, because the track always spans the WHOLE beat, that is the point of the field. Optional, and
-  a beat with no `move:` assembles exactly as it did before this field existed.
+  WHEN the stillness happens and never WHETHER it does. `move:` is the one field for everything that
+  keeps a beat moving beyond a one-shot entrance, and it reads its SCOPE off the entry, not off which
+  field it is written on (harness/lib/contract.mjs `parseMoveEntry`):
+    - `<shape>:<band>` (no `@`)         the beat's own LAYER: a keyed track that never stops moving for
+      the whole beat. A `SHAPES` key (`core/motion/shapes.js`, `make arsenal SHAPE=pan`) and a speed
+      band, the same four words (`energy`, `professional`, `gravity`, `cinematic`) `motion:`'s bands
+      already use. `move: pan:cinematic` on the headline beat, `move: drift:gravity` on a held one. The
+      band scales how FAR/BIG the shape's own measured move is, `professional` reproducing it untouched;
+      it never scales duration, the track always spans the WHOLE beat.
+    - `<selector>@<kind>:<band>[/<outBand>]`   the SAME grammar `motion:` above takes, just written on
+      this field instead: a part entrance on one element. A beat can use either field, or both.
+    - `hold:<idle>`                     the beat's own LAYER keeps living through the hold: sets `idle`
+      (`core/engine/idle.js`: `breathe`, `drift`), the field `rest:` below can only narrate.
+  `;`-separated for more than one entry. Optional, and a beat with no `move:` assembles exactly as it
+  did before this field existed.
 
     `fragment:` IS OPTIONAL, AND BOTH ITS HALVES ARE. `make assemble`'s own convention
   (`<film>.scene<N>.html`) is unchanged when this line is unset. Two forms, either half omittable:

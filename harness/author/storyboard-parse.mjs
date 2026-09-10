@@ -106,14 +106,17 @@ export function parseStoryboard(src) {
       // beat's two edges, "<placement>@<w>x<h>" (a safe-area PLACEMENT name, never a raw pixel). Only
       // meaningful once a beat names one; harness/lib/contract.mjs chainErrors refuses a broken handoff.
       object_in: f('object_in'), object_out: f('object_out'),
-      // THE MOTION PLAN (harness/lib/contract.mjs parseMotion): what else moves in this beat, beyond
-      // the one continuous object above. "<selector>@<kind>:<inBand>[/<outBand>]", `;`-separated for
-      // more than one moving element. Only meaningful once a beat names one.
+      // THE MOTION PLAN (harness/lib/contract.mjs parseMotion, an alias of parseMoveEntry): what else
+      // moves in this beat, beyond the one continuous object above. "<selector>@<kind>:<inBand>[/<outBand>]",
+      // `;`-separated for more than one moving element. Only meaningful once a beat names one.
       motion: f('motion'),
-      // SUSTAINED MOTION (harness/lib/contract.mjs parseMove): a hand-keyed track on this beat's OWN
-      // layer, spanning the whole beat, so the beat never goes still after an entrance lands.
-      // "<shape>:<band>", a harness/author/track.mjs SHAPES key and a SPEED_BAND name. Only meaningful
-      // once a beat names one.
+      // THE MOVE (harness/lib/contract.mjs parseMoveEntries): one grammar, scope read from the entry.
+      // "<shape>:<band>" keys a sustained track on this beat's OWN layer, spanning the whole beat, so
+      // the beat never goes still after an entrance lands (a core/motion/shapes.js SHAPES key and a
+      // SPEED_BAND name). "<selector>@<kind>:<band>" is the same grammar `motion:` takes, on this field
+      // instead. "hold:<idle>" sets this beat's layer `idle` (core/engine/idle.js), the ambient hold
+      // `rest:` below could only narrate. `;`-separated for more than one entry. Only meaningful once a
+      // beat names one.
       move: f('move'),
       // style · layout · rest: the three slots their beat formula has (Element · Motion · Layout ·
       // Style · Timing) and ours did not. Parsed here for the same reason `placement` above is: a slot
@@ -121,6 +124,10 @@ export function parseStoryboard(src) {
       // complete and the film is unchanged. `rest` is what MOVES during the hold, which is the half of
       // pacing this repo had no word for: `dead-air` blocks a held frame and nothing on the other side
       // ever asked a held frame to be alive.
+      //
+      // STILL NOT BUILT, DELIBERATELY. `rest:` stays free-text: its existing lines are narration
+      // ("the arm never stops"), not a grammar, and guessing a `hold:` out of prose risks changing a
+      // render. Use `move: hold:<idle>` on the beat when you want this hold to actually breathe or drift.
       style: f('style'), layout: f('layout'), rest: f('rest'),
       // narration: what is SPOKEN over this beat. Optional, and separate from `onscreen` because the
       // two are different channels: a line can be said and not shown, or shown and not said. The
