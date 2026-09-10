@@ -76,3 +76,22 @@ The prompt always ends with a `## Change me` section naming which lines are the 
 (`on screen`, `camera`, `type`, the one-breath opening paragraph) and which are measured and should
 change only for a deliberately different reference feel (`ground`, `enters`, `leaves`, the recipe
 lines). Read it before editing.
+
+## Asking for detail: `ASK=1` and `ANSWERS=`
+
+Once the acts are known (measured, from `--ref`, or placeholder, from `--name`/`--idea`), a second pass
+asks the detail a good plan needs before any frame is drawn: what fills each frame, where the product
+lives, how text arrives, which cursor, how an act hands off, what the ground does. Every option traces
+to a real registry (a recipe, a kinetic preset, a camera move, a `make screen` KIND) or to the
+reference's own measurement (`shots[].content`); a question with no registry to answer it is dropped,
+never answered with an invented option. `harness/author/ideate-ask.mjs` owns this half.
+
+```bash
+make ideate REF=example-madera ASK=1              # prints the question payload, one batch per act
+make ideate REF=example-madera ANSWERS=<file.json> # applies saved answers into the prompt's lines
+```
+
+Neutral form (no AskUserQuestion tool): run `ASK=1`, print the questions from the JSON it emits, save
+the author's picks as `{ film: {where, text, ground}, acts: [{frame, cursor, handoff, ...}, ...] }` to
+a file, then re-run with `ANSWERS=` pointing at it. Claude Code asks each batch with AskUserQuestion
+instead of printing it.

@@ -20,7 +20,9 @@ import { isLightBg } from '../../core/color/engine.js';
 import { MARGIN } from '../../core/layout/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const KINDS = ['editor', 'grid', 'dashboard', 'chat', 'card'];
+// exported so ideate-ask.mjs can offer these as the real "designed screen" routes, never a second
+// hardcoded copy of this list.
+export const KINDS = ['editor', 'grid', 'dashboard', 'chat', 'card'];
 
 // ---------------------------------------------------------------------------
 // WRITE: a video-ready starting fragment (folded in from the old screen-new.mjs, no make target of its
