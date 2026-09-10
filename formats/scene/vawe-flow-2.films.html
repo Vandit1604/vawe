@@ -88,21 +88,24 @@
   /* Ground wash: the first film's own measured colour, as a soft radial wash, so the resting
      frame already shows the device beat 6 turns on (AGENTS.md: "change bg colour according to
      each film's colour when browsing"). The engine crossfades this per film later; at rest it
-     shows film 1's own tint (#2c66ed, sampled off out/vawe-launch.mp4 at 2s). */
+     shows the focused film's own tint (#2c66ed, sampled off out/vawe-launch.mp4 at 2s). */
   #films-ground{
     position:absolute;inset:0;
     background:
       radial-gradient(ellipse 70% 60% at 50% 46%, color-mix(in srgb, #2c66ed 30%, var(--bg)) 0%, var(--bg) 72%);
   }
   #films{
-    position:absolute;inset:0;
+    position:absolute;inset:0;overflow:hidden;
     display:flex;align-items:center;justify-content:center;gap:var(--kit-space-4);
   }
   .film-card{
     position:relative;flex:none;overflow:hidden;border-radius:22px;aspect-ratio:16/9;
-    box-shadow:var(--kit-elev-3);
   }
   .film-card img{width:100%;height:100%;object-fit:cover;display:block}
+  /* Depth without a grey wash: each card shows its own image at full colour. A receding
+     neighbour gets only a low-alpha black multiply (keeps hue, drops luminance) plus a
+     smaller size and a lighter shadow, never `opacity` on the element itself. */
+  .film-card .film-recede{position:absolute;inset:0;background:rgba(6,9,14,0)}
   .film-card .film-scrim{
     position:absolute;inset:0;
     background:linear-gradient(to top, rgba(8,12,20,.62) 0%, rgba(8,12,20,0) 42%);
@@ -111,47 +114,90 @@
     position:absolute;left:var(--kit-space-3);right:var(--kit-space-3);bottom:var(--kit-space-3);
     display:flex;align-items:baseline;justify-content:space-between;gap:var(--kit-space-2);
   }
-  .film-card .film-name{font:600 32px var(--font-sans);color:#fff;margin:0}
-  .film-card .film-time{font:500 28px var(--font-mono);color:rgba(255,255,255,.82);margin:0;font-variant-numeric:tabular-nums}
-  .film-card[data-focus]{width:46cqw}
-  .film-card:not([data-focus]){width:20cqw;opacity:.5}
+  /* Type stays on the kit's own ramp everywhere below: one size per role (.kit-body for the
+     name, .kit-caption for the time/meta/label), never a one-off number. A receding card is
+     told apart by the recede overlay, its shadow step and its width, not by shrinking type. */
+  .film-card .film-name{color:#fff;font-weight:600;margin:0}
+  .film-card .film-time{color:rgba(255,255,255,.82);margin:0;font-variant-numeric:tabular-nums}
+  .film-card[data-focus]{width:46cqw;box-shadow:var(--kit-elev-3)}
+  .film-card[data-ring="near"]{width:22cqw;box-shadow:var(--kit-elev-2)}
+  .film-card[data-ring="near"] .film-recede{background:rgba(6,9,14,.16)}
+  .film-card[data-ring="outer"]{width:16cqw;box-shadow:var(--kit-elev-1)}
+  .film-card[data-ring="outer"] .film-recede{background:rgba(6,9,14,.30)}
   #films-label{
     position:absolute;top:var(--kit-space-7);left:var(--kit-margin);
     display:flex;align-items:center;gap:var(--kit-space-2);
   }
   #films-label .dot{width:10px;height:10px;border-radius:999px;background:var(--accent)}
-  #films-label p{font:600 28px var(--font-mono);color:var(--text-2);letter-spacing:0.1em;text-transform:uppercase;margin:0}
+  #films-label p{text-transform:uppercase;margin:0}
+  /* The scrub bar: the beat's own claim ("each film should play, not be static") made concrete
+     as a played-to position and a real meta line, read with ffprobe off the actual file, not
+     invented. Sits UNDER the focused card, on the plane, not on top of the footage. */
+  #films-scrub{
+    position:absolute;left:50%;top:calc(50% + 46cqw * 9 / 16 / 2 + var(--kit-space-3));
+    transform:translateX(-50%);width:46cqw;
+    display:flex;flex-direction:column;gap:var(--kit-space-2);
+  }
+  #films-scrub .track{position:relative;height:6px;border-radius:999px;background:var(--line-strong)}
+  #films-scrub .played{position:absolute;left:0;top:0;bottom:0;width:31%;border-radius:999px;background:var(--accent)}
+  #films-scrub .head{position:absolute;left:31%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:999px;background:var(--accent);box-shadow:var(--kit-elev-1)}
+  #films-scrub .meta{margin:0;font-variant-numeric:tabular-nums;font-family:var(--font-mono)}
 </style>
 <div class="kit-root kit-ground-paper" style="position:absolute;inset:0">
   <div id="films-ground"></div>
   <div id="films-label">
     <span class="dot"></span>
-    <p>already rendered</p>
+    <p class="kit-eyebrow">your films</p>
   </div>
   <div id="films">
-    <div class="film-card" data-part="film-card" data-film="out/looks-reel.mp4" data-tint="#4c34fe">
+    <div class="film-card" data-part="film-card" data-ring="outer" data-film="out/looks-reel.mp4" data-tint="#4c34fe">
       <img src="/assets/vawe-flow-2/looks-reel-still.jpg" alt="">
+      <div class="film-recede"></div>
       <div class="film-scrim"></div>
       <div class="film-caption">
-        <p class="film-name">looks reel</p>
-        <p class="film-time">0:37</p>
+        <p class="film-name kit-body">looks reel</p>
+        <p class="film-time kit-caption">0:37</p>
+      </div>
+    </div>
+    <div class="film-card" data-part="film-card" data-ring="near" data-film="out/vawe-teaser.mp4" data-tint="#eae9e9">
+      <img src="/assets/vawe-flow-2/vawe-teaser-still.jpg" alt="">
+      <div class="film-recede"></div>
+      <div class="film-scrim"></div>
+      <div class="film-caption">
+        <p class="film-name kit-body">vawe teaser</p>
+        <p class="film-time kit-caption">0:06</p>
       </div>
     </div>
     <div class="film-card" data-part="film-card" data-film="out/vawe-launch.mp4" data-tint="#2c66ed" data-focus>
       <img src="/assets/vawe-flow-2/vawe-launch-still.jpg" alt="">
+      <div class="film-recede"></div>
       <div class="film-scrim"></div>
       <div class="film-caption">
-        <p class="film-name">vawe launch</p>
-        <p class="film-time">0:20</p>
+        <p class="film-name kit-body">vawe launch</p>
+        <p class="film-time kit-caption">0:20</p>
       </div>
     </div>
-    <div class="film-card" data-part="film-card" data-film="out/motion-reel.mp4" data-tint="#eb6515">
+    <div class="film-card" data-part="film-card" data-ring="near" data-film="out/motion-reel.mp4" data-tint="#eb6515">
       <img src="/assets/vawe-flow-2/motion-reel-still.jpg" alt="">
+      <div class="film-recede"></div>
       <div class="film-scrim"></div>
       <div class="film-caption">
-        <p class="film-name">motion reel</p>
-        <p class="film-time">0:45</p>
+        <p class="film-name kit-body">motion reel</p>
+        <p class="film-time kit-caption">0:45</p>
       </div>
     </div>
+    <div class="film-card" data-part="film-card" data-ring="outer" data-film="out/three-showcase.mp4" data-tint="#2563eb">
+      <img src="/assets/vawe-flow-2/three-showcase-still.jpg" alt="">
+      <div class="film-recede"></div>
+      <div class="film-scrim"></div>
+      <div class="film-caption">
+        <p class="film-name kit-body">three showcase</p>
+        <p class="film-time kit-caption">0:11</p>
+      </div>
+    </div>
+  </div>
+  <div id="films-scrub">
+    <div class="track"><div class="played"></div><div class="head"></div></div>
+    <p class="meta kit-caption">1920x1080 &middot; 30fps &middot; 0:20</p>
   </div>
 </div>
