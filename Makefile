@@ -200,6 +200,12 @@ dev: build ## [dev] THE ITERATION LOOP.
 	. harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4)
 	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
+	@ref=$$(node -e "import('./quality/gates/stage.mjs').then(m=>{const l=m.lookBlock('$(D)'); console.log((l&&l.reference)||'');})") ; \
+	if [ -n "$$ref" ]; then \
+	  cc=$$(node quality/gates/content-check.mjs $(D) --ref $$ref 2>&1); rc=$$? ; \
+	  echo "  content-check vs $$ref:" ; \
+	  if [ $$rc -eq 0 ]; then echo "$$cc" | grep -E "^  act |verdict:" ; else echo "$$cc" | tail -1 ; fi ; \
+	fi
 	@echo "" && echo "  next: make check D=$(D)  (every gate, zero consequence)  ·  make ship D=$(D)  (when it's ready)"
 	@node harness/author/arsenal.mjs --for $(D) 2>/dev/null || true
 
