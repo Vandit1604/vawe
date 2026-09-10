@@ -37,8 +37,9 @@ what genuinely is not a picture: a `count` layer's live figure, a `cursor` layer
 
 - **`demo.json`**: the `cursor` layer proving a real click has a real consequence. The card is one html
   layer; `Exported.` is a second `parts` group that stays hidden until the click lands.
-- **`explainer.json`**: kinetic type, a count-up stat grid (`countStart: 0`, so the figure starts
-  climbing the instant it enters), a payoff line. The nine layer-type chips are one html+parts row.
+- **`explainer.json`**: kinetic type walking through "a frame is a pure function of time", a live
+  `count` layer reading the film's own elapsed seconds (linear, on purpose: it displays a clock), a
+  payoff line landing last.
 - **`launch.json`**: a hook, a captured product still (Ken Burns, left as an `image` layer on purpose:
   a real screenshot is not group-of-rect debt), a five-canvas chip row (html+parts), and a wordmark that
   now actually carries `acrossBeats: true` across all three cuts.
