@@ -31,8 +31,8 @@ Every rule is tagged:
 > [`../MOTION-SNIPPETS.md`](../MOTION-SNIPPETS.md); the feeling layer in [`TASTE-RULES.md`](TASTE-RULES.md).
 > This file is *why*: the principles those apply.
 
-> **The fastest way to obey all of this: compose from [`BLUEPRINTS.md`](BLUEPRINTS.md)**, directed-motion
-> beats (`{type:"beat"}`) that bake these rules in, so you start from directed motion instead of a blank
+> **The fastest way to obey all of this: compose from [`recipes/`](../../recipes/README.md)**,
+> directed motion measured off a real film, so you start from directed motion instead of a blank
 > `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make direct`) is the ceiling, too much,
 > undirected; the **ambition floor** (`make direction-floor`, opt-in via `TASTE=1`) is the floor, too plain,
 > a slideshow. A directed video sits between them.

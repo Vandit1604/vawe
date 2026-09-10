@@ -486,7 +486,7 @@ styleGate('floor', 'direction floor (ambition)', 'quality/gates/direction-floor.
       + `      Cheapest fix, and the numbers are measured off the two exemplars rather than invented:\n`
       + `        node harness/author/track.mjs pan   --to -600 --dur 1.25 --scene ${target} --layer <n>\n`
       + `        node harness/author/track.mjs blast --dur 1.5              --scene ${target} --layer <n>\n`
-      + `      Or reach for a keyed BEAT: recordedPan / scrollStory / focusRack / echoRing (make blueprints).\n`
+      + `      Or reach for a recipe measured off a real film: \`make arsenal Q="…"\` (recipes/README.md).\n`
       + `      Theory and the measurements: docs/CRAFT/KEYED-MOTION.md.\n`);
     printDocs(['no-authored-motion']);
   } else {

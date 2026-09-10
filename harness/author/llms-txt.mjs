@@ -54,7 +54,7 @@ const WHEN = {
   three: 'a real geometry (a font extrusion, a device body, a captured UI plane) is needed, not just a field.',
   globe: 'a dotted-planet-with-routes beat; reach for `three:"globe"` only when a real sun vector matters.',
   particles: 'a burst, flash or drift of many identical small marks (confetti/sparks/dust), deterministic.',
-  composition: 'the beat needs bespoke first-party choreography that `parts` and blueprints cannot express.',
+  composition: 'the beat needs bespoke first-party choreography that `parts` and recipes cannot express.',
   adjust: 'grade everything BENEATH one point in the stack (blur/darken/desaturate a whole background).',
 };
 
@@ -148,7 +148,7 @@ the camera, or the scene:
 ${families.lines.join('\n')}
 
 **Discovery, not memorisation:** \`make arsenal Q="a page scrolling under a static tilt"\` searches all
-${total} named things (layer types, every family above, blueprints, blocks, sound cues) by plain-English
+${total} named things (layer types, every family above, recipes, blocks, sound cues) by plain-English
 description and returns the exact key to write. \`make schema AT="layers[].motion[]"\` answers the other
 half: what fields are legal to write at one JSON path, read live off \`formats/scene/schema.json\`.
 

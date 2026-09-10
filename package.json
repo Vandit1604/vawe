@@ -48,7 +48,6 @@
     "cli/",
     "core/",
     "blocks/",
-    "blueprints/",
     "themes/",
     "formats/scene/scene.html",
     "formats/scene/scene.js",

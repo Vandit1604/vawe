@@ -42,13 +42,12 @@ chapters (or the reverse) lies about the content. Study first, then decide, same
 - **Generic content on the recreated device.** The device is real; the copy, brand and any UI shown
   should be your own or clearly generic, unless the reference is your own site/film.
 
-## The blueprints to reach for
+## The motion to reach for
 
-There is no fixed blueprint list for this type: the studied grammar names the actual devices in play
-(a continuous artefact shown from multiple angles, a build-with-no-hard-cut, a match cut). Reach for the
-mined blueprints in `blueprints/beats-mined.mjs` first, since they were themselves measured off studied
-references the same way (`docs/CRAFT/BLUEPRINTS.md`), then fall back to the general 29 (`make
-blueprints`) for the device the study names.
+There is no fixed device list for this type: the studied grammar names the actual devices in play
+(a continuous artefact shown from multiple angles, a build-with-no-hard-cut, a match cut). Reach for a
+`recipes/` entry first, since it is measured off a studied reference the same way (recipes/README.md);
+otherwise `make arsenal Q="…"` for the nearest device the study names.
 
 ## The rules that matter most
 

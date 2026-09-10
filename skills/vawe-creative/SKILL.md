@@ -12,11 +12,10 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 
 ## The mandates (every one is gate-backed, not suggestions)
 
-1. **Compose from BLUEPRINTS, don't hand-roll motion.** `make arsenal BLUEPRINTS=1` lists directed beats
-   (`{type:"beat"}`, docs/CRAFT/BLUEPRINTS.md): kineticHook, statReveal, cardCascade, chipGrid,
-   terminalReveal, screenDive, verdictProof, logoLockup, ctaEnd. Drop one per storyboard beat, fill brand
-   content; it expands into real layers at load, no separate step. Good motion becomes the default
-   instead of re-derived and under-reached.
+1. **Compose from RECIPES, don't hand-roll motion.** `make arsenal Q="…"` finds motion measured off a
+   real film (recipes/README.md), or a kinetic reveal / count-up / camera move directly. Apply one per
+   storyboard beat, fill brand content. Good motion becomes the default instead of re-derived and
+   under-reached.
 
 2. **Kinetic typography, always.** Key lines reveal word-by-word or char-by-char (`split`+`preset`), never
    a flat fade. Numbers COUNT up. `make direction-floor` FAILS `plain-slideshow` if you skip this.
@@ -53,7 +52,7 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 ## The loop (do not skip a rung)
 
 ```
-make arsenal BLUEPRINTS=1       # browse directed beats → pick one per storyboard beat
+make arsenal Q="…"              # find directed motion → pick one per storyboard beat
 … author formats/scene/<x>.json (beats + brand content + a living bg + camera + seams) …
                                  # beats/blocks/comps expand into real layers at LOAD, no separate step
 make author-check D=<x>.json    # validate · critique · direct(effect-soup ceiling) · FLOOR(slideshow) · slop

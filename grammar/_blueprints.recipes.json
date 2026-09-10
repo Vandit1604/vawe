@@ -1,0 +1,285 @@
+{
+  "_comment": "CANDIDATES only, not loaded by the recipe engine and not merged into recipes/recipes.json. Written when blueprints/ was deleted (see docs/MISTAKES.md and the retire-blueprints inventory) to carry forward the 18 sourced beat factories as recipe-shaped notes for whoever migrates one. Each entry needs its `t` re-measured against the real clip before it can move into recipes/recipes.json: the blueprint files cited their source in prose, and none of the prose timestamps were verified against a frame the way recipes/README.md requires.",
+
+  "typed-erase-enter": {
+    "kind": "enter",
+    "blurb": "a line types itself in at a fixed rate, holds, then un-types at roughly twice the type rate; it never fades, the caret is the only decoration",
+    "sources": [
+      { "ref": "higgsfield-recreation", "note": "the exemplar, cited in prose only, no shot or timestamp given" }
+    ],
+    "slots": { "at": "seconds: when typing starts", "target": "layer id" },
+    "params": {
+      "cps": { "default": 33, "unit": "chars/s", "one-source": true },
+      "untypeRateMultiple": { "default": 2, "note": "un-type speed as a multiple of the type speed", "one-source": true }
+    },
+    "from-blueprint": true
+  },
+
+  "morph-to-next-seam": {
+    "kind": "seam",
+    "blurb": "one object becomes the next: on a single progress variable, width/height shrink, corner radius grows from square to round on a cubic curve, and the label opacity falls away early on a squared term",
+    "sources": [
+      { "ref": "higgsfield-recreation", "note": "the exemplar, cited in prose only, no shot or timestamp given" }
+    ],
+    "slots": { "at": "seconds: when the morph starts", "over": "seconds: how long it runs", "target": "layer id" },
+    "params": {
+      "shrinkPx": { "default": 205, "one-source": true },
+      "labelFadePower": { "default": 2, "note": "opacity falls as 1 - p^2 * 3.2" , "one-source": true }
+    },
+    "from-blueprint": true
+  },
+
+  "prop-sentence-spine": {
+    "kind": "spine",
+    "blurb": "a claim's nouns are real objects (word, photo, chip, captured UI, word) flowed as one wrapping reading line; every item's entrance staggers by its place in the sentence, all items leave together",
+    "sources": [
+      { "ref": "brew-launch-act1", "shot": 4, "t": 4.6, "note": "9 layers land inside 0.42s at a rolling 0.06-0.08s step" }
+    ],
+    "slots": { "at": "seconds", "items": "[layer id, ...] in reading order" },
+    "params": {
+      "stagger": { "default": 0.08, "unit": "s", "note": "measured rolling step, 0.06-0.08s across the shot" },
+      "itemEnterDur": { "default": 0.32, "unit": "s" },
+      "dur": { "default": 1.6, "unit": "s" }
+    },
+    "from-blueprint": true
+  },
+
+  "slot-swap-spine": {
+    "kind": "spine",
+    "blurb": "three fixed slots never move while their contents turn over N passes on one repeated rhythm; the last slot changes what KIND of thing it holds each pass so the row reads as being refilled, not as a table",
+    "sources": [
+      { "ref": "brew-launch-act1", "shot": 11, "t": 14.9, "note": "badge/label/payload pass 1" },
+      { "ref": "brew-launch-act1", "shot": 12, "t": 16.5, "note": "pass 2" },
+      { "ref": "brew-launch-act1", "shot": 13, "t": 18.1, "note": "pass 3, each visible ~1.3s" }
+    ],
+    "slots": { "passes": "[{label, icon?, payload}, ...]" },
+    "params": {
+      "labelOffset": { "default": 0, "unit": "s" },
+      "tileOffset": { "default": 0.1, "unit": "s" },
+      "iconOffset": { "default": 0.16, "unit": "s" },
+      "payloadOffset": { "default": 0.35, "unit": "s" },
+      "passDur": { "default": 1.3, "unit": "s", "note": "measured visible time per pass" }
+    },
+    "from-blueprint": true
+  },
+
+  "recorded-pan-camera": {
+    "kind": "camera",
+    "blurb": "a surface wider than the frame drifts into place then pans on an irregular multi-key linear track, riders welded to the same track by copying its deltas and time-shifting by the rider's own start",
+    "sources": [
+      { "ref": "higgsfield-recreation", "shot": 2, "note": "formats/scene/higgsfield-recreation.json beat 2" }
+    ],
+    "slots": { "surface": "layer id", "riders": "[layer id, ...]?" },
+    "params": {
+      "leadDur": { "default": 0.45, "unit": "s" },
+      "leadPx": { "default": 30 },
+      "panDur": { "default": 0.8, "unit": "s" },
+      "rhythm": { "default": "SCROLL_RHYTHM (core/motion/shapes.js)", "note": "the irregular key spacing that makes the interior read as scrolled, not glided" }
+    },
+    "from-blueprint": true
+  },
+
+  "echo-ring-enter": {
+    "kind": "enter",
+    "blurb": "a stroked ring replays another layer's path one beat late, growing and fading as it goes, supplying motion during a slow morph without competing with the subject for attention",
+    "sources": [
+      { "ref": "higgsfield-recreation", "shot": 4, "note": "formats/scene/higgsfield-recreation.json beat 4, the generate button becoming a dot" }
+    ],
+    "slots": { "path": "the source layer's motion track", "delay": "seconds behind the source" },
+    "params": {
+      "growFrom": { "default": 0.5 },
+      "growTo": { "default": 1.6 },
+      "peakOpacity": { "default": 0.9 },
+      "envelope": { "default": "[[0,0,0],[0.08,0.318,0.85],[0.23,0.4545,0.9],[0.64,0.745,0.5],[1,1,0]]", "note": "[fraction of life, fraction of growth, opacity], normalised off the exemplar's ring" }
+    },
+    "from-blueprint": true
+  },
+
+  "scroll-story-camera": {
+    "kind": "camera",
+    "blurb": "a surface taller than the frame scrolls under a static tilt while the frame stays put; stops are absolute section offsets, every scroll shares one ease, held at each stop before the next begins",
+    "sources": [
+      { "ref": "higgsfield-recreation", "note": "generalised from the exemplar; docs/CRAFT/KEYED-MOTION.md carries the measurements" }
+    ],
+    "slots": { "surface": "layer id", "stops": "[pixels, ...] absolute offsets from content origin" },
+    "params": {
+      "tiltY": { "default": [-4, -12], "unit": "deg" },
+      "tiltX": { "default": [0, 6], "unit": "deg" },
+      "perspective": { "default": [800, 2000], "unit": "px" },
+      "stepDur": { "default": 1.2, "unit": "s" },
+      "dwell": { "default": 0.5, "unit": "s" },
+      "lead": { "default": 0.35, "unit": "s" },
+      "ease": { "default": "power3.out" }
+    },
+    "from-blueprint": true
+  },
+
+  "word-blast-punct": {
+    "kind": "enter",
+    "blurb": "one word or mark arrives already too big, settles into its reading on a decelerating curve, creeps very slightly so a held frame never freezes, then leaves by growing through the frame rather than fading",
+    "sources": [
+      { "ref": "brew-launch-act1", "note": "four beats: \"Today.\", \"Meet\", the logo, \"Faster\"" }
+    ],
+    "slots": { "target": "layer id (text or mark image)" },
+    "params": {
+      "arriveScaleWord": { "default": 1.5 },
+      "arriveScaleMark": { "default": 1.4, "note": "a wide mark takes less amplitude than a word" },
+      "exitScaleWord": { "default": 1.9 },
+      "exitScaleMark": { "default": 1.7 },
+      "settleAt": { "default": 0.42, "unit": "s" },
+      "driftFor": { "default": 0.3, "unit": "s" }
+    },
+    "from-blueprint": true
+  },
+
+  "blur-resolve-enter": {
+    "kind": "enter",
+    "blurb": "type arrives smeared with motion blur and snaps into focus on the blur channel alone; nothing slides, fades or scales",
+    "sources": [
+      { "ref": "pin-1119918632363453012", "shot": 1 },
+      { "ref": "pin-415034921941332045" },
+      { "ref": "pin-333759022406760643" }
+    ],
+    "slots": { "target": "layer id" },
+    "params": {
+      "blurFrom": { "default": 24, "unit": "px" },
+      "resolveAt": { "default": 0.4, "unit": "s" }
+    },
+    "from-blueprint": true
+  },
+
+  "dialogue-accumulate-spine": {
+    "kind": "spine",
+    "blurb": "sans/serif word pairs accumulate one after another on a held frame, a small dot as the joint between each pair; the type never moves, only the ground blooms under a late arriving payoff line",
+    "sources": [
+      { "ref": "rebuilt", "shot": 1, "t": 9.5, "note": "the film's whole open" }
+    ],
+    "slots": { "pairs": "[{sans, serif}, ...]", "bloomLine": "layer id?" },
+    "params": {
+      "stagger": { "default": 0.9, "unit": "s", "note": "time between pairs landing" }
+    },
+    "from-blueprint": true
+  },
+
+  "container-fill-spine": {
+    "kind": "spine",
+    "blurb": "a fixed panel frame never moves while chips fill it in one at a time; the frame is the constant, the count is the variable",
+    "sources": [
+      { "ref": "pin-1119918632363453012", "shot": 2 },
+      { "ref": "pin-583145851797705243" },
+      { "ref": "arc-space-swiping" },
+      { "ref": "pin-333759022406800725" }
+    ],
+    "slots": { "frame": "layer id", "items": "[chip text, ...]" },
+    "params": {
+      "stagger": { "default": 0.35, "unit": "s" }
+    },
+    "from-blueprint": true
+  },
+
+  "card-fan-enter": {
+    "kind": "enter",
+    "blurb": "N cards arrive from one side and fan open in perspective around a fixed anchor, each a touch later and a touch more rotated than its neighbour",
+    "sources": [
+      { "ref": "pinref", "shot": 3 },
+      { "ref": "pinref", "shot": 5 },
+      { "ref": "pinref", "shot": 6 },
+      { "ref": "pinref", "shot": 7 }
+    ],
+    "slots": { "cards": "[layer id, ...]", "anchor": "{x, y}" },
+    "params": {
+      "spreadDeg": { "default": 26 },
+      "stagger": { "default": 0.18, "unit": "s" },
+      "settleAt": { "default": 0.5, "unit": "s" }
+    },
+    "from-blueprint": true
+  },
+
+  "list-build-rows-spine": {
+    "kind": "spine",
+    "blurb": "a vertical list grows one row at a time under a fixed left rule; the list never resets what already landed",
+    "sources": [
+      { "ref": "pinref", "shot": 11 },
+      { "ref": "pinref", "shot": 12 },
+      { "ref": "pinref", "shot": 13 },
+      { "ref": "pinref", "shot": 14 },
+      { "ref": "pinref", "shot": 15 }
+    ],
+    "slots": { "rows": "[layer id, ...] top to bottom" },
+    "params": {
+      "stagger": { "default": 0.5, "unit": "s" }
+    },
+    "from-blueprint": true
+  },
+
+  "chip-converge-enter": {
+    "kind": "enter",
+    "blurb": "a ring of chips scatters in from every side and then converges onto one point, the opposite choreography to a cascade",
+    "sources": [
+      { "ref": "pinref", "shot": 16 },
+      { "ref": "pinref", "shot": 17 }
+    ],
+    "slots": { "chips": "[layer id, ...]", "target": "{x, y}" },
+    "params": {
+      "scatterAt": { "default": 0.55, "unit": "s" },
+      "radius": { "default": 480, "unit": "px" }
+    },
+    "from-blueprint": true
+  },
+
+  "cell-mosaic-spine": {
+    "kind": "spine",
+    "blurb": "a grid of mixed cells travels as ONE object while every cell keeps its own content, so words and pictures cross the cell boundaries together instead of reading as separate slides",
+    "sources": [
+      { "ref": "rebuilt", "shot": 3, "note": "the film's busiest shot, motion 5.77, a dark grid sliding under dotted rules" }
+    ],
+    "slots": { "grid": "layer id (group)", "cells": "[layer id, ...]" },
+    "params": {
+      "travelPx": { "default": -260 }
+    },
+    "from-blueprint": true
+  },
+
+  "word-wipe-seam": {
+    "kind": "seam",
+    "blurb": "one word, far larger than the canvas, crosses the whole frame motion-blurred on an accelerating curve; its passage IS the transition, and what it reveals lands the instant it clears",
+    "sources": [
+      { "ref": "rebuilt", "shot": 4, "note": "one word ~8x the frame's own type, the loudest frame in that film" }
+    ],
+    "slots": { "word": "the crossing layer", "reveal": "layer id revealed as the word clears" },
+    "params": {
+      "wipeAt": { "default": 0.4, "unit": "s" },
+      "scale": { "default": 1.6, "note": "on top of the type-size cap, for the ~8x frame-fill look" }
+    },
+    "from-blueprint": true
+  },
+
+  "wordmark-assemble-enter": {
+    "kind": "enter",
+    "blurb": "the brand mark settles from scattered letters while small tiles drift slowly at a different depth behind it, so the brand assembles rather than simply appearing",
+    "sources": [
+      { "ref": "rebuilt", "shot": 5, "note": "the last shot: cards tumbling, tiles drifting, a wordmark scrambling into place, ending on the mark alone" }
+    ],
+    "slots": { "wordmark": "layer id", "tiles": "[layer id, ...]" },
+    "params": {
+      "settleAt": { "default": 0.9, "unit": "s" },
+      "scatterRadius": { "default": 260, "unit": "px" }
+    },
+    "from-blueprint": true
+  },
+
+  "viewport-trio-spine": {
+    "kind": "spine",
+    "blurb": "the same subject shown at three sizes at once, staggered slightly on entrance, the \"it is really finished\" payoff shot",
+    "sources": [
+      { "ref": "framer-hero", "shot": 2, "t": 17.2, "note": "the film's loudest peak, the finished site in three viewports simultaneously" }
+    ],
+    "slots": { "subject": "one image, reused at each size" },
+    "params": {
+      "sizes": { "default": [280, 460, 760], "unit": "px" },
+      "gap": { "default": 60, "unit": "px" },
+      "entranceStagger": { "default": 0.08, "unit": "s" }
+    },
+    "from-blueprint": true
+  }
+}

@@ -23,8 +23,10 @@
 // reading them off the sheet by eye anyway, and an eye reads a still while two of the three are
 // properties of MOTION:
 //
-//   GROUND    mean luma across the shot. Which way the world is lit, and therefore which `bg` window
-//             the recreation needs. Read off a still, correctly, so this one was only ever tedious.
+//   GROUND    mean luma of the shot's BORDER RING (not the whole frame: a centred card or hero word
+//             would drag the reading toward itself, not the backdrop). Which way the world is lit, and
+//             therefore which `bg` window the recreation needs. `groundHex` beside it is the measured
+//             colour, so a coloured wash and a plain light backdrop in the same bucket don't read alike.
 //   MOTION    mean |luma delta| between consecutive frames, the SAME measurement internal/scene/scene.go
 //             prints beside a render's duration and on the same 0.5 floor, so a reference and our
 //             attempt at it are two numbers on one scale rather than two impressions.
@@ -57,7 +59,6 @@ const positional = argv.filter((a, i) => !a.startsWith('--') && !(argv[i - 1] ||
 const VIDEO = positional[0];
 const THRESHOLD = Number(flag('--threshold', 0.3));
 const MIN_SHOT = Number(flag('--min-shot', 0.4));   // two detections closer than this are one cut
-const FIXED = Number(flag('--fixed', 2));           // fallback sampling period, seconds
 // STRIPS. The event sheet answers "what happens"; it cannot answer "HOW does it move", because a peak
 // is where change is MAXIMAL, not the shape of the move around it. Four frames chosen at four peaks of
 // a nine-second reference read as four states, and a reader then invents the motion between them. That
@@ -80,6 +81,37 @@ const SEAM_THRESHOLD = Number(flag('--seam-threshold', 0.3));
 const EDGE_LOW = Number(flag('--edge-low', 0.08));
 const EDGE_HIGH = Number(flag('--edge-high', 0.2));
 const SEAM_WINDOW = Number(flag('--seam-window', 0.25));  // seconds sampled each side of a seam, for flow direction
+
+// SECOND-OPINION JOINTS. A cut is a spike; a seam is a run of near-zero edge content. Neither sees a
+// joint of a THIRD shape: the frame keeps changing steadily for a while, too long and too even to be
+// either. Two more kinds, both read off the same DELTA series so they cost no extra decode:
+//   PAN         a large, SUSTAINED, roughly flat delta run: a whip or push, moving the whole frame at
+//               close to constant speed rather than spiking once (a cut) or settling (ordinary motion).
+//   CROSSFADE   a smaller, sustained, flat delta run: two pictures dissolving through each other reads
+//               as a steady, moderate difference for the length of the fade, never a single peak.
+// "Flat" is what tells either apart from an ordinary shot's motion, which bursts and settles. Defaults
+// are ponytail: checked, not tuned, against two real clips (madera: 1 pan at 10.89s mean 13.4, 4
+// crossfades mean 1.1-4.3; make-it-move: nothing above PAN_FLOOR, its rotate/cylinder motion is a
+// within-shot BUILD rather than a between-act joint, which this pass does not claim to catch). Upgrade
+// path: measure a corpus of whip pans and crossfades the way SEAM_THRESHOLD was, then tighten these.
+const PAN_FLOOR = Number(flag('--pan-floor', 6));         // delta this high, sustained, is not ordinary motion
+const PAN_MIN_RUN = Number(flag('--pan-min-run', 0.4));   // seconds a run must hold to count
+const CROSSFADE_LO = Number(flag('--crossfade-lo', 0.5)); // above STILL_FLOOR: something is actually changing
+const CROSSFADE_HI = Number(flag('--crossfade-hi', 5));   // below PAN_FLOOR: not a whip
+const CROSSFADE_MIN_RUN = Number(flag('--crossfade-min-run', 0.4));
+const FLAT_RATIO = Number(flag('--flat-ratio', 1.6));     // run's peak/mean must sit under this to count as "flat", not a burst
+
+// UNIQUE FRAMES. Two consecutive decoded frames that differ by less than this (same DELTA scale as
+// STILL_FLOOR, at 160x90) are the same picture: a held frame, or a re-encode of one. Far below
+// STILL_FLOOR (0.5, "the frame is basically still") on purpose: a still SHOT still carries frame-to-frame
+// grain and compression noise that DUP_FLOOR must not call motion. Checked against two real clips:
+// madera measures 782 decoded frames, 689 unique (88%); make-it-move measures 534 decoded, 440 unique
+// (82%). Neither is the owner's illustrative "about 724" for madera, and that is expected: "about" was
+// never a target to hit, DUP_FLOOR is a threshold with room to move, and this is what it measures today.
+const DUP_FLOOR = Number(flag('--dup-floor', 0.15));
+const PAGE_COLS = Number(flag('--page-cols', 4));
+const PAGE_ROWS = Number(flag('--page-rows', 5));
+const FRAME_TOLERANCE = Number(flag('--frame-tolerance', 3));  // decoded-frame-count vs container, in frames
 
 const die = (msg, code = 2) => { console.error(`✗ ${msg}`); process.exit(code); };
 
@@ -111,6 +143,27 @@ if (argv.includes('--selftest')) {
   eq(detectSeams([{ t: 0.02, v: 0 }, { t: 0.98, v: 0 }], 0.3, 1.0), [],
     'a run touching the film\'s own start or end is framing, not a joint');
   console.log('✓ study selftest: detectSeams');
+
+  // A pan/whip: a run of frames all far above PAN_FLOOR, flat (no single spike), long enough to be a
+  // sustained move rather than one loud frame of ordinary shot motion.
+  const panRun = [
+    { t: 0.9, v: 1.0 }, { t: 1.00, v: 8.0 }, { t: 1.05, v: 8.3 }, { t: 1.10, v: 7.8 },
+    { t: 1.15, v: 8.1 }, { t: 1.20, v: 8.0 }, { t: 1.25, v: 7.9 }, { t: 1.35, v: 8.1 }, { t: 1.55, v: 1.0 },
+  ];
+  eq(detectPans(panRun, 6, 0.3, 1.6).length, 1, 'a sustained flat run above the floor is one pan');
+  eq(detectPans(panRun, 6, 0.9, 1.6).length, 0, 'a run shorter than the minimum is not a pan');
+  eq(detectPans(panRun, 6, 0.3, 1.02).length, 0, 'a run whose peak beats its mean by more than flat-ratio is not flat, so not a pan');
+  console.log('✓ study selftest: detectPans');
+
+  // A crossfade: the same shape, one octave quieter (a dissolve changes the frame less than a whip).
+  const cfRun = [
+    { t: 0.9, v: 0.1 }, { t: 1.0, v: 1.2 }, { t: 1.1, v: 1.3 }, { t: 1.2, v: 1.25 },
+    { t: 1.3, v: 1.28 }, { t: 1.4, v: 1.22 }, { t: 1.5, v: 1.24 }, { t: 1.6, v: 0.1 },
+  ];
+  eq(detectCrossfades(cfRun, 0.5, 5, 0.3, 1.6).length, 1, 'a held mid-band flat run is one crossfade');
+  eq(detectCrossfades(cfRun, 0.5, 5, 0.8, 1.6).length, 0, 'shorter than the minimum is not a crossfade');
+  eq(detectCrossfades(panRun, 0.5, 5, 0.3, 1.6).length, 0, 'a run above the crossfade ceiling is not a crossfade (it is a pan)');
+  console.log('✓ study selftest: detectCrossfades');
   process.exit(0);
 }
 
@@ -291,6 +344,36 @@ export function detectSeams(edge, threshold, dur) {
   });
 }
 
+/** A run of DELTA frames inside [lo, hi], held for at least minRun seconds and FLAT (peak/mean under
+ *  flatRatio): a sustained, roughly constant-speed change, which is what a whip/push or a crossfade
+ *  looks like on this series and an ordinary shot's motion (bursts, then settles) does not. One shared
+ *  shape, exported so `--selftest` can assert both callers (detectPans, detectCrossfades) on synthetic
+ *  numbers without decoding a video. */
+function sustainedRun(delta, lo, hi, minRun, flatRatio) {
+  const runs = [];
+  let cur = null;
+  for (const p of delta) {
+    if (p.v >= lo && p.v <= hi) { if (cur) { cur.t1 = p.t; cur.pts.push(p); } else cur = { t0: p.t, t1: p.t, pts: [p] }; }
+    else { if (cur) runs.push(cur); cur = null; }
+  }
+  if (cur) runs.push(cur);
+  return runs.filter((r) => r.t1 - r.t0 >= minRun).map((r) => {
+    const vals = r.pts.map((p) => p.v);
+    const meanV = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const peak = Math.max(...vals);
+    return { t0: r.t0, t1: r.t1, t: (r.t0 + r.t1) / 2, mean: Number(meanV.toFixed(2)),
+      peak: Number(peak.toFixed(2)), flatness: Number((peak / meanV).toFixed(2)), frames: vals.length };
+  }).filter((r) => r.flatness <= flatRatio);
+}
+
+export function detectPans(delta, floor, minRun, flatRatio = FLAT_RATIO) {
+  return sustainedRun(delta, floor, Infinity, minRun, flatRatio);
+}
+
+export function detectCrossfades(delta, lo, hi, minRun, flatRatio = FLAT_RATIO) {
+  return sustainedRun(delta, lo, hi, minRun, flatRatio);
+}
+
 // ── the film as two per-frame series, in two decodes ─────────────────────────────────────────────
 //
 // WHY THIS REPLACED PER-SHOT SAMPLING. The old shape asked ffmpeg a question per shot per statistic,
@@ -332,6 +415,44 @@ const DELTA = frameSeries('scale=160:90,tblend=all_mode=difference,signalstats')
 // Scaled bigger than LUMA/DELTA (410x270, not 160x90): edge detail is finer-grained than luma, and a
 // letterform that survives 410x270 can vanish at 160x90. Cost is one more decode of the same film.
 const EDGE = frameSeries(`scale=410:270,edgedetect=low=${EDGE_LOW}:high=${EDGE_HIGH},signalstats`);
+
+// GROUND: the BORDER RING's mean luma, not the whole frame's. A centred UI card or hero word is bright
+// and sits over the middle of the frame; averaging the whole frame (as `luma`/LUMA below still does, for
+// good reason, see its own comment) lets that card drag a coloured wash into "light". madera's acts 3
+// and 5 are a measured instance: a blurred-photo wash (#a48f76, luma 136) and an olive wash (#8c7c68,
+// luma 175.6) both read "light" off the whole-frame mean, because a white window sits in the middle of
+// both. The border ring is the one region a centred card cannot reach, so it is what "what is the
+// backdrop doing" actually has to sample. Four thin crops (not one, since content can bleed to any one
+// edge) averaged per frame; each crop is far smaller than a full LUMA decode, so this costs little.
+function borderSeries() {
+  const CROPS = {
+    top: 'crop=iw:ih*0.12:0:0', bottom: 'crop=iw:ih*0.12:0:ih-ih*0.12',
+    left: 'crop=iw*0.12:ih:0:0', right: 'crop=iw*0.12:ih:iw-iw*0.12:0',
+  };
+  const series = Object.fromEntries(Object.entries(CROPS).map(([k, c]) => [k, frameSeries(`${c},scale=80:80,signalstats`)]));
+  // Index-aligned with LUMA, not time-matched: all five decodes read the same frame sequence off the
+  // same file, so frame i means the same thing in every one of them (the same assumption DELTA/LUMA
+  // already rely on elsewhere in this file).
+  return LUMA.map((f, i) => {
+    const vs = Object.values(series).map((s) => s[i]?.v).filter((v) => typeof v === 'number');
+    return { t: f.t, v: vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : f.v };
+  });
+}
+const GROUND = borderSeries();
+
+// EVERY FRAME DECODED, COUNTED, AND CHECKED AGAINST THE CONTAINER. LUMA is a full decode (no `fps=`
+// filter drops anything), so LUMA.length IS the decoded frame count. A mismatch beyond the margin this
+// file already knows (audio padding, VFR: see LAST_FRAME above) means something was skipped or invented,
+// and a study that cannot account for its own frame count has no business measuring what is in them.
+const DECODED_FRAMES = LUMA.length;
+const EXPECTED_FRAMES = nbFrames > 0 ? nbFrames : Math.round(duration * fps);
+if (Math.abs(DECODED_FRAMES - EXPECTED_FRAMES) > FRAME_TOLERANCE) {
+  die(`decoded ${DECODED_FRAMES} frames but the container states ${EXPECTED_FRAMES} `
+    + `(nb_frames=${nbFrames || 'unset'}, duration*fps=${(duration * fps).toFixed(1)}). `
+    + `That is more than the ${FRAME_TOLERANCE}-frame margin already known for audio-padding and `
+    + `VFR containers (see LAST_FRAME above), so this refuses rather than measure a film it cannot `
+    + `account for. Check with: ffprobe -select_streams v:0 -show_frames ${VIDEO} | grep -c pts_time`);
+}
 
 const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
 const between = (series, t0, t1) => series.filter((x) => x.t >= t0 && x.t < t1).map((x) => x.v);
@@ -455,6 +576,26 @@ function meanColorOf(t0, len) {
   return `#${hex(R)}${hex(G)}${hex(B)}`;
 }
 
+// The BORDER RING's own colour, per shot: the finer field beside `ground` (see GROUND/borderSeries
+// above for why the ring, not the whole frame). `ground` says light/mid/dark; `groundHex` says WHICH
+// light or dark, so an olive wash and a white paper backdrop that measure the same bucket do not read
+// as the same shot.
+function groundColorOf(t0, len) {
+  const CROPS = ['crop=iw:ih*0.12:0:0', 'crop=iw:ih*0.12:0:ih-ih*0.12', 'crop=iw*0.12:ih:0:0', 'crop=iw*0.12:ih:iw-iw*0.12:0'];
+  let R = 0, G = 0, B = 0, n = 0;
+  for (const crop of CROPS) {
+    const r = spawnSync('ffmpeg', ['-v', 'error', '-ss', Math.max(0, t0).toFixed(3), '-t', Math.max(0.2, len).toFixed(3),
+      '-i', VIDEO, '-vf', `${crop},scale=8:8`, '-pix_fmt', 'rgb24', '-f', 'rawvideo', '-'],
+      { encoding: 'buffer', maxBuffer: 1 << 24 });
+    const buf = r.stdout;
+    if (!buf || buf.length < 3) continue;
+    for (let i = 0; i + 2 < buf.length; i += 3) { R += buf[i]; G += buf[i + 1]; B += buf[i + 2]; n++; }
+  }
+  if (!n) return null;
+  const hex = (v) => Math.round(v / n).toString(16).padStart(2, '0');
+  return `#${hex(R)}${hex(G)}${hex(B)}`;
+}
+
 // AXIS AND DIRECTION FROM ONE COMPARISON. If the incoming side's centroid sits further right than the
 // outgoing side's did (cx grows), the frame is being entered from the right and left by the left, which
 // reads as "right-to-left" flow; the mirror holds on y ("bottom-to-top" when cy grows, content entering
@@ -491,10 +632,12 @@ const bucket = (luma) => {
 
 const measureShot = (s) => {
   const luma = mean(between(LUMA, s.t0, s.t1));
+  const groundLuma = mean(between(GROUND, s.t0, s.t1));
   const deltas = insideShot(s.t0, s.t1, s.i === 1);
   const delta = mean(deltas);
   const joint = jointSize(s.t0, s.i === 1);
   const tone = toneOf(s.t0, s.len);
+  const groundHex = groundColorOf(s.t0, s.len);
   // THE SHAPE, not just the average. A shot that holds for three seconds and then explodes has the same
   // mean as one that moves steadily, and they are different shots. `peak` is the loudest single frame
   // and `held` is the share of the shot below the still floor, so "3.0 average, peak 14, 60% held"
@@ -514,16 +657,23 @@ const measureShot = (s) => {
   });
   return {
     luma: luma == null ? null : Number(luma.toFixed(1)),
-    // GROUND IS THE WHOLE FRAME'S LIGHTNESS, not the backdrop's. Mean luma counts every pixel, so a
-    // bright card entering a dark frame raises it and the backdrop never moved. That is the right
-    // measurement for a study (a viewer sees the frame, not the bg window) and the wrong thing to
-    // compare against a scene's declared `bg` list, which is a mistake study-verify made first.
+    // GROUND IS THE BORDER RING'S LIGHTNESS, not the whole frame's, and that is a reversal from this
+    // field's first cut. Whole-frame `luma` (kept above, still useful: it is what a viewer's eye
+    // averages) is the WRONG read for "what is the backdrop doing", because a centred UI card or hero
+    // word drags it toward whatever that card is, not the wash behind it. Measured, not theorised:
+    // madera's shots 3 (a blurred-photo wash going blue/olive/brick-red, border luma 136) and 5 (an
+    // olive wash, border luma 175.6 vs a whole-frame 136 skewed light by a centred white window) both
+    // printed "light" off the old whole-frame read and neither is. `groundLuma`/`ground` now read the
+    // border ring `borderSeries()` builds above; `groundHex` (below) is the finer field beside the
+    // bucket, so an olive wash and a white paper ground that land in the same bucket do not read alike.
     //
     // A BUCKET EDGE IS A COIN TOSS AND MUST NOT PRINT AS A FACT. brew's accent window measured 128.4
     // against a light/mid edge at 128 and was called "light" with total confidence. Within 4 of an
     // edge the name carries a `?`, so a reader sees the uncertainty in the value rather than having to
     // know the thresholds. Fixed here, at the write site, rather than gated afterwards.
-    ground: luma == null ? null : bucket(luma),
+    groundLuma: groundLuma == null ? null : Number(groundLuma.toFixed(1)),
+    ground: groundLuma == null ? null : bucket(groundLuma),
+    groundHex,
     motion: delta == null ? null : Number(delta.toFixed(2)),
     peak: peak == null ? null : Number(peak.toFixed(2)),
     joint,
@@ -539,35 +689,55 @@ const measureShot = (s) => {
 const { peak, near, cuts } = detectCuts();
 const cutsDetected = cuts.length > 0;
 const seams = detectSeams(EDGE, SEAM_THRESHOLD, duration).map(measureSeam);
+// SECOND OPINION: a joint neither a spike (cut) nor a near-zero-edge run (seam) look like, because
+// nothing goes to zero and nothing spikes; the frame just keeps changing, evenly, for a while. See the
+// flag block above for why these numbers are ponytail defaults.
+const pans = detectPans(DELTA, PAN_FLOOR, PAN_MIN_RUN);
+const crossfades = detectCrossfades(DELTA, CROSSFADE_LO, CROSSFADE_HI, CROSSFADE_MIN_RUN);
 
-// TWO KINDS OF JOINT, ONE BOUNDARY LIST. A cut and a seam within MIN_SHOT of each other are the same
-// joint measured two ways; the cut wins because it is the more exact of the two (an exact scene-score
-// peak vs. a run of low-edge frames). Sorted by time so `shots` still walks the film in order.
-function mergeJoints(cutHits, seamHits) {
-  const items = [
-    ...cutHits.map((c) => ({ t: c.t, kind: 'cut', score: c.score })),
-    ...seamHits.map((s) => ({ t: s.t, kind: 'seam', seam: s })),
-  ].sort((a, b) => a.t - b.t);
+// FOUR KINDS OF JOINT, ONE BOUNDARY LIST. Two that land within MIN_SHOT of each other are the same
+// joint measured two ways, and the more EXACT measurement wins: a cut is an exact scene-score peak, a
+// seam a run of low-edge frames, a pan/crossfade a run of DELTA frames, in that order of precision. Not
+// "whichever sorted first": measured on this study's own ground-truth fixture, a fading title left a
+// few near-empty-edge frames right before a real hard cut, so a SEAM at 2.95s and the CUT it was
+// standing in front of at 3.00s landed 0.05s apart, and first-sorted-wins would have kept the seam and
+// silently thrown the cut away. The disagreement is still RECORDED either way, never silently dropped:
+// a reader can see that two measurements pointed at the same moment and named it differently.
+const JOINT_PRIORITY = { cut: 0, seam: 1, pan: 2, crossfade: 3 };
+function mergeJoints(kindLists) {
+  const items = kindLists.flatMap(({ kind, items: hits }) => hits.map((h) => ({ t: h.t, kind, evidence: h })))
+    .sort((a, b) => a.t - b.t);
   const out = [];
+  const conflicts = [];
   for (const it of items) {
     const prev = out[out.length - 1];
-    if (prev && it.t - prev.t < MIN_SHOT) continue;   // keep the earlier joint, drop the duplicate
+    if (prev && it.t - prev.t < MIN_SHOT) {
+      if (it.kind !== prev.kind)
+        conflicts.push({ t: Number(prev.t.toFixed(2)), kinds: [prev.kind, it.kind],
+          detail: `${prev.kind}@${prev.t.toFixed(2)}s vs ${it.kind}@${it.t.toFixed(2)}s, ${(it.t - prev.t).toFixed(2)}s apart` });
+      if (JOINT_PRIORITY[it.kind] < JOINT_PRIORITY[prev.kind]) out[out.length - 1] = it;
+      continue;   // one joint, the higher-priority kind's own time; the loser is still in `conflicts`
+    }
     out.push(it);
   }
-  return out;
+  return { joints: out, conflicts };
 }
-const joints = mergeJoints(cuts, seams);
+const { joints, conflicts } = mergeJoints([
+  { kind: 'cut', items: cuts },
+  { kind: 'seam', items: seams },
+  { kind: 'pan', items: pans },
+  { kind: 'crossfade', items: crossfades },
+]);
 const detected = joints.length > 0;
-// Fall back rather than ship a wrong cut list. A film built on dissolves AND has no empty-ground seams
-// scores nothing at any usable threshold, and a one-shot film correctly scores nothing at all.
-const bounds = detected
-  ? [0, ...joints.map((j) => j.t)]
-  : Array.from({ length: Math.max(2, Math.ceil(duration / FIXED)) }, (_, i) => (i * duration) / Math.max(2, Math.ceil(duration / FIXED)));
+// NO SILENT FALLBACK. A film with no detected joint is ONE SHOT, stated as such, never an invented
+// equal-slice sample dressed up as a cut list (the deleted behaviour: docs/MISTAKES.md and the OWNER
+// note that removed it). The reason is printed in `note` below and in study.md/the console report.
+const bounds = detected ? [0, ...joints.map((j) => j.t)] : [0];
 const shots = bounds.map((t0, i) => {
   const j = i === 0 ? null : joints[i - 1];
   return {
     i: i + 1, t0, t1: i + 1 < bounds.length ? bounds[i + 1] : duration,
-    score: j && j.kind === 'cut' ? j.score : null,
+    score: j && j.kind === 'cut' ? j.evidence.score : null,
     jointKind: j ? j.kind : null,
   };
 }).filter((s) => s.t1 - s.t0 > 0.05).map((s) => ({ ...s, len: s.t1 - s.t0 }));
@@ -618,6 +788,22 @@ function eventFrames(s, n) {
   return [inT, ...picked.sort((a, b) => a - b), outT];
 }
 
+// ffmpeg's hstack/vstack both refuse `inputs=1` ("Value 1.000000 ... out of range [2 - …]"), which a
+// single-cell row or single-row page hits for real once a film can measure as ONE shot (the deleted
+// equal-slice fallback used to guarantee at least two samples; it no longer does). One input is just a
+// copy, optionally padded, so this drops to that instead of asking hstack/vstack to do nothing.
+function stackImages(files, out, axis, padW, padH, what) {
+  if (files.length === 1) {
+    const pad = padW && padH ? `,pad=${padW}:${padH}:0:0:black` : '';
+    ffmpegOrDie(['-v', 'error', '-y', '-i', files[0], '-vf', `null${pad}`, '-frames:v', '1', out], out, what);
+    return;
+  }
+  const stack = axis === 'h' ? `hstack=inputs=${files.length}` : `vstack=inputs=${files.length}`;
+  const pad = padW && padH ? `,pad=${padW}:${padH}:0:0:black` : '';
+  ffmpegOrDie(['-v', 'error', '-y', ...files.flatMap((c) => ['-i', c]),
+    '-filter_complex', `${stack}${pad}`, '-frames:v', '1', out], out, what);
+}
+
 // ── contact sheet: one row per shot, frames chosen by EVENT (see above), not by position ─────────
 // Same shape as make beats, and for the same reason: the middle of a shot is the frame that hides the
 // entrance, which is exactly what a study is looking for (docs/CRAFT/REFERENCE-STUDY.md, MISTAKES #124).
@@ -642,14 +828,11 @@ for (const s of shots) {
   // PADDED TO A COMMON WIDTH, because a shot with no events gets fewer cells and `vstack` refuses rows
   // of different widths. The pad is on the right and is black, so a short row reads as what it is:
   // a shot where nothing happened worth looking at.
-  ffmpegOrDie(['-v', 'error', '-y', ...cells.flatMap((c) => ['-i', c]),
-    '-filter_complex', `hstack=inputs=${cells.length},pad=${tileW * CELLS}:${tileH}:0:0:black`,
-    '-frames:v', '1', row], row, `row ${s.i}`);
+  stackImages(cells, row, 'h', tileW * CELLS, tileH, `row ${s.i}`);
   rows.push(row);
 }
 const sheet = path.join(dir, 'sheet.png');
-ffmpegOrDie(['-v', 'error', '-y', ...rows.flatMap((r) => ['-i', r]),
-  '-filter_complex', `vstack=inputs=${rows.length}`, '-frames:v', '1', sheet], sheet, 'contact sheet');
+stackImages(rows, sheet, 'v', null, null, 'contact sheet');
 
 // ── motion strips: how a shot MOVES, contiguously ────────────────────────────────────────────────
 // One PNG per studied shot, sampled every 1/STRIP_FPS second across the whole shot and tiled in
@@ -671,24 +854,102 @@ if (STRIPS > 0) {
   }
 }
 
-// ── the study ─────────────────────────────────────────────────────────────────────────────────────
+// ── every unique frame, seen ──────────────────────────────────────────────────────────────────────
+// The event sheet above shows frames at delta PEAKS only, which is the whole film minus everything
+// between the peaks: exactly the gap this study was found to have. Full coverage is the default now,
+// not an opt-in (STRIPS above stays opt-in for the same reason it always was: it costs far more per
+// shot and answers a narrower question, HOW one busy shot moves, not WHAT the whole film shows).
+//
+// A frame is UNIQUE if it changed from the one before it by more than DUP_FLOOR (see the flag block):
+// a held frame or a re-encoded duplicate does not clear that bar, and stands for by the last frame that
+// did. `isUniqueFrame` reuses DELTA index-aligned with LUMA, the same convention `insideShot`/`jointSize`
+// already rely on elsewhere in this file (DELTA[i-1] is the delta arriving AT LUMA[i]).
 const fx = (n, d = 2) => Number(n.toFixed(d));
+const isUniqueFrame = (i) => i === 0 || !DELTA[i - 1] || DELTA[i - 1].v > DUP_FLOOR;
+const uniqueFrames = LUMA.map((f, i) => ({ i, t: f.t })).filter((f) => isUniqueFrame(f.i));
+
+const PAGE_CELLS = PAGE_COLS * PAGE_ROWS;
+const pagesDir = path.join(dir, 'pages');
+fs.mkdirSync(pagesDir, { recursive: true });
+const pageCellW = 480, pageCellH = Math.round((pageCellW * height) / width);
+const pagesMeta = [];
+for (let p = 0; p * PAGE_CELLS < uniqueFrames.length; p++) {
+  const chunk = uniqueFrames.slice(p * PAGE_CELLS, (p + 1) * PAGE_CELLS);
+  const cellFiles = chunk.map((fr, k) => {
+    const t = seekable(fr.t);
+    const out = path.join(pagesDir, `.cell_${p}_${k}.png`);
+    // Stamped with the real timestamp AND the frame number (item 2's own test: read the typed prompt in
+    // madera's first act off a page), and sized bigger than the event-sheet cells (480 vs 300) for it.
+    ffmpegOrDie(['-v', 'error', '-y', '-ss', t.toFixed(3), '-i', VIDEO, '-frames:v', '1', '-vf',
+      `scale=${pageCellW}:${pageCellH},drawtext=text='${drawtext(`f${fr.i} ${t.toFixed(2)}s`)}':x=8:y=8:fontsize=22:fontcolor=white:box=1:boxcolor=black@0.65`,
+      out], out, `page ${p + 1} cell ${k}`);
+    return out;
+  });
+  const rowFiles = [];
+  for (let r = 0; r * PAGE_COLS < cellFiles.length; r++) {
+    const rowCells = cellFiles.slice(r * PAGE_COLS, (r + 1) * PAGE_COLS);
+    const rowOut = path.join(pagesDir, `.row_${p}_${r}.png`);
+    // Padded to a full row width, same reason as the event sheet's rows: a short last row of a short
+    // last page still tiles.
+    stackImages(rowCells, rowOut, 'h', pageCellW * PAGE_COLS, pageCellH, `page ${p + 1} row ${r}`);
+    rowFiles.push(rowOut);
+  }
+  const pageOut = path.join(pagesDir, `page-${String(p + 1).padStart(3, '0')}.png`);
+  stackImages(rowFiles, pageOut, 'v', null, null, `page ${p + 1}`);
+  for (const f of [...cellFiles, ...rowFiles]) fs.rmSync(f, { force: true });
+  pagesMeta.push({
+    page: p + 1, file: path.relative(ROOT, pageOut), t0: fx(chunk[0].t), t1: fx(chunk[chunk.length - 1].t),
+    cells: chunk.map((fr, k) => ({ cell: k, frame: fr.i, t: fx(fr.t) })),
+  });
+}
+
+// Every HELD frame maps to the unique frame that stands for it (the last one before it that WAS unique),
+// and from there to the page/cell a checker can look up: the proof that nothing was skipped, not just a
+// claim of it.
+const uniqueLoc = {};
+for (const pg of pagesMeta) for (const c of pg.cells) uniqueLoc[c.frame] = { page: pg.page, cell: c.cell };
+const heldFrames = [];
+let lastUnique = 0;
+for (let i = 0; i < LUMA.length; i++) {
+  if (isUniqueFrame(i)) { lastUnique = i; continue; }
+  heldFrames.push({ frame: i, t: fx(LUMA[i].t), representative: lastUnique, ...uniqueLoc[lastUnique] });
+}
+fs.writeFileSync(path.join(dir, 'pages.json'), JSON.stringify({
+  name: NAME, totalFrames: DECODED_FRAMES, uniqueFrames: uniqueFrames.length,
+  pages: pagesMeta, held: heldFrames,
+}, null, 1) + '\n');
+
+// THE LEDGER THE AUTHOR MUST FILL. One line per page, `<fill…>` until someone writes what is on it;
+// study-check refuses to call a study complete while any line still says `<fill`.
+fs.writeFileSync(path.join(dir, 'pages.md'),
+  `# Pages · ${NAME}\n\n`
+  + `One line per page. The study is INCOMPLETE until every line says what happens on that page, not\n`
+  + `\`<fill\`. \`make study-check NAME=${NAME}\` names exactly which pages are still unfilled.\n\n`
+  + pagesMeta.map((pg) => `page ${String(pg.page).padStart(3, '0')} (${pg.t0}-${pg.t1}s): <fill: what happens on this page>`).join('\n')
+  + '\n');
+
+// ── the study ─────────────────────────────────────────────────────────────────────────────────────
 const study = {
   source: (() => { const r = path.relative(ROOT, path.resolve(VIDEO)); return r.startsWith('..') ? path.resolve(VIDEO) : r; })(),
   name: NAME,
   measured: {
     duration: fx(duration), width, height, fps: fx(fps, 3),
     aspect: `${width}:${height}`, hasAudio,
-    shotDetection: cutsDetected && seams.length ? 'scene-score+ground-seam'
-      : cutsDetected ? 'scene-score' : seams.length ? 'ground-seam' : 'fixed-sampling',
+    // No more 'fixed-sampling': that name belonged to the equal-slice fallback this study deleted.
+    // 'none' means exactly what it says, a film with no joint any detector here found.
+    shotDetection: [...new Set(joints.map((j) => j.kind))].join('+') || 'none',
     threshold: THRESHOLD, peakSceneScore: fx(peak, 3), nearMisses: near,
     seamThreshold: SEAM_THRESHOLD, seamsFound: seams.length,
+    panFloor: PAN_FLOOR, pansFound: pans.length,
+    crossfadeBand: [CROSSFADE_LO, CROSSFADE_HI], crossfadesFound: crossfades.length,
     shots: shots.length, medianShot: fx(median), cutsPerMinute: fx((shots.length / duration) * 60, 1),
   },
+  coverage: { frames: DECODED_FRAMES, unique: uniqueFrames.length, pages: pagesMeta.length, ledger: 'incomplete' },
   shots: shots.map((s) => ({ i: s.i, t0: fx(s.t0), t1: fx(s.t1), len: fx(s.len),
     score: s.score == null ? null : fx(s.score, 3), jointKind: s.jointKind,
-    luma: s.luma, ground: s.ground, motion: s.motion, alive: s.alive, accent: s.accent, saturation: s.saturation })),
-  seams,
+    luma: s.luma, ground: s.ground, groundLuma: s.groundLuma, groundHex: s.groundHex,
+    motion: s.motion, alive: s.alive, accent: s.accent, saturation: s.saturation })),
+  seams, pans, crossfades, conflicts,
 };
 fs.writeFileSync(path.join(dir, 'study.json'), JSON.stringify(study, null, 2) + '\n');
 
@@ -733,9 +994,13 @@ function writeGrammar(study, shots) {
     source: path.basename(study.source),
     hash: VIDEO_HASH,
     measured: study.measured,
+    // Sets on first study of this film, ledger left 'incomplete': `make study-check NAME=…` re-derives
+    // it from pages.md/pages.json/the shots below and writes 'complete' only when nothing is left unseen
+    // or unexplained. Merged forward like `threads`/`spectacle` so re-studying doesn't discard it.
+    coverage: study.coverage,
     shots: shots.map((s) => ({
       i: s.i, t0: Number(s.t0.toFixed(2)), len: Number(s.len.toFixed(2)),
-      ground: s.ground, luma: s.luma, accent: s.accent,
+      ground: s.ground, groundLuma: s.groundLuma, groundHex: s.groundHex, luma: s.luma, accent: s.accent,
       // THE SHAPE, not just the average. Two shots with the same mean are different shots if one holds
       // and then explodes. `peak` is the loudest single frame, `held` the share of frames below the
       // still floor, and `curve` is the change series itself at 4 samples a second: enough to see a
@@ -758,6 +1023,9 @@ function writeGrammar(study, shots) {
     // flow axis/direction and the ground colour on either side. This is what feeds a `recipes/*.json`
     // seam candidate, see the grammar → recipes write-up below.
     seams: study.seams,
+    // The second-opinion joints (pan/whip, crossfade) and any place two detectors disagreed about the
+    // same moment: reported, never silently resolved. See PAN_FLOOR/CROSSFADE_* above.
+    pans: study.pans, crossfades: study.crossfades, conflicts: study.conflicts,
     threads: (prior && prior.threads) ?? null,
     spectacle: (prior && prior.spectacle) ?? null,
     takeaway: (prior && prior.takeaway) ?? null,
@@ -768,10 +1036,16 @@ function writeGrammar(study, shots) {
 
 const rel = (p) => path.relative(ROOT, p);
 const note = detected
-  ? `Shot boundaries are MEASURED: ${cuts.length} hard cut(s) (scene score > ${THRESHOLD}, peak ${fx(peak, 3)})`
-    + ` and ${seams.length} empty-ground seam(s) (edge content <= ${SEAM_THRESHOLD}). Check them against the sheet.`
-  : `NO hard cuts (peak scene score ${fx(peak, 3)}, below ${THRESHOLD}) and NO empty-ground seams (nothing fell to <= ${SEAM_THRESHOLD}). `
-    + `The film dissolves, or it is one shot. Rows below are a FIXED ${FIXED}s sample, not a cut list.`;
+  ? `Shot boundaries are MEASURED: ${cuts.length} hard cut(s) (scene score > ${THRESHOLD}, peak ${fx(peak, 3)}), `
+    + `${seams.length} empty-ground seam(s) (edge content <= ${SEAM_THRESHOLD}), ${pans.length} sustained pan(s) `
+    + `(delta >= ${PAN_FLOOR}, flat, held >= ${PAN_MIN_RUN}s) and ${crossfades.length} crossfade(s) `
+    + `(delta ${CROSSFADE_LO}-${CROSSFADE_HI}, flat, held >= ${CROSSFADE_MIN_RUN}s). Check them against the sheet and the pages.`
+  // NO SILENT FALLBACK: no detected joint of any of the four kinds means ONE shot, stated as such, never
+  // an invented equal-slice sample. Read the pages (refs/${NAME}/pages/) before deciding this is really
+  // one shot: a joint of a fifth kind this study does not measure yet (a match cut, say) would land here too.
+  : `no joints found: cuts peaked at ${fx(peak, 3)} (below ${THRESHOLD}), edge content never fell below `
+    + `${SEAM_THRESHOLD}, no sustained pan or crossfade held long enough. The film is one shot, or its `
+    + `joints are of a kind this study does not measure: read the pages.`;
 
 const md = `# Study · ${NAME}
 
@@ -779,7 +1053,9 @@ Source: \`${study.source}\` · ${study.measured.duration}s · ${width}x${height}
 Sheet: \`${rel(sheet)}\`
 
 ${note}
-${shots.length} ${detected ? 'shots' : 'samples'} · median ${study.measured.medianShot}s · ${study.measured.cutsPerMinute} per minute.
+${shots.length} ${detected ? 'shots' : 'shot'} · median ${study.measured.medianShot}s · ${study.measured.cutsPerMinute} per minute.
+Coverage: ${study.coverage.frames} frames decoded, ${study.coverage.unique} unique, ${study.coverage.pages} page(s) → \`${rel(pagesDir)}/\`.
+Fill \`${rel(path.join(dir, 'pages.md'))}\` (one line per page) before this study counts as complete: \`make study-check NAME=${NAME}\`.
 
 > You are not copying this film's look. You are extracting its GRAMMAR: how long a shot holds, what
 > makes the next one arrive, what carries across. Throw away its UI, its copy and its colours. Never
@@ -819,7 +1095,39 @@ it closes: which way the content was leaving, and which way it arrives.
 |---|-----|--------|------|-----------|----------------|----------------|
 ${seams.map((s) => `| ${s.t}s | ${s.gap}s | ${s.frames} | ${s.axis ?? '?'} | ${s.direction ?? '?'} | ${s.groundBefore ?? '?'} | ${s.groundAfter ?? '?'} |`).join('\n')}
 
-` : ''}## Then cut it
+` : ''}${pans.length ? `## Pans / pushes
+
+Sustained, flat, elevated delta (>= ${PAN_FLOOR}, held >= ${PAN_MIN_RUN}s): the whole frame moving at close
+to constant speed, a whip or a push, not a cut and not ordinary shot motion.
+
+| t | mean | peak | flatness | frames |
+|---|------|------|----------|--------|
+${pans.map((p) => `| ${p.t}s | ${p.mean} | ${p.peak} | ${p.flatness} | ${p.frames} |`).join('\n')}
+
+` : ''}${crossfades.length ? `## Crossfades
+
+Sustained, flat, moderate delta (${CROSSFADE_LO}-${CROSSFADE_HI}, held >= ${CROSSFADE_MIN_RUN}s): a slow dissolve, not a cut.
+
+| t | mean | peak | flatness | frames |
+|---|------|------|----------|--------|
+${crossfades.map((c) => `| ${c.t}s | ${c.mean} | ${c.peak} | ${c.flatness} | ${c.frames} |`).join('\n')}
+
+` : ''}${conflicts.length ? `## Disagreements
+
+Two detectors both found a joint within ${MIN_SHOT}s of each other and named it differently. Reported,
+never silently resolved: read the pages around each one and decide which reading is right.
+
+${conflicts.map((c) => `- ${c.detail}`).join('\n')}
+
+` : ''}## Pages: every unique frame, in order
+
+\`${rel(pagesDir)}/page-NNN.png\`, ${study.coverage.pages} page(s) covering all ${study.coverage.unique} unique
+frames (of ${study.coverage.frames} decoded; the rest are held/duplicate and stand in for by the frame
+before them, see \`${rel(path.join(dir, 'pages.json'))}\`). Fill \`${rel(path.join(dir, 'pages.md'))}\`, one
+line per page, before writing the four judgement columns below: they should come FROM those lines, not
+from the peaks-only sheet above.
+
+## Then cut it
 
 The method that produced this table cut a 31s film to 15s by REMOVING shots, never by speeding them
 up. One event per screen. Mark each row above KEEP or CUT before you write a storyboard.
@@ -846,7 +1154,8 @@ It is a CANDIDATE, not a promotion: a person still moves it into \`recipes/recip
 fs.writeFileSync(path.join(dir, 'study.md'), md);
 
 // ── report ────────────────────────────────────────────────────────────────────────────────────────
-console.log(`✓ ${shots.length} ${detected ? 'shots' : 'fixed samples'} · ${study.measured.duration}s · ${width}x${height} · ${study.measured.fps}fps → ${rel(dir)}/`);
+console.log(`✓ ${shots.length} ${detected ? 'shots' : 'shot'} · ${study.measured.duration}s · ${width}x${height} · ${study.measured.fps}fps → ${rel(dir)}/`);
+console.log(`  ${DECODED_FRAMES} frames decoded (container states ${EXPECTED_FRAMES}), ${uniqueFrames.length} unique, ${pagesMeta.length} page(s).`);
 if (!cutsDetected) {
   console.log(`  ⚠ no hard cuts: peak scene score ${fx(peak, 3)} < ${THRESHOLD}. Dissolves, a no-cut film of empty-ground seams, or a single shot.`);
   console.log(`    Lower it with --threshold 0.15 if you believe there are cuts, then READ the sheet before trusting the list.`);
@@ -858,10 +1167,23 @@ if (seams.length) {
   console.log(`  ${seams.length} empty-ground seam(s) (edge content <= ${SEAM_THRESHOLD}):`);
   for (const s of seams) console.log(`    ${s.t}s  gap ${s.gap}s (${s.frames}f)  axis ${s.axis ?? '?'} ${s.direction ?? '?'}  ${s.groundBefore ?? '?'} -> ${s.groundAfter ?? '?'}`);
 }
+if (pans.length) {
+  console.log(`  ${pans.length} sustained pan(s) (delta >= ${PAN_FLOOR}, flat, held >= ${PAN_MIN_RUN}s):`);
+  for (const p of pans) console.log(`    ${p.t}s  mean ${p.mean} peak ${p.peak} flatness ${p.flatness} (${p.frames}f)`);
+}
+if (crossfades.length) {
+  console.log(`  ${crossfades.length} crossfade(s) (delta ${CROSSFADE_LO}-${CROSSFADE_HI}, flat, held >= ${CROSSFADE_MIN_RUN}s):`);
+  for (const c of crossfades) console.log(`    ${c.t}s  mean ${c.mean} peak ${c.peak} flatness ${c.flatness} (${c.frames}f)`);
+}
+if (conflicts.length) {
+  console.log(`  ⚠ ${conflicts.length} disagreement(s) between detectors, not silently resolved:`);
+  for (const c of conflicts) console.log(`    ${c.detail}`);
+}
 for (const s of shots) {
   console.log(`  ${String(s.i).padStart(2, ' ')}. ${fx(s.t0).toFixed(2)}s  ${fx(s.len).toFixed(2)}s${s.score == null ? '' : `  (score ${fx(s.score, 3)})`}${s.jointKind ? `  [${s.jointKind}]` : ''}`);
 }
 console.log(`\n  median shot ${study.measured.medianShot}s · ${study.measured.cutsPerMinute}/min${hasAudio ? '' : ' · NO audio track: the sound column is empty by fact, not by omission'}`);
 const g = writeGrammar(study, shots);
 console.log(`  grammar → ${rel(g.file)}  (${g.filled}/${g.total} shots carry an authored reading; it is COMMITTED and outlives refs/)`);
+console.log(`  pages → ${rel(pagesDir)}/  (fill ${rel(path.join(dir, 'pages.md'))}, then \`make study-check NAME=${NAME}\`)`);
 console.log(`  Read ${rel(sheet)}, fill the four authored columns in ${rel(dir)}/study.md, then storyboard and write recipe candidates.`);

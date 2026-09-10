@@ -240,7 +240,7 @@ function applyNoStudy({ a, fm, name, out }) {
   L.push(`# ${name || 'untitled'}: storyboard SKELETON (from the brief, no site study)`);
   L.push('');
   L.push('> The brief fixed the shape: arc, duration, beat count and what holds it across the cuts. Every');
-  L.push('> `<fill:>` below is a decision a person still owes. Blueprints: `make blueprints`.');
+  L.push('> `<fill:>` below is a decision a person still owes. Motion: `make arsenal Q="…"`.');
   L.push('');
   for (let i = 0; i < n; i++) {
     const role = roles[Math.min(i, roles.length - 1)];

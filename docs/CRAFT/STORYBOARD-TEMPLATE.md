@@ -300,7 +300,7 @@ not: "the defaults this film refuses, in your own words"
   line of scene JSON. `storyboard-check` grades the plan against itself; the animatic grades it
   against a clock.
 
-  Field reference: docs/CRAFT/FRAME-SPEC.md. Effects to name: docs/EFFECTS.md. Shot shapes: make blueprints.
+  Field reference: docs/CRAFT/FRAME-SPEC.md. Effects to name: docs/EFFECTS.md. Shot shapes: make arsenal Q="…".
 -->
 
 ## Beat 1: Hook (0s-6s)
