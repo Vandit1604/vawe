@@ -142,7 +142,7 @@ await page.screenshot({ path: out, clip: { x: 0, y: 0, width: 1920, height: 1080
         const ownText = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent.trim()).join(' ').trim();
         if (!isImg && !ownText) continue;
         out.push({ tag: el.tagName.toLowerCase(), text: isImg ? (el.getAttribute('alt') || el.getAttribute('src') || 'img') : ownText,
-          x: r.left, y: r.top, w: r.width, h: r.height });
+          x: r.left, y: r.top, w: r.width, h: r.height, fontPx: isImg ? null : parseFloat(cs.fontSize) });
       }
       return out;
     });

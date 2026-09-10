@@ -1,7 +1,7 @@
 // harness/lib/stagekit.test.mjs: the kit-identity check actually catches drift.
 //   node harness/lib/stagekit.test.mjs
 import assert from 'node:assert/strict';
-import { buildKit, kitCheck, extractKitBlock } from './stagekit.mjs';
+import { buildKit, kitCheck, extractKitBlock, MIN_VIDEO_TEXT_PX } from './stagekit.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
 import fs from 'node:fs';
@@ -48,3 +48,15 @@ assert.ok(extractKitBlock(block), 'extractKitBlock must find the block it just b
 assert.equal(extractKitBlock('<div>nothing</div>'), null);
 
 console.log('✓ stagekit.test.mjs: kit-identity check passes identical blocks, catches drift, catches a missing block');
+
+// every text role the kit writes is readable in a moving frame: a theme whose caption scale sits under the
+// floor (vawe's is 24) still gets a kit that passes make screen's smallest-text check
+{
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+  const vawe = JSON.parse(fs.readFileSync(path.join(root, 'themes/vawe.json'), 'utf8'));
+  const { css } = buildKit(vawe, resolveLook, isLightBg);
+  for (const role of ['kit-caption', 'kit-eyebrow']) {
+    const px = +(new RegExp(`\\.${role}\\{font:\\d+ (\\d+)px`).exec(css) || [])[1];
+    assert.ok(px >= MIN_VIDEO_TEXT_PX, `.${role} is ${px}px, under the ${MIN_VIDEO_TEXT_PX}px floor`);
+  }
+}

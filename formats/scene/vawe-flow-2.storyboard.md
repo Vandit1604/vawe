@@ -1,4 +1,5 @@
 ---
+approved: 2026-09-10
 message: "vawe lives in your terminal: type a request, and it renders itself."
 audience: "Founders and designers who need a launch film and have no motion designer."
 reference: "example-madera"
@@ -51,6 +52,7 @@ craft:
 - borrows: "example-madera's window-focus-rack -> vawe-flow-2's terminal wide-to-prompt travel"
 - picture: the terminal window itself: real prior commands, real success/error output panels, an empty prompt bar waiting at the bottom
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html KIND=editor REF=example-madera ACT=1
+- fragment: formats/scene/vawe-flow-2.terminal.html
 
 ## Beat 2: Typed prompt (2.2s-3.6s)
 - type: product_surface
@@ -69,6 +71,7 @@ craft:
 - weight: quiet
 - picture: the prompt bar mid-type, several words already settled to ink, the current word still in its accent colour
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
+- fragment: formats/scene/vawe-flow-2.terminal.html
 
 ## Beat 3: Send and render (3.6s-4.54s)
 - type: product_surface
@@ -87,6 +90,7 @@ craft:
 - weight: quiet
 - picture: the return glyph under the cursor, the output line pulsing green
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
+- fragment: formats/scene/vawe-flow-2.terminal.html
 
 ## Beat 4: Terminal chains to timeline (4.54s-6s)
 - type: product_surface
@@ -106,6 +110,7 @@ craft:
 - borrows: "example-madera's flow-seam (axis x, right-entry) -> vawe-flow-2's flow-seam (axis x, left-entry, direction named by the owner)"
 - picture: an almost-empty timeline: one dark track, one clip block, most of the frame still the terminal's own ink
 - design: make screen F=formats/scene/vawe-flow-2.timeline.html KIND=dashboard REF=example-madera ACT=2
+- fragment: formats/scene/vawe-flow-2.timeline.html
 
 ## Beat 5: Timeline assembles from the left (6s-8.12s)
 - type: product_surface
@@ -126,6 +131,7 @@ craft:
 - weight: strong
 - picture: the fully assembled timeline, several tracks deep, real clip thumbnails and labels
 - design: make screen F=formats/scene/vawe-flow-2.timeline.html REF=example-madera ACT=3
+- fragment: formats/scene/vawe-flow-2.timeline.html
 
 ## Beat 6: Your films (8.12s-11.08s)
 - type: payoff_withheld
@@ -146,6 +152,7 @@ craft:
 - borrows: "example-madera's card-ground-retint (a swipe deck picking between options) -> vawe-flow-2's films-ring ground (playing, not picking)"
 - picture: a real vawe film mid-play inside the ring, its own colour washed across the ground behind it
 - design: make screen F=formats/scene/vawe-flow-2.films.html KIND=grid REF=example-madera ACT=5
+- fragment: formats/scene/vawe-flow-2.films.html
 
 <!-- NOTE on the cut pick/cards act: example-madera's own swipe-card act (its original act 3) is not
      reproduced here as a literal "choose between three options" moment. The owner's brief never asks
