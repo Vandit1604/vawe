@@ -640,6 +640,17 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | `slide-right` | enters from its right and, with `out`, keeps going left · the mirror of slide-left |
 | `widen` | scales out from its left edge. A row, a rule, anything that should fill rather than appear |
 
+## Path curves (SVG "d" generators)  `[per-layer]`
+
+A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: flies the beat's own layer along the curve, MotionPathPlugin), or `modifiers: [{ alongPath: { curve } }]` (core/fx/along-path.js) to set a line of type on it instead of moving a whole layer.
+
+| name | what / when |
+|---|---|
+| `arc` | a shallow rise-and-fall, peak in the middle |
+| `dip` | a shallow sag-and-rise, trough in the middle |
+| `ramp` | a straight diagonal, top-left to bottom-right |
+| `wave` | an S-curve, one full up-down cycle |
+
 ## Per-layer modifiers  `[per-layer]`
 
 `"modifiers"` on a layer, applied in array order after every motion track. A physical treatment rather than an entrance: a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow. NOT `"fx"`, which is the named-GSAP-effect slot and refuses an entry with no name.
@@ -1157,4 +1168,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_721 effects across 58 families. Regenerate: `make effects`._
+_725 effects across 59 families. Regenerate: `make effects`._

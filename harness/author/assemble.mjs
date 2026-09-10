@@ -21,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMoveEntries, moveErrors, moveKeys } from '../lib/contract.mjs';
+import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMoveEntries, moveErrors, moveKeys, pathMotion, transitionInErrors, resolvedTransitionIn } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
@@ -82,6 +82,12 @@ const moveErrs = moveErrors(beats);
 if (moveErrs.length) {
   console.error(`assemble: a move: does not parse (\`make arsenal SHAPE=<name>\` lists the shapes):`);
   for (const e of moveErrs) console.error(`  ✗ ${e}`);
+  process.exit(1);
+}
+const transitionInErrs = transitionInErrors(beats);
+if (transitionInErrs.length) {
+  console.error(`assemble: a transition_in does not name a real transition (\`make transitions\` for the catalog):`);
+  for (const e of transitionInErrs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }
 
@@ -179,12 +185,14 @@ const htmlLayers = runs.map(([i, j]) => {
   // single field (`motion`, `idle`), and there is no rule for which wins, so both are refused rather than
   // one silently picked. Any number of PART entries is fine, the same as `motion:`.
   const moveDecls = [];
+  const pathDecls = [];
   const holdDecls = [];
   const movePartsByBeat = new Map();
   for (let k = i; k <= j; k++) {
     for (const e of parseMoveEntries(beats[k].move)) {
       if (e.error) continue; // already refused above via moveErrors
       if (e.scope === 'layer') moveDecls.push({ k, mv: e });
+      else if (e.scope === 'path') pathDecls.push({ k, mv: e });
       else if (e.scope === 'hold') holdDecls.push({ k, name: e.name });
       else if (e.scope === 'part') {
         if (!movePartsByBeat.has(k)) movePartsByBeat.set(k, []);
@@ -195,6 +203,8 @@ const htmlLayers = runs.map(([i, j]) => {
   let moveTrack;
   if (moveDecls.length > 1) {
     moveConflicts.push(`scene${i + 1}: beats ${moveDecls.map((d) => d.k + 1).join(' and ')} each declare a move:, but only one move: per shared-fragment run is supported. Pick one.`);
+  } else if (moveDecls.length === 1 && pathDecls.length) {
+    moveConflicts.push(`scene${i + 1}: beat ${moveDecls[0].k + 1} declares a LAYER move: and beat ${pathDecls[0].k + 1} declares a PATH move:, both of which key this run's own transform. Pick one.`);
   } else if (moveDecls.length === 1) {
     if (motionKeys) {
       moveConflicts.push(`scene${i + 1} (beat ${moveDecls[0].k + 1}) declares move:, but this run's fragment placement already changes across beats (a hand-keyed position track); combining move: with a placement change in the same run is not supported yet.`);
@@ -205,6 +215,23 @@ const htmlLayers = runs.map(([i, j]) => {
       const raw = moveKeys(mv, beatDur);
       moveTrack = offset ? raw.map((kf) => ({ ...kf, t: +(kf.t + offset).toFixed(3) })) : raw;
       movesBuilt.push(`scene${i + 1} (beat ${k + 1}, ${mv.shape}:${mv.band})`);
+    }
+  }
+
+  // PATH: scope 'path' flies this run's own layer along a named curve (MotionPathPlugin), the
+  // `layers[].motionPath` field, never `motion[]`: same "spans the whole beat, never negotiable"
+  // duration rule as LAYER scope, for the same reason (docs/MISTAKES.md #610).
+  let pathTrack;
+  if (pathDecls.length > 1) {
+    moveConflicts.push(`scene${i + 1}: beats ${pathDecls.map((d) => d.k + 1).join(' and ')} each declare a move: path curve, but only one per shared-fragment run is supported. Pick one.`);
+  } else if (pathDecls.length === 1) {
+    if (motionKeys) {
+      moveConflicts.push(`scene${i + 1} (beat ${pathDecls[0].k + 1}) declares move:, but this run's fragment placement already changes across beats (a hand-keyed position track); combining move: with a placement change in the same run is not supported yet.`);
+    } else {
+      const { k, mv } = pathDecls[0];
+      const beatDur = +(beats[k].end - beats[k].start).toFixed(3);
+      pathTrack = pathMotion(mv, beatDur);
+      movesBuilt.push(`scene${i + 1} (beat ${k + 1}, path ${mv.curve}:${mv.band})`);
     }
   }
 
@@ -304,6 +331,7 @@ const htmlLayers = runs.map(([i, j]) => {
     id: `scene${i + 1}`, type: 'html', src: path.relative(ROOT, fragPath), start: shiftedStart[i], duration, track: 1,
     x: box.x, y: box.y, w: box.w, h: box.h,
     ...(motionKeys || moveTrack ? { motion: motionKeys || moveTrack } : {}),
+    ...(pathTrack ? { motionPath: pathTrack } : {}),
     ...(merged ? { acrossBeats: true } : {}),
     ...(parts.length ? { parts } : {}),
     ...(idle ? { idle } : {}),
@@ -428,10 +456,20 @@ const bg = rotation
 // cut-only family through as the cut it is, rather than making every fast theme unassemblable.
 // The boundary lands at the SHIFTED time for the same reason the backdrop does: the cut has to arrive
 // where the new beat's content arrives, not where a flat build would have put it.
+// A beat's own `transition_in` (validated above, transitionInErrors) is the author's opinion about the
+// cut INTO it, and wins over the theme default for that one boundary; a beat naming none keeps the
+// theme's `cutFx`, exactly as before this field was built (byte-identical for every film that never
+// writes it).
 const cutFx = look.cuts.default || 'fade';
 let cutMech;
 try { cutMech = boundaryMechanism(cutFx, 'seam'); } catch { cutMech = undefined; }
-const transitions = beats.slice(1).map((b, i) => ({ at: shiftedStart[i + 1], fx: cutFx, ...(cutMech ? { mech: cutMech } : {}) }));
+const transitions = beats.slice(1).map((b, i) => {
+  const named = resolvedTransitionIn(b);
+  if (!named) return { at: shiftedStart[i + 1], fx: cutFx, ...(cutMech ? { mech: cutMech } : {}) };
+  let mech;
+  try { mech = boundaryMechanism(named.fx, 'seam'); } catch { mech = undefined; }
+  return { at: shiftedStart[i + 1], fx: named.fx, ...(mech ? { mech } : {}) };
+});
 
 // ---- ownership: what this pass generated, against what the last one (or a hand edit) left behind ----
 const newDuration = shiftedEnd[shiftedEnd.length - 1];

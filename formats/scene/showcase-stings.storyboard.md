@@ -27,7 +27,6 @@ This video tells an author that a sting is punctuation, and punctuation lands on
 - style: quiet dot grid, the claim in two weights, the pulse the only saturated thing
 - rest: the playhead keeps walking through the hold
 - why: name the problem before the film performs the answer, so the sting has something to punctuate
-- emotion: anticipation
 - duration: 2.9s
 - transition_in: cut
 
@@ -44,7 +43,6 @@ This video tells an author that a sting is punctuation, and punctuation lands on
 - style: the one loud window in the film, the only dark frame, spent here
 - rest: none. The word holds while the ground comes back up
 - why: the moment IS the argument, so it is shown as a moment and not described as one
-- emotion: impact
 - duration: 2.45s
 - transition_in: punch
 
@@ -61,6 +59,5 @@ This video tells an author that a sting is punctuation, and punctuation lands on
 - style: the ground stays light, the second mark is deliberately weaker than the first
 - rest: the playhead runs out to the end of the grid
 - why: the same texture at half the dose proves the sting is a dial, not a decoration
-- emotion: settled
 - duration: 2.65s
 - transition_in: zoom
