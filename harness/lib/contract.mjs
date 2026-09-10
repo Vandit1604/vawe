@@ -39,7 +39,8 @@
 import { PLACEMENT } from '../../core/layout/safe.js';
 import { nearMisses } from '../../core/registry/registry.js';
 import { PART_NAMES } from '../../core/motion/parts.js';
-import { SHAPES } from '../author/track.mjs';
+import { SHAPES } from '../../core/motion/shapes.js';
+import { IDLE_NAMES } from '../../core/engine/idle.js';
 
 const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*((?:\/[a-z]+\s*[:=]\s*-?[\d.]+\s*)*)$/i;
 const POSE_TOKEN_RE = /\/([a-z]+)\s*[:=]\s*(-?[\d.]+)/gi;
@@ -156,58 +157,104 @@ export function fragmentErrors(beats) {
   return errs;
 }
 
-// ── THE MOTION PLAN: what moves in a beat, beyond the one continuous object above ──────────────────
+// ── THE MOVE: one grammar, three scopes, read from the ENTRY, not the field name ────────────────────
 //
-// object_in/object_out say where the ONE thing that survives every cut is. Everything ELSE in a beat
-// (a headline that pushes in, a card that pops) had no contract at all: a fragment agent invented its
-// own entrances, `assemble.mjs` never built them, and a storyboard that said "the headline slides in
-// hard" produced a film where nothing moved, because nothing read that sentence.
+// Three fields used to compete for one job, split by DURATION instead of by what the author was
+// actually deciding: `motion:` always built a `parts[]` entrance, `move:` always built a track on the
+// beat's own layer, and `rest:` (what should keep a hold alive) was parsed by storyboard-parse.mjs and
+// built by nobody. 19 storyboards write `rest:` and none of it ever reached a render.
 //
-// `motion:` on a beat is one or more entries, `;`-separated: `<selector>@<kind>:<inBand>[/<outBand>]`.
-//   - <selector>  a CSS selector into the fragment's own markup (`[data-part="headline"]`), the SAME
-//     selector `parts[].select` already takes (core/motion/parts.js). Naming it here, before the
-//     fragment is written, is what scenes.mjs's brief now hands the fragment author: give this element
-//     that attribute or that class, or the motion plan has nothing to reach.
-//   - <kind>      one of the engine's own named part entrances (growUp, fadeUp, slide-left, …,
-//     PART_NAMES below): a placement name for MOTION the same way `<placement>` above is one for
-//     POSITION, checkable by a person who knows the vocabulary rather than by reading a bezier.
-//   - <inBand>/<outBand>  one of the four named speed bands already in this repo's doctrine
-//     (docs/RULES/speed-bands.md: energy · professional · gravity · cinematic), reused rather than
-//     invented so a beat's motion plan speaks the same words a duration decision already speaks.
-//     <outBand> defaults to <inBand> when only one is given. THIS is the boundary velocity: a fast
-//     (short) exit band arrives at the next cut moving quickly, which is exactly what the content-aware
-//     cut (core/timeline/velocity-cut.js) is hunting for, and a named band is something a plan can be
-//     reviewed against without anyone doing the px/s arithmetic by hand.
+// SCOPE is the real axis, and an entry already says which one it means without a field name's help:
+//   `<selector>@<kind>:<band>[/<outBand>]`   an `@` names a CSS selector INTO THE FRAGMENT: scope PART,
+//                                             a `parts[]` entrance on that one element (core/motion/parts.js)
+//   `hold:<idle>`                            scope HOLD, the beat's own layer keeps living through the
+//                                             hold: `idle: "<idle>"` (core/engine/idle.js), never a
+//                                             second idle mechanism
+//   `<shape>:<band>`                         anything else: scope LAYER, a hand-keyed track on the
+//                                             beat's own layer, spanning the whole beat
+// (band, above, is one of the four named speed bands in this repo's doctrine: energy · professional ·
+// gravity · cinematic, docs/RULES/speed-bands.md.)
+//
+// ONE PARSER for all three, `parseMoveEntry` below, because the PART form is not new grammar: it is the
+// exact string `motion:` always accepted (`<selector>@<kind>:<band>`), so `motion:` and `move:` writing
+// a part-scope entry are the same sentence, not two. `parseMotionEntry`/`parseMotion` are now aliases of
+// `parseMoveEntry`/`parseMoveEntries` (a `motion:` entry always contains `@`, so it is always scope
+// PART), kept under their old names because `motion:` stays a legal field: see the compat note below
+// `moveErrors`.
+//
+// `rest:` IS NOT MIGRATED, on purpose. Its 100+ existing lines are free-text narration ("the arm never
+// stops, it's a metronome"; "the depth rule keeps falling"), almost all describing motion a fragment or
+// a `move:`/`motion:` entry ALREADY builds, not an ambient idle. Auto-converting prose into `hold:`
+// directives would be a guess wearing a migration's clothes, and a wrong guess here changes a render
+// ("no rendered film may change" is the one invariant this whole change is not allowed to cost). So
+// `rest:` keeps parsing exactly as before (storyboard-parse.mjs), stays documentary and unbuilt, and any
+// of its 19 storyboards can adopt the one line that now actually reaches the engine, `move: hold:<idle>`,
+// by hand, when an author decides that beat's hold should really breathe or drift.
 export const SPEED_BAND = { energy: 0.22, professional: 0.4, gravity: 0.65, cinematic: 1.2 };
 
-const MOTION_RE = /^\s*([^@]+?)\s*@\s*([a-z-]+)\s*:\s*([a-z]+)(?:\s*\/\s*([a-z]+))?\s*$/i;
+const PART_RE = /^\s*([^@]+?)\s*@\s*([a-z-]+)\s*:\s*([a-z]+)(?:\s*\/\s*([a-z]+))?\s*$/i;
+const HOLD_RE = /^\s*hold\s*:\s*([a-z]+)\s*$/i;
+const LAYER_RE = /^\s*([a-z-]+)\s*:\s*([a-z]+)\s*$/i;
 
-/** parseMotionEntry("[data-part=\"headline\"]@slide-left:energy/cinematic") → {selector,kind,inBand,outBand} | {error} */
-export function parseMotionEntry(raw) {
+/**
+ * parseMoveEntry(raw) → one unified entry, scope read off the string itself:
+ *   {scope:'part', selector,kind,inBand,outBand} | {scope:'hold', name} | {scope:'layer', shape,band}
+ *   | {error}
+ */
+export function parseMoveEntry(raw) {
   const s = String(raw).trim();
-  const m = MOTION_RE.exec(s);
-  if (!m) return { error: `"${s}" is not "<selector>@<kind>:<band>[/<outBand>]" (e.g. "[data-part=\\"headline\\"]@slide-left:energy")` };
-  const [, selector, kind, inBand, outBandRaw] = m;
-  if (!PART_NAMES.includes(kind)) {
-    const near = nearMisses(kind, PART_NAMES);
-    return { error: `"${kind}" is not a known part entrance${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${PART_NAMES.join(', ')}` };
+  if (s.includes('@')) {
+    const m = PART_RE.exec(s);
+    if (!m) return { error: `"${s}" is not "<selector>@<kind>:<band>[/<outBand>]" (e.g. "[data-part=\\"headline\\"]@slide-left:energy")` };
+    const [, selector, kind, inBand, outBandRaw] = m;
+    if (!PART_NAMES.includes(kind)) {
+      const near = nearMisses(kind, PART_NAMES);
+      return { error: `"${kind}" is not a known part entrance${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${PART_NAMES.join(', ')}` };
+    }
+    if (!SPEED_BAND[inBand]) {
+      const near = nearMisses(inBand, Object.keys(SPEED_BAND));
+      return { error: `"${inBand}" is not a speed band${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SPEED_BAND).join(', ')}` };
+    }
+    const outBand = outBandRaw || inBand;
+    if (!SPEED_BAND[outBand]) return { error: `"${outBand}" is not a speed band. Known: ${Object.keys(SPEED_BAND).join(', ')}` };
+    return { scope: 'part', selector: selector.trim(), kind, inBand, outBand };
   }
-  if (!SPEED_BAND[inBand]) {
-    const near = nearMisses(inBand, Object.keys(SPEED_BAND));
-    return { error: `"${inBand}" is not a speed band${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SPEED_BAND).join(', ')}` };
+  const holdM = HOLD_RE.exec(s);
+  if (holdM) {
+    const name = holdM[1].toLowerCase();
+    if (!IDLE_NAMES.includes(name)) {
+      const near = nearMisses(name, IDLE_NAMES);
+      return { error: `"${name}" is not a known idle${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${IDLE_NAMES.join(', ')}` };
+    }
+    return { scope: 'hold', name };
   }
-  const outBand = outBandRaw || inBand;
-  if (!SPEED_BAND[outBand]) return { error: `"${outBand}" is not a speed band. Known: ${Object.keys(SPEED_BAND).join(', ')}` };
-  return { selector: selector.trim(), kind, inBand, outBand };
+  const m = LAYER_RE.exec(s);
+  if (!m) return { error: `"${s}" is not "<selector>@<kind>:<band>", "hold:<idle>", or "<shape>:<band>" (e.g. "pan:cinematic"). Known shapes: ${Object.keys(SHAPES).join(', ')}. Known idles: ${IDLE_NAMES.join(', ')}` };
+  const [, shape, band] = m;
+  if (!SHAPES[shape]) {
+    const near = nearMisses(shape, Object.keys(SHAPES));
+    return { error: `"${shape}" is not a known move shape${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SHAPES).join(', ')}` };
+  }
+  if (!SPEED_BAND[band]) {
+    const near = nearMisses(band, Object.keys(SPEED_BAND));
+    return { error: `"${band}" is not a speed band${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SPEED_BAND).join(', ')}` };
+  }
+  return { scope: 'layer', shape, band };
 }
 
-/** parseMotion("a@k:b; c@k2:b2") → [{...} | {error}] for a beat's raw `motion:` field. Empty for unset ("no opinion", same convention as parseEdge). */
-export function parseMotion(raw) {
+/** parseMoveEntries(raw) → [{...}|{error}], `;`-separated. Empty for unset ("no opinion", same convention as parseEdge). */
+export function parseMoveEntries(raw) {
   if (raw == null) return [];
   const s = String(raw).trim().replace(/^["']|["']$/g, '');
   if (!s || /^<fill:/i.test(s) || /^none$/i.test(s)) return [];
-  return s.split(';').map((e) => e.trim()).filter(Boolean).map(parseMotionEntry);
+  return s.split(';').map((e) => e.trim()).filter(Boolean).map(parseMoveEntry);
 }
+
+// COMPAT: `motion:` is still a legal field (40 shipped films write it), and it needs no wrapper because
+// every `motion:` entry names a selector, so it is always scope PART already: the alias is exact, not
+// approximate.
+export const parseMotionEntry = parseMoveEntry;
+export const parseMotion = parseMoveEntries;
 
 /** motionErrors(beats) → string[] naming every beat whose `motion:` entry does not parse. */
 export function motionErrors(beats) {
@@ -215,6 +262,17 @@ export function motionErrors(beats) {
   beats.forEach((b, i) => {
     for (const e of parseMotion(b.motion)) {
       if (e.error) errs.push(`beat ${i + 1} (${b.name}) motion: ${e.error}`);
+    }
+  });
+  return errs;
+}
+
+/** moveErrors(beats) → string[] naming every beat whose `move:` entry does not parse (any scope). */
+export function moveErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    for (const e of parseMoveEntries(b.move)) {
+      if (e.error) errs.push(`beat ${i + 1} (${b.name}) move: ${e.error}`);
     }
   });
   return errs;
@@ -269,22 +327,14 @@ export function stagedSchedule(beats) {
   return { caused, shiftedStart, shiftedEnd };
 }
 
-// ── THE MOVE: sustained motion on a beat's own layer, not a one-shot entrance ──────────────────────
+// ── LAYER-SCOPE BUILD: sustained motion on a beat's own layer, not a one-shot entrance ──────────────
 //
 // docs/MISTAKES.md #610: three swept axes (entrance density, overlap, travel/duration) all failed to
 // stop a film going still, because every one of them is still a one-shot ENTRANCE that lands and holds.
 // The one axis that worked, measured median motion 0.17-1.61 against a 0.66 reference, is a keyed x/y/
-// scale track on the LAYER that never stops moving for the length of the beat. `move:` is that decision,
-// named on the beat the same way `motion:` (parts entrances, above) and `object_in`/`object_out`
-// (the continuous object) already are, and it reads the SAME vocabulary as both: a `SHAPES` key from
-// harness/author/track.mjs (`make arsenal SHAPE=pan`, never a new motion mechanism) and a `SPEED_BAND`
-// name (the four words `motion:` already uses).
-//
-//   move: pan:cinematic     the higgsfield beat-2 scroll rhythm, at the "cinematic" scale
-//   move: drift:gravity     an ambient hold that keeps moving, never sitting still
-//
-// A beat that names no `move:` builds nothing here and assembles exactly as it did before this field
-// existed (byte-identical, harness/author/assemble.test.mjs).
+// scale track on the LAYER that never stops moving for the length of the beat. A LAYER-scope `move:`
+// entry is that decision (`move: pan:cinematic`, `move: drift:gravity`), and a beat naming none builds
+// nothing here and assembles exactly as it did before (byte-identical, harness/author/assemble.test.mjs).
 //
 // WHY BAND SCALES MAGNITUDE AND NEVER DURATION. The requirement this field exists to meet is that the
 // track spans the WHOLE beat, so nothing goes still inside it; if a band shortened the track, the beat
@@ -292,7 +342,6 @@ export function stagedSchedule(beats) {
 // always the beat's own duration, never negotiable, and band instead scales how FAR/BIG the shape's own
 // measured motion is: `professional` reproduces the shape's own default untouched (the neutral point
 // `motion:` already treats every band relative to), `energy` shrinks it, `gravity`/`cinematic` grow it.
-const MOVE_RE = /^\s*([a-z-]+)\s*:\s*([a-z]+)\s*$/i;
 
 // The props a "how far/big" scale actually means something for, paired with their identity (the value
 // that means "no movement"), so scaling never invents a magic number per shape: it grows or shrinks the
@@ -311,35 +360,6 @@ function scaleMove(keys, factor) {
     }
     return out;
   });
-}
-
-/** parseMove("pan:cinematic") → {shape,band} | {error} | null (null = the beat names no move). */
-export function parseMove(raw) {
-  if (raw == null) return null;
-  const s = String(raw).trim().replace(/^["']|["']$/g, '');
-  if (!s || /^<fill:/i.test(s) || /^none$/i.test(s)) return null;
-  const m = MOVE_RE.exec(s);
-  if (!m) return { error: `"${s}" is not "<shape>:<band>" (e.g. "pan:cinematic"). Known shapes: ${Object.keys(SHAPES).join(', ')}. Known bands: ${Object.keys(SPEED_BAND).join(', ')}` };
-  const [, shape, band] = m;
-  if (!SHAPES[shape]) {
-    const near = nearMisses(shape, Object.keys(SHAPES));
-    return { error: `"${shape}" is not a known move shape${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SHAPES).join(', ')}` };
-  }
-  if (!SPEED_BAND[band]) {
-    const near = nearMisses(band, Object.keys(SPEED_BAND));
-    return { error: `"${band}" is not a speed band${near.length ? `, did you mean "${near[0]}"?` : ''}. Known: ${Object.keys(SPEED_BAND).join(', ')}` };
-  }
-  return { shape, band };
-}
-
-/** moveErrors(beats) → string[] naming every beat whose `move:` does not parse. */
-export function moveErrors(beats) {
-  const errs = [];
-  beats.forEach((b, i) => {
-    const m = parseMove(b.move);
-    if (m && m.error) errs.push(`beat ${i + 1} (${b.name}) move: ${m.error}`);
-  });
-  return errs;
 }
 
 /** moveKeys({shape,band}, dur) → the named shape's own keyframes, scaled by the band, spanning `dur`. */
