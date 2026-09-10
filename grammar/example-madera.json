@@ -74,7 +74,7 @@
    "content": {
     "colorfulness": 13.2,
     "band": "not",
-    "fill": 0.15,
+    "fill": 0.39,
     "detail": 4.5,
     "photo": 0.05
    }
@@ -230,7 +230,7 @@
    "content": {
     "colorfulness": 2.7,
     "band": "not",
-    "fill": 0.03,
+    "fill": 0.04,
     "detail": 2.3,
     "photo": 0.03
    }
@@ -293,7 +293,7 @@
    "content": {
     "colorfulness": 15.5,
     "band": "slightly",
-    "fill": 0.27,
+    "fill": 0.7,
     "detail": 8.6,
     "photo": 0.14
    }
@@ -324,7 +324,7 @@
    "content": {
     "colorfulness": 18.8,
     "band": "slightly",
-    "fill": 0.43,
+    "fill": 0.68,
     "detail": 14.1,
     "photo": 0.23
    }
