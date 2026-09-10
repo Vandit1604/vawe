@@ -15,7 +15,7 @@ const AUTO_BLUR_FLOOR_PER_SEC = 480;
 // fastest layer, which is 0.16 of the frame, about a 58 degree shutter angle in a camera's units.
 // A scene sets its own with a top-level `shutter` in DEGREES (180 is the film standard, 360 is double
 // the smear, 0 turns the automatic half off), and that is the whole of item 6 in
-// docs/CRAFT/AFTER-EFFECTS-RECIPES.md: the sampler was already automatic and had no dial.
+// docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md: the sampler was already automatic and had no dial.
 const AUTO_SHUTTER = 0.16;
 
 export const slot = 'transform';

@@ -33,7 +33,7 @@ files, and without an index an agent authors from its own priors, which regress 
 **Competent is not the same as directed.** Same tool, same primitives, same defaults produces the same
 film: that is not a guess, it is why the another engine community had to publish an anti-template checklist
 for its own showcase. `library-top5-only` (above) is this engine's version of that check, and the fix is
-always the same shape: reach for a family fewer films already use. [`CRAFT/AFTER-EFFECTS-RECIPES.md`](CRAFT/AFTER-EFFECTS-RECIPES.md)
+always the same shape: reach for a family fewer films already use. [`CRAFT/AFTER-EFFECTS-TECHNIQUES.md`](CRAFT/AFTER-EFFECTS-TECHNIQUES.md)
 names 26 real procedures with a HAVE/PARTLY/LACK verdict against this engine; `direction-floor.mjs`
 reads that table live and cites the recipe by name when it names something to reach for, so the table
 answers "what do I use for this" instead of sitting there for you to remember to open.
@@ -52,7 +52,7 @@ story; we have all three: here's where each lives.
 |---|---|---|
 | **House-style** | *How should it look?*: face, palette, shape, imagery | [`CRAFT/`](CRAFT/README.md) → TYPOGRAPHY · COLOR · LAYOUT · IMAGERY |
 | **Composition** | *How do I fill a frame so it reads produced?*, density, hierarchy, metadata | [`CRAFT/DENSITY.md`](CRAFT/DENSITY.md) (hero + support + metadata triad) |
-| **Motion** | *How should it move?* | [`MOTION-CRAFT.md`](MOTION-CRAFT.md) (10 rules + effect-selection) · [`MOTION-RECIPES.md`](MOTION-RECIPES.md) (copy-paste recipe index) |
+| **Motion** | *How should it move?* | [`MOTION-CRAFT.md`](MOTION-CRAFT.md) (10 rules + effect-selection) · [`MOTION-SNIPPETS.md`](MOTION-SNIPPETS.md) (copy-paste snippet index) |
 | **Direction** | *Why does it read amateur when every layer renders fine?*, pacing, restraint, story placement | [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md). The spine that turns effects into a directed film; every rule sourced to its book + tagged by which gate enforces it |
 | **Film structure** | *What holds this film together across its cuts?* | [`CRAFT/FILM-STRUCTURE.md`](CRAFT/FILM-STRUCTURE.md). The catalogue: ~18 devices in four registers (spatial · verbal and aural · temporal · conceptual), what each one survives, when it fails, and a six-question decision aid. Read it before you pick. Carry two threads, not one. |
 | **Continuous action** | *Why does my plan read as three unrelated cards?* | [`vawe-continuous-action`](../skills/vawe-continuous-action/SKILL.md) · ONE of those devices, worked end to end: one object that transforms across every cut. Diegetic motion (the product doing its job), the measured 5-second budget, and the anti-slop checks you run before a frame renders. Worked from `higgsfield.mp4`. Right for a single-subject product film; wrong for a manifesto or an anthology. |

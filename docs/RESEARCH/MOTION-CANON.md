@@ -13,7 +13,7 @@ reject.
 The bar every ADOPT item had to clear: name the principle and its source, name what the engine can
 express today by file and where it stops, name the concrete change, and name how a viewer would see the
 difference. Anything already stated in [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md),
-[`../CRAFT/`](../CRAFT/README.md) or [`../CRAFT/AFTER-EFFECTS-RECIPES.md`](../CRAFT/AFTER-EFFECTS-RECIPES.md)
+[`../CRAFT/`](../CRAFT/README.md) or [`../CRAFT/AFTER-EFFECTS-TECHNIQUES.md`](../CRAFT/AFTER-EFFECTS-TECHNIQUES.md)
 was thrown out, and there was a lot of it: this repo has already done most of this reading.
 
 ---
@@ -213,7 +213,7 @@ needs a change; all of it needs a citation the next author can check.
 
 **What a motion designer does in a graph editor**, taken from what could actually be read (Bartlett on
 spacing; Williams on breaking joints and on ones-versus-twos; Kowalski on curve choice) and from the
-recipe vocabulary already collected in `docs/CRAFT/AFTER-EFFECTS-RECIPES.md`: they shape SPACING rather
+recipe vocabulary already collected in `docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`: they shape SPACING rather
 than pick a preset. Concretely, that is five distinct operations, and the engine's parity is not uniform
 across them.
 
@@ -291,7 +291,7 @@ from a tutorial does not transfer: the influence does, the speed does not.
   graphics, and the workaround (a `group`) exists.
 - **The recipes table and DIRECTION.md disagree about arcs and squash.** `DIRECTION.md:58` says
   squash-and-stretch, arcs, straight-ahead and solid drawing "don't apply to flat type" and omits them;
-  `AFTER-EFFECTS-RECIPES.md` has squash SHIPPED as a modifier and arcs marked HAVE in the table and PARTLY
+  `AFTER-EFFECTS-TECHNIQUES.md` has squash SHIPPED as a modifier and arcs marked HAVE in the table and PARTLY
   in the body. Both files are read by authors and they say different things. That is a doc fix, not a
   finding.
 

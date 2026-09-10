@@ -28,7 +28,7 @@ Every rule is tagged:
 
 > This is the **Motion** and **Story-spine** doctrine from [`../TASTE.md`](../TASTE.md). The mechanics of
 > *which curve / which cut* live in [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md); the copy-paste JSON in
-> [`../MOTION-RECIPES.md`](../MOTION-RECIPES.md); the feeling layer in [`TASTE-RULES.md`](TASTE-RULES.md).
+> [`../MOTION-SNIPPETS.md`](../MOTION-SNIPPETS.md); the feeling layer in [`TASTE-RULES.md`](TASTE-RULES.md).
 > This file is *why*: the principles those apply.
 
 > **The fastest way to obey all of this: compose from [`BLUEPRINTS.md`](BLUEPRINTS.md)**, directed-motion
@@ -77,7 +77,7 @@ an effector can then wash across it.
 another mid-shot. What has no form here is the draughtsmanship half: nobody is drawing a figure, so
 "does the volume hold as it turns" is a question about a `three` scene, not about your linework.
 
-*Squash-and-stretch and arcs* both apply here, per [AFTER-EFFECTS-RECIPES.md](AFTER-EFFECTS-RECIPES.md):
+*Squash-and-stretch and arcs* both apply here, per [AFTER-EFFECTS-TECHNIQUES.md](AFTER-EFFECTS-TECHNIQUES.md):
 
 | Principle | Here | How |
 |---|---|---|

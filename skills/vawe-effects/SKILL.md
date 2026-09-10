@@ -44,4 +44,4 @@ If you want motion, never reach for a `canvasFx`/`filter` and expect it to anima
   wall (too plain). Directed lives between.
 - **Back every claim with the effect on screen** (docs/MISTAKES.md value gate). "22 stings" must SHOW stings.
 
-Depth: [`docs/CRAFT/DIRECTION.md`](../../docs/CRAFT/DIRECTION.md) · recipes: [`docs/MOTION-RECIPES.md`](../../docs/MOTION-RECIPES.md) · motion feel: `vawe-animation` · camera: `vawe-camera`.
+Depth: [`docs/CRAFT/DIRECTION.md`](../../docs/CRAFT/DIRECTION.md) · snippets: [`docs/MOTION-SNIPPETS.md`](../../docs/MOTION-SNIPPETS.md) · motion feel: `vawe-animation` · camera: `vawe-camera`.
