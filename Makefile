@@ -375,6 +375,13 @@ claims: ## [study] check this repo's own doctrine against the films it claims to
 study-verify: ## [check] prove `make study` measures correctly, by running it on a film whose answers the scene file already
 	@node quality/gates/study-verify.mjs $(D) $(if $(NORENDER),--no-render) $(if $(JSON),--json,)
 
+# make study-check NAME=<name>: is a study COMPLETE, or does it still have something UNSEEN (a unique
+# frame with no page, a page still saying <fill) or UNEXPLAINED (a shot's onScreen/moves/trigger still
+# null)? Reports exactly what is missing and writes grammar/<name>.json's coverage.ledger accordingly;
+# `make ideate` refuses an incomplete study. docs/CRAFT/REFERENCE-STUDY.md
+study-check: ## [check] is a study COMPLETE: every unique frame paged, every page filled, every shot's prose written?
+	@node quality/gates/study-check.mjs $(NAME)
+
 # make recreate NAME=<grammar> [THEME=vawe] [OUT=path]: a scene SKELETON from a studied reference.
 # Emits only what was MEASURED (duration, boundary times, backdrop lightness, a motion target per beat).
 # Every composition decision is left as a hole, on purpose: see the header for why.
