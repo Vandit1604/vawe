@@ -142,7 +142,7 @@ async function runVariant({ name, tag, dir, storyboardText, jsonSeed, extraFiles
     const moves = movesPerBeat(storyboardText);
     return { name, moves, ...(stats.error ? { error: `motion-floor: ${stats.error}` } : { stats }) };
   } finally {
-    if (!keep) for (const f of owned) { try { fs.unlinkSync(f); } catch {} }
+    if (!keep) for (const f of owned) { try { fs.unlinkSync(f); } catch {} } // owned scratch file: may not have been created if render failed early
   }
 }
 

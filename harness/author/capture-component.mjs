@@ -33,7 +33,7 @@ const page = await browser.newPage();
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 2 });
 if (LS) {
   const pairs = LS.split(',').map((kv) => kv.split('=').map((s) => s.trim()));
-  await page.evaluateOnNewDocument((ps) => { try { for (const [k, v] of ps) localStorage.setItem(k, v); } catch {} }, pairs);
+  await page.evaluateOnNewDocument((ps) => { try { for (const [k, v] of ps) localStorage.setItem(k, v); } catch {} }, pairs); // localStorage can be blocked pre-navigation; best-effort seeding only
 }
 try { await page.goto(url, { waitUntil: 'networkidle2', timeout: 45000 }); }
 catch (e) { // slow page: retry on domcontentloaded rather than silently capturing a half-loaded DOM
@@ -138,15 +138,17 @@ fs.writeFileSync(out, JSON.stringify(capture, null, 0) + '\n');
 if (localized) console.log(`  ✓ localized ${localized} asset(s) → media/ (render stays offline + deterministic)`);
 for (const f of failures) console.warn(`  ⚠ still remote (${f.reason}): ${f.url}`);
 console.log(`✓ captured "${selector}" → ${path.relative(ROOT, out)}  (${result.w}×${result.h}, ${(capture.html.length / 1024).toFixed(1)}kb)`);
-// warn LOUDLY when a used font isn't installed: otherwise it silently substitutes at render time
-try {
+// warn LOUDLY when a used font isn't installed: otherwise it silently substitutes at render time.
+// core/tokens.css is repo-owned and always present, so a read/parse failure here is a real bug, not an
+// optional path: let it throw rather than swallow the very check meant to warn loudly.
+{
   const tokens = fs.readFileSync(path.join(ROOT, 'core/tokens.css'), 'utf8');
   const generic = /^(system-ui|sans-serif|serif|monospace|-apple-system|ui-sans-serif|ui-monospace|arial|helvetica)/i;
   for (const f of result.fonts || []) {
     if (!generic.test(f) && !tokens.includes(`'${f}'`) && !tokens.includes(`"${f}"`))
       console.warn(`  ⚠ font "${f}" is used by this component but has no @font-face in core/tokens.css. It will SUBSTITUTE at render. Run brandkit (downloads fonts) or add it manually.`);
   }
-} catch {}
+}
 // The snippet a tool prints is the one an author pastes, so it has to VALIDATE. This line used to
 // carry a `use` key, which the component layer does not read (core/layers/component.js PROPS is
 // src/part/w) and core/validate.mjs rejects as an unknown prop. `w` is here because the layer scales

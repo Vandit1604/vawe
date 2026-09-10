@@ -771,7 +771,7 @@ for (const c of CASES) {
   if (ok) pass++; else broken.push({ ...c, why, out: r.out.split('\n').filter(Boolean).slice(-4).join(' | ').slice(0, 220) });
   fs.unlinkSync(f);
   if (ip) fs.unlinkSync(ip);
-  for (const rel of Object.keys(c.aux || {})) { try { fs.unlinkSync(path.join(repoRoot, rel)); } catch { } }
+  for (const rel of Object.keys(c.aux || {})) { try { fs.unlinkSync(path.join(repoRoot, rel)); } catch {} } // aux fixture: may already be gone, cleanup only
 }
 
 /** A minimal, CURRENT bake of `sim` under assets/baked/<name>/. The fixture the sim cases mutate. */
@@ -1110,7 +1110,13 @@ catch {
 // The restore below is per-case; this is the backstop for the ways a case never reaches it (a throw, a
 // Ctrl-C, a kill). A mutated guard left in the engine is the worst outcome this file can produce.
 const inFlight = new Map();
-const restoreAll = () => { for (const [p, orig] of inFlight) { try { fs.writeFileSync(p, orig); } catch { } } inFlight.clear(); try { fs.unlinkSync(LOCK); } catch { } };
+const restoreAll = () => {
+  // This is the backstop for a mutated guard left in tracked source (the comment above names it the
+  // worst outcome this file can produce), so a failed restore must be SEEN, not swallowed.
+  for (const [p, orig] of inFlight) { try { fs.writeFileSync(p, orig); } catch (e) { console.error('FAILED TO RESTORE ' + path.relative(repoRoot, p) + ': ' + e.message + '  -- inspect this checkout before trusting it.'); } }
+  inFlight.clear();
+  try { fs.unlinkSync(LOCK); } catch {} // lock already gone: fine
+};
 process.on('exit', restoreAll);
 for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { restoreAll(); process.exit(130); });
 

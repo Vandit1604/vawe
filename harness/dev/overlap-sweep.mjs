@@ -117,7 +117,7 @@ async function main() {
     const dir = path.join(ROOT, OUT_DIR);
     for (const f of fs.readdirSync(dir)) fs.unlinkSync(path.join(dir, f));
     fs.rmdirSync(dir);
-    for (const name of names) { try { fs.unlinkSync(path.join(ROOT, 'out', `ov-${name}.mp4`)); } catch {} }
+    for (const name of names) { try { fs.unlinkSync(path.join(ROOT, 'out', `ov-${name}.mp4`)); } catch {} } // a failed render never wrote this file: cleanup only
   }
 }
 
