@@ -8,7 +8,7 @@ group: look
 # A directional entrance winds up on its own; `anticipate: false` turns it off
 
 `anticipate` used to be opt-in: an author had to remember the word for the wind-up before a
-directional entrance (docs/CRAFT/AFTER-EFFECTS-RECIPES.md #5). It is now the reflex. Any layer whose
+directional entrance (docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md #5). It is now the reflex. Any layer whose
 `anim` already carries travel gets `anticipate` added at boot, amount derived from the theme's own
 `bounce` (`anticipateFromMotion`, core/motion/motion.js), so a calm brand winds up less than a bouncy
 one instead of every theme getting the same number.

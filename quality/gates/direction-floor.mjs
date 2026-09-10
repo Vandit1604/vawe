@@ -58,7 +58,7 @@ const HIGH_VALUE = [
 ];
 
 // ── THE ANTI-TEMPLATE CHECK: a bar derived from the LIBRARY, not a constant somebody chose ─────────
-// The research this repo argues from (docs/CRAFT/AFTER-EFFECTS-RECIPES.md's own census, and outside:
+// The research this repo argues from (docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md's own census, and outside:
 // the another engine community's anti-template checklist) found the same shape twice: a tool with 800+ named
 // things and an author who still reaches for the same five every time, because same-tool-same-result is
 // what an unforced default produces. Refusing "too few effects" (feature-poverty, above) does not catch
@@ -117,7 +117,7 @@ function libraryProfile() {
 }
 
 // ── ROUTE THROUGH THE AE RECIPES TABLE, INSTEAD OF DUPLICATING IT ──────────────────────────────────
-// docs/CRAFT/AFTER-EFFECTS-RECIPES.md already carries 26 named recipes with a HAVE/PARTLY/LACK verdict
+// docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md already carries 26 named recipes with a HAVE/PARTLY/LACK verdict
 // and the exact field to reach for; nothing consulted it at the moment a beat gets picked. This reads
 // the table LIVE and answers one question ("which HAVE recipe covers this family?") from it, so the
 // only thing kept here is a search TERM per family, never the recipe's name, verdict or field, which
@@ -126,7 +126,7 @@ let _aeTable = null;
 function aeTable() {
   if (_aeTable) return _aeTable;
   let text = '';
-  try { text = fs.readFileSync(path.join(repoRoot, 'docs/CRAFT/AFTER-EFFECTS-RECIPES.md'), 'utf8'); } catch { _aeTable = []; return _aeTable; }
+  try { text = fs.readFileSync(path.join(repoRoot, 'docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md'), 'utf8'); } catch { _aeTable = []; return _aeTable; }
   const section = text.split('## The table')[1] || '';
   const rows = [];
   for (const line of section.split('\n')) {
@@ -137,7 +137,7 @@ function aeTable() {
   return _aeTable;
 }
 // One unique substring per family, checked against every row's `where` text (see the table printed
-// by `docs/CRAFT/AFTER-EFFECTS-RECIPES.md`'s own header) so each resolves to exactly the row it names,
+// by `docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`'s own header) so each resolves to exactly the row it names,
 // not the first row that happens to share a common word. `fx` and `composition` have no clean single-row
 // answer in the table (both are catch-alls), so they are left unmapped rather than forced onto a wrong
 // citation: aeRecipeFor returns null and the caller falls back to its own description alone.
@@ -149,7 +149,7 @@ const aeRecipeFor = (key) => {
   const term = AE_LOOKUP[key];
   if (!term) return null;
   const hit = aeTable().find((r) => r.verdict === 'HAVE' && r.where.toLowerCase().includes(term));
-  return hit ? `AE recipe #${hit.num} "${hit.name}" (${hit.where}), docs/CRAFT/AFTER-EFFECTS-RECIPES.md` : null;
+  return hit ? `AE recipe #${hit.num} "${hit.name}" (${hit.where}), docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` : null;
 };
 
 const file = process.argv[2];
@@ -282,8 +282,8 @@ if (!directedByBeats) {
     fail('plain-slideshow', `${plainHeadlines.length}/${headlines.length} headlines just fade/rise with no kinetic reveal. The plain-authoring tell. Give headlines split+preset (words rise/scale), or use a blueprint beat.`);
   }
   // coaching WARNs: the range this video is leaving on the table.
-  if (sig.kineticText === 0) warn('no-kinetic-type', 'no kinetic typography anywhere (no split+preset headline). A directed video reveals key lines word-by-word, MOTION-RECIPES words-rise.');
-  if (!camMoves) warn('no-camera', 'the camera never moves. One slow push (or a dive-in on a product shot) adds life without moving content. MOTION-RECIPES slow-push / dive-in.');
+  if (sig.kineticText === 0) warn('no-kinetic-type', 'no kinetic typography anywhere (no split+preset headline). A directed video reveals key lines word-by-word, MOTION-SNIPPETS words-rise.');
+  if (!camMoves) warn('no-camera', 'the camera never moves. One slow push (or a dive-in on a product shot) adds life without moving content. MOTION-SNIPPETS slow-push / dive-in.');
   if (sig.transition === 0) warn('no-transition', 'no seams or cuts between beats. Beats just cut flat. Earn 1-3 transitions (a dissolve, a cinematicZoom into a screen).');
 }
 if (!sig.bgMotion) warn('no-bg-motion', 'the background is static. A good video moves the viewer with a living backdrop (a moving gradient / mesh / aurora / shader), used brand-appropriately, not a flat field. See core/backgrounds/index.js.');

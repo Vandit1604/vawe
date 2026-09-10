@@ -16,7 +16,7 @@ Source of the study: the **Stephan Zammit** YouTube channel, <https://www.youtub
 Forty videos listed; twelve watched for technique. Nothing below is quoted. Every recipe is rewritten
 from what the work shows, and every number is one the videos state out loud.
 
-Read this beside `docs/CRAFT/AFTER-EFFECTS-RECIPES.md`, which already carries 26 named AE recipes with
+Read this beside `docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`, which already carries 26 named AE recipes with
 a HAVE/PARTLY/LACK verdict each. This file does not repeat those. It adds the techniques that come from
 watching somebody DECIDE, rather than from a named effect: where the cut goes, why a loop is boring,
 what a range selector is really for.
@@ -490,7 +490,7 @@ authorable now.
 ## Provenance
 
 Source: the **Stephan Zammit** YouTube channel, <https://www.youtube.com/@stephanzammit> (forty videos
-listed, twelve watched for technique). Companion reference: `docs/CRAFT/AFTER-EFFECTS-RECIPES.md`.
+listed, twelve watched for technique). Companion reference: `docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`.
 
 **Do not re-add:** framing entry 1's camera-blur fix or entry 1's velocity-cut mechanism as an open gap
 still to close, or entry 1's "two of the three arrived after this entry was first written" as live

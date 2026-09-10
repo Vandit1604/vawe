@@ -1,6 +1,6 @@
 // core/fx/squash.js: SQUASH AND STRETCH, driven by the layer's own velocity.
 //
-// The eleventh recipe in docs/CRAFT/AFTER-EFFECTS-RECIPES.md, and the engine already had three baked
+// The eleventh recipe in docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md, and the engine already had three baked
 // shapes of it (the `stretch` text preset, the `fall` entrance's landing squash, the `squeeze` cut) and
 // no way to make a layer deform BECAUSE it is moving. That is the whole difference between physics and
 // a preset: the amount has to come from the speed, or it reads as an effect somebody switched on.

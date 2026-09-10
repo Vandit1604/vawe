@@ -476,7 +476,7 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
   return true;
 })());
 
-// ---- THE ENTRANCE WARP: anticipation (#5) and the overshoot dial (#3), docs/CRAFT/AFTER-EFFECTS-RECIPES.md
+// ---- THE ENTRANCE WARP: anticipation (#5) and the overshoot dial (#3), docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md
 // Both dials ARE the easing of an entrance, so they are asserted on the curve AND through clipStyleAt,
 // which is the only thing that composes them onto a real layer.
 {

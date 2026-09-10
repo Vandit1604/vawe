@@ -738,19 +738,47 @@
       "exitDur": 0.35
     },
     {
-      "_beat": "wordBlast is scale punctuation: the line arrives already too big, falls into its reading, creeps so the held frame is never a freeze, then grows THROUGH the camera into the end card. The statement beat is the one place in this film that wants a full stop rather than a fade.",
-      "type": "beat",
-      "beat": "wordBlast",
+      "type": "text",
       "text": "Built for the future. <b>Available today.</b>",
+      "w": 1620,
+      "align": "center",
       "size": 80,
       "weight": 590,
       "color": "var(--text)",
-      "w": 1620,
-      "align": "center",
+      "fit": true,
       "x": 150,
       "y": 440,
       "start": 38.2,
-      "dur": 5.9
+      "duration": 5.9,
+      "anim": "none",
+      "exitDur": 0,
+      "motion": [
+        {
+          "t": 0,
+          "scale": 1.5,
+          "opacity": 0,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 0.42,
+          "scale": 1,
+          "opacity": 1,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 5.6,
+          "scale": 1.04,
+          "ease": "linear"
+        },
+        {
+          "t": 5.9,
+          "scale": 1.9,
+          "opacity": 0,
+          "ease": "easeInCubic"
+        }
+      ],
+      "motionBlur": true,
+      "_beat": "wordBlast"
     },
     {
       "type": "svg",
