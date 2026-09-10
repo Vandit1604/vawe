@@ -70,7 +70,7 @@ import { PROPS as KIT_PROPS } from '../layers/util.js';
 import { PROPS as ORCHESTRATOR_PROPS } from '../../formats/scene/props.js';
 import { TRACK_PROPS } from '../tracks/index.js';
 import { PROPS as BOOT_PROPS } from '../engine/boot.js';
-import { PROPS as PAN_PROPS } from '../layout/pan-resolve.mjs';
+import { PROPS as PAN_PROPS } from '../timeline/pan-resolve.mjs';
 import { PROPS as FX_PROPS } from '../fx/index.js';
 import { PROPS as LOWER_PROPS } from '../transitions/lower.js';
 

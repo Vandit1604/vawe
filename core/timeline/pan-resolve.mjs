@@ -12,7 +12,7 @@
 // Lives in its own module, importable from the browser renderer AND from node, so the gate that checks
 // the resolved track checks the SAME track the renderer draws. A gate that re-implements the merge is a
 // gate that can agree with itself and disagree with the film.
-import { motionAt } from '../timeline/sequence.js';
+import { motionAt } from './sequence.js';
 
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 const near = (a, b) => Math.abs(a - b) < 1e-6;

@@ -11,7 +11,7 @@
 // SOURCES (one each. Nothing here is re-derived and nothing is hand-typed):
 //   blocks/catalog.mjs          name · family · blurb · props · overlay      (the block manifest)
 //   blueprints/index.mjs        BEATS + REQUESTS                              (the beat registry)
-//   core/layout/generators.js          GENERATORS                                     (the playground registry)
+//   core/generators/generators.js          GENERATORS                                     (the playground registry)
 //   site/lib/block-frames.json  the measured ink rect of each block           (make blocks-scenes)
 //   site/public/assets/blocks/  a standalone scene + poster per block         (make blocks-scenes)
 //
@@ -67,12 +67,12 @@
 //                      uses. Target is `bg[].html` or an html layer, which is where markup goes.
 //
 // install.options is the generator's FIRST PRESET over its schema defaults, not the raw defaults. The
-// registry's own argument, at the top of core/layout/generators.js: a default is the neutral value a field
+// registry's own argument, at the top of core/generators/generators.js: a default is the neutral value a field
 // takes when nobody said otherwise, which is not the same as a good-looking result.
 // install.props is DERIVED, by walking the schema with the generator's own controlsOf(), so it is the
 // same dial list the playground builds its panel from and cannot drift from it.
 //
-// HELD BACK LOOKS GET NO ITEM, and nothing here filters for that: core/layout/generators.js exports
+// HELD BACK LOOKS GET NO ITEM, and nothing here filters for that: core/generators/generators.js exports
 // GENERATORS already filtered to `ready`, with ALL_GENERATORS beside it for the tools that must score
 // what is held back. Importing the shipping list is the whole mechanism.
 //
@@ -84,7 +84,7 @@ import { fileURLToPath } from 'node:url';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { BEATS, REQUESTS } from '../../blueprints/index.mjs';
-import { GENERATORS, controlsOf, defaultsOf } from '../../core/layout/generators.js';
+import { GENERATORS, controlsOf, defaultsOf } from '../../core/generators/generators.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(root, 'registry');
@@ -234,7 +234,7 @@ function generatorItem(g) {
       ...(layers
         ? { layers: g.render(options) }
         // NOT the markup itself. See DECISION 3: it is a rendered picture, sometimes 31KB of it.
-        : { render: `import { byName } from 'core/layout/generators.js'; byName('${g.name}').render(options)` }),
+        : { render: `import { byName } from 'core/generators/generators.js'; byName('${g.name}').render(options)` }),
     },
     docs: g.docs,
     ...(g.reference ? { reference: g.reference } : {}),
