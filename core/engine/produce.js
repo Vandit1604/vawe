@@ -410,6 +410,57 @@ export function bakeCameraMove(data, frame) {
   return data;
 }
 
+// bakeCursorCarry(data): `carry: [{ from, to, id }]` on a `cursor` layer -> the real mechanism, a
+// `follow` written onto the DRAGGED layer, pinned to the cursor's own id for exactly the [from, to]
+// window. Same shape as bakeCameraMove above and the same reason: a cursor already knows the one thing
+// a drag needs (where the pointer is), so the dragged layer states WHEN it is grabbed and nothing else,
+// instead of an author hand-copying the pointer's path into a second layer's motion track and
+// re-copying it every time the drag is retimed.
+//
+// NOT A SECOND FOLLOWER: this reuses core/tracks/follow.js's own per-frame pin (`dx`/`dy` fixed at 0,
+// i.e. the dragged layer's centre sits exactly on the cursor's point), windowed by the `from`/`to` that
+// file's `follow` spec now accepts. `from`/`to` on `carry` are on the CURSOR's OWN clock (matching
+// `clicks`/`snapTo`, both keyed the same way on this layer), so they are shifted here by the cursor's
+// `start` before landing in `follow`, which reads the film's absolute clock.
+//
+// EVERY REFUSAL NAMES THE LAYER: an unknown target id, a target already pinned to something else, or a
+// carry entry missing a field is refused HERE, at boot, rather than rendering a drag that silently
+// grabs the wrong thing or nothing at all.
+export function bakeCursorCarry(data) {
+  const byId = new Map();
+  const cursors = [];
+  const walk = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (typeof L.id === 'string') byId.set(L.id, L);
+    if (L.type === 'cursor' && L.carry) cursors.push(L);
+    walk(L.children); walk(L.layers);
+  } };
+  walk(data.layers);
+  for (const cur of cursors) {
+    if (!cur.id)
+      throw new Error('a `cursor` layer with `carry` needs its own `id`, the thing the dragged layer '
+        + 'pins to. Give the cursor an id and name it.');
+    if (!Array.isArray(cur.carry))
+      throw new Error(`cursor "${cur.id}" carry must be an array of {from, to, id}, `
+        + `got ${JSON.stringify(cur.carry)}.`);
+    const base = cur.start ?? 0;
+    for (const entry of cur.carry) {
+      if (!entry || typeof entry !== 'object' || typeof entry.id !== 'string'
+        || typeof entry.from !== 'number' || typeof entry.to !== 'number')
+        throw new Error(`cursor "${cur.id}" carry entry must be {from:<number>, to:<number>, `
+          + `id:"<layer>"}, got ${JSON.stringify(entry)}.`);
+      const target = byId.get(entry.id);
+      if (!target)
+        throw new Error(`cursor "${cur.id}" carry names layer "${entry.id}", which this scene does not `
+          + `have. Known ids: ${byId.size ? [...byId.keys()].join(', ') : '(this scene has none)'}.`);
+      if (target.follow)
+        throw new Error(`cursor "${cur.id}" carry names "${entry.id}", which already declares its own `
+          + '`follow`. A layer cannot be pinned to two things at once: drop one of them.');
+      target.follow = { id: cur.id, dx: 0, dy: 0, from: base + entry.from, to: base + entry.to };
+    }
+  }
+  return data;
+}
 
 // bakeDepth(data): `depth` sugar -> the real `plane` modifier, resolved against THIS film's lens.
 //

@@ -67,6 +67,12 @@ const SKIP = {
   'three.text': 'same: `extrudeText` is the only reader and it cannot be reached (see three.font)',
   'three.resample': 'core/layers/canvas.js:51 refuses it: a three layer owns its own WebGL context and cannot be sampled',
   'raymarch.resample': 'core/layers/canvas.js:51 refuses it: a raymarch layer owns its own WebGL context and cannot be sampled',
+  // `carry` is read at BOOT (core/engine/produce.js bakeCursorCarry) as a reference to a SECOND layer
+  // by id, exactly the shape `follow`/`becomes`/`panWith` already have, and none of those three is ever
+  // surfaced for probing either: this harness builds one minimal layer per prop, and a carry entry
+  // naming a target that does not exist is refused loudly by design (the whole point of the feature).
+  // Probing it would need a second, real layer in the same scene, which no other cross-layer prop gets.
+  'cursor.carry': 'refused at boot without a real target layer to drag (core/engine/produce.js), the same shape as follow/becomes/panWith, none of which this single-layer harness can construct either',
   'globe.resample': 'core/layers/canvas.js:51 refuses it: a globe layer owns its own WebGL context and cannot be sampled',
 };
 
@@ -147,6 +153,7 @@ const VALUES = {
   varsEase: 'easeOutCubic',
   'glow.preset': 'bloom',
   'particles.preset': 'confetti',   // `preset` also names the particles emitter's mode (confetti/sparks/dust)
+  'cursor.style': 'hand',   // `style` is a registry name (core/layers/cursor.js CURSOR_STYLES), not free text
   color: '#2563eb',
   anim: 'fade',
   out: 'fade',
