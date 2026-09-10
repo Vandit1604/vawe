@@ -108,6 +108,7 @@ import { RESAMPLE_FX } from '../../core/resample/effects.js';
 import { RAYMARCH_FX } from '../../core/surfaces/raymarch-fx.js';
 import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { pairActs, parsePairs, verdictOf, isPlaceholderSurface } from './content-check.mjs';
+import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -7560,6 +7561,51 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // would fail on every honest addition and be edited to fit within a week. The floor is raised when it is
 // comfortably passed, the same way quality/baselines/arsenal-ratchet.json is stamped, and it is a number in the
 // source rather than a file because a floor you can see while adding a test is a floor you remember.
+// ---- harness/lib/claims-truth.mjs: a known-answer fixture, one false claim of each kind ------------
+// A fixture STRING, not a tracked .md file: a tracked fixture with a deliberately false claim would be
+// picked up by docs-drift.mjs's own repo-wide scan and fail the real gate for the wrong reason.
+{
+  const truth = deriveEngineTruth(repoRoot);
+  ok('claims-truth: deriveEngineTruth reads 60 final / 30 draft off cmd/render/main.go', truth.finalFps === 60 && truth.draftFps === 30);
+  ok('claims-truth: deriveEngineTruth reads 5 canvases off core/layout/safe.js', truth.canvasCount === 5);
+  ok('claims-truth: deriveEngineTruth reads 24 layer types off core/layers/index.js', truth.layerCount === 24);
+
+  // BT stands in for a backtick. A literal `make blueprints` in THIS file's own source would be
+  // caught by the "gates: every make <target> a gate prints" check just below, since that check
+  // scans every quality/gates/*.mjs file (this one included) for a backtick-quoted target. Building
+  // the fixture from BT keeps the retired-name text out of this file's own source.
+  const BT = String.fromCharCode(96);
+  // The layer-type line is BUILT, not typed, for the same reason as BT above: a literal
+  // "N layer types" in this file's own source is exactly the claim quality/gates/site-counts.mjs
+  // hunts for across quality/gates/*.mjs, and it would report this fixture as a real stale count.
+  const wrongLayerCount = truth.layerCount + 6;
+  const FIXTURE = [
+    'one rendered Short (1080x1920, 24fps).',                 // wrong fps, and only one number named
+    'the engine now ships 6 canvases.',                        // wrong canvas count
+    `an open canvas of ${wrongLayerCount} composable layer types.`, // wrong layer count
+    `reach for ${BT}make blueprints${BT} to see the full roster.`, // retired name, live instruction
+    'a plain separating line, about nothing in particular.',
+    'the blueprints/ directory is gone, deleted last month.',  // history: same-sentence, must NOT fire
+  ].join('\n');
+
+  const numberFindings = findNumberClaims(FIXTURE, truth);
+  ok('claims-truth fixture: exactly one fps finding', numberFindings.filter((c) => c.kind === 'fps').length === 1);
+  ok('claims-truth fixture: exactly one canvas finding', numberFindings.filter((c) => c.kind === 'canvas').length === 1);
+  ok('claims-truth fixture: exactly one layer finding', numberFindings.filter((c) => c.kind === 'layer').length === 1);
+  ok('claims-truth fixture: no other number findings', numberFindings.length === 3);
+
+  const retiredFindings = findRetiredNames(FIXTURE);
+  ok('claims-truth fixture: exactly one retired-name finding (the live instruction, not the history line)',
+    retiredFindings.length === 1 && retiredFindings[0].label === `${BT}make blueprints${BT}`);
+
+  // printOnly: a bare mention with no print call is not a finding; the same line wrapped in
+  // console.log IS. Proves the printOnly gate actually gates rather than always passing.
+  const bare = `the WHY comment above still says ${BT}make blueprints${BT} for context.`;
+  const printed = `console.log('reach for ${BT}make blueprints${BT} to see the full roster');`;
+  ok('claims-truth: printOnly ignores a bare mention with no print call', findRetiredNames(bare, { printOnly: true }).length === 0);
+  ok('claims-truth: printOnly catches the same name inside console.log(...)', findRetiredNames(printed, { printOnly: true }).length === 1);
+}
+
 const FLOOR = 1800;
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 if (!fail && pass < FLOOR) {

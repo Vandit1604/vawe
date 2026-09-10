@@ -110,6 +110,6 @@ if (process.argv.includes('--json')) {
   }
   const empty = report.shapes.filter((s) => !s.sources.length).map((s) => s.shape);
   if (empty.length) console.log(`\n  ~ no matched shot for: ${empty.join(', ')} (keyword set may need widening)`);
-  console.log(`\n  A shape here backs one factory in blueprints/beats-mined.mjs. Do not add a shape with`);
-  console.log(`  zero sources: a blueprint with no matched shot is an invention wearing this tool's name.\n`);
+  console.log(`\n  A shape here backs one \`spine\` recipe (recipes/README.md). Do not add a shape with`);
+  console.log(`  zero sources: a recipe with no matched shot is an invention wearing this tool's name.\n`);
 }

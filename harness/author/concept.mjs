@@ -191,7 +191,7 @@ function buildOption(dir) {
     lines.push(`- type: ${type}`);
     lines.push(`- object: ${dir.thread === 'transforming object' ? '<what shape the prop is in here>' : `<what carries the ${dir.thread} at this beat>`}`);
     lines.push(`- picture: ${b._new ? '<what this beat SHOWS, not what it says>' : strip(b.picture) || '<what this beat SHOWS>'}`);
-    lines.push(`- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>`);
+    lines.push(`- mechanism: <the motion (make arsenal Q="…" · docs/EFFECTS.md)>`);
     lines.push(`- becomes: <the X becomes the Y at this junction>`);
     lines.push(`- onscreen: ${(b.onscreen || []).map(strip).filter(Boolean).join(' | ') || '<the words on screen>'}`);
     if (strip(b.narration)) lines.push(`- narration: ${strip(b.narration)}`);

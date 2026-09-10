@@ -2,14 +2,23 @@
 // nothing checked it. Twice now it listed shipped work as missing and routed a planning pass at
 // effects that already existed (see its own closing warning, and MISTAKES #83).
 //
-// Two checks, both narrow on purpose:
+// Checks, each narrow on purpose:
 //   1. Any registry NAME the roadmap calls absent must not actually be in that registry.
 //   2. Any registry COUNT it quotes must match.
+//   3. A doc that quotes fps, the canvas count or the layer-type count must match the number the
+//      engine actually has (`deriveEngineTruth`, read from cmd/render/main.go, core/layout/safe.js,
+//      core/layers/index.js). AGENTS.md itself said 30fps while cmd/render renders 60; the same
+//      shape of drift now has one check instead of an author catching it by luck.
+//   4. RETIRED NAMES: `findRetiredNames` refuses a live instruction that tells an agent to reach for
+//      a mechanism this repo already deleted (`blueprints`, `{type:"beat"}`, `make previews`, the
+//      two recipe docs that never shipped). A sentence that says the name RETIRED, DELETED or REMOVED
+//      is history, not an instruction, and is left alone.
 // Deliberately NOT a prose checker. It only reads sentences that make a falsifiable claim about a
-// registry, because a gate that nags about wording gets ignored and takes the real findings with it.
+// registry or a number, because a gate that nags about wording gets ignored and takes the real
+// findings with it.
 import fs from 'fs';
 import path from 'path';
-import { spawnSync } from 'child_process';
+import { spawnSync, execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { SHADER_FX } from '../../core/stings/index.js';
 import { AMBIENT_FX } from '../../core/surfaces/shaders-ambient.js';
@@ -18,7 +27,9 @@ import { RESAMPLE_FX } from '../../core/resample/effects.js';
 import { RAYMARCH_FX } from '../../core/surfaces/raymarch-fx.js';
 import { BG_NAMES } from '../../core/backgrounds/index.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
+import { ASPECT_REGISTRY } from '../../core/layout/safe.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'ROADMAP.md'), 'utf8');
@@ -177,6 +188,42 @@ if (fs.existsSync(LAYERS_MDX)) {
       f.fail('claim-mismatch', `AGENTS.md says "${said[0]}" and ${src} says ${want.join(' / ')}. `
         + 'Fix the sentence: this file is read every session, so a stale number here is repeated downstream.');
     }
+  }
+}
+
+// ---- 5 & 6. engine-number claims and retired-name instructions, over the WIDE doctrine surface -----
+// Not the four files above: every doc an agent reads as an instruction. `git ls-files` so a file
+// written this session is in scope, same reasoning as doc-refs.mjs.
+// Skipped BY REASON, same as doc-refs.mjs: docs/MISTAKES.md is a dated log (a past mistake naming a
+// retired mechanism IS the point of the entry); docs-site/ and site/ are separate builds with their
+// own checks; skills/impeccable is vendored third-party prose, not a claim about this repo.
+const gitFiles = (glob) => execSync(`git ls-files --cached --others --exclude-standard '${glob}'`, { cwd: repoRoot })
+  .toString().trim().split('\n').filter(Boolean);
+const DOC_SKIP = ['docs/MISTAKES.md', 'docs-site/', 'site/', 'skills/impeccable/'];
+const docSurface = [...new Set([...gitFiles('*.md')])]
+  .filter((rel) => (rel === 'AGENTS.md' || rel === 'CLAUDE.md' || rel.startsWith('docs/') || /^skills\/[^/]+\/SKILL\.md$/.test(rel)))
+  .filter((rel) => !DOC_SKIP.some((p) => rel.startsWith(p)));
+const codeSurface = [...gitFiles('harness/**/*.mjs'), ...gitFiles('harness/**/*.js'),
+  ...gitFiles('quality/gates/**/*.mjs'), ...gitFiles('quality/gates/**/*.js')];
+
+const truth = deriveEngineTruth(repoRoot);
+for (const rel of docSurface) {
+  const abs = path.join(repoRoot, rel);
+  if (!fs.existsSync(abs)) continue;
+  const text = fs.readFileSync(abs, 'utf8');
+  for (const c of findNumberClaims(text, truth)) {
+    f.fail('claim-number-wrong', `${rel}:${c.line} ${c.message}`, { at: `${rel}:${c.line}`, fix: c.text.slice(0, 150) });
+  }
+  for (const r of findRetiredNames(text)) {
+    f.fail('claim-retired-name', `${rel}:${r.line} tells an agent to reach for ${r.label}, which is retired`, { at: `${rel}:${r.line}`, fix: r.text.slice(0, 150) });
+  }
+}
+for (const rel of codeSurface) {
+  const abs = path.join(repoRoot, rel);
+  if (!fs.existsSync(abs)) continue;
+  const text = fs.readFileSync(abs, 'utf8');
+  for (const r of findRetiredNames(text, { printOnly: true })) {
+    f.fail('claim-retired-name', `${rel}:${r.line} prints an instruction naming ${r.label}, which is retired`, { at: `${rel}:${r.line}`, fix: r.text.slice(0, 150) });
   }
 }
 
