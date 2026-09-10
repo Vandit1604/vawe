@@ -3,18 +3,17 @@
 // scrubber + play/pause + frame/time readout that drive `__engine.renderFrame(n)` directly (the same pure
 // function the Go renderer seeks). Edit the JSON, hit reload, scrub, no 30-60s render round-trip.
 //
-// The shell is studio/page.mjs + studio/ui/ (shell.html, studio.css, studio.js): a left rail of panels,
-// the preview and its transport in the centre, the timeline full width along the bottom, and a
-// draggable divider between them. This file owns the server, the gate run behind the timeline model,
+// The shell is studio/page.mjs + studio/ui/ (shell.html, studio.css, studio.js): a top bar, an icon
+// sidebar of the four states, a property panel, the preview and its transport, the timeline along the
+// bottom, and a draggable divider between preview and timeline. This file owns the server, the gate run behind the timeline model,
 // and the write side.
 //
 // The timeline: one bar per top-level layer against a seconds/frames ruler, with the
 // cuts/seams/stings marked, the enter/exit ramps shaded off the settled middle, and every dead-air hole
 // painted as a hazard band. It answers the question a contact sheet cannot, what is on screen WHEN.
 //
-//   make studio D=formats/scene/<file>.json [PORT=8799] [THEME=dark]
-//     → open the printed URL, leave it running (Ctrl-C to stop). Light is the default; the toggle in the
-//       transport switches to dark and the choice sticks per browser.
+//   make studio D=formats/scene/<file>.json [PORT=8799]
+//     → open the printed URL, leave it running (Ctrl-C to stop).
 //
 // DEV TOOLING ONLY. It does not touch the renderer or the determinism contract; it just calls the engine's
 // own renderFrame(n) from the parent frame (same-origin), exactly as the Go capture loop does per frame.
@@ -149,11 +148,7 @@ const directionFloorFindings = (file) => {
   return out.split('\n').map((l) => l.trim()).filter((l) => /^[^[]*\[[a-z-]+\]/.test(l));
 };
 
-// LIGHT IS STILL THE DEFAULT, and the dark room is the better of the two. Vawe is a white-first product,
-// so the instrument you photograph beside the site stays light; the black room behind the toggle is where
-// frames get judged, because an achromatic surround is the only one that does not skew the picture.
-const THEME0 = (process.env.THEME || 'light').toLowerCase() === 'dark' ? 'dark' : 'light';
-const page = () => studioPage({ fmt: 'scene', dataUrl, title: path.basename(dataArg), theme: THEME0 });
+const page = () => studioPage({ fmt: 'scene', dataUrl, title: path.basename(dataArg) });
 
 const SLUG = path.basename(dataArg, '.json');
 const MP4 = path.join(REPO_ROOT, 'out', `${SLUG}.mp4`);
@@ -547,10 +542,9 @@ const { server } = await serveRepo({ port: PORT, route: studioRoutes }).catch((e
 server.on('error', oops);
 console.log(`\n  ▶ vawe studio: ${path.basename(dataArg)}`);
 console.log(`    open  http://127.0.0.1:${PORT}/studio`);
-console.log(`    scrub the slider · ← → a frame · shift+← → a second · home/end the ends · space plays`);
+console.log(`    ← → a frame · shift+← → a second · home/end the ends · space plays · 1-4 switch state`);
 console.log(`    timeline below: drag it to seek · hazard bands are dead air (beat-check) · hover a bar for its ramps`);
 console.log(`    drag the divider to trade preview height for timeline height (it sticks)`);
-console.log(`    theme: light · the toggle switches to the black room and it sticks · start dark with THEME=dark`);
 console.log(`    Ctrl-C to stop.\n`);
 
 // Never fatal: a gate crash here must not take the server down with it.
