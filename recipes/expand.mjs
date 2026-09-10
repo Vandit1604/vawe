@@ -185,12 +185,13 @@ function expandCameraLine(scene, line) {
   scene.cameraMove = [...existing, spec];
 }
 
-// expandEnterLine: `{ recipe, at, layer, colors? }` -> the layer's own kinetic split-text sugar
+// expandEnterLine: `{ recipe, at, layer, colors?, exit? }` -> the layer's own kinetic split-text sugar
 // (`split`, `preset`, `each`, `stagger`; core/kinetic/presets.js via core/tracks/units.js), never hand
-// keys per word. `colors` is refused past one distinct value: no named preset holds N different
-// resting colours (colorWave sweeps ONE accent through the units and settles every one of them to the
-// SAME resting colour), so a line asking for that is unroutable today and says so rather than faking
-// it with a hand-keyed workaround. A single colour routes through colorWave as its flash.
+// keys per word. `colors` routes through colorWave's own `colors` dial (core/kinetic/presets.js), which
+// gives unit `i` its own arrival colour (`colors[i % n]`) rather than one shared accent: this used to be
+// refused past one distinct value because colorWave could only sweep a single flash, and that gap is
+// what this line existed to name (docs/MISTAKES.md). A single colour still routes through `flash`,
+// unchanged, so a one-colour line keeps behaving exactly as before.
 function expandEnterLine(scene, line) {
   const name = line.recipe;
   const bad = (why) => { throw new Error(`recipe "${name}": ${why}`); };
@@ -201,11 +202,6 @@ function expandEnterLine(scene, line) {
   if (!L) bad(`no layer id "${line.layer}" (the "layer" slot)`);
   if (L.split) bad(`"${line.layer}" already carries "split: ${JSON.stringify(L.split)}"; the recipe would overwrite it`);
   const distinct = line.colors ? new Set(line.colors) : null;
-  if (distinct && distinct.size > 1)
-    bad(`"colors" names ${distinct.size} distinct colours, but no core capability holds more than one `
-      + `resting colour per split unit (core/kinetic/presets.js colorWave settles every unit to the SAME `
-      + `resting colour). Author the per-word colours in the layer's own markup/spans on an html layer `
-      + `instead, and drop "colors" from this line`);
 
   const preset = paramOf(name, recipe, 'preset', line.params);
   const each = paramOf(name, recipe, 'each', line.params);
@@ -219,7 +215,19 @@ function expandEnterLine(scene, line) {
   if (distinct && distinct.size === 1) {
     L.preset = 'colorWave';
     L.presetOpts = { ...(L.presetOpts || {}), flash: line.colors[0] };
+  } else if (distinct && distinct.size > 1) {
+    L.preset = 'colorWave';
+    // The measured film settles the whole line to one ink once every word has landed (recipes.json
+    // "note"), so this line states that default rather than leaving `colors` to its engine-level default
+    // of staying scattered forever; an author who wants the scatter to persist passes `settle: null`.
+    L.presetOpts = { ...(L.presetOpts || {}), colors: line.colors,
+      settle: line.settle === null ? undefined : (line.settle || 'var(--layer-ink, var(--ink))') };
   }
+  // exit: the word-by-word twin of the arrival, same shape core/tracks/units.js reads off the layer
+  // directly (`preset`, `at` seconds from the layer's OWN start, `each`, `stagger`, `from`). Copied
+  // through as-is: the recipe adds no vocabulary of its own here, it only names where the film measured
+  // it (madera exits its tagline word by word before the next one enters).
+  if (line.exit) L.exit = { ...line.exit };
 }
 
 export function expandRecipes(scene) {

@@ -138,7 +138,9 @@
     "slots": {
       "at": "seconds: the line's arrival start",
       "layer": "layer id: a text layer carrying the line",
-      "colors": "[hex, ...]? one colour per word, optional. No named core capability compiles more than one distinct settle colour per line today (core/kinetic/presets.js colorWave sweeps a single accent through the units, it does not hold N different resting colours); passing more than one throws, naming that gap, rather than hand-keying colours per word"
+      "colors": "[hex, ...]? optional. One colour: routes through colorWave's `flash`. Two or more: routes through colorWave's `colors` (core/kinetic/presets.js), so word i arrives in colors[i % n] then eases to `settle`",
+      "settle": "colour or null? optional, only read when `colors` names 2+. Default: that layer's own ink, matching the measured film (each word lands in its own colour before the line settles to one ink). Pass null to keep every word its own colour forever instead",
+      "exit": "{ preset, at, each?, stagger?, from?, ease? }? optional. Copied straight onto the layer's own `exit` (core/tracks/units.js): the line leaves word by word, `at` seconds after ITS OWN start, reusing the entrance preset vocabulary reversed. Left unconfigured, `each`/`stagger` default to 60% of this line's own arrival timing and `ease` to `easeInCubic`, so the exit reads faster and more decided than the entrance it mirrors, never a same-speed rewind"
     },
     "params": {
       "preset": {

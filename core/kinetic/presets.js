@@ -65,6 +65,11 @@ export const PRESETS = {
     'words/chars rise into place: the default kinetic headline'),
   down: preset((u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${(-(1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
     'words/chars drop into place from above: the mirror of `up`'),
+  // fade: opacity only, no transform at all. The neutral entrance nothing else undercuts, and because
+  // it carries no motion it is also the neutral EXIT: play it with u reversed (a split unit's `exit`
+  // does exactly that) and a word simply dissolves rather than travelling anywhere.
+  fade: preset((u) => ({ opacity: clamp01(u), transform: 'none' }),
+    'plain opacity fade, no motion at all: the neutral entrance, and the neutral exit reversed'),
   // typewriter: hard on/off (unit is fully in once its progress passes ~0)
   // the zero-motion preset: a hard snap on, no transform. `at` chooses WHERE in the entrance it
   // snaps (default 0 = the moment it starts). Raise it for a delayed hard cut in a staggered line.
@@ -154,14 +159,27 @@ export const PRESETS = {
   //
   // The two colours were `#ff742e` and `#1c1613`: the reference brand's accent and ink (themes/brew.json),
   // frozen into a preset every theme may use. They default to the THEME now. docs/MISTAKES.md #354.
-  colorWave: preset((u, { flash, to, hold = 0.5 } = {}) => {
+  //
+  // `colors` IS THE SECOND MODE, added for madera's tagline (docs/MISTAKES.md, recipes/recipes.json
+  // "word-by-word"): "each word landing in its own colour before the line settles to one ink" is N
+  // resting colours in flight at once, one per unit, which `flash`/`to` cannot express (they are a
+  // single accent shared by every unit). `colors[i % n]` gives unit `i` its own arrival colour; `settle`
+  // is what it eases to afterwards, held for `hold` first exactly as `flash` already is. Omitting
+  // `settle` means the unit keeps ITS OWN colour forever, never mixing toward one ink, because "stay
+  // this colour" has to be expressible without inventing a second dial that means "don't settle".
+  // `flash`/`to` are ignored once `colors` is given, so the two modes never fight over one `color` write.
+  colorWave: preset((u, { flash, to, hold = 0.5, colors, settle } = {}, i = 0) => {
     const e = easeOutCubic(clamp01((clamp01(u) - hold) / (1 - hold)));
+    const base = colors ? colors[i % colors.length] : null;
     // The resting colour DEFAULTS TO THE LAYER'S OWN, not to `var(--ink)`. This preset paints `color` on
     // every unit every frame, so it overrides the per-window automatic ink that core/layers/util.js just
     // resolved, and `--ink` is the dark one in a white-first theme, so a colour-wave headline over a
     // dark bg window settled to invisible while the same headline without the preset read fine.
-    // `--layer-ink` is that layer's settled colour, published by util.js. An explicit `to` still wins.
-    const f = flash || 'var(--accent)', rest = to || 'var(--layer-ink, var(--ink))';
+    // `--layer-ink` is that layer's settled colour, published by util.js. An explicit `to`/`settle` still wins.
+    const f = base || flash || 'var(--accent)';
+    // `colors` with no `settle` stays in its own colour: no mix, no fallback to the theme ink.
+    if (base && settle == null) return { opacity: clamp01(u * 4), color: f, transform: 'none' };
+    const rest = settle || to || 'var(--layer-ink, var(--ink))';
     return {
       opacity: clamp01(u * 4),
       // color-mix, not a hex lerp: the resting colour is usually the theme's, and a theme colour is only
@@ -170,7 +188,7 @@ export const PRESETS = {
       transform: 'none',
     };
   },
-    'the accent sweeps word by word along a line, each unit lighting then settling to the resting colour'),
+    'the accent sweeps word by word along a line, each unit lighting then settling to the resting colour · `colors` gives EACH unit its OWN arrival colour instead of one shared accent, per-word colour before the line settles to one ink'),
   // underline: draws left -> right beneath the unit
   underline: preset((u, { color = 'currentColor', h = 3 } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% ${h}px`, backgroundPosition: '0 100%', transform: 'none' }; },
     'a rule grows left to right along the baseline as the word lands, the marker under a heading'),
@@ -411,6 +429,12 @@ const PRESET_AKA = {
   strike: ['strikethrough', 'crossed out', 'struck through'],
   // "chromatic aberration colour fringing" found nothing. The effect's real name is not in our prose.
   chroma: ['chromatic aberration', 'rgb split', 'colour fringing'],
+  // "per word colour" / "each word its own colour" named the madera tagline gap directly and the blurb
+  // alone does not carry the phrase a person actually types for it.
+  colorWave: ['per word colour', 'per-word color', 'each word its own colour', 'colour per word', 'words leave one by one'],
+  // the neutral exit vocabulary: "leave the frame" already means something else (a whole-layer `out`),
+  // so a query for a SPLIT UNIT leaving word by word needs its own words on the preset it defaults to.
+  fade: ['word by word exit', 'words leave one by one', 'text disappears word by word', 'split exit'],
 };
 export const PRESET_REGISTRY = defineRegistry('kinetic preset', PRESETS, { slot: 'preset', blurbs: PRESET_BLURBS, aka: PRESET_AKA,
   catalog: {
