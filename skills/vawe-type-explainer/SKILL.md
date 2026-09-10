@@ -31,7 +31,8 @@ next starts, not to keep pace with a product tour.
   everything else still enough that the facts can be read (`register: 'quiet'` in `type-spines.mjs`).
 - **Counts with REAL figures.** The `count` layer compacts >=1e6 automatically; use a real number,
   never a round placeholder. This type's own worked example (`docs/EVALS.md`) uses this engine's own
-  facts (24 layer types, 703 effects, 29 blueprints) precisely because they are checkable.
+  facts (24 layer types, CSS animation refused at boot, frame-independent rendering) precisely because
+  they are checkable.
 - **Payoff last, always.** Order beats so the most counterintuitive fact lands at the very end; never
   spoil it in the hook. `docs/RULES/payoff-last.md`.
 - **No product needed.** Resist the urge to bolt on a CTA or a brand lockup; an explainer that ends on
@@ -80,7 +81,7 @@ carrying real information, or is the whole film type on a field (`docs/CRAFT/SHO
 
 ## The worked example
 
-`quality/runs/evals/briefs/explainer.json` (12s, 16:9). Shows: four real facts about this engine (24 layer
-types, 703 effects across 56 families, 29 beat blueprints), a live `count` layer animating to 693, and
-the payoff ("no templates: every beat is composed") landing last. A thin accent rule tracks the active
-line as the continuous object.
+`quality/runs/evals/briefs/explainer.json` (20s, 16:9). Shows: this engine's own checkable facts (a frame
+is a pure function of time, 24 layer types each built from `frame(kit,el,L,t)`, CSS animation/transition
+refused at boot), a live `count` layer reading the film's own elapsed seconds, and the payoff (splitting
+the render across workers loses nothing) landing last. A live t-readout is the continuous object.
