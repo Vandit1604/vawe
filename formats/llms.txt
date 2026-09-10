@@ -72,8 +72,8 @@ Full props per type: `formats/scene/schema.json`. What each type is FOR, in pros
 
 ## The vocabulary: effect families
 
-Do not try to memorise all 810 named things the engine can do; reach for them by family, then
-search within the family. Each of these 53 families is a dial you put ON a layer, a cut,
+Do not try to memorise all 819 named things the engine can do; reach for them by family, then
+search within the family. Each of these 55 families is a dial you put ON a layer, a cut,
 the camera, or the scene:
 
 - **Drawn icons** (16, `asset`): `svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists.
@@ -109,7 +109,9 @@ the camera, or the scene:
 - **Effector drives** (6, `per-layer`): What an effector's influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, where the number is the amount at full influence.
 - **Effector falloffs** (4, `per-layer`): A FALLOFF FROM A TRAVELLING POINT, driving the layer's own children.
 - **Enter / exit anims** (19, `per-layer`): `anim` (enter) + `out` (exit) on any layer.
+- **Move shapes (measured keyframe tracks)** (5, `per-layer`): A storyboard's `move: <shape>:<band>` (harness/lib/contract.mjs, scope LAYER: a sustained track on the beat's own layer, never a one-shot entrance), or a hand-keyed `motion` built directly: `node harness/author/track.mjs pan --dur 1.25 --to -600`.
 - **Part entrances** (9, `per-layer`): THE BRIDGE between hand-written markup and the engine's clock.
+- **Path curves (SVG "d" generators)** (4, `per-layer`): A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: flies the beat's own layer along the curve, MotionPathPlugin), or `modifiers: [{ alongPath: { curve } }]` (core/fx/along-path.js) to set a line of type on it instead of moving a whole layer.
 - **Per-layer modifiers** (14, `per-layer`): `"modifiers"` on a layer, applied in array order after every motion track.
 - **Idles (ambient hold motion)** (3, `per-layer/scene`): `idle` on a layer, or scene-level `idle` for the whole cast.
 - **GSAP named effects** (30, `per-layer/text`): `fx` on a layer, pair with `anim:"none"` so GSAP owns the transform.
@@ -131,7 +133,7 @@ the camera, or the scene:
 - **Shader stings** (35, `transition`): `stings:[{t,fx}]`.
 
 **Discovery, not memorisation:** `make arsenal Q="a page scrolling under a static tilt"` searches all
-810 named things (layer types, every family above, blueprints, blocks, sound cues) by plain-English
+819 named things (layer types, every family above, blueprints, blocks, sound cues) by plain-English
 description and returns the exact key to write. `make schema AT="layers[].motion[]"` answers the other
 half: what fields are legal to write at one JSON path, read live off `formats/scene/schema.json`.
 
@@ -160,7 +162,7 @@ make judge D=formats/scene/x.json   # the one step that SEES: composition and fi
 
 ## Discovery
 
-- `make arsenal Q="<what you mean, in plain english>"` searches all 810 named things at once and
+- `make arsenal Q="<what you mean, in plain english>"` searches all 819 named things at once and
   prints the JSON key that means it.
 - `make schema AT="<json path>"` answers what is legal to write at that path, with every field's type.
 - `make list` shows the scene module's schema and a sample scene end to end.
