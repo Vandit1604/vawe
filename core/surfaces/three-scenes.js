@@ -28,6 +28,7 @@ export const THREE_SCENES = {
   codeExtrude: 'syntax-coloured code on lit beveled slabs, rising out of depth and growing to thickness, top line first',
   codeDissolve: 'code resolving out of seeded noise behind a chromatic burn edge, then holding crisp',
   codeAssemble: 'thousands of GPU points flying from a seeded cloud to the exact glyph positions and resolving into readable code',
+  litPlane: 'a captured UI plane, LIT (MeshStandardMaterial under the studio rig, not MeshBasicMaterial), rising with a tilt and a rotation into a soft-shadowed ground with an overshoot settle; `blur` opts it into a shutter-accumulated smear on the fast rise',
 };
 export const THREE_FX = Object.keys(THREE_SCENES);
 

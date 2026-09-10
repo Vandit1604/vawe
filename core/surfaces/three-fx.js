@@ -35,7 +35,11 @@ export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, 
   lines: {},
   // globe
   origin: {}, dest: {}, arcHeight: {}, drawStart: {}, drawDur: {},
-  spinFrom: {}, spinTo: {}, spinDur: {}, sunFrom: {}, sunTo: {}, sunLat: {}, dawnWidth: {} };
+  spinFrom: {}, spinTo: {}, spinDur: {}, sunFrom: {}, sunTo: {}, sunLat: {}, dawnWidth: {},
+  // litPlane: `rise` is its resting height (the arrival is hardcoded, only the landing spot is a dial).
+  // `blur` opts a scene into the in-canvas shutter accumulation createThreeLayer can do (a tap count,
+  // or `true` for a sane default); see the comment on `taps` below for why this exists at all.
+  rise: {}, blur: {} };
 
 export { THREE_FX };
 const T = () => {
@@ -155,12 +159,13 @@ function environment(renderer, scene, colors) {
 }
 
 function studio(renderer, scene, colors) {
-  scene.add(new (T().AmbientLight)(0xffffff, 0.55));
+  const ambient = new (T().AmbientLight)(0xffffff, 0.55); scene.add(ambient);
   const key = new (T().DirectionalLight)(0xffffff, 2.4); key.position.set(4, 6, 5); scene.add(key);
   const fill = new (T().DirectionalLight)(hex(colors?.[1], '#9fb6ff'), 0.9); fill.position.set(-5, 2, 3); scene.add(fill);
   const rim = new (T().DirectionalLight)(0xffffff, 1.5); rim.position.set(-2, 3, -6); scene.add(rim);
   environment(renderer, scene, colors);
-}
+  return { key, fill, rim, ambient };   // handed back so a scene that needs shadows can ask the RIG,
+}                                        // not build a second one; every other scene ignores this.
 
 // ---- the code board, shared by the three code-* scenes ------------------------------------------
 // A snippet laid out as SLABS: one per whitespace-delimited token, sized and placed from the real
@@ -886,7 +891,133 @@ const SCENES = {
       mesh.rotation.x = LL.pitch ?? 0.15;
     } };
   },
+
+  // A LIT captured UI, the "does 3D actually beat html-to-video" experiment. `uiParallax`'s planes are
+  // `MeshBasicMaterial`, which IGNORES the rig `studio()` already builds; this is the same idea, a real
+  // UI capture on a plane, but `MeshStandardMaterial` so the key/fill/rim actually land on it, plus a
+  // ground plane that RECEIVES a soft shadow, so the shot has the thing a flat html capture cannot: a
+  // subject that visibly sits IN a lit room instead of floating on nothing.
+  //
+  // `shadow: true` and `background` are the two extra things this scene hands back that no other one
+  // does: createThreeLayer reads `shadow` to turn shadow-casting on for the ONE light that needs it
+  // (every other scene renders exactly as it did before, nothing here touches the shared rig's
+  // defaults) and `background` to paint the warm soft-box backdrop the reference clip sits on, because
+  // the renderer's own clear colour is transparent alpha and a "floating UI on nothing" is the
+  // deviceShowcase mistake this scene exists to not repeat.
+  //
+  // THE MOVE, absolute in t as everywhere else here: rise (position.y) with an overshoot-then-settle
+  // ease, tilt and rotate (rotation.x/y) with a plain ease, arriving together so it reads as one
+  // gesture, not three. `backOut` is a closed-form cubic, no different in KIND from the smoothstep
+  // every other scene here already uses; it just has the "settle past the mark then ease back" shape
+  // this particular arrival wants (the reference clip overshoots and rocks back before it holds).
+  litPlane(L, colors) {
+    const grp = new (T().Group)();
+    const GROUND_Y = -1.35;
+
+    // THE GROUND. A flat matte floor, warm to match the backdrop.
+    const ground = new (T().Mesh)(new (T().PlaneGeometry)(16, 16),
+      new (T().MeshStandardMaterial)({ color: hex(L.bodyColor, '#d9cdb9'), roughness: 0.97, metalness: 0 }));
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = GROUND_Y;
+    grp.add(ground);
+
+    // THE CONTACT SHADOW. A soft radial decal, not a real shadow map: see the comment on `built.shadow`
+    // in createThreeLayer for why (a real one was built and measured invisible under this rig). Unlit,
+    // so it reads regardless of exposure, and it is the plane's OWN grounding cue rather than the
+    // room's: it darkens and tightens as the plane nears the floor, which is the one part of "it sits
+    // IN the room" a flat html capture cannot fake at all, real shadow or not.
+    const blob = new (T().Mesh)(new (T().PlaneGeometry)(1, 1),
+      new (T().MeshBasicMaterial)({ map: shadowBlob(), transparent: true, depthWrite: false }));
+    blob.rotation.x = -Math.PI / 2;
+    blob.position.y = GROUND_Y + 0.01;                  // just off the floor: no z-fighting
+    grp.add(blob);
+
+    if (!L.screen) {
+      throw new Error('three litPlane: `screen` names the captured UI image this plane shows; there is nothing to light without it.');
+    }
+    const tx = textureFrom(L.screen, 'litPlane screen');
+    // STANDARD, not Basic: the whole point of this scene is that the rig's light actually reaches the
+    // UI, which is exactly what `uiParallax`/`deviceShowcase`'s screen ("a screen EMITS") cannot show.
+    const plane = new (T().Mesh)(new (T().PlaneGeometry)(1, 1),
+      new (T().MeshStandardMaterial)({ map: tx.tex, roughness: L.roughness ?? 0.42, metalness: L.metalness ?? 0.04 }));
+    grp.add(plane);
+
+    // Arrival constants: where it comes FROM. Only where it LANDS (`rise`/`pitch`/`yaw`) is an author
+    // dial, same split deviceShowcase makes between its hardcoded YAW0/PITCH0 and its settle target.
+    const RISE0 = -1.55, TILT0 = 0.82, YAW0 = 0.78;
+    // easeOutBack (Penner): overshoots 1 before settling back to it. A closed form of t, nothing else.
+    const c1 = 1.70158, c3 = c1 + 1;
+    const backOut = (x) => 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+
+    return {
+      obj: grp,
+      shadow: true,
+      background: warmBackdrop(colors),
+      pose(t, LL) {
+        tx.ensure();
+        const asp = tx.img.naturalHeight / tx.img.naturalWidth;
+        plane.scale.set(2.3, 2.3 * asp, 1);
+        const dur = Math.max(0.001, LL.duration ?? 2.2);
+        const u = Math.max(0, Math.min(1, t / dur));
+        const e = ease(u), eb = backOut(u);
+        const restY = LL.rise ?? 0;
+        plane.position.y = RISE0 + (restY - RISE0) * eb;
+        plane.rotation.x = TILT0 + ((LL.pitch ?? 0.08) - TILT0) * e;
+        plane.rotation.y = YAW0 + ((LL.yaw ?? -0.06) - YAW0) * e;
+        plane.position.z = (LL.travel ?? 0.7) * (1 - e);
+        plane.position.y += Math.sin(t * 0.5) * 0.02;   // a slow float once it has landed
+
+        // The blob tracks the plane's OWN height above the floor, not `t`: close to the ground it is
+        // small and dark (real contact); far from it, faint and wide (an ambient-occlusion guess, the
+        // same falloff a blob shadow always makes). `clear` at height 0 so a plane resting exactly on
+        // `rise: 0` still casts something, since a shadow that vanishes at rest would read as a glitch.
+        const above = Math.max(0, plane.position.y - GROUND_Y);
+        const near = 1 / (1 + above * 1.6);
+        blob.scale.set(2.3 * 0.75 * (0.7 + 0.5 * (1 - near)), 2.3 * asp * 0.55 * (0.7 + 0.5 * (1 - near)), 1);
+        blob.position.x = plane.position.x - 0.12 * (1 - near);   // drifts toward the key light's side
+        blob.material.opacity = 0.3 * near * e;
+      },
+    };
+  },
 };
+
+// shadowBlob(): a soft dark ellipse fading to nothing at the edge, painted once. The contact-shadow
+// decal `litPlane` scales and fades per frame; the pixels themselves never change.
+function shadowBlob() {
+  const c = typeof document !== 'undefined' ? document.createElement('canvas') : null;
+  if (!c) return null;
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, 'rgba(20,16,10,1)');
+  g.addColorStop(0.6, 'rgba(20,16,10,0.55)');
+  g.addColorStop(1, 'rgba(20,16,10,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  return new (T().CanvasTexture)(c);
+}
+
+// warmBackdrop(colors): the soft studio-floor gradient the reference clip sits its subject on, painted
+// ONCE into a small CanvasTexture. Not a plane in the scene: a plane would need to be lit or unlit and
+// either is wrong (it is meant to read as an infinite backdrop, not an object in the room), and
+// `scene.background` is exactly what a photographer's paper backdrop is. Warm and neutral rather than
+// themed, because this scene is a materials/lighting experiment, not a brand film; `bodyColor` still
+// lets a caller tint the ground to match, if it ever needs to.
+function warmBackdrop(colors) {
+  const c = typeof document !== 'undefined' ? document.createElement('canvas') : null;
+  if (!c) return null;
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(32, 40, 4, 32, 40, 60);
+  g.addColorStop(0, '#f3eade');
+  g.addColorStop(0.55, '#e7d9c3');
+  g.addColorStop(1, '#c9b79a');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 64, 64);
+  const tex = new (T().CanvasTexture)(c);
+  tex.colorSpace = T().SRGBColorSpace;
+  return tex;
+}
 
 // The buffer every code-* scene poses into: one interleaved mesh for the whole board, because 40
 // separate Meshes is 40 draw calls for a figure that is one object. `local` holds each vertex relative
@@ -921,9 +1052,9 @@ function codeGeometry(board, colors) {
 }
 
 export function createThreeLayer(w, h, L, colors) {
-  const canvas = document.createElement('canvas');
-  canvas.width = w; canvas.height = h;
-  const renderer = new (T().WebGLRenderer)({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
+  const glCanvas = document.createElement('canvas');
+  glCanvas.width = w; glCanvas.height = h;
+  const renderer = new (T().WebGLRenderer)({ canvas: glCanvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(1);                       // NEVER devicePixelRatio: it varies by machine
   renderer.setSize(w, h, false);
   renderer.setClearColor(0x000000, 0);
@@ -931,19 +1062,61 @@ export function createThreeLayer(w, h, L, colors) {
   const scene = new (T().Scene)();
   const camera = new (T().PerspectiveCamera)(L.fov ?? 35, w / h, 0.1, 100);
   camera.position.set(0, 0, L.dolly ?? 5.2);
-  studio(renderer, scene, colors);
+  const rig = studio(renderer, scene, colors);
 
   const make = SCENES[L.three];
   if (!make) throw new Error(`unknown three scene "${L.three}", one of: ${THREE_FX.join(', ')}`);
   const built = make(L, colors);
   scene.add(built.obj);
 
+  // GROUNDING IS OPT-IN, per scene. `studio()`'s lights and room IBL are tuned for a METAL body
+  // catching a handful of specular hits (deviceShowcase); summed with no tone mapping onto a matte
+  // diffuse ground they clip straight to white, and a REAL shadow map on top of that clipped white
+  // renders and is simply invisible (measured: a WebGLRenderer shadow map wired exactly per three's
+  // own docs, `PCFSoftShadowMap`, `castShadow`/`receiveShadow`, the light's `target` added to the
+  // scene, produced a flat, shadowless floor at every frustum and bias tried). Rather than keep
+  // fighting a light rig built for something else, this scene fakes the contact shadow the honest way
+  // cheap 3D has always faked it: a soft radial decal, unlit, scaled and darkened by how close the
+  // plane sits to the ground. It is a poorer shadow than a real one done right, and it is the one that
+  // actually shows up on screen; the case for the real thing is in this scene's remaining-differences
+  // note in the render report, not silently swallowed here.
+  if (built.shadow) {
+    renderer.toneMapping = T().ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+  }
+  if (built.background) scene.background = built.background;
+
+  // MOTION BLUR, IN-CANVAS. core/tracks/motion.js's automatic blur reads the LAYER'S OWN motion
+  // keyframe track (`velocityAt` off `L.motion`) to find a speed; a three scene's move lives inside
+  // `pose(t)`, entirely off that track, so the layer's box never moves and that sampler always reads
+  // zero. The fast rise this scene poses is therefore invisible to the shared blur, and the fix is NOT
+  // to teach the shared sampler about a three scene's internal state (that is core/tracks/motion.js and
+  // core/fx/ghost.js's one shared owner, and a second one reading the same fact is the exact drift
+  // MISTAKES #423 already logged against). Instead: `blur` samples pose() at a few offsets around t,
+  // inside its own exposure window, and composites them translucently, the same shutter-accumulation
+  // idea `smear()` approximates with a CSS filter, done for real because here the geometry is real.
+  // Still pure in t: every tap is pose(t + offset), a fresh render with no memory of any other frame.
+  const taps = Math.max(1, Math.min(8, Math.round(L.blur === true ? 5 : (+L.blur || 0)) || 1));
+  const outCanvas = taps > 1 ? document.createElement('canvas') : glCanvas;
+  let octx = null;
+  if (taps > 1) { outCanvas.width = w; outCanvas.height = h; octx = outCanvas.getContext('2d'); }
+
   return {
-    canvas,
-    draw(t, LL) { built.pose(t, LL); renderer.render(scene, camera); },
+    canvas: outCanvas,
+    draw(t, LL) {
+      if (taps <= 1) { built.pose(t, LL); renderer.render(scene, camera); return; }
+      const shutter = LL.shutterSecs ?? (1 / 30) * 0.6;
+      octx.clearRect(0, 0, w, h);
+      octx.globalAlpha = 1 / taps;
+      for (let i = 0; i < taps; i++) {
+        built.pose(t + ((i / (taps - 1)) - 0.5) * shutter, LL);
+        renderer.render(scene, camera);
+        octx.drawImage(glCanvas, 0, 0);
+      }
+    },
     // off-window must WIPE. Otherwise the buffer holds whichever frame a worker drew last and the
     // canvas is a function of render order rather than of t (core/layers/shader.js, paint.js).
-    clear() { renderer.clear(); },
+    clear() { renderer.clear(); if (octx) octx.clearRect(0, 0, w, h); },
     dispose() { renderer.dispose(); },
   };
 }

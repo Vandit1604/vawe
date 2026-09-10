@@ -1,0 +1,48 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 6,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 6
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "Deterministic",
+      "x": 160,
+      "y": 430,
+      "w": 1600,
+      "size": 150,
+      "weight": 800,
+      "align": "center",
+      "start": 0.3,
+      "duration": 5.4,
+      "motion": [
+        {
+          "t": 0,
+          "y": 40,
+          "opacity": 0
+        },
+        {
+          "t": 0.775,
+          "y": -2.4,
+          "opacity": 1,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 1.25,
+          "y": 0,
+          "ease": "easeOutCubic"
+        }
+      ]
+    }
+  ]
+}

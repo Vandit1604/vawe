@@ -419,6 +419,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `extrudeText` | a real font outline extruded into a lit 3D solid that rotates through space |
 | `globe` | a rotating globe of land dots, with arcs available between coordinates |
 | `liquidBackground` | a subdivided plane churning under summed sine displacement, specular highlights sliding across the swells |
+| `litPlane` | a captured UI plane, LIT (MeshStandardMaterial under the studio rig, not MeshBasicMaterial), rising with a tilt and a rotation into a soft-shadowed ground with an overshoot settle; `blur` opts it into a shutter-accumulated smear on the fast rise |
 | `magnetic` | field lines arcing from pole to pole, traced from the real summed inverse-square field, with charges sliding along them |
 | `pointCloud` | a GPU point cloud: thousands of lit points posed absolutely from t |
 | `shatter` | one solid slab holds, then breaks into a seeded grid of shards that tumble outward and toward camera |
@@ -1169,4 +1170,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_726 effects across 59 families. Regenerate: `make effects`._
+_727 effects across 59 families. Regenerate: `make effects`._

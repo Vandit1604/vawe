@@ -1,0 +1,61 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 6,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 6
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "Deterministic",
+      "x": 160,
+      "y": 430,
+      "w": 1600,
+      "size": 150,
+      "weight": 800,
+      "align": "center",
+      "start": 0.3,
+      "duration": 5.4,
+      "motion": [
+        {
+          "t": 0,
+          "x": 0
+        },
+        {
+          "t": 0.297,
+          "x": -154.8,
+          "ease": "linear"
+        },
+        {
+          "t": 0.523,
+          "x": -288,
+          "ease": "linear"
+        },
+        {
+          "t": 0.782,
+          "x": -447,
+          "ease": "linear"
+        },
+        {
+          "t": 1.04,
+          "x": -541.8,
+          "ease": "linear"
+        },
+        {
+          "t": 1.25,
+          "x": -600,
+          "ease": "easeOutCubic"
+        }
+      ]
+    }
+  ]
+}
