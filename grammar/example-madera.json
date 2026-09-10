@@ -30,7 +30,7 @@
   "frames": 782,
   "unique": 689,
   "pages": 35,
-  "ledger": "incomplete"
+  "ledger": "complete"
  },
  "shots": [
   {
@@ -68,9 +68,9 @@
     2.1,
     2.4
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null,
+   "onScreen": "a tilted macOS-style app window titled 'New Agent' (traffic-light dots, a sidebar with Search/Suggestions and a staggered Chats list of about 13 prior requests, a user profile at the bottom); a prompt bar with a blue 'Ask' tag types 'Help me find a new paper lamp' letter by letter, each letter flashing a colour before settling to ink, then a hand cursor rises to the send button and clicks it",
+   "moves": "camera does one continuous dolly-in/focus-rack the whole shot: blurred and tilted at 0s, sharp and closer by 4.54s, panning right as it goes; the sidebar list staggers in row by row; the prompt text types with a per-letter colour flash; the send button turns green on the click",
+   "trigger": "the film opens already in motion (no prior joint)",
    "content": {
     "colorfulness": 13.2,
     "band": "not",
@@ -99,9 +99,9 @@
     1.9,
     1.7
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null,
+   "onScreen": "the window has shrunk to a small green 'sent' pulse and motion-blurs away; 'MADERA' and 'understands' begin entering from the right",
+   "moves": "the sent window exits left/shrinks with heavy motion blur while the tagline's first two words slide in from the right, each its own colour",
+   "trigger": "the send button click fires the exit",
    "content": {
     "colorfulness": 3.9,
     "band": "not",
@@ -130,9 +130,9 @@
     2.2,
     1.8
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null,
+   "onScreen": "'MADERA understands your taste.' finishes entering word by word and settles; 'taste.' keeps its blue accent colour while the rest goes dark ink; faint grey triangle/square/circle shapes drift behind",
+   "moves": "static camera hold once the words land; only the background shapes drift slowly; the accent word 'taste.' desaturates to ink last",
+   "trigger": "the tagline's own entrance completes",
    "content": {
     "colorfulness": 0.1,
     "band": "not",
@@ -160,9 +160,9 @@
     27.8,
     5.2
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null,
+   "onScreen": "the settled tagline drifts left and exits with motion blur; a swipe card (a room-interior photo, Pass/Like buttons) enters from the bottom-right",
+   "moves": "the tagline exits left with heavy motion blur while the first swipe card slides in from the right, ground beginning to tint pale blue-grey",
+   "trigger": "the tagline finishes its hold and is pushed out by the next act arriving",
    "content": {
     "colorfulness": 25.4,
     "band": "slightly",
@@ -194,9 +194,9 @@
     8.4,
     27.4
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null,
+   "onScreen": "a stack of three swipe cards (blue-grey room, warm leather living room, Japandi wood room) is dragged left one at a time by a hand cursor pressing each 'Like' button, which recolours to match the photo (teal, olive, red); the ground crossfades to match each card",
+   "moves": "a slight continuous camera push on the card stack; each card exits left with motion blur as the next enters from the right, three times, the ground re-tinting with each swap",
+   "trigger": "the hand cursor's presses on 'Like' cause each card's exit",
    "content": {
     "colorfulness": 26.3,
     "band": "slightly",
@@ -224,9 +224,9 @@
     7,
     1.6
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null,
+   "onScreen": "the third card exits left with motion blur, the brick-red ground fading back toward light grey; 'MADERA' and 'find' begin entering from the right for the second tagline",
+   "moves": "the last card's exit motion-blur overlaps the next tagline's first words sliding in from the right",
+   "trigger": "the last card is dragged out of frame",
    "content": {
     "colorfulness": 2.7,
     "band": "not",
@@ -256,9 +256,9 @@
     1.9,
     6.4
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null,
+   "onScreen": "'MADERA find items you love.' finishes entering word by word and settles; 'love.' keeps its red accent colour while the rest goes dark ink; the same faint shapes drift behind",
+   "moves": "static camera hold once the words land; background shapes drift; 'love.' desaturates to ink last, then the whole line begins to blur",
+   "trigger": "the second tagline's own entrance completes",
    "content": {
     "colorfulness": 6.1,
     "band": "not",
@@ -287,9 +287,9 @@
     6.8,
     4.9
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null,
+   "onScreen": "the second tagline exits straight up with heavy motion blur; a tilted results window begins rising from the bottom of frame, its heading starting to type 'Japandi and Modern Paper...'",
+   "moves": "the tagline exits UP (axis change from the acts before it) while the results window rises on y from below, overlapping",
+   "trigger": "the tagline finishes its hold and is pushed upward by the next act arriving",
    "content": {
     "colorfulness": 15.5,
     "band": "slightly",
@@ -318,9 +318,9 @@
     11.4,
     18.5
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null,
+   "onScreen": "the results window's heading finishes typing 'Japandi and Modern Paper Lamps' while a 3x2 grid of captioned lamp photos fills in beneath it",
+   "moves": "a slow continuous camera dolly-in on the window as its heading types and the grid fills in tile by tile",
+   "trigger": "the window reaches its risen position and the heading starts typing",
    "content": {
     "colorfulness": 18.8,
     "band": "slightly",
@@ -354,9 +354,9 @@
     0,
     0
    ],
-   "onScreen": null,
-   "moves": null,
-   "trigger": null,
+   "onScreen": "the full results window holds briefly, then rises straight up and exits with motion blur, ground fading from olive to light grey; small coloured marks (a blue triangle, red squares, a green dot, a tan square) fly in and assemble letter by letter into the bold 'MADERA' wordmark, which holds centred to the end",
+   "moves": "the window exits UP with motion blur; the marks fly in from scattered positions and land as letterforms one at a time; camera holds static once the wordmark lands",
+   "trigger": "the results window's hold ends and it is pushed upward; the wordmark assembly is the film's closing beat, no further joint",
    "content": {
     "colorfulness": 1.5,
     "band": "not",
