@@ -40,7 +40,7 @@ import { flattenLayers } from '../../harness/lib/layers.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/timeline/junctions.js';
-import { population, LIBRARY } from '../../harness/lib/census.mjs';
+import { population, AUTHORED } from '../../harness/lib/census.mjs';
 
 // ── THE 15 EXPRESSIVE FAMILIES, named once ──────────────────────────────────────────────────────
 // Both the per-film `vocab` (below, from `sig`) and the library-wide census (`libraryProfile`) key on
@@ -66,14 +66,16 @@ const HIGH_VALUE = [
 // still be indistinguishable from the last twenty. So this asks a different question: not "how many
 // families" but "which ones, measured against what the library itself already leans on".
 //
-// libraryProfile() answers it from real files, not a guess: for every film this checkout can see (the
-// same `LIBRARY` population `make census`/`make unused` walk), which of the 15 families does it use at
-// least once, and what cadence (stagger / per-unit `each`) values does it author. The result moves as
-// the library moves; nobody has to remember to update a threshold when the library's habits change.
+// libraryProfile() answers it from real files, not a guess: for every AUTHORED film this checkout can
+// see (harness/lib/census.mjs: a `.storyboard.md` sidecar, not the bigger `LIBRARY` population, because
+// LIBRARY still carries still-tile catalogues and held-still demos that would drag this floor down for
+// having never moved on purpose), which of the 15 families does it use at least once, and what cadence
+// (stagger / per-unit `each`) values does it author. The result moves as the library moves; nobody has
+// to remember to update a threshold when the library's habits change.
 let _libProfile = null;
 function libraryProfile() {
   if (_libProfile) return _libProfile;
-  const { names, blind } = population('direction-floor · library profile', { filter: LIBRARY, quiet: true, soft: true });
+  const { names, blind } = population('direction-floor · library profile', { filter: AUTHORED, quiet: true, soft: true });
   const dir = path.join(repoRoot, 'formats/scene');
   const famCount = {};
   const cadence = [];

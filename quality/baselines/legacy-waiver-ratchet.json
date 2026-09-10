@@ -5,10 +5,10 @@
  "feature-poverty": 78,
  "linear-motion": 1,
  "monotone-timing": 2,
- "no-authored-motion": 22,
+ "no-authored-motion": 2,
  "no-preflight": 172,
  "no-storyboard": 127,
- "plain-slideshow": 48,
+ "plain-slideshow": 2,
  "restated-headline": 5,
- "static-bg": 64
+ "static-bg": 2
 }
