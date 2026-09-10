@@ -130,7 +130,8 @@ const identical = [], changed = [], quarantined = [], errored = [], saved = [], 
 for (const scene of scenes) {
   const name = scene.replace(/\.json$/, '');
   let cfg = {}, raw = '';
-  try { raw = fs.readFileSync(path.join(dir, scene), 'utf8'); cfg = JSON.parse(raw); } catch {}
+  try { raw = fs.readFileSync(path.join(dir, scene), 'utf8'); cfg = JSON.parse(raw); }
+  catch (e) { errored.push(`${name}: unreadable or invalid JSON: ${e.message}`); continue; }
   // `formats/scene/scene.js` never expands `block`/`beat`/`comp` sugar itself (deliberate, its own
   // banner says why); boot the already-expanded form instead, the same trick every browser-side sweep
   // in this repo now uses (harness/lib/render-harness.mjs `bootPathFor`).

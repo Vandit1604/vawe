@@ -1336,7 +1336,12 @@ if (isMain) {
         // only actual scenes: a formats/ dir also holds planning artifacts (*.intent.json carries
         // beats, not layers). "Declares a module" is the honest test for "the renderer would read it".
         const fp = path.join(dir, n);
-        try { if (!JSON.parse(fs.readFileSync(fp, 'utf8')).module) continue; } catch { }
+        // A parse failure here must still reach the per-target loop below, which reports "unreadable
+        // JSON" loudly: silently excluding it from the default sweep would mean a corrupt scene never
+        // gets validated by anyone who runs this with no args (the whole point of the default, above).
+        let mod;
+        try { mod = JSON.parse(fs.readFileSync(fp, 'utf8')).module; } catch { targets.push(fp); continue; }
+        if (!mod) continue;
         targets.push(fp);
       }
     }
@@ -1356,7 +1361,9 @@ if (isMain) {
 
   // Anti-rot guard: the cue enum in schema.json is DISCOVERABILITY only (so authors + MCP can see the
   // valid names); CUES is the source of truth. If they drift, the schema lies, fail loudly to resync.
-  try {
+  {
+    // formats/scene/schema.json is repo-owned and required: a read/parse failure here is a real
+    // corruption, not an optional file, so let it fail loud rather than skip the anti-rot guard silently.
     const ss = readJSON(path.join(root, 'formats/scene/schema.json'));
     const el = ss?.fields?.audio?.fields?.cues?.item?.name?.enum || [];
     // Superset guard: every live CUE must be documented. The enum MAY also carry baked ALIASES
@@ -1364,7 +1371,7 @@ if (isMain) {
     // the enum OMITS is drift, extra alias names are legal.
     const missing = CUE_NAMES.filter((n) => !el.includes(n));
     if (el.length && missing.length) { console.error(`✗ schema drift: formats/scene/schema.json audio.cues enum omits live CUES (${missing.join(', ')}), add them.`); failed++; }
-  } catch { }
+  }
 
   for (const file of targets) {
     let data, schema;
@@ -1453,7 +1460,7 @@ if (isMain) {
     const readRef = (p) => {
       for (const b of [null, path.dirname(file), root]) {
         const abs = b == null ? (path.isAbsolute(p) ? p : null) : path.join(b, p.replace(/^\/+/, ''));
-        try { if (abs && fs.existsSync(abs) && fs.statSync(abs).isFile()) return fs.readFileSync(abs, 'utf8'); } catch { }
+        try { if (abs && fs.existsSync(abs) && fs.statSync(abs).isFile()) return fs.readFileSync(abs, 'utf8'); } catch {} // this base didn't resolve; the next base (or the null return below) is the real answer
       }
       return null;
     };
