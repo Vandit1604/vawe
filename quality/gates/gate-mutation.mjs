@@ -226,10 +226,17 @@ const CASES = [
   // ---- validator: must FAIL on vocabulary that does not exist ----
   { gate: 'validate', name: 'unknown anim name', expect: 'fail', match: /anim|not valid/i,
     scene: scene([TXT({ anim: 'slideL' })]) },
-  { gate: 'validate', name: 'unknown cut style', expect: 'fail', match: /style|not valid/i,
-    scene: scene([TXT()], { cuts: [{ t: 1, style: 'teleport' }] }) },
+  // WRITTEN AS transitions[], NOT cuts[]. cuts[] is the lowered internal form and the validator now
+  // refuses the key outright, so the old spelling made this fixture pass on the refusal of the KEY
+  // while never once testing an unknown style NAME. A fixture that fires for the wrong reason is a
+  // fixture that proves nothing, and this file exists to check the checkers.
+  { gate: 'validate', name: 'unknown cut style', expect: 'fail', match: /unknown transition fx/,
+    scene: scene([TXT()], { transitions: [{ at: 1, fx: 'teleport' }] }) },
+  // The refusal of the lowered key is its own case, so both halves stay pinned.
+  { gate: 'validate', name: 'cuts[] written directly is refused', expect: 'fail', match: /no longer an authored key/,
+    scene: scene([TXT()], { cuts: [{ t: 1, style: 'softwipe' }] }) },
   { gate: 'validate', name: 'valid scene passes', expect: 'pass',
-    scene: scene([TXT({ anim: 'lift' })], { cuts: [{ t: 1, style: 'softwipe' }] }) },
+    scene: scene([TXT({ anim: 'lift' })], { transitions: [{ at: 1, fx: 'softwipe' }] }) },
 
   // A bg window's `opts` are the fx knobs of THAT preset. Liquid's knobs on a dot preset used to be
   // accepted by the schema and dropped by the engine: correct-looking JSON, unchanged render. Both
@@ -245,7 +252,7 @@ const CASES = [
   // neither. `src` re-uses a key the schema already gives to an image and to a captured component, so
   // schema-drift is name-based and cannot see the third meaning arrive; these four cases are the only
   // thing standing between that key and a silent widening.
-  { gate: 'validate', name: 'html layer · inline html AND a src file', expect: 'fail', match: /a fragment has ONE source/,
+  { gate: 'validate', name: 'html layer · inline html AND a src file', expect: 'fail', match: /a fragment has ONE source/i,
     scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2,
       html: '<div style="color:#fff">inline</div>', src: 'quality/fixtures/mut-frag-clean.html' }]) },
   { gate: 'validate', name: 'html layer · neither html nor src', expect: 'fail', match: /neither `html` nor `src`/,
