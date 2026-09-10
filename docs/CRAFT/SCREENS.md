@@ -94,10 +94,10 @@ validated by the repo's own theme contract test, then re-runs with `--theme <nam
 
 Loaded (visual/typography categories, the smallest useful set for two SaaS product screens):
 
-- **`dammyjay93/interface-design`** — used for: one focal element per screen (the prompt in `editor`,
+- **`dammyjay93/interface-design`**: used for one focal element per screen (the prompt in `editor`,
   the hero tile in `grid`), a named domain signature over a generic dashboard template, and systemic
   intent (a dark "editor window" ground, not a mixed light/dark mess).
-- **`jakubkrehel/better-typography`** — used for: a small type scale with semantic roles instead of
+- **`jakubkrehel/better-typography`**: used for a small type scale with semantic roles instead of
   literal sizes (this repo's own kit ramp already IS that scale), tabular numbers on changing values,
   and staying at or above the sizes that hold up at 1920px wide.
 
