@@ -1,6 +1,6 @@
 ---
 when: "you are about to add a feature to `make studio`, or you want to know why a feature the other video editors have is deliberately absent here"
-answers: "what another engine Studio and another engine Studio really do (interaction model, timeline, refresh loop, assets) · a COPY / REJECT table with a reason per row · a ranked build list for `harness/dev/studio.mjs` with costs · the three to build first"
+answers: "what another engine Studio and another engine Studio really do (interaction model, timeline, refresh loop, assets) · a COPY / REJECT table with a reason per row · a ranked build list for `studio/server.mjs` with costs · the three to build first"
 group: reference
 ---
 
@@ -8,19 +8,19 @@ group: reference
 
 ## AGENT SUMMARY
 
-- Read this before adding a feature to `make studio` (`harness/dev/studio.mjs`): it holds the COPY/REJECT
+- Read this before adding a feature to `make studio` (`studio/server.mjs`): it holds the COPY/REJECT
   verdict (§4) and the ranked build list with costs (§5) for every candidate feature, each with a reason.
-- `harness/dev/studio.mjs` is ONE file: no build step, no dependency, no framework, light theme by
+- `studio/server.mjs` is ONE file: no build step, no dependency, no framework, light theme by
   default. A feature that needs a bundler, a component tree, or a second way to say what the JSON
   already says is a bad borrow no matter how good it is in another engine or another engine.
 - Checkable action: before building, find your feature's row in §4; if it says REJECT, read the reason
-  before reopening the question. `[ref: harness/dev/studio.mjs]`
+  before reopening the question. `[ref: studio/server.mjs]`
 
 Two other systems ship a developer-facing video editor. Both are far ahead of ours on features, and
 both are built on a format ours does not have. This file reads them, then says which of their
 decisions belong here.
 
-**The constraint that decides every row below.** `harness/dev/studio.mjs` is ONE file: a Node server
+**The constraint that decides every row below.** `studio/server.mjs` is ONE file: a Node server
 plus a page written as a template literal, no build step, no dependency, no framework, light theme by
 default because vawe is a white-first product. The scene it edits is a JSON file that a human or an
 agent opens and edits directly. A feature that needs a bundler, a component tree, or a second way to

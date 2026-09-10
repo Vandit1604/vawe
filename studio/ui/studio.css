@@ -1,0 +1,470 @@
+ @font-face{font-family:Anybody;src:url(/assets/fonts/Anybody.woff2) format('woff2');font-weight:100 900;font-display:swap}
+ @font-face{font-family:'JetBrains Mono';src:url(/assets/fonts/JetBrainsMono.woff2) format('woff2');font-weight:100 800;font-display:swap}
+ /* The greys, and nothing but. #1C1C1C #2E2E2E #4A4A4A #8A8A8A #E8E8E8 are the five the room is built
+    from; the rest are steps between them. Lines are black/white at low alpha so a panel is separated by
+    structure rather than by a heavy border. */
+ /* THE TIMELINE IS A VIEWPORT ONTO A LIST, NOT A LIST THAT DICTATES A HEIGHT. It used to open tall
+    enough to fit every bar, which on a 19-layer film took 439px of a 806px window and left the stage
+    212px, so a 16:9 film rendered 320px wide inside an 1100px stage: 29% of the width, all measured.
+    A fixed default and a scrolling row list gives that height to the picture, and a 40-layer film has
+    no default that would have fitted anyway. The divider still overrides this, and it sticks.
+    THE RAIL IS SIZED FOR WHAT IT WILL HOLD: six candidate takes read as a strip of 16:9 thumbs, two to
+    a row, which wants ~190px a thumb. It costs the picture nothing, because the film is fitted by
+    HEIGHT, so narrowing the stage takes away grey rather than picture. */
+ :root{--tlh:240px;--rail:clamp(300px,28vw,420px);--pad:8px;--r-out:12px;--r-in:calc(var(--r-out) - var(--pad))}
+ :root[data-theme=light]{color-scheme:light;
+   --bg:#F2F2F2;--panel:#FFFFFF;--panel-2:#F7F7F7;--field:#EDEDED;--stage:#E8E8E8;
+   --line:rgba(0,0,0,.10);--line-2:rgba(0,0,0,.20);
+   --ink:#1C1C1C;--ink-2:#4A4A4A;
+   /* #8A8A8A was 3.4:1 on white and every dim label in this room is 10 to 11px. Measured, not
+      guessed: #6E6E6E is 5.1:1 on the panel and 4.8:1 on the panel's own body fill. Still a grey. */
+   --muted:#6E6E6E;
+   --accent:#2563eb;--accent-soft:#EDF2FE;
+   --bad:#a3282d;--bad-bg:#FBF4F4;--hz:#a3282d;--hz-beat:#8a5a00;--hz-mute:#8A8A8A;
+   --wash:#1C1C1C;--wash-a:.34;
+   /* THREE ELEVATIONS, AND THEY ARE LOAD-BEARING. A coloured interface separates a panel from its
+      ground by tint; this room has no hue to spend, so depth is the only separator left. One heavy
+      pair of layers reads as fog on grey, so each step is a RAMP: many small offsets at low alpha,
+      each roughly doubling its blur, which is what makes a shadow read as distance rather than as
+      smudge. Neutral black only: the borrowed recipe tints its ring rgba(25,28,33), a blue-grey, and
+      a tinted shadow is a hue in the surround. Refused. */
+   --sh-1:0 1px 1px rgba(0,0,0,.04),0 2px 4px -2px rgba(0,0,0,.06);
+   --sh-2:0 1px 1px -.5px rgba(0,0,0,.04),0 3px 3px -1.5px rgba(0,0,0,.04),0 7px 7px -3.5px rgba(0,0,0,.045),0 16px 16px -8px rgba(0,0,0,.05);
+   --sh-3:0 2px 3px -1.5px rgba(0,0,0,.06),0 6px 9px -4px rgba(0,0,0,.08),0 16px 22px -10px rgba(0,0,0,.10),0 34px 46px -20px rgba(0,0,0,.13);
+   --shadow:var(--sh-2)}
+ /* the black room. The ground is true black (#000000, not a dark grey), because a grey ground still
+    reads as a tint in the achromatic surround this pane is built to remove. The stage sits at #2E2E2E,
+    the value the brief names, so the picture stays the brightest thing in the frame. Panel/panel-2/
+    field step up from #000 in small, deliberate jumps: on true black a shadow ramp casts no visible
+    shadow (there is no light to fall short of), so LINE CONTRAST carries separation instead, and
+    --line/--line-2 are bumped a step darker-ground demands to stay legible (measured below). */
+ :root[data-theme=dark]{color-scheme:dark;
+   --bg:#000000;--panel:#0D0D0D;--panel-2:#161616;--field:#080808;--stage:#2E2E2E;
+   /* Measured against #000000, the darkest this room gets: rgba(255,255,255,.16) is 1.44:1, a soft
+      hairline; .35 is 3.00:1, WCAG 1.4.11's floor for a UI boundary that has to actually read as one
+      (a beat border, the stage strip). The light theme's .10/.20 read fine on #F2F2F2; this ground is
+      #000, so the same alpha draws a line nobody can see. */
+   --line:rgba(255,255,255,.16);--line-2:rgba(255,255,255,.35);
+   --ink:#E8E8E8;--ink-2:#B4B4B4;--muted:#8A8A8A;
+   /* the engine's #2563eb lifted one step for the dark room: same hue, readable on #0D0D0D */
+   --accent:#3d7bf5;--accent-soft:#1a2740;
+   --bad:#e0787f;--bad-bg:#2A1B1D;--hz:#e0505f;--hz-beat:#d69a30;--hz-mute:#8A8A8A;
+   --wash:#000;--wash-a:.42;
+   /* the dark room has less lightness to spend on separation, so the same ramp runs deeper */
+   --sh-1:0 1px 1px rgba(0,0,0,.28),0 2px 4px -2px rgba(0,0,0,.34);
+   --sh-2:0 1px 1px -.5px rgba(0,0,0,.28),0 3px 3px -1.5px rgba(0,0,0,.28),0 7px 7px -3.5px rgba(0,0,0,.3),0 16px 16px -8px rgba(0,0,0,.34);
+   --sh-3:0 2px 3px -1.5px rgba(0,0,0,.4),0 6px 9px -4px rgba(0,0,0,.44),0 16px 22px -10px rgba(0,0,0,.5),0 34px 46px -20px rgba(0,0,0,.6);
+   --shadow:var(--sh-2)}
+ /* narrow screens: the rail gives its width back to the picture, and the chrome keeps one line */
+ @media (max-width:1240px){:root{--rail:212px}}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden;
+   font:12.5px/1.45 Anybody,system-ui,-apple-system,sans-serif;font-variation-settings:'wdth' 100}
+ /* every digit that can change sits in the mono face with tabular figures, so a frame counter ticking
+    from 9 to 10 does not shove the seconds beside it */
+ .num,#read,#sel,input,#pickjson,#lanes,#zlab,#peekt,#candstat .el{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+ h2{margin:0;font:600 11px/1 Anybody,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+ #shell{display:flex;height:100vh;gap:var(--pad);padding:var(--pad)}
+ /* ---- left rail: a column of panels. One today. A second one is another <section class=panel>. ---- */
+ #rail{width:var(--rail);flex:none;display:flex;flex-direction:column;gap:var(--pad);overflow:auto}
+ /* the keys sit at the foot of the rail, so a column with one panel in it does not read as unfinished */
+ /* the panels size to what is in them and the keys sit at the foot of the column. Stretching the
+    chooser to fill the rail was tried and looked worse: an empty PANEL reads as broken, empty GROUND
+    reads as room. */
+ .panel.keys{margin-top:auto} .panel.keys .body p{font-size:11px;line-height:2}
+ .panel{background:var(--panel);border-radius:var(--r-out);box-shadow:var(--shadow);
+   outline:1px solid var(--line);outline-offset:-1px;padding:var(--pad);display:flex;flex-direction:column;gap:var(--pad)}
+ .panel .body{background:var(--panel-2);border-radius:var(--r-in);padding:10px;color:var(--ink-2);font-size:12px}
+ .panel .body p{margin:0 0 8px} .panel .body p:last-child{margin:0}
+.muted{color:var(--muted)}
+ .stub{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:11px}
+ .stub i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
+ #main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:var(--pad)}
+ /* ---- top bar: the breadcrumb, then the app chrome. Nothing here touches the picture, which is why
+    it is not in the transport: a row of five equal buttons beside a scrubber has no rank. ---- */
+ #top{display:flex;align-items:center;gap:6px;flex:none;min-height:30px}
+ #top .sp{flex:1}
+ #crumbs{display:flex;align-items:center;gap:6px;min-width:0;padding:0 4px;height:22px;color:var(--muted);font-size:12px;overflow:hidden;white-space:nowrap}
+ #crumbs button{background:none;border:0;color:var(--ink-2);cursor:pointer;padding:2px 6px;border-radius:6px;font:inherit}
+ #crumbs button:hover{background:var(--panel-2);color:var(--ink)}
+ #crumbs button[aria-current=page]{color:var(--ink);font-weight:600;cursor:default}
+ #crumbs .sep{color:var(--muted);opacity:.7}
+ #crumbs .none{color:var(--muted);font-size:11px}
+ /* ---- centre: the preview, then the transport ---- */
+ #centre{flex:1;min-height:120px;flex-basis:0;display:flex;flex-direction:column;background:var(--panel);border-radius:var(--r-out);
+   box-shadow:var(--shadow);outline:1px solid var(--line);outline-offset:-1px;padding:var(--pad);gap:var(--pad);overflow:hidden}
+ #stage{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;
+   background:var(--stage);border-radius:var(--r-in);cursor:crosshair}
+ iframe{border:0;background:#fff;box-shadow:0 20px 60px -24px rgba(0,0,0,.6);flex:none}
+ #bar{display:flex;align-items:center;gap:14px;flex:none;padding:0 2px}
+ #scrub{flex:1;min-width:80px;accent-color:var(--accent);height:22px}
+ #scrub:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+ button{background:var(--panel-2);color:var(--ink);border:1px solid var(--line-2);border-radius:8px;padding:6px 11px;cursor:pointer;
+   font:600 12px/1 Anybody,system-ui,sans-serif;white-space:nowrap}
+ button:hover{background:var(--field);border-color:var(--muted)}
+ /* a control that is working is not a control you can press: say so, rather than looking pressable and
+    doing nothing (the chooser disables itself for the fifteen seconds it is rendering) */
+ button:disabled{opacity:.5;cursor:default} button:disabled:hover{background:var(--panel-2);border-color:var(--line-2)}
+ button:active{transform:translateY(1px)}
+ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+ button[aria-pressed=true],#tgl[aria-expanded=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+ /* the icons are drawn here, one set, stroked at 1.5 to sit beside 12px labels */
+ button svg{width:13px;height:13px;vertical-align:-2px;margin-right:5px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+ button svg.solid{fill:currentColor;stroke:none}
+ /* the frame number is the one figure a person watches all day, so it is the largest thing in the row */
+ #read{flex:none;color:var(--ink);font-size:15px;letter-spacing:-.01em}
+ #read b{font-weight:700} #read .of{color:var(--muted);font-weight:400;font-size:13px}
+ /* the selection readout is a status line under the transport, not a column that grows */
+ #sel{flex:none;min-height:14px;color:var(--ink-2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ /* ---- the divider: the preview and the timeline compete for height, so the user arbitrates ---- */
+ #split{flex:none;height:9px;cursor:row-resize;display:flex;align-items:center;justify-content:center;border-radius:5px;
+   touch-action:none;user-select:none}
+ #split:hover,#split.on{background:var(--panel-2)}
+ #split::after{content:'';width:44px;height:3px;border-radius:2px;background:var(--line-2)}
+ #split:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+ /* ---- timeline ---- */
+ #tl{height:var(--tlh);flex:none;background:var(--panel);border-radius:var(--r-out);box-shadow:var(--shadow);
+   outline:1px solid var(--line);outline-offset:-1px;display:flex;flex-direction:column;overflow:hidden}
+ #tl.off{height:36px} #tl.off #lanes,#tl.off #alerts{display:none} #tl.off+#split,body.tloff #split{visibility:hidden}
+ #tlhead{display:flex;align-items:center;gap:10px;padding:9px 12px;color:var(--ink-2);font-size:11px;border-bottom:1px solid var(--line);flex:none}
+ #tlhead b{font:700 12px/1 Anybody,system-ui,sans-serif;color:var(--ink)}
+ #tlkey{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+ #tlhead .sp{flex:1} #tlhead .k{display:inline-flex;align-items:center;gap:4px;margin-left:8px;color:var(--muted)}
+ #tlhead .k i{width:9px;height:9px;border-radius:2px;display:inline-block}
+ #alerts:empty{display:none}
+ #alerts{padding:8px 12px 0;display:flex;flex-wrap:wrap;gap:6px;flex:none}
+ #alerts span{background:var(--bad-bg);border:1px solid var(--bad);color:var(--bad);border-radius:6px;padding:3px 8px;font-size:11px}
+ #alerts span.dis{background:var(--panel-2);border-color:var(--line-2);color:var(--ink-2)}
+ /* the rows scroll under a pinned ruler. #tlbody is the VISIBLE box, and the playhead lives there
+    rather than in the scroller, so it spans what you can see instead of scrolling off the top. */
+ #tlbody{position:relative;flex:1;min-height:0;display:flex}
+ /* ---- ZOOM ------------------------------------------------------------------------------------------
+    A 14 second film fits and a 60 second one does not, and until now there was no way to look closely at
+    one seam. Every position on this timeline is a PERCENTAGE of the ruler, so zoom is one number: the
+    scrolling contents get wider and every mark follows without a single coordinate being recomputed.
+    The playhead is the anchor, so zooming in keeps the frame you are on under the pointer's own place. */
+ #tlhead .zoom{display:inline-flex;align-items:center;gap:6px;margin-left:4px}
+ /* the mono face for the two glyph buttons: Anybody draws a plus so small it reads as a dot */
+ /* the mono face for the glyph buttons: Anybody draws a plus so small it reads as a dot. Sized to the
+    other buttons in this bar rather than smaller: three sizes of button in one row is the tell of a
+    control added late. */
+ #tlhead .zoom button{position:relative;min-width:34px;min-height:34px;padding:5px 9px;
+   font:600 12px/1 'JetBrains Mono',ui-monospace,monospace;border-radius:6px}
+ /* THE HIT AREA IS 40x44 AND THE BUTTON IS NOT. A pointer target this small is a real cost in a tool
+    somebody drives all day, and it does not have to be paid in pixels: the box below reaches into the
+    header's own padding for height and to the MIDDLE of the 6px gap for width, so no two targets ever
+    overlap (which is its own failure) and nothing on screen grew past 34px. 44 in full is unreachable
+    horizontally: three controls 40px apart cannot each own 44px without stealing from each other. */
+ #tlhead .zoom button::after{content:'';position:absolute;left:-3px;right:-3px;top:50%;height:44px;transform:translateY(-50%)}
+ #tlhead .zoom s{text-decoration:none;color:var(--muted);margin-left:4px;font-family:'JetBrains Mono',ui-monospace,monospace}
+ #ruler,#film,#rows{width:calc(var(--z,1) * 100%)}
+ #lanes{position:relative;overflow-y:auto;overflow-x:auto;padding:0 12px 12px;cursor:col-resize;flex:1;
+   overscroll-behavior:contain;scrollbar-width:thin;user-select:none}
+ #lanes:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:var(--r-in)}
+ #tlbody::after{content:'';position:absolute;left:0;right:0;bottom:0;height:20px;z-index:4;pointer-events:none;
+   background:linear-gradient(transparent,var(--panel))}
+ #ruler{position:sticky;top:0;z-index:4;height:32px;background:var(--panel);border-bottom:1px solid var(--line)}
+ #ruler .t{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+ #ruler .t s{position:absolute;left:4px;top:2px;color:var(--ink-2);text-decoration:none;font-size:10px}
+ #ruler .t.end s{left:auto;right:4px}
+ #ruler .t s em{color:var(--muted);font-style:normal;margin-left:5px}
+ /* a transition is a moment, not a layer: it lives on the ruler, above every track */
+ #ruler .m{position:absolute;top:14px;bottom:0;border-left:2px solid var(--ink-2);color:var(--ink-2);padding-left:3px;font-size:10px;font-weight:700;white-space:nowrap}
+ #ruler .ms{position:absolute;top:14px;bottom:0;background:var(--ink-2);opacity:.12}
+ /* ---- THE FILMSTRIP: what the film LOOKS like, against the clock -----------------------------------
+    The bars say when a layer is open; they cannot say what is on screen. The strip is a band of real
+    frames pinned under the ruler, so the timeline is scannable by eye as well as readable by label.
+    It is never a replacement for the bars: two different questions, two registers, one clock.
+    Empty until the frames arrive, and it collapses to nothing rather than reserving a grey hole. */
+ #film{position:sticky;top:32px;z-index:3;height:56px;background:var(--field);border-bottom:1px solid var(--line)}
+ #film:empty{display:none}
+ #film .fr{position:absolute;top:0;bottom:0;background-size:cover;background-position:center;
+   box-shadow:inset -1px 0 0 var(--panel)}
+ #rows{position:relative}
+ /* ---- TYPED LANES: a film has kinds of row, and they are not all layers -----------------------------
+    Differentiated by WEIGHT, HEIGHT and TEXTURE, never by hue. Fifteen colours in the surround is the
+    one thing this room is built to avoid, and a lane's kind is a structural fact, so structure says it:
+    layers are solid and 16px, captions are a dashed outline half that weight, sound is a deep trough.  */
+ .lane-h{position:relative;height:15px;color:var(--muted);font:600 9px/15px Anybody,system-ui,sans-serif;
+   letter-spacing:.09em;text-transform:uppercase;border-top:1px solid var(--line);margin-top:5px;padding-left:1px}
+ .lane-h em{font-style:normal;text-transform:none;letter-spacing:0;font-size:10px;font-weight:400;margin-left:8px;
+   font-family:'JetBrains Mono',ui-monospace,monospace}
+ /* a caption is an ANNOTATION over the picture, so it is drawn as one: no fill, a dashed edge, and it
+    sits low in its row the way a subtitle sits low in a frame */
+ .row.cap{height:16px}
+ .cap b{position:absolute;bottom:0;height:12px;border:1px dashed var(--line-2);border-radius:2px;
+   color:var(--ink-2);font:400 10px/10px 'JetBrains Mono',ui-monospace,monospace;padding:0 4px;overflow:hidden;white-space:nowrap}
+ /* sound is a TROUGH, deeper than any bar, because it runs under the whole film rather than beside it */
+ .row.aud{height:30px}
+ .aud .bed{position:absolute;top:2px;bottom:2px;left:0;right:0;background:var(--field);
+   box-shadow:inset 0 0 0 1px var(--line-2);border-radius:3px;overflow:hidden}
+ /* the beat grid, because a seam is supposed to LAND on it and that is judgeable by eye the moment the
+    grid is drawn under the cuts. Downbeats are full height, the rest are half. */
+ .aud .bt{position:absolute;bottom:0;height:40%;width:1px;background:var(--ink-2);opacity:.30}
+ .aud .bt.db{height:100%;opacity:.55}
+ .aud .fade{position:absolute;top:0;bottom:0;background:var(--panel);opacity:.55}
+ .aud .cue{position:absolute;top:1px;width:1px;bottom:1px;background:var(--ink)}
+ .aud .cue s{position:absolute;left:3px;top:-1px;text-decoration:none;color:var(--ink-2);font-size:9px;white-space:nowrap}
+ .aud .br{position:absolute;top:2px;bottom:2px;border:1px solid var(--ink-2);border-radius:3px;
+   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink-2) 22%,transparent) 0 2px,transparent 2px 6px)}
+ .aud .name{position:absolute;left:5px;top:50%;transform:translateY(-50%);color:var(--ink-2);
+   font:400 10px/1 'JetBrains Mono',ui-monospace,monospace;pointer-events:none}
+.lane-h span,.lane-note span{position:sticky;left:0;display:inline-block;background:var(--panel);padding-right:8px}
+ .lane-note{position:relative;height:16px;color:var(--muted);font-size:10px;line-height:16px;padding-left:1px}
+ /* the ruler's ticks carried down through the stack, so the bars read against a clock */
+ .grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);pointer-events:none}
+ .row{position:relative;height:18px}
+ .bar{position:absolute;top:1px;height:16px;border-radius:3px;overflow:hidden;font-size:10px;line-height:16px;white-space:nowrap;cursor:pointer;
+   font-family:'JetBrains Mono',ui-monospace,monospace}
+ /* the ramps are the point: an open window is not the same as a readable frame. The ramp is DARKENED
+    rather than faded toward the panel, so a long label running into its own exit ramp still reads. */
+ .bar i{position:absolute;top:0;bottom:0;background:var(--wash);opacity:var(--wash-a)}
+ .bar i.in{left:0;border-right:1px solid var(--panel)} .bar i.out{right:0;border-left:1px solid var(--panel)}
+ /* the tail the engine held open past the authored window, hatched in the label's own ink */
+ .bar .held{position:absolute;top:0;bottom:0;right:0;border-left:1px solid currentColor;
+   background:repeating-linear-gradient(135deg,color-mix(in srgb,currentColor 42%,transparent) 0 2px,transparent 2px 6px)}
+ .bar span{position:absolute;top:0;font-weight:600;pointer-events:none}
+ .bar span em{font-style:normal;opacity:.75;font-weight:400}
+ .bar.sel{outline:2px solid var(--accent);outline-offset:1px}
+ /* a layer that never changed across its own window: a dotted underline, the weight of a note */
+ .bar.still{box-shadow:inset 0 -2px 0 0 currentColor}
+ .bar.still span::after{content:' · still';opacity:.6;font-weight:400}
+ .bar u{position:absolute;top:0;bottom:0;width:2px;background:currentColor;opacity:.85}
+ /* dead air: the hole beat-check blocks on, drawn where it actually is. The label gets its own solid
+    chip or the hatch runs straight through the letters. */
+ .hz{position:absolute;top:0;bottom:0;z-index:3;pointer-events:none;
+   background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--hz) 34%,transparent) 0 6px,color-mix(in srgb,var(--hz) 9%,transparent) 6px 12px);
+   border-left:1px solid var(--hz);border-right:1px solid var(--hz)}
+ .hz.beat{--hz:var(--hz-beat)} .hz.disputed{--hz:var(--hz-mute)}
+ .hz b{position:absolute;top:2px;left:3px;color:var(--hz);font-size:10px;font-weight:700;white-space:nowrap;
+   background:var(--panel);border:1px solid var(--hz);padding:0 4px;border-radius:3px}
+ /* ---- THE THUMBNAIL AT THE POINTER ----------------------------------------------------------------
+    Hover the timeline and see that instant WITHOUT moving the playhead: you keep your place, look
+    ahead, and come back having lost nothing. It is a second engine in a hidden iframe, not a captured
+    image, because seeking is free here and a live engine can show ANY instant rather than the fourteen
+    the strip happens to hold. The strip's nearest thumb paints behind it so the box is never empty
+    while the second engine seeks. Fixed, so it can sit above the timeline panel without being clipped. */
+ #peek{position:fixed;z-index:30;display:none;padding:3px;background:var(--panel);border-radius:8px;
+   box-shadow:var(--sh-3);outline:1px solid var(--line-2);outline-offset:-1px;pointer-events:none;
+   left:0;top:0;will-change:transform}
+ #peek.on{display:block}
+ #peekbox{position:relative;overflow:hidden;border-radius:5px;background-size:cover;background-position:center;background-color:var(--stage)}
+ #peekbox iframe{position:absolute;top:0;left:0;border:0;transform-origin:0 0;background:transparent}
+ #peekt{position:absolute;left:5px;bottom:5px;color:#fff;background:rgba(0,0,0,.62);border-radius:4px;
+   padding:1px 5px;font:11px/1.5 'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+ /* the playhead moves every frame of playback, so it moves on the compositor: left stays 0 and the
+    position is a transform. Writing 'left' re-ran layout on the whole lane stack thirty times a second. */
+ #ph{position:absolute;top:0;bottom:0;left:0;width:1px;background:var(--accent);z-index:5;pointer-events:none;will-change:transform}
+ /* the hovered instant, marked on the ruler itself, so the box above and the time below agree */
+ #hov{position:absolute;top:0;bottom:0;left:0;width:1px;background:var(--ink-2);opacity:.5;z-index:5;pointer-events:none;display:none}
+ /* the ruler is the one row that must never scroll away: a bar read against nothing is not a time */
+ #ruler{box-shadow:0 1px 0 var(--line)}
+ #ph::before{content:'';position:absolute;top:0;left:-4px;border:4px solid transparent;border-top:6px solid var(--accent)}
+ /* ---- THE FOUR STATES ----------------------------------------------------------------------------
+    Four questions in the order a person asks them: what am I making · what does this frame look like ·
+    does the whole thing work · can it go out. They share ONE playhead and one loaded scene, so moving
+    between them is not a context change, and nothing here reloads the iframe: the centre is HIDDEN,
+    never unmounted, so the engine that took a second to boot is still booted when you come back.
+    The switch is a segmented control 26px tall in a bar that already existed. A tab strip across the
+    top would have cost a whole row of the only screen the picture is judged on. */
+ #states{display:flex;gap:2px;background:var(--field);border-radius:8px;padding:2px;flex:none}
+ #states button{background:none;border:0;color:var(--muted);padding:4px 10px;border-radius:6px;font:600 11.5px/1 Anybody,system-ui,sans-serif;letter-spacing:.04em}
+ #states button:hover{color:var(--ink);background:none}
+ /* the segmented control is a single-choice TOGGLE GROUP; it was marked aria-current=page inside a
+    nav landmark, and nothing here navigates. The accent belongs to the playhead and the focus ring, so
+    the raised state is drawn with elevation instead, which is what this room has. */
+ #states button[aria-pressed=true]{background:var(--panel);color:var(--ink);box-shadow:var(--sh-1)}
+ #centre,#split,#tl{display:none}
+ body[data-state=make] #centre{display:flex}
+ body[data-state=make] #split{display:flex}
+ body[data-state=make] #tl{display:flex}
+ /* the rail belongs to Make. Look wants the WIDTH: a strip is judged by putting two frames side by
+    side at a size the eye can use, and a rail of keys that do nothing in this state is not worth 300px
+    of it. */
+ body:not([data-state=make]) #rail{display:none}
+ [hidden]{display:none!important}
+ #pane{flex:1;min-height:0;display:none;flex-direction:column;background:var(--panel);border-radius:var(--r-out);
+   box-shadow:var(--shadow);outline:1px solid var(--line);outline-offset:-1px;padding:var(--pad);gap:var(--pad);overflow:hidden}
+ body:not([data-state=make]) #pane{display:flex}
+ #pane>section{display:none;flex:1;min-height:0;flex-direction:column;gap:var(--pad)}
+ body[data-state=plan] #planpane,body[data-state=look] #lookpane,body[data-state=ship] #shippane{display:flex}
+ .panehead{display:flex;align-items:center;gap:8px;flex:none;color:var(--ink-2);font-size:11px}
+ .panehead .sp{flex:1}
+ .paneview{flex:1;min-height:0;overflow:auto;background:var(--panel-2);border-radius:var(--r-in);padding:12px}
+ /* an honest empty state: what this is for, what it does not do yet, and the command that does */
+ .empty{max-width:56ch;color:var(--ink-2);font-size:12.5px;line-height:1.6;text-wrap:pretty}
+ .empty h2{margin:0 0 6px;font:700 14px/1.3 Anybody,system-ui,sans-serif;color:var(--ink);letter-spacing:0;text-transform:none}
+ .empty code{white-space:nowrap;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;background:var(--field);
+   border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--ink)}
+ .empty ul{margin:8px 0 0;padding-left:18px} .empty li{margin:3px 0}
+ /* the strip. A sheet is one wide image and it must never be squeezed to fit: the point of Look is
+    that both sides of a seam are compared at a size the eye can use. So it scrolls, at natural size. */
+ #sheetwrap{flex:1;min-height:0;overflow:auto;background:var(--stage);border-radius:var(--r-in);
+   display:flex;align-items:flex-start;justify-content:center;padding:10px}
+ /* FIT THE WIDTH FIRST, natural size on click. A beats sheet of a 9:16 film is three columns of very
+    tall frames, and at natural size a 900px window shows one and a half rows: you are scrubbing again,
+    which is the thing Look exists not to be. Fitted, the whole shape of the film is one glance, and the
+    click gets you back to real pixels when a detail is in question. */
+ /* the zoom is a real <button>: it was an <img> with a click handler, so it was invisible to the
+    keyboard and announced as an image. The button is the sheet's own box and carries no chrome. */
+ #sheetzoom{display:block;background:none;border:0;padding:0;border-radius:0;max-width:100%;max-height:100%;cursor:zoom-in}
+ #sheetzoom.full{max-width:none;max-height:none;cursor:zoom-out}
+ #sheetzoom:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+ #sheetzoom:hover{background:none}
+ /* width/height ATTRIBUTES carry the ratio and nothing else: both axes stay auto in CSS, so a mapped
+    height can never win over the fit the way it did on the effects thumbnails. */
+ #sheet{display:block;width:auto;height:auto;max-width:100%;max-height:100%}
+ #sheetzoom.full #sheet{max-width:none;max-height:none}
+ #sheetnote{margin:auto;max-width:60ch;color:var(--ink-2);font-size:12.5px;line-height:1.6;text-align:left;text-wrap:pretty}
+ #sheetnote b{color:var(--ink);display:block;margin-bottom:6px;font:700 13px/1.3 Anybody,system-ui,sans-serif}
+ /* the shared playhead, made visible: every marked moment in the film is one click from the strip */
+ #jump{flex:none;display:flex;flex-wrap:wrap;gap:5px}
+ #jump button{padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',ui-monospace,monospace}
+ .work{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-size:11px}
+ .work i{width:9px;height:9px;border-radius:50%;border:2px solid var(--accent);border-right-color:transparent;
+   display:inline-block;animation:sp .7s linear infinite}
+ @keyframes sp{to{transform:rotate(360deg)}}
+ /* the one moving thing on this page, and it stops for anyone who asked movement to stop */
+ @media (prefers-reduced-motion:reduce){.work i{animation:none;border-right-color:var(--accent);opacity:.5}}
+ /* ---- the chooser: six takes of this film, as CLIPS -----------------------------------------------
+    Never stills. A backdrop was once matched on one frame and was, in motion, twice too fast with
+    folds half the size (docs/MISTAKES.md #155), which is the whole reason this panel renders video. */
+ .chooser .body{padding:8px}
+ /* THE TILE IS THE FILM'S OWN SHAPE, never a 16:9 crop of it. Half this library is 9:16, and a thumb
+    that crops a portrait film to landscape is showing you a frame the film does not contain, which is
+    the same class of lie as judging motion off a still. --ar is set from the scene the page loaded. */
+ #cands{display:grid;grid-template-columns:1fr 1fr;gap:8px;--ar:16/9}
+ @media (max-width:1240px){#cands{grid-template-columns:1fr}}
+ .cand{display:flex;flex-direction:column;gap:0;padding:0;text-align:left;overflow:hidden;white-space:normal;
+   background:var(--panel);border:1px solid var(--line-2);border-radius:9px;cursor:pointer;font:inherit;color:var(--ink)}
+ .cand{box-shadow:var(--sh-1)}
+ .cand:hover{border-color:var(--accent)} .cand:active{transform:none}
+ .cand:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+ .cand video,.cand .sk{width:100%;aspect-ratio:var(--ar);object-fit:contain;background:var(--stage);display:block}
+ .cand .sk{background:var(--field)}
+ .cand .t{display:flex;align-items:baseline;gap:5px;padding:6px 7px 0}
+ .cand .t b{font:700 11.5px/1.2 Anybody,system-ui,sans-serif}
+ .cand .t s{margin-left:auto;text-decoration:none;color:var(--muted);font-size:10px;font-family:'JetBrains Mono',ui-monospace,monospace}
+ .cand .t{width:100%} .cand .d{display:block;margin:2px 0 0;padding:0 7px 7px;color:var(--ink-2);font-size:10.5px;line-height:1.45;text-wrap:pretty}
+ /* a flagged candidate is SHOWN, flag and all. Dropping it silently is how a light-on-light backdrop
+    gets chosen from a thumbnail and discovered in a render. */
+ .cand .d.warn{color:var(--bad);background:var(--bad-bg);border-top:1px solid var(--bad);padding:5px 7px;margin-top:4px}
+ #candstat{color:var(--muted);font-size:11px;line-height:1.5;text-wrap:pretty}
+ /* ---- floating surfaces: the picker, the plan, the boot failure ---- */
+ #pick{position:fixed;right:16px;top:16px;width:390px;max-height:74vh;display:none;flex-direction:column;
+   background:var(--panel);color:var(--ink);outline:1px solid var(--line-2);outline-offset:-1px;border-radius:var(--r-out);z-index:40;
+   font:12px/1.5 'JetBrains Mono',ui-monospace,Menlo,monospace;box-shadow:var(--sh-3)}
+ #pick.on{display:flex}
+ #pickhead{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line)}
+ #pickname{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #pickjson{margin:0;padding:11px;overflow:auto;user-select:text;white-space:pre-wrap;color:var(--ink-2)}
+ /* THE PLAN, in this room's own materials. The film's frames are white and the room is grey, so the
+    only place white appears here is inside a beat's stage, where it belongs to the film and not to the
+    tool. Everything around it is the same panel/line/muted set every other pane is built from. */
+ /* THE STAGE STRIP. Always on, under the state tabs, because "where is this film" is the question the
+    whole tool is an answer to and it used to live only in a terminal. It is READ-ONLY: the stage comes
+    from the files on disk (quality/gates/stage.mjs), so the strip cannot claim a stage the repo is not
+    in, and clicking it does nothing but jump to the pane that stage happens in. */
+ #stage{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--panel);
+   border-bottom:1px solid var(--line);font-size:12px;flex:none}
+ #stagedots{display:flex;align-items:center;gap:5px}
+ #stagedots b{font:600 10px/1 'JetBrains Mono',ui-monospace,monospace;color:var(--muted);
+   padding:4px 7px;border-radius:5px;background:var(--panel-2);text-transform:uppercase;letter-spacing:.06em}
+ #stagedots b.done{color:var(--ink-2)}
+ #stagedots b.at{background:var(--accent);color:#fff}
+ #stagedots i{width:8px;height:1px;background:var(--line-2);font-style:normal}
+ #stagenext{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+ #stagenext code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:var(--ink)}
+ #stagewhy{color:var(--muted);flex:none}
+ #planpath{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px}
+ #planview{display:block;overflow:auto;padding:0}
+ #planhead{padding:14px 16px 16px;border-bottom:1px solid var(--line)}
+ #planmsg{margin:0 0 10px;font-size:17px;font-weight:600;line-height:1.35;max-width:70ch}
+ #planfacts{display:flex;flex-wrap:wrap;gap:4px 18px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:var(--muted)}
+ #planfacts b{color:var(--ink);font-weight:600}
+ .planspine{margin:12px 0 0;padding:9px 11px;background:var(--panel-2);border-left:2px solid var(--accent);border-radius:0 var(--r-in) var(--r-in) 0}
+ .planspine p{margin:0 0 5px;font-size:12px;line-height:1.5;color:var(--ink-2)}
+ .planspine p:last-child{margin:0}
+ .planspine b{color:var(--ink);font-weight:600}
+ /* THE REFERENCE, DECODED. Collapsed by default: it is read once when the plan is reviewed and never
+    again, so it must be present and must not sit between the reader and the beats. A dropped device
+    keeps its row on purpose, because "we looked at this and refused it" is a decision and an absent
+    row reads as an oversight. */
+ #plandev{margin:12px 0 0}
+ #plandev summary{cursor:pointer;font:600 11px/1.6 'JetBrains Mono',ui-monospace,monospace;
+   letter-spacing:.06em;text-transform:uppercase;color:var(--muted);list-style:none}
+ #plandev summary::-webkit-details-marker{display:none}
+ #plandev summary::before{content:'▸ ';color:var(--accent)}
+ #plandev[open] summary::before{content:'▾ '}
+ #plandev table{border-collapse:collapse;margin-top:8px;width:100%;font-size:12px}
+ #plandev td{padding:5px 10px 5px 0;border-top:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+ #plandev td:first-child{width:34px;color:var(--accent);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px}
+ #plandev td:nth-child(2){width:38%;color:var(--ink)}
+ #plandev tr.dropped td{color:var(--muted)}
+ #plandev tr.dropped td:first-child{color:var(--muted);text-decoration:line-through}
+ #plangate{margin:12px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;line-height:1.7}
+ #plangate div{padding-left:15px;text-indent:-15px;color:var(--muted)}
+ #plangate .ok{color:var(--accent)}
+ /* One beat is one row: the picture on the left at the film's real ratio, the reasoning on the right.
+    The number is the address, so a reviewer can say "beat 4" and mean one row. */
+ .pbeat{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;
+   padding:16px;border-bottom:1px solid var(--line)}
+ .pbeat > header{grid-column:1/-1;display:flex;align-items:center;gap:9px}
+ .pbeat .pn{width:19px;height:19px;flex:none;display:grid;place-items:center;border-radius:5px;
+   background:var(--accent);color:#fff;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:600}
+ .pbeat h3{margin:0;font-size:14px;font-weight:600}
+ .pbeat .pmeta{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:var(--muted)}
+ .pbeat .pdur{color:var(--ink-2)}
+ /* The two decisions that decide whether the film reads flat, shown where the review happens. An
+    archetype repeated on the beat before is marked here, because a repeat is only visible when the
+    two beats are read together and a per-beat card is the one place that never happens. */
+ .ptag{font:600 10px/1 'JetBrains Mono',ui-monospace,monospace;text-transform:uppercase;
+   letter-spacing:.06em;padding:4px 7px;border-radius:5px;background:var(--panel-2);color:var(--muted)}
+ .ptag.peak{background:var(--accent);color:#fff}
+ .ptag.repeat{background:var(--bad-bg);color:var(--bad)}
+ .pstage{position:relative;aspect-ratio:var(--par,1.7778);background:#fff;border-radius:var(--r-in);
+   overflow:hidden;box-shadow:var(--sh-2)}
+ .pstage iframe{position:absolute;top:0;left:0;width:1920px;height:1080px;border:0;transform-origin:top left}
+ /* the sketch: an svg drawn from the storyboard, not a render, so it never claims to be one. The
+    dashed edge is the same "not a real frame" signal .pstage.none already used; the tag makes the
+    same claim in words for anyone who can't see the dashed line. */
+ .pstage.sketch{border:1px dashed var(--line-2);box-shadow:none}
+ .pstage.sketch svg{position:absolute;inset:0;width:100%;height:100%}
+ .psketchtag{position:absolute;top:8px;left:8px;font:600 9px/1 'JetBrains Mono',ui-monospace,monospace;
+   text-transform:uppercase;letter-spacing:.08em;padding:4px 7px;border-radius:4px;
+   background:rgba(0,0,0,.55);color:#fff;pointer-events:none}
+ .pstage.none{display:grid;place-items:center;background:var(--panel-2);box-shadow:none;
+   border:1px dashed var(--line-2);text-align:center;padding:16px}
+ .pstage.none b{display:block;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;color:var(--accent);margin-bottom:6px}
+ .pstage.none s{display:block;text-decoration:none;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px}
+ .pstage.none p{margin:0;font-size:12px;line-height:1.5;color:var(--ink-2);max-width:44ch}
+ .psrc{margin:6px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;color:var(--muted)}
+ .pcopy{margin:0 0 12px;padding:0;list-style:none}
+ .pcopy li{font-size:16px;font-weight:600;line-height:1.3;margin-bottom:3px}
+ .pcopy li + li{font-weight:400;font-size:14px;color:var(--ink-2)}
+ .prow{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;padding:5px 0;border-top:1px solid var(--line)}
+ .prow dt{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;color:var(--muted);line-height:1.6}
+ .prow dd{margin:0;font-size:12px;line-height:1.5;color:var(--ink-2)}
+ /* the boot failure, said out loud: core/boot.js parks the reason on window.__engineError */
+ #err{position:absolute;z-index:6;max-width:min(920px,86%);max-height:80%;overflow:auto;
+   background:var(--bad-bg);border:1px solid var(--bad);border-radius:var(--r-out);box-shadow:var(--sh-3);
+   padding:16px 18px;color:var(--ink);white-space:pre-wrap;font-size:12.5px;line-height:1.55}
+ #err b{display:block;margin-bottom:8px;color:var(--bad);font:700 15px/1.2 Anybody,system-ui,sans-serif}
+ /* ---- the selection, drawn ON THE PICTURE -----------------------------------------------------------
+    Selecting a layer used to change one line of text under the transport. The box says WHERE the thing
+    you selected is, which is the question you had. The handles do not resize anything yet and are drawn
+    anyway: they are what makes the box read as a selection rather than as a highlight. */
+ #selbox{position:absolute;z-index:5;display:none;pointer-events:none;outline:1px solid var(--accent);outline-offset:0}
+ #selbox.on{display:block}
+ #selbox i{position:absolute;width:6px;height:6px;background:var(--panel);border:1px solid var(--accent)}
+ #selbox i.tl{left:-3px;top:-3px} #selbox i.tr{right:-3px;top:-3px}
+ #selbox i.bl{left:-3px;bottom:-3px} #selbox i.br{right:-3px;bottom:-3px}
+ #selbox b{position:absolute;left:0;top:-17px;background:var(--accent);color:#fff;border-radius:3px;
+   padding:1px 5px;font:600 10px/1.4 'JetBrains Mono',ui-monospace,monospace;white-space:nowrap}
+ #drag{position:absolute;inset:0;display:none;cursor:grab}
+ #drag.on{display:block} #drag.on.dragging{cursor:grabbing;background:color-mix(in srgb,var(--accent) 12%,transparent)}
+ /* said to a screen reader, never drawn: the one live region on the page, written at the moments
+    that matter rather than by whatever text happens to be ticking. */
+ .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+ kbd{font:11px/1 'JetBrains Mono',ui-monospace,monospace;border:1px solid var(--line-2);border-bottom-width:2px;
+   border-radius:4px;padding:2px 4px;margin-right:2px;color:var(--ink-2);background:var(--panel);white-space:nowrap}
