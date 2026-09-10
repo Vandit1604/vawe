@@ -36,7 +36,7 @@ function paramOf(recipeName, recipe, key, overrides) {
 
 const SEAM_PROPS = ['x', 'y', 'z', 'rotX', 'rotY'];
 
-function expandSeamLine(scene, line) {
+function expandSeamLine(scene, line, aspectKey) {
   const name = line.recipe;
   const bad = (why) => { throw new Error(`recipe "${name}": ${why}`); };
 
@@ -59,7 +59,7 @@ function expandSeamLine(scene, line) {
   // Travel comes from the layers' own boxes and the canvas, not a distance measured off one film: the
   // outgoing layer rushes until its far edge has cleared the frame, the incoming one starts with its near
   // edge on the frame edge, so the ground is empty for `gap` whatever the layout.
-  const [W, H] = sceneDims(scene);
+  const [W, H] = sceneDims(scene, aspectKey);
   const span = axis === 'x' ? W : H;
   const extent = (L) => {
     const v = axis === 'x' ? L.w : (L.h ?? (L.type === 'text' && L.size ? L.size * 1.25 : null));
@@ -230,7 +230,11 @@ function expandEnterLine(scene, line) {
   if (line.exit) L.exit = { ...line.exit };
 }
 
-export function expandRecipes(scene) {
+// aspectKey names the canvas a seam's travel (exitPx/enterPx, off sceneDims) should measure against.
+// Omitted (default '') keeps sceneDims' own default, the scene's own declared aspect: core/engine/expand.js
+// passes the render's actual aspect key through here, from internal/render/expand.go, so a flow-seam
+// authored once travels the right distance on every canvas the film ships at, not only its own.
+export function expandRecipes(scene, aspectKey = '') {
   if (!scene || typeof scene !== 'object' || !('recipes' in scene)) return scene;
   const { recipes, ...rest } = scene;
   const out = { ...rest, layers: (scene.layers || []).map((l) => ({ ...l })) };
@@ -241,7 +245,7 @@ export function expandRecipes(scene) {
     .sort((a, b) => a.rank - b.rank || a.i - b.i).map((x) => x.line);
   for (const line of ordered) {
     const kind = pickRecipe(line.recipe).kind;
-    if (kind === 'seam') expandSeamLine(out, line);
+    if (kind === 'seam') expandSeamLine(out, line, aspectKey);
     else if (kind === 'camera') expandCameraLine(out, line);
     else if (kind === 'enter') expandEnterLine(out, line);
     else throw new Error(`recipe "${line.recipe}": expand.mjs does not yet expand kind "${kind}"`);

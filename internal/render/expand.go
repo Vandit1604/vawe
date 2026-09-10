@@ -32,7 +32,11 @@ func hasSugar(raw []byte) bool { return sugarType.Match(raw) }
 // `node harness/author/expand-blocks.mjs` over it and writes the result to a temp file under the one
 // served prefix meant for exactly this (`.vawe-data/scenes/`, scene.go `served`), returning that path.
 // A scene with no sugar is returned unchanged, and the empty cleanup string means "nothing to remove".
-func expandSugar(repoRoot, dataAbs string) (path string, cleanup string, err error) {
+//
+// aspectKey is the render's resolved --aspect (empty = the scene's own): a cameraMove bake and a
+// flow-seam's travel are both aspect-dependent, and this is the only place either resolves before the
+// browser exists, so the aspect it resolves against must be the one this render actually targets.
+func expandSugar(repoRoot, dataAbs, aspectKey string) (path string, cleanup string, err error) {
 	raw, err := os.ReadFile(dataAbs)
 	if err != nil {
 		return "", "", fmt.Errorf("read data: %w", err)
@@ -40,7 +44,7 @@ func expandSugar(repoRoot, dataAbs string) (path string, cleanup string, err err
 	if !hasSugar(raw) {
 		return dataAbs, "", nil
 	}
-	cmd := exec.Command("node", filepath.Join(repoRoot, "harness/author/expand-blocks.mjs"), dataAbs)
+	cmd := exec.Command("node", filepath.Join(repoRoot, "harness/author/expand-blocks.mjs"), dataAbs, aspectKey)
 	cmd.Dir = repoRoot
 	out, err := cmd.Output()
 	if err != nil {

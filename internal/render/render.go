@@ -44,7 +44,12 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	// block/beat/comp sugar (core/engine/expand.js) resolves SERVER-SIDE here, before the browser ever sees
 	// the JSON: the render page cannot reach it itself (internal/render/expand.go says why). A no-op,
 	// unchanged dataAbs, for the overwhelming majority of scenes that carry no sugar.
-	expandedAbs, expandedCleanup, err := expandSugar(repoRoot, dataAbs)
+	//
+	// o.Aspect (empty = the scene's own, same default expandScene already applies) is threaded through so
+	// an aspect-dependent bake (cameraMove, a flow-seam's travel) resolves against the canvas THIS render
+	// actually targets, not always the scene's declared one: expandScene runs once, here, before the
+	// browser knows which aspect it is drawing (formats/scene/scene.js never calls it, see expand.go).
+	expandedAbs, expandedCleanup, err := expandSugar(repoRoot, dataAbs, o.Aspect)
 	if err != nil {
 		return err
 	}

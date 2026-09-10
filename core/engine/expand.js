@@ -92,14 +92,22 @@ function expandComp(layer, comps, stack) {
 }
 
 /**
- * expandScene(data) -> data, mutated in place and returned. Expands every `{type:"block"}`,
- * `{type:"beat"}` and `{type:"comp"}` layer (at any nesting depth, recursively) into the concrete
- * layers its factory/blueprint/definition produces, bakes `cameraMove` (idempotent: a no-op if it was
- * already baked, e.g. by core/engine/boot.js for the browser render path), and strips the top-level `comps`
- * map. Unknown-prop findings for a block/beat instance are printed as warnings (an author typo that a
- * factory silently ignores, docs/MISTAKES.md #60), never thrown: the same posture `make expand` always had.
+ * expandScene(data, aspectKey = '') -> data, mutated in place and returned. Expands every
+ * `{type:"block"}`, `{type:"beat"}` and `{type:"comp"}` layer (at any nesting depth, recursively) into
+ * the concrete layers its factory/blueprint/definition produces, bakes `cameraMove` (idempotent: a
+ * no-op if it was already baked, e.g. by core/engine/boot.js for the browser render path), and strips
+ * the top-level `comps` map. Unknown-prop findings for a block/beat instance are printed as warnings
+ * (an author typo that a factory silently ignores, docs/MISTAKES.md #60), never thrown: the same
+ * posture `make expand` always had.
+ *
+ * aspectKey names the canvas any aspect-dependent resolution (the camera bake, a flow-seam's travel)
+ * should use. Every Node consumer (loadScene, `make expand`) omits it and keeps today's default, the
+ * scene's own declared aspect (frameOf's own fallback). internal/render/expand.go passes the Go render's
+ * actual --aspect, because that render happens BEFORE the browser exists to resolve it itself
+ * (formats/scene/scene.js never imports this module, see the file banner), so without a key here the
+ * bake always used the scene's own aspect no matter which canvas the render targeted.
  */
-export function expandScene(data) {
+export function expandScene(data, aspectKey = '') {
   if (!data || typeof data !== 'object') return data;
   const comps = data.comps || {};
 
@@ -122,13 +130,13 @@ export function expandScene(data) {
   if (data.recipes) {
     // Copy back EVERYTHING the expansion wrote, not just layers: a camera recipe (window-dolly) writes
     // `cameraMove`, and copying layers alone dropped every recipe camera leg before bakeCameraMove saw it.
-    Object.assign(data, expandRecipes(data));
+    Object.assign(data, expandRecipes(data, aspectKey));
     delete data.recipes;
   }
 
   // cameraMove sugar -> data.camera. ONE implementation, core/engine/produce.js. Idempotent (it deletes the
   // field), so calling it here after core/engine/boot.js already baked it for a browser render is a no-op.
-  if (data.cameraMove) bakeCameraMove(data, frameOf(data));
+  if (data.cameraMove) bakeCameraMove(data, frameOf(data, aspectKey));
 
   delete data.comps;
   return data;
