@@ -168,7 +168,7 @@ export function runTracks(kit, el, L, units, t, f, scene) {
 // `shutter` is the film's motion-blur shutter, for the same reason `idle` is here: it is a property of
 // the FILM, one line for the whole cast, and the per-layer override (`motionBlur`) is what says a
 // single layer disagrees. A default that every author has to remember to set on every layer is not a
-// default, it is a per-call-site opt-in (docs/CRAFT/AFTER-EFFECTS-RECIPES.md item 6).
+// default, it is a per-call-site opt-in (docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md item 6).
 //
 // `cameraBlur` is the same kind of film-level dial and lives here for the same reason: a shutter that
 // exposes the SENSOR is a property of the camera, not of any one layer, so it is one line for the whole
