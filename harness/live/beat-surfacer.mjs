@@ -63,6 +63,7 @@ function say(rel, file) {
   if (!found.length) return [];
 
   const { name: shape, path: usesPath } = bestShape();
+  const film = rel.replace(/\.storyboard\.md$/, '.json');
   const lines = [];
   for (const { b, dur } of found) {
     const raw = b.object || b.picture || b.blueprint;
@@ -75,6 +76,10 @@ function say(rel, file) {
       : ` core/motion/path-curves.js registers no curve; \`${shape}\` is the richest sustained track`
         + ` core/motion/shapes.js carries today.`}`);
   }
+  lines.push(`  \`move:\` reads any of four scopes off its own shape: \`<curve>:<band>\` flies the whole`);
+  lines.push(`  layer along a path, \`<shape>:<band>\` keys a layer track, \`<selector>@<kind>:<band>\` staggers`);
+  lines.push(`  parts inside one fragment, \`hold:<idle>\` breathes or drifts a still object. Or pick one by`);
+  lines.push(`  eye in \`make studio D=${film}\`, which writes the key for you as you drag.`);
   return lines;
 }
 
