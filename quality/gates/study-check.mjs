@@ -32,7 +32,7 @@ const missing = [];
 
 // 1. coverage: study.mjs refuses to write a frame-count mismatch it cannot explain, so this only
 //    checks the block survived and carries real numbers.
-if (!grammar.coverage) missing.push('coverage: study.mjs did not write a coverage block (this grammar predates it) — re-run `make study`');
+if (!grammar.coverage) missing.push('coverage: study.mjs did not write a coverage block (this grammar predates it). Re-run `make study`');
 else {
   const { frames, unique, pages } = grammar.coverage;
   if (!(frames > 0)) missing.push('coverage.frames: not recorded');
@@ -43,7 +43,7 @@ else {
 // 2. every unique frame is on a page, and every page's ledger line is filled.
 const pagesJsonFile = path.join(refDir, 'pages.json');
 const pagesMdFile = path.join(refDir, 'pages.md');
-if (!fs.existsSync(pagesJsonFile)) missing.push(`pages.json: missing (refs/${NAME}/pages.json) — re-run \`make study\``);
+if (!fs.existsSync(pagesJsonFile)) missing.push(`pages.json: missing (refs/${NAME}/pages.json). Re-run \`make study\``);
 else {
   const pj = JSON.parse(fs.readFileSync(pagesJsonFile, 'utf8'));
   const paged = (pj.pages || []).reduce((n, p) => n + p.cells.length, 0);
@@ -52,10 +52,10 @@ else {
 }
 
 const unfilledPages = [];
-if (!fs.existsSync(pagesMdFile)) missing.push(`pages.md: missing (refs/${NAME}/pages.md) — re-run \`make study\``);
+if (!fs.existsSync(pagesMdFile)) missing.push(`pages.md: missing (refs/${NAME}/pages.md). Re-run \`make study\``);
 else {
   for (const line of fs.readFileSync(pagesMdFile, 'utf8').split('\n')) {
-    // Non-greedy up to the FIRST "): ", not the last ": " in the line — the fill placeholder itself
+    // Non-greedy up to the FIRST "): ", not the last ": " in the line: the fill placeholder itself
     // contains a colon ("<fill: what happens…"), and a greedy match swallowed it into the prefix.
     const m = /^page (\d+) \([^)]*\):\s*(.*)$/.exec(line.trim());
     if (m && /<fill/i.test(m[2])) unfilledPages.push(Number(m[1]));
@@ -76,7 +76,7 @@ for (const [field, ids] of Object.entries(nullShots))
 // 4. no joint left unstated. The equal-slice fallback is deleted from study.mjs; a grammar that still
 //    carries its old name is stale and must be re-studied, not patched.
 if (grammar.measured && grammar.measured.shotDetection === 'fixed-sampling')
-  missing.push('measured.shotDetection: "fixed-sampling" is the deleted silent fallback — re-run a current `make study`');
+  missing.push('measured.shotDetection: "fixed-sampling" is the deleted silent fallback. Re-run a current `make study`');
 
 const complete = missing.length === 0;
 grammar.coverage = { ...(grammar.coverage || {}), ledger: complete ? 'complete' : 'incomplete' };

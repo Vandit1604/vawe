@@ -43,7 +43,7 @@ if (RENDER || !fs.existsSync(mp4)) {
   console.log(`  rendering ${name} (draft)…`);
   // VAWE_SERVE_ALL=1: this gate's own scenes are not always under the render server's default
   // allowlist (the ground-truth fixture lives in quality/fixtures/, alongside its siblings, not
-  // formats/scene/ — .gitignore keeps formats/scene/*.json out of the repo for anything that is
+  // formats/scene/: .gitignore keeps formats/scene/*.json out of the repo for anything that is
   // authored content rather than the framework itself). Safe to set unconditionally: it only widens
   // what the dev server will fetch, never narrows a normal formats/scene/ render.
   const r = spawnSync(path.join(ROOT, 'bin/vawe'), [path.relative(ROOT, abs), '--draft'],
