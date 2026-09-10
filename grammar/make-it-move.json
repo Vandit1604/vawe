@@ -61,7 +61,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 0,
+    "band": "not",
+    "fill": 0.13,
+    "detail": 4,
+    "photo": 0
+   }
   },
   {
    "i": 2,
@@ -88,7 +95,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 0,
+    "band": "not",
+    "fill": 0.07,
+    "detail": 3.2,
+    "photo": 0
+   }
   },
   {
    "i": 3,
@@ -112,7 +126,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 12.2,
+    "band": "not",
+    "fill": 0.09,
+    "detail": 4.1,
+    "photo": 0.01
+   }
   },
   {
    "i": 4,
@@ -135,7 +156,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 0,
+    "band": "not",
+    "fill": 0.45,
+    "detail": 11.5,
+    "photo": 0
+   }
   },
   {
    "i": 5,
@@ -161,7 +189,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 10,
+    "band": "not",
+    "fill": 0.41,
+    "detail": 13,
+    "photo": 0.01
+   }
   },
   {
    "i": 6,
@@ -193,7 +228,14 @@
    ],
    "onScreen": null,
    "moves": null,
-   "trigger": null
+   "trigger": null,
+   "content": {
+    "colorfulness": 7.9,
+    "band": "not",
+    "fill": 0.16,
+    "detail": 8,
+    "photo": 0.02
+   }
   }
  ],
  "pace": {
