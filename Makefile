@@ -7,7 +7,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor motion-lab frame-check stage worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio
+.PHONY: motion-floor motion-lab frame-check stage worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -1033,6 +1033,13 @@ evals-compare: build ## [engine] before/after sheets stacked per brief plus comp
 # one JSON file, writes the receipt to quality/baselines/approved/panels/<name>.json (stale when the scene changes).
 critics: ## [judge] THE ROSTER (docs/CRAFT/SUBAGENTS.md): critics bare, deciders with DECIDERS=1.
 	node harness/author/critics.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(DECIDERS),--deciders) $(if $(RECORD),--record $(RECORD))
+
+# make core-node-boundary: core/ is fetched and evaluated by a BROWSER, so a `node:fs` or
+# `node:path` import inside it is a file that cannot run where it claims to run. core/audio/kit.mjs
+# carried one for its whole life and only survived because nothing imported it. Not a gate: a
+# boundary, checked where the boundary is.
+core-node-boundary: ## [check] refuse a node: builtin imported anywhere under core/
+	node harness/dev/core-node-boundary.mjs
 
 # make probe [M=scene]: assert renderFrame(n) is PURE in n (byte-identical regardless of
 # render order). Guards sharded/parallel rendering. No M = every format.

@@ -17,8 +17,6 @@
 // Used by harness/media/gen-audio.mjs (`make audio`) to bake assets/sfx/*.wav + assets/music/*.wav,
 // which the Go mixer (internal/audio/audio.go) beds under the render.
 
-import fs from 'node:fs';
-
 export const SR = 44100;
 export const TAU = Math.PI * 2;
 const sec = (s) => Math.round(s * SR);
@@ -161,7 +159,9 @@ export function normalize(samples, ceiling = 0.8) {
 }
 
 // ---------------------------------------------------------------- WAV
-export function writeWav(file, samples, { stereo = false } = {}) {
+// Pure encode, no I/O: core/ is fetched and evaluated by a browser, so nothing here may import
+// node:fs. The caller (a CLI script, which already has fs) writes the returned Buffer to disk.
+export function encodeWav(samples, { stereo = false } = {}) {
   const ch = stereo ? 2 : 1, n = samples.length, bytes = n * 2 * ch;
   const buf = Buffer.alloc(44 + bytes);
   buf.write('RIFF', 0); buf.writeUInt32LE(36 + bytes, 4); buf.write('WAVE', 8);
@@ -174,9 +174,11 @@ export function writeWav(file, samples, { stereo = false } = {}) {
     buf.writeInt16LE(v, o); o += 2;
     if (stereo) { buf.writeInt16LE(v, o); o += 2; }
   }
-  fs.writeFileSync(file, buf);
-  return samples.length / SR;
+  return buf;
 }
+
+// samples.length / SR, named so a caller doesn't need to import SR just to compute a duration.
+export function wavDuration(samples) { return samples.length / SR; }
 
 // ---------------------------------------------------------------- CUE LIBRARY
 // Voicings ported from Cuelume (MIT © Daniel White). Grouped by the role a video actually needs.

@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { CUES, renderCue, normalize, writeWav } from '../../core/audio/kit.mjs';
+import { CUES, renderCue, normalize, encodeWav } from '../../core/audio/kit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(ROOT, 'out/sound-vary');
@@ -269,7 +269,7 @@ for (const n of names) {
     const id = `${n}-${i}`;
     // i === 0 is the shipped voicing, as the control. Everything above it is COMPOSED, not perturbed.
     const spec = i === 0 ? CUES[n] : (MOVEMENT[n] ? composeMovement(n, i) : compose(n, i));
-    writeWav(path.join(OUT, `${id}.wav`), normalize(renderCue(spec, 1)));
+    fs.writeFileSync(path.join(OUT, `${id}.wav`), encodeWav(normalize(renderCue(spec, 1))));
     made.push({ id, cue: n, i, spec });
   }
 }
