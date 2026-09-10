@@ -227,6 +227,18 @@ export function focalAt(ctx, t) {
 // ------------------------------------------------------------------------------------------------
 // THE FILM
 
+// NOT EXTENDED to element handoffs INSIDE a beat (docs/CRAFT/DIRECTION.md, "Directing the eye"), and
+// said here rather than left silent. `focalAt` is built around a JUNCTION: a specific instant with a
+// BEFORE and an AFTER `sceneView`/ground either side of a cut, seam or sting (`marks`, below). A
+// handoff inside one beat (per-word colour walking a phrase, a cursor causing a click) has neither: no
+// mark in `cuts`/`seams`/`stings` names the instant, and the ground and camera view do not change
+// either side of it, so `nearest()`'s cut-aware search has nothing to search FOR. Reusing `focalAt` at
+// an author-chosen mid-beat instant is possible in principle, but a beat's `eye:` line
+// (harness/lib/contract.mjs parseEyeLine) names its start/land in PROSE, not a timestamp, so there is
+// no instant to hand this scorer without a second parser guessing one. `make choreo`'s eye-plan check
+// answers the in-beat question instead, off pixels this file does not read (motion-floor.mjs's own
+// region classifier), which is where the WHERE-DID-IT-END question (not where does the eye jump)
+// actually lives.
 export function trace(scene) {
   const d = JSON.parse(JSON.stringify(scene));
   const T = sceneTiming(d);

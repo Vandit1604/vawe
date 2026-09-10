@@ -2,7 +2,7 @@
 when: it "reads amateur" though every layer renders fine
 answers: "the direction spine, Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it"
 group: crosscutting
-codes: pace, pace-not-chosen, pace-not-kept, pacing, archetype-repeat, feature-poverty, library-top5-only, no-peak, peak-barely-leads, sparse-beats, uniform-cadence, preset-monotony, never-adopted, similarity-same, similarity-close
+codes: pace, pace-not-chosen, pace-not-kept, pacing, archetype-repeat, feature-poverty, library-top5-only, no-peak, peak-barely-leads, sparse-beats, uniform-cadence, preset-monotony, never-adopted, similarity-same, similarity-close, eye-missing, eye-unresolved, eye-device-untargeted, eye-competing-focal-points
 applies-when: always
 confirm: "where is the restraint, and what does the spectacle beat earn against it?"
 ---
@@ -83,6 +83,38 @@ another mid-shot. What has no form here is the draughtsmanship half: nobody is d
 |---|---|---|
 | **Squash and stretch** | **shipped** | the `squash` modifier, scaling non-uniformly off the layer's own velocity with the reciprocal kept, so it deforms rather than zooming. Wrong for anything with a rigid identity: a logo that squashes is a damaged logo |
 | **Arcs** | **partly** | `ease: "through"` rounds the corner AT an interior key, so a polyline of keys becomes a curve: a three-key apex turns 22 degrees where `linear` turns 66. It cannot bow a TWO-key segment, which is what AE's spatial bezier does. For that, `motionPath`, a different mechanism on a different clock that cannot combine with a keyed track |
+
+## Directing the eye: every device names its target
+
+A colour flash, a word-by-word reveal, a camera push, a cursor, contrast, size, a blur-to-sharp focus
+pull, all of them exist for the same reason: to point the viewer's attention somewhere. Per-word colour
+is not decoration on top of the words, it is how the eye is walked through a phrase to its key word.
+The plan has to say where each device points, or the device is a guess wearing a decision's clothes.
+
+- **One landing per moment.** Google's own choreography guide states the rule under this whole engine's
+  motion system: *"Maintain a clear focal point during transitions by carefully selecting the number and
+  type of elements shared across the transitions"* (Material, quoted in full in
+  [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md#layering-life-and-handoffs)). Two devices pulling toward two
+  different places in one beat is not two ideas, it is no read at all: state which pulls first.
+- **The order of pulls is planned.** Cursor or motion moves before colour or size settles the eye,
+  because a moving thing recruits attention before a static contrast does (the same primary-before-
+  secondary ordering `MOTION-CRAFT.md`'s "Layering, life and handoffs" already states for WHAT moves;
+  this is the same ordering applied to WHERE the eye is pulled).
+- **Per-word colour walks the eye, it never just decorates.** A colour flash on every word with no
+  destination is wallpaper; a colour flash that walks in reading order to the key word is direction. The
+  test is the same one §3 already applies to a layer's motion: say out loud what the colour is FOR, in
+  one clause. "It walks the eye to launch film" passes. "It's on-brand" does not.
+- **Measured, not asserted.** `quality/gates/eye-trace.mjs` scores where the eye actually is at a cut
+  (Murch's Rule of Six, §2 above, the 7% eye-trace term); `make choreo` reports, per beat, where the
+  measured primary motion region ends against what the plan's `eye:` line said would be there. Neither
+  one invents a number: both read the frame or the render, never a guess.
+
+Storyboard grammar: a film names its whole journey once, `attention:` in the frontmatter (one sentence:
+the path the eye travels across the film); a beat names its own leg, `eye: <where it starts> -> <what
+pulls it, naming the device> -> <where it lands>` (`harness/lib/contract.mjs parseEyeLine`). WARN only
+(`quality/gates/storyboard-check.mjs`): a beat with motion and no `eye:` line, a device named in the
+beat's own fields that the `eye:` line never targets, and two devices in one `eye:` line pulling to
+different landings with no stated order.
 
 ## 2. Editing & pacing, rhythm is the direction
 
