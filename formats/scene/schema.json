@@ -2849,28 +2849,26 @@
       },
       "voice": {
        "type": "string",
-       "label": "Synthesised voice, generated from parameters rather than loaded from a file, so it is deterministic and needs no asset. internal/audio/synth.go owns this list (VoiceNames).",
-       "values": [
-        "tick",
-        "thud",
-        "whoosh",
-        "riser",
-        "pluck",
-        "sweep"
-       ],
+       "label": "Synthesised voice: baked on demand by generators/media/voice-cue.mjs from core/audio/kit.mjs's CUES table, cached under assets/sfx/ by a hash of (voice, params), then played as an ordinary named sample. Deterministic, needs no shipped asset. Every name here is a live CUES key (core/validate/validate.mjs checks the two never drift); a voice not in CUES is refused at validation, not silently dropped.",
        "enum": [
         "pluck",
-        "droplet",
         "chime",
+        "sparkle",
+        "droplet",
         "bloom",
-        "impact",
+        "success",
+        "ready",
         "whoosh",
-        "riser"
+        "riser",
+        "drop",
+        "impact",
+        "swell",
+        "braam"
        ]
       },
       "params": {
        "type": "object",
-       "label": "Synth parameters for `voice`, all numbers: freq, freqSweep (octaves per second), attack, decay, noise (0..1), punch, lowpass, gain, seed. Omitted keys take the voice's preset value."
+       "label": "Synth parameters for `voice`, all numbers, unknown keys refused at validation: freq (Hz, rescales every tone layer keeping the voice's own intervals), gain (masterGain), attack, decay (multipliers on the voice's own values, 1 = unchanged), seed. Omitted keys take the voice's preset value."
       }
      }
     },

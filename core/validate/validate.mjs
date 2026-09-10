@@ -1372,6 +1372,14 @@ if (isMain) {
     // the enum OMITS is drift, extra alias names are legal.
     const missing = CUE_NAMES.filter((n) => !el.includes(n));
     if (el.length && missing.length) { console.error(`✗ schema drift: formats/scene/schema.json audio.cues enum omits live CUES (${missing.join(', ')}), add them.`); failed++; }
+
+    // Same guard for `voice`, the OTHER direction: unlike `name` (which may carry aliases onto a
+    // real cue, generators/media/audio-bake.mjs ROLES), a voice IS the CUES key it synthesizes from
+    // (generators/media/voice-cue.mjs), so every entry here must be a real one or the render-time
+    // resolve throws on a name nothing backs.
+    const ve = ss?.fields?.audio?.fields?.cues?.item?.voice?.enum || [];
+    const badVoices = ve.filter((v) => !CUE_NAMES.includes(v));
+    if (ve.length && badVoices.length) { console.error(`✗ schema drift: formats/scene/schema.json audio.cues voice enum lists ${badVoices.join(', ')}, which core/audio/kit.mjs CUES does not implement. Fix the enum or add the voice.`); failed++; }
   }
 
   for (const file of targets) {
@@ -1490,6 +1498,10 @@ if (isMain) {
       // schema cannot say "one of these two". So the rule lives here: neither is a cue that plays
       // nothing, and both is a cue whose author disagrees with themselves about which sound it is.
       const VOICES = schema?.fields?.audio?.fields?.cues?.item?.voice?.enum || [];
+      // The exact param keys generators/media/voice-cue.mjs reads. An unknown key used to fail
+      // nothing and hear nothing: the synth reads five names off the object and ignores the rest, so
+      // a typo'd "freqency" baked byte-identical to no params at all.
+      const { VOICE_PARAM_KEYS } = await import('../../generators/media/voice-cue.mjs');
       for (const [i, c] of (Array.isArray(A.cues) ? A.cues : []).entries()) {
         if (!isObj(c)) continue;
         const hasName = typeof c.name === 'string' && c.name.trim();
@@ -1502,6 +1514,10 @@ if (isMain) {
           errors.push(`audio.cues[${i}].voice "${c.voice}" is not a voice the synth knows: ${VOICES.join(', ')}.`);
         if (c.params != null && (!isObj(c.params) || Object.values(c.params).some((v) => typeof v !== 'number')))
           errors.push(`audio.cues[${i}].params must be an object of NUMBERS; the synth reads them as numbers and a string would be dropped silently.`);
+        else if (isObj(c.params)) {
+          const badKeys = Object.keys(c.params).filter((k) => !VOICE_PARAM_KEYS.includes(k));
+          if (badKeys.length) errors.push(`audio.cues[${i}].params has unknown key(s) ${badKeys.join(', ')}; the synth would silently ignore them. Known: ${VOICE_PARAM_KEYS.join(', ')}.`);
+        }
       }
 
       // Sound bridges (J/L-cuts). The SPAN is resolved in the browser, where the junctions live, and

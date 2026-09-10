@@ -410,6 +410,16 @@ give same bytes. That is a genuinely good property and it is worth keeping.
 A cue is honest only when it names something the viewer SEES happen. A `press` with no button on screen
 is a lie; cut it.
 
+**A cue may synthesize its own sound instead of naming a baked one**: `{"t":1,"voice":"chime","params":{"freq":800}}`
+in place of `name`. `voice` picks a live entry in `core/audio/kit.mjs`'s `CUES` table (the same synth
+`make audio` bakes the static cues from), and `params` retunes it: `freq` (Hz, rescales every tone
+layer so the voice's own intervals hold), `gain`, `attack`, `decay` (a multiplier, 1 = unchanged), and
+`seed`. It exists for the case a fixed baked cue cannot cover: a beat that wants THIS voice at a pitch
+or a length none of the static roles ship. `generators/media/voice-cue.mjs` bakes it on demand into
+`assets/sfx/`, keyed by a hash of `(voice, params)`, so two cues with the same voice and params always
+hit the same cached file and never re-synthesize; a name or a voice that does not resolve is refused at
+validation, not dropped to silence. One `name` OR one `voice` per cue, never both.
+
 **A cue is heard OVER the bed, and the mixer guarantees it.** A cue is causal, it says the button was
 pressed, the row landed, the thing arrived, and a bed is atmosphere. When atmosphere covers causality
 the film stops explaining itself, so a cue's table gain is a floor, not a level: `internal/audio/audio.go`
