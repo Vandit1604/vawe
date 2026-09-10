@@ -12,10 +12,17 @@ package render
 // the browser ever sees the JSON: the other of the two options AGENTS.md's engine-changes doctrine
 // names for sugar that cannot run in the render page.
 //
+// A `"voice"` cue rides the same trip for the same reason, one level down: synthesizing it needs
+// core/audio/kit.mjs PLUS a place to write the cached .wav (assets/sfx/), and this browser's file
+// server is read-only and default-deny, so it cannot bake into a directory it may not even serve back.
+// harness/author/expand-blocks.mjs bakes any voice cue into an ordinary named one
+// (generators/media/voice-cue.mjs) before printing, so by the time this scratch file is written the
+// scene the browser sees never contains a `voice` key at all.
+//
 // Gated on an actual sugar hit (`hasSugar`), not run unconditionally: a Node subprocess importing the
 // whole block/beat catalog has a real, measured cost (docs/CRAFT/ENGINE-CHANGES.md "SUGAR MUST NEVER
 // SILENTLY NO-OP"), and it has no business paying itself on every render when the vast majority carry
-// no sugar at all.
+// no sugar and no voice cue at all.
 import (
 	"fmt"
 	"os"
@@ -24,7 +31,7 @@ import (
 	"regexp"
 )
 
-var sugarType = regexp.MustCompile(`"type"\s*:\s*"(block|beat|comp)"|"recipes"\s*:`)
+var sugarType = regexp.MustCompile(`"type"\s*:\s*"(block|beat|comp)"|"recipes"\s*:|"voice"\s*:\s*"`)
 
 func hasSugar(raw []byte) bool { return sugarType.Match(raw) }
 
