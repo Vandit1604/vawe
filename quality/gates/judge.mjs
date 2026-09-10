@@ -5,14 +5,17 @@
 // AGENT then reads /tmp/judge/sheet.png against /tmp/judge/rubric.md and returns a PASS/FIX verdict.
 //
 // Usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]   ·   make judge D=<file> [VS=<brand>]
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import { writeReceipt, readReceipt } from '../../harness/lib/receipt.mjs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { beatsOf, evenSamples } from './beats-of.mjs';
 import { frameTile, tileGrid, tileBox, baseOf, renderOf, gradeable } from './tile.mjs';
 import { craftRubric } from './rubric.mjs';
-import { gateFindings } from '../../harness/lib/findings.mjs';
+import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 // judge.mjs is a PREP step, not a pass/fail check: its product is a rendered sheet + rubric for the
 // agent to score, so there is nothing to emit under --json when it succeeds. The one real finding is
@@ -91,13 +94,32 @@ const tiles = mids.map((m, i) => frameTile(mp4, m.t, path.join(dir, `f${String(i
   { tw: TW, th: TH, label: m.label }));
 tileGrid(tiles, { cols: landscape ? 2 : 3, tw: TW, th: TH, out: `${dir}/sheet.png` });
 
+// MEASURED FINDINGS, HANDED TO THE EYE. quality/audit.mjs measures 19 kinds of pixel defect (overlap,
+// clipped text, off-frame, low contrast, thin-hero, ...) against these SAME rendered frames, and
+// sweep-static.mjs measures whether the pixels ever move; `make ship` already pays for both and neither
+// one's output ever reached this rubric, so the agent scored against a blank card next to findings a
+// script had already made (one real overlap shipped this way). Reuse VAWE_FINDINGS_OUT, the channel
+// every gate already writes structured records to (harness/lib/findings.mjs), rather than re-parsing
+// either script's prose or inventing a second findings channel. Only for a scene JSON input: both
+// scripts need one, so an mp4-only `judge <file>.mp4` run still preps a sheet with no measured findings.
+const runFindings = (script, args) => {
+  const out = path.join(dir, `.findings-${path.basename(script, '.mjs')}.json`);
+  spawnSync(process.execPath, [path.join(repoRoot, script), ...args],
+    { encoding: 'utf8', env: { ...process.env, VAWE_FINDINGS_OUT: out } });
+  return readFindings(out) || [];
+};
+const measured = scene
+  ? [...runFindings('quality/audit.mjs', [inp]), ...runFindings('quality/gates/sweep-static.mjs', [inp])]
+  : [];
+
 fs.writeFileSync(`${dir}/rubric.md`, craftRubric({
-  name: path.basename(mp4), frames: tiles.length, landscape, brand, dir,
+  name: path.basename(mp4), frames: tiles.length, landscape, brand, dir, findings: measured,
 }));
 
 console.log(`\n  judge · ${path.basename(mp4)} · ${tiles.length} key frames · brand: ${brand || '(none)'}`);
 console.log(`  → sheet:  ${dir}/sheet.png`);
 console.log(`  → rubric: ${dir}/rubric.md  (house-style + 7 craft dimensions + verdict template)`);
+console.log(`  → measured: ${measured.length} finding(s) from audit.mjs + sweep-static.mjs, folded into the rubric`);
 console.log(`\n  AGENT: Read ${dir}/sheet.png AGAINST the rubric, score each frame per dimension, return PASS/FIX + fixes.`);
 // Same contract as the beats receipt: producing the sheet for THIS scene content is the checkable
 // proxy for having looked at it. Editing the scene withdraws it, which is the whole point.

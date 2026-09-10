@@ -1713,4 +1713,20 @@ for (const r of rows) {
 }
 console.log(`\noverlays in ${OUT}/ (one PNG per audited scene)`);
 console.log(`${hardTotal ? '✗ ' + hardTotal + ' HARD issue(s)' : '✓ no hard issues'}${warnTotal ? ` · ${warnTotal} warning(s)` : ''}`);
+
+// RECORD WHAT WAS JUST PRINTED, the same VAWE_FINDINGS_OUT channel --hero already writes to below.
+// Only --hero spoke records until now, so a caller waiting on structured findings (make judge) got
+// nothing from a full run: 19 finding kinds measured on real pixels and no way to read them back except
+// re-parsing the prose above. This does not print again, the loop above already did that; it only
+// records what it printed, so the file's exit handler (harness/lib/findings.mjs) can flush it.
+const F2 = gateFindings();
+for (const r of rows) {
+  for (const i of (r.items || [])) {
+    const who = i.b ? `${i.a} ✕ ${i.b}` : `${i.a}${i.t ? ` "${i.t}"` : ''}`;
+    const summary = `${r.m}: ${i.f == null ? '' : `f${i.f} `}${who}, ${i.detail}`;
+    const extra = { at: { module: r.m, frame: i.f }, ...(i.waived ? { waived: true } : {}) };
+    (HARD.has(i.kind) ? F2.fail : F2.warn)(i.kind, summary, extra);
+  }
+}
+
 process.exit(hardTotal ? 1 : 0);
