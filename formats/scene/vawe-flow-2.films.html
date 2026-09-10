@@ -88,7 +88,9 @@
   /* Ground wash: the first film's own measured colour, as a soft radial wash, so the resting
      frame already shows the device beat 6 turns on (AGENTS.md: "change bg colour according to
      each film's colour when browsing"). The engine crossfades this per film later; at rest it
-     shows the focused film's own tint (#2c66ed, sampled off out/vawe-launch.mp4 at 2s). */
+     shows the focused film's own tint (#2c66ed, sampled off out/vawe-launch.mp4 at 2s). The
+     focused card now covers most of the frame, so this wash is what's left of the tint: a
+     thin border of ground around the card, not a background behind a small ring. */
   #films-ground{
     position:absolute;inset:0;
     background:
@@ -96,7 +98,7 @@
   }
   #films{
     position:absolute;inset:0;overflow:hidden;
-    display:flex;align-items:center;justify-content:center;gap:var(--kit-space-4);
+    display:flex;align-items:center;justify-content:center;gap:var(--kit-space-3);
   }
   .film-card{
     position:relative;flex:none;overflow:hidden;border-radius:22px;aspect-ratio:16/9;
@@ -119,36 +121,48 @@
      told apart by the recede overlay, its shadow step and its width, not by shrinking type. */
   .film-card .film-name{color:#fff;font-weight:600;margin:0}
   .film-card .film-time{color:rgba(255,255,255,.82);margin:0;font-variant-numeric:tabular-nums}
-  .film-card[data-focus]{width:46cqw;box-shadow:var(--kit-elev-3)}
-  .film-card[data-ring="near"]{width:22cqw;box-shadow:var(--kit-elev-2)}
+
+  /* The redesign: the focused card is now the largest object in the film (about 1680x945,
+     76.6% of the 1920x1080 frame), covering more than the terminal/timeline planes combined.
+     The neighbours stay in the DOM (data-part, data-film, data-tint intact) but only their
+     slivers show, partly off-frame, which is what "thin border of tint" means below. */
+  .film-card[data-focus]{width:95.9cqw;box-shadow:var(--kit-elev-3)}
+  .film-card[data-ring="near"]{width:18cqw;box-shadow:var(--kit-elev-2)}
   .film-card[data-ring="near"] .film-recede{background:rgba(6,9,14,.16)}
-  .film-card[data-ring="outer"]{width:16cqw;box-shadow:var(--kit-elev-1)}
+  .film-card[data-ring="outer"]{width:14cqw;box-shadow:var(--kit-elev-1)}
   .film-card[data-ring="outer"] .film-recede{background:rgba(6,9,14,.30)}
-  #films-label{
-    position:absolute;top:var(--kit-space-7);left:var(--kit-margin);
+
+  /* There is no room below the focused card (it nearly fills the frame vertically), so the
+     eyebrow, the scrub bar and the meta line all sit ON the card, over its own dark-gradient
+     strips, the same technique the name/time caption already used. */
+  .film-card[data-focus] .film-scrim{
+    background:linear-gradient(to top, rgba(8,12,20,.82) 0%, rgba(8,12,20,0) 40%);
+  }
+  .film-card[data-focus] .film-top{
+    position:absolute;left:0;right:0;top:0;height:16%;
+    background:linear-gradient(to bottom, rgba(8,12,20,.55) 0%, rgba(8,12,20,0) 100%);
+  }
+  .film-card[data-focus] .film-label{
+    position:absolute;left:var(--kit-space-4);top:var(--kit-space-3);
     display:flex;align-items:center;gap:var(--kit-space-2);
   }
-  #films-label .dot{width:10px;height:10px;border-radius:999px;background:var(--accent)}
-  #films-label p{text-transform:uppercase;margin:0}
-  /* The scrub bar: the beat's own claim ("each film should play, not be static") made concrete
-     as a played-to position and a real meta line, read with ffprobe off the actual file, not
-     invented. Sits UNDER the focused card, on the plane, not on top of the footage. */
-  #films-scrub{
-    position:absolute;left:50%;top:calc(50% + 46cqw * 9 / 16 / 2 + var(--kit-space-3));
-    transform:translateX(-50%);width:46cqw;
+  .film-card[data-focus] .film-label .dot{width:10px;height:10px;border-radius:999px;background:#fff}
+  .film-card[data-focus] .film-label p{color:#fff;text-transform:uppercase;margin:0}
+  .film-card[data-focus] .film-bottom{
+    position:absolute;left:var(--kit-space-4);right:var(--kit-space-4);bottom:var(--kit-space-4);
     display:flex;flex-direction:column;gap:var(--kit-space-2);
   }
-  #films-scrub .track{position:relative;height:6px;border-radius:999px;background:var(--line-strong)}
-  #films-scrub .played{position:absolute;left:0;top:0;bottom:0;width:31%;border-radius:999px;background:var(--accent)}
-  #films-scrub .head{position:absolute;left:31%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:999px;background:var(--accent);box-shadow:var(--kit-elev-1)}
-  #films-scrub .meta{margin:0;font-variant-numeric:tabular-nums;font-family:var(--font-mono)}
+  .film-card[data-focus] .film-caption{position:static}
+  /* The scrub bar: the beat's own claim ("each film should play, not be static") made concrete
+     as a played-to position, plus a real meta line read with ffprobe off the actual file. */
+  .film-scrub-row{display:flex;align-items:center;gap:var(--kit-space-3)}
+  .film-scrub-row .track{position:relative;flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.28)}
+  .film-scrub-row .played{position:absolute;left:0;top:0;bottom:0;width:31%;border-radius:999px;background:var(--accent)}
+  .film-scrub-row .head{position:absolute;left:31%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:999px;background:#fff;box-shadow:var(--kit-elev-1)}
+  .film-scrub-row .meta{color:rgba(255,255,255,.82);margin:0;white-space:nowrap;font-variant-numeric:tabular-nums;font-family:var(--font-mono)}
 </style>
 <div class="kit-root kit-ground-paper" style="position:absolute;inset:0">
   <div id="films-ground"></div>
-  <div id="films-label">
-    <span class="dot"></span>
-    <p class="kit-eyebrow">your films</p>
-  </div>
   <div id="films">
     <div class="film-card" data-part="film-card" data-ring="outer" data-film="out/looks-reel.mp4" data-tint="#4c34fe">
       <img src="/assets/vawe-flow-2/looks-reel-still.jpg" alt="">
@@ -172,9 +186,20 @@
       <img src="/assets/vawe-flow-2/vawe-launch-still.jpg" alt="">
       <div class="film-recede"></div>
       <div class="film-scrim"></div>
-      <div class="film-caption">
-        <p class="film-name kit-body">vawe launch</p>
-        <p class="film-time kit-caption">0:20</p>
+      <div class="film-top"></div>
+      <div class="film-label">
+        <span class="dot"></span>
+        <p class="kit-eyebrow">your films</p>
+      </div>
+      <div class="film-bottom">
+        <div class="film-scrub-row">
+          <div class="track"><div class="played"></div><div class="head"></div></div>
+          <p class="meta kit-caption">1920x1080 &middot; 30fps &middot; 0:20</p>
+        </div>
+        <div class="film-caption">
+          <p class="film-name kit-body">vawe launch</p>
+          <p class="film-time kit-caption">0:20</p>
+        </div>
       </div>
     </div>
     <div class="film-card" data-part="film-card" data-ring="near" data-film="out/motion-reel.mp4" data-tint="#eb6515">
@@ -195,9 +220,5 @@
         <p class="film-time kit-caption">0:11</p>
       </div>
     </div>
-  </div>
-  <div id="films-scrub">
-    <div class="track"><div class="played"></div><div class="head"></div></div>
-    <p class="meta kit-caption">1920x1080 &middot; 30fps &middot; 0:20</p>
   </div>
 </div>
