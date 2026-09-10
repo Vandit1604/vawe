@@ -2,7 +2,7 @@
 when: "a beat looks flat / slide-like"
 answers: "hero + support + metadata triad · the \"produced\" tell · thin-beat rule"
 group: density
-codes: dead-air, empty-beat, ends-on-nothing
+codes: dead-air, empty-beat, ends-on-nothing, held-state-too-long
 applies-when: always
 confirm: "does each beat carry the hero + support + metadata triad, not one flat line?"
 ---
