@@ -8,12 +8,12 @@
  // thirty to a hundred times a second, on a page whose lane stack can be seventy rows. The playhead did
  // the same every frame of playback. Nothing here changes without something else changing first (a
  // resize, a zoom, the divider, a repaint), so the reads happen there and the hot paths read variables.
- let rulerW=1, rulerL=0, laneScroll=0, stageBox=null, scBox=null, tlTop=0, peekW=0, peekH=0;
+ let rulerW=1, rulerL=0, laneScroll=0, stageBox=null, scBox=null, tlTop=0, peekW=0, peekH=0, workL=8;
  function measureBoxes(){
    rulerW=ruler.clientWidth||1; rulerL=ruler.getBoundingClientRect().left;
    laneScroll=lanes.scrollLeft;
    stageBox=$('stage').getBoundingClientRect(); scBox=sc.getBoundingClientRect();
-   tlTop=$('tl').getBoundingClientRect().top;
+   tlTop=$('tl').getBoundingClientRect().top; workL=$('work').getBoundingClientRect().left;
  }
  const el=()=>document.activeElement||document.body;
  const typing=()=>/^(INPUT|TEXTAREA|SELECT)$/.test(el().tagName);
@@ -61,7 +61,7 @@
  // this scene names and drilling in shows what that comp is and the data it was given. When the engine
  // grows real nested scenes, this is where the deeper levels attach.
  let crumbAt=null;
- function drawCrumbs(){ const c=$('crumbs'); const file=(model&&model.file)||'scene';
+ function drawCrumbs(){ const c=$('crumbs'); const file=(model&&model.file)||document.title.split(' · ').pop();
    const comps=(model?model.layers:[]).filter(L=>L.type==='composition');
    let h='<button '+(crumbAt==null?'aria-current=page':'data-back=1')+'>'+esc(file)+'</button>';
    if(crumbAt!=null){ const L=comps.find(x=>x.i===crumbAt);
@@ -100,72 +100,41 @@
  }
  document.querySelectorAll('#states button[data-state]').forEach(b=>b.addEventListener('click',()=>setState(b.dataset.state)));
 
- // ---- PLAN: the storyboard the beats were decided in ---------------------------------------------
  // ---- PLAN: the film as its own frames, not as grey boxes ---------------------------------------
- // This used to show \`make panels\`, one grey still per beat sized from \`shot:\`. That answers how big
- // and where and nothing at all about what is in the frame, which is the only question the person
- // signing a plan off can answer (docs/MISTAKES.md #592). Every beat that names a \`fragment:\` has real
- // hand-written markup on disk, so the beat shows THAT, live, on the film's theme.
+ // The person signing a plan off judges what is in the frame (docs/MISTAKES.md #592), so every beat that
+ // names a `fragment:` shows that markup live, on the film's theme. The pane keeps only what that person
+ // decides yes or no on; the fields written for the agents that build the film stay in the storyboard.
  const planPath=$('planpath'), planNote=$('plannote'), planBody=$('planbody');
  let planDrawn=false;
- const PFIELDS=[['why','why'],['becomes','the change'],['trigger','caused by'],['shot','shot'],
-   ['camera','camera'],['layout','layout'],['style','style'],['rest','in the hold'],
-   ['mechanism','mechanism'],['motion','motion plan'],['borrows','borrows'],['transition_in','cut in']];
  // ---- the SKETCH: what a fragment-less beat still shows -----------------------------------------
- // A beat with no fragment used to draw a grey box and a struck-through label (docs/MISTAKES.md #592
- // again, one layer down: an html beat got a real picture, everything else still got nothing). The
- // storyboard already decided a composition (archetype:) and often the exact words (onscreen:), so a
- // beat with no fragment still has a picture to draw, just not a hand-written one. Each archetype
- // (docs/CRAFT/STORYBOARD-TEMPLATE.md, the same closed list storyboard-check enforces) gets a fixed
- // box layout on the film's own 1920x1080 canvas; the box carries the beat's own words, not a caption
- // beside an empty rectangle, and the real onscreen line renders as real type because that IS the beat.
+ // The storyboard already decided a composition (archetype:, the closed list storyboard-check enforces),
+ // so a beat with no fragment still gets that layout as boxes on the film's own 1920x1080 canvas. The
+ // sketch draws no words: the beat's own words sit beside it, and drawing them twice says nothing new.
  const ARCH_BOXES={
-   centred:[[560,210,800,660,'object']],
-   split:[[110,240,800,600,'object'],[1010,240,800,600,'object']],
-   'hero-object':[[260,90,1400,660,'object'],[260,820,1400,190,'copy']],
-   'asymmetric-baseline':[[130,520,880,420,'object']],
-   'full-bleed-row':[[0,380,1920,320,'object']],
-   'symmetric-pair':[[300,290,560,500,'object'],[1060,290,560,500,'object']],
-   lockup:[[560,150,500,520,'object'],[460,730,900,180,'copy']],
+   centred:[[560,210,800,660]],
+   split:[[110,240,800,600],[1010,240,800,600]],
+   'hero-object':[[260,90,1400,660],[260,820,1400,190]],
+   'asymmetric-baseline':[[130,520,880,420]],
+   'full-bleed-row':[[0,380,1920,320]],
+   'symmetric-pair':[[300,290,560,500],[1060,290,560,500]],
+   lockup:[[560,150,500,520],[460,730,900,180]],
  };
- // an archetype the closed list does not name (blank, or "other (a reason)") still gets ONE centred
- // box: a picture with a vague composition beats no picture at all.
- const archBoxes=(name)=>ARCH_BOXES[String(name||'').trim().split(/\s+\(/)[0]]||[[460,240,1000,600,'object']];
- const wrapWords=(s,max)=>{ const out=[]; let cur='';
-   for(const w of String(s||'').split(/\s+/)){ const t=cur?cur+' '+w:w;
-     if(t.length>max&&cur){ out.push(cur); cur=w; } else cur=t; } if(cur) out.push(cur); return out; };
- // WHY sketchable: any one of these is a real authoring decision, so drawing from it is honest. Their
- // absence together is the only case with truly nothing to draw.
+ // an archetype the closed list does not name (blank, or "other (a reason)") still gets ONE centred box
+ const archBoxes=(name)=>ARCH_BOXES[String(name||'').trim().split(/\s+\(/)[0]]||[[460,240,1000,600]];
+ // any one of these is a real authoring decision, so drawing from it is honest
  const hasPicture=(b)=>!!(b.picture||b.object||b.archetype||(b.onscreen&&b.onscreen.length)||b.mechanism||b.becomes);
  function sketchSvg(b,pal){
-   const p=pal||{}, bg=p.bg||'#171717', surface=p.surface||'rgba(255,255,255,.08)',
-     edge=p.lineStrong||p.line||'rgba(255,255,255,.3)',
-     text=p.text||'#fff', dim=p.text2||p.dim||'rgba(255,255,255,.6)';
-   // A STORYBOARD SAYS "NO COPY" IN PROSE, and the sketch used to draw that prose as the film's own
-  // words: beat 1 of hi-vandit reads "onscreen: (none, the mark itself is the only mark)" and the
-  // panel rendered that whole parenthetical as large white type, so the approval surface showed a
-  // line that will never be in the film. A parenthesised note, or a bare "none", is the author
-  // declining the slot, not filling it.
-  const declined=(l)=>/^\s*\(?\s*none\b/i.test(l) || /^\s*\(.*\)\s*$/.test(l);
-  const boxes=archBoxes(b.archetype), label=(b.picture||b.object||'').trim(), onscreen=(b.onscreen||[]).filter(Boolean).filter((l)=>!declined(l));
-   const copyBoxes=boxes.filter((x)=>x[4]==='copy');
-   let s='<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg" font-family="Anybody,system-ui,sans-serif">'
-     +'<rect width="1920" height="1080" fill="'+bg+'"/>';
-   boxes.filter((x)=>x[4]==='object').forEach(([x,y,w,h])=>{
-     s+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="18" fill="'+surface+'" stroke="'+edge+'" stroke-width="3" stroke-dasharray="14 10"/>';
-     if(label){ const lines=wrapWords(label,Math.max(14,Math.floor(w/26))), startY=y+h/2-(lines.length-1)*26;
-       s+='<text x="'+(x+w/2)+'" y="'+startY+'" text-anchor="middle" fill="'+dim+'" font-size="34" font-weight="600">'
-         +lines.map((l,i)=>'<tspan x="'+(x+w/2)+'" dy="'+(i===0?0:52)+'">'+esc(l)+'</tspan>').join('')+'</text>'; }
-   });
-   // onscreen renders as real type: it is not a description of the beat, it IS the beat's own words.
-   // A copy slot the archetype names gets it; an archetype with none still gets it, lower third, because
-   // dropping decided words for want of a layout slot is a worse lie than an imprecise position.
-   if(onscreen.length){ const [cx,cyBox]=copyBoxes.length?[960,copyBoxes[0][1]+copyBoxes[0][3]/2]:[960,940];
-     const startY=cyBox-(onscreen.length-1)*30;
-     s+='<text x="'+cx+'" y="'+startY+'" text-anchor="middle" fill="'+text+'" font-size="52" font-weight="700">'
-       +onscreen.map((l,i)=>'<tspan x="'+cx+'" dy="'+(i===0?0:60)+'">'+esc(l)+'</tspan>').join('')+'</text>'; }
-   return s+'</svg>';
+   const p=pal||{}, bg=p.bg||'#171717', surface=p.surface||'rgba(255,255,255,.08)', edge=p.lineStrong||p.line||'rgba(255,255,255,.3)';
+   return '<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg"><rect width="1920" height="1080" fill="'+bg+'"/>'
+     +archBoxes(b.archetype).map(([x,y,w,h])=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="18" fill="'+surface
+       +'" stroke="'+edge+'" stroke-width="3" stroke-dasharray="14 10"/>').join('')+'</svg>';
  }
+ // A STORYBOARD SAYS "NO COPY" IN PROSE: "onscreen: (none, the mark itself is the only mark)" is the
+ // author declining the slot, not words that will be in the film, so it is never shown as copy.
+ const declined=(l)=>/^\s*\(?\s*none\b/i.test(l) || /^\s*\(.*\)\s*$/.test(l);
+ // a gate line as a value: its first clause, and for a long clause only its subject ("no panels")
+ const shortFinding=(s)=>{ const c=String(s).split(/[,:;(\x60]|\.\s/)[0].trim();
+   return c.split(/\s+/).length>5?c.split(/\s+(?:have|has|is|are|was|were|does|do)\s/)[0]:c; };
  function planEmpty(why){
    planBody.innerHTML=''; planNote.hidden=false;
    planNote.innerHTML='<h2>No storyboard</h2><p>'+esc(why)+'</p>'
@@ -177,58 +146,53 @@
  function fitPlan(){ planBody.querySelectorAll('.pstage iframe').forEach(f=>{
    f.style.transform='scale('+(f.parentElement.clientWidth/1920)+')'; }); }
  addEventListener('resize',fitPlan);
+ const planRow=(label,v)=>v?'<div class=prow><dt>'+label+'</dt><dd>'+esc(v)+'</dd></div>':'';
+ // the film as a whole: its message, who it is for, how long, what shape, its one loud moment and what it
+ // refuses, and only the storyboard gate's warnings and errors
+ // the gate's warnings and errors as short values; five "beat X has no scene layer" lines are one fact
+ function gateChips(findings){
+   const warn=(findings||[]).filter(f=>f.kind!=='✓');
+   const unbuilt=warn.filter(f=>/no scene layer starts there/.test(f.line));
+   const chips=warn.filter(f=>!unbuilt.includes(f))
+     .map(f=>[f.kind,/continuous-object contract/.test(f.line)?'object contract not assembled':shortFinding(f.line)]);
+   if(unbuilt.length) chips.unshift([unbuilt[0].kind,unbuilt.length+' beat'+(unbuilt.length===1?'':'s')+' not assembled']);
+   return chips.length?'<div id=plangate>'+chips.map(([k,t])=>'<span class="'+(k==='✗'?'err':'warn')+'">'+esc(t)+'</span>').join('')+'</div>':'';
+ }
+ function planHead(d){
+   return '<div id=planhead><p id=planmsg>'+esc(d.message||'No message')+'</p>'
+     +'<div id=planfacts>'+(d.audience?'<span>Audience <b>'+esc(d.audience)+'</b></span>':'')
+     +'<span>Duration <b>'+esc(d.duration||'?')+'s</b></span>'
+     +(d.format?'<span>Format <b>'+esc(d.format)+'</b></span>':'')+'</div>'
+     +(d.spectacle||d.not?'<dl class=planspine>'+planRow('Spectacle',d.spectacle)+planRow('Not',d.not)+'</dl>':'')
+     +gateChips(d.findings)
+     +'</div>';
+ }
+ function beatPicture(b,pal){
+   if(b.fragment) return '<div class=pstage><iframe loading=lazy title="'+esc(b.name)+'" src="/__frag?src='+encodeURIComponent(b.fragment)+'"></iframe></div>';
+   if(hasPicture(b)) return '<div class="pstage sketch">'+sketchSvg(b,pal)+'<span class=psketchtag>Sketch</span></div>';
+   return '<div class="pstage none"><b>No picture decided</b></div>';
+ }
+ // One beat is one row: the picture on the left at the film's real ratio, what it says and why on the right
+ function beatHtml(b,i,prevArch,pal){
+   const words=(b.onscreen||[]).filter(l=>l&&!declined(l));
+   return '<section class=pbeat id="pbeat-'+(i+1)+'"><header><span class=pn>'+(i+1)+'</span><h3>'+esc(b.name)+'</h3>'
+     +'<span class=pmeta>'+(+b.start).toFixed(1)+'s to '+(+b.end).toFixed(1)+'s</span>'
+     +'<span class="pmeta pdur">'+(b.end-b.start).toFixed(1)+'s</span><span class=sp></span>'
+     +(b.weight==='peak'?'<span class="ptag peak">Peak</span>':'')
+     +(b.archetype&&prevArch===b.archetype?'<span class="ptag repeat">Repeat</span>':'')
+     +'</header>'+beatPicture(b,pal)+'<div>'
+     +(words.length?'<ul class=pcopy>'+words.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>':'')
+     +'<dl>'+planRow('Why',b.why)+planRow('Eye',b.eye)+'</dl></div></section>';
+ }
  function drawPlan(force){
    if(planDrawn&&!force) return;
-   planDrawn=true; planPath.textContent='reading the storyboard…';
+   planDrawn=true; planPath.textContent='reading…';
    fetch('/api/plan?t='+Date.now()).then(r=>r.json()).then(d=>{
-     if(!d.ok){ planPath.textContent=''; return planEmpty(d.error||'no storyboard'); }
-     planNote.hidden=true; planPath.textContent=d.file;
-     const frags=new Set(d.beats.map(b=>b.fragment).filter(Boolean));
-     let h='<div id=planhead><p id=planmsg>'+esc(d.message||'no message: this film has no spine yet')+'</p>'
-       +'<div id=planfacts><span><b>'+esc(d.duration||'?')+'s</b></span>'
-       +'<span><b>'+Math.round((d.duration||0)*30)+'</b> frames</span>'
-       +'<span><b>'+d.beats.length+'</b> beats</span>'
-       +'<span><b>'+frags.size+'</b> fragments</span>'
-       +'<span><b>'+esc(d.format||'')+'</b></span><span>theme <b>'+esc(d.theme||'')+'</b></span></div>';
-     if(d.pace||d.spectacle||d.not){ h+='<div class=planspine>'
-       +(d.pace?'<p><b>pace</b> '+esc(d.pace)+'</p>':'')
-       +(d.spectacle?'<p><b>spectacle</b> '+esc(d.spectacle)+'</p>':'')
-       +(d.not?'<p><b>not</b> '+esc(d.not)+'</p>':'')+'</div>'; }
-     if(d.devices&&d.devices.length){
-       const used=d.devices.filter(x=>!x.dropped).length;
-       h+='<details id=plandev><summary>Reference devices &middot; '+used+' of '+d.devices.length
-         +' used</summary><table>'
-         +d.devices.map(x=>'<tr class="'+(x.dropped?'dropped':'')+'"><td>'+esc(x.id)+'</td><td>'
-           +esc(x.device)+'</td><td>'+esc(x.use)+'</td></tr>').join('')
-         +'</table></details>'; }
-     if(d.findings&&d.findings.length){ h+='<div id=plangate>'
-       +d.findings.map(f=>'<div class="'+(f.kind==='✓'?'ok':'')+'">'+f.kind+' '+esc(f.line)+'</div>').join('')+'</div>'; }
-     h+='</div>';
-     let prevArch='';
-     d.beats.forEach((b,i)=>{
-       const stage=b.fragment
-         ? '<div><div class=pstage><iframe loading=lazy title="'+esc(b.name)+'" src="/__frag?src='+encodeURIComponent(b.fragment)+'"></iframe></div>'
-           +'<p class=psrc>'+esc(b.fragment)+'</p></div>'
-         : hasPicture(b)
-         ? '<div><div class="pstage sketch">'+sketchSvg(b,d.palette)
-             +'<span class=psketchtag title="no hand-written fragment yet: drawn from the storyboard&#39;s own archetype/picture/onscreen">sketch</span></div>'
-           +'<p class=psrc>'+(b.blueprint?'blueprint: '+esc(String(b.blueprint).split(' (')[0]):'no fragment')+'</p></div>'
-         : '<div class="pstage none"><b>No picture decided</b></div>';
-       const copy=(b.onscreen||[]).length
-         ? '<ul class=pcopy>'+b.onscreen.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>' : '';
-       const rows=PFIELDS.filter(f=>b[f[0]]).map(f=>'<div class=prow><dt>'+f[1]+'</dt><dd>'+esc(b[f[0]])+'</dd></div>').join('');
-       h+='<section class=pbeat id="pbeat-'+(i+1)+'"><header><span class=pn>'+(i+1)+'</span>'
-         +'<h3>'+esc(b.name)+'</h3>'
-         +'<span class=pmeta>'+(+b.start).toFixed(1)+'s to '+(+b.end).toFixed(1)+'s</span>'
-         +'<span class="pmeta pdur">'+(b.end-b.start).toFixed(1)+'s</span>'
-         +'<span class=sp></span>'
-         +(b.archetype?'<span class="ptag'+(prevArch&&prevArch===b.archetype?' repeat':'')+'" title="composition">'+esc(b.archetype)+'</span>':'')
-         +(b.weight?'<span class="ptag'+(b.weight==='peak'?' peak':'')+'" title="how loud this beat is">'+esc(b.weight)+'</span>':'')
-         +'<span class=pmeta>'+esc(b.type||'')+'</span></header>'
-         +stage+'<div>'+copy+'<dl>'+rows+'</dl></div></section>';
-       prevArch=b.archetype||'';
-     });
-     planBody.innerHTML=h;
+     planPath.textContent='';
+     if(!d.ok) return planEmpty(d.error||'no storyboard');
+     planNote.hidden=true;
+     let prev='';
+     planBody.innerHTML=planHead(d)+d.beats.map((b,i)=>{ const s=beatHtml(b,i,prev,d.palette); prev=b.archetype||''; return s; }).join('');
      // The iframes have no layout until the pane is visible, so fit twice: now, and once they load.
      fitPlan(); planBody.querySelectorAll('.pstage iframe').forEach(f=>f.addEventListener('load',fitPlan));
      say('the plan is drawn, '+d.beats.length+' beats');
@@ -244,12 +208,12 @@
    const chip=$('stagechip'), name=$('stagename'), at=d.order.indexOf(d.stage), label=cap(d.stage);
    name.textContent=label;
    chip.title='Stage '+(at+1)+' of '+d.order.length+': '+d.order.map((id,i)=>i===at?id.toUpperCase():id).join(' · ')
-     +String.fromCharCode(10)+'Next: '+d.next;
+     +String.fromCharCode(10)+'Next: '+(d.command||d.next)+(d.note?String.fromCharCode(10)+d.note:'');
    chip.setAttribute('aria-label','stage '+d.stage+', copy the next command');
    chip.hidden=false;
    chip.addEventListener('click',()=>{
      const back=()=>setTimeout(()=>{ name.textContent=label; },1400);
-     navigator.clipboard.writeText(d.next).then(()=>{ name.textContent='Copied'; say('copied: '+d.next); back(); },
+     navigator.clipboard.writeText(d.command||d.next).then(()=>{ name.textContent='Copied'; say('copied: '+(d.command||d.next)); back(); },
        ()=>{ name.textContent='Copy failed'; back(); }); });
  }).catch(()=>{});
 
@@ -287,9 +251,9 @@
    fetch('/__sheet?kind='+kind+'&t='+Date.now()).then(r=>{
      if(!mine()) return;
      const dim=r.headers.get('X-Dim');
-     if(r.status===409&&r.headers.get('X-Needs-Render')) return r.text().then(t=>{ lookStat.textContent=''; say('there are no seam frames yet');
+     if(r.headers.get('X-Needs-Render')) return r.text().then(()=>{ lookStat.textContent=''; say('there are no seam frames yet');
        // SAY IT, never draw an empty grid. And offer the one thing that would fix it.
-       note('No seam frames yet','<p>'+esc(t)+'</p><p><button id=dorender>Render</button></p>');
+       note('No seam frames yet','<p><button id=dorender>Render</button></p>');
        $('dorender').addEventListener('click',startRender); });
      if(!r.ok) return r.text().then(t=>{ lookStat.textContent=''; say('that sheet could not be drawn'); note('that sheet could not be drawn','<pre style="white-space:pre-wrap;user-select:text;font:11px/1.5 ui-monospace,monospace">'+esc(t)+'</pre>'); });
      return r.blob().then(b=>{ const u=URL.createObjectURL(b); sheetHave[kind]={u,dim};
@@ -330,10 +294,13 @@
  // that one gate's codes and refuses to imply it has seen the other nineteen.
  function drawShip(){
    const g=(model&&model.gate)||{codes:[]};
-   const codes=g.codes||[];
+   const codes=g.codes||[], cmd='make ship D='+((model&&(model.path||model.file))||'');
    $('shipstat').textContent=codes.length?codes.length+' finding'+(codes.length===1?'':'s'):'no findings';
    $('shipbody').innerHTML=(codes.length?'<h2>Findings</h2><ul>'+codes.map(c=>'<li><code>'+esc(c)+'</code></li>').join('')+'</ul>':'')
-     +'<h2>Full ladder</h2><ul><li><code>make ship D='+esc((model&&model.file)||'')+'</code></li></ul>';
+     +'<button class=copycmd id=shipcmd><code>'+esc(cmd)+'</code><span>Copy</span></button>';
+   const b=$('shipcmd'), lab=b.querySelector('span'), back=()=>setTimeout(()=>{ lab.textContent='Copy'; },1400);
+   b.addEventListener('click',()=>navigator.clipboard.writeText(cmd)
+     .then(()=>{ lab.textContent='Copied'; say('copied: '+cmd); back(); },()=>{ lab.textContent='Copy failed'; back(); }));
  }
  // ---- THE CHOOSER: six takes of this film, at this frame ------------------------------------------
  // IT NEVER ASKS FOR A WORD. There is no search box here and there will not be one: the person this
@@ -355,7 +322,12 @@
    candTick=setInterval(()=>{ const el=candStat.querySelector('.el');
      if(el) el.textContent=String(Math.round((Date.now()-t0)/1000)); },250);
  }
- function candDone(msg){ clearInterval(candTick); candStat.textContent=msg; }
+ // a failure is one line and one action; the raw output stays one click away
+ function candFail(raw){ clearInterval(candTick);
+   const cp=$('candplay'); if(cp) cp.remove();   // a play control for takes that did not arrive does nothing
+   candStat.innerHTML='<span class=candfail><b>Takes failed</b><button id=candretry>Retry</button></span>'
+     +'<details><summary>Output</summary><pre>'+esc(raw)+'</pre></details>';
+   $('candretry').addEventListener('click',askCandidates); }
  function askCandidates(){
    if(candBusy) return;
    candBusy=true; candGo.disabled=true; candWorking();
@@ -367,11 +339,11 @@
       if(!d.ok){ cands.innerHTML='';
         // The refusals are the useful half: a window painted with \`html\` has no preset to swap, and
         // saying which window and why beats an empty strip.
-        candDone(''); candStat.innerHTML='<span style="color:var(--bad)">'+esc(d.error||'no candidates')+'</span>';
+        candFail(d.error||'no candidates');
         say('no candidates: '+(d.error||''));
         return; }
       drawCands(d);
-    }).catch(e=>{ candBusy=false; candGo.disabled=false; candDone('could not ask for candidates: '+e.message);
+    }).catch(e=>{ candBusy=false; candGo.disabled=false; candFail(e.message);
       say('the chooser failed: '+e.message); });
  }
  function drawCands(d){
@@ -481,7 +453,8 @@
    dragEl.classList.toggle('on',keyMode); });
  $('undo').addEventListener('click',async()=>{
    const r=await fetch('/api/undo',{method:'POST'}).then(x=>x.json());
-   if(r.ok) reloadScene(); else selOut.textContent='could not undo: '+r.error; });
+   $('undo').disabled=!(r.ok&&r.left>0);
+   if(r.ok) reloadScene(); });
  function reloadScene(){ const keep=n; sc.contentWindow.location.reload(); sc.addEventListener('load',()=>{ ready(); setTimeout(()=>{ n=Math.min(keep,total); draw(); },120); },{once:true}); }
  dragEl.addEventListener('pointerdown',e=>{
    if(!keyMode) return;
@@ -577,7 +550,8 @@
  addEventListener('resize',()=>{ if(model) paint(model); });
  // the stage resizes without the WINDOW resizing (the divider moves, a hazard band wraps), and a scale
  // computed against the old height overflows and clips the frame
- if(window.ResizeObserver) new ResizeObserver(()=>fit()).observe($('stage'));
+ // draw() after fit(), so the selection box is re-measured at the new scale (divider, collapse, fullscreen)
+ if(window.ResizeObserver) new ResizeObserver(()=>{ fit(); draw(); }).observe($('stage'));
  // 00:07.00, the reference editor's clock: minutes, seconds, hundredths
  const stamp=(t)=>{ const c=Math.round(Math.max(0,t)*100), p=(v)=>String(v).padStart(2,'0');
    return p(Math.floor(c/6000))+':'+p(Math.floor(c/100)%60)+'.'+p(c%100); };
@@ -626,6 +600,7 @@
    Z=Math.max(1,Math.min(40,z));
    lanes.style.setProperty('--z',Z);
    $('zlab').textContent=Z.toFixed(1)+'x';
+   $('zout').disabled=$('zfit').disabled=Z<=1;   // at 1.0x there is nothing further out to show
    // ANCHOR ON THE PLAYHEAD: zooming is what you do to look closer at where you ARE, so the frame you
    // are on stays put and the film grows around it.
    requestAnimationFrame(()=>{
@@ -648,12 +623,14 @@
    el.innerHTML=html; ruler.appendChild(el); const w=el.offsetWidth; el.remove(); return w; }
  // Clip colour by kind, the reference editor's roles: text purple, media grey, anything else a neutral
  // pill. Captions (blue) and sound (green) are drawn by their own rows.
- const KIND={text:'text',type:'text',count:'text',beat:'text',image:'media',video:'media',lottie:'media',clip:'media'};
- const kindOf=(t)=>KIND[t]||'layer';
+ const KIND={text:'text',type:'text',count:'text',beat:'text',image:'media',video:'media',lottie:'media',clip:'media',
+   rect:'shape',svg:'shape',paint:'shape',glow:'shape',shader:'shape',beam:'shape',canvas:'shape',cursor:'shape'};
+ const kindOf=(t)=>KIND[t]||'comp';
  const ICON={
    text:'<svg viewBox="0 0 16 16"><path d="M3.5 3.5h9M8 3.5v9"/></svg>',
    media:'<svg viewBox="0 0 16 16"><rect x=2.5 y=3 width=11 height=10 rx=1.5 /><path d="M2.5 10.5l3-3 3 3 2-2 3 3"/></svg>',
-   layer:'<svg viewBox="0 0 16 16"><rect x=3 y=3 width=10 height=10 rx=2 /></svg>',
+   shape:'<svg viewBox="0 0 16 16"><rect x=3 y=3 width=10 height=10 rx=2 /></svg>',
+   comp:'<svg viewBox="0 0 16 16"><path d="M2.5 5.5L8 3l5.5 2.5L8 8z"/><path d="M2.5 10.5L8 13l5.5-2.5"/></svg>',
    cap:'<svg viewBox="0 0 16 16"><rect x=2 y=3.5 width=12 height=9 rx=1.5 /><path d="M4.5 9.5h2M8.5 9.5h3"/></svg>',
    sound:'<svg viewBox="0 0 16 16"><path d="M6 12V3.5l6.5-1.5v8.5"/><circle cx=4.5 cy=12 r=1.6 /><circle cx=11 cy=10.5 r=1.6 /></svg>' };
  // The bars come from the LIVE DOM, not from the JSON: the engine writes each clip's real window and ramp
@@ -675,7 +652,12 @@
  // ---- the filmstrip ------------------------------------------------------------------------------
  // NEVER BLOCKS THE FIRST PAINT. The timeline draws, then this asks for the strip and fills the band in
  // when it arrives; the band is display:none until it has something, so nothing reserves a hole.
- let stripDone=false, stripNote='';
+ let stripDone=false, stripNote='', stripStride=0;
+ // the strip's cells keep the film's own shape: the band's height follows the cell width, and contain
+ // covers the clamp, so no frame is cropped
+ function sizeFilm(){ if(!stripStride) return;
+   const cw=(ruler.clientWidth||1)*stripStride/dur;
+   $('film').style.height=Math.round(Math.max(36,Math.min(72,cw*H/W)))+'px'; }
  function markStill(s){
    const still=new Set(s.still||[]);
    if(!still.size) return;
@@ -691,13 +673,13 @@
      if(!s||!s.frames||!s.frames.length){ stripDone=false;
        if(s&&s.error){ stripNote='no strip: '+s.error; $('tlkey').textContent=stripNote; } return; }
      const w=100*s.stride/dur;
-     stripFrames=s.frames;
+     stripFrames=s.frames; stripStride=s.stride; sizeFilm();
      band.innerHTML=s.frames.map(f=>'<div class=fr style="left:'+pc(f.t-s.stride/2)+';width:'+w+'%;background-image:url('+f.src+')"></div>').join('');
      markStill(s);
    }).catch(()=>{ stripDone=false; });
  }
  function timeline(){
-   fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; drawCrumbs(); paint(m); drawJump(); })
+   fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; $('undo').disabled=!(m.undo>0); drawCrumbs(); paint(m); drawJump(); })
      .catch(e=>{ $('tlwhat').textContent='timeline unavailable: '+e; });
  }
  // name each bar: consume the first unclaimed JSON layer that starts at the same instant. A layer the
@@ -756,8 +738,10 @@
    // A DECLARED SILENCE IS A DEVICE, and an undeclared one is a hole. The lane says which.
    if(A.silent) return '<div class=lane-note><span>'+esc(A.why?'silent: '+A.why:'silent, no reason given')+'</span></div>';
    const grid=beatGrid(A.beats);
-   const name=A.music?esc(A.music.split('/').pop()):(A.auto?'auto':'no bed');
-   const meta=[A.gain!=null?'gain '+A.gain:'',A.beats?Math.round(A.beats.bpm)+' bpm':'',grid.dense?'grid hidden':''].filter(Boolean).join(' · ');
+   // audio.auto voices the transitions (core/audio/cues.js) and picks no music, so without a bed the
+   // pill says exactly that rather than a bare "auto"
+   const name=A.music?esc(A.music.split('/').pop()):'no bed';
+   const meta=[A.auto?'auto cues':'',A.gain!=null?'gain '+A.gain:'',A.beats?Math.round(A.beats.bpm)+' bpm':'',grid.dense?'grid hidden':''].filter(Boolean).join(' · ');
    let h='<div class="row aud"><div class=bed>'+grid.html+soundExtras(A)
      +'<span class=name>'+ICON.sound+name+(meta?' <s>'+esc(meta)+'</s>':'')+'</span></div></div>';
    if(A.bridgeError) h+='<div class=lane-note><span>bridges did not resolve: '+esc(A.bridgeError)+'</span></div>';
@@ -796,7 +780,7 @@
    const holes=holesOf(m.gate||{});
    h+=soundRows(m.audio||{})+captionRow(m.captions||[])+bars.map(barHtml).join('')+hazardHtml(holes,grown);
    rows.innerHTML=h;
-   filmstrip();
+   filmstrip(); sizeFilm();
    $('tlwhat').textContent=bars.length+' layer'+(bars.length===1?'':'s');
    $('tlkey').textContent=stripNote;
    $('alerts').innerHTML=alertsHtml(holes,grown);
@@ -848,7 +832,8 @@
    if(near) peekBox.style.backgroundImage='url('+near.src+')';
    peekT.textContent=peekWant.toFixed(2)+'s · '+Math.round(peekWant*fps)+'f';
    peek.classList.add('on');
-   peek.style.transform='translate3d('+Math.max(8,Math.min(innerWidth-peekW-8,clientX-peekW/2))+'px,'
+   // clamped to the work area, so the thumbnail never covers the property panel
+   peek.style.transform='translate3d('+Math.max(workL,Math.min(innerWidth-peekW-8,clientX-peekW/2))+'px,'
      +Math.max(8,tlTop-peekH-8)+'px,0)';
    $('hov').style.display='block';
    $('hov').style.transform='translateX('+atX(peekWant)+'px)';

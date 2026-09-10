@@ -11,7 +11,7 @@
   <div class=tools>
    <button id=key class=ib aria-pressed=false aria-label="motion key" title="Motion key"><svg viewBox="0 0 20 20"><path d="M10 3.5l6.5 6.5-6.5 6.5L3.5 10z"/></svg></button>
    <span class=vr></span>
-   <button id=undo class=ib aria-label=undo title=Undo><svg viewBox="0 0 20 20"><path d="M4.5 8h8a3.5 3.5 0 010 7H9"/><path d="M7.5 5l-3 3 3 3"/></svg></button>
+   <button id=undo class=ib aria-label=undo title=Undo disabled><svg viewBox="0 0 20 20"><path d="M4.5 8h8a3.5 3.5 0 010 7H9"/><path d="M7.5 5l-3 3 3 3"/></svg></button>
   </div>
   <button id=stagechip hidden><span id=stagename></span><svg viewBox="0 0 20 20" aria-hidden=true><rect x=7 y=7 width=9 height=9 rx=2 /><path d="M13 4.5H6A1.5 1.5 0 004.5 6v7"/></svg></button>
  </header>
@@ -48,7 +48,7 @@
    <p id=sel role=status></p>
    <section class="psec chooser">
     <div class=shead><span>Backdrops</span><button id=candgo>Six takes</button></div>
-    <p id=candstat></p>
+    <div id=candstat></div>
     <div id=cands></div>
    </section>
   </aside>
@@ -72,10 +72,10 @@
     <div id=tlhead>
      <span class=l><b id=tlwhat></b><span id=tlkey></span></span>
      <span id=read class=c></span>
-     <span class="r zoom"><button id=zout class=ib aria-label="zoom out" title="Zoom out"><svg viewBox="0 0 20 20"><path d="M5 10h10"/></svg></button><button id=zin class=ib aria-label="zoom in" title="Zoom in"><svg viewBox="0 0 20 20"><path d="M10 5v10M5 10h10"/></svg></button><button id=zfit class=ib aria-label="fit the whole film" title=Fit><svg viewBox="0 0 20 20"><path d="M2.5 10h5M5.5 8l2 2-2 2M17.5 10h-5M14.5 8l-2 2 2 2"/></svg></button><s id=zlab>1.0x</s></span>
+     <span class="r zoom"><button id=zout class=ib aria-label="zoom out" title="Zoom out" disabled><svg viewBox="0 0 20 20"><path d="M5 10h10"/></svg></button><button id=zin class=ib aria-label="zoom in" title="Zoom in"><svg viewBox="0 0 20 20"><path d="M10 5v10M5 10h10"/></svg></button><button id=zfit class=ib aria-label="fit the whole film" title=Fit disabled><svg viewBox="0 0 20 20"><path d="M2.5 10h5M5.5 8l2 2-2 2M17.5 10h-5M14.5 8l-2 2 2 2"/></svg></button><s id=zlab>1.0x</s></span>
     </div>
     <div id=alerts></div>
-    <div id=tlbody><div id=lanes tabindex=0 role=group aria-label="timeline: left and right seek, up and down select a layer"><div id=ruler></div><div id=film></div><div id=rows></div></div><div id=ph></div><div id=hov></div></div>
+    <div id=tlbody><div id=lanes tabindex=0 role=group aria-label=Timeline><div id=ruler></div><div id=film></div><div id=rows></div></div><div id=ph></div><div id=hov></div></div>
    </div>
   </div>
 
