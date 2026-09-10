@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { extractKitBlock, buildKit } from '../lib/stagekit.mjs';
+import { extractKitBlock, buildKit, MIN_VIDEO_TEXT_PX } from '../lib/stagekit.mjs';
 import { measureFrame, measureVideo } from '../media/content.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
@@ -151,6 +151,13 @@ export function readiness(source) {
   });
 
   return { smallest, elementCount, tokenUses, rawColorUses, images, hasRealImage: images.some((i) => i.ok) };
+}
+
+// The smallest text the browser actually laid out. The source parse above cannot see the cascade: a
+// `font:` shorthand, or an inline size overriding a kit class, reads wrong there and right here.
+export function smallestRendered(boxes) {
+  const px = (boxes || []).map((b) => b.fontPx).filter((n) => Number.isFinite(n) && n > 0);
+  return px.length ? Math.min(...px) : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -313,7 +320,9 @@ function main() {
   // (d) VIDEO-READINESS (source) + CLIPPING (rendered)
   const r = readiness(raw);
   console.log(`\n· video readiness ·`);
-  console.log(`  smallest text: ${r.smallest == null ? 'n/a (no sized text found)' : `${r.smallest}px` + (r.smallest < 28 ? '  ⚠ under 28px at 1920 wide: unreadable in a moving frame' : '  ok')}`);
+  const rs = boxes ? smallestRendered(boxes) : null;
+  const smallest = rs ?? r.smallest;
+  console.log(`  smallest text: ${smallest == null ? 'n/a (no sized text found)' : `${smallest}px${rs == null ? ' (read from source, not rendered)' : ''}` + (smallest < MIN_VIDEO_TEXT_PX ? `  ⚠ under ${MIN_VIDEO_TEXT_PX}px at 1920 wide: unreadable in a moving frame` : '  ok')}`);
   console.log(`  elements: ${r.elementCount}`);
   console.log(`  colour: ${r.tokenUses} theme-token use(s), ${r.rawColorUses} raw hex/colour use(s)${r.rawColorUses && !r.tokenUses ? '  ⚠ no theme tokens used' : ''}`);
   if (!r.images.length) console.log('  images: none');

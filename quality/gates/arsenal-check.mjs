@@ -162,7 +162,8 @@ const walk = (d) => {
   for (const e of fs.readdirSync(path.join(ROOT, d), { withFileTypes: true })) {
     const p = `${d}/${e.name}`;
     if (e.isDirectory()) walk(p);
-    else if (e.name.endsWith('.js') || e.name.endsWith('.mjs')) files.push(p);
+    // a test file runs its assertions on import, so it is never a module that declares a vocabulary
+    else if ((e.name.endsWith('.js') || e.name.endsWith('.mjs')) && !/\.test\.m?js$/.test(e.name)) files.push(p);
   }
 };
 walk('core');

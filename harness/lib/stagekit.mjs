@@ -87,6 +87,10 @@ const elevFor = (light, vignette) => (light ? ELEV.light : {
  * Every number below traces to `resolveLook` (scale · cuts · field · layout): nothing here is a literal
  * this file chose, because 41 themes must get 41 kits, not one kit in 41 colours.
  */
+// The smallest text a moving 1920-wide frame can be read at. `make screen` warns under it, so the kit
+// never writes a role below it: a frame built only from kit sizes must pass its own check.
+export const MIN_VIDEO_TEXT_PX = 28;
+
 export function buildKit(theme, resolveLook, isLightBg) {
   const look = resolveLook(theme, { isLightBg });
   const s = look.scale;
@@ -98,7 +102,8 @@ export function buildKit(theme, resolveLook, isLightBg) {
   const shadow = elev[2];
   const unit = spaceUnit(s.hook);
   const margin = (look.layout && look.layout.margin) || 160;
-  const eyebrow = Math.max(14, Math.round(s.caption * 0.92));
+  const caption = Math.max(MIN_VIDEO_TEXT_PX, s.caption);
+  const eyebrow = Math.max(MIN_VIDEO_TEXT_PX, Math.round(caption * 0.92));
   const stat = Math.round(s.hook * 1.15);
   const display = Math.round(s.hook * 2.4);
 
@@ -241,7 +246,7 @@ export function buildKit(theme, resolveLook, isLightBg) {
     `.kit-hook{font:700 ${s.hook}px var(--font-sans);color:var(--text);margin:0}`,
     `.kit-headline{font:700 ${s.headline}px var(--font-sans);color:var(--text);margin:0}`,
     `.kit-body{font:400 ${s.body}px var(--font-sans);color:var(--text-2);margin:0}`,
-    `.kit-caption{font:400 ${s.caption}px var(--font-sans);color:var(--dim);margin:0}`,
+    `.kit-caption{font:400 ${caption}px var(--font-sans);color:var(--dim);margin:0}`,
     `.kit-eyebrow{font:600 ${eyebrow}px var(--font-mono);color:var(--text-2);letter-spacing:0.14em;text-transform:uppercase;margin:0}`,
     `.kit-stat{font:700 ${stat}px var(--font-num);font-variant-numeric:tabular-nums;color:var(--text);margin:0}`,
     '.kit-accent{color:var(--accent)}',
