@@ -1,7 +1,7 @@
 {
-  "total": 716,
-  "previewed": 322,
-  "families": 57,
+  "total": 727,
+  "previewed": 332,
+  "families": 59,
   "tags": [
     [
       "asset",
@@ -21,7 +21,7 @@
     ],
     [
       "camera",
-      14
+      15
     ],
     [
       "canvas",
@@ -49,7 +49,7 @@
     ],
     [
       "layer",
-      41
+      42
     ],
     [
       "motion key",
@@ -65,7 +65,7 @@
     ],
     [
       "per-layer",
-      79
+      88
     ],
     [
       "per-layer/scene",
@@ -934,7 +934,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "a camera move is only legible against a scene laid out for it, which is the film, not a swatch.",
-      "count": 13,
+      "count": 14,
       "undescribed": 0,
       "entries": [
         {
@@ -969,6 +969,13 @@
           "name": "followCursor",
           "stem": "camera-moves--followcursor",
           "desc": "THE CAMERA FOLLOWS THE CURSOR · derived from the `path` and `clicks` on a `cursor` layer, so the pointer stays the single owner of where the camera goes. It pushes toward the spot the pointer is about to click, arrives just BEFORE the click, holds across it and releases. Clicks too close in time or space share one framing, so six clicks are never six crash zooms",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "followLayer",
+          "stem": "camera-moves--followlayer",
+          "desc": "CAMERA TRACKS A LAYER BY ID, at RENDER time, off the same live-box accessor `follow` (the layer track) reads. Holds still while the target sits inside a soft margin of frame centre, translating only the minimum to keep it in once it would cross the edge, rather than rigidly re-centring it every frame (which reads as the world sliding, not the camera tracking). Zoom is HELD (`to`), not framed. The one move here `bakeCameraMove` resolves onto `data.cameraFollow`, not `data.camera`, and it cannot be composed with another leg",
           "scene": null,
           "noPreview": null
         },
@@ -2025,7 +2032,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 11,
+      "count": 12,
       "undescribed": 0,
       "entries": [
         {
@@ -2075,6 +2082,13 @@
           "stem": "three-js-scenes-real-geometry--liquidbackground",
           "desc": "a subdivided plane churning under summed sine displacement, specular highlights sliding across the swells",
           "scene": "/assets/effects/three-js-scenes-real-geometry--liquidbackground.json",
+          "noPreview": null
+        },
+        {
+          "name": "litPlane",
+          "stem": "three-js-scenes-real-geometry--litplane",
+          "desc": "a captured UI plane, LIT (MeshStandardMaterial under the studio rig, not MeshBasicMaterial), rising with a tilt and a rotation into a soft-shadowed ground with an overshoot settle; `blur` opts it into a shutter-accumulated smear on the fast rise",
+          "scene": "/assets/effects/three-js-scenes-real-geometry--litplane.json",
           "noPreview": null
         },
         {
@@ -2971,6 +2985,54 @@
       ]
     },
     {
+      "id": "move-shapes-measured-keyframe-tracks",
+      "title": "Move shapes (measured keyframe tracks)",
+      "tag": "per-layer",
+      "intro": "A storyboard's `move: <shape>:<band>` (harness/lib/contract.mjs, scope LAYER · a sustained track on the beat's own layer, never a one-shot entrance), or a hand-keyed `motion` built directly · `node harness/author/track.mjs pan --dur 1.25 --to -600`. Every shape is the normalised measurement of a real film in this repo, never invented, so a beat that names one keeps moving for its whole length instead of landing an entrance and holding still.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 5,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "blast",
+          "stem": "move-shapes-measured-keyframe-tracks--blast",
+          "desc": "four-key punctuation · arrives oversize, settles, drifts, then grows OUT through the frame. A hard pop, never a fade",
+          "scene": "/assets/effects/move-shapes-measured-keyframe-tracks--blast.json",
+          "noPreview": null
+        },
+        {
+          "name": "drift",
+          "stem": "move-shapes-measured-keyframe-tracks--drift",
+          "desc": "a slow ambient hold on one axis that never returns to where it began, for a layer that should keep living through a beat",
+          "scene": "/assets/effects/move-shapes-measured-keyframe-tracks--drift.json",
+          "noPreview": null
+        },
+        {
+          "name": "enter",
+          "stem": "move-shapes-measured-keyframe-tracks--enter",
+          "desc": "a keyed entrance track on the layer itself rather than a preset name · rises in, overshoots slightly, settles",
+          "scene": "/assets/effects/move-shapes-measured-keyframe-tracks--enter.json",
+          "noPreview": null
+        },
+        {
+          "name": "exit",
+          "stem": "move-shapes-measured-keyframe-tracks--exit",
+          "desc": "a keyed departure that accelerates off-frame, opacity trailing the move · the layer is gone because it LEFT, not because it dimmed",
+          "scene": "/assets/effects/move-shapes-measured-keyframe-tracks--exit.json",
+          "noPreview": null
+        },
+        {
+          "name": "pan",
+          "stem": "move-shapes-measured-keyframe-tracks--pan",
+          "desc": "an irregular multi-key horizontal (or vertical) pan, linear interior keys · surges then gives up, reads as a hand scrolling, not an animation of a page",
+          "scene": "/assets/effects/move-shapes-measured-keyframe-tracks--pan.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "part-entrances",
       "title": "Part entrances",
       "tag": "per-layer",
@@ -2984,7 +3046,7 @@
         {
           "name": "drawOn",
           "stem": "part-entrances--drawon",
-          "desc": "an SVG stroke draws itself along its own path (pathLength=1, no measurement)",
+          "desc": "an SVG stroke draws itself along its own path, measured at build with getTotalLength()",
           "scene": null,
           "noPreview": null
         },
@@ -3042,6 +3104,47 @@
           "stem": "part-entrances--widen",
           "desc": "scales out from its left edge. A row, a rule, anything that should fill rather than appear",
           "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "path-curves-svg-d-generators",
+      "title": "Path curves (SVG \"d\" generators)",
+      "tag": "per-layer",
+      "intro": "A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH · flies the beat's own layer along the curve, MotionPathPlugin), or `modifiers: [{ alongPath: { curve } }]` (core/fx/along-path.js) to set a line of type on it instead of moving a whole layer.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 4,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "arc",
+          "stem": "path-curves-svg-d-generators--arc",
+          "desc": "a shallow rise-and-fall, peak in the middle",
+          "scene": "/assets/effects/path-curves-svg-d-generators--arc.json",
+          "noPreview": null
+        },
+        {
+          "name": "dip",
+          "stem": "path-curves-svg-d-generators--dip",
+          "desc": "a shallow sag-and-rise, trough in the middle",
+          "scene": "/assets/effects/path-curves-svg-d-generators--dip.json",
+          "noPreview": null
+        },
+        {
+          "name": "ramp",
+          "stem": "path-curves-svg-d-generators--ramp",
+          "desc": "a straight diagonal, top-left to bottom-right",
+          "scene": "/assets/effects/path-curves-svg-d-generators--ramp.json",
+          "noPreview": null
+        },
+        {
+          "name": "wave",
+          "stem": "path-curves-svg-d-generators--wave",
+          "desc": "an S-curve, one full up-down cycle",
+          "scene": "/assets/effects/path-curves-svg-d-generators--wave.json",
           "noPreview": null
         }
       ]
