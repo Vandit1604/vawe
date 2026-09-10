@@ -40,7 +40,7 @@ export function parsePairs(spec) {
 }
 
 /** pairActs(filmCount, refCount, pairs?) -> [[filmIdx, refIdx], …] (1-based). An explicit `pairs` wins;
- * otherwise acts pair BY ORDER, stopping at whichever list is shorter — never inventing a pairing for
+ * otherwise acts pair BY ORDER, stopping at whichever list is shorter, never inventing a pairing for
  * the acts that run past the shorter side. */
 export function pairActs(filmCount, refCount, pairs = null) {
   if (pairs && pairs.length) return pairs;
@@ -66,10 +66,10 @@ export function verdictOf(ours, ref) {
 // PLACEHOLDER-SURFACE THRESHOLDS. Calibrated against two real measurements (harness/media/content.mjs
 // measureSpan, over each act's own bounds, the fixed flood/wall fill described above), not guessed:
 //   out/vawe-flow.mp4's editor act, 0-4.6s (a real captured window, NOT a mock): fill 0.49, band
-//     'slightly', photo 0.02, detail 2.4 — real UI chrome fills half the frame, but a code editor's own
+//     'slightly', photo 0.02, detail 2.4: real UI chrome fills half the frame, but a code editor's own
 //     content is legitimately quiet and low-detail.
 //   madera's shot 9, 10.37-11.08s, the "results" act (a real dense photo/UI act): fill 0.43, band
-//     'slightly', photo 0.23, detail 14.1 — high fill AND high photo/detail.
+//     'slightly', photo 0.23, detail 14.1: high fill AND high photo/detail.
 // Both are real material and neither may trip placeholder-surface. Both also band 'slightly', so
 // requiring band === 'not' already clears both on its own; FILL_MIN/PHOTO_MAX/DETAIL_MAX are set so a
 // GENUINELY flat, colourless mock (band 'not') still needs to ALSO be large, photo-free and low-detail
