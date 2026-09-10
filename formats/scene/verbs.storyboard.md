@@ -1,4 +1,5 @@
 ---
+approved: 2026-09-10
 message: "This engine has a verb for every move you want, and here are nine of them in twelve seconds."
 audience: "Someone who has seen our films look like slide decks and does not believe the engine can do more."
 arc: "one continuous action: a cursor works its way down a list of verbs, and each verb is performed on the word that names it, in one unbroken frame"
