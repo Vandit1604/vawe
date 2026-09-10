@@ -673,7 +673,13 @@
       "exitDur": 0.35,
       "html": "<div class=\"chips\" style=\"display:flex;gap:28px;align-items:flex-start\"><span class=\"chip\">Build runner</span><span class=\"chip\">Review bot</span><span class=\"chip\">Release bot</span></div><style>.chip{display:inline-flex;align-items:center;font:600 22px var(--font-mono);color:var(--text-2);background:var(--surface);border-radius:6px;padding:8px 20px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 1px rgba(0,0,0,0.07), 0 2px 2px rgba(0,0,0,0.05)}</style>",
       "parts": [
-        { "select": ".chip", "anim": "popIn", "each": 0.3, "stagger": 0.25, "delay": 0 }
+        {
+          "select": ".chip",
+          "anim": "popIn",
+          "each": 0.3,
+          "stagger": 0.25,
+          "delay": 0
+        }
       ]
     },
     {
@@ -839,16 +845,6 @@
       "preset": "constellation"
     }
   ],
-  "authoring": {
-    "allow": [
-      "no-preflight",
-      "craft-unvisited"
-    ],
-    "_why": {
-      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-      "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
-    }
-  },
   "transitions": [
     {
       "at": 5.6,

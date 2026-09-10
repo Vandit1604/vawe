@@ -709,7 +709,14 @@
    "exitDur": 0.3,
    "html": "<div style=\"position:relative;width:868px;height:112px\"><div class=\"chip\" style=\"position:absolute;left:0px;top:0;width:112px;height:112px;border-radius:8px;background:color-mix(in srgb, var(--down) 22%, transparent);border:2px solid var(--down)\"></div><div class=\"chip\" style=\"position:absolute;left:126px;top:0;width:112px;height:112px;border-radius:8px;background:color-mix(in srgb, var(--down) 22%, transparent);border:2px solid var(--down)\"></div><div class=\"chip\" style=\"position:absolute;left:252px;top:0;width:112px;height:112px;border-radius:8px;background:color-mix(in srgb, var(--down) 22%, transparent);border:2px solid var(--down)\"></div><div class=\"chip\" style=\"position:absolute;left:378px;top:0;width:112px;height:112px;border-radius:8px;background:color-mix(in srgb, var(--down) 22%, transparent);border:2px solid var(--down)\"></div><div class=\"chip\" style=\"position:absolute;left:504px;top:0;width:112px;height:112px;border-radius:8px;background:color-mix(in srgb, var(--down) 22%, transparent);border:2px solid var(--down)\"></div><div class=\"chip\" style=\"position:absolute;left:630px;top:0;width:112px;height:112px;border-radius:8px;background:color-mix(in srgb, var(--down) 22%, transparent);border:2px solid var(--down)\"></div><div class=\"chip\" style=\"position:absolute;left:756px;top:0;width:112px;height:112px;border-radius:8px;background:color-mix(in srgb, var(--down) 34%, transparent);border:2px solid var(--down)\"></div></div>",
    "parts": [
-    { "select": ".chip", "anim": "popIn", "each": 0.22, "stagger": 0.18, "delay": 0, "out": true }
+    {
+     "select": ".chip",
+     "anim": "popIn",
+     "each": 0.22,
+     "stagger": 0.18,
+     "delay": 0,
+     "out": true
+    }
    ]
   },
   {
@@ -838,16 +845,6 @@
    "exitDur": 0
   }
  ],
- "authoring": {
-  "allow": [
-   "no-preflight",
-   "craft-unvisited"
-  ],
-  "_why": {
-   "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-   "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
-  }
- },
  "transitions": [
   {
    "at": 6.1,

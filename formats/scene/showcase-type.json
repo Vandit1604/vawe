@@ -13,16 +13,10 @@
   },
   "authoring": {
     "allow": [
-      "no-continuous-object",
-      "no-authored-motion",
-      "no-preflight",
-      "craft-unvisited"
+      "no-continuous-object"
     ],
     "_why": {
-      "no-continuous-object": "the diagram IS the spine and it changes at every cut: each junction swaps its whole bar chart for the next preset's. direction-floor cannot see it because its `var(--t)` exemption tests `l.html` and this layer carries its markup in `src`. A gate blind spot, not a missing spine.",
-      "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
-      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-      "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)"
+      "no-continuous-object": "the diagram IS the spine and it changes at every cut: each junction swaps its whole bar chart for the next preset's. direction-floor cannot see it because its `var(--t)` exemption tests `l.html` and this layer carries its markup in `src`. A gate blind spot, not a missing spine."
     }
   },
   "layers": [

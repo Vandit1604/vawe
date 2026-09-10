@@ -315,16 +315,10 @@
   ],
   "authoring": {
     "allow": [
-      "aphoristic-cadence",
-      "no-storyboard",
-      "no-preflight",
-      "no-transition"
+      "aphoristic-cadence"
     ],
     "_why": {
-      "aphoristic-cadence": "The rule would have me cut \"Every vertex computed. Not one drawn.\" as manufactured contrast, and it is right about the shape. Here the contrast is the fact: the globe is 22,000 points sampled from Natural Earth and a great-circle route solved per frame, and there is no drawn artwork anywhere in the film. The rule exists to make the author decide rather than comply. This is the decision.",
-      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
-      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)"
+      "aphoristic-cadence": "The rule would have me cut \"Every vertex computed. Not one drawn.\" as manufactured contrast, and it is right about the shape. Here the contrast is the fact: the globe is 22,000 points sampled from Natural Earth and a great-circle route solved per frame, and there is no drawn artwork anywhere in the film. The rule exists to make the author decide rather than comply. This is the decision."
     }
   },
   "cameraMove": [

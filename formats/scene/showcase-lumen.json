@@ -2,16 +2,8 @@
   "module": "scene",
   "authoring": {
     "allow": [
-      "dead-air",
-      "no-storyboard",
-      "no-preflight",
-      "no-transition"
-    ],
-    "_why": {
-      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
-      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)"
-    }
+      "dead-air"
+    ]
   },
   "authoringNote": "PRE-EXISTING dead air, not a design choice: this scene was authored before beat-check existed and has a hole in its timeline. Waived so it keeps rendering; fix the timing and drop this waiver.",
   "aspect": "16:9",

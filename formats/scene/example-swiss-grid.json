@@ -2,15 +2,11 @@
  "authoring": {
   "allow": [
    "safe",
-   "no-storyboard",
-   "no-authored-motion",
-   "no-preflight"
+   "no-storyboard"
   ],
   "_why": {
    "safe": "the beat IS a dimension diagram of the 160px margin, so its leader line and its '160' label are drawn from the frame edge inward. Moving them inside the safe box would measure a distance the film is not about.",
-   "no-storyboard": "this film predates the storyboard rule and was grandfathered by the legacy manifest. Recording the safe waiver above changed the file, which forfeits that row by design. No plan was ever written for this film and inventing one now would be the fake plan the ratchet exists to prevent.",
-   "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
-   "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)"
+   "no-storyboard": "this film predates the storyboard rule and was grandfathered by the legacy manifest. Recording the safe waiver above changed the file, which forfeits that row by design. No plan was ever written for this film and inventing one now would be the fake plan the ratchet exists to prevent."
   }
  },
  "module": "scene",
@@ -140,7 +136,15 @@
    "exitDur": 0,
    "html": "<div style=\"position:relative;width:1600px;height:250px\"><div class=\"box\" style=\"position:absolute;left:0px;top:0;width:250px;height:250px;border-radius:8px;background:var(--surface-2);border:1.5px solid var(--line)\"></div><div class=\"box\" style=\"position:absolute;left:280px;top:0;width:250px;height:250px;border-radius:8px;background:var(--surface-2);border:1.5px solid var(--line)\"></div><div class=\"box\" style=\"position:absolute;left:560px;top:0;width:250px;height:250px;border-radius:8px;background:var(--accent);box-shadow:0 0 28px color-mix(in srgb, var(--accent) 30%, transparent)\"></div><div class=\"box\" style=\"position:absolute;left:840px;top:0;width:250px;height:250px;border-radius:8px;background:var(--surface-2);border:1.5px solid var(--line)\"></div><div class=\"box\" style=\"position:absolute;left:1120px;top:0;width:250px;height:250px;border-radius:8px;background:var(--surface-2);border:1.5px solid var(--line)\"></div><div class=\"box\" style=\"position:absolute;left:1400px;top:0;width:200px;height:250px;border-radius:8px;background:var(--surface-2);border:1.5px solid var(--line)\"></div></div>",
    "parts": [
-    { "select": ".box", "anim": "popIn", "each": 0.3, "stagger": 0.08, "delay": 0, "out": true, "exitDur": 0.3 }
+    {
+     "select": ".box",
+     "anim": "popIn",
+     "each": 0.3,
+     "stagger": 0.08,
+     "delay": 0,
+     "out": true,
+     "exitDur": 0.3
+    }
    ]
   },
   {

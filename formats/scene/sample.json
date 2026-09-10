@@ -34,7 +34,7 @@
    "stagger": 0.09,
    "each": 0.5,
    "start": 0.7,
-   "duration": 3.0
+   "duration": 3
   },
   {
    "type": "text",
@@ -92,15 +92,5 @@
    "t": 0,
    "preset": "soft"
   }
- ],
- "authoring": {
-  "allow": [
-   "no-preflight",
-   "no-transition"
-  ],
-  "_why": {
-   "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-   "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)"
-  }
- }
+ ]
 }

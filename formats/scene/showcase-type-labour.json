@@ -27,17 +27,11 @@
  "authoring": {
   "allow": [
    "numbered-section-markers",
-   "static-bg",
-   "no-preflight",
-   "craft-unvisited",
-   "feature-poverty"
+   "static-bg"
   ],
   "_why": {
    "numbered-section-markers": "the numbers ARE the content: the reel is ordered by ascending After Effects labour, so 01..09 is the argument itself, not scaffolding above unrelated sections. This is the exemption the rule names.",
-   "static-bg": "see bg[0]._why. A motion reference must hold its ground still or the reader cannot tell the effect from the backdrop. The film does turn its backdrop once, at the payoff, where nothing is being compared any more.",
-   "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-   "craft-unvisited": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (every CRAFT doc that applies to this film is answered in the plan)",
-   "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)"
+   "static-bg": "see bg[0]._why. A motion reference must hold its ground still or the reader cannot tell the effect from the backdrop. The film does turn its backdrop once, at the payoff, where nothing is being compared any more."
   }
  },
  "layers": [
