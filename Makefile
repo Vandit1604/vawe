@@ -685,6 +685,13 @@ waiver-ratchet: ## [check] the waived-rule debt per code, a number that may only
 motion-floor: ## [check] DOES THE FILM EVER STOP: local (content) motion per 0.5s window, ambient reported apart and never counted (D=<film>, needs a render)
 	@node quality/gates/motion-floor.mjs $(D) $(if $(JSON),--json,)
 
+# make choreo D=<film.json> [REF=<ref-clip-name>]: per beat, the kinds of motion live at once (scene
+# side from scene-timing, frame side from motion-floor's region reader when a render exists), which
+# elements enter/hold/exit, unplanned exits named by layer id, handoffs found and missing, and REF's
+# own frame-side numbers beside ours. Report only, exit 0.
+choreo: ## [check] HOW THIS FILM CHOREOGRAPHS MOTION: kinds per beat, element lives, handoffs (D=<film>, REF=<ref clip name>)
+	@node quality/gates/choreo.mjs $(D) $(if $(REF),--ref $(REF)) $(if $(JSON),--json,)
+
 # make motion-lab D=<storyboard.md> VARIANTS=<variants.json>: does a motion change actually raise the
 # local-motion floor, or is it a feeling. Assembles, renders and motion-floors the base storyboard plus
 # every named variant (each one a mutation of the beats' `motion:` lines) THE SAME WAY, one table:

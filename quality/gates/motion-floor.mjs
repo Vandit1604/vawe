@@ -68,6 +68,142 @@ const NOISE_FLOOR = 2;             // grayscale levels; ignores encoder/scale no
 // function: a card sliding 3 cells covers 0.11 of the frame, the whole frame sliding covers 0.95.
 export const RIGID_EXTENT = 0.5;   // above this share of the frame, a rigid shift is the camera
 
+// ── KINDS OF MOTION, per spatially separate moving region ─────────────────────────────────────────
+// The share/extent split above answers ONE question: is this pair's change local or global. A frame
+// can carry several DIFFERENT moving things at once (a card sliding while a headline reveals behind
+// it), and choreography is about how many kinds are live together, not just whether something moved.
+// So the diff mask is split into connected regions first, and each region is classified on its own:
+//   camera  - a coherent shift that takes most of the frame with it (extent >= RIGID_EXTENT, explained
+//             by one translation)
+//   move    - a bounded region explained by one translation (a card, a window, a line travelling)
+//   scale   - a bounded region explained by one radial scale about its own centre (growing/shrinking)
+//   reveal  - a bounded region a translation and a scale both fail to explain: new pixels that did not
+//             exist anywhere nearby to be shifted or scaled from
+//   ambient - a large, diffuse region (extent >= RIGID_EXTENT) no rigid motion explains: a breathe, a
+//             drift, a wash, spread rather than arrived
+// A region is a run of grid cells above NOISE_FLOOR, 4-connected, so a card and a headline reveal on
+// opposite sides of the frame are never merged into one "local" blob the way the share test alone sees
+// them (share only ever asks "how concentrated is the change", never "how many concentrations").
+export const REGION_SHIFT_RANGE = 6;              // cheaper than the whole-frame search; a region is small
+export const SCALE_FACTORS = [0.7, 0.8, 0.9, 1.1, 1.2, 1.3, 1.45]; // radial scale probes about a region's own centre
+
+/** Connected components (4-neighbour) of cells where the frame pair actually changed. */
+function componentsOf(d, w, h) {
+  const n = d.length;
+  const visited = new Uint8Array(n);
+  const comps = [];
+  for (let i = 0; i < n; i++) {
+    if (d[i] <= NOISE_FLOOR || visited[i]) continue;
+    const stack = [i]; visited[i] = 1;
+    const cells = [];
+    while (stack.length) {
+      const c = stack.pop();
+      cells.push(c);
+      const y = (c / w) | 0, x = c - y * w;
+      if (x > 0 && !visited[c - 1] && d[c - 1] > NOISE_FLOOR) { visited[c - 1] = 1; stack.push(c - 1); }
+      if (x < w - 1 && !visited[c + 1] && d[c + 1] > NOISE_FLOOR) { visited[c + 1] = 1; stack.push(c + 1); }
+      if (y > 0 && !visited[c - w] && d[c - w] > NOISE_FLOOR) { visited[c - w] = 1; stack.push(c - w); }
+      if (y < h - 1 && !visited[c + w] && d[c + w] > NOISE_FLOOR) { visited[c + w] = 1; stack.push(c + w); }
+    }
+    comps.push(cells);
+  }
+  return comps;
+}
+
+/** Best whole-region translation cost, tested only on this region's own changed pixels. */
+function shiftCostOf(cells, a, b, d, w, h, range) {
+  let best = Infinity;
+  for (let dy = -range; dy <= range; dy++) {
+    for (let dx = -range; dx <= range; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      let sum = 0;
+      for (const i of cells) {
+        const y = (i / w) | 0, x = i - y * w;
+        const sx = x - dx, sy = y - dy;
+        sum += (sx >= 0 && sx < w && sy >= 0 && sy < h) ? Math.abs(a[sy * w + sx] - b[i]) : d[i];
+      }
+      const cost = sum / cells.length;
+      if (cost < best) best = cost;
+    }
+  }
+  return best;
+}
+
+/** Best radial-scale cost about (cx,cy), tested only on this region's own changed pixels. */
+function scaleCostOf(cells, a, b, d, w, h, cx, cy) {
+  let best = Infinity;
+  for (const s of SCALE_FACTORS) {
+    let sum = 0;
+    for (const i of cells) {
+      const y = (i / w) | 0, x = i - y * w;
+      const sx = Math.round(cx + (x - cx) / s), sy = Math.round(cy + (y - cy) / s);
+      sum += (sx >= 0 && sx < w && sy >= 0 && sy < h) ? Math.abs(a[sy * w + sx] - b[i]) : d[i];
+    }
+    const cost = sum / cells.length;
+    if (cost < best) best = cost;
+  }
+  return best;
+}
+
+/**
+ * classifyRegions(a, b): one entry per spatially separate moving region between two frames,
+ * `{ kind, amount, extent }`. `amount` is the region's share of the total changed signal (sums to 1
+ * across the returned list), used to weigh which region is primary. Returns `[]` for identical frames.
+ */
+export function classifyRegions(a, b, { w = GW, h = GH } = {}) {
+  const n = a.length;
+  const d = new Uint8Array(n);
+  let total = 0;
+  for (let i = 0; i < n; i++) { const v = Math.abs(a[i] - b[i]); d[i] = v; total += v; }
+  if (total < 1) return [];
+
+  // WHOLE-FRAME RIGID TEST FIRST, on every changed pixel together, before splitting into components.
+  // A camera move (or a full-bleed layer sliding) can change ONLY its leading and trailing edges,
+  // which land as two separate connected components with no changed pixels between them. Classifying
+  // components first would score each edge on its own small extent and miss the one thing that
+  // actually moved: the whole frame. Same test rigidExplainRatio runs for pairProfile's share flag.
+  const allIdx = [];
+  for (let i = 0; i < n; i++) if (d[i] > NOISE_FLOOR) allIdx.push(i);
+  if (allIdx.length) {
+    let gx0 = w, gx1 = -1, gy0 = h, gy1 = -1;
+    for (const i of allIdx) {
+      const y = (i / w) | 0, x = i - y * w;
+      if (x < gx0) gx0 = x; if (x > gx1) gx1 = x;
+      if (y < gy0) gy0 = y; if (y > gy1) gy1 = y;
+    }
+    const globalExtent = ((gx1 - gx0 + 1) * (gy1 - gy0 + 1)) / (w * h);
+    if (globalExtent >= RIGID_EXTENT) {
+      const globalRatio = shiftCostOf(allIdx, a, b, d, w, h, SHIFT_RANGE) / (total / allIdx.length);
+      if (globalRatio <= RIGID_EXPLAIN) return [{ kind: 'camera', amount: 1, extent: globalExtent }];
+    }
+  }
+
+  const comps = componentsOf(d, w, h);
+  return comps.map((cells) => {
+    let x0 = w, x1 = -1, y0 = h, y1 = -1, amount = 0;
+    for (const i of cells) {
+      const y = (i / w) | 0, x = i - y * w;
+      if (x < x0) x0 = x; if (x > x1) x1 = x;
+      if (y < y0) y0 = y; if (y > y1) y1 = y;
+      amount += d[i];
+    }
+    const extent = ((x1 - x0 + 1) * (y1 - y0 + 1)) / (w * h);
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    const cost0 = amount / cells.length;
+    const shiftRatio = shiftCostOf(cells, a, b, d, w, h, REGION_SHIFT_RANGE) / cost0;
+    let kind;
+    if (extent >= RIGID_EXTENT) {
+      kind = shiftRatio <= RIGID_EXPLAIN ? 'camera' : 'ambient';
+    } else if (shiftRatio <= RIGID_EXPLAIN) {
+      kind = 'move';
+    } else {
+      const scaleRatio = scaleCostOf(cells, a, b, d, w, h, cx, cy) / cost0;
+      kind = scaleRatio <= RIGID_EXPLAIN ? 'scale' : 'reveal';
+    }
+    return { kind, amount: amount / total, extent };
+  });
+}
+
 /** One pass of ffmpeg, the whole film as grayscale cells. One call, not one call per frame. */
 export function pullFrames(mp4, { fps = SAMPLE_FPS, w = GW, h = GH } = {}) {
   const r = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vf', `fps=${fps},scale=${w}:${h},format=gray`,
@@ -146,18 +282,42 @@ export function pairProfile(a, b, { w = GW, h = GH } = {}) {
   return { amount, share };
 }
 
-/** Per-window: local motion (content arriving) and global motion (ambience), kept apart. */
+/**
+ * Per-window: local motion (content arriving) and global motion (ambience), kept apart, PLUS the kinds
+ * of motion live in the window. `kinds` is every kind seen (camera/move/scale/reveal/ambient), ranked
+ * by how much of the window's total change each carries; `regionCount` is the mean number of separate
+ * moving regions per frame pair; `primaryShare` is the mean share of the change the single biggest
+ * region carries, i.e. how much one thing dominates versus several things moving at once.
+ */
 export function profile(frames, { fps = SAMPLE_FPS, windowS = WINDOW_S } = {}) {
   const per = Math.max(1, Math.round(fps * windowS));
   const out = [];
   for (let w = 0; w + per < frames.length; w += per) {
     let local = 0, global = 0, n = 0;
+    const kindTotal = new Map();
+    let regionSum = 0, primarySum = 0, pairsWithChange = 0;
     for (let i = w; i < w + per && i + 1 < frames.length; i++) {
       const { amount, share } = pairProfile(frames[i], frames[i + 1]);
       if (share <= LOCAL_SHARE) local += amount; else global += amount;
       n++;
+      const regions = classifyRegions(frames[i], frames[i + 1]);
+      if (regions.length) {
+        regionSum += regions.length;
+        pairsWithChange++;
+        let maxAmount = 0;
+        for (const r of regions) {
+          kindTotal.set(r.kind, (kindTotal.get(r.kind) || 0) + r.amount);
+          if (r.amount > maxAmount) maxAmount = r.amount;
+        }
+        primarySum += maxAmount; // r.amount is already a share of that pair's total change
+      }
     }
-    out.push({ t: +(w / fps).toFixed(2), local: +(local / n).toFixed(3), global: +(global / n).toFixed(3) });
+    const kinds = [...kindTotal.entries()].sort((x, y) => y[1] - x[1]).map(([k]) => k);
+    out.push({
+      t: +(w / fps).toFixed(2), local: +(local / n).toFixed(3), global: +(global / n).toFixed(3),
+      kinds, regionCount: pairsWithChange ? +(regionSum / pairsWithChange).toFixed(2) : 0,
+      primaryShare: pairsWithChange ? +(primarySum / pairsWithChange).toFixed(2) : 0,
+    });
   }
   return out;
 }
@@ -204,8 +364,22 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const travel = pairProfile(card(0), card(3));
     if (!(travel.share <= LOCAL_SHARE)) { console.error(`a bounded object travelling must read as local content (share ${travel.share})`); process.exit(1); }
 
+    // KIND fixtures: one clean case per kind, reusing the frames above where they already fit.
+    const kindOf = (a, b) => { const rs = classifyRegions(a, b); return rs.sort((x, y) => y.amount - x.amount)[0]?.kind; };
+    if (kindOf(block(0), block(3)) !== 'camera') { console.error(`a whole-frame rigid slide must classify as camera (got ${kindOf(block(0), block(3))})`); process.exit(1); }
+    if (kindOf(card(0), card(3)) !== 'move') { console.error(`a bounded object translating must classify as move (got ${kindOf(card(0), card(3))})`); process.exit(1); }
+    if (kindOf(flat, reveal) !== 'reveal') { console.error(`a small appearing region must classify as reveal (got ${kindOf(flat, reveal)})`); process.exit(1); }
+    if (kindOf(flat, drift) !== 'ambient') { console.error(`a whole-frame low-amplitude drift must classify as ambient (got ${kindOf(flat, drift)})`); process.exit(1); }
+    const square = (half) => {
+      const f = new Uint8Array(GW * GH).fill(240);
+      for (let y = 27 - half; y < 27 + half; y++) for (let x = 48 - half; x < 48 + half; x++) f[y * GW + x] = 40;
+      return f;
+    };
+    if (kindOf(square(6), square(10)) !== 'scale') { console.error(`a region growing about its own centre must classify as scale (got ${kindOf(square(6), square(10))})`); process.exit(1); }
+
     console.log('  ✓ motion-floor self-test: a drift reads global, a reveal reads local, stillness reads zero,');
-    console.log('    a whole-frame slide reads global, and a bounded object travelling reads local');
+    console.log('    a whole-frame slide reads global, a bounded object travelling reads local, and the five');
+    console.log('    kinds (camera/move/scale/reveal/ambient) each classify their own clean fixture');
     process.exit(0);
   }
 
