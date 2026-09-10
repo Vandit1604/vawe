@@ -18,6 +18,7 @@ import { ANIM_NAMES } from '../timeline/clips.js';
 import { PRESENTATIONS } from '../cuts/index.js';
 import { SHADER_FX } from '../stings/index.js';
 import { SEAM_FX } from '../timeline/seams.js';
+import { UNITS } from './units.js';
 
 // family = what the transition DOES (a name can appear in several mechanisms; the family is the same).
 const FAMILY_OF = (name) => {
@@ -43,9 +44,37 @@ const BASIC = new Set([
   'up', 'rise', 'pop', 'clock', 'flip',
 ]);
 
-// names that read a direction (up/down/left/right). cuts/seams take a `dir`; some anims bake it in.
-const DIRECTIONAL_CUT = new Set(['slide', 'whip', 'skewWhip', 'punch', 'blur', 'flip', 'wipe', 'drop', 'push']);
-const DIRECTIONAL_SEAM = new Set(['slide', 'push', 'uncover', 'wipe', 'whipPan']);
+// Names that read a direction (up/down/left/right), PROBED rather than listed: a cut's presentation is
+// called at all four cardinal dirs and a seam's shader body is scanned for u_dir. A hand-kept list here
+// drifted (it named `drop`, which never reads dir, and missed cube, squeeze, roll and spin).
+export const DIRECTIONAL_CUT = new Set(Object.keys(PRESENTATIONS).filter((name) => {
+  const P = PRESENTATIONS[name];
+  const outs = ['left', 'right', 'up', 'down'].map((dir) => {
+    const o = { dir, dist: 90, cx: 50, cy: 50 };
+    let s = '';
+    for (let i = 1; i < 10; i++) { const p = i / 10; s += JSON.stringify(P.enter(p, o)) + JSON.stringify(P.exit(p, o)); }
+    return s;
+  });
+  return outs.some((o) => o !== outs[0]);
+}));
+
+// A seam's GLSL has no JS function to call, but every "vawe" house unit is the SAME fixed preamble
+// wrapped around a body (core/transitions/units.js `vawe()`), and that preamble is the only place
+// `u_dir`/its `ax`/`sg` derivatives appear when the body itself never reads direction. Stripping the
+// fixed text back off (when present) isolates exactly what the unit itself wrote; a raw (non-`vawe`)
+// unit's own GLSL is used as-is. If the preamble text ever changes, the strip silently stops matching
+// and this falls back to scanning the whole shader, which only makes it warn MORE often than it should,
+// never less: false positives there resolve when someone reads the warning message and re-checks.
+const VAWE_DIR_PREAMBLE = 'vec4 transition(vec2 uv){\n  float p = clamp(u_p, 0.0, 1.0);\n'
+  + '  vec2 aspect = vec2(u_res.x/u_res.y, 1.0);\n  float ax = abs(u_dir.x) > 0.5 ? uv.x : uv.y;\n'
+  + '  float sg = u_dir.x + u_dir.y;\n  vec4 col;\n';
+const VAWE_DIR_SUFFIX = '\n  return vec4(col.rgb, 1.0);\n}';
+export const DIRECTIONAL_SEAM = new Set(UNITS.filter((u) => {
+  const g = u.glsl || '';
+  const body = g.startsWith(VAWE_DIR_PREAMBLE) && g.endsWith(VAWE_DIR_SUFFIX)
+    ? g.slice(VAWE_DIR_PREAMBLE.length, g.length - VAWE_DIR_SUFFIX.length) : g;
+  return /\bu_dir\b|\bax\b|\bsg\b/.test(body);
+}).map((u) => u.name));
 
 function entry(name, mechanism) {
   const dir = mechanism === 'cut' ? DIRECTIONAL_CUT.has(name)

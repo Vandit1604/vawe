@@ -20,7 +20,7 @@ import { onScreenText, glyphText } from '../type/on-screen-text.js';
 import { IDLE } from '../engine/idle.js';
 import { STAGGER_FROM } from '../type/type.js';
 import { themeErrors, lookErrors } from '../registry/theme-contract.js';
-import { TRANSITIONS } from '../transitions/catalog.js';
+import { TRANSITIONS, DIRECTIONAL_CUT, DIRECTIONAL_SEAM } from '../transitions/catalog.js';
 import { nearMisses } from '../registry/registry.js';
 // parseColor is handed to themeErrors so a palette value that is not a COLOUR is refused, not just an
 // absent one. theme-contract.js stays import-free on purpose (node + browser); see its note.
@@ -483,42 +483,14 @@ export function seamMotionFreezeWarnings(cfg) {
 // cutWrites): call the real function/read the real shader and see whether the output depends on it,
 // so an fx added tomorrow classifies itself instead of drifting out of a maintained list.
 //
-// core/transitions/catalog.js's own DIRECTIONAL_CUT set was checked against this probe and does not
-// match it: `drop` is listed there but its enter/exit never touch `o.dir`, while `cube`, `squeeze`,
-// `roll` and `spin` all read it and are not listed. That set is used elsewhere (`make transitions`
-// listing) and is out of this change's ownership; this probe does not trust it.
+// That probe now lives in core/transitions/catalog.js as DIRECTIONAL_CUT / DIRECTIONAL_SEAM, the one owner.
 //
 // All four cardinal dirs, not just two: `sign()` in core/cuts/presentations.js is +1 for both `left`
 // and `up`, so a two-value probe ("left" vs "up") missed `roll`/`spin`, which only flip sign on
 // right/down. Four dirs, compared against each other, catches an axis-only OR a sign-only dependency.
-const dirCutFx = new Set(Object.keys(PRESENTATIONS).filter((name) => {
-  const P = PRESENTATIONS[name];
-  const outs = ['left', 'right', 'up', 'down'].map((dir) => {
-    const o = { dir, dist: 90, cx: 50, cy: 50 };
-    let s = '';
-    for (let i = 1; i < 10; i++) { const p = i / 10; s += JSON.stringify(P.enter(p, o)) + JSON.stringify(P.exit(p, o)); }
-    return s;
-  });
-  return outs.some((o) => o !== outs[0]);
-}));
-
-// A seam's GLSL has no JS function to call, but every "vawe" house unit is the SAME fixed preamble
-// wrapped around a body (core/transitions/units.js `vawe()`), and that preamble is the only place
-// `u_dir`/its `ax`/`sg` derivatives appear when the body itself never reads direction. Stripping the
-// fixed text back off (when present) isolates exactly what the unit itself wrote; a raw (non-`vawe`)
-// unit's own GLSL is used as-is. If the preamble text ever changes, the strip silently stops matching
-// and this falls back to scanning the whole shader, which only makes it warn MORE often than it should,
-// never less: false positives there resolve when someone reads the warning message and re-checks.
-const VAWE_DIR_PREAMBLE = 'vec4 transition(vec2 uv){\n  float p = clamp(u_p, 0.0, 1.0);\n'
-  + '  vec2 aspect = vec2(u_res.x/u_res.y, 1.0);\n  float ax = abs(u_dir.x) > 0.5 ? uv.x : uv.y;\n'
-  + '  float sg = u_dir.x + u_dir.y;\n  vec4 col;\n';
-const VAWE_DIR_SUFFIX = '\n  return vec4(col.rgb, 1.0);\n}';
-const dirSeamFx = new Set(UNITS.filter((u) => {
-  const g = u.glsl || '';
-  const body = g.startsWith(VAWE_DIR_PREAMBLE) && g.endsWith(VAWE_DIR_SUFFIX)
-    ? g.slice(VAWE_DIR_PREAMBLE.length, g.length - VAWE_DIR_SUFFIX.length) : g;
-  return /\bu_dir\b|\bax\b|\bsg\b/.test(body);
-}).map((u) => u.name));
+// The directional sets are owned by core/transitions/catalog.js, probed from the real presentations and shaders.
+const dirCutFx = DIRECTIONAL_CUT;
+const dirSeamFx = DIRECTIONAL_SEAM;
 
 // dirWarnings(cfg): a `transitions[]` entry can set `dir`, but only some fx read it. A cut fx not in
 // `dirCutFx`, a seam fx not in `dirSeamFx`, or ANY sting (a generative overlay with no direction input

@@ -7971,6 +7971,14 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 const FLOOR = 1800;
+
+// ---- the directional transition sets are probed from the real code, not listed by hand ----
+{
+  const { DIRECTIONAL_CUT, DIRECTIONAL_SEAM } = await import('../../core/transitions/catalog.js');
+  ok('directional cuts: drop never reads dir, so it is not directional', !DIRECTIONAL_CUT.has('drop'));
+  ok('directional cuts: cube, squeeze, roll and spin read dir', ['cube', 'squeeze', 'roll', 'spin'].every((n) => DIRECTIONAL_CUT.has(n)));
+  ok('directional seams: whipPan reads u_dir', DIRECTIONAL_SEAM.has('whipPan'));
+}
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 if (!fail && pass < FLOOR) {
   console.error(`\n✗ ${pass} assertions ran, below the floor of ${FLOOR}. Nothing FAILED, so something`);
