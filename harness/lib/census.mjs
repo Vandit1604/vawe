@@ -148,6 +148,23 @@ export const LIBRARY = (f, abs) => f !== 'schema.json' && !isTemplate(f) && !DER
  */
 export const LIBRARY_WITH_DERIVATIVES = (f, abs) => f !== 'schema.json' && !isTemplate(f) && isSceneJSON(abs);
 
+// LIBRARY keeps every source scene, including one this population exists to pull out: a still-tile
+// catalogue (`_catalog-1.json` .. `_catalog-26.json`, one frozen frame per block) and a feature demo
+// whose whole job is to hold one thing still so you can look at it (`example-metallic-bg`,
+// `aspects-demo`). Neither was ever authored as a FILM, so grading either for motion is grading a paint
+// chip for plot. A `.storyboard.md` sidecar is the signal a film was actually planned by a person
+// (waiver-drift already treats its absence as `no-storyboard`), and a catalogue tile or a demo never
+// gets one. Measured on this checkout the same day: LIBRARY (177 films) read 101 as zero motion;
+// AUTHORED (41 films) read 4. The 177-film number is not "the library moving less"; it is the population
+// including 60-odd files that were never supposed to move. Any sweep that grades MOTION walks this, not
+// LIBRARY: `quality/gates/direction-floor.mjs`'s `libraryProfile()`, and the motion codes
+// (`no-authored-motion`, `plain-slideshow`, `static-bg`) `quality/gates/waiver-drift.mjs --ratchet`
+// re-measures. A non-motion sweep (waiver-drift's own census, `library-stats.mjs`, `unused.mjs`, …)
+// stays on LIBRARY: whether a film waives a rule or carries a beat blueprint has nothing to do with
+// whether a person planned it, and narrowing those to AUTHORED would just as wrongly shrink the count.
+export const AUTHORED = (f, abs) => f !== 'schema.json' && !isTemplate(f) && !DERIVATIVE.test(f) && isSceneJSON(abs)
+  && fs.existsSync(path.join(path.dirname(abs), `${path.basename(f, '.json')}.storyboard.md`));
+
 // Sweeps that deliberately walk NEITHER, named here so the next reader does not "fix" them into
 // disagreeing again:
 //   audit-scenes · paints-nothing · snap-scenes  walk LIBRARY directly: a source scene renders on its
@@ -158,6 +175,8 @@ export const LIBRARY_WITH_DERIVATIVES = (f, abs) => f !== 'schema.json' && !isTe
 //   similarity · layer-props · feature-audit     carry their own extra exclusions (sample.json,
 //                                                cuts-demo, un-parseable files) on top.
 //   sfx-audit · snap-blocks                      different directory entirely: not scenes at all.
+//   MOTION sweeps (see AUTHORED above)           walk AUTHORED, not LIBRARY, because LIBRARY still
+//                                                carries catalogue tiles and held-still demos.
 
 // ---------- the populations, by NAME, so a doc can quote one ----------
 //
@@ -179,6 +198,8 @@ export const POPULATIONS = [
    'films a person authored and the engine can render on its own. THIS is what CLAUDE.md means by "the library".'],
   ['library+derivatives', LIBRARY_WITH_DERIVATIVES,
    'the above plus generated siblings (.expanded, .beatsync, …). What a sweep grading the RENDERABLE artifact walks.'],
+  ['authored', AUTHORED,
+   'library films with a .storyboard.md sidecar: a person actually planned this one, so a catalogue tile or a held-still demo is excluded. What a sweep grading MOTION walks, not "library".'],
   ['every scene file', (f) => f.endsWith('.json') && f !== 'schema.json' && !isTemplate(f),
    'every .json in formats/scene bar the schema. Bigger than either population above and never the right answer to "how many films".'],
 ];

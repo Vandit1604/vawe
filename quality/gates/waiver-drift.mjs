@@ -23,7 +23,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { population, LIBRARY } from '../../harness/lib/census.mjs';
+import { population, LIBRARY, AUTHORED } from '../../harness/lib/census.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { codeFiresOn } from '../../harness/lib/code-fires.mjs';
 
@@ -183,11 +183,23 @@ if (process.argv.includes('--ratchet')) {
   const stamp = process.argv.includes('--stamp');
   const baseline = (() => { try { return JSON.parse(fs.readFileSync(RATCHET_FILE, 'utf8')); } catch { return {}; } })();
   const codes = Object.keys(baseline);
-  console.log(`\n  LEGACY-WAIVER RATCHET · re-measuring ${codes.length} code(s) across ${pop.names.length} film(s)…`);
+  // Three of these codes grade MOTION (no-authored-motion, plain-slideshow, static-bg): re-measuring
+  // them over `pop.names` (LIBRARY) counts still-tile catalogues and held-still demos that were never
+  // authored as films (harness/lib/census.mjs's AUTHORED comment). Every other ratcheted code (does a
+  // scene waive a rule, carry a beat blueprint, …) has nothing to do with whether a person planned the
+  // film, so it stays on LIBRARY.
+  const MOTION_CODES = new Set(['no-authored-motion', 'plain-slideshow', 'static-bg']);
+  // soft: a concurrent worktree can legitimately trail main by a few in-flight scratch storyboards
+  // (docs/MISTAKES.md #391 is about a tool going blind and staying silent, not about refusing to run
+  // at all here); PARTIAL is stated below rather than swallowed.
+  const authoredPop = population('waiver census · authored', { filter: AUTHORED, quiet: true, soft: true });
+  console.log(`\n  LEGACY-WAIVER RATCHET · re-measuring ${codes.length} code(s) across ${pop.names.length} film(s)`
+    + ` (${authoredPop.names.length} authored${authoredPop.blind ? `, PARTIAL: ${authoredPop.blind.split('\n')[0]}` : ''}, for the motion codes)…`);
   const current = {};
   for (const code of codes) {
+    const names = MOTION_CODES.has(code) ? authoredPop.names : pop.names;
     let n = 0;
-    for (const name of pop.names) {
+    for (const name of names) {
       const abs = path.join(SCENES, name);
       let d; try { d = JSON.parse(fs.readFileSync(abs, 'utf8')); } catch { continue; }
       if (!codeFiresOn(code, abs, d)) continue;
