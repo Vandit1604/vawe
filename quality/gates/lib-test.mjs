@@ -7605,6 +7605,84 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
+// harness/lib/runlog.mjs and harness/lib/why.mjs, on synthetic records: appendRun writes the
+// documented shape and readRuns reads it back; the why-table formatter and diff read a fixed pair of
+// records without touching the filesystem's real out/ directory.
+{
+  const { appendRun, readRuns, runsPathFor } = await import('../../harness/lib/runlog.mjs');
+  const { formatRows, diffLines } = await import('../../harness/lib/why.mjs');
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'runlog-test-'));
+  const film = path.join(tmpDir, '_runlog-lib-test.json');
+  const cwd = process.cwd();
+  process.chdir(tmpDir);
+  try {
+    ok('runsPathFor names out/<basename>.runs.jsonl', runsPathFor(film) === path.join('out', '_runlog-lib-test.runs.jsonl'));
+    ok('readRuns of a film with no log is empty', readRuns(film).length === 0);
+
+    const r1 = appendRun(film, { cmd: 'check', checks: [{ name: 'validate', ran: true, fired: 0, blocked: false, codes: [], waived: [] }] });
+    ok('appendRun returns the written record', r1.cmd === 'check' && Array.isArray(r1.checks));
+    ok('appendRun defaults render/content/judge to null', r1.render === null && r1.content === null && r1.judge === null);
+    ok('appendRun stamps an ISO timestamp', /^\d{4}-\d{2}-\d{2}T/.test(r1.at));
+
+    appendRun(film, {
+      cmd: 'ship',
+      checks: [
+        { name: 'validate', ran: true, fired: 0, blocked: false, codes: [], waived: [] },
+        { name: 'storyboard', ran: true, fired: 1, blocked: true, codes: ['no-storyboard'], waived: [] },
+      ],
+      render: { file: 'out/x.mp4', frames: 300, fps: 30, ms: 8400 },
+      judge: { verdict: 'PASS', file: '/tmp/judge/x/sheet.png' },
+    });
+
+    const runs = readRuns(film);
+    ok('readRuns reads back one line per appendRun call', runs.length === 2);
+    ok('readRuns preserves order (oldest first)', runs[0].cmd === 'check' && runs[1].cmd === 'ship');
+    ok('a corrupt line is dropped, not thrown', (() => {
+      fs.appendFileSync(runsPathFor(film), 'not json\n');
+      return readRuns(film).length === 2;
+    })());
+
+    const rows = formatRows(runs);
+    ok('formatRows returns one line per run', rows.length === 2);
+    ok('formatRows names the cmd and sha', rows[1].includes('ship') && rows[1].includes(runs[1].git || '-'));
+    ok('formatRows shows the render ms', rows[1].includes('8400ms'));
+    ok('formatRows shows the judge verdict', rows[1].includes('judge:PASS'));
+
+    const diff = diffLines(runs[0], runs[1]);
+    ok('diffLines names the newly fired code', diff.some((l) => l.startsWith('newly fired:') && l.includes('no-storyboard')));
+    ok('diffLines with only one run says so', diffLines(null, runs[1])[0].includes('only one run'));
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+// END-TO-END: run-author-check.mjs against a real fixture scene, in a scratch cwd so the log lands
+// under a temp out/, not the repo's own. Asserts one line lands with real gate names as `checks[].name`,
+// recovered from the findings author-check's own gates already write, per the file header comment in
+// harness/lib/run-author-check.mjs.
+{
+  const { readRuns } = await import('../../harness/lib/runlog.mjs');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'runlog-e2e-'));
+  const fixture = path.join(tmpDir, '_runlog-e2e-fixture.json');
+  fs.copyFileSync(path.join(repoRoot, 'formats/scene/sample.json'), fixture);
+  const r = spawnSync('node', [path.join(repoRoot, 'harness/lib/run-author-check.mjs'), fixture], {
+    cwd: tmpDir, encoding: 'utf8', env: { ...process.env, RUNLOG_CMD: 'test', MODE: 'iterate' },
+  });
+  const cwd = process.cwd();
+  process.chdir(tmpDir);
+  let runs = [];
+  try { runs = readRuns(fixture); } finally { process.chdir(cwd); }
+  ok('run-author-check.mjs left one run-log line', runs.length === 1);
+  ok('run-author-check.mjs named the RUNLOG_CMD it was given', runs[0] && runs[0].cmd === 'test');
+  ok('run-author-check.mjs recorded real gate names, not only unrouted codes', runs[0] && runs[0].checks.length > 0
+    && runs[0].checks.some((c) => c.name && c.name !== 'unrouted'));
+  ok('run-author-check.mjs named the preflight gate, which sample.json always fires', runs[0]
+    && runs[0].checks.some((c) => c.name === 'preflight' && c.codes.includes('no-preflight')));
+  fs.rmSync(tmpDir, { recursive: true, force: true });
+}
+
 // A COUNT THAT FALLS IS A FINDING, and until now nothing looked at it. `fail === 0` exits 0 no matter
 // how many assertions actually RAN, so a block that quietly stops running (an `await import` failing
 // inside a swallowing catch, a section deleted in a merge, an early return added while debugging) takes
