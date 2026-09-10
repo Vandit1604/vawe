@@ -50,7 +50,14 @@ generic: centred, effect-soup, no through-line. A site silently hands you FOUR t
 without one you must MANUFACTURE all four before a single layer is authored. This is a hard gate: if
 the lock sheet is missing any of the four, the plan is not locked.
 
-1. **A taste anchor.** Do NOT invent a palette and motion feel. Pick ONE reference profile from
+1. **A taste anchor. ASK FOR IT FIRST** ([`docs/CRAFT/CONTENT.md`](../../docs/CRAFT/CONTENT.md), theme
+   source): a brand site gives the theme for free, a prompt with no site gives nothing, and the silent
+   failure is plain grey. `make quiz` asks a "Theme source" question exactly when no URL is known: point
+   at a reference or a theme, or say "you choose" and get one designed. **"you choose" means INVENT a
+   beautiful theme, never default to plain**: seed a palette from `skills/impeccable/scripts/palette.mjs`
+   and name a colour direction from `command npx -y ui-skills list --category color`, then record
+   `theme: invented` in the lock sheet so the decision travels with the film. Do NOT invent a palette and
+   motion feel from nothing unasked. Pick ONE reference profile from
    [`docs/CRAFT/SELECTION.md`](../../docs/CRAFT/SELECTION.md) Part 2, `linear` · `apple` · `stripe`
    · `nike` · `a24` · `bloomberg` · `duolingo` · `vercel`, chosen for the topic's register, and set
    the scene's `profile` field to it. That profile IS the design language a site would have given: it

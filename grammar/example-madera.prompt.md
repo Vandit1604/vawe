@@ -19,6 +19,7 @@ camera: a slow, continuous dolly-in on the window through the whole act (the sid
 both grow steadily larger frame to frame) [recipe: window-dolly]
 type: the app's own UI type (system sans, small), plus a blue monospace-ish "Ask" pill tag on the
 prompt bar
+content: dense real material, fills about two thirds of the frame, plain UI (fill 0.71, detail 3.8, photo 0.03)
 
 ## Joint at 4.54s
 recipe: flow-seam out=act1 in=act2 axis=x
@@ -35,6 +36,7 @@ ground: light (measured, luma 221.1)
 camera: static hold once the words settle, no push
 type: a bold display sans for "MADERA", a lighter weight for the rest of the line, left-aligned
 mid-frame
+content: light real material, fills a small part of the frame, plain UI (fill 0.03, detail 5.1, photo 0.04)
 
 ## Joint at 6s
 recipe: flow-seam out=act2 in=act3 axis=x
@@ -51,6 +53,7 @@ ground: mid, warm, #a48f76 (measured, luma 136); the true ground here is a blurr
 blue then olive then red as the cards change, not a flat fill
 camera: a slight continuous push on the card stack, steady through each swipe [recipe: window-dolly]
 type: none (photo cards + UI button labels only)
+content: dense real material, fills about a quarter of the frame, photographic (fill 0.25, detail 11.1, photo 0.23)
 
 ## Joint at 8.12s
 recipe: flow-seam out=act3 in=act4 axis=x
@@ -66,6 +69,7 @@ see refs/example-madera/ideate-strips/joint-4-5.png) [recipe: flow-seam]
 ground: light (measured, luma 219.7)
 camera: static hold once the words settle, no push
 type: same bold display sans as act 2, MADERA the heaviest weight, left-aligned mid-frame
+content: quiet, type on ground only (fill 0.02, detail 4.1, photo 0.03)
 
 ## Joint at 9.57s
 recipe: flow-seam out=act4 in=act5 axis=y
@@ -82,6 +86,7 @@ axis, gap 0.083s, see refs/example-madera/ideate-strips/joint-5-6.png) [recipe: 
 ground: mid, olive, #8c7c68 (measured, luma 175.6); an olive-brown wash behind the tilted white window
 camera: a slow continuous dolly-in on the window as its content fills in [recipe: window-dolly]
 type: the app's own UI type for the heading, plus small product captions under each photo
+content: dense real material, fills most of the frame, photographic (fill 0.76, detail 10.3, photo 0.23)
 
 ## Joint at 11.08s
 recipe: flow-seam out=act5 in=act6 axis=y
@@ -96,6 +101,7 @@ leaves: (film ends, no next joint; holds on the wordmark)
 ground: light (measured, luma 221)
 camera: static hold, no push, once the marks land
 type: the same bold display sans as the taglines, all-caps wordmark, centred
+content: quiet, type on ground only (fill 0.01, detail 1.9, photo 0.00)
 
 ## Change me
 `on screen`, `camera` and `type` were filled in by looking at every strip in

@@ -126,6 +126,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
+| [CONTENT.md](CONTENT.md) | a beat draws a screen/window/product/photo, or a film reads as plain beside its reference | the four content numbers · dense-where-dense/quiet-where-quiet · theme source (R1) · screens (R2) · what real material means |
 | [DENSITY.md](DENSITY.md) | a beat looks flat / slide-like | hero + support + metadata triad · the "produced" tell · thin-beat rule |
 | [READING.md](READING.md) | a line is on screen and you do not know if anyone can read it | hold by word count · the flicker gap · what counts as prose · why the library reads once, not twice |
 | [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | the film is all type in boxes | decoration vs explanation · what each claim shape wants · the subject-size rule · no gate, your eyes |

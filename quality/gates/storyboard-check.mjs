@@ -16,13 +16,16 @@
 //   Template: docs/CRAFT/STORYBOARD-TEMPLATE.md
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
 import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../../harness/author/storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, transitionInErrors, transitionInWarnings, moveErrors, motionErrors } from '../../harness/lib/contract.mjs';
+import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, transitionInErrors, transitionInWarnings, moveErrors, motionErrors, parseFragmentSpec } from '../../harness/lib/contract.mjs';
 import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const f = process.argv.slice(2).find((a) => !a.startsWith('--'));
 if (!f || !fs.existsSync(f)) { console.error('usage: storyboard-check <STORYBOARD.md>  (template: docs/CRAFT/STORYBOARD-TEMPLATE.md)'); process.exit(2); }
@@ -136,6 +139,41 @@ for (const w of transitionInWarnings(sbBeats)) warn('transition-in-undecided', w
 for (const e of moveErrors(sbBeats)) warn('move-unknown', e);
 for (const e of motionErrors(sbBeats)) warn('motion-unknown', e);
 
+// ── PLAIN CONTENT: a beat that draws a screen/window/app/UI and names no real source for it ────────
+// docs/CRAFT/CONTENT.md: real content (a capture, a real photo, a screen designed for the video) is
+// what makes a beat DENSE where the reference is dense; a beat that only DESCRIBES a screen and stops
+// is the grey mock the owner named directly ("their content is designed for the video; ours is
+// plain"). WARNING ONLY: a storyboard is legitimately written before design time picks the real
+// source (stage 4, AGENTS.md), so this can never block a plan from existing, only flag a gap for it.
+const CONTENT_NOUN_RE = /\b(screen|window|app|ui|dashboard|grid|card|product|photo)\b/i;
+const REAL_ASSET_RE = /assets\/|\.vawe-data\/uploads\//;
+const REAL_COMMAND_RE = /\bmake\s+(capture|sections|screen)\b/i;
+
+function plainContentWarning(b, title) {
+  const text = ['onscreen', 'picture', 'mechanism', 'object'].map((k) => fieldIn(b, k) || '').join(' ');
+  const noun = (CONTENT_NOUN_RE.exec(text) || [])[1];
+  if (!noun) return;
+  if (REAL_ASSET_RE.test(b) || REAL_COMMAND_RE.test(b)) return;   // a real source is already named
+  const { path: fragRaw } = parseFragmentSpec(fieldIn(b, 'fragment'));
+  if (fragRaw) {
+    const named = fragRaw.split(/\s+\(/)[0].trim();
+    const fragPath = named.includes('/') ? path.resolve(ROOT, named) : path.join(path.dirname(f), named);
+    if (fs.existsSync(fragPath)) return;   // the fragment already exists on disk: a real source
+  }
+  if (/^photo$/i.test(noun)) {
+    warn('plain-content', `beat "${title}": names a photo with no real source stated. Get a real one: `
+      + '`make photos` (docs/CRAFT/IMAGERY.md), never an invented image.');
+    return;
+  }
+  // "make screen" (docs/CRAFT/SCREENS.md) is not backtick-wrapped here on purpose: it is landing on a
+  // parallel branch and is not yet a Makefile target on this one, and quality/gates/lib-test.mjs
+  // requires every backtick-wrapped `make <target>` a gate prints to already exist.
+  warn('plain-content', `beat "${title}": names a ${noun.toLowerCase()} but no real source is stated (no `
+    + '`fragment:` file that exists on disk, no assets/ or .vawe-data/uploads/ path, no capture/sections/screen '
+    + 'mention). A real screen already exists? `make capture` or `make sections URL=<site>`. Otherwise design one '
+    + 'for this beat: make screen F=<fragment.html> [REF=<ref> ACT=<n>] [THEME=<name>] (docs/CRAFT/SCREENS.md).');
+}
+
 // ── the vocabulary that separates a MECHANISM from a TRANSFORMATION ──────────────────────────────
 // `mechanism:` answers how the frame moves; `becomes:` answers what the thing turned into. They read
 // alike and are not the same question, and the cheap answer to the second is the first one again.
@@ -187,6 +225,7 @@ for (const b of blocks) {
   if (shortFilm && hasObject && !has('object')) err('beat-missing-object', `beat "${title}" is missing \`object:\`. This film declares \`object: "${field('object')}"\`, so say what it has become in this beat (or where it is, if it is not born yet). Every cut must read "the X becomes the Y". If the object is not really what holds this film, drop it and name the real devices in \`threads:\`.`);
   const missing = REQ.filter((k) => !has(k));
   if (missing.length) err('beat-missing-fields', `beat "${title}" is missing: ${missing.map((m) => `\`${m}\``).join(', ')} (every beat needs a type, its on-screen cues, and a WHY).`);
+  plainContentWarning(b, title);
   // A beat that names ANY of these has already said how it moves or arrived, so `blueprint:`/
   // `mechanism:` are not the only way to satisfy this: `recipe:` names structure copied from a real
   // film (recipes/README.md), and `camera:`/`move:`/`motion:` each reach a real engine capability

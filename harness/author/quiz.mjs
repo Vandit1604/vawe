@@ -118,6 +118,17 @@ export function threadOptions(job, dirs = DIRECTIONS) {
     .map((d) => ({ key: d.slug, label: d.thread, description: d.why, pace: d.pace, preset: d.preset }));
 }
 
+// THEME SOURCE (owner ruling, .claude/plans/content-richness.plan.md "Update 1"): a brand site gives the
+// theme for free (the study already reads its real colours); a prompt with no site gives nothing, so the
+// brief must ASK rather than default to plain grey. Asked ONLY when no URL is known (`ask()` below): a
+// known site already answers this the ordinary way, `make sections`/`make brandspec`/`make palette`.
+export const THEME_SOURCE = [
+  { key: 'reference', label: 'I will point you at a reference or a theme',
+    description: 'Name a real site (studied the ordinary way) or an existing `themes/<name>.json`, and every colour, face and motion policy traces to it, never invented.' },
+  { key: 'choose', label: 'You choose, invent something beautiful',
+    description: 'No brand to study, so the theme is DESIGNED, not defaulted: a fresh palette seeded from skills/impeccable/scripts/palette.mjs and a colour direction named from `ui-skills list --category color`, recorded as `theme: invented` so the choice is not lost.' },
+];
+
 // Options built from the site's OWN sections. This is the question that cannot be answered generically,
 // and the `kind` tells the author what each one costs to put on screen.
 export function proofOptions(st) {
@@ -153,6 +164,10 @@ export function ask({ name = null, url = null, slug = null } = {}) {
   ];
   if (proof) round1.push({ header: 'Proof', question: st.brand
     ? `Which part of ${st.brand} does the convincing?` : 'Which part of the product does the convincing?', options: proof });
+  // NO URL KNOWN: nothing has given this film a theme yet, and the failure mode is silent (a plain grey
+  // default). ASK rather than assume: point at a reference, or say "you choose" and get an invented one.
+  if (!url) round1.push({ header: 'Theme source',
+    question: 'Point me at a reference or a theme, or say "you choose" and I will design one', options: THEME_SOURCE });
 
   return {
     context: {
@@ -205,6 +220,11 @@ export function frontmatter(a) {
     pace: dir ? dir.pace : null,
     beats: dir ? Math.max(2, Math.round(pl.duration / dir.pace)) : null,
     profile: a.not || null,          // the ELIMINATED one; the caller narrows from it
+    // THEME SOURCE (only asked when no URL is known, see ask() above). "choose" is the owner ruling's
+    // INVENT branch, recorded so the decision is not lost between the brief and the lock sheet.
+    theme: a.themeSource === 'choose' ? 'invented (palette.mjs seed + `ui-skills list --category color`)'
+      : a.themeSource === 'reference' ? 'reference (name it before authoring: make sections/brandspec/palette)'
+      : null,
   };
 }
 
@@ -234,6 +254,7 @@ function applyNoStudy({ a, fm, name, out }) {
   L.push(`arc: ${fm.arc}`);
   if (fm.framework) L.push(`framework: ${fm.framework}`);
   if (fm.threads) L.push(`threads: ${fm.threads}`);
+  if (fm.theme) L.push(`theme: ${fm.theme}`);
   L.push(`format: ${fm.format}`);
   L.push(`duration: ${dur}s`);
   L.push('---', '');
@@ -350,8 +371,13 @@ function selfTest() {
     ok(['16:9', '9:16', '1:1', '4:5'].includes(p.aspect), `placement "${p.key}" names an aspect the engine does not have: ${p.aspect}`);
   }
   for (const j of JOBS) ok(j.arc && j.arc.includes('→'), `job "${j.key}" has no arc`);
+  ok(THEME_SOURCE.length === 2, 'theme source should be exactly two options: point at one, or invent one');
+  ok(frontmatter({ themeSource: 'choose' }).theme === 'invented (palette.mjs seed + `ui-skills list --category color`)',
+    'themeSource "choose" should record theme: invented');
+  ok(frontmatter({ themeSource: 'reference' }).theme != null, 'themeSource "reference" should record a theme line too');
+  ok(frontmatter({}).theme == null, 'a known-URL brief (no themeSource asked) should record no theme line');
   // The consequence must not restate the label. A menu is not a choice.
-  const all = [...PLACEMENT, ...JOBS, ...antiOptions(), ...threadOptions('claim')];
+  const all = [...PLACEMENT, ...JOBS, ...antiOptions(), ...threadOptions('claim'), ...THEME_SOURCE];
   for (const o of all) {
     ok(o.description && o.description.length > 40, `option "${o.label}" has no real consequence text`);
     ok(o.description.toLowerCase() !== String(o.label).toLowerCase(), `option "${o.label}" restates itself`);
@@ -365,7 +391,7 @@ function selfTest() {
     ok(!shown, `a profile NAME ("${k}") is visible to the user. Show its antiBlurb, never the key`);
   }
   if (errs.length) { console.error('✗ quiz self-test\n' + errs.map((e) => `  - ${e}`).join('\n')); process.exit(1); }
-  console.log(`✓ quiz self-test: ${PLACEMENT.length} placements · ${JOBS.length} jobs · ${antiOptions().length} anti-refs · ${DIRECTIONS.length} directions, every option resolves`);
+  console.log(`✓ quiz self-test: ${PLACEMENT.length} placements · ${JOBS.length} jobs · ${antiOptions().length} anti-refs · ${DIRECTIONS.length} directions · ${THEME_SOURCE.length} theme sources, every option resolves`);
 }
 
 const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
