@@ -25,6 +25,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { population, LIBRARY } from '../../harness/lib/census.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { codeFiresOn } from '../../harness/lib/code-fires.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENES = path.join(ROOT, 'formats', 'scene');
@@ -164,4 +165,57 @@ console.log(drifted.length
 for (const [c, films] of drifted) {
   const pct = Math.round((films.length / total) * 100);
   f.warn('waiver-drift', `${c} is waived by ${films.length} film(s), ${pct}% of the library, and has stopped being a rule`, { at: c });
+}
+
+// ---- THE LEGACY-WAIVER RATCHET (opt-in: --ratchet) --------------------------------------------
+//
+// `quality/gates/legacy-fold.mjs` wrote 562 `"legacy: grandfathered …"` waivers into scenes so the
+// 12-character `_why` floor never had to be argued with. `quality/gates/legacy-unfold.mjs` deleted
+// them and stamped what was really behind them into `quality/baselines/legacy-waiver-ratchet.json`:
+// one number per code, the count of films that GENUINELY still fire it. That number may only fall.
+//
+// This does NOT run by default: the header above is still true for the census ("it never blocks"),
+// and this recomputes a live-fire count by spawning the owning gate against every scene for every
+// ratcheted code, which is minutes, not seconds. `--ratchet` opts in; `--stamp` (with `--ratchet`)
+// lowers the file when a real fix earned it. This is the one path in this gate that can exit non-zero.
+if (process.argv.includes('--ratchet')) {
+  const RATCHET_FILE = path.join(ROOT, 'quality/baselines/legacy-waiver-ratchet.json');
+  const stamp = process.argv.includes('--stamp');
+  const baseline = (() => { try { return JSON.parse(fs.readFileSync(RATCHET_FILE, 'utf8')); } catch { return {}; } })();
+  const codes = Object.keys(baseline);
+  console.log(`\n  LEGACY-WAIVER RATCHET · re-measuring ${codes.length} code(s) across ${pop.names.length} film(s)…`);
+  const current = {};
+  for (const code of codes) {
+    let n = 0;
+    for (const name of pop.names) {
+      const abs = path.join(SCENES, name);
+      let d; try { d = JSON.parse(fs.readFileSync(abs, 'utf8')); } catch { continue; }
+      if (!codeFiresOn(code, abs, d)) continue;
+      const why = d.authoring?._why?.[code];
+      const isRealDecision = typeof why === 'string' && why.trim().length >= 12 && !why.startsWith('legacy:');
+      if (!isRealDecision) n++; // a real, human `_why` is a decision and does not count as debt
+    }
+    current[code] = n;
+  }
+  console.log(`\n  ${'code'.padEnd(30)} ${'ratchet'.padEnd(9)} now`);
+  let worse = false;
+  for (const code of codes) {
+    const before = baseline[code] ?? 0;
+    const now = current[code];
+    const mark = now > before ? '✗' : now < before ? '↓' : ' ';
+    if (now > before) worse = true;
+    console.log(`  ${mark} ${code.padEnd(28)} ${String(before).padEnd(9)} ${now}`);
+  }
+  if (stamp) {
+    fs.writeFileSync(RATCHET_FILE, `${JSON.stringify(current, null, 1)}\n`);
+    console.log(`\n  ✓ ratchet stamped at the current count(s).`);
+  } else if (worse) {
+    console.log(`\n  ✗ at least one code fires on MORE films than the ratchet allows. Fix the film(s), or if`);
+    console.log(`    this is a real regression someone should look at, that is the point: it is now visible.`);
+    console.log(`    Never lower the ratchet to match a regression; --stamp is for when things get BETTER.`);
+    f.fail('legacy-waiver-ratchet', 'a legacy-waiver code fires on more films than the ratchet allows; see the table above');
+    process.exit(1);
+  } else {
+    console.log(`\n  ✓ within the ratchet. Lower it as films get fixed: node quality/gates/waiver-drift.mjs --ratchet --stamp`);
+  }
 }

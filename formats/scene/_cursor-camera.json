@@ -36,7 +36,13 @@
       "exitDur": 0,
       "html": "<div style=\"position:relative;width:1400px;height:720px\"><div style=\"position:absolute;left:0;top:0;width:300px;height:720px;background:var(--surface-2)\"></div><div data-part style=\"position:absolute;left:40px;top:46px;font:600 26px var(--font-sans);color:var(--ink)\">Workspace</div><div data-part style=\"position:absolute;left:40px;top:120px;font:400 22px var(--font-sans);color:var(--dim)\">Drafts</div><div data-part style=\"position:absolute;left:40px;top:168px;font:400 22px var(--font-sans);color:var(--dim)\">Published</div><div data-part style=\"position:absolute;left:40px;top:216px;font:400 22px var(--font-sans);color:var(--dim)\">Archive</div></div>",
       "parts": [
-        { "select": "[data-part]", "anim": "fadeUp", "each": 0.4, "stagger": 0.05, "delay": 0.1 }
+        {
+          "select": "[data-part]",
+          "anim": "fadeUp",
+          "each": 0.4,
+          "stagger": 0.05,
+          "delay": 0.1
+        }
       ]
     },
     {
@@ -53,7 +59,14 @@
       "exitDur": 0,
       "html": "<div style=\"position:relative;width:980px;height:200px\"><div class=\"card\" style=\"position:absolute;left:0px;top:0;width:300px;height:200px;border-radius:14px;background:var(--surface);border:1px solid var(--line)\"><span style=\"position:absolute;left:30px;top:140px;font:500 24px var(--font-sans);color:var(--ink)\">Pricing page</span></div><div class=\"card\" style=\"position:absolute;left:340px;top:0;width:300px;height:200px;border-radius:14px;background:var(--surface);border:1px solid var(--line)\"><span style=\"position:absolute;left:30px;top:140px;font:500 24px var(--font-sans);color:var(--ink)\">Changelog</span></div><div class=\"card\" style=\"position:absolute;left:680px;top:0;width:300px;height:200px;border-radius:14px;background:var(--surface);border:1px solid var(--line)\"><span style=\"position:absolute;left:30px;top:140px;font:500 24px var(--font-sans);color:var(--ink)\">Careers</span></div></div>",
       "parts": [
-        { "select": ".card", "anim": "popIn", "each": 0.35, "stagger": 0.1, "delay": 0.2, "out": false }
+        {
+          "select": ".card",
+          "anim": "popIn",
+          "each": 0.35,
+          "stagger": 0.1,
+          "delay": 0.2,
+          "out": false
+        }
       ]
     },
     {
@@ -159,17 +172,5 @@
         }
       ]
     }
-  ],
-  "authoring": {
-    "allow": [
-      "no-transition",
-      "feature-poverty",
-      "static-bg"
-    ],
-    "_why": {
-      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)",
-      "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)",
-      "static-bg": "legacy: grandfathered 2026-09-05, adopted 2026-09-05 (the backdrop moves, at least one beat is not a flat field asleep for the whole film)"
-    }
-  }
+  ]
 }

@@ -189,9 +189,29 @@
       "exitDur": 0,
       "html": "<div style=\"position:relative;width:1570px;height:300px\"><div class=\"card\" style=\"position:absolute;left:0px;top:0;width:500px;height:300px;border-radius:22px;background:var(--surface);border:1.5px solid var(--line)\"><div class=\"title\" style=\"position:absolute;left:40px;top:190px;font:700 46px var(--font-sans);color:var(--text)\">Instant preview</div><div class=\"sub\" style=\"position:absolute;left:40px;top:248px;font:500 30px var(--font-mono);color:var(--dim)\">every branch, live</div></div><div class=\"card\" style=\"position:absolute;left:535px;top:0;width:500px;height:300px;border-radius:22px;background:var(--surface);border:1.5px solid var(--line)\"><div class=\"title\" style=\"position:absolute;left:40px;top:190px;font:700 46px var(--font-sans);color:var(--text)\">Zero config</div><div class=\"sub\" style=\"position:absolute;left:40px;top:248px;font:500 30px var(--font-mono);color:var(--dim)\">it just detects</div></div><div class=\"card\" style=\"position:absolute;left:1070px;top:0;width:500px;height:300px;border-radius:22px;background:var(--surface);border:1.5px solid color-mix(in srgb, var(--accent) 40%, transparent);box-shadow:0 0 32px color-mix(in srgb, var(--accent) 35%, transparent)\"><div class=\"title\" style=\"position:absolute;left:40px;top:190px;font:700 46px var(--font-sans);color:var(--text)\">1-click rollback</div><div class=\"sub\" style=\"position:absolute;left:40px;top:248px;font:500 30px var(--font-mono);color:var(--dim)\">undo any deploy</div></div></div>",
       "parts": [
-        { "select": ".card", "anim": "fadeUp", "each": 0.36, "stagger": 0.1, "delay": 0, "out": true, "exitDur": 0.35 },
-        { "select": ".title", "anim": "fade", "each": 0.3, "stagger": 0.1, "delay": 0.2 },
-        { "select": ".sub", "anim": "fade", "each": 0.3, "stagger": 0.1, "delay": 0.28 }
+        {
+          "select": ".card",
+          "anim": "fadeUp",
+          "each": 0.36,
+          "stagger": 0.1,
+          "delay": 0,
+          "out": true,
+          "exitDur": 0.35
+        },
+        {
+          "select": ".title",
+          "anim": "fade",
+          "each": 0.3,
+          "stagger": 0.1,
+          "delay": 0.2
+        },
+        {
+          "select": ".sub",
+          "anim": "fade",
+          "each": 0.3,
+          "stagger": 0.1,
+          "delay": 0.28
+        }
       ]
     },
     {
@@ -301,18 +321,6 @@
       "preset": "aurora"
     }
   ],
-  "authoring": {
-    "allow": [
-      "no-storyboard",
-      "no-authored-motion",
-      "no-preflight"
-    ],
-    "_why": {
-      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
-      "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
-      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)"
-    }
-  },
   "transitions": [
     {
       "at": 3.3,

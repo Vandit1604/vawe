@@ -344,20 +344,6 @@
       "exitDur": 0
     }
   ],
-  "authoring": {
-    "allow": [
-      "no-storyboard",
-      "no-authored-motion",
-      "no-preflight",
-      "feature-poverty"
-    ],
-    "_why": {
-      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
-      "no-authored-motion": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (something in the film is choreographed: a keyed `motion` track, or a layer that survives a junction)",
-      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-      "feature-poverty": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (the film reaches into the engine's expressive families, not just the top of the box)"
-    }
-  },
   "transitions": [
     {
       "at": 3.05,

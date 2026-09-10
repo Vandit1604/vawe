@@ -64,19 +64,5 @@
       "tone": "light",
       "html": "<style>.fan{position:absolute;inset:0;background:#f6f8fc;overflow:hidden}.fan i{position:absolute;top:-40%;left:50%;width:9vw;height:180%;transform-origin:50% 0;background:linear-gradient(180deg,rgba(37,99,235,.20),rgba(37,99,235,0))}.fan i:nth-child(1){transform:translateX(-50%) rotate(calc(-34deg + var(--t,0) * 5deg))}.fan i:nth-child(2){transform:translateX(-50%) rotate(calc(-20deg + var(--t,0) * 5deg))}.fan i:nth-child(3){transform:translateX(-50%) rotate(calc(-7deg + var(--t,0) * 5deg))}.fan i:nth-child(4){transform:translateX(-50%) rotate(calc(7deg + var(--t,0) * 5deg))}.fan i:nth-child(5){transform:translateX(-50%) rotate(calc(20deg + var(--t,0) * 5deg))}.fan i:nth-child(6){transform:translateX(-50%) rotate(calc(34deg + var(--t,0) * 5deg))}.wash{position:absolute;inset:0;background:radial-gradient(58% 48% at calc(38% + var(--p,0) * 24%) 46%,rgba(255,255,255,.94),rgba(255,255,255,0))}</style><div class=\"fan\"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class=\"wash\"></div>"
     }
-  ],
-  "authoring": {
-    "allow": [
-      "no-storyboard",
-      "plain-slideshow",
-      "no-preflight",
-      "no-transition"
-    ],
-    "_why": {
-      "no-storyboard": "legacy: grandfathered 2026-08-21, adopted 2026-08-21 (the film has a written plan (a storyboard, declared or found beside it))",
-      "plain-slideshow": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film reaches past a slideshow: kinetic type, a camera move, or real transitions)",
-      "no-preflight": "legacy: grandfathered 2026-08-28, adopted 2026-08-28 (the film went through the decision chain before the JSON existed)",
-      "no-transition": "legacy: grandfathered 2026-09-04, adopted 2026-09-04 (a multi-beat film earns at least one real seam or cut, not flat jumps)"
-    }
-  }
+  ]
 }
