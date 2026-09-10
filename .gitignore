@@ -29,6 +29,9 @@ out/**/*.log
 out/**/*.html
 out/**/*.jpg
 out/**/*.webp
+# the run log: one JSON line per check/render/judge run, per film (harness/lib/runlog.mjs). Scratch,
+# same as everything else under out/: it is a local record of what ran, not a source file.
+out/**/*.jsonl
 quality/runs/frames/
 # gate-mutation's exclusive lock: it edits tracked source in place, so two runs must not overlap.
 # Removed on exit; a leftover one means a run was killed — check `git status` before trusting the tree.

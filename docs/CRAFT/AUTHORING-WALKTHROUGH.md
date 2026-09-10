@@ -155,6 +155,7 @@ sheet-less render; `make ship` also runs `seam-check` and the contact sheets).
 ```bash
 make video D=formats/scene/passwords.json             # → out/passwords.mp4  (+ author-check + audit)
 make judge D=formats/scene/passwords.json             # preps /tmp/judge/sheet.png + rubric
+make why   D=formats/scene/passwords.json             # what the last few dev/check/ship/judge runs actually did
 ```
 
 `make judge` is the required post-render step the static ladder structurally cannot be: read

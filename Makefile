@@ -197,7 +197,8 @@ video: build ## [ship] one self-describing JSON → out/<name>.mp4 Runs the mand
 # separate commands nobody remembered. Set NOSHEETS=1 to skip them: they cost roughly one more render.
 dev: build ## [dev] THE ITERATION LOOP.
 	@echo "▶ [dev] the iteration loop, no gates, no audit"
-	. harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4)
+	bash -c 'set -o pipefail; . harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log'
+	@node harness/lib/record-render.mjs dev $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log 2>/dev/null || true
 	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
 	@echo "" && echo "  next: make check D=$(D)  (every gate, zero consequence)  ·  make ship D=$(D)  (when it's ready)"
@@ -273,8 +274,14 @@ llms-txt: ## [engine] regenerate formats/llms.txt, the portable vocabulary prime
 # the same move `make dev` already made for contact sheets.
 check: ## [check] every gate, every finding, ZERO consequence (runs preflight first if it hasn't)
 	@$(if $(D),node harness/lib/ensure-preflight.mjs $(D),)
-	@MODE=iterate node quality/gates/author-check.mjs $(D) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS))
+	@RUNLOG_CMD=check MODE=iterate node harness/lib/run-author-check.mjs $(D) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS))
 	@node harness/author/arsenal.mjs --for $(D) 2>/dev/null || true
+
+# make why D=<file> [N=5]: the run log (harness/lib/runlog.mjs), read back. Which checks ran, fired,
+# blocked; which waivers were used; the last render's frames/fps/ms; the judge verdict; and what
+# changed between the last two runs. The answer to re-deriving by hand what the harness actually did.
+why: ## [check] read the run log for a film: last N runs + what changed between the last two (D=, N=5)
+	@node harness/lib/why.mjs $(D) $(N)
 
 # make ship D=<file>. The ladder with its teeth in: full author-check, render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
@@ -304,8 +311,9 @@ render-verify: ## [check] does the rendered mp4's duration match what the scene 
 
 ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit ASPECT=all -> seams -> forensics
 	@$(if $(D),node harness/lib/ensure-preflight.mjs $(D),)
-	node quality/gates/author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
-	. harness/dev/chrome-pin.sh ship && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
+	RUNLOG_CMD=ship node harness/lib/run-author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
+	bash -c 'set -o pipefail; . harness/dev/chrome-pin.sh ship && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT)) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log'
+	@node harness/lib/record-render.mjs ship $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log 2>/dev/null || true
 	@node quality/gates/render-verify.mjs $(D)
 	@$(if $(NOSPLIT),echo "  · motion split skipped (NOSPLIT=1)",node quality/gates/motion-split.mjs $(D))
 	node quality/audit.mjs $(D) --aspect $(if $(ASPECT),$(ASPECT),all)
