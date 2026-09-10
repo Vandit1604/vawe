@@ -15,6 +15,7 @@ import { beatsOf, evenSamples } from './beats-of.mjs';
 import { frameTile, tileGrid, tileBox, baseOf, renderOf, gradeable } from './tile.mjs';
 import { craftRubric } from './rubric.mjs';
 import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
+import { appendRun } from '../../harness/lib/runlog.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -88,6 +89,9 @@ if (verdictArg) {
   }
   const fixes = arg('--fixes', '');
   writeReceipt('judge', inp, { verdict: v, fixes, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
+  // Logged here, and only here: this is the agent's actual verdict, written down after the eye looked,
+  // never a verdict the prep step invents for itself (docs/MISTAKES.md, judge PASS is never self-recorded).
+  appendRun(inp, { cmd: 'judge', judge: { verdict: v, file: sheet } });
   console.log(v === 'PASS'
     ? `  ✓ judge verdict recorded: PASS. The eye is satisfied, this cut is done (make ledger-add D=${inp}).`
     : `  ✓ judge verdict recorded: FIX${fixes ? ` (${fixes})` : ''}. Fix it, re-render, and re-judge before shipping. The loop is not done until the eye stops finding fixes.`);
