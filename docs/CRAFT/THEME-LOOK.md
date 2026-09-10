@@ -2,7 +2,6 @@
 when: a theme should carry more than colours and fonts, or a scaffold keeps re-deciding the same thing per film
 answers: "the `look` block's shape (backdrop/scale/layout/marks/cuts/field) · how it is validated · how the scaffold merges it over the type spine · how to see it as a picture"
 group: crosscutting
-codes: theme-look-collapsed, theme-look-invalid, theme-look-spread-parse
 ---
 
 # THEME LOOK: the whole-film default a theme fixes
@@ -154,9 +153,11 @@ for the rest.
 
 **`scale` and `cuts` are DERIVED, not constants.** A first cut of this function filled every theme
 with `themes/vawe.json`'s own numbers, so a calm brand and a loud one computed the identical type
-scale and the identical cuts. `quality/gates/theme-look-spread.mjs` (`make theme-look-spread`) exists
-because nothing caught that: it counts distinct values per derived key across every shipped theme and fails
-by name if one collapses.
+scale and the identical cuts. A standalone gate that counted distinct values per derived key across
+every shipped theme caught that once; it was deleted 2026-09-10 after a fire-rate census
+(`harness/dev/gate-census.mjs`) found it had never fired again since. If the derivation regresses
+toward a constant, `core/registry/theme-contract.test.mjs` still asserts the sibling per-key spread
+check inline.
 
 - `scale`: `hook ~= 55 + 1.12 * motion.enter` (regressed off the 7 hand-authored looks; the 7 numbers
   vawe/a24/apple/bloomberg/duolingo/nike/vercel already carried are within 7px of what the formula
