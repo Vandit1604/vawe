@@ -522,7 +522,7 @@ boxes and could not answer what was in the frame (MISTAKES #592).
   a thermal ramp that fades in and out, and a goo morph between two words. Carries the four After
   Effects steps of the effect and their SVG equivalents in its own comments, which is the shape to copy:
   the recipe lives beside the implementation, so the next author inherits the name rather than the guess.
-- **`core/layout/generators.js`, the `thermalBlur` card**: a fragment that inlines its own SVG filter, and
+- **`core/generators/generators.js`, the `thermalBlur` card**: a fragment that inlines its own SVG filter, and
   says in its comments why it does that rather than referencing one on the page.
 - **`formats/scene/demo-frag-*.html`**, four kit-built exemplars, one archetype and one theme each:
   [`FRAGMENT-EXEMPLARS.md`](FRAGMENT-EXEMPLARS.md) says what each one refuses.

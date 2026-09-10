@@ -36,8 +36,9 @@ import { EASINGS, isEasingName } from '../motion/motion.js';
 import { resolveSeconds, FEEL } from '../registry/vocab.js';
 import { bgPreset, bgOverErrors, bgOptKeys , BG_NAMES } from '../backgrounds/index.js';
 import { KNOBS, knobsFor } from '../registry/knobs.js';
-import { mergePan } from '../layout/pan-resolve.mjs';
+import { mergePan } from '../timeline/pan-resolve.mjs';
 import { motionAt, keyHandleErrors } from '../timeline/sequence.js';
+import { RASTER_TYPES, UNSAMPLABLE_TYPES } from '../raster/index.js';
 
 const isObj = (o) => o && typeof o === 'object' && !Array.isArray(o);
 // nearest(val, options) → " Did you mean 'x'?" for the closest valid value (edit distance), else ''.
@@ -1429,8 +1430,8 @@ if (isMain) {
     // two that CANNOT go either way are refused by name: `raymarch` and `three` own their own WebGL
     // context, and `video` a bitmap. None of the three serialises into the offscreen raster, so they
     // would bake a hole. The engine throws at build time; catching it here names the file and index.
-    const RASTER = ['image', 'paint', 'shader'];
-    const UNSAMPLABLE = ['raymarch', 'three', 'globe', 'video'];
+    const RASTER = RASTER_TYPES;
+    const UNSAMPLABLE = UNSAMPLABLE_TYPES;
     (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
       if (!isObj(L) || !L.resample) return;
       if (UNSAMPLABLE.includes(L.type))

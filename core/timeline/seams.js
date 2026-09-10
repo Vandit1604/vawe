@@ -1,5 +1,5 @@
 import { glContext } from '../engine/webgl.js';
-import { buildInlinedCss, domToCanvas } from '../resample/raster.js';
+import { buildInlinedCss, domToCanvas } from '../raster/raster.js';
 import { DIRS } from '../cuts/index.js';
 import { defineRegistry } from '../registry/registry.js';
 import { UNITS, SEAM_FX, SEAM_BLURBS } from '../transitions/units.js';
@@ -281,7 +281,7 @@ export async function stageToCanvas({ w, h, cv, cam, root, useCanvasBg }) {
 
 // isBlankRaster moved to core/raster.js with the serialiser it grades; re-exported so the seam
 // compositor's callers keep importing it from here.
-export { isBlankRaster } from '../resample/raster.js';
+export { isBlankRaster } from '../raster/raster.js';
 
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine

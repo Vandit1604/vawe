@@ -26,7 +26,7 @@
 // amount ramp, the noise clock, not from the source. That is a hero device on a settled beat, not a
 // wrapper you put around a moving one.
 import { createResampler, RESAMPLE_REGISTRY } from './effects.js';
-import { buildInlinedCss, domToCanvas, rasterStats } from './raster.js';
+import { buildInlinedCss, domToCanvas, rasterStats } from '../raster/raster.js';
 
 const SPECS = new WeakMap();   // el → { r, src, fx, amount, speed, seed, isStatic }
 // Layers whose raster has to be BAKED out of the DOM. Filled at build (nothing is measurable then,
