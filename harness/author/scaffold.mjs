@@ -61,6 +61,7 @@ import { computedLook } from '../../core/registry/theme-contract.js';
 // A continuous-action scaffold welds two of them onto one object's track (a compose phase, then a
 // resolve), the same move higgsfield's own button track makes, instead of inventing new numbers.
 import { SHAPES } from './track.mjs';
+import { darkVocabularySummary } from '../../quality/gates/coverage.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CANVAS_W = 1920;
@@ -125,6 +126,14 @@ function writeScaffold(scene, storyboard, logLines) {
   fs.writeFileSync(path.resolve(ROOT, out), JSON.stringify(scene, null, 1) + '\n');
   fs.writeFileSync(path.resolve(ROOT, sbPath), storyboard);
   for (const l of logLines) console.error(l);
+  // Phase 6 of unwired.plan.md: adoption must land where an author already looks, not just in a
+  // report nobody runs. `make scaffold` is the one moment every new film passes through, so it is the
+  // cheapest place to say a whole registry sits unused rather than let it stay a secret until someone
+  // counts by hand. Best-effort: a coverage computation should never block a scaffold from writing.
+  try {
+    const { total, dark, unusedProps } = darkVocabularySummary();
+    console.error(`  ${dark}/${total} named engine capabilities are never used by an authored film (plus ${unusedProps} schema props): \`make coverage\` lists them.`);
+  } catch { /* coverage is advisory here; never block the scaffold on it */ }
   console.error(`  storyboard: ${sbPath}`);
   console.error(`  Replace every REPLACE:/<fill: ...> marker, then \`make dev D=${out}\`.`);
   if (process.argv.includes('--print-path')) process.stdout.write(out + '\n');
