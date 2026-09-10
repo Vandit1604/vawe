@@ -209,4 +209,17 @@ assert.throws(() => expandRecipes(enterScene({
   assert.ok(!tag.motion, 'seam written before word-by-word must still not slide the split layer');
 }
 
+// the real expansion path keeps a camera recipe's leg: expandScene must not drop cameraMove
+{
+  const { expandScene } = await import('../core/engine/expand.js');
+  const s = {
+    module: 'scene', aspect: '16:9', duration: 4,
+    recipes: [{ recipe: 'window-dolly', from: 0, to: 3, target: 'window' }],
+    layers: [{ type: 'html', id: 'window', x: 460, y: 240, w: 1000, h: 600, start: 0, duration: 4 }],
+  };
+  const out = expandScene(structuredClone(s));
+  assert.ok(Array.isArray(out.camera) && out.camera.length >= 2, 'a window-dolly recipe must reach data.camera through expandScene');
+  assert.ok(out.camera.some((k) => k.s > 1), 'the dolly pushes in (some key has scale above 1)');
+}
+
 console.log('ok - recipes/expand: keys and windows written on the named layers, every refusal named');

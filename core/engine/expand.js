@@ -120,8 +120,9 @@ export function expandScene(data) {
   // recipes[] sugar -> plain `motion` keys and layer windows on the layers they name (recipes/expand.mjs).
   // Runs after block/beat/comp, so a recipe naming a layer id one of those produced still resolves.
   if (data.recipes) {
-    const expanded = expandRecipes(data);
-    data.layers = expanded.layers;
+    // Copy back EVERYTHING the expansion wrote, not just layers: a camera recipe (window-dolly) writes
+    // `cameraMove`, and copying layers alone dropped every recipe camera leg before bakeCameraMove saw it.
+    Object.assign(data, expandRecipes(data));
     delete data.recipes;
   }
 
