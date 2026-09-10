@@ -21,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMove, moveErrors, moveKeys } from '../lib/contract.mjs';
+import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragmentErrors, SPEED_BAND, stagedSchedule, STAGE_S, parseMoveEntries, moveErrors, moveKeys } from '../lib/contract.mjs';
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
@@ -170,15 +170,27 @@ const htmlLayers = runs.map(([i, j]) => {
     if (keys.length > 1) motionKeys = keys;
   }
 
-  // THE MOVE: a beat's `move:` builds a sustained track on THIS layer, spanning that beat's own
-  // duration, keyed on the RUN's own clock (offset from the run's start, never the film's absolute
-  // time) so a merged run's later beat still lands its move at the right wall-clock second. At most one
-  // `move:` per run: two would both want to own the same `motion` field, and there is no rule yet for
-  // which wins, so both are refused rather than one silently picked.
+  // THE MOVE: a beat's `move:` can name up to three scopes, read from the entry (harness/lib/contract.mjs):
+  // LAYER builds a sustained track on THIS layer, spanning that beat's own duration, keyed on the RUN's
+  // own clock (offset from the run's start, never the film's absolute time) so a merged run's later beat
+  // still lands its move at the right wall-clock second. HOLD sets this layer's `idle`. PART entries join
+  // the SAME `parts[]` list `motion:` builds below, since a part-scope `move:` entry is the identical
+  // grammar `motion:` already accepts. At most one LAYER and one HOLD per run: each would want to own a
+  // single field (`motion`, `idle`), and there is no rule for which wins, so both are refused rather than
+  // one silently picked. Any number of PART entries is fine, the same as `motion:`.
   const moveDecls = [];
+  const holdDecls = [];
+  const movePartsByBeat = new Map();
   for (let k = i; k <= j; k++) {
-    const mv = parseMove(beats[k].move);
-    if (mv) moveDecls.push({ k, mv });
+    for (const e of parseMoveEntries(beats[k].move)) {
+      if (e.error) continue; // already refused above via moveErrors
+      if (e.scope === 'layer') moveDecls.push({ k, mv: e });
+      else if (e.scope === 'hold') holdDecls.push({ k, name: e.name });
+      else if (e.scope === 'part') {
+        if (!movePartsByBeat.has(k)) movePartsByBeat.set(k, []);
+        movePartsByBeat.get(k).push(e);
+      }
+    }
   }
   let moveTrack;
   if (moveDecls.length > 1) {
@@ -194,6 +206,16 @@ const htmlLayers = runs.map(([i, j]) => {
       moveTrack = offset ? raw.map((kf) => ({ ...kf, t: +(kf.t + offset).toFixed(3) })) : raw;
       movesBuilt.push(`scene${i + 1} (beat ${k + 1}, ${mv.shape}:${mv.band})`);
     }
+  }
+
+  // HOLD: idle rides outside the transform/parts tracks (core/tracks/idle.js), so it never competes
+  // with a placement track or a layer-scope move the way two of those would compete with each other.
+  let idle;
+  if (holdDecls.length > 1) {
+    moveConflicts.push(`scene${i + 1}: beats ${holdDecls.map((d) => d.k + 1).join(' and ')} each declare move: hold:, but only one hold per shared-fragment run is supported. Pick one.`);
+  } else if (holdDecls.length === 1) {
+    idle = holdDecls[0].name;
+    movesBuilt.push(`scene${i + 1} (beat ${holdDecls[0].k + 1}, hold:${idle})`);
   }
 
   // track:1, NEVER 0: direction-floor.mjs (and other gates) treat any track-0 layer as the backdrop
@@ -224,9 +246,10 @@ const htmlLayers = runs.map(([i, j]) => {
   // OFFSET: a run's later beats must still fire at their OWN wall-clock second, not the run's start,
   // so their entries carry the run offset on top of their own spread.
   //
-  // `rest:` was considered for the spread and rejected: it names ambient HOLD motion, the "nothing
-  // ever fully stops" idle that is explicitly ruled out here. This pass only ever moves a delay the
-  // storyboard's own `motion:` already implied.
+  // `rest:` (free-text, unbuilt: see the HOLD note above `moveDecls`) was considered for the spread and
+  // rejected: it names ambient HOLD motion, which is what `move: hold:<idle>` now builds, a separate
+  // field entirely (`idle`, not a part delay). This pass only ever moves a delay the storyboard's own
+  // `motion:` already implied.
   //
   // WHAT THIS CANNOT DO: a part's `out` exit is anchored to the LAYER's end
   // (`layer.start + (layer.duration - exitDur)`, same file), which for a merged run is the run's last
@@ -235,7 +258,10 @@ const htmlLayers = runs.map(([i, j]) => {
   // engine change, and this file does not make one.
   const parts = [];
   for (let k = i; k <= j; k++) {
-    const motion = parseMotion(beats[k].motion);
+    // `motion:` and a part-scope `move:` entry are the same grammar, so they feed the same list: an
+    // author can name a part's entrance on either field, and a beat can use both without either field
+    // knowing the other exists.
+    const motion = [...parseMotion(beats[k].motion), ...(movePartsByBeat.get(k) || [])];
     if (!motion.length) continue;
     const beatDuration = +(beats[k].end - beats[k].start).toFixed(3);
     const runOffset = merged ? shiftedStart[k] - shiftedStart[i] : 0;
@@ -280,6 +306,7 @@ const htmlLayers = runs.map(([i, j]) => {
     ...(motionKeys || moveTrack ? { motion: motionKeys || moveTrack } : {}),
     ...(merged ? { acrossBeats: true } : {}),
     ...(parts.length ? { parts } : {}),
+    ...(idle ? { idle } : {}),
   };
 });
 if (moveConflicts.length) {

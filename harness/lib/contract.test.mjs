@@ -2,7 +2,7 @@
 // is refused with BOTH values named.
 //   node harness/lib/contract.test.mjs
 import assert from 'node:assert/strict';
-import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, SPEED_BAND, isCausedTrigger, STAGE_S } from './contract.mjs';
+import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, parseMoveEntry, parseMoveEntries, moveErrors, moveKeys, SPEED_BAND, isCausedTrigger, STAGE_S } from './contract.mjs';
 
 // parseEdge: the happy path, quotes stripped (storyboard-parse.mjs's fieldIn does not strip them).
 // rot/opacity default to 0/1 (no pose stated = no pose change), same "no opinion" convention as before.
@@ -50,14 +50,14 @@ assert.deepEqual(chainErrors([{ name: 'A' }, { name: 'B' }]), []);
   assert.equal(edges(beats).length, 0, 'a broken chain yields no edges to build a track from');
 }
 
-// ── the motion plan: parseMotionEntry / parseMotion / motionErrors ─────────────────────────────────
+// ── the motion plan: parseMotionEntry / parseMotion / motionErrors, now aliases of the unified parser ──
 {
   const e = parseMotionEntry('[data-part="headline"]@slide-left:energy');
-  assert.deepEqual(e, { selector: '[data-part="headline"]', kind: 'slide-left', inBand: 'energy', outBand: 'energy' }, 'one band fills both in and out');
+  assert.deepEqual(e, { scope: 'part', selector: '[data-part="headline"]', kind: 'slide-left', inBand: 'energy', outBand: 'energy' }, 'one band fills both in and out');
 }
 {
   const e = parseMotionEntry('.card@popIn:energy/cinematic');
-  assert.deepEqual(e, { selector: '.card', kind: 'popIn', inBand: 'energy', outBand: 'cinematic' }, 'two bands: in then out');
+  assert.deepEqual(e, { scope: 'part', selector: '.card', kind: 'popIn', inBand: 'energy', outBand: 'cinematic' }, 'two bands: in then out');
 }
 {
   // an unknown part kind is refused with a near-word hint, exactly as an unknown placement is above
@@ -85,6 +85,58 @@ assert.deepEqual(parseMotion('none'), [], '`none` is an explicit no-motion beat'
 }
 // every named band resolves to a real duration, so assemble.mjs never keys a `parts` entry with `undefined`
 for (const band of Object.keys(SPEED_BAND)) assert.ok(SPEED_BAND[band] > 0, `${band} must be a positive duration`);
+
+// ── the unified move grammar: scope read from the entry, not the field ─────────────────────────────
+{
+  // LAYER scope: bare "<shape>:<band>", the old (and only) `move:` shape
+  const e = parseMoveEntry('pan:cinematic');
+  assert.deepEqual(e, { scope: 'layer', shape: 'pan', band: 'cinematic' });
+}
+{
+  // PART scope: identical grammar to a `motion:` entry, just written under `move:`
+  const e = parseMoveEntry('[data-part="card"]@riseIn:energy');
+  assert.deepEqual(e, { scope: 'part', selector: '[data-part="card"]', kind: 'riseIn', inBand: 'energy', outBand: 'energy' });
+}
+{
+  const e = parseMoveEntry('[data-part="card"]@riseIn:energy/gravity');
+  assert.deepEqual(e, { scope: 'part', selector: '[data-part="card"]', kind: 'riseIn', inBand: 'energy', outBand: 'gravity' });
+}
+{
+  // HOLD scope: sets the beat's layer idle, the field `rest:` could only narrate
+  const e = parseMoveEntry('hold:breathe');
+  assert.deepEqual(e, { scope: 'hold', name: 'breathe' });
+}
+{
+  const bad = parseMoveEntry('hold:shimmy');
+  assert.ok(bad.error, 'an unknown idle name is refused, not silently coerced to none');
+}
+{
+  const bad = parseMoveEntry('pan:blazing');
+  assert.ok(bad.error, 'a known shape with an unknown band is refused');
+}
+{
+  const bad = parseMoveEntry('spinny:cinematic');
+  assert.ok(bad.error, 'an unknown shape is refused with a near-word hint attempt, not defaulted');
+}
+assert.deepEqual(parseMoveEntries(null), [], 'unset move is no opinion');
+assert.deepEqual(parseMoveEntries('none'), [], '`none` is an explicit no-move beat');
+{
+  // a beat can mix scopes on one `move:` line: one layer track and two part entrances
+  const es = parseMoveEntries('pan:cinematic; .a@fadeUp:energy; hold:drift');
+  assert.equal(es.length, 3);
+  assert.deepEqual(es.map((e) => e.scope), ['layer', 'part', 'hold']);
+}
+{
+  const beats = [{ name: 'A', move: 'pan:cinematic' }, { name: 'B', move: 'nope:cinematic' }];
+  const errs = moveErrors(beats);
+  assert.equal(errs.length, 1, 'only the beat with a broken entry is reported');
+  assert.match(errs[0], /beat 2 \(B\)/);
+}
+{
+  // moveKeys still takes a bare {shape,band}, so a LAYER-scope entry from either parser feeds it unchanged
+  const keys = moveKeys({ shape: 'drift', band: 'professional' }, 3);
+  assert.ok(Array.isArray(keys) && keys.length > 1, 'moveKeys builds a real multi-key track');
+}
 
 // ── the pose: rot/op on top of placement@wxh ───────────────────────────────────────────────────────
 {
