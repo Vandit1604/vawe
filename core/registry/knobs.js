@@ -67,7 +67,7 @@ export const KNOBS = {
     // colorWave paints `color` every frame, so both ends default to a THEME variable rather than to a
     // literal: the accent it lights in, the layer's own settled ink it lands on. Neither is a number a
     // signature can state, so both rows come back with a null default and the desc carries the answer.
-    colorWave: [kcol('flash', 'the colour each unit lights in (unset = the theme accent)'), kcol('to', 'the colour it settles to (unset = that layer\'s own ink)'), kn('hold', 'fraction of the window the unit holds the flash before it starts settling', [0, 0.95])],
+    colorWave: [kcol('flash', 'the colour each unit lights in (unset = the theme accent), ignored once `colors` is set'), kcol('to', 'the colour it settles to (unset = that layer\'s own ink), ignored once `colors` is set'), kn('hold', 'fraction of the window the unit holds its arrival colour before it starts settling', [0, 0.95]), { name: 'colors', type: 'color', desc: 'per-unit colour list: unit i arrives in colors[i % n] instead of every unit sharing one `flash`' }, kcol('settle', 'colour every unit eases to once `colors` is set (unset = each unit keeps its own colour forever)')],
     strike: [kcol('color', 'rule colour'), kn('h', 'rule thickness px'), kn('fade', 'how far the word dims once the line has crossed it (0 keeps it at full strength)', [0, 1]), kn('at', 'height of the rule as a percentage of the line box', [0, 100])],
     flap: [kn('steps', 'how many flaps it runs before it lands, so also the speed: the whole run is fitted into `each`')],
     // assemble's five worked and were catalogued NOWHERE, so the AE recipe the preset was built from

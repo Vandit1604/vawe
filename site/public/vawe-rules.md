@@ -59,7 +59,7 @@ JSON *is* the video.
 | `align` | string | Text align. One of: `left` `center` `right` |
 | `font` | string | Face. One of: `sans` `serif` `mono` `num` |
 | `split` | string | Kinetic split ('path' = SVG strokes, for the `draw` preset). One of: `char` `word` `line` `path` |
-| `preset` | string | Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/h. One of: `weight` `up` `down` `type` `scale` `blur` `bounce` `slide` `wave` `shimmerWave` `flip` `fall` `elastic` `skew` `focus` `decode` `tilt` `stretch` `gradient` `highlight` `colorWave` `underline` `shadow` `riseClip` `draw` `chroma` `swing` `unfold` `strike` `flap` `assemble` `bloom` `halation` `diffusion` `rimLight` `spotlight` `chromatic` `chromaCycle` `confetti` `sparks` `dust` |
+| `preset` | string | Kinetic preset (split text; incl. chroma/swing/unfold) OR glow preset (bloom/h. One of: `weight` `up` `down` `fade` `type` `scale` `blur` `bounce` `slide` `wave` `shimmerWave` `flip` `fall` `elastic` `skew` `focus` `decode` `tilt` `stretch` `gradient` `highlight` `colorWave` `underline` `shadow` `riseClip` `draw` `chroma` `swing` `unfold` `strike` `flap` `assemble` `bloom` `halation` `diffusion` `rimLight` `spotlight` `chromatic` `chromaCycle` `confetti` `sparks` `dust` |
 | `presetOpts` | object | Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wav |
 | `stagger` | number|object | Per-unit delay (s), OR the three-dial object form { each, amount, from } that  |
 | `each` | number | Per-unit duration (s) |
@@ -80,11 +80,11 @@ JSON *is* the video.
 | `bg` | string | Fill (rect) |
 | `border` | string|boolean | Border (rect) (true = a 1px hairline in var(--line)) |
 
-## Kinetic presets (31)
+## Kinetic presets (32)
 
 Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `preset` to animate them.
 
-`weight` · `up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `colorWave` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold` · `strike` · `flap` · `assemble`
+`weight` · `up` · `down` · `fade` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` · `shimmerWave` · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` · `tilt` · `stretch` · `gradient` · `highlight` · `colorWave` · `underline` · `shadow` · `riseClip` · `draw` · `chroma` · `swing` · `unfold` · `strike` · `flap` · `assemble`
 
 - `split:"path"` + `preset:"draw"` makes an **inline SVG stroke draw itself** (logos, icons, chart
   lines). The SVG must be inline in `text`, an `<img>` has no reachable paths.
