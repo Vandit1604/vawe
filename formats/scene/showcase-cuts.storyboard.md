@@ -27,7 +27,6 @@ This video tells an author that a cut is a joint the film already has, and the j
 - style: flat white ground, one weight of type, nothing but the strip moving
 - rest: the strip keeps filling through the hold
 - why: state the claim as a question the eye has to answer, so the match cut has something to land on
-- emotion: curiosity
 - duration: 2.8s
 - transition_in: cut
 
@@ -44,7 +43,6 @@ This video tells an author that a cut is a joint the film already has, and the j
 - style: the dot grid arrives, the mark is the only saturated thing in the frame
 - rest: the drifting dot grid, and the strip filling
 - why: the sentence is left unfinished on purpose, so the ear is also waiting at the joint
-- emotion: attention
 - duration: 2.8s
 - transition_in: punch
 
@@ -61,7 +59,6 @@ This video tells an author that a cut is a joint the film already has, and the j
 - style: the one loud backdrop window in the film, spent here and nowhere else
 - rest: none. The frame holds while the eye reads the number
 - why: the number on the card IS the cut's time, so the claim "the joint owns the time" is shown before it is said
-- emotion: recognition
 - duration: 2.0s
 - transition_in: none (the match cut is hard by definition)
 
@@ -78,6 +75,5 @@ This video tells an author that a cut is a joint the film already has, and the j
 - style: the loud window is over, the frame goes quiet for the line
 - rest: the strip holds finished, nothing else moves
 - why: name the rule only after the eye has already seen it work
-- emotion: settled
 - duration: 3.2s
 - transition_in: zoom

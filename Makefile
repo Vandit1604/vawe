@@ -686,11 +686,13 @@ concept: ## [preflight] N DIRECTIONS FOR ONE BRIEF, before any of them is built.
 concept-pick: ## [preflight] promote one direction and record the rest.
 	node harness/author/concept.mjs $(SB) --pick $(OPTION)
 
-# make approve STAGE=<stage> D=<file>: SIGN OFF a stage for this exact file. Records a content hash, so
-# editing the file silently withdraws its own approval; an approval that outlives what it approved is
-# worse than none, because it reads as verified. Stages: beats · concept · treatment · draft.
-approve: ## [preflight] SIGN OFF a stage for this exact file.
-	@node harness/author/approve.mjs "$(STAGE)" "$(D)"
+# make approve D=<file>: SIGN OFF the plan for this exact film (harness/author/approve.mjs writes
+# `approved: <date>` into its storyboard's own frontmatter). Editing the storyboard after this silently
+# withdraws the signature (approve.mjs strips any stale `approved:` line before it re-checks), so an
+# approval never outlives what it approved. This is the USER's signature: an agent runs `make studio
+# D=` to show the plan, but only the user runs this command (or `/vawe-approve`).
+approve: ## [preflight] SIGN OFF the plan for this exact film (D=<file>; run by the USER, never an agent)
+	@node harness/author/approve.mjs "$(D)"
 
 beats: ## [judge] first/mid/last frame of every beat in one contact sheet (D=<file> [VS=brand])
 	node harness/author/beats.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(STRIDE),--stride $(STRIDE))

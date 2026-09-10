@@ -12,7 +12,6 @@ object_last: "the mark and the wordmark, still, on white"
 format: 1920x1080
 theme: "themes/vawe-film.json"
 duration: 20s
-ramp: "kit-display for the wordmark · kit-hook for every beat sentence · kit-caption for every label and every mono row. No fourth size anywhere."
 craft:
   CAPTIONS: "no narration and no captions: every line is on-screen type the viewer reads, and a caption strip under type is a second copy of the same words"
   COLOR: "eyedropped, not invented. themes/vawe-film.json is the real landing page's palette with the surfaces given tone for video; one hue, three grounds in rotation"
@@ -75,7 +74,6 @@ copying a shape without its role.
 - style: the reference grammar opens here, near-white ground, one cobalt word, no card yet
 - rest: none, the word by word reveal fills the beat
 - why: state the whole promise in six words, so every later beat is proof and not exposition
-- emotion: curiosity
 - duration: 2.6s
 - transition_in: cut
 
@@ -99,7 +97,6 @@ copying a shape without its role.
 - style: white plane on the near-white ground, separated by a wide soft shadow and never a border, cobalt on the JSON keys
 - rest: the scroll never fully stops between its stops
 - why: prove the input is a real readable artifact, not a diagram of one
-- emotion: recognition
 - duration: 4s
 - transition_in: cut
 
@@ -123,7 +120,6 @@ copying a shape without its role.
 - style: a transcript, not a window. No chrome, no container, no dark surface: the command is the object
 - rest: none, the typing fills the beat
 - why: name the one command, because the whole promise is that there is only one
-- emotion: relief
 - duration: 3.4s
 - transition_in: cut
 
@@ -146,7 +142,6 @@ copying a shape without its role.
 - style: the loudest frame of the film. THIS is the spectacle beat.
 - rest: none, the landing carries it
 - why: pay off the hook. The viewer watched the input and now sees the output, with nothing in between hidden
-- emotion: inevitability
 - duration: 3.2s
 - transition_in: cinematicZoom
 
@@ -169,7 +164,6 @@ copying a shape without its role.
 - style: the same ground, the plates carrying the only weight, one accent word in the sentence
 - rest: a slow drift across the fan
 - why: show the range without claiming a number the frame does not show
-- emotion: scope
 - duration: 2.4s
 - transition_in: cut
 
@@ -192,7 +186,6 @@ copying a shape without its role.
 - style: quietest frame in the film, no accent except the line that says the two agree
 - rest: 1% breathe on both panes together, so they stay identical even while moving
 - why: determinism is the only claim here that a viewer cannot check by eye, so show it rather than say it
-- emotion: trust
 - duration: 2s
 - transition_in: cut
 
@@ -216,6 +209,5 @@ copying a shape without its role.
 - style: quiet, one line, the mark and nothing competing
 - rest: none. The film stops.
 - why: one next step, and it closes the bookend the blurred type opened
-- emotion: resolution
 - duration: 2.4s
 - transition_in: fade
