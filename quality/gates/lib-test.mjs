@@ -29,7 +29,7 @@ import { frame as squashFrame, build as squashBuild } from '../../core/fx/squash
 import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
 import { frame as matteFrame, build as matteBuild } from '../../core/fx/matte.js';
 import { frame as uprightFrame, build as uprightBuild } from '../../core/fx/upright.js';
-import { mergePan } from '../../core/layout/pan-resolve.mjs';
+import { mergePan } from '../../core/timeline/pan-resolve.mjs';
 import { patchMotion, upsertKey, layerSpan, matchBracket, applyOps } from '../../harness/author/patch-motion.mjs';
 import { SHAPES as TRACK_SHAPES } from '../../harness/author/track.mjs';
 import fs from 'node:fs';
@@ -2116,7 +2116,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     // The EVEN case must reach the shader as no positions at all. The two shader paths are the same
     // formula in real arithmetic and different pictures in float32, so a generator that helpfully
     // filled in `@0.142857…` would shift every field that never asked for positions.
-    const { ALL_GENERATORS, defaultsOf } = await import('../../core/layout/generators.js');
+    const { ALL_GENERATORS, defaultsOf } = await import('../../core/generators/generators.js');
     const spectrum = ALL_GENERATORS.find((g) => g.name === 'spectrum');
     const flat = spectrum.render(defaultsOf(spectrum.schema))[0].colors;
     ok('spectrum: untouched ramp stops carry NO position (bit-identical to before positions existed)',

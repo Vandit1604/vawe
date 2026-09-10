@@ -113,7 +113,7 @@
  "core/fx/upright.js": [
   "UPRIGHT_KEYS"
  ],
- "core/layout/generators.js": [
+ "core/generators/generators.js": [
   "ALL_GENERATORS"
  ],
  "core/engine/gsap-effects.js": [
@@ -123,7 +123,7 @@
   "DEPRECATED_FX",
   "DEPRECATED_EXIT"
  ],
- "core/layout/icons.js": [
+ "core/icons/icons.js": [
   "ICONS"
  ],
  "core/engine/idle.js": [
@@ -183,7 +183,7 @@
   "PROPS",
   "PAINT_FX"
  ],
- "core/layout/pan-resolve.mjs": [
+ "core/timeline/pan-resolve.mjs": [
   "PROPS"
  ],
  "core/motion/parts.js": [
