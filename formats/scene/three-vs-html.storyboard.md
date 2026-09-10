@@ -1,4 +1,5 @@
 ---
+approved: 2026-09-10
 message: "a real light rig and a real move make a screenshot read as an object in a room, not a flat capture."
 audience: "internal: does 3D quality beat html-to-video for a product shot"
 arc: "hold -> hold"
