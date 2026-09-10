@@ -53,6 +53,8 @@ const WAIVED = new Map(Object.entries({
   IDENT: 'the identity style set a cut resets to (core/cuts.js). A reset, not an effect: the CUT vocabulary it belongs to is catalogued in full',
   PROPS: 'per-module prop declarations. Covered by schema-drift and layer-props, which check them against schema.json',
   SHARED_PROPS: 'the props every layer type inherits, a prop list, not a vocabulary',
+  RASTER_TYPES: 'which layer types the resampler may rasterise (core/raster/index.js). An author picks a LAYER TYPE, and every one of the 24 is catalogued; this says which of them the raster path can flatten, a capability of the renderer, not a name to choose between',
+  UNSAMPLABLE_TYPES: 'the complement of RASTER_TYPES: the layer types the resampler must leave alone (core/raster/index.js). Same argument, and validate.mjs imports both instead of hardcoding them twice',
   POSE: 'the table a motion keyframe is evaluated through (core/timeline/sequence.js): authored name to pose key to identity. An author writes `x` or `ox` on a KEY, which formats/scene/schema.json documents field by field and schema-drift checks against this table. A field list, not a vocabulary to pick a name from',
   KEYFRAME_PROPS: 'what a keyframe may carry, generated from POSE and SIDES. Same argument: it is the list schema-drift compares the schema against, not a set of names an author chooses between',
   LAYER_PROPS: 'the generated prop table behind schema-drift',
