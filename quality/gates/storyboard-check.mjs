@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
 import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../../harness/author/storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, transitionInErrors, transitionInWarnings, moveErrors, motionErrors, parseFragmentSpec, arsenalCorpus, useErrors, useWarnings, eyeErrors, hasEyeCandidateMotion, eyeUntargetedDevices, competingEyeDevices, parseEyeLine } from '../../harness/lib/contract.mjs';
+import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, cameraStillHeldWarnings, transitionInErrors, transitionInWarnings, moveErrors, motionErrors, parseFragmentSpec, arsenalCorpus, useErrors, useWarnings, eyeErrors, hasEyeCandidateMotion, eyeUntargetedDevices, competingEyeDevices, parseEyeLine } from '../../harness/lib/contract.mjs';
 import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
@@ -131,6 +131,9 @@ const sbBeats = timeline(parseStoryboard(src)).beats;
 for (const e of cameraErrors(sbBeats)) err('camera-unknown', e);
 for (const w of cameraWarnings(sbBeats)) warn('camera-undecided', w);
 for (const e of cameraContinuityErrors(sbBeats)) err('camera-snap-at-seam', e);
+// REPORT ONLY, never a blocker: the engine keeps every camera move's hold by design
+// (skills/vawe-camera/SKILL.md); this only tells an author who did not intend it before the render does.
+for (const w of cameraStillHeldWarnings(sbBeats)) warn('camera-still-held', w);
 for (const e of transitionInErrors(sbBeats)) err('transition-in-unknown', e);
 for (const w of transitionInWarnings(sbBeats)) warn('transition-in-undecided', w);
 // `move:`/`motion:` are already a real grammar (never free prose): a bad line is a typo, not an
