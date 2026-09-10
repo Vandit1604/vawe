@@ -599,7 +599,9 @@ const SWAP = {
 };
 export function screenSwap({ x = 0, y = 0, w = 320, screens = [], hold = 1.6, overlap = 0.45,
   transition = 'wipe', start = 0, dur = 5 } = {}) {
-  const move = SWAP[transition] || SWAP.wipe;
+  if (!(transition in SWAP)) throw new Error(`blocks/core.mjs screenSwap: unknown transition "${transition}". `
+    + `Known: ${Object.keys(SWAP).join(', ')}`);
+  const move = SWAP[transition];
   const end = start + dur;
   return screens.flatMap((s, i) => {
     const st = r2(start + i * hold);
