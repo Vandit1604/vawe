@@ -24,6 +24,13 @@ export const CURSOR_STYLES = defineRegistry('cursor style', {
   arrow: drawArrow, hand: drawHand, ibeam: drawIbeam, block: drawBlock,
 }, {
   slot: 'style',
+  // The words an author actually types for each shape: the blurbs describe the glyph, these name it.
+  aka: {
+    arrow: ['mouse pointer', 'arrow cursor', 'default cursor'],
+    hand: ['pointer hand', 'hand cursor', 'link cursor', 'clickable cursor'],
+    ibeam: ['i-beam', 'text cursor', 'text selection cursor'],
+    block: ['terminal cursor', 'block caret', 'block cursor'],
+  },
   blurbs: {
     arrow: 'the default macOS pointer arrow, unchanged pixels from before this registry existed',
     hand: 'a pointing hand, for hovering a clickable button or link in a product demo',

@@ -5823,6 +5823,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // about which family answered.
   const FAMILY = [
     ['one scene leaves the frame and the next arrives from the same side, with no cut between them', 'flow-seam'], // recipe
+    ['an i-beam text cursor over the text', 'ibeam'],                                                   // cursor style
     ['a bright white flash to hide a hard cut', 'flash'],                                                 // sting fx
     ['an old worn videotape with scanlines and grain', 'vhs'],                                            // look
     ['the product bursts forward past the camera as it leaves the frame', 'punch'],                       // cut
