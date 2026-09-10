@@ -159,8 +159,8 @@ export function createRenderer(ctx) {
     // motion track) are the per-frame pipeline in core/tracks/, which calls this from the `primitive`
     // slot, in the MIDDLE of that list, not before or after it (core/tracks/primitive.js says why).
     //
-    // `scene` is a FROZEN read-only view of the rest of the frame: geometry (boxOf · specOf · ids), the
-    // frame's own properties (light · camera · canvas · safe · bg), the clock, the theme's palette, and
+    // `scene` is a FROZEN read-only view of the rest of the frame: geometry (boxOf · exposedOf · specOf
+    // · ids), the frame's own properties (light · camera · canvas · safe · bg), the clock, the theme's palette, and
     // the film's joints. A primitive used to be handed itself and the clock and nothing else, which is why
     // occlusion, a shadow keyed to a light, and per-layer 3D could not be written at all, none of
     // them is a property of one layer. It is frozen because a layer that could write to it would be
@@ -170,5 +170,13 @@ export function createRenderer(ctx) {
     // it occupies the LAST slot of the pipeline (cut · units · vars · react · box · motion), and
     // frame() occupies one in the middle. Composition order is spelled out in core/fx/index.js.
     modify(el, L, t, scene) { frameFx(kit, el, L, t, scene); },
+    // expose(L, t, scene) → a plain object of NAMED values this layer publishes about its own private
+    // state (which character its caret sits at, so what x; core/layers/text.js is the first case), or
+    // null if this type or this layer exposes nothing. The general form of `boxOf`: a fact a layer
+    // already computes internally, made readable BY NAME instead of a second private computation
+    // drifting from the first. Optional per type; most expose nothing. Pure in (L, t, scene): no DOM
+    // read, no state kept between frames, so it is safe to resolve before any layer's own frame() runs
+    // and to re-run out of order (make probe samples frames out of order for exactly this reason).
+    expose(L, t, scene) { const m = pick(L); return m.expose ? m.expose(L, t, scene) : null; },
   };
 }
