@@ -90,6 +90,7 @@ copying a shape without its role.
 - fragment: formats/scene/_vawe-oblique.code.html
 - onscreen: "You write the scene."
 - motion: .line@fadeUp:professional
+- move: drift:professional
 - mechanism: static tilt · absolute-stop scroll · line focus bar keyed by index
 - becomes: a claim becomes the document that backs it, and a still plane becomes a document being read
 - trigger: the hook claims one file, and a claim about a file demands the file on screen
@@ -156,6 +157,7 @@ copying a shape without its role.
 - blueprint: cardFan (Adapt: the cards are the same rendered frame at five aspect ratios, not five different cards)
 - fragment: formats/scene/_vawe-oblique.range.html
 - motion: .rg-card@growUp:energy
+- move: drift:professional
 - onscreen: "Five canvases. One file."
 - mechanism: fan out from one card · camera pulling back
 - becomes: one frame becomes five shapes of the same frame
@@ -179,6 +181,7 @@ copying a shape without its role.
 - fragment: formats/scene/_vawe-oblique.proof.html
 - onscreen: "Run it twice. Identical."
 - motion: .pf-pane@fade:gravity
+- move: hold:breathe
 - mechanism: the fan collapsing · two panes settling to one alignment
 - becomes: five shapes become one pair, and the pair becomes proof that the render is deterministic
 - trigger: the fan in beat 5 pulls back far enough that two of its cards line up
