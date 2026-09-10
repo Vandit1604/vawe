@@ -73,6 +73,18 @@ export function groundStrategy() {
   ];
 }
 
+// ATTENTION, film-wide. The owner's own framing: every device (per-word colour, a camera push, a
+// cursor, contrast, size, a blur-to-sharp focus pull) exists to point the eye somewhere, and the plan
+// has to say where across the WHOLE film, not just inside one beat. Each option traces to a real
+// mechanism the film can already declare, never an invented strategy.
+export function attentionOptions() {
+  return [
+    { key: 'cause-chain', label: 'One cause chases the next', description: 'Each beat is caused by the one before (`trigger:`, docs/CRAFT/STORYBOARD-TEMPLATE.md): the eye follows the causal chain start to finish, the cursor causes the type, the type causes the send, the send causes the cut.' },
+    { key: 'object-carries', label: 'A continuous object carries it', description: 'The film declares `object:`/`object_in`/`object_out` (harness/lib/contract.mjs): the eye follows one thing across every cut because it never truly leaves the frame.' },
+    { key: 'color-carries', label: 'Colour carries it act to act', description: '`ground: colour taken from the content`: the ground re-tints to whatever is on screen, so the eye is pulled toward whatever just changed it.' },
+  ];
+}
+
 export function filmLevelBatch() {
   return {
     label: 'film',
@@ -80,6 +92,7 @@ export function filmLevelBatch() {
       { header: 'Lives in', question: 'Where does the product live on screen?', options: whereProductLives() },
       { header: 'Text', question: 'How does text arrive, film-wide (an act can still override it)?', options: howTextArrives() },
       { header: 'Ground', question: 'What decides the ground colour act to act?', options: groundStrategy() },
+      { header: 'Attention', question: 'Across the whole film, what carries the eye from beat to beat?', options: attentionOptions() },
     ],
   };
 }
@@ -146,6 +159,23 @@ export function cameraOptions() {
   return pick.filter((k) => CAMERA_MOVE_BLURBS[k]).map((k) => ({ key: k, label: k, description: `core/camera-moves: ${CAMERA_MOVE_BLURBS[k]}.` }));
 }
 
+// EYE. Where does this act point attention, and which device does the pointing (the owner's own
+// framing: a camera push doubles as an eye-directing device, so it lives here rather than in a
+// separate question). Four options, the AskUserQuestion ceiling, so this REPLACES the old standalone
+// "what does the camera do" question rather than sitting beside it; a camera push is still reachable,
+// as this question's first option.
+export function eyeOptions() {
+  const wbw = RECIPES['word-by-word'];
+  return [
+    { key: 'camera', label: 'A camera push', description: `camera move \`diveIn\` (${CAMERA_MOVE_BLURBS.diveIn}), core/camera-moves: the push itself is the pull, no separate device needed.` },
+    { key: 'word-color', label: 'Per-word colour walks the phrase', description: wbw
+      ? `recipe \`word-by-word\` (${wbw.blurb}): each word takes the eye in reading order onto the key word.`
+      : 'no word-by-word recipe is promoted; drop this option.' },
+    { key: 'cursor', label: 'The cursor causes it', description: 'core/layers/cursor.js: a pointer that travels and clicks, the visible cause the eye follows to where it lands.' },
+    { key: 'contrast-size', label: 'Contrast or size alone', description: 'No motion at all: the hero element is simply the biggest or highest-contrast thing in the frame, so the eye lands there unpulled.' },
+  ];
+}
+
 export function actBatch(act, joint) {
   return {
     label: `act${act.i}`,
@@ -153,7 +183,7 @@ export function actBatch(act, joint) {
       { header: 'Frame', question: `Act ${act.i}: what fills the frame?`, options: frameOptions(act) },
       { header: 'Cursor', question: `Act ${act.i}: is anything clicked or typed here?`, options: cursorOptions() },
       { header: 'Hands off', question: `Act ${act.i}: how does it leave and hand off to the next?`, options: joint ? handoffOptions(joint) : [{ key: 'ends', label: 'The film ends here', description: 'No next joint: this is the last act.' }] },
-      { header: 'Camera', question: `Act ${act.i}: what does the camera do?`, options: cameraOptions() },
+      { header: 'Eye', question: `Act ${act.i}: where should the eye land, and what takes it there?`, options: eyeOptions() },
     ],
   };
 }
@@ -192,13 +222,21 @@ const HANDOFF_LINE = { 'flow-seam': (j) => `recipe: flow-seam out=act${j.outAct}
   becomes: () => 'becomes: <fill: the X becomes the Y>', camera: () => 'camera: travels through (camera move: travel)' };
 const GROUND_LINE = { theme: () => "ground: the theme's own default", content: () => 'ground: colour taken from the content on screen',
   chained: () => 'ground: chained from the previous scene (flow-seam ground slot)' };
+// EYE: each answer names a device but leaves the start/land ends as `<fill:>`, the same convention
+// every other still-undecided slot in this prompt already uses: the storyboard-check gate (contract.mjs
+// parseEyeLine) refuses `<fill:` lines as unset rather than as a broken device, so a partially-answered
+// eye line is a fine thing to scaffold and fine to fill in by hand afterwards.
+const EYE_LINE = { camera: () => 'eye: <fill: where it starts> -> a camera push pulls it -> <fill: where it lands>',
+  'word-color': () => 'eye: <fill: the first word> -> per-word colour flash walks the phrase -> <fill: the key word>',
+  cursor: () => 'eye: <fill: where it starts> -> the cursor travels and causes it -> <fill: where it lands>',
+  'contrast-size': () => 'eye: <fill: where it starts> -> contrast or size alone, unpulled -> <fill: where it lands>' };
 
 // An ENTRY is a label line plus every hard-wrapped continuation line under it, up to the next label,
 // a blank line, or a heading: the same grouping ideate.mjs's own `annotateFilledPrompt` uses for
 // `enters:`/`leaves:`/`camera:`, because a measured `leaves:` entry is routinely two physical lines
 // and replacing only the first would leave its continuation dangling below the new text.
 const ENTRY_LABELS = ['on screen:', 'enters:', 'leaves:', 'camera:', 'type:', 'ground:', 'content:',
-  'frame:', 'cursor:', 'recipe:', 'becomes:', 'measured:'];
+  'frame:', 'cursor:', 'recipe:', 'becomes:', 'measured:', 'eye:'];
 const startsNewEntry = (line) => ENTRY_LABELS.some((lb) => line.startsWith(lb)) || /^##/.test(line) || line.trim() === '';
 
 /** setEntry(sectionText, label, newLine) → sectionText with the WHOLE `<label>: ...` entry (its label
@@ -241,6 +279,7 @@ export function applyAnswers(promptText, answers) {
     if (!a) continue;
     if (a.frame && FRAME_LINE[a.frame]) sections[idx] = setEntry(sections[idx], 'frame', FRAME_LINE[a.frame](a));
     if (a.cursor && CURSOR_LINE[a.cursor]) sections[idx] = setEntry(sections[idx], 'cursor', CURSOR_LINE[a.cursor]());
+    if (a.eye && EYE_LINE[a.eye]) sections[idx] = setEntry(sections[idx], 'eye', EYE_LINE[a.eye]());
     if (answers.film && answers.film.ground && GROUND_LINE[answers.film.ground]) sections[idx] = setEntry(sections[idx], 'ground', GROUND_LINE[answers.film.ground]());
     if (a.handoff && HANDOFF_LINE[a.handoff]) {
       const jointIdx = idx + 1;
@@ -257,7 +296,16 @@ export function applyAnswers(promptText, answers) {
     const bits = [];
     if (answers.film.where) bits.push(`lives in: ${whereProductLives().find((o) => o.key === answers.film.where)?.label || answers.film.where}`);
     if (answers.film.text) bits.push(`text arrives: ${howTextArrives().find((o) => o.key === answers.film.text)?.label || answers.film.text}`);
-    if (bits.length && !/^film: /m.test(text)) text = text.replace(/^(# .*\n)/, `$1\nfilm: ${bits.join(' · ')}\n`);
+    const extra = [];
+    if (bits.length && !/^film: /m.test(text)) extra.push(`film: ${bits.join(' · ')}`);
+    // ATTENTION, the film-level twin of each act's `eye:` answer: one sentence naming the path across
+    // the whole film, promoted verbatim to the storyboard's own `attention:` frontmatter field once
+    // `make scaffold` runs.
+    if (answers.film.attention && !/^attention: /m.test(text)) {
+      const opt = attentionOptions().find((o) => o.key === answers.film.attention);
+      extra.push(`attention: ${opt ? opt.description : answers.film.attention}`);
+    }
+    if (extra.length) text = text.replace(/^(# .*\n)/, `$1\n${extra.join('\n')}\n`);
   }
   return text;
 }
@@ -313,6 +361,18 @@ function selfTest() {
   ok(/ground: chained from the previous scene/.test(applied), 'the film-level ground strategy should apply to every act');
   const twice = applyAnswers(applied, answers);
   ok((twice.match(/^film: /gm) || []).length === 1, 'a second apply pass must not duplicate the film: line');
+
+  // the eye question replaces the old standalone camera question and stays a real device.
+  ok(CAMERA_MOVE_BLURBS.diveIn, 'eyeOptions cites camera move diveIn which is missing');
+  const withEye = { ...answers, film: { ...answers.film, attention: 'cause-chain' },
+    acts: [{ ...answers.acts[0], eye: 'cursor' }, answers.acts[1]] };
+  const eyeApplied = applyAnswers(prompt, withEye);
+  ok(/^attention: /m.test(eyeApplied), 'an attention answer should write an attention: line near the top');
+  ok(/eye: <fill: where it starts> -> the cursor travels and causes it -> <fill: where it lands>/.test(eyeApplied),
+    'act 1 eye answer should write an eye: line');
+  const eyeTwice = applyAnswers(eyeApplied, withEye);
+  ok((eyeTwice.match(/^attention: /gm) || []).length === 1, 'a second apply pass must not duplicate the attention: line');
+  ok((eyeTwice.match(/^eye:/gm) || []).length === 1, 'a second apply pass must not duplicate the eye: line');
 
   // a `flow-seam` handoff answer rewrites the JOINT's own `recipe:` line, never the act's, and a
   // multi-line `leaves:` entry is replaced whole, not left with a dangling continuation line.
