@@ -175,19 +175,50 @@ function actSection(act, ref, clip) {
 
 // annotateFilledPrompt(text): given a prompt.md ALREADY hand-filled (on screen/camera/type rewritten
 // from placeholders, enters/leaves/ground corrected against the frames), append a routing bracket to
-// every `enters:`/`leaves:`/`camera:` line that does not already carry one. Every other line, including
-// every word of hand-corrected prose, passes through byte for byte: this only ever appends, never edits
-// or removes. Regenerating a prompt from the study data (buildRefPrompt) would discard the hand-fill; a
-// person's own correction like commit 01150c25 is not something a second pass gets to overwrite.
+// every `enters:`/`leaves:`/`camera:` ENTRY that does not already carry one. Every other line,
+// including every word of hand-corrected prose, passes through byte for byte: this only ever appends
+// one bracket to the LAST physical line of an entry, never edits or removes anything. Regenerating a
+// prompt from the study data (buildRefPrompt) would discard the hand-fill; a person's own correction
+// like commit 01150c25 is not something a second pass gets to overwrite.
+//
+// AN ENTRY IS NOT A LINE: `leaves: ...as\nthe window defocuses (measured...)` is ONE entry hard-wrapped
+// across two lines of markdown, and a bracket mid-sentence reads worse than the thing it is meant to
+// clarify. So this groups every physical line up to the next label (or a blank line, or the next `##`
+// heading) into one entry and appends to its last line.
+//
+// ACT 6's letterform landing is why `enters:` also reads the act's own `on screen:` entry: the axis and
+// gap alone (`from the bottom along the y axis`) look identical to a plain slide, and only the
+// paragraph above names what is actually arriving ("scattered ... marks ... land as the individual
+// letterforms"). Composing on-screen with enters is how that gap gets flagged instead of silently
+// routed as a plain flow-seam.
+const ENTRY_LABELS = ['on screen:', 'enters:', 'leaves:', 'camera:', 'type:', 'ground:'];
+const startsNewEntry = (line) => ENTRY_LABELS.some((lb) => line.startsWith(lb))
+  || /^##/.test(line) || /^recipe:|^measured:/.test(line) || line.trim() === '';
+
 export function annotateFilledPrompt(text) {
-  return text.split('\n').map((line) => {
-    if (/\[recipe:|\[camera:|\[unrouted:/.test(line)) return line;    // already routed, leave it
-    let m;
-    if ((m = /^enters:\s*(.*)$/.exec(line))) return appendBracket(line, routeSeamProse('enter', m[1]));
-    if ((m = /^leaves:\s*(.*)$/.exec(line))) return appendBracket(line, routeSeamProse('leave', m[1]));
-    if ((m = /^camera:\s*(.*)$/.exec(line))) return appendBracket(line, routeCameraProse(m[1]));
-    return line;
-  }).join('\n');
+  const lines = text.split('\n');
+  const entries = [];
+  for (let i = 0; i < lines.length;) {
+    const label = ENTRY_LABELS.find((lb) => lines[i].startsWith(lb));
+    if (!label) { i++; continue; }
+    let j = i + 1;
+    while (j < lines.length && !startsNewEntry(lines[j])) j++;
+    entries.push({ label, start: i, end: j - 1 });
+    i = j;
+  }
+  const out = [...lines];
+  let lastOnScreen = '';
+  for (const e of entries) {
+    const full = lines.slice(e.start, e.end + 1).join('\n');
+    if (e.label === 'on screen:') { lastOnScreen = full; continue; }
+    if (/\[recipe:|\[camera:|\[unrouted:/.test(full)) continue;    // already routed, leave it
+    let bracket = null;
+    if (e.label === 'enters:') bracket = /film opens/.test(full) ? null : routeSeamProse('enter', `${lastOnScreen} ${full}`);
+    else if (e.label === 'leaves:') bracket = /film ends/.test(full) ? null : routeSeamProse('leave', full);
+    else if (e.label === 'camera:') bracket = routeCameraProse(full);
+    if (bracket) out[e.end] = appendBracket(out[e.end], bracket);
+  }
+  return out.join('\n');
 }
 
 function jointSection(joint) {
@@ -288,7 +319,50 @@ function selfTest() {
   assert.equal(menu.length, 1);
   assert.match(menu[0], /^- flow-seam \(seam\): /);
 
-  console.log('ideate.mjs self-test: ok (buildActs, buildJoints, recipeLineFor, recipeMenu)');
+  // routing: a seam line always resolves (every joint here is measured), composed cases layer on top,
+  // and the two real gaps (a word-by-word exit, marks assembling into letterforms) say so by name.
+  assert.equal(routeSeamProse('enter', 'the line enters word by word from the right'), '[recipe: flow-seam + word-by-word]');
+  assert.equal(routeSeamProse('leave', 'the sentence slides off left word by word'), '[recipe: flow-seam; unrouted: per-word exit, core/tracks/units.js splits text IN only, no staggered-out]');
+  assert.equal(routeSeamProse('enter', 'a tilted window rises from the bottom'), '[recipe: flow-seam]');
+  assert.equal(routeSeamProse('enter', 'scattered marks fly in and land as letterforms'), '[recipe: flow-seam; unrouted: marks assembling into letterforms, no named core capability for shape-to-glyph landing]');
+  assert.equal(routeSeamProse('enter', null), null);
+  assert.equal(routeCameraProse('a slow, continuous dolly-in on the window through the whole act'), '[recipe: window-dolly]');
+  assert.equal(routeCameraProse('a slight continuous push on the card stack, steady through each swipe'), '[recipe: window-dolly]');
+  assert.equal(routeCameraProse('static hold once the words settle, no push'), null);
+  assert.equal(routeCameraProse('<look: 0s to 4.54s, see strip.png>'), null);
+
+  // annotateFilledPrompt: appends brackets, never touches any other text, and is idempotent (a second
+  // pass sees the brackets it already wrote and adds nothing more).
+  const filled = ['camera: static hold once the words settle, no push',
+    'camera: a slow, continuous dolly-in on the window through the whole act',
+    'enters: from the right along the x axis (measured, gap 0.1s)',
+    'leaves: toward the left along the x axis (measured, gap 0.05s). something unrelated stays untouched',
+    'ground: light (measured, luma 209.1)'].join('\n');
+  const annotated = annotateFilledPrompt(filled);
+  assert.match(annotated, /camera: a slow, continuous dolly-in on the window through the whole act \[recipe: window-dolly\]/);
+  assert.match(annotated, /^camera: static hold once the words settle, no push$/m);
+  assert.match(annotated, /^ground: light \(measured, luma 209\.1\)$/m);
+  assert.equal(annotateFilledPrompt(annotated), annotated, 'a second pass is a no-op');
+
+  // a hard-wrapped entry gets ONE bracket on its LAST line, never mid-sentence on the first.
+  const wrapped = ['leaves: the sent prompt bar snaps to a green "sent" pulse, motion-blurs and slides off-frame left as',
+    'the window defocuses (measured: x axis, gap 0.1s)',
+    'ground: light, #def9fe (measured, luma 209.1)'].join('\n');
+  const wrappedOut = annotateFilledPrompt(wrapped).split('\n');
+  assert.equal(wrappedOut[0], 'leaves: the sent prompt bar snaps to a green "sent" pulse, motion-blurs and slides off-frame left as');
+  assert.equal(wrappedOut[1], 'the window defocuses (measured: x axis, gap 0.1s) [recipe: flow-seam]');
+
+  // "film opens"/"film ends" name no joint at all: no bracket, even though the label matched.
+  assert.equal(annotateFilledPrompt('enters: (film opens, no prior joint)'), 'enters: (film opens, no prior joint)');
+  assert.equal(annotateFilledPrompt('leaves: (film ends, no next joint; holds on the wordmark)'), 'leaves: (film ends, no next joint; holds on the wordmark)');
+
+  // act 6's letterform landing is named in `on screen:`, not in `enters:` itself; the entry composes
+  // with the paragraph above it to catch that.
+  const act6 = ['on screen: scattered small coloured marks fly in from below and land as the individual letterforms of "MADERA"',
+    'enters: from the bottom along the y axis (measured, gap 0.083s)'].join('\n');
+  assert.match(annotateFilledPrompt(act6), /\[recipe: flow-seam; unrouted: marks assembling into letterforms/);
+
+  console.log('ideate.mjs self-test: ok (buildActs, buildJoints, recipeLineFor, recipeMenu, routing, annotateFilledPrompt)');
 }
 
 // ── CLI ─────────────────────────────────────────────────────────────────────────────────────────────
@@ -296,13 +370,32 @@ function main() {
   const args = process.argv.slice(2);
   if (args.includes('--self-test')) { selfTest(); return; }
   const flag = (name) => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : null; };
+  const annotateRef = flag('annotate');
   const ref = flag('ref');
   const name = flag('name');
   const idea = flag('idea');
   const clipArg = flag('clip');
 
+  if (annotateRef) {
+    // Adds routing brackets to an ALREADY-FILLED prompt in place, without going anywhere near the
+    // study: no grammar/<ref>.json read, no coverage ledger, no re-run of the reference at all. That
+    // is the point: a prompt a person already hand-corrected (commit 01150c25) is text on disk, and
+    // this reads that text, appends brackets to three line kinds, and writes it back byte-identical
+    // everywhere else. --ref regenerates from the study and would discard the hand-fill; this does not.
+    const promptPath = path.join(ROOT, 'grammar', `${annotateRef}.prompt.md`);
+    if (!fs.existsSync(promptPath)) {
+      console.error(`ideate --annotate: no prompt at ${path.relative(ROOT, promptPath)}.`);
+      process.exit(1);
+    }
+    const before = fs.readFileSync(promptPath, 'utf8');
+    const after = annotateFilledPrompt(before);
+    fs.writeFileSync(promptPath, after);
+    console.log(`ideate --annotate → ${path.relative(ROOT, promptPath)}${after === before ? ' (no change)' : ''}`);
+    return;
+  }
+
   if (!ref && !name) {
-    console.error('usage: node harness/author/ideate.mjs --ref <ref>   |   --name <film> --idea "..." [--ref <ref>]');
+    console.error('usage: node harness/author/ideate.mjs --ref <ref>   |   --name <film> --idea "..." [--ref <ref>]   |   --annotate <ref>');
     process.exit(2);
   }
 
