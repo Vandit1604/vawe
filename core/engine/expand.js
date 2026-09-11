@@ -29,6 +29,7 @@ import { bakeCameraMove } from './produce.js';
 import { frameOf } from '../layout/safe.js';
 import { lowerScene } from '../transitions/lower.js';
 import { expandRecipes } from '../../recipes/expand.mjs';
+import { resolveTempo } from './tempo.js';
 
 // An AUTHOR NOTE is not an unknown-prop finding. This repo writes notes as `_`-prefixed keys everywhere
 // (`_why`, `_template`, `_camera`); `note` is the one un-prefixed alias already in use.
@@ -133,6 +134,11 @@ export function expandScene(data, aspectKey = '') {
     Object.assign(data, expandRecipes(data, aspectKey));
     delete data.recipes;
   }
+
+  // TEMPO, the one global pace dial. Resolved AFTER blocks/beats/comps/recipes have produced their
+  // final concrete times, and BEFORE the camera bake below, so a scaled cameraMove leg (still sugar
+  // here) reaches bakeCameraMove already in the film's real seconds. core/engine/tempo.js.
+  resolveTempo(data);
 
   // cameraMove sugar -> data.camera. ONE implementation, core/engine/produce.js. Idempotent (it deletes the
   // field), so calling it here after core/engine/boot.js already baked it for a browser render is a no-op.
