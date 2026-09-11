@@ -11,10 +11,10 @@
 // mechanism; the doc is the map.
 
 // Registry, keyed by finding `kind` (the same string every gate already reports under). Each entry:
-//   intent   — one line, copied from the guard's own comment: what the guard is FOR.
-//   doc      — the doc that owns that intent.
-//   applies(finding, ctx) — does this finding carry the facts this entry needs to judge it?
-//   adapt(finding, ctx)   — called only when applies() is true; returns the verdict.
+//   intent: one line, copied from the guard's own comment: what the guard is FOR.
+//   doc: the doc that owns that intent.
+//   applies(finding, ctx): does this finding carry the facts this entry needs to judge it?
+//   adapt(finding, ctx): called only when applies() is true; returns the verdict.
 const REGISTRY = {
   overflow: {
     intent: 'text clipped (scrollW/H > clientW/H) is a HARD fail: content the viewer cannot read.',
