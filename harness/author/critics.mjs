@@ -18,9 +18,25 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 import { writeReceipt } from '../lib/receipt.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+// docs/CRAFT/SUBAGENTS.md owns the worktree agent contract text (marked by these comments) so a
+// DECIDERS=1 brief quotes it rather than carrying its own drifting copy.
+export function worktreeContract() {
+  const doc = fs.readFileSync(path.resolve(repoRoot, 'docs/CRAFT/SUBAGENTS.md'), 'utf8');
+  const start = doc.indexOf('<!-- worktree-contract:start -->');
+  const end = doc.indexOf('<!-- worktree-contract:end -->');
+  if (start < 0 || end < 0) return null;
+  return doc.slice(start + '<!-- worktree-contract:start -->'.length, end).trim();
+}
+
+function currentSha() {
+  try { return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repoRoot }).toString().trim(); }
+  catch { return '(unknown, git rev-parse failed)'; }
+}
 
 // The roster, kept in lockstep with docs/CRAFT/SUBAGENTS.md's table. `ab` is listed there as built-then-
 // cut (nothing runs today), so it is not in this roster. Each `input` is a function of the scene's
@@ -165,6 +181,8 @@ export function buildRoster(scenePath) {
     theme: scene.theme || '(none)',
     aspect: scene.aspect || '16:9',
     duration: scene.duration,
+    baseSha: currentSha(),
+    contract: worktreeContract(),
   };
   const roster = DECIDERS.map((d) => {
     const lines = [
@@ -190,6 +208,9 @@ export function buildRoster(scenePath) {
       '',
       'Standing rules: no em-dashes anywhere. Stage explicit paths. Do not block on a background render.',
       'Do not delegate to sub-agents. Report what you wrote and what you deliberately left alone.',
+      '',
+      `Worktree agent contract (docs/CRAFT/SUBAGENTS.md), base sha ${ctx.baseSha}:`,
+      ctx.contract || '  ! docs/CRAFT/SUBAGENTS.md has no worktree-contract block. Fix the doc before briefing further.',
     );
     return { name: d.name, scope: d.scope, prompt: lines.filter((l) => l !== null).join('\n') };
   });
