@@ -136,8 +136,8 @@
  // layer's element in the iframe every frame it draws, so a hidden layer stays hidden through seeking
  // and playback. Alt-click solos one layer (hides every other). Persisted per film, best effort.
  let hiddenLayers=new Set(), soloLayer=-1;
- const EYE_ON='<svg viewBox="0 0 16 16"><path d="M1.5 8S4 3 8 3s6.5 5 6.5 5-2.5 5-6.5 5S1.5 8 1.5 8z"/><circle cx=8 cy=8 r=2/></svg>';
- const EYE_OFF='<svg viewBox="0 0 16 16"><path d="M1.5 8S4 3 8 3s6.5 5 6.5 5-2.5 5-6.5 5S1.5 8 1.5 8z"/><circle cx=8 cy=8 r=2/><path d="M2 2l12 12"/></svg>';
+ const EYE_ON='<svg viewBox="0 0 16 16"><path d="M1.5 8S4 3 8 3s6.5 5 6.5 5-2.5 5-6.5 5S1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>';
+ const EYE_OFF='<svg viewBox="0 0 16 16"><path d="M1.5 8S4 3 8 3s6.5 5 6.5 5-2.5 5-6.5 5S1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/><path d="M2 2l12 12"/></svg>';
  const hiddenKey=()=>'vawe-studio-hidden:'+((model&&model.file)||'');
  function loadHidden(){ try{ const raw=localStorage.getItem(hiddenKey()); hiddenLayers=new Set(raw?JSON.parse(raw):[]); }catch{ hiddenLayers=new Set(); } soloLayer=-1; }
  function saveHidden(){ try{ localStorage.setItem(hiddenKey(),JSON.stringify([...hiddenLayers])); }catch{} }
@@ -778,6 +778,13 @@
    const before=chatInput.value.slice(0,q.start), after=chatInput.value.slice(chatInput.selectionStart), ins=before+'@'+id+' ';
    chatInput.value=ins+after; closeMention(); chatInput.focus(); chatInput.setSelectionRange(ins.length,ins.length); }
  // "Mention in chat" / "Edit in chat": the same move from the property panel, without typing @ by hand.
+ // `@5.63s`, at the cursor: the reference is to a FRAME, not a layer, so it carries the time itself
+ // rather than a name, for "this exact instant looks wrong" kind of report.
+ function insertTimeMention(t){ setChat(true);
+   const text='@'+t.toFixed(2)+'s ', el=chatInput, s=el.selectionStart??el.value.length, e=el.selectionEnd??s;
+   el.value=el.value.slice(0,s)+text+el.value.slice(e);
+   el.style.height='auto'; el.style.height=Math.min(140,el.scrollHeight)+'px';
+   el.focus(); const p=s+text.length; el.setSelectionRange(p,p); }
  function insertMention(id){ setChat(true);
    const v=chatInput.value, sep=v&&!/\s$/.test(v)?' ':'';
    chatInput.value=v+sep+'@'+id+' ';
@@ -1127,16 +1134,22 @@
    $('hov').style.transform='translateX('+atX(peekWant)+'px)';
  }
  function peekOff(){ peek.classList.remove('on'); $('hov').style.display='none'; peekWant=null; }
+ $('atchip').addEventListener('pointerdown',(e)=>{ e.stopPropagation(); e.preventDefault();
+   if(peekWant!=null) insertTimeMention(peekWant); });
  lanes.addEventListener('pointermove',e=>{
    // a drag is a scrub and owns the pointer; hovering is the only thing that peeks
    if(e.buttons&1){ peekOff(); return; }
    peekAt((e.clientX-rulerL)/rulerW*dur, e.clientX);
  });
- lanes.addEventListener('pointerleave',peekOff);
+ // the peek box floats ABOVE the lanes rect (so it never covers the row you are pointing at), which
+ // means reaching for its @ chip leaves `lanes` from the pointer's point of view. Do not drop the
+ // hovered time just because the cursor is now over the thing that reads it.
+ lanes.addEventListener('pointerleave',e=>{ if(peek.contains(e.relatedTarget)) return; peekOff(); });
  // SELECTING A LAYER WAS POINTER-ONLY. Every bar is a div, and making seventy of them tab stops would
  // bury the rest of the page, so the lane stack is one stop and the arrows walk it: the same shape a
  // list box has. Left and right still seek, because the global handler owns those.
  lanes.addEventListener('keydown',e=>{
+   if(e.key==='@'){ e.preventDefault(); insertTimeMention(n/fps); return; }
    if(e.key==='Enter'&&selIdx>=0&&!insideLayer){ e.preventDefault(); enterInside(selIdx); return; }
    if(e.key!=='ArrowDown'&&e.key!=='ArrowUp') return;
    const bars=[...rows.querySelectorAll('.bar')].filter(b=>+b.dataset.i>=0);

@@ -4003,12 +4003,18 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     const d0 = JSON.parse(dropped).bg[0];
     ok('applyOps removes the `opts` the new preset has no knob for', d0.preset === 'paperDots' && d0.opts === undefined);
     ok('applyOps leaves the other window untouched', JSON.parse(dropped).bg[1].preset === 'dark');
-    ok('applyOps refuses a path outside the shape it understands',
-      (() => { try { applyOps(src, [{ op: 'replace', path: '/layers/0/text', value: 'x' }]); return false; }
-        catch (e) { return /bg\/<i>/.test(e.message); } })());
+    // the studio curves panel needs a NESTED path (a layer's motion key, a camera station), so the
+    // shape widened from `/bg/<i>/<prop>` to any chain of array/index pairs ending in a property.
+    ok('applyOps refuses a path with no property at the end',
+      (() => { try { applyOps(src, [{ op: 'replace', path: '/bg', value: 'x' }]); return false; }
+        catch (e) { return /<key>\/<i>/.test(e.message); } })());
     ok('applyOps refuses a scene with no such window',
       (() => { try { applyOps(src, [{ op: 'replace', path: '/bg/9/preset', value: 'x' }]); return false; }
         catch (e) { return /bg\[9\]/.test(e.message); } })());
+    ok('applyOps writes a nested path (a layer array two levels deep)',
+      (() => { const nested = '{\n "layers": [\n  { "motion": [ { "t": 0 }, { "t": 1, "ease": "linear" } ] }\n ]\n}';
+        const out = applyOps(nested, [{ op: 'replace', path: '/layers/0/motion/1/ease', value: 'easeOutCubic' }]);
+        return JSON.parse(out).layers[0].motion[1].ease === 'easeOutCubic'; })());
   }
 }
 
