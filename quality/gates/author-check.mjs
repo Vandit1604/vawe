@@ -197,13 +197,18 @@ const HARD_CODES = {
 // nothing, and reads here as no findings, which is what the regex said about it too.
 const findingsTmp = path.join('/tmp/.author-check', String(process.pid));
 let findingsSeq = 0;
-/** Run a gate, return { r, records }. `records` is null when the gate wrote none. */
+/** Run a gate, return { r, records }. `records` is null when the gate wrote none.
+ * Also drops a `.wallms` sidecar next to the findings file, the gate's own wall-clock time in ms:
+ * harness/lib/run-author-check.mjs reads it to fill `checks[].wallMs` in the run log, without this
+ * file's printed output (or the findings record shape other readers already parse) having to change. */
 function spawnGate(script, args, opts = {}) {
   fs.mkdirSync(findingsTmp, { recursive: true });
   const out = path.join(findingsTmp, `findings-${++findingsSeq}.json`);
   try { fs.rmSync(out, { force: true }); } catch { /* first run */ }
+  const t0 = Date.now();
   const r = spawnSync('node', [path.join(repoRoot, script), ...args],
     { encoding: 'utf8', cwd: repoRoot, ...opts, env: { ...process.env, VAWE_FINDINGS_OUT: out } });
+  try { fs.writeFileSync(`${out}.wallms`, String(Date.now() - t0)); } catch { /* best-effort, never fail the gate over this */ }
   return { r, records: readFindings(out) };
 }
 

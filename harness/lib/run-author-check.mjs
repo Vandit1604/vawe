@@ -78,28 +78,45 @@ if (!film) {
 // stdout is captured (not inherited) so the verdict can be parsed, then replayed byte-for-byte: spawnSync
 // blocks until the child exits, so nothing else writes to stdout in the meantime and the reader sees the
 // same transcript, just flushed at the end instead of streamed. stderr stays live.
+const t0 = Date.now();
 const r = spawnSync('node', [path.join(repoRoot, 'quality/gates/author-check.mjs'), ...args], {
   stdio: ['inherit', 'pipe', 'inherit'], cwd: repoRoot, encoding: 'utf8',
 });
+const wallMs = Date.now() - t0;
 if (r.stdout) process.stdout.write(r.stdout);
 
 const blockedCodes = parseBlockedCodes(r.stdout);
 
-const findingsTmp = path.join('/tmp/.author-check', String(r.pid));
-let records = [];
-try {
-  for (const f of fs.readdirSync(findingsTmp)) {
-    const recs = readFindings(path.join(findingsTmp, f));
-    if (recs) records = records.concat(recs);
-  }
-} catch { /* author-check exited before spawning any gate (bad usage, bad JSON): no findings to read */ }
-
 const codeGate = codesEmitted();
-const nameForCode = (code) => {
+function nameForCode(code) {
   const files = codeGate.get(code);
   if (!files || !files.size) return 'unrouted';
   return path.basename([...files][0]).replace(/\.mjs$/, '');
-};
+}
+
+const findingsTmp = path.join('/tmp/.author-check', String(r.pid));
+let records = [];
+// wallMsByName: each findings-N.json belongs to exactly one gate script (spawnGate in
+// author-check.mjs runs one script per findings file), so every record it holds shares that gate's
+// wall time. Read alongside the matching `.wallms` sidecar (see spawnGate) and keyed by the same
+// check name the codes below resolve to, summed if a gate is spawned more than once in a run.
+const wallMsByName = new Map();
+try {
+  for (const f of fs.readdirSync(findingsTmp)) {
+    if (!f.endsWith('.json')) continue;
+    const recs = readFindings(path.join(findingsTmp, f));
+    if (!recs) continue;
+    records = records.concat(recs);
+    if (recs.length) {
+      let gateMs = null;
+      try { gateMs = Number(fs.readFileSync(path.join(findingsTmp, `${f}.wallms`), 'utf8')); } catch { /* no timing recorded */ }
+      if (Number.isFinite(gateMs)) {
+        const name = nameForCode(recs[0].code);
+        wallMsByName.set(name, (wallMsByName.get(name) || 0) + gateMs);
+      }
+    }
+  }
+} catch { /* author-check exited before spawning any gate (bad usage, bad JSON): no findings to read */ }
 
 const byCheck = new Map();
 for (const rec of records) {
@@ -117,11 +134,12 @@ for (const rec of records) {
   else if (blockedCodes.has(rec.code)) c.blocked = true;
   else if (rec.severity === 'error') c.report = true;
 }
+for (const [name, ms] of wallMsByName) { if (byCheck.has(name)) byCheck.get(name).wallMs = ms; }
 // author-check itself always ran, whether or not any gate under it left findings behind (a bad-JSON
 // or bad-usage exit spawns no gates at all, and that absence is itself a fact worth one row).
 if (!byCheck.size) byCheck.set('author-check', { name: 'author-check', ran: true, fired: 0, blocked: r.status !== 0, report: false, codes: [], waived: [] });
 
-appendRun(film, { cmd: process.env.RUNLOG_CMD || 'author-check', checks: [...byCheck.values()] });
+appendRun(film, { cmd: process.env.RUNLOG_CMD || 'author-check', checks: [...byCheck.values()], wallMs });
 
 process.exit(r.status ?? 1);
 }

@@ -7843,6 +7843,12 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // being fixed: a run log that said "reported" for a code that was actually stopping the ship.
   ok('run-author-check.mjs: a HARD_CODES-escalated WARN-severity code also logs blocked:true', runs[0]
     && runs[0].checks.some((c) => c.name === 'direction-floor' && c.codes.includes('no-transition') && c.blocked === true));
+  // TIMING: the whole ladder's wall time lands at the top level, and at least one gate that actually
+  // ran (preflight always fires on sample.json) carries its own wallMs, read off the `.wallms` sidecar
+  // spawnGate drops in quality/gates/author-check.mjs.
+  ok('run-author-check.mjs logs a top-level wallMs for the whole ladder', runs[0] && Number.isFinite(runs[0].wallMs) && runs[0].wallMs >= 0);
+  ok('run-author-check.mjs logs a per-gate wallMs for a gate that ran', runs[0]
+    && runs[0].checks.some((c) => c.name === 'preflight' && Number.isFinite(c.wallMs) && c.wallMs >= 0));
   fs.rmSync(tmpDir, { recursive: true, force: true });
 }
 
@@ -7863,6 +7869,64 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // block") must NOT be in the blocked set. The old rule (severity === 'error' alone) could not tell
   // this apart from a genuine block and would have marked it blocked:true.
   ok('parseBlockedCodes never blocks a report-only code', !blocked.has('hollow-beat'));
+}
+
+// UNIT: record-render.mjs parses a fixture render log into wallMs (the real time the render took),
+// kept separate from `ms` (the rendered VIDEO's length, from the Go line's own "(<n>s, ...)").
+{
+  const { appendRun, readRuns, runsPathFor } = await import('../../harness/lib/runlog.mjs');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'record-render-test-'));
+  const film = path.join(tmpDir, '_record-render-lib-test.json');
+  const logfile = path.join(tmpDir, 'render.log');
+  fs.writeFileSync(logfile, '▶ rendering …\n✓ done → out/x.mp4  (17.0s, 1022 frames)\n');
+  const cwd = process.cwd();
+  process.chdir(tmpDir);
+  try {
+    const r = spawnSync('node', [path.join(repoRoot, 'harness/lib/record-render.mjs'), 'dev', film, logfile, '4200'], {
+      cwd: tmpDir, encoding: 'utf8',
+    });
+    ok('record-render.mjs exits 0', r.status === 0);
+    const runs = readRuns(film);
+    ok('record-render.mjs left one run-log line', runs.length === 1);
+    ok('record-render.mjs keeps render.ms as the VIDEO length', runs[0].render.ms === 17000);
+    ok('record-render.mjs records render.wallMs from its 4th argument, not the video length', runs[0].render.wallMs === 4200);
+    ok('record-render.mjs also stamps the top-level wallMs for this step', runs[0].wallMs === 4200);
+
+    // no wallMs argument given: both fields stay null rather than falling back to the video length.
+    fs.rmSync(runsPathFor(film));
+    const r2 = spawnSync('node', [path.join(repoRoot, 'harness/lib/record-render.mjs'), 'dev', film, logfile], {
+      cwd: tmpDir, encoding: 'utf8',
+    });
+    ok('record-render.mjs without a wallMs argument still exits 0', r2.status === 0);
+    const runs2 = readRuns(film);
+    ok('record-render.mjs with no wallMs argument leaves render.wallMs null', runs2[0].render.wallMs === null);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+// UNIT: harness/lib/timings.mjs formats a fixture run log into a wall-clock table, and computes the
+// per-command median from a small set of synthetic runs (odd and even counts, both exercised).
+{
+  const { formatRows, medianByCmd } = await import('../../harness/lib/timings.mjs');
+  const mkRun = (cmd, wallMs, renderWallMs, frames) => ({
+    at: '2026-09-12T00:00:00.000Z', cmd, git: 'abc123', dirty: false,
+    checks: [{ name: 'preflight', ran: true, fired: 0, blocked: false, codes: [], waived: [], wallMs: 120 }],
+    render: renderWallMs === null ? null : { file: 'out/x.mp4', frames, fps: 60, ms: 17000, wallMs: renderWallMs },
+    content: null, judge: null, wallMs,
+  });
+  const runs = [mkRun('ship', 5000, 4200, 1022), mkRun('ship', 9000, 8000, 1022), mkRun('dev', 3000, null, null)];
+  const rows = formatRows(runs);
+  ok('timings formatRows returns one line per run', rows.length === 3);
+  ok('timings formatRows shows the gate wallMs, not just render', rows[0].includes('gate:120ms'));
+  ok('timings formatRows shows render wallMs and a wall fps derived from it', rows[0].includes('render:4200ms') && rows[0].includes('wallfps:'));
+  ok('timings formatRows shows the total wallMs for the step', rows[0].includes('total:5000ms'));
+  ok('timings formatRows tolerates a run with no render (dev with NOCHECK-shaped data)', rows[2].includes('render:-'));
+
+  const medians = medianByCmd(runs);
+  ok('medianByCmd takes the median of an even count for one cmd', medians.ship === 7000);
+  ok('medianByCmd handles a single-run cmd', medians.dev === 3000);
 }
 
 // FIX 2: stage.mjs lookBlock names the pre-render page audit alongside the frame commands, so a
