@@ -1246,6 +1246,12 @@ globe-dots: ## [engine] re-bake core/globe-dots.js from Natural Earth (SPACING=2
 pace-check: ## [check] events per second, and the longest dead stretch (D=<file>)
 	node quality/gates/pace-check.mjs $(D)
 
+# make pace D=scene.json [TEMPO=0.85]: prints the resulting duration and pace-check numbers with
+# `tempo` overridden to TEMPO, writing nothing. The preview for core/engine/tempo.js.
+.PHONY: pace
+pace: ## [check] preview a scene's duration/pace at a given TEMPO, writes nothing (D=<file> [TEMPO=n])
+	node quality/gates/pace.mjs $(D) $(TEMPO)
+
 # make paints-nothing [D=scene.json] [STRICT=1]: did each layer actually paint anything in its own box?
 # Renders the scene, screenshots a layer's box against itself hidden, and diffs the PIXELS (a DOM probe
 # passes a masked-to-nothing layer, this cannot). No D sweeps every formats/scene/*.json. REPORTS-tier:
