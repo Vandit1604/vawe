@@ -87,3 +87,47 @@ test('typing-camera-still: no camera at all stays quiet (nothing to compare agai
   const { findings } = runCritique(scene);
   assert.ok(!findings.some((f) => f.code === 'typing-camera-still'), `did not expect typing-camera-still; got ${JSON.stringify(findings)}`);
 });
+
+// copied-plane: two top-level layers sharing one tilted plane by hand-copying rotX/rotY keys instead
+// of nesting under the `group` that carries the tilt (docs/CRAFT/KEYED-MOTION.md 5b).
+test('copied-plane: two top-level layers hand-copy the same rotX/rotY keys', () => {
+  const scene = { ...BASE, layers: [
+    { id: 'card', type: 'html', start: 0, duration: 4, html: '<p>card</p>',
+      motion: [{ t: 0, rotX: 0, rotY: 0 }, { t: 2, rotX: 20, rotY: -12 }] },
+    { id: 'label', type: 'text', text: 'x', start: 0, duration: 4,
+      motion: [{ t: 0, rotX: 0, rotY: 0 }, { t: 2, rotX: 20, rotY: -12 }] },
+  ] };
+  const { findings } = runCritique(scene);
+  assert.ok(findings.some((f) => f.code === 'copied-plane'), `expected copied-plane; got ${JSON.stringify(findings)}`);
+});
+
+test('copied-plane: the same tilt nested as group children stays quiet', () => {
+  const scene = { ...BASE, layers: [
+    { id: 'plane', type: 'group', start: 0, duration: 4, layout: 'free',
+      motion: [{ t: 0, rotX: 0, rotY: 0 }, { t: 2, rotX: 20, rotY: -12 }],
+      children: [
+        { id: 'card', type: 'html', start: 0, duration: 4, html: '<p>card</p>' },
+        { id: 'label', type: 'text', text: 'x', start: 0, duration: 4 },
+      ] },
+  ] };
+  const { findings } = runCritique(scene);
+  assert.ok(!findings.some((f) => f.code === 'copied-plane'), `did not expect copied-plane; got ${JSON.stringify(findings)}`);
+});
+
+test('copied-plane: a lone tilted layer with no partner stays quiet', () => {
+  const scene = { ...BASE, layers: [
+    { id: 'card', type: 'html', start: 0, duration: 4, html: '<p>card</p>',
+      motion: [{ t: 0, rotX: 0, rotY: 0 }, { t: 2, rotX: 20, rotY: -12 }] },
+  ] };
+  const { findings } = runCritique(scene);
+  assert.ok(!findings.some((f) => f.code === 'copied-plane'), `did not expect copied-plane; got ${JSON.stringify(findings)}`);
+});
+
+test('copied-plane: a pivot pushed far outside its own box is named', () => {
+  const scene = { ...BASE, layers: [
+    { id: 'label', type: 'text', text: 'x', start: 0, duration: 4,
+      motion: [{ t: 0, rotX: 0, rotY: 0, ox: 132.3, oy: -273.66 }, { t: 2, rotX: 20, rotY: -12, ox: 132.3, oy: -273.66 }] },
+  ] };
+  const { findings } = runCritique(scene);
+  assert.ok(findings.some((f) => f.code === 'copied-plane'), `expected copied-plane; got ${JSON.stringify(findings)}`);
+});

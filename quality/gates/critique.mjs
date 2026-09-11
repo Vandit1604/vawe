@@ -209,6 +209,44 @@ for (const l of layers) {
   }
 }
 
+// ---- 9b2. copied-plane: several layers sharing one tilted plane belong under a `group` that carries
+// the tilt (core/fx/tilt.js:39-46, `plane` refuses a group child in core/fx/plane.js, docs/PRIMITIVES.md
+// :556-584, docs/CRAFT/KEYED-MOTION.md 5b "Rides a tilted or moving surface"). Nothing notices when an
+// author does it by hand instead: copy one layer's rotX/rotY keys onto another top-level layer, then
+// push its `ox`/`oy` pivot far outside its own box to fake a shared centre. `layers` here is already
+// top-level only (expandScene keeps a group's children nested under it, never flattened in), so a real
+// group child never reaches this loop and stays quiet by construction; a single tilted layer with a
+// normal pivot has nothing to pair against and also stays quiet.
+const TILT_TOL = 0.05, TILT_TIME_TOL = 0.05;
+function tiltKeys(l) {
+  if (!Array.isArray(l.motion)) return [];
+  return l.motion.filter((k) => k && (k.rotX || k.rotY))
+    .map((k) => ({ t: s0(l) + (k.t ?? 0), rotX: k.rotX ?? 0, rotY: k.rotY ?? 0 }));
+}
+const tiltedLayers = layers.map((l) => ({ l, keys: tiltKeys(l) })).filter((e) => e.keys.length);
+const copiedPlaneReported = new Set();
+for (let i = 0; i < tiltedLayers.length; i++) {
+  for (let j = i + 1; j < tiltedLayers.length; j++) {
+    const a = tiltedLayers[i], b = tiltedLayers[j];
+    if (!overlaps(a.l, s0(b.l), s1(b.l))) continue;
+    const shares = a.keys.some((ka) => b.keys.some((kb) => Math.abs(ka.t - kb.t) <= TILT_TIME_TOL
+      && Math.abs(ka.rotX - kb.rotX) <= TILT_TOL && Math.abs(ka.rotY - kb.rotY) <= TILT_TOL));
+    if (!shares) continue;
+    const nameOf = (x) => x.id ? `"${x.id}"` : `layer @${s0(x).toFixed(1)}s`;
+    const key = [a.l, b.l].map(nameOf).sort().join('|');
+    if (copiedPlaneReported.has(key)) continue;
+    copiedPlaneReported.add(key);
+    warn('copied-plane', `${nameOf(a.l)} and ${nameOf(b.l)} carry the same rotX/rotY keys at the same times: a tilted plane copied by hand instead of shared. Nest both as \`children\` of one \`group\` ("layout": "free" keeps their exact x/y) and put the motion on the group instead (docs/CRAFT/KEYED-MOTION.md 5b).`, Math.min(s0(a.l), s0(b.l)));
+  }
+}
+for (const l of layers) {
+  if (!Array.isArray(l.motion)) continue;
+  const badKey = l.motion.find((k) => k && ((k.ox != null && (k.ox < -10 || k.ox > 110)) || (k.oy != null && (k.oy < -10 || k.oy > 110))));
+  if (!badKey) continue;
+  const who = l.id ? `"${l.id}"` : `layer @${s0(l).toFixed(1)}s`;
+  warn('copied-plane', `${who}'s motion pivot (ox ${badKey.ox ?? 50}, oy ${badKey.oy ?? 50}) sits far outside its own 0-100% box: a pivot pushed off-box by hand to borrow another layer's centre. Nest it as a \`group\` child instead and put the motion on the group (docs/CRAFT/KEYED-MOTION.md 5b).`, s0(l));
+}
+
 // ---- 9c. typing-camera-still: a real typing line the camera never leans into. The owner's complaint
 // this whole cluster answers: type without a push reads as a static caption, not a live terminal. Fires
 // when the camera is neither scaled in (s >= 1.15, an arbitrary but named "clearly pushed in" floor)
