@@ -113,7 +113,7 @@ import { evenSamples } from './beats-of.mjs';
 import { gradeable, tileBox, baseOf } from './tile.mjs';
 import { classifyRegions } from './motion-floor.mjs';
 import { sceneTiming } from './scene-timing.mjs';
-import { exitEmphasis } from './choreo.mjs';
+import { exitEmphasis, entranceEmphasis } from './choreo.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -3779,6 +3779,33 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   }));
   ok('travel: deterministic', JSON.stringify(travel({ stations: trStations }))
     === JSON.stringify(travel({ stations: trStations })));
+  // TRAVEL STOP SPEED: a station may carry easeIn/easeOut, the same handle shape a motion key carries,
+  // resolved through the same handleCurve. A station with neither is unchanged from before (asserted
+  // above); one with a dead-stop easeIn must actually arrive at zero velocity.
+  {
+    const speedStations = [{ tx: 0, ty: 0, s: 1 }, { tx: 960, ty: 540, s: 1.5, dur: 1, easeIn: { speed: 0, influence: 80 } }];
+    const spTr = travel({ stations: speedStations, start: 0 });
+    ok('travel: a station easeIn is carried onto its arrival key, no default `ease`', spTr[1].easeIn && spTr[1].easeIn.speed === 0 && spTr[1].ease === undefined);
+    const EPS = 1 / 240; // a quarter-frame at 60fps: small enough to read the instantaneous rate at the key
+    const justBefore = cameraAt(spTr, 1 - EPS), atArrival = cameraAt(spTr, 1);
+    const vxAtArrival = (atArrival.x - justBefore.x) / EPS;
+    ok('travel: easeIn {speed:0} arrives at (near) zero velocity', Math.abs(vxAtArrival) < 5);
+    // no handles at all: byte-identical to the pre-existing shape (linear interior, default ease at end).
+    const plain = travel({ stations: [{ tx: 0, ty: 0, s: 1 }, { tx: 960, ty: 540, s: 1.5, dur: 1 }], start: 0 });
+    ok('travel: a station without handles is unchanged (interior linear, no easeIn/easeOut)',
+      plain[1].ease === 'easeOutCubic' && plain[1].easeIn === undefined && plain[1].easeOut === undefined);
+    // easeOut on an interior station: the NEXT arrival must not also carry the default `ease`, or the
+    // shared segment would be shaped twice and keyHandleErrors would refuse the whole track.
+    const departStations = [{ tx: 0, ty: 0, s: 1 },
+      { tx: 500, ty: 500, s: 1.2, dur: 1, easeOut: { speed: 3, influence: 30 } },
+      { tx: 960, ty: 540, s: 1.5, dur: 1 }];
+    const depTr = travel({ stations: departStations, start: 0 });
+    ok('travel: a station easeOut leaves no conflicting `ease` on the next arrival',
+      depTr[1].easeOut && depTr[1].easeOut.speed === 3 && keyHandleErrors(depTr, 'travel').length === 0);
+    ok('travel: a bad easeIn/easeOut handle still throws, named to the station',
+      (() => { try { travel({ stations: [{ tx: 0, ty: 0 }, { tx: 1, ty: 1, easeIn: { influence: 200 } }] }); return false; }
+        catch (e) { return /travel station 1/.test(e.message); } })());
+  }
   const tk = truck({ start: 1, dur: 2, dx: -800, s: 1.3 });
   ok('truck: 2 keyframes, x runs 0 → dx', tk.length === 2 && approx(cameraAt(tk, 1).x, 0)
     && approx(cameraAt(tk, 3).x, -800));
@@ -4015,6 +4042,18 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       (() => { const nested = '{\n "layers": [\n  { "motion": [ { "t": 0 }, { "t": 1, "ease": "linear" } ] }\n ]\n}';
         const out = applyOps(nested, [{ op: 'replace', path: '/layers/0/motion/1/ease', value: 'easeOutCubic' }]);
         return JSON.parse(out).layers[0].motion[1].ease === 'easeOutCubic'; })());
+    // WALKPATH MUST MATCH THE ARRAY AT THIS OBJECT'S OWN TOP LEVEL, not the first `"motion":[` a bare
+    // scan finds anywhere in the region. A `fx` sub-object naming its own `motion` array earlier in the
+    // byte stream than the layer's real `motion` used to win, silently patching the wrong track.
+    ok('applyOps: a nested same-name array does not shadow the layer\'s own array',
+      (() => {
+        const shadowed = '{\n "layers": [\n  { "fx": { "motion": [ { "junk": 1 } ] }, '
+          + '"motion": [ { "t": 0 }, { "t": 1, "ease": "linear" } ] }\n ]\n}';
+        const out = applyOps(shadowed, [{ op: 'replace', path: '/layers/0/motion/1/ease', value: 'easeOutCubic' }]);
+        const d = JSON.parse(out);
+        return d.layers[0].motion[1].ease === 'easeOutCubic'          // the REAL track was patched
+          && JSON.stringify(d.layers[0].fx) === '{"motion":[{"junk":1}]}';  // the nested one is untouched
+      })());
   }
 }
 
@@ -8013,6 +8052,43 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     { type: 'rect', id: 'bare', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 2 },
   ] }).lives.find((L) => L.id === 'bare');
   ok('exitEmphasis: a layer with no declared exit is not graded', exitEmphasis(noExitLife) === null);
+
+  // MEASURED SPEED: a symmetric duration, a non-accelerating ease, but the layer's own x track
+  // measurably speeds up toward the exit -> passes on the measured number alone.
+  const measuredFast = sceneTiming({ module: 'scene', duration: 6, layers: [
+    { type: 'rect', id: 'zoomOut', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, enterDur: 1, out: 'fade', exitDur: 1,
+      motion: [{ t: 0, x: 0 }, { t: 3, x: 10 }, { t: 3.5, x: 60 }, { t: 4, x: 900 }] },
+  ] });
+  const zoomOutCheck = exitEmphasis(measuredFast.lives.find((L) => L.id === 'zoomOut'));
+  ok('exitEmphasis: a symmetric duration with no accelerating ease still passes on measured speed alone',
+    zoomOutCheck && zoomOutCheck.ok === true && zoomOutCheck.endSpeed > zoomOutCheck.startSpeed);
+
+  // an exit that never moves position (fade-only) has nothing to measure: the speed fields stay null
+  // and the verdict rests on duration/ease exactly as before (unchanged behaviour, #arrival note above).
+  ok('exitEmphasis: an opacity-only exit reports no measured speed', quickCheck.startSpeed === null && quickCheck.endSpeed === null);
+}
+
+// ---- quality/gates/choreo.mjs entranceEmphasis: an entrance should DECELERATE into place ----------
+{
+  const settling = sceneTiming({ module: 'scene', duration: 6, layers: [
+    { type: 'rect', id: 'lands', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, enterDur: 1,
+      motion: [{ t: 0, x: 900 }, { t: 1, x: 0, ease: 'easeOutCubic' }] },
+  ] });
+  const landsCheck = entranceEmphasis(settling.lives.find((L) => L.id === 'lands'));
+  ok('entranceEmphasis: an entrance that slows into place passes', landsCheck && landsCheck.ok === true
+    && landsCheck.endSpeed < landsCheck.startSpeed);
+
+  const notSettling = sceneTiming({ module: 'scene', duration: 6, layers: [
+    { type: 'rect', id: 'overshoots', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, enterDur: 1,
+      motion: [{ t: 0, x: 900 }, { t: 1, x: 0, ease: 'easeInCubic' }] },
+  ] });
+  const overshootsCheck = entranceEmphasis(notSettling.lives.find((L) => L.id === 'overshoots'));
+  ok('entranceEmphasis: an entrance that never decelerates is flagged', overshootsCheck && overshootsCheck.ok === false);
+
+  const noMotion = sceneTiming({ module: 'scene', duration: 2, layers: [
+    { type: 'rect', id: 'bare2', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 2 },
+  ] }).lives.find((L) => L.id === 'bare2');
+  ok('entranceEmphasis: nothing measured (no `anim`, no motion) gives no verdict', entranceEmphasis(noMotion) === null);
 }
 
 const FLOOR = 1800;
