@@ -7784,7 +7784,37 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     && runs[0].checks.some((c) => c.name && c.name !== 'unrouted'));
   ok('run-author-check.mjs named the preflight gate, which sample.json always fires', runs[0]
     && runs[0].checks.some((c) => c.name === 'preflight' && c.codes.includes('no-preflight')));
+  // FIX 1: `blocked` must come from author-check's own verdict (tier + TASTE + HARD_CODES), not from
+  // finding severity alone. no-preflight is a REPORT-tier code (preflight's own tier is 'reports') that
+  // HARD_CODES escalates to blocking regardless of TASTE, so the true answer is blocked:true.
+  ok('run-author-check.mjs: a HARD_CODES-escalated report-tier code logs blocked:true', runs[0]
+    && runs[0].checks.some((c) => c.name === 'preflight' && c.blocked === true));
+  // direction-floor's no-transition finding is severity WARN (F.warn, not F.fail) but is ALSO a
+  // HARD_CODES code, so it blocks too. This is the shape the old `severity === 'error'` rule missed
+  // entirely (a warn-severity finding could never be marked blocked), which is exactly the real defect
+  // being fixed: a run log that said "reported" for a code that was actually stopping the ship.
+  ok('run-author-check.mjs: a HARD_CODES-escalated WARN-severity code also logs blocked:true', runs[0]
+    && runs[0].checks.some((c) => c.name === 'direction-floor' && c.codes.includes('no-transition') && c.blocked === true));
   fs.rmSync(tmpDir, { recursive: true, force: true });
+}
+
+// UNIT: parseBlockedCodes reads author-check's two structural "this code blocks" prints. Isolated from
+// any real gate so the assertion is exact and does not depend on which codes a fixture happens to fire.
+{
+  const { parseBlockedCodes } = await import('../../harness/lib/run-author-check.mjs');
+  const stdout = [
+    '  ✗ beats      BLOCKS (dead-air, empty-close)',
+    '  ~ critique   reported, does not block (hollow-beat)',
+    '      [no-transition] (step floor)',
+    '          read: docs/CRAFT/TRANSITIONS.md',
+  ].join('\n');
+  const blocked = parseBlockedCodes(stdout);
+  ok('parseBlockedCodes reads codes off a BLOCKS(...) line', blocked.has('dead-air') && blocked.has('empty-close'));
+  ok('parseBlockedCodes reads a HARD_CODES escalation [code] (step ...) line', blocked.has('no-transition'));
+  // THE REAL DEFECT: a report-tier gate's error finding (hollow-beat, printed as "reported, does not
+  // block") must NOT be in the blocked set. The old rule (severity === 'error' alone) could not tell
+  // this apart from a genuine block and would have marked it blocked:true.
+  ok('parseBlockedCodes never blocks a report-only code', !blocked.has('hollow-beat'));
 }
 
 // ---- harness/lib/waivers.mjs: a waiver excuses the instance it names, a bare one excuses the film ---
