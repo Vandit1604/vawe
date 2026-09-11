@@ -3776,8 +3776,12 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('travel: each station arrives at its own scale', trStations.every((st, i) =>
     approx(cameraAt(tr, arrivals[i]).s, st.s, 1e-6)));
   // One journey, not four hops: an eased curve at each station zeroes velocity on arrival (#125).
-  ok('travel: interiors are linear, only the final arrival settles',
-    tr.slice(1, -1).every((k) => k.ease === 'linear') && tr[tr.length - 1].ease === 'easeOutCubic'
+  // Interiors default to `through` (velocity-continuous, core/timeline/sequence.js), not `linear`:
+  // two straight segments at different speeds still kink at the shared station. tr[2] is the DWELL
+  // keyframe behind station 1 (same pose, zero distance): a hold has no velocity to shape, so it keeps
+  // the old `linear` placeholder rather than `through`.
+  ok('travel: interiors are velocity-continuous, only the final arrival settles',
+    tr[1].ease === 'through' && tr[2].ease === 'linear' && tr[tr.length - 1].ease === 'easeOutCubic'
     && tr[0].ease === undefined);
   const dw0 = cameraAt(tr, 1.2), dw1 = cameraAt(tr, 1.5);
   ok('travel: a dwell holds the pose on s/x/y', approx(dw1.s, dw0.s, 1e-6) && approx(dw1.x, dw0.x, 1e-6)
@@ -3806,9 +3810,9 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     const justBefore = cameraAt(spTr, 1 - EPS), atArrival = cameraAt(spTr, 1);
     const vxAtArrival = (atArrival.x - justBefore.x) / EPS;
     ok('travel: easeIn {speed:0} arrives at (near) zero velocity', Math.abs(vxAtArrival) < 5);
-    // no handles at all: byte-identical to the pre-existing shape (linear interior, default ease at end).
+    // no handles at all, only 2 stations: the sole arrival is also the FINAL one, so it still settles.
     const plain = travel({ stations: [{ tx: 0, ty: 0, s: 1 }, { tx: 960, ty: 540, s: 1.5, dur: 1 }], start: 0 });
-    ok('travel: a station without handles is unchanged (interior linear, no easeIn/easeOut)',
+    ok('travel: a station without handles is unchanged (final arrival settles, no easeIn/easeOut)',
       plain[1].ease === 'easeOutCubic' && plain[1].easeIn === undefined && plain[1].easeOut === undefined);
     // easeOut on an interior station: the NEXT arrival must not also carry the default `ease`, or the
     // shared segment would be shaped twice and keyHandleErrors would refuse the whole track.
