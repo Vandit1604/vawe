@@ -68,3 +68,40 @@ console.log('✓ stagekit.test.mjs: kit-identity check passes identical blocks, 
   for (const k of ['sm', 'md', 'lg']) assert.match(css, new RegExp(`--kit-radius-${k}:\\d+px`), `kit is missing --kit-radius-${k}`);
 }
 
+// REGRESSION: no design.md (spec undefined, or spec null) leaves the kit byte-identical to before
+// design.md existed. This is the one guarantee the whole mechanism rests on.
+{
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+  const vawe = JSON.parse(fs.readFileSync(path.join(root, 'themes/vawe.json'), 'utf8'));
+  const noArg = buildKit(vawe, resolveLook, isLightBg);
+  const nullSpec = buildKit(vawe, resolveLook, isLightBg, null);
+  assert.equal(noArg.css, nullSpec.css, 'a bare buildKit call and an explicit null spec must match byte for byte');
+  assert.equal(noArg.block, nullSpec.block);
+  assert.deepEqual(noArg.warnings, []);
+}
+
+// a design.md that declares a NEW token gets a --kit-<group>-<name> custom property and, for a type
+// role, a .kit-<role> class; a design.md that SHADOWS an existing kit value with a different number
+// gets one warn line naming the drift.
+{
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+  const vawe = JSON.parse(fs.readFileSync(path.join(root, 'themes/vawe.json'), 'utf8'));
+  const base = buildKit(vawe, resolveLook, isLightBg);
+  const [, mdRadius] = /--kit-radius-md:(\d+)px/.exec(base.css) || [];
+  const spec = { tokens: {
+    palette: { branch: '#4f46e5' },
+    type: { command: { family: 'Anybody', size: 40, weight: 600 } },
+    radius: { panel: 24, md: Number(mdRadius) + 5 },
+    shadow: { glass: '0 8px 30px rgba(0,0,0,0.12)' },
+    space: {},
+  } };
+  const withSpec = buildKit(vawe, resolveLook, isLightBg, spec);
+  assert.match(withSpec.css, /--kit-color-branch:#4f46e5;/);
+  assert.match(withSpec.css, /--kit-type-command-size:40px;/);
+  assert.match(withSpec.css, /\.kit-command\{font:var\(--kit-type-command-weight, 600\) var\(--kit-type-command-size, 40px\) var\(--kit-type-command-family, Anybody\);color:var\(--text\);margin:0\}/);
+  assert.match(withSpec.css, /--kit-radius-panel:24px;/);
+  assert.match(withSpec.css, /--kit-shadow-glass:0 8px 30px rgba\(0,0,0,0\.12\);/);
+  assert.equal(withSpec.warnings.length, 1, 'radius.md shadows the kit\'s own value and must warn exactly once');
+  assert.match(withSpec.warnings[0], /radius\.md/);
+}
+

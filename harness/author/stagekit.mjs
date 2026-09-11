@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
 import { buildKit, kitCheck } from '../lib/stagekit.mjs';
+import { readDesignSpec } from '../lib/design-spec.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -25,7 +26,9 @@ const themeFile = typeof scene.theme === 'object' ? null : path.join(ROOT, 'them
 const theme = themeFile ? JSON.parse(fs.readFileSync(themeFile, 'utf8')) : scene.theme;
 if (!theme) { console.error(`stagekit: ${film} names no theme`); process.exit(1); }
 
-const { css, block } = buildKit(theme, resolveLook, isLightBg);
+const spec = readDesignSpec(path.resolve(ROOT, film));
+const { css, block, warnings } = buildKit(theme, resolveLook, isLightBg, spec);
+for (const w of warnings) console.warn(w);
 const kitPath = film.replace(/\.json$/, '') + '.kit.css';
 
 const base = path.basename(film, '.json');

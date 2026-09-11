@@ -239,6 +239,9 @@ ideate: ## [preflight] THE FILM, IN PLAIN WORDS, before any JSON: one prompt an 
 stagekit: ## [preflight] the shared CSS block every per-scene HTML fragment carries verbatim, from the film's theme (D=<film>, --check verifies fragments)
 	node harness/author/stagekit.mjs $(D) $(if $(CHECK),--check)
 
+design-spec: ## [preflight] write <film>.design.md seeded from the theme's own numbers, or print it if it already exists (D=<film>)
+	node harness/author/design-spec.mjs $(D)
+
 contract: ## [preflight] validate the storyboard's per-beat continuous-object contract chains edge to edge (D=<film>)
 	node harness/author/contract.mjs $(D)
 
