@@ -10,8 +10,10 @@ confirm: "does each html fragment move by the engine's mechanisms, not CSS anima
 
 ## AGENT SUMMARY
 
-- Type is a ROLE (`.kit-display` … `.kit-caption`) and elevation is a three-level ramp
-  (`--kit-elev-1/2/3`), both from the stage kit. Never invent a size or a shadow.
+- The stage kit ships type ROLES (`.kit-display` … `.kit-caption`), a three-level elevation ramp
+  (`--kit-elev-1/2/3`), spacing and radius tokens. Use it for consistency; any CSS is also allowed for
+  size, shadow, radius and spacing (docs/MISTAKES.md #621). Only `animation`/`transition`, `opacity`/
+  `filter` in the layer `css` prop, and `<script>` are refused outright, for determinism.
 - The STORYBOARD comes first. Sort its beat table into who-draws-what, then author only the
   fragments it asked for, against the `motion:` selectors it already named (MISTAKES #591).
 - Fragment count comes from the REQUIREMENT, one per hand-drawn surface, never one per beat: a
@@ -321,10 +323,11 @@ grammar if there is one, then the SMALLEST useful set from `ui-skills`
 then `make preview`, then your own eye at full size. `DESIGN.md` records which skills shaped this
 repo's frames and which were refused.
 
-## The ramps a frame must use, and why
+## The ramps the kit offers, and why
 
-Two things make seven frames read as one film rather than seven films. Both live in the stage kit now,
-so a frame gets them by pasting the block and naming a role.
+Two things help seven frames read as one film rather than seven films. Both live in the stage kit,
+available by pasting the block and naming a role; neither is required, and any literal size or shadow
+a reference calls for is allowed (docs/MISTAKES.md #621).
 
 **Type is a ROLE, never a number.** `.kit-display` · `.kit-hook` · `.kit-headline` · `.kit-body` ·
 `.kit-caption` · `.kit-eyebrow` · `.kit-stat`. Before this file existed, seven frames of one film
@@ -362,9 +365,9 @@ a premium pass on a flat layout makes an expensive-looking flat layout.
 | # | the symptom | skill | what it settles | what holds it here |
 |---|---|---|---|---|
 | 1 | every frame reads alike, nothing leads | `pbakaus/layout` | state the spatial thesis first; one archetype per beat, never twice running | `frame-check` `archetype-repeat` |
-| 2 | a bag of arbitrary sizes | `pbakaus/typeset` | roles not numbers; change weight, tone or tracking, never size alone | `frame-check` `off-ramp-size` |
+| 2 | a bag of arbitrary sizes | `pbakaus/typeset` | roles not numbers; change weight, tone or tracking, never size alone | `frame-check` `scale-drift` (report-only, film-wide) |
 | 3 | dull, monochrome, flat colour | `pbakaus/colorize` | the strongest colour OWNS a region; grounds rotate; remap tokens, never invert | contrast pairs in `make preview` |
-| 4 | depth is muddy, borders generic | `mengto/beautiful-shadows` | a three-level neutral ramp, one level per element | `frame-check` `off-ramp-shadow` |
+| 4 | depth is muddy, borders generic | `mengto/beautiful-shadows` | a three-level neutral ramp, one level per element | judged by eye |
 | 5 | clean but not expensive | `leonxlnx/soft-skill` | the double bezel, chips, macro whitespace, concentric radii | `impeccable` `nested-cards`, as a reason |
 | 6 | too safe, no peak | `pbakaus/bolder` | commit to ONE loud moment, quiet everything around it | motion, contrast, or a camera move, judged by eye |
 
@@ -438,7 +441,7 @@ The fix is process and context, never a cleverer one-shot.
 | the fix | what already does it here |
 |---|---|
 | **Split the creative call from the build.** Decide layout, style and motion in TEXT, then let the builder execute a choice already made | the storyboard is stage 2 and the fragment is stage 4, and `stage-gate` DENIES the fragment first (MISTAKES #591) |
-| **Extract the design system before any screen.** Pull every colour, size and spacing value from the file; ask before inventing anything not in it | the stage kit, and `frame-check`'s `off-ramp-size` / `off-ramp-shadow` fail a literal where a role exists |
+| **Extract the design system before any screen.** Pull every colour, size and spacing value from the file; ask before inventing anything not in it | the stage kit ships the tokens to reuse; `frame-check`'s `scale-drift` reports, film-wide, when fragments drift onto many scales anyway |
 | **Give explicit specs, not adjectives** | `archetype:` `weight:` `borrows:` are closed vocabularies; `not:` names the forbidden defaults by name |
 | **Ground with tone.** No pure black or white; tint it. One dominant colour (~60%), one neutral (~30%), one sharp accent (~10%), never past three hues | `themes/vawe-film.json`: a cool `#f4f6fa` ground, one accent, one neutral. The flat white theme is what made a glass shine render as nothing |
 | **Add real motion, and keep the touch light.** One memorable moment beats motion on everything | `spectacle:` and `weight: peak` name that one moment, carried by motion, contrast or a camera move |

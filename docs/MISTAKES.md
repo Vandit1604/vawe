@@ -2586,6 +2586,20 @@ The fix is deletion, not a smarter measurement: the size check, its helpers, bot
 carried by motion, contrast or a camera move, judged by eye rather than measured in pixels.
 holds: none
 
+## 621. A token whitelist refused a reference's own values
+`off-ramp-size` and `off-ramp-shadow` failed any fragment with three or more literal type sizes or one
+box-shadow naming no `--kit-elev` role, even when the reference being recreated used those exact
+values: a Warp-style terminal's own sizes and shadows got refused because they were not spelled as kit
+tokens. An agent facing the error rounded the reference's numbers to the nearest kit role to pass the
+gate, and the frame drifted from the thing it was supposed to match. Checking "is this value from the
+kit" was the wrong proxy for the real intent, which was that a film's frames agree with EACH OTHER, not
+that every value trace to one fixed list.
+The fix: the kit stays as a foundation of tokens an author may use, never a whitelist that refuses a
+literal. `off-ramp-size` and `off-ramp-shadow` are gone from `frame-check` and `craft-live`, replaced by
+one report-only `scale-drift` warning that looks at a whole film's fragments together and names the
+sizes only when there are more than a handful of distinct ones.
+holds: quality/gates/frame-check.mjs
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
