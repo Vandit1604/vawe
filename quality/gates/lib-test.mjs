@@ -71,7 +71,7 @@ import { PART_NAMES, PART_BLURBS, PARTS } from '../../core/motion/parts.js';
 import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorAt, effectorStyle } from '../../core/motion/effector.js';
 import { cutVelocityAdvice, layerSpeedAt, cameraSpeedAt } from '../../core/timeline/velocity-cut.js';
 import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
-import { parseCameraLine, cameraErrors, cameraWarnings, cameraContinuityErrors, resolvedCamera, nearestCameraMoves, parseTransitionIn, transitionInErrors, transitionInWarnings, resolvedTransitionIn, nearestTransitions, parseTransitionWhy, transitionFindings } from '../../harness/lib/contract.mjs';
+import { parseCameraLine, cameraErrors, cameraWarnings, cameraContinuityErrors, resolvedCamera, nearestCameraMoves, parseTransitionIn, transitionInErrors, transitionInWarnings, resolvedTransitionIn, nearestTransitions, parseTransitionWhy, transitionFindings, isContinuousBoundary } from '../../harness/lib/contract.mjs';
 import { RELATIONSHIPS, DEVICES } from '../../core/transitions/relationships.js';
 import { TRANSITIONS as TRANSITIONS_CATALOG } from '../../core/transitions/catalog.js';
 import { adoptionReport } from './stage.mjs';
@@ -7719,6 +7719,14 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const coveredBySeam = [beat('A', {}), beat('B', { recipe: 'flow-seam out=a in=b axis=x' })];
   ok('contract: transitionFindings.uncovered is quiet across a flow-seam recipe boundary', transitionFindings(coveredBySeam).uncovered.length === 0);
 
+  // isContinuousBoundary: two beats naming the same fragment file are one continuous surface, not a
+  // cut waiting on a transition (vawe-flow-2's beats 2-3-4-5, all one terminal fragment).
+  const sameFrag = [beat('A', { fragment: 'terminal.html' }), beat('B', { fragment: 'terminal.html' })];
+  ok('contract: isContinuousBoundary is true when two beats name the same fragment', isContinuousBoundary(sameFrag[0], sameFrag[1]));
+  ok('contract: transitionFindings.uncovered is quiet across a same-fragment boundary', transitionFindings(sameFrag).uncovered.length === 0);
+  const diffFrag = [beat('A', { fragment: 'a.html' }), beat('B', { fragment: 'b.html' })];
+  ok('contract: isContinuousBoundary is false when two beats name different fragments', !isContinuousBoundary(diffFrag[0], diffFrag[1]));
+
   const mismatch = [beat('A', {}), beat('B', { transition_in: 'fx:whipPan', transition_why: 'time · a slow reveal · invisible' })];
   ok('contract: transitionFindings.mismatch fires when the fx is not among the relationship\'s candidates', transitionFindings(mismatch).mismatch.length === 1);
   const matched = [beat('A', {}), beat('B', { transition_in: 'fx:whipPan', transition_why: 'new-place-energy · frantic · expressive' })];
@@ -7733,7 +7741,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   fs.writeFileSync(sbPath, [
     '---',
     'message: "test"',
-    'duration: "10s"',
+    'duration: "13s"',
     'spectacle: "beat 2, card, punch, the reveal"',
     'not: "no confetti"',
     '---',
@@ -7746,12 +7754,27 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     'transition_in: fx:cinematicZoom',
     'transition_why: time · a slow reveal · invisible',
     '',
+    '## Beat 3, grain gradient (6s-9.5s)',
+    'why: texture',
+    '',
+    '## Beat 4, grain settle (9.5s-13s)',
+    'why: hold',
+    'fragment: terminal.html',
+    '',
   ].join('\n'));
   fs.writeFileSync(jsonPath, '{"module":"scene"}');
   const r = spawnSync('node', [path.join(repoRoot, 'quality/gates/transitions-catalog.mjs'), jsonPath], { encoding: 'utf8', cwd: repoRoot });
   ok('make transitions D=: exits 0 on a fixture storyboard', r.status === 0);
   ok('make transitions D=: names the boundary and its current fx', /beat 1 \(open\) -> beat 2 \(reveal\)/.test(r.stdout) && /fx:cinematicZoom/.test(r.stdout));
   ok('make transitions D=: prints the stated why', /time · a slow reveal · invisible/.test(r.stdout));
+  // (b) no transition_why: never guess a candidate from the beat's name ("grain gradient" -> "grain").
+  const candidateLines = r.stdout.split('\n').filter((l) => l.trim().startsWith('candidates'));
+  ok('make transitions D=: an unreasoned boundary states the relationship first, never a name-guessed fx',
+    candidateLines.some((l) => l.includes('state the relationship first (transition_why)'))
+    && !candidateLines.some((l) => l.includes('grain')));
+  // (c) the relationships list + doc anchor print exactly once, not once per boundary (3 boundaries here).
+  const relLines = (r.stdout.match(/^  relationships: /gm) || []).length;
+  ok('make transitions D=: the relationships legend prints once, not per boundary', relLines === 1);
   fs.rmSync(tmp, { recursive: true, force: true });
 }
 

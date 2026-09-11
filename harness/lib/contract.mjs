@@ -1030,18 +1030,37 @@ export function transitionWhyErrors(beats) {
   return errs;
 }
 
-/** boundaryCovered(prev, b) → true when the boundary INTO `b` (from `prev`) is covered by something
- * other than silence: a `transition_in` line (resolved or not, prose still counts as a decision made),
- * a seam recipe, a declared camera travel on either side, or a shared element (`becomes:`) crossing it.
- * Mirrors the taxonomy's own non-cut devices (core/transitions/relationships.js DEVICES). */
-function boundaryCovered(prev, b) {
-  if (b.transition_in) return true;
-  if (isSeamRecipe(b) || isSeamRecipe(prev)) return true;
+/** sameFragment(prev, b) → true when two consecutive beats explicitly name the identical `fragment:`
+ * file, the convention assemble.mjs already reads to keep one shared component alive across a cut
+ * instead of tearing it down and rebuilding it (parseFragmentSpec above). Beats 2-3-4-5 all pointing at
+ * one terminal fragment is the same boundary, not three separate cuts each waiting on a transition. */
+function sameFragment(prev, b) {
+  const pf = parseFragmentSpec(prev.fragment).path;
+  const bf = parseFragmentSpec(b.fragment).path;
+  return !!pf && pf === bf;
+}
+
+/** isContinuousBoundary(prev, b) → true when the boundary is not a cut at all: the same fragment file
+ * carries across it, a shared element (`becomes:`) crosses it, or a camera `travel` move spans it
+ * (core/transitions/relationships.js DEVICES: "camera travel"/"shared-element morph"). A continuous
+ * boundary needs no transition and is never `boundary-uncovered`; `make transitions D=` reports it as
+ * "continuous (same surface)" via the same check, so the gate and the report can't disagree. */
+export function isContinuousBoundary(prev, b) {
+  if (sameFragment(prev, b)) return true;
+  if (b.becomes || prev.becomes) return true;
   const camB = resolvedCamera(b);
   const camPrev = resolvedCamera(prev);
   if ((camB && camB.move === 'travel') || (camPrev && camPrev.move === 'travel')) return true;
-  if (b.becomes || prev.becomes) return true;
   return false;
+}
+
+/** boundaryCovered(prev, b) → true when the boundary INTO `b` (from `prev`) is covered by something
+ * other than silence: a `transition_in` line (resolved or not, prose still counts as a decision made),
+ * a seam recipe, or a continuous boundary (isContinuousBoundary above). */
+function boundaryCovered(prev, b) {
+  if (b.transition_in) return true;
+  if (isSeamRecipe(b) || isSeamRecipe(prev)) return true;
+  return isContinuousBoundary(prev, b);
 }
 
 /** transitionFindings(beats) → { unreasoned, uncovered, mismatch }, each a string[], the three
