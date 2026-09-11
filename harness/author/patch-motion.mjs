@@ -217,22 +217,35 @@ export function upsertKey(keys, k, eps = 1e-4) {
   return out.sort((a, b) => (a.t ?? 0) - (b.t ?? 0));
 }
 
-// applyOps(src, ops) → new source text, for the RFC 6902 patches harness/dev/candidates.mjs emits.
+// applyOps(src, ops) → new source text, for the RFC 6902 patches harness/dev/candidates.mjs emits,
+// and for the studio curves panel (an ease, a camera station, a split-text stagger).
 //
-// Same reason the rest of this file exists: a candidate accepted in studio changes ONE preset name, and
-// a parse/stringify round trip would reformat the whole hand-written scene around it. The ops that tool
-// emits are narrow by construction (a `replace` on a bg window's preset, and a `remove` of the `opts`
-// the new preset has no knob for), so this understands exactly that shape and refuses anything else
-// rather than growing into a general json-patch implementation nobody asked for.
+// Same reason the rest of this file exists: a change accepted in studio should touch ONE value, and a
+// parse/stringify round trip would reformat the whole hand-written scene around it. A path is a chain
+// of array/index pairs ending in a property name (`/bg/0/preset`, `/layers/2/motion/1/ease`,
+// `/cameraMove/0/stations/2/dur`): each pair is resolved against the array literal actually on disk,
+// so the walk only ever narrows into the exact bytes the property owns.
+function walkPath(src, segs) {
+  let region = null; // the object span to search the next array within; null = whole file
+  for (let p = 0; p < segs.length - 1; p += 2) {
+    const key = segs[p], idx = +segs[p + 1];
+    const hay = region ? src.slice(region.start, region.end) : src;
+    const arr = new RegExp(`"${key}"\\s*:\\s*\\[`).exec(hay);
+    if (!arr) throw new Error(`this scene has no \`${key}\` array to patch at /${segs.join('/')}`);
+    const arrOpen = (region ? region.start : 0) + arr.index + arr[0].length - 1;
+    const el = elementSpans(src, arrOpen)[idx];
+    if (!el) throw new Error(`${key}[${idx}] does not exist in this scene`);
+    region = el;
+  }
+  return region;
+}
 export function applyOps(src, ops) {
   for (const op of ops || []) {
-    const m = /^\/(bg)\/(\d+)\/([A-Za-z0-9_]+)$/.exec(String(op && op.path));
-    if (!m) throw new Error(`this editor applies /bg/<i>/<prop> ops only, not ${JSON.stringify(op && op.path)}`);
-    const [, key, idxs, name] = m;
-    const arr = new RegExp(`"${key}"\\s*:\\s*\\[`).exec(src);
-    if (!arr) throw new Error(`this scene has no \`${key}\` array to patch`);
-    const el = elementSpans(src, arr.index + arr[0].length - 1)[+idxs];
-    if (!el) throw new Error(`${key}[${idxs}] does not exist in this scene`);
+    const segs = String(op && op.path || '').split('/').filter(Boolean);
+    if (segs.length < 3 || segs.length % 2 === 0 || segs.some((s) => !/^[A-Za-z0-9_]+$/.test(s)))
+      throw new Error(`this editor applies /<key>/<i>/.../<prop> ops only, not ${JSON.stringify(op && op.path)}`);
+    const name = segs[segs.length - 1];
+    const el = walkPath(src, segs);
     const cur = propSpan(src, el, name);
     if (op.op === 'replace' || op.op === 'add') {
       const text = JSON.stringify(op.value);
