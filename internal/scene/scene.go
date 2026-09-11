@@ -12,6 +12,7 @@ import (
 	"image"
 	_ "image/jpeg"
 	"image/png"
+	"math"
 	"net"
 	"net/http"
 	"os"
@@ -53,6 +54,12 @@ type Meta struct {
 	// StillnessAcrossShards was written to avoid: comparing two frames that were never drawn by the
 	// same browser.
 	FrameWorker []int32 `json:"-"`
+	// RangeStart/RangeEnd are the [start,end) frame indices this call actually captured: 0..TotalFrames
+	// for an ordinary render, a narrower window when Capture was given a from/to range. Go-only: it is
+	// what the caller needs to name ffmpeg's -start_number and the clip's own frame count, and there is
+	// nothing on the JS side to mirror it against.
+	RangeStart int `json:"-"`
+	RangeEnd   int `json:"-"`
 }
 
 // served is the ONLY prefix set the render page may fetch. A render needs the engine (core), the
@@ -568,7 +575,33 @@ func downsample(buf []byte, ss int) ([]byte, error) {
 	return out.Bytes(), nil
 }
 
-func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir string, transparent bool, ss int, aspect string) (Meta, error) {
+// frameRange resolves a from/to film-time window to the [start,end) frame indices Capture should
+// shoot. fromSec < 0 means "no range": the whole film, frame 0 through total. Pulled out of Capture so
+// the index math (the actual thing a range gets wrong) is checkable without a browser.
+func frameRange(fromSec, toSec, duration, fps float64, total int) (start, end int, err error) {
+	if fromSec < 0 {
+		return 0, total, nil
+	}
+	if toSec > duration+1e-6 {
+		return 0, 0, fmt.Errorf("--to %.3fs is past this film's duration (%.3fs)", toSec, duration)
+	}
+	start = int(math.Floor(fromSec*fps + 1e-9))
+	end = int(math.Ceil(toSec*fps - 1e-9))
+	if start < 0 {
+		start = 0
+	}
+	if end > total {
+		end = total
+	}
+	if start >= end {
+		return 0, 0, fmt.Errorf("--from %.3fs must be less than --to %.3fs (resolves to frame %d..%d of %d)", fromSec, toSec, start, end, total)
+	}
+	return start, end, nil
+}
+
+// fromSec/toSec: a partial-render window, in final (post-tempo) film seconds. -1/-1 means "no range":
+// capture every frame, same as before this parameter existed.
+func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir string, transparent bool, ss int, aspect string, fromSec, toSec float64) (Meta, error) {
 	if ss < 1 {
 		ss = 1
 	}
@@ -651,11 +684,23 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	if cw == 0 || ch == 0 {
 		cw, ch = W, H
 	}
+
+	// RANGE RESOLUTION. fromSec/toSec are film time, same clock meta.Duration is in (the browser has
+	// already applied tempo by the time this runs: core/engine/tempo.js resolves at expand, before the
+	// page loads). Refused here, before a single frame is shot, rather than left to fail obscurely once
+	// jobs reference frame indices past the film's own last frame.
+	ranged := fromSec >= 0
+	fromFrame, toFrame, err := frameRange(fromSec, toSec, meta.Duration, meta.FPS, total)
+	if err != nil {
+		return meta, err
+	}
+	meta.RangeStart, meta.RangeEnd = fromFrame, toFrame
+
 	if workers < 1 {
 		workers = 1
 	}
-	if workers > total {
-		workers = total
+	if frameCount := toFrame - fromFrame; workers > frameCount {
+		workers = frameCount
 	}
 
 	// ---- static-frame dedup: capture each RUN of identical frames once ----
@@ -663,12 +708,13 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	// signatures capture only their first frame; the rest are hardlinked afterwards. Mid-run
 	// ANCHOR frames are captured anyway and byte-compared: a mismatch means the signature
 	// missed real motion, and we fail LOUDLY (purity culture: no silent wrong frames).
-	// VAWE_NO_DEDUP=1 disables.
+	// VAWE_NO_DEDUP=1 disables it, and so does a range: a dup's representative frame can sit outside
+	// the window being captured, and skipping the optimisation is cheaper than chasing it back in.
 	rep := make([]int, total)
 	for f := range rep {
 		rep[f] = f
 	}
-	if os.Getenv("VAWE_NO_DEDUP") == "" {
+	if os.Getenv("VAWE_NO_DEDUP") == "" && !ranged {
 		var sigs []string
 		expr := fmt.Sprintf(`(() => { const out = []; for (let f = 0; f < %d; f++) out.push(window.__engine.frameSig ? String(window.__engine.frameSig(f)) : 'nofsig' + f); return out; })()`, total)
 		if err := chromedp.Run(ctx0, chromedp.Evaluate(expr, &sigs)); err == nil && len(sigs) == total {
@@ -705,7 +751,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	}
 	jobs := []capJob{}
 	dups := 0
-	for f := 0; f < total; f++ {
+	for f := fromFrame; f < toFrame; f++ {
 		if rep[f] == f {
 			a := -1
 			if m, ok := anchorFor[f]; ok {
@@ -871,7 +917,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 
 	anchorsOK := len(anchorFor)
 	if dups > 0 {
-		for f := 0; f < total; f++ {
+		for f := fromFrame; f < toFrame; f++ {
 			if rep[f] == f {
 				continue
 			}

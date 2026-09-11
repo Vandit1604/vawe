@@ -82,10 +82,17 @@ func main() {
 	bg := flag.String("bg", "", "composite the (alpha) graphics over this background video → out.mp4")
 	watermark := flag.String("watermark", "", "transparent PNG laid over every frame (free previews); empty = clean export")
 	aspect := flag.String("aspect", "", "render aspect(s): comma-separated 16:9,9:16,1:1,4:5,4:3 (empty = the scene's own)")
+	from := flag.Float64("from", -1, "capture only from this many seconds of film time (post-tempo); requires --to")
+	to := flag.Float64("to", -1, "capture only up to this many seconds of film time (post-tempo); requires --from")
 	flag.Parse()
 
+	if err := checkRange(*from, *to); err != nil {
+		fmt.Fprintf(os.Stderr, "✗ %v\n", err)
+		os.Exit(1)
+	}
+
 	repoRoot := repoRoot()
-	opts := render.Options{FPS: *fps, Workers: *workers, Draft: *draft, SS: *ssFlag, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg, Watermark: *watermark}
+	opts := render.Options{FPS: *fps, Workers: *workers, Draft: *draft, SS: *ssFlag, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg, Watermark: *watermark, Range: *from >= 0, From: *from, To: *to}
 
 	if *list {
 		listFormats(repoRoot)
@@ -135,7 +142,11 @@ func main() {
 			_ = flag.CommandLine.Parse(flag.Args()[1:]) // flags may follow the file: vawe foo.json --draft --out x.mp4
 		}
 	}
-	opts = render.Options{FPS: *fps, Workers: *workers, Draft: *draft, SS: *ssFlag, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg, Watermark: *watermark} // rebuild after any trailing flags
+	if err := checkRange(*from, *to); err != nil { // trailing flags (after the positional file arg) may have set these
+		fmt.Fprintf(os.Stderr, "✗ %v\n", err)
+		os.Exit(1)
+	}
+	opts = render.Options{FPS: *fps, Workers: *workers, Draft: *draft, SS: *ssFlag, Grain: !*noGrain, Transparent: *alpha, BgVideo: *bg, Watermark: *watermark, Range: *from >= 0, From: *from, To: *to} // rebuild after any trailing flags
 	if dataPath == "" {
 		fmt.Fprintln(os.Stderr, "usage: vawe <video.json>  [--module N] [--out F] [--draft] | --all | --list")
 		os.Exit(1)
@@ -213,6 +224,11 @@ func main() {
 			if o.Aspect != "" {
 				tag = "." + strings.ReplaceAll(o.Aspect, ":", "x")
 			}
+			// A range never shares the full film's filename: out/<name>.mp4 stays whatever the last
+			// full render made, so a beat/join check can never look like it clobbered the real output.
+			if o.Range {
+				tag += fmt.Sprintf(".range-%s-%s", trimNum(o.From), trimNum(o.To))
+			}
 			base := name
 			if outPath != "" {
 				base = strings.TrimSuffix(filepath.Base(outPath), filepath.Ext(outPath))
@@ -225,6 +241,25 @@ func main() {
 		}
 		fmt.Printf("✓ %s\n", outPath)
 	}
+}
+
+// checkRange refuses a partial-render window before any browser starts: --from without --to (or the
+// reverse), or from >= to. Whether the window fits inside the film's own duration is not decidable
+// here (nothing has read the scene yet), so that check happens once meta.Duration is known, in
+// scene.Capture.
+func checkRange(from, to float64) error {
+	if (from >= 0) != (to >= 0) {
+		return fmt.Errorf("--from and --to must be given together")
+	}
+	if from >= 0 && from >= to {
+		return fmt.Errorf("--from %.3f must be less than --to %.3f", from, to)
+	}
+	return nil
+}
+
+// trimNum: 3.4 -> "3.4", 12 -> "12". Used only for a filename tag, so trailing zeros are noise.
+func trimNum(v float64) string {
+	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.3f", v), "0"), ".")
 }
 
 // videoGrain reports whether a video OPTS IN to film grain via `"grain": true`. Default (absent) is
