@@ -40,6 +40,80 @@ const REGISTRY = {
       return { verdict: 'hard' };
     },
   },
+  'small-text': {
+    intent: 'a kit must never write a text role below the smallest size a moving 1920-wide frame can be read at.',
+    doc: 'harness/lib/stagekit.mjs',
+    applies: (f) => typeof f.wrapped === 'boolean',
+    adapt: (f) => {
+      if (f.wrapped) {
+        return { verdict: 'skip', value: f.px,
+          line: `adapted small-text: ${f.px}px text inside a screenshot/mock-UI wrapper skipped (the floor is the captured surface's own type, not the kit's)` };
+      }
+      return { verdict: 'hard' };
+    },
+  },
+  'peak-not-largest': {
+    intent: 'the beat declared the peak must hold the largest object, or the "peak" promise is broken.',
+    doc: 'docs/CRAFT/DIRECTION.md',
+    applies: (f, ctx) => !!(ctx && ctx.beat && ctx.beat.payoff),
+    adapt: (f, ctx) => {
+      const SIZE_WORDS = /\b(scale|size|larger|bigger|zoom|grow\w*|shrink\w*|magnif\w*)\b/i;
+      if (!SIZE_WORDS.test(String(ctx.beat.payoff))) {
+        return { verdict: 'reclassify', value: 'report',
+          line: `adapted peak-not-largest: downgraded to a report, the beat names a non-size payoff ("${ctx.beat.payoff}")` };
+      }
+      return { verdict: 'hard' };
+    },
+  },
+  'plain-slideshow': {
+    intent: 'a film this long needs a minimum count of beats/effects/expressive families, or it reads as an unforced default.',
+    doc: 'docs/CRAFT/DIRECTION.md',
+    applies: (f, ctx) => !!(ctx && Array.isArray(ctx.not)),
+    adapt: (f, ctx) => {
+      if (ctx.not.some((n) => /slideshow|plain|static/i.test(n))) {
+        return { verdict: 'skip', value: 'waived-by-not',
+          line: 'adapted plain-slideshow: skipped, the storyboard\'s NOT line names this on purpose' };
+      }
+      return { verdict: 'hard' };
+    },
+  },
+  'feature-poverty': {
+    intent: 'a film this long needs a minimum count of beats/effects/expressive families, or it reads as an unforced default.',
+    doc: 'docs/CRAFT/DIRECTION.md',
+    applies: (f, ctx) => typeof (ctx && ctx.durationSec) === 'number',
+    adapt: (f, ctx) => {
+      const SHORT_FILM_FLOOR_SEC = 12;
+      if (ctx.durationSec < SHORT_FILM_FLOOR_SEC) {
+        return { verdict: 'skip', value: ctx.durationSec,
+          line: `adapted feature-poverty: skipped, ${ctx.durationSec}s is below the ${SHORT_FILM_FLOOR_SEC}s short-film floor` };
+      }
+      return { verdict: 'hard' };
+    },
+  },
+  'ends-on-nothing': {
+    intent: 'the final tail of the film must hold a content layer, not a bare backdrop.',
+    doc: 'docs/CRAFT/DIRECTION.md',
+    applies: (f) => typeof f.tailLayerKind === 'string',
+    adapt: (f) => {
+      if (/brand|mark|logo/i.test(f.tailLayerKind)) {
+        return { verdict: 'reclassify', value: 'content',
+          line: `adapted ends-on-nothing: the tail's ${f.tailLayerKind} layer counts as content` };
+      }
+      return { verdict: 'hard' };
+    },
+  },
+  'plan-overruns-render': {
+    intent: 'the plan\'s beat spans must describe the film that actually rendered.',
+    doc: 'docs/CRAFT/AUTHORING-WALKTHROUGH.md',
+    applies: (f, ctx) => typeof f.driftFrames === 'number' && typeof (ctx && ctx.fps) === 'number',
+    adapt: (f) => {
+      if (Math.abs(f.driftFrames) <= 1) {
+        return { verdict: 'tolerate', value: f.driftFrames,
+          line: `adapted plan-overruns-render: kept as a warning, ${f.driftFrames} frame(s) drift is within the one-frame floor` };
+      }
+      return { verdict: 'hard' };
+    },
+  },
 };
 
 // adaptFinding(finding, ctx) -> finding, unchanged for a code with no entry or one that does not
