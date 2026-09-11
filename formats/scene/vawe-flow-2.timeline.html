@@ -90,12 +90,15 @@
 .tl-tracklabel .dot{width:8px;height:8px;border-radius:50%}
 .tl-lane{position:relative;border-radius:10px;display:flex;flex-direction:column;gap:6px;padding:6px 0}
 .tl-row{position:relative;flex:1;min-height:0}
-.tl-clip{position:absolute;top:0;bottom:0;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--kit-elev-1);container-type:inline-size}
-.tl-clip img{flex:1;min-height:0;width:100%;object-fit:cover;display:block}
-.tl-clip .tag{flex:none;background:var(--ink, #0f1620);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 8px}
-.tl-clip .tag b{font:600 28px var(--font-sans);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@container (max-width:240px){.tl-clip .tag i{display:none}}
-.tl-clip .tag i{font:600 28px var(--font-mono);font-style:normal;font-variant-numeric:tabular-nums;opacity:.75;flex:none}
+.tl-clip{position:absolute;top:0;bottom:0;border-radius:999px;overflow:hidden;display:flex;align-items:center;gap:8px;box-shadow:var(--kit-elev-1);container-type:inline-size;padding-inline-end:8px}
+.tl-clip img{flex:none;width:34px;height:calc(100% - 8px);margin:4px 0 4px 4px;border-radius:999px;object-fit:cover;display:block;border:2px solid rgba(255,255,255,.55)}
+.tl-clip svg{flex:none;width:18px;height:18px;stroke-width:2}
+.tl-clip .lbl{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;overflow:hidden}
+.tl-clip b{font:700 28px var(--font-sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@container (max-width:200px){.tl-clip i{display:none}}
+.tl-clip i{font:600 28px var(--font-mono);font-style:normal;font-variant-numeric:tabular-nums;opacity:.85;flex:none;margin-inline-start:auto}
+.tl-film{position:relative;height:56px;border-radius:10px;overflow:hidden;background:var(--ink, #0f1620)}
+.tl-film img{position:absolute;top:0;bottom:0;width:16.5%;object-fit:cover;border-right:1px solid rgba(255,255,255,.3)}
 </style>
 <div class="kit-root kit-ground-paper" id="timeline-root" style="position:absolute;inset:0">
   <div class="kit-stage" style="display:flex;flex-direction:column;padding-top:var(--kit-space-7);padding-bottom:var(--kit-space-4)">
@@ -122,67 +125,79 @@
             <div class="tl-tick" style="left:92.31%"><span>0:12</span></div>
           </div>
         </div>
+        <div class="tl-track">
+          <div class="tl-tracklabel"><p class="kit-caption" style="color:var(--dim)">Frames</p></div>
+          <div class="tl-film">
+            <img src="/assets/vawe-flow-2/frame-00s.jpg" style="left:0%">
+            <img src="/assets/vawe-flow-2/frame-02s.jpg" style="left:16.5%">
+            <img src="/assets/vawe-flow-2/frame-04s.jpg" style="left:33%">
+            <img src="/assets/vawe-flow-2/frame-06s.jpg" style="left:49.5%">
+            <img src="/assets/vawe-flow-2/frame-08s.jpg" style="left:66%">
+            <img src="/assets/vawe-flow-2/frame-10s.jpg" style="left:82.5%">
+            <img src="/assets/vawe-flow-2/frame-12s.jpg" style="left:96%;width:4%;border-right:0">
+          </div>
+        </div>
         <div class="tl-tracks">
           <div class="tl-track" data-part="track" style="flex:1">
-            <div class="tl-tracklabel"><span class="dot" style="background:#2563eb"></span><p class="kit-caption" style="color:var(--text)">Video</p></div>
+            <div class="tl-tracklabel"><span class="dot" style="background:#52525a"></span><p class="kit-caption" style="color:var(--text)">Video</p></div>
             <div class="tl-lane kit-panel">
               <div class="tl-row">
-                <div class="tl-clip" data-part="clip" style="left:0%;width:35.38%"><img src="/assets/vawe-flow-2/terminal.jpg"><div class="tag"><b>terminal</b><i>4.6s</i></div></div>
-                <div class="tl-clip" data-part="clip" style="left:73.08%;width:11.54%"><img src="/assets/vawe-flow-2/films.jpg"><div class="tag"><b>results</b><i>1.5s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:0%;width:35.38%;background:#52525a"><img src="/assets/vawe-flow-2/terminal.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg><div class="lbl"><b style="color:#fff">terminal</b><i style="color:#fff">4.6s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:73.08%;width:11.54%;background:#52525a"><img src="/assets/vawe-flow-2/films.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg><div class="lbl"><b style="color:#fff">results</b><i style="color:#fff">1.5s</i></div></div>
               </div>
             </div>
           </div>
           <div class="tl-track" data-part="track" style="flex:1">
-            <div class="tl-tracklabel"><span class="dot" style="background:#e6a13a"></span><p class="kit-caption" style="color:var(--text)">Text</p></div>
+            <div class="tl-tracklabel"><span class="dot" style="background:#a67dff"></span><p class="kit-caption" style="color:var(--text)">Text</p></div>
             <div class="tl-lane kit-panel">
               <div class="tl-row">
-                <div class="tl-clip" data-part="clip" style="left:18.46%;width:16.92%"><img src="/assets/vawe-flow-2/prompt.jpg"><div class="tag"><b>req-type</b><i>2.2s</i></div></div>
-                <div class="tl-clip" data-part="clip" style="left:35.92%;width:10.23%"><img src="/assets/vawe-flow-2/tagline1.jpg"><div class="tag"><b>tag1</b><i>1.3s</i></div></div>
-                <div class="tl-clip" data-part="clip" style="left:63.62%;width:9.46%"><img src="/assets/vawe-flow-2/tagline2.jpg"><div class="tag"><b>tag2</b><i>1.2s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:18.46%;width:16.92%;background:#a67dff"><img src="/assets/vawe-flow-2/prompt.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><path d="M4 6h16M12 6v14"/></svg><div class="lbl"><b style="color:#fff">req-type</b><i style="color:#fff">2.2s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:35.92%;width:10.23%;background:#a67dff"><img src="/assets/vawe-flow-2/tagline1.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><path d="M4 6h16M12 6v14"/></svg><div class="lbl"><b style="color:#fff">tag1</b><i style="color:#fff">1.3s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:63.62%;width:9.46%;background:#a67dff"><img src="/assets/vawe-flow-2/tagline2.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><path d="M4 6h16M12 6v14"/></svg><div class="lbl"><b style="color:#fff">tag2</b><i style="color:#fff">1.2s</i></div></div>
               </div>
             </div>
           </div>
           <div class="tl-track" data-part="track" style="flex:1">
-            <div class="tl-tracklabel"><span class="dot" style="background:#3aa16a"></span><p class="kit-caption" style="color:var(--text)">Cursor</p></div>
+            <div class="tl-tracklabel"><span class="dot" style="background:#e0714f"></span><p class="kit-caption" style="color:var(--text)">Cursor</p></div>
             <div class="tl-lane kit-panel">
               <div class="tl-row">
-                <div class="tl-clip" data-part="clip" style="left:30.00%;width:5.38%"><img src="/assets/vawe-flow-2/send.jpg"><div class="tag"><b>send</b></div></div>
-                <div class="tl-clip" data-part="clip" style="left:46.15%;width:16.92%"><img src="/assets/vawe-flow-2/keep.jpg"><div class="tag"><b>keep</b><i>2.2s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:30.00%;width:5.38%;background:#e0714f"><img src="/assets/vawe-flow-2/send.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><path d="M6 4l14 6-6 2-2 6z"/></svg><div class="lbl"><b style="color:#fff">send</b></div></div>
+                <div class="tl-clip" data-part="clip" style="left:46.15%;width:16.92%;background:#e0714f"><img src="/assets/vawe-flow-2/keep.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><path d="M6 4l14 6-6 2-2 6z"/></svg><div class="lbl"><b style="color:#fff">keep</b><i style="color:#fff">2.2s</i></div></div>
               </div>
             </div>
           </div>
           <div class="tl-track" data-part="track" style="flex:3">
-            <div class="tl-tracklabel"><span class="dot" style="background:#c25b9e"></span><p class="kit-caption" style="color:var(--text)">Cards</p></div>
+            <div class="tl-tracklabel"><span class="dot" style="background:#cf5b98"></span><p class="kit-caption" style="color:var(--text)">Cards</p></div>
             <div class="tl-lane kit-panel">
               <div class="tl-row">
-                <div class="tl-clip" data-part="clip" style="left:46.15%;width:16.92%"><img src="/assets/vawe-flow-2/card1.jpg"><div class="tag"><b>card1</b><i>0.5s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:46.15%;width:16.92%;background:#cf5b98"><img src="/assets/vawe-flow-2/card1.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="13" width="7" height="7" rx="1"/></svg><div class="lbl"><b style="color:#fff">card1</b><i style="color:#fff">0.5s</i></div></div>
               </div>
               <div class="tl-row">
-                <div class="tl-clip" data-part="clip" style="left:46.15%;width:23.85%"><img src="/assets/vawe-flow-2/card2.jpg"><div class="tag"><b>card2</b><i>1.35s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:46.15%;width:23.85%;background:#cf5b98"><img src="/assets/vawe-flow-2/card2.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="13" width="7" height="7" rx="1"/></svg><div class="lbl"><b style="color:#fff">card2</b><i style="color:#fff">1.35s</i></div></div>
               </div>
               <div class="tl-row">
-                <div class="tl-clip" data-part="clip" style="left:46.15%;width:16.92%"><img src="/assets/vawe-flow-2/card3.jpg"><div class="tag"><b>card3</b><i>2.2s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:46.15%;width:16.92%;background:#cf5b98"><img src="/assets/vawe-flow-2/card3.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="13" width="7" height="7" rx="1"/></svg><div class="lbl"><b style="color:#fff">card3</b><i style="color:#fff">2.2s</i></div></div>
               </div>
             </div>
           </div>
           <div class="tl-track" data-part="track" style="flex:1">
-            <div class="tl-tracklabel"><span class="dot" style="background:#7d8b9e"></span><p class="kit-caption" style="color:var(--text)">Ground</p></div>
+            <div class="tl-tracklabel"><span class="dot" style="background:#3ea3ff"></span><p class="kit-caption" style="color:var(--text)">Ground</p></div>
             <div class="tl-lane kit-panel">
               <div class="tl-row">
-                <div class="tl-clip" data-part="clip" style="left:46.15%;width:6.54%"><img src="/assets/vawe-flow-2/bg1.jpg"><div class="tag"><b>bg1</b></div></div>
-                <div class="tl-clip" data-part="clip" style="left:52.69%;width:5.38%"><img src="/assets/vawe-flow-2/groundcard2.jpg"><div class="tag"><b>bg2</b></div></div>
-                <div class="tl-clip" data-part="clip" style="left:58.08%;width:5.00%"><img src="/assets/vawe-flow-2/bg3.jpg"><div class="tag"><b>bg3</b></div></div>
+                <div class="tl-clip" data-part="clip" style="left:46.15%;width:6.54%;background:#3ea3ff"><img src="/assets/vawe-flow-2/bg1.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><path d="M3 16l5-5 4 4 5-6 4 5"/></svg><div class="lbl"><b style="color:#fff">bg1</b></div></div>
+                <div class="tl-clip" data-part="clip" style="left:52.69%;width:5.38%;background:#3ea3ff"><img src="/assets/vawe-flow-2/groundcard2.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><path d="M3 16l5-5 4 4 5-6 4 5"/></svg><div class="lbl"><b style="color:#fff">bg2</b></div></div>
+                <div class="tl-clip" data-part="clip" style="left:58.08%;width:5.00%;background:#3ea3ff"><img src="/assets/vawe-flow-2/bg3.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><path d="M3 16l5-5 4 4 5-6 4 5"/></svg><div class="lbl"><b style="color:#fff">bg3</b></div></div>
               </div>
             </div>
           </div>
           <div class="tl-track" data-part="track" style="flex:2">
-            <div class="tl-tracklabel"><span class="dot" style="background:#2563eb"></span><p class="kit-caption" style="color:var(--text)">FX</p></div>
+            <div class="tl-tracklabel"><span class="dot" style="background:#0eaf80"></span><p class="kit-caption" style="color:var(--text)">FX</p></div>
             <div class="tl-lane kit-panel">
               <div class="tl-row">
-                <div class="tl-clip" data-part="clip" style="left:87.31%;width:12.69%"><img src="/assets/vawe-flow-2/finaltile.jpg"><div class="tag"><b>final-tile</b><i>1.65s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:87.31%;width:12.69%;background:#0eaf80"><img src="/assets/vawe-flow-2/finaltile.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l3 3M18 18l-3-3M6 18l3-3M18 6l-3 3"/></svg><div class="lbl"><b style="color:#fff">final-tile</b><i style="color:#fff">1.65s</i></div></div>
               </div>
               <div class="tl-row">
-                <div class="tl-clip" data-part="clip" style="left:89.62%;width:10.38%"><img src="/assets/vawe-flow-2/mark.jpg"><div class="tag"><b>mark</b><i>1.35s</i></div></div>
+                <div class="tl-clip" data-part="clip" style="left:89.62%;width:10.38%;background:#0eaf80"><img src="/assets/vawe-flow-2/mark.jpg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l3 3M18 18l-3-3M6 18l3-3M18 6l-3 3"/></svg><div class="lbl"><b style="color:#fff">mark</b><i style="color:#fff">1.35s</i></div></div>
               </div>
             </div>
           </div>
