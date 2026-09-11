@@ -346,11 +346,21 @@ function bindFollowCamera(spec, data) {
 // findLayerById(layers, id): the one small tree-walk every "resolve a target by id" caller in this file
 // already does its own copy of (bindFollowCamera above, bindCursorCamera's `hit` walk). Pulled out once
 // here for the newest caller, resolveElementTarget, so a fourth copy does not join the first three.
-function findLayerById(layers, id) {
+//
+// A `layout: 'free'` group's own x/y is the group's stage position, and its children's x/y are the
+// child's own offset INSIDE the group (core/layers/util.js addGroupChild), never added back. Every
+// caller here reads `.x`/`.y` off the returned layer as if it were stage space, which was true for a
+// top-level layer and silently wrong for a nested one: the camera would frame the child's offset from
+// (0,0) instead of the child's real place on stage. Accumulated here, in the one walk, rather than a
+// second lookup: dx/dy sum every ancestor free-group's own x/y on the way down, and the returned layer
+// carries the absolute x/y a caller already expects. Flex/grid children have no meaningful x/y to begin
+// with (they flow), so this only ever changes the answer for the `free` case it fixes.
+function findLayerById(layers, id, dx = 0, dy = 0) {
   for (const L of layers || []) {
     if (!L || typeof L !== 'object') continue;
-    if (L.id === id) return L;
-    const hit = findLayerById(L.children, id);
+    if (L.id === id) return (dx || dy) ? { ...L, x: (L.x || 0) + dx, y: (L.y || 0) + dy } : L;
+    const isFreeGroup = L.type === 'group' && L.layout === 'free';
+    const hit = findLayerById(L.children, id, isFreeGroup ? dx + (L.x || 0) : dx, isFreeGroup ? dy + (L.y || 0) : dy);
     if (hit) return hit;
   }
   return null;

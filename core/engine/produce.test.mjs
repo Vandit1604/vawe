@@ -3,7 +3,7 @@
 // at each inferred joint (core/timeline/junctions.js classifyJoint/chooseCutStyles). Pure-JS, no DOM.
 //   node core/engine/produce.test.mjs
 import assert from 'node:assert/strict';
-import { produceBaseline, resolveTextSize, bakeTextSizeRoles, applyAnticipateDefault } from './produce.js';
+import { produceBaseline, resolveTextSize, bakeTextSizeRoles, applyAnticipateDefault, bakeCameraMove } from './produce.js';
 import { anticipateFromMotion } from '../motion/motion.js';
 
 const look = { cuts: { default: 'fade', accent: 'cinematicZoom' }, scale: { hook: 92, headline: 64, body: 38, caption: 24 } };
@@ -201,6 +201,27 @@ const beatLayers = (starts) => starts.map((start, i) => ({ type: 'text', track: 
   };
   produceBaseline(data, { motion: { bounce: 0 } }, frame, look);
   assert.equal(data.layers[1].anticipate, undefined, 'produced:false opts out of the injected baseline, anticipate included');
+}
+
+// ---- a travel "caret" station finds a typing text layer nested in a `layout:free` group at the
+// group's STAGE position, not at the child's own offset inside it (findLayerById now sums every
+// ancestor free-group's x/y on the walk down; core/engine/produce.js findLayerById) ----
+{
+  const travelSpec = () => ({ move: 'travel', start: 0, stations: [{ tx: 960, ty: 540 }, { caret: '#t1' }] });
+  const flatSpec = travelSpec(), groupSpec = travelSpec();
+  const flat = {
+    module: 'scene', duration: 5, bg: [{ preset: 'plain' }], cameraMove: flatSpec,
+    layers: [{ type: 'text', id: 't1', x: 150, y: 230, w: 300, text: 'hello', typing: true, start: 1.5 }],
+  };
+  const grouped = {
+    module: 'scene', duration: 5, bg: [{ preset: 'plain' }], cameraMove: groupSpec,
+    layers: [{ type: 'group', id: 'g1', x: 100, y: 200, layout: 'free', start: 0, duration: 5,
+      children: [{ type: 'text', id: 't1', x: 50, y: 30, w: 300, text: 'hello', typing: true, start: 1.5 }] }],
+  };
+  bakeCameraMove(flat, { W: 1920, H: 1080 });
+  bakeCameraMove(grouped, { W: 1920, H: 1080 });
+  assert.deepEqual(groupSpec.stations, flatSpec.stations,
+    'a caret station on a group child resolves to the same stage box as an equivalent flat layer');
 }
 
 console.log('produce.test.mjs: ok');

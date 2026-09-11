@@ -173,7 +173,10 @@ stale the moment the line is reworded (`typing-camera-still`, `make critique`). 
 station instead: `{ "move": "travel", "stations": [ { "target": "#opening" }, { "caret": "#line" } ] }`.
 `caret: "#<typing text layer id>"` expands to two stations, pushed in as typing begins and panned to the
 caret's end as it finishes, timed off the layer's own `start`/`typing`/text length
-(`core/engine/produce.js` `resolveCaretStations`).
+(`core/engine/produce.js` `resolveCaretStations`). **Rides a tilted or moving surface**: nest the `html`
+and the typing `text` as children of one `group` that carries the motion track (rotX/rotY/z/blur/opacity);
+`caret` still resolves, at the child's real stage position (`findLayerById` sums each ancestor
+`layout:"free"` group's own x/y on the way down).
 
 ---
 
