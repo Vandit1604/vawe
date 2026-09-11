@@ -1,4 +1,5 @@
 ---
+approved: 2026-09-11
 message: "vawe lives in your terminal: type a request, and it renders itself."
 audience: "Founders and designers who need a launch film and have no motion designer."
 reference: "example-madera"
