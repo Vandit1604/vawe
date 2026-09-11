@@ -52,19 +52,6 @@ const REGISTRY = {
       return { verdict: 'hard' };
     },
   },
-  'peak-not-largest': {
-    intent: 'the beat declared the peak must hold the largest object, or the "peak" promise is broken.',
-    doc: 'docs/CRAFT/DIRECTION.md',
-    applies: (f, ctx) => !!(ctx && ctx.beat && ctx.beat.payoff),
-    adapt: (f, ctx) => {
-      const SIZE_WORDS = /\b(scale|size|larger|bigger|zoom|grow\w*|shrink\w*|magnif\w*)\b/i;
-      if (!SIZE_WORDS.test(String(ctx.beat.payoff))) {
-        return { verdict: 'reclassify', value: 'report',
-          line: `adapted peak-not-largest: downgraded to a report, the beat names a non-size payoff ("${ctx.beat.payoff}")` };
-      }
-      return { verdict: 'hard' };
-    },
-  },
   'plain-slideshow': {
     intent: 'a film this long needs a minimum count of beats/effects/expressive families, or it reads as an unforced default.',
     doc: 'docs/CRAFT/DIRECTION.md',

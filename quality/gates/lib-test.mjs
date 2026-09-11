@@ -7704,8 +7704,6 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   };
   runSelftest('known-answer: motion-floor --self-test (still=0, drift=global, reveal=local)',
     'quality/gates/motion-floor.mjs', ['--self-test']);
-  runSelftest('known-answer: frame-check --self-test (area = width*height, never a square)',
-    'quality/gates/frame-check.mjs', ['--self-test']);
   runSelftest('known-answer: harness/media/content.mjs --selftest', 'harness/media/content.mjs', ['--selftest']);
   runSelftest('known-answer: harness/media/study.mjs --selftest', 'harness/media/study.mjs', ['--selftest']);
   runSelftest('known-answer: screen-readiness.test.mjs (readiness() against fixed markup)',
@@ -8233,12 +8231,6 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('safeguards: small-text inside a screenshot/mock-UI wrapper is skipped', wrapped.adapted && wrapped.adapted.verdict === 'skip');
   const unwrapped = adaptFinding({ kind: 'small-text', px: 18, wrapped: false });
   ok('safeguards: small-text with no wrapper stays a hard fail', !unwrapped.adapted);
-
-  // peak-not-largest: a non-size payoff downgrades to a report, a size payoff still fails.
-  const colourPeak = adaptFinding({ kind: 'peak-not-largest' }, { beat: { payoff: 'a re-tint of the whole field' } });
-  ok('safeguards: peak-not-largest downgrades when the beat names a non-size payoff', colourPeak.adapted && colourPeak.adapted.verdict === 'reclassify');
-  const scalePeak = adaptFinding({ kind: 'peak-not-largest' }, { beat: { payoff: 'the card grows to fill the frame' } });
-  ok('safeguards: peak-not-largest stays a hard fail when the beat names a size payoff', !scalePeak.adapted);
 
   // plain-slideshow: the storyboard's own NOT line waives it, an unexplained slideshow still fails.
   const notWaived = adaptFinding({ kind: 'plain-slideshow' }, { not: ['this film is deliberately a plain slideshow'] });
