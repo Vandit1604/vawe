@@ -286,3 +286,61 @@ ${moveLine ? `- move: ${moveLine}\n` : ''}- onscreen: "hi"
   fs.rmSync(dir4, { recursive: true, force: true });
   console.log('✓ assemble.test.mjs: move: builds a sustained per-beat track, an unset move: is byte-identical, and an unknown shape is refused');
 }
+
+// ---- (g) a shared-fragment run swallows its internal beat boundary: no dead transition written -----
+// core/transitions/lower.js needs two layers to build a seam; a run merges beats 1-2 into ONE layer
+// (scene1), so the 3s boundary between them has nothing to join. The boundary out of the run (into
+// beat 3's own layer) is real and must still get a transition.
+{
+  const dir5 = fs.mkdtempSync(path.join(os.tmpdir(), 'assemble-test-run-transition-'));
+  const film5 = path.join(dir5, 'v.json');
+  const sb5 = path.join(dir5, 'v.storyboard.md');
+  fs.writeFileSync(film5, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9' }));
+  fs.writeFileSync(path.join(dir5, 'shared.html'), '<div>card</div>');
+  fs.writeFileSync(path.join(dir5, 'v.scene3.html'), '<div>c</div>');
+  fs.writeFileSync(sb5, `---
+message: "test film"
+audience: "ci"
+arc: "hook -> build -> payoff"
+framework: "AIDA"
+object: "none"
+format: 1920x1080
+theme: "themes/default.json"
+duration: 9s
+pace: "held, 3s/idea"
+spectacle: "beat 3"
+not: "no centred text default"
+---
+
+## Beat 1: Hook (0s-3s)
+- type: hook
+- fragment: shared.html
+- onscreen: "hi"
+- becomes: a
+- why: open
+- duration: 3s
+
+## Beat 2: Build (3s-6s)
+- type: product_intro
+- fragment: shared.html
+- onscreen: "what"
+- becomes: b
+- why: name
+- duration: 3s
+
+## Beat 3: Payoff (6s-9s)
+- type: benefit_highlight
+- onscreen: "the payoff"
+- becomes: c
+- why: land
+- duration: 3s
+`);
+  const out5 = execFileSync(node, [path.join(ROOT, 'harness/author/assemble.mjs'), film5], { encoding: 'utf8' });
+  assert.match(out5, /dropped transition at 3s: inside scene1's shared-fragment run, nothing to join/, 'the swallowed boundary is named and its reason given');
+  const scene5 = JSON.parse(fs.readFileSync(film5, 'utf8'));
+  assert.deepEqual(scene5.layers.map((l) => l.id).filter((id) => id.startsWith('scene')), ['scene1', 'scene3'], 'beats 1-2 merge into one layer, beat 3 keeps its own');
+  assert.equal(scene5.transitions.length, 1, 'only the real boundary (out of the run, into scene3) gets a transition');
+  assert.equal(scene5.transitions[0].at, 6, 'the surviving transition lands at the run\'s outer boundary, not the swallowed internal one');
+  fs.rmSync(dir5, { recursive: true, force: true });
+  console.log('✓ assemble.test.mjs: a boundary strictly inside a shared-fragment run is dropped and named, the run\'s outer boundary keeps its transition');
+}

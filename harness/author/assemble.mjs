@@ -633,7 +633,18 @@ try { cutMech = boundaryMechanism(cutFx, 'seam'); } catch { cutMech = undefined;
 // same boundary. An author who wants BOTH still can, by naming an explicit `transition_in:` on that
 // same beat (checked first, unchanged), the same "an explicit decision always wins" rule every other
 // field here already keeps.
+// A BOUNDARY A SHARED-FRAGMENT RUN SWALLOWS gets no transition at all: `runs` merged beats i..j into
+// ONE layer (above), so a boundary strictly between them (ri <= k < rj) never separates two layers.
+// core/transitions/lower.js needs two layers to build a seam; asked for one, it lowers to nothing,
+// so the write here would be dead weight the render silently drops. Caught at the write site rather
+// than downstream, so the film's json never claims a cut that cannot happen.
+const runOf = (k) => runs.find(([ri, rj]) => rj > ri && k >= ri && k < rj);
 const transitions = beats.slice(1).map((b, i) => {
+  const swallowedBy = runOf(i);
+  if (swallowedBy) {
+    console.log(`  dropped transition at ${shiftedStart[i + 1]}s: inside scene${swallowedBy[0] + 1}'s shared-fragment run, nothing to join`);
+    return null;
+  }
   const named = resolvedTransitionIn(b);
   if (named) {
     let mech;

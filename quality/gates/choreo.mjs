@@ -190,6 +190,31 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     return { ...b, scn, frm, ref, refRatio, eye, camStillHeld, entering: entering.map((L) => L.id) };
   });
 
+  // CAMERA-COVERAGE-FLOOR: does the resolved camera (after recipe expansion, T.cameraLegSpans, the same
+  // model beatMotionAt already uses) actually travel over the film, or did an appended leg just cover
+  // its own few seconds while cameraAt held the last pose everywhere else (recipes/expand.mjs appends
+  // recipe legs to hand legs; it does not chain them). `camKfs.length` under 2 means no camera array
+  // was ever baked, so a camera-less film says nothing here. FULL_FRAME/40%/6s are read off the one
+  // measured regression (vawe-flow-2: 4.2s of legs over 13.3s), not tuned further.
+  const CAMERA_COVERAGE_FLOOR = 0.4, CAMERA_COVERAGE_MIN_DURATION = 6;
+  let cameraCoverageFloor = null;
+  if (T.scene.camera && Array.isArray(T.scene.camera) && T.scene.camera.length > 1 && T.duration > CAMERA_COVERAGE_MIN_DURATION) {
+    const legs = [...T.cameraLegSpans].sort((a, b) => a[0] - b[0]);
+    const covered = legs.reduce((s, [a, b]) => s + (b - a), 0);
+    const coverage = T.duration > 0 ? covered / T.duration : 0;
+    if (coverage < CAMERA_COVERAGE_FLOOR) {
+      const gaps = [];
+      let cursor = 0;
+      for (const [a, b] of legs) { if (a > cursor) gaps.push([cursor, a]); cursor = Math.max(cursor, b); }
+      if (cursor < T.duration) gaps.push([cursor, T.duration]);
+      const spanStr = gaps.map(([a, b]) => `${+a.toFixed(2)}s-${+b.toFixed(2)}s`).join(' and ');
+      cameraCoverageFloor = `camera-coverage-floor: the camera travels for ${covered.toFixed(2)}s of ${T.duration}s `
+        + `(${Math.round(coverage * 100)}%, under the ${Math.round(CAMERA_COVERAGE_FLOOR * 100)}% floor); `
+        + `camera holds still ${spanStr}. Recipe legs join hand-authored cameraMove legs back to back, `
+        + `they do not replace covering the film; chain the legs so the camera moves across the gap.`;
+    }
+  }
+
   const exitChecks = T.lives.map(exitEmphasis).filter(Boolean);
   const notEmphasised = exitChecks.filter((c) => !c.ok);
   // GROUNDING, not a gate on the default: the owner's rule applies regardless of what madera measures
@@ -202,6 +227,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       slug, refName, beats: rows.map((r) => ({ ...r, eye: r.eye && { ...r.eye, region: r.eye.region || null } })),
       unplanned: unplanned.map((L) => L.id), missingHandoffs: missingHandoffs.map((L) => L.id),
       handoffs: T.handoffs, exitNotEmphasised: notEmphasised, refExitRatioMedian: refMedian,
+      cameraCoverageFloor,
     }, null, 2));
     process.exit(0);
   }
@@ -249,6 +275,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   } else if (exitChecks.length) {
     console.log(`  ✓ all ${exitChecks.length} declared exit(s) are emphasised (faster than their entrance, or an accelerating ease)`);
   }
+  if (cameraCoverageFloor) console.log(`  ~ ${cameraCoverageFloor}`);
   console.log('');
   process.exit(0);
 }
