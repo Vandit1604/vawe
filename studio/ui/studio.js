@@ -151,12 +151,16 @@
    if(alt) soloLayer=soloLayer===i?-1:i;
    else { soloLayer=-1; if(hiddenLayers.has(i)) hiddenLayers.delete(i); else hiddenLayers.add(i); saveHidden(); }
    refreshEyeUI(); applyHiddenVisibility(); }
- // re-applied every frame draw(), so a hidden layer stays hidden across a seek or a play loop
+ // re-applied every frame draw(), so a hidden layer stays hidden across a seek or a play loop.
+ // An ATTRIBUTE plus one injected rule, never the layer's own visibility style: the engine writes that
+ // style itself (a matte source, a resample source and its clone), so clearing it re-showed layers the
+ // engine had hidden. Runs even with nothing hidden, so a layer shown again loses its mark.
  function applyHiddenVisibility(){
-   if(!hiddenLayers.size&&soloLayer<0) return;
-   try{ const doc=sc.contentDocument; if(!doc) return;
+   try{ const doc=sc.contentDocument; if(!doc||!doc.head) return;
+     if(!doc.getElementById('studio-hidden-rule')){ const st=doc.createElement('style'); st.id='studio-hidden-rule';
+       st.textContent='[data-studio-hidden]{visibility:hidden!important}'; doc.head.appendChild(st); }
      doc.querySelectorAll('.hs-layer[data-idx]').forEach(el=>{
-       el.style.visibility=isHiddenState(+el.dataset.idx)?'hidden':''; });
+       if(isHiddenState(+el.dataset.idx)) el.setAttribute('data-studio-hidden',''); else el.removeAttribute('data-studio-hidden'); });
    }catch{ /* cross-origin doc: nothing to hide */ } }
  const dragEl=$('drag'), keyBtn=$('key'), selOut=$('sel');
  function setSel(i){ if(i!==selIdx) selOut.textContent='';
@@ -1171,7 +1175,7 @@
  const seek=(e)=>{ n=Math.max(0,Math.min(total,Math.round((e.clientX-rulerL)/rulerW*dur*fps))); draw(); };
  lanes.addEventListener('pointerdown',e=>{
    const eye=e.target&&e.target.closest&&e.target.closest('.eye');
-   if(eye){ toggleEye(+eye.dataset.eye,e.altKey); return; }
+   if(eye){ e.preventDefault(); e.stopPropagation(); toggleEye(+eye.dataset.eye,e.altKey); return; }
    // BEFORE the capture: setPointerCapture retargets everything that follows to the lanes element, so
    // a click handler on the bar never sees its own bar and selection silently did nothing.
    const bar=e.target&&e.target.closest&&e.target.closest('.bar');
@@ -1179,5 +1183,6 @@
      if(i<0) selOut.textContent='no JSON layer: the produced baseline added this bar';
      else setSel(i); }
    lanes.setPointerCapture(e.pointerId); seek(e); });
- lanes.addEventListener('pointermove',e=>{ if(e.buttons&1) seek(e); });
+ // only a press the lanes captured scrubs: an eye click never captures, so holding it must not move the playhead
+ lanes.addEventListener('pointermove',e=>{ if((e.buttons&1)&&lanes.hasPointerCapture(e.pointerId)) seek(e); });
  drawCrumbs(); setState('make');
