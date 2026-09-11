@@ -123,7 +123,7 @@ move across the runtime, not sit static), and \`layers\` (at least one). This is
       "type": "text",
       "text": "One data point beats a slide of ten",
       "x": 100, "y": 420, "w": 880, "size": 84, "weight": 800,
-      "split": "word", "preset": "up",
+      "split": "word", "preset": "blurUp",
       "start": 0.2, "duration": 2.4
     }
   ]
