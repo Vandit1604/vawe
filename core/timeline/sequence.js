@@ -168,12 +168,45 @@ export const POSE = { x: ['dx', 0], y: ['dy', 0], scale: ['scale', 1], rot: ['ro
   // `plane.js` made for its own reason (see that file's "WHY THE translate LONGHAND").
   z: ['z', 0], rotX: ['rotX', 0], rotY: ['rotY', 0] };
 
+// ARRIVAL_EASE_PROPS/IDENTITY: the visual props whose motion this checks for an unfinished stop
+// (docs/CRAFT/MOTION-CRAFT.md owns the speed/motion vocabulary this feeds). Not `opacity`: a move
+// TO opacity 0 is an exit, and exits accelerate by the owner's rule (exits-faster-than-entrances).
+const ARRIVAL_EASE_PROPS = ['x', 'y', 'scale', 'rot', 'w', 'h'];
+const ARRIVAL_EASE_IDENTITY = { x: 0, y: 0, scale: 1, rot: 0, w: null, h: null };
+
+// adaptArrivalEase(motion, who): a key whose move ENDS AT FULL SPEED (`easeIn*`, `linear` on a real
+// move, `rush`) but lands in a HOLD (the next key, or the end of the track, repeats the same values)
+// never decelerates: the layer slams into the stop it was always going to make anyway. Adapted to the
+// decelerating twin so the arrival still lands, just softly, and printed the way
+// core/camera-moves/dive-in.js already prints its own adaptation (docs/SAFEGUARDS.md). An authored
+// handle (`easeIn`/`easeOut`) already shapes its own segment and is left alone; so is an exit.
+function adaptArrivalEase(motion, who) {
+  for (let i = 1; i < motion.length; i++) {
+    const prev = motion[i - 1], k = motion[i], next = motion[i + 1];
+    if (k.ease == null || k.easeIn != null) continue;
+    if (k.opacity === 0) continue; // exit: fading out keeps its accelerating ease on purpose
+    const moved = ARRIVAL_EASE_PROPS.filter((p) => k[p] != null
+      && k[p] !== (prev[p] ?? ARRIVAL_EASE_IDENTITY[p]));
+    if (!moved.length) continue;
+    if (!moved.every((p) => !next || next[p] === k[p])) continue; // not a hold: leave it alone
+    let to = null;
+    if (k.ease === 'linear') to = 'easeOutCubic';
+    else if (k.ease === 'rush') to = 'brake';
+    else if (/^easeIn(?!Out)[A-Z]/.test(k.ease)) to = `easeInOut${k.ease.slice(6)}`;
+    if (!to) continue;
+    console.log(`adapted arrival-ease: ${who} key ${k.t} ${k.ease} -> ${to} (the move lands in a hold)`);
+    k.ease = to;
+  }
+}
+
 export function resolveKeyedProps(layers) {
   (layers || []).forEach((L, idx) => {
     if (!Array.isArray(L.motion) || !L.motion.length) return;
+    const who = L.id || L.type || '?';
     // Two authored curves on one segment, refused with the layer in hand. This walk already exists and
     // already names the layer, so the check goes here instead of in a second pass over the same list.
-    assertKeyHandles(L.motion, `layer "${L.id || L.type || '?'}"`);
+    assertKeyHandles(L.motion, `layer "${who}"`);
+    adaptArrivalEase(L.motion, who);
     // A KEY THAT CARRIES A PROPERTY NOTHING INTERPOLATES IS ACCEPTED-THEN-IGNORED, which is the failure
     // this repo pays for most. `origin` is the one that found this: it reads as a keyable anchor point,
     // an author writes a pivot that travels, and `origin` is a static CSS transform-origin written once
