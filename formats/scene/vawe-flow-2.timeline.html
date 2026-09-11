@@ -93,6 +93,9 @@
 .tl-clip{position:absolute;top:0;bottom:0;border-radius:999px;overflow:hidden;display:flex;align-items:center;gap:8px;box-shadow:var(--kit-elev-1);container-type:inline-size;padding-inline-end:8px}
 .tl-clip img{flex:none;width:34px;height:calc(100% - 8px);margin:4px 0 4px 4px;border-radius:999px;object-fit:cover;display:block;border:2px solid rgba(255,255,255,.55)}
 .tl-clip svg{flex:none;width:18px;height:18px;stroke-width:2}
+.tl-clip img{display:none}
+.tl-clip{padding-inline:14px}
+@container (max-width:150px){.tl-clip svg{display:none}}
 .tl-clip .lbl{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;overflow:hidden}
 .tl-clip b{font:700 28px var(--font-sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @container (max-width:200px){.tl-clip i{display:none}}
