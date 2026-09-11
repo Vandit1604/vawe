@@ -205,6 +205,7 @@ function main() {
   const act = flag('--act', null) ? parseInt(flag('--act'), 10) : null;
   const w = parseInt(flag('--w', '1920'), 10);
   const h = parseInt(flag('--h', '1080'), 10);
+  const film = flag('--film', null);
 
   const exists = fs.existsSync(frag);
   if (exists && kind) {
@@ -238,7 +239,8 @@ function main() {
   } else {
     if (h !== 1080) console.log(`  note: the reused preview path screenshots a fixed 1920x1080 canvas; H=${h} is not yet honoured (W=${w} sizes the centred box only).`);
     const pv = spawnSync('node', [path.join(ROOT, 'harness/author/preview-fragment.mjs'), frag,
-      '--theme', theme, '--w', String(w), '--out', png, '--boxes-out', boxesFile, '--no-detect'], { encoding: 'utf8', cwd: ROOT });
+      '--theme', theme, '--w', String(w), '--out', png, '--boxes-out', boxesFile, '--no-detect',
+      ...(film ? ['--film', film] : [])], { encoding: 'utf8', cwd: ROOT });
     process.stdout.write(pv.stdout || '');
     if (pv.status !== 0) { console.error(pv.stderr || 'screen: preview render failed'); }
     else {
@@ -341,3 +343,27 @@ function main() {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main();
+
+// clipAgainstBox(boxes, box) -> the same shape of finding as clipping(), but against an arbitrary
+// {x,y,w,h} rather than the canvas + its safe margin. A LAYER's box has no margin of its own: whatever
+// margin placed the box against the canvas already happened in resolveCoords, so a fragment's job is
+// just to fit the box it was given. Used to check a fragment at its REAL assembled layer box (build
+// fix 7: make screen/make preview used to check only the full 1920x1080 canvas, so a fragment could
+// pass standalone and still clip once the film placed it in a smaller box).
+export function clipAgainstBox(boxes, box) {
+  const x0 = box.x, y0 = box.y, x1 = box.x + box.w, y1 = box.y + box.h;
+  const findings = [];
+  for (const b of boxes || []) {
+    const bx1 = b.x + b.w, by1 = b.y + b.h;
+    if (b.x >= x0 && b.y >= y0 && bx1 <= x1 && by1 <= y1) continue;
+    const amounts = [
+      b.x < x0 && (Math.round(x0 - b.x) + 'px past its left edge'),
+      b.y < y0 && (Math.round(y0 - b.y) + 'px past its top edge'),
+      bx1 > x1 && (Math.round(bx1 - x1) + 'px past its right edge'),
+      by1 > y1 && (Math.round(by1 - y1) + 'px past its bottom edge'),
+    ].filter(Boolean);
+    findings.push({ tag: b.tag, text: String(b.text || '').slice(0, 60), severity: 'layer-box', amounts });
+  }
+  return findings;
+}
+

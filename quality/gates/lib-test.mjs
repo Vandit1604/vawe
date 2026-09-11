@@ -7679,6 +7679,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   runSelftest('known-answer: harness/media/study.mjs --selftest', 'harness/media/study.mjs', ['--selftest']);
   runSelftest('known-answer: screen-readiness.test.mjs (readiness() against fixed markup)',
     'quality/gates/screen-readiness.test.mjs', []);
+  runSelftest('known-answer: preview-fragment.test.mjs (sanitiser parity + real layer box clipping)',
+    'quality/gates/preview-fragment.test.mjs', []);
 }
 
 // ---- the judge prep (quality/gates/judge.mjs), on its own pure halves: which frame stands for which
