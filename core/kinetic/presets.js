@@ -62,7 +62,7 @@ export const PRESETS = {
     'the glyphs THICKEN into place along the font\'s own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still'),
   // rise + fade (default kinetic reveal)
   up: preset((u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${((1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
-    'words/chars rise into place: the default kinetic headline'),
+    'words/chars rise into place, no blur: the plain lift'),
   down: preset((u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${(-(1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
     'words/chars drop into place from above: the mirror of `up`'),
   // fade: opacity only, no transform at all. The neutral entrance nothing else undercuts, and because
@@ -86,7 +86,7 @@ export const PRESETS = {
   // lift share one ease, so a unit is never sharp while still travelling.
   blurUp: preset((u, { dist = 28, px = 12 } = {}) => { const e = easeOutCubic(clamp01(u));
     return { opacity: clamp01(u * 1.4), transform: `translateY(${((1 - e) * dist).toFixed(2)}px)`, filter: `blur(${((1 - e) * px).toFixed(2)}px)` }; },
-    'letters lift and sharpen out of blur together: the soft premium headline reveal'),
+    'letters lift and sharpen out of blur together: the default kinetic headline'),
   // springy bounce in
   // `settle` used to scale the spring INPUT (`u * settle * 2`) while spring's own omega is 2π/settle,
   // so the two cancelled and the dial did nothing (docs/MISTAKES.md #115). Input is a constant now, so

@@ -821,7 +821,7 @@ A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: fli
 |---|---|
 | `assemble` | each glyph flies in from its OWN scattered offset and rotation and settles into the word, arriving in a shuffled order · the AE "text animator + randomize-order range selector" reveal. Pair it with `split: "char"` |
 | `blur` | resolve out of blur: calm, premium |
-| `blurUp` | letters lift and sharpen out of blur together: the soft premium headline reveal |
+| `blurUp` | letters lift and sharpen out of blur together: the default kinetic headline |
 | `bounce` | springy bounce in: playful brands only |
 | `chroma` | R/G/B ghosts split apart and converge to a crisp glyph |
 | `colorWave` | the accent sweeps word by word along a line, each unit lighting then settling to the resting colour · `colors` gives EACH unit its OWN arrival colour instead of one shared accent, per-word colour before the line settles to one ink |
@@ -849,7 +849,7 @@ A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: fli
 | `type` | typewriter hard on/off, no transform: terminals, timers, code |
 | `underline` | a rule grows left to right along the baseline as the word lands, the marker under a heading |
 | `unfold` | opens from edge-on about its left hinge, a panel turning to face you, premium |
-| `up` | words/chars rise into place: the default kinetic headline |
+| `up` | words/chars rise into place, no blur: the plain lift |
 | `wave` | sinusoidal wave across units: a LOOP that never settles; ambient only |
 | `weight` | the glyphs THICKEN into place along the font's own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still |
 
