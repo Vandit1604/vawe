@@ -64,6 +64,7 @@ import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { snippet } from '../../harness/lib/text.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -184,7 +185,18 @@ const tailStart = duration - TAIL;
 // last layer landing at duration minus 0.2 as a deliberate outro beat, and that is not an empty plate.
 const tailCovered = merged.some(([a, b]) => b >= tailStart - 1e-9 && a < duration - 1e-9);
 if (!tailCovered && duration > TAIL) {
-  fail('ends-on-nothing', `the last ${s(TAIL)} of this ${s(duration)} video (from ${s(tailStart)}) holds no content layer, so the film fades to a bare backdrop and the viewer's last frame is empty. That is the frame a feed freezes on, so it is the one that has to carry the mark or the line. Fix it by running the closing layer to \`${s(duration)}\` (start + duration = the scene duration), or by shortening \`duration\` to where the content actually ends.`);
+  const msg = `the last ${s(TAIL)} of this ${s(duration)} video (from ${s(tailStart)}) holds no content layer, so the film fades to a bare backdrop and the viewer's last frame is empty. That is the frame a feed freezes on, so it is the one that has to carry the mark or the line. Fix it by running the closing layer to \`${s(duration)}\` (start + duration = the scene duration), or by shortening \`duration\` to where the content actually ends.`;
+  // A closing brand card or mark IS the content the tail wants, but scene-timing's own `speck()` filter
+  // (correctly) drops it from `content` for the coverage checks above: a small mark never fills the
+  // frame, but it is not empty either. Named by id/class/role, on the raw layer set speck() never saw.
+  // ponytail: no scene-units correction here (unlike T.content above), so a mark shortened or lengthened
+  // by a non-last-beat cut reads on its authored start/duration; tighten if that drifts in practice.
+  const isMark = (L) => /brand|mark|logo/i.test(String(L.id || L.class || L.role || ''));
+  const markCovers = layers.some((L) => L.track !== 0 && isMark(L)
+    && num(L.start, 0) < duration - 1e-9 && num(L.start, 0) + num(L.duration, duration) >= tailStart - 1e-9);
+  const adapted = adaptFinding({ kind: 'ends-on-nothing', tailLayerKind: markCovers ? 'brand-mark' : '' }).adapted;
+  if (adapted) { console.log(`  ${adapted.line}`); warn('ends-on-nothing', msg); }
+  else fail('ends-on-nothing', msg);
 }
 
 // ---------- 3. empty-beat ----------
