@@ -1142,5 +1142,21 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `ui focus zoom` | camera → `move: "diveIn"` |
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
+## Transition relationships  `[transition]`
+
+Name the RELATIONSHIP between two beats first, then pick from its candidates, per `docs/CRAFT/TRANSITIONS.md`'s decision procedure. Write the reason in the scene as `transition_why`.
+
+| name | what / when |
+|---|---|
+| `act-break` | a beginning or an ending, an act break: open or close the film or a major section. → try: fade |
+| `continuity` | nothing: invisible, respects momentum. Two beats are one continuous thought. → try: none |
+| `contrast` | shock, jolt: end on maximum tonal contrast; wake from a dream. → try: none, flashWhite |
+| `new-place-energy` | frantic energy, momentum, "meanwhile": an energetic location or time change. → try: whipPan, wipe |
+| `rhyme` | "these two things are the same": bridge scenes by a visual or compositional rhyme. → try: none |
+| `same-action` | seamless, energy carried through: cut on a movement so the eye rides it past the seam. → try: match-on-action |
+| `same-object` | magic: the same identity across states, the highest-craft continuity there is. → try: shared-element morph |
+| `spatial-travel` | one world: the beats are PLACES, not claims. The content has a spatial logic worth walking. → try: camera travel |
+| `time` | passage of time, a connection, gentleness: link two images, soften, show time passing. → try: dissolve, fade |
+
 ---
-_700 effects across 59 families. Regenerate: `make effects`._
+_709 effects across 60 families. Regenerate: `make effects`._

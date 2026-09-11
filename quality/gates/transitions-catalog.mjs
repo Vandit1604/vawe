@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { TRANSITIONS, MECHANISMS, basics, unclassified } from '../../core/transitions/catalog.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { parseStoryboard, timeline } from '../../harness/author/storyboard-parse.mjs';
-import { resolvedTransitionIn, parseTransitionWhy, isSeamRecipe, nearestTransitions } from '../../harness/lib/contract.mjs';
+import { resolvedTransitionIn, parseTransitionWhy, isSeamRecipe, isContinuousBoundary } from '../../harness/lib/contract.mjs';
 import { RELATIONSHIP_KEYS, candidatesFor } from '../../core/transitions/relationships.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -33,20 +33,29 @@ if (filmArg) {
   const src = fs.readFileSync(sbPath, 'utf8');
   const beats = timeline(parseStoryboard(src)).beats;
   console.log(`\n  TRANSITIONS · ${path.relative(ROOT, sbPath)} · ${Math.max(0, beats.length - 1)} boundary(ies)\n`);
+  console.log(`  relationships: ${RELATIONSHIP_KEYS.join(', ')}. docs/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam\n`);
   for (let i = 1; i < beats.length; i++) {
     const prev = beats[i - 1], b = beats[i];
     const resolved = resolvedTransitionIn(b);
     const seam = isSeamRecipe(b) || isSeamRecipe(prev);
-    const current = resolved ? `fx:${resolved.fx}` : (b.transition_in ? `"${b.transition_in}" (unresolved)` : seam ? 'recipe seam' : 'nothing');
+    // A continuous boundary (same fragment, a shared `becomes:`, or a camera `travel` spanning it) is
+    // not a cut waiting on a transition, so it is reported as such and never as an "unreasoned" guess.
+    const continuous = !resolved && !seam && isContinuousBoundary(prev, b);
+    const current = resolved ? `fx:${resolved.fx}`
+      : (b.transition_in ? `"${b.transition_in}" (unresolved)`
+        : seam ? 'recipe seam'
+          : continuous ? 'continuous (same surface)' : 'nothing');
     const why = parseTransitionWhy(b.transition_why);
     const whyLine = why && !why.error ? `${why.relationship} · ${why.feeling} · ${why.mode}` : 'unreasoned';
     const relationship = why && !why.error ? why.relationship : null;
-    const candidates = relationship ? (candidatesFor(relationship) || []) : nearestTransitions(`${prev.name} ${b.name}`, 3).map((t) => t.name);
     console.log(`  beat ${i} (${prev.name}) -> beat ${i + 1} (${b.name})`);
     console.log(`    current: ${current}`);
     console.log(`    why: ${whyLine}`);
-    console.log(`    candidates${relationship ? ` for "${relationship}"` : ' (likely, unreasoned)'}: ${candidates.join(', ') || '(none)'}`);
-    console.log(`    relationships: ${RELATIONSHIP_KEYS.join(', ')}. docs/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam\n`);
+    // A name-keyword guess ("grain gradient" -> "grain" the transition) reads as reasoned when it is
+    // not. State the relationship first; candidates come from the taxonomy, never from beat names.
+    if (relationship) console.log(`    candidates for "${relationship}": ${(candidatesFor(relationship) || []).join(', ') || '(none)'}`);
+    else console.log('    candidates: state the relationship first (transition_why)');
+    console.log('');
   }
   process.exit(0);
 }

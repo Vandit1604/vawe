@@ -19,6 +19,7 @@ import { catalogued } from '../../core/registry/registry.js';
 // contain the three.js layer at all: a whole scene-graph capability with four registered scenes, a
 // written determinism contract and a purity gate, invisible to the one document whose job is to list it.
 import { FEEL, DURATION, CAMERA_WORDS } from '../../core/registry/vocab.js';
+import { RELATIONSHIPS, RELATIONSHIP_KEYS } from '../../core/transitions/relationships.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CHECK = process.argv.includes('--check');
@@ -109,6 +110,14 @@ const VOCAB_BLURBS = Object.fromEntries([
   ...Object.entries(CAMERA_WORDS).map(([w, t]) => [w, `camera → \`move: "${t}"\``]),
 ]);
 
+// RELATIONSHIPS (core/transitions/relationships.js): docs/CRAFT/TRANSITIONS.md's taxonomy, keyed by the
+// relationship between two beats, so `make arsenal Q="transition for time passing"` finds the candidate
+// by the FEELING it names rather than by a mechanism word the author has not chosen yet.
+const REL_BLURBS = Object.fromEntries(RELATIONSHIP_KEYS.map((k) => {
+  const { candidates, meaning } = RELATIONSHIPS[k];
+  return [k, `${meaning} → try: ${candidates.join(', ')}`];
+}));
+
 // ── the sections that WRITE THEMSELVES ──────────────────────────────────────────────────────────
 //
 // A registry that carries a `catalog` block (core/registry.js) already holds every part of a section:
@@ -178,6 +187,7 @@ export const sections = [
   // does not fix adoption (`parts` went 0 to 5 block files and its scenes stayed at 2), but a
   // catalogue that names the wrong key guarantees the opposite.
   ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `docs/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
+  ['Transition relationships', 'Name the RELATIONSHIP between two beats first, then pick from its candidates, per `docs/CRAFT/TRANSITIONS.md`\'s decision procedure. Write the reason in the scene as `transition_why`.', names(RELATIONSHIP_KEYS), 'transition', { blurbs: REL_BLURBS }],
 ];
 
 // Imported (by scripts/site/effects-json.mjs) this module is a DATA source for `sections`, so the
