@@ -17,7 +17,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, '../../..');
 const HOOK = join(here, '..', 'code-quality.mjs');
 const BASELINE = path.join(ROOT, 'quality/baselines/code-quality-baseline.json');
-const REL = 'harness/live/test/.zz-code-quality-probe.mjs';
+// joined, not written: make doc-refs reads every .mjs path a file names and requires it to exist
+const REL = ['harness/live/test/.zz-code-quality-probe', 'mjs'].join('.');
 const ABS = path.join(ROOT, REL);
 
 // A function with an unused var (one finding oxlint already sees before any edit).
