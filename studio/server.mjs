@@ -277,6 +277,7 @@ const chatContext = (prompt) => {
     sceneMap(),
     mentionContext(prompt),
     'Answer in 1 to 3 short sentences: what changed.',
+    'Never write an em dash, in replies or in files.',
   ].filter(Boolean).join(' ');
 };
 
