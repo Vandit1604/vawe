@@ -187,6 +187,16 @@ station are untouched: they still measure the plain typed characters, never the 
 
 ---
 
+## 5c. The camera does not sit still
+
+Every film moves the camera at least once: a slowPush or a diveIn is the smallest way to keep the
+frame alive, and a film with none at all fires `no-camera`. Recipe camera legs join hand-authored
+legs rather than replace them, so a film with legs only in its opening seconds holds still for the
+rest: `make choreo` warns `camera-coverage-floor` when the resolved legs cover under 40% of a film
+over 6s long (`skills/vawe-camera/SKILL.md`).
+
+---
+
 ## 6. Motion blur, once
 
 `motionBlur: 0.16` appears on exactly one layer, `btn`, the fast traveller. Blur on everything is
