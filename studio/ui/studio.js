@@ -514,10 +514,10 @@
    let d='';
    for(let k=0;k<=N;k++){ const t=k/N; let y; try{ y=fn(t); }catch{ y=t; }
      d+=(k?'L':'M')+(pad+t*(W-2*pad)).toFixed(1)+' '+y2p(y).toFixed(1)+' '; }
-   return '<svg viewBox="0 0 '+W+' '+H+'" width='+W+' height='+H+' class=curvegraph>'
-     +'<line x1='+pad+' y1='+y2p(0).toFixed(1)+' x2='+(W-pad)+' y2='+y2p(0).toFixed(1)+' class=cg0/>'
-     +'<line x1='+pad+' y1='+y2p(1).toFixed(1)+' x2='+(W-pad)+' y2='+y2p(1).toFixed(1)+' class=cg1/>'
-     +'<path d="'+d+'" class=cgpath/></svg>';
+   return '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" class="curvegraph">'
+     +'<line x1='+pad+' y1='+y2p(0).toFixed(1)+' x2='+(W-pad)+' y2='+y2p(0).toFixed(1)+' class="cg0" />'
+     +'<line x1='+pad+' y1='+y2p(1).toFixed(1)+' x2='+(W-pad)+' y2='+y2p(1).toFixed(1)+' class="cg1" />'
+     +'<path d="'+d+'" class="cgpath" /></svg>';
  }
  // one <select> of the engine's real named easings (Object.keys(EASINGS), never a hand list), or the
  // raw numbers for a bezier ease (docs/PRIMITIVES.md never names draggable-handle math a requirement
