@@ -2613,6 +2613,19 @@ the SAME value through the SAME name, and a film with no design.md renders byte-
 existed. Uniformity is now something a film states, not something a fixed list enforces from outside it.
 holds: harness/lib/design-spec.mjs, harness/lib/stagekit.mjs
 
+## 623. An `image` layer's relative src rendered nothing, and nothing said so
+`{"src": "assets/vawe-flow-2/tile-grid.jpg"}` on an image layer rendered an empty box in the mp4. The
+file existed at the repo root; `make asset-check` and the render both passed. The scene page is served
+from `/formats/scene/`, so the bare path resolved to `/formats/scene/assets/...` in the browser and
+404'd, the exact trap `core/layers/video.js` already names in its own comment. `core/engine/src-url.js`
+(`srcUrl`) already fixed this for video; the image layer never called it. It builds its `<img>` through
+`icon()` (`core/motion/motion.js`), which wrote the raw `src` straight into the tag.
+The fix: `icon()` now resolves its image src through `srcUrl` too, so image, video and any HTML built
+through `icon()` share the one resolver instead of video carrying a fix nothing else got. `make
+asset-check` also notes (does not fail on) a relative src that does resolve to a real file, naming the
+served-root form an author could write directly.
+holds: core/motion/motion.js, core/engine/src-url.js, quality/gates/asset-check.mjs
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
