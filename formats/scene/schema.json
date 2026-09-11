@@ -152,6 +152,7 @@
     "text",
     "tracking",
     "typing",
+    "typingColors",
     "untype",
     "untypeRate",
     "w",
@@ -1249,6 +1250,14 @@
     "caretHold": {
      "type": "boolean",
      "label": "typing: keep the caret after the text finishes"
+    },
+    "typingColors": {
+     "type": "object",
+     "label": "typing: each typed word flashes a colour from `colors`, then settles to the layer colour over `hold`",
+     "properties": {
+      "colors": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+      "hold": { "type": "number", "minimum": 0, "maximum": 1 }
+     }
     },
     "untype": {
      "type": "number",

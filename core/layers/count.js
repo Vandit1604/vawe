@@ -11,7 +11,7 @@ export { build } from './text.js';
 // layer, where they were accepted and read by nothing (found by quality/gates/prop-probe.mjs; no scene
 // in the library sets one). `typing` itself stays: the keyclick generator reads it for any layer
 // (formats/scene/scene.js:1529). `fit`/`fitH` stay too, they are read in the shared BUILD.
-const TEXT_FRAME_ONLY = ['caret', 'caretHold', 'untype', 'untypeRate', 'maxLines'];
+const TEXT_FRAME_ONLY = ['caret', 'caretHold', 'untype', 'untypeRate', 'typingColors', 'maxLines'];
 const textShared = Object.fromEntries(
   Object.entries(TEXT_PROPS).filter(([k]) => !TEXT_FRAME_ONLY.includes(k)));
 

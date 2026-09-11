@@ -178,6 +178,11 @@ and the typing `text` as children of one `group` that carries the motion track (
 `caret` still resolves, at the child's real stage position (`findLayerById` sums each ancestor
 `layout:"free"` group's own x/y on the way down).
 
+A typed line can also flash each word its own accent as it lands: `"typingColors": { "colors": ["var(--accent)", "var(--accent-2)"], "hold": 0.4 }`.
+`colors` cycles one per word (colorWave's `colors[i % n]` vocabulary), `hold` is the same 0..1 fraction
+of the ramp spent at full flash before easing to the layer's own ink. `caretX`/the camera's caret
+station are untouched: they still measure the plain typed characters, never the colour.
+
 ---
 
 ## 6. Motion blur, once

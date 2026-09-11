@@ -348,7 +348,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `rect` | a plain box, panel, card or pill. it carries no text: put that on a higher track |
 | `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
 | `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
-| `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too |
+| `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink |
 | `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
 | `video` | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
 
