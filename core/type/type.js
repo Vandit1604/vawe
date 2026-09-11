@@ -193,7 +193,7 @@ export function circleText(el, units, { radius = 220 } = {}) {
 
 // animateUnits(units, t, opts): apply a preset to each split unit at time t. Presets except `wave`
 // are one-shot staggered reveals; `wave` uses (t * speed + i*phaseStep) as a looping phase.
-export function animateUnits(units, t, { preset = 'up', each = 0.5, stagger = 0.06, smoothness = 1, loop = false, speed = 1, phaseStep = 0.5, ...popts } = {}) {
+export function animateUnits(units, t, { preset = 'blurUp', each = 0.5, stagger = 0.06, smoothness = 1, loop = false, speed = 1, phaseStep = 0.5, ...popts } = {}) {
   // An unknown name is a HARD ERROR. It used to fall back to `up`, so a typo - or a preset renamed out
   // from under a scene - rendered a plausible frame that was not what was asked for, and the schema does
   // not enumerate these names either, so nothing else caught it. Same reasoning as the unknown-modifier
