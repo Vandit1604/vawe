@@ -1,3 +1,9 @@
+---
+when: "a check blocks or flags a film and you need to know whether it should adapt (clamp, tolerate, reclassify, skip) or stay a hard refusal"
+answers: "which safeguards adapt to the film and how · the shared registry harness/lib/safeguards.mjs and its adaptation line · which checks stay hard and why · how adaptation relates to authoring.allow waivers"
+group: process
+---
+
 # SAFEGUARDS.md: which checks adapt, and which stay hard
 
 This is an INDEX, not a rulebook. Each guard's intent still lives next to the code it measures
