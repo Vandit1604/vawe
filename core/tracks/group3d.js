@@ -50,31 +50,62 @@ export function computeGroup3D(layers) {
 // already carry), and the group is reset to opaque/unfiltered. Order-independent: every value read here
 // was written earlier in THIS SAME call by writers documented authoritative on every frame (motion.js),
 // never carried over from a stale prior one, so a cold render and a warm one agree.
+//
+// A CHILD'S "WHATEVER IT ALREADY CARRIES" IS NOT SAFE TO READ BLIND, and it used to be. A child that
+// keys its own 3D pose but never keys its own blur/opacity (the ordinary case: a card just needs to
+// SIT at its tilt) never gets a fresh, unconditional write to that property from its own track: motion.js
+// only writes `filter` when the layer computes a nonzero blur or already owns a stash (`el.__hsBlur`),
+// and `opacity` is read back from `el.style.opacity` itself rather than a separate stored base. So
+// "whatever it already carries" was, every frame after the first, THIS FUNCTION'S OWN PUSH FROM LAST
+// FRAME: read, concatenated/multiplied again, and written back, forever compounding one more blur() or
+// one more opacity factor onto the pile every tick a group blur/opacity stayed nonzero. A rack-focus
+// blur meant to decay to 0 over a beat instead grew withOUT bound, which is the heavy, whole-beat blur
+// this was found from. THE FIX is the same idempotent stash `writeBlur` already uses for exactly this
+// reason (core/tracks/motion.js): remember what WE wrote and to what base, so next frame we can tell
+// our own last push apart from the child's own fresh write and start from the child's real base again,
+// never from our own leftovers.
+// gFilter null means the group carries no filter THIS frame: still run, because a child may hold a
+// stash from an earlier frame's push (a decaying blur that just reached 0) that has to be cleared back
+// to the child's own base rather than left sitting there forever (the same bug, at the other end of
+// the decay: nothing to compound, but nothing to clean up either, without this branch running).
+function pushFilter(c, gFilter) {
+  const raw = c.style.filter;
+  const cur = raw && raw !== 'none' ? raw : '';
+  const prior = c.__hsGroup3D;
+  const base = prior && cur === prior.out ? prior.base : cur;
+  const out = gFilter ? (base ? base + ' ' : '') + gFilter : base;
+  c.style.filter = out || 'none';
+  c.__hsGroup3D = { out, base };
+}
+function pushOpacity(c, gOpV) {
+  const raw = parseFloat(c.style.opacity);
+  const cur = Number.isFinite(raw) ? raw : 1;
+  const prior = c.__hsGroup3DOp;
+  const base = prior && Math.abs(cur - prior.out) < 1e-6 ? prior.base : cur;
+  const out = base * gOpV;
+  c.style.opacity = out.toFixed(3);
+  c.__hsGroup3DOp = { out, base };
+}
 export function applyGroup3DOpacityAdapt(list, logged) {
   for (const g of list) {
     const gOp = parseFloat(g.el.style.opacity);
     const gOpV = Number.isFinite(gOp) ? gOp : 1;
     const gFilter = g.el.style.filter;
     const gHasFilter = gFilter && gFilter !== 'none';
-    if (gOpV === 1 && !gHasFilter) continue;
+    // A group that has never carried a push and is at rest this frame (opaque, unfiltered) has nothing
+    // to give and nothing of its own to clean up: skip it exactly as before. Once either property has
+    // ever been nonzero, __hs* is set on the group itself below and this group keeps running every
+    // frame after, so a decay back to rest still gets its last cleanup pass.
+    if (gOpV === 1 && !gHasFilter && !g.el.__hsGroup3DTouched) continue;
+    if (gOpV !== 1 || gHasFilter) g.el.__hsGroup3DTouched = true;
     if (logged && !logged.has(g.el)) {
       logged.add(g.el);
       console.log(`adapted group-3d-opacity: ${g.el.dataset?.id || g.el.id || 'group'} opacity moved `
         + `to children (opacity flattens 3D in CSS)`);
     }
-    if (gOpV !== 1) {
-      g.el.style.opacity = '1';
-      for (const c of g.children) {
-        const cOp = parseFloat(c.style.opacity);
-        c.style.opacity = ((Number.isFinite(cOp) ? cOp : 1) * gOpV).toFixed(3);
-      }
-    }
-    if (gHasFilter) {
-      g.el.style.filter = 'none';
-      for (const c of g.children) {
-        const cFilter = c.style.filter && c.style.filter !== 'none' ? c.style.filter + ' ' : '';
-        c.style.filter = cFilter + gFilter;
-      }
-    }
+    g.el.style.opacity = '1';
+    for (const c of g.children) pushOpacity(c, gOpV);
+    g.el.style.filter = 'none';
+    for (const c of g.children) pushFilter(c, gHasFilter ? gFilter : null);
   }
 }
