@@ -239,7 +239,11 @@ export function lookBlock(film) {
   const addReference = reference ? null
     : `no reference named. Studied one already? add \`reference: "<name>"\` to ${path.relative(ROOT, p.sb)}'s `
       + `frontmatter, matching grammar/<name>.json. Not studied yet: make study VIDEO=<clip> NAME=<name>, then add the field.`;
-  return { fragments, theme, reference, screens, dev, sheets, contentCheck, addReference };
+  // FIX 2: the page audit (overflow, safe, contrast, buried, tiny/clipped text) needs no render, only
+  // the scene JSON, so a design/direct-stage author can see it at exactly the same moment as the frames
+  // above, not after paying for the mp4. Same invocation `make ship` already trusts (Makefile:319).
+  const audit = scene ? `node quality/audit.mjs ${p.base}.json --aspect all` : null;
+  return { fragments, theme, reference, screens, dev, sheets, contentCheck, addReference, audit };
 }
 
 // Stage 1 has no film yet, so stageOf() has nothing to read. What DOES exist is the same deliverable
@@ -300,6 +304,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(`  LOOK (frames now, not after render):`);
     for (const s of look.screens) console.log(`    ${s}`);
     console.log(`    ${look.dev}   (draft render; writes the sheets below)`);
+    if (look.audit) console.log(`    ${look.audit}   (page audit; no render needed)`);
     console.log(`    ${look.contentCheck || look.addReference}`);
     console.log(`    sheets: ${look.sheets.beats}  ·  ${look.sheets.reveal}`);
     console.log('');

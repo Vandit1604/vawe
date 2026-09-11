@@ -7817,6 +7817,26 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('parseBlockedCodes never blocks a report-only code', !blocked.has('hollow-beat'));
 }
 
+// FIX 2: stage.mjs lookBlock names the pre-render page audit alongside the frame commands, so a
+// design/direct-stage author sees it at the same moment, not after paying for a render. sample.json +
+// sample.storyboard.md are committed fixtures (unlike a working film's scene JSON, which is gitignored)
+// so this stays true on a fresh clone.
+{
+  const { lookBlock } = await import('./stage.mjs');
+  const look = lookBlock('sample');
+  ok('lookBlock names the pre-render page audit for a film with a scene', look
+    && typeof look.audit === 'string' && look.audit.includes('quality/audit.mjs') && look.audit.includes('sample.json'));
+  // THE REAL DEFECT: before this field existed, a design/direct worklist had no audit command at all,
+  // so it was reachable only through `make ship`, a POST-render step. A storyboard with no scene JSON
+  // yet (still at the design stage, nothing for the audit to load) must not claim one it cannot run.
+  const noSceneStoryboard = 'formats/scene/_zz-lookblock-noscene.storyboard.md';
+  fs.copyFileSync('formats/scene/sample.storyboard.md', noSceneStoryboard);
+  try {
+    const noScene = lookBlock('_zz-lookblock-noscene');
+    ok('lookBlock names no audit command when there is no scene JSON yet', noScene && noScene.audit === null);
+  } finally { fs.rmSync(noSceneStoryboard, { force: true }); }
+}
+
 // ---- harness/lib/waivers.mjs: a waiver excuses the instance it names, a bare one excuses the film ---
 {
   ok('waivers: splitWaiver reads a bare code with no instance', JSON.stringify(splitWaiver('dead-air')) === JSON.stringify({ code: 'dead-air', instance: null }));
