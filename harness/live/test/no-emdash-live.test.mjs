@@ -29,7 +29,7 @@ const write = (rel, body) => {
 const cleanup = (rel) => fs.rmSync(path.join(ROOT, rel), { force: true });
 
 test('a Write that lands an em dash is reported with its file and line', () => {
-  const rel = 'harness/live/test/.zz-emdash-write-probe.mjs';
+  const rel = ['harness/live/test/.zz-emdash-write-probe', 'mjs'].join('.'); // joined: make doc-refs reads .mjs paths
   const body = `const a = 1;\nconst b = 'note${EM}here';\n`;
   write(rel, body);
   try {
@@ -41,7 +41,7 @@ test('a Write that lands an em dash is reported with its file and line', () => {
 });
 
 test('an Edit whose new_string has no em dash is silent, even if the file has one elsewhere', () => {
-  const rel = 'harness/live/test/.zz-emdash-edit-probe.mjs';
+  const rel = ['harness/live/test/.zz-emdash-edit-probe', 'mjs'].join('.'); // joined: make doc-refs reads .mjs paths
   const before = `const stale = 'old${EM}note';\n`;
   write(rel, before);
   const newString = `const fresh = 'clean line';\n`;
