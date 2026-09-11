@@ -1,0 +1,62 @@
+[
+  {
+    "id": "typography.measure-first",
+    "category": "typography",
+    "stage": "design",
+    "applies": "hasTextBeats",
+    "check": null,
+    "adapt": null,
+    "brief": "A good face does ~90% of the work; spend the effort before styling (Butterick)",
+    "doc": "docs/CRAFT/TYPOGRAPHY.md"
+  },
+  {
+    "id": "typography.overused-face",
+    "category": "typography",
+    "stage": "design",
+    "applies": "hasTextBeats",
+    "check": "off-font",
+    "adapt": null,
+    "brief": "This is also an impeccable rule, make designspec-check flags overused faces",
+    "doc": "docs/CRAFT/TYPOGRAPHY.md"
+  },
+  {
+    "id": "typography.two-face-max",
+    "category": "typography",
+    "stage": "design",
+    "applies": "hasTextBeats",
+    "check": null,
+    "adapt": null,
+    "brief": "Two faces max; one is often enough",
+    "doc": "docs/CRAFT/TYPOGRAPHY.md"
+  },
+  {
+    "id": "typography.weight-contrast",
+    "category": "typography",
+    "stage": "design",
+    "applies": "hasTextBeats",
+    "check": null,
+    "adapt": null,
+    "brief": "Weight contrast must be extreme. You default to 400 vs 700. Video needs 300 vs 900",
+    "doc": "docs/CRAFT/TYPOGRAPHY.md"
+  },
+  {
+    "id": "typography.hierarchy-not-size-alone",
+    "category": "typography",
+    "stage": "design",
+    "applies": "hasTextBeats",
+    "check": "weak-headline",
+    "adapt": null,
+    "brief": "Hierarchy via weight + colour, not size alone: supporting text = lighter weight or dim/text2 colour",
+    "doc": "docs/CRAFT/TYPOGRAPHY.md"
+  },
+  {
+    "id": "typography.measure-exemption",
+    "category": "typography",
+    "stage": "design",
+    "applies": "hasTextBeats",
+    "check": null,
+    "adapt": null,
+    "brief": "Measure (line length): 45-75 chars, ~66 ideal. BODY AND CAPTIONS ONLY. Display type is exempt",
+    "doc": "docs/CRAFT/TYPOGRAPHY.md"
+  }
+]

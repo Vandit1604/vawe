@@ -1,0 +1,62 @@
+[
+  {
+    "id": "layout.asymmetric-hero",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Compose asymmetric with one hero (scale contrast), never centered with an equal grid",
+    "doc": "docs/CRAFT/LAYOUT.md"
+  },
+  {
+    "id": "layout.two-focal-points",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Two focal points minimum per scene",
+    "doc": "docs/CRAFT/LAYOUT.md"
+  },
+  {
+    "id": "layout.safe-zones",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": "safe",
+    "adapt": null,
+    "brief": "Keep essential text/hero inside title-safe ≈ inner 90% of the frame",
+    "doc": "docs/CRAFT/LAYOUT.md"
+  },
+  {
+    "id": "layout.archetype-rotation",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": "archetype-repeat",
+    "adapt": null,
+    "brief": "No layout archetype twice in a row; the storyboard names each beat's archetype",
+    "doc": "docs/CRAFT/LAYOUT.md"
+  },
+  {
+    "id": "layout.active-passive-whitespace",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "The empty part of a frame is either doing a job or it is a leftover",
+    "doc": "docs/CRAFT/LAYOUT.md#active-vs-passive-whitespace"
+  },
+  {
+    "id": "layout.three-planes",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Three layers minimum per scene. Background treatment, foreground content, accent elements",
+    "doc": "docs/CRAFT/LAYOUT.md"
+  }
+]
