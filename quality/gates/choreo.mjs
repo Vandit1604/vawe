@@ -24,6 +24,7 @@ import { pullFrames, profile, primaryRegionAt } from './motion-floor.mjs';
 import { parseStoryboard } from '../../harness/author/storyboard-parse.mjs';
 import { parseEyeLine } from '../../harness/lib/contract.mjs';
 import { EASINGS } from '../../core/motion/motion.js';
+import { velocityAt } from '../../core/timeline/sequence.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -58,16 +59,63 @@ export const ACCEL_EASES = new Set([...Object.keys(EASINGS).filter((n) => /^ease
 export const FAST_RATIO = 0.6;
 export const SUGGESTED_EASE = 'rush'; // the engine's own name for "accelerate away" (core/motion/motion.js)
 
+// SPEED_SAMPLE_DT: the lookback window velocityAt samples at each edge. Short enough to read the rate
+// AT the edge rather than averaged over the whole enter/exit ramp, never longer than half that ramp
+// (a `dt` past the segment's own end would sample motion outside it).
+const SPEED_SAMPLE_DT = 0.05;
+// A window under this is not worth measuring: rounding noise in the resolved pose would read as a
+// real speed swing at 1-2 frames.
+const SPEED_EPS = 1; // px/s
+
+/** measuredSpeed(life, window): the layer's own measured speed (px/s) at the start and end of an
+ * enter/exit window, sampled off its OWN motion track (velocityAt, core/timeline/sequence.js). Null
+ * when there is nothing to measure: no keyed motion, no window, or the layer never keys position (a
+ * fade-only layer has no travel to be fast or slow about). `motion` keyframe times are LOCAL to the
+ * layer's own life, so the window is shifted by `life.start` before sampling. */
+function measuredSpeed(life, window) {
+  const dur = window.end - window.start;
+  if (!life.motion || !(dur > 0) || !life.channels.includes('position')) return null;
+  const dt = Math.min(SPEED_SAMPLE_DT, dur / 2);
+  if (!(dt > 0)) return null;
+  try {
+    const localStart = window.start - life.start, localEnd = window.end - life.start;
+    const start = +velocityAt(life.motion, localStart + dt, dt).speed.toFixed(1);
+    const end = +velocityAt(life.motion, localEnd, dt).speed.toFixed(1);
+    return { start, end };
+  } catch { return null; }
+}
+
 /** Is this life's exit emphasised (owner rule), and what would fix it if not. Null when there is no
- * declared exit to grade (nothing to compare a duration or an ease against). */
+ * declared exit to grade (nothing to compare a duration or an ease against). Beside the authored
+ * duration-ratio/ease proxy, also reads the layer's MEASURED speed: an exit that speeds up (its own
+ * end faster than its own start) earns the pass on that alone, even with a symmetric duration and a
+ * named ease neither side calls "accelerating". */
 export function exitEmphasis(life) {
   if (!life.exit) return null;
   const enterDur = +(life.enter.end - life.enter.start).toFixed(3);
   const exitDur = +(life.exit.end - life.exit.start).toFixed(3);
   const fastEnough = enterDur > 0 && exitDur <= enterDur * FAST_RATIO + 1e-9;
   const accelerating = ACCEL_EASES.has(life.exit.ease);
-  return { id: life.id, enterDur, exitDur, ease: life.exit.ease || null, ok: fastEnough || accelerating,
+  const speed = measuredSpeed(life, life.exit);
+  const speedingUp = !!(speed && speed.end > speed.start + SPEED_EPS);
+  return { id: life.id, enterDur, exitDur, ease: life.exit.ease || null,
+    ok: fastEnough || accelerating || speedingUp,
+    startSpeed: speed ? speed.start : null, endSpeed: speed ? speed.end : null,
     suggestDur: +(enterDur * FAST_RATIO).toFixed(2) };
+}
+
+/** entrance-not-settled: an entrance whose MEASURED end speed is not lower than its start speed, i.e.
+ * it never decelerates into place. Null when there is nothing measured to grade (no keyed position, or
+ * no enter window) - like exitEmphasis, a report, never a gate. */
+export function entranceEmphasis(life) {
+  if (!life.enter || life.enter.kind === 'none') return null;
+  const enterDur = +(life.enter.end - life.enter.start).toFixed(3);
+  const speed = measuredSpeed(life, life.enter);
+  // A near-zero start speed has nothing to decelerate FROM (a hold, or a channel that only moves
+  // elsewhere in the layer's life): grading it would flag every quiet entrance as "never settles".
+  if (!speed || speed.start <= SPEED_EPS) return null;
+  const settling = speed.end < speed.start - SPEED_EPS;
+  return { id: life.id, enterDur, ok: settling, startSpeed: speed.start, endSpeed: speed.end };
 }
 
 // ── THE EYE-PLAN CHECK: where the primary motion region actually ends, against what the storyboard's
@@ -217,6 +265,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   const exitChecks = T.lives.map(exitEmphasis).filter(Boolean);
   const notEmphasised = exitChecks.filter((c) => !c.ok);
+  const entranceChecks = T.lives.map(entranceEmphasis).filter(Boolean);
+  const notSettled = entranceChecks.filter((c) => !c.ok);
   // GROUNDING, not a gate on the default: the owner's rule applies regardless of what madera measures
   // (say so plainly), but the median late:early ratio is reported so the ratio is not asserted blind.
   const refRatios = rows.map((r) => r.refRatio).filter((v) => v != null);
@@ -226,8 +276,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(JSON.stringify({
       slug, refName, beats: rows.map((r) => ({ ...r, eye: r.eye && { ...r.eye, region: r.eye.region || null } })),
       unplanned: unplanned.map((L) => L.id), missingHandoffs: missingHandoffs.map((L) => L.id),
-      handoffs: T.handoffs, exitNotEmphasised: notEmphasised, refExitRatioMedian: refMedian,
-      cameraCoverageFloor,
+      handoffs: T.handoffs, exitNotEmphasised: notEmphasised, entranceNotSettled: notSettled,
+      refExitRatioMedian: refMedian, cameraCoverageFloor,
     }, null, 2));
     process.exit(0);
   }
@@ -268,12 +318,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(`  · ${refName}'s median late:early motion ratio is ${refMedian}x ${refMedian > 1 ? '(its own motion intensifies toward each act\'s exit)' : '(NOT clearly faster late in the act - honestly reported, this does not override the owner\'s default below)'}`);
   }
   if (notEmphasised.length) {
-    console.log(`  ~ ${notEmphasised.length} exit(s) not emphasised (owner rule: an exit runs at most ${FAST_RATIO}x its own entrance, or eases with an accelerating curve):`);
+    console.log(`  ~ ${notEmphasised.length} exit(s) not emphasised (owner rule: an exit runs at most ${FAST_RATIO}x its own entrance, or eases with an accelerating curve, or measurably speeds up):`);
     for (const c of notEmphasised) {
-      console.log(`      ${c.id}  enter ${c.enterDur}s -> exit ${c.exitDur}s, ease ${c.ease || 'none'}  ->  set exitDur to ${c.suggestDur}s, or ease:"${SUGGESTED_EASE}"`);
+      const measured = c.startSpeed != null ? `, measured ${c.startSpeed}px/s -> ${c.endSpeed}px/s` : '';
+      console.log(`      ${c.id}  enter ${c.enterDur}s -> exit ${c.exitDur}s, ease ${c.ease || 'none'}${measured}  ->  set exitDur to ${c.suggestDur}s, or ease:"${SUGGESTED_EASE}"`);
     }
   } else if (exitChecks.length) {
-    console.log(`  ✓ all ${exitChecks.length} declared exit(s) are emphasised (faster than their entrance, or an accelerating ease)`);
+    console.log(`  ✓ all ${exitChecks.length} declared exit(s) are emphasised (faster than their entrance, an accelerating ease, or measurably speeding up)`);
+  }
+  if (notSettled.length) {
+    console.log(`  ~ ${notSettled.length} entrance(s) not settled (measured end speed is not lower than its start speed):`);
+    for (const c of notSettled) console.log(`      ${c.id}  enter ${c.enterDur}s, measured ${c.startSpeed}px/s -> ${c.endSpeed}px/s  ->  ease into it (an ease-out curve), or slow the arrival`);
+  } else if (entranceChecks.length) {
+    console.log(`  ✓ all ${entranceChecks.length} measured entrance(s) settle (end speed lower than start speed)`);
   }
   if (cameraCoverageFloor) console.log(`  ~ ${cameraCoverageFloor}`);
   console.log('');

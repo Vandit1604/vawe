@@ -113,7 +113,7 @@ import { evenSamples } from './beats-of.mjs';
 import { gradeable, tileBox, baseOf } from './tile.mjs';
 import { classifyRegions } from './motion-floor.mjs';
 import { sceneTiming } from './scene-timing.mjs';
-import { exitEmphasis } from './choreo.mjs';
+import { exitEmphasis, entranceEmphasis } from './choreo.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -8040,6 +8040,43 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     { type: 'rect', id: 'bare', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 2 },
   ] }).lives.find((L) => L.id === 'bare');
   ok('exitEmphasis: a layer with no declared exit is not graded', exitEmphasis(noExitLife) === null);
+
+  // MEASURED SPEED: a symmetric duration, a non-accelerating ease, but the layer's own x track
+  // measurably speeds up toward the exit -> passes on the measured number alone.
+  const measuredFast = sceneTiming({ module: 'scene', duration: 6, layers: [
+    { type: 'rect', id: 'zoomOut', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, enterDur: 1, out: 'fade', exitDur: 1,
+      motion: [{ t: 0, x: 0 }, { t: 3, x: 10 }, { t: 3.5, x: 60 }, { t: 4, x: 900 }] },
+  ] });
+  const zoomOutCheck = exitEmphasis(measuredFast.lives.find((L) => L.id === 'zoomOut'));
+  ok('exitEmphasis: a symmetric duration with no accelerating ease still passes on measured speed alone',
+    zoomOutCheck && zoomOutCheck.ok === true && zoomOutCheck.endSpeed > zoomOutCheck.startSpeed);
+
+  // an exit that never moves position (fade-only) has nothing to measure: the speed fields stay null
+  // and the verdict rests on duration/ease exactly as before (unchanged behaviour, #arrival note above).
+  ok('exitEmphasis: an opacity-only exit reports no measured speed', quickCheck.startSpeed === null && quickCheck.endSpeed === null);
+}
+
+// ---- quality/gates/choreo.mjs entranceEmphasis: an entrance should DECELERATE into place ----------
+{
+  const settling = sceneTiming({ module: 'scene', duration: 6, layers: [
+    { type: 'rect', id: 'lands', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, enterDur: 1,
+      motion: [{ t: 0, x: 900 }, { t: 1, x: 0, ease: 'easeOutCubic' }] },
+  ] });
+  const landsCheck = entranceEmphasis(settling.lives.find((L) => L.id === 'lands'));
+  ok('entranceEmphasis: an entrance that slows into place passes', landsCheck && landsCheck.ok === true
+    && landsCheck.endSpeed < landsCheck.startSpeed);
+
+  const notSettling = sceneTiming({ module: 'scene', duration: 6, layers: [
+    { type: 'rect', id: 'overshoots', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, enterDur: 1,
+      motion: [{ t: 0, x: 900 }, { t: 1, x: 0, ease: 'easeInCubic' }] },
+  ] });
+  const overshootsCheck = entranceEmphasis(notSettling.lives.find((L) => L.id === 'overshoots'));
+  ok('entranceEmphasis: an entrance that never decelerates is flagged', overshootsCheck && overshootsCheck.ok === false);
+
+  const noMotion = sceneTiming({ module: 'scene', duration: 2, layers: [
+    { type: 'rect', id: 'bare2', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 2 },
+  ] }).lives.find((L) => L.id === 'bare2');
+  ok('entranceEmphasis: nothing measured (no `anim`, no motion) gives no verdict', entranceEmphasis(noMotion) === null);
 }
 
 const FLOOR = 1800;

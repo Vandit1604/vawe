@@ -396,6 +396,10 @@ export function sceneTiming(input) {
       enter: { kind: enterKind || 'none', start: s, end: +(s + enterDur).toFixed(3) },
       exit: exitDeclared ? { kind: L.out, start: +(e - exitDur).toFixed(3), end: e, ease: exitEase } : null,
       becomes: becomesTo, cutOut: uc, planned,
+      // The layer's own motion track, on its LOCAL clock (kfs[0].t is the layer's own start). Carried
+      // here so a caller can measure the layer's actual speed at its enter/exit edges (velocityAt,
+      // core/timeline/sequence.js) instead of only reading the authored duration/ease as a proxy.
+      motion: Array.isArray(L.motion) && L.motion.length > 1 ? L.motion : null,
     };
   });
 
