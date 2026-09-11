@@ -40,6 +40,7 @@ const PATTERNS = [
   /[✗~⚠]\s*\\?\[([a-z][a-z0-9-]{2,})\\?\]/g,              // the printed form
   /\bsev\s*:\s*'([a-z][a-z0-9-]{2,})'/g,                  // designspec-check's finding objects
   /\ballow(?:ed)?\.has\('([a-z][a-z0-9-]{2,})'\)/g,       // a gate reading its own waiver
+  /\braise\(\s*'([a-z][a-z0-9-]{2,})'/g,                  // a gate helper that adapts through safeguards.mjs, then fails or warns
 ];
 
 // quality/audit.mjs composes findings as `{ kind: 'overlap', … }`, so no marker above sees it. Its
