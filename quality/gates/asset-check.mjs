@@ -66,12 +66,22 @@ if (data.bg) walk(data.bg, 'bg');
 // audio.music may be a NAMED bed ("lofi") resolved by the mixer, not a path. Don't treat a bare name as missing.
 const isNamedBed = (where, v) => /audio\.music$/.test(where) && !v.includes('/') && !ASSET_EXT.test(v);
 
+// A repo-root-relative src (no leading `/`, no scheme) resolves under the page the scene is served
+// from (/formats/scene/) and 404s in the browser with no visible error: core/engine/src-url.js is the
+// one place that rewrites it to the served-root form, and image/video/icon all now route through it
+// (docs/MISTAKES.md, the entry for this fix). This is a WARN, not a hard fail, exactly because the
+// runtime already corrects it; the note is here so an author sees the mismatch and can write the
+// served-root form directly next time instead of relying on the adaptation.
+const isRelative = (v) => !/^[a-z][a-z0-9+.-]*:/i.test(v) && !v.startsWith('/');
+const adapted = [];
+
 const missing = [], remotes = [], seen = new Set();
 for (const [where, v] of refs) {
   if (isNamedBed(where, v)) continue;
   const key = where + '=' + v; if (seen.has(key)) continue; seen.add(key);
   if (remote(v)) { remotes.push([where, v]); continue; }
-  if (!resolvesToFile(v)) missing.push([where, v]);
+  if (!resolvesToFile(v)) { missing.push([where, v]); continue; }
+  if (isRelative(v) && ASSET_EXT.test(v)) adapted.push([where, v]);
 }
 
 // a targeted "how to get it" per missing kind.
@@ -147,6 +157,8 @@ for (const [u, fam] of missingFonts) f.finding({ severity: sev(), code: 'missing
   summary: `${u} (${[...fam].join(', ')}) has no vendored file, every frame renders in a fallback face and nothing else will say so`,
   at: u, fix: 'make fonts   (about twenty seconds; assets/fonts is gitignored, so a fresh worktree has none)' });
 for (const [w, v] of remotes) f.note('remote-asset', `${v}  [${w}]  not checked (remote)`, { at: w });
+for (const [w, v] of adapted) f.note('adapted-asset-src',
+  `adapted asset-src: ${v} -> /${v.replace(/^\.\//, '')}  [${w}]  (file exists at repo root; relative src resolves under the page)`, { at: w });
 for (const [w, v] of missing) f.finding({ severity: sev(), code: 'missing-asset',
   summary: `${v}  [${w}]  the render will show a broken image / silent gap`, at: w, fix: howto(v) });
 

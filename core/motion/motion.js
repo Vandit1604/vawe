@@ -8,6 +8,7 @@
 
 import { FEEL, INTERP } from '../registry/vocab.js';
 import { defineRegistry, withBlurb, blurbsOf, nearMisses } from '../registry/registry.js';
+import { srcUrl } from '../engine/src-url.js';
 
 export const FPS = 30;
 
@@ -24,7 +25,9 @@ export const icon = (v, fallback = '') => {
   // If the image fails to load (missing file / 404), swap to the fallback (emoji/monogram)
   // instead of the browser's broken-image placeholder. Empty fallback → the img just disappears.
   const fb = String(fallback).replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-  return `<img class="icon-img" src="${v}" alt="" onerror="this.outerHTML='${fb}'" />`;
+  // srcUrl: the page is served from /formats/scene/, so a bare `assets/x.png` resolves under that
+  // path and 404s with no visible error, same trap core/layers/video.js already guards against.
+  return `<img class="icon-img" src="${srcUrl(v)}" alt="" onerror="this.outerHTML='${fb}'" />`;
 };
 
 export const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
