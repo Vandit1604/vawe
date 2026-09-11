@@ -105,6 +105,11 @@ export function parseStoryboard(src) {
       onscreen: onscreenLines(f('onscreen')), mechanism: f('mechanism'),
       becomes: f('becomes'), why: f('why'),
       transition_in: f('transition_in'),
+      // THE REASON (harness/lib/contract.mjs parseTransitionWhy): "<relationship> · <feeling> ·
+      // <invisible|expressive>", the decision procedure's own four questions (docs/CRAFT/
+      // TRANSITIONS.md), written down rather than only answered in an author's head. Optional; a beat
+      // may carry `transition_in` with no `transition_why` and only warns, never blocks.
+      transition_why: f('transition_why'),
       // the shot vocabulary: see docs/CRAFT/STORYBOARD-TEMPLATE.md. Optional so existing storyboards
       // keep parsing; the gate is what asks for them.
       shot: f('shot'), camera: f('camera'), picture: f('picture'),

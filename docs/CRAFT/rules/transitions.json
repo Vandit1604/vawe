@@ -78,5 +78,35 @@
     "adapt": "seam-split",
     "brief": "One step several times the size of the rest is a hard background swap disguised inside a soft layer dissolve",
     "doc": "docs/CRAFT/TRANSITIONS.md#seam-forensics-split-seam"
+  },
+  {
+    "id": "transitions.unreasoned",
+    "category": "transitions",
+    "stage": "plan",
+    "applies": "hasBoundaries",
+    "check": "transition-unreasoned",
+    "adapt": null,
+    "brief": "This is the thought process. Run it in order; stop when the transition is chosen.",
+    "doc": "docs/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam"
+  },
+  {
+    "id": "transitions.boundary-uncovered",
+    "category": "transitions",
+    "stage": "plan",
+    "applies": "hasBoundaries",
+    "check": "boundary-uncovered",
+    "adapt": null,
+    "brief": "What is the RELATIONSHIP between the two beats?",
+    "doc": "docs/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam"
+  },
+  {
+    "id": "transitions.reason-mismatch",
+    "category": "transitions",
+    "stage": "plan",
+    "applies": "hasBoundaries",
+    "check": "transition-reason-mismatch",
+    "adapt": null,
+    "brief": "The meta-rule again: if a seam can't answer (1)-(5) with a real relationship or feeling, it is a hard cut.",
+    "doc": "docs/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam"
   }
 ]
