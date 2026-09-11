@@ -3779,6 +3779,33 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   }));
   ok('travel: deterministic', JSON.stringify(travel({ stations: trStations }))
     === JSON.stringify(travel({ stations: trStations })));
+  // TRAVEL STOP SPEED: a station may carry easeIn/easeOut, the same handle shape a motion key carries,
+  // resolved through the same handleCurve. A station with neither is unchanged from before (asserted
+  // above); one with a dead-stop easeIn must actually arrive at zero velocity.
+  {
+    const speedStations = [{ tx: 0, ty: 0, s: 1 }, { tx: 960, ty: 540, s: 1.5, dur: 1, easeIn: { speed: 0, influence: 80 } }];
+    const spTr = travel({ stations: speedStations, start: 0 });
+    ok('travel: a station easeIn is carried onto its arrival key, no default `ease`', spTr[1].easeIn && spTr[1].easeIn.speed === 0 && spTr[1].ease === undefined);
+    const EPS = 1 / 240; // a quarter-frame at 60fps: small enough to read the instantaneous rate at the key
+    const justBefore = cameraAt(spTr, 1 - EPS), atArrival = cameraAt(spTr, 1);
+    const vxAtArrival = (atArrival.x - justBefore.x) / EPS;
+    ok('travel: easeIn {speed:0} arrives at (near) zero velocity', Math.abs(vxAtArrival) < 5);
+    // no handles at all: byte-identical to the pre-existing shape (linear interior, default ease at end).
+    const plain = travel({ stations: [{ tx: 0, ty: 0, s: 1 }, { tx: 960, ty: 540, s: 1.5, dur: 1 }], start: 0 });
+    ok('travel: a station without handles is unchanged (interior linear, no easeIn/easeOut)',
+      plain[1].ease === 'easeOutCubic' && plain[1].easeIn === undefined && plain[1].easeOut === undefined);
+    // easeOut on an interior station: the NEXT arrival must not also carry the default `ease`, or the
+    // shared segment would be shaped twice and keyHandleErrors would refuse the whole track.
+    const departStations = [{ tx: 0, ty: 0, s: 1 },
+      { tx: 500, ty: 500, s: 1.2, dur: 1, easeOut: { speed: 3, influence: 30 } },
+      { tx: 960, ty: 540, s: 1.5, dur: 1 }];
+    const depTr = travel({ stations: departStations, start: 0 });
+    ok('travel: a station easeOut leaves no conflicting `ease` on the next arrival',
+      depTr[1].easeOut && depTr[1].easeOut.speed === 3 && keyHandleErrors(depTr, 'travel').length === 0);
+    ok('travel: a bad easeIn/easeOut handle still throws, named to the station',
+      (() => { try { travel({ stations: [{ tx: 0, ty: 0 }, { tx: 1, ty: 1, easeIn: { influence: 200 } }] }); return false; }
+        catch (e) { return /travel station 1/.test(e.message); } })());
+  }
   const tk = truck({ start: 1, dur: 2, dx: -800, s: 1.3 });
   ok('truck: 2 keyframes, x runs 0 → dx', tk.length === 2 && approx(cameraAt(tk, 1).x, 0)
     && approx(cameraAt(tk, 3).x, -800));
