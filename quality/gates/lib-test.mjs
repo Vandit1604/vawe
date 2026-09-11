@@ -8421,6 +8421,23 @@ const FLOOR = 1800;
   const detChild2 = mockEl(detEl2);
   applyGroup3DOpacityAdapt([{ el: detEl2, children: [detChild2] }], new Set());
   ok('group3d push-down: deterministic, same pose gives the same composed opacity every time', firstRun === detChild2.style.opacity);
+
+  // REGRESSION (the whole-beat blur bug): a group's own blur decays 8px -> 0 across ten frames while
+  // its child keeps a STATIC pose (no own blur/opacity key), the shape scene5's rack-focus beat took.
+  // The child never gets a fresh unconditional write of its own to `filter`, so a naive push-down reads
+  // back what IT pushed last frame and appends onto it again: a monotonically DECAYING blur rendered as
+  // a monotonically GROWING, ever-thicker stack of blur() functions, heavy for the whole beat instead of
+  // fading out. Each frame's composed blur must equal the group's OWN blur for that frame, nothing more.
+  const decayEl = mockEl();
+  const decayChild = mockEl(decayEl);
+  const blurSteps = [8, 7, 6, 5, 4, 3, 2, 1, 0.5, 0];
+  for (const b of blurSteps) {
+    decayEl.style.opacity = '1';
+    decayEl.style.filter = b > 0 ? `blur(${b.toFixed(2)}px)` : 'none';
+    applyGroup3DOpacityAdapt([{ el: decayEl, children: [decayChild] }], new Set());
+  }
+  ok('group3d push-down: a decaying group blur composes to exactly this frame\'s value, never accumulates',
+    decayChild.style.filter === 'none');
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
