@@ -25,6 +25,7 @@ import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../harness/a
 import { extractKitBlock } from '../../harness/lib/stagekit.mjs';
 import { KIT_ROLE, offRampSizes, offRampShadows } from '../../harness/lib/kit-ramp.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -56,6 +57,7 @@ const beats = sb.beats.map((b, i) => ({
   ...b,
   archetype: (fieldIn(blocks[i], 'archetype') || '').trim(),
   weight: (fieldIn(blocks[i], 'weight') || '').trim(),
+  payoff: (fieldIn(blocks[i], 'threads') || fieldIn(blocks[i], 'object') || '').trim(),
   fragment: (fieldIn(blocks[i], 'fragment') || '').split(/\s+\(/)[0].trim() || null,
 }));
 
@@ -179,11 +181,14 @@ if (measured) {
   const peak = measured.find((b) => b.weight === 'peak');
   const biggest = measured.reduce((m, b) => (b.area > m.area ? b : m), measured[0]);
   if (peak && biggest && biggest.name !== peak.name) {
-    err('peak-not-largest', `beat "${peak.name}" is declared the peak and beat "${biggest.name}" holds the larger object `
+    const msg = `beat "${peak.name}" is declared the peak and beat "${biggest.name}" holds the larger object `
       + `(${(biggest.share * 100).toFixed(0)}% of the frame in .${biggest.what}, against ${(peak.share * 100).toFixed(0)}% `
       + `in .${peak.what}). Naming a peak is a promise the other beats stay quieter, and the frames say otherwise. `
       + 'The fix is one decisive move on the peak, then quieting whatever competes with it, so the move stays '
-      + 'legible. Turning every beat up is how a film gets flatter, not louder.');
+      + 'legible. Turning every beat up is how a film gets flatter, not louder.';
+    const adapted = adaptFinding({ kind: 'peak-not-largest' }, { beat: peak }).adapted;
+    if (adapted) { console.log(`  ${adapted.line}`); warn('peak-not-largest', msg); }
+    else err('peak-not-largest', msg);
   }
   if (peak && biggest && biggest.name === peak.name) {
     const second = measured.filter((b) => b.name !== peak.name).reduce((m, b) => (b.area > m.area ? b : m), { area: 0, name: '' });
