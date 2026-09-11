@@ -6026,7 +6026,9 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     const i = ranked.findIndex((r) => r.x.name === e.name && r.x.kind === e.kind);
     return i < 0 ? Infinity : i + 1;
   };
-  const blurbed = corpus.filter((e) => e.blurb && e.blurb.trim());
+  // Craft rule records join the corpus as kind `rule`, but their brief is a VERBATIM quote of its doc
+  // (craft-rules.mjs refuses a paraphrase), so it cannot be rewritten for retrieval. Grade authored blurbs only.
+  const blurbed = corpus.filter((e) => e.kind !== 'rule' && e.blurb && e.blurb.trim());
   const top3 = blurbed.filter((e) => selfRank(e) <= 3).length;
   // 97% is a RATCHET set just under where the vocabulary sits (352/359, 98.1%), not a round number:
   // before the six terse blurbs below it were rewritten the figure was 346/359, 96.4%, and this failed.
