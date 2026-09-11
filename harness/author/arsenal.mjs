@@ -215,6 +215,19 @@ export async function collect() {
   // Only the cues no registry already owns: MOTION_CUE_REGISTRY (core/audio-tactile.js) covers seven,
   // and a cue findable twice under two kinds is the drift this tool exists to remove. This fills the rest.
   out.push(...(await cueSource()).filter((c) => !out.some((e) => e.name === c.name && e.slot === c.slot)));
+  // CRAFT RULES: docs/CRAFT/rules/*.json, so an agent can PULL a rule on demand by searching for what
+  // it is about ("caption safe strip") instead of waiting for the harness to push every rule at once.
+  // Dynamic import only: a static import of craft-rules.mjs drags in craft-checklist.mjs and
+  // finding-codes.mjs at module load, which deadlocks this file's own top-level `await collect()`
+  // (docs/MISTAKES.md style trap, fixed once already for craft-coverage in commit 12f25371). No slot:
+  // a rule is prose to read, not JSON to paste, so it never enters pasteOf's JSON path.
+  try {
+    const { loadCraftRules } = await import('../lib/craft-rules.mjs');
+    for (const rec of loadCraftRules()) {
+      out.push({ name: rec.id, kind: 'rule', slot: null, blurb: rec.brief,
+        aka: [rec.category], pitfall: null, doc: rec.doc });
+    }
+  } catch { /* craft rules are optional to search: a fresh clone can still find the registries */ }
   return out;
 }
 
@@ -368,6 +381,9 @@ export function pasteOf(entry) {
 
 /** The same thing as text, without the outer braces, so it drops into a scene as written. */
 export function snippet(entry) {
+  // A rule is prose, not a paste: the "snippet" line is the doc#anchor so an agent opens the doc
+  // only if the brief above was not enough, never a JSON object nobody can paste into a scene.
+  if (entry.kind === 'rule') return entry.doc || null;
   const obj = pasteOf(entry);
   if (!obj) return null;
   return Object.entries(obj).map(([k, v]) => `"${k}": ${jsonish(v)}`).join(', ');
@@ -452,7 +468,20 @@ export function rankQuery(all, query, { kind = null, n = 8, guessN = 3 } = {}) {
 // Guarded, because the ranking above is a library now: lib-test imports `collect`, `coverageIn` and
 // `CONFIDENT` to calibrate the threshold against real queries, and an unguarded CLI would exit(2) the
 // moment it was imported with no query.
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  // No top-level await: this used to be `await collect()` straight inside the guarded `if`, which gave
+  // arsenal.mjs an unsettled top-level await. Loading docs/CRAFT/rules/*.json below pulls in
+  // quality/gates/stage.mjs, which statically imports THIS file for `score`/`toks`/`coverageIn`/
+  // `CONFIDENT`, a real cycle back to arsenal.mjs. Node refuses to resolve that cycle while arsenal's
+  // own top-level await is pending (exit 13, "unsettled top-level await"), even though every binding
+  // stage.mjs wants is already defined above this line. An ordinary async function, called and left
+  // unawaited, carries no such restriction: every terminal branch below calls process.exit(), so
+  // nothing needs to be awaited at module scope for the CLI to still block until it is done.
+  main().catch((err) => { console.error(err); process.exit(1); });
+}
+
+async function main() {
   const argv = process.argv.slice(2);
   const VALUE_FLAGS = new Set(['kind', 'n']);
   const flag = (n) => {
