@@ -56,8 +56,83 @@ export function declaredPoints(cfg) {
   return pts;
 }
 
+// EVIDENCE ONLY, never the verdict: a bg[] boundary sits at every scene join by construction, so
+// "there is a schedule point nearby" is true of every flip, planned or not, and cannot itself say
+// whether the change was carried. It is reported alongside a finding so a reader can see the schedule
+// the plan actually wrote, not used to decide light-vs-dark or declared-vs-flash.
 export function isDeclared(cfg, t, tolerance = JOIN_TOLERANCE) {
   return declaredPoints(cfg).some((p) => Math.abs(p - t) <= tolerance);
+}
+
+// The PLAN saying a ground change happens is a separate fact from a schedule point existing: the
+// frontmatter's own craft.color arc states the intent ("crossfades to the theme's white-first ground"),
+// and a beat's body (mechanism/picture/eye/becomes, whatever prose it carries) can name the same thing
+// locally. Either counts; neither is a bg[] timestamp.
+const GROUND_WORDS = /\b(ground|tint|crossfade|chain|carry|carries|carried)\b/i;
+
+export function colorArc(storyboardText) {
+  const m = /color:\s*"([^"]*)"/i.exec(storyboardText);
+  return m ? m[1] : '';
+}
+
+// "crossfades ... over 0.4s" / "crossfade over a set duration" style phrasing: a number of seconds
+// named near the word crossfade is the plan's own minimum, held to instead of guessing one.
+export function declaredCrossfadeSeconds(text) {
+  const m = /crossfade[^.]*?([\d.]+)\s*s\b/i.exec(text);
+  return m ? +m[1] : null;
+}
+
+export function beatText(storyboardText, beat) {
+  if (!beat) return '';
+  const heads = [...storyboardText.matchAll(/^##\s*Beat\s+(\d+)[^\n(]*\(([\d.]+)s-([\d.]+)s\)/gm)];
+  const idx = heads.findIndex((h) => +h[1] === beat.n);
+  if (idx < 0) return '';
+  const start = heads[idx].index;
+  const end = idx + 1 < heads.length ? heads[idx + 1].index : storyboardText.length;
+  return storyboardText.slice(start, end);
+}
+
+/** Does the PLAN (frontmatter arc, or either beat's own body) name a ground change at this join? */
+export function planDeclaresGround(storyboardText, before, after) {
+  return GROUND_WORDS.test(colorArc(storyboardText))
+    || GROUND_WORDS.test(beatText(storyboardText, before))
+    || GROUND_WORDS.test(beatText(storyboardText, after));
+}
+
+/**
+ * measureTransition(samples, flipT) -> {t10, t90, duration, frames} | null
+ * `samples` are fine-grained (frame-rate) {t, lum} around one flip. The steady level on each side is
+ * the mean of the samples farthest from the flip in this window (least likely to already be mid-
+ * transition); duration is the time the signal takes to cross from 10% to 90% of that jump, which is
+ * the same definition a scope uses for a rise/fall time and does not depend on picking one threshold.
+ */
+export function measureTransition(samples, flipT, { fps = 30 } = {}) {
+  const sorted = [...samples].sort((a, b) => a.t - b.t);
+  const before = sorted.filter((s) => s.t <= flipT);
+  const after = sorted.filter((s) => s.t > flipT);
+  if (before.length < 2 || after.length < 2) return null;
+  const avg = (arr) => arr.reduce((s, x) => s + x.lum, 0) / arr.length;
+  const from = avg(before.slice(0, Math.min(3, before.length)));
+  const to = avg(after.slice(-Math.min(3, after.length)));
+  const jump = to - from;
+  if (Math.abs(jump) < 1) return null;
+  const lo = from + 0.1 * jump, hi = from + 0.9 * jump;
+  const crossTime = (target) => {
+    for (let i = 1; i < sorted.length; i++) {
+      const a = sorted[i - 1], b = sorted[i];
+      const reached = jump > 0 ? (a.lum <= target && b.lum >= target) : (a.lum >= target && b.lum <= target);
+      if (reached) {
+        const span = b.lum - a.lum;
+        const frac = span !== 0 ? (target - a.lum) / span : 0;
+        return a.t + frac * (b.t - a.t);
+      }
+    }
+    return null;
+  };
+  const t10 = crossTime(lo), t90 = crossTime(hi);
+  if (t10 == null || t90 == null) return null;
+  const duration = Math.abs(t90 - t10);
+  return { t10, t90, duration: +duration.toFixed(3), frames: Math.round(duration * fps) };
 }
 
 /** Beat windows from the storyboard sidecar's own `## Beat N: … (t0s-t1s)` headers. */
@@ -101,9 +176,33 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const { before, after } = beatsAround(beats, 1.22);
     if (before?.n !== 1 || after?.n !== 2) { console.error(`beatsAround must name beat 1 -> beat 2, got ${JSON.stringify({ before, after })}`); process.exit(1); }
 
+    // THE REAL DEFECT THIS FIX EXISTS FOR: a bg[] boundary sits at every join, so "declared" cannot
+    // come from schedule proximity alone. A crossfade spread over 0.5s must measure as carried...
+    const smooth = []; for (let t = 0; t <= 1; t += 1 / 30) smooth.push({ t: +t.toFixed(4), lum: t < 0.25 ? 250 : t > 0.75 ? 40 : 250 - (t - 0.25) / 0.5 * 210 });
+    const smoothTrans = measureTransition(smooth, 0.5, { fps: 30 });
+    if (!smoothTrans || smoothTrans.duration < 0.3) { console.error(`a 0.5s crossfade must measure as carried, got ${JSON.stringify(smoothTrans)}`); process.exit(1); }
+
+    // ...but the SAME jump inside 3 frames (0.1s at 30fps) must measure as a flash, even though a bg
+    // boundary can sit right on top of it. Schedule proximity is evidence, never the verdict.
+    const abrupt = [{ t: 0, lum: 250 }, { t: 0.033, lum: 250 }, { t: 0.066, lum: 145 }, { t: 0.1, lum: 40 }, { t: 0.2, lum: 40 }];
+    const abruptTrans = measureTransition(abrupt, 0.066, { fps: 30 });
+    if (!abruptTrans || abruptTrans.duration >= 0.3) { console.error(`a 3-frame jump must NOT measure as carried, got ${JSON.stringify(abruptTrans)}`); process.exit(1); }
+    const scheduledCfg = { bg: [{ from: 0, to: 0.066 }, { from: 0.066, to: 0.2 }] };
+    if (!isDeclared(scheduledCfg, 0.066)) { console.error('the fixture must have a schedule point at the flip (that is the point of this test)'); process.exit(1); }
+    // schedule proximity says nothing about whether the plan named ground; an empty storyboard must not.
+    if (planDeclaresGround('', null, null)) { console.error('an empty plan must not read as declaring a ground change'); process.exit(1); }
+
+    // a flip with a plan that never mentions ground/tint/crossfade at all is a flash regardless of timing
+    const noPlan = 'color: "just a plain white background, nothing changes"';
+    if (planDeclaresGround(noPlan, null, null)) { console.error('a plan that never names ground/tint/crossfade must not read as declaring one'); process.exit(1); }
+    const withPlan = 'color: "the dark terminal ground crossfades to the white-first ground"';
+    if (!planDeclaresGround(withPlan, null, null)) { console.error('a plan that says crossfades must read as declaring a ground change'); process.exit(1); }
+    if (declaredCrossfadeSeconds('crossfade over 0.4s') !== 0.4) { console.error('declaredCrossfadeSeconds must read the plan\'s own number'); process.exit(1); }
+
     console.log('  ✓ ground-arc self-test: the known-truth fixture finds all four flips, a steady fixture');
-    console.log('    finds none, a flip on a schedule point reads declared, a flip with nothing nearby');
-    console.log('    reads undeclared, and beatsAround names the beat on each side of a flip');
+    console.log('    finds none, beatsAround names the beat on each side of a flip, a 0.5s crossfade');
+    console.log('    measures as carried, the SAME jump inside 3 frames measures as a flash even with a');
+    console.log('    schedule point sitting on it, and planDeclaresGround reads the plan, not the schedule');
     process.exit(0);
   }
 
@@ -118,32 +217,59 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   const gf = gateFindings();
 
+  const measure = (img) => luminanceOf(img, { x: 0, y: 0, w: img.width, h: Math.round(img.height * 0.1) });
   const rel = path.relative(ROOT, jsonPath);
-  const { samples } = await sampleScene(rel, {
-    rate: 0.25,
-    measure: (img) => luminanceOf(img, { x: 0, y: 0, w: img.width, h: Math.round(img.height * 0.1) }),
-  });
-  const lumSamples = samples.map((s) => ({ t: s.t, lum: s.img }));
-  const flips = findFlips(lumSamples);
+  const coarse = await sampleScene(rel, { rate: 0.25, measure });
+  const fps = coarse.fps || 30;
+  const lumSamples = coarse.samples.map((s) => ({ t: s.t, lum: s.img }));
+  const approxFlips = findFlips(lumSamples);
 
-  for (const f of flips) {
-    const declared = isDeclared(cfg, f.t);
+  // A coarse (0.25s) pass finds WHERE a flip roughly is; a MINIMUM crossfade of 0.3s (10 frames at
+  // 30fps) cannot be measured at that resolution, so a second frame-rate pass around each approximate
+  // flip is needed to answer "how long did it take", not just "did it happen".
+  const fineTimes = [...new Set(approxFlips.flatMap((f) => {
+    const out = [];
+    for (let t = Math.max(0, f.t - 0.6); t <= f.t + 0.6; t += 1 / fps) out.push(+t.toFixed(4));
+    return out;
+  }))].sort((a, b) => a - b);
+  const fine = fineTimes.length ? await sampleScene(rel, { times: fineTimes, measure }) : { samples: [] };
+  const fineByFlip = new Map();
+  for (const f of approxFlips) {
+    fineByFlip.set(f.t, fine.samples.filter((s) => Math.abs(s.t - f.t) <= 0.6).map((s) => ({ t: s.t, lum: s.img })));
+  }
+
+  const MIN_CROSSFADE = 0.3;
+  for (const f of approxFlips) {
     const { before, after } = beatsAround(beats, f.t);
     const beatNote = before && after ? `beat ${before.n} -> beat ${after.n}` : 'beat unknown (no storyboard match)';
+    const evidence = isDeclared(cfg, f.t) ? `a schedule point sits within ${JOIN_TOLERANCE}s (evidence, not the verdict)` : 'no nearby schedule point';
+    const trans = measureTransition(fineByFlip.get(f.t) || [], f.t, { fps });
+    const declaredMin = declaredCrossfadeSeconds(colorArc(storyboard));
+    const minRequired = Math.max(MIN_CROSSFADE, declaredMin || 0);
+    const declared = planDeclaresGround(storyboard, before, after);
+    const carried = trans && trans.duration >= minRequired;
     const summary = `ground flips ${f.from}->${f.to} at ${f.t}s (${beatNote})`;
-    if (declared) {
-      gf.note('ground-flip-declared', summary, { at: f.t });
-    } else {
-      gf.warn('ground-flip-undeclared', `${summary}: no bg/recipe/transition schedule point within `
-        + `${JOIN_TOLERANCE}s. Carry the ground across ${beatNote.includes('->') ? `the ${beatNote} join` : 'this join'} `
-        + 'or crossfade it over a set duration instead of flipping cold.', { at: f.t });
+
+    if (declared && carried) {
+      gf.note('ground-flip-declared', `${summary}: carried over ${trans.duration}s `
+        + `(${trans.frames} frames), ${evidence}.`, { at: f.t });
+      continue;
     }
+    const durationNote = trans ? `measured change took ${trans.duration}s (${trans.frames} frames)`
+      : 'measured change happened between two consecutive samples (could not resolve a duration)';
+    const planNote = declared ? 'the plan names a ground change at this join, but the render does not carry it that long'
+      : (colorArc(storyboard) ? `the plan's color arc says: "${colorArc(storyboard)}"` : 'nothing in the plan names a ground change here');
+    const fix = before && after
+      ? `carry beat ${before.n}'s ground across the beat ${before.n} -> beat ${after.n} join, or crossfade it over at least ${minRequired}s`
+      : `crossfade this change over at least ${minRequired}s instead of flipping cold`;
+    gf.warn('ground-flash', `${summary}: ${durationNote}, needs at least ${minRequired}s. `
+      + `${planNote}. ${evidence}. Fix: ${fix}.`, { at: f.t });
   }
 
   if (process.argv.includes('--json')) { gf.emit(); process.exit(gf.records.some((r) => r.severity === 'error') ? 1 : 0); }
-  console.log(`\n  ground-arc · ${path.basename(base)} · ${lumSamples.length} samples · ${flips.length} flip(s)`);
+  console.log(`\n  ground-arc · ${path.basename(base)} · ${lumSamples.length} samples · ${approxFlips.length} flip(s)`);
   gf.emit();
-  if (!flips.length) console.log('    (no ground flips measured)');
+  if (!approxFlips.length) console.log('    (no ground flips measured)');
   console.log('');
   process.exit(0);
 }
