@@ -4,6 +4,7 @@ answers: "how to route a frame through the stage kit and ui-skills before writin
 group: look
 applies-when: hasHtml
 confirm: "does each html fragment move by the engine's mechanisms, not CSS animation or transition?"
+codes: design-drift, design-token-hint
 ---
 
 # Writing HTML fragments, and making them move
@@ -530,6 +531,17 @@ boxes and could not answer what was in the frame (MISTAKES #592).
   says in its comments why it does that rather than referencing one on the page.
 - **`formats/scene/demo-frag-*.html`**, four kit-built exemplars, one archetype and one theme each:
   [`FRAGMENT-EXEMPLARS.md`](FRAGMENT-EXEMPLARS.md) says what each one refuses.
+
+## One film, one set of values: `<film>.design.md`
+
+A film may declare its own resolved values, once, in `formats/scene/<film>.design.md`
+(`harness/lib/design-spec.mjs`): palette, type roles, radius, shadow, space, laid over the stage kit's
+own numbers. No file, or an empty one, means the kit's values only.
+
+`quality/gates/design-drift.mjs` (`make design-drift D=<film>`, also run from `make frame-check`)
+previews every fragment the storyboard names and checks each box's font, radius, shadow and colour
+against that set: near a token warns `design-token-hint` (reach for `var(--kit-...)`); nowhere near one
+blocks as `design-drift`, naming the fix. Silent with no design.md; `scale-drift` stays that check.
 
 ## The one thing to remember
 
