@@ -18,6 +18,8 @@ import { extractKitBlock } from '../../harness/lib/stagekit.mjs';
 import { fragmentFontSizes } from '../../harness/lib/kit-ramp.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
+import { readDesignSpec } from '../../harness/lib/design-spec.mjs';
+import { runDesignDrift } from './design-drift.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -52,6 +54,11 @@ const warn = (code, msg, extra) => { warns.push(msg); gf.warn(code, msg, extra);
 // SCALE_DRIFT_MAX: more distinct literal sizes than this across one film's fragments and the frames
 // stop reading as one film (docs/CRAFT/HTML-FRAGMENTS.md's "seven frames, eight invented sizes" case).
 const SCALE_DRIFT_MAX = 7;
+// A film that has DECLARED its values (`<film>.design.md`) gets the stricter per-value check below
+// instead: `scale-drift` is the coarse "too many sizes" warn for a film that never opted in, and it
+// would only be noise once design-drift is naming every undeclared value by itself.
+const filmJsonPath = sbPath.replace(/\.storyboard\.md$/, '.json');
+const designSpec = fs.existsSync(filmJsonPath) ? readDesignSpec(filmJsonPath) : null;
 const filmSizes = new Map(); // px -> Set of fragments using it
 for (const b of beats) {
   if (!b.fragment) continue;
@@ -70,11 +77,21 @@ for (const b of beats) {
     filmSizes.get(px).add(b.fragment);
   }
 }
-if (filmSizes.size > SCALE_DRIFT_MAX) {
+if (!designSpec && filmSizes.size > SCALE_DRIFT_MAX) {
   const list = [...filmSizes.keys()].sort((a, b2) => a - b2).join(', ');
   warn('scale-drift', `this film's fragments use ${filmSizes.size} distinct literal type sizes `
     + `(${list}px), more than ${SCALE_DRIFT_MAX}. Any size is allowed; the kit's roles are there `
     + 'if two close fragments would rather share one scale.');
+}
+
+// ── 1b. design-drift: every visible box's font, radius, shadow and colour against the declared set ──
+// ONE IMPLEMENTATION, TWO ENTRY POINTS: the check itself lives in design-drift.mjs (also its own
+// `make design-drift D=` target); this just calls it, on the SAME `gf` emitter, rather than shelling
+// out and parsing prose back. Silent (no browser launched) when the film has no design.md.
+if (designSpec) {
+  const before = gf.records.length;
+  runDesignDrift(filmJsonPath, gf);
+  for (const r of gf.records.slice(before)) (r.severity === 'error' ? errs : warns).push(r.summary);
 }
 
 // ── 2. the object the storyboard promised, against the layer the assembly actually shipped ─────────
@@ -89,7 +106,7 @@ if (filmSizes.size > SCALE_DRIFT_MAX) {
 // 'var(--accent)'`, docs/MISTAKES.md #596's sibling: the plan said one thing, the frame carries the
 // tool's placeholder for it). A film that DOES locate the object per beat is answering the promise the
 // other legal way and must not be flagged for it.
-const jsonPath = sbPath.replace(/\.storyboard\.md$/, '.json');
+const jsonPath = filmJsonPath;
 let scene = null;
 if (fs.existsSync(jsonPath)) {
   try { scene = JSON.parse(fs.readFileSync(jsonPath, 'utf8')); } catch { scene = null; }
