@@ -3853,23 +3853,36 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('buildCameraMove throws on unknown', (() => { try { buildCameraMove({ move: 'nope' }); return false; } catch { return true; } })());
   ok('CAMERA_MOVE_NAMES lists the generators', CAMERA_MOVE_NAMES.includes('diveIn') && CAMERA_MOVE_NAMES.includes('panFollow'));
 
-  // ---- diveIn headroom: a target bigger than the frame is a REFUSAL, never a silent crop -----------
-  // `to` used to be accepted at any value, so a dive could land with the thing it dove at cropped by the
-  // canvas and say nothing. maxScale = min(0.88*W/targetW, 0.88*H/targetH).
+  // ---- diveIn headroom: a target bigger than the frame ADAPTS, never a silent crop -----------------
+  // `to` past the frame used to be a hard refusal; it now clamps to the largest scale that keeps the
+  // subject in frame and prints an "adapted" line, so a scene that predates a target's real size still
+  // renders. maxScale = min(0.88*W/targetW, 0.88*H/targetH). `crop: true`, or a raised `headroom`, is
+  // the explicit opt-in that keeps `to` exactly as authored (tested beside the clamp).
   ok('diveIn: a `to` inside the headroom is allowed', diveIn({ tx: 960, ty: 540, to: 2,
     targetW: 400, targetH: 300, canvasW: 1920, canvasH: 1080 }).length === 2);
-  ok('diveIn: REFUSES a `to` that pushes the target off-frame', (() => {
-    try { diveIn({ tx: 960, ty: 540, to: 5, targetW: 400, targetH: 300, canvasW: 1920, canvasH: 1080 }); return false; }
-    catch (e) { return /headroom|past the frame/i.test(e.message); }
+  ok('diveIn: a `to` that pushes the target off-frame is CLAMPED, not refused', (() => {
+    const max = Math.min(0.88 * 1920 / 400, 0.88 * 1080 / 300);
+    const kf = diveIn({ tx: 960, ty: 540, to: 5, targetW: 400, targetH: 300, canvasW: 1920, canvasH: 1080 });
+    return kf.length === 2 && approx(kf[1].s, max);
   })());
   ok('diveIn: the limit is the tighter axis (0.88 * H / targetH here)', (() => {
     const max = Math.min(0.88 * 1920 / 400, 0.88 * 1080 / 900);   // 4.224 vs 1.056 → 1.056
     const inside = diveIn({ tx: 0, ty: 0, to: max - 1e-6, targetW: 400, targetH: 900, canvasW: 1920, canvasH: 1080 });
-    try { diveIn({ tx: 0, ty: 0, to: max + 1e-3, targetW: 400, targetH: 900, canvasW: 1920, canvasH: 1080 }); return false; }
-    catch { return inside.length === 2; }
+    const outside = diveIn({ tx: 0, ty: 0, to: max + 1e-3, targetW: 400, targetH: 900, canvasW: 1920, canvasH: 1080 });
+    return inside.length === 2 && approx(outside[1].s, max);
   })());
-  ok('diveIn: one axis alone still guards', (() => {
-    try { diveIn({ tx: 0, ty: 0, to: 3, targetW: 1200, canvasW: 1920, canvasH: 1080 }); return false; } catch { return true; }
+  ok('diveIn: one axis alone still guards, and still adapts', (() => {
+    const max = 0.88 * 1920 / 1200;
+    const kf = diveIn({ tx: 0, ty: 0, to: 3, targetW: 1200, canvasW: 1920, canvasH: 1080 });
+    return approx(kf[1].s, max);
+  })());
+  ok('diveIn: `crop: true` keeps `to` exactly as authored, no clamp', (() => {
+    const kf = diveIn({ tx: 960, ty: 540, to: 5, targetW: 400, targetH: 300, canvasW: 1920, canvasH: 1080, crop: true });
+    return kf[1].s === 5;
+  })());
+  ok('diveIn: a `headroom` raised above 0.88 also opts out of the clamp', (() => {
+    const kf = diveIn({ tx: 960, ty: 540, to: 5, targetW: 400, targetH: 300, canvasW: 1920, canvasH: 1080, headroom: 0.95 });
+    return kf[1].s === 5;
   })());
   ok('diveIn: no target size given = nothing to check, unchanged behaviour',
     diveIn({ tx: 0, ty: 0, to: 9 }).length === 2);
