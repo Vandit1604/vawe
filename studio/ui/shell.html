@@ -63,7 +63,7 @@
       <button id=play class="ib big" aria-label=play title=Play><svg class=solid viewBox="0 0 20 20"><path d="M6 3.8v12.4L16 10z"/></svg></button>
       <button id=next class=ib aria-label="next frame" title="Next frame"><svg class=solid viewBox="0 0 20 20"><rect x=14 y=4.5 width=2 height=11 rx=.8 /><path d="M4.5 4.8v10.4l8-5.2z"/></svg></button>
      </span>
-     <span class=r><button id=fs class=ib aria-label=fullscreen title=Fullscreen><svg viewBox="0 0 20 20"><path d="M4 8V5a1 1 0 011-1h3M12 4h3a1 1 0 011 1v3M16 12v3a1 1 0 01-1 1h-3M8 16H5a1 1 0 01-1-1v-3"/></svg></button></span>
+     <span class=r><button id=fs class=ib aria-label=fullscreen title=Fullscreen><svg viewBox="0 0 20 20"><path d="M4 8V5a1 1 0 011-1h3M12 4h3a1 1 0 011 1v3M16 12v3a1 1 0 01-1 1h-3M8 16H5a1 1 0 01-1-1v-3"/></svg></button><button id=chatopen class=ib aria-label="show chat" title=Chat aria-controls=chat hidden><svg viewBox="0 0 20 20"><path d="M4 5h12a1 1 0 011 1v6a1 1 0 01-1 1H9l-3.5 3V13H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg></button></span>
     </div>
    </div>
    <div id=split role=separator aria-orientation=horizontal aria-label="resize the timeline"
@@ -97,6 +97,20 @@
     <div class=paneview><div class=empty id=shipbody></div></div>
    </section>
   </div>
+  <aside id=chat aria-label=chat>
+   <div class=phead><h2>Chat</h2>
+    <button id=chatclose class=ib aria-label="collapse panel" title=Collapse aria-controls=chat><svg viewBox="0 0 20 20"><path d="M10 6l4 4-4 4M5 6l4 4-4 4"/></svg></button></div>
+   <div id=chatlog role=log aria-live=polite></div>
+   <div id=chatbar>
+    <textarea id=chatinput rows=1 placeholder="ask for a change to this film..."></textarea>
+    <div class=chatactions>
+     <button id=chatnew class=ib aria-label="new chat" title="New chat"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button>
+     <span class=sp></span>
+     <button id=chatstop hidden>Stop</button>
+     <button id=chatsend>Send</button>
+    </div>
+   </div>
+  </aside>
  </main>
 <script src=/studio/ui/studio.js></script>
 </body></html>

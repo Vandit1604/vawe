@@ -580,6 +580,62 @@
    requestAnimationFrame(()=>{ fit(); if(model) paint(model); draw(); }); }
  $('propclose').addEventListener('click',()=>setProp(false));
  $('propopen').addEventListener('click',()=>setProp(true));
+
+ // ---- CHAT: a prompt in, the agent's own words streamed back, then the scene reloaded on success ----
+ const chatLog=$('chatlog'), chatInput=$('chatinput'), chatSend=$('chatsend'), chatStop=$('chatstop');
+ let chatBusy=false, chatAbort=null, chatReset=false;
+ function setChat(open){ document.body.classList.toggle('chatoff',!open);
+   $('chatopen').hidden=open;
+   (open?$('chatclose'):$('chatopen')).focus();
+   requestAnimationFrame(()=>{ fit(); if(model) paint(model); draw(); }); }
+ $('chatclose').addEventListener('click',()=>setChat(false));
+ $('chatopen').addEventListener('click',()=>setChat(true));
+ function addMsg(cls,text){ const d=document.createElement('div'); d.className='cmsg '+cls; d.textContent=text;
+   chatLog.appendChild(d); chatLog.scrollTop=chatLog.scrollHeight; return d; }
+ // The CLI's own stdout, as SSE lines: "event: X\ndata: {...}\n\n" blocks, read off a fetch body
+ // stream rather than EventSource, which cannot carry the POST body a prompt needs.
+ async function runChat(prompt,reset){
+   chatBusy=true; chatSend.disabled=true; chatStop.hidden=false;
+   addMsg('me',prompt);
+   const agentEl=addMsg('agent',''); let agentText='', done=false;
+   chatAbort=new AbortController();
+   try{
+     const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({prompt,reset:!!reset}),signal:chatAbort.signal});
+     if(!res.ok){ const e=await res.json().catch(()=>({error:'chat failed'})); agentEl.remove(); addMsg('err',e.error||'chat failed'); return; }
+     const reader=res.body.getReader(), dec=new TextDecoder(); let buf='';
+     for(;;){
+       const r=await reader.read(); if(r.done) break;
+       buf+=dec.decode(r.value,{stream:true});
+       let idx;
+       while((idx=buf.indexOf('\n\n'))>=0){
+         const chunk=buf.slice(0,idx); buf=buf.slice(idx+2);
+         const evM=chunk.match(/^event: (.+)$/m), dataM=chunk.match(/^data: (.+)$/m);
+         if(!dataM) continue;
+         let data; try{ data=JSON.parse(dataM[1]); }catch{ continue; }
+         const ev=evM?evM[1]:'message';
+         if(ev==='text'){ agentText+=data.text; agentEl.textContent=agentText; chatLog.scrollTop=chatLog.scrollHeight; }
+         else if(ev==='done'){
+           done=true;
+           if(!agentText) agentEl.remove();
+           if(data.error==='not-found') addMsg('err','Claude Code CLI not found');
+           else if(data.code!==0) addMsg('err',data.error||('exited '+data.code));
+           else{ addMsg('note','Updated, scene reloaded'); reloadScene(); }
+         }
+       }
+     }
+   }catch(e){ if(e.name!=='AbortError') addMsg('err',e.message); }
+   finally{ if(!done&&!agentText) agentEl.remove(); chatBusy=false; chatSend.disabled=false; chatStop.hidden=true; chatAbort=null; }
+ }
+ function sendChat(){ if(chatBusy) return; const v=chatInput.value.trim(); if(!v) return;
+   chatInput.value=''; chatInput.style.height='auto';
+   const reset=chatReset; chatReset=false; runChat(v,reset); }
+ chatSend.addEventListener('click',sendChat);
+ $('chatnew').addEventListener('click',()=>{ if(chatBusy) return; chatLog.innerHTML=''; chatReset=true; say('new chat'); });
+ chatStop.addEventListener('click',()=>{ if(chatAbort) chatAbort.abort(); fetch('/api/chat/stop',{method:'POST'}); });
+ chatInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(); } });
+ chatInput.addEventListener('input',()=>{ chatInput.style.height='auto'; chatInput.style.height=Math.min(140,chatInput.scrollHeight)+'px'; });
+
  // Arrows step a frame, shift+arrow a second, home/end the ends, space plays.
  addEventListener('keydown',e=>{
    // Escape closes an open popover first; only a second press clears the selection
