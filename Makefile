@@ -648,7 +648,7 @@ mine: ## [study] cluster every studied grammar/*.json shot by device into named 
 # hand-written fragment (or a captured component JSON) STANDALONE on the theme bg → /tmp/preview.png.
 # SERVE=1 keeps it LIVE in your browser instead (real fonts/assets). "is this HTML doing what I want?".
 preview: ## [dev] render a single hand-written fragment (or a captured component JSON) STANDALONE on the theme bg →
-	node harness/author/preview-fragment.mjs $(HTML) $(if $(THEME),--theme $(THEME)) $(if $(BG),--bg $(BG)) $(if $(W),--w $(W)) $(if $(SERVE),--serve)
+	node harness/author/preview-fragment.mjs $(HTML) $(if $(THEME),--theme $(THEME)) $(if $(BG),--bg $(BG)) $(if $(W),--w $(W)) $(if $(SERVE),--serve) $(if $(D),--film $(D))
 
 # make screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [THEME=<name>] [INVENT=1]
 #   [REF=<ref> ACT=<n>] [W=1920 H=1080]: ONE command, the whole design route for a PRODUCT SCREEN in a
@@ -662,7 +662,7 @@ preview: ## [dev] render a single hand-written fragment (or a captured component
 # the 1920x1080 frame and its safe margin, core/layout/safe.js MARGIN): a static source parse cannot
 # see a percentage width or an object-fit crop resolve, only the browser can. Report-only, exit 0.
 screen: ## [dev] ONE command: write (if new) + preview + impeccable + content measure + readiness + clipping (F= [KIND=] [THEME=] [INVENT=1] [REF= ACT=] [W= H=])
-	node harness/author/screen.mjs $(F) $(if $(KIND),--kind $(KIND)) $(if $(THEME),--theme $(THEME)) $(if $(INVENT),--invent) $(if $(REF),--ref $(REF)) $(if $(ACT),--act $(ACT)) $(if $(W),--w $(W)) $(if $(H),--h $(H))
+	node harness/author/screen.mjs $(F) $(if $(KIND),--kind $(KIND)) $(if $(THEME),--theme $(THEME)) $(if $(INVENT),--invent) $(if $(REF),--ref $(REF)) $(if $(ACT),--act $(ACT)) $(if $(W),--w $(W)) $(if $(H),--h $(H)) $(if $(D),--film $(D))
 
 # make beats D=formats/x/video.json [VS=brand]: first/mid/last frame of every beat in one contact
 # sheet → /tmp/beats/$(notdir $(basename $(D))).png. VS=brand stacks each beat beside its source-section shot (fidelity diff).

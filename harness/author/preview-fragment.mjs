@@ -15,6 +15,17 @@ import puppeteer from 'puppeteer';
 import { serveRepo } from '../lib/render-harness.mjs';
 import { extractKitBlock } from '../lib/stagekit.mjs';
 import { fragPage, FULLBLEED_RE, INSET_RE } from '../lib/frag-page.mjs';
+// THE SAME SANITISER AND SCOPE THE FILM APPLIES. `core/layers/html.js`'s build() runs every hand-
+// authored fragment through `scopeStyles(sanitizeHtml(markup))` before it becomes DOM; this used to
+// preview the raw bytes untouched, so a style or attribute the render silently drops (an escaping
+// `<iframe>`, an `on*` handler, a second layer's `<style>` bleeding in unscoped) still previewed clean.
+// Imported from the engine, not copied, so the two can never drift (an earlier drift: the sanitiser
+// once stripped `<img src>` only in the render path, never here).
+import { sanitizeHtml, scopeStyles } from '../../core/type/sanitize-html.js';
+// THE REAL LAYER BOX, and its own clipping check against it (not the canvas): see the header comments
+// on each file for why they are separate, importable modules rather than inline here.
+import { findFilmLayerBox } from '../lib/film-layer-box.mjs';
+import { clipAgainstBox } from './screen.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -83,16 +94,72 @@ const kitBlock = extractKitBlock(raw);
 const ownMarkup = kitBlock ? raw.replace(kitBlock, '') : raw;
 const fullBleed = FULLBLEED_RE.test(ownMarkup) && INSET_RE.test(ownMarkup);
 
-const page$html = fragPage({ raw, theme, bg, boxW, tSec, fullBleed });
+// Sanitised AFTER the full-bleed detection (which must read the fragment's OWN unsanitised markup,
+// see the comment above) and BEFORE it becomes the page: the same order build() applies it in.
+const markup = scopeStyles(sanitizeHtml(raw));
+
+const page$html = fragPage({ raw: markup, theme, bg, boxW, tSec, fullBleed });
+
+// reportFilmBox(browser, port, out, layerBox, boxesOutFilm): renders the fragment a SECOND time, at
+// its real assembled layer box, and reports the difference from the generic preview above. Its own
+// function (rather than inline in the render branch) so the report stays flat: a nested "if themed,
+// screenshot, dump boxes, clip-check, print" reads as five decisions instead of one.
+async function reportFilmBox(browser, port, out, layerBox, boxesOutFilm) {
+  const page2 = await browser.newPage();
+  await page2.setViewport({ width: layerBox.W, height: layerBox.H, deviceScaleFactor: 1 });
+  await page2.goto(`http://127.0.0.1:${port}/__frag_film`, { waitUntil: 'load' });
+  await page2.waitForFunction('window.__themed !== undefined', { timeout: 10000 });
+  const themed = await page2.evaluate(() => window.__themed);
+  if (themed !== true) { console.log(`  ⚠ film-box render skipped: theme failed to apply, ${themed}`); await page2.close(); return; }
+  await page2.evaluate(async () => { await document.fonts.ready; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); });
+  await page2.screenshot({ path: out.replace(/\.png$/, '') + '.film.png', clip: { x: 0, y: 0, width: layerBox.W, height: layerBox.H } });
+  const filmBoxes = await page2.evaluate(getFragBoxes);
+  await page2.close();
+  if (boxesOutFilm) fs.writeFileSync(boxesOutFilm, JSON.stringify({ box: layerBox, elements: filmBoxes }));
+  console.log(`  assembled: ${layerBox.film}${layerBox.id ? ` layer "${layerBox.id}"` : ''}, `
+    + `box ${layerBox.w}x${layerBox.h} at (${layerBox.x},${layerBox.y}) on a ${layerBox.W}x${layerBox.H} canvas`);
+  const filmFindings = clipAgainstBox(filmBoxes, layerBox);
+  if (!filmFindings.length) { console.log('  preview matches film: fits inside its assembled layer box.'); return; }
+  for (const f of filmFindings)
+    console.log(`  preview differs from film: <${f.tag}> "${f.text}" clips ${f.amounts.join(', ')} at its layer box ${layerBox.w}x${layerBox.h}`);
+}
+
+// The REAL LAYER BOX. `--film <path>` (`D=` from `make preview`/`make screen`) names the film
+// explicitly; otherwise every .json beside the fragment is scanned for an html layer whose `src`
+// names this file. `null` means no film uses it yet, and today's full-canvas-only preview stands.
+const layerBox = findFilmLayerBox(ROOT, src, flag('--film', null));
+const filmPage$html = layerBox ? fragPage({ raw: markup, theme, bg, tSec, box: layerBox }) : null;
 
 const { server, port } = await serveRepo({
   route: (req, res) => {
-    if (decodeURIComponent(req.url.split('?')[0]) !== '/__frag') return false;
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(page$html);
-    return true;
+    const p = decodeURIComponent(req.url.split('?')[0]);
+    if (p === '/__frag') { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(page$html); return true; }
+    if (p === '/__frag_film' && filmPage$html) { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(filmPage$html); return true; }
+    return false;
   },
 });
+
+// getFragBoxes(): every #frag descendant's LAID-OUT bounding box, browser-side. Shared by both
+// renders (the standalone preview and, when assembled, the film's own layer box) so the two ask the
+// same question of the page rather than two slightly different ones.
+const getFragBoxes = () => {
+  const frag = document.getElementById('frag');
+  if (!frag) return [];
+  const out = [];
+  for (const el of frag.querySelectorAll('*')) {
+    const r = el.getBoundingClientRect();
+    if (r.width <= 0 || r.height <= 0) continue;
+    const cs = getComputedStyle(el);
+    if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) === 0) continue;
+    const isImg = el.tagName === 'IMG';
+    // own text only (not descendants'), so a wrapper div is not double-reported for its child's words
+    const ownText = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent.trim()).join(' ').trim();
+    if (!isImg && !ownText) continue;
+    out.push({ tag: el.tagName.toLowerCase(), text: isImg ? (el.getAttribute('alt') || el.getAttribute('src') || 'img') : ownText,
+      x: r.left, y: r.top, w: r.width, h: r.height, fontPx: isImg ? null : parseFloat(cs.fontSize) });
+  }
+  return out;
+};
 
 // --serve: keep the page live in your browser (real fonts/assets, interactive) instead of a PNG
 if (argv.includes('--serve')) {
@@ -127,27 +194,13 @@ await page.screenshot({ path: out, clip: { x: 0, y: 0, width: 1920, height: 1080
   // resolve only once the browser lays the page out), and `make screen`'s clipping check needs exactly
   // that: whether an element the author put on screen actually landed inside the frame.
   const boxesOut = flag('--boxes-out', null);
-  if (boxesOut) {
-    const boxes = await page.evaluate(() => {
-      const frag = document.getElementById('frag');
-      if (!frag) return [];
-      const out = [];
-      for (const el of frag.querySelectorAll('*')) {
-        const r = el.getBoundingClientRect();
-        if (r.width <= 0 || r.height <= 0) continue;
-        const cs = getComputedStyle(el);
-        if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) === 0) continue;
-        const isImg = el.tagName === 'IMG';
-        // own text only (not descendants'), so a wrapper div is not double-reported for its child's words
-        const ownText = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent.trim()).join(' ').trim();
-        if (!isImg && !ownText) continue;
-        out.push({ tag: el.tagName.toLowerCase(), text: isImg ? (el.getAttribute('alt') || el.getAttribute('src') || 'img') : ownText,
-          x: r.left, y: r.top, w: r.width, h: r.height, fontPx: isImg ? null : parseFloat(cs.fontSize) });
-      }
-      return out;
-    });
-    fs.writeFileSync(boxesOut, JSON.stringify(boxes));
-  }
+  if (boxesOut) fs.writeFileSync(boxesOut, JSON.stringify(await page.evaluate(getFragBoxes)));
+
+  // PASS 2: the SAME fragment at its REAL assembled layer box, when one exists. A generic centred or
+  // full-bleed preview cannot tell you whether the film's own box clips it, a percentage width or a
+  // wrapped line reflows differently at 1400px than at the layer's real w/h.
+  if (layerBox) await reportFilmBox(browser, port, out, layerBox, flag('--boxes-out-film', null));
+  else console.log('  not assembled yet, checked at full canvas.');
   // --no-detect: for a caller photographing many generated fragments (invent-look's candidate sheet),
   // where the craft tells belong to the generator, not to this run. Never pass it for a HAND-written
   // fragment, that is the one this check exists for.
