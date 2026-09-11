@@ -25,6 +25,10 @@ below.
 8. **Something continuous crosses every cut.** One object survives a cut and changes across it, or the
    film names in a waiver what else holds it together.
 
+Read `<film>.design.md` before you write a size, radius, shadow or colour: it is the film's own resolved
+design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Reference its
+`--kit-<group>-<name>` token instead of a literal; to use a new value, add it there first.
+
 ## The rules
 
 | rule | when | holds |
