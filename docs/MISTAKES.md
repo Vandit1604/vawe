@@ -2557,6 +2557,20 @@ report-only: `fake-typing` for the word-fade/glyph fragment, `typing-camera-stil
 camera never leans into.
 holds: core/engine/produce.js, quality/gates/critique.mjs, docs/CRAFT/KEYED-MOTION.md
 
+## 619. A size rule measured one frame at a time and could not see fast motion
+`frame-check`'s peak check rendered each fragment as a single still and compared the largest painted
+object across beats, failing a film whenever the beat declared the peak did not hold the biggest object
+(`peak-not-largest`) or barely led the next beat (`peak-barely-leads`). Fast motion legitimately shows a
+small object for only a few frames: a browsing ring of films panned past several small cards in quick
+succession, and the still-frame measurement forced the focused card to 92% of the frame to satisfy the
+rule, killing the browsing feel the beat was going for. The rule was checking the wrong evidence: size
+in one frame is not the same claim as loudness across the beat's whole span, which is carried by motion,
+contrast or a camera move instead.
+The fix is deletion, not a smarter measurement: the size check, its helpers, both codes, and the
+`peak-not-largest` safeguards entry are gone. `weight: peak` still means one thing: the one loud moment,
+carried by motion, contrast or a camera move, judged by eye rather than measured in pixels.
+holds: none
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
