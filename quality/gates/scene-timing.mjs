@@ -403,6 +403,17 @@ export function sceneTiming(input) {
   // beat), and the OFFSETS between their start times - a beat where everything starts on the same
   // frame has one offset of 0; a beat with staggered arrivals has several small ones.
   const camKfs = Array.isArray(d.camera) ? d.camera.filter((k) => k && typeof k === 'object' && num(k.t, null) != null) : [];
+  // a camera LEG (consecutive keyframes whose pose actually differs) as a [start, end] span. Shared by
+  // beatMotionAt (below) and by callers measuring how much of the film the camera actually travels
+  // (choreo.mjs's camera-coverage-floor): one model of "when is the camera moving", not two.
+  const CAM_POSE_KEYS = ['x', 'y', 's', 'rx', 'ry', 'roll', 'z'];
+  const cameraLegSpans = [];
+  for (let k = 0; k < camKfs.length - 1; k++) {
+    const a = camKfs[k], b = camKfs[k + 1];
+    if (CAM_POSE_KEYS.some((p) => a[p] != null && b[p] != null && a[p] !== b[p])) {
+      cameraLegSpans.push([num(a.t, 0), num(b.t, 0)]);
+    }
+  }
   // Exported as a FUNCTION, not only the cut-segmented array below, because a film with no cuts (a
   // continuous camera move, like a whole `flow-seam` film) has exactly one scene-timing beat but nine
   // STORYBOARD beats, and it is the storyboard's beats a caller usually wants this measured against.
@@ -418,12 +429,10 @@ export function sceneTiming(input) {
       for (const c of ch) kinds.add(c);
       if (ch.size) starts.push(num(L.start, 0));
     }
-    // a camera LEG (consecutive keyframes whose pose actually differs) overlapping this window.
-    const POSE_KEYS = ['x', 'y', 's', 'rx', 'ry', 'roll', 'z'];
-    for (let k = 0; k < camKfs.length - 1; k++) {
-      const a = camKfs[k], b = camKfs[k + 1];
-      if (num(a.t, 0) >= end || num(b.t, 0) <= start) continue;
-      if (POSE_KEYS.some((p) => a[p] != null && b[p] != null && a[p] !== b[p])) { kinds.add('camera'); starts.push(num(a.t, 0)); }
+    // a camera leg overlapping this window.
+    for (const [ls, le] of cameraLegSpans) {
+      if (ls >= end || le <= start) continue;
+      kinds.add('camera'); starts.push(ls);
     }
     for (const r of rawRecipes) {
       const at = num(r.at, num(r.from, null));
@@ -504,6 +513,6 @@ export function sceneTiming(input) {
   return {
     scene: d, layers, content, spans, contentSpans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges,
     sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H],
-    lives, beatMotion, beatMotionAt, handoffs, cameraStillHeldAt,
+    lives, beatMotion, beatMotionAt, handoffs, cameraStillHeldAt, cameraLegSpans,
   };
 }
