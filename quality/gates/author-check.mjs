@@ -150,6 +150,9 @@ const motionFails = (_sceneFile, d) => {
 // `authoring.allow` was always built to answer. Two codes that used to live here were retired instead
 // of folded (`sparse-beats`, and `no-plan-for-craft` which was never even adopted): see the block above.
 const HARD_CODES = {
+  // Only fires at all for a film that opted in (`<film>.design.md` exists); silent otherwise, see
+  // quality/gates/design-drift.mjs. `design-token-hint` is its non-blocking sibling, always a warn.
+  'design-drift': 'every visible box\'s font, radius, shadow and colour is a declared value, in the kit or in the film\'s design.md',
   'plain-slideshow': 'the film reaches past a slideshow: kinetic type, a camera move, or real transitions',
   'no-preflight': 'the film went through the decision chain before the JSON existed',
   'crossfade-mud': 'no transition dissolves one text state into another in place',
@@ -297,6 +300,7 @@ const LADDER = [
   ['motion', 'blocks', 'whether anything in this film is choreographed rather than named'],
   ['dissolve', 'reports', 'transitions: two text states cross-dissolved into mud'],
   ['designspec', 'reports', 'the look lock: colours off the theme palette, fonts outside its roles'],
+  ['design-drift', 'reports', 'silent with no design.md; otherwise every frame value against it (hard code)'],
   ['craft', 'reports', 'the craft checklist: every CRAFT doc relevant to this film is answered in the plan'],
   ['copy', 'reports', 'the words: weak hook, jargon, a restated headline, a number set flat'],
   ['read', 'reports', 'whether a viewer can read each line in the seconds it is on screen'],
@@ -538,6 +542,10 @@ styleGate('dissolve', 'dissolve check (crossfade mud)', 'quality/gates/dissolve-
 // decoration. Every scene in the library passes it: the seven that are legitimately off the brand say
 // so per-scene, with a reason, in {"authoring":{"allow":["off-colour"]}} (docs/MISTAKES.md #337).
 styleGate('designspec', 'design-spec lock (theme colours + fonts)', 'quality/gates/designspec-check.mjs', ['--strict'], { waivable: true, exitMeansFail: true });
+// 4b1. design-drift. Silent (no browser launched, exit 0) for the library's default: a film with no
+// `<film>.design.md`. Named in HARD_CODES above, so once a film opts in, an undeclared value blocks
+// the same way any other ratcheted code does. See quality/gates/design-drift.mjs.
+styleGate('design-drift', 'design drift (frame values vs the film\'s design.md)', 'quality/gates/design-drift.mjs', [], { waivable: true, exitMeansFail: true });
 // 4b2. craft. THE CHECKLIST: every CRAFT doc whose `applies-when:` matches this film must be answered in
 // the storyboard's `craft:` map, so an author cannot ship without going through the docs that apply. This
 // is the fix for the failure that a huge doc system existed and a film used none of it: it turns the
