@@ -2,7 +2,7 @@
 when: a film has the right structure and still feels amateur, or a recreation drifts where the original snaps
 answers: "how the exemplar actually MOVES, as numbers from its JSON: dense keys with linear between them · layers sharing one pan · `--p` carrying what position cannot · traced timings · diegetic exits. A register you choose, not a floor, and deliberately ungated"
 group: crosscutting
-codes: beat-holds-still, beats-held-open, beats-wrapped-as-units, held-through-the-change, junction-is-static, no-authored-motion, motion-diverges, motion-not-built, fake-typing, typing-camera-still
+codes: beat-holds-still, beats-held-open, beats-wrapped-as-units, held-through-the-change, junction-is-static, no-authored-motion, motion-diverges, motion-not-built, fake-typing, typing-camera-still, copied-plane
 ---
 
 # KEYED MOTION: how the exemplar actually moves
@@ -176,7 +176,9 @@ caret's end as it finishes, timed off the layer's own `start`/`typing`/text leng
 (`core/engine/produce.js` `resolveCaretStations`). **Rides a tilted or moving surface**: nest the `html`
 and the typing `text` as children of one `group` that carries the motion track (rotX/rotY/z/blur/opacity);
 `caret` still resolves, at the child's real stage position (`findLayerById` sums each ancestor
-`layout:"free"` group's own x/y on the way down).
+`layout:"free"` group's own x/y on the way down). Copying the tilt's rotX/rotY keys onto a second
+top-level layer by hand, then pushing its `ox`/`oy` pivot off its own box to fake the shared centre,
+is named by `copied-plane` (`make critique`): nest both under the `group` instead.
 
 A typed line can also flash each word its own accent as it lands: `"typingColors": { "colors": ["var(--accent)", "var(--accent-2)"], "hold": 0.4 }`.
 `colors` cycles one per word (colorWave's `colors[i % n]` vocabulary), `hold` is the same 0..1 fraction
