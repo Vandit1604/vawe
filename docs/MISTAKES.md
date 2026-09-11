@@ -2557,6 +2557,21 @@ report-only: `fake-typing` for the word-fade/glyph fragment, `typing-camera-stil
 camera never leans into.
 holds: core/engine/produce.js, quality/gates/critique.mjs, docs/CRAFT/KEYED-MOTION.md
 
+## 619. A caret station found a group child's OFFSET, not its place on stage
+A `caret:"#id"` travel station (#618) resolved the typed layer's own `x`/`y` straight off the authored
+JSON. That is correct for a top-level layer and silently wrong for one nested as a `group` child: a
+`layout:"free"` child's `x`/`y` is its offset INSIDE the group (`core/layers/util.js` `addGroupChild`),
+never added back to the group's own stage position. The camera would have framed a point near the
+group's top-left corner rather than the line it was told to follow, the moment an author put a typing
+line inside a tilted group instead of at the top level, which the group-plane work (nesting `html` and
+`text` under one motion-carrying group) was about to make a normal thing to do.
+The fix stays inside the one existing tree-walk: `findLayerById` (`core/engine/produce.js`) now
+accumulates every ancestor `layout:"free"` group's own `x`/`y` on the way down and returns the nested
+layer with absolute stage coordinates, rather than growing a second lookup beside it. Flex/grid children
+have no meaningful `x`/`y` to begin with, so the walk only ever changes the answer for the `free` case
+it fixes.
+holds: core/engine/produce.js
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.

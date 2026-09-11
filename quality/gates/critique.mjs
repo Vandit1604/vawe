@@ -200,12 +200,12 @@ for (const l of layers) {
   const fakeWordPart = (Array.isArray(l.parts) ? l.parts : []).find((p) => p && typeof p.select === 'string'
     && (p.each != null || p.stagger != null) && (TYPING_WORD_RE.test(p.select) || TYPING_WORD_RE.test(l.id || '')));
   if (fakeWordPart) {
-    warn('fake-typing', `${who}'s part "${fakeWordPart.select}" fakes typing by fading words in one at a time (${fakeWordPart.anim || 'its anim'}, each/stagger). Put a \`text\` layer with \`typing\` + \`caret\` over that slot instead: it reveals per CHARACTER and gives the camera a real caret to follow.`, s0(l));
+    warn('fake-typing', `${who}'s part "${fakeWordPart.select}" fakes typing by fading words in one at a time (${fakeWordPart.anim || 'its anim'}, each/stagger). Put a \`text\` layer with \`typing\` + \`caret\` over that slot instead: it reveals per CHARACTER and gives the camera a real caret to follow. Riding a tilted or moving surface? Nest both as children of a \`group\` that carries the motion, not two layers kept in sync by hand.`, s0(l));
     continue; // one finding names the fix; the glyph check below would be redundant noise on the same layer
   }
   const markup = fragmentMarkup(l);
   if (markup && CARET_GLYPH_RE.test(markup)) {
-    warn('fake-typing', `${who} draws a literal "|"/"▏" caret glyph next to typed text. That glyph never blinks and never moves with a real reveal. Put a \`text\` layer with \`typing\` + \`caret\` over that slot instead.`, s0(l));
+    warn('fake-typing', `${who} draws a literal "|"/"▏" caret glyph next to typed text. That glyph never blinks and never moves with a real reveal. Put a \`text\` layer with \`typing\` + \`caret\` over that slot instead, nested as a \`group\` child if it must ride the same tilt or motion as the html around it.`, s0(l));
   }
 }
 
