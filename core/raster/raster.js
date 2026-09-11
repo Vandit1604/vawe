@@ -110,10 +110,35 @@ export async function buildInlinedCss(el) {
   return `${fonts}\n:root{${rootVars}}\n${base}`;
 }
 
+// Chromium never loads a nested <img src="…"> while rasterising a detached SVG (the
+// data:image/svg+xml this file feeds to `new Image()`): that render runs a same-document-only
+// resource policy, so even a same-origin repo-local image comes back BLANK, not just the
+// documented cross-origin case. The pixels already exist, though: preloadImages (boot.js) decoded
+// every <img> before the scene reported ready, so a clone's <img> can be swapped for the ALREADY
+// DECODED bitmap as a data: URI, exactly how inlineFonts closes the parallel gap for @font-face.
+// A genuinely tainted cross-origin source still throws on toDataURL and is left as-is (unchanged,
+// documented behaviour); everything else now bakes instead of leaving a flat background slab.
+function inlineImages(work, live) {
+  const clones = work.querySelectorAll('img');
+  const origs = live.querySelectorAll('img');
+  for (let i = 0; i < clones.length; i++) {
+    const im = origs[i];
+    if (!im || !im.complete || !im.naturalWidth) continue;
+    try {
+      const c = document.createElement('canvas');
+      c.width = im.naturalWidth; c.height = im.naturalHeight;
+      c.getContext('2d').drawImage(im, 0, 0);
+      clones[i].src = c.toDataURL('image/png');
+    } catch (e) { /* tainted cross-origin source: leave the original src, same as before */ }
+  }
+}
+
 // domToCanvas(el, w, h): serialise `el` into an SVG <foreignObject> with the inlined CSS, rasterise
 // it through an <img>, and return a canvas. Async (image decode), build-time only.
 export async function domToCanvas(el, w, h, css) {
-  const xml = new XMLSerializer().serializeToString(el);
+  const work = el.cloneNode(true);
+  inlineImages(work, el);
+  const xml = new XMLSerializer().serializeToString(work);
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
     // CSS goes in a CDATA section: stylesheet text can legally contain characters (`<`, `&`) that are
