@@ -26,3 +26,28 @@ for (const query of ['caret', 'typing caret']) {
 }
 
 console.log('arsenal.test.mjs: OK (caret/typing queries surface all typed-caret blocks + text)');
+
+// CRAFT RULES: docs/CRAFT/rules/*.json should be PULLABLE by search, not only pushed by a hook. A
+// query matching a known rule's own brief must come back as kind "rule" with that rule's id, so an
+// agent can `make arsenal Q="..."` a rule the same way it searches for an effect.
+{
+  const rule = all.find((e) => e.kind === 'rule' && e.name === 'motion.caption-safe-strip');
+  assert.ok(rule, 'expected a "rule" entry for motion.caption-safe-strip; craft rules never loaded into the corpus');
+  const { results } = rankQuery(all, 'captions inside its safe strip', { n: 20 });
+  const found = results.find((e) => e.kind === 'rule' && e.name === 'motion.caption-safe-strip');
+  assert.ok(found, `query on a rule's own brief should surface it; got [${results.map((e) => e.name).join(', ')}]`);
+  console.log('arsenal.test.mjs: OK (a query on a craft rule\'s brief returns kind "rule" with its id)');
+}
+
+// THE DEADLOCK GUARD. arsenal.mjs runs a top-level `await collect()`, and a STATIC import chain back
+// into arsenal.mjs from a module it loads hangs the process forever ("unsettled top-level await",
+// exit 13, docs/MISTAKES.md). Both the plain CLI and --for must still exit cleanly now that craft-rules
+// is in the corpus.
+{
+  const { execFileSync } = await import('node:child_process');
+  const repoRoot = new URL('../..', import.meta.url).pathname;
+  execFileSync(process.execPath, ['harness/author/arsenal.mjs', 'caret'], { cwd: repoRoot, stdio: 'pipe' });
+  execFileSync(process.execPath, ['harness/author/arsenal.mjs', '--for', 'formats/scene/sample.json'],
+    { cwd: repoRoot, stdio: 'pipe' });
+  console.log('arsenal.test.mjs: OK (CLI query and --for both exit 0, no deadlock)');
+}
