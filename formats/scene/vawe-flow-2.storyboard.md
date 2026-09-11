@@ -8,7 +8,7 @@ attention: "the eye follows the camera as it flattens out of a tilt, then the in
 threads: "a cursor and a caret that cause every change + one exit axis per act (x for the terminal/timeline/films chain, y only for the final rise into the mark) + a ground that takes its colour from whatever is on screen + one continuous camera travel, never still"
 format: 1920x1080
 theme: "themes/vawe.json"
-duration: 11.2s
+duration: 14.48s
 spectacle: "beat 7 (Your films) · the ground re-tints to each playing film's own colour as the ring browses, live footage not stills · the film's one loud moment"
 not: "no hard cut anywhere, no centred slide deck, no gradient hero, no stock photography, no copy vawe cannot back, no second typeface, no sound bed, no swipe-to-pick moment standing beside Your films, no static camera hold longer than a beat needs"
 craft:
@@ -37,8 +37,25 @@ craft:
      motion blur, arrival on the same axis, a frame of empty ground between) but now sit inside a film
      that is moving throughout, not only at the joins. Reference: refs/example-madera/pages/ (all 782
      frames at 60fps) and grammar/example-madera.json's per-shot moves. No reference content is used. -->
+## Beat 1: Type-only card, grain gradient (0s-1.2s)
+- type: type_only
+- shot: full-bleed, one line of white type over a still image
+- onscreen: "Nothing here looks like a template."
+- trigger: the film opens on this image and line, ahead of the terminal, so the two image frames in the film sit apart from each other
+- mechanism: a grainy blue gradient with blurred crosses fills the frame with a slow scale drift; the line blurs up into place over it in the theme sans, then exits fast as the camera's one continuous push begins moving across it; the terminal rises out of the same dark ground, tilted and blurred, as the card clears
+- eye: the grain gradient drifting in under the line -> the line blurring up and holding -> a fast exit as the terminal rises out of the same ground behind it
+- becomes: one held photograph and line becomes the terminal's own tilted, blurred arrival
+- why: the owner's own request, to use this non-grid image at the START of the film to space the two image frames apart (the tile-grid card stays mid-film, between the terminal and the timeline); the ground stays one dark field under both, so the join is carried by motion, not a cut
+- duration: 1.20s
+- object_in: center@1920x1080
+- object_out: center@1920x1080/op:0
+- archetype: full-bleed-row
+- weight: quiet
+- picture: the grain-gradient photo, full-bleed, with "Nothing here looks like a template." set large and left-aligned inside the safe margin
+- fragment: none, an image + text layer pair (card-b-bg, card-b-text)
 
-## Beat 1: Terminal, wide and tilted (0s-1.2s)
+
+## Beat 2: Terminal, wide and tilted (0.95s-2.15s)
 - type: hook
 - shot: wide, tilted in perspective, subject low and off-centre, settling toward flat and centred
 - onscreen: "a macOS terminal window (traffic-light dots, centred title, a left column of timestamps beside prior command lines: an italic monospace command word, then a softly rounded output panel, one success green, one error red), seen at a tilt like a screen turning to face you"
@@ -58,7 +75,7 @@ craft:
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html KIND=editor REF=example-madera ACT=1
 - fragment: formats/scene/vawe-flow-2.terminal.html
 
-## Beat 2: Install, typed and done (1.2s-2.7s)
+## Beat 3: Install, typed and done (2.15s-4.0s)
 - type: product_surface
 - shot: close on the new command row, lower-middle
 - onscreen: "npm install -g vawe, then added 1 package in 1.2s / vawe installed. run npx vawe <scene.json> to render"
@@ -67,7 +84,7 @@ craft:
 - eye: "npm" -> "install -g vawe" landing word by word -> the green completion line, then the install note beneath it
 - becomes: an empty command slot becomes a finished install, shown as the terminal's own real output
 - why: the owner's own instruction: open on installing vawe and show it completing, before any request is typed
-- duration: 1.50s
+- duration: 1.84s
 - motion: [data-part="install-word"]@fadeUp:energy; [data-part="install-done"]@popIn:energy
 - object_in: center@1100x700
 - object_out: center@640x160
@@ -77,7 +94,7 @@ craft:
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
 - fragment: formats/scene/vawe-flow-2.terminal.html
 
-## Beat 3: Typed prompt, camera zooms in (2.7s-4.0s)
+## Beat 4: Typed prompt, camera zooms in (4.0s-5.62s)
 - type: product_surface
 - shot: close on the prompt bar, lower third, the camera pushing in as it types
 - onscreen: "make a 12 second launch film"
@@ -86,7 +103,7 @@ craft:
 - eye: "make" -> per-word cobalt flash walks the phrase as the frame tightens -> "launch film", now close and centred
 - becomes: the empty prompt bar becomes a typed request, framed close by a camera that has arrived
 - why: the owner's own instruction: zoom in as the command types, so the push and the words land together
-- duration: 1.30s
+- duration: 1.62s
 - motion: [data-part="prompt-word"]@fadeUp:energy
 - object_in: center@640x160
 - object_out: center@640x160
@@ -96,7 +113,7 @@ craft:
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
 - fragment: formats/scene/vawe-flow-2.terminal.html
 
-## Beat 4: Send and render (4.0s-4.7s)
+## Beat 5: Send and render (5.62s-6.32s)
 - type: product_surface
 - shot: close on the return glyph, lower-right
 - onscreen: "make a 12 second launch film"
@@ -114,7 +131,24 @@ craft:
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
 - fragment: formats/scene/vawe-flow-2.terminal.html
 
-## Beat 5: Terminal chains to timeline (4.7s-5.5s)
+## Beat 5b: Type-only card, tile grid (6.32s-7.22s)
+- type: type_only
+- shot: full-bleed, one line of white type over a still image
+- onscreen: "Every film here fits in one file."
+- trigger: the terminal's send pulse clears the frame, ahead of the timeline
+- mechanism: a blue tilted tile-grid photo fills the frame with a slow scale drift; the line blurs up into place over it in the theme sans, then exits fast; the camera keeps its one push moving through the card, never stopping
+- eye: the terminal's exit -> the tile-grid image drifting in under the line -> the line blurring up and holding -> a fast exit into the timeline's own arrival
+- becomes: the terminal's ink ground becomes one held photograph and line, which becomes the timeline
+- why: the owner's own request, to use this image as a background for a short type-only moment here; the ground change (dark terminal ink to the image, then to the timeline's paper ground) is a declared change, not a flash, and the film's own site copy (site/app/page.tsx:195) supplies the line
+- duration: 0.90s
+- object_in: center@1920x1080
+- object_out: center@1920x1080/op:0
+- archetype: full-bleed-row
+- weight: quiet
+- picture: the tile-grid photo, full-bleed, with "Every film here fits in one file." set large and left-aligned inside the safe margin
+- fragment: none, an image + text layer pair (card-a-bg, card-a-text)
+
+## Beat 6: Terminal chains to timeline (7.22s-8.02s)
 - type: product_surface
 - shot: wide, empty ground with one track entering left
 - onscreen: "(the terminal's own ink ground, motion-blurring away, as a single timeline track and one clip slide in from the left)"
@@ -134,7 +168,7 @@ craft:
 - design: make screen F=formats/scene/vawe-flow-2.timeline.html KIND=dashboard REF=example-madera ACT=2
 - fragment: formats/scene/vawe-flow-2.timeline.html
 
-## Beat 6: Timeline assembles from the left (5.5s-7.3s)
+## Beat 7: Timeline assembles from the left (8.02s-9.97s)
 - type: product_surface
 - shot: medium-wide, timeline filling from the left, camera panning with it
 - onscreen: "(vawe's own multi-track timeline: tracks, clip thumbnails, a playhead)"
@@ -143,7 +177,7 @@ craft:
 - eye: the first track and clip -> each new track and clip pops in and stacks downward, staggering one after another as the camera moves with them -> the fully built timeline panel
 - becomes: the almost-empty timeline becomes vawe's own fully populated multi-track editor
 - why: "show timeline elements coming together and assemble from the left side" is the owner's own line, and a real multi-track build is the one thing this film can show that a home-page screenshot cannot
-- duration: 1.80s
+- duration: 1.95s
 - object_in: center@480x270
 - object_out: center@1600x820
 - motion: [data-part="clip"]@popIn:energy
@@ -153,36 +187,37 @@ craft:
 - design: make screen F=formats/scene/vawe-flow-2.timeline.html REF=example-madera ACT=3
 - fragment: formats/scene/vawe-flow-2.timeline.html
 
-## Beat 7: Your films (7.3s-9.6s)
+## Beat 8: Your films (9.97s-12.97s)
 - type: payoff_withheld
-- shot: wide, full-bleed ring centred
-- onscreen: "(a ring of real vawe films, playing, with captions)"
+- shot: wide, full-bleed wall, camera drifting then pushing to centre
+- onscreen: "(a wall of six real vawe films, all playing at once, then a push into vawe launch)"
 - trigger: the timeline finishing its build frees the frame for what it produced
-- mechanism: the assembled timeline exits left with motion blur; a ring of real vawe films enters from the right, each one PLAYING (moving footage, never a still); as the ring turns to the next film, the ground crossfades to a blurred wash of that film's own dominant colour, then the ring holds one beat longer on its last film before exiting left
-- eye: the assembled timeline -> each playing film pulls the eye as the ground re-tints to its own colour -> the ring's last film, held one beat longer
-- becomes: the timeline becomes a ring of real films, each one recolouring the ground as it plays, then empty ground again
-- why: this is the spectacle, and the proof that vawe's output is real, shown as films actually running rather than photographed
-- duration: 2.30s
+- mechanism: the assembled timeline exits left with motion blur; a wall of six real vawe films fills the frame edge to edge, all six PLAYING at once (moving footage, never a still, no fast switching between them); the camera drifts slowly across the wall, left toward right, then pushes straight into vawe launch at the wall's own centre and holds; as the push lands, the ground takes vawe launch's own colour
+- eye: the assembled timeline -> the whole wall of six playing films as the camera drifts across it -> vawe launch at the wall's centre, held as the push lands
+- becomes: the timeline becomes a wall of six real films playing together, then just vawe launch, held, as the ground takes its colour
+- why: the owner removed the ring's fast film switching and asked for one slower move instead, a wall of six playing films with a slow drift, then a push into vawe launch, so the proof that vawe's output is real reads as one held look rather than a series of quick swaps
+- duration: 3.00s (before the film's own slower 0.85 tempo)
 - recipe: flow-seam at=7.3 out=timeline in=films axis=x
 - object_in: center@1600x820
-- object_out: center@160x160
-- motion: [data-part="film-card"]@fadeUp:professional
+- object_out: center@960x716
+- motion: [data-part="films-wall"]@widen:cinematic; [data-part="film-card"][data-film*="vawe-launch"]@growUp:professional
 - archetype: full-bleed-row
 - weight: peak
-- borrows: "example-madera's card-ground-retint (a swipe deck picking between options) -> vawe-flow-2's films-ring ground (playing, not picking)"
-- picture: a real vawe film mid-play inside the ring, its own colour washed across the ground behind it
-- design: make screen F=formats/scene/vawe-flow-2.films.html KIND=grid REF=example-madera ACT=5
+- borrows: "example-madera's card-ground-retint (a swipe deck picking between options) -> vawe-flow-2's films-wall ground (playing together, not picking, not switching)"
+- picture: the wall's six films playing at once, then held on vawe launch alone at full-bleed, its own colour washed across the ground behind it
+- design: make screen F=formats/scene/vawe-flow-2.films.html REF=example-madera ACT=5
 - fragment: formats/scene/vawe-flow-2.films.html
 
 <!-- NOTE on the cut pick/cards act: example-madera's own swipe-card act (its original act 3) is not
      reproduced here as a literal "choose between three options" moment. The owner's brief never asks
-     the viewer to pick; it asks for real films to play while the ground takes each one's colour as the
-     ring browses. That is exactly the card act's one load-bearing device (per-item ground retint), so
-     the device is kept and reused inside beat 7 above, and the literal swipe-to-choose framing is cut.
-     Keeping both would mean vawe appears to pick a film for the viewer twice, once literally and once
-     as a device, which is the duplicate this film explicitly excludes (see `not:` above). -->
+     the viewer to pick; it asks for real films to play while the ground takes vawe launch's own colour
+     once the wall drifts and the camera pushes in. That is exactly the card act's one load-bearing
+     device (per-item ground retint), so the device is kept and reused inside beat 8 above, and the
+     literal swipe-to-choose framing is cut. Keeping both would mean vawe appears to pick a film for the
+     viewer twice, once literally and once as a device, which is the duplicate this film explicitly
+     excludes (see `not:` above). -->
 
-## Beat 8: The mark (9.6s-11.2s)
+## Beat 9: The mark (12.97s-14.78s)
 - type: payoff_withheld
 - shot: medium close, mark and wordmark centred
 - onscreen: "(the vawe mark, drawn as a line, then the wordmark growing out of it)"
@@ -191,7 +226,7 @@ craft:
 - eye: scattered marks gathering off-frame -> the drawn line traces the vawe mark's outline -> the wordmark growing out beside it, held
 - becomes: scattered marks become a drawn line, which becomes the vawe mark with its wordmark grown out beside it, held still
 - why: the only still moment in the film, earned by everything before it moving; "text should come out of the logo as well" is the owner's own line
-- duration: 1.60s
+- duration: 1.82s
 - recipe: flow-seam at=9.6 out=films in=logo axis=y
 - object_in: center@160x160
 - object_out: center@640x180
