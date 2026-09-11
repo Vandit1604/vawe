@@ -116,6 +116,9 @@ export const DECIDERS = [
     scope: 'exactly one fragment file, named in your brief',
     job: 'write the markup for one beat, and put addressable handles where the motion plan says something must move',
     why: 'HTML renders instantly, so you iterate against your own work with no render. That is the loop, not a critique',
+    extra: [
+      'Read this film\'s <film>.design.md before writing a size, radius, shadow or colour: reference its --kit-<group>-<name> token, never a literal. A value it does not have yet goes there first.',
+    ],
     perScene: true,
   },
   {
@@ -124,6 +127,7 @@ export const DECIDERS = [
     job: 'key the motion the storyboard planned, and prove it moved by MEASURING across frames',
     why: 'nothing moves that nobody asked to move, so every keyed track is a decision somebody made',
     extra: [
+      'Read this film\'s <film>.design.md before writing a size, radius, shadow or colour: reference its --kit-<group>-<name> token, never a literal. A value it does not have yet goes there first.',
       'You cannot watch the film. A description of the motion written from the JSON is a restatement of what you just wrote, so it proves nothing.',
       'Measure instead: sample the element across frames and report the numbers. A claimed wind-up that measures 3% variance where 24% was claimed is absent, whatever the JSON says.',
       'You carry a budget. The register split (docs/CRAFT/MOTION-REGISTERS.md) licenses sustained motion for kinetic work, and that licence is the door effect soup comes through. One named peak, and every other moving thing able to say what it is for.',

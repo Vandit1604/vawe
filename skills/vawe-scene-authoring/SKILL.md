@@ -18,6 +18,10 @@ turns, something continuous crosses every cut). Then load only the rule files th
 writing needs, from the table there: one numeric rule per file, a right-JSON recipe and a wrong-JSON
 anti-pattern. This is where the specific numbers live (durations, sizes, offsets); do not guess one.
 
+Read `<film>.design.md` before you write a size, radius, shadow or colour: it is the film's own resolved
+design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Reference its
+`--kit-<group>-<name>` token instead of a literal; to use a new value, add it there first.
+
 ## The one hard rule: `renderFrame(n)` is PURE in `n`
 
 The scene exposes `window.__engine = { meta, renderFrame(n) }`. `renderFrame(n)` must produce

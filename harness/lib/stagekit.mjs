@@ -91,7 +91,93 @@ const elevFor = (light, vignette) => (light ? ELEV.light : {
 // never writes a role below it: a frame built only from kit sizes must pass its own check.
 export const MIN_VIDEO_TEXT_PX = 28;
 
-export function buildKit(theme, resolveLook, isLightBg) {
+// designRadiusExtras(t, radius) -> { decls[], warnings[] }: a name the kit already owns (sm/md/lg) is
+// checked against the theme's current number rather than duplicated; a new name becomes a custom prop.
+function designRadiusExtras(t, radius) {
+  const decls = []; const warnings = [];
+  for (const [name, v] of Object.entries(t.radius || {})) {
+    const num = Number(v);
+    const known = name in radius;
+    if (known && Math.round(radius[name]) !== Math.round(num)) {
+      warnings.push(`stagekit: design.md radius.${name}=${num} shadows the kit's own radius.${name}=${radius[name]} (resolveLook has moved). Update design.md, or accept the drift.`);
+    } else if (!known) decls.push(`--kit-radius-${name}:${num}px;`);
+  }
+  return { decls, warnings };
+}
+
+// designFlatExtras(t) -> decls[]: shadow, palette and space have no kit-owned names to collide with
+// (the kit's own shadow/space vars are numbered, never named), so every declared entry is a custom prop.
+function designFlatExtras(t) {
+  const decls = [];
+  for (const [name, v] of Object.entries(t.shadow || {})) decls.push(`--kit-shadow-${name}:${v};`);
+  for (const [name, v] of Object.entries(t.palette || {})) decls.push(`--kit-color-${name}:${String(v).toLowerCase()};`);
+  for (const [name, v] of Object.entries(t.space || {})) decls.push(`--kit-space-${name}:${Number(v)}px;`);
+  return decls;
+}
+
+// roleDecl(role, r) -> the `--kit-type-<role>-*` custom properties one type role declares.
+function roleDecl(role, r) {
+  const decls = [];
+  if (r.size != null) decls.push(`--kit-type-${role}-size:${Number(r.size)}px;`);
+  if (r.family) decls.push(`--kit-type-${role}-family:${r.family};`);
+  if (r.weight != null) decls.push(`--kit-type-${role}-weight:${Number(r.weight)};`);
+  if (r.tracking != null) decls.push(`--kit-type-${role}-tracking:${r.tracking}em;`);
+  return decls;
+}
+
+// roleClass(role, r) -> the `.kit-<role>` rule, reading each var with the declared value as its
+// fallback so the class works even where the `--kit-type-*` custom property above was not emitted.
+function roleClass(role, r) {
+  const family = r.family ? `var(--kit-type-${role}-family, ${r.family})` : 'var(--font-sans)';
+  const size = r.size != null ? `var(--kit-type-${role}-size, ${Number(r.size)}px)` : '16px';
+  const weight = r.weight != null ? `var(--kit-type-${role}-weight, ${Number(r.weight)})` : '400';
+  const tracking = r.tracking != null ? `letter-spacing:var(--kit-type-${role}-tracking, ${r.tracking}em);` : '';
+  return `.kit-${role}{font:${weight} ${size} ${family};${tracking}color:var(--text);margin:0}`;
+}
+
+// designTypeExtras(t, sizes) -> { decls[], roleClasses[], warnings[] }: `sizes` is the px the kit
+// already computed for a name (hook, headline, ...); a role reusing one of those names is checked
+// against it, same rule as designRadiusExtras.
+function designTypeExtras(t, sizes) {
+  const decls = []; const roleClasses = []; const warnings = [];
+  for (const [role, r] of Object.entries(t.type || {})) {
+    if (!r) continue;
+    if (role in sizes && r.size != null && Math.round(sizes[role]) !== Math.round(Number(r.size))) {
+      warnings.push(`stagekit: design.md type.${role}.size=${r.size} shadows the kit's own .kit-${role}=${sizes[role]}px (resolveLook has moved). Update design.md, or accept the drift.`);
+    }
+    decls.push(...roleDecl(role, r));
+    roleClasses.push(roleClass(role, r));
+  }
+  return { decls, roleClasses, warnings };
+}
+
+// designExtras(spec, existing) -> { extraDecls[], roleClasses[], warnings[] }
+// `spec` is the merged design.md (harness/lib/design-spec.mjs readDesignSpec), or null. `existing`
+// names the values the kit ALREADY emits under the same names (radius sm/md/lg, the named type
+// roles), so a design.md value reusing one of those names is checked against it, not silently forked.
+function designExtras(spec, existing) {
+  if (!spec) return { extraDecls: [], roleClasses: [], warnings: [] };
+  const t = spec.tokens || {};
+  const rad = designRadiusExtras(t, existing.radius);
+  const type = designTypeExtras(t, existing.type);
+  return {
+    extraDecls: [...rad.decls, ...designFlatExtras(t), ...type.decls],
+    roleClasses: type.roleClasses,
+    warnings: [...rad.warnings, ...type.warnings],
+  };
+}
+
+// applyDesignExtras(rules, spec, existing): pushes design.md's extra tokens onto `rules` (a film with
+// no design.md leaves `rules` untouched, so buildKit's output stays byte-identical) and returns any
+// drift warnings for the caller to print.
+function applyDesignExtras(rules, spec, existing) {
+  const { extraDecls, roleClasses, warnings } = designExtras(spec, existing);
+  if (extraDecls.length) rules.push(`:scope{${extraDecls.join('')}}`);
+  if (roleClasses.length) rules.push(...roleClasses);
+  return warnings;
+}
+
+export function buildKit(theme, resolveLook, isLightBg, spec) {
   const look = resolveLook(theme, { isLightBg });
   const s = look.scale;
   const bg = theme && theme.palette && theme.palette.bg;
@@ -110,7 +196,7 @@ export function buildKit(theme, resolveLook, isLightBg) {
   const spaceVars = SPACE_STEPS.map((mul, i) => `--kit-space-${i + 1}:${mul * unit}px;`).join('');
   const gridCols = Array.from({ length: 12 }, (_, i) => `.kit-col-${i + 1}{grid-column:span ${i + 1}}`).join('\n');
 
-  const css = [
+  const rules = [
     // --- tokens: spacing rhythm, the content column, the grid gutter. `:scope` is the fragment's own
     // root element (the prelude-less `@scope` block's implicit root, sanitize-html.js scopeStyles), so
     // these reach every element in the fragment without depending on which class sits where.
@@ -250,9 +336,14 @@ export function buildKit(theme, resolveLook, isLightBg) {
     `.kit-eyebrow{font:600 ${eyebrow}px var(--font-mono);color:var(--text-2);letter-spacing:0.14em;text-transform:uppercase;margin:0}`,
     `.kit-stat{font:700 ${stat}px var(--font-num);font-variant-numeric:tabular-nums;color:var(--text);margin:0}`,
     '.kit-accent{color:var(--accent)}',
-  ].join('\n');
-  const block = `<style>${KIT_START}\n${css}\n${KIT_END}</style>`;
-  return { css, block, look };
+  ];
+
+  // Extra tokens design.md declares beyond the kit: appended, never interleaved, so a film with no
+  // design.md (or an empty one) renders BYTE-IDENTICAL to before this existed (`stagekit.test.mjs`
+  // regression). `existing` is what the kit above already computed under the same names, so a
+  // design.md value that reuses one (radius.md, type.hook) is checked against it, not silently forked.
+  const warnings = applyDesignExtras(rules, spec, { radius, type: { hook: s.hook, headline: s.headline, body: s.body, caption, eyebrow, stat, display } });
+  return { css: rules.join('\n'), block: `<style>${KIT_START}\n${rules.join('\n')}\n${KIT_END}</style>`, look, warnings };
 }
 
 /** The token var names a fragment may use (already global, set by applyTheme, never redeclared here). */

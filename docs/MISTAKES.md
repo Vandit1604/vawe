@@ -2600,6 +2600,19 @@ one report-only `scale-drift` warning that looks at a whole film's fragments tog
 sizes only when there are more than a handful of distinct ones.
 holds: quality/gates/frame-check.mjs
 
+## 622. Uniformity needs a per-film declaration, not a fixed kit whitelist
+#621 deleted the kit whitelist because it refused a reference's own real values, but that left nothing
+enforcing the other half of the same intent: a film's OWN frames agreeing with each other. Two scene
+agents on the same film still picked their own literal for the same radius or shadow with nothing
+naming the disagreement until a human looked at the rendered frames side by side.
+The fix is a value a film can DECLARE rather than a list the engine fixes: `<film>.design.md` holds this
+film's resolved sizes, radii, shadows and colours, merged over the theme's own `resolveLook` numbers
+(`harness/lib/design-spec.mjs`, `make design-spec`). `harness/lib/stagekit.mjs buildKit` folds every
+declared token into the shared kit as a `--kit-<group>-<name>` custom property, so every fragment reaches
+the SAME value through the SAME name, and a film with no design.md renders byte-identical to before it
+existed. Uniformity is now something a film states, not something a fixed list enforces from outside it.
+holds: harness/lib/design-spec.mjs, harness/lib/stagekit.mjs
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
