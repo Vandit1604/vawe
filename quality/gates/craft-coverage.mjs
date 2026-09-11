@@ -23,7 +23,6 @@ import { LOOK_NAMES } from '../../core/looks/index.js';
 import { SHADER_FX } from '../../core/stings/index.js';
 import { run as runDocMap } from './doc-map.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
-import { loadCraftRules } from '../../harness/lib/craft-rules.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CRAFT = path.join(ROOT, 'docs', 'CRAFT');
@@ -153,14 +152,14 @@ function indexErrors() {
 // docs/CRAFT/rules/*.json fails loudly on ANY problem (loadCraftRules), a check naming a finding code
 // nothing emits included, so this is a thin adapter: one caught throw becomes one error line per
 // problem, in the same failed-groups shape the rest of this gate already uses.
-function ruleRecordErrors() {
+function ruleRecordErrors(loadCraftRules) {
   try { loadCraftRules({}); return []; }
   catch (err) { return String(err.message).split('\n').slice(1).map((l) => l.replace(/^\s*/, '')); }
 }
 
 // REPORTED, never failed: a prose-only rule (both `check` and `adapt` null) is the kind nothing else
 // surfaces, not a defect, so this is a worklist for a category agent, printed unconditionally.
-function proseOnlyCounts() {
+function proseOnlyCounts(loadCraftRules) {
   let records;
   try { records = loadCraftRules({}); } catch { return []; }
   const byCategory = new Map();
@@ -173,17 +172,20 @@ function proseOnlyCounts() {
 
 const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
+  // Loaded here, not at the top: effects-catalog imports this file for registersOf while arsenal.mjs is
+  // still inside its own top-level await, and a static craft-rules import closes that loop into a deadlock.
+  const { loadCraftRules } = await import('../../harness/lib/craft-rules.mjs');
   const docmap = runDocMap();
   const groups = [
     ['registry coverage', 'craft-coverage-registry', coverageErrors()],
     ['phantom references', 'craft-coverage-phantom', phantomErrors()],
     ['cross-links', 'craft-coverage-link', linkErrors()],
     ['README index', 'craft-coverage-orphan', indexErrors()],
-    ['rule records', 'craft-coverage-rule', ruleRecordErrors()],
+    ['rule records', 'craft-coverage-rule', ruleRecordErrors(loadCraftRules)],
     ['doc map', 'doc-map', docmap.fails],
   ];
   const f = gateFindings();
-  for (const [category, n] of proseOnlyCounts()) {
+  for (const [category, n] of proseOnlyCounts(loadCraftRules)) {
     console.log(`  · ${category}: ${n} prose-only rule(s) (no check, no adapt)`);
   }
   // Named on every run, never silently absent: an incomplete index must announce itself.
