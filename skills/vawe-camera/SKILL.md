@@ -57,6 +57,28 @@ earlier push is still open.
   it arrived with. `dwell` holds at a station. Only the final arrival settles.
 - **truck** `{dx,dur,s}`: the plain lateral move, linear, so it reads as the camera tracking rather than a lurch.
 
+## Camera by element (no more guessing pixels)
+
+A `diveIn`, or any `travel` station, can name the layer to look at instead of hand-typed `tx`/`ty`:
+
+```json
+"cameraMove": { "move": "diveIn", "start": 1.0, "dur": 2.2, "target": "#cta", "margin": 0.1 }
+```
+
+`bakeCameraMove` (core/engine/produce.js) resolves `"#<layer id>"` off the layer's own authored box
+(it needs a numeric `x`/`y` and a declared `w`/`h` or `size`), centres on it, and picks the largest
+scale that still keeps the box plus `margin` (a fraction of the frame, default 0.06) inside the canvas.
+It prints what it resolved: `resolved camera target #cta at 3.2s -> tx 960 ty 852 s 1.2`. Raw `tx`/`ty`
+on the same spec still win, and a target with no measurable size (a `text` layer with no `w`/`h`) is
+refused by name rather than guessed. A `[data-part="..."]` selector needs a live render to measure and
+is not resolvable this way; give that camera its `tx`/`ty` by hand.
+
+A `diveIn` whose `to` would push a KNOWN-size target (`targetW`/`targetH`, whether hand-declared or
+resolved from a `target`) past the frame no longer refuses: it clamps to the largest scale that keeps
+the subject in frame and prints `adapted diveIn-headroom: to 1.05 -> 0.88 (no crop declared)`.
+`"crop": true`, or a `headroom` raised above its 0.88 default, is the explicit opt-in that keeps `to`
+exactly as authored.
+
 ## The camera as the transition (what you asked the cuts to do, done with the lens)
 
 A cut, a sting and a seam are all LOCAL: they own a window around a boundary. The camera is CONTINUOUS and
