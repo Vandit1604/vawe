@@ -85,3 +85,46 @@ console.log('✓ sequence.test.mjs: radius joins POSE, interpolates, leaves an u
   const { omega } = velocityAt(kfs, 0.5, 1 / 30);
   assert.ok(omega < 0, `a rot 180->0 reads a negative omega, got ${omega}`);
 }
+
+// ---- ARRIVAL EASE, adapted when a move ends at full speed but lands in a hold (jerky joins) ----
+// A slide that accelerates all the way in (`easeInCubic`) then holds is a hard stop with no
+// deceleration: adapted to its decelerating twin so the arrival still lands, just softly.
+{
+  const layers = [{ id: 'card', motion: [
+    { t: 0, x: 0 }, { t: 1, x: 300, ease: 'easeInCubic' }, { t: 1.5, x: 300 },
+  ] }];
+  resolveKeyedProps(layers);
+  assert.equal(layers[0].motion[1].ease, 'easeInOutCubic',
+    'a move that ends at full speed and lands in a hold is adapted to its decelerating twin');
+}
+
+// An EXIT (this key sends opacity to 0) keeps its accelerating ease: exits accelerate on purpose.
+{
+  const layers = [{ id: 'fader', motion: [
+    { t: 0, x: 0, opacity: 1 }, { t: 1, x: 300, opacity: 0, ease: 'easeInCubic' },
+  ] }];
+  resolveKeyedProps(layers);
+  assert.equal(layers[0].motion[1].ease, 'easeInCubic', 'an exit is left alone, exits accelerate');
+}
+
+// An authored handle already shapes its own segment and is left alone too.
+{
+  const layers = [{ id: 'handled', motion: [
+    { t: 0, x: 0 }, { t: 1, x: 300, easeIn: 'easyEase' }, { t: 1.5, x: 300 },
+  ] }];
+  resolveKeyedProps(layers);
+  assert.equal(layers[0].motion[1].ease, undefined, 'a key with an authored easeIn handle is left alone');
+}
+
+// resolveKeyedProps runs twice per boot (scene.js:831), so the adaptation must be idempotent: running
+// it again on an already-adapted key must not double-wrap it (easeInOutCubic -> easeInOutOutCubic).
+{
+  const layers = [{ id: 'card', motion: [
+    { t: 0, x: 0 }, { t: 1, x: 300, ease: 'easeInCubic' }, { t: 1.5, x: 300 },
+  ] }];
+  resolveKeyedProps(layers);
+  resolveKeyedProps(layers);
+  assert.equal(layers[0].motion[1].ease, 'easeInOutCubic', 'adapting twice is a no-op the second time');
+}
+
+console.log('✓ sequence.test.mjs: arrival-ease adapts a hard stop into a hold, leaves exits and authored handles alone');
