@@ -3,6 +3,7 @@
 import { isPainting } from '../engine/fonts.js';
 import { mergeProps, propsOf } from '../registry/props.js';
 import { measureText } from '../type/type.js';
+import { clamp01, easeOutCubic } from '../motion/motion.js';
 
 // The `fit` family is guarded because a fit with no width has nothing to fit INTO, and the typing
 // family because a caret with no `typing` has no reveal to trail. A guard has no spelling in a
@@ -14,6 +15,7 @@ const GUARDED = {
   fitH: { when: 'fit' },
   caret: { when: 'typing' }, caretHold: { when: 'typing' },
   untype: { when: 'typing' }, untypeRate: { when: 'typing' },
+  typingColors: { when: 'typing' },
 };
 
 // The second the layer's settled look is judged at. Both styleText and microType ask the same question
@@ -265,9 +267,91 @@ export function frame(kit, el, L, t, scene, { gradient, typing, text } = L) {
   const lt = t - start;
   const n = typedLen(lt, { cps, visLen, untype: L.untype, untypeRate: L.untypeRate });
   const caret = (L.caret !== false && Math.floor((t - start) * 2.2) % 2 === 0 && (n < visLen || L.caretHold)) ? '▏' : '';
-  if (/[<&]/.test(full)) el.innerHTML = revealHtml(full, n) + caret;
+  if (L.typingColors) el.innerHTML = colorizeTyped(full, n, lt, cps, L.typingColors) + caret;
+  else if (/[<&]/.test(full)) el.innerHTML = revealHtml(full, n) + caret;
   else el.textContent = full.slice(0, n) + caret;
 }
+
+// typingColorFor: pure fn of (dt, i) → the CSS colour for word `i`, `dt` seconds after ITS OWN first
+// character was revealed. Reuses colorWave's ramp shape and dial names (core/kinetic/presets.js):
+// `colors` cycles per word (like colorWave's `colors[i % n]`), `hold` is the same 0..1 fraction of
+// the ramp spent at full flash before easing out. TYPING_RAMP is the ramp's fixed length in seconds:
+// typing has no per-unit `each` window to borrow (that belongs to `split`, which typing can't combine
+// with), so the ramp needs its own clock instead.
+const TYPING_RAMP = 0.6;
+export function typingColorFor(dt, i, { colors, hold = 0.5 } = {}) {
+  if (!colors || !colors.length || dt == null) return null;
+  const flash = colors[i % colors.length];
+  if (dt <= 0) return flash;
+  const u = clamp01(dt / TYPING_RAMP);
+  const e = easeOutCubic(clamp01((u - hold) / (1 - hold)));
+  return `color-mix(in srgb, ${flash} ${((1 - e) * 100).toFixed(1)}%, var(--layer-ink, var(--ink)))`;
+}
+
+// colorizeTyped: the shown text (revealHtml's output for markup, a plain slice otherwise), with
+// each revealed WORD wrapped in a span coloured by typingColorFor. Word index and each word's own
+// start char are read off the FULL text (untruncated), so a word already fully typed keeps the same
+// identity and start time frame to frame, out of order or not: no state, only (full, n, lt, cps) in.
+//
+// PLAIN TEXT NEVER TOUCHES A DOM: the branch below is a pure string splice (words come from the same
+// full-text slice frame() already committed to using), which is what makes typingColorFor's ramp and
+// the word-boundary maths independently testable with plain node:assert (make lib-test). Markup
+// (`<b>`, an entity) is the one case that must go through a real HTML tree, exactly as revealHtml
+// already does for the same reason, and colorizeMarkup below does that walk.
+export function colorizeTyped(full, n, lt, cps, opts) {
+  const hasMarkup = /[<&]/.test(full);
+  const words = [...(hasMarkup ? plainTextOf(full) : full).matchAll(/\S+/g)];
+  if (hasMarkup) return colorizeMarkup(full, n, words, lt, cps, opts);
+  const shown = full.slice(0, n);
+  let out = '', pos = 0;
+  for (let wi = 0; wi < words.length; wi++) {
+    const w = words[wi];
+    if (w.index >= shown.length) break;
+    out += shown.slice(pos, w.index); // whitespace/gap before this word, verbatim
+    const end = Math.min(shown.length, w.index + w[0].length);
+    out += `<span style="color:${typingColorFor(lt - w.index / cps, wi, opts)}">${shown.slice(w.index, end)}</span>`;
+    pos = end;
+    if (end < w.index + w[0].length) break; // n cut this word mid-way: nothing after it is shown
+  }
+  return out + shown.slice(pos);
+}
+// the markup branch of colorizeTyped: walks revealHtml's DOM (tags already preserved, truncated to
+// n) and wraps each text run's word-characters in a coloured span, leaving existing tags (`<b>`,
+// caret-adjacent empties) exactly where revealHtml put them.
+function colorizeMarkup(full, n, words, lt, cps, opts) {
+  const wordAt = (pos) => words.findIndex((w) => pos >= w.index && pos < w.index + w[0].length);
+  const root = document.createElement('div');
+  root.innerHTML = revealHtml(full, n);
+  let charIdx = 0;
+  const walk = (node) => {
+    for (const child of [...node.childNodes]) {
+      if (child.nodeType === 3) {
+        const text = child.textContent;
+        const frag = document.createDocumentFragment();
+        let i = 0;
+        while (i < text.length) {
+          const pos = charIdx + i;
+          const wi = wordAt(pos);
+          if (wi === -1) { frag.appendChild(document.createTextNode(text[i])); i++; continue; }
+          const w = words[wi];
+          const end = Math.min(text.length, i + (w.index + w[0].length - pos));
+          const span = document.createElement('span');
+          span.style.color = typingColorFor(lt - w.index / cps, wi, opts);
+          span.textContent = text.slice(i, end);
+          frag.appendChild(span);
+          i = end;
+        }
+        child.replaceWith(frag);
+        charIdx += text.length;
+      } else if (child.nodeType === 1) walk(child);
+    }
+  };
+  walk(root);
+  return root.innerHTML;
+}
+// the plain textContent of an HTML (or plain) string. One owner: stripLen and colorizeTyped both
+// need "what does this read as, tags gone", never two ways to strip the same markup.
+function plainTextOf(html) { const d = document.createElement('div'); d.innerHTML = html; return d.textContent || ''; }
 
 // expose(L, t, scene): the caret's LOCAL x (px from the text's own flow start, no chip padding, no
 // layer transform) and how far through the line typing has got, 0..1. `scene` is unread, kept only
@@ -294,7 +378,7 @@ export function expose(L, t) {
   return Object.freeze({ caretX: measureText(shown, font), progress: visLen ? n / visLen : 1 });
 }
 // visible-character length of an HTML string (text content only, not tags)
-function stripLen(html) { const d = document.createElement('div'); d.innerHTML = html; return (d.textContent || '').length; }
+function stripLen(html) { return plainTextOf(html).length; }
 // return the HTML with only the first `n` VISIBLE characters shown, tags preserved (empty tags kept.
 // Harmless, and they keep the caret's colour context stable across frames).
 function revealHtml(html, n) {
@@ -326,4 +410,4 @@ export const PROPS = mergeProps(propsOf(build), propsOf(frame), GUARDED, {
 });
 
 // The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
-export const blurb = "theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too";
+export const blurb = "theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink";
