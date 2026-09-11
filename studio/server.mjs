@@ -252,6 +252,24 @@ const mentionContext = (prompt) => {
   }).filter(Boolean);
   return blocks.join(' ');
 };
+// The film's map, handed to every chat run: which layer is which scene, which storyboard beat it serves,
+// and the camera and transitions over the film. A prompt that names no @layer still knows the film.
+const sceneMap = () => {
+  let d; try { d = JSON.parse(fs.readFileSync(dataArg, 'utf8')); } catch { return ''; }
+  const r2 = (n) => Math.round((+n || 0) * 100) / 100;
+  const layers = (Array.isArray(d.layers) ? d.layers : []).map((L) => `${L.id}(${L.type || 'layer'} ${r2(L.start)}-${r2((L.start || 0) + (L.duration ?? L.dur ?? 0))}s${L.src ? ' ' + L.src : ''})`);
+  let beats = [];
+  const sb = storyboardPath();
+  if (sb) { try { beats = timeline(parseStoryboard(fs.readFileSync(sb, 'utf8'))).beats.map((b, i) => `beat ${i + 1} "${b.name}" ${r2(b.start)}-${r2(b.end)}s`); } catch { /* the map is a courtesy, never a failure */ } }
+  const cams = normCamera(d).map((c) => `${c.move || c.type || 'move'} ${r2(c.start)}-${r2(c.start + c.dur)}s`);
+  const trans = normTransitions(d).map((t) => `${t.fx || t.mech || 'transition'} at ${r2(t.at)}s`);
+  return [
+    layers.length ? `Layers (id type start-end fragment): ${layers.join('; ')}.` : '',
+    beats.length ? `Storyboard beats: ${beats.join('; ')}. A beat is served by the layer whose window covers its time.` : '',
+    cams.length ? `Camera legs: ${cams.join('; ')}.` : 'No camera moves.',
+    trans.length ? `Transitions: ${trans.join('; ')}.` : 'No transitions.',
+  ].filter(Boolean).join(' ').slice(0, 4000);
+};
 const chatContext = (prompt) => {
   const rel = path.relative(REPO_ROOT, dataArg);
   const sb = storyboardPath();
@@ -261,8 +279,10 @@ const chatContext = (prompt) => {
     'Follow AGENTS.md.',
     `Edit only ${rel} and its own fragments.`,
     `Keep the JSON valid: run node core/validate/validate.mjs ${rel} after editing.`,
+    sceneMap(),
     mentionContext(prompt),
     'Answer in 1 to 3 short sentences: what changed.',
+    'Never write an em dash, in replies or in files.',
   ].filter(Boolean).join(' ');
 };
 
