@@ -70,96 +70,58 @@
 .kit-accent{color:var(--accent)}
 /* STAGEKIT:end */</style>
 <!--
-  ui-skills used: pbakaus/layout (row grouping, proximity and rhythm for the command list; the
-    timestamp/command/output triad reads as one group per command, not three loose lines) and
-    mengto/beautiful-shadows (confirmed the kit's own --kit-elev-3 ramp for the window and
-    --kit-elev-1 for the prompt bar rather than inventing a new shadow).
-  ui-skills refused: a dedicated CLI/terminal skill does not exist in the registry (checked every
-    category; nearest hits are browser-automation CLIs, not a terminal VISUAL skill), so this frame
-    follows AGENTS.md's own ladder (layout -> type -> colour -> depth) instead of a single fetched
-    terminal skill. taste-skill/impeccable are the craft gate, not a second builder skill, so neither
-    is "loaded" here, only checked via `make screen`.
+  ui-skills used: ibelick/baseline-ui, for two things only: fewer, bigger groups instead of a scrolling
+    log (the whole point of "less busy" is proximity: one command + its own outcome, not five rows all
+    competing), and no glow as a PRIMARY affordance, so the success accent stays a thin, low-opacity
+    ring behind text that already reads on its own, not a light source.
+  ui-skills rejected: Tailwind defaults, motion/react, cn()/clsx (no build step here, plain inline
+    style per HTML-FRAGMENTS.md); "never add animation unless requested" would forbid the progress
+    fill and the success accent outright, but the owner asked for exactly that motion, so vars (not
+    CSS animation/transition, which the engine refuses at boot) carries it instead. Local stage-kit
+    type roles and the vawe cobalt/ink ground win over baseline-ui's own colour and shadow opinions.
 -->
 <div class="kit-root kit-ground-accent" style="position:absolute;inset:0">
   <div class="kit-stage" style="display:flex;align-items:center;justify-content:center">
-    <div id="terminal" class="kit-plane" style="--text:#f2f5f9;--text-2:#aab6c6;--dim:#7d8b9e;--surface:#182231;--surface-2:#131c28;--line:#26313f;--line-strong:#33404f;--accent:#8fc0ff;--accent-dim:rgba(143,192,255,.16);background:var(--surface);border:1px solid rgba(255,255,255,.16);box-shadow:var(--kit-elev-3), inset 0 1px 0 rgba(255,255,255,.06), 0 0 0 1px rgba(15,22,32,.045);width:100%;height:88%;display:flex;flex-direction:column;overflow:hidden;position:relative">
-      <div style="position:relative;flex:0 0 auto;height:76px;display:flex;align-items:center;padding:0 var(--kit-space-6);border-bottom:1px solid var(--line)">
-        <div style="display:flex;gap:10px">
-          <div style="width:16px;height:16px;border-radius:50%;background:#ff5f56"></div>
-          <div style="width:16px;height:16px;border-radius:50%;background:#ffbd2e"></div>
-          <div style="width:16px;height:16px;border-radius:50%;background:#27c93f"></div>
+    <div id="terminal" class="kit-plane" style="--text:#f2f5f9;--text-2:#aab6c6;--dim:#7d8b9e;--surface:#182231;--surface-2:#131c28;--line:#26313f;--line-strong:#33404f;--accent:#8fc0ff;--accent-dim:rgba(143,192,255,.16);background:linear-gradient(135deg, #050d0b 0%, #081714 40%, #0e211c 70%, #142a26 100%);border:1px solid rgba(255,255,255,.10);border-radius:12px;box-shadow:var(--kit-elev-3), inset 0 1px 0 rgba(255,255,255,.05), 0 0 0 1px rgba(15,22,32,.045);width:100%;height:88%;display:flex;flex-direction:column;overflow:hidden;position:relative">
+      <div style="position:absolute;top:5%;right:-8%;width:42%;height:85%;background:radial-gradient(ellipse at right, rgba(180,255,232,.10), transparent 70%);pointer-events:none"></div>
+
+      <div style="position:relative;flex:0 0 auto;height:96px;display:flex;align-items:center;gap:var(--kit-space-3);padding:0 var(--kit-space-4);border-bottom:1px solid var(--line)">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--dim)" stroke-width="1.6" style="flex:0 0 auto"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="M9 4v16"></path></svg>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <span style="font:500 32px var(--font-mono);color:var(--text)">~/vawe</span>
+          <span style="width:100%;height:3px;border-radius:2px;background:var(--accent)"></span>
         </div>
-        <p style="position:absolute;left:0;right:0;text-align:center;margin:0;font:600 28px var(--font-mono);letter-spacing:0.14em;text-transform:uppercase;color:var(--text-2)">vawe &middot; zsh</p>
+        <span style="margin-left:var(--kit-space-2);font:400 32px var(--font-mono);color:var(--dim)">+</span>
       </div>
 
-      <div style="flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:var(--kit-space-2) var(--kit-space-6);overflow:hidden">
+      <div style="position:relative;flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-start;padding:0 var(--kit-space-6);overflow:hidden">
 
-        <div data-part="sidebar-row" style="display:flex;align-items:baseline;gap:var(--kit-space-4)">
-          <p style="width:130px;flex:0 0 auto;margin:0;font:400 28px var(--font-mono);color:var(--dim)">13:58</p>
-          <p class="kit-body" style="color:var(--text);font-family:var(--font-mono)"><em style="color:var(--accent);font-style:italic">make</em> ideate NAME=vawe-flow-2</p>
-        </div>
-
-        <div data-part="sidebar-row" style="display:flex;flex-direction:column;gap:var(--kit-space-2)">
-          <div style="display:flex;align-items:baseline;gap:var(--kit-space-4)">
-            <p style="width:130px;flex:0 0 auto;margin:0;font:400 28px var(--font-mono);color:var(--dim)">14:02</p>
-            <p class="kit-body" style="color:var(--text);font-family:var(--font-mono)"><em style="color:var(--accent);font-style:italic">make</em> stage D=formats/scene/vawe-flow-2.json</p>
-          </div>
-          <div class="kit-panel" style="margin-left:calc(130px + var(--kit-space-4));padding:10px var(--kit-space-4)">
-            <p style="margin:0;font:400 28px var(--font-mono);color:var(--text-2)">vawe-flow-2 is at stage DESIGN</p>
-            <p style="margin:0;font:400 28px var(--font-mono);color:var(--dim)">next: author each fragment, then make screen</p>
-          </div>
-        </div>
-
-        <div data-part="sidebar-row" style="display:flex;flex-direction:column;gap:var(--kit-space-2)">
-          <div style="display:flex;align-items:baseline;gap:var(--kit-space-4)">
-            <p style="width:130px;flex:0 0 auto;margin:0;font:400 28px var(--font-mono);color:var(--dim)">14:05</p>
-            <p class="kit-body" style="color:var(--text);font-family:var(--font-mono)"><em style="color:var(--accent);font-style:italic">make</em> judge D=formats/scene/vawe-flow-2.json</p>
-          </div>
-          <div class="kit-panel" style="margin-left:calc(130px + var(--kit-space-4));padding:10px var(--kit-space-4)">
-            <p style="margin:0;font:600 28px var(--font-mono);color:#e05d5d">Error: no rendered video at out/vawe-flow-2.mp4</p>
-            <p style="margin:0;font:400 28px var(--font-mono);color:var(--dim)">fix: make video D=formats/scene/vawe-flow-2.json</p>
+        <div data-part="row-install" style="display:flex;flex-direction:column;gap:var(--kit-space-1);padding:var(--kit-space-3) 0">
+          <p style="margin:0;font:400 28px var(--font-mono);color:var(--dim)">~/vawe (1.2s)</p>
+          <em id="slot-install" style="display:inline-block;min-width:640px;min-height:1.2em;font:400 46px var(--font-mono);font-style:normal;letter-spacing:0.01em;color:var(--text)"></em>
+          <div style="margin-top:var(--kit-space-1);display:flex;flex-direction:column;gap:var(--kit-space-1)">
+            <div style="position:relative;height:8px;border-radius:4px;background:var(--line-strong);overflow:hidden">
+              <div style="position:absolute;inset:0 auto 0 0;width:calc(var(--install, 0) * 100%);background:var(--accent);border-radius:4px"></div>
+            </div>
+            <div data-part="install-done" style="display:flex;align-items:center;gap:var(--kit-space-2)">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5fd68c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><path d="M20 6L9 17l-5-5"></path></svg>
+              <p style="margin:0;font:400 32px var(--font-mono);color:#5fd68c">added 1 package in 1.2s</p>
+            </div>
           </div>
         </div>
 
-        <div data-part="sidebar-row" style="display:flex;flex-direction:column;gap:var(--kit-space-2)">
-          <div style="display:flex;align-items:baseline;gap:var(--kit-space-4)">
-            <p style="width:130px;flex:0 0 auto;margin:0;font:400 28px var(--font-mono);color:var(--dim)">14:07</p>
-            <p class="kit-body" style="color:var(--text);font-family:var(--font-mono)"><em style="color:var(--accent);font-style:italic">make</em> screen F=vawe-flow-2.terminal.html KIND=editor</p>
-          </div>
-          <div class="kit-panel" style="margin-left:calc(130px + var(--kit-space-4));padding:10px var(--kit-space-4)">
-            <p style="margin:0;font:600 28px var(--font-mono);color:#5fd68c">screen ok  fill 0.81 (ref 0.39)  clipped: none</p>
+        <div class="kit-divider" style="height:1px;background:var(--line);margin:0"></div>
+
+        <div data-part="row-vawe" style="display:flex;flex-direction:column;gap:var(--kit-space-1);padding:var(--kit-space-3) 0">
+          <p style="margin:0;font:500 28px var(--font-mono)"><span style="color:var(--accent)">~/vawe</span> <span style="color:var(--dim)">git:(</span><span style="color:#5fd68c">main</span><span style="color:var(--dim)">)</span></p>
+          <em id="slot-vawe" style="display:inline-block;min-width:560px;min-height:1.2em;font:400 46px var(--font-mono);font-style:normal;letter-spacing:0.01em;color:var(--text)"></em>
+          <div data-part="vawe-out" style="position:relative;margin-top:var(--kit-space-1);display:flex;flex-direction:column;gap:8px;padding:var(--kit-space-2) var(--kit-space-3);border-radius:14px">
+            <div id="success-pulse" data-part="success-pulse" style="position:absolute;inset:0;border-radius:14px;background:rgba(95,214,140,0.14);box-shadow:var(--kit-elev-1), 0 0 0 2px rgba(95,214,140,0.5);pointer-events:none;opacity:var(--success, 0)"></div>
+            <p style="position:relative;margin:0;font:400 32px var(--font-mono);color:var(--text-2)">&#9654; sample &middot; system Chrome</p>
+            <p style="position:relative;margin:0;font:600 32px var(--font-mono);color:#5fd68c">&#10003; sample.mp4</p>
           </div>
         </div>
 
-        <div data-part="sidebar-row" style="display:flex;flex-direction:column;gap:var(--kit-space-2)">
-          <div style="display:flex;align-items:baseline;gap:var(--kit-space-4)">
-            <p style="width:130px;flex:0 0 auto;margin:0;font:400 28px var(--font-mono);color:var(--dim)">14:09</p>
-            <p class="kit-body" style="color:var(--text);font-family:var(--font-mono)"><em style="color:var(--accent);font-style:italic"><span data-part="install-word">npm</span> <span data-part="install-word">install</span> <span data-part="install-word">-g</span> <span data-part="install-word">vawe</span></em></p>
-          </div>
-          <div class="kit-panel" data-part="install-done" style="margin-left:calc(130px + var(--kit-space-4));padding:10px var(--kit-space-4)">
-            <p style="margin:0;font:600 28px var(--font-mono);color:#5fd68c">added 1 package in 1.2s</p>
-            <p style="margin:0;font:400 28px var(--font-mono);color:var(--text)">vawe installed. run npx vawe &lt;scene.json&gt; to render</p>
-          </div>
-        </div>
-
-      </div>
-
-      <div id="prompt-bar" style="position:relative;flex:0 0 auto;margin:0 var(--kit-space-6) var(--kit-space-5);padding:var(--kit-space-3) var(--kit-space-4);background:var(--surface-2);border-radius:14px;box-shadow:var(--kit-elev-1);display:flex;align-items:center;gap:var(--kit-space-2)">
-        <div id="success-pulse" data-part="success-pulse" style="position:absolute;inset:0;border-radius:14px;background:rgba(95,214,140,0.28);box-shadow:0 0 0 2px rgba(95,214,140,0.6);pointer-events:none"></div>
-        <span class="kit-body" style="color:var(--accent);font-family:var(--font-mono)">vawe&gt;</span>
-        <p class="kit-body" style="flex:1 1 auto;color:var(--text);font-family:var(--font-mono);margin:0">
-          <span data-part="prompt-word">make</span>
-          <span data-part="prompt-word">a</span>
-          <span data-part="prompt-word">12</span>
-          <span data-part="prompt-word">second</span>
-          <span data-part="prompt-word">launch</span>
-          <span data-part="prompt-word">film</span>
-          <span style="display:inline-block;width:5px;height:0.9em;background:var(--accent);margin-left:6px;vertical-align:-0.12em"></span>
-        </p>
-        <svg id="return-glyph" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto">
-          <path d="M20 5v6a3 3 0 0 1-3 3H5"></path>
-          <path d="M9 10l-4 4 4 4"></path>
-        </svg>
       </div>
     </div>
   </div>
