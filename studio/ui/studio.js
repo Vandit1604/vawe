@@ -132,6 +132,32 @@
  // ONE interaction, end to end: pick a layer, scrub to a frame, drag it. That writes a motion key at
  // that frame. Everything else an editor eventually needs sits on top of this loop.
  let FITS=1, keyMode=false, selIdx=-1, selStart=0, selLabel='', dragging=null;
+ // ---- eye toggle: PREVIEW ONLY. Never touches the scene JSON, never affects a render: it hides the
+ // layer's element in the iframe every frame it draws, so a hidden layer stays hidden through seeking
+ // and playback. Alt-click solos one layer (hides every other). Persisted per film, best effort.
+ let hiddenLayers=new Set(), soloLayer=-1;
+ const EYE_ON='<svg viewBox="0 0 16 16"><path d="M1.5 8S4 3 8 3s6.5 5 6.5 5-2.5 5-6.5 5S1.5 8 1.5 8z"/><circle cx=8 cy=8 r=2/></svg>';
+ const EYE_OFF='<svg viewBox="0 0 16 16"><path d="M1.5 8S4 3 8 3s6.5 5 6.5 5-2.5 5-6.5 5S1.5 8 1.5 8z"/><circle cx=8 cy=8 r=2/><path d="M2 2l12 12"/></svg>';
+ const hiddenKey=()=>'vawe-studio-hidden:'+((model&&model.file)||'');
+ function loadHidden(){ try{ const raw=localStorage.getItem(hiddenKey()); hiddenLayers=new Set(raw?JSON.parse(raw):[]); }catch{ hiddenLayers=new Set(); } soloLayer=-1; }
+ function saveHidden(){ try{ localStorage.setItem(hiddenKey(),JSON.stringify([...hiddenLayers])); }catch{} }
+ const isHiddenState=(i)=>soloLayer>=0?i!==soloLayer:hiddenLayers.has(i);
+ function refreshEyeUI(){
+   rows.querySelectorAll('.eye').forEach(b=>{ const i=+b.dataset.eye, h=isHiddenState(i);
+     b.classList.toggle('off',h); b.setAttribute('aria-pressed',String(h));
+     b.setAttribute('aria-label',h?'show layer':'hide layer'); b.innerHTML=h?EYE_OFF:EYE_ON; });
+   rows.querySelectorAll('.bar').forEach(b=>{ const i=+b.dataset.i; b.classList.toggle('hidden-layer',i>=0&&isHiddenState(i)); }); }
+ function toggleEye(i,alt){
+   if(alt) soloLayer=soloLayer===i?-1:i;
+   else { soloLayer=-1; if(hiddenLayers.has(i)) hiddenLayers.delete(i); else hiddenLayers.add(i); saveHidden(); }
+   refreshEyeUI(); applyHiddenVisibility(); }
+ // re-applied every frame draw(), so a hidden layer stays hidden across a seek or a play loop
+ function applyHiddenVisibility(){
+   if(!hiddenLayers.size&&soloLayer<0) return;
+   try{ const doc=sc.contentDocument; if(!doc) return;
+     doc.querySelectorAll('.hs-layer[data-idx]').forEach(el=>{
+       el.style.visibility=isHiddenState(+el.dataset.idx)?'hidden':''; });
+   }catch{ /* cross-origin doc: nothing to hide */ } }
  const dragEl=$('drag'), keyBtn=$('key'), selOut=$('sel');
  function setSel(i){ if(i!==selIdx) selOut.textContent='';
    selIdx=i; const L=model&&model.layers.find(l=>l.i===i);
@@ -472,6 +498,76 @@
  function overlappingTransitions(start,end){
    return ((model&&model.transitions)||[]).filter(t=>t.at<end-1e-9&&start<t.at+t.dur-1e-9);
  }
+ // ---- curves panel: every tween that controls speed or camera, read from the engine's OWN easing
+ // function so the graph matches the render, never a hand-copied formula. Loaded once; the panel
+ // re-draws once it lands, so the first paint before it arrives just shows "loading".
+ let MOTION=null;
+ import('/core/motion/motion.js').then(m=>{ MOTION=m; if(selIdx>=0&&!insideLayer) layerProps(selIdx); }).catch(()=>{});
+ function easeFn(v){
+   if(!MOTION) return null;
+   if(Array.isArray(v)&&v.length===4) return MOTION.cubicBezier(+v[0],+v[1],+v[2],+v[3]);
+   try{ return MOTION.resolveEasing(v); }catch{ return MOTION.EASINGS.easeOutCubic; }
+ }
+ function easeGraphSvg(fn){
+   const W=180,H=100,pad=6,N=48,lo=-0.4,hi=1.4;
+   const y2p=(y)=>H-pad-(Math.max(lo,Math.min(hi,y))-lo)/(hi-lo)*(H-2*pad);
+   let d='';
+   for(let k=0;k<=N;k++){ const t=k/N; let y; try{ y=fn(t); }catch{ y=t; }
+     d+=(k?'L':'M')+(pad+t*(W-2*pad)).toFixed(1)+' '+y2p(y).toFixed(1)+' '; }
+   return '<svg viewBox="0 0 '+W+' '+H+'" width='+W+' height='+H+' class=curvegraph>'
+     +'<line x1='+pad+' y1='+y2p(0).toFixed(1)+' x2='+(W-pad)+' y2='+y2p(0).toFixed(1)+' class=cg0/>'
+     +'<line x1='+pad+' y1='+y2p(1).toFixed(1)+' x2='+(W-pad)+' y2='+y2p(1).toFixed(1)+' class=cg1/>'
+     +'<path d="'+d+'" class=cgpath/></svg>';
+ }
+ // one <select> of the engine's real named easings (Object.keys(EASINGS), never a hand list), or the
+ // raw numbers for a bezier ease (docs/PRIMITIVES.md never names draggable-handle math a requirement
+ // this panel skips: it takes the four numbers directly, same value the JSON carries).
+ function easeControl(path,v){
+   if(!MOTION) return '<span class=inone>loading…</span>';
+   if(Array.isArray(v)&&v.length===4)
+     return '<span class=bez>'+v.map((n,k)=>'<input type=number step=0.05 data-curve-bez="'+path+'" data-k='+k+' value="'+esc(n)+'">').join('')+'</span>';
+   const cur=typeof v==='string'&&v?v:'easeOutCubic';
+   return '<select data-curve-ease="'+path+'">'+Object.keys(MOTION.EASINGS)
+     .map((n)=>'<option'+(n===cur?' selected':'')+'>'+n+'</option>').join('')+'</select>';
+ }
+ function curveRow(label,path,v,extra){
+   const fn=easeFn(v);
+   return '<div class=curve><b>'+esc(label)+'</b>'+(fn?easeGraphSvg(fn):'<span class=inone>no curve</span>')
+     +easeControl(path,v)+(extra||'')+'</div>';
+ }
+ const numIn=(path,label,v)=>v==null?'':'<label class=cnum>'+esc(label)+' <input type=number step=0.01 data-curve-num="'+path+'" value="'+esc(v)+'"></label>';
+ // every tween this layer's window touches: its own motion keys, a split-text part's timing, and any
+ // camera leg or transition overlapping it (the ones "speed and camera movement" actually means).
+ function curvesFor(i,L,raw,cams,trans){
+   let h='';
+   const keys=Array.isArray(raw.motion)?raw.motion:[];
+   keys.forEach((k,j)=>{ if(k.ease===undefined) return;
+     h+=curveRow('motion key '+(k.t||0).toFixed(2)+'s',`/layers/${i}/motion/${j}/ease`,k.ease); });
+   (Array.isArray(raw.parts)?raw.parts:[]).forEach((p,j)=>{
+     h+='<div class=curve><b>part '+esc(p.select||p.anim||j)+'</b>'
+       +numIn(`/layers/${i}/parts/${j}/each`,'each',p.each)+numIn(`/layers/${i}/parts/${j}/stagger`,'stagger',p.stagger)+'</div>'; });
+   cams.forEach((c)=>{ if(c.i==null||!c.arrayed) return;
+     if(c.move==='travel'&&Array.isArray(c.raw.stations)) c.raw.stations.forEach((s,j)=>{
+       if(s.dur==null&&s.dwell==null&&s.s==null) return;
+       h+='<div class=curve><b>station '+j+'</b>'+numIn(`/cameraMove/${c.i}/stations/${j}/dur`,'dur',s.dur)
+         +numIn(`/cameraMove/${c.i}/stations/${j}/dwell`,'dwell',s.dwell)+numIn(`/cameraMove/${c.i}/stations/${j}/s`,'s',s.s)+'</div>';
+     });
+     else h+=curveRow('camera '+c.move,`/cameraMove/${c.i}/dur`,c.raw.ease,numIn(`/cameraMove/${c.i}/dur`,'dur',c.dur)); });
+   trans.forEach((t)=>{ if(t.i==null) return;
+     h+='<div class=curve><b>transition '+esc(t.fx||t.mech)+'</b>'+numIn(`/transitions/${t.i}/dur`,'dur',t.dur)+'</div>'; });
+   return h?'<section class=psec><h3>Curves</h3>'+h+'</section>':'';
+ }
+ propsEl.addEventListener('change',async(e)=>{
+   const sel=e.target.closest('[data-curve-ease]'), bez=e.target.closest('[data-curve-bez]'), num=e.target.closest('[data-curve-num]');
+   let path,value;
+   if(sel){ path=sel.dataset.curveEase; value=sel.value; }
+   else if(bez){ path=bez.dataset.curveBez; const sib=[...bez.parentElement.querySelectorAll('[data-curve-bez]')]; value=sib.map((el)=>+el.value); }
+   else if(num){ path=num.dataset.curveNum; value=+num.value; }
+   else return;
+   const r=await fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({ops:[{op:'replace',path,value}]})}).then((x)=>x.json()).catch((err)=>({ok:false,error:String(err)}));
+   if(r.ok) reloadScene(); else selOut.textContent='could not write the curve: '+r.error;
+ });
  function layerProps(i){
    const L=model&&model.layers.find(l=>l.i===i);
    if(!L) return showProps('Layer','',null);
@@ -491,7 +587,7 @@
      +camRows
      +'<div id=pbox class=psub hidden>'+prow('Position',fld('','X','pX'),fld('','Y','pY'))+prow('Size',fld('','W','pW'),fld('','H','pH'))+'</div>'
      +prow('Key at',fld('','T','pK'))
-     +actions, raw);
+     +actions+curvesFor(i,L,raw,cams,id?overlappingTransitions(L.start,end):[]), raw);
  }
  // one delegated listener: the panel's inner HTML is replaced on every selection, so a button bound
  // directly would be re-bound (or silently dropped) on the next render.
@@ -572,7 +668,7 @@
    FITS=s;
    measureBoxes();
  }
- function draw(){ const e=sc.contentWindow.__engine; if(!e)return; e.renderFrame(n);
+ function draw(){ const e=sc.contentWindow.__engine; if(!e)return; e.renderFrame(n); applyHiddenVisibility();
    read.innerHTML=stamp(n/fps)+'<s>/</s><span>'+stamp(dur)+'</span><em>'+n+'f</em>';
    // measured off the RULER, which is the element the times are drawn on. A percentage of the lanes
    // box was 12px out at the end of the film and moved again when a scrollbar appeared.
@@ -695,6 +791,13 @@
  $('chatopen').addEventListener('click',()=>setChat(true));
  function addMsg(cls,text){ const d=document.createElement('div'); d.className='cmsg '+cls; d.textContent=text;
    chatLog.appendChild(d); chatLog.scrollTop=chatLog.scrollHeight; return d; }
+ // the CLI exited: report it, or reload the scene it changed
+ function chatDone(data,agentEl,agentText){
+   if(!agentText) agentEl.remove();
+   if(data.error==='not-found') addMsg('err','Claude Code CLI not found');
+   else if(data.code!==0) addMsg('err',data.error||('exited '+data.code));
+   else{ addMsg('note','Updated, scene reloaded'); reloadScene(); }
+ }
  // The CLI's own stdout, as SSE lines: "event: X\ndata: {...}\n\n" blocks, read off a fetch body
  // stream rather than EventSource, which cannot carry the POST body a prompt needs.
  async function runChat(prompt,reset){
@@ -718,13 +821,7 @@
          let data; try{ data=JSON.parse(dataM[1]); }catch{ continue; }
          const ev=evM?evM[1]:'message';
          if(ev==='text'){ agentText+=data.text; agentEl.textContent=agentText; chatLog.scrollTop=chatLog.scrollHeight; }
-         else if(ev==='done'){
-           done=true;
-           if(!agentText) agentEl.remove();
-           if(data.error==='not-found') addMsg('err','Claude Code CLI not found');
-           else if(data.code!==0) addMsg('err',data.error||('exited '+data.code));
-           else{ addMsg('note','Updated, scene reloaded'); reloadScene(); }
-         }
+         else if(ev==='done'){ done=true; chatDone(data,agentEl,agentText); }
        }
      }
    }catch(e){ if(e.name!=='AbortError') addMsg('err',e.message); }
@@ -864,7 +961,7 @@
  const paintRows=paint;
  paint=function(m){ paintRows(m); if(lastStrip) markStill(lastStrip); };
  function timeline(){
-   fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; $('undo').disabled=!(m.undo>0); drawCrumbs();
+   fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; loadHidden(); $('undo').disabled=!(m.undo>0); drawCrumbs();
      if(insideLayer) paintInside(); else paint(m); drawJump(); })
      .catch(e=>{ $('tlwhat').textContent='timeline unavailable: '+e; });
  }
@@ -935,10 +1032,15 @@
  }
  const barTitle=(b)=>b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s to '+(b.s+b.w).toFixed(2)
    +(b.anim?' · '+b.anim:'')+(b.out?' then '+b.out:'')+(b.grew>0.005?' · held '+b.grew.toFixed(2)+'s past '+(b.s+b.w-b.grew).toFixed(2)+'s':'');
+ function eyeBtn(i){
+   if(i<0) return '';
+   const h=isHiddenState(i);
+   return '<button type=button class="eye'+(h?' off':'')+'" data-eye="'+i+'" aria-pressed="'+h+'" aria-label="'+(h?'show layer':'hide layer')+'" title="'+(h?'Show layer (alt-click: solo)':'Hide layer (alt-click: solo)')+'">'+(h?EYE_OFF:EYE_ON)+'</button>';
+ }
  function barHtml(b){
    const wpc=100*b.w/dur, inp=b.w?100*Math.min(b.enter,b.w)/b.w:0, outp=b.w?100*Math.min(b.exit,b.w)/b.w:0;
    const heldp=b.grew>0.005&&b.w?100*Math.min(b.grew,b.w)/b.w:0, k=kindOf(b.type);
-   return '<div class=row><div class="bar k-'+k+'" data-i="'+b.i+'" data-t="'+b.s+'" style="left:'+pc(b.s)+';width:'+wpc+'%" title="'+esc(barTitle(b))+'">'
+   return '<div class=row>'+eyeBtn(b.i)+'<div class="bar k-'+k+(b.i>=0&&isHiddenState(b.i)?' hidden-layer':'')+'" data-i="'+b.i+'" data-t="'+b.s+'" style="left:'+pc(b.s)+';width:'+wpc+'%" title="'+esc(barTitle(b))+'">'
      +(heldp?'<div class=held style="width:'+heldp+'%"></div>':'')
      +'<i class=in style="width:'+inp+'%"></i><i class=out style="width:'+outp+'%"></i>'
      +b.keys.map(kt=>'<u style="left:'+(b.w?100*Math.max(0,Math.min(1,kt/b.w)):0)+'%"></u>').join('')
@@ -1055,6 +1157,8 @@
  // drag anywhere in the lanes to seek
  const seek=(e)=>{ n=Math.max(0,Math.min(total,Math.round((e.clientX-rulerL)/rulerW*dur*fps))); draw(); };
  lanes.addEventListener('pointerdown',e=>{
+   const eye=e.target&&e.target.closest&&e.target.closest('.eye');
+   if(eye){ toggleEye(+eye.dataset.eye,e.altKey); return; }
    // BEFORE the capture: setPointerCapture retargets everything that follows to the lanes element, so
    // a click handler on the bar never sees its own bar and selection silently did nothing.
    const bar=e.target&&e.target.closest&&e.target.closest('.bar');

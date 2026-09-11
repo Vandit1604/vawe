@@ -116,12 +116,17 @@ const audioLane = (d, marks, duration) => {
 // so a client (the inside view, a mention's context) never has to branch on which it got.
 const normCamera = (d) => (Array.isArray(d.cameraMove) ? d.cameraMove : d.cameraMove ? [d.cameraMove] : [])
   .filter((c) => c && typeof c === 'object')
-  .map((c) => ({ move: c.move || '', start: c.start ?? 0, dur: c.dur ?? 0, from: c.from ?? null, to: c.to ?? null }));
+  .map((c, i) => ({ i, move: c.move || '', start: c.start ?? 0, dur: c.dur ?? 0, from: c.from ?? null, to: c.to ?? null,
+    // the curves panel needs the authored shape whole (stations, ease): only present, and only
+    // writable through /cameraMove/<i>/..., when the scene actually authors `cameraMove` as an array.
+    raw: c, arrayed: Array.isArray(d.cameraMove) }));
 // `transitions[]` is the authored form (AGENTS.md); cuts/seams/stings are its lowered internal shape.
 // A scene may carry either, so both are read and merged into one list of the same shape.
 const normTransitions = (d) => {
   const authored = (Array.isArray(d.transitions) ? d.transitions : [])
-    .map((t) => ({ at: t.at ?? 0, dur: t.dur ?? 0.5, fx: t.fx || t.style || '', mech: t.mech || '' }));
+    // `i` is the index in `transitions[]` on disk: the only shape /transitions/<i>/<prop> can write.
+    // A lowered cut/seam/sting has no such index, so it carries none and the curves panel reads it only.
+    .map((t, i) => ({ i, at: t.at ?? 0, dur: t.dur ?? 0.5, fx: t.fx || t.style || '', mech: t.mech || '', timing: t.timing ?? null, raw: t }));
   const lowered = ['cuts', 'seams', 'stings'].flatMap((key) => (Array.isArray(d[key]) ? d[key] : [])
     .filter((c) => c && typeof c.t === 'number')
     .map((c) => ({ at: c.t, dur: c.dur ?? 0.5, fx: c.fx || c.style || '', mech: key.replace(/s$/, '') })));
