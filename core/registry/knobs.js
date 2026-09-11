@@ -40,6 +40,7 @@ export const KNOBS = {
     weight: [kn('from', 'starting weight on the font\'s own wght axis', [100, 900]), kn('to', 'weight it lands on', [100, 900]), kn('rise', 'px the line lifts through while the weight arrives')],
     up: [kn('dist', 'rise distance px')],
     down: [kn('dist', 'drop distance px')],
+    blurUp: [kn('dist', 'rise distance px, shared with the blur ease'), kn('px', 'blur radius px at the start')],
     scale: [kn('from', 'start scale (0..1)')],
     stretch: [kn('from', 'start scaleX: over 1 is the smear this preset is for, under 1 is a squeeze')],
     blur: [kn('px', 'start blur px')],

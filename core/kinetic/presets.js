@@ -81,6 +81,12 @@ export const PRESETS = {
   // blur + fade in
   blur: preset((u, { px = 16 } = {}) => ({ opacity: clamp01(u), filter: `blur(${((1 - easeOutCubic(u)) * px).toFixed(2)}px)` }),
     'resolve out of blur: calm, premium'),
+  // rise + blur + fade, per unit: measured off a studied text-animation reference at 10fps, where each
+  // letter lifts a short way while it sharpens, about 0.05s apart, settled in about 0.4s. The blur and the
+  // lift share one ease, so a unit is never sharp while still travelling.
+  blurUp: preset((u, { dist = 28, px = 12 } = {}) => { const e = easeOutCubic(clamp01(u));
+    return { opacity: clamp01(u * 1.4), transform: `translateY(${((1 - e) * dist).toFixed(2)}px)`, filter: `blur(${((1 - e) * px).toFixed(2)}px)` }; },
+    'letters lift and sharpen out of blur together: the soft premium headline reveal'),
   // springy bounce in
   // `settle` used to scale the spring INPUT (`u * settle * 2`) while spring's own omega is 2π/settle,
   // so the two cancelled and the dial did nothing (docs/MISTAKES.md #115). Input is a constant now, so
