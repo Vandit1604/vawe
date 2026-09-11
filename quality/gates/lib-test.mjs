@@ -28,6 +28,7 @@ import { createKit, GLYPH_PAINTERS, paintsOwnGlyphs, childExitDur } from '../../
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt, keyHandleErrors } from '../../core/timeline/sequence.js';
 import { frame as squashFrame, build as squashBuild } from '../../core/fx/squash.js';
 import { coverScale, isFullBleedPlane } from '../../core/tracks/overscan.js';
+import { hasOwn3DMotion, computeGroup3D, applyGroup3DOpacityAdapt } from '../../core/tracks/group3d.js';
 import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
 import { frame as matteFrame, build as matteBuild } from '../../core/fx/matte.js';
 import { frame as uprightFrame, build as uprightBuild } from '../../core/fx/upright.js';
@@ -8335,6 +8336,91 @@ const FLOOR = 1800;
   const b = coverScale(basePose({ rotX: 5, rotY: -5 })); // unrelated call in between
   const a3 = coverScale(basePose({ rotX: 13, rotY: -15, z: -260 }));
   ok('overscan: coverScale carries no state between calls (order-independent)', a1 === a3 && b !== a1);
+}
+
+// group3d: a group never gets its own preserve-3d, so a child's own rotY/rotX/z would flatten onto
+// the group's plane without this. Mock elements only need parentElement/style/dataset, plain objects
+// stand in for real DOM nodes (core/tracks/group3d.js's functions never touch anything else).
+{
+  const mockEl = (parentElement = null) => ({ style: {}, dataset: {}, parentElement });
+
+  ok('group3d: hasOwn3DMotion is false with no motion track', !hasOwn3DMotion({}));
+  ok('group3d: hasOwn3DMotion is false for a flat (x/y/rot only) motion track',
+    !hasOwn3DMotion({ motion: [{ t: 0, x: 10 }, { t: 1, rot: 5 }] }));
+  ok('group3d: hasOwn3DMotion is true the moment a key states rotY', hasOwn3DMotion({ motion: [{ t: 0, rotY: 45 }] }));
+  ok('group3d: hasOwn3DMotion is true for z', hasOwn3DMotion({ motion: [{ t: 0, z: -260 }] }));
+
+  // flat group: no descendant keys 3D, so it is left alone (the terminal-plane case, KEYED-MOTION.md 5b).
+  const flatGroupEl = mockEl();
+  const flatChildEl = mockEl(flatGroupEl);
+  const flatLayers = [
+    { L: { type: 'group' }, el: flatGroupEl },
+    { L: { type: 'text', motion: [{ t: 0, x: 5 }] }, el: flatChildEl },
+  ];
+  const flatResult = computeGroup3D(flatLayers);
+  ok('group3d: a group with no 3D-keying descendant needs no preserve-3d', flatResult.need3D.size === 0);
+  ok('group3d: a flat group has nothing to adapt', flatResult.adapt.length === 0);
+
+  // the ticket's shape: films-ring (opacity-only) holding wall-left/wall-right (their own rotY/z).
+  const ringEl = mockEl();
+  const wallLeftEl = mockEl(ringEl);
+  const wallRightEl = mockEl(ringEl);
+  const ringLayers = [
+    { L: { type: 'group', motion: [{ t: 0, opacity: 0 }, { t: 1, opacity: 1 }] }, el: ringEl },
+    { L: { type: 'rect', motion: [{ t: 0, rotY: 45, z: -260 }] }, el: wallLeftEl },
+    { L: { type: 'rect', motion: [{ t: 0, rotY: -45, z: -260 }] }, el: wallRightEl },
+  ];
+  const ringResult = computeGroup3D(ringLayers);
+  ok('group3d: an ancestor group of a 3D-keying child needs preserve-3d', ringResult.need3D.has(ringEl));
+  ok('group3d: exactly one group needed preserve-3d (the leaves themselves are not groups)',
+    ringResult.need3D.size === 1);
+  ok('group3d: the flattening group\'s direct children are both collected', ringResult.adapt.length === 1
+    && ringResult.adapt[0].children.length === 2
+    && ringResult.adapt[0].children.includes(wallLeftEl) && ringResult.adapt[0].children.includes(wallRightEl));
+
+  // a nested group: outer -> inner (3D-holding) -> leaf (the actual 3D key). Both groups need it.
+  const outerEl = mockEl();
+  const innerEl = mockEl(outerEl);
+  const leafEl = mockEl(innerEl);
+  const nestedLayers = [
+    { L: { type: 'group' }, el: outerEl },
+    { L: { type: 'group' }, el: innerEl },
+    { L: { type: 'rect', motion: [{ t: 0, rotX: 20 }] }, el: leafEl },
+  ];
+  const nestedResult = computeGroup3D(nestedLayers);
+  ok('group3d: every group ancestor between a 3D leaf and the camera needs preserve-3d',
+    nestedResult.need3D.has(outerEl) && nestedResult.need3D.has(innerEl));
+
+  // applyGroup3DOpacityAdapt: the group's resolved opacity/filter (as motion.js would have written it)
+  // moves onto its children, multiplying into whatever they already carry, and the group resets.
+  const gEl = mockEl(); gEl.style.opacity = '0.4'; gEl.style.filter = 'blur(2px)'; gEl.id = 'g1';
+  const c1 = mockEl(gEl); c1.style.opacity = '0.8';
+  const c2 = mockEl(gEl); // no prior opacity: baseline 1
+  const logged = new Set();
+  applyGroup3DOpacityAdapt([{ el: gEl, children: [c1, c2] }], logged);
+  ok('group3d push-down: the group itself is reset to opaque', gEl.style.opacity === '1');
+  ok('group3d push-down: the group itself is reset unfiltered', gEl.style.filter === 'none');
+  ok('group3d push-down: multiplies into a child\'s existing opacity (0.8 * 0.4)', c1.style.opacity === (0.8 * 0.4).toFixed(3));
+  ok('group3d push-down: a child with no prior opacity gets exactly the group\'s (1 * 0.4)', c2.style.opacity === (1 * 0.4).toFixed(3));
+  ok('group3d push-down: a filtered group appends its filter onto an unfiltered child', c2.style.filter === 'blur(2px)');
+  ok('group3d push-down: logs the adaptation exactly once per group', logged.size === 1 && logged.has(gEl));
+
+  // an already-opaque, unfiltered group (no adaptation needed) is left untouched and unlogged.
+  const quietEl = mockEl(); quietEl.style.opacity = '1'; quietEl.style.filter = 'none';
+  const quietChild = mockEl(quietEl); quietChild.style.opacity = '0.5';
+  const quietLogged = new Set();
+  applyGroup3DOpacityAdapt([{ el: quietEl, children: [quietChild] }], quietLogged);
+  ok('group3d push-down: a group at rest (opacity 1, no filter) changes nothing', quietChild.style.opacity === '0.5' && quietLogged.size === 0);
+
+  // determinism: same inputs, same result, repeat call, order-independent between separate groups.
+  const detEl = mockEl(); detEl.style.opacity = '0.6';
+  const detChild = mockEl(detEl);
+  applyGroup3DOpacityAdapt([{ el: detEl, children: [detChild] }], new Set());
+  const firstRun = detChild.style.opacity;
+  const detEl2 = mockEl(); detEl2.style.opacity = '0.6';
+  const detChild2 = mockEl(detEl2);
+  applyGroup3DOpacityAdapt([{ el: detEl2, children: [detChild2] }], new Set());
+  ok('group3d push-down: deterministic, same pose gives the same composed opacity every time', firstRun === detChild2.style.opacity);
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

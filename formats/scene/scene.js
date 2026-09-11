@@ -35,6 +35,7 @@ import { resolveCameraBlur, resolveShutter } from '/core/tracks/motion.js';
 import { normalizeIdle } from '/core/engine/idle.js';
 import { resolveSpectacle } from '/core/timeline/spectacle.js';
 import { followOffset, followVelocity } from '/core/camera-moves/follow.js';
+import { computeGroup3D, applyGroup3DOpacityAdapt } from '/core/tracks/group3d.js';
 const $ = (id) => document.getElementById(id);
 
 // resolveRelativeStarts: a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
@@ -60,6 +61,10 @@ const $ = (id) => document.getElementById(id);
 //   an answer. No film in the library uses `.end` at all, so nothing depended on the guess.
 //   A start that survives every pass as a string used to be handed downstream to become that NaN.
 //   Both now throw, naming the layer.
+// GROUP 3D: computeGroup3D / applyGroup3DOpacityAdapt now live in core/tracks/group3d.js (unit-tested
+// with plain mock elements there). Used at build (near `layers.push(...extra)`) and every frame inside
+// renderFrame; see that module's header for the mechanism.
+
 function eachLayerDeep(ls, fn) {
   for (const L of ls || []) {
     if (!L || typeof L !== 'object') continue;
@@ -456,6 +461,8 @@ boot((data, fps, theme, canvas) => {
   resolveAnchors(data);        // anchor/at/dx/dy → absolute x/y (annotations point at what they annotate)
   resolveKeyedProps(data.layers);   // a key that states w/h → every key on that track states it (see core/timeline/sequence.js)
   const extra = []; // group children (any depth), animated on their root group's window
+  const GROUP_3D_OPACITY_ADAPT = []; // { el, children }, filled once groups are known: see "GROUP 3D" below
+  const loggedGroup3DOpacity = new Set(); // one console line per group id, not per frame
 
   // applyGsapHooks: the GSAP-driven layer entrances/exits/paths, all built as PAUSED tweens on
   // gsap.globalTimeline at build; seekAll(t) seeks them per frame (runs AFTER driveClips, so GSAP
@@ -768,6 +775,32 @@ boot((data, fps, theme, canvas) => {
   // top-level layer's parts use, and a child's `delay` stays relative to its OWN group's window.
   for (const { L, el, units } of extra) applyGsapHooks(el, L, units);
   layers.push(...extra); // group children join the per-frame animation loop
+
+  // ---- GROUP 3D: a `group` never gets its own preserve-3d, so a child's rotY/rotZ/z is flattened ----
+  //
+  // The rig above (`RIG`/`has3DMotion`) turns preserve-3d on for `#cam` and every beat wrapper the
+  // moment ANY layer, top-level or nested, keys a 3D motion prop. But a GROUP sitting between the beat
+  // wrapper and that layer stays flat by default (browsers default every element to
+  // `transform-style: flat`), so a child's own rotateY/rotateX/translateZ is flattened onto the
+  // group's 2D plane before it ever reaches the rig. This is the earlier group-plane case
+  // (docs/CRAFT/KEYED-MOTION.md 5b) in reverse: there, a flat group is CORRECT because its children
+  // have no 3D of their own and are meant to ride the group's tilt flat. Here the children carry their
+  // OWN rotY/rotX/z, so the group has to open a 3D context for them to stand in, or the depth is lost.
+  //
+  // Decided once, from the resolved motion tracks, exactly like `has3DMotion` above: a group needs
+  // `preserve-3d` iff some descendant (any depth) keys its own z/rotX/rotY, and so does every group
+  // ancestor between it and the camera (the rig already reaches the camera and beat wrapper; this
+  // closes the gap for every group in between). A group whose descendants are all flat is untouched.
+  //
+  // OPACITY AND FILTER ARE GROUPING PROPERTIES too (scene.js "THE CAMERA RIG" above): either one on a
+  // 3D-holding group flattens it right back, motion track or not. Adapted rather than refused, because
+  // an author writing a group-level fade has no way to know it kills its own children's depth: see
+  // core/tracks/group3d.js for the per-frame push-down this feeds (`GROUP_3D_OPACITY_ADAPT` below).
+  {
+    const { need3D, adapt } = computeGroup3D(layers);
+    for (const el of need3D) el.style.transformStyle = 'preserve-3d';
+    GROUP_3D_OPACITY_ADAPT.push(...adapt);
+  }
 
   // THE TIMED SET, taken here because here is where the scene has finished being built: every
   // top-level layer is in `cam` (or in its beat wrapper, which is), and every group child was appended
@@ -1448,6 +1481,8 @@ const boxOf = (id) => boxes.get(id) || null;
       const lt = Number.isFinite(ownEnd) ? Math.min(rawT, ownEnd - EPS) : rawT;
       runTracks(trackKit, el, L, units, lt, L.step != null ? Math.round(lt * fps) : f, view);
     }
+    // GROUP 3D OPACITY/FILTER PUSH-DOWN: see "GROUP 3D" at build, and applyGroup3DOpacityAdapt below.
+    applyGroup3DOpacityAdapt(GROUP_3D_OPACITY_ADAPT, loggedGroup3DOpacity);
     drawCaptions(t);
     drawCameraAndCut(t, camNow);
     drawStings(t);
