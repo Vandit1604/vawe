@@ -346,6 +346,44 @@ export function profile(frames, { fps = SAMPLE_FPS, windowS = WINDOW_S } = {}) {
   return out;
 }
 
+/**
+ * typingWindows(storyboardText) -> [{t0, t1}], one per beat that DECLARES a typed or word/letter-
+ * stagger reveal: its own `- motion:` line names a `[data-part="…word…"]`/`…letter…`/`…char…` split
+ * unit, or its body mentions `typing` outright (the `L.typing` char-by-char layer). A beat like this
+ * can sit under DEAD for a whole window (the reveal is a caret ticking one character at a time, not a
+ * block of pixels arriving at once) without the film actually having stopped, so `dead-window` needs
+ * to know which windows this is true for BEFORE deciding whether they are really dead.
+ */
+export function typingWindows(text) {
+  const heads = [...text.matchAll(/^##\s*Beat\s+\d+[^\n(]*\(([\d.]+)s-([\d.]+)s\)/gm)];
+  const windows = [];
+  for (let i = 0; i < heads.length; i++) {
+    const m = heads[i];
+    const start = m.index + m[0].length;
+    const end = i + 1 < heads.length ? heads[i + 1].index : text.length;
+    const body = text.slice(start, end);
+    const motionLine = /^- motion:\s*(.+)$/m.exec(body);
+    const wordSplit = motionLine && /data-part="[^"]*(word|letter|char)[^"]*"/i.test(motionLine[1]);
+    if (wordSplit || /\btyping\b/i.test(body)) windows.push({ t0: +m[1], t1: +m[2] });
+  }
+  return windows;
+}
+
+const overlapsAny = (t0, t1, ranges) => ranges.some((r) => t0 < r.t1 && t1 > r.t0);
+
+/**
+ * samplePre(scenePath) -> Uint8Array(GW*GH)[], one frame per WINDOW_S seconds, taken from
+ * renderFrame(n) through harness/lib/frame-sampler.mjs rather than a decoded out/<film>.mp4. Feeding
+ * this straight into profile() with fps=1/WINDOW_S, windowS=WINDOW_S makes each pair of consecutive
+ * samples exactly one window's before/after, the coarsest read that still reuses the same local/
+ * global classifier the post-render path uses, rather than a second implementation of it.
+ */
+export async function samplePre(scenePath) {
+  const { sampleScene, downsampleGray } = await import('../../harness/lib/frame-sampler.mjs');
+  const { samples } = await sampleScene(scenePath, { rate: WINDOW_S, measure: (img) => downsampleGray(img, GW, GH) });
+  return samples.map((s) => s.img);
+}
+
 // ── the CLI. Guarded, so importing this module for a test does not run the gate and exit. The
 // self-test lives INSIDE this guard for the same reason: it used to sit at module scope, so any
 // script that imported this file while its own `--self-test` flag was on process.argv ran THIS
@@ -429,30 +467,51 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.error('primaryRegionAt must return null when nothing changed, never a guessed centroid'); process.exit(1);
     }
 
+    // typingWindows: a beat whose motion line names a "-word" split unit declares text arrival; a
+    // beat with an ordinary fadeUp on a non-split part does not, so a real dead window under IT still
+    // fails. Both fixtures below reuse vawe-flow-2's own beat 2/3 shape.
+    const sbTyped = `## Beat 2: Install (1.2s-2.7s)\n- motion: [data-part="install-word"]@fadeUp:energy\n`
+      + `## Beat 9: Static card (2.7s-4.0s)\n- motion: [data-part="card"]@fadeUp:energy\n`;
+    const tw = typingWindows(sbTyped);
+    if (tw.length !== 1 || tw[0].t0 !== 1.2 || tw[0].t1 !== 2.7) {
+      console.error(`typingWindows must find only the word-split beat's own window, got ${JSON.stringify(tw)}`); process.exit(1);
+    }
+    if (!overlapsAny(1.5, 2.0, tw)) { console.error('overlapsAny must see a window inside a declared typing range'); process.exit(1); }
+    if (overlapsAny(2.8, 3.3, tw)) { console.error('overlapsAny must NOT see a window in the undeclared beat as typing-covered'); process.exit(1); }
+
     console.log('  ✓ motion-floor self-test: a drift reads global, a reveal reads local, stillness reads zero,');
     console.log('    a whole-frame slide reads global, a bounded object travelling reads local, the five');
-    console.log('    kinds (camera/move/scale/reveal/ambient) each classify their own clean fixture, and');
-    console.log('    primaryRegionAt centres a centred fixture and corners a cornered one');
+    console.log('    kinds (camera/move/scale/reveal/ambient) each classify their own clean fixture,');
+    console.log('    primaryRegionAt centres a centred fixture and corners a cornered one, and');
+    console.log('    typingWindows finds only the beat that actually declares a word-split reveal');
     process.exit(0);
   }
 
   const arg = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
-  if (!arg) { console.error('usage: make motion-floor D=formats/scene/<film>.json'); process.exit(2); }
+  if (!arg) { console.error('usage: make motion-floor D=formats/scene/<film>.json [--pre]'); process.exit(2); }
   const base = String(arg).replace(/\.json$/, '');
   const slug = path.basename(base);
+  const pre = process.argv.includes('--pre');
   const mp4 = path.join(ROOT, 'out', slug + '.mp4');
-  if (!fs.existsSync(mp4)) { console.log(`  motion-floor: no render at out/${slug}.mp4 yet, so there are no pixels to read. Render first.`); process.exit(0); }
 
-  const frames = pullFrames(mp4);
-  if (!frames) { console.log('  motion-floor: ffmpeg returned no frames; skipped rather than guessed.'); process.exit(0); }
-  const prof = profile(frames);
-
-  // The reference's own numbers, when the film declares one. Nothing here is a threshold I chose.
-  let ref = null, refName = null;
   const sbPath = [base + '.storyboard.md', path.join(ROOT, 'formats/scene', slug + '.storyboard.md')]
     .map((f) => path.resolve(ROOT, f)).find((f) => fs.existsSync(f));
-  if (sbPath) {
-    const m = /^reference\s*:\s*["']?([\w.-]+)/mi.exec(fs.readFileSync(sbPath, 'utf8'));
+  const storyboard = sbPath ? fs.readFileSync(sbPath, 'utf8') : '';
+  const typingRanges = typingWindows(storyboard);
+
+  // THE PART THAT CANNOT BE SATISFIED BY A REFERENCE COMPARISON. `--pre` samples renderFrame at
+  // WINDOW_S-second centres, which is a coarser clock than the mp4 path's 30fps decode; comparing that
+  // against a reference profiled at 30fps would blame a resolution mismatch on the film. So `--pre`
+  // answers "does the film ever stop" only, and leaves the floor-below-reference / median-below-
+  // reference checks to the mp4 path, exactly as the plan asked.
+  let frames, ref = null, refName = null;
+  if (pre) {
+    frames = await samplePre(base + '.json');
+  } else {
+    if (!fs.existsSync(mp4)) { console.log(`  motion-floor: no render at out/${slug}.mp4 yet, so there are no pixels to read. Render first.`); process.exit(0); }
+    frames = pullFrames(mp4);
+    if (!frames) { console.log('  motion-floor: ffmpeg returned no frames; skipped rather than guessed.'); process.exit(0); }
+    const m = /^reference\s*:\s*["']?([\w.-]+)/mi.exec(storyboard);
     if (m) {
       refName = m[1];
       const refMp4 = ['refs/' + refName + '.mp4', 'refs/' + refName + '/' + refName + '.mp4']
@@ -460,18 +519,34 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       if (refMp4) { const rf = pullFrames(refMp4); if (rf) ref = profile(rf); }
     }
   }
+  const prof = pre ? profile(frames, { fps: 1 / WINDOW_S, windowS: WINDOW_S }) : profile(frames);
 
   const gf = gateFindings();
-  const errs = [], warns = [];
+  const errs = [], warns = [], adapted = [];
   const err = (c, m) => { errs.push(m); gf.fail(c, m); };
   const warn = (c, m) => { warns.push(m); gf.warn(c, m); };
+  const adapt = (c, m) => { adapted.push(m); gf.note(c, m); };
 
   // The last window is the outro: a film is allowed to stop at its end, and the reference does.
   const body = prof.slice(0, -2);
-  const dead = body.filter((w) => w.local < DEAD);
+  const deadAll = body.filter((w) => w.local < DEAD);
   const localMed = [...body.map((w) => w.local)].sort((a, b) => a - b)[Math.floor(body.length / 2)] || 0;
   const globalMed = [...body.map((w) => w.global)].sort((a, b) => a - b)[Math.floor(body.length / 2)] || 0;
 
+  // A window that reads dead by pixel share is not necessarily a stopped film: a typed line or a
+  // word/letter stagger reveals its content a few pixels at a time (one caret-width per tick), which
+  // can sit under DEAD for a whole window without the beat having actually stopped. `typingWindows`
+  // reads that declaration off the storyboard's own `- motion:` line, so a window is only spared when
+  // the PLAN says text is arriving there, never on the gate's own say-so.
+  const dead = deadAll.filter((w) => !overlapsAny(w.t, w.t + WINDOW_S, typingRanges));
+  const typingDead = deadAll.filter((w) => overlapsAny(w.t, w.t + WINDOW_S, typingRanges));
+
+  if (typingDead.length) {
+    adapt('dead-window', `dead-window: ${typingDead.length} window(s) at `
+      + `${typingDead.map((w) => w.t + 's').join(', ')} read as no content motion by pixel share, but the `
+      + 'storyboard declares a typed/word-stagger reveal there, which arrives a few pixels at a time. '
+      + 'Scored as text arrival, not pixels: not a defect.');
+  }
   if (dead.length) {
     err('dead-window', `${dead.length} of ${body.length} windows carry no content motion at all `
       + `(under ${DEAD} local, at ${dead.slice(0, 6).map((w) => w.t + 's').join(', ')}${dead.length > 6 ? ' …' : ''}). `
@@ -517,8 +592,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       + 'is not a substitute for a reveal, and this gate will not accept it as one.');
   }
 
-  if (process.argv.includes('--json')) { console.log(JSON.stringify({ prof, errs, warns }, null, 2)); process.exit(errs.length ? 1 : 0); }
-  console.log(`\n  motion-floor · ${slug} · ${body.length} windows of ${WINDOW_S}s${refName ? ` · vs ${refName}` : ''}`);
+  if (process.argv.includes('--json')) { console.log(JSON.stringify({ prof, errs, warns, adapted, pre }, null, 2)); process.exit(errs.length ? 1 : 0); }
+  console.log(`\n  motion-floor · ${slug} · ${body.length} windows of ${WINDOW_S}s${pre ? ' · --pre (renderFrame, no mp4)' : ''}${refName ? ` · vs ${refName}` : ''}`);
   console.log(`    local (content)  median ${localMed.toFixed(2)}  floor ${Math.min(...body.map((w) => w.local)).toFixed(2)}  peak ${Math.max(...body.map((w) => w.local)).toFixed(2)}`);
   console.log(`    global (ambient) median ${globalMed.toFixed(2)}`);
   if (ref) {
@@ -527,6 +602,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   for (const m of errs) console.log(`    ✗ ${m}`);
   for (const m of warns) console.log(`    ~ ${m}`);
+  for (const m of adapted) console.log(`    · adapted ${m}`);
   if (!errs.length && !warns.length) console.log('    ✓ the film never stops, and what fills it is content\n'); else console.log('');
   process.exit(errs.length ? 1 : 0);
 }
