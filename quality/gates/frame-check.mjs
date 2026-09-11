@@ -15,7 +15,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../harness/author/storyboard-parse.mjs';
 import { extractKitBlock } from '../../harness/lib/stagekit.mjs';
-import { KIT_ROLE, offRampSizes, offRampShadows } from '../../harness/lib/kit-ramp.mjs';
+import { fragmentFontSizes } from '../../harness/lib/kit-ramp.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 
@@ -44,9 +44,15 @@ const errs = [], warns = [];
 const err = (code, msg, extra) => { errs.push(msg); gf.fail(code, msg, extra); };
 const warn = (code, msg, extra) => { warns.push(msg); gf.warn(code, msg, extra); };
 
-// ── 1. every size and every shadow in a fragment traces to the kit ─────────────────────────────────
-// Live at the keystroke already (harness/live/craft-live.mjs), and a gate too, because the live hook
-// speaks to whoever is typing and says nothing to whoever is reviewing a branch.
+// ── 1. every fragment pastes the shared kit block, and the film's scales stay in one family ────────
+// The kit is a foundation an author MAY draw on, never a whitelist that refuses a literal value: any
+// CSS is allowed for size, shadow, radius and spacing (owner decision, docs/MISTAKES.md #621). What
+// still matters is that a film's frames read as one film, so this only reports, film-wide, when its
+// fragments have drifted onto many different type scales.
+// SCALE_DRIFT_MAX: more distinct literal sizes than this across one film's fragments and the frames
+// stop reading as one film (docs/CRAFT/HTML-FRAGMENTS.md's "seven frames, eight invented sizes" case).
+const SCALE_DRIFT_MAX = 7;
+const filmSizes = new Map(); // px -> Set of fragments using it
 for (const b of beats) {
   if (!b.fragment) continue;
   const file = path.join(ROOT, b.fragment);
@@ -59,22 +65,16 @@ for (const b of beats) {
       + '`<film>.kit.css` sidecar (docs/MISTAKES.md #594).');
   }
   const own = (kit ? raw.replace(kit, '') : raw).replace(/\/\*[\s\S]*?\*\//g, '');
-  const sizes = offRampSizes(own);
-  if (sizes.length >= 3 && !KIT_ROLE.test(own)) {
-    err('off-ramp-size', `${b.fragment} sets ${sizes.length} literal type sizes (${sizes.slice(0, 6).join(', ')}) and names no `
-      + '`.kit-` role. The kit ships the ramp; a film whose frames each invent a scale is several films.');
+  for (const px of fragmentFontSizes(own)) {
+    if (!filmSizes.has(px)) filmSizes.set(px, new Set());
+    filmSizes.get(px).add(b.fragment);
   }
-  // A shadow is on the ramp if it NAMES the ramp anywhere in the value, not only at the start. A
-  // hairline ring plus a kit elevation is one composite surface, and so is an inset highlight, which
-  // is not elevation at all: it is where the light hits the top edge. Requiring `var(--kit-elev` to be
-  // the first token rejected the double-bezel, which is the technique that makes a surface read as
-  // machined rather than as a sticker.
-  const offRamp = offRampShadows(own);
-  if (offRamp.length) {
-    err('off-ramp-shadow', `${b.fragment} writes ${offRamp.length} box-shadow(s) that name no kit elevation. `
-      + 'Elevation is a three-level ramp (`--kit-elev-1/2/3`), one level per element, neutral black. A ring '
-      + 'or an inset highlight may ride along with one; neither is an elevation on its own.');
-  }
+}
+if (filmSizes.size > SCALE_DRIFT_MAX) {
+  const list = [...filmSizes.keys()].sort((a, b2) => a - b2).join(', ');
+  warn('scale-drift', `this film's fragments use ${filmSizes.size} distinct literal type sizes `
+    + `(${list}px), more than ${SCALE_DRIFT_MAX}. Any size is allowed; the kit's roles are there `
+    + 'if two close fragments would rather share one scale.');
 }
 
 // ── 2. the object the storyboard promised, against the layer the assembly actually shipped ─────────

@@ -1,10 +1,8 @@
 // node harness/live/test/craft-live-fragment.test.mjs
 //
 // The fragment branch of harness/live/craft-live.mjs, fed exactly as Claude Code's PostToolUse feeds
-// it (stdin JSON, stderr on exit 2). Two of the three cases are REAL files in formats/scene/, because
-// a fixture that drifts from the fragments in the repo would pass while the hook stops working. The
-// third is written to disk for the length of the test, since the repo deliberately holds no fragment
-// that breaks these rules.
+// it (stdin JSON, stderr on exit 2). Both cases are REAL files in formats/scene/, because a fixture
+// that drifts from the fragments in the repo would pass while the hook stops working.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -27,25 +25,6 @@ const run = (rel) => {
 test('a fragment on the kit ramps is silent', () => {
   const { status, out } = run('formats/scene/_vawe-oblique.hook.html');
   assert.equal(status, 0, `expected silence, got:\n${out}`);
-});
-
-test('literal type sizes with no kit role, and a hand-written shadow, both speak', () => {
-  // Deliberately what the rules forbid: three literal sizes, no .kit- role, one raw box-shadow.
-  const rel = 'formats/scene/_craft-live-probe.html';
-  fs.writeFileSync(path.join(ROOT, rel), [
-    '<style>', '.a{font: 700 236px var(--font-sans)}', '.b{font-size: 104px}',
-    '.c{font-size: 34px}', '.d{box-shadow: 0 2px 8px rgba(15,22,32,.1)}', '</style>',
-    '<div class="a">x</div>',
-  ].join('\n'));
-  try {
-    const { status, out } = run(rel);
-    assert.equal(status, 2);
-    assert.match(out, /literal type size/);
-    assert.match(out, /name no kit elevation/);
-    // The advice must name the roles, or it is a complaint rather than a fix.
-    assert.match(out, /\.kit-display/);
-    assert.match(out, /--kit-elev-1/);
-  } finally { fs.rmSync(path.join(ROOT, rel), { force: true }); }
 });
 
 test('the pasted stage kit is never counted as the author\'s own CSS', () => {

@@ -229,9 +229,9 @@ console.log(`✓ ${path.relative(ROOT, src)}  →  ${out}   (theme ${themeName},
 // THIRD-PARTY, AND SAID SO. `impeccable` is not house tooling: it is a vendored skill (v3.5.0,
 // Apache 2.0, LICENSE at skills/impeccable/LICENSE) and its detector is the only thing in this repo
 // that opens a browser and measures what actually rendered. Our OWN anti-slop is elsewhere and is
-// named for itself: harness/live/craft-live.mjs reads a fragment's source for off-ramp sizes and
-// shadows, and quality/gates/frame-check.mjs compares the plan with the frames. Neither is impeccable
-// and neither should ever be called it.
+// named for itself: harness/live/craft-live.mjs reads a fragment's source for the kit block and the
+// roster order, and quality/gates/frame-check.mjs compares the plan with the frames. Neither is
+// impeccable and neither should ever be called it.
 //
 // RESOLVED THE WAY THE SKILL RESOLVES IT. skills/impeccable/scripts/detect.mjs is its own entry point
 // and it tries TWO layouts before giving up. Hard-coding one of them, which this did, means a skill
