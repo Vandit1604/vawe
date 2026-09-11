@@ -18,6 +18,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../harness/author/storyboard-parse.mjs';
+import { parseFragmentSpec } from '../../harness/lib/contract.mjs';
 import { population, LIBRARY } from '../../harness/lib/census.mjs';
 import { route } from '../../harness/author/route.mjs';
 import { scratchBase } from '../../harness/lib/scratch.mjs';
@@ -71,7 +72,7 @@ export function stageOf(arg) {
   const sb = sbExists ? parseStoryboard(sbSrc) : null;
   const approved = sbExists ? frontmatter(sbSrc).field('approved') : null;
   const fragments = sbExists
-    ? blocksOf(sbSrc).map((b) => (fieldIn(b, 'fragment') || '').split(/\s+\(/)[0].trim()).filter(Boolean)
+    ? blocksOf(sbSrc).map((b) => parseFragmentSpec(fieldIn(b, 'fragment')).path).filter(Boolean)
     : [];
   const missingFrags = [...new Set(fragments)].filter((f) => !fs.existsSync(path.join(ROOT, f)));
   const layers = (scene && Array.isArray(scene.layers) ? scene.layers : []).length;
@@ -224,7 +225,7 @@ export function lookBlock(film) {
   const sbSrc = fs.readFileSync(p.sb, 'utf8');
   const fm = frontmatter(sbSrc);
   const fragments = [...new Set(blocksOf(sbSrc)
-    .map((b) => (fieldIn(b, 'fragment') || '').split(/\s+\(/)[0].trim()).filter(Boolean))];
+    .map((b) => parseFragmentSpec(fieldIn(b, 'fragment')).path).filter(Boolean))];
   const scene = fs.existsSync(p.scene) ? (() => { try { return JSON.parse(fs.readFileSync(p.scene, 'utf8')); } catch { return null; } })() : null;
   const rawTheme = (scene && scene.theme) || fm.field('theme');
   // `themes/vawe.json` (a storyboard's frontmatter shape) vs `default` (a scene's own field): make

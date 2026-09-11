@@ -236,7 +236,9 @@ not: "the defaults this film refuses, in your own words"
   (`<placement>@<w>x<h>`), never a second one to learn. TWO CONSECUTIVE BEATS NAMING THE SAME FILE keep
   ONE component alive across the cut instead of tearing it down and rebuilding it, which is the cheapest
   way to stop a shared panel reading as a slideshow. A placement change between them is keyed as that
-  one layer's own `motion`, not a second layer.
+  one layer's own `motion`, not a second layer. A beat built from native layers alone (an image + text
+  pair, a solid card, nothing to author as HTML) writes `fragment: none` (optionally `, <reason>`); the
+  stage, storyboard-check and frame-check all read this the same way and never ask for that file.
 
   either answer. `threads:` names the devices carrying this film from docs/CRAFT/FILM-STRUCTURE.md, a
   match cut, a camera travel, a motif, a bookend, a metric cut rate, an unfinished sentence, an open

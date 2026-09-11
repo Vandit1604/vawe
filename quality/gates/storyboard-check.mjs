@@ -211,10 +211,10 @@ function plainContentWarning(b, title) {
   const noun = (CONTENT_NOUN_RE.exec(text) || [])[1];
   if (!noun) return;
   if (REAL_ASSET_RE.test(b) || REAL_COMMAND_RE.test(b)) return;   // a real source is already named
-  const { path: fragRaw } = parseFragmentSpec(fieldIn(b, 'fragment'));
+  const { path: fragRaw, none: noFragment } = parseFragmentSpec(fieldIn(b, 'fragment'));
+  if (noFragment) return;   // `fragment: none`: a native-layer beat, nothing on disk to check
   if (fragRaw) {
-    const named = fragRaw.split(/\s+\(/)[0].trim();
-    const fragPath = named.includes('/') ? path.resolve(ROOT, named) : path.join(path.dirname(f), named);
+    const fragPath = fragRaw.includes('/') ? path.resolve(ROOT, fragRaw) : path.join(path.dirname(f), fragRaw);
     if (fs.existsSync(fragPath)) return;   // the fragment already exists on disk: a real source
   }
   if (/^photo$/i.test(noun)) {
@@ -284,7 +284,7 @@ for (const b of blocks) {
   // A beat that plans its frame with `make screen F=` and no matching `fragment:` has a frame no reader
   // can see: the stage, frame-check and the studio read `fragment:` only, so the film skips design.
   const screenFile = (/\bmake\s+screen\s+F=(\S+)/i.exec(b) || [])[1];
-  const fragNamed = (fieldIn(b, 'fragment') || '').split(/\s+\(/)[0].trim();
+  const fragNamed = parseFragmentSpec(fieldIn(b, 'fragment')).path || '';
   if (screenFile && path.basename(fragNamed) !== path.basename(screenFile)) {
     err('screen-without-fragment', `beat "${title}": plans \`make screen F=${screenFile}\` but `
       + (fragNamed ? `its \`fragment:\` is ${fragNamed}` : 'has no `fragment:` line')
