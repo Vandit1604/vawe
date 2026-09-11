@@ -4042,6 +4042,18 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       (() => { const nested = '{\n "layers": [\n  { "motion": [ { "t": 0 }, { "t": 1, "ease": "linear" } ] }\n ]\n}';
         const out = applyOps(nested, [{ op: 'replace', path: '/layers/0/motion/1/ease', value: 'easeOutCubic' }]);
         return JSON.parse(out).layers[0].motion[1].ease === 'easeOutCubic'; })());
+    // WALKPATH MUST MATCH THE ARRAY AT THIS OBJECT'S OWN TOP LEVEL, not the first `"motion":[` a bare
+    // scan finds anywhere in the region. A `fx` sub-object naming its own `motion` array earlier in the
+    // byte stream than the layer's real `motion` used to win, silently patching the wrong track.
+    ok('applyOps: a nested same-name array does not shadow the layer\'s own array',
+      (() => {
+        const shadowed = '{\n "layers": [\n  { "fx": { "motion": [ { "junk": 1 } ] }, '
+          + '"motion": [ { "t": 0 }, { "t": 1, "ease": "linear" } ] }\n ]\n}';
+        const out = applyOps(shadowed, [{ op: 'replace', path: '/layers/0/motion/1/ease', value: 'easeOutCubic' }]);
+        const d = JSON.parse(out);
+        return d.layers[0].motion[1].ease === 'easeOutCubic'          // the REAL track was patched
+          && JSON.stringify(d.layers[0].fx) === '{"motion":[{"junk":1}]}';  // the nested one is untouched
+      })());
   }
 }
 
