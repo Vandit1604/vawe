@@ -58,5 +58,35 @@
     "adapt": null,
     "brief": "Use make assets for logos, and if you curl one by hand, use -f",
     "doc": "docs/CRAFT/IMAGERY.md"
+  },
+  {
+    "id": "imagery.logo-prominence",
+    "category": "imagery",
+    "stage": "design",
+    "applies": "hasImages",
+    "check": null,
+    "adapt": null,
+    "brief": "A mark reads as the brand, next to the title and on the end card",
+    "doc": "docs/RULES/logo-prominence.md"
+  },
+  {
+    "id": "imagery.svg-inline",
+    "category": "imagery",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "An svg layer is inline geometry, not a file reference",
+    "doc": "docs/RULES/svg-inline.md"
+  },
+  {
+    "id": "imagery.no-css-clock",
+    "category": "imagery",
+    "stage": "design",
+    "applies": "hasHtml",
+    "check": null,
+    "adapt": null,
+    "brief": "The engine owns the clock: no CSS animation, transition, opacity, or filter",
+    "doc": "docs/RULES/no-css-clock.md"
   }
 ]

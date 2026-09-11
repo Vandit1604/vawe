@@ -75,7 +75,7 @@
     "stage": "direct",
     "applies": "hasBoundaries",
     "check": "seam-split",
-    "adapt": null,
+    "adapt": "seam-split",
     "brief": "One step several times the size of the rest is a hard background swap disguised inside a soft layer dissolve",
     "doc": "docs/CRAFT/TRANSITIONS.md#seam-forensics-split-seam"
   }

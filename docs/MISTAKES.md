@@ -2645,6 +2645,30 @@ asset-check` also notes (does not fail on) a relative src that does resolve to a
 served-root form an author could write directly.
 holds: core/motion/motion.js, core/engine/src-url.js, quality/gates/asset-check.mjs
 
+## 625. Craft lived in four mechanisms with no shared shape, so nothing could ask "what applies here"
+docs/RULES per-rule files, a doc's own `when`/`answers` frontmatter, `harness/lib/safeguards.mjs`, and
+hand-typed prose in `critics.mjs` each said "follow this rule" in a different shape. `docs/CRAFT/rules/
+<category>.json` is now the one shape: one JSON record per rule, one file per category, loaded and
+validated by `harness/lib/craft-rules.mjs`.
+
+Two side effects turned up while wiring it in, both measured, not guessed. First, `motion.json` had been
+migrated wholesale from `docs/RULES`, so it carried records that were not motion at all (`caption-safe-
+strip` duplicated captions.json outright and was deleted; `logo-prominence` and two asset/HTML rules moved
+to `imagery.json`; `state-the-canvas` and `video-scale` moved to `layout.json`). A record in the wrong
+category is invisible to the decider that actually owns it. Second, a broader scanner pattern tried for
+`harness/lib/finding-codes.mjs` (to catch choreo.mjs's unbracketed `camera-coverage-floor` message) matched
+18 unrelated script-name log banners and even a markdown-quoted term inside a comment, which would have
+crowded the vocabulary the "codes emitted" census exists to keep precise; anchoring the pattern to an
+actual assignment (`var = \`code: prose\``) narrowed it back to the one real code plus its sibling
+`camera-still-held`.
+
+The fix: move/delete the five misplaced motion records, rewrite `logo-prominence`'s pixel-size sentence
+into a prominence statement (no object-size checks, per the owner's rule), tighten the finding-codes
+scanner to an assignment-anchored pattern, and wire two safeguards entries (`archetype-repeat`,
+`seam-split`) whose blind spots are decidable from real film context (a storyboard's own `not:` line, a
+scene's own authored layer boxes) rather than a guess.
+holds: harness/lib/craft-rules.mjs, harness/lib/finding-codes.mjs, harness/lib/safeguards.mjs, docs/CRAFT/rules/
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.

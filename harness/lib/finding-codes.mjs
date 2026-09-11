@@ -15,12 +15,14 @@
 // every false code becomes an "unrouted finding" a person is asked to explain. The first draft matched
 // any `kind: '...'` and returned 135 codes, of which `circle`, `sphere`, `stripes`, `sting`, `cut` and
 // `seam` are background fx and transition names, not findings. Those patterns are gone. What is left
-// is four shapes that only ever carry a finding code:
+// is six shapes that only ever carry a finding code:
 //
 //   fail('code', …) / warn('code', …)   the convention 10 gates share
 //   ✗ [code] / ~ [code]                 the printed form author-check itself parses
 //   sev: 'code'                         designspec-check's finding objects
 //   allow.has('code')                   a gate checking its own waiver, which names a real code
+//   raise('code', …)                    a gate helper that adapts through safeguards.mjs
+//   var = `code: prose`                 a message assigned with no brackets (choreo.mjs's camera-coverage-floor)
 //
 // Plus quality/audit.mjs's HARD set, read by name: audit builds findings as `{kind}` objects, so it has
 // no textual marker of its own and would otherwise be invisible to all four.
@@ -41,6 +43,7 @@ const PATTERNS = [
   /\bsev\s*:\s*'([a-z][a-z0-9-]{2,})'/g,                  // designspec-check's finding objects
   /\ballow(?:ed)?\.has\('([a-z][a-z0-9-]{2,})'\)/g,       // a gate reading its own waiver
   /\braise\(\s*'([a-z][a-z0-9-]{2,})'/g,                  // a gate helper that adapts through safeguards.mjs, then fails or warns
+  /=\s*`([a-z][a-z0-9]*-[a-z][a-z0-9-]*): /g,             // a message assigned as `code: prose`, printed with no brackets (choreo.mjs's camera-coverage-floor)
 ];
 
 // quality/audit.mjs composes findings as `{ kind: 'overlap', … }`, so no marker above sees it. Its

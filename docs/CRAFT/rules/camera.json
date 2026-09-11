@@ -44,7 +44,7 @@
     "category": "camera",
     "stage": "direct",
     "applies": "always",
-    "check": null,
+    "check": "camera-coverage-floor",
     "adapt": null,
     "brief": "make choreo warns camera-coverage-floor when the resolved legs cover under 40% of a film over 6s long",
     "doc": "docs/CRAFT/KEYED-MOTION.md#5c-the-camera-does-not-sit-still"

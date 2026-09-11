@@ -2,19 +2,19 @@
 name: logo-prominence
 when: placing a brand mark beside a headline, or on the end card
 holds: eye (live hook harness/live/craft-live.mjs on Claude Code; check by hand elsewhere)
-answers: "the minimum logo size beside a title and on an end card, so it reads as an element, not punctuation"
+answers: "why a mark must read as the brand, not as punctuation, beside a title and on the end card"
 group: look
 ---
-# A logo beside a title is at least 100px; on the end card, at least 150px
+# A mark reads as the brand, next to the title and on the end card
 
-A mark sized like a bullet next to a headline reads as punctuation, not as the brand. Give it deliberate
-size: at least 100px beside a title, and at least 150px on the end card, where it is the last thing the
-viewer sees.
+A mark sized like a bullet next to a headline reads as punctuation, not as the brand. Give it
+deliberate prominence: it must read clearly next to the title, and it is the last thing the viewer
+sees on the end card, so it earns real weight there too.
 
-| placement | minimum size |
+| placement | what it must do |
 |---|---|
-| beside a headline | ≥100px |
-| end card | ≥150px |
+| beside a headline | read as the brand, not a bullet |
+| end card | carry the frame alone, the last thing the viewer sees |
 
 Right:
 ```json

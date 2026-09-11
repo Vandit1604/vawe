@@ -35,7 +35,7 @@
     "stage": "design",
     "applies": "always",
     "check": "archetype-repeat",
-    "adapt": null,
+    "adapt": "archetype-repeat",
     "brief": "No layout archetype twice in a row; the storyboard names each beat's archetype",
     "doc": "docs/CRAFT/LAYOUT.md"
   },
@@ -58,5 +58,25 @@
     "adapt": null,
     "brief": "Three layers minimum per scene. Background treatment, foreground content, accent elements",
     "doc": "docs/CRAFT/LAYOUT.md"
+  },
+  {
+    "id": "layout.state-the-canvas",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "State the canvas, or the film renders portrait",
+    "doc": "docs/RULES/state-the-canvas.md"
+  },
+  {
+    "id": "layout.video-scale",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Size for video, not for the web",
+    "doc": "docs/RULES/video-scale.md"
   }
 ]

@@ -128,7 +128,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/RULES/ease-direction.md](RULES/ease-direction.md) | choosing an ease for an entrance, an exit, or a move between two positions | which easing family belongs on an entrance, an exit, and a handover, and why easeOutExpo on a handover is wrong |
 | [docs/RULES/first-arrival.md](RULES/first-arrival.md) | a layer's first entrance in a beat | why nothing should arrive at t=0, and the offset that fixes it |
 | [docs/RULES/handover-glide.md](RULES/handover-glide.md) | one layer becomes another across a cut or a beat boundary | how long a becomes handover must glide so the viewer sees the object travel, not cut |
-| [docs/RULES/logo-prominence.md](RULES/logo-prominence.md) | placing a brand mark beside a headline, or on the end card | the minimum logo size beside a title and on an end card, so it reads as an element, not punctuation |
+| [docs/RULES/logo-prominence.md](RULES/logo-prominence.md) | placing a brand mark beside a headline, or on the end card | why a mark must read as the brand, not as punctuation, beside a title and on the end card |
 | [docs/RULES/motion-offsets.md](RULES/motion-offsets.md) | writing a layer's motion[] keyframe track | motion track x/y are offsets on the base position, not absolute canvas coordinates |
 | [docs/RULES/no-css-clock.md](RULES/no-css-clock.md) | hand-writing an html layer or a css fragment | why a fragment cannot own a CSS animation, transition, opacity, or filter, and what to use instead |
 | [docs/RULES/paired-directional-exit.md](RULES/paired-directional-exit.md) | choosing anim/out for a layer that slides | why an entrance and its exit must travel in one continuous direction, never enter-and-retreat |
