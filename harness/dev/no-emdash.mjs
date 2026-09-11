@@ -11,8 +11,9 @@
 // EN DASHES AND HYPHENS ARE FINE. An en dash in a number range is explicitly allowed and a hyphen is
 // not a dash at all. Only U+2014 is matched here.
 import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-const EM = String.fromCharCode(0x2014);   // never write the literal here: this file is in scope
+export const EM = String.fromCharCode(0x2014);   // never write the literal here: this file is in scope
 const QUIET = process.argv.includes('--quiet');
 
 // The surfaces the rule covers: the JS engine, the Go render service, the MCP server, brand data, its
@@ -24,8 +25,9 @@ const SCOPE = [
 ];
 
 // EXCLUSIONS, each one deliberate and each with its own reason. Nothing here is "too hard to fix";
-// each is a different surface with its own owner and its own build.
-const EXCLUDE = [
+// each is a different surface with its own owner and its own build. Exported so harness/live's
+// write-time twin checks the same allowlist instead of growing its own copy.
+export const EXCLUDE = [
   // Another codebase with its own build and its own pass. Handled separately.
   (f) => f.startsWith('site/') || f.startsWith('docs-site/'),
   // Vendored, not ours to rewrite: assets/vendor and any third-party bundle carried under a vendor/
@@ -41,28 +43,33 @@ const EXCLUDE = [
 // the rule, same as everything else in SCOPE.
 const MISTAKES = 'docs/MISTAKES.md';
 
-const raw = execSync(`git grep -nI '${EM}' -- ${SCOPE.map((s) => `'${s}'`).join(' ')} || true`,
-  { encoding: 'utf8', maxBuffer: 64 << 20 });
+// Only run the CLI scan when this file is the entrypoint. harness/live's write-time twin imports EM
+// and EXCLUDE above and must not pay for (or trigger) a repo-wide git grep just to reuse the matcher.
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+if (isMain) {
+  const raw = execSync(`git grep -nI '${EM}' -- ${SCOPE.map((s) => `'${s}'`).join(' ')} || true`,
+    { encoding: 'utf8', maxBuffer: 64 << 20 });
 
-const hits = [];
-for (const line of raw.split('\n')) {
-  if (!line) continue;
-  const m = /^([^:]+):(\d+):(.*)$/s.exec(line);
-  if (!m) continue;
-  const [, file, no, text] = m;
-  if (EXCLUDE.some((f) => f(file))) continue;
-  hits.push({ file, no, text: text.trim() });
-}
-
-if (!QUIET) {
-  for (const h of hits) {
-    const i = h.text.indexOf(EM);
-    console.log(`${h.file}:${h.no}: ${h.text.slice(Math.max(0, i - 60), i + 60)}`);
+  const hits = [];
+  for (const line of raw.split('\n')) {
+    if (!line) continue;
+    const m = /^([^:]+):(\d+):(.*)$/s.exec(line);
+    if (!m) continue;
+    const [, file, no, text] = m;
+    if (EXCLUDE.some((f) => f(file))) continue;
+    hits.push({ file, no, text: text.trim() });
   }
+
+  if (!QUIET) {
+    for (const h of hits) {
+      const i = h.text.indexOf(EM);
+      console.log(`${h.file}:${h.no}: ${h.text.slice(Math.max(0, i - 60), i + 60)}`);
+    }
+  }
+  if (hits.length) {
+    console.error(`\nno-emdash: ${hits.length} em dash(es) in scope. Use a colon, a comma, a `
+      + 'period, or parentheses, or split the sentence. The choice is per site, not one character swap.');
+    process.exit(1);
+  }
+  console.log(`no-emdash: clean (${MISTAKES} included, every allowlisted path is vendored, none is debt)`);
 }
-if (hits.length) {
-  console.error(`\nno-emdash: ${hits.length} em dash(es) in scope. Use a colon, a comma, a `
-    + 'period, or parentheses, or split the sentence. The choice is per site, not one character swap.');
-  process.exit(1);
-}
-console.log(`no-emdash: clean (${MISTAKES} included, every allowlisted path is vendored, none is debt)`);
