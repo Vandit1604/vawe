@@ -116,6 +116,12 @@ import { sceneTiming } from './scene-timing.mjs';
 import { exitEmphasis, entranceEmphasis } from './choreo.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
+import { DIAL_CONTRACT_VIOLATIONS } from '../../core/registry/knobs.js';
+
+// Snapshot taken BEFORE any test fixture runs: knobs.js's own `bindDials(KNOBS.kinetic, PRESETS)` ran
+// at import, above, so this is exactly the real repo's violations, none of the synthetic ones the
+// bindDials tests further down push onto the same array to test the collection mechanism itself.
+const REAL_DIAL_VIOLATIONS = DIAL_CONTRACT_VIOLATIONS.slice();
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -6522,26 +6528,38 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('dialsOf: and so decode keeps its hand-written rows, defaults included',
     KNOBS.kinetic.decode.length === 3 && KNOBS.kinetic.decode[1].default === 48);
 
-  // 3. THE REFUSALS. All three fire at module load, so they are exercised on a fixture.
-  const threw = (family, presets) => { try { bindDials(family, presets); return ''; } catch (e) { return e.message; } };
+  // 3. THE REFUSALS, collected rather than thrown (build fix 10, adaptive safeguards wave 2): a
+  // mismatch used to throw here, at module load, so one bad row crashed every `import` of this file.
+  // The contract is unchanged, only WHEN it is enforced moved to DIAL_CONTRACT_VIOLATIONS + the
+  // "dial contract" assertions further down this file. Each fixture uses its own preset name so it
+  // cannot be mistaken for another fixture's violation, or for a real one.
   const fake = (fn) => fn;
-  const contradiction = threw({ up: [{ name: 'dist', type: 'number', default: 60, desc: 'rise px' }] },
-    { up: fake((u, { dist = 40 } = {}) => u) });
-  ok('bindDials: a hand-written default that contradicts the signature throws', !!contradiction);
-  ok('bindDials: and the refusal names BOTH numbers, so nobody has to go and look',
-    /40/.test(contradiction) && /60/.test(contradiction) && /"dist"/.test(contradiction));
-  ok('bindDials: a dial the signature does not read is refused, and it lists what IS read',
-    /does not[\s\S]*read/.test(threw({ up: [{ name: 'dsit', type: 'number', desc: 'typo' }] },
-      { up: fake((u, { dist = 40 } = {}) => u) })));
+  const violationsFor = (name, family, presets) => {
+    const before = DIAL_CONTRACT_VIOLATIONS.length;
+    bindDials(family, presets);
+    return DIAL_CONTRACT_VIOLATIONS.slice(before).filter((v) => v.preset === name);
+  };
+  const contradiction = violationsFor('zzFixtureContradict',
+    { zzFixtureContradict: [{ name: 'dist', type: 'number', default: 60, desc: 'rise px' }] },
+    { zzFixtureContradict: fake((u, { dist = 40 } = {}) => u) });
+  ok('bindDials: a hand-written default that contradicts the signature is collected, not thrown', contradiction.length === 1);
+  ok('bindDials: and the message names BOTH numbers, so nobody has to go and look',
+    /40/.test(contradiction[0].message) && /60/.test(contradiction[0].message) && /"dist"/.test(contradiction[0].message));
+  const typo = violationsFor('zzFixtureTypo',
+    { zzFixtureTypo: [{ name: 'dsit', type: 'number', desc: 'typo' }] },
+    { zzFixtureTypo: fake((u, { dist = 40 } = {}) => u) });
+  ok('bindDials: a dial the signature does not read is collected, and it lists what IS read',
+    typo.some((v) => /does not[\s\S]*read/.test(v.message)));
   // The half that lost `assemble`'s five dials for its whole life: a real dial with no row is
   // invisible to vawe_capabilities, to `make knobs` and to the dead-knob validator.
-  ok('bindDials: a signature dial with no manifest row is refused, and named',
-    /"spin"/.test(threw({ up: [] }, { up: fake((u, { spin = 65 } = {}) => u) })));
+  const missingRow = violationsFor('zzFixtureMissingRow', { zzFixtureMissingRow: [] },
+    { zzFixtureMissingRow: fake((u, { spin = 65 } = {}) => u) });
+  ok('bindDials: a signature dial with no manifest row is collected, and named', missingRow.length === 1 && /"spin"/.test(missingRow[0].message));
   ok('bindDials: a matching default is not a contradiction, and the row is bound',
     (() => {
-      const fam = { up: [{ name: 'dist', type: 'number', default: 40, desc: 'rise px' }] };
-      bindDials(fam, { up: fake((u, { dist = 40 } = {}) => u) });
-      return fam.up[0].default === 40;
+      const fam = { zzFixtureMatch: [{ name: 'dist', type: 'number', default: 40, desc: 'rise px' }] };
+      const clean = violationsFor('zzFixtureMatch', fam, { zzFixtureMatch: fake((u, { dist = 40 } = {}) => u) });
+      return clean.length === 0 && fam.zzFixtureMatch[0].default === 40;
     })());
 
   // 4. THE LIVE MANIFEST. Every kinetic row's default now equals the signature's, by construction,
@@ -8182,6 +8200,69 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('safeguards: an unregistered code passes through unchanged', !noEntry.adapted);
   const noFacts = adaptFinding({ kind: 'overflow', a: 'x', detail: 'no pct on this one' });
   ok('safeguards: overflow with no pct fact does not apply', !noFacts.adapted);
+}
+
+// ---- dial contract (core/registry/knobs.js bindDials): the mismatch check used to throw at module
+// load, so one preset a day behind its own row list took the whole engine down on import. It now
+// COLLECTS into DIAL_CONTRACT_VIOLATIONS instead, and this is where the contract is actually enforced:
+// a real mismatch fails this gate by name, same as the old throw did, but a broken preset can no longer
+// crash every other render on the way in. ----
+{
+  const before = DIAL_CONTRACT_VIOLATIONS.length;
+  let threw = false;
+  try {
+    // a preset whose signature reads a dial ("undocumentedDial") that core/knobs.js never lists: the
+    // exact "a dial with no row" case the old code threw on at import.
+    bindDials({ fakePreset: [] }, { fakePreset: ({ undocumentedDial = 1 } = {}) => ({ undocumentedDial }) });
+  } catch { threw = true; }
+  ok('bindDials: a preset with an undocumented dial no longer throws at bind time', !threw);
+  ok('bindDials: the mismatch is collected instead, naming the preset and the dial',
+    DIAL_CONTRACT_VIOLATIONS.slice(before).some((v) => v.preset === 'fakePreset' && v.dial === 'undocumentedDial'));
+
+  // REAL_DIAL_VIOLATIONS was snapshotted at the top of this file, right after import (so before this
+  // or any other fixture ran bindDials again): it is exactly what `bindDials(KNOBS.kinetic, PRESETS)`
+  // found in the real repo at module load, none of the synthetic entries every fixture above adds.
+  if (REAL_DIAL_VIOLATIONS.length) for (const v of REAL_DIAL_VIOLATIONS) console.error(`  dial contract: ${v.preset}.${v.dial}: ${v.message}`);
+  ok('dial contract: every real kinetic preset\'s dials and knobs.js rows agree', REAL_DIAL_VIOLATIONS.length === 0);
+}
+
+// ---- safeguards: the new REGISTRY entries (build fix 10, adaptive safeguards wave 2) ----
+{
+  // small-text: wrapped text is skipped, unwrapped small text still fails.
+  const wrapped = adaptFinding({ kind: 'small-text', px: 18, wrapped: true });
+  ok('safeguards: small-text inside a screenshot/mock-UI wrapper is skipped', wrapped.adapted && wrapped.adapted.verdict === 'skip');
+  const unwrapped = adaptFinding({ kind: 'small-text', px: 18, wrapped: false });
+  ok('safeguards: small-text with no wrapper stays a hard fail', !unwrapped.adapted);
+
+  // peak-not-largest: a non-size payoff downgrades to a report, a size payoff still fails.
+  const colourPeak = adaptFinding({ kind: 'peak-not-largest' }, { beat: { payoff: 'a re-tint of the whole field' } });
+  ok('safeguards: peak-not-largest downgrades when the beat names a non-size payoff', colourPeak.adapted && colourPeak.adapted.verdict === 'reclassify');
+  const scalePeak = adaptFinding({ kind: 'peak-not-largest' }, { beat: { payoff: 'the card grows to fill the frame' } });
+  ok('safeguards: peak-not-largest stays a hard fail when the beat names a size payoff', !scalePeak.adapted);
+
+  // plain-slideshow: the storyboard's own NOT line waives it, an unexplained slideshow still fails.
+  const notWaived = adaptFinding({ kind: 'plain-slideshow' }, { not: ['this film is deliberately a plain slideshow'] });
+  ok('safeguards: plain-slideshow is skipped when the storyboard\'s NOT line names it', notWaived.adapted && notWaived.adapted.verdict === 'skip');
+  const notSilent = adaptFinding({ kind: 'plain-slideshow' }, { not: ['no auto-playing audio'] });
+  ok('safeguards: plain-slideshow stays a hard fail when NOT does not name it', !notSilent.adapted);
+
+  // feature-poverty: below the short-film floor it is skipped, a full-length film still fails.
+  const shortFilm = adaptFinding({ kind: 'feature-poverty' }, { durationSec: 9 });
+  ok('safeguards: feature-poverty is skipped below the short-film floor', shortFilm.adapted && shortFilm.adapted.verdict === 'skip');
+  const longFilm = adaptFinding({ kind: 'feature-poverty' }, { durationSec: 30 });
+  ok('safeguards: feature-poverty stays a hard fail past the short-film floor', !longFilm.adapted);
+
+  // ends-on-nothing: a brand/mark tail layer counts as content, a truly bare tail still fails.
+  const brandTail = adaptFinding({ kind: 'ends-on-nothing', tailLayerKind: 'brand-mark' });
+  ok('safeguards: ends-on-nothing reclassifies a closing brand/mark layer as content', brandTail.adapted && brandTail.adapted.verdict === 'reclassify');
+  const bareTail = adaptFinding({ kind: 'ends-on-nothing', tailLayerKind: '' });
+  ok('safeguards: ends-on-nothing stays a hard fail on a truly bare tail', !bareTail.adapted);
+
+  // plan-overruns-render: a one-frame drift tolerates, a real overrun still fails.
+  const oneFrame = adaptFinding({ kind: 'plan-overruns-render', driftFrames: 1 }, { fps: 30 });
+  ok('safeguards: plan-overruns-render tolerates a one-frame drift', oneFrame.adapted && oneFrame.adapted.verdict === 'tolerate');
+  const bigDrift = adaptFinding({ kind: 'plan-overruns-render', driftFrames: 45 }, { fps: 30 });
+  ok('safeguards: plan-overruns-render stays a hard fail on a real overrun', !bigDrift.adapted);
 }
 
 const FLOOR = 1800;

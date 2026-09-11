@@ -47,6 +47,7 @@ import path from 'node:path';
 import { sceneTiming, num } from './scene-timing.mjs';
 import { parseStoryboard } from '../../harness/author/storyboard-parse.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
@@ -234,10 +235,15 @@ if (!spanned.length) {
 } else {
   // 1. does the plan describe THIS film, or a different-length one?
   const planEnd = Math.max(...spanned.map((b) => b.span[1]));
-  if (Math.abs(planEnd - T.duration) > OVERRUN) {
-    fail('plan-overruns-render', `the plan budgets ${s(planEnd)} and the film runs ${s(T.duration)}, a gap of ${s(Math.abs(planEnd - T.duration))}. `
+  const drift = Math.abs(planEnd - T.duration);
+  if (drift > OVERRUN) {
+    const msg = `the plan budgets ${s(planEnd)} and the film runs ${s(T.duration)}, a gap of ${s(drift)}. `
       + `Every beat span below is therefore pointing at the wrong part of the film, so nothing this gate says about them can be trusted. `
-      + `Either the storyboard's times are stale (re-time it and re-run \`make intent\`) or the scene's \`duration\` is not what you planned.`);
+      + `Either the storyboard's times are stale (re-time it and re-run \`make intent\`) or the scene's \`duration\` is not what you planned.`;
+    const fps = num(d.fps, 60);
+    const adapted = adaptFinding({ kind: 'plan-overruns-render', driftFrames: drift * fps }, { fps }).adapted;
+    if (adapted) { console.log(`  ${adapted.line}`); warn('plan-overruns-render', msg); }
+    else fail('plan-overruns-render', msg);
   }
 
   // 2. at each junction the plan marks with a change, does the render put anything there?
