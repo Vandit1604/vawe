@@ -8,9 +8,17 @@ import { resolveHandle } from '../motion/motion.js';
 // Each station is { tx, ty, s?, dwell?, dur? }: `dur` is the flight INTO the station, `dwell` a hold AT
 // it once arrived. Station 0 is where the flight BEGINS, so nothing flies into it and its `dur` is unused.
 // Author the wide shot as station 0 when the film should open full-frame and fly in.
-// Interiors are linear on purpose: an eased curve at every station zeroes velocity on each arrival, so
-// the journey lands as N separate hops instead of one move (docs/MISTAKES.md #125). Only the last
-// arrival settles.
+// Interiors are velocity-CONTINUOUS on purpose: an eased curve at every station zeroes velocity on
+// each arrival, so the journey lands as N separate hops instead of one move (docs/MISTAKES.md #125).
+// The fix is not `linear` either: two straight segments at different speeds still KINK at the shared
+// station, a jolt rather than a stop. `ease: "through"` (core/timeline/sequence.js) already exists for
+// exactly this: a cubic Hermite whose tangent at an interior key comes from its NEIGHBOURS, so the
+// speed entering a station equals the speed leaving it. First and last are its natural zero-tangent
+// boundary, so the flight still departs from rest and settles into the final arrival's own ease. Only
+// the last arrival settles.
+// ponytail: `through`'s tangent is not monotone-clamped (Fritsch-Carlson), so a station sequence with a
+// sharp reversal in scale could in principle overshoot past a clamp; tighten tangentAt in
+// core/timeline/sequence.js if a real film ever hits that.
 export function travel({ stations, start = 0, ease = 'easeOutCubic', canvasW = 1920,
   canvasH = 1080 } = {}) {
   if (!Array.isArray(stations) || !stations.length)
@@ -47,21 +55,28 @@ export function travel({ stations, start = 0, ease = 'easeOutCubic', canvasW = 1
     };
     if (i > 0) t += span('travel', `station ${i} "dur"`, st.dur ?? 0.8);
     const arrive = { t, ...pose };
-    // A station with neither handle keeps today's byte-identical behaviour: linear interiors, only the
-    // final arrival eases (docs/MISTAKES.md #125). `easeIn` REPLACES that default for this arrival's
+    const dwellSec = hold('travel', `station ${i} "dwell"`, st.dwell);
+    // A station's OWN `easeOut`, with no dwell, lands on this SAME arrival keyframe (see below), and
+    // `through` refuses to share a key with any handle: it computes this key's velocity from its
+    // NEIGHBOURS, a handle AUTHORS it, and a segment cannot have two answers (keyHandleErrors). The
+    // author already opted into drawing this station's departure by hand, so the arrival falls back to
+    // the pre-`through` default (`linear`) rather than fighting that choice.
+    const ownOutHandleSameKey = st.easeOut != null && !dwellSec;
+    // A station with neither handle keeps the default: velocity-continuous interiors (`through`), only
+    // the final arrival eases (docs/MISTAKES.md #125). `easeIn` REPLACES that default for this arrival's
     // own segment; a handle left by the PREVIOUS station's `easeOut` already shapes the same segment,
     // so the default stands down for that reason too rather than fighting it.
     if (i > 0) {
       if (st.easeIn != null) arrive.easeIn = st.easeIn;
-      else if (!departHasHandle()) arrive.ease = 'linear';
+      else if (!departHasHandle()) arrive.ease = ownOutHandleSameKey ? 'linear' : 'through';
     }
     lastArrival = kf.push(arrive) - 1;
     // A dwell is a second keyframe at the SAME pose, so the hold is a real hold rather than the tail of
     // the incoming tween creeping on. The station's DEPARTURE belongs to whichever keyframe actually
     // leaves toward the next station: the dwell when there is one, the arrival otherwise.
     let departIdx = lastArrival;
-    if (hold('travel', `station ${i} "dwell"`, st.dwell)) {
-      t += st.dwell;
+    if (dwellSec) {
+      t += dwellSec;
       departIdx = kf.push({ t, ...pose, ease: 'linear' }) - 1;
     }
     if (st.easeOut != null) kf[departIdx].easeOut = st.easeOut;
