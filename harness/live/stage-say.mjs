@@ -18,6 +18,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { stageOf, ROOT } from '../../quality/gates/stage.mjs';
+import { computeFeatures } from '../../quality/gates/craft-checklist.mjs';
+import { rulesFor, briefLine } from '../lib/craft-rules.mjs';
 
 const DAY = 24 * 60 * 60 * 1000;
 const dir = path.join(ROOT, 'formats/scene');
@@ -44,3 +46,13 @@ console.log(`  ${st.why}`);
 console.log(`  next: ${st.next}`);
 console.log('  Do that stage, not the one after it. `make stage D=formats/scene/'
   + `${st.name}.json\` re-reads this from the files on disk.`);
+
+// Rule briefs for this film's own stage and features. Never let a bad/missing rules file break the
+// hook: this line is a nudge, not a gate, and a hook that can crash the prompt is worse than one that
+// silently says nothing this one time.
+try {
+  const scene = fs.existsSync(st.scene) ? JSON.parse(fs.readFileSync(st.scene, 'utf8')) : null;
+  const sbText = fs.existsSync(st.sb) ? fs.readFileSync(st.sb, 'utf8') : null;
+  const features = computeFeatures(scene, sbText);
+  for (const r of rulesFor({ stage: st.stage, features })) console.log(`  ${briefLine(r)}`);
+} catch { /* rule briefs are a nudge; a broken loader must never break this hook */ }
