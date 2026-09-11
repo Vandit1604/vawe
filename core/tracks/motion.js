@@ -2,8 +2,9 @@
 // transform (which driveClips and the `enter` track already wrote to el.style), and multiply into the
 // composed opacity. Last before the modifiers, because every track above it writes a transform this
 // one is meant to carry rather than replace.
-import { motionAt, velocityAt } from '../timeline/sequence.js';
+import { motionAt, velocityAt, dollyZ } from '../timeline/sequence.js';
 import { baseOpacity } from './util.js';
+import { coverScale, isFullBleedPlane } from './overscan.js';
 
 // PX PER SECOND, not per frame. It was 16 px/frame, which sounds fps-neutral and is not: at 30fps that
 // is 480 px/s, and at 60fps the same physical motion covers 8px per frame, drops under the floor, and
@@ -25,7 +26,10 @@ export const slot = 'transform';
 // opts out of an automatic blur that a still layer would never have had.
 export const PROPS = {
   // Read here and by core/tracks/box.js and the scene's own pose pass, all three through motionAt.
-  motionDelay: { when: 'motion' }, motion: {}, motionBlur: { when: 'motion' } };
+  motionDelay: { when: 'motion' }, motion: {}, motionBlur: { when: 'motion' },
+  // Opt-out for the full-bleed-plane overscan guard below (`overscan: false`). Never a positive knob:
+  // there is nothing to dial, a plane either needs the minimum cover scale or it does not.
+  overscan: { when: 'motion' } };
 
 // The scene's shutter, in the units a camera states it in, converted once. Exported so the one place
 // that builds the track kit reads the conversion rather than restating it (formats/scene/scene.js).
@@ -183,8 +187,37 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   // shared space with two different rotation orders is the fact-with-two-owners shape this file argues
   // against everywhere else. `scale` stays where it always sat, between the 2D rotate and the position,
   // because a flat film's transform must still read `translate(...) scale(...) rotate(...)` to the byte.
+  // ---- OVERSCAN: never reveal the edge of a full-bleed plane under perspective ----
+  //
+  // A full-canvas plane (a background `group`, an `html` layer sized to the stage) is a flat rectangle.
+  // The moment IT tilts (rotX/rotY) or stands off the picture plane (a keyed `z`), perspective
+  // foreshortens it, so its projected corners can land inside the viewport and the stage shows behind
+  // its edge. Real 3D compositors call the fix OVERSCAN: the plane is drawn larger than its frame so
+  // the foreshortened edge still lands off-screen. Gated on `has3D` (a rotation or depth this frame
+  // actually keys) and on the box already covering the stage AT REST: a card meant to show its own edge
+  // is untouched, only a plane trying to BE the background is grown to hide it (core/tracks/overscan.js).
+  let overscanK = 1;
+  if (has3D && L.overscan !== false && cam && cam.rig && (m.rotX !== 0 || m.rotY !== 0 || m.z !== 0)) {
+    const box = scene && scene.boxOf ? scene.boxOf(L.id) : null;
+    const canvas = scene && scene.canvas;
+    if (isFullBleedPlane(box, canvas)) {
+      overscanK = coverScale({
+        box, originPct: { ox: m.ox ?? 50, oy: m.oy ?? 50 }, scale: m.scale,
+        rotZ: m.rot, rotX: m.rotX, rotY: m.rotY, z: m.z, canvas, persp: cam.lens,
+        cam: { x: cam.x, y: cam.y, z: dollyZ(cam.s, cam.lens), rx: cam.rx, ry: cam.ry, roll: cam.roll },
+      });
+      // Adaptation, not a silent change: one line per NEW peak, the safeguards registry's own
+      // convention (docs/SAFEGUARDS.md: "adapted <code>: <what changed> (<why>)").
+      if (overscanK > 1 && overscanK > (el.__hsOverscanMax || 0) + 1e-6) {
+        console.log(`adapted overscan: ${L.id || L.type || 'layer'} scaled up to ${overscanK.toFixed(3)}x `
+          + `at ${t.toFixed(2)}s (full-bleed plane under perspective)`);
+        el.__hsOverscanMax = overscanK;
+      }
+    }
+  }
+  const scaleOut = m.scale * overscanK;
   el.style.transform = has3D
-    ? `translate3d(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px, ${m.z.toFixed(2)}px) scale(${m.scale.toFixed(4)}) `
+    ? `translate3d(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px, ${m.z.toFixed(2)}px) scale(${scaleOut.toFixed(4)}) `
       + `rotate(${m.rot.toFixed(2)}deg) rotateX(${m.rotX.toFixed(2)}deg) rotateY(${m.rotY.toFixed(2)}deg)${base}`
     : `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
   // A KEYED ANCHOR POINT. Written only when the track mentions it, so a layer's static `origin` is
