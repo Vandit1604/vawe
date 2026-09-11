@@ -26,6 +26,7 @@ import { sanitizeHtml, scopeStyles } from '../../core/type/sanitize-html.js';
 // on each file for why they are separate, importable modules rather than inline here.
 import { findFilmLayerBox } from '../lib/film-layer-box.mjs';
 import { clipAgainstBox } from './screen.mjs';
+import { normalizeColor, shadowOrNull, firstFontFamily, cornerRadii } from './box-style.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -113,7 +114,7 @@ async function reportFilmBox(browser, port, out, layerBox, boxesOutFilm) {
   if (themed !== true) { console.log(`  ⚠ film-box render skipped: theme failed to apply, ${themed}`); await page2.close(); return; }
   await page2.evaluate(async () => { await document.fonts.ready; await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); });
   await page2.screenshot({ path: out.replace(/\.png$/, '') + '.film.png', clip: { x: 0, y: 0, width: layerBox.W, height: layerBox.H } });
-  const filmBoxes = await page2.evaluate(getFragBoxes);
+  const filmBoxes = mapBoxStyle(await page2.evaluate(getFragBoxes));
   await page2.close();
   if (boxesOutFilm) fs.writeFileSync(boxesOutFilm, JSON.stringify({ box: layerBox, elements: filmBoxes }));
   console.log(`  assembled: ${layerBox.film}${layerBox.id ? ` layer "${layerBox.id}"` : ''}, `
@@ -142,11 +143,16 @@ const { server, port } = await serveRepo({
 // getFragBoxes(): every #frag descendant's LAID-OUT bounding box, browser-side. Shared by both
 // renders (the standalone preview and, when assembled, the film's own layer box) so the two ask the
 // same question of the page rather than two slightly different ones.
+//
+// Runs INSIDE the browser via page.evaluate(getFragBoxes): puppeteer serialises this function to
+// source text, so it cannot import box-style.mjs's helpers. It hands back RAW getComputedStyle
+// strings for a box that PAINTS; mapBoxStyle (below, in Node) turns those into the final fields.
 const getFragBoxes = () => {
   const frag = document.getElementById('frag');
   if (!frag) return [];
   const out = [];
   for (const el of frag.querySelectorAll('*')) {
+    if (el.classList.contains('kit-root')) continue; // the pasted stage-kit's own root wrapper, not the fragment's design
     const r = el.getBoundingClientRect();
     if (r.width <= 0 || r.height <= 0) continue;
     const cs = getComputedStyle(el);
@@ -154,12 +160,38 @@ const getFragBoxes = () => {
     const isImg = el.tagName === 'IMG';
     // own text only (not descendants'), so a wrapper div is not double-reported for its child's words
     const ownText = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent.trim()).join(' ').trim();
-    if (!isImg && !ownText) continue;
+    const hasBg = cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent';
+    const hasBorder = ['Top', 'Right', 'Bottom', 'Left'].some((side) => parseFloat(cs[`border${side}Width`]) > 0 && cs[`border${side}Style`] !== 'none');
+    const hasShadow = cs.boxShadow && cs.boxShadow !== 'none';
+    if (!isImg && !ownText && !hasBg && !hasBorder && !hasShadow) continue;
     out.push({ tag: el.tagName.toLowerCase(), text: isImg ? (el.getAttribute('alt') || el.getAttribute('src') || 'img') : ownText,
-      x: r.left, y: r.top, w: r.width, h: r.height, fontPx: isImg ? null : parseFloat(cs.fontSize) });
+      x: r.left, y: r.top, w: r.width, h: r.height, fontPx: isImg ? null : parseFloat(cs.fontSize),
+      raw: { fontFamily: cs.fontFamily, fontWeight: cs.fontWeight, letterSpacing: cs.letterSpacing,
+        color: cs.color, backgroundColor: cs.backgroundColor, boxShadow: cs.boxShadow,
+        borderTopLeftRadius: cs.borderTopLeftRadius, borderTopRightRadius: cs.borderTopRightRadius,
+        borderBottomRightRadius: cs.borderBottomRightRadius, borderBottomLeftRadius: cs.borderBottomLeftRadius } });
   }
   return out;
 };
+
+// mapBoxStyle(boxes): the Node-side half of getFragBoxes, turning its raw computed-style strings into
+// the fields a design check can compare against a spec (harness/author/box-style.mjs). Mutates the
+// `raw` field away rather than leaving both shapes on the box, so a consumer sees exactly one.
+function mapBoxStyle(boxes) {
+  for (const b of boxes) {
+    const raw = b.raw;
+    delete b.raw;
+    if (!raw) continue; // an older boxes-out file replayed through here, or a box with no styling captured
+    b.fontFamily = firstFontFamily(raw.fontFamily);
+    b.fontWeight = parseInt(raw.fontWeight, 10);
+    b.letterSpacing = raw.letterSpacing === 'normal' ? 0 : parseFloat(raw.letterSpacing) || 0;
+    b.color = normalizeColor(raw.color);
+    b.backgroundColor = normalizeColor(raw.backgroundColor);
+    Object.assign(b, cornerRadii(raw.borderTopLeftRadius, raw.borderTopRightRadius, raw.borderBottomRightRadius, raw.borderBottomLeftRadius));
+    b.boxShadow = shadowOrNull(raw.boxShadow);
+  }
+  return boxes;
+}
 
 // --serve: keep the page live in your browser (real fonts/assets, interactive) instead of a PNG
 if (argv.includes('--serve')) {
@@ -194,7 +226,7 @@ await page.screenshot({ path: out, clip: { x: 0, y: 0, width: 1920, height: 1080
   // resolve only once the browser lays the page out), and `make screen`'s clipping check needs exactly
   // that: whether an element the author put on screen actually landed inside the frame.
   const boxesOut = flag('--boxes-out', null);
-  if (boxesOut) fs.writeFileSync(boxesOut, JSON.stringify(await page.evaluate(getFragBoxes)));
+  if (boxesOut) fs.writeFileSync(boxesOut, JSON.stringify(mapBoxStyle(await page.evaluate(getFragBoxes))));
 
   // PASS 2: the SAME fragment at its REAL assembled layer box, when one exists. A generic centred or
   // full-bleed preview cannot tell you whether the film's own box clips it, a percentage width or a
