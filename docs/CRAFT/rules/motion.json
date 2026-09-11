@@ -1,0 +1,212 @@
+[
+  {
+    "id": "motion.anticipate-default",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "A directional entrance winds up on its own; `anticipate: false` turns it off",
+    "doc": "docs/RULES/anticipate-default.md"
+  },
+  {
+    "id": "motion.banned-defaults",
+    "category": "motion",
+    "stage": "design",
+    "applies": "always",
+    "check": "off-colour",
+    "adapt": null,
+    "brief": "Ban gradient text, cyan/purple, identical card grids, and Inter by default",
+    "doc": "docs/RULES/banned-defaults.md"
+  },
+  {
+    "id": "motion.blur-out-dense",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Blur out when a slide would fight the content",
+    "doc": "docs/RULES/blur-out-dense.md"
+  },
+  {
+    "id": "motion.caption-safe-strip",
+    "category": "motion",
+    "stage": "render",
+    "applies": "always",
+    "check": "safe",
+    "adapt": null,
+    "brief": "Set destination, and keep captions inside its safe strip",
+    "doc": "docs/RULES/caption-safe-strip.md"
+  },
+  {
+    "id": "motion.continuous-object",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": "no-continuous-object",
+    "adapt": null,
+    "brief": "One object survives a cut and changes across it, or name what else holds the film",
+    "doc": "docs/RULES/continuous-object.md"
+  },
+  {
+    "id": "motion.ease-direction",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Entrances ease out, exits ease in, a handover eases in-out",
+    "doc": "docs/RULES/ease-direction.md"
+  },
+  {
+    "id": "motion.first-arrival",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Nothing arrives at t=0",
+    "doc": "docs/RULES/first-arrival.md"
+  },
+  {
+    "id": "motion.handover-glide",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "A becomes handover glides 0.8 to 1.0 seconds, or it reads as a cut",
+    "doc": "docs/RULES/handover-glide.md"
+  },
+  {
+    "id": "motion.logo-prominence",
+    "category": "motion",
+    "stage": "design",
+    "applies": "hasImages",
+    "check": null,
+    "adapt": null,
+    "brief": "A logo beside a title is at least 100px; on the end card, at least 150px",
+    "doc": "docs/RULES/logo-prominence.md"
+  },
+  {
+    "id": "motion.motion-offsets",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Motion x/y are offsets on the base position, never absolute coordinates",
+    "doc": "docs/RULES/motion-offsets.md"
+  },
+  {
+    "id": "motion.no-css-clock",
+    "category": "motion",
+    "stage": "design",
+    "applies": "hasHtml",
+    "check": null,
+    "adapt": null,
+    "brief": "The engine owns the clock: no CSS animation, transition, opacity, or filter",
+    "doc": "docs/RULES/no-css-clock.md"
+  },
+  {
+    "id": "motion.one-cut-family",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "hasBoundaries",
+    "check": "cut-families",
+    "adapt": null,
+    "brief": "One transition family per film; earn 2-3 accents by meaning",
+    "doc": "docs/RULES/one-cut-family.md"
+  },
+  {
+    "id": "motion.paired-directional-exit",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Entrances and exits travel in one direction; never enter-and-retreat",
+    "doc": "docs/RULES/paired-directional-exit.md"
+  },
+  {
+    "id": "motion.payoff-last",
+    "category": "motion",
+    "stage": "plan",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "The hook asks a question in 12 words or less; the payoff lands at 77-90% of runtime",
+    "doc": "docs/RULES/payoff-last.md"
+  },
+  {
+    "id": "motion.speed-bands",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": "tempo-flat",
+    "adapt": null,
+    "brief": "Pick a named speed band; the slowest beat is at least 3x the fastest",
+    "doc": "docs/RULES/speed-bands.md"
+  },
+  {
+    "id": "motion.stagger-total",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": "stagger-total",
+    "adapt": null,
+    "brief": "A staggered group's total arrival stays at or under 0.5 seconds",
+    "doc": "docs/RULES/stagger-total.md"
+  },
+  {
+    "id": "motion.state-the-canvas",
+    "category": "motion",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "State the canvas, or the film renders portrait",
+    "doc": "docs/RULES/state-the-canvas.md"
+  },
+  {
+    "id": "motion.svg-inline",
+    "category": "motion",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "An svg layer is inline geometry, not a file reference",
+    "doc": "docs/RULES/svg-inline.md"
+  },
+  {
+    "id": "motion.text-on-flat",
+    "category": "motion",
+    "stage": "design",
+    "applies": "hasTextBeats",
+    "check": "contrast",
+    "adapt": null,
+    "brief": "A headline sits on a flat patch, never a blob or a gradient hot spot",
+    "doc": "docs/RULES/text-on-flat.md"
+  },
+  {
+    "id": "motion.video-scale",
+    "category": "motion",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Size for video, not for the web",
+    "doc": "docs/RULES/video-scale.md"
+  },
+  {
+    "id": "motion.world-turns",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "The backdrop changes tone per beat, or the film is a slide with effects on it",
+    "doc": "docs/RULES/world-turns.md"
+  }
+]

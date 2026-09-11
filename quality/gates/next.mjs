@@ -17,8 +17,21 @@
 // (`/vawe-approve`), and harness/live/stage-gate.mjs already refuses to let an agent write that line.
 // Letting `make next` run "the thing that gets the user to approve" would make the irreducible human
 // step into a thing an agent performs by proxy. There is no flag past this, same as that gate.
+import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { stageOf, ROOT } from './stage.mjs';
+import { computeFeatures } from './craft-checklist.mjs';
+import { rulesFor, briefLine } from '../../harness/lib/craft-rules.mjs';
+
+/** Rule briefs for this film's stage/features. Never breaks the caller: a nudge, not a gate. */
+function printRuleBriefs(st) {
+  try {
+    const scene = fs.existsSync(st.scene) ? JSON.parse(fs.readFileSync(st.scene, 'utf8')) : null;
+    const sbText = fs.existsSync(st.sb) ? fs.readFileSync(st.sb, 'utf8') : null;
+    const features = computeFeatures(scene, sbText);
+    for (const r of rulesFor({ stage: st.stage, features })) console.log(`  ${briefLine(r)}`);
+  } catch { /* rule briefs are a nudge; a broken loader must never break `make next` */ }
+}
 
 /** Strip a trailing parenthetical note or a chained second command, keep the one runnable command. */
 export function firstCommand(next) {
@@ -40,6 +53,7 @@ function main() {
 
   const cmd = firstCommand(st.next);
   console.log(`\n  ${st.name} is at ${st.stage.toUpperCase()}. Running:\n  ${cmd}\n`);
+  printRuleBriefs(st);
   const [bin, ...args] = cmd.split(/\s+/);
   const res = spawnSync(bin, args, { cwd: ROOT, stdio: 'inherit' });
   process.exit(res.status ?? 1);

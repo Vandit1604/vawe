@@ -23,6 +23,7 @@ import { LOOK_NAMES } from '../../core/looks/index.js';
 import { SHADER_FX } from '../../core/stings/index.js';
 import { run as runDocMap } from './doc-map.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { loadCraftRules } from '../../harness/lib/craft-rules.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CRAFT = path.join(ROOT, 'docs', 'CRAFT');
@@ -149,6 +150,27 @@ function indexErrors() {
   return errs;
 }
 
+// docs/CRAFT/rules/*.json fails loudly on ANY problem (loadCraftRules), a check naming a finding code
+// nothing emits included, so this is a thin adapter: one caught throw becomes one error line per
+// problem, in the same failed-groups shape the rest of this gate already uses.
+function ruleRecordErrors() {
+  try { loadCraftRules({}); return []; }
+  catch (err) { return String(err.message).split('\n').slice(1).map((l) => l.replace(/^\s*/, '')); }
+}
+
+// REPORTED, never failed: a prose-only rule (both `check` and `adapt` null) is the kind nothing else
+// surfaces, not a defect, so this is a worklist for a category agent, printed unconditionally.
+function proseOnlyCounts() {
+  let records;
+  try { records = loadCraftRules({}); } catch { return []; }
+  const byCategory = new Map();
+  for (const r of records) {
+    if (r.check != null || r.adapt != null) continue;
+    byCategory.set(r.category, (byCategory.get(r.category) || 0) + 1);
+  }
+  return [...byCategory.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+}
+
 const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
   const docmap = runDocMap();
@@ -157,9 +179,13 @@ if (isMain) {
     ['phantom references', 'craft-coverage-phantom', phantomErrors()],
     ['cross-links', 'craft-coverage-link', linkErrors()],
     ['README index', 'craft-coverage-orphan', indexErrors()],
+    ['rule records', 'craft-coverage-rule', ruleRecordErrors()],
     ['doc map', 'doc-map', docmap.fails],
   ];
   const f = gateFindings();
+  for (const [category, n] of proseOnlyCounts()) {
+    console.log(`  · ${category}: ${n} prose-only rule(s) (no check, no adapt)`);
+  }
   // Named on every run, never silently absent: an incomplete index must announce itself.
   for (const msg of docmap.pending) { console.warn(`  ⚠ doc map: ${msg}`); f.note('doc-map-pending', msg); }
   const failed = groups.filter(([, , e]) => e.length);

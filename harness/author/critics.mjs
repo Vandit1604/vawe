@@ -20,8 +20,23 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { writeReceipt } from '../lib/receipt.mjs';
+import { stageOf } from '../../quality/gates/stage.mjs';
+import { computeFeatures } from '../../quality/gates/craft-checklist.mjs';
+import { rulesFor, briefLine } from '../lib/craft-rules.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+// One decider writes one exclusive scope (docs/CRAFT/SUBAGENTS.md), so its rule briefs must stay
+// scoped the same way: a scene decider hears nothing about sound, a sound decider hears nothing about
+// layout. This table is the ONE place that mapping lives.
+const DECIDER_CATEGORIES = {
+  storyboard: ['direction', 'content'],
+  subject: ['direction', 'content'],
+  scene: ['layout', 'imagery', 'typography', 'colour', 'content'],
+  motion: ['motion', 'camera'],
+  transition: ['transitions'],
+  sound: ['sound', 'captions'],
+};
 
 // docs/CRAFT/SUBAGENTS.md owns the worktree agent contract text (marked by these comments) so a
 // DECIDERS=1 brief quotes it rather than carrying its own drifting copy.
@@ -188,6 +203,9 @@ export function buildRoster(scenePath) {
     baseSha: currentSha(),
     contract: worktreeContract(),
   };
+  const stage = stageOf(scenePath).stage;
+  const sbText = ctx.hasStoryboard ? fs.readFileSync(path.resolve(repoRoot, storyboard), 'utf8') : null;
+  const features = computeFeatures(scene, sbText);
   const roster = DECIDERS.map((d) => {
     const lines = [
       `You are the "${d.name}" decider for ${ctx.scene}.`,
@@ -208,6 +226,12 @@ export function buildRoster(scenePath) {
       for (const f of ctx.fragments) lines.push(`  · ${f}`);
     }
     if (d.extra) { lines.push(''); for (const e of d.extra) lines.push(e); }
+    const categories = DECIDER_CATEGORIES[d.name] || null;
+    const rules = categories ? rulesFor({ stage, features, categories, maxChars: 800 }) : [];
+    if (rules.length) {
+      lines.push('', `Craft rules for this role (${categories.join(', ')}):`);
+      for (const r of rules) lines.push(`  ${briefLine(r)}`);
+    }
     lines.push(
       '',
       'Standing rules: no em-dashes anywhere. Stage explicit paths. Do not block on a background render.',
