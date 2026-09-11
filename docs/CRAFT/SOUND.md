@@ -19,6 +19,10 @@ confirm: "does this film carry sound, or is the silence a stated decision?"
   `bed-missing`, `bed-provenance-unknown`, `bed-licence-unverified`, `bed-muted`).
 - Checkable action: does this film carry sound, or is the silence a stated decision?
 
+A derived or declared cue still needs a baked file under `assets/sfx/`; an empty pack resolves every
+cue to silence while the gate still reads the film as sounded (`cues-have-no-sound`). Run `make audio`
+before shipping.
+
 **`audio.auto`, the cue-derivation flag §4 describes, is now a DEFAULT, not an opt-in**
 (`formats/scene/scene.js`, `buildSfx`): a scene's own cuts, stings and seams score themselves
 automatically unless it says `audio.auto: false`. Measured across `formats/scene/` before and after
