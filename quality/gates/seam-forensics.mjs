@@ -23,6 +23,7 @@ import { loadScene } from '../../core/engine/expand.js';
 import { layerBoxes, sceneDims } from '../../harness/lib/layer-boxes.mjs';
 import { gradeable } from './tile.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import {
   requireTool, probeFps, probeTotalFrames, edgeReadingAt, diffBoxes, meanColorAt, savePNG, median,
 } from '../../harness/lib/frame-forensics.mjs';
@@ -246,6 +247,8 @@ for (const b of boundaries) {
   if (maxStep > threshold) {
     const idx = steps.indexOf(maxStep);
     const stepFrame = colors[idx + 1].fr;
+    const adapted = adaptFinding({ kind: 'seam-split', fieldBox }, { layers }).adapted;
+    if (adapted) { console.log(`  ~ ${adapted.line}`); continue; }
     const p1 = snap(stepFrame, `split-${b.t}s`);
     f.fail('seam-split',
       `split seam at ${b.t}s: the field jumps ${maxStep.toFixed(1)} at frame ${stepFrame} (median step ${med.toFixed(1)} across the ${b.dur}s window) while the transition is still dissolving the layers on top of it`,

@@ -76,17 +76,46 @@ approved: "ci-fixture"
 
 fs.writeFileSync(film, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9', duration: 9, layers: [] }));
 fs.writeFileSync(sb, SB);
-after(() => { for (const f of [film, sb]) { try { fs.unlinkSync(f); } catch { /* already gone */ } } });
+const rulesState = path.join(ROOT, '.vawe-data/stage-say-rules-state.json');
+after(() => {
+  for (const f of [film, sb, rulesState]) { try { fs.unlinkSync(f); } catch { /* already gone */ } }
+});
 
 test('the fixture film really is at stage design (a fragment is planned and does not exist yet)', () => {
   assert.equal(stageOf(NAME).stage, 'design');
 });
 
 test('stage-say prints "design"-stage rule briefs, doc-qualified, at most 5', () => {
+  try { fs.unlinkSync(rulesState); } catch { /* first run of the suite: nothing to clear */ }
   const out = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')], { cwd: ROOT, encoding: 'utf8' });
   assert.match(out, new RegExp(`${NAME} is at stage DESIGN`));
   const briefLines = out.split('\n').filter((l) => l.trim().startsWith('rule '));
   assert.ok(briefLines.length > 0, 'at least one always-applies design-stage rule should print');
   assert.ok(briefLines.length <= 5, 'never more than the 5-brief cap');
   for (const l of briefLines) assert.match(l, /^\s*rule [a-z-]+\.[a-z0-9-]+: .+\(docs\/.+\.md\)$/);
+});
+
+test('a second prompt in the same stage stays silent on the briefs (per film, per stage, per session)', () => {
+  // the previous test already spoke design-stage briefs for this film and wrote the state file; a
+  // repeat run in the same stage must still print the stage line every turn (that re-statement is the
+  // whole point of the hook) but not the rule briefs again.
+  const out = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')], { cwd: ROOT, encoding: 'utf8' });
+  assert.match(out, new RegExp(`${NAME} is at stage DESIGN`), 'the stage line still re-states every turn');
+  const briefLines = out.split('\n').filter((l) => l.trim().startsWith('rule '));
+  assert.equal(briefLines.length, 0, 'the same (film, stage) already spoke its briefs once');
+});
+
+test('a different stage for the same film speaks its briefs again', () => {
+  fs.writeFileSync(rulesState, JSON.stringify({ film: NAME, stage: 'plan' }));
+  const out = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')], { cwd: ROOT, encoding: 'utf8' });
+  const briefLines = out.split('\n').filter((l) => l.trim().startsWith('rule '));
+  assert.ok(briefLines.length > 0, 'the recorded stage was "plan", not the fixture\'s real "design": briefs speak again');
+});
+
+test('make next (quality/gates/next.mjs) is not rationed by the every-turn hook\'s state file', () => {
+  // next.mjs RUNS the stage's command (real side effects), so this does not execute it; it asserts the
+  // source carries no reference to stage-say's per-(film,stage) state file, i.e. printRuleBriefs() there
+  // is unconditional, the way the plan requires ("make next keeps printing them every time").
+  const src = fs.readFileSync(path.join(ROOT, 'quality/gates/next.mjs'), 'utf8');
+  assert.doesNotMatch(src, /stage-say-rules-state/, 'next.mjs must not gate its briefs on stage-say\'s state file');
 });

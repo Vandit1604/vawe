@@ -47,12 +47,35 @@ console.log(`  next: ${st.next}`);
 console.log('  Do that stage, not the one after it. `make stage D=formats/scene/'
   + `${st.name}.json\` re-reads this from the files on disk.`);
 
-// Rule briefs for this film's own stage and features. Never let a bad/missing rules file break the
-// hook: this line is a nudge, not a gate, and a hook that can crash the prompt is worse than one that
-// silently says nothing this one time.
+// Rule briefs for this film's own stage and features, but only ONCE per (film, stage): printed on
+// every turn, these would be exactly the always-loaded context Update 1 (the anti-bloat policy in
+// .claude/plans/craft-rules-into-harness.plan.md) argues against, on top of the stage line above,
+// which already re-states every turn on purpose. A tiny state file remembers the last (film, stage)
+// this hook spoke the briefs for; a repeat prompt in the same stage stays silent, and moving to a new
+// stage (or a new film) speaks again. `make next` (quality/gates/next.mjs) is a deliberate, one-shot
+// command an author runs on purpose, so it always prints its briefs; only this every-turn hook rations.
+const RULES_STATE = path.join(ROOT, '.vawe-data/stage-say-rules-state.json');
+function alreadySpoke(film, stage) {
+  try {
+    const s = JSON.parse(fs.readFileSync(RULES_STATE, 'utf8'));
+    return s.film === film && s.stage === stage;
+  } catch { return false; }
+}
+function markSpoke(film, stage) {
+  try {
+    fs.mkdirSync(path.dirname(RULES_STATE), { recursive: true });
+    fs.writeFileSync(RULES_STATE, JSON.stringify({ film, stage }));
+  } catch { /* best effort: a state-file write failure only costs a repeated brief, never a crash */ }
+}
+
+// Never let a bad/missing rules file break the hook: this line is a nudge, not a gate, and a hook that
+// can crash the prompt is worse than one that silently says nothing this one time.
 try {
-  const scene = fs.existsSync(st.scene) ? JSON.parse(fs.readFileSync(st.scene, 'utf8')) : null;
-  const sbText = fs.existsSync(st.sb) ? fs.readFileSync(st.sb, 'utf8') : null;
-  const features = computeFeatures(scene, sbText);
-  for (const r of rulesFor({ stage: st.stage, features })) console.log(`  ${briefLine(r)}`);
+  if (!alreadySpoke(best.film, st.stage)) {
+    const scene = fs.existsSync(st.scene) ? JSON.parse(fs.readFileSync(st.scene, 'utf8')) : null;
+    const sbText = fs.existsSync(st.sb) ? fs.readFileSync(st.sb, 'utf8') : null;
+    const features = computeFeatures(scene, sbText);
+    for (const r of rulesFor({ stage: st.stage, features })) console.log(`  ${briefLine(r)}`);
+    markSpoke(best.film, st.stage);
+  }
 } catch { /* rule briefs are a nudge; a broken loader must never break this hook */ }

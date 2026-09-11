@@ -30,16 +30,6 @@
     "doc": "docs/RULES/blur-out-dense.md"
   },
   {
-    "id": "motion.caption-safe-strip",
-    "category": "motion",
-    "stage": "render",
-    "applies": "always",
-    "check": "safe",
-    "adapt": null,
-    "brief": "Set destination, and keep captions inside its safe strip",
-    "doc": "docs/RULES/caption-safe-strip.md"
-  },
-  {
     "id": "motion.continuous-object",
     "category": "motion",
     "stage": "direct",
@@ -80,16 +70,6 @@
     "doc": "docs/RULES/handover-glide.md"
   },
   {
-    "id": "motion.logo-prominence",
-    "category": "motion",
-    "stage": "design",
-    "applies": "hasImages",
-    "check": null,
-    "adapt": null,
-    "brief": "A logo beside a title is at least 100px; on the end card, at least 150px",
-    "doc": "docs/RULES/logo-prominence.md"
-  },
-  {
     "id": "motion.motion-offsets",
     "category": "motion",
     "stage": "direct",
@@ -98,16 +78,6 @@
     "adapt": null,
     "brief": "Motion x/y are offsets on the base position, never absolute coordinates",
     "doc": "docs/RULES/motion-offsets.md"
-  },
-  {
-    "id": "motion.no-css-clock",
-    "category": "motion",
-    "stage": "design",
-    "applies": "hasHtml",
-    "check": null,
-    "adapt": null,
-    "brief": "The engine owns the clock: no CSS animation, transition, opacity, or filter",
-    "doc": "docs/RULES/no-css-clock.md"
   },
   {
     "id": "motion.one-cut-family",
@@ -160,26 +130,6 @@
     "doc": "docs/RULES/stagger-total.md"
   },
   {
-    "id": "motion.state-the-canvas",
-    "category": "motion",
-    "stage": "design",
-    "applies": "always",
-    "check": null,
-    "adapt": null,
-    "brief": "State the canvas, or the film renders portrait",
-    "doc": "docs/RULES/state-the-canvas.md"
-  },
-  {
-    "id": "motion.svg-inline",
-    "category": "motion",
-    "stage": "design",
-    "applies": "always",
-    "check": null,
-    "adapt": null,
-    "brief": "An svg layer is inline geometry, not a file reference",
-    "doc": "docs/RULES/svg-inline.md"
-  },
-  {
     "id": "motion.text-on-flat",
     "category": "motion",
     "stage": "design",
@@ -188,16 +138,6 @@
     "adapt": null,
     "brief": "A headline sits on a flat patch, never a blob or a gradient hot spot",
     "doc": "docs/RULES/text-on-flat.md"
-  },
-  {
-    "id": "motion.video-scale",
-    "category": "motion",
-    "stage": "design",
-    "applies": "always",
-    "check": null,
-    "adapt": null,
-    "brief": "Size for video, not for the web",
-    "doc": "docs/RULES/video-scale.md"
   },
   {
     "id": "motion.world-turns",

@@ -24,6 +24,7 @@ import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGG
 import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -40,13 +41,16 @@ const warn = (code, msg, extra) => { warns.push(msg); gf.warn(code, msg, extra);
 // ── THE PICTURE, ACROSS THE FILM ────────────────────────────────────────────────────────────────
 // Two rules that only exist between beats, so no per-beat check can see them. Both silent on a
 // storyboard that declares neither field, for the reason the per-beat versions are.
-function pictureAcrossFilm(blocks) {
+function pictureAcrossFilm(blocks, notLine) {
   const arch = blocks.map((b) => (fieldIn(b, 'archetype') || '').trim().split(/\s+\(/)[0]);
   const wts = blocks.map((b) => (fieldIn(b, 'weight') || '').trim());
   const titles = blocks.map((b) => b.split('\n')[0].trim());
+  const notCtx = { not: notLine ? [notLine] : [] };
   if (arch.some(Boolean)) {
     for (let i = 1; i < arch.length; i++) {
       if (arch[i] && arch[i] === arch[i - 1]) {
+        const adapted = adaptFinding({ kind: 'archetype-repeat' }, notCtx).adapted;
+        if (adapted) { warns.push(adapted.line); continue; }
         warn('archetype-repeat', `beats "${titles[i - 1]}" and "${titles[i]}" both use the "${arch[i]}" archetype. `
           + 'Two beats running with the same composition is the flat film: nothing about the cut between them '
           + 'reads as a change. Rotate it, or say why this pair is the exception.');
@@ -263,7 +267,7 @@ const RANGE = SB_RANGE;
 const spans = [];
 
 let n = 0;
-pictureAcrossFilm(blocks);
+pictureAcrossFilm(blocks, not);
 for (const b of blocks) {
   n++;
   const title = b.split('\n')[0].trim();

@@ -89,6 +89,31 @@ const REGISTRY = {
       return { verdict: 'hard' };
     },
   },
+  'archetype-repeat': {
+    intent: 'two beats running with the same composition archetype back to back read as one flat cut.',
+    doc: 'docs/CRAFT/LAYOUT.md',
+    applies: (f, ctx) => !!(ctx && Array.isArray(ctx.not)),
+    adapt: (f, ctx) => {
+      if (ctx.not.some((n) => /archetype|repeat/i.test(n))) {
+        return { verdict: 'skip', value: 'waived-by-not',
+          line: 'adapted archetype-repeat: skipped, the storyboard\'s NOT line names the repeat on purpose' };
+      }
+      return { verdict: 'hard' };
+    },
+  },
+  'seam-split': {
+    intent: 'a hard background swap disguised inside a soft layer dissolve, measured in the margin strip outside every authored layer box.',
+    doc: 'docs/CRAFT/TRANSITIONS.md#seam-forensics-split-seam',
+    applies: (f, ctx) => Array.isArray(ctx && ctx.layers) && f.fieldBox,
+    adapt: (f, ctx) => {
+      const overlaps = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+      if (ctx.layers.some((l) => l.box && overlaps(l.box, f.fieldBox))) {
+        return { verdict: 'reclassify', value: 'real-content-in-margin',
+          line: 'adapted seam-split: reclassified, a real content layer occupies the margin strip this check reads as the field' };
+      }
+      return { verdict: 'hard' };
+    },
+  },
   'plan-overruns-render': {
     intent: 'the plan\'s beat spans must describe the film that actually rendered.',
     doc: 'docs/CRAFT/AUTHORING-WALKTHROUGH.md',
