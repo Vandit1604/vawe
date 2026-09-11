@@ -311,5 +311,8 @@
   "DURATION",
   "CAMERA_WORDS",
   "INTERP"
+ ],
+ "core/registry/knobs.js": [
+  "DIAL_CONTRACT_VIOLATIONS"
  ]
 }
