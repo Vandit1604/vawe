@@ -20,6 +20,13 @@ At the scene ROOT (not a layer). It bakes into `data.camera` at load (`bakeCamer
 several moves across the film. Each generator emits interior `ease:"linear"` automatically for a
 velocity-continuous path.
 
+**Legs must chain back to back over the film, not just at the start.** A recipe's own camera leg (e.g.
+`window-dolly`) JOINS whatever hand-authored `cameraMove` legs the film already has; it does not replace
+covering the rest of the film. `recipes/expand.mjs` appends the recipe leg after the hand legs, so a film
+with legs only in its opening seconds holds still (at the last leg's pose) for everything after, even
+though the plan asked for camera travel throughout. `make choreo` warns (`camera-coverage-floor`) when the
+resolved legs cover under 40% of a film over 6s long.
+
 **A move HOLDS its end pose, forever, until another move changes it.** `cameraAt` holds the last keyframe
 past its own window; nothing resets the camera at a cut, a recipe seam, or the film's own end. A `diveIn`
 to `to:1.6` at 1s-2.6s is still at scale 1.6 at 10s if nothing says otherwise. To return to the normal
