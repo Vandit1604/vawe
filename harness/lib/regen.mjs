@@ -1,4 +1,4 @@
-// harness/lib/regen.mjs: `make regen` (FIX 8) — write every generated file in one command.
+// harness/lib/regen.mjs: `make regen` (FIX 8): write every generated file in one command.
 //
 // `make check` already runs generated-check READ-ONLY (schema enums, catalogue, doc counts, rules-build)
 // and reports drift; this is its write half, so the fix for reported drift is one command, not a
