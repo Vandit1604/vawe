@@ -177,12 +177,38 @@ const withBody = (req, res, run) => {
   }));
 };
 
+// The storyboard beside a film's JSON, either named in the JSON's own `storyboard` field or the
+// <name>.storyboard.md sidecar. Read by both the plan pane and the chat sidebar's own context.
+const storyboardPath = () => {
+  const named = (() => { try { const d = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
+    return typeof d.storyboard === 'string' ? path.join(REPO_ROOT, d.storyboard) : null; } catch { return null; } })();
+  return [named, dataArg.replace(/\.json$/, '.storyboard.md')].find((f) => f && fs.existsSync(f)) || null;
+};
+
 // ---- the CHOOSER, and the LOOK sheets: three CLIs, spawned ------------------------------------------
 // candidates.mjs, beats.mjs and seam-snap.mjs each open a browser or a decoder, print, and exit. They
 // are spawned rather than imported for the reason beat-check is: they read process.argv and exit at top
 // level. Spawning also keeps them ASYNC, which matters more here than anywhere else in this file: a
 // candidate set takes about fifteen seconds and the page has to stay answerable throughout, not least
 // because the six mp4s it is about to play come off this same server.
+
+// ---- the CHAT sidebar's own child process and conversation -------------------------------------
+let chatJob = null;        // the running `claude -p` child, or null
+let chatSessionId = null;  // the CLI's own session_id, so the next prompt --resumes it
+const CHAT_TOOLS = 'Read,Edit,Write,Glob,Grep,Bash(node core/validate/validate.mjs:*),Bash(make validate:*)';
+const chatContext = () => {
+  const rel = path.relative(REPO_ROOT, dataArg);
+  const sb = storyboardPath();
+  const sbRel = sb ? path.relative(REPO_ROOT, sb) : null;
+  return [
+    `The film being edited is ${rel}` + (sbRel ? `, with its storyboard at ${sbRel} and its fragments beside it.` : ', with its fragments beside it.'),
+    'Follow AGENTS.md.',
+    `Edit only ${rel} and its own fragments.`,
+    `Keep the JSON valid: run node core/validate/validate.mjs ${rel} after editing.`,
+    'Answer in 1 to 3 short sentences: what changed.',
+  ].join(' ');
+};
+
 const jobs = new Map();   // name → true while it runs, so a second click cannot fight the first
 const run = (name, args, done) => {
   if (jobs.get(name)) return done(new Error(`a ${name} run is already going, wait for it`), '', '');
@@ -342,11 +368,6 @@ const studioRoutes = (req, res) => {
   // were on disk the whole time: every beat that names a `fragment:` has hand-written markup that
   // renders instantly. So the plan is served as DATA and the page draws it in the studio's own room,
   // with each beat's real fragment live beside its reasoning.
-  const storyboardPath = () => {
-    const named = (() => { try { const d = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
-      return typeof d.storyboard === 'string' ? path.join(REPO_ROOT, d.storyboard) : null; } catch { return null; } })();
-    return [named, dataArg.replace(/\.json$/, '.storyboard.md')].find((f) => f && fs.existsSync(f)) || null;
-  };
   // WHERE THE FILM IS, in the tool that shows the film. `make stage` answers this in a terminal, and a
   // terminal is not where anyone is looking while they work on a film.
   if (url === '/api/stage') {
@@ -387,6 +408,68 @@ const studioRoutes = (req, res) => {
     } catch (e) { reply({ ok: false, error: 'could not read the storyboard: ' + e.message }, 500); }
     return true;
   }
+
+  // ---- the CHAT sidebar: a headless Claude Code run, streamed to the page --------------------------
+  // One prompt in, the CLI's own stdout lines out, as Server-Sent Events. --resume keeps the same
+  // conversation across prompts, cleared with `reset` for a "New chat". One run at a time, same as
+  // the CHOOSER's jobs map: a second prompt while the first is still writing would race it on disk.
+  if (req.method === 'POST' && url === '/api/chat') {
+    let raw = '';
+    req.on('data', (c) => { raw += c; if (raw.length > 1e6) req.destroy(); });
+    req.on('end', () => {
+      let prompt = '', reset = false;
+      try { const q = JSON.parse(raw || '{}'); prompt = String(q.prompt || '').trim(); reset = !!q.reset; } catch { /* empty prompt below */ }
+      if (reset) chatSessionId = null;
+      if (!prompt) { res.writeHead(400, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ ok: false, error: 'empty prompt' })); }
+      if (chatJob) { res.writeHead(409, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ ok: false, error: 'a chat run is already going' })); }
+      const args = ['-p', prompt, '--output-format', 'stream-json', '--verbose', '--model', 'sonnet',
+        '--allowedTools', CHAT_TOOLS, '--append-system-prompt', chatContext()];
+      if (chatSessionId) args.push('--resume', chatSessionId);
+      res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-store', Connection: 'keep-alive' });
+      const send = (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      const child = spawn('claude', args, { cwd: REPO_ROOT });
+      chatJob = child;
+      let buf = '', stderr = '';
+      child.stdout.on('data', (chunk) => {
+        buf += chunk;
+        let idx;
+        while ((idx = buf.indexOf('\n')) >= 0) {
+          const line = buf.slice(0, idx); buf = buf.slice(idx + 1);
+          if (!line.trim()) continue;
+          let msg; try { msg = JSON.parse(line); } catch { continue; }
+          if (msg.session_id) chatSessionId = msg.session_id;
+          if (msg.type === 'assistant') {
+            const text = (msg.message?.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+            if (text) send('text', { text });
+          } else if (msg.type === 'result') {
+            send('result', { result: msg.result, isError: !!msg.is_error });
+          }
+        }
+      });
+      child.stderr.on('data', (c) => { stderr += c; });
+      child.on('error', (e) => {
+        chatJob = null;
+        send('done', { code: null, error: e.code === 'ENOENT' ? 'not-found' : e.message });
+        res.end();
+      });
+      child.on('close', (code) => {
+        chatJob = null;
+        send('done', { code, error: code !== 0 ? stderr.trim().slice(0, 500) : null });
+        res.end();
+      });
+      // res, not req: req's 'close' fires as soon as this small POST body finishes being READ, long
+      // before the response is done, and would kill the child before it said a word. res only closes
+      // when the client actually goes away or the response has finished, which is what "cancel" means.
+      res.on('close', () => { if (chatJob === child) { try { child.kill(); } catch { /* already gone */ } chatJob = null; } });
+    });
+    return true;
+  }
+  if (req.method === 'POST' && url === '/api/chat/stop') {
+    if (chatJob) { try { chatJob.kill(); } catch { /* already gone */ } chatJob = null; }
+    res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: true }));
+    return true;
+  }
+
   // One fragment, on the film's theme, in the SAME wrapper `make preview` photographs. Sharing that
   // wrapper is the point: two copies would drift, and the drift shows a fragment clean in one tool and
   // wrong in the other with nothing saying which is lying.
