@@ -3,7 +3,8 @@
 import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
   random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
   sequence, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
-  anticipateEase, overshootEase, stepClock } from '../../core/motion/motion.js';
+  anticipateEase, overshootEase, stepClock, icon } from '../../core/motion/motion.js';
+import { srcUrl } from '../../core/engine/src-url.js';
 import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/timeline/time.js';
 import { unitProgress, PRESETS, PRESET_BLURBS, wght, staggerOffset, staggerStep, gsapStagger, decodeText, DECODE_CHARS, STAGGER_FROM } from '../../core/type/type.js';
 import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites, TIMINGS,
@@ -8266,6 +8267,18 @@ const FLOOR = 1800;
   ok('directional cuts: cube, squeeze, roll and spin read dir', ['cube', 'squeeze', 'roll', 'spin'].every((n) => DIRECTIONAL_CUT.has(n)));
   ok('directional seams: whipPan reads u_dir', DIRECTIONAL_SEAM.has('whipPan'));
 }
+// ---- srcUrl / icon(): a repo-root-relative image src 404s under /formats/scene/ unless rewritten ----
+{
+  ok('srcUrl: a bare repo-relative path gets the served-root slash', srcUrl('assets/x/tile.jpg') === '/assets/x/tile.jpg');
+  ok('srcUrl: an already-absolute path is untouched', srcUrl('/assets/x/tile.jpg') === '/assets/x/tile.jpg');
+  ok('srcUrl: http(s) is untouched', srcUrl('https://cdn.example.com/x.jpg') === 'https://cdn.example.com/x.jpg');
+  ok('srcUrl: data: is untouched', srcUrl('data:image/png;base64,AAAA') === 'data:image/png;base64,AAAA');
+  ok('icon(): a relative image src is adapted to the served-root form (docs/MISTAKES.md, silent image layer)',
+    icon('assets/x/tile.jpg').includes('src="/assets/x/tile.jpg"'));
+  ok('icon(): an absolute image src is untouched', icon('/assets/x/tile.jpg').includes('src="/assets/x/tile.jpg"'));
+  ok('icon(): a non-path value (emoji/monogram) is returned as-is, no <img> at all', icon('🔥') === '🔥');
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 if (!fail && pass < FLOOR) {
   console.error(`\n✗ ${pass} assertions ran, below the floor of ${FLOOR}. Nothing FAILED, so something`);
