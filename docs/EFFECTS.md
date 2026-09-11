@@ -1087,6 +1087,22 @@ One word at the top of the scene sets the default speed curve for every cut and 
 | `whipPan` | horizontal smear streaks racing across, as if the camera whipped sideways. Energy carried into a payoff. |
 | `wipe` | a directional band sweeping across the frame. The plainest geometric transition, and it always reads. |
 
+## Transition relationships  `[transition]`
+
+Name the RELATIONSHIP between two beats first, then pick from its candidates, per docs/CRAFT/TRANSITIONS.md's decision procedure. Write the reason in the scene as `transition_why: "<relationship> · <feeling> · <invisible|expressive>"` on the arriving beat.
+
+| name | what / when |
+|---|---|
+| `act-break` | a beginning or an ending, an act break: open or close the film or a major section. Candidates: fade. |
+| `continuity` | nothing: invisible, respects momentum. Two beats are one continuous thought. Candidates: none. |
+| `contrast` | shock, jolt: end on maximum tonal contrast; wake from a dream. Candidates: none, flashWhite. |
+| `new-place-energy` | frantic energy, momentum, "meanwhile": an energetic location or time change. Candidates: whipPan, wipe. |
+| `rhyme` | "these two things are the same": bridge scenes by a visual or compositional rhyme. Candidates: none. |
+| `same-action` | seamless, energy carried through: cut on a movement so the eye rides it past the seam. Candidates: match-on-action. |
+| `same-object` | magic: the same identity across states, the highest-craft continuity there is. Candidates: shared-element morph. |
+| `spatial-travel` | one world: the beats are PLACES, not claims. The content has a spatial logic worth walking. Candidates: camera travel. |
+| `time` | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
+
 ## Per-frame accent layers  `[per-frame]`
 
 `{ "type":"beam", ... }`. A light that travels a border or a sheen that sweeps; pure in t (no CSS @keyframes). `{ "type":"beam","mode":"border","speed":0.5 }`
@@ -1141,22 +1157,6 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `tour` | camera → `move: "travel"` |
 | `ui focus zoom` | camera → `move: "diveIn"` |
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
-
-## Transition relationships  `[transition]`
-
-Name the RELATIONSHIP between two beats first, then pick from its candidates, per `docs/CRAFT/TRANSITIONS.md`'s decision procedure. Write the reason in the scene as `transition_why`.
-
-| name | what / when |
-|---|---|
-| `act-break` | a beginning or an ending, an act break: open or close the film or a major section. → try: fade |
-| `continuity` | nothing: invisible, respects momentum. Two beats are one continuous thought. → try: none |
-| `contrast` | shock, jolt: end on maximum tonal contrast; wake from a dream. → try: none, flashWhite |
-| `new-place-energy` | frantic energy, momentum, "meanwhile": an energetic location or time change. → try: whipPan, wipe |
-| `rhyme` | "these two things are the same": bridge scenes by a visual or compositional rhyme. → try: none |
-| `same-action` | seamless, energy carried through: cut on a movement so the eye rides it past the seam. → try: match-on-action |
-| `same-object` | magic: the same identity across states, the highest-craft continuity there is. → try: shared-element morph |
-| `spatial-travel` | one world: the beats are PLACES, not claims. The content has a spatial logic worth walking. → try: camera travel |
-| `time` | passage of time, a connection, gentleness: link two images, soften, show time passing. → try: dissolve, fade |
 
 ---
 _709 effects across 60 families. Regenerate: `make effects`._

@@ -1,3 +1,5 @@
+import { defineRegistry } from '../registry/registry.js';
+
 // core/transitions/relationships.js: THE TAXONOMY, AS DATA.
 //
 // docs/CRAFT/TRANSITIONS.md carries the decision theory in prose (the taxonomy table, the 9-step
@@ -57,6 +59,22 @@ export const RELATIONSHIPS = {
 };
 
 export const RELATIONSHIP_KEYS = Object.keys(RELATIONSHIPS);
+
+// A registry rather than hand-written catalogue prose (scripts/site/effects-catalog.mjs): this map IS
+// a capability an author picks from (`transition_why: <relationship> · <feeling> · <invisible|expressive>`),
+// so it publishes its own section, usage form and no-preview reason from one edit, the same as any other
+// vocabulary. The blurb is each relationship's own `meaning` plus the candidates it resolves to.
+export const RELATIONSHIP_REGISTRY = defineRegistry('transition relationship', RELATIONSHIPS, {
+  slot: 'transition_why',
+  blurbs: Object.fromEntries(RELATIONSHIP_KEYS.map((k) => [k, `${RELATIONSHIPS[k].meaning} Candidates: ${RELATIONSHIPS[k].candidates.join(', ')}.`])),
+  catalog: {
+    title: 'Transition relationships',
+    tag: 'transition',
+    intro: 'Name the RELATIONSHIP between two beats first, then pick from its candidates, per docs/CRAFT/TRANSITIONS.md\'s decision procedure. Write the reason in the scene as `transition_why: "<relationship> · <feeling> · <invisible|expressive>"` on the arriving beat.',
+    usage: (n, { j }) => j({ transition_why: `${n} · <feeling> · <invisible|expressive>` }),
+    noPreview: 'a relationship is a word chosen in a beat\'s `transition_why:` line, not a layer or effect that renders by itself. Preview the transition it names instead (fade, dissolve, whipPan, ...).',
+  },
+});
 
 /** candidatesFor(relationship) -> string[] | null. The exact list a gate or `make transitions` prints. */
 export function candidatesFor(relationship) {
