@@ -242,6 +242,24 @@ should have, which is why each of these is written down rather than remembered.
 - **Never run the mutation gate inside an agent.** An interrupted run leaves planted mutations in the
   tree, and the next agent inherits them as real findings.
 
+## Worktree agent contract
+
+Every worktree brief must carry this block, in this order. Each line cost a real session before it was
+written down (`make critics D=<file> DECIDERS=1` prints it with the film's real base sha filled in, so
+there is one owner of the text, not a copy in every brief).
+
+<!-- worktree-contract:start -->
+- Prove the base: run plain `git merge main`, then quote `git merge-base --is-ancestor <sha> HEAD` because a stale tip merges silently and nobody notices until review.
+- Copy the gitignored inputs the task needs: `node_modules`, `assets/fonts`, `refs`, and any scene JSON the task names, from the lead's checkout, because a fresh worktree carries none of them.
+- Run git only as plain `git <cmd>` from your own worktree, never `git -C`, `command git`, or `/usr/bin/git`, because those are exactly the paths the worktree guard exists to refuse.
+- If a hook denies a command, stop and quote the denial rather than working around it, because going around a guard is how a killed server or a silenced gate happened before.
+- Never edit `quality/baselines/*`, because a ratchet must only fall, never be pushed back up to hide a finding.
+- Never write an `approved:` line, and never drop one that is already there, because only the user's own signature counts as approval.
+- Start any server on your own port, and stop it by PID, because stopping by name kills whatever else is listening on that name, including another session's.
+- Work inside a render budget stated in the brief, and when it runs out, stop and report rather than rendering again, because renders are the most expensive step and a budget only holds if it is obeyed.
+- Scene JSON is gitignored, so any film work that edits it runs in the lead's checkout, never a worktree, because a worktree cannot carry the edit home through a merge.
+<!-- worktree-contract:end -->
+
 ## Provenance
 
 **Do not re-add:** the claim that an `ab` critic runs today. It shipped (`05a5123`) and was removed
