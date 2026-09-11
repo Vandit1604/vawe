@@ -112,15 +112,37 @@ const audioLane = (d, marks, duration) => {
   };
 };
 
+// A scene's camera move is authored as one object or a list; either shape is flattened to a list here
+// so a client (the inside view, a mention's context) never has to branch on which it got.
+const normCamera = (d) => (Array.isArray(d.cameraMove) ? d.cameraMove : d.cameraMove ? [d.cameraMove] : [])
+  .filter((c) => c && typeof c === 'object')
+  .map((c) => ({ move: c.move || '', start: c.start ?? 0, dur: c.dur ?? 0, from: c.from ?? null, to: c.to ?? null }));
+// `transitions[]` is the authored form (AGENTS.md); cuts/seams/stings are its lowered internal shape.
+// A scene may carry either, so both are read and merged into one list of the same shape.
+const normTransitions = (d) => {
+  const authored = (Array.isArray(d.transitions) ? d.transitions : [])
+    .map((t) => ({ at: t.at ?? 0, dur: t.dur ?? 0.5, fx: t.fx || t.style || '', mech: t.mech || '' }));
+  const lowered = ['cuts', 'seams', 'stings'].flatMap((key) => (Array.isArray(d[key]) ? d[key] : [])
+    .filter((c) => c && typeof c.t === 'number')
+    .map((c) => ({ at: c.t, dur: c.dur ?? 0.5, fx: c.fx || c.style || '', mech: key.replace(/s$/, '') })));
+  return [...authored, ...lowered].sort((a, b) => a.at - b.at);
+};
+
 const timelineModel = (file) => {
   const d = JSON.parse(fs.readFileSync(file, 'utf8'));
   const marks = (key) => (Array.isArray(d[key]) ? d[key] : []).filter((c) => c && typeof c.t === 'number')
     .map((c) => ({ kind: key.replace(/s$/, ''), t: c.t, dur: c.dur ?? 0.5, name: c.fx || c.style || c.kind || '' }));
+  // Only the AUTHORED transitions here: cuts/seams/stings are already read by marks() above, and
+  // normTransitions() merges both shapes for the camera/transition overlap lookups elsewhere.
+  const transitionMarks = (Array.isArray(d.transitions) ? d.transitions : [])
+    .map((t) => ({ kind: t.mech || 'transition', t: t.at ?? 0, dur: t.dur ?? 0.5, name: t.fx || t.style || '' }));
   return {
     file: path.basename(file),
     path: path.relative(REPO_ROOT, path.resolve(file)),
     duration: d.duration || null,
-    marks: [...marks('cuts'), ...marks('seams'), ...marks('stings')].sort((a, b) => a.t - b.t),
+    marks: [...marks('cuts'), ...marks('seams'), ...marks('stings'), ...transitionMarks].sort((a, b) => a.t - b.t),
+    cameraMove: normCamera(d),
+    transitions: normTransitions(d),
     layers: (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object')
       // `raw` is the authored object, carried whole. The picker hands it back when you click the
       // picture, and the point is that what you copy is EXACTLY what is in the file: a summary you
@@ -196,7 +218,36 @@ const storyboardPath = () => {
 let chatJob = null;        // the running `claude -p` child, or null
 let chatSessionId = null;  // the CLI's own session_id, so the next prompt --resumes it
 const CHAT_TOOLS = 'Read,Edit,Write,Glob,Grep,Bash(node core/validate/validate.mjs:*),Bash(make validate:*)';
-const chatContext = () => {
+// An overlap test on [aStart,aEnd) x [bStart,bEnd), used to find what a mentioned layer's window
+// touches: the camera moves and transitions running while it is on screen.
+const overlaps = (aStart, aEnd, bStart, bEnd) => aStart < bEnd - 1e-9 && bStart < aEnd - 1e-9;
+// `@id` in a chat prompt, resolved against the film's own layer ids. Each mention hands the agent the
+// layer's JSON (so it can edit it) plus what happens AROUND it (its fragment, the camera, the
+// transitions), because "make @scene1 punchier" is a question about its neighbourhood, not just itself.
+// An id that matches no layer is left as plain text: the agent still reads the prompt, it just gets no
+// extra context for a word that was never meant as a mention.
+const mentionContext = (prompt) => {
+  let d; try { d = JSON.parse(fs.readFileSync(dataArg, 'utf8')); } catch { return ''; }
+  const layers = Array.isArray(d.layers) ? d.layers : [];
+  const cams = normCamera(d), trans = normTransitions(d);
+  const ids = [...new Set([...String(prompt).matchAll(/@([A-Za-z0-9_.-]+)/g)].map((m) => m[1]))];
+  const blocks = ids.map((id) => {
+    const L = layers.find((x) => x && x.id === id);
+    if (!L) return '';
+    const start = L.start ?? 0, end = start + (L.duration ?? L.dur ?? 0);
+    const cam = cams.filter((c) => overlaps(c.start, c.start + c.dur, start, end));
+    const tr = trans.filter((t) => overlaps(t.at, t.at + t.dur, start, end));
+    return [
+      `Context for @${id}: it is layer ${JSON.stringify(id)} (${L.type || 'layer'}), start ${start}s, duration ${(end - start).toFixed(2)}s.`,
+      `Its JSON: ${JSON.stringify(L).slice(0, 2000)}`,
+      L.src ? `Its fragment is at ${L.src}.` : '',
+      cam.length ? `Camera moves over it: ${JSON.stringify(cam)}` : '',
+      tr.length ? `Transitions over it: ${JSON.stringify(tr)}` : '',
+    ].filter(Boolean).join(' ');
+  }).filter(Boolean);
+  return blocks.join(' ');
+};
+const chatContext = (prompt) => {
   const rel = path.relative(REPO_ROOT, dataArg);
   const sb = storyboardPath();
   const sbRel = sb ? path.relative(REPO_ROOT, sb) : null;
@@ -205,8 +256,9 @@ const chatContext = () => {
     'Follow AGENTS.md.',
     `Edit only ${rel} and its own fragments.`,
     `Keep the JSON valid: run node core/validate/validate.mjs ${rel} after editing.`,
+    mentionContext(prompt),
     'Answer in 1 to 3 short sentences: what changed.',
-  ].join(' ');
+  ].filter(Boolean).join(' ');
 };
 
 const jobs = new Map();   // name → true while it runs, so a second click cannot fight the first
@@ -423,7 +475,7 @@ const studioRoutes = (req, res) => {
       if (!prompt) { res.writeHead(400, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ ok: false, error: 'empty prompt' })); }
       if (chatJob) { res.writeHead(409, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ ok: false, error: 'a chat run is already going' })); }
       const args = ['-p', prompt, '--output-format', 'stream-json', '--verbose', '--model', 'sonnet',
-        '--allowedTools', CHAT_TOOLS, '--append-system-prompt', chatContext()];
+        '--allowedTools', CHAT_TOOLS, '--append-system-prompt', chatContext(prompt)];
       if (chatSessionId) args.push('--resume', chatSessionId);
       res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-store', Connection: 'keep-alive' });
       const send = (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
@@ -625,6 +677,24 @@ const studioRoutes = (req, res) => {
     return res.end(JSON.stringify(render
       ? { ...render, secs: Math.round((Date.now() - render.started) / 1000) }
       : { done: fs.existsSync(MP4), line: fs.existsSync(MP4) ? `out/${SLUG}.mp4 is already on disk` : 'not started' })), true;
+  }
+
+  // ---- a fragment's own parts, for the inside view: what `[data-part]` it exposes to author motion on.
+  // Restricted to formats/, and to a path that resolves inside the repo, same guard as /__frag: this is
+  // the one route that takes a path from the browser and reads a file with it.
+  if (url === '/api/fragment') {
+    const reply = (o, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(o)); };
+    const rel = new URL(req.url, 'http://x').searchParams.get('src') || '';
+    const formatsRoot = path.join(REPO_ROOT, 'formats') + path.sep;
+    const file = path.resolve(REPO_ROOT, rel);
+    if (!rel || !file.startsWith(formatsRoot) || !fs.existsSync(file)) return reply({ ok: false, error: 'no such fragment under formats/' }, 404), true;
+    try {
+      const raw = fs.readFileSync(file, 'utf8');
+      const parts = [...raw.matchAll(/<[^>]*\bdata-part=["']([^"']+)["'][^>]*>/g)].map((m) =>
+        ({ name: m[1], id: (/\bid=["']([^"']+)["']/.exec(m[0]) || [])[1] || null }));
+      reply({ ok: true, parts });
+    } catch (e) { reply({ ok: false, error: String(e.message) }, 500); }
+    return true;
   }
 
   if (url === '/api/timeline') {
