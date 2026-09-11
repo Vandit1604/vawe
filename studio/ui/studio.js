@@ -60,18 +60,73 @@
  // the DOM plus its props. There is nothing on disk to drill INTO, so the crumb lists the compositions
  // this scene names and drilling in shows what that comp is and the data it was given. When the engine
  // grows real nested scenes, this is where the deeper levels attach.
- let crumbAt=null;
+ let crumbAt=null, insideLayer=null;
  function drawCrumbs(){ const c=$('crumbs'); const file=(model&&model.file)||document.title.split(' · ').pop();
    const comps=(model?model.layers:[]).filter(L=>L.type==='composition');
-   let h='<button '+(crumbAt==null?'aria-current=page':'data-back=1')+'>'+esc(file)+'</button>';
-   if(crumbAt!=null){ const L=comps.find(x=>x.i===crumbAt);
+   let h='<button '+(crumbAt==null&&!insideLayer?'aria-current=page':'data-back=1')+'>'+esc(file)+'</button>';
+   if(insideLayer) h+='<span class=sep>&rsaquo;</span><button aria-current=page>'+esc(insideLayer.id)+'</button>';
+   else if(crumbAt!=null){ const L=comps.find(x=>x.i===crumbAt);
      h+='<span class=sep>/</span><button aria-current=page>comp: '+esc((L&&L.raw&&L.raw.comp)||'?')+'</button>'; }
    else if(comps.length) h+='<span class=sep>/</span>'+comps.map(L=>
      '<button data-comp="'+L.i+'">'+esc((L.raw&&L.raw.comp)||('layer '+L.i))+'</button>').join('<span class=sep>·</span>');
    c.innerHTML=h;
    c.querySelectorAll('[data-comp]').forEach(b=>b.addEventListener('click',()=>enterComp(+b.dataset.comp)));
-   c.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>{ crumbAt=null; drawCrumbs(); })); }
+   c.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>{ crumbAt=null; exitInside(); })); }
  function enterComp(i){ crumbAt=i; drawCrumbs(); setSel(i); }
+
+ // ---- INSIDE VIEW: double-click a layer bar (or its "Open" button) to zoom the timeline to that
+ // layer's own window, and see what runs inside it: its parts, its motion keys, and the camera moves
+ // and transitions that happen while it is on screen. Nothing here edits the file; chat does that.
+ let insideParts=null;   // the last /api/fragment result for the open layer's src, or [] / null
+ function overlapPct(s,e,vs,ve){ return { l:100*Math.max(0,Math.min(1,(s-vs)/(ve-vs)))+'%',
+   w:100*Math.max(0.006,Math.min(1,(e-s)/(ve-vs)))+'%' }; }
+ function insideRow(label,kind,items){
+   if(!items.length) return '<div class=irow><b>'+esc(label)+'</b><span class=inone>none</span></div>';
+   return '<div class=irow><b>'+esc(label)+'</b><div class=row>'+items.map(it=>{
+     const p=overlapPct(it.s,it.e,insideLayer.start,insideLayer.start+insideLayer.dur);
+     return '<div class="bar k-'+kind+'" style="left:'+p.l+';width:'+p.w+'" title="'+esc(it.title)+'"><span>'+esc(it.label)+'</span></div>';
+   }).join('')+'</div></div>';
+ }
+ function paintInside(){
+   if(!insideLayer) return;
+   const L=insideLayer, vs=L.start, ve=L.start+L.dur, span=Math.max(1e-6,ve-vs);
+   const step=span<=3?.25:span<=8?.5:1;
+   let rh=''; for(let t=Math.ceil(vs/step)*step;t<=ve+1e-6;t+=step)
+     rh+='<div class=t style="left:'+(100*(t-vs)/span)+'%"><s>'+clock(t-vs)+'</s></div>';
+   ruler.innerHTML=rh; $('film').innerHTML='';
+   const cams=overlappingCamera(vs,ve).map(c=>({s:Math.max(vs,c.start),e:Math.min(ve,c.start+c.dur),
+     label:c.move||'camera',title:c.move+' '+c.from+' → '+c.to+' at '+c.start.toFixed(2)+'s'}));
+   const trans=overlappingTransitions(vs,ve).map(t=>({s:Math.max(vs,t.at),e:Math.min(ve,t.at+t.dur),
+     label:t.fx||t.mech||'transition',title:(t.fx||t.mech||'transition')+' at '+t.at.toFixed(2)+'s'}));
+   const motion=(Array.isArray(L.raw.motion)?L.raw.motion:[]).map(k=>({s:vs+(k.t||0),e:vs+(k.t||0)+.3,
+     label:'key '+(k.t||0).toFixed(2)+'s',title:JSON.stringify(k)}));
+   const parts=(Array.isArray(L.raw.parts)?L.raw.parts:[]).map(p=>{ const s=vs+(p.delay||0), e=s+(p.each||0)+(p.exitDur||.3);
+     return { s, e, label:(p.select||p.anim||'part'), title:JSON.stringify(p) }; });
+   let h=insideRow('Camera','camera',cams)+insideRow('Transitions','fx',trans)+insideRow('Motion','motion',motion)+insideRow('Parts','part',parts);
+   if(L.raw.src){
+     h+='<div class=irow><b>Fragment</b>'+(insideParts==null?'<span class=inone>loading…</span>'
+       :insideParts.length?'<div class=ichips>'+insideParts.map(p=>'<span class=ichip>'+esc(p.name)+(p.id?' #'+esc(p.id):'')+'</span>').join('')+'</div>'
+       :'<span class=inone>no [data-part] found</span>')+'</div>';
+   }
+   rows.innerHTML=h;
+   $('tlwhat').textContent=insideLayer.id+' · '+L.dur.toFixed(2)+'s';
+   $('alerts').innerHTML='';
+ }
+ function loadInsideFragment(src){
+   insideParts=null; paintInside();
+   fetch('/api/fragment?src='+encodeURIComponent(src)).then(r=>r.json())
+     .then(r=>{ insideParts=r.ok?r.parts:[]; if(insideLayer) paintInside(); })
+     .catch(()=>{ insideParts=[]; if(insideLayer) paintInside(); });
+ }
+ function enterInside(i){
+   const L=model&&model.layers.find(l=>l.i===i); if(!L) return;
+   insideLayer={ i, id:(L.raw&&L.raw.id)||('layer '+i), start:L.start, dur:L.dur, raw:L.raw||{} };
+   drawCrumbs(); setSel(i);
+   if(insideLayer.raw.src) loadInsideFragment(insideLayer.raw.src); else { insideParts=null; paintInside(); }
+   go(Math.round(insideLayer.start*fps));
+ }
+ function exitInside(){ if(!insideLayer&&crumbAt==null) return; insideLayer=null; crumbAt=null;
+   drawCrumbs(); if(model) paint(model); if(selIdx>=0) layerProps(selIdx); }
 
  // ---------- keyframing ----------
  // ONE interaction, end to end: pick a layer, scrub to a frame, drag it. That writes a motion key at
@@ -410,17 +465,42 @@
    propsEl.innerHTML=obj?html:'';
    pickJson.textContent=obj?JSON.stringify(obj,null,2):'';
  }
+ // camera moves whose window touches [start,end): shared by the property panel and the inside view.
+ function overlappingCamera(start,end){
+   return ((model&&model.cameraMove)||[]).filter(c=>c.start<end-1e-9&&start<c.start+c.dur-1e-9);
+ }
+ function overlappingTransitions(start,end){
+   return ((model&&model.transitions)||[]).filter(t=>t.at<end-1e-9&&start<t.at+t.dur-1e-9);
+ }
  function layerProps(i){
    const L=model&&model.layers.find(l=>l.i===i);
    if(!L) return showProps('Layer','',null);
-   const raw=L.raw||{};
+   const raw=L.raw||{}, id=raw.id!=null?raw.id:null;
+   const end=L.start+L.dur, cams=id?overlappingCamera(L.start,end):[];
+   // one compact fact per move: five separate fld cells do not fit this rail's width (docs/MISTAKES.md
+   // pattern: a fixed-width grid squeezed to nothing is the same as not showing the value at all).
+   const camRows=cams.map(c=>prow('Camera',fld(c.move+' '+c.from+'→'+c.to+' at '+c.start.toFixed(2)+'s for '+c.dur.toFixed(2)+'s'))).join('');
+   const actions='<div class=pactions>'
+     +(id?'<button type=button data-mention="'+esc(id)+'">Mention in chat</button>':'')
+     +(insideLayer&&insideLayer.i===i?'<button type=button data-editchat="'+esc(id||'')+'">Edit in chat</button>'
+       :'<button type=button data-open="'+i+'">Open</button>')+'</div>';
    showProps(cap(L.type),
-     prow('Type',fld(L.type))+prow('ID',fld(raw.id!=null?raw.id:'layers['+i+']'))
+     prow('Type',fld(L.type))+prow('ID',fld(id!=null?id:'layers['+i+']'))
      +(L.type==='composition'?prow('Comp',fld(raw.comp||'?')):'')
      +prow('Time',fld((+L.start).toFixed(2),'S'),fld((+L.dur).toFixed(2),'D'))
+     +camRows
      +'<div id=pbox class=psub hidden>'+prow('Position',fld('','X','pX'),fld('','Y','pY'))+prow('Size',fld('','W','pW'),fld('','H','pH'))+'</div>'
-     +prow('Key at',fld('','T','pK')), raw);
+     +prow('Key at',fld('','T','pK'))
+     +actions, raw);
  }
+ // one delegated listener: the panel's inner HTML is replaced on every selection, so a button bound
+ // directly would be re-bound (or silently dropped) on the next render.
+ propsEl.addEventListener('click',e=>{
+   const m=e.target.closest('[data-mention],[data-editchat]');
+   if(m){ const id=m.dataset.mention!=null?m.dataset.mention:m.dataset.editchat; if(id) insertMention(id); return; }
+   const o=e.target.closest('[data-open]');
+   if(o) enterInside(+o.dataset.open);
+ });
  function bgProps(b){
    setSel(-1);
    const w=b.win||{};
@@ -584,6 +664,29 @@
  // ---- CHAT: a prompt in, the agent's own words streamed back, then the scene reloaded on success ----
  const chatLog=$('chatlog'), chatInput=$('chatinput'), chatSend=$('chatsend'), chatStop=$('chatstop');
  let chatBusy=false, chatAbort=null, chatReset=false;
+
+ // ---- @MENTIONS: typing @ opens the film's own layer ids, filtered as you type -------------------
+ const mentionBox=$('mention');
+ let mentionOpen=false, mentionList=[], mentionSel=0;
+ const layerIds=()=>(model?model.layers:[]).map(L=>L.raw&&L.raw.id).filter(Boolean);
+ // the "@word" ending at the caret, or null: a mention is only live while the caret sits inside it
+ function mentionQuery(){ const v=chatInput.value.slice(0,chatInput.selectionStart);
+   const m=/@([A-Za-z0-9_.-]*)$/.exec(v); return m?{start:m.index,q:m[1]}:null; }
+ function closeMention(){ mentionOpen=false; mentionBox.hidden=true; }
+ const mentionMouseDown=(e)=>{ const el=e.target.closest('.mi'); if(!el) return; e.preventDefault(); pickMention(+el.dataset.i); };
+ mentionBox.addEventListener('mousedown',mentionMouseDown);
+ function drawMention(){ if(!mentionList.length) return closeMention();
+   mentionOpen=true; mentionBox.hidden=false;
+   mentionBox.innerHTML=mentionList.map((id,i)=>'<div class="mi'+(i===mentionSel?' on':'')+'" data-i="'+i+'" role=option>@'+esc(id)+'</div>').join(''); }
+ function pickMention(i){ const q=mentionQuery(), id=mentionList[i]; if(!q||!id) return closeMention();
+   const before=chatInput.value.slice(0,q.start), after=chatInput.value.slice(chatInput.selectionStart), ins=before+'@'+id+' ';
+   chatInput.value=ins+after; closeMention(); chatInput.focus(); chatInput.setSelectionRange(ins.length,ins.length); }
+ // "Mention in chat" / "Edit in chat": the same move from the property panel, without typing @ by hand.
+ function insertMention(id){ setChat(true);
+   const v=chatInput.value, sep=v&&!/\s$/.test(v)?' ':'';
+   chatInput.value=v+sep+'@'+id+' ';
+   chatInput.style.height='auto'; chatInput.style.height=Math.min(140,chatInput.scrollHeight)+'px';
+   chatInput.focus(); chatInput.setSelectionRange(chatInput.value.length,chatInput.value.length); }
  function setChat(open){ document.body.classList.toggle('chatoff',!open);
    $('chatopen').hidden=open;
    (open?$('chatclose'):$('chatopen')).focus();
@@ -633,13 +736,28 @@
  chatSend.addEventListener('click',sendChat);
  $('chatnew').addEventListener('click',()=>{ if(chatBusy) return; chatLog.innerHTML=''; chatReset=true; say('new chat'); });
  chatStop.addEventListener('click',()=>{ if(chatAbort) chatAbort.abort(); fetch('/api/chat/stop',{method:'POST'}); });
- chatInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(); } });
- chatInput.addEventListener('input',()=>{ chatInput.style.height='auto'; chatInput.style.height=Math.min(140,chatInput.scrollHeight)+'px'; });
+ const mentionKeys={ArrowDown:1,ArrowUp:1,Enter:1,Tab:1,Escape:1};
+ function mentionKeydown(e){
+   if(e.key==='ArrowDown'){ mentionSel=Math.min(mentionList.length-1,mentionSel+1); drawMention(); return; }
+   if(e.key==='ArrowUp'){ mentionSel=Math.max(0,mentionSel-1); drawMention(); return; }
+   if(e.key==='Enter'||e.key==='Tab'){ pickMention(mentionSel); return; }
+   closeMention(); // Escape
+ }
+ chatInput.addEventListener('keydown',e=>{
+   if(mentionOpen&&mentionKeys[e.key]){ e.preventDefault(); e.stopPropagation(); mentionKeydown(e); return; }
+   if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(); } });
+ chatInput.addEventListener('input',()=>{ chatInput.style.height='auto'; chatInput.style.height=Math.min(140,chatInput.scrollHeight)+'px';
+   const q=mentionQuery();
+   if(!q){ closeMention(); return; }
+   mentionList=layerIds().filter(id=>id.toLowerCase().includes(q.q.toLowerCase())).slice(0,8);
+   mentionSel=0; drawMention(); });
 
  // Arrows step a frame, shift+arrow a second, home/end the ends, space plays.
  addEventListener('keydown',e=>{
-   // Escape closes an open popover first; only a second press clears the selection
-   if(e.key==='Escape'){ if(!document.querySelector(':popover-open')&&(selIdx>=0||!propsEl.hidden)) setSel(-1); return; }
+   // Escape steps back out of the inside view first, then closes an open popover, then clears the selection
+   if(e.key==='Escape'){
+     if(insideLayer){ exitInside(); return; }
+     if(!document.querySelector(':popover-open')&&(selIdx>=0||!propsEl.hidden)) setSel(-1); return; }
    if(typing()||e.metaKey||e.ctrlKey||e.altKey) return;
    // the states, in the order they are asked. Cheap to move between, so they are one keystroke apart.
    const st={'1':'plan','2':'make','3':'look','4':'ship'}[e.key];
@@ -746,7 +864,8 @@
  const paintRows=paint;
  paint=function(m){ paintRows(m); if(lastStrip) markStill(lastStrip); };
  function timeline(){
-   fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; $('undo').disabled=!(m.undo>0); drawCrumbs(); paint(m); drawJump(); })
+   fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; $('undo').disabled=!(m.undo>0); drawCrumbs();
+     if(insideLayer) paintInside(); else paint(m); drawJump(); })
      .catch(e=>{ $('tlwhat').textContent='timeline unavailable: '+e; });
  }
  // name each bar: consume the first unclaimed JSON layer that starts at the same instant. A layer the
@@ -916,6 +1035,7 @@
  // bury the rest of the page, so the lane stack is one stop and the arrows walk it: the same shape a
  // list box has. Left and right still seek, because the global handler owns those.
  lanes.addEventListener('keydown',e=>{
+   if(e.key==='Enter'&&selIdx>=0&&!insideLayer){ e.preventDefault(); enterInside(selIdx); return; }
    if(e.key!=='ArrowDown'&&e.key!=='ArrowUp') return;
    const bars=[...rows.querySelectorAll('.bar')].filter(b=>+b.dataset.i>=0);
    if(!bars.length) return;
@@ -924,6 +1044,13 @@
    const to=bars[Math.max(0,Math.min(bars.length-1,at<0?0:at+(e.key==='ArrowDown'?1:-1)))];
    setSel(+to.dataset.i); to.scrollIntoView({block:'nearest'});
    say(selLabel.trim()||('layer '+selIdx)); });
+ // NOT e.target: lanes holds the pointer capture from the pointerdown half of this same click, which
+ // retargets the compatibility mouse events (click, dblclick) to the capturing element, so e.target is
+ // lanes itself, not the bar under the cursor. A hit test at the real point is the only thing that still
+ // names the bar (the same fix the iframe pick handler above needed for the topmost element).
+ lanes.addEventListener('dblclick',e=>{
+   const bar=(document.elementsFromPoint(e.clientX,e.clientY)||[]).find(el=>el.classList&&el.classList.contains('bar'));
+   if(bar&&+bar.dataset.i>=0) enterInside(+bar.dataset.i); });
 
  // drag anywhere in the lanes to seek
  const seek=(e)=>{ n=Math.max(0,Math.min(total,Math.round((e.clientX-rulerL)/rulerW*dur*fps))); draw(); };

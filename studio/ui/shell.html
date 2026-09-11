@@ -102,7 +102,8 @@
     <button id=chatclose class=ib aria-label="collapse panel" title=Collapse aria-controls=chat><svg viewBox="0 0 20 20"><path d="M10 6l4 4-4 4M5 6l4 4-4 4"/></svg></button></div>
    <div id=chatlog role=log aria-live=polite></div>
    <div id=chatbar>
-    <textarea id=chatinput rows=1 placeholder="ask for a change to this film..."></textarea>
+    <div id=mention role=listbox aria-label="layer mentions" hidden></div>
+    <textarea id=chatinput rows=1 placeholder="ask for a change to this film... @ to mention a layer"></textarea>
     <div class=chatactions>
      <button id=chatnew class=ib aria-label="new chat" title="New chat"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button>
      <span class=sp></span>
