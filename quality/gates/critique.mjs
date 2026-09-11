@@ -9,6 +9,11 @@ import { canvasShare, sceneTiming, boxOf, sceneView, inView, PICTORIAL, htmlGrap
 import { onScreenText, glyphText, snippet } from '../../harness/lib/text.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { cameraAt } from '../../core/timeline/sequence.js';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
@@ -20,7 +25,18 @@ if (!file) { console.error('usage: node quality/gates/critique.mjs <scene.json> 
 const d = loadScene(JSON.parse(fs.readFileSync(file, 'utf8')));
 const layers = d.layers || [];
 const findings = [];
-const F = (sev, rule, msg, t) => findings.push({ sev, rule, msg, t });
+// Named `warn`/`fail`, not one `F(severity, rule, ...)`: harness/lib/finding-codes.mjs statically greps
+// gate source for a call named warn or fail whose first argument is the finding code, the shared
+// convention ten other gates already follow, to answer "which codes does this file actually emit" for
+// doc-map's routing check. A single dispatcher with the severity as its first argument hides every code
+// behind a variable name that scan cannot read; every finding in this file was invisible to it before
+// this split (docs/MISTAKES.md #618).
+// `sev` is set from these constants, not a literal quoted here: finding-codes.mjs also matches a bare
+// `sev: '<code>'` (designspec-check's own shape) and would otherwise read "warn"/"error" themselves as
+// finding codes.
+const SEV_WARN = 'warn', SEV_ERROR = 'error';
+const warn = (rule, msg, t) => findings.push({ sev: SEV_WARN, rule, msg, t });
+const fail = (rule, msg, t) => findings.push({ sev: SEV_ERROR, rule, msg, t });
 
 const [CW, CH] = sceneTiming(d).canvas;
 
@@ -46,7 +62,7 @@ for (const l of layers) {
   if (l.type !== 'text' || !l.text) continue;
   const w = onScreenText(l.text).toLowerCase();
   if (PLACEHOLDER.has(w) && (l.size ?? 0) >= 48) {
-    F('error', 'placeholder-word', `"${snippet(l.text, 40)}" (${l.size}px) is a filler label, not a real artifact. Render the actual thing (a live mini-scene), not the word.`, s0(l));
+    fail('placeholder-word', `"${snippet(l.text, 40)}" (${l.size}px) is a filler label, not a real artifact. Render the actual thing (a live mini-scene), not the word.`, s0(l));
   }
 }
 
@@ -61,9 +77,9 @@ for (const l of layers) {
     const shaderish = /shader/.test(noun);
     const hasShaderLayer = layers.some((x) => x.type === 'shader');
     if (shaderish && !hasShaderLayer) {
-      F('error', 'false-claim', `"${snippet(l.text, 40)}" claims ${m[1]} ${noun} but the scene has NO shader layers. Remove the claim or add the effect.`, s0(l));
+      fail('false-claim', `"${snippet(l.text, 40)}" claims ${m[1]} ${noun} but the scene has NO shader layers. Remove the claim or add the effect.`, s0(l));
     } else {
-      F('warn', 'unbacked-claim', `"${snippet(l.text, 40)}": a count claim ("${m[1]} ${noun}"). Verify the ${noun} are actually shown in this beat, or cut the number.`, s0(l));
+      warn('unbacked-claim', `"${snippet(l.text, 40)}": a count claim ("${m[1]} ${noun}"). Verify the ${noun} are actually shown in this beat, or cut the number.`, s0(l));
     }
   }
 }
@@ -73,13 +89,13 @@ for (const l of layers) {
   if (l.type !== 'group' || !l.children) continue;
   const txt = l.children.filter((c) => c.type === 'text');
   if (txt.length >= 4 && txt.every((c) => !c.split && !c.preset) && (l.duration ?? 0) > 2 && !l.stagger) {
-    F('warn', 'static-list', `a ${txt.length}-item text group held ${(l.duration).toFixed(1)}s with no live motion. A list reads as a spec sheet; animate the concept (reveal/pass/count).`, s0(l));
+    warn('static-list', `a ${txt.length}-item text group held ${(l.duration).toFixed(1)}s with no live motion. A list reads as a spec sheet; animate the concept (reveal/pass/count).`, s0(l));
   }
 }
 
 // ---- 4. illegible transition ----
 for (const s of d.stings || []) {
-  if (LOW_LEGIBILITY_STINGS.has(s.fx)) F('warn', 'illegible-effect', `sting "${s.fx}" @${s.t}s is hard to perceive at cut scale. Replace with a legible one (wipe/iris/push).`, s.t);
+  if (LOW_LEGIBILITY_STINGS.has(s.fx)) warn('illegible-effect', `sting "${s.fx}" @${s.t}s is hard to perceive at cut scale. Replace with a legible one (wipe/iris/push).`, s.t);
 }
 
 // ---- 5. lonely beat: a beat whose ONLY sizable content is a single centered text >3s ----
@@ -90,7 +106,7 @@ for (const b of beats) {
   const artifacts = content.filter((l) => l.type !== 'text' || (l.children && l.children.length));
   const texts = content.filter((l) => l.type === 'text');
   if (texts.length && artifacts.length === 0 && content.length <= 2) {
-    F('warn', 'lonely-beat', `beat @${b.start.toFixed(1)}s is text-only with no artifact. What does the viewer LOSE if cut? give it a demo/proof or fold it into a neighbour.`, b.start);
+    warn('lonely-beat', `beat @${b.start.toFixed(1)}s is text-only with no artifact. What does the viewer LOSE if cut? give it a demo/proof or fold it into a neighbour.`, b.start);
   }
 }
 
@@ -103,7 +119,7 @@ beats.forEach((b, bi) => {
   const content = layers.filter((l) => (l.track ?? 9) > 2 && overlaps(l, b.start, b.end + 0.3)
     && (l.type !== 'text' || (l.size ?? 0) >= 24));
   if (content.length && content.length < 3) {
-    F('warn', 'thin-beat', `beat @${b.start.toFixed(1)}s has only ${content.length} sizable element(s) over ${span.toFixed(1)}s. Reads as a slide. Add support (a demo/stat/chart) + metadata (a dim readout). See docs/CRAFT/DENSITY.md.`, b.start);
+    warn('thin-beat', `beat @${b.start.toFixed(1)}s has only ${content.length} sizable element(s) over ${span.toFixed(1)}s. Reads as a slide. Add support (a demo/stat/chart) + metadata (a dim readout). See docs/CRAFT/DENSITY.md.`, b.start);
   }
 });
 
@@ -113,7 +129,7 @@ for (const l of layers) {
   if (l.type && l.type !== 'text') continue;
   if (!l.text || l.split) continue;
   if ((l.size ?? 0) >= 40 && (l.w ?? 0) >= 600 && !l.align) {
-    F('warn', 'mis-centre', `"${snippet(l.text, 28)}" (${l.size}px, w:${l.w}) has a wide box but no "align". Text left-aligns inside it and reads off-centre. Set align:"center"/"right", or use pin. See docs/MISTAKES.md #15.`, s0(l));
+    warn('mis-centre', `"${snippet(l.text, 28)}" (${l.size}px, w:${l.w}) has a wide box but no "align". Text left-aligns inside it and reads off-centre. Set align:"center"/"right", or use pin. See docs/MISTAKES.md #15.`, s0(l));
   }
 }
 
@@ -139,7 +155,7 @@ for (const b of beats) {
     && overlaps(l, b.start, b.end + 0.3) && (l.type !== 'text' || (l.size ?? 0) >= 18)
     && inView(l, view));
   if (content.length >= 8) {
-    F('warn', 'scattered-beat', `beat @${b.start.toFixed(1)}s packs ${content.length} top-level elements. Likely no clear focal (the eye can't land). Cut to a hero + 1-2 supports; run make judge to confirm.`, b.start);
+    warn('scattered-beat', `beat @${b.start.toFixed(1)}s packs ${content.length} top-level elements. Likely no clear focal (the eye can't land). Cut to a hero + 1-2 supports; run make judge to confirm.`, b.start);
   }
 }
 
@@ -157,7 +173,63 @@ for (const l of layers) {
   const typeTime = chars / cps;
   const dur = l.duration ?? 0;
   if (typeTime + MIN_TYPE_HOLD > dur + 1e-6) {
-    F('warn', 'typing-cutoff', `"${snippet(l.text, 32)}" types for ${typeTime.toFixed(2)}s (${chars} chars / ${cps}per s) but its beat is only ${dur.toFixed(2)}s. It cannot finish and hold before the cut. Extend duration to >= ${(typeTime + MIN_TYPE_HOLD).toFixed(1)}s or raise the typing speed.`, s0(l));
+    warn('typing-cutoff', `"${snippet(l.text, 32)}" types for ${typeTime.toFixed(2)}s (${chars} chars / ${cps}per s) but its beat is only ${dur.toFixed(2)}s. It cannot finish and hold before the cut. Extend duration to >= ${(typeTime + MIN_TYPE_HOLD).toFixed(1)}s or raise the typing speed.`, s0(l));
+  }
+}
+
+// ---- 9b. fake-typing: a typewriter effect built the WRONG way, on an `html` fragment instead of a
+// `text` layer's real `typing`. Two tells, either one is enough to name the fix:
+//   (a) a `parts` entry whose selector names the typing slot (type/typing/prompt/command) and reveals
+//       it PER WORD (`each`/`stagger`), which is a stagger-fade, not a character-by-character reveal;
+//   (b) a literal caret glyph (`|`/`▏`) sitting as its own text node right after the typed copy, which
+//       never blinks and never tracks where the "typing" actually stopped (docs/CRAFT/KEYED-MOTION.md).
+// Both are report-only (docs/SAFEGUARDS.md): a hand-tuned fragment may have a reason, so this names the
+// swap rather than blocking the render.
+const TYPING_WORD_RE = /\b(type|typing|prompt|command)\w*/i;
+const CARET_GLYPH_RE = />[^<>]*[|▏]\s*<(?!\/?(?:span|b|em|strong|i)\b)/;
+function fragmentMarkup(l) {
+  if (typeof l.html === 'string') return l.html;
+  if (typeof l.src === 'string') {
+    try { return fs.readFileSync(path.join(REPO_ROOT, l.src), 'utf8'); } catch { return null; }
+  }
+  return null;
+}
+for (const l of layers) {
+  if (l.type !== 'html') continue;
+  const who = l.id ? `"${l.id}"` : `html layer @${s0(l).toFixed(1)}s`;
+  const fakeWordPart = (Array.isArray(l.parts) ? l.parts : []).find((p) => p && typeof p.select === 'string'
+    && (p.each != null || p.stagger != null) && (TYPING_WORD_RE.test(p.select) || TYPING_WORD_RE.test(l.id || '')));
+  if (fakeWordPart) {
+    warn('fake-typing', `${who}'s part "${fakeWordPart.select}" fakes typing by fading words in one at a time (${fakeWordPart.anim || 'its anim'}, each/stagger). Put a \`text\` layer with \`typing\` + \`caret\` over that slot instead: it reveals per CHARACTER and gives the camera a real caret to follow.`, s0(l));
+    continue; // one finding names the fix; the glyph check below would be redundant noise on the same layer
+  }
+  const markup = fragmentMarkup(l);
+  if (markup && CARET_GLYPH_RE.test(markup)) {
+    warn('fake-typing', `${who} draws a literal "|"/"▏" caret glyph next to typed text. That glyph never blinks and never moves with a real reveal. Put a \`text\` layer with \`typing\` + \`caret\` over that slot instead.`, s0(l));
+  }
+}
+
+// ---- 9c. typing-camera-still: a real typing line the camera never leans into. The owner's complaint
+// this whole cluster answers: type without a push reads as a static caption, not a live terminal. Fires
+// when the camera is neither scaled in (s >= 1.15, an arbitrary but named "clearly pushed in" floor)
+// NOR moving toward the line during the typing window (start -> when the caret reaches the end).
+const CAMERA_PUSH_S = 1.15, CAMERA_MOVE_PX = 4;
+if (Array.isArray(d.camera) && d.camera.length) {
+  for (const l of layers) {
+    if (!l.typing || l.type !== 'text') continue;
+    const cps = l.typing === true ? 24 : +l.typing;
+    if (!(cps > 0)) continue;
+    const chars = glyphText(l.text).length;
+    const start = s0(l);
+    const end = start + Math.min(chars / cps, l.duration ?? chars / cps);
+    if (end <= start) continue;
+    const poseStart = cameraAt(d.camera, start), poseEnd = cameraAt(d.camera, end);
+    const pushedIn = poseStart.s >= CAMERA_PUSH_S || poseEnd.s >= CAMERA_PUSH_S;
+    const tracking = Math.hypot(poseEnd.x - poseStart.x, poseEnd.y - poseStart.y) >= CAMERA_MOVE_PX;
+    if (!pushedIn && !tracking) {
+      const idSel = l.id ? `#${l.id}` : '<give this layer an id>';
+      warn('typing-camera-still', `"${snippet(l.text, 32)}" types for ${(end - start).toFixed(2)}s at a still camera (s~${poseStart.s.toFixed(2)}, no pan). Give the travel leg a station {"caret": "${idSel}"} to push in as typing starts and pan to the caret's end (core/engine/produce.js resolveCaretStations).`, start);
+    }
   }
 }
 
@@ -204,7 +276,7 @@ if (contentIv.length > 1) {
   for (let i = 1; i < contentIv.length; i++) {
     const gap = contentIv[i][0] - covEnd;
     if (gap > 0.12) {
-      F('warn', 'transition-dip', `the stage is EMPTY from ${covEnd.toFixed(1)}s to ${contentIv[i][0].toFixed(1)}s (${gap.toFixed(1)}s of blank). The outgoing beat fully exits before the next enters (a jump-cut with a dip). Overlap them: start the next beat during this one's exit, so the transition IS the exit.`, covEnd);
+      warn('transition-dip', `the stage is EMPTY from ${covEnd.toFixed(1)}s to ${contentIv[i][0].toFixed(1)}s (${gap.toFixed(1)}s of blank). The outgoing beat fully exits before the next enters (a jump-cut with a dip). Overlap them: start the next beat during this one's exit, so the transition IS the exit.`, covEnd);
     }
     covEnd = Math.max(covEnd, contentIv[i][1]);
   }

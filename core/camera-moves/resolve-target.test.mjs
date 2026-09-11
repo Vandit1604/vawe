@@ -159,3 +159,93 @@ test('bakeCameraMove: travel station "target" resolves per-station', () => {
   assert.equal(data.camera[1].x, 1920 / 2 - 1575);
   assert.equal(data.camera[1].y, 1080 / 2 - 875);
 });
+
+// --- bakeCameraMove: travel station "caret" (the owner's typing-camera fix) ---
+
+const sceneWithTypedLine = (typing = true, textLen = 24) => ({
+  layers: [{ id: 'wide', type: 'rect', x: 0, y: 0, w: 1900, h: 1000 },
+    { id: 'line', type: 'text', typing, x: 200, y: 400, size: 60, text: 'x'.repeat(textLen), start: 2 }],
+  cameraMove: { move: 'travel', stations: [{ target: '#wide', dur: 1 }, { caret: '#line' }] },
+});
+
+test('bakeCameraMove: travel "caret" expands into a push station arriving at the layer\'s "start"', () => {
+  const data = sceneWithTypedLine();
+  bakeCameraMove(data, FRAME);
+  // stations: wide (t=0), push-in (t=2, the typed line's own "start"), pan-to-caret-end (t=2+dur)
+  assert.equal(data.camera.length, 3);
+  assert.equal(data.camera[1].t, 2);
+  assert.ok(data.camera[1].s >= 1.15, `push-in should scale the camera in; got s=${data.camera[1].s}`);
+});
+
+test('bakeCameraMove: travel "caret" pan finishes exactly when typing does (retiming the text retimes it)', () => {
+  const slow = sceneWithTypedLine(12, 24);  // 24 chars / 12cps = 2s of typing
+  const fast = sceneWithTypedLine(24, 24);  // 24 chars / 24cps = 1s of typing
+  bakeCameraMove(slow, FRAME); bakeCameraMove(fast, FRAME);
+  const panDurSlow = slow.camera[2].t - slow.camera[1].t;
+  const panDurFast = fast.camera[2].t - fast.camera[1].t;
+  assert.ok(Math.abs(panDurSlow - 2) < 1e-9, `slow typing (12cps, 24 chars) should pan for 2s; got ${panDurSlow}`);
+  assert.ok(Math.abs(panDurFast - 1) < 1e-9, `fast typing (24cps, 24 chars) should pan for 1s; got ${panDurFast}`);
+});
+
+test('bakeCameraMove: travel "caret" still moves (push -> pan), and keeps the line start in view when it fits', () => {
+  const data = sceneWithTypedLine();
+  bakeCameraMove(data, FRAME);
+  const push = data.camera[1], pan = data.camera[2];
+  const tx = (pose) => FRAME.W / 2 - pose.x; // travel.js stores canvasW/2 - tx as the keyframe's own x
+  // the default 24-char mono line at its auto-computed push scale fits well inside the frame (the
+  // whole point of the ~60%-width push default), so the LAST station must centre it rather than crop
+  // the head chasing the caret's end (docs/MISTAKES.md #618 fix-up: "mak" cropped off the left edge).
+  assert.notEqual(tx(push), tx(pan), 'the pan station must move the camera, not repeat the push-in pose');
+  const line = data.layers.find((l) => l.id === 'line');
+  const lineStartWorldX = line.x; // world x of the line's first character
+  const viewLeftEdge = tx(pan) - (FRAME.W / pan.s) / 2;
+  assert.ok(viewLeftEdge <= lineStartWorldX,
+    `line start (world x=${lineStartWorldX}) must stay inside the final view (left edge=${viewLeftEdge}), not cropped off`);
+});
+
+test('bakeCameraMove: travel "caret" follows the caret\'s end, clamped inside the margin, when the line is too wide to fit', () => {
+  // force !fits by pushing in far tighter than the line needs (an explicit "s" on the caret station).
+  const data = { layers: [{ id: 'wide', type: 'rect', x: 0, y: 0, w: 1900, h: 1000 },
+    { id: 'line', type: 'text', typing: true, x: 200, y: 400, size: 60, text: 'x'.repeat(24), start: 2 }],
+    cameraMove: { move: 'travel', stations: [{ target: '#wide', dur: 1 }, { caret: '#line', s: 3 }] } };
+  bakeCameraMove(data, FRAME);
+  const pan = data.camera[2];
+  const tx = FRAME.W / 2 - pan.x; // travel.js stores canvasW/2 - tx as the keyframe's own x
+  const line = data.layers.find((l) => l.id === 'line');
+  const lineEndWorldX = line.x + 24 * line.size * 0.6; // mirrors produce.js's own mono advance estimate
+  const viewW = FRAME.W / pan.s;
+  const viewRightEdge = tx + viewW / 2;
+  // "clamped inside the margin", not flush: the right edge sits close to the caret's end, on a scale
+  // set by the authored "s" (which resolveCameraTarget may itself clamp for headroom), not by guessing
+  // the exact clamped scale here and re-deriving the same arithmetic the production code already did.
+  assert.ok(Math.abs(viewRightEdge - lineEndWorldX) < viewW * 0.1,
+    `the caret's end (${lineEndWorldX}) should sit close to the right margin (view right edge=${viewRightEdge}, viewW=${viewW})`);
+});
+
+test('bakeCameraMove: travel "caret" throws on a non-typing layer', () => {
+  const data = {
+    layers: [{ id: 'a', type: 'rect', x: 0, y: 0, w: 100, h: 100 },
+      { id: 'line', type: 'text', x: 200, y: 400, size: 60, text: 'hi', start: 2 }],
+    cameraMove: { move: 'travel', stations: [{ target: '#a', dur: 1 }, { caret: '#line' }] },
+  };
+  assert.throws(() => bakeCameraMove(data, FRAME), /has no "typing" prop/);
+});
+
+test('bakeCameraMove: travel "caret" throws on a missing id', () => {
+  const data = {
+    layers: [{ id: 'a', type: 'rect', x: 0, y: 0, w: 100, h: 100 }],
+    cameraMove: { move: 'travel', stations: [{ target: '#a', dur: 1 }, { caret: '#nope' }] },
+  };
+  assert.throws(() => bakeCameraMove(data, FRAME), /no layer with id "nope"/);
+});
+
+test('bakeCameraMove: travel "caret" throws when typing starts before the camera can arrive', () => {
+  // station 0's own "dur" is unused (travel.js: nothing flies INTO the opening station), so the clock
+  // only starts advancing at station 1: two non-zero-dur stations land it at t=1 before the caret leg.
+  const data = {
+    layers: [{ id: 'a', type: 'rect', x: 0, y: 0, w: 100, h: 100 },
+      { id: 'line', type: 'text', typing: true, x: 200, y: 400, size: 60, text: 'hi', start: 0.1 }],
+    cameraMove: { move: 'travel', stations: [{ target: '#a' }, { target: '#a', dur: 1 }, { caret: '#line' }] },
+  };
+  assert.throws(() => bakeCameraMove(data, FRAME), /at or before the camera can arrive/);
+});
