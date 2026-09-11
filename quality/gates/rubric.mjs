@@ -33,6 +33,15 @@ const DIMENSIONS = [
   // can pass, and neither passes by being what it is.
   '**Produced-not-generated**: every element in the frame is doing a job, and so is the empty part.\n   A dense frame where two elements repeat the same point FAILS. A spare frame whose emptiness\n   isolates the subject PASSES. Ask what the space is doing, never how much of it there is.',
   '**Value**: this frame teaches/proves/delights something no other frame does.',
+  // Every dimension above grades ONE frame. A ground flip only exists BETWEEN two frames: a beat that
+  // whites out then blacks out reads fine on each still in isolation, which is exactly why nothing
+  // caught it before quality/gates/ground-arc.mjs measured it pre-render. That gate answers "is this
+  // flip DECLARED" against the scene's own schedule; it cannot answer whether the CUT ITSELF reads as
+  // a jarring flash across the sheet, which needs an eye on the sequence. Ask it here instead.
+  '**Ground continuity**: where the background changes light/dark between adjacent frames, is it a\n'
+  + '   planned beat change carried across the join (a crossfade, a colour that follows the content), or\n'
+  + '   does it flash cold from one still to the next with nothing bridging it? A carried change PASSES\n'
+  + '   even when it happens more than once; an unbridged flash FAILS regardless of how brief it is.',
 ];
 
 const numbered = (list) => list.map((d, i) => `${i + 1}. ${d}`).join('\n');
@@ -132,4 +141,30 @@ Write it to \`${dir}/verdicts/${judge ?? 'N'}.json\`. Every field names a POSITI
 \`wouldShip\` is independent of \`overall\`. One cut can win and both can still be \`no\`; say so when true.
 A \`TIE\` is a real answer. Do not break one to look decisive.
 `;
+}
+
+// Guarded the same way motion-floor.mjs's self-test is: importing this module for its exports must
+// never run a CLI-only check.
+if (import.meta.url === `file://${process.argv[1]}` && process.argv.includes('--self-test')) {
+  // The real defect this guards: ground-arc.mjs measures a flip between frames, which no per-frame
+  // dimension above can see. Adding the dimension without checking it landed would ship a rubric that
+  // still cannot ask the question.
+  if (!DIMENSIONS.some((d) => /Ground continuity/.test(d))) {
+    console.error('rubric must carry a Ground continuity dimension'); process.exit(1);
+  }
+  const sheet = craftRubric({ name: 'x.mp4', frames: 3, landscape: true, dir: '/tmp/judge' });
+  if (!/Ground continuity/.test(sheet)) { console.error('craftRubric output must include Ground continuity'); process.exit(1); }
+
+  // abRubric drops indices 3/4 (brand/asset fidelity) unless a brand is named. Appending the new
+  // dimension at the END must not shift those indices: this is the case that would silently break if
+  // a future edit inserted the new dimension in the middle instead of appending it.
+  const noBrand = abRubric({ rows: 2, landscape: true, dir: '/tmp/judge' });
+  if (/Brand fidelity/.test(noBrand) || /Asset fidelity/.test(noBrand)) {
+    console.error('abRubric with no brand must still drop Brand/Asset fidelity'); process.exit(1);
+  }
+  if (!/Ground continuity/.test(noBrand)) { console.error('abRubric must keep Ground continuity even with no brand'); process.exit(1); }
+
+  console.log('  ✓ rubric self-test: Ground continuity is present in both craftRubric and abRubric,');
+  console.log('    and appending it did not shift the brand/asset-fidelity exclusion in abRubric');
+  process.exit(0);
 }
