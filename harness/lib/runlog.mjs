@@ -19,10 +19,15 @@
 //     cmd:     "dev" | "check" | "ship" | "judge" | "author-check" | "content-check"
 //     git:     short sha, or null outside a git repo
 //     dirty:   bool, true if the worktree had uncommitted changes when this line was written
-//     checks:  [{ name, ran, fired: n, blocked: bool, codes: [...], waived: [...] }]
-//     render:  { file, frames, fps, ms } | null
+//     checks:  [{ name, ran, fired: n, blocked: bool, codes: [...], waived: [...], wallMs? }]
+//     render:  { file, frames, fps, ms, wallMs? } | null
 //     content: <content-check summary> | null
 //     judge:   { verdict, file } | null
+//     wallMs:  how long THIS step (this appendRun call) took, real wall-clock time, or null if
+//              the caller never measured it. `render.ms` above is the VIDEO's length, not the time
+//              spent rendering it; `wallMs` fields (here, on `render`, and per entry in `checks`) are
+//              the actual timings, added so `make timings` can answer "how long did this take" without
+//              re-deriving it from scrollback.
 //   }
 import fs from 'node:fs';
 import path from 'node:path';
@@ -55,6 +60,7 @@ export function appendRun(film, record = {}) {
     render: record.render || null,
     content: record.content || null,
     judge: record.judge || null,
+    wallMs: Number.isFinite(record.wallMs) ? record.wallMs : null,
   };
   const out = runsPathFor(film);
   fs.mkdirSync(path.dirname(out) || '.', { recursive: true });

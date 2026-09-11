@@ -191,8 +191,10 @@ video: build ## [ship] one self-describing JSON → out/<name>.mp4 Runs the mand
 # separate commands nobody remembered. Set NOSHEETS=1 to skip them: they cost roughly one more render.
 dev: build ## [dev] THE ITERATION LOOP.
 	@echo "▶ [dev] the iteration loop, no gates, no audit"
-	bash -c 'set -o pipefail; . harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log'
-	@node harness/lib/record-render.mjs dev $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log 2>/dev/null || true
+	@t0=$$(node -e 'process.stdout.write(String(Date.now()))'); \
+	bash -c 'set -o pipefail; . harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log'; \
+	t1=$$(node -e 'process.stdout.write(String(Date.now()))'); \
+	node harness/lib/record-render.mjs dev $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log $$((t1-t0)) 2>/dev/null || true
 	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
 	@ref=$$(node -e "import('./quality/gates/stage.mjs').then(m=>{const l=m.lookBlock('$(D)'); console.log((l&&l.reference)||'');})") ; \
@@ -296,6 +298,13 @@ regen: ## [maintenance] write every generated file: schema-write + generated-che
 why: ## [check] read the run log for a film: last N runs + what changed between the last two (D=, N=5)
 	@node harness/lib/why.mjs $(D) $(N)
 
+# make timings D=<file> [N=10]: real wall-clock time per step from the run log (harness/lib/runlog.mjs
+# wallMs fields), not the video length record-render.mjs also stores. One row per logged run: gate
+# time, render time, frames, wall frames/sec, and the target's own total; a median per command at
+# the bottom, so "is this slow" has an answer without re-timing it by hand.
+timings: ## [check] real wall-clock timing per step, from the run log (D=, N=10)
+	@node harness/lib/timings.mjs $(D) $(N)
+
 # make ship D=<file>. The ladder with its teeth in: full author-check, render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
 # need real pixels, so it is the one command that says a film is actually done.
@@ -325,8 +334,10 @@ render-verify: ## [check] does the rendered mp4's duration match what the scene 
 ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit ASPECT=all -> seams -> forensics
 	@$(if $(D),node harness/lib/ensure-preflight.mjs $(D),)
 	RUNLOG_CMD=ship node harness/lib/run-author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
-	bash -c 'set -o pipefail; . harness/dev/chrome-pin.sh ship && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT)) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log'
-	@node harness/lib/record-render.mjs ship $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log 2>/dev/null || true
+	t0=$$(node -e 'process.stdout.write(String(Date.now()))'); \
+	bash -c 'set -o pipefail; . harness/dev/chrome-pin.sh ship && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT)) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log'; \
+	t1=$$(node -e 'process.stdout.write(String(Date.now()))'); \
+	node harness/lib/record-render.mjs ship $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log $$((t1-t0)) 2>/dev/null || true
 	@node quality/gates/render-verify.mjs $(D)
 	@$(if $(NOSPLIT),echo "  · motion split skipped (NOSPLIT=1)",node quality/gates/motion-split.mjs $(D))
 	node quality/audit.mjs $(D) --aspect $(if $(ASPECT),$(ASPECT),all)
