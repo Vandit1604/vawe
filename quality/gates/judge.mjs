@@ -140,7 +140,7 @@ fs.writeFileSync(`${dir}/rubric.md`, craftRubric({
 
 console.log(`\n  judge · ${path.basename(mp4)} · ${tiles.length} key frames · brand: ${brand || '(none)'}`);
 console.log(`  → sheet:  ${dir}/sheet.png`);
-console.log(`  → rubric: ${dir}/rubric.md  (house-style + 7 craft dimensions + verdict template)`);
+console.log(`  → rubric: ${dir}/rubric.md  (house-style + 8 craft dimensions + verdict template)`);
 console.log(`  → measured: ${measured.length} finding(s) from audit.mjs + sweep-static.mjs, folded into the rubric`);
 console.log(`\n  AGENT: Read ${dir}/sheet.png AGAINST the rubric, score each frame per dimension, return PASS/FIX + fixes.`);
 // Same contract as the beats receipt: producing the sheet for THIS scene content is the checkable
