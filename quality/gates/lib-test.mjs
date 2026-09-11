@@ -6016,7 +6016,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // are ALIASES with one sentence between them, and `scale` beaten by `punch` is two names for one move.
 // TOP 3 is the bar. The report is harness/dev/blurb-retrieval.mjs; 98.1% clear it today.
 {
-  const corpus = await arsenalCollect();
+  // Ranked the way rankQuery ranks: rule records sit on their own list, never in the vocabulary one.
+  const corpus = (await arsenalCollect()).filter((e) => e.kind !== 'rule');
   const own = (name) => new Set(String(name).replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().match(/[a-z0-9]+/g) || []);
   const selfRank = (e) => {
     const lower = e.name.toLowerCase(), parts = own(e.name);
@@ -6027,9 +6028,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     const i = ranked.findIndex((r) => r.x.name === e.name && r.x.kind === e.kind);
     return i < 0 ? Infinity : i + 1;
   };
-  // Craft rule records join the corpus as kind `rule`, but their brief is a VERBATIM quote of its doc
-  // (craft-rules.mjs refuses a paraphrase), so it cannot be rewritten for retrieval. Grade authored blurbs only.
-  const blurbed = corpus.filter((e) => e.kind !== 'rule' && e.blurb && e.blurb.trim());
+  const blurbed = corpus.filter((e) => e.blurb && e.blurb.trim());
   const top3 = blurbed.filter((e) => selfRank(e) <= 3).length;
   // 97% is a RATCHET set just under where the vocabulary sits (352/359, 98.1%), not a round number:
   // before the six terse blurbs below it were rewritten the figure was 346/359, 96.4%, and this failed.

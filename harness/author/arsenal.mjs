@@ -423,7 +423,10 @@ export function score(entry, qt) {
 // well" without being wide enough to call a much-better match merely comparable.
 const covBand = (c) => Math.round(c * 20);
 
-export function rankQuery(all, query, { kind = null, n = 8, guessN = 3 } = {}) {
+export function rankQuery(allIn, query, { kind = null, n = 8, guessN = 3 } = {}) {
+  // Craft rule records answer a different question (how to decide) than the vocabulary (what to name),
+  // and about a hundred of them crowded effects out of their own results. They rank on their own list.
+  const all = kind === 'rule' ? allIn : allIn.filter((e) => e.kind !== 'rule');
   const qt = toks(query);
   const u = usage();
   const coverage = coverageIn(all);
@@ -459,6 +462,10 @@ export function rankQuery(all, query, { kind = null, n = 8, guessN = 3 } = {}) {
     all: all.length,
     usage: { films: u.n, blind: u.blind, note: u.note() },
     results: selected.map(shape),
+    rules: kind ? [] : allIn.filter((e) => e.kind === 'rule')
+      .map((e) => ({ e, s: score(e, qt) })).filter((r) => r.s > 0)
+      .sort((x, y) => y.s - x.s || x.e.name.localeCompare(y.e.name)).slice(0, 3)
+      .map(({ e }) => ({ name: e.name, blurb: e.blurb, snippet: snippet(e) })),
     answers: answersRaw.map(shape),
     guesses: guessesRaw.map(shape),
   };
@@ -699,6 +706,10 @@ async function main() {
     if (e.pitfall) console.log(`      pitfall: ${e.pitfall}`);
     if (e.snippet) console.log(`      ${e.snippet}`);
     console.log('');
+  }  if (result.rules.length) {
+    console.log('  RULES (how to decide, open the doc only if you need more)');
+    for (const r of result.rules) console.log(`  ${r.name}\n      ${r.blurb}${r.snippet ? `\n      ${r.snippet}` : ''}\n`);
   }
+
 
 }
