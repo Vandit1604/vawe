@@ -252,6 +252,33 @@ const mentionContext = (prompt) => {
   }).filter(Boolean);
   return blocks.join(' ');
 };
+// `@5.63s` in a chat prompt: the exact instant the author was looking at when something read wrong.
+// Same idea as `@id` above, but keyed by TIME instead of a layer's name, because the report is "this
+// frame is broken", not "this layer is broken", and the two do not always name the same thing.
+const timeContext = (prompt) => {
+  let d; try { d = JSON.parse(fs.readFileSync(dataArg, 'utf8')); } catch { return ''; }
+  const fps = d.fps || 30;
+  const layers = Array.isArray(d.layers) ? d.layers : [];
+  const cams = normCamera(d), trans = normTransitions(d);
+  const times = [...new Set([...String(prompt).matchAll(/@(\d+(?:\.\d+)?)s\b/g)].map((m) => +m[1]))];
+  const blocks = times.map((t) => {
+    const n = Math.round(t * fps);
+    const active = layers.filter((L) => {
+      const s = L.start ?? 0, e = s + (L.duration ?? L.dur ?? 0);
+      return t >= s - 1e-9 && t < e - 1e-9;
+    }).map((L) => `${L.id || L.type || 'layer'}(${(L.start ?? 0)}-${(L.start ?? 0) + (L.duration ?? L.dur ?? 0)}s)`);
+    const cam = cams.find((c) => t >= c.start - 1e-9 && t < c.start + c.dur - 1e-9);
+    const near = trans.filter((tr) => Math.abs(tr.at - t) <= 0.5).sort((a, b) => Math.abs(a.at - t) - Math.abs(b.at - t))[0];
+    return [
+      `At ${t}s (frame ${n} at ${fps}fps):`,
+      active.length ? `active layers ${active.join(', ')}.` : 'no layer is active.',
+      cam ? `camera leg ${cam.move || 'move'} ${cam.start}-${(cam.start + cam.dur).toFixed(2)}s.` : '',
+      near ? `nearest transition ${near.fx || near.mech || 'transition'} at ${near.at}s.` : '',
+      `To see this exact frame run: make frame D=${path.relative(REPO_ROOT, dataArg)} N=${n}`,
+    ].filter(Boolean).join(' ');
+  });
+  return blocks.join(' ');
+};
 // The film's map, handed to every chat run: which layer is which scene, which storyboard beat it serves,
 // and the camera and transitions over the film. A prompt that names no @layer still knows the film.
 const sceneMap = () => {
@@ -281,6 +308,7 @@ const chatContext = (prompt) => {
     `Keep the JSON valid: run node core/validate/validate.mjs ${rel} after editing.`,
     sceneMap(),
     mentionContext(prompt),
+    timeContext(prompt),
     'Answer in 1 to 3 short sentences: what changed.',
     'Never write an em dash, in replies or in files.',
   ].filter(Boolean).join(' ');
