@@ -18,6 +18,7 @@ import { measureFrame, measureVideo } from '../media/content.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
 import { MARGIN } from '../../core/layout/safe.js';
+import { adaptFinding } from '../lib/safeguards.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // exported so ideate-ask.mjs can offer these as the real "designed screen" routes, never a second
@@ -117,6 +118,38 @@ function writeStartingFragment(fragPath, kind, themeName, invent) {
   return true;
 }
 
+// A source-only stand-in for `maskedByDesign`/`clipsByDesign` (quality/audit.mjs:220,648): no DOM
+// here, only the fragment's own markup, so "is this element a screenshot/mock-UI wrapper" is answered
+// by the same two markers those checks already use: the `hs-img-wrap` class (an image-backed capture,
+// audit.mjs:711 walks `.hs-img-wrap > img`) and `data-ink="off"` (audit.mjs:183, "in the DOM on purpose
+// and never on screen"). Returns the [start,end) ranges of every such element's outer markup.
+function wrapperRanges(html) {
+  const ranges = [];
+  const openRe = /<([a-zA-Z][a-zA-Z0-9-]*)\b([^>]*)>/g;
+  let om;
+  while ((om = openRe.exec(html))) {
+    const [full, tag, attrs] = om;
+    if (/\/>\s*$/.test(full)) continue;
+    const isWrapper = /class="[^"]*\bhs-img-wrap\b[^"]*"/.test(attrs) || /data-ink=["']off["']/.test(attrs);
+    if (!isWrapper) continue;
+    const openTagRe = new RegExp(`<${tag}\\b[^>]*>`, 'g');
+    const closeTagRe = new RegExp(`</${tag}>`, 'g');
+    let depth = 1, pos = openRe.lastIndex;
+    while (depth > 0 && pos < html.length) {
+      openTagRe.lastIndex = pos; closeTagRe.lastIndex = pos;
+      const nextOpen = openTagRe.exec(html);
+      const nextClose = closeTagRe.exec(html);
+      if (!nextClose) { pos = html.length; break; }
+      if (nextOpen && nextOpen.index < nextClose.index && !/\/>\s*$/.test(nextOpen[0])) { depth++; pos = nextOpen.index + nextOpen[0].length; }
+      else { depth--; pos = nextClose.index + nextClose[0].length; }
+    }
+    ranges.push([om.index, pos]);
+    openRe.lastIndex = pos;
+  }
+  return ranges;
+}
+const inWrapper = (ranges, idx) => ranges.some(([a, b]) => idx >= a && idx < b);
+
 // ---------------------------------------------------------------------------
 // VIDEO-READINESS (source-only): what a fragment's own markup can prove, without a render. Exported
 // and pure so it is unit-testable on a string (quality/gates/screen-readiness.test.mjs).
@@ -124,6 +157,7 @@ function writeStartingFragment(fragPath, kind, themeName, invent) {
 export function readiness(source) {
   const kit = extractKitBlock(source);
   const own = kit ? source.replace(kit, '') : source;
+  const wrapped = wrapperRanges(own);
 
   const roleSizes = {};
   const roleRe = /\.(kit-[a-z0-9-]+)\{[^}]*font:\s*\d+\s+(\d+)px/g;
@@ -131,10 +165,21 @@ export function readiness(source) {
 
   const sizes = [];
   const classRe = /class="([^"]*)"/g;
-  while ((m = classRe.exec(own))) for (const c of m[1].split(/\s+/)) if (roleSizes[c] != null) sizes.push(roleSizes[c]);
+  while ((m = classRe.exec(own))) for (const c of m[1].split(/\s+/)) if (roleSizes[c] != null) sizes.push({ px: roleSizes[c], at: m.index });
   const inlineRe = /font-size:\s*(\d+)px/g;
-  while ((m = inlineRe.exec(own))) sizes.push(parseInt(m[1], 10));
-  const smallest = sizes.length ? Math.min(...sizes) : null;
+  while ((m = inlineRe.exec(own))) sizes.push({ px: parseInt(m[1], 10), at: m.index });
+
+  // MIN_VIDEO_TEXT_PX only floors text the VIEWER reads as the kit's own type. A captured screenshot
+  // or a hand-marked decorative block carries type it never wrote (a real product's UI, a caption
+  // nobody sees): the registry, not this file, decides whether that skip is warranted.
+  const adaptedLines = [];
+  const kept = sizes.filter((s) => {
+    if (s.px >= MIN_VIDEO_TEXT_PX) return true;
+    const f = adaptFinding({ kind: 'small-text', px: s.px, wrapped: inWrapper(wrapped, s.at) });
+    if (f.adapted) { adaptedLines.push(f.adapted.line); return false; }
+    return true;
+  });
+  const smallest = kept.length ? Math.min(...kept.map((s) => s.px)) : null;
 
   const elementCount = (own.match(/<[a-zA-Z][a-zA-Z0-9-]*(\s|>|\/)/g) || []).length;
 
@@ -150,7 +195,7 @@ export function readiness(source) {
     return { src, ok: true };
   });
 
-  return { smallest, elementCount, tokenUses, rawColorUses, images, hasRealImage: images.some((i) => i.ok) };
+  return { smallest, elementCount, tokenUses, rawColorUses, images, hasRealImage: images.some((i) => i.ok), adaptedLines };
 }
 
 // The smallest text the browser actually laid out. The source parse above cannot see the cascade: a
@@ -325,6 +370,7 @@ function main() {
   const rs = boxes ? smallestRendered(boxes) : null;
   const smallest = rs ?? r.smallest;
   console.log(`  smallest text: ${smallest == null ? 'n/a (no sized text found)' : `${smallest}px${rs == null ? ' (read from source, not rendered)' : ''}` + (smallest < MIN_VIDEO_TEXT_PX ? `  ⚠ under ${MIN_VIDEO_TEXT_PX}px at 1920 wide: unreadable in a moving frame` : '  ok')}`);
+  console.log(r.adaptedLines.map((line) => `  ${line}`).join('\n'));
   console.log(`  elements: ${r.elementCount}`);
   console.log(`  colour: ${r.tokenUses} theme-token use(s), ${r.rawColorUses} raw hex/colour use(s)${r.rawColorUses && !r.tokenUses ? '  ⚠ no theme tokens used' : ''}`);
   if (!r.images.length) console.log('  images: none');

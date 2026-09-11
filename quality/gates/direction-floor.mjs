@@ -39,6 +39,7 @@ import { glyphText, snippet } from '../../harness/lib/text.mjs';
 import { flattenLayers } from '../../harness/lib/layers.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { junctionTable, marksOf, resolveJunction, isJunctionRef } from '../../core/timeline/junctions.js';
 import { population, AUTHORED } from '../../harness/lib/census.mjs';
 import { pickRecipe } from '../../recipes/index.mjs';
@@ -197,6 +198,17 @@ try {
 } catch { planThreads = ''; }
 const canWaive = (code) => !(PLAN_BACKED_WAIVERS.has(code) && !planThreads);
 
+// `not:` (docs/CRAFT/STORYBOARD-TEMPLATE.md): the defaults THIS film refuses, in the author's own
+// words. adaptFinding reads it for plain-slideshow, the same way planThreads above is read for the
+// waiver check: a film that already named "no kinetic type" as a deliberate exclusion should not then
+// fail for doing exactly that.
+let planNot = '';
+try {
+  const fm = fs.readFileSync(file.replace(/\.json$/, '.storyboard.md'), 'utf8').match(/^---\n([\s\S]*?)\n---/);
+  const m = fm && fm[1].match(/^not:\s*(\S.*)$/m);
+  planNot = m ? m[1].trim() : '';
+} catch { planNot = ''; }
+
 // flatten every layer, including group children and beat descriptors.
 const flat = flattenLayers(d.layers);
 
@@ -288,14 +300,22 @@ const directedByBeats = sig.beats > 0;
 const findings = [];
 const fail = (code, msg) => findings.push({ sev: 'FAIL', code, msg });
 const warn = (code, msg) => findings.push({ sev: 'WARN', code, msg });
+// A hard-fail that the film's own `not:` line, or its adaptive registry entry, may downgrade to a
+// report: adaptFinding is asked first, and only fails outright when it declines.
+const raise = (code, msg, ctx) => {
+  const adapted = adaptFinding({ kind: code }, ctx).adapted;
+  if (adapted) { console.log(`  ${adapted.line}`); warn(code, msg); }
+  else fail(code, msg);
+};
 
 if (!directedByBeats) {
   const plainShare = headlines.length ? plainHeadlines.length / headlines.length : 0;
+  const notCtx = { not: planNot ? [planNot] : [] };
   // THE HARD FLOOR: a plain slideshow. No kinetic type, no camera, no transitions, and a thin vocab.
   if (sig.kineticText === 0 && !camMoves && sig.transition === 0 && vocab.length < 2) {
-    fail('plain-slideshow', `this reads as a SLIDESHOW: no kinetic typography, no camera move, no transitions, motion vocabulary = {${vocab.join(', ') || 'none'}}. Compose from blueprints ({type:"beat"}) or add kinetic reveals + a camera move + seams. See docs/CRAFT/BLUEPRINTS.md + DIRECTION.md.`);
+    raise('plain-slideshow', `this reads as a SLIDESHOW: no kinetic typography, no camera move, no transitions, motion vocabulary = {${vocab.join(', ') || 'none'}}. Compose from blueprints ({type:"beat"}) or add kinetic reveals + a camera move + seams. See docs/CRAFT/BLUEPRINTS.md + DIRECTION.md.`, notCtx);
   } else if (headlines.length >= 4 && plainShare >= 0.85 && sig.kineticText === 0) {
-    fail('plain-slideshow', `${plainHeadlines.length}/${headlines.length} headlines just fade/rise with no kinetic reveal. The plain-authoring tell. Give headlines split+preset (words rise/scale), or use a blueprint beat.`);
+    raise('plain-slideshow', `${plainHeadlines.length}/${headlines.length} headlines just fade/rise with no kinetic reveal. The plain-authoring tell. Give headlines split+preset (words rise/scale), or use a blueprint beat.`, notCtx);
   }
   // coaching WARNs: the range this video is leaving on the table.
   if (sig.kineticText === 0) warn('no-kinetic-type', 'no kinetic typography anywhere (no split+preset headline). A directed video reveals key lines word-by-word, MOTION-SNIPPETS words-rise.');
@@ -334,7 +354,9 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
   const beats = beatBounds + 1;
   const needed = dur >= 8 ? Math.ceil(dur / 3.5) : 0;
   if (needed && beats < needed)
-    fail('sparse-beats', `${beats} beat(s) across ${Math.round(dur * 10) / 10}s, a film this long needs about ${needed} (a boundary roughly every 3.5s). Two or three cards held for twelve seconds is a slideshow by length, not a film. Compose more beats from blueprints (make blueprints), or shorten the film. docs/CRAFT/DIRECTION.md.`);
+    // WARN, not fail: the comment above already retired this from blocking. It was still wired
+    // through `fail()`, so a legacy waiver was doing the work this severity should have done itself.
+    warn('sparse-beats', `${beats} beat(s) across ${Math.round(dur * 10) / 10}s, a film this long needs about ${needed} (a boundary roughly every 3.5s). Two or three cards held for twelve seconds is a slideshow by length, not a film. Compose more beats from blueprints (make blueprints), or shorten the film. docs/CRAFT/DIRECTION.md.`);
 }
 
 // FEATURE POVERTY (fix 8). The engine has ~15 expressive families; a film that reaches for only a
@@ -350,7 +372,7 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
       const ae = aeRecipeFor(k);
       return ae ? `${v} → ${ae}` : v;
     }).slice(0, 5);
-    fail('feature-poverty', `this film uses ${vocab.length} expressive famil(y/ies) (${vocab.join(', ') || 'none'}); a ${Math.round(dur * 10) / 10}s film should reach for about ${need}. The engine has ~15 families and this draws from the top of the box. Reach for one of: ${reach.join(' · ')}. Rank them for THIS film with \`make preflight\`, or search: \`make arsenal Q="<the feeling>"\`.`);
+    raise('feature-poverty', `this film uses ${vocab.length} expressive famil(y/ies) (${vocab.join(', ') || 'none'}); a ${Math.round(dur * 10) / 10}s film should reach for about ${need}. The engine has ~15 families and this draws from the top of the box. Reach for one of: ${reach.join(' · ')}. Rank them for THIS film with \`make preflight\`, or search: \`make arsenal Q="<the feeling>"\`.`, { durationSec: dur });
   }
 }
 

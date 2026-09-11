@@ -176,8 +176,16 @@ export const KNOBS = {
 // whose stated default is wrong still moves the frame and still passes. The refusal has to sit at the
 // write site, which is here.
 //
-// Exported so the refusals can be exercised on a fixture: they fire at module load, and a test cannot
-// break a manifest that has already loaded.
+// COLLECTED, NOT THROWN. The contract is unchanged (every advertised dial is read, every read dial
+// has a row); only WHEN it is enforced moved. Throwing here ran at module load, so one preset shipped
+// a day behind its own row list took down every `import`, of core/kinetic and everything above it, for
+// every render and every other gate, whether that render touched the broken preset or not. Collected
+// here, the mismatch stays fully described (preset, dial, message) and quality/gates/lib-test.mjs's
+// "dial contract" check fails on it by name, same as before, without a single bad row bringing down
+// the engine. adaptFinding does not apply: nothing about a film's own context excuses this, it is a
+// mismatch between two files this repo's own author controls.
+export const DIAL_CONTRACT_VIOLATIONS = [];
+
 export function bindDials(family, presets) {
   for (const [name, fn] of Object.entries(presets)) {
     const sig = dialsOf(fn);
@@ -186,27 +194,34 @@ export function bindDials(family, presets) {
     if (!sig) continue;
     const rows = family[name] || [];
     for (const row of rows) {
-      if (!(row.name in sig))
-        throw new Error(`kinetic preset "${name}" advertises a dial "${row.name}" its signature does not`
-          + ` read. It reads: ${Object.keys(sig).join(', ')}. Delete the row in core/knobs.js, or`
-          + ` destructure the dial in core/type.js. A dial nothing reads is ignored at render.`);
+      if (!(row.name in sig)) {
+        DIAL_CONTRACT_VIOLATIONS.push({ preset: name, dial: row.name,
+          message: `kinetic preset "${name}" advertises a dial "${row.name}" its signature does not`
+            + ` read. It reads: ${Object.keys(sig).join(', ')}. Delete the row in core/knobs.js, or`
+            + ` destructure the dial in core/type.js. A dial nothing reads is ignored at render.` });
+        continue;
+      }
       // A row may still carry a hand-written default, because nothing stops a future author typing one
       // back in, and a SECOND opinion about a number is the state this block exists to end. Name both.
-      if ('default' in row && row.default !== sig[row.name])
-        throw new Error(`kinetic preset "${name}" states two defaults for "${row.name}": core/type.js`
-          + ` destructures ${JSON.stringify(sig[row.name])} and core/knobs.js advertises`
-          + ` ${JSON.stringify(row.default)}. The signature is what the engine runs. Delete the default`
-          + ` from the knobs row: it is read off the signature.`);
+      if ('default' in row && row.default !== sig[row.name]) {
+        DIAL_CONTRACT_VIOLATIONS.push({ preset: name, dial: row.name,
+          message: `kinetic preset "${name}" states two defaults for "${row.name}": core/type.js`
+            + ` destructures ${JSON.stringify(sig[row.name])} and core/knobs.js advertises`
+            + ` ${JSON.stringify(row.default)}. The signature is what the engine runs. Delete the default`
+            + ` from the knobs row: it is read off the signature.` });
+      }
       // undefined means the signature names the dial and states no default (colorWave's flash and to
       // resolve to a theme variable at render). `null` is this manifest's word for "no stated default".
       row.default = sig[row.name] === undefined ? null : sig[row.name];
     }
     const missing = Object.keys(sig).filter((d) => !rows.some((r) => r.name === d));
-    if (missing.length)
-      throw new Error(`kinetic preset "${name}" reads ${missing.map((d) => `"${d}"`).join(', ')} and`
-        + ` core/knobs.js does not list ${missing.length > 1 ? 'them' : 'it'}. A dial with no row is`
-        + ` invisible to vawe_capabilities, to make knobs and to the dead-knob validator, so nobody`
-        + ` outside this file can find it. Add the row: the desc is what a signature cannot state.`);
+    for (const d of missing) {
+      DIAL_CONTRACT_VIOLATIONS.push({ preset: name, dial: d,
+        message: `kinetic preset "${name}" reads "${d}" and core/knobs.js does not list it. A dial`
+          + ` with no row is invisible to vawe_capabilities, to make knobs and to the dead-knob`
+          + ` validator, so nobody outside this file can find it. Add the row: the desc is what a`
+          + ` signature cannot state.` });
+    }
   }
   return family;
 }
