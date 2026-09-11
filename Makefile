@@ -692,6 +692,12 @@ motion-floor: ## [check] DOES THE FILM EVER STOP: local (content) motion per 0.5
 choreo: ## [check] HOW THIS FILM CHOREOGRAPHS MOTION: kinds per beat, element lives, handoffs (D=<film>, REF=<ref clip name>)
 	@node quality/gates/choreo.mjs $(D) $(if $(REF),--ref $(REF)) $(if $(JSON),--json,)
 
+# make speed D=<film> [LAYER=<id>]: a READOUT, not a gate. Start/peak/end speed for every motion
+# segment, camera leg and transition, sampled off the engine's own resolved values at the film's fps
+# (motionAt/velocityAt/cameraAt/cameraVelocityAt), plus the ease or handles driving each one.
+speed: ## [check] speed readout: start/peak/end px-per-s (scale/s for zoom) per motion segment, camera leg, transition (D=<film>, LAYER=<id>)
+	@node quality/gates/speed.mjs $(D)
+
 # make motion-lab D=<storyboard.md> VARIANTS=<variants.json>: does a motion change actually raise the
 # local-motion floor, or is it a feeling. Assembles, renders and motion-floors the base storyboard plus
 # every named variant (each one a mutation of the beats' `motion:` lines) THE SAME WAY, one table:
