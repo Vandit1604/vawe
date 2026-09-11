@@ -97,9 +97,8 @@ not: "the defaults this film refuses, in your own words"
   one composition is the flat film: nothing about the cut between them reads as a change.
 
   `weight:` is peak · strong · quiet, and EXACTLY ONE beat in a film is the peak. This is `spectacle:`
-  made per beat and made measurable: `make frame-check D=<film>` renders every fragment and reports the
-  largest object in each, so a film whose quietest beat holds its biggest object fails instead of
-  shipping. Ours did: the declared payoff was the fifth-largest object in its own film.
+  made per beat: the one loud moment, carried by motion, contrast or a camera move, not a size to
+  measure. Fast motion legitimately shows a small object for a few frames.
 
   `borrows:` is `<their device> -> <our object>`, required whenever a reference is in play. Writing that
   arrow is the whole point: a shape copied without its role is how a chat input ends up in a film about

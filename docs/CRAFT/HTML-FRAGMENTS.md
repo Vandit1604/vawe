@@ -366,7 +366,7 @@ a premium pass on a flat layout makes an expensive-looking flat layout.
 | 3 | dull, monochrome, flat colour | `pbakaus/colorize` | the strongest colour OWNS a region; grounds rotate; remap tokens, never invert | contrast pairs in `make preview` |
 | 4 | depth is muddy, borders generic | `mengto/beautiful-shadows` | a three-level neutral ramp, one level per element | `frame-check` `off-ramp-shadow` |
 | 5 | clean but not expensive | `leonxlnx/soft-skill` | the double bezel, chips, macro whitespace, concentric radii | `impeccable` `nested-cards`, as a reason |
-| 6 | too safe, no peak | `pbakaus/bolder` | commit to ONE loud moment, quiet everything around it | `frame-check` `peak-not-largest` |
+| 6 | too safe, no peak | `pbakaus/bolder` | commit to ONE loud moment, quiet everything around it | motion, contrast, or a camera move, judged by eye |
 
 Two more that are not skills and outrank all six, because they decide whether the ladder is even
 pointed at the right thing:
@@ -441,7 +441,7 @@ The fix is process and context, never a cleverer one-shot.
 | **Extract the design system before any screen.** Pull every colour, size and spacing value from the file; ask before inventing anything not in it | the stage kit, and `frame-check`'s `off-ramp-size` / `off-ramp-shadow` fail a literal where a role exists |
 | **Give explicit specs, not adjectives** | `archetype:` `weight:` `borrows:` are closed vocabularies; `not:` names the forbidden defaults by name |
 | **Ground with tone.** No pure black or white; tint it. One dominant colour (~60%), one neutral (~30%), one sharp accent (~10%), never past three hues | `themes/vawe-film.json`: a cool `#f4f6fa` ground, one accent, one neutral. The flat white theme is what made a glass shine render as nothing |
-| **Add real motion, and keep the touch light.** One memorable moment beats motion on everything | `spectacle:` and `weight: peak` name that one moment, and `frame-check` measures whether the frames agree |
+| **Add real motion, and keep the touch light.** One memorable moment beats motion on everything | `spectacle:` and `weight: peak` name that one moment, carried by motion, contrast or a camera move |
 
 The one this repo did NOT have is the fourth, and it is the one that was making the frames read flat:
 a ground with no tonal range cannot show depth, glass or light, so every modern effect degrades to
@@ -500,9 +500,10 @@ right? Then render.
 make frame-check D=formats/scene/<film>.json
 ```
 
-It renders every fragment and reports the largest object in each, so `weight: peak` is measured
-rather than asserted, and it fails a size or a shadow that does not trace to the kit. Nothing did
-this before: `storyboard-check` grades the plan against itself, `critique` and `eye-trace` read the
+It checks every fragment against its own beat, and it fails a size or a shadow that does not trace to
+the kit. `weight: peak` names the one loud moment, carried by motion, contrast or a camera move, not a
+size to measure: fast motion legitimately shows a small object for a few frames. Nothing did the kit
+check before: `storyboard-check` grades the plan against itself, `critique` and `eye-trace` read the
 scene after assembly, and `make preview` judges one fragment with no idea which beat it serves.
 
 **To review the fragments AS THE FILM, and to hand a human something to approve:**
