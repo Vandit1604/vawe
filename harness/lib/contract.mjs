@@ -147,15 +147,27 @@ export function edges(beats) {
 // down and rebuilding it (docs/CRAFT/STORYBOARD-TEMPLATE.md).
 const FRAGMENT_SEP_RE = /^(?:(.+?)\s+)?@\s*(.+)$/;
 
-/** parseFragmentSpec("_together.card.html @ center@900x520") → {path, edge}. path/edge are null when unstated; edge carries {error} the same way parseEdge does. */
+// `fragment: none` (optionally `, <reason>`) is the one spelling every reader of `fragment:` accepts
+// for "this beat has no fragment file": a beat built from native layers alone (an image + text pair,
+// a solid card), never a pretend filename standing in for "nothing to author here". One convention,
+// taught to the one parser, so stage/storyboard-check/frame-check never each invent their own guess
+// at what "no fragment" looks like (docs/CRAFT/STORYBOARD-TEMPLATE.md).
+const FRAGMENT_NONE_RE = /^none\b/i;
+
+/** parseFragmentSpec("_together.card.html @ center@900x520") → {path, edge, none}. path/edge are null
+ * when unstated; edge carries {error} the same way parseEdge does; none is true for "fragment: none". */
 export function parseFragmentSpec(raw) {
-  if (raw == null) return { path: null, edge: null };
+  if (raw == null) return { path: null, edge: null, none: false };
   const s = String(raw).trim().replace(/^["']|["']$/g, '');
-  if (!s) return { path: null, edge: null };
+  if (!s) return { path: null, edge: null, none: false };
+  if (FRAGMENT_NONE_RE.test(s)) return { path: null, edge: null, none: true };
+  // A trailing "(a note)" is a remark, not part of the path or the placement clause: strip it once,
+  // here, rather than in every caller that used to re-derive the same split.
+  const stripNote = (v) => { const t = (v || '').split(/\s+\(/)[0].trim(); return t || null; };
   const m = FRAGMENT_SEP_RE.exec(s);
-  if (!m) return { path: s, edge: null };   // no "@": a plain file override, no placement stated
+  if (!m) return { path: stripNote(s), edge: null, none: false };   // no "@": a plain file override
   const [, pathPart, placementRaw] = m;
-  return { path: pathPart || null, edge: parseEdge(placementRaw) };
+  return { path: stripNote(pathPart), edge: parseEdge(placementRaw), none: false };
 }
 
 /** fragmentErrors(beats) → string[] naming every beat whose `fragment:` placement clause does not parse. */

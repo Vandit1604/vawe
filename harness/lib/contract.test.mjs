@@ -2,7 +2,23 @@
 // is refused with BOTH values named.
 //   node harness/lib/contract.test.mjs
 import assert from 'node:assert/strict';
-import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, parseMoveEntry, parseMoveEntries, moveErrors, moveKeys, SPEED_BAND, isCausedTrigger, STAGE_S, parseUseLine, resolveUse, useErrors, useWarnings, resolvedUses, useSlotPath, cameraStillHeldWarnings, normalCameraEvidence, isRestCameraPose } from './contract.mjs';
+import { parseEdge, chainErrors, edges, parseMotionEntry, parseMotion, motionErrors, parseMoveEntry, parseMoveEntries, moveErrors, moveKeys, SPEED_BAND, isCausedTrigger, STAGE_S, parseUseLine, resolveUse, useErrors, useWarnings, resolvedUses, useSlotPath, cameraStillHeldWarnings, normalCameraEvidence, isRestCameraPose, parseFragmentSpec } from './contract.mjs';
+
+// parseFragmentSpec: "none" (the one spelling for "this beat has no fragment file") short-circuits
+// to path:null, none:true, regardless of a trailing reason after a comma.
+assert.deepEqual(parseFragmentSpec('none'), { path: null, edge: null, none: true });
+assert.deepEqual(parseFragmentSpec('none, an image + text layer pair'), { path: null, edge: null, none: true });
+assert.deepEqual(parseFragmentSpec(null), { path: null, edge: null, none: false });
+
+// a plain file, a file with a placement clause, and a file with a trailing "(note)": all resolve to
+// the same path with the note or clause stripped, one place, not re-derived by each caller.
+assert.deepEqual(parseFragmentSpec('_together.card.html'), { path: '_together.card.html', edge: null, none: false });
+assert.equal(parseFragmentSpec('_together.card.html (shared across two beats)').path, '_together.card.html');
+{
+  const withPlacement = parseFragmentSpec('_together.card.html @ center@900x520');
+  assert.equal(withPlacement.path, '_together.card.html');
+  assert.equal(withPlacement.edge.placement, 'center');
+}
 
 // parseEdge: the happy path, quotes stripped (storyboard-parse.mjs's fieldIn does not strip them).
 // rot/opacity default to 0/1 (no pose stated = no pose change), same "no opinion" convention as before.
@@ -301,4 +317,4 @@ assert.equal(normalCameraEvidence({ name: 'A', camera: 'slowPush', picture: 'the
     'a lone wide beat with no earlier push at all has nothing held against it');
 }
 
-console.log('✓ contract.test.mjs: use: resolves exact/aka/kind-prefixed names, refuses ambiguous/dedicated/internal ones, warns free prose with ready lines, and its slot skeleton reuses pasteOf; cameraStillHeldWarnings flags an unreturned push into a later normal-camera beat and clears on a return or a non-normal shot');
+console.log('✓ contract.test.mjs: use: resolves exact/aka/kind-prefixed names, refuses ambiguous/dedicated/internal ones, warns free prose with ready lines, and its slot skeleton reuses pasteOf; cameraStillHeldWarnings flags an unreturned push into a later normal-camera beat and clears on a return or a non-normal shot; parseFragmentSpec reads "none" as no-fragment and strips a trailing (note) from a path');
