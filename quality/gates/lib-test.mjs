@@ -72,7 +72,7 @@ import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
 import { parseCameraLine, cameraErrors, cameraWarnings, cameraContinuityErrors, resolvedCamera, nearestCameraMoves, parseTransitionIn, transitionInErrors, transitionInWarnings, resolvedTransitionIn, nearestTransitions } from '../../harness/lib/contract.mjs';
 import { adoptionReport } from './stage.mjs';
 import { bgPaletteFrom } from '../../core/backgrounds/index.js';
-import { parseColorRGB } from '../../core/color/engine.js';
+import { parseColorRGB, colorDistance } from '../../core/color/engine.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
 import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
 import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/layers/path-morph.js';
@@ -130,6 +130,13 @@ let pass = 0, fail = 0;
 const r2gain = (v) => Math.round(v * 1000) / 1000;
 const approx = (a, b, eps = 1e-6) => Math.abs(a - b) <= eps;
 const ok = (name, cond) => { if (cond) { pass++; } else { fail++; console.error('✗ ' + name); } };
+
+// colorDistance is alpha-aware: quality/gates/design-drift.mjs's COLOR_TOL (6) draws the hint/drift
+// line, and this is the bug it was drawn to catch (a 72%-white read as a match for solid white).
+ok('colorDistance: alpha gap is drift, not a hint', colorDistance('rgba(255,255,255,0.72)', '#ffffff') > 6);
+ok('colorDistance: same rgba against itself is legal (0)', colorDistance('rgba(255,255,255,0.72)', 'rgba(255,255,255,0.72)') === 0);
+ok('colorDistance: 1-2 unit RGB gap at equal alpha is still a hint', colorDistance('rgb(254,254,253)', 'rgb(255,255,255)') <= 6);
+ok('colorDistance: unparseable colour is Infinity, not a false match', colorDistance('not-a-colour', '#ffffff') === Infinity);
 
 // `node quality/gates/lib-test.mjs --colours` prints what the ONE parser now does with the colours
 // the four old copies disagreed about. The asserts below are the gate; this is how you READ it.

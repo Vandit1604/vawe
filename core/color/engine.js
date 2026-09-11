@@ -78,6 +78,21 @@ export function parseColorRGB(c) {
   return t ? { r: t[0], g: t[1], b: t[2] } : null;
 }
 
+// THE one colour distance, alpha included. quality/gates/design-drift.mjs and harness/lib/design-spec.mjs
+// each had their own euclidean RGB distance, and both dropped alpha the way parseColorRGB does for its
+// own callers (they want opaque channels). A gate comparing DECLARED colours can't afford that drop:
+// `rgba(255,255,255,0.72)` and `#ffffff` are the same RGB triple and a different colour on screen, so a
+// gate that reads only RGB calls a 72%-white a match for solid white. Alpha is scaled to 0-255 and
+// folded into the same euclidean sum as a fourth channel, so it sits on the existing tolerances
+// (COLOR_TOL = 6) instead of needing one of its own: a 0.28 alpha gap is ~71 units, far past any of them.
+// Returns Infinity when either colour fails to parse, same as an unmatched candidate.
+export function colorDistance(a, b) {
+  const ca = parseColor(a), cb = parseColor(b);
+  if (!ca || !cb) return Infinity;
+  const aa = colorAlpha(a) * 255, ab = colorAlpha(b) * 255;
+  return Math.sqrt((ca[0] - cb[0]) ** 2 + (ca[1] - cb[1]) ** 2 + (ca[2] - cb[2]) ** 2 + (aa - ab) ** 2);
+}
+
 // ---------- color contrast (WCAG) ----------
 // contrastRatio >= 1 (21 = black/white).
 // ensureContrast: keep fg if it clears min against bg, else return whichever of light/dark reads.

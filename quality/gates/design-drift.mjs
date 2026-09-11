@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { resolveLook } from '../../core/registry/theme-contract.js';
-import { isLightBg, parseColorRGB } from '../../core/color/engine.js';
+import { isLightBg, colorDistance } from '../../core/color/engine.js';
 import { buildKit } from '../../harness/lib/stagekit.mjs';
 import { readDesignSpec, legalSet, nearestToken } from '../../harness/lib/design-spec.mjs';
 import { parseStoryboard, blocksOf, fieldIn } from '../../harness/author/storyboard-parse.mjs';
@@ -64,11 +64,10 @@ export function fragmentsOf(sbPath) {
   return out;
 }
 
-function colorDist(a, b) {
-  const ca = parseColorRGB(a), cb = parseColorRGB(b);
-  if (!ca || !cb) return Infinity;
-  return Math.sqrt((ca.r - cb.r) ** 2 + (ca.g - cb.g) ** 2 + (ca.b - cb.b) ** 2);
-}
+// alpha-aware: core/color/engine.js#colorDistance is the one distance both this gate and
+// harness/lib/design-spec.mjs's nearestToken use, so a colour declared with alpha can't match one
+// without it.
+const colorDist = colorDistance;
 
 function nearestNumeric(value, legalArr) {
   let best = null;
