@@ -44,6 +44,7 @@ import { IDLE_NAMES } from '../../core/engine/idle.js';
 import { CURVES as PATH_CURVES } from '../../core/motion/path-curves.js';
 import { boundaryMechanism } from '../../core/transitions/lower.js';
 import { TRANSITIONS } from '../../core/transitions/catalog.js';
+import { RELATIONSHIP_KEYS, candidatesFor } from '../../core/transitions/relationships.js';
 import { pickRecipe, RECIPES } from '../../recipes/index.mjs';
 import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS, cameraMoveParams, buildCameraMove } from '../../core/camera-moves/index.js';
 import { CAMERA_WORDS, resolveCameraMove } from '../../core/registry/vocab.js';
@@ -978,6 +979,102 @@ export function recipeErrors(beats) {
     if (p.missingSlots.length) errs.push(`beat ${i + 1} (${b.name}) recipe "${p.name}" is missing slot(s): ${p.missingSlots.join(', ')}. recipes/README.md.`);
   });
   return errs;
+}
+
+/** isSeamRecipe(b) → true when this beat's `recipe:` line names a recipe of kind "seam"
+ * (recipes/recipes.json), the same "a boundary with no cut" job seamRecipeEntry() already names. Used
+ * as boundary COVERAGE by the transition procedure below: a `flow-seam`/`object-wipe`/`colour-wipe`
+ * recipe IS the boundary, same as a real transitions[] entry would be. */
+export function isSeamRecipe(b) {
+  if (!b || !b.recipe) return false;
+  const p = parseRecipeLine(b.recipe);
+  return !!(p && p.def && p.def.kind === 'seam');
+}
+
+// ── THE DECISION PROCEDURE, AS DATA (docs/CRAFT/TRANSITIONS.md #the-decision-procedure-the-algorithm-
+// to-run-at-every-seam): a boundary's RELATIONSHIP and FEELING, and whether the seam should disappear or
+// speak, written down as `transition_why: <relationship> · <feeling> · <invisible|expressive>` on the
+// arriving beat, the same beat that already carries `transition_in`. Read here, next to it, because a
+// second parser for the same boundary would drift the way two readers of one field always do.
+const TRANSITION_WHY_RE = /^\s*([a-z][a-z-]*)\s*·\s*([^·]+?)\s*·\s*(invisible|expressive)\s*$/i;
+
+/** parseTransitionWhy(raw) → {relationship,feeling,mode} | {error} | null (nothing written). */
+export function parseTransitionWhy(raw) {
+  if (!raw) return null;
+  const s = String(raw).trim();
+  if (!s) return null;
+  const m = TRANSITION_WHY_RE.exec(s);
+  if (!m) {
+    return { error: `transition_why "${raw}" must read "<relationship> · <feeling> · <invisible|expressive>". `
+      + `Relationships: ${RELATIONSHIP_KEYS.join(', ')}.` };
+  }
+  const [, relRaw, feeling, modeRaw] = m;
+  const relationship = relRaw.toLowerCase();
+  if (!RELATIONSHIP_KEYS.includes(relationship)) {
+    const near = nearMisses(relationship, RELATIONSHIP_KEYS);
+    return { error: `transition_why relationship "${relRaw}" is not one of ${RELATIONSHIP_KEYS.join(', ')}`
+      + `${near.length ? `, did you mean "${near[0]}"?` : ''}.` };
+  }
+  return { relationship, feeling: feeling.trim(), mode: modeRaw.toLowerCase() };
+}
+
+/** transitionWhyErrors(beats) → string[]: every beat (after the first) whose `transition_why` is
+ * written but does not parse (bad shape, or a relationship word the taxonomy does not name). */
+export function transitionWhyErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    if (i === 0) return;
+    const p = parseTransitionWhy(b.transition_why);
+    if (p && p.error) errs.push(`beat ${i + 1} (${b.name}) transition_why: ${p.error}`);
+  });
+  return errs;
+}
+
+/** boundaryCovered(prev, b) → true when the boundary INTO `b` (from `prev`) is covered by something
+ * other than silence: a `transition_in` line (resolved or not, prose still counts as a decision made),
+ * a seam recipe, a declared camera travel on either side, or a shared element (`becomes:`) crossing it.
+ * Mirrors the taxonomy's own non-cut devices (core/transitions/relationships.js DEVICES). */
+function boundaryCovered(prev, b) {
+  if (b.transition_in) return true;
+  if (isSeamRecipe(b) || isSeamRecipe(prev)) return true;
+  const camB = resolvedCamera(b);
+  const camPrev = resolvedCamera(prev);
+  if ((camB && camB.move === 'travel') || (camPrev && camPrev.move === 'travel')) return true;
+  if (b.becomes || prev.becomes) return true;
+  return false;
+}
+
+/** transitionFindings(beats) → { unreasoned, uncovered, mismatch }, each a string[], the three
+ * report-only findings storyboard-check.mjs routes to `transition-unreasoned` / `boundary-uncovered` /
+ * `transition-reason-mismatch`. One function, three arrays, so the per-boundary loop runs once. */
+export function transitionFindings(beats) {
+  const unreasoned = [], uncovered = [], mismatch = [];
+  beats.forEach((b, i) => {
+    if (i === 0) return;
+    const prev = beats[i - 1];
+    const hasSeam = isSeamRecipe(b) || isSeamRecipe(prev);
+    const why = parseTransitionWhy(b.transition_why);
+    if ((b.transition_in || hasSeam) && !why) {
+      unreasoned.push(`beat ${i + 1} (${b.name}) has a transition_in or recipe seam into it but no `
+        + `transition_why. Answer the procedure: relationship, feeling, invisible or expressive `
+        + '(docs/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam).');
+    }
+    if (!boundaryCovered(prev, b)) {
+      const guess = nearestTransitions(`${prev.name} ${b.name}`, 3).map((t) => t.name).join(', ');
+      uncovered.push(`beat ${i} (${prev.name}) -> beat ${i + 1} (${b.name}) has no transition_in, no `
+        + `recipe seam, and no declared camera travel or shared element (becomes:) across it. Name the `
+        + `relationship (${RELATIONSHIP_KEYS.join(', ')}) and pick a transition: nearest by name ${guess}.`);
+    }
+    if (why && !why.error && b.transition_in) {
+      const resolved = resolvedTransitionIn(b);
+      const candidates = candidatesFor(why.relationship) || [];
+      if (resolved && !candidates.includes(resolved.fx)) {
+        mismatch.push(`beat ${i + 1} (${b.name}) transition_why relationship "${why.relationship}" names `
+          + `${candidates.join(', ')}, not "${resolved.fx}". Either the relationship or the fx is wrong.`);
+      }
+    }
+  });
+  return { unreasoned, uncovered, mismatch };
 }
 
 // ── USE: the general door onto the arsenal's 790-entry corpus (harness/author/arsenal.mjs collect()),

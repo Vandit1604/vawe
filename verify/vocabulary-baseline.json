@@ -303,6 +303,9 @@
  "core/transitions/units.js": [
   "UNITS"
  ],
+ "core/transitions/relationships.js": [
+  "RELATIONSHIPS"
+ ],
  "core/type/type.js": [
   "STAGGER_FROM_BLURBS"
  ],

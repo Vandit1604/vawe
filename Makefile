@@ -612,8 +612,11 @@ doc-index: ## [site] regenerate every index view from the per-doc frontmatter: d
 
 # make transitions [BASIC=1], print THE TRANSITION DATABASE (core/transitions/catalog.js): every transition
 # across all four mechanisms (anim/cut/sting/seam), grouped, basics marked. Decision theory: docs/CRAFT/TRANSITIONS.md.
+# make transitions D=<film.json>, run the DECISION PROCEDURE per boundary of that film's storyboard: the
+# current transition_in/recipe seam or "nothing", the stated transition_why or "unreasoned", and the top
+# candidates for the relationship (docs/CRAFT/TRANSITIONS.md).
 transitions: ## [study] print THE TRANSITION DATABASE (core/transitions/catalog.js): every transition across all four
-	@node quality/gates/transitions-catalog.mjs $(if $(JSON),--json,)
+	@node quality/gates/transitions-catalog.mjs $(D) $(if $(JSON),--json,)
 
 # make transition-preview FX=<name> [MECH=seam|cut|sting|anim] [DIR=left|right|up|down] [TIMING=smooth|linear] [DUR=0.7]
 # SEE one transition before authoring: renders a canned two-beat scene (blue A → orange B) through the

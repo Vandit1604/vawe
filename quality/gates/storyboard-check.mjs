@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
 import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../../harness/author/storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, cameraStillHeldWarnings, transitionInErrors, transitionInWarnings, moveErrors, motionErrors, parseFragmentSpec, arsenalCorpus, useErrors, useWarnings, eyeErrors, hasEyeCandidateMotion, eyeUntargetedDevices, competingEyeDevices, parseEyeLine } from '../../harness/lib/contract.mjs';
+import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, cameraStillHeldWarnings, transitionInErrors, transitionInWarnings, transitionWhyErrors, transitionFindings, moveErrors, motionErrors, parseFragmentSpec, arsenalCorpus, useErrors, useWarnings, eyeErrors, hasEyeCandidateMotion, eyeUntargetedDevices, competingEyeDevices, parseEyeLine } from '../../harness/lib/contract.mjs';
 import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
@@ -140,6 +140,15 @@ for (const e of cameraContinuityErrors(sbBeats)) err('camera-snap-at-seam', e);
 for (const w of cameraStillHeldWarnings(sbBeats)) warn('camera-still-held', w);
 for (const e of transitionInErrors(sbBeats)) err('transition-in-unknown', e);
 for (const w of transitionInWarnings(sbBeats)) warn('transition-in-undecided', w);
+// `transition_why` runs the decision procedure's own questions per boundary (docs/CRAFT/
+// TRANSITIONS.md), report-only: a bad shape is an error (it will never parse), the three coverage/
+// reasoning findings are warnings, because the field is new and a blocker here would fail every
+// storyboard written before it existed.
+for (const e of transitionWhyErrors(sbBeats)) err('transition-why-unknown', e);
+const tf = transitionFindings(sbBeats);
+for (const w of tf.unreasoned) warn('transition-unreasoned', w);
+for (const w of tf.uncovered) warn('boundary-uncovered', w);
+for (const w of tf.mismatch) warn('transition-reason-mismatch', w);
 // `move:`/`motion:` are already a real grammar (never free prose): a bad line is a typo, not an
 // undecided sentence, so it is reported here the same way `recipe:` already is above, a plan-time
 // WARNING (assemble.mjs still blocks on it at JSON-build time; two gates, one parser).

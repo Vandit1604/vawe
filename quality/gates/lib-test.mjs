@@ -71,7 +71,9 @@ import { PART_NAMES, PART_BLURBS, PARTS } from '../../core/motion/parts.js';
 import { FALLOFFS, FALLOFF_NAMES, FALLOFF_BLURBS, DRIVES, DRIVE_NAMES, effectorAt, effectorStyle } from '../../core/motion/effector.js';
 import { cutVelocityAdvice, layerSpeedAt, cameraSpeedAt } from '../../core/timeline/velocity-cut.js';
 import { TRACK_TYPES, SLOTS } from '../../core/tracks/index.js';
-import { parseCameraLine, cameraErrors, cameraWarnings, cameraContinuityErrors, resolvedCamera, nearestCameraMoves, parseTransitionIn, transitionInErrors, transitionInWarnings, resolvedTransitionIn, nearestTransitions } from '../../harness/lib/contract.mjs';
+import { parseCameraLine, cameraErrors, cameraWarnings, cameraContinuityErrors, resolvedCamera, nearestCameraMoves, parseTransitionIn, transitionInErrors, transitionInWarnings, resolvedTransitionIn, nearestTransitions, parseTransitionWhy, transitionFindings } from '../../harness/lib/contract.mjs';
+import { RELATIONSHIPS, DEVICES } from '../../core/transitions/relationships.js';
+import { TRANSITIONS as TRANSITIONS_CATALOG } from '../../core/transitions/catalog.js';
 import { adoptionReport } from './stage.mjs';
 import { bgPaletteFrom } from '../../core/backgrounds/index.js';
 import { parseColorRGB, colorDistance } from '../../core/color/engine.js';
@@ -7675,6 +7677,82 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const rt = resolvedTransitionIn(beat('B', { transition_in: 'fx:whipPan dur=0.4' }));
   ok('contract: resolvedTransitionIn carries mech and the extra params', rt && rt.mech && rt.dur === 0.4);
   ok('contract: transitionInErrors ignores beat 1 (opens the film, not a boundary)', transitionInErrors([beat('A', { transition_in: 'fx:notreal' })]).length === 0);
+}
+
+// ---- core/transitions/relationships.js + contract.mjs: the decision procedure per boundary ---------
+{
+  const beat = (name, extra) => ({ name, ...extra });
+  const catalogNames = new Set(TRANSITIONS_CATALOG.map((t) => t.name));
+
+  // freshness: every catalog candidate in the taxonomy actually exists in the catalog. A device name
+  // (camera travel, shared-element morph, match-on-action) is not a catalog transition on purpose.
+  let staleCandidate = null;
+  for (const [rel, { candidates }] of Object.entries(RELATIONSHIPS)) {
+    for (const c of candidates) {
+      if (!DEVICES.has(c) && !catalogNames.has(c)) staleCandidate = `${rel}: "${c}"`;
+    }
+  }
+  ok('relationships: every catalog candidate exists in core/transitions/catalog.js', staleCandidate === null);
+  if (staleCandidate) console.error(`  (stale candidate: ${staleCandidate})`);
+
+  // parseTransitionWhy: the three-part grammar, a bad relationship word, and "nothing written"
+  const why = parseTransitionWhy('time · a slow reveal · invisible');
+  ok('contract: transition_why parses relationship/feeling/mode', why && why.relationship === 'time' && why.feeling === 'a slow reveal' && why.mode === 'invisible');
+  const badRel = parseTransitionWhy('teleport · zap · invisible');
+  ok('contract: transition_why an unknown relationship is an error naming the real ones', !!badRel.error && /continuity/.test(badRel.error));
+  const badShape = parseTransitionWhy('time, a slow reveal, invisible');
+  ok('contract: transition_why wrong separator (no middle dot) is an error', !!badShape.error);
+  ok('contract: transition_why unset is null (no opinion)', parseTransitionWhy(undefined) === null && parseTransitionWhy('') === null);
+
+  // transitionFindings: the three report-only findings, firing and quiet
+  const covered = [beat('A', {}), beat('B', { transition_in: 'fx:dissolve', transition_why: 'time · a slow reveal · invisible' })];
+  ok('contract: transitionFindings is quiet on a covered, reasoned, matched boundary', transitionFindings(covered).unreasoned.length === 0
+    && transitionFindings(covered).uncovered.length === 0 && transitionFindings(covered).mismatch.length === 0);
+
+  const unreasoned = [beat('A', {}), beat('B', { transition_in: 'fx:cinematicZoom' })];
+  ok('contract: transitionFindings.unreasoned fires when transition_in has no transition_why', transitionFindings(unreasoned).unreasoned.length === 1);
+
+  const uncovered = [beat('A', {}), beat('B', {})];
+  ok('contract: transitionFindings.uncovered fires on a bare boundary (no transition_in/recipe/camera/becomes)', transitionFindings(uncovered).uncovered.length === 1);
+  const coveredByBecomes = [beat('A', {}), beat('B', { becomes: 'the card becomes the label' })];
+  ok('contract: transitionFindings.uncovered is quiet when becomes: crosses the boundary', transitionFindings(coveredByBecomes).uncovered.length === 0);
+  const coveredBySeam = [beat('A', {}), beat('B', { recipe: 'flow-seam out=a in=b axis=x' })];
+  ok('contract: transitionFindings.uncovered is quiet across a flow-seam recipe boundary', transitionFindings(coveredBySeam).uncovered.length === 0);
+
+  const mismatch = [beat('A', {}), beat('B', { transition_in: 'fx:whipPan', transition_why: 'time · a slow reveal · invisible' })];
+  ok('contract: transitionFindings.mismatch fires when the fx is not among the relationship\'s candidates', transitionFindings(mismatch).mismatch.length === 1);
+  const matched = [beat('A', {}), beat('B', { transition_in: 'fx:whipPan', transition_why: 'new-place-energy · frantic · expressive' })];
+  ok('contract: transitionFindings.mismatch is quiet when the fx IS among the relationship\'s candidates', transitionFindings(matched).mismatch.length === 0);
+}
+
+// ---- make transitions D=<film.json>: the per-boundary CLI report, on a fixture storyboard ----------
+{
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-transitions-'));
+  const sbPath = path.join(tmp, 'x.storyboard.md');
+  const jsonPath = path.join(tmp, 'x.json');
+  fs.writeFileSync(sbPath, [
+    '---',
+    'message: "test"',
+    'duration: "10s"',
+    'spectacle: "beat 2, card, punch, the reveal"',
+    'not: "no confetti"',
+    '---',
+    '',
+    '## Beat 1, open (0s-3s)',
+    'why: open',
+    '',
+    '## Beat 2, reveal (3s-6s)',
+    'why: payoff',
+    'transition_in: fx:cinematicZoom',
+    'transition_why: time · a slow reveal · invisible',
+    '',
+  ].join('\n'));
+  fs.writeFileSync(jsonPath, '{"module":"scene"}');
+  const r = spawnSync('node', [path.join(repoRoot, 'quality/gates/transitions-catalog.mjs'), jsonPath], { encoding: 'utf8', cwd: repoRoot });
+  ok('make transitions D=: exits 0 on a fixture storyboard', r.status === 0);
+  ok('make transitions D=: names the boundary and its current fx', /beat 1 \(open\) -> beat 2 \(reveal\)/.test(r.stdout) && /fx:cinematicZoom/.test(r.stdout));
+  ok('make transitions D=: prints the stated why', /time · a slow reveal · invisible/.test(r.stdout));
+  fs.rmSync(tmp, { recursive: true, force: true });
 }
 
 // ---- content-check.mjs: act pairing and the verdict function, on synthetic numbers ----------------
