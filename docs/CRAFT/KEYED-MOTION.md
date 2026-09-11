@@ -2,7 +2,7 @@
 when: a film has the right structure and still feels amateur, or a recreation drifts where the original snaps
 answers: "how the exemplar actually MOVES, as numbers from its JSON: dense keys with linear between them · layers sharing one pan · `--p` carrying what position cannot · traced timings · diegetic exits. A register you choose, not a floor, and deliberately ungated"
 group: crosscutting
-codes: beat-holds-still, beats-held-open, beats-wrapped-as-units, held-through-the-change, junction-is-static, no-authored-motion, motion-diverges, motion-not-built
+codes: beat-holds-still, beats-held-open, beats-wrapped-as-units, held-through-the-change, junction-is-static, no-authored-motion, motion-diverges, motion-not-built, fake-typing, typing-camera-still
 ---
 
 # KEYED MOTION: how the exemplar actually moves
@@ -160,6 +160,20 @@ The same discipline shows in the chrome: the app UI is hand-authored HTML at mea
 
 A fade-out is the default and it is a way of declining to decide how something leaves. Ask what the
 object would actually do.
+
+---
+
+## 5b. A typed line gets a camera, not a caption
+
+Two typing mistakes recur. **Fake typing**: `html` `parts` fading whole words in (`each`/`stagger` on a
+selector like `[data-part="prompt-word"]`), or a static `|`/`▏` glyph beside the copy, has no
+per-character reveal and no caret to chase. Use a `text` layer's own `typing` + `caret` instead
+(`fake-typing`, `make critique`). **Camera left behind**: a hand-keyed push with guessed `tx`/`ty` goes
+stale the moment the line is reworded (`typing-camera-still`, `make critique`). Give the travel leg one
+station instead: `{ "move": "travel", "stations": [ { "target": "#opening" }, { "caret": "#line" } ] }`.
+`caret: "#<typing text layer id>"` expands to two stations, pushed in as typing begins and panned to the
+caret's end as it finishes, timed off the layer's own `start`/`typing`/text length
+(`core/engine/produce.js` `resolveCaretStations`).
 
 ---
 

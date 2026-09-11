@@ -160,7 +160,8 @@ export async function collect() {
       // line an author writes inside a block layer. A first attempt put the whole layer JSON in here
       // and the snippet came out as nested quotes inside nested quotes, unreadable and uncopyable.
       out.push({ name: row.name, kind: 'block', slot: 'block',
-        blurb: row.blurb || '', aka: [catOf[row.family] || ''].filter(Boolean), pitfall: row.pitfall || '' });
+        blurb: row.blurb || '', aka: [catOf[row.family] || '', ...(row.aka || [])].filter(Boolean),
+        pitfall: row.pitfall || '' });
     }
   } catch { /* the block library is optional to search, the same way recipes are */ }
 

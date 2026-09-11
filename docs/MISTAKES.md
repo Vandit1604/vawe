@@ -2539,6 +2539,24 @@ The brief said to run `git merge main` first. Saying it is not enough, and this 
 Nothing was lost but the agent's run, caught before merge by comparing the branch's merge base against main and testing its factual claims against the current tree.
 holds: docs/CRAFT/SUBAGENT-BUDGET.md, docs/CRAFT/SUBAGENTS.md
 
+## 618. typing had a real reveal and a fake camera, or a fake reveal and no camera at all
+A real film typed its terminal prompt by fading whole words in through `html` `parts`
+(`[data-part="prompt-word"]@fadeUp`) with a static `|` span standing in for a caret, while the camera's
+`travel` legs carried twelve hand-guessed `tx`/`ty` stations that never pushed in on the line or moved
+with where the caret actually was. Nothing noticed: the fake-typing fragment rendered fine on its own
+frame, and a still or drifting camera is not wrong the way a crash is, so no gate had ever asked either
+question. Two mechanisms already existed and were not connected to each other: `text` layers have had a
+real `typing`/`caret` reveal for a long time, and `travel` stations already resolve a still `target:"#id"`
+box (`core/engine/produce.js` `resolveElementTarget`); nobody had asked a camera station to resolve
+against a MOVING typed line rather than a still box.
+The fix is one property, not a new subsystem: a travel station can now name `caret:"#<typing layer id>"`
+and it expands into the push-in-then-pan pair itself, timed off the layer's own `start`/`typing`
+cps/text length (`core/engine/produce.js` `resolveCaretStations`), so retiming the text retimes the
+camera instead of leaving a stale hand-keyed number behind. `make critique` now names both halves
+report-only: `fake-typing` for the word-fade/glyph fragment, `typing-camera-still` for a typed line the
+camera never leans into.
+holds: core/engine/produce.js, quality/gates/critique.mjs, docs/CRAFT/KEYED-MOTION.md
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.

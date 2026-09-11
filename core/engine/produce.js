@@ -22,6 +22,7 @@
 
 import { buildCameraMove, followCamera } from '../camera-moves/index.js';
 import { resolveCameraTarget } from '../camera-moves/resolve-target.js';
+import { span, hold } from '../camera-moves/units.js';
 import { resolveCameraMove } from '../registry/vocab.js';
 import { nearMisses } from '../registry/registry.js';
 import { sceneDims } from '../layout/safe.js';
@@ -395,6 +396,97 @@ function resolveElementTarget(data, sel, who) {
   return { id, w: size.w, h: size.h, cx: L.x + size.w / 2, cy: L.y + size.h / 2 };
 }
 
+// resolveCaretLayer(data, sel): `caret: "#id"` -> the typing text layer it names, checked the same way
+// resolveElementTarget checks a plain target (numeric x/y required), plus the one thing only a typing
+// station needs: a `typing` prop, since there is no reveal to follow without one.
+function resolveCaretLayer(data, sel) {
+  const m = /^#([\w-]+)$/.exec(String(sel ?? ''));
+  if (!m) throw new Error(`travel station "caret" must be "#<layer id>"; got ${JSON.stringify(sel)}.`);
+  const id = m[1];
+  const L = findLayerById(data.layers, id);
+  if (!L) {
+    const ids = []; (function walk(ls) { for (const x of ls || []) { if (x?.id) ids.push(x.id); walk(x.children); } })(data.layers);
+    throw new Error(`travel station "caret": no layer with id ${JSON.stringify(id)}. Known ids: ${ids.join(', ') || '(this scene has none)'}.`);
+  }
+  if (!L.typing)
+    throw new Error(`travel station "caret": target "#${id}" (a ${L.type || 'text'} layer) has no `
+      + `"typing" prop, so there is no typed reveal for the camera to follow. Give it "typing": true (or a cps number).`);
+  if (!Number.isFinite(L.x) || !Number.isFinite(L.y))
+    throw new Error(`travel station "caret": target "#${id}" has non-numeric x/y (${JSON.stringify({ x: L.x, y: L.y })}).`);
+  return { id, L };
+}
+
+// resolveCaretStations(data, stations, start, dims): CAMERA FOLLOWS TYPING, the moving twin of
+// resolveElementTarget's still box. A station `{caret: "#id"}` names a `text` layer with `typing` and
+// expands to TWO real stations: arrive pushed in as typing begins, then pan to the caret's end as
+// typing finishes. Timing comes from the layer's own start/typing(cps)/text length, never authored, so
+// retiming the text retimes the camera with it (the owner's complaint: hand-keyed tx/ty went stale the
+// moment the line was reworded). One `t` accumulator, kept in the same shape travel() itself advances
+// (span/hold from camera-moves/units.js), so a caret station's arrival lands on the real clock instead
+// of a second, drifting notion of "when we get there".
+// caretFramePose({x, lineW, cxFull, cxEnd, s, canvasW}): the two tx values a caret pair frames on, at
+// a shared scale `s`. FRAME_MARGIN is the fraction of the zoomed view kept clear at each edge, so a
+// character never sits flush against the crop; `viewW` is that view's width in WORLD px (screen /s).
+// Station 1 puts the line's START just inside the LEFT margin (room for the caret to travel right).
+// Station 2 CENTRES the whole line when it fits the view (chasing the caret here would only crop the
+// head for no reason, docs/MISTAKES.md #618 fix-up); only a line too wide to show whole is worth
+// cropping the head of, and even then the caret's end is clamped inside the right margin, not flush.
+function caretFramePose({ x, lineW, cxFull, cxEnd, s, canvasW }) {
+  const FRAME_MARGIN = 0.08;
+  const viewW = canvasW / s;
+  const halfInset = (0.5 - FRAME_MARGIN) * viewW;
+  const fits = lineW <= viewW * (1 - 2 * FRAME_MARGIN);
+  return { txStart: x + halfInset, txEnd: fits ? cxFull : cxEnd - halfInset };
+}
+
+function resolveCaretStations(data, stations, start, dims) {
+  if (!Array.isArray(stations) || !stations.some((st) => st && st.caret != null)) return stations;
+  const [W] = dims;
+  const out = [];
+  let t = start;
+  stations.forEach((st, i) => {
+    if (st && st.caret != null) {
+      if (i === 0)
+        throw new Error('travel station 0 "caret" has no flight into it to time against; name a real '
+          + 'tx/ty/target station first, or start the film already pushed in.');
+      const { id, L } = resolveCaretLayer(data, st.caret);
+      const size = Number.isFinite(L.size) ? L.size : 96; // mirrors TEXT_SIZE_DEFAULT, core/layers/text.js
+      const full = L.text || '';
+      // ponytail: tags stripped by regex, not a real HTML text-content walk (no DOM at bake time); fine
+      // for a plain or single-accent typed line, wrong for nested markup. Upgrade if that ever ships.
+      const visLen = full.replace(/<[^>]*>/g, '').length;
+      const cps = L.typing === true ? 24 : L.typing;
+      if (!(cps > 0)) throw new Error(`travel station ${i} "caret": text layer "#${id}" has no positive "typing" cps.`);
+      // ponytail: a fixed advance-width ratio per font family, not a measured glyph width (no live DOM
+      // at bake time). Give the layer an explicit "w" for an exact box when this estimate is off.
+      const advance = L.font === 'mono' ? 0.6 : 0.55;
+      const lineW = Number.isFinite(L.w) ? L.w : visLen * size * advance;
+      const cy = L.y + size / 2, cxFull = L.x + lineW / 2, cxEnd = L.x + lineW;
+      const typingDur = visLen / cps;
+      const desiredS = (0.6 * W) / lineW; // default push: the line fills ~60% of frame width
+      const { s } = resolveCameraTarget({ w: lineW, h: size * 1.3, cx: cxFull, cy },
+        { margin: st.margin, to: st.s ?? desiredS, canvasW: dims[0], canvasH: dims[1] });
+      const { txStart, txEnd } = caretFramePose({ x: L.x, lineW, cxFull, cxEnd, s, canvasW: dims[0] });
+      const arriveDur = (L.start ?? 0) - t;
+      if (!(arriveDur > 0))
+        throw new Error(`travel station ${i} "caret": text layer "#${id}" starts typing at `
+          + `${L.start ?? 0}s, at or before the camera can arrive (already at ${t.toFixed(2)}s). `
+          + `Give the preceding station less dur/dwell, or start "${id}" later.`);
+      out.push({ tx: txStart, ty: cy, s, dur: arriveDur });
+      t += arriveDur;
+      const panStation = { tx: txEnd, ty: cy, s, dur: typingDur };
+      out.push(panStation);
+      t += typingDur;
+      if (st.dwell != null) { t += hold('travel', `station ${i} "dwell"`, st.dwell); panStation.dwell = st.dwell; }
+      return;
+    }
+    if (i > 0) t += span('travel', `station ${i} "dur"`, st?.dur ?? 0.8);
+    if (st?.dwell != null) t += hold('travel', `station ${i} "dwell"`, st.dwell);
+    out.push(st);
+  });
+  return out;
+}
+
 // resolveTargetSpecs(data, specs, dims): the CAMERA BY ELEMENT feature. A diveIn's own `target`, or any
 // travel station's, resolves against the layer tree ONCE, here, before buildCameraMove ever sees the
 // spec: tx/ty/(to) are filled in from the measured box and `target`/`margin` are gone by the time
@@ -420,6 +512,7 @@ function resolveTargetSpecs(data, specs, dims) {
       delete spec.target; delete spec.margin;
     }
     if (Array.isArray(spec.stations)) {
+      spec.stations = resolveCaretStations(data, spec.stations, spec.start ?? 0, dims);
       let t = spec.start ?? 0;
       spec.stations.forEach((st, i) => {
         if (i > 0) t += st?.dur ?? 0.8;

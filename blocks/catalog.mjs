@@ -4,13 +4,16 @@
 // in its family factory if it's a family.variant). No hand-placement, no per-block catalog code.
 //
 // Entry shape:
-//   { name, family, blurb, props }
+//   { name, family, blurb, props, aka }
 //   - name    : registry key. Bare ("card") → the raw factory. Namespaced ("card.pricing") → the family
 //               called with props merged UNDER call-time opts (so a scene can still override anything).
 //   - family  : which factory in blocks/index.mjs renders it.
 //   - blurb   : one line for the catalog label + the docs table.
 //   - props   : example/default content props (NO x/y/start/dur, the catalog + expander supply those).
 //   - overlay : true → a full-frame overlay (captions); skipped in the grid catalog.
+//   - aka     : optional synonyms `make arsenal` should find this row under, for a word the blurb has
+//               no honest room for ("caret" for a block whose blurb already says "text cursor"). Never
+//               printed, read only by harness/author/arsenal.mjs's block adapter.
 //
 // Hex literals (not TOKENS) on purpose: index.mjs imports THIS, so this must not import index.mjs.
 
@@ -22,12 +25,15 @@ export const CATALOG = [
       { text: '{', color: '#8898AA' }, { text: '  "module": "scene",', color: '#E8ECF1' },
       { text: '  "theme": "argus",', color: 'var(--up)' }, { text: '}', color: '#8898AA' }] } },
   { name: 'terminal', family: 'terminal', blurb: "a terminal window: a shell command types itself in character by character, then its output prints below",
+    aka: ['caret', 'typing', 'typewriter', 'cursor'],
     props: { w: 540, command: 'make video', output: ['rendering 1950 frames...', 'done → out.mp4'] } },
   // The two halves of the layers-vs-html head-to-head (docs/MISTAKES.md #429), kept as a matched pair
   // on purpose: same subject, one built from layer primitives and one as a hand-authored surface.
   { name: 'terminalPro', family: 'terminalPro', blurb: "a full deploy terminal built from real boxes: typed command, a live percent counter over its track, a file diff, a spinner turning into a checkmark",
+    aka: ['caret', 'typing', 'typewriter', 'cursor'],
     props: { w: 820, command: 'npm run deploy' } },
   { name: 'terminalHtml', family: 'terminalHtml', blurb: "the same deploy terminal as one hand-drawn console surface: gradient glass, per-word command colouring, a blinking text cursor",
+    aka: ['caret', 'typing', 'typewriter'],
     props: { w: 820 } },
   { name: 'loadingBar', family: 'loadingBar', blurb: "a progress bar: a track fills left to right to a set percent and finishes with a green done checkmark",
     props: { w: 340, fillDur: 1.6, label: 'rendering' } },
@@ -498,6 +504,7 @@ export const CATALOG = [
 
   // CODE MOTION (blocks/codeanim.mjs): the chrome is dev.mjs's; what is new here is code that MOVES.
   { name: 'codeTyping', family: 'codeTyping', blurb: "code being typed live in an editor: a text cursor runs across the snippet revealing one character at a time",
+    aka: ['caret', 'typing', 'typewriter'],
     props: { w: 620, label: 'server.ts', theme: 'midnight', cps: 26, lines: [
       'export function serve(req) {', '  const t = route(req.url);', '  return t.handle(req);', '}'] } },
   { name: 'codeHighlight', family: 'codeHighlight', blurb: "a code editor spotlight: the surrounding lines dim while a highlighted band sweeps down onto one target line",
