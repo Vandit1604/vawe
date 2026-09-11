@@ -539,6 +539,12 @@
    "min": 0.5,
    "max": 120
   },
+  "tempo": {
+   "type": "number",
+   "label": "Global pace dial. 1 (default) = unchanged, 0.85 = 15% slower, 1.2 = 20% faster. Scales every authored time in the scene (durations, starts, delays, camera legs, typing speed) by 1/tempo in one pass, resolved once in core/engine/expand.js before build and bake; footage and the audio bed play at their own native rate regardless. Refused outside 0.5-2 (core/engine/tempo.js): past that range a scene needs re-timing by hand, not a dial.",
+   "min": 0.5,
+   "max": 2
+  },
   "fps": {
    "type": "number",
    "label": "Frame rate (default 30; use 60 for smoother fast motion)",
