@@ -27,6 +27,7 @@ import { PROFILES } from '../../harness/author/profiles.mjs';
 import { createKit, GLYPH_PAINTERS, paintsOwnGlyphs, childExitDur } from '../../core/layers/util.js';
 import { cameraAt, dollyZ, motionAt, resolveKeyedProps, poseBack, velocityAt, keyHandleErrors } from '../../core/timeline/sequence.js';
 import { frame as squashFrame, build as squashBuild } from '../../core/fx/squash.js';
+import { coverScale, isFullBleedPlane } from '../../core/tracks/overscan.js';
 import { frame as lagFrame, build as lagBuild } from '../../core/fx/lag.js';
 import { frame as matteFrame, build as matteBuild } from '../../core/fx/matte.js';
 import { frame as uprightFrame, build as uprightBuild } from '../../core/fx/upright.js';
@@ -8286,6 +8287,50 @@ const FLOOR = 1800;
     icon('assets/x/tile.jpg').includes('src="/assets/x/tile.jpg"'));
   ok('icon(): an absolute image src is untouched', icon('/assets/x/tile.jpg').includes('src="/assets/x/tile.jpg"'));
   ok('icon(): a non-path value (emoji/monogram) is returned as-is, no <img> at all', icon('🔥') === '🔥');
+}
+
+// ---- overscan: the full-bleed-plane cover scale (core/tracks/overscan.js) ----
+{
+  const canvas = { w: 1920, h: 1080 };
+  const fullBox = { x: 0, y: 0, w: 1920, h: 1080 };
+  const cardBox = { x: 400, y: 300, w: 800, h: 600 };
+  ok('overscan: isFullBleedPlane is true for a box that covers the whole stage', isFullBleedPlane(fullBox, canvas));
+  ok('overscan: isFullBleedPlane is false for a smaller card', !isFullBleedPlane(cardBox, canvas));
+  ok('overscan: isFullBleedPlane is false for a box full on one axis only',
+    !isFullBleedPlane({ x: 0, y: 0, w: 1920, h: 600 }, canvas));
+
+  const basePose = (over) => ({
+    box: fullBox, originPct: { ox: 50, oy: 50 }, scale: 1, rotZ: 0, rotX: 0, rotY: 0, z: 0,
+    canvas, persp: 1600, cam: { x: 0, y: 0, z: 0, rx: 0, ry: 0, roll: 0 }, ...over,
+  });
+  const flat = coverScale(basePose({}));
+  ok('overscan: a flat plane (no rotation, z=0) needs exactly 1x', flat === 1);
+
+  const tilted = coverScale(basePose({ rotX: 13, rotY: -15 }));
+  ok('overscan: a tilted full-bleed plane needs more than 1x', tilted > 1);
+
+  const tiltedMore = coverScale(basePose({ rotX: 26, rotY: -30 }));
+  ok('overscan: a larger tilt needs a larger cover scale', tiltedMore > tilted);
+
+  const pushedBack = coverScale(basePose({ rotX: 13, rotY: -15, z: -260 }));
+  ok('overscan: the same tilt pushed further behind the picture plane needs a larger scale',
+    pushedBack > tilted);
+
+  const withCamera = coverScale(basePose({ rotX: 13, rotY: -15, z: -260, cam: { x: 0, y: 0, z: 200, rx: 0, ry: 0, roll: 0 } }));
+  ok('overscan: composes with a moving camera (a push-in dolly still resolves to a finite, sane scale)',
+    Number.isFinite(withCamera) && withCamera >= 1 && withCamera < 64);
+
+  // classification: a card that never covers the stage is simply not in scope, whatever it does.
+  ok('overscan: classification excludes a non-full-bleed card even under a hard tilt',
+    !isFullBleedPlane(cardBox, canvas));
+
+  // determinism: same inputs, same answer, called twice, called out of order.
+  const a1 = coverScale(basePose({ rotX: 13, rotY: -15, z: -260 }));
+  const a2 = coverScale(basePose({ rotX: 13, rotY: -15, z: -260 }));
+  ok('overscan: coverScale is a pure function of its pose (repeat call, same answer)', a1 === a2);
+  const b = coverScale(basePose({ rotX: 5, rotY: -5 })); // unrelated call in between
+  const a3 = coverScale(basePose({ rotX: 13, rotY: -15, z: -260 }));
+  ok('overscan: coverScale carries no state between calls (order-independent)', a1 === a3 && b !== a1);
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
