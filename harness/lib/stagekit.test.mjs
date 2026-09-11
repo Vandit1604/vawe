@@ -60,3 +60,11 @@ console.log('✓ stagekit.test.mjs: kit-identity check passes identical blocks, 
     assert.ok(px >= MIN_VIDEO_TEXT_PX, `.${role} is ${px}px, under the ${MIN_VIDEO_TEXT_PX}px floor`);
   }
 }
+
+// radius is a variable as well as a class, so a fragment rule's var(--kit-radius-md) resolves
+{
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+  const { css } = buildKit(JSON.parse(fs.readFileSync(path.join(root, 'themes/vawe.json'), 'utf8')), resolveLook, isLightBg);
+  for (const k of ['sm', 'md', 'lg']) assert.match(css, new RegExp(`--kit-radius-${k}:\\d+px`), `kit is missing --kit-radius-${k}`);
+}
+

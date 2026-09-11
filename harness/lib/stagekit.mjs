@@ -114,7 +114,7 @@ export function buildKit(theme, resolveLook, isLightBg) {
     // --- tokens: spacing rhythm, the content column, the grid gutter. `:scope` is the fragment's own
     // root element (the prelude-less `@scope` block's implicit root, sanitize-html.js scopeStyles), so
     // these reach every element in the fragment without depending on which class sits where.
-    `:scope{${spaceVars}--kit-unit:${unit}px;--kit-margin:${margin}px;--kit-gutter:var(--kit-space-4)}`,
+    `:scope{${spaceVars}--kit-unit:${unit}px;--kit-margin:${margin}px;--kit-gutter:var(--kit-space-4);--kit-radius-sm:${radius.sm}px;--kit-radius-md:${radius.md}px;--kit-radius-lg:${radius.lg}px}`,
     // --- ground: a full-bleed root needs a ground of its own, or `audit` reads it as one giant text box.
     // 10%, not a rounder number: `--line` is sometimes already translucent (rgba, most dark themes) and
     // sometimes fully opaque (a brand that authors it as a flat hex, e.g. plinth), so the SAME percentage
