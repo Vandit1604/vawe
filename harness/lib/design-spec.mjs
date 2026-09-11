@@ -15,6 +15,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { frontmatter } from '../author/storyboard-parse.mjs';
+import { colorDistance } from '../../core/color/engine.js';
 
 // A minimal indented map/list reader, built for exactly design.md's shape:
 //   key: scalar
@@ -126,13 +127,6 @@ export function legalSet(spec, kitValues) {
   return out;
 }
 
-function parseHex(v) {
-  const m = /^#([0-9a-f]{6})$/i.exec(String(v).trim());
-  if (!m) return null;
-  const n = parseInt(m[1], 16);
-  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
-}
-
 /**
  * nearestToken(kind, value, spec) -> { name, value, delta } or null
  * kind: 'fontSize' | 'fontWeight' | 'radius' | 'shadow' | 'color'. Only searches tokens THIS film
@@ -163,13 +157,11 @@ function closest(candidates, delta) {
 
 const NUMERIC_DELTA = (value) => (c) => Math.abs(c.value - Number(value));
 const SHADOW_DELTA = (value) => (c) => (c.value === String(value) ? 0 : 1);
-const COLOR_DELTA = (value) => {
-  const target = parseHex(value);
-  if (!target) return () => null;
-  return (c) => {
-    const rgb = parseHex(c.value);
-    return rgb ? Math.sqrt((rgb.r - target.r) ** 2 + (rgb.g - target.g) ** 2 + (rgb.b - target.b) ** 2) : null;
-  };
+// core/color/engine.js#colorDistance is alpha-aware and shared with quality/gates/design-drift.mjs's
+// own nearest-colour search, so a token declared `rgba(...)` can't read as a match for its opaque hex.
+const COLOR_DELTA = (value) => (c) => {
+  const d = colorDistance(value, c.value);
+  return Number.isFinite(d) ? d : null;
 };
 const DELTA_FOR = { fontSize: NUMERIC_DELTA, fontWeight: NUMERIC_DELTA, radius: NUMERIC_DELTA, shadow: SHADOW_DELTA, color: COLOR_DELTA };
 
