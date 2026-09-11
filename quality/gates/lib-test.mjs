@@ -5773,6 +5773,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   //               honest question for one answers the other, so asking is asserting a preference. The
   //               same reason the top-three rule exists.
   const PLAIN = [
+    ["a transition that shows time passing", "time"],
     ["should the film have sound", "sound.default-not-silence"],
     ["a terminal window", "terminal"],
     ["a fake browser window around a screenshot", "browserFrame"],
