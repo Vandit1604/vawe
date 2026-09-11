@@ -27,9 +27,25 @@ const EMBED = new RegExp(`<\\s*(${EMBEDDING})\\b[\\s\\S]*?(?:<\\/\\s*\\1\\s*>|>)
 // and any orphan closing tag the pass above leaves behind (harmless to a browser, but "harmless" is
 // not a claim worth making twice about the same element)
 const EMBED_CLOSE = new RegExp(`<\\s*\\/\\s*(?:${EMBEDDING})\\s*>`, 'gi');
-// A src/href that LEAVES the fragment: an absolute path reaches the whole file server, a protocol URL
-// reaches the network (and breaks determinism). Relative asset paths are untouched.
-const ESCAPING_URL = /\s(?:src|href|data|srcset|action|formaction)\s*=\s*("|')?\s*(?:[a-z][a-z0-9+.-]*:|\/\/|\/)[^"'\s>]*\1?/gi;
+// The render server's own allowlist (internal/scene/scene.go's `served`), duplicated here because the
+// two have to agree: a path this sanitiser lets through and the server then 404s is a blank layer with
+// no error; a path the server would serve and this strips is the bug below.
+const SERVED_ROOTS = ['core/', 'themes/', 'formats/', 'assets/', '.vawe-data/scenes/', '.vawe-data/uploads/'];
+const isServedPath = (p) => {
+  const c = p.replace(/^\/+/, '');
+  return SERVED_ROOTS.some((r) => c === r.slice(0, -1) || c.startsWith(r));
+};
+
+// A src/href that LEAVES the fragment: `//host/…` and `scheme:…` reach the network (and break
+// determinism), and an absolute path OUTSIDE the served roots reaches the rest of the file server, e.g.
+// `<iframe src="/docs/…">`. An absolute path INSIDE a served root (`/assets/vawe-flow-2/frame.jpg`) is
+// not an escape, it is the documented way to reference a captured asset from hand-authored markup, and
+// stripping it left every such `<img>` with no `src` at all: an empty element painting nothing over
+// whatever sits behind it, which read as a solid black frame (docs/MISTAKES.md). Relative asset paths
+// were already untouched; this only stops treating a served absolute path the same as a real escape.
+const ESCAPING_URL = /\s(src|href|data|srcset|action|formaction)\s*=\s*("|')?\s*((?:[a-z][a-z0-9+.-]*:|\/\/|\/)[^"'\s>]*)\2?/gi;
+const stripEscapingUrls = (src) => src.replace(ESCAPING_URL, (whole, attr, quote, url) =>
+  url.startsWith('/') && !url.startsWith('//') && isServedPath(url) ? whole : '');
 // on* handlers never fire in a static render, but leaving them is an invitation for the day something does.
 const ON_HANDLER = /\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi;
 // AN HTML COMMENT IS PROSE, AND EVERY REGEX BELOW READS IT AS MARKUP. A fragment's own notes are the
@@ -51,11 +67,11 @@ const CSS_COMMENT = /\/\*[\s\S]*?\*\//g;
 export const stripComments = (src) => String(src || '').replace(COMMENT, '').replace(CSS_COMMENT, '');
 
 export function sanitizeHtml(src) {
-  return stripComments(src)
-    .replace(EMBED, '')
-    .replace(EMBED_CLOSE, '')
-    .replace(ESCAPING_URL, '')
-    .replace(ON_HANDLER, '');
+  return stripEscapingUrls(
+    stripComments(src)
+      .replace(EMBED, '')
+      .replace(EMBED_CLOSE, '')
+  ).replace(ON_HANDLER, '');
 }
 
 // SCOPE A FRAGMENT'S OWN STYLESHEET TO ITS OWN SUBTREE. A `<style>` block inside hand-authored markup
