@@ -21,6 +21,7 @@
 // browser AND in node gates, so the gates evaluate the SAME produced scene the renderer does.
 
 import { buildCameraMove, followCamera } from '../camera-moves/index.js';
+import { resolveCameraTarget } from '../camera-moves/resolve-target.js';
 import { resolveCameraMove } from '../registry/vocab.js';
 import { nearMisses } from '../registry/registry.js';
 import { sceneDims } from '../layout/safe.js';
@@ -341,6 +342,100 @@ function bindFollowCamera(spec, data) {
   return followCamera(params);
 }
 
+// findLayerById(layers, id): the one small tree-walk every "resolve a target by id" caller in this file
+// already does its own copy of (bindFollowCamera above, bindCursorCamera's `hit` walk). Pulled out once
+// here for the newest caller, resolveElementTarget, so a fourth copy does not join the first three.
+function findLayerById(layers, id) {
+  for (const L of layers || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (L.id === id) return L;
+    const hit = findLayerById(L.children, id);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+// A layer's DECLARED size, before any render exists: `w`/`h`, or `size` for the layers that only take
+// one number (a cursor dot, a progress ring). This is deliberately the SAME tier boxOf's own comment
+// (quality/gates/scene-timing.mjs) calls "explicit"/"size", not a re-derivation of it: core/ cannot
+// import quality/gates (that would point the dependency the wrong way, engine depending on its own
+// gate), so the handful of lines are read here directly rather than invented differently.
+function declaredLayerSize(L) {
+  if (Number.isFinite(L.w) && Number.isFinite(L.h)) return { w: L.w, h: L.h };
+  if (Number.isFinite(L.size)) return { w: L.size, h: L.size };
+  return null;
+}
+
+// resolveElementTarget(data, sel, who): `target: "#id"` -> { tx, ty, w, h }, the box a diveIn or a
+// travel station centres on instead of a hand-typed tx/ty. Resolved from the layer's own AUTHORED
+// geometry (no live DOM exists at bake time, see the module header), so it needs a numeric x/y and a
+// declared w/h/size; anything a track only produces at render (`becomes`, a `[data-part]` child of a
+// component) is out of reach here and refused by name rather than guessed.
+function resolveElementTarget(data, sel, who) {
+  const m = /^#([\w-]+)$/.exec(String(sel ?? ''));
+  if (!m) {
+    const dataPart = '[data-part="..."]';
+    throw new Error(`cameraMove ${who}: "target" must be "#<layer id>"; got ${JSON.stringify(sel)}. `
+      + `A ${dataPart} selector needs a live render to measure and cannot be resolved before it.`);
+  }
+  const id = m[1];
+  const L = findLayerById(data.layers, id);
+  if (!L) {
+    const ids = []; (function walk(ls) { for (const x of ls || []) { if (x?.id) ids.push(x.id); walk(x.children); } })(data.layers);
+    throw new Error(`cameraMove ${who}: no layer with id ${JSON.stringify(id)}. Known ids: ${ids.join(', ') || '(this scene has none)'}.`);
+  }
+  const size = declaredLayerSize(L);
+  if (!size)
+    throw new Error(`cameraMove ${who}: target "#${id}" (a ${L.type || 'text'} layer) declares no numeric `
+      + `w/h or size, so its box cannot be measured before render. Give it explicit "w"/"h" (or "size"), `
+      + `or hand-key tx/ty/targetW/targetH yourself.`);
+  if (!Number.isFinite(L.x) || !Number.isFinite(L.y))
+    throw new Error(`cameraMove ${who}: target "#${id}" has non-numeric x/y (${JSON.stringify({ x: L.x, y: L.y })}). `
+      + `Resolve its position to plain numbers before naming it as a camera target.`);
+  return { id, w: size.w, h: size.h, cx: L.x + size.w / 2, cy: L.y + size.h / 2 };
+}
+
+// resolveTargetSpecs(data, specs, dims): the CAMERA BY ELEMENT feature. A diveIn's own `target`, or any
+// travel station's, resolves against the layer tree ONCE, here, before buildCameraMove ever sees the
+// spec: tx/ty/(to) are filled in from the measured box and `target`/`margin` are gone by the time
+// core/camera-moves/dive-in.js or travel.js run, so neither module needs to know this sugar exists.
+// Printed once per resolution, at the move's (or station's arrival) own clock, so the number stays
+// inspectable in the same output an author already reads (author-check / expand-blocks).
+function resolveTargetSpecs(data, specs, dims) {
+  const [W, H] = dims;
+  for (const spec of specs) {
+    if (!spec || typeof spec !== 'object') continue;
+    if (spec.target != null) {
+      // Raw tx/ty WIN when both are given (COMMON RULES: "raw tx/ty/s still work and win"): the target
+      // is then just dropped rather than resolved, silently, because a written tx/ty is the more
+      // specific instruction. Either way `target`/`margin` must not survive to buildCameraMove, which
+      // validates every diveIn/travel param against the generator's own signature and neither is one.
+      if (spec.tx == null && spec.ty == null) {
+        const box = resolveElementTarget(data, spec.target, `"${spec.move}"`);
+        const { tx, ty, s } = resolveCameraTarget(box, { margin: spec.margin, to: spec.to, canvasW: W, canvasH: H });
+        spec.tx = tx; spec.ty = ty; spec.to = s; spec.targetW = box.w; spec.targetH = box.h;
+        const at = (spec.start ?? 0) + (spec.dur ?? 1.6);
+        console.log(`resolved camera target #${box.id} at ${at}s -> tx ${tx.toFixed(1)} ty ${ty.toFixed(1)} s ${s.toFixed(3)}`);
+      }
+      delete spec.target; delete spec.margin;
+    }
+    if (Array.isArray(spec.stations)) {
+      let t = spec.start ?? 0;
+      spec.stations.forEach((st, i) => {
+        if (i > 0) t += st?.dur ?? 0.8;
+        if (!st || st.target == null) return;
+        if (st.tx == null && st.ty == null) {
+          const box = resolveElementTarget(data, st.target, 'travel station');
+          const { tx, ty, s } = resolveCameraTarget(box, { margin: st.margin, to: st.s, canvasW: W, canvasH: H });
+          st.tx = tx; st.ty = ty; if (st.s == null) st.s = s;
+          console.log(`resolved camera target #${box.id} at ${t}s -> tx ${tx.toFixed(1)} ty ${ty.toFixed(1)} s ${s.toFixed(3)}`);
+        }
+        delete st.target; delete st.margin;
+      });
+    }
+  }
+}
+
 export function bakeCameraMove(data, frame) {
   if (!data || !data.cameraMove) return data;
   const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
@@ -366,6 +461,10 @@ export function bakeCameraMove(data, frame) {
   // sceneDims so a move that centres a point centres it in the REAL canvas (core/camera-moves.js can only
   // default to landscape). Same call expand-blocks.mjs makes; the math stays in camera-moves.js.
   const dims = (frame && frame.W > 0 && frame.H > 0) ? [frame.W, frame.H] : sceneDims(data);
+  // CAMERA BY ELEMENT, before anything else touches the spec: a diveIn's own `target`, or a travel
+  // station's, becomes a plain tx/ty/(to) here, so bindCursorCamera and buildCameraMove below still see
+  // only the coordinates they always have.
+  resolveTargetSpecs(data, specs, dims);
   // A cursor binding resolves HERE, inside the one funnel, so `cursor` cannot be a field an author
   // writes and nothing reads.
   const built = specs.map((s) => ({ spec: s, kf: buildCameraMove(bindCursorCamera(s, data), dims) }));
