@@ -1187,7 +1187,7 @@
  function soundRows(A){
    if(A.none) return '';
    // A DECLARED SILENCE IS A DEVICE, and an undeclared one is a hole. The lane says which.
-   if(A.silent) return '<div class=lane-note><span>'+esc(A.why?'silent: '+A.why:'silent, no reason given')+'</span></div>';
+   if(A.silent) return '<div class=lane-note><span'+(A.why?' title="'+esc(A.why)+'"':'')+'>silent</span></div>';
    const grid=beatGrid(A.beats);
    // audio.auto voices the transitions (core/audio/cues.js) and picks no music, so without a bed the
    // pill says exactly that rather than a bare "auto"
