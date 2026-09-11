@@ -189,7 +189,17 @@ video: build ## [ship] one self-describing JSON → out/<name>.mp4 Runs the mand
 # gates were never the cost: being interrupted mid-thought was. Iterate here; prove it with `make ship`.
 # Then it writes both contact sheets (`make sheets`), because the two images an author MUST read were
 # separate commands nobody remembered. Set NOSHEETS=1 to skip them: they cost roughly one more render.
-dev: build ## [dev] THE ITERATION LOOP.
+#
+# BEAT=<n or name> / JOIN=<n> / FROM=<s> TO=<s>: render only that slice (--from/--to,
+# cmd/render/main.go), not the whole film. A film pass re-renders every second to check one change;
+# this is the same loop for the one beat, or the one join, that actually moved. Dispatches to
+# dev-range below instead, which skips the sheets and content-check: those read the WHOLE film and
+# would either crash on a partial mp4 or report a false gap against a clip that was never meant to
+# hold the other acts.
+dev: build ## [dev] THE ITERATION LOOP. BEAT=/JOIN=/FROM=&TO=: only that slice, not the whole film.
+ifneq ($(strip $(BEAT)$(JOIN)$(FROM)$(TO)),)
+	@$(MAKE) --no-print-directory dev-range D=$(D) BEAT=$(BEAT) JOIN=$(JOIN) FROM=$(FROM) TO=$(TO) WORKERS=$(WORKERS)
+else
 	@echo "▶ [dev] the iteration loop, no gates, no audit"
 	@t0=$$(node -e 'process.stdout.write(String(Date.now()))'); \
 	bash -c 'set -o pipefail; . harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log'; \
@@ -205,6 +215,30 @@ dev: build ## [dev] THE ITERATION LOOP.
 	fi
 	@echo "" && echo "  next: make check D=$(D)  (every gate, zero consequence)  ·  make ship D=$(D)  (when it's ready)"
 	@node harness/author/arsenal.mjs --for $(D) 2>/dev/null || true
+endif
+
+# make dev-range D=<file> BEAT=<n|name>|JOIN=<n>|FROM=<s> TO=<s>: the guts of `make dev`'s range path,
+# a target of its own so it can be called directly. BEAT resolves to that beat's storyboard span, JOIN
+# to the seam between beat n and n+1 (the most common check: transitions), both padded and converted
+# from authored to post-tempo film time by harness/lib/resolve-range.mjs. FROM=/TO= skip resolution
+# and go straight to the renderer as final film seconds. Silent (see internal/render/render.go), and
+# named out/<name>.range-<from>-<to>.mp4 so it never touches the full film's own output.
+dev-range: build ## [dev] the range path `make dev BEAT=/JOIN=/FROM=&TO=` dispatches to.
+	@if [ -n "$(BEAT)" ]; then \
+	  out=$$(node harness/lib/resolve-range.mjs $(D) beat "$(BEAT)") || exit 1; \
+	elif [ -n "$(JOIN)" ]; then \
+	  out=$$(node harness/lib/resolve-range.mjs $(D) join "$(JOIN)") || exit 1; \
+	else \
+	  out="$(FROM) $(TO)"; \
+	fi; \
+	set -- $$out; f="$$1"; t="$$2"; \
+	if [ -z "$$f" ] || [ -z "$$t" ]; then echo "✗ pass BEAT=, JOIN=, or FROM= and TO="; exit 1; fi; \
+	echo "▶ [dev-range] $$f s .. $$t s"; \
+	t0=$$(node -e 'process.stdout.write(String(Date.now()))'); \
+	bash -c "set -o pipefail; . harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh '$(D)' ./bin/vawe $(D) --draft --from $$f --to $$t $(if $(WORKERS),--workers $(WORKERS),--workers 4) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log"; \
+	t1=$$(node -e 'process.stdout.write(String(Date.now()))'); \
+	node harness/lib/record-render.mjs dev-range $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log $$((t1-t0)) 2>/dev/null || true
+	@o=$$(ls -t out/$$(basename $(D) .json).range-*.mp4 2>/dev/null | head -1); echo "  → $$o"; open "$$o" 2>/dev/null || true
 
 # make demo Q="what this shows" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]: scaffold a SPECIMEN scene
 # and run the dev loop on it. A demo written from a blank file comes out a contact sheet every time (27

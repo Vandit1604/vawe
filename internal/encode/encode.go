@@ -39,13 +39,16 @@ func watermarkChain(preFx string) string {
 	return fc + "[1:v]" + base + "scale2ref[wm][b];[b][wm]overlay=0:0[v]"
 }
 
-func Video(framesDir string, fps int, grain, draft bool, watermark, out, ext string, w, h int) error {
+// startNumber names the first frame ffmpeg reads off disk: 0 for an ordinary render, or a range
+// render's RangeStart (internal/scene.Meta), since a range only ever writes files at its own global
+// frame indices, never a fresh 0-based run.
+func Video(framesDir string, fps int, grain, draft bool, watermark, out, ext string, w, h, startNumber int) error {
 	if ext == "" {
 		ext = ".png"
 	}
 	seq := filepath.Join(framesDir, "%05d"+ext)
 	r := strconv.Itoa(fps)
-	args := []string{"-y", "-framerate", r, "-start_number", "0", "-i", seq}
+	args := []string{"-y", "-framerate", r, "-start_number", strconv.Itoa(startNumber), "-i", seq}
 	if watermark != "" {
 		args = append(args, "-i", watermark)
 	}

@@ -24,6 +24,11 @@ type Options struct {
 	Aspect      string // render aspect ("16:9"/"9:16"/"1:1"/"4:5"); empty = the scene's own
 	SS          int    // supersample factor; 0 = the default for the mode (2 final, 1 draft)
 	Watermark   string // transparent PNG laid over every frame (free previews); empty = clean export
+	// Range: capture and encode only [From,To) seconds of film time (post-tempo), not the whole film.
+	// From/To are meaningless unless Range is true; a zero-value Options never sets it, so an ordinary
+	// caller renders the whole film exactly as before this field existed.
+	Range    bool
+	From, To float64
 }
 
 type dataFile struct {
@@ -113,7 +118,11 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	if o.SS > 0 {
 		ss = o.SS // explicit -ss wins, so the cost of supersampling can be measured against its benefit
 	}
-	meta, err := scene.Capture(repoRoot, module, dataURL, o.FPS, o.Workers, framesDir, transparent, ss, o.Aspect)
+	fromSec, toSec := -1.0, -1.0
+	if o.Range {
+		fromSec, toSec = o.From, o.To
+	}
+	meta, err := scene.Capture(repoRoot, module, dataURL, o.FPS, o.Workers, framesDir, transparent, ss, o.Aspect, fromSec, toSec)
 	if err != nil {
 		return err
 	}
@@ -190,8 +199,20 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 			sw, sh = 1080, 1920
 		}
 	}
-	if err := encode.Video(framesDir, o.FPS, o.Grain, o.Draft, o.Watermark, tmpVideo, scene.CaptureExt(transparent), sw, sh); err != nil {
+	if err := encode.Video(framesDir, o.FPS, o.Grain, o.Draft, o.Watermark, tmpVideo, scene.CaptureExt(transparent), sw, sh, meta.RangeStart); err != nil {
 		return err
+	}
+
+	if o.Range {
+		// ponytail: a range render ships silent. Slicing the audio bed/cues to an arbitrary frame
+		// window needs its own seek-and-trim path (audio.Render only knows how to build a whole film's
+		// mix); wire it up if silent range previews stop being good enough for a motion/transition check.
+		if err := encode.Copy(tmpVideo, out); err != nil {
+			return err
+		}
+		frames := meta.RangeEnd - meta.RangeStart
+		fmt.Printf("✓ done → %s  (%.2fs, %d frames · range %.2f-%.2fs, silent)\n", out, float64(frames)/float64(o.FPS), frames, o.From, o.To)
+		return nil
 	}
 
 	formatDir := filepath.Join(repoRoot, "formats", module)
