@@ -8,7 +8,18 @@
 export const FULLBLEED_RE = /position\s*:\s*(?:absolute|fixed)/i;
 export const INSET_RE = /inset\s*:\s*0|(?:top|left|right|bottom)\s*:\s*0\s*(?:;|})/i;
 
-export function fragPage({ raw, theme, bg, boxW = 1400, tSec = 0, fullBleed = false }) {
+// `box` (optional): {x,y,w,h,W,H}, the ASSEMBLED FILM's real layer box, in canvas pixels. Passing it
+// swaps the centred/full-bleed preview layout for the same absolute placement `core/layers/html.js`
+// gives the layer: #stage fills the real W×H canvas and #frag sits at (x,y) sized (w,h), so a fragment
+// that fits the generic preview box but overruns its actual assembled box clips here too (build fix 7).
+export function fragPage({ raw, theme, bg, boxW = 1400, tSec = 0, fullBleed = false, box = null }) {
+  const W = box ? box.W : 1920, H = box ? box.H : 1080;
+  const stageCss = box
+    ? `position:relative;width:${W}px;height:${H}px;overflow:visible`
+    : 'min-width:1920px;min-height:1080px;display:flex;align-items:center;justify-content:center';
+  const fragCss = box
+    ? `position:absolute;left:${box.x}px;top:${box.y}px;width:${box.w}px;height:${box.h}px`
+    : `${fullBleed ? 'width:1920px;height:1080px' : `width:${boxW}px`};position:relative`;
   return `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="/core/tokens.css">
 <style>*{box-sizing:border-box}
@@ -18,14 +29,14 @@ export function fragPage({ raw, theme, bg, boxW = 1400, tSec = 0, fullBleed = fa
    centred" (docs/MISTAKES.md #351). Undo both: the vars carry the landscape canvas this harness really
    photographs, and html/body grow rather than clip, so --serve still scrolls and the PNG path clips
    through the screenshot rect as the comment below says. */
-:root{--vw:1920px;--vh:1080px}
+:root{--vw:${W}px;--vh:${H}px}
 /* color was hard-coded #f7f8f8, which is exactly what made the missing palette invisible: text kept
    looking right while every var(--…) colour resolved to nothing. It follows the theme now. */
 html,body{margin:0;background:${bg};color:var(--text);width:auto;height:auto;overflow:visible}
 /* min-height (not fixed) + no overflow:hidden → the page SCROLLS when served; the PNG path clips to
-   1920x1080 via the screenshot clip, so it's unaffected. */
-#stage{min-width:1920px;min-height:1080px;display:flex;align-items:center;justify-content:center}
-#frag{--t:${tSec};--p:0;${fullBleed ? 'width:1920px;height:1080px' : `width:${boxW}px`};position:relative;font-family:'Inter',system-ui,sans-serif}</style></head>
+   the canvas via the screenshot clip, so it's unaffected. */
+#stage{${stageCss}}
+#frag{--t:${tSec};--p:0;${fragCss};font-family:'Inter',system-ui,sans-serif}</style></head>
 <body><div id="stage"><div id="frag">${raw}</div></div>
 <script type="module">
   // ONE definition of what a theme means. Importing the engine's own applyTheme is the point: a second
