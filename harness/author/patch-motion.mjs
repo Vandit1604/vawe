@@ -225,14 +225,40 @@ export function upsertKey(keys, k, eps = 1e-4) {
 // of array/index pairs ending in a property name (`/bg/0/preset`, `/layers/2/motion/1/ease`,
 // `/cameraMove/0/stations/2/dur`): each pair is resolved against the array literal actually on disk,
 // so the walk only ever narrows into the exact bytes the property owns.
+// the index of the `[` opening a `"key":[...]` array declared directly on `obj` (depth 1, the same
+// convention propSpan uses), never a same-named array nested deeper inside a child object. Tracks
+// brace/bracket depth while skipping strings instead of a bare regex .exec, which finds the FIRST
+// occurrence of the text anywhere in the region: a `parts`/`fx` sub-object naming its own `motion`
+// array ahead of the layer's own `"motion":[...]` was picked instead, silently patching the wrong
+// track. -1 when `key` names no array at this object's own top level.
+function topArrayOpen(src, obj, key) {
+  const needle = `"${key}"`;
+  let p = obj.start, inStr = false, depth = 0;
+  for (; p < obj.end; p++) {
+    const c = src[p];
+    if (inStr) { if (c === '\\') { p++; continue; } if (c === '"') inStr = false; continue; }
+    if (c === '{' || c === '[') { depth++; continue; }
+    if (c === '}' || c === ']') { depth--; continue; }
+    if (c === '"') {
+      if (depth === 1 && src.startsWith(needle, p)) {
+        const after = src.indexOf(':', p + needle.length);
+        let v = after + 1;
+        while (v < obj.end && /\s/.test(src[v])) v++;
+        if (src[v] === '[') return v;
+      }
+      inStr = true;
+    }
+  }
+  return -1;
+}
+
 function walkPath(src, segs) {
   let region = null; // the object span to search the next array within; null = whole file
   for (let p = 0; p < segs.length - 1; p += 2) {
     const key = segs[p], idx = +segs[p + 1];
-    const hay = region ? src.slice(region.start, region.end) : src;
-    const arr = new RegExp(`"${key}"\\s*:\\s*\\[`).exec(hay);
-    if (!arr) throw new Error(`this scene has no \`${key}\` array to patch at /${segs.join('/')}`);
-    const arrOpen = (region ? region.start : 0) + arr.index + arr[0].length - 1;
+    const obj = region || { start: 0, end: src.length };
+    const arrOpen = topArrayOpen(src, obj, key);
+    if (arrOpen < 0) throw new Error(`this scene has no \`${key}\` array to patch at /${segs.join('/')}`);
     const el = elementSpans(src, arrOpen)[idx];
     if (!el) throw new Error(`${key}[${idx}] does not exist in this scene`);
     region = el;
