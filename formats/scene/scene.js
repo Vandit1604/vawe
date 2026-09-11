@@ -757,6 +757,16 @@ boot((data, fps, theme, canvas) => {
       for (const { L, el } of layers) if (L.id && consumed.has(L.id)) el.style.visibility = 'hidden';
   }
   const topCount = layers.length; // group children follow; their x/y are relative to their group
+  // GROUP CHILDREN NEVER GOT parts/fx/motionPath/physics/splitText/morph: applyGsapHooks was called only
+  // from buildLayer (top-level layers), and addGroupChild (core/layers/util.js) built children straight
+  // into `extra` without ever passing them through it. A group's `html` child with `parts` rendered its
+  // popped-in state from frame 0; only the group's OTHER children (typing, driven per-frame by driveClips
+  // off data-*) worked, which is why the bug looked like "typing is fine, parts is broken" instead of
+  // "GSAP hooks never run on a child". Same call, same function, every depth: addGroupChild already
+  // resolves each child's absolute start into `L.start` (rootL.start + its own `delay`, recursively for
+  // nested groups), so `(L.start ?? 0) + p.delay` inside applyGsapHooks lands on the same clock a
+  // top-level layer's parts use, and a child's `delay` stays relative to its OWN group's window.
+  for (const { L, el, units } of extra) applyGsapHooks(el, L, units);
   layers.push(...extra); // group children join the per-frame animation loop
 
   // THE TIMED SET, taken here because here is where the scene has finished being built: every

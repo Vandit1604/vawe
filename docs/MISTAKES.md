@@ -2613,6 +2613,25 @@ the SAME value through the SAME name, and a film with no design.md renders byte-
 existed. Uniformity is now something a film states, not something a fixed list enforces from outside it.
 holds: harness/lib/design-spec.mjs, harness/lib/stagekit.mjs
 
+## 623. A group child's `parts` entrance never ran, and an earlier claim said it did
+A render (vawe-flow-2) showed a group's `html` child popping in visible from frame 1 instead of at its
+authored delay: `parts: [{ select: '[data-part="install-done"]', anim: 'popIn', delay: 2.8 }]` on an
+`html` child never fired. An earlier agent had claimed parts run on group children; the render proved
+otherwise, and the claim was never checked against the code that builds a child.
+`applyGsapHooks` (`formats/scene/scene.js`) is the one place that builds every GSAP-driven hook (parts,
+fx, motionPath, physics, splitText, morph) as a paused tween, and it was called only from `buildLayer`,
+for TOP-LEVEL layers. `addGroupChild` (`core/layers/util.js`) builds a child straight into `extra[]` and
+never passed it through `applyGsapHooks`, so none of those six hooks ever ran on a child at any depth.
+A sibling child's `typing` still worked, because typing is driven per-frame off `data-*` by driveClips,
+which `extra[]` does join, so the bug read as "typing is fine, parts is broken" rather than "GSAP hooks
+never run on a child" until someone read `addGroupChild` end to end.
+The fix calls `applyGsapHooks(el, L, units)` for every entry in `extra` before it joins `layers`
+(`formats/scene/scene.js`, right before the `extra[]` join). `addGroupChild` already resolves a child's
+absolute start into `L.start` (its root's start plus its own `delay`, recursively for nested groups), so
+`(L.start ?? 0) + p.delay` inside `applyGsapHooks` lands on the same clock a top-level layer's parts use,
+and a child's `delay` stays relative to its OWN group's window. One call, one code path, every depth.
+holds: core/layers/group-parts.test.mjs
+
 <!-- carried over from the archived file; doc-refs.mjs's own syntax for -->
 <!-- "this reference names a thing in order to record that the thing is gone" -->
 `<!-- doc-refs-allow: <ref> · <reason> -->` when it names a thing in order to say the thing is gone.
