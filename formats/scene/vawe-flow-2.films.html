@@ -145,6 +145,9 @@
   .film-card[data-ring="near"] .film-recede{background:rgba(6,9,14,.16)}
   .film-card[data-ring="outer"]{width:14cqw;padding:var(--kit-space-1);box-shadow:var(--kit-elev-1)}
   .film-card[data-ring="outer"] .film-recede{background:rgba(6,9,14,.30)}
+  /* Ring cards sit partly off-frame; their captions are slivers that clip at the card edge.
+     Hide rather than truncate: the focused card alone carries a readable name/time. */
+  .film-card[data-ring] .film-caption{display:none}
 
   /* There is no room below the focused card (it nearly fills the frame vertically), so the
      eyebrow, the scrub bar and the meta line all sit ON the card, over its own dark-gradient
