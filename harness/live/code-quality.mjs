@@ -8,14 +8,21 @@
 //
 // IT ONLY EVER COMPLAINS ABOUT WHAT YOU MADE WORSE. The repo carries 334 known findings across 126
 // files. Blocking every edit that touches an already-tangled file would make the hook noise, and noise
-// is how a rule gets turned off. So this compares the file against quality/baselines/code-quality-baseline.json,
-// the same ratchet quality/gates/code-quality.mjs uses. Touching a bad file is fine. Making it worse is
-// not, and fixing it is rewarded with silence.
+// is how a rule gets turned off. So "worse" is measured against the LOWER of two numbers: the file's
+// own count in quality/baselines/code-quality-baseline.json, and the count in the file as it stood at
+// git HEAD, linted the same way. The baseline alone was not enough: 615 baseline entries were compiled
+// once and never mean to be re-run after every rename or new file, so a file with real pre-existing
+// debt but no baseline entry (an untracked-by-the-baseline file, count defaults to 0) tripped the hook
+// on every touch, including a no-op. HEAD always has an entry for a tracked file, so it closes that
+// gap; the baseline still wins when it is the stricter (lower) of the two, so debt already paid down
+// there can never be re-borrowed by comparing against a laxer HEAD. A brand new file (no HEAD version)
+// falls back to baseline-only, today's behaviour.
 //
 // It is affordable because oxlint is Rust: a single file measures in a few milliseconds, and the whole
 // repo in about 70. An ESLint-based version of this hook would add seconds to every edit and would be
 // removed within a day.
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -28,6 +35,35 @@ const CFG = path.join(ROOT, '.oxlintrc.json');
 // gate; interrupting an edit for an unused variable would be exactly the noise described above.
 const SHAPE = new Set(['complexity', 'max-lines-per-function', 'max-depth', 'max-nested-callbacks', 'max-params']);
 
+/** Run oxlint over one file's content, without touching the real working tree copy. */
+function lintContent(rel, content) {
+  const tmp = path.join(os.tmpdir(), `code-quality-live-${process.pid}-${path.basename(rel)}`);
+  fs.writeFileSync(tmp, content);
+  try {
+    const r = spawnSync(BIN, ['-c', CFG, '--format=json', tmp], { cwd: ROOT, encoding: 'utf8' });
+    let diags = [];
+    try { diags = (JSON.parse(r.stdout).diagnostics || []); } catch { return []; }
+    return diags
+      .map((d) => ({ rule: (/eslint\(([^)]+)\)/.exec(d.code) || [, ''])[1], message: d.message,
+                     line: d.labels && d.labels[0] ? d.labels[0].span.line : 0 }))
+      .filter((d) => SHAPE.has(d.rule));
+  } finally {
+    fs.rmSync(tmp, { force: true });
+  }
+}
+
+const tally = (found) => {
+  const counts = {};
+  for (const d of found) counts[d.rule] = (counts[d.rule] || 0) + 1;
+  return counts;
+};
+
+/** The file's content at git HEAD, or null for an untracked/new file. */
+function headContent(rel) {
+  const r = spawnSync('git', ['show', `HEAD:${rel}`], { cwd: ROOT, encoding: 'utf8' });
+  return r.status === 0 ? r.stdout : null;
+}
+
 let raw = '';
 process.stdin.on('data', (d) => { raw += d; });
 process.stdin.on('end', () => {
@@ -38,29 +74,42 @@ process.stdin.on('end', () => {
 
   const rel = path.relative(ROOT, file);
   if (rel.startsWith('..') || rel.startsWith('site/') || rel.includes('node_modules')) process.exit(0);
+  if (!fs.existsSync(file)) process.exit(0);
 
-  const r = spawnSync(BIN, ['-c', CFG, '--format=json', rel], { cwd: ROOT, encoding: 'utf8' });
-  let diags = [];
-  try { diags = (JSON.parse(r.stdout).diagnostics || []); } catch { process.exit(0); }
-
-  const found = diags
-    .map((d) => ({ rule: (/eslint\(([^)]+)\)/.exec(d.code) || [, ''])[1], message: d.message,
-                   line: d.labels && d.labels[0] ? d.labels[0].span.line : 0 }))
-    .filter((d) => SHAPE.has(d.rule));
+  const found = lintContent(rel, fs.readFileSync(file, 'utf8'));
   if (!found.length) process.exit(0);
+  const counts = tally(found);
 
   let base = {};
   try { base = JSON.parse(fs.readFileSync(BASELINE, 'utf8')); } catch { /* no baseline yet */ }
 
-  const counts = {};
-  for (const d of found) counts[d.rule] = (counts[d.rule] || 0) + 1;
+  const atHead = headContent(rel);
+  const headCounts = atHead === null ? null : tally(lintContent(rel, atHead));
 
-  const worse = Object.entries(counts).filter(([rule, n]) => n > (base[`${rel}::${rule}`] || 0));
-  if (!worse.length) process.exit(0);   // touched a tangled file without making it worse
+  // The allowed count per rule. A MISSING baseline entry means "never measured", not "zero": treating
+  // it as zero is exactly what tripped the hook on every touch of a file the baseline never recorded.
+  // So an absent entry defers entirely to HEAD. Only when the baseline DOES have an entry do the two
+  // compete, and the lower wins, so neither source can raise the bar past what the other already
+  // holds. No HEAD version (a new file) means baseline alone decides, unchanged from before.
+  const allowed = (rule) => {
+    const key = `${rel}::${rule}`;
+    const hasBase = Object.prototype.hasOwnProperty.call(base, key);
+    const fromHead = headCounts === null ? null : (headCounts[rule] || 0);
+    if (!hasBase) return fromHead === null ? 0 : fromHead;
+    if (fromHead === null) return base[key];
+    return Math.min(base[key], fromHead);
+  };
+
+  const worse = Object.entries(counts).filter(([rule, n]) => n > allowed(rule));
+  if (!worse.length) {
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    if (total > 0) process.stderr.write(`${rel} carries ${total} pre-existing finding(s), unchanged.\n`);
+    process.exit(0);
+  }
 
   const lines = [];
   for (const [rule, n] of worse) {
-    const had = base[`${rel}::${rule}`] || 0;
+    const had = allowed(rule);
     lines.push(`  ${rule}: was ${had}, now ${n}`);
     for (const d of found.filter((f) => f.rule === rule)) lines.push(`    ${rel}:${d.line}  ${d.message}`);
   }
