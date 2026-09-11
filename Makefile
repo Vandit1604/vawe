@@ -7,7 +7,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor motion-lab frame-check stage worktrees dev check ship script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet
+.PHONY: motion-floor motion-lab frame-check stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -272,10 +272,20 @@ llms-txt: ## [engine] regenerate formats/llms.txt, the portable vocabulary prime
 # W11: preflight used to be a step an author had to remember to run FIRST; it is now the hidden
 # prerequisite this runs for you when the receipt is missing or stale (harness/lib/ensure-preflight.mjs),
 # the same move `make dev` already made for contact sheets.
+# FIX 2/8: author-check -> the page audit (no render needed) -> generated-check (read-only) -> ONE
+# summary block, via harness/lib/check-report.mjs. `make ship` still runs its own author-check/audit;
+# this only runs the same commands earlier, before a render is paid for.
 check: ## [check] every gate, every finding, ZERO consequence (runs preflight first if it hasn't)
 	@$(if $(D),node harness/lib/ensure-preflight.mjs $(D),)
-	@RUNLOG_CMD=check MODE=iterate node harness/lib/run-author-check.mjs $(D) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS))
+	@node harness/lib/check-report.mjs $(D) $(if $(filter 1,$(TASTE)),--taste)
 	@node harness/author/arsenal.mjs --for $(D) 2>/dev/null || true
+
+# make regen: write every generated file in one command (FIX 8). `make check` above only REPORTS drift
+# (generated-check with no --write); this is the write half, so the fix for reported drift is one
+# command: schema-write, generated-check --write, rules-build, and (D=<film> only) a byte-identical
+# kit re-paste into that film's fragments, verified with kitCheck.
+regen: ## [maintenance] write every generated file: schema-write + generated-check --write + rules-build + kit re-paste (D=<film> for the last)
+	@node harness/lib/regen.mjs $(D)
 
 # make why D=<file> [N=5]: the run log (harness/lib/runlog.mjs), read back. Which checks ran, fired,
 # blocked; which waivers were used; the last render's frames/fps/ms; the judge verdict; and what
