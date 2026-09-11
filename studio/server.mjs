@@ -519,7 +519,8 @@ const studioRoutes = (req, res) => {
       // seam-snap exits 1 when it FINDS a flash and still writes its sheet, which is the run you most
       // want to look at. So the sheet decides, not the exit code.
       if (fs.existsSync(png)) return send();
-      text(500, `${kind} drew no sheet:\n${String(stderr || stdout || (err && err.message) || '').trim().slice(0, 900)}`);
+      // 200 with a header, not 500: a scene that cannot render is a state the page shows, not a failed request
+      text(200, `${kind} drew no sheet:\n${String(stderr || stdout || (err && err.message) || '').trim().slice(0, 900)}`, { 'X-Scene-Error': '1' });
     });
     return true;
   }

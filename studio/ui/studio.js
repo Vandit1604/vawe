@@ -151,7 +151,7 @@
  // refuses, and only the storyboard gate's warnings and errors
  // the gate's warnings and errors as short values; five "beat X has no scene layer" lines are one fact
  function gateChips(findings){
-   const warn=(findings||[]).filter(f=>f.kind!=='✓');
+   const warn=(findings||[]).filter(f=>f.kind!=='✓'&&!/make panels|continuous-object contract/.test(f.line));
    const unbuilt=warn.filter(f=>/no scene layer starts there/.test(f.line));
    const chips=warn.filter(f=>!unbuilt.includes(f))
      .map(f=>[f.kind,/continuous-object contract/.test(f.line)?'object contract not assembled':shortFinding(f.line)]);
@@ -174,7 +174,7 @@
  }
  // One beat is one row: the picture on the left at the film's real ratio, what it says and why on the right
  function beatHtml(b,i,prevArch,pal){
-   const words=(b.onscreen||[]).filter(l=>l&&!declined(l));
+   const words=(b.onscreen||[]).filter(l=>l&&!declined(l)&&l.split(/\s+/).length<=12&&!/[()]/.test(l));
    return '<section class=pbeat id="pbeat-'+(i+1)+'"><header><span class=pn>'+(i+1)+'</span><h3>'+esc(b.name)+'</h3>'
      +'<span class=pmeta>'+(+b.start).toFixed(1)+'s to '+(+b.end).toFixed(1)+'s</span>'
      +'<span class="pmeta pdur">'+(b.end-b.start).toFixed(1)+'s</span><span class=sp></span>'
@@ -207,8 +207,7 @@
    if(!d||!d.ok) return;
    const chip=$('stagechip'), name=$('stagename'), at=d.order.indexOf(d.stage), label=cap(d.stage);
    name.textContent=label;
-   chip.title='Stage '+(at+1)+' of '+d.order.length+': '+d.order.map((id,i)=>i===at?id.toUpperCase():id).join(' · ')
-     +String.fromCharCode(10)+'Next: '+(d.command||d.next)+(d.note?String.fromCharCode(10)+d.note:'');
+   chip.title=d.command||d.next;
    chip.setAttribute('aria-label','stage '+d.stage+', copy the next command');
    chip.hidden=false;
    chip.addEventListener('click',()=>{
@@ -238,10 +237,12 @@
  function lookBusy(msg){ lookStat.innerHTML='<span class=work><i></i>'+esc(msg)+'</span>'; }
  function note(title,body){ sheetBtn.hidden=true; sheetNote.hidden=false;
    sheetNote.innerHTML='<b>'+esc(title)+'</b>'+body; }
+ const sheetErr={};   // a sheet the scene cannot draw is kept, so each visit does not re-run the failing render
  function showSheet(kind,force){
    sheetKind=kind;
    [...document.querySelectorAll('[data-sheet]')].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sheet===kind)));
    if(sheetHave[kind]&&!force){ setSheet(sheetHave[kind].u,sheetHave[kind].dim); lookStat.textContent=''; return; }
+   if(sheetErr[kind]&&!force){ lookStat.textContent=''; note('Scene did not load',sheetErr[kind]); return; }
    const busy={beats:'rendering beats',frames:'rendering key frames',seams:'decoding seams'}[kind]||'rendering';
    lookBusy(busy); say(busy);
    sheetBtn.hidden=true; sheetNote.hidden=true;
@@ -253,8 +254,11 @@
      const dim=r.headers.get('X-Dim');
      if(r.headers.get('X-Needs-Render')) return r.text().then(()=>{ lookStat.textContent=''; say('there are no seam frames yet');
        // SAY IT, never draw an empty grid. And offer the one thing that would fix it.
-       note('No seam frames yet','<p><button id=dorender>Render</button></p>');
-       $('dorender').addEventListener('click',startRender); });
+       note('No seam frames yet',window.sceneFailed?'':'<p><button id=dorender>Render</button></p>');
+       const dr=$('dorender'); if(dr) dr.addEventListener('click',startRender); });
+     if(r.headers.get('X-Scene-Error')) return r.text().then(t=>{ lookStat.textContent='';
+       sheetErr[kind]='<details><summary>Output</summary><pre style="white-space:pre-wrap;user-select:text;font:11px/1.5 ui-monospace,monospace">'+esc(t)+'</pre></details>';
+       say('the scene did not load'); note('Scene did not load',sheetErr[kind]); });
      if(!r.ok) return r.text().then(t=>{ lookStat.textContent=''; say('that sheet could not be drawn'); note('that sheet could not be drawn','<pre style="white-space:pre-wrap;user-select:text;font:11px/1.5 ui-monospace,monospace">'+esc(t)+'</pre>'); });
      return r.blob().then(b=>{ const u=URL.createObjectURL(b); sheetHave[kind]={u,dim};
        setSheet(u,dim); lookStat.textContent=''; say('the '+kind+' sheet is ready'); }); })
@@ -295,7 +299,7 @@
  function drawShip(){
    const g=(model&&model.gate)||{codes:[]};
    const codes=g.codes||[], cmd='make ship D='+((model&&(model.path||model.file))||'');
-   $('shipstat').textContent=codes.length?codes.length+' finding'+(codes.length===1?'':'s'):'no findings';
+   $('shipstat').textContent=window.sceneFailed?'scene did not load':codes.length?codes.length+' finding'+(codes.length===1?'':'s'):'no findings';
    $('shipbody').innerHTML=(codes.length?'<h2>Findings</h2><ul>'+codes.map(c=>'<li><code>'+esc(c)+'</code></li>').join('')+'</ul>':'')
      +'<button class=copycmd id=shipcmd><code>'+esc(cmd)+'</code><span>Copy</span></button>';
    const b=$('shipcmd'), lab=b.querySelector('span'), back=()=>setTimeout(()=>{ lab.textContent='Copy'; },1400);
@@ -349,7 +353,7 @@
  function drawCands(d){
    const w=d.window||{}, cs=(d.candidates||[]).filter(c=>c.clip);
    clearInterval(candTick);
-   candStat.textContent=('bg['+w.index+'], now \u201c'+w.current+'\u201d, at '+d.at+'s · '+cs.length+' takes in '+Math.round((d.ms||0)/1000)+'s');
+   candStat.textContent='';
    // SIX AUTOPLAYING LOOPS IS EXACTLY THE MOTION SOMEBODY MAY HAVE ASKED TO BE SPARED, so under
    // prefers-reduced-motion they load paused and the panel offers one control that starts them all.
    // Not silently replaced by stills: a still hides speed, scale and direction, which is the whole
@@ -358,9 +362,9 @@
    // a <button> takes phrasing content, so the card is spans: a <p> inside a button is invalid markup
    // and the parser closes the button around it, which is why the cards were one hit target on paper
    // and several in the tree.
-   cands.innerHTML=cs.map((c,i)=>'<button class=cand data-i="'+i+'" title="'+esc(c.blurb||c.name)+'">'
+   cands.innerHTML=cs.map((c,i)=>'<button class=cand data-i="'+i+'">'
      +'<video src="/'+esc(c.clip)+'" loop muted playsinline preload=metadata'+(still?'':' autoplay')+'></video>'
-     +'<span class=t><b>'+esc(c.name)+'</b><s>'+(c.new?'new':(c.scenes+' film'+(c.scenes===1?'':'s')))+'</s></span>'
+     +'<span class=t><b>'+esc(c.name)+'</b>'+(c.new?'<s>new</s>':'')+'</span>'
      +(c.warnings||[]).map(w2=>'<span class="d warn">'+esc(w2)+'</span>').join('')
      +'</button>').join('');
    cands.querySelectorAll('.cand').forEach(b=>b.addEventListener('click',()=>applyCand(cs[+b.dataset.i])));
@@ -522,13 +526,16 @@
  // AN ERROR YOU CANNOT COPY IS AN ERROR YOU RETYPE BY HAND. The text is selectable, one button copies
  // it, and it is POSTed to the server so the terminal that started studio hears about it too.
  function fail(title,detail){ errBox.hidden=false;
-   errBox.innerHTML='<b></b><pre></pre><button class="ecopy">copy</button>';
-   errBox.querySelector('b').textContent=title;
+   window.sceneFailed=true;
+   errBox.innerHTML='<b></b><details><summary>Output</summary><pre></pre></details><button class="ecopy">Copy</button>';
+   ['prev','play','next','zin','zout','key','candgo'].forEach(id=>{ const e=$(id); if(e) e.disabled=true; });
+   errBox.querySelector('b').textContent='Scene did not load';
    const pre=errBox.querySelector('pre');
    pre.textContent=detail; pre.style.cssText='white-space:pre-wrap;user-select:text;margin:.5em 0;font:12px/1.5 ui-monospace,monospace';
    const btn=errBox.querySelector('.ecopy');
    btn.onclick=()=>{ navigator.clipboard.writeText(title+String.fromCharCode(10)+detail).then(()=>{btn.textContent='copied';setTimeout(()=>btn.textContent='copy',1200);}); };
    read.textContent='scene did not load';
+   try{ timeline(); }catch{}
    try{ fetch('/__err',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({title:title,detail:detail})}); }catch{}
  }
@@ -556,7 +563,7 @@
  const stamp=(t)=>{ const c=Math.round(Math.max(0,t)*100), p=(v)=>String(v).padStart(2,'0');
    return p(Math.floor(c/6000))+':'+p(Math.floor(c/100)%60)+'.'+p(c%100); };
  function loop(){ if(!playing)return; n=(n+1)%(total+1); draw(); setTimeout(()=>requestAnimationFrame(loop),1000/fps); }
- function setPlaying(p){ playing=p;
+ function setPlaying(p){ if(p&&!(sc.contentWindow&&sc.contentWindow.__engine)) return; playing=p;
    play.innerHTML=p?'<svg class=solid viewBox="0 0 20 20"><rect x=5 y=4 width=3.5 height=12 rx=1 /><rect x=11.5 y=4 width=3.5 height=12 rx=1 /></svg>'
                    :'<svg class=solid viewBox="0 0 20 20"><path d="M6 3.8v12.4L16 10z"/></svg>';
    play.setAttribute('aria-label',p?'pause':'play'); play.title=p?'Pause':'Play';
@@ -658,7 +665,9 @@
  function sizeFilm(){ if(!stripStride) return;
    const cw=(ruler.clientWidth||1)*stripStride/dur;
    $('film').style.height=Math.round(Math.max(36,Math.min(72,cw*H/W)))+'px'; }
+ let lastStrip=null;
  function markStill(s){
+   lastStrip=s;
    const still=new Set(s.still||[]);
    if(!still.size) return;
    [...rows.querySelectorAll('.bar')].forEach(b=>{ if(still.has(+b.dataset.i)){ b.classList.add('still');
@@ -678,6 +687,8 @@
      markStill(s);
    }).catch(()=>{ stripDone=false; });
  }
+ const paintRows=paint;
+ paint=function(m){ paintRows(m); if(lastStrip) markStill(lastStrip); };
  function timeline(){
    fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; $('undo').disabled=!(m.undo>0); drawCrumbs(); paint(m); drawJump(); })
      .catch(e=>{ $('tlwhat').textContent='timeline unavailable: '+e; });
@@ -747,7 +758,7 @@
    if(A.bridgeError) h+='<div class=lane-note><span>bridges did not resolve: '+esc(A.bridgeError)+'</span></div>';
    return h;
  }
- const barTitle=(b)=>b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s to '+(b.s+b.w).toFixed(2)+'s · enter '+b.enter+'s / exit '+b.exit+'s'
+ const barTitle=(b)=>b.type+' '+(b.name||'')+' · '+b.s.toFixed(2)+'s to '+(b.s+b.w).toFixed(2)
    +(b.anim?' · '+b.anim:'')+(b.out?' then '+b.out:'')+(b.grew>0.005?' · held '+b.grew.toFixed(2)+'s past '+(b.s+b.w-b.grew).toFixed(2)+'s':'');
  function barHtml(b){
    const wpc=100*b.w/dur, inp=b.w?100*Math.min(b.enter,b.w)/b.w:0, outp=b.w?100*Math.min(b.exit,b.w)/b.w:0;
