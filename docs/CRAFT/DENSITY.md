@@ -48,6 +48,7 @@ Keep it at **~15–25% opacity of attention**: present, legible, never loud. It'
 - A big word centered on empty space with nothing else (the slide tell).
 - Decorative density: noise added just to fill. Every element must inform or frame.
 - Metadata that competes (too bright, too big). If you read it before the hero, it's too loud.
+- Ending on a bare backdrop with no content layer (`ends-on-nothing`).
 
 ## Guardrails: you build for the web. Video frames are not pages.
 

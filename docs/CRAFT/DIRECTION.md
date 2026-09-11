@@ -215,6 +215,7 @@ The applied spine lives in [`STORY.md`](STORY.md); §"Provenance" below carries 
   earned. `[gated]` direct: `dead-final-frame` + `[eye]`
 - **Honesty / earned attention.** On-screen copy must be literally true; the hook's promise must be
   paid. Real, accurate numbers only. `[gated]` critique: `unbacked-claim`/`false-claim` + `[eye]`
+- **Value test.** Every beat earns its time, or it is cut. `[eye]`
 
 ## 5. The pro-vs-amateur checklist (run this before shipping)
 
