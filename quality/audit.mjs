@@ -40,6 +40,7 @@ import { snippet } from '../harness/lib/text.mjs';
 import { gateFindings } from '../harness/lib/findings.mjs';
 import { loadScene } from '../core/engine/expand.js';
 import { bootPathFor } from '../harness/lib/render-harness.mjs';
+import { adaptFinding } from '../harness/lib/safeguards.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const formatsDir = path.join(repoRoot, 'formats');
@@ -649,7 +650,14 @@ function overflowFinding(el, s, id, li, t) {
   const spills = (s.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1)
     || (s.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1);
   if (!spills || maskedByDesign(el)) return null;
-  return { kind: 'overflow', a: id, li, t, detail: `content ${el.scrollWidth}x${el.scrollHeight} clipped to ${el.clientWidth}x${el.clientHeight}` };
+  // `pct`: how far the box overflows on its worst axis, relative to that axis's own size. A page
+  // renders sub-pixel layout in float CSS px, so a fraction-of-a-pixel rounding difference between the
+  // author's declared box and the browser's computed one reads as "overflow" here even though nothing
+  // is actually clipped. harness/lib/safeguards.mjs reads this to tell that apart from a real spill.
+  const pctW = el.clientWidth ? (el.scrollWidth - el.clientWidth) / el.clientWidth : 0;
+  const pctH = el.clientHeight ? (el.scrollHeight - el.clientHeight) / el.clientHeight : 0;
+  return { kind: 'overflow', a: id, li, t, pct: Math.max(pctW, pctH),
+    detail: `content ${el.scrollWidth}x${el.scrollHeight} clipped to ${el.clientWidth}x${el.clientHeight}` };
 }
 
 // Two spaces, two questions. The SAFE box is asked in SCENE space, because it is the margin the
@@ -758,7 +766,11 @@ function checkClippedText() {
     const txt = inkText(el).trim();
     if (!txt || !vis(el) || !atRest(el) || maskedByDesign(el)) continue;
     const dy = el.scrollHeight - el.clientHeight, dx = el.scrollWidth - el.clientWidth;
+    // `ellipsis`: this node ASKED to truncate (text-overflow:ellipsis on overflow:hidden). That is
+    // designed truncation, not the mask-too-small bug this check exists to catch, and
+    // harness/lib/safeguards.mjs reads this flag to tell the two apart.
     if (dy > 1 || dx > 1) issues.push({ kind: 'clipped-text', a: txt.slice(0, 16),
+      ellipsis: cs.textOverflow === 'ellipsis' && cs.overflow === 'hidden',
       detail: `mask is ${dy > 1 ? `${dy}px too short` : `${dx}px too narrow`} for the glyphs, descenders/edges are being cut` });
   }
   return issues;
@@ -1651,7 +1663,10 @@ for (const aspectKey of askedAspects) {
     // already holds. The page decides per LAYER, from the render: `travelling` for a box mid-journey,
     // `stageRotated` for a 3D rig whose boxes are over-bounds, `unCam` for the camera's own displacement.
     // Every one of those is measured; this was guessed from JSON, and it was strictly coarser.
-    for (const i of issues) all.push({ f, ...i });
+    // Route overflow/clipped-text through the adaptive-safeguards registry: it either hands the
+    // finding back unchanged, or attaches `.adapted = { verdict, line }` when the film's own numbers
+    // (pct, ellipsis, gathered above) already explain it. Nothing else in this loop changes.
+    for (const i of issues) all.push({ f, ...adaptFinding(i, { scene: cfg }) });
   }
   // WAIVERS. Every other gate in this repo honours {"authoring":{"allow":[...]}}; this one did not, so
   // a DELIBERATE composition had no way past it and the only options were to contort the scene or to
@@ -1661,8 +1676,11 @@ for (const aspectKey of askedAspects) {
   // find. A waived issue is still PRINTED, tagged, and counted separately, so waiving stays visible.
   if (heroOnly) for (let i = all.length - 1; i >= 0; i--) if (all[i].kind !== 'thin-hero') all.splice(i, 1);
   const waived = all.filter((i) => allow.has(i.kind));
-  const hard = all.filter((i) => HARD.has(i.kind) && !allow.has(i.kind));
-  const warn = all.filter((i) => !HARD.has(i.kind) && !allow.has(i.kind));
+  // An adapted finding (registry verdict `tolerate`/`reclassify`) already had its HARD-ness judged
+  // against the film's own numbers; it reports like a warning, with the adaptation's line as its
+  // detail, instead of failing the film.
+  const hard = all.filter((i) => HARD.has(i.kind) && !allow.has(i.kind) && !i.adapted);
+  const warn = all.filter((i) => (!HARD.has(i.kind) || i.adapted) && !allow.has(i.kind));
   for (const i of waived) i.waived = true;
   // De-dup repeated issues to the first frame they appear on: the SAME element failing on 12 sampled
   // frames is one bug, not twelve. Identity is the layer index (`li`) where we have it, because the
@@ -1724,7 +1742,11 @@ for (const r of rows) {
   for (const i of (r.items || [])) {
     const who = i.b ? `${i.a} ✕ ${i.b}` : `${i.a}${i.t ? ` "${i.t}"` : ''}`;
     // a waived issue still prints. A gate that goes silent when waived teaches you to waive.
-    console.log(`    ${i.waived ? '○' : ' '}[${i.kind}]${i.waived ? ' (waived)' : ''} ${i.f == null ? '' : `f${i.f} `}${who}, ${i.detail}`);
+    // an adapted finding prints its registry line instead of the raw detail: the point of adapting is
+    // to say what changed and why, not to make the finding disappear.
+    console.log(i.adapted
+      ? `    ○ [${i.kind}] ${i.adapted.line}`
+      : `    ${i.waived ? '○' : ' '}[${i.kind}]${i.waived ? ' (waived)' : ''} ${i.f == null ? '' : `f${i.f} `}${who}, ${i.detail}`);
   }
 }
 console.log(`\noverlays in ${OUT}/ (one PNG per audited scene)`);
@@ -1739,9 +1761,9 @@ const F2 = gateFindings();
 for (const r of rows) {
   for (const i of (r.items || [])) {
     const who = i.b ? `${i.a} ✕ ${i.b}` : `${i.a}${i.t ? ` "${i.t}"` : ''}`;
-    const summary = `${r.m}: ${i.f == null ? '' : `f${i.f} `}${who}, ${i.detail}`;
-    const extra = { at: { module: r.m, frame: i.f }, ...(i.waived ? { waived: true } : {}) };
-    (HARD.has(i.kind) ? F2.fail : F2.warn)(i.kind, summary, extra);
+    const summary = i.adapted ? `${r.m}: ${i.adapted.line}` : `${r.m}: ${i.f == null ? '' : `f${i.f} `}${who}, ${i.detail}`;
+    const extra = { at: { module: r.m, frame: i.f }, ...(i.waived ? { waived: true } : {}), ...(i.adapted ? { adapted: i.adapted.verdict } : {}) };
+    (HARD.has(i.kind) && !i.adapted ? F2.fail : F2.warn)(i.kind, summary, extra);
   }
 }
 
