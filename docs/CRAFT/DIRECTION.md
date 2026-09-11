@@ -118,6 +118,11 @@ different landings with no stated order.
 
 ## 2. Editing & pacing, rhythm is the direction
 
+**One global speed dial**: a scene-level `tempo` (1 = unchanged, 0.85 = 15% slower) scales every
+authored time at once, resolved in `core/engine/tempo.js`. Preview it with `make pace D=<file>
+TEMPO=<n>` before committing. It is a global correction, not a substitute for the per-beat rhythm
+variety below; footage and the audio bed keep their own native rate regardless of tempo.
+
 - **The Rule of Six**. A cut serves, in priority: **emotion (51%) · story (23%) · rhythm (10%) ·
   eye-trace (7%) · screen plane (5%) · spatial continuity (4%)**. Emotion dominates; spatial logic is
   nearly worthless. → Cut/transition to serve the feeling and the beat first. When a move and the
