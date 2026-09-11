@@ -114,6 +114,18 @@
  .curve .bez{display:flex;gap:4px} .curve .bez input{width:52px}
  .cnum{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-3);margin-right:6px}
  .cnum input{width:56px}
+ /* speed graph: 220x110, a faint value overlay toggled on demand, two draggable AE-style handles */
+ .speedseg .curvegraph{width:220px;height:110px}
+ .cgval{stroke:var(--ink-3);opacity:.4;stroke-width:1.2}
+ .hnd{fill:var(--c-camera,#6cf);stroke:var(--panel);stroke-width:1.5;cursor:grab;touch-action:none}
+ .hnd:active{cursor:grabbing}
+ .valtoggle{font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:4px;width:auto!important}
+ .hvals{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+ .hvals label{display:flex;flex-direction:column;gap:2px;font-size:10px;color:var(--ink-3)}
+ .hvals input{width:100%}
+ .convertbtn{align-self:flex-start;background:var(--panel-2);color:var(--ink);border:1px solid var(--line);
+   border-radius:6px;font-size:11px;padding:4px 8px;cursor:pointer}
+ .convertbtn:hover{border-color:var(--accent)}
  .fld b{font-weight:400;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  .fld.txt b{font-family:Anybody,system-ui,sans-serif;font-size:13px}
  #propjson details{margin:0 0 4px}
@@ -237,8 +249,15 @@
  #ruler .t:first-child s{transform:none;left:8px}
  #ruler .t.end s{left:auto;right:0;transform:none}
  #ruler .m{position:absolute;bottom:2px;height:13px;border-left:2px solid var(--ink-3);color:var(--ink-3);padding-left:3px;
-   font:600 9.5px/13px var(--mono);white-space:nowrap}
+   font:600 9.5px/13px var(--mono);white-space:nowrap;cursor:pointer}
+ #ruler .m.ro{cursor:default}
+ #ruler .m:not(.ro):hover,#ruler .m.sel{color:var(--ink);border-left-color:var(--accent)}
  #ruler .ms{position:absolute;top:22px;bottom:0;background:var(--ink-3);opacity:.14}
+ /* a camera leg pill, in the gap between the tick row and the transition marks */
+ #ruler .camleg{position:absolute;top:15px;height:9px;min-width:3px;background:var(--c-camera,#6cf);opacity:.5;
+   border-radius:3px;color:#001;font:700 8px/9px var(--mono);text-align:center;overflow:hidden;cursor:pointer}
+ #ruler .camleg:hover,#ruler .camleg.sel{opacity:.9}
+ .bar[data-cam-i].sel,.bar[data-trans-i].sel{outline:2px solid var(--accent);outline-offset:-2px}
  /* the filmstrip is the media row, pinned under the ruler so the timeline reads by eye */
  #film{position:sticky;top:30px;z-index:3;height:58px;background:var(--c-media);border-radius:var(--r-pill);overflow:hidden;
    box-shadow:0 0 0 4px var(--panel)}

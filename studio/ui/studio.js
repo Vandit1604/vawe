@@ -80,11 +80,12 @@
  let insideParts=null;   // the last /api/fragment result for the open layer's src, or [] / null
  function overlapPct(s,e,vs,ve){ return { l:100*Math.max(0,Math.min(1,(s-vs)/(ve-vs)))+'%',
    w:100*Math.max(0.006,Math.min(1,(e-s)/(ve-vs)))+'%' }; }
- function insideRow(label,kind,items){
+ function insideRow(label,kind,items,idAttr){
    if(!items.length) return '<div class=irow><b>'+esc(label)+'</b><span class=inone>none</span></div>';
    return '<div class=irow><b>'+esc(label)+'</b><div class=row>'+items.map(it=>{
      const p=overlapPct(it.s,it.e,insideLayer.start,insideLayer.start+insideLayer.dur);
-     return '<div class="bar k-'+kind+'" style="left:'+p.l+';width:'+p.w+'" title="'+esc(it.title)+'"><span>'+esc(it.label)+'</span></div>';
+     const id=idAttr&&it.i!=null?' data-'+idAttr+'="'+it.i+'"':'';
+     return '<div class="bar k-'+kind+'"'+id+' style="left:'+p.l+';width:'+p.w+'" title="'+esc(it.title)+'"><span>'+esc(it.label)+'</span></div>';
    }).join('')+'</div></div>';
  }
  function paintInside(){
@@ -94,15 +95,15 @@
    let rh=''; for(let t=Math.ceil(vs/step)*step;t<=ve+1e-6;t+=step)
      rh+='<div class=t style="left:'+(100*(t-vs)/span)+'%"><s>'+clock(t-vs)+'</s></div>';
    ruler.innerHTML=rh; $('film').innerHTML='';
-   const cams=overlappingCamera(vs,ve).map(c=>({s:Math.max(vs,c.start),e:Math.min(ve,c.start+c.dur),
+   const cams=overlappingCamera(vs,ve).map(c=>({i:c.i,s:Math.max(vs,c.start),e:Math.min(ve,c.start+c.dur),
      label:c.move||'camera',title:c.move+' '+c.from+' → '+c.to+' at '+c.start.toFixed(2)+'s'}));
-   const trans=overlappingTransitions(vs,ve).map(t=>({s:Math.max(vs,t.at),e:Math.min(ve,t.at+t.dur),
+   const trans=overlappingTransitions(vs,ve).map(t=>({i:t.i,s:Math.max(vs,t.at),e:Math.min(ve,t.at+t.dur),
      label:t.fx||t.mech||'transition',title:(t.fx||t.mech||'transition')+' at '+t.at.toFixed(2)+'s'}));
    const motion=(Array.isArray(L.raw.motion)?L.raw.motion:[]).map(k=>({s:vs+(k.t||0),e:vs+(k.t||0)+.3,
      label:'key '+(k.t||0).toFixed(2)+'s',title:JSON.stringify(k)}));
    const parts=(Array.isArray(L.raw.parts)?L.raw.parts:[]).map(p=>{ const s=vs+(p.delay||0), e=s+(p.each||0)+(p.exitDur||.3);
      return { s, e, label:(p.select||p.anim||'part'), title:JSON.stringify(p) }; });
-   let h=insideRow('Camera','camera',cams)+insideRow('Transitions','fx',trans)+insideRow('Motion','motion',motion)+insideRow('Parts','part',parts);
+   let h=insideRow('Camera','camera',cams,'cam-i')+insideRow('Transitions','fx',trans,'trans-i')+insideRow('Motion','motion',motion)+insideRow('Parts','part',parts);
    if(L.raw.src){
      h+='<div class=irow><b>Fragment</b>'+(insideParts==null?'<span class=inone>loading…</span>'
        :insideParts.length?'<div class=ichips>'+insideParts.map(p=>'<span class=ichip>'+esc(p.name)+(p.id?' #'+esc(p.id):'')+'</span>').join('')+'</div>'
@@ -131,7 +132,7 @@
  // ---------- keyframing ----------
  // ONE interaction, end to end: pick a layer, scrub to a frame, drag it. That writes a motion key at
  // that frame. Everything else an editor eventually needs sits on top of this loop.
- let FITS=1, keyMode=false, selIdx=-1, selStart=0, selLabel='', dragging=null;
+ let FITS=1, keyMode=false, selIdx=-1, selStart=0, selLabel='', dragging=null, selCam=-1, selTrans=-1;
  // ---- eye toggle: PREVIEW ONLY. Never touches the scene JSON, never affects a render: it hides the
  // layer's element in the iframe every frame it draws, so a hidden layer stays hidden through seeking
  // and playback. Alt-click solos one layer (hides every other). Persisted per film, best effort.
@@ -164,11 +165,36 @@
    }catch{ /* cross-origin doc: nothing to hide */ } }
  const dragEl=$('drag'), keyBtn=$('key'), selOut=$('sel');
  function setSel(i){ if(i!==selIdx) selOut.textContent='';
-   selIdx=i; const L=model&&model.layers.find(l=>l.i===i);
+   selIdx=i; selCam=-1; selTrans=-1; const L=model&&model.layers.find(l=>l.i===i);
    selStart=L?L.start:0; selLabel=L?(L.type+' '+(L.label||'')):'';
    layerProps(i); selReadout();
-   [...rows.querySelectorAll('.bar')].forEach(b=>b.classList.toggle('sel',+b.dataset.i===i));
-   drawSelBox(); }
+   [...rows.querySelectorAll('.bar')].forEach(b=>b.classList.toggle('sel',b.dataset.camI==null&&b.dataset.transI==null&&+b.dataset.i===i));
+   drawSelBox(); paintSel(); }
+ // a camera leg or transition is a moment, not a layer: selecting one shows its OWN Curves, not a
+ // layer's, so it goes through showProps directly rather than layerProps. curvesFor is reused with an
+ // empty layer (no motion/parts) and just the one camera or transition in its list.
+ function paintSel(){
+   [...document.querySelectorAll('#ruler .camleg,#ruler .m,.bar[data-cam-i],.bar[data-trans-i]')].forEach(el=>
+     el.classList.toggle('sel',(el.dataset.camI!=null&&+el.dataset.camI===selCam)||(el.dataset.transI!=null&&+el.dataset.transI===selTrans)));
+ }
+ function camProps(i){
+   const c=model&&(model.cameraMove||[]).find(x=>x.i===i); if(!c) return;
+   selIdx=-1; selCam=i; selTrans=-1;
+   [...rows.querySelectorAll('.bar')].forEach(b=>b.dataset.camI==null&&b.dataset.transI==null&&b.classList.remove('sel'));
+   drawSelBox();
+   showProps('Camera',prow('Type',fld('camera'))+prow('Move',fld(c.move||'?'))
+     +prow('Time',fld(c.start.toFixed(2),'S'),fld(c.dur.toFixed(2),'D'))+curvesFor(-1,null,{},[c],[]),c.raw);
+   paintSel();
+ }
+ function transProps(i){
+   const t=model&&(model.transitions||[]).find(x=>x.i===i); if(!t) return;
+   selIdx=-1; selCam=-1; selTrans=i;
+   [...rows.querySelectorAll('.bar')].forEach(b=>b.dataset.camI==null&&b.dataset.transI==null&&b.classList.remove('sel'));
+   drawSelBox();
+   showProps('Transition',prow('Type',fld('transition'))+prow('FX',fld(t.fx||t.mech||'?'))
+     +prow('At',fld(t.at.toFixed(2),'S'),fld(t.dur.toFixed(2),'D'))+curvesFor(-1,null,{},[],[t]),t.raw);
+   paintSel();
+ }
  // ---- THE FOUR STATES ----------------------------------------------------------------------------
  // One scene, one playhead, four things you might be doing with them. Nothing here touches sc.src: the
  // centre is hidden and shown, so the engine stays booted and the frame you left is the frame you
@@ -540,34 +566,147 @@
      +easeControl(path,v)+(extra||'')+'</div>';
  }
  const numIn=(path,label,v)=>v==null?'':'<label class=cnum>'+esc(label)+' <input type=number step=0.01 data-curve-num="'+path+'" value="'+esc(v)+'"></label>';
+
+ // ---- speed graph: AE's graph editor. A value curve (above) says WHERE; this says HOW FAST, which is
+ // the derivative of that same curve, and since a segment's fn(0)=0, fn(1)=1, its average slope is
+ // exactly 1 -- so d/dt already IS "a multiple of the average velocity", no extra scaling needed.
+ function speedAt(fn,t){ const h=0.01,t0=Math.max(0,t-h),t1=Math.min(1,t+h);
+   try{ return t1>t0?(fn(t1)-fn(t0))/(t1-t0):0; }catch{ return 0; } }
+ function speedGraphSvg(fn){
+   const W=220,H=110,pad=10,N=64,lo=0,hi=6;
+   const xOf=(t)=>pad+Math.max(0,Math.min(1,t))*(W-2*pad);
+   const y2p=(s)=>H-pad-(Math.max(lo,Math.min(hi,s))-lo)/(hi-lo)*(H-2*pad);
+   let d='',dv='';
+   for(let k=0;k<=N;k++){ const t=k/N; let v=t; try{ v=fn(t); }catch{ /* keep linear fallback */ }
+     d+=(k?'L':'M')+xOf(t).toFixed(1)+' '+y2p(speedAt(fn,t)).toFixed(1)+' ';
+     dv+=(k?'L':'M')+xOf(t).toFixed(1)+' '+(H-pad-Math.max(0,Math.min(1,v))*(H-2*pad)).toFixed(1)+' '; }
+   return { d, dv, xOf, y2p, W, H, pad };
+ }
+ let curveDrag=null;   // the handle side mid-drag: {seg,side,outPath,inPath,out:{speed,influence},in:{...}}
+ // one segment's speed graph, driven by the engine's OWN handleCurve: two draggable handles, one per
+ // side, each carrying {speed,influence}. Absent handles default to the linear side (resolveHandle).
+ function speedRow(label,outPath,inPath,outH,inH){
+   if(!MOTION) return '<div class=curve><b>'+esc(label)+'</b><span class=inone>loading…</span></div>';
+   let oi,ii,fn;
+   try{ oi=MOTION.resolveHandle(outH==null?null:outH,'easeOut'); }catch{ oi={influence:100/3,speed:1}; }
+   try{ ii=MOTION.resolveHandle(inH==null?null:inH,'easeIn'); }catch{ ii={influence:100/3,speed:1}; }
+   try{ fn=MOTION.handleCurve(outH==null?null:outH,inH==null?null:inH)||((t)=>t); }catch{ fn=(t)=>t; }
+   const g=speedGraphSvg(fn);
+   const ox=g.xOf(oi.influence/100),oy=g.y2p(oi.speed),ix=g.xOf(1-ii.influence/100),iy=g.y2p(ii.speed);
+   return '<div class="curve speedseg" data-out="'+esc(outPath)+'" data-in="'+esc(inPath)+'"><b>'+esc(label)+'</b>'
+     +'<svg viewBox="0 0 '+g.W+' '+g.H+'" width='+g.W+' height='+g.H+' class=curvegraph>'
+     +'<line x1='+g.pad+' y1='+g.y2p(1).toFixed(1)+' x2='+(g.W-g.pad)+' y2='+g.y2p(1).toFixed(1)+' class=cg1 />'
+     +'<path d="'+g.d+'" class=cgpath data-speedpath></path>'
+     +'<path d="'+g.dv+'" class="cgpath cgval" data-valpath hidden></path>'
+     +'<circle class=hnd data-side=out cx='+ox.toFixed(1)+' cy='+oy.toFixed(1)+' r=5></circle>'
+     +'<circle class=hnd data-side=in cx='+ix.toFixed(1)+' cy='+iy.toFixed(1)+' r=5></circle>'
+     +'</svg><label class=valtoggle><input type=checkbox data-valtoggle> value</label>'
+     +'<div class=hvals>'
+     +'<label>out speed<input type=number step=0.05 min=0 max=6 data-hnum="out.speed" value="'+oi.speed.toFixed(2)+'"></label>'
+     +'<label>out infl<input type=number step=0.1 min=0.1 max=100 data-hnum="out.influence" value="'+oi.influence.toFixed(1)+'"></label>'
+     +'<label>in speed<input type=number step=0.05 min=0 max=6 data-hnum="in.speed" value="'+ii.speed.toFixed(2)+'"></label>'
+     +'<label>in infl<input type=number step=0.1 min=0.1 max=100 data-hnum="in.influence" value="'+ii.influence.toFixed(1)+'"></label>'
+     +'</div></div>';
+ }
+ // a segment still on a named ease: show what it does as a speed curve too (same graph, read-only),
+ // plus a button that writes handles approximating it -- sampled from the engine's own eased fn, not
+ // guessed, so "convert" never redraws a shape the render did not actually have.
+ function namedSpeedRow(label,easePath,outPath,inPath,v){
+   const fn=easeFn(v)||((t)=>t), g=speedGraphSvg(fn);
+   const so=Math.max(0,Math.min(6,Math.round(speedAt(fn,0.02)/0.05)*0.05));
+   const si=Math.max(0,Math.min(6,Math.round(speedAt(fn,0.98)/0.05)*0.05));
+   return '<div class=curve><b>'+esc(label)+'</b>'
+     +'<svg viewBox="0 0 '+g.W+' '+g.H+'" width='+g.W+' height='+g.H+' class=curvegraph>'
+     +'<line x1='+g.pad+' y1='+g.y2p(1).toFixed(1)+' x2='+(g.W-g.pad)+' y2='+g.y2p(1).toFixed(1)+' class=cg1 />'
+     +'<path d="'+g.d+'" class=cgpath data-speedpath></path>'
+     +'<path d="'+g.dv+'" class="cgpath cgval" data-valpath hidden></path></svg>'
+     +'<label class=valtoggle><input type=checkbox data-valtoggle> value</label>'
+     +easeControl(easePath,v)
+     +'<button type=button class=convertbtn data-convert data-convert-remove="'+esc(easePath)+'" data-convert-out="'+esc(outPath)
+     +'" data-convert-in="'+esc(inPath)+'" data-outspeed="'+so+'" data-inspeed="'+si+'">Convert to handles</button></div>';
+ }
  // every tween this layer's window touches: its own motion keys, a split-text part's timing, and any
  // camera leg or transition overlapping it (the ones "speed and camera movement" actually means).
  function curvesFor(i,L,raw,cams,trans){
    let h='';
    const keys=Array.isArray(raw.motion)?raw.motion:[];
-   keys.forEach((k,j)=>{ if(k.ease===undefined) return;
-     h+=curveRow('motion key '+(k.t||0).toFixed(2)+'s',`/layers/${i}/motion/${j}/ease`,k.ease); });
+   keys.forEach((k,j)=>{ if(j===0) return;
+     const prev=keys[j-1], label='key '+(j-1)+'→'+j;
+     if(k.ease!==undefined) h+=namedSpeedRow(label,`/layers/${i}/motion/${j}/ease`,`/layers/${i}/motion/${j-1}/easeOut`,`/layers/${i}/motion/${j}/easeIn`,k.ease);
+     else h+=speedRow(label,`/layers/${i}/motion/${j-1}/easeOut`,`/layers/${i}/motion/${j}/easeIn`,prev.easeOut,k.easeIn); });
    (Array.isArray(raw.parts)?raw.parts:[]).forEach((p,j)=>{
      h+='<div class=curve><b>part '+esc(p.select||p.anim||j)+'</b>'
        +numIn(`/layers/${i}/parts/${j}/each`,'each',p.each)+numIn(`/layers/${i}/parts/${j}/stagger`,'stagger',p.stagger)+'</div>'; });
    cams.forEach((c)=>{ if(c.i==null||!c.arrayed) return;
-     if(c.move==='travel'&&Array.isArray(c.raw.stations)) c.raw.stations.forEach((s,j)=>{
-       if(s.dur==null&&s.dwell==null&&s.s==null) return;
-       h+='<div class=curve><b>station '+j+'</b>'+numIn(`/cameraMove/${c.i}/stations/${j}/dur`,'dur',s.dur)
-         +numIn(`/cameraMove/${c.i}/stations/${j}/dwell`,'dwell',s.dwell)+numIn(`/cameraMove/${c.i}/stations/${j}/s`,'s',s.s)+'</div>';
-     });
+     if(c.move==='travel'&&Array.isArray(c.raw.stations)){
+       const st=c.raw.stations;
+       st.forEach((s,j)=>{ if(s.dur==null&&s.dwell==null&&s.s==null) return;
+         h+='<div class=curve><b>station '+j+'</b>'+numIn(`/cameraMove/${c.i}/stations/${j}/dur`,'dur',s.dur)
+           +numIn(`/cameraMove/${c.i}/stations/${j}/dwell`,'dwell',s.dwell)+numIn(`/cameraMove/${c.i}/stations/${j}/s`,'s',s.s)
+           +numIn(`/cameraMove/${c.i}/stations/${j}/tx`,'tx',s.tx)+numIn(`/cameraMove/${c.i}/stations/${j}/ty`,'ty',s.ty)+'</div>'; });
+       for(let j=0;j<st.length-1;j++) h+=speedRow('station '+j+'→'+(j+1),
+         `/cameraMove/${c.i}/stations/${j}/easeOut`,`/cameraMove/${c.i}/stations/${j+1}/easeIn`,st[j].easeOut,st[j+1].easeIn);
+     }
      else h+=curveRow('camera '+c.move,`/cameraMove/${c.i}/dur`,c.raw.ease,numIn(`/cameraMove/${c.i}/dur`,'dur',c.dur)); });
    trans.forEach((t)=>{ if(t.i==null) return;
-     h+='<div class=curve><b>transition '+esc(t.fx||t.mech)+'</b>'+numIn(`/transitions/${t.i}/dur`,'dur',t.dur)+'</div>'; });
+     h+='<div class=curve><b>transition '+esc(t.fx||t.mech)+'</b>'+numIn(`/transitions/${t.i}/dur`,'dur',t.dur)
+       +numIn(`/transitions/${t.i}/timing`,'timing',t.timing)+'</div>'; });
    return h?'<section class=psec><h3>Curves</h3>'+h+'</section>':'';
  }
  propsEl.addEventListener('change',async(e)=>{
+   const vt=e.target.closest('[data-valtoggle]');
+   if(vt){ const c=vt.closest('.curve'), vp=c&&c.querySelector('[data-valpath]'); if(vp) vp.hidden=!vt.checked; return; }
    const sel=e.target.closest('[data-curve-ease]'), bez=e.target.closest('[data-curve-bez]'), num=e.target.closest('[data-curve-num]');
+   const hnum=e.target.closest('[data-hnum]');
    let path,value;
    if(sel){ path=sel.dataset.curveEase; value=sel.value; }
    else if(bez){ path=bez.dataset.curveBez; const sib=[...bez.parentElement.querySelectorAll('[data-curve-bez]')]; value=sib.map((el)=>+el.value); }
    else if(num){ path=num.dataset.curveNum; value=+num.value; }
+   else if(hnum){
+     const seg=hnum.closest('.speedseg'), [side]=hnum.dataset.hnum.split('.');
+     const gv=(p)=>+seg.querySelector('[data-hnum="'+side+'.'+p+'"]').value;
+     path=side==='out'?seg.dataset.out:seg.dataset.in; value={speed:gv('speed'),influence:gv('influence')};
+   }
    else return;
+   const r=await fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({ops:[{op:'replace',path,value}]})}).then((x)=>x.json()).catch((err)=>({ok:false,error:String(err)}));
+   if(r.ok) reloadScene(); else selOut.textContent='could not write the curve: '+r.error;
+ });
+ // ---- speed handle drag: live redraw from the engine's own curve as the pointer moves, one write
+ // (and one undo step) on pointerup only.
+ propsEl.addEventListener('pointerdown',e=>{
+   const h=e.target.closest('.hnd'); if(!h) return;
+   const seg=h.closest('.speedseg'), svg=h.closest('svg'); if(!seg||!svg) return;
+   const gv=(s,p)=>+seg.querySelector('[data-hnum="'+s+'.'+p+'"]').value;
+   curveDrag={seg,svg,side:h.dataset.side,outPath:seg.dataset.out,inPath:seg.dataset.in,
+     out:{speed:gv('out','speed'),influence:gv('out','influence')},in:{speed:gv('in','speed'),influence:gv('in','influence')}};
+   svg.setPointerCapture(e.pointerId); e.preventDefault();
+ });
+ propsEl.addEventListener('pointermove',e=>{
+   if(!curveDrag||!MOTION) return;
+   const d=curveDrag, rect=d.svg.getBoundingClientRect(), W=220,H=110,pad=10;
+   const x=Math.max(pad,Math.min(W-pad,(e.clientX-rect.left)*(W/rect.width)));
+   const y=Math.max(pad,Math.min(H-pad,(e.clientY-rect.top)*(H/rect.height)));
+   const inflRaw=d.side==='out'?((x-pad)/(W-2*pad))*100:((W-pad-x)/(W-2*pad))*100;
+   const spdRaw=Math.round((((H-pad-y)/(H-2*pad))*6)/0.05)*0.05;
+   d[d.side]={speed:Math.max(0,Math.min(6,spdRaw)),influence:Math.max(0.1,Math.min(100,inflRaw))};
+   let fn; try{ fn=MOTION.handleCurve(d.out,d.in)||((t)=>t); }catch{ fn=(t)=>t; }
+   const g=speedGraphSvg(fn);
+   d.seg.querySelector('[data-speedpath]').setAttribute('d',g.d);
+   const vp=d.seg.querySelector('[data-valpath]'); if(vp) vp.setAttribute('d',g.dv);
+   const oc=d.svg.querySelector('circle[data-side=out]'), ic=d.svg.querySelector('circle[data-side=in]');
+   oc.setAttribute('cx',g.xOf(d.out.influence/100)); oc.setAttribute('cy',g.y2p(d.out.speed));
+   ic.setAttribute('cx',g.xOf(1-d.in.influence/100)); ic.setAttribute('cy',g.y2p(d.in.speed));
+   d.seg.querySelector('[data-hnum="out.speed"]').value=d.out.speed.toFixed(2);
+   d.seg.querySelector('[data-hnum="out.influence"]').value=d.out.influence.toFixed(1);
+   d.seg.querySelector('[data-hnum="in.speed"]').value=d.in.speed.toFixed(2);
+   d.seg.querySelector('[data-hnum="in.influence"]').value=d.in.influence.toFixed(1);
+ });
+ propsEl.addEventListener('pointerup',async()=>{
+   if(!curveDrag) return;
+   const d=curveDrag; curveDrag=null;
+   const path=d.side==='out'?d.outPath:d.inPath;
+   const value={speed:Math.round(d[d.side].speed*100)/100,influence:Math.round(d[d.side].influence*10)/10};
    const r=await fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},
      body:JSON.stringify({ops:[{op:'replace',path,value}]})}).then((x)=>x.json()).catch((err)=>({ok:false,error:String(err)}));
    if(r.ok) reloadScene(); else selOut.textContent='could not write the curve: '+r.error;
@@ -595,11 +734,20 @@
  }
  // one delegated listener: the panel's inner HTML is replaced on every selection, so a button bound
  // directly would be re-bound (or silently dropped) on the next render.
- propsEl.addEventListener('click',e=>{
+ propsEl.addEventListener('click',async(e)=>{
    const m=e.target.closest('[data-mention],[data-editchat]');
    if(m){ const id=m.dataset.mention!=null?m.dataset.mention:m.dataset.editchat; if(id) insertMention(id); return; }
    const o=e.target.closest('[data-open]');
-   if(o) enterInside(+o.dataset.open);
+   if(o){ enterInside(+o.dataset.open); return; }
+   const c=e.target.closest('[data-convert]');
+   if(c){
+     const ops=[{op:'remove',path:c.dataset.convertRemove},
+       {op:'add',path:c.dataset.convertOut,value:{speed:+c.dataset.outspeed,influence:100/3}},
+       {op:'add',path:c.dataset.convertIn,value:{speed:+c.dataset.inspeed,influence:100/3}}];
+     const r=await fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({ops})}).then(x=>x.json()).catch(err=>({ok:false,error:String(err)}));
+     if(r.ok) reloadScene(); else selOut.textContent='could not convert: '+r.error;
+   }
  });
  function bgProps(b){
    setSel(-1);
@@ -999,10 +1147,19 @@
    let r=ticks.map((t,k)=>{ const end=k===ticks.length-1, x=rw*Math.min(1,t/dur);
      const show=end||(k%stride===0&&x+labW<=rw-labW-6);
      return '<div class="t'+(end?' end':'')+'" style="left:'+pc(t)+'">'+(show?'<s>'+clock(t)+'</s>':'')+'</div>'; }).join('');
-   // a transition is a moment, not a layer: it lives on the ruler, above every track
-   for(const k of m.marks){
-     r+='<div class=ms style="left:'+pc(k.t)+';width:'+(100*k.dur/dur)+'%"></div>'
-       +'<div class=m style="left:'+pc(k.t)+'" title="'+esc(k.kind+' '+k.t+'s'+(k.name?' '+k.name:''))+'">'+k.kind.charAt(0).toUpperCase()+'</div>'; }
+   // a transition is a moment, not a layer: it lives on the ruler, above every track. Drawn from
+   // model.transitions (not model.marks) so an authored one carries its `i` and can be clicked; a
+   // lowered cut/seam/sting has none and stays read-only, same rule the curves panel already keeps.
+   for(const t of (m.transitions||[])){
+     const kind=t.mech||'transition';
+     r+='<div class=ms style="left:'+pc(t.at)+';width:'+(100*t.dur/dur)+'%"></div>'
+       +'<div class=m'+(t.i!=null?'':' ro')+' style="left:'+pc(t.at)+'"'+(t.i!=null?' data-trans-i="'+t.i+'"':'')
+       +' title="'+esc(kind+' '+t.at+'s'+(t.fx?' '+t.fx:''))+'">'+kind.charAt(0).toUpperCase()+'</div>'; }
+   // camera legs: one pill per authored cameraMove entry, clickable the same way.
+   for(const c of (m.cameraMove||[])){
+     if(c.i==null) continue;
+     r+='<div class=camleg style="left:'+pc(c.start)+';width:'+(100*c.dur/dur)+'%" data-cam-i="'+c.i+'"'
+       +' title="camera '+esc(c.move||'')+' '+c.start.toFixed(2)+'s for '+c.dur.toFixed(2)+'s">'+(c.move||'cam').charAt(0).toUpperCase()+'</div>'; }
    return r;
  }
  function captionRow(caps){
@@ -1178,8 +1335,12 @@
    if(eye){ e.preventDefault(); e.stopPropagation(); toggleEye(+eye.dataset.eye,e.altKey); return; }
    // BEFORE the capture: setPointerCapture retargets everything that follows to the lanes element, so
    // a click handler on the bar never sees its own bar and selection silently did nothing.
-   const bar=e.target&&e.target.closest&&e.target.closest('.bar');
-   if(bar){ const i=+bar.dataset.i;
+   const camPill=e.target&&e.target.closest&&e.target.closest('.camleg,.bar[data-cam-i]');
+   const transPill=e.target&&e.target.closest&&e.target.closest('#ruler .m[data-trans-i],.bar[data-trans-i]');
+   const bar=e.target&&e.target.closest&&e.target.closest('.bar:not([data-cam-i]):not([data-trans-i])');
+   if(camPill) camProps(+camPill.dataset.camI);
+   else if(transPill) transProps(+transPill.dataset.transI);
+   else if(bar){ const i=+bar.dataset.i;
      if(i<0) selOut.textContent='no JSON layer: the produced baseline added this bar';
      else setSel(i); }
    lanes.setPointerCapture(e.pointerId); seek(e); });
