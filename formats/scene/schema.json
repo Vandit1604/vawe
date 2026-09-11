@@ -1252,6 +1252,10 @@
      "type": "boolean",
      "label": "typing: keep the caret after the text finishes"
     },
+    "overscan": {
+     "type": "boolean",
+     "label": "a full-bleed plane under perspective scales up just enough to cover the frame; false keeps its edges"
+    },
     "typingColors": {
      "type": "object",
      "label": "typing: each typed word flashes a colour from `colors`, then settles to the layer colour over `hold`",
