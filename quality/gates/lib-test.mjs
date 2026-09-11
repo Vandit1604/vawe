@@ -115,6 +115,7 @@ import { classifyRegions } from './motion-floor.mjs';
 import { sceneTiming } from './scene-timing.mjs';
 import { exitEmphasis, entranceEmphasis } from './choreo.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
+import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -8089,6 +8090,33 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     { type: 'rect', id: 'bare2', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 2 },
   ] }).lives.find((L) => L.id === 'bare2');
   ok('entranceEmphasis: nothing measured (no `anim`, no motion) gives no verdict', entranceEmphasis(noMotion) === null);
+}
+
+// ---- harness/lib/safeguards.mjs: adaptive verdicts for overflow and clipped-text ----
+{
+  // overflow: under 1% of the box on its worst axis is rounding, tolerated and reported, not failed.
+  const smallSpill = adaptFinding({ kind: 'overflow', a: 'x', pct: 0.0075, detail: 'content 402x100 clipped to 400x100' });
+  ok('safeguards: overflow under 1% tolerates', smallSpill.adapted && smallSpill.adapted.verdict === 'tolerate');
+  ok('safeguards: tolerated overflow prints an adapted line', /^adapted overflow:/.test(smallSpill.adapted.line));
+
+  // overflow: a real spill above the 1% floor still fails, unmodified (no `.adapted`).
+  const realSpill = adaptFinding({ kind: 'overflow', a: 'x', pct: 0.2, detail: 'content 480x100 clipped to 400x100' });
+  ok('safeguards: overflow over 1% stays a hard fail', !realSpill.adapted);
+
+  // clipped-text: ellipsis + overflow:hidden is designed truncation, reclassified and reported.
+  const truncated = adaptFinding({ kind: 'clipped-text', a: 'headline', ellipsis: true, detail: 'mask is 4px too narrow' });
+  ok('safeguards: ellipsis clipped-text reclassifies', truncated.adapted && truncated.adapted.verdict === 'reclassify');
+  ok('safeguards: reclassified clipped-text prints an adapted line', /^adapted clipped-text:/.test(truncated.adapted.line));
+
+  // clipped-text: a real mask-too-small bug (no ellipsis) still fails, unmodified.
+  const realClip = adaptFinding({ kind: 'clipped-text', a: 'headline', ellipsis: false, detail: 'mask is 4px too narrow' });
+  ok('safeguards: non-ellipsis clipped-text stays a hard fail', !realClip.adapted);
+
+  // a code with no registry entry, or a finding missing the facts an entry needs, passes through.
+  const noEntry = adaptFinding({ kind: 'safe', a: 'x', detail: 'off frame' });
+  ok('safeguards: an unregistered code passes through unchanged', !noEntry.adapted);
+  const noFacts = adaptFinding({ kind: 'overflow', a: 'x', detail: 'no pct on this one' });
+  ok('safeguards: overflow with no pct fact does not apply', !noFacts.adapted);
 }
 
 const FLOOR = 1800;
