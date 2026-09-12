@@ -38,6 +38,14 @@ const DECIDER_CATEGORIES = {
   sound: ['sound', 'captions'],
 };
 
+// The owner's top motion rules must reach the motion brief whatever the default check-then-order
+// ranking would do with a fixed char budget (docs/CRAFT/rules/motion.json has 12 records, the flat cap
+// keeps 5). Named here, not hand-typed as prose in DECIDERS below: rulesFor's `pin` is the one selector
+// mechanism, this is just which ids this role insists on.
+export const DECIDER_PIN = {
+  motion: ['motion.readable-hold', 'motion.exit-faster', 'motion.no-jolt'],
+};
+
 // docs/CRAFT/SUBAGENTS.md owns the worktree agent contract text (marked by these comments) so a
 // DECIDERS=1 brief quotes it rather than carrying its own drifting copy.
 export function worktreeContract() {
@@ -141,14 +149,17 @@ export const DECIDERS = [
     scope: 'motion[] and idle, on layers the storyboard says move',
     job: 'key the motion the storyboard planned, and prove it moved by MEASURING across frames',
     why: 'nothing moves that nobody asked to move, so every keyed track is a decision somebody made',
+    // The doctrine used to live here as hand-typed prose, drifting from docs/CRAFT/rules/motion.json
+    // the moment either one changed. Now only lines that are NOT a restatement of a rule record stay:
+    // the design.md pointer (no shared preamble exists to hold it, see critics.mjs's module comment
+    // above DECIDER_PIN) and the register-budget sentence, which names no motion.json record. The rest
+    // is 3 standing lines plus whatever rulesFor(pin: DECIDER_PIN.motion) below surfaces.
     extra: [
       'Read this film\'s <film>.design.md before writing a size, radius, shadow or colour: reference its --kit-<group>-<name> token, never a literal. A value it does not have yet goes there first.',
-      'You cannot watch the film. A description of the motion written from the JSON is a restatement of what you just wrote, so it proves nothing.',
-      'Measure instead: sample the element across frames and report the numbers. A claimed wind-up that measures 3% variance where 24% was claimed is absent, whatever the JSON says.',
       'You carry a budget. The register split (docs/CRAFT/MOTION-REGISTERS.md) licenses sustained motion for kinetic work, and that licence is the door effect soup comes through. One named peak, and every other moving thing able to say what it is for.',
-      'THE FILM MAY NOT STOP, and this is measured, not judged. `make motion-floor D=<file>` reports content motion per half second against the film\'s reference when it declares one. A window with nothing arriving in it is a hole the viewer feels, and the commonest cause is every reveal in a beat firing at once and landing inside its first second.',
-      'THE FIX FOR A HOLE IS OVERLAP, NEVER AMBIENCE. Do not reach for `idle`, `breathe` or `drift` to raise a number: motion-floor counts only change concentrated in a small region, so ambient motion cannot satisfy it, and it was TESTED that way (idle on every layer of a real film changed the finding by nothing at all). Start the next reveal before the last one lands instead.',
-      'AND NEVER ONE THING AT A TIME. Measured on a real launch film: at 9.5s its card is scaling AND its rows are arriving, and at 0.4s its word is travelling WHILE it types. Every moment carries an object in transit and content appearing inside it. A beat that scales an object in silence, or reveals text on a frozen frame, is doing half of what the frame can do.',
+      'Measure the motion across frames; never describe it from the JSON.',
+      'The fix for a hole is overlap, never ambient motion: idle, breathe and drift will not satisfy it.',
+      'Search the arsenal first (`make arsenal Q="..."`) before hand-keying a new device.',
     ],
   },
   {
@@ -230,7 +241,8 @@ export function buildRoster(scenePath) {
     }
     if (d.extra) { lines.push(''); for (const e of d.extra) lines.push(e); }
     const categories = DECIDER_CATEGORIES[d.name] || null;
-    const rules = categories ? rulesFor({ stage, features, categories, maxChars: 800 }) : [];
+    const pin = DECIDER_PIN[d.name] || null;
+    const rules = categories ? rulesFor({ stage, features, categories, maxChars: 800, pin }) : [];
     if (rules.length) {
       lines.push('', `Craft rules for this role (${categories.join(', ')}):`);
       for (const r of rules) lines.push(`  ${briefLine(r)}`);

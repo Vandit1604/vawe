@@ -5,13 +5,59 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildRoster, worktreeContract } from './critics.mjs';
+import { buildRoster, worktreeContract, DECIDERS, DECIDER_PIN } from './critics.mjs';
+import { rulesFor, briefLine } from '../lib/craft-rules.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 // Any small existing scene works; the roster only needs a readable JSON file.
 const sceneFile = fs.readdirSync(path.join(repoRoot, 'formats/scene'))
   .find((f) => f.endsWith('.json') && fs.existsSync(path.join(repoRoot, 'formats/scene', f)));
+
+// P4: the motion decider brief is the shared preamble/context lines (unchanged, checked elsewhere)
+// plus a small doctrine block: `extra` (the design.md pointer, the register-budget sentence, and the
+// 3 standing motion lines) and rulesFor's motion/camera rule brief, pinned so the owner's must-show
+// ids survive the char budget. Built directly from DECIDERS/rulesFor at stage 'direct' (the stage those
+// rules actually fire at), rather than through a full buildRoster/stageOf fixture: constructing a real
+// 'direct'-stage scene (approved, every fragment on disk, frame-check passing) is not this test's job.
+function motionDoctrineBlock() {
+  const motion = DECIDERS.find((d) => d.name === 'motion');
+  const rules = rulesFor({
+    stage: 'direct', features: { always: true }, categories: ['motion', 'camera'],
+    maxChars: 800, pin: DECIDER_PIN.motion,
+  });
+  const lines = [...motion.extra, ...rules.map(briefLine)];
+  return { motion, rules, text: lines.join('\n') };
+}
+
+test('motion brief carries the owner\'s pinned must-show rules, only motion/camera rules, and stays <= 1400 chars', () => {
+  const { rules, text } = motionDoctrineBlock();
+  for (const id of DECIDER_PIN.motion) {
+    assert.ok(rules.some((r) => r.id === id), `${id} did not survive the pin/budget`);
+  }
+  for (const r of rules) {
+    assert.ok(['motion', 'camera'].includes(r.category), `${r.id} is not a motion/camera rule`);
+  }
+  assert.ok(text.length <= 1400, `motion brief is ${text.length} chars, over the 1,400 cap`);
+});
+
+test('motion brief keeps exactly 3 standing lines (measure/overlap/arsenal), totalling <= 600 chars', () => {
+  const { motion } = motionDoctrineBlock();
+  const standing = motion.extra.filter((l) => /measure the motion|fix for a hole|search the arsenal/i.test(l));
+  assert.equal(standing.length, 3, 'expected exactly 3 standing lines');
+  assert.ok(standing.join(' ').length <= 600, 'the 3 standing lines must total 600 chars or less');
+});
+
+test('every other decider\'s extra/categories are unchanged by the motion brief work', () => {
+  for (const d of DECIDERS) {
+    if (d.name === 'motion') continue;
+    assert.equal(DECIDER_PIN[d.name], undefined, `${d.name} should carry no pin`);
+  }
+  const scene = DECIDERS.find((d) => d.name === 'scene');
+  assert.deepEqual(scene.extra, [
+    'Read this film\'s <film>.design.md before writing a size, radius, shadow or colour: reference its --kit-<group>-<name> token, never a literal. A value it does not have yet goes there first.',
+  ]);
+});
 
 test('worktreeContract reads a non-empty block from SUBAGENTS.md', () => {
   const contract = worktreeContract();
