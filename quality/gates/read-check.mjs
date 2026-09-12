@@ -111,6 +111,7 @@ import { sceneTiming, num, spanOf } from './scene-timing.mjs';
 import { settleWindow } from '../../core/layout/safe.js';
 import { BASE_ENTER, BASE_EXIT } from '../../core/timeline/clips.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { parseStoryboard, timeline } from '../../harness/author/storyboard-parse.mjs';
 
 export const FPS = 30;
 export const HOLD_PER_WORD = 0.6;
@@ -122,18 +123,43 @@ export const GAP_MIN = 15 / FPS;         // 0.5s
 export const CUT_SNAP = 0.5;
 export const PROSE_WORDS = 4;
 export const PROSE_SIZE = 28;
+// MIN_READABLE_HOLD: about 1.2s, the owner's floor on any held frame, clip or card alike, because
+// that is roughly how long a viewer needs to register one still thing before it moves again
+// (docs/RULES/readable-hold.md). OTHER_WPS: 3 words/second, a single quick read (not the read-twice
+// rate HOLD_PER_WORD encodes), for a short label that is real words but not full prose.
+export const MIN_READABLE_HOLD = 1.2;
+export const OTHER_WPS = 3;
+// A layer type that is watched, not read: a viewer needs a beat to register it even with no words.
+const CLIP_TYPES = new Set(['clip', 'video', 'image']);
 
 const f = (s) => `${s.toFixed(2)}s (${Math.round(s * FPS)}f)`;
 const clip = (s, n = 40) => (s.length > n ? `${s.slice(0, n)}…` : s);
 const wordsOf = (s) => s.trim().split(/\s+/).filter(Boolean);
 
+// A "card": a real captured or built UI surface, not decoration. Scoped narrowly on purpose (same
+// reasoning as PROSE_WORDS/PROSE_SIZE above): grading every rect/glow/group would fire on ambient
+// paint nobody is meant to read, and get waived by everybody.
+const CARD_TYPES = new Set(['board', 'component']);
+
+/** beatLabel(beats, t) -> "beat N \"name\"" for the beat holding time t, or null if unresolvable
+ *  (no storyboard, or t falls outside every beat). The caller falls back to the layer id. */
+function beatLabel(beats, t) {
+  if (!Array.isArray(beats) || !beats.length) return null;
+  const i = beats.findIndex((b) => t >= (b.start ?? 0) && t < (b.end ?? Infinity));
+  if (i < 0) return null;
+  const b = beats[i];
+  return `beat ${i + 1}${b.name ? ` "${b.name}"` : ''}`;
+}
+
 /**
- * readFindings(scene) → [{ code, at, msg }] sorted by time then code. Pure: same JSON in, same list out.
- * Exported so lib-test can drive it without a file.
+ * readFindings(scene, beats=[]) → [{ code, at, msg }] sorted by time then code. Pure: same JSON in,
+ * same list out, given the same `beats` (storyboard beat windows, engine-time, optional). Exported so
+ * lib-test can drive it without a file.
  */
-export function readFindings(scene) {
+export function readFindings(scene, beats = []) {
   const T = sceneTiming(scene);
   const events = [];
+  const visuals = [];
 
   // Walk the tree once. A child's `start` is on the same clock as its parent's, and the parent's
   // engine-corrected window is the outer bound, so a child is clipped to it rather than trusted alone.
@@ -144,8 +170,12 @@ export function readFindings(scene) {
       const [a0, b0] = spanOf(L);
       const outer = bound ?? [a0, T.unitEnd(L) ?? b0];
       const a = Math.max(a0, outer[0]), b = Math.min(b0, outer[1]);
-      const txt = (L.type === 'text' || L.type === 'count' || L.type == null) ? onScreenText(L.text).trim() : '';
+      const isTextLike = L.type === 'text' || L.type === 'count' || L.type == null;
+      const txt = isTextLike ? onScreenText(L.text).trim() : '';
       if (txt && b > a) events.push({ L, id, txt, a, b, words: wordsOf(txt), size: num(L.size, 96) });
+      else if (!isTextLike && b > a && (CLIP_TYPES.has(L.type) || CARD_TYPES.has(L.type))) {
+        visuals.push({ L, id, a, b, words: [], txt: '', size: num(L.size, 96) });
+      }
       if (Array.isArray(L.children)) walk(L.children, [a, b], id);
     }
   };
@@ -162,6 +192,11 @@ export function readFindings(scene) {
 
   const isProse = (e) => (e.L.type === 'text' || e.L.type == null)
     && e.words.length >= PROSE_WORDS && e.size >= PROSE_SIZE;
+  // A short but prominent line (a chip, an eyebrow, a stat) is still text someone is asked to read,
+  // just not at the read-TWICE rate: it stays out of PROSE_WORDS/HOLD_PER_WORD and into the gentler
+  // OTHER_WPS rule below. Small type (< PROSE_SIZE) stays fully excluded, same as before: it is
+  // reference material the eye returns to, not a line the film asks you to read on the way past.
+  const isTextish = (e) => (e.L.type === 'text' || e.L.type == null) && e.size >= PROSE_SIZE;
 
   const out = [];
   const say = (code, at, msg) => out.push({ code, at, msg });
@@ -177,40 +212,62 @@ export function readFindings(scene) {
         + `not as a line. Give it "duration": ${(e.a + MIN_LIFE > T.duration ? MIN_LIFE : Math.max(MIN_LIFE, life)).toFixed(2)} or longer, or drop the layer.`);
     }
 
-    if (!isProse(e)) continue;
+    if (!isTextish(e)) continue;
+    readableHold(e, 'text', isProse(e));
+  }
 
-    // ── the read-twice hold, measured on the STILL part only ──
-    // settleWindow owns the SHAPE of the rule (split enters instantly, a moving `out` eats the tail,
-    // ARRIVED_PAD). What it does not own is the DEFAULT ramp for a scene read off disk: its 0.45/0.4
-    // are audit.mjs's fallbacks for an unset DOM attribute, and scene.js:485 always sets that attribute
-    // to BASE_ENTER/BASE_EXIT. Supplying the engine's own numbers keeps one copy of the logic and
-    // stops this gate quoting a ramp the render never spends. A theme's `durationScale` can stretch
-    // both, and this gate does not read the theme; that only ever makes the hold look LONGER than it
-    // is, so it can delete a finding and never invent one.
+  // ── the same readable-hold floor, for a watched clip or a built card (docs/RULES/readable-hold.md) ──
+  // A clip or card carries no words, so `need` collapses to the MIN_READABLE_HOLD floor: the same
+  // formula as a short text label, just with words.length === 0.
+  for (const e of visuals) {
+    readableHold(e, CLIP_TYPES.has(e.L.type) ? 'clip' : 'card', false);
+  }
+
+  // ── the read-twice (or quick-read) hold, measured on the STILL part only ──
+  // settleWindow owns the SHAPE of the rule (split enters instantly, a moving `out` eats the tail,
+  // ARRIVED_PAD). What it does not own is the DEFAULT ramp for a scene read off disk: its 0.45/0.4
+  // are audit.mjs's fallbacks for an unset DOM attribute, and scene.js:485 always sets that attribute
+  // to BASE_ENTER/BASE_EXIT. Supplying the engine's own numbers keeps one copy of the logic and
+  // stops this gate quoting a ramp the render never spends. A theme's `durationScale` can stretch
+  // both, and this gate does not read the theme; that only ever makes the hold look LONGER than it
+  // is, so it can delete a finding and never invent one.
+  //
+  // OWNER DECISION (docs/RULES/readable-hold.md): this REPORTS the fix, never changes the timing.
+  function readableHold(e, kind, prose) {
     const cut = e.L.cut ? { enterDur: 0, exitDur: 0 } : {};   // the cut IS the entrance (scene.js:485,489)
     const w = settleWindow({
       enterDur: BASE_ENTER, exitDur: BASE_EXIT, ...e.L, ...cut,
       start: e.a, duration: e.b - e.a,
     });
     const hold = w ? Math.min(w.t1, e.b) - w.t0 : 0;
-    const need = e.words.length * HOLD_PER_WORD;
+    const need = prose ? e.words.length * HOLD_PER_WORD : Math.max(MIN_READABLE_HOLD, e.words.length / OTHER_WPS);
+    const where = beatLabel(beats, e.a) ?? `layer #${e.id}`;
+    const what = kind === 'text' ? `"${clip(e.txt)}"` : `the ${kind}`;
+    if (hold < need) {
+      const basis = prose
+        ? `reading it twice at 200 wpm needs ${f(need)} (${e.words.length} words x ${HOLD_PER_WORD}s/word)`
+        : `a readable hold needs at least ${f(need)}` + (e.words.length
+          ? ` (${e.words.length} words / ${OTHER_WPS} words-per-second, floored at ${MIN_READABLE_HOLD}s)`
+          : ` (the ${MIN_READABLE_HOLD}s floor: about how long a viewer needs to register one held frame)`);
+      say('unreadable-hold', e.a, `${where}, ${what}, is on screen ${f(hold)}. ${basis}. `
+        + `Add ${f(need - hold)} to its "duration".`);
+      return;
+    }
+    if (!prose) return;
     const cps = hold > 0 ? e.txt.replace(/\s+/g, ' ').length / hold : Infinity;
     const fit = Math.max(1, Math.floor(hold / HOLD_PER_WORD));
-    if (hold < need) {
-      say('unreadable-hold', e.a, `${label} is ${e.words.length} words and holds STILL for ${f(hold)}. `
-        + `Reading it twice at 200 wpm needs ${f(need)} (words x 0.6s). It reads at `
-        + `${cps === Infinity ? 'infinite' : cps.toFixed(0)} characters per second against a ${CPS_WALL} cps wall. `
-        + `Add ${f(need - hold)} to its "duration", or cut it to ${fit} word${fit === 1 ? '' : 's'}.`);
-    } else if (hold > MAX_HOLD && hold > need) {
+    if (hold > MAX_HOLD && hold > need) {
       // `hold > need` as well, or the two published rules contradict each other: a 9-word line NEEDS
       // 5.4s to be read twice and is over the 5s ceiling the moment it gets it. That contradiction is
       // real and it is Netflix's 42-character cap arriving as a word count, past 8 words a line cannot
       // satisfy both, and the answer is to cut the line, not to argue with the clock. So this fires
       // only on time the reading did not ask for.
-      say('text-overstays', e.a, `${label} holds still for ${f(hold)}. The ceiling on one text event is `
-        + `${MAX_HOLD}s (BBC subtitling; Netflix says 7s and we take the tighter one, because 7s of one `
-        + `card is a quarter of a 30-second film). Cut the "duration" to about ${f(Math.max(need, MAX_HOLD))}, `
-        + `or give the beat a second thing to look at.`);
+      say('text-overstays', e.a, `${where}, ${what}, holds still for ${f(hold)}. The ceiling on one text `
+        + `event is ${MAX_HOLD}s (BBC subtitling; Netflix says 7s and we take the tighter one, because 7s `
+        + `of one card is a quarter of a 30-second film). It reads at `
+        + `${cps === Infinity ? 'infinite' : cps.toFixed(0)} characters per second against a ${CPS_WALL} cps `
+        + `wall. Cut the "duration" to about ${f(Math.max(need, MAX_HOLD))}, or give the beat a second `
+        + `thing to look at (or cut the line to ${fit} word${fit === 1 ? '' : 's'}).`);
     }
   }
 
@@ -283,6 +340,20 @@ export function proseCount(scene) {
   return { prose: n, text: all };
 }
 
+/** loadBeats(file, scene) -> the film's storyboard beats, in engine (post-tempo) time, or [] when
+ *  there is no sidecar to read. "if resolvable" (docs/RULES/readable-hold.md): a missing or
+ *  unparsable storyboard falls back to naming the layer id instead, never throws. */
+function loadBeats(file, scene) {
+  try {
+    const sbPath = file.replace(/\.json$/, '.storyboard.md');
+    if (!fs.existsSync(sbPath)) return [];
+    const inv = 1 / (typeof scene.tempo === 'number' ? scene.tempo : 1);
+    return timeline(parseStoryboard(fs.readFileSync(sbPath, 'utf8'))).beats.map((b) => ({
+      ...b, start: b.start != null ? b.start * inv : b.start, end: b.end != null ? b.end * inv : b.end,
+    }));
+  } catch { return []; }
+}
+
 // ── CLI ──
 if (process.argv[1] && process.argv[1].endsWith('read-check.mjs')) {
   const file = process.argv[2];
@@ -293,7 +364,7 @@ if (process.argv[1] && process.argv[1].endsWith('read-check.mjs')) {
   }
   const scene = JSON.parse(fs.readFileSync(file, 'utf8'));
   const { prose, text } = proseCount(scene);
-  const findings = readFindings(scene);
+  const findings = readFindings(scene, loadBeats(file, scene));
   console.log(`\n  read gate · ${file}  (${text} text layer(s), ${prose} graded as prose)`);
   if (!findings.length) {
     console.log(prose

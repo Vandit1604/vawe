@@ -52,5 +52,6 @@ design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Re
 | [`payoff-last`](payoff-last.md) | ordering beats and the hook | eye |
 | [`logo-prominence`](logo-prominence.md) | placing a brand mark | eye |
 | [`paired-directional-exit`](paired-directional-exit.md) | choosing anim/out for a sliding layer | eye |
+| [`readable-hold`](readable-hold.md) | a clip, card, or line of text holds still | reports: `make direct`, read gate |
 | [`blur-out-dense`](blur-out-dense.md) | exiting a face, card, or dense grid | eye |
 | [`caption-safe-strip`](caption-safe-strip.md) | shipping to a phone feed | gated: `make audit` |

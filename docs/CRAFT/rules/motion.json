@@ -120,6 +120,16 @@
     "doc": "docs/RULES/speed-bands.md"
   },
   {
+    "id": "motion.readable-hold",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": "unreadable-hold",
+    "adapt": null,
+    "brief": "A readable hold stays still long enough to be read",
+    "doc": "docs/RULES/readable-hold.md"
+  },
+  {
     "id": "motion.stagger-total",
     "category": "motion",
     "stage": "direct",
