@@ -132,6 +132,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [docs/RULES/motion-offsets.md](RULES/motion-offsets.md) | writing a layer's motion[] keyframe track | motion track x/y are offsets on the base position, not absolute canvas coordinates |
 | [docs/RULES/no-css-clock.md](RULES/no-css-clock.md) | hand-writing an html layer or a css fragment | why a fragment cannot own a CSS animation, transition, opacity, or filter, and what to use instead |
 | [docs/RULES/paired-directional-exit.md](RULES/paired-directional-exit.md) | choosing anim/out for a layer that slides | why an entrance and its exit must travel in one continuous direction, never enter-and-retreat |
+| [docs/RULES/readable-hold.md](RULES/readable-hold.md) | a beat holds still on a clip, a card, or a line of text before it moves on | the minimum time a held frame needs to be readable, and why the fix is always a hold, never a slower move |
 | [docs/RULES/speed-bands.md](RULES/speed-bands.md) | choosing a duration for an entrance, an exit, or a keyed move | the four named speed bands, the 3x rule between the slowest and fastest beat, and why no two independent layers share an ease in one beat |
 | [docs/RULES/stagger-total.md](RULES/stagger-total.md) | a group of items arrives with a stagger | the cap on a staggered group's total arrival time, and why past it the last item lands in a different beat |
 | [docs/RULES/state-the-canvas.md](RULES/state-the-canvas.md) | starting any scene JSON | why every scene must state aspect, and what it renders as when it does not |
