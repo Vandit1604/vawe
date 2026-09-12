@@ -303,12 +303,29 @@ const hermite = (p0, p1, m0, m1, h, u) => {
        + (-2 * u3 + 3 * u2) * p1 + (u3 - u2) * h * m1;
 };
 
-/** The finite-difference tangent of `prop` at key `i`, in units per second. Zero at either end. */
+/**
+ * The finite-difference tangent of `prop` at key `i`, in units per second. Zero at either end.
+ * Fritsch-Carlson clamped: the travel.js ponytail comment named this exact gap ("a station sequence
+ * with a sharp reversal in scale could in principle overshoot past a clamp") and it is real, not
+ * hypothetical (docs/MISTAKES.md #626): a camera `travel` with an s:1.08 -> s:1 -> s:1 tail dipped
+ * BELOW every authored station's scale between two keys that were themselves equal, because the raw
+ * chordal tangent at the shared key carried velocity in from the unequal segment behind it. A tangent
+ * at a local extremum (the two neighbouring secants disagree in sign, or either is flat) is zeroed, and
+ * otherwise scaled so the Hermite curve on NEITHER neighbouring segment can leave that segment's own
+ * [min, max], the standard monotone-cubic constraint, applied per key instead of adding a second
+ * min/max clamp downstream of the curve.
+ */
 function tangentAt(kfs, i, prop, dflt) {
   if (i <= 0 || i >= kfs.length - 1) return 0;
-  const span = kfs[i + 1].t - kfs[i - 1].t;
-  if (!(span > 0)) return 0;
-  return ((kfs[i + 1][prop] ?? dflt) - (kfs[i - 1][prop] ?? dflt)) / span;
+  const p0 = kfs[i - 1][prop] ?? dflt, p1 = kfs[i][prop] ?? dflt, p2 = kfs[i + 1][prop] ?? dflt;
+  const h0 = kfs[i].t - kfs[i - 1].t, h1 = kfs[i + 1].t - kfs[i].t;
+  if (!(h0 > 0) || !(h1 > 0)) return 0;
+  const d0 = (p1 - p0) / h0, d1 = (p2 - p1) / h1;
+  if (d0 === 0 || d1 === 0 || (d0 < 0) !== (d1 < 0)) return 0; // local extremum: no overshoot allowed
+  const m = (p2 - p0) / (h0 + h1); // the chordal estimate this function always used, now only clamped
+  const alpha = m / d0, beta = m / d1;
+  const s = alpha * alpha + beta * beta;
+  return s > 9 ? (3 / Math.sqrt(s)) * m : m;
 }
 
 // ---------- ONE SEGMENT, ONE OWNER ----------
