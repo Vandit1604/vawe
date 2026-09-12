@@ -197,16 +197,26 @@ export const STAGE_CATEGORY_ORDER = {
  * per-category cap/budget instead of one global cap/budget, walking `categories` in the order given so
  * one busy category (motion) can never crowd out the next (transitions, sound) the way a flat global
  * cap would. `categories` alone (no `capPerCategory`) still just scopes the flat filter, unchanged.
+ *
+ * `pin`: an array of rule ids that must sort first (in the order given) among the matched records,
+ * before the default check-then-authored-order ranking, so an owner's must-show rules survive the cap
+ * and char budget whatever their position in the source JSON. Pinning an id that does not match
+ * (wrong stage/category/features) is simply a no-op, never an error.
  */
-function byCheckThenOrder(a, b) {
-  const pa = a.r.check == null ? 0 : 1;
-  const pb = b.r.check == null ? 0 : 1;
-  return pa !== pb ? pa - pb : a.i - b.i;
+function byCheckThenOrder(pin) {
+  const pinIndex = new Map((pin || []).map((id, i) => [id, i]));
+  return (a, b) => {
+    const pa = pinIndex.has(a.r.id) ? -1 : (a.r.check == null ? 0 : 1);
+    const pb = pinIndex.has(b.r.id) ? -1 : (b.r.check == null ? 0 : 1);
+    if (pa !== pb) return pa - pb;
+    if (pa === -1) return pinIndex.get(a.r.id) - pinIndex.get(b.r.id);
+    return a.i - b.i;
+  };
 }
 
-/** capList(indexed, cap, maxChars) -> record[], stable-sorted then walked once, capped both ways. */
-function capList(indexed, cap, maxChars) {
-  const sorted = [...indexed].sort(byCheckThenOrder);
+/** capList(indexed, cap, maxChars, pin) -> record[], stable-sorted then walked once, capped both ways. */
+function capList(indexed, cap, maxChars, pin) {
+  const sorted = [...indexed].sort(byCheckThenOrder(pin));
   const out = [];
   let chars = 0;
   for (const { r } of sorted) {
@@ -219,19 +229,19 @@ function capList(indexed, cap, maxChars) {
   return out;
 }
 
-/** groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory) -> the grouped-mode walk. */
-function groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory) {
+/** groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory, pin) -> the grouped-mode walk. */
+function groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory, pin) {
   const out = [];
   for (const cat of categories) {
     const group = matched.filter(({ r }) => r.category === cat);
-    out.push(...capList(group, capPerCategory, maxCharsPerCategory));
+    out.push(...capList(group, capPerCategory, maxCharsPerCategory, pin));
   }
   return out;
 }
 
 export function rulesFor({
   stage, features = {}, categories = null, cap = 5, maxChars = 1200,
-  capPerCategory = null, maxCharsPerCategory = null, root = ROOT,
+  capPerCategory = null, maxCharsPerCategory = null, pin = null, root = ROOT,
 } = {}) {
   const all = loadCraftRules({ root });
   const matched = all
@@ -241,7 +251,7 @@ export function rulesFor({
       && (r.applies === 'always' || !!features[r.applies]));
 
   if (categories && capPerCategory != null) {
-    return groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory);
+    return groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory, pin);
   }
-  return capList(matched, cap, maxChars);
+  return capList(matched, cap, maxChars, pin);
 }

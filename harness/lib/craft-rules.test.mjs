@@ -160,6 +160,28 @@ test('rulesFor: categories scope the result, so an unrelated role sees nothing',
   assert.equal(forSound.length, 1);
 });
 
+test('rulesFor: pin puts named ids first, ahead of check-null records the default order would pick', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'craft-rules-pin-'));
+  fs.mkdirSync(path.join(root, 'docs/RULES'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'docs/CRAFT/rules'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'docs/RULES/thing.md'), '# A title\n\nbody\n');
+  const base = { stage: 'direct', applies: 'always', doc: 'docs/RULES/thing.md', brief: 'A title', category: 'pin', adapt: null };
+  // First two are prose (check: null), so the default order would pick them before the checked ones.
+  const records = [
+    { ...base, id: 'pin.prose-a', check: null },
+    { ...base, id: 'pin.prose-b', check: null },
+    { ...base, id: 'pin.checked-wanted', check: 'off-colour' },
+    { ...base, id: 'pin.checked-other', check: 'contrast' },
+  ];
+  fs.writeFileSync(path.join(root, 'docs/CRAFT/rules/pin.json'), JSON.stringify(records));
+  const unpinned = rulesFor({ stage: 'direct', features: { always: true }, root, cap: 2 });
+  assert.deepEqual(unpinned.map((r) => r.id), ['pin.prose-a', 'pin.prose-b'], 'unpinned: prose-first order, as before');
+  const pinned = rulesFor({ stage: 'direct', features: { always: true }, root, cap: 2, pin: ['pin.checked-wanted'] });
+  assert.deepEqual(pinned.map((r) => r.id), ['pin.checked-wanted', 'pin.prose-a'], 'pinned id leads, cap still holds');
+  const noop = rulesFor({ stage: 'direct', features: { always: true }, root, cap: 2, pin: ['no.such.id'] });
+  assert.deepEqual(noop.map((r) => r.id), ['pin.prose-a', 'pin.prose-b'], 'pinning an id that matches nothing is a no-op');
+});
+
 // P3: motion.json cleanup + stage-say category order, against the real rule files.
 
 test('rulesFor: grouped mode at direct returns a motion rule first, capped at 2 per category', () => {
