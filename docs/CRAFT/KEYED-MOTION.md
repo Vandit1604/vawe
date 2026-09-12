@@ -32,7 +32,7 @@ reference and cannot work out why yours drifts while the original snaps.
 |---|---|
 | linear between dense keys | `motionAt` interpolates a segment shorter than `DENSE_KEY_SEC` (0.14s, ~4 frames) linearly unless you name an `ease`. Dense keys mean mechanical. |
 | motion blur on fast movers | applies itself above `AUTO_BLUR_FLOOR` (16px/frame) at a gentle `AUTO_SHUTTER` of 0.16. The exemplar author's own hand-picked value. `motionBlur: false` opts out; a number overrides the shutter. |
-| exits faster than entrances | `theme.motion.exitRatio` scales the default exit. Defaults to `1` so no theme changes until it opts in; `themes/higgsfield.json` sets `0.45`. |
+| exits faster than entrances | `theme.motion.exitRatio` scales the default exit. Any theme that leaves it unset now gets `exitRatioFromMotion(durationScale)` instead of the old silent `1`; an explicit value, e.g. `themes/higgsfield.json` at `0.45`, still wins. Numbers: docs/RULES/ease-direction.md. |
 
 **Two more are one line away:** `panWith` (below) and the `typedHook` / `morphButton` blueprints.
 
