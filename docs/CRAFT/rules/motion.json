@@ -36,7 +36,7 @@
     "applies": "always",
     "check": null,
     "adapt": null,
-    "brief": "An exit also runs faster than its entrance, about half its duration by default, for emphasis.",
+    "brief": "An exit also runs faster than its entrance, derived from the theme's pace (`exitRatioFromMotion`, table below), for emphasis.",
     "doc": "docs/RULES/ease-direction.md"
   },
   {

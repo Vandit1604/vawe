@@ -639,6 +639,7 @@ measure: ## [study] MEASURE a transition's real motion and name it in OUR vocabu
 # list` silently drops it and nobody notices (harness/lib/make-help.mjs --check).
 lib-test: ## [maintenance] motion-primitive asserts + every Makefile target carries a [phase] tag
 	node quality/gates/lib-test.mjs
+	@node scripts/site/motion-numbers-catalog.mjs --check
 	@node harness/lib/make-help.mjs --check
 
 # make mistakes-check: is a docs/MISTAKES.md entry a near-verbatim duplicate of an earlier one?
@@ -1349,6 +1350,12 @@ vocab: ## [engine] regenerate docs/CRAFT/VOCABULARY.md. The plain words (feel/du
 
 vocab-check: ## [engine] fail if docs/CRAFT/VOCABULARY.md is stale vs core/registry/vocab.js
 	node scripts/site/vocab-catalog.mjs --check
+
+motion-numbers: ## [engine] regenerate the motion-number tables in docs/RULES from core/motion/motion.js + vocab.js
+	node scripts/site/motion-numbers-catalog.mjs
+
+motion-numbers-check: ## [engine] fail if a docs/RULES motion-number table is stale vs the engine
+	node scripts/site/motion-numbers-catalog.mjs --check
 
 critique: ## [check] value-gate, flag hollow/low-value beats (D=<file>)
 	@node quality/gates/critique.mjs $(D) $(if $(JSON),--json,)

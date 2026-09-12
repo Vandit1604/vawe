@@ -8,7 +8,7 @@ group: look
 
 ## AGENT SUMMARY
 
-- Default entrances to `easeOutQuint` (not the weaker `easeOutCubic` this engine currently defaults to); never `ease-in` on an entrance. Turn on `exitRatio` per theme so exits move faster than their entrance.
+- Default entrances to `easeOutQuint` (the engine's own `DEFAULT_MOTION.easing`); never `ease-in` on an entrance. `exitRatio` is now derived per theme (`exitRatioFromMotion`) so exits move faster than their entrance by default.
 - `[eye]`: no gate enforces this page. `make claims` tracks the `linear`-easing split it names.
 - Checkable action: does this entrance ease out on a strong curve, and does its exit move faster than its arrival?
 
@@ -55,9 +55,8 @@ custom ones. Sampled against our 41 easings at 21 points:
 | `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)` | `easeInOutQuart` | 0.0200 |
 | `--ease-drawer: cubic-bezier(0.32, 0.72, 0, 1)` | `easeOutQuint` | 0.0233 |
 
-We already ship their ease-out under another name. **We default to `easeOutCubic`, which is the weaker
-one they specifically argue against.** That is a one-line change to `DEFAULT_MOTION` and a re-baseline,
-and it is the highest-value item on this page.
+We already ship their ease-out under another name, and `DEFAULT_MOTION.easing` now names it directly:
+`easeOutQuint`, not the weaker `easeOutCubic` this page used to default to.
 
 ### Asymmetric timing: we have the knob and almost nobody turns it
 
@@ -65,8 +64,9 @@ and it is the highest-value item on this page.
 `docs/CRAFT/KEYED-MOTION.md` already states: an entrance is an introduction and deserves its time; an
 exit is over.
 
-`exitRatio` exists in `motionDefaults` for exactly this and defaults to 1, meaning symmetric.
-**14 of 45 themes declare it.** So 31 brands leave everything exiting at the speed it arrived.
+`exitRatio` exists in `motionDefaults` for exactly this. An explicit `exitRatio` on a theme still wins;
+any theme that leaves it unset now gets `exitRatioFromMotion(durationScale)` (docs/RULES/ease-direction.md),
+not the old silent 1 (symmetric). Numbers: docs/RULES/ease-direction.md.
 
 ### Physicality: kept, and by accident
 

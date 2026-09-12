@@ -15,6 +15,7 @@ import { defineRegistry } from './registry.js';
 import { SHADER_FX } from '../stings/index.js';
 import { PRESETS } from '../type/type.js';
 import { dialsOf } from './props.js';
+import { DEFAULT_MOTION } from '../motion/motion.js';
 
 const n = (name, def, desc, range) => ({ name, type: 'number', default: def, desc, ...(range ? { range } : {}) });
 const col = (name, def, desc) => ({ name, type: 'color', default: def, desc });
@@ -34,7 +35,7 @@ export const KNOBS = {
   kinetic: {
     _shared: [
       n('each', 0.06, 'seconds between each unit entering'),
-      n('stagger', 0.04, 'extra offset per unit (rhythm)'),
+      n('stagger', DEFAULT_MOTION.stagger, 'extra offset per unit (rhythm)'),
       n('speed', 1, 'overall speed multiplier'),
     ],
     weight: [kn('from', 'starting weight on the font\'s own wght axis', [100, 900]), kn('to', 'weight it lands on', [100, 900]), kn('rise', 'px the line lifts through while the weight arrives')],
