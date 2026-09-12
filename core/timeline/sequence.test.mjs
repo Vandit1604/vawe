@@ -127,4 +127,42 @@ console.log('✓ sequence.test.mjs: radius joins POSE, interpolates, leaves an u
   assert.equal(layers[0].motion[1].ease, 'easeInOutCubic', 'adapting twice is a no-op the second time');
 }
 
+// ---- A MOTION KEY PAST THE LAYER'S OWN DURATION STRETCHES IT, RATHER THAN TRUNCATING THE MOVE ----
+// core/tracks/motion.js gates its whole write (transform AND opacity) on `t < start + duration`; a
+// key authored past `duration` used to go dark, the layer freezing at its last live pose while the
+// GENERIC exit fade took over, which is why an authored slide-and-fade read as "doesn't move, just
+// disappears" (the real bug this file was written for, vawe-flow-2's `terminal-plane`).
+{
+  const layers = [{ id: 'terminal-plane', duration: 4.6, motion: [
+    { t: 0, opacity: 0 }, { t: 1.2, opacity: 1 }, { t: 5.1129, opacity: 1, x: 0 },
+    { t: 5.4129, opacity: 0, x: -2400 },
+  ] }];
+  resolveKeyedProps(layers);
+  assert.equal(layers[0].duration, 5.4129, 'duration stretches to cover a motion key authored past it');
+  assert.equal(motionAt(layers[0].motion, 5.4129).dx, -2400, 'the late key still resolves to its authored x');
+}
+
+// A `duration` already long enough for the whole track is left exactly as authored.
+{
+  const layers = [{ id: 'fits', duration: 10, motion: [{ t: 0, x: 0 }, { t: 2, x: 100 }] }];
+  resolveKeyedProps(layers);
+  assert.equal(layers[0].duration, 10, 'a duration that already covers the track is untouched');
+}
+
+// A layer with no authored `duration` at all already lives forever (clipStyleAt's Infinity fallback,
+// core/timeline/clips.js); resolveKeyedProps must not invent one where the author stated none.
+{
+  const layers = [{ id: 'no-duration', motion: [{ t: 0, x: 0 }, { t: 5, x: 500 }] }];
+  resolveKeyedProps(layers);
+  assert.equal(layers[0].duration, undefined, 'no authored duration is left undefined, not invented');
+}
+
+// Idempotent, same reason as the arrival-ease adaptation above: resolveKeyedProps runs twice per boot.
+{
+  const layers = [{ id: 'stretch-twice', duration: 1, motion: [{ t: 0, x: 0 }, { t: 3, x: 300 }] }];
+  resolveKeyedProps(layers);
+  resolveKeyedProps(layers);
+  assert.equal(layers[0].duration, 3, 'stretching twice lands on the same duration, not a second stretch');
+}
+
 console.log('✓ sequence.test.mjs: arrival-ease adapts a hard stop into a hold, leaves exits and authored handles alone');

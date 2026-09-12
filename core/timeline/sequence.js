@@ -199,6 +199,29 @@ function adaptArrivalEase(motion, who) {
   }
 }
 
+// adaptDurationForMotion(L, who): the CLIP WINDOW (core/timeline/clips.js, read by every per-frame
+// track through `t < start + duration`) is what makes a layer "live". core/tracks/motion.js's own
+// early return skips its whole write, transform AND opacity, the instant a layer goes not-live, so a
+// motion key authored past the layer's own `duration` never plays: the track just stops advancing at
+// the last live instant and the ordinary generic exit fade (driveClips' envelope, a different
+// mechanism entirely) fades the FROZEN pose out in place. That is why the symptom reads as "doesn't
+// slide, just disappears" rather than a jump or a stutter: the layer's own authored slide-and-fade
+// keys are silently never reached at all.
+//
+// A layer that never states `duration` already lives forever (clipStyleAt's `dur` falls back to
+// Infinity, core/timeline/clips.js), so this only fires on a layer that authored BOTH a duration and
+// a motion track whose own last key runs past it, the case that actually truncates something. Stretched
+// to the track's own last key rather than thrown, because the fix this codebase wants is that the
+// keys the author wrote animate as written; the keys themselves already say how long the story runs.
+function adaptDurationForMotion(L, who) {
+  if (L.duration == null) return;
+  const last = L.motion[L.motion.length - 1].t;
+  if (!(last > L.duration)) return;
+  console.log(`adapted motion-duration: ${who} duration ${L.duration} -> ${last} `
+    + `(a motion key ran past the layer's own duration, which would have hidden it before the key played)`);
+  L.duration = last;
+}
+
 export function resolveKeyedProps(layers) {
   (layers || []).forEach((L, idx) => {
     if (!Array.isArray(L.motion) || !L.motion.length) return;
@@ -207,6 +230,7 @@ export function resolveKeyedProps(layers) {
     // already names the layer, so the check goes here instead of in a second pass over the same list.
     assertKeyHandles(L.motion, `layer "${who}"`);
     adaptArrivalEase(L.motion, who);
+    adaptDurationForMotion(L, who);
     // A KEY THAT CARRIES A PROPERTY NOTHING INTERPOLATES IS ACCEPTED-THEN-IGNORED, which is the failure
     // this repo pays for most. `origin` is the one that found this: it reads as a keyable anchor point,
     // an author writes a pivot that travels, and `origin` is a static CSS transform-origin written once
