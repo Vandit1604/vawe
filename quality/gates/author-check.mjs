@@ -299,6 +299,7 @@ const LADDER = [
   ['storyboard', 'blocks', 'whether this film has a written plan, and whether the plan holds together'],
   ['beats', 'blocks', 'the clock: dead air, an empty closing frame, a backdrop that cannot move'],
   ['sweep-static', 'reports', 'the RENDERED pixels: did anything move, or is the whole film frozen (needs a render; hard code)'],
+  ['jolt', 'reports', 'frame-to-frame speed jumps on any layer or the camera, plus motion-floor dead windows (needs a current render)'],
   ['critique', 'reports', 'beat value: hollow, placeholder, unbacked or thin beats'],
   ['direct', 'reports', 'direction: cut families, effect soup, continuity, and the motion tells'],
   ['floor', 'reports', 'ambition: whether this is a plain slideshow'],
@@ -496,6 +497,11 @@ record('beats', runGate('beats', 'beat check (timeline holes)', 'quality/gates/b
 // whose whole timeline is frozen emits [sweep-static], a HARD_CODE (below), so it blocks unless waived.
 // Reports here; the escalation pass below gives it teeth.
 record('sweep-static', runGate('sweep-static', 'sweep-static (rendered pixels moved)', 'quality/gates/sweep-static.mjs', []), { waivable: true, tier: 'reports' });
+// 1c. jolt. Frame-to-frame speed jumps (speed.mjs's findVelocitySpikes, over every moving layer and
+// camera leg, cuts excluded) plus motion-floor's dead-window read WHEN a current render exists.
+// Report-only, like sweep-static above; motion-floor needs the mp4 and skips itself with one line
+// when there is none, or when the one on disk predates this version of the scene.
+record('jolt', runGate('jolt', 'jolt (frame-to-frame speed jumps + dead windows)', 'quality/gates/jolt-check.mjs', []), { waivable: true, tier: 'reports' });
 // 2. critique, value gate; errors report, waivable by rule code.
 styleGate('critique', 'critique (value gate)', 'quality/gates/critique.mjs', strict ? ['--strict'] : [], { waivable: true });
 // 3. direct, direction gate; FAILs report, waivable by code.
