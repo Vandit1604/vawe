@@ -16,9 +16,9 @@ import { resolveHandle } from '../motion/motion.js';
 // speed entering a station equals the speed leaving it. First and last are its natural zero-tangent
 // boundary, so the flight still departs from rest and settles into the final arrival's own ease. Only
 // the last arrival settles.
-// ponytail: `through`'s tangent is not monotone-clamped (Fritsch-Carlson), so a station sequence with a
-// sharp reversal in scale could in principle overshoot past a clamp; tighten tangentAt in
-// core/timeline/sequence.js if a real film ever hits that.
+// `through`'s tangent (tangentAt, core/timeline/sequence.js) is Fritsch-Carlson clamped: a real film
+// hit the overshoot this once predicted (docs/MISTAKES.md #626), a `travel` scale tail pulling the
+// camera below every authored station between two keys that were themselves equal.
 export function travel({ stations, start = 0, ease = 'easeOutCubic', canvasW = 1920,
   canvasH = 1080 } = {}) {
   if (!Array.isArray(stations) || !stations.length)

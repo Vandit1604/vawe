@@ -62,3 +62,30 @@ test('s stays positive and within a small tolerance of the authored range (no wi
       `s=${s} at t=${t} overshoots the authored [${lo}, ${hi}] range by more than the 2% tolerance`);
   }
 });
+
+// docs/MISTAKES.md #626: a real travel (vawe-flow-2.json) whose tail is all s >= 1 still pulled the
+// camera BELOW every authored station, because the finite-difference tangent at a station shared by an
+// unequal segment (s:1.08 -> s:1) and an equal one (s:1 -> s:1) carried velocity into the flat segment
+// and bowed it downward. `tangentAt` is now Fritsch-Carlson clamped, so this must hold for exact,
+// not-just-tolerant, equality.
+test('a flat-tailed travel never dips below (or rises above) its own authored min/max', () => {
+  const tailStations = [
+    { s: 1.5, tx: 400, ty: 300, dur: 1 },
+    { s: 1.08, dur: 1.95 },
+    { s: 1, dur: 0.3 },
+    { s: 1, dur: 2.3, tx: 960, ty: 540 },
+    { s: 1, dur: 0.326 },
+    { s: 1, dur: 0.724 },
+    { s: 1, dur: 1.47 },
+  ];
+  const kf = travel({ stations: tailStations });
+  const sVals = kf.map((k) => k.s);
+  const lo = Math.min(...sVals), hi = Math.max(...sVals);
+  const N = 2000;
+  for (let i = 0; i <= N; i++) {
+    const t = kf[0].t + (kf[kf.length - 1].t - kf[0].t) * (i / N);
+    const s = cameraAt(kf, t).s;
+    assert.ok(s >= lo - 1e-9 && s <= hi + 1e-9,
+      `s=${s} at t=${t} leaves the authored [${lo}, ${hi}] range (the ground-rim regression)`);
+  }
+});
