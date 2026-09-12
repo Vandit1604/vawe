@@ -3,7 +3,7 @@ name: no-jolt
 when: a layer or the camera's speed changes between two consecutive rendered frames
 holds: reports (make speed; author-check jolt step; TASTE=1 gives it teeth); `velocity-spike`
 answers: "how much a layer's or the camera's speed may jump frame to frame before it reads as a jolt, and why a declared cut is exempt"
-group: eye
+group: look
 codes: velocity-spike
 ---
 
