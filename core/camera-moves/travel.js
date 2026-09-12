@@ -17,7 +17,7 @@ import { resolveHandle } from '../motion/motion.js';
 // boundary, so the flight still departs from rest and settles into the final arrival's own ease. Only
 // the last arrival settles.
 // `through`'s tangent (tangentAt, core/timeline/sequence.js) is Fritsch-Carlson clamped: a real film
-// hit the overshoot this once predicted (docs/MISTAKES.md #135), a `travel` scale tail pulling the
+// hit the overshoot this once predicted (docs/MISTAKES.md #626), a `travel` scale tail pulling the
 // camera below every authored station between two keys that were themselves equal.
 export function travel({ stations, start = 0, ease = 'easeOutCubic', canvasW = 1920,
   canvasH = 1080 } = {}) {
