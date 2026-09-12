@@ -2691,3 +2691,27 @@ holds: harness/lib/craft-rules.mjs, harness/lib/finding-codes.mjs, harness/lib/s
 <!-- doc-refs-allow: formats/scene/tokenjam-launch.json · the entry records this scene's deletion -->
 <!-- doc-refs-allow: make slop · retired in #340; the entries that cite it are records of what it did -->
 <!-- doc-refs-allow: quality/gates/slop.mjs · the script #340 records the retirement of -->
+
+## 626. A camera `travel`'s velocity-continuous tangent overshot below every authored station
+`ease: "through"` (core/timeline/sequence.js, `tangentAt`) gives a `travel` station velocity-continuous
+arrivals by fitting a chordal finite-difference tangent from each key's two neighbours. The tangent was
+never clamped, and `core/camera-moves/travel.js` had already named the gap in a `ponytail:` comment
+without a real film hitting it yet. One did: `formats/scene/vawe-flow-2.json`'s camera `travel` ends in
+stations `s:1.08 -> s:1 -> s:1 -> ...`, all at or above 1. At authored time 11.22s the rig carried
+`translate3d(0px, 0px, -8.95px)`, a scale BELOW every one of those stations, and the stage shrank enough
+to show a 3-5px rim of ground around the frame.
+
+The cause: the key shared by the unequal segment (1.08 -> 1) and the following flat one (1 -> 1) still
+carries the unequal segment's nonzero tangent into the flat segment, bowing it below 1 even though both
+its own endpoints equal 1 exactly. Measured on that station tail in isolation: worst sampled `s` was
+0.9895 against an authored minimum of 1.
+
+The fix: `tangentAt` is now Fritsch-Carlson clamped, the standard monotone-cubic constraint, applied per
+key rather than as a second min/max clamp downstream of the curve. A tangent whose two neighbouring
+secants disagree in sign (a real reversal) or where either secant is flat is zeroed; otherwise it is
+scaled so the Hermite curve on neither neighbouring segment can leave that segment's own [min, max].
+Re-measured on the same station tail: worst sampled `s` is exactly 1, no overshoot. `core/camera-moves/
+travel.test.mjs` adds a test on this exact tail asserting the sampled scale never leaves the authored
+[min, max] to within 1e-9, alongside the existing tests (interior stations stay `through`, velocity stays
+continuous, the wider 2%-tolerance overshoot check) which still pass unchanged.
+holds: core/timeline/sequence.js (tangentAt), core/camera-moves/travel.js, core/camera-moves/travel.test.mjs
