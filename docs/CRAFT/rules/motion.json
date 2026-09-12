@@ -158,5 +158,15 @@
     "adapt": null,
     "brief": "The backdrop changes tone per beat, or the film is a slide with effects on it",
     "doc": "docs/RULES/world-turns.md"
+  },
+  {
+    "id": "motion.no-jolt",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": "velocity-spike",
+    "adapt": null,
+    "brief": "A layer or the camera may not jump more than 600 px/s or 0.6 scale/s between two frames outside a cut.",
+    "doc": "docs/RULES/no-jolt.md#a-move-never-jumps-speed-frame-to-frame"
   }
 ]

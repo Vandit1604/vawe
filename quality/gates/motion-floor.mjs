@@ -523,7 +523,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   const gf = gateFindings();
   const errs = [], warns = [], adapted = [];
-  const err = (c, m) => { errs.push(m); gf.fail(c, m); };
+  const fail = (c, m) => { errs.push(m); gf.fail(c, m); };
   const warn = (c, m) => { warns.push(m); gf.warn(c, m); };
   const adapt = (c, m) => { adapted.push(m); gf.note(c, m); };
 
@@ -548,7 +548,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       + 'Scored as text arrival, not pixels: not a defect.');
   }
   if (dead.length) {
-    err('dead-window', `${dead.length} of ${body.length} windows carry no content motion at all `
+    fail('dead-window', `${dead.length} of ${body.length} windows carry no content motion at all `
       + `(under ${DEAD} local, at ${dead.slice(0, 6).map((w) => w.t + 's').join(', ')}${dead.length > 6 ? ' …' : ''}). `
       + 'A reveal finished and nothing took over. Two things fix this and they were measured, not guessed. '
       + 'SPREAD the moves in a beat so one is always arriving: firing four at once measured 80% of windows '
@@ -563,7 +563,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const rMed = [...rb.map((w) => w.local)].sort((a, b) => a - b)[Math.floor(rb.length / 2)];
     const ourFloor = Math.min(...body.map((w) => w.local));
     if (ourFloor < rFloor * 0.8) {
-      err('floor-below-reference', `this film's quietest window is ${ourFloor.toFixed(2)} and ${refName}'s is `
+      fail('floor-below-reference', `this film's quietest window is ${ourFloor.toFixed(2)} and ${refName}'s is `
         + `${rFloor.toFixed(2)}. Its floor is the thing that makes it read as continuous.`);
     }
     if (localMed < rMed * 0.6) {
@@ -587,7 +587,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     } catch { return false; }
   })();
   if (declaresIdle && globalMed > localMed && globalMed > 0.2) {
-    err('ambient-padding', `global (whole-frame) motion ${globalMed.toFixed(2)} now exceeds local (content) motion `
+    fail('ambient-padding', `global (whole-frame) motion ${globalMed.toFixed(2)} now exceeds local (content) motion `
       + `${localMed.toFixed(2)}. Something is drifting or breathing more than anything is happening. Ambient motion `
       + 'is not a substitute for a reveal, and this gate will not accept it as one.');
   }

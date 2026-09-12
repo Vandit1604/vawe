@@ -2,7 +2,7 @@
 when: picking a preset, a cut or a sting and you need the mechanics behind it
 answers: "the stored rules of good motion: timing, physics, the gates that enforce each one"
 group: process
-codes: enter-and-retreat, front-loaded, linear-motion, monotone-timing, motion-monotony, profile, shared-start, stagger-total, tempo-flat, uneven-cascade, median-below-reference, sweep-static
+codes: enter-and-retreat, front-loaded, linear-motion, monotone-timing, motion-monotony, profile, shared-start, stagger-total, tempo-flat, uneven-cascade, median-below-reference, sweep-static, velocity-spike, dead-window, floor-below-reference, ambient-padding
 applies-when: always
 confirm: "is the motion hand-keyed with real physics, not a named preset firing once?"
 ---

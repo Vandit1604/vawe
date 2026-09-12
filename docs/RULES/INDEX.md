@@ -53,5 +53,6 @@ design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Re
 | [`logo-prominence`](logo-prominence.md) | placing a brand mark | eye |
 | [`paired-directional-exit`](paired-directional-exit.md) | choosing anim/out for a sliding layer | eye |
 | [`readable-hold`](readable-hold.md) | a clip, card, or line of text holds still | reports: `make direct`, read gate |
+| [`no-jolt`](no-jolt.md) | a layer or the camera changes speed between frames | reports: `make speed`, author-check jolt step |
 | [`blur-out-dense`](blur-out-dense.md) | exiting a face, card, or dense grid | eye |
 | [`caption-safe-strip`](caption-safe-strip.md) | shipping to a phone feed | gated: `make audit` |
