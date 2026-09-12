@@ -36,8 +36,8 @@ test('a beat with a real subject, real duration, and no move/motion speaks', () 
   try {
     const { status, out } = run(FIXTURE);
     assert.equal(status, 2);
-    assert.match(out, /names no `move:` or `motion:`/);
-    assert.match(out, /move: \w+:\w+/);
+    assert.match(out, /lands and then nothing changes/);
+    assert.match(out, /Ambient motion does\s+not count/);
   } finally { cleanup(); }
 });
 
@@ -72,6 +72,19 @@ test('four qualifying beats still speak about at most two', () => {
   try {
     const { status, out } = run(FIXTURE);
     assert.equal(status, 2);
-    assert.equal((out.match(/names no `move:` or `motion:`/g) || []).length, 2);
+    assert.equal((out.match(/lands and then nothing changes/g) || []).length, 2);
+  } finally { cleanup(); }
+});
+
+test('the output never prescribes a move: shape or a camera move', () => {
+  write([
+    '---', 'duration: 6s', '---', '',
+    '## Beat 1: Hold (0s-3s)', '- object: the pricing card, full size, doing nothing',
+  ].join('\n'));
+  try {
+    const { status, out } = run(FIXTURE);
+    assert.equal(status, 2);
+    assert.doesNotMatch(out, /move:/);
+    assert.doesNotMatch(out, /camera:/);
   } finally { cleanup(); }
 });
