@@ -175,34 +175,73 @@ export function briefLine(rec) {
   return `rule ${rec.id}: ${rec.brief} (${rec.doc})`;
 }
 
+// STAGE_CATEGORY_ORDER: the order AGENTS.md already names for a stage's own categories (direct: motion,
+// transitions, sound in that order under "Direction"; design: layout, imagery, typography, colour,
+// content; plan: direction, content). `rulesFor`'s grouped mode (below) reads it so a hook can print
+// motion before transitions without hand-sorting every call site the same way.
+export const STAGE_CATEGORY_ORDER = {
+  direct: ['motion', 'transitions', 'sound'],
+  design: ['layout', 'imagery', 'typography', 'colour', 'content'],
+  plan: ['direction', 'content'],
+};
+
 /**
- * rulesFor({stage, features, categories, cap, maxChars, root}) -> record[]. Matches a record when its
- * stage is this one, its category is in `categories` (when given), and its `applies` is "always" or a
- * truthy feature. Sorted stable with `check: null` (prose-only, the kind nothing else surfaces) first,
- * then capped BOTH by count (default 5) and by a character budget (default 1200: a decider brief
- * should pass 800, see critics.mjs) so a long run of matches cannot flood a hook's output or a
- * teammate's context the way an uncapped list would.
+ * rulesFor({stage, features, categories, cap, maxChars, capPerCategory, maxCharsPerCategory, root})
+ * -> record[]. Matches a record when its stage is this one, its category is in `categories` (when
+ * given), and its `applies` is "always" or a truthy feature. Sorted stable with `check: null`
+ * (prose-only, the kind nothing else surfaces) first, then capped BOTH by count (default 5) and by a
+ * character budget (default 1200: a decider brief should pass 800, see critics.mjs) so a long run of
+ * matches cannot flood a hook's output or a teammate's context the way an uncapped list would.
+ *
+ * GROUPED MODE: passing `categories` as an ORDERED array together with `capPerCategory` switches to a
+ * per-category cap/budget instead of one global cap/budget, walking `categories` in the order given so
+ * one busy category (motion) can never crowd out the next (transitions, sound) the way a flat global
+ * cap would. `categories` alone (no `capPerCategory`) still just scopes the flat filter, unchanged.
  */
-export function rulesFor({ stage, features = {}, categories = null, cap = 5, maxChars = 1200, root = ROOT } = {}) {
+function byCheckThenOrder(a, b) {
+  const pa = a.r.check == null ? 0 : 1;
+  const pb = b.r.check == null ? 0 : 1;
+  return pa !== pb ? pa - pb : a.i - b.i;
+}
+
+/** capList(indexed, cap, maxChars) -> record[], stable-sorted then walked once, capped both ways. */
+function capList(indexed, cap, maxChars) {
+  const sorted = [...indexed].sort(byCheckThenOrder);
+  const out = [];
+  let chars = 0;
+  for (const { r } of sorted) {
+    if (out.length >= cap) break;
+    const len = briefLine(r).length;
+    if (out.length > 0 && maxChars != null && chars + len > maxChars) break;
+    out.push(r);
+    chars += len;
+  }
+  return out;
+}
+
+/** groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory) -> the grouped-mode walk. */
+function groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory) {
+  const out = [];
+  for (const cat of categories) {
+    const group = matched.filter(({ r }) => r.category === cat);
+    out.push(...capList(group, capPerCategory, maxCharsPerCategory));
+  }
+  return out;
+}
+
+export function rulesFor({
+  stage, features = {}, categories = null, cap = 5, maxChars = 1200,
+  capPerCategory = null, maxCharsPerCategory = null, root = ROOT,
+} = {}) {
   const all = loadCraftRules({ root });
   const matched = all
     .map((r, i) => ({ r, i }))
     .filter(({ r }) => r.stage === stage
       && (!categories || categories.includes(r.category))
       && (r.applies === 'always' || !!features[r.applies]));
-  matched.sort((a, b) => {
-    const pa = a.r.check == null ? 0 : 1;
-    const pb = b.r.check == null ? 0 : 1;
-    return pa !== pb ? pa - pb : a.i - b.i;
-  });
-  const out = [];
-  let chars = 0;
-  for (const { r } of matched) {
-    if (out.length >= cap) break;
-    const len = briefLine(r).length;
-    if (out.length > 0 && chars + len > maxChars) break;
-    out.push(r);
-    chars += len;
+
+  if (categories && capPerCategory != null) {
+    return groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory);
   }
-  return out;
+  return capList(matched, cap, maxChars);
 }

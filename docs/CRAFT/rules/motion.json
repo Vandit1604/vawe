@@ -10,16 +10,6 @@
     "doc": "docs/RULES/anticipate-default.md"
   },
   {
-    "id": "motion.banned-defaults",
-    "category": "motion",
-    "stage": "design",
-    "applies": "always",
-    "check": "off-colour",
-    "adapt": null,
-    "brief": "Ban gradient text, cyan/purple, identical card grids, and Inter by default",
-    "doc": "docs/RULES/banned-defaults.md"
-  },
-  {
     "id": "motion.blur-out-dense",
     "category": "motion",
     "stage": "direct",
@@ -30,16 +20,6 @@
     "doc": "docs/RULES/blur-out-dense.md"
   },
   {
-    "id": "motion.continuous-object",
-    "category": "motion",
-    "stage": "direct",
-    "applies": "always",
-    "check": "no-continuous-object",
-    "adapt": null,
-    "brief": "One object survives a cut and changes across it, or name what else holds the film",
-    "doc": "docs/RULES/continuous-object.md"
-  },
-  {
     "id": "motion.ease-direction",
     "category": "motion",
     "stage": "direct",
@@ -47,6 +27,16 @@
     "check": null,
     "adapt": null,
     "brief": "Entrances ease out, exits ease in, a handover eases in-out",
+    "doc": "docs/RULES/ease-direction.md"
+  },
+  {
+    "id": "motion.exit-faster",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "An exit also runs faster than its entrance, about half its duration by default, for emphasis.",
     "doc": "docs/RULES/ease-direction.md"
   },
   {
@@ -80,34 +70,14 @@
     "doc": "docs/RULES/motion-offsets.md"
   },
   {
-    "id": "motion.one-cut-family",
-    "category": "motion",
-    "stage": "direct",
-    "applies": "hasBoundaries",
-    "check": "cut-families",
-    "adapt": null,
-    "brief": "One transition family per film; earn 2-3 accents by meaning",
-    "doc": "docs/RULES/one-cut-family.md"
-  },
-  {
     "id": "motion.paired-directional-exit",
     "category": "motion",
     "stage": "direct",
     "applies": "always",
-    "check": null,
+    "check": "enter-and-retreat",
     "adapt": null,
     "brief": "Entrances and exits travel in one direction; never enter-and-retreat",
     "doc": "docs/RULES/paired-directional-exit.md"
-  },
-  {
-    "id": "motion.payoff-last",
-    "category": "motion",
-    "stage": "plan",
-    "applies": "always",
-    "check": null,
-    "adapt": null,
-    "brief": "The hook asks a question in 12 words or less; the payoff lands at 77-90% of runtime",
-    "doc": "docs/RULES/payoff-last.md"
   },
   {
     "id": "motion.speed-bands",
@@ -138,26 +108,6 @@
     "adapt": null,
     "brief": "A staggered group's total arrival stays at or under 0.5 seconds",
     "doc": "docs/RULES/stagger-total.md"
-  },
-  {
-    "id": "motion.text-on-flat",
-    "category": "motion",
-    "stage": "design",
-    "applies": "hasTextBeats",
-    "check": "contrast",
-    "adapt": null,
-    "brief": "A headline sits on a flat patch, never a blob or a gradient hot spot",
-    "doc": "docs/RULES/text-on-flat.md"
-  },
-  {
-    "id": "motion.world-turns",
-    "category": "motion",
-    "stage": "direct",
-    "applies": "always",
-    "check": null,
-    "adapt": null,
-    "brief": "The backdrop changes tone per beat, or the film is a slide with effects on it",
-    "doc": "docs/RULES/world-turns.md"
   },
   {
     "id": "motion.no-jolt",

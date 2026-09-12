@@ -78,5 +78,35 @@
     "adapt": null,
     "brief": "Name what holds the film across each cut",
     "doc": "docs/CRAFT/FILM-STRUCTURE.md"
+  },
+  {
+    "id": "direction.payoff-last",
+    "category": "direction",
+    "stage": "plan",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "The hook asks a question in 12 words or less; the payoff lands at 77-90% of runtime",
+    "doc": "docs/RULES/payoff-last.md"
+  },
+  {
+    "id": "direction.continuous-object",
+    "category": "direction",
+    "stage": "direct",
+    "applies": "always",
+    "check": "no-continuous-object",
+    "adapt": null,
+    "brief": "One object survives a cut and changes across it, or name what else holds the film",
+    "doc": "docs/RULES/continuous-object.md"
+  },
+  {
+    "id": "direction.world-turns",
+    "category": "direction",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "The backdrop changes tone per beat, or the film is a slide with effects on it",
+    "doc": "docs/RULES/world-turns.md"
   }
 ]
