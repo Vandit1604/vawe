@@ -13,10 +13,10 @@
 // ENDS rather than sustains. A beat with real duration, a real subject, and no `move:`/`motion:` field
 // is exactly that hole, and it is checkable from the storyboard alone, before a single layer exists.
 //
-// DEGRADES GRACEFULLY. If `core/motion/path-curves.js` registers no curve (checked
-// live below, never hand-listed): a separate agent is adding one. Until it lands this names the
-// richest shape actually in SHAPES today (`pan`); the day a `*path*` shape appears, this starts naming
-// it instead, with no edit here.
+// THE FIX IS OVERLAP, NEVER AMBIENT MOTION. A still hold is fixed by something arriving or changing
+// during it (a second element, content inside the held layer, the next reveal starting early), never
+// by idling the held layer itself (`hold:`, `breathe`, `drift`, an arc) and never by a camera move.
+// This hook only names the gap; `make arsenal Q=` finds the actual device.
 //
 // THE CONTRACT, same as craft-live.mjs and stage-say.mjs: silent on a fine beat, never blocks (exit 2
 // only carries a message), and speaks about what THIS save wrote, never a generic tip.
@@ -35,19 +35,14 @@ import { coverageIn, CONFIDENT } from '../author/arsenal.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
-// The one shape worth reaching for when nothing moves after the entrance: a `*path*` shape flies the
-// layer instead of parking it, and is named the instant one is registered; `pan` is the next-richest
-// shape SHAPES carries today (a multi-key travel, not a fade).
-// A path curve wins outright when one is registered: it defaults its duration to the layer's own span,
-// so it is sustained motion by construction, while a SHAPES track ends when its keys run out. `arc` is
-// the plainest of the four and the safest thing to put in front of an author who asked for nothing.
+// Only used to dedupe: whatever shape/curve would be the obvious ambient pick for a still beat is
+// kept out of the corpus-wide push too, so that push never quietly re-offers the same idle motion
+// under a different name. The fix for a still hold is overlap, never this; nothing below prints it.
 function bestShape() {
   if (CURVE_NAMES.length) return { name: CURVE_NAMES.includes('arc') ? 'arc' : CURVE_NAMES[0], path: true };
   const names = Object.keys(SHAPES);
   return { name: names.includes('pan') ? 'pan' : names[0], path: false };
 }
-
-const bandFor = (weight) => (weight === 'peak' ? 'cinematic' : weight === 'quiet' ? 'energy' : 'professional');
 
 /** Beats worth a nudge: real duration, a real subject, and no move/motion field already spoken for. */
 function candidates(sb) {
@@ -77,10 +72,12 @@ function seamCandidates(sb) {
 // on-demand; this fires at the one moment a gap is provably visible, the beat's own prose already
 // describing it). Built once per save, not per beat: the corpus and its idf weighting are a property
 // of the whole engine, never of one beat.
+// Camera is excluded outright: the owner rule for this hook is nudge, never prescribe a camera move,
+// so the corpus-wide push must never surface one, no matter how well a beat's prose matches it.
 let CORPUS = null;
 function corpus() {
   if (!CORPUS) {
-    const all = GROUPS.flatMap(([, entries]) => entries());
+    const all = GROUPS.filter(([group]) => group !== 'camera').flatMap(([, entries]) => entries());
     CORPUS = { all, coverage: coverageIn(all), ambiguous: ambiguousNames(all) };
   }
   return CORPUS;
@@ -97,6 +94,11 @@ function capabilityCandidates(sb, sbSrc, skip) {
   const perBeat = sb.beats.map((b) => {
     const tokenGroups = tokenGroupsOf(b);
     if (!tokenGroups.length) return null;
+    // A beat carrying only a couple of common words ("nothing to hold onto") is not a real
+    // subject, it is the ABSENCE of one; at that size ordinary words collide with unrelated
+    // blurbs (measured: "hold"+"onto" clears CONFIDENT against a camera move and a cursor
+    // layer alike). Below this floor there is no real subject to match against, so stay silent.
+    if (tokenGroups.reduce((n, g) => n + g.length, 0) < 4) return null;
     let best = null;
     for (const e of remaining) {
       const m = bestWindowMatch(e, tokenGroups, coverage);
@@ -149,25 +151,16 @@ function say(rel, file) {
   const capFound = capabilityCandidates(sb, raw, alreadyNudgedKeys(found, seams));
   if (!found.length && !seams.length && !capFound.length) return [];
 
-  const film = rel.replace(/\.storyboard\.md$/, '.json');
   const lines = [];
   if (found.length) {
-    const { name: shape, path: usesPath } = bestShape();
     for (const { b, dur } of found) {
-      const raw = b.object || b.picture || b.blueprint;
-      const subject = raw.length > 60 ? `${raw.slice(0, 57)}...` : raw;
-      const band = bandFor(b.weight);
-      lines.push(`  "${b.name}" (${dur.toFixed(1)}s) holds "${subject}" and names no \`move:\` or \`motion:\` -`);
-      lines.push(`  it lands its entrance and then sits still for the rest of the beat. Add this line to`);
-      lines.push(`  the beat: \`move: ${shape}:${band}\`.${usesPath
-        ? ' It flies the layer along a path for the whole beat, sustained motion by construction.'
-        : ` core/motion/path-curves.js registers no curve; \`${shape}\` is the richest sustained track`
-          + ` core/motion/shapes.js carries today.`}`);
+      lines.push(`  "${b.name}" (${dur.toFixed(1)}s) lands and then nothing changes.`);
+      lines.push(`  Name what arrives during the hold: a second element, content inside the`);
+      lines.push(`  card, or start the next reveal before this one lands. Ambient motion does`);
+      lines.push(`  not count.`);
     }
-    lines.push(`  \`move:\` reads any of four scopes off its own shape: \`<curve>:<band>\` flies the whole`);
-    lines.push(`  layer along a path, \`<shape>:<band>\` keys a layer track, \`<selector>@<kind>:<band>\` staggers`);
-    lines.push(`  parts inside one fragment, \`hold:<idle>\` breathes or drifts a still object. Or pick one by`);
-    lines.push(`  eye in \`make studio D=${film}\`, which writes the key for you as you drag.`);
+    lines.push(`  \`make arsenal Q="staggered entrance"\` finds the overlap devices that fit,`);
+    lines.push(`  never a camera move and never ambient motion.`);
   }
   const seam = Object.entries(RECIPES).find(([, r]) => r.kind === 'seam');
   if (seams.length && seam) {

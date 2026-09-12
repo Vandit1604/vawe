@@ -239,7 +239,7 @@ quality/gates/rung.mjs --list` prints the worklist. Highest rung wins:
 | PostToolUse hooks that speak mid-task | a hook reads what you just saved and answers | `harness/live/*.mjs` |
 | a PreToolUse deny, evaluated before permission mode | the authoring ORDER refuses a write that skips a stage | `harness/live/stage-gate.mjs` |
 | UserPromptSubmit context injection | the open stage and its next command, re-stated every turn | `harness/live/stage-say.mjs` |
-| `[live]` capability discovery, PUSHED instead of searched | a beat with real duration and no `move`/`motion` is named at the moment its storyboard is saved, and told the exact `move:` line to add; `make surface D=<storyboard>` is the neutral on-demand form | `harness/live/beat-surfacer.mjs` |
+| `[live]` capability discovery, PUSHED instead of searched | a beat with real duration and no `move`/`motion` is named at the moment its storyboard is saved, and told to name what arrives during the hold, never a `move:` line or a camera move; `make surface D=<storyboard>` is the neutral on-demand form | `harness/live/beat-surfacer.mjs` |
 | deferred tools, fetched by search | `make arsenal Q="…"`, `make schema AT=…` | `harness/author/` |
 | skills loaded only when needed | `docs/CRAFT/*.md`; a finding NAMES the doc that settles it | `docs/TASTE.md` |
 | refusing an invalid call at the boundary | refusing at the WRITE SITE, so a bad state is unrepresentable | `core/registry/registry.js` |
