@@ -322,7 +322,7 @@ function tangentAt(kfs, i, prop, dflt) {
   if (!(h0 > 0) || !(h1 > 0)) return 0;
   const d0 = (p1 - p0) / h0, d1 = (p2 - p1) / h1;
   if (d0 === 0 || d1 === 0 || (d0 < 0) !== (d1 < 0)) return 0; // local extremum: no overshoot allowed
-  const m = (d0 * h1 + d1 * h0) / (h0 + h1); // same chordal estimate as before, now just clamped
+  const m = (p2 - p0) / (h0 + h1); // the chordal estimate this function always used, now only clamped
   const alpha = m / d0, beta = m / d1;
   const s = alpha * alpha + beta * beta;
   return s > 9 ? (3 / Math.sqrt(s)) * m : m;
