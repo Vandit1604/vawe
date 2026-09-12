@@ -24,6 +24,7 @@ import { buildKit } from '../../harness/lib/stagekit.mjs';
 import { readDesignSpec, legalSet, nearestToken } from '../../harness/lib/design-spec.mjs';
 import { parseStoryboard, blocksOf, fieldIn } from '../../harness/author/storyboard-parse.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { parseFragmentSpec } from '../../harness/lib/contract.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -58,7 +59,7 @@ export function fragmentsOf(sbPath) {
   const blocks = blocksOf(src);
   const out = [];
   sb.beats.forEach((b, i) => {
-    const frag = (fieldIn(blocks[i], 'fragment') || '').split(/\s+\(/)[0].trim();
+    const frag = parseFragmentSpec(fieldIn(blocks[i], 'fragment')).path;
     if (frag && !out.includes(frag)) out.push(frag);
   });
   return out;
