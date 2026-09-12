@@ -19,7 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { stageOf, ROOT } from '../../quality/gates/stage.mjs';
 import { computeFeatures } from '../../quality/gates/craft-checklist.mjs';
-import { rulesFor, briefLine } from '../lib/craft-rules.mjs';
+import { rulesFor, briefLine, STAGE_CATEGORY_ORDER } from '../lib/craft-rules.mjs';
 
 const DAY = 24 * 60 * 60 * 1000;
 const dir = path.join(ROOT, 'formats/scene');
@@ -75,7 +75,14 @@ try {
     const scene = fs.existsSync(st.scene) ? JSON.parse(fs.readFileSync(st.scene, 'utf8')) : null;
     const sbText = fs.existsSync(st.sb) ? fs.readFileSync(st.sb, 'utf8') : null;
     const features = computeFeatures(scene, sbText);
-    for (const r of rulesFor({ stage: st.stage, features })) console.log(`  ${briefLine(r)}`);
+    // A stage AGENTS.md gives an order for (direct: motion/transitions/sound, etc.) prints by that
+    // order, 2 lines and 320 chars per category, so motion cannot crowd out transitions and sound at
+    // the same stage. A stage with no named order keeps the old flat cap/budget.
+    const order = STAGE_CATEGORY_ORDER[st.stage];
+    const rules = order
+      ? rulesFor({ stage: st.stage, features, categories: order, capPerCategory: 2, maxCharsPerCategory: 320 })
+      : rulesFor({ stage: st.stage, features });
+    for (const r of rules) console.log(`  ${briefLine(r)}`);
     markSpoke(best.film, st.stage);
   }
 } catch { /* rule briefs are a nudge; a broken loader must never break this hook */ }

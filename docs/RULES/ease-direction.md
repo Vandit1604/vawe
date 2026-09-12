@@ -12,7 +12,8 @@ a launch: it accelerates, so use `easeInCubic`/`easeInExpo`. A move BETWEEN two 
 already sees, including a `becomes` handover, is neither arriving nor departing: it travels, so it
 eases both ends with `easeInOutCubic`. `easeOutExpo` on a handover decelerates through the whole
 travel, so the object seems to teleport in fast and crawl the rest of the way, which reads as two
-separate objects, not one that moved.
+separate objects, not one that moved. An exit also runs faster than its entrance, about half its
+duration by default, for emphasis.
 
 | move | ease family | example |
 |---|---|---|

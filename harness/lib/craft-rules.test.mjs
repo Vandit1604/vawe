@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { loadCraftRules, validateRule, rulesFor, briefLine, ROOT } from './craft-rules.mjs';
+import { loadCraftRules, validateRule, rulesFor, briefLine, STAGE_CATEGORY_ORDER, ROOT } from './craft-rules.mjs';
 
 test('the real docs/CRAFT/rules load and validate with no problems', () => {
   const records = loadCraftRules({});
@@ -158,4 +158,52 @@ test('rulesFor: categories scope the result, so an unrelated role sees nothing',
   assert.equal(forScene.length, 0);
   const forSound = rulesFor({ stage: 'direct', features: { always: true }, root, categories: ['sound'] });
   assert.equal(forSound.length, 1);
+});
+
+// P3: motion.json cleanup + stage-say category order, against the real rule files.
+
+test('rulesFor: grouped mode at direct returns a motion rule first, capped at 2 per category', () => {
+  const rules = rulesFor({
+    stage: 'direct', features: { always: true, hasBoundaries: true },
+    categories: STAGE_CATEGORY_ORDER.direct, capPerCategory: 2, maxCharsPerCategory: 320,
+  });
+  assert.ok(rules.length > 0, 'expected at least one rule at direct');
+  assert.equal(rules[0].category, 'motion', 'motion leads because AGENTS.md orders it first at direct');
+  const perCategory = new Map();
+  for (const r of rules) perCategory.set(r.category, (perCategory.get(r.category) || 0) + 1);
+  for (const [cat, n] of perCategory) assert.ok(n <= 2, `${cat} carried ${n} rules, over the cap of 2`);
+});
+
+test('P3 moves: banned-defaults and text-on-flat live in colour.json, payoff-last/continuous-object/world-turns in direction.json', () => {
+  const records = loadCraftRules({});
+  const ids = new Set(records.map((r) => r.id));
+  for (const id of ['colour.banned-defaults', 'colour.text-on-flat', 'direction.payoff-last', 'direction.continuous-object', 'direction.world-turns']) {
+    assert.ok(ids.has(id), `expected ${id} to exist after the P3 move`);
+  }
+  for (const id of ['motion.banned-defaults', 'motion.text-on-flat', 'motion.payoff-last', 'motion.continuous-object', 'motion.world-turns', 'motion.one-cut-family']) {
+    assert.ok(!ids.has(id), `expected ${id} to be gone from motion.json after the P3 move`);
+  }
+});
+
+test('motion.paired-directional-exit carries its real check, and motion.exit-faster exists', () => {
+  const records = loadCraftRules({});
+  const paired = records.find((r) => r.id === 'motion.paired-directional-exit');
+  assert.equal(paired.check, 'enter-and-retreat');
+  const exitFaster = records.find((r) => r.id === 'motion.exit-faster');
+  assert.ok(exitFaster, 'expected motion.exit-faster to exist');
+  assert.equal(exitFaster.check, null);
+  assert.ok(exitFaster.brief.length <= 120);
+});
+
+test('motion.json stays at 12 records or fewer, every brief at 120 chars or fewer', () => {
+  const records = loadCraftRules({}).filter((r) => r.category === 'motion');
+  assert.ok(records.length <= 12, `motion.json carries ${records.length} records, over the cap of 12`);
+  for (const r of records) assert.ok(r.brief.length <= 120, `${r.id} brief is ${r.brief.length} chars, over 120`);
+});
+
+test('one owner per code: velocity-spike and unreadable-hold route to their RULES doc, not MOTION-CRAFT.md', async () => {
+  const { docMap, codeDocMap } = await import('../../quality/gates/doc-map.mjs');
+  const map = codeDocMap(docMap().entries);
+  assert.equal(map.get('velocity-spike'), 'docs/RULES/no-jolt.md');
+  assert.equal(map.get('unreadable-hold'), 'docs/RULES/readable-hold.md');
 });

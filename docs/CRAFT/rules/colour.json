@@ -68,5 +68,25 @@
     "adapt": null,
     "brief": "Muted is fine. Flat is not",
     "doc": "docs/CRAFT/COLOR.md"
+  },
+  {
+    "id": "colour.banned-defaults",
+    "category": "colour",
+    "stage": "design",
+    "applies": "always",
+    "check": "off-colour",
+    "adapt": null,
+    "brief": "Ban gradient text, cyan/purple, identical card grids, and Inter by default",
+    "doc": "docs/RULES/banned-defaults.md"
+  },
+  {
+    "id": "colour.text-on-flat",
+    "category": "colour",
+    "stage": "design",
+    "applies": "hasTextBeats",
+    "check": "contrast",
+    "adapt": null,
+    "brief": "A headline sits on a flat patch, never a blob or a gradient hot spot",
+    "doc": "docs/RULES/text-on-flat.md"
   }
 ]
