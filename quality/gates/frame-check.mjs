@@ -20,6 +20,7 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 import { readDesignSpec } from '../../harness/lib/design-spec.mjs';
 import { runDesignDrift } from './design-drift.mjs';
+import { parseFragmentSpec } from '../../harness/lib/contract.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -38,7 +39,7 @@ const beats = sb.beats.map((b, i) => ({
   archetype: (fieldIn(blocks[i], 'archetype') || '').trim(),
   weight: (fieldIn(blocks[i], 'weight') || '').trim(),
   payoff: (fieldIn(blocks[i], 'threads') || fieldIn(blocks[i], 'object') || '').trim(),
-  fragment: (fieldIn(blocks[i], 'fragment') || '').split(/\s+\(/)[0].trim() || null,
+  fragment: parseFragmentSpec(fieldIn(blocks[i], 'fragment')).path,
 }));
 
 const gf = gateFindings();

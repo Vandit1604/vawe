@@ -136,3 +136,18 @@ test('a one-beat film with no continuous object: neither finding fires', () => {
   const r = run([json]);
   assert.equal(r.status, 0, r.stdout);
 });
+
+test('a beat built from layers (`fragment: none, ...`) is not reported as a missing file', () => {
+  const storyboard = FRONT(null) + `
+## Beat 1: Card (0s-5s)
+- type: hook
+- onscreen: "hello"
+- why: opens the film
+- duration: 5s
+- fragment: none, an image + text layer pair (card-bg, card-text)
+`;
+  const json = writeFixture({ name: 'fragment-none', storyboard, layers: [fullBleedLayer('s1', 0)] });
+  const r = run([json]);
+  assert.doesNotMatch(r.stdout + r.stderr, /names none/, r.stdout);
+  assert.doesNotMatch(r.stdout + r.stderr, /fragment-missing|no such file exists/, r.stdout);
+});
