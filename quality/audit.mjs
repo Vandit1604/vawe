@@ -8,15 +8,9 @@
 //   • contrast: text/emphasis vs bg below WCAG, incl. <b>/<em> --em spans & ≈-same-colour
 //                 (blue-on-blue); widened to any ≥60px headline text  (HARD on critical, else warn)
 //   • buried: >40% of a ≥60px headline sits under an opaque layer  (HARD fail)
-//   • thin-hero: a LANDSCAPE hero line's ink fills <55% of frame width, and nothing else on the
-//                 frame reaches out past it (a split frame is exempt)     (warn)
 //   • tight: sibling boxes closer than MIN_GAP px    (warn)
 // Writes an annotated screenshot of the worst frame per format to /tmp/audit/<format>.png.
 //   node quality/audit.mjs [format ...]      (default: all)   ·   make audit
-//   node quality/audit.mjs <scene.json> --hero    thin-hero alone, no screenshots, exit 0. This is the
-//     slice `author-check` runs BEFORE the render under TASTE=1, so a hero set at web scale is caught
-//     while it is still cheap to fix. Same frames and same numbers as the full run, proven on three
-//     scenes; it just skips the contrast pictures and the overlay. 1.44s vs 4.60s on argus-launch.
 //
 // --aspect 16:9,9:16,1:1,4:5 (or `all`) audits the SAME canvas list the renderer would ship, mirroring
 // `bin/vawe --aspect a,b,c`. This exists because a scene renders "fine" at every aspect and can be wrong
@@ -54,15 +48,6 @@ const SAMPLES = 14;                                    // frames sampled across 
 
 
 const argv = process.argv.slice(2);
-// --hero: the PRE-RENDER slice of this audit. `thin-hero` was reachable only through `make audit`, which
-// is a post-render step, so the finding arrived after the mp4 was paid for. The measurement itself needs
-// a real page (it reads INK width, and a check on the declared `w` would call the library healthy and
-// see nothing, which is why there is no static approximation of it). So the page is what moves earlier,
-// not the rule: same browser, same frames, same in-page function, with the contrast screenshots and the
-// overlay shot skipped, thin-hero the only finding reported, and exit 0 always because it is a warning.
-// Everything else about this file is untouched when the flag is absent.
-const heroOnly = argv.includes('--hero');
-if (heroOnly) argv.splice(argv.indexOf('--hero'), 1);
 const aspectAt = argv.findIndex((a) => a === '--aspect' || a.startsWith('--aspect='));
 let aspectArg = '';
 if (aspectAt !== -1) {
@@ -953,77 +938,6 @@ function coverSample(el, r, FW, FH) {
   return { covered, total };
 }
 
-// THIN HERO. The reference standard is a hero line filling 60-80% of frame width, and our landscape
-// films sit at a 40.4% median ink with 82.9% of sampled frames under the floor (1090 samples, 88
-// scenes). The cause is doctrine, not accident: TYPOGRAPHY.md and LAYOUT.md both applied Butterick's
-// 45-75 character measure to display type, and a six-word hook at 66 characters lands near 45% of
-// 1920 by construction. Both docs now exempt display type; this reports the frames still short.
-//
-// Measure the INK, never the declared box. The box is already about right (70% median) and the glyphs
-// fill only 67.5% of it, so a check on `w` would call the library healthy and see nothing.
-//
-// WARN ONLY, and it must stay that way. Four landscape films in five trip this, and a gate that
-// blocks four in five is a gate everyone waives; a rule waived by reflex has already been repealed.
-function checkThinHero(ctx) {
-  const { FW, FH, layerIdx } = ctx;
-  if (!(FW > FH)) return [];
-  const issues = [];
-  const hero = findHero(ctx);
-  // 55, not the 60 floor itself: a frame a hair under the floor is a judgement call, and a warn that
-  // fires there says nothing an author can act on. Below 55 the type is web-sized, not marginal.
-  const HERO_FILL_MIN = 0.55;
-  const { spanL, spanR } = contentSpan(hero, FW, FH);
-  const composed = (spanR - spanL) / FW >= 0.6;
-  if (hero && !composed && hero.w / FW < HERO_FILL_MIN)
-    issues.push({ kind: 'thin-hero', a: hero.el.id || `hero@${hero.px | 0}px`, li: layerIdx.get(hero.el.closest('.hs-layer')),
-      t: hero.t.slice(0, 18),
-      detail: `hero ink is ${Math.round(hero.w / FW * 100)}% of frame width, want 60-80%. Set it at video scale, not web scale.` });
-  return issues;
-}
-
-// The hero is the largest type on the frame; a supporting line under it is not this rule's
-// subject, and reporting both would make one thin beat read as two findings.
-function findHero(ctx) {
-  let hero = null;
-  for (const el of document.querySelectorAll('[data-layer="critical"]')) {
-    if (!vis(el) || midMove(el, ctx) || !arrived(el)) continue;
-    const s = getComputedStyle(el);
-    if (paintsBox(s)) continue;                    // a chip or card sets its own width; the box IS the design there
-    const txt = inkText(el).trim();
-    // A short payoff is exempt on purpose. "2.5B" cannot reach 60% of the frame without type nobody
-    // would set, so demanding it would make the film worse to move a number (CLAUDE.md: suspect the
-    // gate). The rule is about a HOOK LINE that was set at web size, and a hook has words in it.
-    if (txt.length < 12) continue;
-    const r = inkRect(el);
-    if (!r || r.width < 4) continue;
-    const px = parseFloat(s.fontSize) || 0;
-    if (!hero || px > hero.px || (px === hero.px && r.width > hero.w)) hero = { el, px, w: r.width, left: r.left, t: txt };
-  }
-  return hero;
-}
-
-// A SPLIT FRAME is not a thin hero. LAYOUT.md §6 calls "headline left, artifact right" the workhorse
-// archetype and §0 asks for two focal points, so in a split the hero owns a column by design and
-// stretching it to 60% of the FRAME would drive it into the artifact. Found by rendering the first
-// findings and looking: argus-launch f173 sets its hook against a live dashboard, reads well, and was
-// reported at 37%. So the subject is the frame's whole content extent: if the hero plus the other
-// content beside it already spans the frame, the frame is composed and this rule has nothing to say.
-function contentSpan(hero, FW, FH) {
-  let spanL = Infinity, spanR = -Infinity;
-  if (!hero) return { spanL, spanR };
-  spanL = hero.left; spanR = hero.left + hero.w;
-  const MIN_AREA = FW * FH * 0.015;              // ignore specks; a hairline or a corner tick is not a focal point
-  for (const el of document.querySelectorAll('.hs-layer')) {
-    if (el.contains(hero.el) || hero.el.contains(el)) continue;
-    if (!vis(el) || !arrived(el) || !carriesContent(el)) continue;
-    const b = el.getBoundingClientRect();
-    if (b.width * b.height < MIN_AREA) continue;
-    // Clamp to the canvas: a decorative field that bleeds off both edges is not evidence that the
-    // frame is composed, and unclamped it would silence this rule on every scene that has one.
-    spanL = Math.min(spanL, Math.max(b.left, 0)); spanR = Math.max(spanR, Math.min(b.right, FW));
-  }
-  return { spanL, spanR };
-}
 
 // ── CONTRAST: COLLECT PROBES, THEN HIDE THE GLYPHS (docs/MISTAKES.md #390) ────────────────────
 // No rule below decides anything. Each one names its SUBJECT, the ink box, the declared ink
@@ -1239,7 +1153,7 @@ function auditFrame(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   const ctx = frameContext(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND);
   const issues = [];
   for (const check of [checkLayerBounds, checkImageFloor, checkTinyText, checkClippedText,
-    checkClippedComponent, checkVerticalMass, checkPairs, checkBuried, checkThinHero])
+    checkClippedComponent, checkVerticalMass, checkPairs, checkBuried])
     issues.push(...check(ctx));
   const { probes, hideList } = collectProbes(ctx);
   hideProbeSubjects(hideList);
@@ -1268,7 +1182,7 @@ const PAGE_FNS = { vis, effOpacity, arrived, paintsOwnBox, inkText, maskedByDesi
   frameContext, unCam, midMove, checkLayerBounds, overflowFinding, safeFinding, captionBandFinding,
   checkImageFloor, checkTinyText, checkClippedText, checkClippedComponent, checkVerticalMass,
   fading, crossDissolve, occluded, checkPairs, pairFinding, checkBuried, coverSample,
-  checkThinHero, findHero, contentSpan, collectTextProbes, collectSpanProbes, onOwnFill,
+  collectTextProbes, collectSpanProbes, onOwnFill,
   collectHeadlineProbes, collectImageProbes, collectProbes, hideProbeSubjects, auditFrame };
 const PAGE_SRC = `(() => {\n${Object.entries(PAGE_FNS).map(([k, f]) => `const ${k} = ${f};`).join('\n')}\n`
   + 'window.__auditFrame = auditFrame;\n})()';
@@ -1551,7 +1465,7 @@ for (const spec of modules) {
   if (bootSample !== sample) bootScratch.push(path.join(repoRoot, bootSample));
 
   // source checks are aspect-independent (they're about the JSON, not a canvas), report them once
-  const si = heroOnly ? [] : sourceIssues(cfg);
+  const si = sourceIssues(cfg);
   if (si.length) rows.push({ m: `${isData ? `${m} · ${path.basename(sample)}` : m}  [source]`,
     hard: si.filter((i) => HARD.has(i.kind)).length, warn: si.filter((i) => !HARD.has(i.kind)).length, crit: 0, items: si });
 
@@ -1636,10 +1550,7 @@ for (const aspectKey of askedAspects) {
     // viewer would see it under the glyphs. Deliberately page.screenshot() and not a cached frame
     // buffer: a cache is keyed on the frame, knows nothing of the DOM mutation just made, and would
     // hand back a picture that predates it (the same trap the reference implementation carries).
-    // --hero grades no text, so it needs no picture of the backdrop. The glyph restore still runs: the
-    // page function hid them, and leaving them hidden would poison every frame measured after this one.
-    if (probes && probes.length && heroOnly) await page.evaluate(restoreHiddenFn);
-    else if (probes && probes.length) {
+    if (probes && probes.length) {
       let shot = null, shotErr = null;
       try { shot = await page.screenshot({ type: 'png', optimizeForSpeed: true }); }
       catch (e) { shotErr = e.message; }
@@ -1674,7 +1585,6 @@ for (const aspectKey of askedAspects) {
   // the row is composited into a gap the wall reserves for it: the boxes overlap by design, the content
   // never does, and with no card there is no opaque surface for the overlap check's own exemption to
   // find. A waived issue is still PRINTED, tagged, and counted separately, so waiving stays visible.
-  if (heroOnly) for (let i = all.length - 1; i >= 0; i--) if (all[i].kind !== 'thin-hero') all.splice(i, 1);
   const waived = all.filter((i) => allow.has(i.kind));
   // An adapted finding (registry verdict `tolerate`/`reclassify`) already had its HARD-ness judged
   // against the film's own numbers; it reports like a warning, with the adaptation's line as its
@@ -1693,7 +1603,6 @@ for (const aspectKey of askedAspects) {
   const label = `${isData ? `${m} · ${path.basename(sample)}` : m}  [${aspectKey || `${vw}x${vh}`}]`;
   rows.push({ m: label, hard: hu.length, warn: wu.length, waived: vu.length, crit: critMax, items: [...hu, ...wu, ...vu] });
 
-  if (heroOnly) { await page.close(); continue; }   // no overlay: nothing here is worth a picture yet
   await page.evaluate(overlayFn, worst.f, safe);
   // one overlay per audited canvas, the whole point is comparing where the SAME scene breaks per ratio
   // named for the SCENE, not the module: every scene audits as module `scene`, so `scene.png` was one
@@ -1706,32 +1615,6 @@ for (const aspectKey of askedAspects) {
 await browser.close(); server.close();
 for (const f of bootScratch) { try { fs.unlinkSync(f); } catch {} } // scratch boot file: may already be gone, cleanup only
 
-// --hero prints its own short report and exits 0. It is ONE warning out of this file's 18 kinds, so
-// printing the full LAYOUT AUDIT banner under it would claim a sweep that did not happen.
-if (heroOnly) {
-  const items = rows.flatMap((r) => (r.items || []).map((i) => ({ ...i, m: r.m })));
-  // A scene that never loaded measured NOTHING, and a tick over it would be the worst outcome this
-  // whole change could have: the finding moved earlier only to become a false green.
-  for (const r of rows.filter((x) => x.note)) console.log(`  ! ${r.m}: ${r.note}. Hero fill was NOT measured.`);
-  if (!items.length && !rows.some((r) => r.note)) {
-    console.log(`  ✓ hero fill: no landscape frame sampled sets its hero line at web scale.`);
-  } else {
-    // Only the --hero branch speaks records so far, because it is the only part of this file
-    // author-check consumes before the render exists. The record is the finding and the line is
-    // rendered from it, so the aggregator reads `code` instead of re-reading the sentence
-    // (docs/MISTAKES.md #401). The rest of this file still prints `{kind}` rows post-render.
-    // The glyph is fixed rather than derived: a waived thin-hero has always printed `~ … (waived)`,
-    // never the `○` the shared renderer would reach for, and this change may not move the line.
-    const F = gateFindings({ indent: '  ',
-      line: (r) => `  ~ [${r.code}]${r.waived ? ' (waived)' : ''} ${r.summary}` });
-    for (const i of items) F.warn('thin-hero', `${i.m} f${i.f} ${i.a}${i.t ? ` "${i.t}"` : ''}, ${i.detail}`,
-      { at: { frame: i.f }, ...(i.waived ? { waived: true } : {}) });
-    F.emit();
-  }
-  console.log(`  (hero fill only: 1 of the 19 finding kinds in this file. Every contrast, overlap, clipping`);
-  console.log(`   and safe-zone check still runs post-render, under \`make audit\`.)`);
-  process.exit(0);
-}
 console.log('\n==================== LAYOUT AUDIT ====================');
 let hardTotal = 0, warnTotal = 0;
 for (const r of rows) {
@@ -1752,11 +1635,10 @@ for (const r of rows) {
 console.log(`\noverlays in ${OUT}/ (one PNG per audited scene)`);
 console.log(`${hardTotal ? '✗ ' + hardTotal + ' HARD issue(s)' : '✓ no hard issues'}${warnTotal ? ` · ${warnTotal} warning(s)` : ''}`);
 
-// RECORD WHAT WAS JUST PRINTED, the same VAWE_FINDINGS_OUT channel --hero already writes to below.
-// Only --hero spoke records until now, so a caller waiting on structured findings (make judge) got
-// nothing from a full run: 19 finding kinds measured on real pixels and no way to read them back except
-// re-parsing the prose above. This does not print again, the loop above already did that; it only
-// records what it printed, so the file's exit handler (harness/lib/findings.mjs) can flush it.
+// RECORD WHAT WAS JUST PRINTED, the VAWE_FINDINGS_OUT channel: a caller waiting on structured findings
+// (make judge) got nothing from a full run: 18 finding kinds measured on real pixels and no way to read
+// them back except re-parsing the prose above. This does not print again, the loop above already did
+// that; it only records what it printed, so the file's exit handler (harness/lib/findings.mjs) can flush it.
 const F2 = gateFindings();
 for (const r of rows) {
   for (const i of (r.items || [])) {
