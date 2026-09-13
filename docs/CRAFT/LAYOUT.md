@@ -15,7 +15,7 @@ confirm: "is each frame asymmetric with one hero, not centered with an equal gri
   of frame width with hero text, anchor to edges/thirds, and keep essential content inside the
   title-safe box and out of the caption band.
 - Enforced by `make audit` (codes: `buried`, `clipped-component`, `clipped-text`, `collapsed-image`,
-  `degenerate-pin`, `overflow`, `overlap`, `safe`, `thin-hero`).
+  `degenerate-pin`, `overflow`, `overlap`, `safe`).
 - Checkable action: is each frame asymmetric with one hero, not centered with an equal grid?
 
 Layout is where hand-authored work most often regresses to slop (centered everything, equal card grid). This is
@@ -36,8 +36,7 @@ arguing with these.
   **Do not fix this by widening the text box.** The declared boxes are near right already (70% median) and
   the glyphs fill only 67.5% of them, so the answer is bigger type, not a bigger `w`. The 45-75 character
   measure in §5 below is a BODY rule and no longer applies to display type; see
-  [TYPOGRAPHY.md](TYPOGRAPHY.md) §4 for where the exemption starts. `make audit` warns `thin-hero` on a
-  landscape hero under 55%.
+  [TYPOGRAPHY.md](TYPOGRAPHY.md) §4 for where the exemption starts.
 - **Anchor to edges.** *"Pin content to left/top or right/bottom. Centered-and-floating is a web layout
   pattern."* This is §2 below, stated as an accusation rather than as a tradition.
 - **Three layers minimum per scene.** Background treatment, foreground content, accent elements. This is
