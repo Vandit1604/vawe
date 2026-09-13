@@ -37,9 +37,6 @@
 //   sound. The SILENCE gate: silent:true with no `_why`, an audio block that produces nothing, and
 //               where the bed came from. It ran for months and nothing read it, because it was not a
 //               step here and stated its findings in a shape finding-codes.mjs could not see.
-//   hero. The one LAYOUT finding that can run pre-render: `thin-hero`, via quality/audit.mjs --hero.
-//               Landscape only, and it costs a browser launch (1.4s measured), so it announces the cost
-//               before it pays it. Portrait films are told the rule has nothing to say about them.
 //   treatment: is the film's written rationale current with its storyboard
 //   drift, how many other films excuse the same waiver
 //
@@ -71,7 +68,6 @@ import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { spawnSync } from 'node:child_process';
 import { codeDocMap, docMap } from './doc-map.mjs';
 import { readFindings } from '../../harness/lib/findings.mjs';
-import { sceneDims } from '../../core/layout/safe.js';
 import { LIBRARY } from '../../harness/lib/census.mjs';
 import { isWaivedBy, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
 
@@ -287,8 +283,6 @@ const { declared: declaredSb, candidates: sbCandidates, path: sbPath } = resolve
 const moFails = motionFails(file, scene);
 const sidecarPath = file.replace(/\.json$/, '.intent.json');
 const hasSidecar = fs.existsSync(sidecarPath);
-const [sceneW, sceneH] = sceneDims(scene, '');
-const landscape = sceneW > sceneH;
 
 // ---- THE LADDER, DECLARED BEFORE IT RUNS -------------------------------------------------------------
 // A person watching this needs to know where it is and what is left. So the whole run is listed first,
@@ -314,7 +308,6 @@ const LADDER = [
   ['eye', 'reports', 'where the eye is when a cut lands, and where the next shot sends it'],
   ['sound', 'reports', 'whether this film\'s silence is a decision somebody wrote down'],
   ['assets', strict ? 'blocks' : 'reports', 'every referenced image, icon, capture and voice file exists'],
-  ...(landscape ? [['hero', 'reports', 'whether the hero line is set at video scale (launches a browser)']] : []),
   ...(sbPath ? [['treatment', 'reports', 'whether the written rationale still describes this plan']] : []),
   ['drift', 'reports', 'how many other films excuse the same waivers this one does'],
   // Both of these need the intent sidecar to have a contract to verify. Without one they still run and
@@ -611,35 +604,6 @@ styleGate('eye', 'eye-trace (where the viewer is looking at each cut)', 'quality
 styleGate('sound', 'sound gate (is the silence a decision)', 'quality/gates/audio-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // 4d. assets. The READINESS preflight: every referenced image/icon/capture/vo actually exists on disk.
 { const r = runGate('assets', 'asset preflight (referenced files exist)', 'quality/gates/asset-check.mjs', strict ? ['--strict'] : []); record('assets', r, { waivable: true, exitMeansFail: strict }); }
-
-// 4g. hero fill. The one LAYOUT finding that can be moved before the render.
-//
-// WHY IT WAS LATE. `thin-hero` lives in quality/audit.mjs, which runs under `make audit` after the mp4
-// exists, so a hero line set at web scale was reported once the render had been paid for. Every other
-// rule in that file needs the rendered page for a reason this one shares: it measures INK width, and the
-// declared `w` is not the ink. The audit says so in its own comment, with the numbers: the boxes are
-// about right (70% median) and the glyphs fill 67.5% of them, so a static check on `w` would call the
-// library healthy and report nothing. A weaker approximation would therefore not be a rougher version
-// of this finding, it would be a different and mostly silent one, and a gate that is quiet where the
-// real check is loud is worse than the documented absence.
-//
-// So the PAGE moves earlier, not the rule. `quality/audit.mjs --hero` runs the same browser, the same
-// sampled frames and the same in-page function, with the contrast screenshots and the overlay shot
-// skipped. Measured on argus-launch (23s, 16:9): 4.60s for the full audit, 1.44s for --hero.
-//
-// It REPORTS rather than blocks for the honest reason, and the reason is the cost rather than the noise.
-// DOSE, measured by running --hero over the library: 29 of the 91 landscape scenes carry a thin-hero
-// finding (32%). That is a usable warning rate, well under the "four landscape films in five" the audit's
-// own comment cites, which counted sampled FRAMES under the 60% reference rather than films under the 55%
-// floor with the split-frame exemption applied. It now runs every time, and it announces its cost first,
-// because a step that surprises you with a browser launch is a step you learn to route around.
-// Portrait scenes never reach it: the rule only fires when the frame is wider than it is tall.
-if (landscape) {
-  runGate('hero', 'hero fill (thin-hero, pre-render)', 'quality/audit.mjs', ['--hero'], { slow: true });
-} else {
-  console.log(`\n──────── hero fill (thin-hero) ────────`);
-  console.log(`  ○ portrait canvas (${sceneW}x${sceneH}); thin-hero is a landscape rule and has nothing to say here.`);
-}
 
 // 4e. treatment. The film's own rationale. It REPORTS, always: a treatment is an argument a person
 //     makes, so a gate can only check that one exists and still describes THIS storyboard. It goes
