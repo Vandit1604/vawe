@@ -40,6 +40,16 @@
     "doc": "docs/CRAFT/TRANSITIONS.md#restraint-the-invisible-cut-dominates"
   },
   {
+    "id": "transitions.covered-move",
+    "category": "transitions",
+    "stage": "direct",
+    "applies": "hasBoundaries",
+    "check": "covered-move",
+    "adapt": null,
+    "brief": "A full-bleed layer above must not start mid-move and hide it before it plays",
+    "doc": "docs/CRAFT/TRANSITIONS.md#track-decides-stacking-array-order-breaks-a-tie"
+  },
+  {
     "id": "transitions.flat-seams",
     "category": "transitions",
     "stage": "direct",
