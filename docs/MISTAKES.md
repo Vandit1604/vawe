@@ -2715,3 +2715,15 @@ travel.test.mjs` adds a test on this exact tail asserting the sampled scale neve
 [min, max] to within 1e-9, alongside the existing tests (interior stations stay `through`, velocity stays
 continuous, the wider 2%-tolerance overshoot check) which still pass unchanged.
 holds: core/timeline/sequence.js (tangentAt), core/camera-moves/travel.js, core/camera-moves/travel.test.mjs
+
+## 627. thin-hero measured how large an object was on screen, the class of check this repo refuses
+`thin-hero` (quality/audit.mjs) warned whenever a landscape hero line's ink filled under 55% of frame
+width, alongside its pre-render slice `quality/audit.mjs --hero` run from `author-check`. Both measured
+the same thing #620 already named and removed for `frame-check`'s peak size rule: how big a painted
+object is, not whether the beat lands. The owner rule, stated after that removal, is broader than the
+one case it came from: never gate or report on how large an object is on screen.
+The fix is deletion: `checkThinHero`, `findHero`, `contentSpan`, the `--hero` flag and its whole
+pre-render branch, the `hero` step in `author-check`'s ladder, and every doc line that named `thin-hero`
+as a live rule. The underlying craft guidance, fill the frame, hero text at video scale, stays in
+LAYOUT.md and TYPOGRAPHY.md; only the measurement and the gate step are gone.
+holds: none
