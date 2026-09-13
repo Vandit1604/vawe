@@ -59,6 +59,9 @@ import { dialsOf } from '../../core/registry/props.js';
 import { resolveSpectacle } from '../../core/timeline/spectacle.js';
 import { okDir as seamDir } from '../../core/timeline/seams.js';
 import { produceBaseline } from '../../core/engine/produce.js';
+import { resolveRelativeTimes } from '../../core/timeline/relative-time.js';
+import { expandScene } from '../../core/engine/expand.js';
+import { resolveTempo } from '../../core/engine/tempo.js';
 import { easeErrors, bgErrors, durationWordErrors, cssErrors, authoredJunctionErrors } from '../../core/validate/validate.mjs';
 import { raise as raiseJunction, deepEqual as junctionDeepEqual, migrateOne } from '../../harness/author/migrate-junctions.mjs';
 import { splitWaiver, waiverCovers, isWaivedBy, groupWaivers, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
@@ -8604,6 +8607,86 @@ const FLOOR = 1800;
   }
   ok('group3d push-down: a decaying group blur composes to exactly this frame\'s value, never accumulates',
     decayChild.style.filter === 'none');
+}
+
+// RELATIVE TIME (core/timeline/relative-time.js): resolveRelativeTimes, and its place in
+// core/engine/expand.js's expandScene, BEFORE core/engine/tempo.js's resolveTempo, so an offset
+// authored in the film's real seconds scales like any other authored time instead of landing on top
+// of an already-scaled target.
+{
+  const GRID = 1 / 60;
+  const snap = (v) => Math.round(v / GRID) * GRID;
+
+  // a layer start named relative to another layer's end, plus an offset.
+  const scene1 = { layers: [
+    { id: 'hero', type: 'text', start: 1, duration: 2 },
+    { id: 'b', type: 'text', start: 'hero.end+0.5' },
+  ] };
+  resolveRelativeTimes(scene1);
+  ok('relative-time: layer start resolves off another layer\'s end plus an offset',
+    typeof scene1.layers[1].start === 'number' && approx(scene1.layers[1].start, 3.5));
+
+  // a bare id (no `.end`) means that layer's own start.
+  const scene2 = { layers: [
+    { id: 'a', type: 'text', start: 2 },
+    { id: 'c', type: 'text', start: 'a-0.5' },
+  ] };
+  resolveRelativeTimes(scene2);
+  ok('relative-time: a bare id names that layer\'s start', approx(scene2.layers[1].start, 1.5));
+
+  // a cameraMove start written relative to a layer's end (array-of-specs form and single-spec form).
+  const scene3 = { layers: [{ id: 'reveal', type: 'text', start: 1, duration: 1 }],
+    cameraMove: [{ move: 'slowPush', start: 'reveal.end+0.2', dur: 2, from: 1, to: 1.1 }] };
+  resolveRelativeTimes(scene3);
+  ok('relative-time: cameraMove[].start resolves off a layer\'s end', approx(scene3.cameraMove[0].start, 2.2));
+
+  const scene3b = { layers: [{ id: 'reveal', type: 'text', start: 1, duration: 1 }],
+    cameraMove: { move: 'slowPush', start: 'reveal.end', dur: 2 } };
+  resolveRelativeTimes(scene3b);
+  ok('relative-time: the single-spec cameraMove object form resolves too', approx(scene3b.cameraMove.start, 2));
+
+  // a transition boundary written relative to a layer's end.
+  const scene4 = { layers: [{ id: 'beat1', type: 'text', start: 0, duration: 4 }],
+    transitions: [{ at: 'beat1.end', fx: 'whip' }] };
+  resolveRelativeTimes(scene4);
+  ok('relative-time: transitions[].at resolves off a layer\'s end', approx(scene4.transitions[0].at, 4));
+
+  // unknown id and circular reference keep their named errors.
+  let unknownMsg = '';
+  try { resolveRelativeTimes({ layers: [{ id: 'a', type: 'text', start: 'nope+1' }] }); }
+  catch (e) { unknownMsg = e.message; }
+  ok('relative-time: an unknown id names itself in the error', unknownMsg.includes('"nope"') && unknownMsg.includes('unknown reference'));
+
+  let circularMsg = '';
+  try { resolveRelativeTimes({ layers: [
+    { id: 'x', type: 'text', start: 'y+1' },
+    { id: 'y', type: 'text', start: 'x+1' },
+  ] }); } catch (e) { circularMsg = e.message; }
+  ok('relative-time: a circular reference is refused, not resolved to a guess', circularMsg.includes('circular'));
+
+  // a bg window's own string grammar ("cut@N", core/timeline/junctions.js) is a DIFFERENT mechanism and
+  // untouched here: this resolver must never mistake a junction reference for an unknown layer id.
+  const scene5 = { layers: [{ id: 'hero', type: 'text', start: 0 }], bg: [{ preset: 'plain', from: 'cut@1' }] };
+  resolveRelativeTimes(scene5);
+  ok('relative-time: leaves a bg window\'s junction reference alone (a different grammar, a different owner)',
+    scene5.bg[0].from === 'cut@1');
+
+  // THE ORDERING PROOF: expandScene resolves relative time BEFORE tempo scales it, so the resolved
+  // number scales like any other authored time rather than adding an unscaled offset onto a scaled one.
+  const tempoScene = { tempo: 0.85, layers: [
+    { id: 'hero', type: 'text', start: 1, duration: 2 },
+    { id: 'b', type: 'text', start: 'hero.end+0.5' },
+  ] };
+  const expanded = expandScene(tempoScene);
+  const expectedB = snap(3.5 * (1 / 0.85)); // resolved (3.5) THEN scaled, matching resolveTempo's own snap
+  ok('relative-time + tempo: expandScene resolves the reference before tempo scales the result',
+    typeof expanded.layers[1].start === 'number' && approx(expanded.layers[1].start, expectedB));
+
+  // a numbers-only scene expands byte-identical: nothing here is a string, every branch is a no-op.
+  const plain = { layers: [{ id: 'hero', type: 'text', start: 1, duration: 2 }] };
+  const plainCopy = JSON.parse(JSON.stringify(plain));
+  resolveRelativeTimes(plainCopy);
+  ok('relative-time: a numbers-only scene is untouched', JSON.stringify(plainCopy) === JSON.stringify(plain));
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
