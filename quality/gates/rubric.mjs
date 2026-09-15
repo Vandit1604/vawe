@@ -47,7 +47,7 @@ const DIMENSIONS = [
 const numbered = (list) => list.map((d, i) => `${i + 1}. ${d}`).join('\n');
 
 // The eye is not the first check to look at these pixels. quality/audit.mjs and sweep-static.mjs
-// already measured 19 kinds of defect against this SAME render before this rubric was written; a
+// already measured 18 kinds of defect against this SAME render before this rubric was written; a
 // finding here is a FACT about the frames, not a lead to re-verify by squinting. Grouped by severity so
 // a HARD (ship-blocking) finding cannot hide among warnings, and a waived one still shows, the same
 // "still printed, tagged, and counted separately" rule audit.mjs itself holds for a waiver.

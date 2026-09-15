@@ -2696,7 +2696,7 @@ holds: harness/lib/craft-rules.mjs, harness/lib/finding-codes.mjs, harness/lib/s
 `ease: "through"` (core/timeline/sequence.js, `tangentAt`) gives a `travel` station velocity-continuous
 arrivals by fitting a chordal finite-difference tangent from each key's two neighbours. The tangent was
 never clamped, and `core/camera-moves/travel.js` had already named the gap in a `ponytail:` comment
-without a real film hitting it yet. One did: `formats/scene/vawe-flow-2.json`'s camera `travel` ends in
+without a real film hitting it yet. One did: vawe-flow-2's camera (a local, gitignored scene) `travel` ends in
 stations `s:1.08 -> s:1 -> s:1 -> ...`, all at or above 1. At authored time 11.22s the rig carried
 `translate3d(0px, 0px, -8.95px)`, a scale BELOW every one of those stations, and the stage shrank enough
 to show a 3-5px rim of ground around the frame.
@@ -2715,3 +2715,15 @@ travel.test.mjs` adds a test on this exact tail asserting the sampled scale neve
 [min, max] to within 1e-9, alongside the existing tests (interior stations stay `through`, velocity stays
 continuous, the wider 2%-tolerance overshoot check) which still pass unchanged.
 holds: core/timeline/sequence.js (tangentAt), core/camera-moves/travel.js, core/camera-moves/travel.test.mjs
+
+## 627. thin-hero measured how large an object was on screen, the class of check this repo refuses
+`thin-hero` (quality/audit.mjs) warned whenever a landscape hero line's ink filled under 55% of frame
+width, alongside its pre-render slice `quality/audit.mjs --hero` run from `author-check`. Both measured
+the same thing #620 already named and removed for `frame-check`'s peak size rule: how big a painted
+object is, not whether the beat lands. The owner rule, stated after that removal, is broader than the
+one case it came from: never gate or report on how large an object is on screen.
+The fix is deletion: `checkThinHero`, `findHero`, `contentSpan`, the `--hero` flag and its whole
+pre-render branch, the `hero` step in `author-check`'s ladder, and every doc line that named `thin-hero`
+as a live rule. The underlying craft guidance, fill the frame, hero text at video scale, stays in
+LAYOUT.md and TYPOGRAPHY.md; only the measurement and the gate step are gone.
+holds: none

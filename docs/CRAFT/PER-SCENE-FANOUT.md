@@ -129,9 +129,10 @@ Two things it gets right that are easy to get wrong by hand:
   0.05s longer per caused junction. 0.05s is evidence, not a guess: higgsfield-recreation's own three
   key events land roughly 30ms and 150ms apart. A junction with no stated trigger is left exactly where
   it always was: staging an undocumented cause would be inventing one. `layers[].start` also legally
-  accepts a live relative reference (`"otherId.end+0.5"`, 2 of 120 films used it); `assemble` resolves
-  it to a real second instead, because `quality/gates/beat-check` and `harness/author/motion-director.mjs`
-  both read `start` as a number in places a string breaks (measured: one of them crashes).
+  accepts a live relative reference (`"otherId.end+0.5"`, 2 of 120 films used it), same for
+  `transitions[].at` and `cameraMove[].start`; core/timeline/relative-time.js resolves it to a real
+  number at load (`core/engine/expand.js`, before `resolveTempo`), so every gate reads a plain number
+  and `assemble` no longer needs to pre-resolve it for them.
 
 `assemble` deliberately does nothing else: no camera, no captions, no authored `cuts`/`sceneUnits`
 beyond the two lines above. Everything past that is the engine's, or the next author's, to add.

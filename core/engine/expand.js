@@ -30,6 +30,7 @@ import { frameOf } from '../layout/safe.js';
 import { lowerScene } from '../transitions/lower.js';
 import { expandRecipes } from '../../recipes/expand.mjs';
 import { resolveTempo } from './tempo.js';
+import { resolveRelativeTimes } from '../timeline/relative-time.js';
 
 // An AUTHOR NOTE is not an unknown-prop finding. This repo writes notes as `_`-prefixed keys everywhere
 // (`_why`, `_template`, `_camera`); `note` is the one un-prefixed alias already in use.
@@ -134,6 +135,11 @@ export function expandScene(data, aspectKey = '') {
     Object.assign(data, expandRecipes(data, aspectKey));
     delete data.recipes;
   }
+
+  // RELATIVE TIME ("otherId+0.5", "otherId.end-0.2"), resolved to a plain number BEFORE tempo below:
+  // an offset is authored in the film's real seconds, so it must scale like any other authored time,
+  // not get added on top of an already-scaled target. core/timeline/relative-time.js.
+  resolveRelativeTimes(data);
 
   // TEMPO, the one global pace dial. Resolved AFTER blocks/beats/comps/recipes have produced their
   // final concrete times, and BEFORE the camera bake below, so a scaled cameraMove leg (still sugar

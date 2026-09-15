@@ -116,8 +116,8 @@ const tiles = mids.map((m, i) => frameTile(mp4, m.t, path.join(dir, `f${String(i
   { tw: TW, th: TH, label: m.label }));
 tileGrid(tiles, { cols: landscape ? 2 : 3, tw: TW, th: TH, out: `${dir}/sheet.png` });
 
-// MEASURED FINDINGS, HANDED TO THE EYE. quality/audit.mjs measures 19 kinds of pixel defect (overlap,
-// clipped text, off-frame, low contrast, thin-hero, ...) against these SAME rendered frames, and
+// MEASURED FINDINGS, HANDED TO THE EYE. quality/audit.mjs measures 18 kinds of pixel defect (overlap,
+// clipped text, off-frame, low contrast, ...) against these SAME rendered frames, and
 // sweep-static.mjs measures whether the pixels ever move; `make ship` already pays for both and neither
 // one's output ever reached this rubric, so the agent scored against a blank card next to findings a
 // script had already made (one real overlap shipped this way). Reuse VAWE_FINDINGS_OUT, the channel

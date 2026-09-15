@@ -14,7 +14,7 @@ confirm: "which face was chosen for its personality, and does the size scale hol
 - Run `make brandspec URL=…` (or `make fonts-discover` with no site) BEFORE picking a face or a
   weight; never guess. Pick 1-3 faces with roles (primary/secondary/accent), pair for contrast not
   conflict, and size hero type to fill 60-80% of frame width, not a web-sized box.
-- Enforced by `make audit` (`off-font`, `weak-headline`, `thin-hero`) and `make designspec-check`
+- Enforced by `make audit` (`off-font`, `weak-headline`) and `make designspec-check`
   (overused-face detection).
 - Checkable action: which face was chosen for its personality, and does the size scale hold across
   beats?
@@ -72,7 +72,7 @@ before you argue with any of it.
   fall below the 60% floor** (1090 samples across 88 landscape scenes; `[data-layer="critical"]` ink width
   against frame width, sampled 14 frames per scene). That is not a house style anybody chose: it is §4's
   measure rule applied to display type, which §4 now exempts. **Portrait is already in band at a 66.4%
-  median, so this is a landscape problem.** `make audit` warns on it (`thin-hero`).
+  median, so this is a landscape problem.**
 - **Tracking tighter than web.** Their number is **-0.03em to -0.05em** on display sizes, against the
   -0.02 to -0.03 in §4 below. Video encoding compresses letter detail. Theirs is the more extreme claim
   and it is theirs, not a measurement of ours; §4 stays as written until somebody measures it here.
@@ -172,9 +172,7 @@ Pick a ratio, hand-pick ~5 sizes, reuse them. Don't use every step.
     over the library, landscape hero ink sits at a **40.4% median** with **82.9% of sampled frames under
     the 60% floor** (1090 samples, 88 landscape scenes). The declared boxes are close to right at a 70%
     median; the GLYPHS fill only 67.5% of them. So the fix is rarely a wider `w`. It is bigger type.
-  - **The two rules never both apply to one layer, so neither excuses the other.** `make audit` reports a
-    landscape hero under 55% frame fill as a `thin-hero` warning. It warns and never blocks, because four
-    landscape films in five currently trip it.
+  - **The two rules never both apply to one layer, so neither excuses the other.**
 
 ## 4b. The face must actually LOAD (engine gotcha)
 Referencing a face isn't enough. It must be **loaded before the first frame** or it silently falls back
