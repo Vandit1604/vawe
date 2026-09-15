@@ -63,7 +63,9 @@ function resolveSrc(src, formatDir, repoRoot) {
 // A SOURCE WITH NO AUDIO TRACK IS NORMAL IN AN EDIT, not an error. B-roll, a screen capture and a
 // generated clip all carry video only, and asking ffmpeg for their audio fails the whole render in the
 // pre-pass. Measured: 5 of 6 clips in one film had no audio stream. Ask first, skip with a line.
-function hasAudioStream(src) {
+// Exported so harness/media/ingest.mjs can ask the same question of a whole source file (not just a
+// clip layer's slice of one) without a second ffprobe incantation.
+export function hasAudioStream(src) {
   const r = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'a',
     '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', src], { encoding: 'utf8' });
   return r.status === 0 && /audio/.test(r.stdout || '');
