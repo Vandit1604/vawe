@@ -36,10 +36,10 @@ make reveal D=formats/scene/<film>.json    # per beat: the ENTER arc, settled, t
 ```
 
 Then **READ the sheets**. Producing an image is not looking at one. Score every frame on the seven
-dimensions in `docs/JUDGE.md` (readability · hierarchy · composition · brand fidelity · asset fidelity ·
+dimensions in `engine-doctrine/JUDGE.md` (readability · hierarchy · composition · brand fidelity · asset fidelity ·
 produced-not-generated · value), 1 to 5, and write the issue AND the fix for anything at 3 or below.
 
-For a full pass, launch the critics from `docs/CRAFT/SUBAGENTS.md` in PARALLEL, one job each:
+For a full pass, launch the critics from `engine-doctrine/CRAFT/SUBAGENTS.md` in PARALLEL, one job each:
 **beat · bg-motion · reveal · fidelity · copy · seam**. Each gets one input path and returns a fixed
 verdict shape. Overkill for a one-line tweak; required for anything you intend to ship.
 
@@ -50,7 +50,7 @@ the one read that cannot be trusted to fail it: a judge scoring its own lineage 
 that is not a character flaw, it is a measured bias. It is why hinge-v1, a slideshow, was recorded PASS
 by the agent that wrote it. So before `make judge --verdict PASS`, hand `/tmp/judge/<name>/sheet.png` and
 the rubric to a SEPARATE critic (a fresh subagent that did not author the film: the fidelity and beat
-critics in `docs/CRAFT/SUBAGENTS.md`), and record PASS only when that independent eye agrees. A FIX from
+critics in `engine-doctrine/CRAFT/SUBAGENTS.md`), and record PASS only when that independent eye agrees. A FIX from
 either eye keeps the loop open.
 
 ## The stopping rule
@@ -70,7 +70,7 @@ Two guards on the rule, both learned here the hard way:
 and record why. A round must never trade a good frame for a fixed one, and without this the loop happily
 oscillates forever.
 
-**The gate-is-wrong guard.** CLAUDE.md, `docs/MISTAKES.md` #211: *when satisfying a gate requires making
+**The gate-is-wrong guard.** CLAUDE.md, `engine-doctrine/MISTAKES.md` #211: *when satisfying a gate requires making
 the film worse, suspect the gate.* If a fix means shrinking, recentring or deleting something you can see
 is right, stop and read what the gate actually measures. A gate that measures the wrong thing does not
 miss defects, it manufactures them, and the author pays by deforming a good design until a number moves.
@@ -96,7 +96,7 @@ Rank by what the viewer notices, not by what is easy:
 2. **A seam that flashes.** `make seam-check` finds it; it is the worst defect per unit of effort.
 3. **A beat with no focal point.** The eye does not know where to land.
 4. **A beat that is only type.** Ask what it could SHOW: a bar whose length IS the number, the real
-   product surface, a diagram. `docs/CRAFT/SHOW-DONT-TELL.md`.
+   product surface, a diagram. `engine-doctrine/CRAFT/SHOW-DONT-TELL.md`.
 5. **A dead backdrop.** Most films in this library paint one window for the whole runtime. Bind windows
    to the cuts and the world turns with the edit.
 6. **Copy tells.** Weak hook, restated headline, marketing jargon, a big number set as flat text.

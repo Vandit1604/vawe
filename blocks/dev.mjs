@@ -44,7 +44,7 @@ export const CODE_THEMES = {
 // content is not a document, mono for figures/output, sans stays out entirely (this family has none),
 // one accent hue at two weights for state (diff bands, the lit accent hash, tinted success). MOTION
 // restrained: `parts` staggers a family's own rows/lines where it already did as native text, a
-// single-unit card keeps its envelope `anim`. docs/CRAFT/HTML-FRAGMENTS.md.
+// single-unit card keeps its envelope `anim`. engine-doctrine/CRAFT/HTML-FRAGMENTS.md.
 
 // codeBlock: a code card. `lines` are strings OR {text,color} for syntax colour. Optional `theme`
 // names a CODE_THEMES palette; it overrides dark/light, and lines that don't bring a colour get the

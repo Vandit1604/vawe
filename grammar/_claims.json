@@ -25,7 +25,7 @@
   {
    "id": "beat-length",
    "claim": "Our films sit at 2.5 to 4 seconds a beat.",
-   "source": "docs/CRAFT/FILM-STRUCTURE.md Q4",
+   "source": "engine-doctrine/CRAFT/FILM-STRUCTURE.md Q4",
    "metric": "declaredBeat",
    "op": "within",
    "lo": 2.5,
@@ -54,7 +54,7 @@
   {
    "id": "cuts-are-rare",
    "claim": "Cuts are a last resort: the strongest reference films are built on travel, not on cutting.",
-   "source": "docs/CRAFT/REF-together-chat.md",
+   "source": "engine-doctrine/CRAFT/REF-together-chat.md",
    "metric": "cutsPerMinute",
    "op": "atMost",
    "value": 12,

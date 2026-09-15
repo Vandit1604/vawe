@@ -1,12 +1,12 @@
 // harness/author/mistakes-compact.mjs: ONE-TIME migration, kept for the record.
 //
-// docs/MISTAKES.md was 17,797 lines and 569 entries. Nobody could read that; `mistakes.mjs`'s own
+// engine-doctrine/MISTAKES.md was 17,797 lines and 569 entries. Nobody could read that; `mistakes.mjs`'s own
 // header argued against compressing it, on the theory that the reasoning IS the value. The owner
 // overruled that: a file nobody reads preserves nothing, so the working copy becomes a three-line
 // index (title, the one-sentence lesson, what holds it now) and the full reasoning for every entry
 // moves into git history, retrievable on demand by number.
 //
-// Run once: `node harness/author/mistakes-compact.mjs`. It reads the CURRENT docs/MISTAKES.md,
+// Run once: `node harness/author/mistakes-compact.mjs`. It reads the CURRENT engine-doctrine/MISTAKES.md,
 // writes the compact version in place, and prints the archive hash to paste into mistakes.mjs's
 // ARCHIVE_HASH constant (must be the commit made BEFORE this migration's own commit).
 import fs from 'node:fs';
@@ -15,7 +15,7 @@ import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const FILE = path.join(ROOT, 'docs/MISTAKES.md');
+const FILE = path.join(ROOT, 'engine-doctrine/MISTAKES.md');
 
 const ARCHIVE_HASH = execSync('/usr/bin/git rev-parse HEAD', { cwd: ROOT }).toString().trim();
 
@@ -127,7 +127,7 @@ or "none" if it is still just a sentence someone has to remember).
 
 The full write-up for any entry, root cause and all, still exists: it is git history as of
 ${ARCHIVE_HASH}. Read one with \`make mistakes N=<n> FULL=1\`. A citation elsewhere in the repo
-(\`docs/MISTAKES.md #N\`) still resolves here by number; nothing renumbers.
+(\`engine-doctrine/MISTAKES.md #N\`) still resolves here by number; nothing renumbers.
 
 New incidents: add a rule or a gate message first. Only add a line here if nothing else can hold
 the lesson yet.

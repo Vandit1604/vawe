@@ -1,5 +1,5 @@
 // core/timeline/clips.test.mjs: the runnable self-check for the "one clock per layer, no default
-// fade-out" fix (docs/MISTAKES.md #574, #575). Pure-JS, no DOM: exitDurOf and clipStyleAt read only
+// fade-out" fix (engine-doctrine/MISTAKES.md #574, #575). Pure-JS, no DOM: exitDurOf and clipStyleAt read only
 // `el.dataset`, so a plain object stands in for an element.
 //   node core/timeline/clips.test.mjs
 import assert from 'node:assert/strict';

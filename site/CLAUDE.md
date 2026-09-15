@@ -5,7 +5,7 @@ CSS, not written as an aspiration, so it describes what the site IS. Read it fir
 if you change the system, change it there too.
 
 The root `CLAUDE.md` governs the video engine. It has nothing to say about this Next app, and the
-film-craft doc map (`docs/INDEX.md`) deliberately does not index `DESIGN.md`, because a token table
+film-craft doc map (`engine-doctrine/INDEX.md`) deliberately does not index `DESIGN.md`, because a token table
 for a marketing site answers none of that map's questions. This file is how you find it instead.
 
 ## The five rules a contributor breaks first

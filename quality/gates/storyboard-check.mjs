@@ -7,13 +7,13 @@
 //
 // Under ~15s it also asks the plan to NAME WHAT HOLDS THE FILM, because a short film planned as
 // independent beats is a slideshow on paper and the scene gate can only find that out after the JSON
-// exists. It takes either answer: `threads:` names devices from docs/CRAFT/FILM-STRUCTURE.md (a match
+// exists. It takes either answer: `threads:` names devices from engine-doctrine/CRAFT/FILM-STRUCTURE.md (a match
 // cut, a camera travel, a motif, a bookend, a metric cut rate, an unfinished sentence), and `object:`
 // names the one device the scene-side gate can also see. It used to demand `object:` and nothing else,
 // which enforced the register Murch ranks last and made every other way of holding a film unwritable.
 //
 //   node quality/gates/storyboard-check.mjs path/to/STORYBOARD.md   ·   make storyboard-check SB=<file>
-//   Template: docs/CRAFT/STORYBOARD-TEMPLATE.md
+//   Template: engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,7 +29,7 @@ import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const f = process.argv.slice(2).find((a) => !a.startsWith('--'));
-if (!f || !fs.existsSync(f)) { console.error('usage: storyboard-check <STORYBOARD.md>  (template: docs/CRAFT/STORYBOARD-TEMPLATE.md)'); process.exit(2); }
+if (!f || !fs.existsSync(f)) { console.error('usage: storyboard-check <STORYBOARD.md>  (template: engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md)'); process.exit(2); }
 const src = fs.readFileSync(f, 'utf8');
 
 const gf = gateFindings();
@@ -79,7 +79,7 @@ for (const k of ['audience', 'arc', 'format', 'duration']) if (!field(k)) warn('
 // ── WHAT HOLDS THE FILM: required on short films ──────────────────────────────────────────────────
 // A film under ~15s has no room for chapters, so something has to carry the viewer across the cuts, and
 // the plan is where that gets decided. TWO ANSWERS ARE ACCEPTED and they are not ranked. `threads:` names
-// devices from docs/CRAFT/FILM-STRUCTURE.md; `object:` names a continuous object, the one device the
+// devices from engine-doctrine/CRAFT/FILM-STRUCTURE.md; `object:` names a continuous object, the one device the
 // scene-side gate can measure, and the one Murch's Rule of Six ranks last of six. Demanding `object:`
 // alone made a manifesto, an anthology, a comparison and a metric-cut film unplannable here.
 //
@@ -93,10 +93,10 @@ const shortFilm = durSec != null && durSec < SPINE_MAX_S;
 const hasObject = !!field('object');
 const hasThreads = !!field('threads');
 if (shortFilm && !hasObject && !hasThreads) {
-  err('no-holding-device', `this is a ${durRaw} film and the frontmatter names neither \`threads:\` nor \`object:\`, NAME WHAT HOLDS THIS FILM. Under ${SPINE_MAX_S}s there is no room for chapters, so a film whose beats are islands is a slideshow. Write \`threads:\` naming two devices from docs/CRAFT/FILM-STRUCTURE.md (a match cut · a camera travel · a motif · a bookend · a metric cut rate · an unfinished sentence · an open question · a transforming object). If one of them is a continuous object, name it as \`object:\` too and the scene-side gate can check it.`);
+  err('no-holding-device', `this is a ${durRaw} film and the frontmatter names neither \`threads:\` nor \`object:\`, NAME WHAT HOLDS THIS FILM. Under ${SPINE_MAX_S}s there is no room for chapters, so a film whose beats are islands is a slideshow. Write \`threads:\` naming two devices from engine-doctrine/CRAFT/FILM-STRUCTURE.md (a match cut · a camera travel · a motif · a bookend · a metric cut rate · an unfinished sentence · an open question · a transforming object). If one of them is a continuous object, name it as \`object:\` too and the scene-side gate can check it.`);
 }
 if (shortFilm && !hasThreads && hasObject) {
-  warn('single-thread', 'one thread only: `object:` names a continuous object and nothing else. A single thread has to be literal and obvious to work, which is how a film ends up as a resizing box. Add `threads:` with a second device (docs/CRAFT/FILM-STRUCTURE.md).');
+  warn('single-thread', 'one thread only: `object:` names a continuous object and nothing else. A single thread has to be literal and obvious to work, which is how a film ends up as a resizing box. Add `threads:` with a second device (engine-doctrine/CRAFT/FILM-STRUCTURE.md).');
 }
 if (shortFilm && hasObject) for (const k of ['object_t0', 'object_states', 'object_last']) {
   if (!field(k)) warn('missing-object-field', `missing \`${k}:\`. A declared object spine needs the object's state at t=0, at each cut, and at the last frame (the payoff, or the moment before it).`);
@@ -140,7 +140,7 @@ for (const e of cameraContinuityErrors(sbBeats)) err('camera-snap-at-seam', e);
 for (const w of cameraStillHeldWarnings(sbBeats)) warn('camera-still-held', w);
 for (const e of transitionInErrors(sbBeats)) err('transition-in-unknown', e);
 for (const w of transitionInWarnings(sbBeats)) warn('transition-in-undecided', w);
-// `transition_why` runs the decision procedure's own questions per boundary (docs/CRAFT/
+// `transition_why` runs the decision procedure's own questions per boundary (engine-doctrine/CRAFT/
 // TRANSITIONS.md), report-only: a bad shape is an error (it will never parse), the three coverage/
 // reasoning findings are warnings, because the field is new and a blocker here would fail every
 // storyboard written before it existed.
@@ -162,7 +162,7 @@ const useCorpus = await arsenalCorpus();
 for (const e of useErrors(sbBeats, useCorpus)) err('use-unresolved', e);
 for (const w of useWarnings(sbBeats, useCorpus)) warn('use-prose', w);
 
-// ── THE EYE: does the plan say where attention goes, per the owner's own framing (docs/CRAFT/
+// ── THE EYE: does the plan say where attention goes, per the owner's own framing (engine-doctrine/CRAFT/
 // DIRECTION.md, "Directing the eye") - every device exists to point the eye somewhere, and naming the
 // device without naming its target is not a plan. WARN, never a blocker: `eye:` is a new field and a
 // blocker here would fail every storyboard written before it existed.
@@ -183,13 +183,13 @@ sbBeats.forEach((b, i) => {
   if (competing) {
     warn('eye-competing-focal-points', `beat ${i + 1} (${b.name}) eye: "${b.eye}" pulls toward `
       + `${competing.join(' and ')} with no stated order between them. Material's own choreography rule: `
-      + '"maintain a clear focal point during transitions" (docs/MOTION-CRAFT.md). Say which pulls '
+      + '"maintain a clear focal point during transitions" (engine-doctrine/MOTION-CRAFT.md). Say which pulls '
       + 'first with "then"/"before"/"after", or drop one.');
   }
 });
 
 // ── PLAIN CONTENT: a beat that draws a screen/window/app/UI and names no real source for it ────────
-// docs/CRAFT/CONTENT.md: real content (a capture, a real photo, a screen designed for the video) is
+// engine-doctrine/CRAFT/CONTENT.md: real content (a capture, a real photo, a screen designed for the video) is
 // what makes a beat DENSE where the reference is dense; a beat that only DESCRIBES a screen and stops
 // is the grey mock the owner named directly ("their content is designed for the video; ours is
 // plain"). WARNING ONLY: a storyboard is legitimately written before design time picks the real
@@ -228,14 +228,14 @@ function plainContentWarning(b, title) {
   }
   if (/^photo$/i.test(noun)) {
     warn('plain-content', `beat "${title}": names a photo with no real source stated. Get a real one: `
-      + '`make photos` (docs/CRAFT/IMAGERY.md), never an invented image.');
+      + '`make photos` (engine-doctrine/CRAFT/IMAGERY.md), never an invented image.');
     return;
   }
   warn('plain-content', `beat "${title}": names a ${noun.toLowerCase()} but no real source is stated (no `
     + '`fragment:` file that exists on disk, no assets/ or .vawe-data/uploads/ path, no capture/sections/screen '
     + 'mention). A real screen already exists? `make capture` or `make sections URL=<site>`. Otherwise design one '
     + 'for this beat: `make screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [REF=<ref> ACT=<n>] '
-    + '[THEME=<name>]` (docs/CRAFT/SCREENS.md).');
+    + '[THEME=<name>]` (engine-doctrine/CRAFT/SCREENS.md).');
 }
 
 // ── the vocabulary that separates a MECHANISM from a TRANSFORMATION ──────────────────────────────
@@ -255,7 +255,7 @@ const CHANGE_VERB = /(becomes?|turns? into|opens? into|collapses?|morphs?|splits
 // A film where every beat has a `becomes:` and no beat is caused by the one before it is a run of
 // unrelated changes, which is the slideshow failure read off the plan instead of off the render.
 // `no-continuous-object` cannot see this: it measures a prop surviving a junction, which is spatial,
-// and a cause is not spatial. Named `trigger` because docs/CRAFT/TRANSITIONS.md already calls it that
+// and a cause is not spatial. Named `trigger` because engine-doctrine/CRAFT/TRANSITIONS.md already calls it that
 // ("motion that emerges from a real trigger, a whip, a touch point"); `because` was rejected for
 // colliding with `why:`, which asks the beat's narrative job and is a third question again.
 //
@@ -333,7 +333,7 @@ for (const b of blocks) {
     // ── THE PICTURE'S OWN DECISIONS ──────────────────────────────────────────────────────────────
     // `picture:` and `style:` are prose, and prose is where the wrong object hides: a beat that
     // described "a white pill bar with a round cobalt run button" passed every check while drawing an
-    // AI chat input into a film about a command line (docs/MISTAKES.md #596). These three fields are
+    // AI chat input into a film about a command line (engine-doctrine/MISTAKES.md #596). These three fields are
     // closed vocabularies precisely so a gate can disagree with them.
     //
     // PRESENCE ONLY, AND ONLY WHEN DECLARED. A film written before these existed still passes: this

@@ -113,7 +113,7 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 		// assets/music/<name>.wav, the same place `make audio`/`make music-pack` write and the same
 		// rule core/validate.mjs checks. Without this, a named bed matched nothing and dropped to
 		// silence with no error: a silent substitution the validator wrongly reported as fine
-		// (docs/MISTAKES.md #132). A real path ("assets/music/lofi.wav") resolves directly and never
+		// (engine-doctrine/MISTAKES.md #132). A real path ("assets/music/lofi.wav") resolves directly and never
 		// hits the fallback.
 		fallback := ""
 		if !strings.ContainsAny(cfg.Music, "/\\") && filepath.Ext(cfg.Music) == "" {
@@ -152,7 +152,7 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 	// reached the mix, so the field did nothing except let an auto-discovered assets/sting.wav force a
 	// silent audio track onto a scene that asked for none. No scene sets it, and what a "sting file"
 	// should mean is ambiguous now that scene.html emits per-sting `reveal` cues into the sfx list.
-	// Removed rather than left as config that reads as intent (docs/MISTAKES.md #70).
+	// Removed rather than left as config that reads as intent (engine-doctrine/MISTAKES.md #70).
 	if musicFile == "" && voFile == "" && len(sfx) == 0 && len(bridges) == 0 {
 		return false, nil
 	}
@@ -294,7 +294,7 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 	for _, cue := range sfx {
 		// SYNTHESIS LIVES IN JS, in core/audio-kit.mjs, which is the framework's own audio engine and
 		// bakes every cue to assets/sfx via `make audio`. A second synthesiser briefly lived here and
-		// was retired: one fact with two owners (docs/MISTAKES.md #492).
+		// was retired: one fact with two owners (engine-doctrine/MISTAKES.md #492).
 		label := cue.Name
 		clip := loadSfx(cue.Name)
 		if clip == nil {

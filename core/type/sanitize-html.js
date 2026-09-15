@@ -8,7 +8,7 @@
 //
 // The renderer serves the scene over a static file server rooted at the repo, so an
 // <iframe src="/docs/…"> renders a private server file INTO the video and hands it back. That was not
-// theoretical: it was demonstrated, and it read docs/MISTAKES.md out of a draft.
+// theoretical: it was demonstrated, and it read engine-doctrine/MISTAKES.md out of a draft.
 //
 // WHAT THIS FILE IS NOT, said here because the absence of the sentence is the hazard. It is a
 // DETERMINISM filter and an embedding filter. It is not, and cannot be, a defence against the markup
@@ -41,7 +41,7 @@ const isServedPath = (p) => {
 // `<iframe src="/docs/…">`. An absolute path INSIDE a served root (`/assets/vawe-flow-2/frame.jpg`) is
 // not an escape, it is the documented way to reference a captured asset from hand-authored markup, and
 // stripping it left every such `<img>` with no `src` at all: an empty element painting nothing over
-// whatever sits behind it, which read as a solid black frame (docs/MISTAKES.md). Relative asset paths
+// whatever sits behind it, which read as a solid black frame (engine-doctrine/MISTAKES.md). Relative asset paths
 // were already untouched; this only stops treating a served absolute path the same as a real escape.
 const ESCAPING_URL = /\s(src|href|data|srcset|action|formaction)\s*=\s*("|')?\s*((?:[a-z][a-z0-9+.-]*:|\/\/|\/)[^"'\s>]*)\2?/gi;
 const stripEscapingUrls = (src) => src.replace(ESCAPING_URL, (whole, attr, quote, url) =>
@@ -53,14 +53,14 @@ const ON_HANDLER = /\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi;
 // the real element after it: a comment saying "a <style> block gets no such check" made STYLE_BLOCK
 // match from the COMMENT to the first real `</style>`, so the fragment's whole stylesheet and the
 // opening tag of its root div were swallowed into a `@scope {…}` block and the panel rendered as
-// unstyled text on nothing, with no error anywhere (docs/MISTAKES.md #548). Comments paint no pixels,
+// unstyled text on nothing, with no error anywhere (engine-doctrine/MISTAKES.md #548). Comments paint no pixels,
 // so dropping them first is free, and it disarms EMBED and ESCAPING_URL in the same stroke.
 const COMMENT = /<!--[\s\S]*?-->/g;
 // A CSS BLOCK COMMENT IS PROSE TOO, and the same argument applies to it exactly. `timeCssUsed` strips
 // comments before looking for `animation`/`transition` precisely so a note explaining the rule is not
 // read as a breach of it, and it did that only for HTML comments: a fragment whose stylesheet carried
 // `/* ... never a CSS animation: mod() gives a square wave ... */` was refused by the validator FOR THE
-// SENTENCE SAYING IT DOES NOT DO THE THING (docs/MISTAKES.md #602). Stripped here rather than at each
+// SENTENCE SAYING IT DOES NOT DO THE THING (engine-doctrine/MISTAKES.md #602). Stripped here rather than at each
 // call site, because every reader of this file wants the same thing: the declarations, not the prose.
 const CSS_COMMENT = /\/\*[\s\S]*?\*\//g;
 /** A fragment's markup with its author notes removed. ONE owner: the three readers below share it. */
@@ -78,7 +78,7 @@ export function sanitizeHtml(src) {
 // lands in the DOCUMENT, not in the layer, so two `html` layers that happen to share a class name fight
 // and the LATER stylesheet silently wins on every frame. That cost an author three rounds: a card set to
 // 40px rendered at 25px because a smaller copy of the same card, later in paint order, declared the same
-// class (docs/MISTAKES.md #425). Same global namespace, last one wins, nothing said a word.
+// class (engine-doctrine/MISTAKES.md #425). Same global namespace, last one wins, nothing said a word.
 //
 // A prelude-less `@scope { … }` limits the block to the subtree of the style element's PARENT, which is
 // why the blocks are HOISTED to the front of the fragment first: the caller drops the result straight
@@ -124,7 +124,7 @@ export function htmlSource(o, table, where) {
 // The failure that makes this worth a named check: hand-authored CSS animation does not error, it does
 // nothing. The fragment animates perfectly in a browser, renders as a dead still in the mp4, and the
 // author has no way to find out why. Silent substitution is the worst failure mode this codebase has
-// (docs/MISTAKES.md), so the authoring gate names it and points at what does work: `var(--t)` (seconds),
+// (engine-doctrine/MISTAKES.md), so the authoring gate names it and points at what does work: `var(--t)` (seconds),
 // written every frame, and `var(--p)`, 0→1 across the window, but ONLY if the layer DECLARES it:
 //   "vars": { "--p": [0, 1] }, "varsDur": 1.5, "varsDelay": 0.12, "varsEase": "easeOutQuart"
 // Without that declaration `--p` is simply undefined, `var(--p, 1)` falls back to 1, and the fragment

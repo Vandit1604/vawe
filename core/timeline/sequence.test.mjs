@@ -61,7 +61,7 @@ assert.ok(KEYFRAME_PROPS.includes('radius'), 'KEYFRAME_PROPS carries `radius`, g
 
 console.log('✓ sequence.test.mjs: radius joins POSE, interpolates, leaves an unkeyed layer untouched, and the button reaches pill then circle');
 
-// ---- ANGULAR VELOCITY (`omega`), the half `squash` could not see (docs/MISTAKES.md #588) ----
+// ---- ANGULAR VELOCITY (`omega`), the half `squash` could not see (engine-doctrine/MISTAKES.md #588) ----
 // A layer that only turns has zero dx/dy by construction, so `speed` reads 0 however fast it spins.
 {
   const kfs = [{ t: 0, x: 0 }, { t: 1, x: 300, ease: 'linear' }];

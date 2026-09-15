@@ -21,7 +21,7 @@ concept: rhymed · warm (dark)
 - type: hook
 - object: <what carries the match cut at this beat>
 - picture: a hand-built timeline drawn as stacked bars, lit from one side, most of the frame empty and dark
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: You built it <b>by hand</b>,
 - narration: You built it by hand,
@@ -32,7 +32,7 @@ concept: rhymed · warm (dark)
 - type: build
 - object: <what carries the match cut at this beat>
 - picture: <what this beat SHOWS, not what it says>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
 - why: <why this beat earns its seconds>
@@ -42,7 +42,7 @@ concept: rhymed · warm (dark)
 - type: proof
 - object: <what carries the match cut at this beat>
 - picture: the finished thing on a bright workbench, warm and settled, nothing wrong with it
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: and it <b>looked good</b>,
 - narration: and it looked good,
@@ -53,7 +53,7 @@ concept: rhymed · warm (dark)
 - type: build
 - object: <what carries the match cut at this beat>
 - picture: <what this beat SHOWS, not what it says>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
 - why: <why this beat earns its seconds>
@@ -63,7 +63,7 @@ concept: rhymed · warm (dark)
 - type: proof
 - object: <what carries the match cut at this beat>
 - picture: one figure ticking over and every bar around it going out of alignment, lit red
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: until the <b>number moved</b>,
 - narration: until one number moved,
@@ -74,7 +74,7 @@ concept: rhymed · warm (dark)
 - type: build
 - object: <what carries the match cut at this beat>
 - picture: a wall of identical days with the same task written on every one of them
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: and now it is <b>Friday</b> again.
 - narration: and now it is Friday again.
@@ -85,7 +85,7 @@ concept: rhymed · warm (dark)
 - type: proof
 - object: <what carries the match cut at this beat>
 - picture: <what this beat SHOWS, not what it says>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
 - why: <why this beat earns its seconds>
@@ -95,7 +95,7 @@ concept: rhymed · warm (dark)
 - type: payoff
 - object: <what carries the match cut at this beat>
 - picture: a single file, small and still, with the whole wall of days collapsing into it
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <b>Describe it once.</b>
 - narration: So describe it once instead.

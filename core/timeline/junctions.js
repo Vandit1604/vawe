@@ -9,7 +9,7 @@
 // one went blind. `brew-launch-act1` is the case that prompted it: its backdrop cuts per beat, which is
 // the film's main structural device, and every boundary was written TWICE, once in `bg`, once in
 // `transitions`, with nothing keeping them equal. Move one and the register change silently detaches
-// from the junction that was punctuating it. docs/MISTAKES.md #358.
+// from the junction that was punctuating it. engine-doctrine/MISTAKES.md #358.
 //
 //   "cut@0" · "seam@2" · "sting@1" · "junction@3"   (junction = all kinds, merged and time-ordered)
 
@@ -73,7 +73,7 @@ export function resolveJunction(ref, table, where = 'junction reference') {
  * It applies ONLY when there are 2+ windows and not one of them declares an edge, which is today a
  * SILENT BUG rather than a style: every window defaults to 0..1e9, `bgWinAt` keeps the last match, so
  * all but the final window are accepted and then never drawn. Input taken and discarded is the failure
- * this codebase hates most (docs/MISTAKES.md #213, #369). A single window still means "the whole film",
+ * this codebase hates most (engine-doctrine/MISTAKES.md #213, #369). A single window still means "the whole film",
  * and any window that names an edge still means exactly what it said.
  */
 export function bindWindowsToJunctions(windows, table, duration = Infinity) {
@@ -173,7 +173,7 @@ export function inferCuts(layers, duration = Infinity) {
 // occupy the same pixels reads muddy. Those are true or false, not a matter of taste. CHOOSING among
 // what survives that narrowing never reaches past the two names the THEME already picked
 // (`look.cuts.default`/`look.cuts.accent`) plus the doctrine's own unconditional fallback, the hard
-// cut (`docs/CRAFT/TRANSITIONS.md`: "if a seam can't answer with a real relationship or feeling, it is
+// cut (`engine-doctrine/CRAFT/TRANSITIONS.md`: "if a seam can't answer with a real relationship or feeling, it is
 // a hard cut"). The engine narrows a set someone else supplied; it never invents a name into it.
 const RAPID_JOINT_S = 1.6; // joints closer together than this stay in one cut family (rhythm)
 const VELOCITY_FLOOR = 200; // px/s; cutVelocityAdvice's own floor for "this is a move, not drift"
@@ -331,7 +331,7 @@ export function classifyJoint(t, layers, { cuts = {}, bg = null, layerSpeedAt = 
   } else {
     chosen = compatible.includes('none') ? 'none' : compatible[0];
   }
-  if (!why.length) why.push('no relationship or feeling crosses this joint (docs/CRAFT/TRANSITIONS.md): the doctrine default, a hard cut');
+  if (!why.length) why.push('no relationship or feeling crosses this joint (engine-doctrine/CRAFT/TRANSITIONS.md): the doctrine default, a hard cut');
 
   return { compatible, chosen, reason: why.join('; ') };
 }
@@ -363,4 +363,4 @@ export function chooseCutStyles(joints, layers, opts = {}) {
 // across the whole library (formats/scene/showcase-cuts.json) against `becomes`'s dozen-plus, and its
 // entire value-add over writing `becomes`/`duration`/`start` by hand was that one convenience, on one
 // scene. Removed as a two-owner mechanism: `becomes` is the one way to say "this layer becomes that
-// one" now. showcase-cuts.json was rewritten to declare `becomes` directly (docs/MISTAKES.md #364-adjacent).
+// one" now. showcase-cuts.json was rewritten to declare `becomes` directly (engine-doctrine/MISTAKES.md #364-adjacent).

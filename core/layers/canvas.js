@@ -35,7 +35,7 @@ export function canvasLayer(name, blurb) {
       // and the canvas stayed put: with a radius (hence `overflow:hidden`) the surface became a window
       // onto a larger field, and without one it overflowed its own panel. A shader folding from
       // 1216x596 down to a 540x380 panel showed a CROP of the big field rather than the field fitted
-      // to the panel, and nothing reported it (docs/MISTAKES.md #550). Percentages make the box the one
+      // to the panel, and nothing reported it (engine-doctrine/MISTAKES.md #550). Percentages make the box the one
       // owner of the size, so anything that moves it moves the picture with it.
       el.style.width = w + 'px';
       el.style.height = h + 'px';

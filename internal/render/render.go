@@ -128,7 +128,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	}
 
 	// beatSync moved the film's joints onto the track's pulse. The report is built in the page and
-	// console.log cannot cross into this process, so it rides out on Meta (docs/MISTAKES.md #477).
+	// console.log cannot cross into this process, so it rides out on Meta (engine-doctrine/MISTAKES.md #477).
 	if meta.BeatSync != "" {
 		fmt.Println("\u25b6 " + meta.BeatSync)
 	}

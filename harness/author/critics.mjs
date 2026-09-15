@@ -1,6 +1,6 @@
 // harness/author/critics.mjs: THE CRITIC PANEL, as an invokable, recorded step.
 //
-// docs/CRAFT/SUBAGENTS.md defines six standing critics (beat · bg-motion · reveal · fidelity · copy ·
+// engine-doctrine/CRAFT/SUBAGENTS.md defines six standing critics (beat · bg-motion · reveal · fidelity · copy ·
 // seam), each with one job, one input path, one verdict shape, and says to run them in parallel and
 // record what they find. That doc was an argument nobody could invoke: launching the panel meant
 // re-deriving six prompts by hand from a table, and "record it" meant a bare instruction with nowhere
@@ -26,7 +26,7 @@ import { rulesFor, briefLine } from '../lib/craft-rules.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// One decider writes one exclusive scope (docs/CRAFT/SUBAGENTS.md), so its rule briefs must stay
+// One decider writes one exclusive scope (engine-doctrine/CRAFT/SUBAGENTS.md), so its rule briefs must stay
 // scoped the same way: a scene decider hears nothing about sound, a sound decider hears nothing about
 // layout. This table is the ONE place that mapping lives.
 const DECIDER_CATEGORIES = {
@@ -39,17 +39,17 @@ const DECIDER_CATEGORIES = {
 };
 
 // The owner's top motion rules must reach the motion brief whatever the default check-then-order
-// ranking would do with a fixed char budget (docs/CRAFT/rules/motion.json has 12 records, the flat cap
+// ranking would do with a fixed char budget (engine-doctrine/CRAFT/rules/motion.json has 12 records, the flat cap
 // keeps 5). Named here, not hand-typed as prose in DECIDERS below: rulesFor's `pin` is the one selector
 // mechanism, this is just which ids this role insists on.
 export const DECIDER_PIN = {
   motion: ['motion.readable-hold', 'motion.exit-faster', 'motion.no-jolt'],
 };
 
-// docs/CRAFT/SUBAGENTS.md owns the worktree agent contract text (marked by these comments) so a
+// engine-doctrine/CRAFT/SUBAGENTS.md owns the worktree agent contract text (marked by these comments) so a
 // DECIDERS=1 brief quotes it rather than carrying its own drifting copy.
 export function worktreeContract() {
-  const doc = fs.readFileSync(path.resolve(repoRoot, 'docs/CRAFT/SUBAGENTS.md'), 'utf8');
+  const doc = fs.readFileSync(path.resolve(repoRoot, 'engine-doctrine/CRAFT/SUBAGENTS.md'), 'utf8');
   const start = doc.indexOf('<!-- worktree-contract:start -->');
   const end = doc.indexOf('<!-- worktree-contract:end -->');
   if (start < 0 || end < 0) return null;
@@ -61,7 +61,7 @@ function currentSha() {
   catch { return '(unknown, git rev-parse failed)'; }
 }
 
-// The roster, kept in lockstep with docs/CRAFT/SUBAGENTS.md's table. `ab` is listed there as built-then-
+// The roster, kept in lockstep with engine-doctrine/CRAFT/SUBAGENTS.md's table. `ab` is listed there as built-then-
 // cut (nothing runs today), so it is not in this roster. Each `input` is a function of the scene's
 // paths, matching the table's "input it is handed" column exactly.
 export const ROSTER = [
@@ -114,7 +114,7 @@ function flatLayers(ls) {
   return (ls || []).flatMap((L) => [L, ...flatLayers(L.layers), ...flatLayers(L.children)]);
 }
 
-// The DECIDER roster, kept in lockstep with docs/CRAFT/SUBAGENTS.md's second table and with AGENTS.md.
+// The DECIDER roster, kept in lockstep with engine-doctrine/CRAFT/SUBAGENTS.md's second table and with AGENTS.md.
 // A decider WRITES into the film, which is a larger permission than a critic's, so each one carries the
 // field it owns and nothing else: two deciders that share a field fight over it, and a decision that
 // turns out wrong has to be untangled instead of reverted. Order is a dependency chain, not a
@@ -132,7 +132,7 @@ export const DECIDERS = [
     name: 'subject',
     scope: "each beat's subject slot",
     job: 'decide what each beat SHOWS, and capture or name the real asset that shows it',
-    why: '36% of films carry no pictorial layer at all, and what a beat shows is the one thing the engine must never choose alone (docs/MISTAKES.md #159)',
+    why: '36% of films carry no pictorial layer at all, and what a beat shows is the one thing the engine must never choose alone (engine-doctrine/MISTAKES.md #159)',
   },
   {
     name: 'scene',
@@ -149,14 +149,14 @@ export const DECIDERS = [
     scope: 'motion[] and idle, on layers the storyboard says move',
     job: 'key the motion the storyboard planned, and prove it moved by MEASURING across frames',
     why: 'nothing moves that nobody asked to move, so every keyed track is a decision somebody made',
-    // The doctrine used to live here as hand-typed prose, drifting from docs/CRAFT/rules/motion.json
+    // The doctrine used to live here as hand-typed prose, drifting from engine-doctrine/CRAFT/rules/motion.json
     // the moment either one changed. Now only lines that are NOT a restatement of a rule record stay:
     // the design.md pointer (no shared preamble exists to hold it, see critics.mjs's module comment
     // above DECIDER_PIN) and the register-budget sentence, which names no motion.json record. The rest
     // is 3 standing lines plus whatever rulesFor(pin: DECIDER_PIN.motion) below surfaces.
     extra: [
       'Read this film\'s <film>.design.md before writing a size, radius, shadow or colour: reference its --kit-<group>-<name> token, never a literal. A value it does not have yet goes there first.',
-      'You carry a budget. The register split (docs/CRAFT/MOTION-REGISTERS.md) licenses sustained motion for kinetic work, and that licence is the door effect soup comes through. One named peak, and every other moving thing able to say what it is for.',
+      'You carry a budget. The register split (engine-doctrine/CRAFT/MOTION-REGISTERS.md) licenses sustained motion for kinetic work, and that licence is the door effect soup comes through. One named peak, and every other moving thing able to say what it is for.',
       'Measure the motion across frames; never describe it from the JSON.',
       'The fix for a hole is overlap, never ambient motion: idle, breathe and drift will not satisfy it.',
       'Search the arsenal first (`make arsenal Q="..."`) before hand-keying a new device.',
@@ -252,8 +252,8 @@ export function buildRoster(scenePath) {
       'Standing rules: no em-dashes anywhere. Stage explicit paths. Do not block on a background render.',
       'Do not delegate to sub-agents. Report what you wrote and what you deliberately left alone.',
       '',
-      `Worktree agent contract (docs/CRAFT/SUBAGENTS.md), base sha ${ctx.baseSha}:`,
-      ctx.contract || '  ! docs/CRAFT/SUBAGENTS.md has no worktree-contract block. Fix the doc before briefing further.',
+      `Worktree agent contract (engine-doctrine/CRAFT/SUBAGENTS.md), base sha ${ctx.baseSha}:`,
+      ctx.contract || '  ! engine-doctrine/CRAFT/SUBAGENTS.md has no worktree-contract block. Fix the doc before briefing further.',
     );
     return { name: d.name, scope: d.scope, prompt: lines.filter((l) => l !== null).join('\n') };
   });

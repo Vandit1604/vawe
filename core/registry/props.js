@@ -13,7 +13,7 @@
 // where the engine lived on the day the gate was written, and the engine keeps moving: the day
 // core/tracks/ became a registry, 1454 live props started reporting as dropped, because a directory the
 // list did not name is a directory the gate cannot see. Three earlier fixes to the same gate each widened
-// the scan by one shape and each was overtaken by the next move (docs/MISTAKES.md #229 · #232 · #242).
+// the scan by one shape and each was overtaken by the next move (engine-doctrine/MISTAKES.md #229 · #232 · #242).
 // A declaration cannot be outrun by a file move: it travels in the file that does the reading.
 //
 // THE GUARD IS THE HALF THAT MATTERS. Six props fire only behind another prop, `preset` needs `split`,

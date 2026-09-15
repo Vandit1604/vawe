@@ -361,7 +361,7 @@ export function codeMorph({ x, y, w = 720, from = [], to = [], label = '', theme
 // MOTION: `parts`, and this is the block it was written for. Two specs, one selecting the snippets
 // that come from the left, one those from the right. Each a seeked, staggered entrance with `out:
 // true` for its paired exit, so the assembly comes apart the way it went together instead of the card
-// fading out whole (core/parts.js, and docs/MISTAKES.md #429 for why that exit slot exists).
+// fading out whole (core/parts.js, and engine-doctrine/MISTAKES.md #429 for why that exit slot exists).
 // Nothing in this block declares `transform` on a snippet: gsap owns that property on any element
 // `parts` touches, and a hand-written transform there would be silently overwritten.
 export function codeFlight({ x, y, w = 720, snippets = [], label = '', theme = 'midnight',

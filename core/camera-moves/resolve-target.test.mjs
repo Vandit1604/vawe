@@ -194,7 +194,7 @@ test('bakeCameraMove: travel "caret" still moves (push -> pan), and keeps the li
   const tx = (pose) => FRAME.W / 2 - pose.x; // travel.js stores canvasW/2 - tx as the keyframe's own x
   // the default 24-char mono line at its auto-computed push scale fits well inside the frame (the
   // whole point of the ~60%-width push default), so the LAST station must centre it rather than crop
-  // the head chasing the caret's end (docs/MISTAKES.md #618 fix-up: "mak" cropped off the left edge).
+  // the head chasing the caret's end (engine-doctrine/MISTAKES.md #618 fix-up: "mak" cropped off the left edge).
   assert.notEqual(tx(push), tx(pan), 'the pan station must move the camera, not repeat the push-in pose');
   const line = data.layers.find((l) => l.id === 'line');
   const lineStartWorldX = line.x; // world x of the line's first character

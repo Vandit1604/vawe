@@ -86,7 +86,7 @@
       }
     ]
   },
-  "docs": "docs/EFFECTS.md",
+  "docs": "engine-doctrine/EFFECTS.md",
   "preview": {
     "url": "https://vawe.dev/playground?gen=effector"
   }

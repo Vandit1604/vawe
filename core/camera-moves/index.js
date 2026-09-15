@@ -4,7 +4,7 @@ import { resolveCameraMove } from '../registry/vocab.js';
 // (params) → camera-keyframe array, the same shape core/timeline/sequence.js `cameraAt` interpolates
 // ([{t,s,x,y,rx,ry,ease}], t in absolute seconds). A move is smooth and CALCULATED instead of
 // hand-typed, and the multi-keyframe ones emit interior `ease:"linear"` automatically so a chained push
-// is velocity-CONTINUOUS (docs/MISTAKES.md #125: a chained ease-in-out pulses because it zeroes velocity
+// is velocity-CONTINUOUS (engine-doctrine/MISTAKES.md #125: a chained ease-in-out pulses because it zeroes velocity
 // at every keyframe. The "shaking zoom"). Only the final settle eases out. All pure → renderFrame(n)
 // stays seek-safe; assert the endpoints with `make lib-test`.
 //
@@ -40,7 +40,7 @@ export { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, trave
 
 // name → generator, each carrying its own catalogue row. The descriptions used to live in a hand-kept
 // map inside scripts/site/effects-catalog.mjs, which knew eight of the eleven: cameraShake, punchIn and
-// driftHold rendered as an em-dash in docs/EFFECTS.md, so three of the engine's camera moves existed and
+// driftHold rendered as an em-dash in engine-doctrine/EFFECTS.md, so three of the engine's camera moves existed and
 // could not be chosen. The blurb rides the entry non-enumerably (core/registry/registry.js), so CAMERA_MOVES is
 // still exactly a name → function map for everything that walks it.
 export const CAMERA_MOVES = {

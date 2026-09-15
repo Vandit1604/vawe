@@ -1,0 +1,82 @@
+[
+  {
+    "id": "sound.default-not-silence",
+    "category": "sound",
+    "stage": "direct",
+    "applies": "always",
+    "check": "silent-by-omission",
+    "adapt": null,
+    "brief": "Sound is the default, not silence. Give every film sound",
+    "doc": "engine-doctrine/CRAFT/SOUND.md#agent-summary"
+  },
+  {
+    "id": "sound.silence-needs-a-reason",
+    "category": "sound",
+    "stage": "direct",
+    "applies": "silent",
+    "check": "silence-without-a-reason",
+    "adapt": null,
+    "brief": "ship mute only with a stated reason",
+    "doc": "engine-doctrine/CRAFT/SOUND.md#agent-summary"
+  },
+  {
+    "id": "sound.cue-pack-must-exist",
+    "category": "sound",
+    "stage": "direct",
+    "applies": "hasAudio",
+    "check": "cues-have-no-sound",
+    "adapt": null,
+    "brief": "A derived or declared cue still needs a baked file under assets/sfx/; an empty pack resolves every cue to silence",
+    "doc": "engine-doctrine/CRAFT/SOUND.md#agent-summary"
+  },
+  {
+    "id": "sound.bed-provenance",
+    "category": "sound",
+    "stage": "direct",
+    "applies": "hasAudio",
+    "check": "bed-provenance-unknown",
+    "adapt": null,
+    "brief": "Record the source and the licence in assets/music/credits.json before the track goes under a",
+    "doc": "engine-doctrine/CRAFT/SOUND.md#the-rule-for-this-repo"
+  },
+  {
+    "id": "sound.j-cut",
+    "category": "sound",
+    "stage": "direct",
+    "applies": "hasAudio",
+    "check": null,
+    "adapt": null,
+    "brief": "J-cut: the audio leads. The next scene's sound starts before its picture",
+    "doc": "engine-doctrine/CRAFT/SOUND.md#2-the-sound-bridge-the-device-this-whole-file-exists-for"
+  },
+  {
+    "id": "sound.l-cut",
+    "category": "sound",
+    "stage": "direct",
+    "applies": "hasAudio",
+    "check": null,
+    "adapt": null,
+    "brief": "L-cut: the picture leads. The previous scene's sound runs under the new picture",
+    "doc": "engine-doctrine/CRAFT/SOUND.md#2-the-sound-bridge-the-device-this-whole-file-exists-for"
+  },
+  {
+    "id": "sound.pre-impact-drop",
+    "category": "sound",
+    "stage": "direct",
+    "applies": "hasAudio",
+    "check": null,
+    "adapt": null,
+    "brief": "cut everything one beat before the reveal, then land the impact into the vacuum",
+    "doc": "engine-doctrine/CRAFT/SOUND.md#5-silence-used-on-purpose"
+  },
+  {
+    "id": "sound.reach-for-a-cue",
+    "category": "sound",
+    "stage": "direct",
+    "applies": "silent",
+    "check": null,
+    "adapt": null,
+    "brief": "Reach for a real cue instead of shipping mute",
+    "doc": "engine-doctrine/CRAFT/SFX-CATALOG.md#agent-summary"
+  }
+]

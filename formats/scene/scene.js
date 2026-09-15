@@ -159,7 +159,7 @@ boot((data, fps, theme, canvas) => {
   // Once, at build, so renderFrame(n) stays pure. Throws when a grid was named and none arrived.
   // The note is KEPT, not only logged: console.log runs inside the headless page and the render
   // process cannot hear it, so an author rendering to mp4 never learned that a cut had moved
-  // (docs/MISTAKES.md #477). It rides out through the meta channel boot.js already owns.
+  // (engine-doctrine/MISTAKES.md #477). It rides out through the meta channel boot.js already owns.
   let beatSyncNote = '';
   { const r = bindBeats(data, canvas && canvas.beats); if (r) { beatSyncNote = describeBind(r); console.log(beatSyncNote); } }
   // The film's nominated loud moment: write the device as a sting at `at` and pull every competing
@@ -186,7 +186,7 @@ boot((data, fps, theme, canvas) => {
   // A bg window may bind its edges to a JOINT instead of a time: `"from": "cut@1"`. brew-launch-act1
   // cuts its backdrop per beat - paper, dark, paper, accent - and wrote every boundary twice, once here
   // and once in `transitions`, with nothing keeping the two equal. Now the cut owns the number.
-  // core/timeline/junctions.js, docs/MISTAKES.md #358.
+  // core/timeline/junctions.js, engine-doctrine/MISTAKES.md #358.
   const BG_JUNCTIONS = junctionTable(marksOf(data));
   const atTime = (v, where) => (isJunctionRef(v) ? resolveJunction(v, BG_JUNCTIONS, where) : v);
   const BG_DURATION = Number(data.duration) || Infinity;
@@ -282,7 +282,7 @@ boot((data, fps, theme, canvas) => {
   // ---- shader stings: [{t, fx, dur, seed, color?, intensity?}]. Boundary effects on a WebGL overlay ----
   // A sting tint is a COLOUR: a hex, an rgb(), a CSS name, or a theme token. This read `parseInt(hex,
   // 16)` and nothing else, so every other form became NaN and then [0,0,0] -- "var(--accent)" tinted
-  // the sting BLACK with no error (docs/MISTAKES.md #476). core/looks/filters.js `glowRGB` is the engine's
+  // the sting BLACK with no error (engine-doctrine/MISTAKES.md #476). core/looks/filters.js `glowRGB` is the engine's
   // one owner of token -> literal rgb (feFlood cannot resolve var() either); core/transitions/lower.js
   // owns the refusal, at the write site, so an unresolvable tint is named before a browser starts.
   const tint01 = (c, where) => glowRGB(checkStingColor(c, where)).map((v) => v / 255);
@@ -333,7 +333,7 @@ boot((data, fps, theme, canvas) => {
   // descendant can do: a `filter` makes the element a backdrop root, so a `glass` layer under it
   // samples nothing and stops being glass, for exactly the length of the cut. core/ancestor-kills.js
   // owns which property takes which capability away; this is the one place the film is checked
-  // against it. docs/MISTAKES.md #542.
+  // against it. engine-doctrine/MISTAKES.md #542.
   checkCuts({ cuts: sceneCuts, layers: data.layers || [], sceneUnits: data.sceneUnits === true });
   const beatBounds = [], beatWrap = [];
   if (sceneUnits) {
@@ -373,7 +373,7 @@ boot((data, fps, theme, canvas) => {
   // not. The wrapper owns the exit slide, so a layer still on screen when the cut starts has its own
   // exit suppressed and its VISIBILITY stretched to the cut (setLayerTiming below); doing that to
   // every layer of the beat, including ones the beat had already moved on from, painted a whole act's
-  // superseded type lines superimposed from the cut onward (docs/MISTAKES.md #555).
+  // superseded type lines superimposed from the cut onward (engine-doctrine/MISTAKES.md #555).
   //
   // A layer is the beat's current state ONLY while it is on screen when the cut starts: its own end
   // reaches the beat's end. A layer that ended earlier is gone at the cut on its own clock, same as
@@ -383,7 +383,7 @@ boot((data, fps, theme, canvas) => {
   // primitive that stops at its OWN authored end when handed a `t` past it (`cursor.js`'s early
   // return, the guard every "if (!(t>=start&&t<end)) return" primitive shares) rendered its resting
   // pose, at the origin, instead of holding: the cursor drawn top-left at 6.9s, the caption solid past
-  // its own end at 7.2s (docs/MISTAKES.md, this fix). An author who wants a line to persist to the
+  // its own end at 7.2s (engine-doctrine/MISTAKES.md, this fix). An author who wants a line to persist to the
   // cut authors its `duration` to reach the beat's end; the wrapper no longer guesses it for them.
   const EPS = 1e-6; // float noise only: `start + duration` lands on 20.099999999999998 for a cut at 20.1
   const beatIsCurrent = (L, bi, beatEnd) => (L.start ?? 0) + (L.duration ?? Infinity) >= beatEnd - EPS;
@@ -419,7 +419,7 @@ boot((data, fps, theme, canvas) => {
     // TextMorph: letters migrate A->B (core/motion/morph.js), tweened by GSAP. Rebuilds the layer's chars.
     // Guard on type: an svg layer's `morph` is a SHAPE morph it drives itself in svg.js frame(), without
     // this, buildMorph would rebuild the svg as text glyphs and render the target path `d` string as words
-    // (docs/MISTAKES.md #140: the engine silently doing the wrong thing on an accepted input).
+    // (engine-doctrine/MISTAKES.md #140: the engine silently doing the wrong thing on an accepted input).
     if (L.morph && L.type !== 'svg' && window.gsap) buildMorph(el, L, window.gsap);
     // NAMED GSAP effects (core/engine/gsap-effects.js): `fx:"popIn"` | `fx:{name,dur,ease}` | `fx:["blurIn","float"]`.
     if (L.fx && window.gsap) {
@@ -429,7 +429,7 @@ boot((data, fps, theme, canvas) => {
         // `console.warn` and continue meant the effect simply did not happen, and a warning in a
         // headless render nobody reads is the same as silence. validate.mjs rejects an unknown name
         // at author-check time, so this only bit under NOCHECK=1 - which is exactly when a render is
-        // least supervised. docs/MISTAKES.md #360.
+        // least supervised. engine-doctrine/MISTAKES.md #360.
         GSAP_REGISTRY.pick(spec.name);
         const fn = window.gsap.effects[spec.name];
         if (!fn) throw new Error(`fx "${spec.name}" is registered but GSAP has no such effect, the `
@@ -479,7 +479,7 @@ boot((data, fps, theme, canvas) => {
           // `stagger` is a number OR the object form { each, from, amount }, the SAME two dials a split
           // text layer takes. It used to reach GSAP as an unvalidated, undocumented pass-through:
           // whatever the author wrote arrived at the library and nothing said whether it meant anything
-          // (docs/CRAFT/PARITY-AUDIT.md). It is now the engine's own vocabulary,
+          // (engine-doctrine/CRAFT/PARITY-AUDIT.md). It is now the engine's own vocabulary,
           // refused by `validate` when it is not, and translated here at the single seam where a spec
           // meets GSAP's two different words for the same two places (`start`/`end`).
           ...spec[2], duration: p.each ?? 0.5, stagger: gsapStagger(p.stagger, 0.07),
@@ -532,7 +532,7 @@ boot((data, fps, theme, canvas) => {
     // needs to answer "which layer is this", and `track` cannot answer it because an author may set it.
     el.dataset.idx = String(idx);
     // The author's OWN id, mirrored onto the element so a probe tool can find a layer by the name the
-    // scene JSON gave it instead of re-deriving the array index (`make probe-frame`, docs/CRAFT). Not
+    // scene JSON gave it instead of re-deriving the array index (`make probe-frame`, engine-doctrine/CRAFT). Not
     // read by anything in the render itself, same footing as data-idx above.
     if (L.id) el.dataset.id = String(L.id);
     el.dataset.start = String(L.start ?? 0);
@@ -541,7 +541,7 @@ boot((data, fps, theme, canvas) => {
     // REFUSE WHAT THIS FUNCTION IS ABOUT TO THROW AWAY. A split layer enters per unit and a cut layer's
     // entrance IS the cut, so both branches below discard `anim` and (for split) `enterDur`. Accepting
     // them and dropping them silently is the failure this engine logs most: 33 layers across 10 films
-    // carried an entrance the render never performed, and every gate stayed green (docs/MISTAKES.md).
+    // carried an entrance the render never performed, and every gate stayed green (engine-doctrine/MISTAKES.md).
     // `anim: "none"` is exempt, it asks for exactly what happens.
     const owner = L.split ? `split: "${L.split}"` : `cut: "${L.cut}"`;
     const instead = L.split
@@ -726,7 +726,7 @@ boot((data, fps, theme, canvas) => {
   // wrapper and that layer stays flat by default (browsers default every element to
   // `transform-style: flat`), so a child's own rotateY/rotateX/translateZ is flattened onto the
   // group's 2D plane before it ever reaches the rig. This is the earlier group-plane case
-  // (docs/CRAFT/KEYED-MOTION.md 5b) in reverse: there, a flat group is CORRECT because its children
+  // (engine-doctrine/CRAFT/KEYED-MOTION.md 5b) in reverse: there, a flat group is CORRECT because its children
   // have no 3D of their own and are meant to ride the group's tilt flat. Here the children carry their
   // OWN rotY/rotX/z, so the group has to open a 3D context for them to stand in, or the depth is lost.
   //
@@ -1136,7 +1136,7 @@ const boxOf = (id) => boxes.get(id) || null;
   // The flat emission stops being equivalent, and it fails in the one way that matters: it moves an
   // already-finished projection, so a tilted card's vanishing point travels WITH the card and the
   // perspective never changes however far the camera goes. That is the tell in
-  // docs/CRAFT/REF-pin-16818198602994243.md, and it is why this is a rig and not a transform.
+  // engine-doctrine/CRAFT/REF-pin-16818198602994243.md, and it is why this is a rig and not a transform.
   //
   //   #root  perspective + perspective-origin   the EYE, fixed to the frame
   //   #cam   transform-style: preserve-3d       the RIG, standing inside the eye's space
@@ -1233,7 +1233,7 @@ const boxOf = (id) => boxes.get(id) || null;
         throw new Error(`unknown seam timing "${s.timing}" at t=${s.t}, known: ${Object.keys(CUT_TIMINGS).join(', ')}`);
       // `SEAM_FX.includes(s.fx) ? s.fx : 'fade'` until now, a silent swap at a JUNCTION, two lines
       // below a guard that already throws on an unknown seam TIMING. One half of the same object was
-      // checked and the other was not. docs/MISTAKES.md #361.
+      // checked and the other was not. engine-doctrine/MISTAKES.md #361.
       if (s.fx != null && !SEAM_FX.includes(s.fx))
         throw new Error(`unknown seam fx "${s.fx}" at t=${s.t}, one of: ${SEAM_FX.join(', ')}`);
       return { t: +s.t, fx: s.fx ?? 'fade', dur: +(s.dur ?? 0.5),

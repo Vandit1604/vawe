@@ -9,7 +9,7 @@
 // the earliest point a gap is even visible.
 //
 // WHY THIS ONE SIGNAL. The owner's measured complaint: reference films hold a local-motion median of
-// 0.66, this library measures 0.02 (docs/RESEARCH). Films read as slideshows because a beat's move
+// 0.66, this library measures 0.02 (engine-doctrine/RESEARCH). Films read as slideshows because a beat's move
 // ENDS rather than sustains. A beat with real duration, a real subject, and no `move:`/`motion:` field
 // is exactly that hole, and it is checkable from the storyboard alone, before a single layer exists.
 //

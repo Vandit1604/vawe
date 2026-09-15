@@ -20,7 +20,7 @@
 // and could never end as itself: an outline effect wearing a logo reveal's name. Give the layer a
 // `fill` (or `draw.fill`) and it now resolves. Give it none and nothing changes, which is why no
 // shipped film moved: 0 of the 7 `svg` draw layers in the library carried a fill, because carrying one
-// did nothing. docs/CRAFT/PARITY-AUDIT.md, docs/MISTAKES.md #545.
+// did nothing. engine-doctrine/CRAFT/PARITY-AUDIT.md, engine-doctrine/MISTAKES.md #545.
 import { interpolate, easeOutCubic, resolveEasing } from '../motion/motion.js';
 import { resamplePath, bestRotation, rotatePoints, morphD } from './path-morph.js';
 import { mergeProps, propsOf } from '../registry/props.js';
@@ -46,7 +46,7 @@ function applyDraw(el, p, draw, { fillIn, fill, stroke, strokeWidth }) {
   // the arc, so at u≈0 a stray round-cap dot paints at the seam (not the true start) for a frame or two
   // before the correct growth from the start takes over. getTotalLength() is the same accurate, build-time
   // DOM read path-morph.js already trusts for arc-bearing paths (resamplePath, core/layers/path-morph.js:18);
-  // dashing in its real units sidesteps the seam entirely. docs/MISTAKES.md.
+  // dashing in its real units sidesteps the seam entirely. engine-doctrine/MISTAKES.md.
   const total = p.getTotalLength();
   p.style.strokeDasharray = `${total} ${total}`;
   p.style.strokeDashoffset = total;        // hidden at t=0
@@ -156,5 +156,5 @@ export function frame(kit, el, L, t, scene, { draw, morph } = L) {
 // build time. mergeProps unions them (core/props.js).
 export const PROPS = mergeProps(propsOf(build), propsOf(frame));
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin)";

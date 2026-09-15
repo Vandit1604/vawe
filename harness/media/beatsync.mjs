@@ -9,7 +9,7 @@
 // its own nearest-beat search (so it never appeared as an importer of `snapToBeat` and nothing linked
 // the two), its own tolerance (half a beat capped at 0.18s, against beat-bind's 0.12s), and its own
 // joint set (transitions and stings as well as cuts and seams). Two owners of one fact, drifting
-// quietly, docs/MISTAKES.md #477.
+// quietly, engine-doctrine/MISTAKES.md #477.
 //
 // A scene that will be beat-matched EVERY render should declare it instead and skip the derivative
 // entirely: `"audio": { "music": "warm", "beatSync": true }`. This tool is the preview, and the
@@ -88,5 +88,5 @@ if (WRITE) {
   console.log(`      "audio": { "music": ${JSON.stringify(path.basename(MUSIC).replace(/\.wav$/i, ''))}, "beatSync": true }\n`);
 } else {
   console.log('\n  report only. WRITE=1 writes <scene>.beatsync.json; `"audio":{"beatSync":true}` in the scene');
-  console.log('  gets the same joints at boot with no second file. docs/CRAFT/SOUND.md.\n');
+  console.log('  gets the same joints at boot with no second file. engine-doctrine/CRAFT/SOUND.md.\n');
 }

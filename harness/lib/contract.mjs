@@ -145,14 +145,14 @@ export function edges(beats) {
 // The placement clause reuses parseEdge above: the SAME "<placement>@<w>x<h>" grammar object_in/
 // object_out already speak, never a second copy of the keyword math. Two CONSECUTIVE beats naming the
 // SAME file is how assemble.mjs keeps one shared component alive across a cut instead of tearing it
-// down and rebuilding it (docs/CRAFT/STORYBOARD-TEMPLATE.md).
+// down and rebuilding it (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md).
 const FRAGMENT_SEP_RE = /^(?:(.+?)\s+)?@\s*(.+)$/;
 
 // `fragment: none` (optionally `, <reason>`) is the one spelling every reader of `fragment:` accepts
 // for "this beat has no fragment file": a beat built from native layers alone (an image + text pair,
 // a solid card), never a pretend filename standing in for "nothing to author here". One convention,
 // taught to the one parser, so stage/storyboard-check/frame-check never each invent their own guess
-// at what "no fragment" looks like (docs/CRAFT/STORYBOARD-TEMPLATE.md).
+// at what "no fragment" looks like (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md).
 const FRAGMENT_NONE_RE = /^none\b/i;
 
 /** parseFragmentSpec("_together.card.html @ center@900x520") → {path, edge, none}. path/edge are null
@@ -197,7 +197,7 @@ export function fragmentErrors(beats) {
 //   `<shape>:<band>`                         anything else: scope LAYER, a hand-keyed track on the
 //                                             beat's own layer, spanning the whole beat
 // (band, above, is one of the four named speed bands in this repo's doctrine: energy · professional ·
-// gravity · cinematic, docs/RULES/speed-bands.md.)
+// gravity · cinematic, engine-doctrine/RULES/speed-bands.md.)
 //
 // ONE PARSER for all three, `parseMoveEntry` below, because the PART form is not new grammar: it is the
 // exact string `motion:` always accepted (`<selector>@<kind>:<band>`), so `motion:` and `move:` writing
@@ -472,7 +472,7 @@ export function beatCameraEndPose(b, dims = [1920, 1080]) {
 }
 
 // A beat "plans a normal camera" when the plan itself reads as the rest/full-frame composition, by any
-// ONE of four independent signals docs/CRAFT/STORYBOARD-TEMPLATE.md already gives a beat to state this
+// ONE of four independent signals engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md already gives a beat to state this
 // in. Kept as named, separately-testable regexes rather than one clever combined rule, per CLAUDE.md's
 // "fewer, clearer rules" - each is a fact about the plan's own words, not an inference about intent.
 const NORMAL_SHOT_RE = /\b(wide|full|establishing|rest|normal)\b/i;
@@ -482,7 +482,7 @@ const NORMAL_EYE_START_RE = /\b(whole|full)\s+(frame|window|screen|app|compositi
 // to guess past them.
 const NORMAL_PICTURE_RE = /\bfull(?:[\s-])?(?:frame|screen)\b|\bfills?\s+the\s+frame\b|\bwhole\s+(?:app|window|screen|frame)\b/i;
 // A "full frame" object_in: centred and covering most of a standard canvas, regardless of which of the
-// five aspect ratios (docs/AGENTS.md) is in play - 1,400,000px^2 clears every one of them (smallest is
+// five aspect ratios (engine-doctrine/AGENTS.md) is in play - 1,400,000px^2 clears every one of them (smallest is
 // 1080x1080 = 1,166,400) while still excluding a merely large card or panel.
 const FULL_FRAME_OBJECT_AREA = 1_400_000;
 
@@ -641,7 +641,7 @@ const EYE_ORDER_WORDS = /\bthen\b|\bfirst\b|\bbefore\b|\bafter\b|\bfollowed by\b
 
 /** competingEyeDevices(device) -> the >=2 named phrases a beat's own `eye:` device text pulls toward
  * at once with no stated order between them, or `null` when there is at most one, or an order is
- * already stated (Material's one-focal-point-per-transition rule, docs/MOTION-CRAFT.md). */
+ * already stated (Material's one-focal-point-per-transition rule, engine-doctrine/MOTION-CRAFT.md). */
 export function competingEyeDevices(device) {
   const dLower = String(device || '').toLowerCase();
   const hits = EYE_DEVICE_PHRASES.filter((p) => dLower.includes(p));
@@ -692,7 +692,7 @@ export function cameraContinuityErrors(beats) {
 
 // ── STAGING: a documented cause becomes a mechanical stagger ────────────────────────────────────────
 //
-// `trigger:` on a beat (docs/CRAFT/STORYBOARD-TEMPLATE.md, graded by storyboard-check.mjs) already
+// `trigger:` on a beat (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md, graded by storyboard-check.mjs) already
 // answers WHAT MADE THIS BEAT HAPPEN. storyboard-check reports "N/M junctions caused" and then throws
 // that answer away: nobody stages, because staging means inventing an id and typing arithmetic.
 // isCausedTrigger is the ONE test for "this junction names a real cause", shared verbatim with
@@ -713,10 +713,10 @@ export function isCausedTrigger(raw) {
 }
 
 // STAGE_S: the causal stagger assemble.mjs offsets a caused beat's start by. Evidence, not a guess:
-// higgsfield-recreation.json (docs/MISTAKES.md's own reference film) stages its three key events
+// higgsfield-recreation.json (engine-doctrine/MISTAKES.md's own reference film) stages its three key events
 // roughly 30ms and 150ms apart (button lands 3.07s, world floods 3.10s, ring appears 3.25s). 0.05s
 // sits at the small end of that range on purpose: it is enough to read as "because", never enough to
-// visibly shorten a beat or read as its own edit. `docs/CRAFT/PER-SCENE-FANOUT.md` names it.
+// visibly shorten a beat or read as its own edit. `engine-doctrine/CRAFT/PER-SCENE-FANOUT.md` names it.
 export const STAGE_S = 0.05;
 
 /**
@@ -741,7 +741,7 @@ export function stagedSchedule(beats) {
 
 // ── LAYER-SCOPE BUILD: sustained motion on a beat's own layer, not a one-shot entrance ──────────────
 //
-// docs/MISTAKES.md #610: three swept axes (entrance density, overlap, travel/duration) all failed to
+// engine-doctrine/MISTAKES.md #610: three swept axes (entrance density, overlap, travel/duration) all failed to
 // stop a film going still, because every one of them is still a one-shot ENTRANCE that lands and holds.
 // The one axis that worked, measured median motion 0.17-1.61 against a 0.66 reference, is a keyed x/y/
 // scale track on the LAYER that never stops moving for the length of the beat. A LAYER-scope `move:`
@@ -991,7 +991,7 @@ export function isSeamRecipe(b) {
   return !!(p && p.def && p.def.kind === 'seam');
 }
 
-// ── THE DECISION PROCEDURE, AS DATA (docs/CRAFT/TRANSITIONS.md #the-decision-procedure-the-algorithm-
+// ── THE DECISION PROCEDURE, AS DATA (engine-doctrine/CRAFT/TRANSITIONS.md #the-decision-procedure-the-algorithm-
 // to-run-at-every-seam): a boundary's RELATIONSHIP and FEELING, and whether the seam should disappear or
 // speak, written down as `transition_why: <relationship> · <feeling> · <invisible|expressive>` on the
 // arriving beat, the same beat that already carries `transition_in`. Read here, next to it, because a
@@ -1076,7 +1076,7 @@ export function transitionFindings(beats) {
     if ((b.transition_in || hasSeam) && !why) {
       unreasoned.push(`beat ${i + 1} (${b.name}) has a transition_in or recipe seam into it but no `
         + `transition_why. Answer the procedure: relationship, feeling, invisible or expressive `
-        + '(docs/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam).');
+        + '(engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam).');
     }
     if (!boundaryCovered(prev, b)) {
       const guess = nearestTransitions(`${prev.name} ${b.name}`, 3).map((t) => t.name).join(', ');

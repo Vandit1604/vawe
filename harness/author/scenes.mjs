@@ -1,6 +1,6 @@
 // scenes.mjs: `make scenes D=<film>`: THE FAN-OUT. PRINTS one agent brief per scene: the kit block,
 // that scene's contract, its exact copy, the anti-slop rules, and the one verify command. It launches
-// NOTHING: docs/CRAFT/SUBAGENT-BUDGET.md is the reason (fewer, larger agents; a fan-out's cost is a
+// NOTHING: engine-doctrine/CRAFT/SUBAGENT-BUDGET.md is the reason (fewer, larger agents; a fan-out's cost is a
 // deliberate human choice, never a default). The owner reads the briefs and decides whether to spend
 // the tokens a real fan-out costs.
 //
@@ -57,7 +57,7 @@ const ANTI_SLOP = [
 
 console.log(`scenes · ${beats.length} scene(s) for ${film}\n`);
 console.log('These briefs are for a real per-scene agent (Agent tool, one per scene, launched in parallel).');
-console.log('Nothing is launched by this command. docs/CRAFT/SUBAGENT-BUDGET.md before you spend the tokens.\n');
+console.log('Nothing is launched by this command. engine-doctrine/CRAFT/SUBAGENT-BUDGET.md before you spend the tokens.\n');
 
 beats.forEach((b, i) => {
   const n = i + 1;

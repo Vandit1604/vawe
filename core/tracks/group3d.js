@@ -3,7 +3,7 @@
 // "THE CAMERA RIG": #cam and every beat wrapper get preserve-3d the moment ANY layer keys a 3D motion
 // prop, but a group in between stays flat, browsers default every element to transform-style: flat).
 //
-// This is the earlier group-plane case (docs/CRAFT/KEYED-MOTION.md 5b) in reverse: there, a flat group
+// This is the earlier group-plane case (engine-doctrine/CRAFT/KEYED-MOTION.md 5b) in reverse: there, a flat group
 // is CORRECT because its children have no 3D of their own and are meant to ride the group's tilt flat.
 // Here the children carry their OWN rotY/rotX/z, so the group has to open a 3D context for them to
 // stand in, or the depth is lost. Decided once, from the resolved motion tracks, exactly like scene.js's

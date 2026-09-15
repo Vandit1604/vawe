@@ -7,7 +7,7 @@
 // Determinism note: the per-glyph rotation promotes each tile to its own compositing layer. The
 // production renderer waits for raster to settle, so `bin/vawe` output is byte-identical; the fast
 // `preview.mjs` screenshot does NOT wait and can vary on rotated tiles. Trust the video, not preview,
-// for this effect (see docs/MISTAKES.md).
+// for this effect (see engine-doctrine/MISTAKES.md).
 import { hashSeed, random } from '../motion/motion.js';
 import { registeredFamilies } from '../engine/fonts.js';
 import { defineRegistry } from '../registry/registry.js';
@@ -87,7 +87,7 @@ export function ransomSwatches(accent = '#c8342b') {
 // ink on pink stock measured 1.92:1 and cream on grass green 2.96:1, both under the large-text bar of
 // 3.0. Deepening the two inks keeps the ransom-note look (the hues are unchanged, a blue ink on pink
 // stock is still a blue ink on pink stock) and makes the letters legible. Checked in linear light with
-// the same relative-luminance formula core/motion.js and quality/audit.mjs use. docs/MISTAKES.md #378.
+// the same relative-luminance formula core/motion.js and quality/audit.mjs use. engine-doctrine/MISTAKES.md #378.
 export function ransomColorSwatches(accent = '#d62828') {
   return [
     { bg: '#131313', ink: '#ff2d8b', w: 2, mat: 'neon' }, // black card, hot-pink neon outline

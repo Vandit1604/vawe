@@ -2,7 +2,7 @@
 // middle (the settled state), which hides the motion that carries the craft, the dolly direction, the
 // typewriter, a colour-wave, a collage assembling. This renders, per beat, the ENTER arc densely +
 // the settled frame + the EXIT arc, so the reveal is always visible. The recurring failure it kills:
-// judging a beat by its hold and missing the reveal (docs/MISTAKES.md, the "settled not reveal" trap).
+// judging a beat by its hold and missing the reveal (engine-doctrine/MISTAKES.md, the "settled not reveal" trap).
 //
 //   make reveal D=formats/scene/x.json                 → /tmp/reveal/<name>.png (one row per beat: enter | set | exit)
 //   node harness/author/reveal.mjs <scene.json> [--enter 0.7] [--n 8]

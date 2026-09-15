@@ -15,7 +15,7 @@ format: 1080x1920
 destination: reels
 theme: preface
 craft:
-  captions: "hand-timed word-by-word at 2-4 words/sec, chunked 2-6 words, pop layout + highlight style so the read word lights up (docs/CRAFT/CAPTIONS.md)"
+  captions: "hand-timed word-by-word at 2-4 words/sec, chunked 2-6 words, pop layout + highlight style so the read word lights up (engine-doctrine/CRAFT/CAPTIONS.md)"
   color: "eyedropped from the preface theme pack (paper-white + one terracotta accent), reused because the subject is literally documents and citations"
   density: "each beat carries a hero (doc card / contrast rows / count) + a support caption + the mono label/accent-bar metadata strip"
   direction: "the whole film stays quiet paper-white; the one accent-colour flash is the verified-badge resolving at 7.3s, nothing else pops that hard"

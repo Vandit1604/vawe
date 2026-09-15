@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// harness/author/sfx-catalog.mjs: generate docs/CRAFT/SFX-CATALOG.md from core/audio-kit.mjs's own
+// harness/author/sfx-catalog.mjs: generate engine-doctrine/CRAFT/SFX-CATALOG.md from core/audio-kit.mjs's own
 // CUES registry, so the catalog cannot drift from the engine. Run with `node harness/author/sfx-catalog.mjs`.
 //
 // Every cue in CUES must have a metadata entry below. A cue with no entry fails the run loudly
@@ -14,7 +14,7 @@ import { CUES } from '../../core/audio/kit.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
-const OUT = path.join(ROOT, 'docs/CRAFT/SFX-CATALOG.md');
+const OUT = path.join(ROOT, 'engine-doctrine/CRAFT/SFX-CATALOG.md');
 
 // Curated one-line metadata per cue, grounded in the comments above each cue's spec in
 // core/audio-kit.mjs (the file cited beside every quoted phrase below). Do not invent facts here:

@@ -34,7 +34,7 @@ make ship D=path/to/video.json   # the real ladder: check, render, audit, seams.
 
 Every video JSON starts with `"module": "scene"` and lives at `formats/scene/<topic>.json`.
 Read `formats/scene/sample.json` and one shipped video first, as references, never as a
-structure to copy. Compose your own layers from the vocabulary in `docs/PRIMITIVES.md`.
+structure to copy. Compose your own layers from the vocabulary in `engine-doctrine/PRIMITIVES.md`.
 
 ## Hard rules for day one
 
@@ -51,6 +51,6 @@ structure to copy. Compose your own layers from the vocabulary in `docs/PRIMITIV
 ## Where to go next
 
 - `AGENTS.md`, the full doctrine and the skill router.
-- `docs/PRIMITIVES.md`, the layer and effect vocabulary.
-- `docs/TASTE.md`, the quality system: house style, composition, motion, story spine.
-- `docs/CRAFT/`, deep dives on one topic each (HTML fragments, sound, film structure, and more).
+- `engine-doctrine/PRIMITIVES.md`, the layer and effect vocabulary.
+- `engine-doctrine/TASTE.md`, the quality system: house style, composition, motion, story spine.
+- `engine-doctrine/CRAFT/`, deep dives on one topic each (HTML fragments, sound, film structure, and more).

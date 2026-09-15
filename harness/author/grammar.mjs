@@ -63,7 +63,7 @@ if (ONE) {
 // `measured.shotDetection`. The table read `measured.shots` and `measured.medianShot` without asking,
 // so a 19.78s film sampled into 10 equal 1.98s slices printed as "10 shots, median 1.98s, 30.3/min".
 //
-// The hand study of that same film (docs/CRAFT/REF-pin-16818198602994243.md) counted 15 shots at a
+// The hand study of that same film (engine-doctrine/CRAFT/REF-pin-16818198602994243.md) counted 15 shots at a
 // 1.08s median, by eye, correctly. Five of the seven rows here were in that state. So the store's first
 // act was to contradict the one careful reading the repo already had, in a table with nothing on it to
 // say which number to believe. That is absence read as a pass, in a file whose own header warns about
@@ -77,7 +77,7 @@ const sampled = (g) => g.measured.shotDetection !== 'scene-score';
 // ── the document: one page an author reads BEFORE authoring ──────────────────────────────────────
 //
 // GENERATED, never hand-written, and that is the whole difference between it and the deep studies it
-// links to. `docs/CRAFT/REF-<name>.md` is a person going frame by frame through ONE film: palette by
+// links to. `engine-doctrine/CRAFT/REF-<name>.md` is a person going frame by frame through ONE film: palette by
 // pixel share, type crops, the continuity register, what the engine cannot do. Those are worth writing
 // and there is no machine substitute for them. What no one was ever going to keep current by hand is
 // the CROSS-FILM page: every reference on one scale, so "how long does a shot hold in work that reads
@@ -128,7 +128,7 @@ function renderDoc(all) {
   for (const g of all) {
     const m = g.motionBand ? `${g.motionBand.lo}–${g.motionBand.hi}` : '?';
     const sc = sampled(g) ? '· | · | ·' : `${g.measured.shots} | ${g.measured.medianShot}s | ${g.measured.cutsPerMinute}`;
-    L.push(`| ${g.deepStudy ? `[${g.name}](${path.relative(path.join(ROOT, 'docs/CRAFT'), path.join(ROOT, g.deepStudy))})` : g.name} | ${g.measured.duration}s | ${sc} | ${m} | ${g.groundPattern || '?'} |`);
+    L.push(`| ${g.deepStudy ? `[${g.name}](${path.relative(path.join(ROOT, 'engine-doctrine/CRAFT'), path.join(ROOT, g.deepStudy))})` : g.name} | ${g.measured.duration}s | ${sc} | ${m} | ${g.groundPattern || '?'} |`);
   }
   L.push('');
   if (lo != null) {
@@ -147,7 +147,7 @@ function renderDoc(all) {
   L.push('## What each film does');
   L.push('');
   for (const g of all) {
-    L.push(`### ${g.name}${g.deepStudy ? ` · [deep study](${path.relative(path.join(ROOT, 'docs/CRAFT'), path.join(ROOT, g.deepStudy))})` : ''}`);
+    L.push(`### ${g.name}${g.deepStudy ? ` · [deep study](${path.relative(path.join(ROOT, 'engine-doctrine/CRAFT'), path.join(ROOT, g.deepStudy))})` : ''}`);
     L.push('');
     if (!g.takeaway && !readN(g)) { L.push('_Measured, never read. The numbers above are real; nobody has written down what causes what._'); L.push(''); continue; }
     if (g.takeaway) { L.push(`**Takeaway.** ${g.takeaway.replace(/\n/g, '\n\n')}`); L.push(''); }
@@ -232,7 +232,7 @@ function renderDoc(all) {
 }
 
 function writeDoc(all) {
-  const out = path.join(ROOT, 'docs/CRAFT/GRAMMAR.md');
+  const out = path.join(ROOT, 'engine-doctrine/CRAFT/GRAMMAR.md');
   fs.writeFileSync(out, renderDoc(all));
   return out;
 }
@@ -242,11 +242,11 @@ function writeDoc(all) {
 // the same "one fact, two owners" the page itself is about. `--check` regenerates in memory and
 // compares; docs-drift runs it, so studying a film and not regenerating the page now fails.
 if (process.argv.includes('--check')) {
-  const out = path.join(ROOT, 'docs/CRAFT/GRAMMAR.md');
+  const out = path.join(ROOT, 'engine-doctrine/CRAFT/GRAMMAR.md');
   const want = renderDoc(all);
   const have = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : null;
-  if (have === want) { console.log(`  ✓ docs/CRAFT/GRAMMAR.md matches the ${all.length} grammar file(s) it is generated from`); process.exit(0); }
-  console.error(`  ✗ docs/CRAFT/GRAMMAR.md is ${have === null ? 'missing' : 'stale'}: it does not match the ${all.length} grammar file(s).`);
+  if (have === want) { console.log(`  ✓ engine-doctrine/CRAFT/GRAMMAR.md matches the ${all.length} grammar file(s) it is generated from`); process.exit(0); }
+  console.error(`  ✗ engine-doctrine/CRAFT/GRAMMAR.md is ${have === null ? 'missing' : 'stale'}: it does not match the ${all.length} grammar file(s).`);
   console.error(`    Fix: make grammar DOC=1`);
   process.exit(1);
 }

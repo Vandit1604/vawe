@@ -27,7 +27,7 @@ const COUNTRY = { 'united states': 'us', usa: 'us', america: 'us', 'united kingd
 // subject that wants an icon, which is right for a layer and wrong for a sound: an audio cue has a
 // `name` too, so a film that took CLAUDE.md 2a2 seriously and gave itself sound got a plan to draw
 // `whisper`, `press` and `droplet` as image cards, and `error` and `success` deduped against each
-// other seven times (docs/MISTAKES.md #328). The better the film, the louder the false plan.
+// other seven times (engine-doctrine/MISTAKES.md #328). The better the film, the louder the false plan.
 //
 // A cue name resolves against assets/sfx/ and never against assets/cards/, so these subtrees are not
 // this tool's business at all. Named rather than inferred: guessing which blocks are visual from
@@ -50,7 +50,7 @@ function slots(o, acc = []) {
 //
 // It used to. The word "PLAN (dry run)" was printed AFTER two write paths had already run, so every
 // `make video` downloaded icons and generated cards into formats/scene/assets/, and a clean checkout
-// grew seven SVGs nobody asked for (docs/MISTAKES.md #329). Only the final JSON edit was ever gated.
+// grew seven SVGs nobody asked for (engine-doctrine/MISTAKES.md #329). Only the final JSON edit was ever gated.
 async function tryFetch(url, dest) {
   if (NOFETCH) return false;
   try {

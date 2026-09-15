@@ -6,7 +6,7 @@
 //   node quality/gates/conformance.mjs paths      only the cross-path sweep
 //   make conformance
 //
-// WHY THIS EXISTS. Nine framework bugs were found by hand while authoring (docs/MISTAKES.md #19-27)
+// WHY THIS EXISTS. Nine framework bugs were found by hand while authoring (engine-doctrine/MISTAKES.md #19-27)
 // and eight of them share one signature: the engine ACCEPTS an input and then silently ignores or
 // substitutes it. `radius` on an image did nothing unless `ken` was also set. `slideL` was in a
 // schema label but no such anim exists, so it resolved to `fade`. The `cuts` array was never read by
@@ -329,6 +329,6 @@ else console.log(`CONFORMANCE FINDINGS (${findings.length})\n`);
 gf.emit();
 if (findings.length) {
   console.log('Each finding is one of: unimplemented vocabulary, a prop accepted and discarded, or a');
-  console.log('constructor that forgot a prop. Triage against docs/MISTAKES.md #19-27 before fixing.');
+  console.log('constructor that forgot a prop. Triage against engine-doctrine/MISTAKES.md #19-27 before fixing.');
 }
 process.exit(findings.length ? 1 : 0);

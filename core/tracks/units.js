@@ -22,7 +22,7 @@ export const PROPS = {
   circle: {}, fx: {}, ransom: {},
 };
 
-// A split group's whole arrival must read as ONE beat, not a typewriter: docs/RULES caps the total
+// A split group's whole arrival must read as ONE beat, not a typewriter: engine-doctrine/RULES caps the total
 // stagger (last unit's delay) at 0.5s. A flat per-unit theme delay was authored for short headlines and
 // silently blew past that on a long one (a 20-char headline at the theme's 0.05s/unit already runs 0.95s
 // of pure delay before its last glyph even starts moving). Only the UNAUTHORED case is scaled: an author

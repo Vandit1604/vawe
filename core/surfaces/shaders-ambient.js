@@ -23,7 +23,7 @@ import { defineRegistry } from '../registry/registry.js';
 // EACH FIELD DESCRIBES ITSELF, and the ORDER IS THE WIRE FORMAT: the index of a name here is the
 // `u_fx` the fragment shader branches on, so this map is read positionally as well as by key and a
 // name may not be moved or inserted mid-list. It was a bare array, so 17 of the 18 rendered their
-// blurb as an em-dash in docs/EFFECTS.md and on the site. A capability an author is never shown and
+// blurb as an em-dash in engine-doctrine/EFFECTS.md and on the site. A capability an author is never shown and
 // therefore never reaches for. Same shape as THREE_SCENES (core/three-scenes.js): the map is the
 // source, the array is derived, and the two cannot drift because one is computed from the other.
 export const AMBIENT_SHADERS = {
@@ -47,7 +47,7 @@ export const AMBIENT_SHADERS = {
   domainWarp: 'marbled ink: fBm sampled through a domain that is itself two levels of fBm, so the field folds back over itself. the classic warp, and the only field here with real interior structure',
   voronoi: 'cellular (Worley) noise: seeded cells drifting on their own loops, each one flat-tinted, with a lit line along every shared border',
   metaballs: 'five signed-distance circles merging and parting on a polynomial smooth minimum, so they fuse into one body instead of overlapping',
-  bands: 'a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; docs/LIGHTFIELD.md',
+  bands: 'a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; engine-doctrine/LIGHTFIELD.md',
   godRays: 'shafts of light: sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point. it is BRIGHT through the middle, so drop `intensity` toward 0.4 before putting white type over it',
   curlSmoke: 'a rising plume of ink or smoke that rolls into vortices as it climbs, its filaments stretching and folding. slow, continuous, and never repeating; the one field here with real fluid motion rather than a drifting pattern',
 };
@@ -217,7 +217,7 @@ void main(){
     // multiplied by 5: periods of 11.4 to 20.9s, deliberately just SLOWER than the reference band
     // because a mesh gradient run inside 12s sloshes, and a backdrop that draws the eye has stopped
     // being a backdrop. The layer's own speed prop still scales this; it is now a correction, not a
-    // prerequisite. docs/CRAFT/PARITY-AUDIT.md, docs/MISTAKES.md #542.
+    // prerequisite. engine-doctrine/CRAFT/PARITY-AUDIT.md, engine-doctrine/MISTAKES.md #542.
     // (No backticks in here: this whole shader is a JS template literal and one would end it.)
     col = mix(c0, c1, smoothstep(0.0,1.0,uv.y));          // gentle base wash
     col = mix(col, c2, blob(p, vec2((0.30+0.16*sin(t*0.50))*ar, 0.34+0.13*cos(t*0.40)), 2.4)*0.8);

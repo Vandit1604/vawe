@@ -11,7 +11,7 @@ object_last: the same shot as the first frame, measured correctly
 duration: 15.0s
 format: 1080x1920
 destination: feed
-source: docs/MISTAKES.md #211 (the layout audit measured a rotating layer's empty corners, not the ink it draws)
+source: engine-doctrine/MISTAKES.md #211 (the layout audit measured a rotating layer's empty corners, not the ink it draws)
 ---
 
 <!--

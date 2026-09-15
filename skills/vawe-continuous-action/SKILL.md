@@ -1,6 +1,6 @@
 ---
 name: vawe-continuous-action
-description: "Turn a one-line brief into a SHOOTABLE plan for a short product film built as ONE continuous action. This is ONE of the ~18 devices in docs/CRAFT/FILM-STRUCTURE.md, the right one when the film has a single subject and a single process; read that catalogue first and pick. Load this once you have picked it, for a launch/promo/teaser under ~15s. Teaches the continuous-object spine, diegetic motion, the second-by-second budget, and emits a storyboard that make storyboard-check and make intent already consume."
+description: "Turn a one-line brief into a SHOOTABLE plan for a short product film built as ONE continuous action. This is ONE of the ~18 devices in engine-doctrine/CRAFT/FILM-STRUCTURE.md, the right one when the film has a single subject and a single process; read that catalogue first and pick. Load this once you have picked it, for a launch/promo/teaser under ~15s. Teaches the continuous-object spine, diegetic motion, the second-by-second budget, and emits a storyboard that make storyboard-check and make intent already consume."
 ---
 
 # vawe-continuous-action - plan the film as one action
@@ -37,7 +37,7 @@ the states and the transform it built are the RIGHT ones, which no scaffold can 
 ## Before you use this skill: it is one device, not the law
 
 This skill was written from one reference and then treated as a floor for every short film. It is not.
-[`docs/CRAFT/FILM-STRUCTURE.md`](../../docs/CRAFT/FILM-STRUCTURE.md) catalogues about eighteen devices
+[`engine-doctrine/CRAFT/FILM-STRUCTURE.md`](../../engine-doctrine/CRAFT/FILM-STRUCTURE.md) catalogues about eighteen devices
 that hold a short film together, across four registers: spatial (a match cut, a oner, camera travel,
 masking, cloning, a dolly-zoom, and this one), verbal and aural (an unfinished sentence, a sound bridge,
 a bookend, an open question), temporal (metric cutting, rhythmic cutting, a track that IS the structure),
@@ -389,19 +389,19 @@ Then, and only then, write JSON.
 
 ## Where this sits
 
-- [`docs/CRAFT/FILM-STRUCTURE.md`](../../docs/CRAFT/FILM-STRUCTURE.md) is the catalogue this skill
+- [`engine-doctrine/CRAFT/FILM-STRUCTURE.md`](../../engine-doctrine/CRAFT/FILM-STRUCTURE.md) is the catalogue this skill
   is one entry in, with the sources and the six questions that pick a register. Read it BEFORE this one.
 - [`vawe-video-planning`](../vawe-video-planning/SKILL.md) collects the brief, studies the brand
   and locks the palette, fonts, copy and lock sheet. Run it first. This skill replaces its Step 3
   storyboard for any film under ~15s **whose subject is one thing changing**.
 - [`recipes/README.md`](../../recipes/README.md) gives the motion *inside* a beat, measured off a
   real film. Use it after the spine is fixed, never to choose the spine.
-- [`docs/CRAFT/TRANSITIONS.md`](../../docs/CRAFT/TRANSITIONS.md) picks the seam once you know
+- [`engine-doctrine/CRAFT/TRANSITIONS.md`](../../engine-doctrine/CRAFT/TRANSITIONS.md) picks the seam once you know
   the relationship. Here the relationship is always "the X becomes the Y".
-- [`docs/CRAFT/DIRECTION.md`](../../docs/CRAFT/DIRECTION.md) is the cross-cutting spine, and
-  [`docs/CRAFT/RECREATION.md`](../../docs/CRAFT/RECREATION.md) is the loop for copying a
+- [`engine-doctrine/CRAFT/DIRECTION.md`](../../engine-doctrine/CRAFT/DIRECTION.md) is the cross-cutting spine, and
+  [`engine-doctrine/CRAFT/RECREATION.md`](../../engine-doctrine/CRAFT/RECREATION.md) is the loop for copying a
   specific reference shot for shot.
 - [`vawe-effects`](../vawe-effects/SKILL.md) and [`vawe-camera`](../vawe-camera/SKILL.md) pick the
   mechanism per state change.
 - After rendering: `make seam-check`, then `make judge`, then the critics in
-  [`docs/CRAFT/SUBAGENTS.md`](../../docs/CRAFT/SUBAGENTS.md).
+  [`engine-doctrine/CRAFT/SUBAGENTS.md`](../../engine-doctrine/CRAFT/SUBAGENTS.md).

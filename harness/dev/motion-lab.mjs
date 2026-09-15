@@ -9,7 +9,7 @@
 //
 // variants.json: { "<name>": { "<beat number>": "<selector>@<kind>:<band>", ... }, ... }. A variant
 // touches ONLY the named beats' `motion:` line (harness/lib/contract.mjs parseMotion), because that is
-// the one knob docs/MISTAKES.md #608 did NOT already rule out: it proved structure (a shared fragment,
+// the one knob engine-doctrine/MISTAKES.md #608 did NOT already rule out: it proved structure (a shared fragment,
 // a keyed object chain) moves the floor by nothing, so what is left to test is density, the number and
 // placement of keyed reveals per second. An implicit "base" variant (no edits) always runs first, so
 // every named variant is read against the unmodified film.
@@ -156,7 +156,7 @@ function printTable(rows) {
   console.log('');
 }
 
-// ── self-test: reproduce docs/MISTAKES.md #608 (the A/B/C structural experiment) end to end ────────
+// ── self-test: reproduce engine-doctrine/MISTAKES.md #608 (the A/B/C structural experiment) end to end ────────
 //
 // A: two beats, a fragment each, torn down and rebuilt at the cut. B: the same two beats sharing ONE
 // fragment (acrossBeats survives the cut), no object. C: B plus a keyed object chain across the cut
@@ -171,7 +171,7 @@ async function selfTest() {
 
   const frontmatter = `---\n`
     + `message: "motion-lab self-test: structure alone does not raise the local-motion floor."\n`
-    + `audience: "internal, docs/MISTAKES.md #608"\n`
+    + `audience: "internal, engine-doctrine/MISTAKES.md #608"\n`
     + `arc: "hold -> hold"\n`
     + `format: 1920x1080\n`
     + `theme: "themes/vawe.json"\n`
@@ -246,7 +246,7 @@ async function selfTest() {
     console.error(`✗ self-test: a variant failed to render, see the table above. Cannot judge dead-window counts.`);
     process.exit(1);
   }
-  console.log(`  measured dead windows: A=${dead[0]} B=${dead[1]} C=${dead[2]} (docs/MISTAKES.md #608: A=9 B=9 C=10)`);
+  console.log(`  measured dead windows: A=${dead[0]} B=${dead[1]} C=${dead[2]} (engine-doctrine/MISTAKES.md #608: A=9 B=9 C=10)`);
   const reproduced = dead[0] === 9 && dead[1] === 9 && dead[2] === 10;
   if (reproduced) {
     console.log('  ✓ motion-lab self-test: reproduced the exact #608 figures (9, 9, 10)');

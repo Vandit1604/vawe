@@ -83,7 +83,7 @@ pure.
 
 ## Adding one
 
-1. `make study` the reference at a dense rate (`docs/CRAFT/REFERENCE-STUDY.md`).
+1. `make study` the reference at a dense rate (`engine-doctrine/CRAFT/REFERENCE-STUDY.md`).
 2. Find the moment, name the second, look at the frames around it.
 3. Measure the params off those frames. Write the entry with its `sources`.
 4. Rebuild the moment from the recipe and put it beside the reference.

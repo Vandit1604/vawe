@@ -12,7 +12,7 @@
 //     stock card tells you nothing about `metallic` behind YOUR terminal at 7.7s, so every candidate is
 //     the real scene with one key changed and nothing else.
 //   · A STILL HIDES SPEED, SCALE AND DIRECTION. A backdrop was once "matched" on one frame and was, in
-//     motion, twice too fast with folds half the size (docs/MISTAKES.md #155). So each candidate is a
+//     motion, twice too fast with folds half the size (engine-doctrine/MISTAKES.md #155). So each candidate is a
 //     ~2s clip centred on `--at`, never an image.
 //   · IT NEVER OFFERS SOMETHING THAT WILL NOT WORK. Every patched scene is graded by `bgErrors`
 //     (core/validate.mjs), the same function `make validate` runs, and by `checkCuts`
@@ -165,7 +165,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 
   // ---- which bg window paints `--at` -----------------------------------------------------------------
   // The joints are resolved by the ENGINE'S owner (core/junctions.js), never re-derived here: a second
-  // copy of "where does this film turn" is the drift docs/MISTAKES.md #358 is about.
+  // copy of "where does this film turn" is the drift engine-doctrine/MISTAKES.md #358 is about.
   const bg = Array.isArray(scene.bg) ? scene.bg : [];
   if (!bg.length) die(`this scene declares no \`bg\`, so there is no backdrop to offer alternatives for.`);
   let bound;
@@ -253,7 +253,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     let L; try { L = lookOf(name); } catch (e) { continue; }     // a preset this palette cannot build is not an option
     const warnings = [];
     // `opts` is a PER-PRESET vocabulary. Carrying a `liquid` window's scale/warp onto `paperDots` is a
-    // key nothing reads, which core/backgrounds.js throws on by design (docs/MISTAKES.md #157). So the
+    // key nothing reads, which core/backgrounds.js throws on by design (engine-doctrine/MISTAKES.md #157). So the
     // patch removes them and says so, rather than offering a candidate that dies at boot.
     const dropOpts = win.opts != null && bgOverErrors(L.spec, win.opts).length > 0;
     if (dropOpts) warnings.push(`this window's \`opts\` (${Object.keys(win.opts).join(', ')}) are knobs of `

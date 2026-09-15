@@ -4,7 +4,7 @@
 //
 // It lives here because three scripts had grown their own: beatmap.mjs, sfx-audit.mjs, and this
 // module's first draft. Three readers is how you end up with one that only understands 16-bit and
-// calls every other file "unreadable" (docs/MISTAKES.md #56).
+// calls every other file "unreadable" (engine-doctrine/MISTAKES.md #56).
 import fs from 'node:fs';
 
 /** readWav(path) → { sampleRate, channels, bits, frames, mono: Float64Array } (mono = channel mean) */

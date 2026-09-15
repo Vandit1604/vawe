@@ -63,7 +63,7 @@ const strict = process.argv.includes('--strict');
 
 // EVERY RULE PROVES ITSELF BEFORE IT IS TRUSTED. `fires` must produce a finding, `clean` must not. The
 // second half is the one that matters: a rule that flags everything is not strict, it is broken, and
-// that is how 21 false findings shipped from the detector this replaces (docs/MISTAKES.md #338).
+// that is how 21 false findings shipped from the detector this replaces (engine-doctrine/MISTAKES.md #338).
 if (process.argv.includes('--self-test')) {
   let bad = 0;
   console.log(`\n  designspec rules · self-test · ${RULES.length} rule(s)\n`);
@@ -154,7 +154,7 @@ const scanTargets = [...flat, ...(data.bg || [])];
 // core/theme-contract.js, emitted as `--font-num` by core/boot.js, dispatched by core/layers/util.js,
 // and listed in the scene schema's `font` enum, and every shipped theme sets it. Leaving it out here
 // made this gate report a correctly-themed tabular-figures layer as off-spec, which is a gate inventing
-// a finding: the only way to satisfy it was to put the numbers in the wrong face. docs/MISTAKES.md #245.
+// a finding: the only way to satisfy it was to put the numbers in the wrong face. engine-doctrine/MISTAKES.md #245.
 const ROLES = new Set(['sans', 'serif', 'mono', 'num']);
 const specRadii = data.spec && Array.isArray(data.spec.radii) ? new Set(data.spec.radii.map(String)) : null;
 const specShadows = data.spec && Array.isArray(data.spec.shadows) ? new Set(data.spec.shadows.map(String)) : null;
@@ -276,7 +276,7 @@ if (!allowed.has('ruled-grid')) {
     if (gridSeen.has(where)) return; gridSeen.add(where);
     findings.push({ sev: 'ruled-grid', msg: `${where} · ${how}. A ruled line grid is a design tool's canvas: `
       + `it makes the film read as a mock-up of itself. Nothing in the engine draws one unless asked, so either `
-      + `delete it or waive it with a \`_why\` saying what the grid is doing. See docs/CRAFT/SURFACES.md.` });
+      + `delete it or waive it with a \`_why\` saying what the grid is doing. See engine-doctrine/CRAFT/SURFACES.md.` });
   };
   for (const l of scanTargets) {
     const kv = []; strings(l, '', kv);
@@ -328,7 +328,7 @@ if (!findings.length) { console.log(`  ✓ on-spec: every colour is a token or a
     + `${tokenLockRan ? '' : ' (dead-token lock did not run, see above.)'}\n`); process.exit(0); }
 console.log(`  ${findings.length} off-spec value(s):`);
 // `sev` here has always been the finding CODE, not a severity. It is recorded under its real name so
-// author-check can read the code off a structure instead of the printed line (docs/MISTAKES.md #401).
+// author-check can read the code off a structure instead of the printed line (engine-doctrine/MISTAKES.md #401).
 const F = gateFindings({ scene: file, indent: '    ' });
 for (const f of findings) F.warn(f.sev, f.msg);
 F.emit();

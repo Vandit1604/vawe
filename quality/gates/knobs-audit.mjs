@@ -23,7 +23,7 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 // guard can only prove the ones whose resolution is a pure function: `kinetic` (u, opts → keyframes)
 // and `look` (name, opts → filter + overlays). `three`, `raymarch`, `ambient` and `sting` resolve
 // inside a live scene, so a knob of theirs that does nothing still passes here.
-// `look` was added in docs/MISTAKES.md #365, after four of its six advertised knobs turned out to
+// `look` was added in engine-doctrine/MISTAKES.md #365, after four of its six advertised knobs turned out to
 // change NOTHING on any of the 31 looks. The manifest had been lying to authors for a year, in the
 // same file this guard reads, one family across, and the guard was scoped to `kinetic` alone.
 

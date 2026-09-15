@@ -1,4 +1,4 @@
-// scripts/site/blocks-docs.mjs: regenerate the block table in docs/BLOCKS.md from the manifest, so the docs
+// scripts/site/blocks-docs.mjs: regenerate the block table in engine-doctrine/BLOCKS.md from the manifest, so the docs
 // never drift from the registry. Replaces everything between <!-- BLOCKS:START --> and <!-- BLOCKS:END -->.
 // Run via `make blocks-docs` (or directly). Deterministic; no network.
 // `--check` (make blocks-docs CHECK=1) reports a stale table and exits 1 instead of writing one. The
@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 
-const DOC = 'docs/BLOCKS.md';
+const DOC = 'engine-doctrine/BLOCKS.md';
 const S = '<!-- BLOCKS:START -->', E = '<!-- BLOCKS:END -->';
 
 // group by family (bare entry first, then its variants) preserving manifest order.

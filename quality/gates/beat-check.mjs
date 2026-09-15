@@ -233,7 +233,7 @@ const backdropMotion = layers.some((L) => L.shader || L.canvasFx || L.three || L
 const movingWindows = bgs.filter((b) => !(typeof b.preset === 'string' && STATIC_PRESETS.has(b.preset)));
 if (bgs.length && movingWindows.length === 0 && duration > 3 && !backdropMotion) {
   const names = [...new Set(bgs.map((b) => b.preset))].join(', ');
-  warn('static-bg', `every bg window in this ${s(duration)} film is a flat field (${names}) and nothing behind the content ever changes. One flat window is a deliberate look; a whole video on one puts the largest area of the frame to sleep. Reach for a moving preset on at least one beat (aurora / mesh / dotmatrix / gradientWash / metallic, see core/backgrounds/index.js), or split \`bg\` into windows with \`t\` so the field shifts with the story. See docs/CRAFT/SURFACES.md.`);
+  warn('static-bg', `every bg window in this ${s(duration)} film is a flat field (${names}) and nothing behind the content ever changes. One flat window is a deliberate look; a whole video on one puts the largest area of the frame to sleep. Reach for a moving preset on at least one beat (aurora / mesh / dotmatrix / gradientWash / metallic, see core/backgrounds/index.js), or split \`bg\` into windows with \`t\` so the field shifts with the story. See engine-doctrine/CRAFT/SURFACES.md.`);
 }
 
 // ---------- 5. beats-wrapped-as-units ----------
@@ -316,7 +316,7 @@ const waived = findings.filter((f) => allow.has(f.code));
 const warns = findings.filter((f) => f.sev === 'WARN' && !allow.has(f.code));
 console.log(`\n  ${fails.length} fail · ${warns.length} warn${waived.length ? ` · ${waived.length} waived` : ''}`);
 // One fact, one owner: the RECORD is the finding and the line below is rendered from it, so
-// author-check reads `code` instead of re-reading this sentence (docs/MISTAKES.md #401).
+// author-check reads `code` instead of re-reading this sentence (engine-doctrine/MISTAKES.md #401).
 const F = gateFindings({ scene: file, indent: '    ',
   line: (r, g) => `    ${g} [${r.code}] ${r.waived ? 'waived via authoring.allow' : r.summary}` });
 for (const f of fails) F.fail(f.code, f.msg);

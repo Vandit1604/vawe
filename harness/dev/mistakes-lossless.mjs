@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Extracts the load-bearing facts from docs/MISTAKES.md so an edit pass can be
+// Extracts the load-bearing facts from engine-doctrine/MISTAKES.md so an edit pass can be
 // proven lossless: every file:line, every #<number> cross-reference (with the
 // clause naming what it was about), every holds: line, every heading, and a
 // count of every number that appears. Run before editing, save the output,
@@ -13,7 +13,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
-const FILE = 'docs/MISTAKES.md';
+const FILE = 'engine-doctrine/MISTAKES.md';
 const BASELINE = 'harness/dev/.mistakes-lossless-baseline.txt';
 
 function extract(text) {

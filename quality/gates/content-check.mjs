@@ -4,7 +4,7 @@
 //   make content-check D=formats/scene/<film>.json REF=<ref>
 //   node quality/gates/content-check.mjs <film.json> --ref <ref> [--pairs 1:1,2:2] [--strict]
 //
-// WHY PER ACT, NEVER A GLOBAL BAR. Measured with harness/media/content.mjs (docs/CRAFT plan,
+// WHY PER ACT, NEVER A GLOBAL BAR. Measured with harness/media/content.mjs (engine-doctrine/CRAFT plan,
 // content-richness): madera's editor and taglines are QUIET (colourfulness "not") and its cards/results
 // acts are DENSE. A film that is quiet where the reference is quiet and dense where it is dense is
 // doing the right thing even if its numbers never match a single fixed threshold; a film that is quiet
@@ -174,7 +174,7 @@ if (isMain) {
       gf.warn('placeholder-surface', `act ${fi} (${act.label}) reads as a flat mock: fill ${ours.fill} (>= `
         + `${PLACEHOLDER.FILL_MIN}), band ${ours.band}, photo ${ours.photo} (< ${PLACEHOLDER.PHOTO_MAX}), `
         + `detail ${ours.detail} (< ${PLACEHOLDER.DETAIL_MAX}). Design the screen: make screen `
-        + '(docs/CRAFT/SCREENS.md) or capture a real one: make capture / make sections.', { at: `act ${fi}` });
+        + '(engine-doctrine/CRAFT/SCREENS.md) or capture a real one: make capture / make sections.', { at: `act ${fi}` });
   }
   gf.emit();
   process.exit(strict && (anyUnder || anyPlaceholder) ? 1 : 0);

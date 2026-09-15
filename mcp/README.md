@@ -26,7 +26,7 @@ What never leaves this machine is the half that makes the output good:
 | Server-side | Why it stays |
 |---|---|
 | `blocks/` (154 implementations) | `expand` inlines them; callers see resulting layers, not factories |
-| `docs/` taste corpus | the judgment, accumulated over 100+ logged mistakes |
+| `engine-doctrine/` taste corpus | the judgment, accumulated over 100+ logged mistakes |
 | 27 gates + the ledger | callers get verdicts, not the rules that produced them |
 | licensed asset packs | gradients and ransom sprites may be USED, never redistributed |
 

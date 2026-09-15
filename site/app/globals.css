@@ -602,7 +602,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .pggrid { display: block; }
 .pgstage { display: block; min-width: 0; }
 /* The field sizes itself against this box: a generator is full-bleed, so the container is what gives
-   it a height. A width with no height collapses an inset:0 child to nothing (docs/MISTAKES.md #261). */
+   it a height. A width with no height collapses an inset:0 child to nothing (engine-doctrine/MISTAKES.md #261). */
 .pgfield {
   position: relative; width: 100%; height: clamp(320px, 56vh, 640px); overflow: hidden;
   border: 1px solid var(--line); border-radius: 16px; background: #05070c;

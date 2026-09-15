@@ -1,7 +1,7 @@
 // harness/author/directions.mjs: THE CREATIVE DIRECTIONS a brief can be taken in.
 //
 // A direction commits to three things at once: the THREAD that holds the film across its cuts
-// (docs/CRAFT/FILM-STRUCTURE.md), the PACE (median beat length, which decides the beat count for a fixed
+// (engine-doctrine/CRAFT/FILM-STRUCTURE.md), the PACE (median beat length, which decides the beat count for a fixed
 // duration), and the LOOK (one of the design systems in presets/). `make concept` generates N of these
 // from one storyboard and MEASURES their divergence with quality/gates/similarity.mjs.
 //

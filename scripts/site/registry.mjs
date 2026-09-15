@@ -41,7 +41,7 @@
 //
 // ── DECISION 2: effects are not items ──
 // An effect is a prop value on a layer (anim, ease, a bg preset), not a thing you place, so it has no
-// install site and nothing to target. They stay in docs/EFFECTS.md, not here. (Beats installed through
+// install site and nothing to target. They stay in engine-doctrine/EFFECTS.md, not here. (Beats installed through
 // this registry too, once; blueprints are retired, recipes/README.md.)
 //
 // -- DECISION 3: a generator is a THIRD kind of item, and its install differs by `produces` --

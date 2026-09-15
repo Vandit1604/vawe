@@ -1,7 +1,7 @@
 // core/color.js: a colour default is a DECISION ABOUT THE THEME, or it is a deliberate constant.
 // Nothing in this engine could tell those apart, so they were all written the same way: a hex.
 //
-// WHAT THAT COST (docs/MISTAKES.md #352, #354, #356). `bgPreset` defaulted its whole palette to
+// WHAT THAT COST (engine-doctrine/MISTAKES.md #352, #354, #356). `bgPreset` defaulted its whole palette to
 // `PAL_PLINTH`, one specific brand's colours, so the engine's own default theme painted in plinthai.xyz
 // blue. `inkflash` defaulted to `#ff742e` settling onto `#1c1613`, themes/brew.json's accent and ink,
 // copied verbatim out of a reference film into a preset every theme may use. Both were fixed by hand,

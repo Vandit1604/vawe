@@ -208,7 +208,7 @@ function linkPathsIn(line, roots) {
 }
 
 /**
- * A doc may NAME a thing in order to say the thing does not exist. `docs/JUDGE.md` records that
+ * A doc may NAME a thing in order to say the thing does not exist. `engine-doctrine/JUDGE.md` records that
  * `CRAFT/AB-JUDGE.md` was never written; `SUBAGENTS.md` says in the same breath that there is no
  * `make ab`. Reporting those is the gate arguing with prose that is already correct, and a gate that
  * argues with correct prose is one an author learns to skip. So a doc may waive one reference, per

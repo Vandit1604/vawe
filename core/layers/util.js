@@ -7,7 +7,7 @@ import { droppedProps } from '../type/sanitize-html.js';
 import { isLook, applyComposite } from '../looks/index.js';
 // isLightBg is core/motion.js's single definition of light-versus-dark, in linear light. Every part of
 // this engine that has to tell a light ground from a dark one asks THAT function; a second hand-kept
-// copy of the question is docs/MISTAKES.md #159.
+// copy of the question is engine-doctrine/MISTAKES.md #159.
 import { isLightBg, parseColor } from '../color/engine.js';
 // The frame authority. One builder, so a kit that has to derive a frame derives the SAME one boot did.
 import { frameOf } from '../layout/safe.js';
@@ -331,7 +331,7 @@ export function createKit(ctx) {
   // sampler2D, so frosted glass and everything in that family was blocked on a structural
   // layer-as-texture change. CSS has had the capability all along and the repo had zero occurrences
   // of it. This is the cheap half: blur/saturate what is behind. It does NOT give radial/zoom/spin
-  // blur, which still need real sampling (docs/ROADMAP.md).
+  // blur, which still need real sampling (engine-doctrine/ROADMAP.md).
   //   glass: true            → a sensible frosted default
   //   glass: 18              → blur radius in px
   //   glass: 'blur(18px) saturate(1.4)'  → the raw filter, for full control
@@ -449,7 +449,7 @@ export function createKit(ctx) {
 
   // ORIGIN-AWARE MOTION: which point a scale or a rotation grows OUT OF.
   //
-  // The outside standards call this the strongest single technique they have (docs/CRAFT/MOTION-STANDARDS.md):
+  // The outside standards call this the strongest single technique they have (engine-doctrine/CRAFT/MOTION-STANDARDS.md):
   // a popover that scales from the button that opened it EXPLAINS where it came from, and one that
   // scales from its own centre explains nothing. The engine writes `transformOrigin` in six files for
   // its own purposes and no layer prop reached any of them, so every scale in every film in this
@@ -514,7 +514,7 @@ export function createKit(ctx) {
   // (opacity, transform, left/top/width/height, zIndex, pointerEvents) or that core/tokens.css kills
   // globally (animation, transition): a build-time write to one of those is silently erased the moment
   // the render advances past frame 0, which is the exact "accepted input the engine then ignores" bug
-  // this feature exists not to be (docs/MISTAKES.md #213, #369, #373, #375).
+  // this feature exists not to be (engine-doctrine/MISTAKES.md #213, #369, #373, #375).
   //
   // camelCase in (`boxShadow`), CSS out: `el.style` is a CSSStyleDeclaration, so assigning its camelCase
   // property IS how a browser accepts a JS write for a hyphenated CSS property, no hand conversion.

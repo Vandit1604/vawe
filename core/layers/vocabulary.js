@@ -92,7 +92,7 @@ export function checkLayer(L, typeProps, where) {
 // checkLayerTree: a layer and every descendant, under the SAME rule. A group child is built by the
 // same builder as a top-level layer (kit.buildLeaf), so it must be judged by the same vocabulary; the
 // nested-group path does not go through buildLeaf at all, which is how nested groups have twice ended
-// up silently supporting less than their leaves (docs/MISTAKES.md #69, #70). Walking the tree from
+// up silently supporting less than their leaves (engine-doctrine/MISTAKES.md #69, #70). Walking the tree from
 // one entry point means there is no second path to forget.
 //
 // `block` / `comp` / `beat` layers are build-time sugar carrying THEIR factory's props, not a

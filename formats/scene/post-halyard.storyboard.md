@@ -21,7 +21,7 @@ craft:
     layout: "centered on the canvas, mark above, wordmark and descriptor stacked below on the same axis: the eye moves down once and stops"
     motion-craft: "a hand-keyed motion track carries anticipation (coil at 0.82 scale, hold, snap to 1.06 on easeOutBack, settle to 1.0 on easeOutCubic, all inside 0.68s) ahead of the mark's own draw-on completing at 1.2s, then a barely-there 1.0-to-1.03 breathe on easeInOutSine through the hold. Not a named preset: AUTHOR THE MOTION"
     keyed-motion: "the anticipation-then-settle track is the one hand-keyed motion in the film; the coil-to-snap segment is dense enough (0.2s) that a curve, not a linear chain, is the right call because it is a physical spring, not a mechanical drag"
-    imagery: "the mark itself is the only picture: an inline svg path (d + viewBox), never a rasterised file (docs/RULES/svg-inline.md)"
+    imagery: "the mark itself is the only picture: an inline svg path (d + viewBox), never a rasterised file (engine-doctrine/RULES/svg-inline.md)"
     show-dont-tell: "n/a at this length: a sting shows the mark, it does not argue a claim"
     sound: "one cue: `swell` (audio.cues[0], t=0.4, gain=0.7) rides the coil-and-draw and collapses on its own decay exactly as the stroke finishes resolving at ~1.2s, so the anticipation is felt as well as seen and the landing has a real sound decision behind it, not silence by default"
     transitions: "none: one beat, no seam to author"

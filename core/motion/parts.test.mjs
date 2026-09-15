@@ -6,7 +6,7 @@
 // both call window.__engine.renderFrame(n)). The fix measures the real path length with
 // getTotalLength() (as core/layers/svg.js's applyDraw already does for its own draw reveal, #581) and
 // tweens/dashes in real units, which gives GSAP's px rounding hundreds of representable steps instead
-// of two. docs/MISTAKES.md #582.
+// of two. engine-doctrine/MISTAKES.md #582.
 //   node core/motion/parts.test.mjs
 import assert from 'node:assert/strict';
 import { PARTS } from './parts.js';

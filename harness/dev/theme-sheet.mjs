@@ -5,7 +5,7 @@
 // second thing to drift.
 //
 // Reads the RESOLVED look (`resolveLook`), not the authored one: `computedLook` now derives scale/cuts/
-// field from a theme's own motion and dominance (docs/CRAFT/THEME-LOOK.md), so the 37 themes with no
+// field from a theme's own motion and dominance (engine-doctrine/CRAFT/THEME-LOOK.md), so the 37 themes with no
 // authored `look` block have a real, non-constant one to show too. Only `backdrop` stays a taste
 // decision that is never computed (the same file explains why), so an un-authored theme's sheet falls
 // back to a single `plain` window rather than refusing outright.

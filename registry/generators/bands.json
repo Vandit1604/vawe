@@ -123,7 +123,7 @@
       }
     ]
   },
-  "docs": "docs/LIGHTFIELD.md",
+  "docs": "engine-doctrine/LIGHTFIELD.md",
   "preview": {
     "url": "https://vawe.dev/playground?gen=bands"
   }

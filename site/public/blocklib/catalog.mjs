@@ -1,6 +1,6 @@
 // blocks/catalog.mjs: the REGISTRY MANIFEST. One data row per named block entry. This is the single
 // source of truth for (a) what the registry contains, (b) how each renders in `make catalog`, and
-// (c) the auto-generated docs/BLOCKS.md table. Adding a block = adding a row here (+ a `variant` branch
+// (c) the auto-generated engine-doctrine/BLOCKS.md table. Adding a block = adding a row here (+ a `variant` branch
 // in its family factory if it's a family.variant). No hand-placement, no per-block catalog code.
 //
 // Entry shape:
@@ -23,7 +23,7 @@ export const CATALOG = [
       { text: '  "theme": "argus",', color: 'var(--up)' }, { text: '}', color: '#8898AA' }] } },
   { name: 'terminal', family: 'terminal', blurb: "a terminal window: a shell command types itself in character by character, then its output prints below",
     props: { w: 540, command: 'make video', output: ['rendering 1950 frames...', 'done → out.mp4'] } },
-  // The two halves of the layers-vs-html head-to-head (docs/MISTAKES.md #429), kept as a matched pair
+  // The two halves of the layers-vs-html head-to-head (engine-doctrine/MISTAKES.md #429), kept as a matched pair
   // on purpose: same subject, one built from layer primitives and one as a hand-authored surface.
   { name: 'terminalPro', family: 'terminalPro', blurb: "a full deploy terminal built from real boxes: typed command, a live percent counter over its track, a file diff, a spinner turning into a checkmark",
     props: { w: 820, command: 'npm run deploy' } },
@@ -377,7 +377,7 @@ export const CATALOG = [
   { name: 'pressButton', family: 'pressButton', blurb: "a CTA button that visibly depresses and springs back when clicked, the payoff for a pointer tap on a button.",
     props: { w: 280, label: 'Start a project', pressAt: 1 } },
 
-  // COMPOSITION, STATE AND PROOF. The gaps an App Showcase storyboard found (docs/ROADMAP.md): no
+  // COMPOSITION, STATE AND PROOF. The gaps an App Showcase storyboard found (engine-doctrine/ROADMAP.md): no
   // container owned a split, no block could move between two states, no screen became another screen,
   // and the proof surfaces proved nothing without a hand-placed caption beside them. Appended at the
   // END for the same reason as every wave before it. The site crops thumbnails by cell index.

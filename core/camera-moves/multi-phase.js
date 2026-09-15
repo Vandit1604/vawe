@@ -13,7 +13,7 @@ export function multiPhase({ start = 0, legs = [], settleEase = 'easeOutCubic' }
     // same line, so the documented "hold" leg (`{dur: 2}` between a push and a settle) was not a hold at
     // all. It panned the camera the whole way back to centre, 180px over 2s in the docstring's own
     // example, a move as large as the push it was supposed to be holding after. The right idiom was
-    // known and applied to one of three axes (docs/MISTAKES.md #197).
+    // known and applied to one of three axes (engine-doctrine/MISTAKES.md #197).
     const prev = kf[kf.length - 1];
     kf.push({ t, s: leg.s ?? prev.s, x: leg.x ?? prev.x, y: leg.y ?? prev.y, ease: last ? settleEase : 'linear' });
   });

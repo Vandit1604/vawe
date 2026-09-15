@@ -35,7 +35,7 @@ const ALL = [];   // every registry built here, so a failed pick can ask the oth
  *     to render the paste `make arsenal` prints. It is a PATH, and two markers say where the NAME goes:
  *     `bg[].preset` (the value of `preset` in an array of objects), `modifiers[]` (the KEY of an object
  *     inside the array), `effector.drives{}` (a KEY in an object map).
- *   opts.catalog: everything docs/EFFECTS.md and the site's arsenal need in order to PUBLISH this
+ *   opts.catalog: everything engine-doctrine/EFFECTS.md and the site's arsenal need in order to PUBLISH this
  *     vocabulary, written here so that adding one is a single edit. See checkCatalog below.
  * There is deliberately no `fallback` option.
  */
@@ -117,7 +117,7 @@ export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog, pitf
  *
  *   title    the section heading, and the thing its id is slugged from
  *   tag      the one-word slot label the catalogue prints beside the heading (`per-layer`, `camera`)
- *   intro    the prose an author reads before choosing. Written for docs/EFFECTS.md
+ *   intro    the prose an author reads before choosing. Written for engine-doctrine/EFFECTS.md
  *   usage    (name, kit) → the JSON snippet an author writes. `kit` is the catalogue's own furniture
  *            (`j`, `text`, `full`), passed in rather than imported so core/ keeps no site dependency
  *   preview  (name, kit) → a whole scene object the site plays, `kit` being { base, HERO, TWO, OVER }
@@ -217,7 +217,7 @@ const nameWords = (name) => new Set(String(name)
  * THE RULE IS DELIBERATELY THE NARROWEST ONE THAT CATCHES THAT. Strip the stopwords, strip every word
  * the name already carries, strip the kind every sibling shares, and refuse only when NOTHING is left. It says nothing about length, about
  * style, or about whether the blurb is any good: a wrong refusal fires at module load and stops the
- * engine, and this repo has deleted two gates for measuring the wrong thing (docs/TASTE.md, the
+ * engine, and this repo has deleted two gates for measuring the wrong thing (engine-doctrine/TASTE.md, the
  * `visual-vocabulary` story). Run over all 445 named things the day it was written, it fired ONCE, on
  * `tilt: "3D tilt-in"`, whose only non-name word is `3D`, which the tokenizer cannot index at all.
  *
@@ -229,7 +229,7 @@ export function checkBlurb(kind, name, blurb) {
   if (typeof blurb !== 'string' || !blurb.trim())
     throw new Error(`${kind} "${name}" has no blurb, wrap it where it is written: `
       + `${name}: withBlurb("what it does, in one line", …). Without one it is absent from `
-      + `\`make effects\`, docs/EFFECTS.md and the site, so nobody can choose it.`);
+      + `\`make effects\`, engine-doctrine/EFFECTS.md and the site, so nobody can choose it.`);
   // What a reader already has before the blurb: the entry's own name, its morphological variants
   // (`fade` → `fades`), and the KIND, which every sibling shares and which therefore separates nothing.
   // Prefix matching in both directions is what makes "the fade cut fades" a restatement rather than
@@ -298,7 +298,7 @@ export function withBlurb(blurb, value) {
 
 /**
  * blurbsOf(kind, entries): the name→blurb map, DERIVED from the entries so the two cannot drift.
- * Refuses at load, naming the entry: the blurb is the row `make effects`, docs/EFFECTS.md and the site
+ * Refuses at load, naming the entry: the blurb is the row `make effects`, engine-doctrine/EFFECTS.md and the site
  * print, so an entry without one exists and cannot be chosen, and that was caught by a gate after the
  * fact instead of at the point of writing.
  */
@@ -315,7 +315,7 @@ export function blurbsOf(kind, entries) {
 export const registries = () => ALL.slice();
 
 /**
- * catalogued(): the registries that publish themselves, in the order docs/EFFECTS.md prints them.
+ * catalogued(): the registries that publish themselves, in the order engine-doctrine/EFFECTS.md prints them.
  *
  * Sorted by slot label and then by title, NOT by definition order. Definition order is module
  * evaluation order, so deleting one unused import from the catalogue script would reshuffle the whole

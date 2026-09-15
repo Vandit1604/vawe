@@ -8,7 +8,7 @@ import { propsOf } from '../registry/props.js';
 // `h` used to be accepted and then ignored: build() set width and not height, and the `.hs-html` wrapper
 // had no height of its own, so hand-authored CSS saying `height:100%` resolved against an auto-height
 // parent and collapsed to its own content height. A layer declaring a 580px box rendered 310px of card
-// and no gate said anything. The silent-substitution class again (docs/MISTAKES.md #210).
+// and no gate said anything. The silent-substitution class again (engine-doctrine/MISTAKES.md #210).
 //
 // `height:100%` on the wrapper is deliberately a no-op when the layer declares no height: 100% against
 // an auto-height parent computes to auto, which is exactly today's behaviour. It changes the render only
@@ -48,7 +48,7 @@ export function build(kit, el, L, { html, src, w, h } = L) {
       + `element simply never does it. A leading minus outside calc() is the usual cause: write `
       + `\`calc(-1 * …)\`, not \`-calc(…)\`.`);
   // scopeStyles hoists the fragment's <style> blocks to the front and scopes each one to this wrapper,
-  // so one layer's class names cannot reach another layer's DOM (docs/MISTAKES.md #425).
+  // so one layer's class names cannot reach another layer's DOM (engine-doctrine/MISTAKES.md #425).
   el.innerHTML = `<div class="hs-html" style="height:100%">${scopeStyles(sanitizeHtml(markup))}</div>`;
 }
 
@@ -63,5 +63,5 @@ export function frame(kit, el, L, t) {
   el.style.setProperty('--t', t.toFixed(4));
 }
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock";

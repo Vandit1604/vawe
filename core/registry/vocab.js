@@ -18,7 +18,7 @@
 //
 // AN UNKNOWN WORD THROWS. It never falls back. That is the whole argument of core/registry.js, and
 // this file is built on it rather than beside it: a silent substitution renders a plausible frame
-// that is not the one asked for, and the author has no way to see it (docs/MISTAKES.md #213 · #367).
+// that is not the one asked for, and the author has no way to see it (engine-doctrine/MISTAKES.md #213 · #367).
 import { defineRegistry } from './registry.js';
 
 // ---- FEEL: a word → an easing name in core/motion.js EASINGS ------------------------------------

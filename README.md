@@ -15,7 +15,7 @@ it renders one video (mp4, H.264 + AAC, portrait / landscape / square). A Go ser
 Chrome to seek an HTML/CSS scene **frame-by-frame** and ffmpeg to encode and mux. No timeline, no
 editor: the JSON *is* the video, and the same input always produces byte-identical output.
 
-![Vawe demo](docs/media/vawe-demo.gif)
+![Vawe demo](engine-doctrine/media/vawe-demo.gif)
 
 <sub>*The Vawe wordmark, typed out from a single JSON scene and rendered deterministically to the frame. See more in the [showcase](https://vawe.dev/showcase).*</sub>
 
@@ -91,7 +91,7 @@ author the JSON  →  make author-check / audit  →  make judge (the vision gat
 ```
 
 Ask an agent to write the scene, grounded in `formats/scene/schema.json` (the contract), the primitive
-vocabulary ([`docs/PRIMITIVES.md`](docs/PRIMITIVES.md)), and the taste system ([`docs/TASTE.md`](docs/TASTE.md)).
+vocabulary ([`engine-doctrine/PRIMITIVES.md`](engine-doctrine/PRIMITIVES.md)), and the taste system ([`engine-doctrine/TASTE.md`](engine-doctrine/TASTE.md)).
 Reflecting a real brand? `make brandspec URL=…` reads its real CSS, `make sections`/`make palette` capture
 and eyedrop it, and `make house-style NAME=…` persists the brand's Design Read so the next video stays
 on-brand automatically.
@@ -103,12 +103,12 @@ system that fights that:
 
 | Layer | What it does |
 |---|---|
-| **[Blocks](docs/BLOCKS.md)** | a 100-entry component registry (charts, cards, code, tweets, terminals, KPIs…). Vetted, deterministic, and **theme-aware** (they reskin to any brand). `make catalog` to browse. |
-| **[Per-brand house style](docs/TASTE.md)** | `make house-style` persists a brand's dominance / faces / palette / signature details / NEVERs so taste is *remembered*, not re-derived each time. |
+| **[Blocks](engine-doctrine/BLOCKS.md)** | a 100-entry component registry (charts, cards, code, tweets, terminals, KPIs…). Vetted, deterministic, and **theme-aware** (they reskin to any brand). `make catalog` to browse. |
+| **[Per-brand house style](engine-doctrine/TASTE.md)** | `make house-style` persists a brand's dominance / faces / palette / signature details / NEVERs so taste is *remembered*, not re-derived each time. |
 | **Composition** | `pin:"thirds-*"`, a 12-column grid, and optical centering. Beats are well-composed by default, not by eyeballing pixels. |
 | **Micro-typography** | optical tracking by size, balanced/pretty wrapping, real kerning + ligatures, on every text layer. |
 | **Motion director** | `make direct` picks cuts/stings per transition from the brand's motion personality, restraint by default. |
-| **Gate ladder** | `validate` → `critique` (value) → `slop` (anti-slop) → `audit` (contrast/overlap) → **`make judge`**. A vision gate that *sees* the rendered frames and scores composition + brand fidelity, catching what static gates can't. See [`docs/JUDGE.md`](docs/JUDGE.md). |
+| **Gate ladder** | `validate` → `critique` (value) → `slop` (anti-slop) → `audit` (contrast/overlap) → **`make judge`**. A vision gate that *sees* the rendered frames and scores composition + brand fidelity, catching what static gates can't. See [`engine-doctrine/JUDGE.md`](engine-doctrine/JUDGE.md). |
 
 ## Determinism
 
@@ -153,7 +153,7 @@ frame looks. They meet at exactly one function.
 **Parallel capture is only correct because `renderFrame(n)` is pure in `n`**, frame 400 is
 byte-identical whether it is rendered first or last, and whether frame 399 was ever rendered at all.
 That single invariant is what every gate ultimately protects. See
-[Determinism](#determinism) below, and [`docs/architecture.html`](docs/architecture.html) for the
+[Determinism](#determinism) below, and [`engine-doctrine/architecture.html`](engine-doctrine/architecture.html) for the
 long-form walkthrough (layer vocabulary, the gate ladder, the render cost model, and the known-weak
 places worth pushing on).
 
@@ -191,7 +191,7 @@ scripts/         CLI tooling, grouped by WHAT YOU ARE DOING:
   media/           fetch or make assets: fonts · sfx · gen-audio · assets · cards
   author/          compose a scene: beats · expand · batch · captions · preview · capture-*
   site/            build the website: site-assets · site-engine · rules-build · blocks-*
-docs/            TASTE.md · PRIMITIVES.md · BLOCKS.md · MOTION-CRAFT.md · JUDGE.md · CRAFT/ · CODEMAPS/
+engine-doctrine/            TASTE.md · PRIMITIVES.md · BLOCKS.md · MOTION-CRAFT.md · JUDGE.md · CRAFT/ · CODEMAPS/
 ```
 
 ## Command reference
@@ -229,10 +229,10 @@ make site-assets [RENDER=1] [CHECK=1]   engine renders → site/public/assets (+
 New here and want to author? Start at **[`QUICKSTART.md`](QUICKSTART.md)** (blank file to rendered
 video in one page), then **[`AGENTS.md`](AGENTS.md)** for the full, tool-neutral authoring doctrine.
 
-Start at **[`docs/TASTE.md`](docs/TASTE.md)** (how to make something good), then
-[`docs/PRIMITIVES.md`](docs/PRIMITIVES.md) (the vocabulary), [`docs/BLOCKS.md`](docs/BLOCKS.md) (the
-registry), [`docs/MOTION-CRAFT.md`](docs/MOTION-CRAFT.md) (motion rules), and
-[`docs/JUDGE.md`](docs/JUDGE.md) (the vision gate). System map: [`docs/CODEMAPS/ARCHITECTURE.md`](docs/CODEMAPS/ARCHITECTURE.md).
+Start at **[`engine-doctrine/TASTE.md`](engine-doctrine/TASTE.md)** (how to make something good), then
+[`engine-doctrine/PRIMITIVES.md`](engine-doctrine/PRIMITIVES.md) (the vocabulary), [`engine-doctrine/BLOCKS.md`](engine-doctrine/BLOCKS.md) (the
+registry), [`engine-doctrine/MOTION-CRAFT.md`](engine-doctrine/MOTION-CRAFT.md) (motion rules), and
+[`engine-doctrine/JUDGE.md`](engine-doctrine/JUDGE.md) (the vision gate). System map: [`engine-doctrine/CODEMAPS/ARCHITECTURE.md`](engine-doctrine/CODEMAPS/ARCHITECTURE.md).
 
 ## Status & license
 

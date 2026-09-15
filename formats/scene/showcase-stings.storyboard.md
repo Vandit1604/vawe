@@ -3,7 +3,7 @@ message: "A sting is punctuation, and punctuation lands on the beat the music al
 audience: "An author about to hang a shader effect on a cut because the cut looked bare."
 arc: "hook → turn → payoff"
 framework: "PAS. problem: a claim with no moment lands nowhere. agitate: the frame is flat where it should be loud. solution: put the joint on the pulse and mark it once."
-threads: "a metric cut rate taken from the track itself (both joints snapped onto beat.beats.json), and a bookend: the panel under the film opens on an empty pulse and closes with both joints standing on it. Both from docs/CRAFT/FILM-STRUCTURE.md: temporal, and conceptual."
+threads: "a metric cut rate taken from the track itself (both joints snapped onto beat.beats.json), and a bookend: the panel under the film opens on an empty pulse and closes with both joints standing on it. Both from engine-doctrine/CRAFT/FILM-STRUCTURE.md: temporal, and conceptual."
 format: 1920x1080
 theme: "themes/vawe.json"
 duration: 8.0s

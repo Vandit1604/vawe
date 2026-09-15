@@ -3,7 +3,7 @@
 // THE DEFECT THIS CLOSES. A `SPECTACLE` line was added to the authoring brief and the storyboard
 // parser reads it. Nothing consumed it. A field an author must fill and no code reads is worse than
 // no field, because the storyboard looks complete and the film is unchanged, the bug class logged
-// most in this repo (docs/MISTAKES.md #213, #369, #373).
+// most in this repo (engine-doctrine/MISTAKES.md #213, #369, #373).
 //
 //   "spectacle": { "at": 6.2, "of": "logo", "device": "flash", "why": "the mark lands" }
 //

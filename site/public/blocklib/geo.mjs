@@ -97,7 +97,7 @@ const titleEl = (title, sub, w) => (title || sub)
 // measured 1.9:1 and the audit refused it.
 //
 // The defect is not the grey. It is a colour decision made against an ASSUMED background, the same
-// class as docs/MISTAKES.md #387, where a preset's lightness was read off a hand-kept name list instead
+// class as engine-doctrine/MISTAKES.md #387, where a preset's lightness was read off a hand-kept name list instead
 // of being measured. A block cannot know what a scene will put behind it, so it must not depend on it.
 // Painting the card removes the question rather than answering it.
 const wrap = ({ x, y, w, html, start, dur, parts }) =>

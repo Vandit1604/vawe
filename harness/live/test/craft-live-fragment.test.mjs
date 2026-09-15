@@ -30,7 +30,7 @@ test('a fragment on the kit ramps is silent', () => {
 test('the pasted stage kit is never counted as the author\'s own CSS', () => {
   // The regression that made this test worth writing: seven fragments pasted the kit WITHOUT its
   // STAGEKIT markers, extractKitBlock returned null, and .kit-card's own box-shadow was reported as
-  // two hand-written shadows on a fragment that has none (docs/MISTAKES.md #594).
+  // two hand-written shadows on a fragment that has none (engine-doctrine/MISTAKES.md #594).
   const src = fs.readFileSync(path.join(ROOT, 'formats/scene/_vawe-oblique.frame.html'), 'utf8');
   assert.match(src, /STAGEKIT:start/, 'the fragment must carry the kit block with its markers');
   assert.equal(run('formats/scene/_vawe-oblique.frame.html').status, 0);

@@ -38,7 +38,7 @@ const REGISTRY = { alongPath, ghost, kick, lag, matte, mixBlend, occlude, plane,
 // already has. schema-drift compares the schema's copy of this list against it in both directions.
 export const FX_TYPES = Object.keys(REGISTRY);
 
-// One line per modifier, beside the registry, each condensed from that module's own header. docs/EFFECTS.md
+// One line per modifier, beside the registry, each condensed from that module's own header. engine-doctrine/EFFECTS.md
 // renders these and quality/gates/lib-test.mjs fails when one is missing.
 //
 // This family is here because it was the LAST place the flat name-keyed map in effects-catalog.mjs could
@@ -83,7 +83,7 @@ export const FX_REGISTRY = defineRegistry('modifier', REGISTRY, { blurbs: FX_BLU
 // An unknown name is a HARD ERROR, never a skipped entry. A modifier that quietly does nothing is the
 // worst shape this repo has: `fx:[{"mixBlned":"screen"}]` would render a frame that looks plausible,
 // pass every gate, and differ from what was asked in a way only the author's memory can catch. Input
-// accepted and then ignored is the bug class logged most here (docs/MISTAKES.md #210 #213 #215 #217).
+// accepted and then ignored is the bug class logged most here (engine-doctrine/MISTAKES.md #210 #213 #215 #217).
 const pick = (name) => {
   if (REGISTRY[name]) return REGISTRY[name];
   throw new Error(`unknown modifier "${name}", known: ${FX_TYPES.join(', ')}. `

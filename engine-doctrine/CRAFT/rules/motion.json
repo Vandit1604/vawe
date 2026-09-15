@@ -1,0 +1,122 @@
+[
+  {
+    "id": "motion.anticipate-default",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "A directional entrance winds up on its own; `anticipate: false` turns it off",
+    "doc": "engine-doctrine/RULES/anticipate-default.md"
+  },
+  {
+    "id": "motion.blur-out-dense",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Blur out when a slide would fight the content",
+    "doc": "engine-doctrine/RULES/blur-out-dense.md"
+  },
+  {
+    "id": "motion.ease-direction",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Entrances ease out, exits ease in, a handover eases in-out",
+    "doc": "engine-doctrine/RULES/ease-direction.md"
+  },
+  {
+    "id": "motion.exit-faster",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "An exit also runs faster than its entrance, derived from the theme's pace (`exitRatioFromMotion`, table below), for emphasis.",
+    "doc": "engine-doctrine/RULES/ease-direction.md"
+  },
+  {
+    "id": "motion.first-arrival",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Nothing arrives at t=0",
+    "doc": "engine-doctrine/RULES/first-arrival.md"
+  },
+  {
+    "id": "motion.handover-glide",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "A becomes handover glides 0.8 to 1.0 seconds, or it reads as a cut",
+    "doc": "engine-doctrine/RULES/handover-glide.md"
+  },
+  {
+    "id": "motion.motion-offsets",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Motion x/y are offsets on the base position, never absolute coordinates",
+    "doc": "engine-doctrine/RULES/motion-offsets.md"
+  },
+  {
+    "id": "motion.paired-directional-exit",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": "enter-and-retreat",
+    "adapt": null,
+    "brief": "Entrances and exits travel in one direction; never enter-and-retreat",
+    "doc": "engine-doctrine/RULES/paired-directional-exit.md"
+  },
+  {
+    "id": "motion.speed-bands",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": "tempo-flat",
+    "adapt": null,
+    "brief": "Pick a named speed band; the slowest beat is at least 3x the fastest",
+    "doc": "engine-doctrine/RULES/speed-bands.md"
+  },
+  {
+    "id": "motion.readable-hold",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": "unreadable-hold",
+    "adapt": null,
+    "brief": "A readable hold stays still long enough to be read",
+    "doc": "engine-doctrine/RULES/readable-hold.md"
+  },
+  {
+    "id": "motion.stagger-total",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": "stagger-total",
+    "adapt": null,
+    "brief": "A staggered group's total arrival stays at or under 0.5 seconds",
+    "doc": "engine-doctrine/RULES/stagger-total.md"
+  },
+  {
+    "id": "motion.no-jolt",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": "velocity-spike",
+    "adapt": null,
+    "brief": "A layer or the camera may not jump more than 600 px/s or 0.6 scale/s between two frames outside a cut.",
+    "doc": "engine-doctrine/RULES/no-jolt.md#a-move-never-jumps-speed-frame-to-frame"
+  }
+]

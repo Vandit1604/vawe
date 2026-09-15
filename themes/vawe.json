@@ -37,7 +37,7 @@
     "durationScale": 0.88,
     "stagger": 0.045,
     "exitRatio": 0.4,
-    "_exitRatio": "the fastest of the seven: this engine is about determinism and speed, and its own theme already runs durationScale 0.88. Asymmetric timing: an entrance is an introduction, an exit is over (docs/CRAFT/MOTION-STANDARDS.md)."
+    "_exitRatio": "the fastest of the seven: this engine is about determinism and speed, and its own theme already runs durationScale 0.88. Asymmetric timing: an entrance is an introduction, an exit is over (engine-doctrine/CRAFT/MOTION-STANDARDS.md)."
   },
   "bg": {
     "accent": "37,99,235",

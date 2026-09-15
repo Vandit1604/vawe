@@ -212,7 +212,7 @@
  document.querySelectorAll('#states button[data-state]').forEach(b=>b.addEventListener('click',()=>setState(b.dataset.state)));
 
  // ---- PLAN: the film as its own frames, not as grey boxes ---------------------------------------
- // The person signing a plan off judges what is in the frame (docs/MISTAKES.md #592), so every beat that
+ // The person signing a plan off judges what is in the frame (engine-doctrine/MISTAKES.md #592), so every beat that
  // names a `fragment:` shows that markup live, on the film's theme. The pane keeps only what that person
  // decides yes or no on; the fields written for the agents that build the film stay in the storyboard.
  const planPath=$('planpath'), planNote=$('plannote'), planBody=$('planbody');
@@ -423,7 +423,7 @@
  // help with. You point at a frame, it renders six real versions of that frame, and you pick one.
  //
  // Every card is a LOOPING CLIP, never a still. A still hides speed, scale and direction, and this repo
- // has been burned by exactly that (docs/MISTAKES.md #155).
+ // has been burned by exactly that (engine-doctrine/MISTAKES.md #155).
  const cands=$('cands'), candStat=$('candstat'), candGo=$('candgo');
  let candBusy=false, candTick=null;
  function candWorking(){
@@ -550,7 +550,7 @@
      +'<path d="'+d+'" class="cgpath" /></svg>';
  }
  // one <select> of the engine's real named easings (Object.keys(EASINGS), never a hand list), or the
- // raw numbers for a bezier ease (docs/PRIMITIVES.md never names draggable-handle math a requirement
+ // raw numbers for a bezier ease (engine-doctrine/PRIMITIVES.md never names draggable-handle math a requirement
  // this panel skips: it takes the four numbers directly, same value the JSON carries).
  function easeControl(path,v){
    if(!MOTION) return '<span class=inone>loading…</span>';
@@ -716,7 +716,7 @@
    if(!L) return showProps('Layer','',null);
    const raw=L.raw||{}, id=raw.id!=null?raw.id:null;
    const end=L.start+L.dur, cams=id?overlappingCamera(L.start,end):[];
-   // one compact fact per move: five separate fld cells do not fit this rail's width (docs/MISTAKES.md
+   // one compact fact per move: five separate fld cells do not fit this rail's width (engine-doctrine/MISTAKES.md
    // pattern: a fixed-width grid squeezed to nothing is the same as not showing the value at all).
    const camRows=cams.map(c=>prow('Camera',fld(c.move+' '+c.from+'→'+c.to+' at '+c.start.toFixed(2)+'s for '+c.dur.toFixed(2)+'s'))).join('');
    const actions='<div class=pactions>'

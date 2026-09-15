@@ -115,7 +115,7 @@ export const MARGIN = 0.06;
  * edge; this constant is the point past which the frame edge eats it. The engine used to inject a
  * `slowPush` to 1.06 into every camera-less scene, which made the relationship between these two 0.06s
  * load-bearing on every film; that injection is gone (a still subject should not zoom), but the ceiling
- * still bounds any push an AUTHOR writes, so cropped pixels never ship (docs/MISTAKES.md #454, #458).
+ * still bounds any push an AUTHOR writes, so cropped pixels never ship (engine-doctrine/MISTAKES.md #454, #458).
  *
  * The arithmetic, once, so it is not re-derived: `#cam` scales about the centre of the viewport, so a
  * point at the safe edge sits `dim * (0.5 - MARGIN)` from that centre and lands at `dim * (0.5 -
@@ -350,7 +350,7 @@ export function captionBand(W, H, destination = 'web', skin = 'any', caps = []) 
 // "you asked for tiktok chrome on a 16:9 canvas" out loud instead of quietly producing a strange box.
 // `(DESTINATIONS[d] || {}).native ?? null` until now, so an UNKNOWN destination returned the same
 // `null` as a destination that legitimately has no fixed aspect (web/feed) - the one input validated
-// two different ways nine lines apart from safeArea, which throws. docs/MISTAKES.md #360.
+// two different ways nine lines apart from safeArea, which throws. engine-doctrine/MISTAKES.md #360.
 export const nativeAspect = (destination) => {
   const d = DESTINATION_REGISTRY.pick(destination);
   return d.native ?? null;   // null still means "this destination serves any canvas"
@@ -378,7 +378,7 @@ export function frameOf(cfg = {}, aspectKey = '') {
 // ── SETTLED, NOT MID-FLIGHT ─────────────────────────────────────────────────────────────────────
 // A layer that SLIDES IN from off-frame is a legitimate entrance; a layer that SETTLES off-frame is a
 // bug. Grading the first produces constant false failures, which is what quality/audit.mjs learned
-// (docs/MISTAKES.md #376): it grades only ARRIVED content, through midMove() and ARRIVED, after
+// (engine-doctrine/MISTAKES.md #376): it grades only ARRIVED content, through midMove() and ARRIVED, after
 // grading mid-entrance boxes reported a correct frame as broken.
 //
 // This is that same rule, read from the JSON instead of from the DOM, and the numbers are audit.mjs's

@@ -5,7 +5,7 @@ import { lit } from '../color/color.js';
 // A canvas cannot read a CSS custom property, so a theme token has to be resolved to components.
 // glowRGB does that against the live theme and caches it (core/filters.js), so the theme is read once
 // at build and never per frame. `#ffffff`/`#111111` were here before: "what colour is the paper" is a
-// BRAND decision, not a physical fact, and it was answered for every brand. docs/MISTAKES.md #364.
+// BRAND decision, not a physical fact, and it was answered for every brand. engine-doctrine/MISTAKES.md #364.
 const THEME_PAPER = () => `rgb(${glowRGB('var(--bg)').join(',')})`;
 const THEME_INK = () => `rgb(${glowRGB('var(--ink)').join(',')})`;
 // core/canvas-fx.js: Tier 2 Canvas-2D per-pixel image passes (halftone, dither, mosaic, …).
@@ -256,7 +256,7 @@ export const canvasFxKey = (src, spec) => JSON.stringify([src, typeof spec === '
 export const CANVAS_FX_NAMES = Object.keys(CANVAS_FX);
 
 // The catalogue row for each pass, derived from the entries so the two cannot drift and refused at load
-// when one is missing. All eight rendered as an em-dash in docs/EFFECTS.md until this existed.
+// when one is missing. All eight rendered as an em-dash in engine-doctrine/EFFECTS.md until this existed.
 export const CANVAS_FX_BLURBS = blurbsOf('canvas fx', CANVAS_FX);
 
 // The words an author types who does not know the pass by name, never printed, only searched.

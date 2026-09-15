@@ -8,7 +8,7 @@ import (
 // The watermark sheet must be sized against the FINAL frame, never the raw captured one. On any
 // non-draft render the captured frame is 2x supersampled, so a sheet sized against it comes out at
 // twice the size and overlay=0:0 keeps only its top-left quarter. Nothing in the pipeline can see
-// that: ffmpeg exits 0, the file plays, and the damage is only in the pixels (docs/MISTAKES.md #225).
+// that: ffmpeg exits 0, the file plays, and the damage is only in the pixels (engine-doctrine/MISTAKES.md #225).
 func TestWatermarkIsSizedAgainstTheFinalFrame(t *testing.T) {
 	const scale = "scale=1080:1920:flags=area"
 	fc := watermarkChain(scale)

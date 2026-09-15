@@ -7,7 +7,7 @@
 //
 // Every stage below already had a command. What did not exist was anything that knew which stage a
 // film was IN, so the order lived only in prose in AGENTS.md, and prose is a suggestion. An author who
-// can quote the order still runs it backwards five hours into a session (docs/MISTAKES.md #591, #595).
+// can quote the order still runs it backwards five hours into a session (engine-doctrine/MISTAKES.md #591, #595).
 //
 // STATE IS DERIVED FROM ARTIFACTS, NEVER STORED. A state file drifts from the repo the moment someone
 // deletes a fragment by hand, and then it is a confident liar. A storyboard that exists cannot lie
@@ -80,10 +80,10 @@ export function stageOf(arg) {
   const S = [
     { id: 'brief', done: fs.existsSync(p.brief) || sbExists,
       why: 'nobody has asked what this film is about. A brief is five lines and any of them missing changes the film.',
-      next: `make quiz NAME=${p.name} URL=<the product site>   (no site? docs/CRAFT/AUTHORING-WALKTHROUGH.md, and write ${path.relative(ROOT, p.brief)} by hand)` },
+      next: `make quiz NAME=${p.name} URL=<the product site>   (no site? engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md, and write ${path.relative(ROOT, p.brief)} by hand)` },
     { id: 'plan', done: sbExists && gatePasses('quality/gates/storyboard-check.mjs', p.sb),
       why: sbExists ? 'the storyboard exists and does not pass its own gate yet.' : 'there is no storyboard. Every role that writes into the film transcribes it, so a gap here becomes an invention further down.',
-      next: sbExists ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}` : `make scaffold OUT=${p.base}.json THEME=<theme> DUR=<seconds>   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, docs/CRAFT/IDEATE.md)` },
+      next: sbExists ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}` : `make scaffold OUT=${p.base}.json THEME=<theme> DUR=<seconds>   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, engine-doctrine/CRAFT/IDEATE.md)` },
     { id: 'approval', done: !!approved,
       why: 'the plan passes and nobody has signed it off. Nothing is rendered until the plan is LOCKED and the user signs off.',
       next: `make studio D=${p.base}.json, then share http://127.0.0.1:8799/studio (it opens on the plan) so anyone can see it, then the USER runs /vawe-approve ${p.name}` },
@@ -112,7 +112,7 @@ export function stageOf(arg) {
 
 /**
  * Every film in the library, staged. Reuses harness/lib/census.mjs's LIBRARY filter rather than a
- * second walk of formats/scene/: one owner for "which files count as a film" (docs/MISTAKES.md #391).
+ * second walk of formats/scene/: one owner for "which files count as a film" (engine-doctrine/MISTAKES.md #391).
  * A film that errors while staging (unparseable storyboard, say) is reported, not thrown, because one
  * bad film should not blind the roster to the rest.
  */
@@ -253,7 +253,7 @@ export function lookBlock(film) {
 // storyboard exists: what this film is, and the one command that starts it.
 function briefFor(q) {
   const matched = route(q);
-  const next = `make quiz NAME=<name> URL=<the product site>   (no site? docs/CRAFT/AUTHORING-WALKTHROUGH.md)`;
+  const next = `make quiz NAME=<name> URL=<the product site>   (no site? engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md)`;
   return { stage: 'brief', request: q, deliverable: matched.name, intake: matched.intake, next };
 }
 

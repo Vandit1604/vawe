@@ -1,0 +1,82 @@
+[
+  {
+    "id": "layout.asymmetric-hero",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Compose asymmetric with one hero (scale contrast), never centered with an equal grid",
+    "doc": "engine-doctrine/CRAFT/LAYOUT.md"
+  },
+  {
+    "id": "layout.two-focal-points",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Two focal points minimum per scene",
+    "doc": "engine-doctrine/CRAFT/LAYOUT.md"
+  },
+  {
+    "id": "layout.safe-zones",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": "safe",
+    "adapt": null,
+    "brief": "Keep essential text/hero inside title-safe ≈ inner 90% of the frame",
+    "doc": "engine-doctrine/CRAFT/LAYOUT.md"
+  },
+  {
+    "id": "layout.archetype-rotation",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": "archetype-repeat",
+    "adapt": "archetype-repeat",
+    "brief": "No layout archetype twice in a row; the storyboard names each beat's archetype",
+    "doc": "engine-doctrine/CRAFT/LAYOUT.md"
+  },
+  {
+    "id": "layout.active-passive-whitespace",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "The empty part of a frame is either doing a job or it is a leftover",
+    "doc": "engine-doctrine/CRAFT/LAYOUT.md#active-vs-passive-whitespace"
+  },
+  {
+    "id": "layout.three-planes",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Three layers minimum per scene. Background treatment, foreground content, accent elements",
+    "doc": "engine-doctrine/CRAFT/LAYOUT.md"
+  },
+  {
+    "id": "layout.state-the-canvas",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "State the canvas, or the film renders portrait",
+    "doc": "engine-doctrine/RULES/state-the-canvas.md"
+  },
+  {
+    "id": "layout.video-scale",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Size for video, not for the web",
+    "doc": "engine-doctrine/RULES/video-scale.md"
+  }
+]

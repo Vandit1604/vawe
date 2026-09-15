@@ -3,7 +3,7 @@
 #
 # Every target here is .PHONY (see below): nothing in this file is a build rule make can skip when
 # nothing changed. This is a command catalogue with memorable names, not a dependency graph, and
-# that is deliberate: see docs/MAKEFILE-AUDIT.md for why it stays a Makefile despite that.
+# that is deliberate: see engine-doctrine/MAKEFILE-AUDIT.md for why it stays a Makefile despite that.
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
@@ -39,9 +39,9 @@ audio: ## [engine] bake every cue + music bed from PARAMETERS (core/audio/kit.mj
 	node generators/media/audio-bake.mjs
 
 # make audio-bed D=<file> [WRITE=1]: resolve `audio.music:"auto"` to a concrete bed from the scene's
-# profile (docs/CRAFT/SOUND.md via core/audio/select.js). Prints by default; WRITE bakes it in place,
+# profile (engine-doctrine/CRAFT/SOUND.md via core/audio/select.js). Prints by default; WRITE bakes it in place,
 # because the render binary has no JS pre-pass and would read "auto" as a filename → silence.
-audio-bed: ## [dev] resolve `audio.music:"auto"` to a concrete bed from the scene's profile (docs/CRAFT/SOUND.md via
+audio-bed: ## [dev] resolve `audio.music:"auto"` to a concrete bed from the scene's profile (engine-doctrine/CRAFT/SOUND.md via
 	node core/audio/select.js $(D) $(if $(filter 1,$(WRITE)),--write)
 
 # make audio-check D=<file> [STRICT=1]. THE SOUND GATE: is this film's silence a decision or an
@@ -106,7 +106,7 @@ beatsync: ## [dev] snap the scene's cuts and seams onto the track's beat grid so
 # a downloaded file named `click` turned out to be 19.6 seconds long and nothing noticed (MISTAKES #51).
 
 # make sfx-check: is each sound effect the SHAPE its role claims? A 19.6s file named `click` is how
-# a typed line came out sounding like a passing train (docs/MISTAKES.md #51).
+# a typed line came out sounding like a passing train (engine-doctrine/MISTAKES.md #51).
 # make spectrum MUSIC=assets/music/x.wav [FPS=30]: bake per-frame band energy beside a track, so
 # layers can react to the music while renderFrame(n) stays a pure table lookup.
 spectrum: ## [dev] bake per-frame band energy beside a track (MUSIC=<file> [FPS=30])
@@ -133,10 +133,18 @@ dead-branch: ## [maintenance] a ternary whose arms are identical: a decision tha
 doc-refs: ## [maintenance] every `make <target>` and every repo path the docs NAME must exist, and every Makefile recipe must
 	@node quality/gates/doc-refs.mjs $(if $(JSON),--json,)
 
-# make rung: which rules in CLAUDE.md and docs/CRAFT are enforced by something, and which are only prose?
+# make skill-reach: does anything actually route an agent to this skill? doc-refs checks that a link
+# resolves and discovery checks that a registry entry can be found; neither checked whether a
+# skills/*/SKILL.md is ever POINTED AT. vawe-review-loop carried the judge loop's stopping rule and
+# nothing named it from AGENTS.md, engine-doctrine/CRAFT/ROUTING.md, the Makefile, or another skill,
+# so it was unreachable, same failure class as an unrouted doc, one layer up.
+skill-reach: ## [maintenance] every skills/*/SKILL.md is routed to from AGENTS.md, ROUTING.md, the Makefile, or another skill
+	@node quality/gates/skill-reach.mjs $(if $(JSON),--json,)
+
+# make rung: which rules in CLAUDE.md and engine-doctrine/CRAFT are enforced by something, and which are only prose?
 # Every non-[eye] tag has to NAME its mechanism, and the named gate, hook, command or file:line has to
 # exist. LIST=1 prints the [eye] worklist instead; STAMP=1 records today's [eye] count as the ceiling.
-rung: ## [maintenance] which rules in CLAUDE.md and docs/CRAFT are enforced by something, and which are only prose?
+rung: ## [maintenance] which rules in CLAUDE.md and engine-doctrine/CRAFT are enforced by something, and which are only prose?
 	@node quality/gates/rung.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp) $(if $(JSON),--json,)
 
 # make docs-drift: ROADMAP/PRIMITIVES list shipped effects as missing, or quote a stale count. It decayed this way twice and
@@ -148,11 +156,11 @@ docs-drift: ## [maintenance] ROADMAP/PRIMITIVES list shipped effects as missing,
 layer-props: ## [check] does the engine READ the props a layer sets on a layer? (D=<file>)
 	@node quality/gates/layer-props.mjs $(D) $(if $(JSON),--json,)
 
-sfx-check: ## [check] is each sound effect the SHAPE its role claims? (docs/MISTAKES.md #51)
+sfx-check: ## [check] is each sound effect the SHAPE its role claims? (engine-doctrine/MISTAKES.md #51)
 	@node quality/gates/sfx-audit.mjs $(if $(JSON),--json,)
 
 # make canvas-purity [M=scene] [D=<file>]: do the shader/paint PIXELS depend only on n? `make probe`
-# compares a DOM signature and structurally cannot see inside a canvas (docs/MISTAKES.md #64).
+# compares a DOM signature and structurally cannot see inside a canvas (engine-doctrine/MISTAKES.md #64).
 canvas-purity: ## [check] do the shader/paint PIXELS depend only on n?
 	@node quality/gates/canvas-purity.mjs $(if $(M),$(M),scene) $(D) $(if $(JSON),--json,)
 
@@ -181,7 +189,7 @@ video: build ## [ship] one self-describing JSON → out/<name>.mp4 Runs the mand
 	. harness/dev/chrome-pin.sh video && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) $(if $(ASPECT),--aspect $(ASPECT))
 	@node quality/gates/render-verify.mjs $(D)
 	@$(if $(NOAUDIT),echo "  · audit skipped (NOAUDIT=1)",echo "" && echo "▶ audit (contrast · size · safe-zone · overlap) …" && node quality/audit.mjs $(D))
-	@echo "" && echo "▶ REQUIRED before shipping: make judge D=$(D)$(if $(VS), VS=$(VS)), then read /tmp/judge/sheet.png vs the rubric (docs/JUDGE.md)."
+	@echo "" && echo "▶ REQUIRED before shipping: make judge D=$(D)$(if $(VS), VS=$(VS)), then read /tmp/judge/sheet.png vs the rubric (engine-doctrine/JUDGE.md)."
 
 # make dev D=<file>: THE ITERATION LOOP. Build, draft-render, open. No gates, no audit, no ladder.
 # This exists because the fast path was already reachable (NOCHECK=1 NOAUDIT=1) and nobody would ever
@@ -255,7 +263,7 @@ demo: ## [dev] scaffold a SPECIMEN demo scene (one subject, one shot) and iterat
 # a real film, not a demo. Writes a scene composed entirely from {type:"beat"} blueprints (directed by
 # construction: it clears sparse-beats, plain-slideshow and no-transition/no-bg-motion on write) plus its
 # `.storyboard.md` sidecar (structurally clean against storyboard-check and craft-checklist). The
-# author's only job afterwards is to replace the `REPLACE:`/`<fill: ...>` markers. docs/CRAFT/BLUEPRINTS.md.
+# author's only job afterwards is to replace the `REPLACE:`/`<fill: ...>` markers. engine-doctrine/CRAFT/BLUEPRINTS.md.
 scaffold: ## [preflight] write a directed, gate-passing scene + storyboard skeleton to start a film from (OUT=, DUR=, THEME=, BEATS=, TYPE=launch|explainer|talking-head|sting|demo|recreation)
 	node harness/author/scaffold.mjs $(if $(OUT),--out $(OUT)) $(if $(DUR),--dur $(DUR)) $(if $(THEME),--theme $(THEME)) $(if $(BEATS),--beats $(BEATS)) $(if $(TYPE),--type $(TYPE))
 
@@ -263,11 +271,11 @@ scaffold: ## [preflight] write a directed, gate-passing scene + storyboard skele
 # (grammar/<ref>.json → grammar/<ref>.prompt.md; refuses with the exact `make study` command if the
 # study is missing). make ideate NAME=<film> IDEA="...": the same shape from an idea, acts left
 # `<fill:>` (formats/scene/<film>.prompt.md); add REF= alongside NAME= to copy a reference's act/joint
-# structure with the content left to fill. docs/CRAFT/IDEATE.md.
+# structure with the content left to fill. engine-doctrine/CRAFT/IDEATE.md.
 ideate: ## [preflight] THE FILM, IN PLAIN WORDS, before any JSON: one prompt an owner reads and edits (REF=, or NAME= IDEA= [REF=]; ASK=1 asks the detail brief, ANSWERS=<file.json> applies it)
 	node harness/author/ideate.mjs $(if $(REF),--ref $(REF)) $(if $(NAME),--name $(NAME)) $(if $(IDEA),--idea "$(IDEA)") $(if $(ASK),--ask) $(if $(ANSWERS),--answers $(ANSWERS))
 
-# THE LOCK-STEP-BEFORE-FAN-OUT CHAIN, for per-scene HTML agents (docs/CRAFT/PER-SCENE-FANOUT.md):
+# THE LOCK-STEP-BEFORE-FAN-OUT CHAIN, for per-scene HTML agents (engine-doctrine/CRAFT/PER-SCENE-FANOUT.md):
 #   make stagekit D=<film>   the shared CSS block every fragment carries verbatim (fragments are @scope-isolated, cannot share a stylesheet)
 #   make contract D=<film>   validate the storyboard's continuous-object handoff chains before any fan-out spends a token
 #   make scenes   D=<film>   PRINT one agent brief per scene (kit + contract + copy + anti-slop + verify cmd); launches nothing
@@ -290,13 +298,13 @@ assemble: ## [preflight] write the scene JSON from the storyboard's contract + t
 # make pitch NAME=<name>: DIVERGE before the storyboard. Prints the pitch protocol (4 questions, 5 concepts
 # on 5 forced axes, the anti-median 0.10 gate, the silhouette check) so the chosen angle is not the median a
 # model would default to. Record the outcome: make pitch NAME=<name> CHOSE="<angle>" LEFT="<median left behind>"
-# writes a receipt (quality/baselines/approved/pitch/<name>.json) and prints the storyboard `angle:` line. docs/CRAFT/PITCH.md.
+# writes a receipt (quality/baselines/approved/pitch/<name>.json) and prints the storyboard `angle:` line. engine-doctrine/CRAFT/PITCH.md.
 pitch: ## [preflight] diverge to 5 concepts under the anti-median gate before authoring (NAME=, CHOSE=, LEFT=)
 	node harness/author/pitch.mjs $(NAME) $(if $(CHOSE),--chose "$(CHOSE)") $(if $(LEFT),--left "$(LEFT)")
 
 # make route Q="<what the user asked>": map a request to ONE vawe deliverable (launch-video / explainer /
 # motion-graphic / recreation / demo) and print that route's intake questions + which blueprints and CRAFT
-# docs to load. Read one small route file, not all of AGENTS.md. docs/CRAFT/ROUTING.md.
+# docs to load. Read one small route file, not all of AGENTS.md. engine-doctrine/CRAFT/ROUTING.md.
 route: ## [preflight] map a request to a vawe deliverable + its intake (Q="...")
 	node harness/author/route.mjs "$(Q)"
 
@@ -427,11 +435,11 @@ frame: ## [dev] one exact frame of the film at D (D=<file.json> N=<n> or N=b<bea
 # make grammar [N=<name>]: what we have learned about how good films are BUILT, from the committed
 # grammar/ store that `make study` writes. No argument prints every reference as one comparison table
 # and names the ones nobody has read.
-# DOC=1 regenerates docs/CRAFT/GRAMMAR.md, the cross-film page, from the same store.
+# DOC=1 regenerates engine-doctrine/CRAFT/GRAMMAR.md, the cross-film page, from the same store.
 grammar: ## [study] what we have learned about how good films are BUILT, from the committed grammar/ store that `make
 	node harness/author/grammar.mjs $(if $(DOC),--doc,$(N))
 
-# make mistakes [Q="…"] [N=496] [FULL=1]: ASK the mistake log. docs/MISTAKES.md is now a three-line
+# make mistakes [Q="…"] [N=496] [FULL=1]: ASK the mistake log. engine-doctrine/MISTAKES.md is now a three-line
 # index (title, lesson, what holds it) per entry; FULL=1 with N=<n> prints that entry's original
 # write-up from the git commit taken just before the index migration.
 mistakes: ## [study] MOVED into `make arsenal MISTAKES=1 Q=...` (W11); still works, one release
@@ -452,7 +460,7 @@ study-verify: ## [check] prove `make study` measures correctly, by running it on
 # make study-check NAME=<name>: is a study COMPLETE, or does it still have something UNSEEN (a unique
 # frame with no page, a page still saying <fill) or UNEXPLAINED (a shot's onScreen/moves/trigger still
 # null)? Reports exactly what is missing and writes grammar/<name>.json's coverage.ledger accordingly;
-# `make ideate` refuses an incomplete study. docs/CRAFT/REFERENCE-STUDY.md
+# `make ideate` refuses an incomplete study. engine-doctrine/CRAFT/REFERENCE-STUDY.md
 study-check: ## [check] is a study COMPLETE: every unique frame paged, every page filled, every shot's prose written?
 	@node quality/gates/study-check.mjs $(NAME)
 
@@ -504,7 +512,7 @@ audit: ## [check] layout audit: overlap / overflow / safe-zone / tight-spacing o
 # make audit-all [SCENE=<name-substring>] [ASPECT=16:9,9:16], the same layout audit, over the WHOLE
 # library. `make audit` grades the one scene you have open, which is a check against NEW defects only:
 # two scenes shipped dark-on-dark and stayed that way because nothing ever asked them again
-# (docs/MISTAKES.md #387). Slow on purpose; an on-demand sweep, never part of the per-edit ladder.
+# (engine-doctrine/MISTAKES.md #387). Slow on purpose; an on-demand sweep, never part of the per-edit ladder.
 audit-all: ## [check] the same layout audit, over the WHOLE library.
 	@node quality/gates/audit-scenes.mjs $(SCENE) $(if $(ASPECT),--aspect $(ASPECT)) $(if $(JSON),--json,)
 
@@ -546,13 +554,13 @@ motion: ## [check] animation-over-time audit: renders every frame headless (no v
 # each layer moves vs holds, its peak position velocity and peak area-change (a scale pulse with no
 # position velocity still shows here), when each peak lands, and whether the motion is monotonic or
 # oscillating. An INSTRUMENT (no pass/fail), sampled not rendered whole, so it costs seconds. Read
-# docs/CRAFT/MOTION-TRACE.md for what it can and cannot see.
+# engine-doctrine/CRAFT/MOTION-TRACE.md for what it can and cannot see.
 motion-trace: ## [check] per-layer velocity/area-change trace over time: an agent's way to SEE motion without watching the video
 	@node quality/gates/motion-audit.mjs $(M) --trace $(if $(D),--data $(D)) $(if $(STRIDE),--stride $(STRIDE)) $(if $(JSON),--json,)
 
 # make conformance [enums|props|paths]: does the engine DO what it says it accepts? Applies every
 # declared enum value and every layer prop, and asserts the OUTPUT CHANGED. Catches the dominant bug
-# class in this repo (docs/MISTAKES.md #19-28): input accepted, then silently ignored or substituted.
+# class in this repo (engine-doctrine/MISTAKES.md #19-28): input accepted, then silently ignored or substituted.
 conformance: ## [check] does the engine DO what it says it accepts?
 	@node quality/gates/conformance.mjs $(P) $(if $(JSON),--json,)
 
@@ -575,7 +583,7 @@ watermark: ## [ship] bake the draft watermark sheet.
 
 # make site-counts: every capability number written on the SITE, checked against the registry it
 # describes. The copy claimed 96 blocks / 44 families / 22 presets / 32 stings long after the
-# registries had moved (docs/MISTAKES.md #114). Hand-typed counts about a growing registry go stale
+# registries had moved (engine-doctrine/MISTAKES.md #114). Hand-typed counts about a growing registry go stale
 # by default; this is what notices.
 site-counts: ## [maintenance] every capability number written on the SITE, checked against the registry it describes.
 	@node quality/gates/site-counts.mjs $(if $(JSON),--json,)
@@ -602,19 +610,19 @@ craft-coverage: ## [maintenance] keep the docs honest: every look/sting in the e
 # make docs, PRINT THE DOC MAP: every written thing in this repo, one line each (reach for it when…,
 # it answers…). Read the line, open only the doc you need. Same map as the `vawe-docs` skill.
 docs: ## [site] PRINT THE DOC MAP: every written thing in this repo, one line each (reach for it when…, it answers…).
-	@cat docs/INDEX.md
+	@cat engine-doctrine/INDEX.md
 
-# make doc-index, regenerate every index view from the per-doc frontmatter: docs/INDEX.md, the
-# `vawe-docs` skill, and the table inside docs/CRAFT/README.md. Run it after editing a doc's `when:` or
+# make doc-index, regenerate every index view from the per-doc frontmatter: engine-doctrine/INDEX.md, the
+# `vawe-docs` skill, and the table inside engine-doctrine/CRAFT/README.md. Run it after editing a doc's `when:` or
 # `answers:`, or after adding a doc. The views are generated so they cannot drift from the docs.
-doc-index: ## [site] regenerate every index view from the per-doc frontmatter: docs/INDEX.md, the `vawe-docs` skill, and
+doc-index: ## [site] regenerate every index view from the per-doc frontmatter: engine-doctrine/INDEX.md, the `vawe-docs` skill, and
 	@node quality/gates/doc-map.mjs --write $(if $(JSON),--json,)
 
 # make transitions [BASIC=1], print THE TRANSITION DATABASE (core/transitions/catalog.js): every transition
-# across all four mechanisms (anim/cut/sting/seam), grouped, basics marked. Decision theory: docs/CRAFT/TRANSITIONS.md.
+# across all four mechanisms (anim/cut/sting/seam), grouped, basics marked. Decision theory: engine-doctrine/CRAFT/TRANSITIONS.md.
 # make transitions D=<film.json>, run the DECISION PROCEDURE per boundary of that film's storyboard: the
 # current transition_in/recipe seam or "nothing", the stated transition_why or "unreasoned", and the top
-# candidates for the relationship (docs/CRAFT/TRANSITIONS.md).
+# candidates for the relationship (engine-doctrine/CRAFT/TRANSITIONS.md).
 transitions: ## [study] print THE TRANSITION DATABASE (core/transitions/catalog.js): every transition across all four
 	@node quality/gates/transitions-catalog.mjs $(D) $(if $(JSON),--json,)
 
@@ -622,7 +630,7 @@ transitions: ## [study] print THE TRANSITION DATABASE (core/transitions/catalog.
 # SEE one transition before authoring: renders a canned two-beat scene (blue A → orange B) through the
 # transition and lays the window out as a labelled filmstrip → /tmp/transition-preview.png. The labels are
 # EASED progress, so `TIMING=linear` vs `smooth` shows as where the motion bunches. Mechanism is inferred
-# from the name when unambiguous (default seam). Inventory: `make transitions`. Theory: docs/CRAFT/TRANSITIONS.md.
+# from the name when unambiguous (default seam). Inventory: `make transitions`. Theory: engine-doctrine/CRAFT/TRANSITIONS.md.
 transition-preview: ## [dev] renders a canned two-beat scene (blue A → orange B) through the transition and lays the window out
 	node harness/author/transition-preview.mjs
 
@@ -630,7 +638,7 @@ transition-preview: ## [dev] renders a canned two-beat scene (blue A → orange 
 # name it in OUR vocabulary: per-frame tracks the moving element and fits the progress curve against the
 # engine's own easings (core/motion/motion.js + core/cuts.js), reporting the nearest preset + residual. Point it
 # at a reference video ("what transition is this?") or at our own render + EXPECT=<preset> ("did my cut
-# render as the curve I authored?"). Dependency-free (ffmpeg + Node). Notes/limits: docs/CRAFT/MEASURE.md.
+# render as the curve I authored?"). Dependency-free (ffmpeg + Node). Notes/limits: engine-doctrine/CRAFT/MEASURE.md.
 measure: ## [study] MEASURE a transition's real motion and name it in OUR vocabulary: per-frame tracks the moving
 	node harness/author/measure-motion.mjs $(VIDEO) $(FROM) $(TO) $(EXPECT)
 
@@ -642,16 +650,16 @@ lib-test: ## [maintenance] motion-primitive asserts + every Makefile target carr
 	@node scripts/site/motion-numbers-catalog.mjs --check
 	@node harness/lib/make-help.mjs --check
 
-# make mistakes-check: is a docs/MISTAKES.md entry a near-verbatim duplicate of an earlier one?
+# make mistakes-check: is a engine-doctrine/MISTAKES.md entry a near-verbatim duplicate of an earlier one?
 # A property only knowable across the whole library, so it is a gate, not a write-site fix (CLAUDE.md).
 # Two verbatim duplicates and a restatement shipped because nobody rereads a 540-entry file before
 # appending; this is the reread, automated. Exits non-zero on a hit.
-mistakes-check: ## [maintenance] is a docs/MISTAKES.md entry a near-verbatim duplicate of an earlier one?
+mistakes-check: ## [maintenance] is a engine-doctrine/MISTAKES.md entry a near-verbatim duplicate of an earlier one?
 	@node quality/gates/mistakes-dupes.mjs $(if $(JSON),--json,)
 
 # make silent-check: is any named vocabulary still resolved with a silent default? A wrong name must
 # not become a plausible substitute; absence may keep its documented default. core/registry/registry.js removes
-# the ability to BUILD such a fallback, this catches one written by hand. docs/MISTAKES.md #376.
+# the ability to BUILD such a fallback, this catches one written by hand. engine-doctrine/MISTAKES.md #376.
 silent-check: ## [maintenance] is any named vocabulary still resolved with a silent default?
 	@node quality/gates/silent-fallback.mjs $(if $(JSON),--json,)
 
@@ -686,13 +694,13 @@ sections: ## [study] capture a website's real sections into assets/brands/<brand
 # make study VIDEO=refs/ref.mp4 [NAME=… THRESH=0.3]: the film-side twin of `make sections`. Reads a
 # REFERENCE video: shot boundaries (ffmpeg scene score), a contact sheet (in/mid/out per shot) and a
 # study.md whose four judgement columns you fill by eye. Writes refs/<name>/ (gitignored: study the
-# grammar, never ship the frames). docs/CRAFT/REFERENCE-STUDY.md
+# grammar, never ship the frames). engine-doctrine/CRAFT/REFERENCE-STUDY.md
 study: ## [study] the film-side twin of `make sections`. STRIPS=<n> adds a contiguous motion strip for the n busiest shots.
 	node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS))
 
 # make mine: cluster every studied grammar/*.json shot by device into named shapes, each with the
 # grammar + shot index that backs it, → grammar/_mined-shapes.json. The receipt beats-mined.mjs's
-# `sources:` lines are read from. docs/CRAFT/BLUEPRINTS.md "Mined blueprints".
+# `sources:` lines are read from. engine-doctrine/CRAFT/BLUEPRINTS.md "Mined blueprints".
 mine: ## [study] cluster every studied grammar/*.json shot by device into named shapes, each with the grammar + shot
 	node harness/author/mine.mjs $(if $(JSON),--json,)
 
@@ -740,7 +748,7 @@ waivers: ## [preflight] every blocking gate can be waived, and a waiver costs no
 waiver-ratchet: ## [check] the waived-rule debt per code, a number that may only fall
 	@node quality/gates/waiver-drift.mjs --ratchet $(if $(STAMP),--stamp,)
 
-# make preflight D=<scene.json>, the nine decisions from docs/CRAFT/README.md put in front of you for
+# make preflight D=<scene.json>, the nine decisions from engine-doctrine/CRAFT/README.md put in front of you for
 # THIS film, plus the arsenal ranked against what the film says it is, then a receipt. It records only
 # with --record: a bare run would otherwise certify the whole library by accident (it did, once, for
 # all 134).
@@ -770,7 +778,7 @@ speed: ## [check] speed readout: start/peak/end px-per-s (scale/s for zoom) per 
 # local-motion floor, or is it a feeling. Assembles, renders and motion-floors the base storyboard plus
 # every named variant (each one a mutation of the beats' `motion:` lines) THE SAME WAY, one table:
 # moves/beat, dead windows, local median, local peak. `make motion-lab --self-test` (no D=) instead
-# reproduces docs/MISTAKES.md #608's A/B/C structural experiment end to end.
+# reproduces engine-doctrine/MISTAKES.md #608's A/B/C structural experiment end to end.
 motion-lab: ## [dev] does a motion change raise the local-motion floor: one table over a base + named variants (D=<storyboard.md> VARIANTS=<variants.json>, or SELFTEST=1)
 	@node harness/dev/motion-lab.mjs $(if $(filter 1,$(SELFTEST)),--self-test,$(D) --variants $(VARIANTS)) $(if $(KEEP),--keep,)
 
@@ -792,7 +800,7 @@ preflight: ## [preflight] the decisions that belong BEFORE the JSON, recorded fo
 # `make legacy` (the ratchet census/adopt/stamp) is RETIRED. quality/gates/legacy-manifest.json and the
 # author-check.mjs ratchet engine that read it are gone: quality/gates/legacy-fold.mjs folded every row
 # into an explicit per-scene `authoring.allow` + `_why`, so `authoring.allow` is the one excuse mechanism
-# left. See docs/TASTE.md "Waivers, not legacy" and AGENTS.md "Waivers, legacy, and the difference".
+# left. See engine-doctrine/TASTE.md "Waivers, not legacy" and AGENTS.md "Waivers, legacy, and the difference".
 
 # make draft D=<scene.json> STAGE=85|95: hand over a draft at a DECLARED level of finish.
 # Without one, review is a guess: a reviewer who thinks they are seeing a ship candidate flags the
@@ -814,7 +822,7 @@ treatment: ## [preflight] WHY this film looks like this, written while the answe
 # The missing first stage: every other stage refines a single idea and nothing ever produced a second
 # one. Each direction commits to a thread, a pace and a look at once, the three decisions that actually
 # change a film, and leaves every word to you, because a tool that invents copy produces options that
-# are all wrong alike. docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md has the threads.
+# are all wrong alike. engine-doctrine/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md has the threads.
 concept: ## [preflight] N DIRECTIONS FOR ONE BRIEF, before any of them is built.
 	node harness/author/concept.mjs $(SB) $(if $(N),--n $(N)) $(if $(SEED),--seed $(SEED)) $(if $(filter 1,$(STRICT)),--strict)
 
@@ -926,7 +934,7 @@ quiz-look: ## [preflight] THE LOOK, SETTLED BY PICTURE.
 
 # make storyboard-check SB=path/to/STORYBOARD.md. The storyboard-as-PROPOSAL gate: a one-sentence
 # message + audience/arc/format/duration, and per beat a type + on-screen cues + a WHY. Enforces that the
-# decisions that make a video good were made and written down BEFORE the JSON. Template: docs/CRAFT/STORYBOARD-TEMPLATE.md
+# decisions that make a video good were made and written down BEFORE the JSON. Template: engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md
 storyboard-check: ## [preflight] The storyboard-as-PROPOSAL gate: a one-sentence message + audience/arc/format/duration, and per
 	@node quality/gates/storyboard-check.mjs $(SB) $(if $(JSON),--json,)
 
@@ -985,10 +993,10 @@ pace-from-vo: ## [check] SCRIPT-FIRST PACING: propose beat start/durations timed
 export-edl: ## [ship] HAND THE FILM TO AN EDITOR: read the RESOLVED timeline (cuts/seams/stings, per-shot windows, layer
 	@node harness/media/export-edl.mjs $(D) $(if $(OUT),--out $(OUT),)
 
-# make sfx-catalog, REGENERATE docs/CRAFT/SFX-CATALOG.md from core/audio/kit.mjs CUES: the "reach for this
+# make sfx-catalog, REGENERATE engine-doctrine/CRAFT/SFX-CATALOG.md from core/audio/kit.mjs CUES: the "reach for this
 # sound" table (family/energy/purpose/placement/pitfall per cue). Fails loudly if a cue has no catalog line,
 # so a new cue cannot ship undocumented. Run after adding or renaming a cue.
-sfx-catalog: ## [engine] REGENERATE docs/CRAFT/SFX-CATALOG.md from core/audio/kit.mjs CUES: the "reach for this sound" table
+sfx-catalog: ## [engine] REGENERATE engine-doctrine/CRAFT/SFX-CATALOG.md from core/audio/kit.mjs CUES: the "reach for this sound" table
 	@node harness/author/sfx-catalog.mjs
 
 # make studio D=formats/scene/<file>.json [PORT=8799]: LIVE scrubbable preview (no mp4 render). Serves
@@ -999,7 +1007,7 @@ sfx-catalog: ## [engine] REGENERATE docs/CRAFT/SFX-CATALOG.md from core/audio/ki
 # EDITING, not just viewing: turn on `key` mode, click a layer's bar, scrub to a frame, drag it on the
 # stage. That writes a motion keyframe into the scene at that frame, surgically, the file's hand
 # formatting survives and a save that changes nothing is a zero-byte diff (harness/author/patch-motion.mjs).
-# `undo` walks back through the session. docs/CRAFT/KEYED-MOTION.md is what you are authoring toward.
+# `undo` walks back through the session. engine-doctrine/CRAFT/KEYED-MOTION.md is what you are authoring toward.
 studio: ## [dev] LIVE scrubbable preview (no mp4 render). Its `plan` state shows the storyboard with every beat's real fragment live in it.
 	node studio/server.mjs $(D)
 
@@ -1151,7 +1159,7 @@ review: ## [engine] One-command health snapshot: lib-test + layout audit + a mas
 # make evals: render the fixed set of eval briefs (quality/runs/evals/briefs/*.json) under the CURRENT
 # engine + rules, into a fresh quality/runs/evals/runs/<timestamp>/ with a contact sheet per brief, one
 # combined sheet, and manifest.json. Asserts LIVENESS only (mp4 exists, duration + dims match the
-# scene): no aesthetic score, a human reads the sheets. Exits 1 if any brief is not live. docs/EVALS.md.
+# scene): no aesthetic score, a human reads the sheets. Exits 1 if any brief is not live. engine-doctrine/EVALS.md.
 evals: build ## [engine] render the fixed set of eval briefs (quality/runs/evals/briefs/*.json) under the CURRENT engine + rules,
 	node harness/dev/evals.mjs
 
@@ -1163,12 +1171,12 @@ evals-compare: build ## [engine] before/after sheets stacked per brief plus comp
 	node harness/dev/evals.mjs --compare --before $(BEFORE) $(if $(AFTER),--after $(AFTER))
 
 # make critics D=<scene.json> [VS=brand] [DECIDERS=1] [RECORD=<panels.json>]: THE ROSTER
-# (docs/CRAFT/SUBAGENTS.md), as an invokable, recorded step. Bare: the six critics' prompts, concrete
+# (engine-doctrine/CRAFT/SUBAGENTS.md), as an invokable, recorded step. Bare: the six critics' prompts, concrete
 # for this film, to launch as parallel Agent calls. DECIDERS=1: the other half, the roles that WRITE
 # into the film, one brief each in dependency order (motion before transitions, because the
 # content-aware cut reads velocity at the joint). RECORD=<file>: given the six verdicts collected into
 # one JSON file, writes the receipt to quality/baselines/approved/panels/<name>.json (stale when the scene changes).
-critics: ## [judge] THE ROSTER (docs/CRAFT/SUBAGENTS.md): critics bare, deciders with DECIDERS=1.
+critics: ## [judge] THE ROSTER (engine-doctrine/CRAFT/SUBAGENTS.md): critics bare, deciders with DECIDERS=1.
 	node harness/author/critics.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(DECIDERS),--deciders) $(if $(RECORD),--record $(RECORD))
 
 # make core-node-boundary: core/ is fetched and evaluated by a BROWSER, so a `node:fs` or
@@ -1217,7 +1225,7 @@ beat-check: ## [check] timeline gate: dead air, empty last frame, empty cut wind
 	node quality/gates/beat-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
 # make impeccable D="a.html b.html": the bundled impeccable anti-slop detector on raw HTML fragments
-# (local, no network, token-efficient). the RENDERED-scene twin of this was retired (docs/MISTAKES.md #340);
+# (local, no network, token-efficient). the RENDERED-scene twin of this was retired (engine-doctrine/MISTAKES.md #340);
 # this is for a hand-written fragment BEFORE it goes into a scene. Build HTML through impeccable, not by eye.
 impeccable: ## [check] impeccable detector on raw HTML fragment(s) (D=<file...>)
 	node skills/impeccable/scripts/detect.mjs --json $(D)
@@ -1229,7 +1237,7 @@ preset-sheets: ## [site] MOVED into `make arsenal PRESETS=1` (W11); still works,
 	node harness/dev/preset-sheets.mjs $(if $(ONLY),--only=$(ONLY))
 
 # make theme-sheet THEME=<name>: one rendered contact sheet for ONE theme's `look` (W8), so a brand's
-# look is a picture, not a JSON. Reuses preset-sheets' own tile machinery. docs/CRAFT/THEME-LOOK.md.
+# look is a picture, not a JSON. Reuses preset-sheets' own tile machinery. engine-doctrine/CRAFT/THEME-LOOK.md.
 theme-sheet: ## [site] MOVED into `make arsenal THEME=...` (W11); still works, one release
 	@echo "  · make theme-sheet moved: use make arsenal THEME=$(THEME)"
 	node harness/dev/theme-sheet.mjs --theme=$(THEME)
@@ -1262,7 +1270,7 @@ blurbs: ## [maintenance] how well does each entry's own blurb retrieve it? (ALL=
 # make track SHAPE=pan TO=-600 DUR=1.25 [D=<scene.json> LAYER=<n>], a hand-keyed motion track from a
 # MEASURED shape rather than a preset name. studio's keyframe mode writes keys by DRAGGING on the stage,
 # which an agent cannot do, so the cheap path existed for a person and not for the author who writes
-# most of these scenes. docs/CRAFT/KEYED-MOTION.md.
+# most of these scenes. engine-doctrine/CRAFT/KEYED-MOTION.md.
 track: ## [dev] MOVED into `make arsenal SHAPE=...` (W11); still works, one release
 	@echo "  · make track moved: use make arsenal SHAPE=$(or $(SHAPE),pan)"
 	node harness/author/track.mjs $(or $(SHAPE),pan) $(if $(TO),--to $(TO)) $(if $(DUR),--dur $(DUR)) \
@@ -1275,12 +1283,12 @@ track: ## [dev] MOVED into `make arsenal SHAPE=...` (W11); still works, one rele
 mcp-smoke: ## [maintenance] end-to-end over the real MCP server: connects, reads the guide, refuses three leak vectors, drafts a scene.
 	node mcp/smoke.mjs --no-render
 
-effects: ## [engine] regenerate docs/EFFECTS.md. The whole arsenal in one place (from the registries)
+effects: ## [engine] regenerate engine-doctrine/EFFECTS.md. The whole arsenal in one place (from the registries)
 	node scripts/site/effects-catalog.mjs
 	node scripts/site/effects-json.mjs
 
 # make effects-json [CHECK=1]. The site's copy of the same arsenal: site/lib/effects.json plus one
-# playable scene per previewable effect. Same family list as docs/EFFECTS.md, imported not restated.
+# playable scene per previewable effect. Same family list as engine-doctrine/EFFECTS.md, imported not restated.
 .PHONY: effects-json
 effects-json: ## [engine] regenerate the /showcase/effects index (and its preview scenes) from the registries
 	@node scripts/site/effects-json.mjs $(if $(CHECK),--check,)
@@ -1318,7 +1326,7 @@ pace: ## [check] preview a scene's duration/pace at a given TEMPO, writes nothin
 paints-nothing: ## [check] does each layer paint anything in its own box? pixel diff, not DOM (D=<file> [STRICT=1])
 	@node quality/gates/paints-nothing.mjs $(D) $(if $(filter 1,$(STRICT)),--strict) $(if $(JSON),--json,)
 
-arsenal-check: ## [engine] fail if the engine exports a capability docs/EFFECTS.md never mentions
+arsenal-check: ## [engine] fail if the engine exports a capability engine-doctrine/EFFECTS.md never mentions
 	@node quality/gates/arsenal-check.mjs $(if $(JSON),--json,)
 
 # discovery: can an author still FIND what the engine can do? Registry blurbs are refused at load, so
@@ -1330,7 +1338,7 @@ discovery: ## [engine] can an author still FIND what the engine can do?
 	@node quality/gates/discovery.mjs $(if $(JSON),--json,)
 
 # no-judge: has the eye actually looked at every film that shipped a render? make judge writes a
-# receipt (docs/JUDGE.md) hashing both the scene JSON and the rendered mp4's own bytes, so it goes
+# receipt (engine-doctrine/JUDGE.md) hashing both the scene JSON and the rendered mp4's own bytes, so it goes
 # stale on either one changing; this ratchets the count of rendered films with no valid one. Not wired
 # into `make ship`/CI: formats/scene and out/*.mp4 are gitignored, so a small or fresh checkout would
 # report a number about its own thinness, not the library (the same reason doc-refs stays out of CI).
@@ -1339,7 +1347,7 @@ no-judge: ## [judge] ratchet: rendered films with no valid judge receipt (--stam
 	@node quality/gates/no-judge.mjs $(if $(STAMP),--stamp,) $(if $(JSON),--json,)
 
 # output-contract: every reporting gate renders through harness/lib/findings.mjs (tight prose + --json).
-# Ratchets the count of gates that still print ad-hoc prose DOWN. docs/CRAFT/COMMAND-OUTPUT.md.
+# Ratchets the count of gates that still print ad-hoc prose DOWN. engine-doctrine/CRAFT/COMMAND-OUTPUT.md.
 # JSON=1 emits the whole migration worklist as findings; --stamp lowers the ratchet after a batch.
 output-contract: ## [maintenance] every reporting gate renders through harness/lib/findings.mjs (tight prose + --json).
 	@node quality/gates/output-contract.mjs $(if $(JSON),--json,) $(if $(STAMP),--stamp,)
@@ -1351,19 +1359,19 @@ output-contract: ## [maintenance] every reporting gate renders through harness/l
 generated-check: ## [maintenance] run every generator, then ask git what moved.
 	@node quality/gates/generated-check.mjs $(if $(WRITE),--write,) $(if $(JSON),--json,)
 
-effects-check: ## [engine] fail if docs/EFFECTS.md is stale vs the registries
+effects-check: ## [engine] fail if engine-doctrine/EFFECTS.md is stale vs the registries
 	node scripts/site/effects-catalog.mjs --check
 
-vocab: ## [engine] regenerate docs/CRAFT/VOCABULARY.md. The plain words (feel/duration/camera) from core/registry/vocab.js
+vocab: ## [engine] regenerate engine-doctrine/CRAFT/VOCABULARY.md. The plain words (feel/duration/camera) from core/registry/vocab.js
 	node scripts/site/vocab-catalog.mjs
 
-vocab-check: ## [engine] fail if docs/CRAFT/VOCABULARY.md is stale vs core/registry/vocab.js
+vocab-check: ## [engine] fail if engine-doctrine/CRAFT/VOCABULARY.md is stale vs core/registry/vocab.js
 	node scripts/site/vocab-catalog.mjs --check
 
-motion-numbers: ## [engine] regenerate the motion-number tables in docs/RULES from core/motion/motion.js + vocab.js
+motion-numbers: ## [engine] regenerate the motion-number tables in engine-doctrine/RULES from core/motion/motion.js + vocab.js
 	node scripts/site/motion-numbers-catalog.mjs
 
-motion-numbers-check: ## [engine] fail if a docs/RULES motion-number table is stale vs the engine
+motion-numbers-check: ## [engine] fail if a engine-doctrine/RULES motion-number table is stale vs the engine
 	node scripts/site/motion-numbers-catalog.mjs --check
 
 critique: ## [check] value-gate, flag hollow/low-value beats (D=<file>)
@@ -1379,7 +1387,7 @@ catalog: build ## [site] render the block registry to paged sheets (browse the a
 	node scripts/site/blocks-catalog.mjs
 	@sh scripts/site/catalog-render.sh
 
-blocks-docs: ## [site] regenerate the docs/BLOCKS.md table from the manifest (CHECK=1 to verify only)
+blocks-docs: ## [site] regenerate the engine-doctrine/BLOCKS.md table from the manifest (CHECK=1 to verify only)
 	node scripts/site/blocks-docs.mjs $(if $(CHECK),--check,)
 
 blocks-json: ## [site] regenerate site/lib/blocks.json (the site's grid) from the manifest (CHECK=1 to verify only)
@@ -1398,7 +1406,7 @@ films-json: ## [site] check site/lib/films.json against the rendered films (WRIT
 # A gate nobody runs is not a gate.
 site-check: scenes-json films-json site-counts ## [site] check every published artifact against its source
 	@# The three GENERATED artifacts that are committed: registry/ (outside agents fetch it),
-	@# docs/BLOCKS.md and site/lib/blocks.json. Each is written by a target somebody has to remember,
+	@# engine-doctrine/BLOCKS.md and site/lib/blocks.json. Each is written by a target somebody has to remember,
 	@# and registry/ had drifted from blocks/catalog.mjs for a week before anything ran this.
 	@node scripts/site/registry.mjs --check
 	@node scripts/site/blocks-docs.mjs --check
@@ -1555,12 +1563,12 @@ cinematic: ## [dev] The CINEMATIC MOTION director: emit the camera-push + per-he
 	node harness/author/cinematic.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
 
 .PHONY: deck
-deck: ## [site] publish docs/animation.html to the site as /deck (site/public/deck.html)
+deck: ## [site] publish engine-doctrine/animation.html to the site as /deck (site/public/deck.html)
 	node scripts/site/deck.mjs
 
 # make lightfield [PRESET=ref|tide|fern] [ARGS='--seed 9 --pattern.kind rings ...']  generate a light
 # field: a seeded, palette-driven backdrop. No PRESET rebuilds all three committed fields into
-# formats/scene/ and shoots a PNG of each into out/. Options and dials: docs/LIGHTFIELD.md.
+# formats/scene/ and shoots a PNG of each into out/. Options and dials: engine-doctrine/LIGHTFIELD.md.
 .PHONY: lightfield
 lightfield: ## [engine] generate a seeded, palette-driven backdrop (PRESET=ref|tide|fern)
 ifdef PRESET

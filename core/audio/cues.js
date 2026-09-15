@@ -10,7 +10,7 @@
 // Cut style -> cue. Consumed for layer `cut` and top-level `cuts`.
 // `none` maps to SILENCE explicitly. It was simply absent, so `CUT_CUE[style] || 'whoosh'` gave a
 // no-transition cut a whoosh - a sound for something the audience never sees. An entry of `null` is a
-// stated decision; a missing key is a gap that the fallback fills with a guess. docs/MISTAKES.md #360.
+// stated decision; a missing key is a gap that the fallback fills with a guess. engine-doctrine/MISTAKES.md #360.
 // EVERY MOVING CUT USED TO POINT AT `whisper`, AND `whisper` NO LONGER EXISTS. When the listening pass
 // deleted the noise cues it did not follow them here, so eleven of these keys named nothing and the
 // clicks (`press`, `tick`, `toggle`) that survived the edit were UI sounds standing in for a cut.

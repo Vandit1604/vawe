@@ -170,7 +170,7 @@ if (groundShare > 0.6) {
 }
 
 // THE SHAPE, NOT A SCORE. Both numbers above are BOUNDS: they say how much this film moves and whose
-// motion it is, and neither says WHEN. Bruce Block's argument (docs/RESEARCH/MOTION-CANON.md, ADOPT 3)
+// motion it is, and neither says WHEN. Bruce Block's argument (engine-doctrine/RESEARCH/MOTION-CANON.md, ADOPT 3)
 // is that a film's visual intensity should follow its story: establish, escalate through the middle,
 // resolve on the payoff. DIRECTION.md section 2 asks the author to accelerate toward the climax and
 // then gives them nothing to look at. The per-sample series was already in hand here and was thrown
@@ -180,7 +180,7 @@ if (groundShare > 0.6) {
 // so any threshold on this curve manufactures a finding on every film that made that choice. This repo
 // has deleted two gates for measuring a proxy for a judgement, and `visual-vocabulary` is the one to
 // remember: it squared a 590x18 rule into 590x590 and credited a hairline with a tenth of the frame
-// (docs/TASTE.md). The eye reads the shape. This only draws it.
+// (engine-doctrine/TASTE.md). The eye reads the shape. This only draws it.
 const FPS = 30;                 // the URL above renders at 30, so a sample index converts back to seconds
 const BLOCKS = '▁▂▃▄▅▆▇█';
 const shape = bare.series;      // the LAYERS alone: the ground's own motion is not the film's energy
@@ -202,7 +202,7 @@ console.log(`    0s${' '.repeat(Math.max(1, shape.length - 2 - end.length))}${en
 console.log(`\n  peak ${peak.toFixed(2)} at ${((shape.indexOf(peak) * bareRun.step) / FPS).toFixed(1)}s.`);
 console.log(`  Read the SHAPE, not the height: does it rise into the payoff, or is the loudest frame in
   the middle? A film whose peak sits in its middle ends twice. Nothing scores this and nothing will:
-  docs/CRAFT/DIRECTION.md section 2, "accelerate toward the climax".`);
+  engine-doctrine/CRAFT/DIRECTION.md section 2, "accelerate toward the climax".`);
 console.log('');
 f.note('energy-shape', `peak ${peak.toFixed(2)} at ${((shape.indexOf(peak) * bareRun.step) / FPS).toFixed(1)}s over ${shape.length} samples, ${dur.toFixed(1)}s runtime`,
   { peak, peakAt: (shape.indexOf(peak) * bareRun.step) / FPS, samples: shape.length });

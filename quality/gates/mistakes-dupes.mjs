@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Gate: flags docs/MISTAKES.md entries whose HEADINGS look like duplicates of an
+// Gate: flags engine-doctrine/MISTAKES.md entries whose HEADINGS look like duplicates of an
 // earlier entry. A property only knowable across the whole library (CLAUDE.md's
 // own test for when a gate belongs): two verbatim duplicates and one restatement
 // (#528 of #196/#280) shipped because nobody rereads a 540-entry file before
@@ -16,7 +16,7 @@ import path from 'node:path';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const MISTAKES_PATH = path.join(__dirname, '..', '..', 'docs', 'MISTAKES.md');
+const MISTAKES_PATH = path.join(__dirname, '..', '..', 'engine-doctrine', 'MISTAKES.md');
 
 const STOPWORDS = new Set([
   'a', 'an', 'the', 'and', 'or', 'but', 'so', 'nor', 'for', 'yet', 'of', 'to',
@@ -104,7 +104,7 @@ function main() {
   for (const { a, b, score } of hits) {
     f.fail('mistakes-dupe',
       `${score.toFixed(2)}  #${a.num} ${a.title} (line ${a.line})  ~  #${b.num} ${b.title} (line ${b.line})`,
-      { at: `docs/MISTAKES.md:${a.line}`,
+      { at: `engine-doctrine/MISTAKES.md:${a.line}`,
         fix: 'if a deliberate cross-reference, not a duplicate, add the pair to ALLOWLIST in this file with a reason' });
   }
   f.emit();

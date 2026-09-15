@@ -31,7 +31,7 @@ const TIMING = env('TIMING', 'smooth');
 const DUR = Math.max(0.2, Math.min(3, +env('DUR', '0.7')));
 let MECH = env('MECH', '');
 
-// mechanism registries: a transition belongs to exactly one (docs/CRAFT/TRANSITIONS.md).
+// mechanism registries: a transition belongs to exactly one (engine-doctrine/CRAFT/TRANSITIONS.md).
 const REG = { seam: SEAM_FX, cut: Object.keys(PRESENTATIONS).filter((n) => n !== 'none'), sting: SHADER_FX, anim: [...ANIM_NAMES] };
 
 if (!FX) {
@@ -127,4 +127,4 @@ const easeNote = (MECH === 'seam' || MECH === 'cut') ? ` · timing ${TIMING}` : 
 const dirNote = (MECH === 'seam' || MECH === 'cut') ? ` · dir ${DIR}` : '';
 console.log(`✓ ${MECH} · ${FX}${dirNote}${easeNote} · ${DUR}s  →  ${sheet}`);
 console.log('  Read the strip left→right: the labels are eased progress. Does the motion read, is the');
-console.log('  direction right, and does the from→to swap land where you want it? Decision theory: docs/CRAFT/TRANSITIONS.md');
+console.log('  direction right, and does the from→to swap land where you want it? Decision theory: engine-doctrine/CRAFT/TRANSITIONS.md');

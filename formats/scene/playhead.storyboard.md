@@ -15,7 +15,7 @@ destination: web
 ---
 
 <!--
-  STUDIED FROM refs/pin-16818198602994243.mp4. Measurements: docs/CRAFT/REF-pin-16818198602994243.md.
+  STUDIED FROM refs/pin-16818198602994243.mp4. Measurements: engine-doctrine/CRAFT/REF-pin-16818198602994243.md.
   CORRECTED against the reference shot by shot, and against the real studio surface, on 2026-08-09.
 
   WHAT WE TAKE from that film: the grammar, not the content.
@@ -78,7 +78,7 @@ destination: web
 
   THREE WAYS THIS FILM COULD HOLD ITS SUBJECT, and the first one is rejected:
     1. REJECTED. One card that keys w and h across four beats. Eighteen films in this library already
-       are that, docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md says so, and it is the gate's minimum.
+       are that, engine-doctrine/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md says so, and it is the gate's minimum.
     2. CHOSEN. Camera travel over one plane. Every surface is a card on the same field and the
        camera moves between them; no beat is a new world.
     3. CHOSEN. A shape match on one small mark. A vertical bar is the text caret at 0s, the playhead

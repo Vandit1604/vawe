@@ -120,7 +120,7 @@ spawnSync('ffmpeg', ['-v', 'error', '-y', ...inputs, '-filter_complex', `${chain
 // designspec (palette + font lock) judges appearance rather than motion. Running the motion gates here
 // would be wrong: at this stage there is nothing to say about pacing, and a stage that reports failures
 // it cannot act on teaches people to skip it.
-// `slop` used to run here too. It was retired in 2026-08 (docs/MISTAKES.md #340) and its script deleted,
+// `slop` used to run here too. It was retired in 2026-08 (engine-doctrine/MISTAKES.md #340) and its script deleted,
 // but this loop kept spawning it, so node exited 1 on a missing module and every run of this stage
 // printed a phantom "✗ slop" and exited non-zero. A gate name that does not resolve to a file is a bug,
 // never a finding, so resolve it first and say so loudly.

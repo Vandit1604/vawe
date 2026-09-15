@@ -2,7 +2,7 @@
 //
 // quality/gates/seam-snap.mjs proved the value of living inside the transition overlap instead of
 // stepping over it, and then found nothing on a film that had three real defects at its two joints (a
-// hand frame-by-frame read of out/demo.mp4, docs/MISTAKES.md-worthy but not yet logged there): a layer
+// hand frame-by-frame read of out/demo.mp4, engine-doctrine/MISTAKES.md-worthy but not yet logged there): a layer
 // that had already ended, redrawn at the canvas origin (a RESURRECTION); the outgoing card still
 // visible, fading, several extra frames past its own declared transition (a GHOST); and a background
 // that steps instantly while the layers on top of it dissolve across the same window (a SPLIT SEAM). All
@@ -92,7 +92,7 @@ const snap = (frameIdx, tag) => {
   return dest;
 };
 
-// Thresholds are read off a real defect, not guessed: docs/CRAFT/TRANSITIONS.md#seam-forensics-tuning
+// Thresholds are read off a real defect, not guessed: engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-tuning
 // records the pixel readings on out/demo.mp4 that fixed each number below.
 const GHOST_FLOOR = 4;      // mean |Δ| per channel (0-255) below this is compression noise, not a ghost
 const GHOST_RATIO = 1.3;    // the +1f reading must still be this much above the +10f reading (decaying)
@@ -142,7 +142,7 @@ for (const b of boundaries) {
       const p1 = snap(f1, `ghost-${b.t}s-${l.i}`);
       f.fail('seam-ghost',
         `ghost at ${b.t}s: "${l.label}" still visible and fading ${(f1 - jointFrame - durFrames)}f past its own transition (Δ${d1.toFixed(1)} at +1f vs Δ${d2.toFixed(1)} at +10f, both against the settled frame)`,
-        { at: `frame ${f1}`, fix: p1, doc: 'docs/CRAFT/TRANSITIONS.md#seam-forensics-ghost' });
+        { at: `frame ${f1}`, fix: p1, doc: 'engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-ghost' });
     }
   }
 }
@@ -200,7 +200,7 @@ for (const l of layers) {
       const p1 = snap(probeFrame, `resurrection-${l.i}-${tag}`);
       f.fail('seam-resurrection',
         `resurrection: "${l.label}" ended at ${l.end.toFixed(2)}s but its ${tag === 'origin' ? 'origin corner' : 'authored box'} reads differently at ${b.t.toFixed(2)}s (edge reading ${e1} vs ${e0} clean, before it ever drew)`,
-        { at: `frame ${probeFrame}`, fix: p1, doc: 'docs/CRAFT/TRANSITIONS.md#seam-forensics-resurrection' });
+        { at: `frame ${probeFrame}`, fix: p1, doc: 'engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-resurrection' });
     }
   }
 }
@@ -252,7 +252,7 @@ for (const b of boundaries) {
     const p1 = snap(stepFrame, `split-${b.t}s`);
     f.fail('seam-split',
       `split seam at ${b.t}s: the field jumps ${maxStep.toFixed(1)} at frame ${stepFrame} (median step ${med.toFixed(1)} across the ${b.dur}s window) while the transition is still dissolving the layers on top of it`,
-      { at: `frame ${stepFrame}`, fix: p1, doc: 'docs/CRAFT/TRANSITIONS.md#seam-forensics-split-seam' });
+      { at: `frame ${stepFrame}`, fix: p1, doc: 'engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-split-seam' });
   }
 }
 
