@@ -33,7 +33,7 @@ export function deriveEngineTruth(repoRoot) {
 /**
  * A doc's headline fps sentence ("one rendered Short/video ... NNfps") must name BOTH the final and
  * the draft rate, because naming only one is exactly the shape of the measured mistake: a single
- * number read once and quoted as if it were the whole fact. `docs/CRAFT/*` sentences that use "30fps"
+ * number read once and quoted as if it were the whole fact. `engine-doctrine/CRAFT/*` sentences that use "30fps"
  * as a MEASURING convention (a reference studied at 10fps, a duration table at 30fps) do not match
  * this pattern and are correctly left alone; only the "one rendered Short/video" idiom is a headline
  * claim about the engine's own frame rate.
@@ -81,7 +81,7 @@ export function findNumberClaims(text, truth) {
 }
 
 // RETIRED: a mechanism this repo deleted. Naming one as something to REACH FOR is a live instruction
-// an agent will follow into a dead end (docs/MISTAKES.md: a storyboard warning told authors to run
+// an agent will follow into a dead end (engine-doctrine/MISTAKES.md: a storyboard warning told authors to run
 // `make blueprints` after it was removed). Naming one as HISTORY ("blueprints were retired when...")
 // is not a mistake, so a sentence that also says retired/deleted/removed in the same breath is left
 // alone: see the RETIRED_OK guard in findRetiredNames.
@@ -90,8 +90,8 @@ export const RETIRED_NAMES = [
   { label: '`make blueprints`', re: /`make blueprints`/ },
   { label: '`make previews`', re: /`make previews`/ },
   { label: '{type:"beat"}', re: /\{\s*["']?type["']?\s*:\s*["']beat["']\s*\}/ },
-  { label: 'docs/MOTION-RECIPES.md', re: /\bMOTION-RECIPES\.md\b/ },
-  { label: 'docs/AFTER-EFFECTS-RECIPES.md', re: /\bAFTER-EFFECTS-RECIPES\.md\b/ },
+  { label: 'engine-doctrine/MOTION-RECIPES.md', re: /\bMOTION-RECIPES\.md\b/ },
+  { label: 'engine-doctrine/AFTER-EFFECTS-RECIPES.md', re: /\bAFTER-EFFECTS-RECIPES\.md\b/ },
 ];
 
 const RETIRED_OK = /\b(retired|deleted|removed)\b/i;

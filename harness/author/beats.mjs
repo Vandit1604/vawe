@@ -141,5 +141,5 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   try {
     await beatSheet(s, { dataArg, vs: flag('--vs', null) });
   } finally { await s.close(); }
-  console.log('  Read the sheet, give a verdict PER numbered beat (keep / fix X / cut / too fast). Judge each against\n  docs/CRAFT/TASTE-RULES.md: does it read, earn its time, and connect to its neighbours?');
+  console.log('  Read the sheet, give a verdict PER numbered beat (keep / fix X / cut / too fast). Judge each against\n  engine-doctrine/CRAFT/TASTE-RULES.md: does it read, earn its time, and connect to its neighbours?');
 }

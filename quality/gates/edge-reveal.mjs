@@ -131,7 +131,7 @@ export function matrixScale(cssTransform) {
 const hasRadius = (r) => typeof r === 'string' && r.split(' ').some((v) => parseFloat(v) > 0.5);
 
 // causeOf: read the worst frame's state and name ONE likely cause, in the priority the real cases in
-// docs/MISTAKES.md #626 and this doc's own header list them: a clip beats a scale, a scale beats a
+// engine-doctrine/MISTAKES.md #626 and this doc's own header list them: a clip beats a scale, a scale beats a
 // generic camera read, because a clip or an own-scale is the more specific, more certain answer.
 export function causeOf(state, camTf) {
   if (!state) return 'gap detected; no per-frame layer state captured, inspect the frame by hand';

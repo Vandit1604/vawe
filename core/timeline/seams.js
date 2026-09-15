@@ -265,7 +265,7 @@ export async function stageToCanvas({ w, h, cv, cam, root, useCanvasBg }) {
   } else {
     // No canvas bg window: the live frame's background comes from the .hs-stage CSS (the theme --bg
     // fallback). Rasterising `root` ALONE yields a TRANSPARENT snapshot, which the seam's WebGL then
-    // composites as BLACK. A black flash on every seam of a white-first scene (docs/MISTAKES.md #138).
+    // composites as BLACK. A black flash on every seam of a white-first scene (engine-doctrine/MISTAKES.md #138).
     // Fill the theme base bg first so the snapshot matches what the viewer actually sees.
     const stage = (root.closest && root.closest('.hs-stage')) || document.body;
     const cs = getComputedStyle(stage);

@@ -6,7 +6,7 @@
 // non-last-beat layer that is still the beat's CURRENT STATE with the run to `beatEnd + cutDur`, so the
 // beat wrapper can slide the whole beat out as one unit. A gate that reads the raw fields sees holes the
 // render does not have, and misses ones it does. beat-check learned that the expensive way
-// (docs/MISTAKES.md #172) by modelling it inline. Which layers count as current is #555.
+// (engine-doctrine/MISTAKES.md #172) by modelling it inline. Which layers count as current is #555.
 //
 // It lives here because a second gate now needs the same answer. Two copies of a model of someone else's
 // code drift, and the copy that drifts is the one that stops catching the bug. Import it; do not fork it.
@@ -222,7 +222,7 @@ export function sceneView(d, t, CW, CH) {
 // the frame, and `camera-aimed-at-nothing` invented 1.4s of emptiness in gh-wrapped, the exact
 // direction the paragraph above says this predicate must never take. Reading each axis's declared value
 // back keeps boxOf's contract (the extent it could not derive is still unknown) and only ever grows the
-// box, so it can delete a false finding and cannot create a true one. docs/MISTAKES.md.
+// box, so it can delete a false finding and cannot create a true one. engine-doctrine/MISTAKES.md.
 export function inView(L, view, root = ROOT) {
   if (!view) return true;
   // x/y are NOT always numbers: `x:"center"` and the `pin` keywords are resolved by the engine against
@@ -241,7 +241,7 @@ export function inView(L, view, root = ROOT) {
 // engine expands it to cuts/seams/stings before it renders anything (core/transitions/lower.js). A model
 // of the clock that reads raw `cuts` therefore says brew-launch-act1 has no boundaries when it has four,
 // and every gate built on this model inherits that. #380 fixed eight consumers one at a time and missed
-// the ninth; lowering HERE is what makes the tenth impossible. docs/MISTAKES.md #394, #407.
+// the ninth; lowering HERE is what makes the tenth impossible. engine-doctrine/MISTAKES.md #394, #407.
 //
 // CLONED, because loadScene mutates and `delete`s `transitions` off what it is given. That is right for
 // the renderer, which lowers once at the top, and wrong for a gate: a check that rewrites the object it
@@ -271,7 +271,7 @@ export function sceneTiming(input) {
   // when the film moves on from it. A layer authored to leave long before its beat's cut is being HELD,
   // and telling the two apart needs the cut time, not the end of the cut window.
   // Only the layers that are still the beat's CURRENT STATE ride the wrapper out; the ones the beat
-  // already replaced keep their authored window and leave when the author said (docs/MISTAKES.md #555).
+  // already replaced keep their authored window and leave when the author said (engine-doctrine/MISTAKES.md #555).
   // Mirrors `beatIsCurrent` in formats/scene/scene.js exactly, including the start-times-only ceiling.
   const EPS = 1e-6;
   const beatIsCurrent = (L, i) => {

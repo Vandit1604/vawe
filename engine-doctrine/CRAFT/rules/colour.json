@@ -1,0 +1,92 @@
+[
+  {
+    "id": "colour.eyedrop-not-invent",
+    "category": "colour",
+    "stage": "design",
+    "applies": "always",
+    "check": "off-colour",
+    "adapt": null,
+    "brief": "Colours come only from the brand: eyedrop the real pixels (make palette), never invent",
+    "doc": "engine-doctrine/CRAFT/COLOR.md"
+  },
+  {
+    "id": "colour.dominance-by-looking",
+    "category": "colour",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "A white site gets a light-first video; a dark site gets dark-first. Decide by looking at the hero",
+    "doc": "engine-doctrine/CRAFT/COLOR.md"
+  },
+  {
+    "id": "colour.sixty-thirty-ten",
+    "category": "colour",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "60% dominant/neutral field · 30% secondary tone · 10% accent",
+    "doc": "engine-doctrine/CRAFT/COLOR.md"
+  },
+  {
+    "id": "colour.contrast-floor",
+    "category": "colour",
+    "stage": "design",
+    "applies": "always",
+    "check": "contrast",
+    "adapt": null,
+    "brief": "WCAG floors: 4.5:1 body · 3:1 large text (≥24px, or ≥18.7px bold) · 3:1 non-text/UI. AAA = 7:1",
+    "doc": "engine-doctrine/CRAFT/COLOR.md"
+  },
+  {
+    "id": "colour.declare-up-front",
+    "category": "colour",
+    "stage": "design",
+    "applies": "always",
+    "check": "dead-token",
+    "adapt": null,
+    "brief": "Declare the palette up front. Don't invent colours per element",
+    "doc": "engine-doctrine/CRAFT/COLOR.md"
+  },
+  {
+    "id": "colour.no-linear-gradient-on-dark",
+    "category": "colour",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "A FULL-SCREEN LINEAR GRADIENT ON A DARK GROUND WILL BAND, and the banding is the encoder, not the design",
+    "doc": "engine-doctrine/CRAFT/COLOR.md"
+  },
+  {
+    "id": "colour.muted-not-flat",
+    "category": "colour",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Muted is fine. Flat is not",
+    "doc": "engine-doctrine/CRAFT/COLOR.md"
+  },
+  {
+    "id": "colour.banned-defaults",
+    "category": "colour",
+    "stage": "design",
+    "applies": "always",
+    "check": "off-colour",
+    "adapt": null,
+    "brief": "Ban gradient text, cyan/purple, identical card grids, and Inter by default",
+    "doc": "engine-doctrine/RULES/banned-defaults.md"
+  },
+  {
+    "id": "colour.text-on-flat",
+    "category": "colour",
+    "stage": "design",
+    "applies": "hasTextBeats",
+    "check": "contrast",
+    "adapt": null,
+    "brief": "A headline sits on a flat patch, never a blob or a gradient hot spot",
+    "doc": "engine-doctrine/RULES/text-on-flat.md"
+  }
+]

@@ -10,7 +10,7 @@
 // is the same class one step milder: two keys at the same `t` make cameraAt divide by zero and lerp NaN.
 // Neither errors. `slowPush({dur:-4})` emits [0, -4] and `panFollow({dur:0})` emits [0, 0]; both looked
 // like working calls. Guarded in ONE place because all six generators advance a clock the same way, and
-// the review that caught it named only the two new ones (docs/MISTAKES.md #341).
+// the review that caught it named only the two new ones (engine-doctrine/MISTAKES.md #341).
 export const span = (move, key, v) => {
   if (!Number.isFinite(v) || v <= 0)
     throw new Error(`${move}: "${key}" must be a positive number of seconds (it advances the camera clock); got ${JSON.stringify(v)}`);

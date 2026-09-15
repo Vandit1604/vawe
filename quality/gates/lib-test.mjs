@@ -428,7 +428,7 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
 // The engine carries TWO easing vocabularies and the FIELD decides which is in force. The exclusion
 // list is the whole rule, and it can rot in silence: too strict invents findings on scenes that name a
 // GSAP ease correctly (showcase-lumen, showcase-type-labour both do), too loose and the wrong-slot
-// name renders on a curve nobody chose. One assertion per direction. docs/MISTAKES.md #381.
+// name renders on a curve nobody chose. One assertion per direction. engine-doctrine/MISTAKES.md #381.
 ok('easeErrors: a GSAP ease in an engine field is caught', (() => {
   const e = easeErrors({ layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'power2.inOut' }] }] });
   return e.length === 1 && /GSAP ease/.test(e[0]);
@@ -506,7 +506,7 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
   return true;
 })());
 
-// ---- THE ENTRANCE WARP: anticipation (#5) and the overshoot dial (#3), docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md
+// ---- THE ENTRANCE WARP: anticipation (#5) and the overshoot dial (#3), engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md
 // Both dials ARE the easing of an entrance, so they are asserted on the curve AND through clipStyleAt,
 // which is the only thing that composes them onto a real layer.
 {
@@ -817,7 +817,7 @@ ok('unitProgress later unit delayed', unitProgress(0.06, 1, 3, { each: 0.5, stag
 ok('unitProgress completes', unitProgress(2, 2, 3, { each: 0.5, stagger: 0.06 }) === 1);
 ok('unitProgress clamped [0,1]', (() => { for (let t = -1; t < 3; t += 0.1) { const u = unitProgress(t, 1, 4); if (u < 0 || u > 1) return false; } return true; })());
 
-// THE OTHER TWO STAGGER DIALS (docs/CRAFT/PARITY-AUDIT.md). `from` is an ORDER and `amount` a TOTAL
+// THE OTHER TWO STAGGER DIALS (engine-doctrine/CRAFT/PARITY-AUDIT.md). `from` is an ORDER and `amount` a TOTAL
 // time, and the first thing asserted is that neither moves a frame of what shipped.
 ok('a number stagger is exactly what it was: offset i, no remap', (() => {
   for (let i = 0; i < 6; i++) for (let t = -0.2; t < 2; t += 0.07) {
@@ -878,7 +878,7 @@ ok('typewriter with no cps defaults to 24, matching text.js\'s own typing defaul
 ok('an exit order of random is untouched by the typewriter branch',
   staggerStep({ from: 'random' }, 11, 0.06) === 0.06 && staggerOffset(3, 11, 'random') === staggerOffset(3, 11, 'random'));
 
-// TEXT SCRAMBLE: a RATE, a charset, and a reveal delay (docs/CRAFT/PARITY-AUDIT.md).
+// TEXT SCRAMBLE: a RATE, a charset, and a reveal delay (engine-doctrine/CRAFT/PARITY-AUDIT.md).
 const scramble = (u, opts) => { const el = { textContent: 'DETERMINISTIC' }; decodeText(el, u, 0, opts); return el.textContent; };
 ok('decode default is byte-identical to the baked 24 steps it replaced', (() => {
   for (let u = 0; u < 1; u += 0.017) if (scramble(u) !== scramble(u, { rate: 48, each: 0.5 })) return false;
@@ -1241,7 +1241,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('capabilitiesOf: a plain layer asks for nothing', capabilitiesOf({ type: 'text', text: 'x' }).length === 0);
 
   // THE REPORTED BUG, as a test: a glass layer under a filter-writing cut must refuse, and the
-  // refusal must name the layer, the capability and a way out. docs/MISTAKES.md #542.
+  // refusal must name the layer, the capability and a way out. engine-doctrine/MISTAKES.md #542.
   const glassScene = { cuts: [{ t: 8.2, style: 'blur', dur: 0.34 }], sceneUnits: false,
     layers: [{ id: 'lens', type: 'html', glass: 'refract', start: 0.35, duration: 10.8 }] };
   let msg = '';
@@ -1431,7 +1431,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // captionBand: the strip a burnt-in caption occupies, so a headline can be kept off it. Derived from
   // safeArea rather than from a second table, because the platform's chrome is not a property of the
-  // aspect and one definition of that has to be enough (docs/MISTAKES.md #409, #165).
+  // aspect and one definition of that has to be enough (engine-doctrine/MISTAKES.md #409, #165).
   {
     const web = captionBand(1080, 1920, 'web');
     const tik = captionBand(1080, 1920, 'tiktok');
@@ -1497,7 +1497,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
   // THE ONE THAT MATTERS. Same box, same layer, graded 0.1s in: it is still sliding on, so there is no
   // verdict to give. A check without this fires on every well-made entrance in the library.
-  ok('bounds: the SAME box mid-entrance is NOT reported (arrived-only, docs/MISTAKES.md #390)',
+  ok('bounds: the SAME box mid-entrance is NOT reported (arrived-only, engine-doctrine/MISTAKES.md #390)',
     outOfFrame(settled, F, 0.1) === null);
   ok('bounds: settleWindow uses audit.mjs\'s own numbers (start+enter+pad)',
     settleWindow({ start: 1, duration: 5 }).t0 === 1 + 0.45 + 0.06);
@@ -2087,7 +2087,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     ok('text: emphasis INSIDE a word does not split it',
       onScreenText('North<b>wind</b>') === 'Northwind');
     ok('text: a block element separates its neighbours', onScreenText('<div>Mon</div><div>Tue</div>') === 'Mon Tue');
-    // docs/MISTAKES.md #220/#216/#217: a <style> body, a <script> body and a comment are source the
+    // engine-doctrine/MISTAKES.md #220/#216/#217: a <style> body, a <script> body and a comment are source the
     // frame never shows. Read as copy they became a brand-voice defect, clipped text and tiny type.
     ok('text: a stylesheet is not copy',
       onScreenText('<style>.g{color:red}/* unlock */</style><p>Ship it</p>') === 'Ship it');
@@ -2242,7 +2242,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('looks: every look resolves to a filter or overlays', LOOK_NAMES.every((n) => { const r = resolveComposite(n); return r && (r.filter.length > 0 || r.overlays.length > 0); }));
   ok('looks: deterministic', resolveComposite('vhs', {}, 0.6).filter === resolveComposite('vhs', {}, 0.6).filter);
 
-  // ---- the three guards from docs/MISTAKES.md #365 ----
+  // ---- the three guards from engine-doctrine/MISTAKES.md #365 ----
   // All derived from LOOKS. A hand-written list is what let `color` be dead on nineteen looks while
   // the test above proved the feature on `neon`. One of the three where it happened to work.
   const sig = (r) => r.filter + '||' + JSON.stringify(r.overlays);
@@ -2267,7 +2267,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // that fixes the same spelling silently shadows it). Sixteen looks declared a colour that never
   // rendered, including vintageAnamorphic's `#a9c8ff`. The exact hex the comment in core/looks.js
   // records finding dead and fixing, where the fix went to the pass and left the look entry behind.
-  // Setting letterpress's to pure red moved zero pixels. docs/MISTAKES.md #380.
+  // Setting letterpress's to pure red moved zero pixels. engine-doctrine/MISTAKES.md #380.
   const shadowed = [];
   for (const n of LOOK_NAMES) {
     for (const k of Object.keys(LOOKS[n].d)) {
@@ -2327,7 +2327,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 // ---- themes: `default` IS the brand, and must stay identical to it ----
 // `default` is the name every author reaches for by habit. It used to hold a mono+lime palette that
-// belonged to no site of ours, so films shipped in a colour nobody chose (docs/MISTAKES.md #366). It
+// belonged to no site of ours, so films shipped in a colour nobody chose (engine-doctrine/MISTAKES.md #366). It
 // now mirrors themes/vawe.json, and two files holding the same palette is exactly the shape that
 // drifts, so the drift is a test, not a comment.
 {
@@ -2351,7 +2351,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 
 // ---- the registry primitive (core/registry/registry.js) ----
 // Every named vocabulary resolves through `pick()`, which takes no fallback parameter, so a silent
-// default is not expressible. docs/MISTAKES.md #369.
+// default is not expressible. engine-doctrine/MISTAKES.md #369.
 {
   const r = defineRegistry('widget', { alpha: 1, beta: 2 }, { slot: 'widget',
     blurbs: { alpha: 'the first test widget, which exists only so this file has a vocabulary to pick from',
@@ -2427,7 +2427,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     refuses({ ...FULL, preview: () => ({}) }));
   // A registry with no catalog block is not catalogued, and the order is a property of the vocabulary
   // (tag then title) rather than of module evaluation order, so deleting an import cannot reshuffle
-  // docs/EFFECTS.md.
+  // engine-doctrine/EFFECTS.md.
   ok('registry: catalogued() holds only the registries that publish themselves', (() => {
     try {
       const cats = catalogued();
@@ -2488,7 +2488,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return true;
   })());
 
-  // ---- the effector: a falloff from a travelling point (docs/CRAFT/AE-TECHNIQUES.md #4) ----------
+  // ---- the effector: a falloff from a travelling point (engine-doctrine/CRAFT/AE-TECHNIQUES.md #4) ----------
   //
   // The sticky assertion is the one that matters. Everything else here is a shape contract; sticky is
   // the whole difference between a moving highlight and a painted trail, and it is the number the
@@ -2551,7 +2551,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     && effectorStyle(effectorAt(5000, 0, [{ t: 0, x: 0, y: 0 }, { t: 2, x: 100, y: 0 }], 1, { radius: 300 }), { scale: 1 }).transform === 'none');
   ok('effector: the track claims its own slot in the pipeline', TRACK_TYPES.includes('effector') && SLOTS.includes('effector'));
 
-  // ---- where the cut goes, read off the speed graph (docs/CRAFT/AE-TECHNIQUES.md #1) -------------
+  // ---- where the cut goes, read off the speed graph (engine-doctrine/CRAFT/AE-TECHNIQUES.md #1) -------------
   //
   // A SCALE CHANGE IS MOTION. The technique's own demonstration is a null scaling 100 to 200 per cent
   // across the seam and nothing translating at all, so a reader that measured translation alone would
@@ -2561,7 +2561,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return layerSpeedAt(L, 0.5, 30) > 400;
   })());
   // A ROTATION MOVES PIXELS TOO, and this reader could not see one. The technique this file
-  // implements (docs/CRAFT/AE-TECHNIQUES.md #1) hands a fast ROTATION across the seam, so the
+  // implements (engine-doctrine/CRAFT/AE-TECHNIQUES.md #1) hands a fast ROTATION across the seam, so the
   // advisory scored its own worked example at 0 px/s and called it a velocity trough.
   ok('velocity-cut: a pure rotation reads as picture speed', (() => {
     const L = { start: 0, duration: 2, motion: [{ t: 0, rot: 0 }, { t: 2, rot: 720 }] };
@@ -2633,7 +2633,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return blind[0].speed === 0 && seeing[0].speed > 500 && seeing[0].peak.t === 1.4;
   })());
 
-  // ---- the range selector's smoothness dial (docs/CRAFT/AE-TECHNIQUES.md #5) ---------------------
+  // ---- the range selector's smoothness dial (engine-doctrine/CRAFT/AE-TECHNIQUES.md #5) ---------------------
   //
   // DEFAULT 1 IS THE IDENTITY, and that is why exposing this dial changed no rendered frame. Asserted
   // rather than assumed: the remap is (u-0.5)/s+0.5, which is only the identity at exactly s=1, so a
@@ -2671,7 +2671,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
 // ---- sound: a CUT must have a voicing, exactly as a SEAM does ----
 // lib-test already asserted "SEAM_CUE covers every SEAM_FX (no silent seam)". CUT_CUE had no equivalent,
 // so the next presentation added to core/cuts.js would silently play the generic `whoosh`. The gate for
-// one half of a pair and not the other is how a family goes quietly out of sync. docs/MISTAKES.md #374.
+// one half of a pair and not the other is how a family goes quietly out of sync. engine-doctrine/MISTAKES.md #374.
 {
   // an explicit null is a DECISION (silence); only a missing KEY is a gap.
   const missing = CUT_REGISTRY.names.filter((n) => !(n in CUT_CUE));
@@ -2791,7 +2791,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // `matches` (a top-level array binding two layers onto a junction, via bindMatchesToJunctions) used
   // to have its own test block here. Deleted with the mechanism: it measured ONE use across the whole
   // library and its only value over writing `becomes`/`duration`/`start` by hand was retiming onto a
-  // named joint, on that one scene (docs/MISTAKES.md #364-adjacent). `becomes` itself is still tested
+  // named joint, on that one scene (engine-doctrine/MISTAKES.md #364-adjacent). `becomes` itself is still tested
   // by lib-test's produce.js coverage below.
 
   // The grammar has ONE definition now. audio-bridges established it and backgrounds reuse it; two
@@ -3181,12 +3181,12 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('beat-bind: a pulseless track is refused, not snapped to', throws(() => bindBeats(sc(), { ...G, confidence: 1.2 }), /confidence/));
   ok('beat-bind: an empty grid is refused', throws(() => bindBeats(sc(), { ...G, beats: [] }), /carries no/));
   ok('beat-bind: beatSync with no track to read names the fix', throws(() => beatGridPath({ audio: { beatSync: true, music: 'auto' } }), /audio\.music/));
-  // ONE POLICY (docs/MISTAKES.md #477). harness/media/beatsync.mjs calls snapJoints/unrollGrid too, so
+  // ONE POLICY (engine-doctrine/MISTAKES.md #477). harness/media/beatsync.mjs calls snapJoints/unrollGrid too, so
   // these pin the contract the CLI used to hold a second, wider opinion about.
   ok('beat-bind: the default tolerance IS snapToBeat\'s own', snapToBeat(1.04, bts) === snapToBeat(1.04, bts, DEFAULT_MAX_SHIFT));
   const s6 = { cuts: [{ t: 0.54 }], seams: [{ t: 1.75, dur: 0.5 }], stings: [{ t: 0.54, fx: 'flash' }] };
   const r6 = snapJoints(s6, G.beats, DEFAULT_MAX_SHIFT);
-  // A STING RIDES ITS JOINT (docs/MISTAKES.md #496). It used to keep the time the author wrote, so a
+  // A STING RIDES ITS JOINT (engine-doctrine/MISTAKES.md #496). It used to keep the time the author wrote, so a
   // sting authored ON a cut drifted off that cut by however far the cut moved.
   ok('beat-bind: a sting authored on a cut is still on that cut after the snap', s6.stings[0].t === s6.cuts[0].t);
   ok('beat-bind: snapJoints reports the drift the CLI prints', r6.moved[0].kind === 'cut' && r6.moved[0].drift === 0.04);
@@ -3354,7 +3354,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('transitions: ambiguous basic lowers to a cut', (() => { const x = lowerScene({ transitions: [{ at: 1, fx: 'slide', dir: 'left' }] }); return Array.isArray(x.cuts) && x.cuts[0].style === 'slide'; })());
   ok('transitions: lowering is idempotent (no-op second pass)', (() => { const x = lowerScene(lowerScene({ transitions: [{ at: 1, fx: 'fade' }] })); return x.cuts.length === 1; })());
   ok('transitions: a scene with no unified keys is untouched', (() => { const src = { layers: [{ text: 'x' }], cuts: [{ t: 1, style: 'fade' }] }; const x = lowerScene(src); return x.cuts.length === 1 && !('transitions' in x); })());
-  // A STING TINT IS A COLOUR, NOT A HEX (docs/MISTAKES.md #497). The renderer read it with
+  // A STING TINT IS A COLOUR, NOT A HEX (engine-doctrine/MISTAKES.md #497). The renderer read it with
   // parseInt(hex, 16), so a theme token or an rgb() became NaN and then [0,0,0]: a black tint, no error.
   ok('transitions: a sting tint may be a theme token', checkStingColor('var(--accent)', 'x') === 'var(--accent)');
   ok('transitions: a sting tint may be a hex or an rgb()',
@@ -3587,7 +3587,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // `gradient` + `split` rendered NOTHING for as long as both existed. gradientFill paints the container
 // and sets the text transparent; splitText then moves every glyph into a child span, and while `color`
 // and `-webkit-text-fill-color` inherit, `background-image` does not. So the glyphs were transparent
-// with no paint of their own, and a shipped film's headline was invisible (docs/MISTAKES.md #417).
+// with no paint of their own, and a shipped film's headline was invisible (engine-doctrine/MISTAKES.md #417).
 //
 // ASSERT ON THE RESOLVED PAINT, NEVER ON THE BOX. That is the trap the bug set: a transparent glyph
 // still measures as a full-size opaque box, so every DOM-geometry check in this repo passed a blank
@@ -3674,7 +3674,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // inspection, exactly the registries sitting one import away. It reads `catalogued()` now, so this
 // asserts the join actually happened: a registry that publishes itself has one section, carrying its
 // own title, slot label, prose and names. A regression here is silent otherwise, because a section
-// that vanishes takes its rows out of docs/EFFECTS.md and the doc still regenerates cleanly.
+// that vanishes takes its rows out of engine-doctrine/EFFECTS.md and the doc still regenerates cleanly.
 {
   const { sections } = await import('../../scripts/site/effects-catalog.mjs');
   // Minus this file's own fixture on both sides: the `catalog widget` built a few hundred lines up is
@@ -3699,7 +3699,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 // ---- registry blurbs (the description lives beside the thing it describes) ------------------------
-// docs/EFFECTS.md is generated from the registries and 379 of its 476 rows had no description, because
+// engine-doctrine/EFFECTS.md is generated from the registries and 379 of its 476 rows had no description, because
 // the only source was a FLAT 68-key map in the generator whose own comment called the notes "a bonus,
 // never a second source of truth". A name with no description is a vocabulary nobody can choose from.
 // Each family now keeps its blurbs next to its registry, and a missing one fails HERE, the same shape
@@ -4391,7 +4391,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // ---- produce: NO auto camera, and cameraMove sugar still BECOMES camera keys on the one path --------
 // The engine no longer injects a slowPush into a scene that declares no camera: a still headline used to
 // zoom the whole runtime, and `bg` (required, must-animate) already keeps the frame alive. A push is an
-// authored choice now (docs/CRAFT/TRANSITIONS.md, "move on purpose"). The sugar funnel stays closed: an
+// authored choice now (engine-doctrine/CRAFT/TRANSITIONS.md, "move on purpose"). The sugar funnel stays closed: an
 // author who DOES write `cameraMove` still gets real camera keys, never a field written and read by none.
 {
   const base = () => ({ module: 'scene', duration: 6, bg: { preset: 'plain' }, layers: [{ type: 'text', text: 'x' }] });
@@ -4796,7 +4796,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     lib.every((f) => wide.includes(f)) && wide.length >= lib.length);
 }
 
-// ---- THE RENDER PIPELINE ORDER (docs/CODEMAPS/ARCHITECTURE.md, "Frame pipeline") ----------------
+// ---- THE RENDER PIPELINE ORDER (engine-doctrine/CODEMAPS/ARCHITECTURE.md, "Frame pipeline") ----------------
 //
 // #463 and #464 were both ordering and neither was arithmetic: a handover resolved before the layout
 // measurement, and a box composed before the tracks that move it. The order that governs both was
@@ -4809,7 +4809,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // It cannot prove that a track read a fresh value rather than a stale one, that is a property of one
 // scene at one t, and probe-purity, canvas-purity and snap-scenes are what see it.
 {
-  const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'CODEMAPS', 'ARCHITECTURE.md'), 'utf8');
+  const doc = fs.readFileSync(path.join(repoRoot, 'engine-doctrine', 'CODEMAPS', 'ARCHITECTURE.md'), 'utf8');
   const block = doc.match(/```pipeline\n([\s\S]*?)```/);
   ok('the codemap still states the pipeline', !!block);
   const rows = (block ? block[1] : '').split('\n')
@@ -4879,7 +4879,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 }
 
-// ---- THE GSAP TRIGGER LOCKSTEP (docs/MISTAKES.md #154, #487) ----
+// ---- THE GSAP TRIGGER LOCKSTEP (engine-doctrine/MISTAKES.md #154, #487) ----
 // core/engine/preload.js decides whether the tween engine is fetched at all, from the props a scene names. Get
 // that set wrong and the render is silent and STILL: no throw, no warning, a figure that simply does not
 // move. It shipped that way once, because the set was a hand-typed list beside a comment asking the next
@@ -4921,7 +4921,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const missing = [...derived].filter((k) => !GSAP_PROPS.includes(k));
   const stale = GSAP_PROPS.filter((k) => !derived.has(k));
   // 7 -> 6 when `fxOut` (the named GSAP exit family) was deleted for zero users: its
-  // `if (L.fxOut && window.gsap)` hook went with it (docs/MISTAKES.md #364).
+  // `if (L.fxOut && window.gsap)` hook went with it (engine-doctrine/MISTAKES.md #364).
   ok(`the sweep finds the GSAP hooks at all (found ${swept.size})`, swept.size >= 6);
   ok(`every prop read behind window.gsap triggers the preload${missing.length ? ': MISSING ' + missing.join(', ') : ''}`,
     missing.length === 0);
@@ -4960,7 +4960,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('the harness resolves the repo root', fs.existsSync(path.join(REPO_ROOT, 'core/motion/motion.js')));
 }
 
-// ---- a fragment's stylesheet stops at its own layer (docs/MISTAKES.md #510) ----
+// ---- a fragment's stylesheet stops at its own layer (engine-doctrine/MISTAKES.md #510) ----
 {
   const { scopeStyles } = await import('../../core/type/sanitize-html.js');
   ok('markup with no stylesheet is handed back unchanged',
@@ -4978,7 +4978,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     scopeStyles('<style>a{}</style><b><style>c{}</style></b>')
       === '<style>@scope {a{}}</style><style>@scope {c{}}</style><b></b>');
   ok('a style attribute is not a style block', scopeStyles('<i style="color:red"></i>') === '<i style="color:red"></i>');
-  // A COMMENT IS PROSE, AND EVERY REGEX IN THAT FILE READ IT AS MARKUP (docs/MISTAKES.md #548). The
+  // A COMMENT IS PROSE, AND EVERY REGEX IN THAT FILE READ IT AS MARKUP (engine-doctrine/MISTAKES.md #548). The
   // word `<style>` in an author's note made STYLE_BLOCK span from the NOTE to the first real
   // `</style>`, so the fragment's whole stylesheet and the opening tag of its root element were
   // swallowed into one `@scope {…}` block. The panel rendered as unstyled text and nothing said a word.
@@ -5062,7 +5062,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('an unknown depth is refused with the menu and its magnifications',
     m != null && /far/.test(m) && /0\.57x/.test(m) && /1\.39x/.test(m));
   // THE SUGAR BECOMES THE MODIFIER, or core/engine/boot.js throws. A field written and read by nothing is the
-  // failure the whole bake path exists to make impossible (docs/MISTAKES.md #444).
+  // failure the whole bake path exists to make impossible (engine-doctrine/MISTAKES.md #444).
   const d = { layers: [{ type: 'rect', depth: 'back' }] };
   bakeDepth(d);
   ok('depth lowers to the plane modifier, holding its size', d.layers[0].depth === undefined
@@ -5129,7 +5129,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 // ---------- the three motion-standard changes ----------
-// docs/CRAFT/MOTION-STANDARDS.md audits this engine against animations.dev / emilkowal.ski. Three
+// engine-doctrine/CRAFT/MOTION-STANDARDS.md audits this engine against animations.dev / emilkowal.ski. Three
 // things came out of it, and all three are pinned here because all three are one-line reversions.
 {
   ok('the default ease is the STRONG one', DEFAULT_MOTION.easing === 'easeOutQuint');
@@ -5534,7 +5534,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     appendChild(n) { n.parentNode = this; this.childNodes.push(n); return n; },
     removeChild(n) { this.childNodes = this.childNodes.filter((c) => c !== n); return n; },
     // svg.js's draw reveal measures the path's real length (getTotalLength) instead of relying on the
-    // browser's own pathLength=1 rescaling, which mismeasures arcs (docs/MISTAKES.md). This mock has no
+    // browser's own pathLength=1 rescaling, which mismeasures arcs (engine-doctrine/MISTAKES.md). This mock has no
     // layout engine to measure a real `d`, so it returns a fixed stand-in; every assert below reads
     // fill/stroke opacity, never the dash length itself, so the exact number does not matter.
     getTotalLength() { return 100; },
@@ -5667,7 +5667,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 // ---- ARSENAL HONESTY (harness/author/arsenal.mjs) ------------------------------------------------
 // The search an author is told to reach for before inventing anything returned its nearest match even
-// when it had none, twice in one day (docs/MISTAKES.md #551). Two things are asserted here and they are
+// when it had none, twice in one day (engine-doctrine/MISTAKES.md #551). Two things are asserted here and they are
 // different failures: RECALL, that it holds what it holds, and CONFIDENCE, that it can say it does not
 // know. Fixing only the second would leave it silently missing `beam`; fixing only the first would
 // leave it confidently answering questions with no answer.
@@ -5696,7 +5696,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // chasing around its border") answers the query's own words more exactly: the query says "of a card"
   // and beam is a bare layer type. So the assertion is what the original finding actually cared about,
   // which is RECALL: beam was returned by nothing at all, and the search offered cardCascade, lightLeak
-  // and highlight in its place (docs/MISTAKES.md #551). Being findable and confident is the property;
+  // and highlight in its place (engine-doctrine/MISTAKES.md #551). Being findable and confident is the property;
   // being first was a coincidence of a smaller library.
   ok('"a light that travels around the border of a card" FINDS beam, and confidently', (() => {
     const q = 'a light that travels around the border of a card';
@@ -5789,7 +5789,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // split their shared words; the retrieval floor fell 97% → 95% the day all 185 rows went in). So
   // `make arsenal Q="a pricing plan card"` answers ABSENT about something the engine has, which is
   // the failure this whole corpus exists to end. Their blurbs were stubs too and are rewritten, but
-  // that only fixes the catalog label and the docs/BLOCKS.md line. THE ASSERTION ABOVE, "every block
+  // that only fixes the catalog label and the engine-doctrine/BLOCKS.md line. THE ASSERTION ABOVE, "every block
   // FAMILY in the catalog is in the search corpus", reads the manifest's bare NAMES rather than its
   // `family` field, so it passed over all five in silence. Two ways to close it, and the second is
   // cheaper than it looks: index a family that has no bare row (arsenal.mjs), or give each a bare row
@@ -5997,7 +5997,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 // ---- AKA: the searchable half of a description that is never printed -------------------------------
-// A blurb is prose a person reads in docs/EFFECTS.md AND the retrieval index `make arsenal` ranks on.
+// A blurb is prose a person reads in engine-doctrine/EFFECTS.md AND the retrieval index `make arsenal` ranks on.
 // Those two jobs pull apart: "handheld" is the only word a director uses for `driftHold` and no honest
 // rewrite of "a held frame that is never dead, a sub-12px Lissajous micro-drift" contains it. `aka`
 // takes the search half so the prose half never has to become keyword soup.
@@ -6025,7 +6025,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // CLEARLY MATCHES while core/tracks/effector.js was exactly that, because the blurb never used the
 // words a person types. One blurb was rewritten; this is the class. The rule is the NARROWEST one that
 // catches it, because a wrong refusal fires at module load and stops the engine, and this repo has
-// deleted two gates for measuring the wrong thing (docs/TASTE.md, `visual-vocabulary`).
+// deleted two gates for measuring the wrong thing (engine-doctrine/TASTE.md, `visual-vocabulary`).
 {
   ok('a blurb that only restates the entry\'s own name is refused', (() => {
     try { checkBlurb('cut', 'fade', 'the fade cut fades'); return false; }
@@ -6134,7 +6134,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 // ---------------------------------------------------------------------------------------------------
-// SCENE UNITS: which layers the beat wrapper carries through the cut (docs/MISTAKES.md #555).
+// SCENE UNITS: which layers the beat wrapper carries through the cut (engine-doctrine/MISTAKES.md #555).
 //
 // The wrapper owns the exit slide, so a layer it carries loses its own exit and lives to the end of the
 // cut window. Applied to EVERY layer of the beat, a beat that is a whole act paints its entire history
@@ -6216,7 +6216,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('backgrounds: the engine MEASURES it dark, so no `tone` has to be typed beside it',
     bgLook('black').tone === 'dark' && bgLook('black').moves === false);
   // The whole reason lightness is not read off the name: `value:"dark"` makes the same preset a dark
-  // window, exactly as formats/scene/scene.js decides it (docs/MISTAKES.md #159 is the drift this avoids).
+  // window, exactly as formats/scene/scene.js decides it (engine-doctrine/MISTAKES.md #159 is the drift this avoids).
   ok('candidates: `value:"dark"` makes a light preset a dark window, the engine\'s own rule',
     bgLook('plain').tone === 'light' && bgLook('plain', 'dark').tone === 'dark');
 
@@ -6248,7 +6248,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 // ---- schema-drift --write: a regeneration must be READABLE and must never drop a name -------------
-// Both halves of docs/MISTAKES.md #564. The generator emitted each array on one line while
+// Both halves of engine-doctrine/MISTAKES.md #564. The generator emitted each array on one line while
 // schema.json is committed one-name-per-line, so every `--write` reflowed a 451-line block into 6 and
 // `git diff --stat` reported ~445 deletions for a one-prop change. Nothing was lost, the data
 // round-tripped identical, but the diff was unreadable, and an unreadable diff is where a real
@@ -6319,7 +6319,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     !!caretHold && caretHold.layer.typing != null && caretHold.layer.caretHold != null);
 
   // PER-PRESET COVERAGE, and this is the acceptance test in assertion form. Five three scenes read
-  // `metalness`; the one that ignored it was deviceShowcase (docs/MISTAKES.md #529). Asking one preset
+  // `metalness`; the one that ignored it was deviceShowcase (engine-doctrine/MISTAKES.md #529). Asking one preset
   // per prop would have asked a scene that reads it and passed over the bug.
   const metal = probesOf('three').filter((p) => p.prop === 'metalness');
   ok('prop-probe: `three` asks every preset that claims a dial, not the first',
@@ -6379,7 +6379,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // POSE and SIDES now, and these two assertions are what would have caught it.
   ok('keyframe: the real handle names are accepted', refuses({ easeIn: 'easyEase', easeOut: 'hang' }) === null);
   // A layer that declares w/h/track, because keying a BOX the layer never declared is a different and
-  // correct refusal (there is nothing to animate from, docs/MISTAKES.md #563).
+  // correct refusal (there is nothing to animate from, engine-doctrine/MISTAKES.md #563).
   const boxed = (extra) => { try {
     resolveKeyedProps([{ id: 'probe', type: 'rect', w: 100, h: 50, track: 1,
       motion: [{ t: 0, rot: 0, ...extra }, { t: 1, rot: 45 }] }]); return null;
@@ -6402,7 +6402,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('anchor: a track that never keys it returns null, so the layer keeps its own origin',
     noPivot.ox === null && noPivot.oy === null);
   // Same rule as w/h: both endpoints state it or neither does. One-sided cannot mean "hold", because
-  // that is the second interpretation rule docs/MISTAKES.md #563 exists to refuse.
+  // that is the second interpretation rule engine-doctrine/MISTAKES.md #563 exists to refuse.
   ok('anchor: one endpoint alone is not enough',
     motionAt([{ t: 0, ox: 0 }, { t: 1, rot: 45 }], 0.5).ox === null);
   ok('anchor: the refusal for `origin` now names the thing that works',
@@ -6447,7 +6447,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     JSON.stringify(motionAt(kfs, 0.42, { rot: 0.1 })) === JSON.stringify(motionAt(kfs, 0.42, { rot: 0.1 })));
 
   // A LAYER-OWNED PROP THE TRACK NEVER KEYS MUST STAY null. Sampling it earlier would hand the caller
-  // a number for a property the author never animated, which is exactly the class docs/MISTAKES.md #563
+  // a number for a property the author never animated, which is exactly the class engine-doctrine/MISTAKES.md #563
   // is about: a size reinterpreted without anything saying so.
   ok('motionDelay: an unkeyed layer-owned property stays null rather than becoming a number',
     motionAt(kfs, 0.5, { '*': 0.2 }).w === null);
@@ -6506,7 +6506,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   // ABSTENTION. The craft verdict grammar had two values, PASS and FIX, so a judge asked about a
   // dimension a STILL cannot carry had to guess, and the guess came back in the same shape as a real
-  // finding. docs/MISTAKES.md #155 is the archetype: a background "matched" on one frame that was 2.5x
+  // finding. engine-doctrine/MISTAKES.md #155 is the archetype: a background "matched" on one frame that was 2.5x
   // too fast in motion. harness/author/arsenal.mjs solved the identical problem with CONFIDENT and a
   // WEAK GUESS heading (#552) and it was never carried to the judge.
   ok('rubric: the craft judge can decline a dimension a still cannot answer',
@@ -6528,7 +6528,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 // ---- the committed GENERATED artifacts have a check, and a target that runs it ----
-// registry/, docs/BLOCKS.md and site/lib/blocks.json are generated, committed, and read by outsiders.
+// registry/, engine-doctrine/BLOCKS.md and site/lib/blocks.json are generated, committed, and read by outsiders.
 // Each check EXISTED and none was reachable: the registry target documented `CHECK=1` in three places
 // and its recipe passed no flag, so `make registry CHECK=1` regenerated and exited 0, which looks
 // exactly like a passing check. registry/ and blocks.json were both stale for a week underneath it.
@@ -6780,7 +6780,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // author-check used to decide whether a rule had fired by matching `[✗~]\s*\[<code>\]` against the
 // gate's printed output. Forty gates can fail and every one of them was one reformat away from being
 // silently unheard: the step prints its findings, the aggregator reads none, the film passes. The same
-// class is already recorded as docs/MISTAKES.md #401, where a verdict line printed after a --json
+// class is already recorded as engine-doctrine/MISTAKES.md #401, where a verdict line printed after a --json
 // payload made the documented machine-readable output unparseable and a sweep called all 154 scenes
 // crashed. These asserts hold the contract that replaced it.
 {
@@ -6873,7 +6873,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 //
 // The corpus read `*_REGISTRY` exports plus two hardcoded special cases (recipes, layer types), each
 // added because its subject is not a registry. So a capability with no registry was invisible to the
-// search this repo tells you to run before inventing anything: docs/EFFECTS.md carried 639 effects and
+// search this repo tells you to run before inventing anything: engine-doctrine/EFFECTS.md carried 639 effects and
 // the corpus carried 445. `easeOutExpo`, `tiktok`, `wordFlash`, `refract` and `commaSplit` all returned
 // NOTHING HERE CLEARLY MATCHES, over a sentence claiming 445 things had been searched. True about the
 // corpus, false about the engine, and the worse kind of wrong because it reads as an answer.
@@ -7010,18 +7010,18 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     .stdout.split('\n').filter(Boolean);
   ok('site-counts: the resolved surface list reaches docs-site/content/docs',
     files.includes('docs-site/content/docs/layers.mdx'));
-  ok('site-counts: and docs/', files.includes('docs/PRIMITIVES.md'));
+  ok('site-counts: and engine-doctrine/', files.includes('engine-doctrine/PRIMITIVES.md'));
   ok('site-counts: while keeping the site surfaces it already had',
     files.includes('site/lib/features.ts') && files.includes('site/public/vawe-rules.md'));
-  ok('site-counts: docs/MISTAKES.md stays out, it is a log of numbers that WERE wrong',
-    !files.includes('docs/MISTAKES.md'));
+  ok('site-counts: engine-doctrine/MISTAKES.md stays out, it is a log of numbers that WERE wrong',
+    !files.includes('engine-doctrine/MISTAKES.md'));
 
   // Discovery is only half of it: a file can be in the list and still be read by nobody. Plant a
   // stale count in each new surface and require the gate to name that file. Both were proved to fail
   // by planting the number first and watching the gate stay green before the widening landed.
   const planted = [
     ['docs-site/content/docs/_lib-test-count.mdx', '# probe\n\nThere are 3 layer types.\n'],
-    ['docs/_LIB-TEST-COUNT.md', '# probe\n\nThe engine ships 3 kinetic presets.\n'],
+    ['engine-doctrine/_LIB-TEST-COUNT.md', '# probe\n\nThe engine ships 3 kinetic presets.\n'],
   ];
   for (const [rel, body] of planted) {
     const abs = path.join(repoRoot, rel);
@@ -7035,7 +7035,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   // The waiver has to cost a sentence. `doc-refs-allow` set the precedent and this one copies it:
   // a bare marker is the cheap way out of a real stale number, so it does not count.
-  const abs = path.join(repoRoot, 'docs/_LIB-TEST-COUNT.md');
+  const abs = path.join(repoRoot, 'engine-doctrine/_LIB-TEST-COUNT.md');
   try {
     fs.writeFileSync(abs, '<!-- site-counts-allow: the number below is a probe -->\nThere are 3 layer types.\n');
     ok('site-counts: a waiver WITH a reason silences the line',
@@ -7048,7 +7048,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // ── AND IT READS THE TOOLS, WHICH IS WHERE A STALE COUNT COSTS MOST ───────────────────────────
   // A wrong number in marketing copy oversells the product. A wrong number in a gate's own finding
   // sends an author to a capability that is not there, or away from one that is: block-schema printed
-  // "154 of 155 blocks" over a registry of 185, doc-map advertised docs/EFFECTS.md as "15 families"
+  // "154 of 155 blocks" over a registry of 185, doc-map advertised engine-doctrine/EFFECTS.md as "15 families"
   // over 53, and feature-audit answered a monotony warning with "21 presets available" over 31. Same
   // class as `make sfx` in audio-check (the make-target test above), and nothing checked it either.
   // `make arsenal` is the shape to copy: it prints `all.length`, so it cannot be wrong.
@@ -7150,7 +7150,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     catch (e) { return { code: e.status, out: `${e.stdout || ''}${e.stderr || ''}` }; } };
   try {
     const clean = run();
-    ok('rungs: every tag CLAUDE.md and docs/CRAFT carry today names something that exists', clean.code === 0);
+    ok('rungs: every tag CLAUDE.md and engine-doctrine/CRAFT carry today names something that exists', clean.code === 0);
     ok('rungs: and the distribution is printed, so the shape of the debt is visible', /\[eye\]/.test(clean.out));
 
     // A GATE THAT DOES NOT EXIST. The tag reads exactly as authoritative as a true one, which is why
@@ -7327,7 +7327,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ok('sound gate: silent:true with no _why fires silence-without-a-reason',
       bare.codes.includes('silence-without-a-reason'));
     // THE RECORD, NOT THE LINE. The old shape printed the same sentence and told the aggregator
-    // nothing, which is how a working gate stayed unread (docs/MISTAKES.md #401).
+    // nothing, which is how a working gate stayed unread (engine-doctrine/MISTAKES.md #401).
     ok('sound gate: and it says so as a RECORD, so author-check can read it without scraping prose',
       bare.recs.some((r) => r.code === 'silence-without-a-reason' && r.severity === 'error' && r.fix));
     ok('sound gate: and the printed line still carries the code, for the person watching',
@@ -7377,7 +7377,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     /storyboard = one beat per section, in this order/.test(src));
   ok('sections: and hands you a runnable `make capture` per block, which is the capture-first half',
     /make capture URL="\$\{url\}" SEL=/.test(src));
-  // A CRAWL THAT FINDS NOTHING HAS TOLD YOU NOTHING (docs/MISTAKES.md #207). An empty inventory that
+  // A CRAWL THAT FINDS NOTHING HAS TOLD YOU NOTHING (engine-doctrine/MISTAKES.md #207). An empty inventory that
   // exits 0 is the tag's worst failure: the command ran, said nothing, and the rule reads as answered.
   ok('sections: an empty inventory FAILS rather than printing a green tick over nothing',
     /if \(!manifest\.length\)/.test(src) && /process\.exit\(1\)/.test(src));
@@ -7470,7 +7470,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // (this is the DEFECT the owner measured: a doc added today re-blocked 34 approved films). Anchor
   // on the real git-dated confirm: line of an 'always' doc so the test tracks reality, not a date
   // that a later edit to the doc could silently invalidate.
-  const densityDate = docConfirmDate('docs/CRAFT/DENSITY.md');
+  const densityDate = docConfirmDate('engine-doctrine/CRAFT/DENSITY.md');
   ok('craft-checklist: docConfirmDate finds a real YYYY-MM-DD date for an existing doc',
     typeof densityDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(densityDate));
 
@@ -7992,7 +7992,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     '  ✗ beats      BLOCKS (dead-air, empty-close)',
     '  ~ critique   reported, does not block (hollow-beat)',
     '      [no-transition] (step floor)',
-    '          read: docs/CRAFT/TRANSITIONS.md',
+    '          read: engine-doctrine/CRAFT/TRANSITIONS.md',
   ].join('\n');
   const blocked = parseBlockedCodes(stdout);
   ok('parseBlockedCodes reads codes off a BLOCKS(...) line', blocked.has('dead-air') && blocked.has('empty-close'));
@@ -8273,7 +8273,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 }
 
 // ---- quality/gates/scene-timing.mjs cameraStillHeldAt: the camera holds its end pose (owner's
-// decision, docs/MOTION-CRAFT.md) and this is the scene-side warning that names a later beat's
+// decision, engine-doctrine/MOTION-CRAFT.md) and this is the scene-side warning that names a later beat's
 // full-frame content sitting under a hold nothing has returned. ------------------------------------
 {
   // a diveIn-shaped leg (baked `camera[]`, as bakeCameraMove would produce) ending at 1.5s pushed to
@@ -8484,7 +8484,7 @@ const FLOOR = 1800;
   ok('srcUrl: an already-absolute path is untouched', srcUrl('/assets/x/tile.jpg') === '/assets/x/tile.jpg');
   ok('srcUrl: http(s) is untouched', srcUrl('https://cdn.example.com/x.jpg') === 'https://cdn.example.com/x.jpg');
   ok('srcUrl: data: is untouched', srcUrl('data:image/png;base64,AAAA') === 'data:image/png;base64,AAAA');
-  ok('icon(): a relative image src is adapted to the served-root form (docs/MISTAKES.md, silent image layer)',
+  ok('icon(): a relative image src is adapted to the served-root form (engine-doctrine/MISTAKES.md, silent image layer)',
     icon('assets/x/tile.jpg').includes('src="/assets/x/tile.jpg"'));
   ok('icon(): an absolute image src is untouched', icon('/assets/x/tile.jpg').includes('src="/assets/x/tile.jpg"'));
   ok('icon(): a non-path value (emoji/monogram) is returned as-is, no <img> at all', icon('🔥') === '🔥');

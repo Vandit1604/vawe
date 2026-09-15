@@ -73,7 +73,7 @@ const FAMILY_POSTER = {
   'seams-2-scene-blends': (scene) => scene.seams[0].t + scene.seams[0].dur / 2,
 
   // `gsap-exits` (the named `fxOut` family) used to have its own poster timing here. Deleted with the
-  // family itself: all 11 names measured zero users across the library (docs/MISTAKES.md #364).
+  // family itself: all 11 names measured zero users across the library (engine-doctrine/MISTAKES.md #364).
 };
 
 // Default: 45% into the layer's own entrance. `enterDur` names it directly; `each` is the

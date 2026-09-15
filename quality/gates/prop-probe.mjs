@@ -8,7 +8,7 @@
 // Its only gap is COVERAGE: it can judge a prop only when an author wrote it. `metalness` and
 // `roughness` were declared on the `three` layer (core/three-fx.js:29) and overwritten by literals in
 // `deviceShowcase`, and no shipped scene set them on that path, so the check never had anything to
-// fire on (docs/MISTAKES.md #529, PARITY-AUDIT). This file supplies the missing input and reuses the
+// fire on (engine-doctrine/MISTAKES.md #529, PARITY-AUDIT). This file supplies the missing input and reuses the
 // whole mechanism: `watchProps` records the reads, `deadProps` decides, `auditedProps` scopes.
 //
 //   node quality/gates/prop-probe.mjs              every type, table + exit 1 on an unwaived death
@@ -62,7 +62,7 @@ const WAIVERS = {
 // with a message that says why: that is the opposite of the silent no-op this gate exists for, and
 // probing it would only prove the refusal works.
 const SKIP = {
-  // TWO NAME COLLISIONS, and both are findings in their own right (docs/MISTAKES.md #565): the prop is
+  // TWO NAME COLLISIONS, and both are findings in their own right (engine-doctrine/MISTAKES.md #565): the prop is
   // read, but the flat schema gives the name ONE type for every layer, so the reading type cannot be
   // authored. They are not deaths, and a dead-prop gate is the wrong place to report them.
   'video.out': 'the schema types `out` as the exit-animation NAME for every layer, so a video `out` '

@@ -1,7 +1,7 @@
 // core/parts.js. The `parts` vocabulary: named entrances for the SUB-ELEMENTS of a hand-authored
 // html/svg layer. A figure grows its bars, then draws its line, then pops its dots.
 //
-// It lived inline inside formats/scene/scene.js's build path until docs/MISTAKES.md #355. That is why it
+// It lived inline inside formats/scene/scene.js's build path until engine-doctrine/MISTAKES.md #355. That is why it
 // was the only vocabulary in the engine with no catalogue entry, no blurb map and no gate: nothing could
 // import it to enumerate it. It also resolved `PARTS[p.anim] || PARTS.fadeUp`, so a mistyped part
 // entrance silently faded up - the eighth instance of that pattern found in one sweep.
@@ -42,7 +42,7 @@ export const PARTS = {
     // has only two representable states (1px, 0px) and a seven-second draw renders as a one-frame
     // snap partway through. getTotalLength() gives GSAP hundreds of real pixels to interpolate
     // across, so the rounding is imperceptible. Same fix shape as core/layers/svg.js's applyDraw
-    // (docs/MISTAKES.md #581), for a different, GSAP-side reason: that bug was Chromium's own
+    // (engine-doctrine/MISTAKES.md #581), for a different, GSAP-side reason: that bug was Chromium's own
     // arc-flattening estimate disagreeing with pathLength=1, not integer px rounding.
     drawOn: [(t) => {
       try { t.removeAttribute('pathLength'); } catch (e) {}

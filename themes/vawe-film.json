@@ -1,6 +1,6 @@
 {
   "name": "vawe-film",
-  "note": "The vawe brand, tuned for FILM. themes/vawe.json mirrors the real landing page and must keep doing that: Anybody is the site's actual face and changing it there would make the theme lie about the brand (docs/MISTAKES.md, the Space Grotesk correction). A film has different needs from a web page and this is where they live.\nTHREE CHANGES, EACH FOR A REASON A STILL FRAME CAN SHOW.\n1. FACES: Geist and Geist Mono, a matched pair. A film about a scene file alternates statements and code every other beat, and two unrelated families make that alternation read as two design systems. Geist also holds up at 220px, which Anybody's default width does not.\n2. SURFACES GAIN TONE: bg #f4f6fa against surface #ffffff. On the site both are white and a card is separated by a border. In a film a border is a hairline nobody sees at 30fps, so separation has to come from depth, and depth needs two different tones to exist between. It is also why a glass shine was invisible in this film: a white highlight on a white plate has nothing to catch.\n3. A MOVING BACKDROP BY DEFAULT: the site is a flat white page and correctly so; a flat white FILM is a slideshow, and `direction-floor` says so as `no-bg-motion`.",
+  "note": "The vawe brand, tuned for FILM. themes/vawe.json mirrors the real landing page and must keep doing that: Anybody is the site's actual face and changing it there would make the theme lie about the brand (engine-doctrine/MISTAKES.md, the Space Grotesk correction). A film has different needs from a web page and this is where they live.\nTHREE CHANGES, EACH FOR A REASON A STILL FRAME CAN SHOW.\n1. FACES: Geist and Geist Mono, a matched pair. A film about a scene file alternates statements and code every other beat, and two unrelated families make that alternation read as two design systems. Geist also holds up at 220px, which Anybody's default width does not.\n2. SURFACES GAIN TONE: bg #f4f6fa against surface #ffffff. On the site both are white and a card is separated by a border. In a film a border is a hairline nobody sees at 30fps, so separation has to come from depth, and depth needs two different tones to exist between. It is also why a glass shine was invisible in this film: a white highlight on a white plate has nothing to catch.\n3. A MOVING BACKDROP BY DEFAULT: the site is a flat white page and correctly so; a flat white FILM is a slideshow, and `direction-floor` says so as `no-bg-motion`.",
   "palette": {
     "bg": "#f4f6fa",
     "bg2": "#eef2f8",
@@ -37,7 +37,7 @@
     "durationScale": 0.88,
     "stagger": 0.045,
     "exitRatio": 0.4,
-    "_exitRatio": "the fastest of the seven: this engine is about determinism and speed, and its own theme already runs durationScale 0.88. Asymmetric timing: an entrance is an introduction, an exit is over (docs/CRAFT/MOTION-STANDARDS.md)."
+    "_exitRatio": "the fastest of the seven: this engine is about determinism and speed, and its own theme already runs durationScale 0.88. Asymmetric timing: an entrance is an introduction, an exit is over (engine-doctrine/CRAFT/MOTION-STANDARDS.md)."
   },
   "bg": {
     "accent": "37,99,235",

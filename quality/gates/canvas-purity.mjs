@@ -8,7 +8,7 @@
 // somewhere the DOM signature cannot reach. probe reported the paint demo clean while 2 of 6 frames
 // rendered different PIXELS depending on render order: an off-window layer never cleared its canvas,
 // so it held whatever a previous frame had drawn, and frames render across 8 workers in arbitrary
-// order (docs/MISTAKES.md #64). This gate hashes the actual pixels instead.
+// order (engine-doctrine/MISTAKES.md #64). This gate hashes the actual pixels instead.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

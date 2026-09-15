@@ -21,7 +21,7 @@ export const PAL = PAL_PLINTH; // back-compat
 // WHY THIS EXISTS. The presets are palette-driven so that one colours-pack reskins every background,
 // and most themes in this repo hand-author a `bg` block to supply it. A theme that does not falls
 // through to `PAL_PLINTH` (one specific brand's blue), including `default`, the theme an author gets
-// when they declare nothing. Reaching for the defaults gave you another brand's colours (docs/MISTAKES.md #352).
+// when they declare nothing. Reaching for the defaults gave you another brand's colours (engine-doctrine/MISTAKES.md #352).
 //
 // Derived, not hand-written, because themes/default.json's own note says "Copy this file to start a
 // new brand kit". A second palette that must be kept in sync with the first is a palette that drifts.

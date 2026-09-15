@@ -52,7 +52,7 @@ jobs:
 
       # Structured, readable failures. This step is the pass/fail authority's SIDECAR, not the authority:
       # it runs `if: always()`, writes to the job Summary and an artifact, and never sets the job status
-      # (the `make` step above does). So it cannot mask a real exit code (docs/MISTAKES.md #401).
+      # (the `make` step above does). So it cannot mask a real exit code (engine-doctrine/MISTAKES.md #401).
       - name: findings summary (json)
         if: always()
         run: |

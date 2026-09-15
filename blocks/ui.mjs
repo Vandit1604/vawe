@@ -53,7 +53,7 @@ export function browserFrame({ x, y, w = 900, h = 560, url = 'example.com', chil
 // weights (kit.mjs's DATA TREATMENT idiom), mono for figures/sans for words, never a gradient or a
 // card-in-card. VARIANCE low (utility chrome, not the film's loud moment); MOTION restrained, either
 // the layer's own envelope anim for a single-unit card or `parts` where the family already staggers
-// its own children. docs/CRAFT/HTML-FRAGMENTS.md.
+// its own children. engine-doctrine/CRAFT/HTML-FRAGMENTS.md.
 
 // pillRow, a horizontal row of chip tags.
 export function pillRow({ x, y, items = [], fg = T.accentInk, bg = T.accentSoft, start = 0, dur = 4 } = {}) {

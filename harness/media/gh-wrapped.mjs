@@ -109,7 +109,7 @@ const cells = weeks.map((w, x) => w.contributionDays.map((d) => {
 // fragment's size a property of the data (53 weeks vs 52) rather than of the composition.
 // Solid fill + fill-opacity rather than color-mix(): the grid was the only region of the frame that
 // differed between worker tabs, and color-mix in an SVG fill is the only thing here the rest of the
-// scene does not also do. See docs/MISTAKES.md #384.
+// scene does not also do. See engine-doctrine/MISTAKES.md #384.
 const heat = `<div style="width:100%">
 <svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;display:block">
 <style>

@@ -3,7 +3,7 @@
 // The static quality gates existed but were opt-in and mostly WARN-tier, so a maximal "effect-soup"
 // video passed everything the render flow actually ran (only schema + purity were mandatory). This one
 // command chains them so `make video` can REQUIRE the loop (it runs author-check unless NOCHECK=1).
-// See docs/MISTAKES.md (authoring-gates-were-optional) and docs/CRAFT/DIRECTION.md.
+// See engine-doctrine/MISTAKES.md (authoring-gates-were-optional) and engine-doctrine/CRAFT/DIRECTION.md.
 //
 // EVERY STEP RUNS, EVERY TIME. There is no opt-in half any more. A mechanism nobody is made to use is a
 // mechanism that does not exist, and half this ladder sat behind TASTE=1 where almost nobody set it.
@@ -14,7 +14,7 @@
 // Measured before this was written: turning the REPORTS half into blocks fails 116 of the 141 scenes in
 // this library, four films in five, which is the exact shape CLAUDE.md warns about, a rule waived by
 // reflex has already been repealed and nobody wrote it down. So the steps became mandatory and the
-// severities did not move. See docs/TASTE.md · "One process, two severities".
+// severities did not move. See engine-doctrine/TASTE.md · "One process, two severities".
 //
 // BLOCKS:
 //   validate: schema + em-dash (correctness; never waivable)
@@ -42,9 +42,9 @@
 //
 // `visual-vocabulary` used to sit here and was DELETED, not moved: its size measurement squared a
 // single-axis layer, so a 590x18 underline was scored as 590x590 and passed a blocking gate whose only
-// job was to catch exactly that. See docs/TASTE.md and docs/MISTAKES.md.
+// job was to catch exactly that. See engine-doctrine/TASTE.md and engine-doctrine/MISTAKES.md.
 //
-// The vision judge (docs/JUDGE.md) is NOT run here: it needs the rendered mp4, so it is a post-render
+// The vision judge (engine-doctrine/JUDGE.md) is NOT run here: it needs the rendered mp4, so it is a post-render
 // step. A deterministic script also cannot force an agent to judge honestly. So the ladder ends by
 // printing the REQUIRED post-render judge step, author-check being green is necessary, not sufficient.
 //
@@ -87,7 +87,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 // rule's debt been paid down enough to stop grandfathering the past? Once the library is folded, that
 // question has one answer, an explicit waiver on a real scene, and a rule can go straight to being a
 // PLAIN BLOCK: it fires or it doesn't, and `authoring.allow` is the only door out, for old debt and a
-// deliberate new exception alike. See docs/TASTE.md and AGENTS.md "Waivers, legacy, and the difference".
+// deliberate new exception alike. See engine-doctrine/TASTE.md and AGENTS.md "Waivers, legacy, and the difference".
 //
 // HARD_CODES below (was RATCHET_CODES) is still where a code opts into "no reports tier, no free pass":
 // if it fires and the scene has not waived it, the run stops. Two codes were retired rather than folded,
@@ -100,7 +100,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 //                   exited before the craft checklist could even run. Folded into `craft-unvisited`
 //                   instead, in quality/gates/craft-checklist.mjs: no storyboard now just means every
 //                   relevant doc reads as unanswered, which is what that code already measures.
-// Both numbers, and the rest of the per-code table, are in docs/TASTE.md "Measured, before any cut".
+// Both numbers, and the rest of the per-code table, are in engine-doctrine/TASTE.md "Measured, before any cut".
 
 // A storyboard is resolved in exactly one place, so this stays the one function that answers the question.
 function resolveStoryboard(sceneFile, sceneJson) {
@@ -183,7 +183,7 @@ const HARD_CODES = {
 //
 // and every one of the forty gates that can fail was one reformat away from becoming invisible to it.
 // Nothing would error. The step would print its findings in full, this file would read none of them,
-// and the film would pass. docs/MISTAKES.md #401 is the same class already paid for: motion-audit
+// and the film would pass. engine-doctrine/MISTAKES.md #401 is the same class already paid for: motion-audit
 // printed its verdict line to stdout after its JSON, so the documented machine-readable output was not
 // machine-readable, and a sweep reported all 154 scenes as crashed.
 //
@@ -236,7 +236,7 @@ const allowRaw = (scene.authoring && Array.isArray(scene.authoring.allow)) ? sce
 // a written cause; the audit says otherwise. Across the tracked library `no-continuous-object` is
 // waived 6 times with 0 reasons and `dead-air` 3 times with 0, while `no-visual-vocabulary` carried a
 // reason on every single one, and that difference is exactly the difference between a rule people
-// argue with and a keyword that makes a gate stop talking (docs/MISTAKES.md #209).
+// argue with and a keyword that makes a gate stop talking (engine-doctrine/MISTAKES.md #209).
 //
 // Nothing here judges whether the reason is GOOD. It cannot. It only makes waiving cost one sentence,
 // which is the whole mechanism: the cost is what turns a reflex back into a decision, and a bad reason
@@ -323,7 +323,7 @@ console.log(`  ${LADDER.filter((s) => s[1] === 'blocks').length} can stop you; $
 for (const [i, [name, tier, what]] of LADDER.entries()) {
   console.log(`   ${String(i + 1).padStart(2)}. ${name.padEnd(11)} ${tier === 'blocks' ? 'BLOCKS ' : 'reports'}  ${what}`);
 }
-console.log(`  Style findings report by default and BLOCK under TASTE=1. Why: docs/TASTE.md.`);
+console.log(`  Style findings report by default and BLOCK under TASTE=1. Why: engine-doctrine/TASTE.md.`);
 
 let stepNo = 0;
 const describe = (name) => (LADDER.find((s) => s[0] === name) || [null, null, ''])[2];
@@ -430,13 +430,13 @@ const record = (name, { code, blockCodes, blockRecords = blockCodes.map((c) => (
 // steps run and print, always, and `taste` now decides one thing only: whether their findings block.
 //   TASTE=1 make author-check D=<file>      · or `--taste`
 // Measured on this library the day the flag changed meaning: with teeth, 116 of 141 scenes fail. That is
-// the number that keeps this a report rather than a wall. docs/TASTE.md carries what would have to change.
+// the number that keeps this a report rather than a wall. engine-doctrine/TASTE.md carries what would have to change.
 const styleGate = (name, label, script, args, opts) =>
   record(name, runGate(name, label, script, args), { ...opts, tier: 'reports' });
 
 // 1. validate, correctness, never waivable.
 // 0. preflight. The one step that is not about the JSON in front of you: it asks whether the nine
-//    decisions in docs/CRAFT/README.md were put in front of somebody for THIS version. It cannot grade
+//    decisions in engine-doctrine/CRAFT/README.md were put in front of somebody for THIS version. It cannot grade
 //    the answers and does not pretend to, the same way `make beats` proves a sheet was looked at and
 //    not that the beats are good. Ratcheted like the rest, so the library warns and new work complies.
 record('preflight', runGate('preflight', 'preflight (the decisions before the JSON)', 'quality/gates/preflight.mjs', [], { subject: file }), { waivable: true, tier: 'reports' });
@@ -461,7 +461,7 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
     console.log(`      Looked for: ${sbCandidates.map((p) => path.relative(repoRoot, p)).join('  ·  ')}`);
     console.log(`      A film with no written plan has no spectacle, no pace budget and no named thread, so three`);
     console.log(`      of this ladder's checks have nothing to compare the render against and stay quiet.`);
-    console.log(`      Write one from docs/CRAFT/STORYBOARD-TEMPLATE.md, then: make storyboard-check SB=<file>`);
+    console.log(`      Write one from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md, then: make storyboard-check SB=<file>`);
     console.log(`      Then point this scene at it, so a rename cannot break the link:`);
     console.log(`        "storyboard": "formats/scene/${sbBase}.storyboard.md"`);
     const excused = isWaivedBy(allowRaw, 'no-storyboard'); // whole-film code, carries no instance
@@ -527,7 +527,7 @@ styleGate('floor', 'direction floor (ambition)', 'quality/gates/direction-floor.
       + `        node harness/author/track.mjs pan   --to -600 --dur 1.25 --scene ${target} --layer <n>\n`
       + `        node harness/author/track.mjs blast --dur 1.5              --scene ${target} --layer <n>\n`
       + `      Or reach for a recipe measured off a real film: \`make arsenal Q="…"\` (recipes/README.md).\n`
-      + `      Theory and the measurements: docs/CRAFT/KEYED-MOTION.md.\n`);
+      + `      Theory and the measurements: engine-doctrine/CRAFT/KEYED-MOTION.md.\n`);
     printDocs(['no-authored-motion']);
   } else {
     process.stdout.write(`  → nothing found.\n`);
@@ -543,11 +543,11 @@ styleGate('dissolve', 'dissolve check (crossfade mud)', 'quality/gates/dissolve-
 // 4d. covered-move. Does a full-bleed layer above a moving one start mid-move and hide it? `track`
 //     decides stacking, array order breaks a same-track tie (formats/scene/scene.js:597), and a move
 //     hidden before it plays reads as a hard cut nobody authored. Always report-only: this can't tell
-//     a deliberate cover from an accident, only name the collision. See docs/CRAFT/TRANSITIONS.md.
+//     a deliberate cover from an accident, only name the collision. See engine-doctrine/CRAFT/TRANSITIONS.md.
 styleGate('covered-move', 'covered-move (a move hidden before it plays)', 'quality/gates/covered-move.mjs', [], { waivable: true });
 // 4. slop, RETIRED 2026-08. It ran 41 borrowed rules over a DOM dump carrying three of the CSS
 // properties those rules read, so most of them had no evidence to work from and their silence read as
-// a pass across the whole library (docs/MISTAKES.md #340). Its replacement is the designspec rule
+// a pass across the whole library (engine-doctrine/MISTAKES.md #340). Its replacement is the designspec rule
 // table, which runs in the gate below. The vendored detector is still the right tool for a hand-authored
 // FRAGMENT, where it gets real computed styles, `make preview HTML=<file>` still runs it.
 // 4b. designspec. The LOOK lock (visual twin of the storyboard): off-palette colours / non-role fonts. TASTE.
@@ -555,7 +555,7 @@ styleGate('covered-move', 'covered-move (a move hidden before it plays)', 'quali
 // drift ("#8fdcff is 17% from anything in the palette") and I read it and shipped anyway, twice. A
 // gate whose finding is precise and whose severity is advisory teaches the author that warnings are
 // decoration. Every scene in the library passes it: the seven that are legitimately off the brand say
-// so per-scene, with a reason, in {"authoring":{"allow":["off-colour"]}} (docs/MISTAKES.md #337).
+// so per-scene, with a reason, in {"authoring":{"allow":["off-colour"]}} (engine-doctrine/MISTAKES.md #337).
 styleGate('designspec', 'design-spec lock (theme colours + fonts)', 'quality/gates/designspec-check.mjs', ['--strict'], { waivable: true, exitMeansFail: true });
 // 4b1. design-drift. Silent (no browser launched, exit 0) for the library's default: a film with no
 // `<film>.design.md`. Named in HARD_CODES above, so once a film opts in, an undeclared value blocks
@@ -582,7 +582,7 @@ styleGate('copy', 'copy gate (on-screen writing)', 'quality/gates/copy-check.mjs
 styleGate('read', 'read gate (can a viewer read it in time)', 'quality/gates/read-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // PACE. A still film is sometimes right, so this reports rather than blocks. What it is NOT is a matter
 // of opinion: two films authored as a deliberate improvement came out slower than the one they replaced,
-// measured, and the only thing that noticed was a census run by hand afterwards (docs/MISTAKES.md #336).
+// measured, and the only thing that noticed was a census run by hand afterwards (engine-doctrine/MISTAKES.md #336).
 styleGate('pace', 'pace (is anything happening, and how often)', 'quality/gates/pace-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // EYE-TRACE. Murch ranks it fourth of six at 7% and says to sacrifice upward from the bottom, so a cut
 // that serves the story may fairly cost the eye a journey. It reports for that reason, not because the
@@ -603,7 +603,7 @@ styleGate('eye', 'eye-trace (where the viewer is looking at each cut)', 'quality
 // `audio.silent:true` and 25 of those say why; 17 name no `audio` block at all and 1 has a block that
 // produces nothing. So blocking on day one fails 99 films, two in three, and CLAUDE.md already names
 // what happens next: everyone adds a waiver and the rule is repealed with nobody writing it down.
-// docs/MISTAKES.md #25 and #159 are that bill, paid twice.
+// engine-doctrine/MISTAKES.md #25 and #159 are that bill, paid twice.
 //
 // It is not ratcheted either, and that is the narrower call. A ratchet grandfathers the past and blocks
 // new work, which is right for `no-storyboard`, where the debt is a missing artefact. Here the rule
@@ -684,7 +684,7 @@ console.log(`\n════════ author-check · ${path.basename(file)} �
 // every vocabulary registry throws during layer build. Those cannot be skipped by anything: a scene
 // that fails them will not render, with or without this target. Everything else here is this target's
 // own judgement about craft, and the engine will happily render a film that fails all of it.
-// docs/MISTAKES.md #379.
+// engine-doctrine/MISTAKES.md #379.
 const ENGINE_REFUSES = new Set(['validate']);
 const line = (r) => {
   const mark = r.failed ? '✗' : r.waived ? '○' : r.reported ? '~' : '✓';
@@ -719,7 +719,7 @@ if (reported.length) {
   console.log(`\n  ~ ${reported.length} step(s) found something and did not stop you: ${reported.map((r) => r.name).join(', ')}.`);
   console.log(`      These are house-style findings. They are real and they are printed in full above.`);
   console.log(`      Give them teeth:  TASTE=1 make author-check D=${file}`);
-  console.log(`      Why they report rather than block: docs/TASTE.md · "One process, two severities".`);
+  console.log(`      Why they report rather than block: engine-doctrine/TASTE.md · "One process, two severities".`);
 } else if (!taste && !noisy.length) {
   console.log(`\n  ✓ the house-style steps found nothing either. Nothing above is being held back from you.`);
 }
@@ -737,7 +737,7 @@ console.log(`\n  ▶ REQUIRED after render (the ladder is not complete without i
 console.log(`      make judge D=${file}${vs ? ` VS=${vs}` : ''}`);
 console.log(`      then READ /tmp/judge/${path.basename(file, '.json')}/sheet.png against its rubric.md and score every frame`);
 console.log(`      (readability · hierarchy · composition · brand + asset fidelity · produced · value).`);
-console.log(`      If your eye catches a flaw, it is a FIX, never ship one you noticed. See docs/JUDGE.md.`);
+console.log(`      If your eye catches a flaw, it is a FIX, never ship one you noticed. See engine-doctrine/JUDGE.md.`);
 
 // ---- HARD CODES, decided from what already ran ------------------------------------------------------
 // A HARD_CODES code blocks whenever it fires and the scene has not waived it, whatever tier its own step

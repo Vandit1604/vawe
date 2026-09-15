@@ -219,5 +219,5 @@ F.emit();
 if (!findings.length) console.log('  ✓ no authored move is covered by a full-bleed layer above it before it plays.');
 console.log(`\n  ${allow.has('covered-move') ? 0 : findings.length} finding(s)${allow.has('covered-move') && findings.length ? ` (waived, ${findings.length} live)` : ''}.`);
 console.log('  (report only, never blocks: a covering start can be a deliberate hard cut. Reads the declared JSON,');
-console.log('   not rendered pixels, and never judges html coverage; see docs/CRAFT/TRANSITIONS.md.)\n');
+console.log('   not rendered pixels, and never judges html coverage; see engine-doctrine/CRAFT/TRANSITIONS.md.)\n');
 process.exit(0); // report-only: never fails the build, regardless of TASTE=1

@@ -6,7 +6,7 @@
 //   1. WE CANNOT FIX IT. The browser path injects `detect-antipatterns-browser.js`, a 4,920-line
 //      GENERATED bundle whose build script is not vendored. It cannot be regenerated here. When the
 //      detector reported 21 false low-contrast findings on the first fragment it was ever shown
-//      (docs/MISTAKES.md #338), the only repair was to hand-edit the generated file, and a skill
+//      (engine-doctrine/MISTAKES.md #338), the only repair was to hand-edit the generated file, and a skill
 //      update silently reverts it.
 //   2. ITS THRESHOLDS WERE FITTED TO SOMEBODY ELSE'S PAGES. They are calibrated for React landing
 //      pages. A 13-second film carries about eight lines of copy, so a rule that needs three
@@ -126,7 +126,7 @@ export const RULES = [
     scope: 'document',
     severity: 'warn',
     needs: 'text',
-    // Only reachable since the fragments moved into files (docs/MISTAKES.md #339 and the extraction
+    // Only reachable since the fragments moved into files (engine-doctrine/MISTAKES.md #339 and the extraction
     // beside it). While the markup was escaped inside the scene JSON there was nothing to read.
     why: 'Numbers earn their place when the content IS a sequence and the order carries information. '
       + '01 / 02 / 03 over three unrelated sections is scaffolding by reflex.',
@@ -250,7 +250,7 @@ export const RULES = [
     needs: 'scene',
     // The library's tightest declared tracking is exactly -0.04em, so the floor sits just beyond it:
     // fitted to what we ship, not to a number somebody else picked. `ls` is a documented synonym for
-    // `tracking` (docs/MISTAKES.md), so both are read. Reading one and not the other is how a prop
+    // `tracking` (engine-doctrine/MISTAKES.md), so both are read. Reading one and not the other is how a prop
     // goes silently unchecked here.
     why: 'Past about -0.04em the letters touch and the word stops being read, it is recognised. That is '
       + 'a logo technique, and it is wrong for anything a viewer has to actually read.',

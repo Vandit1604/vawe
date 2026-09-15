@@ -63,7 +63,7 @@ const typeOf = (v) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof
 // silently, and only visibly wrong at some aspects. The audit has flagged this on the x axis for a
 // while; the rule lives HERE now so it fails at `make validate` AND in boot (which imports this
 // module) before a single frame renders, and so there is exactly one copy of it. Two copies is how
-// the safe box and the canvas size each drifted into four (docs/MISTAKES.md #46).
+// the safe box and the canvas size each drifted into four (engine-doctrine/MISTAKES.md #46).
 //
 // The Y axis is the same trap. It is enforced only where no honest estimate exists: a text layer's
 // height is reliably ~size*1.2 and scenes have tuned around the current behaviour, so applying that
@@ -99,7 +99,7 @@ export function layoutErrors(cfg) {
   // `resolveAnchors` does `const T = L.anchor && byId[L.anchor]; if (!T) continue;`, so a typo leaves the
   // layer at whatever x/y it happened to carry and the annotation quietly stops pointing at anything.
   // This is the identical shape `panWith` had, and `panWith` got a hard error for it while `anchor`,
-  // three lines away in the same file, kept the silent skip (docs/MISTAKES.md #199).
+  // three lines away in the same file, kept the silent skip (engine-doctrine/MISTAKES.md #199).
   (cfg.layers || []).forEach((L, i) => {
     if (!isObj(L) || typeof L.anchor !== 'string' || ids.has(L.anchor)) return;
     out.push(`layers[${i}] (${L.type || 'text'}): anchor "${L.anchor}". No layer has that \`id\`, so the anchoring is skipped and this layer stays wherever its own x/y put it. Known ids: ${[...ids].join(', ') || '(none, give the target an `id`)'}.`);
@@ -149,7 +149,7 @@ export function layoutErrors(cfg) {
   //
   // The defect: `cadence`'s button rode a shared pan to -512 while its own next key said -318, so it
   // jumped 194px right in two frames (126 px/frame^2 against the travel) and every gate stayed green
-  // (docs/MISTAKES.md #194). The author cannot see the pan's accumulated value, so the arithmetic has to
+  // (engine-doctrine/MISTAKES.md #194). The author cannot see the pan's accumulated value, so the arithmetic has to
   // be done for them.
   const FPS = 30, REV_ACCEL = 60;
   (cfg.layers || []).forEach((L, i) => {
@@ -380,7 +380,7 @@ export function captionErrors(cfg) {
 // Measured: formats/scene/together-recreation.json had a layer at 2.55s to 6.70s with a boundary at
 // 2.65s. Ten of its four thousand one hundred and fifty milliseconds survived. Four beats of a finished
 // film rendered pure white, and finding it took a single-layer probe scene because every fragment
-// previewed perfectly on its own (docs/MISTAKES.md #603).
+// previewed perfectly on its own (engine-doctrine/MISTAKES.md #603).
 //
 // `acrossBeats: true` is the documented opt-out and the check respects it: that flag says the layer
 // belongs to the FILM rather than to a beat, which is exactly what a continuous object is.
@@ -547,7 +547,7 @@ export function htmlLayerErrors(cfg) {
 // time. That is exactly why a key the ENGINE rewrites every frame must be refused here rather than
 // applied: a build-time write to `opacity`/`transform`/etc. is silently erased the instant the render
 // advances past frame 0, and this repo's most-logged bug class is an accepted prop the engine then
-// ignores (docs/MISTAKES.md #213, #369, #373, #375). Every refusal names the vocabulary that already
+// ignores (engine-doctrine/MISTAKES.md #213, #369, #373, #375). Every refusal names the vocabulary that already
 // owns the job, never just "no".
 const OWNED_CSS = {
   opacity: 'written every frame from the enter/exit envelope (core/timeline/clips.js:220), use `anim` / `motion`',
@@ -626,7 +626,7 @@ export function bgErrors(cfg) {
   // Checked HERE as well as at render because the render throw arrives 60 seconds and one ffmpeg pass
   // later, and the answer is the same either way. Lowered first: a scene written with the unified
   // `transitions` surface has no `cuts` key yet, and counting the raw form would refuse a film whose
-  // cuts are real (docs/MISTAKES.md #358 is the same grammar, one layer up).
+  // cuts are real (engine-doctrine/MISTAKES.md #358 is the same grammar, one layer up).
   const bgList = Array.isArray(cfg.bg) ? cfg.bg : [];
   if (bgList.length > 1 && bgList.every((b) => isObj(b) && b.from == null && b.to == null)) {
     // CLONED. lowerScene mutates and `delete`s `transitions` off what it is given, which is right for
@@ -670,7 +670,7 @@ export function bgErrors(cfg) {
       // `opts` tunes the fx a preset is made of, so the vocabulary is PER PRESET: `liquid` takes
       // scale/speed/warp/edge0…, `paperDots` takes spacing/period/drift…. Anything else used to be
       // accepted by the schema, dropped by applyBgOver and never read, correct-looking JSON, unchanged
-      // render (docs/MISTAKES.md #157). Say which keys this preset actually has.
+      // render (engine-doctrine/MISTAKES.md #157). Say which keys this preset actually has.
       // A `use:"theme"` window names no preset here (it comes from themes/<name>.json), so it cannot be
       // resolved without the theme; applyBgOver throws on it at build time instead.
       // bgPreset now THROWS on an unknown preset (#361). The validator must REPORT a bad name, never
@@ -685,7 +685,7 @@ export function bgErrors(cfg) {
       // override is dropped and the film renders exactly as if the key were not there. That is the
       // identical failure the earlier fix was written for, at the level nobody looked at: I authored one
       // myself, changed the numbers twice, and got a byte-identical contact sheet both times before
-      // reading the call site (docs/MISTAKES.md #327).
+      // reading the call site (engine-doctrine/MISTAKES.md #327).
       if (b.use == null && bgKnown) {
         const known = new Set(bgOptKeys(bgPreset(b.preset || 'paper', b.value)));
         const stray = Object.keys(b).filter((k) => known.has(k) && !BG_WINDOW_KEYS.has(k));
@@ -721,7 +721,7 @@ export function fxErrors(cfg) {
     // ASK THE REGISTRY, do not keep a second copy of what it knows. This used to import GSAP_FX and
     // re-implement the membership test, so the vocabulary lived in two places, the shape that made the
     // snap signature go blind (#159) and the silent-fallback gate miss its own blind spot (#363).
-    // GSAP_REGISTRY.has() is the same knowledge, asked rather than duplicated. docs/MISTAKES.md #364.
+    // GSAP_REGISTRY.has() is the same knowledge, asked rather than duplicated. engine-doctrine/MISTAKES.md #364.
     if (L.fx != null) {
       for (const item of (Array.isArray(L.fx) ? L.fx : [L.fx])) {
         const nm = nameOf(item);
@@ -797,7 +797,7 @@ export function knobErrors(cfg) {
 // A STAGGER OBJECT IS THE ENGINE'S VOCABULARY, NOT A PASS-THROUGH. `parts[].stagger` used to be
 // handed to GSAP exactly as written: an object with any keys at all was accepted, forwarded, and
 // whatever GSAP made of it was the answer. Nothing documented it and nothing checked it, which is the
-// undocumented-capability shape this repo logs (docs/CRAFT/PARITY-AUDIT.md). Both slots that take a
+// undocumented-capability shape this repo logs (engine-doctrine/CRAFT/PARITY-AUDIT.md). Both slots that take a
 // stagger now take the same three dials and refuse a fourth.
 const STAGGER_KEYS = ['each', 'amount', 'from', 'cps']; // cps: the typing rate, only read when from:'typewriter'
 function staggerSpecErrors(spec, at, out) {
@@ -903,7 +903,7 @@ export function authoredJunctionErrors(cfg) {
 
 // ON-SCREEN TEXT, out of a string that may be MARKUP. The rule moved to core/type/on-screen-text.js and is
 // re-exported here so the existing importers keep working: it was the strictest of eight copies, and
-// making it the only one is what closes docs/MISTAKES.md #214/#216/#217 in the consumers that still
+// making it the only one is what closes engine-doctrine/MISTAKES.md #214/#216/#217 in the consumers that still
 // used the naive `/<[^>]+>/g` form. Every em-dash in ordinary copy is still caught, including inside
 // `<b>`/`<em>`, whose TEXT survives.
 export { onScreenText, glyphText } from '../type/on-screen-text.js';
@@ -1054,7 +1054,7 @@ function inertPropWarns(data) {
   // A prop that is read only INSIDE a conditional on another prop does nothing when that other prop is
   // absent, and does it silently, which is the failure class this repo hates most. Three of them live
   // in the anchor/align code, and CLAUDE.md already describes two as things that "render silently"
-  // rather than fixing them (docs/MISTAKES.md #199). `at` is skipped for blocks, where it is an
+  // rather than fixing them (engine-doctrine/MISTAKES.md #199). `at` is skipped for blocks, where it is an
   // unrelated block param (`tapRipple` uses `at: 2.1` as a time), the prop is overloaded, and a check
   // that did not know that would have fired on innocent scenes.
   for (const [i, L] of (data.layers || []).entries()) {
@@ -1168,7 +1168,7 @@ function countWindowWarns(data) {
   // (2b) countStart is LOCAL to the layer's own `start` (count.js: interpolate(t - start, [cs, cs+cd])),
   //      NOT an absolute scene time. Setting it to the wall-clock second the count should fire is the
   //      classic footgun: the animation window falls outside the layer's visible span, so the number
-  //      freezes on its `from` value and the render is silently wrong (docs/MISTAKES.md #147). If
+  //      freezes on its `from` value and the render is silently wrong (engine-doctrine/MISTAKES.md #147). If
   //      countStart alone already meets/exceeds the layer's duration, the count can never animate.
   layers.forEach((L, i) => {
     if (!isObj(L) || L.type !== 'count') return;
@@ -1192,7 +1192,7 @@ function sceneCollisionWarns(data) {
   // decides where inside it the glyphs sit, and `h` is absent so the old estimate assumed one line.
   // So a 1200px-wide layer reading "Hi" was compared as a 1200px-wide object and collided with a
   // neighbour it comes nowhere near, while a layer whose copy wraps to four lines was compared as one.
-  // Both are findings about the JSON, not about the film (docs/MISTAKES.md #214 and its recurrences).
+  // Both are findings about the JSON, not about the film (engine-doctrine/MISTAKES.md #214 and its recurrences).
   //
   // This file is pure and browser-safe, so there is no font to measure with. Estimate the run from the
   // STRING instead: a heavy sans averages roughly half an em per glyph, and 0.55 is deliberately on the
@@ -1203,7 +1203,7 @@ function sceneCollisionWarns(data) {
   // and it was written, measured and removed: at 0.55 em a short word in a narrow column reads as
   // wrapping when it does not, and the guessed second line reached down into the caption beneath it.
   // That added 11 collision warnings across the library, every one of them a heading that fits on its
-  // line. A gate that manufactures a defect is worse than one that misses it (docs/MISTAKES.md #211,
+  // line. A gate that manufactures a defect is worse than one that misses it (engine-doctrine/MISTAKES.md #211,
   // and the retired typing rule), so the height stays the old single-line estimate: it under-states, and
   // under-stating can only drop a finding, never invent one.
   const ADVANCE = 0.55;                                  // average glyph advance, in em
@@ -1267,7 +1267,7 @@ export function lintData(data) {
     //     intact, so an accent word types in ITS OWN COLOUR. The rule outlived the bug by a fortnight and
     //     went on telling authors to strip markup the engine handles correctly, a gate that manufactures
     //     a defect, which is worse than one that misses it, because the author pays by making the film
-    //     plainer. docs/MISTAKES.md #85.
+    //     plainer. engine-doctrine/MISTAKES.md #85.
     //     Nothing replaces it: `stripLen`/`revealHtml` are exercised by `make lib-test`, and lint-test
     //     now pins that typed markup is SILENT so this cannot be reintroduced by reflex.
     ...countWindowWarns(data),
@@ -1277,7 +1277,7 @@ export function lintData(data) {
   ];
 }
 
-// A kinetic split group's whole arrival must read as ONE beat: docs/RULES caps the last unit's delay
+// A kinetic split group's whole arrival must read as ONE beat: engine-doctrine/RULES caps the last unit's delay
 // at 0.5s, past that it reads as a typewriter, not a reveal. core/tracks/units.js scales the default for
 // an UNAUTHORED stagger, but a number or object the author actually wrote is a decision, so this warns
 // instead of overriding it. Unit count is estimated the same way splitText (core/type/type.js) counts them:
@@ -1311,7 +1311,7 @@ function staggerTotalWarns(data) {
 // A scene that states neither `aspect` nor `orientation` renders 9:16. core/engine/boot.js resolves the canvas
 // as ?aspect= > data.aspect > orientation, and the orientation fallback is portrait; nothing said so. A
 // 16:9 film authored that way spent an hour being debugged as "the panel vanishes when its track starts"
-// before ffprobe showed a 1080px-wide canvas (docs/MISTAKES.md #569). A default that changes the whole
+// before ffprobe showed a 1080px-wide canvas (engine-doctrine/MISTAKES.md #569). A default that changes the whole
 // composition must not be silent. A warning, not an error: 10 library scenes rely on the default today.
 function noAspectWarns(data) {
   if (!isObj(data) || data.aspect || data.orientation || data.orient) return [];
@@ -1504,7 +1504,7 @@ if (isMain) {
     // UNKNOWN PROPS. The engine reads the props it knows and ignores the rest in silence, so
     // `fill` instead of `bg`, or `colour` instead of `color`, renders a layer that is quietly wrong
     // and gives the author nothing to search for. Two shipped scenes set `opacity` on a layer for
-    // months with no effect whatsoever. Silence is the worst failure (docs/MISTAKES.md).
+    // months with no effect whatsoever. Silence is the worst failure (engine-doctrine/MISTAKES.md).
     //
     // Scoped deliberately:
     //   · `block`/`comp` layers carry the BLOCK's props, which this schema does not describe and
@@ -1597,7 +1597,7 @@ if (isMain) {
       } else if (typeof m === 'string') {
         // `auto` is the auto-SOUND-DESIGN flag (derives SFX cues); it has NOTHING to do with music
         // resolution. Skipping the music check when auto:true is how vawe-identity's bare "tense" bed
-        // shipped SILENT for so long (docs/MISTAKES.md #132). The mixer now resolves a bare bed name
+        // shipped SILENT for so long (engine-doctrine/MISTAKES.md #132). The mixer now resolves a bare bed name
         // to assets/music/<name>.wav, so mirror EXACTLY that here, the two must agree.
         const ok = resolves(m) || (!/[\\/]/.test(m) && !path.extname(m) && fs.existsSync(path.join(root, 'assets/music', m + '.wav')));
         if (!ok) audioWarns.push(`audio.music "${m}" will not resolve to a file. The mixer falls back to SILENCE. Use "auto", a real .wav path, or a bed name that exists under assets/music/ (run make audio / make music-pack).`);
@@ -1694,13 +1694,13 @@ if (isMain) {
 // A COUNTER MUST NEVER OVERSHOOT. Overshoot is a claim about mass: a thing with weight passes its target
 // and settles back. A number has no mass. `core/layers/count.js` runs the value through whatever ease it
 // is handed, so a spring makes the count fly PAST its true figure and fall back, and for a few frames the
-// film paints a number that is not true. `docs/MOTION-CRAFT.md` used to recommend exactly that, twice,
+// film paints a number that is not true. `engine-doctrine/MOTION-CRAFT.md` used to recommend exactly that, twice,
 // for "a value that should feel physical (number, bar, camera)".
 //
 // This is a CONTENT rule wearing a motion rule's clothes: "use real, accurate figures" is the one line in
 // CLAUDE.md's content philosophy that has no exceptions, and a rendered 1,900 on the way to 1,822 breaks
 // it. Refused rather than warned for that reason. No shipped scene trips it, so this closes a trap rather
-// than reporting a defect (docs/MISTAKES.md #385).
+// than reporting a defect (engine-doctrine/MISTAKES.md #385).
 export function countEaseErrors(cfg) {
   // Declared INSIDE, not as a module const. This file is also a CLI, so its main block runs during
   // module evaluation; a const appended below it is still in the temporal dead zone when the main calls

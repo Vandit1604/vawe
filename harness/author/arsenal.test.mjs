@@ -27,7 +27,7 @@ for (const query of ['caret', 'typing caret']) {
 
 console.log('arsenal.test.mjs: OK (caret/typing queries surface all typed-caret blocks + text)');
 
-// CRAFT RULES: docs/CRAFT/rules/*.json should be PULLABLE by search, not only pushed by a hook. A
+// CRAFT RULES: engine-doctrine/CRAFT/rules/*.json should be PULLABLE by search, not only pushed by a hook. A
 // query matching a known rule's own brief must come back as kind "rule" with that rule's id, so an
 // agent can `make arsenal Q="..."` a rule the same way it searches for an effect.
 {
@@ -41,7 +41,7 @@ console.log('arsenal.test.mjs: OK (caret/typing queries surface all typed-caret 
 
 // THE DEADLOCK GUARD. arsenal.mjs runs a top-level `await collect()`, and a STATIC import chain back
 // into arsenal.mjs from a module it loads hangs the process forever ("unsettled top-level await",
-// exit 13, docs/MISTAKES.md). Both the plain CLI and --for must still exit cleanly now that craft-rules
+// exit 13, engine-doctrine/MISTAKES.md). Both the plain CLI and --for must still exit cleanly now that craft-rules
 // is in the corpus.
 {
   const { execFileSync } = await import('node:child_process');

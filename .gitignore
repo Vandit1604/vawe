@@ -38,7 +38,7 @@ quality/baselines/approved/
 
 # make evals: every timestamped run + compare dir is scratch, mp4s included. quality/runs/evals/baseline/ is
 # the one committed run, and only its sheets + manifest.json, never its mp4s (they are gigabytes across
-# a library; see docs/CRAFT/EVALS.md and harness/dev/evals.mjs saveBaseline()).
+# a library; see engine-doctrine/CRAFT/EVALS.md and harness/dev/evals.mjs saveBaseline()).
 quality/runs/evals/runs/
 quality/runs/evals/baseline/*.mp4
 
@@ -102,7 +102,7 @@ formats/scene/*.expanded.json
 # a generator with no consumer, which is the "not reproducible from the repo" case this section exists
 # to prevent. The RENDERED instance (formats/scene/_batch/) stays ignored, because that is content.
 !formats/scene/gh-wrapped.template.json
-# The camera-blur A/B. Not a film: it is the fixture `docs/MISTAKES.md` #552 and the effects
+# The camera-blur A/B. Not a film: it is the fixture `engine-doctrine/MISTAKES.md` #552 and the effects
 # catalogue both cite, a whip pan across two depth planes plus one layer that counter-pans, so
 # the smear and the cancellation can be re-rendered rather than taken on trust. An untracked
 # fixture leaves both references naming a file a clean clone does not have.
@@ -111,7 +111,7 @@ formats/scene/*.expanded.json
 # and somebody's record rather than the framework. Same policy as assets/gen.
 formats/scene/_data/
 formats/scene/_batch/
-# auto-orient: the A/B pair for AE technique 12 (docs/CRAFT/AE-TECHNIQUES.md). Two files that differ
+# auto-orient: the A/B pair for AE technique 12 (engine-doctrine/CRAFT/AE-TECHNIQUES.md). Two files that differ
 # in one key, the `upright` modifier on each carried mark, so the verdict can be re-rendered rather
 # than taken on trust. A worked example the docs NAME and a clone does not have is not an example.
 !formats/scene/_auto-orient.json
@@ -173,7 +173,7 @@ build/
 
 # reference films: third-party marketing videos downloaded for LOCAL STUDY ONLY (measure timings,
 # easing, beat structure). Never committed, never shipped, never reproduced pixel-for-pixel — a
-# recreation reproduces INTENT with our own assets (docs/CRAFT/RECREATION.md).
+# recreation reproduces INTENT with our own assets (engine-doctrine/CRAFT/RECREATION.md).
 refs/
 # grammar/ is NOT ignored, and the pair is the point. `refs/` holds other people's films; `grammar/`
 # holds what we measured and concluded about them: shot lengths, luma, motion, one accent hex, and the
@@ -235,7 +235,7 @@ site/public/scenes/*
 # scripts/brand/*.mjs, which write themes this way); a human or agent adding a new brand-reflection
 # theme must follow that convention so reviewers can find it by grepping `note` for "reflecting".
 # `themes/presets/` is the one place this IS enforceable by path: every file there is a named
-# reference-profile taste anchor (docs/CRAFT/SELECTION.md), so the whole directory is ignored.
+# reference-profile taste anchor (engine-doctrine/CRAFT/SELECTION.md), so the whole directory is ignored.
 # Direct site recreations load by bare name (`themes/<name>.json`, see core/engine/boot.js /
 # harness/author/treatment.mjs), so they cannot move under a subdirectory without a loader change;
 # they stay listed here until one exists. They stay on disk so local brand work keeps rendering; they
@@ -276,7 +276,7 @@ formats/scene/_ransom-intro-page.html
 assets/ransom/
 
 # site/public/blocklib/: `make previews` / `make preset-sheets` regenerate every mp4/png on demand
-# (docs/CRAFT/BLUEPRINTS.md, docs/CRAFT/SELECTION.md), the same rule as out/**/*.mp4 above: a video
+# (engine-doctrine/CRAFT/BLUEPRINTS.md, engine-doctrine/CRAFT/SELECTION.md), the same rule as out/**/*.mp4 above: a video
 # instance is not the framework. The manifests (index.json) ARE committed, same as scenes-json's split.
 site/public/blocklib/**/*.mp4
 site/public/blocklib/**/*.png

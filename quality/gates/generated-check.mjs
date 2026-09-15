@@ -26,7 +26,7 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const write = process.argv.includes('--write');
-// The printed line is rendered FROM the record (docs/MISTAKES.md #401): each `stale` record's summary
+// The printed line is rendered FROM the record (engine-doctrine/MISTAKES.md #401): each `stale` record's summary
 // already carries the file/cmd detail a human reads, so the custom renderer prints it verbatim.
 const f = gateFindings({ line: (r) => r.summary });
 
@@ -34,11 +34,11 @@ const f = gateFindings({ line: (r) => r.summary });
 // itself: the diff below would report it and name a path this table does not list.
 const GENERATORS = [
   ['effects catalogue', ['scripts/site/effects-catalog.mjs'],
-    ['docs/EFFECTS.md', 'site/lib/effects.json', 'site/lib/effects-counts.json', 'site/lib/effects-body.json']],
+    ['engine-doctrine/EFFECTS.md', 'site/lib/effects.json', 'site/lib/effects-counts.json', 'site/lib/effects-body.json']],
   ['arsenal index', ['scripts/site/arsenal-json.mjs'],
     ['site/lib/arsenal.json', 'site/lib/blocks.json']],
   ['doc map', ['quality/gates/doc-map.mjs', '--write'],
-    ['docs/INDEX.md', 'docs/CRAFT/README.md', 'skills/vawe-docs/SKILL.md']],
+    ['engine-doctrine/INDEX.md', 'engine-doctrine/CRAFT/README.md', 'skills/vawe-docs/SKILL.md']],
   // registry/ is 216 generated files with its own `--check` mode that nothing ran. It went stale the
   // same way arsenal.json did: block blurbs changed, the tree carried the old `description`, and only
   // an agent regenerating it by hand noticed 110 files were behind. A generated tree with a checker
@@ -78,7 +78,7 @@ if (write) {
 }
 for (const [label, cmd, moved] of stale) f.fail('generated-stale', `${label}: ${moved.join(' ')}   (${cmd})`, {
   fix: 'the files have been REGENERATED in place; review and commit them',
-  doc: 'docs/CRAFT/COMMAND-OUTPUT.md',
+  doc: 'engine-doctrine/CRAFT/COMMAND-OUTPUT.md',
 });
 console.error(`\n  ✗ ${stale.length} generator(s) produce output that differs from what is committed.`);
 f.emit();

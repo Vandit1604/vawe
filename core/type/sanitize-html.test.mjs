@@ -22,13 +22,13 @@ for (const root of ['core/', 'themes/', 'formats/', 'assets/', '.vawe-data/scene
 }
 
 // A real escape, outside every served root, is still refused: this is the vulnerability the file
-// exists to close (docs/MISTAKES.md, an <iframe src="/docs/…"> reading a private server file).
+// exists to close (engine-doctrine/MISTAKES.md, an <iframe src="/docs/…"> reading a private server file).
 assert.doesNotMatch(
   sanitizeHtml('<img src="/docs/private.png">'),
   /src=/,
   'an absolute path OUTSIDE the served roots must still be stripped'
 );
-assert.doesNotMatch(sanitizeHtml('<iframe src="/docs/MISTAKES.md"></iframe>'), /docs\/MISTAKES/,
+assert.doesNotMatch(sanitizeHtml('<iframe src="/engine-doctrine/MISTAKES.md"></iframe>'), /engine-doctrine\/MISTAKES/,
   'an embedding tag pointed at an unserved path is still refused (EMBED, unchanged)');
 
 // Network escapes (protocol-relative and scheme URLs) still break determinism and must still go.

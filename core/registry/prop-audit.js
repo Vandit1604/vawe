@@ -1,6 +1,6 @@
 // core/prop-audit.js: refuse a layer prop that was WRITTEN and never READ.
 //
-// The bug class (docs/MISTAKES.md #428, #424): an author sets a real, documented prop, the engine
+// The bug class (engine-doctrine/MISTAKES.md #428, #424): an author sets a real, documented prop, the engine
 // accepts it, no code consults it, and a still frame comes out with nothing to say why. The static
 // vocabulary check (core/layers/vocabulary.js) cannot see this. Statically `bg` IS read, by
 // group.js, rect.js and text.js, through kit.chipBox. #428 was that the builder for THIS type never
@@ -135,7 +135,7 @@ export function auditLayer(p, label = labelOf(p)) {
     + `${dead.length === 1 ? 'was' : 'were'} set and never read while this layer was built.\n`
     + `The prop is real and the schema advertises it. Nothing in the \`${type}\` builder reached for `
     + `it, so it would be accepted and then ignored and the frame would come out with nothing to say `
-    + `why (docs/MISTAKES.md #428).\n`
+    + `why (engine-doctrine/MISTAKES.md #428).\n`
     + `Either the builder should consume it (these are the box props kit.chipBox paints, text, rect, `
     + `group and html all call it), or the layer should not carry it.`);
 }

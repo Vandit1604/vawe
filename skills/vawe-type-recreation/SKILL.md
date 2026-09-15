@@ -1,6 +1,6 @@
 ---
 name: vawe-type-recreation
-description: "Playbook for matching a reference film's or site's exact look in this engine: study the grammar, take it, never the frames. Load when the route table (docs/CRAFT/ROUTING.md) matches recreation, or the request is to recreate a specific reference with no product of ours to sell."
+description: "Playbook for matching a reference film's or site's exact look in this engine: study the grammar, take it, never the frames. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches recreation, or the request is to recreate a specific reference with no product of ours to sell."
 ---
 
 # vawe-type-recreation: the studied-grammar playbook
@@ -29,7 +29,7 @@ chapters (or the reverse) lies about the content. Study first, then decide, same
 - **No fixed register.** `register: null` in `type-spines.mjs`: a recreation inherits whatever register
   the STUDIED source is in. Grade a kinetic reference (a continuous title sequence) against a quiet
   restraint rule and the recreation will read as under-directed no matter how faithful it is
-  (`docs/CRAFT/MOTION-REGISTERS.md` §1).
+  (`engine-doctrine/CRAFT/MOTION-REGISTERS.md` §1).
 - **`make study VIDEO=refs/ref.mp4 NAME=ref`.** Nothing else in this repo has looked at a reference
   film by machine; this is the only type that starts here. It writes `grammar/<name>.json` and a
   contact sheet at `refs/<name>/study.md` with the shot boundaries, ground pattern, motion curve and a
@@ -51,9 +51,9 @@ otherwise `make arsenal Q="…"` for the nearest device the study names.
 
 ## The rules that matter most
 
-`docs/CRAFT/REFERENCE-STUDY.md` (the whole `make study` mechanism) · `docs/CRAFT/RECREATION.md` (the
-capture-first procedure for a SITE reference specifically) · `docs/CRAFT/FILM-STRUCTURE.md` (naming the
-device a continuous-object gate cannot verify) · `docs/RULES/continuous-object.md`.
+`engine-doctrine/CRAFT/REFERENCE-STUDY.md` (the whole `make study` mechanism) · `engine-doctrine/CRAFT/RECREATION.md` (the
+capture-first procedure for a SITE reference specifically) · `engine-doctrine/CRAFT/FILM-STRUCTURE.md` (naming the
+device a continuous-object gate cannot verify) · `engine-doctrine/RULES/continuous-object.md`.
 
 ## Assets and how to get them
 

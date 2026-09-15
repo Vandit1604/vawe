@@ -10,7 +10,7 @@ import { motionAt } from '../timeline/sequence.js';   // followCursor samples th
 // WHY IT EXISTS. An author who wrote `path` and `clicks` had already stated exactly where the pointer
 // goes and when it presses. Reaching for `diveIn` after that means typing the same coordinates a second
 // time and keeping the two copies in step by eye, which is the one-fact-two-owners defect this repo
-// logs more than any other (docs/MISTAKES.md #423).
+// logs more than any other (engine-doctrine/MISTAKES.md #423).
 //
 // THE SHOT. Push toward the point the pointer is ABOUT to press, arrive `lead` seconds BEFORE the
 // press, hold across it, then release to the wide frame. Arriving after the press is worthless: the

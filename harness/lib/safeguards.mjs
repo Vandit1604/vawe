@@ -7,7 +7,7 @@
 // one printable line. A code with no entry here passes through unchanged: this file only ever SOFTENS
 // a verdict an entry explicitly owns, never invents a new failure.
 //
-// docs/SAFEGUARDS.md is the index (code, file:line, intent, doc, adaptive behaviour). This file is the
+// engine-doctrine/SAFEGUARDS.md is the index (code, file:line, intent, doc, adaptive behaviour). This file is the
 // mechanism; the doc is the map.
 
 // Registry, keyed by finding `kind` (the same string every gate already reports under). Each entry:
@@ -54,7 +54,7 @@ const REGISTRY = {
   },
   'plain-slideshow': {
     intent: 'a film this long needs a minimum count of beats/effects/expressive families, or it reads as an unforced default.',
-    doc: 'docs/CRAFT/DIRECTION.md',
+    doc: 'engine-doctrine/CRAFT/DIRECTION.md',
     applies: (f, ctx) => !!(ctx && Array.isArray(ctx.not)),
     adapt: (f, ctx) => {
       if (ctx.not.some((n) => /slideshow|plain|static/i.test(n))) {
@@ -66,7 +66,7 @@ const REGISTRY = {
   },
   'feature-poverty': {
     intent: 'a film this long needs a minimum count of beats/effects/expressive families, or it reads as an unforced default.',
-    doc: 'docs/CRAFT/DIRECTION.md',
+    doc: 'engine-doctrine/CRAFT/DIRECTION.md',
     applies: (f, ctx) => typeof (ctx && ctx.durationSec) === 'number',
     adapt: (f, ctx) => {
       const SHORT_FILM_FLOOR_SEC = 12;
@@ -79,7 +79,7 @@ const REGISTRY = {
   },
   'ends-on-nothing': {
     intent: 'the final tail of the film must hold a content layer, not a bare backdrop.',
-    doc: 'docs/CRAFT/DIRECTION.md',
+    doc: 'engine-doctrine/CRAFT/DIRECTION.md',
     applies: (f) => typeof f.tailLayerKind === 'string',
     adapt: (f) => {
       if (/brand|mark|logo/i.test(f.tailLayerKind)) {
@@ -91,7 +91,7 @@ const REGISTRY = {
   },
   'archetype-repeat': {
     intent: 'two beats running with the same composition archetype back to back read as one flat cut.',
-    doc: 'docs/CRAFT/LAYOUT.md',
+    doc: 'engine-doctrine/CRAFT/LAYOUT.md',
     applies: (f, ctx) => !!(ctx && Array.isArray(ctx.not)),
     adapt: (f, ctx) => {
       if (ctx.not.some((n) => /archetype|repeat/i.test(n))) {
@@ -103,7 +103,7 @@ const REGISTRY = {
   },
   'seam-split': {
     intent: 'a hard background swap disguised inside a soft layer dissolve, measured in the margin strip outside every authored layer box.',
-    doc: 'docs/CRAFT/TRANSITIONS.md#seam-forensics-split-seam',
+    doc: 'engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-split-seam',
     applies: (f, ctx) => Array.isArray(ctx && ctx.layers) && f.fieldBox,
     adapt: (f, ctx) => {
       const overlaps = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -116,7 +116,7 @@ const REGISTRY = {
   },
   'plan-overruns-render': {
     intent: 'the plan\'s beat spans must describe the film that actually rendered.',
-    doc: 'docs/CRAFT/AUTHORING-WALKTHROUGH.md',
+    doc: 'engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md',
     applies: (f, ctx) => typeof f.driftFrames === 'number' && typeof (ctx && ctx.fps) === 'number',
     adapt: (f) => {
       if (Math.abs(f.driftFrames) <= 1) {

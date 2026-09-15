@@ -1,6 +1,6 @@
 ---
 name: vawe-type-launch
-description: "Playbook for a SaaS/product launch video in this engine: captured UI, a continuous object, a hue-turning field, logo prominence. Load when the route table (docs/CRAFT/ROUTING.md) matches launch-video, or the request is to market/showcase a real product, company or site."
+description: "Playbook for a SaaS/product launch video in this engine: captured UI, a continuous object, a hue-turning field, logo prominence. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches launch-video, or the request is to market/showcase a real product, company or site."
 ---
 
 # vawe-type-launch: the SaaS launch playbook
@@ -27,20 +27,20 @@ the brand beat, never after it: a stat after the logo reads as an afterthought.
 ## What this type needs that others do not
 
 - **Kinetic register.** A launch film sells sustained motion, not one loud moment against a quiet
-  field: `docs/CRAFT/MOTION-REGISTERS.md` §1 and `type-spines.mjs`'s `register: 'kinetic'`. A beat that
+  field: `engine-doctrine/CRAFT/MOTION-REGISTERS.md` §1 and `type-spines.mjs`'s `register: 'kinetic'`. A beat that
   moves differently from its neighbours is directed; a beat that copies the last beat's timing is the
   real failure, not the fact that most beats move.
 - **Captured UI, not invented UI.** `make sections` / `make capture` before writing a single layer.
   A hand-drawn dashboard is the fastest way into generic-AI-slop territory.
 - **A continuous object.** One element (the wordmark, a UI element, an accent rule) that survives
-  every cut and changes across it. `docs/RULES/continuous-object.md`.
+  every cut and changes across it. `engine-doctrine/RULES/continuous-object.md`.
 - **A hue-turning field.** `bg` changes tone per beat; a launch film especially needs this because the
   captured UI is usually light, so the backdrop is the only thing that can carry mood change.
-  `docs/RULES/world-turns.md`.
+  `engine-doctrine/RULES/world-turns.md`.
 - **Logo prominence.** The mark gets its own beat (`logoLockup`/`logoReveal`), never a bullet beside a
-  headline. `docs/RULES/logo-prominence.md`.
+  headline. `engine-doctrine/RULES/logo-prominence.md`.
 - **Paired directional exits.** A layer that enters from the right leaves to the left.
-  `docs/RULES/paired-directional-exit.md`.
+  `engine-doctrine/RULES/paired-directional-exit.md`.
 
 ## The motion to reach for
 
@@ -54,9 +54,9 @@ By role (`make arsenal Q="…"` to search):
 
 ## The rules that matter most
 
-`docs/RULES/continuous-object.md` · `docs/RULES/world-turns.md` · `docs/RULES/logo-prominence.md` ·
-`docs/RULES/paired-directional-exit.md` · `docs/RULES/video-scale.md` · `docs/RULES/text-on-flat.md` ·
-`docs/RULES/banned-defaults.md`. Also read AGENTS.md's "Launch-video rules" section (five standing
+`engine-doctrine/RULES/continuous-object.md` · `engine-doctrine/RULES/world-turns.md` · `engine-doctrine/RULES/logo-prominence.md` ·
+`engine-doctrine/RULES/paired-directional-exit.md` · `engine-doctrine/RULES/video-scale.md` · `engine-doctrine/RULES/text-on-flat.md` ·
+`engine-doctrine/RULES/banned-defaults.md`. Also read AGENTS.md's "Launch-video rules" section (five standing
 rules, checked by the `craft-live.mjs` hook on every save).
 
 ## Assets and how to get them

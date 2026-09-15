@@ -6,7 +6,7 @@
 // WHY THIS EXISTS. The house rule bans the em dash in code, comments, docs, commit messages and
 // engine OUTPUT. The engine broke its own rule 7,345 times, error messages included, and it was
 // noticed only when a docs page tried to quote a real error and could not do so without breaking
-// the rule. A rule nothing checks is a rule that has already been repealed (docs/MISTAKES.md #511).
+// the rule. A rule nothing checks is a rule that has already been repealed (engine-doctrine/MISTAKES.md #511).
 //
 // EN DASHES AND HYPHENS ARE FINE. An en dash in a number range is explicitly allowed and a hyphen is
 // not a dash at all. Only U+2014 is matched here.
@@ -20,7 +20,7 @@ const QUIET = process.argv.includes('--quiet');
 // tooling, and every markdown file. Nothing is "not yet reached" any more; the whole repo is in scope.
 const SCOPE = [
   'core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'tools', 'formats', 'scene', 'films',
-  'verify', 'blueprints', 'cli', 'docs', 'Makefile', '*.md', 'studio',
+  'verify', 'blueprints', 'cli', 'engine-doctrine', 'Makefile', '*.md', 'studio',
   'cmd', 'internal', 'mcp', 'themes', 'presets', 'registry',
 ];
 
@@ -35,13 +35,13 @@ export const EXCLUDE = [
   (f) => f.startsWith('assets/vendor/') || f.includes('/vendor/') || f.includes('node_modules/'),
 ];
 
-// docs/MISTAKES.md USED TO carry the full prose of each entry, and an entry below #418 was exempted
+// engine-doctrine/MISTAKES.md USED TO carry the full prose of each entry, and an entry below #418 was exempted
 // as history: rewriting it would have edited the record of what was written at the time. That record
 // now lives in git, not in the working file: the migration to a three-line index
 // (harness/author/mistakes-compact.mjs) rewrote every entry's lesson line fresh, so nothing in the
 // current file is verbatim historical text any more. The exemption is gone; the whole file is held to
 // the rule, same as everything else in SCOPE.
-const MISTAKES = 'docs/MISTAKES.md';
+const MISTAKES = 'engine-doctrine/MISTAKES.md';
 
 // Only run the CLI scan when this file is the entrypoint. harness/live's write-time twin imports EM
 // and EXCLUDE above and must not pay for (or trigger) a repo-wide git grep just to reuse the matcher.

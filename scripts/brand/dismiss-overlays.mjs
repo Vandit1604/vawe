@@ -3,7 +3,7 @@
 // Newsletter modals, cookie walls, chat bubbles and sticky promo bars are close to universal, and every
 // one of them is fixed-position, so it does not scroll away: it sits on top of EVERY section shot and
 // every component capture. ramp.com's product-newsletter modal covered all eight of its sections, and
-// the crawl reported success with the modal in all eight (docs/MISTAKES.md #207).
+// the crawl reported success with the modal in all eight (engine-doctrine/MISTAKES.md #207).
 //
 // Two passes, in this order, because the polite one is safer:
 //   1. ask, press Escape, then click anything that looks like a close control

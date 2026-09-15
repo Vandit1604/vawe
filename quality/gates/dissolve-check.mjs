@@ -193,7 +193,7 @@ console.log(`  ${layers.filter((L) => typeof L.html === 'string').length} html l
 const mud = findings.filter(() => !allow.has('crossfade-mud'));
 // One fact, one owner: the record IS the finding and the five printed lines are rendered from it, so
 // author-check reads `code` off a structure rather than re-reading this paragraph. The class of bug
-// that costs is docs/MISTAKES.md #401.
+// that costs is engine-doctrine/MISTAKES.md #401.
 const F = gateFindings({ scene: file, indent: '  ', line: (r, g) => [
   `  ${g} [${r.code}] ${r.summary}`,
   `      "${r.oa}"  vs  "${r.ob}"`,

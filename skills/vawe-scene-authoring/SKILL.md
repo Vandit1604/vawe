@@ -12,7 +12,7 @@ Go renderer.** You write data JSON (most common) or a format's `scene.html`.
 
 ## Rules, loaded before you write a layer
 
-Read [`docs/RULES/INDEX.md`](../../docs/RULES/INDEX.md) first: the contract every scene obeys
+Read [`engine-doctrine/RULES/INDEX.md`](../../engine-doctrine/RULES/INDEX.md) first: the contract every scene obeys
 (deterministic, seek-safe, offsets not absolutes, state the canvas, one cut family, the backdrop
 turns, something continuous crosses every cut). Then load only the rule files the beat you are
 writing needs, from the table there: one numeric rule per file, a right-JSON recipe and a wrong-JSON
@@ -145,4 +145,4 @@ copyrighted media (posters/stills/album art) in a published video.
 If the audit flags overlap/overflow, fix with the spacing tokens and re-run. Mark new key text
 `data-layer="critical"` so the audit can see it.
 
-See `docs/CODEMAPS/ARCHITECTURE.md` for the full system map.
+See `engine-doctrine/CODEMAPS/ARCHITECTURE.md` for the full system map.

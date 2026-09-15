@@ -10,7 +10,7 @@
 //     did not override it, in a repo whose rule is to ship the SHAPE and never a lockup.
 //
 // A block is authored content that ships to every caller, so the copy rules apply to it exactly as
-// they apply to a scene. This gate reads the factory source and holds it to them (docs/MISTAKES.md #67).
+// they apply to a scene. This gate reads the factory source and holds it to them (engine-doctrine/MISTAKES.md #67).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -144,7 +144,7 @@ for (const e of CATALOG) {
   const walk = (v, at) => {
     if (typeof v === 'string') {
       if (BRANDS.test(v) && e.family !== 'stripeCard') issues.push({ name: e.name, kind: 'baked-brand', detail: `manifest \`${at}\` ships "${v}". A real brand, straight into the registry, docs table and site grid.` });
-      if (CLAIM.test(v) && !CSS_VALUE.test(v) && !FIGURE_IS_THE_POINT[e.family]) issues.push({ name: e.name, kind: 'baked-claim', detail: `manifest \`${at}\` ships "${v}". A figure nobody stood behind, and it lands in docs/BLOCKS.md and the site thumbnails.` });
+      if (CLAIM.test(v) && !CSS_VALUE.test(v) && !FIGURE_IS_THE_POINT[e.family]) issues.push({ name: e.name, kind: 'baked-claim', detail: `manifest \`${at}\` ships "${v}". A figure nobody stood behind, and it lands in engine-doctrine/BLOCKS.md and the site thumbnails.` });
       if (SUPERLATIVE.test(v)) issues.push({ name: e.name, kind: 'baked-superlative', detail: `manifest \`${at}\` ships "${v}".` });
     } else if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${at}[${i}]`));
     else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) walk(x, `${at}.${k}`);

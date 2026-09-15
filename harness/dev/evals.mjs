@@ -8,7 +8,7 @@
 // hides disagreement a human would have caught. The one thing this file asserts by machine is
 // LIVENESS: did every brief produce an mp4 of the duration and dimensions the scene declared. Beyond
 // that, a human looks at the sheets and the compare page and says which one is better. See
-// docs/EVALS.md.
+// engine-doctrine/EVALS.md.
 //
 //   node harness/dev/evals.mjs                                    render every brief, write a run, assert liveness
 //   node harness/dev/evals.mjs --compare --before <run-dir> [--after <run-dir>]
@@ -210,7 +210,7 @@ function compare() {
   // may not exist on this checkout. Say so instead of embedding a <video> that will 404 silently.
   const videoOrNote = (v, label) => fs.existsSync(v.mp4)
     ? `<video src="${abs(v.mp4)}" controls muted loop></video>`
-    : `<p class="missing">no mp4 on disk for ${label} (a committed baseline keeps sheets + manifest only, see docs/EVALS.md)</p>`;
+    : `<p class="missing">no mp4 on disk for ${label} (a committed baseline keeps sheets + manifest only, see engine-doctrine/EVALS.md)</p>`;
   const row = (r) => `
     <section>
       <h2>${r.name} ${r.before.ok && r.after.ok ? '' : '<span class="bad">LIVENESS FAILED</span>'}</h2>
@@ -237,7 +237,7 @@ video{width:100%;background:#000}
 .sheet{max-width:100%;margin-top:12px;border:1px solid #333}
 </style>
 <h1>vawe evals: ${path.basename(before.runDir)} vs ${path.basename(after.runDir)}</h1>
-<p class="meta">no aesthetic score here on purpose (docs/EVALS.md). Watch both, look at the sheets, decide.</p>
+<p class="meta">no aesthetic score here on purpose (engine-doctrine/EVALS.md). Watch both, look at the sheets, decide.</p>
 ${rows.map(row).join('\n')}
 `;
   const htmlPath = path.join(outDir, 'compare.html');

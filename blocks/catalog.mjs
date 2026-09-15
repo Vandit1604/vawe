@@ -1,6 +1,6 @@
 // blocks/catalog.mjs: the REGISTRY MANIFEST. One data row per named block entry. This is the single
 // source of truth for (a) what the registry contains, (b) how each renders in `make catalog`, and
-// (c) the auto-generated docs/BLOCKS.md table. Adding a block = adding a row here (+ a `variant` branch
+// (c) the auto-generated engine-doctrine/BLOCKS.md table. Adding a block = adding a row here (+ a `variant` branch
 // in its family factory if it's a family.variant). No hand-placement, no per-block catalog code.
 //
 // Entry shape:
@@ -27,7 +27,7 @@ export const CATALOG = [
   { name: 'terminal', family: 'terminal', blurb: "a terminal window: a shell command types itself in character by character, then its output prints below",
     aka: ['caret', 'typing', 'typewriter', 'cursor'],
     props: { w: 540, command: 'make video', output: ['rendering 1950 frames...', 'done → out.mp4'] } },
-  // The two halves of the layers-vs-html head-to-head (docs/MISTAKES.md #429), kept as a matched pair
+  // The two halves of the layers-vs-html head-to-head (engine-doctrine/MISTAKES.md #429), kept as a matched pair
   // on purpose: same subject, one built from layer primitives and one as a hand-authored surface.
   { name: 'terminalPro', family: 'terminalPro', blurb: "a full deploy terminal built from real boxes: typed command, a live percent counter over its track, a file diff, a spinner turning into a checkmark",
     aka: ['caret', 'typing', 'typewriter', 'cursor'],
@@ -112,7 +112,7 @@ export const CATALOG = [
   // split the words they share (the retrieval floor fell 97% → 95% the day all 185 rows went in). So
   // the family is in NO search corpus, and `make arsenal Q="a pricing plan card"` answers ABSENT about
   // something the engine has. The blurbs below are rewritten because they are also the catalog label
-  // and the docs/BLOCKS.md line, but the retrieval hole is upstream of them. Same for `lowerThird` and
+  // and the engine-doctrine/BLOCKS.md line, but the retrieval hole is upstream of them. Same for `lowerThird` and
   // `searchEngine`. Closing it is a change to arsenal.mjs (index a family with no bare row), not five
   // more rows here: a bare row also needs a poster, a scene and a frame rect, and moves the block
   // count three doc surfaces state by hand.
@@ -396,7 +396,7 @@ export const CATALOG = [
   { name: 'pressButton', family: 'pressButton', blurb: "a CTA button that visibly depresses and springs back when clicked, the payoff for a pointer tap on a button.",
     props: { w: 280, label: 'Start a project', pressAt: 1 } },
 
-  // COMPOSITION, STATE AND PROOF. The gaps an App Showcase storyboard found (docs/ROADMAP.md): no
+  // COMPOSITION, STATE AND PROOF. The gaps an App Showcase storyboard found (engine-doctrine/ROADMAP.md): no
   // container owned a split, no block could move between two states, no screen became another screen,
   // and the proof surfaces proved nothing without a hand-placed caption beside them. Appended at the
   // END for the same reason as every wave before it. The site crops thumbnails by cell index.

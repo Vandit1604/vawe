@@ -5,7 +5,7 @@ description: "Playbook for a talking-head / narrated video in this engine: VO + 
 
 # vawe-type-talking-head: the narrated presenter playbook
 
-Not in the priority route table (`docs/CRAFT/ROUTING.md` names five deliverables; this is a sixth,
+Not in the priority route table (`engine-doctrine/CRAFT/ROUTING.md` names five deliverables; this is a sixth,
 reached directly by request wording: "narrated", "voiceover", "presenter", "talking head"). This is the
 one type built around a VOICE, not a visual device: everything else follows the pace of the words.
 
@@ -24,16 +24,16 @@ beat**, the slowest of any type, because the voice track, not a device, sets the
 
 ## What this type needs that others do not
 
-- **Quiet register.** The quiet field this section already asks for is `docs/CRAFT/MOTION-REGISTERS.md`
+- **Quiet register.** The quiet field this section already asks for is `engine-doctrine/CRAFT/MOTION-REGISTERS.md`
   §1's first register stated another way: a face reads only against restraint, so motion is a cost paid
   in attention taken away from the voice (`register: 'quiet'` in `type-spines.mjs`).
 - **VO + word-timed captions.** A real film needs `audio.vo` + `audio.voWords` (a `[{w,t}]` sidecar),
-  then `make vo-captions D=<file> WRITE=1` builds karaoke-timed `captions[]` from it. `docs/CRAFT/CAPTIONS.md`.
+  then `make vo-captions D=<file> WRITE=1` builds karaoke-timed `captions[]` from it. `engine-doctrine/CRAFT/CAPTIONS.md`.
 - **`make pace-from-vo`.** Once a real VO track exists, `make pace-from-vo VO=<file>.words.json`
   proposes beat timings that land reveals ON the voice instead of guessing durations by ear.
 - **A face-safe layout.** Keep the safe centre of the frame free for a presenter shot; do not stack
   type or UI over where a face would sit. On a phone destination, also mind the platform chrome
-  (`docs/RULES/caption-safe-strip.md`).
+  (`engine-doctrine/RULES/caption-safe-strip.md`).
 - **A lower-third.** Name and title in a fixed chip, low in the frame, present across the whole film
   (or the whole presenter beat), never centred.
 - **A quiet field.** The backdrop should not compete with a face; hold it dark and slow, one or two
@@ -53,9 +53,9 @@ There is no dedicated "face" device: the presenter slot is always a placeholder 
 
 ## The rules that matter most
 
-`docs/RULES/caption-safe-strip.md` · `docs/RULES/text-on-flat.md` · `docs/RULES/first-arrival.md` ·
-`docs/RULES/world-turns.md` (a quiet field still turns, just slowly) · `docs/CRAFT/CAPTIONS.md` ·
-`docs/CRAFT/SOUND.md` (the VO/mix contract).
+`engine-doctrine/RULES/caption-safe-strip.md` · `engine-doctrine/RULES/text-on-flat.md` · `engine-doctrine/RULES/first-arrival.md` ·
+`engine-doctrine/RULES/world-turns.md` (a quiet field still turns, just slowly) · `engine-doctrine/CRAFT/CAPTIONS.md` ·
+`engine-doctrine/CRAFT/SOUND.md` (the VO/mix contract).
 
 ## Assets and how to get them
 

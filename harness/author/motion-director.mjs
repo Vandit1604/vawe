@@ -3,7 +3,7 @@
 // restraint instead of the author over-reaching. Suggest-first: prints a director's report; WRITE=1 (or
 // --write) applies the picks into <file>.directed.json. Deterministic (pure mapping, no Date/random).
 //
-// Rules encoded (docs/MOTION-CRAFT.md): cover a hard background jump with a sting · whip/punch only when
+// Rules encoded (engine-doctrine/MOTION-CRAFT.md): cover a hard background jump with a sting · whip/punch only when
 // the background DOESN'T change · one cut family per film, rotated so no archetype repeats · match the
 // brand: punchy → snap cuts, calm → dissolves.
 //
@@ -108,7 +108,7 @@ function resolveFamily(d) {
     neutral: { cuts: ['fade', 'slide', 'wipe', 'blur'], stings: ['dissolve', 'flash'], seam: 'crossWarp', seamTiming: 'smooth' },
   }[personality];
 
-  // Reference profiles (docs/CRAFT/SELECTION.md Part 2): a named target picks the whole look at once.
+  // Reference profiles (engine-doctrine/CRAFT/SELECTION.md Part 2): a named target picks the whole look at once.
   // A scene opts in with a top-level "profile":"apple". `bounceOk` and the banned lists are the
   // contradiction rules. A bounce preset on `apple` is wrong by rule, not by taste.
   if (d.profile != null && !(d.profile in PROFILES)) {
@@ -153,7 +153,7 @@ function beatsOf(layers) {
 }
 
 // ---- DIRECTION AUDIT (the pre-render gate) ------------------------------------------------------
-// Source-decidable checks for the direction failure-modes in docs/CRAFT/TASTE-RULES.md. Severity:
+// Source-decidable checks for the direction failure-modes in engine-doctrine/CRAFT/TASTE-RULES.md. Severity:
 // FAIL = wrong by rule (blocks, exit 1); WARN = judgment (informs).
 // Effect budget flexes with purpose (TASTE-RULES), so busyness is WARN, not a fixed hard count.
 
@@ -243,7 +243,7 @@ function tellPacing(d, duration) {
 // the fastest part of a move"` returns matchCut and none, and both are shapes of cut. The eye cannot
 // resolve a join buried inside peak velocity, so a seam placed in a trough is the most visible one in
 // the film, and it is where a cut written on a round second nearly always lands
-// (docs/CRAFT/AE-TECHNIQUES.md #1).
+// (engine-doctrine/CRAFT/AE-TECHNIQUES.md #1).
 //
 // A SUGGESTION AND NOT A MOVE. The scene wrote 4.2 and the film cuts at 4.2; this says where the peak
 // was and leaves the number to the author. The measurement is core/timeline/velocity-cut.js, which sums
@@ -278,7 +278,7 @@ function tellDeadFinalFrame(layers, duration) {
   return { metrics: {}, findings: [warn('dead-final-frame', `nothing is held to the final frame (every layer exits before ${duration.toFixed(1)}s). End on a held frame, exitDur:0, never fade the payoff`)] };
 }
 
-// ---- MOTION MECHANICS: the book-grounded amateur tells (docs/CRAFT/DIRECTION.md) ----------------
+// ---- MOTION MECHANICS: the book-grounded amateur tells (engine-doctrine/CRAFT/DIRECTION.md) ----------------
 // linear-motion: a visible move that runs at a FLAT rate from rest to rest. Real motion accelerates
 // in and decelerates out (Disney slow-in/slow-out; Material asymmetric easing).
 //
@@ -413,7 +413,7 @@ function tellMonotoneTiming(allLayers) {
   return { metrics: {}, findings: [warn('monotone-timing', `${explicitDurs.length} entrances all set enterDur:${explicitDurs[0]}. Uniform tempo reads as monotone. Timing is a voice: ambient drifts slow (0.6-1s), payoffs snap (0.25-0.35s), thesis lines luxurious (DIRECTION.md: timing)`)] };
 }
 
-// ---- ARRIVAL RHYTHM: four measures nothing else here can see (docs/MOTION-CRAFT.md rules 1, 3, 4) --
+// ---- ARRIVAL RHYTHM: four measures nothing else here can see (engine-doctrine/MOTION-CRAFT.md rules 1, 3, 4) --
 // All four are WARN. They grade rhythm, which is an argument; and the library trips the first one on
 // roughly a third of its scenes, so blocking would teach the reflex waive that repeals a rule silently.
 
@@ -481,7 +481,7 @@ function tellStaggerTotal(allLayers) {
 // authored with `stagger`. Reference test: consistent = maxDrift < avgInterval * 0.3.
 // This does NOT contradict (1). Different scopes: (1) wants DIFFERENT elements to arrive at irregular
 // offsets across a beat; (3) wants ONE cascade of like elements to keep its own metre. Both stated in
-// docs/MOTION-CRAFT.md. The two can never fire on the same run, an exact clump has a zero interval.
+// engine-doctrine/MOTION-CRAFT.md. The two can never fire on the same run, an exact clump has a zero interval.
 function tellUnevenCascade(layers) {
   const CASCADE_GAP = 0.3;      // a wider hole is a new beat, not the next item
   const CASCADE_SPAN = 1.2;     // an arrival, not the film's whole running order
@@ -705,7 +705,7 @@ if (picks.length && !profile) {
 console.log(`\n  motion director · ${file}`);
 console.log(`  brand personality: ${personality}  (settle ${settle}, bounce ${bounce}) → cut family [${FAMILY.cuts.join(', ')}]${profile ? '' : ` · payoff seam ${FAMILY.seam}`}`);
 if (profile) console.log(`  profile: ${d.profile}  (restraint ${profile.restraint}, face ${profile.face}, bounce ${profile.bounceOk})`);
-console.log(`  transitions: one invisible cut family carries ~all seams; the accents are stings on background jumps + ONE seam at the payoff. Theory: docs/CRAFT/TRANSITIONS.md`);
+console.log(`  transitions: one invisible cut family carries ~all seams; the accents are stings on background jumps + ONE seam at the payoff. Theory: engine-doctrine/CRAFT/TRANSITIONS.md`);
 
 // Place every finding in the library before printing it, then print the most unusual first. Order used
 // to be the order the checks happen to run in, which put a code half the library trips above the one
@@ -726,7 +726,7 @@ if (findings.length && !lib.blind) console.log(`  Each finding carries where thi
   + `  target: the rule is what fired, and the median is only what has been made here.`);
 if (findings.length && lib.blind && lib.blind !== 'no findings') console.log(`  census BLIND (${lib.blind}), findings print without their library context.`);
 // One fact, one owner: the record carries the finding, the renderer carries the layout, and
-// author-check reads `code` rather than re-reading the line (docs/MISTAKES.md #401).
+// author-check reads `code` rather than re-reading the line (engine-doctrine/MISTAKES.md #401).
 const F = gateFindings({ scene: file, indent: '    ',
   line: (r, g) => `    ${g} [${r.code}] ${r.summary}` + (r.census ? `\n        library: ${r.census}` : '') });
 for (const f of findings) F.finding({ code: f.code, severity: f.sev === 'FAIL' ? 'error' : 'warn', summary: f.msg, ...(f.census ? { census: f.census } : {}) });

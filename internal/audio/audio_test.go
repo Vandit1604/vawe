@@ -301,7 +301,7 @@ func TestCueWithNoBedIsUnchanged(t *testing.T) {
 // (l) A cue that resolves to no file used to `continue` without a word (the same failure class the
 // music-bed warning above exists to close): a typo'd name or an unbaked voice cue played SILENCE and
 // nothing said so. It must now name the cue and the time on stderr, restoring the sound-cue doctrine
-// this repo's own comment at the call site cites (docs/MISTAKES.md #492: one synthesiser, in JS).
+// this repo's own comment at the call site cites (engine-doctrine/MISTAKES.md #492: one synthesiser, in JS).
 func TestUnresolvedCueLogsWarning(t *testing.T) {
 	dir := t.TempDir()
 	out := filepath.Join(dir, "n.wav")

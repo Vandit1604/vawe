@@ -1,6 +1,6 @@
 // make-help.mjs: `make list` and `make help` read straight from the Makefile itself, so this can
 // never drift from the real target list the way a hand-kept catalog would (this repo has already
-// paid for that mistake more than once - see docs/MISTAKES.md on generated artefacts nobody re-ran).
+// paid for that mistake more than once - see engine-doctrine/MISTAKES.md on generated artefacts nobody re-ran).
 //
 // W11: 207 targets, no way to see which of ten PHASES a target belongs to, and seven separate
 // discovery commands for one question ("what can I search for"). This is the phase half: every real

@@ -42,7 +42,7 @@ export function whereProductLives() {
   return [
     { key: 'terminal', label: 'A terminal', description: `Closest route is \`make screen KIND=${KIND_BY_SURFACE.editor}\`: a typed prompt as the one focal element, dark ground, mono type (screen.mjs BODIES.editor). No core layer draws terminal chrome itself; the window is hand-authored HTML.` },
     { key: 'app', label: 'An app window', description: `Closest route is \`make screen KIND=${KIND_BY_SURFACE.dashboard}\` or KIND=${KIND_BY_SURFACE.card}: a real desktop surface, stats or a single focal card. No core layer draws a titlebar; not supported as a named capability, hand-author the chrome.` },
-    { key: 'other-frame', label: 'A browser or a phone', description: 'Not supported yet as a named capability: no `make screen` KIND and no core layer draws browser or phone chrome. A phone feed reformats the canvas to a vertical destination (AGENTS.md 9:16/4:5); either chrome is hand-authored HTML (docs/CRAFT/HTML-FRAGMENTS.md).' },
+    { key: 'other-frame', label: 'A browser or a phone', description: 'Not supported yet as a named capability: no `make screen` KIND and no core layer draws browser or phone chrome. A phone feed reformats the canvas to a vertical destination (AGENTS.md 9:16/4:5); either chrome is hand-authored HTML (engine-doctrine/CRAFT/HTML-FRAGMENTS.md).' },
     { key: 'none', label: 'No product surface', description: 'No screen at all this film: type sits directly on the ground, nothing to design or capture.' },
   ];
 }
@@ -79,7 +79,7 @@ export function groundStrategy() {
 // mechanism the film can already declare, never an invented strategy.
 export function attentionOptions() {
   return [
-    { key: 'cause-chain', label: 'One cause chases the next', description: 'Each beat is caused by the one before (`trigger:`, docs/CRAFT/STORYBOARD-TEMPLATE.md): the eye follows the causal chain start to finish, the cursor causes the type, the type causes the send, the send causes the cut.' },
+    { key: 'cause-chain', label: 'One cause chases the next', description: 'Each beat is caused by the one before (`trigger:`, engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md): the eye follows the causal chain start to finish, the cursor causes the type, the type causes the send, the send causes the cut.' },
     { key: 'object-carries', label: 'A continuous object carries it', description: 'The film declares `object:`/`object_in`/`object_out` (harness/lib/contract.mjs): the eye follows one thing across every cut because it never truly leaves the frame.' },
     { key: 'color-carries', label: 'Colour carries it act to act', description: '`ground: colour taken from the content`: the ground re-tints to whatever is on screen, so the eye is pulled toward whatever just changed it.' },
   ];
@@ -114,7 +114,7 @@ export function frameOptions(act) {
   return [
     { key: 'screen', label: 'A designed screen', description: `\`make screen F=<file> KIND=<${KINDS.join('|')}>\`, then \`make preview\`.${suffix}` },
     { key: 'capture', label: 'A real capture', description: `\`make capture\` (a live product surface) or \`make sections\` (a brand site's own sections), never a mock.${suffix}` },
-    { key: 'photo', label: 'A real photo or film still', description: `A cutout or still (\`make cutout\`, docs/CRAFT/IMAGERY.md); never a stock photo, never AI-generated, per AGENTS.md.${suffix}` },
+    { key: 'photo', label: 'A real photo or film still', description: `A cutout or still (\`make cutout\`, engine-doctrine/CRAFT/IMAGERY.md); never a stock photo, never AI-generated, per AGENTS.md.${suffix}` },
     { key: 'type-only', label: 'Display type only', description: `No product surface in this frame, the words carry it alone.${suffix}` },
   ];
 }
@@ -148,7 +148,7 @@ export function handoffOptions(joint) {
       ? `recipe \`flow-seam\` (${seam.blurb}). ${joint ? `Measured here: gap ${joint.gap}s, axis ${joint.axis}.` : 'Default axis x (x flows right to left, y flows bottom to top).'}`
       : 'no seam recipe is promoted; drop this option.' },
     { key: 'transition', label: `A named transition (${push ? push.name : wipe.name})`, description: `core/transitions/catalog.js, mechanism \`seam\`: \`${push ? push.name : 'push'}\` (one act pushes the other off) or \`${wipe ? wipe.name : 'wipe'}\` (one act reveals over the other), both in the BASIC set.` },
-    { key: 'becomes', label: 'The object becomes the next', description: 'A storyboard `becomes:` line (docs/CRAFT/FILM-STRUCTURE.md): "the X becomes the Y", the continuous-object handoff `contract.mjs` validates edge to edge. No cut at all, one thing turns into the next.' },
+    { key: 'becomes', label: 'The object becomes the next', description: 'A storyboard `becomes:` line (engine-doctrine/CRAFT/FILM-STRUCTURE.md): "the X becomes the Y", the continuous-object handoff `contract.mjs` validates edge to edge. No cut at all, one thing turns into the next.' },
     { key: 'camera', label: 'Camera travels through', description: `camera move \`travel\` (${travel}), core/camera-moves: the camera itself is the transition, no cut.` },
   ];
 }

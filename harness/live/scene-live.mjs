@@ -56,7 +56,7 @@ const PICTORIAL = new Set(['image', 'html', 'component', 'svg', 'video', 'clip',
 const strHash = (s) => { let h = 0; for (let c = 0; c < s.length; c++) h = (h * 31 + s.charCodeAt(c)) | 0; return h >>> 0; };
 
 // Three presets this FILM does not use, picked by the film's own path so the pick is stable here and
-// different next door. `bg` stays required (docs/MISTAKES.md #159): this only ever suggests a value,
+// different next door. `bg` stays required (engine-doctrine/MISTAKES.md #159): this only ever suggests a value,
 // never writes one.
 function unusedPresets(rel, used) {
   const pool = PRESETS.filter((p) => !used.has(p.name));
@@ -127,7 +127,7 @@ process.stdin.on('end', () => {
   // then a concrete next edit where one can be made honestly.
   if (pict === 0) {
     say.push(`  no pictorial layers at all. 70 of the 171 gate-visible scenes are the same and that was`);
-    say.push(`  nobody's decision, it is debt. brew-launch-act1 is 46% pictorial. docs/CRAFT/SHOW-DONT-TELL.md`);
+    say.push(`  nobody's decision, it is debt. brew-launch-act1 is 46% pictorial. engine-doctrine/CRAFT/SHOW-DONT-TELL.md`);
   } else if (pctP < 8) {
     say.push(`  ${pctP}% pictorial (${pict}/${layers.length}). The library median is 8% and brew is 46%.`);
   }

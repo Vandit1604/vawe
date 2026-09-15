@@ -30,7 +30,7 @@ ok(bad.some((w) => /colliding/.test(w)), 'rule 3: scene collision (Preferencesâ†
 // rule 3, the other half: the collision must be measured on the GLYPHS, not on the declared `w`. A
 // centred or left-aligned line needs a `w` (pin centres a box) and mostly does not fill it, so two
 // boxes can intersect over empty slack while nothing on screen touches. Pinned because the same
-// read-the-representation bug has been logged four times (docs/MISTAKES.md #220/#216/#217/#242).
+// read-the-representation bug has been logged four times (engine-doctrine/MISTAKES.md #220/#216/#217/#242).
 const slack = lintData({ module: 'scene', layers: [
   { type: 'text', text: 'Hi', x: 100, y: 400, w: 1200, size: 70, start: 0, duration: 4 },
   { type: 'text', text: 'There', x: 900, y: 400, w: 600, size: 70, start: 0, duration: 4 },
@@ -107,7 +107,7 @@ const cleanDir = direct('formats/scene/sample.json');
 ok(!/\[(linear-motion|monotone-timing|enter-and-retreat)\]/.test(cleanDir), 'direct: clean sample.json trips none of the new tells', 'direct-clean-silent');
 
 // --- direction floor: fails a plain slideshow, passes a directed scene (the ambition floor) ---
-// quality/fixtures/directed-beat.json is a beat's baked output (blueprints are retired, docs/MISTAKES.md
+// quality/fixtures/directed-beat.json is a beat's baked output (blueprints are retired, engine-doctrine/MISTAKES.md
 // the retire-blueprints migration): literal kinetic-reveal + count-up layers, `_beat`-tagged, the same
 // shape every shipped film that used {type:"beat"} was baked to.
 const floor = (rel) => { try { execFileSync('node', [path.join(root, 'quality/gates/direction-floor.mjs'), path.join(root, rel)], { encoding: 'utf8' }); return 0; } catch (e) { return e.status ?? 1; } };

@@ -62,12 +62,12 @@ export function frame(kit, el, L, t, scene, { ken } = L) {
   }
   // NOTE ken + resample do not compose: ken is a CSS transform on the <img>, and the texture is the
   // img's own pixels, which a CSS transform does not touch. Rejected at validate rather than
-  // rendered as a silently-ignored ken (docs/MISTAKES.md, silence is the worst failure).
+  // rendered as a silently-ignored ken (engine-doctrine/MISTAKES.md, silence is the worst failure).
   // The resample TICK is core/tracks/resample.js now, one slot later, so every layer type gets one.
 }
 
 export const PROPS = mergeProps(
   propsOf(build), propsOf(frame), { edgeFadeColor: { when: 'edgeFade' } }, RESAMPLE_PROPS);
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot";

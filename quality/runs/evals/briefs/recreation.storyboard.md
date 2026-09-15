@@ -1,6 +1,6 @@
 ---
 message: "Postmark Studio sets, casts and prints by hand, and sells the type it cuts."
-audience: "a print-curious buyer landing on the shop's site; this is the recreation-type eval fixture (docs/EVALS.md), re-rendered on every doctrine change"
+audience: "a print-curious buyer landing on the shop's site; this is the recreation-type eval fixture (engine-doctrine/EVALS.md), re-rendered on every doctrine change"
 arc: "home -> type specimens -> the press -> print runs -> the craft line -> the end card (one beat per invented site section, in the site's own order)"
 format: 1920x1080
 theme: "themes/vawe-paper.json"
@@ -9,7 +9,7 @@ threads: "a continuous object (the compositor's steel line gauge: a thin accent 
 spectacle: "beat 2 (Type specimens) · the two oversized specimen letterforms in two different display faces · the loudest visual moment because it is the one beat where the PRODUCT (a typeface) fills the frame at full size"
 not: "no captured brand (the source is invented, ruled by the owner: these six eval briefs stay fictional and self-contained), no gradient hero, no Inter/Space Grotesk/Instrument Serif/Fraunces, no drop shadow anywhere (letterpress is a deboss, never a lift), no metric-only measurements (this shop thinks in points and picas)"
 craft:
-  (see docs/RULES/INDEX.md; every beat below states its own trace to the design study)
+  (see engine-doctrine/RULES/INDEX.md; every beat below states its own trace to the design study)
 ---
 
 <!-- Fidelity cannot be scored on this film: there is no real Postmark Studio to compare frames

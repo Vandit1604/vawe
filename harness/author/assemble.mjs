@@ -293,7 +293,7 @@ const boxOf = (i) => (fragSpecs[i].edge ? resolvePx(fragSpecs[i].edge, { aspect,
 
 // RUNS: a shared `fragment:` file across consecutive beats is ONE component, alive across the cut, not
 // torn down and rebuilt as two layers (that destroy/recreate is the measured cause of a film reading as
-// a slideshow, docs/MISTAKES.md #603 for the truncation failure mode of the fix below). A run needs
+// a slideshow, engine-doctrine/MISTAKES.md #603 for the truncation failure mode of the fix below). A run needs
 // BOTH beats to name the SAME explicit override: the default path is unique per index and can never
 // collide on its own.
 const runs = [];
@@ -383,7 +383,7 @@ const htmlLayers = runs.map(([i, j]) => {
 
   // PATH: scope 'path' flies this run's own layer along a named curve (MotionPathPlugin), the
   // `layers[].motionPath` field, never `motion[]`: same "spans the whole beat, never negotiable"
-  // duration rule as LAYER scope, for the same reason (docs/MISTAKES.md #610).
+  // duration rule as LAYER scope, for the same reason (engine-doctrine/MISTAKES.md #610).
   let pathTrack;
   if (pathDecls.length > 1) {
     moveConflicts.push(`scene${i + 1}: beats ${pathDecls.map((d) => d.k + 1).join(' and ')} each declare a move: path curve, but only one per shared-fragment run is supported. Pick one.`);
@@ -478,7 +478,7 @@ const htmlLayers = runs.map(([i, j]) => {
   // STAGING: `start` is the SHIFTED, fully-resolved second (shiftedStart[i]), not the raw `b.start` a
   // flat build would have used, and not the relative-start STRING form ("scene1.end+0.05")
   // layers[].start also legally accepts. Measured trying it: `make beats`'s own coverage check and
-  // `motion-director.mjs` (docs/CRAFT/SUBAGENT-BUDGET.md-adjacent tooling this file does not own) both
+  // `motion-director.mjs` (engine-doctrine/CRAFT/SUBAGENT-BUDGET.md-adjacent tooling this file does not own) both
   // read `layers[].start` as a number in several places and mishandle a string one, one of them a
   // crash. `make assemble` owns exactly one film's numbers, resolving the reference itself and writing
   // the number is the same "one source of truth" the relative form buys a hand-author, without a
@@ -575,7 +575,7 @@ if (chain.length) {
     // every film that had a placeholder object assembles byte-identically. An html layer consumes
     // radius only through chipBox, which paints nothing without a surface prop beside it, so a
     // fabricated default there is a prop set and never read: core/registry/prop-audit.js refuses the
-    // render outright rather than let it look accepted and be dropped (docs/MISTAKES.md #428). So a
+    // render outright rather than let it look accepted and be dropped (engine-doctrine/MISTAKES.md #428). So a
     // non-rect object carries a radius only when the contract actually names one.
     ...(objectType === 'rect'
       ? { radius: chain[0].in.radius ?? 4 }
@@ -594,7 +594,7 @@ if (chain.length) {
 // `theme.bgDefault` as an array is the render-time rotation core/backgrounds/theme-rotation.js expands
 // behind `{use:"theme"}`, one window per shot. Writing the presets out here instead would fork that
 // decision: the theme would say one thing and every assembled film a copy of it, drifting the moment
-// the brand changed its mind. `look.backdrop` is deliberately NOT that field (docs/CRAFT/THEME-LOOK.md
+// the brand changed its mind. `look.backdrop` is deliberately NOT that field (engine-doctrine/CRAFT/THEME-LOOK.md
 // says three times it is scaffold-only and never read at render), so it stays the fallback for a theme
 // that declares no rotation at all. That fallback reads the SHIFTED schedule: a staged junction moved
 // where beat i actually starts, and the backdrop has to turn there too, or the ground swaps while the

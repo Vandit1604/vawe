@@ -1,6 +1,6 @@
 // core/audio-select.js: pick a music bed by FEELING, not by filename.
 //
-// WHY THIS EXISTS. `docs/CRAFT/SOUND.md` maps each reference profile to a bed mood, but an author
+// WHY THIS EXISTS. `engine-doctrine/CRAFT/SOUND.md` maps each reference profile to a bed mood, but an author
 // still had to know which .wav that mood baked to. This lets a scene say `audio.music:"auto"` and
 // get the right bed from its `profile`. Pure + deterministic: same profile -> same bed, no clock,
 // no randomness, no I/O (the CLI at the bottom only reads+prints).
@@ -50,7 +50,7 @@ export function selectBed(profile) {
 // DOES declare `profile` defaults to "auto" too, so a bed gets picked from the taste mapping instead
 // of shipping silent purely because nobody typed the word "auto". A scene with no profile is left
 // alone: picking a bed with no input is choosing taste with nothing to go on, the same mistake
-// `bg` injection made for backgrounds (docs/MISTAKES.md #159), so it stays silent, the engine default.
+// `bg` injection made for backgrounds (engine-doctrine/MISTAKES.md #159), so it stays silent, the engine default.
 // Any OTHER explicit `music` value (a real path, or absent-with-no-profile) is returned untouched.
 export function resolveAudio(scene) {
   const audio = (scene && scene.audio) || {};

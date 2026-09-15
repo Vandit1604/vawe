@@ -26,7 +26,7 @@ const T = TOKENS;
 // the hairline card every other family shares (kit.mjs's cardChrome/htmlCard idiom). VARIANCE low
 // (these are the boring, load-bearing surfaces a film composes around, not its loud moment); MOTION
 // restrained, either the layer's own envelope `anim` for a single-unit card or `parts` where a family
-// stages its own repeating children. docs/CRAFT/HTML-FRAGMENTS.md.
+// stages its own repeating children. engine-doctrine/CRAFT/HTML-FRAGMENTS.md.
 
 // card. One product surface: hairline + a single step of elevation, content, a footer row.
 // The tinted inner panel it used to draw is gone by DEFAULT (`tint` now matches the card fill), because

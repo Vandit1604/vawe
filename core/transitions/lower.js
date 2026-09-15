@@ -42,7 +42,7 @@ MECHS_OF.get('none')?.add('cut');
 const BOUNDARY_ORDER = ['cut', 'seam', 'sting'];
 
 // SPEED BY DEFAULT for MOTION transitions. A spatial fx (a whip, a zoom, a slide, a squeeze) with no
-// `timing` reads FLAT, and a film whose seams are all flat feels repetitive (docs/CRAFT/TRANSITIONS.md,
+// `timing` reads FLAT, and a film whose seams are all flat feels repetitive (engine-doctrine/CRAFT/TRANSITIONS.md,
 // "speed is the anti-repetition lever"). So when the agent authors a motion fx through the `transitions`
 // sugar and names no timing, it gets the slow-fast-slow speed ramp for free. A pure blend (fade/dissolve)
 // stays on the gentle default. An explicit `timing` always wins, and raw hand-authored `seams`/`cuts`
@@ -70,7 +70,7 @@ export function boundaryMechanism(fx, mech) {
 // A STING TINT IS A COLOUR, NOT A HEX STRING, and it used to be read as one. The renderer turned
 // `color` into a vec3 with `parseInt(hex, 16)`, so anything that is not a bare hex became NaN and then
 // [0,0,0]: a theme token, an `rgb()`, a named colour all tinted the sting BLACK, with no error and
-// nothing on screen to say why. That is the silent substitution this repo hates (docs/MISTAKES.md
+// nothing on screen to say why. That is the silent substitution this repo hates (engine-doctrine/MISTAKES.md
 // #476). RESOLUTION is not ours: core/filters.js `glowRGB` is the engine's one owner of "an author
 // colour that may be a theme token -> literal rgb", and feFlood has the identical problem for the
 // identical reason. What belongs HERE is the REFUSAL, because lowerScene is the one pass every

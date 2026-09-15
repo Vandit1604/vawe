@@ -1,4 +1,4 @@
-// storyboard-parse: ONE reader for the storyboard contract (docs/CRAFT/STORYBOARD-TEMPLATE.md).
+// storyboard-parse: ONE reader for the storyboard contract (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md).
 //
 // It exists because two things now read a storyboard: the gate that grades it, and the animatic that
 // PLAYS it. Two parsers would drift, and the drift would be invisible in the worst way, the gate
@@ -18,7 +18,7 @@ export const RANGE = /\(([\d.]+)\s*s\s*[–: -]\s*([\d.]+)\s*s\)/;
 // THE REFERENCE, DECODED INTO ITS PARTS. A `### Reference devices` table, kept out of `blocksOf`'s way
 // by its heading level. It exists because the first pass at this film took three of the reference's
 // twelve moves and nobody could see which nine were missing: the catalogue lived in a chat message,
-// and a decision that lives in a transcript cannot be checked tomorrow (docs/MISTAKES.md #599).
+// and a decision that lives in a transcript cannot be checked tomorrow (engine-doctrine/MISTAKES.md #599).
 export function referenceDevices(src) {
   const m = /^###\s+Reference devices\s*$([\s\S]*?)(?=^##\s|\Z)/m.exec(src || '');
   if (!m) return [];
@@ -106,11 +106,11 @@ export function parseStoryboard(src) {
       becomes: f('becomes'), why: f('why'),
       transition_in: f('transition_in'),
       // THE REASON (harness/lib/contract.mjs parseTransitionWhy): "<relationship> · <feeling> ·
-      // <invisible|expressive>", the decision procedure's own four questions (docs/CRAFT/
+      // <invisible|expressive>", the decision procedure's own four questions (engine-doctrine/CRAFT/
       // TRANSITIONS.md), written down rather than only answered in an author's head. Optional; a beat
       // may carry `transition_in` with no `transition_why` and only warns, never blocks.
       transition_why: f('transition_why'),
-      // the shot vocabulary: see docs/CRAFT/STORYBOARD-TEMPLATE.md. Optional so existing storyboards
+      // the shot vocabulary: see engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md. Optional so existing storyboards
       // keep parsing; the gate is what asks for them.
       shot: f('shot'), camera: f('camera'), picture: f('picture'),
       // WHERE things sit. Its own field, not a placement word buried in `picture`, because that is
@@ -159,7 +159,7 @@ export function parseStoryboard(src) {
       eye: f('eye'),
       // THE PICTURE'S OWN DECISIONS, from CLOSED vocabularies so a gate can compare them rather than
       // admire them. `picture:` and `style:` are prose and always were: an author can describe the
-      // wrong object in fluent English and pass every check (docs/MISTAKES.md #596). These three cannot
+      // wrong object in fluent English and pass every check (engine-doctrine/MISTAKES.md #596). These three cannot
       // be written vaguely.
       //   archetype: the composition, so "no archetype twice in a row" is checkable
       //   weight:    peak | strong | quiet, so exactly one beat is the loudest and it is measurable

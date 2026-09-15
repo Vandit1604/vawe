@@ -7,11 +7,11 @@
 //   • sting. A generative shader OVERLAY painted over one beat.             core/stings.js SHADER_FX
 //   • seam. A two-scene GPU blend of BOTH beats across a boundary.         core/seams.js  SEAM_FX
 //
-// WHICH TO REACH FOR (short version; full theory in docs/CRAFT/TRANSITIONS.md):
+// WHICH TO REACH FOR (short version; full theory in engine-doctrine/CRAFT/TRANSITIONS.md):
 //   a real scene-to-scene transition → SEAM. a one-beat element move → ANIM. a whole-stage cut → CUT.
 //   a texture/energy accent painted over a cut → STING.
 //
-// This file is the INVENTORY (what exists); docs/CRAFT/TRANSITIONS.md is the DECISION layer (what to
+// This file is the INVENTORY (what exists); engine-doctrine/CRAFT/TRANSITIONS.md is the DECISION layer (what to
 // pick and why). `make transitions` prints this catalog.
 
 import { ANIM_NAMES } from '../timeline/clips.js';

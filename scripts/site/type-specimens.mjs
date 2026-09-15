@@ -7,7 +7,7 @@
 // Run it directly:  node scripts/site/type-specimens.mjs
 //
 // WHY IT IS GENERATED. A hand-kept list of kinetic presets goes stale the moment a preset is added,
-// and nothing says so (docs/MISTAKES.md #165). So the inventory here is read out of the code that
+// and nothing says so (engine-doctrine/MISTAKES.md #165). So the inventory here is read out of the code that
 // renders it: PRESETS + PRESET_BLURBS in core/type.js, and
 // the text-layer prop list the schema generates from the PROPS declarations. Add a preset and it
 // appears on the site with its own blurb and a working specimen, with no edit here.
@@ -69,7 +69,7 @@ const READABLE = new Set([...TEXT_PROPS, ...schema.layerProps.shared]);
 // registry cannot supply, and it is the part that decides whether the page teaches anything.
 //
 // y is DERIVED, not set, because the copy now wraps. A two-line specimen parked at the y that centres
-// one line sits low in the card and leaves a band of space nobody decided (docs/CRAFT/LAYOUT.md,
+// one line sits low in the card and leaves a band of space nobody decided (engine-doctrine/CRAFT/LAYOUT.md,
 // passive whitespace reads as unfinished, not minimal). So the block is centred on its own height.
 const ADVANCE = 0.55;   // average glyph advance in em, the same estimate core/validate.mjs:727 uses
 const LINE_H = 1.04;    // .hs-text in formats/scene/scene.css

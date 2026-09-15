@@ -120,7 +120,7 @@ function textureFrom(src, what) {
 // A STUDIO IS FOUR LIGHTS AND A ROOM, and this had only the four lights. `MeshStandardMaterial` is
 // physically based: at high metalness its diffuse term goes to almost nothing and the whole surface is
 // REFLECTION, so with punctual lights alone a metal body renders as near black with three specular
-// hits. That is what `deviceShowcase`'s 0.86 metalness was doing (docs/CRAFT/PARITY-AUDIT.md), and it
+// hits. That is what `deviceShowcase`'s 0.86 metalness was doing (engine-doctrine/CRAFT/PARITY-AUDIT.md), and it
 // is a property of the MATERIAL, not of that one scene, so the room belongs here with the lights rather
 // than in the scene that happened to notice it missing.
 //

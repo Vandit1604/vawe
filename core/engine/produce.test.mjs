@@ -1,5 +1,5 @@
 // core/engine/produce.test.mjs: the runnable self-check for produceBaseline's inferred-cut default
-// (docs/MISTAKES.md, "101 of 181 films had no joint at all") AND the content-aware style it now picks
+// (engine-doctrine/MISTAKES.md, "101 of 181 films had no joint at all") AND the content-aware style it now picks
 // at each inferred joint (core/timeline/junctions.js classifyJoint/chooseCutStyles). Pure-JS, no DOM.
 //   node core/engine/produce.test.mjs
 import assert from 'node:assert/strict';

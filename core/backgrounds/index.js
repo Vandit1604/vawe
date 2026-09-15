@@ -40,7 +40,7 @@ export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
 // The fx implementations in ./fx.js are the ONLY authority on which knobs exist, so the accepted-key
 // list is READ OUT OF THEM rather than restated here. A hand-kept list is the bug it is trying to
 // prevent: it goes stale the moment an fx grows a parameter, and the stale half fails silently
-// (docs/MISTAKES.md #159). Each fx takes its options as its LAST parameter and reads them as `bag.<key>`,
+// (engine-doctrine/MISTAKES.md #159). Each fx takes its options as its LAST parameter and reads them as `bag.<key>`,
 // so the keys are exactly the property reads on that parameter.
 const FX_IMPL = { dots: dotGrid, particles, aurora, softwash, spotlight, metallic, liquid, grain, gradientFill };
 function paramsOf(fn) {
@@ -92,7 +92,7 @@ export function bgOverErrors(spec, over, at = 'bg opts') {
 //     documented fx parameters (scale, speed, warp, edge0/edge1, gloss, res, count, waves, glow,
 //     sweep, spacing, period, …) work by name instead of being accepted and dropped.
 // A key no fx here reads THROWS: it was accepted and ignored before, which is how a `liquid` window
-// carrying scale/speed/edge0 rendered completely unchanged with nothing said (docs/MISTAKES.md #157).
+// carrying scale/speed/edge0 rendered completely unchanged with nothing said (engine-doctrine/MISTAKES.md #157).
 // Mutates the freshly-built spec (each bg window builds its own), so no shared state. over falsy = no-op.
 export function applyBgOver(spec, over) {
   if (!over || !spec) return spec;
@@ -139,7 +139,7 @@ export function renderBg(ctx, w, h, t, spec) {
 // a second, bg-only constant, this reuses `exitRatioFromMotion` (core/motion/motion.js) outright: the
 // same theme fact (durationScale: a brisk brand snaps, a cinematic one lingers) already answers the
 // identical question for every layer's exit, and a bg-only re-tuning would just be that fact drifting
-// into a second copy (docs/CRAFT/ENGINE-CHANGES.md, "one fact, one owner").
+// into a second copy (engine-doctrine/CRAFT/ENGINE-CHANGES.md, "one fact, one owner").
 //
 // `authored` (a window's own `turnRatio`) wins outright when set; `1` is the explicit opt-out back to
 // the old, even crossfade. See formats/scene/scene.js drawBg for where the ratio actually reshapes

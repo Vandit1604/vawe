@@ -315,7 +315,7 @@ function rings(opt, { dark, lit }) {
   // caller asked for, so the loop's `size < 260` guard was the real limit and rings saturated at about
   // 42: every value above that was accepted and silently discarded, while the schema advertised 400.
   // That is the silent-substitution class this repo keeps paying for, and the playground found it
-  // within minutes of existing (docs/MISTAKES.md #272).
+  // within minutes of existing (engine-doctrine/MISTAKES.md #272).
   let size = span(r, 4, 10);
   const step = (REACH - size) / count;
   for (let i = 0; i < count && size < REACH; i++) {

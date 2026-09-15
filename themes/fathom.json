@@ -1,6 +1,6 @@
 {
   "name": "fathom",
-  "note": "Fathom: a machined titanium dive instrument. Near-black anodised field with a single brass (#c8a24a), the colour of the milled bezel itself rather than a screen glow. Cyan-on-dark was the first choice and the anti-slop detector was right to refuse it: cyan neon on a dark field is one of the most recognisable AI-generated palettes, and a brass instrument mark is both more specific and more true to a milled object. Type is instrument-face: mono for every measured value, sans only for prose. Motion is kinetic register (docs/CRAFT/MOTION-REGISTERS.md): a launch film, so sustained motion is the content, not a cost. Fast easing, no bounce, because an instrument does not overshoot.",
+  "note": "Fathom: a machined titanium dive instrument. Near-black anodised field with a single brass (#c8a24a), the colour of the milled bezel itself rather than a screen glow. Cyan-on-dark was the first choice and the anti-slop detector was right to refuse it: cyan neon on a dark field is one of the most recognisable AI-generated palettes, and a brass instrument mark is both more specific and more true to a milled object. Type is instrument-face: mono for every measured value, sans only for prose. Motion is kinetic register (engine-doctrine/CRAFT/MOTION-REGISTERS.md): a launch film, so sustained motion is the content, not a cost. Fast easing, no bounce, because an instrument does not overshoot.",
   "palette": {
     "bg": "#05090b",
     "bg2": "#0a1014",

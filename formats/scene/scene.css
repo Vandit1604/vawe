@@ -19,7 +19,7 @@
    capture depends on which frames were painted before it. Geometry stayed identical to six decimals
    and the pixels did not: a render at -workers 1 and the same render at -workers 6 disagreed on 50 of
    60 frames, because each tab paints a different subset of the film. Removing these two took that to
-   1 of 60 (docs/MISTAKES.md #507). Same family as #272, where 400 promoted elements in a lightfield
+   1 of 60 (engine-doctrine/MISTAKES.md #507). Same family as #272, where 400 promoted elements in a lightfield
    made the picture never settle: a promotion hint is a promise about ANIMATION, and this renderer
    does not animate, it seeks. */
 #cam { position: absolute; inset: 0; transform-origin: 50% 50%; }
@@ -41,7 +41,7 @@
    declaring a destination is that the platform's chrome is not a property of the aspect: 9:16 for a
    website hero and 9:16 for TikTok are the same canvas with different keep-out. core/boot.js:315 names
    `.hs-cap` as the element that broke this way before. max() so a film that declares no destination
-   keeps its 300px exactly. docs/MISTAKES.md #390. */
+   keeps its 300px exactly. engine-doctrine/MISTAKES.md #390. */
 .hs-cap { position: absolute; left: 60px; right: 180px; bottom: max(300px, var(--safe-bottom, 300px)); z-index: 90; text-align: center;
   font: 700 46px var(--font-sans), sans-serif; color: var(--text); text-shadow: 0 3px 24px rgba(0,0,0,0.7);
   opacity: 0; }

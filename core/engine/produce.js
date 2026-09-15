@@ -5,7 +5,7 @@
 // NO AUTO CAMERA. This pass used to inject a slowPush (s 1 -> 1.06) into every scene that declared no
 // camera, so the frame "stayed alive". It fought text: a still headline zoomed the whole runtime, and
 // `bg` (a REQUIRED, must-animate field) already keeps the frame alive without moving the subject. The
-// doctrine is "move on purpose" (docs/CRAFT/TRANSITIONS.md): a push is an authored choice now, one line
+// doctrine is "move on purpose" (engine-doctrine/CRAFT/TRANSITIONS.md): a push is an authored choice now, one line
 // away (`cameraMove: {move:'slowPush', ...}`), not a default that resizes type nobody asked to move.
 // ADDITIVE ONLY: it adds camera/sceneUnits fields; it NEVER rewrites a layer the author wrote (auto-
 // splitting text for kinetic reveals mutated structure and broke motion-track layers + the contrast audit,
@@ -171,7 +171,7 @@ export function produceBaseline(data, theme, frame, look) {
   return data;
 }
 
-// applyAnticipateDefault(data, theme): ANTICIPATE, OPT-OUT NOT OPT-IN. docs/CRAFT/AFTER-EFFECTS-
+// applyAnticipateDefault(data, theme): ANTICIPATE, OPT-OUT NOT OPT-IN. engine-doctrine/CRAFT/AFTER-EFFECTS-
 // RECIPES.md #5 calls a wind-up before a directional entrance "the loudest missing principle in the
 // engine" as long as it has to be typed. On every entrance that already carries travel (`WARPABLE`,
 // core/timeline/clips.js, imported rather than re-listed: one fact, one owner) it becomes the reflex
@@ -235,7 +235,7 @@ export function applyAnticipateDefault(data, theme) {
 // and the camera is derived from it, so the two cannot disagree.
 //
 // IT RUNS INSIDE bakeCameraMove, on the ONE funnel every render goes through, for the reason that funnel
-// exists (docs/MISTAKES.md #424): a binding resolved anywhere else is a field an author can write and
+// exists (engine-doctrine/MISTAKES.md #424): a binding resolved anywhere else is a field an author can write and
 // nothing can read. core/boot.js already throws on a `cameraMove` that survives to render, so a scene
 // reaching a frame with this unresolved is impossible rather than silent.
 //
@@ -439,7 +439,7 @@ function resolveCaretLayer(data, sel) {
 // character never sits flush against the crop; `viewW` is that view's width in WORLD px (screen /s).
 // Station 1 puts the line's START just inside the LEFT margin (room for the caret to travel right).
 // Station 2 CENTRES the whole line when it fits the view (chasing the caret here would only crop the
-// head for no reason, docs/MISTAKES.md #618 fix-up); only a line too wide to show whole is worth
+// head for no reason, engine-doctrine/MISTAKES.md #618 fix-up); only a line too wide to show whole is worth
 // cropping the head of, and even then the caret's end is clamped inside the right margin, not flush.
 function caretFramePose({ x, lineW, cxFull, cxEnd, s, canvasW }) {
   const FRAME_MARGIN = 0.08;

@@ -1,6 +1,6 @@
 // core/fx/tilt.js: turn a layer out of the picture plane. A card that leans away, a phone held at an
 // angle, a wall of panels receding: the difference between a graphic laid on glass and an object with a
-// side to it. docs/MISTAKES.md #59 rejected this and concluded "there is no per-layer angle that
+// side to it. engine-doctrine/MISTAKES.md #59 rejected this and concluded "there is no per-layer angle that
 // composes correctly". Its DIAGNOSIS was exactly right and its CONCLUSION was wrong, and the gap
 // between the two is one CSS distinction:
 //

@@ -1,7 +1,7 @@
 // core/fx/lag.js: FOLLOW-THROUGH. This layer follows another layer's motion a frame or three LATE, and
 // overruns its stop before settling back.
 //
-// The sixth recipe in docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md, and the one the engine had no shape for at
+// The sixth recipe in engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md, and the one the engine had no shape for at
 // all. `stagger` is not this: stagger delays a whole ENTRANCE on a SIBLING, while follow-through makes
 // one layer trail another's CONTINUOUS motion and ring past its resting pose. Richard Williams' manual
 // version is "parent the trailing element, then shift its keys 1 to 3 frames later"; Dan Ebberts'

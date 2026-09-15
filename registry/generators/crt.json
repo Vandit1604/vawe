@@ -44,7 +44,7 @@
     },
     "render": "import { byName } from 'core/generators/generators.js'; byName('crt').render(options)"
   },
-  "docs": "docs/EFFECTS.md",
+  "docs": "engine-doctrine/EFFECTS.md",
   "preview": {
     "url": "https://vawe.dev/playground?gen=crt"
   }

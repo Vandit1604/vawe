@@ -26,7 +26,7 @@ export const PROPS = {
 // pill and needed exactly that, so its author drove a LINEAR 0→1 and hand-wrote the easing as polynomials
 // inside CSS: `calc(392px - (var(--p)*0.35 + var(--p)*var(--p)*0.65) * 205px)` for width against
 // `calc(30px + var(--p)*var(--p)*var(--p) * 900px)` for the radius. That is a workaround, and by this
-// repo's own rule a workaround is a bug report. docs/MISTAKES.md #357.
+// repo's own rule a workaround is a bug report. engine-doctrine/MISTAKES.md #357.
 const per = (v, name, dflt) =>
   (v && typeof v === 'object' && !Array.isArray(v)) ? (v[name] ?? v['*'] ?? dflt) : (v ?? dflt);
 

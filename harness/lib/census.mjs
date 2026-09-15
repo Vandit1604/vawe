@@ -103,7 +103,7 @@ export function population(what, { dir = SCENE_DIR, ext = '.json', filter = () =
     if (theirs.length > names.length) {
       blind = stop(`this worktree sees ${names.length} of the ${theirs.length} in ${anchor}/${dir}.\n`
         + `    A worktree checks out TRACKED files only and most of this library is gitignored, so the\n`
-        + `    sweep would have reported a confident green over a third of its subject (docs/MISTAKES.md #391).\n`
+        + `    sweep would have reported a confident green over a third of its subject (engine-doctrine/MISTAKES.md #391).\n`
         + `    Fix: harness/dev/worktree.sh add <name>, which copies the library in.`);
     }
   }

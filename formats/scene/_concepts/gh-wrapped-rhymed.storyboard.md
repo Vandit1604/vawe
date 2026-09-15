@@ -21,7 +21,7 @@ concept: rhymed · warm (dark)
 - type: hook
 - object: <what carries the match cut at this beat>
 - picture: <what this beat SHOWS>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
 - why: <why this beat earns its seconds>
@@ -31,7 +31,7 @@ concept: rhymed · warm (dark)
 - type: build
 - object: <what carries the match cut at this beat>
 - picture: <what this beat SHOWS, not what it says>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
 - why: <why this beat earns its seconds>
@@ -41,7 +41,7 @@ concept: rhymed · warm (dark)
 - type: proof
 - object: <what carries the match cut at this beat>
 - picture: <what this beat SHOWS>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
 - why: <why this beat earns its seconds>
@@ -51,7 +51,7 @@ concept: rhymed · warm (dark)
 - type: build
 - object: <what carries the match cut at this beat>
 - picture: <what this beat SHOWS, not what it says>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
 - why: <why this beat earns its seconds>
@@ -61,7 +61,7 @@ concept: rhymed · warm (dark)
 - type: proof
 - object: <what carries the match cut at this beat>
 - picture: <what this beat SHOWS>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
 - why: <why this beat earns its seconds>
@@ -71,7 +71,7 @@ concept: rhymed · warm (dark)
 - type: build
 - object: <what carries the match cut at this beat>
 - picture: <what this beat SHOWS, not what it says>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
 - why: <why this beat earns its seconds>
@@ -81,7 +81,7 @@ concept: rhymed · warm (dark)
 - type: payoff
 - object: <what carries the match cut at this beat>
 - picture: <what this beat SHOWS>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <the words on screen>
 - why: <why this beat earns its seconds>

@@ -4,7 +4,7 @@
 // they hold us back") and an outside audit (225 make targets, 95 files in quality/gates) both point
 // the same way: strip weight that never earns its keep. This script is the measurement, not the
 // opinion. It runs every check over every authored film, records what happened, and prints one table.
-// Deleting anything is a separate, human-reviewed step (see docs/gate-census.md / the plan).
+// Deleting anything is a separate, human-reviewed step (see engine-doctrine/gate-census.md / the plan).
 //
 // Run: node harness/dev/gate-census.mjs [--json out.json]
 import fs from 'node:fs';
@@ -29,7 +29,7 @@ function authoredFilms() {
 // grouping the remainder by whether the source ever touches process.argv, and whether the file is
 // wired into any make target. Kept explicit here (not re-derived at run time) because the four kinds
 // below need genuinely different handling, and guessing that from source shape is exactly the kind of
-// silent-drift heuristic this repo warns against elsewhere (findings.mjs, docs/MISTAKES.md #401).
+// silent-drift heuristic this repo warns against elsewhere (findings.mjs, engine-doctrine/MISTAKES.md #401).
 const LIBRARIES = ['beats-of.mjs', 'block-schema.mjs', 'paths.mjs', 'rubric.mjs', 'scene-timing.mjs', 'snap-signature.mjs', 'tile.mjs'];
 
 // film: single positional arg is a formats/scene/<name>.json path (a few need a second literal arg).
@@ -101,7 +101,7 @@ function referencedBy(basename) {
   grep(['.githooks'], '.githooks');
   grep(['quality/gates', '--include=*.mjs'], 'other-gate');
   grep(['harness', '--include=*.mjs'], 'harness');
-  grep(['docs', '--include=*.md'], 'docs');
+  grep(['engine-doctrine', '--include=*.md'], 'docs');
   // exclude the file's own gate-dir self-hit from "other-gate" (it always contains its own name in its usage comment)
   return refs.filter((r) => !(r === 'other-gate' && refs.length === 1));
 }

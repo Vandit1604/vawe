@@ -5,7 +5,7 @@
 // express a ONE-DIMENSIONAL order, the order the elements happen to sit in the DOM. An effector
 // expresses DISTANCE, in two dimensions, from a point that moves. The same rig therefore gives a wave
 // across a row, a ripple out of a centre and a stroke painted across a grid, and the only thing that
-// changes between the three is where the point goes (docs/CRAFT/AE-TECHNIQUES.md #4).
+// changes between the three is where the point goes (engine-doctrine/CRAFT/AE-TECHNIQUES.md #4).
 //
 // NO KEYFRAME LANDS ON ANY CLONE. One point is keyed and the falloff is the whole choreography. That
 // is the part worth holding on to when reading this file: nothing here schedules anything.

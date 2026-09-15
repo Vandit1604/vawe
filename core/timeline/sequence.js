@@ -40,14 +40,14 @@ export function cameraAt(camKf, t) {
   // Default easeInOutCubic keeps every existing camera byte-identical; set `ease:"linear"` on interior
   // keyframes for a velocity-CONTINUOUS multi-keyframe push. The old hardcoded ease-in-out zeroed
   // velocity at every keyframe, so a chained push pulsed (accelerate/stop/accelerate). The "not smooth /
-  // shaking zoom" (docs/MISTAKES.md #125). WHICH default is picked stays here and not in segmentAt: the
+  // shaking zoom" (engine-doctrine/MISTAKES.md #125). WHICH default is picked stays here and not in segmentAt: the
   // camera has no DENSE_KEY_SEC rule and that difference is deliberate (see motionAt).
   const at = segmentAt(camKf, i, t, 'easeInOutCubic');
   // rx/ry/roll are the camera's ORIENTATION and they belong to the camera rather than to a layer for a
   // geometric reason: CSS `perspective()` takes its vanishing point from the element it is applied to,
   // so tilting sibling layers individually rotates each about its OWN centre and the composition comes
   // apart. Applied once on the camera root, every layer shares one vanishing point and the frame reads
-  // as a single plane in space, which is what "perspective on the frame" means (docs/MISTAKES.md #59).
+  // as a single plane in space, which is what "perspective on the frame" means (engine-doctrine/MISTAKES.md #59).
   // `persp` is the LENS: the focal distance the projection is taken through, not the camera's position.
   // Position is `s` (see dollyZ); confusing the two is the dolly-zoom, and it is authored by keying both.
   return { s: at('s', 1), x: at('x', 0), y: at('y', 0),
@@ -114,7 +114,7 @@ export const DENSE_KEY_SEC = 0.14;
 // "where it was authored". These three do not. Identity for `w` is the layer's own authored `w`;
 // identity for `track` is the layer's own z-order. A pure evaluator cannot know either, so an omitted
 // value inside motionAt could only ever mean "hold the neighbour", a second, different interpretation
-// rule, in the one file where a second rule already cost this repo a day (docs/MISTAKES.md #563: a
+// rule, in the one file where a second rule already cost this repo a day (engine-doctrine/MISTAKES.md #563: a
 // panel sprang back to its declared width because a later key mentioned only `scale`).
 //
 // So the fill happens HERE, once, with the layer in hand, and motionAt keeps exactly one rule: both
@@ -169,7 +169,7 @@ export const POSE = { x: ['dx', 0], y: ['dy', 0], scale: ['scale', 1], rot: ['ro
   z: ['z', 0], rotX: ['rotX', 0], rotY: ['rotY', 0] };
 
 // ARRIVAL_EASE_PROPS/IDENTITY: the visual props whose motion this checks for an unfinished stop
-// (docs/CRAFT/MOTION-CRAFT.md owns the speed/motion vocabulary this feeds). Not `opacity`: a move
+// (engine-doctrine/CRAFT/MOTION-CRAFT.md owns the speed/motion vocabulary this feeds). Not `opacity`: a move
 // TO opacity 0 is an exit, and exits accelerate by the owner's rule (exits-faster-than-entrances).
 const ARRIVAL_EASE_PROPS = ['x', 'y', 'scale', 'rot', 'w', 'h'];
 const ARRIVAL_EASE_IDENTITY = { x: 0, y: 0, scale: 1, rot: 0, w: null, h: null };
@@ -178,7 +178,7 @@ const ARRIVAL_EASE_IDENTITY = { x: 0, y: 0, scale: 1, rot: 0, w: null, h: null }
 // move, `rush`) but lands in a HOLD (the next key, or the end of the track, repeats the same values)
 // never decelerates: the layer slams into the stop it was always going to make anyway. Adapted to the
 // decelerating twin so the arrival still lands, just softly, and printed the way
-// core/camera-moves/dive-in.js already prints its own adaptation (docs/SAFEGUARDS.md). An authored
+// core/camera-moves/dive-in.js already prints its own adaptation (engine-doctrine/SAFEGUARDS.md). An authored
 // handle (`easeIn`/`easeOut`) already shapes its own segment and is left alone; so is an exit.
 function adaptArrivalEase(motion, who) {
   for (let i = 1; i < motion.length; i++) {
@@ -307,7 +307,7 @@ const hermite = (p0, p1, m0, m1, h, u) => {
  * The finite-difference tangent of `prop` at key `i`, in units per second. Zero at either end.
  * Fritsch-Carlson clamped: the travel.js ponytail comment named this exact gap ("a station sequence
  * with a sharp reversal in scale could in principle overshoot past a clamp") and it is real, not
- * hypothetical (docs/MISTAKES.md #626): a camera `travel` with an s:1.08 -> s:1 -> s:1 tail dipped
+ * hypothetical (engine-doctrine/MISTAKES.md #626): a camera `travel` with an s:1.08 -> s:1 -> s:1 tail dipped
  * BELOW every authored station's scale between two keys that were themselves equal, because the raw
  * chordal tangent at the shared key carried velocity in from the unequal segment behind it. A tangent
  * at a local extremum (the two neighbouring secants disagree in sign, or either is flat) is zeroed, and
@@ -423,7 +423,7 @@ export function assertKeyHandles(kfs, who) {
 // tracks in the library key position AND scale/rot/opacity together, so the case is half the library
 // rather than a hypothetical.
 //
-// IT ADDS NO SECOND INTERPRETATION RULE, which is the thing this file refuses (docs/MISTAKES.md #563).
+// IT ADDS NO SECOND INTERPRETATION RULE, which is the thing this file refuses (engine-doctrine/MISTAKES.md #563).
 // The track is read exactly as before; only the CLOCK differs per property, and a shifted pure function
 // is still pure. Both endpoints still state a value or neither does.
 //
@@ -485,7 +485,7 @@ function poseAt(kfs, lt) {
 // motion track twice and subtracting: the automatic motion blur (core/tracks/motion.js), the ghost
 // trail and its blur (core/fx/ghost.js), and squash (core/fx/squash.js). Written out three times that
 // is three chances to disagree about the window, the clamp and the units, which is the fact-with-two-
-// owners shape this codebase logs most (docs/MISTAKES.md #423).
+// owners shape this codebase logs most (engine-doctrine/MISTAKES.md #423).
 //
 // PURE, and that is the whole reason a velocity is allowed here at all. Nothing is remembered between
 // frames: the earlier pose is COMPUTED from the same keyframes at every visit, so a backwards seek and
@@ -504,7 +504,7 @@ export const poseBack = (kfs, lt, dt) => motionAt(kfs, Math.max(0, lt - dt));
 
 // velocityAt(kfs, lt, dt): the layer's travel over the window ENDING at lt, in px per SECOND.
 // Per second and not per frame: 16px per frame is 480px/s at 30fps and 960px/s at 60, so a threshold
-// in frames means two different speeds in two renders of the same film (docs/MISTAKES.md #204).
+// in frames means two different speeds in two renders of the same film (engine-doctrine/MISTAKES.md #204).
 // `now` and `prev` ride along because every caller wants at least one of them and re-sampling the
 // track to get it back would be a fourth evaluation per layer per frame. Named `prev` and not `then`
 // because an object with a `then` key is a THENABLE: `await` on it, or a promise resolved with it,

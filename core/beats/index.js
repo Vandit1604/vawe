@@ -4,7 +4,7 @@
 // core/beats/detect.js (was core/beats.js) has computed a grid since it was written, `make
 // beatmap` has written the sidecar,
 // and NOTHING on the render path ever read either: the comment in harness/media/beatmap.mjs told
-// authors to snap cut times "by hand". That is the `cameraMove` failure again (docs/MISTAKES.md
+// authors to snap cut times "by hand". That is the `cameraMove` failure again (engine-doctrine/MISTAKES.md
 // #424) (a value produced and never consumed) so the repair has the same shape: the binding
 // happens once, at boot, on the one path every render goes through, and a scene that ASKS to be
 // beat-matched and cannot be throws instead of quietly rendering unmatched.
@@ -112,7 +112,7 @@ export function beatPeriod(grid) {
  *    offset onto the cut's beat, which is why this file used to leave them alone entirely -- and
  *    leaving them alone drifts a sting off the very cut it punctuates, by up to `maxShift`. A sting
  *    that punctuates nothing (no joint within half a beat) keeps the time the author wrote.
- *    docs/MISTAKES.md #475.
+ *    engine-doctrine/MISTAKES.md #475.
  *  - beat boundaries and bg windows need nothing: they are DERIVED from the cuts (core/junctions.js
  *    marksOf runs on the lowered scene, after this), so they follow for free. One fact, one owner.
  *

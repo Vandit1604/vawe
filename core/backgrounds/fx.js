@@ -88,7 +88,7 @@ export function aurora(ctx, w, h, t, o = {}) {
   ctx.globalCompositeOperation = 'lighter';
   const so = o.seed ?? 0; // seed jitters blob positions + phase so the SAME preset differs per video
   // motionScale: ONE knob for how alive this field is. It widens the drift AND shortens the period
-  // together, because raising amplitude alone makes a field slosh rather than move (docs/MISTAKES.md
+  // together, because raising amplitude alone makes a field slosh rather than move (engine-doctrine/MISTAKES.md
   // #155, logged for `liquid` and true here for the same reason).
   const ms = o.motionScale ?? 1;
   blobs.forEach((b, i) => {
@@ -230,7 +230,7 @@ export function liquid(ctx, w, h, t, o = {}) {
   const img = bctx.createImageData(res, bh);
   const d = img.data;
   // speed and scale are NOT independent knobs to tune in one step: bigger folds (lower `scale`) already
-  // read as slower, so cutting both at once double-reduces the apparent motion (docs/MISTAKES.md #155).
+  // read as slower, so cutting both at once double-reduces the apparent motion (engine-doctrine/MISTAKES.md #155).
   const sp = (o.speed ?? 1.2) * t, sc = o.scale ?? 1.25, wrp = o.warp ?? 0.7;
   const lo = o.edge0 ?? 0.52, hi = o.edge1 ?? 0.93, gl = o.gloss ?? 0.99;
   const sd = (o.seed ?? 0) * 0.37;

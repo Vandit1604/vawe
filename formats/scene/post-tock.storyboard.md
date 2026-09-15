@@ -12,7 +12,7 @@ craft:
   captions: "no spoken track; the only text is the tempo readout and one closing line"
   color: "mercury's own locked palette, near-black graphite with a single cobalt. The arm is the one bright object in the frame"
   density: "deliberately one object. A metronome is one moving part and a film about it that adds a second is describing something else"
-  direction: "kinetic register (docs/CRAFT/MOTION-REGISTERS.md): sustained motion is the content here, because the product IS a motion. The budget still holds, the named peak is the accelerando"
+  direction: "kinetic register (engine-doctrine/CRAFT/MOTION-REGISTERS.md): sustained motion is the content here, because the product IS a motion. The budget still holds, the named peak is the accelerando"
   fragment-exemplars: "the fragment refuses a card, refuses a grid, and refuses a second focal point. It is a scale, an arm and a readout, which is what the object has and nothing more"
   html-fragments: "the fragment is geometry only and carries no motion of its own. Every move is keyed in the scene, never a CSS animation, because the engine owns the clock"
   layout: "the arm pivots at the lower third and sweeps the upper two thirds; the readout rides its tip and the scale sits on the arc it traces"

@@ -23,7 +23,7 @@
 // uses, and tokens.css with it, once per seam. The bytes are identical every time, so caching them
 // changes no pixel and cannot break renderFrame(n) purity: the cached value is what the fetch would
 // have returned. The declaration below existed for months and nothing read it, so a comment claimed
-// "inlined once per document" while the work ran on every seam (docs/MISTAKES.md #257).
+// "inlined once per document" while the work ran on every seam (engine-doctrine/MISTAKES.md #257).
 const _fontCache = new Map();   // absolute url → data: URI
 const _linkedCss = new Map();   // same-origin stylesheet href → CSS text, fetched once each
 
@@ -92,7 +92,7 @@ export async function buildInlinedCss(el) {
   // This closes the bug where the seam bake lost `.hs-layer{position:absolute}` (it lives in the
   // LINKED scene.css, not an inline <style>): without it every baked layer fell back to `position:
   // static`, collapsed to top-of-frame block flow, and seam content jumped upward until the window
-  // ended (docs/MISTAKES.md). tokens.css was the one link hand-fetched here; this generalises it so
+  // ended (engine-doctrine/MISTAKES.md). tokens.css was the one link hand-fetched here; this generalises it so
   // no future linked sheet goes missing from a raster.
   for (const link of document.querySelectorAll('link[rel="stylesheet"]')) {
     const href = link.href;

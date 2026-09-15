@@ -1,5 +1,5 @@
 {
-  "_comment": "CANDIDATES only, not loaded by the recipe engine and not merged into recipes/recipes.json. Written when blueprints/ was deleted (see docs/MISTAKES.md and the retire-blueprints inventory) to carry forward the 18 sourced beat factories as recipe-shaped notes for whoever migrates one. Each entry needs its `t` re-measured against the real clip before it can move into recipes/recipes.json: the blueprint files cited their source in prose, and none of the prose timestamps were verified against a frame the way recipes/README.md requires.",
+  "_comment": "CANDIDATES only, not loaded by the recipe engine and not merged into recipes/recipes.json. Written when blueprints/ was deleted (see engine-doctrine/MISTAKES.md and the retire-blueprints inventory) to carry forward the 18 sourced beat factories as recipe-shaped notes for whoever migrates one. Each entry needs its `t` re-measured against the real clip before it can move into recipes/recipes.json: the blueprint files cited their source in prose, and none of the prose timestamps were verified against a frame the way recipes/README.md requires.",
 
   "typed-erase-enter": {
     "kind": "enter",
@@ -99,7 +99,7 @@
     "kind": "camera",
     "blurb": "a surface taller than the frame scrolls under a static tilt while the frame stays put; stops are absolute section offsets, every scroll shares one ease, held at each stop before the next begins",
     "sources": [
-      { "ref": "higgsfield-recreation", "note": "generalised from the exemplar; docs/CRAFT/KEYED-MOTION.md carries the measurements" }
+      { "ref": "higgsfield-recreation", "note": "generalised from the exemplar; engine-doctrine/CRAFT/KEYED-MOTION.md carries the measurements" }
     ],
     "slots": { "surface": "layer id", "stops": "[pixels, ...] absolute offsets from content origin" },
     "params": {

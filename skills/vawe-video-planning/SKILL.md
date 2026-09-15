@@ -35,11 +35,11 @@ it as the locked Design Read**: the brand's remembered taste (dominance, faces, 
 signature details, NEVERs). Do NOT re-derive what it already states; only study what it leaves open. This
 is the per-brand memory that keeps every video for a brand consistent. If it's missing, do the full study
 below, then persist it with `make house-style NAME=<brand>` and sharpen the `<…>` judgment lines so the
-NEXT video is faster and on-brand. (See `docs/TASTE.md` → per-brand house style.)
+NEXT video is faster and on-brand. (See `engine-doctrine/TASTE.md` → per-brand house style.)
 
 ## Step 0.5: NO brand site? MANUFACTURE the four things a site gives, before authoring
 
-> **The full narrative for this path is [`docs/CRAFT/AUTHORING-WALKTHROUGH.md`](../../docs/CRAFT/AUTHORING-WALKTHROUGH.md)**:
+> **The full narrative for this path is [`engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md`](../../engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md)**:
 > one video carried blank-page → shipped, chaining the whole arsenal (including the mandatory
 > `make author-check` ladder and the `make judge` step). Read it alongside this step; the four things
 > below are its Step 1.
@@ -50,7 +50,7 @@ generic: centred, effect-soup, no through-line. A site silently hands you FOUR t
 without one you must MANUFACTURE all four before a single layer is authored. This is a hard gate: if
 the lock sheet is missing any of the four, the plan is not locked.
 
-1. **A taste anchor. ASK FOR IT FIRST** ([`docs/CRAFT/CONTENT.md`](../../docs/CRAFT/CONTENT.md), theme
+1. **A taste anchor. ASK FOR IT FIRST** ([`engine-doctrine/CRAFT/CONTENT.md`](../../engine-doctrine/CRAFT/CONTENT.md), theme
    source): a brand site gives the theme for free, a prompt with no site gives nothing, and the silent
    failure is plain grey. `make quiz` asks a "Theme source" question exactly when no URL is known: point
    at a reference or a theme, or say "you choose" and get one designed. **"you choose" means INVENT a
@@ -58,7 +58,7 @@ the lock sheet is missing any of the four, the plan is not locked.
    and name a colour direction from `command npx -y ui-skills list --category color`, then record
    `theme: invented` in the lock sheet so the decision travels with the film. Do NOT invent a palette and
    motion feel from nothing unasked. Pick ONE reference profile from
-   [`docs/CRAFT/SELECTION.md`](../../docs/CRAFT/SELECTION.md) Part 2, `linear` · `apple` · `stripe`
+   [`engine-doctrine/CRAFT/SELECTION.md`](../../engine-doctrine/CRAFT/SELECTION.md) Part 2, `linear` · `apple` · `stripe`
    · `nike` · `a24` · `bloomberg` · `duolingo` · `vercel`, chosen for the topic's register, and set
    the scene's `profile` field to it. That profile IS the design language a site would have given: it
    fixes the face role, pace, easing, cut family, sting/look policy, accent, and the bounce rule
@@ -80,8 +80,8 @@ the lock sheet is missing any of the four, the plan is not locked.
    the user. On-screen text is only what is true (the honesty rule). If the user has not given copy,
    ASK for it before locking; do not fill with plausible filler.
 
-Then read [`docs/CRAFT/TASTE-RULES.md`](../../docs/CRAFT/TASTE-RULES.md) (the failure-modes catalog
-and the prime directive) and [`SELECTION.md`](../../docs/CRAFT/SELECTION.md) (intent→effect), and
+Then read [`engine-doctrine/CRAFT/TASTE-RULES.md`](../../engine-doctrine/CRAFT/TASTE-RULES.md) (the failure-modes catalog
+and the prime directive) and [`SELECTION.md`](../../engine-doctrine/CRAFT/SELECTION.md) (intent→effect), and
 apply their continuity + restraint rules: shared elements travel across beats, one cut family, effects
 earned on 2–3 beats. `make direct D=<file>` will flag any pick that contradicts the chosen profile.
 
@@ -138,8 +138,8 @@ anchor, Step 0.5) is not built yet: storyboard it by hand.
 ## Step 2: Derive the design language FROM the site (no canned styles)
 
 There is no style menu, and NO auto-heuristic. The brand's own site is the art direction; the taste
-is in the actual pixels. **Load [`docs/CRAFT/TYPOGRAPHY.md`](../../docs/CRAFT/TYPOGRAPHY.md) +
-[`COLOR.md`](../../docs/CRAFT/COLOR.md) before authoring the theme** (how to choose a face / build the
+is in the actual pixels. **Load [`engine-doctrine/CRAFT/TYPOGRAPHY.md`](../../engine-doctrine/CRAFT/TYPOGRAPHY.md) +
+[`COLOR.md`](../../engine-doctrine/CRAFT/COLOR.md) before authoring the theme** (how to choose a face / build the
 palette to the contract keys). Do the study, literally:
 
 ```bash
@@ -153,8 +153,8 @@ make palette IMG=assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero �
 1-3 real faces mapped to primary/secondary/accent, **the weights actually used** (author the headline at the
 MEASURED weight, never a default 800), and the site's `--color-*` tokens (accurate where eyedrop reads a
 photo: a site's declared accent is the hex in its CSS, not the nearest colour in its hero image). Use `make palette` for DOMINANCE only.
-Author the font system per [`docs/CRAFT/TYPOGRAPHY.md`](../../docs/CRAFT/TYPOGRAPHY.md) §0b (1-3 roles) and
-validate every colour pair's contrast per [`COLOR.md`](../../docs/CRAFT/COLOR.md) before locking.
+Author the font system per [`engine-doctrine/CRAFT/TYPOGRAPHY.md`](../../engine-doctrine/CRAFT/TYPOGRAPHY.md) §0b (1-3 roles) and
+validate every colour pair's contrast per [`COLOR.md`](../../engine-doctrine/CRAFT/COLOR.md) before locking.
 
 **DOMINANCE IS DECIDED BY LOOKING, NEVER BY A FIELD.** `make palette` reports LIGHT/DARK from the hero's
 real luminance + the dominant hexes; then READ the hero screenshot yourself and confirm. A white site
@@ -186,7 +186,7 @@ in, generic video out.
 move differently per brand (punchy: short settle/tight stagger; calm: long settle/no bounce).
 Leaving motion at defaults is shared DNA across brands; don't.
 
-**Write `look` into the theme too** (`docs/CRAFT/THEME-LOOK.md`): the bg preset rotation, the
+**Write `look` into the theme too** (`engine-doctrine/CRAFT/THEME-LOOK.md`): the bg preset rotation, the
 type scale, the layout anchor/margin, the mark's two sizes, the cut family, the audio cues. This
 is the same study, spent a second time: a theme with `motion` but no `look` still forces every
 FILM for that brand to re-decide its own backdrop and cut family from scratch. `make scaffold
@@ -218,7 +218,7 @@ per beat to the target duration.
 
 There is ONE module: **scene** (the open canvas, layers/cuts/stings/bg windows/camera;
 `formats/scene/schema.json` is the contract). No templates. You compose every video from the
-primitive vocabulary in `docs/PRIMITIVES.md`; the JSON is the video.
+primitive vocabulary in `engine-doctrine/PRIMITIVES.md`; the JSON is the video.
 
 **Compose motion from RECIPES, not blank JSON.** Blueprints are retired ([`recipes/README.md`](../../recipes/README.md)
 is the live mechanism): `make arsenal Q="…"` finds a recipe measured off a real film, or a kinetic
@@ -229,7 +229,7 @@ then fill brand content.
 
 ## Step 3b: Choreography rules (anti-monotony)
 
-**Read `docs/MOTION-CRAFT.md` before storyboarding**. The stored rulebook: 10 rules with their
+**Read `engine-doctrine/MOTION-CRAFT.md` before storyboarding**. The stored rulebook: 10 rules with their
 enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection guide.
 
 - **Layout variety**: no layout archetype twice in a row. Rotate: split (headline left / artifact
@@ -242,7 +242,7 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
   most important element on each beat moves last or most, motion order = reading order.
 - **Easing = physics**: entrances decelerate (ease-out family), exits accelerate (rush), ambient
   loops sinusoidal. Never linear on visible moves.
-- **Choose every CUT by meaning, not habit** (`docs/CRAFT/TRANSITIONS.md`). Run the per-seam decision
+- **Choose every CUT by meaning, not habit** (`engine-doctrine/CRAFT/TRANSITIONS.md`). Run the per-seam decision
   procedure: name the RELATIONSHIP between the two beats (continuity · time · contrast · same-object ·
   new act) and the FEELING across it, then pick the transition that serves both. **If a seam serves
   neither, it is a hard cut.** Most seams are invisible (hard/soft cut, overlapped so the stage never
@@ -258,13 +258,13 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
   dots/shapes. Only use a patterned preset (`accent`/`dotmatrix`/`aurora`/`mesh`/`constellation`/
   `paperShapes`) if the site itself has that texture. And even then a pattern is a SEASONING, not the
   wallpaper: at most one or two beats (a hook or one accent moment), never throughout. Content/proof
-  beats stay plain so the content reads. Recurring mistakes + fixes live in `docs/MISTAKES.md`; ask it
+  beats stay plain so the content reads. Recurring mistakes + fixes live in `engine-doctrine/MISTAKES.md`; ask it
   with `make arsenal MISTAKES=1 Q="…"` before authoring rather than reading it end to end.
 
 ## Step 3b.1: Every frame FIGHTS for its value (the value gate)
 
 The single most common failure: beats that occupy time without earning it. Before locking any beat,
-apply **the value test** ([`docs/TASTE.md`](../../docs/TASTE.md), the one law). If the answer is
+apply **the value test** ([`engine-doctrine/TASTE.md`](../../engine-doctrine/TASTE.md), the one law). If the answer is
 "nothing" or "a restatement of the headline," the beat is not done. Reimagine it until it teaches,
 proves, or delights something no other frame does. Concretely:
 
@@ -315,8 +315,8 @@ each image, and every cut's reason.
 | **Continuity plan** | which 1–2 elements TRAVEL across beats; the one cut family used | **the brief** (thread) + quiz-look |
 | Per beat (one row each) | `t-range · role · exact copy · image/treatment · cut-in (relationship + transition + WHY, per TRANSITIONS.md) · motion · feeling` | you |
 | Assets | which real logos / photos / uploads (NOT bare rects), and their treatment | you |
-| Sound | bed + cues, or a written `_why` for silence: [`SOUND.md`](../../docs/CRAFT/SOUND.md) §0 has the four-command path | you |
-| Captions | timing source, `destination` if this ships to a phone feed, `captionMode`/`captionStyle` if not plain: [`CAPTIONS.md`](../../docs/CRAFT/CAPTIONS.md) | you |
+| Sound | bed + cues, or a written `_why` for silence: [`SOUND.md`](../../engine-doctrine/CRAFT/SOUND.md) §0 has the four-command path | you |
+| Captions | timing source, `destination` if this ships to a phone feed, `captionMode`/`captionStyle` if not plain: [`CAPTIONS.md`](../../engine-doctrine/CRAFT/CAPTIONS.md) | you |
 | CTA | the exact end action + url | the brief, when the study found one |
 
 For a no-site video, the first four rows ARE the four manufactured things from Step 0.5. If any is
@@ -334,7 +334,7 @@ didn't make, that's a lock-sheet gap: amend the sheet and re-confirm, don't impr
 
 ## Step 3d (Authoring discipline (from the real thing, with the tools) not imagination)
 
-Three failures that ship "renders-fine but wrong" videos (see `docs/MISTAKES.md` #15). Do the opposite:
+Three failures that ship "renders-fine but wrong" videos (see `engine-doctrine/MISTAKES.md` #15). Do the opposite:
 - **Assets: capture, never recreate.** If the brand has a mark/mascot/illustration, `make capture` it or
   crop it from the section screenshot (transparent the bg if needed) → an `image` layer. Recreating a brand
   asset "from memory" is off-brand by definition: you'll draw a lookalike, not the thing.
@@ -365,7 +365,7 @@ hook / payoff / CTA frames. Fix data, re-render. Never ship unverified.
 read `/tmp/judge/sheet.png` against `/tmp/judge/rubric.md` and score every frame (readability · hierarchy ·
 composition · brand + asset fidelity · produced-not-generated · value). If your eye catches a flaw, it's a
 FIX, never rationalize one you noticed. This is the gate the static ladder above structurally can't be. See
-`docs/JUDGE.md`.
+`engine-doctrine/JUDGE.md`.
 After the user approves the shipped video: `make ledger-add D=<file>` logs it to the design
 memory (`quality/ledger/ledger.json`) so future videos are checked against it.
 <!-- doc-refs-allow: quality/ledger/ledger.json · gitignored, written on first `make ledger-add` -->

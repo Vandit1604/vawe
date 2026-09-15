@@ -20,7 +20,7 @@
 //                              then reach a grade or a glow that read null and silently fell back.
 // This accepts the UNION of those grammars and is ANCHORED at both ends. The unanchored form was a
 // bug, not a feature: it made a typo ("colour: #fff rgb(1,2,3)") parse as a colour instead of
-// failing, which is exactly the silent substitution docs/MISTAKES.md keeps warning about.
+// failing, which is exactly the silent substitution engine-doctrine/MISTAKES.md keeps warning about.
 //
 // Return shape is [r,g,b], because that is what the engine's own call sites already destructure.
 // Channels are NOT rounded: the gate measures palette distance on floats, and rounding here would

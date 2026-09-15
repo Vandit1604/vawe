@@ -3,7 +3,7 @@ message: hand-animating a video is fine until the number changes, and then you d
 audience: people who rebuild the same product video every time a figure moves
 arc: a familiar grind, named clause by clause, until the thing that ends it arrives
 thread: transforming object
-object: none. The thread is a SENTENCE (docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md)
+object: none. The thread is a SENTENCE (engine-doctrine/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md)
 duration: 15s
 format: 1080x1920
 concept: held-object · editorial (light)
@@ -21,7 +21,7 @@ concept: held-object · editorial (light)
 - type: hook
 - object: <what shape the prop is in here>
 - picture: a hand-built timeline drawn as stacked bars, lit from one side, most of the frame empty and dark
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: You built it <b>by hand</b>,
 - narration: You built it by hand,
@@ -32,7 +32,7 @@ concept: held-object · editorial (light)
 - type: build
 - object: <what shape the prop is in here>
 - picture: the finished thing on a bright workbench, warm and settled, nothing wrong with it
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: and it <b>looked good</b>, | until the <b>number moved</b>,
 - narration: and it looked good, until one number moved,
@@ -43,7 +43,7 @@ concept: held-object · editorial (light)
 - type: build
 - object: <what shape the prop is in here>
 - picture: a wall of identical days with the same task written on every one of them
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: and now it is <b>Friday</b> again.
 - narration: and now it is Friday again.
@@ -54,7 +54,7 @@ concept: held-object · editorial (light)
 - type: payoff
 - object: <what shape the prop is in here>
 - picture: a single file, small and still, with the whole wall of days collapsing into it
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <b>Describe it once.</b>
 - narration: So describe it once instead.

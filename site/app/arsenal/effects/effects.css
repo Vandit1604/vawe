@@ -1,5 +1,5 @@
 /* ===== THE EFFECTS INDEX + PER-EFFECT PAGES (/showcase/effects, /showcase/effects/[stem]) ======
-   Rebuilt from the flat 22,600px scroll globals.css used to carry (search docs/MISTAKES.md and this
+   Rebuilt from the flat 22,600px scroll globals.css used to carry (search engine-doctrine/MISTAKES.md and this
    file's own git history for the shape it replaced: one long page, a table row per effect, a drawer
    for detail). Three defects drove the rebuild: no way to find a family without scrolling past it,
    a "catalog of motion" that never moved until you opened something, and a 166KB JSON payload the

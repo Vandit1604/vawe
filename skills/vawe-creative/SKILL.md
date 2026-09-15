@@ -5,7 +5,7 @@ description: "FORCE a creative, directed video (not a plain slideshow) when auth
 
 # vawe-creative: the anti-slideshow forcing layer
 
-The proven failure (docs/MISTAKES.md #143): with the full arsenal in hand, authoring from a blank JSON
+The proven failure (engine-doctrine/MISTAKES.md #143): with the full arsenal in hand, authoring from a blank JSON
 regresses to `rise`+`fade` on flat white: a slideshow that passes the correctness gates. Planning owns
 *what*; scene-authoring owns *how*; **this skill owns AMBITION**, it forces the video to reach for the
 range. Directed lives between two walls: not a slideshow (the ambition floor), not effect-soup (the ceiling).
@@ -37,7 +37,7 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 
 5. **Rich layout: kill the centered slideshow.** Asymmetry over centered; scale contrast (one huge hero +
    one tiny caption, ~5-8×), not three medium lines. Off-center anchors with a compositional reason. See
-   docs/CRAFT/DIRECTION.md §5 + LAYOUT.md.
+   engine-doctrine/CRAFT/DIRECTION.md §5 + LAYOUT.md.
 
 6. **Terminals show real OUTPUT.** A CLI beat types the command AND shows what the tool actually prints
    (read the repo's real output, never a placeholder line). `terminalReveal` bakes the type→cursor→output→
@@ -67,7 +67,7 @@ border-beam / shine (`{type:"beam"}`), aurora / meteor paint fields (`{type:"pai
 `flash`, an svg logo that draws-on or shape-morphs (the `logoReveal` beat / `{type:"svg","morph":{…}}`), and
 calculated camera moves (`"cameraMove":{"move":"diveIn",…}`). Companion skills: **`vawe-effects`** (see the
 whole catalog + pick), **`vawe-animation`** (easing feel + `springEase`), **`vawe-camera`** (smooth camera
-work). Full list: `make effects` → `docs/EFFECTS.md`.
+work). Full list: `make effects` → `engine-doctrine/EFFECTS.md`.
 
 ## The bar
 Study `formats/scene/brew-native.json` (warm, expressive) and `formats/scene/preface-launch.json`

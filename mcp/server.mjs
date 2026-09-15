@@ -78,7 +78,7 @@ server.registerTool('vawe_guide', {
   // the traps that render wrong without erroring, and which effects actually read on screen, which
   // is what the first draft needs. `full` is there for the second question, not the first.
   if (detail !== 'full') {
-    const quick = path.join(pipe.repoRoot, 'docs/SCENE-QUICK.md');
+    const quick = path.join(pipe.repoRoot, 'engine-doctrine/SCENE-QUICK.md');
     if (fs.existsSync(quick)) {
       return text(fs.readFileSync(quick, 'utf8')
         + '\n\n---\nNeed a prop not listed here? Call vawe_guide with detail:"full".\n');
@@ -230,7 +230,7 @@ server.registerTool('vawe_capabilities', {
     ...c.looks.map((l) => `  ${l.name.padEnd(20)} ${l.blurb || ''}`.trimEnd()),
     // Typed by hand, this line drifted from the manifest in both directions at once: it still offered
     // `warmth`, removed because no pass in any of the 31 looks ever read it (core/registry/knobs.js,
-    // docs/MISTAKES.md #351), and it omitted `colors`, the gradient-map ramp that IS the thermal and
+    // engine-doctrine/MISTAKES.md #351), and it omitted `colors`, the gradient-map ramp that IS the thermal and
     // chrome looks. So the tool advertised a dead dial and hid the one that matters. Read the manifest.
     knobLine('look'),
     ``,

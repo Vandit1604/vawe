@@ -87,7 +87,7 @@
     "durationScale": 0.95,
     "stagger": 0.05,
     "exitRatio": 0.55,
-    "_exitRatio": "reference-heavy and calm. Asymmetric timing: an entrance is an introduction, an exit is over (docs/CRAFT/MOTION-STANDARDS.md)."
+    "_exitRatio": "reference-heavy and calm. Asymmetric timing: an entrance is an introduction, an exit is over (engine-doctrine/CRAFT/MOTION-STANDARDS.md)."
   },
   "gradient": [
     "#ffffff",

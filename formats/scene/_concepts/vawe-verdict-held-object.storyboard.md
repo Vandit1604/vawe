@@ -21,7 +21,7 @@ concept: held-object · editorial (light)
 - type: hook
 - object: <what shape the prop is in here>
 - picture: a real rendered vawe frame, full bleed, looking finished and calm
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <b>Nobody</b> looked at this frame.
 - narration: Nobody looked at this frame.
@@ -32,7 +32,7 @@ concept: held-object · editorial (light)
 - type: build
 - object: <what shape the prop is in here>
 - picture: hairline measurement bounds draw themselves onto the same picture, corner ticks, a bound around the type
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: Something did.
 - narration: Something did.
@@ -43,7 +43,7 @@ concept: held-object · editorial (light)
 - type: build
 - object: <what shape the prop is in here>
 - picture: one real gate finding, at size: the rule, the measured value, the required value
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <REAL RULE ID> | <MEASURED> against <REQUIRED> | vawe <b>would not render it.</b>
 - narration: One rule, one number, one film that does not pass it. So it did not render.
@@ -54,7 +54,7 @@ concept: held-object · editorial (light)
 - type: proof
 - object: <what shape the prop is in here>
 - picture: the JSON line that carries the fault, and the single value in it changing
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: One value.
 - narration: One value moved.
@@ -65,7 +65,7 @@ concept: held-object · editorial (light)
 - type: build
 - object: <what shape the prop is in here>
 - picture: the real list of checks this film ran, travelling right to left, each landing as it passes
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: <REAL COUNT> checks. Every render.
 - narration: Then all of them ran again.
@@ -76,7 +76,7 @@ concept: held-object · editorial (light)
 - type: payoff
 - object: <what shape the prop is in here>
 - picture: the vawe mark at real prominence with the film's own verdict line under it
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: This film failed <REAL N> times before you saw it.
 - narration: This film failed its own checks before you saw it.

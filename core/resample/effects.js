@@ -6,7 +6,7 @@
 // Why this is the whole feature and not a pile of separate ones: radial blur, spin blur, fisheye,
 // bit-crush, macroblocking, dissolve and glass refraction are all "read neighbouring pixels of an
 // existing image". None of them can be expressed procedurally, and all of them are three lines once
-// you can sample. See docs/ROADMAP.md. This cluster was blocked on exactly this.
+// you can sample. See engine-doctrine/ROADMAP.md. This cluster was blocked on exactly this.
 //
 // THE DETERMINISM CONTRACT (same as core/paint-fx.js):
 //   · the shader is a pure function of (uv, u_amt, u_time, u_seed) and the source texture;
@@ -44,7 +44,7 @@ export const RESAMPLE_BLURBS = {
   dissolve: 'noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away',
   refract: 'liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do',
   chromaShift: 'radial RGB separation, the channels pulling apart from the centre outwards',
-  directionalBlur: 'a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS "Directional Blur": a look an author SETS, not a byproduct of a layer\'s own travel speed (that one is automatic, see `docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4)',
+  directionalBlur: 'a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS "Directional Blur": a look an author SETS, not a byproduct of a layer\'s own travel speed (that one is automatic, see `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4)',
 };
 
 // The registry, and with it the catalogue section that used to be hand-listed in

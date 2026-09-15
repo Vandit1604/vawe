@@ -29,7 +29,7 @@ const SB = args.find((a) => !a.startsWith('--'));
 const flag = (n, d) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; };
 if (!SB || !fs.existsSync(SB)) {
   console.error('usage: animatic <STORYBOARD.md> [--voice Name] [--out <scene.json>]');
-  console.error('       template: docs/CRAFT/STORYBOARD-TEMPLATE.md');
+  console.error('       template: engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md');
   process.exit(2);
 }
 

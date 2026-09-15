@@ -20,7 +20,7 @@
 //     main working tree, byte for byte;
 //   * for each dirty or untracked file, compare it against the main working tree the same way.
 // Content is the authority, never the commit graph. Agent work here is routinely copied out rather
-// than merged (films are gitignored, docs/MISTAKES.md #391), so a branch whose commit never merged
+// than merged (films are gitignored, engine-doctrine/MISTAKES.md #391), so a branch whose commit never merged
 // can still have every byte of its work in main. Judging by the graph would hoard those forever.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';

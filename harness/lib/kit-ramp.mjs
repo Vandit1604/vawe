@@ -2,7 +2,7 @@
 //
 // The kit is a foundation of tokens an author MAY use, never a whitelist that refuses a literal
 // value: fragment authors are free to write any CSS for size, shadow, radius and spacing
-// (docs/MISTAKES.md #621). This module only measures whether a FILM, across all its fragments,
+// (engine-doctrine/MISTAKES.md #621). This module only measures whether a FILM, across all its fragments,
 // drifts onto many different scales, for `frame-check`'s report-only `scale-drift` finding.
 export function fragmentFontSizes(css) {
   const sizes = [...css.matchAll(/font(?:-size)?\s*:\s*(?:[^;{}]*?\s)?(\d{2,3})px/g)].map((m) => +m[1]);

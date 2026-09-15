@@ -3,7 +3,7 @@
 // transforms the whole frame, scrim included, so a film that wants the page to slide under a fixed
 // frame has to move the chosen layers together. Doing that by hand means writing the same deltas once
 // per layer and time-shifting each by its own start, which is what the exemplar does, twice, across
-// five of its six moving layers (docs/CRAFT/KEYED-MOTION.md). Six identical delta lists kept in sync by
+// five of its six moving layers (engine-doctrine/CRAFT/KEYED-MOTION.md). Six identical delta lists kept in sync by
 // hand, where a one-key drift is invisible in the JSON and obvious on screen.
 //
 // Copied as DELTAS, not absolute values, because each layer sits at its own x/y; and shifted by the
@@ -21,7 +21,7 @@ const near = (a, b) => Math.abs(a - b) < 1e-6;
 // the source's remaining keys must stop applying: a thing that has peeled off cannot still be dragged
 // along by what it peeled off from. Before this rule the pan kept contributing past the break, so the
 // page's later keys yanked the layer back onto a path it had already left, 194px of reversal in two
-// frames in `cadence`, which is what the snap at 2.87s was (docs/MISTAKES.md #194).
+// frames in `cadence`, which is what the snap at 2.87s was (engine-doctrine/MISTAKES.md #194).
 //
 // Only x/y count as leaving, because x/y are the only properties a pan supplies. A key that states just
 // `rot` or `scale` is the layer doing its own thing WHILE it rides (the spinner turns as it travels),
@@ -60,7 +60,7 @@ export function mergePan(L, src) {
   // that instant. Sampling own[0] instead (it was the layer's first key, held constant) pinned the
   // spinner's `rot:0` onto all six pan keys, so its rotation ran 0 → 214 → 0 → 286 → 0 against the
   // author's keys and it shuddered for 27 frames. Constant is right only for a property that never
-  // animates, which is the one case the old code was tested on (docs/MISTAKES.md #195).
+  // animates, which is the one case the old code was tested on (engine-doctrine/MISTAKES.md #195).
   const animates = new Set();
   for (const k of own) for (const p of ['x', 'y', 'scale', 'rot', 'opacity', 'blur']) if (k[p] != null) animates.add(p);
   const poseAt = (t) => (own.length ? motionAt(own, t) : null);

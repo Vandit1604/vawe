@@ -4,7 +4,7 @@
 // swallowed and the exit code is always 0.
 //
 // internal/render/render.go prints exactly one of a few "✓ done → <out>  (<n>s, <n> frames...)" lines
-// on success; nothing there is machine-readable on purpose (docs/MISTAKES.md #401 is about a script
+// on success; nothing there is machine-readable on purpose (engine-doctrine/MISTAKES.md #401 is about a script
 // misreading exactly this kind of line), so this reads the one stable substring rather than the whole
 // sentence. `fps` here is the REALIZED rate (frames / seconds) of this render, not the requested
 // --fps: the Go side never prints its target rate, and the realized one is the more useful number for

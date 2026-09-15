@@ -1,7 +1,7 @@
-// harness/lib/craft-rules.mjs: ONE schema for a craft rule, loaded from docs/CRAFT/rules/<category>.json,
+// harness/lib/craft-rules.mjs: ONE schema for a craft rule, loaded from engine-doctrine/CRAFT/rules/<category>.json,
 // so the harness can print the right rule at the right stage instead of an author re-reading AGENTS.md.
 //
-// Four mechanisms said this before with no shared shape (docs/RULES per-rule records, doc frontmatter
+// Four mechanisms said this before with no shared shape (engine-doctrine/RULES per-rule records, doc frontmatter
 // codes/confirm, safeguards.mjs adapts, critics.mjs hand-typed prose). This is the fifth, and the last:
 // everything above either migrates into a record here or stays prose a record here points at.
 //
@@ -79,8 +79,8 @@ function checkBrief(rec) {
 /** checkDoc(rec, root): doc path shape, file existence, anchor existence, and the freshness quote. */
 function checkDoc(rec, root) {
   const errs = [];
-  if (typeof rec.doc !== 'string' || !/^docs\/[^\s]+\.md(#[a-z0-9-]+)?$/.test(rec.doc)) {
-    errs.push(`doc "${rec.doc}" must be "docs/....md" or "docs/....md#anchor"`);
+  if (typeof rec.doc !== 'string' || !/^engine-doctrine\/[^\s]+\.md(#[a-z0-9-]+)?$/.test(rec.doc)) {
+    errs.push(`doc "${rec.doc}" must be "engine-doctrine/....md" or "engine-doctrine/....md#anchor"`);
     return errs;
   }
   const [file, anchor] = rec.doc.split('#');
@@ -134,14 +134,14 @@ export function validateRule(rec, { root = ROOT } = {}) {
 }
 
 /**
- * loadCraftRules({root}) -> record[]. Reads every docs/CRAFT/rules/<category>.json (an array of
+ * loadCraftRules({root}) -> record[]. Reads every engine-doctrine/CRAFT/rules/<category>.json (an array of
  * records), validates each, and fails loudly (one Error, every problem listed) rather than returning a
  * partial list a caller might not notice is short. A duplicate id, even across two files, fails too:
  * one id is one rule, and a collision means two authors reached for the same name for two different
  * things.
  */
 export function loadCraftRules({ root = ROOT } = {}) {
-  const dir = path.join(root, 'docs/CRAFT/rules');
+  const dir = path.join(root, 'engine-doctrine/CRAFT/rules');
   const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort() : [];
   const records = [];
   const seen = new Map();

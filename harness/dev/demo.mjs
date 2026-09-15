@@ -22,7 +22,7 @@
 // the fault looked like the filter's. It was the subject's. So the picture carries the effect, the
 // line of type CAPTIONS it, and the slug names the registry key.
 //
-// The doctrine, and when to reach for `make catalog` instead: docs/CRAFT/SPECIMEN.md.
+// The doctrine, and when to reach for `make catalog` instead: engine-doctrine/CRAFT/SPECIMEN.md.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -98,7 +98,7 @@ if (!q) {
   --subject  the picture the effect acts on (default: the house plaster cast). A capture, an
              image, anything with real detail. The box it fills is a series constant.
 
-  doctrine: docs/CRAFT/SPECIMEN.md   ·   nine variants of one effect is \`make catalog\``);
+  doctrine: engine-doctrine/CRAFT/SPECIMEN.md   ·   nine variants of one effect is \`make catalog\``);
 }
 if (q.includes('\u2014')) die('✗ --q contains an em dash. The validator rejects them in on-screen text.');
 if (q.length > SERIES.maxCaptionChars) {
@@ -179,7 +179,7 @@ const scene = {
     allow: ['no-storyboard', 'no-preflight', 'slow-pace', 'text-overstays'],
     _why: {
       'no-storyboard': 'the archetype IS the plan. A specimen shows one mechanism for nine seconds and '
-        + 'has no beats to storyboard: docs/CRAFT/SPECIMEN.md carries the decisions once, for the series.',
+        + 'has no beats to storyboard: engine-doctrine/CRAFT/SPECIMEN.md carries the decisions once, for the series.',
       'no-preflight': 'the nine decisions are made in the scaffold, once, for every specimen. Making '
         + 'them again per demo is how each demo ends up looking like a different film.',
       'slow-pace': 'a specimen is held on purpose. The pace floor grades films that must carry a story '
@@ -230,5 +230,5 @@ fs.writeFileSync(path.join(repoRoot, rel), JSON.stringify(migrateOne(scene).next
 // The path goes to stdout alone, so `make demo` can hand it straight to `make dev`.
 console.error(`✓ ${rel}  ${D}s · one picture full bleed, one cut, one camera move, two grounds, a keyed track`);
 console.error(`  The picture carries the effect and the line captions it. Swap the picture with --subject.`);
-console.error(`  Nine variants of one effect is \`make catalog\`, never this. docs/CRAFT/SPECIMEN.md`);
+console.error(`  Nine variants of one effect is \`make catalog\`, never this. engine-doctrine/CRAFT/SPECIMEN.md`);
 if (has('print-path')) console.log(rel);

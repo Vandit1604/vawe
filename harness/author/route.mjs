@@ -1,12 +1,12 @@
 // harness/author/route.mjs: DELIVERABLE-AWARE ROUTING. A request maps to one of a few vawe
-// deliverables (docs/CRAFT/routes/*.md) before any brief-collection or authoring starts. Adapted from
+// deliverables (engine-doctrine/CRAFT/routes/*.md) before any brief-collection or authoring starts. Adapted from
 // another engine' route model (~/.claude/skills/another engine/SKILL.md § 2): a small priority table picks
 // the deliverable, then only that deliverable's route file is read, never the whole doctrine at once.
 //
 //   node harness/author/route.mjs "<what the user asked, plain english>"
 //   make route Q="market our launch from hinge.co"
 //
-// Deterministic keyword/priority match, same table as docs/CRAFT/ROUTING.md. Never an LLM call: a
+// Deterministic keyword/priority match, same table as engine-doctrine/CRAFT/ROUTING.md. Never an LLM call: a
 // route decision has to be reproducible from the same words every time, and this is a lookup, not a
 // judgement call worth spending a model on.
 import fs from 'node:fs';
@@ -15,13 +15,13 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// Priority order matches docs/CRAFT/ROUTING.md's table exactly. First matching row wins; keep the two
+// Priority order matches engine-doctrine/CRAFT/ROUTING.md's table exactly. First matching row wins; keep the two
 // in sync by hand, `route.test.mjs` is the check that they still agree with real requests.
 const ROUTES = [
   {
     name: 'recreation',
     type: 'recreation',
-    file: 'docs/CRAFT/routes/recreation.md',
+    file: 'engine-doctrine/CRAFT/routes/recreation.md',
     keywords: ['recreate', 'recreation', 'match this site', 'look like this video', 'reference film', 'exact look', 'clone this ad', 'this ad'],
     intake: [
       'The reference: exact URL or file. `make study` for a film, `make sections` for a site.',
@@ -32,7 +32,7 @@ const ROUTES = [
   {
     name: 'launch-video',
     type: 'launch',
-    file: 'docs/CRAFT/routes/launch-video.md',
+    file: 'engine-doctrine/CRAFT/routes/launch-video.md',
     keywords: ['launch video', 'launch film', 'promo', 'market our', 'market this', 'showcase our', 'product video', 'site tour', '.com', '.co', '.ai', '.app', '.xyz', '.dev', '.io', 'our site', 'our product'],
     intake: [
       'Which URL, and every page? Crawl routes, view modes and empty states, not just the homepage.',
@@ -44,7 +44,7 @@ const ROUTES = [
   {
     name: 'explainer',
     type: 'explainer',
-    file: 'docs/CRAFT/routes/explainer.md',
+    file: 'engine-doctrine/CRAFT/routes/explainer.md',
     keywords: ['explain', 'explainer', 'how does', 'how rag works', 'how it works', 'teach', 'topic', 'article about', 'data about'],
     intake: [
       'Data: where the facts come from (URL, file, or pasted numbers).',
@@ -56,7 +56,7 @@ const ROUTES = [
   {
     name: 'motion-graphic',
     type: 'sting',
-    file: 'docs/CRAFT/routes/motion-graphic.md',
+    file: 'engine-doctrine/CRAFT/routes/motion-graphic.md',
     keywords: ['sting', 'logo reveal', 'stat hit', 'title card that moves', 'lower-third', 'second logo', 'second sting', 'quick loop', '6 second', '6-second', '5 second', 'under 10s', 'under 10 seconds'],
     intake: [
       'The one move: what single motion carries the whole unit?',
@@ -68,7 +68,7 @@ const ROUTES = [
   {
     name: 'demo',
     type: 'demo',
-    file: 'docs/CRAFT/routes/demo.md',
+    file: 'engine-doctrine/CRAFT/routes/demo.md',
     keywords: ['demo', 'specimen', 'prove this effect', 'prove this blueprint', 'test render', 'quick test', 'show me this effect'],
     intake: [
       'The one mechanism: name exactly what is being proven.',
@@ -83,7 +83,7 @@ const FALLBACK = {
   file: null,
   intake: [
     'None of the five deliverables matched. Fall back to the full planning chain: read AGENTS.md and',
-    'start at docs/CRAFT/AUTHORING-WALKTHROUGH.md.',
+    'start at engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md.',
   ],
 };
 

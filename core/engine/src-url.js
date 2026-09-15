@@ -4,7 +4,7 @@
 // lands at /formats/scene/assets/x.png and 404s, while "/assets/x.png" is served. That rule had been
 // written twice (html fragments in preload.js, video in layers/video.js) and never for images, which is
 // how a still that existed on disk was reported as "never loaded ... outside the roots the render server
-// allows", both halves false (docs/MISTAKES.md #569). A fact with two owners drifts; this is the owner.
+// allows", both halves false (engine-doctrine/MISTAKES.md #569). A fact with two owners drifts; this is the owner.
 //
 // A leaf module on purpose: boot.js, preload.js and a layer all import it, and a layer importing
 // preload.js would be a cycle.

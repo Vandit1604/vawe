@@ -11,7 +11,7 @@ import { defineRegistry, blurbsOf, withBlurb } from '../registry/registry.js';
 // Each preset carries its own one-liner, so adding a preset is ONE edit: the blurb rides the entry
 // instead of sitting in a second map that agreed with this one only because a gate said so. Say what
 // it LOOKS like and when to reach for it, not how the maths works, and carry the caution where there
-// is one (`wave`/`shimmerWave` never settle). docs/EFFECTS.md renders these lines verbatim.
+// is one (`wave`/`shimmerWave` never settle). engine-doctrine/EFFECTS.md renders these lines verbatim.
 // withBlurb, not a local Object.assign: two agents built this independently and each invented its own
 // way to attach a blurb, which is precisely the duplication the change exists to remove. One
 // mechanism for a FUNCTION entry (core/registry.js), and a plain `blurb:` key for a DATA entry
@@ -89,7 +89,7 @@ export const PRESETS = {
     'letters lift and sharpen out of blur together: the default kinetic headline'),
   // springy bounce in
   // `settle` used to scale the spring INPUT (`u * settle * 2`) while spring's own omega is 2π/settle,
-  // so the two cancelled and the dial did nothing (docs/MISTAKES.md #115). Input is a constant now, so
+  // so the two cancelled and the dial did nothing (engine-doctrine/MISTAKES.md #115). Input is a constant now, so
   // settle drives the settle time as named; the constant 1.0 keeps the default (settle 0.5) identical.
   bounce: preset((u, { bounce = 0.5, settle = 0.5, dist = 60 } = {}) => { const s = spring(u, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `translateY(${((1 - s) * dist).toFixed(2)}px)` }; },
     'springy bounce in: playful brands only'),
@@ -157,16 +157,16 @@ export const PRESETS = {
   // so the wave travels along the line.
   //
   // IT WAS CALLED `inkflash`, and the name was the only ink in it. The effect was extracted from the
-  // Brew launch film (docs/CRAFT/REFERENCE-STUDY.md), where a collage "lights EACH word orange in turn";
+  // Brew launch film (engine-doctrine/CRAFT/REFERENCE-STUDY.md), where a collage "lights EACH word orange in turn";
   // what was measured off that reference was a COLOUR WAVE, and that is faithfully what was built. The
   // name promised pigment hitting paper, so a bleed was later added to make the code match the word -
   // which is designing backwards from a label. Renamed to what it does, and the bleed removed with the
   // name that asked for it. A real ink effect is still unbuilt and should be built as itself.
   //
   // The two colours were `#ff742e` and `#1c1613`: the reference brand's accent and ink (themes/brew.json),
-  // frozen into a preset every theme may use. They default to the THEME now. docs/MISTAKES.md #354.
+  // frozen into a preset every theme may use. They default to the THEME now. engine-doctrine/MISTAKES.md #354.
   //
-  // `colors` IS THE SECOND MODE, added for madera's tagline (docs/MISTAKES.md, recipes/recipes.json
+  // `colors` IS THE SECOND MODE, added for madera's tagline (engine-doctrine/MISTAKES.md, recipes/recipes.json
   // "word-by-word"): "each word landing in its own colour before the line settles to one ink" is N
   // resting colours in flight at once, one per unit, which `flash`/`to` cannot express (they are a
   // single accent shared by every unit). `colors[i % n]` gives unit `i` its own arrival colour; `settle`
@@ -339,7 +339,7 @@ export const PRESET_BLURBS = blurbsOf('kinetic preset', PRESETS);
 // decode support: scrambles textContent deterministically until u resolves each char L->R.
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ023456789#$%&';
 
-// THE CHARSET IS A DIAL EVERY REFERENCE EXPOSES AND OURS BAKED (docs/CRAFT/PARITY-AUDIT.md). A brand
+// THE CHARSET IS A DIAL EVERY REFERENCE EXPOSES AND OURS BAKED (engine-doctrine/CRAFT/PARITY-AUDIT.md). A brand
 // scramble in numerals, or in block shading, is a different effect and was unreachable. Write a NAME
 // from this table, or any string of your own glyphs.
 export const DECODE_CHARS = {

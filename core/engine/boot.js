@@ -170,7 +170,7 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
   // THE BOUNDS CHECK LIVES HERE, at the one funnel where a relative coordinate becomes a pixel, so an
   // effect never carries placement logic of its own: one check instead of one per factory. It grades
   // only SETTLED boxes (core/safe.js outOfFrame), because a layer sliding in from off-frame is a
-  // legitimate entrance and grading it manufactures findings (docs/MISTAKES.md #376).
+  // legitimate entrance and grading it manufactures findings (engine-doctrine/MISTAKES.md #376).
   //
   // REPORT ONLY, off by default. It prints under `?bounds` in the browser or FRAME_BOUNDS=1 in node,
   // and it never throws: whether the engine should REFUSE a settled off-frame box is a decision for a
@@ -497,7 +497,7 @@ export async function boot(build) {
     // reads the theme, and a later phase's named size/placement needs `look` to lower through
     // resolveCoords the same way a pin does, not one line too late to reach it.
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
-    const look = resolveLook(theme, { isLightBg }); // the whole-film default (docs/CRAFT/THEME-LOOK.md);
+    const look = resolveLook(theme, { isLightBg }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md);
     // an authored theme.look wins key by key, computedLook fills the rest for the 37 themes with none.
     // A NAMED size ("headline") lowers to the theme's real px number HERE, before resolveCoords: that
     // function reads `L.size` directly to estimate a text layer's height for a bottom pin, and a string
@@ -617,7 +617,7 @@ export async function boot(build) {
       // formats/scene/scene.js never returns the key. Its one reader, quality/gates/motion-audit.mjs,
       // took the empty array as "this film declares no windows" and disabled its whole FAIL tier. The
       // film's joints are its cuts and seams, core/junctions.js owns reading them, and a second way to
-      // say that is the drift MISTAKES #159 and #358 are both about. docs/MISTAKES.md #425.
+      // say that is the drift MISTAKES #159 and #358 are both about. engine-doctrine/MISTAKES.md #425.
       meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [], bridges: scene.bridges || [], beatSync: scene.beatSync || '' },
       renderFrame: (n) => { vclock.set(n, fps); scene.renderFrame(n); },
       // Font audit is a FUNCTION, not a value: it inspects the families the DOM actually asks for,
@@ -640,7 +640,7 @@ export async function boot(build) {
           // ASK canvasKind, NEVER getContext. getContext('2d') CREATES the context it is meant to
           // report, so probing here used to turn context-less canvases into 2D ones on the meta tab
           // alone, and that tab then rasterized every later frame differently from every worker tab
-          // (docs/MISTAKES.md #507). A canvas with no kind holds no context and paints nothing.
+          // (engine-doctrine/MISTAKES.md #507). A canvas with no kind holds no context and paints nothing.
           const kind = canvasKind(cv);
           if (!kind) continue;
           // visible 2D canvases repaint time-varying fx (grain/drift) BELOW probe resolution,
