@@ -24,13 +24,12 @@ import { serveRepo, launchPage, waitForEngine, bootPathFor, REPO_ROOT } from '..
 const RATE_S = 0.1;      // 10fps of FILM time, the sampling rate the doctrine asked for
 const INSET_PX = 2;      // how far in from each edge a border sample point sits
 const OPAQUE_MIN = 0.85; // a candidate below this cumulative opacity cannot be relied on to cover another
-const VISIBLE_MIN = 0.05; // below this, a layer is not "on screen" and cannot be faulted for a gap
 
 // The in-page probe. Runs once per sampled frame, after renderFrame(n) has settled the DOM. No modules,
 // no closures over the outer scope: page.evaluate serialises this to a string and runs it cold in the
 // page, so everything it needs is passed in as an argument.
 /* eslint-disable no-undef */
-function pageProbe(W, H, inset, opaqueMin, visibleMin) {
+function pageProbe(W, H, inset, opaqueMin) {
   function cumulativeOpacity(el) {
     let o = 1, n = el;
     while (n && n.nodeType === 1) {
@@ -75,7 +74,11 @@ function pageProbe(W, H, inset, opaqueMin, visibleMin) {
     const fullBleed = w > 0 && h > 0 && x <= 0.5 && y <= 0.5 && x + w >= W - 0.5 && y + h >= H - 0.5;
     return { idx, id: el.dataset.id || el.id || null, el, fullBleed, opacity: cumulativeOpacity(el) };
   });
-  const candidates = layers.filter((L) => L.fullBleed && L.opacity > visibleMin);
+  // FULLY ENTERED, not merely on screen. A layer mid first-frame-clip entrance (opacity ramping, or its
+  // resolved box still mid-transition) is not yet claiming the frame; testing it there is testing the
+  // entrance, not the beat. Gate on the same opaqueMin used to judge "does THIS cover another point": a
+  // layer below it is not yet a candidate ground either.
+  const candidates = layers.filter((L) => L.fullBleed && L.opacity > opaqueMin);
   if (!candidates.length) return { gaps: [], camTf: null, states: [] };
 
   // 16-ish points along the four borders, 2px inset, corners included (where a border-radius clip
@@ -171,7 +174,7 @@ export async function sampleEdgeReveal(scenePath, { rate = RATE_S } = {}) {
       const tr = +t.toFixed(3);
       const frame = Math.min(total - 1, Math.max(0, Math.round(tr * fps)));
       await page.evaluate((n) => window.__engine.renderFrame(n), frame);
-      const { gaps, camTf, states } = await page.evaluate(pageProbe, vw, vh, INSET_PX, OPAQUE_MIN, VISIBLE_MIN);
+      const { gaps, camTf, states } = await page.evaluate(pageProbe, vw, vh, INSET_PX, OPAQUE_MIN);
       const byIdx = new Map(states.map((s) => [s.idx, s]));
       for (const g of gaps) {
         const key = `${g.idx}:${g.id ?? ''}:${g.border}`;
@@ -195,10 +198,21 @@ export async function sampleEdgeReveal(scenePath, { rate = RATE_S } = {}) {
 export function toRanges(hits, rate = RATE_S) {
   const out = [];
   for (const h of hits) {
-    const frames = [...h.frames].sort((a, b) => a.t - b.t);
+    // DEDUPE BY TIME. A border carries several sample POINTS (top/bottom span W/3 steps); more than one
+    // failing at the same instant is still one failing SAMPLE, not extra persistence, or a border that
+    // fails wide (many points) would out-count one that fails narrow (one point) for no temporal reason.
+    const byT = new Map();
+    for (const f of h.frames) if (!byT.has(f.t)) byT.set(f.t, f);
+    const frames = [...byT.values()].sort((a, b) => a.t - b.t);
     let run = [];
     const flush = () => {
-      if (!run.length) return;
+      // ONE OR TWO samples is not a reveal a viewer sees, and it is exactly the shape of a false
+      // positive at an entrance boundary: vawe-flow-2's card-a sampled at the tick just before its
+      // resolved clip window opens reads as "not yet covering" for a single 0.1s tick, then the layer
+      // is live and correct for the rest of its life (`make probe-frame` confirmed it full-bleed at
+      // scale 1 one tick later). Three consecutive samples (>=0.2s of persisted gap) is the floor for
+      // "this is a hold a viewer sees", not a boundary artifact.
+      if (run.length < 3) { run = []; return; }
       // the "worst" frame: the one whose cause string carries the smallest scale number, else the first.
       const scored = run.map((f) => {
         const m = f.cause.match(/(\d+\.\d+)x/);
