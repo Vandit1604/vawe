@@ -11,8 +11,8 @@
 #
 #   Dockerfile      (the site + docs apps) — themes core films/scene assets/{icons,vendor,brands,plinth}
 #                   scripts site docs-site docker-start.sh
-#   Dockerfile.cli  (the renderer)         — go.mod go.sum cmd internal cli core blocks
-#                   themes assets/vendor harness/author/expand-blocks.mjs films/scene CREDITS.md LICENSE-FAQ.md
+#   Dockerfile.cli  (the renderer): go.mod go.sum cmd internal cli core blocks
+#                   themes assets/vendor harness/author/expand-blocks.mjs films/scene NOTICE
 #
 # EDITING THIS FILE: add a COPY, add its `!` line here in the same commit. `make docker-check` builds
 # the context and prints what is in it.
@@ -47,8 +47,7 @@
 !site
 !docs-site
 !docker-start.sh
-!CREDITS.md
-!LICENSE-FAQ.md
+!NOTICE
 **/node_modules
 **/.next
 **/.source
