@@ -854,6 +854,30 @@ ok('gsapStagger translates only the two words GSAP spells differently',
   gsapStagger({ each: 0.05, from: 'first' }).from === 'start' && gsapStagger({ from: 'last' }).from === 'end'
   && gsapStagger({ from: 'center' }).from === 'center' && gsapStagger(0.07) === 0.07 && gsapStagger(undefined, 0.07) === 0.07);
 
+// TYPEWRITER: a per-unit delay that is a TYPING RATE (i/cps), not a share of a budget. The other
+// dials (amount/each) stay untouched; typewriter only changes what staggerStep returns for the rank
+// staggerOffset already produces.
+ok('typewriter per-unit delay is exactly i/cps', (() => {
+  const step = staggerStep({ from: 'typewriter', cps: 24 }, 11);
+  for (let i = 0; i < 11; i++) if (!approx(staggerOffset(i, 11, 'typewriter') * step, i / 24)) return false;
+  return true;
+})());
+ok('a 24cps line of 11 chars finishes at 11/24s', (() => {
+  const cps = 24, n = 11, each = 1 / cps; // each = 1/cps: a glyph appears instantly at its turn, like typing
+  const total = n / cps;
+  return unitProgress(total, n - 1, n, { each, stagger: { from: 'typewriter', cps } }) === 1
+    && unitProgress(total - 0.001, n - 1, n, { each, stagger: { from: 'typewriter', cps } }) < 1;
+})());
+ok('typewriter composes with a preset (unit progress feeds the preset like any other order)', (() => {
+  const u = unitProgress(5 / 24, 4, 11, { each: 1 / 24, stagger: { from: 'typewriter', cps: 24 } });
+  const style = PRESETS.up(u);
+  return u === 1 && style.opacity === 1;
+})());
+ok('typewriter with no cps defaults to 24, matching text.js\'s own typing default',
+  staggerStep({ from: 'typewriter' }, 11) === 1 / 24);
+ok('an exit order of random is untouched by the typewriter branch',
+  staggerStep({ from: 'random' }, 11, 0.06) === 0.06 && staggerOffset(3, 11, 'random') === staggerOffset(3, 11, 'random'));
+
 // TEXT SCRAMBLE: a RATE, a charset, and a reveal delay (docs/CRAFT/PARITY-AUDIT.md).
 const scramble = (u, opts) => { const el = { textContent: 'DETERMINISTIC' }; decodeText(el, u, 0, opts); return el.textContent; };
 ok('decode default is byte-identical to the baked 24 steps it replaced', (() => {
