@@ -6983,8 +6983,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const { TRANSITIONS: liveTransitions } = await import('../../core/transitions/catalog.js');
   const liveTransitionNames = liveTransitions.map((t) => t.name);
   const themeDir = path.join(repoRoot, 'themes');
+  // themes/presets/ is gitignored (real-brand-named taste anchors, not redistributed) and may not
+  // exist locally at all, e.g. right after a clean clone; an empty list is correct, not an error.
+  const presetsDir = path.join(themeDir, 'presets');
   const themeFiles = fs.readdirSync(themeDir).filter((n) => n.endsWith('.json'))
-    .concat(fs.readdirSync(path.join(themeDir, 'presets')).filter((n) => n.endsWith('.json')).map((n) => `presets/${n}`));
+    .concat(fs.existsSync(presetsDir) ? fs.readdirSync(presetsDir).filter((n) => n.endsWith('.json')).map((n) => `presets/${n}`) : []);
   let themeLookErrs = 0;
   for (const tf of themeFiles) {
     const t = JSON.parse(fs.readFileSync(path.join(themeDir, tf), 'utf8'));
