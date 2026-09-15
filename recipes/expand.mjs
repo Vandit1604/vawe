@@ -75,7 +75,7 @@ function expandSeamLine(scene, line, aspectKey) {
   if (at - exitDur < outStart) bad(`"at" (${at}) minus exitDur (${exitDur}) lands before "${line.out}" even starts (${outStart})`);
 
   // Depth collision: every layer shares ONE CSS preserve-3d space once any layer keys z/rotX/rotY
-  // (formats/scene/scene.js ~1131), so a tilted seam layer cuts through a flat full-bleed ground at
+  // (films/scene/scene.js ~1131), so a tilted seam layer cuts through a flat full-bleed ground at
   // z=0. Refuse and name the fix rather than move the ground into depth silently.
   const outKeysDepth = (outLayer.motion || []).some((k) => k.z != null || k.rotX != null || k.rotY != null);
   if (outKeysDepth && line.ground) {

@@ -18,7 +18,7 @@ confirm: "are captions timed to the words, and do they sit in the safe strip for
   destination?
 
 Captions are a lock-sheet checkbox today and phone-feed vertical is first-class, so the two need to
-meet. This is the short version; the fields themselves live in `formats/scene/schema.json`.
+meet. This is the short version; the fields themselves live in `films/scene/schema.json`.
 
 ## 1. Timing: write it, or derive it
 
@@ -73,7 +73,7 @@ margins and then a real TikTok caption strip sits on top of your last line.
 
 ## 3. The style options: `captionMode` and `captionStyle`
 
-`captionMode` (top-level scene field, `formats/scene/schema.json`) picks the layout:
+`captionMode` (top-level scene field, `films/scene/schema.json`) picks the layout:
 
 | Value | What it is |
 |---|---|

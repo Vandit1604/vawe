@@ -11,7 +11,7 @@ a slug, what it does and WHEN, the exact JSON to paste, and tags. Compose **2-4 
 An entrance + a rhythm + a transition, never one uniform fade on everything.
 
 - Inspired by another engine' `rules-index.md`, but every mechanism here is a REAL vawe field
-  (`formats/scene/schema.json` is the contract; `engine-doctrine/PRIMITIVES.md` is the vocabulary).
+  (`films/scene/schema.json` is the contract; `engine-doctrine/PRIMITIVES.md` is the vocabulary).
 - **Doctrine lives in [`MOTION-CRAFT.md`](MOTION-CRAFT.md)** (the 10 rules, the Snap section, the
   Cut-or-transition guide). This file is the lookup table that applies it.
 - The golden rule, from MOTION-CRAFT: entrances overshoot-and-settle, exits accelerate away, **never
@@ -194,5 +194,5 @@ A product-feature beat = an entrance + a rhythm + a backing surface + an earned 
 ```
 plus the real UI it proves (a `component` capture with `lift-in` + `wave-stagger`), a `slow-push` camera
 over the whole film, `auto-sfx`, and a `dissolve` only when the next beat changes place. That is 4 snippets,
-not one fade. See `formats/scene/motion-test.json` for the snap A/B, and the `showcase-*.json` scenes for
+not one fade. See `films/scene/motion-test.json` for the snap A/B, and the `showcase-*.json` scenes for
 feature demos.

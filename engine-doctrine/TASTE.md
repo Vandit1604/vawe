@@ -151,7 +151,7 @@ from ever being read; it never protected the author from a rule fitted to the wr
 storyboard every run and says what it found. A scene declares its plan explicitly:
 
 ```json
-{ "storyboard": "formats/scene/my-film.storyboard.md" }
+{ "storyboard": "films/scene/my-film.storyboard.md" }
 ```
 
 Without that field the step falls back to the naming convention: `<base>.storyboard.md` beside the

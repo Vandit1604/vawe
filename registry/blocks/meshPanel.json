@@ -45,7 +45,7 @@
     {
       "source": "site/public/assets/blocks/meshPanel.json",
       "url": "https://vawe.dev/assets/blocks/meshPanel.json",
-      "target": "formats/scene/meshPanel.json",
+      "target": "films/scene/meshPanel.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

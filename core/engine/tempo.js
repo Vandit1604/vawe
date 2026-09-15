@@ -20,7 +20,7 @@ export const MAX_TEMPO = 2;
 const GRID = 1 / 60;
 const snapTime = (v) => Math.round(v / GRID) * GRID;
 
-// ONE TABLE, every authored-time field this resolver touches. Grep formats/scene/schema.json's
+// ONE TABLE, every authored-time field this resolver touches. Grep films/scene/schema.json's
 // `layerProps.shared`/`byType` lists before adding a key here.
 const LAYER_TIME_KEYS = [
   'start', 'duration', 'delay', 'enterDur', 'exitDur', 'each', 'stagger',

@@ -68,7 +68,7 @@
     {
       "source": "site/public/assets/blocks/notification.stack.json",
       "url": "https://vawe.dev/assets/blocks/notification.stack.json",
-      "target": "formats/scene/notification.stack.json",
+      "target": "films/scene/notification.stack.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

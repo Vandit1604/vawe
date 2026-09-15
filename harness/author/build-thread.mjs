@@ -1,4 +1,4 @@
-// harness/author/build-thread.mjs: generate formats/scene/thread.json.
+// harness/author/build-thread.mjs: generate films/scene/thread.json.
 //
 // The first film here held together by a SENTENCE rather than a prop. Nothing survives a cut: every beat
 // is its own world, its own palette, its own graphic. What stops it being a slideshow is that no clause
@@ -16,7 +16,7 @@
 //   5 the wall collapsing into one file
 import fs from 'node:fs';
 
-const OUT = 'formats/scene/thread.json';
+const OUT = 'films/scene/thread.json';
 const W = 1080;
 const r1 = (v) => +v.toFixed(1);
 

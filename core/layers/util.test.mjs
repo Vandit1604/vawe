@@ -7,11 +7,11 @@
 // and returns [] outright when `document` is undefined (plain node has none). A direct unit test would
 // therefore either fake a DOM (the "hand-rolled CSS grammar drifts from the real one" mistake this
 // check exists to avoid) or test nothing. So this launches the real engine in a real Chromium page,
-// the same way `make snap-all` caught the reported bug live in the library (formats/scene/one-word.json
-// and formats/scene/vawe-oblique.json both shipped a bare `"color": "accent"`/`"text"` and rendered
+// the same way `make snap-all` caught the reported bug live in the library (films/scene/one-word.json
+// and films/scene/vawe-oblique.json both shipped a bare `"color": "accent"`/`"text"` and rendered
 // silently wrong until this check existed).
 //
-// Fixtures are written under formats/scene/ with a `stagetest-` prefix (the convention
+// Fixtures are written under films/scene/ with a `stagetest-` prefix (the convention
 // quality/gates/stage.test.mjs already uses) and removed in `after()`, pass or fail.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -21,7 +21,7 @@ import assert from 'node:assert';
 import { serveRepo, launchPage, waitForEngine } from '../../harness/lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENES = path.join(ROOT, 'formats/scene');
+const SCENES = path.join(ROOT, 'films/scene');
 
 const written = [];
 function writeFixture(name, color) {
@@ -41,7 +41,7 @@ test('a bare theme-token colour ("accent" for var(--accent)) is refused, named, 
   const { server, port, close: closeServer } = await serveRepo({ root: ROOT });
   const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
   try {
-    await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/formats/scene/${rel}&fps=30`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/films/scene/${rel}&fps=30`, { waitUntil: 'load' });
     const err = await waitForEngine(page);
     assert.ok(err, 'a bare colour token must not render silently: the engine should report an error');
     assert.match(err, /the browser drops this css declaration, color: accent/);
@@ -56,7 +56,7 @@ test('the same layer with the var() form renders clean', async () => {
   const { server, port, close: closeServer } = await serveRepo({ root: ROOT });
   const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
   try {
-    await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/formats/scene/${rel}&fps=30`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/films/scene/${rel}&fps=30`, { waitUntil: 'load' });
     const err = await waitForEngine(page);
     assert.equal(err, null, `a valid var() colour must not be refused, got: ${err}`);
   } finally {

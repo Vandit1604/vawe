@@ -82,7 +82,7 @@ counter, a real UI), not a word in a box.
 count-up / camera move directly, so kinetic type and real motion are the *default*, not something you
 remember. Hand-author only what nothing named already covers.
 
-Read `formats/scene/sample.json` and one shipped scene as structural references, then compose, never
+Read `films/scene/sample.json` and one shipped scene as structural references, then compose, never
 copy a structure wholesale (the ledger flags it). Build in the [`README.md`](README.md) layering order:
 
 1. **Beats**: layer `start`/`duration` per the lock sheet's timing.
@@ -107,8 +107,8 @@ This is the `make check` phase of the one spine in
 nothing blocks yet.
 
 ```bash
-make author-check D=formats/scene/passwords.json           # validate · beats · assets · inspect · plan-vs-render
-TASTE=1 make author-check D=formats/scene/passwords.json  # ...+ critique · direct · floor · dissolve
+make author-check D=films/scene/passwords.json           # validate · beats · assets · inspect · plan-vs-render
+TASTE=1 make author-check D=films/scene/passwords.json  # ...+ critique · direct · floor · dissolve
                                                           #     designspec · copy · pace
 ```
 
@@ -153,9 +153,9 @@ This is the `make ship` + `make judge` phases of the same spine (`make video` he
 sheet-less render; `make ship` also runs `seam-check` and the contact sheets).
 
 ```bash
-make video D=formats/scene/passwords.json             # → out/passwords.mp4  (+ author-check + audit)
-make judge D=formats/scene/passwords.json             # preps /tmp/judge/sheet.png + rubric
-make why   D=formats/scene/passwords.json             # what the last few dev/check/ship/judge runs actually did
+make video D=films/scene/passwords.json             # → out/passwords.mp4  (+ author-check + audit)
+make judge D=films/scene/passwords.json             # preps /tmp/judge/sheet.png + rubric
+make why   D=films/scene/passwords.json             # what the last few dev/check/ship/judge runs actually did
 ```
 
 `make judge` is the required post-render step the static ladder structurally cannot be: read

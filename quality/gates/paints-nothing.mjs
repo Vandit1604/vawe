@@ -37,7 +37,7 @@
 // and --strict still fails on it.
 //
 //   node quality/gates/paints-nothing.mjs <scene.json> [--strict]
-//   node quality/gates/paints-nothing.mjs                 (census: every formats/scene/*.json)
+//   node quality/gates/paints-nothing.mjs                 (census: every films/scene/*.json)
 //   make paints-nothing [D=scene.json] [STRICT=1]
 import fs from 'node:fs';
 import path from 'node:path';
@@ -95,11 +95,11 @@ async function checkScene(browser, port, absFile) {
   const bootRel = bootPathFor(repoRoot, raw, loadScene(structuredClone(scene)), relFile);
   const page = await browser.newPage();
   try {
-    await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/${bootRel}&fps=${FPS}`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/${bootRel}&fps=${FPS}`, { waitUntil: 'load' });
     const boot = await waitForEngine(page, { throwOnTimeout: false });
     if (boot) return { file: relFile, error: `boot: ${boot}` };
 
-    // `.hs-layer` is stamped ONLY on top-level layers (formats/scene/scene.js buildLayer); a nested
+    // `.hs-layer` is stamped ONLY on top-level layers (films/scene/scene.js buildLayer); a nested
     // group child gets `hs-group` alone. So this NodeList's length and order matches `T.layers` exactly
     // for the ordinary (non-beat-wrapped) scene, and matches it for a beat-wrapped one too as long as a
     // beat's layers are declared contiguously in the JSON, true of every scene this repo authors. A

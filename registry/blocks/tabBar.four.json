@@ -49,7 +49,7 @@
     {
       "source": "site/public/assets/blocks/tabBar.four.json",
       "url": "https://vawe.dev/assets/blocks/tabBar.four.json",
-      "target": "formats/scene/tabBar.four.json",
+      "target": "films/scene/tabBar.four.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

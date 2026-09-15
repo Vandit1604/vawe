@@ -58,7 +58,7 @@
     {
       "source": "site/public/assets/blocks/socialProof.json",
       "url": "https://vawe.dev/assets/blocks/socialProof.json",
-      "target": "formats/scene/socialProof.json",
+      "target": "films/scene/socialProof.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -96,7 +96,7 @@ const s = (n) => `${(+n).toFixed(2)}s`;
 // as shaped. Nominating a peak is also a promise the rest stays restrained, which is what core/spectacle.js
 // enforces once the block exists.
 //
-// THE TRIGGER IS NARROW ON PURPOSE. Measured over the 110 scenes in formats/scene, EVERY one of them
+// THE TRIGGER IS NARROW ON PURPOSE. Measured over the 110 scenes in films/scene, EVERY one of them
 // lacks a `spectacle` block, so warning on all of them would be a report about the library rather than a
 // gate, and a finding on every file teaches the reader to skip the section. It fires only where the
 // author has already declared structure the peak could sit in: at least 2 declared boundaries and at

@@ -71,20 +71,20 @@ export function cameraAt(camKf, t) {
 // is no axis-aligned answer. Every static gate measures a layer against the canvas box at the origin,
 // which is where the camera stands on frame 0 and nowhere else. A film that uses the camera as its edit
 // lays its content out across a canvas far larger than the frame and travels between stations:
-// formats/scene/linear-journey.json puts five stations across 5760x2160 and declares ZERO cuts, and every
+// films/scene/linear-journey.json puts five stations across 5760x2160 and declares ZERO cuts, and every
 // gate read it against 1920x1080 at the origin. canvasShare scored a station at x:2180 that FILLS the
 // screen as share 0, and critique's scattered-beat added four stations the eye never sees at once into one
 // count and called two beats crammed. Both findings were false, and the cause was the same missing answer.
 //
 // The map is INVERTED from the flat camera transform, not guessed at: #cam is `inset: 0` with
-// `transform-origin: 50% 50%` (formats/scene/scene.css:15) and drawCameraAndCut writes
-// `scale(s) translate(x, y)` (formats/scene/scene.js:888). A CSS function list applies to points right to
+// `transform-origin: 50% 50%` (films/scene/scene.css:15) and drawCameraAndCut writes
+// `scale(s) translate(x, y)` (films/scene/scene.js:888). A CSS function list applies to points right to
 // left, so a stage point p lands on screen at C + s * (p + T - C), with C the canvas centre and T = (x, y).
 // Solving that for p at the two screen corners gives a view starting at C - C/s - T and sized CW/s by CH/s.
 //
 // It answers for the CAMERA, and the camera is not the only thing that can rotate the stage: a top-level
-// `tilt` or `plane` modifier builds the same 3D rig with no camera angle at all (formats/scene/scene.js:705,
-// and formats/scene/playhead.json is a shipped film that does exactly that). Layers are not visible from
+// `tilt` or `plane` modifier builds the same 3D rig with no camera angle at all (films/scene/scene.js:705,
+// and films/scene/playhead.json is a shipped film that does exactly that). Layers are not visible from
 // here, so THE CALLER must refuse that case as well. This returns a rect for it, and the rect is a lie.
 export function cameraView(camKf, t, CW, CH) {
   const c = cameraAt(camKf, t);
@@ -161,7 +161,7 @@ export const POSE = { x: ['dx', 0], y: ['dy', 0], scale: ['scale', 1], rot: ['ro
   // everything the tracks write, deliberately so a depth is a placement and not an animated value.
   // These are the animated form, read every frame off the SAME `motion` track x/y/rot already live on,
   // because a keyframe that can move x and y but not z is not "AE minus one axis", it is a different,
-  // smaller idea, and this repo already has the bigger one two properties over. formats/scene/scene.js
+  // smaller idea, and this repo already has the bigger one two properties over. films/scene/scene.js
   // composes them into the layer's own `transform` (core/tracks/motion.js), never into the `translate`/
   // `rotate` longhands `plane`/`tilt` own, so keying a layer's depth and giving it a static one at the
   // same time cannot collide: they are different CSS properties by construction, the same split

@@ -93,7 +93,7 @@ export function resolveVoiceCue(voice, params, sfxDir) {
 // `_bakedName` is a `_`-prefixed field (this repo's own "author note" convention, `_why`/`_template`)
 // that the schema does not declare, so the generic validator never looks at it: `core/validate/
 // validate.mjs`'s `walk()` only visits keys the schema's `fields` object names. The one line
-// formats/scene/scene.js is allowed to touch (its cue-meta push) reads `_bakedName` first, `name`
+// films/scene/scene.js is allowed to touch (its cue-meta push) reads `_bakedName` first, `name`
 // second, bare `voice` last (a param-less voice already matches a statically baked role file).
 export function bakeVoiceCues(data, sfxDir) {
   const cues = data?.audio?.cues;

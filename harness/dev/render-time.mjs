@@ -32,7 +32,7 @@ const has = (k) => process.argv.includes(k);
 // A cheap film and an expensive one. Averaging the two would describe neither: a type film is bound by
 // layout and text measurement, a shader film by fragment work, and a change can help one and hurt the
 // other. `--films` overrides; a name with no file on disk is reported, not crashed on, because most of
-// formats/scene is gitignored and a clone will not have these.
+// films/scene is gitignored and a clone will not have these.
 const DEFAULT_FILMS = ['plinth-ad', 'site-backdrop'];
 const RUNS = +arg('--runs', 3);
 const BASELINE = 'quality/baselines/perf/baseline.json';
@@ -52,19 +52,19 @@ function frameCount(film) {
   // Read the film's own duration and fps rather than assuming 30: throughput is frames per second of
   // wall clock, and a 60fps film does twice the work for the same runtime.
   try {
-    const d = JSON.parse(fs.readFileSync(`formats/scene/${film}.json`, 'utf8'));
+    const d = JSON.parse(fs.readFileSync(`films/scene/${film}.json`, 'utf8'));
     return Math.round((d.duration ?? 0) * (d.fps ?? 30));
   } catch { return null; }
 }
 
 function timeOne(film) {
   const t0 = process.hrtime.bigint();
-  execFileSync('./bin/vawe', [`formats/scene/${film}.json`, '--draft'], { stdio: 'ignore' });
+  execFileSync('./bin/vawe', [`films/scene/${film}.json`, '--draft'], { stdio: 'ignore' });
   return Number(process.hrtime.bigint() - t0) / 1e9;
 }
 
 function measure(film) {
-  const file = `formats/scene/${film}.json`;
+  const file = `films/scene/${film}.json`;
   if (!fs.existsSync(file)) return { film, skipped: `no ${file} on disk (most films are gitignored)` };
 
   const before = loadNow();

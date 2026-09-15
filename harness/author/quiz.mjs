@@ -243,7 +243,7 @@ const ROLES = {
   'image → turn → mark': ['image', 'turn', 'mark'],
 };
 function applyNoStudy({ a, fm, name, out }) {
-  const dest = out || path.join(ROOT, 'formats/scene', `${(name || 'untitled').replace(/[^a-z0-9-]/gi, '-')}.storyboard.md`);
+  const dest = out || path.join(ROOT, 'films/scene', `${(name || 'untitled').replace(/[^a-z0-9-]/gi, '-')}.storyboard.md`);
   const dur = parseInt(fm.duration, 10);
   const n = fm.beats || Math.max(2, Math.round(dur / 2.5));
   const roles = ROLES[fm.arc] || ROLES['hook → build → proof → payoff → CTA'];
@@ -340,7 +340,7 @@ function look({ sb, n = 3 }) {
   const c = run([path.join(ROOT, 'harness/author/concept.mjs'), sb, '--n', String(N)]);
   if (c.status !== 0) return { error: 'concept-failed', message: (c.stderr || c.stdout || '').trim() };
   const stem = path.basename(sb).replace(/\.storyboard\.md$/, '');
-  const dir = path.join(ROOT, 'formats/scene/_concepts');
+  const dir = path.join(ROOT, 'films/scene/_concepts');
   const variants = fs.existsSync(dir)
     ? fs.readdirSync(dir).filter((f) => f.startsWith(`${stem}-`) && f.endsWith('.storyboard.md'))
     : [];

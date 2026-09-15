@@ -12,7 +12,7 @@
 // SILENT UNLESS A FILM IS IN FLIGHT, and one line when it speaks. A hook that talks every turn is a
 // hook whose output stops being read, which would leave the rule exactly where it started.
 //
-// THE FILM IN FLIGHT is the most recently modified storyboard in formats/scene/, within a day. Not a
+// THE FILM IN FLIGHT is the most recently modified storyboard in films/scene/, within a day. Not a
 // stored "current film": that is a second source of truth, free to disagree with the repo, and this
 // whole design refuses those (see quality/gates/stage.mjs, state is derived).
 import fs from 'node:fs';
@@ -22,7 +22,7 @@ import { computeFeatures } from '../../quality/gates/craft-checklist.mjs';
 import { rulesFor, briefLine, STAGE_CATEGORY_ORDER } from '../lib/craft-rules.mjs';
 
 const DAY = 24 * 60 * 60 * 1000;
-const dir = path.join(ROOT, 'formats/scene');
+const dir = path.join(ROOT, 'films/scene');
 let best = null;
 for (const f of (fs.existsSync(dir) ? fs.readdirSync(dir) : [])) {
   if (!f.endsWith('.storyboard.md')) continue;
@@ -44,7 +44,7 @@ if (st.stage === 'judge') process.exit(0);
 console.log(`vawe: ${st.name} is at stage ${st.stage.toUpperCase()} (${st.order.join(' → ')}).`);
 console.log(`  ${st.why}`);
 console.log(`  next: ${st.next}`);
-console.log('  Do that stage, not the one after it. `make stage D=formats/scene/'
+console.log('  Do that stage, not the one after it. `make stage D=films/scene/'
   + `${st.name}.json\` re-reads this from the files on disk.`);
 
 // Rule briefs for this film's own stage and features, but only ONCE per (film, stage): printed on

@@ -1,8 +1,8 @@
 // quality/gates/study-verify.mjs: does `make study` measure correctly? Check it against a film whose
 // answers we already know.
 //
-//   node quality/gates/study-verify.mjs formats/scene/brew-launch-act1.json
-//   make study-verify D=formats/scene/<scene>.json
+//   node quality/gates/study-verify.mjs films/scene/brew-launch-act1.json
+//   make study-verify D=films/scene/<scene>.json
 //
 // WHY THIS IS POSSIBLE AT ALL, and why it is the right gate. `make study` reads someone else's film and
 // nobody can grade it: the reference has no source, so a wrong measurement and a right one look the
@@ -43,9 +43,9 @@ if (RENDER || !fs.existsSync(mp4)) {
   console.log(`  rendering ${name} (draft)…`);
   // VAWE_SERVE_ALL=1: this gate's own scenes are not always under the render server's default
   // allowlist (the ground-truth fixture lives in quality/fixtures/, alongside its siblings, not
-  // formats/scene/: .gitignore keeps formats/scene/*.json out of the repo for anything that is
+  // films/scene/: .gitignore keeps films/scene/*.json out of the repo for anything that is
   // authored content rather than the framework itself). Safe to set unconditionally: it only widens
-  // what the dev server will fetch, never narrows a normal formats/scene/ render.
+  // what the dev server will fetch, never narrows a normal films/scene/ render.
   const r = spawnSync(path.join(ROOT, 'bin/vawe'), [path.relative(ROOT, abs), '--draft'],
     { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VAWE_SERVE_ALL: '1' } });
   if (!fs.existsSync(mp4)) { console.error(`✗ render produced no ${path.relative(ROOT, mp4)}\n${r.stderr || r.stdout}`); process.exit(1); }

@@ -42,7 +42,7 @@
     {
       "source": "site/public/assets/blocks/callout.info.json",
       "url": "https://vawe.dev/assets/blocks/callout.info.json",
-      "target": "formats/scene/callout.info.json",
+      "target": "films/scene/callout.info.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

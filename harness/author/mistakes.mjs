@@ -127,7 +127,7 @@ const AREAS = [
   [/\bharness\/(author|media|lib|dev|live)\//g, 'scripts (tooling)'],
   [/\bgenerators\//g, 'scripts (tooling)'],
   [/\bresearch\/lightfield\//g, 'scripts (tooling)'],
-  [/\bformats\/scene\/scene\.(js|html)/g, 'formats/scene engine'],
+  [/\bformats\/scene\/scene\.(js|html)/g, 'films/scene engine'],
   [/\bformats\/scene\/[a-z0-9_-]+\.json/g, 'a scene file'],
   [/\binternal\/|\bcmd\//g, 'Go renderer'],
   [/\bblocks\//g, 'blocks'],

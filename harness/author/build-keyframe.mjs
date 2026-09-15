@@ -1,4 +1,4 @@
-// Builds formats/scene/keyframe.json: a film about keyed motion that IS keyed motion.
+// Builds films/scene/keyframe.json: a film about keyed motion that IS keyed motion.
 // The timeline strip and the shape's motion track are generated from ONE list of keys, so the diamonds
 // you see landing are literally the keys the shape is moving through. If they ever disagree the film is
 // lying, and generating both from one source is the only way to be sure they cannot.
@@ -83,5 +83,5 @@ const scene = {
   bg: [{ t: 0, preset: 'dotmatrix', mode: 'wave', period: 7, peakAlpha: 0.3 }],
 };
 
-fs.writeFileSync('formats/scene/keyframe.json', JSON.stringify(scene, null, 2) + '\n');
-console.log(`wrote formats/scene/keyframe.json · ${KEYS.length} keys · ${scene.layers.length} layers`);
+fs.writeFileSync('films/scene/keyframe.json', JSON.stringify(scene, null, 2) + '\n');
+console.log(`wrote films/scene/keyframe.json · ${KEYS.length} keys · ${scene.layers.length} layers`);

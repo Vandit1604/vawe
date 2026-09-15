@@ -18,7 +18,7 @@
 //              reverse (`at` going down) out of the same mechanism, with no second vocabulary.
 //
 // THE THIRD DIAL IS NOT HERE, and that is deliberate. Posterize Time, the hand-drawn "on twos" look,
-// is already `step` on a layer: core/motion.js stepClock quantises the clock and formats/scene/scene.js
+// is already `step` on a layer: core/motion.js stepClock quantises the clock and films/scene/scene.js
 // hands runTracks the stepped second, so the entrance is stepped by the same number inside clipStyleAt.
 // A `stepFps` beside it would have been a second spelling of a shipped capability, which is the fork
 // this repo logs more than any other defect.

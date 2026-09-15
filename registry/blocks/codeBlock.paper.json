@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/codeBlock.paper.json",
       "url": "https://vawe.dev/assets/blocks/codeBlock.paper.json",
-      "target": "formats/scene/codeBlock.paper.json",
+      "target": "films/scene/codeBlock.paper.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

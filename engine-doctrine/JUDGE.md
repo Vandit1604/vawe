@@ -23,7 +23,7 @@ is that gate: it preps the key frames + the brand's house-style + a craft rubric
 scores them**. (It leverages the vision model already authoring, no API key, no cost beyond one read.)
 
 ```bash
-make judge D=formats/scene/<file>.json VS=<brand>     # after a near-final render
+make judge D=films/scene/<file>.json VS=<brand>     # after a near-final render
 ```
 
 It writes, into a directory named after the film so judging a second one does not destroy the first:
@@ -90,7 +90,7 @@ and the date. A receipt is valid only when both hashes still match what is on di
 
 `make no-judge` (`quality/gates/no-judge.mjs`) counts rendered films (an `out/<name>.mp4` exists) with
 no valid receipt, against a ratchet at `quality/baselines/no-judge-ratchet.json` that may only fall.
-It is deliberately NOT wired into `make ship` or CI: both `formats/scene/*.json` content and
+It is deliberately NOT wired into `make ship` or CI: both `films/scene/*.json` content and
 `out/*.mp4` are gitignored, so a thin checkout would report a number about itself, not the library
 (the same reason `doc-refs` stays out of CI). Run it on demand, or from `.githooks/pre-push` once an
 author wants it enforced there. `--stamp` lowers the ceiling after judging a batch.

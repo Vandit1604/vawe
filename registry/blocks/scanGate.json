@@ -41,7 +41,7 @@
     {
       "source": "site/public/assets/blocks/scanGate.json",
       "url": "https://vawe.dev/assets/blocks/scanGate.json",
-      "target": "formats/scene/scanGate.json",
+      "target": "films/scene/scanGate.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

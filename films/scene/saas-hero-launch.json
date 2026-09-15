@@ -1,0 +1,812 @@
+{
+  "module": "scene",
+  "storyboard": "films/scene/saas-hero-launch.storyboard.md",
+  "_template": "FILLABLE TEMPLATE - a white-first SaaS launch film. Nothing here is anyone's brand: the product is the fictional 'Meridian', every colour is a theme token, and every logo in the wall is invented. To reskin, change `theme` (any file in themes/) and nothing else. To refill, replace the copy strings, the logoWall entries, the browserFrame rows, the barChart data and the four capability cards. Structure, timing and camera are the part worth keeping.",
+  "orientation": "landscape",
+  "theme": "default",
+  "duration": 45,
+  "audio": {
+    "silent": true,
+    "_why": "Template ships mute so a fork can drop its own bed in without fighting a mix it did not choose. Replace with a real audio block before shipping."
+  },
+  "_camera": "The camera is written as MOVES, not keys: the generators in core/camera-moves.js own the arithmetic, so retiming a beat is one number. The dive is the only large one, and it lands on the release panel because that is the beat the film is about. A dive is bounded by the copy it must not push off the frame. At scale s centred on tx the left edge of the visible stage is tx - 960/s, and both films set their text column at x=150, so tx must stay at or under 150 + 960/s. The first pass dove to 1.2 on the panel centre and cropped the whole left column for five seconds with every gate green; `make judge` was the only thing that saw it.",
+  "cameraMove": [
+    {
+      "move": "slowPush",
+      "start": 0,
+      "dur": 7.4,
+      "from": 1,
+      "to": 1.04
+    },
+    {
+      "move": "slowPush",
+      "start": 7.9,
+      "dur": 4.8,
+      "from": 1,
+      "to": 1.03
+    },
+    {
+      "move": "diveIn",
+      "start": 13.9,
+      "dur": 2.6,
+      "tx": 980,
+      "ty": 500,
+      "to": 1.1,
+      "targetW": 820,
+      "targetH": 620
+    },
+    {
+      "move": "workspaceZoomOut",
+      "start": 21.8,
+      "dur": 2.4,
+      "from": 1.1,
+      "to": 1,
+      "tx": 980,
+      "ty": 500
+    },
+    {
+      "move": "punchIn",
+      "start": 24.5,
+      "dur": 0.36,
+      "from": 0.95,
+      "to": 1
+    },
+    {
+      "move": "slowPush",
+      "start": 25.6,
+      "dur": 5.3,
+      "from": 1,
+      "to": 1.04
+    },
+    {
+      "move": "slowPush",
+      "start": 31.5,
+      "dur": 6.9,
+      "from": 1,
+      "to": 1.05
+    },
+    {
+      "move": "slowPush",
+      "start": 39.2,
+      "dur": 5.8,
+      "from": 1.03,
+      "to": 1
+    }
+  ],
+  "_cuts": "One family, soft: this is a white editorial film and a punchy edit would fight it. `blur` and `riseBlur` are the two soft styles that work without beat wrapping (core/cuts.js refuses a masking cut on a whole-frame root, because there is nothing underneath to reveal). Each cut sits in the gap between two beats, and the backdrop windows below carry no times because they bind to these joints (core/junctions.js).",
+  "spectacle": {
+    "at": 26.5,
+    "of": "shippedTotal",
+    "device": "cinematicZoom",
+    "why": "The film has spent 24 seconds showing ONE release go out. The peak lands where the counter stops, not where the beat opens: a 0.9s sting written at the cut buried the number's whole entrance, so it is written where 4.8M settles instead. The device is monochrome on purpose. `chromaticSplit` was tried and painted a rainbow ring over the chart, which is off-palette on a film whose whole look is one blue. It is the only beat allowed to raise its voice."
+  },
+  "layers": [
+    {
+      "type": "text",
+      "track": 1,
+      "critical": false,
+      "text": "<div style=\"width:1300px;height:1300px;border-radius:50%;filter:blur(80px);opacity:0.55;background:radial-gradient(circle at 50% 50%, var(--accent) 0%, color-mix(in srgb, var(--accent) 45%, transparent) 42%, transparent 70%)\"></div>",
+      "x": 980,
+      "y": -360,
+      "start": 0,
+      "duration": 45,
+      "anim": "fade",
+      "enterDur": 1,
+      "exitDur": 0.8,
+      "motion": [
+        {
+          "t": 0,
+          "x": 0,
+          "y": 0,
+          "scale": 1
+        },
+        {
+          "t": 15,
+          "x": -180,
+          "y": 120,
+          "scale": 1.14
+        },
+        {
+          "t": 30,
+          "x": 60,
+          "y": -60,
+          "scale": 0.95
+        },
+        {
+          "t": 45,
+          "x": -120,
+          "y": 80,
+          "scale": 1.1
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "track": 1,
+      "critical": false,
+      "text": "<div style=\"width:1200px;height:1200px;border-radius:50%;filter:blur(80px);opacity:0.5;background:radial-gradient(circle at 50% 50%, var(--accent-2, var(--up)) 0%, color-mix(in srgb, var(--accent) 40%, transparent) 48%, transparent 72%)\"></div>",
+      "x": 1280,
+      "y": 260,
+      "start": 0,
+      "duration": 45,
+      "anim": "fade",
+      "enterDur": 1,
+      "exitDur": 0.8,
+      "motion": [
+        {
+          "t": 0,
+          "x": 0,
+          "y": 0,
+          "scale": 1
+        },
+        {
+          "t": 18,
+          "x": -140,
+          "y": -180,
+          "scale": 1.12
+        },
+        {
+          "t": 34,
+          "x": 120,
+          "y": 40,
+          "scale": 0.94
+        },
+        {
+          "t": 45,
+          "x": -60,
+          "y": -120,
+          "scale": 1.08
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "track": 1,
+      "critical": false,
+      "text": "<div style=\"width:1000px;height:1000px;border-radius:50%;filter:blur(78px);opacity:0.42;background:radial-gradient(circle at 50% 50%, var(--accent) 0%, transparent 64%)\"></div>",
+      "x": 900,
+      "y": 520,
+      "start": 0,
+      "duration": 45,
+      "anim": "fade",
+      "enterDur": 1,
+      "exitDur": 0.8,
+      "motion": [
+        {
+          "t": 0,
+          "x": 0,
+          "y": 0,
+          "scale": 1
+        },
+        {
+          "t": 12,
+          "x": 160,
+          "y": -100,
+          "scale": 1.1
+        },
+        {
+          "t": 28,
+          "x": -80,
+          "y": 120,
+          "scale": 0.96
+        },
+        {
+          "t": 45,
+          "x": 100,
+          "y": -40,
+          "scale": 1.12
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "track": 1,
+      "critical": false,
+      "text": "<div style=\"width:900px;height:900px;border-radius:50%;filter:blur(76px);opacity:0.34;background:radial-gradient(circle at 50% 50%, var(--up) 0%, transparent 62%)\"></div>",
+      "x": 1500,
+      "y": 620,
+      "start": 0,
+      "duration": 45,
+      "anim": "fade",
+      "enterDur": 1,
+      "exitDur": 0.8,
+      "motion": [
+        {
+          "t": 0,
+          "x": 0,
+          "y": 0,
+          "scale": 1
+        },
+        {
+          "t": 16,
+          "x": -120,
+          "y": 60,
+          "scale": 1.08
+        },
+        {
+          "t": 32,
+          "x": 80,
+          "y": -140,
+          "scale": 0.92
+        },
+        {
+          "t": 45,
+          "x": -40,
+          "y": 100,
+          "scale": 1.1
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "track": 2,
+      "critical": false,
+      "text": "<div style=\"width:1920px;height:1180px;background:linear-gradient(96deg, var(--bg) 24%, color-mix(in srgb, var(--bg) 88%, transparent) 46%, transparent 80%)\"></div>",
+      "x": -20,
+      "y": -40,
+      "start": 0,
+      "duration": 45,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "exitDur": 0.6
+    },
+    {
+      "type": "group",
+      "track": 20,
+      "direction": "row",
+      "align2": "baseline",
+      "gap": 20,
+      "x": 150,
+      "y": 250,
+      "start": 0.3,
+      "duration": 7.65,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "exitDur": 0.4,
+      "children": [
+        {
+          "type": "text",
+          "text": "UPTIME, LAST 90 DAYS",
+          "font": "mono",
+          "size": 22,
+          "weight": 600,
+          "color": "var(--text-2)",
+          "tracking": "0.12em"
+        },
+        {
+          "type": "count",
+          "from": 99,
+          "to": 99.98,
+          "decimals": 2,
+          "suffix": "%",
+          "font": "mono",
+          "size": 22,
+          "weight": 700,
+          "color": "var(--accent)",
+          "countStart": 0.3,
+          "countDur": 1.6
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "One platform to run<br>your <b>whole release.</b>",
+      "size": 104,
+      "weight": 600,
+      "color": "var(--text)",
+      "w": 1080,
+      "x": 150,
+      "y": 320,
+      "split": "word",
+      "preset": "up",
+      "dist": 24,
+      "stagger": 0.035,
+      "each": 0.32,
+      "start": 0.5,
+      "duration": 7.45,
+      "exitDur": 0.4,
+      "critical": true
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "Plan the work, ship the change, and watch what it did,<br>without leaving one workspace.",
+      "size": 30,
+      "weight": 400,
+      "color": "var(--text-2)",
+      "w": 1000,
+      "x": 152,
+      "y": 736,
+      "start": 1.3,
+      "duration": 6.65,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "Start free  ›",
+      "size": 26,
+      "weight": 600,
+      "color": "var(--bg)",
+      "bg": "var(--accent)",
+      "radius": 10,
+      "pad": "17px 34px",
+      "x": 152,
+      "y": 800,
+      "start": 1.9,
+      "duration": 6.05,
+      "anim": "rise",
+      "enterDur": 0.35,
+      "exitDur": 0.4,
+      "critical": true
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "Teams of every size <b>build here.</b>",
+      "size": 72,
+      "weight": 600,
+      "color": "var(--text)",
+      "w": 1500,
+      "x": 150,
+      "y": 330,
+      "split": "word",
+      "preset": "scale",
+      "dist": 18,
+      "stagger": 0.03,
+      "each": 0.26,
+      "start": 8,
+      "duration": 5.15,
+      "exitDur": 0.4,
+      "critical": true
+    },
+    {
+      "type": "block",
+      "block": "logoWall",
+      "x": 150,
+      "y": 520,
+      "w": 1620,
+      "cols": 3,
+      "logos": [
+        {
+          "text": "Northwind"
+        },
+        {
+          "text": "Kite Studio"
+        },
+        {
+          "text": "Fieldwork"
+        },
+        {
+          "text": "Atlas Type"
+        },
+        {
+          "text": "Orbit Labs"
+        },
+        {
+          "text": "Rowan & Co"
+        }
+      ],
+      "start": 8.5,
+      "dur": 4.65
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "Ship a change<br>in <b>one click.</b>",
+      "size": 84,
+      "weight": 600,
+      "color": "var(--text)",
+      "w": 700,
+      "x": 150,
+      "y": 330,
+      "split": "word",
+      "preset": "riseClip",
+      "dist": 20,
+      "stagger": 0.03,
+      "each": 0.28,
+      "start": 13.2,
+      "duration": 11.35,
+      "exitDur": 0.4,
+      "critical": true
+    },
+    {
+      "type": "block",
+      "block": "browserFrame",
+      "x": 972,
+      "y": 200,
+      "w": 820,
+      "h": 620,
+      "url": "meridian.example",
+      "start": 13.6,
+      "dur": 10.95,
+      "children": [
+        {
+          "type": "group",
+          "layout": "column",
+          "items": "stretch",
+          "gap": 10,
+          "pad": "22px 12px 6px",
+          "children": [
+            {
+              "type": "text",
+              "text": "Release 24.8",
+              "size": 40,
+              "weight": 600,
+              "color": "var(--text)"
+            },
+            {
+              "type": "text",
+              "text": "3 services · 41 commits · reviewed",
+              "size": 22,
+              "weight": 400,
+              "color": "var(--dim)"
+            }
+          ]
+        },
+        {
+          "type": "block",
+          "block": "checklist",
+          "w": 740,
+          "items": [
+            {
+              "text": "Build passed on all targets",
+              "done": true
+            },
+            {
+              "text": "Migrations applied",
+              "done": true
+            },
+            {
+              "text": "Canary at 10% traffic",
+              "done": true
+            },
+            {
+              "text": "Roll out to everyone",
+              "done": false
+            }
+          ],
+          "start": 14.4,
+          "dur": 9.4
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "Review, canary and full rollout are one timeline.<br>Every step is reversible, and every step is logged.",
+      "size": 27,
+      "weight": 400,
+      "color": "var(--text-2)",
+      "w": 700,
+      "x": 152,
+      "y": 660,
+      "start": 14.6,
+      "duration": 9.95,
+      "anim": "fade",
+      "enterDur": 0.45,
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "SHIPPED LAST YEAR",
+      "font": "mono",
+      "size": 22,
+      "weight": 600,
+      "color": "var(--text-2)",
+      "tracking": "0.12em",
+      "x": 152,
+      "y": 300,
+      "start": 24.6,
+      "duration": 6.75,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "exitDur": 0.4
+    },
+    {
+      "type": "count",
+      "track": 20,
+      "id": "shippedTotal",
+      "from": 0,
+      "to": 4.8,
+      "decimals": 1,
+      "suffix": "M",
+      "size": 176,
+      "weight": 700,
+      "color": "var(--text)",
+      "w": 720,
+      "h": 200,
+      "x": 150,
+      "y": 352,
+      "countStart": 0.45,
+      "countDur": 1.4,
+      "start": 24.7,
+      "duration": 6.65,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0.4,
+      "critical": true,
+      "_ghost": "The number ARRIVES rather than fades up: a fast keyed slide, and `ghost` reads the same motion track a few frames back and draws the poses it just left. This is the layer the spectacle names, so it is the one the engine exempts from the attenuation.",
+      "motion": [
+        {
+          "t": 0.28,
+          "x": 220,
+          "y": 0
+        },
+        {
+          "t": 0.62,
+          "x": 0,
+          "y": 0,
+          "ease": "easeOutQuart"
+        },
+        {
+          "t": 6.3,
+          "x": 0,
+          "y": 0,
+          "ease": "linear"
+        }
+      ],
+      "modifiers": [
+        {
+          "ghost": {
+            "mode": "trail",
+            "k": 5,
+            "alpha": 0.42,
+            "fade": 0.62
+          }
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "deployments run through Meridian, up 38%<br>year over year, and more than double 2021.",
+      "size": 30,
+      "weight": 400,
+      "color": "var(--text-2)",
+      "w": 720,
+      "x": 152,
+      "y": 590,
+      "start": 25.1,
+      "duration": 6.25,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "exitDur": 0.4
+    },
+    {
+      "type": "block",
+      "block": "barChart",
+      "x": 950,
+      "y": 260,
+      "w": 840,
+      "h": 520,
+      "data": [
+        {
+          "label": "2021",
+          "value": 2.1
+        },
+        {
+          "label": "2022",
+          "value": 2.8
+        },
+        {
+          "label": "2023",
+          "value": 3.5
+        },
+        {
+          "label": "2024",
+          "value": 4.8
+        }
+      ],
+      "start": 25.2,
+      "dur": 6.15
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "One platform. <b>Every tool the team needs.</b>",
+      "size": 64,
+      "weight": 600,
+      "color": "var(--text)",
+      "w": 1620,
+      "align": "center",
+      "x": 150,
+      "y": 250,
+      "split": "word",
+      "preset": "blur",
+      "dist": 16,
+      "stagger": 0.028,
+      "each": 0.24,
+      "start": 31.4,
+      "duration": 7.4,
+      "exitDur": 0.4,
+      "critical": true
+    },
+    {
+      "type": "html",
+      "track": 20,
+      "id": "capGrid",
+      "becomes": "endLine",
+      "becomesDur": 0.52,
+      "becomesEase": "easeOutQuart",
+      "_becomes": "The four cards do not fade out and a headline does not fade in: the grid HANDS OVER to the closing line, which opens in the grid's own pose and shrinks into its own. `becomes` resolves the pose from the measured boxes, so retiming or resizing either side cannot drift the match (films/scene/scene.js resolveBecomes).",
+      "_parts": "Four cards used to be one `group` that faded in as a block and left as a block. As markup they keep the whole CSS surface, and `parts` hands the ENGINE the clock: one selector, an engine-driven seeked entrance per card on a stagger, and `out: true` so they leave one at a time in the direction they arrived (core/parts.js).",
+      "x": 150,
+      "y": 440,
+      "w": 1620,
+      "h": 280,
+      "start": 31.9,
+      "duration": 6.9,
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0.5,
+      "parts": [
+        {
+          "select": ".cap",
+          "anim": "riseIn",
+          "each": 0.5,
+          "stagger": 0.11,
+          "delay": 0.1,
+          "ease": "power3.out",
+          "out": true,
+          "exitDur": 0.42
+        }
+      ],
+      "html": "<div class=\"caps\"><div class=\"cap\"><div class=\"capname\" style=\"color:var(--accent)\">Deploy</div><div class=\"capsub\">Every environment, one pipeline.</div></div><div class=\"cap\"><div class=\"capname\" style=\"color:var(--text)\">Observe</div><div class=\"capsub\">Traces and logs on the same clock.</div></div><div class=\"cap\"><div class=\"capname\" style=\"color:var(--up)\">Review</div><div class=\"capsub\">Approvals that travel with the change.</div></div><div class=\"cap\"><div class=\"capname\" style=\"color:var(--down)\">Guard</div><div class=\"capsub\">Rollback in a single keystroke.</div></div></div><style>.caps{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;width:1620px}.cap{height:280px;padding:34px;box-sizing:border-box;background:var(--surface);border-radius:16px;box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;gap:14px;align-items:flex-start}.capname{font-size:40px;font-weight:700;line-height:1.05}.capsub{font-size:22px;font-weight:400;color:var(--text-2);max-width:280px;line-height:1.35}</style>"
+    },
+    {
+      "type": "svg",
+      "track": 20,
+      "id": "ctamark",
+      "x": 912,
+      "y": 300,
+      "w": 96,
+      "h": 96,
+      "viewBox": "0 0 100 100",
+      "d": "M50 8 L92 32 L50 56 L8 32 Z M50 66 L92 42 L92 54 L50 78 L8 54 L8 42 Z",
+      "fill": "var(--accent)",
+      "start": 39.2,
+      "duration": 5.8,
+      "anim": "pop",
+      "enterDur": 0.4,
+      "exitDur": 0,
+      "motion": [
+        {
+          "t": 0,
+          "y": 0
+        },
+        {
+          "t": 1.6,
+          "y": -12,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 3.2,
+          "y": 0,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 4.8,
+          "y": -12,
+          "ease": "easeInOutCubic"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "id": "endLine",
+      "text": "Start with <b>Meridian.</b>",
+      "size": 100,
+      "weight": 600,
+      "color": "var(--text)",
+      "w": 1620,
+      "align": "center",
+      "x": 150,
+      "y": 460,
+      "split": "word",
+      "preset": "up",
+      "dist": 20,
+      "stagger": 0.03,
+      "each": 0.3,
+      "start": 38.9,
+      "duration": 6.1,
+      "exitDur": 0,
+      "critical": true
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "Start now  ›",
+      "size": 27,
+      "weight": 600,
+      "color": "var(--bg)",
+      "bg": "var(--accent)",
+      "radius": 10,
+      "pad": "17px 40px",
+      "x": 810,
+      "y": 640,
+      "start": 40,
+      "duration": 5,
+      "anim": "rise",
+      "enterDur": 0.35,
+      "exitDur": 0,
+      "critical": true
+    },
+    {
+      "type": "text",
+      "track": 20,
+      "text": "meridian.example",
+      "font": "mono",
+      "size": 24,
+      "weight": 500,
+      "color": "var(--text-2)",
+      "w": 1620,
+      "align": "center",
+      "x": 150,
+      "y": 760,
+      "start": 40.3,
+      "duration": 4.7,
+      "anim": "fade",
+      "enterDur": 0.3,
+      "exitDur": 0
+    }
+  ],
+  "_bg": "Six windows, one per beat, and not one of them names a time: the engine binds window i to the joint after it, so the cuts own the numbers and retiming a beat moves the backdrop with it. Every preset is a QUIET light field on purpose. The loud light ones (blobs, gradientWash) were tried and read as big saturated pools over a white film that already carries four blurred accent discs of its own; the backdrop turning per beat has to be felt, not looked at.",
+  "bg": [
+    {
+      "preset": "dotmatrix"
+    },
+    {
+      "preset": "paperDots"
+    },
+    {
+      "preset": "paperShapes"
+    },
+    {
+      "preset": "soft"
+    },
+    {
+      "preset": "paper"
+    },
+    {
+      "preset": "dotmatrix"
+    }
+  ],
+  "transitions": [
+    {
+      "at": 7.6,
+      "mech": "cut",
+      "fx": "blur",
+      "dur": 0.34
+    },
+    {
+      "at": 12.95,
+      "mech": "cut",
+      "fx": "riseBlur",
+      "dur": 0.36
+    },
+    {
+      "at": 24.4,
+      "mech": "cut",
+      "fx": "riseBlur",
+      "dur": 0.32
+    },
+    {
+      "at": 31.2,
+      "mech": "cut",
+      "fx": "blur",
+      "dur": 0.34
+    },
+    {
+      "at": 38.8,
+      "mech": "cut",
+      "fx": "blur",
+      "dur": 0.36
+    }
+  ]
+}

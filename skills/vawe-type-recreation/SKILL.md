@@ -64,7 +64,7 @@ is the only artefact this type keeps.
 ## `make scaffold TYPE=recreation`
 
 ```bash
-make scaffold OUT=formats/scene/<name>.json TYPE=recreation DUR=11
+make scaffold OUT=films/scene/<name>.json TYPE=recreation DUR=11
 ```
 
 Composes a minimal `kineticHook -> statReveal -> ctaEnd` fallback spine (`harness/author/

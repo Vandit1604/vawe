@@ -40,7 +40,7 @@
     {
       "source": "site/public/assets/blocks/quote.customer.json",
       "url": "https://vawe.dev/assets/blocks/quote.customer.json",
-      "target": "formats/scene/quote.customer.json",
+      "target": "films/scene/quote.customer.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

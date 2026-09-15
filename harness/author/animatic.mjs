@@ -37,7 +37,7 @@ const sb = parseStoryboard(fs.readFileSync(SB, 'utf8'));
 if (!sb.beats.length) { console.error(`✗ no beats in ${SB}, beats are "## Beat N: Title (0s-6s)" headings.`); process.exit(1); }
 
 const name = path.basename(SB).replace(/\.(md|markdown)$/i, '').replace(/[^a-z0-9-]+/gi, '-').toLowerCase();
-const OUT = flag('--out') || `formats/scene/${name}.animatic.json`;
+const OUT = flag('--out') || `films/scene/${name}.animatic.json`;
 // `make animatic` renders what this writes, so it needs the path. It used to rebuild the name in shell
 // and got a different answer (`tr -c` turned basename's trailing newline into an extra dash), so the
 // render ran against a file that never existed. One derivation, asked for by name.

@@ -12,7 +12,7 @@
 // cuts/seams/stings marked, the enter/exit ramps shaded off the settled middle, and every dead-air hole
 // painted as a hazard band. It answers the question a contact sheet cannot, what is on screen WHEN.
 //
-//   make studio D=formats/scene/<file>.json [PORT=8799]
+//   make studio D=films/scene/<file>.json [PORT=8799]
 //     → open the printed URL, leave it running (Ctrl-C to stop).
 //
 // DEV TOOLING ONLY. It does not touch the renderer or the determinism contract; it just calls the engine's
@@ -35,7 +35,7 @@ import { extractKitBlock } from '../harness/lib/stagekit.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataArg = process.env.D || process.argv[2];
-if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: make studio D=formats/scene/<file>.json [PORT=8799]'); process.exit(2); }
+if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: make studio D=films/scene/<file>.json [PORT=8799]'); process.exit(2); }
 const dataUrl = '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/');
 // The film's theme, read once. The plan pane previews every fragment on it, and a fragment previewed
 // on the wrong palette is a different picture with no warning (engine-doctrine/MISTAKES.md #382).
@@ -377,7 +377,7 @@ async function buildStrip() {
   const { page, close } = await launchPage({ width: VW, height: VH, scale: Math.min(1, 132 / VH) });
   const frames = [], samples = [];
   try {
-    await page.goto(`http://127.0.0.1:${PORT}/formats/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}`,
+    await page.goto(`http://127.0.0.1:${PORT}/films/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}`,
       { waitUntil: 'load' });
     const err = await waitForEngine(page, { timeout: 40000, throwOnTimeout: false });
     if (err) return { error: `the scene will not boot, so there are no frames to strip: ${err}` };
@@ -733,14 +733,14 @@ const studioRoutes = (req, res) => {
   }
 
   // ---- a fragment's own parts, for the inside view: what `[data-part]` it exposes to author motion on.
-  // Restricted to formats/, and to a path that resolves inside the repo, same guard as /__frag: this is
+  // Restricted to films/, and to a path that resolves inside the repo, same guard as /__frag: this is
   // the one route that takes a path from the browser and reads a file with it.
   if (url === '/api/fragment') {
     const reply = (o, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(o)); };
     const rel = new URL(req.url, 'http://x').searchParams.get('src') || '';
-    const formatsRoot = path.join(REPO_ROOT, 'formats') + path.sep;
+    const formatsRoot = path.join(REPO_ROOT, 'films') + path.sep;
     const file = path.resolve(REPO_ROOT, rel);
-    if (!rel || !file.startsWith(formatsRoot) || !fs.existsSync(file)) return reply({ ok: false, error: 'no such fragment under formats/' }, 404), true;
+    if (!rel || !file.startsWith(formatsRoot) || !fs.existsSync(file)) return reply({ ok: false, error: 'no such fragment under films/' }, 404), true;
     try {
       const raw = fs.readFileSync(file, 'utf8');
       const parts = [...raw.matchAll(/<[^>]*\bdata-part=["']([^"']+)["'][^>]*>/g)].map((m) =>

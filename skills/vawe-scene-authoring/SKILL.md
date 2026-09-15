@@ -1,6 +1,6 @@
 ---
 name: vawe-scene-authoring
-description: How to author good-looking, well-spaced, well-animated Vawe scenes (formats/<name>/scene.html) and data JSON. Use when creating or editing a format's scene HTML/CSS, adding animations, integrating images, or fixing spacing. Covers the renderFrame(n) purity contract, design tokens, motion primitives, the image/visual system, and the QA loop.
+description: How to author good-looking, well-spaced, well-animated Vawe scenes (films/<name>/scene.html) and data JSON. Use when creating or editing a format's scene HTML/CSS, adding animations, integrating images, or fixing spacing. Covers the renderFrame(n) purity contract, design tokens, motion primitives, the image/visual system, and the QA loop.
 codes: canvas-order-dependent, purity-forward-mismatch, purity-render-order
 ---
 
@@ -114,14 +114,14 @@ the purity contract. Use these closed-form, pure-in-`n` helpers instead:
 
 **Standard beat structure:** hook → enter (rise/pop in) → hold/guess → reveal (pop + count-up) →
 hold → exit. Count-ups: `setVal(el, value * interpolate(t,[r0,r1],[0,1],{easing:easeOutQuart}))`.
-`formats/scene/scene.html` is the reference. Test primitives with `make lib-test`.
+`films/scene/scene.html` is the reference. Test primitives with `make lib-test`.
 
 ## Images & visuals: real first, emoji last
 
 Order of preference (CLAUDE.md): **real licensed image → generated card → emoji**. Never embed
 copyrighted media (posters/stills/album art) in a published video.
 
-- **Auto-source:** `make assets D=formats/<fmt>/<topic>.json`, fills missing icons: country→flag
+- **Auto-source:** `make assets D=films/<fmt>/<topic>.json`, fills missing icons: country→flag
   (flagcdn, PD), brand→logo (simple-icons, free), else a generated topic card. Dry-run by default;
   `WRITE=1` to apply.
 - **Topic cards (any subject):** `node harness/media/cards.mjs "Quantum Computing" --sub "…"` → a designed

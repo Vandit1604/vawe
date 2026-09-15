@@ -8,7 +8,7 @@
 // backdrop root, a stacking context, a flattening group) cuts that reach. CSS reports nothing: the
 // declaration stays on the element, the browser keeps painting, and the capability simply stops.
 //
-// THE BUG THAT PAID FOR THIS FILE. `formats/scene/vawe-glass-hero.json` puts a refracting lens over a
+// THE BUG THAT PAID FOR THIS FILE. `films/scene/vawe-glass-hero.json` puts a refracting lens over a
 // hard black horizon, and the whole film is that one bend. Its `blur` cut writes `filter: blur(...)`
 // onto the scene root (core/cuts.js), which makes the root a BACKDROP ROOT, so for a third of a second
 // the lens sampled an empty backdrop and the horizon ran dead straight through the glass. No error, no

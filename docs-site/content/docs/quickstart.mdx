@@ -32,27 +32,27 @@ This produces `bin/vawe`. The `make build` step also runs `make fonts`, which pu
 
 ```bash
 make list                        # show the scene module + its schema and sample
-./bin/vawe formats/scene/sample.json
+./bin/vawe films/scene/sample.json
 # → out/sample.mp4
 ```
 
 Or through make, which is the same thing with a friendlier name:
 
 ```bash
-make video D=formats/scene/sample.json
+make video D=films/scene/sample.json
 ```
 
 Add `--draft` for a fast render with no film grain while you iterate:
 
 ```bash
-./bin/vawe formats/scene/sample.json --draft
+./bin/vawe films/scene/sample.json --draft
 ```
 
 ## Write your first scene
 
-Every scene is a JSON file that starts with `"module": "scene"`. Save new videos as `formats/scene/<topic>.json`. Here is a complete, minimal one:
+Every scene is a JSON file that starts with `"module": "scene"`. Save new videos as `films/scene/<topic>.json`. Here is a complete, minimal one:
 
-```json title="formats/scene/hello.json"
+```json title="films/scene/hello.json"
 {
   "module": "scene",
   "orientation": "landscape",
@@ -78,7 +78,7 @@ Every scene is a JSON file that starts with `"module": "scene"`. Save new videos
 Render it:
 
 ```bash
-make video D=formats/scene/hello.json
+make video D=films/scene/hello.json
 ```
 
 You just wrote a scene with one [text layer](/docs/layers#text) that splits its headline into words and rises each one into place, staggered in reading order. The `theme` sets the palette, fonts, and motion personality; `pin: "center"` places the layer in the middle of whatever aspect you render.
@@ -92,7 +92,7 @@ On-screen copy cannot contain em-dashes. The [validator](/docs/quality-gates#val
 Once you have a scene, the rhythm is: render, look, fix, repeat.
 
 ```bash
-make video D=formats/scene/hello.json     # render
+make video D=films/scene/hello.json     # render
 make look M=scene                          # storyboard the key frames
 make audit                                 # overlap, contrast, safe-zone
 ```

@@ -5,7 +5,7 @@
 // `beats.mjs` had them, `styleframes.mjs` was about to have them again, and a second copy is how the
 // two drift until one of them is quietly capturing at the wrong scale.
 //
-//   const page = await openScene('formats/scene/x.json', { scale: 2 });
+//   const page = await openScene('films/scene/x.json', { scale: 2 });
 //   await page.grab(3.2, '/tmp/a.png');   // seconds → PNG
 //   await page.close();
 //
@@ -25,7 +25,7 @@ export async function openScene(dataArg, opts = {}) {
   const fps = opts.fps ?? 30;
   const data = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
   const format = data.module;
-  if (!format || !fs.existsSync(path.join(ROOT, 'formats', format, 'scene.html'))) {
+  if (!format || !fs.existsSync(path.join(ROOT, 'films', format, 'scene.html'))) {
     throw new Error(`unknown module "${format}" in ${dataArg}`);
   }
   const dataUrl = '/' + path.relative(ROOT, path.resolve(dataArg)).split(path.sep).join('/');
@@ -36,7 +36,7 @@ export async function openScene(dataArg, opts = {}) {
   const { browser, page } = await launchPage({ width: VW, height: VH, scale,
     args: ['--no-sandbox', '--hide-scrollbars', '--force-color-profile=srgb', '--font-render-hinting=none',
       `--force-device-scale-factor=${scale}`] });
-  await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/films/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}`, { waitUntil: 'load' });
   const err = await waitForEngine(page);
   if (err) { await browser.close(); server.close(); throw new Error(`SCENE ERROR: ${err}`); }
   const meta = await page.evaluate(() => window.__engine.meta);

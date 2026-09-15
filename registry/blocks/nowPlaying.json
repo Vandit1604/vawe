@@ -47,7 +47,7 @@
     {
       "source": "site/public/assets/blocks/nowPlaying.json",
       "url": "https://vawe.dev/assets/blocks/nowPlaying.json",
-      "target": "formats/scene/nowPlaying.json",
+      "target": "films/scene/nowPlaying.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

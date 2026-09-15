@@ -59,7 +59,7 @@
     {
       "source": "site/public/assets/blocks/kanban.json",
       "url": "https://vawe.dev/assets/blocks/kanban.json",
-      "target": "formats/scene/kanban.json",
+      "target": "films/scene/kanban.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

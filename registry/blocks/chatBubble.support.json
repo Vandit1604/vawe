@@ -49,7 +49,7 @@
     {
       "source": "site/public/assets/blocks/chatBubble.support.json",
       "url": "https://vawe.dev/assets/blocks/chatBubble.support.json",
-      "target": "formats/scene/chatBubble.support.json",
+      "target": "films/scene/chatBubble.support.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

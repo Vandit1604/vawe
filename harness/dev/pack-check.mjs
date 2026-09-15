@@ -22,10 +22,10 @@ const MAX_MB = 25; // fits the engine + fonts with headroom; the demo reel alone
 // future edit that drops one gets an error explaining the consequence rather than a bare path.
 const REQUIRED = [
   ['cli/vawe.mjs', 'the bin entry point, without it `npx vawe` resolves to nothing'],
-  ['formats/scene/scene.html', 'the render page the Go binary serves'],
-  ['formats/scene/scene.js', 'scene.html loads this by URL; a missing file is a blank render'],
-  ['formats/scene/schema.json', 'validate.mjs reads it at boot; absent means every scene is refused'],
-  ['formats/scene/sample.json', 'the one scene a new user can render before writing their own'],
+  ['films/scene/scene.html', 'the render page the Go binary serves'],
+  ['films/scene/scene.js', 'scene.html loads this by URL; a missing file is a blank render'],
+  ['films/scene/schema.json', 'validate.mjs reads it at boot; absent means every scene is refused'],
+  ['films/scene/sample.json', 'the one scene a new user can render before writing their own'],
   ['core/engine/boot.js', 'the engine entry the page imports'],
   ['core/validate/validate.mjs', 'the loud refusals; shipping without it turns errors into silent wrong output'],
   ['harness/author/expand-blocks.mjs', 'block/beat/comp sugar is expanded here, NOT by the renderer'],

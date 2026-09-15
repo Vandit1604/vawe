@@ -20,7 +20,7 @@
 // downgrades content into instructions, and nothing here upgrades it into safety.
 
 // So embedding elements go, not just scripts. Defence in depth, not the whole defence: the file server
-// should ALSO refuse anything outside core/themes/formats/assets. Both, because either alone is one
+// should ALSO refuse anything outside core/themes/films/assets. Both, because either alone is one
 // mistake away from leaking.
 const EMBEDDING = 'script|iframe|object|embed|frame|frameset|portal|link|meta|base';
 const EMBED = new RegExp(`<\\s*(${EMBEDDING})\\b[\\s\\S]*?(?:<\\/\\s*\\1\\s*>|>)`, 'gi');
@@ -30,7 +30,7 @@ const EMBED_CLOSE = new RegExp(`<\\s*\\/\\s*(?:${EMBEDDING})\\s*>`, 'gi');
 // The render server's own allowlist (internal/scene/scene.go's `served`), duplicated here because the
 // two have to agree: a path this sanitiser lets through and the server then 404s is a blank layer with
 // no error; a path the server would serve and this strips is the bug below.
-const SERVED_ROOTS = ['core/', 'themes/', 'formats/', 'assets/', '.vawe-data/scenes/', '.vawe-data/uploads/'];
+const SERVED_ROOTS = ['core/', 'themes/', 'films/', 'assets/', '.vawe-data/scenes/', '.vawe-data/uploads/'];
 const isServedPath = (p) => {
   const c = p.replace(/^\/+/, '');
   return SERVED_ROOTS.some((r) => c === r.slice(0, -1) || c.startsWith(r));
@@ -112,7 +112,7 @@ export function htmlSource(o, table, where) {
   if (got == null)
     throw new Error(`${where}: html fragment "${o.src}" was never loaded. `
       + `Either the file does not exist, or its path is outside the roots the render server allows `
-      + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
+      + `(core/, themes/, films/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
   return got;
 }
 

@@ -49,7 +49,7 @@ Uncommitted working note. Three of the seven effects in `engine-doctrine/CRAFT/S
 against how practitioners actually build them. Every claim about our code names a file and a line that
 was opened. Numbers were re-measured here, not quoted from the demand sheet.
 
-Population for the adoption counts: the 161 files in `formats/scene/` with `module == "scene"`
+Population for the adoption counts: the 161 files in `films/scene/` with `module == "scene"`
 (`schema.json` excluded). That is the raw directory, not the 134 gate-visible set CLAUDE.md quotes, so
 the counts here are an upper bound.
 
@@ -80,7 +80,7 @@ Two implementations, and they do not share a dial.
   the DOM index `i`, always. Defaults resolved at `core/tracks/units.js:26`: `stagger` falls through to
   `kit.M.stagger`, which is `DEFAULT_MOTION.stagger = 0.045` (`core/motion/motion.js:881`), and `each`
   defaults to 0.5s.
-- `parts`: `formats/scene/scene.js:517` hands the spec to `gsap.fromTo` with
+- `parts`: `films/scene/scene.js:517` hands the spec to `gsap.fromTo` with
   `duration: p.each ?? 0.5, stagger: p.stagger ?? 0.07, ease: power3.out, delay: layer.start + (p.delay ?? 0.1)`.
 - `core/motion/effector.js:107` is a different primitive (falloff from a moving point, `radius` 300,
   `falloff: "smooth"`), correctly described in its own header as the thing a stagger cannot express.
@@ -124,9 +124,9 @@ future consumer read:
   the same wall time. This is what the two scenes above hand-computed.
 
 For `parts` the fix is nearly free and is documentation plus validation, not code: GSAP already accepts
-`{ each, from, amount, grid }` in the `stagger` slot, so `formats/scene/scene.js:517` passes an object
+`{ each, from, amount, grid }` in the `stagger` slot, so `films/scene/scene.js:517` passes an object
 straight through today. Nothing says so and nothing validates it, which is the undocumented-capability
-shape this repo logs. `formats/scene/schema.json` carries `stagger` as a bare name with no type.
+shape this repo logs. `films/scene/schema.json` carries `stagger` as a bare name with no type.
 
 ### The step somebody would not guess
 
@@ -322,7 +322,7 @@ range rather than repairing a wrong.
 
 Scope: rows 6, 8, 9 and 10 of [`SAAS-MOTION-DEMAND.md`](SAAS-MOTION-DEMAND.md). All four are marked
 **SHIPPED** there. Three of the four are not at parity. Adoption counts below are `grep -l` over the
-170 files in `formats/scene/*.json` on this machine.
+170 files in `films/scene/*.json` on this machine.
 
 Every claim about our code names a file and a line I opened. Where a source publishes no number I say
 so rather than inventing one.
@@ -356,7 +356,7 @@ https://genkicomp.gumroad.com/l/GenKiParallaxer
 Two separate implementations.
 
 **The DOM one.** `core/fx/plane.js:122` writes `translate: 0 0 <z>px` on the layer element, under a
-camera rig whose default lens is 1600px (`formats/scene/scene.js:1080`, `persp: 1600`). Named depths at
+camera rig whose default lens is 1600px (`films/scene/scene.js:1080`, `persp: 1600`). Named depths at
 `core/fx/plane.js:158`: `far -0.75`, `back -0.375`, `front 0.15`, `near 0.28`, all fractions of the live
 lens, so `back` under the 1600px default is z = -600 and is drawn at 0.73x. `depthZ`
 (`core/fx/plane.js:183`) prints the magnification of every name in its own refusal. `--plane-z` makes the

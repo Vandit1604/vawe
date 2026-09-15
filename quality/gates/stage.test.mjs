@@ -7,7 +7,7 @@
 // film's CURRENT state as a fixture, because a real film's state is the one thing this repo promises
 // will keep changing.
 //
-// Fixtures live under formats/scene/ (stageOf resolves a bare name to that directory) with a
+// Fixtures live under films/scene/ (stageOf resolves a bare name to that directory) with a
 // `stagetest-` prefix, and `after()` deletes every one of them whether a test passed or not.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,7 +19,7 @@ import { stageOf } from './stage.mjs';
 import { firstCommand } from './next.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENES = path.join(ROOT, 'formats/scene');
+const SCENES = path.join(ROOT, 'films/scene');
 const abs = (rel) => path.join(SCENES, rel);
 
 const written = [];
@@ -48,7 +48,7 @@ function passingStoryboard(name, { approved = false, layers = false } = {}) {
     '',
     '## 1. hook (0.0-2.0)',
     '- type: html',
-    `- fragment: formats/scene/${frag1}`,
+    `- fragment: films/scene/${frag1}`,
     '- onscreen: "one line"',
     '- why: "opens on the claim, before the film has earned anything else"',
     '- becomes: "the claim becomes the proof"',
@@ -56,7 +56,7 @@ function passingStoryboard(name, { approved = false, layers = false } = {}) {
     '',
     '## 2. proof (2.0-4.0)',
     '- type: html',
-    `- fragment: formats/scene/${frag2}`,
+    `- fragment: films/scene/${frag2}`,
     '- onscreen: "one number"',
     '- why: "pays off the claim the first beat opened"',
     '- becomes: "the proof becomes the close"',
@@ -110,7 +110,7 @@ test('stage 4, design: approved, and a beat names a fragment that does not exist
     '',
     '## 1. hook (0.0-2.0)',
     '- type: html',
-    '- fragment: formats/scene/_stagetest-design.hook.html',
+    '- fragment: films/scene/_stagetest-design.hook.html',
     '- onscreen: "one line"',
     '- why: "opens on the claim, before the film has earned anything else"',
     '- becomes: "the claim becomes the proof"',
@@ -118,7 +118,7 @@ test('stage 4, design: approved, and a beat names a fragment that does not exist
     '',
     '## 2. proof (2.0-4.0)',
     '- type: html',
-    '- fragment: formats/scene/_stagetest-design.proof.html',
+    '- fragment: films/scene/_stagetest-design.proof.html',
     '- onscreen: "one number"',
     '- why: "pays off the claim the first beat opened"',
     '- becomes: "the proof becomes the close"',

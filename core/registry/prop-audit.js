@@ -67,7 +67,7 @@ export function watchedTree(p, out = []) {
 import { LAYER_PROPS } from '../layers/index.js';
 import { SHARED_PROPS } from '../layers/vocabulary.js';
 import { PROPS as KIT_PROPS } from '../layers/util.js';
-import { PROPS as ORCHESTRATOR_PROPS } from '../../formats/scene/props.js';
+import { PROPS as ORCHESTRATOR_PROPS } from '../../films/scene/props.js';
 import { TRACK_PROPS } from '../tracks/index.js';
 import { PROPS as BOOT_PROPS } from '../engine/boot.js';
 import { PROPS as PAN_PROPS } from '../timeline/pan-resolve.mjs';

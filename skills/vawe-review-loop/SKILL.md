@@ -29,10 +29,10 @@ So the loop always has two halves, and skipping the second is the failure mode i
 Run rounds until the stopping rule fires. One round is:
 
 ```bash
-make ship  D=formats/scene/<film>.json     # author-check → render → audit → seams
-make judge D=formats/scene/<film>.json     # writes /tmp/judge/sheet.png + the rubric
-make beats D=formats/scene/<film>.json     # per beat: first/mid/last
-make reveal D=formats/scene/<film>.json    # per beat: the ENTER arc, settled, the EXIT arc
+make ship  D=films/scene/<film>.json     # author-check → render → audit → seams
+make judge D=films/scene/<film>.json     # writes /tmp/judge/sheet.png + the rubric
+make beats D=films/scene/<film>.json     # per beat: first/mid/last
+make reveal D=films/scene/<film>.json    # per beat: the ENTER arc, settled, the EXIT arc
 ```
 
 Then **READ the sheets**. Producing an image is not looking at one. Score every frame on the seven
@@ -82,7 +82,7 @@ sign-off:
 
 ```js
 import { writeReceipt } from './harness/lib/receipt.mjs';
-writeReceipt('review', 'formats/scene/<film>.json', { round: 3, lowest: 4, stopped: 'done' });
+writeReceipt('review', 'films/scene/<film>.json', { round: 3, lowest: 4, stopped: 'done' });
 ```
 
 `make beats` and `make reveal` already write theirs, and `beat-check` fails `beats-unseen` when the scene

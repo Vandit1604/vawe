@@ -64,7 +64,7 @@
     {
       "source": "site/public/assets/blocks/codeFlight.json",
       "url": "https://vawe.dev/assets/blocks/codeFlight.json",
-      "target": "formats/scene/codeFlight.json",
+      "target": "films/scene/codeFlight.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

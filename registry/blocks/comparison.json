@@ -53,7 +53,7 @@
     {
       "source": "site/public/assets/blocks/comparison.json",
       "url": "https://vawe.dev/assets/blocks/comparison.json",
-      "target": "formats/scene/comparison.json",
+      "target": "films/scene/comparison.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

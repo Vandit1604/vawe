@@ -73,7 +73,7 @@
     {
       "source": "site/public/assets/blocks/searchEngine.home.json",
       "url": "https://vawe.dev/assets/blocks/searchEngine.home.json",
-      "target": "formats/scene/searchEngine.home.json",
+      "target": "films/scene/searchEngine.home.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

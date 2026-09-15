@@ -91,7 +91,7 @@ directly, and the build-step failure this section described can no longer happen
 longer exists for an author to skip, even though the engine still performs it, just never in the JSON
 the author reads or writes.
 
-The fourth, `cameraMove`, was written into `data.cameraMove` and read by nobody: `formats/scene/scene.js`
+The fourth, `cameraMove`, was written into `data.cameraMove` and read by nobody: `films/scene/scene.js`
 reads `data.camera`. So an author who wrote a camera move and rendered without expanding got no camera
 and no error. It now bakes at boot (`bakeCameraMove` in `core/engine/produce.js`, also called from
 `core/engine/expand.js` for the Node consumers that never reach `core/engine/boot.js`), and `core/engine/boot.js` THROWS if

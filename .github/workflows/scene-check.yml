@@ -16,9 +16,9 @@ name: author-check (changed scenes)
 on:
   push:
     branches: [main]
-    paths: ["formats/scene/**.json"]
+    paths: ["films/scene/**.json"]
   pull_request:
-    paths: ["formats/scene/**.json"]
+    paths: ["films/scene/**.json"]
   workflow_dispatch:
     inputs:
       taste:
@@ -73,11 +73,11 @@ jobs:
             base="$(git rev-parse HEAD~1)"
           fi
           : > scenes.txt
-          git diff --name-only --diff-filter=ACMR "$base" "$GITHUB_SHA" -- 'formats/scene/*.json' \
+          git diff --name-only --diff-filter=ACMR "$base" "$GITHUB_SHA" -- 'films/scene/*.json' \
             > candidates.txt || true
           while IFS= read -r f; do
             [ -n "$f" ] && [ -f "$f" ] || continue
-            # A file under formats/scene/ is not automatically a film: the examples registry and the
+            # A file under films/scene/ is not automatically a film: the examples registry and the
             # intent sidecars live there too, and the ladder has nothing to say about either.
             if node -e 'const fs=require("fs");let m;try{m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")).module}catch{};process.exit(m==="scene"?0:1)' "$f"; then
               echo "$f" >> scenes.txt

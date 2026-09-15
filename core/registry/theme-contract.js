@@ -96,7 +96,7 @@ export function themeErrors(theme, { parseColor, contrastRatio } = {}) {
 import { defineRegistry } from './registry.js';
 
 // `cues` used to be an eighth key here (a fixed per-theme audio-cue list). Deleted: `buildSfx`
-// (formats/scene/scene.js:1593-1602) already derives every cue from `CUT_CUE`/`SEAM_CUE`, keyed on the
+// (films/scene/scene.js:1593-1602) already derives every cue from `CUT_CUE`/`SEAM_CUE`, keyed on the
 // transition actually used at each joint, so a fixed list cannot say which cue replaces which. A film
 // changes its cut family beat to beat; the cue has to follow the cut, not a brand-wide preference.
 const LOOK_KEY_ENTRIES = { backdrop: 'backdrop', scale: 'scale', layout: 'layout', marks: 'marks', cuts: 'cuts', field: 'field' };

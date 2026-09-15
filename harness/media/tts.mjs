@@ -3,9 +3,9 @@
 // engine already mixes VO (audio.go: `vo` + `voWords`, ducks the music under speech), this is the missing
 // generation half, adapted from another engine' Step 3.1 to a local model.
 //
-//   node harness/media/tts.mjs --script narration.txt --out formats/scene/myvideo.vo [--voice Samantha]
+//   node harness/media/tts.mjs --script narration.txt --out films/scene/myvideo.vo [--voice Samantha]
 //   node harness/media/tts.mjs --text "Line one.\nLine two." --out out/vo
-//   make tts SCRIPT=narration.txt OUT=formats/scene/myvideo.vo VOICE=Samantha
+//   make tts SCRIPT=narration.txt OUT=films/scene/myvideo.vo VOICE=Samantha
 //
 // Writes <out>.wav (the VO) and <out>.words.json ([{w,t}], the voWords format captions read). Each
 // non-empty line of the script is one caption UNIT: it is synthesized separately so line boundaries are

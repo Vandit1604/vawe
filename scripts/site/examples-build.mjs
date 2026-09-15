@@ -11,9 +11,9 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const run = (cmd, args) => execFileSync(cmd, args, { cwd: repoRoot, stdio: 'inherit' });
 
-const reg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats/scene/examples.json'), 'utf8'));
+const reg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films/scene/examples.json'), 'utf8'));
 for (const it of reg.examples || []) {
-  const source = path.join('formats/scene', it.source);
+  const source = path.join('films/scene', it.source);
   const scene = JSON.parse(fs.readFileSync(path.join(repoRoot, source), 'utf8'));
   let target = source;
   if (it.video.endsWith('.beatsync.mp4')) {

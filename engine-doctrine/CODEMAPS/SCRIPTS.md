@@ -152,12 +152,12 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `mistakes.mjs` | 244 | yes | harness/author/mistakes.mjs: ASK the mistake log instead of reading it. |
 | `animatic.mjs` | 224 | yes | harness/author/animatic.mjs: cut the picture to the sound, before building the film. |
 | `fonts-discover.mjs` | 221 | yes | fonts-discover.mjs: surface typefaces this repo has never used. A pure data query over the Google |
-| `build-thread.mjs` | 206 | no | harness/author/build-thread.mjs: generate formats/scene/thread.json. |
+| `build-thread.mjs` | 206 | no | harness/author/build-thread.mjs: generate films/scene/thread.json. |
 | `sfx-catalog.mjs` | 198 | yes | harness/author/sfx-catalog.mjs: generate engine-doctrine/CRAFT/SFX-CATALOG.md from core/audio-kit.mjs's own |
 | `build-cadence.mjs` | 196 | no | build-cadence.mjs: a 5-second launch clip for a made-up product, authored in the higgsfield |
-| `llms-txt.mjs` | 196 | yes | harness/author/llms-txt.mjs: GENERATE formats/llms.txt, a portable vocabulary primer for any agent |
+| `llms-txt.mjs` | 196 | yes | harness/author/llms-txt.mjs: GENERATE films/llms.txt, a portable vocabulary primer for any agent |
 | `storyboard-parse.mjs` | 195 | no | storyboard-parse: ONE reader for the storyboard contract (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md). |
-| `build-onefile.mjs` | 185 | no | harness/author/build-onefile.mjs: generate formats/scene/onefile.json. |
+| `build-onefile.mjs` | 185 | no | harness/author/build-onefile.mjs: generate films/scene/onefile.json. |
 | `preview-fragment.mjs` | 185 | yes | preview-fragment.mjs: the "is this HTML doing what I want?" loop. Author a hand-written fragment |
 | `claims.mjs` | 172 | yes | harness/author/claims.mjs: check this repo's doctrine against the films it claims to describe. |
 | `build-cadence-film.mjs` | 167 | no | build-cadence-film.mjs: 15s, three dense 5s beats joined by TWO transitions, one invisible and one |
@@ -168,12 +168,12 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `measure-motion.mjs` | 154 | yes | measure-motion.mjs: MEASURE a transition's real motion from a video, and name it in OUR vocabulary. |
 | `script.mjs` | 154 | yes | harness/author/script.mjs: the WORDS, as a two-column AV script, checked before a picture exists. |
 | `styleframes.mjs` | 153 | yes | harness/author/styleframes.mjs: the LOOK, settled and signed off, before the motion is trusted. |
-| `build-glass.mjs` | 148 | no | harness/author/build-glass.mjs: generate formats/scene/glass.json. |
+| `build-glass.mjs` | 148 | no | harness/author/build-glass.mjs: generate films/scene/glass.json. |
 | `beats.mjs` | 146 | yes | beats.mjs: verify a video BEAT BY BEAT before you trust it. Renders the first / mid / last frame of |
 | `route.mjs` | 142 | yes | harness/author/route.mjs: DELIVERABLE-AWARE ROUTING. A request maps to one of a few vawe |
 | `capture-scene.mjs` | 141 | yes | capture-scene.mjs: capture an ANIMATED site section as PARTS, so the engine can re-stage the |
 | `type-spines.mjs` | 141 | no | harness/author/type-spines.mjs: one beat spine per VIDEO TYPE, read by `scaffold.mjs --type <type>`. |
-| `build-zerochrome.mjs` | 137 | no | harness/author/build-zerochrome.mjs: generate formats/scene/zerochrome.json. |
+| `build-zerochrome.mjs` | 137 | no | harness/author/build-zerochrome.mjs: generate films/scene/zerochrome.json. |
 | `transition-preview.mjs` | 131 | yes | transition-preview.mjs: SEE a transition before you author it. Renders a canned two-beat scene |
 | `treatment.mjs` | 128 | yes | harness/author/treatment.mjs: WHY THIS FILM LOOKS LIKE THIS, written down while the answer is known. |
 | `coverage-reel.mjs` | 127 | yes | coverage-reel.mjs: build a reel that renders whatever nothing else renders. |
@@ -186,7 +186,7 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `reimagine.mjs` | 102 | no | harness/author/reimagine.mjs: rebuild the flagged beats through the taste library. Run once. |
 | `lightfield.mjs` | 101 | yes | harness/author/lightfield.mjs: generate a light field from the command line. |
 | `profiles.mjs` | 93 | no | harness/author/profiles.mjs: THE REFERENCE PROFILES, as data. |
-| `build-keyframe.mjs` | 88 | no | Builds formats/scene/keyframe.json: a film about keyed motion that IS keyed motion. |
+| `build-keyframe.mjs` | 88 | no | Builds films/scene/keyframe.json: a film about keyed motion that IS keyed motion. |
 | `cinematic.mjs` | 81 | yes | cinematic.mjs. The CINEMATIC MOTION director. Real launch films are never static: a continuous |
 | `sheets.mjs` | 80 | yes | sheets.mjs, BOTH review contact sheets from ONE browser, and the rule that keeps them honest. |
 | `recency.mjs` | 79 | no | recency.mjs: which named things are NEW? Read out of git, never out of a list. |
@@ -194,7 +194,7 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `argus.mjs` | 75 | no | harness/author/argus.mjs: composes the argushq.cc launch teaser (landscape 16:9) from the taste library + |
 | `filmstrip.mjs` | 75 | yes | filmstrip.mjs, SEE a whole video efficiently: extract frames and pack them into a few dense, |
 | `capture-motion.mjs` | 74 | yes | capture-motion.mjs: WATCH a real element animate and emit a motion track our engine can replay. |
-| `build-orbit.mjs` | 68 | no | harness/author/build-orbit.mjs: generate formats/scene/orbit-proof.json. |
+| `build-orbit.mjs` | 68 | no | harness/author/build-orbit.mjs: generate films/scene/orbit-proof.json. |
 | `scene-page.mjs` | 57 | no | harness/author/scene-page.mjs: open a scene in a headless browser and hand back a frame grabber. |
 | `approve.mjs` | 53 | yes | harness/author/approve.mjs: write the USER's signature onto a film's plan. |
 | `captions.mjs` | 52 | yes | captions.mjs: burn muted-social subtitles onto a video with zero hand-timing. Splits a script into |
@@ -246,7 +246,7 @@ LOOK. Nothing here changes a film. The previews, the contact sheets, the experim
 | `worktree.sh` | 85 | no | harness/dev/worktree.sh: make a git worktree usable by an agent, in about a second. |
 | `bar-probe.mjs` | 78 | no | harness/dev/bar-probe.mjs: PROVE the continuous subject is actually drawn, by counting pixels. |
 | `pack-check.mjs` | 78 | no | harness/dev/pack-check.mjs: refuse to publish a package that cannot render, or that carries the |
-| `hfgap-probe.mjs` | 71 | no | harness/dev/hfgap-probe.mjs: writes formats/scene/_probe-hfgap.json. |
+| `hfgap-probe.mjs` | 71 | no | harness/dev/hfgap-probe.mjs: writes films/scene/_probe-hfgap.json. |
 | `no-emdash.mjs` | 68 | yes | harness/dev/no-emdash.mjs: refuse the em dash anywhere the repo writes prose. |
 | `chrome-pin.sh` | 62 | yes | harness/dev/chrome-pin.sh <target-name>: resolve, pin, and RECORD the Chrome build a render uses. |
 | `prompt-eval.sh` | 57 | no | prompt-eval.sh: ablate ONE section of AGENTS.md and measure what the JSON does differently. |

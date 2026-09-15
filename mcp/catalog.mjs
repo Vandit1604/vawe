@@ -6,7 +6,7 @@ import path from 'node:path';
 import { repoRoot } from './pipeline.mjs';
 import { KNOBS } from '../core/registry/knobs.js';
 
-// A curated shortlist, not everything in formats/. Each teaches a different structure an author
+// A curated shortlist, not everything in films/. Each teaches a different structure an author
 // reaches for, and each is self-contained. Returning the JSON is safe: a scene is authoring guidance,
 // and the vocabulary it uses is already public.
 const EXAMPLES = [
@@ -18,12 +18,12 @@ const EXAMPLES = [
 ];
 
 export function examples() {
-  return EXAMPLES.filter((e) => fs.existsSync(path.join(repoRoot, 'formats/scene', `${e.name}.json`)));
+  return EXAMPLES.filter((e) => fs.existsSync(path.join(repoRoot, 'films/scene', `${e.name}.json`)));
 }
 
 export function example(name) {
   const clean = String(name || '').replace(/[^a-z0-9-]/gi, '');
-  const file = path.join(repoRoot, 'formats/scene', `${clean}.json`);
+  const file = path.join(repoRoot, 'films/scene', `${clean}.json`);
   if (!EXAMPLES.some((e) => e.name === clean) || !fs.existsSync(file)) return null;
   return fs.readFileSync(file, 'utf8');
 }

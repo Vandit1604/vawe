@@ -5,7 +5,7 @@
 //   node harness/author/track.mjs drift --dur 3 --amp 12
 //   node harness/author/track.mjs enter --from 40 --dur 0.9
 //   node harness/author/track.mjs pan --to -600 --dur 1.25 --offset 0.12   # weld a rider to the same pan
-//   … --scene formats/scene/x.json --layer 4                               # write it, surgically
+//   … --scene films/scene/x.json --layer 4                               # write it, surgically
 //
 // WHY THIS EXISTS, and why studio's keyframe mode is not it. `engine-doctrine/CRAFT/KEYED-MOTION.md` says the
 // thing that stopped anyone placing dense keys was the cost of placing them, and it fixed that by

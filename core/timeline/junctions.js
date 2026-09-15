@@ -360,7 +360,7 @@ export function chooseCutStyles(joints, layers, opts = {}) {
 // "to" }`), used to live here: bindMatchesToJunctions retimed both layers onto the joint and handed
 // the handover to `becomes`, so the boundary had one copy of its number instead of three (the cut's
 // `t`, the outgoing layer's `duration`, the incoming layer's `start`). It measured exactly ONE use
-// across the whole library (formats/scene/showcase-cuts.json) against `becomes`'s dozen-plus, and its
+// across the whole library (films/scene/showcase-cuts.json) against `becomes`'s dozen-plus, and its
 // entire value-add over writing `becomes`/`duration`/`start` by hand was that one convenience, on one
 // scene. Removed as a two-owner mechanism: `becomes` is the one way to say "this layer becomes that
 // one" now. showcase-cuts.json was rewritten to declare `becomes` directly (engine-doctrine/MISTAKES.md #364-adjacent).

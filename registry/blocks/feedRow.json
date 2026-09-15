@@ -46,7 +46,7 @@
     {
       "source": "site/public/assets/blocks/feedRow.json",
       "url": "https://vawe.dev/assets/blocks/feedRow.json",
-      "target": "formats/scene/feedRow.json",
+      "target": "films/scene/feedRow.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

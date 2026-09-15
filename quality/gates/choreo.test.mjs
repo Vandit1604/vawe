@@ -74,7 +74,7 @@ test('a short film under the 6s minimum is quiet regardless of coverage', () => 
 });
 
 test('v1 (vawe-flow.json) does not false-fire', () => {
-  const r = spawnSync(process.execPath, [path.join(here, 'choreo.mjs'), 'formats/scene/vawe-flow.json', '--json'],
+  const r = spawnSync(process.execPath, [path.join(here, 'choreo.mjs'), 'films/scene/vawe-flow.json', '--json'],
     { cwd: ROOT, encoding: 'utf8' });
   assert.equal(r.status, 0, r.stdout + r.stderr);
   const text = [r.stdout, r.stderr].find((s) => s && s.includes('"slug"')) || r.stdout;

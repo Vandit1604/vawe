@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/motion-floor.mjs: DOES THE FILM EVER STOP, and is what fills the gaps real?
 //
-//   make motion-floor D=formats/scene/<film>.json   ·   node quality/gates/motion-floor.mjs <film> [--json]
+//   make motion-floor D=films/scene/<film>.json   ·   node quality/gates/motion-floor.mjs <film> [--json]
 //
 // WHY THIS AND NOT THE THREE GATES THAT ALREADY TOUCH MOTION. `direction-floor` counts FAMILIES, so a
 // film with four families and six dead seconds passes it. `sweep-static` asks whether the WHOLE film is
@@ -9,7 +9,7 @@
 // was. None of them can see a hole, and `internal/scene/scene.go:926` says why in its own comment:
 // "48 evenly spaced probes measure velocity at 48 random instants, not motion over time".
 //
-// Measured on formats/scene/together-recreation.json against the film it recreates: the reference has
+// Measured on films/scene/together-recreation.json against the film it recreates: the reference has
 // ZERO windows below 0.2 across 19.8s and ours had TEN, including one dead stretch of 2.5 seconds.
 //
 // ── THE PART THAT MATTERS: THIS CANNOT BE SATISFIED BY ADDING AMBIENT MOTION ────────────────────────
@@ -488,13 +488,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 
   const arg = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
-  if (!arg) { console.error('usage: make motion-floor D=formats/scene/<film>.json [--pre]'); process.exit(2); }
+  if (!arg) { console.error('usage: make motion-floor D=films/scene/<film>.json [--pre]'); process.exit(2); }
   const base = String(arg).replace(/\.json$/, '');
   const slug = path.basename(base);
   const pre = process.argv.includes('--pre');
   const mp4 = path.join(ROOT, 'out', slug + '.mp4');
 
-  const sbPath = [base + '.storyboard.md', path.join(ROOT, 'formats/scene', slug + '.storyboard.md')]
+  const sbPath = [base + '.storyboard.md', path.join(ROOT, 'films/scene', slug + '.storyboard.md')]
     .map((f) => path.resolve(ROOT, f)).find((f) => fs.existsSync(f));
   const storyboard = sbPath ? fs.readFileSync(sbPath, 'utf8') : '';
   const typingRanges = typingWindows(storyboard);

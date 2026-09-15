@@ -58,7 +58,7 @@
     {
       "source": "site/public/assets/blocks/logoWall.json",
       "url": "https://vawe.dev/assets/blocks/logoWall.json",
-      "target": "formats/scene/logoWall.json",
+      "target": "films/scene/logoWall.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

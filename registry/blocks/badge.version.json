@@ -40,7 +40,7 @@
     {
       "source": "site/public/assets/blocks/badge.version.json",
       "url": "https://vawe.dev/assets/blocks/badge.version.json",
-      "target": "formats/scene/badge.version.json",
+      "target": "films/scene/badge.version.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

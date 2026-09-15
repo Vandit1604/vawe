@@ -261,7 +261,7 @@ for (const rel of FILES) {
     let scene = null;
     try { scene = JSON.parse(m[1]); } catch (e) { fail(`the STARTER scene is not valid JSON: ${e.message}`); }
     if (scene) {
-      const schemaPath = path.join(root, 'formats', scene.module || 'scene', 'schema.json');
+      const schemaPath = path.join(root, 'films', scene.module || 'scene', 'schema.json');
       const schema = fs.existsSync(schemaPath) ? JSON.parse(fs.readFileSync(schemaPath, 'utf8')) : null;
       for (const err of validateAll(schema, scene)) fail(err);
     }

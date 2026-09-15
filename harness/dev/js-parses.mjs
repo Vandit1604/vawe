@@ -16,9 +16,9 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-// Browser-served source, not node modules: core/ and formats/ are fetched and evaluated by the page,
+// Browser-served source, not node modules: core/ and films/ are fetched and evaluated by the page,
 // studio/ui/ is served to the studio shell. A .mjs under harness/ is node's problem and node reports it.
-const ROOTS = ['core', 'formats/scene', 'studio/ui', 'blocks', 'blueprints'];
+const ROOTS = ['core', 'films/scene', 'studio/ui', 'blocks', 'blueprints'];
 const SKIP = /node_modules|\.test\.mjs$/;
 
 const files = [];

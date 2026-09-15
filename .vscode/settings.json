@@ -1,8 +1,8 @@
 {
   "json.schemas": [
     {
-      "fileMatch": ["formats/scene/!(schema).json"],
-      "url": "./formats/scene/schema.json"
+      "fileMatch": ["films/scene/!(schema).json"],
+      "url": "./films/scene/schema.json"
     }
   ]
 }

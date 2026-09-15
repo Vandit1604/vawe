@@ -67,7 +67,7 @@ recording; either way, get its word-timing sidecar before writing captions by ha
 ## `make scaffold TYPE=talking-head`
 
 ```bash
-make scaffold OUT=formats/scene/<name>.json TYPE=talking-head DUR=12
+make scaffold OUT=films/scene/<name>.json TYPE=talking-head DUR=12
 ```
 
 Composes `blurResolveHook -> containerFill -> statReveal -> ctaEnd` (`harness/author/type-spines.mjs`),

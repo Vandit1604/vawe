@@ -38,7 +38,7 @@
     {
       "source": "site/public/assets/blocks/keyboard.json",
       "url": "https://vawe.dev/assets/blocks/keyboard.json",
-      "target": "formats/scene/keyboard.json",
+      "target": "films/scene/keyboard.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

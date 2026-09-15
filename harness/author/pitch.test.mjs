@@ -11,7 +11,7 @@ const STAGE = 'pitch';
 // The subject lives OUTSIDE quality/baselines/approved/pitch/ on purpose: the receipt for a subject named
 // "x" is written to quality/baselines/approved/pitch/x.json, so a subject placed in that same directory would
 // collide with its own receipt.
-const subject = path.join(ROOT, 'formats/scene/_pitch-selfcheck.json');
+const subject = path.join(ROOT, 'films/scene/_pitch-selfcheck.json');
 const receiptFile = path.join(ROOT, 'quality/baselines/approved/pitch/_pitch-selfcheck.json');
 
 fs.mkdirSync(path.dirname(subject), { recursive: true });

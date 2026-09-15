@@ -74,7 +74,7 @@
     {
       "source": "site/public/assets/blocks/splitScreen.pip.json",
       "url": "https://vawe.dev/assets/blocks/splitScreen.pip.json",
-      "target": "formats/scene/splitScreen.pip.json",
+      "target": "films/scene/splitScreen.pip.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

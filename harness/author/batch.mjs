@@ -15,7 +15,7 @@ if (!tpl || !dataPath) { console.error('usage: node harness/author/batch.mjs <te
 
 const template = fs.readFileSync(tpl, 'utf8');
 const rows = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-const outDir = 'formats/scene/_batch'; fs.mkdirSync(outDir, { recursive: true });
+const outDir = 'films/scene/_batch'; fs.mkdirSync(outDir, { recursive: true });
 const sub = (s, row) => s.replace(/\{\{(\w+)\}\}/g, (_, k) => (k in row ? String(row[k]) : `{{${k}}}`));
 const expand = (d) => { const layers = []; for (const l of d.layers || []) {
   if (l.type === 'block') { const { type, block, ...o } = l; layers.push(...B.BLOCKS[block](o)); } else layers.push(l);

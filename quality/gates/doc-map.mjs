@@ -102,7 +102,7 @@ const CRAFT_ALSO = [{
   label: '[`vawe-continuous-action`](../../skills/vawe-continuous-action/SKILL.md) (skill)',
   group: 'crosscutting',
   when: 'planning a short product film (≤ ~15s) whose subject really is one thing changing, pick it from FILM-STRUCTURE.md first, it is one device of about eighteen',
-  answers: 'the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make intent` already eat. Worked from `higgsfield.mp4` + `formats/scene/higgsfield-recreation.json`.',
+  answers: 'the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make intent` already eat. Worked from `higgsfield.mp4` + `films/scene/higgsfield-recreation.json`.',
 }];
 
 const GROUPS = [
@@ -301,7 +301,7 @@ const CODE_EXCLUDE = new Map([
   ['blind-check', 'layer-props.mjs\'s own self-check that its shared-prop declarations have not been gutted; failing this is a bug in the gate\'s inputs'],
   ['silent-fallback', 'silent-fallback.mjs: a hand-indexed object with a default in engine JS, bypassing defineRegistry, an engine-JS linter'],
   ['stale-waiver', 'silent-fallback.mjs: a waiver in the gate itself matches no code any more, gate-file hygiene'],
-  ['schema-doc-mismatch', 'schema-drift: formats/scene/schema.json prop docs vs what the engine actually reads, engine bookkeeping'],
+  ['schema-doc-mismatch', 'schema-drift: films/scene/schema.json prop docs vs what the engine actually reads, engine bookkeeping'],
   ['schema-engine-prop-missing', 'schema-drift: the engine reads a prop schema.json never declared, engine bookkeeping'],
   ['schema-enum-drift', 'schema-drift: a schema enum vs the engine\'s real implemented values, engine bookkeeping'],
   ['schema-layerprops-stale', 'schema-drift: the generated per-type prop table is stale, run its own --write'],

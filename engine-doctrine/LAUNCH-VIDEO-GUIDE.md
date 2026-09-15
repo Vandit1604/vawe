@@ -37,5 +37,5 @@ make palette   IMG=assets/brands/<brand>/sections/01-*.png   # eyedrop the hero 
 ## References
 - Primitive vocabulary: **`engine-doctrine/PRIMITIVES.md`**  ·  Motion rules: **`engine-doctrine/MOTION-CRAFT.md`**
 - Design knowledge (backgrounds, transitions, plain-vs-busy): **`engine-doctrine/DESIGN-DATABASE.md`**
-- Worked example: `formats/scene/linear-launch.json` (reflects linear.app section-by-section).
+- Worked example: `films/scene/linear-launch.json` (reflects linear.app section-by-section).
 - Landscape 1920×1080 for launch videos (`"orientation": "landscape"`).

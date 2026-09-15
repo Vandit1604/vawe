@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// harness/dev/hfgap-probe.mjs: writes formats/scene/_probe-hfgap.json.
+// harness/dev/hfgap-probe.mjs: writes films/scene/_probe-hfgap.json.
 //
 // It BAKES the blocks/vfx.mjs factories to concrete layers rather than emitting `{"type":"block"}`
 // sugar, because vfx.mjs is not wired into blocks/index.mjs yet (a registry refactor owns that file).
@@ -65,6 +65,6 @@ const scene = {
   bg: [{ preset: dark ? 'dark' : 'paper', from: 0, to: duration }],
   layers,
 };
-const out = path.join(root, 'formats/scene/_probe-hfgap.json');
+const out = path.join(root, 'films/scene/_probe-hfgap.json');
 fs.writeFileSync(out, JSON.stringify(scene, null, 2) + '\n');
 console.log(`_probe-hfgap.json · theme ${theme} (${dark ? 'dark' : 'light'}) · ${layers.length} layers · ${duration}s`);

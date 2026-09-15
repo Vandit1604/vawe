@@ -4,7 +4,7 @@ import { useSceneEngine } from "../../components/useSceneEngine";
 
 /* One specimen, rendered LIVE by the real engine.
  *
- * Not a CSS reproduction of the preset. The site already ships core/ and formats/scene/scene.html
+ * Not a CSS reproduction of the preset. The site already ships core/ and films/scene/scene.html
  * (scripts/site/site-engine.mjs copies them into public/), so this boots the same renderFrame(n) the
  * Go renderer drives and plays the same scene JSON the poster was shot from. A hand-copied CSS
  * version of `decode` or `riseClip` would look right until the day the preset changed, and nothing

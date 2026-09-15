@@ -192,7 +192,7 @@ Treat any confident decision framework on this topic, including Part 4 below, as
 
 `no-continuous-object` came from one reference. The `vawe-continuous-action` skill states its own
 provenance: "The reference in this repo (`higgsfield.mp4`, first 5 seconds, recreated in
-`formats/scene/higgsfield-recreation.json`) is not a sequence of beats. It is one continuous action." The
+`films/scene/higgsfield-recreation.json`) is not a sequence of beats. It is one continuous action." The
 gate generalised that single sample into a floor for every film under 15 seconds
 (`CONTINUITY_MAX_DUR = 15` in `quality/gates/direction-floor.mjs:134`).
 
@@ -222,7 +222,7 @@ must be.
 
 **The measurable cost.** The gate rewards the cheapest satisfying answer, because the cheapest answer is
 the only one it can see. A keyed `w`/`h` on a rectangle passes. A motif does not. Eighteen short films in
-`formats/scene/` carry an explicit `no-continuous-object` waiver, and three consecutive films were one
+`films/scene/` carry an explicit `no-continuous-object` waiver, and three consecutive films were one
 rectangle changing size and passed everything. That is the shape of a gate teaching a habit rather than
 catching a defect. CLAUDE.md 2a001 already says so; this page adds the reason. **The gate did not merely
 fail to see the alternatives. It made one alternative free and all the others expensive.**

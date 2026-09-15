@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { population, LIBRARY } from '../lib/census.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENES = path.join(ROOT, 'formats/scene');
+const SCENES = path.join(ROOT, 'films/scene');
 
 // WHAT COUNTS AS A PICTURE, stated rather than assumed. CLAUDE.md's own worked example is brew, 16 of
 // 35 layers, and it reaches 16 as 11 image + 5 html, so `html` counts and the effect layers do not.

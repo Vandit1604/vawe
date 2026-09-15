@@ -273,7 +273,7 @@ override any layer's emphasis colour with `emColor`.
   frame and usable inside `calc()`: `transform: rotate(calc(var(--t) * 12deg))`. CSS `animation` and
   `transition` are disabled engine-wide (`core/tokens.css`) because a frame is seeked, not played, the
   validator rejects them by name rather than let them render a dead still. Example:
-  `formats/scene/example-html-bg.json`.
+  `films/scene/example-html-bg.json`.
 
 ### Customization knobs (added July 2026: most primitives take overrides now)
 The primitives ship rich defaults but expose their knobs to the JSON; reach for these instead of
@@ -428,7 +428,7 @@ The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-d
   site's animation with windows/cuts (`component` + `part:"p1"`). Re-type text by overlaying our
   own `type`-preset layer. Icons/dots must be DOM shapes, never out-of-face glyphs.
 
-## The open canvas (`formats/scene/`)
+## The open canvas (`films/scene/`)
 
 **Each primitive lives in its own file**: `core/layers/<type>.js`, exporting `build(kit, el, L)` (DOM)
 and optionally `frame(kit, el, L, t, scene)` (per-frame). `scene` is a frozen read-only view of the rest
@@ -613,7 +613,7 @@ edge, dur}]` eases onto a named layer's LIVE box, arriving exactly at `t` even i
 moving; refused by name for an unknown `id`. Drag: `carry: [{from, to, id}]`, all on the cursor's own
 clock, bound at boot (`core/engine/produce.js`) onto the dragged layer's own `follow`, windowed to
 `[from, to]`; refused for an unknown `id` or one already following something else.
-Schema: `formats/scene/schema.json`. **Ask it what is legal at a path rather than reading it:**
+Schema: `films/scene/schema.json`. **Ask it what is legal at a path rather than reading it:**
 `make schema AT='layers[].motion[]'` prints every field there with its type, its written label and,
 where the field takes a named vocabulary, which registry owns it. No `AT` prints the top-level shape.
 

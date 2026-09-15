@@ -54,7 +54,7 @@
     {
       "source": "site/public/assets/blocks/codeDiff.json",
       "url": "https://vawe.dev/assets/blocks/codeDiff.json",
-      "target": "formats/scene/codeDiff.json",
+      "target": "films/scene/codeDiff.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

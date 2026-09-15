@@ -14,10 +14,10 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const GATES_DIR = path.join(ROOT, 'quality', 'gates');
-const SCENE_DIR = path.join(ROOT, 'formats', 'scene');
+const SCENE_DIR = path.join(ROOT, 'films', 'scene');
 const TIMEOUT_MS = Number(process.env.GATE_CENSUS_TIMEOUT_MS || 15_000);
 
-// ---- discover authored films: a formats/scene/<name>.json with a matching <name>.storyboard.md ----
+// ---- discover authored films: a films/scene/<name>.json with a matching <name>.storyboard.md ----
 function authoredFilms() {
   const files = fs.readdirSync(SCENE_DIR);
   const storyboards = new Set(files.filter((f) => f.endsWith('.storyboard.md')).map((f) => f.slice(0, -('.storyboard.md'.length))));
@@ -32,7 +32,7 @@ function authoredFilms() {
 // silent-drift heuristic this repo warns against elsewhere (findings.mjs, engine-doctrine/MISTAKES.md #401).
 const LIBRARIES = ['beats-of.mjs', 'block-schema.mjs', 'paths.mjs', 'rubric.mjs', 'scene-timing.mjs', 'snap-signature.mjs', 'tile.mjs'];
 
-// film: single positional arg is a formats/scene/<name>.json path (a few need a second literal arg).
+// film: single positional arg is a films/scene/<name>.json path (a few need a second literal arg).
 const FILM_CHECKS = {
   'asset-check.mjs': (f) => [f],
   'audio-check.mjs': (f) => [f],
@@ -65,7 +65,7 @@ const FILM_CHECKS = {
   'waiver-drift.mjs': (f) => [f],
   'next.mjs': (f) => [f],
   'study-check.mjs': (f, name) => [name],
-  'storyboard-check.mjs': (_f, name) => [path.join('formats', 'scene', `${name}.storyboard.md`)],
+  'storyboard-check.mjs': (_f, name) => [path.join('films', 'scene', `${name}.storyboard.md`)],
 };
 
 // repo: no film argument, scans the whole tree once.
@@ -163,7 +163,7 @@ function main() {
     if (FILM_CHECKS[file]) {
       const runs = [];
       for (const name of films) {
-        const filmJson = path.join('formats', 'scene', `${name}.json`);
+        const filmJson = path.join('films', 'scene', `${name}.json`);
         const args = FILM_CHECKS[file](filmJson, name);
         const r = runOnce(file, args);
         runs.push({ name, ...r });

@@ -1,7 +1,7 @@
 // core/parts.js. The `parts` vocabulary: named entrances for the SUB-ELEMENTS of a hand-authored
 // html/svg layer. A figure grows its bars, then draws its line, then pops its dots.
 //
-// It lived inline inside formats/scene/scene.js's build path until engine-doctrine/MISTAKES.md #355. That is why it
+// It lived inline inside films/scene/scene.js's build path until engine-doctrine/MISTAKES.md #355. That is why it
 // was the only vocabulary in the engine with no catalogue entry, no blurb map and no gate: nothing could
 // import it to enumerate it. It also resolved `PARTS[p.anim] || PARTS.fadeUp`, so a mistyped part
 // entrance silently faded up - the eighth instance of that pattern found in one sweep.

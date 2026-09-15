@@ -119,7 +119,7 @@ const WINDUP_FRAMES = 3;
 
 // entranceWarp(el, enterDur): the layer's two dials → one warp function, or null when it set neither.
 // Read off the dataset like every other clip input, so clipStyleAt stays a pure function of t and of
-// attributes written once at build (formats/scene/scene.js setLayerTiming).
+// attributes written once at build (films/scene/scene.js setLayerTiming).
 export function entranceWarp(el, enterDur) {
   const aRaw = el.dataset.anticipate, oRaw = el.dataset.overshoot;
   if (aRaw == null && oRaw == null) return null;
@@ -149,7 +149,7 @@ export const BASE_ENTER = 0.3, BASE_EXIT = 0.26;
 // Two functions rather than one returning a pair: this runs for every clip on every frame, and an
 // object literal here is an allocation the render pays ~50,000 times a minute of video.
 export const enterDurOf = (el) => (el.dataset.enter != null ? parseFloat(el.dataset.enter) : BASE_ENTER);
-// NO DEFAULT FADE-OUT (engine-doctrine/MISTAKES.md, "four hands on one layer's life"). formats/scene/scene.js
+// NO DEFAULT FADE-OUT (engine-doctrine/MISTAKES.md, "four hands on one layer's life"). films/scene/scene.js
 // (setLayerTiming) only writes `data-exitDur` for a layer that named an `out`, or one that named
 // `exitDur` itself; a layer with neither holds to its own end. If this function still handed back
 // BASE_EXIT whenever the attribute was absent, that silence would have been undone right here: the
@@ -173,7 +173,7 @@ export const opacityEnvelope = (enterT, exitT = 0) =>
 // error says where the name does live. See core/registry.js and engine-doctrine/MISTAKES.md #355.
 // ABSENCE and a WRONG NAME are different questions, and the old `ANIM[name] || fade` answered both with
 // `fade`. A layer that declares no anim is simply PRESENT for its window (`none`, not `fade`, see
-// `anim` default in formats/scene/scene.js `setLayerTiming`); a layer that names one the engine does
+// `anim` default in films/scene/scene.js `setLayerTiming`); a layer that names one the engine does
 // not have is a mistake. Splitting them is the whole point - and collapsing them is what let five
 // layers in three shipped scenes ask for an entrance that does not exist and get a cross-fade instead.
 const resolveAnim = (name) => (name == null ? ANIM.none : ANIM_REGISTRY.pick(name));
@@ -205,7 +205,7 @@ const asExit = (fn, exitT) => fn(1 - clamp01(exitT));
 // render first. Frozen because the array is the scene's timing contract, not a scratch list.
 //
 // NOTHING in this engine legitimately adds a clip after build, and that is a checked claim, not an
-// assumption: every writer of `dataset.start` runs at build time (formats/scene/scene.js
+// assumption: every writer of `dataset.start` runs at build time (films/scene/scene.js
 // `setLayerTiming` for a top-level layer, core/layers/util.js `addGroupChild` for a group child). If a
 // future feature ever does need to add one. A beat materialised mid-film, a lazily built sub-scene.
 // It must call collectClips again and hand driveClips the new array, rather than reinstating the live
@@ -243,7 +243,7 @@ const TF_RESET = Object.freeze({ transform: 'none' });
 // wants. Anything that reasons ABOUT motion (a ghost that needs the pose an entrance ago, a cut that
 // reads how fast the outgoing layer was travelling) needs the pose at two times at once.
 //
-// PURE: reads only el.dataset, which is written at build time (formats/scene/scene.js `setLayerTiming`,
+// PURE: reads only el.dataset, which is written at build time (films/scene/scene.js `setLayerTiming`,
 // core/layers/util.js `addGroupChild`), and writes nothing.
 export function clipStyleAt(el, t) {
   const start = parseFloat(el.dataset.start) || 0;

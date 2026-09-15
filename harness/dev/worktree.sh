@@ -38,7 +38,7 @@ mkdir -p "$WT/bin" && ln -sf "$ROOT/bin/vawe" "$WT/bin/vawe" 2>/dev/null || true
 ln -sfn "$ROOT/.vawe-data" "$WT/.vawe-data" 2>/dev/null || true
 # COPIED, because they get edited, AND DRIVEN FROM .worktreeinclude, not from a second list.
 #
-# This loop used to be its own hand-written list: assets/fonts/local, formats/scene/*.json, and each
+# This loop used to be its own hand-written list: assets/fonts/local, films/scene/*.json, and each
 # brand's components/scenes/photos. `.worktreeinclude` meanwhile asked for `assets/fonts/*.woff2`,
 # `assets/brands/**` and `assets/cutouts/**` as well, with a comment on each explaining which silent
 # failure it prevents. The script did not implement its own manifest, so every worktree made here was

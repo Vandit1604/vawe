@@ -228,7 +228,7 @@ across them.
 | retime a whole move without reshaping it (roving keyframes) | nothing | **NO PARITY**, and correct: roving is spatial-only |
 
 **The measurement that matters most, and it is not about a missing feature.** Across the 166
-`module: "scene"` files in `formats/scene/`, containing 2838 layers:
+`module: "scene"` files in `films/scene/`, containing 2838 layers:
 
 | | count |
 |---|---|
@@ -238,7 +238,7 @@ across them.
 | tracks using `ease: "through"` | **0** |
 | tracks stating `influence` as a number | **0** (only the named handles are ever used) |
 
-Re-run: the script is four lines of `node -e` over `formats/scene/*.json`; the counts above were taken
+Re-run: the script is four lines of `node -e` over `films/scene/*.json`; the counts above were taken
 on 2026-09-02.
 
 **So the answer to the question CLAUDE.md asks is uncomfortable.** The engine gained full AE graph-editor

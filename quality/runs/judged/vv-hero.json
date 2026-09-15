@@ -19,7 +19,7 @@
     },
     {
       "position": "RIGHT",
-      "input": "formats/scene/hero-site.json",
+      "input": "films/scene/hero-site.json",
       "mp4": "out/hero-site.mp4",
       "sceneHash": "3ff6ecebfca60572eb35a4f82c49697f6aa58db60867e680e7504cc3a0848db2",
       "allow": [],
@@ -31,7 +31,7 @@
   ],
   "result": {
     "winner": "RIGHT",
-    "winnerArm": "formats/scene/hero-site.json",
+    "winnerArm": "films/scene/hero-site.json",
     "confidence": "DECISIVE",
     "tally": {
       "LEFT": 0,
@@ -63,7 +63,7 @@
       "no",
       "no"
     ],
-    "formats/scene/hero-site.json": [
+    "films/scene/hero-site.json": [
       "yes",
       "yes",
       "yes"

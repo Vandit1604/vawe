@@ -220,7 +220,7 @@ resort: if the bad value has a write site, the refusal goes there and the class 
   layer instead. And a group child's own <code>start</code> / <code>duration</code> are read off the
   group and the child's discarded, which 49 children across 13 films do today: warned in the validator,
   not refused, because honouring an absolute start would let a child outlive the group containing it.</p>
-  <div class="ev"><b>fix</b> · <span class="m">formats/scene/scene.js</span>,
+  <div class="ev"><b>fix</b> · <span class="m">films/scene/scene.js</span>,
   <span class="m">core/validate/validate.mjs</span>, pinned in <span class="m">lint-test</span> in both
   directions, with the asserts watched failing.</div>
 </div>
@@ -298,12 +298,12 @@ resort: if the bad value has a write site, the refusal goes there and the class 
 <h2><span class="n">Today</span>What changed while this was written</h2>
 <div class="scroll"><table>
 <tr><th>change</th><th>where</th><th>effect</th></tr>
-<tr><td>The layer lifecycle gained its third phase</td><td class="m">core/motion/motion.js · formats/scene/scene.js</td><td><code>clipStyleAt</code> computes an entrance ramp and an exit ramp and has no branch for the middle, so stillness was never a decision, it was the shape of the data model. <span class="m">motionDefaults</span> now carries <span class="m">idle</span>, resolved layer → scene → theme → engine default.</td></tr>
+<tr><td>The layer lifecycle gained its third phase</td><td class="m">core/motion/motion.js · films/scene/scene.js</td><td><code>clipStyleAt</code> computes an entrance ramp and an exit ramp and has no branch for the middle, so stillness was never a decision, it was the shape of the data model. <span class="m">motionDefaults</span> now carries <span class="m">idle</span>, resolved layer → scene → theme → engine default.</td></tr>
 <tr><td>The transform accumulator is emptied every frame</td><td class="m">core/timeline/clips.js</td><td>Fixes an order-dependence older than the idle. See the board.</td></tr>
 <tr><td>The aurora family got the motion knob it never had</td><td class="m">core/backgrounds/index.js</td><td>aurora 0.14 → 1.31, mesh 0.12 → 1.02. Amplitude and period move together, or the field sloshes.</td></tr>
 <tr><td>Every render reports how much of it moves</td><td class="m">internal/scene · internal/render</td><td><span class="m">78% still, motion 0.30</span> beside the duration. It refuses nothing.</td></tr>
 <tr><td>A new layer type: <span class="m">adjust</span></td><td class="m">core/layers/adjust.js</td><td>One grade over everything with a lower <code>track</code>. Five kinds plus a raw filter, keyed through the existing <code>vars</code> track.</td></tr>
-<tr><td>Relative time, three holes closed</td><td class="m">formats/scene/scene.js · core/validate/validate.mjs</td><td>The resolver walks the whole tree, two invented defaults became refusals, and a group child's discarded window is warned.</td></tr>
+<tr><td>Relative time, three holes closed</td><td class="m">films/scene/scene.js · core/validate/validate.mjs</td><td>The resolver walks the whole tree, two invented defaults became refusals, and a group child's discarded window is warned.</td></tr>
 <tr><td>A tracked snapshot digest</td><td class="m">quality/baselines/snap/digest.json</td><td>4.2KB of sha256, so CI can answer whether a scene moved.</td></tr>
 <tr><td><span class="m">make census</span> · preflight's NOT REACHED FOR</td><td class="m">harness/lib/census.mjs · quality/gates/preflight.mjs</td><td>Populations by name; capabilities this film declines, with the library's share beside each.</td></tr>
 </table></div>

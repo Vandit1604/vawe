@@ -42,7 +42,7 @@ const card = (rot = `rotate:0 1 0 ${RY}deg;`) => `
     </div>
   </div>`;
 
-// FLAT, exactly what formats/scene/scene.js writes today: lens on #cam (tilt), camera as a 2D
+// FLAT, exactly what films/scene/scene.js writes today: lens on #cam (tilt), camera as a 2D
 // transform on that same #cam.
 const flat = (camTf) => `
   <div id="root" style="position:absolute;inset:0;overflow:hidden">

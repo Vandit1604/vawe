@@ -22,19 +22,19 @@ const f = gateFindings();
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const format = process.argv[2];
 const dataArg = process.argv[3];
-if (!format || !fs.existsSync(path.join(repoRoot, 'formats', format, 'scene.html'))) {
+if (!format || !fs.existsSync(path.join(repoRoot, 'films', format, 'scene.html'))) {
   console.error('usage: node quality/gates/probe-purity.mjs <format> [data.json]');
-  console.error('formats:', fs.readdirSync(path.join(repoRoot, 'formats')).join(', '));
+  console.error('formats:', fs.readdirSync(path.join(repoRoot, 'films')).join(', '));
   process.exit(2);
 }
 const dataUrl = dataArg
   ? '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/')
-  : `/formats/${format}/sample.json`;
+  : `/films/${format}/sample.json`;
 
 const { server, port } = await serveRepo();
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
-const url = `http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`;
+const url = `http://127.0.0.1:${port}/films/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`;
 const openPage = async () => {
   const p = await browser.newPage();
   await p.goto(url, { waitUntil: 'load' });

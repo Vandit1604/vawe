@@ -9,10 +9,10 @@
 # absent from the context until somebody says otherwise, and the failure mode of forgetting is a build
 # that stops with "not found" instead of one that quietly grows.
 #
-#   Dockerfile      (the site + docs apps) — themes core formats/scene assets/{icons,vendor,brands,plinth}
+#   Dockerfile      (the site + docs apps) — themes core films/scene assets/{icons,vendor,brands,plinth}
 #                   scripts site docs-site docker-start.sh
 #   Dockerfile.cli  (the renderer)         — go.mod go.sum cmd internal cli core blocks
-#                   themes assets/vendor harness/author/expand-blocks.mjs formats/scene CREDITS.md LICENSE-FAQ.md
+#                   themes assets/vendor harness/author/expand-blocks.mjs films/scene CREDITS.md LICENSE-FAQ.md
 #
 # EDITING THIS FILE: add a COPY, add its `!` line here in the same commit. `make docker-check` builds
 # the context and prints what is in it.
@@ -26,7 +26,7 @@
 !cli
 # The whole scene directory, not just the page: scene.html loads scene.js and scene.css, and shipping
 # only the page put a dead engine in production behind a 200.
-!formats/scene
+!films/scene
 # The site COPYs scripts/ whole (site-engine.mjs vendors the engine into public/).
 !scripts
 # The CLI image takes expand-blocks.mjs out of harness/author, moved out of scripts in the harness split.
@@ -56,7 +56,7 @@
 site/public/core
 site/public/themes
 site/public/engine
-site/public/formats
+site/public/films
 site/public/scripts
 
 # ── assets: the browser reaches for a handful of real files out of 59M ───────────────────────────

@@ -15,7 +15,7 @@ const words = (s) => ((s || '').toLowerCase().match(/[a-z]{3,}/g) || []).filter(
 
 /** The goldSet full films, or [] if the registry is missing/malformed. */
 export function goldFilms() {
-  const p = path.join(ROOT, 'formats/scene/examples.json');
+  const p = path.join(ROOT, 'films/scene/examples.json');
   if (!fs.existsSync(p)) return [];
   let ex; try { ex = JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return []; }
   const films = ex && ex.goldSet && ex.goldSet.fullFilms;
@@ -30,7 +30,7 @@ export function goldFilms() {
 export function nearestExemplars(feelText, n = 3) {
   const feel = new Set(words(feelText));
   const scored = goldFilms().map((f) => {
-    const sbPath = path.join(ROOT, 'formats/scene', String(f.file).replace(/\.json$/, '.storyboard.md'));
+    const sbPath = path.join(ROOT, 'films/scene', String(f.file).replace(/\.json$/, '.storyboard.md'));
     let own = [f.teaches, f.register].filter(Boolean).join(' ');
     if (fs.existsSync(sbPath)) own += ' ' + fs.readFileSync(sbPath, 'utf8').slice(0, 1200);
     const score = feel.size ? words(own).filter((w) => feel.has(w)).length : 0;
@@ -48,7 +48,7 @@ export function nearestExemplars(feelText, n = 3) {
  * exemplars carry none (they cut on bg + camera, like brew), so there is nothing to imitate there.
  */
 export function exemplarSignature(file) {
-  const p = path.join(ROOT, 'formats/scene', file);
+  const p = path.join(ROOT, 'films/scene', file);
   if (!fs.existsSync(p)) return null;
   let s; try { s = JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; }
   const bg = Array.isArray(s.bg) ? s.bg : (s.bg ? [s.bg] : []);

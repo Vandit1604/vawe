@@ -146,7 +146,7 @@ The rule resolves both directions at once, and it settles new cases without a ju
 
 **The Bookend Rule.** The Paper Rule governs *content bands*, not the whole page. The page opens and closes on a **cobalt bookend**: a full-bleed band carrying a real vawe render, with the hero editor floating over the V it cuts. This is a Committed colour strategy (one saturated colour across 30-60% of a surface), which the brand register explicitly permits and which a product this loud has earned. The white bands in between are still paper and still governed above. Two constraints are non-negotiable:
 
-- **The film is `assets/backdrop.mp4` and nothing else.** It comes from `formats/scene/site-backdrop.json`, the one contentless scene in the repo: a single ambient shader field, no text, no blocks, no cuts, no stings, `enterDur: 0` so the loop never pulses dark at its seam. Read the rest of this twice, because it has already been got wrong twice: *every other clip in `assets/` demonstrates a capability, and demonstrations contain words.* `linear-launch` carries Linear's headline. `stings.mp4` is not shader texture at all despite its name, it is the word "proof." animating. The label describes the capability being demonstrated, not what is on screen. Blurred and multiplied, either reads as drifting black smudges behind the headline. **Never pick a bookend film from its filename or its label. Open it.**
+- **The film is `assets/backdrop.mp4` and nothing else.** It comes from `films/scene/site-backdrop.json`, the one contentless scene in the repo: a single ambient shader field, no text, no blocks, no cuts, no stings, `enterDur: 0` so the loop never pulses dark at its seam. Read the rest of this twice, because it has already been got wrong twice: *every other clip in `assets/` demonstrates a capability, and demonstrations contain words.* `linear-launch` carries Linear's headline. `stings.mp4` is not shader texture at all despite its name, it is the word "proof." animating. The label describes the capability being demonstrated, not what is on screen. Blurred and multiplied, either reads as drifting black smudges behind the headline. **Never pick a bookend film from its filename or its label. Open it.**
 - **The film composites with `mix-blend-mode: multiply`, never a translucent scrim.** Text over video is a moving contrast target: a cobalt scrim over a bright frame composites to ~4:1 and silently fails AA on whichever frames happen to be light. multiply can only darken, so the band is mathematically guaranteed never to exceed cobalt's luminance, and white on it never drops below 5.17:1. Verified at 5.17 worst-case across 7,616 backdrop pixels over 8 frames. **Never swap it for soft-light / overlay / screen**. Those can lighten, and the guarantee dies silently.
 
 **The Shell Rule.** Every page is a rounded card (26px) floating on `--field`, not a document bleeding to the window edge. It frames the site the way a contact sheet frames its frames, which is the North Star made literal.
@@ -247,7 +247,7 @@ Elevation and hairlines are complements, not alternatives. Hairlines do the ever
 
 ## ui-skills: what was used on this repo's frames, and what was refused
 
-Consulted 2026-09-09 while building `formats/scene/_vawe-oblique.*.html`.
+Consulted 2026-09-09 while building `films/scene/_vawe-oblique.*.html`.
 
 **Used, both refiners rather than builders, so neither competes with the vendored `impeccable`:**
 

@@ -59,7 +59,7 @@ if (!SB || !fs.existsSync(SB)) {
   process.exit(2);
 }
 
-const OUTDIR = 'formats/scene/_concepts';
+const OUTDIR = 'films/scene/_concepts';
 const CLOSE = 0.55;                 // similarity.mjs's own "too close" line; not a new number
 const IMPROBABLE = 0.10;            // the tail line. Where the number comes from: engine-doctrine/CRAFT/SELECTION.md
 // How many of the round must be under it. RAISE ONLY: a knob that can lower this is a knob that turns

@@ -31,7 +31,7 @@ not, and `beat-check` will tell you nobody has read the current version. That ch
 ### `make beats` shows the holds
 
 ```bash
-make beats D=formats/scene/<film>.json      # → /tmp/beats/<film>.png
+make beats D=films/scene/<film>.json      # → /tmp/beats/<film>.png
 ```
 
 Three frames per beat. This is the fastest way to catch murk, an overlap, a beat that lands on nothing.
@@ -41,7 +41,7 @@ samples, everything has arrived.
 ### `make reveal` shows the arrival
 
 ```bash
-make reveal D=formats/scene/<film>.json     # → /tmp/reveal/<film>.png
+make reveal D=films/scene/<film>.json     # → /tmp/reveal/<film>.png
 ```
 
 Per beat: the enter arc, the settled frame, the exit arc, pulled from the real layer start times. This
@@ -52,7 +52,7 @@ exists because that happened here.
 ### `make studio` is the only one that moves
 
 ```bash
-make studio D=formats/scene/<film>.json
+make studio D=films/scene/<film>.json
 ```
 
 A frame scrubber (drag, step, space to play) over a timeline: one bar per layer against a seconds
@@ -62,7 +62,7 @@ dead-air hole painted as a hazard band. **The contact sheets sample. This is whe
 ### `make seam-check` is the cheapest catch for the worst bugs
 
 ```bash
-make seam-check D=formats/scene/<film>.json  # → /tmp/seams/<film>.png
+make seam-check D=films/scene/<film>.json  # → /tmp/seams/<film>.png
 ```
 
 It pulls the frames straddling every transition out of the rendered mp4 and flags a luminance flash in
@@ -72,7 +72,7 @@ This finds it in seconds.
 ### `make judge` is the scored one
 
 ```bash
-make judge D=formats/scene/<film>.json      # → /tmp/judge/sheet.png + a rubric
+make judge D=films/scene/<film>.json      # → /tmp/judge/sheet.png + a rubric
 ```
 
 Score every frame 1 to 5 on **readability, hierarchy, composition, brand fidelity, asset fidelity,

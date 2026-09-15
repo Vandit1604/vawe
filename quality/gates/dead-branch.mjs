@@ -35,7 +35,7 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 // THE SCAN SURFACE IS DISCOVERED, NOT LISTED. It used to be `['core','blocks','scripts','verify']`,
-// which is a map of where the code lived the day the gate was written. `formats/`, `sims/`, `mcp/`
+// which is a map of where the code lived the day the gate was written. `films/`, `sims/`, `mcp/`
 // and `site/` were never read, so a dead branch there was invisible by construction and the gate
 // reported "256 source files" as though that were all of them. core/props.js records the same flaw
 // turning into 1482 false findings in a sibling gate; here it produced silence instead, which is

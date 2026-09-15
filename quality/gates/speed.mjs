@@ -68,7 +68,7 @@ export function findVelocitySpikes(evalSpeed, t0, t1, fps, threshold, cutsAt = [
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const arg = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
-  if (!arg) { console.error('usage: make speed D=formats/scene/<film>.json [LAYER=<id>]'); process.exit(2); }
+  if (!arg) { console.error('usage: make speed D=films/scene/<film>.json [LAYER=<id>]'); process.exit(2); }
   const layerFilter = process.env.LAYER || null;
   const sceneFile = path.resolve(ROOT, String(arg).replace(/\.json$/, '') + '.json');
   if (!fs.existsSync(sceneFile)) { console.error(`no scene at ${sceneFile}`); process.exit(2); }

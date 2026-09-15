@@ -1,7 +1,7 @@
 ---
 name: handover-glide
 when: one layer becomes another across a cut or a beat boundary
-holds: built (formats/scene/scene.js and core/timeline/junctions.js default becomesDur 0.9, becomesEase easeInOutCubic)
+holds: built (films/scene/scene.js and core/timeline/junctions.js default becomesDur 0.9, becomesEase easeInOutCubic)
 answers: "how long a becomes handover must glide so the viewer sees the object travel, not cut"
 group: look
 ---

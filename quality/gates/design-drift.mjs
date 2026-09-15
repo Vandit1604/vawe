@@ -1,6 +1,6 @@
 // quality/gates/design-drift.mjs: EVERY FRAME OF ONE FILM AGREES ON ITS VALUES.
 //
-//   node quality/gates/design-drift.mjs formats/scene/<film>.json   ·   make design-drift D=<film>
+//   node quality/gates/design-drift.mjs films/scene/<film>.json   ·   make design-drift D=<film>
 //
 // A film with `<film>.design.md` (harness/lib/design-spec.mjs) has declared the values its frames may
 // use, on top of the stage kit's own generated ones (harness/lib/stagekit.mjs buildKit). This gate

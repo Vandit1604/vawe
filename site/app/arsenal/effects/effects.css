@@ -131,7 +131,7 @@
 #fxpanel-preview,#fxpanel-json,#fxpanel-scene{display:flex;flex-direction:column;gap:16px}
 
 /* ---- the knob panel: the family's own authoring form, one control per field, derived from the
-   snippet + formats/scene/schema.json (see [stem]/knobs.ts). Never hand-listed per family. ------- */
+   snippet + films/scene/schema.json (see [stem]/knobs.ts). Never hand-listed per family. ------- */
 .fxknobs{border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px;background:var(--bg-2)}
 .fxknobs-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
   font-family:var(--font-mono),monospace;font-size:11.5px;color:var(--muted);

@@ -1,6 +1,6 @@
 // showcase-build.mjs: emits the six capability clips the site's showcase rows play.
 //
-//   node harness/author/showcase-build.mjs        # → formats/scene/showcase-*.json
+//   node harness/author/showcase-build.mjs        # → films/scene/showcase-*.json
 //
 // THE RULE EVERY CLIP OBEYS: the capability performs itself. No clip carries an eyebrow naming what
 // it is ("kinetic typography", "shader stings"), and no clip labels its effects ("fade", "whip",
@@ -16,7 +16,7 @@ import { migrateOne } from './migrate-junctions.mjs';
 
 const T = 'vawe';
 const write = (name, scene) => {
-  fs.writeFileSync(`formats/scene/${name}.json`, JSON.stringify(migrateOne(scene).next, null, 2));
+  fs.writeFileSync(`films/scene/${name}.json`, JSON.stringify(migrateOne(scene).next, null, 2));
   console.log(`  ✓ ${name.padEnd(17)} ${String(scene.duration).padStart(4)}s  ${String(scene.layers.length).padStart(2)} layers  ${(scene.cuts || []).length} cuts  ${(scene.stings || []).length} stings`);
 };
 const txt = (o) => ({ type: 'text', ...o });

@@ -32,13 +32,13 @@ const allow = () => process.exit(0);
 // WHICH FILM DOES THIS FILE BELONG TO. Not guessable from the name alone, because this repo uses two
 // fragment conventions at once: `_vawe-oblique.frame.html` (film.part) and `_hinge-hook.html`
 // (film-part). Splitting on a separator picks the wrong film on one of them every time. So the answer
-// is not parsed, it is LOOKED UP: the longest real film in formats/scene/ whose name this file's stem
+// is not parsed, it is LOOKED UP: the longest real film in films/scene/ whose name this file's stem
 // starts with. A name cannot be ambiguous against the films that actually exist.
 const stemOf = (rel) => path.basename(rel).replace(/^_/, '')
   .replace(/\.(storyboard\.md|kit\.css|json|html|css)$/, '');
 function filmOf(rel) {
   const stem = stemOf(rel);
-  const dir = path.join(ROOT, 'formats/scene');
+  const dir = path.join(ROOT, 'films/scene');
   const films = new Set();
   for (const f of (fs.existsSync(dir) ? fs.readdirSync(dir) : [])) {
     if (f.endsWith('.storyboard.md')) films.add(f.slice(0, -'.storyboard.md'.length).replace(/^_/, ''));
@@ -61,14 +61,14 @@ process.stdin.on('end', () => {
   } catch { allow(); }
   if (!file) allow();
   const rel = path.relative(ROOT, file);
-  if (rel.startsWith('..') || !rel.startsWith('formats/scene/')) allow();
+  if (rel.startsWith('..') || !rel.startsWith('films/scene/')) allow();
 
   // 1. APPROVAL IS A HUMAN ACT. An agent that can write its own sign-off has no gate at all, only a
   //    habit. The user's /vawe-approve writes this line; nothing else may.
   if (rel.endsWith('.storyboard.md') && /^approved\s*:/m.test(text)) {
     const n = stemOf(rel);
     deny('`approved:` is the USER\'s signature on the plan and an agent may not write it. Show the plan '
-      + `with \`make studio D=formats/scene/${n}.json\` (press 1), then ask the user to run `
+      + `with \`make studio D=films/scene/${n}.json\` (press 1), then ask the user to run `
       + `\`/vawe-approve ${n}\`. AGENTS.md: nothing is rendered until the plan is LOCKED and the user signs off.`);
   }
   // A storyboard itself is always writable: it is stage 2, and denying it would deny the way out of
@@ -79,11 +79,11 @@ process.stdin.on('end', () => {
   // 2. THE ROSTER ORDER, first half: a fragment no film on disk claims has no plan behind it at all.
   if (!film) {
     if (!rel.endsWith('.html')) allow();
-    deny(`no storyboard in formats/scene/ claims ${path.basename(rel)}, so there is no plan behind this `
+    deny(`no storyboard in films/scene/ claims ${path.basename(rel)}, so there is no plan behind this `
       + 'fragment. AGENTS.md orders the deciders storyboard (1), subject (2), scene (3), and scene is the '
       + 'role that writes this file. The beat table is what decides how many fragments exist and names the '
       + 'selectors each must expose (engine-doctrine/MISTAKES.md #591).\nNext: write the storyboard first, '
-      + '`make scaffold OUT=formats/scene/<film>.json THEME=<theme> DUR=<seconds>`.');
+      + '`make scaffold OUT=films/scene/<film>.json THEME=<theme> DUR=<seconds>`.');
   }
   const p = filePaths(film);
   const st = stageOf(film);
@@ -99,7 +99,7 @@ process.stdin.on('end', () => {
 
   // 3. NO FILM BEFORE THE PLAN IS SIGNED. Writing layers is building; building before approval is the
   //    contract this repo states in two places and kept losing.
-  if (rel === `formats/scene/${film}.json` && !st.approved) {
+  if (rel === `films/scene/${film}.json` && !st.approved) {
     let layers = 0;
     try { const d = JSON.parse(text); layers = Array.isArray(d.layers) ? d.layers.length : 0; } catch { layers = /"layers"\s*:\s*\[\s*\{/.test(text) ? 1 : 0; }
     if (layers > 0) {

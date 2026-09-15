@@ -164,7 +164,7 @@ function printTable(rows) {
 // Same theme, same copy, same 6 seconds, one fadeUp reveal per 3s beat in every variant: the only thing
 // that differs between A/B/C is the structure #608 is about, never the motion plan under it.
 async function selfTest() {
-  const dir = path.join(ROOT, 'formats/scene');
+  const dir = path.join(ROOT, 'films/scene');
   const FRAG = (label) => `<style>.stage{position:absolute;inset:0;display:flex;align-items:center;`
     + `justify-content:center;background:#0b0d10}.headline{font:700 96px/1.1 sans-serif;color:#fff}</style>`
     + `<div class="stage"><div class="headline" data-part="headline">${label}</div></div>\n`;

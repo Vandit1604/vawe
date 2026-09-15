@@ -58,7 +58,7 @@ const FAMILIES = [
 // Every SHIPPED scene. Scratch files (`_`-prefixed) and intent sidecars are not films.
 let corpus = '';
 let files = 0;
-const dir = path.join(ROOT, 'formats/scene');
+const dir = path.join(ROOT, 'films/scene');
 for (const f of population('unused · corpus', { filter: (f) => !f.startsWith('_') && !f.includes('.intent.'), quiet: true }).names) {
   corpus += fs.readFileSync(path.join(dir, f), 'utf8');
   files++;

@@ -5,7 +5,7 @@
 // without earning it" gap: after rendering, author-check's inspect step confirms each beat's mustShow text
 // is on screen and (if mustAnimate) something is moving.
 //
-//   make intent SB=<storyboard.md> [D=formats/scene/<topic>.json]   → writes <topic>.intent.json (or prints)
+//   make intent SB=<storyboard.md> [D=films/scene/<topic>.json]   → writes <topic>.intent.json (or prints)
 // It reads the storyboard's beat time ranges for `at` + `span`, the quoted copy in `onscreen:` for
 // `mustShow`, and `why:` for the artifact note. A beat whose onscreen is still a <fill:…> placeholder is
 // emitted WITHOUT mustShow (nothing to verify yet) and flagged, sharpen the storyboard first for a real
