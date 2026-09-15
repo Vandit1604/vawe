@@ -53,6 +53,7 @@ import { fileURLToPath } from 'node:url';
 import { drawtext } from '../author/sheets.mjs';
 import { ffmpegOrDie } from '../lib/scratch.mjs';
 import { measureSpan } from './content.mjs';
+import { clusterCuts, detectCuts, detectSeams, detectPans, detectCrossfades, frameSeries, mergeJoints } from './shot-detect.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -284,156 +285,17 @@ if (videoAbs.startsWith(dir + path.sep)) {
 fs.rmSync(dir, { recursive: true, force: true });
 fs.mkdirSync(dir, { recursive: true });
 
-/** The frames eligible to BE a cut. The first frame always scores high because nothing precedes it,
- *  so ffmpeg reports the opening of every film as a scene change. One owner for that rule, because
- *  the peak and the near-miss count are both reported as reasons and must describe the same set:
- *  peak was once taken over every hit, so a film whose only high score was its own first frame
- *  printed "peak 0.593, below 0.3" and stated a reason that was not true. */
-function cutEligible(h) { return h.t > 0.2; }
-
-/** One cut lands on several consecutive frames, so collapse a run into its highest-scoring frame.
- *  Pure and exported so `--selftest` can assert it without a video file. */
-export function clusterCuts(hits, threshold, minShot) {
-  const out = [];
-  for (const h of hits.filter((x) => x.score > threshold && cutEligible(x)).sort((a, b) => a.t - b.t)) {
-    const prev = out[out.length - 1];
-    if (prev && h.t - prev.t < minShot) { if (h.score > prev.score) { prev.t = h.t; prev.score = h.score; } continue; }
-    out.push({ ...h });
-  }
-  return out;
-}
-
-// ── shot boundaries ──────────────────────────────────────────────────────────────────────────────
-// ffmpeg's scene score per frame. A hard cut spikes it; a dissolve does not, which is why the result
-// below is reported with its evidence instead of asserted. Detections cluster (a cut lands on several
-// consecutive frames), so nearby hits collapse to the highest-scoring one.
-function detectCuts() {
-  const meta = path.join(dir, '.scene-scores.txt');
-  ffmpegOrDie(['-v', 'error', '-y', '-i', VIDEO, '-an',
-    '-vf', `select='gt(scene,0.01)',metadata=print:file=${meta}`, '-f', 'null', '-'], meta, 'scene detect');
-  const hits = [];
-  let t = null;
-  for (const line of fs.readFileSync(meta, 'utf8').split('\n')) {
-    const p = /pts_time:([0-9.]+)/.exec(line);
-    if (p) { t = +p[1]; continue; }
-    const s = /scene_score=([0-9.]+)/.exec(line);
-    if (s && t != null) { hits.push({ t, score: +s[1] }); t = null; }
-  }
-  fs.rmSync(meta, { force: true });
-  const eligible = hits.filter(cutEligible);
-  const peak = eligible.reduce((m, h) => Math.max(m, h.score), 0);
-  const clustered = clusterCuts(hits, THRESHOLD, MIN_SHOT);
-  // Near-misses are the hint that the threshold is wrong for THIS film, and the author cannot see
-  // them from the sheet. Our own renders cross-dissolve, so half their authored cuts land here.
-  const near = eligible.filter((h) => h.score > THRESHOLD / 2 && h.score <= THRESHOLD).length;
-  return { peak, near, cuts: clustered };
-}
-
-// ── ground seams: joints a luma-delta cut can't see ─────────────────────────────────────────────
-// `edgedetect` marks every pixel that belongs to an edge; its per-frame YAVG (the same signalstats
-// reading LUMA/DELTA use, just on the edge map instead of the picture) is near zero exactly when the
-// frame is empty ground and rises with every letterform, icon or UI edge on screen. On madera, content
-// frames run 0.8 to 11 and the five seams run 0.00 to 0.24, so SEAM_THRESHOLD=0.3 sits with margin
-// above every seam and below every content frame: a run of consecutive frames at or under it is a beat
-// of empty ground, with no cut in it for detectCuts() to find.
-//
-// A THRESHOLD RUN IS THE PENUMBRA, NOT THE GAP. The frames either side of true zero are the outgoing
-// shot fading OUT and the incoming shot fading IN, both still "ground" by the 0.3 test but not actually
-// empty: on madera one such run spans 18 frames while the deepest, truly-empty CORE of it (the frames
-// AT the run's own minimum) is only 5. So the reported joint is the CORE's midpoint, and the reported
-// gap is the CORE's span, which is what lands within "1 to 12 frames" on every one of madera's seams;
-// the outer run only decides WHERE to look for the core. `dur` is passed in rather than read off the
-// module-level `duration`, so the run-finding logic is testable on synthetic numbers (`--selftest`)
-// without decoding a video.
-export function detectSeams(edge, threshold, dur) {
-  const runs = [];
-  let cur = null;
-  for (const p of edge) {
-    if (p.v <= threshold) { if (cur) { cur.t1 = p.t; cur.pts.push(p); } else cur = { t0: p.t, t1: p.t, pts: [p] }; }
-    else { if (cur) runs.push(cur); cur = null; }
-  }
-  if (cur) runs.push(cur);
-  return runs.filter((r) => r.t0 > 0.05 && r.t1 < dur - 0.05).map((r) => {
-    const minv = Math.min(...r.pts.map((p) => p.v));
-    // 0.02 tolerance, not exact equality: ffmpeg's YAVG lands on a clean 0.000 for several consecutive
-    // frames on madera, but a noisier clip could sit at 0.01 vs 0.02 without a true tie.
-    const core = r.pts.filter((p) => p.v <= minv + 0.02);
-    return { t0: r.t0, t1: r.t1, core0: core[0].t, core1: core[core.length - 1].t,
-      t: (core[0].t + core[core.length - 1].t) / 2, frames: core.map((p) => p.v) };
-  });
-}
-
-/** A run of DELTA frames inside [lo, hi], held for at least minRun seconds and FLAT (peak/mean under
- *  flatRatio): a sustained, roughly constant-speed change, which is what a whip/push or a crossfade
- *  looks like on this series and an ordinary shot's motion (bursts, then settles) does not. One shared
- *  shape, exported so `--selftest` can assert both callers (detectPans, detectCrossfades) on synthetic
- *  numbers without decoding a video. */
-function sustainedRun(delta, lo, hi, minRun, flatRatio) {
-  const runs = [];
-  let cur = null;
-  for (const p of delta) {
-    if (p.v >= lo && p.v <= hi) { if (cur) { cur.t1 = p.t; cur.pts.push(p); } else cur = { t0: p.t, t1: p.t, pts: [p] }; }
-    else { if (cur) runs.push(cur); cur = null; }
-  }
-  if (cur) runs.push(cur);
-  return runs.filter((r) => r.t1 - r.t0 >= minRun).map((r) => {
-    const vals = r.pts.map((p) => p.v);
-    const meanV = vals.reduce((a, b) => a + b, 0) / vals.length;
-    const peak = Math.max(...vals);
-    return { t0: r.t0, t1: r.t1, t: (r.t0 + r.t1) / 2, mean: Number(meanV.toFixed(2)),
-      peak: Number(peak.toFixed(2)), flatness: Number((peak / meanV).toFixed(2)), frames: vals.length };
-  }).filter((r) => r.flatness <= flatRatio);
-}
-
-export function detectPans(delta, floor, minRun, flatRatio = FLAT_RATIO) {
-  return sustainedRun(delta, floor, Infinity, minRun, flatRatio);
-}
-
-export function detectCrossfades(delta, lo, hi, minRun, flatRatio = FLAT_RATIO) {
-  return sustainedRun(delta, lo, hi, minRun, flatRatio);
-}
-
-// ── the film as two per-frame series, in two decodes ─────────────────────────────────────────────
-//
-// WHY THIS REPLACED PER-SHOT SAMPLING. The old shape asked ffmpeg a question per shot per statistic,
-// so a 5-shot film cost 11 decodes, and each answer was one number for a span. That is the wrong shape
-// twice over: it is slower, and a mean over 3.5 seconds cannot tell a shot that moves steadily from one
-// that holds for three seconds and then explodes. In a 20s film a great deal happens and a per-shot
-// average is a summary of a summary.
-//
-// Two decodes now, over the WHOLE film, at its own frame rate:
-//   LUMA   how light the frame is, per frame
-//   DELTA  how much it changed from the frame before, per frame
-//
-// Every per-shot figure is then a slice of an array we already hold, and the arrays are what make the
-// rest possible: choosing which frames are worth LOOKING at, and storing the film's shape rather than
-// its average.
-//
-// COST. Two full decodes at 160x90 of a 30s file is about a second. The sheet after it is unchanged.
-// Nothing here costs an agent a token: ffmpeg reads every frame, and tokens are only spent on the
-// handful of frames that end up in the sheet, which is exactly the split to want.
-function frameSeries(chain) {
-  const r = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', VIDEO, '-an', '-vf',
-    `${chain},metadata=mode=print:key=lavfi.signalstats.YAVG`, '-f', 'null', '-'],
-    { encoding: 'utf8', maxBuffer: 1 << 28 });
-  const out = [];
-  let t = null;
-  for (const line of String(r.stderr).split('\n')) {
-    const p = /pts_time:\s*([0-9.]+)/.exec(line);
-    if (p) { t = +p[1]; continue; }
-    const v = /lavfi\.signalstats\.YAVG=([\d.]+)/.exec(line);
-    if (v && t != null) { out.push({ t, v: +v[1] }); t = null; }
-  }
-  return out;
-}
-
-const LUMA = frameSeries('scale=160:90,signalstats');
+// clusterCuts, detectCuts, detectSeams, detectPans, detectCrossfades and frameSeries used to live
+// here as module-scoped closures; they are pure and side-effect-free (until called), so they now
+// live in shot-detect.mjs and this file imports them, rather than duplicating them for
+// harness/media/ingest.mjs to import safely (importing THIS file used to also run its whole CLI).
+const LUMA = frameSeries(VIDEO, 'scale=160:90,signalstats');
 // The first difference frame is the frame against itself and reads 0. Dropped rather than averaged in,
 // because "how much did this change from the one before" has no answer for the first frame.
-const DELTA = frameSeries('scale=160:90,tblend=all_mode=difference,signalstats').slice(1);
+const DELTA = frameSeries(VIDEO, 'scale=160:90,tblend=all_mode=difference,signalstats').slice(1);
 // Scaled bigger than LUMA/DELTA (410x270, not 160x90): edge detail is finer-grained than luma, and a
 // letterform that survives 410x270 can vanish at 160x90. Cost is one more decode of the same film.
-const EDGE = frameSeries(`scale=410:270,edgedetect=low=${EDGE_LOW}:high=${EDGE_HIGH},signalstats`);
+const EDGE = frameSeries(VIDEO, `scale=410:270,edgedetect=low=${EDGE_LOW}:high=${EDGE_HIGH},signalstats`);
 
 // GROUND: the BORDER RING's mean luma, not the whole frame's. A centred UI card or hero word is bright
 // and sits over the middle of the frame; averaging the whole frame (as `luma`/LUMA below still does, for
@@ -448,7 +310,7 @@ function borderSeries() {
     top: 'crop=iw:ih*0.12:0:0', bottom: 'crop=iw:ih*0.12:0:ih-ih*0.12',
     left: 'crop=iw*0.12:ih:0:0', right: 'crop=iw*0.12:ih:iw-iw*0.12:0',
   };
-  const series = Object.fromEntries(Object.entries(CROPS).map(([k, c]) => [k, frameSeries(`${c},scale=80:80,signalstats`)]));
+  const series = Object.fromEntries(Object.entries(CROPS).map(([k, c]) => [k, frameSeries(VIDEO, `${c},scale=80:80,signalstats`)]));
   // Index-aligned with LUMA, not time-matched: all five decodes read the same frame sequence off the
   // same file, so frame i means the same thing in every one of them (the same assumption DELTA/LUMA
   // already rely on elsewhere in this file).
@@ -705,48 +567,29 @@ const measureShot = (s) => {
   };
 };
 
-const { peak, near, cuts } = detectCuts();
+const { peak, near, cuts } = detectCuts(VIDEO, dir, THRESHOLD, MIN_SHOT);
 const cutsDetected = cuts.length > 0;
 const seams = detectSeams(EDGE, SEAM_THRESHOLD, duration).map(measureSeam);
 // SECOND OPINION: a joint neither a spike (cut) nor a near-zero-edge run (seam) look like, because
 // nothing goes to zero and nothing spikes; the frame just keeps changing, evenly, for a while. See the
 // flag block above for why these numbers are ponytail defaults.
-const pans = detectPans(DELTA, PAN_FLOOR, PAN_MIN_RUN);
-const crossfades = detectCrossfades(DELTA, CROSSFADE_LO, CROSSFADE_HI, CROSSFADE_MIN_RUN);
+const pans = detectPans(DELTA, PAN_FLOOR, PAN_MIN_RUN, FLAT_RATIO);
+const crossfades = detectCrossfades(DELTA, CROSSFADE_LO, CROSSFADE_HI, CROSSFADE_MIN_RUN, FLAT_RATIO);
 
-// FOUR KINDS OF JOINT, ONE BOUNDARY LIST. Two that land within MIN_SHOT of each other are the same
-// joint measured two ways, and the more EXACT measurement wins: a cut is an exact scene-score peak, a
-// seam a run of low-edge frames, a pan/crossfade a run of DELTA frames, in that order of precision. Not
-// "whichever sorted first": measured on this study's own ground-truth fixture, a fading title left a
-// few near-empty-edge frames right before a real hard cut, so a SEAM at 2.95s and the CUT it was
-// standing in front of at 3.00s landed 0.05s apart, and first-sorted-wins would have kept the seam and
-// silently thrown the cut away. The disagreement is still RECORDED either way, never silently dropped:
-// a reader can see that two measurements pointed at the same moment and named it differently.
-const JOINT_PRIORITY = { cut: 0, seam: 1, pan: 2, crossfade: 3 };
-function mergeJoints(kindLists) {
-  const items = kindLists.flatMap(({ kind, items: hits }) => hits.map((h) => ({ t: h.t, kind, evidence: h })))
-    .sort((a, b) => a.t - b.t);
-  const out = [];
-  const conflicts = [];
-  for (const it of items) {
-    const prev = out[out.length - 1];
-    if (prev && it.t - prev.t < MIN_SHOT) {
-      if (it.kind !== prev.kind)
-        conflicts.push({ t: Number(prev.t.toFixed(2)), kinds: [prev.kind, it.kind],
-          detail: `${prev.kind}@${prev.t.toFixed(2)}s vs ${it.kind}@${it.t.toFixed(2)}s, ${(it.t - prev.t).toFixed(2)}s apart` });
-      if (JOINT_PRIORITY[it.kind] < JOINT_PRIORITY[prev.kind]) out[out.length - 1] = it;
-      continue;   // one joint, the higher-priority kind's own time; the loser is still in `conflicts`
-    }
-    out.push(it);
-  }
-  return { joints: out, conflicts };
-}
+// FOUR KINDS OF JOINT, ONE BOUNDARY LIST (mergeJoints, imported from shot-detect.mjs). Two that land
+// within MIN_SHOT of each other are the same joint measured two ways, and the more EXACT measurement
+// wins: a cut is an exact scene-score peak, a seam a run of low-edge frames, a pan/crossfade a run of
+// DELTA frames, in that order of precision (JOINT_PRIORITY there). Not "whichever sorted first":
+// measured on this study's own ground-truth fixture, a fading title left a few near-empty-edge frames
+// right before a real hard cut, so a SEAM at 2.95s and the CUT it was standing in front of at 3.00s
+// landed 0.05s apart, and first-sorted-wins would have kept the seam and silently thrown the cut away.
+// The disagreement is still RECORDED either way, never silently dropped.
 const { joints, conflicts } = mergeJoints([
   { kind: 'cut', items: cuts },
   { kind: 'seam', items: seams },
   { kind: 'pan', items: pans },
   { kind: 'crossfade', items: crossfades },
-]);
+], MIN_SHOT);
 const detected = joints.length > 0;
 // NO SILENT FALLBACK. A film with no detected joint is ONE SHOT, stated as such, never an invented
 // equal-slice sample dressed up as a cut list (the deleted behaviour: engine-doctrine/MISTAKES.md and the OWNER

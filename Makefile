@@ -7,7 +7,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet
+.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet ingest
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -697,6 +697,14 @@ sections: ## [study] capture a website's real sections into assets/brands/<brand
 # grammar, never ship the frames). engine-doctrine/CRAFT/REFERENCE-STUDY.md
 study: ## [study] the film-side twin of `make sections`. STRIPS=<n> adds a contiguous motion strip for the n busiest shots.
 	node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS))
+
+# make ingest SRC=footage.mp4 [NAME=…]: turn a SOURCE video into something an agent can edit from.
+# Probes it, reuses study.mjs's own shot-boundary detectors (cuts, seams, pans, crossfades) and
+# ffmpeg's silencedetect, then writes films/scene/<name>.cuts.json (the shape `cuts[]` consumes) and
+# films/scene/<name>.contact-sheet.png (one cell per shot). Reads films/scene/<name>.transcript.json
+# for per-shot notes if it exists. Edit the cut list, then render.
+ingest: ## [study] probe a source clip into a starting cuts.json + contact sheet an agent edits from
+	node harness/media/ingest.mjs $(SRC) $(NAME) $(if $(THRESHOLD),--threshold $(THRESHOLD)) $(if $(SILENCE_DB),--silence-db $(SILENCE_DB)) $(if $(SILENCE_MIN),--silence-min $(SILENCE_MIN))
 
 # make mine: cluster every studied grammar/*.json shot by device into named shapes, each with the
 # grammar + shot index that backs it, → grammar/_mined-shapes.json. The receipt beats-mined.mjs's
