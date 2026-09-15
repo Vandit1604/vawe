@@ -1560,6 +1560,26 @@ if (isMain) {
       if (L.type === 'image' && L.ken)
         errors.push(`layer[${i}] combines \`ken\` with \`resample\`, ken is a CSS transform and does not reach the sampled pixels, so it would be silently ignored. Pick one.`);
     });
+    // CLIP AUDIO. `audio` on a video layer is the one prop the LAYER owns for sound (the mixer owns
+    // how it is heard): `true` or `{gain, duck}`. Anything else is caught here rather than at build
+    // time in the browser, so a bad value fails the author-check gate instead of a silent render.
+    (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
+      if (!isObj(L) || L.type !== 'video' || L.audio == null) return;
+      const a = L.audio;
+      if (a === true) return;
+      if (!isObj(a) || Array.isArray(a)) {
+        errors.push(`video-audio-invalid: layer[${i}] \`audio\` must be \`true\` or \`{gain, duck}\`, got ${JSON.stringify(a)}`);
+        return;
+      }
+      for (const k of Object.keys(a)) {
+        if (k !== 'gain' && k !== 'duck')
+          errors.push(`video-audio-invalid: layer[${i}] \`audio\` has unknown key "${k}", only gain and duck are read`);
+      }
+      if (a.gain != null && (typeof a.gain !== 'number' || a.gain < 0))
+        errors.push(`video-audio-invalid: layer[${i}] \`audio.gain\` must be a non-negative number, got ${JSON.stringify(a.gain)}`);
+      if (a.duck != null && (typeof a.duck !== 'number' || a.duck < 0 || a.duck > 1))
+        errors.push(`video-audio-invalid: layer[${i}] \`audio.duck\` must be a number between 0 and 1, got ${JSON.stringify(a.duck)}`);
+    });
     // named themes: the CLI can read the file, so completeness-check it here (boot re-checks).
     if (typeof data.theme === 'string') {
       const tp = path.join(root, 'themes', data.theme + '.json');
