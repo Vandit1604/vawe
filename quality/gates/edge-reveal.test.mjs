@@ -51,6 +51,18 @@ test('a full-frame rect with radius 16 fires at the corners', async () => {
   assert.ok(ranges.every((r) => /border-radius/.test(r.cause)), `expected a border-radius cause, got: ${ranges.map((r) => r.cause)}`);
 });
 
+test('a layer sampled just before its start is silent (not yet entered, not a candidate)', async () => {
+  // The samples at t=0..0.9 fall entirely before `start`, while the layer does not exist in the DOM
+  // (or sits at opacity 0 mid-entrance): they must never be read as "a full-bleed layer failing to
+  // cover", the false positive `make probe-frame` caught on vawe-flow-2's card-a (a layer sampled just
+  // before its resolved clip window, not a real reveal).
+  const rel = write('before-start', { ...base, duration: 1.6,
+    layers: [{ id: 'late', type: 'rect', x: 0, y: 0, w: 1920, h: 1080, fill: '#111', radius: 0, start: 1.0, duration: 0.6 }],
+  });
+  const ranges = toRanges(await sampleEdgeReveal(rel));
+  assert.equal(ranges.length, 0, `a normal full-bleed layer with a delayed start must not fire, got: ${JSON.stringify(ranges)}`);
+});
+
 test('a layer scaled to 0.86 over a full opaque ground is silent (not the topmost full-bleed layer)', async () => {
   const rel = write('panel-over-ground', { ...base,
     layers: [
