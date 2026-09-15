@@ -139,6 +139,27 @@ function visibleUntil(A, from, to) {
   return last;
 }
 
+// B's own opacity, from `motionAt` the same way A's pose is read. A coverer with no `motion` of its
+// own is opaque from the instant it exists (isCoverer already required a fill/full-bleed image).
+function opacityAt(B, lt) {
+  if (!Array.isArray(B.motion) || !B.motion.length) return 1;
+  const pose = motionAt(B.motion, lt, B.motionDelay);
+  return pose.opacity == null ? 1 : pose.opacity;
+}
+
+// opaqueSince(B, from, to) -> the first instant in [from, to] B's own opacity reaches 0.95 (it hides
+// whatever is behind it only once it is itself mostly solid), or null if it never does in that span.
+// B FADING IN over A fading out is a crossfade, not a cover, until B is the one actually on top.
+const OPAQUE_STEPS = 24;
+function opaqueSince(B, from, to) {
+  if (opacityAt(B, from - B.start) >= 0.95) return from;
+  for (let s = 1; s <= OPAQUE_STEPS; s++) {
+    const t = from + (to - from) * (s / OPAQUE_STEPS);
+    if (opacityAt(B, t - B.start) >= 0.95) return t;
+  }
+  return null;
+}
+
 const findings = [];
 for (let ai = 0; ai < top.length; ai++) {
   const A = top[ai];
@@ -155,16 +176,20 @@ for (let ai = 0; ai < top.length; ai++) {
     if (!bBox || !isFullBleedPlane(bBox, canvas) || !isCoverer(B)) continue;
     for (const w of wins) {
       if (B.start < w.from || B.start >= w.to) continue;
-      // A must still be ON SCREEN the instant B starts covering it: not already faded/translated away.
-      if (!visibleAt(A, B.start - A.start)) continue;
-      // THE VISIBLE PART OF THE OVERLAP, not the authored window: from B.start (when the cover
-      // begins) to the last instant A is still on screen, never the whole authored window.
-      const to = visibleUntil(A, B.start, w.to);
+      // B only COVERS once it is itself mostly opaque: a fading-in B over a fading-out A is a
+      // crossfade, not a cover, until B is actually the solid one on top.
+      const coverStart = opaqueSince(B, B.start, w.to);
+      if (coverStart == null) continue;
+      // A must still be ON SCREEN the instant B becomes opaque: not already faded/translated away.
+      if (!visibleAt(A, coverStart - A.start)) continue;
+      // THE VISIBLE PART OF THE OVERLAP, not the authored window: from the moment B is opaque AND
+      // A is still on screen, to the last instant A is still visible.
+      const to = visibleUntil(A, coverStart, w.to);
       const aTrack = effTrack(A, ai), bTrack = effTrack(B, bi);
       const why = bTrack !== aTrack
         ? `track ${bTrack} draws above track ${aTrack}`
         : `same track (${aTrack}), later in layers[] (index ${bi} > ${ai})`;
-      findings.push({ a: A.id || `layer#${ai}`, b: B.id || `layer#${bi}`, from: B.start, to, why });
+      findings.push({ a: A.id || `layer#${ai}`, b: B.id || `layer#${bi}`, from: coverStart, to, why });
     }
   }
 }
