@@ -1,5 +1,5 @@
 // scripts/brand/theme-remix.mjs: the another engine "pick a preset, remix it onto the brand" move (their
-// Step 2), adapted to our theme system. A PRESET (presets/*.json) is a shippable design SYSTEM, dominance,
+// Step 2), adapted to our theme system. A PRESET (directions/*.json) is a shippable design SYSTEM, dominance,
 // type roles, motion character, bg style, colour-derivation rules, with placeholder base colours. The
 // remix maps a brand's real base + accent (from `make palette`/`brandspec`, or --flags) onto the preset's
 // ROLES and DERIVES the full 15-key palette (surfaces, lines, text ladder, accent tints) so good, coherent
@@ -62,8 +62,8 @@ function derivePalette(brand, preset) {
 const presetName = flag('--preset');
 const brandName = flag('--brand', 'remixed');
 if (!presetName) { console.error('usage: theme-remix --preset <name> --brand <name> [--bg #hex --accent #hex --text #hex]'); process.exit(2); }
-const presetPath = path.join(ROOT, 'presets', `${presetName}.json`);
-if (!fs.existsSync(presetPath)) { console.error(`✗ unknown preset "${presetName}". available: ${fs.readdirSync(path.join(ROOT, 'presets')).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).join(', ')}`); process.exit(2); }
+const presetPath = path.join(ROOT, 'directions', `${presetName}.json`);
+if (!fs.existsSync(presetPath)) { console.error(`✗ unknown preset "${presetName}". available: ${fs.readdirSync(path.join(ROOT, 'directions')).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).join(', ')}`); process.exit(2); }
 const preset = JSON.parse(fs.readFileSync(presetPath, 'utf8'));
 
 // brand tokens: explicit flags win; else read captured tokens if present.

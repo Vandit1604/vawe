@@ -21,7 +21,7 @@ const QUIET = process.argv.includes('--quiet');
 const SCOPE = [
   'core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'tools', 'films', 'scene', 'films',
   'blueprints', 'cli', 'engine-doctrine', 'Makefile', '*.md', 'studio',
-  'cmd', 'internal', 'mcp', 'themes', 'presets', 'registry',
+  'cmd', 'internal', 'mcp', 'themes', 'directions', 'registry',
 ];
 
 // EXCLUSIONS, each one deliberate and each with its own reason. Nothing here is "too hard to fix";

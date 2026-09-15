@@ -859,10 +859,10 @@ sheet: ## [dev] DESIGN SHEET: every captured element on one page (on the theme b
 
 
 # make theme-remix PRESET=editorial BRAND=acme [BG=#hex ACCENT=#hex TEXT=#hex], pick a design-system
-# PRESET (presets/*.json) and remix it onto a brand's base+accent → a complete themes/<brand>.json. The
+# PRESET (directions/*.json) and remix it onto a brand's base+accent → a complete themes/<brand>.json. The
 # another engine "pick a preset, paint the brand into it" move: good coherent design in one command, not
 # hand-authored per pixel. Reads assets/brands/<brand>/palette.json when BG/ACCENT are omitted.
-theme-remix: ## [engine] pick a design-system PRESET (presets/*.json) and remix it onto a brand's base+accent → a complete
+theme-remix: ## [engine] pick a design-system PRESET (directions/*.json) and remix it onto a brand's base+accent → a complete
 	node scripts/brand/theme-remix.mjs --preset $(PRESET) --brand $(BRAND) $(if $(BG),--bg "$(BG)") $(if $(ACCENT),--accent "$(ACCENT)") $(if $(TEXT),--text "$(TEXT)")
 
 # make tts (SCRIPT=narration.txt | TEXT="…") OUT=films/scene/<name>.vo [VOICE=Samantha], LOCAL narration:
