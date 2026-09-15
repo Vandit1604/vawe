@@ -612,7 +612,7 @@ function main() {
   }
   if (askFlag) { console.log(JSON.stringify(ideateAsk(ideateLoadActs({ ref, name, idea })), null, 2)); return; }
   const prompt = buildIdeaPrompt(name, idea, { refGrammar });
-  const out = path.join(ROOT, 'formats/scene', `${name}.prompt.md`);
+  const out = path.join(ROOT, 'films/scene', `${name}.prompt.md`);
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, answersPath ? ideateApplyAnswers(prompt, JSON.parse(fs.readFileSync(answersPath, 'utf8'))) : prompt);
   console.log(`ideate → ${path.relative(ROOT, out)}${answersPath ? ' (answers applied)' : ''}`);

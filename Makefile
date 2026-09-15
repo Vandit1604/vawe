@@ -1,5 +1,5 @@
 # Vawe: render engine
-# Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in formats/<name>/.
+# Go renders the video (chromedp + ffmpeg); scenes are HTML/CSS in films/<name>/.
 #
 # Every target here is .PHONY (see below): nothing in this file is a build rule make can skip when
 # nothing changed. This is a command catalogue with memorable names, not a dependency graph, and
@@ -78,7 +78,7 @@ music-pack: ## [engine] fetch the curated real-loop pack (lofi/chill/beat) the e
 	node harness/media/music.mjs --pack
 
 # make gallery: build the hover-to-play example showcase (out/gallery/index.html) from the flagship
-# registry (formats/scene/examples.json). Render the examples first (make video / beatsync).
+# registry (films/scene/examples.json). Render the examples first (make video / beatsync).
 gallery: ## [site] build the hover-to-play example showcase (out/gallery/index.html) from the flagship registry
 	node scripts/site/examples-gallery.mjs
 
@@ -92,7 +92,7 @@ examples: build ## [site] rebuild the whole flagship showcase from committed sou
 beatmap: ## [dev] detect tempo + beat grid -> <name>.beats.json, so an edit can be built ON the music.
 	node harness/media/beatmap.mjs $(MUSIC)
 
-# make beatsync D=formats/x/video.json MUSIC=assets/music/warm.wav [GRID=beat|downbeat] [SNAP=0.12]
+# make beatsync D=films/x/video.json MUSIC=assets/music/warm.wav [GRID=beat|downbeat] [SNAP=0.12]
 # [LAYERS=1] [WRITE=1]: snap the scene's cuts and seams onto the track's beat grid so the edit lands
 # ON the beat. The policy is core/beats/index.js's, not a second copy of it: same tolerance, same joints,
 # stings never. Reports drift; WRITE writes <scene>.beatsync.json. Deterministic + idempotent.
@@ -259,7 +259,7 @@ demo: ## [dev] scaffold a SPECIMEN demo scene (one subject, one shot) and iterat
 	@f=$$(node harness/dev/demo.mjs --print-path --q "$(Q)" $(if $(NAME),--name "$(NAME)") $(if $(FX),--fx "$(FX)") $(if $(SUBJECT),--subject "$(SUBJECT)")) \
 	  && $(MAKE) --no-print-directory dev D=$$f
 
-# make scaffold OUT=formats/scene/<name>.json [DUR=13] [THEME=default] [BEATS=5]: THE DEFAULT START for
+# make scaffold OUT=films/scene/<name>.json [DUR=13] [THEME=default] [BEATS=5]: THE DEFAULT START for
 # a real film, not a demo. Writes a scene composed entirely from {type:"beat"} blueprints (directed by
 # construction: it clears sparse-beats, plain-slideshow and no-transition/no-bg-motion on write) plus its
 # `.storyboard.md` sidecar (structurally clean against storyboard-check and craft-checklist). The
@@ -270,7 +270,7 @@ scaffold: ## [preflight] write a directed, gate-passing scene + storyboard skele
 # make ideate REF=<ref>: the film in plain words, act by act, from a studied reference
 # (grammar/<ref>.json → grammar/<ref>.prompt.md; refuses with the exact `make study` command if the
 # study is missing). make ideate NAME=<film> IDEA="...": the same shape from an idea, acts left
-# `<fill:>` (formats/scene/<film>.prompt.md); add REF= alongside NAME= to copy a reference's act/joint
+# `<fill:>` (films/scene/<film>.prompt.md); add REF= alongside NAME= to copy a reference's act/joint
 # structure with the content left to fill. engine-doctrine/CRAFT/IDEATE.md.
 ideate: ## [preflight] THE FILM, IN PLAIN WORDS, before any JSON: one prompt an owner reads and edits (REF=, or NAME= IDEA= [REF=]; ASK=1 asks the detail brief, ANSWERS=<file.json> applies it)
 	node harness/author/ideate.mjs $(if $(REF),--ref $(REF)) $(if $(NAME),--name $(NAME)) $(if $(IDEA),--idea "$(IDEA)") $(if $(ASK),--ask) $(if $(ANSWERS),--answers $(ANSWERS))
@@ -308,10 +308,10 @@ pitch: ## [preflight] diverge to 5 concepts under the anti-median gate before au
 route: ## [preflight] map a request to a vawe deliverable + its intake (Q="...")
 	node harness/author/route.mjs "$(Q)"
 
-# make llms-txt: regenerate formats/llms.txt, the portable, drift-proof vocabulary primer (one rule + a
+# make llms-txt: regenerate films/llms.txt, the portable, drift-proof vocabulary primer (one rule + a
 # when-to-use per layer type + the effect families + the hard rules + the loop), generated from the live
 # registries so an agent can author a compliant scene from the full palette without loading the whole repo.
-llms-txt: ## [engine] regenerate formats/llms.txt, the portable vocabulary primer
+llms-txt: ## [engine] regenerate films/llms.txt, the portable vocabulary primer
 	node harness/author/llms-txt.mjs
 
 # make check D=<file>: every gate, every finding, ZERO consequence. Same information `make ship`
@@ -405,7 +405,7 @@ help: list ## [maintenance] alias for `make list`
 # make render M=scene: render a format's bundled sample.json
 render: build ## [ship] render a format's bundled sample.json
 	$(eval M := $(if $(M),$(M),scene))
-	. harness/dev/chrome-pin.sh render && harness/dev/render-lock.sh "render-$(M)" ./bin/vawe --module $(M) --data formats/$(M)/sample.json --out out/$(M).mp4
+	. harness/dev/chrome-pin.sh render && harness/dev/render-lock.sh "render-$(M)" ./bin/vawe --module $(M) --data films/$(M)/sample.json --out out/$(M).mp4
 
 # make all: every format via the render queue
 all: build ## [ship] every format via the render queue
@@ -424,12 +424,12 @@ all: build ## [ship] every format via the render queue
 # M set here (the old, wrong habit) is now loud too instead of being silently ignored.
 look: ## [dev] storyboard (key frames) for visual review, of the film at D.
 	@test -z "$(M)" || { echo "make look takes D=<file.json>, not M= (M was the module, always \"scene\"). Use: make look D=$(M)"; exit 1; }
-	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing formats/scene/sample.json"
+	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing films/scene/sample.json"
 	node harness/author/preview.mjs scene "" $(if $(D),--data $(D))
 
 frame: ## [dev] one exact frame of the film at D (D=<file.json> N=<n> or N=b<beat>)
 	@test -z "$(M)" || { echo "make frame takes D=<file.json>, not M= (M was the module, always \"scene\"). Use: make frame D=$(M) N=$(N)"; exit 1; }
-	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing formats/scene/sample.json"
+	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing films/scene/sample.json"
 	node harness/author/preview.mjs scene $(N) $(if $(D),--data $(D))
 
 # make grammar [N=<name>]: what we have learned about how good films are BUILT, from the committed
@@ -452,7 +452,7 @@ mistakes: ## [study] MOVED into `make arsenal MISTAKES=1 Q=...` (W11); still wor
 claims: ## [study] check this repo's own doctrine against the films it claims to describe.
 	node harness/author/claims.mjs
 
-# make study-verify D=formats/scene/<scene>.json: prove `make study` measures correctly, by running it
+# make study-verify D=films/scene/<scene>.json: prove `make study` measures correctly, by running it
 # on a film whose answers the scene file already declares (duration, boundary times, backdrop runs).
 study-verify: ## [check] prove `make study` measures correctly, by running it on a film whose answers the scene file already
 	@node quality/gates/study-verify.mjs $(D) $(if $(NORENDER),--no-render) $(if $(JSON),--json,)
@@ -483,17 +483,17 @@ recreate: ## [study] a scene SKELETON from a studied reference.
 ref: ## [study] fetch a reference film and study it in one step.
 	node harness/media/ref.mjs $(URL) $(if $(NAME),--name $(NAME))
 
-# make motion-split D=formats/scene/<scene>.json: how much of a film's measured motion is its GROUND
+# make motion-split D=films/scene/<scene>.json: how much of a film's measured motion is its GROUND
 # and how much is its LAYERS. Two sampled renders in one browser, seconds not minutes.
 motion-split: ## [check] how much of a film's measured motion is its GROUND and how much is its LAYERS.
 	@node quality/gates/motion-split.mjs $(D) $(if $(JSON),--json,)
 
-# make census: every named population in formats/scene, with the question each one answers.
+# make census: every named population in films/scene, with the question each one answers.
 # Quote a NAME in prose and print this to get the number (harness/lib/census.mjs owns the definitions).
-census: ## [study] every named population in formats/scene, with the question each one answers.
+census: ## [study] every named population in films/scene, with the question each one answers.
 	node harness/lib/census.mjs
 
-# make assets D=formats/x/topic.json [WRITE=1], fill missing icons: country→flag, brand→logo,
+# make assets D=films/x/topic.json [WRITE=1], fill missing icons: country→flag, brand→logo,
 # else a generated topic card. Dry-run without WRITE.
 assets: ## [dev] fill missing icons: country→flag, brand→logo, else a generated topic card.
 	node harness/media/assets.mjs $(D) $(if $(WRITE),--write)
@@ -574,7 +574,7 @@ gate-test: ## [maintenance] MUTATION-test the gates: feed each one a fixture bui
 # derived from the LIVE gap so it never goes stale. Watch it: the gates only prove it did not crash.
 coverage-reel: ## [check] generate + render a reel of whatever `make coverage` says nothing exercises, derived from the LIVE
 	node harness/author/coverage-reel.mjs
-	$(MAKE) video D=formats/scene/_coverage-reel.json
+	$(MAKE) video D=films/scene/_coverage-reel.json
 
 # make watermark [TEXT="VAWE DRAFT"] [OPACITY=0.1]: bake the draft watermark sheet. Offline, once;
 # the render only reads the finished PNG. Pass it with ./bin/vawe <scene> --watermark assets/watermark/draft.png
@@ -724,7 +724,7 @@ preview: ## [dev] render a single hand-written fragment (or a captured component
 screen: ## [dev] ONE command: write (if new) + preview + impeccable + content measure + readiness + clipping (F= [KIND=] [THEME=] [INVENT=1] [REF= ACT=] [W= H=])
 	node harness/author/screen.mjs $(F) $(if $(KIND),--kind $(KIND)) $(if $(THEME),--theme $(THEME)) $(if $(INVENT),--invent) $(if $(REF),--ref $(REF)) $(if $(ACT),--act $(ACT)) $(if $(W),--w $(W)) $(if $(H),--h $(H)) $(if $(D),--film $(D))
 
-# make beats D=formats/x/video.json [VS=brand]: first/mid/last frame of every beat in one contact
+# make beats D=films/x/video.json [VS=brand]: first/mid/last frame of every beat in one contact
 # sheet → /tmp/beats/$(notdir $(basename $(D))).png. VS=brand stacks each beat beside its source-section shot (fidelity diff).
 # make cutout SRC=<photo> NAME=<name>: remove a photograph's background so it becomes a PROP.
 # A rectangular photo cannot be both recognisable and edge-free in a frame it does not fill. With the
@@ -865,7 +865,7 @@ sheet: ## [dev] DESIGN SHEET: every captured element on one page (on the theme b
 theme-remix: ## [engine] pick a design-system PRESET (presets/*.json) and remix it onto a brand's base+accent → a complete
 	node scripts/brand/theme-remix.mjs --preset $(PRESET) --brand $(BRAND) $(if $(BG),--bg "$(BG)") $(if $(ACCENT),--accent "$(ACCENT)") $(if $(TEXT),--text "$(TEXT)")
 
-# make tts (SCRIPT=narration.txt | TEXT="…") OUT=formats/scene/<name>.vo [VOICE=Samantha], LOCAL narration:
+# make tts (SCRIPT=narration.txt | TEXT="…") OUT=films/scene/<name>.vo [VOICE=Samantha], LOCAL narration:
 # synthesize a voiceover WAV + word-timing sidecar offline with macOS `say` (no cloud, no key). Writes
 # <OUT>.wav + <OUT>.words.json; wire them into the scene's audio block: { "vo":…, "voWords":… }.
 tts: ## [dev] LOCAL narration: synthesize a voiceover WAV + word-timing sidecar offline with macOS `say` (no cloud, no key).
@@ -938,7 +938,7 @@ quiz-look: ## [preflight] THE LOOK, SETTLED BY PICTURE.
 storyboard-check: ## [preflight] The storyboard-as-PROPOSAL gate: a one-sentence message + audience/arc/format/duration, and per
 	@node quality/gates/storyboard-check.mjs $(SB) $(if $(JSON),--json,)
 
-# make surface D=formats/scene/<film>.storyboard.md: the neutral, on-demand front door to
+# make surface D=films/scene/<film>.storyboard.md: the neutral, on-demand front door to
 # harness/live/beat-surfacer.mjs, for an agent with no PostToolUse hook. Claude Code runs the same
 # check automatically after every save; everyone else runs this by hand after writing a beat.
 surface: ## [preflight] PUSH the one unused rich capability a storyboard beat could reach for (the neutral form of the beat-surfacer hook)
@@ -950,7 +950,7 @@ surface: ## [preflight] PUSH the one unused rich capability a storyboard beat co
 storyboard-draft: ## [preflight] auto-draft a STORYBOARD.md skeleton from a captured sections.json (one beat per real section, in
 	node scripts/brand/storyboard-draft.mjs
 
-# make intent SB=<storyboard.md> [D=formats/scene/<topic>.json], export the storyboard's per-beat whys
+# make intent SB=<storyboard.md> [D=films/scene/<topic>.json], export the storyboard's per-beat whys
 # into a <topic>.intent.json sidecar, so author-check's `inspect` VERIFIES the render delivers each beat's
 # on-screen copy + motion (turns "every beat earns its frame" from doctrine into a checked contract).
 intent: ## [preflight] export the storyboard's per-beat whys into a <topic>.intent.json sidecar, so author-check's
@@ -986,7 +986,7 @@ asset-check: ## [check] ASSET-READINESS PREFLIGHT: confirm every referenced imag
 pace-from-vo: ## [check] SCRIPT-FIRST PACING: propose beat start/durations timed to the narration (from a voWords sidecar)
 	node harness/media/pace-from-vo.mjs
 
-# make export-edl D=formats/scene/<file>.json [OUT=<dir>], HAND THE FILM TO AN EDITOR: read the RESOLVED
+# make export-edl D=films/scene/<file>.json [OUT=<dir>], HAND THE FILM TO AN EDITOR: read the RESOLVED
 # timeline (cuts/seams/stings, per-shot windows, layer in/out + on-screen text, the audio track) and write
 # two sidecars beside the source: <name>.shots.json (self-describing) and <name>.edl (CMX3600, importable
 # by Premiere/Resolve/FCP7). Read-only, the render path is untouched, deterministic. A vawe mp4 stops being terminal.
@@ -999,7 +999,7 @@ export-edl: ## [ship] HAND THE FILM TO AN EDITOR: read the RESOLVED timeline (cu
 sfx-catalog: ## [engine] REGENERATE engine-doctrine/CRAFT/SFX-CATALOG.md from core/audio/kit.mjs CUES: the "reach for this sound" table
 	@node harness/author/sfx-catalog.mjs
 
-# make studio D=formats/scene/<file>.json [PORT=8799]: LIVE scrubbable preview (no mp4 render). Serves
+# make studio D=films/scene/<file>.json [PORT=8799]: LIVE scrubbable preview (no mp4 render). Serves
 # the scene in a browser with a frame slider + play; scrub/step to iterate, edit the JSON + reload. Under
 # it, a TIMELINE: a bar per layer against a seconds/frames ruler, cuts/seams/stings marked, enter/exit
 # ramps shaded off the settled middle, and every dead-air hole (beat-check) painted as a hazard band.
@@ -1011,20 +1011,20 @@ sfx-catalog: ## [engine] REGENERATE engine-doctrine/CRAFT/SFX-CATALOG.md from co
 studio: ## [dev] LIVE scrubbable preview (no mp4 render). Its `plan` state shows the storyboard with every beat's real fragment live in it.
 	node studio/server.mjs $(D)
 
-# make seam-check D=formats/x/video.json, SAMPLE THE SEAMS: pull the frames straddling every transition
+# make seam-check D=films/x/video.json, SAMPLE THE SEAMS: pull the frames straddling every transition
 # (cut/seam/sting/beat boundary) out of the RENDERED mp4 and flag a luminance flash in the overlap, the
 # black-flash / collision class the center-sampling gates (beats/audit/probe) structurally miss (#138).
 # Requires out/<name>.mp4 (render first). Sheet → /tmp/seams/$(notdir $(basename $(D))).png (read it, the eye is the backstop).
 seam-check: ## [check] SAMPLE THE SEAMS: pull the frames straddling every transition (cut/seam/sting/beat boundary) out of
 	@node quality/gates/seam-snap.mjs $(D) $(if $(JSON),--json,)
 
-# make forensics D=formats/x/video.json: three seam defects luminance sampling can't see (seam-check
+# make forensics D=films/x/video.json: three seam defects luminance sampling can't see (seam-check
 # flags a flash; this flags a redraw, a lingering fade, or a field that steps). Requires the rendered
 # mp4, same as seam-check; run after `./bin/vawe` / `make video` / `make ship`.
 forensics: ## [ship] sample a rendered mp4's transitions for a redraw, a lingering fade, or a field that steps
 	node quality/gates/seam-forensics.mjs $(D)
 
-# make sweep-static D=formats/x/video.json, THE PIXELS-MOVED CHECK: sample 10 frames from the RENDERED mp4
+# make sweep-static D=films/x/video.json, THE PIXELS-MOVED CHECK: sample 10 frames from the RENDERED mp4
 # and fail if geometry never changes across the whole film (max consecutive change < 0.5%). Complements
 # static-bg (which checks declared bg WINDOWS): this checks whether anything actually moved on screen. A
 # held beat among real motion cannot trip it (it fails only when EVERY sampled pair is frozen). Render first.
@@ -1042,12 +1042,12 @@ similar: ## [check] sameness audit: score authored videos pairwise (motion vocab
 feature-audit: ## [check] static utilization report: framework vocabulary (kinetic presets / cuts / shader stings) +
 	@node quality/gates/feature-audit.mjs $(if $(JSON),--json,)
 
-# make captions D=formats/x/video.json TEXT="script": auto-time a script into muted-social burned-in
+# make captions D=films/x/video.json TEXT="script": auto-time a script into muted-social burned-in
 # subtitles (captionMode:pop). Deterministic (time proportional to word count). See harness/author/captions.mjs.
 captions: ## [dev] auto-time a script into muted-social burned-in subtitles (captionMode:pop).
 	node harness/author/captions.mjs $(D) "$(TEXT)"
 
-# make ledger D=formats/x/video.json: check a design against ALL shipped designs (cross-video
+# make ledger D=films/x/video.json: check a design against ALL shipped designs (cross-video
 # memory); make ledger-add D=… logs it after shipping.
 ledger: ## [ledger] check a design against ALL shipped designs (cross-video memory); make ledger-add D=… logs it after shipping.
 	@node quality/gates/ledger.mjs check $(D) $(if $(JSON),--json,)
@@ -1092,14 +1092,14 @@ gen-video: ## [dev] generate a video AND extract it to a clip in one step (a det
 capture: ## [dev] lift a REAL UI component off a live site (its HTML + computed CSS) into an animatable `component`
 	node harness/author/capture-component.mjs $(URL) "$(SEL)" $(NAME) $(LABEL) $(if $(LS),--localstorage "$(LS)") $(if $(SETTLE),--settle $(SETTLE))
 
-# make validate [D=formats/x/topic.json]: check data + inline theme against the format schema.
-# No D = validate every formats/*/sample.json. Same validator boot() runs before rendering.
+# make validate [D=films/x/topic.json]: check data + inline theme against the format schema.
+# No D = validate every films/*/sample.json. Same validator boot() runs before rendering.
 validate: ## [check] check data + inline theme against the format schema.
 	node core/validate/validate.mjs $(D)
 
 # make schema AT='layers[].motion[]', what may I WRITE at this path. The sibling of `make arsenal`:
 # arsenal answers "what can the engine DO" from the registries, this answers "what may I write HERE"
-# from formats/scene/schema.json, which already carries a written label on every field and served it to
+# from films/scene/schema.json, which already carries a written label on every field and served it to
 # nobody. Built after an author guessed the two bezier handles on a keyframe were `in`/`out` (they are
 # `easeIn`/`easeOut`) and shipped a refusal that rejected three correct films. No AT prints the
 # top-level shape; a partial or wrong path names what IS legal there, the way a failed registry pick does.
@@ -1191,14 +1191,14 @@ core-node-boundary: ## [check] refuse a node: builtin imported anywhere under co
 probe: ## [check] assert renderFrame(n) is PURE in n (byte-identical regardless of render order).
 	@$(if $(M),node quality/gates/probe-purity.mjs $(M),sh harness/dev/probe-all.sh)
 
-# make font-audit [D=formats/scene/x.json] [M=scene]: assert every family the scene renders is
+# make font-audit [D=films/scene/x.json] [M=scene]: assert every family the scene renders is
 # actually vendored, loaded and painting. Catches the silent substitution that shipped Geist,
 # Anybody and Manrope in the wrong typeface. Writes out/<name>.fonts.json. Exits 1 on any non-OK.
 # (Distinct from `make fonts`, which DOWNLOADS the faces.)
 font-audit: ## [check] assert every family the scene renders is actually vendored, loaded and painting.
 	@node quality/gates/font-audit.mjs $(if $(M),$(M),scene) $(D) $(if $(JSON),--json,)
 
-# make probe-frame D=formats/scene/x.json T=12.9 ID=card-a,card-b: where is layer X at time T, and what
+# make probe-frame D=films/scene/x.json T=12.9 ID=card-a,card-b: where is layer X at time T, and what
 # covers it. T is film time as the VIEWER sees it (post-tempo); see harness/dev/probe-frame.mjs for the
 # page-time conversion.
 probe-frame: ## [dev] where is layer ID at time T (post-tempo seconds), and what covers it
@@ -1320,7 +1320,7 @@ pace: ## [check] preview a scene's duration/pace at a given TEMPO, writes nothin
 
 # make paints-nothing [D=scene.json] [STRICT=1]: did each layer actually paint anything in its own box?
 # Renders the scene, screenshots a layer's box against itself hidden, and diffs the PIXELS (a DOM probe
-# passes a masked-to-nothing layer, this cannot). No D sweeps every formats/scene/*.json. REPORTS-tier:
+# passes a masked-to-nothing layer, this cannot). No D sweeps every films/scene/*.json. REPORTS-tier:
 # it never blocks without STRICT=1, because the library has never been held to this rule before today.
 .PHONY: paints-nothing
 paints-nothing: ## [check] does each layer paint anything in its own box? pixel diff, not DOM (D=<file> [STRICT=1])
@@ -1340,7 +1340,7 @@ discovery: ## [engine] can an author still FIND what the engine can do?
 # no-judge: has the eye actually looked at every film that shipped a render? make judge writes a
 # receipt (engine-doctrine/JUDGE.md) hashing both the scene JSON and the rendered mp4's own bytes, so it goes
 # stale on either one changing; this ratchets the count of rendered films with no valid one. Not wired
-# into `make ship`/CI: formats/scene and out/*.mp4 are gitignored, so a small or fresh checkout would
+# into `make ship`/CI: films/scene and out/*.mp4 are gitignored, so a small or fresh checkout would
 # report a number about its own thinness, not the library (the same reason doc-refs stays out of CI).
 # --stamp lowers the ceiling after judging a batch; it never rises unnoticed.
 no-judge: ## [judge] ratchet: rendered films with no valid judge receipt (--stamp to lower)
@@ -1393,7 +1393,7 @@ blocks-docs: ## [site] regenerate the engine-doctrine/BLOCKS.md table from the m
 blocks-json: ## [site] regenerate site/lib/blocks.json (the site's grid) from the manifest (CHECK=1 to verify only)
 	node scripts/site/blocks-json.mjs $(if $(CHECK),--check,)
 
-scenes-json: ## [site] check site/public/scenes/ against formats/scene/ (WRITE=1 to rewrite)
+scenes-json: ## [site] check site/public/scenes/ against films/scene/ (WRITE=1 to rewrite)
 	node scripts/site/scenes-json.mjs $(if $(WRITE),--write,)
 
 films-json: ## [site] check site/lib/films.json against the rendered films (WRITE=1 to rewrite)
@@ -1568,13 +1568,13 @@ deck: ## [site] publish engine-doctrine/animation.html to the site as /deck (sit
 
 # make lightfield [PRESET=ref|tide|fern] [ARGS='--seed 9 --pattern.kind rings ...']  generate a light
 # field: a seeded, palette-driven backdrop. No PRESET rebuilds all three committed fields into
-# formats/scene/ and shoots a PNG of each into out/. Options and dials: engine-doctrine/LIGHTFIELD.md.
+# films/scene/ and shoots a PNG of each into out/. Options and dials: engine-doctrine/LIGHTFIELD.md.
 .PHONY: lightfield
 lightfield: ## [engine] generate a seeded, palette-driven backdrop (PRESET=ref|tide|fern)
 ifdef PRESET
-	node harness/author/lightfield.mjs --preset $(PRESET) --out formats/scene/_lightfield-$(PRESET).html --shot $(ARGS)
+	node harness/author/lightfield.mjs --preset $(PRESET) --out films/scene/_lightfield-$(PRESET).html --shot $(ARGS)
 else ifdef ARGS
 	node harness/author/lightfield.mjs $(ARGS)
 else
-	@for p in $$(node -e "import('./core/lightfield/presets.js').then(m=>console.log(Object.keys(m.PRESETS).join(' ')))"); do node harness/author/lightfield.mjs --preset $$p --out formats/scene/_lightfield-$$p.html --shot; done
+	@for p in $$(node -e "import('./core/lightfield/presets.js').then(m=>console.log(Object.keys(m.PRESETS).join(' ')))"); do node harness/author/lightfield.mjs --preset $$p --out films/scene/_lightfield-$$p.html --shot; done
 endif

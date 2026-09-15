@@ -21,7 +21,7 @@
 // third-party wordmark the reference puts there.
 import fs from 'node:fs';
 
-const OUT = 'formats/scene/refstudy.json';
+const OUT = 'films/scene/refstudy.json';
 const SAFE = { x0: 65, x1: 929, y0: 192, y1: 1498 };
 const r1 = (v) => +v.toFixed(2);
 const P = '/assets/brands/refstudy/photos/';

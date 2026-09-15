@@ -3,7 +3,7 @@
 # frame-dedup makes re-renders of UNCHANGED pages pixel-different (worker-order picks a different
 # representative frame per static group), which churns every cropped clip in git.
 set -e
-for f in formats/scene/_catalog-*.json; do
+for f in films/scene/_catalog-*.json; do
   m="out/_catalog-$(basename "$f" .json | sed 's/_catalog-//').mp4"
   if [ ! -f "$m" ] || [ "$f" -nt "$m" ]; then
     ./bin/vawe "$f" --draft

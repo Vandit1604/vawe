@@ -25,7 +25,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const OUT = path.join(root, 'out');
 const PUB = path.join(root, 'site', 'public', 'assets');
 
-// scene = formats/scene/<scene>.json → out/<render>.mp4 → site/public/assets/<dest>
+// scene = films/scene/<scene>.json → out/<render>.mp4 → site/public/assets/<dest>
 // poster = seconds into the clip to grab the still (pick a frame that reads at a glance).
 // ar     = the ratio the SITE LAYOUT expects. Asserted against the real render, because a scene
 //          that renders the wrong shape otherwise encodes and ships silently (it did: a missing
@@ -121,7 +121,7 @@ if (!rows.length) { console.error(`no rows for --only ${only}`); process.exit(1)
 if (has('--render')) {
   const scenes = [...new Set(rows.map((r) => r[1]))];
   for (const s of scenes) {
-    const data = path.join(root, 'formats', 'scene', `${s}.json`);
+    const data = path.join(root, 'films', 'scene', `${s}.json`);
     if (!fs.existsSync(data)) { console.error(`✗ missing scene ${data}`); process.exit(1); }
     const extra = MULTI_ASPECT[s] ? ['--aspect', MULTI_ASPECT[s]] : [];
     process.stdout.write(`▶ render ${s}${extra.length ? ` (${extra[1]})` : ''} … `);
@@ -152,7 +152,7 @@ for (const [group, scene, render, dest, width, poster, ar] of rows) {
   const actual = w / h;
   if (Math.abs(actual - ar) / ar > 0.01) {
     console.error(`✗ ${dest}: ${render}.mp4 is ${w}x${h} (${actual.toFixed(3)}) but the layout expects ${ar.toFixed(3)}.`);
-    console.error(`  → the scene is rendering the wrong shape. Check "aspect" in formats/scene/${scene}.json.`);
+    console.error(`  → the scene is rendering the wrong shape. Check "aspect" in films/scene/${scene}.json.`);
     mismatched++;
     continue;
   }
@@ -161,11 +161,11 @@ for (const [group, scene, render, dest, width, poster, ar] of rows) {
   // whatever anyone last rendered, and nothing here asked whether the file in it came from the JSON on
   // disk today. So encoding took the newest bytes it could find and shipped them. Cheap to check,
   // because the scene path is already known and mtime is free.
-  const sceneJson = path.join(root, 'formats/scene', `${scene}.json`);
+  const sceneJson = path.join(root, 'films/scene', `${scene}.json`);
   if (fs.existsSync(sceneJson) && fs.statSync(sceneJson).mtimeMs > fs.statSync(src).mtimeMs) {
-    console.error(`✗ ${dest}: out/${render}.mp4 is OLDER than formats/scene/${scene}.json.`);
+    console.error(`✗ ${dest}: out/${render}.mp4 is OLDER than films/scene/${scene}.json.`);
     console.error(`  → that render predates the scene, so it is not a render of it. Re-render first:`);
-    console.error(`     ./bin/vawe formats/scene/${scene}.json`);
+    console.error(`     ./bin/vawe films/scene/${scene}.json`);
     stalerender++;
     continue;
   }

@@ -44,7 +44,7 @@
     {
       "source": "site/public/assets/blocks/listRow.json",
       "url": "https://vawe.dev/assets/blocks/listRow.json",
-      "target": "formats/scene/listRow.json",
+      "target": "films/scene/listRow.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

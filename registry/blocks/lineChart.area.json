@@ -62,7 +62,7 @@
     {
       "source": "site/public/assets/blocks/lineChart.area.json",
       "url": "https://vawe.dev/assets/blocks/lineChart.area.json",
-      "target": "formats/scene/lineChart.area.json",
+      "target": "films/scene/lineChart.area.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

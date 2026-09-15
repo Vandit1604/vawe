@@ -50,15 +50,15 @@ for brand-fidelity captures; supply your own copy at `assets/fonts/local/Sohne.w
 Authoring here often starts by reflecting a real website, and the working files that come out of it
 stay local. **No recreation of another company's marketing page ships from this repository**, not
 the scene JSON, not the rendered mp4, not the poster frame, not the palette file named after them.
-`.gitignore` enforces it by allowlist rather than by blocklist (`formats/scene/*.json`, plus the
+`.gitignore` enforces it by allowlist rather than by blocklist (`films/scene/*.json`, plus the
 `site/public/scenes/`, `site/public/assets/films/` and `themes/` blocks near the end of the file), so
 a new brand study cannot ship by being named something nobody thought to exclude.
 
 Three such recreations were published for a while, and were **converted rather than deleted**. What
 was worth keeping in them was never the brand: it was the composition, the timing, the camera and the
 beat structure. Those are now
-`formats/scene/saas-hero-launch.json`, `formats/scene/product-feature-tour.json` and
-`formats/scene/preface-launch.json`: fillable films for a fictional product, drawing every colour
+`films/scene/saas-hero-launch.json`, `films/scene/product-feature-tour.json` and
+`films/scene/preface-launch.json`: fillable films for a fictional product, drawing every colour
 from a theme token and every mark from an inline SVG. Nothing in any of the three traces to a real
 company.
 

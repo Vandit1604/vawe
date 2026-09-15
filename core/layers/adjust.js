@@ -18,7 +18,7 @@
 //     ABOVE   = every layer with a HIGHER `track`. Those are untouched, and that is how you keep a
 //               headline crisp over a background you are blurring.
 //
-// A layer with no `track` gets its array index (formats/scene/scene.js), so in a scene that never
+// A layer with no `track` gets its array index (films/scene/scene.js), so in a scene that never
 // mentions `track`, "beneath" means "written earlier in `layers`". State `track` when the answer
 // matters; leaving it to the array order is how a later edit silently moves the grade.
 //

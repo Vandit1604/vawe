@@ -1,7 +1,7 @@
 // core/src-url.js: the ONE resolver from a scene's `src` to the URL the page fetches.
 //
-// The page that loads a scene lives at /formats/scene/, so a bare "assets/x.png" resolved by the browser
-// lands at /formats/scene/assets/x.png and 404s, while "/assets/x.png" is served. That rule had been
+// The page that loads a scene lives at /films/scene/, so a bare "assets/x.png" resolved by the browser
+// lands at /films/scene/assets/x.png and 404s, while "/assets/x.png" is served. That rule had been
 // written twice (html fragments in preload.js, video in layers/video.js) and never for images, which is
 // how a still that existed on disk was reported as "never loaded ... outside the roots the render server
 // allows", both halves false (engine-doctrine/MISTAKES.md #569). A fact with two owners drifts; this is the owner.

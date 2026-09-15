@@ -1,5 +1,5 @@
 // harness/live/stage-say.test.mjs: the rule-brief lines this hook appends after the stage line, against
-// a real fixture film placed in formats/scene/ (the only directory stage-say.mjs scans, by design: see
+// a real fixture film placed in films/scene/ (the only directory stage-say.mjs scans, by design: see
 // its own header comment on why state is never redirected to a param). Cleaned up in `after`.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -11,7 +11,7 @@ import { stageOf } from '../../quality/gates/stage.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const NAME = 'craft-rules-stage-say-fixture';
-const base = path.join(ROOT, 'formats/scene', NAME);
+const base = path.join(ROOT, 'films/scene', NAME);
 const film = `${base}.json`;
 const sb = `${base}.storyboard.md`;
 
@@ -42,7 +42,7 @@ approved: "ci-fixture"
 - object_in: bottom-left@120x40
 - object_out: bottom-right@120x40
 - motion: [data-part="headline"]@slide-left:energy
-- fragment: formats/scene/craft-rules-stage-say-fixture.hook.html
+- fragment: films/scene/craft-rules-stage-say-fixture.hook.html
 - onscreen: "the strong first line"
 - mechanism: static headline
 - becomes: the bare stage becomes a question

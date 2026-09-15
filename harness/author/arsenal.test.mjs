@@ -47,7 +47,7 @@ console.log('arsenal.test.mjs: OK (caret/typing queries surface all typed-caret 
   const { execFileSync } = await import('node:child_process');
   const repoRoot = new URL('../..', import.meta.url).pathname;
   execFileSync(process.execPath, ['harness/author/arsenal.mjs', 'caret'], { cwd: repoRoot, stdio: 'pipe' });
-  execFileSync(process.execPath, ['harness/author/arsenal.mjs', '--for', 'formats/scene/sample.json'],
+  execFileSync(process.execPath, ['harness/author/arsenal.mjs', '--for', 'films/scene/sample.json'],
     { cwd: repoRoot, stdio: 'pipe' });
   console.log('arsenal.test.mjs: OK (CLI query and --for both exit 0, no deadlock)');
 }

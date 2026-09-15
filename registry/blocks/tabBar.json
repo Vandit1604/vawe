@@ -48,7 +48,7 @@
     {
       "source": "site/public/assets/blocks/tabBar.json",
       "url": "https://vawe.dev/assets/blocks/tabBar.json",
-      "target": "formats/scene/tabBar.json",
+      "target": "films/scene/tabBar.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -52,7 +52,7 @@
     {
       "source": "site/public/assets/blocks/codeBlock.ink.json",
       "url": "https://vawe.dev/assets/blocks/codeBlock.ink.json",
-      "target": "formats/scene/codeBlock.ink.json",
+      "target": "films/scene/codeBlock.ink.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

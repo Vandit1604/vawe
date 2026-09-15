@@ -1,5 +1,5 @@
 // harness/lib/exemplars.test.mjs: the runnable self-check for exemplars.mjs. Retrieval and signature
-// both read real files under formats/scene, so a change to the goldSet or to those films that breaks a
+// both read real files under films/scene, so a change to the goldSet or to those films that breaks a
 // caller (preflight's "EXEMPLARS TO STUDY", scaffold's backdrop rhythm) fails here first.
 //   node harness/lib/exemplars.test.mjs
 import assert from 'node:assert/strict';

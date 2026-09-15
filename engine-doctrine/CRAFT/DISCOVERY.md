@@ -12,7 +12,7 @@ group: crosscutting
   (`make effects` regenerates `engine-doctrine/EFFECTS.md`, the live count and family total, so a hand-typed figure
   here cannot go stale), blueprints, cuts/seams/stings, camera, kinetic type. The failure is not missing
   capability, it is defaulting to a thin slice (rise+fade, text on a flat field). Reach wider on purpose.
-- Four moves, cheapest first: (1) read `formats/llms.txt`, the always-visible primer (one when-to-use line
+- Four moves, cheapest first: (1) read `films/llms.txt`, the always-visible primer (one when-to-use line
   per layer type + the families); (2) `make arsenal Q="<plain english>"` to search all named things (the header line prints the live count);
   (3) `make arsenal --for <scene>` to see the families this film has NOT reached for; (4) the discipline
   below.

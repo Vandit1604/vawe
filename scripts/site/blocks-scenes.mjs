@@ -87,7 +87,7 @@ for (const entry of grid) {
   const body = JSON.stringify(scene, null, 2) + '\n';
   if (!fs.existsSync(jsonPath) || fs.readFileSync(jsonPath, 'utf8') !== body) { fs.writeFileSync(jsonPath, body); wrote++; }
 
-  await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/site/public/assets/blocks/${encodeURIComponent(safe)}.json&fps=30&aspect=16:9`,
+  await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/site/public/assets/blocks/${encodeURIComponent(safe)}.json&fps=30&aspect=16:9`,
     { waitUntil: 'load' });
   const boot = await waitForEngine(page, { throwOnTimeout: false });
   if (boot) { console.error(`boot fail ${entry.name}: ${boot}`); miss++; continue; }

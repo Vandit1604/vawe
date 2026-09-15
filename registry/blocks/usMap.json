@@ -89,7 +89,7 @@
     {
       "source": "site/public/assets/blocks/usMap.json",
       "url": "https://vawe.dev/assets/blocks/usMap.json",
-      "target": "formats/scene/usMap.json",
+      "target": "films/scene/usMap.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

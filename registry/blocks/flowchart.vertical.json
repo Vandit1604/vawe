@@ -50,7 +50,7 @@
     {
       "source": "site/public/assets/blocks/flowchart.vertical.json",
       "url": "https://vawe.dev/assets/blocks/flowchart.vertical.json",
-      "target": "formats/scene/flowchart.vertical.json",
+      "target": "films/scene/flowchart.vertical.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

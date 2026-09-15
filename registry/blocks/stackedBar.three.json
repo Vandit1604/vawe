@@ -71,7 +71,7 @@
     {
       "source": "site/public/assets/blocks/stackedBar.three.json",
       "url": "https://vawe.dev/assets/blocks/stackedBar.three.json",
-      "target": "formats/scene/stackedBar.three.json",
+      "target": "films/scene/stackedBar.three.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

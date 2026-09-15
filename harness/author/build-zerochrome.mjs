@@ -1,4 +1,4 @@
-// harness/author/build-zerochrome.mjs: generate formats/scene/zerochrome.json.
+// harness/author/build-zerochrome.mjs: generate films/scene/zerochrome.json.
 //
 // This film exists to prove one primitive. Its reference (refs/arc-zero-chrome.mp4, measured frame by
 // frame) is a browser whose chrome dissolves while the photo grid underneath REFLOWS to fill the space
@@ -17,7 +17,7 @@
 // by hand is a layout with an arithmetic mistake in it.
 import fs from 'node:fs';
 
-const OUT = 'formats/scene/zerochrome.json';
+const OUT = 'films/scene/zerochrome.json';
 const P = '/assets/brands/zerochrome/photos/architecture-interior-landscape-';
 const r = (v) => +v.toFixed(1);
 

@@ -56,7 +56,7 @@
     {
       "source": "site/public/assets/blocks/codeBlock.py.json",
       "url": "https://vawe.dev/assets/blocks/codeBlock.py.json",
-      "target": "formats/scene/codeBlock.py.json",
+      "target": "films/scene/codeBlock.py.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -41,7 +41,7 @@
     {
       "source": "site/public/assets/blocks/lowerThird.kickerName.json",
       "url": "https://vawe.dev/assets/blocks/lowerThird.kickerName.json",
-      "target": "formats/scene/lowerThird.kickerName.json",
+      "target": "films/scene/lowerThird.kickerName.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

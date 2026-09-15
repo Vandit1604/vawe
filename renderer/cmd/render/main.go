@@ -2,7 +2,7 @@
 //
 // Command vawe: Go render service CLI (mirrors engine/render.js).
 //
-//	go run ./cmd/render --module higherlower --data formats/higherlower/sample.json --out out/q.mp4
+//	go run ./cmd/render --module higherlower --data films/higherlower/sample.json --out out/q.mp4
 //	go run ./cmd/render --all
 //
 // flags: --fps N  --workers N  --draft  --no-grain  --concurrency 1 (for --all)
@@ -100,7 +100,7 @@ func main() {
 	}
 
 	if *all {
-		formatsDir := filepath.Join(repoRoot, "formats")
+		formatsDir := filepath.Join(repoRoot, "films")
 		entries, _ := os.ReadDir(formatsDir)
 		var jobs []func() error
 		var names []string
@@ -295,7 +295,7 @@ func moduleOf(path string) (string, error) {
 
 // listFormats prints each format folder with its schema + sample paths (the authoring contract).
 func listFormats(repoRoot string) {
-	formatsDir := filepath.Join(repoRoot, "formats")
+	formatsDir := filepath.Join(repoRoot, "films")
 	entries, _ := os.ReadDir(formatsDir)
 	fmt.Println("formats (write a JSON with \"module\": \"<name>\" + the fields in schema.json):")
 	for _, e := range entries {
@@ -306,18 +306,18 @@ func listFormats(repoRoot string) {
 		if !exists(filepath.Join(formatsDir, name, "scene.html")) {
 			continue
 		}
-		fmt.Printf("  %-12s schema: formats/%s/schema.json   sample: formats/%s/sample.json\n", name, name, name)
+		fmt.Printf("  %-12s schema: films/%s/schema.json   sample: films/%s/sample.json\n", name, name, name)
 	}
 }
 
-// repoRoot finds the directory containing formats/ (walk up from cwd; REPO env overrides).
+// repoRoot finds the directory containing films/ (walk up from cwd; REPO env overrides).
 func repoRoot() string {
 	if r := os.Getenv("REPO"); r != "" {
 		return r
 	}
 	dir, _ := os.Getwd()
 	for {
-		if exists(filepath.Join(dir, "formats")) && exists(filepath.Join(dir, "core")) {
+		if exists(filepath.Join(dir, "films")) && exists(filepath.Join(dir, "core")) {
 			return dir
 		}
 		parent := filepath.Dir(dir)

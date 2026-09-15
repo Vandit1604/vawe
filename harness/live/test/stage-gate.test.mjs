@@ -1,6 +1,6 @@
 // node --test harness/live/test/stage-gate.test.mjs
 //
-// The three denials, and the writes that must stay allowed. Real films from formats/scene/ through the
+// The three denials, and the writes that must stay allowed. Real films from films/scene/ through the
 // real hook, exactly as Claude Code's PreToolUse feeds it. The allows matter as much as the denials: a
 // gate that blocks legitimate work gets switched off, and then it enforces nothing.
 import fs from 'node:fs';
@@ -27,11 +27,11 @@ function run(rel, content = '') {
 // THE FIXTURE IS BUILT, NOT BORROWED. These cases need a film whose plan passes and which nobody has
 // signed, and that is a state a real film LEAVES the moment the user approves it: leaning on
 // vawe-oblique broke all three the day it was signed. So the fixture is written here, under
-// formats/scene/ because the hook resolves a film's owner among the real films in that directory, and
+// films/scene/ because the hook resolves a film's owner among the real films in that directory, and
 // removed again afterwards.
-const SB = 'formats/scene/stage-gate-fixture.storyboard.md';
-const FILM = 'formats/scene/stage-gate-fixture.json';
-const FRAG = 'formats/scene/_stage-gate-fixture.hook.html';
+const SB = 'films/scene/stage-gate-fixture.storyboard.md';
+const FILM = 'films/scene/stage-gate-fixture.json';
+const FRAG = 'films/scene/_stage-gate-fixture.hook.html';
 const abs = (rel) => path.join(ROOT, rel);
 const FIXTURES = [SB, FILM, FRAG];
 
@@ -44,7 +44,7 @@ before(() => {
     '---',
     '',
     '## 1. hook (0.0-2.0)',
-    '- fragment: formats/scene/_stage-gate-fixture.hook.html',
+    '- fragment: films/scene/_stage-gate-fixture.hook.html',
     '- onscreen: "one line"',
     '',
   ].join('\n'));
@@ -77,18 +77,18 @@ test('layers may not be written into an unapproved film', () => {
 });
 
 test('a fragment no storyboard claims is denied, and one with a plan behind it is not', () => {
-  assert.ok(run('formats/scene/_nothing-claims-this.hook.html', '<div></div>').denied);
+  assert.ok(run('films/scene/_nothing-claims-this.hook.html', '<div></div>').denied);
   assert.equal(run(FRAG, '<div></div>').denied, false);
 });
 
 test('both fragment naming conventions resolve to the right film', () => {
   // `_film.part.html` and `_film-part.html` both live in this repo. Splitting on a separator picks the
   // wrong film on one of them, which is why the hook looks the owner up instead of parsing it.
-  assert.equal(run('formats/scene/_vawe-oblique.frame.html', '<div></div>').denied, false);
-  assert.equal(run('formats/scene/_hinge-hook.html', '<div></div>').denied, false);
+  assert.equal(run('films/scene/_vawe-oblique.frame.html', '<div></div>').denied, false);
+  assert.equal(run('films/scene/_hinge-hook.html', '<div></div>').denied, false);
 });
 
-test('nothing outside formats/scene is this hook\'s business', () => {
+test('nothing outside films/scene is this hook\'s business', () => {
   assert.equal(run('README.md', 'hi').denied, false);
   assert.equal(run('core/layers/text.js', 'export {}').denied, false);
 });

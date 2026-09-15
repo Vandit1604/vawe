@@ -71,7 +71,7 @@
     {
       "source": "site/public/assets/blocks/parallaxZoom.json",
       "url": "https://vawe.dev/assets/blocks/parallaxZoom.json",
-      "target": "formats/scene/parallaxZoom.json",
+      "target": "films/scene/parallaxZoom.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

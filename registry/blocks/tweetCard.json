@@ -49,7 +49,7 @@
     {
       "source": "site/public/assets/blocks/tweetCard.json",
       "url": "https://vawe.dev/assets/blocks/tweetCard.json",
-      "target": "formats/scene/tweetCard.json",
+      "target": "films/scene/tweetCard.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -5,7 +5,7 @@
 // to exist. The engine had the machinery since `374ffa9` and was barely asked to use it, because the
 // derivation it needed was gated behind an OPT-IN flag (`audio.auto`) that almost nobody set.
 //
-// THAT FLAG IS NOW A DEFAULT. `formats/scene/scene.js` (buildSfx) derives a cue for every cut, sting
+// THAT FLAG IS NOW A DEFAULT. `films/scene/scene.js` (buildSfx) derives a cue for every cut, sting
 // and seam UNLESS a scene says `audio.auto: false`. So a film's own junctions now score themselves for
 // free, and this gate's job has narrowed: it used to have to notice a film that never asked for cues at
 // all (`silent-by-omission`, `audio-block-produces-nothing`). Most of those films now sound on their
@@ -80,8 +80,8 @@ const resolveBed = (m, sceneDir) => {
 const OMITTED = 'omitted', SILENT = 'silent', HOLLOW = 'hollow', SOUNDED = 'sounded';
 
 // Does this scene have a cut, sting or seam for `audio.auto`'s default derivation to score?
-// Reuses the SAME pure lowering `formats/scene/scene.js` runs before its own `buildSfx` reads
-// `data.cuts`/`data.stings`/`data.seams` (and `formats/scene/scene.js:buildSfx` reads a layer's own
+// Reuses the SAME pure lowering `films/scene/scene.js` runs before its own `buildSfx` reads
+// `data.cuts`/`data.stings`/`data.seams` (and `films/scene/scene.js:buildSfx` reads a layer's own
 // `L.cut` too), so this gate cannot read a film's junctions differently than the render path does.
 function hasScoredJunction(scene) {
   let data;
@@ -98,7 +98,7 @@ export function classify(scene) {
   const a = scene && scene.audio;
   const audio = (a && typeof a === 'object') ? a : null;
   if (audio && audio.silent === true) return SILENT;
-  // `audio.auto` is a default now (formats/scene/scene.js): ON unless a scene says `false` outright.
+  // `audio.auto` is a default now (films/scene/scene.js): ON unless a scene says `false` outright.
   const autoOn = !audio || audio.auto !== false;
   const ownsSound = !!audio && (
     (typeof audio.music === 'string' && audio.music !== '')
@@ -245,7 +245,7 @@ function findings(scene, sceneDir) {
 // nothing for it to derive from, or one that opted out and named no sound of its own. SILENT is an
 // author's decision and stays exactly as authored either way.
 if (all) {
-  const dir = path.join(ROOT, 'formats/scene');
+  const dir = path.join(ROOT, 'films/scene');
   const tally = { [OMITTED]: [], [SILENT]: [], [HOLLOW]: [], [SOUNDED]: [] };
   let reasoned = 0;
   // Population through harness/lib/census.mjs: it states N and refuses a checkout that cannot see the
@@ -258,7 +258,7 @@ if (all) {
     if (st === SILENT && reasonOf(s.audio)) reasoned++;
   }
   const n = Object.values(tally).reduce((a, b) => a + b.length, 0);
-  console.log(`\n  sound census · ${n} scene(s) in formats/scene\n`);
+  console.log(`\n  sound census · ${n} scene(s) in films/scene\n`);
   console.log(`    ${String(tally[SOUNDED].length).padStart(4)}  sounded          a bed, a VO, cues, or a derived auto cue: the mixer writes a track`);
   console.log(`    ${String(tally[SILENT].length).padStart(4)}  silent:true      ${reasoned} of them state a reason`);
   console.log(`    ${String(tally[OMITTED].length).padStart(4)}  no audio key     no junction to derive a cue from either: silent, nobody decided it`);

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/frame-check.mjs: THE PLAN, COMPARED WITH THE FRAMES BUILT FROM IT.
 //
-//   make frame-check D=formats/scene/<film>.json   ·   node quality/gates/frame-check.mjs <film> [--json]
+//   make frame-check D=films/scene/<film>.json   ·   node quality/gates/frame-check.mjs <film> [--json]
 //
 // Nothing in this repo did this. `storyboard-check` grades the plan against itself; `critique` and
 // `eye-trace` read the scene JSON after assembly; `make preview` judges one fragment with no idea which
@@ -25,9 +25,9 @@ import { parseFragmentSpec } from '../../harness/lib/contract.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const arg = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
-if (!arg) { console.error('usage: make frame-check D=formats/scene/<film>.json'); process.exit(2); }
+if (!arg) { console.error('usage: make frame-check D=films/scene/<film>.json'); process.exit(2); }
 const base = String(arg).replace(/\.(json|storyboard\.md)$/, '');
-const sbPath = [base + '.storyboard.md', path.join('formats/scene', path.basename(base) + '.storyboard.md')]
+const sbPath = [base + '.storyboard.md', path.join('films/scene', path.basename(base) + '.storyboard.md')]
   .map((f) => path.resolve(ROOT, f)).find((f) => fs.existsSync(f));
 if (!sbPath) { console.error(`no storyboard for "${arg}"`); process.exit(2); }
 

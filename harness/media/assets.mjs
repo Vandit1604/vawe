@@ -1,8 +1,8 @@
 // harness/media/assets.mjs: make integrating images easy. Given a data JSON, fill every item that has a
 // name but no real image: country → flag (flagcdn, public domain), brand → logo (simple-icons, free),
 // else → a generated topic card (scripts/cards.mjs). Rewrites the icon paths in place.
-//   node harness/media/assets.mjs formats/scene/video.json            (dry run, prints the plan)
-//   node harness/media/assets.mjs formats/scene/video.json --write    (fetch/generate + save JSON)
+//   node harness/media/assets.mjs films/scene/video.json            (dry run, prints the plan)
+//   node harness/media/assets.mjs films/scene/video.json --write    (fetch/generate + save JSON)
 //   flags:  --no-fetch (skip network, cards only) · --replace-emoji (also replace emoji icons)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,7 +16,7 @@ const WRITE = args.includes('--write'), NOFETCH = args.includes('--no-fetch'), R
 if (!dataPath) { console.error('usage: node harness/media/assets.mjs <data.json> [--write] [--no-fetch] [--replace-emoji]'); process.exit(1); }
 
 const isImg = (v) => typeof v === 'string' && (/\.(svg|png|jpe?g|webp|gif)$/i.test(v) || /^(assets\/|\/|https?:)/.test(v));
-const fmtDir = path.dirname(path.resolve(dataPath));            // formats/<fmt>
+const fmtDir = path.dirname(path.resolve(dataPath));            // films/<fmt>
 const cardsDir = path.join(fmtDir, 'assets', 'cards');         // per-format generated cards
 
 // common country → ISO2 (flagcdn). Extend as needed; unknown names fall through to a card.
@@ -49,7 +49,7 @@ function slots(o, acc = []) {
 // between them. What it must not do is put the file on disk.
 //
 // It used to. The word "PLAN (dry run)" was printed AFTER two write paths had already run, so every
-// `make video` downloaded icons and generated cards into formats/scene/assets/, and a clean checkout
+// `make video` downloaded icons and generated cards into films/scene/assets/, and a clean checkout
 // grew seven SVGs nobody asked for (engine-doctrine/MISTAKES.md #329). Only the final JSON edit was ever gated.
 async function tryFetch(url, dest) {
   if (NOFETCH) return false;

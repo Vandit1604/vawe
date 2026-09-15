@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import { BLOCKS, TOKENS } from '../../blocks/index.mjs';
 const B = { ...BLOCKS, TOKENS };
 import { boundaryMechanism } from '../../core/transitions/lower.js';
-const p = 'formats/scene/vawe-launch.json';
+const p = 'films/scene/vawe-launch.json';
 const d = JSON.parse(fs.readFileSync(p, 'utf8'));
 const T = B.TOKENS;
 const has = (l, t) => l.type === 'text' && (l.text || '').includes(t);

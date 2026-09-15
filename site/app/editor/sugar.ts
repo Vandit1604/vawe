@@ -8,7 +8,7 @@
  *
  * Why the render page (and this editor's live stage, the same iframe) cannot expand it live. It is not
  * a bundler limitation: `blocks/index.mjs` is static-import based precisely so it CAN be bundled
- * (see its own file banner). It is a deliberate SERVER boundary instead: `formats/scene/scene.js` never
+ * (see its own file banner). It is a deliberate SERVER boundary instead: `films/scene/scene.js` never
  * imports `core/expand.js`, because the render page's file server default-denies the ~186 block/beat
  * factories by design (`internal/scene/scene.go` `served`, a security wall for MCP/stranger scenes),
  * and one factory (`blocks/geo.mjs`) imports `d3-geo` by bare specifier, resolvable only through an

@@ -1,7 +1,7 @@
 // font-audit.mjs: fail the build if any text renders in a font we did not intend.
 //
-//   node quality/gates/font-audit.mjs scene formats/scene/tpot-launch.json
-//   make fonts D=formats/scene/tpot-launch.json
+//   node quality/gates/font-audit.mjs scene films/scene/tpot-launch.json
+//   make fonts D=films/scene/tpot-launch.json
 //
 // Writes a deterministic sidecar next to the render: out/<name>.fonts.json.
 // Deliberately records only the VERDICT per family, never the probe widths, which are
@@ -22,13 +22,13 @@ const format = process.argv[2] || 'scene';
 const dataArg = process.argv[3];
 const dataUrl = dataArg
   ? '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/')
-  : `/formats/${format}/sample.json`;
+  : `/films/${format}/sample.json`;
 
 const { server, port } = await serveRepo();
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 const page = await browser.newPage();
-await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
+await page.goto(`http://127.0.0.1:${port}/films/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
 const err = await waitForEngine(page);
 if (err) { console.error('SCENE ERROR:', err); await browser.close(); server.close(); process.exit(1); }
 

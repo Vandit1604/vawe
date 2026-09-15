@@ -119,7 +119,7 @@ captionSkin(cfg)                       // 'plain' | 'pop' | 'styled', from capti
 ```
 
 It is vertical only. A caption is centred and its width follows its text, so the useful keep-out is a
-strip, not a box. The three skins are `formats/scene/scene.css` verbatim: **plain** (`captionMode`
+strip, not a box. The three skins are `films/scene/scene.css` verbatim: **plain** (`captionMode`
 sentence/word) sits `300px` up at 46px type; **pop** and **styled** (any `captionStyle`) sit `12%` up at
 64px, and `styled` adds its scrim plate's padding. Each takes the deeper of its own offset and the
 destination's bottom chrome, which is the `max()` the CSS itself uses against `--safe-bottom`. The band

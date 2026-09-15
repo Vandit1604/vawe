@@ -44,7 +44,7 @@
     {
       "source": "site/public/assets/blocks/settingsRow.json",
       "url": "https://vawe.dev/assets/blocks/settingsRow.json",
-      "target": "formats/scene/settingsRow.json",
+      "target": "films/scene/settingsRow.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -1,6 +1,6 @@
 // core/motion/path-curves.js: the named SVG curves a caption can set type ON (core/fx/along-path.js)
 // and a whole LAYER can fly ALONG (harness/lib/contract.mjs, `move:` scope 'path', MotionPathPlugin
-// via `layers[].motionPath`, formats/scene/scene.js). One catalog, two consumers, wrapped in the same
+// via `layers[].motionPath`, films/scene/scene.js). One catalog, two consumers, wrapped in the same
 // `defineRegistry` every other named-vocabulary set here uses (SHAPES, PARTS, IDLE) so an unknown
 // curve is refused at the write site with a hint, never silently defaulted, and `make arsenal` can
 // list it without a second, hand-maintained catalogue entry.

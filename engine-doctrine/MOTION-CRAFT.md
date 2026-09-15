@@ -157,7 +157,7 @@ this engine as it stands, not as it is planned to be.
 
 An audit of this engine's 26 seam shader transitions (`core/transitions/units.js`) found that a `seam`
 bakes both beats into two STILL textures at build and blends the two static rasters
-(`core/timeline/seams.js` header, `formats/scene/scene.js` `bakeSeams`/`drawSeams`): any motion inside
+(`core/timeline/seams.js` header, `films/scene/scene.js` `bakeSeams`/`drawSeams`): any motion inside
 the seam window freezes at the bake, then jumps at the far side. A film with continuing motion through
 a boundary needs a LIVE join recipe (`flow-seam`, `object-wipe`, `colour-wipe`, `becomes`, or a camera
 move travelling through), never a seam mechanism, however close the seam's name reads to what is meant.

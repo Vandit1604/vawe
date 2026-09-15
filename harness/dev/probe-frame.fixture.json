@@ -1,5 +1,5 @@
 {
- "$schema": "../../formats/scene/schema.json",
+ "$schema": "../../films/scene/schema.json",
  "module": "scene",
  "theme": "default",
  "aspect": "16:9",

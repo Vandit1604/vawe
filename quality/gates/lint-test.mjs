@@ -62,7 +62,7 @@ ok(!disc.some((w) => /'C'|text: 'C'/.test(w)) && childWin.filter((w) => /DISCARD
   'child window: a child using `delay` is silent', 'child-window-delay-silent');
 
 // committed clean scene must stay silent (no false positives)
-const clean = lintData(read('formats/scene/sample.json'));
+const clean = lintData(read('films/scene/sample.json'));
 ok(clean.length === 0, `clean sample.json is silent (got ${clean.length}: ${clean.join('; ') || 'none'})`, 'sample-clean');
 
 // --- fxErrors: named GSAP effect names must be real, and split ownership must not clash (#82) ---
@@ -89,7 +89,7 @@ ok(resolveEasing('spring') !== easeOutCubic && typeof resolveEasing('spring') ==
 ok(resolveEasing('easeOutQuart')(1) === 1 && resolveEasing('easeOutQuart')(0) === 0, 'resolveEasing: resolved curve holds endpoints', 'easing-endpoints-hold');
 
 // --- block/comp layers are EXEMPT from base-layer field validation (#84: showcase-spot could not boot) ---
-const sceneSchema = read('formats/scene/schema.json');
+const sceneSchema = read('films/scene/schema.json');
 const blockScene = { module: 'scene', theme: 'default', duration: 3, layers: [
   { type: 'block', block: 'pointer', x: 100, y: 100, to: { x: 640, y: 542 }, start: 0, dur: 2 },   // to is object, not number
   { type: 'block', block: 'kpiRow', x: 100, y: 300, items: [{ value: '1', label: 'a' }], start: 0, dur: 2 }, // items is array, not string
@@ -103,7 +103,7 @@ const badDir = direct('quality/fixtures/direction-bad.json');
 ok(/\[linear-motion\]/.test(badDir), 'direct: linear-motion tell fires (ease:"linear" on a move)', 'direct-linear-motion');
 ok(/\[monotone-timing\]/.test(badDir), 'direct: monotone-timing tell fires (6 identical enterDur)', 'direct-monotone-timing');
 ok(/\[enter-and-retreat\]/.test(badDir), 'direct: enter-and-retreat tell fires (anim+out same side)', 'direct-enter-and-retreat');
-const cleanDir = direct('formats/scene/sample.json');
+const cleanDir = direct('films/scene/sample.json');
 ok(!/\[(linear-motion|monotone-timing|enter-and-retreat)\]/.test(cleanDir), 'direct: clean sample.json trips none of the new tells', 'direct-clean-silent');
 
 // --- direction floor: fails a plain slideshow, passes a directed scene (the ambition floor) ---

@@ -80,7 +80,7 @@ function renderBrief(name, runDir) {
   const scene = JSON.parse(fs.readFileSync(src, 'utf8'));
   const [expectW, expectH] = sceneDims(scene);
 
-  // VAWE_SERVE_ALL: the render server only serves core/ themes/ formats/ assets/ .vawe-data/ by
+  // VAWE_SERVE_ALL: the render server only serves core/ themes/ films/ assets/ .vawe-data/ by
   // default, and these fixtures live under quality/runs/ on purpose (they are eval scaffolding, not a film
   // to author further), so the debug escape hatch is the correct way to reach them, not a workaround.
   execFileSync('./bin/vawe', [src, '--draft', '--workers', '2'],

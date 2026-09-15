@@ -129,7 +129,7 @@ for (const { familyId, stem } of targets) {
   const rule = FAMILY_POSTER[familyId] ?? defaultPoster;
   const candidates = candidatesFor(scene, rule(scene));
 
-  await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/site/public/assets/effects/${stem}.json&fps=30&aspect=16:9`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/site/public/assets/effects/${stem}.json&fps=30&aspect=16:9`, { waitUntil: 'load' });
   const boot = await waitForEngine(page, { throwOnTimeout: false });
   if (boot) {
     console.error(`  boot fail ${stem}: ${boot}`);

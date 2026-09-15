@@ -30,7 +30,7 @@ is what was painted into that tab before.
 From the repo root, with the engine's own instrument:
 
 ```
-go run ./harness/dev/tabprobe -root . -data /formats/scene/higgsfield-recreation.json \
+go run ./harness/dev/tabprobe -root . -data /films/scene/higgsfield-recreation.json \
   -tabs 2 -frame 114 -pre 0,6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108 -pre1 0-113
 tab 0  sha=b76078e918fa84091d61b1fcd39e7dff80a69c8551880a73164478eeb222867d  bytes=97038
 tab 1  sha=1b75eecba8698bb04aa76849ed449e0950c03257c19fbf87919d1871902952e1  bytes=97026

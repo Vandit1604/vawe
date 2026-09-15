@@ -61,7 +61,7 @@ instructions, not three that will assemble into one film.
 `/rot:<deg>` and `/op:<0-1>`, e.g. `object_out: center@40x26/rot:15/op:0.4`. Before this, `w`/`h` were
 parsed and then discarded (`assemble.mjs` only ever built x/y offsets), so a beat could declare a size
 and the built film would ignore it. `x`, `y`, `w`, `h`, `rot` and `opacity` are all properties
-`layers[].motion[]` can already key (`formats/scene/schema.json`), so `make assemble` now writes
+`layers[].motion[]` can already key (`films/scene/schema.json`), so `make assemble` now writes
 `w`/`h`/`rot`/`opacity` keys whenever the chain actually uses one (a film that states no pose beyond
 placement builds the identical track it always did). A pose mismatch at a handoff is a chain error
 exactly like a placement mismatch, named on both sides. What this cannot do: a shape morph (rectangle

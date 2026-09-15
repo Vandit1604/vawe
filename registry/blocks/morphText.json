@@ -49,7 +49,7 @@
     {
       "source": "site/public/assets/blocks/morphText.json",
       "url": "https://vawe.dev/assets/blocks/morphText.json",
-      "target": "formats/scene/morphText.json",
+      "target": "films/scene/morphText.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

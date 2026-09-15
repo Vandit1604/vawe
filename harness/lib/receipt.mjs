@@ -17,8 +17,8 @@
 // silently withdraws its own sign-off, which is the property that makes the receipt worth trusting.
 //
 //   import { writeReceipt, readReceipt } from '../lib/receipt.mjs';
-//   writeReceipt('concept', 'formats/scene/x.storyboard.md', { picked: 'technical' });
-//   const r = readReceipt('concept', 'formats/scene/x.storyboard.md');
+//   writeReceipt('concept', 'films/scene/x.storyboard.md', { picked: 'technical' });
+//   const r = readReceipt('concept', 'films/scene/x.storyboard.md');
 //   if (!r.exists || r.stale) { ... }
 import fs from 'node:fs';
 import path from 'node:path';
@@ -37,7 +37,7 @@ const keyOf = (subject) => path.basename(subject).replace(/\.(json|md|markdown)$
 export const receiptPath = (stage, subject) => path.join(dirFor(stage), `${keyOf(subject)}.json`);
 
 // A scene's hand-authored markup can live INSIDE the JSON as an escaped `html` string, or beside it as
-// `{"type":"html","src":"formats/scene/x.html"}`. The second form moves the markup out of the subject's
+// `{"type":"html","src":"films/scene/x.html"}`. The second form moves the markup out of the subject's
 // bytes, so hashing the subject alone would leave every receipt for that scene FRESH while its whole
 // backdrop was rewritten. That is precisely the failure this module exists to prevent, reintroduced by
 // a feature, and it landed before a single scene used `src`.

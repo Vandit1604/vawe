@@ -12,15 +12,15 @@ and builds a per-element time series to run nine checks against, then throws the
 of a pass/fail.
 
 ```
-make motion-trace M=scene D=formats/scene/<file>.json [STRIDE=N] [JSON=1]
-node quality/gates/motion-audit.mjs scene --data formats/scene/<file>.json --trace [--stride N] [--json]
+make motion-trace M=scene D=films/scene/<file>.json [STRIDE=N] [JSON=1]
+node quality/gates/motion-audit.mjs scene --data films/scene/<file>.json --trace [--stride N] [--json]
 ```
 
 ## What it shows
 
 For every element the engine itself considers a timed layer, top-level or nested inside a group
 (selected on `[data-start]`, the same attribute `core/timeline/clips.js` uses to find "every timed
-element", stamped on every layer by `formats/scene/scene.js` and `core/layers/util.js`'s
+element", stamped on every layer by `films/scene/scene.js` and `core/layers/util.js`'s
 `addGroupChild`; an authored `id` reaches this report when the layer has one, but it is never a
 requirement to be tracked):
 

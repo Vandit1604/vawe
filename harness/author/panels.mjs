@@ -29,7 +29,7 @@
 //
 //   node harness/author/panels.mjs <STORYBOARD.md> [--out /tmp/panels]
 //   node harness/author/panels.mjs --self-test        # the region/area arithmetic, asserted
-//   make panels SB=formats/scene/<name>.storyboard.md
+//   make panels SB=films/scene/<name>.storyboard.md
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
@@ -412,7 +412,7 @@ for (const b of beats) {
 }
 
 // ── spend what is left of the layer budget on the layout and style lines ───────────────────────────
-// `formats/scene/schema.json` caps a scene at 120 layers, and the longest storyboard here already
+// `films/scene/schema.json` caps a scene at 120 layers, and the longest storyboard here already
 // builds 117. So these lines are fitted to the room that is left: both, or one line carrying both, or
 // neither and a loud line in the report saying where they went. A panel silently missing a field it was
 // asked to show is the failure this whole join exists to end.
@@ -443,7 +443,7 @@ const scene = {
   layers,
   bg: [{ t: 0, preset: 'plain', from: 0, to: total }],
 };
-// The scene has to live inside the repo: the render server serves core/, themes/, formats/, assets/
+// The scene has to live inside the repo: the render server serves core/, themes/, films/, assets/
 // and .vawe-data/ only, so a scene written to /tmp boots to a 404. The pictures still go to /tmp; this
 // is scratch, gitignored, and overwritten every run.
 const SCENE_JSON = path.join('.vawe-data', 'scenes', `panels-${NAME}.json`);

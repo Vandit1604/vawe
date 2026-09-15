@@ -17,7 +17,7 @@
 //   pageTime = viewerTime * tempo
 // (tempo absent, or 1, is a no-op). Both times are printed so a mismatch is visible rather than silent.
 //
-//   node harness/dev/probe-frame.mjs formats/scene/x.json --t 12.9 --id card-a,card-b --json
+//   node harness/dev/probe-frame.mjs films/scene/x.json --t 12.9 --id card-a,card-b --json
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -64,7 +64,7 @@ const expanded = expandScene(cloneForExpand);
 
 // Find a layer by id anywhere in the tree (top-level or a group child at any depth), for the AUTHORED
 // fields (type, start, duration, video in/rate/out) the DOM dataset does not carry verbatim once a
-// beat wrapper has stretched data-duration (formats/scene/scene.js setLayerTiming, data-authoredDuration).
+// beat wrapper has stretched data-duration (films/scene/scene.js setLayerTiming, data-authoredDuration).
 function findLayer(id, layers) {
   for (const L of layers || []) {
     if (!L || typeof L !== 'object') continue;
@@ -164,7 +164,7 @@ async function main() {
   const report = { viewerT, tempo, pageT, module, samples: {} };
   try {
     const bootRel = bootPathFor(REPO_ROOT, raw, data, rel);
-    await page.goto(`http://127.0.0.1:${port}/formats/${module}/scene.html?data=/${bootRel}&fps=30`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/films/${module}/scene.html?data=/${bootRel}&fps=30`, { waitUntil: 'load' });
     const err = await waitForEngine(page, { throwOnTimeout: false });
     if (err) throw new Error(`scene did not load: ${err}`);
     const meta = await page.evaluate(() => window.__engine.meta);

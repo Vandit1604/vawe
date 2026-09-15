@@ -42,7 +42,7 @@
     {
       "source": "site/public/assets/blocks/progressRing.json",
       "url": "https://vawe.dev/assets/blocks/progressRing.json",
-      "target": "formats/scene/progressRing.json",
+      "target": "films/scene/progressRing.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

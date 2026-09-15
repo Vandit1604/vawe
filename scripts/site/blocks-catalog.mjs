@@ -1,6 +1,6 @@
 // scripts/site/blocks-catalog.mjs: auto-renders EVERY registry entry from the manifest onto paged stages.
 // Proof + visual regression + the browsable arsenal. No hand-placement: drop a row in blocks/catalog.mjs
-// and it shows up here. Writes formats/scene/_catalog-<n>.json (one per page). Run via `make catalog`.
+// and it shows up here. Writes films/scene/_catalog-<n>.json (one per page). Run via `make catalog`.
 import fs from 'node:fs';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
@@ -40,15 +40,15 @@ for (let p = 0; p < pages; p++) {
   // leave sub-pixel motion inside the signature's rounding, so re-rendering an UNCHANGED page
   // produces a pixel-different mp4, and every clip cropped from it churns in git for no reason.
   // (Pre-existing renderer behaviour, recorded in engine-doctrine/ROADMAP.md; not fixed here.)
-  const out = `formats/scene/_catalog-${p + 1}.json`;
+  const out = `films/scene/_catalog-${p + 1}.json`;
   const body = JSON.stringify(scene, null, 2);
   if (!fs.existsSync(out) || fs.readFileSync(out, 'utf8') !== body) fs.writeFileSync(out, body);
 }
-// Remove pages a SHRINKING registry left behind. `make catalog` renders formats/scene/_catalog-*.json
+// Remove pages a SHRINKING registry left behind. `make catalog` renders films/scene/_catalog-*.json
 // by glob, so a stale page keeps getting rendered as a real one long after nothing points at it.
-const stale = fs.readdirSync('formats/scene')
+const stale = fs.readdirSync('films/scene')
   .filter((f) => /^_catalog-(\d+)\.json$/.test(f) && +f.match(/^_catalog-(\d+)\.json$/)[1] > pages);
-for (const f of stale) fs.rmSync(`formats/scene/${f}`);
+for (const f of stale) fs.rmSync(`films/scene/${f}`);
 
-console.log(`wrote ${pages} catalog page(s) · ${grid.length} grid blocks (${CATALOG.length} total registry entries) → formats/scene/_catalog-*.json`
+console.log(`wrote ${pages} catalog page(s) · ${grid.length} grid blocks (${CATALOG.length} total registry entries) → films/scene/_catalog-*.json`
   + (stale.length ? `\n  removed ${stale.length} stale page(s): ${stale.join(', ')}` : ''));

@@ -1,4 +1,4 @@
-// harness/author/build-orbit.mjs: generate formats/scene/orbit-proof.json.
+// harness/author/build-orbit.mjs: generate films/scene/orbit-proof.json.
 //
 // The single shot that proved keyed depth was worth building. In the reference a ribbon sweeps around
 // a photograph, passing IN FRONT of it on the near side and BEHIND it on the far side, so the flat
@@ -9,7 +9,7 @@
 // near for half its circumference and far for the other half. Each half carries its own depth key.
 import fs from 'node:fs';
 
-const OUT = 'formats/scene/orbit-proof.json';
+const OUT = 'films/scene/orbit-proof.json';
 const DUR = 4.0;
 const CX = 960, CY = 540;             // 16:9 centre
 const PW = 620, PH = 400;             // the photograph, the thing being orbited

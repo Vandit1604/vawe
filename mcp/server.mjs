@@ -85,7 +85,7 @@ server.registerTool('vawe_guide', {
     }
   }
   const rules = path.join(pipe.repoRoot, 'site/public/vawe-rules.md');
-  const schema = path.join(pipe.repoRoot, 'formats/scene/schema.json');
+  const schema = path.join(pipe.repoRoot, 'films/scene/schema.json');
   const parts = [];
   if (fs.existsSync(rules)) parts.push(fs.readFileSync(rules, 'utf8'));
   if (fs.existsSync(schema)) parts.push('## Scene schema\n\n```json\n' + fs.readFileSync(schema, 'utf8') + '\n```');
@@ -272,7 +272,7 @@ server.registerTool('vawe_capabilities', {
 // disk, never from stored state, so this tool calls straight into stageOf() rather than keeping a
 // second copy of the eight-stage order.
 function listFilms() {
-  const dir = path.join(STAGE_ROOT, 'formats/scene');
+  const dir = path.join(STAGE_ROOT, 'films/scene');
   const skip = new Set(['schema', 'sample']);
   const names = new Set();
   if (fs.existsSync(dir)) {
@@ -295,13 +295,13 @@ server.registerTool('vawe_next', {
     + 'give `make stage D=`) or omit it to list films on disk and whether each has shipped. Approval '
     + 'is a human act: this tool can tell you a plan is waiting on it, but nothing can grant it.',
   inputSchema: {
-    film: z.string().optional().describe('Film name or path, e.g. "launch" or "formats/scene/launch.json". Omit to list films.'),
+    film: z.string().optional().describe('Film name or path, e.g. "launch" or "films/scene/launch.json". Omit to list films.'),
   },
 }, async ({ film }) => {
   if (!film) {
     const names = listFilms();
     if (!names.length) return text('no films yet. Start one: vawe_guide, then vawe_draft with a scene.');
-    // Capped, not paged: this reads a shared, ever-growing scratch directory (formats/scene/*.json is
+    // Capped, not paged: this reads a shared, ever-growing scratch directory (films/scene/*.json is
     // gitignored, so a long-lived worktree accumulates hundreds of throwaway scenes). A caller asking
     // "what films exist" wants a usable answer, not the whole directory dumped into its context.
     const CAP = 40;

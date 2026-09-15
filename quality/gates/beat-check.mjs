@@ -15,7 +15,7 @@
 //   beats-held-open  . …and which does it hold on screen long past theirs?
 //   beats-unseen     . nobody has LOOKED at this version of the scene (`make beats` writes a receipt).
 //
-// A layer is visible over [start, start+duration), matching formats/scene/scene.js (default duration 2,
+// A layer is visible over [start, start+duration), matching films/scene/scene.js (default duration 2,
 // default start 0). Exits run INSIDE that window, so the window is the whole truth. `track:0` layers are
 // backdrops, not content, so they never keep the frame alive.
 //
@@ -238,7 +238,7 @@ if (bgs.length && movingWindows.length === 0 && duration > 3 && !backdropMotion)
 
 // ---------- 5. beats-wrapped-as-units ----------
 // The authored `duration` is not always the rendered one. `core/engine/produce.js` turns `sceneUnits` on for
-// any cut film with no choreographed `motion` track, and `formats/scene/scene.js` then rewrites every
+// any cut film with no choreographed `motion` track, and `films/scene/scene.js` then rewrites every
 // non-last-beat layer to end with its own beat so the wrapper can slide the beat out as one block. A
 // layer authored across a cut is truncated at it, silently, and the JSON keeps saying otherwise.
 //

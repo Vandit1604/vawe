@@ -49,7 +49,7 @@ That last row is a permanent structural advantage. A self-hoster legally cannot 
 
 ## Security
 
-The render file server default-denies (`renderer/internal/scene/scene.go`): only `core`, `themes`, `formats`,
+The render file server default-denies (`renderer/internal/scene/scene.go`): only `core`, `themes`, `films`,
 `assets` and the caller's own `.vawe-data/scenes|uploads` are reachable. `docs`, `blocks`, `scripts`,
 `.git`, `LICENSE`, and other owners' records are not. The `html` and `svg` sanitisers and the
 submit-time `src` allowlist are defence in depth in front of that wall. Outbound fetches (logo, photo,

@@ -16,7 +16,7 @@ set -euo pipefail
 HEADING="${1:?pass the exact '## ' heading to ablate}"
 OUT="${2:-out/prompt-eval}"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SCENE="$ROOT/formats/scene/_demo-heatread.json"
+SCENE="$ROOT/films/scene/_demo-heatread.json"
 cd "$ROOT"
 mkdir -p "$OUT"
 

@@ -45,7 +45,7 @@
     {
       "source": "site/public/assets/blocks/borderBeamCard.json",
       "url": "https://vawe.dev/assets/blocks/borderBeamCard.json",
-      "target": "formats/scene/borderBeamCard.json",
+      "target": "films/scene/borderBeamCard.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

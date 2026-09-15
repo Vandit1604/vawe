@@ -94,7 +94,7 @@
    "duration": 7.25,
    "anim": "fade",
    "enterDur": 0.5,
-   "src": "formats/scene/_hero-site-card.html"
+   "src": "films/scene/_hero-site-card.html"
   }
  ],
  "bg": [

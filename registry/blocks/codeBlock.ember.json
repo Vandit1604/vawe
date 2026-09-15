@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/codeBlock.ember.json",
       "url": "https://vawe.dev/assets/blocks/codeBlock.ember.json",
-      "target": "formats/scene/codeBlock.ember.json",
+      "target": "films/scene/codeBlock.ember.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

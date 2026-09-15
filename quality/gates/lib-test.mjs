@@ -487,7 +487,7 @@ ok('wipe-up grows upward from the bottom edge', ANIM['wipe-up'](0.5).clipPath ==
 ok('plain wipe is the default direction, rightward', ANIM.wipe(0.5).clipPath === ANIM['wipe-right'](0.5).clipPath);
 ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-right', 'wipe-up', 'wipe-down'].map((n) => ANIM[n](0.5).clipPath)).size === 4);
 
-// ---- AN ENTRANCE IS PART OF WHERE A LAYER IS (MISTAKES #461). formats/scene/scene.js resolveBoxes
+// ---- AN ENTRANCE IS PART OF WHERE A LAYER IS (MISTAKES #461). films/scene/scene.js resolveBoxes
 // folds the enter/exit transform into every box, so boxOf reports the pose on screen rather than the
 // pose the layer is heading for. It does that by reading the composed transform through DOMMatrix,
 // which means the fold is only as complete as the shapes the registry writes. These pin the two halves
@@ -1199,7 +1199,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     }
     ok(`solo ${name} never hides the frame`, held);
     // and the classification must agree with what actually moves, or the loud refusal in
-    // formats/scene/scene.js is guarding the wrong set.
+    // films/scene/scene.js is guarding the wrong set.
     ok(`solo ${name} SOLO_BLIND matches what moves`, SOLO_BLIND.has(name) !== moved);
   }
   ok('SOLO_BLIND is derived, not empty and not everything', SOLO_BLIND.size > 0 && SOLO_BLIND.size < Object.keys(PRESENTATIONS).length);
@@ -1257,7 +1257,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // and a cut OUTSIDE the layer's window is fine, whatever it writes
   ok('a blur cut outside the layer window is allowed',
     (() => { try { checkCuts({ ...glassScene, cuts: [{ t: 20, style: 'blur', dur: 0.34 }] }); return true; } catch { return false; } })());
-  // depth is the second live row: the same filter flattens the rig (formats/scene/scene.js says so)
+  // depth is the second live row: the same filter flattens the rig (films/scene/scene.js says so)
   let dmsg = '';
   try { checkCuts({ cuts: [{ t: 1, style: 'blur', dur: 0.3 }], layers: [{ id: 'card', modifiers: [{ plane: -800 }], start: 0, duration: 5 }] }); } catch (e) { dmsg = e.message; }
   ok('ancestor-kills refuses a filter cut over a depth layer', dmsg.includes('"card"') && dmsg.includes('plane'));
@@ -1849,7 +1849,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // so a style added to the registry validated as an unknown name and the feature stayed unreachable.
   // Checked here rather than in schema-drift, which has no caption subject at all. MISTAKES #400.
   ok('captions: the schema enum IS the registry', (() => {
-    const sch = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+    const sch = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films', 'scene', 'schema.json'), 'utf8'));
     const en = sch.fields.captionStyle.enum;
     return en.length === CAP_STYLE_NAMES.length && CAP_STYLE_NAMES.every((n) => en.includes(n));
   })());
@@ -1873,7 +1873,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok(`stings: every effect has a unit file${missingUnit.length ? ', missing ' + missingUnit.join(', ') : ''}`, missingUnit.length === 0);
   const extraUnit = fs.readdirSync(unitsDir).map((f) => f.replace(/\.js$/, '')).filter((n) => !SHADER_FX.includes(n));
   ok(`stings: no unit file past the end of the list${extraUnit.length ? ', extra ' + extraUnit.join(', ') : ''}`, extraUnit.length === 0);
-  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films', 'scene', 'schema.json'), 'utf8'));
   const en = schema.fields.stings.item.fx.enum;
   ok('stings: schema fx enum is exactly SHADER_FX, in order', JSON.stringify(en) === JSON.stringify(SHADER_FX));
   // EVERY unit keys off pp/bell (progress): a sting that ignores progress freezes mid-cut, which
@@ -1916,7 +1916,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return !/pose\(t\b/.test(body);
   });
   ok(`three: every scene poses from t${frozen.length ? ', frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
-  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films', 'scene', 'schema.json'), 'utf8'));
   ok('three: schema enum is exactly THREE_FX, in order', JSON.stringify(schema.fields.layers.item.three.enum) === JSON.stringify(THREE_FX));
 }
 
@@ -1941,7 +1941,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
     return !body.includes('u_time');
   });
   ok(`raymarch: every scene has a named distance field that depends on time${frozen.length ? ', missing/frozen: ' + frozen.join(', ') : ''}`, frozen.length === 0);
-  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films', 'scene', 'schema.json'), 'utf8'));
   ok('raymarch: schema enum is exactly RAYMARCH_FX, in order', JSON.stringify(schema.fields.layers.item.raymarch.enum) === JSON.stringify(RAYMARCH_FX));
   // ---- raymarchKeys: ONE window, several lit surfaces, cut on a chosen instant ----
   // The same lookup shaderKeys uses (core/surfaces/surface-keys.js), asserted separately because the
@@ -1989,7 +1989,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // which is what `amount: [from, to]` exists for.
   const deaf = RESAMPLE_FX.filter((_, i) => !branchAt(i).includes('u_amt'));
   ok(`resample: every effect responds to amount${deaf.length ? ', deaf: ' + deaf.join(', ') : ''}`, deaf.length === 0);
-  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films', 'scene', 'schema.json'), 'utf8'));
   ok('resample: schema enum is exactly RESAMPLE_FX, in order', JSON.stringify(schema.fields.layers.item.resample.enum) === JSON.stringify(RESAMPLE_FX));
 }
 
@@ -2003,7 +2003,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const noBranch = AMBIENT_FX.slice(0, -1).map((_, i) => i).filter((i) => !frag.includes(`u_fx==${i}`));
   ok(`ambient: FRAG has a branch for effects 0..${AMBIENT_FX.length - 2}${noBranch.length ? ', missing ' + noBranch.map((i) => AMBIENT_FX[i]).join(', ') : ''}`, noBranch.length === 0);
   ok(`ambient: last effect (${AMBIENT_FX[AMBIENT_FX.length - 1]}) is the trailing else, no branch past it`, !frag.includes(`u_fx==${AMBIENT_FX.length - 1}`));
-  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'schema.json'), 'utf8'));
+  const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films', 'scene', 'schema.json'), 'utf8'));
   ok('ambient: schema shader enum is exactly AMBIENT_FX, in order', JSON.stringify(schema.fields.layers.item.shader.enum) === JSON.stringify(AMBIENT_FX));
   // ---- shaderKeys: ONE window, several looks, cut on a chosen instant ----
   // A lookup, never a transition: which look shows at `at` is a pure function of `at`, so a worker
@@ -3373,7 +3373,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // that still says `tick` is a film nobody has re-listened to. This asserts the scenes themselves,
   // not the alias layer, so the aliases stay a courtesy rather than becoming load-bearing.
   ok('audio: every cue an author named in a scene is a cue that exists', (() => {
-    const dir = path.join(repoRoot, 'formats/scene');
+    const dir = path.join(repoRoot, 'films/scene');
     const bad = [];
     for (const f of fs.readdirSync(dir)) {
       if (!f.endsWith('.json')) continue;
@@ -4020,7 +4020,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // The code is the source of truth; this is the assertion that says so out loud.
   ok('the schema cameraMove label names every move the code exports', (() => {
     const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-    const label = JSON.parse(fs.readFileSync(path.join(root, 'formats/scene/schema.json'), 'utf8'))
+    const label = JSON.parse(fs.readFileSync(path.join(root, 'films/scene/schema.json'), 'utf8'))
       .fields.cameraMove.label;
     return CAMERA_MOVE_NAMES.every((n) => label.includes(n));
   })());
@@ -4033,7 +4033,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // the editor can be redone; silently reformatting 104 scenes cannot be undone from a diff.
 {
   for (const name of ['higgsfield-recreation', 'showcase', 'ledgerline-neon', 'demo-interactions']) {
-    const f = path.join(repoRoot, 'formats/scene', `${name}.json`);
+    const f = path.join(repoRoot, 'films/scene', `${name}.json`);
     if (!fs.existsSync(f)) continue;
     const src = fs.readFileSync(f, 'utf8');
     const d = JSON.parse(src);
@@ -4059,7 +4059,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       ok(`patch-motion one key = a small diff (${name}, ${churn} lines)`, churn <= 8);
     }
   }
-  const hf = path.join(repoRoot, 'formats/scene/higgsfield-recreation.json');
+  const hf = path.join(repoRoot, 'films/scene/higgsfield-recreation.json');
   if (fs.existsSync(hf)) {
     const src = fs.readFileSync(hf, 'utf8'), d = JSON.parse(src);
     const btn = d.layers.findIndex((l) => l.id === 'btn');
@@ -4123,7 +4123,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 // ---- becomes: the handover must be EXACT, or a match cut silently stops reading ---------------------
 {
-  const src = fs.readFileSync(path.join(repoRoot, 'formats/scene/scene.js'), 'utf8');
+  const src = fs.readFileSync(path.join(repoRoot, 'films/scene/scene.js'), 'utf8');
   const body = src.slice(src.indexOf('function resolveBecomes'), src.indexOf('// resolveAnchors'));
   const num = (v, d2) => (typeof v === 'number' && Number.isFinite(v) ? v : d2);
   // eslint-disable-next-line no-new-func
@@ -4506,7 +4506,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // THE LIBRARY, BEFORE AND AFTER. A new refusal that fires on a shipped scene is a regression until
   // proven otherwise, so the count is asserted rather than remembered.
   {
-    const dir = path.join(repoRoot, 'formats', 'scene');
+    const dir = path.join(repoRoot, 'films', 'scene');
     const guilty = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'schema.json').filter((f) => {
       let d; try { d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { return false; }
       return d.module === 'scene' && knobErrors(d).length > 0;
@@ -4817,7 +4817,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     .map((l) => l.split(/\s+/));
   const of = (kind) => rows.filter((r) => r[0] === kind).map((r) => r.slice(1));
 
-  const sceneSrc = fs.readFileSync(path.join(repoRoot, 'formats', 'scene', 'scene.js'), 'utf8');
+  const sceneSrc = fs.readFileSync(path.join(repoRoot, 'films', 'scene', 'scene.js'), 'utf8');
 
   // BUILD. The needle is a literal from the step itself, so a step that moves takes its needle with it
   // and a step that is deleted fails as "not found" rather than passing on a stale index.
@@ -4913,7 +4913,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       if (!f.endsWith('.js')) continue;
       for (const m of fs.readFileSync(f, 'utf8').matchAll(READ)) swept.add(m[1]);
     }
-  })(ROOT + '/formats');
+  })(ROOT + '/films');
 
   // composition.js reads L.comp and tests window.gsap on separate lines, so the sweep cannot see it. It
   // says so itself instead, which is the stronger statement of the two.
@@ -5735,7 +5735,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ['letters get squeezed together kerning', 'expandIn'],
     ['chromatic aberration colour fringing', 'chroma'],
     ['strikethrough a word', 'strike'],
-    // The seventh, and the one with a measured cost. Counted over `formats/scene/*.json`: 166 films,
+    // The seventh, and the one with a measured cost. Counted over `films/scene/*.json`: 166 films,
     // 289 motion tracks, `ease: "through"` on ZERO of them and a bezier handle on 12. Asked in the words
     // of the DEFECT it removes, the search answered NOTHING HERE CLEARLY MATCHES and offered a camera
     // move, a flight path and a colour grade; asked in the engine's own words ("velocity through a
@@ -6139,7 +6139,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // The wrapper owns the exit slide, so a layer it carries loses its own exit and lives to the end of the
 // cut window. Applied to EVERY layer of the beat, a beat that is a whole act paints its entire history
 // at once. These assert the membership rule through scene-timing.mjs, which is the ONE model of it
-// outside the renderer; formats/scene/scene.js carries the same rule and snap-all's tpot-launch
+// outside the renderer; films/scene/scene.js carries the same rule and snap-all's tpot-launch
 // baseline is what proves the two still agree in the DOM.
 {
   const { sceneTiming } = await import('./scene-timing.mjs');
@@ -6216,7 +6216,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('backgrounds: the engine MEASURES it dark, so no `tone` has to be typed beside it',
     bgLook('black').tone === 'dark' && bgLook('black').moves === false);
   // The whole reason lightness is not read off the name: `value:"dark"` makes the same preset a dark
-  // window, exactly as formats/scene/scene.js decides it (engine-doctrine/MISTAKES.md #159 is the drift this avoids).
+  // window, exactly as films/scene/scene.js decides it (engine-doctrine/MISTAKES.md #159 is the drift this avoids).
   ok('candidates: `value:"dark"` makes a light preset a dark window, the engine\'s own rule',
     bgLook('plain').tone === 'light' && bgLook('plain', 'dark').tone === 'dark');
 
@@ -6262,7 +6262,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 {
   const { execFileSync } = await import('node:child_process');
   const gate = new URL('./schema-drift.mjs', import.meta.url).pathname;
-  const file = path.join(repoRoot, 'formats', 'scene', 'schema.json');
+  const file = path.join(repoRoot, 'films', 'scene', 'schema.json');
   const original = fs.readFileSync(file, 'utf8');
   const run = (args) => {
     try { return { code: 0, out: String(execFileSync(process.execPath, [gate, ...args], { stdio: 'pipe' })) }; }
@@ -6485,7 +6485,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   let out = '', ranClean = true;
   try {
     out = execFileSync('node', [path.join(repoRoot, 'harness/author/arsenal.mjs'), '--for',
-      path.join(repoRoot, 'formats/scene/sample.json')], { encoding: 'utf8' });
+      path.join(repoRoot, 'films/scene/sample.json')], { encoding: 'utf8' });
   } catch { ranClean = false; }
   // sample.json is the reference scene every author reads first, so it is the one file guaranteed to
   // exist in a fresh clone. If it draws from no vocabulary at all the output is legitimately empty.
@@ -6671,7 +6671,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
 // ---- `make schema AT=` (harness/author/schema-at.mjs) --------------------------------------------
 //
-// The tool that answers "what may I write HERE" from formats/scene/schema.json. Every assert below is
+// The tool that answers "what may I write HERE" from films/scene/schema.json. Every assert below is
 // about the ANSWER being read out of the schema, never about a list this test or that tool keeps: the
 // failure it was built for was an author guessing a keyframe's bezier handles were `in`/`out`, so a
 // second copy of the field names anywhere in this chain would be the same bug with more steps.
@@ -6958,7 +6958,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   ok('theme.look: an unknown top-level key refuses with the near word', lookErrors({ backdorp: ['soft'] }, { bgNames, nearMisses })
     .some((m) => /look\.backdorp/.test(m) && /did you mean "backdrop"/.test(m)));
-  // `cues` used to be a name here: dropped from LOOK_KEYS entirely, `buildSfx` (formats/scene/scene.js)
+  // `cues` used to be a name here: dropped from LOOK_KEYS entirely, `buildSfx` (films/scene/scene.js)
   // already derives every cue from the transition actually used, so a fixed per-brand list is unanswerable.
   ok('theme.look: LOOK_KEYS is the registry\'s own name list (one owner, not a second copy), and cues is gone',
     LOOK_KEYS.length === 6 && LOOK_KEYS.includes('backdrop') && !LOOK_KEYS.includes('cues'));
@@ -7191,7 +7191,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
         const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: scene } }), encoding: 'utf8' });
         return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
       };
-      const tmp = path.join(repoRoot, 'formats/scene/_rung-live-probe.json');
+      const tmp = path.join(repoRoot, 'films/scene/_rung-live-probe.json');
       fs.writeFileSync(tmp, JSON.stringify({ module: 'scene', bg: { preset: 'black' },
         layers: [{ type: 'text', text: 'a' }, { type: 'text', text: 'b' }, { type: 'text', text: 'c' }] }));
       const thin = fire(tmp);
@@ -7208,7 +7208,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       fs.unlinkSync(tmp);
       // A DERIVATIVE IS GENERATED. Telling an author their .expanded.json is thin names a file they did
       // not write and cannot fix in place.
-      const der = path.join(repoRoot, 'formats/scene/_rung-live-probe.expanded.json');
+      const der = path.join(repoRoot, 'films/scene/_rung-live-probe.expanded.json');
       fs.writeFileSync(der, JSON.stringify({ module: 'scene', bg: { preset: 'black' },
         layers: [{ type: 'text' }, { type: 'text' }, { type: 'text' }] }));
       ok('scene-live: a generated derivative is never spoken to', fire(der).code === 0);
@@ -7224,7 +7224,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
         const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: f } }), encoding: 'utf8' });
         return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
       };
-      const tmp = path.join(repoRoot, 'formats/scene/_craft-live-probe.json');
+      const tmp = path.join(repoRoot, 'films/scene/_craft-live-probe.json');
       const write = (o) => fs.writeFileSync(tmp, JSON.stringify({ module: 'scene', bg: [{ preset: 'black' }], ...o }));
 
       // core/timeline/clips.js:77 owns the direction: slide-left enters from the left edge and, as an `out`,
@@ -7260,7 +7260,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       fs.unlinkSync(tmp);
 
       // ONLY WHAT THE AUTHOR WROTE. A derivative is generated and cannot be fixed in place.
-      const der2 = path.join(repoRoot, 'formats/scene/_craft-live-probe.expanded.json');
+      const der2 = path.join(repoRoot, 'films/scene/_craft-live-probe.expanded.json');
       fs.writeFileSync(der2, JSON.stringify({ module: 'scene', layers: [{ type: 'text', text: '🚀' },
         { type: 'text', text: 'b' }, { type: 'text', text: 'c' }] }));
       ok('craft-live: a generated derivative is never spoken to', fire(der2).code === 0);
@@ -7426,7 +7426,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 
   // storyboardPathFor: same basename, .storyboard.md sibling.
   ok('craft-checklist: storyboardPathFor swaps .json for .storyboard.md beside the scene',
-    storyboardPathFor('formats/scene/foo.json') === 'formats/scene/foo.storyboard.md');
+    storyboardPathFor('films/scene/foo.json') === 'films/scene/foo.storyboard.md');
 
   // craftMapFrom: reads the nested `craft:` map out of a storyboard's frontmatter, case-insensitive key,
   // and stops at the first dedented (or blank) line so it never bleeds into the prose below.
@@ -7565,7 +7565,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // `easeInOutElastic`) outrank a real match on pure substring luck. A tiny synthetic storyboard, one
 // beat naming a real capability in prose and one declaring `camera:` structurally.
 {
-  const sbPath = path.join(repoRoot, 'formats/scene/_lib-test-adoption.storyboard.md');
+  const sbPath = path.join(repoRoot, 'films/scene/_lib-test-adoption.storyboard.md');
   fs.writeFileSync(sbPath, [
     '---',
     'duration: 6s',
@@ -7950,7 +7950,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const { readRuns } = await import('../../harness/lib/runlog.mjs');
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'runlog-e2e-'));
   const fixture = path.join(tmpDir, '_runlog-e2e-fixture.json');
-  fs.copyFileSync(path.join(repoRoot, 'formats/scene/sample.json'), fixture);
+  fs.copyFileSync(path.join(repoRoot, 'films/scene/sample.json'), fixture);
   const r = spawnSync('node', [path.join(repoRoot, 'harness/lib/run-author-check.mjs'), fixture], {
     cwd: tmpDir, encoding: 'utf8', env: { ...process.env, RUNLOG_CMD: 'test', MODE: 'iterate' },
   });
@@ -8073,8 +8073,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // THE REAL DEFECT: before this field existed, a design/direct worklist had no audit command at all,
   // so it was reachable only through `make ship`, a POST-render step. A storyboard with no scene JSON
   // yet (still at the design stage, nothing for the audit to load) must not claim one it cannot run.
-  const noSceneStoryboard = 'formats/scene/_zz-lookblock-noscene.storyboard.md';
-  fs.copyFileSync('formats/scene/sample.storyboard.md', noSceneStoryboard);
+  const noSceneStoryboard = 'films/scene/_zz-lookblock-noscene.storyboard.md';
+  fs.copyFileSync('films/scene/sample.storyboard.md', noSceneStoryboard);
   try {
     const noScene = lookBlock('_zz-lookblock-noscene');
     ok('lookBlock names no audit command when there is no scene JSON yet', noScene && noScene.audit === null);
@@ -8478,7 +8478,7 @@ const FLOOR = 1800;
   ok('directional cuts: cube, squeeze, roll and spin read dir', ['cube', 'squeeze', 'roll', 'spin'].every((n) => DIRECTIONAL_CUT.has(n)));
   ok('directional seams: whipPan reads u_dir', DIRECTIONAL_SEAM.has('whipPan'));
 }
-// ---- srcUrl / icon(): a repo-root-relative image src 404s under /formats/scene/ unless rewritten ----
+// ---- srcUrl / icon(): a repo-root-relative image src 404s under /films/scene/ unless rewritten ----
 {
   ok('srcUrl: a bare repo-relative path gets the served-root slash', srcUrl('assets/x/tile.jpg') === '/assets/x/tile.jpg');
   ok('srcUrl: an already-absolute path is untouched', srcUrl('/assets/x/tile.jpg') === '/assets/x/tile.jpg');
@@ -8820,7 +8820,7 @@ const FLOOR = 1800;
   // PROOF NOTHING EXISTING CHANGES: every one of these real, committed films declares no `beats[]`, so
   // item 3's every new branch (beat pass 0, `beat:` checks in the layer/transition/camera/bg passes) is
   // a no-op for it. Expanding it before and after this file's changes must produce the identical scene.
-  const NO_BEATS_FIXTURES = ['formats/scene/sample.json', 'formats/scene/_auto-orient.json', 'formats/scene/_cursor-camera.json'];
+  const NO_BEATS_FIXTURES = ['films/scene/sample.json', 'films/scene/_auto-orient.json', 'films/scene/_cursor-camera.json'];
   for (const rel of NO_BEATS_FIXTURES) {
     const p = path.join(process.cwd(), rel);
     if (!fs.existsSync(p)) continue;

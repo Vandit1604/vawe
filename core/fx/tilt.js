@@ -49,7 +49,7 @@
 //
 // UNDER A CAMERA RIG none of the above applies to a TOP-LEVEL layer, and that is the point. A tilted
 // layer is the thing that makes the frame three-dimensional, so a scene containing one puts the lens on
-// the STAGE instead and turns `#cam` into a rig standing inside it (formats/scene/scene.js). This
+// the STAGE instead and turns `#cam` into a rig standing inside it (films/scene/scene.js). This
 // modifier then contributes its rotation alone; `dist` and `origin` are read at build and become the
 // stage's lens and vanishing point, so nothing an author wrote is dropped, and the camera can travel
 // past the layer with the perspective changing as it goes, which the per-parent camera cannot do,
@@ -126,7 +126,7 @@ export function frame(kit, el, L, t, scene, spec) {
   const parent = el.parentNode;
   const inGroup = !el.classList.contains('hs-layer');
   // UNDER A CAMERA RIG the lens is already on the stage and this layer's parent is inside its 3D space
-  // (formats/scene/scene.js). Writing a second `perspective` here would project the layer once through
+  // (films/scene/scene.js). Writing a second `perspective` here would project the layer once through
   // its parent and again through the stage, and a doubly-projected card leans about twice as hard as
   // the angle asks for. So a top-level tilt contributes its ROTATION and nothing else, and the camera
   // owns the vanishing point, which is the whole reason it can now be travelled past.

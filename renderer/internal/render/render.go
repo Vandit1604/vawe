@@ -53,7 +53,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	// o.Aspect (empty = the scene's own, same default expandScene already applies) is threaded through so
 	// an aspect-dependent bake (cameraMove, a flow-seam's travel) resolves against the canvas THIS render
 	// actually targets, not always the scene's declared one: expandScene runs once, here, before the
-	// browser knows which aspect it is drawing (formats/scene/scene.js never calls it, see expand.go).
+	// browser knows which aspect it is drawing (films/scene/scene.js never calls it, see expand.go).
 	expandedAbs, expandedCleanup, err := expandSugar(repoRoot, dataAbs, o.Aspect)
 	if err != nil {
 		return err
@@ -89,7 +89,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	// starts, and say where a scene may live: that is the only part of the answer the author needs.
 	if !scene.ServeAll() && !scene.Allowed(filepath.ToSlash(rel)) {
 		return fmt.Errorf("%s is outside the paths the render server serves (%s), so the page cannot fetch it.\n"+
-			"  Move the scene under formats/scene/ (or .vawe-data/scenes/), or set VAWE_SERVE_ALL=1 for a local debug render",
+			"  Move the scene under films/scene/ (or .vawe-data/scenes/), or set VAWE_SERVE_ALL=1 for a local debug render",
 			dataPath, strings.Join(scene.Served(), " "))
 	}
 	dataURL := url.QueryEscape("/" + filepath.ToSlash(rel))
@@ -215,7 +215,7 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 		return nil
 	}
 
-	formatDir := filepath.Join(repoRoot, "formats", module)
+	formatDir := filepath.Join(repoRoot, "films", module)
 	// assets/ lives at the repo root now (it was engine/assets). The resolver joins base+path and
 	// falls back to base+"assets"+file, so the base IS the repo root.
 	hasAudio, err := audio.Render(df.Audio, meta.Duration, meta.Stings, meta.SFX, meta.Bridges, formatDir, repoRoot, tmpAudio)

@@ -32,7 +32,7 @@ measured seams, `make ideate` refuses and prints the exact `make study` command 
 make ideate NAME=<film> IDEA="a quick sting for a dev tool called Loom, dark ground, one word landing hard"
 ```
 
-Writes `formats/scene/<film>.prompt.md`. The acts are left as `<fill: ...>` (nothing about a new idea
+Writes `films/scene/<film>.prompt.md`. The acts are left as `<fill: ...>` (nothing about a new idea
 is measured), and under every joint it prints the recipe menu, every promoted recipe's name, kind,
 blurb and first source, so structure is picked from a real measured recipe instead of invented. Add
 `REF=<ref>` to copy that reference's act count and joint axes as structure, with the content still

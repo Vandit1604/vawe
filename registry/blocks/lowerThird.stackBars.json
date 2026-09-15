@@ -41,7 +41,7 @@
     {
       "source": "site/public/assets/blocks/lowerThird.stackBars.json",
       "url": "https://vawe.dev/assets/blocks/lowerThird.stackBars.json",
-      "target": "formats/scene/lowerThird.stackBars.json",
+      "target": "films/scene/lowerThird.stackBars.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

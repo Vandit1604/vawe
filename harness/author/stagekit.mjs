@@ -4,8 +4,8 @@
 // drift): harness/lib/stagekit.mjs explains why a shared stylesheet cannot work here (fragment <style>
 // blocks are @scope-isolated per fragment, core/type/sanitize-html.js).
 //
-//   node harness/author/stagekit.mjs formats/scene/launch.json          # write + print the kit
-//   node harness/author/stagekit.mjs formats/scene/launch.json --check  # verify every scene fragment
+//   node harness/author/stagekit.mjs films/scene/launch.json          # write + print the kit
+//   node harness/author/stagekit.mjs films/scene/launch.json --check  # verify every scene fragment
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

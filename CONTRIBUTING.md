@@ -21,7 +21,7 @@ need a commercial licence. Contributions are accepted under the same licence.
 ```bash
 npm install
 make build          # fetches the free fonts, then builds bin/vawe
-./bin/vawe formats/scene/sample.json      # → out/sample.mp4
+./bin/vawe films/scene/sample.json      # → out/sample.mp4
 ```
 
 If a font is missing the engine refuses to render and names the fix. That is deliberate: a browser

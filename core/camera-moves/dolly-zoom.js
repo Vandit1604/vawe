@@ -5,7 +5,7 @@ import { span } from './units.js';
 // planes, and it is the only move here that does not touch `s`.
 //
 // It is NOT an approximation, and it is not free either. The whole effect is one identity: under the
-// camera rig (formats/scene/scene.js) a point at depth z is magnified by
+// camera rig (films/scene/scene.js) a point at depth z is magnified by
 //
 //     m(z) = s * L / (L - s * z)          L = the lens (`p`), s = where the camera stands (dollyZ)
 //

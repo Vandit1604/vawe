@@ -56,7 +56,7 @@ export const fieldAllIn = (block, k) => {
 export const blocksOf = (src) => src.split(/^##\s+/m).slice(1);
 
 // The film-level `object:` line names the noun ("the input bar"), same as always, and MAY carry a
-// source after an arrow ("the input bar -> formats/scene/_together.bar.html"): the real layer to draw
+// source after an arrow ("the input bar -> films/scene/_together.bar.html"): the real layer to draw
 // it as, instead of assemble.mjs's placeholder rect. Splitting it here, once, keeps `object` itself
 // unchanged for the many readers (docs, panels, the animatic) that only ever wanted the name.
 export function parseObjectLine(raw) {

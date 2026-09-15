@@ -43,7 +43,7 @@ const films = fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && !f.starts
 // `seams`), so the beat lengths are readable without rendering 134 films. That is a different fact from
 // a reference's MEASURED shot list, and the difference is stated rather than smoothed over: ours is
 // what the author asked for, theirs is what a viewer sees.
-const SCENES = path.join(ROOT, 'formats/scene');
+const SCENES = path.join(ROOT, 'films/scene');
 const ours = fs.readdirSync(SCENES).filter((f) => f.endsWith('.json') && f !== 'schema.json'
   && !/\.(animatic|intent|expanded|beatsync|captioned|directed|template)\./.test(f))
   .map((f) => { try { return JSON.parse(fs.readFileSync(path.join(SCENES, f), 'utf8')); } catch { return null; } })

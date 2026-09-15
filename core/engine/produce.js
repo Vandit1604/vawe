@@ -115,7 +115,7 @@ export function produceBaseline(data, theme, frame, look) {
   //
   // `sceneUnits: false`, WRITTEN BY THE AUTHOR, skips injection outright. A `fade` (or any other
   // fading/masking style) on a whole-frame cut with no scene-unit wrapper is refused at render
-  // (formats/scene/scene.js: "transitions only by fading/masking, which a whole-frame cut cannot do"),
+  // (films/scene/scene.js: "transitions only by fading/masking, which a whole-frame cut cannot do"),
   // because there is nothing under the fade to cross into. sceneUnits below only fills an ABSENT field,
   // so an explicit `false` would survive untouched under a freshly-injected fading cut and turn what was
   // a clean render into a boot-time refusal. cadence-film.json is exactly this case in the library today
@@ -189,7 +189,7 @@ export function produceBaseline(data, theme, frame, look) {
 //   - the FIRST WAVE (the earliest `start` in the flattened tree): the viewer is watching the frame
 //     open, already looking there, so a wind-up would buy attention already held.
 //   - `type: "count"`: a rolling number is read, not glanced at; the doc names counters by name.
-// Split and cut layers are excluded outright: `formats/scene/scene.js` (setLayerTiming) THROWS if
+// Split and cut layers are excluded outright: `films/scene/scene.js` (setLayerTiming) THROWS if
 // either carries an `anticipate`, because a split's rhythm and a cut's entrance are owned elsewhere.
 //
 // OPT-OUT via the same sentinel this file already uses for `produced`/`sceneUnits`: `anticipate: false`
@@ -213,7 +213,7 @@ export function applyAnticipateDefault(data, theme) {
   });
 }
 
-// THE ONE FUNNEL. `cameraMove` is sugar; nothing at render time reads it (formats/scene/scene.js reads
+// THE ONE FUNNEL. `cameraMove` is sugar; nothing at render time reads it (films/scene/scene.js reads
 // `data.camera`). It used to be resolved only by harness/author/expand-blocks.mjs, at AUTHOR time, so the
 // baseline push produce.js injects at BOOT time, after expansion, was written and never once read: a static
 // scene rendered identically at frame 2 and frame 170. Resolving it HERE, on the one path every render goes

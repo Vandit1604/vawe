@@ -10,7 +10,7 @@ The live scrubbable preview for one scene: a static server, a plan/make/look/shi
 timeline, so a film can be inspected and approved before it is ever rendered.
 
 ```
-make studio D=formats/scene/<file>.json [PORT=8799]
+make studio D=films/scene/<file>.json [PORT=8799]
 ```
 
 Open the printed URL, leave it running (Ctrl-C to stop). See `AGENTS.md` for the eight authoring

@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/codeBlock.neon.json",
       "url": "https://vawe.dev/assets/blocks/codeBlock.neon.json",
-      "target": "formats/scene/codeBlock.neon.json",
+      "target": "films/scene/codeBlock.neon.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

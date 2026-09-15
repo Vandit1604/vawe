@@ -26,7 +26,7 @@ import { codesEmitted } from '../../harness/lib/finding-codes.mjs';
 import { readFindings } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENE_DIR = path.join(repoRoot, 'formats', 'scene');
+const SCENE_DIR = path.join(repoRoot, 'films', 'scene');
 const MANIFEST = path.join(repoRoot, 'quality/gates/legacy-manifest.json');
 const dryRun = process.argv.includes('--dry-run');
 

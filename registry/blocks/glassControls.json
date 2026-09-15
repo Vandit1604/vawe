@@ -47,7 +47,7 @@
     {
       "source": "site/public/assets/blocks/glassControls.json",
       "url": "https://vawe.dev/assets/blocks/glassControls.json",
-      "target": "formats/scene/glassControls.json",
+      "target": "films/scene/glassControls.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -1,7 +1,7 @@
 // harness/author/recreate.mjs: turn a studied reference into a scene SKELETON.
 //
-//   node harness/author/recreate.mjs rebuilt --theme vawe --out formats/scene/vawe-rebuilt.json
-//   make recreate NAME=rebuilt THEME=vawe OUT=formats/scene/vawe-rebuilt.json
+//   node harness/author/recreate.mjs rebuilt --theme vawe --out films/scene/vawe-rebuilt.json
+//   make recreate NAME=rebuilt THEME=vawe OUT=films/scene/vawe-rebuilt.json
 //
 // WHAT IT EMITS AND WHAT IT REFUSES TO. Everything the study MEASURED becomes real: the duration, a
 // transition at every boundary, one `bg` window per shot in the measured lightness, and a per-beat note

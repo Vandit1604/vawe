@@ -1,5 +1,5 @@
 # The marketing site + live editor. Build context is the REPO ROOT, not site/: the site vendors the
-# render engine (core/, themes/, formats/scene/scene.html, fonts) into its public/ at build time via
+# render engine (core/, themes/, films/scene/scene.html, fonts) into its public/ at build time via
 # scripts/site/site-engine.mjs, so the editor can run the real renderFrame(n) in the browser.
 #
 #   docker build -t vawe-site .
@@ -25,7 +25,7 @@ COPY blocks ./blocks
 COPY assets/geo ./assets/geo
 # The whole scene directory, not just the page: scene.html loads scene.js and scene.css, and shipping
 # only the page put a dead engine in production behind a 200.
-COPY formats/scene ./formats/scene
+COPY films/scene ./films/scene
 COPY assets/icons ./assets/icons
 COPY assets/vendor ./assets/vendor
 COPY scripts ./scripts

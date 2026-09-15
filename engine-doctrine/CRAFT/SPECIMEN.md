@@ -9,7 +9,7 @@ group: look
 ## AGENT SUMMARY
 
 - A demo proves ONE mechanism: `make demo Q="…" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]` writes the
-  fixed archetype (`formats/scene/_demo-<slug>.json`) and runs the dev loop. Never hand-author a demo
+  fixed archetype (`films/scene/_demo-<slug>.json`) and runs the dev loop. Never hand-author a demo
   from a blank file, a blank file plus "prove it works" produces a debug-harness grid every time.
 - The subject MUST be a real picture (full-bleed, bled off three edges with the fourth feathered),
   never a headline: most effects need real tonal detail to act on, and a line of type gives them none.
@@ -25,7 +25,7 @@ A demo is written to prove a mechanism works. That purpose leaks straight into t
 because the fastest proof is nine specimens side by side, and nine specimens side by side is a debug
 harness. A harness is legible and it is never beautiful, and it is the thing we end up showing people.
 
-The measurement, over `formats/scene/_*.json`:
+The measurement, over `films/scene/_*.json`:
 
 | | the 35 scratch scenes | the 120 shipped films |
 |---|---|---|
@@ -44,7 +44,7 @@ harness. Tokens decide what a frame is made of. They do not decide that it is a 
 ## The archetype
 
 `make demo Q="what this shows" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]` writes
-`formats/scene/_demo-<slug>.json` and runs the dev loop on it. A blank file plus "prove it works"
+`films/scene/_demo-<slug>.json` and runs the dev loop on it. A blank file plus "prove it works"
 produces a grid every time, so the archetype arrives with the file:
 
 - **ONE subject, and it is a PICTURE, full bleed.** Never a grid, never a row of variants.

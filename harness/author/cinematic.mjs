@@ -4,8 +4,8 @@
 // This emits the motion SCAFFOLD (camera push + per-hero dolly + motion-blur) derived from the scene's
 // OWN beats (not a template), which you then refine. Suggest-first; WRITE=1 → <file>.cinematic.json.
 //
-//   make cinematic D=formats/scene/x.json            # report: what it would add
-//   make cinematic D=formats/scene/x.json WRITE=1    # → x.cinematic.json (then `make reveal` it)
+//   make cinematic D=films/scene/x.json            # report: what it would add
+//   make cinematic D=films/scene/x.json WRITE=1    # → x.cinematic.json (then `make reveal` it)
 //
 // NOT a template: it adds MOTION to the layers/beats you already authored and never invents content or
 // a canned layout. The ledger + `make direct` one-family rule stay the gate. Verify with `make reveal`.

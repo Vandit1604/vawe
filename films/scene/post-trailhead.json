@@ -1,0 +1,73 @@
+{
+ "module": "scene",
+ "note": "POSTABLE film. Trailhead, a fictional hiker's route planner. Proves ONE mechanism: a person draws a route on a map and the elevation profile fills in underneath the drawn line as it is drawn, so the climb is visible before the walk. Fictional and self-contained, invented figures. Built as the 9:16 reels-length successor to the 15s worked example at quality/runs/evals/briefs/demo.json: same mechanism, more room to breathe, real sound.",
+ "theme": "satara",
+ "aspect": "9:16",
+ "destination": "reels",
+ "profile": "duolingo",
+ "duration": 24.1,
+ "storyboard": "films/scene/post-trailhead.storyboard.md",
+ "sceneUnits": true,
+ "authoring": { "allow": ["slow-pace"], "_why": { "slow-pace": "a demo's whole value is one uninterrupted full-frame hold long enough to watch the route drawn and the profile fill in lockstep; cutting to the launch-film event floor would cut away before the mechanism finishes reading" } },
+ "audio": {
+  "music": "assets/music/warm.wav",
+  "musicGain": 0.5,
+  "musicFade": { "in": 1, "out": 1.5 },
+  "cues": [
+   { "t": 13.8, "name": "impact" },
+   { "t": 14.1, "name": "chime" }
+  ]
+ },
+ "spectacle": { "at": 13.8, "of": "panel", "device": "ripple", "why": "the click and the stat pill it causes are the one loud moment; every other move (the arrival bounce, the draw, the shrink) stays a plain eased settle with no sting of its own" },
+ "bg": [
+  { "from": 0, "to": 5.3, "preset": "soft" },
+  { "from": 5.3, "to": 18.3, "preset": "paperDots" },
+  { "from": 18.3, "to": 24.1, "preset": "gradientWash" }
+ ],
+ "transitions": [
+  { "at": 5.3, "fx": "fade", "dur": 0.5, "mech": "seam" },
+  { "at": 18.3, "fx": "cinematicZoom", "dur": 0.45, "mech": "seam" }
+ ],
+ "camera": [
+  { "t": 0, "s": 1.0 },
+  { "t": 5.3, "s": 1.0 },
+  { "t": 17.7, "s": 1.035, "ease": "easeInOutSine" },
+  { "t": 24.1, "s": 1.035 }
+ ],
+ "layers": [
+  { "type": "text", "text": "ROUTE PLANNING", "size": 28, "weight": 600, "color": "var(--text-2)", "font": "mono", "w": 820, "x": 90, "y": 690, "align": "left", "start": 0, "duration": 5.3, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Draw the route. The climb comes with it.", "size": 72, "weight": 650, "w": 820, "x": 90, "y": 760, "align": "left", "split": "word", "preset": "up", "dist": 24, "stagger": 0.05, "each": 0.38, "start": 0, "duration": 5.3, "out": "fade", "exitDur": 0.3 },
+
+  { "type": "html", "id": "panel", "src": "films/scene/post-trailhead.panel.html", "x": 110, "y": 383, "w": 860, "h": 1000, "start": 0, "duration": 24.1, "acrossBeats": true, "anim": "fade", "enterDur": 0.01, "out": "fade", "exitDur": 0.01,
+    "parts": [
+      { "select": "[data-part-open]", "anim": "riseIn", "each": 0.5, "stagger": 0.12, "delay": 5.9 },
+      { "select": "#route", "anim": "drawOn", "each": 7.0, "delay": 6.6, "ease": "easeOutCubic" },
+      { "select": "[data-part-done]", "anim": "popIn", "each": 0.3, "delay": 14.1 }
+    ],
+    "vars": { "--fill": [0, 1] }, "varsDur": 7.0, "varsDelay": 6.6, "varsEase": "easeOutCubic",
+    "motion": [
+      { "t": 0, "scale": 0.30, "x": 260, "y": -541 },
+      { "t": 4.8, "scale": 0.30, "x": 260, "y": -541 },
+      { "t": 5.3, "scale": 1.0, "x": 0, "y": 0, "ease": "easeOutBack" },
+      { "t": 17.7, "scale": 1.0, "x": 0, "y": 0 },
+      { "t": 18.3, "scale": 0.30, "x": 260, "y": 465, "ease": "easeInOutSine" },
+      { "t": 24.1, "scale": 0.30, "x": 260, "y": 465 }
+    ]
+  },
+
+  { "type": "cursor", "path": [
+      { "t": 0.0, "x": 270, "y": 573, "ease": "easeOutCubic" },
+      { "t": 1.3, "x": 270, "y": 573 },
+      { "t": 2.8, "x": 450, "y": 713, "ease": "easeInOutSine" },
+      { "t": 4.3, "x": 370, "y": 873, "ease": "easeInOutSine" },
+      { "t": 5.8, "x": 630, "y": 973, "ease": "easeInOutSine" },
+      { "t": 7.3, "x": 530, "y": 1093, "ease": "easeInOutSine" },
+      { "t": 8.3, "x": 820, "y": 1195, "ease": "easeOutCubic" },
+      { "t": 8.5, "x": 820, "y": 1195, "ease": "easeOutCubic" }
+    ], "clicks": [8.5], "start": 5.3, "duration": 13.0, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.5 },
+
+  { "type": "text", "text": "The climb, visible before the first step.", "size": 54, "weight": 640, "w": 800, "x": 90, "y": 600, "align": "left", "start": 18.3, "duration": 5.0, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0.3 },
+  { "type": "text", "text": "Trailhead", "size": 42, "weight": 700, "x": 90, "y": 730, "align": "left", "start": 18.9, "duration": 5.2, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 },
+  { "type": "text", "text": "Plan the walk you can actually see.", "size": 28, "weight": 500, "color": "var(--text)", "font": "mono", "x": 90, "y": 800, "align": "left", "start": 19.3, "duration": 4.8, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 }
+ ]
+}

@@ -17,7 +17,7 @@
 //     and stare at, not a cell in a contact sheet.
 //
 //   node harness/author/styleframes.mjs <scene.json> [--n 4] [--scale 2]
-//   make styleframes D=formats/scene/<name>.json [N=4]
+//   make styleframes D=films/scene/<name>.json [N=4]
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';

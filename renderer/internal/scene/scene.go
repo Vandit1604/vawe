@@ -74,7 +74,7 @@ type Meta struct {
 // handler is the wall. A layer type added next year that forgets to sanitise is still contained,
 // because the SERVER, not the layer, decides what may leave.
 var served = []string{
-	"core/", "themes/", "formats/", "assets/",
+	"core/", "themes/", "films/", "assets/",
 	".vawe-data/scenes/", ".vawe-data/uploads/",
 }
 
@@ -172,7 +172,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// shooting it is a different history from seeking sixty, and a sharded capture gives every tab a
 		// different history by construction, so the same frame came out differently at -workers 1 and
 		// -workers 6. Measured on a 60-frame scene once the will-change promotions were gone (see
-		// formats/scene/scene.css): 1 of 60 frames still differed between the two, and 0 of 60 with this
+		// films/scene/scene.css): 1 of 60 frames still differed between the two, and 0 of 60 with this
 		// flag. Cost: none measurable on a 60-frame draft (engine-doctrine/MISTAKES.md #507).
 		//
 		// PRICED PROPERLY, against a real baseline, once the stopwatch existed. Turning partial raster back
@@ -190,8 +190,8 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// COLD tabs of the SAME browser different pixels for an identical display list, but only at
 		// device scale 2:
 		//
-		//	tabprobe -root . -data /formats/scene/plinth-ad.json -tabs 2 -frame 45 -ss 1  identical sha
-		//	tabprobe -root . -data /formats/scene/plinth-ad.json -tabs 2 -frame 45 -ss 2  different sha,
+		//	tabprobe -root . -data /films/scene/plinth-ad.json -tabs 2 -frame 45 -ss 1  identical sha
+		//	tabprobe -root . -data /films/scene/plinth-ad.json -tabs 2 -frame 45 -ss 2  different sha,
 		//	  and its 118-line DOM dump (rects to six decimals, transform, filter, font) is line-for-line
 		//	  the same on both tabs. Same display list, different raster.
 		//
@@ -648,7 +648,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 		return meta, err
 	}
 	defer srv.Close()
-	url := fmt.Sprintf("http://127.0.0.1:%d/formats/%s/scene.html?data=%s&fps=%d", port, module, dataURL, fps)
+	url := fmt.Sprintf("http://127.0.0.1:%d/films/%s/scene.html?data=%s&fps=%d", port, module, dataURL, fps)
 	if aspect != "" {
 		url += "&aspect=" + aspect
 	}

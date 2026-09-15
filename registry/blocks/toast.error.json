@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/toast.error.json",
       "url": "https://vawe.dev/assets/blocks/toast.error.json",
-      "target": "formats/scene/toast.error.json",
+      "target": "films/scene/toast.error.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

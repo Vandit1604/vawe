@@ -1,7 +1,7 @@
-import schemaRaw from "../../../../../formats/scene/schema.json";
+import schemaRaw from "../../../../../films/scene/schema.json";
 
 /* Derive an effect's editable knobs from its own authoring snippet (site/lib/effects-body.json),
- * with a label per field read off formats/scene/schema.json — never hand-listed per family. A
+ * with a label per field read off films/scene/schema.json — never hand-listed per family. A
  * field the schema does not describe gets no description rather than an invented one.
  *
  * WHY WALK THE SNIPPET INSTEAD OF THE SCHEMA. The schema describes every possible field on every

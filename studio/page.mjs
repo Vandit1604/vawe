@@ -20,4 +20,4 @@ const SHELL = fs.readFileSync(path.join(DIR, 'ui/shell.html'), 'utf8');
 // studio.js are pure static files, served straight off disk by the same server.
 export const studioPage = ({ fmt, dataUrl, title }) => SHELL
   .replace('{{TITLE}}', title)
-  .replace('{{IFRAME_SRC}}', `/formats/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`);
+  .replace('{{IFRAME_SRC}}', `/films/${fmt}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`);

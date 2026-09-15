@@ -69,7 +69,7 @@ const typeOf = (v) => (Array.isArray(v) ? 'array' : v === null ? 'null' : typeof
 // height is reliably ~size*1.2 and scenes have tuned around the current behaviour, so applying that
 // estimate would MOVE shipped content. That is the deliberate "measure later" half, see ROADMAP.
 // PIN_AXIS used to be its own copy of the same 17-name table core/engine/boot.js resolves and
-// formats/scene/schema.json enumerates. It is now core/layout/safe.js PLACEMENT, the one table all
+// films/scene/schema.json enumerates. It is now core/layout/safe.js PLACEMENT, the one table all
 // three read; this file keeps the short local name only because `check()` below is written against it.
 const PIN_AXIS = PLACEMENT;
 // keywords that SUBTRACT the layer's size, and are therefore meaningless without one
@@ -322,7 +322,7 @@ export function idleErrors(cfg, IDLES = IDLE) {
 
 // CAPTIONS: the two ways a caption line is accepted and then never seen.
 //
-// 1. OVERLAPPING WINDOWS. formats/scene/scene.js draws `caps.find(c => t >= c.t0 && t < c.t1)`, ONE
+// 1. OVERLAPPING WINDOWS. films/scene/scene.js draws `caps.find(c => t >= c.t0 && t < c.t1)`, ONE
 //    element, FIRST match. Two captions that overlap are not two captions: the second is dropped for
 //    the length of the overlap and nothing says so. That is the silent-substitution shape this repo
 //    logs more than any other, and it costs one comparison to refuse.
@@ -373,11 +373,11 @@ export function captionErrors(cfg) {
 // A GROUP's children were invisible to this: the walk was a flat pass over cfg.layers, so the identical
 // fragment was checked at the top level and unchecked one nesting deep. Nesting is not an exemption.
 // SCENE UNITS AND THE LAYER THAT LOSES MOST OF ITSELF. With `sceneUnits:true` a layer is assigned to a
-// beat BY ITS START TIME (formats/scene/scene.js `beatIndexOf`) and its wrapper is only on screen for
+// beat BY ITS START TIME (films/scene/scene.js `beatIndexOf`) and its wrapper is only on screen for
 // that beat, so a layer that begins just before a boundary is truncated to the sliver between its start
 // and that boundary. It does not error and it does not warn: the beat simply renders empty.
 //
-// Measured: formats/scene/together-recreation.json had a layer at 2.55s to 6.70s with a boundary at
+// Measured: films/scene/together-recreation.json had a layer at 2.55s to 6.70s with a boundary at
 // 2.65s. Ten of its four thousand one hundred and fifty milliseconds survived. Four beats of a finished
 // film rendered pure white, and finding it took a single-layer probe scene because every fragment
 // previewed perfectly on its own (engine-doctrine/MISTAKES.md #603).
@@ -418,7 +418,7 @@ export function sceneUnitWarnings(cfg) {
 }
 
 // seamMotionFreezeWarnings(cfg): a boundary transition that lowers to a SEAM (core/transitions/lower.js
-// boundaryMechanism) bakes the OUTGOING and INCOMING beat to two still rasters once (formats/scene/
+// boundaryMechanism) bakes the OUTGOING and INCOMING beat to two still rasters once (films/scene/
 // scene.js bakeSeams, ~1613-1649) and blends between those two stills for the whole window
 // (drawSeams, ~1593-1611): the live DOM underneath is fully covered. That is a deliberate determinism
 // trade (a seam has to composite two frames it can hold onto, not the moving stage), and it stays: the
@@ -554,9 +554,9 @@ const OWNED_CSS = {
   transform: 'written every frame by motion tracks and named entrances (core/timeline/clips.js, GSAP), use `motion`',
   animation: 'killed engine-wide (core/tokens.css:28, `* { animation: none !important }`) because a frame is seeked, not played, use `parts` for a seeked entrance into your own markup, or drive a value from `vars`',
   transition: 'killed engine-wide (core/tokens.css:28, `* { transition: none !important }`) for the same reason as `animation`, use `parts` or `vars`',
-  position: 'the coordinate system the engine lays the layer out with (formats/scene/scene.js), use `x` / `y` / `w`',
-  left: "written from the layer's `x` on every build (formats/scene/scene.js), set `x` instead",
-  top: "written from the layer's `y` on every build (formats/scene/scene.js), set `y` instead",
+  position: 'the coordinate system the engine lays the layer out with (films/scene/scene.js), use `x` / `y` / `w`',
+  left: "written from the layer's `x` on every build (films/scene/scene.js), set `x` instead",
+  top: "written from the layer's `y` on every build (films/scene/scene.js), set `y` instead",
   width: "written from the layer's `w`, and again by the type-specific builder, set `w` instead",
   height: "written from the layer's `h` by the type-specific builder (core/layers/*.js), set `h` instead",
   zIndex: "written every frame from the layer's stacking order (core/timeline/clips.js:150, driven by `track`), set `track` instead",
@@ -681,7 +681,7 @@ export function bgErrors(cfg) {
         out.push(...bgOverErrors(bgPreset(b.preset || 'paper', b.value), b.opts, at));
       // ...AND THE SAME KEY ONE LEVEL UP. #157 made an unknown key INSIDE `opts` throw. Nothing checked
       // a real fx parameter written OUTSIDE it: `{"preset":"gradientWash","intensity":0.3}` is read by
-      // formats/scene/scene.js:146 as `applyBgOver(spec, b.opts)` with `b.opts` undefined, so the whole
+      // films/scene/scene.js:146 as `applyBgOver(spec, b.opts)` with `b.opts` undefined, so the whole
       // override is dropped and the film renders exactly as if the key were not there. That is the
       // identical failure the earlier fix was written for, at the level nobody looked at: I authored one
       // myself, changed the numbers twice, and got a byte-identical contact sheet both times before
@@ -1207,7 +1207,7 @@ function sceneCollisionWarns(data) {
   // and the retired typing rule), so the height stays the old single-line estimate: it under-states, and
   // under-stating can only drop a finding, never invent one.
   const ADVANCE = 0.55;                                  // average glyph advance, in em
-  const LINE_HEIGHT = 1.04;                              // .hs-text in formats/scene/scene.css
+  const LINE_HEIGHT = 1.04;                              // .hs-text in films/scene/scene.css
   const TEXT_IS_NOT_ITS_BOX = new Set(['text', 'count']);
   const inkBox = (L) => {
     const size = L.size ?? 40;
@@ -1227,7 +1227,7 @@ function sceneCollisionWarns(data) {
   const box = (L) => {
     if (typeof L.start === 'string' || L.x == null || L.y == null || L.w == null) return null;
     const ink = TEXT_IS_NOT_ITS_BOX.has(L.type || 'text') ? inkBox(L) : null;
-    // 1.04 is the engine's own line-height for .hs-text (formats/scene/scene.css). The estimate used to
+    // 1.04 is the engine's own line-height for .hs-text (films/scene/scene.css). The estimate used to
     // be 1.3, which is nobody's number: it gave every headline a box a quarter taller than the line the
     // renderer draws, and that phantom band under a title is what "collided" with the caption below it.
     const h = L.h != null ? L.h : (L.size ?? 40) * LINE_HEIGHT;
@@ -1409,7 +1409,7 @@ export function validateAll(schema, data) {
 }
 
 // ---------- CLI: `node core/validate/validate.mjs [data.json ...]` (make validate) ----------
-// No args → validate every formats/*/sample.json. Browser never runs this branch.
+// No args → validate every films/*/sample.json. Browser never runs this branch.
 const isMain = typeof process !== 'undefined' && process.argv?.[1] && import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
   const fs = await import('node:fs');
@@ -1419,14 +1419,14 @@ if (isMain) {
 
   const strict = process.argv.includes('--strict'); // treat lint warnings as failures
   let targets = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-  // No args used to mean "formats/*/sample.json", with one format, that is ONE file, while 60
+  // No args used to mean "films/*/sample.json", with one format, that is ONE file, while 60
   // authored scenes and every theme pack went unchecked. So a scene could carry an anim name that
   // never existed (silently resolving to fade) and a theme could be missing half the contract, for
   // as long as nobody happened to re-render it by hand. Default is now EVERY authored scene and
   // EVERY theme, because a validator nobody points at the real files validates nothing (#48).
   let themeTargets = [];
   if (targets.length === 0) {
-    const fdir = path.join(root, 'formats');
+    const fdir = path.join(root, 'films');
     for (const fmt of fs.readdirSync(fdir)) {
       const dir = path.join(fdir, fmt);
       if (!fs.statSync(dir).isDirectory()) continue;
@@ -1443,7 +1443,7 @@ if (isMain) {
         // on purpose: those files still declare `module` and validate cleanly, so excluding them would
         // just shrink coverage.
         if (/\.(animatic|template)\.json$/.test(n)) continue;
-        // only actual scenes: a formats/ dir also holds planning artifacts (*.intent.json carries
+        // only actual scenes: a films/ dir also holds planning artifacts (*.intent.json carries
         // beats, not layers). "Declares a module" is the honest test for "the renderer would read it".
         const fp = path.join(dir, n);
         // A parse failure here must still reach the per-target loop below, which reports "unreadable
@@ -1472,15 +1472,15 @@ if (isMain) {
   // Anti-rot guard: the cue enum in schema.json is DISCOVERABILITY only (so authors + MCP can see the
   // valid names); CUES is the source of truth. If they drift, the schema lies, fail loudly to resync.
   {
-    // formats/scene/schema.json is repo-owned and required: a read/parse failure here is a real
+    // films/scene/schema.json is repo-owned and required: a read/parse failure here is a real
     // corruption, not an optional file, so let it fail loud rather than skip the anti-rot guard silently.
-    const ss = readJSON(path.join(root, 'formats/scene/schema.json'));
+    const ss = readJSON(path.join(root, 'films/scene/schema.json'));
     const el = ss?.fields?.audio?.fields?.cues?.item?.name?.enum || [];
     // Superset guard: every live CUE must be documented. The enum MAY also carry baked ALIASES
     // (whoosh/reveal/click/pop, generators/media/audio-bake.mjs) that are not CUES keys, so only a CUE
     // the enum OMITS is drift, extra alias names are legal.
     const missing = CUE_NAMES.filter((n) => !el.includes(n));
-    if (el.length && missing.length) { console.error(`✗ schema drift: formats/scene/schema.json audio.cues enum omits live CUES (${missing.join(', ')}), add them.`); failed++; }
+    if (el.length && missing.length) { console.error(`✗ schema drift: films/scene/schema.json audio.cues enum omits live CUES (${missing.join(', ')}), add them.`); failed++; }
 
     // Same guard for `voice`, the OTHER direction: unlike `name` (which may carry aliases onto a
     // real cue, generators/media/audio-bake.mjs ROLES), a voice IS the CUES key it synthesizes from
@@ -1488,14 +1488,14 @@ if (isMain) {
     // resolve throws on a name nothing backs.
     const ve = ss?.fields?.audio?.fields?.cues?.item?.voice?.enum || [];
     const badVoices = ve.filter((v) => !CUE_NAMES.includes(v));
-    if (ve.length && badVoices.length) { console.error(`✗ schema drift: formats/scene/schema.json audio.cues voice enum lists ${badVoices.join(', ')}, which core/audio/kit.mjs CUES does not implement. Fix the enum or add the voice.`); failed++; }
+    if (ve.length && badVoices.length) { console.error(`✗ schema drift: films/scene/schema.json audio.cues voice enum lists ${badVoices.join(', ')}, which core/audio/kit.mjs CUES does not implement. Fix the enum or add the voice.`); failed++; }
   }
 
   for (const file of targets) {
     let data, schema;
     try { data = readJSON(file); } catch (e) { console.error(`✗ ${file}: unreadable JSON, ${e.message}`); failed++; continue; }
     const mod = data.module;
-    const schemaPath = mod && path.join(root, 'formats', mod, 'schema.json');
+    const schemaPath = mod && path.join(root, 'films', mod, 'schema.json');
     try { schema = schemaPath && fs.existsSync(schemaPath) ? readJSON(schemaPath) : null; } catch (e) { schema = null; }
     const errors = validateAll(schema, data);
     // `block`/`beat`/`comp` sugar expands at LOAD time (core/engine/expand.js), so a scene naming one is

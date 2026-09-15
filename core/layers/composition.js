@@ -5,7 +5,7 @@
 //
 // build() looks up the comp and hands it { el, gsap, start, W, H, kit, ...props }. The comp builds its
 // static DOM and authors PAUSED tweens on gsap.globalTimeline (delays offset by start); seekAll(t) drives
-// them per frame → pure in n, exactly like every other GSAP hook (formats/scene/scene.js applyGsapHooks).
+// them per frame → pure in n, exactly like every other GSAP hook (films/scene/scene.js applyGsapHooks).
 // No frame() hook: the timeline is global and seeked centrally.
 import { COMPOSITION_REGISTRY } from '../compositions/index.js';
 import { propsOf } from '../registry/props.js';

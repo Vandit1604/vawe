@@ -22,7 +22,7 @@ const DIR = path.join(ROOT, 'grammar');
 const ONE = process.argv.slice(2).find((a) => !a.startsWith('--'));
 
 let files = [];
-// A LEADING UNDERSCORE MEANS "not a film", which is the convention formats/scene already uses for a
+// A LEADING UNDERSCORE MEANS "not a film", which is the convention films/scene already uses for a
 // file that is in the directory but not part of the population. `_claims.json` and `_patterns.json`
 // live here because they are ABOUT the films and belong beside them; they are excluded by RULE rather
 // than by a list of names, because a list of exceptions grows and the second time I added one I had

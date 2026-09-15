@@ -1,4 +1,4 @@
-// harness/author/build-glass.mjs: generate formats/scene/glass.json.
+// harness/author/build-glass.mjs: generate films/scene/glass.json.
 //
 // THE CONCEPT, because the first version of this file did not have one. That draft was four frosted
 // rectangles drifting over a gradient: the stock result anyone gets from typing "glassmorphism" into
@@ -22,7 +22,7 @@
 // pane over a light source is the substance doing the one thing it actually does.
 import fs from 'node:fs';
 
-const OUT = 'formats/scene/glass.json';
+const OUT = 'films/scene/glass.json';
 const DUR = 12.0;
 const r1 = (v) => +v.toFixed(2);
 const layers = [];

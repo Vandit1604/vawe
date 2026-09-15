@@ -41,7 +41,7 @@
     {
       "source": "site/public/assets/blocks/lowerThird.sideRule.json",
       "url": "https://vawe.dev/assets/blocks/lowerThird.sideRule.json",
-      "target": "formats/scene/lowerThird.sideRule.json",
+      "target": "films/scene/lowerThird.sideRule.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -37,7 +37,7 @@
     {
       "source": "site/public/assets/blocks/stripeCard.json",
       "url": "https://vawe.dev/assets/blocks/stripeCard.json",
-      "target": "formats/scene/stripeCard.json",
+      "target": "films/scene/stripeCard.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

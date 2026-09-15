@@ -9,7 +9,7 @@
 // input can name a comp and fill in labels, but cannot inject code (unlike an inline `<script>`, the real
 // past exploit). Comps therefore treat every `props` string as DATA (textContent / attr), never innerHTML.
 //
-// Determinism contract (identical to every hook in formats/scene/scene.js):
+// Determinism contract (identical to every hook in films/scene/scene.js):
 //   • build(ctx) constructs the beat's STATIC DOM into `el`, then authors PAUSED tweens via `ctx.gsap`
 //     with `delay` offset by `ctx.start` and `immediateRender:true` so the start values are pinned.
 //   • No `Date.now()`, no `Math.random()`, no reading prior DOM/frame state, pure in the frame.

@@ -118,7 +118,7 @@
     {
       "source": "site/public/assets/blocks/usMapHex.json",
       "url": "https://vawe.dev/assets/blocks/usMapHex.json",
-      "target": "formats/scene/usMapHex.json",
+      "target": "films/scene/usMapHex.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

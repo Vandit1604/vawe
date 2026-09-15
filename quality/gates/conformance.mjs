@@ -42,7 +42,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const only = process.argv.slice(2).find((a) => !a.startsWith('--')) || 'all';
 
 
-// Scenes are served from MEMORY, never written to formats/. A sweep that litters the repo with
+// Scenes are served from MEMORY, never written to films/. A sweep that litters the repo with
 // hundreds of fixture files is a sweep nobody runs twice.
 const scenes = new Map();
 const { server, port } = await serveRepo({
@@ -121,7 +121,7 @@ let id = 0;
 async function sig(scene, frames, blind = []) {
   const key = `s${id++}.json`;
   scenes.set(key, JSON.stringify(scene));
-  await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${encodeURIComponent('/__conf/' + key)}&fps=30`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=${encodeURIComponent('/__conf/' + key)}&fps=30`, { waitUntil: 'load' });
   const err = await waitForEngine(page);
   if (err) return { error: String(err).slice(0, 120) };
   const out = blind.length
@@ -140,7 +140,7 @@ async function sig(scene, frames, blind = []) {
 async function assertMirrorsFrameSig() {
   const key = `mirror.json`;
   scenes.set(key, JSON.stringify(base([T(), I({ x: 900, y: 200 })])));
-  await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${encodeURIComponent('/__conf/' + key)}&fps=30`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=${encodeURIComponent('/__conf/' + key)}&fps=30`, { waitUntil: 'load' });
   await waitForEngine(page);
   const bad = await page.evaluate((src) => {
     const fn = new Function('return ' + src)();
@@ -203,7 +203,7 @@ async function sweepEnums() {
   // finding per category forever.
   const DEFAULTS = { 'layer anim': 'none', 'kinetic preset': 'up' };
   const CUT_STYLES = (() => {
-    const j = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats/scene/schema.json'), 'utf8'));
+    const j = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films/scene/schema.json'), 'utf8'));
     let found = [];
     const walk = (o) => { if (!o || typeof o !== 'object') return;
       if (Array.isArray(o.enum) && o.enum.includes('punch') && o.enum.includes('softwipe')) found = o.enum.filter((v) => v !== 'none');

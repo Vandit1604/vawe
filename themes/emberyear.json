@@ -1,6 +1,6 @@
 {
   "name": "emberyear",
-  "note": "INVENTED (not selected) by harness/author/invent-look.mjs from formats/scene/_concepts/gh-wrapped.storyboard.md, seed 17, candidate 1 of 6. Stance \"ignition\": the year starts cold and catches fire, so the one warm colour IS the event. Ground is burnt ember (#170c0b), not neutral black: a year of work banked rather than a void. Texture is halation, the accent bleeds a little light into the ground and nothing else glows. Display face is a STENCIL, whose letters are interrupted by gaps, which is the subject said in type. The tool's own generated story line is preserved verbatim under `invented` and names the candidate's seed word, not this film.",
+  "note": "INVENTED (not selected) by harness/author/invent-look.mjs from films/scene/_concepts/gh-wrapped.storyboard.md, seed 17, candidate 1 of 6. Stance \"ignition\": the year starts cold and catches fire, so the one warm colour IS the event. Ground is burnt ember (#170c0b), not neutral black: a year of work banked rather than a void. Texture is halation, the accent bleeds a little light into the ground and nothing else glows. Display face is a STENCIL, whose letters are interrupted by gaps, which is the subject said in type. The tool's own generated story line is preserved verbatim under `invented` and names the candidate's seed word, not this film.",
   "palette": {
     "bg": "#170c0b",
     "bg2": "#1f1412",
@@ -97,7 +97,7 @@
   },
   "invented": {
     "tool": "harness/author/invent-look.mjs",
-    "storyboard": "formats/scene/_concepts/gh-wrapped.storyboard.md",
+    "storyboard": "films/scene/_concepts/gh-wrapped.storyboard.md",
     "subject": "GitHub wrapped, Vandit1604 · 20 Aug 2025 to 20 Aug 2026",
     "seed": 17,
     "resolvedSeed": 2725014791,

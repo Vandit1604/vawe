@@ -23,7 +23,7 @@
 // It used to need both, plus two Object.assign calls, and nine identical registration lines sat here
 // differing only in a name, carrying no information the module did not already have.
 //
-// This module is NODE-ONLY (nothing in core/ or formats/ imports it), so reading the directory is
+// This module is NODE-ONLY (nothing in core/ or films/ imports it), so reading the directory is
 // available and top-level await is fine: an ESM importer awaits it before its own body runs.
 //
 // See engine-doctrine/BLOCKS.md for the catalog + screenshots.

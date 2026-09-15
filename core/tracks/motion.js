@@ -32,7 +32,7 @@ export const PROPS = {
   overscan: { when: 'motion' } };
 
 // The scene's shutter, in the units a camera states it in, converted once. Exported so the one place
-// that builds the track kit reads the conversion rather than restating it (formats/scene/scene.js).
+// that builds the track kit reads the conversion rather than restating it (films/scene/scene.js).
 export const DEFAULT_SHUTTER = AUTO_SHUTTER;
 export function resolveShutter(deg) {
   if (deg == null) return AUTO_SHUTTER;
@@ -51,7 +51,7 @@ export function resolveShutter(deg) {
 //
 // THE SUM IS THE WHOLE MECHANISM, and it is a sum because of where the camera's translate is written.
 // The flat rig is `scale(s) translate(x, y)` on #cam and the 3D rig is `translate3d(x, y, dollyZ(s))`
-// (formats/scene/scene.js drawCameraAndCut). In both, the translation is applied in the same
+// (films/scene/scene.js drawCameraAndCut). In both, the translation is applied in the same
 // pre-projection space a layer's own `motion` dx/dy live in, so a layer's velocity on the sensor is
 // (its own) + (the camera's), and a layer whose track exactly counter-pans lands on zero and stays
 // sharp. Nothing has to be converted, compared or corrected: the cancellation falls out of the
@@ -63,7 +63,7 @@ export function resolveShutter(deg) {
 // element in its OWN local space and the projection then scales the result, so the same P/(P-z)
 // magnifies the smear it magnifies the travel by. The ratio is depth-invariant, so a blur written in
 // local pixels off a local velocity is correct at every depth, and a depth term here would double-count
-// it. Verified against the two-plane probe in formats/scene/_camera-blur-probe.json, whose far plane
+// it. Verified against the two-plane probe in films/scene/_camera-blur-probe.json, whose far plane
 // smears visibly less than its near one with no depth code on this path.
 //
 // WHAT IS NOT MODELLED, said plainly rather than approximated: a camera ZOOM (`s`) and a ROLL/tilt
@@ -178,7 +178,7 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   // decided from the AUTHORED keyframes, once per frame, the same shape scene.js already uses to decide
   // whether a track keys `radius` at all.
   const has3D = L.motion.some((k) => k && (k.z != null || k.rotX != null || k.rotY != null));
-  // COMPOSITION ORDER, matched to the camera rig's own (formats/scene/scene.js drawCameraAndCut):
+  // COMPOSITION ORDER, matched to the camera rig's own (films/scene/scene.js drawCameraAndCut):
   // `translate3d(...) rotateZ(...) rotateX(...) rotateY(...)`. CSS applies a function list right to
   // left, so that string is rotateY first, rotateX second, rotateZ (`rotate`, already this layer's `rot`)
   // third, and the position last. Reusing the camera's own Y-X-Z order rather than inventing an

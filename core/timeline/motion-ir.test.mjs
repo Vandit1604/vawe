@@ -86,9 +86,9 @@ test('a layer with no motion, idle, preset or parts contributes nothing to the I
 // on each layer's raw keyframes. A full before/after `diff` of the gate's stdout on the whole library,
 // run once by hand during this change, was empty save for one unrelated stack-trace line number.)
 test('motion-ir json coverage matches a naive raw-JSON scan, on every layer of every shipped film', () => {
-  const dir = path.join(ROOT, 'formats/scene');
+  const dir = path.join(ROOT, 'films/scene');
   const films = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && !f.startsWith('_'));
-  assert.ok(films.length > 0, 'expected shipped films in formats/scene');
+  assert.ok(films.length > 0, 'expected shipped films in films/scene');
   for (const name of films) {
     let data;
     // gh-wrapped.template.json is a deliberate TEMPLATE with placeholder syntax that is not valid

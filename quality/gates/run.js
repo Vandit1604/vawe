@@ -12,7 +12,7 @@ import { population } from '../../harness/lib/census.mjs';
 import { serveRepo, waitForEngine } from '../../harness/lib/render-harness.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const formatsDir = path.join(repoRoot, 'formats');
+const formatsDir = path.join(repoRoot, 'films');
 const OUT = path.join(repoRoot, 'quality', 'runs', 'out');
 fs.mkdirSync(OUT, { recursive: true });
 // The canvas and the safe box come from the SAMPLE, via core/safe.js, the same function boot.js
@@ -44,7 +44,7 @@ for (const m of modules) {
   if (!fs.existsSync(dir)) continue;
   // The asset sweep is the purest form of "absence read as a pass": a checkout that cannot see the
   // library finds no missing image and reports assets green. population() states N and refuses instead.
-  for (const file of population(`assets · ${m}`, { dir: `formats/${m}`, filter: (f) => f !== 'schema.json' }).names) {
+  for (const file of population(`assets · ${m}`, { dir: `films/${m}`, filter: (f) => f !== 'schema.json' }).names) {
     let data;
     try { data = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8')); } catch { continue; }
     const missing = imgRefs(data)
@@ -58,7 +58,7 @@ const { server, port } = await serveRepo();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 
 for (const m of modules) {
-  const sample = `formats/${m}/sample.json`;
+  const sample = `films/${m}/sample.json`;
   if (!fs.existsSync(path.join(repoRoot, sample))) { add('exists', m, false, 'no sample.json'); continue; }
   const cfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, sample), 'utf8')); } catch { return {}; } })();
   const [VW, VH] = dimsFor(cfg);
@@ -71,7 +71,7 @@ for (const m of modules) {
   // live scene for meta + safe-zone bboxes
   const page = await browser.newPage();
   await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
-  await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${sample}&fps=30`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/films/${m}/scene.html?data=/${sample}&fps=30`, { waitUntil: 'load' });
   await waitForEngine(page);
   const meta = await page.evaluate(() => window.__engine.meta);
   const total = meta.totalFrames;

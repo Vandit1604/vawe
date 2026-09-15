@@ -36,8 +36,8 @@
 // whether its motion is monotonic (one direction) or oscillating. Sampled, not rendered whole: default
 // stride auto-scales to ~200 samples over the film so a trace costs seconds. See engine-doctrine/CRAFT/MOTION-TRACE.md.
 //
-//   node quality/gates/motion-audit.mjs scene --data formats/scene/x.json --trace [--stride N] [--json]
-//   make motion-trace M=scene D=formats/scene/x.json
+//   node quality/gates/motion-audit.mjs scene --data films/scene/x.json --trace [--stride N] [--json]
+//   make motion-trace M=scene D=films/scene/x.json
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -63,7 +63,7 @@ const JSON_OUT = args.includes('--json');
 const TRACE = args.includes('--trace');
 const TRACE_TARGET_SAMPLES = 200; // stride auto-scales to land near this many samples, unless --stride is given
 let formats = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--stride' && args[i - 1] !== '--data');
-if (!formats.length) formats = fs.readdirSync(path.join(repoRoot, 'formats')).filter((f) => fs.existsSync(path.join(repoRoot, 'formats', f, 'sample.json'))).sort();
+if (!formats.length) formats = fs.readdirSync(path.join(repoRoot, 'films')).filter((f) => fs.existsSync(path.join(repoRoot, 'films', f, 'sample.json'))).sort();
 
 const FPS = 30;
 const HOLDW = 0.5;              // settle window: payoffs must be steady for this long before the exit
@@ -71,7 +71,7 @@ const HOLDW = 0.5;              // settle window: payoffs must be steady for thi
 // severity change across the whole library and not a side effect of fixing the windows. `report` names
 // every finding at the tier the clause asked for (`would`) and blocks on none; `enforce` blocks.
 const FAIL_LEVEL = (process.env.MOTION_TIER || 'report') === 'enforce' ? 'FAIL' : 'WARN';
-// `cam` is the CAMERA RIG (formats/scene/scene.html:13), and it was missing from this list. Two
+// `cam` is the CAMERA RIG (films/scene/scene.html:13), and it was missing from this list. Two
 // consequences, both measured: a camera move made the rig itself report as unsettled content, and the
 // rig's textContent is every word in the film, so any text changing anywhere read as "cam text still
 // changing". It belongs here beside `stage` and `root`, which it has always been a sibling of.
@@ -95,7 +95,7 @@ const parseNum = (t) => {
 //
 // SELECTOR: `[data-start]`, not `[id], [data-layer="critical"]`. An authored layer's `id` (scene JSON
 // `L.id`) is used all over the JS side (geometry maps, `becomes`, error messages) but is NEVER written
-// to the DOM: `formats/scene/scene.js` keeps a separate geometry object (`g.id = L.id`, scene.js:922)
+// to the DOM: `films/scene/scene.js` keeps a separate geometry object (`g.id = L.id`, scene.js:922)
 // and never sets `el.id`. So `[id]` matched only the four hand-authored ids in scene.html's static
 // markup (stage/root/cv/cam) plus whatever a browser default happens to be, never an authored layer.
 // `[data-layer="critical"]` only catches text layers ≥60px that default (or opt) into the layout
@@ -215,7 +215,7 @@ const captureSeries = (page, total, stride, idsByIdx) => page.evaluate(async (to
 
 // ---- windows: the film's OWN JOINTS ----
 // This used to read `meta.segments`, and NO SCENE HAS EVER SET IT: core/engine/boot.js read
-// `scene.segments || []`, formats/scene never returns the key, and there is exactly one format. So
+// `scene.segments || []`, films/scene never returns the key, and there is exactly one format. So
 // every segment-scoped FAIL was rewritten to WARN before a reader saw it and the run printed a tick.
 // `segments` was never a missing declaration: it was a SECOND way to say what `cuts` already says,
 // and the film's cuts and seams are the joints, so core/timeline/junctions.js owns the reading of them
@@ -253,7 +253,7 @@ const sampleAt = (series, F, i, f) => { const idx = F.findIndex((x) => x >= f); 
 
 // A LAYER'S OWN EXIT IS A FADE TOO, and (ii) could not tell it from the defect it hunts. Its only
 // exclusion was the SEGMENT's transition window, so every ordinary layer leaving mid-shot read as
-// a mid-scene fade. Two of them on formats/scene/sample.json, the canonical clean scene. The
+// a mid-scene fade. Two of them on films/scene/sample.json, the canonical clean scene. The
 // window was never the missing piece: this clause is scoped to a LAYER'S LIFE, not to a shot.
 // An exit is a TERMINAL DESCENT: from some frame on the opacity never rises again and the element
 // does reach nothing. A dip comes back, and a dip is the bug. Scanning back from the end of the
@@ -473,13 +473,13 @@ function presetFinding(data) {
 // its data/meta. One door for both readers so a change to how a page is opened (a query param, a wait
 // condition) cannot drift between the check and the instrument.
 async function loadPage(format, dataArg) {
-  const dataPath = dataArg || `formats/${format}/sample.json`;
+  const dataPath = dataArg || `films/${format}/sample.json`;
   const dataName = dataPath.split('/').pop();
   const data = JSON.parse(fs.readFileSync(path.join(repoRoot, dataPath), 'utf8'));
   const [VW, VH] = sceneDims(data);
   const page = await browser.newPage();
   await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
-  await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=/${dataPath}&fps=${FPS}`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/films/${format}/scene.html?data=/${dataPath}&fps=${FPS}`, { waitUntil: 'load' });
   const err = await waitForEngine(page);
   if (err) { await page.close(); return { dataName, error: String(err) }; }
   const meta = await page.evaluate(() => window.__engine.meta);

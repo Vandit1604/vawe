@@ -41,7 +41,7 @@
     {
       "source": "site/public/assets/blocks/lowerThird.accentUnderline.json",
       "url": "https://vawe.dev/assets/blocks/lowerThird.accentUnderline.json",
-      "target": "formats/scene/lowerThird.accentUnderline.json",
+      "target": "films/scene/lowerThird.accentUnderline.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

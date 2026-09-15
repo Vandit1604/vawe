@@ -8,7 +8,7 @@ what: A generator for light-field backdrops. Five dials, one seed, one HTML stri
 
 # Lightfield
 
-`formats/scene/_lightfall.html` is a good backdrop and a dead end. Every colour in it is typed by
+`films/scene/_lightfall.html` is a good backdrop and a dead end. Every colour in it is typed by
 hand, so a second one in another palette means editing 58 lines of baked CSS. This is the same
 backdrop as a function.
 
@@ -291,7 +291,7 @@ most-logged bug class in this repo.
 make lightfield                                  # ref, tide and fern only: the loop in the Makefile
                                                  # is hardcoded and does not yet know about the two
                                                  # new presets. Use the CLI for those.
-node harness/author/lightfield.mjs --preset ember --out formats/scene/_lightfield-ember.html --shot
+node harness/author/lightfield.mjs --preset ember --out films/scene/_lightfield-ember.html --shot
 make lightfield PRESET=tide                      # one preset
 make lightfield ARGS='--seed 91 --pattern.kind shards --bloom "#ffd166" --out /tmp/f.html --shot'
 ```
@@ -307,11 +307,11 @@ wrong page for a full-bleed field: the field is `position:absolute;inset:0` and 
 
 | file | palette | pattern | polarity | envelope |
 |---|---|---|---|---|
-| `formats/scene/_lightfield-ref.html` | orange, magenta, red, navy fill | slats, 58 | dark seam, lit face | none |
-| `formats/scene/_lightfield-ember.html` | orange, scarlet, oxblood, black | slats, 40 | bright hairline seam, EMITTED face | ramp, from the bottom, tapered to points |
-| `formats/scene/_lightfield-colonnade.html` | amber, ochre, umber, blue fill | slats, 12 | BRIGHT hairline seam, EMITTED, no face | valley, drawn as a field-wide `mass` |
-| `formats/scene/_lightfield-tide.html` | ice blue, steel, navy, black | rings, 120 | dark seam, lit face | none |
-| `formats/scene/_lightfield-fern.html` | acid green, jade, forest, black | shards, 34 | dark seam, lit face | none |
+| `films/scene/_lightfield-ref.html` | orange, magenta, red, navy fill | slats, 58 | dark seam, lit face | none |
+| `films/scene/_lightfield-ember.html` | orange, scarlet, oxblood, black | slats, 40 | bright hairline seam, EMITTED face | ramp, from the bottom, tapered to points |
+| `films/scene/_lightfield-colonnade.html` | amber, ochre, umber, blue fill | slats, 12 | BRIGHT hairline seam, EMITTED, no face | valley, drawn as a field-wide `mass` |
+| `films/scene/_lightfield-tide.html` | ice blue, steel, navy, black | rings, 120 | dark seam, lit face | none |
+| `films/scene/_lightfield-fern.html` | acid green, jade, forest, black | shards, 34 | dark seam, lit face | none |
 
 The first three are all `slats`. That is the point of the table: `ref`, `ember` and `colonnade`
 reproduce three photographs that look nothing alike, and none of them is a new structure. What

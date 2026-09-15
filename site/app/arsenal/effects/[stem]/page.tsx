@@ -22,7 +22,7 @@ import "../effects.css";
  * never in the client bundle the index page ships. That split (not a runtime fetch) is what the
  * per-effect-page amendment bought: /showcase/effects no longer carries a `json` field at all.
  *
- * Same split for the knob plan: deriveKnobs reads formats/scene/schema.json (2100+ lines of field
+ * Same split for the knob plan: deriveKnobs reads films/scene/schema.json (2100+ lines of field
  * labels this page's client bundle has no business shipping) and hands EffectStage a small, already
  * -resolved list. schema.json is imported nowhere the browser can reach it.
  */

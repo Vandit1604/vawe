@@ -93,13 +93,13 @@ Every `html` layer and every hand-authored `bg` is somebody's raw HTML. It is th
 in the pipeline and the easiest to review: one file, one command, one picture.
 
 ```
-make preview HTML=formats/scene/hero.html THEME=<brand>      →  /tmp/preview.png
+make preview HTML=films/scene/hero.html THEME=<brand>      →  /tmp/preview.png
 ```
 
 Put the fragment in a FILE and point the layer at it with `src` instead of escaping it into the scene:
 
 ```json
-{ "type": "html", "src": "formats/scene/hero.html", "x": 200, "y": 400, "w": 1200 }
+{ "type": "html", "src": "films/scene/hero.html", "x": 200, "y": 400, "w": 1200 }
 ```
 
 `html` and `src` are alternatives, never both. A `src` that is not on disk stops the render, naming the
@@ -112,7 +112,7 @@ hierarchy and the cobalt glow in `engine-doctrine/animation.html`.
 **Two things the file does not change, and both bite:**
 
 - **A relative path inside the fragment resolves against the PAGE, not against the fragment's folder.**
-  Moving markup into `formats/scene/` does not make `./logo.svg` mean the file beside it. Write asset
+  Moving markup into `films/scene/` does not make `./logo.svg` mean the file beside it. Write asset
   paths from the repo root.
 - **`sanitizeHtml` strips any absolute `src`/`href`** (`core/type/sanitize-html.js`), so an `<img src="/…">`
   that renders in your browser renders empty in the film. The preview shows the fragment BEFORE the

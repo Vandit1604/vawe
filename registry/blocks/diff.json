@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/diff.json",
       "url": "https://vawe.dev/assets/blocks/diff.json",
-      "target": "formats/scene/diff.json",
+      "target": "films/scene/diff.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

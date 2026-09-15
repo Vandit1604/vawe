@@ -128,7 +128,7 @@ video starts ahead.
    **It feeds the storyboard.** `study.md` ends with three questions whose answers are storyboard fields:
    `pace:` (from the measured median shot), `threads:`/`object:` (what survives a cut here, then OUR
    version of it) and `spectacle:` (which shot is the loud one). Answer them, then write
-   `formats/scene/<topic>.storyboard.md` and run `storyboard-check`. See
+   `films/scene/<topic>.storyboard.md` and run `storyboard-check`. See
    [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md).
 
 1. **Map the beats.** `ffmpeg -vf "fps=3,scale=…,drawtext=…timestamp…,tile=…"` → a labelled contact

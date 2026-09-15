@@ -50,7 +50,7 @@
     {
       "source": "site/public/assets/blocks/kpiRow.time.json",
       "url": "https://vawe.dev/assets/blocks/kpiRow.time.json",
-      "target": "formats/scene/kpiRow.time.json",
+      "target": "films/scene/kpiRow.time.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

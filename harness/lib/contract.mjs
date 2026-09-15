@@ -19,14 +19,14 @@
 // a pixel pair is not. `rot`/`op` stay raw numbers for the same reason `w`/`h` already are: a degree or
 // an opacity fraction is something a reviewer can sanity-check by eye, unlike a bezier or a matrix.
 //
-// A POSE, NOT ONLY A POSITION. `formats/scene/higgsfield-recreation.json`, the film this repo holds up
+// A POSE, NOT ONLY A POSITION. `films/scene/higgsfield-recreation.json`, the film this repo holds up
 // as its best, has an object that holds a constant bbox AREA while it travels (measured ~800px² at both
 // x=170 and x=98, which is exactly what w/h already encode), spins into its fastest frame and rights
 // itself on landing (rot), and fades its label out as it goes (opacity). Before this, `w`/`h` were
 // parsed and then THROWN AWAY by assemble.mjs (only x/y made it into the built motion track), so this
 // contract could say a size and never keep the promise. `rot`/`op` are new; `w`/`h` were always here,
 // they just were not honoured. All four are properties `layers[].motion[]` can already key
-// (formats/scene/schema.json: x, y, w, h, rot, opacity), so this is a REACH problem, not a capability
+// (films/scene/schema.json: x, y, w, h, rot, opacity), so this is a REACH problem, not a capability
 // one: assemble.mjs now builds them (see there), no core/** change is needed or made.
 //
 // WHAT THIS STILL CANNOT SAY: a shape morph (rectangle -> pill -> circle) needs a keyable corner
@@ -257,7 +257,7 @@ export function parseMoveEntry(raw) {
   const [, shape, band] = m;
   // A curve name (arc/dip/wave/ramp, the same catalog core/fx/along-path.js sets a caption's TYPE on)
   // is the same "<word>:<band>" sentence as a move shape, resolved against a second registry: it flies
-  // the whole LAYER along the curve (MotionPathPlugin, formats/scene/scene.js `L.motionPath`) instead
+  // the whole LAYER along the curve (MotionPathPlugin, films/scene/scene.js `L.motionPath`) instead
   // of keying x/y/scale, so it is scope PATH, not LAYER, but it costs no new syntax to say.
   const isPath = !SHAPES[shape] && !!PATH_CURVES[shape];
   if (!SHAPES[shape] && !isPath) {
@@ -805,7 +805,7 @@ export function pathMotion({ curve, band }, dur) {
 // cut; the film is one take)", almost never a bare fx word the catalog itself would recognise ("cut"
 // is not one: the catalog's hard cut is "none"). That is the exact shape `rest:` (above) was found in
 // and deliberately NOT auto-built from: guessing a decision out of prose is a guess wearing a
-// migration's clothes, and `formats/scene/vawe-oblique.json` (this repo's own byte-identity contract)
+// migration's clothes, and `films/scene/vawe-oblique.json` (this repo's own byte-identity contract)
 // already writes "cut" and "cinematicZoom" as documentary colour, never vetted against reaching a
 // render. Auto-building a bare word would silently change it, the one thing this whole file may not do.
 //

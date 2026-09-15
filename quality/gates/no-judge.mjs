@@ -23,7 +23,7 @@
 // decrease is reported but not required. It never blocks a run other than its own.
 //
 // DELIBERATELY NOT in quality/gates/author-check.mjs, `make ship`, or CI (.github/workflows/gates.yml):
-// author-check.mjs is owned by other work in flight right now, and both formats/scene/*.json content and
+// author-check.mjs is owned by other work in flight right now, and both films/scene/*.json content and
 // out/*.mp4 renders are gitignored (.gitignore:2,21), so a CI checkout or a small local clone would
 // report a number that says nothing about the real library, the same reason doc-refs stays out of CI
 // (see the comment at the top of gates.yml). It runs on demand, like `make discovery`, and in
@@ -41,7 +41,7 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const RATCHET = path.join(ROOT, 'quality/baselines/no-judge-ratchet.json');
 
-const isScene = (name, dir = path.join(ROOT, 'formats/scene')) => {
+const isScene = (name, dir = path.join(ROOT, 'films/scene')) => {
   try { return JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8')).module === 'scene'; }
   catch { return false; }
 };
@@ -67,7 +67,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 
   const rendered = [];
   for (const name of names) {
-    const scenePath = path.join('formats/scene', name);
+    const scenePath = path.join('films/scene', name);
     const mp4 = renderOf(scenePath);
     if (!fs.existsSync(mp4)) continue; // never rendered: not this ratchet's question
     rendered.push({ scenePath, mp4 });

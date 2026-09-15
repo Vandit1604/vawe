@@ -18,10 +18,10 @@ as here.
 Preview any of them yourself:
 
 ```bash
-make preview HTML=formats/scene/demo-frag-asymmetric-split.html   THEME=linear
-make preview HTML=formats/scene/demo-frag-instrument-face.html    THEME=plinth
-make preview HTML=formats/scene/demo-frag-oversized-statement.html THEME=satara
-make preview HTML=formats/scene/demo-frag-data-object.html        THEME=ledgerline-neon
+make preview HTML=films/scene/demo-frag-asymmetric-split.html   THEME=linear
+make preview HTML=films/scene/demo-frag-instrument-face.html    THEME=plinth
+make preview HTML=films/scene/demo-frag-oversized-statement.html THEME=satara
+make preview HTML=films/scene/demo-frag-data-object.html        THEME=ledgerline-neon
 ```
 
 ## `demo-frag-asymmetric-split.html`: theme `linear`

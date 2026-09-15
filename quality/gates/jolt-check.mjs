@@ -7,7 +7,7 @@
 // neither script spoke the findings contract (harness/lib/findings.mjs) and neither ran in the ship
 // path. This gate is the one step that puts both in front of an author automatically, report-only.
 //
-//   node quality/gates/jolt-check.mjs formats/scene/<film>.json   ·   part of `make author-check`
+//   node quality/gates/jolt-check.mjs films/scene/<film>.json   ·   part of `make author-check`
 //
 // speed.mjs stays the one owner of the jolt thresholds (VELOCITY_SPIKE_PX_S / _SCALE_S): this file
 // only calls its findVelocitySpikes, it never repeats a number of its own.
@@ -30,7 +30,7 @@ const DEFAULT_FPS = 60;
 
 const file = process.argv[2];
 if (!file || !fs.existsSync(file)) {
-  console.error('usage: node quality/gates/jolt-check.mjs formats/scene/<film>.json');
+  console.error('usage: node quality/gates/jolt-check.mjs films/scene/<film>.json');
   process.exit(2);
 }
 const scene = JSON.parse(fs.readFileSync(file, 'utf8'));

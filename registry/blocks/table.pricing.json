@@ -60,7 +60,7 @@
     {
       "source": "site/public/assets/blocks/table.pricing.json",
       "url": "https://vawe.dev/assets/blocks/table.pricing.json",
-      "target": "formats/scene/table.pricing.json",
+      "target": "films/scene/table.pricing.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }
