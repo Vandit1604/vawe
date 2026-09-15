@@ -119,9 +119,11 @@ test("a scene loads, plays and seeks", async () => {
 test("a scene using build-time sugar boots directly, no separate expand step", async () => {
   const page = await open();
   await settled(page);
-  // saas-hero-launch is SHIPPED in the picker and carries four `"type":"block"` layers. This used to
-  // be refused (a browser had no shell to run `make expand`); core/engine/expand.js now resolves the same
-  // sugar at load, vendored into the site by scripts/site/site-engine.mjs, so it boots like any scene.
+  // saas-hero-launch is SHIPPED in the picker, and it AUTHORS four `"type":"block"` layers. It boots
+  // with no refusal because scripts/site/scenes-json.mjs ran expandScene over it at PUBLISH time, so
+  // what the picker serves under site/public/scenes/ is already plain layers. Nothing expands sugar at
+  // load: films/scene/scene.js:152 never imports core/engine/expand.js, on purpose. That is exactly why
+  // site/app/editor/sugar.ts still refuses sugar a visitor TYPES, which has no publish step behind it.
   await page.select("#ed-scene", "saas-hero-launch");
   await settled(page);
   const meta = await page.evaluate(() => document.querySelector(".sp-frame").contentWindow.__engine?.meta);
