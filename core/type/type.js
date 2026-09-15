@@ -1,4 +1,4 @@
-// core/type.js: kinetic-typography kit (another engine "Kinetic Type" parity). All PURE in the time
+// core/type.js: kinetic-typography kit. All PURE in the time
 // input `t`: presets map a per-unit local progress `u∈[0,1]` → {opacity, transform, filter}.
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
 import { clamp01, random } from '../motion/motion.js';
@@ -267,7 +267,7 @@ export function formatNumber(n, { currency = false, decimals = 0, compact = fals
   return (currency ? '$' : '') + s;
 }
 
-// ---------- text measuring (another engine measureText/fitText parity, browser only) ----------
+// ---------- text measuring (browser only) ----------
 // measureText: pixel width of `text` in CSS `font` shorthand. fitText: largest px size (stepping
 // down) whose rendered width fits maxWidth. Call at build time (fonts already loaded in boot).
 // Moved from core/motion/motion.js: this is text layout, not motion.
@@ -282,7 +282,7 @@ export function fitText(text, maxWidth, { font = (px) => `800 ${px}px Inter`, ma
   while (px > min && measureText(text, font(px)) > maxWidth) px -= step;
   return px;
 }
-// fitBox(el, {maxW, maxH, max, min}): MULTI-LINE overflow-safe fit (another engine fitTextOnNLines parity).
+// fitBox(el, {maxW, maxH, max, min}): MULTI-LINE overflow-safe fit.
 // `el` must be in-DOM. Binary-searches the largest font-size where the element (wrapping at maxW) fits
 // within maxH AND no word overflows the width. Layout-only → deterministic at build time. Sets + returns px.
 export function fitBox(el, { maxW, maxH, max = 168, min = 24 }) {

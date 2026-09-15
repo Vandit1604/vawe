@@ -180,17 +180,18 @@ unchanged):
 { "at": 5, "fx": "wipe", "mech": "seam", "dir": 35, "feather": 0.12, "timing": "ramp" }
 ```
 
-> **Studied and deliberately not built (yet).** another engine models a transition as an orthogonal
-> *presentation* (`{draw, props}`) times a *timing* (`{getProgress, getDurationInFrames}`), and carries a
-> physics **spring** whose duration is *measured* from its damping/stiffness, not specified. Its overlap
-> model mounts and blends two LIVE scenes; vawe (like another engine' shader-transitions, the same seam
-> architecture) blends two BAKED stills. Our named-curve dial above is a nicer author surface than a raw
-> ease string, and `pop` already gives a spring-like overshoot. **`spring`** closes the shape gap: it is
-> the house damped-harmonic-oscillator easing (`core/motion/motion.js` `easeOutSpring`, the same math behind
-> `easeOutSettle`/`easeOutSnap`) fixed at one tasteful bounce/settle rather than exposed as another engine's
-> per-call `{damping, stiffness}` API. A genuinely *parameterized* spring, where an author dials the
-> bounce and duration per transition, stays out until a film needs an arrival this fixed curve cannot
-> fake. Recorded here so the next author inherits the decision, not the re-investigation.
+> **Studied and deliberately not built (yet).** One well-known model separates a transition into an
+> orthogonal *presentation* (`{draw, props}`) times a *timing* (`{getProgress, getDurationInFrames}`),
+> and carries a physics **spring** whose duration is *measured* from its damping/stiffness, not
+> specified, with an overlap model that mounts and blends two LIVE scenes. Vawe blends two BAKED stills
+> instead, the same seam architecture as any shader-transition system. Our named-curve dial above is a
+> nicer author surface than a raw ease string, and `pop` already gives a spring-like overshoot.
+> **`spring`** closes the shape gap: it is the house damped-harmonic-oscillator easing
+> (`core/motion/motion.js` `easeOutSpring`, the same math behind `easeOutSettle`/`easeOutSnap`) fixed at
+> one tasteful bounce/settle rather than exposed as a per-call `{damping, stiffness}` API. A genuinely
+> *parameterized* spring, where an author dials the bounce and duration per transition, stays out until
+> a film needs an arrival this fixed curve cannot fake. Recorded here so the next author inherits the
+> decision, not the re-investigation.
 
 > **Align the beats to the seam, or a `mech:"seam"` transition dissolves nothing.** A seam blends the
 > frame just BEFORE `at` against the frame just AFTER. If both beats are still on screen across `at`
@@ -245,8 +246,7 @@ The hard cut is the default and the overwhelming majority of professional edits.
 more by naming what it does. "It looks smoother" is not a reason, it is the blur-spam tell.
 
 > **You crossfade everything. Use hard cuts for disruption and register shifts.** Borrowed verbatim from
-> the reference system's `another engine-creative/references/motion-principles.md`, which also states what
-> each seam MEANS in three lines: *"Crossfade = this continues. Hard cut = wake up / disruption. Slow
+> the reference notes, which also state what each seam MEANS in three lines: *"Crossfade = this continues. Hard cut = wake up / disruption. Slow
 > dissolve = drift with me."* That is the taxonomy below in three words, and it names the exact wrong
 > move: reaching for the soft one because it is soft.
 

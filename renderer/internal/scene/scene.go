@@ -266,8 +266,8 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 //
 // IT USED TO SPIN UP A WHOLE BROWSER PER CALL: `chromedp.NewExecAllocator` was inside here, and its
 // own comment said "an independent browser + tab". Four workers meant four complete Chrome
-// installations: measured at 51 processes and 5,604 MB peak against another engine's 12 / 1,738 and
-// another engine' 9 / 1,347 for the same job. One browser with four tabs measures 13 processes and
+// installations: measured at 51 processes and 5,604 MB peak for four independent browsers doing
+// the same job. One browser with four tabs measures 13 processes and
 // 1,468 MB. Each extra tab costs exactly one renderer process and about 118 MB; the browser, GPU and
 // utility processes stay flat, so the parallelism is unchanged and only the duplication goes.
 //

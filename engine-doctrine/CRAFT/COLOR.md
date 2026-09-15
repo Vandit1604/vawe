@@ -25,7 +25,7 @@ how to turn those pixels into a full `theme.palette` and use it well. Maps to th
 
 ## 0. Lazy defaults to question: the first thing every LLM reaches for
 
-Borrowed close to verbatim from the reference system's `another engine-creative/references/house-style.md`.
+Borrowed close to verbatim from the reference notes.
 *"If you're about to use one, pause and ask: is this a deliberate choice for THIS content, or am I
 defaulting?"* The goal is intentionality, not avoidance: if the content genuinely calls for one, use it
 and be able to say why.
@@ -129,5 +129,5 @@ same palette (`core/backgrounds/index.js` is palette-driven), so one pack reskin
 ## Provenance
 
 **Sources:** Refactoring UI (accessible colour systems, defining greys first); Material 3 (tonal palettes, error/
-semantic roles); WCAG 2.x (1.4.3 / 1.4.11); 60-30-10 (interior-design rule); the reference system's
-`another engine-creative/references/house-style.md` (§0 lazy-default list).
+semantic roles); WCAG 2.x (1.4.3 / 1.4.11); 60-30-10 (interior-design rule); the reference notes'
+lazy-default list (§0).

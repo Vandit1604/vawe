@@ -1,8 +1,8 @@
 // harness/media/pace-from-vo.mjs: SCRIPT-FIRST PACING. Write the narration first (make tts), then pace the
 // video TO THE VOICE instead of guessing seconds per beat. This reads a voWords sidecar ([{w,t}], from
 // make tts / captions) and proposes beat boundaries at the sentence breaks, with each beat's start +
-// duration taken from when the words are actually spoken. Transcribe those onto each beat's hero layer and
-// the reveals land on the narration, the way another engine times shots to audio. It PROPOSES; it never
+// duration taken from when the words are actually spoken. Transcribe those onto each beat's hero layer so
+// the reveals land on the narration instead of a guessed clock. It PROPOSES; it never
 // mutates the scene.
 //
 //   make pace-from-vo VO=<file>.words.json [BEATS=<n>]   (BEATS forces n roughly-equal chunks by word count)

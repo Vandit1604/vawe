@@ -1,9 +1,9 @@
-// harness/dev/evals.mjs: THE EVAL HARNESS (another engine's skills-evals, adapted; W6 of the motion-design
+// harness/dev/evals.mjs: THE EVAL HARNESS (W6 of the motion-design
 // plan). A fixed set of brief scenes, rendered under the CURRENT engine + rules, kept with a contact
 // sheet, and a before/after diff so a doctrine or engine change can be judged against what it actually
 // moved instead of a hunch.
 //
-// NO AESTHETIC SCORE. another engine and another engine both refuse one, for the same reason: a number that
+// NO AESTHETIC SCORE, by design: a number that
 // claims to measure "looks good" trains everyone to optimize the number instead of the film, and it
 // hides disagreement a human would have caught. The one thing this file asserts by machine is
 // LIVENESS: did every brief produce an mp4 of the duration and dimensions the scene declared. Beyond

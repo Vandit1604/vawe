@@ -1,6 +1,6 @@
 // harness/author/llms-txt.mjs: GENERATE films/llms.txt, a portable vocabulary primer for any agent
 // (this one or a fresh one with no repo access) that has to write a vawe scene JSON from scratch.
-// Modeled on another engine's own llms.txt: About -> a runnable skeleton -> one rule + one snippet per
+// Structured as: About -> a runnable skeleton -> one rule + one snippet per
 // capability, escalating -> the hard rules -> the command loop.
 //
 //   node harness/author/llms-txt.mjs   ·   make llms-txt (wired by the caller)

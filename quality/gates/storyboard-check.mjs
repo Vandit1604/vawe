@@ -1,4 +1,4 @@
-// quality/gates/storyboard-check.mjs: the STORYBOARD-AS-PROPOSAL gate (another engine Step 3, adapted).
+// quality/gates/storyboard-check.mjs: the STORYBOARD-AS-PROPOSAL gate.
 // A great video is planned on paper and approved BEFORE the JSON. This gate enforces that the plan is a
 // real proposal, not a vibe: a one-sentence MESSAGE + audience + arc up front, and per beat a type, the
 // on-screen cues, and a WHY (its narrative role / persuasion). A beat with no "why" is decoration; a video

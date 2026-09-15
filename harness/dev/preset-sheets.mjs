@@ -1,6 +1,6 @@
 // harness/dev/preset-sheets.mjs: a rendered showcase per REFERENCE PROFILE (engine-doctrine/CRAFT/SELECTION.md
-// Part 2), so a film with no site to study picks a rendered look, not an adjective (another engine' 14
-// frame presets each ship a rendered sheet; the profiles here had none). Companion to `make previews`
+// Part 2), so a film with no site to study picks a rendered look, not an adjective (each frame preset
+// should ship a rendered sheet; the profiles here had none). Companion to `make previews`
 // (W3), same reasoning applied to the taste anchor instead of the beat library.
 //
 // harness/author/profiles.mjs (PROFILES) is the machine-readable source of truth for what each profile

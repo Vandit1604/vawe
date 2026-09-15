@@ -22,11 +22,11 @@ group: look
 - Confirm: is every on-screen cue weighted into the back half of its beat, and did you run
   `make seam-check` after rendering?
 
-The another engine lesson: a great video is not authored frame-first. Two artifacts are locked first and every
-frame then *obeys them line by line*: a **design-system spec** (their `frame.md`) and a **scene-by-scene
-storyboard** (their `STORYBOARD.md`) where each beat names its mechanism, its persuasion, and
-its emotion. Our engine already has the pieces (themes, recipes, EFFECTS.md, the direction-floor); this
-doc is the contract that ties them into a front-door you fill before writing a single layer.
+A great video is not authored frame-first. Two artifacts are locked first and every frame then *obeys
+them line by line*: a **design-system spec** (our `frame.md`) and a **scene-by-scene storyboard** (our
+`STORYBOARD.md`) where each beat names its mechanism, its persuasion, and its emotion. Our engine
+already has the pieces (themes, recipes, EFFECTS.md, the direction-floor); this doc is the contract
+that ties them into a front-door you fill before writing a single layer.
 
 > This complements [`vawe-video-planning`](../../skills/vawe-video-planning/SKILL.md) (the lock-sheet)
 > and [`DIRECTION.md`](DIRECTION.md) (pacing/restraint). Lock BOTH artifacts below and get sign-off before authoring.
@@ -35,11 +35,11 @@ doc is the contract that ties them into a front-door you fill before writing a s
 
 One page, authored from the brand study (`make brandspec` + `make palette`). It is normative: the storyboard
 and every layer use ONLY these values. Fill the design-spec table in [SURFACES.md](SURFACES.md#the-design-spec)
-plus these video-scale rules another engine proved:
+plus these video-scale rules, proven in practice:
 
 - **Colour ROLES, not hexes.** Ground / text / text-muted / **one scarce accent** / positive / negative.
   The accent is *voltage*: eyebrows, numerals, one rule per frame, the CTA, **no frame lets it dominate by
-  area.** (Their line: "the absent shadow is the premium signal.") Encode it in `themes/<brand>.json`.
+  area.** ("The absent shadow is the premium signal.") Encode it in `themes/<brand>.json`.
 - **Type by role, in fixed faces.** Display / body / **mono for every numeral** ("a dollar figure in
   anything but mono is a bug"). Author at the MEASURED weights from `make brandspec`, never a default 800.
 - **A negative list.** Name what this video will NOT do: no nav/footer/cursor chrome, no AI gradients/bokeh/
@@ -69,11 +69,10 @@ That is how you stay directed without re-deriving motion or copying a template.
 ## Part 3 (The reveal model (anti-front-load)) now gated
 
 > **Every scene has three phases: build · breathe · resolve. You dump everything in the build and leave
-> nothing for breathe or resolve.** Borrowed verbatim from the reference system's
-> `another engine-creative/references/motion-principles.md`. Their split: **build 0-30%** (elements enter,
-> staggered, not all at once) · **breathe 30-70%** (content visible, alive with ONE ambient motion) ·
-> **resolve 70-100%** (exit or a decisive end, faster than the entrance). Our `front-loaded` gate fires on
-> exactly the first half of that sentence.
+> nothing for breathe or resolve.** Borrowed verbatim from the reference notes. The split: **build 0-30%**
+> (elements enter, staggered, not all at once) · **breathe 30-70%** (content visible, alive with ONE
+> ambient motion) · **resolve 70-100%** (exit or a decisive end, faster than the entrance). Our
+> `front-loaded` gate fires on exactly the first half of that sentence.
 
 A directed video weights its cues **across its length**; the two failure modes, banned by name:
 - **slideshow**: everything dumped in the first ~25%, then frozen.

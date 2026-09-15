@@ -168,8 +168,8 @@ These are what a good reference does that our defaults do NOT. Reach for them on
    **Keep it SMOOTH** (MISTAKES #125): one MONOTONIC move, never a reversal (don't zoom in then snap
    out). For a multi-keyframe camera push set `ease:"linear"` on the interior keyframes, the default
    easeInOutCubic zeroes velocity at every keyframe, so a chained push pulses/shakes. Per-beat push is
-   cleanest as a per-layer `motion.scale` (`ease:"linear"`) that resets naturally per element (the
-   another engine way: one continuous interpolation per shot, not chained ease segments). Scale via
+   cleanest as a per-layer `motion.scale` (`ease:"linear"`) that resets naturally per element: one
+   continuous interpolation per shot, not chained ease segments. Scale via
    `transform` (GPU, our `#cam` is `will-change:transform`), never font-size, that reflows and jitters.
 2. **Zoom / punch transitions, not hard cuts.** Motion carries THROUGH the seam, the outgoing beat
    zooms out as the incoming zooms in. Use `transitions[{fx:"zoom"|"punch"|"whipPan"}]`, not a bg swap.

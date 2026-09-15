@@ -461,7 +461,7 @@ boot((data, fps, theme, canvas) => {
     // reveals, each line clipped so it slides up from behind. Do NOT combine with `split` on the same layer.
     // PARTS, dense per-CHILD choreography: stagger a named entrance across a layer's own child elements
     // (a bespoke SVG's bars/dots/paths, a group's cards), so a single figure animates piece by piece
-    // instead of arriving as one block. This is the another engine density move (tl.fromTo on child elements
+    // instead of arriving as one block. This is a density move (tl.fromTo on child elements
     // with a stagger), built on our seeked GSAP so it stays pure in n. Applies to any layer with children
     // (html inline-SVG, group, svg). `parts: { select, anim, each, stagger, delay, ease }`.
     if (L.parts && window.gsap) {

@@ -1,7 +1,7 @@
 // harness/author/route.mjs: DELIVERABLE-AWARE ROUTING. A request maps to one of a few vawe
-// deliverables (engine-doctrine/CRAFT/routes/*.md) before any brief-collection or authoring starts. Adapted from
-// another engine' route model (~/.claude/skills/another engine/SKILL.md § 2): a small priority table picks
-// the deliverable, then only that deliverable's route file is read, never the whole doctrine at once.
+// deliverables (engine-doctrine/CRAFT/routes/*.md) before any brief-collection or authoring starts. A small
+// priority table picks the deliverable, then only that deliverable's route file is read, never the
+// whole doctrine at once.
 //
 //   node harness/author/route.mjs "<what the user asked, plain english>"
 //   make route Q="market our launch from hinge.co"

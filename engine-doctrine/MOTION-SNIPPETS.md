@@ -10,7 +10,7 @@ The fastest way to author snappy, directed motion instead of default fades. Each
 a slug, what it does and WHEN, the exact JSON to paste, and tags. Compose **2-4 snippets per beat**.
 An entrance + a rhythm + a transition, never one uniform fade on everything.
 
-- Inspired by another engine' `rules-index.md`, but every mechanism here is a REAL vawe field
+- Every mechanism here is a REAL vawe field
   (`films/scene/schema.json` is the contract; `engine-doctrine/PRIMITIVES.md` is the vocabulary).
 - **Doctrine lives in [`MOTION-CRAFT.md`](MOTION-CRAFT.md)** (the 10 rules, the Snap section, the
   Cut-or-transition guide). This file is the lookup table that applies it.

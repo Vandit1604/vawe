@@ -4,7 +4,7 @@
 // Same package split as core/stings/ and core/backgrounds/: core/cuts.js re-exports this whole
 // surface so every existing importer keeps its `from './cuts.js'` path.
 //
-// another engine's two-axis split, ported to the pure model: a TIMING shapes how progress 0->1 evolves
+// A two-axis split in the pure model: a TIMING shapes how progress 0->1 evolves
 // through the cut window; a PRESENTATION says what the cut looks like, pure style objects for the
 // entering / exiting scene root. Everything derives from sequence()'s enter/exit values, so it stays
 // pure in n and composes with in-scene motion.
