@@ -7,7 +7,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor ground-arc motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet
+.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -749,6 +749,9 @@ motion-floor: ## [check] DOES THE FILM EVER STOP: local (content) motion per 0.5
 
 ground-arc: ## [check] does the ground flip white/dark on purpose: pre-render luma sampling, each flip named against its beats and the bg/join schedule that should carry it (D=<film>)
 	@node quality/gates/ground-arc.mjs $(D) $(if $(JSON),--json,)
+
+edge-check: ## [check] does a full-bleed layer stop covering the frame while on screen: pre-render DOM hit-test on the four borders, cause named (camera scale, layer scale, tilt, radius), report only (D=<film>)
+	@node quality/gates/edge-check.mjs $(D) $(if $(JSON),--json,)
 
 # make choreo D=<film.json> [REF=<ref-clip-name>]: per beat, the kinds of motion live at once (scene
 # side from scene-timing, frame side from motion-floor's region reader when a render exists), which
