@@ -2,7 +2,7 @@
 when: "choosing the CUT between two beats (you can't say why a transition is there)"
 answers: "the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure"
 group: story
-codes: crossfade-mud, cut-families, cut-velocity, dead-final-frame, no-transition, flat-seams, seam-flash, seam-ghost, seam-resurrection, seam-split, seam-unread, unclassified-transition, transition-unreasoned, boundary-uncovered, transition-reason-mismatch
+codes: crossfade-mud, cut-families, cut-velocity, dead-final-frame, no-transition, flat-seams, seam-flash, seam-ghost, seam-resurrection, seam-split, seam-unread, unclassified-transition, transition-unreasoned, boundary-uncovered, transition-reason-mismatch, covered-move
 applies-when: hasBoundaries
 confirm: "does each cut serve the relationship between its two beats, chosen by theory not habit?"
 ---
@@ -445,6 +445,16 @@ delta, and a split seam's step floor. `quality/gates/seam-forensics.mjs`'s own h
 them the same way (crop the box, `blend=difference` or `edgedetect=mode=colormix`, `scale=1:1`) before
 moving them, on a scene with and without the defect in question, the same way this file's numbers were
 found.
+
+### Track decides stacking; array order breaks a tie
+
+`track` sets which layer paints on top (`core/timeline/clips.js` writes zIndex off `data-track`,
+`formats/scene/scene.js:597` sets `data-track` to `L.track ?? idx`). Two layers on the same track tie,
+and the tie breaks by their order in `layers[]`: the one written later draws on top.
+A full-bleed layer above must not start mid-move and hide it before it plays, or it reads as a hard cut
+nobody authored. `quality/gates/covered-move.mjs` (`make covered-move D=<file>`) reports
+this, always report-only: it cannot tell a deliberate cover from an accident, only name the collision
+and its fix (start the coverer after the move ends, or move the mover to a higher track).
 
 ## Provenance
 

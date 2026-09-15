@@ -1190,6 +1190,12 @@ probe: ## [check] assert renderFrame(n) is PURE in n (byte-identical regardless 
 font-audit: ## [check] assert every family the scene renders is actually vendored, loaded and painting.
 	@node quality/gates/font-audit.mjs $(if $(M),$(M),scene) $(D) $(if $(JSON),--json,)
 
+# make probe-frame D=formats/scene/x.json T=12.9 ID=card-a,card-b: where is layer X at time T, and what
+# covers it. T is film time as the VIEWER sees it (post-tempo); see harness/dev/probe-frame.mjs for the
+# page-time conversion.
+probe-frame: ## [dev] where is layer ID at time T (post-tempo seconds), and what covers it
+	@node harness/dev/probe-frame.mjs $(D) --t $(T) --id $(ID) $(if $(JSON),--json,)
+
 # make install-hooks: activate the version-controlled git hooks (pre-push runs the framework gates)
 install-hooks: ## [maintenance] activate the version-controlled git hooks (pre-push runs the framework gates)
 	git config core.hooksPath .githooks
@@ -1469,6 +1475,9 @@ plan-check: ## [check] plan vs render: does the film change where the storyboard
 
 dissolve: ## [check] transition gate, is any text state cross-dissolved into another (D=<file>)
 	node quality/gates/dissolve-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
+
+covered-move: ## [check] does a full-bleed layer above start mid-move and hide it (D=<file>)
+	node quality/gates/covered-move.mjs $(D)
 
 scrub: ## [dev] preview strip: contact sheet of the whole film (M=<fmt> or F=<mp4>)
 	node harness/author/scrub.mjs $(F)
