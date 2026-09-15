@@ -321,8 +321,8 @@ to `resolveLook` (`core/registry/theme-contract.js`), never a literal the kit au
 **Route the design decisions before you write the markup:** the stage kit first, then the reference's
 grammar if there is one, then the SMALLEST useful set from `ui-skills`
 (`command npx -y ui-skills categories`, one or two skills, never two builder skills on one surface),
-then `make preview`, then your own eye at full size. `DESIGN.md` records which skills shaped this
-repo's frames and which were refused.
+then `make preview`, then your own eye at full size. The section below records which skills shaped
+this repo's frames and which were refused.
 
 ## The ramps the kit offers, and why
 
@@ -541,6 +541,52 @@ own numbers. No file, or an empty one, means the kit's values only.
 previews every fragment the storyboard names and checks each box's font, radius, shadow and colour
 against that set: near a token warns `design-token-hint` (reach for `var(--kit-...)`); nowhere near one
 blocks as `design-drift`, naming the fix. Silent with no design.md; `scale-drift` stays that check.
+
+## ui-skills: what was used on this repo's frames, and what was refused
+
+Consulted 2026-09-09 while building `films/scene/_vawe-oblique.*.html`.
+
+**Used, both refiners rather than builders, so neither competes with the vendored `impeccable`:**
+
+- **`pbakaus/typeset`** (typography). Took: state the roles and their intended contrast BEFORE editing;
+  the fewest roles that make hierarchy unmistakable; combine size, weight, space and tone rather than
+  asking size to do all the work; keep repeated roles identical across screens; tabular numerals where
+  digits line up; tune leading to the face and the measure, not a universal ratio. Refused: its web
+  reading floors (16px body, a 45-75ch measure). A 1920x1080 frame read from across a room is not a
+  reading surface, and its body role is 38px.
+- **`mengto/beautiful-shadows`** (elevation). Took: the layered ramp shape, three named levels, one
+  level per element, and neutral black only, never a tinted shadow. Refused: its Tailwind class syntax
+  (this repo writes CSS), and its `0 0 0 1px` contact ring, which is a border wearing a shadow's
+  clothes. A frame that wants an edge asks for `.kit-card`, which has one.
+
+**Refused outright:** `zeke/swiss-design`, `ericzakariasson/scandinavian-design`, `leonxlnx/soft-skill`
+and every other whole-look skill. A film already has an art direction, from its theme and from its
+reference, and importing a second one is how a brand's video stops looking like the brand.
+
+**Already vendored, so never fetched:** `pbakaus/impeccable`. It runs inside `make preview` as the
+detector. Do not fetch the skill version alongside it.
+
+**Consulted 2026-09-09 for the studio "every beat shows a picture" fix** (`studio/server.mjs`,
+`studio/page.mjs`). Read `ui-skills categories`, then `color` and `visual`.
+
+**Rejected, both:**
+- **`accesslint/contrast-checker`** (color, accessibility). Read the whole skill: it drives a live
+  browser through a full WCAG audit protocol, built for auditing a shipped product surface. This task
+  was one token pair (`--bg`, `--line`) in a dev tool nobody but an author ever opens. The repo's own
+  convention already measures contrast inline as a comment next to the token (e.g. `--muted:#6E6E6E`,
+  "5.1:1 on the panel. Measured, not guessed"), so the fix computed WCAG relative-luminance ratios by
+  hand and kept the same comment style, rather than importing a heavier audit workflow for one number.
+- Every whole-look/color-system skill in `visual` and `color` (`ericzakariasson/scandinavian-design`,
+  `pbakaus/colorize`, the OKLCH palette generators). This room is deliberately achromatic (studio-page.mjs's
+  own header: "any hue in the surround skews the judgement of the picture"), so a fetched palette
+  system would import hue or a different elevation model into a surface that has to stay grey-scale by
+  design. The local system, not the default, wins here.
+
+**What the fix actually is:** a fragment-less beat now draws an inline SVG sketch from its own
+storyboard fields (`archetype:`, `picture:`/`object:`, `onscreen:`) instead of a grey box, and the dark
+theme's ground moved from `#161616` to true `#000000`, with `--line`/`--line-2` alpha raised (0.09→0.16,
+0.18→0.35) so a panel boundary still reads a non-text contrast ratio against pure black (measured:
+0.16 alpha is 1.44:1, 0.35 alpha is 3.00:1, WCAG 1.4.11's floor for a UI boundary).
 
 ## The one thing to remember
 

@@ -42,7 +42,7 @@ The 62 are not all losses. Most are per-video storyboards, historical plan recor
 third-party skill pages and asset licence notes: things a reader should not be sent to. Stripping
 those leaves the ones that hurt:
 
-- `DESIGN.md`, `PRODUCT.md`: the reasoning behind the engine, unreachable
+- `site/DESIGN.md`, `site/PRODUCT.md`: the reasoning behind the site, unreachable
 - `engine-doctrine/SCENE-QUICK.md`: the one-page cheat sheet, unreachable
 - `engine-doctrine/LAUNCH-VIDEO-GUIDE.md`: unreachable, while CLAUDE.md carries a hand-written "Launch-video
   rules" section covering the same ground
