@@ -26,6 +26,17 @@
   --ink-2:#454f5e;          /* ~8:1 secondary */
   --muted:#697182;          /* ~5:1 meta */
 
+  /* ---- BAND · the cobalt hero and footer are cobalt in BOTH themes ----
+     A control sitting on the band is therefore theme-independent, and one that reads --ink or
+     --surface flips with the page while its ground does not: in dark that put white text on a
+     white CTA and a white-on-white GitHub pill. These four are declared once here and are the
+     only tokens a theme block must never redefine. */
+  --band-pill:#0f1620;      /* the dark pill on cobalt (GitHub, theme toggle) */
+  --band-pill-ink:#ffffff;
+  --band-card:#ffffff;      /* the white CTA on cobalt */
+  --band-card-ink:#0f1620;
+  --band:#2563eb;           /* the band's own cobalt: its fill, and cobalt text on a white pill */
+
   /* ---- SYSTEM ---- */
   --r:14px; --maxw:1160px;
   --ease:cubic-bezier(.16,1,.3,1);        /* ease-out-expo-ish */
@@ -139,8 +150,12 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* ===== THE BOOKEND =========================================================================
    A band of the engine's own output, full-bleed, committed to cobalt. Structure borrowed from a
    comp that used a stock sky here; the sky is the part any competitor can buy, so ours is a real
-   render instead. Blurred and dimmed so it stays ambient and the hero editor still wins the eye. */
-.bookend{position:relative;background:var(--accent);isolation:isolate;overflow:hidden}
+   render instead. Blurred and dimmed so it stays ambient and the hero editor still wins the eye.
+
+   The fill is --band, NOT --accent. The 5.17:1 guarantee two comments down is a property of
+   #2563eb; dark mode lightens --accent to #5588e6, where the band's own white headline measures
+   3.47:1. A band that is cobalt in both themes cannot drift out of contrast when a palette moves. */
+.bookend{position:relative;background:var(--band);isolation:isolate;overflow:hidden}
 /* Two rules hold this band together, and both are load-bearing:
  *
  * 1. ABSTRACT TEXTURE, never a narrative cut. A brand film carries its own headline, and a
@@ -184,8 +199,8 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .bar.pill .glyph{color:#fff}
 .bar.pill .nav a{padding:9px 15px;border-radius:999px}
 .bar.pill .nav a:hover{background:rgba(11,31,84,.38)}
-.bar.pill .nav a.on{background:#fff;color:var(--accent)}
-.bar.pill .ghbtn{background:var(--ink);color:#fff;border-color:transparent;border-radius:999px}
+.bar.pill .nav a.on{background:#fff;color:var(--band)}
+.bar.pill .ghbtn{background:var(--band-pill);color:var(--band-pill-ink);border-color:transparent;border-radius:999px}
 .bar.pill .ghbtn:hover{background:#000}
 /* Everything living on the cobalt band. White on #2563eb is 5.17:1 — legal for body, and the
    scrim keeps it that way over any frame the film happens to be on.
@@ -237,7 +252,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   font-family:var(--font-mono),monospace;cursor:pointer;
   transition:transform .14s var(--ease),box-shadow .14s var(--ease),color .14s var(--ease)}
 .themetoggle:hover{transform:translateY(-1px);box-shadow:var(--shadow-2);color:var(--ink)}
-.bar.pill .themetoggle{background:var(--ink);color:#fff;border-color:transparent;border-radius:999px}
+.bar.pill .themetoggle{background:var(--band-pill);color:var(--band-pill-ink);border-color:transparent;border-radius:999px}
 .bar.pill .themetoggle:hover{background:#000}
 /* solid variant (interior) */
 .bar.solid{border-bottom:1px solid var(--line)}
@@ -259,7 +274,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .btn:active{transform:translateY(1px) scale(.99)}
 .btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 20px -6px rgba(37,99,235,.5)}
 .btn-primary:hover{background:var(--accent-2);box-shadow:0 10px 30px -8px rgba(37,99,235,.55)}
-.btn-white{background:#fff;color:var(--ink);box-shadow:var(--shadow-2)}
+.btn-white{background:var(--band-card);color:var(--band-card-ink);box-shadow:var(--shadow-2)}
 .btn-white:hover{transform:translateY(-2px);box-shadow:var(--shadow-3)}
 .btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--line-2)}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
