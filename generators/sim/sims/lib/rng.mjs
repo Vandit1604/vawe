@@ -1,11 +1,11 @@
-// sims/lib/rng.mjs — the seeded randomness a sim is allowed to use.
+// generators/sim/sims/lib/rng.mjs: the seeded randomness a sim is allowed to use.
 //
 // A bake is only worth trusting if it REPRODUCES: same source + same seed → the same PNG bytes.
 // Determinism does not disappear when a simulation runs offline, it MOVES to bake time. So a sim
 // draws every "random" number from here, never from the platform, and `make sim-audit` fails any
 // sim that reaches for the platform's entropy or the wall clock.
 
-/** mulberry32 — 32-bit state, one multiply-xor round. Fast, well-distributed, and exactly repeatable. */
+/** mulberry32: 32-bit state, one multiply-xor round. Fast, well-distributed, and exactly repeatable. */
 export function rng(seed) {
   let a = seed >>> 0;
   const next = () => {

@@ -1507,8 +1507,8 @@ glyphs-audit: ## [engine] fail if any baked 3D typeface is stale against its wof
 # because 411 ran first. So it runs HERE instead, offline, in its own process, in frame order, as
 # stateful as it likes, and emits a PNG sequence the scene plays back through the existing `clip`
 # layer. Non-determinism is confined to bake time. Same shape as canvas-fx (baked once at boot) and
-# `make spectrum` (FFT baked to a per-frame table). Contract: sims/README.md.
-sim: ## [engine] bake a simulation to frames: D=sims/<name>.mjs [WRITE=1] -> assets/baked/<name>/
+# `make spectrum` (FFT baked to a per-frame table). Contract: generators/sim/sims/README.md.
+sim: ## [engine] bake a simulation to frames: D=generators/sim/sims/<name>.mjs [WRITE=1] -> assets/baked/<name>/
 	node generators/sim/run.mjs $(D) $(if $(WRITE),--write)
 
 # It is confined, not abolished: same source + same seed must still give the same PNGs. This fails a
@@ -1558,18 +1558,9 @@ cinematic: ## [dev] The CINEMATIC MOTION director: emit the camera-push + per-he
 deck: ## [site] publish docs/animation.html to the site as /deck (site/public/deck.html)
 	node scripts/site/deck.mjs
 
-# make lightfield-model  check that the CPU model of the colour field agrees with the renderer.
-# The two fitting tools (lightfield-seeds, lightfield-fit) RANK layouts by what that model says, so a
-# model that is quietly wrong reports a confident winner that is not the winner. Renders the field
-# alone, with no pattern or shadow to hide behind, and fails if the prediction drifts.
-.PHONY: lightfield-model
-lightfield-model: ## [engine] check the CPU colour-field model against the renderer
-	node research/lightfield/lightfield-model-check.mjs
-
 # make lightfield [PRESET=ref|tide|fern] [ARGS='--seed 9 --pattern.kind rings ...']  generate a light
 # field: a seeded, palette-driven backdrop. No PRESET rebuilds all three committed fields into
-# formats/scene/, shoots a PNG of each into out/, and measures the reference one against
-# refs/lightfield-ref.jpg. Options and dials: docs/LIGHTFIELD.md.
+# formats/scene/ and shoots a PNG of each into out/. Options and dials: docs/LIGHTFIELD.md.
 .PHONY: lightfield
 lightfield: ## [engine] generate a seeded, palette-driven backdrop (PRESET=ref|tide|fern)
 ifdef PRESET
@@ -1577,7 +1568,5 @@ ifdef PRESET
 else ifdef ARGS
 	node harness/author/lightfield.mjs $(ARGS)
 else
-	@node research/lightfield/lightfield-test.mjs
 	@for p in $$(node -e "import('./core/lightfield/presets.js').then(m=>console.log(Object.keys(m.PRESETS).join(' ')))"); do node harness/author/lightfield.mjs --preset $$p --out formats/scene/_lightfield-$$p.html --shot; done
-	@node research/lightfield/lightfield-compare.mjs refs/lightfield-ref.jpg out/_lightfield-ref.png
 endif
