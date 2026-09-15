@@ -107,7 +107,7 @@ COPY --from=builder --chown=nextjs:nodejs /src/docs-site/.source ./docs/.source
 # Start docs on 3001, then the site on $PORT. The site proxies /docs to it, so if docs is not up
 # the docs link 500s — start it first and let the site be the process that keeps the container
 # alive, so a docs crash surfaces as a restart rather than a silently broken tab.
-COPY --chown=nextjs:nodejs docker-start.sh ./
+COPY --chown=nextjs:nodejs site/docker-start.sh ./
 RUN chmod +x docker-start.sh
 
 USER nextjs

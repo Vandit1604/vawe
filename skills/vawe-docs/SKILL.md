@@ -20,9 +20,9 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 |---|---|---|
 | [CONTRIBUTING.md](../../CONTRIBUTING.md) | you want to change this repo rather than use it | the licence you are contributing under, how to run the suite, and the four things this repo pushes back on |
 | [CREDITS.md](../../CREDITS.md) | shipping a video that uses bundled assets | the attribution the fonts, icons and photo sources require |
-| [DESIGN.md](../../DESIGN.md) | you want the reasoning behind the engine design, not the API | the design rationale: why one module, why JSON, why determinism is the constraint everything bends to |
+| [site/DESIGN.md](../../site/DESIGN.md) | you want the reasoning behind the site's design, not the API | the design rationale for the marketing site: colours, type, the tokens extracted from `site/app/globals.css` |
 | [LICENSE-FAQ.md](../../LICENSE-FAQ.md) | asking what you may do with output from this repo | the licence in plain answers: what you may do, the patent grant, attribution, no warranty |
-| [PRODUCT.md](../../PRODUCT.md) | you need the product thesis rather than the mechanics | who this is for, what it replaces, and what it deliberately does not do |
+| [site/PRODUCT.md](../../site/PRODUCT.md) | you need the site's product thesis rather than the mechanics | who this is for, what it replaces, and what it deliberately does not do |
 | [README.md](../../README.md) | you have never run this repo | what vawe is, how to install it, and the one command that turns a JSON into an mp4 |
 
 ## Vocabulary & reference

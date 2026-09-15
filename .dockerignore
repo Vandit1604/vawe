@@ -9,9 +9,9 @@
 # absent from the context until somebody says otherwise, and the failure mode of forgetting is a build
 # that stops with "not found" instead of one that quietly grows.
 #
-#   Dockerfile      (the site + docs apps) — themes core films/scene assets/{icons,vendor,brands,plinth}
-#                   scripts site docs-site docker-start.sh
-#   Dockerfile.cli  (the renderer)         — go.mod go.sum cmd internal cli core blocks
+#   Dockerfile      (the site + docs apps): themes core films/scene assets/{icons,vendor,brands,plinth}
+#                   scripts site (site/docker-start.sh included) docs-site
+#   Dockerfile.cli  (the renderer): go.mod go.sum cmd internal cli core blocks
 #                   themes assets/vendor harness/author/expand-blocks.mjs films/scene CREDITS.md LICENSE-FAQ.md
 #
 # EDITING THIS FILE: add a COPY, add its `!` line here in the same commit. `make docker-check` builds
@@ -46,7 +46,6 @@
 # stay out so the image regenerates it from content/ rather than shipping a stale copy.
 !site
 !docs-site
-!docker-start.sh
 !CREDITS.md
 !LICENSE-FAQ.md
 **/node_modules
