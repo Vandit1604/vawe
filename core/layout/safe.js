@@ -5,7 +5,7 @@
 //   core/boot.js      min(W,H)*0.06 on every side          → PLACED content (pin/col/edge keywords)
 //   core/tokens.css   240/580/60/180 keyed on data-orient  → drew the ?debug=safe overlay
 //   quality/audit.mjs  60/240/900/1340                      → CHECKED content
-//   verify/run.js     the same box again                   → checked it again
+//   quality/gates/run.js     the same box again                   → checked it again
 // So the engine placed `pin:"bottom"` 550px inside the zone the audit called unsafe, and `pin:"top"`
 // and `pin:"right"` failed too. The engine told you where the bottom was and the gate failed you for
 // being there. Worse, data-orient is just `width > height`, so 1:1 and 4:5 counted as "portrait" and

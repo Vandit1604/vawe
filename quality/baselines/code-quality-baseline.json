@@ -172,7 +172,7 @@
  "core/camera-moves/follow-cursor.js::complexity": 1,
  "harness/author/lightfield.mjs::unicorn(no-useless-spread)": 1,
  "research/lightfield/lightfield-fit.mjs::no-unused-vars": 1,
- "verify/run.js::no-unused-vars": 1,
+ "quality/gates/run.js::no-unused-vars": 1,
  "core/audio/kit.mjs::no-unused-vars": 1,
  "core/audio/kit.mjs::complexity": 1,
  "core/camera-moves/dive-in.js::complexity": 1,

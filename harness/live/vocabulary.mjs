@@ -17,13 +17,13 @@
 // IT ONLY EVER COMPLAINS ABOUT WHAT YOU ADDED. 131 bare vocabularies exist across 78 files in core/, and
 // most of them are correct: a props table, an interaction matrix, a constant set nobody picks from. A
 // hook that fired on those would be noise, and noise is how a rule gets turned off. So it compares
-// against verify/vocabulary-baseline.json and stays silent on everything already there. Regenerate that
+// against quality/baselines/vocabulary-baseline.json and stays silent on everything already there. Regenerate that
 // file deliberately, never to quiet a complaint.
 import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
-const BASELINE = path.join(ROOT, 'verify/vocabulary-baseline.json');
+const BASELINE = path.join(ROOT, 'quality/baselines/vocabulary-baseline.json');
 
 // A vocabulary is a map or list an author PICKS A NAME FROM, so the test is for several named entries
 // or several string values. Deliberately loose: this is a nudge, and the gate is the judgement.
@@ -78,6 +78,6 @@ refuses to let you leave unfindable.
   });
 
 If it is NOT something an author names (a props table, an interaction matrix, a constant set), it is
-correct as it is: add it to verify/vocabulary-baseline.json and carry on.`);
+correct as it is: add it to quality/baselines/vocabulary-baseline.json and carry on.`);
   process.exit(2);
 });
