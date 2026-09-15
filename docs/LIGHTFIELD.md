@@ -55,118 +55,6 @@ Four stops, six-digit hex, nothing else. Read them from the light outwards.
 | `originX` / `originY` | WHERE THE LIGHT IS, as a percentage across and down the frame. It moves the bloom cluster and the mid with it, rigidly, and leaves `deep` alone. Off-frame values are legal and useful. |
 | `extra` | an optional ordered list of up to four more colours, laid over the roles in the order given. Empty by default. The four roles are the whole API for a simple field; this is for a colour none of them can name. |
 
-#### `shade`, and why `ground` could not do its job
-
-Real photographs have warm light and cool shadows, because the key light is warm and a faint cold
-skylight fills everything it does not reach. A field lit by one hue cannot do that: a shadow in it is
-only less of the same hue, so it comes out warm.
-
-That is not a theory, it is the bug the reference reproduction shipped with. It scored a mean sample
-distance of 12.7 and a human looked at it and said no. All four sample points were in lit areas. The
-reference's shadows are `rgb(0,2,11)` navy on the right and `rgb(23,12,35)` violet in the dark lower
-left; the render's were `rgb(11,4,4)` and `rgb(83,5,12)`, both warm. No number the tool printed could
-see it.
-
-The obvious fix does not work, and the measurement is the argument. `ground` is not only the backdrop,
-it is the far stop of the body gradient, mixed with `deep` at 35% and 70% across the frame:
-
-| `ground` | shadow band, r-b error | shadow band dE | brightest mid cell, r-b |
-|---|---|---|---|
-| `#000202` (warm, as shipped) | **+14.8** | 28.0 | 133 → 133 |
-| `#12082a` (violet) | -2.6 | **42.2** | 133 → **55** |
-
-The temperature comes right and the picture falls apart, because a violet ground drags the lit body
-violet with it. `shade` is a separate role for a separate job. It SCREENS, which lifts black to
-exactly that colour and leaves white exactly white, and it sits above the colour field and below the
-pattern, because fill is light and the blind occludes it like any other light.
-
-It is a trade and no number picks the setting: every step darker buys about 4 units of shadow warmth
-and spends about 3.5 in the highlights. The judgement in `ref` is that they are not equally visible.
-Eight units of r-b in a near-black region is the difference between a brown black and a blue black;
-eight units on a highlight of 127 is under 6% and nothing looks different.
-
-#### `through`, and a blind that stops existing in the dark
-
-`sheen` is COLOR-DODGE. It SCALES what is behind an element, and 1.5 times black is black, so
-wherever the colour field has drained away the pattern disappears with it. Real backlit blinds do not
-do that: some light passes through them everywhere, usually a cooler light than the one making the
-bloom, so the slats stay visible against a dark wall.
-
-The reference says so plainly. In the darkest third of `refs/lightfield-ref.jpg` the striping is
-STRONGER than in the frame as a whole, and the render's is less than half its own frame average:
-
-| | frame edge | frame swing | dark third: luma | edge | swing |
-|---|---|---|---|---|---|
-| `refs/lightfield-ref.jpg` | 3.26 | 10.70 | 27.1 | **4.22** | **14.52** |
-| render, `through` off | 2.15 | 7.13 | 29.7 | **1.60** | **5.35** |
-| render, `through` `#3a3a4c` | 3.40 | 11.10 | 38.7 | 3.06 | 9.86 |
-
-**No existing dial reaches it**, which is why this is a role rather than a preset value. `shade` is
-the obvious candidate and fails by construction: it screens the faces and the gaps between them
-equally, so brightening it took the dark third's mean luma from 29.7 to 49.6 while the swing moved
-only from 5.35 to 6.67. It floods the dark long before the bars arrive.
-
-It SCREENS rather than adding. Plus-lighter matched the reference's striping exactly and cost 3.4
-points of block error doing it, because it brightens the lit half of the picture by as much as the
-dark half. Screen lifts black to the colour and leaves white alone, which is what light landing on a
-surface already brighter than itself looks like.
-
-It is not free on this reference. Every setting that improves the striping also lifts a region the
-reference keeps darker than the render already has it, so the mean block error rises: `#181820` costs
-1.4 points, `#3a3a4c` costs 4.2. The `ref` preset therefore leaves it off, and the striping gap is
-recorded rather than paid for. Looks whose elements have no face (`colonnade`, `sheen: 0`) have
-almost nothing for it to draw, and it moves their score by 0.05.
-
-#### `originX` / `originY`, and a layout that was fitted to one photograph
-
-The blob layout under the palette was fitted to `refs/lightfield-ref.jpg` and then imposed on every
-field after it: the bloom cluster high, the mid below it, the deep body against the left edge,
-whatever palette you hand it. So a generator advertised as general could only ever light a picture
-from the top. `refs/ref-a.jpg` is lit from off the bottom-right corner and was unreachable by any
-seed: four million layouts were searched and none of them existed, because the search was over jitter
-inside a fixed frame rather than over the frame.
-
-The pair moves the light and NOT `deep`, because `deep` is the body the light sits in rather than
-part of the light. The defaults are the centres of the fitted ranges, so they shift nothing.
-
-#### `spread`, and a constant that was fitted to one photograph
-
-The bloom is three lobes, and how fast a lobe fades used to be a constant: hold 0.85 out to 30%,
-finish by 80%. That was measured against `refs/lightfield-ref.jpg`, which really does have lobes with
-edges you can point at, and on that image the tight ramp beat a gentle one.
-
-On any reference whose light is one broad mass it draws three hard ellipses that no palette can hide.
-It was the single thing standing between this generator and both of the other two references, and in
-each case it showed up as circles nobody asked for. `spread` 0 is that constant exactly, so the field
-it was chosen for does not move.
-
-The reference needs `extra`. It carries a dark magenta lane between two orange lobes and a cold blue
-corner, and neither of those is a bloom, a mid, a deep or a ground. Naming them as roles would have
-meant inventing two roles that mean nothing on any other palette, so they go in a list.
-
-#### `lobes` and `evenness`, the same class of bug one level deeper
-
-`spread` was a constant fitted to one photograph. So was the number of lobes, and so was where they
-were allowed to sit. Both were written into an array literal: exactly three blobs, each drawn at a
-random x anywhere between 8% and 92% of the width.
-
-Three large blobs can only ever make one soft mass, and independent draws are lumpy however many of
-them there are. The two failures those two constants caused are visible in two different references:
-
-* `refs/lightfield-ref.jpg` is a flowing field with several colour regions, and the render was one
-  soft lobe that reads as a spotlight on a curtain. That is the COUNT.
-* `refs/ref-b.png` has a horizontal profile that is flat from a quarter of the way across to three
-  quarters, and the render dipped in the middle, because three independently placed lobes overlapped
-  into two humps. That is the PLACEMENT, and adding lobes at random positions only moved the dips.
-
-`lobes` is scaled so the cluster covers the same total area at any count: nine lobes are nine smaller
-lobes, never nine times the light, so the dial cannot be used to brighten a field by accident.
-`evenness` hands each lobe its own band of the width, from the middle outwards so the largest lobe
-takes the centre and the smaller ones fall away to the edges. Handing bands out left to right instead
-would ramp the lobe size across the frame and tilt every field to one side.
-
-`lobes` 3 with `evenness` 0 is the fitted cluster exactly, down to the byte.
-
 ### shadow
 
 How the light falls off. This is the mood dial: one palette and one pattern read as dawn or as a
@@ -406,11 +294,6 @@ make lightfield                                  # ref, tide and fern only: the 
 node harness/author/lightfield.mjs --preset ember --out formats/scene/_lightfield-ember.html --shot
 make lightfield PRESET=tide                      # one preset
 make lightfield ARGS='--seed 91 --pattern.kind shards --bloom "#ffd166" --out /tmp/f.html --shot'
-
-node research/lightfield/lightfield-test.mjs                  # determinism + fail-early, as assertions
-node research/lightfield/lightfield-compare.mjs A.jpg B.png   # measured fidelity, not an opinion
-node research/lightfield/lightfield-seeds.mjs ref.jpg 4000000  # rank millions of layouts, arithmetically
-SEEDLIST=<its output> node research/lightfield/lightfield-fit.mjs ref.jpg   # confirm the shortlist for real
 ```
 
 Every flag is derived from the option table, so the CLI cannot drift from the generator. Group keys
@@ -447,61 +330,6 @@ the API. Nothing about them is special-cased inside the generator: a preset is o
 | `core/lightfield/patterns.js` | the three structures and the field-wide `mass`. Knows nothing about colour |
 | `core/lightfield/colour.js` | hex parsing and mixing |
 | `core/lightfield/rng.js` | the seeded generator. Never swap this for `Math.random` |
-
-## How it is measured, and why the old number was wrong
-
-`node research/lightfield/lightfield-compare.mjs <reference> <render>` prints four things, and the first
-two exist because the other two passed a picture a human rejected.
-
-**Tonal bands.** An 8x5 grid, split into shadow, mid and highlight by the REFERENCE's own luma, never
-the render's, so a field that lost all its shadows cannot redefine what a shadow is and then pass.
-Each band reports its dE, its WORST cell, and warmth as `r - b` for both pictures. Warmth is there
-because "warm or cool" is the axis the eye grades a shadow on and dE cannot tell a violet miss from a
-green one. The worst cell is printed beside every mean, because a mean is a budget a fit will spend.
-
-**Bands.** How many vertical elements there are and how hard they cut, off one column-luma profile:
-average every row away and what is left is the vertical structure alone. `count` is local maxima that
-clear a prominence floor set as a fraction of the profile's own range. `hardness` is the mean absolute
-gradient of that profile. This is a better number than the `edge` under STRIPING, which is measured
-at full resolution and therefore also measures a JPEG reference's compression noise: on
-`refs/lightfield-ref.jpg` the full-res edge runs 50% above the column-profile hardness for the same
-picture.
-
-**Samples** are four fixed points fitted to `refs/lightfield-ref.jpg` and are only printed for it.
-**Block grid** downsamples hard so the slat phase cancels and what is left is the colour field.
-
-The failure this section is named after: the `ref` preset scored a mean sample dE of **12.7** and was
-rejected on sight, because all four sample points sat in lit areas and the defect was in the dark
-ones. After fixing it the same number went to **12.4**, which is to say it never had an opinion. The
-numbers that moved were the ones that did not exist yet.
-
-| `ref`, shadow band | before | after |
-|---|---|---|
-| warmth error, `r - b` | **+14.8** (warm where the reference is cool) | **+6.5** |
-| dE | 28.0 | 27.1 |
-| right-edge sample | `#050403`, r-b **+1.5** | `#06060d`, r-b **-7.1** (reference: -9.0) |
-| band hardness vs reference | 1.27x | 1.05x |
-
-## Where it stops
-
-1. **The violet lower-left corner of `refs/lightfield-ref.jpg`.** The worst cell is still `#1a0818`
-   in the reference against `#5c0817` here, and no fill can reach it: the `deep` blob genuinely sits
-   there, so the region is red by layout rather than by palette. 259 alternative seeds were rendered
-   and scored and none beat the incumbent, so this is the vocabulary, not the search.
-2. **Light that lives INSIDE the elements.** In `refs/ref-a.jpg` each spike carries its own white
-   core on pure black. Here an element MODULATES a field: `color-dodge` cannot brighten black, so a
-   flame cannot glow where the field behind it is dark. `ember` reaches the shape by inverting the
-   picture, drawing the black as tapered wedges and letting the flames be the gaps, which gets the
-   silhouette and the rising envelope but not a per-flame core. `plus-lighter` would emit light and
-   was rejected for a separate documented reason: it ADDS, so it lit up the reference's black
-   right-hand side with bars that should not be there.
-3. **A tapered element and its own complement.** A bar carries at most one dark cell and one lit
-   cell, and both take the same box and the same taper. `refs/ref-a.jpg` needs the dark to be the
-   complement of a tapered lit shape, which is two dark cells per bar and therefore a fourth pattern
-   rather than a dial.
-4. **Chroma in the mid-tones.** The reference holds a crimson through the fall from orange to dark
-   red, and compositing fixed hex stops walks that ramp towards brown. Interpolating `in oklab`
-   recovered some. The rest needs more stops than four, which would cost the thing the four are for.
 
 ## Turning the dials without a render
 
@@ -567,33 +395,3 @@ interpolation between four stops reaches it. The seventeen effects written befor
 the change. That was checked by shooting every effect at two clocks with and without a palette,
 before and after, and comparing the hashes rather than the pictures.
 
-### Where `spectrum` stops, measured against `refs/colonnade/c6.jpg`
-
-Mean per-channel error **14.2 out of 255** at the reference's own 9:16, on a 120x214 grid, which is
-the same measurement `research/lightfield/lightfield-check.mjs` uses one size up.
-
-The construction is right: eleven bands, evenly spaced, mirror-symmetric, the band edges within a
-pixel of the reference's, a spectrum falling down the frame, and each band out from the middle
-showing less of that spectrum, which is what makes the picture read as depth rather than as stripes.
-
-What still differs, in one word, is CONTRAST. The reference's dark green is darker and its blue
-deeper; ours is the same hue at roughly two thirds the punch, and where the reference's adjacent
-columns jump, ours slide. The cause is nameable: the eight stops are EVENLY SPACED along the ramp, and
-the reference's dark-green trough is about 6% of the frame height wide, sitting between our stops at
-28.6% and 42.9%. The straight leg between two stops cuts that corner off. Closing it needs per-stop
-POSITIONS, not more stops, and that is eight more floats than the parameter vectors currently carry.
-
-One smaller residual: the reference's per-band depth is not a clean step. Within each band the depth
-recovers slightly toward the band's outer edge, which `bandLean` models but only approximately; the
-reference behaves as though the recovery is about half a step and ours is a straight ramp.
-
-### What was measured on the reference
-
-Recorded so the next person does not re-derive it. At 120x214: eleven bands, edges at
-`x = 10, 21, 32 … 110`, no jitter. The ramp runs DOWN the frame, perpendicular to the bands. The
-centre column, top to bottom, is `(239,251,231) → (206,239,212) → (107,175,144) → (124,185,109) →
-(216,235,157) → (137,205,207) → (66,155,213) → (224,239,248) → (240,251,255)`. Each band samples that
-ramp at a different vertical SCALE, not a different offset: fitting `(scale, offset)` per column gives
-offsets inside ±0.01 everywhere and scales of `1.00, 0.89, 0.78, 0.66, 0.54, 0.44` out from the middle
-band. That is a per-band ZOOM on the gradient anchored at its midpoint, and it is the single most
-characteristic thing about the picture.

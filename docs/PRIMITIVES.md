@@ -885,7 +885,7 @@ karaoke timing; without it, windows distribute across the line proportional to w
 `make captions` output still reads as intentional. Inactive words dim via colour mix toward the bg,
 never opacity: the styled plate keeps every state above WCAG 4.5:1.
 
-## Baked simulation (`sims/` · `make sim`): the stateful tier, run offline
+## Baked simulation (`generators/sim/sims/` · `make sim`): the stateful tier, run offline
 
 `renderFrame(n)` is a pure function of `n`: eight workers, arbitrary order, byte-identical output.
 A simulation is the exact opposite (frame 412 exists only because 411 ran first) so nothing
@@ -899,7 +899,7 @@ the renderer keeps exactly one contract. Same shape as `canvasFx` (an image pass
 and `make spectrum` (band energy baked to a table the render reads by row).
 
 ```bash
-make sim D=sims/ember-burst.mjs WRITE=1     # → assets/baked/ember-burst/{f0001.png…,manifest.json,meta.json}
+make sim D=generators/sim/sims/ember-burst.mjs WRITE=1     # → assets/baked/ember-burst/{f0001.png…,manifest.json,meta.json}
 make sim-audit                              # seeded? bake fresh against its source? sequence intact?
 ```
 
@@ -914,7 +914,7 @@ frame count: `clip` derives its index from `t`, `manifest.fps` and `speed`. Fram
 holds.
 
 Determinism moved to bake time, it did not disappear. A sim draws every random number from
-`sims/lib/rng.mjs`, seeded by its exported `seed`; `make sim-audit` fails any sim that reaches for
+`generators/sim/sims/lib/rng.mjs`, seeded by its exported `seed`; `make sim-audit` fails any sim that reaches for
 `Math.random` or the wall clock, any bake whose sim has been edited since (the frames would silently
 keep playing the previous version of the effect), and any sequence with a hole in it. Full contract:
-`sims/README.md`. Shipped: `ember-burst` · `ink-bloom` · `shatter`.
+`generators/sim/sims/README.md`. Shipped: `ember-burst` · `ink-bloom` · `shatter`.

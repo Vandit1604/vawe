@@ -16,7 +16,7 @@ window.__simLoad = async (src) => {
     const need = ['dims', 'fps', 'frames', 'seed', 'setup', 'step', 'draw'];
     const missing = need.filter((k) => sim[k] === undefined);
     if (missing.length) return { error: `sim is missing required export(s): ${missing.join(', ')}` };
-    const { rng } = await import('/sims/lib/rng.mjs');
+    const { rng } = await import('/generators/sim/sims/lib/rng.mjs');
     const { w, h } = sim.dims;
     canvas = document.createElement('canvas');
     canvas.width = w; canvas.height = h;
