@@ -11,6 +11,9 @@
 # doc-refs joined it once engine-doctrine/MISTAKES.md was patched. Same argument: a doc names a command as an
 # instruction, and an instruction that fails teaches the author to distrust the whole file. It found
 # 111 usage strings printing a path that had moved months earlier.
+# skill-reach is the same argument once more, one layer up: a SKILL.md nothing routes to is unreachable
+# the same way a broken doc link is, and it is invisible from a diff, because the new skill file itself
+# looks finished. vawe-review-loop shipped that way and carried the judge loop's stopping rule with it.
 # arsenal-check is the same argument once more, and it belongs here rather than in author-check for a
 # specific reason: the commit that ADDS a capability is a framework commit, and framework commits never
 # run an authoring ladder. The three.js layer landed that way and stayed out of the catalogue for as
@@ -36,8 +39,8 @@
 # `metalness` and `roughness` were declared on the three layer and overwritten by literals, and every
 # gate stayed green for months because no scene set them (engine-doctrine/MISTAKES.md #565). It is the slow step
 # here, about 35 seconds, and it is the only one that needs a browser.
-echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + arsenal + discovery + generated + scenes + mistakes + prop-probe) …"
-if ! make schema-check lib-test craft-coverage doc-refs arsenal-check discovery generated-check scenes-json no-emdash mistakes-check prop-probe; then
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + prop-probe) …"
+if ! make schema-check lib-test craft-coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check prop-probe; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi

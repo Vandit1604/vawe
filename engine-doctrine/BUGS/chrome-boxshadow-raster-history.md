@@ -69,7 +69,7 @@ shimmed so the same `tabprobe` command drives it.
 
 ```
 go run ./harness/dev/tabprobe -tabs 2 -frame 114 \
-  -url "file://$PWD/docs/BUGS/chrome-boxshadow-raster-history.html" \
+  -url "file://$PWD/engine-doctrine/BUGS/chrome-boxshadow-raster-history.html" \
   -pre 0,6,12,18,24,30,36,42,48,54,60,66,72,78,84,90,96,102,108 -pre1 0-113
 ```
 
