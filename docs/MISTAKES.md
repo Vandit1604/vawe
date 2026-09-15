@@ -2727,3 +2727,7 @@ pre-render branch, the `hero` step in `author-check`'s ladder, and every doc lin
 as a live rule. The underlying craft guidance, fill the frame, hero text at video scale, stays in
 LAYOUT.md and TYPOGRAPHY.md; only the measurement and the gate step are gone.
 holds: none
+
+## 628. `tempo` was silently ignored unless a scene happened to carry other sugar
+The Go renderer pre-expands a scene only when it matches block/beat/comp sugar, a `recipes` key or a `voice` cue (`internal/render/expand.go`), and `tempo` is resolved by that pass and by nothing else. A catalog film asked for `tempo: 0.6` and rendered at its authored 19.6s, with no warning; vawe-flow-2 only worked because it carries an empty `recipes` key. The matcher now names `tempo` too, with a Go test over every trigger, and the film renders 32.7s. The class: a feature that only one pass resolves must be named by whatever decides to run that pass.
+holds: none

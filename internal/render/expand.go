@@ -31,7 +31,10 @@ import (
 	"regexp"
 )
 
-var sugarType = regexp.MustCompile(`"type"\s*:\s*"(block|beat|comp)"|"recipes"\s*:|"voice"\s*:\s*"`)
+// `tempo` rides the same trip: core/engine/expand.js resolves it and nothing else does, so a scene
+// carrying it and no other sugar rendered at its authored speed with no warning at all (measured on
+// a catalog film: tempo 0.6, 19.6s authored, 19.6s rendered).
+var sugarType = regexp.MustCompile(`"type"\s*:\s*"(block|beat|comp)"|"recipes"\s*:|"voice"\s*:\s*"|"tempo"\s*:`)
 
 func hasSugar(raw []byte) bool { return sugarType.Match(raw) }
 
