@@ -868,7 +868,7 @@ sheet: ## [dev] DESIGN SHEET: every captured element on one page (on the theme b
 
 # make theme-remix PRESET=editorial BRAND=acme [BG=#hex ACCENT=#hex TEXT=#hex], pick a design-system
 # PRESET (directions/*.json) and remix it onto a brand's base+accent → a complete themes/<brand>.json. The
-# another engine "pick a preset, paint the brand into it" move: good coherent design in one command, not
+# "pick a preset, paint the brand into it" move: good coherent design in one command, not
 # hand-authored per pixel. Reads assets/brands/<brand>/palette.json when BG/ACCENT are omitted.
 theme-remix: ## [engine] pick a design-system PRESET (directions/*.json) and remix it onto a brand's base+accent → a complete
 	node scripts/brand/theme-remix.mjs --preset $(PRESET) --brand $(BRAND) $(if $(BG),--bg "$(BG)") $(if $(ACCENT),--accent "$(ACCENT)") $(if $(TEXT),--text "$(TEXT)")
@@ -1466,8 +1466,8 @@ blocks-sync: blocks-docs blocks-json blocks-scenes ## [site] regenerate everythi
 blocks-scenes: ## [site] per-block scene JSON + poster still for the site (no render needed)
 	node scripts/site/blocks-scenes.mjs
 
-# make registry. The agent-consumable REGISTRY: an index plus one item per block and beat, in the
-# shadcn/another engine shape, so an outside agent can pick one by name and know what to write where.
+# make registry. The agent-consumable REGISTRY: an index plus one item per block and beat, in a
+# component-catalog shape, so an outside agent can pick one by name and know what to write where.
 # Block items land in blocks/catalog/, beside the factories they describe; the index and every
 # non-block item land in registry/. Generated from blocks/catalog.mjs + blueprints/index.mjs; never
 # hand-edited.

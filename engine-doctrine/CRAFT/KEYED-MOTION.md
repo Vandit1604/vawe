@@ -328,9 +328,9 @@ Two things follow:
 - **The steps are 0.5px, not 1px, and that is `ss=2` doing a second job.** Supersampling halves the
   layout-snap quantum as well as anti-aliasing edges. It was documented as only doing the second.
 
-The rule this borrows from is another engine', which forbids animating layout properties outright and lints
-for it. vawe does not need the lint: `motionAt` returns transforms, so 91% of the library's motion keys
-are transforms by construction. The box track is the deliberate exception, and this is its cost.
+The wider rule is: never animate layout properties, only transforms. vawe does not need a lint for
+this: `motionAt` returns transforms, so 91% of the library's motion keys are transforms by construction.
+The box track is the deliberate exception, and this is its cost.
 
 ## ONE MODEL OF WHAT MOVES: the motion IR
 

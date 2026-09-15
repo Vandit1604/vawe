@@ -12,7 +12,7 @@ brand
 
 ## Users
 
-Three audiences that look different on paper and behave identically in practice: **developers** evaluating a render engine (technical, skeptical, have seen another engine, deciding whether this is worth a weekend), **agent-authors** wiring an LLM into a video pipeline (want proof the JSON contract is actually machine-writable), and **marketing teams** who need video at volume (want the outcome, not the engine).
+Three audiences that look different on paper and behave identically in practice: **developers** evaluating a render engine (technical, skeptical, have seen other rendering tools, deciding whether this is worth a weekend), **agent-authors** wiring an LLM into a video pipeline (want proof the JSON contract is actually machine-writable), and **marketing teams** who need video at volume (want the outcome, not the engine).
 
 What unifies them: **they all work through AI.** None of them will hand-author a timeline. They arrive expecting to describe a video and get a video, and the question they're really asking is "can I trust the thing on the other end of that description?" The site's job is to answer that in the first five seconds, without a signup.
 

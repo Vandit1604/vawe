@@ -48,7 +48,7 @@ REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a 
 | `schema-drift.mjs` | 447 | yes | schema-drift.mjs: keep the DATA CONTRACT honest. The engine (scene.html) reads layer props as |
 | `arsenal-check.mjs` | 441 | yes | quality/gates/arsenal-check.mjs: is every capability the engine offers actually IN the catalogue |
 | `doc-map.mjs` | 436 | yes | quality/gates/doc-map.mjs. The doc map: one source of truth, every index generated from it. |
-| `storyboard-check.mjs` | 432 | yes | quality/gates/storyboard-check.mjs: the STORYBOARD-AS-PROPOSAL gate (another engine Step 3, adapted). |
+| `storyboard-check.mjs` | 432 | yes | quality/gates/storyboard-check.mjs: the STORYBOARD-AS-PROPOSAL gate. |
 | `prop-probe.mjs` | 417 | yes | prop-probe.mjs: exercise EVERY declared layer prop against EVERY type that declares it, so a prop |
 | `plan-vs-render.mjs` | 408 | yes | quality/gates/plan-vs-render.mjs: DOES THE FILM DO WHAT THE PLAN SAID? |
 | `conformance.mjs` | 335 | yes | conformance.mjs: does the engine actually DO what it says it accepts? |
@@ -226,7 +226,7 @@ LOOK. Nothing here changes a film. The previews, the contact sheets, the experim
 | `sound-vary.mjs` | 395 | no | harness/dev/sound-vary.mjs: generate variations of a cue, judge them by ear, keep what survives. |
 | `candidates.mjs` | 357 | no | harness/dev/candidates.mjs: SIX VERSIONS OF YOUR OWN FRAME, so a choice can be pointed at. |
 | `motion-lab.mjs` | 317 | yes | harness/dev/motion-lab.mjs: does a motion change actually raise the local-motion floor, or is it an |
-| `evals.mjs` | 278 | yes | harness/dev/evals.mjs: THE EVAL HARNESS (another engine's skills-evals, adapted; W6 of the motion-design |
+| `evals.mjs` | 278 | yes | harness/dev/evals.mjs: THE EVAL HARNESS (W6 of the motion-design |
 | `demo.mjs` | 235 | yes | harness/dev/demo.mjs: scaffold a SPECIMEN scene, so that the default shape of a demo is a SHOT. |
 | `sound-lab.mjs` | 198 | no | harness/dev/sound-lab.mjs: hear every cue the engine can make, and say which ones are any good. |
 | `previews.mjs` | 174 | yes | harness/dev/previews.mjs: one rendered preview per beat blueprint, so an author picks a finished part |
@@ -357,7 +357,7 @@ STUDY A BRAND. Read a real site and turn it into a theme: sections, palette, fon
 | `localize-assets.mjs` | 300 | no | localize-assets.mjs: make a CAPTURED component self-contained, so a render never touches the network. |
 | `sections.mjs` | 152 | yes | sections.mjs: inventory a page as SECTIONS so nothing gets ignored. Where lookbook.mjs gives you |
 | `brandspec.mjs` | 110 | yes | brandspec.mjs, READ a site's real CSS instead of guessing it. Loads the page, walks the stylesheets |
-| `theme-remix.mjs` | 108 | yes | scripts/brand/theme-remix.mjs: the another engine "pick a preset, remix it onto the brand" move (their |
+| `theme-remix.mjs` | 108 | yes | scripts/brand/theme-remix.mjs: the "pick a preset, remix it onto the brand" move. |
 | `storyboard-draft.mjs` | 102 | yes | scripts/brand/storyboard-draft.mjs: turn a captured `sections.json` into a STORYBOARD.md SKELETON: |
 | `intent-from-storyboard.mjs` | 99 | yes | scripts/brand/intent-from-storyboard.mjs: export a STORYBOARD.md's whys into a `.intent.json` sidecar, |
 | `house-style.mjs` | 91 | yes | scripts/brand/house-style.mjs: scaffold a brand's persisted DESIGN READ as declarative markdown, so the |

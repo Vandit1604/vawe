@@ -35,7 +35,7 @@ not: "the defaults this film refuses, in your own words"
   writing any scene JSON?
 
 <!--
-  This is the STORYBOARD contract (another engine Step 3, adapted). Copy it, fill it, then run
+  This is the STORYBOARD contract. Copy it, fill it, then run
   `make storyboard-check SB=<file>` and present it for sign-off BEFORE writing any scene JSON:
   open with "This video tells <audience> that <message>", then the beat table. Every beat states its
   JOB. A beat with no `why` is decoration. Reveal model: weight each cue into the back ~50% of its beat

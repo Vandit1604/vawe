@@ -1,6 +1,6 @@
 // core/produce.js, PRODUCE THE BASELINE. The engine's "go all-in" default: inject the universal produced
 // motion into a scene that didn't specify it, so a film with cuts swaps its beats as whole scene-units
-// by default. The another engine posture, forced at BUILD time.
+// by default. This posture is forced at BUILD time.
 //
 // NO AUTO CAMERA. This pass used to inject a slowPush (s 1 -> 1.06) into every scene that declared no
 // camera, so the frame "stayed alive". It fought text: a still headline zoomed the whole runtime, and

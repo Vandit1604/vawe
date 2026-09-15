@@ -622,12 +622,12 @@ holds: none
 Point the mutation at `notARealProp` ,  a name no layer will ever accept ,  and match on it.
 holds: quality/gates/gate-mutation.mjs
 
-## 150. ported the another engine craft: seam-QA, anti-front-load floor, author-the-frame, the spec contract
-What. Studied a real another engine-built promo (its storyboard, `frame.md` design spec, per-beat HTML+GSAP compositions, rendered frames, and the build session trace) to find what set its output...
+## 150. ported an external craft study: seam-QA, anti-front-load floor, author-the-frame, the spec contract
+What. Studied a real externally-built promo (its storyboard, `frame.md` design spec, per-beat HTML+GSAP compositions, rendered frames, and the build session trace) to find what set its output...
 holds: none
 
-## 151. ported the full another engine pipeline (Steps 0-6) as local-model tooling
-What. Studied the authoritative another engine `product-launch-video` skill (its gated Step 0-6 pipeline) and built our own version of all five adoptable pieces, offline / local-model only: 1....
+## 151. ported a full external pipeline (Steps 0-6) as local-model tooling
+What. Studied an external `product-launch-video` pipeline (its gated Step 0-6 stages) and built our own version of all five adoptable pieces, offline / local-model only: 1....
 holds: none
 
 ## 152. theme-remix emitted an incomplete `bg` block; dark bg presets crashed the render
@@ -635,11 +635,11 @@ Derive the whole block: a light ground pair + a dark ground pair (both always pr
 holds: none
 
 ## 153. dense per-child choreography (`parts`), so figures animate piece by piece by default
-What. Our motion read flatter than another engine because a figure (a chart, a diagram) arrived as ONE block ,  we animated at the layer level, they choreograph every child on a timeline (bar 1...
+What. Our motion read flatter than a reference pipeline because a figure (a chart, a diagram) arrived as ONE block ,  we animated at the layer level, they choreograph every child on a timeline (bar 1...
 holds: none
 
 ## 154. the composition path (per-beat GSAP timeline), and TWO framework bugs it surfaced
-What. Adopted another engine' "one worker hand-writes a GSAP timeline per beat" model ,  but SAFELY.
+What. Adopted the "one worker hand-writes a GSAP timeline per beat" model from an external pipeline ,  but SAFELY.
 holds: quality/gates/lib-test.mjs
 
 ## 155. direction-floor nagged "no-camera" on scenes that HAVE a cameraMove (pre-expand blind spot)
@@ -650,7 +650,7 @@ holds: quality/gates/lib-test.mjs
 Opt-in `"sceneUnits": true`: partition layers into BEATS by the `cuts` times, wrap each beat's layers in a `.hs-beat` div, and at each boundary move the OUTGOING wrapper (exit) against the...
 holds: none
 
-## 157. the produced baseline: force rich-by-default at the ENGINE, additively (go all-in like another engine)
+## 157. the produced baseline: force rich-by-default at the ENGINE, additively (go all-in like an external reference pipeline)
 What. The engine was capability-oriented (composition/parts/sceneUnits/camera all opt-in) so authors defaulted to thin videos.
 holds: quality/gates/lib-test.mjs
 
@@ -2454,7 +2454,7 @@ The first pass at one film used three of the reference film's twelve devices and
 holds: films/scene/vawe-oblique.storyboard.md, harness/author/storyboard-parse.mjs, studio/page.mjs
 
 ## 600. seven frames were designed at web values and rendered at 1920x1080
-`films/scene/_vawe-oblique.*.html` read "too simple" across five rounds of fixes: compositions, then the type ramp, then the elevation ramp, then the theme, then the double bezel. Each fix was real and none was the reason. The reason is in a table this machine already had: `~/.claude/skills/another engine-creative/references/video-composition.md` puts decorative opacity at 3-8% on a web page and 12-25% on video, borders at 1px against 2-4px, and says plainly that a card at `1px solid #e2e3e6` with a 6% shadow is INVISIBLE on video. The ambient backdrop here was authored at 6-9% opacity, twice, with a comment defending it: "a backdrop a viewer NOTICES has stopped being a backdrop", true of a page and wrong of a frame that will be encoded. Every decorative value in `harness/lib/stagekit.mjs` is now set from the video column: hairlines 2px, grain 5.5%, ambient fields 14-20%. The same reference names two more things the film was failing: "muted is fine, flat is not", and that a LIGHT canvas is the hard case because an accent glows for free on dark and needs bolder structure and real texture on light. Not taken from it: registration marks, on its list of foreground accents but belonging to a genre this film is not in, and the film's own reference has none. A frame's accents come from its reference, not a menu.
+`films/scene/_vawe-oblique.*.html` read "too simple" across five rounds of fixes: compositions, then the type ramp, then the elevation ramp, then the theme, then the double bezel. Each fix was real and none was the reason. The reason is in a table this machine already had: an internal video-composition reference puts decorative opacity at 3-8% on a web page and 12-25% on video, borders at 1px against 2-4px, and says plainly that a card at `1px solid #e2e3e6` with a 6% shadow is INVISIBLE on video. The ambient backdrop here was authored at 6-9% opacity, twice, with a comment defending it: "a backdrop a viewer NOTICES has stopped being a backdrop", true of a page and wrong of a frame that will be encoded. Every decorative value in `harness/lib/stagekit.mjs` is now set from the video column: hairlines 2px, grain 5.5%, ambient fields 14-20%. The same reference names two more things the film was failing: "muted is fine, flat is not", and that a LIGHT canvas is the hard case because an accent glows for free on dark and needs bolder structure and real texture on light. Not taken from it: registration marks, on its list of foreground accents but belonging to a genre this film is not in, and the film's own reference has none. A frame's accents come from its reference, not a menu.
 One correction, because the wrong reading is expensive: "a video frame is not a web page" is a claim about VIEWING CONDITIONS, not design quality. Web craft is the input, and inheriting it is why this engine renders HTML at all: `make capture URL= SEL=` lifts a real component with its computed CSS into an animatable layer, and hand-authoring a fragment is the fallback for a surface that does not exist yet. What the medium breaks is a short list of decorative VALUES; hierarchy, restraint, rhythm, optical alignment and type pairing transfer unchanged. Transpose the decoration, keep the craft.
 holds: harness/lib/stagekit.mjs, engine-doctrine/CRAFT/HTML-FRAGMENTS.md
 

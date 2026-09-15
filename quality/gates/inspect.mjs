@@ -1,7 +1,7 @@
 // quality/gates/inspect.mjs: INTENT VERIFICATION. Checks a scene against a declared `.intent.json`
 // sidecar: for each beat you state the artifact that earns it + what must show + whether it must
-// animate. inspect confirms the render actually delivers it. This is the another engine motion-verify
-// idea: the agent verifies its OWN output against intent before a human sees it.
+// animate. inspect confirms the render actually delivers it: the agent verifies its OWN output
+// against intent before a human sees it.
 //
 // Sidecar shape (scene.intent.json next to scene.json, or pass --intent):
 //   { "spine": { "object": "the generate button", ... },

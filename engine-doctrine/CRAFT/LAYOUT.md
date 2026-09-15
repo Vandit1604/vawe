@@ -23,9 +23,8 @@ how to place layers and compose an `html` layer with intent.
 
 ## 0. Guardrails: you build for the web. Video frames are not pages.
 
-Borrowed close to verbatim from the reference system's
-`another engine-creative/references/video-composition.md` and `motion-principles.md`. Read those before
-arguing with these.
+These guardrails come from studying premium motion-graphic references closely. Read the whole list
+before arguing with any one line.
 
 - **Two focal points minimum per scene.** *"The eye needs somewhere to travel. Never a single text block
   floating in empty space."* That single floating block is what [DENSITY.md](DENSITY.md) calls the slide

@@ -1,7 +1,7 @@
 // scripts/site/examples-gallery.mjs: build a hover-to-play showcase from the flagship example registry.
 // Reads films/scene/examples.json, copies each rendered video into out/gallery/, and writes a single
 // self-contained out/gallery/index.html: a "start from a use case" table + portrait/landscape grids of
-// cards that play on hover and park on a poster frame on leave (the another engine template-gallery pattern).
+// cards that play on hover and park on a poster frame on leave.
 // Run via `make gallery`. Render the videos first (make video / beatsync), a missing video is warned, not fatal.
 import fs from 'node:fs';
 import path from 'node:path';

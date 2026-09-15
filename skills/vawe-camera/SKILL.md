@@ -105,7 +105,7 @@ in front. Sign is the CSS one. Measured under a 600px truck at a 1600px lens (`h
 `lens / (lens - z)`, and it must: depth without magnification is a translation, not a distance. Author the
 layer at the size the distance asks for. `plane` turns the 3D rig on by itself, exactly as `tilt` does.
 
-## Doctrine (another engine camera-journey, adapted)
+## Camera-journey doctrine
 
 - **One camera, one journey.** Don't fight cuts with the camera; the camera moves the whole beat as one plane.
   When the camera IS the transition (`travel`, above), the right number of cuts is usually zero.

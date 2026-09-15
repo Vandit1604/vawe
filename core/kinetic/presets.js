@@ -1,5 +1,4 @@
-// core/kinetic/presets.js: the kinetic-type PRESET vocabulary (another engine "Kinetic Type" parity),
-// extracted out of core/type.js. Every preset is PURE in the unit's own local progress `u∈[0,1]`: it
+// core/kinetic/presets.js: the kinetic-type PRESET vocabulary, extracted out of core/type.js. Every preset is PURE in the unit's own local progress `u∈[0,1]`: it
 // reads nothing about layout, measurement or the DOM. That purity is what made the lift possible -
 // splitText/unitProgress/animateUnits stay in core/type.js because THEY touch the DOM and the clock;
 // this file only maps a number to a style object (plus the two presets, decode/flap, whose subject is

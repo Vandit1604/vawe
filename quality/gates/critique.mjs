@@ -3,7 +3,7 @@
 // illegible transitions, lonely low-value beats. Not taste-complete, but it makes the recurring
 // mistakes un-shippable. Run: node quality/gates/critique.mjs <scene.json> [--strict]
 //
-// Modeled on another engine' per-frame red-flags + our engine-doctrine/skill "every frame fights for its value".
+// Modeled on per-frame red-flag checks + our engine-doctrine/skill "every frame fights for its value".
 import fs from 'node:fs';
 import { canvasShare, sceneTiming, boxOf, sceneView, inView, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
 import { onScreenText, glyphText, snippet } from '../../harness/lib/text.mjs';
@@ -272,8 +272,8 @@ if (Array.isArray(d.camera) && d.camera.length) {
 }
 
 // ---- 10. transition-dip: the stage must never go EMPTY between beats. If the outgoing beat fully
-//        exits before the next enters, the cut is a jump-cut-with-a-dip (both another engine and another engine
-//        ban it. The transition should BE the exit: overlap outgoing + incoming). We merge every
+//        exits before the next enters, the cut is a jump-cut-with-a-dip. The transition should BE the
+//        exit: overlap outgoing + incoming. We merge every
 //        content layer's [start, end] interval and flag any blank gap in the middle. Persistent marks
 //        (a watermark spanning most of the film) and tiny captions are excluded so they can't mask a dip.
 const sceneDur = d.duration ?? 0;

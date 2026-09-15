@@ -1,6 +1,6 @@
 // quality/gates/sweep-static.mjs: does the film's PIXELS ever move, mechanically checked.
 //
-// Adapted from another engine' `check` sweep_static. Every other gate that touches motion reads the JSON:
+// This gate reads the render itself instead of the JSON. Every other gate that touches motion reads the JSON:
 // static-bg (beat-check.mjs) asks whether a DECLARED bg window carries `var(--t)`/`var(--p)` so it CAN
 // animate. It never looks at the render, so a film that declares a moving preset but whose camera,
 // cuts and content all sit frozen for the whole runtime still passes it clean. This gate reads the
@@ -51,7 +51,7 @@ export function meanAbsDiff(a, b) {
 }
 
 // FAIL only when the WHOLE film is frozen: every consecutive sampled pair reads as unchanged. One
-// still pair is a legitimate held beat; this must not flag it (another engine' persistence rule).
+// still pair is a legitimate held beat; this must not flag it.
 export function verdict(changes, duration) {
   const readable = changes.filter((c) => c != null);
   if (!readable.length) return { fail: false, maxChange: null };

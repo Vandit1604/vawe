@@ -92,7 +92,7 @@ Non-negotiable moves:
 - **Layout by containment: group-first.** Anything with a spatial relationship (a label+value, a logo
   row, a card grid, a checkout card's contents) goes in a `group` (flex/grid box; children flow by `gap`,
   and children can be **nested groups**), never two absolute `x/y` layers you space by eye (that's what
-  collides). Absolute `x/y` + `motion` is only for free placement / choreography. This is the another engine/HF
+  collides). Absolute `x/y` + `motion` is only for free placement / choreography. This is the
   flex-not-pixels rule; it's why the fix for "the % is too close to the label" is a group, not new coords.
 - **Gate it:** `make designspec-check D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
   clear its flags before you render. Full routing: `AGENTS.md`.

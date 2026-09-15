@@ -31,8 +31,8 @@ files, and without an index an agent authors from its own priors, which regress 
 > demo, a proof), not by **saying** it (a word in a box). Produced, not generated.
 
 **Competent is not the same as directed.** Same tool, same primitives, same defaults produces the same
-film: that is not a guess, it is why the another engine community had to publish an anti-template checklist
-for its own showcase. `library-top5-only` (above) is this engine's version of that check, and the fix is
+film: that is not a guess, it is why any tool with a fixed effect library needs an anti-template check
+against its own showcase. `library-top5-only` (above) is this engine's version of that check, and the fix is
 always the same shape: reach for a family fewer films already use. [`CRAFT/AFTER-EFFECTS-TECHNIQUES.md`](CRAFT/AFTER-EFFECTS-TECHNIQUES.md)
 names 26 real procedures with a HAVE/PARTLY/LACK verdict against this engine; `direction-floor.mjs`
 reads that table live and cites the recipe by name when it names something to reach for, so the table
@@ -45,8 +45,8 @@ anti-pattern.
 
 ## The three spines (what "taste" decomposes into)
 
-Great video-making is three separable decisions. another engine names them house-style / composition /
-story; we have all three: here's where each lives.
+Great video-making is three separable decisions: house-style, composition, and story. This engine
+covers all three: here's where each lives.
 
 | Spine | The question | Load |
 |---|---|---|
