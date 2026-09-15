@@ -259,6 +259,32 @@ if (!spanned.length) {
     }
   }
 
+  // 2b. TWO OWNERS OF BEAT TIMING (item 3, `beats[]`). The storyboard sidecar has always carried beat
+  // spans; a scene that also carries its own `beats[]` (core/timeline/relative-time.js `beat:<id>.start`
+  // targets) now has a SECOND place beat timing lives, and a second place can drift from the first.
+  // Report-only, by design: this gate proves render behaviour and BLOCKS on it, but a stale `beats[]`
+  // entry is a bookkeeping drift, not a broken render (nothing here reads `beats[]` to draw a frame), so
+  // it prints and never fails, not even under --strict, the same as the spectacle nomination above.
+  if (Array.isArray(d.beats)) {
+    const BEAT_TOL = 0.05;
+    const mismatches = [];
+    spanned.forEach((b, i) => {
+      const sb2 = d.beats[i];
+      if (!sb2 || typeof sb2.start !== 'number' || typeof sb2.duration !== 'number') return;
+      const [planStart, planEnd] = b.span;
+      const sceneEnd = sb2.start + sb2.duration;
+      if (Math.abs(sb2.start - planStart) > BEAT_TOL || Math.abs(sceneEnd - planEnd) > BEAT_TOL) {
+        mismatches.push(`    ! beat ${i + 1} "${b.name || ''}": storyboard plans ${s(planStart)}-${s(planEnd)}, `
+          + `scene beats[${i}] ("${sb2.id}") is ${s(sb2.start)}-${s(sceneEnd)}.`);
+      }
+    });
+    if (mismatches.length) {
+      console.log(`  beats[] vs storyboard: ${mismatches.length} beat(s) disagree (re-run \`make assemble D=${file}\` to regenerate beats[] from the storyboard):`);
+      for (const m of mismatches) console.log(m);
+      console.log('    (report-only: never blocks, not even under --strict.)\n');
+    }
+  }
+
   // 3. inside a beat the plan paid seconds for, does the film hold still for most of them?
   for (const [i, b] of spanned.entries()) {
     const [a, z] = b.span;

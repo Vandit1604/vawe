@@ -570,7 +570,11 @@ export function bakeCameraMove(data, frame) {
   resolveTargetSpecs(data, specs, dims);
   // A cursor binding resolves HERE, inside the one funnel, so `cursor` cannot be a field an author
   // writes and nothing reads.
-  const built = specs.map((s) => ({ spec: s, kf: buildCameraMove(bindCursorCamera(s, data), dims) }));
+  // `beats` (item 3, cross-seam camera) is THIS FUNNEL'S OWN field, read below to report a move that
+  // overruns the beats it names: it is never a param a move generator itself reads, so it is stripped
+  // before `buildCameraMove` sees the spec, the same way `target`/`cursor` are resolved and consumed
+  // above rather than passed through to a generator that would refuse an unknown key.
+  const built = specs.map((s) => { const { beats: _beats, ...rest } = s; return { spec: s, kf: buildCameraMove(bindCursorCamera(rest, data), dims) }; });
 
   // THE ONE PLACE EVERY CAMERA SPEC MEETS, REGARDLESS OF WHO WROTE IT. `data.cameraMove` can be filled
   // by hand, by harness/author/assemble.mjs (one entry per beat's `camera:` line), or by
@@ -586,6 +590,29 @@ export function bakeCameraMove(data, frame) {
     const ts = kf.map((k) => k.t);
     return { move: spec.move, from: Math.min(...ts), to: Math.max(...ts) };
   });
+
+  // CROSS-SEAM CAMERA (item 3, owner Q2): a camera move that continues across a beat seam must say so
+  // explicitly, by listing the beats it spans (`cameraMove: {..., beats: ["b1","b2"]}`). Only meaningful
+  // once a scene carries `beats[]`; a scene without one behaves exactly as today (this block is a no-op).
+  // REPORT, NEVER BLOCK: a move whose baked window runs outside the beats it names is very likely a stale
+  // declaration (a beat got retimed, or the move was extended), but the render is not wrong because of
+  // it, so this prints instead of throwing, the same report-only shape as `beats[]` vs the storyboard.
+  if (Array.isArray(data.beats) && data.beats.length) {
+    const beatById = Object.fromEntries(data.beats.filter((b) => b && b.id).map((b) => [b.id, b]));
+    built.forEach(({ spec }, i) => {
+      if (!Array.isArray(spec.beats) || !spec.beats.length) return;
+      const named = spec.beats.map((id) => beatById[id]).filter(Boolean);
+      if (!named.length) return;
+      const spanFrom = Math.min(...named.map((b) => b.start ?? 0));
+      const spanTo = Math.max(...named.map((b) => (b.start ?? 0) + (b.duration ?? 0)));
+      const w = windows[i];
+      if (w.from < spanFrom - 1e-6 || w.to > spanTo + 1e-6) {
+        console.warn(`cameraMove "${w.move}" declares beats [${spec.beats.join(', ')}] `
+          + `(${spanFrom}s-${spanTo}s) but its resolved window is ${w.from}s-${w.to}s, which runs outside `
+          + `them. Add the beat it actually reaches to the \`beats\` list, or retime the move to fit.`);
+      }
+    });
+  }
   // Strict overlap, not touch: two specs sharing an endpoint (one ends exactly where the next begins,
   // e.g. assemble's per-beat windows at a real cut) is ordinary editing grammar, not a race, and MUST
   // stay legal, or every beat-cut film with more than one `camera:` line would refuse itself.

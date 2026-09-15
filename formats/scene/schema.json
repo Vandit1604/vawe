@@ -1036,7 +1036,30 @@
    }
   },
   "cameraMove": {
-   "label": "Author sugar: { move, ...params } (or an array of them) \u2192 data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold | dollyZoom | followCursor | followLayer. `followCursor` is the one move that is DERIVED rather than typed: give it `\"cursor\": \"<layer id>\"` and it reads that cursor layer's own `path` and `clicks`, pushes toward each press, arrives just before it, holds, then releases, so the pointer stays the single owner of where the camera goes. `followLayer` tracks a layer's live box by id (`\"id\": \"<layer>\"`) instead of a fixed point, and resolves onto `cameraFollow`, not `camera`. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves/index.js is the source of truth, and lib-test asserts the two agree. CAMERA BY ELEMENT: a diveIn, or any travel station, may name `\"target\": \"#<layer id>\"` instead of hand-typing `tx`/`ty`(/`to`): bakeCameraMove (core/engine/produce.js) resolves it once off the layer's own authored box (needs numeric x/y and a declared w/h or size), computes the largest scale that keeps the box plus an optional `margin` (fraction of the frame, default 0.06) inside the canvas, and prints the resolved numbers. Raw `tx`/`ty` on the same spec win and the target is dropped. `{\"move\":\"diveIn\",\"target\":\"#cta\",\"margin\":0.1}`."
+   "label": "Author sugar: { move, ...params } (or an array of them) \u2192 data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold | dollyZoom | followCursor | followLayer. `followCursor` is the one move that is DERIVED rather than typed: give it `\"cursor\": \"<layer id>\"` and it reads that cursor layer's own `path` and `clicks`, pushes toward each press, arrives just before it, holds, then releases, so the pointer stays the single owner of where the camera goes. `followLayer` tracks a layer's live box by id (`\"id\": \"<layer>\"`) instead of a fixed point, and resolves onto `cameraFollow`, not `camera`. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves/index.js is the source of truth, and lib-test asserts the two agree. CAMERA BY ELEMENT: a diveIn, or any travel station, may name `\"target\": \"#<layer id>\"` instead of hand-typing `tx`/`ty`(/`to`): bakeCameraMove (core/engine/produce.js) resolves it once off the layer's own authored box (needs numeric x/y and a declared w/h or size), computes the largest scale that keeps the box plus an optional `margin` (fraction of the frame, default 0.06) inside the canvas, and prints the resolved numbers. Raw `tx`/`ty` on the same spec win and the target is dropped. `{\"move\":\"diveIn\",\"target\":\"#cta\",\"margin\":0.1}`.  A single leg may also declare `\"beats\": [\"<id>\", ...]` naming every `beats[]` id (below) it spans, when the move continues across a beat seam; core/engine/produce.js reports (never blocks) a move whose resolved window runs outside the beats it declares."
+  },
+  "beats": {
+   "type": "array",
+   "label": "Optional: ONE clock per beat, {id,start,duration}. Written by harness/author/assemble.mjs from the storyboard it already parsed (`id` reuses the html layer's own \"scene<N>\" convention). A beat's `id` becomes a relative-time target elsewhere in the scene (\"beat:<id>.start\"/\"beat:<id>.end\", plus an optional offset), for layer start, transitions[].at, cameraMove[].start and a bg window from/to (core/timeline/relative-time.js). A scene with no beats[] behaves exactly as it did before this field existed.",
+   "item": {
+    "id": {
+     "type": "string",
+     "label": "This beat's id, the name a \"beat:<id>.start\"/\"beat:<id>.end\" reference targets.",
+     "required": true
+    },
+    "start": {
+     "type": "number|string",
+     "label": "Beat start (s), or itself a \"beat:<id>.start\"/\"beat:<id>.end\" reference to another beat (plus an optional offset).",
+     "required": true,
+     "min": 0
+    },
+    "duration": {
+     "type": "number",
+     "label": "Beat length (s).",
+     "required": true,
+     "min": 0
+    }
+   }
   },
   "spectacle": {
    "type": "object",
