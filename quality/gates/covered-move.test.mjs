@@ -99,6 +99,22 @@ test('an html B over a fading rect is silent (html coverage is undecidable from 
   assert.ok(!records.some((r) => r.code === 'covered-move'), `expected silence, got ${JSON.stringify(records)}`);
 });
 
+test('B fading IN over A fading out (a crossfade) is silent', () => {
+  const scene = seamScene({ bStart: 6.05 });
+  // card-a fades in itself over its first 0.25s: it never hides terminal-plane, it dissolves across it.
+  scene.layers[1].motion = [{ t: 0, opacity: 0 }, { t: 0.25, opacity: 1 }];
+  const { records } = run(scene);
+  assert.ok(!records.some((r) => r.code === 'covered-move'), `expected silence, got ${JSON.stringify(records)}`);
+});
+
+test('B already opaque at its own start, over a visible A, fires', () => {
+  const scene = seamScene({ bStart: 6.05 });
+  scene.layers[1].motion = [{ t: 0, opacity: 1 }]; // opaque from its first frame, no fade-in
+  const { records } = run(scene);
+  const hit = records.find((r) => r.code === 'covered-move');
+  assert.ok(hit, `expected a covered-move finding, got ${JSON.stringify(records)}`);
+});
+
 test('a waived scene stays silent even with a live collision', () => {
   const scene = seamScene({ bStart: 6.05 });
   scene.authoring = { allow: ['covered-move'] };
