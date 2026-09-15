@@ -49,8 +49,12 @@ function resolveRef(str, byId, label) {
   if (m[2] && T.duration == null) throw new Error(`${label} "${str}": "${m[1]}" declares no \`duration\`, `
     + `so it has no end to hang this off. Give "${m[1]}" a duration, or hang this off its START instead `
     + `("${m[1]}${m[3] || ''}").`);
-  return (T.start ?? 0) + (m[2] ? T.duration : 0) + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0);
+  return roundTime((T.start ?? 0) + (m[2] ? T.duration : 0) + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0));
 }
+
+// A resolved time is authored seconds plus an authored offset, so float noise (26.400000000000002) is
+// never meaningful: round to a micro-second, far below any frame, so published scenes read as written.
+const roundTime = (x) => Math.round(x * 1e6) / 1e6;
 
 /**
  * resolveRelativeTimes(data) -> data, mutated in place and returned. Numbers-only input passes through
@@ -77,7 +81,7 @@ export function resolveRelativeTimes(data) {
       if (m[2] && T.duration == null) throw new Error(`layer start "${L.start}" on ${nameOf(L)}: `
         + `"${m[1]}" declares no \`duration\`, so it has no end to hang this off. Give "${m[1]}" a duration, `
         + `or hang this off its START instead ("${m[1]}${m[3] || ''}").`);
-      L.start = (T.start ?? 0) + (m[2] ? T.duration : 0) + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0);
+      L.start = roundTime((T.start ?? 0) + (m[2] ? T.duration : 0) + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0));
     }
     if (!pending) break;
     if (pass === 7) throw new Error('relative starts: circular reference');
