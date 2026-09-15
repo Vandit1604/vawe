@@ -1,7 +1,7 @@
 ---
 name: motion-offsets
 when: writing a layer's motion[] keyframe track
-holds: eye (formats/scene/schema.json labels x/y as offsets; no gate catches an absolute value)
+holds: eye (films/scene/schema.json labels x/y as offsets; no gate catches an absolute value)
 answers: "motion track x/y are offsets on the base position, not absolute canvas coordinates"
 group: look
 ---
@@ -44,7 +44,7 @@ Wrong:
 `resolveKeyedProps` (`core/timeline/sequence.js`) has every layer in hand at boot, so it looks like the
 write site for a refusal: flag a key whose value, read as an offset, resolves the layer far off the
 canvas, while the SAME value, read as an absolute coordinate, would sit plainly on it. Measured against
-every motion track in `formats/scene/*.json` (295 tracks) before writing anything:
+every motion track in `films/scene/*.json` (295 tracks) before writing anything:
 
 - A threshold loose enough to clear every real track (resolved position within roughly [-0.6, 1.6] of
   the canvas span, given the value alone looks like a plausible absolute coordinate) never fires: zero

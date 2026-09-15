@@ -45,7 +45,7 @@
     {
       "source": "site/public/assets/blocks/statBig.currency.json",
       "url": "https://vawe.dev/assets/blocks/statBig.currency.json",
-      "target": "formats/scene/statBig.currency.json",
+      "target": "films/scene/statBig.currency.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

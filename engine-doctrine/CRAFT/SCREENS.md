@@ -35,8 +35,8 @@ the fix is a route every screen takes, and a command that measures whether it ac
 ## `make screen`: ONE command, write-if-new then always check
 
 ```
-make screen F=formats/scene/vawe-flow-editor.html THEME=vawe REF=example-madera ACT=1        # check an existing screen
-make screen F=formats/scene/new-results.html KIND=grid THEME=vawe                             # write, then check
+make screen F=films/scene/vawe-flow-editor.html THEME=vawe REF=example-madera ACT=1        # check an existing screen
+make screen F=films/scene/new-results.html KIND=grid THEME=vawe                             # write, then check
 ```
 
 The owner: "why two? not single one." There used to be a separate `screen-new` target; it is gone.
@@ -66,7 +66,7 @@ Either way, five things happen next, always report-only (exit 0):
 4. **Video readiness**, read off the fragment's own source, no render needed: the smallest text size in
    px at film scale (flagged under 28px, unreadable in a moving frame), element count, whether colour
    comes from theme tokens (`var(--...)`) or raw hex, and whether every `<img>` resolves to a served
-   path (`/assets/`, `/.vawe-data/uploads/`, `/core/`, `/themes/`, `/formats/`). A RELATIVE `<img src>`
+   path (`/assets/`, `/.vawe-data/uploads/`, `/core/`, `/themes/`, `/films/`). A RELATIVE `<img src>`
    is the known trap: it resolves against the preview page's own base, not the fragment's, and paints
    nothing while the fragment still "looks right" in the markup.
 5. **Clipped**, read off the RENDERED page, not the source: `preview-fragment.mjs --boxes-out` dumps
@@ -119,11 +119,11 @@ skills; these are product screens, not a page), `ericzakariasson/scandinavian-de
 
 Built for the `vawe` theme against `example-madera`:
 
-- `formats/scene/vawe-flow-editor.html`, `KIND=editor`, the typed prompt "Make a 12 second launch
+- `films/scene/vawe-flow-editor.html`, `KIND=editor`, the typed prompt "Make a 12 second launch
   film" in a bezelled window on a dark ground. `make screen ... REF=example-madera ACT=1`: fill 0.45
   (ref 0.52, ok), detail 11.6 (ref 3.75, ok), colourfulness 12 (ref 12.05, ok), smallest text 38px,
   nothing clipped, no impeccable findings.
-- `formats/scene/vawe-flow-results.html`, `KIND=grid`, six real stills from
+- `films/scene/vawe-flow-results.html`, `KIND=grid`, six real stills from
   `/.vawe-data/uploads/vawe-flow/` in a 3x2 grid, each cell at `aspect-ratio:16/9` (the source stills'
   own aspect), so `object-fit:cover` neither crops nor letterboxes: every still shows its own
   composition whole. `make screen ... REF=example-madera ACT=5`: fill 0.22 (ref 0.27, ok), detail 9.5
@@ -156,4 +156,4 @@ After:
   none: every element sits inside the frame and its margin.
 ```
 
-Neither screen is wired into `formats/scene/vawe-flow.json`; that rebuild is a separate pass.
+Neither screen is wired into `films/scene/vawe-flow.json`; that rebuild is a separate pass.

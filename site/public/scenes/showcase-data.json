@@ -1,6 +1,6 @@
 {
  "module": "scene",
- "storyboard": "formats/scene/showcase-data.storyboard.md",
+ "storyboard": "films/scene/showcase-data.storyboard.md",
  "aspect": "16:9",
  "theme": "vawe",
  "duration": 9.8,

@@ -101,7 +101,7 @@ For anything else, one agent and a better prompt is cheaper and often better.
 Two rules borrowed from a reference system's dispatch doc, both learned here the hard way today.
 
 **WAIT ON THE EXPECTED FILE EXISTING ON DISK, never on the harness's completion notification.** An agent
-can report success and have delivered nothing: the authored films in `formats/scene/` are GITIGNORED, so
+can report success and have delivered nothing: the authored films in `films/scene/` are GITIGNORED, so
 a worktree fan-out over scenes merges cleanly, reports success, and brings back only the tracked files.
 Four agents did exactly that, and it was caught only because one of them said so in its report
 (`../MISTAKES.md` #377). If the artifact is not on disk where you expect it, re-dispatch once; do not

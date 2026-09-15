@@ -1,6 +1,6 @@
 {
  "module": "scene",
- "storyboard": "formats/scene/saas-hero-launch.storyboard.md",
+ "storyboard": "films/scene/saas-hero-launch.storyboard.md",
  "_template": "FILLABLE TEMPLATE - a white-first SaaS launch film. Nothing here is anyone's brand: the product is the fictional 'Meridian', every colour is a theme token, and every logo in the wall is invented. To reskin, change `theme` (any file in themes/) and nothing else. To refill, replace the copy strings, the logoWall entries, the browserFrame rows, the barChart data and the four capability cards. Structure, timing and camera are the part worth keeping.",
  "orientation": "landscape",
  "theme": "default",
@@ -765,7 +765,7 @@
    "becomes": "endLine",
    "becomesDur": 0.52,
    "becomesEase": "easeOutQuart",
-   "_becomes": "The four cards do not fade out and a headline does not fade in: the grid HANDS OVER to the closing line, which opens in the grid's own pose and shrinks into its own. `becomes` resolves the pose from the measured boxes, so retiming or resizing either side cannot drift the match (formats/scene/scene.js resolveBecomes).",
+   "_becomes": "The four cards do not fade out and a headline does not fade in: the grid HANDS OVER to the closing line, which opens in the grid's own pose and shrinks into its own. `becomes` resolves the pose from the measured boxes, so retiming or resizing either side cannot drift the match (films/scene/scene.js resolveBecomes).",
    "_parts": "Four cards used to be one `group` that faded in as a block and left as a block. As markup they keep the whole CSS surface, and `parts` hands the ENGINE the clock: one selector, an engine-driven seeked entrance per card on a stagger, and `out: true` so they leave one at a time in the direction they arrived (core/parts.js).",
    "x": 150,
    "y": 440,

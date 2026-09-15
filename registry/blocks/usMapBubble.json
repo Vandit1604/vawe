@@ -65,7 +65,7 @@
     {
       "source": "site/public/assets/blocks/usMapBubble.json",
       "url": "https://vawe.dev/assets/blocks/usMapBubble.json",
-      "target": "formats/scene/usMapBubble.json",
+      "target": "films/scene/usMapBubble.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

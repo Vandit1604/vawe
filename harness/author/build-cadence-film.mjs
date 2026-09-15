@@ -162,5 +162,5 @@ const scene = {
   cameraMove: { move: 'slowPush', start: 0, dur: 15, from: 1, to: 1.06, ease: 'easeInOutCubic' },
 };
 
-fs.writeFileSync('formats/scene/cadence-film.json', JSON.stringify(scene, null, 2) + '\n');
-console.log(`wrote formats/scene/cadence-film.json · ${scene.layers.length} layers · no cuts, no seams · ${scene.duration}s`);
+fs.writeFileSync('films/scene/cadence-film.json', JSON.stringify(scene, null, 2) + '\n');
+console.log(`wrote films/scene/cadence-film.json · ${scene.layers.length} layers · no cuts, no seams · ${scene.duration}s`);

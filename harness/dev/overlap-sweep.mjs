@@ -19,7 +19,7 @@
 // overlap fraction is written directly into `parts[].delay` here, bypassing `motion:` entirely.
 //
 // Writes scene JSON + the shared fragment under .vawe-data/scenes/overlap-sweep/ (gitignored, and
-// outside formats/scene/ so the stage-gate hook does not ask for a storyboard this is not a film).
+// outside films/scene/ so the stage-gate hook does not ask for a storyboard this is not a film).
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT_DIR = '.vawe-data/scenes/overlap-sweep';
 const EACH = 0.4;          // professional speed band, held constant across every variant
-const BASE_DELAY = 0.1;    // the engine's own lead-in convention (formats/scene/scene.js: p.delay ?? 0.1)
+const BASE_DELAY = 0.1;    // the engine's own lead-in convention (films/scene/scene.js: p.delay ?? 0.1)
 const DURATION = 4;
 const SELECTORS = ['[data-part="line1"]', '[data-part="line2"]', '[data-part="line3"]', '[data-part="line4"]'];
 const FRACTIONS = { '100': 1, '75': 0.75, '50': 0.5, '25': 0.25, '0': 0 };

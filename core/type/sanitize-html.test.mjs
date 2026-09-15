@@ -1,6 +1,6 @@
 // core/type/sanitize-html.test.mjs: pins the fix for a solid-black `<img>` inside an `html` layer.
 // Bug: ESCAPING_URL stripped the `src` attribute off ANY absolute path ("/…"), including one under a
-// root the render server itself serves (assets/, core/, themes/, formats/, .vawe-data/scenes|uploads).
+// root the render server itself serves (assets/, core/, themes/, films/, .vawe-data/scenes|uploads).
 // That left `<img src="/assets/x.jpg">` as a bare `<img>` with no src, painting nothing over whatever
 // sat behind it: a solid black frame in the real render, while `harness/author/preview-fragment.mjs`
 // (which never runs this sanitiser) showed the image fine. Fixed by exempting served-root absolute
@@ -9,14 +9,14 @@
 import assert from 'node:assert/strict';
 import { sanitizeHtml } from './sanitize-html.js';
 
-// The exact case from formats/scene/vawe-flow-2.timeline.html: a served asset path must survive.
+// The exact case from films/scene/vawe-flow-2.timeline.html: a served asset path must survive.
 assert.match(
   sanitizeHtml('<img src="/assets/vawe-flow-2/frame-06s.jpg" width="800" height="450">'),
   /src="\/assets\/vawe-flow-2\/frame-06s\.jpg"/,
   'an <img> src under a served root (assets/) must not be stripped'
 );
 
-for (const root of ['core/', 'themes/', 'formats/', 'assets/', '.vawe-data/scenes/', '.vawe-data/uploads/']) {
+for (const root of ['core/', 'themes/', 'films/', 'assets/', '.vawe-data/scenes/', '.vawe-data/uploads/']) {
   const html = `<img src="/${root}x.jpg">`;
   assert.match(sanitizeHtml(html), /src="/, `served root "${root}" survives`);
 }

@@ -44,7 +44,7 @@ const f = gateFindings();
 for (const k of ['start', 'duration', 'motion', 'anim', 'out']) {
   if (!SHARED[k] || SHARED[k].when) {
     f.fail('blind-check', `layer-props is blind: nothing declares \`${k}\` as an unconditional shared read. `
-      + `The declarations in formats/scene/props.js and core/tracks/ have drifted from the engine.`);
+      + `The declarations in films/scene/props.js and core/tracks/ have drifted from the engine.`);
     f.emit();
     process.exit(2);
   }

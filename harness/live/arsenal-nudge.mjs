@@ -117,9 +117,9 @@ function handleBash(cmd) {
 function handleEdit(file, addedText) {
   const rel = path.relative(ROOT, file);
   if (rel.startsWith('..')) return;
-  const isJson = rel.startsWith('formats/scene/') && rel.endsWith('.json');
-  const isHtml = rel.startsWith('formats/scene/') && rel.endsWith('.html');
-  const isBoard = rel.startsWith('formats/scene/') && rel.endsWith('.storyboard.md');
+  const isJson = rel.startsWith('films/scene/') && rel.endsWith('.json');
+  const isHtml = rel.startsWith('films/scene/') && rel.endsWith('.html');
+  const isBoard = rel.startsWith('films/scene/') && rel.endsWith('.storyboard.md');
   if (!isJson && !isHtml && !isBoard) return;
   if (typeof addedText !== 'string' || !addedText) return;
 

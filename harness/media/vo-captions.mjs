@@ -39,7 +39,7 @@ if (!voRef) {
 
 const wordsPath = resolveVo(voRef, file);
 if (!wordsPath) {
-  console.error(`audio.voWords "${voRef}" not found (looked next to the scene, at repo root, and under formats/scene/)`);
+  console.error(`audio.voWords "${voRef}" not found (looked next to the scene, at repo root, and under films/scene/)`);
   process.exit(2);
 }
 const raw = JSON.parse(fs.readFileSync(wordsPath, 'utf8'));
@@ -99,7 +99,7 @@ function resolveVo(ref, sceneFile) {
   const candidates = [
     path.resolve(path.dirname(sceneFile), ref), // next to the scene
     path.resolve(ref),                          // repo root / cwd
-    path.resolve('formats/scene', ref),         // the scene home
+    path.resolve('films/scene', ref),         // the scene home
   ];
   return candidates.find((p) => fs.existsSync(p)) || null;
 }

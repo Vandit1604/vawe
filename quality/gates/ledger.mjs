@@ -2,8 +2,8 @@
 // Every shipped video logs its fingerprint; every new design is checked against history BEFORE
 // shipping. Per-video QA can't see repetition, this can.
 //
-//   node quality/gates/ledger.mjs check formats/x/brand-video.json   # compare vs all logged designs
-//   node quality/gates/ledger.mjs add   formats/x/brand-video.json   # log it (after it ships)
+//   node quality/gates/ledger.mjs check films/x/brand-video.json   # compare vs all logged designs
+//   node quality/gates/ledger.mjs add   films/x/brand-video.json   # log it (after it ships)
 //   node quality/gates/ledger.mjs list
 //   node quality/gates/ledger.mjs not [theme]                        # the FORWARD query: see deriveNotLine
 //   make ledger D=… (check) · make ledger-add D=…
@@ -84,7 +84,7 @@ if (process.argv[1] && process.argv[1].endsWith('ledger.mjs')) {
     process.exit(0);
   }
   if (!cmd || !file || !['check', 'add'].includes(cmd)) {
-    console.error('usage: node quality/gates/ledger.mjs check|add|list|not [formats/x/video.json | theme]');
+    console.error('usage: node quality/gates/ledger.mjs check|add|list|not [films/x/video.json | theme]');
     process.exit(1);
   }
 

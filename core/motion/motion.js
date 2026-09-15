@@ -25,7 +25,7 @@ export const icon = (v, fallback = '') => {
   // If the image fails to load (missing file / 404), swap to the fallback (emoji/monogram)
   // instead of the browser's broken-image placeholder. Empty fallback → the img just disappears.
   const fb = String(fallback).replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-  // srcUrl: the page is served from /formats/scene/, so a bare `assets/x.png` resolves under that
+  // srcUrl: the page is served from /films/scene/, so a bare `assets/x.png` resolves under that
   // path and 404s with no visible error, same trap core/layers/video.js already guards against.
   return `<img class="icon-img" src="${srcUrl(v)}" alt="" onerror="this.outerHTML='${fb}'" />`;
 };
@@ -439,7 +439,7 @@ export const gsapEase = (e, fallback, where = '') => {
 // them the same way: first silently, then (after the typo `ease:"eastOutQuart"` rendered the wrong
 // curve) with a warn-once-and-substitute. But a warning printed once per process, from one of eight
 // render workers, into a log nobody reads, is the same as silence, the argument this repo already
-// makes at formats/scene/scene.js about `fx`. The frame still rendered on the wrong curve.
+// makes at films/scene/scene.js about `fx`. The frame still rendered on the wrong curve.
 //
 // core/fx/progress.js saw this and hand-rolled its own membership test above its call, with the note
 // that warn-and-substitute is "right for a prop authored in a hundred scenes and wrong for this
@@ -818,7 +818,7 @@ export function motionDefaults(theme) {
     durationScale,
     stagger: m.stagger ?? DEFAULT_MOTION.stagger,
     // The theme's answer to "how does a layer behave once it has arrived". Read by
-    // formats/scene/scene.js as the third rung of layer -> scene -> theme -> engine default, and
+    // films/scene/scene.js as the third rung of layer -> scene -> theme -> engine default, and
     // normalized there so a misspelled name is refused at boot rather than on a later frame.
     idle: m.idle ?? DEFAULT_MOTION.idle,
     // THINGS SHOULD LEAVE FASTER THAN THEY ARRIVE. An entrance is an introduction and deserves its

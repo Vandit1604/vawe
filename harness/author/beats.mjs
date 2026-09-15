@@ -4,8 +4,8 @@
 // `make sections`). A side-by-side taste diff: does our beat actually reflect the real section?
 //
 //   node harness/author/beats.mjs <data.json> [--vs brand] [--stride 1]
-//   make beats D=formats/scene/linear-30.json            (self check)
-//   make beats D=formats/scene/linear-30.json VS=linear  (fidelity vs captured sections)
+//   make beats D=films/scene/linear-30.json            (self check)
+//   make beats D=films/scene/linear-30.json VS=linear  (fidelity vs captured sections)
 //   make sheets D=…                                      (this sheet AND the reveal sheet, one browser)
 //
 // Beat boundaries: authored cut times, else layer-start clusters (>1.2s gap), else camera/captions, else even chop.

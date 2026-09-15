@@ -18,7 +18,7 @@
 // editing, the Saul Bass / Kyle Cooper title tradition) and a still beat is the cost. Selected here so
 // an author does not have to remember which register a film is in.
 // CONTINUOUS-ACTION THRESHOLD, measured rather than guessed. Bucketing every real (non-scratch) film
-// in formats/scene/ by duration (excluding `_`-prefixed probes and generated siblings): 0-10s carries
+// in films/scene/ by duration (excluding `_`-prefixed probes and generated siblings): 0-10s carries
 // 0.59 declared transitions/film on average and is transition-free 72% of the time; 10-15s is still
 // transition-light (56% zero, avg 1.34); the break happens right at 15s, where 15-18s drops to 36% zero
 // and avg 2.57, and 18-25s to 18% zero and avg 4.47. The library itself treats a film under ~15s as

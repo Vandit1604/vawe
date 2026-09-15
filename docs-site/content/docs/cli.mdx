@@ -9,7 +9,7 @@ icon: Terminal
 The renderer is a single Go binary, built by `make build`:
 
 ```bash
-./bin/vawe formats/scene/my-video.json
+./bin/vawe films/scene/my-video.json
 ```
 
 The module is read from the JSON's `"module"` field, and the output defaults to `out/<name>.mp4`. Flags may follow the file.
@@ -35,8 +35,8 @@ Most work goes through make, which wraps the binary and the tooling with shorter
 ```bash
 make build                              # fetch fonts, then build bin/vawe
 make list                               # show the scene module + schema + sample
-make video D=formats/scene/my.json      # render one scene
-make video D=formats/scene/my.json ASPECT=16:9,9:16
+make video D=films/scene/my.json      # render one scene
+make video D=films/scene/my.json ASPECT=16:9,9:16
 make render M=scene                     # render the bundled sample
 make all                                # render every format
 make clean                              # remove the binary and rendered mp4s
@@ -47,14 +47,14 @@ make clean                              # remove the binary and rendered mp4s
 ```bash
 make look M=scene                       # storyboard the key frames
 make frame M=scene N=42                 # one exact frame
-make beats D=formats/scene/my.json      # first, mid, and last frame of every beat → /tmp/beats/<name>.png
+make beats D=films/scene/my.json      # first, mid, and last frame of every beat → /tmp/beats/<name>.png
 make scrub F=out/my.mp4          # a contact sheet of the whole film
 ```
 
 ### Assets and previews
 
 ```bash
-make assets D=formats/scene/my.json WRITE=1   # fetch missing icons and logos
+make assets D=films/scene/my.json WRITE=1   # fetch missing icons and logos
 make photos Q="query" NAME=hero N=4           # fetch openly-licensed photos
 make preview HTML=fragment.json THEME=brand   # render one fragment standalone → /tmp/preview.png
 make capture URL=... SEL=... NAME=... LABEL=... # lift a real UI component into a fragment
@@ -63,9 +63,9 @@ make capture URL=... SEL=... NAME=... LABEL=... # lift a real UI component into 
 ### Building and expanding
 
 ```bash
-make expand D=formats/scene/my.json     # expand block and comp sugar into real layers
+make expand D=films/scene/my.json     # expand block and comp sugar into real layers
 make catalog                            # render the whole block registry to sheets
-make direct D=formats/scene/my.json WRITE=1  # let the motion director pick cuts and stings
+make direct D=films/scene/my.json WRITE=1  # let the motion director pick cuts and stings
 ```
 
 The full list of targets is in the repo's `Makefile`, and `make list` prints them. Every quality check has its own wrapper too, covered in [Quality gates](/docs/quality-gates).
@@ -73,10 +73,10 @@ The full list of targets is in the repo's `Makefile`, and `make list` prints the
 ## The authoring loop, end to end
 
 ```bash
-make assets D=formats/scene/my.json WRITE=1   # 1. fill any missing images
-make beats D=formats/scene/my.json            # 2. read the beats
-make slop D=formats/scene/my.json             # 3. anti-slop check
-make video D=formats/scene/my.json            # 4. render
+make assets D=films/scene/my.json WRITE=1   # 1. fill any missing images
+make beats D=films/scene/my.json            # 2. read the beats
+make slop D=films/scene/my.json             # 3. anti-slop check
+make video D=films/scene/my.json            # 4. render
 make audit                                    # 5. overlap, contrast, safe-zone
 make look M=scene                             # 6. eyeball hook, reveal, and end
 ```

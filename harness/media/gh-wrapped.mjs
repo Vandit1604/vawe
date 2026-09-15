@@ -4,7 +4,7 @@
 //   node harness/media/gh-wrapped.mjs <login> [--from 2025-08-19] [--to 2026-08-19]
 //
 // Writes:
-//   formats/scene/_data/gh-wrapped.json          the batch row(s), scalars only, see below
+//   films/scene/_data/gh-wrapped.json          the batch row(s), scalars only, see below
 //   assets/gen/gh-heat-<login>.html              the 366-cell heatmap as an inline SVG fragment
 //
 // WHY THE HEATMAP IS A FILE AND NOT A FIELD. harness/author/batch.mjs substitutes `{{key}}` into the
@@ -123,7 +123,7 @@ const heat = `<div style="width:100%">
 </style>${cells}</svg></div>`;
 
 fs.mkdirSync('assets/gen', { recursive: true });
-fs.mkdirSync('formats/scene/_data', { recursive: true });
+fs.mkdirSync('films/scene/_data', { recursive: true });
 const heatPath = `assets/gen/gh-heat-${login}.html`;
 fs.writeFileSync(heatPath, heat);
 
@@ -161,7 +161,7 @@ const row = {
   // truth, it is a false one: the film's whole claim is what happened across those months.
   from: niceY(from), to: niceY(to),
 };
-fs.writeFileSync('formats/scene/_data/gh-wrapped.json', JSON.stringify([row], null, 2));
+fs.writeFileSync('films/scene/_data/gh-wrapped.json', JSON.stringify([row], null, 2));
 
 console.log(`gh-wrapped · ${login} · ${from} → ${to}`);
 console.log(`  ${row.total} contributions · ${row.activedays}/${row.totaldays} active days`);
@@ -169,4 +169,4 @@ console.log(`  quiet: ${row.quietmonths} months (${row.quietfrom}–${row.quiett
 console.log(`  streak ${row.streak}d to ${row.streakend} · peak ${row.peakcount} on ${row.peakday}`);
 console.log(`  top: ${row.repo1} ${row.repo1n} · ${row.repo2} ${row.repo2n} · ${row.repo3} ${row.repo3n}`);
 console.log(`  furthest: +${row.faradds}/-${row.fardels} into ${row.farowner}/${row.farrepo} (${row.farstars}★) ${row.farwhen}`);
-console.log(`  → formats/scene/_data/gh-wrapped.json · ${heatPath}`);
+console.log(`  → films/scene/_data/gh-wrapped.json · ${heatPath}`);

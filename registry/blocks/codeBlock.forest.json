@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/codeBlock.forest.json",
       "url": "https://vawe.dev/assets/blocks/codeBlock.forest.json",
-      "target": "formats/scene/codeBlock.forest.json",
+      "target": "films/scene/codeBlock.forest.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

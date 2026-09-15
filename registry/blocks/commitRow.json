@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/commitRow.json",
       "url": "https://vawe.dev/assets/blocks/commitRow.json",
-      "target": "formats/scene/commitRow.json",
+      "target": "films/scene/commitRow.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

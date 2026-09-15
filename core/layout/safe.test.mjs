@@ -1,5 +1,5 @@
 // core/layout/safe.test.mjs: the runnable self-check for PLACEMENT, the registry PIN now reads
-// (core/engine/boot.js, core/validate/validate.mjs and formats/scene/schema.json's `pin` enum all
+// (core/engine/boot.js, core/validate/validate.mjs and films/scene/schema.json's `pin` enum all
 // derive from it). Asserts every placement name resolves a settled box INSIDE the safe box, at all
 // five aspects and at a phone destination, which is the property the plan asked this table to hold.
 //   node core/layout/safe.test.mjs

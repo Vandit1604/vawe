@@ -21,7 +21,7 @@ import { frameTile, tileGrid, tileBox, renderOf } from '../../quality/gates/tile
 import { migrateOne } from '../author/migrate-junctions.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCRATCH = path.join(ROOT, 'formats/scene/_batch/preset-sheets');
+const SCRATCH = path.join(ROOT, 'films/scene/_batch/preset-sheets');
 const OUT_DIR = path.join(ROOT, 'site/public/blocklib/presets');
 
 // The theme each profile shows itself in. `linear`/`stripe` already have a real, committed theme; the

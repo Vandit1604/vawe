@@ -241,7 +241,7 @@ const CACHE = { counts: null };
 function usage() {
   if (CACHE.counts) return CACHE.counts;
   const { names, n, blind } = population('arsenal · usage corpus', { filter: LIBRARY, quiet: true, soft: true });
-  const dir = path.join(repoRoot, 'formats/scene');
+  const dir = path.join(repoRoot, 'films/scene');
   const texts = [];
   for (const f of names) {
     try { texts.push(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { /* raced with a delete, skip it */ }
@@ -250,7 +250,7 @@ function usage() {
     texts, n, blind: blind || null,
     count: (name) => texts.reduce((c, t) => c + (t.includes(`"${name}"`) ? 1 : 0), 0),
     // What "used in N films" means, and the command that reproduces N without trusting this tool's word.
-    note: () => `usage counted across ${n} shipped scene(s) in formats/scene, reproducible via `
+    note: () => `usage counted across ${n} shipped scene(s) in films/scene, reproducible via `
       + `\`node harness/lib/census.mjs\`${blind ? ` (PARTIAL: ${blind.split('\n')[0]})` : ''}`,
   };
   return CACHE.counts;

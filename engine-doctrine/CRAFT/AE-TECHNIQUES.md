@@ -92,7 +92,7 @@ free, because it derives from the one velocity owner rather than re-implementing
 CAMERA too, and it used to not: a seam whose whole move lived on the null scored 0 px/s, so the
 advisory called this technique's own construction a dead frame.
 
-*The worked example.* `formats/scene/_kinetic-cut.json`, with `_kinetic-cut-plain.json` as the twin
+*The worked example.* `films/scene/_kinetic-cut.json`, with `_kinetic-cut-plain.json` as the twin
 that differs in ONE number (the camera's second `x`). Two `text` layers with abutting windows,
 `anim: "none"` and `out: "none"` so nothing fades, `cuts: [{ t: 1.4, style: "none" }]` to declare the
 seam, and a camera keyed `x: 460 -> -460` on `hang` handles either side. The advisory reads the seam at
@@ -455,7 +455,7 @@ refused alongside `tilt`, the other modifier that owns that property.
 **IT IS ROTATION ONLY.** Not scale, not skew. A carrier that scales is a rig moving toward the eye and
 its contents are meant to come with it, and `plane` already owns holding apparent size at a distance.
 
-**THE WORKED EXAMPLE** `formats/scene/_auto-orient.json`, with `_auto-orient-plain.json` as the twin
+**THE WORKED EXAMPLE** `films/scene/_auto-orient.json`, with `_auto-orient-plain.json` as the twin
 that differs in exactly one key. Six brand marks on a 300px circle inside a group keyed
 `rot: 0 -> 360` over four seconds. Compared at frames 45 and 90: the marks sit at the SAME six
 positions in both films, and in the plain twin the Google wordmark stands vertical, Netflix leans and

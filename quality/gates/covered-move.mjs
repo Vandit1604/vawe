@@ -3,7 +3,7 @@
 // vawe-flow-2's terminal group (track 1) carried a real exit (x 0 -> -2400, opacity 1 -> 0 over
 // 0.3s), and the next beat's full-frame `card-a` (track 1, drawn later in `layers[]`) started on the
 // exit's first frame. `track` sets stacking (core/timeline/clips.js ~260 writes zIndex off
-// data-track; formats/scene/scene.js:597 sets data-track to `L.track ?? idx`), and layers on the same
+// data-track; films/scene/scene.js:597 sets data-track to `L.track ?? idx`), and layers on the same
 // track tie, so array order breaks the tie: later in `layers[]` draws on top. card-a covered the
 // terminal group's exit before a single frame of it painted, so the render looked like a hard cut and
 // an agent misread the missing exit as an engine bug. It was an authoring collision, not a bug: the
@@ -86,7 +86,7 @@ function windows(L) {
   return out;
 }
 
-// effTrack/tieBreak mirror formats/scene/scene.js:597 exactly (`L.track ?? idx`) and the verified
+// effTrack/tieBreak mirror films/scene/scene.js:597 exactly (`L.track ?? idx`) and the verified
 // stacking fact: same track ties, array order breaks the tie, LATER draws on top.
 const effTrack = (L, idx) => (typeof L.track === 'number' ? L.track : idx);
 function drawnAbove(bIdx, aIdx) {

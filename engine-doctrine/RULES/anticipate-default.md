@@ -21,7 +21,7 @@ on anything informational"):
 | the film's first wave (earliest `start`) | the viewer is watching the frame open, already looking there |
 | `type: "count"` | a rolling number is read, not glanced at |
 
-A split or cut layer never gets it either: its entrance is owned elsewhere, and `formats/scene/scene.js`
+A split or cut layer never gets it either: its entrance is owned elsewhere, and `films/scene/scene.js`
 throws if either carries `anticipate`.
 
 Nothing here starts a still layer moving: it only reshapes the ease curve of an entrance already

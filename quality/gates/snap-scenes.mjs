@@ -1,5 +1,5 @@
 // quality/gates/snap-scenes.mjs: the WHOLE-LIBRARY determinism + regression net. scene-snap.mjs
-// snapshots one format's sample.json; this sweeps EVERY shipped scene (formats/scene/*.json), and for
+// snapshots one format's sample.json; this sweeps EVERY shipped scene (films/scene/*.json), and for
 // each does two things the single-scene gate never did across the library:
 //
 //   1. NON-DETERMINISM CHECK, render the sampled frames ascending, then descending, and compare. A
@@ -87,7 +87,7 @@ try { digest = JSON.parse(fs.readFileSync(DIGEST, 'utf8')); } catch { /* no dige
 const digestNow = {};
 const ONLY = args.find((a) => !a.startsWith('--')); // optional: sweep just one scene by name
 
-// Every shipped SCENE: formats/scene/*.json with module:"scene", except the schema and _-prefixed
+// Every shipped SCENE: films/scene/*.json with module:"scene", except the schema and _-prefixed
 // scratch. A file without module:"scene" (the examples registry, a *.intent storyboard partial) is not
 // a renderable scene and is skipped, not errored.
 const dir = path.join(repoRoot, SCENE_DIR);
@@ -132,7 +132,7 @@ for (const scene of scenes) {
   let cfg = {}, raw = '';
   try { raw = fs.readFileSync(path.join(dir, scene), 'utf8'); cfg = JSON.parse(raw); }
   catch (e) { errored.push(`${name}: unreadable or invalid JSON: ${e.message}`); continue; }
-  // `formats/scene/scene.js` never expands `block`/`beat`/`comp` sugar itself (deliberate, its own
+  // `films/scene/scene.js` never expands `block`/`beat`/`comp` sugar itself (deliberate, its own
   // banner says why); boot the already-expanded form instead, the same trick every browser-side sweep
   // in this repo now uses (harness/lib/render-harness.mjs `bootPathFor`).
   const dataPath = `/${bootPathFor(repoRoot, raw, loadScene(structuredClone(cfg)), `${SCENE_DIR}/${scene}`)}`;

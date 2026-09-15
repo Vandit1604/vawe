@@ -14,7 +14,7 @@ Handed "make a 5s launch film for an AI image tool", an agent writes a competent
 hook card, feature card, logo card. Every gate passes. Nobody watches it twice.
 
 The reference in this repo (`higgsfield.mp4`, first 5 seconds, recreated in
-`formats/scene/higgsfield-recreation.json`) is not a sequence of beats. **It is one continuous
+`films/scene/higgsfield-recreation.json`) is not a sequence of beats. **It is one continuous
 action.** You type a prompt. You press generate. The generate button itself becomes the loading
 dot. One object is on screen from the first frame to the last and every cut is that object
 changing state.
@@ -183,7 +183,7 @@ The UI is the star. Plan the real surfaces first and fit copy around them, never
 
 ## Step 5 - The 5-second budget (measured, not estimated)
 
-Every number below is read off `formats/scene/higgsfield-recreation.json`, which was measured
+Every number below is read off `films/scene/higgsfield-recreation.json`, which was measured
 frame by frame from the reference.
 
 | Cost | Measured |
@@ -286,8 +286,8 @@ plan format.
 
 ```bash
 make storyboard-check SB=<storyboard.md>          # blocks unless every beat has type + onscreen + why
-make intent SB=<storyboard.md> D=formats/scene/<topic>.json   # writes <topic>.intent.json
-make author-check D=formats/scene/<topic>.json    # inspect verifies the render against that contract
+make intent SB=<storyboard.md> D=films/scene/<topic>.json   # writes <topic>.intent.json
+make author-check D=films/scene/<topic>.json    # inspect verifies the render against that contract
 ```
 
 The shape below is verified against both tools. Four things matter:

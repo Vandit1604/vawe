@@ -323,7 +323,7 @@ Which way "away" is: the bearing the light falls off along. A keyword is a beari
 
 ## Layer types  `[layer]`
 
-The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `engine-doctrine/PRIMITIVES.md` for what each is FOR.
+The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `films/scene/schema.json`, and `engine-doctrine/PRIMITIVES.md` for what each is FOR.
 
 | name | what / when |
 |---|---|

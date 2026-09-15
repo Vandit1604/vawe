@@ -7,7 +7,7 @@
 //
 // So: recolour the subject layers to a colour that appears nowhere else, render headless, and COUNT.
 //
-//   node harness/dev/bar-probe.mjs formats/scene/playhead.json --ids playhead,bar --at 0.5,2,3.2,3.4
+//   node harness/dev/bar-probe.mjs films/scene/playhead.json --ids playhead,bar --at 0.5,2,3.2,3.4
 //
 // Headless (this tool) is for iterating. The shipped proof is counted off the ENCODED mp4, because
 // that is the artifact that ships and h264 is one more thing between the bar and the viewer.

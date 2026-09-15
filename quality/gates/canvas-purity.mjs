@@ -22,7 +22,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const format = process.argv[2] || 'scene';
 const dataArg = process.argv[3];
 const dataUrl = dataArg ? '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/')
-  : `/formats/${format}/sample.json`;
+  : `/films/${format}/sample.json`;
 
 const { server, port } = await serveRepo();
 
@@ -31,7 +31,7 @@ const [VW, VH] = sceneDims(cfg);
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
-await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'networkidle0' });
+await page.goto(`http://127.0.0.1:${port}/films/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'networkidle0' });
 const err = await waitForEngine(page);
 if (err) { console.error('SCENE ERROR:', err); process.exit(1); }
 

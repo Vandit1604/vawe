@@ -46,7 +46,7 @@
     {
       "source": "site/public/assets/blocks/card.stat.json",
       "url": "https://vawe.dev/assets/blocks/card.stat.json",
-      "target": "formats/scene/card.stat.json",
+      "target": "films/scene/card.stat.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

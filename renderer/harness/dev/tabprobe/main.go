@@ -44,7 +44,7 @@ const blankJS = `(async () => { const s = document.getElementById('stage'); s.st
 
 func main() {
 	root := flag.String("root", ".", "repo root")
-	data := flag.String("data", "/formats/scene/_shardtest.json", "scene json path")
+	data := flag.String("data", "/films/scene/_shardtest.json", "scene json path")
 	tabs := flag.Int("tabs", 6, "tabs")
 	frame := flag.Int("frame", 4, "frame to render before probing")
 	sweep := flag.Int("sweep", 0, "sweep length on tab 0")
@@ -74,7 +74,7 @@ func main() {
 		panic(err)
 	}
 	defer srv.Close()
-	u := fmt.Sprintf("http://127.0.0.1:%d/formats/scene/scene.html?data=%s&fps=30", port, url.QueryEscape(*data))
+	u := fmt.Sprintf("http://127.0.0.1:%d/films/scene/scene.html?data=%s&fps=30", port, url.QueryEscape(*data))
 	if *pageURL != "" {
 		u = *pageURL
 	}

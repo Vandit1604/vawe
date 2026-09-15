@@ -4,7 +4,7 @@
 // the settled frame + the EXIT arc, so the reveal is always visible. The recurring failure it kills:
 // judging a beat by its hold and missing the reveal (engine-doctrine/MISTAKES.md, the "settled not reveal" trap).
 //
-//   make reveal D=formats/scene/x.json                 → /tmp/reveal/<name>.png (one row per beat: enter | set | exit)
+//   make reveal D=films/scene/x.json                 → /tmp/reveal/<name>.png (one row per beat: enter | set | exit)
 //   node harness/author/reveal.mjs <scene.json> [--enter 0.7] [--n 8]
 //   GHOST=1 node harness/author/reveal.mjs <scene.json> → /tmp/reveal/<name>.ghost.png (onion skin)
 //   make sheets D=…                                    → this sheet AND the beat sheet, one browser
@@ -45,7 +45,7 @@ const GHOST_MAX = 15;                 // a long film has dozens of entrances; a 
 // ffmpeg's hstack/vstack reject `inputs=1` outright, so a scene with ONE beat crashed the whole tool at
 // the last step, after every frame had already been rendered. A one-item stack is the identity, and it
 // is the single-beat film that most needs looking at, so it is answered here rather than by ffmpeg.
-// Pre-existing: `node harness/author/reveal.mjs formats/scene/ab3-nogate-tenor.json` failed on HEAD.
+// Pre-existing: `node harness/author/reveal.mjs films/scene/ab3-nogate-tenor.json` failed on HEAD.
 const stack = (dir, inputs, out, what, extra = '') => {
   if (inputs.length === 1 && !extra) { fs.copyFileSync(inputs[0], out); return out; }
   const chain = inputs.length === 1 ? `[0:v]${extra.replace(/^,/, '')}` : `${dir}stack=inputs=${inputs.length}${extra}`;
@@ -84,7 +84,7 @@ export async function revealSheet(s, { dataArg, enter = 0.7, n = 8, all = false,
   for (const t of starts) { if (t - last > 1.2 && !near(bounds, t)) bounds.push(t); last = t; }
 
   // The clips' REAL ramp lengths, read off the DOM the engine built rather than off the JSON. The two are
-  // not the same number: formats/scene/scene.js writes `dataset.enter` as the theme's durationScale times
+  // not the same number: films/scene/scene.js writes `dataset.enter` as the theme's durationScale times
   // BASE_ENTER, so a layer that declares no `enterDur` enters in 0.26s under vawe and 0.3s under a theme
   // that does not scale. Sampling a window computed from the JSON would miss the end of one and overshoot
   // the other. `[data-start]` is the same selector collectClips uses.

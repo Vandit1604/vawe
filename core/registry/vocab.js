@@ -106,7 +106,7 @@ export const INTERP = {
 // colour grade. The blurb is accurate and speaks the engine's own words (velocity, key, Hermite), so it
 // retrieves for somebody who already knows the mechanism and for nobody else. That is the retrieval
 // failure core/registry.js `aka` exists for: the words go in the SEARCH index without turning the
-// printed description into keyword soup. Counted over `formats/scene/*.json`: 289 motion tracks in
+// printed description into keyword soup. Counted over `films/scene/*.json`: 289 motion tracks in
 // 166 films, and `through` appears on none of them.
 const INTERP_AKA = {
   through: ['stall', 'stalls', 'stops dead', 'dead stop', 'stops in the middle', 'pause', 'pauses',

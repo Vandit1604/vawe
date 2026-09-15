@@ -1,7 +1,7 @@
 // site-engine.mjs: vendor the RENDER ENGINE into the marketing site so scenes play in the browser.
 //
 // The engine is already a web page: the Go renderer just serves the repo over HTTP and navigates to
-// `formats/scene/scene.html?data=<url>&fps=30` (internal/scene/scene.go). Nothing in core/ imports
+// `films/scene/scene.html?data=<url>&fps=30` (internal/scene/scene.go). Nothing in core/ imports
 // node. So the site can serve the exact same files and run the exact same renderFrame(n) live.
 //
 //   node scripts/site/site-engine.mjs            # copy engine → site/public
@@ -69,18 +69,18 @@ const COPY = [
   ['assets/icons', 'assets/icons'],     // svgIcon() + lucide UI marks
   ['assets/vendor', 'assets/vendor'],   // lottie runtime (lazy-loaded by boot)
 ];
-// The scene page and EVERYTHING IT LOADS. scene.html pulls in /formats/scene/scene.js and scene.css by
+// The scene page and EVERYTHING IT LOADS. scene.html pulls in /films/scene/scene.js and scene.css by
 // absolute path, and for a long time this list shipped only the html: in production both 404'd, so the
 // iframe on /editor and /blocks loaded a page whose engine never started. It worked locally because the
 // files were already sitting in public/ from some earlier copy, which is the whole reason a publish
 // step must be derived rather than enumerated. Anything a browser can load in that directory now goes;
 // scene JSON is content and the site curates its own under public/scenes/.
 const SCENE_EXT = new Set(['.html', '.js', '.mjs', '.css', '.json']);
-const FILES = fs.readdirSync(path.join(root, 'formats', 'scene'), { withFileTypes: true })
+const FILES = fs.readdirSync(path.join(root, 'films', 'scene'), { withFileTypes: true })
   .filter((e) => e.isFile() && SCENE_EXT.has(path.extname(e.name)) && !e.name.endsWith('.intent.json'))
   // schema.json is loaded by boot to validate; every other .json in here is a scene, which is content.
   .filter((e) => path.extname(e.name) !== '.json' || e.name === 'schema.json')
-  .map((e) => [`formats/scene/${e.name}`, `formats/scene/${e.name}`]);
+  .map((e) => [`films/scene/${e.name}`, `films/scene/${e.name}`]);
 
 const DRY = process.argv.includes('--check');
 let copied = 0, drift = 0, bytes = 0;

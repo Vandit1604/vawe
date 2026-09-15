@@ -1,4 +1,4 @@
-// harness/author/build-onefile.mjs: generate formats/scene/onefile.json.
+// harness/author/build-onefile.mjs: generate films/scene/onefile.json.
 //
 // vawe's own film, and the first one built ON the box track and keyed depth rather than around them.
 //
@@ -11,7 +11,7 @@
 // one video" that shows a stock photograph instead of its own output is telling, not showing.
 import fs from 'node:fs';
 
-const OUT = 'formats/scene/onefile.json';
+const OUT = 'films/scene/onefile.json';
 const S = '/assets/brands/vawe/stills/';
 // The scene's duration IS where the content ends. Declaring 17.5 while the last layer stopped at
 // 14.6 left 2.9s of bare backdrop, which is exactly the frame a feed freezes on (`ends-on-nothing`).

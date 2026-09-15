@@ -1,7 +1,7 @@
 // preflight.mjs: the decisions that belong BEFORE the JSON, as a step that happened.
 //
-//   node quality/gates/preflight.mjs formats/scene/x.json --record  # print the chain, record it
-//   node quality/gates/preflight.mjs formats/scene/x.json           # did it happen for THIS version?
+//   node quality/gates/preflight.mjs films/scene/x.json --record  # print the chain, record it
+//   node quality/gates/preflight.mjs films/scene/x.json           # did it happen for THIS version?
 //
 // WHY. CLAUDE.md's authoring ladder numbers "compose from blueprints" and "see the whole arsenal" as
 // steps 0 and 0a, and PRINTS them eleventh and twelfth, inside a section called "After writing a JSON".
@@ -167,7 +167,7 @@ const gold = nearestExemplars(feelForExemplars, 3);
 if (gold.length) {
   console.log(`\n  EXEMPLARS TO STUDY. These are the films to reach toward, not rules to avoid:\n`);
   for (const g of gold) {
-    console.log(`   · formats/scene/${g.file}, ${g.register || g.teaches}: study it for ${g.teaches}`);
+    console.log(`   · films/scene/${g.file}, ${g.register || g.teaches}: study it for ${g.teaches}`);
   }
 }
 

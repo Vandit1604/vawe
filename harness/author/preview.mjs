@@ -42,17 +42,17 @@ if (flagIdx >= 0 && flagData === undefined) {
 if (dataArg && !fs.existsSync(path.resolve(dataArg))) {
   // Falling back to sample.json here is exactly how this bug hid: a missing scene must be loud.
   console.error(`preview.mjs: no such data file "${dataArg}"`);
-  console.error('usage: make look D=formats/scene/<film>.json  (or make frame D=… N=<n>)');
+  console.error('usage: make look D=films/scene/<film>.json  (or make frame D=… N=<n>)');
   process.exit(1);
 }
-if (!format || !fs.existsSync(path.join(repoRoot, 'formats', format, 'scene.html'))) {
+if (!format || !fs.existsSync(path.join(repoRoot, 'films', format, 'scene.html'))) {
   console.error('usage: node harness/author/preview.mjs <format> [frame] [data.json | --data f.json]');
-  console.error('formats:', fs.readdirSync(path.join(repoRoot, 'formats')).join(', '));
+  console.error('formats:', fs.readdirSync(path.join(repoRoot, 'films')).join(', '));
   process.exit(1);
 }
 const dataUrl = dataArg
   ? '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/')
-  : `/formats/${format}/sample.json`;
+  : `/films/${format}/sample.json`;
 
 const { server, port } = await serveRepo();
 
@@ -65,7 +65,7 @@ const page = await browser.newPage();
 const cfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, decodeURIComponent(dataUrl).replace(/^\//, '')), 'utf8')); } catch { return {}; } })();
 const [VW, VH] = sceneDims(cfg);
 await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 });
-await page.goto(`http://127.0.0.1:${port}/formats/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
+await page.goto(`http://127.0.0.1:${port}/films/${format}/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
 const err = await waitForEngine(page);
 if (err) { console.error('SCENE ERROR:', err); process.exit(1); }
 const meta = await page.evaluate(() => window.__engine.meta);

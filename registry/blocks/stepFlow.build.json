@@ -52,7 +52,7 @@
     {
       "source": "site/public/assets/blocks/stepFlow.build.json",
       "url": "https://vawe.dev/assets/blocks/stepFlow.build.json",
-      "target": "formats/scene/stepFlow.build.json",
+      "target": "films/scene/stepFlow.build.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

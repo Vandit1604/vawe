@@ -42,8 +42,8 @@ export function build(kit, el, L, { src, w, h, radius, fit, poster, in: inPoint,
     throw new Error(`video layer: out (${out}) must be greater than in (${inPoint ?? 0}), an empty cut cannot be rendered`);
   const v = document.createElement('video');
   v.className = 'hs-video';
-  // ROOT-RELATIVE, ALWAYS. The page is served from /formats/scene/, so a bare `assets/clip.mp4`
-  // resolves to /formats/scene/assets/clip.mp4 and 404s, and a <video> that cannot load its source
+  // ROOT-RELATIVE, ALWAYS. The page is served from /films/scene/, so a bare `assets/clip.mp4`
+  // resolves to /films/scene/assets/clip.mp4 and 404s, and a <video> that cannot load its source
   // fires no error the frame pass can see, so the layer renders as an empty box and the film looks
   // like the layer was never written. Both spellings mean the same file and the assets preflight
   // already checks the repo-relative one, so the resolver belongs here rather than in the author's

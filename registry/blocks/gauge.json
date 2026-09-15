@@ -42,7 +42,7 @@
     {
       "source": "site/public/assets/blocks/gauge.json",
       "url": "https://vawe.dev/assets/blocks/gauge.json",
-      "target": "formats/scene/gauge.json",
+      "target": "films/scene/gauge.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -1,5 +1,5 @@
 // core/tracks/group3d.js: a `group` never gets its own preserve-3d, so a child's own rotY/rotX/z is
-// flattened onto the group's 2D plane before it ever reaches the camera rig (formats/scene/scene.js
+// flattened onto the group's 2D plane before it ever reaches the camera rig (films/scene/scene.js
 // "THE CAMERA RIG": #cam and every beat wrapper get preserve-3d the moment ANY layer keys a 3D motion
 // prop, but a group in between stays flat, browsers default every element to transform-style: flat).
 //

@@ -64,8 +64,8 @@ needs a video recording of a real click, since the engine draws and animates the
 ## `make scaffold TYPE=demo`
 
 ```bash
-make scaffold OUT=formats/scene/<name>.json TYPE=demo DUR=10   # < 15s: continuous action (the control)
-make scaffold OUT=formats/scene/<name>.json TYPE=demo DUR=18   # >= 15s: the beat spine below
+make scaffold OUT=films/scene/<name>.json TYPE=demo DUR=10   # < 15s: continuous action (the control)
+make scaffold OUT=films/scene/<name>.json TYPE=demo DUR=18   # >= 15s: the beat spine below
 ```
 
 At DUR>=15 it composes `kineticHook -> recordedPan -> verdictProof -> ctaEnd`

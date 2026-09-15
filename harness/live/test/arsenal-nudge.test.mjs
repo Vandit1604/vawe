@@ -33,8 +33,8 @@ function run(input, dataDir) {
   return { status: r.status, out: r.stderr };
 }
 
-const probeHtml = () => join(ROOT, 'formats/scene', ['_arsenal-nudge-probe', 'html'].join('.'));
-const probeBoard = () => join(ROOT, 'formats/scene', ['_arsenal-nudge-probe', 'storyboard', 'md'].join('.'));
+const probeHtml = () => join(ROOT, 'films/scene', ['_arsenal-nudge-probe', 'html'].join('.'));
+const probeBoard = () => join(ROOT, 'films/scene', ['_arsenal-nudge-probe', 'storyboard', 'md'].join('.'));
 
 const CARET_HTML = '<div class="typing"><span class="caret">|</span></div>'
   + '<style>.caret{animation:blink 1s infinite}</style>';

@@ -61,7 +61,7 @@
     {
       "source": "site/public/assets/blocks/glassNotification.json",
       "url": "https://vawe.dev/assets/blocks/glassNotification.json",
-      "target": "formats/scene/glassNotification.json",
+      "target": "films/scene/glassNotification.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

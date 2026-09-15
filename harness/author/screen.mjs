@@ -7,8 +7,8 @@
 // renders, detects and measures. If F exists and KIND is given, refuses rather than overwrite an
 // authored screen.
 //
-//   node harness/author/screen.mjs formats/scene/vawe-flow-editor.html --theme vawe --ref example-madera --act 1
-//   node harness/author/screen.mjs formats/scene/new-screen.html --kind grid --theme vawe   # writes it first
+//   node harness/author/screen.mjs films/scene/vawe-flow-editor.html --theme vawe --ref example-madera --act 1
+//   node harness/author/screen.mjs films/scene/new-screen.html --kind grid --theme vawe   # writes it first
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -187,7 +187,7 @@ export function readiness(source) {
   const rawColorUses = (own.match(/#[0-9a-fA-F]{3,8}\b/g) || []).length;
 
   const imgs = [...own.matchAll(/<img[^>]*\ssrc="([^"]*)"/g)].map((x) => x[1]);
-  const servedPrefixes = ['/assets/', '/.vawe-data/uploads/', '/core/', '/themes/', '/formats/'];
+  const servedPrefixes = ['/assets/', '/.vawe-data/uploads/', '/core/', '/themes/', '/films/'];
   const images = imgs.map((src) => {
     if (/^<fill:/i.test(src)) return { src, ok: false, why: 'unfilled placeholder marker' };
     if (!src.startsWith('/')) return { src, ok: false, why: 'relative path: resolves against the preview page\'s own base, not this fragment\'s, and paints nothing (the known trap)' };

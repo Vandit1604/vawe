@@ -29,7 +29,7 @@ const aspect = aspectAt >= 0 ? argv[aspectAt + 1] : null;
 // is the filter itself. `audit-scenes.mjs argus` therefore swept all 110 scenes and never said why.
 const filter = argv.find((a, i) => !a.startsWith('--') && !(aspectAt >= 0 && i === aspectAt + 1)) || '';
 
-const DIR = 'formats/scene';
+const DIR = 'films/scene';
 // The same exclusion every library sweep uses: a sidecar is not a film.
 const skip = (f) => !f.endsWith('.json') || f === 'schema.json' || f.startsWith('_')
   || /\.(intent|animatic|template)\.json$/.test(f);
@@ -48,7 +48,7 @@ const scenes = pop.names
     return true;
   });
 
-// A FILTER THAT MATCHED NOTHING PRINTED A GREEN TICK. `audit-scenes.mjs formats/scene/thread.json` swept
+// A FILTER THAT MATCHED NOTHING PRINTED A GREEN TICK. `audit-scenes.mjs films/scene/thread.json` swept
 // 0 scenes and reported `✓ clean: 0 … errored: 0`, exit 0. The filter is a bare-FILENAME substring, so
 // any path-shaped argument silently matches none. That is #377 at the scale of one command: the sweep
 // reported confidence over a population it never had. Say what the filter did, always, and refuse an

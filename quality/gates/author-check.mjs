@@ -463,7 +463,7 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
     console.log(`      of this ladder's checks have nothing to compare the render against and stay quiet.`);
     console.log(`      Write one from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md, then: make storyboard-check SB=<file>`);
     console.log(`      Then point this scene at it, so a rename cannot break the link:`);
-    console.log(`        "storyboard": "formats/scene/${sbBase}.storyboard.md"`);
+    console.log(`        "storyboard": "films/scene/${sbBase}.storyboard.md"`);
     const excused = isWaivedBy(allowRaw, 'no-storyboard'); // whole-film code, carries no instance
     if (!excused) {
       console.log(`        The rule blocks here. Write the plan, or waive it with a reason someone can read:`);
@@ -541,7 +541,7 @@ styleGate('floor', 'direction floor (ambition)', 'quality/gates/direction-floor.
 //     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174.
 styleGate('dissolve', 'dissolve check (crossfade mud)', 'quality/gates/dissolve-check.mjs', strict ? ['--strict'] : [], { waivable: true });
 // 4d. covered-move. Does a full-bleed layer above a moving one start mid-move and hide it? `track`
-//     decides stacking, array order breaks a same-track tie (formats/scene/scene.js:597), and a move
+//     decides stacking, array order breaks a same-track tie (films/scene/scene.js:597), and a move
 //     hidden before it plays reads as a hard cut nobody authored. Always report-only: this can't tell
 //     a deliberate cover from an accident, only name the collision. See engine-doctrine/CRAFT/TRANSITIONS.md.
 styleGate('covered-move', 'covered-move (a move hidden before it plays)', 'quality/gates/covered-move.mjs', [], { waivable: true });

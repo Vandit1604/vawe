@@ -4,7 +4,7 @@
 // file already exists this PRINTS it and does nothing else: it is the film's own resolved design once
 // written, never something a re-run should overwrite.
 //
-//   node harness/author/design-spec.mjs formats/scene/launch.json
+//   node harness/author/design-spec.mjs films/scene/launch.json
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

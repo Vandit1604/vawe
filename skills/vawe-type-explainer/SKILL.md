@@ -64,8 +64,8 @@ icon; see `engine-doctrine/CRAFT/SHOW-DONT-TELL.md` for what counts as explanati
 ## `make scaffold TYPE=explainer`
 
 ```bash
-make scaffold OUT=formats/scene/<name>.json TYPE=explainer DUR=12   # < 15s: continuous action (the held figure)
-make scaffold OUT=formats/scene/<name>.json TYPE=explainer DUR=20   # >= 15s: the beat spine below
+make scaffold OUT=films/scene/<name>.json TYPE=explainer DUR=12   # < 15s: continuous action (the held figure)
+make scaffold OUT=films/scene/<name>.json TYPE=explainer DUR=20   # >= 15s: the beat spine below
 ```
 
 At DUR>=15 it composes `kineticHook -> containerFill -> listBuildRows -> chipGrid -> statReveal -> ctaEnd`

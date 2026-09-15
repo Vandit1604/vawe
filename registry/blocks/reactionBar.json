@@ -50,7 +50,7 @@
     {
       "source": "site/public/assets/blocks/reactionBar.json",
       "url": "https://vawe.dev/assets/blocks/reactionBar.json",
-      "target": "formats/scene/reactionBar.json",
+      "target": "films/scene/reactionBar.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

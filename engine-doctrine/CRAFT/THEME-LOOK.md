@@ -69,7 +69,7 @@ instead of rebuilding it.
 
 ### `bgDefault` can now be a ROTATION, not only a single backdrop
 
-Measured across `formats/scene/`: 85 of 119 films (71%) paint exactly one `bg` window for the whole
+Measured across `films/scene/`: 85 of 119 films (71%) paint exactly one `bg` window for the whole
 runtime, however many times the film cuts. That is not the mistake `backdrop` above guards against: an
 author who writes `bg:[{use:"theme"}]` has already asked for the theme's own backdrop, the same
 explicit door `bgDefault` opened as a single spec. `theme.bgDefault` now accepts an ARRAY of specs (a
@@ -95,7 +95,7 @@ never read at render; the rotation lives on the field already read at render (`b
 fires when the author already wrote the opt-in the engine has always honoured.
 
 `look` used to carry an eighth key, `cues`: a fixed per-theme list of audio cue names. It is gone.
-`buildSfx` (`formats/scene/scene.js:1593-1602`) already derives every cue from the `CUT_CUE`/`SEAM_CUE`
+`buildSfx` (`films/scene/scene.js:1593-1602`) already derives every cue from the `CUT_CUE`/`SEAM_CUE`
 tables in `core/audio/cues.js`, keyed on the transition actually used at each joint, so a fixed list
 could never say which cue replaces which as a film's cut family changes beat to beat. It would have
 been a second, disagreeing owner of a fact `buildSfx` already owns.
@@ -195,7 +195,7 @@ reason.
   so a theme with no `marks` stays without one until it declares its own.
 
 (`cues` used to be a third uncomputed key. It is gone from `LOOK_KEYS` entirely: `buildSfx`
-(`formats/scene/scene.js:1593-1602`) already derives every cue from the transition actually used at
+(`films/scene/scene.js:1593-1602`) already derives every cue from the transition actually used at
 each joint, so a fixed per-theme cue list was a second, disagreeing owner of the same fact rather than
 something worth computing a default for.)
 

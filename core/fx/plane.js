@@ -24,7 +24,7 @@
 // a distance. It is never read back, and renderFrame(n) stays pure in n without an element of its own.
 //
 // IT NEEDS THE RIG, and that is not a limitation to work around. It is what makes this depth and not a
-// scale. Under the rig (formats/scene/scene.js) the eye is fixed to the FRAME and `#cam` stands inside
+// scale. Under the rig (films/scene/scene.js) the eye is fixed to the FRAME and `#cam` stands inside
 // its space carrying the camera's own transform, so a layer at z is projected by lens/(lens - z - dolly)
 // about a vanishing point that does not travel with it. Move the camera and a near layer crosses the
 // frame faster than a far one, which is the whole point and is measurable
@@ -105,7 +105,7 @@ function resolve(spec) {
 // A group child's parent is the group element, which is flat, so the depth would be silently
 // orthographic. The layer would sit at z and be drawn at exactly the size and place it had. Checked
 // here rather than per frame because the class is set before either build path reaches the modifiers
-// (formats/scene/scene.js, core/layers/util.js), so this can throw before a frame is drawn.
+// (films/scene/scene.js, core/layers/util.js), so this can throw before a frame is drawn.
 export function build(kit, el, L, spec) {
   const { hold } = resolve(spec);
   // `kick` and `squash` write the same `scale` longhand, and modifiers resolve last-writer-wins
@@ -132,7 +132,7 @@ export function frame(kit, el, L, t, scene, spec) {
   const cam = scene.camera;
   if (!(cam && cam.rig))
     throw new Error(`plane: this frame has no camera rig, so there is no space to stand ${z}px into. A `
-      + `top-level \`plane\` turns the rig on by itself (formats/scene/scene.js), so reaching this means `
+      + `top-level \`plane\` turns the rig on by itself (films/scene/scene.js), so reaching this means `
       + `the modifier is somewhere the scene could not see it.`);
   // The eye is AT the lens distance, so a layer at or past it is at or behind the camera. CSS projects
   // that anyway, through a division by zero and out the far side, mirrored and inverted, and says

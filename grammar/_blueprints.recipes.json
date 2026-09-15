@@ -67,7 +67,7 @@
     "kind": "camera",
     "blurb": "a surface wider than the frame drifts into place then pans on an irregular multi-key linear track, riders welded to the same track by copying its deltas and time-shifting by the rider's own start",
     "sources": [
-      { "ref": "higgsfield-recreation", "shot": 2, "note": "formats/scene/higgsfield-recreation.json beat 2" }
+      { "ref": "higgsfield-recreation", "shot": 2, "note": "films/scene/higgsfield-recreation.json beat 2" }
     ],
     "slots": { "surface": "layer id", "riders": "[layer id, ...]?" },
     "params": {
@@ -83,7 +83,7 @@
     "kind": "enter",
     "blurb": "a stroked ring replays another layer's path one beat late, growing and fading as it goes, supplying motion during a slow morph without competing with the subject for attention",
     "sources": [
-      { "ref": "higgsfield-recreation", "shot": 4, "note": "formats/scene/higgsfield-recreation.json beat 4, the generate button becoming a dot" }
+      { "ref": "higgsfield-recreation", "shot": 4, "note": "films/scene/higgsfield-recreation.json beat 4, the generate button becoming a dot" }
     ],
     "slots": { "path": "the source layer's motion track", "delay": "seconds behind the source" },
     "params": {

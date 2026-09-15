@@ -24,8 +24,8 @@ cue to silence while the gate still reads the film as sounded (`cues-have-no-sou
 before shipping.
 
 **`audio.auto`, the cue-derivation flag §4 describes, is now a DEFAULT, not an opt-in**
-(`formats/scene/scene.js`, `buildSfx`): a scene's own cuts, stings and seams score themselves
-automatically unless it says `audio.auto: false`. Measured across `formats/scene/` before and after
+(`films/scene/scene.js`, `buildSfx`): a scene's own cuts, stings and seams score themselves
+automatically unless it says `audio.auto: false`. Measured across `films/scene/` before and after
 that flip: scenes that resolve at least one cue went from **18 to 68**. Run `make audio-check` to see
 the live census; it is the first thing this document is for.
 
@@ -340,7 +340,7 @@ important, which means none of them are.** It is mickey-mousing applied to edito
 of to on-screen action, and it dies of the same saturation.
 
 This was the argument against shipping `audio.auto:true`: draft it to hear the shape of an edit, then
-replace it with two or three hand-placed cues. **The default was flipped anyway** (`formats/scene/scene.js`),
+replace it with two or three hand-placed cues. **The default was flipped anyway** (`films/scene/scene.js`),
 because the alternative measured worse: four films in five were shipping with NO cue on ANY junction,
 which is the same amateurish sameness this section warns about, just silent instead of loud. Two things
 soften the objection rather than answer it outright: the cue is not one `whoosh`, `CUT_CUE`/`SEAM_CUE`
@@ -383,7 +383,7 @@ product film's payoff beat.
 ## 6. The mechanism, what this engine can actually do
 
 Everything above is *what*; this is *how*. It all lives in the scene's top-level `audio` block
-(`formats/scene/schema.json`), and the Go mixer (`renderer/internal/audio/audio.go`) builds the whole track in
+(`films/scene/schema.json`), and the Go mixer (`renderer/internal/audio/audio.go`) builds the whole track in
 memory before ffmpeg muxes it.
 
 ```jsonc
@@ -777,7 +777,7 @@ Confine AI music to internal comps, pitch boards and animatics. Never a client d
    picking a bed with nothing to go on is not a default, it is a guess (engine-doctrine/MISTAKES.md #159 in the
    audio domain). It should still map every profile to *something* before "sound by default" is real
    for MUSIC; cue derivation (item 2, below) already is.
-2. **RESOLVED: `audio.auto` is now the engine default, not an opt-in.** `formats/scene/scene.js`
+2. **RESOLVED: `audio.auto` is now the engine default, not an opt-in.** `films/scene/scene.js`
    (`buildSfx`) derives a cue for every cut, sting and seam unless a scene says `audio.auto: false`.
    Measured before/after: scenes that resolve at least one cue went from 18 to 68. §4 records the
    mickey-mousing objection to this and why it was overridden anyway, plus what the objection still

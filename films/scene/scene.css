@@ -1,0 +1,84 @@
+/* scene. The OPEN CANVAS. A generic, data-driven layered composition: the JSON is the
+   video. No per-topic code, no sealed scenes. Layers (text/image/component/rect) + timed
+   windows + kinetic splits + the cut kit (core/cuts.js) + shader stings
+   (core/stings.js) + theme bg presets on canvas + a global camera. Everything pure in n. */
+.chrome { display: none; }
+.stage { background: none !important; }
+.stage::before, .stage::after { display: none !important; }
+/* stage fallback = the theme gradient (g0..g2) when no data.bg windows are declared */
+.hs-stage { position: absolute; inset: 0; overflow: hidden;
+  background: radial-gradient(82% 60% at 66% 42%, var(--g2) 0%, var(--g1) 46%, var(--g0) 100%); }
+#cv { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; transform-origin: 50% 45%; }
+/* a hand-authored living background (core/bg-html.js): full-bleed, behind the canvas and the camera.
+   `overflow: hidden` so an oversized blob the author animates off-frame cannot grow the stage. */
+.hs-bghtml { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+/* NO `will-change` ON EITHER OF THESE, AND THAT IS THE POINT. Both carried
+   `will-change: transform, opacity, filter`, which promotes the element to its own compositor layer.
+   A promoted layer is rasterized once and then TRANSFORMED by the compositor, so the glyphs inside it
+   keep the sub-pixel raster they were given the first time the layer was painted, and the frame you
+   capture depends on which frames were painted before it. Geometry stayed identical to six decimals
+   and the pixels did not: a render at -workers 1 and the same render at -workers 6 disagreed on 50 of
+   60 frames, because each tab paints a different subset of the film. Removing these two took that to
+   1 of 60 (engine-doctrine/MISTAKES.md #507). Same family as #272, where 400 promoted elements in a lightfield
+   made the picture never settle: a promotion hint is a promise about ANIMATION, and this renderer
+   does not animate, it seeks. */
+#cam { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.hs-layer { position: absolute; }
+.hs-text { color: var(--text); line-height: 1.04; }
+/* <b> is ACCENT EMPHASIS (recolour), not "bolder": inherit the layer weight so emphasis never
+   jumps to UA bold 700 and sits heavier than its own line. Opt into a heavier emphasis explicitly. */
+.hs-text b { color: var(--em, var(--accent)); font-weight: inherit; }
+.hs-text em { font-style: italic; font-family: var(--font-serif); }
+.hs-img { display: block; object-fit: contain; }
+.hs-rect { box-sizing: border-box; }
+.hs-group { display: flex; box-sizing: border-box; }
+.hs-group > .hs-text, .hs-group > .hs-img-wrap { position: relative; }
+.hs-comp { transform-origin: 0 0; border-radius: 18px; overflow: hidden; box-shadow: 0 40px 100px rgba(20,20,30,0.16); }
+/* caption bar */
+/* BOTTOM READS THE SAFE AREA. core/boot.js writes --safe-bottom from safeArea(w,h,destination) and this
+   rule hardcoded 300px and never read it, so on `destination:"tiktok"` (bottom chrome 0.302 = 580px of a
+   1920 canvas) a burnt-in caption rendered UNDERNEATH TikTok's own caption strip. The whole point of
+   declaring a destination is that the platform's chrome is not a property of the aspect: 9:16 for a
+   website hero and 9:16 for TikTok are the same canvas with different keep-out. core/boot.js:315 names
+   `.hs-cap` as the element that broke this way before. max() so a film that declares no destination
+   keeps its 300px exactly. engine-doctrine/MISTAKES.md #390. */
+.hs-cap { position: absolute; left: 60px; right: 180px; bottom: max(300px, var(--safe-bottom, 300px)); z-index: 90; text-align: center;
+  font: 700 46px var(--font-sans), sans-serif; color: var(--text); text-shadow: 0 3px 24px rgba(0,0,0,0.7);
+  opacity: 0; }
+.hs-cap.word { font-weight: 800; }
+/* pop: muted-social burned-in subtitle, big, bottom-third safe zone, high-contrast, accent emphasis */
+.hs-cap.pop { left: 8%; right: 8%; bottom: max(12%, var(--safe-bottom, 12%)); font: 800 64px var(--font-sans), sans-serif;
+  letter-spacing: -0.01em; color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.95); }
+.hs-cap.pop b, .hs-cap.pop em { color: var(--accent); font-style: normal; }
+/* caption STYLES (wave 1): word-timed treatments on the pop layout (core/captions.js drives
+   the per-word progress). All look values are theme tokens; the .styled scrim plate exists so
+   contrast is computable: the video content behind a caption is unknown, a plate is not. */
+.hs-cap.styled { left: 8%; right: 8%; bottom: max(12%, var(--safe-bottom, 12%)); font: 700 64px var(--font-sans), sans-serif;
+  letter-spacing: -0.01em; color: var(--text); text-shadow: none;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  border-radius: 18px; padding: 14px 30px; }
+.hs-cap.styled b, .hs-cap.styled em { color: var(--accent); font-style: normal; }
+.hs-cap.pillKaraoke .ku { padding: 3px 16px; margin: 3px 3px; border-radius: 999px;
+  background-color: color-mix(in srgb, var(--surface) 70%, transparent); }
+.hs-cap.clipWipe .cw.base { color: color-mix(in srgb, var(--text) 76%, var(--bg)); }
+.hs-cap.clipWipe .cw.over { position: absolute; inset: 14px 30px; color: var(--accent); }
+/* wave 2 (neonEdge · kineticSlam · underlineDraw · readerFocus). Three of the four add no rule here:
+   every value they need is an inline prop written on the word span every frame, and a static rule
+   beside them would be a second place to look for the same look. What they DO take from this file is
+   the box they are bounded against: the `styled` plate above pads 14px, and that is the ceiling wave
+   2 keeps its halo and its overshoot inside, so the caption band stays the height core/safe.js
+   CAPTION_SKINS says it is. Change that padding and the bounds in core/captions.js are the second edit.
+   kineticSlam is the exception, because the two ways to make a word bigger are not equivalent: a
+   transform cannot move its neighbours and cannot be given room by its neighbours either, so the
+   settled 4% would sit on the following space. The margin is the room. It is static, so it costs the
+   line one constant re-lay at build and none per frame. */
+.hs-cap.kineticSlam .ku { margin: 0 0.10em; }
+/* wave 3, the one-word styles (wordFlash · wordSlide). The scrim plate exists so contrast is
+   computable, and at 8%/8% it is the width of the LINE. With one word on it, that is a full-width
+   bar with a single short word floating in the middle of it, which reads as an empty component
+   rather than a caption. `width:fit-content` shrinks the plate to its word; the left/right pair is
+   still what it centres inside, so the plate stays inside the same safe box every other skin uses
+   and captionBand()'s numbers do not move. Keeping left/right rather than switching to a transform
+   matters: films/scene/scene.js writes `transform` on this element every frame for the entrance,
+   and a centring transform here would be overwritten on the first one. */
+.hs-cap.wordFlash, .hs-cap.wordSlide { width: fit-content; margin-inline: auto; }

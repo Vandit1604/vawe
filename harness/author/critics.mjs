@@ -12,9 +12,9 @@
 // this only composes what to hand each one and records what came back. Pure fs + JSON, no side effects
 // on import.
 //
-//   node harness/author/critics.mjs formats/scene/x.json                 # emit the six critic prompts
-//   node harness/author/critics.mjs formats/scene/x.json --deciders      # emit the decider roster, in order
-//   node harness/author/critics.mjs formats/scene/x.json --record p.json # write the panel receipt
+//   node harness/author/critics.mjs films/scene/x.json                 # emit the six critic prompts
+//   node harness/author/critics.mjs films/scene/x.json --deciders      # emit the decider roster, in order
+//   node harness/author/critics.mjs films/scene/x.json --record p.json # write the panel receipt
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

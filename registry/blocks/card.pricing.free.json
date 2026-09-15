@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/card.pricing.free.json",
       "url": "https://vawe.dev/assets/blocks/card.pricing.free.json",
-      "target": "formats/scene/card.pricing.free.json",
+      "target": "films/scene/card.pricing.free.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

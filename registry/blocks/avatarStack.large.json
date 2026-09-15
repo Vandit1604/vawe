@@ -56,7 +56,7 @@
     {
       "source": "site/public/assets/blocks/avatarStack.large.json",
       "url": "https://vawe.dev/assets/blocks/avatarStack.large.json",
-      "target": "formats/scene/avatarStack.large.json",
+      "target": "films/scene/avatarStack.large.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

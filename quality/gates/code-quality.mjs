@@ -26,7 +26,7 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const BASELINE = path.join(ROOT, 'quality/baselines/code-quality-baseline.json');
-const SCAN = ['core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'formats', 'scene', 'cli', 'tools', 'studio'];
+const SCAN = ['core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'films', 'scene', 'cli', 'tools', 'studio'];
 const write = process.argv.includes('--write');
 const top = process.argv.includes('--top');
 

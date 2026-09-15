@@ -53,7 +53,7 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 
 ```
 make arsenal Q="…"              # find directed motion → pick one per storyboard beat
-… author formats/scene/<x>.json (beats + brand content + a living bg + camera + seams) …
+… author films/scene/<x>.json (beats + brand content + a living bg + camera + seams) …
                                  # beats/blocks/comps expand into real layers at LOAD, no separate step
 make author-check D=<x>.json    # validate · critique · direct(effect-soup ceiling) · FLOOR(slideshow) · slop
 make video    D=<x>.json        # render (author-check runs first; NOCHECK=1 to skip during iteration)
@@ -70,6 +70,6 @@ whole catalog + pick), **`vawe-animation`** (easing feel + `springEase`), **`vaw
 work). Full list: `make effects` → `engine-doctrine/EFFECTS.md`.
 
 ## The bar
-Study `formats/scene/brew-native.json` (warm, expressive) and `formats/scene/preface-launch.json`
+Study `films/scene/brew-native.json` (warm, expressive) and `films/scene/preface-launch.json`
 (minimal, technical) before authoring: one of them is your register. If your draft would look at home as
 a Keynote slide deck, it has failed this skill. Make the viewer feel the motion.

@@ -1,7 +1,7 @@
 // harness/author/argus.mjs: composes the argushq.cc launch teaser (landscape 16:9) from the taste library +
 // the brand's signature details (pixel-eye mascot, hand-drawn cobalt underline, X-native surfaces).
 // Colours come from themes/argus.json via CSS vars (theme-aware blocks), so everything is cobalt-on-white.
-// Writes formats/scene/argus-launch.json. Run: node harness/author/argus.mjs
+// Writes films/scene/argus-launch.json. Run: node harness/author/argus.mjs
 import fs from 'node:fs';
 // Named off BLOCKS: index.mjs is the registry now, not a barrel of 200 re-exported names.
 import { BLOCKS } from '../../blocks/index.mjs';
@@ -70,5 +70,5 @@ const scene = { module: 'scene', theme: 'argus', aspect: '16:9', duration: 23,
   audio: { silent: true },
   bg: [{ preset: 'plain', value: 'light', from: 0, to: 23 }],
   layers: L };
-fs.writeFileSync('formats/scene/argus-launch.json', JSON.stringify(scene, null, 2));
-console.log(`wrote formats/scene/argus-launch.json · ${L.length} layers · 5 beats · 23s · 16:9`);
+fs.writeFileSync('films/scene/argus-launch.json', JSON.stringify(scene, null, 2));
+console.log(`wrote films/scene/argus-launch.json · ${L.length} layers · 5 beats · 23s · 16:9`);

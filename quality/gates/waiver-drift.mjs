@@ -40,7 +40,7 @@ import { codeFiresOn, gateForCode } from '../../harness/lib/code-fires.mjs';
 import { splitWaiver, groupWaivers, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENES = path.join(ROOT, 'formats', 'scene');
+const SCENES = path.join(ROOT, 'films', 'scene');
 const file = process.argv.slice(2).find((a) => !a.startsWith('--'));
 // "It never blocks. A gate that blocked on this would itself be waived" (see header): every finding
 // here is a WARN or a NOTE, never an error, so the exit code stays 0.

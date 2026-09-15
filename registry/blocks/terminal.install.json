@@ -44,7 +44,7 @@
     {
       "source": "site/public/assets/blocks/terminal.install.json",
       "url": "https://vawe.dev/assets/blocks/terminal.install.json",
-      "target": "formats/scene/terminal.install.json",
+      "target": "films/scene/terminal.install.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

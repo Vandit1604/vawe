@@ -26,12 +26,12 @@ const m = args.find((a) => !a.startsWith('--'));
 const SAVE = args.includes('--save');
 if (!m) { console.error('usage: node quality/gates/scene-snap.mjs <format> [--save]'); process.exit(1); }
 // FAIL on an extra positional arg. This gate always snapshots the FORMAT's sample.json, but it used
-// to accept `scene-snap.mjs scene formats/scene/paint-demo.json` and silently ignore the second
+// to accept `scene-snap.mjs scene films/scene/paint-demo.json` and silently ignore the second
 // argument, reporting "IDENTICAL" about a file it never opened. That is a gate answering a question
 // it was not asked, which is worse than no gate: the answer looks authoritative.
 const extra = args.filter((a) => !a.startsWith('--')).slice(1);
 if (extra.length) {
-  console.error(`scene-snap takes a FORMAT name, not a data file. It always snapshots formats/${m}/sample.json.`);
+  console.error(`scene-snap takes a FORMAT name, not a data file. It always snapshots films/${m}/sample.json.`);
   console.error(`  ignored: ${extra.join(', ')}`);
   console.error('  to compare one scene, render it and use `make compare`.');
   process.exit(1);
@@ -42,10 +42,10 @@ const { server, port } = await serveRepo();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 const page = await browser.newPage();
 // Signatures must be captured at the format's real dims, or the baseline records a cropped canvas.
-const snapCfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', m, 'sample.json'), 'utf8')); } catch { return {}; } })();
+const snapCfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, 'films', m, 'sample.json'), 'utf8')); } catch { return {}; } })();
 const [SVW, SVH] = sceneDims(snapCfg);
 await page.setViewport({ width: SVW, height: SVH, deviceScaleFactor: 1 });
-await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/formats/${m}/sample.json&fps=30`, { waitUntil: 'load' });
+await page.goto(`http://127.0.0.1:${port}/films/${m}/scene.html?data=/films/${m}/sample.json&fps=30`, { waitUntil: 'load' });
 await waitForEngine(page);
 const meta = await page.evaluate(() => window.__engine.meta);
 const total = meta.totalFrames;
@@ -68,7 +68,7 @@ const motionFrames = await page.evaluate(() => {
   return [...out];
 });
 const cutFrames = (() => { try {
-  const j = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats', m, 'sample.json'), 'utf8'));
+  const j = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films', m, 'sample.json'), 'utf8'));
   return (j.cuts || []).flatMap((c) => { const h = (c.dur ?? 0.36) / 2; return [c.t - h * 0.5, c.t, c.t + h * 0.5]; }).map((t) => Math.round(t * 30));
 } catch { return []; } })();
 const frames = [...new Set([

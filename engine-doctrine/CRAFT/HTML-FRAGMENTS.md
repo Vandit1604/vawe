@@ -467,7 +467,7 @@ gap, each stated so it can be verified by looking rather than argued about:
   other has not made a hierarchy decision yet, whatever the copy says.
 - **An equal grid reads as unconsidered because it answers a question nobody asked.** Three cards at
   `flex:1` each says "these three things matter exactly the same amount," which is a claim, not a
-  layout default, and it is almost never the true claim (`formats/scene/post-postmark.scene2.html`
+  layout default, and it is almost never the true claim (`films/scene/post-postmark.scene2.html`
   before this pass: two `flex:1` cards for two typefaces with different jobs). An asymmetric split
   (`.kit-col-4`/`.kit-col-8`, `.kit-col-7`/`.kit-col-5`) forces the question to be answered: which one is
   more important, by how much.
@@ -489,7 +489,7 @@ deliberately refuses: [`FRAGMENT-EXEMPLARS.md`](FRAGMENT-EXEMPLARS.md).
 ## Preview before you render
 
 ```bash
-make preview HTML=formats/scene/_your-fragment.html THEME=<brand>
+make preview HTML=films/scene/_your-fragment.html THEME=<brand>
 ```
 
 Renders the fragment in a real browser with real computed styles, runs `impeccable`'s detector over
@@ -501,7 +501,7 @@ right? Then render.
 **The gate that compares the plan with the frames built from it:**
 
 ```bash
-make frame-check D=formats/scene/<film>.json
+make frame-check D=films/scene/<film>.json
 ```
 
 It checks every fragment against its own beat, and it fails a size or a shadow that does not trace to
@@ -513,7 +513,7 @@ scene after assembly, and `make preview` judges one fragment with no idea which 
 **To review the fragments AS THE FILM, and to hand a human something to approve:**
 
 ```bash
-make studio D=formats/scene/<film>.json   # then press 1, or click `plan`
+make studio D=films/scene/<film>.json   # then press 1, or click `plan`
 ```
 
 The studio's plan state: every beat's plan beside that beat's real fragment, live, on the film's
@@ -523,18 +523,18 @@ boxes and could not answer what was in the frame (MISTAKES #592).
 
 ## Worked examples in this repo
 
-- **`formats/scene/_vawe-teaser-word.html`**: an entire six-second film in one fragment: a plain state,
+- **`films/scene/_vawe-teaser-word.html`**: an entire six-second film in one fragment: a plain state,
   a thermal ramp that fades in and out, and a goo morph between two words. Carries the four After
   Effects steps of the effect and their SVG equivalents in its own comments, which is the shape to copy:
   the recipe lives beside the implementation, so the next author inherits the name rather than the guess.
 - **`core/generators/generators.js`, the `thermalBlur` card**: a fragment that inlines its own SVG filter, and
   says in its comments why it does that rather than referencing one on the page.
-- **`formats/scene/demo-frag-*.html`**, four kit-built exemplars, one archetype and one theme each:
+- **`films/scene/demo-frag-*.html`**, four kit-built exemplars, one archetype and one theme each:
   [`FRAGMENT-EXEMPLARS.md`](FRAGMENT-EXEMPLARS.md) says what each one refuses.
 
 ## One film, one set of values: `<film>.design.md`
 
-A film may declare its own resolved values, once, in `formats/scene/<film>.design.md`
+A film may declare its own resolved values, once, in `films/scene/<film>.design.md`
 (`harness/lib/design-spec.mjs`): palette, type roles, radius, shadow, space, laid over the stage kit's
 own numbers. No file, or an empty one, means the kit's values only.
 

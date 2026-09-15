@@ -104,7 +104,7 @@ function resolveSnap(snapTo, lt) {
 }
 
 // pathOffsetAt(L, t): the pointer's on-screen offset from ITS OWN `path` alone, at the ABSOLUTE film
-// time `t`. Exported as `expose()` (core/layers/index.js) so formats/scene/scene.js can ask a cursor's
+// time `t`. Exported as `expose()` (core/layers/index.js) so films/scene/scene.js can ask a cursor's
 // LIVE point through `boxOf`, exactly as it asks every other layer's box, instead of a second private
 // copy of this arithmetic. `frame()` below reads the SAME `path` the same way, through `kit.motionAt`
 // (the identical function, re-exported into the kit rather than a second import) so the two can never

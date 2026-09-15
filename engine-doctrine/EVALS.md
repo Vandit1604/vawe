@@ -70,7 +70,7 @@ node harness/dev/evals.mjs --save-baseline         # render + commit sheets/mani
 ```
 
 The renderer refuses a path under `quality/runs/`: to render one brief by hand (not through `make evals`),
-copy it to `formats/scene/_eval-<name>.json`, render/gate that copy, then delete it.
+copy it to `films/scene/_eval-<name>.json`, render/gate that copy, then delete it.
 
 `quality/runs/evals/runs/` is gitignored (mp4s, scratch). `quality/runs/evals/baseline/` is committed, sheets and
 `manifest.json` only: mp4s are too big to carry per change, so a compare against the baseline shows the

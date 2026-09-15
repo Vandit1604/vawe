@@ -236,7 +236,7 @@ should have, which is why each of these is written down rather than remembered.
   the foreground with `--workers 1` finishes; a sub-agent's brief is written by something that already
   has the context, so delegating it loses more than it saves.
 - **A worktree does not carry the gitignored film library.** Only the tracked `post-*` films are there,
-  so a check that globs `formats/scene/*.json` comes back nearly empty and the agent will report it as a
+  so a check that globs `films/scene/*.json` comes back nearly empty and the agent will report it as a
   defect. Say it in the brief. For the same reason a finished film cannot travel home through a merge:
   copy it across by hand, or track it.
 - **Never run the mutation gate inside an agent.** An interrupted run leaves planted mutations in the

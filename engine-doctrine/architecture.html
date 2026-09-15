@@ -162,11 +162,11 @@
 
     <section id="pipeline">
       <h2>02 · One render, end to end</h2>
-      <p class="lede">What actually happens when you run <code>make video D=formats/scene/x.json</code>.</p>
+      <p class="lede">What actually happens when you run <code>make video D=films/scene/x.json</code>.</p>
       <div class="panel">
         <div class="flow">
           <div class="stage"><span class="who">your file</span>
-            <span class="what">formats/scene/&lt;name&gt;.json
+            <span class="what">films/scene/&lt;name&gt;.json
               <em>Self-describing. Declares module, theme, aspect, duration, layers, backgrounds, audio.</em></span></div>
           <div class="rung">│</div>
           <div class="stage"><span class="who">Go · cmd/render</span>
@@ -210,7 +210,7 @@
               <td><code>cmd/render</code><br><code>internal/scene</code><br><code>internal/encode</code><br><code>internal/audio</code></td></tr>
           <tr><td><b>Browser</b></td>
               <td>The entire visual system: layout, motion, type, transitions, backgrounds, themes.</td>
-              <td><code>formats/scene/scene.html</code><br><code>formats/scene/scene.js</code><br><code>core/*</code></td></tr>
+              <td><code>films/scene/scene.html</code><br><code>films/scene/scene.js</code><br><code>core/*</code></td></tr>
         </tbody>
       </table>
       </div>

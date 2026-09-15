@@ -278,8 +278,8 @@ const fragSpecs = beats.map((b) => parseFragmentSpec(b.fragment));
 // share the default (which never collide, one file per index).
 // WHERE A NAMED FRAGMENT LIVES. Both spellings are real and they resolve against different roots:
 // every storyboard in this repo that names one writes it ROOT-relative
-// (`formats/scene/_film.beat.html`), while a bare filename means the film's own directory, which is
-// the only reading that works for a film assembled outside formats/scene at all. A separator is the
+// (`films/scene/_film.beat.html`), while a bare filename means the film's own directory, which is
+// the only reading that works for a film assembled outside films/scene at all. A separator is the
 // deterministic tell between them, so neither has to be guessed. Unnamed keeps the `make scenes`
 // convention. A trailing parenthetical note after the path is stripped.
 const fragPathOf = (i) => {
@@ -424,7 +424,7 @@ const htmlLayers = runs.map(([i, j]) => {
   // (harness/lib/contract.mjs SPEED_BAND), never a raw second written here.
   //
   // SPREAD WITHIN A BEAT, OFFSET ACROSS A RUN. Two separate timing problems, and both are solved with
-  // the `delay` that `parts[]` already has (formats/scene/scene.js reads it as `layer.start + delay`,
+  // the `delay` that `parts[]` already has (films/scene/scene.js reads it as `layer.start + delay`,
   // defaulting to 0.1), so this is not a second motion mechanism.
   //
   // SPREAD: measured against a real launch film, an assembled beat goes still after its first second,
@@ -514,7 +514,7 @@ if (missing.length) {
 // ---- WHAT THE OBJECT IS DRAWN AS. `object: <name> -> <src>` (storyboard-parse.mjs) names the real
 // layer to build instead of assemble's own placeholder rect. `.html`/`.htm` becomes an `html` layer,
 // `src`-loaded like every scene fragment; anything else (a raster, or an `.svg`) becomes an `image`
-// layer: the `svg` LAYER TYPE has no `src` field at all (formats/scene/schema.json: it takes `d` and
+// layer: the `svg` LAYER TYPE has no `src` field at all (films/scene/schema.json: it takes `d` and
 // `viewBox`, a shape baked into the JSON, never a file), so a vector file loads the same way a raster
 // does, through an `<img>` tag, which renders an .svg source correctly. Getting a REAL `svg`-type layer
 // (draw-on, morph) out of a vector file would mean extracting its path data at assemble time, a second
@@ -568,7 +568,7 @@ if (chain.length) {
   chain.forEach((e, i) => { pushKey(shiftedStart[i], e.in); pushKey(shiftedEnd[i], e.out); });
   objectLayer = {
     id: 'object', type: objectType, track: 5, x: base0.x, y: base0.y, w: base0.w, h: base0.h,
-    // `fill` is a rect-only prop (formats/scene/schema.json byType.rect); an html/image layer refuses
+    // `fill` is a rect-only prop (films/scene/schema.json byType.rect); an html/image layer refuses
     // an unknown prop, so the placeholder's fill is dropped the moment a real source replaces it.
     ...(objectType === 'rect' ? { fill: 'var(--accent)' } : { src: objectSrcRel }),
     // RADIUS IS ONLY WRITTEN WHERE SOMETHING READS IT. The rect keeps its historic `?? 4` default, so

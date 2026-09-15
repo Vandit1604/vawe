@@ -44,7 +44,7 @@
     {
       "source": "site/public/assets/blocks/statBig.json",
       "url": "https://vawe.dev/assets/blocks/statBig.json",
-      "target": "formats/scene/statBig.json",
+      "target": "films/scene/statBig.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

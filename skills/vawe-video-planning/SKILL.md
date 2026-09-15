@@ -199,7 +199,7 @@ different output: this breaks the author's own habits.
 
 ## Step 3: Storyboard on paper before JSON
 
-**First, run `make scaffold OUT=formats/scene/<name>.json DUR=<n> THEME=<name>`.** It writes a scene
+**First, run `make scaffold OUT=films/scene/<name>.json DUR=<n> THEME=<name>`.** It writes a scene
 an empty-layers shell with the storyboard sidecar already tiled with placeholder beats, ready for
 backdrop and sound, plus its `.storyboard.md` sidecar with the frontmatter and per-beat fields
 storyboard-check and craft-checklist ask for. Every field the plan below still has to decide is marked
@@ -217,7 +217,7 @@ Proof (real UI capture / true stat) → Payoff → CTA (3–5s). One idea per be
 per beat to the target duration.
 
 There is ONE module: **scene** (the open canvas, layers/cuts/stings/bg windows/camera;
-`formats/scene/schema.json` is the contract). No templates. You compose every video from the
+`films/scene/schema.json` is the contract). No templates. You compose every video from the
 primitive vocabulary in `engine-doctrine/PRIMITIVES.md`; the JSON is the video.
 
 **Compose motion from RECIPES, not blank JSON.** Blueprints are retired ([`recipes/README.md`](../../recipes/README.md)

@@ -232,7 +232,7 @@ export const PRESENTATIONS = {
 // Consumed by the generated docs table and by any catalog/MCP surface. There is no second list to keep
 // in step: a presentation with no blurb throws here, naming itself.
 // The MASK-ONLY styles (SOLO_BLIND, derived just below) say so: on a whole-frame cut there is nothing
-// underneath them, so formats/scene/scene.js refuses them unless `sceneUnits: true` splits the beats.
+// underneath them, so films/scene/scene.js refuses them unless `sceneUnits: true` splits the beats.
 export const CUT_BLURBS = blurbsOf('cut', PRESENTATIONS);
 
 // ---- SOLO MODE: a cut applied to ONE root that carries the whole frame ----

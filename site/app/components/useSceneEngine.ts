@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
-// The engine is a web page: formats/scene/scene.html?data=<url> boots the scene and exposes
+// The engine is a web page: films/scene/scene.html?data=<url> boots the scene and exposes
 // window.__engine = { meta, renderFrame(n) }, pure in n. So playback is just a wall-clock loop
 // calling renderFrame from OUT HERE. boot() virtualises rAF/Date INSIDE the frame, which is
 // exactly why driving it from the parent stays deterministic — our loop is never captured.
@@ -78,7 +78,7 @@ export function useSceneEngine({
     // keyboard user could not see and could not act on. Every consumer of this hook (editor stage,
     // block thumbnail, playground) had the same hole, so it is closed here rather than per caller.
     el.tabIndex = -1;
-    el.src = `/formats/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30&aspect=${encodeURIComponent(aspect)}`;
+    el.src = `/films/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30&aspect=${encodeURIComponent(aspect)}`;
 
     el.onload = () => {
       if (dead) return;

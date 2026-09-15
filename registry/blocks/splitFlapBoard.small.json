@@ -45,7 +45,7 @@
     {
       "source": "site/public/assets/blocks/splitFlapBoard.small.json",
       "url": "https://vawe.dev/assets/blocks/splitFlapBoard.small.json",
-      "target": "formats/scene/splitFlapBoard.small.json",
+      "target": "films/scene/splitFlapBoard.small.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -163,7 +163,7 @@ function targetsIn(text) {
 //   * A FIRST SEGMENT GIT ALREADY TRACKS. `path/to/video.json` and `scratchpad/x.json` are stand-ins
 //     for the reader's own file. `src/App.tsx` is somebody else's project. A repo-relative claim
 //     starts at a directory this repo has.
-// Globs are skipped whole: `formats/*/sample.json` is a pattern, and a pattern that matches nothing
+// Globs are skipped whole: `films/*/sample.json` is a pattern, and a pattern that matches nothing
 // today is a fact about today's tree, not an error in the sentence.
 const EXT = /\.(md|mjs|js|cjs|json|ts|tsx|jsx|html|css|go|sh|py)$/i;
 const PLACEHOLDER = /[<>{}$…|"'()\[\]*]|\.\.\./;

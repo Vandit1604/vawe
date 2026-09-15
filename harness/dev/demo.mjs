@@ -4,7 +4,7 @@
 //   node harness/dev/demo.mjs --q "what this shows" [--name <slug>] [--fx <key>] [--subject <path>]
 //   make demo Q="what this shows" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]
 //
-// WHY IT EXISTS. 27 of the 35 `formats/scene/_*.json` scratch scenes are contact-sheet shaped: four or
+// WHY IT EXISTS. 27 of the 35 `films/scene/_*.json` scratch scenes are contact-sheet shaped: four or
 // more sibling layers of one type stepping across x or y. All 35 paint exactly ONE `bg` window, and one
 // of the 35 has a cut and one has a camera, against 23% · 40% · 33% of the 120 shipped films. The
 // scratch scenes are the worst-looking work in the repo and they are the ones we show people.
@@ -93,7 +93,7 @@ if (!q) {
 
   --q        the caption: one line of real copy naming what the viewer is looking at.
              At most ${SERIES.maxCaptionChars} characters, because the caption size is fixed for the series.
-  --name     the file slug (default: derived from --q) → formats/scene/_demo-<slug>.json
+  --name     the file slug (default: derived from --q) → films/scene/_demo-<slug>.json
   --fx       an arsenal filter key, applied to the PICTURE. \`make arsenal Q="…"\` finds one.
   --subject  the picture the effect acts on (default: the house plaster cast). A capture, an
              image, anything with real detail. The box it fills is a series constant.
@@ -224,7 +224,7 @@ const scene = {
   ],
 };
 
-const rel = `formats/scene/_demo-${slug}.json`;
+const rel = `films/scene/_demo-${slug}.json`;
 fs.writeFileSync(path.join(repoRoot, rel), JSON.stringify(migrateOne(scene).next, null, 1) + '\n');
 
 // The path goes to stdout alone, so `make demo` can hand it straight to `make dev`.

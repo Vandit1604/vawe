@@ -64,7 +64,7 @@
     {
       "source": "site/public/assets/blocks/uiReveal3d.json",
       "url": "https://vawe.dev/assets/blocks/uiReveal3d.json",
-      "target": "formats/scene/uiReveal3d.json",
+      "target": "films/scene/uiReveal3d.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -4,7 +4,7 @@
  "theme": "vawe",
  "duration": 8,
  "sceneUnits": false,
- "storyboard": "formats/scene/showcase-stings.storyboard.md",
+ "storyboard": "films/scene/showcase-stings.storyboard.md",
  "audio": {
   "music": "beat",
   "musicGain": 0.34,
@@ -63,7 +63,7 @@
      "ease": "easeOutCubic"
     }
    ],
-   "src": "formats/scene/_showcase-stings-panel.html"
+   "src": "films/scene/_showcase-stings-panel.html"
   },
   {
    "type": "text",

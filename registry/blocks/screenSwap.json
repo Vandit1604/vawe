@@ -75,7 +75,7 @@
     {
       "source": "site/public/assets/blocks/screenSwap.json",
       "url": "https://vawe.dev/assets/blocks/screenSwap.json",
-      "target": "formats/scene/screenSwap.json",
+      "target": "films/scene/screenSwap.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

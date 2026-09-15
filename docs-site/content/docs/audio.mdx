@@ -67,7 +67,7 @@ audible (not how long the file is), then holds it to a cap derived from the cue'
 Auto-time a script into burned-in subtitles:
 
 ```bash
-make captions D=formats/scene/my-video.json TEXT="your script here"
+make captions D=films/scene/my-video.json TEXT="your script here"
 ```
 
 Each caption's duration is proportional to its word count, computed deterministically, and written into the scene's `captions` array. Pair it with `"captionMode": "pop"` for the muted-social look, where words punch in one at a time. The three modes are `sentence`, `word`, and `pop`.

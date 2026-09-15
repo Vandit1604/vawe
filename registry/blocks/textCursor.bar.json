@@ -46,7 +46,7 @@
     {
       "source": "site/public/assets/blocks/textCursor.bar.json",
       "url": "https://vawe.dev/assets/blocks/textCursor.bar.json",
-      "target": "formats/scene/textCursor.bar.json",
+      "target": "films/scene/textCursor.bar.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

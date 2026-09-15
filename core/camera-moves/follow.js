@@ -11,7 +11,7 @@
 // is resolved ONCE at build (bakeCameraMove, core/engine/produce.js), before the DOM exists, so it can
 // only encode geometry known from numbers alone. The target's on-screen box depends on its entrance
 // pose, its group nesting and its measured text size, none of which exist before the first frame
-// renders (formats/scene/scene.js resolveBoxes). So `follow` is resolved at RENDER time instead, from
+// renders (films/scene/scene.js resolveBoxes). So `follow` is resolved at RENDER time instead, from
 // the same `scene.boxOf(id)` accessor core/tracks/follow.js reads a live box through, and this
 // function only VALIDATES the params and returns the descriptor `bakeCameraMove` stores on
 // `data.cameraFollow` (a field the keyframe pipeline never touches). See that file for why it cannot
@@ -47,7 +47,7 @@ export function followCamera({ id, margin = 0.18, to = 1 } = {}) {
   return { id, margin, to };
 }
 
-// followOffset(box, { margin, to }, W, H) -> { s, x, y }, the ONE piece of arithmetic formats/scene/
+// followOffset(box, { margin, to }, W, H) -> { s, x, y }, the ONE piece of arithmetic films/scene/
 // scene.js's followCameraAt runs per frame. Pulled out here, pure and DOM-free, so it is unit-testable
 // on its own (core/camera-moves/follow.test.mjs): hand it two different `box` centres (standing in for
 // "before a retime" and "after one") and the two outputs must differ exactly as the boxes do, which is
@@ -64,7 +64,7 @@ export function followOffset(box, spec, W, H) {
 // cameraVelocityAt reports for a keyed camera (px/s, x/y only: see that function's header for why s/
 // rx/ry/roll are excluded). A keyed camera derives both samples from one keyframe array; this move has
 // no keyframes; its pose at any time is `followOffset` of the target's box AT THAT TIME. So the two
-// samples this needs are the two boxes, not two reads of one track, and the caller (formats/scene/
+// samples this needs are the two boxes, not two reads of one track, and the caller (films/scene/
 // scene.js) is the one that can produce a box at an arbitrary t, by re-running resolveBoxes there.
 // Kept here, beside followOffset, because both are the one place that knows what this move's pose IS.
 export function followVelocity(boxNow, boxPrev, spec, W, H, dt) {

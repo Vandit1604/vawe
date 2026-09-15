@@ -180,6 +180,6 @@ export const CAMERA_DIAL_REGISTRY = defineRegistry('camera dial', { cameraBlur: 
     tag: 'camera',
     intro: 'Top-level scene keys that change what the camera DOES rather than where it goes. `"cameraBlur": true` gives the film a real shutter: every layer smears by its velocity RELATIVE to the camera, so a whip pan streaks the frame and a layer travelling with the camera stays sharp. How much is the film\'s `shutter`, in degrees; one layer opts out with `motionBlur: false`.',
     usage: (_, { j }) => j({ cameraBlur: true }),
-    noPreview: 'a shutter is only visible on a frame that is already moving fast, and the whole point is that it is invisible on a still. Its A/B is formats/scene/_camera-blur-probe.json, which renders the same whip pan with the dial up and down.',
+    noPreview: 'a shutter is only visible on a frame that is already moving fast, and the whole point is that it is invisible on a still. Its A/B is films/scene/_camera-blur-probe.json, which renders the same whip pan with the dial up and down.',
   },
 });

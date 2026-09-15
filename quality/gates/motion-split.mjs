@@ -1,7 +1,7 @@
 // quality/gates/motion-split.mjs: how much of a film's motion is the GROUND, and how much is the FILM.
 //
-//   node quality/gates/motion-split.mjs formats/scene/x.json
-//   make motion-split D=formats/scene/x.json
+//   node quality/gates/motion-split.mjs films/scene/x.json
+//   make motion-split D=films/scene/x.json
 //
 // WHY. `./bin/vawe` prints one motion figure and it is a property of the FRAME, so a moving backdrop
 // flatters it exactly as much as moving content does. Measured on a real recreation: 2% still and 1.25
@@ -94,7 +94,7 @@ const seek = async (page, f) => {
 async function series(nobg) {
   const page = await browser.newPage();
   await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
-  await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/${path.relative(ROOT, abs)}&fps=30${nobg ? '&nobg=1' : ''}`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/${path.relative(ROOT, abs)}&fps=30${nobg ? '&nobg=1' : ''}`, { waitUntil: 'load' });
   const err = await waitForEngine(page); if (err) throw new Error(String(err));
   const total = await page.evaluate(() => window.__engine.meta.totalFrames);
   const step = Math.max(1, Math.floor(total / PAIRS));

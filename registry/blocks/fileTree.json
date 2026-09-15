@@ -70,7 +70,7 @@
     {
       "source": "site/public/assets/blocks/fileTree.json",
       "url": "https://vawe.dev/assets/blocks/fileTree.json",
-      "target": "formats/scene/fileTree.json",
+      "target": "films/scene/fileTree.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

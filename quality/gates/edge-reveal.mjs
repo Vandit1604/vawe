@@ -164,7 +164,7 @@ export async function sampleEdgeReveal(scenePath, { rate = RATE_S } = {}) {
   const hits = new Map(); // key `${idx}:${id}:${border}` -> {idx,id,border,frames:[]}
   try {
     const bootRel = bootPathFor(REPO_ROOT, raw, cfg, rel);
-    await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${bootRel}&fps=30`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/films/${m}/scene.html?data=/${bootRel}&fps=30`, { waitUntil: 'load' });
     const err = await waitForEngine(page, { throwOnTimeout: false });
     if (err) throw new Error(`scene did not load: ${err}`);
     const meta = await page.evaluate(() => window.__engine.meta);

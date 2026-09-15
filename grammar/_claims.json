@@ -80,5 +80,5 @@
    "_note": "Measured across 136 films: the median is 4 distinct preset names, 79 are used ANYWHERE in the library against 566 effects shipped, and the films reaching for the most (cuts-demo 26, type-demo 22) are catalogue demos with 0% hand-keyed motion. The correlation between preset count and hand-keyed share is r = -0.150 across the library, which is WEAK: films using 3 or fewer presets hand-key 15% of their layers against 7% for films using 8 or more, a real but modest difference. So the strong claim ('reaching for presets is why a film is flat') is NOT supported. What is supported is that presets are not where the craft lives, and that 86% of the library has never been used once."
   }
  ],
- "_scope": "Every claim names the POPULATION it is about. `reference` tests grammar/*.json, the films we studied. `ours` tests formats/scene/*.json, the films we wrote. Testing a claim about one against the other is a false verdict that reads exactly like a true one, and this file shipped with one for a day."
+ "_scope": "Every claim names the POPULATION it is about. `reference` tests grammar/*.json, the films we studied. `ours` tests films/scene/*.json, the films we wrote. Testing a claim about one against the other is a false verdict that reads exactly like a true one, and this file shipped with one for a day."
 }

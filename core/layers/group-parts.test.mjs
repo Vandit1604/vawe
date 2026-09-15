@@ -1,12 +1,12 @@
 // core/layers/group-parts.test.mjs: the runnable self-check for `parts` on a GROUP CHILD.
 //
-// Bug: applyGsapHooks (formats/scene/scene.js) builds every GSAP-driven hook (parts, fx, motionPath,
+// Bug: applyGsapHooks (films/scene/scene.js) builds every GSAP-driven hook (parts, fx, motionPath,
 // physics, splitText, morph) as a paused tween, but it was called only from buildLayer, which runs
 // for TOP-LEVEL layers. addGroupChild (core/layers/util.js) builds a group child straight into
 // `extra[]` and never passes it through applyGsapHooks, so a group child's `parts` entrance never ran:
 // the child rendered its POPPED-IN state from frame 0 instead of appearing at its authored delay. A
 // sibling child's `typing` still worked because typing is driven per-frame off data-* by driveClips,
-// which extra[] DOES join (formats/scene/scene.js:760) - so the bug read as "typing is fine, parts is
+// which extra[] DOES join (films/scene/scene.js:760) - so the bug read as "typing is fine, parts is
 // broken" rather than "hooks never run on a child". Fixed by calling applyGsapHooks for every entry in
 // `extra` before it joins `layers`.
 //
@@ -19,7 +19,7 @@ import assert from 'node:assert';
 import { serveRepo, launchPage, waitForEngine } from '../../harness/lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENES = path.join(ROOT, 'formats/scene');
+const SCENES = path.join(ROOT, 'films/scene');
 const REL = 'stagetest-group-parts.json';
 
 const SCENE = {
@@ -42,7 +42,7 @@ test('a group child\'s `parts` entrance runs: hidden before its delay, visible a
   const { port, close: closeServer } = await serveRepo({ root: ROOT });
   const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
   try {
-    await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/formats/scene/${REL}&fps=30`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/films/scene/${REL}&fps=30`, { waitUntil: 'load' });
     const err = await waitForEngine(page);
     assert.equal(err, null, `scene must build clean, got: ${err}`);
     const opacityAt = (n) => page.evaluate((fr) => {

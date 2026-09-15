@@ -34,7 +34,7 @@ import cp from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-export const SCENE_DIR = 'formats/scene';
+export const SCENE_DIR = 'films/scene';
 
 const git = (args, cwd) => cp.execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
 
@@ -61,7 +61,7 @@ const listing = (root, dir, ext, filter) => {
  *
  * @param {string}   what        label for the printed line ("waiver census")
  * @param {object}   opts
- * @param {string}   opts.dir    repo-relative directory (default formats/scene)
+ * @param {string}   opts.dir    repo-relative directory (default films/scene)
  * @param {string}   opts.ext    file extension that makes a file a candidate (default .json)
  * @param {function} opts.filter (name, absPath) => boolean: the SWEEP'S OWN rule for what counts.
  *                               Applied identically to this checkout and to the anchor, so a tool that
@@ -133,7 +133,7 @@ export const isTemplate = (f) => /\.template\.json$/.test(f);
 // argued the principle (a sweep that excludes sidecars must be compared against a count that excludes
 // them too) and left every caller to restate it, so every caller restated it differently.
 //
-// A FILM is a file in formats/scene that a person authored and the engine can render on its own:
+// A FILM is a file in films/scene that a person authored and the engine can render on its own:
 const DERIVATIVE = /\.(animatic|intent|expanded|beatsync|captioned|directed)\./;
 const isSceneJSON = (abs) => { try { return JSON.parse(fs.readFileSync(abs, 'utf8'))?.module === 'scene'; } catch { return false; } };
 
@@ -201,7 +201,7 @@ export const POPULATIONS = [
   ['authored', AUTHORED,
    'library films with a .storyboard.md sidecar: a person actually planned this one, so a catalogue tile or a held-still demo is excluded. What a sweep grading MOTION walks, not "library".'],
   ['every scene file', (f) => f.endsWith('.json') && f !== 'schema.json' && !isTemplate(f),
-   'every .json in formats/scene bar the schema. Bigger than either population above and never the right answer to "how many films".'],
+   'every .json in films/scene bar the schema. Bigger than either population above and never the right answer to "how many films".'],
 ];
 
 // A COUNT ON A DEVELOPER MACHINE IS NOT A COUNT ON A CLONE, and saying so is half the point of this

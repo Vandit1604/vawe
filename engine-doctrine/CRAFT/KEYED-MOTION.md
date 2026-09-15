@@ -13,7 +13,7 @@ codes: beat-holds-still, beats-held-open, beats-wrapped-as-units, held-through-t
 - `[ref]`: this is a REGISTER, not a gate, nothing here blocks (opt in for a hero beat or a recreation). Related gate codes enforced elsewhere: `beat-holds-still`, `beats-held-open`, `beats-wrapped-as-units`, `held-through-the-change`, `junction-is-static`, `no-authored-motion`.
 - Checkable action: is every move two keys and a curve, or is a mechanical motion faking as a glide? Run the checklist below.
 
-`formats/scene/higgsfield-recreation.json` is cited across this repo as the exemplar, and everything
+`films/scene/higgsfield-recreation.json` is cited across this repo as the exemplar, and everything
 written about it so far is about its **grammar**: one object, on screen from the first frame, and every
 cut is that object changing state ([`../../skills/vawe-continuous-action/SKILL.md`](../../skills/vawe-continuous-action/SKILL.md)).
 That is the *what*. This file is the *how*. The motion mechanics that make it read as a product film
@@ -308,7 +308,7 @@ Three rules, all enforced:
 3. **An image needs `radius` or `ken`** or the photograph stretches with the box instead of re-cropping
    inside it. `radius: 0` is enough; it is what switches the `<img>` to cover-fit. Flagged at validate.
 
-Working example: `harness/author/build-zerochrome.mjs` → `formats/scene/zerochrome.json`.
+Working example: `harness/author/build-zerochrome.mjs` → `films/scene/zerochrome.json`.
 
 ### A reflow has a speed floor
 
@@ -372,6 +372,6 @@ now discovers which layers and camera legs are worth scanning off `buildMotionIR
 `velocityAt`/`cameraAt`/`cameraVelocityAt` on each layer's raw keyframes (`ease: "through"` fits a
 Hermite curve off a key's neighbours, which a flattened segment alone cannot reconstruct), so the
 migration changed WHERE the gate looks, never HOW FAST it decides a track is moving there. Proved on
-every film in `formats/scene/`: the gate's stdout is unchanged, save one stack-trace line number in a
+every film in `films/scene/`: the gate's stdout is unchanged, save one stack-trace line number in a
 deliberately-invalid template file. `core/timeline/motion-ir.test.mjs` asserts the IR's own segment
 math on a fixture and that its coverage never disagrees with a naive raw-JSON scan on the whole library.

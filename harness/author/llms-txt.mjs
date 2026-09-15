@@ -1,4 +1,4 @@
-// harness/author/llms-txt.mjs: GENERATE formats/llms.txt, a portable vocabulary primer for any agent
+// harness/author/llms-txt.mjs: GENERATE films/llms.txt, a portable vocabulary primer for any agent
 // (this one or a fresh one with no repo access) that has to write a vawe scene JSON from scratch.
 // Modeled on another engine's own llms.txt: About -> a runnable skeleton -> one rule + one snippet per
 // capability, escalating -> the hard rules -> the command loop.
@@ -26,7 +26,7 @@ import { LAYER_REGISTRY } from '../../core/layers/index.js';
 import { collect } from './arsenal.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-export const OUT = path.join(ROOT, 'formats/llms.txt');
+export const OUT = path.join(ROOT, 'films/llms.txt');
 
 // Curated direction, one clause per layer type: why reach for THIS one over its neighbours. The blurb
 // (pulled live below) says what it does; this says when to pick it. Optional by design -- see the file
@@ -137,7 +137,7 @@ cannot go stale). Everything else in the vocabulary below is a dial ON one of th
 
 ${layers.lines.join('\n')}
 
-Full props per type: \`formats/scene/schema.json\`. What each type is FOR, in prose: \`engine-doctrine/PRIMITIVES.md\`.
+Full props per type: \`films/scene/schema.json\`. What each type is FOR, in prose: \`engine-doctrine/PRIMITIVES.md\`.
 
 ## The vocabulary: effect families
 
@@ -150,7 +150,7 @@ ${families.lines.join('\n')}
 **Discovery, not memorisation:** \`make arsenal Q="a page scrolling under a static tilt"\` searches all
 ${total} named things (layer types, every family above, recipes, blocks, sound cues) by plain-English
 description and returns the exact key to write. \`make schema AT="layers[].motion[]"\` answers the other
-half: what fields are legal to write at one JSON path, read live off \`formats/scene/schema.json\`.
+half: what fields are legal to write at one JSON path, read live off \`films/scene/schema.json\`.
 
 ## The hard rules
 
@@ -169,10 +169,10 @@ half: what fields are legal to write at one JSON path, read live off \`formats/s
 
 \`\`\`
 make pitch                          # ask the four questions: subject, data, payoff, audience/feeling
-make scaffold OUT=formats/scene/x.json  # a directed skeleton (beats + continuous object), never a blank file
-make dev D=formats/scene/x.json     # THE iteration loop: build, draft-render, look. No gates.
-make ship D=formats/scene/x.json    # the real ladder: author-check -> render -> audit -> seams
-make judge D=formats/scene/x.json   # the one step that SEES: composition and fidelity, post-render
+make scaffold OUT=films/scene/x.json  # a directed skeleton (beats + continuous object), never a blank file
+make dev D=films/scene/x.json     # THE iteration loop: build, draft-render, look. No gates.
+make ship D=films/scene/x.json    # the real ladder: author-check -> render -> audit -> seams
+make judge D=films/scene/x.json   # the one step that SEES: composition and fidelity, post-render
 \`\`\`
 
 ## Discovery

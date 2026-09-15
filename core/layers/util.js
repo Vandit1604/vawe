@@ -153,7 +153,7 @@ export function createKit(ctx) {
   // token name: `inkAt` hands back theme tokens (`var(--ink)` over a light window, the theme's own light
   // ground over a dark one), and a token name is not a lightness. `themes/vawe.json` sets `text` and
   // `ink` to the same dark hex, so reading the name would call that theme's light-on-dark type dark-on-
-  // light. The same trap formats/scene/scene.js documents at its ON_DARK. So resolve the token back
+  // light. The same trap films/scene/scene.js documents at its ON_DARK. So resolve the token back
   // through the palette first, then ask core/motion.js.
   //
   // Unresolvable → false, NOT isLightBg's own "unreadable → light" default. This answer only ever adds
@@ -271,7 +271,7 @@ export function createKit(ctx) {
     if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow && !(L.css && L.radius != null)) return;
     if (L.bg) { checkDropped(L, { background: L.bg }); el.style.background = L.bg; } else if (L.elevation) el.style.background = 'var(--surface)';
     // The RESTING radius, written once at build. A keyed `radius` (core/timeline/sequence.js POSE)
-    // overwrites this per frame from formats/scene/scene.js resolveBoxes, the same split box.js already
+    // overwrites this per frame from films/scene/scene.js resolveBoxes, the same split box.js already
     // makes for w/h beside their own build-time write: this stays the one place the default lives.
     {
       const radius = typeof L.radius === 'number' || L.radius == null ? (L.radius ?? 16) + 'px' : L.radius;
@@ -648,7 +648,7 @@ export function createKit(ctx) {
     }
     decorate(c, C);   // both paths: mask / filter / look / fade / reflect / logotype
     if (C.critical) c.setAttribute('data-layer', 'critical');
-    // the group-child twin of the opt-out in formats/scene/scene.js: `critical:false` must mean the same
+    // the group-child twin of the opt-out in films/scene/scene.js: `critical:false` must mean the same
     // thing at both depths, or a card that bleeds by design can be excused only when it is top-level.
     if (C.critical === false) c.setAttribute('data-audit', 'off');
     if (parentEl.dataset.free) { c.style.position = 'absolute'; c.style.left = (C.x || 0) + 'px'; c.style.top = (C.y || 0) + 'px'; }
@@ -665,10 +665,10 @@ export function createKit(ctx) {
     // delay/anim/out/enterDur/exitDur mean here exactly what they mean out there.
     c.dataset.start = String(cStart);
     c.dataset.duration = String(cDur);
-    // Same mirror as the top-level layer (formats/scene/scene.js setLayerTiming): a group child's own
+    // Same mirror as the top-level layer (films/scene/scene.js setLayerTiming): a group child's own
     // id, so `make probe-frame` can find it at any depth without walking the tree by hand.
     if (C.id) c.dataset.id = String(C.id);
-    // Always written, like the top-level layer (formats/scene/scene.js setLayerTiming): leaving the
+    // Always written, like the top-level layer (films/scene/scene.js setLayerTiming): leaving the
     // attribute unset here meant `clipStyleAt`'s literal `dataset.anim === 'none'` check never fired for
     // an un-authored child, so it kept fading in via the opacity envelope even after `resolveAnim(null)`
     // stopped writing a transform for it.
@@ -721,7 +721,7 @@ export function createKit(ctx) {
 //
 // The rest of the AE chain, Fresnel rim, specular, bevel, contact shadow, is PAINT ON the shape rather
 // than distortion of what is behind it, so it is box-shadows and gradients, and it belongs in the
-// caller's own CSS. Worked example: formats/scene/_glass-shapes.sphere.html.
+// caller's own CSS. Worked example: films/scene/_glass-shapes.sphere.html.
 const REFRACT = {
   // ior ≈ thick optical glass: the image inside is strongly compressed, the fringes stay a hairline
   refract:     { scales: [-64, -78, -92], blur: 1.1 },

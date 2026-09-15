@@ -1,0 +1,754 @@
+{
+ "module": "scene",
+ "storyboard": "films/scene/showcase-type-labour.storyboard.md",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 32.5,
+ "bg": [
+  {
+   "tone": "light",
+   "html": "<style>.tl{position:absolute;inset:0;background:linear-gradient(180deg,var(--bg) 0%,color-mix(in srgb,var(--accent) 5%,var(--bg)) 100%)}.tl .rows{position:absolute;inset:0;background:repeating-linear-gradient(180deg,color-mix(in srgb,var(--accent) 7%,transparent) 0 2px,transparent 2px 72px)}.tl .ruler{position:absolute;inset:0;background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--text) 5%,transparent) 0 1px,transparent 1px 128px)}</style><div class='tl'><div class='rows'></div><div class='ruler'></div></div>",
+   "_why": "DELIBERATELY STILL for the whole reel. This is a motion reference: the viewer compares one entrance against the last, so the only thing moving in frame must be the effect under examination. A travelling playhead lived here and was cut - it carried no information and it pulled the eye sideways during every beat. The grid stays because a still workspace ground gives the white frame texture without competing.",
+   "from": 0,
+   "to": "cut@9"
+  },
+  {
+   "preset": "ink",
+   "_why": "the one turn in the film, and it lands on the payoff: the workshop light goes out and the answer is left on a dark field.",
+   "from": "cut@9",
+   "to": 32.5
+  }
+ ],
+ "audio": {
+  "auto": true,
+  "sfxGain": 0.55,
+  "_why": "no bed and no voice: the reel is read frame by frame, and a track would set a pace the viewer is meant to ignore while comparing nine entrances. The engine's own cut cues punctuate the ten joints, so the metric rhythm is audible without a loop."
+ },
+ "authoring": {
+  "allow": [
+   "numbered-section-markers",
+   "static-bg"
+  ],
+  "_why": {
+   "numbered-section-markers": "the numbers ARE the content: the reel is ordered by ascending After Effects labour, so 01..09 is the argument itself, not scaffolding above unrelated sections. This is the exemption the rule names.",
+   "static-bg": "see bg[0]._why. A motion reference must hold its ground still or the reader cannot tell the effect from the backdrop. The film does turn its backdrop once, at the payoff, where nothing is being compared any more."
+  }
+ },
+ "layers": [
+  {
+   "id": "hookLine",
+   "type": "text",
+   "text": "After Effects charges by the <b>layer.</b>",
+   "x": 160,
+   "y": 372,
+   "w": 1560,
+   "size": 112,
+   "weight": 800,
+   "split": "word",
+   "preset": "up",
+   "each": 0.55,
+   "stagger": 0.07,
+   "start": 0,
+   "duration": 3.7,
+   "exitDur": 0.3,
+   "critical": true
+  },
+  {
+   "id": "hookSub",
+   "type": "text",
+   "text": "Nine effects, costed by hand.",
+   "x": 164,
+   "y": 648,
+   "w": 1400,
+   "size": 40,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "split": "word",
+   "preset": "up",
+   "each": 0.4,
+   "stagger": 0.02,
+   "start": 0.9,
+   "duration": 3.1,
+   "exitDur": 0.3
+  },
+  {
+   "id": "rail",
+   "type": "text",
+   "text": "IN AFTER EFFECTS",
+   "x": 164,
+   "y": 604,
+   "font": "mono",
+   "size": 28,
+   "weight": 600,
+   "ls": "0.3em",
+   "opacity": 0.5,
+   "start": 3.9,
+   "duration": 24.3,
+   "anim": "fade",
+   "enterDur": 0.4,
+   "exitDur": 0.3,
+   "modifiers": [
+    {
+     "kick": {
+      "on": "cut",
+      "scale": 1.05,
+      "frames": 6
+     }
+    }
+   ],
+   "acrossBeats": true
+  },
+  {
+   "id": "bill",
+   "type": "rect",
+   "x": 164,
+   "y": 736,
+   "w": 1400,
+   "h": 6,
+   "radius": 3,
+   "bg": "var(--accent)",
+   "opacity": 0.85,
+   "start": 4.05,
+   "duration": 24.15,
+   "anim": "fade",
+   "enterDur": 0.3,
+   "exitDur": 0.3,
+   "acrossBeats": true,
+   "motion": [
+    {
+     "t": 0,
+     "w": 0
+    },
+    {
+     "t": 0,
+     "w": 0
+    },
+    {
+     "t": 0.35,
+     "w": 155.6,
+     "ease": "brake"
+    },
+    {
+     "t": 2.7,
+     "w": 155.6
+    },
+    {
+     "t": 3.05,
+     "w": 311.1,
+     "ease": "brake"
+    },
+    {
+     "t": 5.4,
+     "w": 311.1
+    },
+    {
+     "t": 5.75,
+     "w": 466.7,
+     "ease": "brake"
+    },
+    {
+     "t": 8.1,
+     "w": 466.7
+    },
+    {
+     "t": 8.45,
+     "w": 622.2,
+     "ease": "brake"
+    },
+    {
+     "t": 10.8,
+     "w": 622.2
+    },
+    {
+     "t": 11.15,
+     "w": 777.8,
+     "ease": "brake"
+    },
+    {
+     "t": 13.5,
+     "w": 777.8
+    },
+    {
+     "t": 13.85,
+     "w": 933.3,
+     "ease": "brake"
+    },
+    {
+     "t": 16.2,
+     "w": 933.3
+    },
+    {
+     "t": 16.55,
+     "w": 1088.9,
+     "ease": "brake"
+    },
+    {
+     "t": 18.9,
+     "w": 1088.9
+    },
+    {
+     "t": 19.25,
+     "w": 1244.4,
+     "ease": "brake"
+    },
+    {
+     "t": 21.6,
+     "w": 1244.4
+    },
+    {
+     "t": 21.95,
+     "w": 1400,
+     "ease": "brake"
+    }
+   ]
+  },
+  {
+   "id": "n1",
+   "type": "text",
+   "text": "01 · decode",
+   "x": 164,
+   "y": 320,
+   "size": 34,
+   "weight": 600,
+   "color": "var(--accent)",
+   "anim": "fade",
+   "start": 3.9,
+   "duration": 2.7,
+   "enterDur": 0.25,
+   "exitDur": 0.25
+  },
+  {
+   "id": "w1",
+   "type": "text",
+   "text": "SCRAMBLE",
+   "x": 160,
+   "y": 400,
+   "w": 1600,
+   "size": 150,
+   "weight": 800,
+   "split": "char",
+   "preset": "decode",
+   "each": 1.1,
+   "stagger": 0.045,
+   "start": 4.1,
+   "duration": 2.5,
+   "exitDur": 0.3,
+   "critical": true
+  },
+  {
+   "id": "c1",
+   "type": "text",
+   "text": "an expression each",
+   "x": 164,
+   "y": 660,
+   "w": 1400,
+   "size": 38,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "anim": "fade",
+   "start": 4.75,
+   "duration": 1.85,
+   "enterDur": 0.3,
+   "exitDur": 0.25
+  },
+  {
+   "id": "n2",
+   "type": "text",
+   "text": "02 · chroma",
+   "x": 164,
+   "y": 320,
+   "size": 34,
+   "weight": 600,
+   "color": "var(--accent)",
+   "anim": "fade",
+   "start": 6.6,
+   "duration": 2.7,
+   "enterDur": 0.25,
+   "exitDur": 0.25
+  },
+  {
+   "id": "w2",
+   "type": "text",
+   "text": "MISALIGNED",
+   "x": 160,
+   "y": 400,
+   "w": 1600,
+   "size": 150,
+   "weight": 800,
+   "split": "char",
+   "preset": "chroma",
+   "presetOpts": {
+    "dist": 26,
+    "rise": 14
+   },
+   "each": 1,
+   "stagger": 0.04,
+   "start": 6.8,
+   "duration": 2.5,
+   "exitDur": 0.3,
+   "critical": true
+  },
+  {
+   "id": "c2",
+   "type": "text",
+   "text": "three offset copies",
+   "x": 164,
+   "y": 660,
+   "w": 1400,
+   "size": 38,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "anim": "fade",
+   "start": 7.45,
+   "duration": 1.85,
+   "enterDur": 0.3,
+   "exitDur": 0.25
+  },
+  {
+   "id": "n3",
+   "type": "text",
+   "text": "03 · flap",
+   "x": 164,
+   "y": 320,
+   "size": 34,
+   "weight": 600,
+   "color": "var(--accent)",
+   "anim": "fade",
+   "start": 9.3,
+   "duration": 2.7,
+   "enterDur": 0.25,
+   "exitDur": 0.25
+  },
+  {
+   "id": "w3",
+   "type": "text",
+   "text": "DEPARTING",
+   "x": 160,
+   "y": 400,
+   "w": 1600,
+   "font": "mono",
+   "size": 150,
+   "weight": 700,
+   "split": "char",
+   "preset": "flap",
+   "presetOpts": {
+    "steps": 14
+   },
+   "each": 1.2,
+   "stagger": 0.05,
+   "exitDur": 0.3,
+   "critical": true,
+   "start": 9.5,
+   "duration": 2.5
+  },
+  {
+   "id": "c3",
+   "type": "text",
+   "text": "a per-drum rig",
+   "x": 164,
+   "y": 660,
+   "w": 1400,
+   "size": 38,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "anim": "fade",
+   "start": 10.15,
+   "duration": 1.85,
+   "enterDur": 0.3,
+   "exitDur": 0.25
+  },
+  {
+   "id": "n4",
+   "type": "text",
+   "text": "04 · shimmerWave",
+   "x": 164,
+   "y": 320,
+   "size": 34,
+   "weight": 600,
+   "color": "var(--accent)",
+   "anim": "fade",
+   "start": 12,
+   "duration": 2.7,
+   "enterDur": 0.25,
+   "exitDur": 0.25
+  },
+  {
+   "id": "w4",
+   "type": "text",
+   "text": "LIGHT CREST",
+   "x": 160,
+   "y": 400,
+   "w": 1600,
+   "size": 150,
+   "weight": 800,
+   "split": "char",
+   "preset": "shimmerWave",
+   "presetOpts": {
+    "amp": 1.3
+   },
+   "each": 2.2,
+   "stagger": 0.05,
+   "start": 12.2,
+   "duration": 2.5,
+   "exitDur": 0.3,
+   "critical": true
+  },
+  {
+   "id": "c4",
+   "type": "text",
+   "text": "a travelling light",
+   "x": 164,
+   "y": 660,
+   "w": 1400,
+   "size": 38,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "anim": "fade",
+   "start": 12.85,
+   "duration": 1.85,
+   "enterDur": 0.3,
+   "exitDur": 0.25
+  },
+  {
+   "id": "n5",
+   "type": "text",
+   "text": "05 · swing",
+   "x": 164,
+   "y": 320,
+   "size": 34,
+   "weight": 600,
+   "color": "var(--accent)",
+   "anim": "fade",
+   "start": 14.7,
+   "duration": 2.7,
+   "enterDur": 0.25,
+   "exitDur": 0.25
+  },
+  {
+   "id": "w5",
+   "type": "text",
+   "text": "HINGED",
+   "x": 160,
+   "y": 400,
+   "w": 1600,
+   "size": 150,
+   "weight": 800,
+   "split": "char",
+   "preset": "swing",
+   "presetOpts": {
+    "deg": 32,
+    "bounce": 0.6
+   },
+   "each": 0.95,
+   "stagger": 0.06,
+   "start": 14.9,
+   "duration": 2.5,
+   "exitDur": 0.3,
+   "critical": true
+  },
+  {
+   "id": "c5",
+   "type": "text",
+   "text": "every anchor moved",
+   "x": 164,
+   "y": 660,
+   "w": 1400,
+   "size": 38,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "anim": "fade",
+   "start": 15.55,
+   "duration": 1.85,
+   "enterDur": 0.3,
+   "exitDur": 0.25
+  },
+  {
+   "id": "n6",
+   "type": "text",
+   "text": "06 · unfold",
+   "x": 164,
+   "y": 320,
+   "size": 34,
+   "weight": 600,
+   "color": "var(--accent)",
+   "anim": "fade",
+   "start": 17.4,
+   "duration": 2.7,
+   "enterDur": 0.25,
+   "exitDur": 0.25
+  },
+  {
+   "id": "w6",
+   "type": "text",
+   "text": "EDGE ON",
+   "x": 160,
+   "y": 400,
+   "w": 1600,
+   "size": 150,
+   "weight": 800,
+   "split": "char",
+   "preset": "unfold",
+   "presetOpts": {
+    "deg": 90
+   },
+   "each": 1,
+   "stagger": 0.07,
+   "start": 17.6,
+   "duration": 2.5,
+   "exitDur": 0.3,
+   "critical": true
+  },
+  {
+   "id": "c6",
+   "type": "text",
+   "text": "hinged 3D layers",
+   "x": 164,
+   "y": 660,
+   "w": 1400,
+   "size": 38,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "anim": "fade",
+   "start": 18.25,
+   "duration": 1.85,
+   "enterDur": 0.3,
+   "exitDur": 0.25
+  },
+  {
+   "id": "n7",
+   "type": "text",
+   "text": "07 · draw",
+   "x": 164,
+   "y": 320,
+   "size": 34,
+   "weight": 600,
+   "color": "var(--accent)",
+   "anim": "fade",
+   "start": 20.1,
+   "duration": 2.7,
+   "enterDur": 0.25,
+   "exitDur": 0.25
+  },
+  {
+   "id": "w7",
+   "type": "text",
+   "text": "<svg viewBox=\"0 0 120 40\" width=\"780\" height=\"260\" fill=\"none\" style=\"display:block\"><path d=\"M4 22 Q16 2 28 22 T52 22 T76 22 T100 12 T116 20\" stroke=\"var(--accent)\" stroke-width=\"2.6\" stroke-linecap=\"round\"/><path d=\"M4 34 L116 34\" stroke=\"var(--text-2)\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>",
+   "x": 160,
+   "y": 300,
+   "split": "path",
+   "preset": "draw",
+   "presetOpts": {
+    "ease": "easeInOutSine"
+   },
+   "each": 1.5,
+   "stagger": 0.22,
+   "start": 20.3,
+   "duration": 2.5,
+   "exitDur": 0.3
+  },
+  {
+   "id": "c7",
+   "type": "text",
+   "text": "outlined, then trimmed",
+   "x": 164,
+   "y": 660,
+   "w": 1400,
+   "size": 38,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "anim": "fade",
+   "start": 20.95,
+   "duration": 1.85,
+   "enterDur": 0.3,
+   "exitDur": 0.25
+  },
+  {
+   "id": "n8",
+   "type": "text",
+   "text": "08 · ransom",
+   "x": 164,
+   "y": 320,
+   "size": 34,
+   "weight": 600,
+   "color": "var(--accent)",
+   "anim": "fade",
+   "start": 22.8,
+   "duration": 2.7,
+   "enterDur": 0.25,
+   "exitDur": 0.25
+  },
+  {
+   "id": "w8",
+   "type": "text",
+   "text": "RANSOM NOTE",
+   "x": 160,
+   "y": 380,
+   "w": 1620,
+   "size": 140,
+   "ransom": true,
+   "ransomSeed": 7,
+   "anim": "rise",
+   "start": 23,
+   "duration": 2.5,
+   "enterDur": 0.5,
+   "exitDur": 0.35,
+   "critical": true
+  },
+  {
+   "id": "c8",
+   "type": "text",
+   "text": "ten text layers",
+   "x": 164,
+   "y": 660,
+   "w": 1400,
+   "size": 38,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "anim": "fade",
+   "start": 23.65,
+   "duration": 1.85,
+   "enterDur": 0.3,
+   "exitDur": 0.25
+  },
+  {
+   "id": "n9",
+   "type": "text",
+   "text": "09 · morph",
+   "x": 164,
+   "y": 320,
+   "size": 34,
+   "weight": 600,
+   "color": "var(--accent)",
+   "anim": "fade",
+   "start": 25.5,
+   "duration": 2.7,
+   "enterDur": 0.25,
+   "exitDur": 0.25
+  },
+  {
+   "id": "w9",
+   "type": "text",
+   "text": "HOURS",
+   "x": 160,
+   "y": 400,
+   "w": 780,
+   "align": "center",
+   "size": 150,
+   "weight": 800,
+   "anim": "none",
+   "morph": {
+    "to": "SECONDS",
+    "dur": 1.3,
+    "ease": "power3.inOut"
+   },
+   "start": 25.7,
+   "duration": 2.5,
+   "exitDur": 0.3,
+   "critical": true
+  },
+  {
+   "id": "c9",
+   "type": "text",
+   "text": "matched by hand",
+   "x": 164,
+   "y": 660,
+   "w": 1400,
+   "size": 38,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "anim": "fade",
+   "start": 26.35,
+   "duration": 1.85,
+   "enterDur": 0.3,
+   "exitDur": 0.25
+  },
+  {
+   "id": "payoff",
+   "type": "text",
+   "text": "Each one is <b>one word</b> of JSON.",
+   "x": 160,
+   "y": 392,
+   "w": 1620,
+   "size": 88,
+   "weight": 800,
+   "split": "word",
+   "preset": "up",
+   "each": 0.6,
+   "stagger": 0.06,
+   "start": 28.2,
+   "duration": 4.3,
+   "exitDur": 0,
+   "critical": true
+  },
+  {
+   "id": "payoffSub",
+   "type": "text",
+   "text": "\"preset\": \"unfold\"",
+   "x": 164,
+   "y": 664,
+   "w": 1400,
+   "size": 44,
+   "weight": 600,
+   "font": "mono",
+   "color": "color-mix(in srgb, var(--accent) 55%, var(--bg))",
+   "anim": "fade",
+   "start": 29.1,
+   "duration": 3.4,
+   "enterDur": 0.35,
+   "exitDur": 0
+  }
+ ],
+ "sceneUnits": true,
+ "transitions": [
+  {
+   "at": 3.9,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 6.6,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 9.3,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 12,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 14.7,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 17.4,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 20.1,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 22.8,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 25.5,
+   "mech": "cut",
+   "fx": "punch"
+  },
+  {
+   "at": 28.2,
+   "mech": "cut",
+   "fx": "riseBlur"
+  }
+ ]
+}
