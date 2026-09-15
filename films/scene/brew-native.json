@@ -1,0 +1,482 @@
+{
+  "module": "scene",
+  "theme": "brew-dark",
+  "aspect": "16:9",
+  "destination": "web",
+  "duration": 20.5,
+  "audio": {
+    "auto": true,
+    "music": "assets/music/lofi.wav",
+    "musicGain": 0.4,
+    "musicFade": {
+      "in": 0.9,
+      "out": 1.8
+    },
+    "sfxGain": 0.85
+  },
+  "camera": [
+    {
+      "t": 0,
+      "s": 1
+    },
+    {
+      "t": 20.5,
+      "s": 1.05
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "100 emails to write.",
+      "start": 0.3,
+      "duration": 3,
+      "x": 160,
+      "y": 400,
+      "w": 1600,
+      "align": "center",
+      "size": 150,
+      "weight": 800,
+      "color": "#f6f3ee",
+      "anim": "rise",
+      "enterDur": 0.5,
+      "out": "defocus",
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "By Friday.",
+      "start": 1.5,
+      "duration": 1.8,
+      "x": 160,
+      "y": 600,
+      "w": 1600,
+      "align": "center",
+      "size": 120,
+      "weight": 800,
+      "color": "#ff742e",
+      "anim": "rise",
+      "enterDur": 0.45,
+      "out": "defocus",
+      "exitDur": 0.4
+    },
+    {
+      "type": "text",
+      "text": "So just describe it.",
+      "start": 3.6,
+      "duration": 3.4,
+      "x": 160,
+      "y": 250,
+      "w": 1600,
+      "align": "center",
+      "size": 66,
+      "weight": 700,
+      "color": "#a49b92",
+      "anim": "fade",
+      "enterDur": 0.5,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "html",
+      "x": 460,
+      "y": 430,
+      "w": 1000,
+      "h": 260,
+      "start": 3.7,
+      "duration": 3.3,
+      "anim": "scale",
+      "enterDur": 0.45,
+      "out": "defocus",
+      "exitDur": 0.35,
+      "html": "<div style=\"box-sizing:border-box;width:100%;height:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:28px\"></div>"
+    },
+    {
+      "type": "text",
+      "text": "a friday flash sale, 20% off, on-brand",
+      "start": 4.2,
+      "duration": 2.8,
+      "x": 500,
+      "y": 480,
+      "w": 860,
+      "align": "left",
+      "size": 44,
+      "weight": 500,
+      "font": "mono",
+      "color": "#f6f3ee",
+      "typing": 22,
+      "keyGain": 0.16
+    },
+    {
+      "type": "html",
+      "x": 1360,
+      "y": 585,
+      "w": 64,
+      "h": 64,
+      "start": 4,
+      "duration": 3,
+      "anim": "pop",
+      "enterDur": 0.4,
+      "out": "fade",
+      "exitDur": 0.3,
+      "glow": 0.5,
+      "html": "<div style=\"width:100%;height:100%;background:var(--accent);border-radius:32px\"></div>"
+    },
+    {
+      "type": "cursor",
+      "size": 40,
+      "start": 5.5,
+      "duration": 1.6,
+      "path": [
+        {
+          "t": 0,
+          "x": 980,
+          "y": 780
+        },
+        {
+          "t": 0.8,
+          "x": 1392,
+          "y": 617
+        }
+      ],
+      "clicks": [
+        0.95
+      ]
+    },
+    {
+      "type": "text",
+      "text": "On brand, automatically.",
+      "start": 7.35,
+      "duration": 1,
+      "x": 160,
+      "y": 120,
+      "w": 1600,
+      "align": "center",
+      "size": 62,
+      "weight": 700,
+      "color": "#a49b92",
+      "anim": "fade",
+      "enterDur": 0.4,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/brew/collage.png",
+      "x": 285,
+      "y": 235,
+      "w": 1350,
+      "radius": 24,
+      "start": 7.4,
+      "duration": 3.1,
+      "anim": "scale",
+      "enterDur": 0.5,
+      "out": "defocus",
+      "exitDur": 0.4,
+      "ken": {
+        "from": 1.02,
+        "to": 1.1
+      }
+    },
+    {
+      "type": "text",
+      "text": "Plugs into your stack.",
+      "start": 10.75,
+      "duration": 3.2,
+      "x": 160,
+      "y": 230,
+      "w": 1600,
+      "align": "center",
+      "size": 92,
+      "weight": 800,
+      "color": "#f6f3ee",
+      "anim": "rise",
+      "enterDur": 0.45,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "html",
+      "x": 106,
+      "y": 480,
+      "w": 400,
+      "h": 130,
+      "start": 10.85,
+      "duration": 3,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "each": 0.08,
+      "out": "defocus",
+      "exitDur": 0.3,
+      "html": "<div style=\"box-sizing:border-box;width:100%;height:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:65px\"></div>"
+    },
+    {
+      "type": "text",
+      "text": "Klaviyo",
+      "start": 10.9,
+      "duration": 2.95,
+      "x": 235,
+      "y": 522,
+      "w": 250,
+      "align": "left",
+      "size": 40,
+      "weight": 600,
+      "color": "#f6f3ee",
+      "anim": "fade",
+      "enterDur": 0.5
+    },
+    {
+      "type": "html",
+      "x": 542,
+      "y": 480,
+      "w": 400,
+      "h": 130,
+      "start": 10.93,
+      "duration": 2.95,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "out": "defocus",
+      "exitDur": 0.3,
+      "html": "<div style=\"box-sizing:border-box;width:100%;height:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:65px\"></div>"
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/brew/logos/hubspot.svg",
+      "x": 586,
+      "y": 513,
+      "w": 64,
+      "start": 10.98,
+      "duration": 2.9,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "HubSpot",
+      "start": 10.98,
+      "duration": 2.9,
+      "x": 671,
+      "y": 522,
+      "w": 250,
+      "align": "left",
+      "size": 40,
+      "weight": 600,
+      "color": "#f6f3ee",
+      "anim": "fade",
+      "enterDur": 0.5
+    },
+    {
+      "type": "html",
+      "x": 978,
+      "y": 480,
+      "w": 400,
+      "h": 130,
+      "start": 11.01,
+      "duration": 2.9,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "out": "defocus",
+      "exitDur": 0.3,
+      "html": "<div style=\"box-sizing:border-box;width:100%;height:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:65px\"></div>"
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/brew/logos/mailchimp.svg",
+      "x": 1022,
+      "y": 513,
+      "w": 64,
+      "start": 11.06,
+      "duration": 2.85,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Mailchimp",
+      "start": 11.06,
+      "duration": 2.85,
+      "x": 1107,
+      "y": 522,
+      "w": 260,
+      "align": "left",
+      "size": 40,
+      "weight": 600,
+      "color": "#f6f3ee",
+      "anim": "fade",
+      "enterDur": 0.5
+    },
+    {
+      "type": "html",
+      "x": 1414,
+      "y": 480,
+      "w": 400,
+      "h": 130,
+      "start": 11.09,
+      "duration": 2.85,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "out": "defocus",
+      "exitDur": 0.3,
+      "html": "<div style=\"box-sizing:border-box;width:100%;height:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:65px\"></div>"
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/brew/logos/brevo.svg",
+      "x": 1458,
+      "y": 513,
+      "w": 64,
+      "start": 11.14,
+      "duration": 2.8,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "out": "fade",
+      "exitDur": 0.3
+    },
+    {
+      "type": "text",
+      "text": "Brevo",
+      "start": 11.14,
+      "duration": 2.8,
+      "x": 1543,
+      "y": 522,
+      "w": 240,
+      "align": "left",
+      "size": 40,
+      "weight": 600,
+      "color": "#f6f3ee",
+      "anim": "fade",
+      "enterDur": 0.5
+    },
+    {
+      "type": "text",
+      "text": "Idea to inbox,",
+      "start": 14.2,
+      "duration": 3.2,
+      "x": 160,
+      "y": 360,
+      "w": 1600,
+      "align": "center",
+      "size": 118,
+      "weight": 700,
+      "color": "#a49b92",
+      "anim": "fade",
+      "enterDur": 0.5,
+      "out": "defocus",
+      "exitDur": 0.5
+    },
+    {
+      "type": "text",
+      "text": "in <em>minutes</em>.",
+      "start": 14.7,
+      "duration": 2.75,
+      "x": 160,
+      "y": 520,
+      "w": 1600,
+      "align": "center",
+      "size": 230,
+      "weight": 800,
+      "color": "#f6f3ee",
+      "gradient": {
+        "from": "#ffffff",
+        "to": "#ff742e",
+        "angle": 165
+      },
+      "motionBlur": true,
+      "motion": [
+        {
+          "t": 0,
+          "scale": 1.16,
+          "opacity": 0,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 0.42,
+          "scale": 1,
+          "opacity": 1,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 2.4,
+          "scale": 1.03,
+          "ease": "linear"
+        },
+        {
+          "t": 2.75,
+          "scale": 1.5,
+          "opacity": 0,
+          "ease": "easeInCubic"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "src": "/assets/brands/brew/logo-white.svg",
+      "x": 610,
+      "y": 430,
+      "w": 700,
+      "start": 17.85,
+      "duration": 2.65,
+      "anim": "rise",
+      "enterDur": 0.55
+    },
+    {
+      "type": "text",
+      "text": "Start free at <em>brew.new</em>",
+      "start": 18.45,
+      "duration": 2.05,
+      "x": 160,
+      "y": 660,
+      "w": 1600,
+      "align": "center",
+      "size": 60,
+      "weight": 600,
+      "color": "#a49b92",
+      "anim": "fade",
+      "enterDur": 0.6
+    }
+  ],
+  "bg": [
+    {
+      "t": 0,
+      "preset": "aurora"
+    }
+  ],
+  "transitions": [
+    {
+      "at": 10.6,
+      "mech": "cut",
+      "fx": "punch",
+      "dur": 0.28
+    },
+    {
+      "at": 3.4,
+      "mech": "seam",
+      "fx": "whipPan",
+      "dur": 0.5,
+      "timing": "smooth"
+    },
+    {
+      "at": 7.1,
+      "mech": "seam",
+      "fx": "cinematicZoom",
+      "dur": 0.55,
+      "timing": "smooth"
+    },
+    {
+      "at": 14.1,
+      "mech": "seam",
+      "fx": "whipPan",
+      "dur": 0.5,
+      "timing": "smooth"
+    },
+    {
+      "at": 17.5,
+      "mech": "seam",
+      "fx": "flashWhite",
+      "dur": 0.4
+    }
+  ]
+}

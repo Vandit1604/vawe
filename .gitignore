@@ -137,6 +137,18 @@ films/scene/example-*.expanded.json
 !films/scene/process.json
 !films/scene/process.intent.json
 !films/scene/process.storyboard.md
+# Worked examples engine-doctrine/CRAFT docs and skills name and walk a reader through. A worked
+# example a clone does not have is not an example, same rule as _auto-orient above.
+!films/scene/_kinetic-cut.json
+!films/scene/_kinetic-cut-plain.json
+!films/scene/higgsfield-recreation.json
+!films/scene/zerochrome.json
+!films/scene/linear-launch.json
+!films/scene/brew-native.json
+!films/scene/aspects-demo.json
+!films/scene/app-showcase.json
+!films/scene/playhead.json
+!films/scene/_playhead-subject.json
 # Music beds are third-party tracks and the Mixkit licence forbids redistributing the files, so the
 # audio never lands in git. credits.json is not audio, it is the PROVENANCE, and ignoring the whole
 # directory meant the one file that records where a bed came from could not survive a clone — while

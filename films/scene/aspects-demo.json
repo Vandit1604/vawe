@@ -1,0 +1,203 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 6,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 6
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "One scene.<br>Every canvas.",
+      "x": 150,
+      "y": 300,
+      "w": 760,
+      "align": "left",
+      "size": 96,
+      "weight": 600,
+      "color": "var(--text)",
+      "start": 0.2,
+      "duration": 5.6,
+      "anim": "rise",
+      "enterDur": 0.55,
+      "exitDur": 0.35,
+      "aspects": {
+        "9:16": {
+          "x": "center",
+          "y": 300,
+          "w": "84%",
+          "align": "center",
+          "size": 104
+        },
+        "4:5": {
+          "x": "center",
+          "y": 220,
+          "w": "86%",
+          "align": "center",
+          "size": 88
+        },
+        "1:1": {
+          "x": "center",
+          "y": 240,
+          "w": "84%",
+          "align": "center",
+          "size": 80
+        },
+        "4:3": {
+          "x": 110,
+          "y": 250,
+          "w": 600,
+          "align": "left",
+          "size": 78
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "The composition changes. The JSON is still one file.",
+      "x": 150,
+      "y": 560,
+      "w": 700,
+      "align": "left",
+      "size": 28,
+      "color": "var(--dim)",
+      "start": 0.45,
+      "duration": 5.35,
+      "anim": "fade",
+      "enterDur": 0.5,
+      "exitDur": 0.3,
+      "aspects": {
+        "9:16": {
+          "x": "center",
+          "y": 560,
+          "w": "78%",
+          "align": "center",
+          "size": 34
+        },
+        "4:5": {
+          "x": "center",
+          "y": 430,
+          "w": "80%",
+          "align": "center",
+          "size": 30
+        },
+        "1:1": {
+          "x": "center",
+          "y": 420,
+          "w": "78%",
+          "align": "center",
+          "size": 28
+        },
+        "4:3": {
+          "x": 110,
+          "y": 470,
+          "w": 560,
+          "align": "left",
+          "size": 26
+        }
+      }
+    },
+    {
+      "type": "rect",
+      "x": 1080,
+      "y": 250,
+      "w": 660,
+      "h": 580,
+      "radius": 22,
+      "bg": "var(--surface-2)",
+      "border": true,
+      "start": 0.35,
+      "duration": 5.45,
+      "anim": "slide-right",
+      "out": "slide-left",
+      "enterDur": 0.5,
+      "exitDur": 0.35,
+      "aspects": {
+        "9:16": {
+          "x": "center",
+          "y": 760,
+          "w": "84%",
+          "h": 820,
+          "anim": "rise",
+          "out": "fade"
+        },
+        "4:5": {
+          "x": "center",
+          "y": 560,
+          "w": "86%",
+          "h": 660,
+          "anim": "rise",
+          "out": "fade"
+        },
+        "1:1": {
+          "x": "center",
+          "y": 540,
+          "w": "84%",
+          "h": 440,
+          "anim": "rise",
+          "out": "fade"
+        },
+        "4:3": {
+          "x": 760,
+          "y": 220,
+          "w": 560,
+          "h": 640
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "16:9",
+      "x": 1080,
+      "y": 300,
+      "w": 660,
+      "align": "center",
+      "size": 132,
+      "weight": 600,
+      "color": "var(--accent)",
+      "start": 0.6,
+      "duration": 5.2,
+      "anim": "lift",
+      "enterDur": 0.6,
+      "exitDur": 0.3,
+      "aspects": {
+        "9:16": {
+          "text": "9:16",
+          "x": "center",
+          "y": 1020,
+          "w": "84%",
+          "size": 150
+        },
+        "4:5": {
+          "text": "4:5",
+          "x": "center",
+          "y": 760,
+          "w": "86%",
+          "size": 130
+        },
+        "1:1": {
+          "text": "1:1",
+          "x": "center",
+          "y": 660,
+          "w": "84%",
+          "size": 120
+        },
+        "4:3": {
+          "text": "4:3",
+          "x": 760,
+          "y": 270,
+          "w": 560,
+          "size": 110
+        }
+      }
+    }
+  ]
+}

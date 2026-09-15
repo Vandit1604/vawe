@@ -1,0 +1,81 @@
+{
+  "module": "scene",
+  "theme": "default",
+  "aspect": "16:9",
+  "fps": 30,
+  "duration": 3.5,
+  "bg": [
+    {
+      "preset": "dark"
+    }
+  ],
+  "audio": {
+    "silent": true,
+    "_why": "a controlled A/B against _kinetic-cut.json: the two files differ in one number and nothing else, so anything on the track would be a second variable"
+  },
+  "authoring": {
+    "allow": [
+      "dead-air",
+      "plain-slideshow",
+      "no-continuous-object",
+      "static-bg",
+      "no-storyboard"
+    ],
+    "_why": {
+      "dead-air": "the frame is deliberately bare: this measures WHEN a swap happens, so anything else moving would be a second variable",
+      "plain-slideshow": "same reason, the swap is isolated on purpose",
+      "no-continuous-object": "the twin with the parent's motion removed: nothing crosses the seam here, by design, and that IS the comparison",
+      "no-storyboard": "a two-shot mechanism demo, not a film: the whole plan is 'one word replaces another at the frame the camera is moving fastest', and it is written down in docs/CRAFT/AE-TECHNIQUES.md #1, which names this file as its worked example",
+      "static-bg": "a moving backdrop would be a second thing crossing the seam, doing the hiding the camera is meant to do"
+    }
+  },
+  "camera": [
+    {
+      "t": 0.4,
+      "x": 0,
+      "easeOut": "hang"
+    },
+    {
+      "t": 2.4,
+      "x": 0,
+      "easeIn": "hang"
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "before",
+      "x": 260,
+      "y": 440,
+      "w": 1400,
+      "align": "center",
+      "size": 150,
+      "weight": 800,
+      "anim": "none",
+      "out": "none",
+      "start": 0,
+      "duration": 1.4
+    },
+    {
+      "type": "text",
+      "text": "after",
+      "x": 260,
+      "y": 440,
+      "w": 1400,
+      "align": "center",
+      "size": 150,
+      "weight": 800,
+      "anim": "none",
+      "out": "none",
+      "start": 1.4,
+      "duration": 2.1
+    }
+  ],
+  "transitions": [
+    {
+      "at": 1.4,
+      "mech": "cut",
+      "fx": "none"
+    }
+  ]
+}
