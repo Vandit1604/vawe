@@ -156,4 +156,4 @@ After:
   none: every element sits inside the frame and its margin.
 ```
 
-Neither screen is wired into `films/scene/vawe-flow.json`; that rebuild is a separate pass.
+Neither screen is wired into the film yet; that rebuild is a separate pass.

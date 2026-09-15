@@ -1,0 +1,827 @@
+{
+ "module": "scene",
+ "aspect": "16:9",
+ "theme": "vawe-dark",
+ "destination": "web",
+ "duration": 16,
+ "fps": 30,
+ "authoringNote": "Recreation of refs/pin-16818198602994243.mp4: its grammar, our content. CYBERPUNK PASS: the film is now LIGHT IN A DARK ROOM, and the light is the product. `8624ce0` gave the studio a real dark mode behind its ◐ toggle, so the hero surface is `#tl` RE-CAPTURED under THEME=dark at the same 1440px viewport, not the light capture repainted: mint #5ee0c8 lane fills, #ff3b4e hazard hatch, #0e1117 panel, all of them tokens the instrument ships. The frame around it is themes/vawe-dark.json, which is those same tokens. The only bright surfaces in the film are the instrument and the preview monitor it is showing, and the monitor is bright because the draft being previewed is a white film, which is what the real studio looks like in dark mode. One vertical bar is a text caret, then the studio playhead, then the leading edge of a render fill. The subject is formats/scene/_playhead-subject.json, whose 1.20s dead-air hole is genuine (beat-check reports 9.60s to 10.80s). Beat 4's copy is a measurement, not a claim.",
+ "authoring": {
+  "allow": [
+   "safe"
+  ],
+  "_why": {
+   "safe": "from 6.3s the camera is INSIDE the timeline, not looking at it, so the captured surface runs off the left edge and keeps running further off as beats 3 to 5 push in. That is the scale ladder the film is built on, wide to close, and the only thing behind the left edge is timeline the playhead has already crossed. Pulling the surface in would mean stopping the truck, which is beat 3's whole mechanism. Second film in 127 to waive this code."
+  }
+ },
+ "audio": {
+  "silent": true,
+  "_why": "the reference runs a flat bed at -15.3 LUFS with no voiceover, and every bed in assets/music/credits.json is licenceVerified:false. An unlicensed bed under a product film is a Content ID claim, so this ships silent and carries its structure in the picture: the bar survives every junction and the one cut is a jump cut on one surface. Overrule this the moment a licensed bed exists."
+ },
+ "bg": [
+  {
+   "t": 0,
+   "html": "<div style=\"position:absolute;inset:0;background:#06080d\"><div style=\"position:absolute;inset:-12%;background:radial-gradient(58% 52% at calc(34% + var(--t) * 1.6%) calc(40% + var(--t) * 1.1%), #16223a 0%, rgba(6,8,13,0) 62%),radial-gradient(52% 46% at calc(74% - var(--t) * 1.9%) calc(64% - var(--t) * 0.9%), #0d2b2a 0%, rgba(6,8,13,0) 58%)\"></div><div style=\"position:absolute;inset:-12%;background:radial-gradient(46% 58% at 42% 56%, rgba(255,77,109,0.44) 0%, rgba(255,77,109,0) 66%);opacity:calc(clamp(0, (var(--t) - 8.7) / 1.1, 1) * clamp(0, (12.44 - var(--t)) / 0.28, 1))\"></div><div style=\"position:absolute;inset:-12%;background:radial-gradient(56% 62% at 52% 62%, rgba(94,224,200,0.30) 0%, rgba(94,224,200,0) 68%);opacity:calc(clamp(0, (var(--t) - 12.9) / 1.3, 1))\"></div><div style=\"position:absolute;inset:0;background:radial-gradient(80% 96% at 50% 50%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.66) 100%)\"></div></div>",
+   "tone": "dark",
+   "_why": "the room, not a wallpaper. Two cool blooms drift across the whole film at the pace the light version used, so the two frames that hold longest are never dead. The other two are the film's argument said in light: a red bloom rises over 1.1s as the camera dives into the hazard band and is cut dead at 12.44s by the film's one cut, and a mint bloom rises after it as the render runs. Every value is driven from var(--t); nothing here is a fixed field."
+  }
+ ],
+ "camera": [
+  {
+   "t": 0,
+   "x": 656,
+   "y": 0,
+   "s": 1
+  },
+  {
+   "t": 0.3,
+   "x": 656,
+   "y": 0,
+   "s": 1,
+   "ease": "linear"
+  },
+  {
+   "t": 0.66,
+   "x": 226,
+   "y": 0,
+   "s": 1.02,
+   "ease": "easeOutExpo"
+  },
+  {
+   "t": 1.86,
+   "x": 226,
+   "y": 0,
+   "s": 1.02,
+   "ease": "linear"
+  },
+  {
+   "t": 2.6,
+   "x": 150,
+   "y": -30,
+   "s": 1.06,
+   "ease": "linear"
+  },
+  {
+   "t": 3.28,
+   "x": -500,
+   "y": -190,
+   "s": 0.86,
+   "ease": "easeInOutCubic"
+  },
+  {
+   "t": 3.98,
+   "x": -500,
+   "y": -190,
+   "s": 0.86,
+   "ease": "linear"
+  },
+  {
+   "t": 4.52,
+   "x": -640,
+   "y": -200,
+   "s": 0.88,
+   "ease": "easeInOutCubic"
+  },
+  {
+   "t": 5.6,
+   "x": -640,
+   "y": -200,
+   "s": 0.88,
+   "ease": "linear"
+  },
+  {
+   "t": 6.24,
+   "x": -742,
+   "y": -190,
+   "s": 1.1,
+   "ease": "easeInOutCubic"
+  },
+  {
+   "t": 6.86,
+   "x": -742,
+   "y": -190,
+   "s": 1.1,
+   "ease": "linear"
+  },
+  {
+   "t": 7.7,
+   "x": -790,
+   "y": -160,
+   "s": 1.18,
+   "ease": "easeInOutCubic"
+  },
+  {
+   "t": 8.1,
+   "x": -790,
+   "y": -160,
+   "s": 1.18,
+   "ease": "linear"
+  },
+  {
+   "t": 8.8,
+   "x": -820,
+   "y": -100,
+   "s": 1.45,
+   "ease": "easeInOutCubic"
+  },
+  {
+   "t": 9.16,
+   "x": -848.5,
+   "y": -287.5,
+   "s": 2.6,
+   "ease": "easeOutExpo"
+  },
+  {
+   "t": 10.36,
+   "x": -848.5,
+   "y": -287.5,
+   "s": 2.6,
+   "ease": "linear"
+  },
+  {
+   "t": 12.4,
+   "x": -848.5,
+   "y": -287.5,
+   "s": 2.66,
+   "ease": "linear"
+  },
+  {
+   "t": 12.95,
+   "x": -848.5,
+   "y": -287.5,
+   "s": 2.66,
+   "ease": "linear"
+  },
+  {
+   "t": 14.3,
+   "x": -560,
+   "y": -230,
+   "s": 0.82,
+   "ease": "easeInOutCubic"
+  },
+  {
+   "t": 16,
+   "x": -560,
+   "y": -230,
+   "s": 0.8,
+   "ease": "linear"
+  }
+ ],
+ "layers": [
+  {
+   "id": "slab",
+   "type": "rect",
+   "x": 260,
+   "y": 275,
+   "w": 2400,
+   "h": 940,
+   "bg": "var(--surface-2)",
+   "radius": 32,
+   "border": "1px solid var(--line)",
+   "start": 2.6,
+   "duration": 13.4,
+   "anim": "fade",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    },
+    {
+     "plane": -500
+    }
+   ]
+  },
+  {
+   "id": "timeline",
+   "type": "component",
+   "src": "/assets/brands/vawe/components/timeline.json",
+   "x": 740,
+   "y": 600,
+   "w": 1440,
+   "start": 2.6,
+   "duration": 9.8,
+   "anim": "fade",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    }
+   ]
+  },
+  {
+   "id": "timeline-fixed",
+   "type": "component",
+   "src": "/assets/brands/vawe/components/timeline-fixed.json",
+   "x": 740,
+   "y": 632,
+   "w": 1440,
+   "start": 12.4,
+   "duration": 3.6,
+   "anim": "none",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    }
+   ]
+  },
+  {
+   "id": "rendertrack",
+   "type": "rect",
+   "x": 756,
+   "y": 1000,
+   "w": 1408,
+   "h": 16,
+   "bg": "var(--line-strong)",
+   "radius": 4,
+   "start": 12.4,
+   "duration": 3.6,
+   "anim": "none",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    }
+   ]
+  },
+  {
+   "id": "renderfill",
+   "type": "rect",
+   "x": 756,
+   "y": 1000,
+   "w": 871,
+   "h": 16,
+   "bg": "var(--accent)",
+   "radius": 4,
+   "glow": "#5ee0c8",
+   "intensity": 0.45,
+   "start": 12.4,
+   "duration": 3.6,
+   "anim": "none",
+   "exitDur": 0,
+   "motion": [
+    {
+     "t": 0,
+     "w": 871.2
+    },
+    {
+     "t": 0.55,
+     "w": 871.2
+    },
+    {
+     "t": 1.3,
+     "w": 1056
+    },
+    {
+     "t": 2.3,
+     "w": 1267.2
+    },
+    {
+     "t": 3.3,
+     "w": 1408
+    },
+    {
+     "t": 3.6,
+     "w": 1408
+    }
+   ],
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    }
+   ]
+  },
+  {
+   "id": "phbar",
+   "type": "group",
+   "x": 740,
+   "y": 600,
+   "w": 1440,
+   "h": 430,
+   "start": 0,
+   "duration": 16,
+   "anim": "none",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    }
+   ],
+   "children": [
+    {
+     "id": "bar",
+     "type": "rect",
+     "x": 10,
+     "y": 70,
+     "w": 9,
+     "h": 308,
+     "bg": "var(--text)",
+     "radius": 0,
+     "glow": "#e6e9ef",
+     "intensity": 0.34,
+     "start": 0,
+     "duration": 16,
+     "anim": "fade",
+     "exitDur": 0,
+     "motion": [
+      {
+       "t": 0,
+       "x": -379,
+       "y": -268,
+       "w": 6,
+       "h": 109
+      },
+      {
+       "t": 2.6,
+       "x": -379,
+       "y": -268,
+       "w": 6,
+       "h": 109,
+       "ease": "linear"
+      },
+      {
+       "t": 3.28,
+       "x": 0,
+       "ease": "easeInOutCubic",
+       "y": 0,
+       "w": 9,
+       "h": 308
+      },
+      {
+       "t": 5.6,
+       "x": 0,
+       "ease": "linear"
+      },
+      {
+       "t": 6.24,
+       "x": 299.2,
+       "ease": "easeInOutCubic"
+      },
+      {
+       "t": 6.86,
+       "x": 299.2,
+       "ease": "linear"
+      },
+      {
+       "t": 7.7,
+       "x": 668.8,
+       "ease": "easeInOutCubic"
+      },
+      {
+       "t": 8.1,
+       "x": 668.8,
+       "ease": "linear"
+      },
+      {
+       "t": 8.8,
+       "x": 792,
+       "ease": "easeInOutCubic"
+      },
+      {
+       "t": 9.16,
+       "x": 871.2,
+       "ease": "easeInOutCubic"
+      },
+      {
+       "t": 12.95,
+       "x": 871.2,
+       "ease": "linear"
+      },
+      {
+       "t": 13.7,
+       "x": 1056,
+       "ease": "easeInOutCubic"
+      },
+      {
+       "t": 14.7,
+       "x": 1267.2,
+       "ease": "linear"
+      },
+      {
+       "t": 15.7,
+       "x": 1408,
+       "ease": "easeInOutCubic"
+      },
+      {
+       "t": 16,
+       "x": 1408,
+       "ease": "linear"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hero1",
+   "type": "text",
+   "text": "See the film",
+   "x": 366,
+   "y": 457,
+   "w": 1200,
+   "align": "left",
+   "size": 137,
+   "weight": 600,
+   "color": "var(--text)",
+   "typing": 17,
+   "caret": false,
+   "untype": 1.75,
+   "untypeRate": 45,
+   "start": 0.35,
+   "duration": 2.1,
+   "anim": "none",
+   "exitDur": 0
+  },
+  {
+   "id": "hero2",
+   "type": "text",
+   "text": "before you render it.",
+   "x": 366,
+   "y": 638,
+   "w": 1200,
+   "align": "left",
+   "size": 69,
+   "weight": 400,
+   "color": "var(--dim)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.05,
+   "each": 0.4,
+   "start": 1.3,
+   "duration": 1.1,
+   "anim": "none",
+   "out": "defocus",
+   "exitDur": 0.3
+  },
+  {
+   "id": "head2",
+   "type": "text",
+   "text": "Every layer, on one clock.",
+   "x": 518,
+   "y": 277,
+   "w": 1300,
+   "align": "left",
+   "size": 113,
+   "weight": 600,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.07,
+   "each": 0.42,
+   "start": 2.75,
+   "duration": 1.75,
+   "anim": "none",
+   "out": "slide-left",
+   "exitDur": 0.34
+  },
+  {
+   "id": "head3",
+   "type": "text",
+   "text": "Scrub it. No render.",
+   "x": 947,
+   "y": 348,
+   "w": 840,
+   "align": "left",
+   "size": 88,
+   "weight": 600,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.07,
+   "each": 0.4,
+   "start": 5.7,
+   "duration": 1.95,
+   "anim": "none",
+   "out": "slide-left",
+   "exitDur": 0.34
+  },
+  {
+   "id": "card3frame",
+   "type": "rect",
+   "x": 1790,
+   "y": 368,
+   "w": 540,
+   "h": 303,
+   "bg": "var(--surface)",
+   "radius": 10,
+   "border": "1px solid var(--line-strong)",
+   "glow": "#dbe6ff",
+   "intensity": 0.3,
+   "start": 5.8,
+   "duration": 3,
+   "anim": "fade",
+   "out": "defocus",
+   "exitDur": 0.3,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    },
+    {
+     "plane": 150
+    }
+   ]
+  },
+  {
+   "id": "card3a",
+   "type": "image",
+   "src": "/assets/brands/vawe/frames/f030.png",
+   "x": 1798,
+   "y": 376,
+   "w": 524,
+   "h": 295,
+   "start": 5.85,
+   "duration": 1.05,
+   "anim": "fade",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    },
+    {
+     "plane": 150
+    }
+   ]
+  },
+  {
+   "id": "card3b",
+   "type": "image",
+   "src": "/assets/brands/vawe/frames/f150.png",
+   "x": 1798,
+   "y": 376,
+   "w": 524,
+   "h": 295,
+   "start": 6.9,
+   "duration": 0.95,
+   "anim": "fade",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    },
+    {
+     "plane": 150
+    }
+   ]
+  },
+  {
+   "id": "card3c",
+   "type": "image",
+   "src": "/assets/brands/vawe/frames/f255.png",
+   "x": 1798,
+   "y": 376,
+   "w": 524,
+   "h": 295,
+   "start": 7.85,
+   "duration": 0.95,
+   "anim": "fade",
+   "out": "defocus",
+   "exitDur": 0.3,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    },
+    {
+     "plane": 150
+    }
+   ]
+  },
+  {
+   "id": "card4frame",
+   "type": "rect",
+   "x": 1846,
+   "y": 845,
+   "w": 416,
+   "h": 241,
+   "bg": "var(--surface)",
+   "radius": 6,
+   "border": "1px solid var(--line-strong)",
+   "glow": "#dbe6ff",
+   "intensity": 0.3,
+   "start": 9.2,
+   "duration": 3.2,
+   "anim": "fade",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    },
+    {
+     "plane": 150
+    }
+   ]
+  },
+  {
+   "id": "card4",
+   "type": "image",
+   "src": "/assets/brands/vawe/frames/f300.png",
+   "x": 1854,
+   "y": 853,
+   "w": 400,
+   "h": 225,
+   "start": 9.2,
+   "duration": 3.2,
+   "anim": "fade",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    },
+    {
+     "plane": 150
+    }
+   ]
+  },
+  {
+   "id": "head4a",
+   "type": "text",
+   "text": "1.2 seconds",
+   "x": 1785,
+   "y": 707,
+   "w": 400,
+   "align": "left",
+   "size": 62,
+   "weight": 600,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.09,
+   "each": 0.44,
+   "start": 9.6,
+   "duration": 2.8,
+   "anim": "none",
+   "exitDur": 0
+  },
+  {
+   "id": "head4b",
+   "type": "text",
+   "text": "of nothing.",
+   "x": 1785,
+   "y": 772,
+   "w": 400,
+   "align": "left",
+   "size": 62,
+   "weight": 600,
+   "color": "var(--down)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.09,
+   "each": 0.44,
+   "start": 10,
+   "duration": 2.4,
+   "anim": "none",
+   "exitDur": 0
+  },
+  {
+   "id": "dim",
+   "type": "svg",
+   "x": 1609,
+   "y": 968,
+   "w": 101,
+   "h": 20,
+   "viewBox": "0 0 101 20",
+   "d": "M0 10 H101 M1.5 2 V18 M99.5 2 V18",
+   "stroke": "var(--down)",
+   "strokeWidth": 3,
+   "draw": {
+    "dur": 0.55,
+    "weight": 3
+   },
+   "start": 9.9,
+   "duration": 2.5,
+   "anim": "none",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    }
+   ]
+  },
+  {
+   "id": "dimlabel",
+   "type": "text",
+   "text": "1.20s",
+   "x": 1609,
+   "y": 994,
+   "w": 101,
+   "align": "center",
+   "size": 18,
+   "weight": 500,
+   "font": "mono",
+   "color": "var(--down)",
+   "start": 10.35,
+   "duration": 2.05,
+   "anim": "fade",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    }
+   ]
+  },
+  {
+   "id": "card5frame",
+   "type": "rect",
+   "x": 1723,
+   "y": 265,
+   "w": 630,
+   "h": 355,
+   "bg": "var(--surface)",
+   "radius": 12,
+   "border": "1px solid var(--line-strong)",
+   "glow": "#dbe6ff",
+   "intensity": 0.3,
+   "start": 13.6,
+   "duration": 2.4,
+   "anim": "fade",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    },
+    {
+     "plane": 150
+    }
+   ]
+  },
+  {
+   "id": "card5",
+   "type": "image",
+   "src": "/assets/brands/vawe/frames/f420.png",
+   "x": 1731,
+   "y": 273,
+   "w": 614,
+   "h": 345,
+   "start": 13.7,
+   "duration": 2.3,
+   "anim": "fade",
+   "exitDur": 0,
+   "modifiers": [
+    {
+     "tilt": {
+      "y": 18
+     }
+    },
+    {
+     "plane": 150
+    }
+   ]
+  },
+  {
+   "id": "head5",
+   "type": "text",
+   "text": "Fixed here. Then rendered.",
+   "x": 532,
+   "y": 1087,
+   "w": 1400,
+   "align": "left",
+   "size": 93,
+   "weight": 500,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.07,
+   "each": 0.4,
+   "start": 14.2,
+   "duration": 1.8,
+   "anim": "none",
+   "exitDur": 0
+  }
+ ],
+ "transitions": [
+  {
+   "at": 12.4,
+   "mech": "cut",
+   "fx": "none",
+   "dur": 0.1
+  }
+ ]
+}

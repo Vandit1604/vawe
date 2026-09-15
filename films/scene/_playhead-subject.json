@@ -1,0 +1,211 @@
+{
+  "module": "scene",
+  "authoringNote": "CAPTURE SUBJECT for formats/scene/playhead.json. This is a real, renderable draft film whose timeline is photographed as the hero surface of the recreation. Two things are deliberate and load-bearing: (1) it declares NO cuts, so `sceneUnits` never turns on and no layer's authored duration is rewritten, which is what lets a dead-air hole draw as an undisputed hazard band; (2) its fourteen layers are SIX different types, so the lane stack reads as a structure rather than as one block of identical bars.",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 16,
+  "audio": {
+    "silent": true
+  },
+  "authoring": {
+    "allow": [
+      "no-continuous-object",
+      "plain-slideshow",
+      "ends-on-nothing"
+    ]
+  },
+  "bg": [
+    {
+      "t": 0,
+      "preset": "plain"
+    }
+  ],
+  "layers": [
+    {
+      "id": "title",
+      "type": "text",
+      "text": "A draft, mid authoring.",
+      "x": 140,
+      "y": 300,
+      "w": 1400,
+      "align": "left",
+      "size": 96,
+      "weight": 600,
+      "color": "var(--text)",
+      "start": 0.2,
+      "duration": 2.4
+    },
+    {
+      "id": "sub",
+      "type": "text",
+      "text": "Fourteen layers on one clock.",
+      "x": 140,
+      "y": 440,
+      "w": 1400,
+      "align": "left",
+      "size": 52,
+      "weight": 400,
+      "color": "var(--dim)",
+      "start": 0.9,
+      "duration": 2.2
+    },
+    {
+      "id": "rule",
+      "type": "rect",
+      "x": 140,
+      "y": 540,
+      "w": 620,
+      "h": 6,
+      "fill": "var(--accent)",
+      "start": 1.4,
+      "duration": 3.1
+    },
+    {
+      "id": "panel",
+      "type": "rect",
+      "x": 140,
+      "y": 240,
+      "w": 900,
+      "h": 560,
+      "radius": 20,
+      "fill": "var(--surface2)",
+      "start": 3,
+      "duration": 4.4
+    },
+    {
+      "id": "panel-head",
+      "type": "text",
+      "text": "Coverage",
+      "x": 190,
+      "y": 300,
+      "w": 800,
+      "align": "left",
+      "size": 44,
+      "weight": 600,
+      "color": "var(--text)",
+      "start": 3.3,
+      "duration": 4
+    },
+    {
+      "id": "stat",
+      "type": "count",
+      "from": 0,
+      "to": 14,
+      "x": 190,
+      "y": 400,
+      "w": 800,
+      "align": "left",
+      "size": 180,
+      "color": "var(--accent)",
+      "start": 3.6,
+      "duration": 3.6
+    },
+    {
+      "id": "stat-label",
+      "type": "text",
+      "text": "layers declared",
+      "x": 190,
+      "y": 640,
+      "w": 800,
+      "align": "left",
+      "size": 38,
+      "weight": 400,
+      "color": "var(--dim)",
+      "start": 4.2,
+      "duration": 2.9
+    },
+    {
+      "id": "aside",
+      "type": "text",
+      "text": "Every window declared, in order.",
+      "x": 1180,
+      "y": 560,
+      "w": 600,
+      "align": "left",
+      "size": 40,
+      "weight": 400,
+      "color": "var(--text2)",
+      "start": 5.4,
+      "duration": 2.4
+    },
+    {
+      "id": "band",
+      "type": "rect",
+      "x": 140,
+      "y": 860,
+      "w": 1640,
+      "h": 10,
+      "fill": "var(--line)",
+      "start": 6.2,
+      "duration": 3
+    },
+    {
+      "id": "closing-card",
+      "type": "group",
+      "x": 480,
+      "y": 340,
+      "w": 960,
+      "h": 400,
+      "start": 7.6,
+      "duration": 2,
+      "children": [
+        {
+          "type": "text",
+          "text": "Then the plan stops.",
+          "size": 72,
+          "weight": 600,
+          "color": "var(--text)"
+        },
+        {
+          "type": "text",
+          "text": "and nothing is scheduled",
+          "size": 36,
+          "weight": 400,
+          "color": "var(--dim)"
+        }
+      ]
+    },
+    {
+      "id": "resume",
+      "type": "text",
+      "text": "Back, 1.2 seconds later.",
+      "x": 140,
+      "y": 420,
+      "w": 1640,
+      "align": "left",
+      "size": 88,
+      "weight": 600,
+      "color": "var(--text)",
+      "start": 10.8,
+      "duration": 2.4
+    },
+    {
+      "id": "resume-note",
+      "type": "text",
+      "text": "The gap above is real. The gate found it before a render did.",
+      "x": 140,
+      "y": 560,
+      "w": 1500,
+      "align": "left",
+      "size": 40,
+      "weight": 400,
+      "color": "var(--dim)",
+      "start": 11.4,
+      "duration": 2.6
+    },
+    {
+      "id": "end",
+      "type": "text",
+      "text": "See the film before you render it.",
+      "x": 140,
+      "y": 480,
+      "w": 1640,
+      "align": "left",
+      "size": 76,
+      "weight": 600,
+      "color": "var(--accent)",
+      "start": 13.9,
+      "duration": 2.4
+    }
+  ]
+}
