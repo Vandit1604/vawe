@@ -299,6 +299,7 @@ const LADDER = [
   ['floor', 'reports', 'ambition: whether this is a plain slideshow'],
   ['motion', 'blocks', 'whether anything in this film is choreographed rather than named'],
   ['dissolve', 'reports', 'transitions: two text states cross-dissolved into mud'],
+  ['covered-move', 'reports', 'a full-bleed layer above starts mid-move and hides it before it plays'],
   ['designspec', 'reports', 'the look lock: colours off the theme palette, fonts outside its roles'],
   ['design-drift', 'reports', 'silent with no design.md; otherwise every frame value against it (hard code)'],
   ['craft', 'reports', 'the craft checklist: every CRAFT doc relevant to this film is answered in the plan'],
@@ -534,6 +535,11 @@ styleGate('floor', 'direction floor (ambition)', 'quality/gates/direction-floor.
 //     crossfade between two text states (a double exposure: both strings at half strength through the
 //     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174.
 styleGate('dissolve', 'dissolve check (crossfade mud)', 'quality/gates/dissolve-check.mjs', strict ? ['--strict'] : [], { waivable: true });
+// 4d. covered-move. Does a full-bleed layer above a moving one start mid-move and hide it? `track`
+//     decides stacking, array order breaks a same-track tie (formats/scene/scene.js:597), and a move
+//     hidden before it plays reads as a hard cut nobody authored. Always report-only: this can't tell
+//     a deliberate cover from an accident, only name the collision. See docs/CRAFT/TRANSITIONS.md.
+styleGate('covered-move', 'covered-move (a move hidden before it plays)', 'quality/gates/covered-move.mjs', [], { waivable: true });
 // 4. slop, RETIRED 2026-08. It ran 41 borrowed rules over a DOM dump carrying three of the CSS
 // properties those rules read, so most of them had no evidence to work from and their silence read as
 // a pass across the whole library (docs/MISTAKES.md #340). Its replacement is the designspec rule
