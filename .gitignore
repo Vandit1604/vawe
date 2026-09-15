@@ -1,37 +1,25 @@
 node_modules/
-out/*.mp4
-out/.tmp_*
+# out/ is the scratch directory every author tool writes to (renders, mixes, logs, sound-vary specs,
+# the gallery build): every file in it is regenerable, none is source. `out/**/*.<ext>` rules used to
+# list this out file-extension by file-extension and still missed `.m4a` (12 files reached main that
+# way); ignoring the whole tree by pattern is the fix that can't be outrun by a new extension.
+# `!out/.gitkeep` keeps the directory present in a fresh clone.
+out/
+!out/.gitkeep
 assets/*.mp3
+# no font binary ships from this repo, paid or not (CREDITS.md): woff2 already covered above,
+# a bare .woff (e.g. a paid Klim face used locally for fidelity) is the same rule, same directory.
 assets/fonts/*.woff2
+assets/fonts/*.woff
 .DS_Store
 
 # go
 bin/
 
-# verify + previews (generated output)
+# verify + previews (generated output). out/ itself is covered wholesale above; these two live
+# outside out/.
 quality/runs/out/
 verify/*_contactsheet.png
-out/**/*.meta.json
-out/**/*.fonts.json
-# out/ is the scratch directory every author tool writes to, but only the mp4 and the json sidecars
-# were ignored, so shots and logs sat untracked in `git status` waiting to be committed by accident.
-# `**/`, not a bare `*`: `out/*.png` matches out/shot.png and NOT out/flight/shot.png, so a tool that
-# writes into a SUBDIRECTORY of out/ walked straight past this rule. Fourteen contact-sheet frames
-# from `out/flight/` reached main inside an unrelated commit exactly that way (docs/MISTAKES.md #424).
-out/**/*.mp4
-# `out/*.mp4` above misses a SUBDIRECTORY, which is the exact `**/` lesson the note above records.
-# harness/dev/candidates.mjs writes out/candidates/<scene>-<axis>-<t>s/ full of proposal clips and
-# the patched scene copies they were rendered from. Every one is scratch: the panel applies a patch
-# to the real scene, and nothing downstream reads these.
-out/candidates/
-out/**/*.png
-out/**/*.log
-out/**/*.html
-out/**/*.jpg
-out/**/*.webp
-# the run log: one JSON line per check/render/judge run, per film (harness/lib/runlog.mjs). Scratch,
-# same as everything else under out/: it is a local record of what ran, not a source file.
-out/**/*.jsonl
 quality/runs/frames/
 # gate-mutation's exclusive lock: it edits tracked source in place, so two runs must not overlap.
 # Removed on exit; a leftover one means a run was killed — check `git status` before trusting the tree.
@@ -241,13 +229,28 @@ site/public/scenes/*
 !site/public/scenes/saas-hero-launch.json
 !site/public/scenes/product-feature-tour.json
 
-# Brand-reflection themes: a palette is not a protected work, but a file named after a company whose
-# `note` says "reflecting <their site>" is a statement this repo does not need to publish. They stay
-# on disk so local brand work keeps rendering; they are not redistributed. The generic themes the
-# templates use (default, northwind, neutral) are tracked and are what a fork should copy.
+# Brand-recreation themes: a palette is not a protected work, but a theme that recreates a real
+# company's look is a statement this repo does not need to publish. A theme declares itself as one
+# by writing `"note": "... reflecting <their site> ..."` (see harness/dev/preset-sheets.mjs and
+# scripts/brand/*.mjs, which write themes this way); a human or agent adding a new brand-reflection
+# theme must follow that convention so reviewers can find it by grepping `note` for "reflecting".
+# `themes/presets/` is the one place this IS enforceable by path: every file there is a named
+# reference-profile taste anchor (docs/CRAFT/SELECTION.md), so the whole directory is ignored.
+# Direct site recreations load by bare name (`themes/<name>.json`, see core/engine/boot.js /
+# harness/author/treatment.mjs), so they cannot move under a subdirectory without a loader change;
+# they stay listed here until one exists. They stay on disk so local brand work keeps rendering; they
+# are not redistributed. The generic themes the templates use (default, northwind, neutral) are
+# tracked and are what a fork should copy.
+themes/presets/*.json
 themes/stripe.json
 themes/linear.json
 themes/higgsfield.json
+
+# Scratch experiment themes: one-off A/B variants (`ab*.json`) and per-person tryouts (`hi-<name>.json`)
+# made for a single test render, never a shipped look. Pattern, not a filename list, so the next
+# ab-run or hi-<name> experiment is ignored without a new line here.
+themes/ab*.json
+themes/hi-*.json
 
 # scratch probe renders, written by hand during debugging and never an input to anything
 assets/video/
@@ -282,14 +285,10 @@ site/public/blocklib/**/*.png
 !formats/scene/post-*.html
 !formats/scene/post-*.kit.css
 
-# GENERATED MEDIA IS NOT SOURCE. 181 mp3/wav/mp4 files under out/ were tracked, about 28MB, every one
-# of them the output of a command in this repo. A render is reproducible; storing it is storing a
-# cache. site/public/assets stays tracked: the marketing site SERVES those, so they are content.
-out/**/*.mp4
-out/**/*.mov
-out/**/*.webm
-out/**/*.wav
-out/**/*.mp3
+# GENERATED MEDIA IS NOT SOURCE. mp3/wav/mp4/m4a files under out/ were tracked at various points,
+# every one the output of a command in this repo; out/ is ignored wholesale above now, so nothing
+# further is needed here. site/public/assets stays tracked: the marketing site SERVES those, so they
+# are content.
 
 # Per-brand demo imagery, the same rule assets/brands/** already applies, for two directories that
 # predate it and escaped it. 4MB of one brand's hero art. The only scenes referencing them are
