@@ -949,8 +949,8 @@
    "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut \u00b7 seam \u00b7 sting) via core/transitions/catalog.js, ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make transitions`.",
    "item": {
     "at": {
-     "type": "number",
-     "label": "Boundary time (s). The transition plays over [at, at+dur]",
+     "type": "number|string",
+     "label": "Boundary time (s), or a relative reference like \"otherId.end+0.5\" (core/timeline/relative-time.js). The transition plays over [at, at+dur]",
      "required": true,
      "min": 0
     },

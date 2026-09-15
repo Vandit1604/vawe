@@ -36,75 +36,12 @@ import { normalizeIdle } from '/core/engine/idle.js';
 import { resolveSpectacle } from '/core/timeline/spectacle.js';
 import { followOffset, followVelocity } from '/core/camera-moves/follow.js';
 import { computeGroup3D, applyGroup3DOpacityAdapt } from '/core/tracks/group3d.js';
+import { resolveRelativeTimes } from '/core/timeline/relative-time.js';
 const $ = (id) => document.getElementById(id);
 
-// resolveRelativeStarts: a layer `start` may be a STRING like "otherId+0.5" or "otherId.end-0.2", so
-// stagger chains are declared relationships (the temporal twin of `anchor`) instead of hand-added
-// arithmetic. Multi-pass (a target may itself be relative); an unresolvable/circular ref fails loud.
-// Pure in `data`: mutates the layers' start fields in place before any DOM exists.
-//
-// IT WALKS THE WHOLE TREE, and it used to walk `data.layers` only. Everything nested (a group's
-// `children`, a composition's `layers`) was invisible to it in both directions: such a layer could not
-// BE a target, and its own relative start was never resolved. The second half is the dangerous one,
-// because nothing failed. `setLayerTiming` writes `String(L.start ?? 0)` to the dataset, so the string
-// "hero+0.4" reached the DOM intact, and `parseFloat("hero+0.4")` is NaN, and `NaN || 0` is 0. The
-// layer started at zero, on screen, silently, with every gate green. That is the silent-substitution
-// class this engine logs more than any other: an input accepted and then ignored.
-//
-// Nothing in the library was hurt, because 0 of 1,305 nested layers had reached for it: 26 relative
-// starts exist and all 26 are top-level. A feature that is broken everywhere it is not yet used is
-// still broken, and the containment rule it was breaking is one the geometry already keeps, since a
-// group child's x/y are relative to its group.
-//
-// TWO REFUSALS REPLACE TWO GUESSES.
-//   `.end` on a target with no `duration` used to score `?? 2`, an invented two seconds that read as
-//   an answer. No film in the library uses `.end` at all, so nothing depended on the guess.
-//   A start that survives every pass as a string used to be handed downstream to become that NaN.
-//   Both now throw, naming the layer.
 // GROUP 3D: computeGroup3D / applyGroup3DOpacityAdapt now live in core/tracks/group3d.js (unit-tested
 // with plain mock elements there). Used at build (near `layers.push(...extra)`) and every frame inside
 // renderFrame; see that module's header for the mechanism.
-
-function eachLayerDeep(ls, fn) {
-  for (const L of ls || []) {
-    if (!L || typeof L !== 'object') continue;
-    fn(L);
-    eachLayerDeep(L.children, fn);
-    eachLayerDeep(L.layers, fn);
-  }
-}
-
-function resolveRelativeStarts(data) {
-  const byId = {};
-  const all = [];
-  eachLayerDeep(data.layers, (L) => { all.push(L); if (L.id) byId[L.id] = L; });
-  const RX = /^([\w-]+?)(\.end)?\s*([+-]\s*[\d.]+)?$/;
-  const nameOf = (L) => `${L.id ? `"${L.id}"` : `a ${L.type || 'text'} layer`}`;
-  for (let pass = 0; pass < 8; pass++) {
-    let pending = 0;
-    for (const L of all) {
-      if (typeof L.start !== 'string') continue;
-      const m = RX.exec(L.start.trim());
-      if (!m || !byId[m[1]]) throw new Error(`layer start "${L.start}" on ${nameOf(L)}: unknown reference `
-        + `"${m ? m[1] : L.start}". A relative start names another layer's \`id\`. Known ids: ${Object.keys(byId).join(', ') || '(none: no layer in this scene declares an id)'}.`);
-      const T = byId[m[1]];
-      if (typeof T.start === 'string') { pending++; continue; } // resolve target first
-      // `.end` IS the target's start plus its duration, so a target with no duration has no end. It
-      // scored an invented 2s here, which is a number nobody wrote reading as one somebody did.
-      if (m[2] && T.duration == null) throw new Error(`layer start "${L.start}" on ${nameOf(L)}: `
-        + `"${m[1]}" declares no \`duration\`, so it has no end to hang this off. Give "${m[1]}" a duration, `
-        + `or hang this off its START instead ("${m[1]}${m[3] || ''}").`);
-      L.start = (T.start ?? 0) + (m[2] ? T.duration : 0) + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0);
-    }
-    if (!pending) break;
-    if (pass === 7) throw new Error('relative starts: circular reference');
-  }
-  // NOTHING LEAVES HERE AS A STRING. Downstream is `String(L.start ?? 0)` into the dataset and a
-  // `parseFloat` back out, and that pair turns an unresolved reference into a layer at t=0 rather than
-  // into an error. The pass either resolved it or says which layer it could not.
-  for (const L of all) if (typeof L.start === 'string')
-    throw new Error(`layer start "${L.start}" on ${nameOf(L)} did not resolve. It would render at t=0 with nothing to say so.`);
-}
 
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 
@@ -454,7 +391,9 @@ boot((data, fps, theme, canvas) => {
   // PROP AUDIT: every layer is watched from here, before the first read of any layer prop, so the
   // record covers the pre-passes below as well as the build itself.
   data.layers = (data.layers || []).map(watchProps);
-  resolveRelativeStarts(data); // "otherId+0.5" / "otherId.end-0.2" → numeric starts (declared stagger chains)
+  resolveRelativeTimes(data); // "otherId+0.5" / "otherId.end-0.2" → numeric starts (declared stagger chains).
+  // A no-op when Go already pre-expanded this scene (internal/render/expand.go); still needed here for a
+  // scene with nothing else to expand, since that gate only shells to Node on block/beat/comp/recipes/voice.
   resolvePans(data);           // panWith:"<id>" → that layer's motion, same wall clock, this layer's origin
   // becomes:"<id>" is NOT resolved here. It needs the measured box of a layer that states no w/h, and
   // nothing is measured until the DOM exists, so it runs beside `baseSize` below (see resolveBecomes).
@@ -1107,7 +1046,7 @@ const boxOf = (id) => boxes.get(id) || null;
   // accepts "above"/"below", occlusion by stacking order rather than by a hand-listed set of ids,
   // which is the form the effect actually wants ("hide me under everything on a higher track").
   //
-  // A DEEP-FROZEN COPY, not the live object. The engine mutates layer specs (resolveRelativeStarts
+  // A DEEP-FROZEN COPY, not the live object. The engine mutates layer specs (resolveRelativeTimes
   // rewrites `start`, resolveKeyedProps expands tracks), so handing out the real one would let a
   // modifier rewrite the input of a layer that has not rendered yet and make renderFrame(n) depend on
   // render order. Copied and frozen ONCE at build, so the per-frame cost is a Map lookup.
