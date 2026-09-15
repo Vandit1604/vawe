@@ -18,12 +18,30 @@
 // compete for stacking only among themselves, in their own group, not against their group's siblings).
 // That is also exactly the shape of the vawe-flow-2 defect this gate was written to catch.
 //
+// VISIBILITY, NOT THE AUTHORED WINDOW. The first cut of this reported the whole authored move window
+// as "covered" the moment B's start fell inside it, which fired on terminal-plane's real exit: by the
+// time card-a started, terminal-plane had already translated to x -2390 and faded to opacity 0.004, so
+// nothing visible was actually hidden. `motionAt` (the same function core/tracks/motion.js drives a
+// frame from) is the one place that already knows a layer's pose at an arbitrary instant, so THIS reads
+// A's real pose at the moment B starts covering it, rather than re-deriving "is it still there" from
+// the endpoints. A finding fires only if A is still on screen at that instant (opacity >= 0.05 and its
+// translated box still overlaps the canvas), and reports the VISIBLE remainder of the overlap, not the
+// window as authored.
+//
+// HTML COVERAGE IS NOT DECIDED HERE. An `html` layer's real opacity/background is markup this gate does
+// not read (the fragment can be, and in this repo's own films is, transparent on purpose so a ground
+// rect shows through it). Guessing "may cover" from the type alone produced four false positives on
+// vawe-flow-2's own `gnd-*` backdrop rects. Deciding an html layer's real coverage is a rendered-pixel
+// question, seam-forensics.mjs's / probe-frame's job, not this JSON-only gate's: an html B is simply
+// never reported as a coverer here.
+//
 //   node quality/gates/covered-move.mjs <scene.json>   ·   make covered-move D=<file>
 import fs from 'node:fs';
 import { loadScene } from '../../core/engine/expand.js';
 import { resolveCoords } from '../../core/engine/boot.js';
 import { sceneDims } from '../../core/layout/safe.js';
 import { isFullBleedPlane } from '../../core/tracks/overscan.js';
+import { motionAt } from '../../core/timeline/sequence.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const file = process.argv[2];
@@ -78,26 +96,47 @@ function drawnAbove(bIdx, aIdx) {
   return bIdx > aIdx;
 }
 
-// isCoverer(L) -> { opaque, confidence } for whether L, AT REST, is the kind of thing that hides
-// whatever is behind it: an opaque fill, or a full-bleed image/video/html. This reads the declared
-// JSON, not rendered pixels (that is seam-forensics.mjs's job), so an html layer's actual markup
-// opacity is unknowable here and is reported at lower confidence rather than guessed at.
+// isCoverer(L) -> true when L, AT REST, is a kind of layer whose coverage IS decidable from the JSON
+// alone: an opaque fill, or a full-bleed image. `html` is deliberately absent (see the file header):
+// its opacity is markup this gate cannot read, and a ground rect in this repo's own films is made
+// transparent ON PURPOSE so it shows through the html fragment above it.
 function isCoverer(L) {
-  if (!L || typeof L !== 'object') return { opaque: false, confidence: 'n/a' };
-  if (L.type === 'image' || L.type === 'video') return { opaque: true, confidence: 'high' };
-  if (L.type === 'rect' && (L.fill || L.bg || L.color)) return { opaque: true, confidence: 'high' };
-  if (L.type === 'html') return { opaque: true, confidence: 'may cover' };
+  if (!L || typeof L !== 'object') return false;
+  if (L.type === 'image' || L.type === 'video') return true;
+  if (L.type === 'rect' && (L.fill || L.bg || L.color)) return true;
   if (L.type === 'group') {
     for (const child of L.children || []) {
       const box = (typeof child.x === 'number' && typeof child.y === 'number'
         && typeof child.w === 'number' && typeof child.h === 'number') ? child : null;
-      if (box && isFullBleedPlane(box, canvas)) {
-        const c = isCoverer(child);
-        if (c.opaque) return c;
-      }
+      if (box && isFullBleedPlane(box, canvas) && isCoverer(child)) return true;
     }
   }
-  return { opaque: false, confidence: 'n/a' };
+  return false;
+}
+
+// visibleAt(A, lt) -> A's translated box + opacity at local time `lt` (`motionAt`, the same pose
+// core/tracks/motion.js drives a frame from), or null once A is effectively gone: faded below 5%
+// opacity, or translated fully off the canvas. `dx`/`dy` are motionAt's own output names for x/y.
+function visibleAt(A, lt) {
+  if (!Array.isArray(A.motion) || !A.motion.length) return null;
+  const pose = motionAt(A.motion, lt, A.motionDelay);
+  if (pose.opacity == null || pose.opacity < 0.05) return null;
+  const box = { x: A.x + (pose.dx || 0), y: A.y + (pose.dy || 0), w: A.w, h: A.h };
+  const overlapsCanvas = box.x < canvas.w && box.x + box.w > 0 && box.y < canvas.h && box.y + box.h > 0;
+  return overlapsCanvas ? { box, opacity: pose.opacity } : null;
+}
+
+// visibleUntil(A, from, to) -> the last instant in [from, to] A is still visible, sampled forward
+// (A's own move never reads past its own window, so `to` is always the window's own end).
+const VISIBLE_STEPS = 24;
+function visibleUntil(A, from, to) {
+  let last = from;
+  for (let s = 1; s <= VISIBLE_STEPS; s++) {
+    const t = from + (to - from) * (s / VISIBLE_STEPS);
+    if (!visibleAt(A, t - A.start)) break;
+    last = t;
+  }
+  return last;
 }
 
 const findings = [];
@@ -113,19 +152,19 @@ for (let ai = 0; ai < top.length; ai++) {
     if (typeof B.start !== 'number') continue; // an unresolved relative start: skip, don't guess
     if (!drawnAbove(bi, ai)) continue;
     const bBox = (typeof B.x === 'number' && typeof B.y === 'number' && typeof B.w === 'number' && typeof B.h === 'number') ? B : null;
-    if (!bBox || !isFullBleedPlane(bBox, canvas)) continue;
-    const cover = isCoverer(B);
-    if (!cover.opaque) continue;
+    if (!bBox || !isFullBleedPlane(bBox, canvas) || !isCoverer(B)) continue;
     for (const w of wins) {
       if (B.start < w.from || B.start >= w.to) continue;
+      // A must still be ON SCREEN the instant B starts covering it: not already faded/translated away.
+      if (!visibleAt(A, B.start - A.start)) continue;
+      // THE VISIBLE PART OF THE OVERLAP, not the authored window: from B.start (when the cover
+      // begins) to the last instant A is still on screen, never the whole authored window.
+      const to = visibleUntil(A, B.start, w.to);
       const aTrack = effTrack(A, ai), bTrack = effTrack(B, bi);
       const why = bTrack !== aTrack
         ? `track ${bTrack} draws above track ${aTrack}`
         : `same track (${aTrack}), later in layers[] (index ${bi} > ${ai})`;
-      findings.push({
-        a: A.id || `layer#${ai}`, b: B.id || `layer#${bi}`, from: w.from, to: w.to, why,
-        confidence: cover.confidence, bStart: B.start,
-      });
+      findings.push({ a: A.id || `layer#${ai}`, b: B.id || `layer#${bi}`, from: B.start, to, why });
     }
   }
 }
@@ -144,10 +183,9 @@ for (const rec of findings) {
     severity: 'warn',
     waived: allow.has('covered-move'),
     at: { layer: rec.a },
-    summary: `"${rec.a}" moves from ${round(rec.from)}s to ${round(rec.to)}s, and "${rec.b}" `
-      + `starts at ${round(rec.bStart)}s${rec.confidence === 'may cover' ? ' (may cover, unread html opacity)' : ''} `
-      + `on top of it: ${rec.why}.`,
-    fix: `Start "${rec.b}" at ${round(rec.to)}s (after "${rec.a}"'s move ends), `
+    summary: `"${rec.a}" is still visible (opacity >= 0.05, on canvas) from ${round(rec.from)}s to `
+      + `${round(rec.to)}s while "${rec.b}" covers it starting at ${round(rec.from)}s: ${rec.why}.`,
+    fix: `Start "${rec.b}" at ${round(rec.to)}s (after "${rec.a}" is no longer visible), `
       + `or give "${rec.a}" a track above "${rec.b}".`,
   });
 }
@@ -156,5 +194,5 @@ F.emit();
 if (!findings.length) console.log('  ✓ no authored move is covered by a full-bleed layer above it before it plays.');
 console.log(`\n  ${allow.has('covered-move') ? 0 : findings.length} finding(s)${allow.has('covered-move') && findings.length ? ` (waived, ${findings.length} live)` : ''}.`);
 console.log('  (report only, never blocks: a covering start can be a deliberate hard cut. Reads the declared JSON,');
-console.log('   not rendered pixels; an html coverer\'s real opacity is unknowable here, see docs/CRAFT/TRANSITIONS.md.)\n');
+console.log('   not rendered pixels, and never judges html coverage; see docs/CRAFT/TRANSITIONS.md.)\n');
 process.exit(0); // report-only: never fails the build, regardless of TASTE=1
