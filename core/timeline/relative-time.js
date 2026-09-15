@@ -18,12 +18,23 @@
 // `cameraMove[].start` (or the single-spec object form). `cameraMove.stations[]` carries no absolute
 // time key in that table (only `dur`/`dwell`, both durations), so it is not a target here.
 //
-// data.bg / layers[].bg window `from`/`to` are deliberately NOT resolved here even though tempo.js
-// scales them as absolute times: that string slot already has its OWN grammar, a junction reference
-// like `"cut@1"` (core/timeline/junctions.js `bindWindowsToJunctions`), resolved separately at its own
-// call sites. Layering a second string grammar onto the same field would make `"cut@1"` ambiguous with
-// a (nonexistent) layer named `cut`; this resolver refuses instead of guessing, so a bg window's string
-// is simply left to its existing owner.
+// BEAT TARGETS ("beat:<id>.start"/"beat:<id>.end", plus offset), a SEPARATE grammar from the layer-id
+// one above, only live where `data.beats` (`{id,start,duration}[]`, item 3) is present. The `beat:`
+// prefix is the one thing that lets this share a string slot with the bg window's junction grammar
+// (`"cut@1"`, core/timeline/junctions.js `JUNCTION_REF = /^([a-z]+)@(\d+)$/`) without ambiguity: a
+// junction ref never carries a colon and a beat ref never carries an `@`, so the two cannot collide
+// (proved by a test: "beat:x.start" fails JUNCTION_REF, "cut@1" fails BEAT_RX). Every field the bare
+// layer-id grammar already reaches also accepts a `beat:` target (layer start, transitions[].at,
+// cameraMove[].start), PLUS the bg window `from`/`to` on `data.bg` and any layer's own `L.bg`, which
+// the bare grammar was deliberately refused (see the note it used to carry, now folded into this one:
+// a bg window's string is otherwise left entirely to its existing junction owner). A beat's own `start`
+// may itself be relative to another beat, resolved in its own multi-pass below, before anything else
+// can reference a beat.
+//
+// TWO OWNERS OF BEAT TIMING is the risk this whole feature carries (the storyboard sidecar also has
+// beat spans): `harness/author/assemble.mjs` is the one place that WRITES `data.beats` (from the
+// storyboard it already parses), and `quality/gates/plan-vs-render.mjs` reports, never blocks, any beat
+// whose scene start/duration disagrees with the storyboard. This resolver only ever READS `data.beats`.
 //
 // captions[].start is in tempo.js's table too, but no caption ever carries that field (the real shape
 // is `{t0,t1}`, schema-checked); it is a dead key in that table, not a live one, so nothing to resolve.
@@ -38,6 +49,9 @@ function eachLayerDeep(ls, fn) {
 }
 
 const RX = /^([\w-]+?)(\.end)?\s*([+-]\s*[\d.]+)?$/;
+// Explicit `.start`/`.end` only: a beat has no "bare id = start" shorthand (that shorthand belongs to
+// the layer-id grammar above, and the two must stay visually distinct in a scene that uses both).
+const BEAT_RX = /^beat:([\w-]+)\.(start|end)\s*([+-]\s*[\d.]+)?$/;
 
 // resolveRef(str, byId, label) -> number. `label` names the field in the error, e.g. `transition "at"`.
 // Used once every layer start (the only field a reference can itself target) is already a number.
@@ -58,7 +72,9 @@ const roundTime = (x) => Math.round(x * 1e6) / 1e6;
 
 /**
  * resolveRelativeTimes(data) -> data, mutated in place and returned. Numbers-only input passes through
- * byte-identical (nothing here is a string, every branch below is a no-op).
+ * byte-identical (nothing here is a string, every branch below is a no-op). A film with no `data.beats`
+ * never sees the `beat:` grammar at all: `isBeatTarget` is false for every string, so it behaves exactly
+ * as it did before item 3.
  */
 export function resolveRelativeTimes(data) {
   if (!data || typeof data !== 'object') return data;
@@ -67,12 +83,63 @@ export function resolveRelativeTimes(data) {
   eachLayerDeep(data.layers, (L) => { all.push(L); if (L.id) byId[L.id] = L; });
   const nameOf = (L) => `${L.id ? `"${L.id}"` : `a ${L.type || 'text'} layer`}`;
 
+  const hasBeats = Array.isArray(data.beats) && data.beats.length;
+  const beatById = {};
+  if (hasBeats) for (const b of data.beats) if (b && b.id) beatById[b.id] = b;
+  // RISK 2, SURPRISE SHIFTS: only a string that NAMES a beat moves when the beat moves; a plain number
+  // never does. This list is what makes a shift visible rather than silent: every `beat:` string this
+  // run actually resolved, printed once at the end.
+  const beatResolutions = [];
+
+  // resolveBeatRef(str, label) -> number, or null if the beat it names is not resolved YET (its own
+  // `start` is still a string, mid multi-pass below). Throws on an unknown beat id, the same shape
+  // resolveRef throws for an unknown layer id.
+  const resolveBeatRef = (str, label) => {
+    const m = BEAT_RX.exec(str.trim());
+    if (!m || !beatById[m[1]]) throw new Error(`${label} "${str}": unknown beat reference "${m ? m[1] : str}". `
+      + `A beat-relative time names another beat's \`id\` as "beat:<id>.start" or "beat:<id>.end". `
+      + `Known beats: ${Object.keys(beatById).join(', ') || '(none: this scene declares no beats[])'}.`);
+    const B = beatById[m[1]];
+    if (typeof B.start !== 'string') {
+      const v = roundTime((B.start ?? 0) + (m[2] === 'end' ? (B.duration ?? 0) : 0)
+        + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0));
+      beatResolutions.push(`${label} "${str}" -> ${v}s`);
+      return v;
+    }
+    return null; // B's own start is still unresolved; caller retries next pass
+  };
+  const isBeatTarget = (v) => typeof v === 'string' && v.trim().startsWith('beat:');
+
+  // PASS 0: beats[] own starts. A beat's start may itself be relative to another beat
+  // ("beat:b1.end + 0.2"); multi-pass for the same reason layer starts are, and RISK 3 (circular
+  // references) reuses the exact same "N passes then give up" mechanism, one shared shape for both
+  // beats and layers rather than two.
+  if (hasBeats) {
+    for (let pass = 0; pass < 8; pass++) {
+      let pending = 0;
+      for (const b of data.beats) {
+        if (typeof b.start !== 'string') continue;
+        if (!isBeatTarget(b.start)) throw new Error(`beat "${b.id}" start "${b.start}": a beat's start `
+          + `must be a number or "beat:<id>.start"/"beat:<id>.end" (plus an optional offset).`);
+        const v = resolveBeatRef(b.start, `beat "${b.id}" start`);
+        if (v == null) { pending++; continue; }
+        b.start = v;
+      }
+      if (!pending) break;
+      if (pass === 7) throw new Error('relative beat starts: circular reference');
+    }
+    for (const b of data.beats) if (typeof b.start === 'string')
+      throw new Error(`beat "${b.id}" start "${b.start}" did not resolve.`);
+  }
+
   // PASS 1: layer starts. Multi-pass because a target may itself be a relative start; an
-  // unresolvable/circular reference fails loud, naming the layer.
+  // unresolvable/circular reference fails loud, naming the layer. A `beat:` target resolves in one
+  // step (every beats[] entry is already a plain number by now, from PASS 0 above).
   for (let pass = 0; pass < 8; pass++) {
     let pending = 0;
     for (const L of all) {
       if (typeof L.start !== 'string') continue;
+      if (isBeatTarget(L.start)) { L.start = resolveBeatRef(L.start, `layer start "${L.start}" on ${nameOf(L)}`); continue; }
       const m = RX.exec(L.start.trim());
       if (!m || !byId[m[1]]) throw new Error(`layer start "${L.start}" on ${nameOf(L)}: unknown reference `
         + `"${m ? m[1] : L.start}". A relative start names another layer's \`id\`. Known ids: ${Object.keys(byId).join(', ') || '(none: no layer in this scene declares an id)'}.`);
@@ -93,12 +160,27 @@ export function resolveRelativeTimes(data) {
     throw new Error(`layer start "${L.start}" on ${nameOf(L)} did not resolve. It would render at t=0 with nothing to say so.`);
 
   // PASS 2: every other absolute field. None of these can themselves be a relative-time TARGET (nothing
-  // names a transition or a camera leg by reference), so one pass, now that every layer start is a number.
+  // names a transition or a camera leg by reference), so one pass, now that every layer start and every
+  // beat is a number.
   if (Array.isArray(data.transitions)) for (const T of data.transitions)
-    if (typeof T.at === 'string') T.at = resolveRef(T.at, byId, 'transition "at"');
+    if (typeof T.at === 'string') T.at = isBeatTarget(T.at) ? resolveBeatRef(T.at, 'transition "at"') : resolveRef(T.at, byId, 'transition "at"');
   if (data.cameraMove) {
     const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
-    for (const s of specs) if (s && typeof s.start === 'string') s.start = resolveRef(s.start, byId, 'cameraMove "start"');
+    for (const s of specs) if (s && typeof s.start === 'string')
+      s.start = isBeatTarget(s.start) ? resolveBeatRef(s.start, 'cameraMove "start"') : resolveRef(s.start, byId, 'cameraMove "start"');
   }
+
+  // BG WINDOWS: `beat:` ONLY. A bare id/`cut@1` string stays untouched, still owned entirely by
+  // core/timeline/junctions.js `bindWindowsToJunctions`; only the `beat:`-prefixed form is this
+  // resolver's to read, since that prefix is what makes it unambiguous (see the file banner).
+  const resolveBgWindow = (w, label) => {
+    if (!w || typeof w !== 'object') return;
+    if (isBeatTarget(w.from)) w.from = resolveBeatRef(w.from, `${label} "from"`);
+    if (isBeatTarget(w.to)) w.to = resolveBeatRef(w.to, `${label} "to"`);
+  };
+  if (Array.isArray(data.bg)) for (const w of data.bg) resolveBgWindow(w, 'bg window');
+  for (const L of all) if (Array.isArray(L.bg)) for (const w of L.bg) resolveBgWindow(w, `layer ${nameOf(L)} bg window`);
+
+  if (beatResolutions.length) console.log(`  beat-relative: ${beatResolutions.join(', ')}`);
   return data;
 }

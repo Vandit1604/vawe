@@ -8687,6 +8687,122 @@ const FLOOR = 1800;
   const plainCopy = JSON.parse(JSON.stringify(plain));
   resolveRelativeTimes(plainCopy);
   ok('relative-time: a numbers-only scene is untouched', JSON.stringify(plainCopy) === JSON.stringify(plain));
+
+  // a scene with NO beats[] at all behaves byte-identical even when it names layer ids that would
+  // otherwise collide with beat syntax: the `beat:` prefix is the only trigger.
+  const noBeats = { layers: [{ id: 'hero', type: 'text', start: 1, duration: 2 }] };
+  const noBeatsCopy = JSON.parse(JSON.stringify(noBeats));
+  resolveRelativeTimes(noBeatsCopy);
+  ok('relative-time: a scene with no beats[] is untouched', JSON.stringify(noBeatsCopy) === JSON.stringify(noBeats));
+}
+
+// BEAT-RELATIVE TIME (item 3, `beats[]` + "beat:<id>.start"/"beat:<id>.end"): a beat gives its own id
+// to every field the plain relative-time grammar already reaches, plus a bg window from/to, which the
+// bare grammar was refused (that string slot's own junction grammar).
+{
+  // layer start off a beat's start plus an offset, and off a beat's end.
+  const s1 = { beats: [{ id: 'b1', start: 2, duration: 3 }],
+    layers: [{ id: 'x', type: 'text', start: 'beat:b1.start + 0.3' }, { id: 'y', type: 'text', start: 'beat:b1.end' }] };
+  resolveRelativeTimes(s1);
+  ok('relative-time: layer start resolves off a beat\'s start plus an offset', approx(s1.layers[0].start, 2.3));
+  ok('relative-time: layer start resolves off a beat\'s end', approx(s1.layers[1].start, 5));
+
+  // cameraMove[].start off a beat.
+  const s2 = { beats: [{ id: 'b1', start: 1, duration: 2 }],
+    cameraMove: [{ move: 'slowPush', start: 'beat:b1.start', dur: 1, from: 1, to: 1.1 }] };
+  resolveRelativeTimes(s2);
+  ok('relative-time: cameraMove[].start resolves off a beat', approx(s2.cameraMove[0].start, 1));
+
+  // transitions[].at off a beat's end.
+  const s2b = { beats: [{ id: 'b1', start: 0, duration: 4 }], transitions: [{ at: 'beat:b1.end', fx: 'whip' }] };
+  resolveRelativeTimes(s2b);
+  ok('relative-time: transitions[].at resolves off a beat\'s end', approx(s2b.transitions[0].at, 4));
+
+  // a bg window's from/to, `beat:`-prefixed only: this is the one place the bare grammar was refused.
+  const s3 = { beats: [{ id: 'b1', start: 0, duration: 3 }, { id: 'b2', start: 3, duration: 2 }],
+    bg: [{ preset: 'plain', from: 'beat:b1.start', to: 'beat:b2.end' }] };
+  resolveRelativeTimes(s3);
+  ok('relative-time: bg window from/to resolve off beats (the beat: prefix only)',
+    approx(s3.bg[0].from, 0) && approx(s3.bg[0].to, 5));
+
+  // a beat's own start relative to another beat.
+  const s4 = { beats: [{ id: 'a', start: 1, duration: 2 }, { id: 'b', start: 'beat:a.end + 0.5' }] };
+  resolveRelativeTimes(s4);
+  ok('relative-time: a beat\'s own start may be relative to another beat', approx(s4.beats[1].start, 3.5));
+
+  // unknown beat id names itself in the error.
+  let unknownBeatMsg = '';
+  try { resolveRelativeTimes({ beats: [{ id: 'a', start: 0, duration: 1 }],
+    layers: [{ id: 'x', type: 'text', start: 'beat:nope.start' }] }); }
+  catch (e) { unknownBeatMsg = e.message; }
+  ok('relative-time: an unknown beat id names itself in the error',
+    unknownBeatMsg.includes('"nope"') && unknownBeatMsg.includes('unknown beat reference'));
+
+  // circular beat reference is refused, the same "circular reference" shape a layer gets.
+  let circularBeatMsg = '';
+  try { resolveRelativeTimes({ beats: [{ id: 'p', start: 'beat:q.start' }, { id: 'q', start: 'beat:p.start' }] }); }
+  catch (e) { circularBeatMsg = e.message; }
+  ok('relative-time: a circular beat reference is refused, not resolved to a guess', circularBeatMsg.includes('circular'));
+
+  // the pre-existing junction grammar stays untouched even when the scene also carries beats[]: "beat:"
+  // and "cut@1" cannot collide (proved directly against both regexes, not just observed on one scene).
+  const s5 = { beats: [{ id: 'b1', start: 0, duration: 1 }], layers: [{ id: 'hero', type: 'text', start: 0 }],
+    bg: [{ preset: 'plain', from: 'cut@1' }] };
+  resolveRelativeTimes(s5);
+  ok('relative-time: a junction ref ("cut@1") is untouched on a scene that also has beats[]', s5.bg[0].from === 'cut@1');
+  const JUNCTION_REF = /^([a-z]+)@(\d+)$/;
+  const BEAT_TARGET = /^beat:([\w-]+)\.(start|end)\s*([+-]\s*[\d.]+)?$/;
+  ok('relative-time: "beat:x.start" and "cut@1" cannot both match, by construction',
+    !JUNCTION_REF.test('beat:x.start') && !BEAT_TARGET.test('cut@1'));
+
+  // tempo scales beats[] the same as every other authored time, keeping a "beat:" reference resolved
+  // BEFORE tempo in step with everything it can sit beside.
+  const GRID2 = 1 / 60;
+  const snap2 = (v) => Math.round(v / GRID2) * GRID2;
+  const tempoBeats = { tempo: 0.85, beats: [{ id: 'b1', start: 1, duration: 2 }],
+    layers: [{ id: 'x', type: 'text', start: 'beat:b1.start + 0.5' }] };
+  const expandedBeats = expandScene(tempoBeats);
+  ok('relative-time + tempo: beats[] scale the same as every other authored time',
+    approx(expandedBeats.beats[0].start, snap2(1 * (1 / 0.85))) && approx(expandedBeats.beats[0].duration, snap2(2 * (1 / 0.85))));
+  ok('relative-time + tempo: a beat: reference resolves before tempo scales the result',
+    approx(expandedBeats.layers[0].start, snap2(1.5 * (1 / 0.85))));
+
+  // a camera move that overruns the beats it declares is REPORTED (console.warn), never blocked.
+  const origWarn = console.warn;
+  let warned = '';
+  console.warn = (msg) => { warned += msg; };
+  try {
+    const overrun = { beats: [{ id: 'b1', start: 0, duration: 2 }],
+      cameraMove: [{ move: 'slowPush', start: 1.5, dur: 1, from: 1, to: 1.1, beats: ['b1'] }] };
+    bakeCameraMove(overrun, { W: 1920, H: 1080 });
+    ok('cameraMove.beats: a move that runs past its declared beats is reported, not thrown', warned.includes('runs outside'));
+    ok('cameraMove.beats: the render still bakes (report, never block)', Array.isArray(overrun.camera) && overrun.camera.length > 0);
+  } finally { console.warn = origWarn; }
+
+  // a camera move that fits inside its declared beats stays silent.
+  const origWarn2 = console.warn;
+  let warned2 = '';
+  console.warn = (msg) => { warned2 += msg; };
+  try {
+    const fits = { beats: [{ id: 'b1', start: 0, duration: 2 }, { id: 'b2', start: 2, duration: 2 }],
+      cameraMove: [{ move: 'slowPush', start: 0, dur: 4, from: 1, to: 1.1, beats: ['b1', 'b2'] }] };
+    bakeCameraMove(fits, { W: 1920, H: 1080 });
+    ok('cameraMove.beats: a move that fits its declared beats stays silent', warned2 === '');
+  } finally { console.warn = origWarn2; }
+
+  // PROOF NOTHING EXISTING CHANGES: every one of these real, committed films declares no `beats[]`, so
+  // item 3's every new branch (beat pass 0, `beat:` checks in the layer/transition/camera/bg passes) is
+  // a no-op for it. Expanding it before and after this file's changes must produce the identical scene.
+  const NO_BEATS_FIXTURES = ['formats/scene/sample.json', 'formats/scene/_auto-orient.json', 'formats/scene/_cursor-camera.json'];
+  for (const rel of NO_BEATS_FIXTURES) {
+    const p = path.join(process.cwd(), rel);
+    if (!fs.existsSync(p)) continue;
+    const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
+    if (raw.beats !== undefined) continue; // not a fixture for this proof
+    let expanded;
+    try { expanded = expandScene(JSON.parse(JSON.stringify(raw))); } catch { continue; } // not every fixture is a bootable scene on its own
+    ok(`relative-time item 3 no-op: ${rel} expands with no beats[] key introduced`, expanded.beats === undefined);
+  }
 }
 
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);

@@ -31,6 +31,11 @@ const CAMERA_SPEC_TIME_KEYS = ['start', 'dur', 'dwell'];
 const CAMERA_STATION_TIME_KEYS = ['dur', 'dwell'];
 const TRANSITION_TIME_KEYS = ['at', 't', 'dur'];
 const CAPTION_TIME_KEYS = ['start', 'duration'];
+// `beats[]` (item 3, core/timeline/relative-time.js) is already resolved to plain numbers by the time
+// tempo runs (expand.js calls the relative-time resolver first), so it is an authored time like any
+// other and must scale the same way, or a film's `beats[]` would read stale against every layer start
+// that scaled off it.
+const BEAT_TIME_KEYS = ['start', 'duration'];
 
 function scaleWindow(w, inv) {
   if (!w || typeof w !== 'object') return;
@@ -99,6 +104,7 @@ export function resolveTempo(data) {
   const mul = tempo;       // every authored RATE (cps) shrinks by this factor when tempo < 1
 
   if (typeof data.duration === 'number') data.duration = snapTime(data.duration * inv);
+  if (Array.isArray(data.beats)) for (const b of data.beats) scaleKeys(b, BEAT_TIME_KEYS, inv);
   for (const L of data.layers || []) scaleLayer(L, inv, mul);
   if (Array.isArray(data.bg)) for (const w of data.bg) scaleWindow(w, inv);
   if (Array.isArray(data.transitions)) for (const T of data.transitions) scaleKeys(T, TRANSITION_TIME_KEYS, inv);
