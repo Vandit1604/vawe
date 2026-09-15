@@ -21,9 +21,10 @@ export const metadata: Metadata = {
  * is not depth, it is a detour.
  *
  * Two more things made the detail route indefensible rather than merely redundant. Six of its
- * eight pages ended on "Read the docs →" pointing into github.com/Vandit1604/vawe, and the repo is
- * private: components/Header.tsx already dropped its GitHub button for exactly that reason, so the
- * site was carrying a decision and contradicting it on the same visit. And the sound-design page
+ * eight pages ended on "Read the docs →" pointing into github.com/Vandit1604/vawe, which was a
+ * private repo at the time: the site was carrying a decision and contradicting it on the same visit.
+ * The repo went public on 2026-09-16 and the header now links it, but that only removes one of the
+ * reasons below; the detail route stays cut on the others. And the sound-design page
  * closed on "Unmute the clip to hear it" over a file with no audio stream in it. Every mp4 on this
  * site is video-only, and components/Clip.tsx hardcodes `muted` with no controls, so that sentence
  * asked the reader to do something the page cannot do.
