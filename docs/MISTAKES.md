@@ -2696,7 +2696,7 @@ holds: harness/lib/craft-rules.mjs, harness/lib/finding-codes.mjs, harness/lib/s
 `ease: "through"` (core/timeline/sequence.js, `tangentAt`) gives a `travel` station velocity-continuous
 arrivals by fitting a chordal finite-difference tangent from each key's two neighbours. The tangent was
 never clamped, and `core/camera-moves/travel.js` had already named the gap in a `ponytail:` comment
-without a real film hitting it yet. One did: `formats/scene/vawe-flow-2.json`'s camera `travel` ends in
+without a real film hitting it yet. One did: vawe-flow-2's camera (a local, gitignored scene) `travel` ends in
 stations `s:1.08 -> s:1 -> s:1 -> ...`, all at or above 1. At authored time 11.22s the rig carried
 `translate3d(0px, 0px, -8.95px)`, a scale BELOW every one of those stations, and the stage shrank enough
 to show a 3-5px rim of ground around the frame.
