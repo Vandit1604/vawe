@@ -799,7 +799,7 @@ export function knobErrors(cfg) {
 // whatever GSAP made of it was the answer. Nothing documented it and nothing checked it, which is the
 // undocumented-capability shape this repo logs (docs/CRAFT/PARITY-AUDIT.md). Both slots that take a
 // stagger now take the same three dials and refuse a fourth.
-const STAGGER_KEYS = ['each', 'amount', 'from'];
+const STAGGER_KEYS = ['each', 'amount', 'from', 'cps']; // cps: the typing rate, only read when from:'typewriter'
 function staggerSpecErrors(spec, at, out) {
   if (spec == null || typeof spec === 'number') return;
   if (!isObj(spec)) { out.push(`${at} must be a number (the per-unit delay) or { each, amount, from }`); return; }
