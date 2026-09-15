@@ -642,6 +642,9 @@ export function createKit(ctx) {
     // delay/anim/out/enterDur/exitDur mean here exactly what they mean out there.
     c.dataset.start = String(cStart);
     c.dataset.duration = String(cDur);
+    // Same mirror as the top-level layer (formats/scene/scene.js setLayerTiming): a group child's own
+    // id, so `make probe-frame` can find it at any depth without walking the tree by hand.
+    if (C.id) c.dataset.id = String(C.id);
     // Always written, like the top-level layer (formats/scene/scene.js setLayerTiming): leaving the
     // attribute unset here meant `clipStyleAt`'s literal `dataset.anim === 'none'` check never fired for
     // an un-authored child, so it kept fading in via the opacity envelope even after `resolveAnim(null)`
