@@ -1,4 +1,4 @@
-// sims/shatter.mjs — a panel disintegrating.
+// generators/sim/sims/shatter.mjs: a panel disintegrating.
 //
 // The reveal move that a `t`-posed layer cannot do: the panel holds still, takes an impulse from one
 // point, and its pieces then carry independent linear and angular momentum with gravity and drag.

@@ -4,7 +4,7 @@ answers: the simulation harness, what it guarantees about determinism, and how a
 group: engine
 ---
 
-# `sims/`: stateful simulation, baked offline
+# `generators/sim/sims/`: stateful simulation, baked offline
 
 `renderFrame(n)` is a pure function of `n`. Eight workers render frames in arbitrary order and the
 bytes must match. A simulation is the opposite of that: it is iterative, frame 412 exists only
@@ -20,13 +20,13 @@ pass once at boot, and `make spectrum` bakes FFT band energy to a per-frame tabl
 row.
 
 ```bash
-make sim D=sims/ember-burst.mjs WRITE=1     # bake → assets/baked/ember-burst/
+make sim D=generators/sim/sims/ember-burst.mjs WRITE=1     # bake → assets/baked/ember-burst/
 make sim-audit                              # seeded? bake fresh? sequence intact?
 ```
 
 ## The module contract
 
-A sim is an ES module in `sims/`. Everything is a plain export:
+A sim is an ES module in `generators/sim/sims/`. Everything is a plain export:
 
 ```js
 export const dims   = { w: 900, h: 900 };  // pixel size of the emitted PNGs
@@ -51,7 +51,7 @@ without re-simulating.
 | `ctx.g` | the destination `CanvasRenderingContext2D`, `dims.w × dims.h`, cleared to transparent before each `draw` |
 | `ctx.W`, `ctx.H` | `dims.w`, `dims.h` |
 | `ctx.fps`, `ctx.frames`, `ctx.seed` | as exported |
-| `ctx.rng` | a seeded PRNG (`sims/lib/rng.mjs`), already constructed from `seed` |
+| `ctx.rng` | a seeded PRNG (`generators/sim/sims/lib/rng.mjs`), already constructed from `seed` |
 | `ctx.state` | yours. Put particles, grids, buffers here. |
 | `ctx.frame` | the index most recently passed to `step` |
 
@@ -66,7 +66,7 @@ entire point of moving the work offline.
 
 ### What a sim MUST NOT do
 
-- `Math.random()`, use `ctx.rng` (or `rng(seed)` from `sims/lib/rng.mjs`).
+- `Math.random()`, use `ctx.rng` (or `rng(seed)` from `generators/sim/sims/lib/rng.mjs`).
 - `Date.now()`, `new Date()`, `performance.now()`: a bake that depends on when it ran is not a bake.
 - `crypto.getRandomValues()`, same reason.
 

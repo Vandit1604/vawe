@@ -1,4 +1,4 @@
-// sims/ink-bloom.mjs — ink dropped into still water.
+// generators/sim/sims/ink-bloom.mjs: ink dropped into still water.
 //
 // A real advection sim, which is the case Tier B exists for: frame n's density field is frame n-1's
 // field pushed along a velocity field and dissipated. There is no closed form for it and no way to
@@ -6,7 +6,7 @@
 //
 // The flow is CURL noise: velocity is the perpendicular gradient of a scalar noise field, which makes
 // it divergence-free by construction. That is the whole trick behind ink-in-water reading as ink in
-// water rather than as a blur — a divergence-free field cannot compress the density, so the blob
+// water rather than as a blur. A divergence-free field cannot compress the density, so the blob
 // curls and folds instead of dissolving into grey.
 //
 // Rendered at grid resolution and scaled up with smoothing on: the bilinear interpolation IS the

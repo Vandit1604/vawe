@@ -1,8 +1,8 @@
 // generators/sim/run.mjs: bake a stateful simulation to a deterministic PNG frame sequence.
 //
-//   node generators/sim/run.mjs sims/ember-burst.mjs            (dry run: report, write nothing)
-//   node generators/sim/run.mjs sims/ember-burst.mjs --write     (bake → assets/baked/ember-burst/)
-//   make sim D=sims/ember-burst.mjs WRITE=1
+//   node generators/sim/run.mjs generators/sim/sims/ember-burst.mjs            (dry run: report, write nothing)
+//   node generators/sim/run.mjs generators/sim/sims/ember-burst.mjs --write     (bake → assets/baked/ember-burst/)
+//   make sim D=generators/sim/sims/ember-burst.mjs WRITE=1
 //
 // WHY THIS EXISTS. `renderFrame(n)` is a pure function of n, eight workers, arbitrary order,
 // byte-identical output. A simulation is the exact opposite: frame 412 exists only because 411 ran
@@ -10,7 +10,7 @@
 // them back through the existing `clip` layer. Non-determinism is confined to bake time.
 //
 // It is confined, not abolished. A bake must REPRODUCE: same source + same seed → the same bytes.
-// That is what `sims/lib/rng.mjs` and `make sim-audit` are for, and it is why the manifest records
+// That is what `generators/sim/sims/lib/rng.mjs` and `make sim-audit` are for, and it is why the manifest records
 // a hash of the source that produced it.
 //
 // Rasterising happens in headless Chromium, the same engine the renderer uses, so a sim can be
@@ -102,7 +102,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const entry = args.find((a) => !a.startsWith('--'));
   const write = args.includes('--write');
   if (!entry) {
-    console.error('usage: node generators/sim/run.mjs sims/<name>.mjs [--write]');
+    console.error('usage: node generators/sim/run.mjs generators/sim/sims/<name>.mjs [--write]');
     const dir = path.join(repoRoot, 'sims');
     if (fs.existsSync(dir)) console.error('sims:', fs.readdirSync(dir).filter((f) => f.endsWith('.mjs')).join(', '));
     process.exit(1);

@@ -5,7 +5,7 @@
 // running.
 //
 // A bake records the hash of its whole SOURCE GRAPH, not of the entry file. Hashing the entry alone
-// would let an edit to sims/lib/rng.mjs change every sequence in the repo while every meta.json still
+// would let an edit to generators/sim/sims/lib/rng.mjs change every sequence in the repo while every meta.json still
 // claimed to be current, silent staleness, the shape this repo keeps writing gates against
 // (MISTAKES #96).
 import fs from 'node:fs';
