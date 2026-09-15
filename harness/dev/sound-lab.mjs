@@ -5,7 +5,7 @@
 // voicings: they were tuned by reading numbers, and it shows. A film shipped today was pulled back for
 // exactly that.
 //
-// The verdicts are the point, not the page. `verify/sound-verdicts.json` is a record of which cues a
+// The verdicts are the point, not the page. `quality/baselines/sound-verdicts.json` is a record of which cues a
 // person actually liked, per cue, with a note. That is the input a tuning pass needs and has never had:
 // without it, "the sounds are bad" is one sentence covering twenty different sounds.
 //
@@ -19,7 +19,7 @@ import { CUES, renderCue, normalize, encodeWav, SR } from '../../core/audio/kit.
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(ROOT, 'out/sound-lab');
-const VERDICTS = 'verify/sound-verdicts.json';
+const VERDICTS = 'quality/baselines/sound-verdicts.json';
 
 fs.mkdirSync(OUT, { recursive: true });
 const names = Object.keys(CUES).sort();

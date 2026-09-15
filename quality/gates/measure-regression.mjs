@@ -6,12 +6,12 @@
 // site while another consumer went on reading the raw value. Comments do not stop that; a failing
 // test does. Each case below is a real reproduction, and each one hard-failed the audit before it was
 // fixed. The name of each fixture says what it is measuring.
-//   node verify/measure-regression.mjs      ·      make audit-test
+//   node quality/gates/measure-regression.mjs      ·      make audit-test
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const audit = (fixture) => {
   try { return execFileSync('node', ['quality/audit.mjs', fixture], { cwd: root, encoding: 'utf8' }); }
   catch (e) { return (e.stdout || '') + (e.stderr || ''); } // the audit exits 1 on a HARD fail

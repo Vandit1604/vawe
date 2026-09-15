@@ -69,7 +69,7 @@ make evals-compare BEFORE=<run-a> AFTER=<run-b>    # two specific runs
 node harness/dev/evals.mjs --save-baseline         # render + commit sheets/manifest as the new baseline
 ```
 
-The renderer refuses a path under `verify/`: to render one brief by hand (not through `make evals`),
+The renderer refuses a path under `quality/runs/`: to render one brief by hand (not through `make evals`),
 copy it to `formats/scene/_eval-<name>.json`, render/gate that copy, then delete it.
 
 `quality/runs/evals/runs/` is gitignored (mp4s, scratch). `quality/runs/evals/baseline/` is committed, sheets and
