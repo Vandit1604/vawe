@@ -39,7 +39,7 @@ for (let p = 0; p < pages; p++) {
   // static-ish group, and WHICH frame wins varies across the 8 parallel workers when spring settles
   // leave sub-pixel motion inside the signature's rounding, so re-rendering an UNCHANGED page
   // produces a pixel-different mp4, and every clip cropped from it churns in git for no reason.
-  // (Pre-existing renderer behaviour, recorded in docs/ROADMAP.md; not fixed here.)
+  // (Pre-existing renderer behaviour, recorded in engine-doctrine/ROADMAP.md; not fixed here.)
   const out = `formats/scene/_catalog-${p + 1}.json`;
   const body = JSON.stringify(scene, null, 2);
   if (!fs.existsSync(out) || fs.readFileSync(out, 'utf8') !== body) fs.writeFileSync(out, body);

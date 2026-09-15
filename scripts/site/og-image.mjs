@@ -8,7 +8,7 @@
 // the SITE's own vendored fonts, and regenerating is one command.
 //
 // It serves the repo through harness/lib/render-harness.mjs rather than standing up another server:
-// that module exists because this file's job had been copy-pasted 22 times (docs/MISTAKES.md #509).
+// that module exists because this file's job had been copy-pasted 22 times (engine-doctrine/MISTAKES.md #509).
 import fs from 'node:fs';
 import path from 'node:path';
 import { serveRepo, launchPage, REPO_ROOT } from '../../harness/lib/render-harness.mjs';

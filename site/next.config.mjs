@@ -46,7 +46,7 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      // the animation explainer: one source (docs/animation.html), published here by
+      // the animation explainer: one source (engine-doctrine/animation.html), published here by
       // `make deck`. A rewrite rather than a page route, because it is a self-contained
       // file that also has to open straight from disk in the repo.
       { source: "/deck", destination: "/deck.html" },

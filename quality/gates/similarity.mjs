@@ -23,7 +23,7 @@ export function fingerprint(input) {
   // Lowered HERE rather than at each caller, so `make ledger` (quality/gates/ledger.mjs imports this)
   // inherits it. A film that declares its boundaries as `transitions` fingerprinted with no stings at
   // all, so two films could share a sting vocabulary and the ledger would score them as further apart
-  // than they are (docs/MISTAKES.md #408). Cloned: loadScene mutates and deletes what it is handed,
+  // than they are (engine-doctrine/MISTAKES.md #408). Cloned: loadScene mutates and deletes what it is handed,
   // and a fingerprint must never rewrite the scene its caller goes on to grade.
   const data = loadScene(structuredClone(input));
   const vocab = new Set(), structure = [], layout = [], colors = new Set();

@@ -1662,7 +1662,7 @@
     },
     "fx": {
      "type": "string|object|array",
-     "label": "Named GSAP effect(s) from core/engine/gsap-effects.js: zoomBlur | {name,dur,ease} | [blurIn,float]. Entrances (zoomBlur/elasticIn/blurIn/spinIn/flipInX/bounceIn/clipUp/maskReveal/revealUp/expandIn/tiltIn/driftIn/glitchIn/foldIn), per-letter text (charFold/charTilt/charBlurCascade/charOvershoot, on split layers), loops (float/pulse/breathe/wobble). Pair with anim:none. There is no `fxOut`: the named GSAP exit family measured zero users and was deleted whole (docs/MISTAKES.md #364); use `out` for an exit."
+     "label": "Named GSAP effect(s) from core/engine/gsap-effects.js: zoomBlur | {name,dur,ease} | [blurIn,float]. Entrances (zoomBlur/elasticIn/blurIn/spinIn/flipInX/bounceIn/clipUp/maskReveal/revealUp/expandIn/tiltIn/driftIn/glitchIn/foldIn), per-letter text (charFold/charTilt/charBlurCascade/charOvershoot, on split layers), loops (float/pulse/breathe/wobble). Pair with anim:none. There is no `fxOut`: the named GSAP exit family measured zero users and was deleted whole (engine-doctrine/MISTAKES.md #364); use `out` for an exit."
     },
     "modifiers": {
      "type": "array",
@@ -1725,7 +1725,7 @@
       },
       "upright": {
        "type": "string|object",
-       "label": "AUTO-ORIENT: hold this layer UPRIGHT while the layer carrying it rotates. \"wheel\", or { of: \"wheel\" }, naming the ROTATING layer this one is carried by (normally the group it sits in). Parenting hands you the rotation for free and it is almost always wrong: photographs and words carried round a circle go upside down at the bottom, so the layout stops being readable exactly when the motion peaks. This cancels the carrier's rotation and NOTHING else, so the arrangement still swings this layer around the carrier's centre and only its orientation is held. Rotation only, not scale (a carrier that scales is moving toward the eye and its contents come with it; `plane` owns holding apparent size) and not skew. The angle is recomputed from the carrier's own `motion` keyframes, never read back off the rendered transform, so it stays pure in the frame index. The carrier needs a `rot` key in a `motion` track and is refused without one, because an entrance is composed by the clip pipeline and is not rotation this can read. Refused alongside `tilt`, which writes the same `rotate` longhand, and refused when it names this layer itself.\n\nThe After Effects name is Auto-Orient (docs/CRAFT/AE-TECHNIQUES.md, technique 12)."
+       "label": "AUTO-ORIENT: hold this layer UPRIGHT while the layer carrying it rotates. \"wheel\", or { of: \"wheel\" }, naming the ROTATING layer this one is carried by (normally the group it sits in). Parenting hands you the rotation for free and it is almost always wrong: photographs and words carried round a circle go upside down at the bottom, so the layout stops being readable exactly when the motion peaks. This cancels the carrier's rotation and NOTHING else, so the arrangement still swings this layer around the carrier's centre and only its orientation is held. Rotation only, not scale (a carrier that scales is moving toward the eye and its contents come with it; `plane` owns holding apparent size) and not skew. The angle is recomputed from the carrier's own `motion` keyframes, never read back off the rendered transform, so it stays pure in the frame index. The carrier needs a `rot` key in a `motion` track and is refused without one, because an entrance is composed by the clip pipeline and is not rotation this can read. Refused alongside `tilt`, which writes the same `rotate` longhand, and refused when it names this layer itself.\n\nThe After Effects name is Auto-Orient (engine-doctrine/CRAFT/AE-TECHNIQUES.md, technique 12)."
       },
       "tilt": {
        "type": "object",
@@ -1826,7 +1826,7 @@
     },
     "becomes": {
      "type": "string",
-     "label": "Declare that this layer CONTINUES as another (by its `id`) across a boundary. A cut transforms one root and a seam blends two frozen stills; neither joins the CONTENT, so the only thing that truly connects two scenes is a form that persists. The named layer opens on THIS layer's final pose (centres matched, size matched by scale, rotation carried) and then animates away into its own geometry, so the handover is exact by construction instead of hand-aligned and hoped for. `becomesDur` (default 0.9) and `becomesEase` shape the handover. validate fails if the two do not meet at the boundary. See docs/CRAFT/KEYED-MOTION.md."
+     "label": "Declare that this layer CONTINUES as another (by its `id`) across a boundary. A cut transforms one root and a seam blends two frozen stills; neither joins the CONTENT, so the only thing that truly connects two scenes is a form that persists. The named layer opens on THIS layer's final pose (centres matched, size matched by scale, rotation carried) and then animates away into its own geometry, so the handover is exact by construction instead of hand-aligned and hoped for. `becomesDur` (default 0.9) and `becomesEase` shape the handover. validate fails if the two do not meet at the boundary. See engine-doctrine/CRAFT/KEYED-MOTION.md."
     },
     "becomesDur": {
      "type": "number",
@@ -1838,7 +1838,7 @@
     },
     "panWith": {
      "type": "string",
-     "label": "Share another layer's motion track by its `id`, on the SAME wall clock, from THIS layer's own origin. A pan of the page is not a camera move (a camera transforms the whole frame, scrim included), so moving a surface means moving its layers together. Copied as deltas and time-shifted by the difference in `start`, so each layer keeps its own position. Anything this layer declares WINS: state your own key at a shared time to peel away from the pan, and any key at a time the pan does not cover is kept. Worked example and the reasoning: docs/CRAFT/KEYED-MOTION.md."
+     "label": "Share another layer's motion track by its `id`, on the SAME wall clock, from THIS layer's own origin. A pan of the page is not a camera move (a camera transforms the whole frame, scrim included), so moving a surface means moving its layers together. Copied as deltas and time-shifted by the difference in `start`, so each layer keeps its own position. Anything this layer declares WINS: state your own key at a shared time to peel away from the pan, and any key at a time the pan does not cover is kept. Worked example and the reasoning: engine-doctrine/CRAFT/KEYED-MOTION.md."
     },
     "follow": {
      "type": "object",
@@ -2735,7 +2735,7 @@
   },
   "audio": {
    "type": "object",
-   "label": "Sound. Every film should have some, and silence should be a decision you write down (`make audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio/select.js. The CUES are synthesized and carry no licence (core/audio/kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks. Check assets/music/credits.json before any commercial release. See docs/CRAFT/SOUND.md.",
+   "label": "Sound. Every film should have some, and silence should be a decision you write down (`make audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio/select.js. The CUES are synthesized and carry no licence (core/audio/kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks. Check assets/music/credits.json before any commercial release. See engine-doctrine/CRAFT/SOUND.md.",
    "fields": {
     "music": {
      "type": "string",
@@ -2793,7 +2793,7 @@
     },
     "bridges": {
      "type": "array",
-     "label": "Sound bridges, J-cuts and L-cuts. A bridge is a texture that crosses a picture change instead of stopping at it: a J-cut starts the next shot's sound BEFORE its picture, an L-cut lets the last shot's sound run UNDER the new one. It is the one continuous object that costs the picture nothing, so a film whose beats are visually unrelated is still held together. Each bridge names a JUNCTION, never a timestamp, so retiming a beat moves the sound with it. Resolved by core/audio/bridges.js, mixed by internal/audio/audio.go. See docs/CRAFT/SOUND.md \u00a72.",
+     "label": "Sound bridges, J-cuts and L-cuts. A bridge is a texture that crosses a picture change instead of stopping at it: a J-cut starts the next shot's sound BEFORE its picture, an L-cut lets the last shot's sound run UNDER the new one. It is the one continuous object that costs the picture nothing, so a film whose beats are visually unrelated is still held together. Each bridge names a JUNCTION, never a timestamp, so retiming a beat moves the sound with it. Resolved by core/audio/bridges.js, mixed by internal/audio/audio.go. See engine-doctrine/CRAFT/SOUND.md \u00a72.",
      "item": {
       "bridge": {
        "type": "string",
@@ -2927,7 +2927,7 @@
     },
     "beatSync": {
      "type": "boolean|object",
-     "label": "Snap the film's picture joints to the music's pulse. `true` takes the grid `make beatmap` wrote beside audio.music (assets/music/<bed>.beats.json); an object may set `grid` (an explicit .beats.json), `maxShift` (how far a joint may travel, default 0.12s) and `bar` (snap to downbeats, not every beat). Cuts snap their time and seams snap the centre of their blend; stings never snap, because an author offsets one from its cut on purpose. A grid that is missing, empty or below confidence 1.6 FAILS the render rather than quietly leaving the film unmatched. core/beats/index.js, docs/CRAFT/SOUND.md.",
+     "label": "Snap the film's picture joints to the music's pulse. `true` takes the grid `make beatmap` wrote beside audio.music (assets/music/<bed>.beats.json); an object may set `grid` (an explicit .beats.json), `maxShift` (how far a joint may travel, default 0.12s) and `bar` (snap to downbeats, not every beat). Cuts snap their time and seams snap the centre of their blend; stings never snap, because an author offsets one from its cut on purpose. A grid that is missing, empty or below confidence 1.6 FAILS the render rather than quietly leaving the film unmatched. core/beats/index.js, engine-doctrine/CRAFT/SOUND.md.",
      "fields": {
       "grid": {
        "type": "string",

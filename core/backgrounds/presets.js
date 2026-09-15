@@ -58,7 +58,7 @@ export const PRESETS = [
       { type: 'dots', mode: 'wave', color: P.dotLight, baseAlpha: 0.06, peakAlpha: 0.24, spacing: 52, r: 1.6, rPeak: 4.5, k: 0.03, period: 5, driftX: 12, driftY: 6 }, grain ] }),
   },
   // `case 'aurora': default:` used to catch ANY unknown name too, byte-identically. The schema enum is
-  // what catches a typo now (docs/MISTAKES.md #361); this entry is only the named `aurora` preset.
+  // what catches a typo now (engine-doctrine/MISTAKES.md #361); this entry is only the named `aurora` preset.
   {
     name: 'aurora',
     blurb: 'drifting colour aurora (moves)',
@@ -142,7 +142,7 @@ export const PRESETS = [
   },
   // blobs. The OTHER light look: airier and more open. Smaller, better-separated pools that leave white
   // space between them. `grid` is opt-in by name on a softwash fx now, never baked into this preset
-  // (silent substitution was the failure: docs/MISTAKES.md, nobody who wrote "preset":"blobs" asked
+  // (silent substitution was the failure: engine-doctrine/MISTAKES.md, nobody who wrote "preset":"blobs" asked
   // for a blueprint).
   {
     name: 'blobs',

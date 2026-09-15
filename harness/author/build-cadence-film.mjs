@@ -1,5 +1,5 @@
 // build-cadence-film.mjs: 15s, three dense 5s beats joined by TWO transitions, one invisible and one
-// expressive. The shape docs/CRAFT/TRANSITIONS.md argues for: one cut family carries the film and a
+// expressive. The shape engine-doctrine/CRAFT/TRANSITIONS.md argues for: one cut family carries the film and a
 // single seam is earned at the payoff. Three families would trip `effect-soup`; the vocabulary is deep
 // so you can pick the right one, not so you can use several.
 //
@@ -79,7 +79,7 @@ const scene = {
   duration: 15,
   sceneUnits: false,
   authoringNote: 'Three dense 5s beats, two transitions: an invisible riseBlur cut at 5s carries the '
-    + 'film and ONE expressive cinematicZoom seam is earned at the 10s payoff (docs/CRAFT/TRANSITIONS.md). '
+    + 'film and ONE expressive cinematicZoom seam is earned at the 10s payoff (engine-doctrine/CRAFT/TRANSITIONS.md). '
     + 'The sound-form is the spine: a flat bar, then four stems, then one merged waveform, all one SVG '
     + 'driven by var(--t), so it survives both transitions and CHANGES at each. Built by '
     + 'harness/author/build-cadence-film.mjs; the cut easings are verified with `make measure`.',

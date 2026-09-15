@@ -10,7 +10,7 @@
 // none of them, and the film would pass. The failure is silent by construction, which is the worst
 // property a check can have.
 //
-// THE CLASS HAS ALREADY BITTEN, AND IT IS RECORDED. docs/MISTAKES.md #401: motion-audit --json printed
+// THE CLASS HAS ALREADY BITTEN, AND IT IS RECORDED. engine-doctrine/MISTAKES.md #401: motion-audit --json printed
 // its human verdict line to stdout AFTER the JSON, so the documented machine-readable output was never
 // machine-readable. A sweep over the library reported all 154 scenes as CRASHED and the number was
 // believed until somebody read the parse error instead of the count.
@@ -127,7 +127,7 @@ export function gateFindings(opts = {}) {
  * be a silent loss dressed up as a contract. What it must NOT do is print that object with console.log,
  * because this module has already pointed stdout at stderr; and it must claim the payload, or the exit
  * flush would append a second document to the same stream. That is exactly the two-writers-one-stdout
- * shape of docs/MISTAKES.md #401, so there is one door and this is it.
+ * shape of engine-doctrine/MISTAKES.md #401, so there is one door and this is it.
  */
 export function emitJson(value) {
   emitted = true;

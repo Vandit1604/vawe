@@ -53,7 +53,7 @@ if (guideLen < 2000) { console.error('✗ guide looks empty: is site/public/vawe
 // wall shut; if any of these ever renders instead of refusing, a stranger can read the repo. ────────
 const attacks = [
   { name: 'escaping src', scene: { module: 'scene', theme: 'vawe', aspect: '16:9', duration: 1, audio: { silent: true },
-    layers: [{ type: 'image', src: '/docs/MISTAKES.md', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 1 }] } },
+    layers: [{ type: 'image', src: '/engine-doctrine/MISTAKES.md', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 1 }] } },
   { name: 'protocol src', scene: { module: 'scene', theme: 'vawe', aspect: '16:9', duration: 1, audio: { silent: true },
     layers: [{ type: 'image', src: 'file:///etc/passwd', x: 0, y: 0, w: 100, h: 100, start: 0, duration: 1 }] } },
   { name: 'oversize', scene: { module: 'scene', theme: 'vawe', aspect: '16:9', duration: 1, audio: { silent: true },

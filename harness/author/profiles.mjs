@@ -1,6 +1,6 @@
 // harness/author/profiles.mjs: THE REFERENCE PROFILES, as data.
 //
-// docs/CRAFT/SELECTION.md Part 2 says why they exist: "An adjective is vague; a brand is a spec." Name
+// engine-doctrine/CRAFT/SELECTION.md Part 2 says why they exist: "An adjective is vague; a brand is a spec." Name
 // the one reference a video should feel like and every family is chosen at once, coherently. A scene
 // opts in with a top-level `"profile": "apple"`.
 //

@@ -1,4 +1,4 @@
-// scripts/site/vocab-catalog.mjs: regenerate docs/CRAFT/VOCABULARY.md from core/vocab.js.
+// scripts/site/vocab-catalog.mjs: regenerate engine-doctrine/CRAFT/VOCABULARY.md from core/vocab.js.
 //
 //   node scripts/site/vocab-catalog.mjs            write the doc
 //   node scripts/site/vocab-catalog.mjs --check    fail if the doc is stale (make vocab-check)
@@ -117,14 +117,14 @@ for (const [title, slot, intro, rows] of FAMILIES) {
 }
 out.push('---');
 out.push(`_${total} words across ${FAMILIES.length} families. Regenerate: \`make vocab\`. The full engine`);
-out.push('vocabularies these alias: `docs/EFFECTS.md` (`make effects`)._');
+out.push('vocabularies these alias: `engine-doctrine/EFFECTS.md` (`make effects`)._');
 
 const md = out.join('\n') + '\n';
-const dest = path.join(root, 'docs/CRAFT/VOCABULARY.md');
+const dest = path.join(root, 'engine-doctrine/CRAFT/VOCABULARY.md');
 if (CHECK) {
   const cur = fs.existsSync(dest) ? fs.readFileSync(dest, 'utf8') : '';
-  if (cur.trim() !== md.trim()) { console.error('✗ docs/CRAFT/VOCABULARY.md is stale, run `make vocab`.'); process.exit(1); }
-  console.log('✓ docs/CRAFT/VOCABULARY.md is in sync with core/vocab.js'); process.exit(0);
+  if (cur.trim() !== md.trim()) { console.error('✗ engine-doctrine/CRAFT/VOCABULARY.md is stale, run `make vocab`.'); process.exit(1); }
+  console.log('✓ engine-doctrine/CRAFT/VOCABULARY.md is in sync with core/vocab.js'); process.exit(0);
 }
 fs.writeFileSync(dest, md);
-console.log(`✓ wrote docs/CRAFT/VOCABULARY.md: ${total} words across ${FAMILIES.length} families`);
+console.log(`✓ wrote engine-doctrine/CRAFT/VOCABULARY.md: ${total} words across ${FAMILIES.length} families`);

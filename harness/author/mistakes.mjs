@@ -6,7 +6,7 @@
 //   node harness/author/mistakes.mjs --n 496 --full      # the ORIGINAL prose, from git history
 //   make mistakes [Q="…"] [N=496] [FULL=1]
 //
-// WHY THIS FILE CHANGED SHAPE. docs/MISTAKES.md was 17,797 lines and 569 entries, 45% of every word of
+// WHY THIS FILE CHANGED SHAPE. engine-doctrine/MISTAKES.md was 17,797 lines and 569 entries, 45% of every word of
 // documentation in this repo. Its own header used to say "read this before authoring", and that was
 // never true in practice: nobody ingests 17,797 lines, so the log written so a mistake is never
 // repeated was the one file nothing actually consulted. The previous version of this comment argued
@@ -14,11 +14,11 @@
 // a repeat. That argument is superseded: a full-text entry nobody reads preserves nothing either, and
 // git already preserves the reasoning without asking a working file to carry both jobs at once.
 //
-// THE CURRENT SHAPE. `harness/author/mistakes-compact.mjs` rewrote docs/MISTAKES.md to three lines
+// THE CURRENT SHAPE. `harness/author/mistakes-compact.mjs` rewrote engine-doctrine/MISTAKES.md to three lines
 // per entry: the title, one lesson sentence, and what holds it now (a gate or live check, by file, or
 // "none"). The full write-up, root cause and all, is unchanged and un-lost: it lives in git at
 // ARCHIVE_HASH below, the commit taken immediately before that migration. `--full` fetches it with
-// `git show <hash>:docs/MISTAKES.md` and slices out the one entry, so the reasoning is still one
+// `git show <hash>:engine-doctrine/MISTAKES.md` and slices out the one entry, so the reasoning is still one
 // command away, just no longer paid for on every read that only wanted the lesson.
 //
 // Same shape as `make arsenal`, deliberately: that tool solved the identical problem for the 337 named
@@ -29,9 +29,9 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const FILE = path.join(ROOT, 'docs/MISTAKES.md');
+const FILE = path.join(ROOT, 'engine-doctrine/MISTAKES.md');
 
-// The commit holding the last full-prose version of docs/MISTAKES.md, set once by the migration and
+// The commit holding the last full-prose version of engine-doctrine/MISTAKES.md, set once by the migration and
 // never moved: every entry number below was resolvable against this tree the moment it was recorded.
 const ARCHIVE_HASH = '77993ff0799dcc41efd2f948204e95531a15ed9f';
 
@@ -46,9 +46,9 @@ if (FULL) {
   if (!ONE) { console.error('✗ --full needs --n <number>: it prints one entry\'s original prose.'); process.exit(2); }
   let archived;
   try {
-    archived = execFileSync('git', ['show', `${ARCHIVE_HASH}:docs/MISTAKES.md`], { cwd: ROOT, maxBuffer: 64 << 20 }).toString();
+    archived = execFileSync('git', ['show', `${ARCHIVE_HASH}:engine-doctrine/MISTAKES.md`], { cwd: ROOT, maxBuffer: 64 << 20 }).toString();
   } catch {
-    console.error(`✗ could not read docs/MISTAKES.md at ${ARCHIVE_HASH}. Is this a shallow clone?`);
+    console.error(`✗ could not read engine-doctrine/MISTAKES.md at ${ARCHIVE_HASH}. Is this a shallow clone?`);
     process.exit(2);
   }
   const alines = archived.split('\n');
@@ -134,7 +134,7 @@ const AREAS = [
   [/\bsite\/|\bdocs-site\//g, 'site'],
   [/\bverify\//g, 'verify'],
   [/\bthemes\//g, 'themes'],
-  [/\bdocs\/(?!MISTAKES)/g, 'docs'],
+  [/\bengine-doctrine\/(?!MISTAKES)/g, 'docs'],
 ];
 
 // CLASS comes from the words. This repo names its defect classes over and over, in the same phrases,

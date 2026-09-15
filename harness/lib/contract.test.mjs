@@ -293,7 +293,7 @@ assert.equal(normalCameraEvidence({ name: 'A', camera: 'slowPush', picture: 'the
 // cameraStillHeldWarnings: a push, then a wide beat with no return, warns; the same pair with a return
 // beat IN BETWEEN does not (the hold is fixed before the wide beat is judged); a push then a CLOSE beat
 // (not a normal-camera shot) does not warn either, even though the camera is still just as pushed in.
-// The push beat's own shot is never graded against its own not-yet-applied end pose (docs/MOTION-CRAFT.md).
+// The push beat's own shot is never graded against its own not-yet-applied end pose (engine-doctrine/MOTION-CRAFT.md).
 {
   const pushed = { name: 'push', camera: 'diveIn tx=960 ty=540 to=1.6' };
   const wide = { name: 'wide', shot: 'wide' };

@@ -5,7 +5,7 @@
 //
 // WHY THIS IS A SCRIPT. The technique is three lines of curl and it has now been re-derived from
 // scratch three times, once by me an hour after reading a doc that already documented it
-// (docs/CRAFT/REF-together-chat.md: "yt-dlp is not installed here, so the pin page was fetched with
+// (engine-doctrine/CRAFT/REF-together-chat.md: "yt-dlp is not installed here, so the pin page was fetched with
 // curl and the v1.pinimg.com mp4 pulled out of its metadata"). A procedure that lives only in prose is
 // a procedure everyone re-invents, which is the same evaporation `grammar/` exists to stop, one step
 // earlier in the pipeline.

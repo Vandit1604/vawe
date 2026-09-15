@@ -4,7 +4,7 @@
 // WHY. The another engine shot-template library (22 templates) was distilled from 178 real ads, not
 // invented. vawe's 19 hand-invented blueprints (blueprints/index.mjs) went the other way, and 12 of
 // them have never been used once: an author reaching for a shape the invented set does not have falls
-// back to raw layers (docs/CRAFT/BLUEPRINTS.md tells that story). This is the distillation step: read
+// back to raw layers (engine-doctrine/CRAFT/BLUEPRINTS.md tells that story). This is the distillation step: read
 // every studied grammar, find the shots that repeat a nameable DEVICE, and print a receipt naming
 // exactly which grammar + shot backs each candidate shape, so a new blueprint is traceable to a real
 // film rather than to a guess.
@@ -29,7 +29,7 @@ const OUT = path.join(GDIR, '_mined-shapes.json');
 // The shape dictionary. Each shape names the blueprint it feeds (blueprints/beats-mined.mjs), the
 // keywords that identify it in a shot's onScreen/moves/trigger prose (all measured, never guessed:
 // every keyword below was copied out of a grammar file this repo already committed), and the storyboard
-// ROLE it is used for (docs/CRAFT/AUTHORING-WALKTHROUGH.md's role vocabulary).
+// ROLE it is used for (engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md's role vocabulary).
 // Each keyword list is kept NON-REDUNDANT on purpose: 'blur' and 'blurred' would both match the same
 // occurrence of "motion-blurred" and double-count it, which silently outweighs a more specific rival
 // shape (rebuilt#4 mismatched to blurResolveHook instead of wordWipe on exactly this bug, caught by

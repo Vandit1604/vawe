@@ -1,6 +1,6 @@
 // core/fx/squash.js: SQUASH AND STRETCH, driven by the layer's own velocity.
 //
-// The eleventh recipe in docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md, and the engine already had three baked
+// The eleventh recipe in engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md, and the engine already had three baked
 // shapes of it (the `stretch` text preset, the `fall` entrance's landing squash, the `squeeze` cut) and
 // no way to make a layer deform BECAUSE it is moving. That is the whole difference between physics and
 // a preset: the amount has to come from the speed, or it reads as an effect somebody switched on.
@@ -13,7 +13,7 @@
 //
 // THE VELOCITY IS READ THROUGH core/sequence.js `velocityAt`, the same sampler the automatic motion
 // blur and the ghost trail use. One fact, one owner: three copies of "evaluate the track twice and
-// subtract" is three chances to disagree about the window and the clamp (docs/MISTAKES.md #423).
+// subtract" is three chances to disagree about the window and the clamp (engine-doctrine/MISTAKES.md #423).
 //
 // PURE, for that reason: the earlier pose is COMPUTED from the keyframes, never remembered, so frame n
 // is a function of n whichever order the workers reach it in.
@@ -44,7 +44,7 @@ export const SQUASH_KEYS = ['amount', 'at'];
 
 // 110 to 125% on the travel axis at full speed is the band practitioners quote; 0.18 sits in it.
 // `at` is the speed that earns the whole of `amount`, in px per SECOND for the same reason the blur
-// floor is (docs/MISTAKES.md #204): px per frame means two different speeds at two frame rates.
+// floor is (engine-doctrine/MISTAKES.md #204): px per frame means two different speeds at two frame rates.
 const DEFAULTS = { amount: 0.18, at: 1600 };
 const MAX_AMOUNT = 0.6;
 

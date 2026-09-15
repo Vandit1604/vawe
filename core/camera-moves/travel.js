@@ -9,7 +9,7 @@ import { resolveHandle } from '../motion/motion.js';
 // it once arrived. Station 0 is where the flight BEGINS, so nothing flies into it and its `dur` is unused.
 // Author the wide shot as station 0 when the film should open full-frame and fly in.
 // Interiors are velocity-CONTINUOUS on purpose: an eased curve at every station zeroes velocity on
-// each arrival, so the journey lands as N separate hops instead of one move (docs/MISTAKES.md #125).
+// each arrival, so the journey lands as N separate hops instead of one move (engine-doctrine/MISTAKES.md #125).
 // The fix is not `linear` either: two straight segments at different speeds still KINK at the shared
 // station, a jolt rather than a stop. `ease: "through"` (core/timeline/sequence.js) already exists for
 // exactly this: a cubic Hermite whose tangent at an interior key comes from its NEIGHBOURS, so the
@@ -17,7 +17,7 @@ import { resolveHandle } from '../motion/motion.js';
 // boundary, so the flight still departs from rest and settles into the final arrival's own ease. Only
 // the last arrival settles.
 // `through`'s tangent (tangentAt, core/timeline/sequence.js) is Fritsch-Carlson clamped: a real film
-// hit the overshoot this once predicted (docs/MISTAKES.md #626), a `travel` scale tail pulling the
+// hit the overshoot this once predicted (engine-doctrine/MISTAKES.md #626), a `travel` scale tail pulling the
 // camera below every authored station between two keys that were themselves equal.
 export function travel({ stations, start = 0, ease = 'easeOutCubic', canvasW = 1920,
   canvasH = 1080 } = {}) {
@@ -63,7 +63,7 @@ export function travel({ stations, start = 0, ease = 'easeOutCubic', canvasW = 1
     // the pre-`through` default (`linear`) rather than fighting that choice.
     const ownOutHandleSameKey = st.easeOut != null && !dwellSec;
     // A station with neither handle keeps the default: velocity-continuous interiors (`through`), only
-    // the final arrival eases (docs/MISTAKES.md #125). `easeIn` REPLACES that default for this arrival's
+    // the final arrival eases (engine-doctrine/MISTAKES.md #125). `easeIn` REPLACES that default for this arrival's
     // own segment; a handle left by the PREVIOUS station's `easeOut` already shapes the same segment,
     // so the default stands down for that reason too rather than fighting it.
     if (i > 0) {

@@ -3,7 +3,7 @@
 // illegible transitions, lonely low-value beats. Not taste-complete, but it makes the recurring
 // mistakes un-shippable. Run: node quality/gates/critique.mjs <scene.json> [--strict]
 //
-// Modeled on another engine' per-frame red-flags + our docs/skill "every frame fights for its value".
+// Modeled on another engine' per-frame red-flags + our engine-doctrine/skill "every frame fights for its value".
 import fs from 'node:fs';
 import { canvasShare, sceneTiming, boxOf, sceneView, inView, PICTORIAL, htmlGraphic } from './scene-timing.mjs';
 import { onScreenText, glyphText, snippet } from '../../harness/lib/text.mjs';
@@ -30,7 +30,7 @@ const findings = [];
 // convention ten other gates already follow, to answer "which codes does this file actually emit" for
 // doc-map's routing check. A single dispatcher with the severity as its first argument hides every code
 // behind a variable name that scan cannot read; every finding in this file was invisible to it before
-// this split (docs/MISTAKES.md #618).
+// this split (engine-doctrine/MISTAKES.md #618).
 // `sev` is set from these constants, not a literal quoted here: finding-codes.mjs also matches a bare
 // `sev: '<code>'` (designspec-check's own shape) and would otherwise read "warn"/"error" themselves as
 // finding codes.
@@ -111,7 +111,7 @@ for (const b of beats) {
 }
 
 // ---- 6. thin-beat: a content beat held >3s with <3 sizable elements = a slide, not a shot ----
-//        (density doctrine, see docs/CRAFT/DENSITY.md). First & last beat exempt (hook / end card).
+//        (density doctrine, see engine-doctrine/CRAFT/DENSITY.md). First & last beat exempt (hook / end card).
 beats.forEach((b, bi) => {
   if (bi === 0 || bi === beats.length - 1) return;
   const span = (b.end + 3) - b.start;
@@ -119,17 +119,17 @@ beats.forEach((b, bi) => {
   const content = layers.filter((l) => (l.track ?? 9) > 2 && overlaps(l, b.start, b.end + 0.3)
     && (l.type !== 'text' || (l.size ?? 0) >= 24));
   if (content.length && content.length < 3) {
-    warn('thin-beat', `beat @${b.start.toFixed(1)}s has only ${content.length} sizable element(s) over ${span.toFixed(1)}s. Reads as a slide. Add support (a demo/stat/chart) + metadata (a dim readout). See docs/CRAFT/DENSITY.md.`, b.start);
+    warn('thin-beat', `beat @${b.start.toFixed(1)}s has only ${content.length} sizable element(s) over ${span.toFixed(1)}s. Reads as a slide. Add support (a demo/stat/chart) + metadata (a dim readout). See engine-doctrine/CRAFT/DENSITY.md.`, b.start);
   }
 });
 
 // ---- 7. mis-centre tell: a big text with a WIDE box but no `align` left-aligns inside it (looks off-
-//        centre). If you gave it `w` to centre it, set align:"center". (docs/MISTAKES.md #15.) ----
+//        centre). If you gave it `w` to centre it, set align:"center". (engine-doctrine/MISTAKES.md #15.) ----
 for (const l of layers) {
   if (l.type && l.type !== 'text') continue;
   if (!l.text || l.split) continue;
   if ((l.size ?? 0) >= 40 && (l.w ?? 0) >= 600 && !l.align) {
-    warn('mis-centre', `"${snippet(l.text, 28)}" (${l.size}px, w:${l.w}) has a wide box but no "align". Text left-aligns inside it and reads off-centre. Set align:"center"/"right", or use pin. See docs/MISTAKES.md #15.`, s0(l));
+    warn('mis-centre', `"${snippet(l.text, 28)}" (${l.size}px, w:${l.w}) has a wide box but no "align". Text left-aligns inside it and reads off-centre. Set align:"center"/"right", or use pin. See engine-doctrine/MISTAKES.md #15.`, s0(l));
   }
 }
 
@@ -161,7 +161,7 @@ for (const b of beats) {
 
 // ---- 9. typing-cutoff: a typed line must finish AND hold a beat before the layer exits, or the cut
 //        lands mid-type. type-time = chars / cps (typing:true = 24/s); it must fit inside `duration`
-//        with a ~0.4s hold. The engine types halfway and cuts in silence otherwise (docs/MISTAKES.md).
+//        with a ~0.4s hold. The engine types halfway and cuts in silence otherwise (engine-doctrine/MISTAKES.md).
 const MIN_TYPE_HOLD = 0.4;
 for (const l of layers) {
   if (!l.typing || l.type !== 'text') continue;
@@ -182,8 +182,8 @@ for (const l of layers) {
 //   (a) a `parts` entry whose selector names the typing slot (type/typing/prompt/command) and reveals
 //       it PER WORD (`each`/`stagger`), which is a stagger-fade, not a character-by-character reveal;
 //   (b) a literal caret glyph (`|`/`▏`) sitting as its own text node right after the typed copy, which
-//       never blinks and never tracks where the "typing" actually stopped (docs/CRAFT/KEYED-MOTION.md).
-// Both are report-only (docs/SAFEGUARDS.md): a hand-tuned fragment may have a reason, so this names the
+//       never blinks and never tracks where the "typing" actually stopped (engine-doctrine/CRAFT/KEYED-MOTION.md).
+// Both are report-only (engine-doctrine/SAFEGUARDS.md): a hand-tuned fragment may have a reason, so this names the
 // swap rather than blocking the render.
 const TYPING_WORD_RE = /\b(type|typing|prompt|command)\w*/i;
 const CARET_GLYPH_RE = />[^<>]*[|▏]\s*<(?!\/?(?:span|b|em|strong|i)\b)/;
@@ -210,8 +210,8 @@ for (const l of layers) {
 }
 
 // ---- 9b2. copied-plane: several layers sharing one tilted plane belong under a `group` that carries
-// the tilt (core/fx/tilt.js:39-46, `plane` refuses a group child in core/fx/plane.js, docs/PRIMITIVES.md
-// :556-584, docs/CRAFT/KEYED-MOTION.md 5b "Rides a tilted or moving surface"). Nothing notices when an
+// the tilt (core/fx/tilt.js:39-46, `plane` refuses a group child in core/fx/plane.js, engine-doctrine/PRIMITIVES.md
+// :556-584, engine-doctrine/CRAFT/KEYED-MOTION.md 5b "Rides a tilted or moving surface"). Nothing notices when an
 // author does it by hand instead: copy one layer's rotX/rotY keys onto another top-level layer, then
 // push its `ox`/`oy` pivot far outside its own box to fake a shared centre. `layers` here is already
 // top-level only (expandScene keeps a group's children nested under it, never flattened in), so a real
@@ -236,7 +236,7 @@ for (let i = 0; i < tiltedLayers.length; i++) {
     const key = [a.l, b.l].map(nameOf).sort().join('|');
     if (copiedPlaneReported.has(key)) continue;
     copiedPlaneReported.add(key);
-    warn('copied-plane', `${nameOf(a.l)} and ${nameOf(b.l)} carry the same rotX/rotY keys at the same times: a tilted plane copied by hand instead of shared. Nest both as \`children\` of one \`group\` ("layout": "free" keeps their exact x/y) and put the motion on the group instead (docs/CRAFT/KEYED-MOTION.md 5b).`, Math.min(s0(a.l), s0(b.l)));
+    warn('copied-plane', `${nameOf(a.l)} and ${nameOf(b.l)} carry the same rotX/rotY keys at the same times: a tilted plane copied by hand instead of shared. Nest both as \`children\` of one \`group\` ("layout": "free" keeps their exact x/y) and put the motion on the group instead (engine-doctrine/CRAFT/KEYED-MOTION.md 5b).`, Math.min(s0(a.l), s0(b.l)));
   }
 }
 for (const l of layers) {
@@ -244,7 +244,7 @@ for (const l of layers) {
   const badKey = l.motion.find((k) => k && ((k.ox != null && (k.ox < -10 || k.ox > 110)) || (k.oy != null && (k.oy < -10 || k.oy > 110))));
   if (!badKey) continue;
   const who = l.id ? `"${l.id}"` : `layer @${s0(l).toFixed(1)}s`;
-  warn('copied-plane', `${who}'s motion pivot (ox ${badKey.ox ?? 50}, oy ${badKey.oy ?? 50}) sits far outside its own 0-100% box: a pivot pushed off-box by hand to borrow another layer's centre. Nest it as a \`group\` child instead and put the motion on the group (docs/CRAFT/KEYED-MOTION.md 5b).`, s0(l));
+  warn('copied-plane', `${who}'s motion pivot (ox ${badKey.ox ?? 50}, oy ${badKey.oy ?? 50}) sits far outside its own 0-100% box: a pivot pushed off-box by hand to borrow another layer's centre. Nest it as a \`group\` child instead and put the motion on the group (engine-doctrine/CRAFT/KEYED-MOTION.md 5b).`, s0(l));
 }
 
 // ---- 9c. typing-camera-still: a real typing line the camera never leans into. The owner's complaint

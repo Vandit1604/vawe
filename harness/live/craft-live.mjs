@@ -95,7 +95,7 @@ function scene(rel, file) {
       say.push(`  ${em.length} emoji in on-screen text and no image, svg or captured surface anywhere:`);
       say.push(`  ${em.map(([L, i]) => name(L, i)).join(', ')}. The emoji IS the picture in this film.`);
       say.push(`  \`make capture\` takes real product UI, \`make assets\` fetches a real logo, and`);
-      say.push(`  docs/CRAFT/IMAGERY.md carries the rest of the ladder with emoji at the bottom of it.`);
+      say.push(`  engine-doctrine/CRAFT/IMAGERY.md carries the rest of the ladder with emoji at the bottom of it.`);
     }
   }
   return say;
@@ -111,8 +111,8 @@ function scene(rel, file) {
  */
 // ── a hand-written FRAGMENT, at the moment it is saved ────────────────────────────────────────────
 // Two rules that were held up by nothing but a sentence, and that the sentence did not hold. Both were
-// broken on `formats/scene/_vawe-oblique.*.html` by an author who had read them (docs/MISTAKES.md #591,
-// and the type/elevation ramps in docs/CRAFT/HTML-FRAGMENTS.md). A rule at [eye] is a rule you can
+// broken on `formats/scene/_vawe-oblique.*.html` by an author who had read them (engine-doctrine/MISTAKES.md #591,
+// and the type/elevation ramps in engine-doctrine/CRAFT/HTML-FRAGMENTS.md). A rule at [eye] is a rule you can
 // agree with and not follow; these two are cheap to check syntactically, so they move to [live].
 //
 // The ceiling, said rather than dressed up: this reads BYTES. It reports that the kit block is
@@ -126,7 +126,7 @@ function fragment(rel, file) {
   //    at the keystroke because this one recurs: the FIRST `</style>` in a fragment is the kit's own
   //    closing tag, so `replace('</style>', css + '</style>')` appends the fragment's CSS INSIDE the
   //    generated block and corrupts the markers. Made twice in one session by the same author, both
-  //    times caught only later by a gate (docs/MISTAKES.md #594).
+  //    times caught only later by a gate (engine-doctrine/MISTAKES.md #594).
   if (!kit && /STAGEKIT:start/.test(raw)) {
     out.push('  the STAGEKIT markers are present but the block no longer parses, so some CSS was written',
       '  INSIDE it. The first `</style>` in a fragment closes the KIT, not your own styles: append to the',
@@ -134,7 +134,7 @@ function fragment(rel, file) {
   } else if (!kit) {
     out.push('  no STAGEKIT block. Paste `buildKit().block` verbatim, markers and all, not the generated',
       '  `<film>.kit.css` sidecar: the markers are the boundary between what you wrote and what the',
-      '  generator did, and four separate checks depend on that boundary (docs/MISTAKES.md #594).');
+      '  generator did, and four separate checks depend on that boundary (engine-doctrine/MISTAKES.md #594).');
   }
   // 1. THE ROSTER ORDER. The scene decider is third, after storyboard and subject. A fragment written
   //    before the beat table exists is a guess at the count and an invented set of motion handles.
@@ -145,7 +145,7 @@ function fragment(rel, file) {
     out.push(`  no storyboard anywhere in formats/scene/. AGENTS.md orders the deciders storyboard (1),`,
       `  subject (2), scene (3), and scene is the role that writes THIS file. Written first, the fragment`,
       `  count is a guess and the motion handles are invented after the fact rather than read off the`,
-      `  plan's own \`motion:\` line. docs/MISTAKES.md #591.`);
+      `  plan's own \`motion:\` line. engine-doctrine/MISTAKES.md #591.`);
   }
 
   return out;
@@ -153,7 +153,7 @@ function fragment(rel, file) {
 
 function engine(rel, file) {
   if (/^internal\/(scene|render)\//.test(rel)) {
-    return [`  ${rel} is the CAPTURE PATH. docs/CRAFT/ENGINE-CHANGES.md: render one film before and`,
+    return [`  ${rel} is the CAPTURE PATH. engine-doctrine/CRAFT/ENGINE-CHANGES.md: render one film before and`,
       `  after, and put BOTH wall-clock times in the commit body. A correctness fix may cost speed;`,
       `  not knowing what it cost is the failure the rule exists for.`];
   }
@@ -162,7 +162,7 @@ function engine(rel, file) {
     try { execFileSync('git', ['ls-files', '--error-unmatch', rel], { cwd: ROOT, stdio: 'ignore' }); }
     catch { tracked = false; }
     if (!tracked && fs.existsSync(file)) {
-      return [`  ${rel} is a NEW GATE. docs/CRAFT/ENGINE-CHANGES.md: a gate is the LAST resort. If the`,
+      return [`  ${rel} is a NEW GATE. engine-doctrine/CRAFT/ENGINE-CHANGES.md: a gate is the LAST resort. If the`,
         `  bad value has a write site, the refusal belongs there and the whole class of bug ends. A gate`,
         `  that runs afterwards only promises to notice. Write it anyway if there is no write site.`];
     }

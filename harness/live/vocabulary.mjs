@@ -67,7 +67,7 @@ process.stdin.on('end', () => {
 
 If an author writes one of those names in a scene, make it a registry instead. It costs one edit in this
 file and buys all of it: a throwing pick() that names the near word instead of rendering a default, its
-own catalogue section in docs/EFFECTS.md, searchability through \`make arsenal\`, and a blurb the engine
+own catalogue section in engine-doctrine/EFFECTS.md, searchability through \`make arsenal\`, and a blurb the engine
 refuses to let you leave unfindable.
 
   export const ${fresh[0]}_REGISTRY = defineRegistry('${fresh[0].toLowerCase().replace(/_/g, ' ')}', ${fresh[0]}, {

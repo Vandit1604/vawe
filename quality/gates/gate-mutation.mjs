@@ -98,7 +98,7 @@ const MOVER = (o = {}) => ({ type: 'html', w: 800, x: 200, y: 700, start: 0, dur
 
 // NB there used to be a GFX fixture here, and four `visuals` cases, pinning `visual-vocabulary`. That
 // gate was deleted: it measured a single-axis layer by squaring it, so it passed the exact defect it
-// existed to catch. A pinned gate is only worth pinning if what it measures is true. See docs/TASTE.md.
+// existed to catch. A pinned gate is only worth pinning if what it measures is true. See engine-doctrine/TASTE.md.
 
 /** One html layer holding two strings at the SAME point with their opacities on the same variable, the
  *  exact shape dissolve-check reads. `clip` wraps each string in a clip-path wrapper, which is the WIPE
@@ -894,7 +894,7 @@ const srcCases = [
     cmd: ['node', ['quality/gates/blocks-audit.mjs']], match: /brand-default/ },
   { name: 'validate · an unknown prop on a layer, silently ignored by the engine', file: 'formats/scene/sample.json',
     // NB: the injected prop must be a name NO layer accepts. `fill` was used here until it became a real
-    // svg-layer prop (docs/MISTAKES.md #149), pick a prop that can never be legitimised.
+    // svg-layer prop (engine-doctrine/MISTAKES.md #149), pick a prop that can never be legitimised.
     mutate: (s) => s.replace('"layers": [', '"layers": [\n    { "type": "rect", "x": 0, "y": 0, "w": 10, "h": 10, "start": 0, "duration": 1, "notARealProp": "#000" },'),
     cmd: ['node', ['core/validate/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "notARealProp"/ },
   { name: 'three · a scene reaching for wall-clock or unseeded randomness', file: 'core/surfaces/three-fx.js',
@@ -904,7 +904,7 @@ const srcCases = [
     mutate: (s) => s.replace('float w = sin(p.x * 2.2 + u_time * 0.9) * 0.13 + sin(p.z * 1.7 - u_time * 0.7) * 0.11;',
                              'float w = sin(p.x * 2.2) * 0.13 + sin(p.z * 1.7) * 0.11;'),
     cmd: ['node', ['quality/gates/lib-test.mjs']], match: /distance field that depends on time/ },
-  { name: 'docs-drift · a shipped effect listed as missing', file: 'docs/ROADMAP.md',
+  { name: 'docs-drift · a shipped effect listed as missing', file: 'engine-doctrine/ROADMAP.md',
     mutate: (s) => s.replace('- Still absent: **Glitch RGB captions', '- Still absent: `zoomBlur`, **Glitch RGB captions'),
     cmd: ['node', ['quality/gates/docs-drift.mjs']], match: /DOCS DRIFT/ },
   { name: 'canvas-purity · a paint layer that does not clear off-window', file: 'core/layers/canvas.js',

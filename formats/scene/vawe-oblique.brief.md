@@ -42,7 +42,7 @@ The reference is a design language, not a script. Its GRAMMAR travels: the groun
 tilt, the accent word. Its OBJECTS do not: their hero is a chat input because their product is chat.
 Every beat that borrows from it carries a `borrows:` line naming what the device becomes here, and
 beat 3 is the one that had to be corrected after it borrowed a shape without its role
-(`docs/MISTAKES.md` #596).
+(`engine-doctrine/MISTAKES.md` #596).
 
 ## The four things a brand site would have given, manufactured
 

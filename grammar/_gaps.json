@@ -1,5 +1,5 @@
 {
- "_": "Capabilities a reference film uses that we cannot do, or can only do awkwardly. Found by READING a film and then probing the engine, so each one names the film that motivated it and how it was verified. `status`: verified means a probe was rendered; suspected means it has not been built yet and building is how it will be settled. Rendered into docs/CRAFT/GRAMMAR.md.",
+ "_": "Capabilities a reference film uses that we cannot do, or can only do awkwardly. Found by READING a film and then probing the engine, so each one names the film that motivated it and how it was verified. `status`: verified means a probe was rendered; suspected means it has not been built yet and building is how it will be settled. Rendered into engine-doctrine/CRAFT/GRAMMAR.md.",
  "gaps": [
   {
    "name": "An authored `filter` was destroyed by a motion track  \u00b7  FIXED",
@@ -65,9 +65,9 @@
   {
    "name": "Light could not be used to steer the eye  \u00b7  FIXED",
    "status": "fixed",
-   "from": "A reference tutorial whose whole thesis is animating light to control where a viewer looks. Cross-checked against docs/CRAFT/EYE-TRACE.md, which ranks the eye's targets as brighter > larger > in focus > moving and treats every one of them as a STATIC property measured at a cut.",
+   "from": "A reference tutorial whose whole thesis is animating light to control where a viewer looks. Cross-checked against engine-doctrine/CRAFT/EYE-TRACE.md, which ranks the eye's targets as brighter > larger > in focus > moving and treats every one of them as a STATIC property measured at a cut.",
    "why": "Three of the four terms were decided once, at build, for a layer's whole life. A glow's colour was baked, a depth was a fixed plane, and there was no camera focus at all, so the doc named `in focus` as an instrument the engine did not have. The eye could be ranked and never steered.",
-   "fix": "FIXED, all four. `--glow-c` crossfades a light's colour; `--plane-z` travels a layer in Z so it grows by approaching rather than by scaling; camera `f`/`a` rack the focus through the depth planes and every layer reacts by where it stands; and a `beam` can now feed a `matte`, so light reveals what it touches. docs/CRAFT/EYE-TRACE.md gained the section that says which knob moves which term."
+   "fix": "FIXED, all four. `--glow-c` crossfades a light's colour; `--plane-z` travels a layer in Z so it grows by approaching rather than by scaling; camera `f`/`a` rack the focus through the depth planes and every layer reacts by where it stands; and a `beam` can now feed a `matte`, so light reveals what it touches. engine-doctrine/CRAFT/EYE-TRACE.md gained the section that says which knob moves which term."
   },
   {
    "name": "A beam of light could not reveal anything  \u00b7  FIXED",

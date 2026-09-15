@@ -401,14 +401,14 @@ export const CAPTION_BLURBS = blurbsOf('caption style', CAP_STYLES);
 //
 // THE INTRO SAID `captions:{ style:"<name>" }`, WHICH THE ENGINE HAS NEVER ACCEPTED. `captionStyle` is
 // a top-level string and `captions` is an array of {t0,t1,text}; schema-drift checks `captionStyle`
-// against these names. The usage snippet was corrected once already (docs/MISTAKES.md, the note in
+// against these names. The usage snippet was corrected once already (engine-doctrine/MISTAKES.md, the note in
 // effects-json.mjs) and the prose above it was left saying the wrong thing, because prose about code
 // goes stale in silence. Moving it to the definition site is what stops that happening twice.
 export const CAP_STYLE_REGISTRY = defineRegistry('caption style', CAP_STYLES, { slot: 'captionStyle', blurbs: CAPTION_BLURBS,
   catalog: {
     title: 'Caption styles',
     tag: 'captions',
-    intro: '`captionStyle:"<name>"` alongside a `captions:[{t0,t1,text}]` array. How burnt-in captions present. Sound and captions: `docs/CRAFT/SOUND.md`.',
+    intro: '`captionStyle:"<name>"` alongside a `captions:[{t0,t1,text}]` array. How burnt-in captions present. Sound and captions: `engine-doctrine/CRAFT/SOUND.md`.',
     usage: (n, { j }) => j({
       captionStyle: n,
       captions: [{ t0: 0.3, t1: 4.6, text: 'Ship the payoff last', pin: 'center', size: 96 }],
@@ -417,7 +417,7 @@ export const CAP_STYLE_REGISTRY = defineRegistry('caption style', CAP_STYLES, { 
     // opening: a line with NO `words` array gets deterministic per-word windows distributed by word
     // length, so every style still reads as intentional karaoke with no audio at all. The caption sits
     // at the CENTRE rather than in the bottom band, the only honest way to make it the subject of a
-    // 640x360 swatch, and itself a demonstration of the placement grammar of docs/MISTAKES.md #422.
+    // 640x360 swatch, and itself a demonstration of the placement grammar of engine-doctrine/MISTAKES.md #422.
     preview: (n, { base, OVER }) => base({
       captionStyle: n,
       captions: [{ t0: 0.3, t1: 5.4, text: 'Ship the payoff last', pin: 'center', size: 96 }],

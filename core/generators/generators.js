@@ -34,7 +34,7 @@
 //
 // WHY A REGISTRY AND NOT A LIST IN THE SITE. The site is a separate app that vendors this directory
 // (scripts/site/site-engine.mjs). A hand-kept list over there is a second source of truth that goes
-// stale silently, which is precisely how site/public froze 77 files behind core/ (docs/MISTAKES.md
+// stale silently, which is precisely how site/public froze 77 files behind core/ (engine-doctrine/MISTAKES.md
 // #271). The site reads GENERATORS and renders whatever it finds.
 //
 // ADDING ONE. Export a `SCHEMA` and a render function from your module, then add a row here. If your
@@ -65,7 +65,7 @@ import { PRESETS as LIGHTFIELD_PRESETS } from '../lightfield/presets.js';
 
 // Which dials a look does not honour, taken from the generator's own HONOURS table rather than listed
 // again here. Narrowing is why a `rings` look cannot show `shadow.seamWidth` and therefore cannot build
-// the illegal pair that used to throw in someone's face (docs/MISTAKES.md #277).
+// the illegal pair that used to throw in someone's face (engine-doctrine/MISTAKES.md #277).
 function narrow(schema, kind) {
   const drop = HONOURS.filter((r) => !r.by.includes(kind)).map((r) => r.at);
   const out = {};
@@ -136,7 +136,7 @@ const build = ({ name, preset, ref, blurb, ready }) => {
     name,
     group: 'lightfield',
     blurb,
-    docs: 'docs/LIGHTFIELD.md',
+    docs: 'engine-doctrine/LIGHTFIELD.md',
     reference: ref,
     schema: narrow(LIGHTFIELD_SCHEMA, kind),
     presets: { [preset]: opts },
@@ -373,7 +373,7 @@ const BANDS = {
   name: 'bands',
   group: 'shader',
   blurb: 'A ramp repeated over a field: panels, concentric arcs or nested rounds, with a light behind.',
-  docs: 'docs/LIGHTFIELD.md',
+  docs: 'engine-doctrine/LIGHTFIELD.md',
   reference: null,
   schema: BANDS_SCHEMA,
   presets: { bands: {} },
@@ -385,12 +385,12 @@ const BANDS = {
 
 // MEASURED, not invented. Fitted to refs/colonnade/c6.jpg at that image's own 9:16, where it scores a
 // mean per-channel error of 14.2 out of 255 against the reference. What still differs is written down
-// in docs/LIGHTFIELD.md rather than left for the next person to rediscover.
+// in engine-doctrine/LIGHTFIELD.md rather than left for the next person to rediscover.
 const SPECTRUM = {
   name: 'spectrum',
   group: 'shader',
   blurb: 'Upright bands with a colour ramp falling down the frame, each band showing less of it than the one inside it.',
-  docs: 'docs/LIGHTFIELD.md',
+  docs: 'engine-doctrine/LIGHTFIELD.md',
   reference: 'refs/colonnade/c6.jpg',
   schema: SPECTRUM_SCHEMA,
   presets: { c6: {} },
@@ -464,7 +464,7 @@ const CRT = {
   name: 'crt',
   group: 'treatment',
   blurb: 'A cathode ray tube: the picture under it goes soft and blooms, then scanlines and a corner falloff go over the top.',
-  docs: 'docs/EFFECTS.md',
+  docs: 'engine-doctrine/EFFECTS.md',
   reference: null,
   schema: CRT_SCHEMA,
   presets: { tube: {} },
@@ -564,7 +564,7 @@ const THERMAL = {
   name: 'thermalBlur',
   group: 'treatment',
   blurb: 'White type blurred, then remapped through a heat ramp: white cores, an orange body, a blue rim, and the thin strokes eaten away.',
-  docs: 'docs/EFFECTS.md',
+  docs: 'engine-doctrine/EFFECTS.md',
   reference: null,
   schema: THERMAL_SCHEMA,
   presets: { heat: {} },
@@ -620,7 +620,7 @@ const EFFECTOR = {
   name: 'effector',
   group: 'motion',
   blurb: 'Move a hundred copies with one moving point, and keyframe none of them. Each copy reacts to how FAR the point is, not to its place in a list, so you get a wave, a ripple, or a trail that lags behind. Flip between trail, highlight and ripple to see it.',
-  docs: 'docs/EFFECTS.md',
+  docs: 'engine-doctrine/EFFECTS.md',
   reference: null,
   schema: EFFECTOR_SCHEMA,
   presets: { trail: {}, highlight: { sticky: 0 }, ripple: { falloff: 'sphere', push: 90, scale: 0 } },
@@ -676,7 +676,7 @@ const SELECTOR = {
   name: 'rangeSelector',
   group: 'type',
   blurb: 'The AE range selector\'s smoothness dial on this engine\'s kinetic presets: at 1 a glyph transitions, at 0 it swaps outright, which is the value a font morph needs.',
-  docs: 'docs/EFFECTS.md',
+  docs: 'engine-doctrine/EFFECTS.md',
   reference: null,
   schema: SELECTOR_SCHEMA,
   presets: { swap: { smoothness: 0 }, continuous: {} },
@@ -727,7 +727,7 @@ const HANDLE_CARD = {
   name: 'keyframeHandle',
   group: 'motion',
   blurb: 'Why two easings that look alike FEEL different: one curve between two keyframes, drawn beside a strip of evenly spaced dots. The dots bunch where the thing is slow and spread where it is fast, which the curve alone hides. Flip between easyEase, snap, hang and overshoot to see it.',
-  docs: 'docs/EFFECTS.md',
+  docs: 'engine-doctrine/EFFECTS.md',
   reference: null,
   schema: HANDLE_SCHEMA,
   presets: {
@@ -787,7 +787,7 @@ export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM, CRT, THERMA
 export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);
 
 // Every generator already wrote its own blurb; nothing READ them, so all four rendered as an em-dash in
-// docs/EFFECTS.md. Derived here rather than in the catalogue so a new generator without one is refused
+// engine-doctrine/EFFECTS.md. Derived here rather than in the catalogue so a new generator without one is refused
 // at load instead of shipping a blank row.
 // The name-keyed map used to be built here, read once by blurbsOf and thrown away. It is kept and
 // handed to defineRegistry, which is what lets the catalogue section below live at the definition site

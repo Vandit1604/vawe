@@ -53,7 +53,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 // is now a 20-line shell that imports scene.js, and it contains zero `L.` reads, so for as long as
 // that split has existed, every prop read only by the orchestrator (cut · vars · react · motionBlur ·
 // borderTrail · circle · becomes · panWith …) was outside the check, and the gate reported green over
-// the blind spot (docs/MISTAKES.md #235).
+// the blind spot (engine-doctrine/MISTAKES.md #235).
 //
 // So the scan is the orchestrator plus the four REGISTRY DIRECTORIES, each walked whole: a layer prop
 // is read by the thing that DRAWS a layer (core/layers, and core/surfaces for the four types whose
@@ -89,7 +89,7 @@ const vocabulary = {
 // on a single line, which is not a formatting preference: schema.json is committed one-name-per-line,
 // so every `--write` reflowed a 451-line block into 6 and `git diff --stat` reported ~445 deletions for
 // a one-prop change. A reviewer read that as "the shared array was deleted" and it was not, the data
-// round-tripped identical (docs/MISTAKES.md #564). A generated block whose diff is unreadable cannot be
+// round-tripped identical (engine-doctrine/MISTAKES.md #564). A generated block whose diff is unreadable cannot be
 // reviewed, and an unreviewable diff is how a real deletion would hide.
 //
 // THE INDENT IS READ OFF THE FILE, not assumed. It was hardcoded to two spaces here and in the splice
@@ -261,7 +261,7 @@ if (process.argv.includes('--write')) {
   // NO WRITE MAY LOSE VOCABULARY IN SILENCE. Everything above this line is the generator agreeing with
   // itself: `--write` produces the block and the check then compares the file against the same
   // computation, so re-running the gate can never tell "I verified this" from "I produced this"
-  // (docs/MISTAKES.md #564). The one thing a re-run cannot see is what the write TOOK AWAY, so that is
+  // (engine-doctrine/MISTAKES.md #564). The one thing a re-run cannot see is what the write TOOK AWAY, so that is
   // measured here, against the file as it stood, and it is measured on NAMES rather than on lines: a
   // reflow is not a loss and a lost prop is not a formatting difference.
   //
@@ -382,7 +382,7 @@ console.log(`✓ schema in sync: all ${engineProps.size} engine props are define
 // once advertised "slideL", an anim that never existed and so silently resolved to fade (#21). This
 // check existed for exactly that, and covered ONE enum out of eight. Adding `nebula` to AMBIENT_FX
 // made the schema reject a valid value and nothing said so until a scene failed to validate
-// (docs/MISTAKES.md #137). Every vocabulary the engine owns is compared here now, both directions.
+// (engine-doctrine/MISTAKES.md #137). Every vocabulary the engine owns is compared here now, both directions.
 {
   let bad = 0, checked = 0;
   for (const { path: pth, want, src } of OWNED) {

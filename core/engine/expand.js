@@ -45,7 +45,7 @@ const shift = (layer, dx, dy, dt) => ({
 });
 
 // warnUnknown(fn, opts, label): an unknown-prop finding for a block/beat instance, printed (an author
-// typo a factory silently ignores, docs/MISTAKES.md #60), never thrown: the same posture `make expand`
+// typo a factory silently ignores, engine-doctrine/MISTAKES.md #60), never thrown: the same posture `make expand`
 // always had. Reads the factory's OWN signature, so nobody maintains a second copy of its parameter list.
 function warnUnknown(fn, opts, label) {
   const sig = fn && /\(\s*\{([^}]*)\}/.exec(fn.toString());
@@ -62,7 +62,7 @@ function expandBlock(layer) {
   if (!f) throw new Error(`unknown block "${layer.block}". known: ${Object.keys(B.BLOCKS).join(', ')}`);
   const { type: _type, block: _block, ...opts } = layer;
   // A namespaced entry ("searchEngine.home") resolves to a WRAPPER; walk to the family the catalog
-  // declares so introspecting its signature reads the right function (docs/MISTAKES.md).
+  // declares so introspecting its signature reads the right function (engine-doctrine/MISTAKES.md).
   const entry = CATALOG.find((e) => e.name === layer.block);
   const famFn = entry ? B.BLOCKS[entry.family] : (layer.block.includes('.') ? B.BLOCKS[layer.block.split('.')[0]] : f);
   warnUnknown(famFn, opts, `block "${layer.block}"`);
@@ -70,7 +70,7 @@ function expandBlock(layer) {
 }
 
 // expandBeat(layer) -> refused. Blueprints are retired: `{type:"beat"}` was the sugar that expanded to
-// one, and every film that used it has been baked to its literal layers (docs/MISTAKES.md, the
+// one, and every film that used it has been baked to its literal layers (engine-doctrine/MISTAKES.md, the
 // retire-blueprints migration). A scene still authoring `{type:"beat"}` is either a stale draft or a
 // copy-paste from an old example; the fix is to compose from `recipes/` (recipes/README.md) or, for a
 // whole beat's worth of layers, to read `make arsenal Q="..."` for the nearest vocabulary that replaced
@@ -99,7 +99,7 @@ function expandComp(layer, comps, stack) {
  * the concrete layers its factory/blueprint/definition produces, bakes `cameraMove` (idempotent: a
  * no-op if it was already baked, e.g. by core/engine/boot.js for the browser render path), and strips
  * the top-level `comps` map. Unknown-prop findings for a block/beat instance are printed as warnings
- * (an author typo that a factory silently ignores, docs/MISTAKES.md #60), never thrown: the same
+ * (an author typo that a factory silently ignores, engine-doctrine/MISTAKES.md #60), never thrown: the same
  * posture `make expand` always had.
  *
  * aspectKey names the canvas any aspect-dependent resolution (the camera bake, a flow-seam's travel)
@@ -160,7 +160,7 @@ export function expandScene(data, aspectKey = '') {
 // see the file banner for why, and internal/render/expand.go for where the same expansion happens for
 // that path instead.
 // DO NOT call core/engine/produce.js's produceBaseline (or any other defaults pass) from here. It was
-// tried and reverted: docs/MISTAKES.md #157 records that wiring the produced baseline into the gates
+// tried and reverted: engine-doctrine/MISTAKES.md #157 records that wiring the produced baseline into the gates
 // masked the exact conditions they test (a gate checking "no camera was injected" can no longer see
 // that once loadScene injects one first). A gate coaches on what the author WROTE; the engine fills
 // the baseline only on the render path, at core/engine/boot.js. Two different jobs, read the same

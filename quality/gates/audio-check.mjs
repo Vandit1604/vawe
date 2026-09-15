@@ -1,6 +1,6 @@
 // quality/gates/audio-check.mjs. THE SOUND GATE: is this film's silence a decision, or an omission?
 //
-// WHY THIS EXISTS. `docs/CRAFT/FILM-STRUCTURE.md` found that shipping mute closes a whole family of
+// WHY THIS EXISTS. `engine-doctrine/CRAFT/FILM-STRUCTURE.md` found that shipping mute closes a whole family of
 // structural device: the sound bridge, music-led structure, the unfinished sentence all need a track
 // to exist. The engine had the machinery since `374ffa9` and was barely asked to use it, because the
 // derivation it needed was gated behind an OPT-IN flag (`audio.auto`) that almost nobody set.
@@ -19,7 +19,7 @@
 // renders true digital silence, whether the audio key is present or not, and that is still worth a
 // finding. And `music:"auto"` only resolves to a real bed when the scene ALSO names a `profile`
 // (`core/audio/select.js`): picking a bed with nothing to go on is the same mistake `bg` injection
-// made for backgrounds (docs/MISTAKES.md #159), so a profile-less film choosing to stay musically
+// made for backgrounds (engine-doctrine/MISTAKES.md #159), so a profile-less film choosing to stay musically
 // silent is not flagged, that part is unchanged.
 //
 // This gate does NOT add sound to anything. It cannot: choosing a bed is a taste decision and picking
@@ -35,7 +35,7 @@
 // It also checks the thing nothing else checks: WHERE THE BED CAME FROM. `assets/music/credits.json`
 // records provenance, and every entry in it is currently `licenceVerified: false`. A bed with no
 // verified licence under a commercial product film is a Content ID claim waiting to land, so it warns
-// loudly and names the file. See docs/CRAFT/SOUND.md §Licensing.
+// loudly and names the file. See engine-doctrine/CRAFT/SOUND.md §Licensing.
 //
 //   node quality/gates/audio-check.mjs <scene.json> [--strict]   ·   make audio-check D=<file>
 //   node quality/gates/audio-check.mjs --all                     ·   make audio-check
@@ -128,7 +128,7 @@ const reasonOf = (a) => {
 // names one a FALSE TAG for exactly that reason. Two failures with one cause: the fact lived in a
 // shape only this file understood.
 //
-// So the codes are written as literals through the shared emitter (docs/MISTAKES.md #401). The printed
+// So the codes are written as literals through the shared emitter (engine-doctrine/MISTAKES.md #401). The printed
 // line is rendered FROM the record and keeps the wording it always had, so nothing a person reads moved.
 const F = gateFindings({
   scene: file,

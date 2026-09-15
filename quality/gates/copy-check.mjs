@@ -88,7 +88,7 @@ if (!findings.length) {
   process.exit(0);
 }
 console.log(`  ${findings.length} copy tell(s):`);
-// The record is the finding; the line is rendered from it (docs/MISTAKES.md #401).
+// The record is the finding; the line is rendered from it (engine-doctrine/MISTAKES.md #401).
 const F = gateFindings({ scene: file, indent: '    ' });
 for (const f of findings) F.warn(f.code, f.msg);
 F.emit();

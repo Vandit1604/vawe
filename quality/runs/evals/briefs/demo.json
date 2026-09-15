@@ -1,6 +1,6 @@
 {
  "module": "scene",
- "note": "DEMO worked example (docs/EVALS.md, skills/vawe-type-demo/SKILL.md). Trailhead, a fictional hiker's route planner. Proves ONE mechanism: a person draws a route on a map with a real cursor path, and the elevation profile fills in underneath the drawn line as it is drawn, so the climb is visible before the walk. No captured site: fictional, self-contained, invented figures. Theme satara: warm paper, single trail-orange accent, geometric rounded sans, snappy easeOutBack motion, chosen for an outdoor/warm/spatial register.",
+ "note": "DEMO worked example (engine-doctrine/EVALS.md, skills/vawe-type-demo/SKILL.md). Trailhead, a fictional hiker's route planner. Proves ONE mechanism: a person draws a route on a map with a real cursor path, and the elevation profile fills in underneath the drawn line as it is drawn, so the climb is visible before the walk. No captured site: fictional, self-contained, invented figures. Theme satara: warm paper, single trail-orange accent, geometric rounded sans, snappy easeOutBack motion, chosen for an outdoor/warm/spatial register.",
  "theme": "satara",
  "aspect": "16:9",
  "duration": 15,
@@ -8,7 +8,7 @@
  "storyboard": "quality/runs/evals/briefs/demo.storyboard.md",
  "audio": { "silent": true, "_why": "worked example: proving the draw+click+fill mechanism, not a mix" },
  "authoring": { "allow": ["no-preflight", "craft-unvisited"], "_why": {
-   "no-preflight": "a small worked-example fixture (docs/EVALS.md) with a locked storyboard beside it; the 9-step decision chain is for a commissioned film with a requester to sign a lock sheet",
+   "no-preflight": "a small worked-example fixture (engine-doctrine/EVALS.md) with a locked storyboard beside it; the 9-step decision chain is for a commissioned film with a requester to sign a lock sheet",
    "craft-unvisited": "same fixture: sized to stay a liveness proof for `make evals`, not to carry a full multi-critic craft pass"
  } },
  "spectacle": { "at": 8.7, "of": "panel", "device": "ripple", "why": "the click and the stat pill it causes are the one loud moment; every other move in the film is a plain eased pop/shrink with no sting of its own" },

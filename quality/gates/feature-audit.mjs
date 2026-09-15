@@ -90,6 +90,6 @@ for (const v of ship) {
 }
 if (!warned) console.log('  ✓ no single preset dominates any shipped video');
 
-console.log('\nfeature-audit: report only (WARN tier). Prefer group/spring/fitH per docs/PRIMITIVES.md.');
+console.log('\nfeature-audit: report only (WARN tier). Prefer group/spring/fitH per engine-doctrine/PRIMITIVES.md.');
 f.emit();
 process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

@@ -89,7 +89,7 @@ test('typing-camera-still: no camera at all stays quiet (nothing to compare agai
 });
 
 // copied-plane: two top-level layers sharing one tilted plane by hand-copying rotX/rotY keys instead
-// of nesting under the `group` that carries the tilt (docs/CRAFT/KEYED-MOTION.md 5b).
+// of nesting under the `group` that carries the tilt (engine-doctrine/CRAFT/KEYED-MOTION.md 5b).
 test('copied-plane: two top-level layers hand-copy the same rotX/rotY keys', () => {
   const scene = { ...BASE, layers: [
     { id: 'card', type: 'html', start: 0, duration: 4, html: '<p>card</p>',

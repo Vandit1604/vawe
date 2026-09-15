@@ -25,7 +25,7 @@ craft:
 ---
 
 <!-- ACCEPTANCE RUN, 2026-09-06: the same lock sheet as vawe-explainer, re-authored from scratch on the new
-     doctrine (route -> vawe-type-explainer -> scaffold TYPE=explainer -> docs/RULES), counting renders. -->
+     doctrine (route -> vawe-type-explainer -> scaffold TYPE=explainer -> engine-doctrine/RULES), counting renders. -->
 
 ## Beat 1: hook (0.2s-3.67s)
 - type: hook

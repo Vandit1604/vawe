@@ -6,7 +6,7 @@
 // to a condition that was always true. Between them the cascade the block exists for was unreachable,
 // and NO render gate could ever catch it: the output was valid, deterministic and wrong-by-omission.
 // That is a linter's job, and this repo has one dependency and intends to keep it that way, so this is
-// the cheap half done honestly rather than a linter added for one rule (docs/MISTAKES.md #82).
+// the cheap half done honestly rather than a linter added for one rule (engine-doctrine/MISTAKES.md #82).
 //
 // WHAT IT CATCHES:
 //   1. SYNTACTIC, `cond ? X : X`, both arms textually identical after normalising space.
@@ -18,7 +18,7 @@
 // where the condition is invariant only after propagating a non-constant expression through another
 // binding. That needs a real dataflow engine over a real AST; this repo has one dependency and intends
 // to keep it. Stated rather than implied, because a gate whose limits are unwritten gets trusted past
-// them (docs/MISTAKES.md #82).
+// them (engine-doctrine/MISTAKES.md #82).
 //
 // THE MEASUREMENT UNDERNEATH RULE 2, stated because a gate's blind spot is never in the rule it
 // states: "never mentioned again" is decided by counting word-boundary occurrences of the identifier

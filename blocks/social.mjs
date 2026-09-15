@@ -22,7 +22,7 @@ const T = TOKENS;
 // VARIANCE low (these are proof/identity chrome, not a film's loud moment); MOTION is the envelope's
 // own `anim` for a single-card family, `parts` where a card's own pieces arrive in more than one beat
 // (a CTA chip after the identity, a stack of avatars landing in order, a chat thread by side).
-// docs/CRAFT/HTML-FRAGMENTS.md.
+// engine-doctrine/CRAFT/HTML-FRAGMENTS.md.
 
 // AVATAR INITIALS ARE THE SAME CASE, and the default is in the kit. `avatarHtml` falls back to
 // `{ bg: accentSoft, color: accentInk }`, the accent as TEXT on a tint of itself, the lowest-contrast

@@ -27,7 +27,7 @@
 // browser and in Node), which is exactly what the static family list below exists to make safe: no
 // `fs.readdirSync` and no dynamic `import()`, so nothing here needs a filesystem to run.
 //
-// See docs/BLOCKS.md for the catalog + screenshots.
+// See engine-doctrine/BLOCKS.md for the catalog + screenshots.
 // THE FAMILY LIST IS STATIC, AND THAT IS WHAT LETS A BLOCK RUN IN A BROWSER. This file used to
 // `fs.readdirSync` its own directory and `await import()` each family, which is a fine plugin loader
 // and is why blocks could never leave node: `scripts/site/site-engine.mjs` vendors core/ into the
@@ -148,7 +148,7 @@ for (const file of FAMILY_FILES) {
 }
 
 // CONTRACT 4, and it is the one that loses authored work. A factory with no CATALOG row still renders
-// if you already know its name, and appears in NOTHING that lists the library: docs/BLOCKS.md, make
+// if you already know its name, and appears in NOTHING that lists the library: engine-doctrine/BLOCKS.md, make
 // catalog, the site grid, make arsenal, registry/. It has happened: six of the twelve codeBlock themes
 // were authored and WCAG-checked together and six shipped without a row, invisible, one manifest line
 // away from being usable (see blocks/catalog.mjs, where they now have rows).
@@ -157,7 +157,7 @@ for (const file of FAMILY_FILES) {
 // rather than in a gate for the reason the other two throws give: the write site can refuse, and a
 // gate that runs afterwards only promises to notice.
 // CONTRACT 5: A ROW WITHOUT A REAL BLURB IS A BLOCK NOBODY CAN FIND. The row itself was already
-// required (contract 4 below), which is what makes a block appear in docs/BLOCKS.md and on the site.
+// required (contract 4 below), which is what makes a block appear in engine-doctrine/BLOCKS.md and on the site.
 // It was not enough. A row with `blurb: ''` loaded silently and entered `make arsenal`'s corpus with
 // nothing to match on, so the block was reachable only by someone who already knew its exact name,
 // which is the definition of undiscoverable. Measured, and it was not hypothetical: 97 of 97 families
@@ -181,7 +181,7 @@ Object.assign(BLOCKS, EXPORTS);
 
 // A namespaced entry resolves to its family with the manifest's preset props merged UNDER call-time
 // opts, so a scene can still override anything. Adding a variant = a row in blocks/catalog.mjs (+ a
-// `variant` branch in the family). See docs/BLOCKS.md (auto-generated) and docs/TASTE.md.
+// `variant` branch in the family). See engine-doctrine/BLOCKS.md (auto-generated) and engine-doctrine/TASTE.md.
 for (const e of CATALOG) {
   // A BARE NAME USES THE RAW FACTORY, AND THAT IS NOT "IDENTICAL BEHAVIOUR", this line said it was.
   // Measured: 82 of the 88 bare catalog rows render DIFFERENTLY without their `props`, because a row's

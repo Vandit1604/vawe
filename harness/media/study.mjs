@@ -8,8 +8,8 @@
 //   node harness/media/study.mjs <video> [name] [--threshold 0.3] [--min-shot 0.4] [--fixed 2] [--cells 4]
 //   node harness/media/study.mjs <video> [name] --content-only   # add content.mjs's numbers, nothing else
 //
-// NAME IT FOR A PERSON. The name becomes grammar/<name>.json, a row in docs/CRAFT/GRAMMAR.md and, if
-// the film earns a deep study, docs/CRAFT/REF-<name>.md. The first one written here was called
+// NAME IT FOR A PERSON. The name becomes grammar/<name>.json, a row in engine-doctrine/CRAFT/GRAMMAR.md and, if
+// the film earns a deep study, engine-doctrine/CRAFT/REF-<name>.md. The first one written here was called
 // `pin-16818198602994243`, which is the id in a URL: it says nothing about a film anyone might be
 // looking for, and it was the filename of a download rather than a decision. `together-chat` is the
 // same film.
@@ -171,7 +171,7 @@ if (argv.includes('--selftest')) {
 
 if (!VIDEO) die('usage: node harness/media/study.mjs <video> [name] [--threshold 0.3]');
 if (!fs.existsSync(VIDEO)) die(`no such file: ${VIDEO}`);
-// A missing tool is not a clean result. seam-snap reported one for months (docs/MISTAKES.md), so this
+// A missing tool is not a clean result. seam-snap reported one for months (engine-doctrine/MISTAKES.md), so this
 // refuses at the entry point and names the binary rather than producing an empty study.
 for (const bin of ['ffprobe', 'ffmpeg']) {
   if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error) {
@@ -749,7 +749,7 @@ const { joints, conflicts } = mergeJoints([
 ]);
 const detected = joints.length > 0;
 // NO SILENT FALLBACK. A film with no detected joint is ONE SHOT, stated as such, never an invented
-// equal-slice sample dressed up as a cut list (the deleted behaviour: docs/MISTAKES.md and the OWNER
+// equal-slice sample dressed up as a cut list (the deleted behaviour: engine-doctrine/MISTAKES.md and the OWNER
 // note that removed it). The reason is printed in `note` below and in study.md/the console report.
 const bounds = detected ? [0, ...joints.map((j) => j.t)] : [0];
 const shots = bounds.map((t0, i) => {
@@ -825,7 +825,7 @@ function stackImages(files, out, axis, padW, padH, what) {
 
 // ── contact sheet: one row per shot, frames chosen by EVENT (see above), not by position ─────────
 // Same shape as make beats, and for the same reason: the middle of a shot is the frame that hides the
-// entrance, which is exactly what a study is looking for (docs/CRAFT/REFERENCE-STUDY.md, MISTAKES #124).
+// entrance, which is exactly what a study is looking for (engine-doctrine/CRAFT/REFERENCE-STUDY.md, MISTAKES #124).
 const frames = path.join(dir, 'frames');
 fs.mkdirSync(frames, { recursive: true });
 const tileW = 300, tileH = Math.round((tileW * height) / width);
@@ -1161,7 +1161,7 @@ answers in. The storyboard is where they turn into our film.
 - **spectacle:** which single shot is the loud one, and what makes it loud?
 
 Storyboard fields these feed: \`pace:\`, \`threads:\`/\`object:\`, \`spectacle:\`.
-See \`docs/CRAFT/STORYBOARD-TEMPLATE.md\` and \`docs/CRAFT/REFERENCE-STUDY.md\`.
+See \`engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md\` and \`engine-doctrine/CRAFT/REFERENCE-STUDY.md\`.
 
 ## Write recipe candidates
 

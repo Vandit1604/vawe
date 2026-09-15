@@ -26,8 +26,8 @@ craft:
   show-dont-tell: "the elevation claim is never set in type, it is a real filling chart synced to a real drawn route; the climb figure only appears as a caused consequence of the click, never asserted in advance"
   motion-craft: "the panel's motion track is hand-keyed (6 keys: hold, arrive on easeOutBack, hold, shrink on easeInOutSine, hold), not a single named preset fired once; the cursor follows a 8-point hand-placed path, not a canned move"
   transitions: "fade (seam) into the demo because the hook's claim dissolves straight into the picture that proves it; cinematicZoom (seam) out of the demo because the proof deserves a push, not a plain cut, into the close"
-  sound: "sounded by default: a warm synth bed under the whole film, plus an explicit `impact` cue at 13.8s and a `chime` at 14.1s so the one consequence in the film has its own sound (docs/CRAFT/SOUND.md)"
-  html-fragments: "the panel is one hand-authored html fragment using `parts` (riseIn/drawOn/popIn) and a `vars` width-mask for the elevation fill; no CSS animation/transition anywhere, the engine owns every seeked frame (docs/CRAFT/HTML-FRAGMENTS.md)"
+  sound: "sounded by default: a warm synth bed under the whole film, plus an explicit `impact` cue at 13.8s and a `chime` at 14.1s so the one consequence in the film has its own sound (engine-doctrine/CRAFT/SOUND.md)"
+  html-fragments: "the panel is one hand-authored html fragment using `parts` (riseIn/drawOn/popIn) and a `vars` width-mask for the elevation fill; no CSS animation/transition anywhere, the engine owns every seeked frame (engine-doctrine/CRAFT/HTML-FRAGMENTS.md)"
 ---
 
 <!--

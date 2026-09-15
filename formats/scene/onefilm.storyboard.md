@@ -11,7 +11,7 @@ destination: web
 ---
 
 <!--
-  STRUCTURE, derived rather than assumed. docs/CRAFT/FILM-STRUCTURE.md Part 4, answered honestly:
+  STRUCTURE, derived rather than assumed. engine-doctrine/CRAFT/FILM-STRUCTURE.md Part 4, answered honestly:
 
     Q1 a voice or continuous reading line?   No. So the thread must be visible or rhythmic.
     Q2 how many subjects?                    SEVERAL, AS PEERS. text, a count, an image, the camera.
@@ -49,7 +49,7 @@ destination: web
   escalation, if beat 5 does not visibly displace beats 2 to 4, the film is a list and we stop and
   rethink it. That is the thing to check on the style frames, before any motion exists.
 
-  SOUND. Not decided here, deliberately. `docs/CRAFT/SOUND.md` landed today and a J-cut is being built
+  SOUND. Not decided here, deliberately. `engine-doctrine/CRAFT/SOUND.md` landed today and a J-cut is being built
   in the engine now. A bed running under all four demonstrations and changing at each junction would be
   a fourth thread, and the one the picture never has to carry. Revisit once that work lands.
 -->

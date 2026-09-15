@@ -8,7 +8,7 @@
 // `make` invocation, and type it. This closes that gap and stops there.
 //
 // ONE COMMAND, NEVER A CHAIN. A `next` string sometimes carries a trailing note in parens, or a second
-// step joined with ", then " (docs/MISTAKES.md #591 is what happens when a whole ladder gets read as
+// step joined with ", then " (engine-doctrine/MISTAKES.md #591 is what happens when a whole ladder gets read as
 // one instruction). Chaining here would make the same mistake in code: run the first command, stop, and
 // let the NEXT invocation re-derive from disk. A step that did not really land then does not silently
 // advance past.

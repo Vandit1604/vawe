@@ -1,6 +1,6 @@
 // core/fx/matte.js: LUMA MATTE. Another layer's brightness becomes this layer's alpha.
 //
-// The twentieth recipe in docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md, and the general case of the whole wipe
+// The twentieth recipe in engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md, and the general case of the whole wipe
 // family: a wipe is a hard edge travelling across a layer, and this is any shape at all, moving however
 // the source layer moves. A gradient sweeping across a headline IS a wipe. A logo over a paint field
 // puts the field inside the logo. A radial fade over a photograph is a vignette that can travel.
@@ -106,7 +106,7 @@ export function frame(kit, el, L, t, scene, spec) {
     ? kit.maskPaintOf(src, t - (src.start ?? 0), { w, h, x, y }) : null;
   const img = live ? live.image : maskImage(src, L);
   // Authoritative writes, every frame, every property: a mask left from another frame is exactly the
-  // render-order dependence renderFrame(n) promises it is not (docs/MISTAKES.md #41).
+  // render-order dependence renderFrame(n) promises it is not (engine-doctrine/MISTAKES.md #41).
   for (const p of ['maskImage', 'webkitMaskImage']) el.style[p] = img;
   for (const p of ['maskSize', 'webkitMaskSize']) el.style[p] = live ? live.size : `${w.toFixed(2)}px ${h.toFixed(2)}px`;
   for (const p of ['maskPosition', 'webkitMaskPosition']) el.style[p] = live ? live.position : `${x.toFixed(2)}px ${y.toFixed(2)}px`;

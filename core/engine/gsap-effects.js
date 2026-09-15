@@ -16,7 +16,7 @@ import { defineRegistry } from '../registry/registry.js';
 // duplicated an `anim` preset exactly (fade/rise/slide-down/slide-left/slide-right/pop/scale), worked
 // on any layer type same as anim, and measured ZERO users across the library while carrying its own
 // doc row, its own arsenal entry, and its own way to spell the same motion. Removed rather than kept
-// as a fourth vocabulary for one idea (docs/MISTAKES.md #364, GSAP_FX comment below).
+// as a fourth vocabulary for one idea (engine-doctrine/MISTAKES.md #364, GSAP_FX comment below).
 //
 // `expandIn` looked like an eighth (it was mapped to `anim:"scale"` in an earlier pass), and it is
 // NOT ONE: `anim`'s `scale`/`pop` transform the whole layer's size, `expandIn` animates `letterSpacing`
@@ -60,7 +60,7 @@ const TEXT = {
 // `scale`/`defocus`) already reaches every one of those motions on any layer type, and the three with
 // no exact `anim`/`out` twin (dropOut, collapseOut, spinOut) were unused all the same, so there was no
 // evidence a real capability was lost by removing the family as a unit. Removed with `fxOut`, `EXIT_FX`,
-// `GSAP_EXIT_BLURBS`, `GSAP_EXIT_REGISTRY` and `DEPRECATED_EXIT`. docs/MISTAKES.md #364.
+// `GSAP_EXIT_BLURBS`, `GSAP_EXIT_REGISTRY` and `DEPRECATED_EXIT`. engine-doctrine/MISTAKES.md #364.
 
 // LOOPS: continuous emphasis (repeat:-1, yoyo). Seeked to t → state at t mod period → deterministic.
 const LOOPS = {
@@ -164,7 +164,7 @@ export const FX_DUR = Object.fromEntries(
 const GSAP_AKA = { expandIn: ['kerning', 'letter-spacing', 'letterspacing', 'tracking out'] };
 
 // Registered so a name in the WRONG SLOT is diagnosable: `anim:"popIn"` is told popIn is a gsap effect.
-// Three shipped layers made exactly that mistake and silently faded for months (docs/MISTAKES.md #355).
+// Three shipped layers made exactly that mistake and silently faded for months (engine-doctrine/MISTAKES.md #355).
 // The blurbs are PASSED, not merely exported. They were written above and this registry used to be
 // built without them, so `defineRegistry` carried `blurbs: null` and every tool that asks a registry
 // what a name MEANS got nothing for the largest effect family. Written and unread is the same as
@@ -180,11 +180,11 @@ export const GSAP_REGISTRY = defineRegistry('gsap effect',
   },
 });
 
-// ---- REMOVED (docs/MISTAKES.md #364): `fxOut` and 7 `fx` entrances that duplicated `anim` exactly ---
+// ---- REMOVED (engine-doctrine/MISTAKES.md #364): `fxOut` and 7 `fx` entrances that duplicated `anim` exactly ---
 //
 // The engine still has THREE vocabularies for "how does this appear": `anim` (19), kinetic `preset`
 // (27) and `fx` (30, down from 37), for one idea, and that overlap is not cosmetic: three of the five
-// layers stranded in docs/MISTAKES.md #355 were real names written into the wrong slot, because an
+// layers stranded in engine-doctrine/MISTAKES.md #355 were real names written into the wrong slot, because an
 // author who learns one vocabulary reasonably expects its words in the next field along.
 //
 // `fadeIn`/`fadeUp`/`fadeDown`/`flyLeft`/`flyRight`/`popIn`/`zoomIn` each had an exact `anim`

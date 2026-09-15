@@ -227,7 +227,7 @@ export function focalAt(ctx, t) {
 // ------------------------------------------------------------------------------------------------
 // THE FILM
 
-// NOT EXTENDED to element handoffs INSIDE a beat (docs/CRAFT/DIRECTION.md, "Directing the eye"), and
+// NOT EXTENDED to element handoffs INSIDE a beat (engine-doctrine/CRAFT/DIRECTION.md, "Directing the eye"), and
 // said here rather than left silent. `focalAt` is built around a JUNCTION: a specific instant with a
 // BEFORE and an AFTER `sceneView`/ground either side of a cut, seam or sting (`marks`, below). A
 // handoff inside one beat (per-word colour walking a phrase, a cursor causing a click) has neither: no

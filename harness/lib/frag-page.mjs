@@ -26,7 +26,7 @@ export function fragPage({ raw, theme, bg, boxW = 1400, tSec = 0, fullBleed = fa
 /* tokens.css is linked for its fonts, but it also sets html,body{width:var(--vw);overflow:hidden} and
    its default --vw is PORTRAIT 1080px. This page never boots, so nothing ever rewrites that default.
    Every fragment wider than 1080px was silently cut at x=1080 while the tool printed "box 1900px
-   centred" (docs/MISTAKES.md #351). Undo both: the vars carry the landscape canvas this harness really
+   centred" (engine-doctrine/MISTAKES.md #351). Undo both: the vars carry the landscape canvas this harness really
    photographs, and html/body grow rather than clip, so --serve still scrolls and the PNG path clips
    through the screenshot rect as the comment below says. */
 :root{--vw:${W}px;--vh:${H}px}

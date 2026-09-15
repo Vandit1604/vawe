@@ -13,7 +13,7 @@ import { defineRegistry } from '../registry/registry.js';
 //
 // WHAT THIS DOES NOT COVER: anything needing real geometry, extruded 3D text, a device showcase, a
 // point cloud, cloth. An SDF cannot import a font outline or a mesh. That half of Tier 4 is where a
-// three.js dependency would actually earn itself; see docs/ROADMAP.md.
+// three.js dependency would actually earn itself; see engine-doctrine/ROADMAP.md.
 //
 // DETERMINISM: pure in (local time, seed). The camera orbit is f(t), never accumulated. No frame
 // feedback, nothing read back. Guarded by `make probe` (DOM) and `make canvas-purity` (real pixels),

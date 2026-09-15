@@ -2,7 +2,7 @@
 # harness/dev/chrome-pin.sh <target-name>: resolve, pin, and RECORD the Chrome build a render uses.
 #
 # WHY THIS EXISTS. renderFrame(n) is pure in n and probe-purity.mjs proves it adversarially
-# (docs/CRAFT/ENGINE-CHANGES.md), and an outside survey named that the best-evidenced determinism
+# (engine-doctrine/CRAFT/ENGINE-CHANGES.md), and an outside survey named that the best-evidenced determinism
 # story of any HTML-to-video tool it looked at. That claim is only as strong as the browser doing the
 # rendering: internal/scene/scene.go:229 reads CHROME_BIN straight from the environment with no
 # version check at all. Two machines, or the same machine after an unattended Chrome auto-update,

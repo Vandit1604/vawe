@@ -40,7 +40,7 @@ rm((l) => l.type === 'text' && l.text === 'scene' && (l.y ?? 0) === 430);
 // cuts beat ── kill the false "22 shader stings" claim; relabel the invisible "blinds"
 L().forEach((l) => { if (has(l, '26 cuts')) l.text = 'every cut, deterministic'; if (l.type === 'text' && l.text === 'blinds') l.text = 'push'; });
 // Both surfaces, because a boundary can be declared raw or through the unified `transitions` list, and
-// a rewrite that saw only one of them left the invisible blinds on screen (docs/MISTAKES.md #408).
+// a rewrite that saw only one of them left the invisible blinds on screen (engine-doctrine/MISTAKES.md #408).
 // This script WRITES the scene back, so it edits the authored surface in place instead of lowering:
 // lowering here would silently convert an author's `transitions` into raw cuts and stings.
 // `boundaryMechanism` decides what a unified entry IS, so the rule is not duplicated here.

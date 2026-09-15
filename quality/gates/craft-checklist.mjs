@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/craft-checklist.mjs · did this film actually VISIT the CRAFT doctrine relevant to it?
 //
-// WHY THIS EXISTS. The CRAFT docs (docs/CRAFT/*.md, docs/TASTE.md, docs/MOTION-CRAFT.md) each carry a
+// WHY THIS EXISTS. The CRAFT docs (engine-doctrine/CRAFT/*.md, engine-doctrine/TASTE.md, engine-doctrine/MOTION-CRAFT.md) each carry a
 // `when:` line that says when to read them, but reading is voluntary and leaves no trace. An author can
 // skip DENSITY.md entirely and nothing downstream notices until `make judge` catches the flat beat by
 // eye, three renders later. This gate makes the visit CHEAP TO CHECK: it computes a small fixed set of
@@ -10,7 +10,7 @@
 // storyboard sidecar for a one-line answer to that doc's `confirm:` question.
 //
 // THE ACKNOWLEDGMENT LIVES IN THE PLAN, NOT THE SCENE. The storyboard is where decisions get made
-// (docs/CRAFT/STORYBOARD-TEMPLATE.md); the scene JSON is where they get transcribed. So the answer goes
+// (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md); the scene JSON is where they get transcribed. So the answer goes
 // in `<scene-basename>.storyboard.md`'s frontmatter, under a `craft:` map keyed by doc slug:
 //
 //     craft:
@@ -41,11 +41,11 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 import { frontmatter as sbFrontmatter, blocksOf, fieldIn } from '../../harness/author/storyboard-parse.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const CRAFT_DIR = path.join(ROOT, 'docs/CRAFT');
-// Two docs carry `applies-when:` outside docs/CRAFT/ because that is where they actually live on disk:
+const CRAFT_DIR = path.join(ROOT, 'engine-doctrine/CRAFT');
+// Two docs carry `applies-when:` outside engine-doctrine/CRAFT/ because that is where they actually live on disk:
 // TASTE.md is the front door and MOTION-CRAFT.md the motion mechanics, both indexed by doc-map.mjs
-// already from docs/ rather than docs/CRAFT/.
-const EXTRA_DOCS = ['docs/TASTE.md', 'docs/MOTION-CRAFT.md'].map((f) => path.join(ROOT, f));
+// already from engine-doctrine/ rather than engine-doctrine/CRAFT/.
+const EXTRA_DOCS = ['engine-doctrine/TASTE.md', 'engine-doctrine/MOTION-CRAFT.md'].map((f) => path.join(ROOT, f));
 
 // ---- the feature vocabulary: small, fixed, computed, never free text ---------------------------
 function walkLayers(layers, fn) {
@@ -60,7 +60,7 @@ function walkLayers(layers, fn) {
 // grid, a dashboard, a chat, a card, per `make screen KIND=`), not any hand-authored fragment: a title
 // card or a kinetic-type beat is also `html` and SCREENS.md's confirm question ("does the screen fill
 // most of the frame…") does not apply to either. There is no structural flag for this on the layer
-// (docs/CRAFT/SCREENS.md is answered by an author, not computed), so the same noun vocabulary
+// (engine-doctrine/CRAFT/SCREENS.md is answered by an author, not computed), so the same noun vocabulary
 // storyboard-check.mjs already uses for its `plain-content` warning (CONTENT_NOUN_RE) is reused here,
 // scoped the SAME WAY that check scopes it: per beat, over the fields a beat actually describes its
 // picture in (`onscreen`/`picture`/`mechanism`/`object`), never the whole storyboard's prose. A whole-

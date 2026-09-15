@@ -9,7 +9,7 @@
 // used by 2 of 153 scenes and 12 of 19 beats have zero users, so the instruction has been given for
 // months and obeyed twice.
 //
-// The other half of the same problem is that docs/CRAFT/README.md already carries a nine-step decision
+// The other half of the same problem is that engine-doctrine/CRAFT/README.md already carries a nine-step decision
 // chain (beats, then the anchor, then the per-beat effect, then type/colour/layout, then density, then
 // restraint, then sound), each step naming the guide that settles it and what it hands the next step.
 // It is good, it is maintained, and an author who never opens it never sees it. A doc cannot make
@@ -55,20 +55,20 @@ if (check) {
     ? `the scene has CHANGED since the preflight was run. The decisions were made against an older cut of this film.`
     : `this scene has never been through the decision chain.`;
   const F = gateFindings({ scene: file, indent: '  ' });
-  F.fail('no-preflight', why, { fix: `make preflight D=${file}`, doc: 'docs/CRAFT/README.md' });
+  F.fail('no-preflight', why, { fix: `make preflight D=${file}`, doc: 'engine-doctrine/CRAFT/README.md' });
   F.emit();
   console.log(`      The chain is nine decisions that each constrain the next, and skipping it is how a film`);
   console.log(`      ends up composed of whatever the author happened to remember. It costs one command:`);
   console.log(`        make preflight D=${file}`);
-  console.log(`      read: docs/CRAFT/README.md`);
+  console.log(`      read: engine-doctrine/CRAFT/README.md`);
   process.exit(1);
 }
 
 // ---- the chain, printed for THIS film ---------------------------------------------------------------
-// Parsed out of docs/CRAFT/README.md rather than restated. That table is maintained, it is the thing a
+// Parsed out of engine-doctrine/CRAFT/README.md rather than restated. That table is maintained, it is the thing a
 // human is told to read, and a second copy here would be the copy that goes stale.
 function chain() {
-  const p = path.join(repoRoot, 'docs/CRAFT/README.md');
+  const p = path.join(repoRoot, 'engine-doctrine/CRAFT/README.md');
   if (!fs.existsSync(p)) return [];
   const rows = [];
   for (const line of fs.readFileSync(p, 'utf8').split('\n')) {
@@ -87,7 +87,7 @@ console.log(`  ${scene.duration || '?'}s · theme ${scene.theme || '?'} · ${(sc
   + ` · plan: ${sb ? path.relative(repoRoot, sb) : 'NONE'}\n`);
 
 const rows = chain();
-if (!rows.length) console.log('  (docs/CRAFT/README.md has no decision table, so there is no chain to print)');
+if (!rows.length) console.log('  (engine-doctrine/CRAFT/README.md has no decision table, so there is no chain to print)');
 else {
   console.log(`  THE CHAIN. Each decision constrains the next, so they are made in this order:\n`);
   for (const r of rows) {
@@ -141,7 +141,7 @@ const REACH = [
     when: () => scene.audio && scene.audio.silent === true && !scene.audio._why,
     say: 'SILENCE, undeclared. Mute is a device and this film does not say which one.',
     how: '"audio": { "silent": true, "_why": "…" }. The sound bridge, the unfinished sentence and music-led structure are all closed while the track is empty.',
-    read: 'docs/CRAFT/SOUND.md',
+    read: 'engine-doctrine/CRAFT/SOUND.md',
     share: '110 of 134 films ship mute and 13 of the 93 that declare it say why.',
   },
 ];

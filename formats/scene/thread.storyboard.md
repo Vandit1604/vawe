@@ -3,7 +3,7 @@ message: hand-animating a video is fine until the number changes, and then you d
 audience: people who rebuild the same product video every time a figure moves
 framework: PAS
 arc: a familiar grind, named clause by clause, until the thing that ends it arrives
-object: none. The thread is a SENTENCE (docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md)
+object: none. The thread is a SENTENCE (engine-doctrine/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md)
 thread: sentence
 sentence: You built it by hand, and it looked good, until the number moved, and now it is Friday again, so describe it once instead.
 object_t0: no prop. A dark field and the first clause, mid-thought.

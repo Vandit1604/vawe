@@ -11,7 +11,7 @@
 // Every blueprint name here is real: cross-checked by hand against `make blueprints`
 // (scripts/site/blueprints-catalog.mjs), which prints the full 29-beat roster.
 //
-// `register`: 'kinetic' or 'quiet', per docs/CRAFT/MOTION-REGISTERS.md. Restraint (how many beats may
+// `register`: 'kinetic' or 'quiet', per engine-doctrine/CRAFT/MOTION-REGISTERS.md. Restraint (how many beats may
 // move, how loud the loud moment gets) is not one universal rule: a 'quiet' type pays a legibility cost
 // for every millisecond of motion (NN/g, Apple HIG) and wants one loud moment against a still field; a
 // 'kinetic' type sells sustained motion as the content itself (kinetic-typography practice, beat-synced
@@ -79,7 +79,7 @@ export const TYPE_SPINES = {
     cues: ['tick'],
     // No continuousObject: a talking-head is held by the face and the captions, not by a prop. Forcing
     // an object spine onto it would be exactly the "rectangle that resizes four times" the skill warns
-    // against. Below CONTINUOUS_ACTION_MAX_S it still drops the beat-cut rotation (docs/CRAFT/ROUTING.md
+    // against. Below CONTINUOUS_ACTION_MAX_S it still drops the beat-cut rotation (engine-doctrine/CRAFT/ROUTING.md
     // via the type SKILL), it just carries no object; `threads:` alone holds it.
     continuousObject: null,
   },

@@ -115,7 +115,7 @@ export function gradientCss(g, t = 0) {
 // and `background-image` is not an inherited property while `color`/`-webkit-text-fill-color` are. So the
 // units inherited the transparency and none of the paint, and `gradient` + `split` rendered NOTHING.
 // Live in a shipped film, and invisible to every gate because a transparent glyph still measures as a
-// full-size opaque box (docs/MISTAKES.md #399). paintSplitUnits below gives each unit its own copy.
+// full-size opaque box (engine-doctrine/MISTAKES.md #399). paintSplitUnits below gives each unit its own copy.
 export function gradientFill(el, L) {
   const g = L.gradient;
   const css = gradientCss(g, 0);
@@ -258,7 +258,7 @@ export function frame(kit, el, L, t, scene, { gradient, typing, text } = L) {
   // in-window frame typed, so `renderFrame(72)` produced "Mee▏" on a tab that had already drawn frame
   // 66 and the whole line on a tab that had not. The capture shards round-robin, so which frames a tab
   // drew before this one is decided by the worker count: one render at -workers 1 and the same render
-  // at -workers 6 disagreed (docs/MISTAKES.md #507). Every per-frame write in this engine is
+  // at -workers 6 disagreed (engine-doctrine/MISTAKES.md #507). Every per-frame write in this engine is
   // authoritative; this one had an exit that was not.
   if (el.__hsTypeBase == null) el.__hsTypeBase = el.innerHTML;
   if (!(t >= start && t < end)) {
@@ -413,5 +413,5 @@ export const PROPS = mergeProps(propsOf(build), propsOf(frame), GUARDED, {
   font: {}, ls: {}, tracking: {}, raw: {},
 });
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink";

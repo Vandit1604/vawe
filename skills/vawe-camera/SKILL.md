@@ -116,4 +116,4 @@ layer at the size the distance asks for. `plane` turns the 3D rig on by itself, 
 - **Vary the verb per leg.** push, then hold, then settle, not three identical pushes. Motion order = story.
 - **Calm and calculated beats frantic.** A slow push under a payoff reads premium; a fast whip everywhere reads cheap.
 
-Feel of the easing: `vawe-animation`. Effects to move over: `vawe-effects`. Depth: [`docs/CRAFT/DIRECTION.md`](../../docs/CRAFT/DIRECTION.md).
+Feel of the easing: `vawe-animation`. Effects to move over: `vawe-effects`. Depth: [`engine-doctrine/CRAFT/DIRECTION.md`](../../engine-doctrine/CRAFT/DIRECTION.md).

@@ -1,5 +1,5 @@
 // build-cadence.mjs: a 5-second launch clip for a made-up product, authored in the higgsfield
-// register (docs/CRAFT/KEYED-MOTION.md) rather than by tracing a reference.
+// register (engine-doctrine/CRAFT/KEYED-MOTION.md) rather than by tracing a reference.
 //
 // The grammar it copies, deliberately and item by item:
 //   • ONE continuous action, no cuts. The engine's whole transition vocabulary goes unused, because a
@@ -16,7 +16,7 @@
 import fs from 'node:fs';
 import { glyphText } from '../../core/type/on-screen-text.js';
 
-// typedHook/morphButton: inlined from the retired blueprints/beats.mjs (docs/MISTAKES.md, the
+// typedHook/morphButton: inlined from the retired blueprints/beats.mjs (engine-doctrine/MISTAKES.md, the
 // retire-blueprints migration). Both are recipe CANDIDATES now (grammar/_blueprints.recipes.json,
 // "typed-erase-enter" and "morph-to-next-seam"), but this specimen calls them as plain literal-layer
 // factories, the same way it always did, not through the deleted `{type:"beat"}` sugar.
@@ -109,7 +109,7 @@ btn.panWith = 'chrome';
 // The button MUST break away before the pan carries it past -382, and the pan crosses -382 at t≈1.115.
 // Peeling later means travelling left past the destination and coming back, and a reversal is a snap no
 // easing can hide: the previous cut peeled at 1.44, by which time the pan sat at -512, so the first own
-// key threw the button 194px RIGHT in two frames at 3244 px/s (docs/MISTAKES.md #200). So it leaves at
+// key threw the button 194px RIGHT in two frames at 3244 px/s (engine-doctrine/MISTAKES.md #200). So it leaves at
 // 1.05 carrying the pan's own speed (825 px/s against the pan's 877) and decelerates along its arc,
 // 825 → 601 → 555 → 362 → 183, while the page keeps sliding out from under it. The break reads as the
 // button refusing to leave with the page, which is the whole point of it being the object.

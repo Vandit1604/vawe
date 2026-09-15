@@ -89,7 +89,7 @@ let copied = 0, drift = 0, bytes = 0;
 // the published one was newer, which is true of an edit that keeps a file the same length, and of any
 // published file touched after the fact. `--check` is the gate that has to be trustworthy here, and a
 // gate that answers from a timestamp reports what happened to the filesystem rather than what is in
-// the file (docs/MISTAKES.md #271).
+// the file (engine-doctrine/MISTAKES.md #271).
 const same = (a, b) => fs.existsSync(b) && fs.readFileSync(a).equals(fs.readFileSync(b));
 
 const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
@@ -159,7 +159,7 @@ for (const ref of wanted) {
   candidates.push({ ref, rel });
 }
 // .dockerignore is the SECOND list that decides what the build sees, and it is hand-kept too. Its own
-// comment already points at docs/MISTAKES.md #289 for this exact failure, and the fix recorded there
+// comment already points at engine-doctrine/MISTAKES.md #289 for this exact failure, and the fix recorded there
 // was a sentence asking the next author to remember. They did not. So read the file rather than trust
 // the sentence: for a path under a `dir/**` exclusion, a bare `!path` negation must exist.
 const dockerNegations = (() => {

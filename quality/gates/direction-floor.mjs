@@ -22,7 +22,7 @@
 // no-kinetic-type · no-camera · no-transition · no-bg-motion · low-vocab. Waive a deliberate minimal
 // film with {"authoring":{"allow":["plain-slideshow"]}}.
 // A film held by a NON-OBJECT device (a motif, an escalation, a metric cut rate, a sound bridge:
-// docs/CRAFT/FILM-STRUCTURE.md) is legitimate structure this gate cannot verify, so it routes through
+// engine-doctrine/CRAFT/FILM-STRUCTURE.md) is legitimate structure this gate cannot verify, so it routes through
 // the reasoned waiver too: {"authoring":{"allow":["no-continuous-object"],"_why":{...}}}. The gate
 // credits only the two devices the engine PRODUCES (a continuous object, a match cut); the rest are a
 // declaration someone wrote down, not something a static gate can confirm. See FIX_MSG below.
@@ -60,7 +60,7 @@ const HIGH_VALUE = [
 ];
 
 // ── THE ANTI-TEMPLATE CHECK: a bar derived from the LIBRARY, not a constant somebody chose ─────────
-// The research this repo argues from (docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md's own census, and outside:
+// The research this repo argues from (engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md's own census, and outside:
 // the another engine community's anti-template checklist) found the same shape twice: a tool with 800+ named
 // things and an author who still reaches for the same five every time, because same-tool-same-result is
 // what an unforced default produces. Refusing "too few effects" (feature-poverty, above) does not catch
@@ -119,7 +119,7 @@ function libraryProfile() {
 }
 
 // ── ROUTE THROUGH THE AE RECIPES TABLE, INSTEAD OF DUPLICATING IT ──────────────────────────────────
-// docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md already carries 26 named recipes with a HAVE/PARTLY/LACK verdict
+// engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md already carries 26 named recipes with a HAVE/PARTLY/LACK verdict
 // and the exact field to reach for; nothing consulted it at the moment a beat gets picked. This reads
 // the table LIVE and answers one question ("which HAVE recipe covers this family?") from it, so the
 // only thing kept here is a search TERM per family, never the recipe's name, verdict or field, which
@@ -128,7 +128,7 @@ let _aeTable = null;
 function aeTable() {
   if (_aeTable) return _aeTable;
   let text = '';
-  try { text = fs.readFileSync(path.join(repoRoot, 'docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md'), 'utf8'); } catch { _aeTable = []; return _aeTable; }
+  try { text = fs.readFileSync(path.join(repoRoot, 'engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md'), 'utf8'); } catch { _aeTable = []; return _aeTable; }
   const section = text.split('## The table')[1] || '';
   const rows = [];
   for (const line of section.split('\n')) {
@@ -139,7 +139,7 @@ function aeTable() {
   return _aeTable;
 }
 // One unique substring per family, checked against every row's `where` text (see the table printed
-// by `docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`'s own header) so each resolves to exactly the row it names,
+// by `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`'s own header) so each resolves to exactly the row it names,
 // not the first row that happens to share a common word. `fx` and `composition` have no clean single-row
 // answer in the table (both are catch-alls), so they are left unmapped rather than forced onto a wrong
 // citation: aeRecipeFor returns null and the caller falls back to its own description alone.
@@ -151,7 +151,7 @@ const aeRecipeFor = (key) => {
   const term = AE_LOOKUP[key];
   if (!term) return null;
   const hit = aeTable().find((r) => r.verdict === 'HAVE' && r.where.toLowerCase().includes(term));
-  return hit ? `AE recipe #${hit.num} "${hit.name}" (${hit.where}), docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` : null;
+  return hit ? `AE recipe #${hit.num} "${hit.name}" (${hit.where}), engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` : null;
 };
 
 const file = process.argv[2];
@@ -185,7 +185,7 @@ const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.auth
 
 // FIX 6: the two SLIDESHOW waivers must be BACKED BY A PLAN. `no-continuous-object` and `plain-slideshow`
 // are the rules a reflex `allow` silences, so honour their waiver only when the storyboard beside this
-// scene names `threads:` (what holds the film, docs/CRAFT/FILM-STRUCTURE.md). A waiver with a `_why` but
+// scene names `threads:` (what holds the film, engine-doctrine/CRAFT/FILM-STRUCTURE.md). A waiver with a `_why` but
 // no named device is the "make the gate stop talking" move; here it is simply not honoured, the finding
 // stands, and the ratchet in author-check decides severity (new work blocks, the legacy library is frozen).
 // So this tightens NEW films without breaking the many legacy scenes that waive these by habit.
@@ -198,7 +198,7 @@ try {
 } catch { planThreads = ''; }
 const canWaive = (code) => !(PLAN_BACKED_WAIVERS.has(code) && !planThreads);
 
-// `not:` (docs/CRAFT/STORYBOARD-TEMPLATE.md): the defaults THIS film refuses, in the author's own
+// `not:` (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md): the defaults THIS film refuses, in the author's own
 // words. adaptFinding reads it for plain-slideshow, the same way planThreads above is read for the
 // waiver check: a film that already named "no kinetic type" as a deliberate exclusion should not then
 // fail for doing exactly that.
@@ -283,7 +283,7 @@ const sig = {
   motionTrack: flat.filter((l) => Array.isArray(l.motion) && l.motion.length > 1).length,
   fx: flat.filter((l) => l.fx).length,
   bgMotion: hasBgMotion ? 1 : 0,
-  // the killer per-frame effects (docs/EFFECTS.md): a border-beam/shine, a paint field, a glow flash, an
+  // the killer per-frame effects (engine-doctrine/EFFECTS.md): a border-beam/shine, a paint field, a glow flash, an
   // svg logo that draws-on or shape-morphs. Each is a distinct directed technique the floor now credits.
   beam: flat.filter((l) => l.type === 'beam').length,
   paint: flat.filter((l) => l.type === 'paint').length,
@@ -313,7 +313,7 @@ if (!directedByBeats) {
   const notCtx = { not: planNot ? [planNot] : [] };
   // THE HARD FLOOR: a plain slideshow. No kinetic type, no camera, no transitions, and a thin vocab.
   if (sig.kineticText === 0 && !camMoves && sig.transition === 0 && vocab.length < 2) {
-    raise('plain-slideshow', `this reads as a SLIDESHOW: no kinetic typography, no camera move, no transitions, motion vocabulary = {${vocab.join(', ') || 'none'}}. Compose from blueprints ({type:"beat"}) or add kinetic reveals + a camera move + seams. See docs/CRAFT/BLUEPRINTS.md + DIRECTION.md.`, notCtx);
+    raise('plain-slideshow', `this reads as a SLIDESHOW: no kinetic typography, no camera move, no transitions, motion vocabulary = {${vocab.join(', ') || 'none'}}. Compose from blueprints ({type:"beat"}) or add kinetic reveals + a camera move + seams. See engine-doctrine/CRAFT/BLUEPRINTS.md + DIRECTION.md.`, notCtx);
   } else if (headlines.length >= 4 && plainShare >= 0.85 && sig.kineticText === 0) {
     raise('plain-slideshow', `${plainHeadlines.length}/${headlines.length} headlines just fade/rise with no kinetic reveal. The plain-authoring tell. Give headlines split+preset (words rise/scale), or use a blueprint beat.`, notCtx);
   }
@@ -324,7 +324,7 @@ if (!directedByBeats) {
 }
 if (!sig.bgMotion) warn('no-bg-motion', 'the background is static. A good video moves the viewer with a living backdrop (a moving gradient / mesh / aurora / shader), used brand-appropriately, not a flat field. See core/backgrounds/index.js.');
 
-// SPEED IS THE ANTI-REPETITION LEVER (docs/CRAFT/TRANSITIONS.md). A film whose boundaries all ride a
+// SPEED IS THE ANTI-REPETITION LEVER (engine-doctrine/CRAFT/TRANSITIONS.md). A film whose boundaries all ride a
 // gentle curve reads flat and same-y, however many effects it uses. Nudge (never block) toward a speed
 // ramp on the dynamic seam: `ramp` (slow-fast-slow), `rush` (exit), `brake` (entrance).
 {
@@ -356,7 +356,7 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
   if (needed && beats < needed)
     // WARN, not fail: the comment above already retired this from blocking. It was still wired
     // through `fail()`, so a legacy waiver was doing the work this severity should have done itself.
-    warn('sparse-beats', `${beats} beat(s) across ${Math.round(dur * 10) / 10}s, a film this long needs about ${needed} (a boundary roughly every 3.5s). Two or three cards held for twelve seconds is a slideshow by length, not a film. Compose more beats from blueprints (make blueprints), or shorten the film. docs/CRAFT/DIRECTION.md.`);
+    warn('sparse-beats', `${beats} beat(s) across ${Math.round(dur * 10) / 10}s, a film this long needs about ${needed} (a boundary roughly every 3.5s). Two or three cards held for twelve seconds is a slideshow by length, not a film. Compose more beats from blueprints (make blueprints), or shorten the film. engine-doctrine/CRAFT/DIRECTION.md.`);
 }
 
 // FEATURE POVERTY (fix 8). The engine has ~15 expressive families; a film that reaches for only a
@@ -505,7 +505,7 @@ const poseAt = (l, t) => {
     // element and `track` re-letters it, and dropping them made the gate blind to the exact device
     // CLAUDE.md says it makes free: a rectangle whose keyed width IS the spine. A film held by a bar
     // that advances on every cut failed `no-continuous-object` with the bar right there in the track
-    // (docs/MISTAKES.md #352). A null means "this track does not drive that property" and compares
+    // (engine-doctrine/MISTAKES.md #352). A null means "this track does not drive that property" and compares
     // equal to itself, so a layer that only moves is scored exactly as before.
     p.m = [m.dx, m.dy, m.scale, m.rot, m.opacity, m.blur, m.w, m.h, m.track]
       .map((v) => (v == null ? '-' : round3(v))).join(',');
@@ -589,7 +589,7 @@ const label = (l) => `${l.type || 'text'}${l.text ? ` "${snippet(l.text)}"` : ''
 const carriedMsg = (spanning) => (spanning.length
   ? `${spanning.length} layer(s) do cross a boundary (${[...new Set(spanning.map(label))].slice(0, 3).join(' · ')}) but none of them CHANGE there. A fixed logo or watermark riding the cut is furniture, not a spine.`
   : `not one content layer is visible on both sides of any boundary. Every beat is born and dies inside itself.`);
-const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give the outgoing layer an `id` for `becomes` to name and declare `"becomes": "<the Y\'s id>"` on it, at the boundary time. The engine carries the centre, size and rotation across onto the incoming layer\'s opening pose (formats/scene/scene.js resolveBecomes; core/validate/validate.mjs refuses a handover whose two halves do not meet). See skills/vawe-continuous-action/SKILL.md. OR, if this film is deliberately held by a NON-OBJECT device this gate cannot see (a motif, an escalation, a metric cut rate, a sound bridge: docs/CRAFT/FILM-STRUCTURE.md), that is legitimate structure, not a slideshow. This gate only credits the two devices the engine PRODUCES and can verify (a continuous object and a match cut), so declare the other with a reasoned waiver, `{"authoring":{"allow":["no-continuous-object"],"_why":{"no-continuous-object":"held by <device>: <how it carries across the cuts>"}}}`. A waiver with a reason is a structural decision someone wrote down, not an admission of failure.';
+const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give the outgoing layer an `id` for `becomes` to name and declare `"becomes": "<the Y\'s id>"` on it, at the boundary time. The engine carries the centre, size and rotation across onto the incoming layer\'s opening pose (formats/scene/scene.js resolveBecomes; core/validate/validate.mjs refuses a handover whose two halves do not meet). See skills/vawe-continuous-action/SKILL.md. OR, if this film is deliberately held by a NON-OBJECT device this gate cannot see (a motif, an escalation, a metric cut rate, a sound bridge: engine-doctrine/CRAFT/FILM-STRUCTURE.md), that is legitimate structure, not a slideshow. This gate only credits the two devices the engine PRODUCES and can verify (a continuous object and a match cut), so declare the other with a reasoned waiver, `{"authoring":{"allow":["no-continuous-object"],"_why":{"no-continuous-object":"held by <device>: <how it carries across the cuts>"}}}`. A waiver with a reason is a structural decision someone wrote down, not an admission of failure.';
 
 // `acrossBeats: true` attaches a layer to the camera instead of its beat wrapper, keeping its authored
 // window, so a spine is expressible whatever the cut style. It replaced the advice that used to live
@@ -660,13 +660,13 @@ const reveals = flat.filter((l) => l.track !== 0 && (l.text || l.type === 'count
 if (reveals.length >= 4) {
   const early = reveals.filter((t) => t < dur * 0.3).length / reveals.length;
   const lateHalf = reveals.filter((t) => t > dur * 0.5).length;
-  if (early >= 0.8 && lateHalf === 0) warn('front-loaded', `${Math.round(early * 100)}% of reveals land in the first ${(dur * 0.3).toFixed(1)}s and the back half is frozen. The SLIDESHOW failure (everything dumped early, then static). Weight cues into the back ~50%: give each key line its own reveal beat. (docs/CRAFT/DIRECTION.md reveal model.)`);
+  if (early >= 0.8 && lateHalf === 0) warn('front-loaded', `${Math.round(early * 100)}% of reveals land in the first ${(dur * 0.3).toFixed(1)}s and the back half is frozen. The SLIDESHOW failure (everything dumped early, then static). Weight cues into the back ~50%: give each key line its own reveal beat. (engine-doctrine/CRAFT/DIRECTION.md reveal model.)`);
 }
 // NO TWO BEATS MOVE ALIKE (another engine): vary the motion vocabulary across the film. If every kinetic
 // line uses the identical reveal preset, the video moves monotonously even when each beat is "kinetic".
 const presets = flat.filter((l) => l.preset).map((l) => l.preset);
 if (presets.length >= 5 && new Set(presets).size === 1) {
-  warn('motion-monotony', `all ${presets.length} kinetic lines use the same reveal preset "${presets[0]}". The film moves monotonously. Vary it so no two beats move alike (up / scale / blur / decode / riseClip): docs/EFFECTS.md kinetic presets.`);
+  warn('motion-monotony', `all ${presets.length} kinetic lines use the same reveal preset "${presets[0]}". The film moves monotonously. Vary it so no two beats move alike (up / scale / blur / decode / riseClip): engine-doctrine/EFFECTS.md kinetic presets.`);
 }
 // DENSE FIGURES BY DEFAULT (parts): a multi-part figure that lands as ONE block reads flat next to real
 // motion graphics. A group of 3+ cards, or an inline SVG with 3+ shapes, should animate PIECE BY PIECE.
@@ -683,7 +683,7 @@ const staticFigures = flat.filter((l) => {
   }
   return false;
 });
-if (staticFigures.length) warn('static-figure', `${staticFigures.length} figure(s) (a 3+-child group or a multi-shape SVG) animate as one block. Add \`parts\` (or a group \`each\`) so they build piece by piece: bars grow, the line draws, dots pop. docs/CRAFT/AUTHOR-THE-FRAME.md.`);
+if (staticFigures.length) warn('static-figure', `${staticFigures.length} figure(s) (a 3+-child group or a multi-shape SVG) animate as one block. Add \`parts\` (or a group \`each\`) so they build piece by piece: bars grow, the line draws, dots pop. engine-doctrine/CRAFT/AUTHOR-THE-FRAME.md.`);
 
 // ---- report ----
 const score = vocab.length + (directedByBeats ? 3 : 0);
@@ -711,7 +711,7 @@ const waived = findings.filter((f) => f.sev === 'FAIL' && waivedBy(f.code));
 const warns = findings.filter((f) => f.sev === 'WARN' && !waivedBy(f.code));
 console.log(`\n  ${fails.length} fail · ${warns.length} warn${waived.length ? ` · ${waived.length} waived` : ''}`);
 // One fact, one owner: the RECORD is the finding and the line below is rendered from it, so
-// author-check reads `code` instead of re-reading this sentence (docs/MISTAKES.md #401).
+// author-check reads `code` instead of re-reading this sentence (engine-doctrine/MISTAKES.md #401).
 const F = gateFindings({ scene: file, indent: '    ',
   line: (r, g) => `    ${g} [${r.code}] ${r.waived ? 'waived via authoring.allow' : r.summary}` });
 for (const f of fails) F.fail(f.code, f.msg);

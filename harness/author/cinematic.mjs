@@ -1,5 +1,5 @@
 // cinematic.mjs. The CINEMATIC MOTION director. Real launch films are never static: a continuous
-// camera push + a dolly enter/exit on every hero word is what makes them feel alive (docs/CRAFT/
+// camera push + a dolly enter/exit on every hero word is what makes them feel alive (engine-doctrine/CRAFT/
 // REFERENCE-STUDY.md). Authoring that by hand on every beat is slow and is how static/off beats slip in.
 // This emits the motion SCAFFOLD (camera push + per-hero dolly + motion-blur) derived from the scene's
 // OWN beats (not a template), which you then refine. Suggest-first; WRITE=1 → <file>.cinematic.json.

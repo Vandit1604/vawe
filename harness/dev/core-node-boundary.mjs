@@ -6,7 +6,7 @@
 // WHY THIS EXISTS. core/audio/kit.mjs imported node:fs and core/audio/select.js imported node:url,
 // both for years, and neither ever failed a render: nothing in the browser-loaded path happened to
 // import them. A file that cannot run where it claims to run is a bug waiting for the day something
-// finally does import it (docs/CRAFT/ENGINE-CHANGES.md). This is a boundary, not a gate: it names the
+// finally does import it (engine-doctrine/CRAFT/ENGINE-CHANGES.md). This is a boundary, not a gate: it names the
 // rule, it does not rewrite anyone's code.
 //
 // *.test.mjs is exempt: tests run under node directly, never fetched by a browser.

@@ -8,7 +8,7 @@ description: "A reference image or clip shows a look you cannot immediately cons
 An effect a designer has made before has a name. The name leads to a recipe. The recipe has a step you
 would never have guessed, and that step is the reason your approximation failed.
 
-This skill exists because of a measured failure in this repo, `docs/MISTAKES.md` #505. A reference frame
+This skill exists because of a measured failure in this repo, `engine-doctrine/MISTAKES.md` #505. A reference frame
 showed white text with an orange body and a blue rim. It was built four times by stacking coloured,
 offset, blurred copies of the same text, and rejected four times, because a stack of copies cannot make
 a continuous transition between three colours. One search returned the answer: the effect is a **thermal
@@ -100,7 +100,7 @@ number does.
 
 ## The receipt
 
-- `docs/MISTAKES.md` gets an entry when the effect took more than one attempt: what was guessed, what
+- `engine-doctrine/MISTAKES.md` gets an entry when the effect took more than one attempt: what was guessed, what
   the name turned out to be, and which step was the unguessable one.
 - The implementation carries the recipe in its own comments, so the next author inherits the name
   beside the code rather than having to search again.

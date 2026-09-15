@@ -10,7 +10,7 @@
 // Dependency-free on purpose: ffmpeg (already required) extracts raw grey frames; the tracking + curve
 // fit are plain JS against the same easing functions the renderer uses. No OpenCV/numpy. It tracks a
 // single element over a flat-ish background (the common case for a title/card beat); multi-element
-// optical-flow (affine) is a documented future upgrade (needs OpenCV). See docs/CRAFT/MEASURE.md.
+// optical-flow (affine) is a documented future upgrade (needs OpenCV). See engine-doctrine/CRAFT/MEASURE.md.
 //
 //   make measure VIDEO=twitter.mp4 FROM=47.4 TO=48.7          # what is the "Send" transition?
 //   make measure VIDEO=out/brew.mp4 FROM=9.7 TO=10.3 EXPECT=snappy   # did my cut render as snappy?
@@ -141,7 +141,7 @@ if (EXPECT) {
   if (er == null) console.log(`\n  EXPECT "${EXPECT}" is not a known preset. One of: ${Object.keys(ALL).slice(0, 12).join(', ')}…`);
   else console.log(`\n  ✓ EXPECT check: authored "${EXPECT}" → residual ${er.toFixed(3)} ${er < 0.05 ? '(matches. The render is faithful to the intent)' : `(does NOT match; measured curve is closer to "${best.name}")`}`);
 }
-console.log(`\n  filmstrip: ${strip}   ·   what this CAN'T see: masks vs clip-path, blend modes, true 3D depth, shader distortion (docs/CRAFT/MEASURE.md).\n`);
+console.log(`\n  filmstrip: ${strip}   ·   what this CAN'T see: masks vs clip-path, blend modes, true 3D depth, shader distortion (engine-doctrine/CRAFT/MEASURE.md).\n`);
 
 // machine-readable sidecar for downstream use / self-verification gates
 const out = { video: VIDEO, from: FROM, to: TO, fps: FPS, frames: N, dominant: dom.k, durationS: +durS.toFixed(3),

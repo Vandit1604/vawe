@@ -133,7 +133,7 @@ for (const entry of grid) {
     // rasteriser, and anything a design change does moves a channel by more. Keeping the committed
     // bytes is the write-site fix, so `git status` after a regenerate names only real changes.
     // Nothing else guards these files: `snap-blocks` reads the layer JSON, so a poster can drift or
-    // go stale in silence (docs/MISTAKES.md #491).
+    // go stale in silence (engine-doctrine/MISTAKES.md #491).
     const prior = fs.existsSync(dest) ? fs.readFileSync(dest) : null;
     // FAIL OPEN. A comparison that cannot run is not evidence that the picture is unchanged, and the
     // safe answer is to write the fresh bytes: a poster that drifts is a nuisance, a poster that is

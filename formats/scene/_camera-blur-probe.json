@@ -10,7 +10,7 @@
       "no-storyboard"
     ],
     "_why": {
-      "no-preflight": "not a film. It is the A/B fixture for `cameraBlur` (docs/MISTAKES.md #552): render it with the dial up and down and compare frame 31. There is nothing for the nine decisions to decide.",
+      "no-preflight": "not a film. It is the A/B fixture for `cameraBlur` (engine-doctrine/MISTAKES.md #552): render it with the dial up and down and compare frame 31. There is nothing for the nine decisions to decide.",
       "linear-motion": "the linearity IS the measurement. An eased pan would make the smear a function of easeInOutCubic's midpoint rather than of a velocity anyone can compute by hand, and the `locked` layer could not cancel the camera exactly.",
       "no-storyboard": "a fixture has no beats to board. What it shows is stated in its own layer copy: one still station, one counter-panning layer, two depth planes."
     }

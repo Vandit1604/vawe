@@ -45,7 +45,7 @@ type Meta struct {
 	Bridges []audio.Bridge `json:"bridges"`
 	// BeatSync is core/beat-bind.js's one-line report of every joint the track's grid moved. It is
 	// informational, and it only reaches an author because it is DECLARED here: encoding/json drops
-	// an unknown key without a word, which is how it went missing (docs/MISTAKES.md #477).
+	// an unknown key without a word, which is how it went missing (engine-doctrine/MISTAKES.md #477).
 	BeatSync string `json:"beatSync"`
 	// FrameWorker is Go-only (json:"-": there is nothing on the JS side to mirror), set by Capture
 	// after the shoot finishes. FrameWorker[f] names which worker tab actually drew the pixels shown
@@ -69,7 +69,7 @@ type Meta struct {
 //
 // WHY DEFAULT-DENY, AND WHY HERE. This process renders scenes written by strangers (the MCP product),
 // and a bare http.FileServer rooted at the repo hands the browser every file in it. An <img> or
-// <iframe> pointing at /docs/MISTAKES.md, /blocks/index.mjs or /.git/config renders that file INTO
+// <iframe> pointing at /engine-doctrine/MISTAKES.md, /blocks/index.mjs or /.git/config renders that file INTO
 // the video and returns it. The html/svg layers strip such tags, but a sanitiser is a curtain; this
 // handler is the wall. A layer type added next year that forgets to sanitise is still contained,
 // because the SERVER, not the layer, decides what may leave.
@@ -135,7 +135,7 @@ func Serve(root string) (*http.Server, int, error) {
 //
 // settleJS: DRAIN THE ASYNC WORK. A <video> seek fires `seeked` whenever the decode is ready, which
 // is routinely longer than two frames; shooting without waiting captures whatever the decoder had
-// lying around, which varies by worker and by machine (docs/MISTAKES.md #370, #383). __frameSettle is
+// lying around, which varies by worker and by machine (engine-doctrine/MISTAKES.md #370, #383). __frameSettle is
 // installed by core/frame-settle.js for every scene, so the guard is about a stale tab on an older
 // page, not about whether this film uses video.
 const settleJS = `window.__frameSettle ? window.__frameSettle() : true`
@@ -163,7 +163,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// as many frames as one. Measured on brew-launch: 925 of 1890 frames differed between two
 		// 4-worker renders, up to 17% of the pixels of a frame, with whole product screenshots missing.
 		// Waiting longer only shifts the odds; these two flags remove the race
-		// (docs/MISTAKES.pending-worker.md).
+		// (engine-doctrine/MISTAKES.pending-worker.md).
 		chromedp.Flag("disable-checker-imaging", true),
 		chromedp.Flag("run-all-compositor-stages-before-draw", true),
 		// PARTIAL RASTER IS INCREMENTAL, AND AN INCREMENTAL PICTURE IS NOT A FUNCTION OF n. Chrome
@@ -173,7 +173,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// different history by construction, so the same frame came out differently at -workers 1 and
 		// -workers 6. Measured on a 60-frame scene once the will-change promotions were gone (see
 		// formats/scene/scene.css): 1 of 60 frames still differed between the two, and 0 of 60 with this
-		// flag. Cost: none measurable on a 60-frame draft (docs/MISTAKES.md #507).
+		// flag. Cost: none measurable on a 60-frame draft (engine-doctrine/MISTAKES.md #507).
 		//
 		// PRICED PROPERLY, against a real baseline, once the stopwatch existed. Turning partial raster back
 		// ON (VAWE_CHROME_FLAGS="disable-partial-raster=false", 3 runs each against verify/perf/baseline.json)
@@ -203,7 +203,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		//	1 against 6          405 of 900        3 of 900
 		//
 		// The remaining 3 are #531's residue, a different defect with its own reproduction in
-		// docs/BUGS/. Everything else in that table is this flag.
+		// engine-doctrine/BUGS/. Everything else in that table is this flag.
 		//
 		// PRICE, measured, three runs each, median: plinth-ad 51.2s -> 54.6s at 6 workers (+6.6%);
 		// site-backdrop, a shader film, 42.2s -> 36.8s, inside its own 8s run-to-run spread. Raster is
@@ -246,7 +246,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 	// VAWE_CHROME_FLAGS: extra Chrome flags on the REAL capture path, comma separated, "k=v" or bare
 	// "k" for a boolean. It exists so a flag question is answered by a render instead of by reasoning.
 	// harness/dev/tabprobe already had -flags for two tabs; this is the same lever for a whole film,
-	// and it is how the GPU question was settled (docs/MISTAKES.md #551).
+	// and it is how the GPU question was settled (engine-doctrine/MISTAKES.md #551).
 	for _, f := range strings.Split(os.Getenv("VAWE_CHROME_FLAGS"), ",") {
 		if f = strings.TrimSpace(f); f == "" {
 			continue
@@ -280,7 +280,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 //
 // That matters here more than it would elsewhere, because the readiness Poll below runs in rAF mode
 // and `shoot` awaits a double `__realRaf` before every screenshot. Without this, every worker except
-// one would wait forever, which is docs/MISTAKES.md #121 exactly.
+// one would wait forever, which is engine-doctrine/MISTAKES.md #121 exactly.
 func newTab(parent context.Context, url string, ss int) (context.Context, context.CancelFunc, error) {
 	ctx, cancel := chromedp.NewContext(parent)
 	err := chromedp.Run(ctx,
@@ -615,14 +615,14 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	// the deferred image decode the raster flags above now close, and it is why the counts are lower
 	// than these. What remains after the fix is 250 frames, of which one span of 122 moves ~1.8% of its
 	// pixels with a content group offset by about 60 supersampled pixels. That is still open and it is
-	// still not antialiasing (docs/MISTAKES.pending-worker.md).
+	// still not antialiasing (engine-doctrine/MISTAKES.pending-worker.md).
 	//
 	// What that means for the two things this comment used to lean on. Dedup is FINE, and by design
 	// rather than by luck: its anchor check re-shoots inside the SAME browser and tolerates 0.05% of
 	// pixels (see the anchor block below), which is an order of magnitude above what was measured.
 	// renderFrame(n) purity is a claim about the DOM, which is what `make probe` compares, and it holds.
 	// Neither was ever a claim about bytes. VAWE_KEEP_FRAMES=1 keeps the captures if you need to
-	// re-measure this (docs/MISTAKES.md #258).
+	// re-measure this (engine-doctrine/MISTAKES.md #258).
 	//
 	// ALPHA STAYS PNG. JPEG has no alpha channel, and the transparent export is the one path whose
 	// whole point is the alpha channel: exactly the kind of silent substitution this repo keeps
@@ -669,7 +669,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 	// panicked, and the process died with a SIGSEGV attributed to this function's closing brace. That
 	// crash REPLACED the message newTab had already built ("scene error: <what the engine actually
 	// said>") with a stack trace naming a line that has nothing to do with the fault, on the one path
-	// whose whole job is to report why a scene would not load (docs/MISTAKES.md #372).
+	// whose whole job is to report why a scene would not load (engine-doctrine/MISTAKES.md #372).
 	if err != nil {
 		return meta, err
 	}
@@ -966,7 +966,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 //
 // Modelled on TransparentPixels above: same directory, same already-captured frames, decoded once more
 // before they are deleted. No second ffmpeg pass and no new channel out of the page, because unlike
-// beatSync (docs/MISTAKES.md #477) this property does not exist in the page at all. It is a difference
+// beatSync (engine-doctrine/MISTAKES.md #477) this property does not exist in the page at all. It is a difference
 // BETWEEN two rendered frames, and only the Go side ever holds two.
 const (
 	stillPairs = 48  // consecutive pairs sampled across the film. 48 is enough to shape a 20s cut.
@@ -1110,7 +1110,7 @@ func Stillness(framesDir string, total int, ext string, fps float64) (stillPct f
 // (frame n against frame n+1) is exactly wrong on a sharded render: Capture deals frames to workers
 // ROUND-ROBIN ("DEAL THE FRAMES", above), so for `workers` > 1 two frames adjacent by NUMBER are
 // almost always drawn by two different browser tabs, and two tabs do not paint byte-identical pixels
-// for a held frame (docs/MISTAKES.pending-worker.md). A delta between them measures the gap between
+// for a held frame (engine-doctrine/MISTAKES.pending-worker.md). A delta between them measures the gap between
 // tabs, not the gap between instants, exactly like comparing the six-worker row in the comment on
 // render.go's apology to the one-worker row: same film, same frames, wildly different number.
 //

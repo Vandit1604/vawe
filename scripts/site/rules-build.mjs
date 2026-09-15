@@ -1,7 +1,7 @@
 // rules-build.mjs: emits vawe-rules.md, the single file you paste into Claude (or any model) to
 // get a valid scene.json back.
 //
-//   node scripts/site/rules-build.mjs      → docs/vawe-rules.md + site/public/vawe-rules.md
+//   node scripts/site/rules-build.mjs      → engine-doctrine/vawe-rules.md + site/public/vawe-rules.md
 //
 // GENERATED, never hand-written. A hand-maintained rules file drifts from the engine the moment a
 // preset is added, and a rules file that lies is worse than none: the model authors a scene that
@@ -169,8 +169,8 @@ Colours come from the theme, never hardcoded: \`var(--text)\` \`var(--text-2)\` 
 3. For a real file with sound and grain: \`make video D=scene.json\` (clone the repo).
 `;
 
-fs.writeFileSync(path.join(root, 'docs', 'vawe-rules.md'), md);
+fs.writeFileSync(path.join(root, 'engine-doctrine', 'vawe-rules.md'), md);
 fs.writeFileSync(path.join(root, 'site', 'public', 'vawe-rules.md'), md);
 const kb = (Buffer.byteLength(md) / 1024).toFixed(1);
 console.log(`✓ vawe-rules.md  ${kb}KB  ·  ${LAYER_TYPES.length} layer types · ${PRESET_NAMES.length} presets · ${EASE_NAMES.length} easings · ${CUTS.length} cuts · ${STINGS.length} stings · ${THEMES.length} themes`);
-console.log('  → docs/vawe-rules.md + site/public/vawe-rules.md');
+console.log('  → engine-doctrine/vawe-rules.md + site/public/vawe-rules.md');

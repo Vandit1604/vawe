@@ -43,4 +43,4 @@ which easing, how long, in what order. The vocabulary is real and checkable (`ma
   travel, never enter-and-retreat, which the `enter-and-retreat` tell catches).
 - **Blur out when moving would fight the content** (`out:"defocus"` for faces, dense grids, 50-element scenes).
 
-Primitives are pure and tested (`make lib-test`). Effects catalog: `vawe-effects`. Doctrine: [`docs/CRAFT/DIRECTION.md`](../../docs/CRAFT/DIRECTION.md) · [`docs/MOTION-CRAFT.md`](../../docs/MOTION-CRAFT.md).
+Primitives are pure and tested (`make lib-test`). Effects catalog: `vawe-effects`. Doctrine: [`engine-doctrine/CRAFT/DIRECTION.md`](../../engine-doctrine/CRAFT/DIRECTION.md) · [`engine-doctrine/MOTION-CRAFT.md`](../../engine-doctrine/MOTION-CRAFT.md).

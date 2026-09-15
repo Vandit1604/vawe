@@ -1,7 +1,7 @@
 {
   "_generated_by": "one-off, harness/dev/build-reach.mjs (see git history); not re-run automatically",
   "_plan": ".claude/plans/subtraction.plan.md, Phase 1 - split the 91/94 unused schema props, delete nothing",
-  "_method": "For each schema prop make coverage flags unused: (1) grep core/ and formats/scene/scene.js for a real consumer, opened and read, never taken on grep alone; (2) `make arsenal Q=\"<prop>\"` as the repo's own single discovery command, checked for a real hit vs fuzzy word-noise; (3) docs/PRIMITIVES.md and skills/vawe-scene-authoring/SKILL.md grepped for the prop being taught; (4) harness/author/storyboard-parse.mjs and harness/lib/contract.mjs read in full for a storyboard verb. unreachable = real consumer, no verb, no discovery-tool hit, not taught anywhere. unwanted = real consumer AND a real documented JSON path (schema label plus PRIMITIVES.md/arsenal/fx-registry backing), simply never chosen in the library. unsure = evidence conflicts or the prop is not really an authoring surface at all.",
+  "_method": "For each schema prop make coverage flags unused: (1) grep core/ and formats/scene/scene.js for a real consumer, opened and read, never taken on grep alone; (2) `make arsenal Q=\"<prop>\"` as the repo's own single discovery command, checked for a real hit vs fuzzy word-noise; (3) engine-doctrine/PRIMITIVES.md and skills/vawe-scene-authoring/SKILL.md grepped for the prop being taught; (4) harness/author/storyboard-parse.mjs and harness/lib/contract.mjs read in full for a storyboard verb. unreachable = real consumer, no verb, no discovery-tool hit, not taught anywhere. unwanted = real consumer AND a real documented JSON path (schema label plus PRIMITIVES.md/arsenal/fx-registry backing), simply never chosen in the library. unsure = evidence conflicts or the prop is not really an authoring surface at all.",
   "counts": {
     "unwanted": 84,
     "unreachable": 7,
@@ -13,7 +13,7 @@
       "engine": "core/fx/along-path.js:1 (registered core/fx/index.js:35)",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "core/fx/index.js DESCRIPTIONS gives the exact modifiers:[{alongPath:{...}}] shape; docs/PRIMITIVES.md teaches the modifiers[] mechanism generally. Never used in 182 scenes."
+      "evidence": "core/fx/index.js DESCRIPTIONS gives the exact modifiers:[{alongPath:{...}}] shape; engine-doctrine/PRIMITIVES.md teaches the modifiers[] mechanism generally. Never used in 182 scenes."
     },
     {
       "path": "amount",
@@ -27,7 +27,7 @@
       "engine": "formats/scene/scene.js:618-624; core/timeline/clips.js:124",
       "author": "not at all",
       "verdict": "unreachable",
-      "evidence": "`make arsenal Q=\"anticipate\"` returns \"nothing matched\". Not named in docs/PRIMITIVES.md or skills/vawe-scene-authoring. Real, validated entrance-warp dial with capability nobody can find."
+      "evidence": "`make arsenal Q=\"anticipate\"` returns \"nothing matched\". Not named in engine-doctrine/PRIMITIVES.md or skills/vawe-scene-authoring. Real, validated entrance-warp dial with capability nobody can find."
     },
     {
       "path": "basis",
@@ -55,7 +55,7 @@
       "engine": "core/layers/util.js:322-341; core/tracks/border-trail.js:1",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "docs/PRIMITIVES.md:468 names \"orbit (borderTrail)\" directly; schema gives the full {color,width,period,arc} shape. Documented, unused."
+      "evidence": "engine-doctrine/PRIMITIVES.md:468 names \"orbit (borderTrail)\" directly; schema gives the full {color,width,period,arc} shape. Documented, unused."
     },
     {
       "path": "breakAt",
@@ -76,14 +76,14 @@
       "engine": "core/lightfield: bg[].breathe path; scene.js:274-277,1294",
       "author": "JSON (documented)",
       "verdict": "unsure",
-      "evidence": "CONTRADICTS the brief's claim. docs/PRIMITIVES.md:345 states it plainly: \"Continuous: `bg[].breathe` (default OFF; `true` for `scale(1+0.02*sin(t/18*2pi))`, or `{amp,period}`).\" That is a real recipe in the primary authoring doc, not a hidden mechanism. Marking unsure rather than overriding the prior audit outright: it is possible the audit meant something narrower (a canvas-only window, refused on `html` backgrounds per the schema label) that still counts as \"no author has ever reached for it in practice.\" Evidence for JSON-reachability is strong; evidence for \"nobody could have known\" is weak. Needs a second look before either bucket is trusted."
+      "evidence": "CONTRADICTS the brief's claim. engine-doctrine/PRIMITIVES.md:345 states it plainly: \"Continuous: `bg[].breathe` (default OFF; `true` for `scale(1+0.02*sin(t/18*2pi))`, or `{amp,period}`).\" That is a real recipe in the primary authoring doc, not a hidden mechanism. Marking unsure rather than overriding the prior audit outright: it is possible the audit meant something narrower (a canvas-only window, refused on `html` backgrounds per the schema label) that still counts as \"no author has ever reached for it in practice.\" Evidence for JSON-reachability is strong; evidence for \"nobody could have known\" is weak. Needs a second look before either bucket is trusted."
     },
     {
       "path": "bridge",
       "engine": "core/audio/bridges.js:33-96",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "docs/PRIMITIVES.md:359-367 gives the exact J-cut/L-cut JSON with `bridge`, `sound`, `lead`, `duck`, `fade`. A whole documented sound-design feature, unused in the corpus (the audio path documented in #23 as the historical example of exactly this problem)."
+      "evidence": "engine-doctrine/PRIMITIVES.md:359-367 gives the exact J-cut/L-cut JSON with `bridge`, `sound`, `lead`, `duck`, `fade`. A whole documented sound-design feature, unused in the corpus (the audio path documented in #23 as the historical example of exactly this problem)."
     },
     {
       "path": "circle",
@@ -125,7 +125,7 @@
       "engine": "core/layers/util.js:355-378",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "docs/PRIMITIVES.md:184 names `crt` directly in its decoration list; `make arsenal Q=\"crt\"` finds it (5 real uses). Reachable and even lightly used, just not in the raw scene the coverage census happened to sample as \"unset\"."
+      "evidence": "engine-doctrine/PRIMITIVES.md:184 names `crt` directly in its decoration list; `make arsenal Q=\"crt\"` finds it (5 real uses). Reachable and even lightly used, just not in the raw scene the coverage census happened to sample as \"unset\"."
     },
     {
       "path": "css",
@@ -265,7 +265,7 @@
       "engine": "formats/scene/scene.js:1660,1671",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "Real consumer (typing-layer key-click sound). docs/MISTAKES.md #60 discusses its sibling keyGain (which the corpus DOES use), confirming the family is known and reachable, just this particular flag/cue-name pair is not."
+      "evidence": "Real consumer (typing-layer key-click sound). engine-doctrine/MISTAKES.md #60 discusses its sibling keyGain (which the corpus DOES use), confirming the family is known and reachable, just this particular flag/cue-name pair is not."
     },
     {
       "path": "keyCue",
@@ -279,7 +279,7 @@
       "engine": "core/fx/kick.js; core/fx/plane.js:63; core/fx/squash.js:78-83",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "docs/PRIMITIVES.md:118-119 discusses \"a `kick` modifier's `scale`\" directly, and `make arsenal Q=\"kick\"` finds it. Documented, unused."
+      "evidence": "engine-doctrine/PRIMITIVES.md:118-119 discusses \"a `kick` modifier's `scale`\" directly, and `make arsenal Q=\"kick\"` finds it. Documented, unused."
     },
     {
       "path": "kind",
@@ -328,7 +328,7 @@
       "engine": "core/fx/matte.js; core/layers/beam.js:91-104",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "core/fx/index.js DESCRIPTIONS registry and docs/PRIMITIVES.md both describe luma-matte compositing with real syntax. Unused."
+      "evidence": "core/fx/index.js DESCRIPTIONS registry and engine-doctrine/PRIMITIVES.md both describe luma-matte compositing with real syntax. Unused."
     },
     {
       "path": "maxLines",
@@ -349,35 +349,35 @@
       "engine": "core/fx/mix-blend.js:42-84; core/fx/ancestor-kills.js:70",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "docs/PRIMITIVES.md:451,518 gives the literal `\"modifiers\":[{\"mixBlend\":\"difference\"}]` example. Documented, unused."
+      "evidence": "engine-doctrine/PRIMITIVES.md:451,518 gives the literal `\"modifiers\":[{\"mixBlend\":\"difference\"}]` example. Documented, unused."
     },
     {
       "path": "motionPath",
       "engine": "formats/scene/scene.js:496-499; core/engine/preload.js:235,275",
       "author": "not at all",
       "verdict": "unreachable",
-      "evidence": "GSAP MotionPathPlugin, auto-loaded only when the literal `motionPath` key is present in the JSON (core/engine/preload.js GSAP_PLUGINS/GSAP_TRIGGER_RE). Real, validated (core/validate/validate.mjs:825), deterministic, and per the schema label already does SUSTAINED continuous motion along an SVG path - exactly the capability the owner's films are measured missing (0.02 local-motion median vs 0.66 reference). `make arsenal Q=\"motionPath\"` returns \"NOTHING HERE CLEARLY MATCHES\", and it is absent from docs/PRIMITIVES.md, skills/vawe-scene-authoring, and the move:/motion: grammar (harness/lib/contract.mjs SHAPES/PART_NAMES/IDLE_NAMES). This is the plan's own confirmed example, and the highest-value unreachable prop in the set."
+      "evidence": "GSAP MotionPathPlugin, auto-loaded only when the literal `motionPath` key is present in the JSON (core/engine/preload.js GSAP_PLUGINS/GSAP_TRIGGER_RE). Real, validated (core/validate/validate.mjs:825), deterministic, and per the schema label already does SUSTAINED continuous motion along an SVG path - exactly the capability the owner's films are measured missing (0.02 local-motion median vs 0.66 reference). `make arsenal Q=\"motionPath\"` returns \"NOTHING HERE CLEARLY MATCHES\", and it is absent from engine-doctrine/PRIMITIVES.md, skills/vawe-scene-authoring, and the move:/motion: grammar (harness/lib/contract.mjs SHAPES/PART_NAMES/IDLE_NAMES). This is the plan's own confirmed example, and the highest-value unreachable prop in the set."
     },
     {
       "path": "occlude",
       "engine": "core/fx/occlude.js:1-19,83-112",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "docs/PRIMITIVES.md:516,518 names `occlude` directly (\"`occlude` and `shadow` work on one [group child]\"). Documented, unused."
+      "evidence": "engine-doctrine/PRIMITIVES.md:516,518 names `occlude` directly (\"`occlude` and `shadow` work on one [group child]\"). Documented, unused."
     },
     {
       "path": "on",
       "engine": "core/layers/glow.js (glow ring surface variant)",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "docs/PRIMITIVES.md:390 gives `on:\"light\"` directly (\"flips the ring for light surfaces\"). Documented, unused."
+      "evidence": "engine-doctrine/PRIMITIVES.md:390 gives `on:\"light\"` directly (\"flips the ring for light surfaces\"). Documented, unused."
     },
     {
       "path": "overshoot",
       "engine": "formats/scene/scene.js:618-624; core/layout/generators.js:613,652,737",
       "author": "not at all",
       "verdict": "unreachable",
-      "evidence": "Validated in the exact same code path as `anticipate` (scene.js:618-624), same \"motion designers quote\" phrasing, same absence from docs/PRIMITIVES.md, skills/vawe-scene-authoring, and the move:/motion: grammar (contract.mjs). `make arsenal Q=\"overshoot\"` only returns fuzzy word-matches on unrelated easing-curve prose, not the field itself."
+      "evidence": "Validated in the exact same code path as `anticipate` (scene.js:618-624), same \"motion designers quote\" phrasing, same absence from engine-doctrine/PRIMITIVES.md, skills/vawe-scene-authoring, and the move:/motion: grammar (contract.mjs). `make arsenal Q=\"overshoot\"` only returns fuzzy word-matches on unrelated easing-curve prose, not the field itself."
     },
     {
       "path": "ox",
@@ -412,14 +412,14 @@
       "engine": "formats/scene/scene.js:505-506; core/engine/preload.js:235,275",
       "author": "not at all",
       "verdict": "unreachable",
-      "evidence": "GSAP Physics2DPlugin, auto-loaded only when the literal key is present. `make arsenal Q=\"physics\"` returns one fuzzy hit on an unrelated easing name (\"Cartoon physics\"), not the mechanism itself. Absent from docs/PRIMITIVES.md and skills/vawe-scene-authoring. This is the plan's own confirmed example."
+      "evidence": "GSAP Physics2DPlugin, auto-loaded only when the literal key is present. `make arsenal Q=\"physics\"` returns one fuzzy hit on an unrelated easing name (\"Cartoon physics\"), not the mechanism itself. Absent from engine-doctrine/PRIMITIVES.md and skills/vawe-scene-authoring. This is the plan's own confirmed example."
     },
     {
       "path": "plane",
       "engine": "core/fx/plane.js:1-63; core/fx/index.js:25,35,58",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "core/fx/index.js DESCRIPTIONS and docs/PRIMITIVES.md:328-339,458-459 both describe it with real syntax (`modifiers:[{plane:{z}}]`), and `make arsenal Q=\"plane\"` surfaces it. Reachable; the corpus just has not built hand-placed depth planes."
+      "evidence": "core/fx/index.js DESCRIPTIONS and engine-doctrine/PRIMITIVES.md:328-339,458-459 both describe it with real syntax (`modifiers:[{plane:{z}}]`), and `make arsenal Q=\"plane\"` surfaces it. Reachable; the corpus just has not built hand-placed depth planes."
     },
     {
       "path": "poles",
@@ -615,14 +615,14 @@
       "engine": "core/fx/tilt.js; core/fx/plane.js:2-33; core/fx/ancestor-kills.js:71",
       "author": "JSON (documented)",
       "verdict": "unwanted",
-      "evidence": "docs/PRIMITIVES.md:328-339,458 names `tilt` directly as one of the three things that \"leaves the picture plane\" and builds the 3D rig, with the exact CSS longhand it owns. `make arsenal Q=\"tilt\"` surfaces 6 real hits. Reachable and documented; the corpus just has not built a tilted-panel shot."
+      "evidence": "engine-doctrine/PRIMITIVES.md:328-339,458 names `tilt` directly as one of the three things that \"leaves the picture plane\" and builds the 3D rig, with the exact CSS longhand it owns. `make arsenal Q=\"tilt\"` surfaces 6 real hits. Reachable and documented; the corpus just has not built a tilted-panel shot."
     },
     {
       "path": "timeRemap",
       "engine": "core/tracks/index.js:79,142; core/timeline/time.js:15-66",
       "author": "not at all",
       "verdict": "unreachable",
-      "evidence": "The plan's own confirmed example. `make arsenal Q=\"timeRemap\"` returns nothing. Its sibling `timeWarp` (a simpler single-easing form of the same idea) is also unused; neither is named in docs/PRIMITIVES.md, skills/vawe-scene-authoring, or the move:/motion: grammar (contract.mjs), which only ever scales x/y/scale/rot, never a layer's own clock."
+      "evidence": "The plan's own confirmed example. `make arsenal Q=\"timeRemap\"` returns nothing. Its sibling `timeWarp` (a simpler single-easing form of the same idea) is also unused; neither is named in engine-doctrine/PRIMITIVES.md, skills/vawe-scene-authoring, or the move:/motion: grammar (contract.mjs), which only ever scales x/y/scale/rot, never a layer's own clock."
     },
     {
       "path": "upright",

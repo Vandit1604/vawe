@@ -1,13 +1,13 @@
 {
  "module": "scene",
- "note": "TALKING-HEAD worked example (docs/EVALS.md, skills/vawe-type-talking-head/SKILL.md). Subject: Corva, a fictional research assistant that answers with the passage it drew from rather than a summary. Presenter: Mira, a fictional Corva researcher, invented for this fixture, no real brand or person. No voice synthesis exists in this engine and no real presenter footage: the two nested circles (a plate ring plus a small accent core) stand in for a real presenter shot, deliberately abstract rather than an invented face, and the on-screen captions are a hand-timed script standing in for the `voWords`/`make vo-captions` path this skill names for a real VO track. The B-roll beat (9.0-14.0s) is a real `html` layer, a document mock with a highlighted line and a citation chip that resolves, illustrating the payoff (a citation you can check) rather than restating it in type. Theme preface: paper-white typographic stage, restrained motion (bounce 0, ease-out only), one warm accent reserved for the citation resolving, a deliberate fit for a calm editorial register.",
+ "note": "TALKING-HEAD worked example (engine-doctrine/EVALS.md, skills/vawe-type-talking-head/SKILL.md). Subject: Corva, a fictional research assistant that answers with the passage it drew from rather than a summary. Presenter: Mira, a fictional Corva researcher, invented for this fixture, no real brand or person. No voice synthesis exists in this engine and no real presenter footage: the two nested circles (a plate ring plus a small accent core) stand in for a real presenter shot, deliberately abstract rather than an invented face, and the on-screen captions are a hand-timed script standing in for the `voWords`/`make vo-captions` path this skill names for a real VO track. The B-roll beat (9.0-14.0s) is a real `html` layer, a document mock with a highlighted line and a citation chip that resolves, illustrating the payoff (a citation you can check) rather than restating it in type. Theme preface: paper-white typographic stage, restrained motion (bounce 0, ease-out only), one warm accent reserved for the citation resolving, a deliberate fit for a calm editorial register.",
  "theme": "preface",
  "aspect": "9:16",
  "destination": "shorts",
  "duration": 21,
  "energy": "calm",
  "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited"], "_why": {
-   "no-storyboard": "a fixed eval fixture (docs/EVALS.md): liveness + before/after proof for `make evals`, not a planned film with a requester to sign a lock sheet",
+   "no-storyboard": "a fixed eval fixture (engine-doctrine/EVALS.md): liveness + before/after proof for `make evals`, not a planned film with a requester to sign a lock sheet",
    "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
    "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full production craft pass"
  } },

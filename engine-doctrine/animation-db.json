@@ -1,0 +1,342 @@
+{
+  "_note": "Design database for the video engine, concept → technique. Human version: engine-doctrine/DESIGN-DATABASE.md. Backgrounds map to core/backgrounds/index.js bgPreset() ids. Narrative structure + beat roles live in engine-doctrine/CRAFT/STORY.md; layout archetypes in engine-doctrine/CRAFT/LAYOUT.md.",
+  "palette": {
+    "accent": "#1F3BFF",
+    "periwinkle": "#757dbb",
+    "periwinkleDeep": "#454e92",
+    "light": "#c7cbe8",
+    "offwhite": "#f5f5f2",
+    "ink": "#16161a",
+    "rule": "60-30-10: dark periwinkle field (60) / periwinkle tone (30) / electric blue accent (10). White text only on bg L<=45%."
+  },
+  "backgrounds": [
+    {
+      "id": "aurora",
+      "value": "dark",
+      "energy": "calm",
+      "mood": [
+        "premium",
+        "cinematic"
+      ],
+      "useFor": [
+        "hook",
+        "hero",
+        "vision",
+        "payoff"
+      ],
+      "built": true
+    },
+    {
+      "id": "brandglow",
+      "value": "dark",
+      "energy": "strong",
+      "mood": [
+        "brand",
+        "climax"
+      ],
+      "useFor": [
+        "cta",
+        "nameReveal"
+      ],
+      "built": true
+    },
+    {
+      "id": "constellation",
+      "value": "dark",
+      "energy": "medium",
+      "mood": [
+        "data",
+        "network",
+        "tech"
+      ],
+      "useFor": [
+        "stats",
+        "ecosystem",
+        "features"
+      ],
+      "built": true
+    },
+    {
+      "id": "dotmatrix",
+      "value": "light",
+      "energy": "medium",
+      "mood": [
+        "engineered",
+        "clean",
+        "blueprint"
+      ],
+      "useFor": [
+        "howItWorks",
+        "features",
+        "valueBreak"
+      ],
+      "built": true
+    },
+    {
+      "id": "spotlight",
+      "value": "dark",
+      "energy": "calm",
+      "mood": [
+        "focus",
+        "suspense"
+      ],
+      "useFor": [
+        "statement",
+        "quote"
+      ],
+      "built": true
+    },
+    {
+      "id": "mesh",
+      "value": "dark",
+      "energy": "medium",
+      "mood": [
+        "rich",
+        "atmospheric"
+      ],
+      "useFor": [
+        "features",
+        "split",
+        "chapter"
+      ],
+      "built": true
+    },
+    {
+      "id": "conicAura",
+      "value": "dark",
+      "energy": "calm",
+      "mood": [
+        "halo",
+        "metallic"
+      ],
+      "useFor": [
+        "logoReveal"
+      ],
+      "built": false
+    },
+    {
+      "id": "isometricBlueprint",
+      "value": "light",
+      "energy": "medium",
+      "mood": [
+        "engineering",
+        "schematic"
+      ],
+      "useFor": [
+        "architecture"
+      ],
+      "built": false
+    },
+    {
+      "id": "scanlines",
+      "value": "dark",
+      "energy": "edgy",
+      "mood": [
+        "retro-tech",
+        "terminal"
+      ],
+      "useFor": [
+        "devTools"
+      ],
+      "built": false
+    },
+    {
+      "id": "bokeh",
+      "value": "dark",
+      "energy": "playful",
+      "mood": [
+        "soft",
+        "organic"
+      ],
+      "useFor": [
+        "lifestyle"
+      ],
+      "built": false
+    },
+    {
+      "id": "waveform",
+      "value": "dark",
+      "energy": "energetic",
+      "mood": [
+        "audio"
+      ],
+      "useFor": [
+        "voiceProducts"
+      ],
+      "built": false
+    }
+  ],
+  "dotAnimation": {
+    "spacing": "48-64px",
+    "radius": "1.5-3 -> peak 4-6",
+    "baseAlpha": "0.06-0.20",
+    "peakAlpha": "0.3-0.6",
+    "modes": [
+      "wave",
+      "ripple",
+      "pulse"
+    ],
+    "drift": "8-14 px/s (seamless: grid period == spacing)",
+    "waveField": "0.5+0.5*sin(t*omega - (x+y)*k), k~=0.03"
+  },
+  "easing": {
+    "emphasized": "cubic-bezier(.2,0,0,1)",
+    "enter": "cubic-bezier(.05,.7,.1,1)",
+    "exit": "cubic-bezier(.3,0,.8,.15)",
+    "expoOut": "cubic-bezier(.16,1,.3,1)",
+    "backOut": "cubic-bezier(.34,1.56,.64,1)",
+    "backIn": "cubic-bezier(.36,0,.66,-.56)",
+    "inEngine": [
+      "easeOutExpo",
+      "easeOutBack",
+      "spring",
+      "easeOutCubic"
+    ]
+  },
+  "timing": {
+    "microMs": "150-200",
+    "enterMs": "300-400",
+    "transitionMs": "375-500",
+    "exitFactor": 0.7,
+    "staggerMs": "40-80",
+    "cascadeCapMs": 300,
+    "holdPerWordS": 0.3,
+    "holdFloorS": 1.4
+  },
+  "transitions": [
+    {
+      "name": "dipToColor",
+      "ms": "250-400",
+      "when": "chapter change / brand beat",
+      "built": true
+    },
+    {
+      "name": "push",
+      "ms": "350-500",
+      "when": "sequential, directional",
+      "built": true
+    },
+    {
+      "name": "wipe",
+      "ms": "300-450",
+      "when": "energetic reveal",
+      "built": true
+    },
+    {
+      "name": "maskReveal",
+      "ms": "400-600",
+      "when": "logo / hero",
+      "built": true
+    },
+    {
+      "name": "scalePunch",
+      "ms": "200-350",
+      "when": "beat-synced emphasis",
+      "built": true
+    },
+    {
+      "name": "crossfade",
+      "ms": "200-300",
+      "when": "calm, light-to-light",
+      "built": true
+    },
+    {
+      "name": "matchCut",
+      "ms": "400-600",
+      "when": "carry accent shape across",
+      "built": false
+    }
+  ],
+  "conceptMap": {
+    "hook": {
+      "bg": "aurora",
+      "layout": "centered|leftMacro",
+      "value": "dark",
+      "motion": "slowBuild",
+      "in": "-"
+    },
+    "nameReveal": {
+      "bg": "brandglow",
+      "layout": "centeredLogo",
+      "value": "dark",
+      "motion": "maskSpring",
+      "in": "dipToBrand"
+    },
+    "problem": {
+      "bg": "spotlight",
+      "layout": "centeredStatement",
+      "value": "dark",
+      "motion": "slowHold",
+      "in": "crossfade"
+    },
+    "howItWorks": {
+      "bg": "dotmatrix",
+      "layout": "cardFlow",
+      "value": "light",
+      "motion": "cardPops",
+      "in": "dipToWhite"
+    },
+    "features": {
+      "bg": "mesh",
+      "layout": "grid2col",
+      "value": "dark",
+      "motion": "staggerFade",
+      "in": "push"
+    },
+    "stats": {
+      "bg": "constellation",
+      "layout": "fullBleedNumbers",
+      "value": "dark",
+      "motion": "countUp",
+      "in": "scalePunch"
+    },
+    "ecosystem": {
+      "bg": "constellation",
+      "layout": "centered",
+      "value": "dark",
+      "motion": "slowDrift",
+      "in": "crossfade"
+    },
+    "vision": {
+      "bg": "aurora",
+      "layout": "centeredSerif",
+      "value": "dark",
+      "motion": "verySlow",
+      "in": "crossfade"
+    },
+    "quote": {
+      "bg": "spotlight",
+      "layout": "quoteBlock",
+      "value": "dark",
+      "motion": "wordRise",
+      "in": "dip"
+    },
+    "cta": {
+      "bg": "brandglow",
+      "layout": "centeredLogoUrl",
+      "value": "dark",
+      "motion": "logoSpring",
+      "in": "dipToBrand"
+    }
+  },
+  "cohesionAnchors": [
+    "accent #1F3BFF in every scene",
+    "Inter/Instrument Serif/Geist Mono",
+    "consistent margins ~8%",
+    "grain layer on every scene",
+    "one transition vocabulary",
+    "brand mark present"
+  ],
+  "varietyChecklist": {
+    "changeAtLeast": 3,
+    "axes": [
+      "layout",
+      "scale",
+      "value",
+      "backgroundEngine",
+      "hue",
+      "motionCharacter"
+    ],
+    "anchorsHeldConstant": true
+  }
+}

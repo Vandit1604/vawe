@@ -53,7 +53,7 @@ const sheetHtml = `<!doctype html><html><head><meta charset="utf-8">
 <style>*{box-sizing:border-box}
 /* tokens.css is linked for its fonts, and it also sets html,body{width:var(--vw);height:var(--vh);
    overflow:hidden} at the PORTRAIT default 1080x1920. Nothing boots here to rewrite it, so a sheet
-   ${COLW}px wide was clipped at x=1080 and fullPage saw a 1920px-tall page (docs/MISTAKES.md #351).
+   ${COLW}px wide was clipped at x=1080 and fullPage saw a 1920px-tall page (engine-doctrine/MISTAKES.md #351).
    A sheet is a scrolling document, not a canvas: let it size to its content. */
 html,body{margin:0;background:${bg};color:#f7f8f8;font-family:'Inter',system-ui,sans-serif;width:auto;height:auto;overflow:visible}
 .wrap{padding:56px 40px 80px}h1{font-size:26px;font-weight:540;margin:0 0 6px}.sub{color:#8a8f98;font-size:15px;margin:0 0 44px;font-family:'Geist Mono',monospace}</style></head>

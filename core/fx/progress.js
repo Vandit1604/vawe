@@ -41,7 +41,7 @@ function resolve(spec) {
   // the note here said that was "right for a prop authored in a hundred scenes and wrong for this
   // registry". The premise was measured and was false. No scene in the library names an unknown
   // easing, so resolveEasing throws for everyone now and this asks it instead of copying it. Two
-  // hand-kept copies of one rule is #159. docs/MISTAKES.md #367.
+  // hand-kept copies of one rule is #159. engine-doctrine/MISTAKES.md #367.
   const ease = s.ease == null ? null : resolveEasing(s.ease);
   return { name, ease };
 }

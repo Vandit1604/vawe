@@ -4,7 +4,7 @@
 - **Message:** hand-animating a video is fine until the number changes, and then you do all of it again
 - **Audience:** people who rebuild the same product video every time a figure moves
 - **Shape:** 5 beats over 15s · median beat 2.80s
-- **Thread:** (not stated, see docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md)
+- **Thread:** (not stated, see engine-doctrine/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md)
 - **Look:** vawe
 - **Faces:** sans `Anybody` · mono `JetBrains Mono`
 - **Pictures:** 5/5 beats name one
@@ -34,4 +34,4 @@
 
 ## What it must not become
 
-<the failure mode to steer away from: the generic version of this film. See docs/CRAFT/TASTE-RULES.md.>
+<the failure mode to steer away from: the generic version of this film. See engine-doctrine/CRAFT/TASTE-RULES.md.>

@@ -214,7 +214,7 @@ export function frame(kit, el, L, t, scene, { path, clicks, style, styleAt, snap
 // build time. mergeProps unions them (core/props.js). `carry` is read only at boot, see above.
 export const PROPS = mergeProps(propsOf(build), propsOf(frame), { carry: {} });
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "a pointer that follows [{t,x,y}] keyframes (`path`) or eases magnetically onto "
   + "another layer's live box (`snapTo`), fires a ripple at `clicks`, can change shape mid-move "
   + "(`style`/`styleAt`: arrow/hand/ibeam/block), carry a name tag (`label`), and drag another layer "

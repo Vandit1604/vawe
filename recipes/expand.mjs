@@ -289,7 +289,7 @@ function expandCameraLine(scene, line) {
 // keys per word. `colors` routes through colorWave's own `colors` dial (core/kinetic/presets.js), which
 // gives unit `i` its own arrival colour (`colors[i % n]`) rather than one shared accent: this used to be
 // refused past one distinct value because colorWave could only sweep a single flash, and that gap is
-// what this line existed to name (docs/MISTAKES.md). A single colour still routes through `flash`,
+// what this line existed to name (engine-doctrine/MISTAKES.md). A single colour still routes through `flash`,
 // unchanged, so a one-colour line keeps behaving exactly as before.
 function expandEnterLine(scene, line) {
   const name = line.recipe;

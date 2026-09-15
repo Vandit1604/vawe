@@ -37,7 +37,7 @@ export function soloCutStyle(name, seqState, opts) {
 export function cutStyle(name, seqState, { timing = 'smooth', dir = 'left', dist = 90, cx = 50, cy = 50 } = {}) {
   // Both used to fall back silently (to `fade` and `smooth`). A cut is a JUNCTION - the one moment the
   // viewer is guaranteed to be looking - so a mistyped one quietly becoming a dissolve is the worst
-  // place in the engine to substitute. core/registry.js, docs/MISTAKES.md #355.
+  // place in the engine to substitute. core/registry.js, engine-doctrine/MISTAKES.md #355.
   // absent → the documented default; NAMED-BUT-UNKNOWN → throw. See core/clips.js for why they differ.
   const P = name == null ? PRESENTATIONS.fade : CUT_REGISTRY.pick(name);
   const T = typeof timing === 'function' ? timing : timing == null ? TIMINGS.smooth : TIMING_REGISTRY.pick(timing);

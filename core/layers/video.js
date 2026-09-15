@@ -2,7 +2,7 @@
 //
 // THE WHOLE DESIGN IS THE SEEK. A played video advances on wall-clock time, so frame 400 would hold
 // whatever the decoder reached, which differs between the six capture workers and between two renders of
-// the same file. `renderFrame(n)` must be a function of `n` alone (docs/MISTAKES.md #370), so this layer
+// the same file. `renderFrame(n)` must be a function of `n` alone (engine-doctrine/MISTAKES.md #370), so this layer
 // never calls play(): it computes a source time from the scene clock and seeks there. The picture is then
 // as deterministic as a still image, and `make probe` can hold it to the same standard as everything else.
 //
@@ -47,7 +47,7 @@ export function build(kit, el, L, { src, w, h, radius, fit, poster, in: inPoint,
   // fires no error the frame pass can see, so the layer renders as an empty box and the film looks
   // like the layer was never written. Both spellings mean the same file and the assets preflight
   // already checks the repo-relative one, so the resolver belongs here rather than in the author's
-  // JSON. Silence is the worst failure (docs/MISTAKES.md #383).
+  // JSON. Silence is the worst failure (engine-doctrine/MISTAKES.md #383).
   v.src = srcUrl(src);
   if (poster) v.poster = poster;
   // muted + playsInline + no autoplay + no controls: this element is a decoder we scrub, not a player.
@@ -93,5 +93,5 @@ export function frame(kit, el, L, t) {
   }));
 }
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still";

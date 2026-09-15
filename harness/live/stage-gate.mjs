@@ -8,11 +8,11 @@
 //
 // WHY THIS EXISTS AND A DOC DOES NOT. The order was written in AGENTS.md, printed by
 // `make critics DECIDERS=1` as "Step 1 is not optional", and still run backwards by an author who
-// could quote it (docs/MISTAKES.md #591). Long sessions erode rule-following, so a rule that must be
+// could quote it (engine-doctrine/MISTAKES.md #591). Long sessions erode rule-following, so a rule that must be
 // remembered is a rule that fails late in the work, which is exactly when it matters most.
 //
 // THREE DENIALS, ONE PER MISTAKE ACTUALLY MADE. It is not a policy engine and must not grow into one:
-// every rule here has a real entry in docs/MISTAKES.md behind it. Anything softer belongs in
+// every rule here has a real entry in engine-doctrine/MISTAKES.md behind it. Anything softer belongs in
 // harness/live/craft-live.mjs, which speaks and never blocks.
 //
 // THE WAY OUT IS THE SAME AS EVERY GATE HERE. Make the missing artefact. There is no flag, because a
@@ -82,7 +82,7 @@ process.stdin.on('end', () => {
     deny(`no storyboard in formats/scene/ claims ${path.basename(rel)}, so there is no plan behind this `
       + 'fragment. AGENTS.md orders the deciders storyboard (1), subject (2), scene (3), and scene is the '
       + 'role that writes this file. The beat table is what decides how many fragments exist and names the '
-      + 'selectors each must expose (docs/MISTAKES.md #591).\nNext: write the storyboard first, '
+      + 'selectors each must expose (engine-doctrine/MISTAKES.md #591).\nNext: write the storyboard first, '
       + '`make scaffold OUT=formats/scene/<film>.json THEME=<theme> DUR=<seconds>`.');
   }
   const p = filePaths(film);
@@ -94,7 +94,7 @@ process.stdin.on('end', () => {
     deny(`no storyboard for ${film}, so this fragment cannot be written yet. AGENTS.md orders the deciders `
       + 'storyboard (1), subject (2), scene (3), and scene is the role that writes this file. Written first, the '
       + 'fragment count is a guess and the motion handles are invented instead of read off the plan\'s own '
-      + `\`motion:\` line (docs/MISTAKES.md #591).\nNext: ${st.next}`);
+      + `\`motion:\` line (engine-doctrine/MISTAKES.md #591).\nNext: ${st.next}`);
   }
 
   // 3. NO FILM BEFORE THE PLAN IS SIGNED. Writing layers is building; building before approval is the

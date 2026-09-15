@@ -1,6 +1,6 @@
 // node --test quality/gates/read-check.test.mjs
 //
-// docs/RULES/readable-hold.md, P1 of .claude/plans/craft-knowledge/01-motion.plan.md: the
+// engine-doctrine/RULES/readable-hold.md, P1 of .claude/plans/craft-knowledge/01-motion.plan.md: the
 // unreadable-hold finding reports the fix, it never changes timing, and it must name the beat (or the
 // layer id), the element, the measured hold, the minimum it needs, and the exact seconds to add.
 import test from 'node:test';

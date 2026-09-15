@@ -395,8 +395,8 @@ export function lightfield(given) {
     // it paints and the picture never settles. Measured on `tide` at 120 rings: consecutive screenshots
     // 90ms apart differed forever, the PNG oscillating between 200K and 270K, and with will-change off
     // the same field was byte-identical from the eighth attempt on. Same family as the deferred raster
-    // in docs/MISTAKES.md #267, which cost whole product screenshots. A promotion hint that the browser
-    // cannot honour is worse than none (docs/MISTAKES.md #272).
+    // in engine-doctrine/MISTAKES.md #267, which cost whole product screenshots. A promotion hint that the browser
+    // cannot honour is worse than none (engine-doctrine/MISTAKES.md #272).
     `.${cls} i{position:absolute;display:block}`,
     shadow ? `.${cls} .s{position:absolute;inset:0;pointer-events:none;background:${shadow}}` : '',
   ].filter(Boolean).join('\n');

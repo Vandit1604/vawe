@@ -65,8 +65,8 @@ export async function capabilities() {
     import(path.join(repoRoot, 'core/engine/gsap-effects.js')),
   ]);
   // A look's meaning is its REGISTER (the era it evokes), which is what an author picks between, and it
-  // is already complete and gated in docs/CRAFT/SELECTION.md §4.
-  const REGISTERS = registersOf(fs.readFileSync(path.join(repoRoot, 'docs/CRAFT/SELECTION.md'), 'utf8'));
+  // is already complete and gated in engine-doctrine/CRAFT/SELECTION.md §4.
+  const REGISTERS = registersOf(fs.readFileSync(path.join(repoRoot, 'engine-doctrine/CRAFT/SELECTION.md'), 'utf8'));
   const blocks = CATALOG.filter((e) => !e.overlay);
   const families = [...new Set(blocks.map((e) => e.family))];
   // Names WITH their meanings. These three crossed the wire as bare strings while `blocks` right below

@@ -4,7 +4,7 @@ audience: "an experienced diver scrolling a feed, who already owns a computer an
 arc: "hook (a reading that should not exist) -> the instrument -> the mechanism -> payoff (the number the hook withheld) -> close"
 threads: "a continuous object (the depth rule: a hairline accent column pinned to the left stage margin, hand-keyed on an `h` track, growing from 0 to full frame across the whole film, so the film itself descends) + one dive, one instrument, never a person"
 spectacle: "beat 3 (The mechanism) - the sensor stack drawing itself open, layer by layer, while the depth rule keeps falling behind it - the one beat where the object comes apart"
-not: "no diver, no ocean footage, no stock photography, no gradient hero, no Inter/Space Grotesk/Instrument Serif, no drop shadow (a machined instrument is milled, not floated), no captured brand (fictional, per docs/EVALS.md), and no background this library already leans on: the field opens and closes on metallicSheen, the one preset of 23 with zero users, surfaced by `make arsenal --census`, and the two dense beats sit on quiet grounds instead, because a signature field is seasoning and not wallpaper"
+not: "no diver, no ocean footage, no stock photography, no gradient hero, no Inter/Space Grotesk/Instrument Serif, no drop shadow (a machined instrument is milled, not floated), no captured brand (fictional, per engine-doctrine/EVALS.md), and no background this library already leans on: the field opens and closes on metallicSheen, the one preset of 23 with zero users, surfaced by `make arsenal --census`, and the two dense beats sit on quiet grounds instead, because a signature field is seasoning and not wallpaper"
 format: 1920x1080
 theme: fathom
 duration: 17.3s
@@ -12,7 +12,7 @@ craft:
   captions: "no spoken track, so no word-timed captions; on-screen copy only, checked against the web safe strip"
   color: "fathom's own locked palette: near-black anodised field, one backlit sea-glass green. No fragment invents a colour"
   density: "beats 2 and 3 carry an eyebrow, a headline and one real instrument object; beats 1, 4 and 5 stay lean, the hook, the payoff and the close"
-  direction: "the register is KINETIC (docs/CRAFT/MOTION-REGISTERS.md, launch spine), so motion runs through every beat rather than being spent once. The restraint is in the BUDGET, not the stillness: beat 3 is the named peak and every other moving thing is the depth rule or one entrance"
+  direction: "the register is KINETIC (engine-doctrine/CRAFT/MOTION-REGISTERS.md, launch spine), so motion runs through every beat rather than being spent once. The restraint is in the BUDGET, not the stillness: beat 3 is the named peak and every other moving thing is the depth rule or one entrance"
   html-fragments: "every fragment moves via `parts` stagger; the sensor stack opens on `--t` in a calc(), never a CSS animation or transition"
   layout: "left-anchored at the stage margin, with the depth rule occupying the left edge as a fixed column; only the close centers"
   motion-craft: "the depth rule is a 6-key hand-authored height track, never a fired preset, and it never reverses: a descent that goes back up is not a descent"
@@ -23,7 +23,7 @@ craft:
   transitions: "the theme's own derived cut family (whip, from durationScale 0.85) carries every joint except the last, which is the quietest one in the film"
 ---
 
-<!-- THE DESIGN STUDY. No real Fathom exists, so this stands in for `make sections` per docs/EVALS.md's
+<!-- THE DESIGN STUDY. No real Fathom exists, so this stands in for `make sections` per engine-doctrine/EVALS.md's
      ruling that fictional briefs study themselves.
 
      THE POINT OF THIS FILM, beyond the film. It is the first one authored after the motion work, and it

@@ -41,7 +41,7 @@ const boxW = parseInt(flag('--w', '1400'), 10);
 // `--t 3.5` to preview any other moment, which is also how you check that a backdrop moves at all.
 const tSec = parseFloat(flag('--t', '0'));
 // A FULL-BLEED fragment sizes itself to its container, so a centred 1400px box previews a STRIP of it
-// and nothing says so (docs/MISTAKES.md #271). `#frag` declares a width and no height, so a child at
+// and nothing says so (engine-doctrine/MISTAKES.md #271). `#frag` declares a width and no height, so a child at
 // `position:absolute; inset:0` collapses to zero. Detected rather than declared, because the author of
 // a backdrop should not have to know this tool's layout; the choice is PRINTED so it is never silent.
 //
@@ -63,7 +63,7 @@ const tSec = parseFloat(flag('--t', '0'));
 // fragment, it is checking a different fragment. The page now calls the ENGINE's own applyTheme
 // (core/boot.js), so the token names cannot drift from what a real render sets, and they had already
 // drifted, since the palette key is `surface2` while the token is `--surface-2`.
-// docs/MISTAKES.md #382.
+// engine-doctrine/MISTAKES.md #382.
 // --theme-file previews a theme that is not (yet) in themes/. It exists for harness/author/invent-look.mjs,
 // which photographs candidate looks BEFORE one is chosen: without it a generator would have to write
 // five throwaway files into themes/ and remember to delete them.

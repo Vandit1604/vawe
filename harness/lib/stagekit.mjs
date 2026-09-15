@@ -306,7 +306,7 @@ export function buildKit(theme, resolveLook, isLightBg, spec) {
     // (`references/video-composition.md`), which is blunt about it: decorative opacity is 3-8% on the
     // web and 12-25% on video, borders are 1px on the web and 2-4px on video, and anything under those
     // floors is invisible once the frame is encoded. Designing a frame at web values and rendering it
-    // at 1920x1080 is why a set of frames reads thin (docs/MISTAKES.md #600).
+    // at 1920x1080 is why a set of frames reads thin (engine-doctrine/MISTAKES.md #600).
     `.kit-grain{position:absolute;inset:0;pointer-events:none;opacity:.055;mix-blend-mode:multiply;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}`,
     // --- a hairline divider: the structural rule LAYOUT.md §0 asks for, distinct from a card's border --

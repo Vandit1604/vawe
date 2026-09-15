@@ -1,6 +1,6 @@
-// scripts/site/deck.mjs: publish docs/animation.html to the marketing site as /deck.
+// scripts/site/deck.mjs: publish engine-doctrine/animation.html to the marketing site as /deck.
 //
-// One source, two homes. docs/animation.html is the canonical file and opens straight from disk;
+// One source, two homes. engine-doctrine/animation.html is the canonical file and opens straight from disk;
 // the site copy differs only in where it reaches for the fonts and the engine's easing module, so
 // this rewrites those two prefixes rather than keeping a second hand-edited copy that drifts.
 //
@@ -11,11 +11,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SRC = path.join(ROOT, 'docs', 'animation.html');
+const SRC = path.join(ROOT, 'engine-doctrine', 'animation.html');
 const OUT = path.join(ROOT, 'site', 'public', 'deck.html');
 const check = process.argv.includes('--check');
 
-// `../assets` and `../core` are correct from docs/; from site/public they are served at the root.
+// `../assets` and `../core` are correct from engine-doctrine/; from site/public they are served at the root.
 const built = fs.readFileSync(SRC, 'utf8')
   .replace(/\.\.\/assets\//g, '/assets/')
   .replace(/\.\.\/core\//g, '/core/')
@@ -30,4 +30,4 @@ if (check) {
 }
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, built);
-console.log(`✓ ${path.relative(ROOT, OUT)}  ←  docs/animation.html   (served at /deck)`);
+console.log(`✓ ${path.relative(ROOT, OUT)}  ←  engine-doctrine/animation.html   (served at /deck)`);

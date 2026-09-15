@@ -43,7 +43,7 @@ const WHEN = {
   svg: 'a vector mark (a logo, an icon path) that should draw itself on or morph, not just fade in.',
   cursor: 'the beat IS a product demo; this is the one primitive built to drive a click-through.',
   clip: 'footage came in as a frame sequence (PNG/WebP), not a video file, and must stay seek-exact.',
-  html: 'the surface does not exist yet and CSS genuinely expresses it faster than composing primitives; see docs/CRAFT/HTML-FRAGMENTS.md before hand-writing one.',
+  html: 'the surface does not exist yet and CSS genuinely expresses it faster than composing primitives; see engine-doctrine/CRAFT/HTML-FRAGMENTS.md before hand-writing one.',
   component: 'a real product surface was captured (`make capture`); always prefer this over `html` when the surface actually exists.',
   board: 'the beat is "here is our roadmap/backlog" from pure data, no captured asset needed.',
   doc: 'the beat is "here is a file/diff/README" from pure data, no captured asset needed.',
@@ -137,7 +137,7 @@ cannot go stale). Everything else in the vocabulary below is a dial ON one of th
 
 ${layers.lines.join('\n')}
 
-Full props per type: \`formats/scene/schema.json\`. What each type is FOR, in prose: \`docs/PRIMITIVES.md\`.
+Full props per type: \`formats/scene/schema.json\`. What each type is FOR, in prose: \`engine-doctrine/PRIMITIVES.md\`.
 
 ## The vocabulary: effect families
 

@@ -333,5 +333,5 @@ export function frame(kit, el, L, t, scene, { preset, pulse, flash } = L) {
 // core/props.js). `color2` unions in too: read only inside liveColor(), never destructured directly.
 export const PROPS = mergeProps(propsOf(build), propsOf(frame), GUARDED, { color2: {} });
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight)";

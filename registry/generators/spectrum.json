@@ -153,7 +153,7 @@
       }
     ]
   },
-  "docs": "docs/LIGHTFIELD.md",
+  "docs": "engine-doctrine/LIGHTFIELD.md",
   "reference": "refs/colonnade/c6.jpg",
   "preview": {
     "url": "https://vawe.dev/playground?gen=spectrum"

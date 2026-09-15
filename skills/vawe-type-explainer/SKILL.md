@@ -1,6 +1,6 @@
 ---
 name: vawe-type-explainer
-description: "Playbook for an explainer video in this engine: held pace, real counted figures, payoff last, no product or site needed. Load when the route table (docs/CRAFT/ROUTING.md) matches explainer, or the request explains a topic/article/data with invented visuals."
+description: "Playbook for an explainer video in this engine: held pace, real counted figures, payoff last, no product or site needed. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches explainer, or the request explains a topic/article/data with invented visuals."
 ---
 
 # vawe-type-explainer: the explainer playbook
@@ -27,14 +27,14 @@ next starts, not to keep pace with a product tour.
 ## What this type needs that others do not
 
 - **Quiet register.** An explainer is UI-adjacent: motion is a cost the viewer pays to keep reading
-  (NN/g, Apple HIG; `docs/CRAFT/MOTION-REGISTERS.md` §1). Name ONE loud moment (the payoff) and hold
+  (NN/g, Apple HIG; `engine-doctrine/CRAFT/MOTION-REGISTERS.md` §1). Name ONE loud moment (the payoff) and hold
   everything else still enough that the facts can be read (`register: 'quiet'` in `type-spines.mjs`).
 - **Counts with REAL figures.** The `count` layer compacts >=1e6 automatically; use a real number,
-  never a round placeholder. This type's own worked example (`docs/EVALS.md`) uses this engine's own
+  never a round placeholder. This type's own worked example (`engine-doctrine/EVALS.md`) uses this engine's own
   facts (24 layer types, CSS animation refused at boot, frame-independent rendering) precisely because
   they are checkable.
 - **Payoff last, always.** Order beats so the most counterintuitive fact lands at the very end; never
-  spoil it in the hook. `docs/RULES/payoff-last.md`.
+  spoil it in the hook. `engine-doctrine/RULES/payoff-last.md`.
 - **No product needed.** Resist the urge to bolt on a CTA or a brand lockup; an explainer that ends on
   "vawe.dev" when nothing was being sold reads as a bait-and-switch.
 - **A held pace.** Do not chain devices at launch-film speed; a fact needs room to be read and
@@ -51,15 +51,15 @@ By role (`make arsenal Q="…"` to search):
 
 ## The rules that matter most
 
-`docs/RULES/payoff-last.md` · `docs/RULES/speed-bands.md` · `docs/RULES/stagger-total.md` ·
-`docs/RULES/text-on-flat.md` · `docs/RULES/banned-defaults.md` · `docs/RULES/world-turns.md`. Also
+`engine-doctrine/RULES/payoff-last.md` · `engine-doctrine/RULES/speed-bands.md` · `engine-doctrine/RULES/stagger-total.md` ·
+`engine-doctrine/RULES/text-on-flat.md` · `engine-doctrine/RULES/banned-defaults.md` · `engine-doctrine/RULES/world-turns.md`. Also
 AGENTS.md's "Content philosophy" section (hook -> suspense -> payoff, never spoil, real numbers).
 
 ## Assets and how to get them
 
 None required: an explainer is built from type, counts and named-thing chips, not captured UI. If a
 graphic genuinely helps (a diagram, a real chart), prefer generating it from real data over a stock
-icon; see `docs/CRAFT/SHOW-DONT-TELL.md` for what counts as explanation versus decoration.
+icon; see `engine-doctrine/CRAFT/SHOW-DONT-TELL.md` for what counts as explanation versus decoration.
 
 ## `make scaffold TYPE=explainer`
 
@@ -77,7 +77,7 @@ at all, so it is also the fastest `--type` to validate clean out of the box at t
 
 Is the payoff genuinely the most surprising fact, and does it land last? Are the numbers real and
 checkable? Does the pace give each idea room, or does it rush like a product tour? Is there a picture
-carrying real information, or is the whole film type on a field (`docs/CRAFT/SHOW-DONT-TELL.md`)?
+carrying real information, or is the whole film type on a field (`engine-doctrine/CRAFT/SHOW-DONT-TELL.md`)?
 
 ## The worked example
 

@@ -319,10 +319,10 @@ export const EASINGS = {
 // `ease: "snappy"`, which is a shipped spelling. It also carries a cross-registry hint of its own for
 // GSAP ease names, which are real in this engine but only on GSAP-driven fields.
 //
-// What the registry is for: the section in docs/EFFECTS.md, which was hand-listed in
+// What the registry is for: the section in engine-doctrine/EFFECTS.md, which was hand-listed in
 // scripts/site/effects-catalog.mjs with its usage form and its no-preview reason a file further on.
 // `skip` stays, and it is a DECISION, not a gap: 41 curves named by mechanism are better served by the
-// feel table in docs/MOTION-CRAFT.md than by 41 near-identical sentences about acceleration.
+// feel table in engine-doctrine/MOTION-CRAFT.md than by 41 near-identical sentences about acceleration.
 export const EASING_REGISTRY = defineRegistry('easing', EASINGS, { slot: 'ease',
   // EVERY CURVE CARRIES ITS OWN LINE NOW, and the opt-out that used to sit here is gone with the
   // mechanism that allowed it. The argument for skipping them was that 41 near-identical sentences
@@ -379,9 +379,9 @@ export const EASING_REGISTRY = defineRegistry('easing', EASINGS, { slot: 'ease',
     title: 'Easings',
     tag: 'timing',
     intro: '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.',
-    skip: 'named by curve; pick by FEELING from the table in docs/MOTION-CRAFT.md',
+    skip: 'named by curve; pick by FEELING from the table in engine-doctrine/MOTION-CRAFT.md',
     usage: (n, { j }) => j({ motion: [{ t: 0, x: 160 }, { t: 1.2, x: 460, ease: n }] }),
-    noPreview: 'a curve is a feeling over time. Read the table in docs/MOTION-CRAFT.md, then feel it in the editor.',
+    noPreview: 'a curve is a feeling over time. Read the table in engine-doctrine/MOTION-CRAFT.md, then feel it in the editor.',
   },
 });
 // GSAP's easing vocabulary, which this engine also carries: `parts[].ease` and `morph.ease` go
@@ -446,7 +446,7 @@ export const gsapEase = (e, fallback, where = '') => {
 // registry". That fear was measurable and it was unfounded: across 151 scene files and 35 themes,
 // 22 distinct easing names are in use and NOT ONE is unknown. The only two odd values in the library
 // are `power2.inOut` and `power3.inOut`, and both sit on GSAP-driven fields that never reach here.
-// So the check is one copy again, and it lives where the vocabulary does. docs/MISTAKES.md #367.
+// So the check is one copy again, and it lives where the vocabulary does. engine-doctrine/MISTAKES.md #367.
 export const resolveEasing = (e) => {
   if (typeof e === 'function') return e;
   if (e == null || e === '') return easeOutCubic;
@@ -767,7 +767,7 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 // `cubic-bezier(0.23, 1, 0.32, 1)`. Sampled at 21 points against all 41 of our easings, the nearest is
 // `easeOutQuint` at a mean error of 0.0044: we have shipped their curve under another name the whole
 // time and defaulted to `easeOutCubic`, which is the weaker built-in they specifically argue against
-// (docs/CRAFT/MOTION-STANDARDS.md).
+// (engine-doctrine/CRAFT/MOTION-STANDARDS.md).
 //
 // `stagger` 0.045 is 45ms, mid-band of their 30 to 80.
 // `bounce`, `settle` and `enter` are resolved here but NOT currently read by any entrance: `rise`
@@ -797,7 +797,7 @@ export const exitRatioFromMotion = (durationScale) => Math.min(0.7, Math.max(0.3
 // rather than a word an author has to remember. DERIVED, same shape as exitRatioFromMotion above: reads
 // `theme.motion.bounce`, the axis `core/registry/theme-contract.js` already reads for the accent-cut
 // tier, so a calm brand and a bouncy one wind up by different amounts instead of all getting one
-// constant. docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md states the practitioner band directly ("roughly 10 to
+// constant. engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md states the practitioner band directly ("roughly 10 to
 // 20% of the total move"): the engine default (bounce 0) sits at the floor, and the bounciest theme
 // shipped today (threadcite, 0.42) lands at the ceiling; clamped so a still-bouncier future theme
 // cannot wind up past the band the recipe names.

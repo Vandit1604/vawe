@@ -4,7 +4,7 @@
 // AMBIGUOUS NOUNS ARE SCOPED BY SURFACE, and that is the fix this file's own KNOWN LIMIT used to ask
 // for and not do. "families" belongs to at least four registries (blocks, effects, cuts, fonts), and
 // this gate compared every "<n> families" against the block count wherever the sentence sat, so a true
-// statement about effect families read as a stale block count. Widening FILES into docs/ turned that
+// statement about effect families read as a stale block count. Widening FILES into engine-doctrine/ turned that
 // one known nuisance into twenty: "3 cut families", "48 effect families", "30 words across 3
 // families". So the bare noun is gone from TRUTH. What is checked instead is the QUALIFIED form
 // ("block families") plus the one sentence the product actually writes, "<n> blocks across <n>
@@ -70,7 +70,7 @@ const TRUTH = {
   // still present locally, so `readdirSync` says 38 here and a fresh clone has 35. A copy line reading
   // "38 themes" would therefore pass on the author's machine and fail for every contributor, the
   // stale-count failure this gate exists to prevent, inverted. The site describes the PUBLISHED
-  // product, so the published set is the truth. (Same lesson as docs/MISTAKES.md #443: grade the thing
+  // product, so the published set is the truth. (Same lesson as engine-doctrine/MISTAKES.md #443: grade the thing
   // that actually ships, never the copy sitting in the working tree.)
   themes: (() => {
     try {
@@ -90,24 +90,24 @@ const TRUTH = {
 // shape as docs-drift.mjs:26, which records the identical lesson from the other side of the fence.
 // So every surface that states a count is DISCOVERED by walking, never listed: a hand-written list is
 // the exact artefact that goes stale, and a gate whose subject list is stale is a gate that is quiet.
-// docs/MISTAKES.md QUOTES WRONG NUMBERS ON PURPOSE. It is the incident log, and half its entries are
+// engine-doctrine/MISTAKES.md QUOTES WRONG NUMBERS ON PURPOSE. It is the incident log, and half its entries are
 // an account of a count that had decayed: "I found 96 components ... Real: 148 blocks, 63 families".
 // Every one of those is a true sentence containing a false number, so the gate found forty findings in
 // it and not one was actionable. An entry is a record of a past state and correcting it would destroy
 // the record. Excluded as a FILE because the property is a file's, not a line's: waiving forty lines
 // one at a time would be forty lies about having looked.
-const EXCLUDED = new Set(['docs/MISTAKES.md']);
+const EXCLUDED = new Set(['engine-doctrine/MISTAKES.md']);
 
 const FILES = [
   'site/lib/features.ts',
   'site/public/vawe-rules.md',
   ...walk('site/app').filter((f) => /\.tsx?$/.test(f)),
   ...walk('docs-site/content/docs').filter((f) => f.endsWith('.mdx')),
-  ...walk('docs').filter((f) => f.endsWith('.md') && !EXCLUDED.has(f)),
+  ...walk('engine-doctrine').filter((f) => f.endsWith('.md') && !EXCLUDED.has(f)),
   // THE TOOLS THEMSELVES ARE A SURFACE, and they were the last one nobody read. `make arsenal` derives
   // its own headline ("The ${all.length} named things were searched"), so it cannot go stale; every
   // other author-facing script types its number by hand. Three had: block-schema printed "154 of 155
-  // blocks" over a registry of 185, doc-map advertised docs/EFFECTS.md as "15 families" over 53, and
+  // blocks" over a registry of 185, doc-map advertised engine-doctrine/EFFECTS.md as "15 families" over 53, and
   // feature-audit told an author to vary an entrance because "21 presets" were available over 31. An
   // author is told to trust these, and a wrong number here is worse than a wrong number in the copy:
   // it is inside the fix instruction, which is the same failure `make sfx` was (lib-test:2929).
@@ -133,7 +133,7 @@ if (process.argv.includes('--files')) {
 }
 
 // The bare nouns whose meaning is decided by the surface they sit on, not by the word. Checked in
-// site/ (product copy about the product) and never in docs/ (prose about films, frames and history).
+// site/ (product copy about the product) and never in engine-doctrine/ (prose about films, frames and history).
 const SITE_ONLY = new Set(['blocks', 'components', 'looks', 'cuts']);
 const alt = (keys) => keys.sort((a, b) => b.length - a.length).join('|');
 const ALL_SUBJECTS = alt(Object.keys(TRUTH));

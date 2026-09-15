@@ -41,7 +41,7 @@ Consequences to know:
 
 Never put a track from anywhere else under a published film without recording its licence here first.
 Paid stock, a commercial release, or anything that could trip Content ID is out, see `CLAUDE.md`.
-Decision guidance for choosing a bed at all lives in [`docs/CRAFT/SOUND.md`](../docs/CRAFT/SOUND.md).
+Decision guidance for choosing a bed at all lives in [`engine-doctrine/CRAFT/SOUND.md`](../engine-doctrine/CRAFT/SOUND.md).
 
 ## Images
 

@@ -382,7 +382,7 @@ function buildBloom(f, { rgb, threshold, radius, ry, intensity, key }) {
 
 // chromatic split: the same lesson as bloom, one primitive over. `drop-shadow(2px 0 0 red)` paints a
 // flat silhouette of the ALPHA channel, offset: on an opaque photo the alpha is the whole rectangle,
-// so it drew a red bar down one edge and never looked at the picture. See docs/MISTAKES.md #112, #351.
+// so it drew a red bar down one edge and never looked at the picture. See engine-doctrine/MISTAKES.md #112, #351.
 //
 // A real split moves the picture's own COLOUR CHANNELS apart:
 //   1. three copies of the source, each scaled per channel by a diagonal feColorMatrix

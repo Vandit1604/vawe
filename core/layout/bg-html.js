@@ -30,7 +30,7 @@ export function createBgHtml(root, windows, table) {
   // `src` counts as hand-authored just as much as `html` does. Filtering on `w.html != null` dropped
   // every src-only window on the floor: preloadHtml fetched the file into the table and NOTHING read it,
   // so declaring a backdrop by path rendered no backdrop and said nothing. That shipped the same day the
-  // `src` alternative did (docs/MISTAKES.md #264). htmlSource is the one resolver, so a layer and a
+  // `src` alternative did (engine-doctrine/MISTAKES.md #264). htmlSource is the one resolver, so a layer and a
   // backdrop cannot disagree about which source wins.
   const html = windows.filter((w) => w.html != null || typeof w.src === 'string');
   if (!html.length) return null;
@@ -39,7 +39,7 @@ export function createBgHtml(root, windows, table) {
     const el = document.createElement('div');
     el.className = 'hs-bghtml';
     // Same scoping as the html LAYER: `el` is this window's own wrapper, so the fragment's stylesheet
-    // stops at its edge and two bg windows cannot fight over a class name (docs/MISTAKES.md #425).
+    // stops at its edge and two bg windows cannot fight over a class name (engine-doctrine/MISTAKES.md #425).
     el.innerHTML = scopeStyles(sanitizeHtml(htmlSource(w, table, 'bg window')));
     root.insertBefore(el, root.firstChild); // behind the canvas and the camera
     els.set(w, el);
@@ -51,7 +51,7 @@ export function createBgHtml(root, windows, table) {
     // `span < 1e9` was false and the guard returned 0, while this file's header promised "0 -> 1
     // across this bg's own window". One backdrop spanning the film is the COMMONEST shape there is,
     // so the variable was frozen exactly where it was most likely to be used, and a page written
-    // against it rendered a still. docs/MISTAKES.md #353.
+    // against it rendered a still. engine-doctrine/MISTAKES.md #353.
     frame(t, active, filmDur) {
       // EVERY element is written EVERY frame, including the inactive ones. An early return that leaves
       // a stale display/opacity on a window we are no longer in is precisely the glow×sceneUnits bug

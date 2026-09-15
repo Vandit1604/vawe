@@ -1,6 +1,6 @@
 // quality/gates/output-contract.mjs: every REPORTING gate renders its findings through
 // harness/lib/findings.mjs, so it gets tight prose by default and --json for free. This gate counts the
-// ones that still print ad-hoc prose and ratchets that number down. See docs/CRAFT/COMMAND-OUTPUT.md.
+// ones that still print ad-hoc prose and ratchets that number down. See engine-doctrine/CRAFT/COMMAND-OUTPUT.md.
 //
 // WHY A RATCHET, NOT A REFUSAL AT THE WRITE SITE. The 52 non-conforming gates predate the contract, and
 // rewriting all of them at once is the big-bang break the migration plan warns against. A ratchet lets
@@ -46,7 +46,7 @@ const f = gateFindings({ line: (r) => r.summary });
 for (const file of targets) {
   f.warn('ad-hoc-output', `${file} prints its own prose; render through findings.mjs (tight prose + --json)`, {
     at: `quality/gates/${file}`,
-    doc: 'docs/CRAFT/COMMAND-OUTPUT.md',
+    doc: 'engine-doctrine/CRAFT/COMMAND-OUTPUT.md',
   });
 }
 
@@ -63,7 +63,7 @@ if (process.argv.includes('--stamp')) {
 
 if (prior && n > prior.adHoc) {
   console.error(`  ✗ ${n} gate(s) print ad-hoc prose, up from ${prior.adHoc}. A new reporting gate must`);
-  console.error('    render through findings.mjs (docs/CRAFT/COMMAND-OUTPUT.md), so it gets --json for free.');
+  console.error('    render through findings.mjs (engine-doctrine/CRAFT/COMMAND-OUTPUT.md), so it gets --json for free.');
   console.error('    If this is deliberate, raise the bar on purpose: node quality/gates/output-contract.mjs --stamp\n');
   process.exit(1);
 }

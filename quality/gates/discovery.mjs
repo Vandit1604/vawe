@@ -42,7 +42,7 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATCHET = path.join(ROOT, 'quality/baselines/discovery-ratchet.json');
 const stamp = process.argv.includes('--stamp');
-// The printed line is rendered FROM the record (docs/MISTAKES.md #401): each record's `summary`
+// The printed line is rendered FROM the record (engine-doctrine/MISTAKES.md #401): each record's `summary`
 // already carries the full multi-line advice a human reads, so the custom renderer prints it verbatim,
 // and it is printed once, at f.emit(), rather than scattered across the five checks below.
 const f = gateFindings({ line: (r) => r.summary });
@@ -67,12 +67,12 @@ console.log(`\n  DISCOVERY · ${corpus.length} entries across ${new Set(corpus.m
 }
 
 // ---- 2. THE WHOLE CORPUS: a ratchet, because one source has no write site to refuse at ------------
-// The catalogue (docs/EFFECTS.md) is the corpus's second source and nothing refuses on its behalf, so
+// The catalogue (engine-doctrine/EFFECTS.md) is the corpus's second source and nothing refuses on its behalf, so
 // this backstops the corpus the way checkCovered backstops the registries.
 // THE RATCHET IS AT ZERO. Every entry the search can name now carries a blurb, so any new bare entry
 // blocks. The last four (`beam:border`, `beam:shine`, `svg:draw`, `svg:morph`, pseudo-names for a MODE
 // of a layer type) reached the corpus with an empty blurb because their descriptions sat in the flat
-// DESC map that only docs/EFFECTS.md reads, not in the section's own `blurbs` map that the search
+// DESC map that only engine-doctrine/EFFECTS.md reads, not in the section's own `blurbs` map that the search
 // reads; scripts/site/effects-catalog.mjs now scopes them (BEAM_BLURBS / SVG_BLURBS) so both see them.
 // The ransom faces (8) and the aspect ratios (5) that once sat here each earned a registry instead
 // (core/ransom.js, core/safe.js), and "a handwriting face" reaches Caveat, "vertical for a phone"

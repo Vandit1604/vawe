@@ -1,6 +1,6 @@
 // screen.mjs: `make screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [THEME=] [INVENT=1] [REF=<ref> ACT=<n>] [W=1920 H=1080]`
 //
-// ONE command for the design route of a product screen (docs/CRAFT/SCREENS.md, owner ruling in
+// ONE command for the design route of a product screen (engine-doctrine/CRAFT/SCREENS.md, owner ruling in
 // .claude/plans/content-richness.plan.md Update 1: "use a ui design harness to build beautiful mocks,
 // not plain by default"). The owner: "why two? not single one". If F does not exist, KIND writes the
 // starting fragment first (folded in from the old `screen-new` target, now gone); then it always

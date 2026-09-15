@@ -65,7 +65,7 @@ for (const file of candidates) {
   if (short > TOLERANCE) {
     f.fail('render-truncated',
       `${file} is ${actual.toFixed(2)}s, the scene declares ${declared.toFixed(2)}s (short by ${short.toFixed(2)}s)`,
-      { at: file, doc: 'docs/MISTAKES.md' });
+      { at: file, doc: 'engine-doctrine/MISTAKES.md' });
     if (!worst || short > worst.short) worst = { file, actual, short };
   }
 }
