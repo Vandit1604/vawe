@@ -17,7 +17,7 @@ This repo turns **one self-describing JSON → one rendered video** (60fps mp4 f
 | 5 | **assemble** | the frames become a scene | `make assemble D=` |
 | 6 | **direct** | motion, then transitions, then sound, in that order | `make critics D= DECIDERS=1` |
 | 7 | **render** | | `make ship D=` |
-| 8 | **judge** | the only step that SEES | `make judge D=` → `make ledger D=` |
+| 8 | **judge** | the only step that SEES | `make judge D=` → `make ledger D=`, then **vawe-review-loop** for the stopping rule (STOP-done · STOP-converged · STOP-hand-it-back) and the rule that a PASS is never self-recorded |
 
 **Three transitions are refused, not requested** (agents have run this order backwards before: `make arsenal MISTAKES=1 Q="stage order"`): `harness/live/stage-gate.mjs` denies, at `PreToolUse`, a fragment no storyboard claims · `layers` into an unapproved film · writing `approved:` at all, the user's signature and never an agent's. The way out is the missing artefact, never a flag. `harness/live/stage-say.mjs` re-states the open stage every turn; `make next D=<film>` runs its step.
 
@@ -31,6 +31,7 @@ Skills live in `skills/` as plain docs; Claude Code loads them on demand, others
 |---|---|---|
 | **Write any layer** (first move, every time) | **vawe-scene-authoring** | [`docs/RULES/INDEX.md`](docs/RULES/INDEX.md) |
 | Plan a new video, or one from scratch | **vawe-video-planning** | [`AUTHORING-WALKTHROUGH.md`](docs/CRAFT/AUTHORING-WALKTHROUGH.md) |
+| **Direct** it, not just plan it: the ambition pass every type needs, not only a launch | **vawe-creative** | [`TASTE.md`](docs/TASTE.md) |
 | Make a specific TYPE (launch, explainer, talking-head, sting, demo, recreation) | **vawe-type-`<type>`** | `docs/CRAFT/ROUTING.md` maps a request to its type |
 | **Hand-write any HTML**, or fix "looks AI" | **taste-skill** → **impeccable** | [`HTML-FRAGMENTS.md`](docs/CRAFT/HTML-FRAGMENTS.md) |
 | Reflect a website or a film | n/a | `make sections`/[`RECREATION.md`](docs/CRAFT/RECREATION.md); `make study`/[`REFERENCE-STUDY.md`](docs/CRAFT/REFERENCE-STUDY.md) |
