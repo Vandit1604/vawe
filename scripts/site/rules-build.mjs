@@ -16,7 +16,7 @@ import { EASINGS } from '../../core/motion/motion.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
-const schema = JSON.parse(read('formats/scene/schema.json'));
+const schema = JSON.parse(read('films/scene/schema.json'));
 
 const F = schema.fields || {};
 const layerItem = (F.layers && F.layers.item) || {};

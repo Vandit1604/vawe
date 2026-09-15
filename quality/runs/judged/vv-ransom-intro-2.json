@@ -19,7 +19,7 @@
     },
     {
       "position": "RIGHT",
-      "input": "formats/scene/ransom-intro.json",
+      "input": "films/scene/ransom-intro.json",
       "mp4": "out/ransom-intro.mp4",
       "sceneHash": "e1a84052d8e24e21289cff48dac3111bd97b059dcfa3e2a404043d73d0003592",
       "allow": [],
@@ -31,7 +31,7 @@
   ],
   "result": {
     "winner": "RIGHT",
-    "winnerArm": "formats/scene/ransom-intro.json",
+    "winnerArm": "films/scene/ransom-intro.json",
     "confidence": "DECISIVE",
     "tally": {
       "LEFT": 0,
@@ -63,7 +63,7 @@
       "no",
       "no"
     ],
-    "formats/scene/ransom-intro.json": [
+    "films/scene/ransom-intro.json": [
       "yes",
       "yes",
       "yes"

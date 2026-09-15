@@ -56,7 +56,7 @@ const { server, port } = await serveRepo({
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 const page = await browser.newPage();
 await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });  // what the Go capture emulates
-await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${encodeURIComponent(SCENE_URL)}&fps=30`, { waitUntil: 'load' });
+await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=${encodeURIComponent(SCENE_URL)}&fps=30`, { waitUntil: 'load' });
 const err = await waitForEngine(page);
 if (err) { console.error('SCENE ERROR:', err); await browser.close(); server.close(); process.exit(1); }
 

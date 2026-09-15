@@ -78,7 +78,7 @@ let _libProfile = null;
 function libraryProfile() {
   if (_libProfile) return _libProfile;
   const { names, blind } = population('direction-floor · library profile', { filter: AUTHORED, quiet: true, soft: true });
-  const dir = path.join(repoRoot, 'formats/scene');
+  const dir = path.join(repoRoot, 'films/scene');
   const famCount = {};
   const cadence = [];
   let n = 0;
@@ -460,7 +460,7 @@ const bounds = [...new Set(boundaries)].filter((t) => t > EPS && t < dur - EPS).
 const T = sceneTiming(d);
 // A layer the engine confines to its own beat CANNOT be a spine, whatever its authored window says.
 // Under `sceneUnits` (core/engine/produce.js turns it on for any cut film with no choreographed `motion`
-// track) formats/scene/scene.js rewrites every non-last-beat layer to end with its beat, so a layer
+// track) films/scene/scene.js rewrites every non-last-beat layer to end with its beat, so a layer
 // authored across the cut is truncated at it. `unitEnd` is exactly that rewrite: non-null means the
 // engine ends this layer with its own beat. Reading the raw `start`/`duration` here passed a film
 // whose spine the renderer had already cut in half (MISTAKES #183); the factual half of that finding
@@ -533,7 +533,7 @@ const poseAt = (l, t) => {
 // `becomes` is literally the field that writes it.
 //
 // `becomes` is not a claim the author makes and the gate has to trust. The engine PRODUCES the match:
-// resolveBecomes (formats/scene/scene.js) carries the outgoing form's centre, size and rotation onto
+// resolveBecomes (films/scene/scene.js) carries the outgoing form's centre, size and rotation onto
 // the incoming layer's opening pose, and core/validate/validate.mjs refuses a handover whose two halves do not
 // meet.
 //
@@ -589,7 +589,7 @@ const label = (l) => `${l.type || 'text'}${l.text ? ` "${snippet(l.text)}"` : ''
 const carriedMsg = (spanning) => (spanning.length
   ? `${spanning.length} layer(s) do cross a boundary (${[...new Set(spanning.map(label))].slice(0, 3).join(' · ')}) but none of them CHANGE there. A fixed logo or watermark riding the cut is furniture, not a spine.`
   : `not one content layer is visible on both sides of any boundary. Every beat is born and dies inside itself.`);
-const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give the outgoing layer an `id` for `becomes` to name and declare `"becomes": "<the Y\'s id>"` on it, at the boundary time. The engine carries the centre, size and rotation across onto the incoming layer\'s opening pose (formats/scene/scene.js resolveBecomes; core/validate/validate.mjs refuses a handover whose two halves do not meet). See skills/vawe-continuous-action/SKILL.md. OR, if this film is deliberately held by a NON-OBJECT device this gate cannot see (a motif, an escalation, a metric cut rate, a sound bridge: engine-doctrine/CRAFT/FILM-STRUCTURE.md), that is legitimate structure, not a slideshow. This gate only credits the two devices the engine PRODUCES and can verify (a continuous object and a match cut), so declare the other with a reasoned waiver, `{"authoring":{"allow":["no-continuous-object"],"_why":{"no-continuous-object":"held by <device>: <how it carries across the cuts>"}}}`. A waiver with a reason is a structural decision someone wrote down, not an admission of failure.';
+const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token), keep it alive across the boundary, and make the boundary a state change of it (a `motion` track through it, a `vars` morph, a ken push, a typing line that keeps typing). Every junction answers "the X becomes the Y", and a MATCH CUT says that in one line: give the outgoing layer an `id` for `becomes` to name and declare `"becomes": "<the Y\'s id>"` on it, at the boundary time. The engine carries the centre, size and rotation across onto the incoming layer\'s opening pose (films/scene/scene.js resolveBecomes; core/validate/validate.mjs refuses a handover whose two halves do not meet). See skills/vawe-continuous-action/SKILL.md. OR, if this film is deliberately held by a NON-OBJECT device this gate cannot see (a motif, an escalation, a metric cut rate, a sound bridge: engine-doctrine/CRAFT/FILM-STRUCTURE.md), that is legitimate structure, not a slideshow. This gate only credits the two devices the engine PRODUCES and can verify (a continuous object and a match cut), so declare the other with a reasoned waiver, `{"authoring":{"allow":["no-continuous-object"],"_why":{"no-continuous-object":"held by <device>: <how it carries across the cuts>"}}}`. A waiver with a reason is a structural decision someone wrote down, not an admission of failure.';
 
 // `acrossBeats: true` attaches a layer to the camera instead of its beat wrapper, keeping its authored
 // window, so a spine is expressible whatever the cut style. It replaced the advice that used to live
@@ -604,7 +604,7 @@ if (bounds.length && dur < CONTINUITY_MAX_DUR) {
   const { spanning, transforming } = continuity(bounds);
   if (!transforming.length) {
     // BLOCKS. A WARN here let every NEW slideshow through, which is the one thing this tell exists to
-    // stop. The 18 pre-existing short cut-bearing scenes in formats/scene/ carry an explicit
+    // stop. The 18 pre-existing short cut-bearing scenes in films/scene/ carry an explicit
     // {"authoring":{"allow":["no-continuous-object"]}} waiver, so the gate holds new work without
     // breaking `make video` for scenes it did not cause. The same trade beat-check's `dead-air` made.
     fail('no-continuous-object', `SLIDESHOW BY CONSTRUCTION: ${dur}s with ${bounds.length} cut/seam boundary(ies) at ${bounds.map((t) => `${round3(t)}s`).join(', ')}, and ${carriedMsg(spanning)}${wrapNote} ${FIX_MSG}`);

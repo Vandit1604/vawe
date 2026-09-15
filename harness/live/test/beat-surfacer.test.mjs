@@ -16,7 +16,7 @@ import assert from 'node:assert';
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, '../../..');
 const HOOK = join(here, '..', 'beat-surfacer.mjs');
-const FIXTURE = 'formats/scene/zz-beat-surfacer-probe.storyboard.md';
+const FIXTURE = 'films/scene/zz-beat-surfacer-probe.storyboard.md';
 
 const run = (rel) => {
   const r = spawnSync('node', [HOOK], {

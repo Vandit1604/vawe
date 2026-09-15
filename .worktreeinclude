@@ -20,7 +20,7 @@ assets/fonts/*.woff2
 
 # The scene library. 108 of 149 scenes are gitignored, so without this a worktree cannot gate the
 # library at all — and says so by finding nothing.
-formats/scene/*.json
+films/scene/*.json
 
 # Captured product UI. A missing capture renders a grey placeholder box, not an error.
 assets/brands/**/components/*.json

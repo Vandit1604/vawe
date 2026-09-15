@@ -1,7 +1,7 @@
 // beatsync.mjs: align a scene's joints to the music's beat grid, at AUTHOR time.
 //
-//   make beatsync D=formats/scene/x.json MUSIC=assets/music/warm.wav            # report: what would move
-//   make beatsync D=formats/scene/x.json MUSIC=assets/music/warm.wav WRITE=1    # → x.beatsync.json
+//   make beatsync D=films/scene/x.json MUSIC=assets/music/warm.wav            # report: what would move
+//   make beatsync D=films/scene/x.json MUSIC=assets/music/warm.wav WRITE=1    # → x.beatsync.json
 //   [GRID=beat|downbeat]  [SNAP=0.12]  [LAYERS=1]
 //
 // THE SNAP ITSELF IS NOT HERE ANY MORE. `core/beats/index.js` owns which joints move and how far; this

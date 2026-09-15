@@ -38,7 +38,7 @@
     {
       "source": "site/public/assets/blocks/spinner.small.json",
       "url": "https://vawe.dev/assets/blocks/spinner.small.json",
-      "target": "formats/scene/spinner.small.json",
+      "target": "films/scene/spinner.small.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

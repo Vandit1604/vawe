@@ -88,7 +88,7 @@ function projectCorner(k, corner, pose) {
   ]);
   const afterLocal = apply(local, [lx, ly, 0, 1]);
   // back to canvas-centre-relative world space: add the origin and the box's own position, then
-  // recentre. Assumes the rig's perspective-origin is the canvas centre, its default (formats/scene/
+  // recentre. Assumes the rig's perspective-origin is the canvas centre, its default (films/scene/
   // scene.js sets it from an authored top-level `tilt.origin`, otherwise 50% 50%).
   const world = [
     ox + afterLocal[0] + box.x - canvas.w / 2,

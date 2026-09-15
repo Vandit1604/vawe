@@ -41,7 +41,7 @@
     {
       "source": "site/public/assets/blocks/lowerThird.bild.json",
       "url": "https://vawe.dev/assets/blocks/lowerThird.bild.json",
-      "target": "formats/scene/lowerThird.bild.json",
+      "target": "films/scene/lowerThird.bild.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

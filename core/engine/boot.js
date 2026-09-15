@@ -90,7 +90,7 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
     const n = parseFloat(s); return isNaN(n) ? v : n;
   };
   // pin → [x-keyword, y-keyword, widthFraction?]. Read from core/layout/safe.js PLACEMENT, the one
-  // table core/validate/validate.mjs's degenerate-pin check and formats/scene/schema.json's `pin`
+  // table core/validate/validate.mjs's degenerate-pin check and films/scene/schema.json's `pin`
   // enum also read now, in place of the three hand-kept copies this used to be.
   const PIN = PLACEMENT;
   // Children were never walked, so `pin`, `col`, `gutter` and string coords ("50%", "center") were
@@ -124,7 +124,7 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
     if (typeof L.h === 'string') L.h = num(L.h, H, 0, safe.y0, safe.y1);
     const w = typeof L.w === 'number' ? L.w : 0, h = typeof L.h === 'number' ? L.h : 0;
     // A text layer rarely declares `h`, so estimate it from the font size for the bottom edge. size*1.2
-    // is not a new invention: formats/scene/scene.html uses exactly this fallback to anchor layers to
+    // is not a new invention: films/scene/scene.html uses exactly this fallback to anchor layers to
     // each other. There is deliberately NO equivalent for width, a string's rendered width cannot be
     // known before layout, so `pin:"right"` without `w` stays an authoring error the audit reports.
     const hEst = h || (L.type === 'text' && L.size ? L.size * 1.2 : h);
@@ -133,7 +133,7 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
   }
 
   // CAPTIONS PLACE WITH THE SAME GRAMMAR AS LAYERS, and reusing it is the whole point of doing this
-  // here. A caption used to accept t0/t1/text and nothing else (formats/scene/schema.json), so where
+  // here. A caption used to accept t0/t1/text and nothing else (films/scene/schema.json), so where
   // it sat was a CSS constant in scene.css that no JSON could reach: an author who wanted a line at
   // the top of the frame had no way to say so, and nothing told them the wish was unsayable. Giving
   // captions their own placement words would have been a SECOND grammar for one job, which is the
@@ -201,10 +201,10 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
 //     decoder says so.
 //   · anything that is not a repo path. This walk reads EVERY string in the scene, not just image
 //     slots, so a text layer reading "hero.png" is picked up too (one shipped film does exactly that,
-//     formats/scene/ab-skill-shotcode.json). A bare filename is not a path into this repo, so it is
+//     films/scene/ab-skill-shotcode.json). A bare filename is not a path into this repo, so it is
 //     never grounds to refuse a film. The shape of the string is what separates the two, and it is
 //     the only thing this walk knows.
-// Measured across the 147 scenes in formats/scene/: zero of them name a repo-local image that is
+// Measured across the 147 scenes in films/scene/: zero of them name a repo-local image that is
 // absent, so nothing shipped changes.
 export async function preloadImages(data) {
   const urls = new Map(); // src → where it was written, for the refusal
@@ -230,7 +230,7 @@ export async function preloadImages(data) {
     throw new Error(`${missing.length === 1 ? 'this image was' : 'these images were'} never loaded: `
       + `${missing.map((s) => `${urls.get(s)} → "${s}"`).join(' · ')}. `
       + `Either the file does not exist, or its path is outside the roots the render server allows `
-      + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/). `
+      + `(core/, themes/, films/, assets/, .vawe-data/scenes/, .vawe-data/uploads/). `
       + `Capture or fetch it (\`make assets D=<scene> WRITE=1\`), or drop the layer, a repo path that `
       + `404s renders as a hole in the frame and says nothing.`);
 }
@@ -420,7 +420,7 @@ export async function boot(build) {
     // JSON fails here with a readable message instead of a broken video (or a wasted render).
     if (data.module) {
       try {
-        const schema = await fetchJson(`/formats/${data.module}/schema.json`, 'schema');
+        const schema = await fetchJson(`/films/${data.module}/schema.json`, 'schema');
         const errors = validateAll(schema, data);
         if (errors.length) throw new Error(`invalid data for "${data.module}":\n  - ${errors.join('\n  - ')}`);
       } catch (e) {
@@ -614,7 +614,7 @@ export async function boot(build) {
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
     window.__engine = {
       // `segments: scene.segments || []` was here and no scene has ever set it: there is one format and
-      // formats/scene/scene.js never returns the key. Its one reader, quality/gates/motion-audit.mjs,
+      // films/scene/scene.js never returns the key. Its one reader, quality/gates/motion-audit.mjs,
       // took the empty array as "this film declares no windows" and disabled its whole FAIL tier. The
       // film's joints are its cuts and seams, core/junctions.js owns reading them, and a second way to
       // say that is the drift MISTAKES #159 and #358 are both about. engine-doctrine/MISTAKES.md #425.

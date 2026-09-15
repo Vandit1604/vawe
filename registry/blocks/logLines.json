@@ -60,7 +60,7 @@
     {
       "source": "site/public/assets/blocks/logLines.json",
       "url": "https://vawe.dev/assets/blocks/logLines.json",
-      "target": "formats/scene/logLines.json",
+      "target": "films/scene/logLines.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

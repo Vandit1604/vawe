@@ -2,12 +2,12 @@
 // cli/vawe.mjs: the npm entry point.  `npx vawe my.json [--draft] [--aspect 9:16]`
 //
 // WHY A WRAPPER AND NOT JUST THE BINARY. The Go renderer is already relocatable: repoRoot()
-// (cmd/render/main.go:267) walks up from cwd for a directory holding formats/ and core/, and REPO
+// (cmd/render/main.go:267) walks up from cwd for a directory holding films/ and core/, and REPO
 // overrides it outright. So the engine needs no change to run from an installed package. What it does
 // NOT do is behave like a CLI, in three specific ways, and this file is those three fixes and nothing
 // else:
 //
-//   1. The render server only serves paths under the engine root (core/ themes/ formats/ assets/
+//   1. The render server only serves paths under the engine root (core/ themes/ films/ assets/
 //      .vawe-data/scenes/ .vawe-data/uploads/). A scene sitting in the user's own directory cannot be
 //      fetched by the page, and the engine says so by name. `.vawe-data/scenes/` is the sanctioned
 //      drop path, so the scene is STAGED there and removed afterwards.

@@ -1,6 +1,6 @@
 // harness/author/lightfield.mjs: generate a light field from the command line.
 //
-//   node harness/author/lightfield.mjs --out formats/scene/_lightfield-ref.html
+//   node harness/author/lightfield.mjs --out films/scene/_lightfield-ref.html
 //   node harness/author/lightfield.mjs --preset tide --shot
 //   node harness/author/lightfield.mjs --seed 12 --pattern.kind rings --bloom '#7ad9ff' --out /tmp/f.html
 //
@@ -91,7 +91,7 @@ if (out) {
 }
 
 if (shot) {
-  // A shot always lands in out/, never beside the fragment: formats/scene/ holds markup, not PNGs.
+  // A shot always lands in out/, never beside the fragment: films/scene/ holds markup, not PNGs.
   const target = out ? (path.isAbsolute(out) ? out : path.join(ROOT, out)) : path.join(ROOT, 'out/lightfield.html');
   if (!out) { fs.mkdirSync(path.dirname(target), { recursive: true }); fs.writeFileSync(target, html + '\n'); }
   const { shoot } = await import('./lightfield-shot.mjs');

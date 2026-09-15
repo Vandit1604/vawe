@@ -58,7 +58,7 @@ other asset; if it does, that is a sign the brief wants a different type.
 ## `make scaffold TYPE=sting`
 
 ```bash
-make scaffold OUT=formats/scene/<name>.json TYPE=sting DUR=6
+make scaffold OUT=films/scene/<name>.json TYPE=sting DUR=6
 ```
 
 Emits the CONTINUOUS-ACTION shape (`harness/author/type-spines.mjs`'s `continuousObject`): the mark,

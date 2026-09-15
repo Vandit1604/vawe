@@ -1,0 +1,715 @@
+{
+ "module": "scene",
+ "note": "POSTABLE feed film. Subject: Corva, a fictional research assistant that answers with the exact passage it drew from rather than a summary. No real presenter footage and no voice synthesis exist in this engine: this film deliberately carries NO presenter plate at all (the fix for the talking-head eval's static ring/dot occupying half the frame for most of the runtime). It is told entirely in B-roll (a real `html` document/citation card, a guess-vs-citation contrast pair, a real `count` layer) plus hand-timed captions standing in for a VO track that does not exist yet. The twelve caption lines below are the stand-in narration, timed by hand at 2-4 words/sec in 2-6 word chunks; a real film would replace them with `make vo-captions` output once a VO track exists.",
+ "theme": "preface",
+ "aspect": "9:16",
+ "destination": "reels",
+ "duration": 24,
+ "energy": "calm",
+ "spectacle": {
+  "at": 7.3,
+  "of": "verified-badge",
+  "device": "flash",
+  "why": "the citation resolving and the document confirming it inside the real page IS the argument (a citation you can check, not a summary); every other beat stays quiet so this pop reads as the payoff"
+ },
+ "authoring": {
+  "allow": [],
+  "_why": {}
+ },
+ "audio": {
+  "music": "calm",
+  "auto": true
+ },
+ "bg": [
+  {
+   "from": 0,
+   "to": 4.2,
+   "preset": "paperDots"
+  },
+  {
+   "from": 4.2,
+   "to": 11.2,
+   "preset": "soft"
+  },
+  {
+   "from": 11.2,
+   "to": 16.2,
+   "preset": "paperDots"
+  },
+  {
+   "from": 16.2,
+   "to": 20.6,
+   "preset": "soft"
+  },
+  {
+   "from": 20.6,
+   "to": 24,
+   "preset": "paperDots"
+  }
+ ],
+ "transitions": [
+  {
+   "at": 4.2,
+   "fx": "dissolve",
+   "mech": "seam",
+   "dur": 0.5
+  },
+  {
+   "at": 11.2,
+   "fx": "dissolve",
+   "mech": "seam",
+   "dur": 0.5
+  },
+  {
+   "at": 16.2,
+   "fx": "dissolve",
+   "mech": "seam",
+   "dur": 0.5
+  },
+  {
+   "at": 20.6,
+   "fx": "dissolve",
+   "mech": "seam",
+   "dur": 0.5
+  }
+ ],
+ "cameraMove": {
+  "move": "slowPush"
+ },
+ "sceneUnits": true,
+ "layers": [
+  {
+   "type": "text",
+   "id": "hook-guess",
+   "text": "Most tools guess.",
+   "size": 82,
+   "weight": 800,
+   "color": "var(--text)",
+   "align": "left",
+   "x": 90,
+   "y": 720,
+   "w": 900,
+   "font": "sans",
+   "start": 0.1,
+   "duration": 2.4,
+   "split": "word",
+   "preset": "up",
+   "stagger": 0.06,
+   "out": "fade",
+   "exitDur": 0.25
+  },
+  {
+   "type": "text",
+   "id": "hook-corva",
+   "text": "Corva doesn't.",
+   "size": 100,
+   "weight": 800,
+   "color": "var(--text)",
+   "align": "left",
+   "x": 90,
+   "y": 720,
+   "w": 900,
+   "font": "sans",
+   "start": 2.5,
+   "duration": 1.7,
+   "split": "word",
+   "preset": "weight",
+   "stagger": 0.08,
+   "out": "defocus",
+   "exitDur": 0.3
+  },
+  {
+   "type": "rect",
+   "id": "hook-underline",
+   "w": 340,
+   "h": 6,
+   "radius": 3,
+   "x": 90,
+   "y": 845,
+   "fill": "var(--accent)",
+   "start": 2.6,
+   "duration": 1.4,
+   "anim": "fade",
+   "enterDur": 0.2,
+   "out": "fade",
+   "exitDur": 0.2
+  },
+  {
+   "type": "html",
+   "id": "doc-card",
+   "src": "films/scene/post-corva.doc.html",
+   "x": 90,
+   "y": 470,
+   "w": 800,
+   "h": 680,
+   "start": 4.2,
+   "duration": 7,
+   "anim": "pop",
+   "enterDur": 0.35,
+   "out": "defocus",
+   "exitDur": 0.35,
+   "idle": "drift",
+   "parts": [
+    {
+     "select": "[data-label]",
+     "anim": "fade",
+     "each": 0.2,
+     "delay": 0.1
+    },
+    {
+     "select": "[data-line]",
+     "anim": "fade",
+     "each": 0.16,
+     "delay": 0.35
+    },
+    {
+     "select": "[data-highlight]",
+     "anim": "fade",
+     "each": 0.25,
+     "delay": 2.1
+    },
+    {
+     "select": "[data-citation]",
+     "anim": "popIn",
+     "each": 0.3,
+     "delay": 3.1
+    }
+   ]
+  },
+  {
+   "type": "html",
+   "id": "verified-badge",
+   "src": "films/scene/post-corva.verified.html",
+   "x": 148,
+   "y": 1236,
+   "w": 500,
+   "h": 90,
+   "start": 7.3,
+   "duration": 3.5,
+   "anim": "pop",
+   "enterDur": 0.3,
+   "out": "fade",
+   "exitDur": 0.3
+  },
+  {
+   "type": "html",
+   "id": "guess-row",
+   "src": "films/scene/post-corva.guess-row.html",
+   "x": 90,
+   "y": 560,
+   "w": 800,
+   "h": 160,
+   "start": 11.3,
+   "duration": 2.3,
+   "anim": "fade",
+   "enterDur": 0.3,
+   "out": "fade",
+   "exitDur": 0.3,
+   "idle": "drift"
+  },
+  {
+   "type": "html",
+   "id": "cite-row",
+   "src": "films/scene/post-corva.cite-row.html",
+   "x": 90,
+   "y": 820,
+   "w": 800,
+   "h": 160,
+   "start": 12.9,
+   "duration": 3.3,
+   "anim": "pop",
+   "enterDur": 0.35,
+   "out": "fade",
+   "exitDur": 0.3,
+   "idle": "drift"
+  },
+  {
+   "type": "count",
+   "id": "proof-count",
+   "from": 0,
+   "to": 100,
+   "suffix": "%",
+   "size": 190,
+   "weight": 800,
+   "color": "var(--accent)",
+   "align": "center",
+   "x": 90,
+   "y": 780,
+   "w": 900,
+   "font": "mono",
+   "start": 16.2,
+   "duration": 2.6,
+   "out": "fade",
+   "exitDur": 0.3,
+   "idle": "drift"
+  },
+  {
+   "type": "rect",
+   "id": "proof-underline",
+   "w": 220,
+   "h": 6,
+   "radius": 3,
+   "x": 430,
+   "y": 985,
+   "fill": "var(--accent)",
+   "start": 18.6,
+   "duration": 1,
+   "anim": "fade",
+   "enterDur": 0.15,
+   "out": "fade",
+   "exitDur": 0.15
+  },
+  {
+   "type": "text",
+   "id": "proof-label",
+   "text": "sourced, every time",
+   "size": 34,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "align": "center",
+   "x": 90,
+   "y": 1040,
+   "w": 900,
+   "font": "sans",
+   "start": 17.2,
+   "duration": 3.5,
+   "anim": "fade",
+   "enterDur": 0.4,
+   "out": "fade",
+   "exitDur": 0.3
+  },
+  {
+   "type": "text",
+   "id": "end-name",
+   "text": "Corva",
+   "size": 140,
+   "weight": 800,
+   "color": "var(--text)",
+   "align": "center",
+   "x": 90,
+   "y": 780,
+   "w": 900,
+   "font": "sans",
+   "start": 20.7,
+   "duration": 3,
+   "out": "fade",
+   "exitDur": 0.3,
+   "split": "word",
+   "preset": "weight"
+  },
+  {
+   "type": "text",
+   "id": "end-tag",
+   "text": "not the summary",
+   "size": 36,
+   "weight": 500,
+   "color": "var(--text-2)",
+   "align": "center",
+   "x": 90,
+   "y": 960,
+   "w": 900,
+   "font": "sans",
+   "start": 21,
+   "duration": 3,
+   "anim": "fade",
+   "enterDur": 0.45,
+   "out": "fade",
+   "exitDur": 0.3
+  },
+  {
+   "type": "rect",
+   "id": "end-underline",
+   "w": 160,
+   "h": 6,
+   "radius": 3,
+   "x": 460,
+   "y": 1015,
+   "fill": "var(--accent)",
+   "start": 21.6,
+   "duration": 2.2,
+   "anim": "fade",
+   "enterDur": 0.2,
+   "out": "fade",
+   "exitDur": 0.2
+  },
+  {
+   "type": "text",
+   "id": "mono-label",
+   "text": "CORVA · CITED, NOT GUESSED",
+   "size": 28,
+   "weight": 650,
+   "color": "color-mix(in srgb, var(--accent) 60%, black)",
+   "font": "mono",
+   "tracking": "0.12em",
+   "x": 90,
+   "y": 250,
+   "start": 0.3,
+   "duration": 23.4,
+   "anim": "fade",
+   "enterDur": 0.7,
+   "out": "fade",
+   "exitDur": 0.3,
+   "acrossBeats": true
+  },
+  {
+   "type": "rect",
+   "id": "accent-bar",
+   "w": 70,
+   "h": 5,
+   "radius": 3,
+   "x": 90,
+   "y": 292,
+   "fill": "var(--accent)",
+   "start": 0,
+   "duration": 24,
+   "acrossBeats": true,
+   "motion": [
+    {
+     "t": 0,
+     "x": 0
+    },
+    {
+     "t": 4.2,
+     "x": 40,
+     "ease": "easeInOutSine"
+    },
+    {
+     "t": 11.2,
+     "x": -30,
+     "ease": "easeInOutSine"
+    },
+    {
+     "t": 16.2,
+     "x": 50,
+     "ease": "easeInOutSine"
+    },
+    {
+     "t": 20.6,
+     "x": -20,
+     "ease": "easeInOutSine"
+    },
+    {
+     "t": 24,
+     "x": 0,
+     "ease": "easeInOutSine"
+    }
+   ]
+  }
+ ],
+ "captions": [
+  {
+   "t0": 0.2,
+   "t1": 1.8,
+   "text": "Most AI tools guess.",
+   "words": [
+    {
+     "t0": 0.2,
+     "t1": 0.55
+    },
+    {
+     "t0": 0.55,
+     "t1": 0.85
+    },
+    {
+     "t0": 0.85,
+     "t1": 1.2
+    },
+    {
+     "t0": 1.2,
+     "t1": 1.8
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 2,
+   "t1": 3.6,
+   "text": "Corva doesn't.",
+   "words": [
+    {
+     "t0": 2,
+     "t1": 2.6
+    },
+    {
+     "t0": 2.6,
+     "t1": 3.6
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 4.5,
+   "t1": 5.7,
+   "text": "Ask it anything.",
+   "words": [
+    {
+     "t0": 4.5,
+     "t1": 4.75
+    },
+    {
+     "t0": 4.75,
+     "t1": 4.95
+    },
+    {
+     "t0": 4.95,
+     "t1": 5.7
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 5.9,
+   "t1": 7.6,
+   "text": "It opens the real document.",
+   "words": [
+    {
+     "t0": 5.9,
+     "t1": 6.05
+    },
+    {
+     "t0": 6.05,
+     "t1": 6.4
+    },
+    {
+     "t0": 6.4,
+     "t1": 6.5
+    },
+    {
+     "t0": 6.5,
+     "t1": 6.8
+    },
+    {
+     "t0": 6.8,
+     "t1": 7.6
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 7.8,
+   "t1": 9.6,
+   "text": "The exact sentence it read.",
+   "words": [
+    {
+     "t0": 7.8,
+     "t1": 7.95
+    },
+    {
+     "t0": 7.95,
+     "t1": 8.3
+    },
+    {
+     "t0": 8.3,
+     "t1": 8.8
+    },
+    {
+     "t0": 8.8,
+     "t1": 8.95
+    },
+    {
+     "t0": 8.95,
+     "t1": 9.6
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 9.8,
+   "t1": 11.1,
+   "text": "Not a summary. The source itself.",
+   "words": [
+    {
+     "t0": 9.8,
+     "t1": 9.95
+    },
+    {
+     "t0": 9.95,
+     "t1": 10.05
+    },
+    {
+     "t0": 10.05,
+     "t1": 10.5
+    },
+    {
+     "t0": 10.5,
+     "t1": 10.6
+    },
+    {
+     "t0": 10.6,
+     "t1": 10.9
+    },
+    {
+     "t0": 10.9,
+     "t1": 11.1
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 11.5,
+   "t1": 13.3,
+   "text": "A guess you have to trust.",
+   "words": [
+    {
+     "t0": 11.5,
+     "t1": 11.6
+    },
+    {
+     "t0": 11.6,
+     "t1": 11.95
+    },
+    {
+     "t0": 11.95,
+     "t1": 12.1
+    },
+    {
+     "t0": 12.1,
+     "t1": 12.3
+    },
+    {
+     "t0": 12.3,
+     "t1": 12.4
+    },
+    {
+     "t0": 12.4,
+     "t1": 13.3
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 13.5,
+   "t1": 15.9,
+   "text": "Or a citation you can check.",
+   "words": [
+    {
+     "t0": 13.5,
+     "t1": 13.6
+    },
+    {
+     "t0": 13.6,
+     "t1": 13.7
+    },
+    {
+     "t0": 13.7,
+     "t1": 14.3
+    },
+    {
+     "t0": 14.3,
+     "t1": 14.45
+    },
+    {
+     "t0": 14.45,
+     "t1": 14.65
+    },
+    {
+     "t0": 14.65,
+     "t1": 15.9
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 16.5,
+   "t1": 18.7,
+   "text": "Every answer, traced to its source.",
+   "words": [
+    {
+     "t0": 16.5,
+     "t1": 16.8
+    },
+    {
+     "t0": 16.8,
+     "t1": 17.2
+    },
+    {
+     "t0": 17.2,
+     "t1": 17.6
+    },
+    {
+     "t0": 17.6,
+     "t1": 17.7
+    },
+    {
+     "t0": 17.7,
+     "t1": 17.85
+    },
+    {
+     "t0": 17.85,
+     "t1": 18.7
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 18.8,
+   "t1": 20.3,
+   "text": "Nothing to take on faith.",
+   "words": [
+    {
+     "t0": 18.8,
+     "t1": 19.15
+    },
+    {
+     "t0": 19.15,
+     "t1": 19.25
+    },
+    {
+     "t0": 19.25,
+     "t1": 19.5
+    },
+    {
+     "t0": 19.5,
+     "t1": 19.65
+    },
+    {
+     "t0": 19.65,
+     "t1": 20.3
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 20.9,
+   "t1": 21.5,
+   "text": "Corva.",
+   "words": [
+    {
+     "t0": 20.9,
+     "t1": 21.5
+    }
+   ],
+   "pin": "bottom"
+  },
+  {
+   "t0": 21.7,
+   "t1": 23.6,
+   "text": "The passage, not the summary.",
+   "words": [
+    {
+     "t0": 21.7,
+     "t1": 21.85
+    },
+    {
+     "t0": 21.85,
+     "t1": 22.25
+    },
+    {
+     "t0": 22.25,
+     "t1": 22.4
+    },
+    {
+     "t0": 22.4,
+     "t1": 22.55
+    },
+    {
+     "t0": 22.55,
+     "t1": 23.6
+    }
+   ],
+   "pin": "bottom"
+  }
+ ],
+ "captionMode": "pop",
+ "captionStyle": "highlight"
+}

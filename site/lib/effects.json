@@ -658,7 +658,7 @@
       "intro": "Top-level scene keys that change what the camera DOES rather than where it goes. `\"cameraBlur\": true` gives the film a real shutter · every layer smears by its velocity RELATIVE to the camera, so a whip pan streaks the frame and a layer travelling with the camera stays sharp. How much is the film's `shutter`, in degrees; one layer opts out with `motionBlur: false`.",
       "mode": "table",
       "note": null,
-      "noPreview": "a shutter is only visible on a frame that is already moving fast, and the whole point is that it is invisible on a still. Its A/B is formats/scene/_camera-blur-probe.json, which renders the same whip pan with the dial up and down.",
+      "noPreview": "a shutter is only visible on a frame that is already moving fast, and the whole point is that it is invisible on a still. Its A/B is films/scene/_camera-blur-probe.json, which renders the same whip pan with the dial up and down.",
       "count": 1,
       "undescribed": 0,
       "entries": [
@@ -1537,7 +1537,7 @@
       "id": "layer-types",
       "title": "Layer types",
       "tag": "layer",
-      "intro": "The vocabulary itself · `{ \"type\":\"<name>\" }`. Everything else in this document is a dial ON one of these. Full props per type · `formats/scene/schema.json`, and `engine-doctrine/PRIMITIVES.md` for what each is FOR.",
+      "intro": "The vocabulary itself · `{ \"type\":\"<name>\" }`. Everything else in this document is a dial ON one of these. Full props per type · `films/scene/schema.json`, and `engine-doctrine/PRIMITIVES.md` for what each is FOR.",
       "mode": "table",
       "note": null,
       "noPreview": "a layer type is the noun, not the effect. Every preview on this page is already one of them.",

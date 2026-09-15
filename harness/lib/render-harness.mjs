@@ -93,7 +93,7 @@ const SUGAR_RE = /"type"\s*:\s*"(block|beat|comp)"/;
 /**
  * bootPathFor(root, rawText, expandedScene, relFile) -> the repo-relative path to `?data=` for THIS
  * scene: `relFile` unchanged, unless `rawText` (the scene AS AUTHORED, before expansion) carries
- * `block`/`beat`/`comp` sugar, in which case `formats/scene/scene.js` (the render page) cannot expand
+ * `block`/`beat`/`comp` sugar, in which case `films/scene/scene.js` (the render page) cannot expand
  * it itself (its own file banner says why: a deliberate server boundary, not a bundler limit), and
  * this writes `expandedScene` (every one of these tools already runs the scene through
  * `loadScene`/`sceneTiming` for its own measurements, so the caller has it on hand already) to a

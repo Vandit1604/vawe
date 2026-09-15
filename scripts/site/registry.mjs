@@ -33,7 +33,7 @@
 //   files[]         THE FALLBACK, for a consumer who does NOT have our block library. The scene at
 //                   site/public/assets/blocks/<name>.json is ALREADY EXPANDED, it holds concrete
 //                   layer primitives, no factory reference, so it renders in any vawe checkout as-is.
-//                   `target` is a real path there: formats/scene/<name>.json.
+//                   `target` is a real path there: films/scene/<name>.json.
 //
 // We INDEX that artifact, we do not copy it: `source` is its repo path and `url` is where the site
 // already serves it. Copying every scene into registry/ would put the same bytes in two places and
@@ -167,7 +167,7 @@ function blockItem(entry) {
       files: [{
         source: scene,
         url: `${SITE}/assets/blocks/${encodeURIComponent(safe)}.json`,
-        target: `formats/scene/${safe}.json`,
+        target: `films/scene/${safe}.json`,
         type: 'vawe:scene',
         note: 'pre-expanded: concrete layers only, renders without the block library',
       }],

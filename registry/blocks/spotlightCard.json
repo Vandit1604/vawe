@@ -47,7 +47,7 @@
     {
       "source": "site/public/assets/blocks/spotlightCard.json",
       "url": "https://vawe.dev/assets/blocks/spotlightCard.json",
-      "target": "formats/scene/spotlightCard.json",
+      "target": "films/scene/spotlightCard.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -49,7 +49,7 @@
     {
       "source": "site/public/assets/blocks/stepFlow.done.json",
       "url": "https://vawe.dev/assets/blocks/stepFlow.done.json",
-      "target": "formats/scene/stepFlow.done.json",
+      "target": "films/scene/stepFlow.done.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

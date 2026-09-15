@@ -66,8 +66,8 @@ machines.
 
 ```bash
 make build                              # → bin/vawe  (also runs `make fonts` to fetch the free faces)
-./bin/vawe formats/scene/sample.json    # → out/sample.mp4
-make video D=formats/scene/sample.json  # same, via make  (add --draft for a fast, no-grain preview)
+./bin/vawe films/scene/sample.json    # → out/sample.mp4
+make video D=films/scene/sample.json  # same, via make  (add --draft for a fast, no-grain preview)
 ```
 
 A scene is one JSON:
@@ -76,7 +76,7 @@ A scene is one JSON:
 { "module": "scene",
   "theme": "argus",                 // palette + fonts (themes/<name>.json), only the brand's colours
   "aspect": "16:9",                 // 16:9 · 9:16 · 1:1 · 4:5  (or --aspect a,b,c for all at once)
-  "layers": [                       // the open canvas, see formats/scene/schema.json
+  "layers": [                       // the open canvas, see films/scene/schema.json
     { "type": "text", "text": "one JSON, one video", "pin": "center", "size": 96 },
     { "type": "block", "block": "barChart", "x": 1080, "y": 300, "start": 1, "dur": 4 }
   ],
@@ -90,7 +90,7 @@ author the JSON  →  make author-check / audit  →  make judge (the vision gat
                    (TASTE=1 adds critique · direct · floor · slop · designspec · copy)
 ```
 
-Ask an agent to write the scene, grounded in `formats/scene/schema.json` (the contract), the primitive
+Ask an agent to write the scene, grounded in `films/scene/schema.json` (the contract), the primitive
 vocabulary ([`engine-doctrine/PRIMITIVES.md`](engine-doctrine/PRIMITIVES.md)), and the taste system ([`engine-doctrine/TASTE.md`](engine-doctrine/TASTE.md)).
 Reflecting a real brand? `make brandspec URL=…` reads its real CSS, `make sections`/`make palette` capture
 and eyedrop it, and `make house-style NAME=…` persists the brand's Design Read so the next video stays
@@ -122,7 +122,7 @@ Two halves. Go orchestrates and knows nothing about design; the browser owns eve
 frame looks. They meet at exactly one function.
 
 ```
-  formats/scene/<name>.json          one self-describing file: layers · timing · theme · bg · audio
+  films/scene/<name>.json          one self-describing file: layers · timing · theme · bg · audio
           │
           ▼
   cmd/render (Go)                    parse flags · resolve scene · plan the shard
@@ -132,7 +132,7 @@ frame looks. They meet at exactly one function.
           │                            of the timeline at the same time
           │                                    │
           │                                    ▼
-          │                            formats/scene/scene.html + core/*
+          │                            films/scene/scene.html + core/*
           │                            window.__engine.renderFrame(n) → screenshot
           │                            ── layers built · motion tracks evaluated
           │                            ── clips driven · transitions composited
@@ -177,7 +177,7 @@ core/            THE ENGINE: pure, browser+node, self-contained (imports nothing
 core/layers/     the LAYER REGISTRY: one file per primitive (text/image/rect/glow/group/count/clip/
                  cursor/component/html/board/doc/shader/lottie), each exporting build()/frame()
 blocks/          the taste library: manifest-driven component registry (index.mjs + catalog.mjs)
-formats/scene/   scene.html (thin orchestrator) · schema.json (the contract) · sample.json
+films/scene/   scene.html (thin orchestrator) · schema.json (the contract) · sample.json
 themes/          brand palettes + fonts + motion personality (theme-contract.js defines the shape)
 cmd/render,      the Go render service: chromedp capture · ffmpeg encode/mux · audio mixer · queue
   internal/

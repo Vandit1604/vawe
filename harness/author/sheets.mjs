@@ -6,7 +6,7 @@
 // the scene is opened once (harness/author/scene-page.mjs) and both sheets are built off that one page.
 //
 //   node harness/author/sheets.mjs <scene.json> [--vs brand]
-//   make sheets D=formats/scene/x.json
+//   make sheets D=films/scene/x.json
 //   make dev / make ship                       run this after the render (NOSHEETS=1 opts out)
 //
 // THE RECEIPT SPLIT, which is the whole reason this file is careful. `quality/runs/beats-seen/` exists to

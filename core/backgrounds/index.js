@@ -142,7 +142,7 @@ export function renderBg(ctx, w, h, t, spec) {
 // into a second copy (engine-doctrine/CRAFT/ENGINE-CHANGES.md, "one fact, one owner").
 //
 // `authored` (a window's own `turnRatio`) wins outright when set; `1` is the explicit opt-out back to
-// the old, even crossfade. See formats/scene/scene.js drawBg for where the ratio actually reshapes
+// the old, even crossfade. See films/scene/scene.js drawBg for where the ratio actually reshapes
 // the blend (scoped to the plain camera-level cut only; a `sceneUnits` cut keeps riding its wrapper's
 // own opacity curve, see the comment there for why).
 export function bgTurnRatio(authored, durationScale) {

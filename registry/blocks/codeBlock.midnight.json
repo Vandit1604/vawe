@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/codeBlock.midnight.json",
       "url": "https://vawe.dev/assets/blocks/codeBlock.midnight.json",
-      "target": "formats/scene/codeBlock.midnight.json",
+      "target": "films/scene/codeBlock.midnight.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

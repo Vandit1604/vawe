@@ -1,6 +1,6 @@
 // harness/dev/candidates.mjs: SIX VERSIONS OF YOUR OWN FRAME, so a choice can be pointed at.
 //
-//   node harness/dev/candidates.mjs formats/scene/plinth-ad.json --at 7.7 --axis bg --n 6
+//   node harness/dev/candidates.mjs films/scene/plinth-ad.json --at 7.7 --axis bg --n 6
 //
 // WHY. Search needs a word, and the person who most needs help is the one who can see what they want
 // and cannot name it. `make arsenal` answers a question; this one asks it. It takes the film you are
@@ -50,7 +50,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
  * builder, so a palette change moves these with it and nothing here restates a colour.
  *
  * LIGHTNESS IS MEASURED, NOT READ OFF THE NAME, and it asks `isLightBg` (core/motion.js), the single
- * definition of light-versus-dark this engine has. formats/scene/scene.js:307 decides the same thing
+ * definition of light-versus-dark this engine has. films/scene/scene.js:307 decides the same thing
  * the same way for the same reason: `bgPreset` builds every base out of the THEME's ramp, so `accent`
  * is a pale tint in a white-first brand and a saturated field in a dark one, and a hand-kept list of
  * "light preset names" is right for one family of themes and silently wrong for the other.
@@ -184,7 +184,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 
   // ---- what a preset actually LOOKS like, measured rather than guessed --------------------------------
   // The theme's palette decides every base colour, so light-versus-dark is a property of THIS film and
-  // not of the preset name. One line, mirroring formats/scene/scene.js:255, which is the only other place
+  // not of the preset name. One line, mirroring films/scene/scene.js:255, which is the only other place
   // a bg palette is resolved: the theme's own `bg` block wins, else it is derived from the palette.
   const themeName = typeof scene.theme === 'string' ? scene.theme : null;
   let theme = null;
@@ -202,7 +202,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   // `dark`, `deep`, `plain` and `soft` all appear in colour tokens and layer props, so a substring count
   // would report a preset as popular on the strength of a word that has nothing to do with it.
   function presetUsage() {
-    const dir = path.join(repoRoot, 'formats/scene');
+    const dir = path.join(repoRoot, 'films/scene');
     const counts = new Map(BG_NAMES.map((n) => [n, 0]));
     let scenes = 0;
     for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
@@ -259,7 +259,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     if (dropOpts) warnings.push(`this window's \`opts\` (${Object.keys(win.opts).join(', ')}) are knobs of `
       + `"${current}", not of "${name}" (which takes ${bgOptKeys(L.spec).join(', ') || 'none'}), so the patch removes them.`);
     // WHITE ON WHITE, WHICH NO VALIDATOR SEES. The engine flips the default ink per backdrop window
-    // (`inkAt` in formats/scene/scene.js:315): a LIGHT window gets `var(--ink)`, a dark one gets a
+    // (`inkAt` in films/scene/scene.js:315): a LIGHT window gets `var(--ink)`, a dark one gets a
     // light token chosen by construction. So the dark case cannot fail and the light case can, on any
     // theme whose `ink` is itself light. plinth is one: its ink is #f5f5f2, so a light backdrop paints
     // near-white type on a near-white field, and every gate passes it. Warned rather than dropped,
@@ -310,7 +310,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const frames = path.join(runDir, `.f-${cand.name}`);
     fs.mkdirSync(frames, { recursive: true });
 
-    await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}`,
+    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}`,
       { waitUntil: 'load' });
     // Recorded, never thrown. One candidate that will not boot is one candidate missing from the strip,
     // with the reason attached; it is not a reason to abandon the other five.
@@ -345,7 +345,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     at,
     window: { index: winIdx, from: bound[winIdx].from ?? 0, to: bound[winIdx].to ?? duration, current },
     clip: { from: +t0.toFixed(3), to: +t1.toFixed(3), fps, frames: f1 - f0, width: W - (W % 2), height: H - (H % 2) },
-    library: { scenes: libSize, note: 'scenes reads formats/scene/*.json; most films are gitignored, so a clone sees fewer' },
+    library: { scenes: libSize, note: 'scenes reads films/scene/*.json; most films are gitignored, so a clone sees fewer' },
     ranked: { query: feel || null, considered: pool.length, note: feel ? 'ranked by the arsenal\'s coverage of what the film says it is, then picked for variety'
       : 'this scene says nothing about itself (no note/title/description), so relevance is 0 everywhere and variety picked the whole strip' },
     ms: wall,

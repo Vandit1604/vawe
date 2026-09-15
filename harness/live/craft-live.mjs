@@ -111,7 +111,7 @@ function scene(rel, file) {
  */
 // ── a hand-written FRAGMENT, at the moment it is saved ────────────────────────────────────────────
 // Two rules that were held up by nothing but a sentence, and that the sentence did not hold. Both were
-// broken on `formats/scene/_vawe-oblique.*.html` by an author who had read them (engine-doctrine/MISTAKES.md #591,
+// broken on `films/scene/_vawe-oblique.*.html` by an author who had read them (engine-doctrine/MISTAKES.md #591,
 // and the type/elevation ramps in engine-doctrine/CRAFT/HTML-FRAGMENTS.md). A rule at [eye] is a rule you can
 // agree with and not follow; these two are cheap to check syntactically, so they move to [live].
 //
@@ -139,10 +139,10 @@ function fragment(rel, file) {
   // 1. THE ROSTER ORDER. The scene decider is third, after storyboard and subject. A fragment written
   //    before the beat table exists is a guess at the count and an invented set of motion handles.
   const film = rel.replace(/\/_?([^/]+?)(\.[^./]+)?\.html$/, '/$1');
-  const near = fs.existsSync(path.join(ROOT, 'formats/scene'))
-    ? fs.readdirSync(path.join(ROOT, 'formats/scene')).filter((f) => f.endsWith('.storyboard.md')) : [];
+  const near = fs.existsSync(path.join(ROOT, 'films/scene'))
+    ? fs.readdirSync(path.join(ROOT, 'films/scene')).filter((f) => f.endsWith('.storyboard.md')) : [];
   if (!near.length) {
-    out.push(`  no storyboard anywhere in formats/scene/. AGENTS.md orders the deciders storyboard (1),`,
+    out.push(`  no storyboard anywhere in films/scene/. AGENTS.md orders the deciders storyboard (1),`,
       `  subject (2), scene (3), and scene is the role that writes THIS file. Written first, the fragment`,
       `  count is a guess and the motion handles are invented after the fact rather than read off the`,
       `  plan's own \`motion:\` line. engine-doctrine/MISTAKES.md #591.`);
@@ -179,7 +179,7 @@ process.stdin.on('end', () => {
   const rel = path.relative(ROOT, file);
   if (rel.startsWith('..')) process.exit(0);
 
-  const inScenes = rel.startsWith('formats/scene/') && fs.existsSync(file);
+  const inScenes = rel.startsWith('films/scene/') && fs.existsSync(file);
   const say = inScenes && rel.endsWith('.json') ? scene(rel, file)
     : inScenes && rel.endsWith('.html') ? fragment(rel, file)
     : engine(rel, file);

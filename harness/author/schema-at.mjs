@@ -6,7 +6,7 @@
 //
 // WHY THIS EXISTS, from a real failure. An author needed the names of the two bezier handles on a
 // motion keyframe, guessed `in`/`out` from a comment, and shipped a refusal that rejected three
-// correct films. The real names are `easeIn`/`easeOut`, and formats/scene/schema.json HAS them, with a
+// correct films. The real names are `easeIn`/`easeOut`, and films/scene/schema.json HAS them, with a
 // written label on every field, and nothing served it. So the answer existed, was checked by a gate,
 // and was reachable only by reading a 2848-line JSON file, which is the same shape of failure
 // `make arsenal` was built for one level up: a capability that is present, correct and unreachable is
@@ -14,7 +14,7 @@
 //
 // THE SIBLING, and the division of labour. `make arsenal` answers "what can the engine DO" and ranks a
 // plain-English question across every registry. This answers "what may I write HERE" and takes a PATH.
-// Neither owns a list. Everything below is read from formats/scene/schema.json at runtime, and the one
+// Neither owns a list. Everything below is read from films/scene/schema.json at runtime, and the one
 // thing that is not (which vocabulary an enum belongs to) is read from core/registry.js, live.
 //
 // THIS IS NOT A GATE. It checks nothing and blocks nothing. quality/gates/schema-drift.mjs already
@@ -25,7 +25,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCHEMA_PATH = path.join(repoRoot, 'formats/scene/schema.json');
+const SCHEMA_PATH = path.join(repoRoot, 'films/scene/schema.json');
 
 /** The one owner of every field, type, label and enum printed by this tool. */
 export const loadSchema = () => JSON.parse(fs.readFileSync(SCHEMA_PATH, 'utf8'));

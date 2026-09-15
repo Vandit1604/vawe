@@ -55,7 +55,7 @@ Animate it with two custom properties the engine writes onto the element every f
 A frame here is seeked, not played, across eight parallel workers, so nothing may depend on elapsed wall-clock. `core/tokens.css` disables both engine-wide. A CSS animation would not error, it would render a dead still, so the validator rejects `animation`, `@keyframes` and `transition` by name and points you at `var(--t)`. The same applies to the `html` layer.
 </Callout>
 
-Markup is sanitised the same way as the `html` layer (`core/type/sanitize-html.js`): scripts and embedding elements are stripped, and so is any URL that leaves the fragment. A worked example lives in `formats/scene/example-html-bg.json`.
+Markup is sanitised the same way as the `html` layer (`core/type/sanitize-html.js`): scripts and embedding elements are stripped, and so is any URL that leaves the fragment. A worked example lives in `films/scene/example-html-bg.json`.
 
 ## Images, in order of preference
 
@@ -74,8 +74,8 @@ Movie posters, album covers, film stills, news photos, and paid stock trigger Co
 ## Fetching assets
 
 ```bash
-make assets D=formats/scene/my-video.json          # dry run: list missing icons
-make assets D=formats/scene/my-video.json WRITE=1  # fetch them
+make assets D=films/scene/my-video.json          # dry run: list missing icons
+make assets D=films/scene/my-video.json WRITE=1  # fetch them
 ```
 
 `make assets` fills gaps: a country becomes a flag, a brand becomes a logo, anything else becomes a generated topic card. For photos:

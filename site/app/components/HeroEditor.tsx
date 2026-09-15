@@ -116,7 +116,7 @@ export function HeroEditor() {
     el.setAttribute("tabindex", "-1");
     let aspect = "16:9";
     try { aspect = (JSON.parse(live).aspect as string) || "16:9"; } catch { /* keep default */ }
-    el.src = `/formats/scene/scene.html?data=${encodeURIComponent(blob)}&fps=30&aspect=${encodeURIComponent(aspect)}`;
+    el.src = `/films/scene/scene.html?data=${encodeURIComponent(blob)}&fps=30&aspect=${encodeURIComponent(aspect)}`;
 
     el.onload = () => {
       const t0 = performance.now();

@@ -4,7 +4,7 @@
 //
 // Each track is a file exporting `slot` (where it runs) and `frame(kit, el, L, units, t, f, start,
 // end, scene)`. Until now the whole list was written out as statements in the body of `updateLayer`
-// in formats/scene/scene.js, which meant every cross-cutting per-frame job, the thing a motion
+// in films/scene/scene.js, which meant every cross-cutting per-frame job, the thing a motion
 // engine is mostly made of, had to be added by editing a 940-line file in the exact right place,
 // with nothing but a neighbouring comment to say where the right place was.
 //

@@ -37,7 +37,7 @@ import { bootPathFor } from '../harness/lib/render-harness.mjs';
 import { adaptFinding } from '../harness/lib/safeguards.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const formatsDir = path.join(repoRoot, 'formats');
+const formatsDir = path.join(repoRoot, 'films');
 const OUT = '/tmp/audit';
 // Do NOT wipe the directory: two authors auditing at once would delete each other's overlay, and one
 // author auditing a second scene would lose the first. Each run overwrites only its own file.
@@ -1439,7 +1439,7 @@ const bootScratch = []; // expanded-sugar scratch files this run wrote, cleaned 
 for (const spec of modules) {
   // a .json arg audits THAT data file (module read from it); a bare name audits the format's sample
   const isData = spec.endsWith('.json');
-  const raw = isData ? spec : `formats/${spec}/sample.json`;
+  const raw = isData ? spec : `films/${spec}/sample.json`;
   // Normalise to a repo-RELATIVE path. An absolute arg, which the MCP pipeline passes for a scene
   // under .vawe-data, otherwise broke everything: `path.join(repoRoot, absolute)` concatenates into
   // a garbage path (→ "file not found") and `?data=/${absolute}` sends the browser a doubled path.
@@ -1457,7 +1457,7 @@ for (const spec of modules) {
 
   // THE PAGE BOOTS OFF `sample` AS A FILE, not off `cfg`: it fetches `?data=/<path>` and parses it
   // itself, so a scene carrying `block`/`beat`/`comp` sugar (already resolved in `cfg` above, via
-  // `loadScene`) would 404 the browser's own `formats/scene/scene.js` at the raw layer type: that page
+  // `loadScene`) would 404 the browser's own `films/scene/scene.js` at the raw layer type: that page
   // deliberately never imports core/engine/expand.js (its own banner says why). `bootPathFor` writes the
   // already-expanded `cfg` to a scratch file and boots from THAT instead; a scene with no sugar is
   // returned unchanged, so this is a no-op for the overwhelming majority of scenes.
@@ -1490,7 +1490,7 @@ for (const aspectKey of askedAspects) {
   // ?aspect= is the same knob internal/scene/scene.go passes when rendering, so the audit measures the
   // canvas the CLI would actually ship rather than a re-implementation of it.
   const q = aspectKey ? `&aspect=${encodeURIComponent(aspectKey)}` : '';
-  await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${bootSample}&fps=30${q}`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/films/${m}/scene.html?data=/${bootSample}&fps=30${q}`, { waitUntil: 'load' });
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
   // A scene that refuses to boot is the loudest possible failure, so report it as one. Reading
   // __engine.meta unconditionally threw an uncaught TypeError here, which killed the whole run: one

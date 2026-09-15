@@ -37,7 +37,7 @@ assert.equal(exitDurOf({ dataset: { out: 'fade', exitDur: '0.9' } }), 0.9, 'an e
 }
 
 // ---- CLAMP THE OUTGOING SIDE (regression: every cut style's exit reaches identity at p=1) ----
-// formats/scene/scene.js's bg cross-dissolve reads this same function's `opacity` at exit=1 as its
+// films/scene/scene.js's bg cross-dissolve reads this same function's `opacity` at exit=1 as its
 // "the outgoing side is fully gone" signal (via 1 - exitOpacity); a style that never reaches 0 would
 // mean the bg jumps early relative to what the frame actually shows. `none` is the one deliberate
 // exception (docs comment: "no transition at all").
@@ -48,7 +48,7 @@ for (const name of ['fade', 'punch', 'slide', 'zoom', 'whip', 'wipe']) {
   assert.ok(op <= 0.001 || masked, `cut style "${name}" should be fully gone at exit=1 (opacity ${op}, masked ${masked})`);
 }
 
-// ---- NO DEFAULT ENTRANCE (formats/scene/scene.js setLayerTiming writes `data-anim="none"` for a
+// ---- NO DEFAULT ENTRANCE (films/scene/scene.js setLayerTiming writes `data-anim="none"` for a
 // layer that names none). `none` is a real ANIM entry: no transform, and clipStyleAt's `fadeInT`
 // special-cases the literal string so the opacity envelope is skipped too. A layer that states no
 // `anim` is simply PRESENT for its window from frame one, not faded in.

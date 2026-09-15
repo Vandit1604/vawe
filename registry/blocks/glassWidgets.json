@@ -63,7 +63,7 @@
     {
       "source": "site/public/assets/blocks/glassWidgets.json",
       "url": "https://vawe.dev/assets/blocks/glassWidgets.json",
-      "target": "formats/scene/glassWidgets.json",
+      "target": "films/scene/glassWidgets.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

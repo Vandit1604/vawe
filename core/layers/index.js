@@ -64,7 +64,7 @@ export const LAYER_REGISTRY = defineRegistry('layer type', REGISTRY, { slot: 'la
   catalog: {
     title: 'Layer types',
     tag: 'layer',
-    intro: 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `engine-doctrine/PRIMITIVES.md` for what each is FOR.',
+    intro: 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `films/scene/schema.json`, and `engine-doctrine/PRIMITIVES.md` for what each is FOR.',
     usage: (n, { j }) => j({ type: n }),
     noPreview: 'a layer type is the noun, not the effect. Every preview on this page is already one of them.',
   },
@@ -99,7 +99,7 @@ export const LAYER_PROPS = Object.freeze(Object.fromEntries(
 // A missing `type` still means text (documented default). A type that is present and unknown is a bug.
 // `block`, `comp` and `beat` USED to be build-time sugar a separate `make expand` step had to resolve
 // first; core/engine/expand.js `expandScene` now runs at LOAD (core/transitions/lower.js `loadScene`, called
-// by formats/scene/scene.js before any layer is built), so none of the three ever reach this dispatch
+// by films/scene/scene.js before any layer is built), so none of the three ever reach this dispatch
 // any more. A scene that somehow still carries one is an unknown type, same as any other typo.
 const pick = (L) => {
   const t = L.type;

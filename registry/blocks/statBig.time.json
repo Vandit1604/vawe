@@ -45,7 +45,7 @@
     {
       "source": "site/public/assets/blocks/statBig.time.json",
       "url": "https://vawe.dev/assets/blocks/statBig.time.json",
-      "target": "formats/scene/statBig.time.json",
+      "target": "films/scene/statBig.time.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

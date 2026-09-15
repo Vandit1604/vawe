@@ -145,7 +145,7 @@ export function buildFx(kit, el, L) {
 // the frame's own properties (light, camera, canvas, safe, bg), the clock, the theme's palette and the
 // film's joints (marks), because the effects this slot exists for are properties of the FRAME, not of
 // one layer. Every field is built before the frame pass and named beside its consumer where it is
-// assembled (formats/scene/scene.js). `spec` rides LAST so the shared arguments keep the same positions
+// assembled (films/scene/scene.js). `spec` rides LAST so the shared arguments keep the same positions
 // they have on a primitive.
 export function frameFx(kit, el, L, t, scene) {
   for (const { mod, spec } of specsOf(L)) if (mod.frame) mod.frame(kit, el, L, t, scene, spec);

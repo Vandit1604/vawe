@@ -4,7 +4,7 @@ package render
 // are build-time sugar, resolved by core/engine/expand.js `expandScene` (recipes via recipes/expand.mjs,
 // called from inside it). That function runs fine in a browser (it is pure ESM, no
 // `fs`), but THIS browser cannot reach it: internal/scene's file server default-denies everything
-// outside core/themes/formats/assets/.vawe-data (scene.go `served`), by design, because this process
+// outside core/themes/films/assets/.vawe-data (scene.go `served`), by design, because this process
 // renders scenes from strangers over MCP, and `blocks/`/`blueprints/` (156+30 factories, one of which
 // imports `d3-geo` by bare specifier, resolvable only through an import map neither this page nor this
 // server carries) sit outside that allowlist on purpose. So a scene using this vocabulary is expanded

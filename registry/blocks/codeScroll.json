@@ -61,7 +61,7 @@
     {
       "source": "site/public/assets/blocks/codeScroll.json",
       "url": "https://vawe.dev/assets/blocks/codeScroll.json",
-      "target": "formats/scene/codeScroll.json",
+      "target": "films/scene/codeScroll.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

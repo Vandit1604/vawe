@@ -226,5 +226,5 @@ const scene = {
   bg: [{ t: 0, preset: 'plain', from: 0, to: 5 }],
 };
 
-fs.writeFileSync('formats/scene/cadence.json', JSON.stringify(scene, null, 2) + '\n');
-console.log(`wrote formats/scene/cadence.json · ${scene.layers.length} layers · no cuts · ${scene.duration}s`);
+fs.writeFileSync('films/scene/cadence.json', JSON.stringify(scene, null, 2) + '\n');
+console.log(`wrote films/scene/cadence.json · ${scene.layers.length} layers · no cuts · ${scene.duration}s`);

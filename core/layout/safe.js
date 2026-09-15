@@ -199,7 +199,7 @@ export function safeArea(W, H, destination = 'web') {
 // ── PLACEMENT: the named position vocabulary a layer's `pin` (and a caption's) writes ─────────────
 // This was the `PIN` table, copied by hand three times: core/engine/boot.js (the one that actually
 // resolves it), core/validate/validate.mjs (the degenerate-pin check) and the `pin` enum in
-// formats/scene/schema.json. That is the exact drift this file's own header warns about, just for a
+// films/scene/schema.json. That is the exact drift this file's own header warns about, just for a
 // second question ("where does a name land") instead of the first one ("how big is the frame"). One
 // table now; the three consumers read it.
 //
@@ -269,7 +269,7 @@ export const PLACEMENT_REGISTRY = defineRegistry('placement', PLACEMENT, {
 // ── THE CAPTION BAND ────────────────────────────────────────────────────────────────────────────
 // A burnt-in caption owns real estate, and nothing stopped a headline landing on it. The band belongs
 // HERE, next to safeArea, for the reason the header gives: where a caption sits is a property of the
-// DESTINATION, not of the shape. formats/scene/scene.css pins `.hs-cap` with
+// DESTINATION, not of the shape. films/scene/scene.css pins `.hs-cap` with
 // `bottom: max(<skin offset>, var(--safe-bottom))`, and core/boot.js:325 writes --safe-bottom from
 // safeArea(). So the band reads the same numbers the caption itself is placed against; a second table
 // would drift from the CSS exactly the way the four safe boxes drifted from each other.
@@ -292,7 +292,7 @@ const CAPTION_LEADING = 1.05;
 
 // captionSkin(cfg), which skin a scene's caption settings select. One mapping, read by anyone who
 // needs the band, so `captionStyle` overriding `captionMode` is not re-guessed per caller
-// (formats/scene/scene.js:909 is the renderer's own copy of this precedence).
+// (films/scene/scene.js:909 is the renderer's own copy of this precedence).
 export const captionSkin = (cfg = {}) =>
   cfg.captionStyle ? 'styled' : cfg.captionMode === 'pop' ? 'pop' : 'plain';
 

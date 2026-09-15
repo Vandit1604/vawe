@@ -27,7 +27,7 @@ import { codesEmitted } from '../../harness/lib/finding-codes.mjs';
 import { codeFiresOn } from '../../harness/lib/code-fires.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENE_DIR = path.join(repoRoot, 'formats', 'scene');
+const SCENE_DIR = path.join(repoRoot, 'films', 'scene');
 const RATCHET = path.join(repoRoot, 'quality/baselines/legacy-waiver-ratchet.json');
 const dryRun = process.argv.includes('--dry-run');
 

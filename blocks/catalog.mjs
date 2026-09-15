@@ -341,7 +341,7 @@ export const CATALOG = [
       // brand hexes in Google's exact order (blue, red, yellow, blue, green, red) which is the
       // wordmark's colour signature with the letters swapped. The FACTORY was always clean
       // (`word = null`); only this demo row carried them, and the catalog is the most-copied code in
-      // the repo. Same class as the brand recreations already removed from formats/scene.
+      // the repo. Same class as the brand recreations already removed from films/scene.
       // The ramp also makes the demo honest: this is a search-engine block, not one company's.
       word: [{ c: 'S' }, { c: 'e' }, { c: 'a' }, { c: 'r' }, { c: 'c' }, { c: 'h' }] } },
   { name: 'searchEngine.results', family: 'searchEngine', blurb: 'the search results page: a ranked list of links, with a cursor clicking one',

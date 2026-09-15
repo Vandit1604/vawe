@@ -81,7 +81,7 @@
     {
       "source": "site/public/assets/blocks/glassHome.json",
       "url": "https://vawe.dev/assets/blocks/glassHome.json",
-      "target": "formats/scene/glassHome.json",
+      "target": "films/scene/glassHome.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

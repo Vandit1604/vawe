@@ -1,6 +1,6 @@
 {
  "module": "scene",
- "storyboard": "formats/scene/showcase-type.storyboard.md",
+ "storyboard": "films/scene/showcase-type.storyboard.md",
  "aspect": "16:9",
  "theme": "vawe",
  "duration": 13,
@@ -170,7 +170,7 @@
    "anim": "fade",
    "enterDur": 0.45,
    "exitDur": 0,
-   "src": "formats/scene/_showcase-type-timing.html"
+   "src": "films/scene/_showcase-type-timing.html"
   }
  ],
  "bg": [

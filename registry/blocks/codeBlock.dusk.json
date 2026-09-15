@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/codeBlock.dusk.json",
       "url": "https://vawe.dev/assets/blocks/codeBlock.dusk.json",
-      "target": "formats/scene/codeBlock.dusk.json",
+      "target": "films/scene/codeBlock.dusk.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

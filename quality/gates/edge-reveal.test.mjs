@@ -1,6 +1,6 @@
 // quality/gates/edge-reveal.test.mjs: hermetic fixtures for the edge-reveal sampler.
 //   node --test quality/gates/edge-reveal.test.mjs
-// Fixtures are stagetest-prefixed scenes under formats/scene/ (the convention core/layers/util.test.mjs
+// Fixtures are stagetest-prefixed scenes under films/scene/ (the convention core/layers/util.test.mjs
 // already uses), removed in after() whether the run passes or fails.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,13 +10,13 @@ import assert from 'node:assert';
 import { sampleEdgeReveal, toRanges } from './edge-reveal.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENES = path.join(ROOT, 'formats/scene');
+const SCENES = path.join(ROOT, 'films/scene');
 const written = [];
 function write(name, obj) {
   const rel = `stagetest-edge-${name}.json`;
   fs.writeFileSync(path.join(SCENES, rel), JSON.stringify(obj));
   written.push(rel);
-  return path.join('formats/scene', rel);
+  return path.join('films/scene', rel);
 }
 after(() => { for (const f of written) { try { fs.unlinkSync(path.join(SCENES, f)); } catch { /* already gone */ } } });
 

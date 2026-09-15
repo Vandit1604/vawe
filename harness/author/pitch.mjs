@@ -42,7 +42,7 @@ if (!name || name.startsWith('--')) {
 function resolveSubject(n) {
   const candidates = n.endsWith('.json') || n.endsWith('.md')
     ? [n]
-    : [`formats/scene/${n}.json`, `formats/scene/${n}.storyboard.md`];
+    : [`films/scene/${n}.json`, `films/scene/${n}.storyboard.md`];
   for (const rel of candidates) {
     const abs = path.resolve(ROOT, rel);
     if (fs.existsSync(abs)) return { rel, abs };
@@ -59,7 +59,7 @@ const left = arg('left');
 if (chose) {
   if (!subjectExists) {
     console.error(`✗ cannot record: no file at ${subject.rel} yet. Write the scene or storyboard first,`);
-    console.error(`  or point at one directly: node harness/author/pitch.mjs formats/scene/<name>.json --chose "..."`);
+    console.error(`  or point at one directly: node harness/author/pitch.mjs films/scene/<name>.json --chose "..."`);
     process.exit(2);
   }
   const rec = writeReceipt(STAGE, subject.abs, {

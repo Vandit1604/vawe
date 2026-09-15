@@ -111,7 +111,7 @@ const LOOKS = [
 // that can retire a look that passes. A row was deleted; a capability was not.
 //
 // WHAT STAYS REACHABLE. `PRESETS.ember` in core/lightfield/presets.js, so
-// `make lightfield PRESET=ember` still builds the field, formats/scene/_lightfield-ember.html still
+// `make lightfield PRESET=ember` still builds the field, films/scene/_lightfield-ember.html still
 // renders, and the flame construction that took three passes to find is still readable as a worked
 // example. WHAT WAS LOST: its row in `make lightfield-check`, because that tool walks this list. A
 // look off this list is unscored, so a later change to the shared shadow or envelope code can move

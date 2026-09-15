@@ -73,7 +73,7 @@
     {
       "source": "site/public/assets/blocks/screenSwap.slide.json",
       "url": "https://vawe.dev/assets/blocks/screenSwap.slide.json",
-      "target": "formats/scene/screenSwap.slide.json",
+      "target": "films/scene/screenSwap.slide.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

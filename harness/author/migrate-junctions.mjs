@@ -14,7 +14,7 @@
 // to look at (it will still validate-refuse, naming this script, until it is migrated by hand).
 //
 //   node harness/author/migrate-junctions.mjs [--dry-run] [file.json ...]
-// No files named -> every formats/scene/*.json (site-tracked and gitignored alike).
+// No files named -> every films/scene/*.json (site-tracked and gitignored alike).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,7 +22,7 @@ import { lowerScene, RAMP_BY_DEFAULT } from '../../core/transitions/lower.js';
 import { okEnergy } from '../../core/transitions/energy.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENE_DIR = path.join(repoRoot, 'formats', 'scene');
+const SCENE_DIR = path.join(repoRoot, 'films', 'scene');
 
 // PRESERVE THE FILE'S OWN INDENT (quality/gates/legacy-fold.mjs already established why: a chunk of
 // these scenes are git-tracked, and re-serializing with a fixed indent turns a one-key rewrite into a
@@ -45,7 +45,7 @@ const MECH_OF_KEY = { cuts: 'cut', stings: 'sting', seams: 'seam' };
 // (RAMP_BY_DEFAULT) when the film names no `energy`, a benefit raw `cuts`/`seams` never had. Left
 // alone, converting the KEY would silently re-time every such cut, which is exactly the failure this
 // script exists to refuse. So when a raw entry would fall into that default, this pins the render-time
-// default it already had (`smooth`, core/cuts/index.js / formats/scene/scene.js) explicitly, which
+// default it already had (`smooth`, core/cuts/index.js / films/scene/scene.js) explicitly, which
 // renders identically and keeps the round trip honest without ever needing a mismatch.
 export function raise(entry, key, film) {
   const T = { at: entry.t, mech: MECH_OF_KEY[key] };
@@ -85,7 +85,7 @@ export function deepEqual(a, b) {
   return false;
 }
 
-// `timing` absent and `timing: "smooth"` render identically (core/cuts/index.js, formats/scene/
+// `timing` absent and `timing: "smooth"` render identically (core/cuts/index.js, films/scene/
 // scene.js both default a missing one to smooth), and `raise` above may have pinned it explicitly to
 // hold a legacy cut/seam still. Normalise both sides the same way before comparing, so pinning a true
 // no-op doesn't itself read as a mismatch.
@@ -119,7 +119,7 @@ export function migrateOne(data) {
 }
 
 // ---- CLI: `node harness/author/migrate-junctions.mjs [--dry-run] [file.json ...]` ----
-// No files named -> every formats/scene/*.json (site-tracked and gitignored alike).
+// No files named -> every films/scene/*.json (site-tracked and gitignored alike).
 const isMain = typeof process !== 'undefined' && process.argv?.[1] && import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
   const dryRun = process.argv.includes('--dry-run');

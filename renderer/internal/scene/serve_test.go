@@ -7,7 +7,7 @@ import "testing"
 func TestAllowed(t *testing.T) {
 	allow := []string{
 		"core/boot.js", "core/layers/index.js", "themes/vawe.json",
-		"formats/scene/scene.html", "formats/scene/schema.json",
+		"films/scene/scene.html", "films/scene/schema.json",
 		"assets/fonts/Anybody.woff2", "assets/brands/preface/agents/claude.svg",
 		".vawe-data/scenes/vid_abc.json", ".vawe-data/uploads/anon/deadbeef.png",
 	}

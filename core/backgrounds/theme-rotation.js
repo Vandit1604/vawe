@@ -1,8 +1,8 @@
 // core/backgrounds/theme-rotation.js: widens the ALREADY-OPT-IN `bg:[{use:"theme"}]` door
-// (formats/scene/scene.js) so a jointed film gets the brand's own backdrop ROTATION, one window per
+// (films/scene/scene.js) so a jointed film gets the brand's own backdrop ROTATION, one window per
 // shot, instead of one flat window for the whole runtime.
 //
-// Measured across formats/scene/: 85 of 119 films (71%) paint exactly one bg window for the whole
+// Measured across films/scene/: 85 of 119 films (71%) paint exactly one bg window for the whole
 // film. The fix is NOT the engine choosing a different preset per shot (that is exactly the mistake
 // engine-doctrine/MISTAKES.md #159 names: "the engine PICKED the background, so nobody ever designed one again",
 // which is why `bg` stays a REQUIRED authoring field, core/engine/produce.js). It is applying a

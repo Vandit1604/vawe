@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/choreo.mjs: HOW THIS FILM CHOREOGRAPHS MOTION, one beat at a time.
 //
-//   make choreo D=formats/scene/<film>.json [REF=<ref-clip-name>]
+//   make choreo D=films/scene/<film>.json [REF=<ref-clip-name>]
 //   node quality/gates/choreo.mjs <film> [--ref <name>] [--json]
 //
 // REPORT ONLY, exit 0 always. It answers, per beat: which KINDS of motion are live at once (the frame
@@ -171,7 +171,7 @@ export function lateEarlyRatio(prof, start, end) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const arg = args.find((a) => !a.startsWith('--')) || process.env.D;
-  if (!arg) { console.error('usage: make choreo D=formats/scene/<film>.json [REF=<ref-clip-name>]'); process.exit(2); }
+  if (!arg) { console.error('usage: make choreo D=films/scene/<film>.json [REF=<ref-clip-name>]'); process.exit(2); }
   const asJson = args.includes('--json');
   const base = String(arg).replace(/\.json$/, '');
   const slug = path.basename(base);
@@ -183,7 +183,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // storyboard beats, when the film has one: the plan's own acts are what a choreography question is
   // usually asked ABOUT ("does beat 6 read as one thing or three"), and a continuous film with no
   // `cuts[]` (flow-seam, a single unbroken camera move) has exactly one scene-timing beat otherwise.
-  const sbPath = [base + '.storyboard.md', path.join(ROOT, 'formats/scene', slug + '.storyboard.md')]
+  const sbPath = [base + '.storyboard.md', path.join(ROOT, 'films/scene', slug + '.storyboard.md')]
     .map((f) => path.resolve(ROOT, f)).find((f) => fs.existsSync(f));
   let beats = T.beatMotion.map((b) => ({ name: `beat ${b.index + 1}`, start: b.start, end: b.end }));
   const refIdx = args.indexOf('--ref');

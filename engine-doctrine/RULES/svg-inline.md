@@ -1,7 +1,7 @@
 ---
 name: svg-inline
 when: writing an svg layer, or setting src on an image/video/html layer
-holds: eye (formats/scene/schema.json propsByType.svg has no `src` field)
+holds: eye (films/scene/schema.json propsByType.svg has no `src` field)
 answers: "svg is inline d/viewBox/stroke/draw, never a src; and how a repo path in src actually resolves"
 group: reference
 ---

@@ -68,7 +68,7 @@
     {
       "source": "site/public/assets/blocks/usMapFlow.json",
       "url": "https://vawe.dev/assets/blocks/usMapFlow.json",
-      "target": "formats/scene/usMapFlow.json",
+      "target": "films/scene/usMapFlow.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

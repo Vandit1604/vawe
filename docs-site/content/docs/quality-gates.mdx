@@ -11,7 +11,7 @@ They form a ladder. Early gates are cheap and mechanical; later gates look at th
 ## validate
 
 ```bash
-make validate D=formats/scene/my.json
+make validate D=films/scene/my.json
 ```
 
 Schema conformance, no em-dashes in on-screen copy, inline theme keys resolved, and no un-expanded [blocks or comps](/docs/blocks). The same validator runs at boot before the first frame, so a scene that fails here never renders.
@@ -19,7 +19,7 @@ Schema conformance, no em-dashes in on-screen copy, inline theme keys resolved, 
 ## critique
 
 ```bash
-make critique D=formats/scene/my.json
+make critique D=films/scene/my.json
 ```
 
 {/* site-counts-allow: "22 shader stings" is a made-up on-screen claim in an example, not a count of the registry */}
@@ -28,7 +28,7 @@ The value gate. It flags beats that occupy time without earning it: placeholder 
 ## slop
 
 ```bash
-make slop D=formats/scene/my.json
+make slop D=films/scene/my.json
 ```
 
 An anti-slop detector. It renders the real DOM at a frame and runs a 41-rule check for the usual tells: overused fonts, purple and blue gradients, cards inside cards, centered-by-default layouts. No language model, just rules. Reach past anything it flags.
@@ -44,7 +44,7 @@ Layout and accessibility: overlap, clipped text, overflow, safe-zone violations,
 ## beats
 
 ```bash
-make beats D=formats/scene/my.json VS=<brand>
+make beats D=films/scene/my.json VS=<brand>
 ```
 
 The first, middle, and last frame of every beat on one sheet. With `VS=<brand>` it stacks each beat beside its source section, which is the [fidelity check](/docs/brand-reflection#the-fidelity-gate) that a reflected video reads as the same brand as the site.
@@ -52,7 +52,7 @@ The first, middle, and last frame of every beat on one sheet. With `VS=<brand>` 
 ## judge
 
 ```bash
-make judge D=formats/scene/my.json VS=<brand>
+make judge D=films/scene/my.json VS=<brand>
 ```
 
 The vision gate. It renders the key frames of every beat into one labeled sheet and writes a rubric: the brand's house style plus seven craft dimensions (readability, hierarchy, composition, brand fidelity, asset fidelity, produced-not-generated, and value). Then a vision model reads the sheet against the rubric and returns a pass or fix verdict. It catches what the mechanical gates cannot see: a mis-anchored underline, a muddy frame, a lookalike asset. A pass means every frame clears every dimension.
@@ -60,8 +60,8 @@ The vision gate. It renders the key frames of every beat into one labeled sheet 
 ## ledger
 
 ```bash
-make ledger D=formats/scene/my.json         # check
-make ledger-add D=formats/scene/my.json     # log after shipping
+make ledger D=films/scene/my.json         # check
+make ledger-add D=films/scene/my.json     # log after shipping
 ```
 
 Cross-video sameness memory. It fails if a design repeats one you have already shipped. Fix by changing at least two of the cut family, the beat structure, or the layout archetype. After the video is approved, `ledger-add` records it so future videos are checked against it.

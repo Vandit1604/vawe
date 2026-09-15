@@ -2,7 +2,7 @@
 //
 // WHY THIS EXISTS. Motion in this engine comes from five separate systems that no single reader sees:
 // JSON `motion[]` keys (this file's own neighbour, sequence.js, motionAt/velocityAt), GSAP `parts`
-// entrances (core/motion/parts.js, timed in formats/scene/scene.js applyGsapHooks), named GSAP `fx` and
+// entrances (core/motion/parts.js, timed in films/scene/scene.js applyGsapHooks), named GSAP `fx` and
 // motionPath/physics (core/engine/gsap-effects.js, seeked by core/timeline/clips.js), kinetic split
 // presets (core/kinetic/presets.js, core/tracks/units.js), and authored idle (core/engine/idle.js).
 // quality/gates/jolt-check.mjs reads `L.motion` and the camera keys DIRECTLY, so a jolt inside a
@@ -79,7 +79,7 @@ function walkLayers(layers, out, parentAbsStart) {
     if (L.parts) {
       for (const p of (Array.isArray(L.parts) ? L.parts : [L.parts])) {
         out.push({ id, source: 'parts', prop: p.anim || 'fadeUp', segments: null,
-          why: 'per-unit timing needs the real match count of `select` against the layer\'s own hand-authored markup, a DOM query (formats/scene/scene.js applyGsapHooks)' });
+          why: 'per-unit timing needs the real match count of `select` against the layer\'s own hand-authored markup, a DOM query (films/scene/scene.js applyGsapHooks)' });
       }
     }
 

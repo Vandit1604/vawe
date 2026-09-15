@@ -92,7 +92,7 @@ export default function Home() {
               nav, so the skip link still bypasses it. */}
           <div className="bookend tap hero-band">
             <Header variant="pill" />
-            {/* backdrop = formats/scene/site-backdrop.json: an ambient shader field with ZERO text
+            {/* backdrop = films/scene/site-backdrop.json: an ambient shader field with ZERO text
                 layers. Never a capability clip: those all carry copy, which blurs into drifting
                 smudges behind the headline. */}
             <Clip className="bookend-film" src="/assets/backdrop.mp4" poster="/assets/backdrop.jpg" />

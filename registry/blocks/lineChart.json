@@ -69,7 +69,7 @@
     {
       "source": "site/public/assets/blocks/lineChart.json",
       "url": "https://vawe.dev/assets/blocks/lineChart.json",
-      "target": "formats/scene/lineChart.json",
+      "target": "films/scene/lineChart.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -201,7 +201,7 @@ Ways to spotlight a word/element (pick per brand's personality; annotations suit
 - **Highlighter sweep**: a translucent accent rect behind text, `transform-origin:left; scaleX 0→1` (~0.4s ease-out). Left→right.
 - **Underline**: a rule (straight for tech, hand-drawn SVG `stroke-dashoffset 100→0` for editorial) draws L→R (~0.5s).
 - **Color-change wipe**. The word recolours to the accent **left→right** (or up→down): overlay the same text in accent, clip it with `inset()`/`clip-path` animating `0→100%`. Directional = reveals meaning (progress, arrival).
-- **Circle / arrow annotation**: hand-drawn SVG loop or arrow (`pathLength=100`, animate `stroke-dashoffset`) around/at the focal element, + a **Caveat** handwritten label. Signature of `formats/threadcite` (marks up a Reddit card / AI-source pill).
+- **Circle / arrow annotation**: hand-drawn SVG loop or arrow (`pathLength=100`, animate `stroke-dashoffset`) around/at the focal element, + a **Caveat** handwritten label. Signature of `films/threadcite` (marks up a Reddit card / AI-source pill).
 - **Scale-punch / glow pulse**: one-shot `scale 1→1.05→1` (§11) for arrivals.
 - **De-emphasize the rest**: dim/blur non-focal elements so the one thing wins (staging).
 

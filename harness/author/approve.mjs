@@ -24,9 +24,9 @@ if (!arg) { console.error('usage: node harness/author/approve.mjs <film>   (or /
 const revoke = process.argv.includes('--revoke');
 
 const base = arg.replace(/\.(json|storyboard\.md)$/, '');
-const sb = [base + '.storyboard.md', path.join('formats/scene', path.basename(base) + '.storyboard.md')]
+const sb = [base + '.storyboard.md', path.join('films/scene', path.basename(base) + '.storyboard.md')]
   .map((f) => path.resolve(ROOT, f)).find((f) => fs.existsSync(f));
-if (!sb) { console.error(`no storyboard for "${arg}". Looked for ${base}.storyboard.md and formats/scene/${path.basename(base)}.storyboard.md`); process.exit(1); }
+if (!sb) { console.error(`no storyboard for "${arg}". Looked for ${base}.storyboard.md and films/scene/${path.basename(base)}.storyboard.md`); process.exit(1); }
 
 // A plan that does not pass its own gate is not a plan yet, and approving one would make the signature
 // worthless. This is the only precondition, and it is the gate's verdict, not a second opinion.

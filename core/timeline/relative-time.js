@@ -1,10 +1,10 @@
 // core/timeline/relative-time.js: resolveRelativeTimes(data), the ONE resolver for an authored ABSOLUTE
 // time field written as a relative reference ("otherId+0.5", "otherId.end-0.2") instead of a plain
-// number. Was formats/scene/scene.js's own resolveRelativeStarts, page-only: core/engine/expand.js
+// number. Was films/scene/scene.js's own resolveRelativeStarts, page-only: core/engine/expand.js
 // `expandScene` (the loader every Node gate and script calls) left the string untouched, so a gate
 // reading an expanded scene saw `"a.end + 0.5"` where it expected a number. Moved here so BOTH
 // `expandScene` (before `resolveTempo`, so the resolved number scales like any other authored time) and
-// the render page (`formats/scene/scene.js`, for a scene Go did not pre-expand: `internal/render/expand.go`
+// the render page (`films/scene/scene.js`, for a scene Go did not pre-expand: `internal/render/expand.go`
 // only shells out to Node when the file carries block/beat/comp/recipes/voice sugar, so a plain scene
 // using nothing but a relative start never reaches expandScene at all) read the SAME grammar and the
 // SAME errors. Calling this twice (Go pre-expanded, then the page calls it again) is a no-op: every

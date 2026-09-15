@@ -2,7 +2,7 @@
 //
 // A scene JSON does not say when its layers are visible. `start` + `duration` are what the AUTHOR wrote;
 // the renderer then rewrites them. core/engine/produce.js turns `sceneUnits` on for any cut film that is not
-// already choreographed, and formats/scene/scene.js (setLayerTiming) then REPLACES the duration of each
+// already choreographed, and films/scene/scene.js (setLayerTiming) then REPLACES the duration of each
 // non-last-beat layer that is still the beat's CURRENT STATE with the run to `beatEnd + cutDur`, so the
 // beat wrapper can slide the whole beat out as one unit. A gate that reads the raw fields sees holes the
 // render does not have, and misses ones it does. beat-check learned that the expensive way
@@ -10,7 +10,7 @@
 //
 // It lives here because a second gate now needs the same answer. Two copies of a model of someone else's
 // code drift, and the copy that drifts is the one that stops catching the bug. Import it; do not fork it.
-// If formats/scene/scene.js changes how it lowers timing, this file is the one place that follows.
+// If films/scene/scene.js changes how it lowers timing, this file is the one place that follows.
 //
 //   import { sceneTiming } from './scene-timing.mjs';
 //   const T = sceneTiming(sceneJson);
@@ -194,7 +194,7 @@ export function canvasShare(L, CW, CH, root = ROOT, view = null) {
 // measure against the canvas as before". THE WHOLE RULE IN ONE PLACE, because it has two halves and the
 // second is easy to forget: `cameraView` refuses when the CAMERA carries an angle, and it takes
 // keyframes, so it cannot see that a top-level `tilt` or `plane` modifier builds the same 3D rig with no
-// camera angle at all (formats/scene/scene.js:705). playhead ships `{"tilt":{"y":18}}` + `{"plane":-500}`
+// camera angle at all (films/scene/scene.js:705). playhead ships `{"tilt":{"y":18}}` + `{"plane":-500}`
 // and its stage is visibly turned at 12.4s; a view computed there is a rect standing in for a quad, and
 // deleting findings against it deletes them for a reason that is not true.
 // It was split across cameraView and one call site when `scattered-beat` was the only consumer. A second
@@ -272,7 +272,7 @@ export function sceneTiming(input) {
   // and telling the two apart needs the cut time, not the end of the cut window.
   // Only the layers that are still the beat's CURRENT STATE ride the wrapper out; the ones the beat
   // already replaced keep their authored window and leave when the author said (engine-doctrine/MISTAKES.md #555).
-  // Mirrors `beatIsCurrent` in formats/scene/scene.js exactly, including the start-times-only ceiling.
+  // Mirrors `beatIsCurrent` in films/scene/scene.js exactly, including the start-times-only ceiling.
   const EPS = 1e-6;
   const beatIsCurrent = (L, i) => {
     const end = num(L.start, 0) + (L.duration == null ? Infinity : num(L.duration, Infinity));
@@ -286,7 +286,7 @@ export function sceneTiming(input) {
   };
   const unitCut = (L) => {
     if (!sceneUnits || !cutTimes.length) return null;
-    // `acrossBeats` opts a layer out of the wrapper (formats/scene/scene.js beatIndexOf), so the engine
+    // `acrossBeats` opts a layer out of the wrapper (films/scene/scene.js beatIndexOf), so the engine
     // leaves its authored window alone. Modelling it as truncated would make every gate that reasons
     // about time deny the existence of the one thing they ask for.
     if (L.acrossBeats === true) return null;
@@ -325,7 +325,7 @@ export function sceneTiming(input) {
   const allSpans = correct(layers);
 
   const lastEnd = spans.reduce((m, [, b]) => Math.max(m, b), 0);
-  // same duration rule the renderer uses (formats/scene/scene.js): declared, else the last layer plus a beat.
+  // same duration rule the renderer uses (films/scene/scene.js): declared, else the last layer plus a beat.
   const duration = num(d.duration, 0) || +(lastEnd + 0.4).toFixed(2);
 
   // ── CHOREOGRAPHY: each layer's LIFE, what moves together per beat, and the handoffs between them ──

@@ -3,8 +3,8 @@
 // writes `captions` + `captionMode:"pop"` into the JSON. Deterministic: same script + duration → same
 // timing. Emphasise a word with <b>…</b> in the script (renders in the theme accent).
 //
-//   node harness/author/captions.mjs formats/scene/video.json "First line. Then the <b>payoff</b>."
-//   make captions D=formats/scene/video.json TEXT="…"
+//   node harness/author/captions.mjs films/scene/video.json "First line. Then the <b>payoff</b>."
+//   make captions D=films/scene/video.json TEXT="…"
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 

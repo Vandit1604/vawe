@@ -51,7 +51,7 @@
     {
       "source": "site/public/assets/blocks/toast.info.json",
       "url": "https://vawe.dev/assets/blocks/toast.info.json",
-      "target": "formats/scene/toast.info.json",
+      "target": "films/scene/toast.info.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

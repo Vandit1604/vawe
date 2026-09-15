@@ -42,7 +42,7 @@
     {
       "source": "site/public/assets/blocks/pillRow.json",
       "url": "https://vawe.dev/assets/blocks/pillRow.json",
-      "target": "formats/scene/pillRow.json",
+      "target": "films/scene/pillRow.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

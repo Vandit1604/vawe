@@ -48,7 +48,7 @@ const BOUNDARY_ORDER = ['cut', 'seam', 'sting'];
 // stays on the gentle default. An explicit `timing` always wins, and raw hand-authored `seams`/`cuts`
 // are untouched (this only fills the sugar's default, so no legacy film re-times silently).
 // Exported so harness/author/migrate-junctions.mjs can PIN the render-time default (`smooth`, see
-// core/cuts/index.js and formats/scene/scene.js) explicitly on a raw cut/seam it is converting, rather
+// core/cuts/index.js and films/scene/scene.js) explicitly on a raw cut/seam it is converting, rather
 // than let it fall through to this ramp: a legacy scene earns identical rendered output, never a
 // silent re-time, from moving into `transitions[]`.
 export const RAMP_BY_DEFAULT = new Set(['whipPan', 'whip', 'cinematicZoom', 'zoom', 'squeeze', 'slide', 'push', 'uncover']);
@@ -93,7 +93,7 @@ export function checkStingColor(color, where) {
 const clean = (o) => { for (const k of Object.keys(o)) if (o[k] === undefined) delete o[k]; return o; };
 
 // DURATION WORDS are resolved HERE and nowhere else, because this is the one pass every consumer of a
-// scene already runs (the renderer at formats/scene/scene.js, the validator, six gates) and it is a
+// scene already runs (the renderer at films/scene/scene.js, the validator, six gates) and it is a
 // pure data→data transform in array order, so determinism is unchanged. Resolving instead at each of
 // the eleven read sites would be eleven chances to miss one, and a missed one is a NaN in a timeline.
 // A number passes through itself, so a scene that names 0.42 keeps naming 0.42 and re-lowering stays

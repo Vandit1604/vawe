@@ -7,14 +7,14 @@ icon: Ratio
 One scene can render every platform ratio in a single pass. You author once, and the same source resolves to a landscape hero, a vertical Reel, and a square post.
 
 ```bash
-./bin/vawe formats/scene/my-video.json --aspect 16:9,9:16,1:1
+./bin/vawe films/scene/my-video.json --aspect 16:9,9:16,1:1
 # → my-video.16x9.mp4, my-video.9x16.mp4, my-video.1x1.mp4
 ```
 
 Supported ratios: `16:9`, `9:16`, `1:1`, `4:5`, `4:3`. Each output is tagged with its aspect. Through make:
 
 ```bash
-make video D=formats/scene/my-video.json ASPECT=16:9,9:16,1:1
+make video D=films/scene/my-video.json ASPECT=16:9,9:16,1:1
 ```
 
 ## Why it works: relative coordinates

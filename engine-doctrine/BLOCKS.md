@@ -27,7 +27,7 @@ layers at LOAD time (`core/engine/expand.js`), no separate step:
 { "type": "block", "block": "stripeCard", "x": 1260, "y": 400, "w": 420, "start": 40, "dur": 3 }
 ```
 ```bash
-make video D=formats/scene/my.json
+make video D=films/scene/my.json
 ```
 
 **2. From an authoring/transform script:**
@@ -43,7 +43,7 @@ layers.push(...B.stripeCard({ x: 1200, y: 260, start: 40 }));
 
 **Preview the whole library:** `make catalog` (auto-renders every entry to paged sheets).
 
-**Gate a scene for value:** `make critique D=formats/scene/<file>.json`, flags placeholder words,
+**Gate a scene for value:** `make critique D=films/scene/<file>.json`, flags placeholder words,
 <!-- site-counts-allow: "22 shader stings" is a made-up on-screen claim in an example, not a count of the registry -->
 false claims (e.g. "22 shader stings" with no shader layer), static lists, illegible stings, lonely beats.
 

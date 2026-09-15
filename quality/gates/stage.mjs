@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/stage.mjs: WHERE IS THIS FILM, and what is the ONE next thing to do.
 //
-//   make stage D=formats/scene/<film>.json   ·   node quality/gates/stage.mjs <film> [--json]
+//   make stage D=films/scene/<film>.json   ·   node quality/gates/stage.mjs <film> [--json]
 //   make stage                                  · no film yet: the roster, and the one furthest from done
 //   make stage Q="make a launch video for x"    · no film yet EITHER: what to even start
 //
@@ -44,7 +44,7 @@ export const STAGE_ORDER = ['brief', 'plan', 'approval', 'design', 'assemble', '
 /** Every path a film owns, resolved the same way author-check and studio resolve them. */
 export function filePaths(arg) {
   const raw = String(arg || '').replace(/\.(json|storyboard\.md)$/, '');
-  const base = raw.includes('/') ? raw : path.join('formats/scene', raw);
+  const base = raw.includes('/') ? raw : path.join('films/scene', raw);
   const scene = path.join(ROOT, base + '.json');
   let named = null;
   try { const d = JSON.parse(fs.readFileSync(scene, 'utf8'));
@@ -112,7 +112,7 @@ export function stageOf(arg) {
 
 /**
  * Every film in the library, staged. Reuses harness/lib/census.mjs's LIBRARY filter rather than a
- * second walk of formats/scene/: one owner for "which files count as a film" (engine-doctrine/MISTAKES.md #391).
+ * second walk of films/scene/: one owner for "which files count as a film" (engine-doctrine/MISTAKES.md #391).
  * A film that errors while staging (unparseable storyboard, say) is reported, not thrown, because one
  * bad film should not blind the roster to the rest.
  */

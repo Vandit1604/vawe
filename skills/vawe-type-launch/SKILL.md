@@ -69,7 +69,7 @@ homepage: the real product often lives one click deeper than the hero.
 ## `make scaffold TYPE=launch`
 
 ```bash
-make scaffold OUT=formats/scene/<name>.json TYPE=launch DUR=13
+make scaffold OUT=films/scene/<name>.json TYPE=launch DUR=13
 ```
 
 Composes `kineticHook -> screenDive -> cardCascade -> statReveal -> logoLockup -> ctaEnd`

@@ -60,7 +60,7 @@ const K_MAX = 12;
 
 // The surface a layer paints on its own element rather than in its markup. Matched against the
 // LONGHANDS of the layer's own inline style, and read from there rather than from getComputedStyle:
-// a layer is built DETACHED (formats/scene/scene.js `buildLayer` creates the element and appends it
+// a layer is built DETACHED (films/scene/scene.js `buildLayer` creates the element and appends it
 // afterwards), so a computed style at build time answers with the initial value for everything. A
 // shorthand written inline (`el.style.background = ...`) enumerates as its longhands, so nothing has
 // to know which spelling the primitive used. `opacity` is excluded on purpose: the fade down the

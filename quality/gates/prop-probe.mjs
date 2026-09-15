@@ -4,7 +4,7 @@
 //
 // WHY THIS EXISTS AND WHAT IT IS NOT. `core/registry/prop-audit.js` already refuses a prop that was set and
 // never read, at runtime, per layer, with no false positives from computed keys. It is live on every
-// render (formats/scene/scene.js:448 wraps every layer, :726 audits each one as its build finishes).
+// render (films/scene/scene.js:448 wraps every layer, :726 audits each one as its build finishes).
 // Its only gap is COVERAGE: it can judge a prop only when an author wrote it. `metalness` and
 // `roughness` were declared on the `three` layer (core/three-fx.js:29) and overwritten by literals in
 // `deviceShowcase`, and no shipped scene set them on that path, so the check never had anything to
@@ -83,7 +83,7 @@ const SKIP = {
 
 // ---------------------------------------------------------------------------------------------
 // A minimal VALID layer per type: the least a layer of that type needs to build at all. Harvested
-// from the library (the smallest real layer of each type in formats/scene/*.json), so these are shapes
+// from the library (the smallest real layer of each type in films/scene/*.json), so these are shapes
 // an author actually writes rather than a guess.
 const BASE = {
   text: { text: 'probe', w: 600 },
@@ -118,7 +118,7 @@ const BASE = {
 // A plausible value per prop. It only has to be ACCEPTED and TRUTHY: the Proxy records the read
 // whatever the value is, so the value's only jobs are to not throw and to not read as an opt-out
 // (`false` is how every opt-out in this engine is spelled, core/props.js:29).
-const SCHEMA = JSON.parse(fs.readFileSync(path.join(ROOT, 'formats/scene/schema.json'), 'utf8'));
+const SCHEMA = JSON.parse(fs.readFileSync(path.join(ROOT, 'films/scene/schema.json'), 'utf8'));
 const SCHEMA_PROPS = SCHEMA.fields.layers.item;
 
 // Names whose generic value would throw or be ignored, one line each. A `type.prop` key wins over a
@@ -357,7 +357,7 @@ for (const type of types) {
 
   const page = await browser.newPage();
   await page.evaluateOnNewDocument(() => { window.__PROP_PROBE = []; });
-  const url = `http://127.0.0.1:${port}/formats/scene/scene.html`
+  const url = `http://127.0.0.1:${port}/films/scene/scene.html`
     + `?data=${encodeURIComponent(`/out/.tmp_prop-probe/${type}-${c}.json`)}&fps=30`;
   await page.goto(url, { waitUntil: 'load' });
   const err = await waitForEngine(page, { throwOnTimeout: false });

@@ -64,12 +64,12 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 // Deliberately not all of core/: `L` is a local name elsewhere (core/audio-kit.mjs builds a synth voice
 // from an `L` carrying attack/decay/waveform), and a gate widened until it invents findings is worse
 // than the gap it closed.
-const engineFiles = [path.join(ROOT, 'formats/scene/scene.html'), path.join(ROOT, 'formats/scene/scene.js')];
+const engineFiles = [path.join(ROOT, 'films/scene/scene.html'), path.join(ROOT, 'films/scene/scene.js')];
 for (const dir of ['core/layers', 'core/surfaces', 'core/fx', 'core/tracks'])
   for (const f of fs.readdirSync(path.join(ROOT, dir)))
     if (f.endsWith('.js')) engineFiles.push(path.join(ROOT, dir, f));
 const engineSrc = engineFiles.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
-const SCHEMA_PATH = path.join(ROOT, 'formats/scene/schema.json');
+const SCHEMA_PATH = path.join(ROOT, 'films/scene/schema.json');
 const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, 'utf8'));
 
 // ---------- THE DERIVED PER-LAYER VOCABULARY (generated -> checked in -> verified) ----------
@@ -93,7 +93,7 @@ const vocabulary = {
 // reviewed, and an unreviewable diff is how a real deletion would hide.
 //
 // THE INDENT IS READ OFF THE FILE, not assumed. It was hardcoded to two spaces here and in the splice
-// regex below, and formats/scene/schema.json is written with ONE, so the anchor never matched: `--write`
+// regex below, and films/scene/schema.json is written with ONE, so the anchor never matched: `--write`
 // found no block, fell through to the "no `fields` anchor" branch and exited 2 without writing the
 // layerProps block OR the registry-owned enums. The command CLAUDE.md names as the way to regenerate the
 // schema could not regenerate it, and the only symptom was an error message about a different anchor.
@@ -287,7 +287,7 @@ if (process.argv.includes('--write')) {
     process.exit(2);
   }
   fs.writeFileSync(SCHEMA_PATH, next);
-  console.log('✓ wrote formats/scene/schema.json layerProps (generated from the declarations)');
+  console.log('✓ wrote films/scene/schema.json layerProps (generated from the declarations)');
   console.log(`✓ wrote ${targets.length} registry-owned enum(s) at ${targets.reduce((a, t) => a + t.hits, 0)} site(s)`);
   process.exit(0);
 }
@@ -295,7 +295,7 @@ if (process.argv.includes('--write')) {
   const have = JSON.stringify(schema.layerProps ?? null);
   const want = JSON.stringify(vocabulary);
   if (have !== want) {
-    const lines = ['✗ formats/scene/schema.json `layerProps` is stale - it is GENERATED from the PROPS',
+    const lines = ['✗ films/scene/schema.json `layerProps` is stale - it is GENERATED from the PROPS',
       '  declarations and a module has changed what it reads since it was last written.'];
     const hv = schema.layerProps || {};
     const cmp = (label, a = [], b = []) => {
@@ -371,7 +371,7 @@ const missing = [...engineProps].filter((p) => !defined.has(p) && !INTERNAL.has(
 if (missing.length) {
   const lines = [`✗ schema drift: engine reads ${missing.length} prop(s) not in schema.json:`];
   for (const p of missing) lines.push(`    • L.${p}`);
-  lines.push('  add them to formats/scene/schema.json (or to INTERNAL in this script if truly computed).');
+  lines.push('  add them to films/scene/schema.json (or to INTERNAL in this script if truly computed).');
   for (const l of lines) console.error(l);   // f.fail RECORDS, it does not print: findings.mjs:70
   f.fail('schema-engine-prop-missing', lines.join('\n'));
   process.exit(1);
@@ -415,7 +415,7 @@ console.log(`✓ schema in sync: all ${engineProps.size} engine props are define
       // NOT `--write`: each key here carries that modifier's own hand-written prop schema, which no
       // generator can invent. The shared fix line below said --write and it does nothing for this
       // block, so an author ran it, saw the same failure, and had no next move.
-      lines.push('    fix: add the key by hand to layers.item.modifiers.item in formats/scene/schema.json'
+      lines.push('    fix: add the key by hand to layers.item.modifiers.item in films/scene/schema.json'
         + ': this block is a hand-written prop schema per modifier, NOT a generated enum.');
       for (const l of lines) console.error(l);
       f.fail('schema-modifier-drift', lines.join('\n'), { at: 'layers.item.modifiers.item' });
@@ -436,7 +436,7 @@ console.log(`✓ schema in sync: all ${engineProps.size} engine props are define
       const lines = ['\u2717 layers.item.motion.item DRIFT vs core/sequence.js KEYFRAME_PROPS'];
       if (missing.length) lines.push(`    schema is MISSING: ${missing.join(', ')}  (a key may carry these; the schema does not say so)`);
       if (extra.length) lines.push(`    schema ADVERTISES: ${extra.join(', ')}  (a key carrying these is refused at boot)`);
-      lines.push('    fix: add the field by hand to layers.item.motion.item in formats/scene/schema.json'
+      lines.push('    fix: add the field by hand to layers.item.motion.item in films/scene/schema.json'
         + ': each one carries a label no generator can invent.');
       for (const l of lines) console.error(l);
       f.fail('schema-motion-drift', lines.join('\n'), { at: 'layers.item.motion.item' });

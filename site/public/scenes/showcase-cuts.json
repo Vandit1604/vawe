@@ -4,7 +4,7 @@
  "theme": "vawe",
  "duration": 10.8,
  "sceneUnits": false,
- "storyboard": "formats/scene/showcase-cuts.storyboard.md",
+ "storyboard": "films/scene/showcase-cuts.storyboard.md",
  "audio": {
   "music": "chill",
   "musicGain": 0.3,
@@ -73,7 +73,7 @@
      "ease": "easeOutCubic"
     }
    ],
-   "src": "formats/scene/_showcase-cuts-bars.html"
+   "src": "films/scene/_showcase-cuts-bars.html"
   },
   {
    "type": "text",

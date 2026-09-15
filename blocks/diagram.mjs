@@ -11,7 +11,7 @@
 // here moves through `parts` (core/parts.js): a CSS selector into this markup, one seeked GSAP
 // fromTo per matched element, staggered. `drawOn` is the entry that matters, it stamps
 // `pathLength="1"` on each path and ramps `stroke-dashoffset` 1→0, so a per-path staggered draw-on
-// costs one spec and needs no measurement. `parts` accepts an ARRAY (formats/scene/scene.js:390), so
+// costs one spec and needs no measurement. `parts` accepts an ARRAY (films/scene/scene.js:390), so
 // nodes / edges / arrowheads / labels are four passes on one layer with their own delays.
 //
 // THE ARROWHEAD IS A SEPARATE PATH ON PURPOSE. `marker-end` paints at the path's end from frame one,
@@ -30,7 +30,7 @@ export const CATEGORY = 'Diagrams';
 
 const T = TOKENS;
 // GSAP's OWN ease name, not the engine's. `parts` hands `p.ease` straight to gsap
-// (formats/scene/scene.js:398) and gsap has no ease called `easeOutCubic`, so an engine ease name
+// (films/scene/scene.js:398) and gsap has no ease called `easeOutCubic`, so an engine ease name
 // there is accepted and silently replaced by gsap's default. See frameworkFindings.
 const P_EASE = 'power3.out';
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

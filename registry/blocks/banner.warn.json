@@ -45,7 +45,7 @@
     {
       "source": "site/public/assets/blocks/banner.warn.json",
       "url": "https://vawe.dev/assets/blocks/banner.warn.json",
-      "target": "formats/scene/banner.warn.json",
+      "target": "films/scene/banner.warn.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

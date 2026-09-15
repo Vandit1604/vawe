@@ -48,7 +48,7 @@
     {
       "source": "site/public/assets/blocks/checklist.todo.json",
       "url": "https://vawe.dev/assets/blocks/checklist.todo.json",
-      "target": "formats/scene/checklist.todo.json",
+      "target": "films/scene/checklist.todo.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

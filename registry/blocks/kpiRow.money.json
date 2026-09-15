@@ -50,7 +50,7 @@
     {
       "source": "site/public/assets/blocks/kpiRow.money.json",
       "url": "https://vawe.dev/assets/blocks/kpiRow.money.json",
-      "target": "formats/scene/kpiRow.money.json",
+      "target": "films/scene/kpiRow.money.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

@@ -19,7 +19,7 @@ const QUIET = process.argv.includes('--quiet');
 // The surfaces the rule covers: the JS engine, the Go render service, the MCP server, brand data, its
 // tooling, and every markdown file. Nothing is "not yet reached" any more; the whole repo is in scope.
 const SCOPE = [
-  'core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'tools', 'formats', 'scene', 'films',
+  'core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'tools', 'films', 'scene', 'films',
   'blueprints', 'cli', 'engine-doctrine', 'Makefile', '*.md', 'studio',
   'cmd', 'internal', 'mcp', 'themes', 'presets', 'registry',
 ];

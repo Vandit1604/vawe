@@ -20,7 +20,7 @@ import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCRATCH = path.join(ROOT, 'formats/scene/_batch/theme-sheets');
+const SCRATCH = path.join(ROOT, 'films/scene/_batch/theme-sheets');
 const OUT_DIR = path.join(ROOT, 'site/public/blocklib/themes');
 
 const themeArg = process.argv.find((a) => a.startsWith('--theme='));

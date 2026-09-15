@@ -9,7 +9,7 @@ You are the orchestrator. Run each step **in order**, verify its gate, and only 
 are **user-gated**: 0 (brief), 3 (storyboard proposal), 6 (final render). Everything else you do yourself.
 This is the another engine Step 0-6 flow adapted to our engine, tools, and gates.
 
-Save the video at `formats/scene/<topic>.json`. One scene JSON → one mp4.
+Save the video at `films/scene/<topic>.json`. One scene JSON → one mp4.
 
 ## Step 0: Brief (user-gated)
 Lock a tiny brief. First pick a **mode**: *collaborative* (confirm key choices) or *autonomous* (decide
@@ -38,12 +38,12 @@ blueprint) → `assets/brands/<brand>/STORYBOARD.md`. Then **sharpen** it: fill 
 emotion · transition_in). No site? Copy the template and write beats by hand. Then
 `make storyboard-check SB=<file>`. Present it: open with **"This video tells <audience> that <message>"**,
 then the beat table. Weight cues into the back ~50% (the reveal model). Get sign-off. Once approved, export
-the value contract: `make intent SB=<file> D=formats/scene/<topic>.json` writes `<topic>.intent.json` from
+the value contract: `make intent SB=<file> D=films/scene/<topic>.json` writes `<topic>.intent.json` from
 the beats' whys, so Step 6's `inspect` VERIFIES the render delivers each beat's on-screen copy + motion.
 **Gate:** storyboard-check passes AND the user approved (autonomous: post it as a heads-up).
 
 ## Step 3.1 (Narration (local, optional) skip if silent)
-`make tts SCRIPT=<narration.txt> OUT=formats/scene/<topic>.vo [VOICE=<name>]`, offline macOS-`say` TTS →
+`make tts SCRIPT=<narration.txt> OUT=films/scene/<topic>.vo [VOICE=<name>]`, offline macOS-`say` TTS →
 `<topic>.vo.wav` + `<topic>.vo.words.json`. Wire into the scene: `"audio": { "vo": "<topic>.vo.wav",
 "voWords": "<topic>.vo.words.json", "music": "auto" }`. **Pace to the voice:** `make pace-from-vo
 VO=<topic>.vo.words.json` proposes each beat's start + duration from the narration, transcribe those onto

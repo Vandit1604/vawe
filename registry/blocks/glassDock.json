@@ -62,7 +62,7 @@
     {
       "source": "site/public/assets/blocks/glassDock.json",
       "url": "https://vawe.dev/assets/blocks/glassDock.json",
-      "target": "formats/scene/glassDock.json",
+      "target": "films/scene/glassDock.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

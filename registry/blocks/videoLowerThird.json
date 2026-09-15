@@ -46,7 +46,7 @@
     {
       "source": "site/public/assets/blocks/videoLowerThird.json",
       "url": "https://vawe.dev/assets/blocks/videoLowerThird.json",
-      "target": "formats/scene/videoLowerThird.json",
+      "target": "films/scene/videoLowerThird.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

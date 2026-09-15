@@ -119,7 +119,7 @@ export async function sampleScene(scenePath, { rate = 0.25, times, aspect, measu
   const raw = fs.readFileSync(abs, 'utf8');
   const cfg = JSON.parse(raw);
   const rel = path.relative(REPO_ROOT, abs);
-  const m = rel.split(path.sep)[1]; // formats/<name>/<file>.json → <name>
+  const m = rel.split(path.sep)[1]; // films/<name>/<file>.json → <name>
   const [vw, vh] = sceneDims(cfg, aspect);
 
   const { close: closeServer, port } = await serveRepo({});
@@ -127,7 +127,7 @@ export async function sampleScene(scenePath, { rate = 0.25, times, aspect, measu
   try {
     const bootRel = bootPathFor(REPO_ROOT, raw, cfg, rel);
     const q = aspect ? `&aspect=${encodeURIComponent(aspect)}` : '';
-    await page.goto(`http://127.0.0.1:${port}/formats/${m}/scene.html?data=/${bootRel}&fps=30${q}`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/films/${m}/scene.html?data=/${bootRel}&fps=30${q}`, { waitUntil: 'load' });
     const err = await waitForEngine(page, { throwOnTimeout: false });
     if (err) throw new Error(`scene did not load: ${err}`);
     const meta = await page.evaluate(() => window.__engine.meta);

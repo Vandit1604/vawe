@@ -22,7 +22,7 @@ It prints a number and stops nobody. A gate that blocked on the 7% item would ma
 film cannot spend, which inverts the ranking it came from.
 
 ```bash
-node quality/gates/eye-trace.mjs formats/scene/<topic>.json     # one film
+node quality/gates/eye-trace.mjs films/scene/<topic>.json     # one film
 node quality/gates/eye-trace.mjs --selftest                     # the scorer's own fixtures
 node quality/gates/eye-trace.mjs --census [--worst]             # the whole library
 ```

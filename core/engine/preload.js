@@ -28,7 +28,7 @@ export async function fetchJson(url, what = 'file') {
   if (!res.ok) {
     throw new Error(`${what}: ${url} → HTTP ${res.status}, the render server did not serve it. `
       + `Either the file does not exist, or its path is outside the roots the server allows `
-      + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
+      + `(core/, themes/, films/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
   }
   try { return await res.json(); }
   catch (e) { throw new Error(`${what}: ${url} is not valid JSON (${e.message})`); }
@@ -78,7 +78,7 @@ export async function preloadThree(data) {
   // preloadImages had decoded and discarded an identical one. A second load of the same URL still
   // finishes asynchronously, so a render worker that seeks straight to a frame reached `ensure()` first:
   // litPlane rendered in the single-tab preview and threw "not decoded" on the six-worker render. It
-  // also skipped srcUrl, so a bare `assets/x.png` would have loaded from /formats/scene/assets/ and 404d
+  // also skipped srcUrl, so a bare `assets/x.png` would have loaded from /films/scene/assets/ and 404d
   // (engine-doctrine/MISTAKES.md #569). The preloader decodes once, three-fx reads the decoded element: one owner,
   // the same shape as window.__typefaces above. Every image-like string under a three layer is taken,
   // not a list of prop names, so `screen`, `planes` and whatever the next scene adds are all covered.
@@ -180,7 +180,7 @@ export async function preloadEmbeddedImages() {
   await Promise.all([...urls].map((src) => decodeImage(src, true).catch(() => {})));
 }
 
-// Preload HAND-AUTHORED HTML FRAGMENTS: `{"type":"html","src":"formats/scene/hero.html"}` on a layer, or
+// Preload HAND-AUTHORED HTML FRAGMENTS: `{"type":"html","src":"films/scene/hero.html"}` on a layer, or
 // `src` on a bg window, as the alternative to the inline `html` string. Typed like preloadLottie above,
 // NOT sniffed like preloadComponents: a path-shaped string somewhere in a scene is not a promise that it
 // is a fragment, and that sniff is why an unrelated .json path gets fetched as a component.
@@ -198,8 +198,8 @@ export async function preloadHtml(data) {
 // The .html twin of fetchJson: same three distinct outcomes, same served-roots message. fetchJson parses
 // and cannot be reused, and a fragment that 404s must not arrive as the error page's own markup.
 async function fetchHtmlText(src) {
-  // Root-normalised like lottie's src (:182): "formats/scene/x.html" resolved against the scene page at
-  // /formats/scene/ happens to work and resolves to nothing from anywhere else. Which page is loading a
+  // Root-normalised like lottie's src (:182): "films/scene/x.html" resolved against the scene page at
+  // /films/scene/ happens to work and resolves to nothing from anywhere else. Which page is loading a
   // fragment is not something an author should have to know.
   const url = srcUrl(src);
   let res;
@@ -208,7 +208,7 @@ async function fetchHtmlText(src) {
   if (!res.ok) {
     throw new Error(`html fragment: ${url} → HTTP ${res.status}, the render server did not serve it. `
       + `Either the file does not exist, or its path is outside the roots the server allows `
-      + `(core/, themes/, formats/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
+      + `(core/, themes/, films/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
   }
   return await res.text();
 }
@@ -266,7 +266,7 @@ const GSAP_PLUGINS = {
 // from a hand-typed list (engine-doctrine/MISTAKES.md #148).
 //
 // The plugin fields derive from GSAP_PLUGINS above, so that half cannot drift at all. The other four are
-// read in modules this one does not import (applyGsapHooks in formats/scene/scene.js for morph, fx,
+// read in modules this one does not import (applyGsapHooks in films/scene/scene.js for morph, fx,
 // parts, and core/layers/composition.js for comp) and are stated here instead. Stating them is safe only
 // because quality/gates/lib-test.mjs RE-DERIVES the whole set from the source that does the reading and
 // fails when the two disagree; the list on its own is exactly what #148 was.
@@ -317,7 +317,7 @@ export async function preloadLottie(data) {
   if (!srcs.size) return;
   if (!window.lottie) await new Promise((res) => { const s = document.createElement('script'); s.src = '/assets/vendor/lottie_light.min.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
   // Key by the ORIGINAL src (build reads kit.lottie[L.src]) but fetch a ROOT-relative URL: a src like
-  // "assets/lottie/x.json" (no leading slash) resolved against the scene HTML at /formats/scene/ → 404 →
+  // "assets/lottie/x.json" (no leading slash) resolved against the scene HTML at /films/scene/ → 404 →
   // an empty box with NO warning (the exact silent substitution the doctrine forbids). Normalise + warn.
   for (const p of srcs) {
     const url = /^(https?:)?\//.test(p) ? p : '/' + p;

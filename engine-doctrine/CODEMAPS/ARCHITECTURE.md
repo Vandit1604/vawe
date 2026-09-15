@@ -39,7 +39,7 @@ where no gate could see it. The order lives here now, and `lib-test` parses this
 the code cannot drift apart in silence.
 
 Read it as three stages. **BUILD** happens once at boot, on the DOM and the JSON. **FRAME** is
-`renderFrame(n)` in `formats/scene/scene.js`, top to bottom. **ACCUMULATE** names the tracks that read
+`renderFrame(n)` in `films/scene/scene.js`, top to bottom. **ACCUMULATE** names the tracks that read
 `el.style.transform` back and PREPEND to it: `el.style` is the pipeline's accumulator, not its output,
 and the whole composition works only because `driveClips` rewrites the transform from scratch every
 frame.
@@ -100,10 +100,10 @@ Mapped by reading the code, not the docs. Every claim below cites a file; go the
 | # | subsystem | owns | the one thing to know |
 |---|---|---|---|
 | 1 | render pipeline | `internal/`, `cmd/`, `cli/`, `core/engine/` | workers are TABS on one browser (`renderer/internal/scene/scene.go:260`), and block sugar expands server-side in Node BEFORE the browser sees the JSON (`renderer/internal/render/expand.go`) |
-| 2 | scene compiler + timeline | `formats/scene/scene.js`, `core/timeline/`, `core/tracks/`, `core/motion/` | boxes are resolved for ALL layers before ANY track runs, which is why `follow` cannot chain and says so by name (`core/tracks/follow.js:52`) |
+| 2 | scene compiler + timeline | `films/scene/scene.js`, `core/timeline/`, `core/tracks/`, `core/motion/` | boxes are resolved for ALL layers before ANY track runs, which is why `follow` cannot chain and says so by name (`core/tracks/follow.js:52`) |
 | 3 | what can be drawn | `core/layers/`, `core/surfaces/`, `core/type/`, `core/fx/`, `core/stings/`, `core/backgrounds/` | 24 author-facing layer types, but six of them (`shader`, `paint`, `raymarch`, `three`, `globe`, `particles`) are ONE primitive with backends in `core/surfaces/` (`core/layers/index.js:30-38`) |
 | 4 | look and layout | `core/looks/`, `core/color/`, `core/layout/`, `core/registry/`, `themes/`, `presets/` | `resolveLook` DERIVES scale and cuts from the theme's motion by regression over a fixed sample of real theme files; `layout` is a deliberate constant because no signal was found (`core/registry/theme-contract.js:243`) |
-| 5 | cuts, camera, audio | `core/transitions/`, `core/cuts/`, `core/camera-moves/`, `core/audio/`, `core/beats/` | the 3D rig is a FILM-WIDE switch: one tilted layer or one non-zero camera angle puts the whole film on it (`formats/scene/scene.js:1107`) |
+| 5 | cuts, camera, audio | `core/transitions/`, `core/cuts/`, `core/camera-moves/`, `core/audio/`, `core/beats/` | the 3D rig is a FILM-WIDE switch: one tilted layer or one non-zero camera angle puts the whole film on it (`films/scene/scene.js:1107`) |
 | 6 | authoring | `harness/author/`, `harness/lib/`, `harness/dev/` | `assemble` owns only the ids it generates and preserves everything else through an explicit allowlist; it is idempotent by that list, not by nature (`harness/author/assemble.mjs:44-50`) |
 | 7 | verification | `quality/gates/`, `harness/live/` | the ladder always runs every step; `TASTE=1` changes severity, not membership, and `HARD_CODES` escalates by FINDING CODE regardless of which step produced it (`quality/gates/author-check.mjs:146`) |
 
@@ -136,7 +136,7 @@ Each of these cost someone real time. Each cites the file that settles it.
   guaranteed, never pixel bytes (`renderer/internal/scene/scene.go:575`). Any pixel measurement needs a noise floor.
 - **Stillness is a report, never a gate**, and its numbers do not compare across worker counts unless
   `StillnessAcrossShards` is used (`scene.go:917`, `:1061`).
-- **A part's exit is anchored to the LAYER's end**, not to when it entered (`formats/scene/scene.js:549-556`).
+- **A part's exit is anchored to the LAYER's end**, not to when it entered (`films/scene/scene.js:549-556`).
   So in a merged run only the last beat keeps its exit.
 - **`look.backdrop` is scaffold-only and never read at render** (`core/registry/theme-contract.js:106`).
   The film's own `bg[]` is what draws.
@@ -161,8 +161,8 @@ Each of these cost someone real time. Each cites the file that settles it.
 | `core/engine/preload.js` | awaited readiness phase (extracted from `boot`) | one async pass per asset kind BEFORE the virtual clock: images, spectrum, three, canvasFx, components, clips, ransom sprites, **GSAP** (`preloadGsap`: loads on demand for `gsap`/`morph`/`fx`/`fxOut`/`motionPath`/`physics`/`splitText`, stops the ticker, registers effects+plugins), lottie. Whatever it puts on `window.__*` is a static table by render time, so `renderFrame(n)` stays pure. |
 | `core/engine/gsap-effects.js` + `core/motion/morph.js` | GSAP as an INTERNAL tween engine | `gsap-effects.js` = a NAMED effect library (`registerGsapEffects`): entrances/text/loops referenced from JSON by `fx`, exits by `fxOut` (`GSAP_FX`/`EXIT_FX`/`FX_DUR` exports). `morph.js` = TextMorph (letters migrate A→B). GSAP is vendored (`assets/vendor/gsap.min.js` 3.13 + MotionPath/Physics2D/SplitText); scenes can't bring JS, so GSAP is engine-internal, seeked per frame → pure. |
 | `core/timeline/seams.js` · `core/stings/index.js` · `core/cuts/index.js` | beat-to-beat transitions | `seams.js` = two-scene GPU blends (`SEAM_FX`, incl. `portal`); `stings.js` = single-scene shader FX (`SHADER_FX`); `cuts.js` = hard-cut timing. All shader-based → guarded by `make canvas-purity`. |
-| `core/transitions/` | the unified transition surface | `catalog.js` (was `core/transitions/catalog.js`) = THE TRANSITION DATABASE, one entry per transition across `anim`/`cut`/`sting`/`seam`, derived from the four registries above so it can't drift; `lower.js` (was `core/transitions/lower.js`) lowers an author's one `transitions:[]` field to the correct raw mechanism (`lowerScene`), and is imported by `formats/scene/scene.js` (the render page) directly, with NO dependency on `core/engine/expand.js`; `energy.js` = the shared speed-vs-drama dial; `units.js`/`units-house.js` = the GPU-blend seam primitives seams.js reads. Root shims (`core/transitions/catalog.js`, `core/transitions/lower.js`, `core/transitions/energy.js`) keep old import paths working (W9). |
-| `core/engine/expand.js` | build-time sugar, resolved server-side at LOAD time | `expandScene(data)`: expands every `{type:"block"}`/`{type:"comp"}` layer into the real layers its factory/comp definition produces, recursively, then bakes `cameraMove`; a `{type:"beat"}` layer is refused (`expandBeat` throws: blueprints are retired, compose from `recipes/` instead); `loadScene(data)` = `lowerScene(expandScene(data))`, the one loader every Node gate and script calls to read a scene off disk. Pure data→data, no `fs`, but deliberately NOT imported by `formats/scene/scene.js`: it depends on ~186 block/beat factories the render page's file server default-denies by design (`renderer/internal/scene/scene.go` `served`, a security boundary for MCP/stranger scenes), and one of them imports `d3-geo` by bare specifier with no import map on that page. For `./bin/vawe`, the identical expansion runs a level down instead, server-side in Go: `renderer/internal/render/expand.go` shells out to `harness/author/expand-blocks.mjs` (this module's thin CLI wrapper) BEFORE the browser ever fetches the JSON, gated on an actual sugar hit so a non-sugar scene pays nothing extra. So a scene using this vocabulary renders directly either way, no `.expanded.json` twin, but the expansion happens in two different places depending on which render path is asking. |
+| `core/transitions/` | the unified transition surface | `catalog.js` (was `core/transitions/catalog.js`) = THE TRANSITION DATABASE, one entry per transition across `anim`/`cut`/`sting`/`seam`, derived from the four registries above so it can't drift; `lower.js` (was `core/transitions/lower.js`) lowers an author's one `transitions:[]` field to the correct raw mechanism (`lowerScene`), and is imported by `films/scene/scene.js` (the render page) directly, with NO dependency on `core/engine/expand.js`; `energy.js` = the shared speed-vs-drama dial; `units.js`/`units-house.js` = the GPU-blend seam primitives seams.js reads. Root shims (`core/transitions/catalog.js`, `core/transitions/lower.js`, `core/transitions/energy.js`) keep old import paths working (W9). |
+| `core/engine/expand.js` | build-time sugar, resolved server-side at LOAD time | `expandScene(data)`: expands every `{type:"block"}`/`{type:"comp"}` layer into the real layers its factory/comp definition produces, recursively, then bakes `cameraMove`; a `{type:"beat"}` layer is refused (`expandBeat` throws: blueprints are retired, compose from `recipes/` instead); `loadScene(data)` = `lowerScene(expandScene(data))`, the one loader every Node gate and script calls to read a scene off disk. Pure data→data, no `fs`, but deliberately NOT imported by `films/scene/scene.js`: it depends on ~186 block/beat factories the render page's file server default-denies by design (`renderer/internal/scene/scene.go` `served`, a security boundary for MCP/stranger scenes), and one of them imports `d3-geo` by bare specifier with no import map on that page. For `./bin/vawe`, the identical expansion runs a level down instead, server-side in Go: `renderer/internal/render/expand.go` shells out to `harness/author/expand-blocks.mjs` (this module's thin CLI wrapper) BEFORE the browser ever fetches the JSON, gated on an actual sugar hit so a non-sugar scene pays nothing extra. So a scene using this vocabulary renders directly either way, no `.expanded.json` twin, but the expansion happens in two different places depending on which render path is asking. |
 | `core/audio/`, `core/resample/`, `core/canvas/`, `core/beats/` | W9 packaging | Root singletons that shared a name prefix or a single owner grouped into sized packages, each with an `index.js` barrel: `audio/` (bridges·cues·kit·select·tactile), `resample/` (`index.js` the layer-resample wiring, `effects.js` the GL registry, `raster.js` the DOM→canvas serialiser), `canvas/` (`effects.js` Canvas-2D passes, `kind.js`), `beats/` (`index.js` the beat-grid binder, `detect.js` the pulse detector). A handful of single-consumer files moved INTO the package that alone imports them: `fx/ancestor-kills.js`, `layers/{frame-settle,path-morph}.js`, `tracks/spectrum.js`, `backgrounds/gradient-recipes.js`, `surfaces/{paint-fx,raymarch-fx,shaders-ambient,three-fx,three-scenes,globe-dots}.js`. Every moved file keeps a one-line root shim (`export * from './pkg/file.js'`) so no external import broke. |
 | `blocks/` | build-time BLOCK/COMP sugar | `index.mjs` = the assembly point + registry (`BLOCKS`); factories live in family siblings sharing `kit.mjs` (`charts`/`dev`/`social`/`ui`/`app`/`interact`), plus `catalog.mjs` (variants). A `type:"block"` layer (pointer/kpiRow/browserFrame/…) carries the BLOCK's own props, expanded into real layers at LOAD time (`core/engine/expand.js`), not by a separate build step. Block props are validated by `make blocks-audit`, NOT the base layer schema (validate.mjs exempts block/beat/comp). |
 | `core/layers/adjust.js` | ONE grade over everything BENEATH | `{ "type":"adjust","kind":"blur" }`. Grades every layer with a LOWER `track` and leaves everything above crisp, so `track` (already the z-index) IS the z-order contract. Built on the same `backdrop-filter` the GLASS look uses. Keyed through the `vars` track on `--adjust`, never a mechanism of its own. |
@@ -171,10 +171,10 @@ Each of these cost someone real time. Each cites the file that settles it.
 | `core/tokens.css` | design system | color (themeable `--bg/--accent/…` + `--font-*`), **type scale** (`--fs-*`), **spacing scale** (`--sp-*`), radii/shadows, safe-zone vars, `.stage/.act/.safe` scaffold, `.debug-safe` overlay, `html.alpha` transparent-export mode. |
 | `themes/<name>.json` | brand kits / taste | palette + gradient + fonts + motion personality. `data.theme` = name or inline object. `default.json` = current look. |
 | `core/registry/theme-contract.js` | required theme keys (no default look) | `themeErrors()`, shared by validate (node) + applyTheme (browser). |
-| `formats/<name>/scene.html` | one format's HTML/CSS/JS | exposes `window.__engine`; builds `{fps, duration, stings, sfx, segments, renderFrame}`. Mark key text `data-layer="critical"`. |
-| `formats/scene/schema.json` | field schema | the authoring vocabulary; `make schema-check` asserts the engine reads nothing undefined. |
-| `formats/<name>/sample.json` + siblings | data JSONs | `sample.json` is the reference; topics are siblings. |
-| `formats/scene/` | generic data-driven format | layered composition from `data.layers[]` (text/image/block/… + timing + `anim`/`out` + kinetic `split`/`preset` + GSAP `fx`/`fxOut`/`gsap`/`morph`/`motionPath`/`physics`/`splitText` + `circle`/`ransom`) + `cuts`/`seams`/`stings` + `data.captions[]`. No per-topic code, the JSON is the video. |
+| `films/<name>/scene.html` | one format's HTML/CSS/JS | exposes `window.__engine`; builds `{fps, duration, stings, sfx, segments, renderFrame}`. Mark key text `data-layer="critical"`. |
+| `films/scene/schema.json` | field schema | the authoring vocabulary; `make schema-check` asserts the engine reads nothing undefined. |
+| `films/<name>/sample.json` + siblings | data JSONs | `sample.json` is the reference; topics are siblings. |
+| `films/scene/` | generic data-driven format | layered composition from `data.layers[]` (text/image/block/… + timing + `anim`/`out` + kinetic `split`/`preset` + GSAP `fx`/`fxOut`/`gsap`/`morph`/`motionPath`/`physics`/`splitText` + `circle`/`ransom`) + `cuts`/`seams`/`stings` + `data.captions[]`. No per-topic code, the JSON is the video. |
 | `core/validate/validate.mjs` | data + theme validator | `validateData`/`validateTheme`/`validateAll`/`fxErrors`/`lintData` against `schema.json`; runs in `boot()` pre-first-frame (fail fast) + `make validate`. Browser-safe (boot imports it). |
 | `renderer/cmd/render` (Go) | CLI entry | `--data/--module/--out`, `--all`, `--list`, `--workers`, `--alpha` (transparent VP9 `.webm` overlay). |
 | `renderer/internal/scene` (Go) | frame capture | parallel tabs; relies on purity. |
@@ -204,7 +204,7 @@ make video D=…            # render one JSON → out/<name>.mp4
 make assets D=… [WRITE=1] # fill missing icons (flag/logo/card)
 make look D=… / frame D=… N=…   # storyboard / one frame
 make validate [D=…]       # data + theme against schema.json (boot runs it too)
-make census               # every named population in formats/scene, and the question each answers
+make census               # every named population in films/scene, and the question each answers
 make lib-test             # motion-primitive + easing asserts (instant)
 make lint-test            # regression asserts for validate's lint/fx/ease/block rules (instant)
 make audit [M=…]          # overlap/overflow/safe-zone/spacing  → /tmp/audit/<fmt>.png
@@ -222,12 +222,12 @@ there is no CI-only command, because a second path is how the two drift apart.
 | workflow | trigger | runs | billed |
 |---|---|---|---|
 | `gates.yml` | push to main · PR | `make schema-check lib-test craft-coverage arsenal-check` (0.4s of gate) | 1 min |
-| `scene-check.yml` | push · PR, only when `formats/scene/**.json` changed | `make author-check D=<file>` on each changed scene (1.6s each) | 2 min |
+| `scene-check.yml` | push · PR, only when `films/scene/**.json` changed | `make author-check D=<file>` on each changed scene (1.6s each) | 2 min |
 | `audit-scenes.yml` | Monday 06:17 UTC · manual | `make audit-all` (1m46s over 34 scenes) | 3 min |
 | `snap-scenes.yml` | manual only | `make fonts` then `make snap-all SAVE=1` (16s) | 2 min |
 
 The repo is private, so the free allowance is 2,000 Linux minutes a month. Measured against this
-repo's own rate, 467 commits in the last 30 days and 173 of them touching `formats/scene`, the
+repo's own rate, 467 commits in the last 30 days and 173 of them touching `films/scene`, the
 worst case where every commit is its own push comes to about 830 minutes. Batched pushes land nearer
 300. Both workflows cancel a superseded run on the same ref, which is what keeps a burst of commits
 from billing for every one of them.
@@ -239,7 +239,7 @@ calls `puppeteer.launch()` with no `executablePath`, so `npm ci` fetches the bro
 cache it against `package-lock.json`. `CHROME_BIN` steers `allocOpts` in `renderer/internal/scene/scene.go`, and
 that path belongs to the Go renderer, which no workflow invokes.
 
-**`doc-refs` is missing from CI on purpose, and it is not a softened gate.** `formats/scene/*.json` is
+**`doc-refs` is missing from CI on purpose, and it is not a softened gate.** `films/scene/*.json` is
 gitignored, so a clone carries a fraction of the scenes a maintainer's tree holds (`make census` prints
 both numbers, and names which population each answers, because four different counts of this directory
 are all true and mean different things). `doc-refs` resolves every

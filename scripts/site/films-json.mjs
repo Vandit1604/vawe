@@ -35,7 +35,7 @@ import { hashOf } from '../../harness/lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FILMS = path.join(ROOT, 'site/public/assets/films');
-const SCENES = path.join(ROOT, 'formats/scene');
+const SCENES = path.join(ROOT, 'films/scene');
 const OUT = path.join(ROOT, 'site/lib/films.json');
 const write = process.argv.includes('--write');
 
@@ -96,12 +96,12 @@ for (const f of fs.readdirSync(FILMS).filter((n) => n.endsWith('.mp4')).sort()) 
 
     const want = Number(data.duration);
     if (want > 0 && Math.abs(want - secs) > 1.5) findings.push([slug, 'film-orphan',
-      `the scene is ${want}s and the film runs ${secs.toFixed(1)}s. The film was not rendered from this scene, so it cannot be reproduced. Re-render it: make video D=formats/scene/${slug}.json`]);
+      `the scene is ${want}s and the film runs ${secs.toFixed(1)}s. The film was not rendered from this scene, so it cannot be reproduced. Re-render it: make video D=films/scene/${slug}.json`]);
     else if (prior[slug] && prior[slug].sourceHash && prior[slug].sourceHash !== hash) findings.push([slug, 'film-stale',
-      `the scene has changed since this film was rendered. Re-render it: make video D=formats/scene/${slug}.json`]);
+      `the scene has changed since this film was rendered. Re-render it: make video D=films/scene/${slug}.json`]);
 
     if (promisesSound(data.audio) && (db === null || db <= SILENT_DB)) findings.push([slug, 'film-silent',
-      `the scene names sound and the film measures ${db === null ? 'no audio stream' : db.toFixed(1) + ' dB'}, which is silence. Re-render it: make video D=formats/scene/${slug}.json`]);
+      `the scene names sound and the film measures ${db === null ? 'no audio stream' : db.toFixed(1) + ' dB'}, which is silence. Re-render it: make video D=films/scene/${slug}.json`]);
   }
   rows[slug] = row;
 }

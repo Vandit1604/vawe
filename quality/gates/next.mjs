@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/next.mjs: RUN THE ONE COMMAND THE STAGE NAMES. Nothing more.
 //
-//   make next D=formats/scene/<film>.json   ·   node quality/gates/next.mjs <film>
+//   make next D=films/scene/<film>.json   ·   node quality/gates/next.mjs <film>
 //
 // quality/gates/stage.mjs already knows which stage a film is in and stores the ONE command that moves
 // it forward. Knowing that command is not running it: an agent still has to read it, notice it is a
@@ -40,7 +40,7 @@ export function firstCommand(next) {
 
 function main() {
   const arg = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
-  if (!arg) { console.error('usage: make next D=formats/scene/<film>.json'); process.exit(2); }
+  if (!arg) { console.error('usage: make next D=films/scene/<film>.json'); process.exit(2); }
 
   const st = stageOf(arg);
   if (st.stage === 'approval') {

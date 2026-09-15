@@ -1,6 +1,6 @@
 // coverage-reel.mjs: build a reel that renders whatever nothing else renders.
 //
-//   node harness/author/coverage-reel.mjs          write formats/scene/_coverage-reel.json
+//   node harness/author/coverage-reel.mjs          write films/scene/_coverage-reel.json
 //   make coverage-reel                             write it, then render it
 //
 // `make coverage` says which vocabulary no authored scene exercises. Conformance already proves those
@@ -21,7 +21,7 @@ import { execFileSync } from 'node:child_process';
 import { loadScene } from '../../core/engine/expand.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const dir = path.join(repoRoot, 'formats/scene');
+const dir = path.join(repoRoot, 'films/scene');
 const OUT = path.join(dir, '_coverage-reel.json');
 
 // The `clip` layer type was the last uncovered primitive, and it needs an actual video. Rather than

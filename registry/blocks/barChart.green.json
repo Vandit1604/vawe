@@ -60,7 +60,7 @@
     {
       "source": "site/public/assets/blocks/barChart.green.json",
       "url": "https://vawe.dev/assets/blocks/barChart.green.json",
-      "target": "formats/scene/barChart.green.json",
+      "target": "films/scene/barChart.green.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

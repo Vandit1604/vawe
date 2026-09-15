@@ -246,7 +246,7 @@ export function glowRGB(color) {
 // construction the reference uses and this one cannot: the type on an OPAQUE BLACK plate with
 // `mix-blend-mode: screen`, so the far field has full alpha at near-zero luminance and the black is
 // dropped back out at composite time. That is four lines of an `html` layer, and
-// formats/scene/_vawe-teaser-word.html is the worked example. Use this preset for the effect on any
+// films/scene/_vawe-teaser-word.html is the worked example. Use this preset for the effect on any
 // layer; reach for the plate when the blue rim is the point.
 // ONE OWNER FOR THE CHAIN, AS A STRING, because it has exactly two mounts and they need different
 // media. The engine builds a <filter> into the page's def host (DOM), and the playground card inlines
@@ -297,7 +297,7 @@ function buildThermal(f, { stops, radius }) {
 //
 // ALPHA, NOT LUMINANCE. `blur(N) contrast(M)` in plain CSS does the same thing to BRIGHTNESS, which is
 // why that spelling only works on an opaque black plate under `mix-blend-mode: screen`, which is how
-// formats/scene/_vawe-teaser-word.html had to write it and why the technique stayed trapped in one
+// films/scene/_vawe-teaser-word.html had to write it and why the technique stayed trapped in one
 // film. The alpha row here needs no plate and no blend mode: it works on a transparent layer over any
 // background, which is what makes it usable from a scene at all.
 //

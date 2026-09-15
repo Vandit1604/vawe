@@ -1,6 +1,6 @@
 {
  "module": "scene",
- "storyboard": "formats/scene/product-feature-tour.storyboard.md",
+ "storyboard": "films/scene/product-feature-tour.storyboard.md",
  "_template": "FILLABLE TEMPLATE - a dark, chaptered product tour. Three numbered chapters (intake, plan, build), a proof number, an end card. Nothing here is anyone's brand: the product is the fictional 'Northwind', every colour is a theme token, and the end mark is an inline svg that draws itself. To reskin, change `theme` and nothing else. To refill, replace the copy, the board cards, the three roadmap bars, the agent transcript and the adoption count. Structure, timing and the chapter rhythm are the part worth keeping.",
  "orientation": "landscape",
  "theme": "northwind",

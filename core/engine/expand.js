@@ -4,11 +4,11 @@
 //
 // NODE-ONLY BY POLICY, NOT BY CONSTRAINT: expandScene itself is pure ESM (no `fs`) and boots fine in
 // any browser that can fetch `blocks/`. The render page cannot: internal/scene's file
-// server default-denies everything outside core/themes/formats/assets/.vawe-data
+// server default-denies everything outside core/themes/films/assets/.vawe-data
 // (internal/scene/scene.go `served`), by design, because it renders scenes from strangers over MCP,
 // and this module's dependency on ~186 block/beat factories (one of which, blocks/geo.mjs, imports
 // `d3-geo` by bare specifier, resolvable only through an import map the render page does not carry)
-// sits outside that allowlist on purpose. So `formats/scene/scene.js` never imports this file: a scene
+// sits outside that allowlist on purpose. So `films/scene/scene.js` never imports this file: a scene
 // using this vocabulary is expanded SERVER-SIDE instead, in Node (internal/render/expand.go shells out
 // to `harness/author/expand-blocks.mjs`, the debug CLI this file now backs), before the browser ever
 // sees the JSON. Every OTHER consumer of a scene, every gate and script, is plain Node and imports
@@ -106,7 +106,7 @@ function expandComp(layer, comps, stack) {
  * should use. Every Node consumer (loadScene, `make expand`) omits it and keeps today's default, the
  * scene's own declared aspect (frameOf's own fallback). internal/render/expand.go passes the Go render's
  * actual --aspect, because that render happens BEFORE the browser exists to resolve it itself
- * (formats/scene/scene.js never imports this module, see the file banner), so without a key here the
+ * (films/scene/scene.js never imports this module, see the file banner), so without a key here the
  * bake always used the scene's own aspect no matter which canvas the render targeted.
  */
 export function expandScene(data, aspectKey = '') {
@@ -156,7 +156,7 @@ export function expandScene(data, aspectKey = '') {
 
 // loadScene(data): THE loader every Node consumer of a scene JSON calls (a gate, a script). Expands
 // build-time sugar BEFORE lowering the unified transitions surface, so a beat/block emitting its own
-// `transition` sugar is normalised too. formats/scene/scene.js (the render page) does not call this:
+// `transition` sugar is normalised too. films/scene/scene.js (the render page) does not call this:
 // see the file banner for why, and internal/render/expand.go for where the same expansion happens for
 // that path instead.
 // DO NOT call core/engine/produce.js's produceBaseline (or any other defaults pass) from here. It was

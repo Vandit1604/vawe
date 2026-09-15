@@ -18,8 +18,8 @@ The render refuses, naming the layer and the block, and tells you to run `make e
 `block`, `beat` and `comp` are authoring sugar, not layer types. They become real layers at build time.
 
 ```bash
-make expand D=formats/scene/<film>.json     # writes <film>.expanded.json
-./bin/vawe formats/scene/<film>.expanded.json
+make expand D=films/scene/<film>.json     # writes <film>.expanded.json
+./bin/vawe films/scene/<film>.expanded.json
 ```
 
 This fails loudly on purpose. Expansion imports every block factory, which has no business running on

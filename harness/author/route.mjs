@@ -133,7 +133,7 @@ function main() {
   if (matched.type) {
     console.log('');
     console.log(`Type skill: skills/vawe-type-${matched.type}/SKILL.md`);
-    console.log(`make scaffold OUT=formats/scene/<name>.json TYPE=${matched.type}`);
+    console.log(`make scaffold OUT=films/scene/<name>.json TYPE=${matched.type}`);
   }
 }
 

@@ -30,7 +30,7 @@ const args = process.argv.slice(2);
 const asJson = args.includes('--json');
 const showAll = args.includes('--all');
 const roots = args.filter((a) => !a.startsWith('--'));
-const SCAN = roots.length ? roots : ['core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'tools', 'formats', 'scene', 'studio'];
+const SCAN = roots.length ? roots : ['core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'tools', 'films', 'scene', 'studio'];
 
 const files = [];
 const walk = (dir) => {

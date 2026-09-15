@@ -32,8 +32,8 @@ make check D=path/to/video.json  # run every gate. Report findings. Block nothin
 make ship D=path/to/video.json   # the real ladder: check, render, audit, seams.
 ```
 
-Every video JSON starts with `"module": "scene"` and lives at `formats/scene/<topic>.json`.
-Read `formats/scene/sample.json` and one shipped video first, as references, never as a
+Every video JSON starts with `"module": "scene"` and lives at `films/scene/<topic>.json`.
+Read `films/scene/sample.json` and one shipped video first, as references, never as a
 structure to copy. Compose your own layers from the vocabulary in `engine-doctrine/PRIMITIVES.md`.
 
 ## Hard rules for day one

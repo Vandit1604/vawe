@@ -41,7 +41,7 @@
     {
       "source": "site/public/assets/blocks/lowerThird.cleanBar.json",
       "url": "https://vawe.dev/assets/blocks/lowerThird.cleanBar.json",
-      "target": "formats/scene/lowerThird.cleanBar.json",
+      "target": "films/scene/lowerThird.cleanBar.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

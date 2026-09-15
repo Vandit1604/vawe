@@ -204,7 +204,7 @@ const CASES = [
   // the rule gets reverted the first time it cries wolf on a real design.
   { gate: 'audit', name: 'overlap · a wrapped headline lands on a small caption', expect: 'fail', match: /overlap/,
     scene: scene([{ type: 'text', text: 'A headline long enough to wrap onto a second line', x: 200, y: 400, w: 900, size: 90, weight: 600, start: 0, duration: 2 },
-                   { type: 'text', text: 'formats/scene/file.json', x: 200, y: 500, w: 900, size: 24, font: 'mono', start: 0, duration: 2 }]) },
+                   { type: 'text', text: 'films/scene/file.json', x: 200, y: 500, w: 900, size: 24, font: 'mono', start: 0, duration: 2 }]) },
   { gate: 'audit', name: 'overlap · tight typographic stacking is NOT a collision', expect: 'pass',
     scene: scene([{ type: 'text', text: '1.2M', x: 200, y: 400, w: 600, size: 120, weight: 700, start: 0, duration: 2 },
                   { type: 'text', text: 'cups poured', x: 200, y: 508, w: 600, size: 20, font: 'mono', start: 0, duration: 2 }]) },
@@ -275,9 +275,9 @@ const CASES = [
   // preflight most has to see. `.html` was not even a candidate extension until the fragment loader
   // existed, so both halves are pinned here rather than assumed.
   { gate: 'assetcheck', name: 'a src fragment that is not on disk', expect: 'fail', match: /missing|not found/i,
-    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'formats/scene/_no-such-fragment.html' }]) },
+    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'films/scene/_no-such-fragment.html' }]) },
   { gate: 'assetcheck', name: 'a src fragment that IS on disk', expect: 'pass',
-    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'formats/scene/_lightfall.html' }]) },
+    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'films/scene/_lightfall.html' }]) },
 
   // ---- beat-check: the only gate that reads the scene as a TIMELINE rather than a bag of layers.
   // Both tells are pinned, because they are measured off different edges of the clock (an interior
@@ -821,10 +821,10 @@ const snapRestore = (...rels) => {
 const srcCases = [
   { name: 'font-audit · @font-face removed', file: 'core/tokens.css',
     mutate: (s) => s.split('\n').filter((l) => !l.includes("font-family: 'Manrope'")).join('\n'),
-    cmd: ['node', ['quality/gates/font-audit.mjs', 'scene', 'formats/scene/tpot-launch.json']], match: /FALLBACK|not rendering/ },
+    cmd: ['node', ['quality/gates/font-audit.mjs', 'scene', 'films/scene/tpot-launch.json']], match: /FALLBACK|not rendering/ },
   { name: 'clipped-text · riseClip mask too short for descenders', file: 'core/type/type.js',
     mutate: (s) => s.replace("        w.style.paddingBottom = '0.3em'; w.style.marginBottom = '-0.3em';\n", ''),
-    cmd: ['node', ['quality/audit.mjs', 'formats/scene/tpot-launch.json']], match: /clipped-text/ },
+    cmd: ['node', ['quality/audit.mjs', 'films/scene/tpot-launch.json']], match: /clipped-text/ },
   { name: 'snap · opacity easing reverted to linear', file: 'core/timeline/clips.js',
     mutate: (s) => s.replace('  easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);',
                              '  clamp01(enterT) * (exitT > 0 ? 1 - clamp01(exitT) : 1);'),
@@ -844,7 +844,7 @@ const srcCases = [
     after: () => snapRestore('quality/baselines/snap/scenes/showcase-count.json', 'quality/baselines/snap/scenes/.font-state.json') },
   // The other half of the same blindness: the background is painted into <canvas>, which no DOM
   // signature can see, so any change of bg preset, colour, speed or direction diffed as nothing.
-  // formats/scene/sample.json runs the `aurora` preset; brightening it must now register.
+  // films/scene/sample.json runs the `aurora` preset; brightening it must now register.
   { name: 'snap · the background preset changed and the canvas moved', file: 'core/backgrounds/index.js',
     // The preset is READ OFF THE SNAPSHOTTED SCENE, never named here. This case pinned
     // `intensity: 0.46` inside `case 'aurora'` and sample.json's backdrop later became `soft`, so the
@@ -853,7 +853,7 @@ const srcCases = [
     // that still MATCHES is the worst kind: the `mutated === orig` guard cannot see it, so the case
     // accused a healthy gate. Deriving the subject makes the fixture follow the scene.
     mutate: (s) => {
-      const preset = JSON.parse(fs.readFileSync(path.join(repoRoot, 'formats/scene/sample.json'), 'utf8')).bg[0].preset;
+      const preset = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films/scene/sample.json'), 'utf8')).bg[0].preset;
       const at = s.indexOf(`case '${preset}':`);
       if (at < 0) return s;                                   // no such case -> reported STALE, correctly
       const end = s.indexOf("\n    case '", at + 1);
@@ -867,7 +867,7 @@ const srcCases = [
     after: () => snapRestore('quality/baselines/snap/scene.json') },
   { name: 'clipped-component · captured root margin re-offsets the content', file: 'core/layers/component.js',
     mutate: (s) => s.replace("  if (rootEl) rootEl.style.margin = '0';", ''),
-    cmd: ['node', ['quality/audit.mjs', 'formats/scene/tpot-launch.json']], match: /clipped-component/ },
+    cmd: ['node', ['quality/audit.mjs', 'films/scene/tpot-launch.json']], match: /clipped-component/ },
   // Factories were extracted from blocks/index.mjs into family siblings; re-anchored on the sibling that
   // now holds each one (loadingBar→dev.mjs, browserFrame + the swatch fill→ui.mjs).
   { name: 'blocks-audit · a factory ships an invented statistic', file: 'blocks/dev.mjs',
@@ -892,11 +892,11 @@ const srcCases = [
   { name: 'blocks-audit · a factory defaults to a real brand', file: 'blocks/ui.mjs',
     mutate: (s) => s.replace("url = 'example.com'", "url = 'stripe.com'"),
     cmd: ['node', ['quality/gates/blocks-audit.mjs']], match: /brand-default/ },
-  { name: 'validate · an unknown prop on a layer, silently ignored by the engine', file: 'formats/scene/sample.json',
+  { name: 'validate · an unknown prop on a layer, silently ignored by the engine', file: 'films/scene/sample.json',
     // NB: the injected prop must be a name NO layer accepts. `fill` was used here until it became a real
     // svg-layer prop (engine-doctrine/MISTAKES.md #149), pick a prop that can never be legitimised.
     mutate: (s) => s.replace('"layers": [', '"layers": [\n    { "type": "rect", "x": 0, "y": 0, "w": 10, "h": 10, "start": 0, "duration": 1, "notARealProp": "#000" },'),
-    cmd: ['node', ['core/validate/validate.mjs', 'formats/scene/sample.json']], match: /unknown prop "notARealProp"/ },
+    cmd: ['node', ['core/validate/validate.mjs', 'films/scene/sample.json']], match: /unknown prop "notARealProp"/ },
   { name: 'three · a scene reaching for wall-clock or unseeded randomness', file: 'core/surfaces/three-fx.js',
     mutate: (s) => s.replace('const ease = (p)', 'const jitter = Math.random();\nconst ease = (p)'),
     cmd: ['node', ['quality/gates/lib-test.mjs']], match: /no wall-clock or unseeded randomness/ },
@@ -916,7 +916,7 @@ const srcCases = [
     // impurity, whatever else shares the branch. It is one branch for all four canvas types, so this
     // covers shader/raymarch/three too.
     mutate: (s) => s.replace("{ s.clear(); return; }", "{ return; }"),
-    cmd: ['node', ['quality/gates/canvas-purity.mjs', 'scene', 'formats/scene/paint-demo.json']], match: /CANVAS PURITY FAILED/ },
+    cmd: ['node', ['quality/gates/canvas-purity.mjs', 'scene', 'films/scene/paint-demo.json']], match: /CANVAS PURITY FAILED/ },
   // The fixture layer sets `pulseAmp`, which ONLY core/layers/glow.js reads, and the mutation deletes
   // its DECLARATION. The gate answers from the declarations now, so deleting the read itself would
   // prove nothing about the gate. It is the statement that has to be load-bearing, and this is the
@@ -924,12 +924,12 @@ const srcCases = [
   // pass whether or not the mutation applied; a case that cannot tell the two states apart is noise.)
   { name: 'layer-props · a prop the engine never reads', file: 'core/layers/glow.js',
     mutate: (s) => s.replace("pulseAmp: { when: 'pulse' },", ''),
-    cmd: ['node', ['quality/gates/layer-props.mjs', 'formats/scene/_lp-fixture.json']], match: /`pulseAmp` is set and nothing reads it/,
-    before: () => fs.writeFileSync(path.join(repoRoot, 'formats/scene/_lp-fixture.json'), JSON.stringify({
+    cmd: ['node', ['quality/gates/layer-props.mjs', 'films/scene/_lp-fixture.json']], match: /`pulseAmp` is set and nothing reads it/,
+    before: () => fs.writeFileSync(path.join(repoRoot, 'films/scene/_lp-fixture.json'), JSON.stringify({
       module: 'scene', aspect: '16:9', theme: 'tpot', duration: 2, audio: { silent: true },
       bg: [{ preset: 'plain', from: 0, to: 2 }],
       layers: [{ type: 'glow', x: 200, y: 200, w: 400, h: 400, pulse: 2, pulseAmp: 0.4, start: 0, duration: 2 }] })),
-    after: () => fs.rmSync(path.join(repoRoot, 'formats/scene/_lp-fixture.json'), { force: true }) },
+    after: () => fs.rmSync(path.join(repoRoot, 'films/scene/_lp-fixture.json'), { force: true }) },
   // ...and the other direction: layer-props must NOTICE when the SHARED declarations are gutted. A
   // file split once emptied the shared set and the gate answered by calling ~1900 live props dead
   // instead of saying it could no longer see. Losing `start` from the orchestrator's declarations is
@@ -943,14 +943,14 @@ const srcCases = [
   // author knew to point it. The declaration travels with the track, so this must fail on its removal.
   { name: 'layer-props · a prop read only by a track', file: 'core/tracks/vars.js',
     mutate: (s) => s.replace("varsDur: { when: 'vars' }, ", ''),
-    cmd: ['node', ['quality/gates/layer-props.mjs', 'formats/scene/_lp-track-fixture.json']],
+    cmd: ['node', ['quality/gates/layer-props.mjs', 'films/scene/_lp-track-fixture.json']],
     match: /`varsDur` is set and nothing reads it/,
-    before: () => fs.writeFileSync(path.join(repoRoot, 'formats/scene/_lp-track-fixture.json'), JSON.stringify({
+    before: () => fs.writeFileSync(path.join(repoRoot, 'films/scene/_lp-track-fixture.json'), JSON.stringify({
       module: 'scene', aspect: '16:9', theme: 'tpot', duration: 2, audio: { silent: true },
       bg: [{ preset: 'plain', from: 0, to: 2 }],
       layers: [{ type: 'html', html: '<b>hi</b>', x: 200, y: 200, w: 400, start: 0, duration: 2,
         vars: { '--p': [0, 1] }, varsDur: 1.2 }] })),
-    after: () => fs.rmSync(path.join(repoRoot, 'formats/scene/_lp-track-fixture.json'), { force: true }) },
+    after: () => fs.rmSync(path.join(repoRoot, 'films/scene/_lp-track-fixture.json'), { force: true }) },
   { name: 'dead-branch · a ternary whose arms are identical', file: 'core/layers/rect.js',
     mutate: (s) => s.replace('export function build', 'const DEAD = 1 === 1 ? 2 : 2;\nexport function build'),
     cmd: ['node', ['quality/gates/dead-branch.mjs']], match: /both arms are/ },
@@ -1010,22 +1010,22 @@ const srcCases = [
     before: () => fakeBake('_mut-seq', 'generators/sim/sims/ember-burst.mjs'),
     after: () => fs.rmSync(path.join(repoRoot, 'assets/baked/_mut-seq'), { recursive: true, force: true }) },
 
-  { name: 'schema-drift · anim enum drifted', file: 'formats/scene/schema.json',
+  { name: 'schema-drift · anim enum drifted', file: 'films/scene/schema.json',
     mutate: (s) => s.replace('"lift",', '"liftt",'),
     cmd: ['node', ['quality/gates/schema-drift.mjs']], match: /DRIFT/ },
   // the drift check covered ONE enum of eight; adding an ambient fx made the schema reject a valid
   // value and nothing said so. A second enum is pinned so the generalisation cannot quietly regress.
-  { name: 'schema-drift · a NON-anim enum drifted', file: 'formats/scene/schema.json',
+  { name: 'schema-drift · a NON-anim enum drifted', file: 'films/scene/schema.json',
     mutate: (s) => s.replace('"kaleidoscope",', '"kaleidoscop",'),
     cmd: ['node', ['quality/gates/schema-drift.mjs']], match: /DRIFT/ },
   // The modifier vocabulary is a set of schema KEYS, which the enum comparison above cannot see, so it
   // is checked separately and pinned separately. A modifier the schema does not list is dispatched by
   // the engine and refused by validate's unknown-prop pass: drift that makes the two disagree about
   // what a valid scene is.
-  { name: 'schema-drift · the modifier registry and the schema disagree', file: 'formats/scene/schema.json',
+  { name: 'schema-drift · the modifier registry and the schema disagree', file: 'films/scene/schema.json',
     mutate: (s) => s.replace('"mixBlend": {', '"mixBlnd": {'),
     cmd: ['node', ['quality/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
-  { name: 'schema-drift · a blend mode the engine does not accept', file: 'formats/scene/schema.json',
+  { name: 'schema-drift · a blend mode the engine does not accept', file: 'films/scene/schema.json',
     // One member, not a pair on one line: `schema-drift --write` reformats this file, and the pair
     // anchor died the first time the enum was re-emitted one entry per line.
     mutate: (s) => s.replace('"color-burn"', '"colour-burn"'),
@@ -1033,13 +1033,13 @@ const srcCases = [
   // Pinned per MODIFIER, not once for the slot. The key-set check compares two sorted lists, so a
   // fixture on `mixBlend` alone proves the comparison runs and proves nothing about whether the second
   // modifier is in either list, which is exactly how a registry entry ships with no schema entry.
-  { name: 'schema-drift · the shadow modifier is missing from the schema', file: 'formats/scene/schema.json',
+  { name: 'schema-drift · the shadow modifier is missing from the schema', file: 'films/scene/schema.json',
     mutate: (s) => s.replace('"shadow": {\n              "type": "number|object"', '"shdow": {\n              "type": "number|object"'),
     cmd: ['node', ['quality/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
-  { name: 'schema-drift · the occlude modifier is missing from the schema', file: 'formats/scene/schema.json',
+  { name: 'schema-drift · the occlude modifier is missing from the schema', file: 'films/scene/schema.json',
     mutate: (s) => s.replace('"occlude": {', '"occlde": {'),
     cmd: ['node', ['quality/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
-  { name: 'schema-drift · the tilt modifier is missing from the schema', file: 'formats/scene/schema.json',
+  { name: 'schema-drift · the tilt modifier is missing from the schema', file: 'films/scene/schema.json',
     mutate: (s) => s.replace('"tilt": {', '"tlit": {'),
     cmd: ['node', ['quality/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
   // The other direction: the schema advertising a modifier nothing implements. Written against the
@@ -1055,9 +1055,9 @@ const srcCases = [
   // fixture the rule is the only thing standing between an author and a scene that renders on flat nothing,
   // and nothing proves it still fires. Anchored on the top-level key (a layer `bg` is a colour string, so
   // the array match cannot catch one by accident).
-  { name: 'validate · a scene that declares no background at all', file: 'formats/scene/sample.json',
+  { name: 'validate · a scene that declares no background at all', file: 'films/scene/sample.json',
     mutate: (s) => s.replace(/,\s*"bg": \[[^\]]*\]/, ''),
-    cmd: ['node', ['core/validate/validate.mjs', 'formats/scene/sample.json']], match: /bg is required/ },
+    cmd: ['node', ['core/validate/validate.mjs', 'films/scene/sample.json']], match: /bg is required/ },
   // A hand-authored backdrop that animates in a browser and renders a dead still is the exact failure
   // the message exists to prevent; if the check stops firing, nothing else in the pipeline notices.
   // `untype` (reverse typing) used to be checked only for WIRING, that the engine reads the prop the
@@ -1092,12 +1092,12 @@ const srcCases = [
     mutate: (s) => s.replace(', sc = o.scale ??', ', sc = o.scaleX ??'),
     cmd: ['node', ['quality/gates/lib-test.mjs']], match: /bg opts vocabulary is derived from the fx implementation/ },
 
-  { name: 'validate · a hand-authored bg animated with CSS (which never runs)', file: 'formats/scene/example-html-bg.json',
+  { name: 'validate · a hand-authored bg animated with CSS (which never runs)', file: 'films/scene/example-html-bg.json',
     mutate: (s) => s.replace('<style>.fan{', '<style>.x{animation:spin 2s linear infinite}.fan{'),
-    cmd: ['node', ['core/validate/validate.mjs', 'formats/scene/example-html-bg.json']], match: /DEAD STILL/ },
-  { name: 'validate · a hand-authored bg that never says whether it is light or dark', file: 'formats/scene/example-html-bg.json',
+    cmd: ['node', ['core/validate/validate.mjs', 'films/scene/example-html-bg.json']], match: /DEAD STILL/ },
+  { name: 'validate · a hand-authored bg that never says whether it is light or dark', file: 'films/scene/example-html-bg.json',
     mutate: (s) => s.replace('"tone": "light",', ''),
-    cmd: ['node', ['core/validate/validate.mjs', 'formats/scene/example-html-bg.json']], match: /declares no `tone`/ },
+    cmd: ['node', ['core/validate/validate.mjs', 'films/scene/example-html-bg.json']], match: /declares no `tone`/ },
 ];
 console.log('');
 // EXCLUSIVE, because the cases below edit TRACKED SOURCE in place. Two runs overlapping is not a slow

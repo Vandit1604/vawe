@@ -54,7 +54,7 @@
     {
       "source": "site/public/assets/blocks/timeline.release.json",
       "url": "https://vawe.dev/assets/blocks/timeline.release.json",
-      "target": "formats/scene/timeline.release.json",
+      "target": "films/scene/timeline.release.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

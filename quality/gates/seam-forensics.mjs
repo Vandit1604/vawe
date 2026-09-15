@@ -10,7 +10,7 @@
 // layer's box, and a split seam is a property of the field OUTSIDE every layer, which a flash check
 // never samples on its own.
 //
-//   node quality/gates/seam-forensics.mjs formats/scene/<file>.json     ·     make forensics D=<file>
+//   node quality/gates/seam-forensics.mjs films/scene/<file>.json     ·     make forensics D=<file>
 //
 // Reads the real rendered pixels via ffmpeg (harness/lib/frame-forensics.mjs), the same reason
 // seam-snap.mjs gives: a seam is composited during the render, so it exists only in the mp4. Boxes come

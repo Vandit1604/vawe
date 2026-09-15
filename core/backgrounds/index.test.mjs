@@ -1,5 +1,5 @@
 // core/backgrounds/index.test.mjs: the runnable self-check for bgTurnRatio (a bg window's own
-// departure asymmetry, see formats/scene/scene.js drawBg). Pure-JS.
+// departure asymmetry, see films/scene/scene.js drawBg). Pure-JS.
 //   node core/backgrounds/index.test.mjs
 import assert from 'node:assert/strict';
 import { bgTurnRatio } from './index.js';

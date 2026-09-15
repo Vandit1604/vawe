@@ -26,7 +26,7 @@
       "duration": 4,
       "anim": "none",
       "exitDur": 0.22,
-      "text": "make video D=formats/scene/hook.json",
+      "text": "make video D=films/scene/hook.json",
       "font": "mono",
       "typing": 16,
       "caret": true,

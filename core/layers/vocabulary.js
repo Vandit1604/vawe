@@ -13,7 +13,7 @@
 // gate and the renderer would come to disagree about what the engine accepts, and a gate that
 // disagrees with the renderer is worse than no gate.
 //
-// WHY THIS FILE IMPORTS A FORMAT. `formats/scene/props.js` is the scene orchestrator's own
+// WHY THIS FILE IMPORTS A FORMAT. `films/scene/props.js` is the scene orchestrator's own
 // declaration, and the orchestrator reads layer props (timing, `becomes`, anchors, the GSAP hooks).
 // There is no vocabulary without it. The import points down-stack the wrong way on purpose and is the
 // only such edge in core/: the alternative is for the format to inject its declarations through
@@ -21,7 +21,7 @@
 // argument look exactly like a layer with no orchestrator props. A missing declaration must be
 // impossible, not merely unlikely.
 import { mergeProps } from '../registry/props.js';
-import { PROPS as ORCHESTRATOR_PROPS } from '../../formats/scene/props.js';
+import { PROPS as ORCHESTRATOR_PROPS } from '../../films/scene/props.js';
 import { TRACK_PROPS } from '../tracks/index.js';
 import { PROPS as KIT_PROPS } from './util.js';
 import { PROPS as BOOT_PROPS } from '../engine/boot.js';
@@ -84,7 +84,7 @@ export function checkLayer(L, typeProps, where) {
       + `right and the render is wrong, which is the most expensive bug class in this repo.`
       + `\n\`${t}\` reads: ${Object.keys(typeProps).sort().join(', ') || '(nothing of its own)'}`
       + `\nplus the ${Object.keys(SHARED_PROPS).length} props every layer carries (timing · placement · `
-      + `motion · modifiers). The whole vocabulary is formats/scene/schema.json layers.item, whose `
+      + `motion · modifiers). The whole vocabulary is films/scene/schema.json layers.item, whose `
       + `layerProps block is generated from these same declarations.`);
   }
 }

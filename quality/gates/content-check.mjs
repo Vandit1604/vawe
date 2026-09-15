@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/content-check.mjs: is a film's CONTENT as rich as the reference it studied, per ACT?
 //
-//   make content-check D=formats/scene/<film>.json REF=<ref>
+//   make content-check D=films/scene/<film>.json REF=<ref>
 //   node quality/gates/content-check.mjs <film.json> --ref <ref> [--pairs 1:1,2:2] [--strict]
 //
 // WHY PER ACT, NEVER A GLOBAL BAR. Measured with harness/media/content.mjs (engine-doctrine/CRAFT plan,
@@ -112,7 +112,7 @@ if (isMain) {
   const die = (msg) => { console.error(`✗ ${msg}`); process.exit(2); };
 
   const filmArg = argv.find((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--ref' && argv[argv.indexOf(a) - 1] !== '--pairs') || process.env.D;
-  if (!filmArg) die('usage: make content-check D=formats/scene/<film>.json REF=<ref>');
+  if (!filmArg) die('usage: make content-check D=films/scene/<film>.json REF=<ref>');
   const refName = flag('--ref', 'REF');
   if (!refName) die('REF=<name> is required: which grammar/<name>.json to compare against.');
   const strict = argv.includes('--strict') || process.env.STRICT === '1';
@@ -132,7 +132,7 @@ if (isMain) {
     die(`grammar/${refName}.json has no content on ${missingRefContent.length} shot(s). Re-run `
       + `\`node harness/media/study.mjs <clip> ${refName} --content-only\` first.`);
 
-  const sbPath = [filmPath.replace(/\.json$/, '.storyboard.md'), path.join(ROOT, 'formats/scene', `${slug}.storyboard.md`)]
+  const sbPath = [filmPath.replace(/\.json$/, '.storyboard.md'), path.join(ROOT, 'films/scene', `${slug}.storyboard.md`)]
     .find((f) => fs.existsSync(f));
   let acts = sbPath ? actsFromStoryboard(fs.readFileSync(sbPath, 'utf8')) : null;
   let actsSource = sbPath ? `storyboard beats (${sbPath.replace(ROOT + '/', '')})` : null;

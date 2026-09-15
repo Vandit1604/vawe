@@ -55,7 +55,7 @@ const WAIVED = new Map(Object.entries({
   SHARED_PROPS: 'the props every layer type inherits, a prop list, not a vocabulary',
   RASTER_TYPES: 'which layer types the resampler may rasterise (core/raster/index.js). An author picks a LAYER TYPE, and every one of the 24 is catalogued; this says which of them the raster path can flatten, a capability of the renderer, not a name to choose between',
   UNSAMPLABLE_TYPES: 'the complement of RASTER_TYPES: the layer types the resampler must leave alone (core/raster/index.js). Same argument, and validate.mjs imports both instead of hardcoding them twice',
-  POSE: 'the table a motion keyframe is evaluated through (core/timeline/sequence.js): authored name to pose key to identity. An author writes `x` or `ox` on a KEY, which formats/scene/schema.json documents field by field and schema-drift checks against this table. A field list, not a vocabulary to pick a name from',
+  POSE: 'the table a motion keyframe is evaluated through (core/timeline/sequence.js): authored name to pose key to identity. An author writes `x` or `ox` on a KEY, which films/scene/schema.json documents field by field and schema-drift checks against this table. A field list, not a vocabulary to pick a name from',
   KEYFRAME_PROPS: 'what a keyframe may carry, generated from POSE and SIDES. Same argument: it is the list schema-drift compares the schema against, not a set of names an author chooses between',
   LAYER_PROPS: 'the generated prop table behind schema-drift',
   SURFACE_PROPS: 'as LAYER_PROPS, for surfaces',
@@ -127,7 +127,7 @@ const WAIVED = new Map(Object.entries({
   LAG_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   MATTE_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   SQUASH_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
-  WARPABLE: 'the entrances that accept the `anticipate` / `overshoot` dials. Every one of them is ALREADY catalogued, by name, under "Enter / exit anims"; this is a property of those names, not a vocabulary beside them, and the two dials are documented on the anim rows and in formats/scene/schema.json',
+  WARPABLE: 'the entrances that accept the `anticipate` / `overshoot` dials. Every one of them is ALREADY catalogued, by name, under "Enter / exit anims"; this is a property of those names, not a vocabulary beside them, and the two dials are documented on the anim rows and in films/scene/schema.json',
   // Not a vocabulary a scene can name: it is the set of props whose PRESENCE makes preload fetch
   // GSAP. It is exported only so lib-test can re-derive it and refuse to drift (#467, and #148
   // is what drift cost last time). An author never writes GSAP_PROPS; they write `fx` or `parts`,

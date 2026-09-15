@@ -67,7 +67,7 @@ if (data.bg) walk(data.bg, 'bg');
 const isNamedBed = (where, v) => /audio\.music$/.test(where) && !v.includes('/') && !ASSET_EXT.test(v);
 
 // A repo-root-relative src (no leading `/`, no scheme) resolves under the page the scene is served
-// from (/formats/scene/) and 404s in the browser with no visible error: core/engine/src-url.js is the
+// from (/films/scene/) and 404s in the browser with no visible error: core/engine/src-url.js is the
 // one place that rewrites it to the served-root form, and image/video/icon all now route through it
 // (engine-doctrine/MISTAKES.md, the entry for this fix). This is a WARN, not a hard fail, exactly because the
 // runtime already corrects it; the note is here so an author sees the mismatch and can write the

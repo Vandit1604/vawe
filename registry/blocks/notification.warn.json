@@ -50,7 +50,7 @@
     {
       "source": "site/public/assets/blocks/notification.warn.json",
       "url": "https://vawe.dev/assets/blocks/notification.warn.json",
-      "target": "formats/scene/notification.warn.json",
+      "target": "films/scene/notification.warn.json",
       "type": "vawe:scene",
       "note": "pre-expanded: concrete layers only, renders without the block library"
     }

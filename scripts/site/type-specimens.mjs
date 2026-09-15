@@ -32,7 +32,7 @@
 // is the arrival, long enough to wrap where the wrap is the point. Per-character effects get shorter
 // copy than per-word ones, because 30 staggers of noise is the failure they are prone to.
 // Everything here is true or plainly illustrative (CLAUDE.md, "Content philosophy"): the numbers come
-// from real films in formats/scene/, and nothing invents a statistic to have one.
+// from real films in films/scene/, and nothing invents a statistic to have one.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,7 +42,7 @@ import { serveRepo, launchPage, waitForEngine } from '../../harness/lib/render-h
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(repoRoot, 'site/public/assets/type');
 const CATALOGUE = path.join(repoRoot, 'site/lib/type-specimens.json');
-const SCHEMA = path.join(repoRoot, 'formats/scene/schema.json');
+const SCHEMA = path.join(repoRoot, 'films/scene/schema.json');
 fs.mkdirSync(OUT, { recursive: true });
 
 const W = 1920, H = 1080;
@@ -72,7 +72,7 @@ const READABLE = new Set([...TEXT_PROPS, ...schema.layerProps.shared]);
 // one line sits low in the card and leaves a band of space nobody decided (engine-doctrine/CRAFT/LAYOUT.md,
 // passive whitespace reads as unfinished, not minimal). So the block is centred on its own height.
 const ADVANCE = 0.55;   // average glyph advance in em, the same estimate core/validate.mjs:727 uses
-const LINE_H = 1.04;    // .hs-text in formats/scene/scene.css
+const LINE_H = 1.04;    // .hs-text in films/scene/scene.css
 const plain = (t) => String(t ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
 // How many lines will this copy take in a w-wide column? Words do not break, so wrap them greedily.
@@ -208,7 +208,7 @@ const MECHANICS = [
   { id: 'typing', label: 'typing + caret', props: ['typing', 'caret', 'caretHold'],
     note: 'Characters arrive at a rate you set in characters per second, with a caret trailing the reveal. Pure in the frame number, so it seeks.',
     caution: 'A typing line is real time you are spending. Past about eight words it stops reading as writing and starts reading as waiting.',
-    layer: { text: 'make video D=formats/scene/hook.json', font: 'mono', size: 78, typing: 16, caret: true, caretHold: true, align: 'left', x: 260 } },
+    layer: { text: 'make video D=films/scene/hook.json', font: 'mono', size: 78, typing: 16, caret: true, caretHold: true, align: 'left', x: 260 } },
   { id: 'untype', label: 'untype', props: ['untype', 'untypeRate'], poster: 2.6,
     note: 'The line types itself in, holds, then DELETES itself character by character. The "wrote it, thought better of it" beat.',
     caution: 'Faking it with a fade is the tell: a fade removes the whole line at once and the caret stops meaning anything.',
@@ -230,7 +230,7 @@ const MECHANICS = [
     // NO `split` here, deliberately. A gradient fill paints the CONTAINER and clips it to the text,
     // and a split layer moves the glyphs into child spans that carry no background of their own, so
     // they inherit `color: transparent` and paint nothing at all. See the note in the return report:
-    // formats/scene/example-product-promo.json combines the two and its headline is invisible.
+    // films/scene/example-product-promo.json combines the two and its headline is invisible.
     layer: { text: 'Painted through the letterforms', size: 130, weight: 800, anim: 'fade', enterDur: 0.5,
       gradient: { colors: ['#2563eb', '#8b5cf6', '#06b6d4'], animate: 'spin', speed: 0.35 } } },
   { id: 'ransom', label: 'ransom', props: [], poster: 1.6,
@@ -319,7 +319,7 @@ function presetSpecimen(name) {
     for (const [k, v] of Object.entries(layer)) if (v === null) delete layer[k];
     rows.push({
       id: `mech-${m.id}`, label: m.label, kind: 'mechanic',
-      source: 'core/layers/text.js · PROPS (via formats/scene/schema.json)',
+      source: 'core/layers/text.js · PROPS (via films/scene/schema.json)',
       blurb: m.note,
       caution: m.caution ?? null,
       // every prop's one-line label, straight out of the generated schema
@@ -355,7 +355,7 @@ const { browser, page } = await launchPage({ width: W, height: H, scale: 0.5 });
 
 let shot = 0, miss = 0;
 for (const s of specimens) {
-  await page.goto(`http://127.0.0.1:${port}/formats/scene/scene.html?data=/site/public/assets/type/${s.id}.json&fps=30&aspect=16:9`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/site/public/assets/type/${s.id}.json&fps=30&aspect=16:9`, { waitUntil: 'load' });
   const boot = await waitForEngine(page, { throwOnTimeout: false });
   if (boot) { console.error(`  boot fail ${s.id}: ${boot}`); miss++; continue; }
   try {
@@ -387,7 +387,7 @@ const catalogue = {
   _generated: 'node scripts/site/type-specimens.mjs, do not hand-edit',
   _derivedFrom: [
     'core/type.js · PRESETS + PRESET_BLURBS',
-    'core/layers/text.js · PROPS (through the generated formats/scene/schema.json)',
+    'core/layers/text.js · PROPS (through the generated films/scene/schema.json)',
   ],
   counts: {
     specimens: specimens.length,

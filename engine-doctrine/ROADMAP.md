@@ -77,11 +77,11 @@ fixing a layout. It now measures the ink for layers that paint no box of their o
 |---|---|---|
 | Per-aspect gate, `make audit ASPECT=…` | **SHIPS** | `Makefile:302` passes `--aspect` through to `quality/audit.mjs`, mirroring `bin/vawe`. It also reports a scene that fails to boot instead of dying on an uncaught `TypeError`, which is how four unloadable scenes stayed invisible. |
 | One safe area, keyed on destination | **SHIPS** | `safeArea()` at `core/layout/safe.js:121`, throwing on an unknown destination at `:123`. There used to be four disagreeing safe zones, because "safe" was three ideas at once: a margin, a platform's chrome, and an anchor. One function answers all of it, and placement and checking share it, so `pin:"bottom"` cannot fail. |
-| Per-aspect overrides, `aspects: { "9:16": {…} }` | **SHIPS** | Validated per declared ratio at `core/validate/validate.mjs:207-213`; `aspects` is in the shared prop list at `formats/scene/schema.json:8`. An override cannot reintroduce the centring trap at one ratio only. |
-| A scene composed for all five ratios | **SHIPS** | `formats/scene/aspects-demo.json`, which passes `make audit ASPECT=all`. |
+| Per-aspect overrides, `aspects: { "9:16": {…} }` | **SHIPS** | Validated per declared ratio at `core/validate/validate.mjs:207-213`; `aspects` is in the shared prop list at `films/scene/schema.json:8`. An override cannot reintroduce the centring trap at one ratio only. |
+| A scene composed for all five ratios | **SHIPS** | `films/scene/aspects-demo.json`, which passes `make audit ASPECT=all`. |
 | Layout that RESOLVES rather than gets computed | **PART** | The refusal half ships: a centring keyword with nothing to centre is a VALIDATE error (`core/validate/validate.mjs` `layoutErrors`), on both axes, in one place, imported by `quality/audit.mjs`. The **measure** half, `center` sizing itself from the rendered layer, is **NOT BUILT**. It moves every centred layer, so it stays deliberate. |
 | The y-axis version of the same trap | **PART** | Checked, except on text and count, where `size*1.2` is the estimate and enough scenes have tuned around it that changing it would move shipped content. That carve-out is pinned in `make gate-test`. |
-| **Library-wide adoption** | **NOT BUILT** | Counted on this branch over the 170 JSON files in `formats/scene/`: `"aspects"` appears in **1** scene (`aspects-demo.json`), `"col"` in **0**, `"pin"` in **14**. The relative-coordinate system is one demo and fourteen pins. Everything else is hand-placed absolute pixels tuned to a 1920x1080 canvas. |
+| **Library-wide adoption** | **NOT BUILT** | Counted on this branch over the 170 JSON files in `films/scene/`: `"aspects"` appears in **1** scene (`aspects-demo.json`), `"col"` in **0**, `"pin"` in **14**. The relative-coordinate system is one demo and fourteen pins. Everything else is hand-placed absolute pixels tuned to a 1920x1080 canvas. |
 
 Read the last row carefully, because it is not "the library is broken". Each of those scenes declares
 `aspect: "16:9"`, only ever ships 16:9, and is clean there. **The claim is what is broad.** So the
@@ -107,10 +107,10 @@ aspect; a scene is composed for the ones it declares), or compose the films for 
 | macOS notification | **PART** | No macOS-specific block. `notification` (plus `.warn` · `.error` · `.stack`) covers the shape without the platform chrome. |
 | CSS Transitions: 3D · blur · cover · push · radial · scale · mechanical | **SHIPS** | `PRESENTATIONS` in `core/cuts/index.js` holds 27 entries: `cube` (3D) · `blur` · `slide` (cover) · `wipe` · `iris` · `zoom` (scale) · `squeeze` · `blinds` · `barn` · `flip` · `roll` · `letterbox` · `skewWhip` · `matchCut` and more. |
 | CSS Transitions: dissolve · grid | **NOT BUILT** *as cuts* | Neither name is in `PRESENTATIONS`. The dissolve exists one level up as `SEAM_FX.dissolve` (`core/timeline/seams.js:32`) and as `RESAMPLE_FX.dissolve`; the grid one exists as `SHADER_FX.gridPixelateWipe` (`core/stings/index.js:33`). Both are reachable, neither is a cut. |
-| grain overlay · vignette · shimmer sweep · parallax zoom | **SHIPS** | `filmGrain` in `AMBIENT_FX`; `vignette` in `FILTER_PRESETS` (`core/looks/filters.js`); `shimmerWave` in `core/type/type.js` presets; `ken` on an image layer (`formats/scene/schema.json:1327`). |
+| grain overlay · vignette · shimmer sweep · parallax zoom | **SHIPS** | `filmGrain` in `AMBIENT_FX`; `vignette` in `FILTER_PRESETS` (`core/looks/filters.js`); `shimmerWave` in `core/type/type.js` presets; `ken` on an image layer (`films/scene/schema.json:1327`). |
 | Captions: highlight · pill karaoke · neon accent · weight shift · clip wipe | **SHIPS** | `CAP_STYLES` holds 19 (`core/type/captions.js`): `highlight` · `pillKaraoke` · `neonEdge` · `weightShift` · `clipWipe`, plus `kineticSlam` · `underlineDraw` · `flipUp` · `ghostSplit` · `waveRide` · `scramble` · `wordFlash` · `wordSlide` · `typeOn` · `readerFocus` · `inkFill` · `focusPull` · `letterRise` · `weightWave`. |
 | Captions: gradient fill · editorial emphasis · emoji pop | **NOT BUILT** | None of the three is a `CAP_STYLES` key. |
-| Text Effects: blend difference · texture mask | **NOT BUILT** *as named presets* | No preset in `core/type/type.js`, `core/looks/filters.js` or `core/looks/index.js` owns either name. Both are authorable by hand: `mix-blend-mode` is not on `core/type/sanitize-html.js`'s refused list, and `mask` is a layer prop (`formats/scene/schema.json:1291`). |
+| Text Effects: blend difference · texture mask | **NOT BUILT** *as named presets* | No preset in `core/type/type.js`, `core/looks/filters.js` or `core/looks/index.js` owns either name. Both are authorable by hand: `mix-blend-mode` is not on `core/type/sanitize-html.js`'s refused list, and `mask` is a layer prop (`films/scene/schema.json:1291`). |
 | glow/light: bloom · halation | **SHIPS** | `bloom` in `FILTER_PRESETS`; `halationFilm` in `LOOKS` (`core/looks/index.js:197`, 31 entries). |
 | glow/light: diffusion · rim light | **NOT BUILT** | Neither name appears in `FILTER_PRESETS`, `LOOKS` or `AMBIENT_FX`. |
 | glow/light: spotlight cone | **PART** | `spotlight` exists as a BACKGROUND (`core/backgrounds/index.js:152`), a radial glow travelling across the frame. There is no per-layer cone. |
@@ -197,7 +197,7 @@ effect chain and its shader library, never for the sampling, which we now own.
 **The layer type ships.** This section was written as future work, and it was the "what I would build
 first" item 5. `core/surfaces/three.js` exists; `core/surfaces/three-fx.js` declares the props at `:29-38`
 behind an 18-line determinism contract at `:5-18` (no `THREE.Clock`, no `performance.now`, no
-`Date`, no rAF driving anything); `three` has a full schema entry (`formats/scene/schema.json:705`)
+`Date`, no rAF driving anything); `three` has a full schema entry (`films/scene/schema.json:705`)
 and four scenes use it: `three-showcase.json` · `motion-reel.json` · `motion-reel-v2.json` ·
 `showcase-globe.json`. The registry is split into `core/surfaces/three-scenes.js` on purpose, so a Node-side
 gate can read the names without resolving the browser-absolute three.js import.
@@ -286,14 +286,14 @@ helper).
 
 **This is the engine's real disease, and it is not "not built".** A capability lands, is reachable, is
 tested, and no film ever uses it. That reads green on every gate and buys nothing, and this page had
-no way to say it before this section existed. Counted over the 170 JSON files in `formats/scene/`:
+no way to say it before this section existed. Counted over the 170 JSON files in `films/scene/`:
 
 | capability | reachable | proof | scenes using it |
 |---|---|---|---|
-| `effector`, a falloff from a travelling point, spent on a layer's own children | yes | `core/motion/effector.js`, registered at `core/tracks/index.js:59`, schema at `formats/scene/schema.json:1255` | **0** |
-| `timeRemap` (whip · hold · freeze · rewind) | yes | shapes at `core/timeline/time.js:48`, baked once at boot by `bakeTimeRemap` at `:144`, schema at `formats/scene/schema.json:1814` | **0** |
+| `effector`, a falloff from a travelling point, spent on a layer's own children | yes | `core/motion/effector.js`, registered at `core/tracks/index.js:59`, schema at `films/scene/schema.json:1255` | **0** |
+| `timeRemap` (whip · hold · freeze · rewind) | yes | shapes at `core/timeline/time.js:48`, baked once at boot by `bakeTimeRemap` at `:144`, schema at `films/scene/schema.json:1814` | **0** |
 | `aspects`, per-aspect overrides | yes | `core/validate/validate.mjs:207-213` | **1** (`aspects-demo.json`) |
-| `col`, the relative column coordinate | yes | shared prop list, `formats/scene/schema.json:8` | **0** |
+| `col`, the relative column coordinate | yes | shared prop list, `films/scene/schema.json:8` | **0** |
 
 Neither `effector` nor `timeRemap` is unreachable, and neither is untested. They are unproven by a
 film, which is a different failure and needs a different fix: not engineering, but one scene that
@@ -302,10 +302,10 @@ table to grow a row.**
 
 ## The Showcases
 
-**App Showcase** ships (`formats/scene/app-showcase.json`). **Apple Money Count**, **Blue Sweater
+**App Showcase** ships (`films/scene/app-showcase.json`). **Apple Money Count**, **Blue Sweater
 Intro**, **North Korea Locked Down**, **NYC Paris Flight** and **VPN YouTube Spot** are **NOT BUILT**:
-none of them exists in `formats/scene/`. They are not effects, they are *compositions* of the above,
-and they belong in `formats/scene/` as evidence the vocabulary composes. Build them **last**, and let
+none of them exists in `films/scene/`. They are not effects, they are *compositions* of the above,
+and they belong in `films/scene/` as evidence the vocabulary composes. Build them **last**, and let
 them dictate which effects actually matter: a showcase that cannot be built is a better spec for the
 backlog than a wish-list is. The App Showcase already proved that, seventeen times over.
 

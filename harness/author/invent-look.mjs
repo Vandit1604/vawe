@@ -5,7 +5,7 @@
 // proposes 4 to 6 complete looks that each tell a DIFFERENT story about that subject, shows them, and
 // writes the chosen one as a new themes/<name>.json.
 //
-//   node harness/author/invent-look.mjs formats/scene/_concepts/gh-wrapped.storyboard.md --seed 7
+//   node harness/author/invent-look.mjs films/scene/_concepts/gh-wrapped.storyboard.md --seed 7
 //   node harness/author/invent-look.mjs <storyboard.md> --seed 7 --pick 3 --name <theme>
 //   make invent-look SB=<storyboard.md> SEED=7            → /tmp/invent-look/<slug>-sheet.png
 //   make invent-look SB=<storyboard.md> SEED=7 PICK=3     → themes/<name>.json (+ the faces vendored)

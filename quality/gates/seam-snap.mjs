@@ -8,7 +8,7 @@
 // beat's start cluster), it pulls the frames straddling the boundary out of the RENDERED mp4 and flags a
 // luminance DIP that is present at the seam but not just outside it, the signature of a flash.
 //
-//   node quality/gates/seam-snap.mjs formats/scene/<file>.json     ·     make seam-check D=<file>
+//   node quality/gates/seam-snap.mjs films/scene/<file>.json     ·     make seam-check D=<file>
 //
 // It reads the real rendered pixels (not renderFrame) because a seam is composited during the render
 // (core/timeline/seams.js), so it only exists in the mp4, which is the whole reason a DOM-signature gate can't

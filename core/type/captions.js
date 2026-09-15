@@ -202,7 +202,7 @@ export const CAP_STYLES = {
 
   // The letters settle out of noise. This is the ONE style that cannot work by returning a value:
   // the scramble rewrites textContent, and the contract is `Object.assign(el.style, …)`. So it gets
-  // the same carve-out clipWipe has in formats/scene/scene.js, which calls core/type.js decodeText
+  // the same carve-out clipWipe has in films/scene/scene.js, which calls core/type.js decodeText
   // (pure in u and the unit index, with the final string cached on the element). What this function
   // returns is only the read/unread ink, which is the half a style object CAN say.
   scramble: withBlurb('the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does', (u, active) => ({
@@ -394,7 +394,7 @@ export const CAPTION_BLURBS = blurbsOf('caption style', CAP_STYLES);
 
 // The registry, and with it the catalogue section that used to be hand-listed in
 // scripts/site/effects-catalog.mjs, with its usage snippet keyed by a slug of the section TITLE over in
-// scripts/site/effects-json.mjs. It also gives the two hand-rolled refusals below one owner: formats/
+// scripts/site/effects-json.mjs. It also gives the two hand-rolled refusals below one owner: films/
 // scene/scene.js and harness/media/vo-captions.mjs each wrote out `unknown style, known: <join>` over
 // this same list, so a caption style could be rejected in two different sentences, and neither of them
 // could say that the name the author typed is really a kinetic preset or a look.

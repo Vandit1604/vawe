@@ -50,7 +50,7 @@ const { j } = USAGE_KIT;
 
 // ── the JSON an author writes, per family ───────────────────────────────────────────────────────
 // Each returns the snippet shown in the drawer. The shape comes from that family's own intro in
-// effects-catalog.mjs (or, where the intro names no form, from formats/scene/schema.json).
+// effects-catalog.mjs (or, where the intro names no form, from films/scene/schema.json).
 //
 // THIS TABLE IS NOW THE MINORITY CASE. A registry carries its own `usage` at the definition site
 // (core/registry.js), and effects-catalog hands it the same three helpers this table uses. What is
@@ -97,7 +97,7 @@ const PREVIEW = {
 // neither is hidden: the page names the effect and the reason. Both were found by booting all 229
 // preview scenes in a real browser (the sweep is the check, and it is the only thing that can be:
 // nothing in node can start the engine). Re-run it after adding a preview family.
-//   `shapes` is exported by BG_NAMES and rejected by formats/scene/schema.json, so engine-doctrine/EFFECTS.md
+//   `shapes` is exported by BG_NAMES and rejected by films/scene/schema.json, so engine-doctrine/EFFECTS.md
 //   lists a background a scene may not use. That drift is a real bug, reported upstream, not ours.
 //   `extrudeText` needs a 3D typeface baked by `make glyphs`, and the site ships no 3D fonts.
 const UNPLAYABLE = {

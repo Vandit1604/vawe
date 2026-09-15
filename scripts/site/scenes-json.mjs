@@ -25,7 +25,7 @@ import { fileURLToPath } from 'node:url';
 import { expandScene } from '../../core/engine/expand.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SRC = path.join(ROOT, 'formats/scene');
+const SRC = path.join(ROOT, 'films/scene');
 const OUT = path.join(ROOT, 'site/public/scenes');
 const write = process.argv.includes('--write');
 
@@ -46,7 +46,7 @@ if (!files.length) { console.error(`✗ no scenes under ${path.relative(ROOT, OU
 
 // `block`/`beat`/`comp` sugar is expanded HERE, at publish time (core/engine/expand.js `expandScene`, pure
 // Node, same function `./bin/vawe` resolves it with server-side), so the picker's scenes always boot:
-// the render page (`formats/scene/scene.js`) deliberately never imports core/engine/expand.js itself (its own
+// the render page (`films/scene/scene.js`) deliberately never imports core/engine/expand.js itself (its own
 // banner says why: its block/beat factory dependency is outside what the render page's file server, or
 // this site in production, can safely or reliably serve to a browser). Publishing the expanded form is
 // cheaper than solving that in the browser and correct for the same reason a Go pre-expand is: the
@@ -70,7 +70,7 @@ for (const f of files) {
 
 const rel = path.relative(ROOT, OUT);
 if (orphans.length) {
-  console.log(`  ⚠ ${orphans.length} site scene(s) have no source in formats/scene/: ${orphans.join(', ')}`);
+  console.log(`  ⚠ ${orphans.length} site scene(s) have no source in films/scene/: ${orphans.join(', ')}`);
   console.log(`    They cannot be derived. Restore the source, or delete the copy and the link to it.`);
 }
 if (!drifted.length) {
@@ -83,7 +83,7 @@ if (write) {
   for (const f of drifted) console.log(`    ${f}`);
   process.exit(orphans.length ? 1 : 0);
 }
-console.error(`✗ ${drifted.length} of ${files.length} site scene(s) have drifted from formats/scene/:`);
+console.error(`✗ ${drifted.length} of ${files.length} site scene(s) have drifted from films/scene/:`);
 for (const f of drifted) console.error(`    ${f}`);
 console.error(`\n  /editor serves these, so a visitor sees whichever version this directory happens to hold.`);
 console.error(`  Fix: make scenes-json WRITE=1`);

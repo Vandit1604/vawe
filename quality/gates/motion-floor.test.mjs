@@ -56,7 +56,7 @@ test('a large uniform block sliding rigidly is not content, even though only its
 });
 
 test('the gate does not crash or block when there is no render', () => {
-  const r = spawnSync('node', [join(here, 'motion-floor.mjs'), 'formats/scene/_no-such-film.json'],
+  const r = spawnSync('node', [join(here, 'motion-floor.mjs'), 'films/scene/_no-such-film.json'],
     { cwd: ROOT, encoding: 'utf8' });
   assert.equal(r.status, 0, 'a post-render gate must not block a pre-render caller');
   assert.match(r.stdout, /no render/);

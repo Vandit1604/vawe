@@ -27,7 +27,7 @@ import { UNITS, SEAM_FX, SEAM_BLURBS } from '../transitions/units.js';
 
 // THE VOCABULARY now lives with the units in core/transitions/units.js: SEAM_FX and SEAM_BLURBS are
 // DERIVED from that library and re-exported here so every existing importer (core/transitions.js,
-// formats/scene/scene.js, the schema) keeps its `from './seams.js'` path. Adding a transition is adding
+// films/scene/scene.js, the schema) keeps its `from './seams.js'` path. Adding a transition is adding
 // a unit file, never editing this runner.
 export { SEAM_FX, SEAM_BLURBS };
 
