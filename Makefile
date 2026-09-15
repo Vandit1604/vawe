@@ -500,7 +500,7 @@ assets: ## [dev] fill missing icons: country→flag, brand→logo, else a genera
 
 # make verify: integrity + safe-zone + contact sheets (all formats)
 verify: ## [check] integrity + safe-zone + contact sheets (all formats)
-	node verify/run.js
+	node quality/gates/run.js
 
 # make audit [M=scene] [ASPECT=16:9,9:16|all], layout audit: overlap / overflow / safe-zone /
 # tight-spacing on [data-layer=critical] across sampled frames. Annotated overlays →
@@ -520,8 +520,8 @@ audit-all: ## [check] the same layout audit, over the WHOLE library.
 # CATCHES invisible emphasis (blue-on-blue). measure-regression proves it measures the DRAWN ink and
 # not the box the author declared, which is the error this repo logged four times (#214/#216/#217/#242).
 audit-test: ## [maintenance] regression on both edges of `make audit`.
-	node verify/contrast-regression.mjs
-	node verify/measure-regression.mjs
+	node quality/gates/contrast-regression.mjs
+	node quality/gates/measure-regression.mjs
 
 # make snap M=<format> [SAVE=1], check a scene WITHOUT rendering video: capture/diff the per-frame
 # DOM signature (bbox/transform/opacity/font/text). Baseline a refactor, then prove frames unchanged.
@@ -1154,7 +1154,7 @@ worktrees: ## [maintenance] Retire agent worktrees whose work has landed.
 # make review. One-command health snapshot: lib-test + layout audit + a master overlay sheet
 # (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
 review: ## [engine] One-command health snapshot: lib-test + layout audit + a master overlay sheet (/tmp/review.png).
-	node verify/review.mjs
+	node quality/gates/review.mjs
 
 # make evals: render the fixed set of eval briefs (quality/runs/evals/briefs/*.json) under the CURRENT
 # engine + rules, into a fresh quality/runs/evals/runs/<timestamp>/ with a contact sheet per brief, one

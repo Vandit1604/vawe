@@ -81,7 +81,7 @@ function renderBrief(name, runDir) {
   const [expectW, expectH] = sceneDims(scene);
 
   // VAWE_SERVE_ALL: the render server only serves core/ themes/ formats/ assets/ .vawe-data/ by
-  // default, and these fixtures live under verify/ on purpose (they are eval scaffolding, not a film
+  // default, and these fixtures live under quality/runs/ on purpose (they are eval scaffolding, not a film
   // to author further), so the debug escape hatch is the correct way to reach them, not a workaround.
   execFileSync('./bin/vawe', [src, '--draft', '--workers', '2'],
     { stdio: 'inherit', env: { ...process.env, VAWE_SERVE_ALL: '1' } });

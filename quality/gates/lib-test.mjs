@@ -3291,7 +3291,7 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   });
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
   const offenders = [];
-  for (const fp of [...scan(path.join(root, 'scripts')), ...scan(path.join(root, 'harness')), ...scan(path.join(root, 'verify')), ...scan(path.join(root, 'quality')), ...scan(path.join(root, 'core'))]) {
+  for (const fp of [...scan(path.join(root, 'scripts')), ...scan(path.join(root, 'harness')), ...scan(path.join(root, 'quality')), ...scan(path.join(root, 'core'))]) {
     if (fp.endsWith(path.join('core', 'safe.js')) || fp.endsWith(path.join('gates', 'lib-test.mjs'))) continue;
     const src = fs.readFileSync(fp, 'utf8');
     if (/landscape\s*\?\s*(1920\s*:\s*1080|\[1920)/.test(src)) offenders.push(path.relative(root, fp));
@@ -6934,7 +6934,7 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   // The hook WIRING lives in .claude/settings.json, which is Claude-local and gitignored now, so it is
   // not a tracked repo invariant. That the hook SCRIPT exists at harness/live/ is covered by its [live]
   // rung tag (rung.mjs). Here we only check the baseline the hook reads.
-  const base = JSON.parse(fs.readFileSync(path.join(repoRoot, 'verify/vocabulary-baseline.json'), 'utf8'));
+  const base = JSON.parse(fs.readFileSync(path.join(repoRoot, 'quality/baselines/vocabulary-baseline.json'), 'utf8'));
   ok('vocab hook: the baseline records what already exists, so the hook only judges what you add',
     Object.keys(base).length > 40);
 }

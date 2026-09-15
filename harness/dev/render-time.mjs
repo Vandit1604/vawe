@@ -8,7 +8,7 @@
 //
 //   node harness/dev/render-time.mjs                      # the default pair, 3 runs each
 //   node harness/dev/render-time.mjs --films a,b --runs 5
-//   node harness/dev/render-time.mjs --save               # write verify/perf/baseline.json
+//   node harness/dev/render-time.mjs --save               # write quality/baselines/perf/baseline.json
 //   node harness/dev/render-time.mjs --against            # diff against the saved baseline
 //
 // WHAT IT CANNOT DO, said plainly. There is no per-stage split, because the renderer prints one line
@@ -35,7 +35,7 @@ const has = (k) => process.argv.includes(k);
 // formats/scene is gitignored and a clone will not have these.
 const DEFAULT_FILMS = ['plinth-ad', 'site-backdrop'];
 const RUNS = +arg('--runs', 3);
-const BASELINE = 'verify/perf/baseline.json';
+const BASELINE = 'quality/baselines/perf/baseline.json';
 // LOAD IS RUNNABLE THREADS, NOT A PERCENTAGE, so the threshold has to scale with the machine. A flat
 // number (this said 2.0) flags a quiet 16-core box and passes a hammered 2-core one. Half the cores
 // busy is the line: below it the render gets the parallelism it asks for, above it the tabs queue.
