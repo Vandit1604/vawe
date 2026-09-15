@@ -50,6 +50,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <head>
+        {/* Applies a saved theme override before first paint, so a visitor who chose "light" or
+            "dark" does not see one frame of the system default first. Runs before hydration, so it
+            reads localStorage directly rather than through ThemeToggle's own effect. Guarded: a
+            private window or blocked site data throws, and the system default (the CSS media query)
+            is the correct fallback anyway. */}
+        <script
+          dangerouslySetInnerHTML={{ __html:
+            "try{var t=localStorage.getItem('vawe-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}"
+          }}
+        />
         {/* THE ENGINE'S BLOCK LIBRARY RUNS IN THIS PAGE, and one of its 17 families says
             `from 'd3-geo'`. A browser cannot resolve a bare specifier, so without this map
             /blocklib/index.mjs throws at module scope and EVERY block family vanishes from
