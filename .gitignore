@@ -320,3 +320,6 @@ films/scene/process.storyboard.md
 # untracked, so nothing tracked breaks.
 assets/plinth/
 assets/higgsfield/
+
+# Footage for a local edit: third-party clips (public domain or licensed) that we use but never redistribute.
+assets/edit-montage/
