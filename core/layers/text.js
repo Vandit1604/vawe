@@ -249,6 +249,10 @@ export function frame(kit, el, L, t, scene, { gradient, typing, text } = L) {
   if (gradient) refreshGradient(el, L, gradient, t);
   if (!typing) return;
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
+  // The reveal's own clock: `contentStart` (a group child only) lets typing already be under way the
+  // instant the layer is visible, without moving the window above that governs it. Absent -> `start`,
+  // today's behaviour.
+  const clockStart = L.contentStart ?? start;
   // THE BUILT LINE, STASHED ON THE FIRST FRAME THIS LAYER IS ASKED FOR, and put back the moment the
   // layer is off its window. The early return used to leave the element holding whatever the LAST
   // in-window frame typed, so `renderFrame(72)` produced "Mee▏" on a tab that had already drawn frame
@@ -264,9 +268,9 @@ export function frame(kit, el, L, t, scene, { gradient, typing, text } = L) {
   const cps = typing === true ? 24 : typing;
   const full = text || '';
   const visLen = /[<&]/.test(full) ? stripLen(full) : full.length;
-  const lt = t - start;
+  const lt = t - clockStart;
   const n = typedLen(lt, { cps, visLen, untype: L.untype, untypeRate: L.untypeRate });
-  const caret = (L.caret !== false && Math.floor((t - start) * 2.2) % 2 === 0 && (n < visLen || L.caretHold)) ? '▏' : '';
+  const caret = (L.caret !== false && Math.floor(lt * 2.2) % 2 === 0 && (n < visLen || L.caretHold)) ? '▏' : '';
   if (L.typingColors) el.innerHTML = colorizeTyped(full, n, lt, cps, L.typingColors) + caret;
   else if (/[<&]/.test(full)) el.innerHTML = revealHtml(full, n) + caret;
   else el.textContent = full.slice(0, n) + caret;
@@ -373,7 +377,7 @@ export function expose(L, t) {
   const cps = L.typing === true ? 24 : L.typing;
   const full = L.text || '';
   const visLen = /[<&]/.test(full) ? stripLen(full) : full.length;
-  const n = typedLen(t - start, { cps, visLen, untype: L.untype, untypeRate: L.untypeRate });
+  const n = typedLen(t - (L.contentStart ?? start), { cps, visLen, untype: L.untype, untypeRate: L.untypeRate });
   const shown = /[<&]/.test(full) ? plainPrefix(full, n) : full.slice(0, n);
   return Object.freeze({ caretX: measureText(shown, font), progress: visLen ? n / visLen : 1 });
 }
