@@ -42,11 +42,11 @@ causes and only one of them survives.
 - **FIXED: representative selection.** Spring settles leave sub-pixel movement inside the DOM
   signature's rounding, so near-identical frames group together, and WHICH frame the group captured
   used to depend on worker order. The representative is now always the group's FIRST frame by index
-  (`internal/scene/scene.go:616-618`, `rep[f] = rep[f-1]`), and a long run gets a mid-run anchor
+  (`renderer/internal/scene/scene.go:616-618`, `rep[f] = rep[f-1]`), and a long run gets a mid-run anchor
   byte-compared inside the instance, which fails loudly rather than quietly.
 - **STILL OPEN: cross-tab rasterization.** Adjacent frames captured by *different* tabs differ in
   pixels the film never changed. The renderer says so in its own source
-  (`internal/render/render.go:216-217`) and now refuses to print a motion figure measured across
+  (`renderer/internal/render/render.go:216-217`) and now refuses to print a motion figure measured across
   workers (`:219-224`) rather than quoting a number it cannot make. Byte-identical re-renders hold
   at `-workers 1`. This is gap 3 at the bottom of the page.
 
@@ -226,7 +226,7 @@ never was a determinism problem once the analysis moved out of the frame.
 | item | status | proof |
 |---|---|---|
 | Particle and fluid sims: smoke · fog · ink diffusion · reaction-diffusion · boids · gravity fields · disintegration · sand pour | **SHIPS by the baked route** | The carve-out this tier named, "a precomputed baked buffer keyed by frame", is built and was unrecorded. `generators/sim/run.mjs:1-11` runs the simulation offline, in order, once, and emits a PNG frame sequence; reproducibility is hashed by `generators/sim/provenance.mjs`; the scene plays the frames back through the existing `clip` layer. `make sim`, `make sim-audit`. Non-determinism is confined to bake time. Writing a *live* sim is still refused, and should be. |
-| True multi-sample motion blur | **NOT BUILT** | The cheap half ships and is now AUTOMATIC above a speed the eye already reads as fast, not opt-in: `L.motionBlur` derives a streak from the motion track's velocity, sampled at `t` and `t - 1/fps` so it stays pure in `n` (`core/tracks/motion.js:99-104`; `motionBlur:false` opts out, a number overrides the shutter). What remains is real sub-frame accumulation in the render pipeline, and nothing in `internal/render/render.go` does any. |
+| True multi-sample motion blur | **NOT BUILT** | The cheap half ships and is now AUTOMATIC above a speed the eye already reads as fast, not opt-in: `L.motionBlur` derives a streak from the motion track's velocity, sampled at `t` and `t - 1/fps` so it stays pure in `n` (`core/tracks/motion.js:99-104`; `motionBlur:false` opts out, a number overrides the shutter). What remains is real sub-frame accumulation in the render pipeline, and nothing in `renderer/internal/render/render.go` does any. |
 | Depth estimation for 2.5D parallax from a flat image | **NOT BUILT** | No `depthMap` or depth-estimation path in `core/` or `scripts/`. Needs a model in the pipeline. |
 | Chroma key · luma key · difference matte | **NOT BUILT, and unblocked** | The question it waited on, where source video enters a scene, is answered: the `clip` layer plays a preloaded PNG frame sequence (`core/layers/clip.js`, exercised by `_coverage-reel.json`). Keying is now one per-pixel entry over a `clip`. Zero hits for `chromaKey` or `lumaKey` anywhere in the repo. Unblocked is not built. |
 

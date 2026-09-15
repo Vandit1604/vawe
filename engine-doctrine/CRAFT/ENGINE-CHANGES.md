@@ -14,7 +14,7 @@ group: crosscutting
   price a capture-path change with a before/after wall-clock render time in the commit body; after every
   render, classify each friction point as framework bug / gate gap / authoring choice and log framework
   bugs to `engine-doctrine/MISTAKES.md`.
-- Two of the five (a save under `internal/scene`/`internal/render`, a new file under `quality/gates/`)
+- Two of the five (a save under `renderer/internal/scene`/`renderer/internal/render`, a new file under `quality/gates/`)
   are spoken at the keystroke by the Claude Code hook `harness/live/craft-live.mjs`; the rest are `[eye]`,
   check them yourself before committing an engine change.
 
@@ -82,7 +82,7 @@ and `comp` needed a separate `make expand` CLI pass to become layer TYPES, and a
 it was refused by name at boot rather than left to paint nothing, silent failure being worse than a
 loud one. That refusal is gone now, not the discipline behind it: `core/engine/expand.js`'s `expandScene`/
 `loadScene` resolves all three at LOAD time, for every Node gate and script directly, and for
-`./bin/vawe` a level down in Go (`internal/render/expand.go` shells out to this module's CLI wrapper
+`./bin/vawe` a level down in Go (`renderer/internal/render/expand.go` shells out to this module's CLI wrapper
 before the browser ever fetches the JSON, because the render page's file server default-denies the
 ~186 block/beat factories by design, a security boundary for MCP/stranger scenes, so the browser itself
 never expands sugar). Either way the two-file world (`x.json` + a `make expand`-written
@@ -146,19 +146,19 @@ exist precisely to stop Chrome reusing a rasterised tile, which is the single la
 render fast. That was the right trade, made deliberately, and **nobody measured the price**. It is
 still unpriced.
 
-**The rule.** If you touch the capture path (`internal/scene`, `internal/render`, a Chrome flag, the
+**The rule.** If you touch the capture path (`renderer/internal/scene`, `renderer/internal/render`, a Chrome flag, the
 worker count, anything on `.hs-layer` or `#cam`), render one film before and after and state both
 wall-clock times in the commit body. Two numbers. That is the whole ask, and it is what turns "we
 chose correctness" from a hope into a record.
 
 **Two things already true that a reader should not have to rediscover:**
 
-- **The worker cap is `min(NumCPU - 1, 6)`** (`cmd/render/main.go:60`). On a 10-core machine that
+- **The worker cap is `min(NumCPU - 1, 6)`** (`renderer/cmd/render/main.go:60`). On a 10-core machine that
   leaves four cores idle, and memory is not the reason: an extra tab costs one renderer process and
   about 118 MB, so nine tabs is roughly 1 GB. Whether the cap is a leftover or a deliberate ceiling
   is not written down anywhere.
 - **Worker count and determinism are coupled**, so raising the cap is not purely a speed change.
-  `internal/scene/scene.go` records two renders of identical code differing on 373 of 1890 captures
+  `renderer/internal/scene/scene.go` records two renders of identical code differing on 373 of 1890 captures
   at one worker and 1078 at four. Any speed experiment on the pool measures frame agreement too, or
   it is trading correctness for time without saying so.
 

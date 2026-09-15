@@ -165,7 +165,7 @@ canvas-purity: ## [check] do the shader/paint PIXELS depend only on n?
 	@node quality/gates/canvas-purity.mjs $(if $(M),$(M),scene) $(D) $(if $(JSON),--json,)
 
 build: fonts ## [ship] compile bin/vawe from the Go source
-	go build -o bin/vawe ./cmd/render
+	go build -C renderer -o ../bin/vawe ./cmd/render
 
 # make build-all: one binary per platform we ship, named for the machine that runs it.
 #

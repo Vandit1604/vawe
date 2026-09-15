@@ -4,7 +4,7 @@
 // and the file-scan live there) and asserted directly in quality/gates/lib-test.mjs, so this file
 // stays pure: no process.exit, no console output, no reading the whole repo.
 //
-// WHY THIS SHAPE. AGENTS.md said 30fps while cmd/render renders 60 (measured this week); a skill told
+// WHY THIS SHAPE. AGENTS.md said 30fps while renderer/cmd/render renders 60 (measured this week); a skill told
 // an agent to run `make blueprints`, a deleted target. Both are the same defect: a sentence that was
 // true once and never re-checked. `deriveEngineTruth` reads the number FROM the code that owns it, so
 // a doc is compared against today's engine, not against whatever the last author remembered.
@@ -15,13 +15,13 @@ import { ASPECT_REGISTRY } from '../../core/layout/safe.js';
 
 /**
  * fps (final and `--draft`), the canvas count, and the layer-type count: read from the modules that
- * declare each one. Throws loudly if cmd/render/main.go's comment shape changes, rather than silently
+ * declare each one. Throws loudly if renderer/cmd/render/main.go's comment shape changes, rather than silently
  * falling back to a guessed number: a truth function that guesses is the exact drift it exists to catch.
  */
 export function deriveEngineTruth(repoRoot) {
-  const mainGo = fs.readFileSync(path.join(repoRoot, 'cmd/render/main.go'), 'utf8');
+  const mainGo = fs.readFileSync(path.join(repoRoot, 'renderer/cmd/render/main.go'), 'utf8');
   const m = /else (\d+) final \/ (\d+) --draft/.exec(mainGo);
-  if (!m) throw new Error('cmd/render/main.go no longer says "else N final / N --draft"; update the regex in harness/lib/claims-truth.mjs');
+  if (!m) throw new Error('renderer/cmd/render/main.go no longer says "else N final / N --draft"; update the regex in harness/lib/claims-truth.mjs');
   return {
     finalFps: Number(m[1]),
     draftFps: Number(m[2]),

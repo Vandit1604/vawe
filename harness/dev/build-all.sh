@@ -15,7 +15,7 @@ for t in darwin-arm64 darwin-amd64 linux-amd64 linux-arm64 windows-amd64; do
   ext=""
   [ "$os" = "windows" ] && ext=".exe"
   echo "  building bin/vawe-$t$ext"
-  GOOS=$os GOARCH=$arch go build -o "bin/vawe-$t$ext" ./cmd/render
+  GOOS=$os GOARCH=$arch go build -C renderer -o "../bin/vawe-$t$ext" ./cmd/render
 done
 
 echo ""
