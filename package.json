@@ -61,6 +61,7 @@
     "assets/fonts/",
     "bin/",
     "CREDITS.md",
+    "NOTICE",
     "LICENSE-FAQ.md"
   ],
   "optionalDependencies": {

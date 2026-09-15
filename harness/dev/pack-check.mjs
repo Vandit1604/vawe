@@ -30,7 +30,7 @@ const REQUIRED = [
   ['core/validate/validate.mjs', 'the loud refusals; shipping without it turns errors into silent wrong output'],
   ['harness/author/expand-blocks.mjs', 'block/beat/comp sugar is expanded here, NOT by the renderer'],
   ['blocks/index.mjs', 'expand-blocks imports it; a block scene dies without it'],
-  ['blueprints/index.mjs', 'same, for beats'],
+  ['NOTICE', 'Apache-2.0 section 4(d): a redistribution that drops it is a licence breach'],
 ];
 // A prefix that must appear at least N times. A directory shipped empty is the subtler version of
 // shipping nothing, and an allowlist entry like `themes/` gives no error when the directory is bare.
