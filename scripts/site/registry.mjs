@@ -1,7 +1,8 @@
-// scripts/site/registry.mjs: GENERATED, never hand-edited. `make registry` writes registry/;
-// `make registry CHECK=1` fails if what is on disk differs from what the sources say. Edit a row in
-// blocks/catalog.mjs and re-run; editing registry/ by hand is
-// undone by the next run.
+// scripts/site/registry.mjs: GENERATED, never hand-edited. `make registry` writes blocks/catalog/
+// (one file per block, beside the factories they describe) and registry/ (the index plus every
+// non-block item). `make registry CHECK=1` fails if what is on disk differs from what the sources
+// say. Edit a row in blocks/catalog.mjs and re-run; editing either output by hand is undone by the
+// next run.
 //
 // WHAT THIS IS FOR. An outside agent, in someone else's project, wants to start from one of our
 // blocks. Today the only way to find one is to read blocks/catalog.mjs, which is our source, not a
@@ -82,7 +83,11 @@ import { CATALOG } from '../../blocks/catalog.mjs';
 import { GENERATORS, controlsOf, defaultsOf } from '../../core/generators/generators.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const OUT = path.join(root, 'registry');
+// Block items live beside the factories that back them (blocks/catalog/); the index and every
+// non-block item (beats, generators) stay in registry/, the agent-facing entry point that spans all
+// item types and is not owned by one code directory.
+const BLOCKS_OUT = path.join(root, 'blocks/catalog');
+const REGISTRY_OUT = path.join(root, 'registry');
 // `--check` (what the Makefile passes) or CHECK=1 in the environment. Both, because the target read
 // the environment while every sibling target passed a flag, and a check reachable only one way is a
 // check somebody runs the other way and believes.
@@ -231,25 +236,30 @@ const index = {
   items: items.map((it) => ({ name: it.name, type: it.type, description: it.description, tags: it.tags })),
 };
 
-// Every item file, plus the index, keyed by its path relative to registry/.
-const want = new Map([['registry.json', JSON.stringify(index, null, 2) + '\n']]);
+// Every item file, plus the index, keyed by its ABSOLUTE path. A block's file sits in blocks/catalog/
+// (paired with the factory it describes); the index and every non-block item stay under registry/.
+const want = new Map([[path.join(REGISTRY_OUT, 'registry.json'), JSON.stringify(index, null, 2) + '\n']]);
 for (const it of items) {
-  const dir = { 'vawe:beat': 'beats', 'vawe:generator': 'generators' }[it.type] || 'blocks';
-  want.set(`${dir}/${safeName(it.name)}.json`, JSON.stringify(it, null, 2) + '\n');
+  const base = it.type === 'vawe:block' ? BLOCKS_OUT
+    : path.join(REGISTRY_OUT, { 'vawe:beat': 'beats', 'vawe:generator': 'generators' }[it.type] || 'blocks');
+  want.set(path.join(base, `${safeName(it.name)}.json`), JSON.stringify(it, null, 2) + '\n');
 }
 
-const have = fs.existsSync(OUT)
-  ? fs.readdirSync(OUT, { recursive: true }).filter((f) => f.endsWith('.json')).map((f) => f.split(path.sep).join('/'))
-  : [];
+// Every JSON file under either output root, labelled by its own root so a stray file is swept from
+// wherever it actually sits.
+const scan = (dir) => (fs.existsSync(dir)
+  ? fs.readdirSync(dir, { recursive: true }).filter((f) => f.endsWith('.json')).map((f) => path.join(dir, f))
+  : []);
+const have = [...scan(BLOCKS_OUT), ...scan(REGISTRY_OUT)];
+const label = (p) => path.relative(root, p);
 
 if (CHECK) {
   const bad = [];
-  for (const [rel, body] of want) {
-    const p = path.join(OUT, rel);
-    if (!fs.existsSync(p)) bad.push(`missing ${rel}`);
-    else if (fs.readFileSync(p, 'utf8') !== body) bad.push(`stale   ${rel}`);
+  for (const [p, body] of want) {
+    if (!fs.existsSync(p)) bad.push(`missing ${label(p)}`);
+    else if (fs.readFileSync(p, 'utf8') !== body) bad.push(`stale   ${label(p)}`);
   }
-  for (const rel of have) if (!want.has(rel)) bad.push(`orphan  ${rel}`);
+  for (const p of have) if (!want.has(p)) bad.push(`orphan  ${label(p)}`);
   if (bad.length) {
     console.error(`registry is STALE (${bad.length} file(s)), run \`make registry\`:`);
     for (const b of bad.slice(0, 20)) console.error('  ' + b);
@@ -260,16 +270,16 @@ if (CHECK) {
 }
 
 let wrote = 0;
-for (const [rel, body] of want) {
-  const p = path.join(OUT, rel);
+for (const [p, body] of want) {
   fs.mkdirSync(path.dirname(p), { recursive: true });
-  // Write-on-change: registry/ is committed, so an unchanged item must not churn git on every run.
+  // Write-on-change: registry/ and blocks/catalog/ are committed, so an unchanged item must not churn
+  // git on every run.
   if (!fs.existsSync(p) || fs.readFileSync(p, 'utf8') !== body) { fs.writeFileSync(p, body); wrote++; }
 }
 // Sweep items whose entry left the manifest: nothing points at them and a consumer would still fetch them.
-const stale = have.filter((rel) => !want.has(rel));
-for (const rel of stale) fs.rmSync(path.join(OUT, rel));
+const stale = have.filter((p) => !want.has(p));
+for (const p of stale) fs.rmSync(p);
 
 const n = (t) => items.filter((i) => i.type === `vawe:${t}`).length;
-console.log(`registry: ${items.length} items (${n('block')} blocks · ${n('beat')} beats · ${n('generator')} generators) · ${wrote} file(s) written → registry/`
+console.log(`registry: ${items.length} items (${n('block')} blocks · ${n('beat')} beats · ${n('generator')} generators) · ${wrote} file(s) written → blocks/catalog/ + registry/`
   + (stale.length ? `\n  removed ${stale.length} stale file(s)` : ''));
