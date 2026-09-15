@@ -69,7 +69,7 @@ const MANIFEST = [
   ['aspect', 'showcase-aspect',    'showcase-aspect.1x1',    'showcase/aspect-11.mp4',      520, 2.0, 1],
 
   // launch films. Two rows here used to be pixel recreations of other companies' marketing pages and
-  // were converted into fillable TEMPLATES (docs: CREDITS.md · "Third-party brands"). saas-hero-launch
+  // were converted into fillable TEMPLATES (docs: CONTRIBUTING.md). saas-hero-launch
   // is authored with `{type:"block"}` sugar, which now expands at LOAD time (core/engine/expand.js) rather
   // than a separate `make expand` step, so it renders straight off the source file.
   // Posters are chosen for the frame, not the midpoint: 28s is the saas film's number-and-chart beat,

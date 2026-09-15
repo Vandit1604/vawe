@@ -241,5 +241,5 @@ permissive open source license with no paid tier and no team-size limit:
 
 > **Free to use, modify, and distribute, for any purpose, including production and commercial use.**
 
-See the plain-English **[License FAQ](LICENSE-FAQ.md)** for the patent grant and attribution duties,
-and **[CREDITS.md](CREDITS.md)** for third-party attribution. Contributions and issues welcome.
+See the **[LICENSE](LICENSE)** for the full text and the patent grant, and **[NOTICE](NOTICE)** for
+third-party attribution. Contributions and issues welcome.
