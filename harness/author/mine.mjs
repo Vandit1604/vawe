@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // harness/author/mine.mjs · MINE beat blueprints out of the studied reference corpus (grammar/*.json).
 //
-// WHY. The another engine shot-template library (22 templates) was distilled from 178 real ads, not
+// WHY. A well-known shot-template library (22 templates) was distilled from 178 real ads, not
 // invented. vawe's 19 hand-invented blueprints (blueprints/index.mjs) went the other way, and 12 of
 // them have never been used once: an author reaching for a shape the invented set does not have falls
 // back to raw layers (engine-doctrine/CRAFT/BLUEPRINTS.md tells that story). This is the distillation step: read

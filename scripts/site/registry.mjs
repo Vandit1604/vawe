@@ -6,7 +6,7 @@
 //
 // WHAT THIS IS FOR. An outside agent, in someone else's project, wants to start from one of our
 // blocks. Today the only way to find one is to read blocks/catalog.mjs, which is our source, not a
-// contract. This emits the shadcn/another engine registry shape over the data we already keep, so an
+// contract. This emits a shadcn-style registry shape over the data we already keep, so an
 // agent can fetch an index, pick an item by name and tags, and know exactly what to write where.
 //
 // SOURCES (one each. Nothing here is re-derived and nothing is hand-typed):
@@ -15,9 +15,8 @@
 //   site/lib/block-frames.json  the measured ink rect of each block           (make blocks-scenes)
 //   site/public/assets/blocks/  a standalone scene + poster per block         (make blocks-scenes)
 //
-// ── DECISION 1: what `type` and `target` mean here, and why they are NOT another engine' answer ──
-// A another engine block IS a file: one .html composition, and `target` says where to copy it. A vawe
-// block is not a file. It is a named factory in blocks/index.mjs, reached from scene JSON as
+// ── DECISION 1: what `type` and `target` mean here ──
+// A vawe block is not a file. It is a named factory in blocks/index.mjs, reached from scene JSON as
 //   { "type": "block", "block": "card", "x": …, "y": …, "start": …, "dur": …, …props }
 // and expanded at build time by harness/author/expand-blocks.mjs. There is no per-block file to copy,
 // and inventing one (a .mjs extracted per block) would fork the library into copies that drift.

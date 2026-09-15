@@ -24,9 +24,8 @@ group: crosscutting
 
 `AGENTS.md` already carries every deliverable's doctrine, spread across its launch-video rules, the
 recreation section, and the demo/specimen section. That is complete but not routable: an agent reads
-the whole file to find the three sentences that apply to today's request. This table is the index
-another engine already proved out for the same problem: route once from a small table, read one small
-file, leave. Nothing here duplicates `AGENTS.md`; every route file points back at the CRAFT doc that
+the whole file to find the three sentences that apply to today's request. This table is the index:
+route once from a small table, read one small file, leave. Nothing here duplicates `AGENTS.md`; every route file points back at the CRAFT doc that
 already owns the doctrine.
 
 ## The route table (priority order: first matching row wins)

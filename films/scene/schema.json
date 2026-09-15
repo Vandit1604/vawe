@@ -1813,7 +1813,7 @@
     },
     "comp": {
      "type": "string",
-     "label": "Composition name (type:\"composition\"). A FIRST-PARTY hand-authored per-beat GSAP timeline from core/compositions/index.js (the safe form of another engine' one-timeline-per-beat model). The JSON names the comp + passes DATA via `props`; the code lives first-party, so untrusted input cannot inject. Use for bespoke multi-tween motion `parts`/blueprints can't reach (a token travelling a path while a check draws). e.g. \"pipelineFlow\"."
+     "label": "Composition name (type:\"composition\"). A FIRST-PARTY hand-authored per-beat GSAP timeline from core/compositions/index.js (a safe, hand-authored timeline-per-beat model). The JSON names the comp + passes DATA via `props`; the code lives first-party, so untrusted input cannot inject. Use for bespoke multi-tween motion `parts`/blueprints can't reach (a token travelling a path while a check draws). e.g. \"pipelineFlow\"."
     },
     "props": {
      "type": "object",

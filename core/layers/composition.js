@@ -1,5 +1,5 @@
 // core/layers/composition.js. The `composition` layer: a bespoke, hand-authored per-beat GSAP timeline,
-// named from JSON. This is the safe form of another engine' "one worker writes a timeline per frame" model:
+// named from JSON. This is a safe, hand-authored timeline-per-beat model:
 // the JSON carries only `comp` (a registry name) + `props` (DATA), never code, so untrusted input can name
 // a comp and fill labels but cannot inject script. The code lives in first-party `compositions/*.js`.
 //

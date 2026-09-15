@@ -1,5 +1,5 @@
 // scripts/brand/house-style.mjs: scaffold a brand's persisted DESIGN READ as declarative markdown, so the
-// planning skill reads taste instead of re-deriving it every video (the another engine "house style" pattern).
+// planning skill reads taste instead of re-deriving it every video.
 // Measured facts (faces, palette, motion, dominance) are auto-filled from themes/<name>.json; the
 // judgment lines (<…>) are yours to sharpen from the site study. Writes assets/brands/<name>/house-style.md.
 //

@@ -61,7 +61,7 @@ Building first is what stops the "tweak coords blind, re-render, repeat" spiral 
 ## The design spec (lock a look in one page)
 
 Before authoring a bespoke surface, fill this: it is the frame's contract, and every block/fragment obeys it.
-Adapted from another engine' design-spec; the values come from the brand study ([`../DESIGN-DATABASE.md`], `make brandspec`).
+The values come from the brand study ([`../DESIGN-DATABASE.md`], `make brandspec`).
 
 | Token | Decide | Example |
 |---|---|---|
@@ -76,8 +76,7 @@ Adapted from another engine' design-spec; the values come from the brand study (
 
 ### Check the frame against the spec AFTER you build it
 
-Borrowed close to verbatim from the reference system's
-`another engine-creative/references/design-adherence.md`. Run it after building, before the preview, because
+Borrowed close to verbatim from the reference notes. Run it after building, before the preview, because
 a spec nobody re-reads is a spec that was decoration.
 
 1. **Colours**: every hex in the composition appears in the spec's palette. **Flag any invented colour.**

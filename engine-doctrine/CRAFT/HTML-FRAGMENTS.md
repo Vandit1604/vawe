@@ -401,8 +401,7 @@ reading time the viewer controls, a fixed viewport, 30 frames a second, and H.26
 and the eye. Those conditions destroy a specific and short list of values, and nothing else:
 
 The single reason a set of frames reads thin is almost always this: they were designed at WEB values
-and rendered at 1920x1080. The vendored another engine reference states it as a table
-(`~/.claude/skills/another engine-creative/references/video-composition.md`), and every number in the
+and rendered at 1920x1080. The scale ratio below captures it as a table, and every number in the
 stage kit is now set from it:
 
 | | web | video |

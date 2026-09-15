@@ -1,5 +1,5 @@
-// compositions/index.js: the PER-BEAT TIMELINE registry (the safe form of another engine' "one worker
-// hand-writes a GSAP timeline per beat" model).
+// compositions/index.js: the PER-BEAT TIMELINE registry (a safe, hand-authored timeline-per-beat
+// model).
 //
 // A composition is a FIRST-PARTY builder that authors a bespoke, multi-tween GSAP timeline for one beat,
 // the expressiveness `parts` (per-child stagger) and recipes (measured motion) cannot reach: overlapping
@@ -227,7 +227,7 @@ export const COMPOSITION_REGISTRY = defineRegistry('composition', COMPOSITIONS, 
   catalog: {
     title: 'Compositions (bespoke per-beat timeline)',
     tag: 'composition',
-    intro: '`{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine\' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can\'t express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).',
+    intro: '`{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (a safe, hand-authored timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can\'t express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).',
     usage: (n, { j }) => j({ type: 'composition', comp: n, props: {}, start: 0.2, dur: 4.4 }),
     noPreview: 'a composition is a hand-authored timeline over data you pass. There is no neutral data for it.',
   },

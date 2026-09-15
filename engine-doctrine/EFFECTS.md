@@ -205,7 +205,7 @@ The tiktok figures are this repo's own portrait numbers carried over as fraction
 
 ## Compositions (bespoke per-beat timeline)  `[composition]`
 
-`{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can't express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).
+`{ "type":"composition", "comp":"<name>", "props":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat, the safe way to give one beat its own bespoke timeline without opening the whole engine to arbitrary code. JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can't express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).
 
 | name | what / when |
 |---|---|

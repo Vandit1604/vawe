@@ -1035,7 +1035,7 @@
       "id": "compositions-bespoke-per-beat-timeline",
       "title": "Compositions (bespoke per-beat timeline)",
       "tag": "composition",
-      "intro": "`{ \"type\":\"composition\", \"comp\":\"<name>\", \"props\":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (the safe form of another engine' one-timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can't express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).",
+      "intro": "`{ \"type\":\"composition\", \"comp\":\"<name>\", \"props\":{…} }`. A FIRST-PARTY hand-authored multi-tween GSAP timeline for one beat (a safe, hand-authored timeline-per-beat model). JSON names the comp + passes DATA; code lives in `compositions/index.js`. Reach for it when `parts`/blueprints can't express the choreography (overlapping tweens, a token travelling a path while a check draws). Pure (seeked).",
       "mode": "table",
       "note": null,
       "noPreview": "a composition is a hand-authored timeline over data you pass. There is no neutral data for it.",

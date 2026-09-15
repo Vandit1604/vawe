@@ -80,7 +80,7 @@ export const springStiff = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : 1 - Math.exp(-6.5 *
 
 // springEase({response, dampingFraction}). The iOS/SwiftUI spring as a closed-form EASING FACTORY: a
 // damped harmonic oscillator over normalised progress u∈[0,1]. `response` sets snappiness (lower = faster,
-// more frequency); `dampingFraction` (ζ) sets bounce. another engine doctrine: ζ=1.0 house default (no
+// more frequency); `dampingFraction` (ζ) sets bounce. House doctrine: ζ=1.0 default (no
 // overshoot), 0.8-0.85 "alive" (a whisper of overshoot), <0.55 don't (visible bounce). Returns a pure
 // function of u → seek-safe. This is "the iOS feel" without hand-tuning cubic-beziers.
 export function springEase({ response = 0.5, dampingFraction = 1 } = {}) {
@@ -301,7 +301,7 @@ export const EASINGS = {
   easeInElastic, easeInOutElastic, easeInBounce, easeOutBounce, easeInOutBounce,
   // velocity-ramp aliases: rush = accelerate away, brake = decelerate in, ramp = slow-fast-slow
   rush: (t) => accel(t), brake: (t) => decel(t), ramp: (t) => speedRamp(t),
-  // spring physics (another engine-style): premium settle by default, springStiff = no overshoot
+  // spring physics: premium settle by default, springStiff = no overshoot
   spring: (t) => spring(t), springStiff: (t) => springStiff(t),
   // A HOLD, the one interpolation in AE's set this table had no name for: the value does not travel,
   // it JUMPS at the far key. A stepped swap is a real motion-graphics move (a counter that ticks, a
@@ -493,8 +493,8 @@ export function spring(t, { bounce = 0.3, settle = 0.6 } = {}) {
 }
 
 // spring as a t→t EASING (settles by t=1), so any keyframe track, `motion[].ease`, count `ease`,
-// cut timing, can overshoot-and-settle organically. Same idea as another engine's Easing.spring /
-// another engine' springEase, pure in t. Overshoots >1 mid-way (that's the point); lands exactly at 1.
+// cut timing, can overshoot-and-settle organically. Pure in t. Overshoots >1 mid-way (that's the
+// point); lands exactly at 1.
 //
 // spring() is a damped oscillator in SECONDS, and it has not stopped ringing at t=1, sampling it
 // directly over [0,1] made `spring-bouncy` land at 0.96 and STAY there, i.e. an element eased with
@@ -649,7 +649,7 @@ export const slide = (t, dir = 'left', dist = 60, warp = null) => {
 };
 export const applyT = (el, styles) => { if (el) Object.assign(el.style, styles); };
 
-// ---------- seeded, deterministic randomness (another engine `random()` parity, safe for purity) ----------
+// ---------- seeded, deterministic randomness (safe for purity) ----------
 // hashSeed: number|string -> uint32. random(seed) -> [0,1). Same seed always yields the same value,
 // so per-item jitter/scatter stays byte-identical across render order.
 export function hashSeed(seed) {
@@ -720,7 +720,7 @@ export function kenBurns(t, dur, { from = 1.0, to = 1.07, fx = 0.5, fy = 0.42, e
   return { transform: `scale(${lerp(from, to, p).toFixed(4)})`, transformOrigin: `${(fx * 100).toFixed(1)}% ${(fy * 100).toFixed(1)}%` };
 }
 
-// ---------- sequencing (another engine Sequence/TransitionSeries parity), pure in n ----------
+// ---------- sequencing, pure in n ----------
 // sequence(n, fps, segments): like track() but with cross-segment transition windows. Each segment
 // = { name, dur, transition? }. Returns the active segment plus `enter` (0→1 over the leading
 // transition) and `exit` (0→1 over the trailing transition), so a scene can drive an in/out

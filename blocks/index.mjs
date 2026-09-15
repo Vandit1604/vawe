@@ -1,7 +1,7 @@
 // blocks/index.mjs. The TASTE LIBRARY's assembly point. It holds no factories: it DISCOVERS them.
 //
 // WHY THIS EXISTS: agent-authored beats regress to hollow (a word in a box, a static list, an
-// unbacked claim). The fix another engine proved: compose from pre-vetted blocks instead of authoring
+// unbacked claim). The fix: compose from pre-vetted blocks instead of authoring
 // structure from scratch every time. Each factory in blocks/*.mjs is a PURE function of props → an
 // array of scene-layer JSON (absolute-positioned, timed, animated) that is already tasteful. You call
 // them in an authoring/transform script and spread the result into `scene.layers`.

@@ -331,7 +331,7 @@ export function applyTheme(theme) {
 // flush exactly once per rendered frame, timers fire when the virtual clock passes their due time,
 // and Math.random is reseeded per frame (mulberry32) so stochastic code is byte-identical across
 // runs and render orders. Installed once in boot(); __vt.set(n, fps) runs before every
-// renderFrame(n). (The another engine VIRTUAL_TIME_SHIM idea, adapted to the boot() contract.)
+// renderFrame(n). (A virtual-time-shim pattern, adapted to the boot() contract.)
 export function installVirtualClock() {
   if (typeof window === 'undefined' || window.__vt) return window?.__vt;
   const vt = { ms: 0, frame: 0 };
@@ -536,7 +536,8 @@ export async function boot(build) {
     applyTheme(theme); // once, pre-first-frame: pure (identical every frame)
     // load the fonts the THEME actually declares (not just the static list above) at every weight a
     // scene might use, so a brand's face is never silently swapped for the generic fallback. This is
-    // the "load what you use" rule (how another engine ties each font to a render-blocking handle).
+    // the "load what you use" rule: tie each font to a render-blocking handle so it can't
+    // silently fall back.
     try {
       const fams = [...new Set(Object.values(theme.type || {}))].filter(Boolean);
       await Promise.all(fams.flatMap((fam) => [400, 500, 600, 700, 800].map((w) => document.fonts.load(`${w} 100px '${fam}'`))));

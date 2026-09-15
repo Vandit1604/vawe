@@ -19,7 +19,7 @@ group: process
 
 ## Why no score
 
-another engine's skills-evals and another engine both refuse an aesthetic score, and this harness follows them.
+This harness refuses to output an aesthetic score.
 A number that claims to measure "looks better" trains people to chase the number instead of the film.
 It also hides real disagreement: two people can watch the same clip and reach different verdicts, and a
 single score erases that instead of surfacing it. So the machine checks only what a machine can check
