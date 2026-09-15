@@ -42,6 +42,12 @@ COPY assets/brands ./assets/brands
 # Font binaries are deliberately NOT committed (redistribution), so a clean checkout has none, and
 # boot() blocks on document.fonts for every registered face, so the editor would hang without them.
 # fonts.mjs uses only node builtins, hence no install needed here.
+#
+# It reads exactly two repo paths: assets/fonts (which it writes) and this lock, which it refuses to
+# run without ("Every face would read as unlocked"). The lock moved to harness/media/ in the layout
+# pass and no COPY followed it, so the build died here. docker-check reads COPY lines and cannot see
+# what a RUN step opens, which is why this one arrived as a failed deploy rather than a failed gate.
+COPY harness/media/fonts.lock.json ./harness/media/fonts.lock.json
 RUN node generators/media/fonts.mjs
 
 # --- the site ---

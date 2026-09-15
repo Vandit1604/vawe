@@ -31,6 +31,8 @@
 !scripts
 # The CLI image takes expand-blocks.mjs out of harness/author, moved out of scripts in the harness split.
 !harness/author/expand-blocks.mjs
+# generators/media/fonts.mjs refuses to run without its lock, and the builder stage runs it.
+!harness/media/fonts.lock.json
 # generators/ bakes the standing assets. Both images RUN generators/media/fonts.mjs to fetch the
 # faces, so the directory has to survive the `**` above or COPY fails at build and nowhere else.
 !generators
