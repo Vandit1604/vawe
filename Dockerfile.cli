@@ -57,7 +57,7 @@ COPY harness/author/expand-blocks.mjs ./harness/author/expand-blocks.mjs
 COPY generators/media/fonts.mjs ./generators/media/fonts.mjs
 COPY films/scene/scene.html films/scene/scene.js films/scene/props.js \
      films/scene/scene.css films/scene/schema.json films/scene/sample.json ./films/scene/
-COPY CREDITS.md LICENSE-FAQ.md ./
+COPY NOTICE ./
 
 # Font binaries are deliberately not committed (redistribution), and boot() blocks on document.fonts
 # for every registered face, so an image without this step renders nothing. fonts.mjs uses only node
