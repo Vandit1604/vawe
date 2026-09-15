@@ -20,7 +20,7 @@ authoring, this sheet had a gap: surface it, do not improvise.
     theme        themes/vawe.json          the shipped brand, unmodified
     ground       #ffffff white  /  #2563eb cobalt        alternating, one flip per cut
     ink          #0f1620 on white   ·   #ffffff on cobalt
-    sans         Anybody, wdth 105 for display          (DESIGN.md's static width role)
+    sans         Anybody, wdth 105 for display          (site/DESIGN.md's static width role)
     mono         JetBrains Mono, for anything literal: JSON, file names, counts
     grain        on, 0.02, every window
 
