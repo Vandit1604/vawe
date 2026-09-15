@@ -1,4 +1,4 @@
-// Vawe Company License 1.0: see LICENSE at the repository root.
+// Licensed under the Apache License 2.0: see LICENSE at the repository root.
 // core/canvas-kind.js: what kind of context a canvas holds, answered WITHOUT asking for one.
 //
 // `canvas.getContext('2d')` is not a question, it is a CONSTRUCTOR. On a canvas that holds no context

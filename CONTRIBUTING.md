@@ -12,9 +12,9 @@ already gone wrong and why the guard exists.
 
 ## Licence, first, so nobody wastes an afternoon
 
-Vawe is **source-available, not OSI open source**. Read `LICENSE` and `LICENSE-FAQ.md` before you build
-anything on it. Individuals and small teams use it free; larger organisations using it in production
-need a commercial licence. Contributions are accepted under the same licence.
+Vawe is licensed under the **Apache License 2.0**. Use it, change it, ship it, commercially or not:
+keep the notices, and the patent grant comes with it. `LICENSE` is the full text and `LICENSE-FAQ.md`
+answers the usual questions. Contributions are accepted under the same licence.
 
 ## Getting it running
 
