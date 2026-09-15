@@ -592,6 +592,10 @@ boot((data, fps, theme, canvas) => {
     // map a painted pixel back to the JSON that produced it: studio's picker hit-tests the frame and
     // needs to answer "which layer is this", and `track` cannot answer it because an author may set it.
     el.dataset.idx = String(idx);
+    // The author's OWN id, mirrored onto the element so a probe tool can find a layer by the name the
+    // scene JSON gave it instead of re-deriving the array index (`make probe-frame`, docs/CRAFT). Not
+    // read by anything in the render itself, same footing as data-idx above.
+    if (L.id) el.dataset.id = String(L.id);
     el.dataset.start = String(L.start ?? 0);
     if (L.duration != null) el.dataset.duration = String(L.duration);
     el.dataset.track = String(L.track ?? idx);

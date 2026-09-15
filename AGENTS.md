@@ -45,6 +45,7 @@ Skills live in `skills/` as plain docs; Claude Code loads them on demand, others
 ```bash
 make dev    D=path/to/video.json  # THE ITERATION LOOP. Build, draft-render, open. No gates, no audit.
 make dev    D=path/to/video.json BEAT=<n|name>|JOIN=<n>|FROM=<s> TO=<s>  # only that slice, not the whole film
+make probe-frame D=path/to/video.json T=<s> ID=<id>[,<id>...]  # where layer ID is at time T, and what covers it
 make check  D=path/to/video.json  # every gate, every finding, ZERO consequence (runs preflight for you)
 make screen F=<file> THEME=<t>    # design a product screen: preview + impeccable + content + readiness
 make content-check D=<f> REF=<r>  # is this film's content as rich as the reference it studied, per act
