@@ -41,12 +41,15 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [engine-doctrine/EFFECTS.md](../../engine-doctrine/EFFECTS.md) | choosing an effect and you want to see the whole arsenal before defaulting to rise+fade | every registered effect in the engine, generated from the engine registries so it cannot drift |
 | [engine-doctrine/MOTION-SNIPPETS.md](../../engine-doctrine/MOTION-SNIPPETS.md) | you know the motion you want and need the exact keys to type | copy-paste atomic snippets keyed to the schema: entrances · overshoot/spring · counts · cameras |
 | [engine-doctrine/PRIMITIVES.md](../../engine-doctrine/PRIMITIVES.md) | writing scene JSON and you need to know what a layer may contain | every primitive and prop · the responsive one-source→every-aspect model · the motion math exports |
+| [engine-doctrine/README.md](../../engine-doctrine/README.md) | you cannot find the doctrine you need from AGENTS.md's routing table alone | what engine-doctrine/ is: the ~120-file doctrine corpus (craft rules, mistakes log, codemaps, rules index), indexed not memorised |
 | [engine-doctrine/RESEARCH/AI-AGENT-BOOK.md](../../engine-doctrine/RESEARCH/AI-AGENT-BOOK.md) | somebody proposes an agent-architecture change here, or asks what an outside source says about our prompt, our catalogue, our gates or our critic panel | what the free book 'AI Agents in Depth' changes in THIS repo, what it independently confirms, and what it recommends that is wrong for a deterministic renderer |
 | [engine-doctrine/RESEARCH/MOTION-CANON.md](../../engine-doctrine/RESEARCH/MOTION-CANON.md) | you want to know what the motion-design literature says about a rule in this repo, or what the engine still cannot express | the canonical sources, what could actually be read of each, the findings that survive the four-part bar, the rules the canon independently confirms, and the graph-editor gaps |
 | [engine-doctrine/RESEARCH/PROMPT-EVAL.md](../../engine-doctrine/RESEARCH/PROMPT-EVAL.md) | somebody proposes moving, cutting or rewriting a section of CLAUDE.md, or asks what the prompt is measurably worth | the one recorded ablation of a CLAUDE.md section, the procedure that produced it, what it found, and what it is not allowed to prove |
 | [engine-doctrine/RULES/svg-inline.md](../../engine-doctrine/RULES/svg-inline.md) | writing an svg layer, or setting src on an image/video/html layer | svg is inline d/viewBox/stroke/draw, never a src; and how a repo path in src actually resolves |
 | [engine-doctrine/SCENE-QUICK.md](../../engine-doctrine/SCENE-QUICK.md) | you know the vocabulary and just need the shape of a scene file | the one-page cheat sheet: scene shape · layer kinds · the fields you reach for most |
 | [engine-doctrine/vawe-rules.md](../../engine-doctrine/vawe-rules.md) | you need the authoritative, engine-generated rules for writing a scene.json | the generated rulebook: if it is in this file, the engine really reads it |
+| [grammar/README.md](../../grammar/README.md) | checking whether a claim about how reference films move is actually supported by evidence | what grammar/ is: mined motion data from real reference films, and the claims tested against it |
+| [skills/README.md](../../skills/README.md) | adding a new Claude Code skill, or looking for which skill covers a step in authoring | what skills/ is: one folder per vendored/authored Claude Code skill, each a SKILL.md loaded on demand |
 
 ## Craft · front-to-back & cross-cutting
 
@@ -109,6 +112,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 
 | Doc | Reach for it when… | It answers |
 |---|---|---|
+| [directions/README.md](../../directions/README.md) | picking or writing a named design direction (colour, type, motion feel) for stage 4, design | what directions/ is: named style packs (bold, editorial, glass, mesh, mono, technical, warm), one JSON each |
 | [engine-doctrine/CRAFT/AUTHOR-THE-FRAME.md](../../engine-doctrine/CRAFT/AUTHOR-THE-FRAME.md) | a beat needs a bespoke SVG/HTML dataviz or diagram | authoring a bespoke inline-SVG beat · the `window.__timelines` seek bridge · the per-child-choreography gap |
 | [engine-doctrine/CRAFT/BLOCKS-HTML-STATUS.md](../../engine-doctrine/CRAFT/BLOCKS-HTML-STATUS.md) | you are about to convert another blocks/*.mjs family to html output, or wondering why one family still returns native layers | which factories are already html, and which are deliberately native, with the reason |
 | [engine-doctrine/CRAFT/COLOR.md](../../engine-doctrine/CRAFT/COLOR.md) | authoring a `theme` palette, choosing bg/accent | build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG |
@@ -144,6 +148,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [engine-doctrine/RULES/text-on-flat.md](../../engine-doctrine/RULES/text-on-flat.md) | placing a headline over a background fx, a blob, or a gradient | why a headline must sit on a flat patch, not a moving blob or gradient hot spot, and the 3:1 floor it is measured against |
 | [engine-doctrine/RULES/video-scale.md](../../engine-doctrine/RULES/video-scale.md) | sizing a hero graphic or any on-screen type | the hero-ink width band and the type scale a video needs, against the web sizes an agent defaults to |
 | [engine-doctrine/RULES/world-turns.md](../../engine-doctrine/RULES/world-turns.md) | authoring the bg block of any scene | why the backdrop must change tone per beat, and the 82% of the library that ships one window |
+| [themes/README.md](../../themes/README.md) | picking or writing a named colour/type theme for a scene's top-level `theme` field | what themes/ is: named theme JSON files (argus, brew, cadence, default, linear, mercury, and more), one per look |
 
 ## Craft · how full · how it sounds
 
@@ -171,7 +176,9 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [engine-doctrine/MISTAKES.md](../../engine-doctrine/MISTAKES.md) | you hit something odd in the engine, or you just fixed one and must log it | the one-line index of past mistakes; the full reasoning lives in git history |
 | [engine-doctrine/MOTION-CRAFT.md](../../engine-doctrine/MOTION-CRAFT.md) | picking a preset, a cut or a sting and you need the mechanics behind it | the stored rules of good motion: timing, physics, the gates that enforce each one |
 | [engine-doctrine/SAFEGUARDS.md](../../engine-doctrine/SAFEGUARDS.md) | a check blocks or flags a film and you need to know whether it should adapt (clamp, tolerate, reclassify, skip) or stay a hard refusal | which safeguards adapt to the film and how · the shared registry harness/lib/safeguards.mjs and its adaptation line · which checks stay hard and why · how adaptation relates to authoring.allow waivers |
+| [films/README.md](../../films/README.md) | finding, saving, or reading a scene JSON, or the per-video artifacts that go with it | what films/ holds: one 'module: scene' JSON per video plus its sidecar storyboard/design/brief files, under films/scene/ |
 | [recipes/README.md](../../recipes/README.md) | you want a film to move the way a real reference film moves: its spine, its seams, how things enter and exit | what a recipe is, its format, why every recipe names its source video, and how to add one |
+| [scripts/README.md](../../scripts/README.md) | writing or changing repo maintenance tooling: a gate driver, a capture tool for one film, a | what scripts/ is: repo maintenance and gates, split into brand/ (site reflection: palette, sections, lookbook), hooks/ (git hook library), site/ (docs/marketing-site build helpers) |
 
 ## The engine & its history
 
@@ -179,6 +186,9 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 
 | Doc | Reach for it when… | It answers |
 |---|---|---|
+| [blocks/README.md](../../blocks/README.md) | composing a beat from pre-vetted structure instead of authoring layers from scratch | what blocks/ is: the taste library, pure prop-to-layers factories, assembled through index.mjs |
+| [cli/README.md](../../cli/README.md) | publishing or changing the npm-installed `vawe` command | what cli/ is: the npx wrapper around the Go renderer, and the three CLI behaviours it adds |
+| [core/README.md](../../core/README.md) | implementing or changing a motion primitive, layer type, background, transition or any other | what core/ is: the JS motion/layout/effect library renderFrame(n) reads; one subfolder per capability family |
 | [engine-doctrine/BUGS/chrome-boxshadow-raster-history.md](../../engine-doctrine/BUGS/chrome-boxshadow-raster-history.md) | two renders of the same film disagree on a handful of frames and nothing in our code explains it | the reduced case for an upstream Chrome raster bug: what splits two tabs, what does not, and what is still needed to make it minimal |
 | [engine-doctrine/CODEMAPS/ARCHITECTURE.md](../../engine-doctrine/CODEMAPS/ARCHITECTURE.md) | changing the engine itself, not a video | the system map: JSON → validate → scene.html → renderFrame(n) → Go renderer → mp4, and who owns what |
 | [engine-doctrine/CODEMAPS/DOC-DISCOVERY.md](../../engine-doctrine/CODEMAPS/DOC-DISCOVERY.md) | changing how docs are indexed, or wondering why the index is generated rather than written | what the sources say about CLAUDE.md size, Agent Skills progressive disclosure, AGENTS.md and llms.txt · the measurement of this repo · why this mechanism over the alternatives |
@@ -187,7 +197,11 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 | [engine-doctrine/ROADMAP.md](../../engine-doctrine/ROADMAP.md) | proposing new engine work, or checking whether an effect already exists | the effect surface: which named effects ship, which are NOT BUILT, what is built and unused, and the one rule that governs all of it |
 | [generators/README.md](../../generators/README.md) | deciding whether a script belongs in generators/ or somewhere else | what generators/ is: it bakes an asset a film later loads, as opposed to core/ which assembles a frame |
 | [generators/sim/sims/README.md](../../generators/sim/sims/README.md) | reaching for a physics or particle simulation inside a beat | the simulation harness, what it guarantees about determinism, and how a sim reaches the frame |
+| [harness/README.md](../../harness/README.md) | writing or changing a per-film authoring tool (VO, captions, beat sync, assembly, critics) or | what harness/ is: the film-making tools, split into author/ (per-film scripts), dev/ (local dev tools), lib/ (shared helpers), live/ (hooks), media/ (VO/captions/asset wiring) |
 | [mcp/README.md](../../mcp/README.md) | running or changing the MCP server that exposes this engine to other agents | the server layout: which tool does what, how a draft becomes a render, and where uploads and pricing live |
+| [quality/README.md](../../quality/README.md) | adding, changing, or looking up one of the ~120 gates a scene or the repo itself is checked | what quality/ is: every gate script (gates/), its fixtures (fixtures/), ratchet baselines (baselines/), and recorded runs (runs/), plus the audit entry point |
+| [registry/README.md](../../registry/README.md) | publishing or reading the installable-effects registry a caller (or the MCP server) browses | what registry/ is: registry.json, the generated catalog of every installable block/beat as a layer object, plus its generators/ source data |
+| [renderer/README.md](../../renderer/README.md) | changing the Go render pipeline: frame capture, encode, audio mux, the scene file server, the queue | what renderer/ is: the Go binary (renderer/cmd/render) that drives Chrome headless per frame and muxes the output, split into cmd/, internal/, harness/ |
 | [studio/README.md](../../studio/README.md) | changing the studio UI, adding a panel, or working out where its code lives | what studio/ is: the author-facing local preview server and its shell, split into a server, a page assembler and real css/js files |
 
 ## Skills

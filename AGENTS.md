@@ -4,6 +4,21 @@ Canonical, tool-neutral doctrine for the vawe video engine: works the same for C
 
 This repo turns **one self-describing JSON → one rendered video** (60fps mp4 final, 30fps with `--draft`, `renderer/cmd/render/main.go:30`; five canvases, `core/layout/safe.js:35`: `16:9` `9:16` `1:1` `4:5` `4:3`, an unnamed ratio fit to the long edge at 1920). Exactly **one module: `scene`**, an open canvas of **24 layer types** (`ls core/layers/`) plus camera · transitions · captions; `html` is a picture.
 
+## The repo, in seven domains  `[eye]`
+
+Twenty-one top-level folders, flat by choice; each carries its own README with the detail. This table
+groups them so a reader sees seven concerns, not twenty-one names.
+
+| domain | folders | what it covers |
+|---|---|---|
+| engine | `core` `blocks` `registry` `generators` `grammar` `directions` `themes` | the capability vocabulary and the data packs it reads |
+| renderer | `renderer` `cli` | the Go render pipeline and its npm wrapper |
+| authoring | `harness` `scripts` `recipes` `studio` | the tools and loop used to write and iterate on one film |
+| quality | `quality` | every gate a scene or the repo itself is checked against |
+| content | `films` `assets` | the videos themselves and the standing assets they load |
+| knowledge | `engine-doctrine` `skills` `docs-site` | doctrine, on-demand skills, and the docs site that publishes it |
+| apps | `site` `mcp` | the marketing site and the MCP server around the engine |
+
 ## THE EIGHT STAGES, IN ORDER  `[gated: harness/live/stage-gate.mjs]` `[live: harness/live/stage-say.mjs]`
 
 **Read this first.** `make stage D=<film>` reads the files on disk, so it can never disagree with the repo, and says which stage a film is in and the ONE next command.
