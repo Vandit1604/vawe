@@ -28,7 +28,15 @@ import "../effects.css";
  */
 
 const ix = index as Index;
-const BODY = bodies as Record<string, string>;
+// A snippet is USUALLY the authoring JSON as text, but 10 of the 695 entries (the svg path
+// generators, the theme look keys) are stored as a real object rather than a string. The old cast
+// said Record<string, string> and was simply false: it typechecked by assertion, handed an object to
+// deriveKnobs, which JSON.parse'd "[object Object]", threw, and silently gave those pages no knobs.
+// Type what is actually in the file and serialize the object form, which is what the page shows
+// anyway.
+const BODY = bodies as Record<string, string | object>;
+const snippet = (v: string | object | undefined) =>
+  v == null ? "" : typeof v === "string" ? v : JSON.stringify(v, null, 2);
 
 // site/app/arsenal/effects/[stem]/ is 4 directories under site/ — same depth the lib/*.json
 // imports above already climb, just walked at runtime instead of by the bundler, because a still's
@@ -120,7 +128,7 @@ export default async function EffectDetail({ params }: { params: Promise<{ stem:
   const hit = find(stem);
   if (!hit) notFound();
   const { family, entry, prev, next } = hit;
-  const json = BODY[stem] ?? "";
+  const json = snippet(BODY[stem]);
   const { knobs, bodyType } = deriveKnobs(json, entry.name);
   const related = relatedFor(family, entry);
 
