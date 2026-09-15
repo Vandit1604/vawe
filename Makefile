@@ -133,6 +133,14 @@ dead-branch: ## [maintenance] a ternary whose arms are identical: a decision tha
 doc-refs: ## [maintenance] every `make <target>` and every repo path the docs NAME must exist, and every Makefile recipe must
 	@node quality/gates/doc-refs.mjs $(if $(JSON),--json,)
 
+# make skill-reach: does anything actually route an agent to this skill? doc-refs checks that a link
+# resolves and discovery checks that a registry entry can be found; neither checked whether a
+# skills/*/SKILL.md is ever POINTED AT. vawe-review-loop carried the judge loop's stopping rule and
+# nothing named it from AGENTS.md, engine-doctrine/CRAFT/ROUTING.md, the Makefile, or another skill,
+# so it was unreachable, same failure class as an unrouted doc, one layer up.
+skill-reach: ## [maintenance] every skills/*/SKILL.md is routed to from AGENTS.md, ROUTING.md, the Makefile, or another skill
+	@node quality/gates/skill-reach.mjs $(if $(JSON),--json,)
+
 # make rung: which rules in CLAUDE.md and engine-doctrine/CRAFT are enforced by something, and which are only prose?
 # Every non-[eye] tag has to NAME its mechanism, and the named gate, hook, command or file:line has to
 # exist. LIST=1 prints the [eye] worklist instead; STAMP=1 records today's [eye] count as the ceiling.
