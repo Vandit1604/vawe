@@ -270,7 +270,10 @@ not: "the defaults this film refuses, in your own words"
   apart. An UNSTATED junction is left exactly as it was: staging a cause the storyboard never wrote down
   would be inventing one, not reading one off it. (`layers[].start` also legally accepts a live relative
   reference, `"otherId.end+0.5"`, same for `transitions[].at` and `cameraMove[].start`; resolved to a
-  real number at load by core/timeline/relative-time.js, so every gate reads a plain number already.)
+  real number at load by core/timeline/relative-time.js, so every gate reads a plain number already.
+  A scene that also declares top-level `beats: [{id,start,duration}]` (written by `make assemble` from
+  this storyboard) gets the same grammar keyed to a BEAT instead of a layer, `"beat:<id>.start"` /
+  `"beat:<id>.end"` plus an optional offset, legal on every field above PLUS a bg window's `from`/`to`.)
 
   TWO MORE FIELDS, TWO MORE QUESTIONS. `mechanism:` is HOW it moves (count-up, slow push, kinetic reveal).
   `becomes:` is WHAT IT TURNED INTO, written as "the X becomes the Y". A preset name answers the
