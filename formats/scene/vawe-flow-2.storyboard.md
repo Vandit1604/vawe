@@ -8,7 +8,7 @@ attention: "the eye follows the camera as it flattens out of a tilt, then the in
 threads: "a cursor and a caret that cause every change + one exit axis per act (x for the terminal/timeline/films chain, y only for the final rise into the mark) + a ground that takes its colour from whatever is on screen + one continuous camera travel, never still"
 format: 1920x1080
 theme: "themes/vawe.json"
-duration: 14.48s
+duration: 17.45s
 spectacle: "beat 7 (Your films) · the ground re-tints to each playing film's own colour as the ring browses, live footage not stills · the film's one loud moment"
 not: "no hard cut anywhere, no centred slide deck, no gradient hero, no stock photography, no copy vawe cannot back, no second typeface, no sound bed, no swipe-to-pick moment standing beside Your films, no static camera hold longer than a beat needs"
 craft:
@@ -73,6 +73,7 @@ craft:
 - borrows: "example-madera's window-focus-rack (blurred and tilted at 0s, sharp and closer by 4.54s) -> vawe-flow-2's terminal tilt-to-flat open"
 - picture: the terminal window tilted at open, straightening as prior commands land: real prior work, an empty prompt bar waiting below
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html KIND=editor REF=example-madera ACT=1
+- transition_why: new-place-energy · momentum · expressive
 - fragment: formats/scene/vawe-flow-2.terminal.html
 
 ## Beat 3: Install, typed and done (2.15s-4.0s)
@@ -92,6 +93,7 @@ craft:
 - weight: quiet
 - picture: "npm install -g vawe" fully typed, the green "added 1 package" line already landed beneath it
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
+- transition_why: same-object · continuity · invisible
 - fragment: formats/scene/vawe-flow-2.terminal.html
 
 ## Beat 4: Typed prompt, camera zooms in (4.0s-5.62s)
@@ -111,6 +113,7 @@ craft:
 - weight: quiet
 - picture: the prompt bar mid-type, several words already settled to ink, the current word still in its accent colour, framed tight
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
+- transition_why: same-object · continuity · invisible
 - fragment: formats/scene/vawe-flow-2.terminal.html
 
 ## Beat 5: Send and render (5.62s-6.32s)
@@ -129,6 +132,7 @@ craft:
 - weight: quiet
 - picture: the return glyph under the cursor, the output line pulsing green
 - design: make screen F=formats/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
+- transition_why: same-object · continuity · invisible
 - fragment: formats/scene/vawe-flow-2.terminal.html
 
 ## Beat 5b: Type-only card, tile grid (6.32s-7.22s)
@@ -136,10 +140,11 @@ craft:
 - shot: full-bleed, one line of white type over a still image
 - onscreen: "Every film here fits in one file."
 - trigger: the terminal's send pulse clears the frame, ahead of the timeline
-- mechanism: a blue tilted tile-grid photo fills the frame with a slow scale drift; the line blurs up into place over it in the theme sans, then exits fast; the camera keeps its one push moving through the card, never stopping
-- eye: the terminal's exit -> the tile-grid image drifting in under the line -> the line blurring up and holding -> a fast exit into the timeline's own arrival
+- mechanism: the terminal rushes out LEFT, accelerating, streaked with motion blur from its own speed; a few frames of the plain tile-grid photo hold alone; "Every film here fits in one file." then enters from the RIGHT on the same axis, word by word, blurred in and braking to rest; the camera recentres in one smooth move, no push into a box
+- eye: the terminal rushing off left, blurred -> a beat of plain tile-grid ground -> the line's words arriving from the right, braking to rest
 - becomes: the terminal's ink ground becomes one held photograph and line, which becomes the timeline
-- why: the owner's own request, to use this image as a background for a short type-only moment here; the ground change (dark terminal ink to the image, then to the timeline's paper ground) is a declared change, not a flash, and the film's own site copy (site/app/page.tsx:195) supplies the line
+- why: the owner's own request, to use this image as a background for a short type-only moment here; the ground change (dark terminal ink to the image, then to the timeline's paper ground) is a declared change, not a flash, and the film's own site copy (site/app/page.tsx:195) supplies the line; the exit/arrival axis and gap are the madera flow-seam (recipes/recipes.json: flow-seam), matching the reference the owner named
+- transition_why: new-place-energy · momentum · expressive
 - duration: 0.90s
 - object_in: center@1920x1080
 - object_out: center@1920x1080/op:0
@@ -157,6 +162,8 @@ craft:
 - eye: the terminal window -> a fast exit with motion blur carries the eye left as the ink ground itself becomes the timeline's -> the first track and clip arriving from the left
 - becomes: the terminal becomes empty ink ground, then the first timeline track and clip
 - why: "the terminal ground can chain to the next scene with camera movement" is the owner's own line: the boundary is carried by the ground's own colour and the camera's own travel, not a wipe
+- note: the headline card (card-a) now exits UP with blur instead of left, and the timeline (scene5) now enters from BELOW instead of the right, after a short gap: T2 (terminal exits left) and T4 (film strip travels left) already move left, so a third leftward beat in a row read as monotonous against the madera reference, which changes axis between transitions.
+- transition_why: contrast · lift · expressive
 - duration: 0.80s
 - recipe: flow-seam at=4.7 out=terminal in=timeline axis=x
 - object_in: center@40x40/op:0
@@ -185,28 +192,28 @@ craft:
 - weight: strong
 - picture: the fully assembled timeline, several tracks deep, real clip thumbnails and labels
 - design: make screen F=formats/scene/vawe-flow-2.timeline.html REF=example-madera ACT=3
+- transition_why: same-object · continuity · invisible
 - fragment: formats/scene/vawe-flow-2.timeline.html
 
-## Beat 8: Your films (9.97s-12.97s)
+## Beat 8: Your films (9.88s-15.14s)
 - type: payoff_withheld
-- shot: wide, full-bleed wall, camera drifting then pushing to centre
-- onscreen: "(a wall of six real vawe films, all playing at once, then a push into vawe launch)"
+- shot: wide, full-bleed horizontal film strip, camera tracking then pushing to centre
+- onscreen: "(the timeline's own Frames row grows into a film strip, the camera tracks past three playing films, then pushes into vawe launch)"
 - trigger: the timeline finishing its build frees the frame for what it produced
-- mechanism: the assembled timeline exits left with motion blur; a wall of six real vawe films fills the frame edge to edge, all six PLAYING at once (moving footage, never a still, no fast switching between them); the camera drifts slowly across the wall, left toward right, then pushes straight into vawe launch at the wall's own centre and holds; as the push lands, the ground takes vawe launch's own colour
-- eye: the assembled timeline -> the whole wall of six playing films as the camera drifts across it -> vawe launch at the wall's centre, held as the push lands
-- becomes: the timeline becomes a wall of six real films playing together, then just vawe launch, held, as the ground takes its colour
-- why: the owner removed the ring's fast film switching and asked for one slower move instead, a wall of six playing films with a slow drift, then a push into vawe launch, so the proof that vawe's output is real reads as one held look rather than a series of quick swaps
-- duration: 3.00s (before the film's own slower 0.85 tempo)
-- recipe: flow-seam at=7.3 out=timeline in=films axis=x
-- object_in: center@1600x820
-- object_out: center@960x716
-- motion: [data-part="films-wall"]@widen:cinematic; [data-part="film-card"][data-film*="vawe-launch"]@growUp:professional
+- mechanism: the timeline's Frames row (four of its seven thumbnails, measured) grows directly into four big playing film cards on one horizontal strip, a shared-element morph with no fade-swap; the camera tracks the strip past looks-reel, explainer and vawe-teaser at about 1.2s readable-hold each, then settles about 1.5s on vawe launch with its in-point on the wordmark; the camera then pushes in until that word matches the mark beat's own wordmark position, while the ground turns from dark to white under the crossfade
+- eye: the timeline's Frames row -> the same frames growUp into a strip of four playing films -> the camera pans past looks-reel, explainer, vawe-teaser in turn -> vawe launch, settled and the camera pushes in
+- becomes: the timeline's thumbnail row becomes the film strip; the strip becomes just vawe launch, pushed in on its own logo
+- why: the owner rejected the flyin corridor (two mirrored walls); the frames the viewer just watched being built are the same frames that become the films, a same-object relationship, so the strip states its own logic instead of an arbitrary set-piece
+- duration: 5.26s (before the film's own slower 0.85 tempo)
+- transition_why: new-place-energy · momentum · expressive
+- object_in: center@1332x56
+- object_out: center@640x360
+- motion: [data-part="film-card"]@growUp:cinematic
 - archetype: full-bleed-row
 - weight: peak
-- borrows: "example-madera's card-ground-retint (a swipe deck picking between options) -> vawe-flow-2's films-wall ground (playing together, not picking, not switching)"
-- picture: the wall's six films playing at once, then held on vawe launch alone at full-bleed, its own colour washed across the ground behind it
-- design: make screen F=formats/scene/vawe-flow-2.films.html REF=example-madera ACT=5
-- fragment: formats/scene/vawe-flow-2.films.html
+- picture: the strip's four films playing at once as the camera tracks past them, then vawe launch alone, pushed in on its own wordmark
+- design: JSON group only (films-strip, formats/scene/vawe-flow-2.json), no HTML fragment for the strip itself
+- fragment: none
 
 <!-- NOTE on the cut pick/cards act: example-madera's own swipe-card act (its original act 3) is not
      reproduced here as a literal "choose between three options" moment. The owner's brief never asks
@@ -217,7 +224,7 @@ craft:
      viewer twice, once literally and once as a device, which is the duplicate this film explicitly
      excludes (see `not:` above). -->
 
-## Beat 9: The mark (12.97s-14.78s)
+## Beat 9: The mark (14.86s-17.34s)
 - type: payoff_withheld
 - shot: medium close, mark and wordmark centred
 - onscreen: "(the vawe mark, drawn as a line, then the wordmark growing out of it)"
@@ -226,6 +233,7 @@ craft:
 - eye: scattered marks gathering off-frame -> the drawn line traces the vawe mark's outline -> the wordmark growing out beside it, held
 - becomes: scattered marks become a drawn line, which becomes the vawe mark with its wordmark grown out beside it, held still
 - why: the only still moment in the film, earned by everything before it moving; "text should come out of the logo as well" is the owner's own line
+- transition_why: rhyme · arrival · expressive
 - duration: 1.82s
 - recipe: flow-seam at=9.6 out=films in=logo axis=y
 - object_in: center@160x160

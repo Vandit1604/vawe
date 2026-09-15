@@ -893,6 +893,7 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 | `first` | the wave starts at the first unit and runs to the last, the default, and what a line of type being typed looks like |
 | `last` | starts at the last unit and runs backwards to the first, pair it with a right-to-left exit |
 | `random` | a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek |
+| `typewriter` | types one character at a time at a fixed TYPING RATE (`cps`, chars/sec) instead of a shared budget, so any split layer can reveal char by char at a chosen speed and still use a preset, a colour ramp, or a reversed exit |
 
 ## Theme look keys  `[theme]`
 
@@ -1159,4 +1160,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_709 effects across 60 families. Regenerate: `make effects`._
+_710 effects across 60 families. Regenerate: `make effects`._
