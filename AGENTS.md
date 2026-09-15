@@ -91,5 +91,7 @@ A rule you deliberately break is waived IN THE SCENE, with a reason. A waiver wi
 
 ## Changing the ENGINE, not a film?  `[live: harness/live/craft-live.mjs]`
 
+**EVERY EFFECT COMPOSES; NONE IS A SPECIAL CASE.** A new look is a combination of things the engine already owns (a unit, a clock, an order, a property, an exit), never a private code path that owns its own timing, its own colour ramp or its own reveal. The test before writing: name which existing mechanism each half of the effect uses. If one half has no owner yet, add the owner, not the effect. Measured cost of ignoring this: `typing` was built as its own path, so it could use none of the 32 kinetic presets, no transform, no filter and no exit, and its per-word colour ramp was a private copy of `colorWave`. The gaps that produced (per-character colour, a scattered exit) read as missing features and were one missing composition (`docs/CRAFT/KEYED-MOTION.md`, `core/type/type.js` stagger orders, `core/tracks/units.js` exits).
+
 Five rules govern any change to `core/`, `internal/`, a gate, or the capture path, plus what this engine took from the agent harness: `docs/CRAFT/ENGINE-CHANGES.md`. Two are decidable from a path and the hook says them at the keystroke; elsewhere, read the doc by hand. Touched motion, backgrounds, type or layout? Ship a before/after: `make evals-compare` (`docs/EVALS.md`). Editing `scene.html`? Claude Code reads `vawe-scene-authoring` first, others read that skill under `skills/`; system map `docs/CODEMAPS/ARCHITECTURE.md`; run `make probe` after.
 
