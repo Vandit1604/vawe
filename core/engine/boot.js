@@ -1,4 +1,4 @@
-// Vawe Company License 1.0: see LICENSE at the repository root.
+// Licensed under the Apache License 2.0: see LICENSE at the repository root.
 // core/boot.js. The scene RUNTIME lifted out of core/motion.js: theme resolution + CSS apply,
 // the deterministic virtual clock, image/component preload, and boot() (fetch data → validate →
 // build → expose window.__engine). Imports pure helpers from ./motion.js. DOM/fetch live here only.

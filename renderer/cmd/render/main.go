@@ -1,4 +1,4 @@
-// Vawe Company License 1.0. See LICENSE at the repository root.
+// Licensed under the Apache License 2.0. See LICENSE at the repository root.
 //
 // Command vawe: Go render service CLI (mirrors engine/render.js).
 //
