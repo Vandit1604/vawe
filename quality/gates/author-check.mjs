@@ -294,6 +294,7 @@ const LADDER = [
   ['beats', 'blocks', 'the clock: dead air, an empty closing frame, a backdrop that cannot move'],
   ['sweep-static', 'reports', 'the RENDERED pixels: did anything move, or is the whole film frozen (needs a render; hard code)'],
   ['jolt', 'reports', 'frame-to-frame speed jumps on any layer or the camera, plus motion-floor dead windows (needs a current render)'],
+  ['edge', 'reports', 'a full-bleed layer stops covering the frame while on screen (edge-reveal)'],
   ['critique', 'reports', 'beat value: hollow, placeholder, unbacked or thin beats'],
   ['direct', 'reports', 'direction: cut families, effect soup, continuity, and the motion tells'],
   ['floor', 'reports', 'ambition: whether this is a plain slideshow'],
@@ -496,6 +497,10 @@ record('sweep-static', runGate('sweep-static', 'sweep-static (rendered pixels mo
 // Report-only, like sweep-static above; motion-floor needs the mp4 and skips itself with one line
 // when there is none, or when the one on disk predates this version of the scene.
 record('jolt', runGate('jolt', 'jolt (frame-to-frame speed jumps + dead windows)', 'quality/gates/jolt-check.mjs', []), { waivable: true, tier: 'reports' });
+// 1d. edge-reveal. Does a full-bleed layer stop covering the frame while it is on screen, so the
+// ground or the page shows at the border (a camera under scale 1, a layer scaled below 1, an
+// un-overscanned tilt, a corner radius). Report-only: names the fix, never blocks.
+record('edge', runGate('edge', 'edge-check (full-bleed layer stops covering the frame)', 'quality/gates/edge-check.mjs', []), { waivable: true, tier: 'reports' });
 // 2. critique, value gate; errors report, waivable by rule code.
 styleGate('critique', 'critique (value gate)', 'quality/gates/critique.mjs', strict ? ['--strict'] : [], { waivable: true });
 // 3. direct, direction gate; FAILs report, waivable by code.
