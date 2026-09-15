@@ -859,10 +859,10 @@ sheet: ## [dev] DESIGN SHEET: every captured element on one page (on the theme b
 
 
 # make theme-remix PRESET=editorial BRAND=acme [BG=#hex ACCENT=#hex TEXT=#hex], pick a design-system
-# PRESET (presets/*.json) and remix it onto a brand's base+accent → a complete themes/<brand>.json. The
+# PRESET (directions/*.json) and remix it onto a brand's base+accent → a complete themes/<brand>.json. The
 # another engine "pick a preset, paint the brand into it" move: good coherent design in one command, not
 # hand-authored per pixel. Reads assets/brands/<brand>/palette.json when BG/ACCENT are omitted.
-theme-remix: ## [engine] pick a design-system PRESET (presets/*.json) and remix it onto a brand's base+accent → a complete
+theme-remix: ## [engine] pick a design-system PRESET (directions/*.json) and remix it onto a brand's base+accent → a complete
 	node scripts/brand/theme-remix.mjs --preset $(PRESET) --brand $(BRAND) $(if $(BG),--bg "$(BG)") $(if $(ACCENT),--accent "$(ACCENT)") $(if $(TEXT),--text "$(TEXT)")
 
 # make tts (SCRIPT=narration.txt | TEXT="…") OUT=films/scene/<name>.vo [VOICE=Samantha], LOCAL narration:
@@ -1405,9 +1405,10 @@ films-json: ## [site] check site/lib/films.json against the rendered films (WRIT
 # lost in a merge, one committed before its sound existed, one still 9:16 while its film was 16:9.
 # A gate nobody runs is not a gate.
 site-check: scenes-json films-json site-counts ## [site] check every published artifact against its source
-	@# The three GENERATED artifacts that are committed: registry/ (outside agents fetch it),
-	@# engine-doctrine/BLOCKS.md and site/lib/blocks.json. Each is written by a target somebody has to remember,
-	@# and registry/ had drifted from blocks/catalog.mjs for a week before anything ran this.
+	@# The three GENERATED artifacts that are committed: blocks/catalog/ + registry/ (outside agents
+	@# fetch these), engine-doctrine/BLOCKS.md and site/lib/blocks.json. Each is written by a target
+	@# somebody has to remember, and the registry output had drifted from blocks/catalog.mjs for a
+	@# week before anything ran this.
 	@node scripts/site/registry.mjs --check
 	@node scripts/site/blocks-docs.mjs --check
 	@node scripts/site/blocks-json.mjs --check
@@ -1457,13 +1458,15 @@ blocks-sync: blocks-docs blocks-json blocks-scenes ## [site] regenerate everythi
 blocks-scenes: ## [site] per-block scene JSON + poster still for the site (no render needed)
 	node scripts/site/blocks-scenes.mjs
 
-# make registry. The agent-consumable REGISTRY (registry/): an index plus one item per block and beat,
-# in the shadcn/another engine shape, so an outside agent can pick one by name and know what to write
-# where. Generated from blocks/catalog.mjs + blueprints/index.mjs; never hand-edited.
-# CHECK=1 exits non-zero if registry/ is stale, so a forgotten regeneration is visible.
-# PHONY because registry/ is a real directory, and make would otherwise call the target up to date.
+# make registry. The agent-consumable REGISTRY: an index plus one item per block and beat, in the
+# shadcn/another engine shape, so an outside agent can pick one by name and know what to write where.
+# Block items land in blocks/catalog/, beside the factories they describe; the index and every
+# non-block item land in registry/. Generated from blocks/catalog.mjs + blueprints/index.mjs; never
+# hand-edited.
+# CHECK=1 exits non-zero if either output is stale, so a forgotten regeneration is visible.
+# PHONY because both outputs are real directories, and make would otherwise call the target up to date.
 .PHONY: registry
-registry: ## [site] regenerate registry/ from the block + beat manifests (CHECK=1 to verify only)
+registry: ## [site] regenerate blocks/catalog/ + registry/ from the block + beat manifests (CHECK=1 to verify only)
 	node scripts/site/registry.mjs $(if $(CHECK),--check,)
 
 house-style: ## [preflight] scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])

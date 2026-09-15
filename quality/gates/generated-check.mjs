@@ -39,11 +39,11 @@ const GENERATORS = [
     ['site/lib/arsenal.json', 'site/lib/blocks.json']],
   ['doc map', ['quality/gates/doc-map.mjs', '--write'],
     ['engine-doctrine/INDEX.md', 'engine-doctrine/CRAFT/README.md', 'skills/vawe-docs/SKILL.md']],
-  // registry/ is 216 generated files with its own `--check` mode that nothing ran. It went stale the
-  // same way arsenal.json did: block blurbs changed, the tree carried the old `description`, and only
-  // an agent regenerating it by hand noticed 110 files were behind. A generated tree with a checker
-  // nobody calls is a generated tree with no checker.
-  ['registry', ['scripts/site/registry.mjs'], ['registry']],
+  // blocks/catalog/ + registry/ is 216 generated files with its own `--check` mode that nothing ran.
+  // It went stale the same way arsenal.json did: block blurbs changed, the tree carried the old
+  // `description`, and only an agent regenerating it by hand noticed 110 files were behind. A
+  // generated tree with a checker nobody calls is a generated tree with no checker.
+  ['registry', ['scripts/site/registry.mjs'], ['blocks/catalog', 'registry']],
 ];
 
 const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' }).stdout || '';
