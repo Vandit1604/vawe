@@ -39,8 +39,14 @@
 # `metalness` and `roughness` were declared on the three layer and overwritten by literals, and every
 # gate stayed green for months because no scene set them (engine-doctrine/MISTAKES.md #565). It is the slow step
 # here, about 35 seconds, and it is the only one that needs a browser.
-echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + prop-probe) …"
-if ! make schema-check lib-test craft-coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check prop-probe; then
+# docker-check is here for the reason every other gate on this line is: the failure it catches is
+# invisible from the repo and from every local run. A COPY of a path git does not carry builds fine on
+# a machine that has the path and dies on the server, which has only the clone. assets/plinth was
+# untracked on 2026-09-10 and the COPY stayed, so every deploy after that failed while the running
+# container kept serving a stale site for ten days. The gate was already written and correct; nothing
+# ran it. It reads two files and costs milliseconds.
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe) …"
+if ! make schema-check lib-test craft-coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi

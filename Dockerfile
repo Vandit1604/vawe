@@ -34,10 +34,12 @@ COPY generators ./generators
 # Only the marks the playable scenes reference survive .dockerignore's negations here (144K of
 # brands' 59M); site-engine.mjs ships exactly those and fails the build if one is missing.
 COPY assets/brands ./assets/brands
-# plinth is outside assets/brands and one published scene reaches for its hero figure.
-COPY assets/plinth ./assets/plinth
+# assets/plinth is NOT copied. It was, until 2026-09-10, when "stop tracking generated media and
+# per-brand demo art" untracked it: a COPY of a gitignored directory is not a missing file at build
+# time, it is a hard failure, and every deploy since has died on this exact line while the old
+# container kept serving. The rule this encodes: only COPY a path git actually carries.
 
-# Font binaries are deliberately NOT committed (redistribution), so a clean checkout has none — and
+# Font binaries are deliberately NOT committed (redistribution), so a clean checkout has none, and
 # boot() blocks on document.fonts for every registered face, so the editor would hang without them.
 # fonts.mjs uses only node builtins, hence no install needed here.
 RUN node generators/media/fonts.mjs
