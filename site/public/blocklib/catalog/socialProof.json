@@ -1,0 +1,69 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "socialProof",
+  "type": "vawe:block",
+  "title": "socialProof",
+  "description": "an avatar stack next to a trust line, like Trusted by 8,000 teams, for social proof",
+  "tags": [
+    "socialProof"
+  ],
+  "dimensions": {
+    "width": 525,
+    "height": 92
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "socialProof",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "extra": 8,
+      "size": 48,
+      "caption": "Trusted by working teams",
+      "sub": "across every plan",
+      "avatars": [
+        {
+          "initials": "AL"
+        },
+        {
+          "initials": "GH"
+        },
+        {
+          "initials": "VS"
+        },
+        {
+          "initials": "KM"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "avatars",
+      "extra",
+      "size",
+      "caption",
+      "sub",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/socialProof.json",
+      "url": "https://vawe.dev/assets/blocks/socialProof.json",
+      "target": "films/scene/socialProof.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/socialProof.png"
+  }
+}

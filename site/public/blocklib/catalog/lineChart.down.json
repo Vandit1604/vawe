@@ -1,0 +1,73 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "lineChart.down",
+  "type": "vawe:block",
+  "title": "lineChart.down",
+  "description": "declining trend (red)",
+  "tags": [
+    "lineChart"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 287
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "lineChart.down",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "h": 240,
+      "color": "var(--down)",
+      "label": "churn",
+      "data": [
+        {
+          "label": "M",
+          "value": 62
+        },
+        {
+          "label": "T",
+          "value": 55
+        },
+        {
+          "label": "W",
+          "value": 48
+        },
+        {
+          "label": "T",
+          "value": 30
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "data",
+      "color",
+      "area",
+      "label",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/lineChart.down.json",
+      "url": "https://vawe.dev/assets/blocks/lineChart.down.json",
+      "target": "films/scene/lineChart.down.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/lineChart.down.png"
+  }
+}

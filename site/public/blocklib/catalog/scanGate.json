@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "scanGate",
+  "type": "vawe:block",
+  "title": "scanGate",
+  "description": "an autofocus targeting reticle: a scan line sweeps the frame and brackets snap shut and lock onto the subject",
+  "tags": [
+    "scanGate"
+  ],
+  "dimensions": {
+    "width": 804,
+    "height": 504
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "scanGate",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 760,
+      "h": 460,
+      "label": "LOCK · f/1.8"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "label",
+      "ticks",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/scanGate.json",
+      "url": "https://vawe.dev/assets/blocks/scanGate.json",
+      "target": "films/scene/scanGate.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/scanGate.png"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeHighlight",
+  "type": "vawe:block",
+  "title": "codeHighlight",
+  "description": "a code editor spotlight: the surrounding lines dim while a highlighted band sweeps down onto one target line",
+  "tags": [
+    "codeHighlight"
+  ],
+  "dimensions": {
+    "width": 664,
+    "height": 240
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "codeHighlight",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 620,
+      "label": "server.ts",
+      "theme": "ink",
+      "line": 2,
+      "lines": [
+        "export function serve(req) {",
+        "  const t = route(req.url);",
+        "  return t.handle(req);",
+        "}"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "lines",
+      "line",
+      "label",
+      "theme",
+      "dim",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeHighlight.json",
+      "url": "https://vawe.dev/assets/blocks/codeHighlight.json",
+      "target": "films/scene/codeHighlight.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeHighlight.png"
+  }
+}

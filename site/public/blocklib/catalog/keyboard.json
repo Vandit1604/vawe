@@ -1,0 +1,49 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "keyboard",
+  "type": "vawe:block",
+  "title": "keyboard",
+  "description": "an on-screen phone keyboard, qwerty keys or a numeric keypad, that slides up from the bottom edge.",
+  "tags": [
+    "keyboard"
+  ],
+  "dimensions": {
+    "width": 464,
+    "height": 218
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "keyboard",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 420,
+      "layout": "qwerty"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "layout",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/keyboard.json",
+      "url": "https://vawe.dev/assets/blocks/keyboard.json",
+      "target": "films/scene/keyboard.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/keyboard.png"
+  }
+}

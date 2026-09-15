@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "flowchart.vertical",
+  "type": "vawe:block",
+  "title": "flowchart.vertical",
+  "description": "the same flow turned 90 degrees for a phone feed · cols run down, lanes across, type raised to the portrait floor",
+  "tags": [
+    "flowchart"
+  ],
+  "dimensions": {
+    "width": 992,
+    "height": 888
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "flowchart.vertical",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "variant": "vertical",
+      "step": 0.16
+    },
+    "props": [
+      "nodeW",
+      "nodeH",
+      "colGap",
+      "laneGap",
+      "size",
+      "subSize",
+      "labelSize",
+      "anim",
+      "x",
+      "y",
+      "variant",
+      "nodes",
+      "edges",
+      "radius",
+      "gap",
+      "start",
+      "dur",
+      "step"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/flowchart.vertical.json",
+      "url": "https://vawe.dev/assets/blocks/flowchart.vertical.json",
+      "target": "films/scene/flowchart.vertical.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/flowchart.vertical.png"
+  }
+}

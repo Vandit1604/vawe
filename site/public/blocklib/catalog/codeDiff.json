@@ -1,0 +1,65 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeDiff",
+  "type": "vawe:block",
+  "title": "codeDiff",
+  "description": "a code edit replayed as it happened: the old line collapses away in red while the new line types in green",
+  "tags": [
+    "codeDiff"
+  ],
+  "dimensions": {
+    "width": 664,
+    "height": 240
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "codeDiff",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 620,
+      "label": "route.ts",
+      "theme": "forest",
+      "lines": [
+        "  const t = route(req.url);",
+        {
+          "sign": "-",
+          "text": "  if (!t) return null;"
+        },
+        {
+          "sign": "+",
+          "text": "  if (!t) return notFound(req);"
+        },
+        "  return t.handle(req);"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "dur",
+      "w",
+      "lines",
+      "label",
+      "theme",
+      "step",
+      "start"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeDiff.json",
+      "url": "https://vawe.dev/assets/blocks/codeDiff.json",
+      "target": "films/scene/codeDiff.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeDiff.png"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "glassHome",
+  "type": "vawe:block",
+  "title": "glassHome",
+  "description": "a frosted phone home screen: a grid of app icon tiles plus one wide widget",
+  "tags": [
+    "glassHome"
+  ],
+  "dimensions": {
+    "width": 644,
+    "height": 581
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "glassHome",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "cols": 4,
+      "size": 132,
+      "widget": {
+        "label": "THIS RUN",
+        "value": "1,920",
+        "sub": "frames, all pure in n"
+      },
+      "tiles": [
+        {
+          "icon": "cube",
+          "label": "Blocks"
+        },
+        {
+          "icon": "layers",
+          "label": "Stacks"
+        },
+        {
+          "icon": "globe",
+          "label": "Fields"
+        },
+        {
+          "icon": "braces",
+          "label": "Scenes"
+        },
+        {
+          "icon": "clock",
+          "label": "Timing"
+        },
+        {
+          "icon": "plug",
+          "label": "Inputs"
+        },
+        {
+          "icon": "file",
+          "label": "Assets"
+        },
+        {
+          "icon": "link",
+          "label": "Chains"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "tiles",
+      "cols",
+      "size",
+      "gap",
+      "label",
+      "widget",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/glassHome.json",
+      "url": "https://vawe.dev/assets/blocks/glassHome.json",
+      "target": "films/scene/glassHome.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/glassHome.png"
+  }
+}

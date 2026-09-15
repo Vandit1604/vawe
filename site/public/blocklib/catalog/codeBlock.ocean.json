@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeBlock.ocean",
+  "type": "vawe:block",
+  "title": "codeBlock.ocean",
+  "description": "code theme · deep blue, cyan-led",
+  "tags": [
+    "codeBlock"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 211
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "codeBlock.ocean",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "theme": "ocean",
+      "label": "scene.json",
+      "size": 19,
+      "lines": [
+        "{ \"module\": \"scene\",",
+        "  \"theme\": \"argus\",",
+        "  \"fps\": 30 }"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "theme",
+      "w",
+      "lines",
+      "dark",
+      "size",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeBlock.ocean.json",
+      "url": "https://vawe.dev/assets/blocks/codeBlock.ocean.json",
+      "target": "films/scene/codeBlock.ocean.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeBlock.ocean.png"
+  }
+}

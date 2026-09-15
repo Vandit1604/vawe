@@ -1,0 +1,63 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "card",
+  "type": "vawe:block",
+  "title": "card",
+  "description": "a raised info card: a heading, a line of body text, tag pills, and a call-to-action link under a hairline at the bottom",
+  "tags": [
+    "card"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 344
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "card",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "h": 300,
+      "title": "Layers",
+      "desc": "Text, image, count, cursor.",
+      "pills": [
+        "Text",
+        "Image",
+        "Count"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "title",
+      "desc",
+      "w",
+      "h",
+      "tint",
+      "pills",
+      "cta",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/card.json",
+      "url": "https://vawe.dev/assets/blocks/card.json",
+      "target": "films/scene/card.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/card.png"
+  }
+}

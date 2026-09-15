@@ -1,0 +1,55 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "terminal.install",
+  "type": "vawe:block",
+  "title": "terminal.install",
+  "description": "install command",
+  "tags": [
+    "terminal"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 175
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "terminal.install",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "command": "npm i vawe",
+      "output": [
+        "added 1 package",
+        "added 1 package"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "command",
+      "w",
+      "output",
+      "cps",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/terminal.install.json",
+      "url": "https://vawe.dev/assets/blocks/terminal.install.json",
+      "target": "films/scene/terminal.install.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/terminal.install.png"
+  }
+}

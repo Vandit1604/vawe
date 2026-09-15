@@ -1,0 +1,80 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "lineChart",
+  "type": "vawe:block",
+  "title": "lineChart",
+  "description": "a line graph over time: a trend line in a hairline card, optionally filled to an area chart",
+  "tags": [
+    "lineChart"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 287
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "lineChart",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "h": 240,
+      "label": "requests / day",
+      "data": [
+        {
+          "label": "M",
+          "value": 32
+        },
+        {
+          "label": "T",
+          "value": 48
+        },
+        {
+          "label": "W",
+          "value": 41
+        },
+        {
+          "label": "T",
+          "value": 63
+        },
+        {
+          "label": "F",
+          "value": 58
+        },
+        {
+          "label": "S",
+          "value": 79
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "data",
+      "color",
+      "area",
+      "label",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/lineChart.json",
+      "url": "https://vawe.dev/assets/blocks/lineChart.json",
+      "target": "films/scene/lineChart.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/lineChart.png"
+  }
+}

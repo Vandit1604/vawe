@@ -1,0 +1,82 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "parallaxUnzoom",
+  "type": "vawe:block",
+  "title": "parallaxUnzoom",
+  "description": "the reverse of a zoom-in: one card fills the frame first, then shrinks back into a grid of cards around it",
+  "tags": [
+    "parallaxUnzoom"
+  ],
+  "dimensions": {
+    "width": 1244,
+    "height": 804
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "parallaxUnzoom",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 1200,
+      "h": 760,
+      "title": "and hands it back",
+      "caption": "the same board, run backwards",
+      "tiles": [
+        {
+          "label": "queue"
+        },
+        {
+          "label": "index"
+        },
+        {
+          "label": "cache"
+        },
+        {
+          "label": "edge"
+        },
+        {
+          "label": "store"
+        },
+        {
+          "label": "logs"
+        },
+        {
+          "label": "auth"
+        },
+        {
+          "label": "jobs"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "title",
+      "caption",
+      "tiles",
+      "gap",
+      "travel",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/parallaxUnzoom.json",
+      "url": "https://vawe.dev/assets/blocks/parallaxUnzoom.json",
+      "target": "films/scene/parallaxUnzoom.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/parallaxUnzoom.png"
+  }
+}

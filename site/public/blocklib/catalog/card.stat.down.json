@@ -1,0 +1,57 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "card.stat.down",
+  "type": "vawe:block",
+  "title": "card.stat.down",
+  "description": "KPI card, negative delta",
+  "tags": [
+    "statCard"
+  ],
+  "dimensions": {
+    "width": 384,
+    "height": 210
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "card.stat.down",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 340,
+      "to": 320,
+      "label": "active users",
+      "delta": "-8%",
+      "deltaUp": false
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "to",
+      "from",
+      "unit",
+      "label",
+      "delta",
+      "deltaUp",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/card.stat.down.json",
+      "url": "https://vawe.dev/assets/blocks/card.stat.down.json",
+      "target": "films/scene/card.stat.down.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/card.stat.down.png"
+  }
+}

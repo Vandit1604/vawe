@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "morphText",
+  "type": "vawe:block",
+  "title": "morphText",
+  "description": "a gooey word swap: one word melting into the next through a metaball blur, letters with no correspondence",
+  "tags": [
+    "morphText"
+  ],
+  "dimensions": {
+    "width": 944,
+    "height": 194
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "morphText",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 900,
+      "words": [
+        "ideas",
+        "drafts",
+        "inbox",
+        "shipped"
+      ],
+      "size": 120,
+      "hold": 0.8
+    },
+    "props": [
+      "x",
+      "y",
+      "dur",
+      "w",
+      "words",
+      "size",
+      "hold",
+      "goo",
+      "color",
+      "start"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/morphText.json",
+      "url": "https://vawe.dev/assets/blocks/morphText.json",
+      "target": "films/scene/morphText.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/morphText.png"
+  }
+}

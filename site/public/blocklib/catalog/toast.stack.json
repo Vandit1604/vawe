@@ -1,0 +1,76 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "toast.stack",
+  "type": "vawe:block",
+  "title": "toast.stack",
+  "description": "snackbars that stack and expire",
+  "tags": [
+    "toast"
+  ],
+  "dimensions": {
+    "width": 444,
+    "height": 243
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "toast.stack",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 400,
+      "life": 2.4,
+      "step": 1,
+      "items": [
+        {
+          "title": "Block added to the scene",
+          "action": "Undo"
+        },
+        {
+          "title": "Theme switched",
+          "action": "Undo",
+          "icon": "◆",
+          "accent": "var(--accent)"
+        },
+        {
+          "title": "Render queued",
+          "action": "View"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "title",
+      "w",
+      "message",
+      "body",
+      "action",
+      "icon",
+      "accent",
+      "items",
+      "life",
+      "step",
+      "rowH",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/toast.stack.json",
+      "url": "https://vawe.dev/assets/blocks/toast.stack.json",
+      "target": "films/scene/toast.stack.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/toast.stack.png"
+  }
+}

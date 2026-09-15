@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeBlock.light",
+  "type": "vawe:block",
+  "title": "codeBlock.light",
+  "description": "code card, light surface",
+  "tags": [
+    "codeBlock"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 181
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "codeBlock.light",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "dark": false,
+      "label": "terminal",
+      "size": 19,
+      "lines": [
+        "./bin/vawe video.json",
+        "✓ out/video.mp4"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "theme",
+      "w",
+      "lines",
+      "dark",
+      "size",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeBlock.light.json",
+      "url": "https://vawe.dev/assets/blocks/codeBlock.light.json",
+      "target": "films/scene/codeBlock.light.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeBlock.light.png"
+  }
+}

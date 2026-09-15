@@ -1,0 +1,74 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "glassWidgets",
+  "type": "vawe:block",
+  "title": "glassWidgets",
+  "description": "a cluster of frosted iOS-style widgets: one big showcase panel plus small stat tiles and chips",
+  "tags": [
+    "glassWidgets"
+  ],
+  "dimensions": {
+    "width": 1124,
+    "height": 544
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "glassWidgets",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 1080,
+      "h": 520,
+      "title": "Frosted surfaces",
+      "desc": "The field behind the panel never stops moving.",
+      "stats": [
+        {
+          "label": "FRAMES",
+          "value": "1.9",
+          "unit": "k",
+          "delta": "+12%"
+        },
+        {
+          "label": "PASSES",
+          "value": "3"
+        }
+      ],
+      "chips": [
+        "deterministic",
+        "seeked",
+        "pure(n)"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "title",
+      "desc",
+      "stats",
+      "chips",
+      "gap",
+      "split",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/glassWidgets.json",
+      "url": "https://vawe.dev/assets/blocks/glassWidgets.json",
+      "target": "films/scene/glassWidgets.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/glassWidgets.png"
+  }
+}

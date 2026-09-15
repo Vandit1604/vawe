@@ -1,0 +1,63 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "avatarStack",
+  "type": "vawe:block",
+  "title": "avatarStack",
+  "description": "overlapping circular profile pictures in a row with a +N overflow count",
+  "tags": [
+    "avatarStack"
+  ],
+  "dimensions": {
+    "width": 236,
+    "height": 92
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "avatarStack",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "extra": 8,
+      "avatars": [
+        {
+          "initials": "AL"
+        },
+        {
+          "initials": "GH"
+        },
+        {
+          "initials": "VS"
+        },
+        {
+          "initials": "KM"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "avatars",
+      "extra",
+      "size",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/avatarStack.json",
+      "url": "https://vawe.dev/assets/blocks/avatarStack.json",
+      "target": "films/scene/avatarStack.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/avatarStack.png"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "onboardCard",
+  "type": "vawe:block",
+  "title": "onboardCard",
+  "description": "one pane of a first-run onboarding flow: progress dots, a title, body copy, and a CTA button.",
+  "tags": [
+    "onboardCard"
+  ],
+  "dimensions": {
+    "width": 504,
+    "height": 262
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "onboardCard",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 460,
+      "step": 2,
+      "of": 3,
+      "title": "Pick a workspace",
+      "body": "Choose where new drafts are saved. You can change this later.",
+      "cta": "Continue"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "step",
+      "of",
+      "title",
+      "body",
+      "cta",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/onboardCard.json",
+      "url": "https://vawe.dev/assets/blocks/onboardCard.json",
+      "target": "films/scene/onboardCard.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/onboardCard.png"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "tabBar.switch",
+  "type": "vawe:block",
+  "title": "tabBar.switch",
+  "description": "the selection SLIDES from one tab to another",
+  "tags": [
+    "tabBar"
+  ],
+  "dimensions": {
+    "width": 544,
+    "height": 96
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "tabBar.switch",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 500,
+      "activeFrom": 0,
+      "activeTo": 2,
+      "switchAt": 1.4,
+      "tabs": [
+        "Design",
+        "Motion",
+        "Export"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "tabs",
+      "active",
+      "activeFrom",
+      "activeTo",
+      "switchAt",
+      "switchDur",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/tabBar.switch.json",
+      "url": "https://vawe.dev/assets/blocks/tabBar.switch.json",
+      "target": "films/scene/tabBar.switch.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/tabBar.switch.png"
+  }
+}

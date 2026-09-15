@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "tweetCard",
+  "type": "vawe:block",
+  "title": "tweetCard",
+  "description": "a tweet or X post card: avatar, handle, body text, like and reply counts",
+  "tags": [
+    "tweetCard"
+  ],
+  "dimensions": {
+    "width": 524,
+    "height": 223
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "tweetCard",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 480,
+      "name": "Vawe",
+      "handle": "vawe",
+      "initials": "SW",
+      "likes": "1.2k",
+      "reposts": "340",
+      "text": "One JSON. One video. Deterministic, no timeline."
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "name",
+      "handle",
+      "text",
+      "avatar",
+      "initials",
+      "likes",
+      "reposts",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/tweetCard.json",
+      "url": "https://vawe.dev/assets/blocks/tweetCard.json",
+      "target": "films/scene/tweetCard.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/tweetCard.png"
+  }
+}

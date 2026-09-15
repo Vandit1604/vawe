@@ -1,0 +1,92 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "worldMap",
+  "type": "vawe:block",
+  "title": "worldMap",
+  "description": "a world map coloured country by country, a global choropleth with a legend for the data shown",
+  "tags": [
+    "worldMap"
+  ],
+  "dimensions": {
+    "width": 944,
+    "height": 552
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "worldMap",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 900,
+      "h": 470,
+      "legend": "M",
+      "data": [
+        {
+          "code": "CHN",
+          "value": 1410
+        },
+        {
+          "code": "IND",
+          "value": 1430
+        },
+        {
+          "code": "USA",
+          "value": 340
+        },
+        {
+          "code": "IDN",
+          "value": 278
+        },
+        {
+          "code": "BRA",
+          "value": 216
+        },
+        {
+          "code": "NGA",
+          "value": 224
+        },
+        {
+          "code": "DEU",
+          "value": 84
+        },
+        {
+          "code": "JPN",
+          "value": 124
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "data",
+      "title",
+      "sub",
+      "legend",
+      "showLegend",
+      "unit",
+      "labels",
+      "labelMin",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/worldMap.json",
+      "url": "https://vawe.dev/assets/blocks/worldMap.json",
+      "target": "films/scene/worldMap.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/worldMap.png"
+  }
+}

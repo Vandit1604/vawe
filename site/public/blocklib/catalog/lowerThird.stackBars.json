@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "lowerThird.stackBars",
+  "type": "vawe:block",
+  "title": "lowerThird.stackBars",
+  "description": "plate over a short accent bar · reads as a mark",
+  "tags": [
+    "lowerThird"
+  ],
+  "dimensions": {
+    "width": 308,
+    "height": 150
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "lowerThird.stackBars",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "variant": "stackBars",
+      "name": "Ana Roth",
+      "role": "Principal engineer"
+    },
+    "props": [
+      "x",
+      "y",
+      "name",
+      "role",
+      "variant",
+      "accent",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/lowerThird.stackBars.json",
+      "url": "https://vawe.dev/assets/blocks/lowerThird.stackBars.json",
+      "target": "films/scene/lowerThird.stackBars.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/lowerThird.stackBars.png"
+  }
+}

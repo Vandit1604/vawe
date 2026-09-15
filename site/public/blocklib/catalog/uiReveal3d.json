@@ -1,0 +1,75 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "uiReveal3d",
+  "type": "vawe:block",
+  "title": "uiReveal3d",
+  "description": "rows of a UI folding upright out of the floor in 3D perspective, one after another",
+  "tags": [
+    "uiReveal3d"
+  ],
+  "dimensions": {
+    "width": 724,
+    "height": 456
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "uiReveal3d",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 680,
+      "items": [
+        {
+          "label": "Frames rendered",
+          "value": "1,320"
+        },
+        {
+          "label": "Workers",
+          "value": "8"
+        },
+        {
+          "label": "Draft render",
+          "value": "31s"
+        },
+        {
+          "label": "Blocks swept",
+          "value": "179"
+        },
+        {
+          "label": "Identical",
+          "value": "106"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "items",
+      "rowH",
+      "gap",
+      "tilt",
+      "depth",
+      "stagger",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/uiReveal3d.json",
+      "url": "https://vawe.dev/assets/blocks/uiReveal3d.json",
+      "target": "films/scene/uiReveal3d.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/uiReveal3d.png"
+  }
+}

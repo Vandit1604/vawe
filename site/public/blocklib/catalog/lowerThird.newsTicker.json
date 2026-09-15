@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "lowerThird.newsTicker",
+  "type": "vawe:block",
+  "title": "lowerThird.newsTicker",
+  "description": "accent chip + line · role IS the chip (LIVE/BREAKING)",
+  "tags": [
+    "lowerThird"
+  ],
+  "dimensions": {
+    "width": 660,
+    "height": 99
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "lowerThird.newsTicker",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "variant": "newsTicker",
+      "name": "Renders every frame in parallel",
+      "role": "live"
+    },
+    "props": [
+      "x",
+      "y",
+      "name",
+      "role",
+      "variant",
+      "accent",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/lowerThird.newsTicker.json",
+      "url": "https://vawe.dev/assets/blocks/lowerThird.newsTicker.json",
+      "target": "films/scene/lowerThird.newsTicker.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/lowerThird.newsTicker.png"
+  }
+}

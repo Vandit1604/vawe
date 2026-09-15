@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "diff",
+  "type": "vawe:block",
+  "title": "diff",
+  "description": "a git diff card: added and removed code lines highlighted in green and red bands, like a pull request review",
+  "tags": [
+    "diff"
+  ],
+  "dimensions": {
+    "width": 564,
+    "height": 195
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "diff",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 520,
+      "lines": [
+        {
+          "sign": "-",
+          "text": "const x = fetch()"
+        },
+        {
+          "sign": "+",
+          "text": "const x = await fetch()"
+        },
+        {
+          "sign": " ",
+          "text": "return x.json()"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "lines",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/diff.json",
+      "url": "https://vawe.dev/assets/blocks/diff.json",
+      "target": "films/scene/diff.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/diff.png"
+  }
+}

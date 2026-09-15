@@ -1,0 +1,71 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "table",
+  "type": "vawe:block",
+  "title": "table",
+  "description": "a table of rows and columns: a header plus data rows divided by hairlines, rows fill in one after another.",
+  "tags": [
+    "table"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 255
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "table",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "cols": [
+        "Format",
+        "FPS",
+        "Status"
+      ],
+      "rows": [
+        [
+          "portrait",
+          "30",
+          "ready"
+        ],
+        [
+          "landscape",
+          "60",
+          "ready"
+        ],
+        [
+          "alpha",
+          "30",
+          "beta"
+        ]
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "cols",
+      "rows",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/table.json",
+      "url": "https://vawe.dev/assets/blocks/table.json",
+      "target": "films/scene/table.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/table.png"
+  }
+}

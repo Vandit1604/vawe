@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeBlock.aurora",
+  "type": "vawe:block",
+  "title": "codeBlock.aurora",
+  "description": "code theme · teal dark, mint and violet",
+  "tags": [
+    "codeBlock"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 211
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "codeBlock.aurora",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "theme": "aurora",
+      "label": "spectrum.js",
+      "size": 19,
+      "lines": [
+        "const spec = bandEnergies(pcm)",
+        "const v = sampleAt(spec, n, 'low')",
+        "return 1 + v * 0.18"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "theme",
+      "w",
+      "lines",
+      "dark",
+      "size",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeBlock.aurora.json",
+      "url": "https://vawe.dev/assets/blocks/codeBlock.aurora.json",
+      "target": "films/scene/codeBlock.aurora.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeBlock.aurora.png"
+  }
+}

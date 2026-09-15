@@ -1,0 +1,66 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "logLines.errors",
+  "type": "vawe:block",
+  "title": "logLines.errors",
+  "description": "log stream with errors",
+  "tags": [
+    "logLines"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 166
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "logLines.errors",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "lines": [
+        {
+          "t": "12:04",
+          "level": "ok",
+          "text": "validate passed"
+        },
+        {
+          "t": "12:05",
+          "level": "error",
+          "text": "em-dash at layer[7]"
+        },
+        {
+          "t": "12:05",
+          "level": "warn",
+          "text": "retrying"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "lines",
+      "dark",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/logLines.errors.json",
+      "url": "https://vawe.dev/assets/blocks/logLines.errors.json",
+      "target": "films/scene/logLines.errors.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/logLines.errors.png"
+  }
+}

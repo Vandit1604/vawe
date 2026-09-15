@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "terminalPro",
+  "type": "vawe:block",
+  "title": "terminalPro",
+  "description": "a full deploy terminal built from real boxes: typed command, a live percent counter over its track, a file diff, a spinner turning into a checkmark",
+  "tags": [
+    "terminalPro"
+  ],
+  "dimensions": {
+    "width": 864,
+    "height": 380
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "terminalPro",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 820,
+      "command": "npm run deploy"
+    },
+    "props": [
+      "x",
+      "y",
+      "dur",
+      "w",
+      "title",
+      "command",
+      "diff",
+      "success",
+      "start"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/terminalPro.json",
+      "url": "https://vawe.dev/assets/blocks/terminalPro.json",
+      "target": "films/scene/terminalPro.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/terminalPro.png"
+  }
+}

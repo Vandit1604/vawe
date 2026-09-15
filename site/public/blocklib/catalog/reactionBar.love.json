@@ -1,0 +1,61 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "reactionBar.love",
+  "type": "vawe:block",
+  "title": "reactionBar.love",
+  "description": "reactions (love set)",
+  "tags": [
+    "reactionBar"
+  ],
+  "dimensions": {
+    "width": 262,
+    "height": 79
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "reactionBar.love",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "reactions": [
+        {
+          "emoji": "❤️",
+          "count": 41,
+          "mine": true
+        },
+        {
+          "emoji": "😂",
+          "count": 9
+        },
+        {
+          "emoji": "🙌",
+          "count": 6
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "reactions",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/reactionBar.love.json",
+      "url": "https://vawe.dev/assets/blocks/reactionBar.love.json",
+      "target": "films/scene/reactionBar.love.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/reactionBar.love.png"
+  }
+}

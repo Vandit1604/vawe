@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "chatBubble.support",
+  "type": "vawe:block",
+  "title": "chatBubble.support",
+  "description": "support thread",
+  "tags": [
+    "chatBubble"
+  ],
+  "dimensions": {
+    "width": 504,
+    "height": 198
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "chatBubble.support",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 460,
+      "messages": [
+        {
+          "text": "My render is grainy"
+        },
+        {
+          "text": "Grain is opt-in, remove \"grain\": true",
+          "me": true
+        },
+        {
+          "text": "Fixed, thanks!"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "messages",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/chatBubble.support.json",
+      "url": "https://vawe.dev/assets/blocks/chatBubble.support.json",
+      "target": "films/scene/chatBubble.support.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/chatBubble.support.png"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "barChart",
+  "type": "vawe:block",
+  "title": "barChart",
+  "description": "a bar chart: labeled vertical bars scaled to the tallest one, for comparing values side by side",
+  "tags": [
+    "barChart"
+  ],
+  "dimensions": {
+    "width": 564,
+    "height": 286
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "barChart",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 520,
+      "h": 240,
+      "data": [
+        {
+          "label": "Mon",
+          "value": 38
+        },
+        {
+          "label": "Tue",
+          "value": 66
+        },
+        {
+          "label": "Wed",
+          "value": 52
+        },
+        {
+          "label": "Thu",
+          "value": 80
+        },
+        {
+          "label": "Fri",
+          "value": 72
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "data",
+      "color",
+      "label",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/barChart.json",
+      "url": "https://vawe.dev/assets/blocks/barChart.json",
+      "target": "films/scene/barChart.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/barChart.png"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "borderBeamCard",
+  "type": "vawe:block",
+  "title": "borderBeamCard",
+  "description": "a glass card with a bright line of light chasing around its border, like a loading ring on the edge",
+  "tags": [
+    "borderBeamCard"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 304
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "borderBeamCard",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "h": 260,
+      "title": "Border beam",
+      "desc": "A light travels the border."
+    },
+    "props": [
+      "x",
+      "y",
+      "title",
+      "desc",
+      "w",
+      "h",
+      "radius",
+      "thickness",
+      "speed",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/borderBeamCard.json",
+      "url": "https://vawe.dev/assets/blocks/borderBeamCard.json",
+      "target": "films/scene/borderBeamCard.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/borderBeamCard.png"
+  }
+}

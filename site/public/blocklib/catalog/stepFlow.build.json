@@ -1,0 +1,63 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "stepFlow.build",
+  "type": "vawe:block",
+  "title": "stepFlow.build",
+  "description": "the track TRAVELS · rings light and connectors fill in sequence",
+  "tags": [
+    "stepFlow"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 114
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "stepFlow.build",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "activeFrom": 0,
+      "activeTo": 4,
+      "buildAt": 0.5,
+      "buildDur": 3,
+      "steps": [
+        "Capture",
+        "Encode",
+        "Mux",
+        "Upload"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "steps",
+      "active",
+      "activeFrom",
+      "activeTo",
+      "buildAt",
+      "buildDur",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/stepFlow.build.json",
+      "url": "https://vawe.dev/assets/blocks/stepFlow.build.json",
+      "target": "films/scene/stepFlow.build.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/stepFlow.build.png"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeBlock.frost",
+  "type": "vawe:block",
+  "title": "codeBlock.frost",
+  "description": "code theme · cool light, ice-blue syntax",
+  "tags": [
+    "codeBlock"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 209
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "codeBlock.frost",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "theme": "frost",
+      "label": "safe.ts",
+      "size": 19,
+      "lines": [
+        "const [w, h] = sceneDims(cfg)",
+        "const box = safeArea(w, h, dest)",
+        "return box.x1 - box.x0"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "theme",
+      "w",
+      "lines",
+      "dark",
+      "size",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeBlock.frost.json",
+      "url": "https://vawe.dev/assets/blocks/codeBlock.frost.json",
+      "target": "films/scene/codeBlock.frost.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeBlock.frost.png"
+  }
+}
