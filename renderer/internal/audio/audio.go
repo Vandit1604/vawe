@@ -57,6 +57,17 @@ type Bridge struct {
 	Kind  string  `json:"kind"` // "j" | "l"
 }
 
+// ClipTrack is one video layer's OWN audio: harness/media/clip-audio.mjs already extracted [in,out)
+// of the source, resampled it to `sr` and rate-matched it to the layer's `rate` with atempo, so this
+// mixer only has to place the result. The LAYER decides a clip has sound (core/layers/video.js);
+// this is just where that decision lands for the mixer to hear.
+type ClipTrack struct {
+	File  string  `json:"file"`
+	Start float64 `json:"start"` // scene-time seconds where the track's first sample plays
+	Gain  float64 `json:"gain"`
+	Duck  float64 `json:"duck"` // floor the music bed drops to while this clip plays; 1 = no duck
+}
+
 // Config is the data.audio block.
 type Config struct {
 	Music     string   `json:"music"`
@@ -81,6 +92,10 @@ type Config struct {
 	// Loudness is an integrated-loudness target in LUFS (negative, e.g. -14 for socials). Applied at
 	// the MUX by ffmpeg loudnorm (gated BS.1770), not here; render.go reads it. Absent = no normalization.
 	Loudness *float64 `json:"loudness,omitempty"`
+	// ClipAudio is assembled by internal/render.Render from the expanded scene's video layers, never
+	// authored directly under data.audio (`json:"-"`): the LAYER owns the fact a clip has sound, this
+	// struct is only where the mixer finds it.
+	ClipAudio []ClipTrack `json:"-"`
 }
 
 type wav struct {
@@ -153,7 +168,7 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 	// silent audio track onto a scene that asked for none. No scene sets it, and what a "sting file"
 	// should mean is ambiguous now that scene.html emits per-sting `reveal` cues into the sfx list.
 	// Removed rather than left as config that reads as intent (engine-doctrine/MISTAKES.md #70).
-	if musicFile == "" && voFile == "" && len(sfx) == 0 && len(bridges) == 0 {
+	if musicFile == "" && voFile == "" && len(sfx) == 0 && len(bridges) == 0 && len(cfg.ClipAudio) == 0 {
 		return false, nil
 	}
 
@@ -232,6 +247,43 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 		}
 	}
 
+	// CLIP AUDIO: a video layer's own sound, already trimmed to [in,out) and rate-matched by the JS
+	// pre-pass (harness/media/clip-audio.mjs). Loaded here, before the bed loop below, so a clip's
+	// `duck` can pull the music bed down under it the same way `bedDuck` does for a sound bridge; it
+	// is diegetic to the picture, not atmosphere, so it is summed in on its own afterward rather than
+	// folded into `bed` (which only ever meant music + bridge texture).
+	var clipSamples [][]float64
+	var clipStarts []int
+	var clipGains []float64
+	clipDuck := make([]float64, total)
+	for i := range clipDuck {
+		clipDuck[i] = 1
+	}
+	for _, c := range cfg.ClipAudio {
+		w := readWavMono(c.File)
+		if w == nil {
+			return false, fmt.Errorf("clip audio %q (from a video layer's `audio` prop) is not a WAV this mixer can read", c.File)
+		}
+		samples := fit(w, int(math.Round(float64(len(w.data))*sr/float64(w.rate))), false)
+		start := int(math.Round(c.Start * sr))
+		clipSamples = append(clipSamples, samples)
+		clipStarts = append(clipStarts, start)
+		g := c.Gain
+		if g == 0 {
+			g = 1
+		}
+		clipGains = append(clipGains, g)
+		duck := c.Duck
+		if duck == 0 {
+			duck = 1
+		}
+		for i := max(0, start); i < min(total, start+len(samples)); i++ {
+			if duck < clipDuck[i] {
+				clipDuck[i] = duck
+			}
+		}
+	}
+
 	mg := musicGain
 	if cfg.MusicGain != nil {
 		mg = *cfg.MusicGain
@@ -259,7 +311,7 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 			if bedDuck != nil {
 				bd = bedDuck[i]
 			}
-			m = music[i] * ducked * fadeGain(i, total, fadeInN, fadeOutN) * bd
+			m = music[i] * ducked * fadeGain(i, total, fadeInN, fadeOutN) * bd * clipDuck[i]
 		}
 		s := m
 		if vo != nil {
@@ -272,6 +324,22 @@ func Render(cfg Config, duration float64, stings []float64, sfx []Cue, bridges [
 			left[i] += bridgeMix[i]
 			right[i] += bridgeMix[i]
 			bed[i] += bridgeMix[i]
+		}
+	}
+
+	// Place each clip's own audio at its scene-time offset, at its authored gain. Not run through
+	// microGain (the sting micro-silence is a music/vo device) or the limiter-adjacent cue rule
+	// (overTheBed): a clip's sound is the picture's own sync sound, authored by placing the layer
+	// itself, not a cue competing with a bed.
+	for k, samples := range clipSamples {
+		start, g := clipStarts[k], clipGains[k]
+		for i := 0; i < len(samples); i++ {
+			j := start + i
+			if j < 0 || j >= total {
+				continue
+			}
+			left[j] += samples[i] * g
+			right[j] += samples[i] * g
 		}
 	}
 

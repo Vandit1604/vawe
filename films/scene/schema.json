@@ -199,6 +199,7 @@
     "w"
    ],
    "video": [
+    "audio",
     "fit",
     "h",
     "in",
@@ -1527,8 +1528,8 @@
     },
     "out": {
       "enum": ["fade", "up", "rise", "pop", "scale", "lift", "defocus", "slide-left", "slide-right", "slide-up", "slide-down", "wipe", "wipe-right", "wipe-left", "wipe-down", "wipe-up", "iris", "clock", "none"],
-     "type": "string",
-     "label": "driveClips exit anim. `out` plays an entrance BACKWARDS, so the exit that CONTINUES the travel is the oppositely named one: anim:\"slide-right\" + out:\"slide-left\", anim:\"wipe-right\" + out:\"wipe-left\"."
+     "type": "string|number",
+     "label": "driveClips exit anim (a NAME: fade | up | rise | ... , plays an entrance BACKWARDS, so the exit that CONTINUES the travel is the oppositely named one: anim:\"slide-right\" + out:\"slide-left\") · on a `video` layer: the OUT point in the source, seconds (a NUMBER; must be greater than `in`). The two never collide, a layer is one or the other."
     },
     "exitDur": {
      "type": "number|string",
@@ -2354,6 +2355,10 @@
     "in": {
      "type": "number",
      "label": "video: the IN point in the source, seconds. Where the clip starts, not where the layer starts."
+    },
+    "audio": {
+     "type": "boolean|object",
+     "label": "video: pull this clip's OWN audio into the mix (default absent = silent, as before this prop existed). `true`, or `{gain, duck}`: gain scales the clip's sound (default 1), duck is the floor the music bed drops to while it plays (default 1 = no duck)."
     },
     "poster": {
      "type": "string",
