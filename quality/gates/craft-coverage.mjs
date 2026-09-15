@@ -25,7 +25,7 @@ import { run as runDocMap } from './doc-map.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const CRAFT = path.join(ROOT, 'docs', 'CRAFT');
+const CRAFT = path.join(ROOT, 'engine-doctrine', 'CRAFT');
 
 const read = (f) => fs.readFileSync(path.join(CRAFT, f), 'utf8');
 const craftDocs = () => fs.readdirSync(CRAFT).filter((f) => f.endsWith('.md'));
@@ -52,7 +52,7 @@ function selectionTableRows(selection, from = 'Looks: the held texture', to = '\
 //
 // The rows were already parsed here and then thrown away by a `.join('\n')`, so the one place in this
 // repo that knows a `vhs` is analog nostalgia and a `lens` is premium glamour could not tell anyone.
-// docs/EFFECTS.md renders 31 looks and 35 stings as bare names for exactly that reason, and a quiz or an
+// engine-doctrine/EFFECTS.md renders 31 looks and 35 stings as bare names for exactly that reason, and a quiz or an
 // MCP client asking "what IS this" gets nothing. Returning the map costs a split and buys 66 entries.
 //
 // KEYED BY KIND, not flat, because `thermal` is BOTH a look (sci-fi/data/digital) and a sting (premium
@@ -149,7 +149,7 @@ function indexErrors() {
   return errs;
 }
 
-// docs/CRAFT/rules/*.json fails loudly on ANY problem (loadCraftRules), a check naming a finding code
+// engine-doctrine/CRAFT/rules/*.json fails loudly on ANY problem (loadCraftRules), a check naming a finding code
 // nothing emits included, so this is a thin adapter: one caught throw becomes one error line per
 // problem, in the same failed-groups shape the rest of this gate already uses.
 function ruleRecordErrors(loadCraftRules) {
@@ -197,7 +197,7 @@ if (isMain) {
       console.error(`  ${name}:`);
       for (const msg of e) { console.error(`    - ${msg}`); f.fail(code, msg); }
     }
-    console.error('\n  Fix: classify new looks/stings in docs/CRAFT/SELECTION.md §4, repair the link, add the doc to README,');
+    console.error('\n  Fix: classify new looks/stings in engine-doctrine/CRAFT/SELECTION.md §4, repair the link, add the doc to README,');
     console.error('  or give the doc `when:`/`answers:`/`group:` frontmatter and run `make doc-index`.');
     process.exit(1);
   }

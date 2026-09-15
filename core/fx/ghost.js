@@ -5,14 +5,14 @@
 // t minus a handful of frames, and draws from the difference. An echo trail is those past poses drawn as
 // faded copies; a velocity blur is the same poses sampled inside a single frame so they read as a smear.
 // ONE sampler, two presentations, because both answer the identical question and two owners of one fact
-// is how this codebase drifts (docs/MISTAKES.md #423).
+// is how this codebase drifts (engine-doctrine/MISTAKES.md #423).
 //
 //   "modifiers": [{ "ghost": "trail" }]
 //   "modifiers": [{ "ghost": { "mode": "blur", "k": 8 } }]
 //
 // WHY THIS IS SAFE HERE AND EXPENSIVE ELSEWHERE. Sampling an earlier frame is normally an accumulator,
 // and an accumulator makes frame n a function of n AND of every frame drawn before it, exactly the bug
-// that GSAP's `autoRemoveChildren` shipped into this engine (docs/MISTAKES.md #370), where a backward
+// that GSAP's `autoRemoveChildren` shipped into this engine (engine-doctrine/MISTAKES.md #370), where a backward
 // seek could not restore a tween the playhead had already passed. Nothing is remembered here. `motionAt`
 // (core/sequence.js) is a pure function of local time, so the pose at n-k is COMPUTED from the same
 // keyframes at every visit, in any order, from a cold DOM or a warm one. renderFrame(n) stays pure.

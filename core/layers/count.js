@@ -31,7 +31,7 @@ export function frame(kit, el, L, t, scene, { countStart, countDur, from, to, ea
   // A leading currency symbol in `unit` is hoisted to the front: `unit:"$B"` reads "$880B", which is
   // what CLAUDE.md documents and what the catalog's own statBig.currency assumed. Appending it
   // verbatim produced "880$B". The doc, the manifest and the engine each said something different
-  // (docs/MISTAKES.md #76). Plain units (%/k/ms) are untouched.
+  // (engine-doctrine/MISTAKES.md #76). Plain units (%/k/ms) are untouched.
   const rawUnit = unit || suffix || '';
   const cur = /^([$€£¥])(.*)$/.exec(rawUnit);
   const text = (prefix || '') + (cur ? cur[1] : '') + fmtCount(v, L) + (cur ? cur[2] : rawUnit);
@@ -132,5 +132,5 @@ function rollInto(el, text, num) {
   if (el.__rollHTML !== html) { el.innerHTML = html; el.__rollHTML = html; }
 }
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9";

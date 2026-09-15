@@ -19,7 +19,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const f = gateFindings();
 
 // make transitions D=<film.json>: PER-BOUNDARY, the same procedure `make critics` briefs the transition
-// decider to run first (docs/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-
+// decider to run first (engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-
 // seam). Read here, never re-derived: the exact fields storyboard-check.mjs already checks.
 const filmArg = process.argv.slice(2).find((a) => !a.startsWith('--') && a.endsWith('.json'));
 if (filmArg) {
@@ -33,7 +33,7 @@ if (filmArg) {
   const src = fs.readFileSync(sbPath, 'utf8');
   const beats = timeline(parseStoryboard(src)).beats;
   console.log(`\n  TRANSITIONS · ${path.relative(ROOT, sbPath)} · ${Math.max(0, beats.length - 1)} boundary(ies)\n`);
-  console.log(`  relationships: ${RELATIONSHIP_KEYS.join(', ')}. docs/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam\n`);
+  console.log(`  relationships: ${RELATIONSHIP_KEYS.join(', ')}. engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam\n`);
   for (let i = 1; i < beats.length; i++) {
     const prev = beats[i - 1], b = beats[i];
     const resolved = resolvedTransitionIn(b);
@@ -85,7 +85,7 @@ for (const m of MECHANISMS) {
   console.log('');
 }
 console.log('  ★ = basic · ↕ = direction-aware (left/right/up/down)');
-console.log('  Decision theory (what to pick, and why): docs/CRAFT/TRANSITIONS.md\n');
+console.log('  Decision theory (what to pick, and why): engine-doctrine/CRAFT/TRANSITIONS.md\n');
 
 const orphan = unclassified();
 if (orphan.length) {

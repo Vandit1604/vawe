@@ -215,7 +215,7 @@ not: "no centred text default"
 }
 
 // ---- (d)/(e)/(f) `move:` builds a sustained track, an unset move: is byte-identical, an unknown ------
-// shape is refused (docs/MISTAKES.md #610: a slideshow stops when a moves ENDS, not when it starts).
+// shape is refused (engine-doctrine/MISTAKES.md #610: a slideshow stops when a moves ENDS, not when it starts).
 {
   const dir4 = fs.mkdtempSync(path.join(os.tmpdir(), 'assemble-test-move-'));
   const film4 = path.join(dir4, 'v.json');

@@ -68,7 +68,7 @@ export function splitText(el, mode = 'word') {
 // THE STAGGER ORDER. `from` remaps a unit's index to its RANK in the wave, which is the dial that
 // decides what the eye reads: a left-to-right train reads as typing, a centre-out train reads as the
 // word arriving as one object. Every reference implementation ships it and ours could only ever start
-// at the first glyph (docs/CRAFT/PARITY-AUDIT.md).
+// at the first glyph (engine-doctrine/CRAFT/PARITY-AUDIT.md).
 //
 // It is a RANK, not a delay, so `amount` can normalise it: the offsets are pure numbers and the step
 // is seconds. `random` hashes the index, never Math.random(), so a backward seek is exact.
@@ -153,14 +153,14 @@ export const gsapStagger = (spec, fallback) => (spec && typeof spec === 'object'
 // continuously, which is what every preset here has always done, so 1 is the default and no shipped
 // frame moves. At 0 the unit SWAPS: it is unselected, then it is selected, with nothing in between,
 // and a glyph therefore vanishes rather than scaling away. That is the one value a font morph needs
-// and the one nobody reaches by tuning a curve (docs/CRAFT/AE-TECHNIQUES.md #5, #7).
+// and the one nobody reaches by tuning a curve (engine-doctrine/CRAFT/AE-TECHNIQUES.md #5, #7).
 //
 // The remap is the transition band centred on the middle of the unit's own window:
 //   u' = clamp01((u - 0.5) / smoothness + 0.5)
 // At smoothness 1 that is the identity, which is why this is free. Below 1 the band narrows around
 // the midpoint; at 0 it is a step.
 //
-// STAGGER TAKES THE OTHER TWO DIALS EVERY REFERENCE PRIMITIVE SHIPS (docs/CRAFT/PARITY-AUDIT.md).
+// STAGGER TAKES THE OTHER TWO DIALS EVERY REFERENCE PRIMITIVE SHIPS (engine-doctrine/CRAFT/PARITY-AUDIT.md).
 // `stagger: 0.05` is the per-unit delay and stays exactly what it was. The object form is GSAP's own,
 // so the SAME words work in the `parts` slot and an author learns one vocabulary:
 //   "stagger": { "each": 0.05, "from": "center" }   /   "stagger": { "amount": 0.6, "from": "edges" }
@@ -212,7 +212,7 @@ export function animateUnits(units, t, { preset = 'blurUp', each = 0.5, stagger 
   // An unknown name is a HARD ERROR. It used to fall back to `up`, so a typo - or a preset renamed out
   // from under a scene - rendered a plausible frame that was not what was asked for, and the schema does
   // not enumerate these names either, so nothing else caught it. Same reasoning as the unknown-modifier
-  // throw in core/fx/index.js. docs/MISTAKES.md #354.
+  // throw in core/fx/index.js. engine-doctrine/MISTAKES.md #354.
   const fn = PRESET_REGISTRY.pick(preset);
   units.forEach((el, i) => {
     if (loop || preset === 'wave' || preset === 'shimmerWave') {
@@ -222,7 +222,7 @@ export function animateUnits(units, t, { preset = 'blurUp', each = 0.5, stagger 
       // POPTS REACHED EVERY PRESET BUT THIS ONE. The early return handed decodeText three arguments and
       // dropped `popts` on the floor, so `presetOpts` on a decode layer was accepted, forwarded nowhere
       // and silently inert, and the preset's own declared parameter was dead code. Input accepted and
-      // then ignored is this repo's worst bug class (docs/MISTAKES.md #543). `each` rides along because
+      // then ignored is this repo's worst bug class (engine-doctrine/MISTAKES.md #543). `each` rides along because
       // the scramble RATE is per second and only the caller knows how long the window is.
       if (preset === 'decode') { decodeText(el, u, i, { ...popts, each }); el.style.opacity = u > 0 ? '1' : '0'; return; }
       // `flap` mutates the character too, but unlike decode it also has a hinge to apply, so the

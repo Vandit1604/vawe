@@ -46,7 +46,7 @@ not: "no Inter or Roboto · no purple or indigo gradient · no centred hero with
 | D6 | list card, bold value over grey label, a check on the selected row | **beat 2** (what the file declares) and **beat 5** (16:9 is checked, because that is what this film renders) |
 | D7 | extreme scale push into ONE element, same object at three sizes | **beats 4, 6, 5**: the same plate at 1000px, 560px, 340px |
 | D8 | typing into a field, the text scrolling as it overflows | **beat 3**, `--typed` clips the command in whole characters |
-| D9 | attach icon and a round accent send button, pushed to fill the frame | **dropped.** Their hero object is a chat input because their product is chat. Ours is a command line, and copying the shape put an AI chat UI into this film for two rounds (docs/MISTAKES.md #596) |
+| D9 | attach icon and a round accent send button, pushed to fill the frame | **dropped.** Their hero object is a chat input because their product is chat. Ours is a command line, and copying the shape put an AI chat UI into this film for two rounds (engine-doctrine/MISTAKES.md #596) |
 | D10 | an icon inside a pale halo of the accent, a badge on it | **beat 7**, the real favicon in a cobalt halo |
 | D11 | closing sentence word by word, last phrase in the accent | **beat 7**, "Write it. Run it. Ship it." |
 | D12 | ends on black | the film's own outro, not a fragment |

@@ -119,7 +119,7 @@ export function entranceEmphasis(life) {
 }
 
 // ── THE EYE-PLAN CHECK: where the primary motion region actually ends, against what the storyboard's
-// own `eye:` line said would be there (docs/CRAFT/DIRECTION.md, "Directing the eye"). A REPORT, exactly
+// own `eye:` line said would be there (engine-doctrine/CRAFT/DIRECTION.md, "Directing the eye"). A REPORT, exactly
 // like the rest of this file: it names a measured fact and a stated intent, and leaves the verdict to a
 // human wherever the plan names a LAYER rather than a region ("the prompt bar" has no frame-thirds
 // reading without a layout lookup this file does not have); it verdicts only the beats whose `eye:`

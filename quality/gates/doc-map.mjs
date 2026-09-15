@@ -14,10 +14,10 @@
 // enough to choose, and the body only loads if chosen. That frontmatter is the ONLY place a
 // description is written by hand. Three views are GENERATED from it and never edited:
 //
-//   docs/INDEX.md                        the repo-wide map, for humans and for any agent
+//   engine-doctrine/INDEX.md                        the repo-wide map, for humans and for any agent
 //   skills/vawe-docs/SKILL.md    the same map as a skill, so Claude Code surfaces it for ~100
 //                                        tokens and loads the body only when a doc is actually wanted
-//   docs/CRAFT/README.md                 the craft index table, between the docmap markers
+//   engine-doctrine/CRAFT/README.md                 the craft index table, between the docmap markers
 //
 // A generated view cannot drift from its source. What CAN go missing is frontmatter on a new doc, and
 // that is what this gate fails on. Reachability is checked too: every indexed doc must be linked from
@@ -37,14 +37,14 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // The roots are entry points and maps. The things that point AT the index, not entries in it.
 // CLAUDE.md and AGENTS.md are loaded up front by the agent; INDEX.md and CRAFT/README.md are the
 // generated maps themselves. Their links are still checked; they just do not describe themselves.
-const ROOTS = new Set(['CLAUDE.md', 'AGENTS.md', 'docs/INDEX.md', 'docs/CRAFT/README.md']);
+const ROOTS = new Set(['CLAUDE.md', 'AGENTS.md', 'engine-doctrine/INDEX.md', 'engine-doctrine/CRAFT/README.md']);
 
 // Excluded, each with the reason. A path is excluded if any prefix/suffix rule matches.
 const EXCLUDE = [
   // Its frontmatter is the EXAMPLE an author copies into a real storyboard, so doc-map keys added
   // there would land in every storyboard written from it and `storyboard-check` would see props it
   // does not know. Reached instead from DIRECTION.md and TASTE.md, which are both indexed.
-  ['docs/CRAFT/STORYBOARD-TEMPLATE.md', 'its frontmatter is a fill-in example, not metadata about the file'],
+  ['engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md', 'its frontmatter is a fill-in example, not metadata about the file'],
   ['docs-site/', 'a vendored Next app; its own MDX is not repo doctrine'],
   ['skills/impeccable/reference/', 'a vendored third-party skill; its SKILL.md is indexed, its 27 reference pages are not'],
   ['.claude/plans/', 'historical plan records, superseded by what shipped'],
@@ -70,13 +70,13 @@ const EXCLUDE_SUFFIX = [
 // Generated docs. Frontmatter here would be destroyed by the next regenerate, so the one line lives
 // with the gate instead. Keep this list at two; anything else should carry its own frontmatter.
 const GENERATED = {
-  'docs/EFFECTS.md': {
+  'engine-doctrine/EFFECTS.md': {
     group: 'reference',
     when: 'choosing an effect and you want to see the whole arsenal before defaulting to rise+fade',
     answers: 'every registered effect in the engine, generated from the engine registries so it cannot drift',
     by: 'make effects',
   },
-  'docs/vawe-rules.md': {
+  'engine-doctrine/vawe-rules.md': {
     group: 'reference',
     when: 'you need the authoritative, engine-generated rules for writing a scene.json',
     answers: 'the generated rulebook: if it is in this file, the engine really reads it',
@@ -262,10 +262,10 @@ const CODE_EXCLUDE = new Map([
   ['mistakes-dupe', 'MISTAKES.md heading-duplicate detector: log hygiene, not craft, and that file is owned elsewhere right now'],
   ['craft-unvisited', "craft-checklist.mjs: whichever relevant doc's `confirm:` went unanswered in the storyboard; it already names that doc dynamically via its own `doc:` field, so no single doc owns this code"],
 
-  // arsenal-check.mjs + discovery.mjs: does the engine's OWN search/catalogue tooling (docs/EFFECTS.md,
+  // arsenal-check.mjs + discovery.mjs: does the engine's OWN search/catalogue tooling (engine-doctrine/EFFECTS.md,
   // `make arsenal`, the website's index) stay complete and in sync with the registries. Fixed by
   // giving a registry a `catalog`/`blurbs` block, never by a craft decision in a film.
-  ['arsenal-missing', 'arsenal-check: a registry has no catalog section in docs/EFFECTS.md, fixed with a `catalog` block'],
+  ['arsenal-missing', 'arsenal-check: a registry has no catalog section in engine-doctrine/EFFECTS.md, fixed with a `catalog` block'],
   ['arsenal-ratchet', 'arsenal-check: hand-catalogued (non-registry) capability count climbed, an engine-authoring debt'],
   ['blurb-ratchet', 'arsenal-check: registry entries with no blurb climbed, fixed by writing blurbs at the registry'],
   ['block-unsearchable', 'discovery: a block family dropped out of `make arsenal`\'s search corpus, an engine-tooling break'],
@@ -379,7 +379,7 @@ function indexBody(entries) {
   out.push('Read the line, then open only the doc you need. Nothing here loads a body you did not ask for.');
   out.push('');
   // The label is the bare filename, never a relative path: this body is emitted twice, at two depths
-  // (docs/INDEX.md and skills/vawe-docs/SKILL.md), and only the TARGET is rewritten per copy.
+  // (engine-doctrine/INDEX.md and skills/vawe-docs/SKILL.md), and only the TARGET is rewritten per copy.
   // A label of `../CLAUDE.md` was therefore wrong in one of the two files every time it was generated.
   out.push('Start at [`CLAUDE.md`](../CLAUDE.md) for the standing rules and the render loop. This map is');
   out.push('for the question CLAUDE.md cannot answer without growing: *which document settles this?*');
@@ -399,7 +399,7 @@ function indexBody(entries) {
       out.push('| Doc | Reach for it when… | It answers |');
       out.push('|---|---|---|');
       for (const e of rows) {
-        const rel = e.file.startsWith('docs/') ? e.file.slice('docs/'.length) : `../${e.file}`;
+        const rel = e.file.startsWith('engine-doctrine/') ? e.file.slice('engine-doctrine/'.length) : `../${e.file}`;
         const mark = e.source === 'pending' ? ' ⚠' : '';
         out.push(`| [${e.file}](${rel})${mark} | ${cell(e.when)} | ${cell(e.answers)} |`);
       }
@@ -432,21 +432,21 @@ export function renderSkill(entries) {
   ].join('\n');
   const body = indexBody(entries)
     .replace('_GENERATED by `make doc-index` from the `when:` / `answers:` frontmatter on each doc. Do not edit._',
-      '_GENERATED by `make doc-index`. The same map lives at `docs/INDEX.md`. Do not edit either by hand._')
+      '_GENERATED by `make doc-index`. The same map lives at `engine-doctrine/INDEX.md`. Do not edit either by hand._')
     .replace(/\]\(\.\.\/([^)]+)\)/g, '](../../$1)')
-    .replace(/\]\((?!\.\.\/|https?:)([^)]+)\)/g, '](../../docs/$1)');
+    .replace(/\]\((?!\.\.\/|https?:)([^)]+)\)/g, '](../../engine-doctrine/$1)');
   return `${fm}# vawe-docs, which document settles this?\n\n${body}`;
 }
 
 export function renderCraftBlock(entries) {
   const out = ['## The full index', ''];
-  const inCraft = (e) => e.file.startsWith('docs/CRAFT/');
+  const inCraft = (e) => e.file.startsWith('engine-doctrine/CRAFT/');
   for (const key of CRAFT_GROUPS) {
     const rows = [
-      // relative to docs/CRAFT/, not basename: a doc under a subdirectory (docs/CRAFT/routes/*) needs
+      // relative to engine-doctrine/CRAFT/, not basename: a doc under a subdirectory (engine-doctrine/CRAFT/routes/*) needs
       // its subpath in the link, or the generated table points at a file that does not exist there.
       ...entries.filter((e) => e.group === key && inCraft(e)).map((e) => {
-        const rel = path.relative('docs/CRAFT', e.file);
+        const rel = path.relative('engine-doctrine/CRAFT', e.file);
         return { label: `[${rel}](${rel})`, ...e };
       }),
       ...CRAFT_ALSO.filter((e) => e.group === key),
@@ -470,7 +470,7 @@ const START = '<!-- docmap:start -->';
 const END = '<!-- docmap:end -->';
 
 function craftReadmeWith(block) {
-  const p = path.join(ROOT, 'docs/CRAFT/README.md');
+  const p = path.join(ROOT, 'engine-doctrine/CRAFT/README.md');
   const cur = fs.readFileSync(p, 'utf8');
   const a = cur.indexOf(START);
   const b = cur.indexOf(END);
@@ -480,16 +480,16 @@ function craftReadmeWith(block) {
 
 export function views(entries) {
   return [
-    ['docs/INDEX.md', renderIndex(entries) + '\n'],
+    ['engine-doctrine/INDEX.md', renderIndex(entries) + '\n'],
     ['skills/vawe-docs/SKILL.md', renderSkill(entries) + '\n'],
-    ['docs/CRAFT/README.md', craftReadmeWith(renderCraftBlock(entries))],
+    ['engine-doctrine/CRAFT/README.md', craftReadmeWith(renderCraftBlock(entries))],
   ];
 }
 
 export function staleViews(entries) {
   const errs = [];
   for (const [f, want] of views(entries)) {
-    if (want === null) { errs.push(`docs/CRAFT/README.md: the ${START} / ${END} markers are missing. The generated index has nowhere to go`); continue; }
+    if (want === null) { errs.push(`engine-doctrine/CRAFT/README.md: the ${START} / ${END} markers are missing. The generated index has nowhere to go`); continue; }
     const p = path.join(ROOT, f);
     const cur = fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
     if (cur !== want) errs.push(`${f} is stale, run \`make doc-index\``);
@@ -500,8 +500,8 @@ export function staleViews(entries) {
 /** Every indexed doc must be linked from the map, so nothing is written and left unreachable. */
 export function orphanErrors(entries) {
   const map = renderIndex(entries);
-  return entries.filter((e) => !map.includes(`(${e.file.startsWith('docs/') ? e.file.slice(5) : '../' + e.file})`) && !map.includes(`(../${e.file})`))
-    .map((e) => `${e.file} is not linked from docs/INDEX.md: orphaned from the map`);
+  return entries.filter((e) => !map.includes(`(${e.file.startsWith('engine-doctrine/') ? e.file.slice('engine-doctrine/'.length) : '../' + e.file})`) && !map.includes(`(../${e.file})`))
+    .map((e) => `${e.file} is not linked from engine-doctrine/INDEX.md: orphaned from the map`);
 }
 
 export function run({ write = false } = {}) {
@@ -513,7 +513,7 @@ export function run({ write = false } = {}) {
     if (fails.length) return { ok: false, fails, pending, wrote: [], entries };
     const wrote = [];
     for (const [f, content] of views(entries)) {
-      if (content === null) { fails.push(`docs/CRAFT/README.md: missing ${START} / ${END} markers`); continue; }
+      if (content === null) { fails.push(`engine-doctrine/CRAFT/README.md: missing ${START} / ${END} markers`); continue; }
       const p = path.join(ROOT, f);
       fs.mkdirSync(path.dirname(p), { recursive: true });
       const cur = fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';

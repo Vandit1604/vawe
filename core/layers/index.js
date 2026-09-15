@@ -41,11 +41,11 @@ const REGISTRY = { text, count, image, video, group, rect, glow, beam, svg, curs
 
 // Exported so gates DERIVE the layer vocabulary instead of restating it. `make coverage` kept its own
 // hand-typed list and silently reported 14/14 while a 15th type existed, the same failure as the
-// schema advertising an anim that never existed (docs/MISTAKES.md #21, #65).
+// schema advertising an anim that never existed (engine-doctrine/MISTAKES.md #21, #65).
 export const LAYER_TYPES = Object.keys(REGISTRY);
 
 // The catalogue row for each type, DERIVED from the modules so the two cannot drift, and refused at load
-// when one is missing. All 22 rendered as an em-dash in docs/EFFECTS.md until this existed: the layer
+// when one is missing. All 22 rendered as an em-dash in engine-doctrine/EFFECTS.md until this existed: the layer
 // vocabulary is the one thing every other effect in that document is a dial ON, and it was the one
 // family the catalogue could not describe.
 export const LAYER_BLURBS = blurbsOf('layer type', REGISTRY);
@@ -58,13 +58,13 @@ export const LAYER_BLURBS = blurbsOf('layer type', REGISTRY);
 // What it buys: the section below used to be hand-listed in scripts/site/effects-catalog.mjs with its
 // usage form and its no-preview reason in a third file, and `harness/author/arsenal.mjs` carried a
 // hardcoded special case reading LAYER_TYPES + LAYER_BLURBS because layer types were not a registry
-// (docs/MISTAKES.md #551: `beam`, whose blurb says "a light that travels the rounded-rect border", was
+// (engine-doctrine/MISTAKES.md #551: `beam`, whose blurb says "a light that travels the rounded-rect border", was
 // invisible to a query naming exactly that). All of it is one declaration now.
 export const LAYER_REGISTRY = defineRegistry('layer type', REGISTRY, { slot: 'layers[].type', blurbs: LAYER_BLURBS,
   catalog: {
     title: 'Layer types',
     tag: 'layer',
-    intro: 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `docs/PRIMITIVES.md` for what each is FOR.',
+    intro: 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `formats/scene/schema.json`, and `engine-doctrine/PRIMITIVES.md` for what each is FOR.',
     usage: (n, { j }) => j({ type: n }),
     noPreview: 'a layer type is the noun, not the effect. Every preview on this page is already one of them.',
   },
@@ -130,7 +130,7 @@ export function createRenderer(ctx) {
   };
   // Injected AFTER the kit exists (util.js cannot import this file, that would be circular). This is
   // what lets a group child run the same builder as a top-level layer instead of a re-implemented
-  // subset of it (docs/MISTAKES.md #70).
+  // subset of it (engine-doctrine/MISTAKES.md #70).
   // The primitive builds the thing; its `modifiers` then modify what was built, in that order and never
   // the other way round. Routed through ONE helper so a group child and a top-level layer cannot end up
   // with different modifier support.

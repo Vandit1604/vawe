@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // harness/dev/overlap-sweep.mjs: does OVERLAP (when the next reveal starts, relative to the last
 // one's own duration) move the motion-floor, holding the number of moves per beat CONSTANT at 4?
-// docs/MISTAKES.md #608 ruled out structure (a shared fragment, a keyed object chain); this rig tests
+// engine-doctrine/MISTAKES.md #608 ruled out structure (a shared fragment, a keyed object chain); this rig tests
 // the gate's own stated advice instead: "the fix is overlap, not ambience: start the next reveal
 // before the last one lands."
 //

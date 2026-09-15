@@ -23,7 +23,7 @@
 // split word/char count, a `parts` selector's real match count against hand-authored markup) gets an
 // entry with `segments: null` and a `why` string, so a reader can see something moves there without
 // being handed an invented number. Guessing a wrong timing here is the failure this engine logs most
-// (docs/MISTAKES.md): a plausible number silently substituted for a real one.
+// (engine-doctrine/MISTAKES.md): a plausible number silently substituted for a real one.
 import { POSE } from './sequence.js';
 
 // jsonSegments(kfs, absStart): one {t0,t1,from,to,ease} list per POSE property that actually varies

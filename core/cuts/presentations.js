@@ -12,7 +12,7 @@ export function wipe(t, dir = 'left') {
   const p = (1 - clamp01(t)) * 100;
   const m = { left: `inset(0 ${p}% 0 0)`, right: `inset(0 0 0 ${p}%)`, up: `inset(0 0 ${p}% 0)`, down: `inset(${p}% 0 0 0)` };
   // `m[dir] || m.left` silently wiped leftward for any unrecognised direction. core/cuts.js owns the
-  // vocabulary; this is the same rule at the other call site (docs/MISTAKES.md #360).
+  // vocabulary; this is the same rule at the other call site (engine-doctrine/MISTAKES.md #360).
   const c = m[dir];
   if (!c) throw new Error(`wipe: unknown direction "${dir}", one of: ${Object.keys(m).join(', ')}`);
   return { clipPath: c, WebkitClipPath: c };
@@ -42,7 +42,7 @@ const style = (over) => ({ ...IDENT, ...over });
 // `dir` used to fall through to left/X for ANY unrecognised value, so `dir:"top"` on a wipe cut gave a
 // leftward wipe with no signal - the same collapse of "absent" and "wrong" that cutStyle's own comment
 // below argues against for `name` and `timing`. A cut is a junction; it is the worst place to guess.
-// docs/MISTAKES.md #360.
+// engine-doctrine/MISTAKES.md #360.
 export const DIRS = ['left', 'right', 'up', 'down'];
 const okDir = (dir) => {
   if (dir == null) return 'left';                       // absent has a documented default

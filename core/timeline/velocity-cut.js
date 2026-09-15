@@ -4,7 +4,7 @@
 // that graph is steepest. The eye cannot resolve a join buried inside peak velocity, so a cut placed
 // there is felt as continuous motion. The usual habit is the opposite: ease the move, then cut on the
 // beat or on a round second, which puts the seam exactly where the picture is SLOWEST and most
-// visible (docs/CRAFT/AE-TECHNIQUES.md #1).
+// visible (engine-doctrine/CRAFT/AE-TECHNIQUES.md #1).
 //
 // ADVISORY, NEVER AUTOMATIC, and that is a decision rather than a shortcut. A scene that writes
 // `cuts: [{ t: 4.2 }]` has stated a time, and an engine that quietly rendered the cut at 4.55 would
@@ -26,7 +26,7 @@ import { velocityAt, cameraAt } from './sequence.js';
 const SCALE_REACH = 540;
 
 // AND ROTATION MOVES PIXELS, which this file missed and its own source technique proves. The recipe
-// in docs/CRAFT/AE-TECHNIQUES.md #1 hands a fast ROTATION from one element to another across the
+// in engine-doctrine/CRAFT/AE-TECHNIQUES.md #1 hands a fast ROTATION from one element to another across the
 // seam, and a reader that saw only translation and scale scored that exact seam at ZERO px/s and
 // reported it as a velocity trough: the advisory called the technique's own worked example the
 // mistake it exists to catch. ROT_REACH is the radius the turning edge is assumed to sit at, a
@@ -57,7 +57,7 @@ export function layerSpeedAt(L, t, fps = 30) {
  *
  * THE CAMERA MOVES EVERY PIXEL, and a reader that saw only layer tracks scored a camera-driven seam
  * at zero. That is not an edge case here, it is this file's own technique: the recipe in
- * docs/CRAFT/AE-TECHNIQUES.md #1 parents both shots to one null and animates the NULL, and in this
+ * engine-doctrine/CRAFT/AE-TECHNIQUES.md #1 parents both shots to one null and animates the NULL, and in this
  * engine the thing that covers both shots at once is the camera. So the advisory used to read the
  * one construction it exists to check as a dead frame.
  *

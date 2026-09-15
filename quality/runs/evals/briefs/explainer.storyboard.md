@@ -17,15 +17,15 @@ not: "no product, no CTA, no logo, no gradient hero, no centered text, no Inter,
 ---
 
 <!--
-  THE FLOW USED: read skills/vawe-type-explainer/SKILL.md + docs/CRAFT/HTML-FRAGMENTS.md +
-  docs/CRAFT/SHOW-DONT-TELL.md + docs/RULES/INDEX.md first. Theme chosen by reading themes/vawe.json
+  THE FLOW USED: read skills/vawe-type-explainer/SKILL.md + engine-doctrine/CRAFT/HTML-FRAGMENTS.md +
+  engine-doctrine/CRAFT/SHOW-DONT-TELL.md + engine-doctrine/RULES/INDEX.md first. Theme chosen by reading themes/vawe.json
   directly (its own `motion._exitRatio` note already says "this engine is about determinism and speed"),
   not by a render, because the note is decisive on its own: a white-first, flat-field, mono-numerals
   theme with the fastest exitRatio of the seven is the calm technical register this topic wants, and it
   is the engine's own voice rather than a borrowed one.
 
   This is a single film authored in one sitting by one author, not a per-scene fan-out: per
-  docs/CRAFT/PER-SCENE-FANOUT.md's own "when this is overkill" section, the stagekit/contract/scenes/
+  engine-doctrine/CRAFT/PER-SCENE-FANOUT.md's own "when this is overkill" section, the stagekit/contract/scenes/
   assemble chain exists to lock a shared contract BEFORE several agents write fragments in parallel.
   There is one agent and one film here, so that chain buys nothing; this storyboard supplies the same
   per-beat contract (object_in/object_out, exact copy, start/end) by hand instead, which is what the
@@ -81,7 +81,7 @@ not: "no product, no CTA, no logo, no gradient hero, no centered text, no Inter,
 - mechanism: `parts`, chips scramble in with a stagger; the six dots then pop together with near-zero stagger, so the arrival order visibly disagrees with the numeric order while the mark on every one lands at once
 - becomes: an abstract claim becomes a picture: order of arrival does not change the result
 - onscreen: Any order. Same pixel.
-- why: this is the beat that SHOWS the idea rather than states it (docs/CRAFT/SHOW-DONT-TELL.md): a claim about order is illustrated by literally scrambling the order
+- why: this is the beat that SHOWS the idea rather than states it (engine-doctrine/CRAFT/SHOW-DONT-TELL.md): a claim about order is illustrated by literally scrambling the order
 - duration: 4.0s
 - transition_in: dissolve
 

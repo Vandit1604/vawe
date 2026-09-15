@@ -1,7 +1,7 @@
 // core/engine/expand.test.mjs: expandScene(data, aspectKey) resolves a cameraMove bake and a flow-seam's
 // travel against the CANVAS THE RENDER ACTUALLY TARGETS, not always the scene's own declared aspect.
 // Before this test could pass, both baked at the scene's own aspect regardless of aspectKey, because
-// frameOf(data) and sceneDims(scene) were called with no key (docs/CRAFT/ENGINE-CHANGES.md "one fact, one
+// frameOf(data) and sceneDims(scene) were called with no key (engine-doctrine/CRAFT/ENGINE-CHANGES.md "one fact, one
 // owner": the aspect a render targets has one owner, internal/render/render.go's o.Aspect, and this test
 // pins that expandScene actually receives it rather than re-deriving the scene's own aspect).
 import assert from 'node:assert/strict';

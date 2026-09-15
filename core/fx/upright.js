@@ -1,6 +1,6 @@
 // core/fx/upright.js: AUTO-ORIENT. Keep this layer UPRIGHT while the layer carrying it rotates.
 //
-// Technique 12 in docs/CRAFT/AE-TECHNIQUES.md, and the study called it the only serious default
+// Technique 12 in engine-doctrine/CRAFT/AE-TECHNIQUES.md, and the study called it the only serious default
 // candidate of the twelve. Photographs arranged around a centre and parented to one rotating null are
 // the standard rig; left alone each photograph turns WITH the null, so the arrangement reads as a
 // spinning wheel and every caption is upside down at the bottom of the circle. The layout stops being
@@ -79,7 +79,7 @@ export function frame(kit, el, L, t, scene, spec) {
     throw new Error(`upright on ${name(L)}: no layer with id "${of}", known ids: ${scene.ids.join(', ')}.`);
   // A carrier with no keyed rotation turns nothing, so the correction would render exactly like its own
   // absence. Named rather than skipped: input accepted and then ignored is the defect this registry's
-  // hard-error dispatch exists to kill (docs/MISTAKES.md #210 #213 #215 #217).
+  // hard-error dispatch exists to kill (engine-doctrine/MISTAKES.md #210 #213 #215 #217).
   if (!Array.isArray(carrier.motion) || !carrier.motion.some((k) => k && k.rot != null))
     throw new Error(`upright on ${name(L)}: "${of}" has no \`rot\` key in a \`motion\` track, so it `
       + `never turns and there is nothing to cancel. This reads keyframes, not rendered poses: an `

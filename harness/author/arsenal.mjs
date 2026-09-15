@@ -7,7 +7,7 @@
 // WHY. The census that prompted this is not close: the `{type:"beat"}` blueprint mechanism, which
 // CLAUDE.md names as the #1 defence against a plain slideshow, is used by 2 of 153 scenes, and 11 of
 // its 19 beats have zero users. `EXIT_FX`, eleven named exits, was used by NONE and was deleted whole
-// rather than left uncatalogued (docs/MISTAKES.md #364): every film still needs its layers to leave,
+// rather than left uncatalogued (engine-doctrine/MISTAKES.md #364): every film still needs its layers to leave,
 // and `out` already reaches every motion that family named. That instruction has been given for
 // months and obeyed twice, so the
 // problem is not persuasion: 566 effects reachable only by reading an 849-line generated file are not
@@ -25,7 +25,7 @@
 //
 // AND IT MUST BE ABLE TO SAY IT DOES NOT KNOW. Ranking alone has no ceiling, so the best of 420 things
 // came back whether it answered the question or not: `dollyZoom` was offered, twice in one day, for two
-// capabilities this engine does not have (docs/MISTAKES.md #552). A wrong tool is worse than no tool
+// capabilities this engine does not have (engine-doctrine/MISTAKES.md #552). A wrong tool is worse than no tool
 // here, because this is the tool an author is told to consult before inventing anything. Everything
 // under CONFIDENT is now printed as a WEAK GUESS, under a line saying nothing clearly matches.
 import fs from 'node:fs';
@@ -118,7 +118,7 @@ export async function collect() {
   //
   // Why the two sources above could not see them. Blocks are not `*_REGISTRY` exports (the registry
   // object lives in blocks/kit.mjs and is FILLED by blocks/index.mjs, so there is no `BLOCK_REGISTRY`
-  // to walk), and their catalogue is docs/BLOCKS.md, not docs/EFFECTS.md. Each source was correct about
+  // to walk), and their catalogue is engine-doctrine/BLOCKS.md, not engine-doctrine/EFFECTS.md. Each source was correct about
   // its own subject and neither had any reason to mention it.
   //
   // blocks/catalog.mjs is already the one owner of a block's name and its blurb: blocks/index.mjs
@@ -166,7 +166,7 @@ export async function collect() {
   } catch { /* the block library is optional to search, the same way recipes are */ }
 
   // Layer types used to need a special case here, because they were LAYER_TYPES + LAYER_BLURBS and not
-  // a registry, so `beam` was invisible to a query naming its own blurb (docs/MISTAKES.md #551). They
+  // a registry, so `beam` was invisible to a query naming its own blurb (engine-doctrine/MISTAKES.md #551). They
   // are `LAYER_REGISTRY` now and the generic walk above finds them like everything else.
 
   // THE CATALOGUE KNOWS MORE THAN THE REGISTRIES DO, and the search was the last thing to hear about it.
@@ -176,14 +176,14 @@ export async function collect() {
   // whole shape of the bug: a capability the engine offers but has not been given a registry is
   // invisible to the search this repo tells you to run before inventing anything.
   //
-  // Measured: docs/EFFECTS.md carries 639 effects across 48 families and this corpus carried 445, so
+  // Measured: engine-doctrine/EFFECTS.md carries 639 effects across 48 families and this corpus carried 445, so
   // roughly 150 real names could not be found. `easeOutExpo`, `tiktok`, `wordFlash`, `refract` and
   // `commaSplit` all returned NOTHING HERE CLEARLY MATCHES over a sentence claiming 445 things had been
   // searched. The sentence was true about the corpus and false about the engine.
   //
   // So the corpus takes the catalogue as its second source. The catalogue is already the union of the
   // registries that publish themselves and the 16 sections still hand-written, so this is one fact with
-  // one owner rather than a third list: anything a reader can find in docs/EFFECTS.md is now findable
+  // one owner rather than a third list: anything a reader can find in engine-doctrine/EFFECTS.md is now findable
   // here, and anything added to either is added to both.
   //
   // A REGISTRY ENTRY WINS where both know a name, because it carries `slot` and `aka` and the section
@@ -215,11 +215,11 @@ export async function collect() {
   // Only the cues no registry already owns: MOTION_CUE_REGISTRY (core/audio-tactile.js) covers seven,
   // and a cue findable twice under two kinds is the drift this tool exists to remove. This fills the rest.
   out.push(...(await cueSource()).filter((c) => !out.some((e) => e.name === c.name && e.slot === c.slot)));
-  // CRAFT RULES: docs/CRAFT/rules/*.json, so an agent can PULL a rule on demand by searching for what
+  // CRAFT RULES: engine-doctrine/CRAFT/rules/*.json, so an agent can PULL a rule on demand by searching for what
   // it is about ("caption safe strip") instead of waiting for the harness to push every rule at once.
   // Dynamic import only: a static import of craft-rules.mjs drags in craft-checklist.mjs and
   // finding-codes.mjs at module load, which deadlocks this file's own top-level `await collect()`
-  // (docs/MISTAKES.md style trap, fixed once already for craft-coverage in commit 12f25371). No slot:
+  // (engine-doctrine/MISTAKES.md style trap, fixed once already for craft-coverage in commit 12f25371). No slot:
   // a rule is prose to read, not JSON to paste, so it never enters pasteOf's JSON path.
   try {
     const { loadCraftRules } = await import('../lib/craft-rules.mjs');
@@ -266,7 +266,7 @@ export const corpusOf = (e) => `${e.name} ${e.kind} ${e.blurb} ${(e.aka || []).j
 // `score` ranks. It cannot say whether the winner is an answer, because it has no ceiling: the best of
 // 397 things is returned whether it addresses the query or not. That is how "a light that travels
 // around the border of a card" came back as `cardCascade`, `lightLeak` and `highlight`, three confident
-// wrong things (docs/MISTAKES.md #551).
+// wrong things (engine-doctrine/MISTAKES.md #551).
 //
 // Coverage is the share of the query this entry accounts for, and the weighting is the whole trick.
 // Plain word-count coverage does not separate the two cases: "make one layer chase another layer around
@@ -478,7 +478,7 @@ export function rankQuery(allIn, query, { kind = null, n = 8, guessN = 3 } = {})
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   // No top-level await: this used to be `await collect()` straight inside the guarded `if`, which gave
-  // arsenal.mjs an unsettled top-level await. Loading docs/CRAFT/rules/*.json below pulls in
+  // arsenal.mjs an unsettled top-level await. Loading engine-doctrine/CRAFT/rules/*.json below pulls in
   // quality/gates/stage.mjs, which statically imports THIS file for `score`/`toks`/`coverageIn`/
   // `CONFIDENT`, a real cycle back to arsenal.mjs. Node refuses to resolve that cycle while arsenal's
   // own top-level await is pending (exit 13, "unsettled top-level await"), even though every binding
@@ -670,7 +670,7 @@ async function main() {
   });
 
   // AGENT DOOR. Same ranking as the prose below, as a record instead of lines to grep. Nothing but this
-  // JSON may reach stdout under --json (docs/MISTAKES.md #401), so this must be the only exit past here.
+  // JSON may reach stdout under --json (engine-doctrine/MISTAKES.md #401), so this must be the only exit past here.
   if (argv.includes('--json')) {
     emitJson(result);
     process.exit(0);

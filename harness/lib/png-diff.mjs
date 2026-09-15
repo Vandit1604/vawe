@@ -4,7 +4,7 @@
 // posters' crop rects are stable, but a GPU-backed block does not rasterise byte-identically run to
 // run. Measured on `borderBeamCard` (a `beam` layer) and `glassCard` (an `aurora` paint): 196 and 96
 // of about 700k channels moved, MAX DELTA 1. That is invisible, it is not information, and writing it
-// as a change dirtied the tree on every regenerate (docs/MISTAKES.md #491).
+// as a change dirtied the tree on every regenerate (engine-doctrine/MISTAKES.md #491).
 //
 // The comparison was first attempted inside the puppeteer page that was already open. It failed three
 // different ways on exactly the two largest posters: `new Image()` rejected with a bare `Event`,

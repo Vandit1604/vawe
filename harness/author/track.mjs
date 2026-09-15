@@ -7,7 +7,7 @@
 //   node harness/author/track.mjs pan --to -600 --dur 1.25 --offset 0.12   # weld a rider to the same pan
 //   … --scene formats/scene/x.json --layer 4                               # write it, surgically
 //
-// WHY THIS EXISTS, and why studio's keyframe mode is not it. `docs/CRAFT/KEYED-MOTION.md` says the
+// WHY THIS EXISTS, and why studio's keyframe mode is not it. `engine-doctrine/CRAFT/KEYED-MOTION.md` says the
 // thing that stopped anyone placing dense keys was the cost of placing them, and it fixed that by
 // letting a person DRAG a layer on the stage. An agent cannot drag. So the cheap path stayed cheap for
 // a human and stayed absent for the author who writes most of the scenes in this repo, and the result

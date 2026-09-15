@@ -79,7 +79,7 @@ function spawnAndRead(gate, sceneFile) {
 const tally = new Map();      // code -> [scene names]
 let total = 0;
 // The population comes from harness/lib/census.mjs, which states N and REFUSES a checkout that cannot
-// see the library rather than counting what is left (docs/MISTAKES.md #391). `quiet` because the census
+// see the library rather than counting what is left (engine-doctrine/MISTAKES.md #391). `quiet` because the census
 // header below is the line CLAUDE.md quotes, and two counts would invite the drift this gate is about.
 const pop = population('waiver census', { filter: LIBRARY, quiet: true });
 // The census counts by CODE, whatever shape the entry is written in: drift asks whether a RULE is
@@ -101,7 +101,7 @@ for (const f of pop.names) {
 // who reads a scene file believes a rule is being dodged that nothing has enforced for months.
 // Retired: `visual-vocabulary`'s three codes. It measured a single-axis layer by squaring it, so a
 // 590x18 underline scored as 590x590 and bought a pass off the exact defect the gate existed to catch;
-// it was also waived by a quarter of the library. Deleted rather than fixed, docs/TASTE.md says why.
+// it was also waived by a quarter of the library. Deleted rather than fixed, engine-doctrine/TASTE.md says why.
 const RETIRED = new Map([
   ['no-visual-vocabulary', 'visual-vocabulary, deleted (its size measurement was wrong)'],
   ['graphics-thin', 'visual-vocabulary, deleted (its size measurement was wrong)'],
@@ -274,7 +274,7 @@ if (process.argv.includes('--ratchet')) {
   // film, so it stays on LIBRARY.
   const MOTION_CODES = new Set(['no-authored-motion', 'plain-slideshow', 'static-bg']);
   // soft: a concurrent worktree can legitimately trail main by a few in-flight scratch storyboards
-  // (docs/MISTAKES.md #391 is about a tool going blind and staying silent, not about refusing to run
+  // (engine-doctrine/MISTAKES.md #391 is about a tool going blind and staying silent, not about refusing to run
   // at all here); PARTIAL is stated below rather than swallowed.
   const authoredPop = population('waiver census · authored', { filter: AUTHORED, quiet: true, soft: true });
   console.log(`\n  LEGACY-WAIVER RATCHET · re-measuring ${codes.length} code(s) across ${pop.names.length} film(s)`

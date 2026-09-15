@@ -2,7 +2,7 @@ import { defineRegistry } from '../registry/registry.js';
 
 // core/transitions/relationships.js: THE TAXONOMY, AS DATA.
 //
-// docs/CRAFT/TRANSITIONS.md carries the decision theory in prose (the taxonomy table, the 9-step
+// engine-doctrine/CRAFT/TRANSITIONS.md carries the decision theory in prose (the taxonomy table, the 9-step
 // procedure); this is the same taxonomy keyed by RELATIONSHIP so a gate can compare an author's stated
 // reason against real candidates instead of only printing the doc. Prose stays the owner of WHY; this
 // file only makes ITS OWN NAMES checkable (a freshness test in quality/gates/lib-test.mjs asserts every
@@ -16,7 +16,7 @@ import { defineRegistry } from '../registry/registry.js';
 // not by accident.
 export const DEVICES = new Set(['camera travel', 'shared-element morph', 'match-on-action']);
 
-// RELATIONSHIPS: keyed by the RELATIONSHIP between two beats (docs/CRAFT/TRANSITIONS.md, decision
+// RELATIONSHIPS: keyed by the RELATIONSHIP between two beats (engine-doctrine/CRAFT/TRANSITIONS.md, decision
 // procedure step 4). Each value: candidates (catalog names and/or DEVICES entries, in the order the doc
 // itself reaches for them) and meaning (one line, the feeling this relationship signifies).
 export const RELATIONSHIPS = {
@@ -70,7 +70,7 @@ export const RELATIONSHIP_REGISTRY = defineRegistry('transition relationship', R
   catalog: {
     title: 'Transition relationships',
     tag: 'transition',
-    intro: 'Name the RELATIONSHIP between two beats first, then pick from its candidates, per docs/CRAFT/TRANSITIONS.md\'s decision procedure. Write the reason in the scene as `transition_why: "<relationship> · <feeling> · <invisible|expressive>"` on the arriving beat.',
+    intro: 'Name the RELATIONSHIP between two beats first, then pick from its candidates, per engine-doctrine/CRAFT/TRANSITIONS.md\'s decision procedure. Write the reason in the scene as `transition_why: "<relationship> · <feeling> · <invisible|expressive>"` on the arriving beat.',
     usage: (n, { j }) => j({ transition_why: `${n} · <feeling> · <invisible|expressive>` }),
     noPreview: 'a relationship is a word chosen in a beat\'s `transition_why:` line, not a layer or effect that renders by itself. Preview the transition it names instead (fade, dissolve, whipPan, ...).',
   },

@@ -42,7 +42,7 @@ const s0 = (l) => l.start ?? 0, s1 = (l) => s0(l) + (l.duration ?? 0);
 const active = (t) => layers.filter((l) => s0(l) <= t + 0.001 && s1(l) >= t - 0.001);
 const flat = (l) => flattenLayer(l);
 // STRIPPED. The needle comes from the storyboard's plain prose and the layer holds HTML, so matching
-// the authored string fails every film that emphasises a word (docs/MISTAKES.md #327).
+// the authored string fails every film that emphasises a word (engine-doctrine/MISTAKES.md #327).
 const textOf = (l) => (l.type === 'text' ? onScreenText(l.text) : '') + (l.block ? ` [block:${l.block}]` : '');
 const animated = (l) => !!(l.anim || l.split || l.preset || l.type === 'count' || l.ken || (l.children || []).some(animated));
 

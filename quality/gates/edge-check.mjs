@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/edge-check.mjs: report-only. Does a full-bleed layer stop covering the frame while it
 // is on screen, so the ground or the page behind it shows at the border. Real causes seen: a camera
-// `travel` overshooting below scale 1 (fixed in core/timeline/sequence.js tangentAt, docs/MISTAKES.md
+// `travel` overshooting below scale 1 (fixed in core/timeline/sequence.js tangentAt, engine-doctrine/MISTAKES.md
 // #626), a full-frame layer scaled below 1 with nothing else full-bleed under it, a tilted plane under
 // perspective that core/tracks/overscan.js did not overscan (or opted out with `overscan: false`), and
 // a full-frame rect with a corner radius. Never fires on a layer that is deliberately NOT full-bleed at

@@ -4,12 +4,12 @@
 //
 // Measured across formats/scene/: 85 of 119 films (71%) paint exactly one bg window for the whole
 // film. The fix is NOT the engine choosing a different preset per shot (that is exactly the mistake
-// docs/MISTAKES.md #159 names: "the engine PICKED the background, so nobody ever designed one again",
+// engine-doctrine/MISTAKES.md #159 names: "the engine PICKED the background, so nobody ever designed one again",
 // which is why `bg` stays a REQUIRED authoring field, core/engine/produce.js). It is applying a
 // decision the THEME already made, only when the author explicitly asked for the theme's own backdrop
 // (`use:"theme"`) and only across the joints the film itself already declared.
 //
-// `theme.look.backdrop` is NOT this rotation, on purpose: docs/CRAFT/THEME-LOOK.md and
+// `theme.look.backdrop` is NOT this rotation, on purpose: engine-doctrine/CRAFT/THEME-LOOK.md and
 // core/registry/theme-contract.js both say three times over that `look.backdrop` is scaffold-only and
 // never read at render. `theme.bgDefault` is the one field already documented as "the one engine-owned
 // bg default" and already read at render (scene.js's `use:"theme"` branch); this file only teaches that

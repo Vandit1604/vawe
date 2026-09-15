@@ -6,7 +6,7 @@
 // a fallback: `pick()` takes no such parameter. What it cannot do is stop somebody writing a fresh plain
 // object and indexing it by hand. That part needs a reader.
 //
-// WHAT IT COST BEFORE IT EXISTED. Nine of these were found and removed in one week (docs/MISTAKES.md
+// WHAT IT COST BEFORE IT EXISTED. Nine of these were found and removed in one week (engine-doctrine/MISTAKES.md
 // #354 #355 #360 #361). The most expensive was `vawe-identity.json`, this project's own identity film,
 // which set `out:"blur"` on all eighteen of its layers: `blur` is a kinetic preset, the anim that leaves
 // through blur is `defocus`, and `ANIM[name] || fade` meant the film's entire exit vocabulary had never
@@ -30,7 +30,7 @@ const f = gateFindings();
 // hides exactly the bug this file exists to find. The first cut of this pattern could not match it,
 // and three of the waivers below described `o?.[k]` code the gate had therefore never once seen,
 // dead entries that made the list look inspected. A check green about what it cannot see is the
-// defect this whole run was about, reproduced in the check written to catch it. docs/MISTAKES.md #377.
+// defect this whole run was about, reproduced in the check written to catch it. engine-doctrine/MISTAKES.md #377.
 const PATTERN = /\b([A-Za-z_$][\w$]*)\s*\??\.?\s*\[\s*([A-Za-z_$][\w$.?]*)\s*\]\s*(\|\||\?\?)/;
 const POSITIONAL = /^(i|j|k|n|idx|index|len|[0-9]+)$/;
 
@@ -53,7 +53,7 @@ const WAIVED = new Map(Object.entries({
   // WAIVER REMOVED, and the reason it was wrong is worth keeping. It said `corner` is UNREACHABLE
   // from a scene, which was TRUE and not enough: the value comes from a LOOK DEFINITION, our own
   // data, and that is the one place a typo can live forever because no author will ever hit it and
-  // report it. `leakGrad` now throws (docs/MISTAKES.md #454). Judge a fallback by whether a WRONG
+  // report it. `leakGrad` now throws (engine-doctrine/MISTAKES.md #454). Judge a fallback by whether a WRONG
   // value can reach it, never by whether an AUTHOR can send one.
   'core/looks.js:KNOB_ROUTES[knob]': 'the knob was validated by assertKnobs one call earlier',
   'formats/scene/scene.js:SEAM_CUE[s.fx]': 'the seam fx is validated where seams are parsed (#361), and lib-test asserts SEAM_CUE covers every SEAM_FX',

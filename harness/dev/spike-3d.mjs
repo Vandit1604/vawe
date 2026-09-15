@@ -1,6 +1,6 @@
 // harness/dev/spike-3d.mjs, PHASE 0 SPIKE: can sibling layers tilt in 3D and share one vanishing point?
 //
-// docs/MISTAKES.md #59 rejected per-layer 3D and concluded "there is no per-layer angle that composes
+// engine-doctrine/MISTAKES.md #59 rejected per-layer 3D and concluded "there is no per-layer angle that composes
 // correctly". Its diagnosis is right about the construction it considered: CSS `perspective()` takes its
 // vanishing point from the element it is applied to, so sibling layers each rotate about their own centre
 // and the composition comes apart.

@@ -1,6 +1,6 @@
 // core/camera-moves/travel.test.mjs: the interior stations of a `travel` default to velocity-CONTINUOUS
 // (`ease: "through"`, core/timeline/sequence.js), not `linear`: two straight segments at different
-// speeds still kink at the shared station (docs/MISTAKES.md, the "not smooth / jerky" report). This
+// speeds still kink at the shared station (engine-doctrine/MISTAKES.md, the "not smooth / jerky" report). This
 // checks the fix at the level it actually plays at: the sampled camera curve, not the raw keyframes.
 //   node core/camera-moves/travel.test.mjs
 import { test } from 'node:test';
@@ -63,7 +63,7 @@ test('s stays positive and within a small tolerance of the authored range (no wi
   }
 });
 
-// docs/MISTAKES.md #626: a real travel (vawe-flow-2.json) whose tail is all s >= 1 still pulled the
+// engine-doctrine/MISTAKES.md #626: a real travel (vawe-flow-2.json) whose tail is all s >= 1 still pulled the
 // camera BELOW every authored station, because the finite-difference tangent at a station shared by an
 // unequal segment (s:1.08 -> s:1) and an equal one (s:1 -> s:1) carried velocity into the flat segment
 // and bowed it downward. `tangentAt` is now Fritsch-Carlson clamped, so this must hold for exact,

@@ -6,7 +6,7 @@
 // audit` takes ONE scene, it is a post-render step rather than part of `make author-check`, so it only
 // ever grades the file the author has open. `motion-reel` and `motion-reel-v2` rendered dark text on a
 // dark backdrop for their entire runtime and stayed that way, because after they shipped nothing asked
-// them again (docs/MISTAKES.md #387).
+// them again (engine-doctrine/MISTAKES.md #387).
 //
 // A check that only ever runs against the file you are editing is a check against NEW defects. This one
 // runs against the library, so it is a check against OLD ones too.
@@ -78,7 +78,7 @@ for (const f of scenes) {
     code = e.status ?? 1;
   }
   // Count from the audit's own summary lines rather than re-deriving them here: a second copy of the
-  // pass/fail rule would drift from the one that printed it (docs/MISTAKES.md #165).
+  // pass/fail rule would drift from the one that printed it (engine-doctrine/MISTAKES.md #165).
   const hard = [...out.matchAll(/·\s*(\d+)\s+hard/g)].reduce((n, m) => n + +m[1], 0);
   // `warn` with nothing alphabetic after it. The audit ends with `· 9 warning(s)`, a restatement of the
   // same nine findings the per-scene row already reported, so an unanchored `warn` counted every warning

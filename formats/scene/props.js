@@ -24,7 +24,7 @@ export const PROPS = {
   ransom: {}, ransomSeed: { when: 'ransom' }, circle: {}, text: {},
   // the GSAP hooks (applyGsapHooks): each is its own opt-in surface. `fxOut` (the named GSAP exit
   // family) is gone: it measured zero users, all eleven names, and every one duplicated an `out`
-  // preset or had none the library ever reached for (docs/MISTAKES.md #364).
+  // preset or had none the library ever reached for (engine-doctrine/MISTAKES.md #364).
   morph: {}, fx: {}, motionPath: {}, physics: {}, parts: {}, splitText: {},
   // sound derived from the film itself (buildSfx): a keystroke train exists only where text types
   typing: {}, keyClicks: { when: 'typing' }, keyCue: { when: 'typing' }, keyGain: { when: 'typing' },

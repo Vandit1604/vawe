@@ -1,5 +1,5 @@
 // core/registry/theme-contract.test.mjs: the runnable self-check for `computedLook`/`resolveLook`
-// (W8 phase 1, docs/CRAFT/THEME-LOOK.md "The computed look, for the other 37"). Pure-JS: this file
+// (W8 phase 1, engine-doctrine/CRAFT/THEME-LOOK.md "The computed look, for the other 37"). Pure-JS: this file
 // stays node+browser importable on purpose (see the file header), so the test injects `isLightBg`
 // the same way `core/engine/boot.js` does, rather than importing `core/color/engine.js` itself here.
 //   node core/registry/theme-contract.test.mjs
@@ -16,7 +16,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 {
   const noLook = computedLook({ palette: { bg: '#ffffff' } }, { isLightBg });
   for (const k of ['scale', 'layout', 'cuts', 'field']) assert.ok(noLook[k], `computedLook must fill look.${k}`);
-  // deliberately uncomputed: backdrop/marks are never invented (docs/CRAFT/THEME-LOOK.md)
+  // deliberately uncomputed: backdrop/marks are never invented (engine-doctrine/CRAFT/THEME-LOOK.md)
   for (const k of ['backdrop', 'marks']) assert.equal(noLook[k], undefined, `computedLook must not invent look.${k}`);
 }
 
@@ -68,7 +68,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 }
 
 // ---- computedLook is DERIVED, not a constant: a real spread across the themes with no authored look ----
-// (docs/CRAFT/THEME-LOOK.md. A fuller, standalone gate once ran this same check over the whole
+// (engine-doctrine/CRAFT/THEME-LOOK.md. A fuller, standalone gate once ran this same check over the whole
 // library; deleted 2026-09-10, a fire-rate census having found it never caught a second regression.)
 // This is the sibling assertion the
 // engine change instructions asked for: computedLook must not collapse back to one value per key.
@@ -87,7 +87,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 }
 
 // ---- consecutive computed backdrops would differ if computed at all (they are not: this documents why) ----
-// `computedLook` never fills `backdrop` (docs/MISTAKES.md #159: the engine picking a background is the
+// `computedLook` never fills `backdrop` (engine-doctrine/MISTAKES.md #159: the engine picking a background is the
 // mistake this repo already made and undid). So there is nothing here to check for CONTRASTING
 // consecutive fields; the test that would matter is "computedLook never returns a `backdrop` key",
 // already asserted above.

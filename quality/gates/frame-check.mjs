@@ -8,7 +8,7 @@
 // beat it serves. So a storyboard could describe one picture while its fragment drew another, and every
 // gate stayed green: beat 3 of vawe-oblique planned `blueprint: terminalReveal`, described "a white
 // pill bar with a round cobalt run button" in its own `picture:` line, and shipped an AI chat input
-// into a film about a command line (docs/MISTAKES.md #596).
+// into a film about a command line (engine-doctrine/MISTAKES.md #596).
 //
 import fs from 'node:fs';
 import path from 'node:path';
@@ -49,11 +49,11 @@ const warn = (code, msg, extra) => { warns.push(msg); gf.warn(code, msg, extra);
 
 // ── 1. every fragment pastes the shared kit block, and the film's scales stay in one family ────────
 // The kit is a foundation an author MAY draw on, never a whitelist that refuses a literal value: any
-// CSS is allowed for size, shadow, radius and spacing (owner decision, docs/MISTAKES.md #621). What
+// CSS is allowed for size, shadow, radius and spacing (owner decision, engine-doctrine/MISTAKES.md #621). What
 // still matters is that a film's frames read as one film, so this only reports, film-wide, when its
 // fragments have drifted onto many different type scales.
 // SCALE_DRIFT_MAX: more distinct literal sizes than this across one film's fragments and the frames
-// stop reading as one film (docs/CRAFT/HTML-FRAGMENTS.md's "seven frames, eight invented sizes" case).
+// stop reading as one film (engine-doctrine/CRAFT/HTML-FRAGMENTS.md's "seven frames, eight invented sizes" case).
 const SCALE_DRIFT_MAX = 7;
 // A film that has DECLARED its values (`<film>.design.md`) gets the stricter per-value check below
 // instead: `scale-drift` is the coarse "too many sizes" warn for a film that never opted in, and it
@@ -70,7 +70,7 @@ for (const b of beats) {
   if (!kit) {
     warn('kit-markers-missing', `${b.fragment} carries no STAGEKIT markers, so every tool that strips the kit `
       + 'before judging a fragment is judging the kit as the author\'s own CSS. Paste `buildKit().block`, not the '
-      + '`<film>.kit.css` sidecar (docs/MISTAKES.md #594).');
+      + '`<film>.kit.css` sidecar (engine-doctrine/MISTAKES.md #594).');
   }
   const own = (kit ? raw.replace(kit, '') : raw).replace(/\/\*[\s\S]*?\*\//g, '');
   for (const px of fragmentFontSizes(own)) {
@@ -96,7 +96,7 @@ if (designSpec) {
 }
 
 // ── 2. the object the storyboard promised, against the layer the assembly actually shipped ─────────
-// `object:` names a continuous thing that survives every cut, and docs/CRAFT/STORYBOARD-TEMPLATE.md
+// `object:` names a continuous thing that survives every cut, and engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md
 // gives it TWO legal ways to keep that promise: a per-beat `object:` line (the object is drawn fresh,
 // by hand, inside each beat's own fragment, and nothing here can see into that) or a structured
 // `object_in`/`object_out` chain, which `assemble.mjs` turns into one real cross-beat layer. Only the
@@ -104,7 +104,7 @@ if (designSpec) {
 // was ever reached for: the frontmatter names an object and no beat locates it at all (the same "claim
 // nobody kept" storyboard-check.mjs already names), and the assembled scene shows it, either no layer
 // named "object" exists, or `assemble.mjs`'s own literal default shipped untouched (a plain rect, `fill:
-// 'var(--accent)'`, docs/MISTAKES.md #596's sibling: the plan said one thing, the frame carries the
+// 'var(--accent)'`, engine-doctrine/MISTAKES.md #596's sibling: the plan said one thing, the frame carries the
 // tool's placeholder for it). A film that DOES locate the object per beat is answering the promise the
 // other legal way and must not be flagged for it.
 const jsonPath = filmJsonPath;
@@ -115,7 +115,7 @@ if (fs.existsSync(jsonPath)) {
 
 const beatLocatesObject = blocks.some((b) => fieldIn(b, 'object') || fieldIn(b, 'object_in') || fieldIn(b, 'object_out'));
 // A film with neither `object:` nor `threads:` has promised no continuity at all, a manifesto or an
-// anthology says so on purpose (docs/CRAFT/FILM-STRUCTURE.md), and full-bleed beats are the honest
+// anthology says so on purpose (engine-doctrine/CRAFT/FILM-STRUCTURE.md), and full-bleed beats are the honest
 // shape of that. `claimsContinuity` is true only once the plan itself says something should carry
 // across the cuts, which is the fact that makes an unmet promise a defect rather than a valid style.
 // `threads:` is deliberately NOT part of this. It answers "what holds the film across cuts" and a
@@ -123,7 +123,7 @@ const beatLocatesObject = blocks.some((b) => fieldIn(b, 'object') || fieldIn(b, 
 // often a MOTIF or an ARGUMENT rather than a travelling thing. `hinge` declares a plum ink underline
 // that draws on under one word per beat, plus a line of reasoning: both are kept honestly INSIDE each
 // beat's own full-bleed fragment, and convicting that film of a structural defect is exactly the
-// false positive docs/MISTAKES.md #603 was written about. Only `object:` promises a thing that
+// false positive engine-doctrine/MISTAKES.md #603 was written about. Only `object:` promises a thing that
 // travels, so only `object:` can be broken by frames that give it nowhere to travel.
 const claimsContinuity = !!sb.object;
 if (scene && sb.object && !beatLocatesObject) {
@@ -147,7 +147,7 @@ if (scene && sb.object && !beatLocatesObject) {
 // A full-bleed html layer (0,0, the whole canvas) is the right call for a film with one beat, and it
 // stays right for a film that never claimed continuity at all: a manifesto or an anthology names no
 // `object:` and no `threads:` on purpose, and seven independent full frames is that film done correctly
-// (docs/CRAFT/FILM-STRUCTURE.md, `vawe-continuous-action`'s own "do not use it for a manifesto"). What
+// (engine-doctrine/CRAFT/FILM-STRUCTURE.md, `vawe-continuous-action`'s own "do not use it for a manifesto"). What
 // this fires on is narrower: a plan that names an `object:`, a thing that should TRAVEL, and then
 // never locates it in a single beat, so the claim and the frames disagree. A film
 // that locates the object per beat (vawe-oblique's own device: the same prop, described as changing

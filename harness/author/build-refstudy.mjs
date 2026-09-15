@@ -1,6 +1,6 @@
 // harness/author/build-refstudy.mjs: a shot-for-shot study of refs/pin-522769469268499616.mp4.
 //
-// THIS IS A RECREATION EXERCISE (docs/CRAFT/RECREATION.md). The point is to reproduce the reference's
+// THIS IS A RECREATION EXERCISE (engine-doctrine/CRAFT/RECREATION.md). The point is to reproduce the reference's
 // STRUCTURE exactly and see what our engine cannot do, so the gaps become the roadmap. Everything
 // structural is measured from the file rather than eyeballed:
 //
@@ -223,7 +223,7 @@ CLAUSES.forEach((_, i) => { const c = clause(i); if (c) layers.push(c); });
 // Spans OVERLAP by a beat at their trailing edge. Cut to cut they used to abut exactly, and at 7.48s the
 // outgoing light backdrop and the incoming dark one were both mid-fade at the same instant, so neither was
 // opaque and the black root showed through: a dark flash the centre-sampling gates cannot see and
-// `make seam-check` can (docs/MISTAKES.md #144). Holding each span a little past its cut means the frame
+// `make seam-check` can (engine-doctrine/MISTAKES.md #144). Holding each span a little past its cut means the frame
 // is never uncovered.
 const BG_LAP = 0.2;
 const bg = TONE.map((tone, i) => {
@@ -238,7 +238,7 @@ const scene = {
   aspect: '9:16',
   destination: 'reels',
   duration: DUR,
-  authoringNote: 'Shot-for-shot recreation study of refs/pin-522769469268499616.mp4 (docs/CRAFT/RECREATION.md). '
+  authoringNote: 'Shot-for-shot recreation study of refs/pin-522769469268499616.mp4 (engine-doctrine/CRAFT/RECREATION.md). '
     + 'Cut list, shot lengths and palette sequence are MEASURED from the reference; the copy, subject and '
     + 'assets are ours. Props are openly-licensed photographs with attribution in '
     + 'assets/brands/refstudy/photos/credits.json.',

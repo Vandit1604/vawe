@@ -9,7 +9,7 @@
 // command whenever a scene needs Node-side work before the browser sees it (block/comp sugar, or now
 // a `voice` cue), and writes stdout to a scratch file it renders instead of the original. A `voice`
 // cue is baked here too, not in the browser (assets/sfx/ is Node-only reachable) and not in Go (one
-// synthesiser, core/audio/kit.mjs; a second was retired, docs/MISTAKES.md #492): every
+// synthesiser, core/audio/kit.mjs; a second was retired, engine-doctrine/MISTAKES.md #492): every
 // `{voice, params}` cue becomes an ordinary `{name}` cue backed by a cached .wav before this prints.
 //
 // Usage: node harness/author/expand-blocks.mjs <scene.json> [aspectKey]   (make expand D=<scene.json>)

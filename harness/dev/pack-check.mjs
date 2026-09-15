@@ -35,7 +35,7 @@ const REQUIRED = [
 // A prefix that must appear at least N times. A directory shipped empty is the subtler version of
 // shipping nothing, and an allowlist entry like `themes/` gives no error when the directory is bare.
 const REQUIRED_DIRS = [['themes/', 10, 'palettes'], ['core/', 50, 'engine modules'], ['assets/fonts/', 1, 'font files']];
-const FORBIDDEN = [/^site\//, /\.mp4$/, /^out\//, /^verify\//, /^docs\/media\//, /^\.claude\//];
+const FORBIDDEN = [/^site\//, /\.mp4$/, /^out\//, /^verify\//, /^engine-doctrine\/media\//, /^\.claude\//];
 
 let listed;
 try {

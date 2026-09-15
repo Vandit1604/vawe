@@ -50,7 +50,7 @@ process.stdin.on('end', () => {
     if (parts.some((p) => re.test(p))) {
       process.stderr.write(`BLOCKED: ${name}\n\n${why}\n\n`
         + 'Refused by harness/live/no-blanket-git.mjs, because this command has already caused real\n'
-        + 'data loss in this repo with several agents sharing one tree. See docs/MISTAKES.md.\n');
+        + 'data loss in this repo with several agents sharing one tree. See engine-doctrine/MISTAKES.md.\n');
       process.exit(2);
     }
   }

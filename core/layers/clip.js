@@ -36,5 +36,5 @@ export function frame(kit, el, L, t, scene, { src, speed, loop } = L) {
 // build time. mergeProps unions them (core/props.js).
 export const PROPS = mergeProps(propsOf(build), propsOf(frame));
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders";

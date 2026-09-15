@@ -79,7 +79,7 @@ export async function preloadThree(data) {
   // finishes asynchronously, so a render worker that seeks straight to a frame reached `ensure()` first:
   // litPlane rendered in the single-tab preview and threw "not decoded" on the six-worker render. It
   // also skipped srcUrl, so a bare `assets/x.png` would have loaded from /formats/scene/assets/ and 404d
-  // (docs/MISTAKES.md #569). The preloader decodes once, three-fx reads the decoded element: one owner,
+  // (engine-doctrine/MISTAKES.md #569). The preloader decodes once, three-fx reads the decoded element: one owner,
   // the same shape as window.__typefaces above. Every image-like string under a three layer is taken,
   // not a list of prop names, so `screen`, `planes` and whatever the next scene adds are all covered.
   window.__threeImages = {};
@@ -141,7 +141,7 @@ export async function preloadComponents(data) {
 // own HTML, fetched by preloadComponents above, so they were never preloaded and every capture raced
 // them. Measured on brew-launch: two renders of identical code differed on 373 of 1890 frames, in two
 // contiguous runs, and each run lined up with a `component` layer's span to within a few frames
-// (docs/MISTAKES.md #258).
+// (engine-doctrine/MISTAKES.md #258).
 //
 // Runs AFTER preloadComponents and preloadHtml, because it reads what they fetched.
 export async function preloadEmbeddedImages() {
@@ -263,7 +263,7 @@ const GSAP_PLUGINS = {
 // THE TRIGGER SET. A scene naming any of these props has motion authored on the seeked GSAP timeline,
 // so GSAP must be loaded before build or the engine accepts the input and renders it UNANIMATED, the
 // silent-substitution failure that shipped once already, when the boot→preload extraction dropped `parts`
-// from a hand-typed list (docs/MISTAKES.md #148).
+// from a hand-typed list (engine-doctrine/MISTAKES.md #148).
 //
 // The plugin fields derive from GSAP_PLUGINS above, so that half cannot drift at all. The other four are
 // read in modules this one does not import (applyGsapHooks in formats/scene/scene.js for morph, fx,
@@ -273,7 +273,7 @@ const GSAP_PLUGINS = {
 //
 // `gsap` was the ninth name and is gone: the `gsap:{from,to}` field was removed in #208 and no code has
 // read it since, so it loaded a tween engine for a prop with no reader. `fxOut` went the same way: the
-// exit family it dispatched to measured zero users and was removed whole (docs/MISTAKES.md #364).
+// exit family it dispatched to measured zero users and was removed whole (engine-doctrine/MISTAKES.md #364).
 const GSAP_HOOK_PROPS = ['morph', 'fx', 'parts', 'comp'];
 export const GSAP_PROPS = Object.freeze([...GSAP_HOOK_PROPS, ...Object.keys(GSAP_PLUGINS)]);
 const GSAP_TRIGGER_RE = new RegExp(`"(${GSAP_PROPS.join('|')})"\\s*:`);
@@ -294,7 +294,7 @@ export async function preloadGsap(data) {
   // frameSig() over EVERY frame, in order, on the meta tab (internal/scene/scene.go), and worker 0
   // then borrows that same tab and draws frames 0, 6, 12, … from a timeline whose playhead has already
   // been at the last frame. So one frame in six came back with every completed tween stuck at its end
-  // state, which read as a 366-cell grid blinking five times a second (docs/MISTAKES.md #370).
+  // state, which read as a 366-cell grid blinking five times a second (engine-doctrine/MISTAKES.md #370).
   // It hits every GSAP-driven field alike (fx · motionPath · physics · splitText · parts · comp);
   // `parts` only made it loud by putting 80 elements on one tween.
   try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); window.gsap.globalTimeline.autoRemoveChildren = false; registerGsapEffects(window.gsap); } catch (e) {}

@@ -10,13 +10,13 @@ import { coverScale, isFullBleedPlane } from './overscan.js';
 // is 480 px/s, and at 60fps the same physical motion covers 8px per frame, drops under the floor, and
 // auto motion blur SILENTLY STOPS ENGAGING. Rendering the same film at 60 for smoothness therefore
 // threw away the blur that makes its fastest moves read, which is the opposite of what the author
-// asked for and nothing would have said a word (docs/MISTAKES.md #204).
+// asked for and nothing would have said a word (engine-doctrine/MISTAKES.md #204).
 const AUTO_BLUR_FLOOR_PER_SEC = 480;
 // The DEFAULT shutter, and only the default. higgsfield-recreation's own hand-picked value for its
 // fastest layer, which is 0.16 of the frame, about a 58 degree shutter angle in a camera's units.
 // A scene sets its own with a top-level `shutter` in DEGREES (180 is the film standard, 360 is double
 // the smear, 0 turns the automatic half off), and that is the whole of item 6 in
-// docs/CRAFT/AFTER-EFFECTS-TECHNIQUES.md: the sampler was already automatic and had no dial.
+// engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md: the sampler was already automatic and had no dial.
 const AUTO_SHUTTER = 0.16;
 
 export const slot = 'transform';
@@ -151,7 +151,7 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
     // had drawn 77, and `none` on a tab that had not. That is #41 again on the branch #41 did not
     // cover, and it is a purity bug before it is a visual one: a sharded render deals frames
     // round-robin, so which frames a tab drew before this one is decided by the worker count
-    // (docs/MISTAKES.md #507).
+    // (engine-doctrine/MISTAKES.md #507).
     //
     // `el.__hsBlur` is the stash writeBlur leaves behind, so it is exactly the set of elements this
     // writer has ever touched. Clearing only those keeps a layer that never had a filter free of a
@@ -207,7 +207,7 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
         cam: { x: cam.x, y: cam.y, z: dollyZ(cam.s, cam.lens), rx: cam.rx, ry: cam.ry, roll: cam.roll },
       });
       // Adaptation, not a silent change: one line per NEW peak, the safeguards registry's own
-      // convention (docs/SAFEGUARDS.md: "adapted <code>: <what changed> (<why>)").
+      // convention (engine-doctrine/SAFEGUARDS.md: "adapted <code>: <what changed> (<why>)").
       if (overscanK > 1 && overscanK > (el.__hsOverscanMax || 0) + 1e-6) {
         console.log(`adapted overscan: ${L.id || L.type || 'layer'} scaled up to ${overscanK.toFixed(3)}x `
           + `at ${t.toFixed(2)}s (full-bleed plane under perspective)`);
@@ -263,7 +263,7 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
   // one: this line used to write the literal `none` on an unblurred frame, and the next frame that DID
   // blur produced `none blur(2.97px)`. An invalid declaration the browser drops WHOLE, so the layer
   // rendered with no filter at all. Silent, and invisible until the snap signature learned to record
-  // `filter` (docs/MISTAKES.md #351): motion blur simply failed on any frame following an unblurred one,
+  // `filter` (engine-doctrine/MISTAKES.md #351): motion blur simply failed on any frame following an unblurred one,
   // and which frames those were depended on RENDER ORDER, so it was a purity bug as well as a dropped
   // effect. Treat the keyword as the empty base it means.
   // STASH THE BASE, DO NOT PATTERN-MATCH IT. This used to strip every `blur(...)` out of the current

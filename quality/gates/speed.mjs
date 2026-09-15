@@ -38,7 +38,7 @@ const easeLabel = (k) => (k && (k.easeIn || k.easeOut)) ? 'handle' : (k && k.eas
 
 // VELOCITY_SPIKE_PX_S / _SCALE_S: how much a layer's or the camera's speed may jump between two
 // CONSECUTIVE rendered frames before it reads as a jolt rather than a curve, not a gate threshold
-// tuned in the abstract. The vawe-flow-2 diagnosis (docs/MOTION-CRAFT.md owns speed/motion) measured a
+// tuned in the abstract. The vawe-flow-2 diagnosis (engine-doctrine/MOTION-CRAFT.md owns speed/motion) measured a
 // visible jolt from a frame-to-frame scale-rate change well under 1 full scale-unit/s; the floor here
 // sits under that so a real jolt is caught before it needs a frame-difference plot to see.
 export const VELOCITY_SPIKE_PX_S = 600;
@@ -79,7 +79,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log(`\n  speed · ${path.basename(sceneFile)} · ${fps}fps`);
 
   // Only the boundaries that exist on the LOWERED scene (`transitions[]` is baked to `cuts`/`stings`/
-  // `seams` before this point, docs/RULES): a declared cut is an intentional discontinuity, so a
+  // `seams` before this point, engine-doctrine/RULES): a declared cut is an intentional discontinuity, so a
   // velocity-spike check excludes the frame it lands on rather than flagging it as a jolt.
   const cuts = Array.isArray(T.scene.cuts) ? T.scene.cuts : [];
   const cutsAt = cuts.map((c) => c.t);
@@ -101,7 +101,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.log(`    ${at(a.t)}s-${at(b.t)}s  ${fmt(r.start)} -> ${fmt(r.peak)} -> ${fmt(r.end)} px/s  ease: ${easeLabel(b)}`);
     }
     // ONE scan across the WHOLE track, not per segment: a per-segment scan resets its `prev` sample at
-    // every keyframe, which is exactly where a hard stop (docs/MISTAKES.md #125) shows up, so it would
+    // every keyframe, which is exactly where a hard stop (engine-doctrine/MISTAKES.md #125) shows up, so it would
     // never see the one frame it exists to catch.
     const cutsRel = cutsAt.map((c) => c - layerStart);
     const spikes = findVelocitySpikes((t, dt) => velocityAt(L.motion, t, dt).speed,

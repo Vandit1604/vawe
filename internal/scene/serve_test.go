@@ -12,10 +12,10 @@ func TestAllowed(t *testing.T) {
 		".vawe-data/scenes/vid_abc.json", ".vawe-data/uploads/anon/deadbeef.png",
 	}
 	deny := []string{
-		"docs/MISTAKES.md", "blocks/index.mjs", "LICENSE", ".git/config",
+		"engine-doctrine/MISTAKES.md", "blocks/index.mjs", "LICENSE", ".git/config",
 		"quality/gates/ledger.mjs", "internal/scene/scene.go", "package.json",
 		".vawe-data/records/vid_abc.json", // records hold owner data; never served
-		"../../etc/passwd", "core/../docs/MISTAKES.md", "core/../../etc/passwd",
+		"../../etc/passwd", "core/../engine-doctrine/MISTAKES.md", "core/../../etc/passwd",
 		"", "/", "\x00core/boot.js",
 	}
 	for _, p := range allow {

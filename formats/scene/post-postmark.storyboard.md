@@ -4,7 +4,7 @@ audience: "a print-curious buyer scrolling a feed, deciding whether a letterpres
 arc: "hook (name the number) -> compose -> set -> pull -> reveal (pay the number off) -> end card"
 threads: "a continuous object (the compositor's pica rule: a thin accent line, hand-keyed on a `w` track along the lower-band, widening to bracket the case and narrowing to bracket one card) + a single order followed start to finish (one card, not a catalogue tour)"
 spectacle: "beat 4 (The pull) - the press stroke and the card's deboss appearing under it in one continuous motion - the loudest beat because it is the one moment ink actually becomes a mark"
-not: "no captured brand (fictional shop, ruled fictional by the owner: docs/EVALS.md), no gradient hero, no Inter/Space Grotesk/Instrument Serif/Fraunces, no drop shadow anywhere (a letterpress mark is a deboss, pressed IN, never lifted off the page), no catalogue tour of every product line (one order only, followed start to finish)"
+not: "no captured brand (fictional shop, ruled fictional by the owner: engine-doctrine/EVALS.md), no gradient hero, no Inter/Space Grotesk/Instrument Serif/Fraunces, no drop shadow anywhere (a letterpress mark is a deboss, pressed IN, never lifted off the page), no catalogue tour of every product line (one order only, followed start to finish)"
 format: 1920x1080
 theme: vawe-paper
 duration: 24s
@@ -21,7 +21,7 @@ craft:
 ---
 
 <!-- THE DESIGN STUDY (stands in for `make sections`: no real Postmark Studio exists, so this is
-     written first as though it had been crawled, per docs/EVALS.md's ruling that these fictional
+     written first as though it had been crawled, per engine-doctrine/EVALS.md's ruling that these fictional
      briefs study themselves. Company facts (letterpress + type foundry, points/picas, registration
      marks, zero shadow) are carried over from the sibling eval fixture quality/runs/evals/briefs/recreation.json
      so both films describe the same shop; the ANGLE here is deliberately narrower and different: one
@@ -72,7 +72,7 @@ lives inside the beat-2 specimen fragment, never in the film's own chrome.
 **Sound.** On by default, unlike the sibling fixture (silent, proving the spine only). A press has a
 sound: a `impact` cue at 15.2s, timed to the moment the platen bar visually reaches the card in beat 4,
 not to the continuous object (which the viewer does not attribute a sound to).
-[`docs/CRAFT/SOUND.md`](../../docs/CRAFT/SOUND.md).
+[`engine-doctrine/CRAFT/SOUND.md`](../../engine-doctrine/CRAFT/SOUND.md).
 
 ## Beat 1: The number (0.0s-3.5s)
 - type: hook

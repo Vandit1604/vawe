@@ -28,5 +28,5 @@ export function build(kit, el, L,
 
 export const PROPS = propsOf(build);
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height";

@@ -1,6 +1,6 @@
 {
  "module": "scene",
- "note": "RECREATION worked example (docs/EVALS.md, skills/vawe-type-recreation/SKILL.md). The owner has ruled these six eval briefs stay fictional and self-contained (no captured brand, regenerated often), so this type's usual 'study a real site' step is INVENTED instead: Postmark Studio is a fictional letterpress print shop and type foundry, studied as though `make sections` had run against it (the design study lives in the sidecar storyboard). Every beat traces to a line in that study. Six sections in the site's own order: home, type specimens, the press, print runs, the craft line, the end card. Continuous object: a compositor's steel line gauge (the accent rule), hand-keyed on a `w` track that widens and narrows to measure whatever the beat is showing.",
+ "note": "RECREATION worked example (engine-doctrine/EVALS.md, skills/vawe-type-recreation/SKILL.md). The owner has ruled these six eval briefs stay fictional and self-contained (no captured brand, regenerated often), so this type's usual 'study a real site' step is INVENTED instead: Postmark Studio is a fictional letterpress print shop and type foundry, studied as though `make sections` had run against it (the design study lives in the sidecar storyboard). Every beat traces to a line in that study. Six sections in the site's own order: home, type specimens, the press, print runs, the craft line, the end card. Continuous object: a compositor's steel line gauge (the accent rule), hand-keyed on a `w` track that widens and narrows to measure whatever the beat is showing.",
  "theme": "vawe-paper",
  "aspect": "16:9",
  "duration": 22,
@@ -10,7 +10,7 @@
    "no-preflight"
   ],
   "_why": {
-   "no-preflight": "fixed eval fixture (docs/EVALS.md): this brief is re-run unchanged on every doctrine change rather than planned fresh per request, so the 9-step decision chain that precedes a real brief does not apply. Storyboard sidecar IS present (recreation.storyboard.md) and carries the invented design study in its place."
+   "no-preflight": "fixed eval fixture (engine-doctrine/EVALS.md): this brief is re-run unchanged on every doctrine change rather than planned fresh per request, so the 9-step decision chain that precedes a real brief does not apply. Storyboard sidecar IS present (recreation.storyboard.md) and carries the invented design study in its place."
   }
  },
  "audio": {

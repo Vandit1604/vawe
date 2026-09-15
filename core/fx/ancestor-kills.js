@@ -12,7 +12,7 @@
 // hard black horizon, and the whole film is that one bend. Its `blur` cut writes `filter: blur(...)`
 // onto the scene root (core/cuts.js), which makes the root a BACKDROP ROOT, so for a third of a second
 // the lens sampled an empty backdrop and the horizon ran dead straight through the glass. No error, no
-// warning, and a still of the frame looks like a rendering choice. docs/MISTAKES.md #542.
+// warning, and a still of the frame looks like a rendering choice. engine-doctrine/MISTAKES.md #542.
 //
 // WHY A TABLE AND NOT A CHECK PER SITE. The engine writes ancestor styles in four places (the cut on
 // the scene root, the cut on a beat wrapper, a group layer, a motion track's velocity blur), and each

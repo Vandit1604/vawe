@@ -34,7 +34,7 @@ contrast-checked `themes/<brand>.json`. Don't hand-author a theme unless a mappi
 Start from the real sections, not a blank page: `make storyboard-draft NAME=<brand> [MSG="…" DUR=30]`
 skeletons one beat per captured section (in site order, pre-wired with type + capture command + a suggested
 blueprint) → `assets/brands/<brand>/STORYBOARD.md`. Then **sharpen** it: fill the `<…>` fields, the
-`message` and each beat's **why**: using `docs/CRAFT/STORYBOARD-TEMPLATE.md` (Reproduce/Adapt · mechanism ·
+`message` and each beat's **why**: using `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md` (Reproduce/Adapt · mechanism ·
 emotion · transition_in). No site? Copy the template and write beats by hand. Then
 `make storyboard-check SB=<file>`. Present it: open with **"This video tells <audience> that <message>"**,
 then the beat table. Weight cues into the back ~50% (the reveal model). Get sign-off. Once approved, export
@@ -52,12 +52,12 @@ the beats in Step 4 so the reveals land on the words.
 
 ## Step 4: Author the JSON (obey the spec)
 Compose the scene JSON from recipes (`make arsenal Q="…"`, recipes/README.md) + brand content, on the remixed
-theme, transcribing the storyboard exactly. Reach for the arsenal (`make effects` → `docs/EFFECTS.md`):
+theme, transcribing the storyboard exactly. Reach for the arsenal (`make effects` → `engine-doctrine/EFFECTS.md`):
 kinetic reveals, a living bg, border-beam/paint, svg draw/morph, `cameraMove`, dense per-child figures via
 `parts`. For a **hero beat** whose choreography `parts`/recipes can't express (overlapping tweens, a
 token travelling a path while a counter ticks and a check draws), author a bespoke **`composition`**.
 A first-party hand-authored per-beat GSAP timeline in `core/compositions/index.js`, named from the JSON
-(`{type:"composition",comp:"…",props:{…}}`); see [AUTHOR-THE-FRAME.md](../../docs/CRAFT/AUTHOR-THE-FRAME.md).
+(`{type:"composition",comp:"…",props:{…}}`); see [AUTHOR-THE-FRAME.md](../../engine-doctrine/CRAFT/AUTHOR-THE-FRAME.md).
 Load `vawe-creative` + `vawe-effects` + `vawe-animation` + `vawe-camera`. Beats/blocks/comps/cameraMove
 all resolve into real layers at load, no separate step. **Iterate live** without rendering: `make studio D=<file>` serves the scene
 with a frame scrubber: scrub/step, edit the JSON, reload, before you ever render an mp4.
@@ -82,7 +82,7 @@ three are opt-in, run `TASTE=1 make author-check`) ·
 
 ---
 
-Doctrine behind each step: brief/story [FRAME-SPEC.md](../../docs/CRAFT/FRAME-SPEC.md) · design
-[SURFACES.md](../../docs/CRAFT/SURFACES.md) · motion [DIRECTION.md](../../docs/CRAFT/DIRECTION.md) ·
-bespoke frames [AUTHOR-THE-FRAME.md](../../docs/CRAFT/AUTHOR-THE-FRAME.md). Skills: `vawe-video-planning`
+Doctrine behind each step: brief/story [FRAME-SPEC.md](../../engine-doctrine/CRAFT/FRAME-SPEC.md) · design
+[SURFACES.md](../../engine-doctrine/CRAFT/SURFACES.md) · motion [DIRECTION.md](../../engine-doctrine/CRAFT/DIRECTION.md) ·
+bespoke frames [AUTHOR-THE-FRAME.md](../../engine-doctrine/CRAFT/AUTHOR-THE-FRAME.md). Skills: `vawe-video-planning`
 (the lock-sheet detail), `vawe-creative`, `vawe-effects`, `vawe-animation`, `vawe-camera`.

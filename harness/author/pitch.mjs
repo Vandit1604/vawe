@@ -3,7 +3,7 @@
 //   node harness/author/pitch.mjs <name>                                   # print the protocol
 //   node harness/author/pitch.mjs <name> --chose "<angle>" [--left "<median>"]  # record the decision
 //
-// WHY. docs/CRAFT/PITCH.md is the doctrine: an unformed brief has nothing to converge on, so five
+// WHY. engine-doctrine/CRAFT/PITCH.md is the doctrine: an unformed brief has nothing to converge on, so five
 // concepts get sampled wide (one per path) under an anti-median gate before any storyboard question
 // gets asked. This script is a HARNESS, not the agent doing that sampling: it cannot estimate a
 // concept's probability of being the median, that is judgement, not arithmetic. What it CAN do is put
@@ -121,6 +121,6 @@ console.log(`
   Record the outcome:
     node harness/author/pitch.mjs ${name} --chose "<the one-line chosen angle>" [--left "<the median left behind>"]
 
-  read: docs/CRAFT/PITCH.md
+  read: engine-doctrine/CRAFT/PITCH.md
 `);
 }

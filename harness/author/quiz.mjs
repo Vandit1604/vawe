@@ -208,7 +208,7 @@ export function frontmatter(a) {
   const job = JOBS.find((j) => j.key === a.job) || JOBS[0];
   const dir = DIRECTIONS.find((d) => d.slug === a.thread) || null;
   // A SECOND thread is paired automatically, because storyboard-check warns on a short film held by one
-  // device and docs/CRAFT/FILM-STRUCTURE.md is explicit that one thread has to be literal and obvious to
+  // device and engine-doctrine/CRAFT/FILM-STRUCTURE.md is explicit that one thread has to be literal and obvious to
   // work alone. The pairing follows the job: a claim bookends, a number escalates, a mood asks.
   const second = { claim: 'bookend', number: 'escalation', feel: 'open question', how: 'through-line' }[job.key];
   return {

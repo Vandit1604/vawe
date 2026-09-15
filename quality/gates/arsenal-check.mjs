@@ -4,11 +4,11 @@
 //   node quality/gates/arsenal-check.mjs
 //
 // WHY THIS EXISTS. CLAUDE.md step 0a says "see the whole arsenal, then choose: make effects →
-// docs/EFFECTS.md". A film was authored around a hand-built SVG chart while `core/surfaces/three-fx.js` sat in
+// engine-doctrine/EFFECTS.md". A film was authored around a hand-built SVG chart while `core/surfaces/three-fx.js` sat in
 // the repo with a full three.js scene-graph layer, a written determinism contract and four registered
 // scenes. The author had not read the arsenal doc, which is one failure. The doc did not contain three
 // either, which is the one worth fixing: 0 of 4 THREE_FX scenes were named in it, along with 0 of 5
-// raymarch effects and 0 of 5 playground generators (docs/MISTAKES.md #335).
+// raymarch effects and 0 of 5 playground generators (engine-doctrine/MISTAKES.md #335).
 //
 // The cause WAS that `scripts/site/effects-catalog.mjs` imported a HAND-WRITTEN list of registries. Add
 // a vocabulary to core/ and it appeared in the catalogue only if someone remembered an import line.
@@ -38,7 +38,7 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CATALOG = 'scripts/site/effects-catalog.mjs';
-// The printed line is rendered FROM the record (docs/MISTAKES.md #401): each record's `summary` already
+// The printed line is rendered FROM the record (engine-doctrine/MISTAKES.md #401): each record's `summary` already
 // carries the full multi-line advice a human reads, so the custom renderer prints it verbatim.
 const f = gateFindings({ line: (r) => r.summary });
 
@@ -63,13 +63,13 @@ const WAIVED = new Map(Object.entries({
   FX_PARAMS: 'parameter metadata for the background presets, which ARE catalogued',
   THERMAL_REGION: 'the filter region the thermal blur needs so its tail is not clipped. A geometry constant, not something a scene can name',
   KNOBS: 'playground control metadata, not an effect a scene can name',
-  SPECTACLE_KEYS: 'the four keys of the `spectacle` block (at/of/device/why). The block is documented in docs/PRIMITIVES.md and its DEVICE vocabulary IS catalogued, as "Spectacle devices"; this is the shape of the object, not a vocabulary of effects',
+  SPECTACLE_KEYS: 'the four keys of the `spectacle` block (at/of/device/why). The block is documented in engine-doctrine/PRIMITIVES.md and its DEVICE vocabulary IS catalogued, as "Spectacle devices"; this is the shape of the object, not a vocabulary of effects',
 
   DIRS: 'the four travel directions (left/right/up/down). A scene names one, but as the `dir` field of a '
     + 'cut or seam, and the schema carries it as an enum on both. This is the shared constant behind those, '
     + 'not a vocabulary of its own',
 
-  JUNCTION_KINDS: 'the three joint kinds a `"cut@1"` reference may name. Each is already catalogued as its own family (Scene cuts, Seams, Shader stings). This is the GRAMMAR for pointing at one, documented in docs/PRIMITIVES.md, not a fourth vocabulary',
+  JUNCTION_KINDS: 'the three joint kinds a `"cut@1"` reference may name. Each is already catalogued as its own family (Scene cuts, Seams, Shader stings). This is the GRAMMAR for pointing at one, documented in engine-doctrine/PRIMITIVES.md, not a fourth vocabulary',
 
 
   KNOB_ROUTES: 'the map from a lookOpts knob to the private pass arguments it sets. The KNOBS themselves are '
@@ -108,7 +108,7 @@ const WAIVED = new Map(Object.entries({
   // A scene never names a caption SKIN: it sets `captionMode`/`captionStyle` and the skin follows from
   // that plus the destination. CAPTION_SKINS is the geometry table captionBand() measures against, so
   // there is nothing here for an author to choose. It reached main uncatalogued, which is why the gate
-  // is right to have asked (docs/MISTAKES.md #409).
+  // is right to have asked (engine-doctrine/MISTAKES.md #409).
   CAPTION_SKINS: 'the caption geometry captionBand() measures against; a scene sets captionMode/captionStyle and the skin follows',
   // A scene names a caption STYLE and the shape follows it. CAP_STYLE_SHAPE is how the RENDERER
   // treats that style (one word on screen, or split per character); an author never writes it and
@@ -140,7 +140,7 @@ const WAIVED = new Map(Object.entries({
   PROGRESS_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   SHADOW_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   TILT_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
-  CUT_CUE: 'sound. The catalogue is picture; the sound vocabulary is documented in docs/CRAFT/SOUND.md and graded by make audio-check',
+  CUT_CUE: 'sound. The catalogue is picture; the sound vocabulary is documented in engine-doctrine/CRAFT/SOUND.md and graded by make audio-check',
   SEAM_CUE: 'sound, as CUT_CUE',
   CUES: 'sound, as CUT_CUE',
   PROFILE_BED: 'sound, as CUT_CUE',
@@ -154,7 +154,7 @@ const WAIVED = new Map(Object.entries({
   BANDS: 'sound. The three band splits the audio analyser measures energy in, as CUT_CUE',
   ON_INK: 'the four status fills a block puts text on, and the palette key that overrides the ink for each. A theme contract the boot writes off and the theme gate grades off; a scene names neither side of it',
   SURFACE_TYPES: 'the surfaces behind the layer types, which ARE catalogued via LAYER_TYPES',
-  TRACK_TYPES: 'the track vocabulary, documented with the tracks in docs/PRIMITIVES.md rather than as an effect',
+  TRACK_TYPES: 'the track vocabulary, documented with the tracks in engine-doctrine/PRIMITIVES.md rather than as an effect',
 }));
 
 const files = [];
@@ -421,7 +421,7 @@ if (!found.size) {
 if (unreadable.length) console.log(`  ~ ${unreadable.length} module(s) could not be imported in node, so their exports are unchecked: ${unreadable.join(', ')}`);
 
 if (!missing.length) {
-  console.log(`  ✓ every capability the engine exports is named in docs/EFFECTS.md\n`);
+  console.log(`  ✓ every capability the engine exports is named in engine-doctrine/EFFECTS.md\n`);
   f.emit();
   process.exit(0);
 }
@@ -430,7 +430,7 @@ for (const [name, file] of missing) f.fail('arsenal-missing', `${name.padEnd(22)
     + '(title / tag / intro / usage / preview or noPreview, core/registry/registry.js) and run `make effects`. '
     + `Anything else adds a section to ${CATALOG}, or is waived in this file WITH A REASON if it is `
     + 'not something a scene can name',
-  doc: 'docs/EFFECTS.md',
+  doc: 'engine-doctrine/EFFECTS.md',
 });
 console.error(`\n  ✗ ${missing.length} capabilit(ies) the engine offers and the catalogue never mentions:\n`);
 f.emit();

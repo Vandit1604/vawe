@@ -2,7 +2,7 @@
 // atmospheric moments, picked by `preset`: confetti (a gravity-fed burst), sparks (a fast radial
 // flash) or dust (a slow ambient drift). `mode` was the first name tried and it collides: beam.js
 // already owns `mode` with its own enum (border/shine), and schema.json's props are a flat, shared
-// namespace (docs/MISTAKES.md #213, #369 make the same point about `fill`/`color`/`bg` on rect.js).
+// namespace (engine-doctrine/MISTAKES.md #213, #369 make the same point about `fill`/`color`/`bg` on rect.js).
 // `preset` is the vocabulary this codebase already uses for exactly this shape of choice, glow.js
 // picks its five lighting phenomena the same way, so this reuses the name and the registry pattern
 // rather than inventing a second one. Inspiration only from tsParticles/party.js, no ported code:
@@ -14,7 +14,7 @@
 // Math.random/Date (hashSeed/random from core/motion.js, so seed→picture is fixed forever), and
 // CLOSED-FORM motion: a particle's position at local time `lt` is f(lt), never "last position +
 // velocity". That is what makes renderFrame(n) pure and seek-safe, and it is why this is NOT a Tier 5
-// particle sim (docs/ROADMAP.md): a sim steps from the previous frame, this does not.
+// particle sim (engine-doctrine/ROADMAP.md): a sim steps from the previous frame, this does not.
 import { random } from '../motion/motion.js';
 import { glowRGB } from '../looks/filters.js';
 import { mergeProps } from '../registry/props.js';

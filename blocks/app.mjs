@@ -26,7 +26,7 @@ export const CATEGORY = 'App';
 // for a timestamp/count/meta value and sans for a name or a sentence, never a gradient or a nested
 // card. VARIANCE low (these are app chrome, not a film's loud moment); MOTION is the layer's own
 // envelope anim, one arrival per surface, `parts` only where a surface's OWN content stages in two
-// beats (profileHeader's stat row, onboardCard's CTA). docs/CRAFT/HTML-FRAGMENTS.md.
+// beats (profileHeader's stat row, onboardCard's CTA). engine-doctrine/CRAFT/HTML-FRAGMENTS.md.
 
 // the block's outer card: kit chrome + position + timing. One definition for all six surfaces.
 const surface = ({ x, y, w, start, dur, radius = R.card, ...chrome } = {}) => ({

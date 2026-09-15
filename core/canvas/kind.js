@@ -11,7 +11,7 @@
 // every later frame differently from the tabs that never swept: same DOM, same computed geometry to
 // six decimals, different glyph pixels. Measured: with the compositor promotions still in place, the
 // sweep alone moved the captured bytes of a frame. It is no longer load-bearing now that they are gone
-// (docs/MISTAKES.md #507), and it is fixed anyway, because a measurement that changes its subject is
+// (engine-doctrine/MISTAKES.md #507), and it is fixed anyway, because a measurement that changes its subject is
 // a defect whether or not today's page happens to show it.
 //
 // The kind is recorded where a context is actually created, once, for every caller including vendored

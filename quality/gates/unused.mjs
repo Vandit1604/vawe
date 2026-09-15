@@ -10,7 +10,7 @@
 // rendered at all, and `--p` was frozen at 0 in every hand-authored backdrop (#353). A capability nobody
 // uses is a capability nobody has tested, so this list is really a test backlog.
 //
-// WHY THE COUNT IS NOT A TARGET, which matters more. docs/MISTAKES.md #373 records the trap: about a
+// WHY THE COUNT IS NOT A TARGET, which matters more. engine-doctrine/MISTAKES.md #373 records the trap: about a
 // third of the never-used GSAP effects DUPLICATE something the engine already does well, `fadeIn` is
 // `anim:"fade"`, `zoomIn` is `scale`, `revealUp` is the `riseClip` preset. Driving this number down by
 // folding those into blueprints would put two ways to do one thing in front of every author, which
@@ -79,8 +79,8 @@ for (const [family, used, all, missing] of rows) {
   const bar = missing.length ? `  never named: ${missing.join(' ')}` : '';
   console.log(`  ${family.padEnd(w)}  ${String(used).padStart(3)}/${String(all).padEnd(3)} (${String(pct).padStart(3)}%)${bar}`);
   if (missing.length) f.note('unused-vocabulary', `${family}: ${missing.length}/${all.length} never named in a shipped scene: ${missing.join(' ')}`,
-    { doc: 'docs/MISTAKES.md' });
+    { doc: 'engine-doctrine/MISTAKES.md' });
 }
 console.log(`\n  ${total - dead}/${total} of the registered vocabulary appears in a shipped scene · ${dead} never named.`);
 console.log('  Read each zero as: nobody can find it, it does not work, or something else does it better.');
-console.log('  Do not drive this number down for its own sake, see docs/MISTAKES.md #373.');
+console.log('  Do not drive this number down for its own sake, see engine-doctrine/MISTAKES.md #373.');

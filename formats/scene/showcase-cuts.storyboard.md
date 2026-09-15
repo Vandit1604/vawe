@@ -3,7 +3,7 @@ message: "A cut is a joint the film already has, and the joint owns the time."
 audience: "An author writing scene JSON who reaches for a cut style before deciding what the cut is for."
 arc: "hook → build → proof → payoff"
 framework: "BAB. before: a cut is a look you pick. after: a cut is a place two forms agree. bridge: watch one mark cross a joint without a ramp."
-threads: "an unfinished sentence carried across the middle joint (This mark / is this card.) and a match cut on the accent form itself. Both from docs/CRAFT/FILM-STRUCTURE.md: verbal, and spatial."
+threads: "an unfinished sentence carried across the middle joint (This mark / is this card.) and a match cut on the accent form itself. Both from engine-doctrine/CRAFT/FILM-STRUCTURE.md: verbal, and spatial."
 format: 1920x1080
 theme: "themes/vawe.json"
 duration: 10.8s

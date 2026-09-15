@@ -7,7 +7,7 @@
  * (core/generators.js) and builds the panel from each generator's declarative schema, so adding a
  * generator to the registry is the whole job of putting it on this page. A hand-kept list of dials
  * over here would be a second source of truth that goes stale in silence, which is exactly how
- * site/public froze 77 files behind core/ (docs/MISTAKES.md #271).
+ * site/public froze 77 files behind core/ (engine-doctrine/MISTAKES.md #271).
  *
  * The engine is loaded at RUNTIME with a dynamic import of "/core/generators.js", not bundled. Two
  * reasons, and the second is the real one: the site vendors core/ into public/ as static files, so
@@ -433,7 +433,7 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
   //      page stylesheet would rasterise wrong, and that is why this asks the generator for markup
   //      rather than serialising the live DOM node.
   //   2. `--t` has to be written on the wrapper. Inside the SVG there is no page to inherit it from, so
-  //      every calc() reading it would be invalid and the whole declaration dropped (docs/MISTAKES.md
+  //      every calc() reading it would be invalid and the whole declaration dropped (engine-doctrine/MISTAKES.md
   //      #261). Pinned to 0, the frame everyone is looking at.
   //
   // One rasteriser, two callers. The download and the clipboard were never allowed to disagree about
@@ -978,7 +978,7 @@ function useStill() {
  *
  *  It is the REAL generator, not a screenshot. A poster would be a second artefact to keep in step with
  *  the code, and site/public froze 77 files behind core/ the last time this repo had one of those
- *  (docs/MISTAKES.md #271).
+ *  (engine-doctrine/MISTAKES.md #271).
  *
  *  IT MOVES NOW, AND THAT REVERSES A DELIBERATE DECISION, so here is the old one and why it does not
  *  hold any more. ScenePreview set `playing: false` and said: "A field is judged against a still

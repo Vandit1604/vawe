@@ -61,7 +61,7 @@ export const ANIM = {
 // them. A hand-copied list is how the schema came to advertise "slideL", an anim that never existed
 // and therefore silently resolved to fade (MISTAKES #21).
 
-// One line per enter/exit anim, beside the registry itself. docs/EFFECTS.md renders these, and
+// One line per enter/exit anim, beside the registry itself. engine-doctrine/EFFECTS.md renders these, and
 // quality/gates/lib-test.mjs fails when a name has no blurb, a name with no description is a
 // vocabulary an author cannot choose from. The DIRECTIONS below are read off the registry above, not
 // off the names: `slide-*` names the EDGE the layer travels from (and an `out` sends it back to that
@@ -149,7 +149,7 @@ export const BASE_ENTER = 0.3, BASE_EXIT = 0.26;
 // Two functions rather than one returning a pair: this runs for every clip on every frame, and an
 // object literal here is an allocation the render pays ~50,000 times a minute of video.
 export const enterDurOf = (el) => (el.dataset.enter != null ? parseFloat(el.dataset.enter) : BASE_ENTER);
-// NO DEFAULT FADE-OUT (docs/MISTAKES.md, "four hands on one layer's life"). formats/scene/scene.js
+// NO DEFAULT FADE-OUT (engine-doctrine/MISTAKES.md, "four hands on one layer's life"). formats/scene/scene.js
 // (setLayerTiming) only writes `data-exitDur` for a layer that named an `out`, or one that named
 // `exitDur` itself; a layer with neither holds to its own end. If this function still handed back
 // BASE_EXIT whenever the attribute was absent, that silence would have been undone right here: the
@@ -170,7 +170,7 @@ export const opacityEnvelope = (enterT, exitT = 0) =>
 // as the mitigation, but conformance asserts each anim is DISTINCT, which is a different property than
 // "the name the author wrote exists". Five layers in three shipped scenes were silently fading because of
 // it. Now it throws, and because three of those five were real names from a NEIGHBOURING registry, the
-// error says where the name does live. See core/registry.js and docs/MISTAKES.md #355.
+// error says where the name does live. See core/registry.js and engine-doctrine/MISTAKES.md #355.
 // ABSENCE and a WRONG NAME are different questions, and the old `ANIM[name] || fade` answered both with
 // `fade`. A layer that declares no anim is simply PRESENT for its window (`none`, not `fade`, see
 // `anim` default in formats/scene/scene.js `setLayerTiming`); a layer that names one the engine does
@@ -184,7 +184,7 @@ const resolveAnim = (name) => (name == null ? ANIM.none : ANIM_REGISTRY.pick(nam
 // offset the instant the exit began and then slid home while fading. Every directional exit in the
 // engine was backwards (MISTAKES #40).
 const asExit = (fn, exitT) => fn(1 - clamp01(exitT));
-// ASEXIT ALREADY OBEYS docs/RULES/ease-direction.md FOR EVERY `anim`/`out` PAIR, structurally, with no
+// ASEXIT ALREADY OBEYS engine-doctrine/RULES/ease-direction.md FOR EVERY `anim`/`out` PAIR, structurally, with no
 // second curve to author: every ANIM entry decelerates INTO t=1 (an ease-out settle), and sampling that
 // same curve at a linearly DECREASING argument does not just walk it backwards, it inverts which half of
 // the curve is slow. The settle (low slope, near t=1) lands at the START of the exit and the departure
@@ -215,7 +215,7 @@ export function collectClips(root) {
 }
 
 // EL.STYLE.TRANSFORM IS AN ACCUMULATOR, SO SOMEBODY HAS TO EMPTY IT. Four tracks PREPEND to it
-// (react, follow, motion, idle: the `accumulate` list in docs/CODEMAPS/ARCHITECTURE.md), each reading
+// (react, follow, motion, idle: the `accumulate` list in engine-doctrine/CODEMAPS/ARCHITECTURE.md), each reading
 // back what is already on the element and composing onto it. That is only safe if the element starts
 // every frame clean, and it did not: `restingKeys` clears a property only when one of the layer's OWN
 // anims writes it, so a layer whose entrance is `wipe`, `iris` or `clock` (all clipPath, no transform)
@@ -306,7 +306,7 @@ export function clipStyleAt(el, t) {
   // The opacity envelope is EASED, not linear. This line used to multiply two linear ramps while
   // the transform beside it was eased (`rise` settles on easeOutSettle), so the two halves of a
   // single entrance arrived on different curves. The thing you feel as "the easing is off"
-  // without being able to point at it. docs/MOTION-CRAFT.md has said "entrances decelerate, exits
+  // without being able to point at it. engine-doctrine/MOTION-CRAFT.md has said "entrances decelerate, exits
   // accelerate, never linear on visible moves" the whole time; the engine just did not do it.
   //
   // The exit is the MIRROR of the entrance curve, not an independent one. That matters because two

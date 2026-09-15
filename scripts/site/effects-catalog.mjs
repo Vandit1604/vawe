@@ -1,4 +1,4 @@
-// scripts/site/effects-catalog.mjs, GENERATE docs/EFFECTS.md: the single arsenal catalog so the model
+// scripts/site/effects-catalog.mjs, GENERATE engine-doctrine/EFFECTS.md: the single arsenal catalog so the model
 // SEES every effect the engine offers and picks, instead of authoring plain rise+fade from a blank JSON.
 // Derived from the registries themselves (the coverage.mjs pattern), it can never drift from the code.
 //   node scripts/site/effects-catalog.mjs [--check]   ·   make effects
@@ -63,7 +63,7 @@ const DESC = {
 
 // The two pseudo-name sections (a MODE of a layer type, not a registry) keep their blurbs scoped to
 // their own section, the way a family does, so `make arsenal` indexes them. They used to sit in the
-// flat DESC above, which `d()` reads for docs/EFFECTS.md but harness/author/arsenal.mjs does not: the
+// flat DESC above, which `d()` reads for engine-doctrine/EFFECTS.md but harness/author/arsenal.mjs does not: the
 // search reads each section's own `blurbs` map. So four capabilities rendered a description in the docs
 // and were unfindable by the tool CLAUDE.md sends you to before inventing anything (discovery.mjs).
 const BEAM_BLURBS = {
@@ -75,12 +75,12 @@ const SVG_BLURBS = {
   'svg:morph (shape melts into a logo)': 'one path melts into another (blob into logo), optional spin',
 };
 
-// docs/CRAFT/SELECTION.md §4 already classifies every look and every sting by the register it evokes,
+// engine-doctrine/CRAFT/SELECTION.md §4 already classifies every look and every sting by the register it evokes,
 // and `craft-coverage` already FAILS when one is missing, so that map is both complete and guaranteed.
 // It just had no reader, which is why 31 looks and 35 stings rendered here as bare names. Falling back to
 // the register is not a stopgap: for a held texture, "analog nostalgia (warm, dated)" is the thing an
 // author is choosing between, more useful than a sentence about `lomo`'s curve.
-const REGISTERS = registersOf(fs.readFileSync(path.join(root, 'docs/CRAFT/SELECTION.md'), 'utf8'));
+const REGISTERS = registersOf(fs.readFileSync(path.join(root, 'engine-doctrine/CRAFT/SELECTION.md'), 'utf8'));
 
 // `kind` scopes the lookup because `thermal` is BOTH a look and a sting, with a different register in
 // each table. Sections that carry no register pass nothing and behave exactly as before.
@@ -102,7 +102,7 @@ const names = (arr) => [...new Set(arr)].sort();
 
 // The plain words, rendered as word → the concrete value it resolves to. The blurb IS the mapping,
 // because that is the only thing worth knowing here; the "when to reach for it" column lives in the
-// dedicated doc (`make vocab` → docs/CRAFT/VOCABULARY.md), generated from the same registry.
+// dedicated doc (`make vocab` → engine-doctrine/CRAFT/VOCABULARY.md), generated from the same registry.
 const VOCAB_BLURBS = Object.fromEntries([
   ...Object.entries(FEEL).map(([w, t]) => [w, `feel → \`ease: "${t}"\``]),
   ...Object.entries(DURATION).map(([w, s]) => [w, `duration → \`${s}\` seconds`]),
@@ -131,7 +131,7 @@ const walkCore = (d) => {
 walkCore('core');
 // blueprints/index.mjs is NOT under core/ and holds the beat registry. It used to reach this file
 // through an import line for BEATS and BEAT_BLURBS; the section derives itself now, so deleting that
-// import as "no longer needed" would have made the whole beat family vanish from docs/EFFECTS.md in
+// import as "no longer needed" would have made the whole beat family vanish from engine-doctrine/EFFECTS.md in
 // silence. Named here for the same reason quality/gates/arsenal-check.mjs names it in its own walk.
 CORE.push('blueprints/index.mjs');
 for (const f of CORE) { try { await import(path.join(root, f)); } catch { /* browser-only; arsenal-check reports it */ } }
@@ -154,7 +154,7 @@ const derived = catalogued().map((r) => {
 
 // EXPORTED so there is exactly one family list. `scripts/site/effects-json.mjs` builds the site's
 // effects index off this same array, which is why the emit below is guarded: importing this module
-// must read the registries, never rewrite docs/EFFECTS.md.
+// must read the registries, never rewrite engine-doctrine/EFFECTS.md.
 //
 // The hand-written half, and it stays hand-written for one reason each: none of these is a registry.
 // The remaining families and the rest are
@@ -177,11 +177,11 @@ export const sections = [
   // about 80KB of engine, reached by 3 of 135 scenes and by 0 of 30 block files. Documentation alone
   // does not fix adoption (`parts` went 0 to 5 block files and its scenes stayed at 2), but a
   // catalogue that names the wrong key guarantees the opposite.
-  ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `docs/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
+  ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `engine-doctrine/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
 ];
 
 // Imported (by scripts/site/effects-json.mjs) this module is a DATA source for `sections`, so the
-// CLI below must not run: it writes docs/EFFECTS.md and calls process.exit.
+// CLI below must not run: it writes engine-doctrine/EFFECTS.md and calls process.exit.
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) emit();
 
@@ -243,12 +243,12 @@ function emit() {
   out.push(`_${total} effects across ${sections.length} families. Regenerate: \`make effects\`._`);
   const md = out.join('\n') + '\n';
 
-  const dest = path.join(root, 'docs/EFFECTS.md');
+  const dest = path.join(root, 'engine-doctrine/EFFECTS.md');
   if (CHECK) {
     const cur = fs.existsSync(dest) ? fs.readFileSync(dest, 'utf8') : '';
-    if (cur.trim() !== md.trim()) { console.error('✗ docs/EFFECTS.md is stale, run `make effects` (a registered effect is missing/changed).'); process.exit(1); }
-    console.log('✓ docs/EFFECTS.md is in sync with the registries'); process.exit(0);
+    if (cur.trim() !== md.trim()) { console.error('✗ engine-doctrine/EFFECTS.md is stale, run `make effects` (a registered effect is missing/changed).'); process.exit(1); }
+    console.log('✓ engine-doctrine/EFFECTS.md is in sync with the registries'); process.exit(0);
   }
   fs.writeFileSync(dest, md);
-  console.log(`✓ wrote docs/EFFECTS.md: ${total} effects across ${sections.length} families`);
+  console.log(`✓ wrote engine-doctrine/EFFECTS.md: ${total} effects across ${sections.length} families`);
 }

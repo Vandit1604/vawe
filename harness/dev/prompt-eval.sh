@@ -4,7 +4,7 @@
 # WHY. This repo runs ~70 gates over the engine and none over the 44KB file that drives every
 # authoring decision. Sections get moved out of AGENTS.md and nobody can say what that cost. This is
 # the smallest thing that can say. It is NOT an ablation harness: it runs ONE section, ONE arm each
-# way, and n=1 is n=1. Read docs/RESEARCH/PROMPT-EVAL.md before you quote any number it prints.
+# way, and n=1 is n=1. Read engine-doctrine/RESEARCH/PROMPT-EVAL.md before you quote any number it prints.
 #
 #   harness/dev/prompt-eval.sh "## THE BACKGROUND MUST MOVE, AND YOU MUST WATCH IT MOVE" out/prompt-eval
 #

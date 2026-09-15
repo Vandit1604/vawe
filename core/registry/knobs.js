@@ -77,7 +77,7 @@ export const KNOBS = {
     // that matters: it is the randomized ORDER, and at 0 the preset reads as a line being typed.
     assemble: [kn('dist', 'how far out a glyph starts, px: each takes its own fraction of it'), kn('spin', 'largest start rotation in degrees, signed per glyph'), kn('shuffle', 'fraction of a unit\'s own window spent as a hashed delay, which is what scatters the arrival ORDER', [0, 1]), kstr('seed', 'seed for the scatter field: change it for a different arrangement, same on every render'), kn('blur', 'motion blur px on the travel, 0 turns it off')],
     // decode used to read NOTHING: animateUnits returned before it passed popts, so every dial written
-    // here would have been accepted and ignored (docs/MISTAKES.md #542). These three are what the
+    // here would have been accepted and ignored (engine-doctrine/MISTAKES.md #542). These three are what the
     // reference implementations expose and what a brand actually changes.
     //
     // IT IS ALSO THE ONE PRESET WHOSE ROWS ARE STILL HAND-WRITTEN END TO END, defaults included. It
@@ -151,9 +151,9 @@ export const KNOBS = {
       col('colors', null, 'gradient-map ramp stops (thermal, chrome)'),
       n('grain', null, 'grain amount'),
       n('vignette', null, 'vignette strength'),
-      // No `warmth`: it was listed here, in core/looks.js and in docs/PRIMITIVES.md, and no pass in
+      // No `warmth`: it was listed here, in core/looks.js and in engine-doctrine/PRIMITIVES.md, and no pass in
       // any of the 31 looks ever read it. Not every look takes every knob either, `liveKnobs(name)`
-      // says which, and passing one a look cannot apply now throws. docs/MISTAKES.md #351.
+      // says which, and passing one a look cannot apply now throws. engine-doctrine/MISTAKES.md #351.
     ],
   },
 };

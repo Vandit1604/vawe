@@ -6,12 +6,12 @@
 //
 // WHY THIS EXISTS. CLAUDE.md states, in capital letters, with its own measurement inside the sentence,
 // that a film's background must move. 82% of films paint one window. A recorded ablation
-// (docs/RESEARCH/PROMPT-EVAL.md) deleted that rule and the window count did not move by one. So prose
+// (engine-doctrine/RESEARCH/PROMPT-EVAL.md) deleted that rule and the window count did not move by one. So prose
 // is the most expensive way this repo changes behaviour and the least reliable, and until now nothing
 // anywhere recorded WHICH rules are only prose. A reader of CLAUDE.md could not tell a rule the engine
 // makes true from a rule that is a wish, and both are written in the same voice at the same volume.
 //
-// THE FIVE RUNGS, weakest last. docs/CRAFT/DIRECTION.md already ran a two-value version of this in its
+// THE FIVE RUNGS, weakest last. engine-doctrine/CRAFT/DIRECTION.md already ran a two-value version of this in its
 // twelve-principles table ([eye] and [gated]); this is that idea generalised, and the grammar and the
 // voice are borrowed from there rather than imported from anywhere else.
 //
@@ -74,12 +74,12 @@ export const RUNGS = ['built', 'gated', 'live', 'ref', 'eye'];
 // The files whose SECTIONS carry a rung. AGENTS.md is the canonical doctrine every session loads in full
 // (CLAUDE.md is a shim that imports it), so it is the file where an unenforced rule costs the most and the
 // only one whose sections MUST all be tagged. The CRAFT guides are checked when they carry a tag and never
-// required to, because a rung is a property of an INSTRUCTION and half of CRAFT is reference: docs/EFFECTS.md
+// required to, because a rung is a property of an INSTRUCTION and half of CRAFT is reference: engine-doctrine/EFFECTS.md
 // and the codemaps describe what exists rather than telling anyone to do anything, and tagging those would
 // be tagging a table.
 const REQUIRED = 'AGENTS.md';
-const SCANNED = () => [REQUIRED, ...fs.readdirSync(path.join(ROOT, 'docs/CRAFT'))
-  .filter((f) => f.endsWith('.md')).sort().map((f) => `docs/CRAFT/${f}`)];
+const SCANNED = () => [REQUIRED, ...fs.readdirSync(path.join(ROOT, 'engine-doctrine/CRAFT'))
+  .filter((f) => f.endsWith('.md')).sort().map((f) => `engine-doctrine/CRAFT/${f}`)];
 
 /** Every target the Makefile defines. Read off the Makefile, the same way doc-refs does it. */
 function makeTargets() {
@@ -126,7 +126,7 @@ function anyCodeFrom(script) {
 // never as part of the sentence. `[rung]` or `[rung: what it names]`.
 //
 // THE RUNG WORDS ARE IN THE PATTERN, and that is not tidiness. A looser `[a-z]+` read
-// docs/CRAFT/VOCABULARY.md's `## Feel `[ease]`` as a tag with a rung called `ease` and reported it: a
+// engine-doctrine/CRAFT/VOCABULARY.md's `## Feel `[ease]`` as a tag with a rung called `ease` and reported it: a
 // heading may legitimately END in a code span that is part of its own subject. Matching the five words
 // means a heading is tagged or it is not, and a misspelt rung reads as UNTAGGED, which is the safe
 // direction: CLAUDE.md still fails on it, and no other doc is accused of a tag it never wrote.
@@ -206,7 +206,7 @@ export function run() {
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   const r = run();
   const list = process.argv.includes('--list');
-  // The printed line is rendered FROM the record (docs/MISTAKES.md #401): each record's `summary`
+  // The printed line is rendered FROM the record (engine-doctrine/MISTAKES.md #401): each record's `summary`
   // already carries the multi-line advice a human reads, so the custom renderer prints it verbatim.
   const f = gateFindings({ line: (rec) => rec.summary });
 
@@ -261,7 +261,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     f.fail('rung-ratchet',
       `${r.eye} rule(s) are held up by prose alone, up from ${prior.eye}. ` +
       'A new rule with no mechanism is a new rule nobody will follow, and the ablation in ' +
-      'docs/RESEARCH/PROMPT-EVAL.md is what that costs: deleting the loudest prose rule in ' +
+      'engine-doctrine/RESEARCH/PROMPT-EVAL.md is what that costs: deleting the loudest prose rule in ' +
       'this repo changed the behaviour it governs by zero. ' +
       'Give it a default, a gate, a hook or a command. If it genuinely cannot have one, ' +
       'raise the bar on purpose: node quality/gates/rung.mjs --stamp');

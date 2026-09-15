@@ -23,10 +23,10 @@ results.push(run('motion audit (animation over time)', 'node', ['quality/gates/m
 results.push(run('doc refs (commands + paths the docs name)', 'node', ['quality/gates/doc-refs.mjs']));
 // The site boots the engine out of site/public/, and site-engine.mjs has always known how to publish
 // it. What was missing is that NOTHING RAN ITS CHECK outside a site build, so between builds the page
-// served a frozen engine while saying it was the real one (docs/MISTAKES.md #271).
+// served a frozen engine while saying it was the real one (engine-doctrine/MISTAKES.md #271).
 results.push(run('site engine (published copy matches this repo)', 'node', ['scripts/site/site-engine.mjs', '--check']));
 // A path the Dockerfile copies and .dockerignore excludes only ever shows up as a failed deploy: the
-// repo has the file and every local check passes (docs/MISTAKES.md #289).
+// repo has the file and every local check passes (engine-doctrine/MISTAKES.md #289).
 results.push(run('docker context (the image will carry what the build copies)', 'node', ['scripts/site/docker-context-check.mjs']));
 
 // master sheet: tile the per-format audit overlays (safe-zone + critical-box overlays)

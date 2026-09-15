@@ -8,16 +8,16 @@
 # for weeks with four orphaned guides and a link to a file nobody wrote, and nothing noticed, because the
 # only thing that checked it was a command you had to remember to type. This is the place it cannot be
 # skipped by forgetting. It is pure file reads, so it costs about a second.
-# doc-refs joined it once docs/MISTAKES.md was patched. Same argument: a doc names a command as an
+# doc-refs joined it once engine-doctrine/MISTAKES.md was patched. Same argument: a doc names a command as an
 # instruction, and an instruction that fails teaches the author to distrust the whole file. It found
 # 111 usage strings printing a path that had moved months earlier.
 # arsenal-check is the same argument once more, and it belongs here rather than in author-check for a
 # specific reason: the commit that ADDS a capability is a framework commit, and framework commits never
 # run an authoring ladder. The three.js layer landed that way and stayed out of the catalogue for as
-# long as it existed, so the author who needed a globe went to npm instead (docs/MISTAKES.md #335).
+# long as it existed, so the author who needed a globe went to npm instead (engine-doctrine/MISTAKES.md #335).
 # scenes-json is here rather than in a site build because the drift it catches is INVISIBLE: the site
 # serves its own copy of a scene, so a film fixed in formats/scene/ keeps playing broken on the site
-# until someone notices by hand. Nobody did for forty days (docs/MISTAKES.md #475). It reads 15 files.
+# until someone notices by hand. Nobody did for forty days (engine-doctrine/MISTAKES.md #475). It reads 15 files.
 # mistakes-check is here for the same reason as doc-refs: MISTAKES.md is edited on almost every commit
 # that touches this file's own doctrine, and a duplicate entry is only visible across the whole log, not
 # from the diff being pushed. It reads one file.
@@ -34,7 +34,7 @@
 # prop-probe is here because the thing it checks is a property of the ENGINE, not of any one film, and
 # nothing in an authoring ladder ever exercises a prop no film uses. That is the whole gap it closes:
 # `metalness` and `roughness` were declared on the three layer and overwritten by literals, and every
-# gate stayed green for months because no scene set them (docs/MISTAKES.md #565). It is the slow step
+# gate stayed green for months because no scene set them (engine-doctrine/MISTAKES.md #565). It is the slow step
 # here, about 35 seconds, and it is the only one that needs a browser.
 echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + arsenal + discovery + generated + scenes + mistakes + prop-probe) …"
 if ! make schema-check lib-test craft-coverage doc-refs arsenal-check discovery generated-check scenes-json no-emdash mistakes-check prop-probe; then

@@ -104,11 +104,11 @@ export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRI
   slot: 'theme.look',
   blurbs: {
     // SCAFFOLD-ONLY, not read at render: `bg` is a REQUIRED authoring field (core/engine/produce.js:14-16),
-    // written precisely so the engine never picks the backdrop for an author again (docs/MISTAKES.md
+    // written precisely so the engine never picks the backdrop for an author again (engine-doctrine/MISTAKES.md
     // #159: "the engine PICKED the background, so nobody ever designed one"). `backdrop` here is only
     // the theme's own suggested rotation, read by `make scaffold` to seed `bg[]`; a film's own `bg`
     // array is what actually renders, and the engine will not fall back to this list on your behalf.
-    backdrop: 'ordered bg preset names the brand turns through, one window per beat: scaffold-only, seeds `make scaffold`\'s `bg[]`, never read at render (bg is required, docs/MISTAKES.md #159)',
+    backdrop: 'ordered bg preset names the brand turns through, one window per beat: scaffold-only, seeds `make scaffold`\'s `bg[]`, never read at render (bg is required, engine-doctrine/MISTAKES.md #159)',
     scale: 'type sizes at 16:9 for hook / headline / body / caption',
     layout: 'the anchor band (left/center/right) and margin every beat composes against',
     marks: 'the logo path plus its end-card and headline-adjacent sizes',
@@ -118,7 +118,7 @@ export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRI
   catalog: {
     title: 'Theme look keys', tag: 'theme', intro: 'A theme (`themes/<name>.json`) may carry a `look` '
       + 'block: the whole-film default a brand fixes so a scaffold does not re-decide it per video '
-      + '(docs/CRAFT/THEME-LOOK.md). These are the six keys it accepts.',
+      + '(engine-doctrine/CRAFT/THEME-LOOK.md). These are the six keys it accepts.',
     usage: (n) => ({ theme: { look: { [n]: '…' } } }),
     noPreview: 'a theme key, not a per-video effect: see `make theme-sheet THEME=<name>` for the rendered picture of one theme\'s whole look',
   },
@@ -227,7 +227,7 @@ export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) 
 //
 // TWO KEYS ARE DELIBERATELY LEFT UNCOMPUTED (unchanged from before):
 //   - `backdrop` (which bg preset a film turns through) is a TASTE decision, never the engine's to
-//     pick for an author (docs/MISTAKES.md #159: the engine used to choose the background and nobody
+//     pick for an author (engine-doctrine/MISTAKES.md #159: the engine used to choose the background and nobody
 //     ever designed one again; `bg` is a required authoring field now, core/engine/produce.js's own
 //     header explains why). `theme.bgDefault` stays the one engine-owned bg default; `look.backdrop`
 //     is a `make scaffold` seed only, never read by the renderer (see its blurb above).
@@ -298,7 +298,7 @@ export function computedLook(theme, { isLightBg } = {}) {
 }
 
 // resolveLook(theme, opts): the look a film actually gets. An authored `theme.look` wins KEY BY KEY
-// over the computed one (docs/CRAFT/THEME-LOOK.md: "the theme is a DEFAULT, never a constraint an
+// over the computed one (engine-doctrine/CRAFT/THEME-LOOK.md: "the theme is a DEFAULT, never a constraint an
 // author cannot override"), so a brand that fixes only `backdrop` still gets a computed `scale`/
 // `layout`/`cuts`/`field` for the rest instead of losing them to an all-or-nothing merge.
 export function resolveLook(theme, opts) {

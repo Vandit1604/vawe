@@ -1,4 +1,4 @@
-// scripts/site/motion-numbers-catalog.mjs: regenerate the motion NUMBER tables in docs/RULES from the
+// scripts/site/motion-numbers-catalog.mjs: regenerate the motion NUMBER tables in engine-doctrine/RULES from the
 // engine, so a stagger value, a default ease or an exit-speed number can't drift between doc and code.
 //
 //   node scripts/site/motion-numbers-catalog.mjs            write the generated blocks
@@ -43,13 +43,13 @@ const speedBands = block([
   '|---|---|---|',
   ...Object.entries(DURATION).map(([w, s]) => `| \`${w}\` | ${s}s | \`DURATION.${w}\` (core/registry/vocab.js) |`),
   '',
-  'Full word list with the "when": `docs/CRAFT/VOCABULARY.md#duration`.',
+  'Full word list with the "when": `engine-doctrine/CRAFT/VOCABULARY.md#duration`.',
 ]);
 
 const TARGETS = [
-  ['docs/RULES/ease-direction.md', easeDirection],
-  ['docs/RULES/stagger-total.md', staggerTotal],
-  ['docs/RULES/speed-bands.md', speedBands],
+  ['engine-doctrine/RULES/ease-direction.md', easeDirection],
+  ['engine-doctrine/RULES/stagger-total.md', staggerTotal],
+  ['engine-doctrine/RULES/speed-bands.md', speedBands],
 ];
 
 let stale = false;
@@ -70,7 +70,7 @@ for (const [rel, content] of TARGETS) {
 }
 if (CHECK) {
   if (stale) process.exit(1);
-  console.log('✓ docs/RULES motion-number blocks are in sync with the engine');
+  console.log('✓ engine-doctrine/RULES motion-number blocks are in sync with the engine');
 } else {
-  console.log('✓ wrote motion-number blocks into docs/RULES/ease-direction.md, stagger-total.md, speed-bands.md');
+  console.log('✓ wrote motion-number blocks into engine-doctrine/RULES/ease-direction.md, stagger-total.md, speed-bands.md');
 }

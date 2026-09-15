@@ -1,6 +1,6 @@
 // core/layers/svg.test.mjs: the runnable self-check for the `svg` layer's `draw` reveal.
 // Bug: a path with an arc (`A`) command showed a disconnected round-cap dot at u≈0, at the seam
-// between the line and the arc, before the real stroke sweep began there (docs/MISTAKES.md). The cause
+// between the line and the arc, before the real stroke sweep began there (engine-doctrine/MISTAKES.md). The cause
 // was `pathLength="1"` normalising the dash to the browser's own (arc-inaccurate) length estimate;
 // the fix measures the path's REAL length with getTotalLength() and dashes in real units instead.
 // drawOffset(total, u) is the pure arithmetic left over from that fix, no DOM required to assert it.

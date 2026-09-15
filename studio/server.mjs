@@ -38,7 +38,7 @@ const dataArg = process.env.D || process.argv[2];
 if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: make studio D=formats/scene/<file>.json [PORT=8799]'); process.exit(2); }
 const dataUrl = '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/');
 // The film's theme, read once. The plan pane previews every fragment on it, and a fragment previewed
-// on the wrong palette is a different picture with no warning (docs/MISTAKES.md #382).
+// on the wrong palette is a different picture with no warning (engine-doctrine/MISTAKES.md #382).
 const THEME_NAME = (() => { try { return JSON.parse(fs.readFileSync(dataArg, 'utf8')).theme || 'default'; } catch { return 'default'; } })();
 const PORT = Number(process.env.PORT) || 8799;
 
@@ -469,7 +469,7 @@ const studioRoutes = (req, res) => {
   // ---- the PLAN, as the film rather than as grey boxes -------------------------------------------
   // A film has two artefacts and studio only ever showed one. This used to serve `make panels`, one
   // grey still per beat sized from `shot:`, which answers how big and where and nothing about what is
-  // in the frame, so nobody could approve a plan from it (docs/MISTAKES.md #592). The real pictures
+  // in the frame, so nobody could approve a plan from it (engine-doctrine/MISTAKES.md #592). The real pictures
   // were on disk the whole time: every beat that names a `fragment:` has hand-written markup that
   // renders instantly. So the plan is served as DATA and the page draws it in the studio's own room,
   // with each beat's real fragment live beside its reasoning.
@@ -502,7 +502,7 @@ const studioRoutes = (req, res) => {
       try { gateOut = execFileSync(process.execPath, [path.join(REPO_ROOT, 'quality/gates/storyboard-check.mjs'), sbPath], { encoding: 'utf8' }); }
       catch (e) { gateOut = String(e.stdout || '') + String(e.stderr || ''); }
       // A fragment-less beat is still drawn, from its storyboard fields, on the film's own colours
-      // (docs/CRAFT/STORYBOARD-TEMPLATE.md archetypes): a grey box says nothing about what a beat
+      // (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md archetypes): a grey box says nothing about what a beat
       // SHOWS, and this repo's whole point is that the picture is the only thing worth approving.
       let palette = null;
       try { palette = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'themes', THEME_NAME + '.json'), 'utf8')).palette; } catch { /* sketch falls back to studio's own greys */ }

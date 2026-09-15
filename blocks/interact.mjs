@@ -32,7 +32,7 @@ export const CATEGORY = 'Interaction';
 // ring, a face), flat, one accent hue for the interaction's own colour, sans for keys and labels, no
 // gradient or card-in-card. VARIANCE low (this vocabulary supports a beat, it is not the beat);
 // MOTION is each block's own `vars`/`--p` sweep or its envelope `anim`, never `parts`: nothing here
-// has independently-arriving children. docs/CRAFT/HTML-FRAGMENTS.md.
+// has independently-arriving children. engine-doctrine/CRAFT/HTML-FRAGMENTS.md.
 
 // press depth: 0 → 1 → 0 across the sweep. Linear `--p` in, a symmetric dip out.
 const DIP = 'min(var(--p,0), 1 - var(--p,0))';

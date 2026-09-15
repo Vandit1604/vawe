@@ -1,6 +1,6 @@
 ---
 name: vawe-type-demo
-description: "Playbook for a product-mechanism demo in this engine: a cursor path, a real click, a visible consequence, a zoom. Load when the route table (docs/CRAFT/ROUTING.md) matches demo, or the request is to prove one mechanism or effect works, not to ship a full film."
+description: "Playbook for a product-mechanism demo in this engine: a cursor path, a real click, a visible consequence, a zoom. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches demo, or the request is to prove one mechanism or effect works, not to ship a full film."
 ---
 
 # vawe-type-demo: the cursor-and-proof playbook
@@ -27,7 +27,7 @@ can run longer than its neighbours: give the click room to read before the conse
 
 - **Quiet register.** A demo IS the interface being demonstrated, so it inherits the UI-adjacent
   restraint rule: the click and its consequence are the one thing allowed to be loud
-  (`docs/CRAFT/MOTION-REGISTERS.md` §1, `register: 'quiet'` in `type-spines.mjs`).
+  (`engine-doctrine/CRAFT/MOTION-REGISTERS.md` §1, `register: 'quiet'` in `type-spines.mjs`).
 - **A real cursor path.** The `cursor` layer follows `path:[{t,x,y}]` (times LOCAL to the layer's own
   `start`, coordinates absolute screen px when the layer carries no `x`/`y` of its own) and fires a
   ripple at each time in `clicks:[t...]`.
@@ -36,7 +36,7 @@ can run longer than its neighbours: give the click room to read before the conse
   whole point of a demo, and a coincidental timing reads as fake the moment anyone looks twice.
 - **A zoom, when the detail is small.** `ken` on the underlying `image`/`component`, or a `cameraMove`,
   pushes into the part of the UI the click actually touches.
-- **The subject is a picture, not a blank rectangle.** `docs/CRAFT/SPECIMEN.md`'s own rule: a demo
+- **The subject is a picture, not a blank rectangle.** `engine-doctrine/CRAFT/SPECIMEN.md`'s own rule: a demo
   proving nothing visual is not a demo, it is a slide with a caption.
 
 ## The motion to reach for
@@ -51,9 +51,9 @@ By role (`make arsenal Q="…"` to search):
 
 ## The rules that matter most
 
-`docs/RULES/first-arrival.md` · `docs/RULES/motion-offsets.md` (the cursor's own `path` keyframes) ·
-`docs/RULES/text-on-flat.md` · `docs/CRAFT/SPECIMEN.md` (what makes a demo honest) ·
-`docs/CRAFT/SHOW-DONT-TELL.md`.
+`engine-doctrine/RULES/first-arrival.md` · `engine-doctrine/RULES/motion-offsets.md` (the cursor's own `path` keyframes) ·
+`engine-doctrine/RULES/text-on-flat.md` · `engine-doctrine/CRAFT/SPECIMEN.md` (what makes a demo honest) ·
+`engine-doctrine/CRAFT/SHOW-DONT-TELL.md`.
 
 ## Assets and how to get them
 

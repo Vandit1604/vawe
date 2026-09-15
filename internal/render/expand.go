@@ -20,7 +20,7 @@ package render
 // scene the browser sees never contains a `voice` key at all.
 //
 // Gated on an actual sugar hit (`hasSugar`), not run unconditionally: a Node subprocess importing the
-// whole block/beat catalog has a real, measured cost (docs/CRAFT/ENGINE-CHANGES.md "SUGAR MUST NEVER
+// whole block/beat catalog has a real, measured cost (engine-doctrine/CRAFT/ENGINE-CHANGES.md "SUGAR MUST NEVER
 // SILENTLY NO-OP"), and it has no business paying itself on every render when the vast majority carry
 // no sugar and no voice cue at all.
 import (

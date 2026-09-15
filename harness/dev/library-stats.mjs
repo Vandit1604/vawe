@@ -14,7 +14,7 @@
 //
 // THE POPULATION IS NOT DEFINED HERE. It comes from harness/lib/census.mjs, the same helper
 // waiver-drift uses, which REFUSES a checkout that cannot see the library rather than counting what is
-// left (docs/MISTAKES.md #391). Two definitions of "the library" is the drift this file exists to end.
+// left (engine-doctrine/MISTAKES.md #391). Two definitions of "the library" is the drift this file exists to end.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

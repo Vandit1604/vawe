@@ -27,7 +27,7 @@
 // the film's one loud moment, and `pace:` budgets its seconds per idea. So this gate reads the storyboard
 // itself as a second input, alongside the sidecar, and joins those two lines to the film. Without that
 // they are fields an author fills and no code reads, which is worse than no field at all, the plan looks
-// complete and the film is unchanged (docs/MISTAKES.md #219, #383, #387, #400).
+// complete and the film is unchanged (engine-doctrine/MISTAKES.md #219, #383, #387, #400).
 //
 //   node quality/gates/plan-vs-render.mjs <scene.json> [--intent p] [--sb storyboard.md] [--strict]
 //   make plan-check D=<file>
@@ -80,7 +80,7 @@ const OVERRUN = 0.5;     // how far the plan's total may sit from the film's bef
 // T.scene is this scene with the unified `transitions` surface already lowered to cuts/seams/stings, on
 // a clone, so nothing below rewrites the object it is grading. Every boundary read in this file goes
 // through it: reading raw `d.cuts` is how a film that declared four boundaries the documented way was
-// graded as a film with none. docs/MISTAKES.md #394, #407.
+// graded as a film with none. engine-doctrine/MISTAKES.md #394, #407.
 const T = sceneTiming(d);
 const BOUNDARY_KEYS = ['cuts', 'seams', 'stings'];
 const s = (n) => `${(+n).toFixed(2)}s`;
@@ -417,7 +417,7 @@ const fails = findings.filter((f) => f.sev === 'FAIL' && !allow.has(f.code));
 const warns = findings.filter((f) => f.sev === 'WARN' && !allow.has(f.code));
 const waived = findings.filter((f) => allow.has(f.code));
 // One fact, one owner: the record is the finding and the line is rendered from it, so author-check
-// reads `code` off a structure instead of re-reading this sentence (docs/MISTAKES.md #401).
+// reads `code` off a structure instead of re-reading this sentence (engine-doctrine/MISTAKES.md #401).
 const F = gateFindings({ scene: file, indent: '  ',
   line: (r, g) => r.waived ? `  ${g} [${r.code}] waived via authoring.allow` : `  ${g} [${r.code}] ${r.summary}\n` });
 for (const f of fails) F.fail(f.code, f.msg);

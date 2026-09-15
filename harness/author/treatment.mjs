@@ -58,7 +58,7 @@ const measured = [
   `- **Message:** ${sb.message || '(none stated in the storyboard)'}`,
   `- **Audience:** ${sb.audience || '(none stated)'}`,
   `- **Shape:** ${sb.beats.length} beats over ${DUR}s · median beat ${median != null ? `${median.toFixed(2)}s` : '?'}`,
-  `- **Thread:** ${sb.thread || picked?.thread || '(not stated, see docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md)'}`,
+  `- **Thread:** ${sb.thread || picked?.thread || '(not stated, see engine-doctrine/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md)'}`,
   `- **Look:** ${themeName}${theme?.dominance ? ` (${theme.dominance})` : ''}${C.bg ? ` · bg \`${C.bg}\`` : ''}${C.accent ? ` · accent \`${C.accent}\`` : ''}`,
   `- **Faces:** sans \`${F.sans || '?'}\` · mono \`${F.mono || '?'}\``,
   `- **Pictures:** ${sb.beats.length - noPicture}/${sb.beats.length} beats name one${noPicture ? `, ${noPicture} currently planned as type only` : ''}`,
@@ -95,7 +95,7 @@ ${rejected ? `## What was turned down\n\n${rejected}\n` : ''}
 
 ## What it must not become
 
-<the failure mode to steer away from: the generic version of this film. See docs/CRAFT/TASTE-RULES.md.>
+<the failure mode to steer away from: the generic version of this film. See engine-doctrine/CRAFT/TASTE-RULES.md.>
 `;
 
 // ── regenerate without destroying prose ────────────────────────────────────────────────────────────

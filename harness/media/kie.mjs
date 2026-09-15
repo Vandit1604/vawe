@@ -86,7 +86,7 @@ export async function uploadFile(localPath) {
 
 // READ BACK the body, not just the status. A 200 is not a promise that the bytes are media: a CDN that
 // has expired the asset answers 200 with an HTML or JSON error page, and writing it to `dest` leaves a
-// file that EXISTS, passes every path check, and renders as a hole. That is docs/MISTAKES.md #446 with
+// file that EXISTS, passes every path check, and renders as a hole. That is engine-doctrine/MISTAKES.md #446 with
 // a different fetcher, `tryFetch` in harness/media/assets.mjs already requires a status AND a size AND
 // a magic number before it writes, and this is the same demand.
 const MAGIC = [ // enough of each container to tell media from an error page

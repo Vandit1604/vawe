@@ -15,7 +15,7 @@
 //      and its computed styles at sampled frames. Two renders can pass it and still differ in pixels:
 //      rasterization is not in the DOM. Removing `will-change` from every layer moved the antialiasing
 //      of every film and this gate reported 109 identical, correctly, because no element moved. When
-//      the question is whether the PICTURE changed, diff rendered frames. See docs/MISTAKES.md.
+//      the question is whether the PICTURE changed, diff rendered frames. See engine-doctrine/MISTAKES.md.
 //
 //   node quality/gates/snap-scenes.mjs --save   # write baselines → quality/baselines/snap/scenes/<name>.json
 //   node quality/gates/snap-scenes.mjs          # diff current vs baselines
@@ -270,7 +270,7 @@ if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) co
 // A FEW no-baseline scenes stay soft on purpose: that is just a newly authored film waiting for
 // `SAVE=1`, and failing on it would make writing a scene feel like breaking the build. ZERO
 // comparisons is a different statement, and it is the one that must be loud. Same lesson as the
-// `paints-nothing` census (docs/MISTAKES.md #437): a clean result over an empty denominator is not a
+// `paints-nothing` census (engine-doctrine/MISTAKES.md #437): a clean result over an empty denominator is not a
 // pass, it is a gate that never ran.
 if (!identical.length && !changed.length && nobaseline.length) {
   console.error(`\n✗ nothing to compare: all ${nobaseline.length} scene(s) lack a baseline, so this gate checked NOTHING.`);

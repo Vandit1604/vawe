@@ -21,7 +21,7 @@
 // pulsing chrome) are skipped by (ii)/(iii). SHOT WINDOWS come from the film's own cuts and seams via
 // core/timeline/junctions.js `shotWindows`. A film that cuts nowhere is one shot, which is a true answer and not
 // a fallback. They used to come from `meta.segments`, a field no scene has ever set, which disabled the
-// whole FAIL tier for the life of the gate (docs/MISTAKES.md #472).
+// whole FAIL tier for the life of the gate (engine-doctrine/MISTAKES.md #472).
 //
 // TIER: MOTION_TIER=enforce makes the FAIL tier block. It reports by default, because it fires on 53 of
 // the 127 buildable scenes in this library and a rule waived by reflex has already been repealed.
@@ -34,7 +34,7 @@
 // after scoring them. --trace keeps it: per layer, when it moves vs holds, its peak position velocity
 // and peak area-change (a scale pulse moves no pixel and still shows here), when each peak lands, and
 // whether its motion is monotonic (one direction) or oscillating. Sampled, not rendered whole: default
-// stride auto-scales to ~200 samples over the film so a trace costs seconds. See docs/CRAFT/MOTION-TRACE.md.
+// stride auto-scales to ~200 samples over the film so a trace costs seconds. See engine-doctrine/CRAFT/MOTION-TRACE.md.
 //
 //   node quality/gates/motion-audit.mjs scene --data formats/scene/x.json --trace [--stride N] [--json]
 //   make motion-trace M=scene D=formats/scene/x.json
@@ -47,9 +47,9 @@ import { junctionTable, marksOf, shotWindows } from '../../core/timeline/junctio
 import { loadScene } from '../../core/engine/expand.js';
 import { serveRepo, waitForEngine } from '../../harness/lib/render-harness.mjs';
 // This gate already owns a rich --json payload (a whole report object, not a flat finding list), the
-// exact docs/MISTAKES.md #401 case findings.mjs was built to name. `emitJson` is the one door that lets
+// exact engine-doctrine/MISTAKES.md #401 case findings.mjs was built to name. `emitJson` is the one door that lets
 // it keep that payload verbatim while still routing through the shared module (harness/lib/findings.mjs,
-// docs/CRAFT/COMMAND-OUTPUT.md): it writes to the real stdout captured before any --json redirect, so it
+// engine-doctrine/CRAFT/COMMAND-OUTPUT.md): it writes to the real stdout captured before any --json redirect, so it
 // cannot become a second writer on the same stream.
 import { emitJson } from '../../harness/lib/findings.mjs';
 
@@ -219,7 +219,7 @@ const captureSeries = (page, total, stride, idsByIdx) => page.evaluate(async (to
 // every segment-scoped FAIL was rewritten to WARN before a reader saw it and the run printed a tick.
 // `segments` was never a missing declaration: it was a SECOND way to say what `cuts` already says,
 // and the film's cuts and seams are the joints, so core/timeline/junctions.js owns the reading of them
-// (docs/MISTAKES.md #165, #372: one fact, one owner). A film with no cuts is genuinely one shot.
+// (engine-doctrine/MISTAKES.md #165, #372: one fact, one owner). A film with no cuts is genuinely one shot.
 // Lowered first: a scene written with the unified `transitions` surface has no `cuts` key yet.
 function shotWindowsOf(data, total) {
   const lowered = loadScene(structuredClone(data));
@@ -403,7 +403,7 @@ function frozenSpans(series, K, content, F, w, TOTAL_SEC) {
     // is a fraction of the runtime, not an absolute. `cadence` held a perfectly frozen frame for 0.9s
     // out of 5s (a fifth of the film) and sat under this threshold while `beat-check` called the
     // span covered because the layers were still present. A short dead tail fell between the two
-    // gates, and only a person watching found it (docs/MISTAKES.md #202, #206).
+    // gates, and only a person watching found it (engine-doctrine/MISTAKES.md #202, #206).
     else if (F[j] - F[lastChange] > Math.min(2, Math.max(0.6, TOTAL_SEC * 0.15)) * FPS) { spans.push({ from: F[lastChange], to: F[j] }); lastChange = j; }
   }
   return spans;

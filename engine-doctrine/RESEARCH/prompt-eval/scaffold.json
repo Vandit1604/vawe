@@ -1,0 +1,223 @@
+{
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 9,
+ "authoring": {
+  "allow": [
+   "no-storyboard",
+   "no-preflight",
+   "slow-pace",
+   "text-overstays"
+  ],
+  "_why": {
+   "no-storyboard": "the archetype IS the plan. A specimen shows one mechanism for nine seconds and has no beats to storyboard: engine-doctrine/CRAFT/SPECIMEN.md carries the decisions once, for the series.",
+   "no-preflight": "the nine decisions are made in the scaffold, once, for every specimen. Making them again per demo is how each demo ends up looking like a different film.",
+   "slow-pace": "a specimen is held on purpose. The pace floor grades films that must carry a story across their runtime; this one has one thing in it and you are meant to look at it.",
+   "text-overstays": "the line is a caption on a picture, not prose. It is read in under two seconds and it stays because the thing it names is still on screen."
+  }
+ },
+ "audio": {
+  "silent": true,
+  "_why": "a specimen is looked at, not listened to: nothing here is paced to a track, and a bed would only be there to fill nine seconds. Give it sound the moment the demo becomes a film."
+ },
+ "bg": [
+  {
+   "preset": "aurora"
+  },
+  {
+   "preset": "mesh"
+  }
+ ],
+ "camera": [
+  {
+   "t": 0,
+   "s": 1
+  },
+  {
+   "t": 9,
+   "s": 1.11,
+   "ease": "easeInOutCubic"
+  }
+ ],
+ "cuts": [
+  {
+   "t": 4.4,
+   "style": "zoom",
+   "dur": 0.4
+  }
+ ],
+ "layers": [
+  {
+   "type": "image",
+   "src": "/assets/brands/looks/photos/michelangelo-david-sculpture-head-2.webp",
+   "x": 806,
+   "y": -108,
+   "w": 1284,
+   "h": 1284,
+   "mask": "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.55) 9%, #000 22%)",
+   "start": 0,
+   "duration": 9,
+   "anim": "none",
+   "exitDur": 0,
+   "motion": [
+    {
+     "t": 0,
+     "x": 74,
+     "scale": 1.16,
+     "opacity": 0,
+     "ease": "easeOutExpo"
+    },
+    {
+     "t": 0.52,
+     "x": 0,
+     "scale": 1,
+     "opacity": 1,
+     "ease": "easeOutExpo"
+    },
+    {
+     "t": 2.68,
+     "x": -14,
+     "scale": 1.02,
+     "opacity": 1,
+     "ease": "easeInOutSine"
+    },
+    {
+     "t": 4.34,
+     "x": -22,
+     "scale": 1.03,
+     "opacity": 1,
+     "ease": "easeInOutSine"
+    },
+    {
+     "t": 4.4,
+     "x": -186,
+     "scale": 1.22,
+     "opacity": 1,
+     "ease": "easeOutExpo"
+    },
+    {
+     "t": 8.06,
+     "x": -214,
+     "scale": 1.25,
+     "opacity": 1,
+     "ease": "linear"
+    },
+    {
+     "t": 8.69,
+     "x": -248,
+     "scale": 1.31,
+     "opacity": 1,
+     "ease": "easeInCubic"
+    },
+    {
+     "t": 9,
+     "x": -330,
+     "scale": 1.44,
+     "opacity": 0,
+     "ease": "easeInCubic"
+    }
+   ],
+   "filter": "thermalBlur"
+  },
+  {
+   "type": "text",
+   "x": 122,
+   "y": 176,
+   "w": 1000,
+   "size": 34,
+   "weight": 600,
+   "font": "mono",
+   "anim": "none",
+   "exitDur": 0,
+   "text": "filter · thermalBlur",
+   "start": 0,
+   "duration": 9,
+   "motion": [
+    {
+     "t": 0.18,
+     "y": 22,
+     "opacity": 0
+    },
+    {
+     "t": 0.6,
+     "y": -2,
+     "opacity": 1,
+     "ease": "easeOutExpo"
+    },
+    {
+     "t": 0.88,
+     "y": 0,
+     "opacity": 1,
+     "ease": "easeOutExpo"
+    }
+   ]
+  },
+  {
+   "type": "text",
+   "x": 116,
+   "y": 404,
+   "w": 640,
+   "size": 82,
+   "weight": 800,
+   "align": "left",
+   "anim": "none",
+   "exitDur": 0,
+   "text": "how a thermal blur reads heat off a product shot",
+   "start": 0.27,
+   "duration": 8.73,
+   "motion": [
+    {
+     "t": 0.36,
+     "y": 30,
+     "opacity": 0
+    },
+    {
+     "t": 0.84,
+     "y": -2,
+     "opacity": 1,
+     "ease": "easeOutExpo"
+    },
+    {
+     "t": 1.16,
+     "y": 0,
+     "opacity": 1,
+     "ease": "easeOutExpo"
+    }
+   ]
+  },
+  {
+   "type": "text",
+   "x": 122,
+   "y": 890,
+   "w": 1200,
+   "size": 30,
+   "weight": 500,
+   "font": "mono",
+   "anim": "none",
+   "exitDur": 0,
+   "text": "_demo-heatread · vawe",
+   "start": 4.52,
+   "duration": 4.48,
+   "motion": [
+    {
+     "t": 0,
+     "y": 26,
+     "opacity": 0
+    },
+    {
+     "t": 0.372,
+     "y": -2,
+     "opacity": 1,
+     "ease": "easeOutExpo"
+    },
+    {
+     "t": 0.62,
+     "y": 0,
+     "opacity": 1,
+     "ease": "easeOutExpo"
+    }
+   ]
+  }
+ ]
+}

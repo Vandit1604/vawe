@@ -147,7 +147,7 @@ for (const c of changed) { console.log(`\n△ ${c.name} (${c.diffs.length} chang
 if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) console.log(`  ${e}`); }
 // A GATE THAT COMPARED NOTHING MUST NOT EXIT GREEN. quality/baselines/snap/ is gitignored (.gitignore:32), so a
 // fresh clone has no baselines and every block lands in `nobaseline`. snap-scenes learned this the hard
-// way (docs/MISTAKES.md #391, #440): a green tick over zero comparisons is the strongest-sounding
+// way (engine-doctrine/MISTAKES.md #391, #440): a green tick over zero comparisons is the strongest-sounding
 // statement the repo makes and it would be checking nothing. A FEW no-baseline entries stay soft.
 // That is a newly added block waiting for SAVE=1, and failing there makes adding a block feel like
 // breaking the build.

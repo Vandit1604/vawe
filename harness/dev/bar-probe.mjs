@@ -2,7 +2,7 @@
 //
 // A film whose spine is one travelling mark can pass every static gate while that mark is invisible:
 // under the 3D rig painting is by DEPTH, not by layer order, so a tilted 1440px capture happily paints
-// in front of a bar that the JSON says is on top (docs/MISTAKES.md #252, and again #246). The eye
+// in front of a bar that the JSON says is on top (engine-doctrine/MISTAKES.md #252, and again #246). The eye
 // misses it because the frame is busy and the hole is a fifth of a second.
 //
 // So: recolour the subject layers to a colour that appears nowhere else, render headless, and COUNT.

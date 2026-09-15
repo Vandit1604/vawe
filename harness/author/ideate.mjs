@@ -20,7 +20,7 @@
 // and the film's own render) reads fill/detail/photo off real frames. `--annotate` samples 4 points
 // inside each act's own clip and SETS a `content:` line naming the median, in words, so an author
 // writing the storyboard can see per-act where the reference is dense and where it is quiet
-// (docs/CRAFT/CONTENT.md) without opening a video player. Never invented, never a fixed bar. A re-run
+// (engine-doctrine/CRAFT/CONTENT.md) without opening a video player. Never invented, never a fixed bar. A re-run
 // after content.mjs changes REPLACES a stale `content:` line rather than appending a second one beside
 // it: two readings for one act with no way to tell which is current is worse than the stale one alone.
 import fs from 'node:fs';
@@ -565,7 +565,7 @@ function main() {
   const name = flag('name');
   const idea = flag('idea');
   const clipArg = flag('clip');
-  // ASK/ANSWERS: the detail brief harness/author/ideate-ask.mjs owns (docs/CRAFT/IDEATE.md "asking for
+  // ASK/ANSWERS: the detail brief harness/author/ideate-ask.mjs owns (engine-doctrine/CRAFT/IDEATE.md "asking for
   // detail"). Kept to this one seam so a second writer of the film prompt never grows in this file.
   const askFlag = args.includes('--ask');
   const answersPath = flag('answers');

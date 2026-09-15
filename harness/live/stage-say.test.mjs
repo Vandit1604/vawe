@@ -92,7 +92,7 @@ test('stage-say prints "design"-stage rule briefs, doc-qualified, at most 5', ()
   const briefLines = out.split('\n').filter((l) => l.trim().startsWith('rule '));
   assert.ok(briefLines.length > 0, 'at least one always-applies design-stage rule should print');
   assert.ok(briefLines.length <= 5, 'never more than the 5-brief cap');
-  for (const l of briefLines) assert.match(l, /^\s*rule [a-z-]+\.[a-z0-9-]+: .+\(docs\/.+\.md\)$/);
+  for (const l of briefLines) assert.match(l, /^\s*rule [a-z-]+\.[a-z0-9-]+: .+\(engine-doctrine\/.+\.md\)$/);
 });
 
 test('a second prompt in the same stage stays silent on the briefs (per film, per stage, per session)', () => {

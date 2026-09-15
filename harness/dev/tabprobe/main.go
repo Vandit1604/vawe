@@ -4,7 +4,7 @@
 // transform, filter, font, text), so "same DOM, different pixels" (a compositor fault) and "different
 // DOM" (ours) are one command apart.
 //
-// It is the instrument docs/MISTAKES.md #507 was found with, and every finding there is one line:
+// It is the instrument engine-doctrine/MISTAKES.md #507 was found with, and every finding there is one line:
 //
 //	tabprobe -root . -tabs 2 -frame 83 -pre 5,11,17,23,29,35,41,47,53,59,65,71,77
 //	  tab 0 got worker 5's history from a six-worker render, tab 1 got none. Different bytes, and the
@@ -64,7 +64,7 @@ func main() {
 	ss := flag.Int("ss", 1, "device scale factor (the render ships at 2, --draft at 1)")
 	// -url points the whole instrument at any page that exposes the three things it drives:
 	// window.__engineReady, window.__realRaf and window.__engine.{renderFrame,frameSig}. That is what
-	// docs/BUGS/chrome-boxshadow-raster-history.html does, so a minimal reproduction gets the tab
+	// engine-doctrine/BUGS/chrome-boxshadow-raster-history.html does, so a minimal reproduction gets the tab
 	// histories, the DOM dump and the hashes for free instead of a second driver.
 	pageURL := flag.String("url", "", "drive this URL instead of the scene (must shim window.__engine)")
 	plain := flag.String("plain", "", "sweep body: render|html|canvas|readback (default frameSig)")

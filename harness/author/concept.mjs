@@ -10,7 +10,7 @@
 //
 // WHAT AN OPTION IS. Not a palette swap. A direction commits to three decisions at once, and they are
 // the three that actually change a film:
-//   THREAD  what survives a cut (docs/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md), an object that
+//   THREAD  what survives a cut (engine-doctrine/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md), an object that
 //           transforms, a sentence that never finishes, a match cut, a travelling camera, a counter.
 //   PACE    the median beat length, which sets beat COUNT for a fixed duration. The reference study
 //           put a good film at a 1.52s median against our habitual 2.5-4s; pace is not a detail.
@@ -30,7 +30,7 @@
 // proposes for it, so a round with no improbable member is a round with one idea in it. So every option
 // carries a computed PROBABILITY (how likely is this the first answer), at least two of the round must
 // sit under `IMPROBABLE`, two options with the same SILHOUETTE count as one, and a round that fails
-// either test is REGENERATED rather than shipped. The reasoning is written down in docs/CRAFT/SELECTION.md.
+// either test is REGENERATED rather than shipped. The reasoning is written down in engine-doctrine/CRAFT/SELECTION.md.
 //
 //   node harness/author/concept.mjs <STORYBOARD.md> [--n 3] [--seed 0] [--tail-min 2] [--strict]
 //   make concept SB=<storyboard.md> [N=3] [SEED=0]
@@ -61,7 +61,7 @@ if (!SB || !fs.existsSync(SB)) {
 
 const OUTDIR = 'formats/scene/_concepts';
 const CLOSE = 0.55;                 // similarity.mjs's own "too close" line; not a new number
-const IMPROBABLE = 0.10;            // the tail line. Where the number comes from: docs/CRAFT/SELECTION.md
+const IMPROBABLE = 0.10;            // the tail line. Where the number comes from: engine-doctrine/CRAFT/SELECTION.md
 // How many of the round must be under it. RAISE ONLY: a knob that can lower this is a knob that turns
 // the constraint off, and the constraint is the feature. Raising it is how the exhaustion path gets
 // exercised on a library where two tail concepts are still easy to find.
@@ -191,7 +191,7 @@ function buildOption(dir) {
     lines.push(`- type: ${type}`);
     lines.push(`- object: ${dir.thread === 'transforming object' ? '<what shape the prop is in here>' : `<what carries the ${dir.thread} at this beat>`}`);
     lines.push(`- picture: ${b._new ? '<what this beat SHOWS, not what it says>' : strip(b.picture) || '<what this beat SHOWS>'}`);
-    lines.push(`- mechanism: <the motion (make arsenal Q="…" · docs/EFFECTS.md)>`);
+    lines.push(`- mechanism: <the motion (make arsenal Q="…" · engine-doctrine/EFFECTS.md)>`);
     lines.push(`- becomes: <the X becomes the Y at this junction>`);
     lines.push(`- onscreen: ${(b.onscreen || []).map(strip).filter(Boolean).join(' | ') || '<the words on screen>'}`);
     if (strip(b.narration)) lines.push(`- narration: ${strip(b.narration)}`);
@@ -305,7 +305,7 @@ function requireEvidence(ev) {
 // sentence has been rewritten is no longer a rule this repo holds, and a scorer that keeps enforcing it
 // is scoring from memory. Better to fail and be re-read than to be quietly stale.
 const TELLS = [
-  { id: 'habitual-pace', doc: 'docs/CRAFT/FILM-STRUCTURE.md',
+  { id: 'habitual-pace', doc: 'engine-doctrine/CRAFT/FILM-STRUCTURE.md',
     anchor: 'Our films sit at 2.5 to 4 seconds a beat',
     says: 'this library already cuts at 2.5 to 4s, so that pace is the house habit',
     hit: (o) => o.dir.pace >= 2.5 && o.dir.pace <= 4 },

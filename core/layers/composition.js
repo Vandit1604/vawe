@@ -11,7 +11,7 @@ import { COMPOSITION_REGISTRY } from '../compositions/index.js';
 import { propsOf } from '../registry/props.js';
 
 // Which of those props needs the tween engine on disk before build. `props` is inert data; `comp` names a
-// timeline, and a comp built with no GSAP is a still frame with no error (docs/MISTAKES.md #148).
+// timeline, and a comp built with no GSAP is a still frame with no error (engine-doctrine/MISTAKES.md #148).
 export const GSAP_TRIGGER = 'comp';
 
 // `props` is DATA handed to the named comp; what is inside it is the comp's own vocabulary. The props
@@ -30,5 +30,5 @@ export function build(kit, el, L, { comp: compName, props } = L) {
 
 export const PROPS = propsOf(build);
 
-// The catalogue row for this type (docs/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
 export const blurb = "names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and recipes cannot express";

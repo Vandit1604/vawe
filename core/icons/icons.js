@@ -25,7 +25,7 @@ export const ICONS = {
 export function svgIcon(name, { size = 24, color = 'currentColor', stroke = 1.9, fill = 'none' } = {}) {
   // `ICONS[name] || ''` until now, which rendered a complete but EMPTY <svg>: an icon-shaped hole,
   // no error, nothing in the console. `svgIcon('rocket')` is a plausible thing to write and there is
-  // no rocket. docs/MISTAKES.md #355 listed this among the fallbacks it removed and it was never
+  // no rocket. engine-doctrine/MISTAKES.md #355 listed this among the fallbacks it removed and it was never
   // touched - the record said closed while the file said otherwise. See #360.
   const glyph = ICON_REGISTRY.pick(name);
   return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="${fill}" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" style="display:block">${glyph}</svg>`;

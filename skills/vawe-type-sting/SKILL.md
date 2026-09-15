@@ -1,6 +1,6 @@
 ---
 name: vawe-type-sting
-description: "Playbook for a motion-graphic sting/bumper in this engine: one move, the mark, four to eight seconds. Load when the route table (docs/CRAFT/ROUTING.md) matches motion-graphic, or the request is a short unnarrated logo reveal, stat hit, or moving title."
+description: "Playbook for a motion-graphic sting/bumper in this engine: one move, the mark, four to eight seconds. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches motion-graphic, or the request is a short unnarrated logo reveal, stat hit, or moving title."
 ---
 
 # vawe-type-sting: the motion-graphic sting playbook
@@ -17,12 +17,12 @@ assembling into its full form, held. There is no length at which this type takes
 
 One move. No hook/build/payoff structure at all: the mark or the word arrives, resolves, holds. Pace
 band: **4.0-8.0s total runtime**, not per-beat, because there is usually exactly one beat. Where the
-film needs no cuts, use none: `docs/RULES/one-cut-family.md`'s floor does not fire under 8s
+film needs no cuts, use none: `engine-doctrine/RULES/one-cut-family.md`'s floor does not fire under 8s
 (`quality/gates/direction-floor.mjs`), so a single continuous move is not a violation, it is the point.
 
 ## What this type needs that others do not
 
-- **Kinetic register.** A sting is the purest case of `docs/CRAFT/MOTION-REGISTERS.md` §1's second
+- **Kinetic register.** A sting is the purest case of `engine-doctrine/CRAFT/MOTION-REGISTERS.md` §1's second
   register: at 4-8s there is no still beat to hold, so the whole runtime is the "loud moment," and
   restraint means one move done well, not motion held back (`register: 'kinetic'` in `type-spines.mjs`).
 - **One move, named up front.** Before writing anything, say in one sentence what the single motion
@@ -31,7 +31,7 @@ film needs no cuts, use none: `docs/RULES/one-cut-family.md`'s floor does not fi
   icon needs real size and real screen time, not a caption crawling past it.
 - **`AUTHOR THE MOTION. DO NOT NAME IT.`** A sting is judged entirely on its hand-keyed motion track:
   a named preset animates one layer over one span with one curve, and that reads as generic at this
-  length more than at any other. `docs/CRAFT/KEYED-MOTION.md`.
+  length more than at any other. `engine-doctrine/CRAFT/KEYED-MOTION.md`.
 - **Black means black.** If the brief calls for a true-black bumper, write `{"preset":"black"}`
   (`#000000`, no tint) rather than a themed dark preset, which carries a colour wash.
 
@@ -41,13 +41,13 @@ By role (`make arsenal Q="…"` to search):
 - **the one move**: `logoReveal` (draw-on + bloom + wordmark cascade), `wordmarkAssemble`, `wordBlast`,
   `wordWipe`, `morphButton`
 - Chaining two devices is almost always wrong here: `kineticHook` or `statReveal` alone, never combined
-  with a second beat, is the ceiling this type's route file (`docs/CRAFT/routes/motion-graphic.md`)
+  with a second beat, is the ceiling this type's route file (`engine-doctrine/CRAFT/routes/motion-graphic.md`)
   already names.
 
 ## The rules that matter most
 
-`docs/RULES/handover-glide.md` · `docs/RULES/ease-direction.md` · `docs/RULES/first-arrival.md` ·
-`docs/RULES/svg-inline.md` (a mark is almost always an `svg` layer) · `docs/CRAFT/KEYED-MOTION.md`.
+`engine-doctrine/RULES/handover-glide.md` · `engine-doctrine/RULES/ease-direction.md` · `engine-doctrine/RULES/first-arrival.md` ·
+`engine-doctrine/RULES/svg-inline.md` (a mark is almost always an `svg` layer) · `engine-doctrine/CRAFT/KEYED-MOTION.md`.
 
 ## Assets and how to get them
 

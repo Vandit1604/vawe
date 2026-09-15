@@ -6,7 +6,7 @@
 // this module, so tooling and engine read one rule. Zero imports here on purpose: anything core/ or a
 // gate or a browser can load.
 //
-// WHY THIS EXISTS. A layer's `text` is HTML (`docs/PRIMITIVES.md` documents <b>/<em>, and every
+// WHY THIS EXISTS. A layer's `text` is HTML (`engine-doctrine/PRIMITIVES.md` documents <b>/<em>, and every
 // shipped film uses them to carry the accent word), and an `html` layer's value is a whole fragment
 // with its own <style> block. So the authored string and the string a viewer reads are different, and
 // a gate that counts, matches or measures the authored one is measuring markup. This was implemented
@@ -26,7 +26,7 @@
 const INLINE = /^(a|abbr|b|cite|code|em|i|kbd|mark|q|s|samp|small|span|strong|sub|sup|time|tspan|u|var|wbr)$/i;
 
 // Source that is never rendered as copy at all. A <style> body, a <script> body and an HTML comment
-// are all present in the string and absent from the frame. Reading them as copy is docs/MISTAKES.md
+// are all present in the string and absent from the frame. Reading them as copy is engine-doctrine/MISTAKES.md
 // #214 / #216 / #217 / #242, one bug logged five times, each time in a different consumer: it reported
 // a frosted pane's own CSS comment as a brand-voice defect, its stylesheet as clipped text, and its
 // selectors as unreadably small type. Dropped FIRST, before any tag stripping, because after the tags

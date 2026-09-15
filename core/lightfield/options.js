@@ -42,7 +42,7 @@ export const MOTIONS = ['still', 'drift', 'breathe', 'shimmer'];
 // rows, and an author who writes `anchor: "left"` is told that `left` is a shadow DIRECTION rather than
 // being handed the whole flat list to search.
 //
-// The text is still the per-entry prose of docs/LIGHTFIELD.md and of the comments above, moved rather
+// The text is still the per-entry prose of engine-doctrine/LIGHTFIELD.md and of the comments above, moved rather
 // than rewritten. Two corrections were made in the move, both from this file's own SCHEMA: `right` was
 // described as "the default bearing" and the default is `bottom`, and `breathe` carried a two-word
 // placeholder that said nothing a reader could search for.
@@ -50,7 +50,7 @@ const dials = (names) => Object.fromEntries(names.map((n) => [n, n]));
 const catalogFor = (title, slot, extra) => ({
   title,
   tag: 'generator',
-  intro: `${extra} Turn it with the rest at /playground; depth: \`docs/LIGHTFIELD.md\`.`,
+  intro: `${extra} Turn it with the rest at /playground; depth: \`engine-doctrine/LIGHTFIELD.md\`.`,
   usage: (n, { j }) => `// a lightfield option, turned at /playground and pasted as markup:\n${j(slot(n))}`,
   noPreview: 'a dial is a value, not an effect. Turn them together at /playground.',
 });

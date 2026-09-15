@@ -110,7 +110,7 @@
     },
     "render": "import { byName } from 'core/generators/generators.js'; byName('colonnade').render(options)"
   },
-  "docs": "docs/LIGHTFIELD.md",
+  "docs": "engine-doctrine/LIGHTFIELD.md",
   "reference": "refs/ref-b.png",
   "preview": {
     "url": "https://vawe.dev/playground?gen=colonnade"

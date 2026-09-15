@@ -21,7 +21,7 @@ concept: held-object · editorial (light)
 - type: hook
 - object: <what shape the prop is in here>
 - picture: <what this beat SHOWS>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: Your bank calls this a statement. | statement_export_2026-03.csv | LINE 47 OF 412 | 2026-03-14,SQ *BLUE BOTTLE 4471,-6.75,USD
 - why: everyone who has ever opened a bank export recognises this wall and the small despair of it. Naming what they already feel buys the next ten seconds without a single claim
@@ -31,7 +31,7 @@ concept: held-object · editorial (light)
 - type: build
 - object: <what shape the prop is in here>
 - picture: <what this beat SHOWS>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: The commas were always columns. | DATE | MERCHANT | AMOUNT | 2026-03-14 | SQ *BLUE BOTTLE 4471 | -6.75
 - why: this is the whole trick of the product shown once, small: the commas were always the columns. Doing it to one row makes the file-wide version at the end legible in a single second
@@ -41,7 +41,7 @@ concept: held-object · editorial (light)
 - type: build
 - object: <what shape the prop is in here>
 - picture: <what this beat SHOWS>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: Blue Bottle Coffee | COFFEE | -$6.75 | matched on the merchant, not the memo string | Now the other 411.
 - why: the difference between a CSV and a ledger is one field, and this beat is that field arriving. It also answers the obvious objection out loud: the match is on the merchant, not on the garbage in the memo
@@ -51,7 +51,7 @@ concept: held-object · editorial (light)
 - type: payoff
 - object: <what shape the prop is in here>
 - picture: <what this beat SHOWS>
-- mechanism: <the motion (make blueprints · docs/EFFECTS.md)>
+- mechanism: <the motion (make blueprints · engine-doctrine/EFFECTS.md)>
 - becomes: <the X becomes the Y at this junction>
 - onscreen: LEDGERLINE · MAR 2026 | 412 ROWS CATEGORIZED | MARCH OUTGOINGS -$18,431.06 | Ledgerline | Bank CSV in. Ledger out.
 - why: the payoff is the file the viewer came in holding, finished, with their own row still visible at the top of it. The claim at the end is a sentence for something the previous three seconds already did

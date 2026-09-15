@@ -16,7 +16,7 @@
 // Override any of them via `lookOpts: { color, color2, colors, grain, vignette, strength }`,
 // or the quick `filter: "neon:0.9"` where the ONE positional arg is always `strength` (0..1). A single
 // `strength` dial is threaded into every pass, so one number scales the whole look.
-// A knob a look cannot use is an ERROR, not a no-op. See KNOB_ROUTES below and docs/MISTAKES.md #351.
+// A knob a look cannot use is an ERROR, not a no-op. See KNOB_ROUTES below and engine-doctrine/MISTAKES.md #351.
 //
 // A pass is `(o, s) => { fns?: string[], overlays?: [{ bg, blend?, opacity?, radius? }] }`:
 //   o = merged options (look defaults ← per-pass fixed args ← the author's routed knobs), s = 0..1.
@@ -67,7 +67,7 @@ const grainDataUri = (seed) => {
 // `drop-shadow`s, which blur the ALPHA channel: on text or a cut-out that traces the glyph and looks
 // right, but on an opaque photo the alpha IS the rectangle, so every glow look painted a glowing box
 // around the frame and left the picture untouched. Thresholding luminance instead means the light
-// comes from the bright parts of the image and a dark edge emits nothing. See docs/MISTAKES.md #112.
+// comes from the bright parts of the image and a dark edge emits nothing. See engine-doctrine/MISTAKES.md #112.
 const bloomStack = (size, color, s, key) => {
   const k = size * (0.5 + 0.7 * s);
   return bloomFilter({ color, radius: 14 * k, intensity: 0.55 + 0.75 * s, key });
@@ -149,7 +149,7 @@ export const PASSES = {
 // they are PRIVATE. `lookOpts` is the author's half, and the two used to collide in silence: the merge
 // put `fixed` LAST, so `dreamyHaze` fixing the bloom's `glowColor` meant `lookOpts.color` rode into
 // every pass and was read by none. Measured across all 31 looks, five of the six documented knobs
-// changed nothing on any look and `color` worked on three. See docs/MISTAKES.md #351.
+// changed nothing on any look and `color` worked on three. See engine-doctrine/MISTAKES.md #351.
 //
 // A public knob therefore NAMES the private arguments it controls, and supplying it writes them last.
 // Routing is broad on purpose: fadedPolaroid, lomo, heatWarp, watercolor and letterpress carry no
@@ -173,7 +173,7 @@ export const PASS_READS = {
   // wrong and it mattered in one direction only: an author's `color` still reaches relief, because
   // KNOB_ROUTES expands it into `lightColor`. What the wrong entry hid is the OTHER reader of this
   // table. A look's own `d.color` is never routed, so on letterpress and chrome it resolved against a
-  // pass that does not read it and rendered nothing. docs/MISTAKES.md #366.
+  // pass that does not read it and rendered nothing. engine-doctrine/MISTAKES.md #366.
   lightLeak: ['leakColor', 'color'], relief: ['lightColor'], gradientMap: ['colors'],
   chromatic: ['warm', 'cool'], grain: ['grain'], vignette: ['vignette', 'strengthV'],
   vignetteInvert: ['vignette'], grid: ['gridColor'],
@@ -189,8 +189,8 @@ export const PASS_READS = {
 // `d` IS NOT THE PLACE FOR ONE. `d` is merged BEFORE the fixed bag, so a pass that names the same key
 // shadows it and the declared colour never reaches a frame. Sixteen looks carried a `d.color` in exactly
 // that position; every one was a decision nobody could see the result of, and deleting all sixteen moved
-// zero pixels across 104 scenes. `d` holds knobs the passes leave open. docs/MISTAKES.md #366.
-// Each look carries its own `blurb`, so adding a look is ONE edit. docs/CRAFT/SELECTION.md §4 groups
+// zero pixels across 104 scenes. `d` holds knobs the passes leave open. engine-doctrine/MISTAKES.md #366.
+// Each look carries its own `blurb`, so adding a look is ONE edit. engine-doctrine/CRAFT/SELECTION.md §4 groups
 // the looks by REGISTER (the era each evokes). That picks the group. The blurb picks the MEMBER: what
 // the pass stack visibly does, and where it is expensive (a bloom is an SVG blur, a displace is
 // turbulence + a displacement map, relief/convolve read neighbouring pixels).

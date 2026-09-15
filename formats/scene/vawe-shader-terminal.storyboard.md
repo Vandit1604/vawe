@@ -29,7 +29,7 @@ duration: 14s
   on 9.728, 9.812 and 9.896 (a three-frame ripple), and the only cut is the downbeat at 11.074, which carries NO
   presentation (`style: "none"`): the centre panel survives that seam and is the continuity across it,
   so a `rise` would have carried the one thing holding the film together 70px along with everything else
-  (docs/CRAFT/TRANSITIONS.md step 1). `audio.beatSync` is NOT set:
+  (engine-doctrine/CRAFT/TRANSITIONS.md step 1). `audio.beatSync` is NOT set:
   core/beats/index.js refuses this bed at confidence 1.54 against a floor of 1.6, so the grid is applied
   by hand at author time rather than by the engine at boot.
 

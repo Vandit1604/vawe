@@ -1,4 +1,4 @@
-// quality/gates/no-silent-fallback-blocks.test.mjs: the runnable self-check for docs/MISTAKES.md's
+// quality/gates/no-silent-fallback-blocks.test.mjs: the runnable self-check for engine-doctrine/MISTAKES.md's
 // fallback-to-default pattern, in the blocks/ component library. Lives here rather than
 // inside blocks/ itself because blocks/index.mjs treats every .mjs file in that directory as a block
 // family and refuses one with no CATEGORY/schema exports (quality/gates/lib-test.mjs's directory-drift

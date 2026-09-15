@@ -27,7 +27,7 @@
 //     (motion-audit's "degenerate" WARN, xi). This gate only asks about a layer that HAS a box.
 //
 // SEVERITY: REPORTS, not BLOCKS. This rule has never applied to the library before today; making it a
-// wall on day one would fail scenes nobody ever asked to satisfy it (docs/TASTE.md, "One process, two
+// wall on day one would fail scenes nobody ever asked to satisfy it (engine-doctrine/TASTE.md, "One process, two
 // severities"). `--strict` promotes a finding to a failing exit code, for whenever this gate earns a seat
 // in the mandatory ladder.
 //

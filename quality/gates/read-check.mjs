@@ -125,7 +125,7 @@ export const PROSE_WORDS = 4;
 export const PROSE_SIZE = 28;
 // MIN_READABLE_HOLD: about 1.2s, the owner's floor on any held frame, clip or card alike, because
 // that is roughly how long a viewer needs to register one still thing before it moves again
-// (docs/RULES/readable-hold.md). OTHER_WPS: 3 words/second, a single quick read (not the read-twice
+// (engine-doctrine/RULES/readable-hold.md). OTHER_WPS: 3 words/second, a single quick read (not the read-twice
 // rate HOLD_PER_WORD encodes), for a short label that is real words but not full prose.
 export const MIN_READABLE_HOLD = 1.2;
 export const OTHER_WPS = 3;
@@ -216,7 +216,7 @@ export function readFindings(scene, beats = []) {
     readableHold(e, 'text', isProse(e));
   }
 
-  // ── the same readable-hold floor, for a watched clip or a built card (docs/RULES/readable-hold.md) ──
+  // ── the same readable-hold floor, for a watched clip or a built card (engine-doctrine/RULES/readable-hold.md) ──
   // A clip or card carries no words, so `need` collapses to the MIN_READABLE_HOLD floor: the same
   // formula as a short text label, just with words.length === 0.
   for (const e of visuals) {
@@ -232,7 +232,7 @@ export function readFindings(scene, beats = []) {
   // both, and this gate does not read the theme; that only ever makes the hold look LONGER than it
   // is, so it can delete a finding and never invent one.
   //
-  // OWNER DECISION (docs/RULES/readable-hold.md): this REPORTS the fix, never changes the timing.
+  // OWNER DECISION (engine-doctrine/RULES/readable-hold.md): this REPORTS the fix, never changes the timing.
   function readableHold(e, kind, prose) {
     const cut = e.L.cut ? { enterDur: 0, exitDur: 0 } : {};   // the cut IS the entrance (scene.js:485,489)
     const w = settleWindow({
@@ -341,7 +341,7 @@ export function proseCount(scene) {
 }
 
 /** loadBeats(file, scene) -> the film's storyboard beats, in engine (post-tempo) time, or [] when
- *  there is no sidecar to read. "if resolvable" (docs/RULES/readable-hold.md): a missing or
+ *  there is no sidecar to read. "if resolvable" (engine-doctrine/RULES/readable-hold.md): a missing or
  *  unparsable storyboard falls back to naming the layer id instead, never throws. */
 function loadBeats(file, scene) {
   try {
@@ -374,7 +374,7 @@ if (process.argv[1] && process.argv[1].endsWith('read-check.mjs')) {
     process.exit(0);
   }
   console.log(`  ${findings.length} reading problem(s):`);
-  // The record is the finding; the line is rendered from it (docs/MISTAKES.md #401).
+  // The record is the finding; the line is rendered from it (engine-doctrine/MISTAKES.md #401).
   const F = gateFindings({ scene: file, indent: '    ' });
   for (const x of findings) F.warn(x.code, x.msg);
   F.emit();

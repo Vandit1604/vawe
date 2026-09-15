@@ -32,15 +32,15 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const doc = fs.readFileSync(path.join(repoRoot, 'docs', 'ROADMAP.md'), 'utf8');
+const doc = fs.readFileSync(path.join(repoRoot, 'engine-doctrine', 'ROADMAP.md'), 'utf8');
 const f = gateFindings();
 
 // PRIMITIVES.md states a count in its section HEADINGS (", 35 WebGL cover-the-cut effects"). Those
 // decayed exactly like the roadmap's did (33 and 14 against a real 35 and 17) while this gate watched
 // only one file. A gate's blind spot is rarely the rule it states; it is the file list underneath it.
-const PRIM_PATH = path.join(repoRoot, 'docs', 'PRIMITIVES.md');
+const PRIM_PATH = path.join(repoRoot, 'engine-doctrine', 'PRIMITIVES.md');
 const prim = fs.readFileSync(PRIM_PATH, 'utf8');
-// THIS TABLE SURVIVES site-counts.mjs WIDENING INTO docs/, and the reason is not the file list.
+// THIS TABLE SURVIVES site-counts.mjs WIDENING INTO engine-doctrine/, and the reason is not the file list.
 // site-counts matches "<n> <noun>" and "<noun> (<n>)"; these headings put the number AFTER the noun
 // with a source path in between ("## Shader stings (`core/stings/index.js`), 35 WebGL cover-the-cut
 // effects"), and teaching that shape to a prose matcher would pair every trailing number with the
@@ -76,8 +76,8 @@ doc.split('\n').forEach((line, i) => {
     // and uses plain prose for feature names, so the backtick IS the disambiguator. A gate that
     // cries wolf on prose gets skimmed, and takes its real findings down with it.
     if (!tail.includes('`' + n + '`')) continue;
-    f.fail('absent-but-shipped', `docs/ROADMAP.md:${i + 1} calls "${n}" absent, but it ships in ${reg} (${src})`, {
-      at: `docs/ROADMAP.md:${i + 1}`, fix: line.trim().slice(0, 150),
+    f.fail('absent-but-shipped', `engine-doctrine/ROADMAP.md:${i + 1} calls "${n}" absent, but it ships in ${reg} (${src})`, {
+      at: `engine-doctrine/ROADMAP.md:${i + 1}`, fix: line.trim().slice(0, 150),
     });
   }
 });
@@ -93,20 +93,20 @@ for (const [reg, { names, src }] of Object.entries(REGISTRIES)) {
     if (claimed > 500) continue;
     if (claimed === names.length) continue;
     const line = doc.slice(0, m.index).split('\n').length;
-    f.fail('count-mismatch', `docs/ROADMAP.md:${line} says ${reg} holds ${claimed}, but it holds ${names.length} (${src})`,
-      { at: `docs/ROADMAP.md:${line}` });
+    f.fail('count-mismatch', `engine-doctrine/ROADMAP.md:${line} says ${reg} holds ${claimed}, but it holds ${names.length} (${src})`,
+      { at: `engine-doctrine/ROADMAP.md:${line}` });
   }
 }
 
 for (const { re, reg } of HEADING_COUNTS) {
   const m = prim.match(re);
-  if (!m) { f.fail('heading-gone', `docs/PRIMITIVES.md has no ${reg} heading matching ${re}. The count check silently stopped running`); continue; }
+  if (!m) { f.fail('heading-gone', `engine-doctrine/PRIMITIVES.md has no ${reg} heading matching ${re}. The count check silently stopped running`); continue; }
   const claimed = Number(m[1]);
   const real = REGISTRIES[reg].names.length;
   if (claimed !== real) {
     const line = prim.slice(0, m.index).split('\n').length;
-    f.fail('heading-count-mismatch', `docs/PRIMITIVES.md:${line} heading says ${claimed} ${reg}, but it holds ${real} (${REGISTRIES[reg].src})`,
-      { at: `docs/PRIMITIVES.md:${line}` });
+    f.fail('heading-count-mismatch', `engine-doctrine/PRIMITIVES.md:${line} heading says ${claimed} ${reg}, but it holds ${real} (${REGISTRIES[reg].src})`,
+      { at: `engine-doctrine/PRIMITIVES.md:${line}` });
   }
 }
 
@@ -169,13 +169,13 @@ if (fs.existsSync(LAYERS_MDX)) {
     return m ? m.slice(1) : null;
   };
   const effects = /(\d+) effects across (\d+) families/.exec(
-    fs.readFileSync(path.join(repoRoot, 'docs/EFFECTS.md'), 'utf8'));
+    fs.readFileSync(path.join(repoRoot, 'engine-doctrine/EFFECTS.md'), 'utf8'));
   const census = ask('harness/author/arsenal.mjs', ['--census'], /ARSENAL CENSUS · (\d+) named things/);
   const scenes = ask('quality/gates/waiver-drift.mjs', [], /WAIVER CENSUS · (\d+) scenes/);
 
   const CLAIMS = [
     { re: /(\d+) effects across (\d+) families/, want: effects && effects.slice(1),
-      src: 'docs/EFFECTS.md, which `make effects` generates' },
+      src: 'engine-doctrine/EFFECTS.md, which `make effects` generates' },
     { re: /(\d+) named things/, want: census, src: 'harness/author/arsenal.mjs --census' },
     { re: /(\d+) gate-visible scenes/, want: scenes, src: 'quality/gates/waiver-drift.mjs' },
   ];
@@ -194,14 +194,14 @@ if (fs.existsSync(LAYERS_MDX)) {
 // ---- 5 & 6. engine-number claims and retired-name instructions, over the WIDE doctrine surface -----
 // Not the four files above: every doc an agent reads as an instruction. `git ls-files` so a file
 // written this session is in scope, same reasoning as doc-refs.mjs.
-// Skipped BY REASON, same as doc-refs.mjs: docs/MISTAKES.md is a dated log (a past mistake naming a
+// Skipped BY REASON, same as doc-refs.mjs: engine-doctrine/MISTAKES.md is a dated log (a past mistake naming a
 // retired mechanism IS the point of the entry); docs-site/ and site/ are separate builds with their
 // own checks; skills/impeccable is vendored third-party prose, not a claim about this repo.
 const gitFiles = (glob) => execSync(`git ls-files --cached --others --exclude-standard '${glob}'`, { cwd: repoRoot })
   .toString().trim().split('\n').filter(Boolean);
-const DOC_SKIP = ['docs/MISTAKES.md', 'docs-site/', 'site/', 'skills/impeccable/'];
+const DOC_SKIP = ['engine-doctrine/MISTAKES.md', 'docs-site/', 'site/', 'skills/impeccable/'];
 const docSurface = [...new Set([...gitFiles('*.md')])]
-  .filter((rel) => (rel === 'AGENTS.md' || rel === 'CLAUDE.md' || rel.startsWith('docs/') || /^skills\/[^/]+\/SKILL\.md$/.test(rel)))
+  .filter((rel) => (rel === 'AGENTS.md' || rel === 'CLAUDE.md' || rel.startsWith('engine-doctrine/') || /^skills\/[^/]+\/SKILL\.md$/.test(rel)))
   .filter((rel) => !DOC_SKIP.some((p) => rel.startsWith(p)));
 const codeSurface = [...gitFiles('harness/**/*.mjs'), ...gitFiles('harness/**/*.js'),
   ...gitFiles('quality/gates/**/*.mjs'), ...gitFiles('quality/gates/**/*.js')];
