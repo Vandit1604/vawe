@@ -2,10 +2,12 @@
 package render
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -216,6 +218,17 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 	}
 
 	formatDir := filepath.Join(repoRoot, "films", module)
+	// CLIP AUDIO: a video layer's own sound never reaches this process on its own (core/layers/video.js
+	// mutes the element, the browser only draws pixels), so a Node pre-pass walks the EXPANDED scene
+	// (dataAbs, sugar already resolved) for `video` layers with `audio` set and extracts each one's
+	// span into a wav. `df.Audio.ClipAudio` is not read from the JSON (`json:"-"`) precisely because
+	// the layer, not the audio block, owns this fact; it is populated here instead.
+	clipDir := filepath.Join(framesDir, "clip-audio")
+	if clips, err := clipAudioTracks(repoRoot, dataAbs, formatDir, clipDir); err != nil {
+		return err
+	} else {
+		df.Audio.ClipAudio = clips
+	}
 	// assets/ lives at the repo root now (it was engine/assets). The resolver joins base+path and
 	// falls back to base+"assets"+file, so the base IS the repo root.
 	hasAudio, err := audio.Render(df.Audio, meta.Duration, meta.Stings, meta.SFX, meta.Bridges, formatDir, repoRoot, tmpAudio)
@@ -290,4 +303,28 @@ func Render(repoRoot, module, dataPath, out string, o Options) error {
 		fmt.Printf("    `make motion-split D=<scene>`, or re-render with -workers 1.\n")
 	}
 	return nil
+}
+
+// clipAudioTracks shells out to harness/media/clip-audio.mjs (see its header for the full design):
+// it walks the expanded scene at sceneAbs for `video` layers with `audio` set, extracts each one's
+// [in,out) span from its own source, resamples and rate-matches it, and prints the resulting
+// audio.ClipTrack rows as JSON. A scene with no such layer prints "[]" and costs one fast Node
+// process; nothing here runs ffmpeg itself; that lives in the pre-pass, one owner per fact.
+func clipAudioTracks(repoRoot, sceneAbs, formatDir, outDir string) ([]audio.ClipTrack, error) {
+	script := filepath.Join(repoRoot, "harness", "media", "clip-audio.mjs")
+	cmd := exec.Command("node", script, sceneAbs, formatDir, repoRoot, outDir)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("clip-audio pre-pass: %w\n%s", err, stderr.String())
+	}
+	if stderr.Len() > 0 {
+		fmt.Fprint(os.Stderr, stderr.String())
+	}
+	var clips []audio.ClipTrack
+	if err := json.Unmarshal(stdout.Bytes(), &clips); err != nil {
+		return nil, fmt.Errorf("clip-audio pre-pass: unreadable output: %w", err)
+	}
+	return clips, nil
 }

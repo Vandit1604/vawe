@@ -298,6 +298,41 @@ func TestCueWithNoBedIsUnchanged(t *testing.T) {
 	}
 }
 
+// (m) A clip track lands at the right sample offset: silent before its `start`, audible from it.
+func TestClipAudioLandsAtOffset(t *testing.T) {
+	dir := t.TempDir()
+	clip := filepath.Join(dir, "clip.wav")
+	writeMonoWav(t, clip, flat(0.5, int(2*sr)))
+	out := filepath.Join(dir, "c.wav")
+	clips := []ClipTrack{{File: clip, Start: 3, Gain: 1, Duck: 1}}
+	if ok, err := Render(Config{ClipAudio: clips}, 6, nil, nil, nil, dir, dir, out); !ok || err != nil {
+		t.Fatalf("expected a track: %v", err)
+	}
+	w := readWavMono(out)
+	before, during := rmsAt(w, 0, 2.9), rmsAt(w, 3.1, 4.9)
+	if before > 1e-3 {
+		t.Fatalf("nothing should sound before the clip's start, got rms %.4f", before)
+	}
+	if during < 0.2 {
+		t.Fatalf("the clip must be audible from its start, got rms %.4f", during)
+	}
+}
+
+// (n) An empty clip list changes nothing: same mix as no clip audio at all.
+func TestNoClipAudioIsUnchanged(t *testing.T) {
+	dir := t.TempDir()
+	cfg := Config{Music: constMusic(t, dir, 0.4, 3)}
+	a, b := filepath.Join(dir, "a.wav"), filepath.Join(dir, "b.wav")
+	Render(cfg, 2, nil, nil, nil, dir, dir, a)
+	cfg.ClipAudio = []ClipTrack{}
+	Render(cfg, 2, nil, nil, nil, dir, dir, b)
+	x, _ := os.ReadFile(a)
+	y, _ := os.ReadFile(b)
+	if !bytes.Equal(x, y) {
+		t.Fatal("an empty clip list must mix byte-identically to no clip list")
+	}
+}
+
 // (l) A cue that resolves to no file used to `continue` without a word (the same failure class the
 // music-bed warning above exists to close): a typo'd name or an unbaked voice cue played SILENCE and
 // nothing said so. It must now name the cue and the time on stderr, restoring the sound-cue doctrine

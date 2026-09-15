@@ -36,10 +36,16 @@ export function sourceTime(L, t, { in: from, rate, out } = L) {
   return Math.min(Math.max(raw, f), to);
 }
 
-export function build(kit, el, L, { src, w, h, radius, fit, poster, in: inPoint, out } = L) {
+// `audio: true | { gain, duck }` (default absent = silent, byte-identical to every film authored
+// before this prop existed) tells the harness/media/clip-audio.mjs pre-pass to pull this clip's OWN
+// sound into the mix: it never reaches the browser, because this element stays muted below and the
+// mixer (renderer/internal/audio) is the only thing that writes the encoded audio track.
+export function build(kit, el, L, { src, w, h, radius, fit, poster, in: inPoint, out, audio } = L) {
   if (!src) throw new Error('video layer: `src` is required (a path under assets/, e.g. assets/video/clip.mp4)');
   if (out != null && out <= (inPoint ?? 0))
     throw new Error(`video layer: out (${out}) must be greater than in (${inPoint ?? 0}), an empty cut cannot be rendered`);
+  if (audio != null && audio !== true && (typeof audio !== 'object' || Array.isArray(audio)))
+    throw new Error(`video layer: \`audio\` must be true or {gain, duck}, got ${JSON.stringify(audio)}`);
   const v = document.createElement('video');
   v.className = 'hs-video';
   // ROOT-RELATIVE, ALWAYS. The page is served from /films/scene/, so a bare `assets/clip.mp4`
