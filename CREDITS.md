@@ -6,7 +6,7 @@ group: project
 
 # Credits & third-party attribution
 
-Vawe itself is licensed under the [Vawe Company License 1.0](LICENSE). It builds on the
+Vawe itself is licensed under the [Apache License 2.0](LICENSE). It builds on the
 following third-party work, each under its own license. Nothing here is claimed as
 Vawe's own.
 
@@ -21,7 +21,7 @@ Vawe's own.
 ## First-party skills (Vawe)
 
 `skills/shortwave-scene-authoring/` and `skills/shortwave-video-planning/`
-are authored for this project and covered by the Vawe Company License.
+are authored for this project and covered by the Apache License 2.0.
 
 ## Fonts
 

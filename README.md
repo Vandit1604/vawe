@@ -236,13 +236,10 @@ registry), [`engine-doctrine/MOTION-CRAFT.md`](engine-doctrine/MOTION-CRAFT.md) 
 
 ## Status & license
 
-Vawe is under active development. It's released under the **[Vawe Company License 1.0](LICENSE)**, a
-source-available license in the spirit of Fair Source and the another engine model:
+Vawe is under active development. It's released under the **[Apache License 2.0](LICENSE)**, a
+permissive open source license with no paid tier and no team-size limit:
 
-> **Free for individuals and teams of 3 developers or fewer. Larger companies need a paid license for
-> production use.** Rendering your own videos, even inside your own product, is always permitted.
+> **Free to use, modify, and distribute, for any purpose, including production and commercial use.**
 
-See the plain-English **[License FAQ](LICENSE-FAQ.md)** for who pays and who doesn't, and
-**[CREDITS.md](CREDITS.md)** for third-party attribution. Contributions and issues welcome.
-
-For a commercial license (teams over 3 developers), contact the maintainer via the GitHub repo.
+See the plain-English **[License FAQ](LICENSE-FAQ.md)** for the patent grant and attribution duties,
+and **[CREDITS.md](CREDITS.md)** for third-party attribution. Contributions and issues welcome.
