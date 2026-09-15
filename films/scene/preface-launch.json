@@ -1,5 +1,15 @@
 {
  "module": "scene",
+ "authoring": {
+  "allow": [
+   "dead-air",
+   "aphoristic-cadence"
+  ],
+  "_why": {
+   "dead-air": "the beat joints are hard cuts, and each one holds an all-but-empty frame for a few frames either side of the blur; that gap IS the cut, not a hole in the timeline.",
+   "aphoristic-cadence": "the flagged line is \"Deep work 7 to 11am. No meetings Wednesdays.\" Both halves are concrete facts out of the file the film is about, and the beat quotes them back as the source of an answer. The tell is looking at the full stop, not at the content."
+  }
+ },
  "orientation": "landscape",
  "theme": "preface",
  "duration": 53,

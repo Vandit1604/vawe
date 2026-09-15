@@ -97,6 +97,8 @@ films/scene/*.json
 # allowlist above is a glob, so it was quietly re-including the generated file too.
 films/scene/*.expanded.json
 !films/scene/site-backdrop.json
+!films/scene/preface-launch.json
+!films/scene/preface-launch.*
 # gh-wrapped is a TEMPLATE, not a video: it carries {{placeholders}} and renders nothing on its own.
 # harness/media/gh-wrapped.mjs is tracked, and an untracked template would leave a clean clone holding
 # a generator with no consumer, which is the "not reproducible from the repo" case this section exists
