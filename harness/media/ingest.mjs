@@ -211,5 +211,5 @@ if (isMain) {
   console.log(`✓ wrote ${path.relative(ROOT, cutsFile)} (${cuts.length} entr${cuts.length === 1 ? 'y' : 'ies'})`);
   console.log(`✓ wrote ${path.relative(ROOT, sheetFile)}`);
   console.log(`→ next: look at the contact sheet, edit ${path.relative(ROOT, cutsFile)}'s in/out points, `
-    + `paste its array as a scene's "cuts", then render.`);
+    + `paste its array as a scene's "edits", then render.`);
 }
