@@ -1,0 +1,51 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "deploySuccess",
+  "type": "vawe:block",
+  "title": "deploySuccess",
+  "description": "a CI/CD pipeline status: build steps queue then run then check off, ending on a green deployed card with the live URL",
+  "tags": [
+    "deploySuccess"
+  ],
+  "dimensions": {
+    "width": 564,
+    "height": 325
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "deploySuccess",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "w": 520
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "url",
+      "title",
+      "note",
+      "steps",
+      "active",
+      "start",
+      "rowGap"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/deploySuccess.json",
+      "url": "https://vawe.dev/assets/blocks/deploySuccess.json",
+      "target": "films/scene/deploySuccess.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/deploySuccess.png"
+  }
+}

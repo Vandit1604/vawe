@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "lowerThird.softPill",
+  "type": "vawe:block",
+  "title": "lowerThird.softPill",
+  "description": "soft accent pill · product tours, not news",
+  "tags": [
+    "lowerThird"
+  ],
+  "dimensions": {
+    "width": 330,
+    "height": 103
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "lowerThird.softPill",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "variant": "softPill",
+      "name": "Northwind",
+      "role": "v2.1"
+    },
+    "props": [
+      "x",
+      "y",
+      "name",
+      "role",
+      "variant",
+      "accent",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/lowerThird.softPill.json",
+      "url": "https://vawe.dev/assets/blocks/lowerThird.softPill.json",
+      "target": "films/scene/lowerThird.softPill.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/lowerThird.softPill.png"
+  }
+}

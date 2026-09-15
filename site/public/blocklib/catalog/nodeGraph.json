@@ -1,0 +1,57 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "nodeGraph",
+  "type": "vawe:block",
+  "title": "nodeGraph",
+  "description": "a network diagram of nodes and connecting edges, not a top-down tree, with one node highlighted",
+  "tags": [
+    "nodeGraph"
+  ],
+  "dimensions": {
+    "width": 1144,
+    "height": 520
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "nodeGraph",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "highlight": "core",
+      "step": 0.14
+    },
+    "props": [
+      "anim",
+      "x",
+      "y",
+      "nodes",
+      "edges",
+      "highlight",
+      "nodeW",
+      "nodeH",
+      "labelSize",
+      "radius",
+      "gap",
+      "start",
+      "dur",
+      "step"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/nodeGraph.json",
+      "url": "https://vawe.dev/assets/blocks/nodeGraph.json",
+      "target": "films/scene/nodeGraph.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/nodeGraph.png"
+  }
+}

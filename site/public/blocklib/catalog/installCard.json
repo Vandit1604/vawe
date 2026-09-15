@@ -1,0 +1,59 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "installCard",
+  "type": "vawe:block",
+  "title": "installCard",
+  "description": "an app store listing row: icon, star rating that sweeps in, and an Install button",
+  "tags": [
+    "installCard"
+  ],
+  "dimensions": {
+    "width": 464,
+    "height": 140
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "installCard",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 420,
+      "icon": "◆",
+      "name": "Fieldwork",
+      "sub": "Productivity",
+      "rating": 4.6,
+      "ratings": 1204,
+      "cta": "Install"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "icon",
+      "name",
+      "sub",
+      "rating",
+      "ratings",
+      "cta",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/installCard.json",
+      "url": "https://vawe.dev/assets/blocks/installCard.json",
+      "target": "films/scene/installCard.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/installCard.png"
+  }
+}

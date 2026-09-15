@@ -1,0 +1,49 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "keyboard.numeric",
+  "type": "vawe:block",
+  "title": "keyboard.numeric",
+  "description": "phone keypad · numeric grid, rises up into frame",
+  "tags": [
+    "keyboard"
+  ],
+  "dimensions": {
+    "width": 344,
+    "height": 312
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "keyboard.numeric",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 300,
+      "layout": "numeric"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "layout",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/keyboard.numeric.json",
+      "url": "https://vawe.dev/assets/blocks/keyboard.numeric.json",
+      "target": "films/scene/keyboard.numeric.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/keyboard.numeric.png"
+  }
+}

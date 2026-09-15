@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "flowchart",
+  "type": "vawe:block",
+  "title": "flowchart",
+  "description": "a flowchart: boxes connected by lines that draw themselves on, with yes/no labels on the branches",
+  "tags": [
+    "flowchart"
+  ],
+  "dimensions": {
+    "width": 1598,
+    "height": 432
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "flowchart",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "step": 0.16
+    },
+    "props": [
+      "nodeW",
+      "nodeH",
+      "colGap",
+      "laneGap",
+      "size",
+      "subSize",
+      "labelSize",
+      "anim",
+      "x",
+      "y",
+      "variant",
+      "nodes",
+      "edges",
+      "radius",
+      "gap",
+      "start",
+      "dur",
+      "step"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/flowchart.json",
+      "url": "https://vawe.dev/assets/blocks/flowchart.json",
+      "target": "films/scene/flowchart.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/flowchart.png"
+  }
+}

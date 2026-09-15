@@ -1,0 +1,53 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "gauge",
+  "type": "vawe:block",
+  "title": "gauge",
+  "description": "a speedometer-style dial: a semicircular meter needle showing one value against a max",
+  "tags": [
+    "gauge"
+  ],
+  "dimensions": {
+    "width": 344,
+    "height": 317
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "gauge",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 300,
+      "value": 72,
+      "label": "coverage"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "value",
+      "max",
+      "label",
+      "color",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/gauge.json",
+      "url": "https://vawe.dev/assets/blocks/gauge.json",
+      "target": "films/scene/gauge.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/gauge.png"
+  }
+}

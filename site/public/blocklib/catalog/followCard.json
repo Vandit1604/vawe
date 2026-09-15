@@ -1,0 +1,55 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "followCard",
+  "type": "vawe:block",
+  "title": "followCard",
+  "description": "a social profile follow card: name over @handle next to a follow button pill",
+  "tags": [
+    "followCard"
+  ],
+  "dimensions": {
+    "width": 404,
+    "height": 116
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "followCard",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 360,
+      "name": "Ana Roth",
+      "handle": "anaroth",
+      "cta": "Follow"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "handle",
+      "name",
+      "avatar",
+      "initials",
+      "cta",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/followCard.json",
+      "url": "https://vawe.dev/assets/blocks/followCard.json",
+      "target": "films/scene/followCard.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/followCard.png"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeBlock.neon",
+  "type": "vawe:block",
+  "title": "codeBlock.neon",
+  "description": "code theme · near-black, vivid signage hues",
+  "tags": [
+    "codeBlock"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 211
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "codeBlock.neon",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "theme": "neon",
+      "label": "worker.js",
+      "size": 19,
+      "lines": [
+        "onmessage = async (e) => {",
+        "  const f = await renderFrame(e.data.n)",
+        "  postMessage(f) }"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "theme",
+      "w",
+      "lines",
+      "dark",
+      "size",
+      "start",
+      "dur",
+      "anim",
+      "enterDur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeBlock.neon.json",
+      "url": "https://vawe.dev/assets/blocks/codeBlock.neon.json",
+      "target": "films/scene/codeBlock.neon.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeBlock.neon.png"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "badge.version",
+  "type": "vawe:block",
+  "title": "badge.version",
+  "description": "a small chip showing which release is running, like a v2.1.0 shield in a README",
+  "tags": [
+    "badge"
+  ],
+  "dimensions": {
+    "width": 170,
+    "height": 74
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "badge.version",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "label": "vawe",
+      "value": "v2.0",
+      "tone": "accent"
+    },
+    "props": [
+      "x",
+      "y",
+      "label",
+      "value",
+      "tone",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/badge.version.json",
+      "url": "https://vawe.dev/assets/blocks/badge.version.json",
+      "target": "films/scene/badge.version.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/badge.version.png"
+  }
+}

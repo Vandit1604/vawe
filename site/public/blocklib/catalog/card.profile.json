@@ -1,0 +1,55 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "card.profile",
+  "type": "vawe:block",
+  "title": "card.profile",
+  "description": "a person's photo beside their name, with their job title under it",
+  "tags": [
+    "profileCard"
+  ],
+  "dimensions": {
+    "width": 404,
+    "height": 148
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "card.profile",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 360,
+      "name": "Ada Lovelace",
+      "role": "Founding Engineer",
+      "initials": "AL"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "name",
+      "sub",
+      "role",
+      "avatar",
+      "initials",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/card.profile.json",
+      "url": "https://vawe.dev/assets/blocks/card.profile.json",
+      "target": "films/scene/card.profile.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/card.profile.png"
+  }
+}

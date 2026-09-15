@@ -1,0 +1,53 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "pressButton",
+  "type": "vawe:block",
+  "title": "pressButton",
+  "description": "a CTA button that visibly depresses and springs back when clicked, the payoff for a pointer tap on a button.",
+  "tags": [
+    "pressButton"
+  ],
+  "dimensions": {
+    "width": 324,
+    "height": 97
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "pressButton",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 280,
+      "label": "Start a project",
+      "pressAt": 1
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "label",
+      "pressAt",
+      "color",
+      "radius",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/pressButton.json",
+      "url": "https://vawe.dev/assets/blocks/pressButton.json",
+      "target": "films/scene/pressButton.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/pressButton.png"
+  }
+}

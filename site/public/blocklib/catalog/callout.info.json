@@ -1,0 +1,53 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "callout.info",
+  "type": "vawe:block",
+  "title": "callout.info",
+  "description": "info strip (blurple)",
+  "tags": [
+    "callout"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 106
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "callout.info",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "text": "Layers compose from a single canvas.",
+      "tone": "info"
+    },
+    "props": [
+      "x",
+      "y",
+      "text",
+      "w",
+      "body",
+      "title",
+      "tone",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/callout.info.json",
+      "url": "https://vawe.dev/assets/blocks/callout.info.json",
+      "target": "films/scene/callout.info.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/callout.info.png"
+  }
+}

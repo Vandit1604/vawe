@@ -1,0 +1,79 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "usMapFlow",
+  "type": "vawe:block",
+  "title": "usMapFlow",
+  "description": "a map of the United States with arrows drawn between cities showing flow or movement from an origin to destinations",
+  "tags": [
+    "usMapFlow"
+  ],
+  "dimensions": {
+    "width": 864,
+    "height": 544
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "usMapFlow",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 820,
+      "h": 500,
+      "hub": "Denver",
+      "flows": [
+        {
+          "from": "Denver",
+          "to": "New York",
+          "value": 9
+        },
+        {
+          "from": "Denver",
+          "to": "Seattle",
+          "value": 6
+        },
+        {
+          "from": "Denver",
+          "to": "Miami",
+          "value": 5
+        },
+        {
+          "from": "Denver",
+          "to": "Dallas",
+          "value": 4
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "flows",
+      "title",
+      "sub",
+      "bow",
+      "color",
+      "hub",
+      "labels",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/usMapFlow.json",
+      "url": "https://vawe.dev/assets/blocks/usMapFlow.json",
+      "target": "films/scene/usMapFlow.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/usMapFlow.png"
+  }
+}

@@ -375,7 +375,11 @@ const TONES = {
   info: T.accent, accent: T.accent,
   warn: 'var(--warn)', danger: T.down, error: T.down,
 };
-export function toneColor(tone, fallback = T.accent) { return TONES[tone] || fallback; }
+export function toneColor(tone) {
+  if (!(tone in TONES)) throw new Error(`blocks/kit.mjs toneColor: unknown tone "${tone}". `
+    + `Known: ${Object.keys(TONES).join(', ')}`);
+  return TONES[tone];
+}
 // The accepted spellings, read off the map itself so a `tone` dial cannot drift from what paints.
 export const TONE_NAMES = Object.keys(TONES);
 
@@ -399,6 +403,17 @@ export function avatarEl({ avatar = '', initials = '', name = '', size = 56, rad
   if (avatar) return { type: 'image', src: avatar, w: size, h: size, radius };
   return box({ w: size, h: size, radius, bg, layout: 'row', justify: 'center', items: 'center',
     children: [text({ text: initials || initialsOf(name), size: Math.round(size * 0.4), weight: 700, color })] });
+}
+
+// avatarHtml: avatarEl's twin for a caller building a raw html fragment (an html-first family cannot
+// nest a scene layer inside its own markup string). Same rule, same fallback: an explicit avatar wins,
+// otherwise initials derived from the name, one implementation so the two forms cannot drift apart.
+export function avatarHtml({ avatar = '', initials = '', name = '', size = 56,
+  bg = 'color-mix(in srgb, var(--accent) 14%, var(--card))', color = TOKENS.accentInk } = {}) {
+  if (avatar) return `<img src="${avatar}" style="width:${size}px;height:${size}px;border-radius:100%;object-fit:cover;flex:none">`;
+  const glyph = initials || initialsOf(name);
+  return `<div style="width:${size}px;height:${size}px;border-radius:100%;background:${bg};flex:none;`
+    + `display:flex;align-items:center;justify-content:center;font:700 ${Math.round(size * 0.4)}px var(--font-sans);color:${color}">${glyph}</div>`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

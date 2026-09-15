@@ -1,0 +1,55 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "listRow",
+  "type": "vawe:block",
+  "title": "listRow",
+  "description": "a generic list item: leading icon tile, title over a subtitle, trailing detail like a date or count, the workhorse app row.",
+  "tags": [
+    "listRow"
+  ],
+  "dimensions": {
+    "width": 564,
+    "height": 120
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "listRow",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 520,
+      "icon": "✉",
+      "title": "Weekly digest",
+      "sub": "Kite Studio",
+      "meta": "Today"
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "icon",
+      "title",
+      "sub",
+      "meta",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/listRow.json",
+      "url": "https://vawe.dev/assets/blocks/listRow.json",
+      "target": "films/scene/listRow.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/listRow.png"
+  }
+}

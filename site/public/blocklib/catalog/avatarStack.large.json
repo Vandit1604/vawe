@@ -1,0 +1,67 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "avatarStack.large",
+  "type": "vawe:block",
+  "title": "avatarStack.large",
+  "description": "the same overlapping profile pictures at a bigger size, for a hero or a title card",
+  "tags": [
+    "avatarStack"
+  ],
+  "dimensions": {
+    "width": 348,
+    "height": 108
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "avatarStack.large",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "size": 64,
+      "extra": 24,
+      "avatars": [
+        {
+          "initials": "AL"
+        },
+        {
+          "initials": "GH"
+        },
+        {
+          "initials": "VS"
+        },
+        {
+          "initials": "KM"
+        },
+        {
+          "initials": "JR"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "avatars",
+      "extra",
+      "size",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/avatarStack.large.json",
+      "url": "https://vawe.dev/assets/blocks/avatarStack.large.json",
+      "target": "films/scene/avatarStack.large.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/avatarStack.large.png"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "codeTyping",
+  "type": "vawe:block",
+  "title": "codeTyping",
+  "description": "code being typed live in an editor: a text cursor runs across the snippet revealing one character at a time",
+  "tags": [
+    "codeTyping"
+  ],
+  "dimensions": {
+    "width": 664,
+    "height": 240
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "codeTyping",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 620,
+      "label": "server.ts",
+      "theme": "midnight",
+      "cps": 26,
+      "lines": [
+        "export function serve(req) {",
+        "  const t = route(req.url);",
+        "  return t.handle(req);",
+        "}"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "dur",
+      "w",
+      "lines",
+      "label",
+      "theme",
+      "cps",
+      "start"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/codeTyping.json",
+      "url": "https://vawe.dev/assets/blocks/codeTyping.json",
+      "target": "films/scene/codeTyping.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/codeTyping.png"
+  }
+}

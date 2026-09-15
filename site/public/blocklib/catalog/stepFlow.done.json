@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "stepFlow.done",
+  "type": "vawe:block",
+  "title": "stepFlow.done",
+  "description": "steps, all complete",
+  "tags": [
+    "stepFlow"
+  ],
+  "dimensions": {
+    "width": 604,
+    "height": 114
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "stepFlow.done",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 560,
+      "active": 4,
+      "steps": [
+        "Capture",
+        "Encode",
+        "Mux",
+        "Upload"
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "steps",
+      "active",
+      "activeFrom",
+      "activeTo",
+      "buildAt",
+      "buildDur",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/stepFlow.done.json",
+      "url": "https://vawe.dev/assets/blocks/stepFlow.done.json",
+      "target": "films/scene/stepFlow.done.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/stepFlow.done.png"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "donutChart.two",
+  "type": "vawe:block",
+  "title": "donutChart.two",
+  "description": "two-segment ring",
+  "tags": [
+    "donutChart"
+  ],
+  "dimensions": {
+    "width": 364,
+    "height": 462
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "donutChart.two",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 320,
+      "label": "pass / fail",
+      "segments": [
+        {
+          "value": 88,
+          "color": "var(--up)",
+          "label": "Pass"
+        },
+        {
+          "value": 12,
+          "color": "var(--down)",
+          "label": "Fail"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "segments",
+      "label",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/donutChart.two.json",
+      "url": "https://vawe.dev/assets/blocks/donutChart.two.json",
+      "target": "films/scene/donutChart.two.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/donutChart.two.png"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "lowerThird.bild",
+  "type": "vawe:block",
+  "title": "lowerThird.bild",
+  "description": "tabloid front page · caps, reversed, loud",
+  "tags": [
+    "lowerThird"
+  ],
+  "dimensions": {
+    "width": 375,
+    "height": 167
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "lowerThird.bild",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "variant": "bild",
+      "name": "Sold out",
+      "role": "in four minutes"
+    },
+    "props": [
+      "x",
+      "y",
+      "name",
+      "role",
+      "variant",
+      "accent",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/lowerThird.bild.json",
+      "url": "https://vawe.dev/assets/blocks/lowerThird.bild.json",
+      "target": "films/scene/lowerThird.bild.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/lowerThird.bild.png"
+  }
+}

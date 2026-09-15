@@ -1,0 +1,68 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "profileHeader",
+  "type": "vawe:block",
+  "title": "profileHeader",
+  "description": "the top of an account screen: avatar over a name and @handle, with a small row of stat counts below.",
+  "tags": [
+    "profileHeader"
+  ],
+  "dimensions": {
+    "width": 504,
+    "height": 291
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "profileHeader",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 460,
+      "name": "Wren Alcott",
+      "handle": "wren",
+      "stats": [
+        {
+          "value": "0",
+          "label": "posts"
+        },
+        {
+          "value": "0",
+          "label": "lists"
+        },
+        {
+          "value": "0",
+          "label": "saved"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "avatar",
+      "initials",
+      "name",
+      "handle",
+      "stats",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/profileHeader.json",
+      "url": "https://vawe.dev/assets/blocks/profileHeader.json",
+      "target": "films/scene/profileHeader.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/profileHeader.png"
+  }
+}

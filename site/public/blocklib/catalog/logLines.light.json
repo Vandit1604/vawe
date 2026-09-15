@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "logLines.light",
+  "type": "vawe:block",
+  "title": "logLines.light",
+  "description": "log stream on a light surface",
+  "tags": [
+    "logLines"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 140
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "logLines.light",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "dark": false,
+      "lines": [
+        {
+          "level": "ok",
+          "text": "validate: 1 ok, 0 failed"
+        },
+        {
+          "level": "ok",
+          "text": "purity OK · order-independent"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "lines",
+      "dark",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/logLines.light.json",
+      "url": "https://vawe.dev/assets/blocks/logLines.light.json",
+      "target": "films/scene/logLines.light.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/logLines.light.png"
+  }
+}

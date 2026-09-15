@@ -1,0 +1,64 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "donutChart",
+  "type": "vawe:block",
+  "title": "donutChart",
+  "description": "a pie chart drawn as a ring: coloured segments of a whole plus a legend of labels",
+  "tags": [
+    "donutChart"
+  ],
+  "dimensions": {
+    "width": 364,
+    "height": 490
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "donutChart",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 320,
+      "label": "traffic",
+      "segments": [
+        {
+          "value": 52,
+          "label": "Direct"
+        },
+        {
+          "value": 30,
+          "label": "Search"
+        },
+        {
+          "value": 18,
+          "label": "Social"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "segments",
+      "label",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/donutChart.json",
+      "url": "https://vawe.dev/assets/blocks/donutChart.json",
+      "target": "films/scene/donutChart.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/donutChart.png"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "barChart.green",
+  "type": "vawe:block",
+  "title": "barChart.green",
+  "description": "bars in success green",
+  "tags": [
+    "barChart"
+  ],
+  "dimensions": {
+    "width": 564,
+    "height": 286
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "barChart.green",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 520,
+      "h": 240,
+      "color": "var(--up)",
+      "data": [
+        {
+          "label": "Q1",
+          "value": 40
+        },
+        {
+          "label": "Q2",
+          "value": 55
+        },
+        {
+          "label": "Q3",
+          "value": 68
+        },
+        {
+          "label": "Q4",
+          "value": 90
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "data",
+      "color",
+      "label",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/barChart.green.json",
+      "url": "https://vawe.dev/assets/blocks/barChart.green.json",
+      "target": "films/scene/barChart.green.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/barChart.green.png"
+  }
+}

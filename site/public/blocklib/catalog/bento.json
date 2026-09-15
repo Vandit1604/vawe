@@ -1,0 +1,68 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "bento",
+  "type": "vawe:block",
+  "title": "bento",
+  "description": "an asymmetric grid of boxes in different sizes, one big hero box and smaller ones around it, like a bento box or an Apple feature grid",
+  "tags": [
+    "bento"
+  ],
+  "dimensions": {
+    "width": 804,
+    "height": 464
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "bento",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 760,
+      "h": 420,
+      "cells": [
+        {
+          "kind": "mesh",
+          "title": "Hero",
+          "desc": "The big one."
+        },
+        {
+          "kind": "glass",
+          "title": "Cell",
+          "desc": "Support."
+        },
+        {
+          "kind": "spotlight",
+          "title": "Cell",
+          "desc": "Support."
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "gap",
+      "cells",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/bento.json",
+      "url": "https://vawe.dev/assets/blocks/bento.json",
+      "target": "films/scene/bento.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/bento.png"
+  }
+}

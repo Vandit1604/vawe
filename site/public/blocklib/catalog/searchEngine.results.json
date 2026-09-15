@@ -1,0 +1,76 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "searchEngine.results",
+  "type": "vawe:block",
+  "title": "searchEngine.results",
+  "description": "the search results page: a ranked list of links, with a cursor clicking one",
+  "tags": [
+    "searchEngine"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 388
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "searchEngine.results",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "variant": "results",
+      "w": 540,
+      "query": "video from json",
+      "clickIndex": 0,
+      "results": [
+        {
+          "url": "vawe.dev › docs",
+          "title": "One JSON. Any brand.",
+          "snippet": "Same input, same frames, every time."
+        },
+        {
+          "url": "vawe.dev › blocks",
+          "title": "The block registry",
+          "snippet": "Vetted blocks you compose, not author."
+        }
+      ]
+    },
+    "props": [
+      "keyCue",
+      "keyGain",
+      "cursorStart",
+      "x",
+      "y",
+      "w",
+      "variant",
+      "brand",
+      "word",
+      "logo",
+      "logoW",
+      "logoH",
+      "query",
+      "results",
+      "markAlign",
+      "cps",
+      "clickIndex",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/searchEngine.results.json",
+      "url": "https://vawe.dev/assets/blocks/searchEngine.results.json",
+      "target": "films/scene/searchEngine.results.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/searchEngine.results.png"
+  }
+}

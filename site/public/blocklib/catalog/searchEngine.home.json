@@ -1,0 +1,84 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "searchEngine.home",
+  "type": "vawe:block",
+  "title": "searchEngine.home",
+  "description": "a search engine home page: a wordmark over a rounded search box, the query typing itself in",
+  "tags": [
+    "searchEngine"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 284
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "searchEngine.home",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "variant": "home",
+      "w": 540,
+      "cps": 11,
+      "query": "deterministic video from json",
+      "word": [
+        {
+          "c": "S"
+        },
+        {
+          "c": "e"
+        },
+        {
+          "c": "a"
+        },
+        {
+          "c": "r"
+        },
+        {
+          "c": "c"
+        },
+        {
+          "c": "h"
+        }
+      ]
+    },
+    "props": [
+      "keyCue",
+      "keyGain",
+      "cursorStart",
+      "x",
+      "y",
+      "w",
+      "variant",
+      "brand",
+      "word",
+      "logo",
+      "logoW",
+      "logoH",
+      "query",
+      "results",
+      "markAlign",
+      "cps",
+      "clickIndex",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/searchEngine.home.json",
+      "url": "https://vawe.dev/assets/blocks/searchEngine.home.json",
+      "target": "films/scene/searchEngine.home.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/searchEngine.home.png"
+  }
+}

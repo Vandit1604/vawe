@@ -1,0 +1,79 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "notification.stack",
+  "type": "vawe:block",
+  "title": "notification.stack",
+  "description": "alerts that stack and expire, not one that sits",
+  "tags": [
+    "notification"
+  ],
+  "dimensions": {
+    "width": 489,
+    "height": 341
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "notification.stack",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 420,
+      "life": 2.6,
+      "step": 1.1,
+      "items": [
+        {
+          "title": "Draft saved",
+          "body": "Fieldwork · shared workspace",
+          "icon": "✓",
+          "accent": "var(--up)"
+        },
+        {
+          "title": "New comment",
+          "body": "Wren replied on Motion",
+          "icon": "◆"
+        },
+        {
+          "title": "Export ready",
+          "body": "The file is in your downloads",
+          "icon": "↓",
+          "accent": "var(--up)"
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "title",
+      "body",
+      "w",
+      "message",
+      "desc",
+      "icon",
+      "accent",
+      "items",
+      "life",
+      "step",
+      "rowH",
+      "gap",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/notification.stack.json",
+      "url": "https://vawe.dev/assets/blocks/notification.stack.json",
+      "target": "films/scene/notification.stack.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/notification.stack.png"
+  }
+}

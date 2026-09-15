@@ -1,0 +1,51 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "terminalHtml",
+  "type": "vawe:block",
+  "title": "terminalHtml",
+  "description": "the same deploy terminal as one hand-drawn console surface: gradient glass, per-word command colouring, a blinking text cursor",
+  "tags": [
+    "terminalHtml"
+  ],
+  "dimensions": {
+    "width": 864,
+    "height": 184
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "terminalHtml",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 820
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "title",
+      "command",
+      "cps",
+      "output",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/terminalHtml.json",
+      "url": "https://vawe.dev/assets/blocks/terminalHtml.json",
+      "target": "films/scene/terminalHtml.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/terminalHtml.png"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "usMap",
+  "type": "vawe:block",
+  "title": "usMap",
+  "description": "a map of the United States coloured state by state, a choropleth with a legend and value labels per state",
+  "tags": [
+    "usMap"
+  ],
+  "dimensions": {
+    "width": 864,
+    "height": 582
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "usMap",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 820,
+      "h": 500,
+      "legend": "M",
+      "data": [
+        {
+          "code": "CA",
+          "value": 39
+        },
+        {
+          "code": "TX",
+          "value": 30
+        },
+        {
+          "code": "FL",
+          "value": 22
+        },
+        {
+          "code": "NY",
+          "value": 20
+        },
+        {
+          "code": "IL",
+          "value": 13
+        },
+        {
+          "code": "PA",
+          "value": 13
+        },
+        {
+          "code": "OH",
+          "value": 12
+        },
+        {
+          "code": "GA",
+          "value": 11
+        },
+        {
+          "code": "MI",
+          "value": 10
+        },
+        {
+          "code": "WA",
+          "value": 8
+        }
+      ]
+    },
+    "props": [
+      "x",
+      "y",
+      "w",
+      "h",
+      "data",
+      "title",
+      "sub",
+      "legend",
+      "showLegend",
+      "unit",
+      "labels",
+      "labelMin",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/usMap.json",
+      "url": "https://vawe.dev/assets/blocks/usMap.json",
+      "target": "films/scene/usMap.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/usMap.png"
+  }
+}

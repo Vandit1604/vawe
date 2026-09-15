@@ -1,0 +1,51 @@
+{
+  "$schema": "https://vawe.dev/schema/registry-item.json",
+  "name": "quote",
+  "type": "vawe:block",
+  "title": "quote",
+  "description": "a big pull quote with the person's name credited underneath, for a testimonial or a line to remember",
+  "tags": [
+    "quote"
+  ],
+  "dimensions": {
+    "width": 584,
+    "height": 177
+  },
+  "install": {
+    "kind": "scene-layer",
+    "target": "layers[]",
+    "requires": "vawe engine (blocks/index.mjs); expands automatically at load, no separate step",
+    "layer": {
+      "type": "block",
+      "block": "quote",
+      "x": 160,
+      "y": 160,
+      "start": 0,
+      "dur": 4,
+      "w": 540,
+      "text": "One JSON becomes one video.",
+      "author": "vawe"
+    },
+    "props": [
+      "x",
+      "y",
+      "text",
+      "author",
+      "w",
+      "start",
+      "dur"
+    ]
+  },
+  "files": [
+    {
+      "source": "site/public/assets/blocks/quote.json",
+      "url": "https://vawe.dev/assets/blocks/quote.json",
+      "target": "films/scene/quote.json",
+      "type": "vawe:scene",
+      "note": "pre-expanded: concrete layers only, renders without the block library"
+    }
+  ],
+  "preview": {
+    "poster": "https://vawe.dev/assets/blocks/quote.png"
+  }
+}
