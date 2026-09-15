@@ -302,7 +302,7 @@ export function buildKit(theme, resolveLook, isLightBg, spec) {
       --accent:${(theme.palette && theme.palette.accent) || '#2563eb'}}`,
     // --- MATERIAL, AT VIDEO STRENGTH. A flat field is a dead field, and a LIGHT field is the worst
     // case: with nothing to catch, it reads as a blank slide. The number is not a web number. Every
-    // decorative value in this kit is set from the video table in the vendored another engine reference
+    // decorative value in this kit is set from the reference video-composition table
     // (`references/video-composition.md`), which is blunt about it: decorative opacity is 3-8% on the
     // web and 12-25% on video, borders are 1px on the web and 2-4px on video, and anything under those
     // floors is invisible once the frame is encoded. Designing a frame at web values and rendering it

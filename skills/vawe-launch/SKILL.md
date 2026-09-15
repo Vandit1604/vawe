@@ -1,13 +1,13 @@
 ---
 name: vawe-launch
-description: "The gated end-to-end pipeline for a product-launch / promo video in this repo, adapted from another engine: brief → capture → design-system (preset remix) → storyboard proposal → local narration → author from recipes → build (optionally one sub-agent per beat) → finalize (author-check · seam-check · judge · render). Load when the user wants a launch/promo/feature video and you want the full orchestrated flow. Run each step, pass its gate, then continue; user-gated at Step 0, 3, 6."
+description: "The gated end-to-end pipeline for a product-launch / promo video in this repo: brief → capture → design-system (preset remix) → storyboard proposal → local narration → author from recipes → build (optionally one sub-agent per beat) → finalize (author-check · seam-check · judge · render). Load when the user wants a launch/promo/feature video and you want the full orchestrated flow. Run each step, pass its gate, then continue; user-gated at Step 0, 3, 6."
 ---
 
 # vawe-launch: the orchestrated launch-video pipeline
 
 You are the orchestrator. Run each step **in order**, verify its gate, and only then continue. Three steps
 are **user-gated**: 0 (brief), 3 (storyboard proposal), 6 (final render). Everything else you do yourself.
-This is the another engine Step 0-6 flow adapted to our engine, tools, and gates.
+This is a seven-step, Step 0-6 flow built for our engine, tools, and gates.
 
 Save the video at `films/scene/<topic>.json`. One scene JSON → one mp4.
 

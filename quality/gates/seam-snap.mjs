@@ -1,6 +1,6 @@
 // quality/gates/seam-snap.mjs: SAMPLE THE SEAMS, NOT THE CENTERS.
 //
-// The another engine lesson (and our own engine-doctrine/MISTAKES.md #144): the highest-value render bugs, a black
+// A recurring lesson (and our own engine-doctrine/MISTAKES.md #144): the highest-value render bugs, a black
 // flash on a transition, a morph that reads as a collision. Live INSIDE the transition overlap, which
 // every center-sampling gate steps right over. `make beats` samples beat midpoints; `make audit` judges
 // the settled frame; `make probe` checks purity. None of them look at the 3-frame window where two beats

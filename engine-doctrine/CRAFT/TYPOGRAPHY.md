@@ -36,9 +36,8 @@ reads pixels: good for dominance, but it read creed's accent as the *sky-photo* 
 
 ## 0a. Guardrails: you know these rules but you violate them. Stop.
 
-Borrowed close to verbatim from the reference system's `another engine-creative/references/typography.md`,
-whose films measurably read better than ours. Their sentences, our measurements. Go and read the source
-before you argue with any of it.
+Borrowed close to verbatim from the reference notes. Their sentences, our measurements. Go and read the
+source before you argue with any of it.
 
 - **RUN `make fonts-discover` BEFORE you pick a pairing. This is not optional.** *"You will otherwise
   reach for the same 8 fonts every time. That's your training data default, not a contextual choice."*
@@ -190,6 +189,5 @@ symptom is almost always an unloaded face, not a wrong choice. See [`../MISTAKES
 ## Provenance
 
 **Sources:** Butterick *Practical Typography*; Refactoring UI (type system, font weight); Material 3 typography
-(optical size, roles); type-scale.com (modular ratios); the reference system's
-`another engine-creative/references/typography.md` and `design-picker.md` (§0a guardrails, banned/overused
-face lists).
+(optical size, roles); type-scale.com (modular ratios); the reference notes and `design-picker.md`
+(§0a guardrails, banned/overused face lists).

@@ -21,8 +21,8 @@ codes: effect-soup
 
 `MOTION-CRAFT.md` says HOW to move a thing (the 10 rules, the speed dials). This file says WHAT it
 feels like when you do, and WHAT NOT TO DO. It is the cause→feeling layer: you reach for it when the
-video "renders fine but feels cheap." Modelled on the another engine taste system (doctrine in prose,
-the source-decidable subset backstopped by a gate).
+video "renders fine but feels cheap." This file follows a taste-system model: doctrine written in
+prose, with the source-decidable subset backstopped by a gate.
 
 Two things a from-scratch video lacks that a brand site hands you for free, a taste anchor and a
 story spine. This file is the anchor when there is no site. Its companion [`SELECTION.md`](SELECTION.md) turns an intent into the specific transition/font/effect to reach for. Read it before authoring, not after.
@@ -39,8 +39,7 @@ Every rule below is a corollary. When two rules collide, this one wins.
 
 ## Guardrails: you know these rules but you violate them. Stop.
 
-Borrowed close to verbatim from the reference system's
-`another engine-creative/references/motion-principles.md`. Their sentences, our engine's names, and the
+Borrowed close to verbatim from the reference notes. Their sentences, our engine's names, and the
 receipts from this repo where we have them. Everything below this block is the reasoning; this block is
 the part you skip.
 
@@ -180,8 +179,7 @@ the director gate judges busyness against the film's own register rather than a 
 
 ## Every beat declares its feeling (the required fields)
 
-Borrowed from another engine' story model: a beat that cannot say what it is DOING to the viewer is
-decoration. In the storyboard / lock sheet, every beat states two things:
+The rule: a beat that cannot say what it is DOING to the viewer is decoration. In the storyboard / lock sheet, every beat states two things:
 
 - **persuasion**. The rhetorical move: `pain agitation` · `negative contrast` · `future pacing` ·
   `social proof` · `risk reversal` · `inevitability`.
@@ -194,8 +192,7 @@ gate in `vawe-video-planning`).
 
 ## What is gate-checkable vs what is judgment
 
-Following the another engine split: prose carries the taste; a gate backstops only the source-decidable
-subset. Cross-linked by name so a rule can say "or it trips `X`."
+The split: prose carries the taste; a gate backstops only the source-decidable subset. Cross-linked by name so a rule can say "or it trips `X`."
 
 | Taste rule | Backstop |
 |---|---|

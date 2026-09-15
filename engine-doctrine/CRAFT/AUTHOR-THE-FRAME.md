@@ -5,7 +5,7 @@ group: look
 codes: paints-nothing, static-figure
 ---
 
-# AUTHOR-THE-FRAME: bespoke SVG/HTML beats (the another engine expressiveness)
+# AUTHOR-THE-FRAME: bespoke SVG/HTML beats
 
 ## AGENT SUMMARY
 
@@ -14,16 +14,16 @@ codes: paints-nothing, static-figure
 - Enforced by `[gated]` `paints-nothing` (a layer that painted nothing in its own box) and `static-figure` (a 3+-child figure that arrived as one block); `direction-floor.mjs` reports `static-figure` under `TASTE=1`.
 - Checkable action: does this figure build piece by piece (`parts`, staggered), or does it land as one static block?
 
-another engine' single biggest edge is that a beat is a **hand-authored HTML+SVG file**, a bespoke dataviz,
-a spatial org-tree, exact coordinates, any CSS, rather than an assembly of generic layer primitives. This
+A beat authored as a **hand-authored HTML+SVG file**, a bespoke dataviz, a spatial org-tree, exact
+coordinates, any CSS, carries far more expressiveness than an assembly of generic layer primitives. This
 guide is how to get that expressiveness in our engine, what already works, and the one honest gap.
 
-## We already share the mechanism
+## The mechanism: a paused timeline per frame
 
-another engine seeks a **paused GSAP timeline per frame**, registered on `window.__timelines`. **Our engine
-does the identical thing**: `core/timeline/clips.js` `seekAll(t)` seeks every timeline in `window.__timelines` and
-pauses+seeks `gsap.globalTimeline`. So our motion is the same deterministic seek model theirs is; we are
-not behind on the mechanism, only on how a bespoke frame is authored.
+A beat's motion runs on a **paused GSAP timeline per frame**, registered on `window.__timelines`:
+`core/timeline/clips.js` `seekAll(t)` seeks every timeline in `window.__timelines` and pauses+seeks
+`gsap.globalTimeline`. That gives a fully deterministic seek model; the gap is not the mechanism, only
+how a bespoke frame is authored.
 
 ## What works TODAY: bespoke inline SVG/HTML as a layer
 
@@ -42,14 +42,14 @@ That renders a real dataviz (bespoke bars + a trend line) and passes `make probe
 - a `paint`/`aurora` field or `beam` for living motion behind/around it,
 - engine-seeked `fx`/`gsap:{}` and kinetic `split`+`preset` for the type.
 
-Most of what a another engine composition does: bespoke SVG structure, camera choreography, path draw-on,
-count-ups, morph: is expressible this way, deterministically.
+Bespoke SVG structure, camera choreography, path draw-on, count-ups, morph: all of it is expressible
+this way, deterministically.
 
 ## Dense per-CHILD choreography: the DEFAULT via `parts`
 
-another engine animates **individual children of one figure on a single timeline**, bar 1 grows, then bar 2,
-the line draws, the dots pop, all staggered (`01-divergence.html`). **That density is our default now, via
-`parts`.** Put a named entrance on a layer's children and they animate piece by piece, staggered, pure in
+Animating **individual children of one figure on a single timeline**, bar 1 grows, then bar 2, the line
+draws, the dots pop, all staggered, is the density a great figure needs. **That density is our default
+now, via `parts`.** Put a named entrance on a layer's children and they animate piece by piece, staggered, pure in
 n (it builds a paused GSAP tween that `seekAll` drives, the same mechanism as `fx`), and it works on ANY
 layer's children (an `html` inline-SVG, a `group`, an `svg`). No `<script>` in the untrusted html layer
 (that was a real exploit surface); `parts` is the safe, declarative path.
@@ -65,8 +65,7 @@ layer's children (an `html` inline-SVG, a `group`, an `svg`). No `<script>` in t
 
 **You will write the SVG, put one `anim` on the whole layer, and let the figure land in a single frame.
 Don't.** A static figure that arrives as one block is the flat tell `parts` exists to kill, and it is the
-same reflex the reference system names as *"you dump everything in the build"*
-(`another engine-creative/references/motion-principles.md`). Author figures with `parts` BY DEFAULT: bars
+same reflex known as *"you dump everything in the build"*. Author figures with `parts` BY DEFAULT: bars
 grow, then the line draws, then the dots pop.
 
 Named entrances: **growUp** (bars from a baseline), **widen** (bars left→right), **popIn** (scale+fade),
@@ -80,7 +79,7 @@ Still layer-level when you want it: `anim`/`motion`/`fx`/`split`+`preset` for th
 
 `parts` staggers a figure's children; when a beat needs MORE than that, overlapping tweens, cross-timed
 hand-offs, a token travelling a path while a counter ticks and a check draws, reach for a **composition**.
-This is another engine' "one worker writes a GSAP timeline per beat" model, made safe: the bespoke timeline is
+This follows a "one worker writes a GSAP timeline per beat" model, made safe: the bespoke timeline is
 a FIRST-PARTY builder in [`core/compositions/index.js`](../../core/compositions/index.js); the scene only
 NAMES it and passes DATA.
 

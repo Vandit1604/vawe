@@ -90,8 +90,7 @@ owner, not something this note builds, because a translated schema is a second c
 (`schema.json`'s own shape) that has already drifted once (the 566/638, 337/445, 134/148 counts
 `AGENTS.md` warns about) and a second copy needs someone committed to keeping it in sync.
 
-One thing worth carrying into that future file, borrowed from how another engine's Studio drives its own
-schema editor (`ZodSwitch.tsx`): a `label`/`hint` value in a field already reads as a `.describe()`
-brand string. A `format` or `x-widget` tag on top of that could later select a richer input (a colour
-swatch for a hex field, a slider for a 0..1 range) instead of a bare text box. Not built now: it is a
-widget system on top of a schema that does not exist yet.
+One thing worth carrying into that future file: a `label`/`hint` value in a field already reads as a
+descriptive brand string. A `format` or `x-widget` tag on top of that could later select a richer input
+(a colour swatch for a hex field, a slider for a 0..1 range) instead of a bare text box. Not built now:
+it is a widget system on top of a schema that does not exist yet.

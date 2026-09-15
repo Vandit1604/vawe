@@ -60,8 +60,8 @@ const HIGH_VALUE = [
 ];
 
 // ── THE ANTI-TEMPLATE CHECK: a bar derived from the LIBRARY, not a constant somebody chose ─────────
-// The research this repo argues from (engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md's own census, and outside:
-// the another engine community's anti-template checklist) found the same shape twice: a tool with 800+ named
+// The research this repo argues from (engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md's own census, and an
+// outside anti-template checklist) found the same shape twice: a tool with 800+ named
 // things and an author who still reaches for the same five every time, because same-tool-same-result is
 // what an unforced default produces. Refusing "too few effects" (feature-poverty, above) does not catch
 // this: a film can clear that floor by using three of the FIVE things everyone already reaches for and
@@ -335,7 +335,7 @@ if (!sig.bgMotion) warn('no-bg-motion', 'the background is static. A good video 
 }
 if (!directedByBeats && vocab.length < 3) warn('low-vocab', `only ${vocab.length} motion technique(s) in play (${vocab.join(', ') || 'none'}). Reach for more of the range: count-ups, ken push, a cursor demo, a custom motion track.`);
 
-// ANTI-FRONT-LOAD (another engine reveal model): a directed video weights its cues ACROSS its length; the
+// ANTI-FRONT-LOAD: a directed video weights its cues ACROSS its length; the
 // SLIDESHOW failure dumps everything in the first quarter, then freezes. A reveal = a timed content
 // layer's start. If nearly all reveals land in the first 30% and the back half gets nothing new, it is a
 // slideshow even when each line is kinetic. Beat-composed scenes spread starts across the film, so they
@@ -380,7 +380,7 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
 // feature-poverty (above) asks "how many families"; this asks "which ones, next to what the library
 // already leans on". A film can clear the count by using three of the five things every other film
 // already uses and still be a template: same primitives, same defaults, the exact failure the outside
-// research names (the another engine community's own anti-template checklist, cited in the doc this repo
+// research names (an outside anti-template checklist, cited in the doc this repo
 // argues from). Both checks below derive their bar from `libraryProfile()`, never from a number chosen
 // here, so the bar moves as the library's own habits move.
 {
@@ -662,7 +662,7 @@ if (reveals.length >= 4) {
   const lateHalf = reveals.filter((t) => t > dur * 0.5).length;
   if (early >= 0.8 && lateHalf === 0) warn('front-loaded', `${Math.round(early * 100)}% of reveals land in the first ${(dur * 0.3).toFixed(1)}s and the back half is frozen. The SLIDESHOW failure (everything dumped early, then static). Weight cues into the back ~50%: give each key line its own reveal beat. (engine-doctrine/CRAFT/DIRECTION.md reveal model.)`);
 }
-// NO TWO BEATS MOVE ALIKE (another engine): vary the motion vocabulary across the film. If every kinetic
+// NO TWO BEATS MOVE ALIKE: vary the motion vocabulary across the film. If every kinetic
 // line uses the identical reveal preset, the video moves monotonously even when each beat is "kinetic".
 const presets = flat.filter((l) => l.preset).map((l) => l.preset);
 if (presets.length >= 5 && new Set(presets).size === 1) {

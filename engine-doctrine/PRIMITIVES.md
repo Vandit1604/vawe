@@ -619,7 +619,7 @@ where the field takes a named vocabulary, which registry owns it. No `AT` prints
 
 **Layout by containment: `group` is the DEFAULT for anything with a spatial relationship.** A group is
 a flex OR grid box; its children flow with `gap` so a label+value, a logo row, or a card grid can never
-collide (the another engine/another engine flex-not-pixels rule, in JSON). Reach for a group *before* hand-placing
+collide: flex, not fixed pixels, expressed in JSON. Reach for a group *before* hand-placing
 absolute `x/y` layers: absolute placement is only for free composition + `motion` choreography.
 - `layout: "row" | "column" | "grid"` (canonical; `direction` is a legacy alias); `gap`, `items`
   (align-items; `align2` is a legacy alias), `justify` (justify-content), `wrap`.

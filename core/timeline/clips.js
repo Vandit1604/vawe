@@ -1,9 +1,9 @@
-// core/clips.js: declarative composition layer (another engine parity):
+// core/clips.js: declarative composition layer:
 //   • data-attribute timing/tracks   (data-start / data-duration / data-track / data-anim / data-out)
 //   • a seekable animation-adapter interface (WAAPI + registered/GSAP paused timelines)
 // Both are PURE in the time input: driveClips(clips, t) is a deterministic function of t; seeking a
 // paused timeline to t is deterministic. This lets a scene be authored declaratively (fill HTML with
-// timed clips) OR bring its own animation runtime, exactly like another engine' adapter model.
+// timed clips) OR bring its own animation runtime through the same adapter interface.
 import { clamp01, easeOutCubic, defocus, rise, fade, pop, lift, slide,
   anticipateEase, overshootEase, stepClock, FPS } from '../motion/motion.js';
 import { wipe, circleWipe, clockWipe } from '../cuts/presentations.js';
