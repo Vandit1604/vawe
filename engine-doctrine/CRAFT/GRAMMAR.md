@@ -560,7 +560,7 @@ IT WALKED STRAIGHT INTO A NAME COLLISION. A `three` globe has had `origin` as th
 
 **Why we cannot.** Swapping to a near-static ground dropped it to 75% still and 0.29 with NOT ONE LAYER CHANGED. The aurora was contributing almost the whole number and the layers were nearly inert underneath it. The renderer's motion figure is a property of the FRAME, so a moving backdrop flatters it exactly as much as moving content does.
 
-**The fix.** Report the film's motion with the backdrop excluded, or beside it. `internal/scene/scene.go` measures the composited frame and could measure a second pass with `bg` suppressed; that difference is the number an author actually needs.
+**The fix.** Report the film's motion with the backdrop excluded, or beside it. `renderer/internal/scene/scene.go` measures the composited frame and could measure a second pass with `bg` suppressed; that difference is the number an author actually needs.
 
 **Today.** Measure twice by hand, once on the authored ground and once on `plain`, and read the second number as what the layers are doing.
 

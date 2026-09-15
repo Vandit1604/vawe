@@ -49,7 +49,7 @@ That last row is a permanent structural advantage. A self-hoster legally cannot 
 
 ## Security
 
-The render file server default-denies (`internal/scene/scene.go`): only `core`, `themes`, `formats`,
+The render file server default-denies (`renderer/internal/scene/scene.go`): only `core`, `themes`, `formats`,
 `assets` and the caller's own `.vawe-data/scenes|uploads` are reachable. `docs`, `blocks`, `scripts`,
 `.git`, `LICENSE`, and other owners' records are not. The `html` and `svg` sanitisers and the
 submit-time `src` allowlist are defence in depth in front of that wall. Outbound fetches (logo, photo,
@@ -90,5 +90,5 @@ the other.
 - **Payment.** `pricing.mjs` has one seam, `isPaid` / `checkoutUrl`. Provider choice changes the
   merchant of record and tax handling, so it is a business decision before a code one.
 - **Auth.** `VAWE_OWNER` is a trusted string. Fine for stdio on one machine, not for a hosted server.
-- **A queue.** Renders run inline and hold the tool call open. `internal/queue/queue.go` exists and
+- **A queue.** Renders run inline and hold the tool call open. `renderer/internal/queue/queue.go` exists and
   its own comment says it was written for this.

@@ -188,7 +188,7 @@ leaning over two shots is not the device. A `sound` that is not on disk fails th
 continuity is carried by a texture that never plays is not a quieter film, it is a different one.
 
 Resolved by `core/audio/bridges.js` (in the browser, where the junctions live) into spans of seconds;
-mixed by `internal/audio/audio.go`, which never has to know what a cut is.
+mixed by `renderer/internal/audio/audio.go`, which never has to know what a cut is.
 
 ---
 
@@ -383,7 +383,7 @@ product film's payoff beat.
 ## 6. The mechanism, what this engine can actually do
 
 Everything above is *what*; this is *how*. It all lives in the scene's top-level `audio` block
-(`formats/scene/schema.json`), and the Go mixer (`internal/audio/audio.go`) builds the whole track in
+(`formats/scene/schema.json`), and the Go mixer (`renderer/internal/audio/audio.go`) builds the whole track in
 memory before ffmpeg muxes it.
 
 ```jsonc
@@ -426,7 +426,7 @@ validation, not dropped to silence. One `name` OR one `voice` per cue, never bot
 
 **A cue is heard OVER the bed, and the mixer guarantees it.** A cue is causal, it says the button was
 pressed, the row landed, the thing arrived, and a bed is atmosphere. When atmosphere covers causality
-the film stops explaining itself, so a cue's table gain is a floor, not a level: `internal/audio/audio.go`
+the film stops explaining itself, so a cue's table gain is a floor, not a level: `renderer/internal/audio/audio.go`
 raises it until the cue's loudest 50ms sits 6dB over the bed in that same 50ms, and never lowers it.
 Three things follow, and they are the whole contract:
 
@@ -794,6 +794,6 @@ Confine AI music to internal comps, pitch boards and animatics. Never a client d
 
 **Do not re-add:** "silence is the default" as house doctrine. It traced to a real engine bug, the
 mixer once auto-discovered any `assets/music.wav` and put it under everything; making music opt-in
-(`internal/audio/audio.go`) was the right fix for that bug, but the silence-by-default rule that grew
+(`renderer/internal/audio/audio.go`) was the right fix for that bug, but the silence-by-default rule that grew
 from it outlived the bug and is wrong. §1 states the corrected rule: sound is the default, silence is
 a stated device.

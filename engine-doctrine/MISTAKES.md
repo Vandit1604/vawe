@@ -950,7 +950,7 @@ holds: none
 holds: none
 
 ## 231. the watermark was drawn at twice the frame size and clipped, on every render that was not a draft
-`internal/encode/encode.go` scales the base first and sizes the sheet against the result.
+`renderer/internal/encode/encode.go` scales the base first and sizes the sheet against the result.
 holds: none
 
 ## 232. a nested group's modifiers were built by nobody, and only half of each one ran
@@ -1142,7 +1142,7 @@ holds: none
 holds: none
 
 ## 279. Chrome painted a blank placeholder where a captured component's images should be, and the screenshot kept it
-Two Chrome flags in `allocOpts`, `internal/scene/scene.go`: chromedp.Flag("disable-checker-imaging", true), chromedp.Flag("run-all-compositor-stages-before-draw", true), The entrance window then...
+Two Chrome flags in `allocOpts`, `renderer/internal/scene/scene.go`: chromedp.Flag("disable-checker-imaging", true), chromedp.Flag("run-all-compositor-stages-before-draw", true), The entrance window then...
 holds: none
 
 ## 280. the worker that drew a frame was decided by a race, so no two renders could be compared
@@ -1446,7 +1446,7 @@ holds: none
 holds: none
 
 ## 349. Four workers meant four whole browsers, and one CDP call was the difference
-What. `internal/scene/scene.go` `newTab` called `chromedp.NewExecAllocator` on every invocation.
+What. `renderer/internal/scene/scene.go` `newTab` called `chromedp.NewExecAllocator` on every invocation.
 holds: none
 
 ## 350. Worker count changes about 80% of frames, and the cap should not move until that is understood
@@ -1929,7 +1929,7 @@ holds: none
 holds: none
 
 ## 469. a UI cue was mixed quieter than the music under it
-`overTheBed` in `internal/audio/audio.go` is now the one place that relationship is decided.
+`overTheBed` in `renderer/internal/audio/audio.go` is now the one place that relationship is decided.
 holds: none
 
 ## 470. six gates stated a verdict they had not earned
@@ -2141,7 +2141,7 @@ The cheap check that would have caught all three, in order of cost: try to RESOL
 holds: none
 
 ## 522. the motion instrument lied twice, and I was fooled by it within the hour
-Normalised to change-per-thirtieth-of-a-second in `internal/scene/scene.go`, so the number is comparable across frame rates and the still floor means one thing.
+Normalised to change-per-thirtieth-of-a-second in `renderer/internal/scene/scene.go`, so the number is comparable across frame rates and the still floor means one thing.
 holds: none
 
 ## 523. a filter and a height, both authored, both silently dropped
@@ -2209,7 +2209,7 @@ What. `glass: "refract"` displaces the backdrop through a lens ramp built from a
 holds: none
 
 ## 540. the render path that ships never awaited `frameSettle`, only the profiled one did
-The two barriers are now named constants, `settleJS` and `paintJS`, next to `allocOpts` in `internal/scene/scene.go`, and both branches run both.
+The two barriers are now named constants, `settleJS` and `paintJS`, next to `allocOpts` in `renderer/internal/scene/scene.go`, and both branches run both.
 holds: none
 
 ## 541. at the supersample it SHIPS with, the renderer is not reproducible against itself
@@ -2301,7 +2301,7 @@ What happened. A film wanted three panels, each cycling through several ambient 
 holds: none
 
 ## 562. the GPU was never off, and the raster it does at ss=2 is what made a render irreproducible
-The premise this started from was wrong, and it was wrong in the way this file keeps warning about: it was reasoned, not measured. `internal/scene/scene.go` names no `use-gl`, `enable-gpu`,...
+The premise this started from was wrong, and it was wrong in the way this file keeps warning about: it was reasoned, not measured. `renderer/internal/scene/scene.go` names no `use-gl`, `enable-gpu`,...
 holds: none
 
 ## 563. a fold sprang back to full size, because a later keyframe mentioned only `scale`
@@ -2381,15 +2381,15 @@ holds: core/engine/produce.js (`resolveTextSize`, `bakeTextSizeRoles`), core/eng
 holds: core/layers/svg.js (`applyDraw`, `drawOffset`, `frame`), core/layers/svg.test.mjs, quality/gates/lib-test.mjs (the svg draw mock DOM gained `getTotalLength`)
 
 ## 582. a reference band was quoted in four places for months, and the tool that would have caught it existed the whole time
-`internal/scene/scene.go`, `internal/render/render.go` (twice) and `harness/media/study.mjs` all printed "reference films are still for 13% to 24% of their frames", sourced from CLAUDE.md and a motion plan, never from the grammar corpus itself. `node harness/author/claims.mjs` (grammar/_claims.json id `ref-still-share`) already reported this CONTRADICTED: the measured spread is 11% to 77% still, median 29%, with the two Arc product films (the closest genre to a launch film) at 71% and 77%, both of which the renderer's own 60%-still warning would have flagged as a problem. A number that ships from a plan file and is never run against the corpus it claims to describe gets quoted downstream faster than it gets checked, and four call sites repeated it without one of them running the check. Fixed by updating the claim to the measured spread (now SUPPORTED, 15/17) and quoting the real numbers at every call site; the 60%-still warning moved to 80% for the same reason, since 60% would fire on films doing exactly what the doctrine asks for.
+`renderer/internal/scene/scene.go`, `renderer/internal/render/render.go` (twice) and `harness/media/study.mjs` all printed "reference films are still for 13% to 24% of their frames", sourced from CLAUDE.md and a motion plan, never from the grammar corpus itself. `node harness/author/claims.mjs` (grammar/_claims.json id `ref-still-share`) already reported this CONTRADICTED: the measured spread is 11% to 77% still, median 29%, with the two Arc product films (the closest genre to a launch film) at 71% and 77%, both of which the renderer's own 60%-still warning would have flagged as a problem. A number that ships from a plan file and is never run against the corpus it claims to describe gets quoted downstream faster than it gets checked, and four call sites repeated it without one of them running the check. Fixed by updating the claim to the measured spread (now SUPPORTED, 15/17) and quoting the real numbers at every call site; the 60%-still warning moved to 80% for the same reason, since 60% would fire on films doing exactly what the doctrine asks for.
 holds: grammar/_claims.json (`ref-still-share`), internal/scene/scene.go, internal/render/render.go, harness/media/study.mjs
 
 ## 583. two stillness readings of the same film disagreed because they were never the same codec
-The reference band lives in grammar/*.json, measured by `harness/media/study.mjs` reading ffmpeg's `signalstats.YAVG` off decoded H.264 frames; the renderer's own `Stillness` (`internal/scene/scene.go`) reads the JPEG screenshots it captures by default (`CaptureExt`). `quality/gates/motion-split.mjs` had already measured the gap this causes: a JPEG carries a quantisation noise floor around 0.9, above `stillFloor` (0.5), while a lossless PNG of the same instant reads 0.05, so "the render reports 25% still where this file reports 67% on the same film". Comparing the renderer's JPEG-floor number against the reference's H.264-decoded number was comparing two different measurements as if they were one. Neither side's number was wrong; printing them beside each other without saying which codec each came from was. Fixed by naming the codec in every printed line (`"25% still on jpg"`) rather than by trying to make the two measurements identical, since the codec floor is a real property of the format, not a bug to patch away, and `VAWE_CAPTURE=png` remains the way to get a codec-comparable reading.
+The reference band lives in grammar/*.json, measured by `harness/media/study.mjs` reading ffmpeg's `signalstats.YAVG` off decoded H.264 frames; the renderer's own `Stillness` (`renderer/internal/scene/scene.go`) reads the JPEG screenshots it captures by default (`CaptureExt`). `quality/gates/motion-split.mjs` had already measured the gap this causes: a JPEG carries a quantisation noise floor around 0.9, above `stillFloor` (0.5), while a lossless PNG of the same instant reads 0.05, so "the render reports 25% still where this file reports 67% on the same film". Comparing the renderer's JPEG-floor number against the reference's H.264-decoded number was comparing two different measurements as if they were one. Neither side's number was wrong; printing them beside each other without saying which codec each came from was. Fixed by naming the codec in every printed line (`"25% still on jpg"`) rather than by trying to make the two measurements identical, since the codec floor is a real property of the format, not a bug to patch away, and `VAWE_CAPTURE=png` remains the way to get a codec-comparable reading.
 holds: internal/scene/scene.go (`Stillness`, `CaptureExt`), internal/render/render.go
 
 ## 584. 48 evenly spaced probes measured velocity at 48 random instants, so a burst-and-hold film scored the same as a film that never moved
-`Stillness` sampled 48 adjacent-frame pairs across the film and reported the share below `stillFloor` plus the median, both of which describe a random instant, not the film over time. A shot built exactly the way this repo's own doctrine asks for (hold, then one loud burst) lands most of its probes inside the hold and reports mostly-still, indistinguishable from a shot that is mostly-still because it never moves at all. `harness/media/study.mjs` had already solved this for reference films by keeping `peak` (the loudest single frame) beside `held` (the still share), reasoning that "a shot that holds for three seconds and then explodes has the same mean as one that moves steadily". `Stillness` now returns `peak` too, computed from the same deltas array it already builds, so a burst-and-hold film and a genuinely static one both read mostly-still by share but only the first also reports a real peak. `internal/scene/stillness_test.go` asserts the separation directly: a flat 20-frame sequence peaks under 1, one with a single bright frame inserted peaks over 30, and both stay above 80% still by share.
+`Stillness` sampled 48 adjacent-frame pairs across the film and reported the share below `stillFloor` plus the median, both of which describe a random instant, not the film over time. A shot built exactly the way this repo's own doctrine asks for (hold, then one loud burst) lands most of its probes inside the hold and reports mostly-still, indistinguishable from a shot that is mostly-still because it never moves at all. `harness/media/study.mjs` had already solved this for reference films by keeping `peak` (the loudest single frame) beside `held` (the still share), reasoning that "a shot that holds for three seconds and then explodes has the same mean as one that moves steadily". `Stillness` now returns `peak` too, computed from the same deltas array it already builds, so a burst-and-hold film and a genuinely static one both read mostly-still by share but only the first also reports a real peak. `renderer/internal/scene/stillness_test.go` asserts the separation directly: a flat 20-frame sequence peaks under 1, one with a single bright frame inserted peaks over 30, and both stay above 80% still by share.
 holds: internal/scene/scene.go (`Stillness`), internal/render/render.go, internal/scene/stillness_test.go
 
 ## 585. a part's `drawOn` stroke rendered as a one-frame snap, because GSAP rounds a px-unit style value to the nearest whole pixel and the whole tween lived inside one pixel
@@ -2729,5 +2729,5 @@ LAYOUT.md and TYPOGRAPHY.md; only the measurement and the gate step are gone.
 holds: none
 
 ## 628. `tempo` was silently ignored unless a scene happened to carry other sugar
-The Go renderer pre-expands a scene only when it matches block/beat/comp sugar, a `recipes` key or a `voice` cue (`internal/render/expand.go`), and `tempo` is resolved by that pass and by nothing else. A catalog film asked for `tempo: 0.6` and rendered at its authored 19.6s, with no warning; vawe-flow-2 only worked because it carries an empty `recipes` key. The matcher now names `tempo` too, with a Go test over every trigger, and the film renders 32.7s. The class: a feature that only one pass resolves must be named by whatever decides to run that pass.
+The Go renderer pre-expands a scene only when it matches block/beat/comp sugar, a `recipes` key or a `voice` cue (`renderer/internal/render/expand.go`), and `tempo` is resolved by that pass and by nothing else. A catalog film asked for `tempo: 0.6` and rendered at its authored 19.6s, with no warning; vawe-flow-2 only worked because it carries an empty `recipes` key. The matcher now names `tempo` too, with a Go test over every trigger, and the film renders 32.7s. The class: a feature that only one pass resolves must be named by whatever decides to run that pass.
 holds: none
