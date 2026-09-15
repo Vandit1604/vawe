@@ -809,6 +809,13 @@ const out = {
   ...(cameraBlurSet ? { cameraBlur: true } : {}),
   bg: [...bg, ...extraBg],
   transitions,
+  // beats[] (item 3, core/timeline/relative-time.js): ONE clock per beat, written here so it can never
+  // be hand-typed out of sync with the beats this pass just staged. `id` reuses the `scene<N>` vocabulary
+  // the html layer above already carries (RISK 1, two owners of beat timing: `quality/gates/
+  // plan-vs-render.mjs` reports, never blocks, any beat whose start/duration here disagrees with the
+  // storyboard it was built from). A re-assemble always regenerates this whole array, the same "own it
+  // outright" rule the generated layers above follow, never merges it with a hand edit.
+  beats: beats.map((b, k) => ({ id: `scene${k + 1}`, start: shiftedStart[k], duration: +(shiftedEnd[k] - shiftedStart[k]).toFixed(3) })),
   ...(recipes.length ? { recipes } : {}),
   layers: objectLayer ? [...htmlLayers, objectLayer, ...preserved] : [...htmlLayers, ...preserved],
 };
