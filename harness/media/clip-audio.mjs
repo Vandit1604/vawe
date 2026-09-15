@@ -19,7 +19,7 @@
 // it did before this file existed.
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { resolveRelativeTimes } from '../../core/timeline/relative-time.js';
 
 const MIXER_RATE = 44100;
@@ -44,12 +44,29 @@ function collectClipLayers(layers) {
 // asset alongside itself in formatDir. Same two-base fallback order the Go resolve() uses for
 // music/vo, so the two audio owners (bed and clip) agree on where a file lives.
 function resolveSrc(src, formatDir, repoRoot) {
+  // A LEADING SLASH IS THE REPO ROOT, NOT THE DISK ROOT. A scene writes "/assets/x.mp4" because the
+  // page that loads it lives at /films/scene/ and a bare "assets/x.mp4" would 404 there
+  // (core/engine/src-url.js owns that rule). Reading it as a filesystem absolute path handed ffmpeg
+  // /assets/x.mp4, which does not exist, and the render died in the pre-pass with "No such file".
+  if (src.startsWith("/")) {
+    const rooted = path.join(repoRoot, src.slice(1));
+    return fs.existsSync(rooted) ? rooted : (fs.existsSync(src) ? src : null);
+  }
   if (path.isAbsolute(src)) return src;
   for (const base of [formatDir, repoRoot]) {
     const p = path.join(base, src);
     if (fs.existsSync(p)) return p;
   }
   return null;
+}
+
+// A SOURCE WITH NO AUDIO TRACK IS NORMAL IN AN EDIT, not an error. B-roll, a screen capture and a
+// generated clip all carry video only, and asking ffmpeg for their audio fails the whole render in the
+// pre-pass. Measured: 5 of 6 clips in one film had no audio stream. Ask first, skip with a line.
+function hasAudioStream(src) {
+  const r = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'a',
+    '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', src], { encoding: 'utf8' });
+  return r.status === 0 && /audio/.test(r.stdout || '');
 }
 
 // Runs ffmpeg to cut [in, out) of `src`'s audio, rate-match it, and write a mono 44.1kHz wav.
@@ -75,6 +92,10 @@ export function extractClipAudio({ layers, formatDir, repoRoot, outDir }) {
     const abs = resolveSrc(L.src, formatDir, repoRoot);
     if (!abs) {
       process.stderr.write(`⚠ clip-audio: layer ${L.id || i} names src ${JSON.stringify(L.src)}, which is not on disk. Its clip audio is skipped.\n`);
+      return;
+    }
+    if (!hasAudioStream(abs)) {
+      process.stderr.write(`⚠ clip-audio: layer ${L.id || i} (${path.basename(abs)}) carries no audio track, so there is nothing to mix. Its clip audio is skipped.\n`);
       return;
     }
     const inPoint = L.in ?? 0;
