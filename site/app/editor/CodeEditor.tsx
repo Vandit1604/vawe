@@ -42,7 +42,9 @@ const hl = HighlightStyle.define([
 ]);
 
 const theme = EditorView.theme({
-  "&": { fontSize: "12.5px", backgroundColor: "#fff", color: "var(--ink-2)", height: "100%" },
+  // The ground is a TOKEN, not #fff. Every colour above is one, so a literal white here paired the
+  // dark palette's near-white text with a white ground: invisible the moment a visitor's OS is dark.
+  "&": { fontSize: "12.5px", backgroundColor: "var(--surface)", color: "var(--ink-2)", height: "100%" },
   "&.cm-focused": { outline: "none" },
   ".cm-scroller": {
     fontFamily: "var(--font-mono), monospace",
@@ -52,7 +54,7 @@ const theme = EditorView.theme({
   ".cm-content": { padding: "12px 0", caretColor: "var(--accent)" },
   ".cm-line": { padding: "0 14px 0 6px" },
   ".cm-gutters": {
-    backgroundColor: "#fff",
+    backgroundColor: "var(--surface)",
     border: "none",
     color: "var(--muted)",
     fontFamily: "var(--font-mono), monospace",
