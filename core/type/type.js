@@ -78,6 +78,7 @@ export const STAGGER_FROM_BLURBS = {
   last: 'starts at the last unit and runs backwards to the first, pair it with a right-to-left exit',
   edges: 'starts at BOTH ends and closes on the middle, a line that shuts like a door',
   random: 'a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek',
+  typewriter: 'types one character at a time at a fixed TYPING RATE (`cps`, chars/sec) instead of a shared budget, so any split layer can reveal char by char at a chosen speed and still use a preset, a colour ramp, or a reversed exit',
 };
 
 // A REGISTRY, not a bare list, so `make arsenal Q="start the stagger from the middle"` finds it: the
@@ -90,8 +91,10 @@ export const STAGGER_FROM_REGISTRY = defineRegistry('stagger order', STAGGER_FRO
     title: 'Stagger order (`from`)',
     tag: 'text/parts',
     intro: 'The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`. Works in BOTH slots that take a stagger, a split text layer and `parts[]`. `each` is the per-unit delay; `amount` is the TOTAL seconds the whole train may take and derives that delay from the unit count, so a 90-glyph headline and a 6-word one hold the same beat. A number index is legal too: the wave starts at that unit.',
-    usage: (n, { text }) => text({ split: 'char', preset: 'up', each: 0.5, stagger: { amount: 0.6, from: n } }),
-    preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, split: 'char', preset: 'up', each: 0.5, stagger: { amount: 0.9, from: n } }] }),
+    usage: (n, { text }) => n === 'typewriter'
+      ? text({ split: 'char', preset: 'up', each: 0.15, stagger: { from: 'typewriter', cps: 24 } })
+      : text({ split: 'char', preset: 'up', each: 0.5, stagger: { amount: 0.6, from: n } }),
+    preview: (n, { base, HERO }) => base({ layers: [{ ...HERO, split: 'char', preset: 'up', each: n === 'typewriter' ? 0.15 : 0.5, stagger: n === 'typewriter' ? { from: 'typewriter', cps: 24 } : { amount: 0.9, from: n } }] }),
   },
 });
 export const STAGGER_FROM = STAGGER_FROM_REGISTRY.names;
@@ -104,7 +107,7 @@ export function staggerOffset(i, n, from = 'first') {
   if (from === 'center') return Math.abs(i - last / 2);
   if (from === 'edges') return last / 2 - Math.abs(i - last / 2);
   if (from === 'random') return random(`stagger:${i}`) * last;
-  return i;
+  return i; // 'first' and 'typewriter' both rank in index order; typewriter only changes the STEP below
 }
 
 // staggerFrom / staggerStep: the ONE reader of a stagger spec, so units, parts and the tactile mixer
@@ -113,6 +116,18 @@ export const staggerFrom = (spec) => (spec && typeof spec === 'object' ? (spec.f
 
 export function staggerStep(spec, n, fallback = 0.06) {
   if (spec && typeof spec === 'object') {
+    // typewriter's delay is a TYPING RATE, not a share of a shared budget: unit i lands at i/cps
+    // seconds. Every other `from` produces a RANK here and `unitProgress` multiplies it by a step
+    // derived FROM a budget (amount/n) or a flat fallback (each); typewriter is that same rank * step
+    // shape run backwards, the step is given (1/cps) and the effective budget falls out of it. So it
+    // slots into the existing contract as one more way to pick the step, not a second mechanism:
+    // unitProgress, animateUnits, presets and core/tracks/units.js's reversed exits all stay unchanged.
+    if (staggerFrom(spec) === 'typewriter') {
+      // 24 matches core/layers/text.js's own `typing === true ? 24 : typing` default, so
+      // `stagger: { from: 'typewriter' }` with no cps types at the same rate `typing: true` does.
+      const cps = spec.cps > 0 ? spec.cps : 24;
+      return 1 / cps;
+    }
     if (spec.amount > 0) {
       let max = 0;
       for (let i = 0; i < (n || 1); i++) max = Math.max(max, staggerOffset(i, n, staggerFrom(spec)));
