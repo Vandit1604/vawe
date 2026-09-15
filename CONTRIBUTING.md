@@ -13,8 +13,9 @@ already gone wrong and why the guard exists.
 ## Licence, first, so nobody wastes an afternoon
 
 Vawe is licensed under the **Apache License 2.0**. Use it, change it, ship it, commercially or not:
-keep the notices, and the patent grant comes with it. `LICENSE` is the full text and `LICENSE-FAQ.md`
-answers the usual questions. Contributions are accepted under the same licence.
+keep the notices, and the patent grant comes with it. `LICENSE` is the full text and `NOTICE` carries
+the third-party attribution a redistribution must keep. Contributions are accepted under the same
+licence.
 
 ## Getting it running
 
@@ -66,7 +67,7 @@ the author pays by deforming good work until a number moves.
 
 ## Assets
 
-Never commit a font, photo or brand mark without a licence and a source. `CREDITS.md` records every
+Never commit a font, photo or brand mark without a licence and a source. `NOTICE` records every
 one, and photos are fetched on demand rather than committed. No recreation of another company's
 marketing page ships from here, in any form.
 

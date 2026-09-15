@@ -7,7 +7,7 @@ node_modules/
 out/
 !out/.gitkeep
 assets/*.mp3
-# no font binary ships from this repo, paid or not (CREDITS.md): woff2 already covered above,
+# no font binary ships from this repo, paid or not (NOTICE): woff2 already covered above,
 # a bare .woff (e.g. a paid Klim face used locally for fidelity) is the same rule, same directory.
 assets/fonts/*.woff2
 assets/fonts/*.woff
@@ -72,7 +72,7 @@ assets/brands/**
 # paid/licensed fonts — used locally for fidelity, never committed (redistribution)
 assets/fonts/local/
 
-# vendored skill with no declared license — kept local, not redistributed (see CREDITS.md)
+# vendored skill with no declared license, kept local, not redistributed (see NOTICE)
 skills/taste-skill/
 
 # fetched sound effects — same policy as fonts (never committed; `make sfx` re-fetches).

@@ -18,10 +18,48 @@ limitations under the License.
 ===============================================================================
 Third-party notices
 
-This distribution includes the following third-party software. Each remains
-under its own license; see CREDITS.md for the full list.
+This distribution includes the following third-party software and assets.
+Each remains under its own license.
+
+Vendored code and skills:
 
 - impeccable (design skill), skills/impeccable/ - Apache License 2.0.
   License text vendored alongside it at skills/impeccable/LICENSE.
 
 - lottie-web (runtime), assets/vendor/ - MIT License. Copyright Airbnb.
+
+- taste-skill (design skill), skills/taste-skill/ - no declared license.
+  Not redistributed: kept local-only and gitignored until its license is
+  clarified.
+
+Fonts:
+
+No font binary is committed to this repository. `make fonts` downloads the
+free, openly-licensed faces (OFL 1.1 / Apache) from Fontsource at build time,
+into the gitignored assets/fonts/: Inter, Geist, Geist Mono, JetBrains Mono,
+Plus Jakarta Sans, Hanken Grotesk, Archivo, Caveat, Space Grotesk, Instrument
+Serif (all OFL 1.1).
+
+Sohne (Klim Type Foundry) is a paid face and is never distributed. It is
+used locally only for brand-fidelity captures; supply your own copy at
+assets/fonts/local/Sohne.woff2.
+
+Icon and photo sources:
+
+- Brand logos: Simple Icons (simpleicons.org), CC0. A handful of these SVGs
+  are committed under assets/icons/ because local demos load them. CC0
+  covers the icon file, not the trademark: a company mark stays that
+  company's mark.
+
+- Flags: flagcdn.com, public domain. Fetched on demand, not committed.
+
+- Photos: CC0 / CC-BY via the photo fetcher; CC-BY credits are recorded per
+  video. Fetched on demand, not committed.
+
+Never distributed:
+
+- Sohne (see Fonts above): a paid face, bring-your-own copy only.
+
+- Resource Boy gradient pack (assets/gradients/) and the Ransom letter
+  sprites (assets/ransom/, assets/ransom-src/): no-redistribute license.
+  Kept local-only and gitignored; rebuild with `make ransom-sprites`.
