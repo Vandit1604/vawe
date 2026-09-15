@@ -21,6 +21,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { sceneTiming } from './scene-timing.mjs';
 import { velocityAt, cameraAt, cameraVelocityAt } from '../../core/timeline/sequence.js';
+import { buildMotionIR } from '../../core/timeline/motion-ir.js';
 import { findVelocitySpikes, VELOCITY_SPIKE_PX_S, VELOCITY_SPIKE_SCALE_S } from './speed.mjs';
 import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
 
@@ -42,9 +43,19 @@ const f = gateFindings({ scene: file, indent: '  ' });
 console.log(`\n  jolt · ${path.basename(file)}`);
 
 // ---- layer motion tracks: one scan per layer across its WHOLE track, same reason as speed.mjs -----
+//
+// WHICH layers carry a track worth scanning now comes off the ONE motion model every gate is meant to
+// read (core/timeline/motion-ir.js), not off a bespoke `Array.isArray(L.motion)` check repeated in
+// this file. The velocity ARITHMETIC still calls sequence.js's own velocityAt on the layer's raw
+// keyframes: `ease: "through"` fits a Hermite curve off a key's NEIGHBOURS (sequence.js tangentAt),
+// which a flattened {t0,t1,from,to} segment cannot reconstruct on its own, so the IR is the gate's map
+// of WHERE to look and sequence.js stays the one owner of HOW FAST a track is actually moving there.
+const camKf = Array.isArray(T.scene.camera) ? T.scene.camera : [];
+const ir = buildMotionIR({ layers: T.content, camera: camKf });
+const jsonMotionIds = new Set(ir.filter((e) => e.source === 'json').map((e) => e.id));
 T.content.forEach((L, idx) => {
-  if (!Array.isArray(L.motion) || L.motion.length < 2) return;
   const id = L.id || `${L.type || 'layer'}#${idx}`;
+  if (!jsonMotionIds.has(id)) return;
   const [layerStart] = T.contentSpans[idx];
   const cutsRel = cutsAt.map((c) => c - layerStart);
   const spikes = findVelocitySpikes((t, dt) => velocityAt(L.motion, t, dt).speed,
@@ -56,8 +67,7 @@ T.content.forEach((L, idx) => {
 });
 
 // ---- camera legs, position and zoom, one scan each across the whole leg list ----------------------
-const camKf = Array.isArray(T.scene.camera) ? T.scene.camera : [];
-if (camKf.length > 1) {
+if (ir.some((e) => e.source === 'camera')) {
   const posSpikes = findVelocitySpikes((t, dt) => cameraVelocityAt(camKf, t, dt).speed,
     camKf[0].t, camKf[camKf.length - 1].t, fps, VELOCITY_SPIKE_PX_S, cutsAt);
   for (const s of posSpikes) f.warn('velocity-spike', `camera jumps +${s.jump} px/s in one frame at ${s.t}s (outside any cut)`, { at: `${s.t}s` });
