@@ -23,8 +23,11 @@ const textShared = Object.fromEntries(
 export function frame(kit, el, L, t, scene, { countStart, countDur, from, to, ease, unit, suffix, prefix, roll } = L) {
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   if (!(t >= start && t < end)) return;
+  // `contentStart` (a group child only) lets the count already be under way the instant it appears,
+  // without moving the window above that governs when it is on screen. Absent -> `start`, unchanged.
+  const clockStart = L.contentStart ?? start;
   const cs = countStart ?? 0.2, cd = countDur ?? 1.6;
-  const v = kit.interpolate(t - start, [cs, cs + cd], [from ?? 0, to ?? 100], { easing: kit.resolveEasing(ease || 'easeOutCubic') });
+  const v = kit.interpolate(t - clockStart, [cs, cs + cd], [from ?? 0, to ?? 100], { easing: kit.resolveEasing(ease || 'easeOutCubic') });
   // A leading currency symbol in `unit` is hoisted to the front: `unit:"$B"` reads "$880B", which is
   // what CLAUDE.md documents and what the catalog's own statBig.currency assumed. Appending it
   // verbatim produced "880$B". The doc, the manifest and the engine each said something different
