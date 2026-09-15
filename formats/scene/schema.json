@@ -29,6 +29,7 @@
    "color",
    "cols",
    "colw",
+   "contentStart",
    "critical",
    "crt",
    "css",
@@ -1991,6 +1992,11 @@
       "delay": {
        "type": "number",
        "label": "Stagger this child's entrance N seconds into the group's window",
+       "min": 0
+      },
+      "contentStart": {
+       "type": "number",
+       "label": "This child's CONTENT clock (video source time, typing, count, parts), N seconds into the group's window. May run before `delay` to pre-roll while hidden. Defaults to `delay`, clamped at the group's end",
        "min": 0
       }
      }
