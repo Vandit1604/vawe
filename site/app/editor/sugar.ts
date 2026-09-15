@@ -1,6 +1,7 @@
 /* THE `make expand` CLIFF, for HAND-TYPED sugar only.
  *
- * The engine ships four authoring sugars. Three of them — `block`, `beat`, `comp` — are BUILD-TIME:
+ * The engine ships four authoring sugars, and all four are BUILD-TIME: `block`, `beat` and `comp` are
+ * layer types, `edits` is a top-level cut list.
  * `core/expand.js` `expandScene` turns them into real layers, at load. The picker's own scenes never
  * hit this any more: scripts/site/scenes-json.mjs expands them at PUBLISH time, before they ever reach
  * `site/public/scenes/`. What is left, and what this file still exists for, is a scene a visitor TYPES
@@ -12,7 +13,7 @@
  * imports `core/expand.js`, because the render page's file server default-denies the ~186 block/beat
  * factories by design (`internal/scene/scene.go` `served`, a security wall for MCP/stranger scenes),
  * and one factory (`blocks/geo.mjs`) imports `d3-geo` by bare specifier, resolvable only through an
- * import map that page does not carry. So the editor catches the three FIRST, while a visitor is
+ * import map that page does not carry. So the editor catches all four FIRST, while a visitor is
  * typing, and says the true thing: this needs a publish step it cannot run here, here is the layer,
  * here is the line.
  */
@@ -28,6 +29,14 @@ function lineOf(doc: string, prop: string, value: string, from: number): number 
   const needle = new RegExp(`"${prop}"\\s*:\\s*"${value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`);
   const lines = doc.split("\n");
   for (let i = from; i < lines.length; i++) if (needle.test(lines[i])) return i + 1;
+  return 0;
+}
+
+/** Line of the first `"<key>":` in the source, 1-based, for a sugar that is a key and not a layer. */
+function lineOfKey(doc: string, key: string): number {
+  const needle = new RegExp(`"${key}"\\s*:`);
+  const lines = doc.split("\n");
+  for (let i = 0; i < lines.length; i++) if (needle.test(lines[i])) return i + 1;
   return 0;
 }
 
@@ -50,23 +59,38 @@ export function findSugar(scene: unknown, doc: string): Sugar[] {
       walk(L.children);
     }
   };
-  const s = scene as { layers?: unknown; comps?: Record<string, { layers?: unknown }> };
+  const s = scene as { layers?: unknown; edits?: unknown; comps?: Record<string, { layers?: unknown }> };
   walk(s?.layers);
   for (const c of Object.values(s?.comps ?? {})) walk(c?.layers);
+  // `edits` is the fourth sugar and the only one that is NOT a layer type: it is a top-level cut list
+  // that core/engine/expand.js lowers to chained `video` layers. The walk above cannot see it, so an
+  // edit list typed here used to render a blank stage with no message at all, which reads as broken
+  // rather than bounded. It crosses the same server boundary as the other three, so it gets the same
+  // refusal.
+  const edits = s?.edits;
+  if (Array.isArray(edits) && edits.length) {
+    const n = edits.length;
+    found.push({ type: "edits", name: `${n} cut${n === 1 ? "" : "s"}`, line: lineOfKey(doc, "edits") });
+  }
   return found;
 }
 
 /** The refusal, in the editor's own voice. Named the way the engine names things: what, and the fix. */
 export function sugarMessage(found: Sugar[]): string {
   const one = found.length === 1;
-  const list = found.map((f) => `  line ${f.line || "?"} · "type": "${f.type}" → ${f.name}`).join("\n");
+  const list = found
+    .map((f) => (f.type === "edits"
+      ? `  line ${f.line || "?"} · "edits" → ${f.name}`
+      : `  line ${f.line || "?"} · "type": "${f.type}" → ${f.name}`))
+    .join("\n");
   return (
-    `${found.length} build-time sugar layer${one ? "" : "s"} typed by hand. This stage cannot expand `
+    `${found.length} build-time sugar${one ? "" : "s"} typed by hand. This stage cannot expand `
     + `${one ? "it" : "them"} live:\n`
-    + `block, beat and comp are expanded before a render, not during one.\n\n`
+    + `block, beat, comp and edits are expanded before a render, not during one.\n\n`
     + `${list}\n\n`
     + `A scene picked from the list above is already expanded (scripts/site/scenes-json.mjs does that `
-    + `at publish time); typing a NEW block/beat layer by hand has no publish step to run it through. `
+    + `at publish time); typing a NEW block/beat/edits sugar by hand has no publish step to run it `
+    + `through. `
     + `Run \`make expand D=<scene.json>\` and paste the printed JSON, or replace the layer with the `
     + `primitives it emits.`
   );
