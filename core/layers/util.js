@@ -66,6 +66,28 @@ export const paintsOwnGlyphs = (L) => !!L && GLYPH_PAINTERS.some((k) => L[k]);
 // so the inheritance rule is testable without a DOM (addGroupChild needs one for everything else it does).
 export const childExitDur = (C, rootL) => C.exitDur ?? rootL.exitDur;
 
+// childContentStart(C, rootL, delayOffset) -> the group-relative offset (seconds into rootL's own
+// window, same base `delay` counts from) a child's CONTENT clock reads from: which moment of a video,
+// a typed line, a count or a `parts` figure is showing. Kept separate from the VISIBILITY window
+// above on purpose: a video can start its source clip, hidden, before the child appears, so it reads
+// mid-clip the instant it is on screen, without moving when it appears. Absent -> the child's own
+// `delay`, so an unauthored field renders byte-identical to today. Validated and clamped here, the
+// one place both the offset and the group's own span are already in scope.
+export function childContentStart(C, rootL, delayOffset) {
+  if (C.contentStart == null) return (rootL.start ?? 0) + delayOffset;
+  const cs = +C.contentStart;
+  if (!Number.isFinite(cs) || cs < 0)
+    throw new Error(`layer${C.id ? ` "${C.id}"` : ''} (type "${C.type || 'text'}"): \`contentStart\` `
+      + `must be a non-negative number of seconds into the group's window, got ${JSON.stringify(C.contentStart)}.`);
+  const span = rootL.duration ?? 0;
+  if (cs > span) {
+    console.log(`adapted content-start: child ${C.id || C.type} contentStart ${cs} -> ${span} `
+      + `(would start its content past the group's own end)`);
+    return (rootL.start ?? 0) + span;
+  }
+  return (rootL.start ?? 0) + cs;
+}
+
 // The props the SHARED KIT reads, for every layer type that calls it, the type styling, the chip box,
 // the decoration pass, the group layout, and a group child's own timing. A prop honoured here is honoured
 // everywhere, which is why it is one flat set and not a per-type one.
@@ -87,7 +109,7 @@ export const PROPS = {
   layout: {}, gridCols: { when: 'layout' }, colw: { when: 'layout' }, colGap: {}, gap: {}, rowGap: {},
   items: {}, align2: {}, direction: {}, wrap: {}, justify: {}, h: {},
   // a group child's own box and timing (addGroupChild / sizeChild)
-  grow: {}, basis: {}, delay: {}, critical: {}, x: {}, y: {}, split: {}, origin: {},
+  grow: {}, basis: {}, delay: {}, contentStart: {}, critical: {}, x: {}, y: {}, split: {}, origin: {},
 };
 
 // crtSpec(o) -> { filter, background }. Pure, and exported so the arithmetic is testable without a
@@ -580,6 +602,7 @@ export function createKit(ctx) {
     const d = Math.max(0, +C.delay || 0);
     const cStart = (rootL.start ?? 0) + d, cDur = Math.max(0, (rootL.duration ?? 0) - d);
     const exitDur = childExitDur(C, rootL); // see childExitDur above
+    const contentStart = childContentStart(C, rootL, d); // see childContentStart above
     if (isGroup) {
       c.className = 'hs-group';
       layoutGroup(c, C); chipBox(c, C); sizeChild(c, C, false);
@@ -650,7 +673,8 @@ export function createKit(ctx) {
     if (C.out) c.dataset.out = C.out;
     if (C.enterDur != null) c.dataset.enter = String(C.enterDur);
     if (exitDur != null) c.dataset.exitDur = String(exitDur);
-    extra.push({ L: { ...C, start: cStart, duration: cDur }, el: c, units: C.split ? splitText(c, C.split) : null });
+    extra.push({ L: { ...C, start: cStart, duration: cDur,
+      ...(C.contentStart != null ? { contentStart } : {}) }, el: c, units: C.split ? splitText(c, C.split) : null });
   }
 
   // `trackingCss` is exported so anything that needs to KNOW the settled letter-spacing can ask the

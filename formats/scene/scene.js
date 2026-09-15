@@ -544,7 +544,7 @@ boot((data, fps, theme, canvas) => {
           // refused by `validate` when it is not, and translated here at the single seam where a spec
           // meets GSAP's two different words for the same two places (`start`/`end`).
           ...spec[2], duration: p.each ?? 0.5, stagger: gsapStagger(p.stagger, 0.07),
-          ease: gsapEase(p.ease, 'power3.out', `layer ${L.type} parts`), delay: (L.start ?? 0) + (p.delay ?? 0.1), immediateRender: true,
+          ease: gsapEase(p.ease, 'power3.out', `layer ${L.type} parts`), delay: (L.contentStart ?? L.start ?? 0) + (p.delay ?? 0.1), immediateRender: true,
         });
         // A PART CAN NOW LEAVE. Every entry used to be a one-way tween, so a hand-authored html figure
         // could only ever fade out as ONE card while a native layer stack left piece by piece. That
@@ -561,7 +561,7 @@ boot((data, fps, theme, canvas) => {
           window.gsap.fromTo(targets, { ...spec[2] }, {
             ...spec[3], duration: exitDur, stagger: gsapStagger(p.stagger, 0.07),
             ease: gsapEase(p.exitEase ?? p.ease, 'power2.in', `layer ${L.type} parts exit`),
-            delay: (L.start ?? 0) + Math.max(0, span - exitDur), immediateRender: false,
+            delay: (L.contentStart ?? L.start ?? 0) + Math.max(0, span - exitDur), immediateRender: false,
           });
         }
       }

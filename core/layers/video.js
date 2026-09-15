@@ -26,7 +26,10 @@ import { srcUrl } from '../engine/src-url.js';
 // `start` is shared vocabulary (declared centrally, core/layers/vocabulary.js) so it stays `L.start`
 // rather than joining this pattern; `in`/`rate`/`out` are this layer's own and read here.
 export function sourceTime(L, t, { in: from, rate, out } = L) {
-  const start = L.start ?? 0;
+  // `contentStart` (a group child only, core/layers/util.js) is the CONTENT clock: when the source
+  // clip's own zero should read against the scene clock. Falls back to `L.start`, the visibility
+  // start, so a layer with no `contentStart` seeks exactly as it always has.
+  const start = L.contentStart ?? L.start ?? 0;
   const f = from ?? 0;
   const to = out != null ? out : Infinity;
   const raw = f + Math.max(0, t - start) * (rate ?? 1);
