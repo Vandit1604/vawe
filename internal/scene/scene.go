@@ -176,7 +176,7 @@ func allocOpts(ss int) []chromedp.ExecAllocatorOption {
 		// flag. Cost: none measurable on a 60-frame draft (engine-doctrine/MISTAKES.md #507).
 		//
 		// PRICED PROPERLY, against a real baseline, once the stopwatch existed. Turning partial raster back
-		// ON (VAWE_CHROME_FLAGS="disable-partial-raster=false", 3 runs each against verify/perf/baseline.json)
+		// ON (VAWE_CHROME_FLAGS="disable-partial-raster=false", 3 runs each against quality/baselines/perf/baseline.json)
 		// moved plinth-ad +4.2% and site-backdrop +1.9%, both INSIDE the run-to-run spread and both in the
 		// slower direction. So this flag buys byte-identical frames for nothing measurable, and that is the
 		// whole record: CLAUDE.md asks for two numbers when the capture path changes, and these are them.

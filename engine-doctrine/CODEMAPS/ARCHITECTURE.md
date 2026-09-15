@@ -105,7 +105,7 @@ Mapped by reading the code, not the docs. Every claim below cites a file; go the
 | 4 | look and layout | `core/looks/`, `core/color/`, `core/layout/`, `core/registry/`, `themes/`, `presets/` | `resolveLook` DERIVES scale and cuts from the theme's motion by regression over a fixed sample of real theme files; `layout` is a deliberate constant because no signal was found (`core/registry/theme-contract.js:243`) |
 | 5 | cuts, camera, audio | `core/transitions/`, `core/cuts/`, `core/camera-moves/`, `core/audio/`, `core/beats/` | the 3D rig is a FILM-WIDE switch: one tilted layer or one non-zero camera angle puts the whole film on it (`formats/scene/scene.js:1107`) |
 | 6 | authoring | `harness/author/`, `harness/lib/`, `harness/dev/` | `assemble` owns only the ids it generates and preserves everything else through an explicit allowlist; it is idempotent by that list, not by nature (`harness/author/assemble.mjs:44-50`) |
-| 7 | verification | `quality/gates/`, `harness/live/`, `verify/` | the ladder always runs every step; `TASTE=1` changes severity, not membership, and `HARD_CODES` escalates by FINDING CODE regardless of which step produced it (`quality/gates/author-check.mjs:146`) |
+| 7 | verification | `quality/gates/`, `harness/live/` | the ladder always runs every step; `TASTE=1` changes severity, not membership, and `HARD_CODES` escalates by FINDING CODE regardless of which step produced it (`quality/gates/author-check.mjs:146`) |
 
 **`three` is native, and this is where people miss it.** `core/layers/index.js:36` registers a real
 three.js scene graph, implemented in `core/surfaces/three-fx.js` with eleven effects including
@@ -181,8 +181,7 @@ Each of these cost someone real time. Each cites the file that settles it.
 | `internal/encode` (Go) | ffmpeg wrapper | H.264 + grain; `Mux` adds audio. |
 | `internal/audio` (Go) | PCM mixer | music loop + named sfx at cue times + **VO ducking** + sting + limiter. |
 | `internal/queue` (Go) | concurrency runner | foundation for batch (wired to `--all`). |
-| `scripts/` | authoring tools + gates | `harness/author/` (preview/storyboards/captions), `harness/media/` (assets/audio/music/beatsync), `scripts/site/` (gallery). **Gates live in `quality/gates/`**: `probe-purity`, `lib-test`, `lint-test`, `snap-scenes` (`make snap-all`), `canvas-purity`, `schema-drift`, `blocks-audit`, `motion-audit`, `dead-branch`, `docs-drift`. |
-| `verify/` | review tooling | `run.js` (`make verify`: integrity + safe-zone + contact sheets), `audit.mjs` (`make audit`: overlap/overflow/spacing), `review.mjs` (`make review`: fast snapshot). |
+| `scripts/` | authoring tools + gates | `harness/author/` (preview/storyboards/captions), `harness/media/` (assets/audio/music/beatsync), `scripts/site/` (gallery). **Gates live in `quality/gates/`**: `probe-purity`, `lib-test`, `lint-test`, `snap-scenes` (`make snap-all`), `canvas-purity`, `schema-drift`, `blocks-audit`, `motion-audit`, `dead-branch`, `docs-drift`, `run.js` (`make verify`: integrity + safe-zone + contact sheets), `review.mjs` (`make review`: fast snapshot). |
 | `harness/media/kie.mjs` | **planned AI-media client** (kie.ai) | createTask → poll → download for `tts / music / gen-image / gen-video / transcribe`. **Intentional future infra** for another engine-level output (sound, vocals, generated imagery). No consumers yet; do not delete as "dead code". |
 | `.githooks/pre-push` | pre-push gate | runs `make schema-check lib-test`; install with `make install-hooks`. |
 

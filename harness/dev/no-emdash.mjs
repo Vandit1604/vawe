@@ -20,7 +20,7 @@ const QUIET = process.argv.includes('--quiet');
 // tooling, and every markdown file. Nothing is "not yet reached" any more; the whole repo is in scope.
 const SCOPE = [
   'core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'tools', 'formats', 'scene', 'films',
-  'verify', 'blueprints', 'cli', 'engine-doctrine', 'Makefile', '*.md', 'studio',
+  'blueprints', 'cli', 'engine-doctrine', 'Makefile', '*.md', 'studio',
   'cmd', 'internal', 'mcp', 'themes', 'presets', 'registry',
 ];
 

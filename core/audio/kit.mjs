@@ -194,7 +194,7 @@ export function wavDuration(samples) { return samples.length / SR; }
 // is why they were described as sounding bad. They were an impression of Cuelume, not Cuelume
 // (engine-doctrine/MISTAKES.md #58). Do not hand-edit these; re-extract from the library if it versions up.
 // TEN CUES WERE REMOVED AFTER A LISTENING PASS, and the reason is measurable rather than a matter of
-// taste. All twenty were baked and judged by ear (verify/sound-verdicts.json, via
+// taste. All twenty were baked and judged by ear (quality/baselines/sound-verdicts.json, via
 // `node harness/dev/sound-lab.mjs`), and sorting the verdicts against their own specs found one clean
 // rule: EVERY cue that was kept has ZERO noise layers, and the chance of rejection rises with the
 // noise-layer count (keep 0.00, weak 1.00, reject 1.40). Attack and peak barely differ between the
@@ -279,18 +279,18 @@ export const CUES = {
   chime: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1046.5, "attack":0.006, "decay":0.22, "peak":0.09}, {"kind":"tone","waveform":"sine","frequency":1568, "offset":0.09, "attack":0.006, "decay":0.26, "peak":0.08}], "shimmer":{"delay":0.12, "feedback":0.25, "wet":0.18, "lowpass":4000.0}},
   sparkle: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":1760, "offset":0, "attack":0.003, "decay":0.09, "peak":0.045}, {"kind":"tone","waveform":"sine","frequency":2217, "offset":0.045, "attack":0.003, "decay":0.09, "peak":0.04}, {"kind":"tone","waveform":"sine","frequency":2637, "offset":0.09, "attack":0.003, "decay":0.1, "peak":0.038}, {"kind":"tone","waveform":"sine","frequency":3520, "offset":0.135, "attack":0.003, "decay":0.12, "peak":0.032}], "shimmer":{"delay":0.07, "feedback":0.35, "wet":0.22, "lowpass":6000.0}},
   // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
-  // (verify/sound-verdicts.json round 3). Numbers look arbitrary because they are a measured
+  // (quality/baselines/sound-verdicts.json round 3). Numbers look arbitrary because they are a measured
   // preference rather than a designed one: `compose('droplet', 3)` in harness/dev/sound-vary.mjs
   // reproduces them exactly.
   droplet: {"masterGain": 0.55, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 1319.452355839312, "attack": 0.006, "decay": 0.26, "peak": 0.09374999999999999, "offset": 0}, {"kind": "tone", "waveform": "sine", "frequency": 1662.5099683575331, "attack": 0.0084, "decay": 0.2028, "peak": 0.05769230769230769, "offset": 0.008726843487471343}]},
   // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
-  // (verify/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
+  // (quality/baselines/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
   // preference rather than a designed one: `vary('bloom', 3)` in harness/dev/sound-vary.mjs
   // reproduces them exactly.
   bloom: {"masterGain": 0.5, "layers": [{"kind": "tone", "waveform": "sine", "frequency": 597.135335543789, "attack": 0.06768921516090631, "decay": 0.14823116605728864, "peak": 0.07345559132331983}, {"kind": "tone", "waveform": "sine", "frequency": 426.59458829540756, "detune": 12, "attack": 0.14212638809904457, "decay": 0.48715202256059276, "peak": 0.05493165752501228}], "shimmer": {"delay": 0.15, "feedback": 0.2, "wet": 0.12, "lowpass": 2500}},
   success: {"masterGain":0.5, "layers":[{"kind":"tone","waveform":"sine","frequency":880, "attack":0.004, "decay":0.09, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1108.73, "offset":0.06, "attack":0.004, "decay":0.1, "peak":0.06}, {"kind":"tone","waveform":"sine","frequency":1318.51, "offset":0.12, "attack":0.004, "decay":0.18, "peak":0.07}], "shimmer":{"delay":0.1, "feedback":0.22, "wet":0.16, "lowpass":4500}},
   // PROMOTED FROM A VARIANT. The shipped voicing was rejected by ear and this one kept
-  // (verify/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
+  // (quality/baselines/sound-verdicts.json round 2). Numbers look arbitrary because they are a measured
   // preference rather than a designed one: `vary('ready', 7)` in harness/dev/sound-vary.mjs
   // reproduces them exactly.
   // PROMOTED FROM A VARIANT, round 5 (`compose('ready', 3)` in

@@ -5,7 +5,7 @@
   "description": "Deterministic motion-graphics engine: one self-describing JSON in, one video out. Renders frame-by-frame in Chrome, encodes with ffmpeg.",
   "scripts": {
     "setup:audio": "node harness/media/gen-audio.mjs",
-    "verify": "node verify/run.js",
+    "verify": "node quality/gates/run.js",
     "look": "node harness/author/preview.mjs",
     "prepublishOnly": "node harness/dev/pack-check.mjs",
     "pack-check": "node harness/dev/pack-check.mjs"

@@ -6,7 +6,7 @@
 // alone. A variant is therefore reproducible: `vary(name, i)` is a pure function.
 //
 // THE LOOP THIS SERVES. Round 1 judged the twenty shipped cues and found one rule the notes never said:
-// every cue kept had ZERO noise layers (verify/sound-verdicts.json). That rule came out of sorting
+// every cue kept had ZERO noise layers (quality/baselines/sound-verdicts.json). That rule came out of sorting
 // verdicts against specs, not out of anybody's opinion. This tool exists to run that loop again on a
 // wider field: generate many, listen, keep few, then look at what the survivors have in common.
 //

@@ -74,13 +74,13 @@ function makeTargets() {
  *      author is already unsure. Moving the scripts into `harness/author|brand|gates|media|site/`
  *      left 111 of these naming a path that had not existed since the move.
  *   2. A QUOTED path handed to a child process: `spawnSync('node', ['harness/lib-test.mjs'])`.
- *      `verify/review.mjs` had two, so `make review` had been failing two of its three checks on
+ *      `quality/gates/review.mjs` had two, so `make review` had been failing two of its three checks on
  *      ERR_MODULE_NOT_FOUND. That is the worst version of this defect, because a health command that
  *      reports a failure looks like it is working. Nobody reads a red check twice.
  */
 function selfRefs() {
-  const RUN = /\bnode\s+((?:scripts|harness|quality|generators|research|core|verify|blocks|tools|scene|films)\/[A-Za-z0-9_./-]+\.(?:mjs|js))/g;
-  const QUOTED = /['"`]((?:scripts|harness|quality|generators|research|verify|blocks|tools|scene|films)\/[A-Za-z0-9_./-]+\.(?:mjs|js))['"`]/g;
+  const RUN = /\bnode\s+((?:scripts|harness|quality|generators|research|core|blocks|tools|scene|films)\/[A-Za-z0-9_./-]+\.(?:mjs|js))/g;
+  const QUOTED = /['"`]((?:scripts|harness|quality|generators|research|blocks|tools|scene|films)\/[A-Za-z0-9_./-]+\.(?:mjs|js))['"`]/g;
   const out = [];
   // This file QUOTES the patterns it hunts, in the comment above and in the header. Excluded by
   // reason, never by convenience: `dead-branch.mjs` carries the identical exclusion for the identical
@@ -120,7 +120,7 @@ function makeRecipes() {
     if (t) { target = t[1]; return; }
     if (!/^\t/.test(line)) { if (line.trim()) target = null; return; }
     if (!target) return;
-    for (const m of line.matchAll(/\bnode\s+((?:scripts|harness|quality|generators|research|core|verify|blocks|tools|scene|films)\/[A-Za-z0-9_./-]+\.(?:mjs|js))/g)) {
+    for (const m of line.matchAll(/\bnode\s+((?:scripts|harness|quality|generators|research|core|blocks|tools|scene|films)\/[A-Za-z0-9_./-]+\.(?:mjs|js))/g)) {
       out.push({ target, script: m[1], line: i + 1 });
     }
   });

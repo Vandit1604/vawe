@@ -1,17 +1,17 @@
-// verify/run.js: light, format-agnostic checks (no per-format special-casing).
+// quality/gates/run.js: light, format-agnostic checks (no per-format special-casing).
 //   per format: integrity (ffprobe) + safe-zone (critical bboxes ⊂ SAFE) + a contact sheet.
-//   node verify/run.js [format ...]      (default: all formats)
+//   node quality/gates/run.js [format ...]      (default: all formats)
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { ffprobe } from './extract.js';
-import { safeArea, ASPECTS, sceneDims } from '../core/layout/safe.js';
-import { population } from '../harness/lib/census.mjs';
-import { serveRepo, waitForEngine } from '../harness/lib/render-harness.mjs';
+import { safeArea, ASPECTS, sceneDims } from '../../core/layout/safe.js';
+import { population } from '../../harness/lib/census.mjs';
+import { serveRepo, waitForEngine } from '../../harness/lib/render-harness.mjs';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const formatsDir = path.join(repoRoot, 'formats');
 const OUT = path.join(repoRoot, 'quality', 'runs', 'out');
 fs.mkdirSync(OUT, { recursive: true });
@@ -102,13 +102,14 @@ for (const m of modules) {
 
   // contact sheet (key frames)
   const ts = [0.2, ...(meta.stings || []), meta.duration - 0.3].filter((t, i, a) => t >= 0 && t < meta.duration && a.indexOf(t) === i).slice(0, 12);
-  const cs = path.join(repoRoot, 'verify', `.${m}_cs`); fs.rmSync(cs, { recursive: true, force: true }); fs.mkdirSync(cs, { recursive: true });
+  const cs = path.join(OUT, `.${m}_cs`); fs.rmSync(cs, { recursive: true, force: true }); fs.mkdirSync(cs, { recursive: true });
   ts.forEach((t, i) => spawnSync('ffmpeg', ['-v', 'error', '-y', '-ss', t.toFixed(3), '-i', out, '-vf',
     `scale=270:480,drawtext=text='${t.toFixed(1)}s':x=6:y=6:fontsize=22:fontcolor=white:box=1:boxcolor=black@0.6`,
     '-frames:v', '1', path.join(cs, `${String(i).padStart(2, '0')}.png`)]));
-  spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', path.join(cs, '%02d.png'), '-vf', 'tile=4x3:padding=8:color=0x0a0a0c', '-frames:v', '1', path.join(repoRoot, 'verify', `${m}_contactsheet.png`)]);
+  const contactSheet = path.join(OUT, `${m}_contactsheet.png`);
+  spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', path.join(cs, '%02d.png'), '-vf', 'tile=4x3:padding=8:color=0x0a0a0c', '-frames:v', '1', contactSheet]);
   fs.rmSync(cs, { recursive: true, force: true });
-  add('contact-sheet', m, true, `verify/${m}_contactsheet.png`);
+  add('contact-sheet', m, true, path.relative(repoRoot, contactSheet));
 }
 await browser.close(); server.close();
 
