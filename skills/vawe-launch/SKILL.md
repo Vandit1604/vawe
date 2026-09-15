@@ -25,7 +25,7 @@ If there's a URL: `make sections URL=… NAME=<brand>` (inventory every section)
 **Gate:** brand captured (or, no-site: colours/fonts stated from the brief).
 
 ## Step 2: Design system (pick a preset, remix onto the brand)
-Pick the `presets/*.json` whose look fits (editorial · technical · bold · warm), then:
+Pick the `directions/*.json` whose look fits (editorial · technical · bold · warm), then:
 `make theme-remix PRESET=<name> BRAND=<brand> BG=<#hex> ACCENT=<#hex> [TEXT=<#hex>]` → a complete,
 contrast-checked `themes/<brand>.json`. Don't hand-author a theme unless a mapping truly needs it.
 **Gate:** `themes/<brand>.json` exists and validates.

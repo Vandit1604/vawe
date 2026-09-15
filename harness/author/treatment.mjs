@@ -43,7 +43,7 @@ const picked = chosen.exists ? chosen.receipt : null;
 
 const themeName = flag('--theme', picked?.preset || sb.theme || 'vawe');
 let theme = null;
-for (const p of [`themes/${themeName}.json`, `presets/${themeName}.json`]) {
+for (const p of [`themes/${themeName}.json`, `directions/${themeName}.json`]) {
   try { theme = JSON.parse(fs.readFileSync(p, 'utf8')); break; } catch { /* try the next */ }
 }
 const C = theme?.colors || theme?.base || {};
