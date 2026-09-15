@@ -331,3 +331,47 @@ Two things follow:
 The rule this borrows from is another engine', which forbids animating layout properties outright and lints
 for it. vawe does not need the lint: `motionAt` returns transforms, so 91% of the library's motion keys
 are transforms by construction. The box track is the deliberate exception, and this is its cost.
+
+## ONE MODEL OF WHAT MOVES: the motion IR
+
+Five separate systems write motion in this engine and, until now, no gate could see more than one of
+them at a time: a gate reading `L.motion` directly is blind to a kinetic preset or a GSAP `fx` doing the
+exact same job. `core/timeline/motion-ir.js` exports `buildMotionIR(scene)`, a pure function of an
+EXPANDED scene (post `core/engine/expand.js`, so relative times and beats are already numbers) that
+returns one flat list, in FILM SECONDS, for every gate to read instead of re-deriving its own:
+
+```js
+{ id, source, prop, segments: [{ t0, t1, from, to, ease }] | null, why? }
+```
+
+`id` names the layer (its own `id`, or `type#index`, the same fallback every gate already uses) or
+`"camera"`. `source` is which system wrote the move. What it covers today, and on what clock:
+
+- **`json`**: a layer's `motion[]` keys, including a GROUP CHILD's own track. A child carries no
+  `start` of its own; its clock is the parent's `start` plus the child's own `delay` (the VISIBILITY
+  window, not `contentStart`, the content clock item 5 added: `motion` has never read it).
+- **`camera`**: the film's `camera[]` legs, x/y/s/rx/ry/roll, on the camera's own absolute clock.
+- **`idle`**: authored idle (`core/engine/idle.js`) gets one entry spanning the layer's live window,
+  `segments: null`, because a sine generator has no single `from`/`to` to report, only an amplitude.
+- **`kinetic`**: a split layer's `preset` (`core/kinetic/presets.js`). `parts`: a hand-authored
+  fragment's per-child entrance (`core/motion/parts.js`).
+- **`gsap-fx`, `gsap-motionPath`, `gsap-physics`**: named GSAP effects, path-following and 2D physics.
+
+**What it cannot time yet, on purpose.** `kinetic` and `parts` get an entry with `segments: null` and a
+`why` string rather than a guessed number: a unit's own stagger offset is a closed formula of its
+INDEX, but the total unit count (how many words a string splits into, how many elements `parts.select`
+actually matches against hand-written markup) is known only once the real text or markup is split in
+the DOM, which this IR never touches. `gsap-fx`/`motionPath`/`physics` are the same shape of unknown one
+level up: their timing lives inside an opaque, registered GSAP effect function, not in data this file
+can read. A gate that needs a REAL number for one of these still has to render or measure; the IR's job
+is only to say, truthfully, that something moves there and name why it cannot say when.
+
+**One gate reads it so far**: `quality/gates/jolt-check.mjs` (the velocity-spike / dead-window check)
+now discovers which layers and camera legs are worth scanning off `buildMotionIR` instead of its own
+`Array.isArray(L.motion)` check. The velocity ARITHMETIC is untouched, still `sequence.js`'s own
+`velocityAt`/`cameraAt`/`cameraVelocityAt` on each layer's raw keyframes (`ease: "through"` fits a
+Hermite curve off a key's neighbours, which a flattened segment alone cannot reconstruct), so the
+migration changed WHERE the gate looks, never HOW FAST it decides a track is moving there. Proved on
+every film in `formats/scene/`: the gate's stdout is unchanged, save one stack-trace line number in a
+deliberately-invalid template file. `core/timeline/motion-ir.test.mjs` asserts the IR's own segment
+math on a fixture and that its coverage never disagrees with a naive raw-JSON scan on the whole library.
