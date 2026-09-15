@@ -10,7 +10,7 @@ Status: **reduced, not yet minimal. NOT filed anywhere.** File it upstream only 
 below is done, because a report that needs a whole motion-graphics engine to reproduce will be closed.
 
 Chrome version measured: whatever `CHROME_BIN` resolves to on this machine, headless, macOS 15.6 on an
-Apple M4. `internal/scene.allocOpts` is the flag set; `TestGLRenderer` in that package prints the
+Apple M4. `renderer/internal/scene.allocOpts` is the flag set; `TestGLRenderer` in that package prints the
 renderer string, which is `ANGLE (Apple, ANGLE Metal Renderer: Apple M4)` with canvas, compositing and
 rasterisation all hardware accelerated.
 
@@ -92,6 +92,6 @@ changes it: `num-raster-threads=1`, `disable-composited-antialiasing`, `disable-
 `skia-resource-cache-limit-mb=0`, `deterministic-mode`. `disable-threaded-compositing` hangs the
 capture and `force-gpu-mem-available-mb=1` only agrees because it breaks the page.
 
-Note the third one on that list: `disable-gpu-rasterization` is what `internal/scene/scene.go` now
+Note the third one on that list: `disable-gpu-rasterization` is what `renderer/internal/scene/scene.go` now
 sets, and it fixes a DIFFERENT defect (`engine-doctrine/MISTAKES.md` #552, the supersampled raster). This one
 survives it, which is the evidence that they are two bugs and not one.
