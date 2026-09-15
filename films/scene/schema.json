@@ -1062,6 +1062,60 @@
     }
    }
   },
+  "edits": {
+   "type": "array",
+   "label": "Optional: a cut list of real footage, {id, src, in, out, ...}, lowered at expand time (core/engine/expand.js) into one `video` layer per entry, chained by \"<previous id>.end\" (core/timeline/relative-time.js) so an author never computes an offset by hand. NOT `cuts`: that key is the internal lowered output of transitions[] and is refused as an authored key (core/validate/validate.mjs). transitions[] still owns boundaries between cuts. A scene with no edits[] is untouched.",
+   "item": {
+    "id": {
+     "type": "string",
+     "label": "This cut's id, and the name the NEXT cut's start chains off (\"<id>.end\").",
+     "required": true
+    },
+    "src": {
+     "type": "string",
+     "label": "The source clip, a path under assets/",
+     "required": true
+    },
+    "in": {
+     "type": "number",
+     "label": "Trim-in point in the SOURCE (s)",
+     "required": true
+    },
+    "out": {
+     "type": "number",
+     "label": "Trim-out point in the SOURCE (s). Must be greater than `in` (core/layers/video.js refuses an empty cut).",
+     "required": true
+    },
+    "rate": {
+     "type": "number",
+     "label": "Playback speed against the scene clock (default 1). The lowered layer's duration is (out-in)/rate."
+    },
+    "audio": {
+     "type": "boolean|object",
+     "label": "true, or {gain, duck}: pull this cut's own sound into the mix (core/layers/video.js, harness/media/clip-audio.mjs). Default absent = silent."
+    },
+    "fit": {
+     "type": "string",
+     "label": "Object-fit, only meaningful once `w`/`h` place this cut off full frame"
+    },
+    "w": {
+     "type": "number",
+     "label": "Width (px), for a cut that is not full frame. Default: full frame."
+    },
+    "h": {
+     "type": "number",
+     "label": "Height (px), for a cut that is not full frame. Default: full frame."
+    },
+    "x": {
+     "type": "number",
+     "label": "X (px), for a cut that is not full frame."
+    },
+    "y": {
+     "type": "number",
+     "label": "Y (px), for a cut that is not full frame."
+    }
+   }
+  },
   "spectacle": {
    "type": "object",
    "label": "The film's ONE loud moment, nominated: { at, of, device, why }. `device` is a shader sting name (flash | chromaticSplit | glitch | streak | whipPan | ripple | sdfIris | vortex | lens | dispersion | iridescence | cinematicZoom) written at `at`. The other half is what makes it real: with a spectacle declared the engine pulls EVERY competing amplitude dial in the film down to 55% (other stings, seams, composite-look strength, glow/beam intensity, kick scale), and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained, and the engine keeps it. core/timeline/spectacle.js.",

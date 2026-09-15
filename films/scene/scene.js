@@ -588,7 +588,13 @@ boot((data, fps, theme, canvas) => {
     }
     if (L.split) el.dataset.enter = '0';
     else if (!L.cut) el.dataset.enter = String(+(L.enterDur ?? BASE_ENTER * M.durationScale).toFixed(3));
-    if (L.out) el.dataset.out = L.out;
+    // `video` is the one type where `out` already means something else (core/layers/video.js: the
+    // SOURCE trim-out point, a number), not the exit-anim name every other type reads it as here. A
+    // hand-authored two-cut edit crashed the render the moment `out` was set on the second clip,
+    // `resolveAnim` refusing the trim point itself as an unknown anim name ("unknown anim \"5\"").
+    // `in`/`out` only mean anything together on a video layer, so this exemption is not optional.
+    const ownsOut = L.type === 'video';
+    if (L.out && !ownsOut) el.dataset.out = L.out;
     // NO DEFAULT FADE-OUT. BASE_EXIT used to apply to every layer that named no `out`, so a layer
     // authored to simply END held nothing: it faded for its last ~0.26s whether or not anyone asked
     // for that fade, one more hand quietly writing this layer's life. An exit is now authored (`out`,
@@ -597,7 +603,7 @@ boot((data, fps, theme, canvas) => {
     // being drawn there. `exitDur` alone (no `out`) still opts into the OLD calm in-place fade
     // (clipStyleAt's default when `out` is absent), so that spelling keeps working unchanged.
     if (L.exitDur != null) el.dataset.exitDur = String(L.exitDur);
-    else if (!L.cut && L.out) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale * M.exitRatio).toFixed(3));
+    else if (!L.cut && L.out && !ownsOut) el.dataset.exitDur = String(+(BASE_EXIT * M.durationScale * M.exitRatio).toFixed(3));
     // scene units: the beat WRAPPER owns the exit slide. Suppress this layer's own exit fade and keep it
     // alive through the wrapper's exit window, or it would vanish mid-slide. Non-last beats only (the
     // last beat has no exit cut), and only the layers that are still the beat's CURRENT STATE

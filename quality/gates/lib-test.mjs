@@ -8723,6 +8723,57 @@ const FLOOR = 1800;
   ok('relative-time: a scene with no beats[] is untouched', JSON.stringify(noBeatsCopy) === JSON.stringify(noBeats));
 }
 
+// EDITS[] (real-footage cut list, core/engine/expand.js `lowerEdits`): lowers to one `video` layer per
+// entry, chained by "<id>.end" through the same resolveRelativeTimes every other sugar uses.
+{
+  const scene = {
+    module: 'scene', duration: 10,
+    edits: [
+      { id: 'a', src: 'assets/clips/interview.mp4', in: 4, out: 9.5, audio: true },
+      { id: 'b', src: 'assets/clips/broll.mp4', in: 12, out: 15 },
+    ],
+  };
+  const x = expandScene(structuredClone(scene));
+  ok('edits: lowers to one video layer per entry', x.layers.length === 2 && x.layers.every((l) => l.type === 'video'));
+  ok('edits: first cut starts at 0, duration = out-in', x.layers[0].start === 0 && approx(x.layers[0].duration, 5.5));
+  ok('edits: second cut chains off the first cut\'s end', approx(x.layers[1].start, 5.5) && approx(x.layers[1].duration, 3));
+  ok('edits: fields pass through (src, in, out, audio)', x.layers[0].src === 'assets/clips/interview.mp4'
+    && x.layers[0].in === 4 && x.layers[0].out === 9.5 && x.layers[0].audio === true);
+  ok('edits: `edits` is consumed and deleted, never leaks past expand', !('edits' in x));
+
+  // `rate` halves the duration.
+  const rated = expandScene({ module: 'scene', duration: 5,
+    edits: [{ id: 'a', src: 'assets/clips/x.mp4', in: 0, out: 4, rate: 2 }] });
+  ok('edits: a rate of 2 halves the duration', approx(rated.layers[0].duration, 2));
+
+  // a transition authored at a cut boundary still resolves after lowering.
+  const withTransition = expandScene({ module: 'scene', duration: 10,
+    edits: [
+      { id: 'a', src: 'assets/clips/x.mp4', in: 0, out: 3 },
+      { id: 'b', src: 'assets/clips/y.mp4', in: 0, out: 2 },
+    ],
+    transitions: [{ at: 'a.end', fx: 'whip' }] });
+  ok('edits: a transition at a cut boundary resolves after lowering', approx(withTransition.transitions[0].at, 3));
+
+  // duplicate id and missing src throw named errors.
+  let dupMsg = '';
+  try { expandScene({ module: 'scene', duration: 4, edits: [
+    { id: 'a', src: 'x.mp4', in: 0, out: 1 }, { id: 'a', src: 'y.mp4', in: 0, out: 1 },
+  ] }); } catch (e) { dupMsg = e.message; }
+  ok('edits: a duplicate id throws a named error', dupMsg.includes('duplicate id') && dupMsg.includes('"a"'));
+
+  let missingSrcMsg = '';
+  try { expandScene({ module: 'scene', duration: 4, edits: [{ id: 'a', in: 0, out: 1 }] }); }
+  catch (e) { missingSrcMsg = e.message; }
+  ok('edits: a missing src throws a named error', missingSrcMsg.includes('`src`') && missingSrcMsg.includes('"a"'));
+
+  // a scene with no edits[] passes through byte-identical.
+  const noEdits = { module: 'scene', duration: 4, layers: [{ id: 'hero', type: 'text', start: 0, duration: 4 }] };
+  const noEditsCopy = structuredClone(noEdits);
+  expandScene(noEditsCopy);
+  ok('edits: a scene with no edits[] is untouched byte for byte', JSON.stringify(noEditsCopy) === JSON.stringify(noEdits));
+}
+
 // BEAT-RELATIVE TIME (item 3, `beats[]` + "beat:<id>.start"/"beat:<id>.end"): a beat gives its own id
 // to every field the plain relative-time grammar already reaches, plus a bg window from/to, which the
 // bare grammar was refused (that string slot's own junction grammar).

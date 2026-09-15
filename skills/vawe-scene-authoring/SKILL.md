@@ -131,6 +131,27 @@ copyrighted media (posters/stills/album art) in a published video.
 - Chips/badges/cards come from `chipBox` on any layer (bg/pad/radius/border/elevation in the JSON).
   There is no shared treatment stylesheet (visuals.css was removed with the template formats).
 
+## Editing real footage: `edits[]`, a cut list
+
+Cutting real clips together as `video` layers works today (`in`/`out`/`rate`/`audio`, one layer per
+cut, `start` computed by hand). `edits[]` is the sugar: a top-level list, lowered at expand time
+(`core/engine/expand.js`) into ordinary `video` layers chained by `"<id>.end"`, so nobody does the
+arithmetic.
+
+```json
+"edits": [
+  { "id": "a", "src": "/assets/clips/interview.mp4", "in": 4.0, "out": 9.5, "audio": true },
+  { "id": "b", "src": "/assets/clips/broll.mp4", "in": 12.0, "out": 15.0 }
+]
+```
+
+`a` starts at 0 with `duration = 5.5`; `b` gets `start: "a.end"` for free. `id` must be unique and
+`src` required, both refused by name if missing. `out<=in` is refused by `core/layers/video.js`
+itself, not repeated here. **This is not `cuts[]`**: that key is the internal, lowered output of
+`transitions[]` and the validator refuses it written directly (see `AGENTS.md`'s built-in rules).
+Author a transition at a cut boundary the normal way, `transitions[]` at `"<id>.end"`; it still owns
+every boundary between edits.
+
 ## QA loop, run before declaring a scene done
 
 | command | checks |
