@@ -1,4 +1,4 @@
-// sims/ember-burst.mjs — a burst of embers: outward impulse, drag, gravity, cooling.
+// generators/sim/sims/ember-burst.mjs: a burst of embers, outward impulse, drag, gravity, cooling.
 //
 // Stateful on purpose. Each ember carries a velocity that is integrated frame over frame, and a
 // short position history that is drawn as a tapered streak, so fast embers smear and slow ones read

@@ -26,7 +26,7 @@ import { sourceHash } from '../../generators/sim/provenance.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SIMS = path.join(repoRoot, 'sims');
+const SIMS = path.join(repoRoot, 'generators/sim/sims');
 const BAKED = path.join(repoRoot, 'assets/baked');
 
 const problems = [];
@@ -34,11 +34,11 @@ const note = (kind, where, msg) => problems.push({ kind, where, msg });
 
 // ---- (i) unseeded randomness / wall clock --------------------------------------------------------
 // Comments are stripped first: this file's own prose names every pattern it bans, and so does
-// sims/README.md. A scanner that cannot tell code from commentary condemns its own documentation.
+// generators/sim/sims/README.md. A scanner that cannot tell code from commentary condemns its own documentation.
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
 
 const BANNED = [
-  { re: /\bMath\.random\s*\(/, why: 'Math.random(), use ctx.rng (sims/lib/rng.mjs), seeded from the sim\'s exported seed' },
+  { re: /\bMath\.random\s*\(/, why: 'Math.random(), use ctx.rng (generators/sim/sims/lib/rng.mjs), seeded from the sim\'s exported seed' },
   { re: /\bDate\.now\s*\(/, why: 'Date.now(). A bake that depends on when it ran is not a bake' },
   { re: /\bnew\s+Date\s*\(/, why: 'new Date(), same: wall-clock time makes the bake unrepeatable' },
   { re: /\bperformance\.now\s*\(/, why: 'performance.now(), wall-clock time' },
@@ -152,8 +152,8 @@ console.log('='.repeat(72));
 console.log(`SIM AUDIT FAILED (${problems.length})\n`);
 for (const p of problems) {
   console.log(`  ✗ [${p.kind}] ${p.where}\n      ${p.msg}\n`);
-  f.fail(`sim-${p.kind}`, p.msg, { at: p.where, doc: 'sims/README.md' });
+  f.fail(`sim-${p.kind}`, p.msg, { at: p.where, doc: 'generators/sim/sims/README.md' });
 }
-console.log('Determinism moved to bake time; it did not disappear (sims/README.md).');
+console.log('Determinism moved to bake time; it did not disappear (generators/sim/sims/README.md).');
 f.emit();
 process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

@@ -990,24 +990,24 @@ const srcCases = [
   // ---- Tier B: the offline sim bake. Three defects, three fixtures. A sequence on disk carries no
   // evidence of its own reproducibility, so all three of these ship SILENTLY: the video renders, the
   // frames play, and what plays is not what the sim says.
-  { name: 'sim-audit · a sim reaching for unseeded randomness', file: 'sims/ember-burst.mjs',
+  { name: 'sim-audit · a sim reaching for unseeded randomness', file: 'generators/sim/sims/ember-burst.mjs',
     // anchored on the `step` signature: the smallest text that must exist for a sim to BE a sim, so
     // the fixture cannot go stale against tuning inside the sim's body (MISTAKES #89).
     mutate: (s) => s.replace('export function step(ctx, i) {', 'export function step(ctx, i) {\n  const drift = Math.random();'),
     cmd: ['node', ['quality/gates/sim-audit.mjs']], match: /unseeded/ },
-  { name: 'sim-audit · a bake left behind by an edited sim', file: 'sims/ember-burst.mjs',
+  { name: 'sim-audit · a bake left behind by an edited sim', file: 'generators/sim/sims/ember-burst.mjs',
     // any change to the source is the defect; the bake keeps playing the PREVIOUS version of the
     // effect and nothing downstream can tell. The fixture bake is synthesised so this case does not
     // depend on assets/baked/ being populated on the machine running the harness.
     mutate: (s) => s.replace('const GRAVITY = 0.42;', 'const GRAVITY = 0.61;'),
     cmd: ['node', ['quality/gates/sim-audit.mjs']], match: /has changed since this was baked/,
-    before: () => fakeBake('_mut-stale', 'sims/ember-burst.mjs'),
+    before: () => fakeBake('_mut-stale', 'generators/sim/sims/ember-burst.mjs'),
     after: () => fs.rmSync(path.join(repoRoot, 'assets/baked/_mut-stale'), { recursive: true, force: true }) },
   { name: 'sim-audit · a frame sequence with a hole in it', file: 'assets/baked/_mut-seq/manifest.json',
     // `clip` indexes by array position, so a missing PNG does not throw: it holds the previous frame.
     mutate: (s) => s.replace('f0002.png', 'f0009.png'),
     cmd: ['node', ['quality/gates/sim-audit.mjs']], match: /expected "f0002.png"|missing on disk/,
-    before: () => fakeBake('_mut-seq', 'sims/ember-burst.mjs'),
+    before: () => fakeBake('_mut-seq', 'generators/sim/sims/ember-burst.mjs'),
     after: () => fs.rmSync(path.join(repoRoot, 'assets/baked/_mut-seq'), { recursive: true, force: true }) },
 
   { name: 'schema-drift · anim enum drifted', file: 'formats/scene/schema.json',
