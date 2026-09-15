@@ -1473,6 +1473,9 @@ plan-check: ## [check] plan vs render: does the film change where the storyboard
 dissolve: ## [check] transition gate, is any text state cross-dissolved into another (D=<file>)
 	node quality/gates/dissolve-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
+covered-move: ## [check] does a full-bleed layer above start mid-move and hide it (D=<file>)
+	node quality/gates/covered-move.mjs $(D)
+
 scrub: ## [dev] preview strip: contact sheet of the whole film (M=<fmt> or F=<mp4>)
 	node harness/author/scrub.mjs $(F)
 
