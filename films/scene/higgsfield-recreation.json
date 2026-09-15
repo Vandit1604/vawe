@@ -1,0 +1,498 @@
+{
+ "module": "scene",
+ "theme": "higgsfield",
+ "aspect": "16:9",
+ "duration": 5,
+ "grain": true,
+ "produced": false,
+ "audio": {
+  "silent": true
+ },
+ "note": "Shot-for-shot recreation of the first 5s of higgsfield.mp4 (repo root). Every position, size and time below was measured off the reference frames, then scaled 1.5x from its 1280x720 to this 1920x1080 canvas. Two things the eye gets wrong and the pixels settle: beat 1 does NOT zoom (the headline sits at a fixed left edge the whole time), and beat 2's camera is a PURE horizontal pan, no push (pill widths and the panel height are identical at 2.0s and 2.5s). Because the move is a pan, every beat-2 layer can carry the same dx track instead of needing a shared camera.",
+ "layers": [
+  {
+   "id": "hook",
+   "type": "text",
+   "text": "<span style=\"color:#8e908a\">Meet </span>higgsfield.ai",
+   "start": 0.11,
+   "duration": 1.42,
+   "x": 368,
+   "y": 459,
+   "w": 1400,
+   "align": "left",
+   "size": 126,
+   "weight": 700,
+   "color": "#f6f7f0",
+   "typing": 33,
+   "untype": 1.03,
+   "untypeRate": 60,
+   "caret": true,
+   "caretHold": true,
+   "ls": "0.04em",
+   "exitDur": 0
+  },
+  {
+   "id": "scrim",
+   "type": "rect",
+   "start": 1.5,
+   "duration": 1.64,
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "h": 1080,
+   "radius": 0,
+   "bg": "#000000",
+   "anim": "fade",
+   "enterDur": 0.32,
+   "out": "fade",
+   "exitDur": 0.07
+  },
+  {
+   "id": "ui",
+   "type": "html",
+   "start": 1.55,
+   "duration": 1.21,
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "anim": "fade",
+   "enterDur": 0.3,
+   "out": "fade",
+   "exitDur": 0.1,
+   "motion": [
+    {
+     "t": 0,
+     "x": 30
+    },
+    {
+     "t": 0.45,
+     "x": 0,
+     "ease": "easeInOutSine"
+    },
+    {
+     "t": 0.65,
+     "x": -155,
+     "ease": "linear"
+    },
+    {
+     "t": 0.78,
+     "x": -288,
+     "ease": "linear"
+    },
+    {
+     "t": 0.95,
+     "x": -447,
+     "ease": "linear"
+    },
+    {
+     "t": 1.12,
+     "x": -542,
+     "ease": "linear"
+    },
+    {
+     "t": 1.25,
+     "x": -600,
+     "ease": "linear"
+    }
+   ],
+   "html": "<div style=\"position:relative;width:1920px;height:1080px;font-family:'Plus Jakarta Sans',sans-serif\"><div style=\"position:absolute;left:210px;top:308px;width:118px;height:116px;border-radius:24px;background:#27292d\"></div><div style=\"position:absolute;left:343px;top:308px;width:117px;height:116px;border-radius:24px;background:#27292d\"></div><div style=\"position:absolute;left:478px;top:308px;width:117px;height:116px;border-radius:24px;background:#27292d\"></div><div style=\"position:absolute;left:628px;top:308px;width:425px;height:116px;border-radius:24px;background:#27292d\"></div><div style=\"position:absolute;left:1122px;top:308px;width:817px;height:116px;border-radius:24px;background:#27292d\"></div><div style=\"position:absolute;left:1969px;top:308px;width:261px;height:116px;border-radius:24px;background:#27292d\"></div><div style=\"position:absolute;left:192px;top:465px;width:2117px;height:315px;border-radius:42px;background:linear-gradient(90deg,#0d0f13 0%,#191b1f 45%,#232529 100%)\"></div><div style=\"position:absolute;left:225px;top:655px;width:292px;height:83px;border-radius:18px;background:#27292d\"></div><div style=\"position:absolute;left:534px;top:655px;width:156px;height:83px;border-radius:18px;background:#27292d\"></div><div style=\"position:absolute;left:709px;top:655px;width:189px;height:83px;border-radius:18px;background:#27292d\"></div><div style=\"position:absolute;left:915px;top:655px;width:232px;height:83px;border-radius:18px;background:#27292d\"></div><div style=\"position:absolute;left:1165px;top:655px;width:174px;height:83px;border-radius:18px;background:#27292d\"></div><div style=\"position:absolute;left:1357px;top:655px;width:237px;height:83px;border-radius:18px;background:#27292d\"></div></div>"
+  },
+  {
+   "id": "prompt",
+   "type": "text",
+   "text": "Generate an image of an astronaut holding glowing green puzzle pieces",
+   "start": 1.85,
+   "duration": 0.91,
+   "x": 223,
+   "y": 512,
+   "w": 1700,
+   "align": "left",
+   "size": 48,
+   "weight": 400,
+   "color": "#e9eae6",
+   "typing": 110,
+   "caret": true,
+   "caretHold": true,
+   "out": "fade",
+   "exitDur": 0.1,
+   "motion": [
+    {
+     "t": -0.30000000000000004,
+     "x": 30
+    },
+    {
+     "t": 0.1499999999999999,
+     "x": 0,
+     "ease": "easeInOutSine"
+    },
+    {
+     "t": 0.3500000000000001,
+     "x": -155,
+     "ease": "linear"
+    },
+    {
+     "t": 0.48,
+     "x": -288,
+     "ease": "linear"
+    },
+    {
+     "t": 0.6499999999999999,
+     "x": -447,
+     "ease": "linear"
+    },
+    {
+     "t": 0.8199999999999998,
+     "x": -542,
+     "ease": "linear"
+    },
+    {
+     "t": 0.9099999999999997,
+     "x": -600,
+     "ease": "linear"
+    }
+   ]
+  },
+  {
+   "id": "btn",
+   "type": "html",
+   "start": 1.55,
+   "duration": 2.72,
+   "x": 764,
+   "y": 429,
+   "w": 392,
+   "anim": "fade",
+   "enterDur": 0.3,
+   "motionBlur": 0.16,
+   "vars": {
+    "--p": [
+     0,
+     1
+    ],
+    "--w": [
+     0,
+     1
+    ],
+    "--r": [
+     0,
+     1
+    ],
+    "--o": [
+     1,
+     0
+    ]
+   },
+   "varsDelay": 1.45,
+   "varsEase": {
+    "--p": "linear",
+    "--w": "easeInSine",
+    "--r": "easeInCubic",
+    "--o": "easeInQuad"
+   },
+   "motion": [
+    {
+     "t": 0,
+     "x": 1132,
+     "y": 82
+    },
+    {
+     "t": 0.45,
+     "x": 1102,
+     "y": 82,
+     "ease": "easeInOutSine"
+    },
+    {
+     "t": 0.65,
+     "x": 947,
+     "y": 82,
+     "ease": "linear"
+    },
+    {
+     "t": 0.78,
+     "x": 814,
+     "y": 82,
+     "ease": "linear"
+    },
+    {
+     "t": 0.95,
+     "x": 655,
+     "y": 82,
+     "ease": "linear"
+    },
+    {
+     "t": 1.12,
+     "x": 560,
+     "y": 82,
+     "ease": "linear"
+    },
+    {
+     "t": 1.18,
+     "x": 519,
+     "y": 61,
+     "rot": -3,
+     "ease": "linear"
+    },
+    {
+     "t": 1.25,
+     "x": 342,
+     "y": 21,
+     "rot": -7,
+     "ease": "linear"
+    },
+    {
+     "t": 1.31,
+     "x": 207,
+     "y": 6,
+     "rot": -5,
+     "ease": "linear"
+    },
+    {
+     "t": 1.38,
+     "x": 123,
+     "y": 3,
+     "rot": -3,
+     "ease": "linear"
+    },
+    {
+     "t": 1.45,
+     "x": 67,
+     "y": 0,
+     "rot": -1,
+     "ease": "easeOutCubic"
+    },
+    {
+     "t": 1.52,
+     "x": 33,
+     "y": 0,
+     "rot": 0,
+     "ease": "easeOutCubic"
+    },
+    {
+     "t": 1.59,
+     "x": 13,
+     "y": -35,
+     "ease": "easeOutCubic"
+    },
+    {
+     "t": 1.65,
+     "x": 1,
+     "y": -92,
+     "ease": "linear"
+    },
+    {
+     "t": 1.72,
+     "x": 0,
+     "y": -146,
+     "ease": "linear"
+    },
+    {
+     "t": 1.85,
+     "x": 0,
+     "y": -173,
+     "ease": "easeOutCubic"
+    },
+    {
+     "t": 2.12,
+     "x": 0,
+     "y": 3,
+     "ease": "easeInOutCubic"
+    },
+    {
+     "t": 2.2,
+     "x": 0,
+     "y": 0,
+     "ease": "easeOutCubic"
+    },
+    {
+     "t": 2.45,
+     "x": 0,
+     "y": 0,
+     "scale": 0.545,
+     "ease": "easeInOutCubic"
+    },
+    {
+     "t": 2.52,
+     "x": 0,
+     "y": 0,
+     "scale": 0.45,
+     "ease": "linear"
+    },
+    {
+     "t": 2.62,
+     "x": 0,
+     "y": 0,
+     "scale": 0.22,
+     "ease": "linear"
+    },
+    {
+     "t": 2.7,
+     "x": 0,
+     "y": 0,
+     "scale": 0.06,
+     "opacity": 0,
+     "ease": "easeInCubic"
+    }
+   ],
+   "html": "<div style=\"width:392px;height:222px;display:flex;align-items:center;justify-content:center\"><div style=\"width:calc(392px - var(--w,0) * 205px);height:calc(222px - var(--p,0) * 35px);border-radius:calc(30px + var(--r,0) * 900px);background:radial-gradient(110% 85% at 50% 115%, #e8e015 0%, #e2f04a 40%, #e1f66c 75%);box-shadow:0 0 90px rgba(226,254,122,0.4);display:flex;align-items:center;justify-content:center\"><span style=\"opacity:var(--o, 1);color:#12140a;font-family:'Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800;letter-spacing:0.08em;white-space:nowrap\">GENERATE &nbsp;&#10022;2</span></div></div>",
+   "varsDur": {
+    "*": 0.4,
+    "--o": 0.2236
+   }
+  },
+  {
+   "id": "ring",
+   "type": "rect",
+   "start": 3.25,
+   "duration": 0.66,
+   "x": 750,
+   "y": 330,
+   "w": 420,
+   "h": 420,
+   "radius": 210,
+   "bg": "transparent",
+   "border": "4px solid rgba(245,252,230,0.9)",
+   "motion": [
+    {
+     "t": 0,
+     "scale": 0.5,
+     "y": -166,
+     "opacity": 0
+    },
+    {
+     "t": 0.05,
+     "scale": 0.85,
+     "y": -170,
+     "opacity": 0.85,
+     "ease": "easeOutCubic"
+    },
+    {
+     "t": 0.15,
+     "scale": 1,
+     "y": -173,
+     "opacity": 0.9,
+     "ease": "easeOutCubic"
+    },
+    {
+     "t": 0.42,
+     "scale": 1.32,
+     "y": 3,
+     "opacity": 0.5,
+     "ease": "easeInOutCubic"
+    },
+    {
+     "t": 0.66,
+     "scale": 1.6,
+     "y": 0,
+     "opacity": 0,
+     "ease": "easeOutCubic"
+    }
+   ]
+  },
+  {
+   "id": "gen",
+   "type": "text",
+   "text": "Generating",
+   "start": 4.38,
+   "duration": 1,
+   "x": 380,
+   "y": 479,
+   "w": 760,
+   "align": "right",
+   "size": 96,
+   "weight": 400,
+   "color": "#ccd2b4",
+   "anim": "fade",
+   "enterDur": 0.38,
+   "motion": [
+    {
+     "t": -0.16,
+     "x": -255
+    },
+    {
+     "t": 0.15,
+     "x": -225,
+     "ease": "linear"
+    },
+    {
+     "t": 0.25,
+     "x": -153,
+     "ease": "linear"
+    },
+    {
+     "t": 0.35,
+     "x": -68,
+     "ease": "linear"
+    },
+    {
+     "t": 0.45,
+     "x": -27,
+     "ease": "linear"
+    },
+    {
+     "t": 0.59,
+     "x": 0,
+     "ease": "easeOutCubic"
+    }
+   ],
+   "exitDur": 0
+  },
+  {
+   "id": "spin",
+   "type": "html",
+   "start": 4.22,
+   "duration": 1,
+   "x": 1169,
+   "y": 514,
+   "w": 78,
+   "anim": "fade",
+   "enterDur": 0.18,
+   "motion": [
+    {
+     "t": 0,
+     "x": -255,
+     "rot": 0
+    },
+    {
+     "t": 0.31,
+     "x": -225,
+     "rot": 215,
+     "ease": "linear"
+    },
+    {
+     "t": 0.41,
+     "x": -153,
+     "rot": 284,
+     "ease": "linear"
+    },
+    {
+     "t": 0.51,
+     "x": -68,
+     "rot": 353,
+     "ease": "linear"
+    },
+    {
+     "t": 0.61,
+     "x": -27,
+     "rot": 422,
+     "ease": "linear"
+    },
+    {
+     "t": 0.75,
+     "x": 0,
+     "rot": 519,
+     "ease": "linear"
+    }
+   ],
+   "html": "<div style=\"width:70px;height:70px;border:4px solid rgba(230,236,210,0.10);border-top-color:#ccd2b4;border-left-color:#ccd2b4;border-radius:50%\"></div>",
+   "exitDur": 0
+  }
+ ],
+ "bg": [
+  {
+   "t": 0,
+   "preset": "liquid",
+   "from": 0,
+   "to": 5,
+   "seed": 512
+  }
+ ]
+}
