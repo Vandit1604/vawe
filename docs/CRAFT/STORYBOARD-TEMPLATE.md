@@ -269,9 +269,8 @@ not: "the defaults this film refuses, in your own words"
   evidence, not a guess: higgsfield-recreation stages its own three key events roughly 30ms and 150ms
   apart. An UNSTATED junction is left exactly as it was: staging a cause the storyboard never wrote down
   would be inventing one, not reading one off it. (`layers[].start` also legally accepts a live relative
-  reference, `"otherId.end+0.5"`; measured trying it here, `quality/gates/beat-check` and
-  `harness/author/motion-director.mjs` both read `start` as a number in places that string breaks, one
-  of them a crash, so `make assemble` resolves the reference itself rather than leaving it live.)
+  reference, `"otherId.end+0.5"`, same for `transitions[].at` and `cameraMove[].start`; resolved to a
+  real number at load by core/timeline/relative-time.js, so every gate reads a plain number already.)
 
   TWO MORE FIELDS, TWO MORE QUESTIONS. `mechanism:` is HOW it moves (count-up, slow push, kinetic reveal).
   `becomes:` is WHAT IT TURNED INTO, written as "the X becomes the Y". A preset name answers the
