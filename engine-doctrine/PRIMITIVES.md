@@ -350,7 +350,7 @@ a cut that only translates.
 
 ## Sound & captions (added July 2026: biggest quality-per-effort wins)
 
-The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX cues + limiter); these turn it on:
+The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-duck + SFX cues + limiter); these turn it on:
 
 - **Auto sound-design**: `"audio": { "auto": true }`. The scene derives SFX cues from its own timing
   (whoosh on every `cut`, a reveal hit on every sting) and the mixer beds `assets/music.wav` under
@@ -365,7 +365,7 @@ The Go mixer (`internal/audio`) was always there (music bed + VO auto-duck + SFX
   `fade` is the equal-power crossfade at both ends (default 0.35s), `duck` pulls the music bed down under
   the bridge on the same curve. This is the continuous object that costs the picture nothing: it holds a
   film together across cuts that share no visual. Resolved by `core/audio/bridges.js`, mixed by
-  `internal/audio/audio.go`. A junction the film does not have, a lead longer than the beat before it, or
+  `renderer/internal/audio/audio.go`. A junction the film does not have, a lead longer than the beat before it, or
   a `sound` that is not on disk all FAIL the render and name the cause. See `engine-doctrine/CRAFT/SOUND.md` §2.
 - **Muted-social captions**: `captionMode: "pop"`, big bold bottom-third burned-in subtitles (accent on
   `<b>…</b>`), the style social autoplay needs. `make captions D=<file> TEXT="First line. The <b>payoff</b>."`

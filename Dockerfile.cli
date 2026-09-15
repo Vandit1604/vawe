@@ -16,7 +16,7 @@
 # than drifting to a new browser silently — bump the ARG then, deliberately.
 #
 # WHAT IS NOT PINNED: the GPU. Chrome's flags here fix the colour profile, hinting and compositor
-# stages (internal/scene/scene.go:112-131) but nothing selects software rasterisation, so rasterised
+# stages (renderer/internal/scene/scene.go:112-131) but nothing selects software rasterisation, so rasterised
 # output can still differ between hosts with different graphics stacks. This image removes the three
 # largest sources of variation. It does not make renders byte-identical across machines.
 
@@ -26,10 +26,10 @@ FROM golang:1.26-bookworm@sha256:6ef6e30f0ea5c384f6d111cf856e024e3086bbdcb1779da
 # host and broke every child layer even under --no-cache (see Dockerfile, engine-doctrine/MISTAKES.md #104).
 WORKDIR /src
 
-COPY go.mod go.sum ./
+COPY renderer/go.mod renderer/go.sum ./
 RUN go mod download
-COPY cmd ./cmd
-COPY internal ./internal
+COPY renderer/cmd ./cmd
+COPY renderer/internal ./internal
 RUN CGO_ENABLED=0 go build -o bin/vawe ./cmd/render
 
 # --- the runtime ---
@@ -72,7 +72,7 @@ COPY --from=builder /src/bin/vawe ./bin/vawe
 RUN mkdir -p /engine/out /engine/.vawe-data/scenes && chmod 777 /engine/out /engine/.vawe-data/scenes
 
 # Chromium is used directly. The background-throttling flags that a containerised, multi-tab render
-# needs are in the engine's own flag list now (allocOpts, internal/scene/scene.go) — verified by A/B to
+# needs are in the engine's own flag list now (allocOpts, renderer/internal/scene/scene.go) — verified by A/B to
 # change no pixel. There was a three-flag wrapper here; it is gone, because a workaround left in place
 # is a bug report nobody reads.
 

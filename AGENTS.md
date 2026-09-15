@@ -2,7 +2,7 @@
 
 Canonical, tool-neutral doctrine for the vawe video engine: works the same for Claude Code, Cursor, Codex, or a human with no agent. A rule leaning on a Claude Code mechanism (a hook, the Skill tool, a vendored skill) carries a neutral by-hand note. `CLAUDE.md` only points here.
 
-This repo turns **one self-describing JSON → one rendered video** (60fps mp4 final, 30fps with `--draft`, `cmd/render/main.go:30`; five canvases, `core/layout/safe.js:35`: `16:9` `9:16` `1:1` `4:5` `4:3`, an unnamed ratio fit to the long edge at 1920). Exactly **one module: `scene`**, an open canvas of **24 layer types** (`ls core/layers/`) plus camera · transitions · captions; `html` is a picture.
+This repo turns **one self-describing JSON → one rendered video** (60fps mp4 final, 30fps with `--draft`, `renderer/cmd/render/main.go:30`; five canvases, `core/layout/safe.js:35`: `16:9` `9:16` `1:1` `4:5` `4:3`, an unnamed ratio fit to the long edge at 1920). Exactly **one module: `scene`**, an open canvas of **24 layer types** (`ls core/layers/`) plus camera · transitions · captions; `html` is a picture.
 
 ## THE EIGHT STAGES, IN ORDER  `[gated: harness/live/stage-gate.mjs]` `[live: harness/live/stage-say.mjs]`
 
