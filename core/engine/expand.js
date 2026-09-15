@@ -1,5 +1,6 @@
-// core/engine/expand.js: expandScene(data), the PURE data->data expansion of the three build-time sugar layer
-// types (`block`, `beat`, `comp`) into the real layers they produce, and loadScene(data) =
+// core/engine/expand.js: expandScene(data), the PURE data->data expansion of the build-time sugar layer
+// types (`block`, `beat`, `comp`, and the top-level `edits[]` cut list) into the real layers they
+// produce, and loadScene(data) =
 // lowerScene(expandScene(data)), the loader every Node gate and script calls to read a scene off disk.
 //
 // NODE-ONLY BY POLICY, NOT BY CONSTRAINT: expandScene itself is pure ESM (no `fs`) and boots fine in
@@ -93,6 +94,50 @@ function expandComp(layer, comps, stack) {
   return (c.layers || []).map((l) => shift(l, dx, dy, dt));
 }
 
+// EDIT SUGAR (`data.edits`, item 2 of the real-footage plan): a list of {id, src, in, out, ...}
+// clip descriptors, lowered here into ordinary `video` layers chained by the relative-time grammar
+// ("<prevId>.end") so an author never computes an offset by hand. NOT named `cuts`: that key is
+// already the INTERNAL lowered output of `transitions[]` (core/transitions/lower.js, refused as an
+// authored key by core/validate/validate.mjs `authoredJunctionErrors`), and a film using both this
+// sugar and `transitions[]` (the normal case, item 3 of that plan) would otherwise fight over one
+// top-level field.
+//
+// Each entry becomes one `video` layer: `duration = (out - in) / (rate ?? 1)` (a plain number, so
+// "<id>.end" below has something to resolve against), and every entry after the first gets
+// `start: "<previous id>.end"`, resolved by the SAME resolver every other relative start uses
+// (core/timeline/relative-time.js), so this owns no timing arithmetic of its own. `out<=in` is left
+// to core/layers/video.js's own refusal (build()), never duplicated here. transitions[] still owns
+// boundaries: a transition `at: "<id>.end"` resolves off the same layer id these produce.
+function lowerEdits(data) {
+  if (!Array.isArray(data.edits) || !data.edits.length) return;
+  const seen = new Set();
+  let prevId = null;
+  const layers = data.edits.map((cut, i) => {
+    if (!cut || typeof cut !== 'object') throw new Error(`edits[${i}]: each entry must be an object`);
+    const { id, src, in: inPoint, out, rate, audio, fit, w, h, x, y } = cut;
+    if (!id) throw new Error(`edits[${i}]: \`id\` is required (chains this cut's start to the next one)`);
+    if (seen.has(id)) throw new Error(`edits[${i}]: duplicate id "${id}". Every cut needs a unique id.`);
+    seen.add(id);
+    if (!src) throw new Error(`edits[${i}] "${id}": \`src\` is required (a path under assets/)`);
+    const layer = {
+      type: 'video', id, src, in: inPoint, out,
+      duration: (out - inPoint) / (rate ?? 1),
+      start: prevId ? `${prevId}.end` : 0,
+      ...(rate != null ? { rate } : {}),
+      ...(audio != null ? { audio } : {}),
+      ...(fit != null ? { fit } : {}),
+      ...(w != null ? { w } : {}),
+      ...(h != null ? { h } : {}),
+      ...(x != null ? { x } : {}),
+      ...(y != null ? { y } : {}),
+    };
+    prevId = id;
+    return layer;
+  });
+  data.layers = [...(data.layers || []), ...layers];
+  delete data.edits;
+}
+
 /**
  * expandScene(data, aspectKey = '') -> data, mutated in place and returned. Expands every
  * `{type:"block"}`, `{type:"beat"}` and `{type:"comp"}` layer (at any nesting depth, recursively) into
@@ -126,6 +171,10 @@ export function expandScene(data, aspectKey = '') {
   }
 
   data.layers = (data.layers || []).flatMap((l) => expand(l, []));
+
+  // edits[] sugar -> plain `video` layers, chained by relative start. Runs before recipes/relative-time
+  // so a cut's id is a normal layer id by the time either reads it.
+  lowerEdits(data);
 
   // recipes[] sugar -> plain `motion` keys and layer windows on the layers they name (recipes/expand.mjs).
   // Runs after block/beat/comp, so a recipe naming a layer id one of those produced still resolves.
