@@ -48,6 +48,17 @@ Nothing adapts those, because there is no film-context reading that makes them c
 | overscan | `core/tracks/motion.js` (composition), `core/tracks/overscan.js` (math) | a full-bleed plane must not reveal its own edge (and the backdrop behind it) while it tilts or stands off the picture plane under the camera rig | this doc (mechanism); `core/tracks/overscan.js` header (math) | **built**: every frame, a plane whose box already covers the stage at rest is scaled up by the minimum amount real projection math says its current tilt/depth needs to still cover the viewport; reports the peak with `adapted overscan: <id> scaled up to <k>x at <t>s`; opt out per layer with `overscan: false` |
 | group-3d-opacity | `formats/scene/scene.js` ("GROUP 3D" build-time block, `applyGroup3DOpacityAdapt`) | a group holding a descendant with its own 3D motion (rotX/rotY/z) needs `preserve-3d`, but opacity and filter are grouping properties in CSS and flatten that context right back | this doc (mechanism); `formats/scene/scene.js` "THE CAMERA RIG" header | **built**: every frame, a 3D-holding group's own opacity/filter is moved onto its direct children, multiplying into whatever they already carry, and the group is reset to opaque/unfiltered; reports the first frame it fires with `adapted group-3d-opacity: <id> opacity moved to children (opacity flattens 3D in CSS)` |
 
+## edge-reveal: what overscan does not catch
+
+Overscan (the row above) only fires when a layer keys 3D (`has3D`: a `rotX`/`rotY`/`z` track) and the
+frame already covers the stage at rest. It never runs for a flat camera `s` below 1, a layer's own
+`scale` dropping below 1 with no 3D key, or a corner radius, none of which are `has3D` and none of
+which the projection math above is asked about. edge-check reports a full-bleed layer that stops
+covering the frame while it is on screen, by sampling the rendered page (10fps of film time,
+`document.elementsFromPoint` on the four borders) rather than re-deriving the projection. Report only,
+never blocks; a deliberate reveal (a floating panel over a full ground, on purpose) waives the same way
+as any other finding: `{"authoring":{"allow":["edge-reveal"]}}`.
+
 ## Stays hard, always
 
 - `renderFrame` purity (a scene function may not have side effects across frames).
