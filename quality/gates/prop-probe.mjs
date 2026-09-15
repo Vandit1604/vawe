@@ -50,6 +50,11 @@ const WAIVERS = {
   // fresh clone. Verified both ways: with that manifest present, neither prop reports.
   'clip.loop': 'read only once the frame manifest resolves; no clip manifest is tracked, so a fresh clone has no frames to advance',
   'clip.speed': 'same as clip.loop: core/layers/clip.js:19 returns on an empty manifest before either dial is read',
+  // `delay` is read only inside addGroupChild (core/layers/util.js), a GROUP CHILD'S own offset into its
+  // group's window; a top-level layer never reaches that code path. This harness builds one bare
+  // top-level layer per type, which cannot construct the group-child context `delay` needs to be read
+  // at all, the same shape clip.loop/clip.speed are waived for.
+  '(every type).delay': 'read only on a group child (core/layers/util.js addGroupChild), which this single top-level-layer-per-type harness cannot construct',
 };
 
 // NOT PROBED, which is a different statement from waived. A waiver says the prober reported a death
