@@ -34,7 +34,14 @@ import (
 // `tempo` rides the same trip: core/engine/expand.js resolves it and nothing else does, so a scene
 // carrying it and no other sugar rendered at its authored speed with no warning at all (measured on
 // a catalog film: tempo 0.6, 19.6s authored, 19.6s rendered).
-var sugarType = regexp.MustCompile(`"type"\s*:\s*"(block|beat|comp)"|"recipes"\s*:|"voice"\s*:\s*"|"tempo"\s*:`)
+//
+// `edits` (the real-footage cut list, core/engine/expand.js `lowerEdits`) rides the same trip for the
+// same reason: a scene naming only `edits[]` has NO `layers[]` video entries yet, and both this
+// browser and harness/media/clip-audio.mjs (the audio pre-pass, which reads layer ids off the RAW
+// file) need those layers to already exist. Missing this key was the exact silent no-op the doctrine
+// warns about: `edits[]` resolved fine in a unit test and then failed at render with "unknown
+// reference" the first time it was the ONLY sugar in a scene.
+var sugarType = regexp.MustCompile(`"type"\s*:\s*"(block|beat|comp)"|"recipes"\s*:|"voice"\s*:\s*"|"tempo"\s*:|"edits"\s*:`)
 
 func hasSugar(raw []byte) bool { return sugarType.Match(raw) }
 
