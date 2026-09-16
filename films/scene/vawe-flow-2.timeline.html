@@ -54,6 +54,13 @@
       --dim:rgba(255,255,255,.62);--surface:#ffffff;--surface-2:rgba(255,255,255,.14);
       --line:rgba(255,255,255,.22);--line-strong:rgba(255,255,255,.34);
       --accent:#ffffff;--accent-dim:rgba(255,255,255,.18);--kit-chip-bg:#1e46b8;--kit-chip-fg:#ffffff}
+/* studio's own editor tokens, sampled off the reference editor (studio/ui/studio.css), not guessed:
+   the timeline fragment wears these verbatim so the film shows the real tool, not a lookalike. */
+.kit-ground-studio{background:#16151a;--text:#ffffff;--text-2:#d8d8da;--dim:#97969b;--muted:#7c7b81;
+      --surface:#212025;--surface-2:#27262c;--line:rgba(255,255,255,.07);--line-strong:rgba(255,255,255,.13);
+      --accent:#0a87ff;--accent-dim:rgba(10,135,255,.16);--kit-chip-bg:rgba(10,135,255,.16);--kit-chip-fg:#0a87ff}
+/* the timeline is a floating panel on the scene ground, so its root paints no ground of its own */
+.kit-root.kit-ground-studio{background:transparent}
 .kit-picture{--text:#0f1620;
       --text-2:#454f5e;
       --dim:#697182;
@@ -79,7 +86,7 @@
 .kit-accent{color:var(--accent)}
 /* STAGEKIT:end */</style>
 <style>
-.tl-toolbar{display:flex;align-items:center;gap:var(--kit-space-3);padding:var(--kit-space-3) var(--kit-space-4);border-bottom:1px solid var(--line)}
+.tl-toolbar{height:48px;box-sizing:border-box;display:flex;align-items:center;gap:var(--kit-space-3);padding:0 var(--kit-space-4);border-bottom:1px solid var(--line)}
 .tl-play{width:16px;height:16px;background:var(--accent);clip-path:polygon(0 0, 100% 50%, 0 100%)}
 .tl-body{position:relative;display:flex;flex-direction:column;gap:var(--kit-space-3);flex:1;min-height:0;padding:var(--kit-space-4)}
 .tl-ruler{display:grid;grid-template-columns:180px 1fr;column-gap:var(--kit-space-3)}
@@ -90,9 +97,9 @@
 .tl-track{display:grid;grid-template-columns:180px 1fr;column-gap:var(--kit-space-3)}
 .tl-tracklabel{display:flex;align-items:center;gap:10px;padding-inline-start:2px}
 .tl-tracklabel .dot{width:8px;height:8px;border-radius:50%}
-.tl-lane{position:relative;border-radius:10px;display:flex;flex-direction:column;gap:6px;padding:6px 0}
+.tl-lane{position:relative;border-radius:8px;display:flex;flex-direction:column;gap:6px;padding:6px 0}
 .tl-row{position:relative;flex:1;min-height:0}
-.tl-clip{position:absolute;top:0;bottom:0;border-radius:999px;overflow:hidden;display:flex;align-items:center;gap:8px;box-shadow:var(--kit-elev-1);container-type:inline-size;padding-inline-end:8px}
+.tl-clip{position:absolute;top:0;bottom:0;border-radius:6px;overflow:hidden;display:flex;align-items:center;gap:8px;box-shadow:var(--kit-elev-1);container-type:inline-size;padding-inline-end:8px}
 .tl-clip img{flex:none;width:34px;height:calc(100% - 8px);margin:4px 0 4px 4px;border-radius:999px;object-fit:cover;display:block;border:2px solid rgba(255,255,255,.55)}
 .tl-clip svg{flex:none;width:18px;height:18px;stroke-width:2}
 .tl-clip img{display:none}
@@ -105,9 +112,9 @@
 .tl-film{position:relative;height:56px;border-radius:10px;overflow:hidden;background:var(--ink, #0f1620)}
 .tl-film img{position:absolute;top:0;bottom:0;width:16.5%;object-fit:cover;border-right:1px solid rgba(255,255,255,.3)}
 </style>
-<div class="kit-root kit-ground-paper" id="timeline-root" style="position:absolute;inset:0">
+<div class="kit-root kit-ground-studio" id="timeline-root" style="position:absolute;inset:0">
   <div class="kit-stage" style="display:flex;flex-direction:column;padding-top:var(--kit-space-7);padding-bottom:var(--kit-space-4)">
-    <div id="timeline" class="kit-plane" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+    <div id="timeline" class="kit-plane" style="flex:1;display:flex;flex-direction:column;overflow:hidden;border-radius:12px;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 8px 24px -8px rgba(0,0,0,.5)">
       <div class="tl-toolbar">
         <div class="tl-play"></div>
         <p class="kit-eyebrow" style="margin:0">Timeline</p>
