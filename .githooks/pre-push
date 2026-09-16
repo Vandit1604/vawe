@@ -45,6 +45,27 @@
 # untracked on 2026-09-10 and the COPY stayed, so every deploy after that failed while the running
 # container kept serving a stale site for ten days. The gate was already written and correct; nothing
 # ran it. It reads two files and costs milliseconds.
+# push-guard runs FIRST and reads the refs git hands this hook on stdin, so it checks exactly what is
+# about to reach the remote. It is first because the two rules it holds are about publication rather
+# than quality: a wrong gate result costs a re-run, an attribution trailer or a force-added binary in a
+# public repo costs a history rewrite. Both have already happened once.
+#
+# It scans the whole pushed RANGE rather than the working tree, because the incident arrived by MERGE:
+# the commit was authored in an agent's worktree, where this machine's commit-msg hook may not have run
+# at all, and reached main through the lead.
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue   # a branch deletion
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    range="$local_sha"                     # a new branch: every commit it carries is new to the remote
+  else
+    range="$remote_sha..$local_sha"
+  fi
+  if ! node harness/dev/push-guard.mjs "$range"; then
+    echo "✗ pre-push blocked by push-guard. These are house rules, not style checks." >&2
+    exit 1
+  fi
+done
+
 echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe) …"
 if ! make schema-check lib-test craft-coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
