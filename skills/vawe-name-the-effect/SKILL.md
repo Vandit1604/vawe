@@ -1,6 +1,7 @@
 ---
 name: vawe-name-the-effect
 description: "A reference image or clip shows a look you cannot immediately construct. Find out what the effect is CALLED, read its real recipe, build it once, then put it in the arsenal so the next author inherits the name instead of the guess. Use whenever somebody hands you a picture and says 'make this' and your first instinct is to approximate it by eye."
+stage: design
 ---
 
 # Name the effect before you build it

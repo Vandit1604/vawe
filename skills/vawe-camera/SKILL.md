@@ -2,6 +2,7 @@
 name: vawe-camera
 description: "Add smooth, calculated camera movement to a vawe scene: slowPush, diveIn (zoom into a target), travel (the station-to-station flight that replaces cuts), truck (lateral), panFollow, workspaceZoomOut, orbit, multiPhase, plus depth parallax via the plane modifier. Load while authoring a scene JSON when a beat should move the viewer through space, or when the camera should BE the transition. Uses the pure generators in core/camera-moves/index.js via the cameraMove sugar, and enforces the velocity-continuous multi-keyframe rule (#125)."
 codes: no-camera
+stage: direct
 ---
 
 # vawe-camera: smooth, calculated camera work

@@ -1,6 +1,7 @@
 ---
 name: vawe-type-demo
 description: "Playbook for a product-mechanism demo in this engine: a cursor path, a real click, a visible consequence, a zoom. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches demo, or the request is to prove one mechanism or effect works, not to ship a full film."
+stage: plan
 ---
 
 # vawe-type-demo: the cursor-and-proof playbook

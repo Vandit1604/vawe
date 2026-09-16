@@ -1,6 +1,7 @@
 ---
 name: vawe-continuous-action
 description: "Turn a one-line brief into a SHOOTABLE plan for a short product film built as ONE continuous action. This is ONE of the ~18 devices in engine-doctrine/CRAFT/FILM-STRUCTURE.md, the right one when the film has a single subject and a single process; read that catalogue first and pick. Load this once you have picked it, for a launch/promo/teaser under ~15s. Teaches the continuous-object spine, diegetic motion, the second-by-second budget, and emits a storyboard that make storyboard-check and make intent already consume."
+stage: plan
 ---
 
 # vawe-continuous-action - plan the film as one action

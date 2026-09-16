@@ -1,6 +1,7 @@
 ---
 name: vawe-type-sting
 description: "Playbook for a motion-graphic sting/bumper in this engine: one move, the mark, four to eight seconds. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches motion-graphic, or the request is a short unnarrated logo reveal, stat hit, or moving title."
+stage: plan
 ---
 
 # vawe-type-sting: the motion-graphic sting playbook
