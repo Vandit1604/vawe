@@ -1,6 +1,7 @@
 ---
 name: vawe-type-explainer
 description: "Playbook for an explainer video in this engine: held pace, real counted figures, payoff last, no product or site needed. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches explainer, or the request explains a topic/article/data with invented visuals."
+stage: plan
 ---
 
 # vawe-type-explainer: the explainer playbook

@@ -1,6 +1,7 @@
 ---
 name: vawe-type-launch
 description: "Playbook for a SaaS/product launch video in this engine: captured UI, a continuous object, a hue-turning field, logo prominence. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches launch-video, or the request is to market/showcase a real product, company or site."
+stage: plan
 ---
 
 # vawe-type-launch: the SaaS launch playbook

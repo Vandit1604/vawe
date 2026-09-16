@@ -1,6 +1,7 @@
 ---
 name: vawe-creative
 description: "FORCE a creative, directed video (not a plain slideshow) when authoring in this repo. Load AFTER vawe-video-planning locks the brief and BEFORE/while writing the scene JSON, whenever the goal is a launch film, promo, or 'make it amazing'. It mandates recipes, kinetic motion, a living background, rich layout, and an impeccable pass, then gates it with the ambition floor."
+stage: design
 ---
 
 # vawe-creative: the anti-slideshow forcing layer

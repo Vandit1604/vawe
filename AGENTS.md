@@ -42,6 +42,8 @@ groups them so a reader sees seven concerns, not twenty-one names.
 
 Skills live in `skills/` as plain docs; Claude Code loads them on demand, others open the doc in the last column. Full index: `engine-doctrine/CRAFT/README.md`; one-page router by frontmatter: `vawe-docs`.
 
+`make stage`/`make next` also name the ONE skill the open stage wants, next to the command, on a line reading `skill: <name>`. That line is generated from each skill's own `stage:` frontmatter (`harness/lib/skill-stages.mjs`), never a second hand-kept table; a skill with no `stage:` is cross-cutting and just does not appear there.
+
 | You are about to… | Claude Code skill | Everyone: the doc |
 |---|---|---|
 | **Write any layer** (first move, every time) | **vawe-scene-authoring** | [`engine-doctrine/RULES/INDEX.md`](engine-doctrine/RULES/INDEX.md) |
