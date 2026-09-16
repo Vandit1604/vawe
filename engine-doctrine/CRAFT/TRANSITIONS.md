@@ -2,7 +2,7 @@
 when: "choosing the CUT between two beats (you can't say why a transition is there)"
 answers: "the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure"
 group: story
-codes: crossfade-mud, cut-families, cut-velocity, dead-final-frame, no-transition, flat-seams, seam-flash, seam-ghost, seam-resurrection, seam-split, seam-unread, unclassified-transition, transition-unreasoned, boundary-uncovered, transition-reason-mismatch, covered-move
+codes: crossfade-mud, cut-families, cut-velocity, dead-final-frame, no-transition, flat-seams, seam-flash, seam-ghost, seam-resurrection, seam-split, seam-unread, unclassified-transition, transition-unreasoned, boundary-uncovered, transition-reason-mismatch, covered-move, seam-axis-repeat
 applies-when: hasBoundaries
 confirm: "does each cut serve the relationship between its two beats, chosen by theory not habit?"
 ---
@@ -386,6 +386,14 @@ Same grammar, applied to elements not shots:
 Doctrine carries the taste; the gates backstop the source-decidable subset:
 
 - **one cut family** per film; ≥3 families = FAIL (`make direct`).
+- **adjacent seams vary axis or direction**: two authored transitions back to back that both carry the
+  same cardinal `dir` (both `left`, both `down`, …) read as a stutter, one push in one direction
+  repeated. `make direct` warns (`seam-axis-repeat`) and names the two timestamps; switch the axis
+  (x to y) or flip the direction the way `example-madera` does.
+- **the frame must not go empty across a joint**: `make seam-check` reads the rendered mp4 at every
+  boundary for a luminance dip, and now measures how long content takes to reappear once it dips
+  (`seam-flash`, MISTAKES #144). A one-frame dip is a flash; several frames of measured emptiness is
+  the outgoing beat leaving before the incoming one arrives, named with both beats and the fix.
 - **the earned seam**: `make direct` suggests ONE two-scene seam at the payoff boundary (the transition
   into the longest-held beat), matched to the brand personality (punchy → whipPan, calm → cinematicZoom),
   and applies it on `WRITE=1`. Everything else stays an invisible cut. This is the restraint rule made

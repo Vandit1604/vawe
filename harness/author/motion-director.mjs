@@ -174,6 +174,24 @@ function tellCutFamilies(d, layers) {
   return { metrics, findings: [] };
 }
 
+// adjacent seams must vary axis or direction. cardinal dirs only: a numeric wipe angle carries no
+// left/right/up/down reading, so it never enters this comparison (the owner's own example,
+// example-madera, switches an x-axis push into a y-axis one for exactly this reason).
+const AXIS_OF = { left: 'x', right: 'x', up: 'y', down: 'y' };
+function tellSeamAxisRepeat(d) {
+  const dirred = [...(d.cuts || []), ...(d.seams || []), ...(d.stings || [])]
+    .filter((c) => c && typeof c.t === 'number' && AXIS_OF[c.dir])
+    .sort((a, b) => a.t - b.t);
+  const repeats = [];
+  for (let i = 1; i < dirred.length; i++) {
+    const prev = dirred[i - 1], cur = dirred[i];
+    if (prev.dir === cur.dir) repeats.push(`@${prev.t}s and @${cur.t}s both run ${cur.dir}`);
+  }
+  const metrics = dirred.length >= 2 ? { 'seam-axis-repeat': repeats.length } : {};
+  if (!repeats.length) return { metrics, findings: [] };
+  return { metrics, findings: [warn('seam-axis-repeat', `${repeats.length} adjacent seam(s) repeat the same axis and direction (${repeats.join('; ')}). A run of moves in one direction reads monotonous, switch axis or direction (TRANSITIONS.md: direction is a real lever)`)] };
+}
+
 // effect soup: heavy effects are a composite look (layer.filter), an ambient shader, a 3D toy, or a
 // sting. Effects are seasoning (2-3 earned moments), not a per-beat texture.
 function tellEffectSoup(d, layers, beats) {
@@ -557,6 +575,7 @@ function analyse(d) {
   const findings = [];
   for (const tell of [
     tellCutFamilies(d, layers),
+    tellSeamAxisRepeat(d),
     tellEffectSoup(d, layers, beats),
     tellContinuity(d, layers, beats),
     tellPacing(d, duration),
@@ -586,6 +605,7 @@ const SCALE = {
   'tempo-flat':        { worse: 'low',  unit: (v) => `${v.toFixed(2)}x spread` },
   'linear-motion':     { worse: 'high', unit: (v) => `${v} flat move(s)` },
   'cut-families':      { worse: 'high', unit: (v) => `${v} famil${v === 1 ? 'y' : 'ies'}` },
+  'seam-axis-repeat':  { worse: 'high', unit: (v) => `${v} repeat(s)` },
   'uneven-cascade':    { worse: 'high', unit: (v) => `drift ${(v * 100).toFixed(0)}% of the interval` },
   'effect-soup':       { worse: 'high', unit: (v) => `an effect on ${(v * 100).toFixed(0)}% of beats` },
   'stagger-total':     { worse: 'high', unit: (v) => `${v.toFixed(2)}s end to end` },
