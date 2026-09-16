@@ -59,7 +59,6 @@ const FILM_CHECKS = {
   'read-check.mjs': (f) => [f],
   'seam-forensics.mjs': (f) => [f],
   'seam-snap.mjs': (f) => [f],
-  'stage.mjs': (f) => [f],
   'study-verify.mjs': (f) => [f],
   'sweep-static.mjs': (f) => [f],
   'waiver-drift.mjs': (f) => [f],
@@ -84,6 +83,13 @@ const REPO_CHECKS = [
 // not "one check over one film" or "one check over the repo". Listed, never run, never deleted for
 // firing zero times, because that would penalize a shape this script cannot exercise.
 const OTHER_TOOLS = ['compare.mjs', 'similarity.mjs', 'canvas-purity.mjs', 'ledger.mjs', 'probe-purity.mjs', 'scene-snap.mjs', 'snap-blocks.mjs', 'snap-scenes.mjs'];
+
+// reporter: prints status, never emits a finding or a non-zero exit for a real defect (no gateFindings
+// import, no process.exit(1) path). Scoring one by fire-rate always reads as 0 and looks like a dead
+// gate; it is not a gate at all. stage.mjs (`make stage`) is the film-pipeline "what stage is this in,
+// what's next" status line: every path through it ends in process.exit(0). Listed here, not deleted and
+// not scored, for the same reason OTHER_TOOLS is exempt: the census can't measure a shape it isn't.
+const REPORTERS = ['stage.mjs'];
 
 function allGateFiles() {
   return fs.readdirSync(GATES_DIR).filter((f) => f.endsWith('.mjs')).sort();
@@ -157,6 +163,7 @@ function main() {
     if (file.endsWith('.test.mjs')) { results.push({ file, kind: 'test-skip', note: 'run via lib-test.mjs, not censused directly' }); continue; }
     if (LIBRARIES.includes(file)) { results.push({ file, kind: 'library-skip', note: 'no CLI: exports only, not wired to any make target' }); continue; }
     if (OTHER_TOOLS.includes(file)) { results.push({ file, kind: 'other-skip', note: 'multi-file/baseline/probe CLI, not a per-film or repo check' }); continue; }
+    if (REPORTERS.includes(file)) { results.push({ file, kind: 'reporter-skip', note: 'status/reporting tool: never fails, so a fire-rate score is meaningless' }); continue; }
 
     const refs = referencedBy(file);
     process.stderr.write(`censusing ${file}...\n`);
