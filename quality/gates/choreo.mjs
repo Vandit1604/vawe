@@ -25,6 +25,7 @@ import { parseStoryboard } from '../../harness/author/storyboard-parse.mjs';
 import { parseEyeLine } from '../../harness/lib/contract.mjs';
 import { EASINGS } from '../../core/motion/motion.js';
 import { velocityAt } from '../../core/timeline/sequence.js';
+import { gateFindings, emitJson } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -272,16 +273,23 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const refRatios = rows.map((r) => r.refRatio).filter((v) => v != null);
   const refMedian = refRatios.length ? [...refRatios].sort((a, b) => a - b)[Math.floor(refRatios.length / 2)] : null;
 
+  // choreo already owned a --json report shape before this contract existed (the per-beat detail below
+  // is not finding-shaped), so it keeps that payload and prints it through emitJson rather than
+  // console.log, the documented exception for a gate like this (harness/lib/findings.mjs).
   if (asJson) {
-    console.log(JSON.stringify({
+    emitJson({
       slug, refName, beats: rows.map((r) => ({ ...r, eye: r.eye && { ...r.eye, region: r.eye.region || null } })),
       unplanned: unplanned.map((L) => L.id), missingHandoffs: missingHandoffs.map((L) => L.id),
       handoffs: T.handoffs, exitNotEmphasised: notEmphasised, entranceNotSettled: notSettled,
       refExitRatioMedian: refMedian, cameraCoverageFloor,
-    }, null, 2));
+    });
     process.exit(0);
   }
 
+  // A REPORT, not a gate (this file's own header comment): most lines above are measurements, not
+  // problems. The lines below ARE problems (a rule this file names), so they alone are recorded as
+  // findings, dual-write alongside the unchanged console.log, the same idiom craft-coverage.mjs uses.
+  const f = gateFindings({ scene: sceneFile });
   console.log(`\n  choreo · ${slug} · ${beats.length} beat(s)${refName ? ` · vs ${refName}` : ''}${ourProf ? '' : ' (no render at out/' + slug + '.mp4: scene side only)'}`);
   for (const r of rows) {
     console.log(`\n  ${r.name}  (${r.start}s-${r.end}s)`);
@@ -298,19 +306,28 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         console.log(`    eye:    primary motion ends ${label}${verdict}`);
       }
     }
-    if (r.camStillHeld) console.log(`    ~ ${r.camStillHeld}`);
+    if (r.camStillHeld) {
+      console.log(`    ~ ${r.camStillHeld}`);
+      f.warn('camera-still-held', r.camStillHeld, { beat: r.name });
+    }
   }
 
   console.log('');
   if (unplanned.length) {
     console.log(`  ~ ${unplanned.length} layer(s) enter and are never designed to leave (no \`out\`, no cut-out, no becomes, and they end before the film does):`);
-    for (const L of unplanned) console.log(`      ${L.id}  (${L.start}s-${L.end}s)  ->  give it \`out\` + \`exitDur\`, or a \`becomes\` into what replaces it`);
+    for (const L of unplanned) {
+      console.log(`      ${L.id}  (${L.start}s-${L.end}s)  ->  give it \`out\` + \`exitDur\`, or a \`becomes\` into what replaces it`);
+      f.warn('unplanned-exit', `${L.id}  (${L.start}s-${L.end}s)  ->  give it \`out\` + \`exitDur\`, or a \`becomes\` into what replaces it`, { at: L.id });
+    }
   } else {
     console.log('  ✓ every layer either leaves on its own terms or holds to the end');
   }
   if (missingHandoffs.length) {
     console.log(`  ~ ${missingHandoffs.length} exit(s) with nothing measured catching them nearby:`);
-    for (const L of missingHandoffs) console.log(`      ${L.id} exits at ${L.exit ? L.exit.end : L.end}s  ->  name what replaces it in the same region, or a \`flow-seam\` recipe naming \`out\`/\`in\``);
+    for (const L of missingHandoffs) {
+      console.log(`      ${L.id} exits at ${L.exit ? L.exit.end : L.end}s  ->  name what replaces it in the same region, or a \`flow-seam\` recipe naming \`out\`/\`in\``);
+      f.warn('missing-handoff', `${L.id} exits at ${L.exit ? L.exit.end : L.end}s  ->  name what replaces it in the same region, or a \`flow-seam\` recipe naming \`out\`/\`in\``, { at: L.id });
+    }
   } else if (T.handoffs.length) {
     console.log(`  ✓ ${T.handoffs.length} handoff(s) found (${T.handoffs.filter((h) => h.declared).length} declared, ${T.handoffs.filter((h) => !h.declared).length} measured)`);
   }
@@ -322,17 +339,24 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     for (const c of notEmphasised) {
       const measured = c.startSpeed != null ? `, measured ${c.startSpeed}px/s -> ${c.endSpeed}px/s` : '';
       console.log(`      ${c.id}  enter ${c.enterDur}s -> exit ${c.exitDur}s, ease ${c.ease || 'none'}${measured}  ->  set exitDur to ${c.suggestDur}s, or ease:"${SUGGESTED_EASE}"`);
+      f.warn('exit-not-emphasised', `${c.id}  enter ${c.enterDur}s -> exit ${c.exitDur}s, ease ${c.ease || 'none'}${measured}  ->  set exitDur to ${c.suggestDur}s, or ease:"${SUGGESTED_EASE}"`, { at: c.id });
     }
   } else if (exitChecks.length) {
     console.log(`  ✓ all ${exitChecks.length} declared exit(s) are emphasised (faster than their entrance, an accelerating ease, or measurably speeding up)`);
   }
   if (notSettled.length) {
     console.log(`  ~ ${notSettled.length} entrance(s) not settled (measured end speed is not lower than its start speed):`);
-    for (const c of notSettled) console.log(`      ${c.id}  enter ${c.enterDur}s, measured ${c.startSpeed}px/s -> ${c.endSpeed}px/s  ->  ease into it (an ease-out curve), or slow the arrival`);
+    for (const c of notSettled) {
+      console.log(`      ${c.id}  enter ${c.enterDur}s, measured ${c.startSpeed}px/s -> ${c.endSpeed}px/s  ->  ease into it (an ease-out curve), or slow the arrival`);
+      f.warn('entrance-not-settled', `${c.id}  enter ${c.enterDur}s, measured ${c.startSpeed}px/s -> ${c.endSpeed}px/s  ->  ease into it (an ease-out curve), or slow the arrival`, { at: c.id });
+    }
   } else if (entranceChecks.length) {
     console.log(`  ✓ all ${entranceChecks.length} measured entrance(s) settle (end speed lower than start speed)`);
   }
-  if (cameraCoverageFloor) console.log(`  ~ ${cameraCoverageFloor}`);
+  if (cameraCoverageFloor) {
+    console.log(`  ~ ${cameraCoverageFloor}`);
+    f.warn('camera-coverage-floor', cameraCoverageFloor);
+  }
   console.log('');
   process.exit(0);
 }
