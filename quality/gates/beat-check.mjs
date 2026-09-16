@@ -234,6 +234,18 @@ const movingWindows = bgs.filter((b) => !(typeof b.preset === 'string' && STATIC
 if (bgs.length && movingWindows.length === 0 && duration > 3 && !backdropMotion) {
   const names = [...new Set(bgs.map((b) => b.preset))].join(', ');
   warn('static-bg', `every bg window in this ${s(duration)} film is a flat field (${names}) and nothing behind the content ever changes. One flat window is a deliberate look; a whole video on one puts the largest area of the frame to sleep. Reach for a moving preset on at least one beat (aurora / mesh / dotmatrix / gradientWash / metallic, see core/backgrounds/index.js), or split \`bg\` into windows with \`t\` so the field shifts with the story. See engine-doctrine/CRAFT/SURFACES.md.`);
+} else if (bgs.length && movingWindows.length && duration > 3 && !backdropMotion) {
+  // The all-flat check above only fires when NOTHING moves anywhere. It stays silent on a film that
+  // spends one window on a moving preset and the rest of its runtime on a flat one, which still puts
+  // the largest area of the frame to sleep for most of the video. Measure the single longest flat RUN
+  // (windows carry no explicit t range default to the whole film, so an unbounded window's own length
+  // is `duration`) and nudge the same way once it dominates the runtime.
+  const runs = bgs.filter((b) => typeof b.preset === 'string' && STATIC_PRESETS.has(b.preset))
+    .map((b) => (typeof b.to === 'number' && typeof b.from === 'number') ? (b.to - b.from) : duration);
+  const longestFlat = runs.length ? Math.max(...runs) : 0;
+  if (longestFlat >= 6 && longestFlat / duration >= 0.6) {
+    warn('static-bg', `a single flat stretch runs ${s(longestFlat)} of this ${s(duration)} film (${Math.round(longestFlat / duration * 100)}% of it), the largest area of the frame asleep for most of the runtime even though another beat moves. Reach for a moving gradient (aurora / gradientWash / metallic / liquid) or a colourful pattern (dotmatrix / paperDots / constellation / mesh) on that stretch instead, see core/backgrounds/index.js. A deliberate flat match to a real brand ground waives this: {"authoring":{"allow":["static-bg"],"_why":{"static-bg":"..."}}}.`);
+  }
 }
 
 // ---------- 5. beats-wrapped-as-units ----------
