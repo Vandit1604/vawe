@@ -26,6 +26,9 @@ function classify() {
   const conforming = [], targets = [], silent = [];
   for (const file of fs.readdirSync(GATES).filter((f) => f.endsWith('.mjs')).sort()) {
     if (EXEMPT.has(file)) continue;
+    // A *.test.mjs file is a test runner for one gate, tallying pass/fail like lib-test.mjs: not
+    // finding-shaped, so it is out of scope the same way lib-test.mjs is, without listing each by name.
+    if (file.endsWith('.test.mjs')) continue;
     const src = fs.readFileSync(path.join(GATES, file), 'utf8');
     const usesFindings = /findings\.mjs|gateFindings|emitJson/.test(src);
     const prints = /console\.(log|error)/.test(src);
