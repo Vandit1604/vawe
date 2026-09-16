@@ -5,7 +5,7 @@
 // build (67M of assets/baked, 5M of assets/gen). .dockerignore is an ALLOWLIST now: `**` first, then
 // the paths the two Dockerfiles COPY. A directory nobody names is simply not in the context, so that
 // whole failure has no subject any more, and the reverse drift, a COPY whose path the ignore file
-// forgot, is `make docker-check` (scripts/site/docker-context-check.mjs), which reads the COPY lines.
+// forgot, is `make docker-check` (quality/gates/docker-context-check.mjs), which reads the COPY lines.
 //
 // The SIZE budget still has a subject: an allowed directory can grow (site/ is most of the context
 // today). But the walker this file used to carry re-implemented Docker's glob, and under an allowlist

@@ -1188,7 +1188,7 @@ Recorded so nobody reads a wide bound as a considered one: - `statBig.to` / `sta
 holds: none
 
 ## 289. the deploy failed on a directory `.dockerignore` excluded, and nothing local could see it
-`scripts/site/docker-context-check.mjs` (`make docker-check`, in `make review`): read the Dockerfile's COPY lines, apply `.dockerignore`, and fail on anything the build asks for that the context...
+`quality/gates/docker-context-check.mjs` (`make docker-check`, in `make review`; moved out of scripts/site/ so gate-census and doc-refs can see it too): read the Dockerfile's COPY lines, apply `.dockerignore`, and fail on anything the build asks for that the context...
 holds: none
 
 ## A. A fidelity metric that samples only the lit half

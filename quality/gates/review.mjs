@@ -27,7 +27,7 @@ results.push(run('doc refs (commands + paths the docs name)', 'node', ['quality/
 results.push(run('site engine (published copy matches this repo)', 'node', ['scripts/site/site-engine.mjs', '--check']));
 // A path the Dockerfile copies and .dockerignore excludes only ever shows up as a failed deploy: the
 // repo has the file and every local check passes (engine-doctrine/MISTAKES.md #289).
-results.push(run('docker context (the image will carry what the build copies)', 'node', ['scripts/site/docker-context-check.mjs']));
+results.push(run('docker context (the image will carry what the build copies)', 'node', ['quality/gates/docker-context-check.mjs']));
 
 // master sheet: tile the per-format audit overlays (safe-zone + critical-box overlays)
 const tiles = fs.existsSync('/tmp/audit') ? fs.readdirSync('/tmp/audit').filter((f) => f.endsWith('.png')).sort() : [];

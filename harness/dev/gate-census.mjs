@@ -30,7 +30,7 @@ function authoredFilms() {
 // wired into any make target. Kept explicit here (not re-derived at run time) because the four kinds
 // below need genuinely different handling, and guessing that from source shape is exactly the kind of
 // silent-drift heuristic this repo warns against elsewhere (findings.mjs, engine-doctrine/MISTAKES.md #401).
-const LIBRARIES = ['beats-of.mjs', 'block-schema.mjs', 'paths.mjs', 'rubric.mjs', 'scene-timing.mjs', 'snap-signature.mjs', 'tile.mjs'];
+const LIBRARIES = ['beats-of.mjs', 'block-schema.mjs', 'edge-reveal.mjs', 'paths.mjs', 'rubric.mjs', 'scene-timing.mjs', 'snap-signature.mjs', 'tile.mjs'];
 
 // film: single positional arg is a films/scene/<name>.json path (a few need a second literal arg).
 const FILM_CHECKS = {
@@ -39,12 +39,14 @@ const FILM_CHECKS = {
   'author-check.mjs': (f) => [f],
   'beat-check.mjs': (f) => [f],
   'copy-check.mjs': (f) => [f],
+  'covered-move.mjs': (f) => [f],
   'craft-checklist.mjs': (f) => [f],
   'critique.mjs': (f) => [f],
   'designspec-check.mjs': (f) => [f],
   'direction-floor.mjs': (f) => [f],
   'dissolve-check.mjs': (f) => [f],
   'draft-check.mjs': (f) => [f, '--stage', '95'],
+  'edge-check.mjs': (f) => [f],
   'eye-trace.mjs': (f) => [f],
   'font-audit.mjs': (f) => ['scene', f],
   'frame-check.mjs': (f) => [f],
@@ -71,7 +73,7 @@ const FILM_CHECKS = {
 const REPO_CHECKS = [
   'arsenal-check.mjs', 'audit-scenes.mjs', 'blocks-audit.mjs', 'code-quality.mjs', 'conformance.mjs',
   'coverage.mjs', 'craft-coverage.mjs', 'dead-branch.mjs', 'doc-map.mjs', 'doc-refs.mjs',
-  'docker-context.mjs', 'docs-drift.mjs', 'feature-audit.mjs', 'gate-mutation.mjs', 'generated-check.mjs',
+  'docker-context.mjs', 'docker-context-check.mjs', 'docs-drift.mjs', 'feature-audit.mjs', 'gate-mutation.mjs', 'generated-check.mjs',
   'glyphs-audit.mjs', 'knobs-audit.mjs', 'layer-props.mjs', 'legacy-fold.mjs', 'legacy-unfold.mjs',
   'lint-test.mjs', 'mistakes-dupes.mjs', 'motion-audit.mjs', 'no-judge.mjs', 'output-contract.mjs',
   'prop-probe.mjs', 'rung.mjs', 'schema-drift.mjs', 'sfx-audit.mjs', 'silent-fallback.mjs',
@@ -87,9 +89,12 @@ const OTHER_TOOLS = ['compare.mjs', 'similarity.mjs', 'canvas-purity.mjs', 'ledg
 // reporter: prints status, never emits a finding or a non-zero exit for a real defect (no gateFindings
 // import, no process.exit(1) path). Scoring one by fire-rate always reads as 0 and looks like a dead
 // gate; it is not a gate at all. stage.mjs (`make stage`) is the film-pipeline "what stage is this in,
-// what's next" status line: every path through it ends in process.exit(0). Listed here, not deleted and
-// not scored, for the same reason OTHER_TOOLS is exempt: the census can't measure a shape it isn't.
-const REPORTERS = ['stage.mjs'];
+// what's next" status line, and pace.mjs (`make pace`) is the tempo-preview instrument, "every measured
+// fact printed as info, no floor, no verdict" per its own header. Both always process.exit(0). pace.mjs
+// was previously in no list at all here (unclassified, "add it before trusting this census"), found
+// while merging its duplicated event-measurement with pace-check.mjs. Listed here, not deleted and not
+// scored, for the same reason OTHER_TOOLS is exempt: the census can't measure a shape it isn't.
+const REPORTERS = ['stage.mjs', 'pace.mjs'];
 
 function allGateFiles() {
   return fs.readdirSync(GATES_DIR).filter((f) => f.endsWith('.mjs')).sort();
