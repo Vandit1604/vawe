@@ -60,6 +60,16 @@
     "doc": "engine-doctrine/CRAFT/LAYOUT.md"
   },
   {
+    "id": "layout.kit-markers-required",
+    "category": "layout",
+    "stage": "design",
+    "applies": "always",
+    "check": "kit-markers-missing",
+    "adapt": null,
+    "brief": "every scene fragment in a per-scene fan-out pastes VERBATIM",
+    "doc": "engine-doctrine/CRAFT/HTML-FRAGMENTS.md#the-stage-kit-a-foundation-not-a-reset"
+  },
+  {
     "id": "layout.state-the-canvas",
     "category": "layout",
     "stage": "design",
