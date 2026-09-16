@@ -85,33 +85,18 @@ token went with the scope.
 
 ## Themes
 
-**There are two themes, one switching mechanism.** The system default follows
-`prefers-color-scheme: dark`; an explicit choice sets `data-theme="light"` or `data-theme="dark"` on
-`<html>` and wins over the system setting in both directions. That is the one mechanism (per
-`better-colors`, ui-skills: never let a media query own some tokens and a class own others), so both
-the media block and the attribute block redefine the same full set of tokens rather than splitting
-the work between them.
+**There is one theme, and the site has no dark mode at all.** No `prefers-color-scheme`, no
+`data-theme`, and since `/playground` moved to the light system, no opted-in dark scope either. A
+visitor whose OS is set to dark gets the light site.
 
-Dark is not the light palette inverted. Hue is held, vividness is pulled back and the dark end is
-widened rather than mirrored, and `accent-ink` is redefined to the dark `ink` rather than kept at
-white, because white-on-lightened-cobalt fails 4.5:1. Nothing on this site paints a colour on a
-component, only on a token, so the swap needed no component changes: nine call sites still hard-coded
-`#fff` where a component meant "the current surface" (`.ghbtn`, `.bsearch input`, `.bselect select`,
-`.sp`, `.sp-play`, `.tythumb`, `.tylive`), and those moved to `var(--surface)` as part of this pass.
+That is a decision the next change should make on purpose rather than inherit, and the way in is
+already proven. The scope that used to exist was token-level, not component-level: it redefined
+surface, line, ink and accent in one place and every control on the route repainted with no rule of
+its own. Nothing on this site paints a colour on a component, so that mechanism still works.
 
-Measured (WCAG relative luminance): dark `ink` on `bg` 17.4:1, `ink-2` 10.5:1, `muted` 6.1:1, `accent`
-on `bg` 5.5:1, `accent-ink` (`#0b0f16`) on `accent` 5.5:1, `ok` on `ok-bg` 7.0:1, `bad` on `bad-bg`
-5.3:1 — all pass 4.5:1 for text. Light mode, unchanged: `ink` 18.2:1, `muted` 4.9:1, `accent` 5.2:1.
-
-The seven tokens the old `.pgdark` scope never paid for are now covered: `shadow-1/2/3` are darker and
-more opaque rather than a light-surface shadow reused on ink, `ok` `ok-bg` `bad` `bad-bg` get their
-own dark-tinted pair, and `accent-ink` is redefined (see above).
-
-A toggle lives in `Header` (`site/app/components/ThemeToggle.tsx`), cycling system → dark → light →
-system, persisted to `localStorage` (`vawe-theme`, the only precedent on this site, so it is
-try/catch-guarded rather than following an existing pattern). `app/layout.tsx` applies a saved
-override before first paint via an inline script, so a returning visitor never sees a flash of the
-wrong theme.
+What a real dark mode owes, and what the old scope never paid: `shadow-3` kept a light-surface
+shadow, `ok` `ok-bg` `bad` `bad-bg` painted near-white on ink, and `accent-ink` was never
+redefined. Seven tokens, plus one decision about who owns the switch.
 
 ## Typography
 
@@ -209,7 +194,6 @@ while you still know.
 | `/editor` | product | **UNRECORDED** | Same. |
 | `/showcase`, `/`, `/playground`, `/features` | brand | **UNRECORDED** | Same. |
 | `site/og/card.html` | brand | `zeke/swiss-design` (ui-skills), local tokens win | Swiss principles taken (grid is real, whitespace is structure, opacity not hue for hierarchy, one accent, headings never bold). Its Tailwind and IBM Plex specifics REJECTED: this site owns its faces. |
-| Dark mode (`globals.css` tokens, `ThemeToggle`) | system | `jakubkrehel/better-colors` (ui-skills) | Taken: one switching mechanism end to end (not media query for some tokens, class for others); dark built by holding hue and reducing vividness rather than inverting; redefine `accent-ink` rather than leave it white; measure the rendered pair, don't estimate. REJECTED: its `oklch()`-first recommendation — this site's tokens are hex and stay hex, migrating notation was not in scope; its ramp/scale guidance — this site has single tokens per role, not 50-950 ramps, and defining ramps is the separate scale pass `site/CLAUDE.md` already defers. Also rejected: a third "auto" visible state — system default plus one override cycle is enough, per the brief. |
 
 **Two rules for filling a row in.**
 

@@ -42,6 +42,5 @@ hand-edit those files; run the generator.
 - **No spacing, type or radius scale.** Seven font sizes ship inside a 3px band. The evidence tables
   are in `DESIGN.md`; defining the scales means changing about 200 declarations, so it wants its own
   pass rather than a drive-by.
-- **Dark mode shipped.** `prefers-color-scheme` plus an explicit `data-theme` override, both
-  redefining the same token set. See `DESIGN.md` → Themes for the mechanism, the measured contrast
-  ratios and the toggle (`site/app/components/ThemeToggle.tsx`).
+- **No system dark mode.** There is no `prefers-color-scheme` and no `data-theme`, so a dark-OS
+  visitor gets the light site. `DESIGN.md` → Themes records what the mechanism would need to cover.
