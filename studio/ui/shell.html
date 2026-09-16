@@ -21,6 +21,7 @@
   <button data-state=make aria-pressed=true title="Make (2)"><svg viewBox="0 0 20 20"><rect x=3 y=4 width=14 height=9 rx=2 /><path d="M3 16h14M6 16v-3M14 16v-3"/><path class=solid d="M9 6.8v3.4l2.8-1.7z"/></svg><span>Make</span></button>
   <button data-state=look aria-pressed=false title="Look (3)"><svg viewBox="0 0 20 20"><rect x=3 y=3.5 width=6 height=5.5 rx=1.2 /><rect x=11 y=3.5 width=6 height=5.5 rx=1.2 /><rect x=3 y=11 width=6 height=5.5 rx=1.2 /><rect x=11 y=11 width=6 height=5.5 rx=1.2 /></svg><span>Look</span></button>
   <button data-state=ship aria-pressed=false title="Ship (4)"><svg viewBox="0 0 20 20"><path d="M10 12.5V3.5M6.5 7L10 3.5 13.5 7"/><path d="M4 11v3.5A1.5 1.5 0 005.5 16h9a1.5 1.5 0 001.5-1.5V11"/></svg><span>Ship</span></button>
+  <button data-state=sound aria-pressed=false title="Sound (5)"><svg viewBox="0 0 20 20"><path d="M6 15V6l8-2v9"/><circle cx=4.5 cy=15 r=2 /><circle cx=12.5 cy=13 r=2 /></svg><span>Sound</span></button>
   <button id=keyshelp class=ib popovertarget=keys aria-label="keyboard shortcuts" title=Keys><svg viewBox="0 0 20 20"><rect x=2.5 y=5.5 width=15 height=9 rx=2 /><path d="M5.5 8.5h1M9.5 8.5h1M13.5 8.5h1M7 11.5h6"/></svg></button>
  </nav>
  <div id=keys popover aria-label="keyboard shortcuts">
@@ -30,7 +31,7 @@
    <dt><kbd>shift</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd></dt><dd>Second</dd>
    <dt><kbd>home</kbd><kbd>end</kbd></dt><dd>Start, end</dd>
    <dt><kbd>&uarr;</kbd><kbd>&darr;</kbd></dt><dd>Layer</dd>
-   <dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></dt><dd>Plan, make, look, ship</dd>
+   <dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd><kbd>5</kbd></dt><dd>Plan, make, look, ship, sound</dd>
    <dt><kbd>esc</kbd></dt><dd>Deselect</dd>
   </dl>
  </div>
@@ -95,6 +96,10 @@
    <section id=shippane>
     <div class=panehead><b>Beat-check</b><span class=sp></span><span id=shipstat></span></div>
     <div class=paneview><div class=empty id=shipbody></div></div>
+   </section>
+   <section id=soundpane>
+    <div class=panehead><b>Sound</b><span class=sp></span><span id=soundstat></span></div>
+    <div class=paneview id=soundview><div id=soundbody></div><div class=empty id=soundnote hidden></div></div>
    </section>
   </div>
   <aside id=chat aria-label=chat>

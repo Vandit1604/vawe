@@ -20,6 +20,18 @@ before render), and it checks the SCENE directly, never the storyboard.
 A storyboard written before this change may still carry a `craft.sound:` line. Leave it: nothing reads
 it any more, and deleting it from every old storyboard would be a larger diff than the fact is worth.
 
+## Hear it before you commit it: `make studio` state 5
+
+Every other DIRECT decision is made by looking; sound used to be the one made by reading a cue's name
+in this doc and finding out what it sounds like at render. `make studio D=<file>`, then press `5`
+(or the Sound icon), lists every cue that will play, in time order, DERIVED the same way `buildSfx`
+derives them (cuts, seams, stings, the keystroke train, `audio.tactile`, and any hand-placed
+`audio.cues[]`), not just the ones written by hand. Each row names what happens at that instant, plays
+the cue that is currently chosen, and offers every baked cue as an auditionable alternative; clicking
+a row's time seeks the preview to that frame, so the sound is heard against the picture it lands on.
+Choosing an alternative writes it into the scene like any other studio edit (undo still works). See
+`studio/README.md`.
+
 ## AGENT SUMMARY
 
 - Sound is the default, not silence. Give every film sound (`make audio` + `make audio-bed

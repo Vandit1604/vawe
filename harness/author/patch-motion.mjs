@@ -252,33 +252,85 @@ function topArrayOpen(src, obj, key) {
   return -1;
 }
 
-function walkPath(src, segs) {
-  let region = null; // the object span to search the next array within; null = whole file
-  for (let p = 0; p < segs.length - 1; p += 2) {
-    const key = segs[p], idx = +segs[p + 1];
-    const obj = region || { start: 0, end: src.length };
-    const arrOpen = topArrayOpen(src, obj, key);
-    if (arrOpen < 0) throw new Error(`this scene has no \`${key}\` array to patch at /${segs.join('/')}`);
-    const el = elementSpans(src, arrOpen)[idx];
-    if (!el) throw new Error(`${key}[${idx}] does not exist in this scene`);
-    region = el;
+// the `{...}` span of a plain-object property `key` declared directly on `obj` (same depth-1
+// convention as topArrayOpen), or null. Lets a path hop through an OBJECT on its way to an array
+// (`/audio/cues/0/name`: `audio` is an object, `cues` the array inside it), which the pure
+// array-of-array chain below cannot reach on its own.
+function topObjectOpen(src, obj, key) {
+  const needle = `"${key}"`;
+  let p = obj.start, inStr = false, depth = 0;
+  for (; p < obj.end; p++) {
+    const c = src[p];
+    if (inStr) { if (c === '\\') { p++; continue; } if (c === '"') inStr = false; continue; }
+    if (c === '{' || c === '[') { depth++; continue; }
+    if (c === '}' || c === ']') { depth--; continue; }
+    if (c === '"') {
+      if (depth === 1 && src.startsWith(needle, p)) {
+        const after = src.indexOf(':', p + needle.length);
+        let v = after + 1;
+        while (v < obj.end && /\s/.test(src[v])) v++;
+        if (src[v] === '{') return { start: v, end: matchBracket(src, v) + 1 };
+      }
+      inStr = true;
+    }
   }
-  return region;
+  return null;
+}
+
+// walkPath resolves every segment but the last (the property name) into the object span it names,
+// hopping through plain objects (one segment: a key) and arrays (two segments: a key then an
+// index) in whatever order the scene actually nests them. Returns { region, src }: `src` only
+// changes when an 'add' appends a brand-new array element (see below), otherwise it is the input
+// unchanged, so a caller never has to guess which output to keep.
+function walkPath(src, segs, opKind) {
+  let region = { start: 0, end: src.length };
+  let i = 0;
+  while (i < segs.length - 1) {
+    const key = segs[i];
+    const arrOpen = topArrayOpen(src, region, key);
+    if (arrOpen >= 0) {
+      const idxSeg = segs[i + 1];
+      if (!/^\d+$/.test(idxSeg)) throw new Error(`\`${key}\` is an array; expected an index after it, not "${JSON.stringify(idxSeg)}"`);
+      const idx = +idxSeg;
+      let spans = elementSpans(src, arrOpen);
+      // APPEND, add-only, and only as the LAST array hop right before the final property: this is
+      // the one door a studio picker needs to hand-place a new `audio.cues[]` entry (or any other
+      // array row) without a second write path. Anything else out of range still refuses.
+      const isFinalArrayHop = i + 2 === segs.length - 1;
+      if (!spans[idx]) {
+        if (!(isFinalArrayHop && opKind === 'add' && idx === spans.length))
+          throw new Error(`${key}[${idx}] does not exist in this scene`);
+        const close = matchBracket(src, arrOpen);
+        src = src.slice(0, close) + (spans.length ? ', {}' : '{}') + src.slice(close);
+        spans = elementSpans(src, arrOpen);
+      }
+      region = spans[idx]; i += 2; continue;
+    }
+    const objSpan = topObjectOpen(src, region, key);
+    if (!objSpan) throw new Error(`this scene has no \`${key}\` array or object to patch at /${segs.join('/')}`);
+    region = objSpan; i += 1;
+  }
+  return { region, src };
 }
 export function applyOps(src, ops) {
   for (const op of ops || []) {
     const segs = String(op && op.path || '').split('/').filter(Boolean);
-    if (segs.length < 3 || segs.length % 2 === 0 || segs.some((s) => !/^[A-Za-z0-9_]+$/.test(s)))
+    if (segs.length < 2 || segs.some((s) => !/^[A-Za-z0-9_]+$/.test(s)))
       throw new Error(`this editor applies /<key>/<i>/.../<prop> ops only, not ${JSON.stringify(op && op.path)}`);
     const name = segs[segs.length - 1];
-    const el = walkPath(src, segs);
+    const { region: el, src: src2 } = walkPath(src, segs, op.op);
+    src = src2;
     const cur = propSpan(src, el, name);
     if (op.op === 'replace' || op.op === 'add') {
       const text = JSON.stringify(op.value);
+      // no such property yet: first in the object, which is where the eye looks for a preset name.
+      // A freshly-appended array element (see the ADD branch in walkPath) starts life as a bare `{}`,
+      // so the trailing comma this used to write unconditionally is only correct when something
+      // already follows it; an empty object gets none.
+      const bare = cur ? false : !src.slice(el.start + 1, el.end - 1).trim();
       src = cur
         ? src.slice(0, cur.valueStart) + text + src.slice(cur.valueEnd)
-        // no such property yet: first in the object, which is where the eye looks for a preset name
-        : src.slice(0, el.start + 1) + ` "${name}": ${text},` + src.slice(el.start + 1);
+        : src.slice(0, el.start + 1) + ` "${name}": ${text}` + (bare ? ' ' : ',') + src.slice(el.start + 1);
     } else if (op.op === 'remove') {
       if (!cur) continue;
       let a = cur.keyStart, b = cur.valueEnd;
