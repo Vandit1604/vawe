@@ -23,6 +23,10 @@ which easing, how long, in what order. The vocabulary is real and checkable (`ma
 
 - **Stagger = reading order.** Related units enter one-after-another (60-120ms); the single most important
   element moves LAST or MOST. Motion order tells the eye what to read first.
+- **`stagger.from` picks the wave shape**, not just `first`: `center`/`edges`/`last`/`random`, or
+  `typewriter` (chars/sec at a fixed `cps`, not a shared budget, so a long and a short line still type
+  at the same speed). Full table, generated, never restated here: [`engine-doctrine/EFFECTS.md`](../../engine-doctrine/EFFECTS.md)
+  ("Stagger order").
 - **Entry pace is a voice, not a constant.** Ambient elements drift (0.8-1.2s), payoffs snap (0.25-0.35s),
   thesis lines are luxurious (each 0.5+). Uniform 0.45s everywhere is the `monotone-timing` tell.
 - **Settle and hold.** An entrance must reach TRUE rest (endpoints snapped to 0/1) and hold, a layer still
@@ -30,9 +34,11 @@ which easing, how long, in what order. The vocabulary is real and checkable (`ma
 
 ## Text effect vocabulary (`split` + `preset`, or GSAP `fx`)
 
-- **Presets** (`core/type/type.js`): `up` (default kinetic headline), `scale` (punch), `blur` (premium/calm),
-  `decode` (techy scramble), `wave`/`shimmerWave`, `draw` (SVG stroke-on), `riseClip`, `colorWave`,
-  `highlight`, `underline`, `gradient`, `chroma`. Choose by mood, not habit.
+- **The full preset list is generated, never hand-copied here**: `core/kinetic/presets.js` (30+ presets:
+  `up`, `scale`, `blur`, `decode`, `type` the hard on/off for terminals/timers, `wave`/`shimmerWave`,
+  `draw`, `riseClip`, `colorWave` and more) is the source, [`engine-doctrine/EFFECTS.md`](../../engine-doctrine/EFFECTS.md)
+  the regenerated catalogue (`make effects`). Pick by mood there, in `vawe-effects`'s mechanism table,
+  not from a memorised subset, which is exactly how a preset added after this line goes unused.
 - **GSAP char fx** (`core/engine/gsap-effects.js`): `charOvershoot`, `charBlurCascade`, `charFold`, `charTilt` on a
   `split` layer; idle loops `float`/`pulse`/`breathe`. Pair with `anim:"none"`.
 - **A changing word belongs in a fixed box** (launch rule) so nothing reflows; the chip is the brand-colour spot.
