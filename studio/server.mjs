@@ -781,10 +781,24 @@ const { server } = await serveRepo({ port: PORT, route: studioRoutes }).catch((e
 server.on('error', oops);
 console.log(`\n  ▶ vawe studio: ${path.basename(dataArg)}`);
 console.log(`    open  http://127.0.0.1:${PORT}/studio`);
-console.log(`    ← → a frame · shift+← → a second · home/end the ends · space plays · 1-4 switch state`);
+console.log(`    ← → a frame · shift+← → a second · home/end the ends · space plays · 1-5 switch state`);
 console.log(`    timeline below: drag it to seek · hazard bands are dead air (beat-check) · hover a bar for its ramps`);
 console.log(`    drag the divider to trade preview height for timeline height (it sticks)`);
 console.log(`    Ctrl-C to stop.\n`);
+
+// OPEN IT. The studio is where a plan is SHOWN before a person signs it off (AGENTS.md stage 3), and
+// where sound is now chosen by ear. Printing a URL makes that step depend on somebody noticing a line
+// of terminal output, which is the same "a correct thing nobody ran" shape this repo keeps paying for:
+// an approval was asked for as a wall of text, and the frames the person was signing off went unseen.
+// So the browser opens itself. NOOPEN=1 for a headless box or a CI run, where there is nothing to open.
+if (!process.env.NOOPEN) {
+  const url = `http://127.0.0.1:${PORT}/studio`;
+  const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
+  // Detached and ignored: the browser must not hold the server's stdio, and a machine with no opener
+  // (a container, a bare ssh session) must print its URL and carry on rather than die at the banner.
+  try { spawn(cmd, [url], { stdio: 'ignore', detached: true }).unref(); }
+  catch { /* the printed URL above is the fallback, and it is enough */ }
+}
 
 // Never fatal: a gate crash here must not take the server down with it.
 try {
