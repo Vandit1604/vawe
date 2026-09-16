@@ -1,6 +1,7 @@
 ---
 name: vawe-video-planning
 description: "PLAN BEFORE AUTHORING any video in this repo: collect the brief, lock a style pack (from a brand site, OR from a manufactured taste anchor when there is no site), storyboard, THEN write JSON. Use whenever the user asks to 'make a video' and the goal/platform/duration/tone aren't pinned down."
+stage: plan
 ---
 
 # Video planning: brief first, JSON second

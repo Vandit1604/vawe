@@ -3,11 +3,22 @@ when: the film has no sound, or you are about to ship it mute
 answers: "sound as STRUCTURE (J-cut · L-cut · sync points · the pre-impact drop) · how to write a sound bridge (audio.bridges) · sound design vs music · how well any of it is evidenced · what we may legally put under a commercial film · the engine's audio block and commands"
 group: crosscutting
 codes: silent-by-omission, silence-without-a-reason, audio-block-produces-nothing, cues-have-no-sound, cue-missing, bed-unresolved, bed-missing, bed-provenance-unknown, bed-licence-unverified, bed-muted, sfx-shape
-applies-when: always
-confirm: "does this film carry sound, or is the silence a stated decision?"
 ---
 
 # SOUND: the structural register we have not been using
+
+## Sound is asked about at DIRECT, not at the storyboard
+
+Sound is not a storyboard field. It is not part of what a person approves at stage 3: the picture is
+approved before anyone has to have an opinion on sound, and a storyboard's `craft:` map carries no
+`sound:` entry (this doc used to require one, via `craft-checklist.mjs`'s `applies-when: always`; that
+line is gone now on purpose). The question moves to where `harness/lib/craft-rules.mjs`'s
+`STAGE_CATEGORY_ORDER` already places it: stage 6, DIRECT, after motion and transitions, once the cut
+reads. The real gate is `make audio-check D=<file>`, wired into `make check`/`make ship` (stage 7,
+before render), and it checks the SCENE directly, never the storyboard.
+
+A storyboard written before this change may still carry a `craft.sound:` line. Leave it: nothing reads
+it any more, and deleting it from every old storyboard would be a larger diff than the fact is worth.
 
 ## AGENT SUMMARY
 

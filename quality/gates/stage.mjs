@@ -34,6 +34,7 @@ import { score, toks, coverageIn, CONFIDENT } from '../../harness/author/arsenal
 // (AGENTS.md), so that cost is not acceptable here the way it is for `make arsenal`, run once, on
 // demand. See harness/author/discovery.mjs for the full accounting.
 import { GROUPS, usedNames, pasteLine, ambiguousNames, tokenGroupsOf, bestWindowMatch } from '../../harness/author/discovery.mjs';
+import { skillsForStage } from '../../harness/lib/skill-stages.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -106,7 +107,10 @@ export function stageOf(arg) {
       next: `make judge D=${p.base}.json, then make ledger D=${p.base}.json` },
   ];
   const at = S.find((s) => !s.done) || S[S.length - 1];
+  // The skill(s) claiming this stage, read off skills/*/SKILL.md's own `stage:` frontmatter
+  // (harness/lib/skill-stages.mjs), never a second hand-kept table.
   return { ...p, stage: at.id, why: at.why, next: at.next, order: S.map((s) => s.id),
+    skills: skillsForStage(at.id),
     approved: approved || null, fragments: [...new Set(fragments)], missingFrags, layers, sbExists, sceneExists };
 }
 
@@ -300,7 +304,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log(`\n  ${st.name} is at stage ${st.stage.toUpperCase()}`);
   console.log(`  ${line}`);
   console.log(`\n  why: ${st.why}`);
-  console.log(`  do:  ${st.next}\n`);
+  console.log(`  do:  ${st.next}`);
+  if (st.skills.length) console.log(`  skill: ${st.skills.join(', ')}`);
+  console.log('');
   if (look) {
     console.log(`  LOOK (frames now, not after render):`);
     for (const s of look.screens) console.log(`    ${s}`);

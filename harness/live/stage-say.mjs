@@ -44,6 +44,9 @@ if (st.stage === 'judge') process.exit(0);
 console.log(`vawe: ${st.name} is at stage ${st.stage.toUpperCase()} (${st.order.join(' → ')}).`);
 console.log(`  ${st.why}`);
 console.log(`  next: ${st.next}`);
+// The skill(s) that stage wants, read off skills/*/SKILL.md's own `stage:` frontmatter
+// (harness/lib/skill-stages.mjs), not a second hand-kept table.
+if (st.skills.length) console.log(`  skill: ${st.skills.join(', ')}`);
 console.log('  Do that stage, not the one after it. `make stage D=films/scene/'
   + `${st.name}.json\` re-reads this from the files on disk.`);
 
