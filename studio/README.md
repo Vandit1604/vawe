@@ -6,7 +6,7 @@ group: engine
 
 # studio/
 
-The live scrubbable preview for one scene: a static server, a plan/make/look/ship shell, and a
+The live scrubbable preview for one scene: a static server, a plan/make/look/ship/sound shell, and a
 timeline, so a film can be inspected and approved before it is ever rendered.
 
 ```
@@ -14,7 +14,30 @@ make studio D=films/scene/<file>.json [PORT=8799]
 ```
 
 Open the printed URL, leave it running (Ctrl-C to stop). See `AGENTS.md` for the eight authoring
-stages; studio's `plan` state is stage 3, approval.
+stages; studio's `plan` state is stage 3, approval, and its `sound` state serves stage 6, direct.
+
+## The five states
+
+One scene, one playhead, five things you might be doing with them (`studio.js:setState`, key `1`-`5`):
+
+| key | state | what it shows |
+|---|---|---|
+| 1 | plan | the storyboard's beats as real rendered frames, for sign-off before anything is built |
+| 2 | make | the scrubbable preview + timeline: drag a keyframe, pick a backdrop, edit motion by eye |
+| 3 | look | contact sheets: beats, key frames, seams |
+| 4 | ship | the beat-check gate's findings and the `make ship` command |
+| 5 | sound | every cue the render will mix, in time order, each with a play button and a picker |
+
+`sound` reads `window.__engine.meta.sfx`, the SAME list `films/scene/scene.js`'s `buildSfx()` hands
+the render (cuts, seams, stings, the keystroke train, `audio.tactile`'s derived cues, and any
+hand-placed `audio.cues[]`), so it can never claim a different mix than the one that ships. What
+each row means (`cueWhy` in `studio.js`) is reconstructed from the timeline model this pane already
+holds (layers, including group children, transitions, camera, typing) and can only mislabel a row,
+never change what plays. Clicking a row's time seeks the playhead and switches to `make`, so the
+frame a sound lands on is on screen while you audition it. Choosing an alternative (one of the 28
+cues `make audio` bakes) writes an `audio.cues[]` entry through `/api/apply`, same as every other
+write in this file, so undo still works; a cue whose `.wav` is not baked says so in the row with the
+`make audio` command that fixes it, rather than failing silently.
 
 ## Layout
 

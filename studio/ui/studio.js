@@ -208,6 +208,7 @@
    if(s==='plan') drawPlan();
    if(s==='look') showSheet(sheetKind);
    if(s==='ship') drawShip();
+   if(s==='sound') drawSound();
  }
  document.querySelectorAll('#states button[data-state]').forEach(b=>b.addEventListener('click',()=>setState(b.dataset.state)));
 
@@ -416,6 +417,141 @@
    const b=$('shipcmd'), lab=b.querySelector('span'), back=()=>setTimeout(()=>{ lab.textContent='Copy'; },1400);
    b.addEventListener('click',()=>navigator.clipboard.writeText(cmd)
      .then(()=>{ lab.textContent='Copied'; say('copied: '+cmd); back(); },()=>{ lab.textContent='Copy failed'; back(); }));
+ }
+ // ---- SOUND: hear every cue before it ships, against the frame it lands on ------------------------
+ // Sound used to be the one decision made blind: an author wrote a cue's NAME into JSON and only heard
+ // it after a full render. This reads the SAME list the render mixes, `window.__engine.meta.sfx`
+ // (films/scene/scene.js buildSfx()), so the row can never claim a different mix than the one that
+ // ships. It includes the IMPLICIT cues (a keystroke, a layer arrival, a tactile pluck), not just the
+ // three an author might have hand-placed, because those are the ones a cue list that only reads
+ // `audio.cues` would lie about.
+ //
+ // `why` (what happens at this instant) is RECONSTRUCTED here from the model this pane already holds
+ // (layers, transitions, camera, typing), never re-derived engine-side: a wrong guess here only
+ // mislabels a row, it can never change what plays.
+ let soundSfx=[];
+ const sfxWavExists={}; // cue name -> true/false, HEAD-checked once and cached for the session
+ function playCue(name){
+   try{ const a=new Audio('/assets/sfx/'+encodeURIComponent(name)+'.wav'); a.play().catch(()=>{}); }catch{}
+ }
+ // The verb is read off the CUE NAME, never the event: the same "pluck" always "pops", whatever
+ // caused it, so the row names what will be HEARD, matching the label to a sound the ear can learn.
+ const SOUND_VERB={impact:'lands',pluck:'pops',bloom:'opens',droplet:'drops',whoosh:'pans',
+   riser:'builds',chime:'chimes',sparkle:'sparkles',success:'resolves',ready:'settles',
+   drop:'falls',swell:'swells',braam:'hits',
+   // the interaction-vocabulary ALIASES a keystroke or a UI-style cue actually names
+   // (generators/media/audio-bake.mjs ROLES), each pointing at the voicing it bakes to.
+   click:'pops',pop:'drops',tick:'pops',key:'pops',press:'pops',release:'pops',toggle:'pops',
+   page:'pans',loading:'swells',error:'lands',whisper:'swells',thud:'lands',travel:'pans',
+   sweep:'pans',reveal:'chimes'};
+ // The timeline model only lists TOP-LEVEL layers (studio/server.mjs), but a `group`'s children
+ // (nested under `children`) are where most typed text and small parts actually live, so a keystroke
+ // is invisible here unless this pane walks down into them itself. `path` records the exact chain of
+ // array/index hops (`['layers',3,'children',1]`) so an override can be written back through the same
+ // hops with `/api/apply`, which only ever edits the object literal actually on disk.
+ // A group CHILD'S clock is its parent's, offset by `delay`, and that is the whole vocabulary
+ // (core/layers/util.js addGroupChild): a child's own `start` is authored but never read by the
+ // engine, only `delay` is. Recomputing that same rule here (rather than the child's `start`) is what
+ // made the first pass of this pane mislabel every nested keystroke by up to a second.
+ function flattenLayers(m){
+   const out=[];
+   const walk=(L,start,path,label)=>{
+     out.push({ raw:L, path, label:label||L.id||L.type||'layer', start });
+     if(Array.isArray(L.children)) L.children.forEach((c,j)=>
+       walk(c, start+Math.max(0,+c.delay||0), path.concat(['children',j]), (label||L.id||L.type)+' > '+(c.id||c.type)));
+   };
+   (m.layers||[]).forEach(L=>walk(L.raw||{},+(L.start||0),['layers',L.i],L.label||L.type));
+   return out;
+ }
+ function cueWhy(t,flat,m){
+   const eps=0.06;
+   for(const F of flat){
+     if(!F.raw.typing||F.raw.keyClicks===false) continue;
+     const cps=F.raw.typing===true?24:+F.raw.typing, full=String(F.raw.text||'');
+     if(!full.length) continue;
+     // one keystroke every 1/cps seconds, closer together than `eps`, so the NEAREST index is solved
+     // directly (core/type/type.js: character i lands at start+(i+1)/cps) rather than found by a
+     // threshold scan, which used to match several adjacent keys to the same row.
+     const i=Math.round((t-F.start)*cps)-1;
+     if(i<0||i>=full.length) continue;
+     if(Math.abs(t-(F.start+(i+1)/cps))<eps) return { label:F.label+' keystroke '+(i+1)+' of '+full.length, path:F.path };
+   }
+   for(const c of ((m&&m.transitions)||[])) if(Math.abs(t-c.at)<eps)
+     return { label:(c.mech||'transition')+(c.fx?' '+c.fx:'') };
+   for(const c of ((m&&m.cameraMove)||[])) if(Math.abs(t-c.start)<eps)
+     return { label:'camera '+(c.move||'move')+' begins' };
+   for(const F of flat) if(Math.abs(t-F.start)<eps)
+     return { label:F.label+' arrives', arrival:true };
+   return { label:null };
+ }
+ // Every row is overridable, even a purely derived one: `audio.cues[]` placed by hand ALWAYS beats a
+ // derived cue at the same joint (core/audio/tactile.js), so "choose an alternative" always ends up
+ // writing one. If this exact cue is already an authored entry, its own index is patched in place;
+ // otherwise a new one is hand-placed 1ms earlier, which is enough to win buildSfx's tie-break (sorts
+ // by time, then keeps the first of any two cues under 0.09s apart) without touching the engine.
+ function cueTarget(c,m){
+   const authored=(m.audio&&m.audio.cues)||[];
+   const ci=authored.findIndex(a=>Math.abs(a.t-c.t)<0.03&&a.name===c.name);
+   if(ci>=0) return { kind:'authored', ci };
+   if(c.why.path&&!c.why.arrival) return { kind:'keystroke', path:c.why.path };
+   return { kind:'derive', authoredLen:authored.length };
+ }
+ function chooseCue(i,newName){
+   const c=soundSfx[i]; if(!c||!model) return;
+   const t=cueTarget(c,model);
+   let ops;
+   if(t.kind==='authored') ops=[{op:'replace',path:'audio/cues/'+t.ci+'/name',value:newName}];
+   else if(t.kind==='keystroke') ops=[{op:'add',path:t.path.join('/')+'/keyCue',value:newName}];
+   else { const idx=t.authoredLen, at=Math.max(0,+(c.t-0.001).toFixed(3));
+     ops=[{op:'add',path:'audio/cues/'+idx+'/t',value:at},{op:'add',path:'audio/cues/'+idx+'/name',value:newName}]; }
+   fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ops})})
+     .then(r=>r.json()).then(res=>{
+       if(!res.ok){ say('could not change the sound: '+res.error); return; }
+       say(newName+' at '+c.t.toFixed(2)+'s'); timeline();
+       reloadScene(); sc.addEventListener('load',()=>{ setTimeout(()=>{
+         if(document.body.dataset.state==='sound') drawSound(); },250); },{once:true});
+     });
+ }
+ function soundRowHtml(c,i,roles){
+   const label=c.why.label?esc(c.why.label):'cue', verb=SOUND_VERB[c.name]||'sounds';
+   if(sfxWavExists[c.name]==null) fetch('/assets/sfx/'+encodeURIComponent(c.name)+'.wav',{method:'HEAD'})
+     .then(r=>{ sfxWavExists[c.name]=r.ok; if(!r.ok) drawSound(); }).catch(()=>{ sfxWavExists[c.name]=false; });
+   const missing=sfxWavExists[c.name]===false;
+   return '<div class=srow>'
+     +'<button class=splay data-name="'+esc(c.name)+'" aria-label="play '+esc(c.name)+'" title="Play '+esc(c.name)+'">'+ICON.sound+'</button>'
+     +'<button class=swhat data-t="'+c.t+'" title="Go to '+c.t.toFixed(2)+'s in Make">'
+       +'<b>'+label+' &middot; '+verb+'</b><s>'+c.t.toFixed(2)+'s</s></button>'
+     +'<span class=scur>'+esc(c.name)+(missing?'<i class=miss>needs <code>make audio</code></i>':'')+'</span>'
+     +'<div class=spick>'+roles.map(r=>'<span class=alt>'
+       +'<button class=altplay data-name="'+esc(r)+'" aria-label="Play '+esc(r)+'" title="Play '+esc(r)+'">'+ICON.sound+'</button>'
+       +'<button class=altuse data-i="'+i+'" data-name="'+esc(r)+'" aria-pressed="'+(r===c.name)+'" title="Use '+esc(r)+' here">'+esc(r)+'</button></span>').join('')+'</div>'
+     +'</div>';
+ }
+ let soundWired=false;
+ function drawSound(){
+   const note=$('soundnote'), body=$('soundbody');
+   const eng=sc.contentWindow&&sc.contentWindow.__engine;
+   if(!model||!eng||!eng.meta){ note.hidden=false; body.innerHTML='';
+     note.innerHTML='<h2>Loading&hellip;</h2><p>Waiting for the scene to boot.</p>'; $('soundstat').textContent=''; return; }
+   // The label is reconstructed once per draw, off the SAME flattened layer tree (group children
+   // included, studio/server.mjs's model only lists the top level) rather than re-walked per row.
+   const flat=flattenLayers(model);
+   soundSfx=(eng.meta.sfx||[]).map(c=>({ ...c, why:cueWhy(c.t,flat,model) }));
+   if(!soundSfx.length){ note.hidden=false; body.innerHTML='';
+     note.innerHTML='<h2>No sound yet</h2><p>This film has no derived or authored cues. Write '
+       +'<code>audio:{auto:true}</code> or <code>audio:{tactile:true}</code>, or place one by hand in <code>audio.cues</code>.</p>';
+     $('soundstat').textContent=''; return; }
+   note.hidden=true;
+   const roles=model.sfxRoles||[];
+   $('soundstat').textContent=soundSfx.length+' sound'+(soundSfx.length===1?'':'s');
+   body.innerHTML=soundSfx.map((c,i)=>soundRowHtml(c,i,roles)).join('');
+   if(!soundWired){ soundWired=true;
+     body.addEventListener('click',e=>{
+       const p=e.target.closest('.splay,.altplay'); if(p){ playCue(p.dataset.name); return; }
+       const u=e.target.closest('.altuse'); if(u){ chooseCue(+u.dataset.i,u.dataset.name); return; }
+       const w=e.target.closest('.swhat'); if(w){ setState('make'); go(Math.round(+w.dataset.t*fps)); return; }
+     });
+   }
  }
  // ---- THE CHOOSER: six takes of this film, at this frame ------------------------------------------
  // IT NEVER ASKS FOR A WORD. There is no search box here and there will not be one: the person this
@@ -1016,7 +1152,7 @@
      if(!document.querySelector(':popover-open')&&(selIdx>=0||!propsEl.hidden)) setSel(-1); return; }
    if(typing()||e.metaKey||e.ctrlKey||e.altKey) return;
    // the states, in the order they are asked. Cheap to move between, so they are one keystroke apart.
-   const st={'1':'plan','2':'make','3':'look','4':'ship'}[e.key];
+   const st={'1':'plan','2':'make','3':'look','4':'ship','5':'sound'}[e.key];
    if(st){ e.preventDefault(); setState(st); return; }
    const step=e.shiftKey?fps:1;
    if(e.key==='ArrowRight'){ e.preventDefault(); go(n+step); }
