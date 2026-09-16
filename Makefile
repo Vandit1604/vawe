@@ -1363,6 +1363,12 @@ discovery: ## [engine] can an author still FIND what the engine can do?
 no-judge: ## [judge] ratchet: rendered films with no valid judge receipt (--stamp to lower)
 	@node quality/gates/no-judge.mjs $(if $(STAMP),--stamp,) $(if $(JSON),--json,)
 
+# judge-census: a COUNT of what the eye has caught across every judge receipt, never a score
+# (engine-doctrine/EVALS.md refuses one on purpose). Tallies `--fix <code>@<beat>` records by dimension
+# and by their relative position in the film (first/middle/last). Read-only, writes no baseline.
+judge-census: ## [judge] count judge fix codes by dimension and beat position (never a score)
+	@node quality/gates/judge-census.mjs $(if $(JSON),--json,)
+
 # output-contract: every reporting gate renders through harness/lib/findings.mjs (tight prose + --json).
 # Ratchets the count of gates that still print ad-hoc prose DOWN. engine-doctrine/CRAFT/COMMAND-OUTPUT.md.
 # JSON=1 emits the whole migration worklist as findings; --stamp lowers the ratchet after a batch.
