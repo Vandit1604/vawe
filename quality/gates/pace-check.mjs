@@ -37,6 +37,7 @@ const strict = process.argv.includes('--strict');
 const FLOOR = 1.0;          // below this a film is asleep
 const HOLD = 4.0;           // seconds with nothing arriving or leaving
 import { loadScene } from '../../core/engine/expand.js';
+import { measureEvents } from '../../harness/lib/pace-events.mjs';
 
 function measure(p) {
 // The unified `transitions` surface is SUGAR: the engine lowers it to cuts/seams/stings before it
@@ -44,26 +45,7 @@ function measure(p) {
 // that declared its boundaries the documented way was read as a film with no boundaries at all.
 // Lowering here is idempotent and a no-op for a scene that already writes raw `cuts`. MISTAKES #380.
   const d = loadScene(JSON.parse(fs.readFileSync(p, 'utf8')));
-  if (!d.layers || !d.duration) return null;
-  const ev = new Set();
-  const walk = (a) => a.forEach((l) => {
-    if (l.start != null) ev.add(+Number(l.start).toFixed(2));
-    if (l.start != null && l.duration != null) ev.add(+Number(l.start + l.duration).toFixed(2));
-    if (l.children) walk(l.children);
-  });
-  walk(d.layers);
-  for (const c of d.cuts || []) ev.add(c.t);
-  for (const s of d.stings || []) ev.add(s.t);
-  const t = [...ev].filter((x) => x >= 0 && x <= d.duration).sort((a, b) => a - b);
-  // The longest stretch where nothing enters or leaves, INCLUDING the head and the tail: a film that
-  // opens on four seconds of held frame is slow in exactly the way this is looking for.
-  let hold = t.length ? t[0] : d.duration, at = 0;
-  for (let i = 1; i < t.length; i++) if (t[i] - t[i - 1] > hold) { hold = t[i] - t[i - 1]; at = t[i - 1]; }
-  if (t.length && d.duration - t[t.length - 1] > hold) { hold = d.duration - t[t.length - 1]; at = t[t.length - 1]; }
-  // A film SAYS something. A backdrop or a determinism fixture has no copy and is meant to be still, so
-  // it is measured and reported and never failed.
-  const copy = JSON.stringify(d.layers).match(/"text"\s*:/g)?.length ?? 0;
-  return { dur: d.duration, eps: t.length / d.duration, events: t.length, hold, at, copy, allow: d.authoring?.allow || [] };
+  return measureEvents(d);
 }
 
 if (!file) {

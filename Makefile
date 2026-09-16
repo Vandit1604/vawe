@@ -1156,7 +1156,7 @@ engine-sync: ## [engine] publish the engine into site/public (the site's in-brow
 # applies .dockerignore. A mismatch here is invisible locally and fails the deploy.
 .PHONY: docker-check
 docker-check: ## [site] will the image carry what the Dockerfile COPY lines expect?
-	@node scripts/site/docker-context-check.mjs
+	@node quality/gates/docker-context-check.mjs
 
 .PHONY: worktrees
 # Retire agent worktrees whose work has landed. Reports by default; PRUNE=1 removes.
