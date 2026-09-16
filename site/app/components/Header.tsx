@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ThemeToggle } from "./ThemeToggle";
 
 export function WaveGlyph({ className = "glyph" }: { className?: string }) {
   return (
@@ -57,7 +56,6 @@ export function Header({ active, variant = "solid" }: { active?: string; variant
           </svg>
           GitHub
         </a>
-        <ThemeToggle />
       </header>
     </div>
   );
