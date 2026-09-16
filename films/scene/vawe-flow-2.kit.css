@@ -44,6 +44,13 @@
       --dim:rgba(255,255,255,.62);--surface:#ffffff;--surface-2:rgba(255,255,255,.14);
       --line:rgba(255,255,255,.22);--line-strong:rgba(255,255,255,.34);
       --accent:#ffffff;--accent-dim:rgba(255,255,255,.18);--kit-chip-bg:#1e46b8;--kit-chip-fg:#ffffff}
+/* studio's own editor tokens, sampled off the reference editor (studio/ui/studio.css), not guessed:
+   the timeline fragment wears these verbatim so the film shows the real tool, not a lookalike. */
+.kit-ground-studio{background:#16151a;--text:#ffffff;--text-2:#d8d8da;--dim:#97969b;--muted:#7c7b81;
+      --surface:#212025;--surface-2:#27262c;--line:rgba(255,255,255,.07);--line-strong:rgba(255,255,255,.13);
+      --accent:#0a87ff;--accent-dim:rgba(10,135,255,.16);--kit-chip-bg:rgba(10,135,255,.16);--kit-chip-fg:#0a87ff}
+/* the timeline is a floating panel on the scene ground, so its root paints no ground of its own */
+.kit-root.kit-ground-studio{background:transparent}
 .kit-picture{--text:#0f1620;
       --text-2:#454f5e;
       --dim:#697182;
