@@ -16,6 +16,7 @@ import { frameTile, tileGrid, tileBox, baseOf, renderOf, gradeable } from './til
 import { craftRubric } from './rubric.mjs';
 import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
 import { appendRun } from '../../harness/lib/runlog.mjs';
+import { JUDGE_CODES, isJudgeCode, parseFix } from '../../harness/lib/judge-codes.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -33,6 +34,8 @@ const renderHashOf = (file) => { try { return crypto.createHash('sha256').update
 const f = gateFindings();
 const inp = process.argv[2];
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i + 1] : d; };
+// every occurrence of a repeated flag, in order: `--fix a@1 --fix b@2` -> ['a@1', 'b@2'].
+const argAll = (k) => process.argv.reduce((acc, v, i) => (v === k ? [...acc, process.argv[i + 1]] : acc), []);
 if (!inp) {
   console.error('usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]');
   f.fail('judge-usage', 'usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]');
@@ -87,14 +90,40 @@ if (verdictArg) {
     console.error(`✗ ${mp4} has changed since the sheet was made (its content no longer matches). Re-run \`make judge D=${inp}\` first.`);
     process.exit(1);
   }
-  const fixes = arg('--fixes', '');
-  writeReceipt('judge', inp, { verdict: v, fixes, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
+  // --fix <code>@<beat>, repeated: the structured replacement for the free-text --fixes string
+  // (engine-doctrine/JUDGE.md's own complaint: a finding written as a sentence can never become a
+  // rule, because nothing parses it). Each one is a record, {code, beat}, checked against the closed
+  // set in harness/lib/judge-codes.mjs so a typo cannot silently mint a new dimension. An unknown code
+  // is refused here (a determinism concern), but a FIX verdict still records and the film still ships:
+  // this gate asks whether the eye ran, never whether it liked what it saw.
+  const rawFixes = argAll('--fix');
+  const fixRecords = rawFixes.map(parseFix);
+  const bad = fixRecords.find((r) => !isJudgeCode(r.code));
+  if (bad) {
+    console.error(`✗ "${bad.code}" is not a judge fix code. Valid codes: ${JUDGE_CODES.join(', ')}`);
+    f.fail('judge-bad-code', `"${bad.code}" is not a judge fix code`, { fix: `use one of: ${JUDGE_CODES.join(', ')}` });
+    process.exit(2);
+  }
+  for (const { code, beat } of fixRecords) f.warn(code, `beat ${beat}: flagged by the eye`, { beat });
+
+  // Backward compatible for one release: free-text --fixes still records and still ships, and the
+  // caller is told what replaces it rather than left to find --fix by reading this file.
+  const fixesProse = arg('--fixes', '');
+  if (fixesProse) console.error('  note: --fixes is free text and will not be parsed. Use --fix <code>@<beat> (repeated) instead.');
+
+  writeReceipt('judge', inp, {
+    verdict: v, fixes: fixRecords.length ? fixRecords : fixesProse, sheet, renderHash, mp4,
+    at: new Date().toISOString().slice(0, 10),
+  });
   // Logged here, and only here: this is the agent's actual verdict, written down after the eye looked,
   // never a verdict the prep step invents for itself (engine-doctrine/MISTAKES.md, judge PASS is never self-recorded).
   appendRun(inp, { cmd: 'judge', judge: { verdict: v, file: sheet } });
+  const fixSummary = fixRecords.length
+    ? ` (${fixRecords.map((r) => `${r.code}@${r.beat}`).join(', ')})`
+    : (fixesProse ? ` (${fixesProse})` : '');
   console.log(v === 'PASS'
     ? `  ✓ judge verdict recorded: PASS. The eye is satisfied, this cut is done (make ledger-add D=${inp}).`
-    : `  ✓ judge verdict recorded: FIX${fixes ? ` (${fixes})` : ''}. Fix it, re-render, and re-judge before shipping. The loop is not done until the eye stops finding fixes.`);
+    : `  ✓ judge verdict recorded: FIX${fixSummary}. Fix it, re-render, and re-judge before shipping. The loop is not done until the eye stops finding fixes.`);
   process.exit(0);
 }
 
