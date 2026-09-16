@@ -99,6 +99,7 @@ function referencedBy(basename) {
   };
   grep(['Makefile'], 'Makefile');
   grep(['.githooks'], '.githooks');
+  grep(['.github/workflows', '--include=*.yml'], 'ci');
   grep(['quality/gates', '--include=*.mjs'], 'other-gate');
   grep(['harness', '--include=*.mjs'], 'harness');
   grep(['engine-doctrine', '--include=*.md'], 'docs');
