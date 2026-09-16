@@ -7,7 +7,7 @@ group: engine
 # scripts/: the toolchain, file by file
 
 The engine is `core/` plus the Go renderer. **`scripts/` is everything that helps a person or an agent
-USE it**, and it is three times the size of the engine it serves: 290 files, 56,991 lines. The asset
+USE it**, and it is three times the size of the engine it serves: 290 files, 57,004 lines. The asset
 bakers moved out to `generators/` (see [`generators/README.md`](../../generators/README.md)) are not
 counted here: they are not tools that help someone USE the engine, they bake the assets a film loads.
 
@@ -16,10 +16,10 @@ is for, which is itself the finding.
 
 | folder | files | lines | role |
 |---|---|---|---|
-| `quality/gates` | 89 | 26299 | REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a ladder; the rest are on-demand or CI. A gate reports a finding; only some block. |
+| `quality/gates` | 90 | 26430 | REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a ladder; the rest are on-demand or CI. A gate reports a finding; only some block. |
 | `harness/author` | 72 | 13562 | WRITE. Everything that produces or edits a film: the brief, the storyboard, the stage kit, the fragments' briefs, assemble, the motion director. |
 | `harness/dev` | 37 | 6390 | LOOK. Nothing here changes a film. The studio, the previews, the contact sheets, the experiment rigs. |
-| `scripts/site` | 24 | 3370 | PUBLISH. The public website and docs site, and the checks that keep their numbers true. |
+| `scripts/site` | 23 | 3251 | PUBLISH. The public website and docs site, and the checks that keep their numbers true. |
 | `harness/media` | 20 | 2311 | CAPTURE. Real pixels from the outside world: screenshots of live sites, video probes, image work. |
 | `harness/lib` | 24 | 2545 | SHARED. One definition of a thing several tools need: the contract grammar, placement resolution, findings, the census. |
 | `scripts/brand` | 12 | 1325 | STUDY A BRAND. Read a real site and turn it into a theme: sections, palette, fonts, DNA. |
@@ -277,7 +277,6 @@ PUBLISH. The public website and docs site, and the checks that keep their number
 | `films-json.mjs` | 133 | yes | scripts/site/films-json.mjs: what each showcase film IS, read from the film and from its source. |
 | `vocab-catalog.mjs` | 131 | yes | scripts/site/vocab-catalog.mjs: regenerate engine-doctrine/CRAFT/VOCABULARY.md from core/vocab.js. |
 | `examples-gallery.mjs` | 128 | yes | scripts/site/examples-gallery.mjs: build a hover-to-play showcase from the flagship example registry. |
-| `docker-context-check.mjs` | 119 | yes | scripts/site/docker-context-check.mjs : will the image have what the site build needs? |
 | `arsenal-json.mjs` | 98 | no | scripts/site/arsenal-json.mjs: derive site/lib/arsenal.json, the one index behind /arsenal. |
 | `scenes-json.mjs` | 91 | yes | scripts/site/scenes-json.mjs: the site's playable scenes, DERIVED from the real ones. |
 | `blueprints-catalog.mjs` | 68 | yes | scripts/site/blueprints-catalog.mjs: browse the directed-motion BEAT blueprints before authoring. |
