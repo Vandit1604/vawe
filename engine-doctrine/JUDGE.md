@@ -44,9 +44,18 @@ Then the agent **reads the sheet against the rubric** and returns a structured v
 7. **Value**: the frame earns its place.
 
 ## The verdict contract
-- **Per frame:** `beat N, <worst dimension>: <issue> → <fix>` (only frames with a real problem).
+- **Per frame, for the human reading it:** `beat N, <worst dimension>: <issue> → <fix>` (only frames
+  with a real problem). Keep saying this; it is how a person understands what the eye caught.
+- **Per frame, for the machine reading it:** `--fix <code>@<beat>`, repeated once per finding, passed to
+  `make judge D=<file> --verdict FIX`. `<code>` is one of the seven dimension codes in
+  `harness/lib/judge-codes.mjs` (the one place they are defined, so this list is not restated here):
+  `readability`, `hierarchy`, `composition`, `brand-fidelity`, `asset-fidelity`, `produced-not-generated`,
+  `value`. `<beat>` is the beat number already printed on the sheet (`beat N`). A code outside the seven
+  is refused, naming all seven; the free-text `--fixes "<prose>"` form still works for one release and
+  prints a line naming `--fix` as its replacement.
 - **Worst frame overall** + why.
-- **`PASS`** only if every frame clears every dimension; otherwise **`FIX`** + a prioritized list.
+- **`PASS`** only if every frame clears every dimension; otherwise **`FIX`** + a prioritized list, given
+  as both the sentence and the `--fix` codes above.
 - **Rule: if your eye catches it, it's a FIX.** "Renders fine / passes the static gates" is not PASS. Do NOT
   rationalize a flaw you notice. That is the exact failure the judge exists to prevent (see MISTAKES.md #15).
 
