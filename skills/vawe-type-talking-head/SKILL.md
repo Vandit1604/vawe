@@ -1,6 +1,7 @@
 ---
 name: vawe-type-talking-head
 description: "Playbook for a talking-head / narrated video in this engine: VO + word-timed captions, a face-safe layout, a lower-third, a quiet field, B-roll cut rhythm. Load whenever the request is a narrated presenter-style video, a voiceover explainer with a face, or a phone-feed talking-head clip."
+stage: plan
 ---
 
 # vawe-type-talking-head: the narrated presenter playbook

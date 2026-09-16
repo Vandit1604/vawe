@@ -1,6 +1,7 @@
 ---
 name: vawe-animation
 description: "Make motion FEEL right in a vawe scene: the easing doctrine (smooth beats bouncy, ~3 easing characters per film), entrance/exit pairing, stagger as reading order, and the text-effect vocabulary. Load while authoring or tuning a scene JSON when motion reads floaty, monotone, or toy-like. Maps atomic motion rules onto OUR primitives (core/motion/motion.js easings, type.js presets, gsap-effects.js)."
+stage: direct
 ---
 
 # vawe-animation: how motion should FEEL
