@@ -161,8 +161,25 @@ const timelineModel = (file) => {
     captions: (Array.isArray(d.captions) ? d.captions : []).filter((c) => c && typeof c === 'object')
       .map((c) => ({ t0: c.t0 ?? c.start ?? c.t ?? 0, t1: c.t1 ?? ((c.t0 ?? 0) + (c.dur ?? 2)), text: String(c.text || '') })),
     audio: audioLane(d, [...marks('cuts'), ...marks('seams'), ...marks('stings')], d.duration || 0),
+    sfxRoles: bakedRoles(),
     gate: beatCheck(file),
   };
+};
+
+// The 28 files `make audio` bakes (25 sfx roles + 3 music beds), READ off the catalogue
+// (generators/media/audio-bake.mjs) rather than restated here: that file is the one owner of which
+// role aliases which cue, and a second hand-kept list is exactly the drift this repo logs most. Same
+// spawn-and-parse shape as beatCheck above (the catalogue also bakes as a side effect of import, so
+// it cannot be required in-process). Computed once: the roster does not change while `make studio` runs.
+let SFX_ROLES = null;
+const bakedRoles = () => {
+  if (SFX_ROLES) return SFX_ROLES;
+  try {
+    const out = execFileSync(process.execPath, [path.join(repoRoot, 'generators/media/audio-bake.mjs'), '--list'], { encoding: 'utf8' });
+    const line = (/^roles:\s*(.*)$/m.exec(out) || [])[1] || '';
+    SFX_ROLES = line.split(',').map((s) => s.trim().split('<-')[0]).filter(Boolean);
+  } catch { SFX_ROLES = []; }
+  return SFX_ROLES;
 };
 
 // The ambition floor (plain-slideshow, no-continuous-object, no-camera, no-transition, no-bg-motion...)
