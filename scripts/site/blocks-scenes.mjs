@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import { sameWithinNoise } from '../../harness/lib/png-diff.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BLOCKS } from '../../blocks/index.mjs';
+import { BLOCKS, PREVIEW_BG_OF } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { serveRepo, launchPage, waitForEngine } from '../../harness/lib/render-harness.mjs';
 
@@ -59,7 +59,12 @@ function sceneFor(entry) {
   const layers = fam({ ...(entry.props || {}), x: ORIGIN_X, y: ORIGIN_Y, start: START, dur: DUR });
   return {
     module: 'scene', aspect: '16:9', theme: process.env.THEME || 'vawe', duration: DURATION,
-    audio: { silent: true }, bg: [{ preset: 'plain', from: 0, to: DURATION }], layers,
+    // `plain` is the right ground for an opaque block and the wrong one for a frosted block, which
+    // blurs what is behind it and therefore shows nothing over flat white. The module that owns the
+    // blocks says which it wants (blocks/index.mjs `PREVIEW_BG_OF`), the same way it already says
+    // their CATEGORY, so this harness never grows a name-to-ground table.
+    audio: { silent: true },
+    bg: [{ preset: PREVIEW_BG_OF[entry.family] || 'plain', from: 0, to: DURATION }], layers,
     // NOT A FILM. `produceBaseline` injects the produced baseline (scene-unit transitions) into any
     // scene that declares none (core/produce.js). Correct for a film, wrong for a preview: this harness
     // exists so you can JUDGE one block at rest, not watch it swap as a unit. `produced: false` is the
