@@ -22,14 +22,20 @@
 // loop. `--stamp` records the current count as the new ceiling; without it, an INCREASE fails and a
 // decrease is reported but not required. It never blocks a run other than its own.
 //
-// DELIBERATELY NOT in quality/gates/author-check.mjs, `make ship`, or CI (.github/workflows/gates.yml):
-// author-check.mjs is owned by other work in flight right now, and both films/scene/*.json content and
-// out/*.mp4 renders are gitignored (.gitignore:2,21), so a CI checkout or a small local clone would
-// report a number that says nothing about the real library, the same reason doc-refs stays out of CI
-// (see the comment at the top of gates.yml). It runs on demand, like `make discovery`, and in
-// .githooks/pre-push once an author actually wants it enforced there.
+// DELIBERATELY NOT in quality/gates/author-check.mjs or CI (.github/workflows/gates.yml): both
+// films/scene/*.json content and out/*.mp4 renders are gitignored (.gitignore:2,21), so a CI checkout
+// or a small local clone would report a number that says nothing about the real library, the same
+// reason doc-refs stays out of CI (see the comment at the top of gates.yml). The CORPUS ratchet below
+// runs on demand, like `make discovery`, and in .githooks/pre-push once an author actually wants it
+// enforced there.
 //
-//   node quality/gates/no-judge.mjs [--stamp] [--json]
+// SINGLE-FILM MODE is the exception: `make ship` (Makefile) calls `checkOne(scenePath)` for the ONE
+// film it just rendered, not the corpus scan, so the gitignore problem above does not apply (ship
+// always runs against a real checkout with a real render). It reuses `isJudged` unchanged, the same
+// definition of "looked at" the corpus ratchet uses, and never touches the ratchet or its baseline.
+//
+//   node quality/gates/no-judge.mjs [--stamp] [--json]   # corpus ratchet
+//   node quality/gates/no-judge.mjs <scene.json>          # single film: exit 0 if judged, 1 + why if not
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
@@ -57,9 +63,35 @@ export function isJudged(scenePath, mp4 = renderOf(scenePath)) {
   return r.receipt.renderHash === hashFile(mp4);
 }
 
+/** Single-film answer for `make ship`: not just whether the eye looked, but WHY not, so the refusal
+ *  can say which condition failed instead of a bare "unjudged". Three reasons, checked in the order a
+ *  film actually passes through them: never judged at all, judged but the scene moved on since, judged
+ *  but the mp4 on disk now is a different render. `ok: true` for a fresh PASS or FIX alike, same as
+ *  isJudged: this asks whether the eye ran, not whether it liked what it saw. */
+export function checkOne(scenePath, mp4 = renderOf(scenePath)) {
+  const r = readReceipt('judge', scenePath);
+  if (!r.exists) return { ok: false, reason: 'no judge receipt exists yet' };
+  if (r.stale) return { ok: false, reason: 'the scene changed since the receipt was written' };
+  if (!r.receipt.verdict) return { ok: false, reason: 'the receipt has no recorded verdict' };
+  if (r.receipt.renderHash !== hashFile(mp4)) {
+    return { ok: false, reason: 'the mp4 changed since the receipt was written (re-rendered without re-judging)' };
+  }
+  return { ok: true, reason: null };
+}
+
 // The CLI body only runs when this file is the entry point, so tests can import hashFile/isJudged
 // without triggering a repo-wide scan.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const single = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
+  if (single) {
+    const { ok, reason } = checkOne(single);
+    if (ok) { console.log(`  ✓ ${single} has a fresh judge receipt`); process.exit(0); }
+    console.error(`  ✗ ${single}: no fresh judge receipt (${reason})` +
+      `\n    make judge D=${single}, then READ the sheet and record the verdict:` +
+      `\n    node quality/gates/judge.mjs ${single} --verdict PASS|FIX ...\n`);
+    process.exit(1);
+  }
+
   const stamp = process.argv.includes('--stamp');
   const f = gateFindings();
 

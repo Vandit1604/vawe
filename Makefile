@@ -350,6 +350,13 @@ timings: ## [check] real wall-clock timing per step, from the run log (D=, N=10)
 # make ship D=<file>. The ladder with its teeth in: full author-check, render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
 # need real pixels, so it is the one command that says a film is actually done.
+# LAST STEP: `no-judge.mjs $(D)` (single-film mode), after the render and the sheets exist, so the eye
+# has a fresh mp4 and a fresh sheet to look at. It refuses a ship with no fresh judge receipt for THIS
+# render (`quality/baselines/approved/judge/<name>.json`, receipt.mjs's renderHash) and prints the exact
+# `make judge D=<file>` line plus which condition failed. There is no flag to skip it: the way out is
+# the missing artefact, never a flag (AGENTS.md). A FIX verdict still ships; this only asks whether the
+# eye ran (121 rendered films had no receipt against 1 that did, so opt-in lost 121 times out of 122).
+# `make dev` and `make check` stay completely ungated, this check lives ONLY here.
 # It finishes with both contact sheets (`make sheets`); NOSHEETS=1 skips them. Producing them is not the
 # same as reading them: the receipt is marked `auto` and beat-check still asks you to open the sheet.
 # THE MOTION SPLIT RUNS HERE, right after the render, because the render is what prints the
@@ -386,7 +393,7 @@ ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit A
 	@node quality/gates/seam-snap.mjs $(D) $(if $(JSON),--json,)
 	@node quality/gates/seam-forensics.mjs $(D)
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
-	@echo "" && echo "▶ LAST STEP, and no gate can do it: make judge D=$(D)$(if $(VS), VS=$(VS)), then READ the sheet."
+	@node quality/gates/no-judge.mjs $(D)
 
 # make formats: show the scene module + where its schema/sample live (for authoring the JSON).
 # Was `make list`; W11 gave that name to the target listing below, the one question with seven
