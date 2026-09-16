@@ -15,37 +15,16 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 540,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 16,
+      "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:16px;width:540px\"><span style=\"font:600 48px var(--font-sans);color:var(--text);letter-spacing:-0.02em\">“We shipped a launch film in an afternoon.”</span><span style=\"font:500 17px var(--font-mono);color:var(--text-2);letter-spacing:0.04em\">a happy user</span></div>",
       "start": 0.2,
       "duration": 8,
       "anim": "rise",
       "enterDur": 0.5,
-      "exitDur": 0.35,
-      "children": [
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "“We shipped a launch film in an afternoon.”",
-          "size": 48,
-          "color": "var(--text)",
-          "ls": "-0.02em"
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "a happy user",
-          "size": 17,
-          "font": "mono",
-          "tracking": "0.04em",
-          "color": "var(--text-2)"
-        }
-      ]
+      "exitDur": 0.35
     }
   ],
   "produced": false

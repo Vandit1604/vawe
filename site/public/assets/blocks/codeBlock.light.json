@@ -15,14 +15,11 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 540,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 8,
-      "pad": 32,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:8px;padding:32px;box-sizing:border-box;width:540px\"><div style=\"font:400 17px var(--font-mono);color:var(--text-2)\">terminal</div><div data-part style=\"font:400 19px var(--font-mono);color:var(--text);white-space:pre\">./bin/vawe video.json</div><div data-part style=\"font:400 19px var(--font-mono);color:var(--text);white-space:pre\">✓ out/video.mp4</div></div>",
       "bg": "var(--card)",
       "radius": 12,
       "border": "1px solid var(--line)",
@@ -32,36 +29,12 @@
       "anim": "fade",
       "enterDur": 0.25,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "text",
-          "weight": 500,
-          "text": "terminal",
-          "font": "mono",
-          "size": 17,
-          "color": "var(--text-2)"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "./bin/vawe video.json",
-          "color": "var(--text)",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.2,
           "anim": "slide-left",
-          "enterDur": 0.28
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "✓ out/video.mp4",
-          "color": "var(--text)",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.34,
-          "anim": "slide-left",
-          "enterDur": 0.28
+          "each": 0.28,
+          "stagger": 0.14,
+          "delay": 0.2
         }
       ]
     }

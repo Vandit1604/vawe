@@ -8,7 +8,7 @@
   },
   "bg": [
     {
-      "preset": "plain",
+      "preset": "aurora",
       "from": 0,
       "to": 9
     }
@@ -30,15 +30,12 @@
       "exitDur": 0.4
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 612,
       "h": 436,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 12,
-      "pad": 32,
+      "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:32px;box-sizing:border-box;width:612px;height:436px\"><div style=\"width:532px;height:2px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)\"></div><span style=\"font:700 52px var(--font-sans);color:#fff;letter-spacing:-0.02em\">Frosted surfaces</span><span style=\"font:400 28px var(--font-serif);color:rgba(255,255,255,0.72);width:532px\">The field behind the panel never stops moving.</span></div>",
       "bg": "rgba(255,255,255,0.09)",
       "radius": 24,
       "border": "1.5px solid rgba(255,255,255,0.14)",
@@ -49,45 +46,15 @@
       "anim": "pop",
       "enterDur": 0.55,
       "out": "defocus",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "rect",
-          "w": 532,
-          "h": 2,
-          "bg": "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
-          "radius": 0
-        },
-        {
-          "type": "text",
-          "weight": 700,
-          "text": "Frosted surfaces",
-          "size": 52,
-          "color": "#fff",
-          "ls": "-0.02em"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "The field behind the panel never stops moving.",
-          "font": "serif",
-          "size": 28,
-          "color": "rgba(255,255,255,0.72)",
-          "w": 532
-        }
-      ]
+      "exitDur": 0.4
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 796,
       "y": 160,
       "w": 444,
       "h": 206,
-      "layout": "column",
-      "justify": "center",
-      "items": "flex-start",
-      "gap": 6,
-      "pad": 24,
+      "html": "<div style=\"display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:6px;padding:24px;box-sizing:border-box;width:444px;height:206px\"><span style=\"font:600 17px var(--font-sans);color:rgba(255,255,255,0.78);letter-spacing:.10em\">FRAMES</span><span style=\"font:700 48px var(--font-sans);color:#fff;letter-spacing:-.02em\">1.9k</span><span style=\"font:700 17px var(--font-sans);color:color-mix(in srgb, var(--up) 45%, #fff)\">+12%</span></div>",
       "bg": "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.11)), rgba(9,11,17,0.62)",
       "radius": 16,
       "border": "1.5px solid rgba(255,255,255,0.18)",
@@ -98,44 +65,15 @@
       "anim": "slide-right",
       "enterDur": 0.42,
       "out": "defocus",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "FRAMES",
-          "size": 17,
-          "color": "rgba(255,255,255,0.78)",
-          "ls": "0.10em"
-        },
-        {
-          "type": "text",
-          "weight": 700,
-          "text": "1.9k",
-          "size": 48,
-          "color": "#fff",
-          "ls": "-0.02em"
-        },
-        {
-          "type": "text",
-          "weight": 700,
-          "text": "+12%",
-          "size": 17,
-          "color": "color-mix(in srgb, var(--up) 45%, #fff)"
-        }
-      ]
+      "exitDur": 0.4
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 796,
       "y": 390,
       "w": 444,
       "h": 206,
-      "layout": "column",
-      "justify": "center",
-      "items": "flex-start",
-      "gap": 6,
-      "pad": 24,
+      "html": "<div style=\"display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:6px;padding:24px;box-sizing:border-box;width:444px;height:206px\"><span style=\"font:600 17px var(--font-sans);color:rgba(255,255,255,0.78);letter-spacing:.10em\">PASSES</span><span style=\"font:700 48px var(--font-sans);color:#fff;letter-spacing:-.02em\">3</span></div>",
       "bg": "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.11)), rgba(9,11,17,0.62)",
       "radius": 16,
       "border": "1.5px solid rgba(255,255,255,0.18)",
@@ -146,25 +84,7 @@
       "anim": "slide-right",
       "enterDur": 0.42,
       "out": "defocus",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "PASSES",
-          "size": 17,
-          "color": "rgba(255,255,255,0.78)",
-          "ls": "0.10em"
-        },
-        {
-          "type": "text",
-          "weight": 700,
-          "text": "3",
-          "size": 48,
-          "color": "#fff",
-          "ls": "-0.02em"
-        }
-      ]
+      "exitDur": 0.4
     },
     {
       "type": "group",
@@ -181,11 +101,8 @@
       "exitDur": 0.35,
       "children": [
         {
-          "type": "text",
-          "weight": 600,
-          "text": "deterministic",
-          "size": 17,
-          "color": "#fff",
+          "type": "html",
+          "html": "<span style=\"font:600 17px var(--font-sans);color:#fff;white-space:nowrap\">deterministic</span>",
           "pad": "11px 22px",
           "bg": "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.13)), rgba(9,11,17,0.62)",
           "radius": 100,
@@ -197,11 +114,8 @@
           "enterDur": 0.3
         },
         {
-          "type": "text",
-          "weight": 600,
-          "text": "seeked",
-          "size": 17,
-          "color": "#fff",
+          "type": "html",
+          "html": "<span style=\"font:600 17px var(--font-sans);color:#fff;white-space:nowrap\">seeked</span>",
           "pad": "11px 22px",
           "bg": "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.13)), rgba(9,11,17,0.62)",
           "radius": 100,
@@ -213,11 +127,8 @@
           "enterDur": 0.3
         },
         {
-          "type": "text",
-          "weight": 600,
-          "text": "pure(n)",
-          "size": 17,
-          "color": "#fff",
+          "type": "html",
+          "html": "<span style=\"font:600 17px var(--font-sans);color:#fff;white-space:nowrap\">pure(n)</span>",
           "pad": "11px 22px",
           "bg": "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.13)), rgba(9,11,17,0.62)",
           "radius": 100,

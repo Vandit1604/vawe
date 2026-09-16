@@ -8,22 +8,19 @@
   },
   "bg": [
     {
-      "preset": "plain",
+      "preset": "aurora",
       "from": 0,
       "to": 9
     }
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 560,
       "h": 300,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 12,
-      "pad": 32,
+      "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:32px;box-sizing:border-box;width:560px;height:300px\"><div style=\"width:480px;height:2px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)\"></div><span style=\"font:600 22px var(--font-mono);color:var(--accent);letter-spacing:0.08em\">GLASS</span><span style=\"font:700 52px var(--font-sans);color:#fff;letter-spacing:-0.02em\">Backdrop blur</span><span style=\"font:400 28px var(--font-serif);color:rgba(255,255,255,0.72);width:480px\">It blurs whatever moves behind it.</span></div>",
       "bg": "rgba(255,255,255,0.06)",
       "radius": 22,
       "border": "1.5px solid rgba(255,255,255,0.14)",
@@ -34,42 +31,7 @@
       "anim": "pop",
       "enterDur": 0.5,
       "out": "defocus",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "rect",
-          "w": 480,
-          "h": 2,
-          "bg": "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
-          "radius": 0
-        },
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "GLASS",
-          "font": "mono",
-          "size": 22,
-          "color": "var(--accent)",
-          "ls": "0.08em"
-        },
-        {
-          "type": "text",
-          "weight": 700,
-          "text": "Backdrop blur",
-          "size": 52,
-          "color": "#fff",
-          "ls": "-0.02em"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "It blurs whatever moves behind it.",
-          "font": "serif",
-          "size": 28,
-          "color": "rgba(255,255,255,0.72)",
-          "w": 480
-        }
-      ]
+      "exitDur": 0.4
     }
   ],
   "produced": false

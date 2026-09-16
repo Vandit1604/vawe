@@ -9,7 +9,7 @@
   ],
   "dimensions": {
     "width": 384,
-    "height": 321
+    "height": 334
   },
   "install": {
     "kind": "scene-layer",

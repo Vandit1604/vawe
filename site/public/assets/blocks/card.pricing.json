@@ -15,14 +15,11 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 340,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 16,
-      "pad": 24,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:16px;padding:24px;box-sizing:border-box;width:340px\"><span style=\"font:600 20px var(--font-mono);color:var(--accent);letter-spacing:0.1em\">PRO</span><div style=\"display:flex;align-items:flex-end;gap:4px\"><span style=\"font:700 48px var(--font-sans);color:var(--text);letter-spacing:-0.03em\">$29</span><span style=\"font:500 17px var(--font-mono);color:var(--dim)\">/mo</span></div><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:8px\"><div style=\"display:flex;align-items:center;gap:8px\"><span style=\"font:700 17px var(--font-sans);color:var(--accent)\">✓</span><span style=\"font:400 17px var(--font-sans);color:var(--text-2)\">Unlimited renders</span></div><div style=\"display:flex;align-items:center;gap:8px\"><span style=\"font:700 17px var(--font-sans);color:var(--accent)\">✓</span><span style=\"font:400 17px var(--font-sans);color:var(--text-2)\">Every format</span></div><div style=\"display:flex;align-items:center;gap:8px\"><span style=\"font:700 17px var(--font-sans);color:var(--accent)\">✓</span><span style=\"font:400 17px var(--font-sans);color:var(--text-2)\">60fps export</span></div></div><div style=\"background:var(--accent);border-radius:8px;padding:12px 0;display:flex;justify-content:center\"><span style=\"font:600 17px var(--font-sans);color:var(--on-accent)\">Start free</span></div></div>",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1.5px solid var(--accent)",
@@ -31,133 +28,7 @@
       "duration": 8,
       "anim": "rise",
       "enterDur": 0.5,
-      "exitDur": 0.35,
-      "children": [
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "PRO",
-          "size": 20,
-          "font": "mono",
-          "tracking": "0.1em",
-          "color": "var(--accent)"
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "flex-end",
-          "gap": 4,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "$29",
-              "size": 48,
-              "color": "var(--text)",
-              "ls": "-0.03em"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "/mo",
-              "size": 17,
-              "font": "mono",
-              "color": "var(--dim)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 8,
-          "children": [
-            {
-              "type": "group",
-              "layout": "row",
-              "items": "center",
-              "gap": 8,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 700,
-                  "text": "✓",
-                  "size": 17,
-                  "color": "var(--accent)"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "Unlimited renders",
-                  "size": 17,
-                  "color": "var(--text-2)"
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "layout": "row",
-              "items": "center",
-              "gap": 8,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 700,
-                  "text": "✓",
-                  "size": 17,
-                  "color": "var(--accent)"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "Every format",
-                  "size": 17,
-                  "color": "var(--text-2)"
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "layout": "row",
-              "items": "center",
-              "gap": 8,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 700,
-                  "text": "✓",
-                  "size": 17,
-                  "color": "var(--accent)"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "60fps export",
-                  "size": 17,
-                  "color": "var(--text-2)"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "bg": "var(--accent)",
-          "radius": 8,
-          "pad": "12px 0",
-          "layout": "row",
-          "justify": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Start free",
-              "size": 17,
-              "color": "var(--on-accent)"
-            }
-          ]
-        }
-      ]
+      "exitDur": 0.35
     }
   ],
   "produced": false

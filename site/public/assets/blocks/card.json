@@ -15,15 +15,12 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 540,
       "h": 300,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 0,
-      "pad": 0,
+      "html": "<div style=\"display:flex;flex-direction:column;width:540px;height:300px;box-sizing:border-box\"><div style=\"flex:1;min-height:0;background:var(--card);border-radius:8px;padding:24px;box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:12px\"><span style=\"font:700 32px var(--font-sans);color:var(--text);letter-spacing:-0.02em\">Layers</span><span style=\"font:400 20px var(--font-sans);color:var(--text-2)\">Text, image, count, cursor.</span><div style=\"display:flex;flex-wrap:wrap;gap:8px;align-items:center\"><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:100px;padding:6px 16px\">Text</span><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:100px;padding:6px 16px\">Image</span><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:100px;padding:6px 16px\">Count</span></div></div><div style=\"height:1px;background:var(--line)\"></div><div style=\"display:flex;justify-content:space-between;align-items:center;padding:12px 24px\"><span style=\"font:600 17px var(--font-sans);color:var(--text-2)\">Explore</span><span style=\"font:600 17px var(--font-sans);color:var(--accent)\">→</span></div></div>",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
@@ -32,104 +29,7 @@
       "start": 0.2,
       "duration": 8,
       "enterDur": 0.5,
-      "exitDur": 0.35,
-      "children": [
-        {
-          "type": "group",
-          "grow": 1,
-          "bg": "var(--card)",
-          "radius": 8,
-          "pad": 24,
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 12,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Layers",
-              "size": 32,
-              "color": "var(--text)",
-              "ls": "-0.02em"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Text, image, count, cursor.",
-              "size": 20,
-              "color": "var(--text-2)"
-            },
-            {
-              "type": "group",
-              "layout": "row",
-              "wrap": true,
-              "gap": 8,
-              "items": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "Text",
-                  "size": 17,
-                  "color": "var(--text-2)",
-                  "bg": "var(--surface-2)",
-                  "radius": 100,
-                  "pad": "6px 16px"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "Image",
-                  "size": 17,
-                  "color": "var(--text-2)",
-                  "bg": "var(--surface-2)",
-                  "radius": 100,
-                  "pad": "6px 16px"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "Count",
-                  "size": 17,
-                  "color": "var(--text-2)",
-                  "bg": "var(--surface-2)",
-                  "radius": 100,
-                  "pad": "6px 16px"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 0,
-          "h": 1,
-          "bg": "var(--line)"
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "justify": "space-between",
-          "items": "center",
-          "pad": "12px 24px",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Explore",
-              "size": 17,
-              "color": "var(--text-2)"
-            },
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "→",
-              "size": 17,
-              "color": "var(--accent)"
-            }
-          ]
-        }
-      ]
+      "exitDur": 0.35
     }
   ],
   "produced": false

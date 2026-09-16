@@ -8,22 +8,19 @@
   },
   "bg": [
     {
-      "preset": "plain",
+      "preset": "aurora",
       "from": 0,
       "to": 9
     }
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 520,
       "h": 108,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": 16,
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:520px;height:108px\"><div style=\"width:56px;height:56px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.10)\"><svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M13 2.5L4.5 14H10l-1 7.5L19.5 10H14z\"/></svg></div><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:4px;flex:1;min-width:0\"><span style=\"font:700 20px var(--font-sans);color:#fff\">Render finished</span><span style=\"font:500 17px var(--font-sans);color:rgba(255,255,255,0.78)\">1,920 frames, no dropped seams.</span></div><span style=\"font:600 17px var(--font-sans);color:rgba(255,255,255,0.78);flex:none\">now</span></div>",
       "bg": "linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.12)), rgba(9,11,17,0.62)",
       "radius": 16,
       "border": "1.5px solid rgba(255,255,255,0.18)",
@@ -34,71 +31,15 @@
       "anim": "slide-right",
       "enterDur": 0.45,
       "out": "slide-left",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "group",
-          "radius": 12,
-          "w": 56,
-          "h": 56,
-          "bg": "rgba(255,255,255,0.15)",
-          "border": "1px solid rgba(255,255,255,0.10)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "html",
-              "w": 28,
-              "h": 28,
-              "html": "<svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M13 2.5L4.5 14H10l-1 7.5L19.5 10H14z\"/></svg>"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 0,
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 4,
-          "grow": 1,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Render finished",
-              "size": 20,
-              "color": "#fff"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "1,920 frames, no dropped seams.",
-              "size": 17,
-              "color": "rgba(255,255,255,0.78)",
-              "w": 320
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "now",
-          "size": 17,
-          "color": "rgba(255,255,255,0.78)"
-        }
-      ]
+      "exitDur": 0.4
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 173,
       "y": 280,
       "w": 494,
       "h": 108,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": 16,
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:494px;height:108px\"><div style=\"width:56px;height:56px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.10)\"><svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M12 2.5l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11v-6z\"/><path d=\"M8.5 12l2.5 2.5 4.5-5\"/></svg></div><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:4px;flex:1;min-width:0\"><span style=\"font:700 20px var(--font-sans);color:#fff\">Audit clean</span><span style=\"font:500 17px var(--font-sans);color:rgba(255,255,255,0.78)\">No overlap, no clipped text.</span></div><span style=\"font:600 17px var(--font-sans);color:rgba(255,255,255,0.78);flex:none\">2m</span></div>",
       "bg": "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.11)), rgba(9,11,17,0.62)",
       "radius": 16,
       "border": "1.5px solid rgba(255,255,255,0.18)",
@@ -109,71 +50,15 @@
       "anim": "slide-right",
       "enterDur": 0.45,
       "out": "slide-left",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "group",
-          "radius": 12,
-          "w": 56,
-          "h": 56,
-          "bg": "rgba(255,255,255,0.15)",
-          "border": "1px solid rgba(255,255,255,0.10)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "html",
-              "w": 28,
-              "h": 28,
-              "html": "<svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M12 2.5l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11v-6z\"/><path d=\"M8.5 12l2.5 2.5 4.5-5\"/></svg>"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 0,
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 4,
-          "grow": 1,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Audit clean",
-              "size": 20,
-              "color": "#fff"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "No overlap, no clipped text.",
-              "size": 17,
-              "color": "rgba(255,255,255,0.78)",
-              "w": 294
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "2m",
-          "size": 17,
-          "color": "rgba(255,255,255,0.78)"
-        }
-      ]
+      "exitDur": 0.4
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 186,
       "y": 400,
       "w": 468,
       "h": 108,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": 16,
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:468px;height:108px\"><div style=\"width:56px;height:56px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.10)\"><svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M4 12.5l5 5 11-11\"/></svg></div><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:4px;flex:1;min-width:0\"><span style=\"font:700 20px var(--font-sans);color:#fff\">Ledger updated</span><span style=\"font:500 17px var(--font-sans);color:rgba(255,255,255,0.78)\">Design recorded.</span></div><span style=\"font:600 17px var(--font-sans);color:rgba(255,255,255,0.78);flex:none\">5m</span></div>",
       "bg": "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.09)), rgba(9,11,17,0.62)",
       "radius": 16,
       "border": "1.5px solid rgba(255,255,255,0.18)",
@@ -184,60 +69,7 @@
       "anim": "slide-right",
       "enterDur": 0.45,
       "out": "slide-left",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "group",
-          "radius": 12,
-          "w": 56,
-          "h": 56,
-          "bg": "rgba(255,255,255,0.15)",
-          "border": "1px solid rgba(255,255,255,0.10)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "html",
-              "w": 28,
-              "h": 28,
-              "html": "<svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M4 12.5l5 5 11-11\"/></svg>"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 0,
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 4,
-          "grow": 1,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Ledger updated",
-              "size": 20,
-              "color": "#fff"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Design recorded.",
-              "size": 17,
-              "color": "rgba(255,255,255,0.78)",
-              "w": 268
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "5m",
-          "size": 17,
-          "color": "rgba(255,255,255,0.78)"
-        }
-      ]
+      "exitDur": 0.4
     }
   ],
   "produced": false

@@ -15,56 +15,20 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 520,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 2,
-      "pad": 24,
       "bg": "var(--card)",
       "radius": 12,
       "border": "1px solid var(--line)",
       "elevation": 1,
       "anim": "rise",
+      "html": "<div style=\"display:flex;flex-direction:column;gap:2px;padding:24px;box-sizing:border-box;width:520px\"><div style=\"font:400 24px var(--font-mono);color:var(--down);padding:4px 6px;background:color-mix(in srgb, var(--down) 8%, transparent);border-radius:4px;white-space:pre\">- const x = fetch()</div><div style=\"font:400 24px var(--font-mono);color:var(--up);padding:4px 6px;background:color-mix(in srgb, var(--up) 8%, transparent);border-radius:4px;white-space:pre\">+ const x = await fetch()</div><div style=\"font:400 24px var(--font-mono);color:var(--text-2);padding:4px 6px;white-space:pre\">  return x.json()</div></div>",
       "start": 0.2,
       "duration": 8,
       "enterDur": 0.5,
-      "exitDur": 0.35,
-      "children": [
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "- const x = fetch()",
-          "font": "mono",
-          "size": 24,
-          "color": "var(--down)",
-          "bg": "color-mix(in srgb, var(--down) 8%, transparent)",
-          "radius": 4,
-          "pad": "4px 6px"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "+ const x = await fetch()",
-          "font": "mono",
-          "size": 24,
-          "color": "var(--up)",
-          "bg": "color-mix(in srgb, var(--up) 8%, transparent)",
-          "radius": 4,
-          "pad": "4px 6px"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "  return x.json()",
-          "font": "mono",
-          "size": 24,
-          "color": "var(--text-2)",
-          "pad": "4px 6px"
-        }
-      ]
+      "exitDur": 0.35
     }
   ],
   "produced": false

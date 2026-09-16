@@ -15,14 +15,11 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 540,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 8,
-      "pad": 32,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:8px;padding:32px;box-sizing:border-box;width:540px\"><div style=\"font:400 17px var(--font-mono);color:#8CA0A8\">spectrum.js</div><div data-part style=\"font:400 19px var(--font-mono);color:#5AD8C0;white-space:pre\">const spec = bandEnergies(pcm)</div><div data-part style=\"font:400 19px var(--font-mono);color:#88C0F0;white-space:pre\">const v = sampleAt(spec, n, 'low')</div><div data-part style=\"font:400 19px var(--font-mono);color:#D0A8F8;white-space:pre\">return 1 + v * 0.18</div></div>",
       "bg": "#101820",
       "radius": 12,
       "border": "1px solid rgba(255,255,255,0.08)",
@@ -31,47 +28,12 @@
       "anim": "fade",
       "enterDur": 0.25,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "text",
-          "weight": 500,
-          "text": "spectrum.js",
-          "font": "mono",
-          "size": 17,
-          "color": "#8CA0A8"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "const spec = bandEnergies(pcm)",
-          "color": "#5AD8C0",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.2,
           "anim": "slide-left",
-          "enterDur": 0.28
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "const v = sampleAt(spec, n, 'low')",
-          "color": "#88C0F0",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.34,
-          "anim": "slide-left",
-          "enterDur": 0.28
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "return 1 + v * 0.18",
-          "color": "#D0A8F8",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.48,
-          "anim": "slide-left",
-          "enterDur": 0.28
+          "each": 0.28,
+          "stagger": 0.14,
+          "delay": 0.2
         }
       ]
     }

@@ -15,14 +15,11 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 540,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 8,
-      "pad": 32,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:8px;padding:32px;box-sizing:border-box;width:540px\"><div style=\"font:400 17px var(--font-mono);color:#6D7075\">notes.md</div><div data-part style=\"font:400 19px var(--font-mono);color:#9A4A00;white-space:pre\">## release checklist</div><div data-part style=\"font:400 19px var(--font-mono);color:#1E68C5;white-space:pre\">- [x] blocks registry</div><div data-part style=\"font:400 19px var(--font-mono);color:#1F6B3A;white-space:pre\">- [ ] captions pass</div></div>",
       "bg": "#FAF8F2",
       "radius": 12,
       "border": "1px solid var(--line)",
@@ -32,47 +29,12 @@
       "anim": "fade",
       "enterDur": 0.25,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "text",
-          "weight": 500,
-          "text": "notes.md",
-          "font": "mono",
-          "size": 17,
-          "color": "#6D7075"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "## release checklist",
-          "color": "#9A4A00",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.2,
           "anim": "slide-left",
-          "enterDur": 0.28
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "- [x] blocks registry",
-          "color": "#1E68C5",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.34,
-          "anim": "slide-left",
-          "enterDur": 0.28
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "- [ ] captions pass",
-          "color": "#1F6B3A",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.48,
-          "anim": "slide-left",
-          "enterDur": 0.28
+          "each": 0.28,
+          "stagger": 0.14,
+          "delay": 0.2
         }
       ]
     }

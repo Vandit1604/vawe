@@ -15,14 +15,10 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 520,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": "16px 24px",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
@@ -32,51 +28,7 @@
       "duration": 8,
       "enterDur": 0.45,
       "exitDur": 0.3,
-      "children": [
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 2,
-          "grow": 1,
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Sync across devices",
-              "size": 20,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Keep every draft current everywhere",
-              "size": 16,
-              "color": "var(--text-2)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 100,
-          "w": 52,
-          "h": 30,
-          "bg": "var(--accent)",
-          "pad": 2,
-          "layout": "row",
-          "items": "center",
-          "justify": "flex-end",
-          "children": [
-            {
-              "type": "group",
-              "radius": 100,
-              "w": 24,
-              "h": 24,
-              "bg": "var(--card)"
-            }
-          ]
-        }
-      ]
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px 24px;box-sizing:border-box;width:520px\"><div style=\"display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">Sync across devices</span><span style=\"font:400 16px var(--font-sans);color:var(--text-2)\">Keep every draft current everywhere</span></div><div style=\"width:52px;height:30px;flex:none;border-radius:100px;padding:2px;box-sizing:border-box;background:var(--accent);display:flex;align-items:center;justify-content:flex-end\"><div style=\"width:24px;height:24px;border-radius:100%;background:var(--card)\"></div></div></div>"
     }
   ],
   "produced": false

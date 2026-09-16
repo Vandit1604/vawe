@@ -15,95 +15,20 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
-      "layout": "row",
-      "gap": 8,
-      "items": "center",
+      "html": "<div style=\"display:flex;gap:8px;align-items:center\"><div data-part style=\"display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:100px;background:color-mix(in srgb, var(--accent) 14%, transparent);border:1px solid var(--accent)\"><span style=\"font:500 20px var(--font-sans)\">🔥</span><span style=\"font:600 17px var(--font-num);color:var(--accent)\">24</span></div><div data-part style=\"display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:100px;background:var(--surface-2);border:1px solid var(--line)\"><span style=\"font:500 20px var(--font-sans)\">👍</span><span style=\"font:600 17px var(--font-num);color:var(--text-2)\">12</span></div><div data-part style=\"display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:100px;background:var(--surface-2);border:1px solid var(--line)\"><span style=\"font:500 20px var(--font-sans)\">🎉</span><span style=\"font:600 17px var(--font-num);color:var(--text-2)\">5</span></div></div>",
       "start": 0.2,
       "duration": 8,
-      "anim": "rise",
-      "enterDur": 0.4,
-      "exitDur": 0.3,
-      "children": [
+      "anim": "none",
+      "enterDur": 0,
+      "parts": [
         {
-          "type": "group",
-          "layout": "row",
-          "items": "center",
-          "gap": 6,
-          "pad": "6px 12px",
-          "radius": 100,
-          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
-          "border": "1px solid var(--accent)",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "🔥",
-              "size": 20
-            },
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "24",
-              "size": 17,
-              "color": "var(--accent)",
-              "font": "num"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "center",
-          "gap": 6,
-          "pad": "6px 12px",
-          "radius": 100,
-          "bg": "var(--surface-2)",
-          "border": "1px solid var(--line)",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "👍",
-              "size": 20
-            },
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "12",
-              "size": 17,
-              "color": "var(--text-2)",
-              "font": "num"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "center",
-          "gap": 6,
-          "pad": "6px 12px",
-          "radius": 100,
-          "bg": "var(--surface-2)",
-          "border": "1px solid var(--line)",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "🎉",
-              "size": 20
-            },
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "5",
-              "size": 17,
-              "color": "var(--text-2)",
-              "font": "num"
-            }
-          ]
+          "anim": "popIn",
+          "each": 0.3,
+          "stagger": 0.1,
+          "delay": 0.15
         }
       ]
     }

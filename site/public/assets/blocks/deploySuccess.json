@@ -216,62 +216,19 @@
       "enterDur": 0.2
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 346,
       "w": 520,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": 24,
       "bg": "color-mix(in srgb, var(--up) 8%, transparent)",
       "radius": 14,
       "border": "1px solid color-mix(in srgb, var(--up) 16%, transparent)",
       "elevation": 1,
       "anim": "pop",
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:24px;box-sizing:border-box;width:520px\"><div style=\"display:flex;align-items:center;justify-content:center;border-radius:100px;background:color-mix(in srgb, var(--up) 22%, transparent);padding:8px 12px\"><span style=\"font:700 24px var(--font-sans);color:color-mix(in srgb, var(--up) 66%, var(--text))\">✓</span></div><div style=\"display:flex;flex-direction:column;gap:4px;align-items:flex-start\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">Deployed to production</span><span style=\"font:500 17px var(--font-mono);color:color-mix(in srgb, var(--up) 66%, var(--text))\">app.vawe.dev</span></div></div>",
       "start": 1.85,
       "duration": 6,
-      "enterDur": 0.45,
-      "children": [
-        {
-          "type": "group",
-          "bg": "color-mix(in srgb, var(--up) 22%, transparent)",
-          "radius": 100,
-          "pad": "8px 12px",
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "✓",
-              "size": 24,
-              "color": "color-mix(in srgb, var(--up) 66%, var(--text))"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "gap": 4,
-          "items": "flex-start",
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Deployed to production",
-              "size": 24,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "app.vawe.dev",
-              "font": "mono",
-              "size": 17,
-              "color": "color-mix(in srgb, var(--up) 66%, var(--text))"
-            }
-          ]
-        }
-      ]
+      "enterDur": 0.45
     }
   ],
   "produced": false

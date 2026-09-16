@@ -15,214 +15,26 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 460,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 0,
-      "pad": 24,
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
       "elevation": 1,
       "anim": "fade",
+      "html": "<div style=\"display:flex;flex-direction:column;padding:24px;box-sizing:border-box;width:460px\"><div data-part style=\"display:flex;align-items:stretch;gap:16px\"><div style=\"display:flex;flex-direction:column;align-items:center;width:18px;flex:none\"><span style=\"width:14px;height:14px;border-radius:100px;flex:none;background:var(--accent)\"></span><span style=\"width:2px;flex:1;background:var(--line)\"></span></div><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding-bottom:24px\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">v2.0 · registry</span><span style=\"font:500 17px var(--font-mono);color:var(--text-2)\">today</span></div></div><div data-part style=\"display:flex;align-items:stretch;gap:16px\"><div style=\"display:flex;flex-direction:column;align-items:center;width:18px;flex:none\"><span style=\"width:14px;height:14px;border-radius:100px;flex:none;background:var(--accent)\"></span><span style=\"width:2px;flex:1;background:var(--line)\"></span></div><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding-bottom:24px\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">v1.4 · lottie</span><span style=\"font:500 17px var(--font-mono);color:var(--text-2)\">1w</span></div></div><div data-part style=\"display:flex;align-items:stretch;gap:16px\"><div style=\"display:flex;flex-direction:column;align-items:center;width:18px;flex:none\"><span style=\"width:14px;height:14px;border-radius:100px;flex:none;background:color-mix(in srgb, var(--accent) 8%, transparent)\"></span></div><div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding-bottom:24px\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">v2.1 · captions</span><span style=\"font:500 17px var(--font-mono);color:var(--text-2)\">next</span></div></div></div>",
       "start": 0.2,
       "duration": 8,
       "enterDur": 0.25,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "group",
-          "layout": "row",
-          "items": "stretch",
-          "gap": 16,
-          "children": [
-            {
-              "type": "group",
-              "layout": "column",
-              "items": "center",
-              "gap": 0,
-              "w": 18,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "",
-                  "w": 14,
-                  "h": 14,
-                  "radius": 100,
-                  "bg": "var(--accent)",
-                  "delay": 0.2,
-                  "anim": "pop",
-                  "enterDur": 0.26
-                },
-                {
-                  "type": "group",
-                  "radius": 0,
-                  "w": 2,
-                  "grow": 1,
-                  "bg": "var(--line)"
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "layout": "column",
-              "items": "flex-start",
-              "gap": 2,
-              "pad": "0 0 24px",
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 600,
-                  "text": "v2.0 · registry",
-                  "size": 20,
-                  "color": "var(--text)",
-                  "delay": 0.3,
-                  "anim": "slide-left",
-                  "enterDur": 0.3
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "today",
-                  "font": "mono",
-                  "size": 17,
-                  "color": "var(--text-2)",
-                  "delay": 0.36,
-                  "anim": "fade",
-                  "enterDur": 0.3
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "stretch",
-          "gap": 16,
-          "children": [
-            {
-              "type": "group",
-              "layout": "column",
-              "items": "center",
-              "gap": 0,
-              "w": 18,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "",
-                  "w": 14,
-                  "h": 14,
-                  "radius": 100,
-                  "bg": "var(--accent)",
-                  "delay": 0.5,
-                  "anim": "pop",
-                  "enterDur": 0.26
-                },
-                {
-                  "type": "group",
-                  "radius": 0,
-                  "w": 2,
-                  "grow": 1,
-                  "bg": "var(--line)"
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "layout": "column",
-              "items": "flex-start",
-              "gap": 2,
-              "pad": "0 0 24px",
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 600,
-                  "text": "v1.4 · lottie",
-                  "size": 20,
-                  "color": "var(--text)",
-                  "delay": 0.6,
-                  "anim": "slide-left",
-                  "enterDur": 0.3
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "1w",
-                  "font": "mono",
-                  "size": 17,
-                  "color": "var(--text-2)",
-                  "delay": 0.66,
-                  "anim": "fade",
-                  "enterDur": 0.3
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "stretch",
-          "gap": 16,
-          "children": [
-            {
-              "type": "group",
-              "layout": "column",
-              "items": "center",
-              "gap": 0,
-              "w": 18,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "",
-                  "w": 14,
-                  "h": 14,
-                  "radius": 100,
-                  "bg": "color-mix(in srgb, var(--accent) 8%, transparent)",
-                  "delay": 0.8,
-                  "anim": "pop",
-                  "enterDur": 0.26
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "layout": "column",
-              "items": "flex-start",
-              "gap": 2,
-              "pad": "0 0 24px",
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 600,
-                  "text": "v2.1 · captions",
-                  "size": 20,
-                  "color": "var(--text)",
-                  "delay": 0.9,
-                  "anim": "slide-left",
-                  "enterDur": 0.3
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "next",
-                  "font": "mono",
-                  "size": 17,
-                  "color": "var(--text-2)",
-                  "delay": 0.96,
-                  "anim": "fade",
-                  "enterDur": 0.3
-                }
-              ]
-            }
-          ]
+          "anim": "slide-left",
+          "each": 0.3,
+          "stagger": 0.3,
+          "delay": 0.2
         }
       ]
     }

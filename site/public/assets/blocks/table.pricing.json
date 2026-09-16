@@ -15,212 +15,26 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 560,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 0,
-      "pad": "16px 24px",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
       "elevation": 1,
       "anim": "fade",
+      "html": "<div style=\"display:flex;flex-direction:column;padding:16px 24px;box-sizing:border-box;width:560px\"><div style=\"display:flex;gap:16px;align-items:center;padding:12px 0\"><span style=\"flex:1;font:600 17px var(--font-sans);color:var(--text-2)\">Plan</span><span style=\"flex:1;font:600 17px var(--font-sans);color:var(--text-2)\">Price</span><span style=\"flex:1;font:600 17px var(--font-sans);color:var(--text-2)\">Renders</span></div><div data-part style=\"display:flex;gap:16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)\"><span style=\"flex:1;font:500 20px var(--font-sans);color:var(--text)\">Free</span><span style=\"flex:1;font:500 20px var(--font-num);color:var(--text)\">$0</span><span style=\"flex:1;font:500 20px var(--font-sans);color:var(--text)\">3/day</span></div><div data-part style=\"display:flex;gap:16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)\"><span style=\"flex:1;font:500 20px var(--font-sans);color:var(--text)\">Pro</span><span style=\"flex:1;font:500 20px var(--font-num);color:var(--text)\">$29</span><span style=\"flex:1;font:500 20px var(--font-sans);color:var(--text)\">∞</span></div><div data-part style=\"display:flex;gap:16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)\"><span style=\"flex:1;font:500 20px var(--font-sans);color:var(--text)\">Team</span><span style=\"flex:1;font:500 20px var(--font-num);color:var(--text)\">$99</span><span style=\"flex:1;font:500 20px var(--font-sans);color:var(--text)\">∞</span></div></div>",
       "start": 0.2,
       "duration": 8,
       "enterDur": 0.25,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "group",
-          "layout": "row",
-          "gap": 16,
-          "items": "center",
-          "pad": "12px 0",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Plan",
-              "grow": 1,
-              "font": "sans",
-              "size": 17,
-              "color": "var(--text-2)"
-            },
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Price",
-              "grow": 1,
-              "font": "sans",
-              "size": 17,
-              "color": "var(--text-2)"
-            },
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Renders",
-              "grow": 1,
-              "font": "sans",
-              "size": 17,
-              "color": "var(--text-2)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 0,
-          "h": 1,
-          "bg": "var(--line)"
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "gap": 16,
-          "items": "center",
-          "pad": "12px 0",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Free",
-              "grow": 1,
-              "font": "sans",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.3,
-              "anim": "slide-left",
-              "enterDur": 0.32
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "$0",
-              "grow": 1,
-              "font": "num",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.3,
-              "anim": "slide-left",
-              "enterDur": 0.32
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "3/day",
-              "grow": 1,
-              "font": "sans",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.3,
-              "anim": "slide-left",
-              "enterDur": 0.32
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 0,
-          "h": 1,
-          "bg": "var(--line)"
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "gap": 16,
-          "items": "center",
-          "pad": "12px 0",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Pro",
-              "grow": 1,
-              "font": "sans",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.46,
-              "anim": "slide-left",
-              "enterDur": 0.32
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "$29",
-              "grow": 1,
-              "font": "num",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.46,
-              "anim": "slide-left",
-              "enterDur": 0.32
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "∞",
-              "grow": 1,
-              "font": "sans",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.46,
-              "anim": "slide-left",
-              "enterDur": 0.32
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 0,
-          "h": 1,
-          "bg": "var(--line)"
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "gap": 16,
-          "items": "center",
-          "pad": "12px 0",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Team",
-              "grow": 1,
-              "font": "sans",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.62,
-              "anim": "slide-left",
-              "enterDur": 0.32
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "$99",
-              "grow": 1,
-              "font": "num",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.62,
-              "anim": "slide-left",
-              "enterDur": 0.32
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "∞",
-              "grow": 1,
-              "font": "sans",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.62,
-              "anim": "slide-left",
-              "enterDur": 0.32
-            }
-          ]
+          "anim": "slide-left",
+          "each": 0.32,
+          "stagger": 0.16,
+          "delay": 0.3
         }
       ]
     }
