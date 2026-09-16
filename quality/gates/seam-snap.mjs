@@ -20,6 +20,8 @@ import { fileURLToPath } from 'node:url';
 import { flattenLayers } from '../../harness/lib/layers.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { inferCuts } from '../../core/timeline/junctions.js';
+import { edgeReadingAt } from '../../harness/lib/frame-forensics.mjs';
+import { sceneDims } from '../../harness/lib/layer-boxes.mjs';
 
 import { gradeable } from './tile.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
@@ -32,6 +34,7 @@ if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: node quality/ga
 // that declare them that way, so this gate ran and reported nothing on the exemplar it exists to protect
 // (engine-doctrine/MISTAKES.md #394 · #407 · #408). Cloned: loadScene mutates and deletes what it is handed.
 const data = loadScene(structuredClone(JSON.parse(fs.readFileSync(dataArg, 'utf8'))));
+const [W, H] = sceneDims(data, data.aspect);
 const name = path.basename(dataArg).replace(/\.(expanded\.)?json$/, '');
 const mp4 = path.join(ROOT, 'out', `${name}.mp4`);
 // EXISTS IS NOT FRESH. A seam sheet cut from the previous render reports clean seams for a film whose
@@ -107,6 +110,19 @@ if (!total) {
 // ── collect transition boundaries (seconds) ──────────────────────────────────────────────────────
 const flat = flattenLayers(data.layers);
 const bounds = new Set();
+
+// name the beat on either side of a boundary (track 0 is background, never the beat itself).
+// Nearest by start/end, not an exact frame match, because a beat rarely starts on the sampled frame.
+const content = flat.filter((l) => (l.track ?? 1) !== 0 && typeof l.start === 'number');
+function beatsAround(tSec) {
+  let out = null, outEnd = -Infinity, inn = null, inStart = Infinity;
+  for (const l of content) {
+    const end = l.start + (l.duration ?? 0);
+    if (end <= tSec + 0.05 && end > outEnd) { outEnd = end; out = l.id; }
+    if (l.start >= tSec - 0.05 && l.start < inStart) { inStart = l.start; inn = l.id; }
+  }
+  return { out: out || '(nothing)', inn: inn || '(nothing)' };
+}
 for (const c of data.cuts || []) if (typeof c.t === 'number') bounds.add(c.t);
 for (const s of data.seams || []) if (typeof s.t === 'number') bounds.add(s.t);
 for (const s of data.stings || []) if (typeof s.t === 'number') bounds.add(s.t);
@@ -140,7 +156,25 @@ for (const nt of seams) {
   // flag if the darkest seam frame falls to <55% of the darker neighbour AND the neighbours weren't
   // already near-black (so a genuinely dark passage never trips it). 0.06 ≈ a near-black floor.
   if (outside > 0.06 && dip.l < outside * 0.55) {
-    findings.push({ t: (nt / fps).toFixed(2), frame: dip.f, dip: dip.l.toFixed(3), outside: outside.toFixed(3) });
+    // HOW LONG does the stage stay empty, not just whether it dipped. Luma alone recovers as soon as
+    // the frame brightens, before there is anything ON it to read: at this exact defect the luma was
+    // back within a handful of frames while the frame stayed CONTENT-FREE for several more. So walk
+    // forward measuring structure (edgeReadingAt, the same probe seam-forensics.mjs's resurrection
+    // check uses) until it clears a floor read off a settled frame just outside the seam, capped at 2s
+    // (60f @30fps): the grammar this doc enforces is a moment, never a hold.
+    const CAP = fps * 2;
+    const settledEdge = edgeReadingAt(mp4, Math.min(total - 1, nt + 6), { x: 0, y: 0, w: W, h: H }, W, H) ?? 0;
+    const floor = Math.max(15, settledEdge * 0.5);
+    let emptyFrames = CAP;
+    for (let k = 0; k <= CAP; k++) {
+      const e = edgeReadingAt(mp4, Math.min(total - 1, dip.f + k), { x: 0, y: 0, w: W, h: H }, W, H);
+      if (e != null && e >= floor) { emptyFrames = k; break; }
+    }
+    const { out, inn } = beatsAround(nt / fps);
+    findings.push({
+      t: (nt / fps).toFixed(2), frame: dip.f, dip: dip.l.toFixed(3), outside: outside.toFixed(3),
+      emptySec: (emptyFrames / fps).toFixed(2), out, inn,
+    });
   }
 }
 
@@ -182,8 +216,13 @@ if (!findings.length) {
   process.exit(2);
 }
 for (const seam of findings) {
-  console.error(`  ✗ flash at ${seam.t}s (frame ${seam.frame}): luma dips to ${seam.dip} vs ${seam.outside} just outside. A black/dark flash in the transition overlap (engine-doctrine/MISTAKES.md #144).`);
-  f.fail('seam-flash', `flash at ${seam.t}s (frame ${seam.frame}): luma dips to ${seam.dip} vs ${seam.outside} just outside`,
+  // name it by measured hold, not a guess: the "outgoing beat has left and the incoming beat has not
+  // arrived" defect is this same luminance dip when it takes real time for content to reappear.
+  const fix = Number(seam.emptySec) > 0
+    ? `overlap "${seam.out}"'s exit with "${seam.inn}"'s entrance so the stage never empties (TRANSITIONS.md: no transition-dip)`
+    : 'fix the seam compositing or the clip timing, then re-render';
+  console.error(`  ✗ seam "${seam.out}" → "${seam.inn}" at ${seam.t}s: luma dips to ${seam.dip} vs ${seam.outside} just outside, empty ${seam.emptySec}s before content reads. ${fix}.`);
+  f.fail('seam-flash', `seam "${seam.out}" -> "${seam.inn}" at ${seam.t}s: luma dips to ${seam.dip} vs ${seam.outside} just outside, empty ${seam.emptySec}s before content reads. ${fix}`,
     { at: `frame ${seam.frame}`, doc: 'engine-doctrine/MISTAKES.md#144' });
 }
 console.error(`\n✗ seam-snap: ${findings.length} transition flash(es). The center-sampling gates cannot see these, fix the seam compositing or the clip timing, then re-render.`);
