@@ -15,100 +15,44 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 460,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 8,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:8px;width:460px\"><div data-i=\"0\" style=\"display:flex;justify-content:flex-start\"><span style=\"display:inline-block;max-width:80%;box-sizing:border-box;font:500 20px var(--font-sans);color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px\">One JSON becomes one video?</span></div><div data-i=\"1\" style=\"display:flex;justify-content:flex-end\"><span style=\"display:inline-block;max-width:80%;box-sizing:border-box;font:500 20px var(--font-sans);color:var(--on-accent);background:var(--accent);border-radius:16px;padding:12px 16px\">Yep. Pure in n.</span></div><div data-i=\"2\" style=\"display:flex;justify-content:flex-start\"><span style=\"display:inline-block;max-width:80%;box-sizing:border-box;font:500 20px var(--font-sans);color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px\">No timeline?</span></div><div data-i=\"3\" style=\"display:flex;justify-content:flex-end\"><span style=\"display:inline-block;max-width:80%;box-sizing:border-box;font:500 20px var(--font-sans);color:var(--on-accent);background:var(--accent);border-radius:16px;padding:12px 16px\">None. Just renderFrame.</span></div></div>",
       "start": 0.2,
       "duration": 8,
       "anim": "fade",
       "enterDur": 0.25,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "group",
-          "layout": "row",
-          "justify": "flex-start",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "One JSON becomes one video?",
-              "size": 20,
-              "color": "var(--text)",
-              "bg": "var(--card)",
-              "border": "1px solid var(--line)",
-              "radius": 16,
-              "pad": "12px 16px",
-              "delay": 0.2,
-              "anim": "slide-left",
-              "enterDur": 0.35
-            }
-          ]
+          "select": "[data-i=\"0\"]",
+          "anim": "slide-left",
+          "each": 0.35,
+          "delay": 0.2,
+          "out": true
         },
         {
-          "type": "group",
-          "layout": "row",
-          "justify": "flex-end",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Yep. Pure in n.",
-              "size": 20,
-              "color": "var(--on-accent)",
-              "bg": "var(--accent)",
-              "radius": 16,
-              "pad": "12px 16px",
-              "delay": 0.62,
-              "anim": "slide-right",
-              "enterDur": 0.35
-            }
-          ]
+          "select": "[data-i=\"1\"]",
+          "anim": "slide-right",
+          "each": 0.35,
+          "delay": 0.62,
+          "out": true
         },
         {
-          "type": "group",
-          "layout": "row",
-          "justify": "flex-start",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "No timeline?",
-              "size": 20,
-              "color": "var(--text)",
-              "bg": "var(--card)",
-              "border": "1px solid var(--line)",
-              "radius": 16,
-              "pad": "12px 16px",
-              "delay": 1.04,
-              "anim": "slide-left",
-              "enterDur": 0.35
-            }
-          ]
+          "select": "[data-i=\"2\"]",
+          "anim": "slide-left",
+          "each": 0.35,
+          "delay": 1.04,
+          "out": true
         },
         {
-          "type": "group",
-          "layout": "row",
-          "justify": "flex-end",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "None. Just renderFrame.",
-              "size": 20,
-              "color": "var(--on-accent)",
-              "bg": "var(--accent)",
-              "radius": 16,
-              "pad": "12px 16px",
-              "delay": 1.46,
-              "anim": "slide-right",
-              "enterDur": 0.35
-            }
-          ]
+          "select": "[data-i=\"3\"]",
+          "anim": "slide-right",
+          "each": 0.35,
+          "delay": 1.46,
+          "out": true
         }
       ]
     }

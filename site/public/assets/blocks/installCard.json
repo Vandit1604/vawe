@@ -15,118 +15,32 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 420,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": 16,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px solid var(--line)",
       "elevation": 1,
       "anim": "rise",
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:420px\"><div style=\"width:62px;height:62px;flex:none;border-radius:12px;background:color-mix(in srgb, var(--accent) 14%, transparent);display:flex;align-items:center;justify-content:center;font:700 28px var(--font-sans);color:color-mix(in srgb, var(--accent) 66%, var(--text))\">◆</div><div style=\"display:flex;flex-direction:column;gap:4px;flex:1;align-items:flex-start;min-width:0\"><span style=\"font:700 20px var(--font-sans);color:var(--text)\">Fieldwork</span><span style=\"font:500 17px var(--font-sans);color:var(--text-2)\">Productivity</span><div style=\"display:flex;align-items:center;gap:8px\"><div style=\"position:relative;font:500 17px var(--font-sans);letter-spacing:0.06em\"><span style=\"color:color-mix(in srgb, var(--accent) 8%, transparent)\">★★★★★</span><div data-part=\"stars\" style=\"position:absolute;left:0;top:0;overflow:hidden;width:92%\"><span style=\"color:color-mix(in srgb, var(--accent) 66%, var(--text));white-space:nowrap\">★★★★★</span></div></div><span style=\"font:500 17px var(--font-mono);color:var(--text-2)\">1.2K</span></div></div><div data-part=\"cta\" style=\"background:var(--accent);border-radius:100px;padding:8px 24px;flex:none\"><span style=\"font:700 17px var(--font-sans);color:var(--on-accent)\">Install</span></div></div>",
       "start": 0.2,
       "duration": 8,
       "enterDur": 0.45,
       "exitDur": 0.3,
-      "children": [
+      "parts": [
         {
-          "type": "group",
-          "radius": 12,
-          "w": 62,
-          "h": 62,
-          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "◆",
-              "size": 28,
-              "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
-            }
-          ]
+          "select": "[data-part=\"stars\"]",
+          "anim": "widen",
+          "each": 0.8,
+          "delay": 0.35
         },
         {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 4,
-          "grow": 1,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Fieldwork",
-              "size": 20,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Productivity",
-              "size": 17,
-              "color": "var(--text-2)"
-            },
-            {
-              "type": "group",
-              "layout": "row",
-              "items": "center",
-              "gap": 8,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "★★★★★",
-                  "size": 17,
-                  "color": "color-mix(in srgb, var(--accent) 66%, var(--text))",
-                  "ls": "0.06em",
-                  "mask": "linear-gradient(to right, #000 0 calc(var(--p, 1) * 100%), transparent calc(var(--p, 1) * 100%))",
-                  "vars": {
-                    "--p": [
-                      0,
-                      0.92
-                    ]
-                  },
-                  "varsDur": 0.8,
-                  "varsDelay": 0.35,
-                  "varsEase": "easeOutCubic"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "1.2K",
-                  "font": "mono",
-                  "size": 17,
-                  "color": "var(--text-2)"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "bg": "var(--accent)",
-          "radius": 100,
-          "pad": "8px 24px",
-          "start": 0.42,
-          "duration": 8,
-          "anim": "pop",
-          "enterDur": 0.3,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Install",
-              "size": 17,
-              "color": "var(--on-accent)"
-            }
-          ]
+          "select": "[data-part=\"cta\"]",
+          "anim": "popIn",
+          "each": 0.3,
+          "delay": 0.22
         }
       ]
     }

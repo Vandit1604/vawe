@@ -15,14 +15,10 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 520,
-      "layout": "row",
-      "items": "flex-start",
-      "gap": 12,
-      "pad": 16,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px solid var(--line)",
@@ -32,79 +28,7 @@
       "duration": 8,
       "enterDur": 0.45,
       "exitDur": 0.3,
-      "children": [
-        {
-          "type": "group",
-          "radius": 100,
-          "w": 48,
-          "h": 48,
-          "bg": "color-mix(in srgb, var(--accent) 14%, var(--card))",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "WA",
-              "size": 19,
-              "color": "var(--accent)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "stretch",
-          "gap": 6,
-          "grow": 1,
-          "children": [
-            {
-              "type": "group",
-              "layout": "row",
-              "items": "center",
-              "gap": 8,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 700,
-                  "text": "Wren Alcott",
-                  "size": 20,
-                  "color": "var(--text)"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "@wren",
-                  "font": "mono",
-                  "size": 16,
-                  "color": "var(--dim)"
-                },
-                {
-                  "type": "group",
-                  "radius": 0,
-                  "grow": 1
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "just now",
-                  "font": "mono",
-                  "size": 15,
-                  "color": "var(--dim)"
-                }
-              ]
-            },
-            {
-              "type": "text",
-              "weight": 400,
-              "text": "Moved the Fieldwork draft into the shared workspace.",
-              "size": 19,
-              "color": "var(--text)"
-            }
-          ]
-        }
-      ]
+      "html": "<div style=\"display:flex;align-items:flex-start;gap:12px;padding:16px;box-sizing:border-box;width:520px\"><div style=\"width:48px;height:48px;border-radius:100%;background:color-mix(in srgb, var(--accent) 14%, var(--card));flex:none;display:flex;align-items:center;justify-content:center;font:700 19px var(--font-sans);color:var(--accent)\">WA</div><div style=\"display:flex;flex-direction:column;gap:6px;flex:1;align-items:flex-start;min-width:0\"><div style=\"display:flex;align-items:center;gap:8px;width:100%\"><span style=\"font:700 20px var(--font-sans);color:var(--text)\">Wren Alcott</span><span style=\"font:500 16px var(--font-mono);color:var(--dim)\">@wren</span><span style=\"flex:1\"></span><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">just now</span></div><span style=\"font:400 19px var(--font-sans);color:var(--text)\">Moved the Fieldwork draft into the shared workspace.</span></div></div>"
     }
   ],
   "produced": false

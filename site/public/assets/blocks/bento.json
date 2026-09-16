@@ -8,22 +8,19 @@
   },
   "bg": [
     {
-      "preset": "plain",
+      "preset": "aurora",
       "from": 0,
       "to": 9
     }
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 370,
       "h": 420,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 16,
-      "pad": 48,
+      "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:16px;padding:48px;box-sizing:border-box;width:370px;height:420px\"><span style=\"font:800 56px var(--font-sans);color:#fff;letter-spacing:-0.02em\">Hero</span><span style=\"font:500 30px var(--font-sans);color:rgba(255,255,255,0.85);width:278px\">The big one.</span></div>",
       "bg": "radial-gradient(60% 60% at 15% 20%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 70%), radial-gradient(55% 55% at 85% 15%, color-mix(in srgb, var(--accent-glow, var(--accent)) 40%, transparent), transparent 68%), radial-gradient(70% 70% at 70% 90%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 72%), linear-gradient(135deg, var(--surface-2), var(--card))",
       "radius": 26,
       "border": "1.5px solid var(--line)",
@@ -32,36 +29,15 @@
       "anim": "scale",
       "enterDur": 0.55,
       "out": "defocus",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "text",
-          "weight": 800,
-          "text": "Hero",
-          "size": 56,
-          "color": "#fff",
-          "ls": "-0.02em"
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "The big one.",
-          "size": 30,
-          "color": "rgba(255,255,255,0.85)",
-          "w": 278
-        }
-      ]
+      "exitDur": 0.4
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 550,
       "y": 160,
       "w": 370,
       "h": 200,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 12,
-      "pad": 32,
+      "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:32px;box-sizing:border-box;width:370px;height:200px\"><div style=\"width:290px;height:2px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)\"></div><span style=\"font:700 52px var(--font-sans);color:#fff;letter-spacing:-0.02em\">Cell</span><span style=\"font:400 28px var(--font-serif);color:rgba(255,255,255,0.72);width:290px\">Support.</span></div>",
       "bg": "rgba(255,255,255,0.06)",
       "radius": 22,
       "border": "1.5px solid rgba(255,255,255,0.14)",
@@ -72,44 +48,15 @@
       "anim": "pop",
       "enterDur": 0.5,
       "out": "defocus",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "rect",
-          "w": 290,
-          "h": 2,
-          "bg": "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
-          "radius": 0
-        },
-        {
-          "type": "text",
-          "weight": 700,
-          "text": "Cell",
-          "size": 52,
-          "color": "#fff",
-          "ls": "-0.02em"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "Support.",
-          "font": "serif",
-          "size": 28,
-          "color": "rgba(255,255,255,0.72)",
-          "w": 290
-        }
-      ]
+      "exitDur": 0.4
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 550,
       "y": 380,
       "w": 370,
       "h": 200,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 12,
-      "pad": 48,
+      "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:48px;box-sizing:border-box;width:370px;height:200px\"><span style=\"font:700 54px var(--font-sans);color:#fff;letter-spacing:-0.02em\">Cell</span><span style=\"font:400 28px var(--font-serif);color:rgba(255,255,255,0.7);width:286px\">Support.</span></div>",
       "bg": "radial-gradient(120% 90% at 50% -10%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 60%), linear-gradient(180deg, var(--surface-2), color-mix(in srgb, var(--bg) 80%, black))",
       "radius": 22,
       "border": "1.5px solid rgba(255,255,255,0.14)",
@@ -119,26 +66,7 @@
       "anim": "pop",
       "enterDur": 0.5,
       "out": "defocus",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "text",
-          "weight": 700,
-          "text": "Cell",
-          "size": 54,
-          "color": "#fff",
-          "ls": "-0.02em"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "Support.",
-          "font": "serif",
-          "size": 28,
-          "color": "rgba(255,255,255,0.7)",
-          "w": 286
-        }
-      ]
+      "exitDur": 0.4
     }
   ],
   "produced": false

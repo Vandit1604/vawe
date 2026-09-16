@@ -15,14 +15,10 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 254,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": "16px 16px",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
@@ -32,58 +28,7 @@
       "duration": 8,
       "enterDur": 0.45,
       "exitDur": 0.3,
-      "children": [
-        {
-          "type": "group",
-          "radius": 12,
-          "w": 44,
-          "h": 44,
-          "bg": "var(--surface-2)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "✉",
-              "size": 20,
-              "color": "var(--text)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 2,
-          "grow": 1,
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Digest",
-              "size": 20,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Kite Studio",
-              "size": 16,
-              "color": "var(--text-2)"
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "Today",
-          "font": "mono",
-          "size": 15,
-          "color": "var(--dim)"
-        }
-      ]
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:254px\"><div style=\"width:44px;height:44px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:var(--text)\">✉</div><div style=\"display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">Digest</span><span style=\"font:400 16px var(--font-sans);color:var(--text-2)\">Kite Studio</span></div><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">Today</span></div>"
     },
     {
       "type": "rect",
@@ -100,14 +45,10 @@
       "exitDur": 0.3
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 446,
       "y": 160,
       "w": 254,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": "16px 16px",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
@@ -117,58 +58,7 @@
       "duration": 7.82,
       "enterDur": 0.45,
       "exitDur": 0.3,
-      "children": [
-        {
-          "type": "group",
-          "radius": 12,
-          "w": 44,
-          "h": 44,
-          "bg": "var(--surface-2)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "☰",
-              "size": 20,
-              "color": "var(--text)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 2,
-          "grow": 1,
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Drafts",
-              "size": 20,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Fieldwork",
-              "size": 16,
-              "color": "var(--text-2)"
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "Fri",
-          "font": "mono",
-          "size": 15,
-          "color": "var(--dim)"
-        }
-      ]
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:254px\"><div style=\"width:44px;height:44px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:var(--text)\">☰</div><div style=\"display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">Drafts</span><span style=\"font:400 16px var(--font-sans);color:var(--text-2)\">Fieldwork</span></div><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">Fri</span></div>"
     }
   ],
   "produced": false

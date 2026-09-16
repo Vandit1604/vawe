@@ -15,150 +15,32 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 380,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 16,
-      "pad": 22,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px solid var(--line)",
       "elevation": 2,
       "anim": "rise",
+      "html": "<div style=\"display:flex;flex-direction:column;gap:16px;padding:22px;box-sizing:border-box;width:380px\"><div style=\"display:flex;align-items:center;gap:16px\"><div style=\"width:72px;height:72px;border-radius:12px;background:var(--accent);flex:none;display:flex;align-items:center;justify-content:center;font:700 29px var(--font-sans);color:var(--on-accent)\">GH</div><div style=\"display:flex;flex-direction:column;gap:2px;align-items:flex-start;flex:1;min-width:0\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">Golden Hour</span><span style=\"font:500 17px var(--font-sans);color:var(--text-2)\">Field Notes</span></div></div><div style=\"position:relative;width:336px;height:5px;border-radius:100px;background:color-mix(in srgb, var(--accent) 8%, transparent);overflow:hidden\"><div data-part=\"bar\" style=\"position:absolute;left:0;top:0;height:5px;border-radius:100px;background:var(--accent);width:208.32px\"></div></div><div data-part=\"transport\" style=\"display:flex;align-items:center;justify-content:center;gap:32px\"><span style=\"font:600 24px var(--font-sans);color:var(--text-2)\">◁</span><div style=\"width:48px;height:48px;border-radius:100%;background:var(--text);display:flex;align-items:center;justify-content:center\"><span style=\"font:700 20px var(--font-sans);color:var(--bg)\">▷</span></div><span style=\"font:600 24px var(--font-sans);color:var(--text-2)\">▷|</span></div></div>",
       "start": 0.2,
       "duration": 8,
       "enterDur": 0.5,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "group",
-          "layout": "row",
-          "items": "center",
-          "gap": 16,
-          "children": [
-            {
-              "type": "group",
-              "radius": 12,
-              "w": 72,
-              "h": 72,
-              "bg": "var(--accent)",
-              "layout": "row",
-              "justify": "center",
-              "items": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 700,
-                  "text": "GH",
-                  "size": 29,
-                  "color": "var(--on-accent)"
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "layout": "column",
-              "items": "flex-start",
-              "gap": 2,
-              "grow": 1,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 700,
-                  "text": "Golden Hour",
-                  "size": 24,
-                  "color": "var(--text)"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "Field Notes",
-                  "size": 17,
-                  "color": "var(--text-2)"
-                }
-              ]
-            }
-          ]
+          "select": "[data-part=\"bar\"]",
+          "anim": "widen",
+          "each": 0.4,
+          "delay": 0.15
         },
         {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 0,
-          "start": 0.35,
-          "duration": 8,
-          "anim": "wipe",
-          "enterDur": 0.4,
-          "children": [
-            {
-              "type": "group",
-              "radius": 100,
-              "w": 336,
-              "h": 5,
-              "bg": "color-mix(in srgb, var(--accent) 8%, transparent)",
-              "layout": "row",
-              "justify": "flex-start",
-              "items": "stretch",
-              "children": [
-                {
-                  "type": "group",
-                  "radius": 100,
-                  "w": 208.32,
-                  "h": 5,
-                  "bg": "var(--accent)"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "gap": 32,
-          "start": 0.45,
-          "duration": 8,
-          "anim": "rise",
-          "enterDur": 0.35,
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "◁",
-              "size": 24,
-              "color": "var(--text-2)"
-            },
-            {
-              "type": "group",
-              "radius": 100,
-              "w": 48,
-              "h": 48,
-              "bg": "var(--text)",
-              "layout": "row",
-              "justify": "center",
-              "items": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 700,
-                  "text": "▷",
-                  "size": 20,
-                  "color": "var(--bg)"
-                }
-              ]
-            },
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "▷|",
-              "size": 24,
-              "color": "var(--text-2)"
-            }
-          ]
+          "select": "[data-part=\"transport\"]",
+          "anim": "fadeUp",
+          "each": 0.35,
+          "delay": 0.25
         }
       ]
     }

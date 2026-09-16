@@ -15,145 +15,22 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 560,
-      "layout": "row",
-      "items": "flex-start",
-      "gap": 16,
+      "html": "<div style=\"display:flex;align-items:flex-start;gap:16px;width:560px\"><div style=\"display:flex;flex-direction:column;gap:8px;width:176px;flex:none\"><span data-part style=\"font:600 17px var(--font-sans);color:var(--text-2)\">Todo</span><span data-part style=\"font:500 17px var(--font-sans);color:var(--text);background:var(--card);border-radius:14px;border:1px solid var(--line);padding:12px 16px\">captions</span><span data-part style=\"font:500 17px var(--font-sans);color:var(--text);background:var(--card);border-radius:14px;border:1px solid var(--line);padding:12px 16px\">TTS</span></div><div style=\"display:flex;flex-direction:column;gap:8px;width:176px;flex:none\"><span data-part style=\"font:600 17px var(--font-sans);color:var(--text-2)\">Doing</span><span data-part style=\"font:500 17px var(--font-sans);color:var(--text);background:var(--card);border-radius:14px;border:1px solid var(--line);padding:12px 16px\">blocks</span></div><div style=\"display:flex;flex-direction:column;gap:8px;width:176px;flex:none\"><span data-part style=\"font:600 17px var(--font-sans);color:var(--text-2)\">Done</span><span data-part style=\"font:500 17px var(--font-sans);color:var(--text);background:var(--card);border-radius:14px;border:1px solid var(--line);padding:12px 16px\">60fps</span><span data-part style=\"font:500 17px var(--font-sans);color:var(--text);background:var(--card);border-radius:14px;border:1px solid var(--line);padding:12px 16px\">lottie</span></div></div>",
       "start": 0.2,
       "duration": 8,
       "anim": "fade",
       "enterDur": 0.25,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "group",
-          "w": 176,
-          "layout": "column",
-          "items": "stretch",
-          "gap": 8,
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Todo",
-              "size": 17,
-              "color": "var(--text-2)",
-              "delay": 0.15,
-              "anim": "rise",
-              "enterDur": 0.28
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "captions",
-              "size": 17,
-              "color": "var(--text)",
-              "bg": "var(--card)",
-              "radius": 14,
-              "border": "1px solid var(--line)",
-              "pad": "12px 16px",
-              "delay": 0.4,
-              "anim": "pop",
-              "enterDur": 0.3
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "TTS",
-              "size": 17,
-              "color": "var(--text)",
-              "bg": "var(--card)",
-              "radius": 14,
-              "border": "1px solid var(--line)",
-              "pad": "12px 16px",
-              "delay": 0.73,
-              "anim": "pop",
-              "enterDur": 0.3
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "w": 176,
-          "layout": "column",
-          "items": "stretch",
-          "gap": 8,
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Doing",
-              "size": 17,
-              "color": "var(--text-2)",
-              "delay": 0.24,
-              "anim": "rise",
-              "enterDur": 0.28
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "blocks",
-              "size": 17,
-              "color": "var(--text)",
-              "bg": "var(--card)",
-              "radius": 14,
-              "border": "1px solid var(--line)",
-              "pad": "12px 16px",
-              "delay": 0.51,
-              "anim": "pop",
-              "enterDur": 0.3
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "w": 176,
-          "layout": "column",
-          "items": "stretch",
-          "gap": 8,
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Done",
-              "size": 17,
-              "color": "var(--text-2)",
-              "delay": 0.33,
-              "anim": "rise",
-              "enterDur": 0.28
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "60fps",
-              "size": 17,
-              "color": "var(--text)",
-              "bg": "var(--card)",
-              "radius": 14,
-              "border": "1px solid var(--line)",
-              "pad": "12px 16px",
-              "delay": 0.62,
-              "anim": "pop",
-              "enterDur": 0.3
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "lottie",
-              "size": 17,
-              "color": "var(--text)",
-              "bg": "var(--card)",
-              "radius": 14,
-              "border": "1px solid var(--line)",
-              "pad": "12px 16px",
-              "delay": 0.95,
-              "anim": "pop",
-              "enterDur": 0.3
-            }
-          ]
+          "anim": "popIn",
+          "each": 0.3,
+          "stagger": 0.1,
+          "delay": 0.15
         }
       ]
     }

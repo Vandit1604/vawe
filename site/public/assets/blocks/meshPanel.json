@@ -8,22 +8,19 @@
   },
   "bg": [
     {
-      "preset": "plain",
+      "preset": "aurora",
       "from": 0,
       "to": 9
     }
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 560,
       "h": 320,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 16,
-      "pad": 48,
+      "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:16px;padding:48px;box-sizing:border-box;width:560px;height:320px\"><span style=\"font:800 56px var(--font-sans);color:#fff;letter-spacing:-0.02em\">Mesh gradient</span><span style=\"font:500 30px var(--font-sans);color:rgba(255,255,255,0.85);width:468px\">A calm branded surface behind copy.</span></div>",
       "bg": "radial-gradient(60% 60% at 15% 20%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 70%), radial-gradient(55% 55% at 85% 15%, color-mix(in srgb, var(--accent-glow, var(--accent)) 40%, transparent), transparent 68%), radial-gradient(70% 70% at 70% 90%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 72%), linear-gradient(135deg, var(--surface-2), var(--card))",
       "radius": 26,
       "border": "1.5px solid var(--line)",
@@ -32,25 +29,7 @@
       "anim": "scale",
       "enterDur": 0.55,
       "out": "defocus",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "text",
-          "weight": 800,
-          "text": "Mesh gradient",
-          "size": 56,
-          "color": "#fff",
-          "ls": "-0.02em"
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "A calm branded surface behind copy.",
-          "size": 30,
-          "color": "rgba(255,255,255,0.85)",
-          "w": 468
-        }
-      ]
+      "exitDur": 0.4
     }
   ],
   "produced": false

@@ -15,141 +15,24 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 540,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 6,
-      "pad": 24,
       "bg": "#0A2540",
       "radius": 12,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:6px;padding:24px;box-sizing:border-box;width:540px\"><div data-part style=\"display:flex;align-items:baseline;gap:12px\"><span style=\"font:400 17px var(--font-mono);color:#8FA3BA\">12:04</span><span style=\"font:400 20px var(--font-mono);color:#8898AA\">[info] capturing 1950 frames</span></div><div data-part style=\"display:flex;align-items:baseline;gap:12px\"><span style=\"font:400 17px var(--font-mono);color:#8FA3BA\">12:04</span><span style=\"font:400 20px var(--font-mono);color:var(--up)\">[ok] encode done</span></div><div data-part style=\"display:flex;align-items:baseline;gap:12px\"><span style=\"font:400 17px var(--font-mono);color:#8FA3BA\">12:05</span><span style=\"font:400 20px var(--font-mono);color:#F6A417\">[warn] grain skipped (opt-in)</span></div><div data-part style=\"display:flex;align-items:baseline;gap:12px\"><span style=\"font:400 17px var(--font-mono);color:#8FA3BA\">12:05</span><span style=\"font:400 20px var(--font-mono);color:var(--up)\">[ok] out.mp4 written</span></div></div>",
       "start": 0.2,
       "duration": 8,
       "anim": "fade",
       "enterDur": 0.25,
       "exitDur": 0.3,
-      "children": [
+      "parts": [
         {
-          "type": "group",
-          "layout": "row",
-          "items": "baseline",
-          "gap": 12,
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "12:04",
-              "font": "mono",
-              "size": 17,
-              "color": "#8FA3BA",
-              "delay": 0.15,
-              "anim": "fade",
-              "enterDur": 0.18
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "[info] capturing 1950 frames",
-              "font": "mono",
-              "size": 20,
-              "color": "#8898AA",
-              "delay": 0.15,
-              "anim": "fade",
-              "enterDur": 0.18
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "baseline",
-          "gap": 12,
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "12:04",
-              "font": "mono",
-              "size": 17,
-              "color": "#8FA3BA",
-              "delay": 0.28,
-              "anim": "fade",
-              "enterDur": 0.18
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "[ok] encode done",
-              "font": "mono",
-              "size": 20,
-              "color": "var(--up)",
-              "delay": 0.28,
-              "anim": "fade",
-              "enterDur": 0.18
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "baseline",
-          "gap": 12,
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "12:05",
-              "font": "mono",
-              "size": 17,
-              "color": "#8FA3BA",
-              "delay": 0.41,
-              "anim": "fade",
-              "enterDur": 0.18
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "[warn] grain skipped (opt-in)",
-              "font": "mono",
-              "size": 20,
-              "color": "#F6A417",
-              "delay": 0.41,
-              "anim": "fade",
-              "enterDur": 0.18
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "baseline",
-          "gap": 12,
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "12:05",
-              "font": "mono",
-              "size": 17,
-              "color": "#8FA3BA",
-              "delay": 0.54,
-              "anim": "fade",
-              "enterDur": 0.18
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "[ok] out.mp4 written",
-              "font": "mono",
-              "size": 20,
-              "color": "var(--up)",
-              "delay": 0.54,
-              "anim": "fade",
-              "enterDur": 0.18
-            }
-          ]
+          "anim": "fade",
+          "each": 0.18,
+          "stagger": 0.13,
+          "delay": 0.15
         }
       ]
     }

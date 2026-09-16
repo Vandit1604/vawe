@@ -15,14 +15,10 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 460,
-      "layout": "column",
-      "items": "center",
-      "gap": 16,
-      "pad": 32,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px dashed var(--line)",
@@ -31,80 +27,21 @@
       "duration": 2.85,
       "enterDur": 0.45,
       "exitDur": 0.4,
-      "children": [
+      "html": "<div style=\"display:flex;flex-direction:column;gap:16px;align-items:center;padding:32px;box-sizing:border-box;width:460px\"><div style=\"width:60px;height:60px;border-radius:16px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 26px var(--font-sans);color:var(--text-2)\">☐</div><div style=\"display:flex;flex-direction:column;gap:6px;align-items:center\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">Nothing here yet</span><span style=\"font:400 18px var(--font-sans);color:var(--text-2);text-align:center\">Anything you save shows up in this list.</span></div><div data-part style=\"background:var(--text);border-radius:100px;padding:12px 24px\"><span style=\"font:700 17px var(--font-sans);color:var(--bg)\">Add the first one</span></div></div>",
+      "parts": [
         {
-          "type": "group",
-          "radius": 16,
-          "w": 60,
-          "h": 60,
-          "bg": "var(--surface-2)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "☐",
-              "size": 26,
-              "color": "var(--text-2)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "center",
-          "gap": 6,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Nothing here yet",
-              "size": 24,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 400,
-              "text": "Anything you save shows up in this list.",
-              "size": 18,
-              "color": "var(--text-2)",
-              "align": "center"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "bg": "var(--text)",
-          "radius": 100,
-          "pad": "12px 24px",
-          "start": 0.4,
-          "duration": 2.85,
-          "anim": "rise",
-          "enterDur": 0.35,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Add the first one",
-              "size": 17,
-              "color": "var(--bg)"
-            }
-          ]
+          "anim": "fadeUp",
+          "each": 0.35,
+          "delay": 0.2
         }
       ],
       "out": "wipe-left"
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 460,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": "16px 16px",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
@@ -114,69 +51,14 @@
       "duration": 2.85,
       "enterDur": 0.45,
       "exitDur": 0.4,
-      "children": [
-        {
-          "type": "group",
-          "radius": 12,
-          "w": 44,
-          "h": 44,
-          "bg": "var(--surface-2)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "✓",
-              "size": 20,
-              "color": "var(--text)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 2,
-          "grow": 1,
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Fieldwork draft",
-              "size": 20,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Saved to this list",
-              "size": 16,
-              "color": "var(--text-2)"
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "now",
-          "font": "mono",
-          "size": 15,
-          "color": "var(--dim)"
-        }
-      ],
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:460px\"><div style=\"width:44px;height:44px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:var(--text)\">✓</div><div style=\"display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">Fieldwork draft</span><span style=\"font:400 16px var(--font-sans);color:var(--text-2)\">Saved to this list</span></div><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">now</span></div>",
       "out": "wipe-left"
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 460,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 16,
-      "pad": 24,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px solid var(--line)",
@@ -186,93 +68,12 @@
       "duration": 3.2,
       "enterDur": 0.45,
       "exitDur": 0.4,
-      "children": [
+      "html": "<div style=\"display:flex;flex-direction:column;gap:16px;align-items:stretch;padding:24px;box-sizing:border-box;width:460px\"><div style=\"display:flex;align-items:center;gap:8px\"><span style=\"width:8px;height:8px;border-radius:100px;background:var(--surface-2)\"></span><span style=\"width:22px;height:8px;border-radius:100px;background:var(--accent)\"></span><span style=\"width:8px;height:8px;border-radius:100px;background:var(--surface-2)\"></span><span style=\"flex:1\"></span><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">2 of 3</span></div><div style=\"display:flex;flex-direction:column;gap:8px;align-items:flex-start\"><span style=\"font:700 30px var(--font-sans);letter-spacing:-0.02em;color:var(--text)\">Pick a workspace</span><span style=\"font:400 19px var(--font-sans);color:var(--text-2)\">Choose where new drafts are saved.</span></div><div data-part style=\"background:var(--accent);border-radius:12px;padding:12px 0;display:flex;align-items:center;justify-content:center\"><span style=\"font:700 19px var(--font-sans);color:var(--on-accent)\">Continue</span></div></div>",
+      "parts": [
         {
-          "type": "group",
-          "layout": "row",
-          "items": "center",
-          "gap": 8,
-          "children": [
-            {
-              "type": "group",
-              "radius": 100,
-              "w": 8,
-              "h": 8,
-              "bg": "var(--surface-2)"
-            },
-            {
-              "type": "group",
-              "radius": 100,
-              "w": 22,
-              "h": 8,
-              "bg": "var(--accent)"
-            },
-            {
-              "type": "group",
-              "radius": 100,
-              "w": 8,
-              "h": 8,
-              "bg": "var(--surface-2)"
-            },
-            {
-              "type": "group",
-              "radius": 0,
-              "grow": 1
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "2 of 3",
-              "font": "mono",
-              "size": 15,
-              "color": "var(--dim)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 8,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Pick a workspace",
-              "size": 30,
-              "color": "var(--text)",
-              "ls": "-0.02em"
-            },
-            {
-              "type": "text",
-              "weight": 400,
-              "text": "Choose where new drafts are saved.",
-              "size": 19,
-              "color": "var(--text-2)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "bg": "var(--accent)",
-          "radius": 12,
-          "pad": "12px 0",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "start": 5.2,
-          "duration": 3.2,
-          "anim": "rise",
-          "enterDur": 0.35,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Continue",
-              "size": 19,
-              "color": "var(--on-accent)"
-            }
-          ]
+          "anim": "fadeUp",
+          "each": 0.35,
+          "delay": 0.2
         }
       ],
       "out": "wipe-left"

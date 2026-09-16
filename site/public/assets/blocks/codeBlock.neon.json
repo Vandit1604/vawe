@@ -15,14 +15,11 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 540,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 8,
-      "pad": 32,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:8px;padding:32px;box-sizing:border-box;width:540px\"><div style=\"font:400 17px var(--font-mono);color:#8896A8\">worker.js</div><div data-part style=\"font:400 19px var(--font-mono);color:#4AE3B5;white-space:pre\">onmessage = async (e) => {</div><div data-part style=\"font:400 19px var(--font-mono);color:#5AC8FA;white-space:pre\">  const f = await renderFrame(e.data.n)</div><div data-part style=\"font:400 19px var(--font-mono);color:#F5D76E;white-space:pre\">  postMessage(f) }</div></div>",
       "bg": "#0A0E14",
       "radius": 12,
       "border": "1px solid rgba(255,255,255,0.08)",
@@ -31,47 +28,12 @@
       "anim": "fade",
       "enterDur": 0.25,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "text",
-          "weight": 500,
-          "text": "worker.js",
-          "font": "mono",
-          "size": 17,
-          "color": "#8896A8"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "onmessage = async (e) => {",
-          "color": "#4AE3B5",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.2,
           "anim": "slide-left",
-          "enterDur": 0.28
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "  const f = await renderFrame(e.data.n)",
-          "color": "#5AC8FA",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.34,
-          "anim": "slide-left",
-          "enterDur": 0.28
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "  postMessage(f) }",
-          "color": "#F5D76E",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.48,
-          "anim": "slide-left",
-          "enterDur": 0.28
+          "each": 0.28,
+          "stagger": 0.14,
+          "delay": 0.2
         }
       ]
     }

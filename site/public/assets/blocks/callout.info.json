@@ -15,37 +15,22 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 540,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": "16px 24px",
       "bg": "color-mix(in srgb, var(--accent) 8%, transparent)",
       "radius": 12,
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px 24px;box-sizing:border-box;width:540px\"><div style=\"width:4px;height:30px;background:var(--accent);flex:none\"></div><span data-part style=\"font:500 20px var(--font-sans);color:var(--text)\">Layers compose from a single canvas.</span></div>",
       "start": 0.2,
       "duration": 8,
       "anim": "wipe",
       "enterDur": 0.4,
-      "children": [
+      "parts": [
         {
-          "type": "group",
-          "radius": 0,
-          "w": 4,
-          "h": 30,
-          "bg": "var(--accent)"
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "Layers compose from a single canvas.",
-          "size": 20,
-          "color": "var(--text)",
-          "delay": 0.2,
           "anim": "fade",
-          "enterDur": 0.28
+          "each": 0.28,
+          "delay": 0.2
         }
       ]
     }

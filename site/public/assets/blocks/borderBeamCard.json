@@ -8,23 +8,19 @@
   },
   "bg": [
     {
-      "preset": "plain",
+      "preset": "aurora",
       "from": 0,
       "to": 9
     }
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 560,
       "h": 260,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 12,
-      "pad": 48,
-      "justify": "center",
+      "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;padding:48px;box-sizing:border-box;width:560px;height:260px\"><span style=\"font:700 46px var(--font-sans);color:#fff;letter-spacing:-0.02em\">Border beam</span><span style=\"font:500 26px var(--font-mono);color:rgba(255,255,255,0.7);width:476px\">A light travels the border.</span></div>",
       "bg": "rgba(255,255,255,0.04)",
       "radius": 22,
       "border": "1.5px solid rgba(255,255,255,0.14)",
@@ -34,26 +30,7 @@
       "anim": "pop",
       "enterDur": 0.5,
       "out": "defocus",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "text",
-          "weight": 700,
-          "text": "Border beam",
-          "size": 46,
-          "color": "#fff",
-          "ls": "-0.02em"
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "A light travels the border.",
-          "font": "mono",
-          "size": 26,
-          "color": "rgba(255,255,255,0.7)",
-          "w": 476
-        }
-      ]
+      "exitDur": 0.4
     },
     {
       "type": "beam",

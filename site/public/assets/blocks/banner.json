@@ -15,54 +15,23 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 560,
-      "layout": "row",
-      "items": "center",
-      "gap": 12,
-      "pad": "16px 24px",
       "bg": "var(--accent)",
       "radius": 12,
+      "html": "<div style=\"display:flex;align-items:center;gap:12px;padding:16px 24px;box-sizing:border-box;width:560px\"><span style=\"font:400 20px var(--font-sans);color:var(--on-accent)\">★</span><span style=\"flex:1;font:600 20px var(--font-sans);color:var(--on-accent)\">Now with 60fps export</span><div data-part style=\"background:color-mix(in srgb, var(--on-accent) 18%, transparent);border-radius:8px;padding:8px 16px\"><span style=\"font:600 17px var(--font-sans);color:var(--on-accent)\">See how</span></div></div>",
       "start": 0.2,
       "duration": 8,
       "anim": "wipe",
       "enterDur": 0.45,
       "exitDur": 0.3,
-      "children": [
+      "parts": [
         {
-          "type": "text",
-          "weight": 500,
-          "text": "★",
-          "size": 20,
-          "color": "var(--on-accent)"
-        },
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "Now with 60fps export",
-          "size": 20,
-          "color": "var(--on-accent)",
-          "grow": 1
-        },
-        {
-          "type": "group",
-          "bg": "color-mix(in srgb, var(--on-accent) 18%, transparent)",
-          "radius": 8,
-          "pad": "8px 16px",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "See how",
-              "size": 17,
-              "color": "var(--on-accent)",
-              "delay": 0.35,
-              "anim": "pop",
-              "enterDur": 0.3
-            }
-          ]
+          "anim": "popIn",
+          "each": 0.3,
+          "delay": 0.35
         }
       ]
     }

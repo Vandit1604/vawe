@@ -27,97 +27,25 @@
       "enterDur": 0.25,
       "children": [
         {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 4,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "$2.4M",
-              "size": 64,
-              "color": "var(--text)",
-              "ls": "-0.02em",
-              "delay": 0.15,
-              "anim": "rise",
-              "enterDur": 0.35
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "ARR",
-              "size": 17,
-              "tracking": "0.06em",
-              "color": "var(--dim)",
-              "font": "mono",
-              "delay": 0.15,
-              "anim": "rise",
-              "enterDur": 0.35
-            }
-          ]
+          "type": "html",
+          "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:4px\"><span style=\"font:700 64px var(--font-sans);color:var(--text);letter-spacing:-0.02em\">$2.4M</span><span style=\"font:500 17px var(--font-mono);color:var(--dim);letter-spacing:0.06em\">ARR</span></div>",
+          "delay": 0.15,
+          "anim": "rise",
+          "enterDur": 0.35
         },
         {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 4,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "$89",
-              "size": 64,
-              "color": "var(--text)",
-              "ls": "-0.02em",
-              "delay": 0.29,
-              "anim": "rise",
-              "enterDur": 0.35
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "ACV",
-              "size": 17,
-              "tracking": "0.06em",
-              "color": "var(--dim)",
-              "font": "mono",
-              "delay": 0.29,
-              "anim": "rise",
-              "enterDur": 0.35
-            }
-          ]
+          "type": "html",
+          "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:4px\"><span style=\"font:700 64px var(--font-sans);color:var(--text);letter-spacing:-0.02em\">$89</span><span style=\"font:500 17px var(--font-mono);color:var(--dim);letter-spacing:0.06em\">ACV</span></div>",
+          "delay": 0.29,
+          "anim": "rise",
+          "enterDur": 0.35
         },
         {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 4,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "3.2%",
-              "size": 64,
-              "color": "var(--text)",
-              "ls": "-0.02em",
-              "delay": 0.43,
-              "anim": "rise",
-              "enterDur": 0.35
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "churn",
-              "size": 17,
-              "tracking": "0.06em",
-              "color": "var(--dim)",
-              "font": "mono",
-              "delay": 0.43,
-              "anim": "rise",
-              "enterDur": 0.35
-            }
-          ]
+          "type": "html",
+          "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:4px\"><span style=\"font:700 64px var(--font-sans);color:var(--text);letter-spacing:-0.02em\">3.2%</span><span style=\"font:500 17px var(--font-mono);color:var(--dim);letter-spacing:0.06em\">churn</span></div>",
+          "delay": 0.43,
+          "anim": "rise",
+          "enterDur": 0.35
         }
       ]
     }

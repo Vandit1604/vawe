@@ -15,14 +15,11 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 540,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 8,
-      "pad": 32,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:8px;padding:32px;box-sizing:border-box;width:540px\"><div style=\"font:400 17px var(--font-mono);color:#B39A8F\">render.py</div><div data-part style=\"font:400 19px var(--font-mono);color:#FF9F6B;white-space:pre\">from vawe import render</div><div data-part style=\"font:400 19px var(--font-mono);color:#F0C674;white-space:pre\">clip = render('launch.json')</div><div data-part style=\"font:400 19px var(--font-mono);color:#E89AA6;white-space:pre\">clip.save('out.mp4')</div></div>",
       "bg": "#1F1210",
       "radius": 12,
       "border": "1px solid rgba(255,255,255,0.08)",
@@ -31,47 +28,12 @@
       "anim": "fade",
       "enterDur": 0.25,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "text",
-          "weight": 500,
-          "text": "render.py",
-          "font": "mono",
-          "size": 17,
-          "color": "#B39A8F"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "from vawe import render",
-          "color": "#FF9F6B",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.2,
           "anim": "slide-left",
-          "enterDur": 0.28
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "clip = render('launch.json')",
-          "color": "#F0C674",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.34,
-          "anim": "slide-left",
-          "enterDur": 0.28
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "clip.save('out.mp4')",
-          "color": "#E89AA6",
-          "font": "mono",
-          "size": 19,
-          "delay": 0.48,
-          "anim": "slide-left",
-          "enterDur": 0.28
+          "each": 0.28,
+          "stagger": 0.14,
+          "delay": 0.2
         }
       ]
     }

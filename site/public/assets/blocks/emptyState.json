@@ -15,14 +15,10 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 460,
-      "layout": "column",
-      "items": "center",
-      "gap": 16,
-      "pad": 32,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px dashed var(--line)",
@@ -31,67 +27,12 @@
       "duration": 8,
       "enterDur": 0.45,
       "exitDur": 0.3,
-      "children": [
+      "html": "<div style=\"display:flex;flex-direction:column;gap:16px;align-items:center;padding:32px;box-sizing:border-box;width:460px\"><div style=\"width:60px;height:60px;border-radius:16px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 26px var(--font-sans);color:var(--text-2)\">☐</div><div style=\"display:flex;flex-direction:column;gap:6px;align-items:center\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">Nothing here yet</span><span style=\"font:400 18px var(--font-sans);color:var(--text-2);text-align:center\">Anything you save shows up in this list.</span></div><div data-part style=\"background:var(--text);border-radius:100px;padding:12px 24px\"><span style=\"font:700 17px var(--font-sans);color:var(--bg)\">Add the first one</span></div></div>",
+      "parts": [
         {
-          "type": "group",
-          "radius": 16,
-          "w": 60,
-          "h": 60,
-          "bg": "var(--surface-2)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "☐",
-              "size": 26,
-              "color": "var(--text-2)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "center",
-          "gap": 6,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Nothing here yet",
-              "size": 24,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 400,
-              "text": "Anything you save shows up in this list.",
-              "size": 18,
-              "color": "var(--text-2)",
-              "align": "center"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "bg": "var(--text)",
-          "radius": 100,
-          "pad": "12px 24px",
-          "start": 0.4,
-          "duration": 8,
-          "anim": "rise",
-          "enterDur": 0.35,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Add the first one",
-              "size": 17,
-              "color": "var(--bg)"
-            }
-          ]
+          "anim": "fadeUp",
+          "each": 0.35,
+          "delay": 0.2
         }
       ]
     }

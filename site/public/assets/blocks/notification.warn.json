@@ -15,14 +15,11 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 440,
-      "layout": "row",
-      "items": "flex-start",
-      "gap": 12,
-      "pad": 16,
+      "html": "<div style=\"display:flex;align-items:flex-start;gap:12px;padding:16px;box-sizing:border-box;width:440px\"><div style=\"width:12px;height:12px;border-radius:100px;background:var(--warn);flex:none\"></div><div style=\"display:flex;flex-direction:column;gap:6px;align-items:flex-start;flex:1;min-width:0\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">Grain crawls on text</span><span style=\"font:400 17px var(--font-sans);color:var(--text-2)\">opt in only for filmic brands</span></div></div>",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
@@ -32,39 +29,7 @@
       "start": 0.2,
       "duration": 8,
       "enterDur": 0.4,
-      "exitDur": 0.3,
-      "children": [
-        {
-          "type": "group",
-          "radius": 100,
-          "w": 12,
-          "h": 12,
-          "bg": "var(--warn)"
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "gap": 6,
-          "items": "flex-start",
-          "grow": 1,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Grain crawls on text",
-              "size": 24,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "opt in only for filmic brands",
-              "size": 17,
-              "color": "var(--text-2)"
-            }
-          ]
-        }
-      ]
+      "exitDur": 0.3
     }
   ],
   "produced": false

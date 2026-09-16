@@ -15,15 +15,12 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 540,
       "h": 300,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 0,
-      "pad": 0,
+      "html": "<div style=\"display:flex;flex-direction:column;width:540px;height:300px;box-sizing:border-box\"><div style=\"flex:1;min-height:0;background:var(--card);border-radius:8px;padding:24px;box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:12px\"><span style=\"font:700 32px var(--font-sans);color:var(--text);letter-spacing:-0.02em\">Open canvas</span><span style=\"font:400 20px var(--font-sans);color:var(--text-2)\">Compose a beat from the vocabulary.</span><div style=\"display:flex;flex-wrap:wrap;gap:8px;align-items:center\"><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:100px;padding:6px 16px\">Text</span><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:100px;padding:6px 16px\">Image</span><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:100px;padding:6px 16px\">Group</span></div></div><div style=\"height:1px;background:var(--line)\"></div><div style=\"display:flex;justify-content:space-between;align-items:center;padding:12px 24px\"><span style=\"font:600 17px var(--font-sans);color:var(--text-2)\">Explore</span><span style=\"font:600 17px var(--font-sans);color:var(--accent)\">→</span></div></div>",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
@@ -32,166 +29,23 @@
       "start": 0.2,
       "duration": 8,
       "enterDur": 0.5,
-      "exitDur": 0.35,
-      "children": [
-        {
-          "type": "group",
-          "grow": 1,
-          "bg": "var(--card)",
-          "radius": 8,
-          "pad": 24,
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 12,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Open canvas",
-              "size": 32,
-              "color": "var(--text)",
-              "ls": "-0.02em"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Compose a beat from the vocabulary.",
-              "size": 20,
-              "color": "var(--text-2)"
-            },
-            {
-              "type": "group",
-              "layout": "row",
-              "wrap": true,
-              "gap": 8,
-              "items": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "Text",
-                  "size": 17,
-                  "color": "var(--text-2)",
-                  "bg": "var(--surface-2)",
-                  "radius": 100,
-                  "pad": "6px 16px"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "Image",
-                  "size": 17,
-                  "color": "var(--text-2)",
-                  "bg": "var(--surface-2)",
-                  "radius": 100,
-                  "pad": "6px 16px"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "Group",
-                  "size": 17,
-                  "color": "var(--text-2)",
-                  "bg": "var(--surface-2)",
-                  "radius": 100,
-                  "pad": "6px 16px"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 0,
-          "h": 1,
-          "bg": "var(--line)"
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "justify": "space-between",
-          "items": "center",
-          "pad": "12px 24px",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Explore",
-              "size": 17,
-              "color": "var(--text-2)"
-            },
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "→",
-              "size": 17,
-              "color": "var(--accent)"
-            }
-          ]
-        }
-      ]
+      "exitDur": 0.35
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 436,
       "y": 306,
       "w": 248,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": 24,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px solid var(--line)",
       "elevation": 1,
       "anim": "rise",
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:24px;box-sizing:border-box;width:248px\"><div style=\"width:56px;height:56px;border-radius:100%;background:color-mix(in srgb, var(--accent) 14%, var(--card));flex:none;display:flex;align-items:center;justify-content:center;font:700 22px var(--font-sans);color:color-mix(in srgb, var(--accent) 66%, var(--text))\">AL</div><div style=\"display:flex;flex-direction:column;gap:4px;align-items:flex-start;min-width:0\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">Ana Roth</span><span style=\"font:500 17px var(--font-sans);color:var(--text-2)\">Founding Engineer</span></div></div>",
       "start": 0.38,
       "duration": 7.82,
       "enterDur": 0.45,
-      "exitDur": 0.3,
-      "children": [
-        {
-          "type": "group",
-          "radius": 100,
-          "w": 56,
-          "h": 56,
-          "bg": "color-mix(in srgb, var(--accent) 14%, var(--card))",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "AL",
-              "size": 22,
-              "color": "color-mix(in srgb, var(--accent) 66%, var(--text))"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 4,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Ana Roth",
-              "size": 24,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Founding Engineer",
-              "size": 17,
-              "color": "var(--text-2)"
-            }
-          ]
-        }
-      ]
+      "exitDur": 0.3
     }
   ],
   "produced": false

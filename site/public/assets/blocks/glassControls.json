@@ -8,7 +8,7 @@
   },
   "bg": [
     {
-      "preset": "plain",
+      "preset": "aurora",
       "from": 0,
       "to": 9
     }
@@ -75,16 +75,12 @@
       ]
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 292,
       "w": 594,
       "h": 104,
-      "layout": "row",
-      "justify": "center",
-      "items": "center",
-      "gap": 24,
-      "pad": 16,
+      "html": "<div style=\"display:flex;align-items:center;justify-content:center;gap:24px;padding:16px;box-sizing:border-box;width:594px;height:104px\"><div style=\"width:52px;height:52px;border-radius:100px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.18)\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M19.5 12h-14M11.5 6l-6 6 6 6\"/></svg></div><div style=\"width:72px;height:72px;border-radius:100px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid rgba(255,255,255,0.18)\"><svg viewBox=\"0 0 24 24\" width=\"30\" height=\"30\" fill=\"none\" stroke=\"var(--accent)\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M13 2.5L4.5 14H10l-1 7.5L19.5 10H14z\"/></svg></div><div style=\"width:52px;height:52px;border-radius:100px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.18)\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M4.5 12h14M12.5 6l6 6-6 6\"/></svg></div></div>",
       "bg": "linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.12)), rgba(9,11,17,0.62)",
       "radius": 100,
       "border": "1.5px solid rgba(255,255,255,0.18)",
@@ -119,65 +115,6 @@
           "scale": 1,
           "opacity": 1,
           "ease": "spring"
-        }
-      ],
-      "children": [
-        {
-          "type": "group",
-          "radius": 100,
-          "w": 52,
-          "h": 52,
-          "bg": "rgba(255,255,255,0.16)",
-          "border": "1px solid rgba(255,255,255,0.18)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "html",
-              "w": 22,
-              "h": 22,
-              "html": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M19.5 12h-14M11.5 6l-6 6 6 6\"/></svg>"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 100,
-          "w": 72,
-          "h": 72,
-          "bg": "#fff",
-          "border": "1px solid rgba(255,255,255,0.18)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "html",
-              "w": 30,
-              "h": 30,
-              "html": "<svg viewBox=\"0 0 24 24\" width=\"30\" height=\"30\" fill=\"none\" stroke=\"var(--accent)\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M13 2.5L4.5 14H10l-1 7.5L19.5 10H14z\"/></svg>"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "radius": 100,
-          "w": 52,
-          "h": 52,
-          "bg": "rgba(255,255,255,0.16)",
-          "border": "1px solid rgba(255,255,255,0.18)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "html",
-              "w": 22,
-              "h": 22,
-              "html": "<svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:block\"><path d=\"M4.5 12h14M12.5 6l6 6-6 6\"/></svg>"
-            }
-          ]
         }
       ]
     },

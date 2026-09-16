@@ -8,22 +8,19 @@
   },
   "bg": [
     {
-      "preset": "plain",
+      "preset": "aurora",
       "from": 0,
       "to": 9
     }
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 560,
       "h": 300,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 12,
-      "pad": 48,
+      "html": "<div style=\"display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:48px;box-sizing:border-box;width:560px;height:300px\"><span style=\"font:700 54px var(--font-sans);color:#fff;letter-spacing:-0.02em\">Spotlight</span><span style=\"font:400 28px var(--font-serif);color:rgba(255,255,255,0.7);width:476px\">The light directs the eye.</span></div>",
       "bg": "radial-gradient(120% 90% at 50% -10%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 60%), linear-gradient(180deg, var(--surface-2), color-mix(in srgb, var(--bg) 80%, black))",
       "radius": 22,
       "border": "1.5px solid rgba(255,255,255,0.14)",
@@ -33,26 +30,7 @@
       "anim": "pop",
       "enterDur": 0.5,
       "out": "defocus",
-      "exitDur": 0.4,
-      "children": [
-        {
-          "type": "text",
-          "weight": 700,
-          "text": "Spotlight",
-          "size": 54,
-          "color": "#fff",
-          "ls": "-0.02em"
-        },
-        {
-          "type": "text",
-          "weight": 400,
-          "text": "The light directs the eye.",
-          "font": "serif",
-          "size": 28,
-          "color": "rgba(255,255,255,0.7)",
-          "w": 476
-        }
-      ]
+      "exitDur": 0.4
     }
   ],
   "produced": false

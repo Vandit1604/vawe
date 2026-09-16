@@ -15,14 +15,10 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 460,
-      "layout": "column",
-      "items": "flex-start",
-      "gap": 16,
-      "pad": 24,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px solid var(--line)",
@@ -32,130 +28,12 @@
       "duration": 8,
       "enterDur": 0.45,
       "exitDur": 0.3,
-      "children": [
+      "html": "<div style=\"display:flex;flex-direction:column;gap:16px;align-items:flex-start;padding:24px;box-sizing:border-box;width:460px\"><div style=\"width:76px;height:76px;border-radius:100%;background:color-mix(in srgb, var(--accent) 14%, var(--card));flex:none;display:flex;align-items:center;justify-content:center;font:700 30px var(--font-sans);color:var(--accent)\">WA</div><div style=\"display:flex;flex-direction:column;gap:2px;align-items:flex-start\"><span style=\"font:700 28px var(--font-sans);letter-spacing:-0.02em;color:var(--text)\">Wren Alcott</span><span style=\"font:500 17px var(--font-mono);color:var(--dim)\">@wren</span></div><div data-part style=\"display:flex;gap:32px;align-items:flex-start\"><div style=\"display:flex;flex-direction:column;gap:2px;align-items:flex-start\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">0</span><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">posts</span></div><div style=\"display:flex;flex-direction:column;gap:2px;align-items:flex-start\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">0</span><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">lists</span></div><div style=\"display:flex;flex-direction:column;gap:2px;align-items:flex-start\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">0</span><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">saved</span></div></div></div>",
+      "parts": [
         {
-          "type": "group",
-          "radius": 100,
-          "w": 76,
-          "h": 76,
-          "bg": "color-mix(in srgb, var(--accent) 14%, var(--card))",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "WA",
-              "size": 30,
-              "color": "var(--accent)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 2,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "Wren Alcott",
-              "size": 28,
-              "color": "var(--text)",
-              "ls": "-0.02em"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "@wren",
-              "font": "mono",
-              "size": 17,
-              "color": "var(--dim)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "gap": 32,
-          "items": "flex-start",
-          "start": 0.38,
-          "duration": 8,
-          "anim": "rise",
-          "enterDur": 0.35,
-          "children": [
-            {
-              "type": "group",
-              "layout": "column",
-              "items": "flex-start",
-              "gap": 2,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 700,
-                  "text": "0",
-                  "size": 24,
-                  "color": "var(--text)"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "posts",
-                  "font": "mono",
-                  "size": 15,
-                  "color": "var(--dim)"
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "layout": "column",
-              "items": "flex-start",
-              "gap": 2,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 700,
-                  "text": "0",
-                  "size": 24,
-                  "color": "var(--text)"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "lists",
-                  "font": "mono",
-                  "size": 15,
-                  "color": "var(--dim)"
-                }
-              ]
-            },
-            {
-              "type": "group",
-              "layout": "column",
-              "items": "flex-start",
-              "gap": 2,
-              "children": [
-                {
-                  "type": "text",
-                  "weight": 700,
-                  "text": "0",
-                  "size": 24,
-                  "color": "var(--text)"
-                },
-                {
-                  "type": "text",
-                  "weight": 500,
-                  "text": "saved",
-                  "font": "mono",
-                  "size": 15,
-                  "color": "var(--dim)"
-                }
-              ]
-            }
-          ]
+          "anim": "fadeUp",
+          "each": 0.35,
+          "delay": 0.18
         }
       ]
     }

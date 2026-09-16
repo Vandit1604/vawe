@@ -15,119 +15,26 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 460,
-      "layout": "column",
-      "items": "stretch",
-      "gap": 12,
-      "pad": 24,
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
       "elevation": 1,
       "anim": "fade",
+      "html": "<div style=\"display:flex;flex-direction:column;gap:12px;padding:24px;box-sizing:border-box;width:460px\"><div data-part style=\"display:flex;align-items:center;gap:12px\"><span style=\"display:inline-flex;width:28px;height:28px;flex:none;border-radius:8px;background:var(--card);border:2px solid var(--line)\"></span><span style=\"font:500 20px var(--font-sans);color:var(--text)\">Add captions</span></div><div data-part style=\"display:flex;align-items:center;gap:12px\"><span style=\"display:inline-flex;width:28px;height:28px;flex:none;border-radius:8px;background:var(--card);border:2px solid var(--line)\"></span><span style=\"font:500 20px var(--font-sans);color:var(--text)\">Wire TTS</span></div><div data-part style=\"display:flex;align-items:center;gap:12px\"><span style=\"display:inline-flex;width:28px;height:28px;flex:none;border-radius:8px;background:var(--card);border:2px solid var(--line)\"></span><span style=\"font:500 20px var(--font-sans);color:var(--text)\">Batch variants</span></div></div>",
       "start": 0.2,
       "duration": 8,
       "enterDur": 0.25,
       "exitDur": 0.35,
-      "children": [
+      "parts": [
         {
-          "type": "group",
-          "layout": "row",
-          "items": "center",
-          "gap": 12,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "✓",
-              "size": 17,
-              "radius": 8,
-              "pad": "4px 6px",
-              "color": "transparent",
-              "bg": "var(--card)",
-              "border": "2px solid var(--line)",
-              "delay": 0.2,
-              "anim": "fade",
-              "enterDur": 0.3
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Add captions",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.2,
-              "anim": "rise",
-              "enterDur": 0.3
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "center",
-          "gap": 12,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "✓",
-              "size": 17,
-              "radius": 8,
-              "pad": "4px 6px",
-              "color": "transparent",
-              "bg": "var(--card)",
-              "border": "2px solid var(--line)",
-              "delay": 0.46,
-              "anim": "fade",
-              "enterDur": 0.3
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Wire TTS",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.46,
-              "anim": "rise",
-              "enterDur": 0.3
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "row",
-          "items": "center",
-          "gap": 12,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "✓",
-              "size": 17,
-              "radius": 8,
-              "pad": "4px 6px",
-              "color": "transparent",
-              "bg": "var(--card)",
-              "border": "2px solid var(--line)",
-              "delay": 0.72,
-              "anim": "fade",
-              "enterDur": 0.3
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Batch variants",
-              "size": 20,
-              "color": "var(--text)",
-              "delay": 0.72,
-              "anim": "rise",
-              "enterDur": 0.3
-            }
-          ]
+          "anim": "fadeUp",
+          "each": 0.3,
+          "stagger": 0.26,
+          "delay": 0.2
         }
       ]
     }

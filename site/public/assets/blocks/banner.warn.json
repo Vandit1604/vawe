@@ -15,38 +15,18 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
       "w": 560,
-      "layout": "row",
-      "items": "center",
-      "gap": 12,
-      "pad": "16px 24px",
       "bg": "var(--warn)",
       "radius": 12,
+      "html": "<div style=\"display:flex;align-items:center;gap:12px;padding:16px 24px;box-sizing:border-box;width:560px\"><span style=\"font:400 20px var(--font-sans);color:var(--on-warn)\">!</span><span style=\"flex:1;font:600 20px var(--font-sans);color:var(--on-warn)\">Söhne is licensed, do not commit</span></div>",
       "start": 0.2,
       "duration": 8,
       "anim": "wipe",
       "enterDur": 0.45,
-      "exitDur": 0.3,
-      "children": [
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "!",
-          "size": 20,
-          "color": "var(--on-warn)"
-        },
-        {
-          "type": "text",
-          "weight": 600,
-          "text": "Söhne is licensed, do not commit",
-          "size": 20,
-          "color": "var(--on-warn)",
-          "grow": 1
-        }
-      ]
+      "exitDur": 0.3
     }
   ],
   "produced": false

@@ -15,56 +15,20 @@
   ],
   "layers": [
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 160,
-      "layout": "row",
-      "wrap": true,
-      "gap": 8,
-      "items": "center",
+      "html": "<div style=\"display:flex;flex-wrap:wrap;gap:8px;align-items:center\"><span data-part style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, transparent);border-radius:100px;padding:6px 16px;white-space:nowrap\">deterministic</span><span data-part style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, transparent);border-radius:100px;padding:6px 16px;white-space:nowrap\">pure(n)</span><span data-part style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, transparent);border-radius:100px;padding:6px 16px;white-space:nowrap\">no timeline</span></div>",
       "start": 0.2,
       "duration": 8,
-      "anim": "fade",
-      "enterDur": 0.2,
-      "children": [
+      "anim": "none",
+      "enterDur": 0,
+      "parts": [
         {
-          "type": "text",
-          "weight": 500,
-          "text": "deterministic",
-          "size": 17,
-          "color": "var(--accent)",
-          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
-          "radius": 100,
-          "pad": "6px 16px",
-          "delay": 0.1,
-          "anim": "pop",
-          "enterDur": 0.26
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "pure(n)",
-          "size": 17,
-          "color": "var(--accent)",
-          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
-          "radius": 100,
-          "pad": "6px 16px",
-          "delay": 0.18,
-          "anim": "pop",
-          "enterDur": 0.26
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "no timeline",
-          "size": 17,
-          "color": "var(--accent)",
-          "bg": "color-mix(in srgb, var(--accent) 14%, transparent)",
-          "radius": 100,
-          "pad": "6px 16px",
-          "delay": 0.26,
-          "anim": "pop",
-          "enterDur": 0.26
+          "anim": "popIn",
+          "each": 0.26,
+          "stagger": 0.08,
+          "delay": 0.1
         }
       ]
     }

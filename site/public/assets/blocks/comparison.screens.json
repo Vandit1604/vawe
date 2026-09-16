@@ -45,14 +45,10 @@
       "exitDur": 0.3
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 160,
       "y": 206,
       "w": 268,
-      "layout": "column",
-      "items": "center",
-      "gap": 16,
-      "pad": 32,
       "bg": "var(--card)",
       "radius": 16,
       "border": "1px dashed var(--line)",
@@ -61,60 +57,13 @@
       "duration": 8,
       "enterDur": 0.45,
       "exitDur": 0.3,
-      "children": [
-        {
-          "type": "group",
-          "radius": 16,
-          "w": 60,
-          "h": 60,
-          "bg": "var(--surface-2)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "☐",
-              "size": 26,
-              "color": "var(--text-2)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "center",
-          "gap": 6,
-          "children": [
-            {
-              "type": "text",
-              "weight": 700,
-              "text": "No drafts",
-              "size": 24,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 400,
-              "text": "Nothing has been saved to this list.",
-              "size": 18,
-              "color": "var(--text-2)",
-              "align": "center"
-            }
-          ]
-        }
-      ]
+      "html": "<div style=\"display:flex;flex-direction:column;gap:16px;align-items:center;padding:32px;box-sizing:border-box;width:268px\"><div style=\"width:60px;height:60px;border-radius:16px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 26px var(--font-sans);color:var(--text-2)\">☐</div><div style=\"display:flex;flex-direction:column;gap:6px;align-items:center\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">No drafts</span><span style=\"font:400 18px var(--font-sans);color:var(--text-2);text-align:center\">Nothing has been saved to this list.</span></div></div>"
     },
     {
-      "type": "group",
+      "type": "html",
       "x": 452,
       "y": 206,
       "w": 268,
-      "layout": "row",
-      "items": "center",
-      "gap": 16,
-      "pad": "16px 16px",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
@@ -124,58 +73,7 @@
       "duration": 7.82,
       "enterDur": 0.45,
       "exitDur": 0.3,
-      "children": [
-        {
-          "type": "group",
-          "radius": 12,
-          "w": 44,
-          "h": 44,
-          "bg": "var(--surface-2)",
-          "layout": "row",
-          "justify": "center",
-          "items": "center",
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "✓",
-              "size": 20,
-              "color": "var(--text)"
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "layout": "column",
-          "items": "flex-start",
-          "gap": 2,
-          "grow": 1,
-          "children": [
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "Draft saved",
-              "size": 20,
-              "color": "var(--text)"
-            },
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "Fieldwork",
-              "size": 16,
-              "color": "var(--text-2)"
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "weight": 500,
-          "text": "now",
-          "font": "mono",
-          "size": 15,
-          "color": "var(--dim)"
-        }
-      ]
+      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:268px\"><div style=\"width:44px;height:44px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:var(--text)\">✓</div><div style=\"display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">Draft saved</span><span style=\"font:400 16px var(--font-sans);color:var(--text-2)\">Fieldwork</span></div><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">now</span></div>"
     }
   ],
   "produced": false
