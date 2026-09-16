@@ -1215,7 +1215,9 @@ probe-frame: ## [dev] where is layer ID at time T (post-tempo seconds), and what
 # make install-hooks: activate the version-controlled git hooks (pre-push runs the framework gates)
 install-hooks: ## [maintenance] activate the version-controlled git hooks (pre-push runs the framework gates)
 	git config core.hooksPath .githooks
-	@echo "✓ git hooks active (.githooks): pre-push runs schema-check + lib-test + prop-probe"
+	@echo "✓ git hooks active (.githooks):"
+	@echo "    commit-msg  refuses an assistant attribution trailer as it is written"
+	@echo "    pre-push    push-guard (attribution + force-added ignored files) then the framework gates"
 
 clean: ## [maintenance] remove the built binary and rendered mp4s
 	rm -rf bin out/*.mp4

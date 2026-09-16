@@ -1,0 +1,19 @@
+#!/bin/sh
+# commit-msg: refuse an assistant attribution trailer at the moment it is written.
+#
+# The owner's rule is absolute: nothing that reaches a remote credits an assistant. This catches it
+# where the mistake is cheapest to fix, in the authoring worktree, before the commit exists. It is a
+# backstop, not the only one: .githooks/pre-push scans the whole pushed range, because a commit made
+# in an agent's worktree reaches the lead by a merge and the lead's push is the last gate.
+#
+# Bypass with `git commit --no-verify` only if you are certain, which for this rule you are not.
+msg_file="$1"
+if grep -qiE 'co-authored-by:[[:space:]]*claude|generated with \[?claude|claude\.ai/code|anthropic\.com' "$msg_file"; then
+  echo "✗ commit-msg: this message credits an assistant." >&2
+  grep -inE 'co-authored-by:[[:space:]]*claude|generated with \[?claude|claude\.ai/code|anthropic\.com' "$msg_file" >&2
+  echo "" >&2
+  echo "  The owner's rule: never attribute an assistant in anything that reaches a remote," >&2
+  echo "  including commit messages, PR text, tags and release notes. Remove the line." >&2
+  exit 1
+fi
+exit 0
