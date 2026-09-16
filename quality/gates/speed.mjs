@@ -13,6 +13,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sceneTiming } from './scene-timing.mjs';
 import { motionAt, velocityAt, cameraAt, cameraVelocityAt } from '../../core/timeline/sequence.js';
+import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const DEFAULT_FPS = 60; // cmd/render/main.go's own default for a final render
@@ -77,6 +78,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const fps = T.scene.fps || DEFAULT_FPS;
 
   console.log(`\n  speed · ${path.basename(sceneFile)} · ${fps}fps`);
+  // A READOUT prints every segment; a velocity-spike line is the one real finding in it (a jolt, not
+  // just a measurement), so it alone is recorded, the same dual-write craft-coverage.mjs uses: the
+  // console.log beside each stays the printed line, unchanged.
+  const f = gateFindings();
 
   // Only the boundaries that exist on the LOWERED scene (`transitions[]` is baked to `cuts`/`stings`/
   // `seams` before this point, engine-doctrine/RULES): a declared cut is an intentional discontinuity, so a
@@ -106,7 +111,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const cutsRel = cutsAt.map((c) => c - layerStart);
     const spikes = findVelocitySpikes((t, dt) => velocityAt(L.motion, t, dt).speed,
       L.motion[0].t, L.motion[L.motion.length - 1].t, fps, VELOCITY_SPIKE_PX_S, cutsRel);
-    for (const s of spikes) console.log(`      velocity-spike: ${at(s.t)}s  +${s.jump} px/s in one frame`);
+    for (const s of spikes) {
+      console.log(`      velocity-spike: ${at(s.t)}s  +${s.jump} px/s in one frame`);
+      f.warn('velocity-spike', `${id}: ${at(s.t)}s  +${s.jump} px/s in one frame`, { at: at(s.t), jump: s.jump, layer: id });
+    }
   });
   if (!anyLayer) console.log(layerFilter ? `\n  no keyed motion on layer "${layerFilter}"` : '\n  no layer has a keyed motion track');
 
@@ -125,10 +133,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     // ONE scan across the WHOLE leg list, for the same reason as the layer loop above.
     const posSpikes = findVelocitySpikes((t, dt) => cameraVelocityAt(camKf, t, dt).speed,
       camKf[0].t, camKf[camKf.length - 1].t, fps, VELOCITY_SPIKE_PX_S, cutsAt);
-    for (const s of posSpikes) console.log(`      velocity-spike: ${s.t}s  +${s.jump} px/s in one frame`);
+    for (const s of posSpikes) {
+      console.log(`      velocity-spike: ${s.t}s  +${s.jump} px/s in one frame`);
+      f.warn('velocity-spike', `camera: ${s.t}s  +${s.jump} px/s in one frame`, { at: s.t, jump: s.jump, layer: 'camera' });
+    }
     const zoomSpikes = findVelocitySpikes((t, dt) => (cameraAt(camKf, t).s - cameraAt(camKf, t - dt).s) / dt,
       camKf[0].t, camKf[camKf.length - 1].t, fps, VELOCITY_SPIKE_SCALE_S, cutsAt);
-    for (const s of zoomSpikes) console.log(`      velocity-spike: ${s.t}s  +${s.jump} scale/s in one frame`);
+    for (const s of zoomSpikes) {
+      console.log(`      velocity-spike: ${s.t}s  +${s.jump} scale/s in one frame`);
+      f.warn('velocity-spike', `camera zoom: ${s.t}s  +${s.jump} scale/s in one frame`, { at: s.t, jump: s.jump, layer: 'camera-zoom' });
+    }
   } else if (!layerFilter) {
     console.log('\n  camera: no legs (a static frame, or nothing baked to `data.camera`)');
   }
