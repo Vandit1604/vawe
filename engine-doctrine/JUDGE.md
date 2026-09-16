@@ -13,8 +13,10 @@ codes: judge-not-ready, no-judge
   key frames against the brand's house-style and a 7-dimension craft rubric.
 - Score each frame 1-5 on all 7 dimensions; `PASS` only if every frame clears every dimension,
   otherwise `FIX` + a prioritized list.
-- Enforced by `[eye]`: nothing but the agent's own look, opt-in, run on the near-final cut after the
-  static ladder is green.
+- Enforced by `[eye]`: nothing but the agent's own look, run on the near-final cut after the static
+  ladder is green. `make ship` now refuses to finish without a fresh receipt for the film it just
+  rendered (see "The receipt, and the ratchet that reads it" below): the eye is invited by `make dev`,
+  required by `make ship`.
 - Checkable action: if your eye catches a flaw, it's a FIX. Never rationalize a flaw you notice.
 
 `validate`/`critique`/`slop`/`audit` are **static**: they read the DOM/JSON. None can see whether the
@@ -99,15 +101,25 @@ and the date. A receipt is valid only when both hashes still match what is on di
 
 `make no-judge` (`quality/gates/no-judge.mjs`) counts rendered films (an `out/<name>.mp4` exists) with
 no valid receipt, against a ratchet at `quality/baselines/no-judge-ratchet.json` that may only fall.
-It is deliberately NOT wired into `make ship` or CI: both `films/scene/*.json` content and
-`out/*.mp4` are gitignored, so a thin checkout would report a number about itself, not the library
-(the same reason `doc-refs` stays out of CI). Run it on demand, or from `.githooks/pre-push` once an
-author wants it enforced there. `--stamp` lowers the ceiling after judging a batch.
+This CORPUS scan is deliberately NOT wired into CI: both `films/scene/*.json` content and `out/*.mp4`
+are gitignored, so a thin checkout would report a number about itself, not the library (the same
+reason `doc-refs` stays out of CI). Run it on demand, or from `.githooks/pre-push` once an author wants
+it enforced there. `--stamp` lowers the ceiling after judging a batch.
+
+`no-judge.mjs` also has a SINGLE-FILM mode (`node quality/gates/no-judge.mjs <scene.json>`, no flags),
+and `make ship` calls exactly that as its last step. It was opt-in until 2026-09: `make ship` only ever
+echoed a suggestion to run `make judge`, and the corpus ratchet measured the result: 121 rendered films
+with no receipt against 1 that had one. Opt-in lost the eye 121 times out of 122, so the decision
+reversed. `make ship` now refuses to finish without a fresh receipt for the film it just rendered, and
+names the exact `make judge D=<file>` command plus which condition failed (no receipt at all, the
+scene changed since, or the mp4 changed since). There is no flag to skip it, only the missing artefact:
+a `FIX` verdict still ships, because this only asks whether the eye ran, exactly as the corpus ratchet
+already does. `make dev` and `make check` are untouched and stay completely ungated.
 
 ## Where it sits
-Opt-in, but the **final taste check before shipping**, run it on the near-final cut, after the static
-ladder is green. It catches what the others structurally can't; on the argus film it flagged a stat with a
-dropped unit and a scattered beat that `critique` (0 findings) and `slop` (clean) both missed.
+Required by `make ship`, on the near-final cut, after the static ladder is green. It catches what the
+others structurally can't; on the argus film it flagged a stat with a dropped unit and a scattered beat
+that `critique` (0 findings) and `slop` (clean) both missed.
 
 **What this judge cannot see: whether a film is a TEMPLATE.** A frame can score well on all 7 dimensions
 and still be the same shape as the last twenty; "produced-not-generated" asks whether each frame earns
