@@ -18,7 +18,24 @@ const RATCHET = path.join(ROOT, 'quality/baselines/output-contract-ratchet.json'
 // measures the others so it does not measure itself.
 // compare.mjs streams live render progress (not pass/fail findings): routing it through findings.mjs
 // would defer all output to one flush at the end and kill the progress feedback it exists to give.
-const EXEMPT = new Set(['lib-test.mjs', 'output-contract.mjs', 'compare.mjs', 'gate-mutation.mjs']);
+// next.mjs and stage.mjs print the ONE next command for a film, or where it is in the eight stages:
+// navigation, not a finding about a scene.
+// rubric.mjs is a library the vision judge imports for its prompt text; its own console.log calls sit
+// behind a --self-test guard on the module, not a report a person runs to learn something about a film.
+// legacy-fold.mjs's twin: legacy-unfold.mjs is a one-time migration script, run once to unwind 562
+// machine-written waivers, not a check run again and again.
+// contrast-regression.mjs and measure-regression.mjs are self-tests of quality/audit.mjs's own
+// measurement logic (proving it still catches a fixture it caught before), the same shape as
+// lib-test.mjs: a pass/fail tally over this repo's own gates, not a finding about a scene.
+// review.mjs runs each check with `stdio: 'inherit'` so a person watching sees every check's own live
+// output as it runs, the same reason compare.mjs is exempt: capturing that through findings.mjs would
+// defer it all to one flush at the end, and a child's inherited output could not be silenced under
+// --json anyway, so the contract's own "nothing but JSON on stdout" rule could not hold for it.
+const EXEMPT = new Set([
+  'lib-test.mjs', 'output-contract.mjs', 'compare.mjs', 'gate-mutation.mjs',
+  'next.mjs', 'stage.mjs', 'rubric.mjs', 'legacy-unfold.mjs',
+  'contrast-regression.mjs', 'measure-regression.mjs', 'review.mjs',
+]);
 
 /** A gate CONFORMS when it renders through findings.mjs. It is a MIGRATION TARGET when it prints its own
  * prose without that contract. A gate that prints nothing reports nothing, so it is neither. */
