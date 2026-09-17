@@ -292,6 +292,46 @@ if (endClause) {
   }
 }
 
+// ---------- the plan names a fragment the film does not use ----------
+//
+// A DESIGNED FRAME CAN BE BUILT, NAMED IN THE PLAN, AND THEN QUIETLY ORPHANED. vawe-flow-2 is the
+// exemplar: `vawe-flow-2.films.html` was authored over four commits (caption truncation, contrast
+// fixes, a rebuild into a six-card wall), its `fragment-exemplars:` line promised it carried beat 7,
+// and the scene referenced it ZERO times. The beat had been rewritten as raw video groups instead, so
+// the owner saw an unfinished frame and the plan still claimed a designed one.
+//
+// Nothing could catch it. The film JSON is gitignored (.gitignore:84), so the edit that dropped the
+// `src` left no commit, no diff and no reason. The fragment has history; the file that referenced it
+// does not. The log receipts added elsewhere cannot help either: they record what the harness SAYS and
+// REFUSES, and an author deleting a src is neither.
+//
+// This is not prose matching. A storyboard names fragments by FILENAME, so both directions are exact:
+// a file the plan promises and the scene never loads, and a fragment sitting beside the film that
+// nothing references. Both are the same orphan seen from two ends. WARN, not fail: an author may be
+// mid-rewrite, and a plan is allowed to be ahead of the film for a while.
+{
+  const sceneText = JSON.stringify(d);
+  const named = sbPath ? [...new Set((fs.readFileSync(sbPath, 'utf8').match(/[A-Za-z0-9._/-]+\.html/g) || []))] : [];
+  for (const n of named) {
+    const leaf = path.basename(n);
+    if (!sceneText.includes(leaf)) {
+      warn('fragment-orphaned', `${path.basename(sbPath)} names \`${leaf}\` as a fragment this film uses, and `
+        + `${path.basename(file)} never loads it. Either point a layer at it (\`"type": "html", "src": "films/scene/${leaf}"\`), `
+        + `or drop it from the plan, because a plan that promises a designed frame the film does not show is how an `
+        + `abandoned fragment goes unnoticed.`);
+    }
+  }
+  const base = file.replace(/\.json$/, '');
+  for (const f of (fs.existsSync(path.dirname(file)) ? fs.readdirSync(path.dirname(file)) : [])) {
+    const full = path.join(path.dirname(file), f);
+    if (!f.endsWith('.html') || !full.startsWith(base + '.')) continue;
+    if (!sceneText.includes(f)) {
+      warn('fragment-unused', `${f} sits beside this film and nothing in ${path.basename(file)} loads it. `
+        + `A fragment nobody references is either dead work to delete or a frame the film forgot to show: decide which.`);
+    }
+  }
+}
+
 // No sidecar is not a pass and not a failure: there is no plan to check the film against. Say which,
 // and how to make one, rather than printing a tick for work nobody did. The peak question, and the
 // threads promise above, both survive it: neither needs a beat sidecar, only the storyboard.
