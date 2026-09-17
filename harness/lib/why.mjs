@@ -75,6 +75,19 @@ export function refusalLines(runs) {
   });
 }
 
+/** craftLiveLines(runs) -> what harness/live/craft-live.mjs printed on each save it spoke about, and
+ * which sibling checks in the same family ran clean instead. Oldest first; a run with no `craftLive`
+ * contributes nothing. */
+export function craftLiveLines(runs) {
+  const withFindings = runs.filter((r) => r.craftLive);
+  if (!withFindings.length) return ['(no craft-live findings logged; the hook is silent on a fine save)'];
+  return withFindings.flatMap((r) => {
+    const { file, shown, withheld } = r.craftLive;
+    return [`${file}: shown ${shown.join(', ')}`,
+      `  withheld (ran clean): ${withheld.length ? withheld.join(', ') : 'none'}`];
+  });
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const film = process.argv[2];
@@ -95,4 +108,6 @@ if (isMain) {
   for (const line of knowledgeLines(runs)) console.log('  ' + line);
   console.log(`\nrefusals (stage-gate.mjs, ${runs.length} run(s) considered):`);
   for (const line of refusalLines(runs)) console.log('  ' + line);
+  console.log(`\ncraft-live findings (${runs.length} run(s) considered):`);
+  for (const line of craftLiveLines(runs)) console.log('  ' + line);
 }

@@ -45,6 +45,14 @@
 //              Logged EVERY time: unlike a nudge that fires on every keystroke, a deny fires only on
 //              the one write each rule exists to stop, so one line per refusal is already the sparse
 //              cadence runlog wants, with no extra dedupe needed.
+//     craftLive: { file, shown: [ruleId,...], withheld: [ruleId,...] } | null
+//              harness/live/craft-live.mjs runs several independent, syntactic checks on one saved
+//              scene/fragment and prints only the ones that fired. `shown` is what printed; `withheld`
+//              is every other check IN THE SAME FAMILY (scene or fragment) that ran clean on this same
+//              save. That is the fact nothing recorded before: a check that never fires leaves no trace
+//              distinguishing "never violated" from "never run". Logged only when the hook actually
+//              speaks (shown.length > 0), the same gate its own console.error already uses: the hook is
+//              silent on a fine file, so this adds no line where it was already quiet.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -78,6 +86,7 @@ export function appendRun(film, record = {}) {
     judge: record.judge || null,
     knowledge: record.knowledge || null,
     refusal: record.refusal || null,
+    craftLive: record.craftLive || null,
     wallMs: Number.isFinite(record.wallMs) ? record.wallMs : null,
   };
   const out = runsPathFor(film);
