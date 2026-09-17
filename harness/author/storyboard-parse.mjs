@@ -192,6 +192,11 @@ export function parseStoryboard(src) {
     // stays restrained. not is the exclusion line, because most generic output is not a wrong decision,
     // it is an un-excluded default.
     pace: field('pace'), spectacle: field('spectacle'), not: field('not'),
+    // THE DEVICES CARRYING THE FILM: a cursor, a caret, a bookend, a ground that takes its colour, an
+    // exit axis. Free prose (engine-doctrine/MISTAKES.md-adjacent measurement: 34/44 storyboards carry
+    // this field, none of them as a list), so this is read here for `plan-vs-render.mjs` to grep a small
+    // closed set of literal, structurally-checkable nouns out of, never to parse as a grammar.
+    threads: field('threads'),
     // THE ATTENTION PATH: one sentence naming where the eye travels across the WHOLE film, the
     // film-level twin of each beat's own `eye:` line above.
     attention: field('attention'),
