@@ -34,7 +34,13 @@
 // FAIL: plan-overruns-render · junction-is-static.
 // WARN: held-through-the-change · beat-holds-still · unplanned-junction · plan-has-no-spans ·
 //       spectacle-not-built · spectacle-in-wrong-beat · spectacle-beat-unnamed · pace-not-kept ·
-//       pace-not-chosen.
+//       pace-not-chosen · thread-not-built.
+//
+// THE THREADS PROMISE. `threads:` is measured prose (see below), so `thread-not-built` never parses
+// it as a grammar. It greps a small closed set of literal nouns (a cursor, a caret, a ground that
+// takes its colour) and, only when one appears verbatim, asks whether the structural fact a gate CAN
+// see exists: a layer of that kind, or a colour that actually varies. Same restraint as the rest of
+// this file: presence, never correctness, and it says nothing about a thread it does not recognise.
 //       All block under --strict. `held-through-the-change` is the sharp one: it reads a hold the author
 //       WROTE (two identical motion keys) rather than inferring one from an absence.
 // ADVISORY, and never blocking, not even under --strict: no-spectacle-nominated. It is the one finding
@@ -84,6 +90,7 @@ const OVERRUN = 0.5;     // how far the plan's total may sit from the film's bef
 const T = sceneTiming(d);
 const BOUNDARY_KEYS = ['cuts', 'seams', 'stings'];
 const s = (n) => `${(+n).toFixed(2)}s`;
+const walk = (L, fn) => { if (!L || typeof L !== 'object') return; fn(L); (L.children || []).forEach((c) => walk(c, fn)); };
 
 // ---------- the peak, asked about even when there is no plan ----------
 // THE GAP THIS CLOSES. Everything else in this file needs a sidecar, so the film most likely to have no
@@ -150,19 +157,84 @@ function printNomination() {
   console.log(`    (advisory, and it stays advisory under --strict.)\n`);
 }
 
+const findings = [];
+const fail = (code, msg) => findings.push({ sev: 'FAIL', code, msg });
+const warn = (code, msg) => findings.push({ sev: 'WARN', code, msg });
+
+// ---------- the threads promise: a small, deliberately closed vocabulary ----------
+// Needs no sidecar, only the storyboard: `threads:` is read off the film's own frontmatter, the same
+// surface `spectacle:` and `pace:` already come from below. Measured 2026-09-17 across the 44
+// storyboards in films/scene: 34 carry `threads:`, and every one of them is a sentence, not a list
+// ("a cursor and a caret that cause every change + a ground that takes its colour from whatever is on
+// screen"). That rules out parsing it as data. What it does not rule out is grepping for a small set of
+// literal nouns this engine can check structurally, one layer-kind or one measured fact at a time.
+//
+// THIS IS THE GAP THE OWNER FOUND BY HAND. vawe-flow-2's threads promised "a cursor and a caret", and
+// the caret existed while the cursor did not; nothing here read `threads:` back against the render, so
+// nothing said so. That is the one defect this closes. It does NOT attempt "one exit axis per act": an
+// axis-per-act check needs a definition of where one "act" ends and the next begins that the beat table
+// does not carry (a beat is not an act), and guessing one is exactly the kind of invented number this
+// file (see header) refuses to hand back as a finding.
+function hasLayerType(type) {
+  return T.layers.some((L) => { let found = false; walk(L, (x) => { if (x.type === type) found = true; }); return found; });
+}
+function hasCaretLayer() {
+  return T.layers.some((L) => { let found = false; walk(L, (x) => { if (x.typing != null && x.caret !== false) found = true; }); return found; });
+}
+// A "ground" is read by id prefix, the convention every film that has one already uses (gnd-terminal-out,
+// gnd-film-plinth, ...). More than one colour across the ground layers is the only fact a static reader
+// can stand behind for "takes its colour from whatever is on screen"; it says nothing about WHICH colour
+// or WHEN, the same way `hasLayerType` says nothing about where the cursor points.
+function groundColorCount() {
+  const colors = new Set();
+  T.layers.forEach((L) => walk(L, (x) => {
+    if (typeof x.id !== 'string' || !/^(gnd|ground|backdrop)\b/i.test(x.id)) return;
+    for (const k of ['bg', 'color', 'fill', 'background']) if (typeof x[k] === 'string') colors.add(x[k]);
+  }));
+  return colors.size;
+}
+const THREAD_DEVICES = [
+  { rx: /\bcursor\b/i, label: 'a cursor', ok: () => hasLayerType('cursor'),
+    fix: 'add a layer with "type": "cursor" (core/layers/cursor.js)' },
+  { rx: /\bcaret\b/i, label: 'a caret', ok: () => hasCaretLayer(),
+    fix: 'give a text layer `typing` with `caret` left true (core/layers/text.js)' },
+  { rx: /\bground\b[\s\S]{0,40}\bcolou?r/i, label: 'a ground that takes its colour', ok: () => groundColorCount() > 1,
+    fix: 'give the gnd-/ground- layers more than one colour across the film (core/backgrounds)' },
+];
+if (sb && sb.threads) {
+  // Corpus convention (see the `threads:` samples above): clauses are joined with ` + `. Splitting on
+  // it lets a finding quote the one clause that broke a promise instead of the whole sentence.
+  const clauses = sb.threads.split(/\s*\+\s*/).map((c) => c.trim()).filter(Boolean);
+  for (const dev of THREAD_DEVICES) {
+    const promised = clauses.find((c) => dev.rx.test(c)) || (dev.rx.test(sb.threads) ? sb.threads : null);
+    if (!promised || dev.ok()) continue;
+    warn('thread-not-built', `${sbPath} promises ${dev.label} in \`threads:\` ("${promised}"). Nothing in ${file} matches: `
+      + `${dev.fix}, or drop this clause from \`threads:\` if the film no longer means to carry it. `
+      + `This checks the device EXISTS, never that it is the one causing the change threads: describes. `
+      + `If this is a deliberate change of direction, waive it here with a reason `
+      + `({"authoring":{"allow":["thread-not-built"],"_why":{"thread-not-built":"..."}}}) `
+      + `and copy that reason into \`threads:\` by hand so the plan a person approved still describes the film they get.`);
+  }
+}
+
 // No sidecar is not a pass and not a failure: there is no plan to check the film against. Say which,
-// and how to make one, rather than printing a tick for work nobody did. The peak question survives it.
+// and how to make one, rather than printing a tick for work nobody did. The peak question, and the
+// threads promise above, both survive it: neither needs a beat sidecar, only the storyboard.
 if (!fs.existsSync(intentPath)) {
   console.log(`\n  plan vs render · ${file}`);
   console.log(`  ○ no plan to check against: no sidecar at ${intentPath}.`);
   console.log(`    Write the storyboard, then \`make intent SB=<storyboard.md> D=${file}\`.\n`);
+  const threadFails = findings.filter((f) => !allow.has(f.code));
+  if (threadFails.length) {
+    const F0 = gateFindings({ scene: file, indent: '  ',
+      line: (r, g) => `  ${g} [${r.code}] ${r.summary}\n` });
+    for (const f of threadFails) F0.warn(f.code, f.msg);
+    F0.emit();
+  }
   printNomination();
-  process.exit(0);
+  process.exit(threadFails.length ? (strict ? 1 : 0) : 0);
 }
 const intent = JSON.parse(fs.readFileSync(intentPath, 'utf8'));
-const findings = [];
-const fail = (code, msg) => findings.push({ sev: 'FAIL', code, msg });
-const warn = (code, msg) => findings.push({ sev: 'WARN', code, msg });
 
 // ---------- what the render actually does, as a list of moments ----------
 // An EVENT is a moment the frame provably changes: a content layer arriving or leaving, a declared
@@ -178,7 +250,6 @@ for (const key of BOUNDARY_KEYS) {
     if (c && typeof c === 'object' && num(c.t, null) !== null) ev(num(c.t, 0), key.replace(/s$/, ''));
   }
 }
-const walk = (L, fn) => { if (!L || typeof L !== 'object') return; fn(L); (L.children || []).forEach((c) => walk(c, fn)); };
 for (const L of T.layers) walk(L, (x) => {
   const base = num(x.start, 0);
   if (Array.isArray(x.motion)) for (const k of x.motion) if (k && num(k.t, null) !== null) ev(base + num(k.t, 0), 'motion key');
