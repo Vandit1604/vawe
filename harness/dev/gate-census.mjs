@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { splitWaiver } from '../lib/waivers.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const GATES_DIR = path.join(ROOT, 'quality', 'gates');
@@ -18,7 +19,7 @@ const SCENE_DIR = path.join(ROOT, 'films', 'scene');
 const TIMEOUT_MS = Number(process.env.GATE_CENSUS_TIMEOUT_MS || 15_000);
 
 // ---- discover authored films: a films/scene/<name>.json with a matching <name>.storyboard.md ----
-function authoredFilms() {
+export function authoredFilms() {
   const files = fs.readdirSync(SCENE_DIR);
   const storyboards = new Set(files.filter((f) => f.endsWith('.storyboard.md')).map((f) => f.slice(0, -('.storyboard.md'.length))));
   return [...storyboards].filter((name) => fs.existsSync(path.join(SCENE_DIR, `${name}.json`))).sort();
@@ -30,10 +31,10 @@ function authoredFilms() {
 // wired into any make target. Kept explicit here (not re-derived at run time) because the four kinds
 // below need genuinely different handling, and guessing that from source shape is exactly the kind of
 // silent-drift heuristic this repo warns against elsewhere (findings.mjs, engine-doctrine/MISTAKES.md #401).
-const LIBRARIES = ['beats-of.mjs', 'block-schema.mjs', 'edge-reveal.mjs', 'paths.mjs', 'rubric.mjs', 'scene-timing.mjs', 'snap-signature.mjs', 'tile.mjs'];
+export const LIBRARIES = ['beats-of.mjs', 'block-schema.mjs', 'edge-reveal.mjs', 'paths.mjs', 'rubric.mjs', 'scene-timing.mjs', 'snap-signature.mjs', 'tile.mjs'];
 
 // film: single positional arg is a films/scene/<name>.json path (a few need a second literal arg).
-const FILM_CHECKS = {
+export const FILM_CHECKS = {
   'asset-check.mjs': (f) => [f],
   'audio-check.mjs': (f) => [f],
   'author-check.mjs': (f) => [f],
@@ -70,7 +71,7 @@ const FILM_CHECKS = {
 };
 
 // repo: no film argument, scans the whole tree once.
-const REPO_CHECKS = [
+export const REPO_CHECKS = [
   'arsenal-check.mjs', 'audit-scenes.mjs', 'blocks-audit.mjs', 'code-quality.mjs', 'conformance.mjs',
   'coverage.mjs', 'craft-coverage.mjs', 'dead-branch.mjs', 'doc-map.mjs', 'doc-refs.mjs',
   'docker-context.mjs', 'docker-context-check.mjs', 'docs-drift.mjs', 'feature-audit.mjs', 'gate-mutation.mjs', 'generated-check.mjs',
@@ -84,7 +85,7 @@ const REPO_CHECKS = [
 // other: real CLIs, but their contract is N arbitrary files, a baseline-writer, or a probe harness,
 // not "one check over one film" or "one check over the repo". Listed, never run, never deleted for
 // firing zero times, because that would penalize a shape this script cannot exercise.
-const OTHER_TOOLS = ['compare.mjs', 'similarity.mjs', 'canvas-purity.mjs', 'ledger.mjs', 'probe-purity.mjs', 'scene-snap.mjs', 'snap-blocks.mjs', 'snap-scenes.mjs'];
+export const OTHER_TOOLS = ['compare.mjs', 'similarity.mjs', 'canvas-purity.mjs', 'ledger.mjs', 'probe-purity.mjs', 'scene-snap.mjs', 'snap-blocks.mjs', 'snap-scenes.mjs'];
 
 // reporter: prints status, never emits a finding or a non-zero exit for a real defect (no gateFindings
 // import, no process.exit(1) path). Scoring one by fire-rate always reads as 0 and looks like a dead
@@ -94,9 +95,9 @@ const OTHER_TOOLS = ['compare.mjs', 'similarity.mjs', 'canvas-purity.mjs', 'ledg
 // was previously in no list at all here (unclassified, "add it before trusting this census"), found
 // while merging its duplicated event-measurement with pace-check.mjs. Listed here, not deleted and not
 // scored, for the same reason OTHER_TOOLS is exempt: the census can't measure a shape it isn't.
-const REPORTERS = ['stage.mjs', 'pace.mjs'];
+export const REPORTERS = ['stage.mjs', 'pace.mjs'];
 
-function allGateFiles() {
+export function allGateFiles() {
   return fs.readdirSync(GATES_DIR).filter((f) => f.endsWith('.mjs')).sort();
 }
 
@@ -156,6 +157,79 @@ function severityCounts(findings) {
   return c;
 }
 
+// ---- outcome: refused, could-not-run, or passed. NOT the same split as exit code. ----
+//
+// The old census read "exitCode !== 0" as "blocked", which is why seam-snap, judge, preflight,
+// author-check, study-check, study-verify and waiver-drift all read "blocked N of N": none of them
+// refused those films, they had no rendered mp4, no prep receipt, or (study-check) were handed a film
+// name where their contract wants a STUDIED REFERENCE name. A non-zero exit is what a missing
+// precondition and a real defect both look like from outside; only the finding records tell them apart,
+// and even those disagree on HOW they record it, read gate by gate below.
+//
+//   - exit 2 is this repo's own convention for "could not even start": bad usage, a missing/invalid
+//     scene file, a missing precondition file named explicitly (`no grammar/<name>.json`, `no such
+//     scene`). Every FILM_CHECKS gate uses it this way (grep `process.exit(2)` across quality/gates/).
+//     Confirmed on this census: study-check.mjs's census wiring hands it a FILM name where its CLI
+//     wants a studied REFERENCE name, so every real run here dies at this exit(2) branch with zero
+//     findings recorded, never reaching its own 'incomplete' code at all.
+//   - a timeout is an environment fact (the machine, not the film): draft-rendering study-verify.mjs
+//     inline routinely runs past this script's own TIMEOUT_MS.
+//   - exit 1 is ambiguous, and the two shapes below both occur in gates this census runs today,
+//     confirmed by running the unmodified census once as a baseline before writing this function:
+//     (a) NO finding recorded at all: seam-snap.mjs's and study-verify.mjs's "no render"/"study wrote
+//         nothing" branches call console.error and exit(1) without ever calling `.fail` (read line by
+//         line in both files). Baseline evidence: seam-snap.mjs read 20 run / 0 fired / 20 blocked, so
+//         all 20 non-zero exits carried zero findings.
+//     (b) a PRECONDITION finding recorded WITH error severity: judge.mjs's `judge-not-ready` and
+//         preflight.mjs's `no-preflight` both call `.fail(...)` before exit(1), even though the fact
+//         being reported is "no render exists yet" / "this scene has never been through the chain",
+//         not a content defect. Baseline evidence: judge.mjs read 20 run / 20 fired / 20 blocked with
+//         zero authored films rendered anywhere near this run, i.e. every single "finding" was the
+//         same missing-precondition notice, not 20 independent judgments.
+//   So: PRECONDITION_CODES names the codes known (from reading the gate, not guessed) to report shape
+//   (b); anything else with a live (non-waived) error-severity record at exit 1 is shape "a real defect
+//   with a code", i.e. REFUSED. No finding at all, or only a PRECONDITION_CODE, is COULD-NOT-RUN. This
+//   is not a claim that every future gate's precondition code has been enumerated: a gate this census
+//   has not yet been run against, or a new code, needs its own line added here the same way FILM_CHECKS
+//   above says a shape must be read from the source, not guessed from exit code alone.
+const PRECONDITION_CODES = new Set([
+  'judge-not-ready',   // judge.mjs: no render, or a render older than the scene it claims to grade
+  'no-preflight',      // preflight.mjs: the decision-chain receipt was never recorded for this version
+  'incomplete',        // study-check.mjs: the STUDY (not the film) is missing pages/prose; unreached by
+                        // this census today (see exit-2 note above), kept for when it is
+]);
+function classifyOutcome(run) {
+  if (run.timedOut) return 'could-not-run';
+  if (run.exitCode === 2) return 'could-not-run';
+  if (run.exitCode === 0) return 'passed';
+  const liveErrors = (run.findings || []).filter((r) => r.severity === 'error' && !r.waived && !PRECONDITION_CODES.has(r.code));
+  return liveErrors.length ? 'refused' : 'could-not-run';
+}
+
+// ---- waivers: one author writing "this rule does not fit my film", per code, across every scene ----
+// (not just the ones with a matching storyboard: a waiver is a fact about the film regardless of
+// whether it was ever put through this specific census).
+function waiverCounts() {
+  const counts = new Map(); // code -> { total, films: Set }
+  const files = fs.readdirSync(SCENE_DIR).filter((f) => f.endsWith('.json'));
+  for (const file of files) {
+    let scene;
+    try { scene = JSON.parse(fs.readFileSync(path.join(SCENE_DIR, file), 'utf8')); } catch { continue; }
+    const allow = scene?.authoring?.allow;
+    if (!Array.isArray(allow)) continue;
+    for (const entry of allow) {
+      const { code } = splitWaiver(entry);
+      if (!counts.has(code)) counts.set(code, { total: 0, films: new Set() });
+      const c = counts.get(code);
+      c.total++;
+      c.films.add(file);
+    }
+  }
+  return [...counts.entries()]
+    .map(([code, { total, films }]) => ({ code, total, films: films.size }))
+    .sort((a, b) => b.total - a.total || a.code.localeCompare(b.code));
+}
+
 function main() {
   const films = authoredFilms();
   const files = allGateFiles();
@@ -182,36 +256,44 @@ function main() {
         runs.push({ name, ...r });
       }
       const firedRuns = runs.filter((r) => r.findings && r.findings.length > 0);
-      const blockedRuns = runs.filter((r) => r.exitCode !== 0);
+      const outcomes = runs.map((r) => classifyOutcome(r));
+      const refusedRuns = outcomes.filter((o) => o === 'refused').length;
+      const couldNotRunRuns = outcomes.filter((o) => o === 'could-not-run').length;
       const sev = { error: 0, warn: 0, info: 0 };
       for (const r of runs) { const c = severityCounts(r.findings); sev.error += c.error; sev.warn += c.warn; sev.info += c.info; }
       results.push({
-        file, kind: 'film', filmsRun: runs.length, filmsFired: firedRuns.length, filmsBlocked: blockedRuns.length,
+        file, kind: 'film', filmsRun: runs.length, filmsFired: firedRuns.length,
+        filmsRefused: refusedRuns, filmsCouldNotRun: couldNotRunRuns,
         medianMs: median(runs.map((r) => r.ms)), severities: sev, referencedBy: refs, timeouts: runs.filter((r) => r.timedOut).length,
       });
     } else if (REPO_CHECKS.includes(file)) {
       const r = runOnce(file, []);
       const sev = severityCounts(r.findings);
+      const outcome = classifyOutcome(r);
       results.push({
         file, kind: 'repo', filmsRun: 1, filmsFired: (r.findings && r.findings.length > 0) ? 1 : 0,
-        filmsBlocked: r.exitCode !== 0 ? 1 : 0, medianMs: r.ms, severities: sev, referencedBy: refs, timeouts: r.timedOut ? 1 : 0,
+        filmsRefused: outcome === 'refused' ? 1 : 0, filmsCouldNotRun: outcome === 'could-not-run' ? 1 : 0,
+        medianMs: r.ms, severities: sev, referencedBy: refs, timeouts: r.timedOut ? 1 : 0,
       });
     } else {
       results.push({ file, kind: 'unclassified', note: 'not in any list above: add it before trusting this census', referencedBy: refs });
     }
   }
 
-  if (jsonOut) fs.writeFileSync(path.join(ROOT, jsonOut), JSON.stringify({ generatedAt: new Date().toISOString(), films, results }, null, 2));
+  const waivers = waiverCounts();
 
-  // ---- print the table, sorted by fire rate ----
+  if (jsonOut) fs.writeFileSync(path.join(ROOT, jsonOut), JSON.stringify({ generatedAt: new Date().toISOString(), films, results, waivers }, null, 2));
+
+  // ---- print the table, sorted by refusal rate (the number that actually ranks a gate: how often it
+  // caught something real, not how often it could not run at all) ----
   const scored = results.filter((r) => r.kind === 'film' || r.kind === 'repo')
-    .map((r) => ({ ...r, fireRate: r.filmsRun ? r.filmsFired / r.filmsRun : 0 }))
-    .sort((a, b) => a.fireRate - b.fireRate || a.file.localeCompare(b.file));
+    .map((r) => ({ ...r, refuseRate: r.filmsRun ? r.filmsRefused / r.filmsRun : 0 }))
+    .sort((a, b) => a.refuseRate - b.refuseRate || a.file.localeCompare(b.file));
 
-  console.log('check                          kind   run  fired  blocked  medianMs  referenced-by');
+  console.log('check                          kind   run  fired  refused  no-run  medianMs  referenced-by');
   for (const r of scored) {
     console.log(
-      `${r.file.padEnd(31)} ${r.kind.padEnd(6)} ${String(r.filmsRun).padStart(3)}  ${String(r.filmsFired).padStart(5)}  ${String(r.filmsBlocked).padStart(7)}  ${String(Math.round(r.medianMs ?? 0)).padStart(8)}  ${r.referencedBy.join(',') || '(none)'}`
+      `${r.file.padEnd(31)} ${r.kind.padEnd(6)} ${String(r.filmsRun).padStart(3)}  ${String(r.filmsFired).padStart(5)}  ${String(r.filmsRefused).padStart(7)}  ${String(r.filmsCouldNotRun).padStart(6)}  ${String(Math.round(r.medianMs ?? 0)).padStart(8)}  ${r.referencedBy.join(',') || '(none)'}`
     );
   }
 
@@ -221,8 +303,18 @@ function main() {
     for (const r of skipped) console.log(`  ${r.file.padEnd(31)} ${r.kind.padEnd(16)} ${r.note || ''}`);
   }
 
-  const zeroFire = scored.filter((r) => r.fireRate === 0);
+  const zeroFire = scored.filter((r) => r.filmsFired === 0);
   console.log(`\n${zeroFire.length} check(s) fired on zero films/runs: ${zeroFire.map((r) => r.file).join(', ') || '(none)'}`);
+
+  const allCouldNotRun = scored.filter((r) => r.filmsRun > 0 && r.filmsCouldNotRun === r.filmsRun);
+  console.log(`${allCouldNotRun.length} check(s) could not run on ANY film (precondition always absent here): ${allCouldNotRun.map((r) => r.file).join(', ') || '(none)'}`);
+
+  console.log(`\nwaivers: ${waivers.reduce((n, w) => n + w.total, 0)} across ${waivers.length} distinct code(s), read from every films/scene/*.json authoring.allow\n`);
+  console.log('code                              waived  films');
+  for (const w of waivers) console.log(`${w.code.padEnd(33)} ${String(w.total).padStart(6)}  ${w.films}`);
 }
 
-main();
+// Guarded: quality/gates/gate-classification.mjs imports FILM_CHECKS/REPO_CHECKS/etc. from this module
+// to stay the one source of truth for "which gates judge a film". A bare `main()` would re-run the
+// whole census (every gate, every local film) as a side effect of that import.
+if (import.meta.url === `file://${process.argv[1]}`) main();
