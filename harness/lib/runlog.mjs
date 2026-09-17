@@ -37,6 +37,26 @@
 //              ONCE per (film, stage) transition, the same cadence stage-say already dedupes its own
 //              print at, not once per turn: this hook runs on every keystroke and a line-per-turn write
 //              would be the exact noise runlog's own one-line-per-fact rule exists to avoid.
+//     refusal: { rule, file, reason } | null
+//              a PreToolUse DENY from harness/live/stage-gate.mjs: which of its three rules fired
+//              (approval-is-human / no-storyboard / unapproved-layers), the file it refused, and the
+//              reason it printed back to the model. A refusal that leaves no record means nobody can
+//              later ask how often the harness blocks, for what, or whether a given block was right.
+//              Logged EVERY time: unlike a nudge that fires on every keystroke, a deny fires only on
+//              the one write each rule exists to stop, so one line per refusal is already the sparse
+//              cadence runlog wants, with no extra dedupe needed.
+//     craftLive: { file, shown: [ruleId,...], withheld: [ruleId,...] } | null
+//              harness/live/craft-live.mjs runs several independent, syntactic checks on one saved
+//              scene/fragment and prints only the ones that fired. `shown` is what printed; `withheld`
+//              is every other check IN THE SAME FAMILY (scene or fragment) that ran clean on this same
+//              save. That is the fact nothing recorded before: a check that never fires leaves no trace
+//              distinguishing "never violated" from "never run". Logged only when the hook actually
+//              speaks (shown.length > 0), the same gate its own console.error already uses: the hook is
+//              silent on a fine file, so this adds no line where it was already quiet.
+//     sceneLive: { file, shown: [ruleId,...], withheld: [ruleId,...] } | null
+//              the same shape as `craftLive`, for harness/live/scene-live.mjs's own four independent
+//              checks (pictorial %, hand-keyed motion, single bg window, unjustified audio.silent).
+//              Same reasoning, same cadence: logged only when the hook speaks.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -69,6 +89,9 @@ export function appendRun(film, record = {}) {
     content: record.content || null,
     judge: record.judge || null,
     knowledge: record.knowledge || null,
+    refusal: record.refusal || null,
+    craftLive: record.craftLive || null,
+    sceneLive: record.sceneLive || null,
     wallMs: Number.isFinite(record.wallMs) ? record.wallMs : null,
   };
   const out = runsPathFor(film);
