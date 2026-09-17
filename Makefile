@@ -7,7 +7,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet ingest
+.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack sfx-pack sfx-local gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet ingest
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -104,6 +104,19 @@ beatsync: ## [dev] snap the scene's cuts and seams onto the track's beat grid so
 # voicings in core/audio/kit.mjs (noise + biquad + envelope, seeded, deterministic, no licence).
 # harness/media/sfx.mjs (the old Mixkit fetcher) is kept for reference but is NOT wired to a target:
 # a downloaded file named `click` turned out to be 19.6 seconds long and nothing noticed (MISTAKES #51).
+# A sample is an OVERRIDE of that synth, never a replacement: an unmapped role still bakes from
+# parameters. engine-doctrine/ASSET-SOURCES.md covers every other source and which are safe to commit.
+
+# make sfx-pack: fetch Kenney's "Interface Sounds" pack (CC0, verified, shippable) and map it onto
+# the engine's cue roster.
+sfx-pack: ## [engine] fetch Kenney's CC0 "Interface Sounds" pack and map it onto the engine's cue roster
+	node harness/media/sfx-pack.mjs
+
+# make sfx-local DIR=<path>: map sounds YOU already downloaded (soundeffect-lab.info is the owner's
+# preferred source, redistribution prohibited so nothing here fetches from it) onto the cue roster,
+# via harness/media/sfx-local-map.json.
+sfx-local: ## [engine] map YOUR downloaded sounds (DIR=<path>) onto the cue roster via sfx-local-map.json
+	node harness/media/sfx-local.mjs --dir $(DIR)
 
 # make sfx-check: is each sound effect the SHAPE its role claims? A 19.6s file named `click` is how
 # a typed line came out sounding like a passing train (engine-doctrine/MISTAKES.md #51).

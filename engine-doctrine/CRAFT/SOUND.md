@@ -661,8 +661,12 @@ Two consequences, both already true of this repo and both important:
 
 - **The files must stay untracked.** `assets/music/` is gitignored. Committing it would publish the
   tracks as standalone downloadable files, which the licence forbids. See `assets/README-LICENCE.md`.
-- **Our sound EFFECTS have no licence question at all.** They are synthesized from parameters by
-  `make audio`, not downloaded. That is a real and underrated advantage; keep it.
+- **Our sound EFFECTS have no licence question at all, by default.** They are synthesized from
+  parameters by `make audio`, not downloaded. That is a real and underrated advantage; keep it. A real
+  sample is an optional OVERRIDE of one cue, never a replacement of the fallback: `make sfx-pack`
+  fetches a CC0, shippable-by-licence pack, `make sfx-local DIR=<path>` maps sounds you already
+  downloaded by hand. Every source's licence, and which may be committed vs. kept local-only, is in
+  [`../ASSET-SOURCES.md`](../ASSET-SOURCES.md).
 
 ### The four categories, and the one that eats people
 

@@ -56,6 +56,26 @@ Icon and photo sources:
 - Photos: CC0 / CC-BY via the photo fetcher; CC-BY credits are recorded per
   video. Fetched on demand, not committed.
 
+Sound effects:
+
+Every cue is synthesized from parameters by `make audio` (core/audio/kit.mjs):
+no download, no license, byte-identical on every machine. A real sample is an
+optional OVERRIDE, never a replacement.
+
+- `make sfx-pack` fetches Kenney's "Interface Sounds" pack, Creative Commons
+  Zero (CC0, public domain): "free to use in personal, educational and
+  commercial projects", https://kenney.nl/assets/interface-sounds. Fetched on
+  demand into the gitignored assets/sfx/, not committed.
+
+- `make sfx-local DIR=<path>` maps sound files YOU already downloaded onto
+  the engine's cue names, via harness/media/sfx-local-map.json. The owner's
+  preferred source is soundeffect-lab.info, whose terms permit commercial use
+  with no credit but prohibit redistribution; this repo never fetches from
+  that site, only maps files you already have on disk.
+
+See engine-doctrine/ASSET-SOURCES.md for the fuller list of stock media
+sources, with each one's own license verified.
+
 Never distributed:
 
 - Sohne (see Fonts above): a paid face, bring-your-own copy only.
