@@ -1,6 +1,6 @@
 {
   "module": "scene",
-  "authoringNote": "CAPTURE SUBJECT for formats/scene/playhead.json. This is a real, renderable draft film whose timeline is photographed as the hero surface of the recreation. Two things are deliberate and load-bearing: (1) it declares NO cuts, so `sceneUnits` never turns on and no layer's authored duration is rewritten, which is what lets a dead-air hole draw as an undisputed hazard band; (2) its fourteen layers are SIX different types, so the lane stack reads as a structure rather than as one block of identical bars.",
+  "authoringNote": "CAPTURE SUBJECT for films/scene/playhead.json. This is a real, renderable draft film whose timeline is photographed as the hero surface of the recreation. Two things are deliberate and load-bearing: (1) it declares NO cuts, so `sceneUnits` never turns on and no layer's authored duration is rewritten, which is what lets a dead-air hole draw as an undisputed hazard band; (2) its fourteen layers are SIX different types, so the lane stack reads as a structure rather than as one block of identical bars.",
   "aspect": "16:9",
   "theme": "vawe",
   "duration": 16,
