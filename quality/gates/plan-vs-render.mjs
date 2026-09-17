@@ -34,7 +34,7 @@
 // FAIL: plan-overruns-render · junction-is-static.
 // WARN: held-through-the-change · beat-holds-still · unplanned-junction · plan-has-no-spans ·
 //       spectacle-not-built · spectacle-in-wrong-beat · spectacle-beat-unnamed · pace-not-kept ·
-//       pace-not-chosen · thread-not-built · transformation-not-continuous.
+//       pace-not-chosen · thread-not-built · transformation-not-continuous · ground-value-mismatch.
 //
 // THE THREADS PROMISE. `threads:` is measured prose (see below), so `thread-not-built` never parses
 // it as a grammar. It greps a small closed set of literal nouns (a cursor, a caret, a ground that
@@ -51,7 +51,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { sceneTiming, num } from './scene-timing.mjs';
-import { parseStoryboard } from '../../harness/author/storyboard-parse.mjs';
+import { parseStoryboard, timeline } from '../../harness/author/storyboard-parse.mjs';
+import { measureGroundFlips, JOIN_TOLERANCE } from './ground-arc.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { gradeable } from './tile.mjs';
@@ -564,6 +565,42 @@ if (sb && sb.spectacle) {
       }
     }
   }
+}
+
+// THE SEAM'S VALUE. `transition_value:` (harness/lib/contract.mjs, Task 2) declares what a boundary
+// does to ground VALUE (dark->light · light->dark · held) BEFORE the film is built; `ground-arc.mjs`
+// only ever measured a flip after the fact. GUARDED on at least one beat declaring the field: the
+// cross-check re-samples the built film's pixels (measureGroundFlips), which is the one expensive step
+// in this whole gate, and 44 existing storyboards declare it on zero beats today, so this costs nothing
+// until an author opts in. Follows this gate's own restraint: it reports PRESENCE of a disagreement
+// between what was declared and what rendered, never a taste judgement about which is right.
+if (sb && sb.beats.some((b) => b.transition_value)) {
+  const tlBeats = timeline(sb).beats;
+  const flips = await measureGroundFlips(path.resolve(file));
+  tlBeats.forEach((b, i) => {
+    if (!b.transition_value || b.start == null) return;
+    const nearby = flips.filter((f) => Math.abs(f.t - b.start) <= JOIN_TOLERANCE);
+    const measured = nearby.length ? `${nearby[0].from}->${nearby[0].to} at ${nearby[0].t}s` : null;
+    if (b.transition_value === 'held') {
+      if (nearby.length) {
+        warn('ground-value-mismatch', `beat "${b.name}" declares \`transition_value: held\`, but the render `
+          + `flips ${measured} right at this join. Either the hold broke, or the declaration is stale.`);
+      }
+      return;
+    }
+    if (!nearby.length) {
+      warn('ground-value-mismatch', `beat "${b.name}" declares \`transition_value: ${b.transition_value}\`, `
+        + `but ground-arc measures no flip within ${JOIN_TOLERANCE}s of this beat's start (${s(b.start)}). `
+        + `The plan's flip was never built, or it landed somewhere else.`);
+      return;
+    }
+    const gotDirection = `${nearby[0].from}->${nearby[0].to}`;
+    if (gotDirection !== b.transition_value) {
+      warn('ground-value-mismatch', `beat "${b.name}" declares \`transition_value: ${b.transition_value}\`, `
+        + `but ground-arc measures ${measured} at this join. The plan and the render disagree about which `
+        + `way the ground moves.`);
+    }
+  });
 }
 
 // PACE. The plan budgets seconds per IDEA before any beat is written; the film has a runtime and a beat
