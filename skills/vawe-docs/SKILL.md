@@ -27,6 +27,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 
 | Doc | Reach for it when… | It answers |
 |---|---|---|
+| [engine-doctrine/ASSET-SOURCES.md](../../engine-doctrine/ASSET-SOURCES.md) | fetching real footage, sound effects, or music for a film, or committing an asset to the repo | which sites are safe to fetch from, whether their files may be committed (SHIPPABLE) or must stay on disk only (LOCAL ONLY), and the exact license clause each claim rests on |
 | [engine-doctrine/BLOCKS.md](../../engine-doctrine/BLOCKS.md) | you want a ready-made composed block instead of stacking primitives by hand | the block registry (`make catalog`) · the contract each block honours · what every block renders |
 | [engine-doctrine/CRAFT/AE-TECHNIQUES.md](../../engine-doctrine/CRAFT/AE-TECHNIQUES.md) | you want a motion-design technique with the numbers a practitioner actually states, and the engine word for it | 12 techniques studied from one After Effects channel · the ordered recipe and the step nobody guesses · the stated values · where each one lands in this engine · default or per-film option |
 | [engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md](../../engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md) | you want the named procedure a motion designer would reach for, and the engine word for it (or the news that there isn't one) | 26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine (23 HAVE, 3 PARTLY, 0 LACK as of 2026-08-29) · what is left and where it would live |
