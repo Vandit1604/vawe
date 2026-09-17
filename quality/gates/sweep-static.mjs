@@ -135,8 +135,10 @@ if (isMain) {
 
   if (fail) {
     f.fail('sweep-static',
-      `the rendered film shows no geometry change across ${SAMPLE_COUNT} samples over ${durationSec.toFixed(1)}s; ` +
-      'a frozen timeline makes every other green verdict unreliable.',
+      `the rendered film's largest frame-to-frame change is ${(maxChange * 100).toFixed(3)}% across ${SAMPLE_COUNT} samples ` +
+      `over ${durationSec.toFixed(1)}s, below the ${(CHANGE_THRESHOLD * 100).toFixed(1)}% floor: the whole timeline is one frozen frame. ` +
+      'Add a camera move, a keyed `motion` track, or a cut/seam so at least one thing changes, then re-render: ' +
+      `make ship D=${dataArg}`,
       { at: `out/${name}.mp4`, doc: 'AGENTS.md' });
     console.error(`✗ sweep-static: max change ${(maxChange * 100).toFixed(3)}% across ${SAMPLE_COUNT} samples over ${durationSec.toFixed(1)}s, all below the ${(CHANGE_THRESHOLD * 100).toFixed(1)}% floor.`);
     f.emit();
