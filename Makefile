@@ -965,6 +965,13 @@ quiz-look: ## [preflight] THE LOOK, SETTLED BY PICTURE.
 storyboard-check: ## [preflight] The storyboard-as-PROPOSAL gate: a one-sentence message + audience/arc/format/duration, and per
 	@node quality/gates/storyboard-check.mjs $(SB) $(if $(JSON),--json,)
 
+# make storyboard-decide-ratchet [STAMP=1]: how many of the 232 beats across the whole corpus declare
+# NONE of ground:/kinetic:/elements:/transition_value: (the decisions Task 1/2 graduated out of prose).
+# Fails only on an INCREASE from the stamped baseline (harness/dev/storyboard-decide-ratchet.json),
+# never on the number itself: every new field is optional, and adoption rides down, it is never forced.
+storyboard-decide-ratchet: ## [preflight] does a new beat declare a real decision, or add to the pile that decides nothing
+	@node quality/gates/storyboard-check.mjs --ratchet $(if $(STAMP),--stamp,)
+
 # make surface D=films/scene/<film>.storyboard.md: the neutral, on-demand front door to
 # harness/live/beat-surfacer.mjs, for an agent with no PostToolUse hook. Claude Code runs the same
 # check automatically after every save; everyone else runs this by hand after writing a beat.

@@ -105,6 +105,58 @@ not: "the defaults this film refuses, in your own words"
   a command line, because their hero object is a chat box for a reason that is not ours. A `borrows:`
   line with no right-hand side FAILS.
 
+  PROSE IS RIGHT FOR JUDGEMENT. STRUCTURE IS RIGHT FOR DECISIONS. This is the line the whole storyboard
+  format sits on, and it is worth stating in as many words because the failure on the other side of it
+  is real: structuring the judgement too produces checkbox films and an author who stops thinking.
+  `why` a beat exists, `arc`, `attention`, `not:` STAY PROSE FOREVER. They are reasoning, and a dropdown
+  cannot hold a reason: "why does this beat belong here" and "what does this film refuse to do" have no
+  finite answer set, and forcing one would not check the decision, it would erase it. What is allowed to
+  become structured is a CHOICE FROM A KNOWN SET that the engine already has a name for: the ground a
+  beat sits on, the kinetic preset its type uses, the layer types it puts on screen, what a transition
+  does to ground value across a join. Structuring one of THOSE loses nothing, because the set of real
+  answers was always closed, whether or not the storyboard admitted it; prose there was never judgement,
+  it was an unchecked guess wearing judgement's clothes. If a future field cannot name a finite legal
+  set the engine actually has, it belongs on the prose side of this line, not this one.
+
+  THE DECISIONS FROM A CLOSED, ENGINE-OWNED SET. Measured across 232 beats: not one declared a colour, a
+  ground, a transition's effect on value, an animation preset, or the elements it puts on screen. Every
+  decision that determines how a film LOOKS was invented by whoever authored the JSON, off nothing the
+  plan wrote down. Four fields close that gap, each OPTIONAL and each validated against the exact
+  registry the engine already keeps (harness/lib/contract.mjs groundErrors/kineticErrors/
+  elementsErrors/transitionValueErrors): an unknown value is refused NAMING every legal one, the way
+  harness/lib/judge-codes.mjs already refuses an unknown judge code.
+
+  `ground:` the background preset this beat sits on, one of the 23 names in
+  core/backgrounds/presets.js (`ground: aurora`). `kinetic:` the kinetic preset (+ an optional
+  `split=word|char|line`) the beat's type layer uses, one of the 33 in core/kinetic/presets.js
+  (`kinetic: weight split=word`). `elements:` the layer types this beat puts on screen, `;`-separated,
+  from the 24 real types in core/layers/index.js (`elements: rect;text`). ONE OWNER PER FACT: all three
+  kinds were already reachable through the general `use:` door (harness/lib/contract.mjs
+  USE_DEDICATED_FIELD), and a `use:` line naming one of them is now REFUSED, pointing here, the same way
+  a camera move written through `use:` is refused toward `camera:`. A ground or a kinetic preset has
+  exactly one field to be written on, never two spellings of the same fact.
+
+  `transition_value:` sits beside `transition_in:`/`transition_why:` and answers the question neither
+  does: what this boundary does to ground VALUE, one of `dark->light` · `light->dark` · `held`. Nothing
+  declared this before the render existed: `quality/gates/ground-arc.mjs` could only measure a flip
+  AFTER the film was built. The set is exactly what `ground-arc.mjs` itself classifies a frame into, so
+  a declared value and a measured one are directly comparable: `quality/gates/plan-vs-render.mjs` warns
+  `ground-value-mismatch` when they disagree, naming both the declaration and the measurement, and never
+  claims more than that (its own stated restraint: presence of a disagreement, not a taste judgement
+  about which side is right). Declare it deliberately: the owner's own film flips value exactly once,
+  on purpose, and that flip is its spectacle. A film that flips four times by accident should be able to
+  see that on paper, before the render, not discover it in extracted frames after.
+
+  ALL FOUR ARE OPTIONAL, AND ADOPTION RIDES A RATCHET, NOT A REQUIREMENT. 44 storyboards existed before
+  these fields did; a required field would have invalidated every one of them at once.
+  `make storyboard-decide-ratchet` counts how many beats across the whole corpus declare NONE of the
+  four and fails only on an INCREASE from the stamped baseline (harness/dev/
+  storyboard-decide-ratchet.json, kept outside quality/baselines/ because this ratchet is adoption-only
+  and never load-bearing on a push), exactly as `quality/gates/output-contract.mjs` and
+  `quality/gates/no-judge.mjs` already ratchet a count down rather than demanding it hit zero at once.
+  Nothing bulk-fills the 232 existing beats: a declared value nobody actually decided is worse than an
+  absent one, because it LOOKS like a decision.
+
   `ramp:` sits in the frontmatter and names the kit type roles the film uses, once. Seven frames that
   each invent their own scale are seven films; before this field existed one film carried eight sizes
   across seven fragments.

@@ -49,6 +49,15 @@ import { pickRecipe, RECIPES } from '../../recipes/index.mjs';
 import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS, cameraMoveParams, buildCameraMove } from '../../core/camera-moves/index.js';
 import { CAMERA_WORDS, resolveCameraMove } from '../../core/registry/vocab.js';
 import { TIMINGS } from '../../core/cuts/timings.js';
+// THE THREE REGISTRIES `ground:`/`kinetic:`/`elements:` (storyboard-parse.mjs, storyboard-check.mjs)
+// are grounded in: the engine's OWN name -> thing maps, never a second list. `BG_NAMES` and the kinetic
+// `PRESETS` keys are the exact vocabularies `use: <name>` already resolves against (defineRegistry
+// 'background preset' / 'kinetic preset'); `LAYER_TYPES` is the 24-type layer vocabulary. A beat that
+// declares one of these three kinds through `use:` is refused below (USE_DEDICATED_FIELD), pointing at
+// the dedicated field, so a ground or a kinetic preset has exactly one place to be written.
+import { BG_NAMES } from '../../core/backgrounds/index.js';
+import { PRESETS as KINETIC_PRESETS } from '../../core/kinetic/presets.js';
+import { LAYER_TYPES } from '../../core/layers/index.js';
 // score/toks: the SAME word-overlap ranker `make arsenal` uses (harness/author/arsenal.mjs), reused
 // rather than reimplemented so "nearest 3" here and "nearest 3" there can never rank a query
 // differently. Pure and sync (no registry discovery), safe to import from a gate.
@@ -303,6 +312,123 @@ export function moveErrors(beats) {
     for (const e of parseMoveEntries(b.move)) {
       if (e.error) errs.push(`beat ${i + 1} (${b.name}) move: ${e.error}`);
     }
+  });
+  return errs;
+}
+
+// ── THE GROUND, THE KINETIC PRESET, THE ELEMENTS: decisions from a CLOSED, ENGINE-OWNED set ─────────
+//
+// `ground:`/`kinetic:`/`elements:` are optional, validated fields for the three visual decisions the
+// storyboard used to leave to prose and the author reinvented every time. Every legal value is a name
+// this engine already has (core/backgrounds/presets.js, core/kinetic/presets.js, core/layers/index.js):
+// this file never restates the list, it reads it, so a preset added to the engine is legal here for
+// free and one removed is refused here for free. An unknown value is refused NAMING the whole legal
+// set, the way harness/lib/judge-codes.mjs does, because a near-miss guess is not the same promise as
+// "here is everything you could have meant".
+const KINETIC_PRESET_NAMES = Object.keys(KINETIC_PRESETS);
+const SPLIT_MODES = ['word', 'char', 'line'];
+
+/** parseGroundLine(raw) -> null | {name} | {error}. `raw` is a bare background-preset name. */
+export function parseGroundLine(raw) {
+  if (raw == null) return null;
+  const name = String(raw).trim();
+  if (!name) return null;
+  if (!BG_NAMES.includes(name)) {
+    const near = nearMisses(name, BG_NAMES);
+    return { error: `"${name}" is not a background preset${near.length ? `, did you mean "${near[0]}"?` : ''}. Presets: ${BG_NAMES.join(' · ')}.` };
+  }
+  return { name };
+}
+
+/** groundErrors(beats) -> string[] naming every beat whose `ground:` is not a real background preset. */
+export function groundErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    const p = parseGroundLine(b.ground);
+    if (p && p.error) errs.push(`beat ${i + 1} (${b.name}) ground: ${p.error}`);
+  });
+  return errs;
+}
+
+/** parseKineticLine(raw) -> null | {preset, split} | {error}. "<preset> [split=word|char|line]". */
+export function parseKineticLine(raw) {
+  if (raw == null) return null;
+  const s = String(raw).trim();
+  if (!s) return null;
+  const m = /^(\S+)(?:\s+split\s*=\s*(\S+))?\s*$/.exec(s);
+  if (!m) return { error: `"${s}" does not parse. Syntax: "<kinetic preset> [split=word|char|line]".` };
+  const [, presetRaw, splitRaw] = m;
+  if (!KINETIC_PRESET_NAMES.includes(presetRaw)) {
+    const near = nearMisses(presetRaw, KINETIC_PRESET_NAMES);
+    return { error: `"${presetRaw}" is not a kinetic preset${near.length ? `, did you mean "${near[0]}"?` : ''}. Presets: ${KINETIC_PRESET_NAMES.join(' · ')}.` };
+  }
+  if (splitRaw && !SPLIT_MODES.includes(splitRaw)) {
+    return { error: `split "${splitRaw}" is not one of ${SPLIT_MODES.join(' · ')}.` };
+  }
+  return { preset: presetRaw, split: splitRaw || null };
+}
+
+/** kineticErrors(beats) -> string[] naming every beat whose `kinetic:` line does not parse. */
+export function kineticErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    const p = parseKineticLine(b.kinetic);
+    if (p && p.error) errs.push(`beat ${i + 1} (${b.name}) kinetic: ${p.error}`);
+  });
+  return errs;
+}
+
+/** parseElementsLine(raw) -> null | {types: string[]} | {error}. `;`-separated layer type names. */
+export function parseElementsLine(raw) {
+  if (raw == null) return null;
+  const s = String(raw).trim();
+  if (!s) return null;
+  const types = s.split(';').map((t) => t.trim()).filter(Boolean);
+  const unknown = types.filter((t) => !LAYER_TYPES.includes(t));
+  if (unknown.length) {
+    return { error: `${unknown.map((t) => `"${t}"`).join(', ')} ${unknown.length > 1 ? 'are' : 'is'} not a layer type. `
+      + `Types: ${LAYER_TYPES.join(' · ')}.` };
+  }
+  return { types };
+}
+
+/** elementsErrors(beats) -> string[] naming every beat whose `elements:` names an unknown layer type. */
+export function elementsErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    const p = parseElementsLine(b.elements);
+    if (p && p.error) errs.push(`beat ${i + 1} (${b.name}) elements: ${p.error}`);
+  });
+  return errs;
+}
+
+// ── THE SEAM'S VALUE: what a transition does to ground VALUE (light/dark) across the join ───────────
+//
+// `transition_value:` sits beside `transition_in:`/`transition_why:` and answers a question neither
+// does: does this boundary carry the ground from dark to light, light to dark, or hold it. Nothing
+// declared this before the render existed; `quality/gates/ground-arc.mjs` could only measure a flip
+// AFTER the fact. The set is exactly what ground-arc.mjs itself classifies a frame into
+// (core/backgrounds LIGHT/DARK bands), so a declared value and a measured one are directly comparable
+// (`quality/gates/plan-vs-render.mjs`).
+export const TRANSITION_VALUES = ['dark->light', 'light->dark', 'held'];
+
+/** parseTransitionValueLine(raw) -> null | {value} | {error}. */
+export function parseTransitionValueLine(raw) {
+  if (raw == null) return null;
+  const value = String(raw).trim();
+  if (!value) return null;
+  if (!TRANSITION_VALUES.includes(value)) {
+    return { error: `"${value}" is not one of ${TRANSITION_VALUES.join(' · ')}.` };
+  }
+  return { value };
+}
+
+/** transitionValueErrors(beats) -> string[] naming every beat whose `transition_value:` is not legal. */
+export function transitionValueErrors(beats) {
+  const errs = [];
+  beats.forEach((b, i) => {
+    const p = parseTransitionValueLine(b.transition_value);
+    if (p && p.error) errs.push(`beat ${i + 1} (${b.name}) transition_value: ${p.error}`);
   });
   return errs;
 }
@@ -1115,6 +1241,12 @@ export const USE_DEDICATED_FIELD = {
   idle: 'move: hold:<idle>',
   'part entrance': 'motion:',
   recipe: 'recipe:',
+  // THE DECISIONS TASK 1 GRADUATES OUT OF PROSE: the ground a beat sits on, the kinetic preset its
+  // type uses, the layer types it puts on screen. Each already had a name -> thing registry and a
+  // door onto it (`use:`); what it did not have was a field a reviewer could scan down a beat and
+  // check, the way `archetype:`/`weight:` already are. Refusing the door once the field exists keeps
+  // one owner per fact, exactly as `camera:`/`transition_in:` already do above.
+  'background preset': 'ground:', 'kinetic preset': 'kinetic:', 'layer type': 'elements:',
 };
 
 // INTERNAL: engine machinery an author never names from a storyboard. Each is refused naming the doc
