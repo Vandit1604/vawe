@@ -110,6 +110,10 @@ export function parseStoryboard(src) {
       // TRANSITIONS.md), written down rather than only answered in an author's head. Optional; a beat
       // may carry `transition_in` with no `transition_why` and only warns, never blocks.
       transition_why: f('transition_why'),
+      // THE SEAM'S VALUE (harness/lib/contract.mjs parseTransitionValueLine): what this boundary does
+      // to ground VALUE, `dark->light` · `light->dark` · `held`, comparable against what
+      // quality/gates/ground-arc.mjs measures on the built film. Optional, presence-only when declared.
+      transition_value: f('transition_value'),
       // the shot vocabulary: see engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md. Optional so existing storyboards
       // keep parsing; the gate is what asks for them.
       shot: f('shot'), camera: f('camera'), picture: f('picture'),
@@ -165,6 +169,11 @@ export function parseStoryboard(src) {
       //   weight:    peak | strong | quiet, so exactly one beat is the loudest and it is measurable
       //   borrows:   "<reference device> -> <our object>", so a borrowed SHAPE must name its ROLE here
       archetype: f('archetype'), weight: f('weight'), borrows: f('borrows'),
+      // THE DECISIONS FROM A CLOSED, ENGINE-OWNED SET (harness/lib/contract.mjs groundErrors/
+      // kineticErrors/elementsErrors): the background preset this beat sits on, the kinetic preset
+      // (+ split mode) its type uses, and the layer types it puts on screen. Each name is validated
+      // against the engine's own registry, never restated here. Optional, presence-only when declared.
+      ground: f('ground'), kinetic: f('kinetic'), elements: f('elements'),
       // WHICH FILE, AND WHERE. Optional; assemble.mjs's own convention (`<base>.scene<N>.html`) is
       // unchanged when this is unset. `harness/lib/contract.mjs parseFragmentSpec` reads the raw
       // string, so this parser stays a raw-field reader like every field above it.

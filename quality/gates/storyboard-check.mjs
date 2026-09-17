@@ -20,13 +20,62 @@ import { fileURLToPath } from 'node:url';
 // ONE reader for the storyboard contract, shared with the animatic that PLAYS it. Two parsers would
 // drift, and the drift would be invisible in the worst way: this gate passing a beat the animatic drops.
 import { fieldIn, blocksOf, durSec as parseDur, RANGE as SB_RANGE, parseStoryboard, timeline, ARCHETYPES, WEIGHTS, isArchetype } from '../../harness/author/storyboard-parse.mjs';
-import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, cameraStillHeldWarnings, transitionInErrors, transitionInWarnings, transitionWhyErrors, transitionFindings, moveErrors, motionErrors, parseFragmentSpec, arsenalCorpus, useErrors, useWarnings, eyeErrors, hasEyeCandidateMotion, eyeUntargetedDevices, competingEyeDevices, parseEyeLine } from '../../harness/lib/contract.mjs';
+import { chainErrors, edges, parseMotion, isCausedTrigger, stagedSchedule, TRIGGER_SEQUENCE, TRIGGER_EMPTY, parseRecipeLine, cameraErrors, cameraWarnings, cameraContinuityErrors, cameraStillHeldWarnings, transitionInErrors, transitionInWarnings, transitionWhyErrors, transitionFindings, moveErrors, motionErrors, parseFragmentSpec, arsenalCorpus, useErrors, useWarnings, eyeErrors, hasEyeCandidateMotion, eyeUntargetedDevices, competingEyeDevices, parseEyeLine, groundErrors, kineticErrors, elementsErrors, transitionValueErrors } from '../../harness/lib/contract.mjs';
 import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+// ── TASK 5: MIGRATION, WITHOUT A BIG BANG ────────────────────────────────────────────────────────
+//
+// `ground:`/`kinetic:`/`elements:`/`transition_value:` are all OPTIONAL: 44 storyboards and 232 beats
+// exist today and NONE of them declare any of the four (the measurement this whole plan rests on). A
+// REQUIRED field would invalidate the corpus at once; this ratchet instead counts how many beats
+// declare NOTHING of the four, reports today's number, and fails only on an INCREASE, exactly as
+// `quality/gates/output-contract.mjs` and `quality/gates/no-judge.mjs` already ratchet a count down.
+//
+// THE BASELINE LIVES OUTSIDE quality/baselines/ ON PURPOSE (harness/dev/, the same precedent
+// harness/dev/prose-check-ratchet.json set): that directory is reserved for gates this repo has
+// decided are load-bearing on every push, and this one is new and adoption-only, never to be
+// hand-edited or raised by an agent (see AGENTS.md `quality/baselines/`).
+//
+//   node quality/gates/storyboard-check.mjs --ratchet [--stamp]   ·   make storyboard-decide-ratchet
+if (process.argv.includes('--ratchet')) {
+  const RATCHET = path.join(ROOT, 'harness/dev/storyboard-decide-ratchet.json');
+  const DECIDES = ['ground', 'kinetic', 'elements', 'transition_value'];
+  const files = fs.readdirSync(path.join(ROOT, 'films/scene')).filter((n) => n.endsWith('.storyboard.md'));
+  let total = 0, undeclared = 0;
+  for (const name of files) {
+    const text = fs.readFileSync(path.join(ROOT, 'films/scene', name), 'utf8');
+    for (const b of parseStoryboard(text).beats) {
+      total++;
+      if (!DECIDES.some((k) => b[k])) undeclared++;
+    }
+  }
+  const prior = (() => { try { return JSON.parse(fs.readFileSync(RATCHET, 'utf8')); } catch { return null; } })();
+  console.error(`\n  STORYBOARD-DECIDES · ${files.length} storyboard(s) · ${total} beat(s) · `
+    + `${undeclared} declare none of ${DECIDES.join('/')}\n`);
+  if (process.argv.includes('--stamp')) {
+    fs.mkdirSync(path.dirname(RATCHET), { recursive: true });
+    fs.writeFileSync(RATCHET, `${JSON.stringify({ undeclared }, null, 1)}\n`);
+    console.error(`  ✓ ratchet stamped at ${undeclared} undeclared beat(s)${prior ? `, ${undeclared <= prior.undeclared ? 'down' : 'UP'} from ${prior.undeclared}` : ''}\n`);
+    process.exit(0);
+  }
+  if (prior && undeclared > prior.undeclared) {
+    console.error(`  ✗ ${undeclared} beat(s) declare none of ground:/kinetic:/elements:/transition_value:, up from ${prior.undeclared}. `);
+    console.error('    A new beat should declare at least one of these decisions, not add to the pile that decides nothing.');
+    console.error('    If this increase is deliberate, raise the bar on purpose: node quality/gates/storyboard-check.mjs --ratchet --stamp\n');
+    process.exit(1);
+  }
+  if (prior && undeclared < prior.undeclared) {
+    console.error(`  ~ ${prior.undeclared - undeclared} fewer undeclared beat(s) than the ratchet allows. Lower it: `
+      + 'node quality/gates/storyboard-check.mjs --ratchet --stamp\n');
+  }
+  console.error('  ✓ no new undeclared beat\n');
+  process.exit(0);
+}
 
 const f = process.argv.slice(2).find((a) => !a.startsWith('--'));
 if (!f || !fs.existsSync(f)) { console.error('usage: storyboard-check <STORYBOARD.md>  (template: engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md)'); process.exit(2); }
@@ -145,6 +194,20 @@ for (const w of transitionInWarnings(sbBeats)) warn('transition-in-undecided', w
 // reasoning findings are warnings, because the field is new and a blocker here would fail every
 // storyboard written before it existed.
 for (const e of transitionWhyErrors(sbBeats)) err('transition-why-unknown', e);
+// `transition_value:` names what this boundary does to ground VALUE (dark->light · light->dark ·
+// held), the CLOSED set ground-arc.mjs's own classifier uses, so a declared value and a measured one
+// are directly comparable (quality/gates/plan-vs-render.mjs). An ERROR, not a warning, the same as
+// archetype/weight below: this field only exists once someone declares it, so a bad value is a typo,
+// never an undecided sentence.
+for (const e of transitionValueErrors(sbBeats)) err('transition-value-unknown', e);
+// `ground:`/`kinetic:`/`elements:` (harness/lib/contract.mjs): the ground a beat sits on, the kinetic
+// preset (+ split) its type uses, the layer types it puts on screen, each validated against the
+// engine's own registry (core/backgrounds/presets.js, core/kinetic/presets.js, core/layers/index.js).
+// PRESENCE ONLY, AND ONLY WHEN DECLARED, the same restraint archetype/weight below already keep: a
+// storyboard written before these fields existed still passes.
+for (const e of groundErrors(sbBeats)) err('ground-unknown', e);
+for (const e of kineticErrors(sbBeats)) err('kinetic-unknown', e);
+for (const e of elementsErrors(sbBeats)) err('elements-unknown', e);
 const tf = transitionFindings(sbBeats);
 for (const w of tf.unreasoned) warn('transition-unreasoned', w);
 for (const w of tf.uncovered) warn('boundary-uncovered', w);
