@@ -162,6 +162,7 @@ for the question CLAUDE.md cannot answer without growing: *which document settle
 |---|---|---|
 | [QUICKSTART.md](../QUICKSTART.md) | you have never authored a video here and want the model and the loop in one page | the JSON and HTML split, the build-render-ship loop, and the hard rules for day one |
 | [engine-doctrine/EVALS.md](EVALS.md) | a doctrine or engine change touches motion, transitions, backgrounds, type or layout | what `make evals` checks (liveness, not looks) · why there is no aesthetic score · how to run a before/after compare |
+| [engine-doctrine/GATE-CLASSIFICATION.md](GATE-CLASSIFICATION.md) | deciding whether a blocking gate is worth trusting, or picking which one to fix/reclassify/demote next | for every gate under quality/gates/ that judges a FILM: does it measure a MECHANISM in the declared JSON or the RESULT in the rendered pixels (or neither: PROCESS/AGGREGATOR), its corrected fire/refuse rate, and how many films waive it |
 | [engine-doctrine/JUDGE.md](JUDGE.md) | the render is done and something must actually LOOK at it | the 7 scoring dimensions · the verdict contract · why the static gates cannot replace this |
 | [engine-doctrine/LAUNCH-VIDEO-GUIDE.md](LAUNCH-VIDEO-GUIDE.md) | making a product-launch film for a real brand or website | the launch workflow end to end · what to crawl · the references it is built from |
 | [engine-doctrine/MCP.md](MCP.md) | driving this engine from a fresh session over MCP rather than from the shell | one-time setup · registering the server · the tools it exposes |
