@@ -149,6 +149,48 @@ export function beatsAround(beats, t) {
   return { before, after };
 }
 
+/**
+ * measureGroundFlips(jsonPath) -> Promise<[{t, from, to, before, after}]>
+ *
+ * The reusable half of this gate's CLI body: samples the built film's ground and returns every real
+ * flip, WHO it happens between (the storyboard beats either side, if the sidecar exists), never a
+ * verdict. `quality/gates/plan-vs-render.mjs` calls this to compare a beat's declared
+ * `transition_value:` (harness/lib/contract.mjs) against what actually rendered, the join Task 2 exists
+ * for: nothing before this measured the value a boundary carries, `ground-arc` only measured AFTER a
+ * flip happened. One sampler, never a second one that could disagree with it.
+ */
+export async function measureGroundFlips(jsonPath) {
+  const cfg = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+  const base = jsonPath.replace(/\.json$/, '');
+  const sbPath = `${base}.storyboard.md`;
+  const storyboard = fs.existsSync(sbPath) ? fs.readFileSync(sbPath, 'utf8') : '';
+  const beats = beatWindows(storyboard);
+
+  const measure = (img) => luminanceOf(img, { x: 0, y: 0, w: img.width, h: Math.round(img.height * 0.1) });
+  const rel = path.relative(ROOT, jsonPath);
+  const coarse = await sampleScene(rel, { rate: 0.25, measure });
+  const fps = coarse.fps || 30;
+  const lumSamples = coarse.samples.map((s) => ({ t: s.t, lum: s.img }));
+  const approxFlips = findFlips(lumSamples);
+
+  const fineTimes = [...new Set(approxFlips.flatMap((f) => {
+    const out = [];
+    for (let t = Math.max(0, f.t - 0.6); t <= f.t + 0.6; t += 1 / fps) out.push(+t.toFixed(4));
+    return out;
+  }))].sort((a, b) => a - b);
+  const fine = fineTimes.length ? await sampleScene(rel, { times: fineTimes, measure }) : { samples: [] };
+  const fineByFlip = new Map();
+  for (const f of approxFlips) {
+    fineByFlip.set(f.t, fine.samples.filter((s) => Math.abs(s.t - f.t) <= 0.6).map((s) => ({ t: s.t, lum: s.img })));
+  }
+
+  return approxFlips.map((f) => {
+    const { before, after } = beatsAround(beats, f.t);
+    const trans = measureTransition(fineByFlip.get(f.t) || [], f.t, { fps });
+    return { ...f, before, after, transition: trans };
+  });
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   if (process.argv.includes('--self-test')) {
     // The known truth this gate exists to reproduce: vawe-flow-2's real render measures white 0s, dark
@@ -213,37 +255,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const cfg = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
   const sbPath = path.resolve(ROOT, base + '.storyboard.md');
   const storyboard = fs.existsSync(sbPath) ? fs.readFileSync(sbPath, 'utf8') : '';
-  const beats = beatWindows(storyboard);
 
   const gf = gateFindings();
-
-  const measure = (img) => luminanceOf(img, { x: 0, y: 0, w: img.width, h: Math.round(img.height * 0.1) });
-  const rel = path.relative(ROOT, jsonPath);
-  const coarse = await sampleScene(rel, { rate: 0.25, measure });
-  const fps = coarse.fps || 30;
-  const lumSamples = coarse.samples.map((s) => ({ t: s.t, lum: s.img }));
-  const approxFlips = findFlips(lumSamples);
-
-  // A coarse (0.25s) pass finds WHERE a flip roughly is; a MINIMUM crossfade of 0.3s (10 frames at
-  // 30fps) cannot be measured at that resolution, so a second frame-rate pass around each approximate
-  // flip is needed to answer "how long did it take", not just "did it happen".
-  const fineTimes = [...new Set(approxFlips.flatMap((f) => {
-    const out = [];
-    for (let t = Math.max(0, f.t - 0.6); t <= f.t + 0.6; t += 1 / fps) out.push(+t.toFixed(4));
-    return out;
-  }))].sort((a, b) => a - b);
-  const fine = fineTimes.length ? await sampleScene(rel, { times: fineTimes, measure }) : { samples: [] };
-  const fineByFlip = new Map();
-  for (const f of approxFlips) {
-    fineByFlip.set(f.t, fine.samples.filter((s) => Math.abs(s.t - f.t) <= 0.6).map((s) => ({ t: s.t, lum: s.img })));
-  }
+  const approxFlips = await measureGroundFlips(jsonPath);
 
   const MIN_CROSSFADE = 0.3;
   for (const f of approxFlips) {
-    const { before, after } = beatsAround(beats, f.t);
+    const { before, after, transition: trans } = f;
     const beatNote = before && after ? `beat ${before.n} -> beat ${after.n}` : 'beat unknown (no storyboard match)';
     const evidence = isDeclared(cfg, f.t) ? `a schedule point sits within ${JOIN_TOLERANCE}s (evidence, not the verdict)` : 'no nearby schedule point';
-    const trans = measureTransition(fineByFlip.get(f.t) || [], f.t, { fps });
     const declaredMin = declaredCrossfadeSeconds(colorArc(storyboard));
     const minRequired = Math.max(MIN_CROSSFADE, declaredMin || 0);
     const declared = planDeclaresGround(storyboard, before, after);
@@ -267,7 +287,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 
   if (process.argv.includes('--json')) { gf.emit(); process.exit(gf.records.some((r) => r.severity === 'error') ? 1 : 0); }
-  console.log(`\n  ground-arc · ${path.basename(base)} · ${lumSamples.length} samples · ${approxFlips.length} flip(s)`);
+  console.log(`\n  ground-arc · ${path.basename(base)} · ${approxFlips.length} flip(s)`);
   gf.emit();
   if (!approxFlips.length) console.log('    (no ground flips measured)');
   console.log('');
