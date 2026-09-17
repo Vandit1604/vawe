@@ -8,7 +8,8 @@ group: crosscutting
 
 ## AGENT SUMMARY
 
-- Five rules for touching `core/`, `internal/`, a gate, or the capture path: a gate is the LAST resort
+- SIX rules for touching `core/`, `internal/`, a gate, or the capture path. The first: say what you did
+  and what you WITHHELD, to the run log, because every expensive failure here has been a silence. Then: a gate is the LAST resort
   (fix at the write site first); sugar must resolve at boot or fail loudly, never silently no-op; use
   one of three loose-coupling primitives (`defineRegistry`, `paramsOf`, `createKit`) instead of a fourth;
   price a capture-path change with a before/after wall-clock render time in the commit body; after every
@@ -29,6 +30,35 @@ way out loses the incident that justified it and becomes an overgeneral principl
 
 **Every trigger for these rules stays resident in CLAUDE.md**, one line each, because a reader who does
 not know a rule exists cannot go and load it.
+
+## SAY WHAT YOU DID, WHERE SOMEONE WILL READ IT
+
+**A part of the harness that decides something, refuses something, or tells the author something must
+record what it did AND what it withheld.** Not to a console that scrolls away: to `out/<film>.runs.jsonl`
+through `harness/lib/runlog.mjs`, which owns that file and is the only place its shape is written down.
+`make why` reads it back.
+
+This is the sixth rule because every expensive failure this repo has had was a silence, not a mistake:
+
+- `quality/gates/docker-context-check.mjs` (then under `scripts/site/`) was correct and in no ladder. Every production deploy died for
+  TEN DAYS while the old container kept serving.
+- `quality/gates/output-contract.mjs` was in CI and red for four runs. Nobody watches CI.
+- `quality/gates/seam-snap.mjs` printed `flash at 12.30s (frame 369)` and was ignored for ten days.
+  Rewritten to name the outgoing beat, the incoming beat, the dip and the fix, it was acted on the same
+  hour. Same gate, same measurement: the finding text was the whole difference.
+- 121 films rendered with no judge receipt, because `make ship` ENDED by suggesting `make judge` instead
+  of requiring it.
+- Every transition rule was withheld from every film that had no transitions, so the rules that teach you
+  to add one were hidden because you had none. It was invisible until `rulesFor` started recording what
+  it DROPPED and why.
+
+The last one is the pattern to copy. Recording what you did is half a receipt. **The withheld half is
+usually where the bug is**, because a thing that never happened leaves no other trace: without it, nobody
+can tell "the author was never told" from "the author was told and ignored it".
+
+What this asks of a new hook, gate or nudge, in one line each: name what you saw (measured, not
+asserted), where (the beat, the layer, the time, in the author's own vocabulary), the one next command,
+and, if you chose between candidates, what you did not show and why.
 
 ## ARCHITECTURE: fix it at the root, or fail there. A gate is the last resort.
 
