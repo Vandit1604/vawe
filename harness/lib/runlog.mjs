@@ -28,7 +28,15 @@
 //              spent rendering it; `wallMs` fields (here, on `render`, and per entry in `checks`) are
 //              the actual timings, added so `make timings` can answer "how long did this take" without
 //              re-deriving it from scrollback.
-//   }
+//     knowledge: { stage, shown: [ruleId,...], dropped: [{id,category,reason},...] } | null
+//              the craft-rule knowledge a live hook (harness/live/stage-say.mjs) surfaced to the author
+//              for this film's stage: which rule ids it printed, and which it had but did not, each with
+//              why (feature-not-matched / over-cap / over-char-budget, see craft-rules.mjs's rulesFor).
+//              Nothing recorded this before: a rule could be filtered out by a hard cap and nobody could
+//              later tell "the author was never told" from "the author was told and ignored it". Logged
+//              ONCE per (film, stage) transition, the same cadence stage-say already dedupes its own
+//              print at, not once per turn: this hook runs on every keystroke and a line-per-turn write
+//              would be the exact noise runlog's own one-line-per-fact rule exists to avoid.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -60,6 +68,7 @@ export function appendRun(film, record = {}) {
     render: record.render || null,
     content: record.content || null,
     judge: record.judge || null,
+    knowledge: record.knowledge || null,
     wallMs: Number.isFinite(record.wallMs) ? record.wallMs : null,
   };
   const out = runsPathFor(film);

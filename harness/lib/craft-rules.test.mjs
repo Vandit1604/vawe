@@ -182,6 +182,29 @@ test('rulesFor: pin puts named ids first, ahead of check-null records the defaul
   assert.deepEqual(noop.map((r) => r.id), ['pin.prose-a', 'pin.prose-b'], 'pinning an id that matches nothing is a no-op');
 });
 
+test('rulesFor: withReceipt names why each unshown candidate was dropped', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'craft-rules-receipt-'));
+  fs.mkdirSync(path.join(root, 'engine-doctrine/RULES'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'engine-doctrine/CRAFT/rules'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'engine-doctrine/RULES/thing.md'), '# A title\n\nbody\n');
+  const base = { stage: 'design', doc: 'engine-doctrine/RULES/thing.md', brief: 'A title', category: 'rec', check: null, adapt: null };
+  const records = [
+    { ...base, id: 'rec.always-1', applies: 'always' },
+    { ...base, id: 'rec.always-2', applies: 'always' },
+    { ...base, id: 'rec.always-3', applies: 'always' },
+    { ...base, id: 'rec.unmatched', applies: 'hasKinetic' },
+  ];
+  fs.writeFileSync(path.join(root, 'engine-doctrine/CRAFT/rules/rec.json'), JSON.stringify(records));
+  const { rules, dropped } = rulesFor({
+    stage: 'design', features: { hasKinetic: false }, root, cap: 1, withReceipt: true,
+  });
+  assert.deepEqual(rules.map((r) => r.id), ['rec.always-1']);
+  const byId = Object.fromEntries(dropped.map((d) => [d.id, d.reason]));
+  assert.equal(byId['rec.always-2'], 'over-cap');
+  assert.equal(byId['rec.always-3'], 'over-cap');
+  assert.equal(byId['rec.unmatched'], 'feature-not-matched');
+});
+
 // P3: motion.json cleanup + stage-say category order, against the real rule files.
 
 test('rulesFor: grouped mode at direct returns a motion rule first, capped at 2 per category', () => {

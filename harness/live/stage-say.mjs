@@ -20,6 +20,7 @@ import path from 'node:path';
 import { stageOf, ROOT } from '../../quality/gates/stage.mjs';
 import { computeFeatures } from '../../quality/gates/craft-checklist.mjs';
 import { rulesFor, briefLine, STAGE_CATEGORY_ORDER } from '../lib/craft-rules.mjs';
+import { appendRun } from '../lib/runlog.mjs';
 
 const DAY = 24 * 60 * 60 * 1000;
 const dir = path.join(ROOT, 'films/scene');
@@ -82,10 +83,19 @@ try {
     // order, 2 lines and 320 chars per category, so motion cannot crowd out transitions and sound at
     // the same stage. A stage with no named order keeps the old flat cap/budget.
     const order = STAGE_CATEGORY_ORDER[st.stage];
-    const rules = order
-      ? rulesFor({ stage: st.stage, features, categories: order, capPerCategory: 2, maxCharsPerCategory: 320 })
-      : rulesFor({ stage: st.stage, features });
+    const { rules, dropped } = order
+      ? rulesFor({ stage: st.stage, features, categories: order, capPerCategory: 2, maxCharsPerCategory: 320, withReceipt: true })
+      : rulesFor({ stage: st.stage, features, withReceipt: true });
     for (const r of rules) console.log(`  ${briefLine(r)}`);
     markSpoke(best.film, st.stage);
+    // The receipt: what the author was actually shown vs. what existed and was not (and why). Logged
+    // once per (film, stage) transition, the same gate as markSpoke above, not once per turn: this hook
+    // fires on every keystroke and `runlog.mjs` wants one line per fact, not one per prompt.
+    try {
+      appendRun(best.film, {
+        cmd: 'stage-say',
+        knowledge: { stage: st.stage, shown: rules.map((r) => r.id), dropped },
+      });
+    } catch { /* the receipt is a nudge too; never let a log failure touch the printed briefs above */ }
   }
 } catch { /* rule briefs are a nudge; a broken loader must never break this hook */ }
