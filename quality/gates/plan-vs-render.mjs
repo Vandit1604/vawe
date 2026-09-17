@@ -34,7 +34,7 @@
 // FAIL: plan-overruns-render · junction-is-static.
 // WARN: held-through-the-change · beat-holds-still · unplanned-junction · plan-has-no-spans ·
 //       spectacle-not-built · spectacle-in-wrong-beat · spectacle-beat-unnamed · pace-not-kept ·
-//       pace-not-chosen · thread-not-built.
+//       pace-not-chosen · thread-not-built · transformation-not-continuous.
 //
 // THE THREADS PROMISE. `threads:` is measured prose (see below), so `thread-not-built` never parses
 // it as a grammar. It greps a small closed set of literal nouns (a cursor, a caret, a ground that
@@ -54,6 +54,10 @@ import { sceneTiming, num } from './scene-timing.mjs';
 import { parseStoryboard } from '../../harness/author/storyboard-parse.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
+import { gradeable } from './tile.mjs';
+import { emptinessAt, probeFps, probeTotalFrames } from '../../harness/lib/frame-forensics.mjs';
+import { flattenLayers, nearestBeats } from '../../harness/lib/layers.mjs';
+import { allBoundaries } from '../../core/timeline/junctions.js';
 
 const file = process.argv[2];
 const strict = process.argv.includes('--strict') || process.env.STRICT === '1';
@@ -214,6 +218,77 @@ if (sb && sb.threads) {
       + `If this is a deliberate change of direction, waive it here with a reason `
       + `({"authoring":{"allow":["thread-not-built"],"_why":{"thread-not-built":"..."}}}) `
       + `and copy that reason into \`threads:\` by hand so the plan a person approved still describes the film they get.`);
+  }
+}
+
+// ---------- the transformation-at-the-end promise: continuity, never identity ----------
+// THE OWNER'S ACTUAL ASK: "the harness should verify the things we have finalized in storyboard is
+// true in the video, like the vawe video becoming the logo at the end". Be honest about the two halves
+// of that. CHECKABLE: at a promised handoff, the stage never goes empty. NOT CHECKABLE: that the thing
+// which arrives IS the thing that left, transformed. That is identity across two moments, it lives in
+// the pixels, and it belongs to `make judge` and human eyes, the same restraint `thread-not-built`
+// above already holds to.
+//
+// WHERE "the end" IS. `threads:` was measured across 44 storyboards and is always a sentence (see
+// above); `arc:` and `spectacle:` read the same way, and every sample carrying a transformation names
+// it AS PART OF A CHAIN in film order ("the name becomes the surface, the surface becomes the frame it
+// rendered, ... the wall resolves to the claim"). Parsing WHICH BEAT a clause means would be a guess,
+// exactly what `thread-not-built`'s own restraint refuses; which JOIN it means does not need one: take
+// the render's own LAST boundary (core/timeline/junctions.js allBoundaries, the same declared-plus-
+// inferred list quality/gates/seam-snap.mjs samples every one of), since a film's last boundary is its
+// own answer to "what happens at the end" regardless of which noun the prose used for it.
+//
+// WHY NOT `T.handoffs`. It looked like the natural JSON-level proxy for "do the two ends share a
+// place" (an exit near another's entrance, same screen region), but it is tuned for a near-simultaneous
+// meet (its own HANDOFF_WINDOW is 0.25s) and this engine's own deliberate fix for the exemplar defect is
+// a much WIDER overlap (the mark arrives 0.35s before the outgoing strip fully leaves), so `T.handoffs`
+// found no join on the FIXED film either. A check that reads clean on both the broken film and the fix
+// is not reading anything. `allBoundaries` has no such window to mistune, it is the same joint seam-snap
+// already measures pixels at.
+const TRANSFORM_WORDS = '(?:becomes|forms out of|resolves to|turns into|dissolves into)';
+function lastTransformClause(text) {
+  if (!text) return null;
+  const rx = new RegExp(`\\b${TRANSFORM_WORDS}\\b`, 'gi');
+  let m, last = null;
+  while ((m = rx.exec(text))) last = m;
+  if (!last) return null;
+  const start = Math.max(text.lastIndexOf('.', last.index), text.lastIndexOf(',', last.index)) + 1;
+  const dot = text.indexOf('.', last.index);
+  return text.slice(start, dot === -1 ? text.length : dot).trim();
+}
+const endClause = sb && (lastTransformClause(sb.arc) || lastTransformClause(sb.spectacle));
+if (endClause) {
+  const flatAll = flattenLayers(T.scene.layers);
+  const boundaries = allBoundaries(T.scene, flatAll);
+  if (!boundaries.length) {
+    warn('transformation-not-continuous', `${sbPath} names a transformation as its own through-line ("${endClause}"). `
+      + `${file} declares no cut/seam/sting and its layer starts never cluster into an inferred one either `
+      + `(core/timeline/junctions.js): there is no boundary in the render this check can hold the promise to.`);
+  } else {
+    const joinT = boundaries[boundaries.length - 1];
+    const { out: fromId, inn: toId } = nearestBeats(flatAll, joinT);
+    const ready = gradeable(file);
+    if (!ready.ok) {
+      console.log(`  ○ ${sbPath} promises a transformation at the film's end ("${endClause}"), its last boundary `
+        + `lands at ${s(joinT)} as "${fromId}" -> "${toId}". Not checked: ${ready.why} (${ready.fix}).`);
+    } else {
+      const mp4 = ready.mp4;
+      const realFps = probeFps(mp4), totalFrames = probeTotalFrames(mp4);
+      if (realFps && totalFrames) {
+        // same colour-blind emptiness test seam-snap.mjs runs at every boundary (harness/lib/
+        // frame-forensics.mjs emptinessAt), scoped here to the ONE join the storyboard's own prose
+        // named, so the finding reads as a broken PROMISE, not just a broken frame.
+        const empty = emptinessAt(mp4, realFps, totalFrames, Math.round(joinT * realFps));
+        if (empty) {
+          warn('transformation-not-continuous', `${sbPath} promises a transformation at the film's end ("${endClause}"), `
+            + `landing as "${fromId}" -> "${toId}" at ${s(joinT)}. The render goes empty there: spread drops `
+            + `to ${empty.spread} vs ${empty.outsideSpread} just outside (32x18 grid, colour-blind), empty `
+            + `${empty.emptySec.toFixed(2)}s before content reads. This proves continuity broke, never that the wrong `
+            + `thing arrived: overlap "${fromId}"'s exit with "${toId}"'s entrance so the stage never empties `
+            + `(TRANSITIONS.md: no transition-dip), then re-render.`);
+        }
+      }
+    }
   }
 }
 
