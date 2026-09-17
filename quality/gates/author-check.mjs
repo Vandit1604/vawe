@@ -150,6 +150,20 @@ const HARD_CODES = {
   // quality/gates/design-drift.mjs. `design-token-hint` is its non-blocking sibling, always a warn.
   'design-drift': 'every visible box\'s font, radius, shadow and colour is a declared value, in the kit or in the film\'s design.md',
   'plain-slideshow': 'the film reaches past a slideshow: kinetic type, a camera move, or real transitions',
+  // A FILM THAT ASKS FOR SOUND AND HAS NONE IS BROKEN, NOT UNPOLISHED. quality/gates/audio-check.mjs
+  // has always said this exactly right ("every cue resolves to nothing and the mixer writes a SILENT
+  // track while this gate reads it as sounded") and always exited 0 about it. The owner rejected that
+  // silence outright: "dont have fallbacks for sounds, that could end up sounds not working and a new
+  // user not able to understand why."
+  //
+  // WHY THIS DOES NOT REOPEN THE ARGUMENT THE SOUND STEP ALREADY SETTLED. That argument (see the
+  // `sound` styleGate below) is about whether SILENCE was a decision, and blocking it would fail the
+  // 116 films that declare `silent: true`. These two codes ask a different and much narrower question:
+  // this film DECLARED sound and there is none to play. Measured across the library: 49 films declare
+  // sound, 116 declare silence, 26 name no audio block. Only the first group can ever reach these, and
+  // for them the render is not merely unpolished, it is not the film the author asked for.
+  'cues-have-no-sound': 'a film that declares cues has the sound files to play them',
+  'cue-missing': 'every cue a film names by hand exists under assets/sfx/',
   'no-preflight': 'the film went through the decision chain before the JSON existed',
   'crossfade-mud': 'no transition dissolves one text state into another in place',
   'no-continuous-object': 'something survives the film\'s cuts',
