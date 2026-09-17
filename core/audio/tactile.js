@@ -105,6 +105,7 @@ export const DENSITY = {
   minGap: 0.05,      // two cues closer than this flam into one smeared attack: keep the heavier
   maxPerSec: 5,      // measured over a +/-0.5s window around each candidate
   floorArea: 0.0015, // a layer smaller than 0.15% of the frame is punctuation, not an arrival
+  groundArea: 0.92,  // a layer covering 92%+ of the frame is the GROUND, not a thing that arrived
 };
 
 // How long the baked `riser` runs. The cue carries no parameters, so the only way a riser can END on
@@ -166,6 +167,13 @@ function arrivalCues(layers, canvas, out) {
     if (L.type === 'count') continue;                         // and so are a counter's own plucks
     const { area, w, h } = prominenceOf(L, canvas);
     if (area < DENSITY.floorArea) continue;
+    // AND THE CEILING, which the floor above always implied. SILENT_TYPES says a glow is not an event,
+    // it is a condition of the frame; a full-bleed rect is the same thing wearing a different type. A
+    // film that crossfades its ground (dark terminal -> dark editor -> white films, a tint per playing
+    // clip) has one of these per act, each covering the whole canvas, so each passed the floor and took
+    // the HEAVIEST cue available: seven thuds where nothing landed. The owner heard it immediately and
+    // called it "off beat sounds", which is exactly right, the beat had no event on it.
+    if (area >= DENSITY.groundArea) continue;
     if (L.type === 'rect' && Math.min(w, h) <= 6) continue;   // a hairline rule is decoration
     const p = clamp(Math.sqrt(clamp(area, 0, 1)), 0, 1);
     const travel = travelOf(L.anim);

@@ -1746,12 +1746,25 @@ const boxOf = (id) => boxes.get(id) || null;
           gain: +(((L.keyGain ?? 0.13)) * (full[i] === ' ' ? 1.25 : vary)).toFixed(3) });
       }
     }
-    // A key train is legitimately dense, so it gets its own tighter floor, the 0.09 structural
-    // merge above, applied to keystrokes, would silently drop every other letter at real typing speed.
+    // A key train is legitimately dense, so it gets its own floor rather than the 0.09 structural merge
+    // above, which applied to keystrokes would silently drop every other letter at real typing speed.
+    //
+    // BUT DENSE IS NOT UNBOUNDED, and the old 0.03 floor (33 clicks a second) was. The default typing
+    // speed is 24 cps, so a typed line fired ~22 clicks in one second and the ear stopped hearing
+    // typing and started hearing a buzz. The owner's words were "too much sounds", measured at 18 and
+    // 22 sounds in two separate seconds of a 22s film, against this file's own DENSITY.maxPerSec of 5.
+    //
+    // The exclusion from the structural budget stays, and its reasoning is still right: counting keys
+    // as density would starve every arrival that happens while anything types. What was missing is
+    // that NOBODY counted the total a viewer actually hears. So the train keeps every keystroke while
+    // typing is slow enough to resolve, and thins above KEY_MAX_HZ, which is roughly where discrete
+    // clicks stop being countable by ear. The picture still types at its authored cps: only the SOUND
+    // thins, because a sound nobody can resolve is texture, not information.
+    const KEY_MAX_HZ = 11;
     if (keyCues.length) {
       keyCues.sort((a, b) => a.t - b.t);
       const keys = [];
-      for (const c of keyCues) if (!keys.length || c.t - keys[keys.length - 1].t > 0.03) keys.push(c);
+      for (const c of keyCues) if (!keys.length || c.t - keys[keys.length - 1].t > 1 / KEY_MAX_HZ) keys.push(c);
       sfx = sfx.concat(keys).sort((a, b) => a.t - b.t);
     }
     // TACTILE SOUND DESIGN (`audio.tactile`). The film's own motion, voiced: core/audio-tactile.js
