@@ -625,6 +625,12 @@ docs: ## [site] PRINT THE DOC MAP: every written thing in this repo, one line ea
 doc-index: ## [site] regenerate every index view from the per-doc frontmatter: engine-doctrine/INDEX.md, the `vawe-docs` skill, and
 	@node quality/gates/doc-map.mjs --write $(if $(JSON),--json,)
 
+# make gate-classification, regenerate engine-doctrine/GATE-CLASSIFICATION.md: one row per gate under
+# quality/gates/ that judges a FILM, mechanism or result, with its corrected fire/refuse rate and its
+# waiver count. GATE_CENSUS_JSON=<path> to reuse a census already run instead of running a fresh one.
+gate-classification: ## [preflight] regenerate engine-doctrine/GATE-CLASSIFICATION.md: mechanism or result, per gate, generated
+	@node quality/gates/gate-classification.mjs
+
 # make transitions [BASIC=1], print THE TRANSITION DATABASE (core/transitions/catalog.js): every transition
 # across all four mechanisms (anim/cut/sting/seam), grouped, basics marked. Decision theory: engine-doctrine/CRAFT/TRANSITIONS.md.
 # make transitions D=<film.json>, run the DECISION PROCEDURE per boundary of that film's storyboard: the
