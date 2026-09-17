@@ -7,18 +7,35 @@ codes: silent-by-omission, silence-without-a-reason, audio-block-produces-nothin
 
 # SOUND: the structural register we have not been using
 
-## Sound is asked about at DIRECT, not at the storyboard
+## Two questions, two stages: INTENT at the storyboard, CUES at DIRECT
 
-Sound is not a storyboard field. It is not part of what a person approves at stage 3: the picture is
-approved before anyone has to have an opinion on sound, and a storyboard's `craft:` map carries no
-`sound:` entry (this doc used to require one, via `craft-checklist.mjs`'s `applies-when: always`; that
-line is gone now on purpose). The question moves to where `harness/lib/craft-rules.mjs`'s
-`STAGE_CATEGORY_ORDER` already places it: stage 6, DIRECT, after motion and transitions, once the cut
-reads. The real gate is `make audio-check D=<file>`, wired into `make check`/`make ship` (stage 7,
-before render), and it checks the SCENE directly, never the storyboard.
+Sound splits into a question a person answers once, early, and a hundred small ones an author answers
+later, looking at the picture. Conflating the two is what pushed sound out of the plan entirely; keeping
+them apart is what lets it back in without re-freezing it.
 
-A storyboard written before this change may still carry a `craft.sound:` line. Leave it: nothing reads
-it any more, and deleting it from every old storyboard would be a larger diff than the fact is worth.
+**Intent, at the storyboard (stage 2, plan).** Does this film have sound at all, and what is meant to
+carry it, a bed, cue-scored junctions, a bridge, VO, or a stated silence? This is a single line of
+PROSE next to the beat table, the same register as `arc` or `not:`, not a structured field validated
+against a registry: "sound carries the films seam" or "silent by design, autoplays muted in-feed" is
+enough to answer it. It belongs at the plan for the same reason `NOT` does: naming the intent before
+building is what stops an author reaching `render` having never once decided whether the film is meant
+to be heard. It is **not** part of what a person approves at stage 3: the picture is approved before
+anyone has to have an opinion on sound's specifics, and this line commits to nothing that would block
+approval. A storyboard's `craft:` map still carries no required `sound:` entry (`craft-checklist.mjs`'s
+`applies-when: always` line for it is gone on purpose, see below), and this intent line is not
+re-adding that requirement: it is a planning habit, not a gate.
+
+**Per-cue choices, at DIRECT (stage 6).** Which baked cue plays on which junction, whether a bridge
+crosses which cut, the bed's gain and duck, all of it is decided once the cut reads, against the real
+timeline, the way `harness/lib/craft-rules.mjs`'s `STAGE_CATEGORY_ORDER` already places `sound` in
+`direct` (after motion and transitions). The real gate is `make audio-check D=<file>`, wired into
+`make check`/`make ship` (stage 7, before render), and it checks the SCENE directly, never the
+storyboard: a storyboard's stated intent is never itself validated, only the built film is.
+
+A storyboard written before this change may still carry a `craft.sound:` line, or none at all. Leave a
+`craft.sound:` line as-is: nothing reads it any more, and deleting it from every old storyboard would be
+a larger diff than the fact is worth. Adding the new intent line to an old storyboard is optional, never backfilled: `make storyboard-check`
+does not require it on the existing corpus.
 
 ## Hear it before you commit it: `make studio` state 5
 
