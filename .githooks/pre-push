@@ -53,6 +53,14 @@
 # It scans the whole pushed RANGE rather than the working tree, because the incident arrived by MERGE:
 # the commit was authored in an agent's worktree, where this machine's commit-msg hook may not have run
 # at all, and reached main through the lead.
+#
+# deploy-check runs in the same loop, on the same range, for the same reason push-guard does: it needs
+# to know what is actually about to reach the remote, not what the working tree happens to hold. It is
+# quality/gates/site-build-check.mjs: it runs the site's real build (site-engine, the fonts generator,
+# tsc --noEmit) and costs about 3 seconds, but ONLY when the pushed range actually touches something the
+# site build reads (derived from the Dockerfile's own COPY lines). A push that never touches the site
+# pays nothing. This is the local half of the ten-day vawe.dev outage: three stacked build breaks that
+# every local check passed, because none of them ran the build.
 while read -r _local_ref local_sha _remote_ref remote_sha; do
   [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue   # a branch deletion
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
@@ -64,6 +72,10 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
     echo "✗ pre-push blocked by push-guard. These are house rules, not style checks." >&2
     exit 1
   fi
+  if ! node quality/gates/site-build-check.mjs "$range"; then
+    echo "✗ pre-push blocked: the site would not have built. Fix it, or --no-verify to override." >&2
+    exit 1
+  fi
 done
 
 echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe) …"
@@ -72,3 +84,8 @@ if ! make schema-check lib-test craft-coverage doc-refs skill-reach arsenal-chec
   exit 1
 fi
 echo "✓ pre-push: framework healthy"
+
+# ci-status is informational only, never a gate: it reports the LAST CI run (this push has no run yet)
+# so a red gates.yml is visible right here instead of discovered by nobody looking. One API call, never
+# polled. See harness/dev/ci-status.mjs for why this exists (CI was red for four runs, unnoticed).
+node harness/dev/ci-status.mjs || true
