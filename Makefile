@@ -1170,6 +1170,15 @@ engine-sync: ## [engine] publish the engine into site/public (the site's in-brow
 docker-check: ## [site] will the image carry what the Dockerfile COPY lines expect?
 	@node quality/gates/docker-context-check.mjs
 
+# make deploy-check [RANGE=a..b]: run the site's real build steps (site-engine, the fonts generator,
+# tsc --noEmit) so a break in them shows up here instead of on the deploy host. No RANGE checks
+# unconditionally, which is what you want before a push; pre-push passes the pushed range so an
+# unrelated commit (a film, a doc) pays nothing. Skips loudly, never silently, if site/ has no
+# node_modules. See quality/gates/site-build-check.mjs for the incident this replays.
+.PHONY: deploy-check
+deploy-check: ## [site] run the site's real build steps locally (site-engine + fonts + tsc), the check pre-push runs when it applies
+	@node quality/gates/site-build-check.mjs $(RANGE)
+
 .PHONY: worktrees
 # Retire agent worktrees whose work has landed. Reports by default; PRUNE=1 removes.
 # Content is the authority, never the commit graph: agent work here is often copied out rather than
