@@ -74,6 +74,9 @@ only when the image genuinely needs it. An over-graded image is as off as a raw 
 - **Never embed copyrighted material** into a published video (it triggers Content ID claims): movie/TV
   posters, album covers, film stills, news photos, paid stock without a license, copyrighted music.
   **Capture the real product UI instead.**
+- **Fetching stock footage or photos from a new site?** Check it against
+  [`../ASSET-SOURCES.md`](../ASSET-SOURCES.md) first: SHIPPABLE sources may be committed, LOCAL ONLY
+  sources may only be fetched fresh onto disk, never redistributed inside this repo.
 
 ## 4. Icons
 - **Brand marks → simple-icons**, fetched with `make assets` (or the `curl -f` form in §0) → `assets/icons/`.
