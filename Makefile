@@ -340,6 +340,12 @@ regen: ## [maintenance] write every generated file: schema-write + generated-che
 why: ## [check] read the run log for a film: last N runs + what changed between the last two (D=, N=5)
 	@node harness/lib/why.mjs $(D) $(N)
 
+# make knowledge-audit: does a craft rule withheld as feature-not-matched (harness/lib/runlog.mjs's
+# `knowledge` receipt) later get PROVEN necessary, i.e. does the same film go on to hit the finding
+# code that rule owns? A report, never a gate: it never blocks a ship. Scans every out/*.runs.jsonl.
+knowledge-audit: ## [check] join withheld craft rules against the findings they'd have prevented
+	@node harness/lib/knowledge-audit.mjs
+
 # make timings D=<file> [N=10]: real wall-clock time per step from the run log (harness/lib/runlog.mjs
 # wallMs fields), not the video length record-render.mjs also stores. One row per logged run: gate
 # time, render time, frames, wall frames/sec, and the target's own total; a median per command at
