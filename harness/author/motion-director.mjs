@@ -209,11 +209,14 @@ function tellEffectSoup(d, layers, beats) {
   });
   const distinctEffects = new Set(effectsPerBeat.flatMap((s) => [...s]));
   const effectBeats = effectsPerBeat.filter((s) => s.size).length;
+  const effectTimes = beats.filter((t, i) => effectsPerBeat[i].size).map((t) => `${t}s`);
   const metrics = beats.length ? { 'effect-soup': effectBeats / beats.length } : {};
-  if (beats.length >= 3 && effectBeats / beats.length > 0.6)
-    return { metrics, findings: [warn('effect-soup', `an effect on ${effectBeats}/${beats.length} beats. Most beats should be clean type; effects are 2-3 earned moments (TASTE-RULES: effect soup)`)] };
+  if (beats.length >= 3 && effectBeats / beats.length > 0.6) {
+    const strip = effectTimes.slice(2); // keep the first two as the "earned" moments, drop the rest
+    return { metrics, findings: [warn('effect-soup', `an effect on ${effectBeats}/${beats.length} beats (@${effectTimes.join(', @')}). Most beats should be clean type; effects are 2-3 earned moments. Remove \`filter\`/\`shader\`/\`sting\` from the beat(s) at @${strip.join(', @')}, keeping the two earliest (TASTE-RULES: effect soup)`)] };
+  }
   if (distinctEffects.size > Math.max(4, Math.ceil(beats.length / 2)))
-    return { metrics, findings: [warn('effect-soup', `${distinctEffects.size} distinct effects across ${beats.length} beats. A new look every beat is a demo reel, not a film`)] };
+    return { metrics, findings: [warn('effect-soup', `${distinctEffects.size} distinct effects across ${beats.length} beats (${[...distinctEffects].join(', ')}). A new look every beat is a demo reel, not a film. Pick 2-3 to keep and drop the rest.`)] };
   return { metrics, findings: [] };
 }
 
@@ -386,7 +389,7 @@ function tellLinearMotion(layers) {
   layers.forEach((l, i) => scanEase(l, `layer[${i}]`));
   const metrics = { 'linear-motion': linearHits.length };
   if (!linearHits.length) return { metrics, findings: [] };
-  return { metrics, findings: [warn('linear-motion', `${linearHits.length} move(s) run FLAT from rest to rest on ease "linear"/"none". A move that starts and stops must decelerate in / accelerate out (DIRECTION.md: slow-in/slow-out). A pan, scroll, marquee, spinner or ambient drift is exempt: it is entered or left in motion, it turns a full circle, it stays inside the ambient band, or its keys are spaced so the run already decelerates. At: ${linearHits.slice(0, 4).join(', ')}${linearHits.length > 4 ? ', …' : ''}`)] };
+  return { metrics, findings: [warn('linear-motion', `${linearHits.length} move(s) run FLAT from rest to rest on ease "linear"/"none", at ${linearHits.slice(0, 4).join(', ')}${linearHits.length > 4 ? `, …` : ''}. Set the entrance key's \`ease\` to "easeOutBack" (or "spring") and the exit key's to an ease-in curve, so the move decelerates into rest and accelerates out of it (DIRECTION.md: slow-in/slow-out). A pan, scroll, marquee, spinner or ambient drift is exempt: it is entered or left in motion, it turns a full circle, it stays inside the ambient band, or its keys are spaced so the run already decelerates.`)] };
 }
 
 // ---- DURATION AGAINST DISTANCE (measured, never a finding. See the header) ---------------------
@@ -553,7 +556,10 @@ function tellEnterAndRetreat(allLayers) {
   const retreats = allLayers.filter((l) => DIR.test(l.anim || '') && DIR.test(l.out || '') && l.anim.split('-')[1] === l.out.split('-')[1]);
   const metrics = { 'enter-and-retreat': retreats.length };
   if (!retreats.length) return { metrics, findings: [] };
-  return { metrics, findings: [warn('enter-and-retreat', `${retreats.length} layer(s) enter and exit on the same side (e.g. anim:"${retreats[0].anim}" + out:"${retreats[0].out}"). Travel ONE continuous direction: enter a side, exit the opposite (DIRECTION.md: paired directional exits)`)] };
+  const named = retreats.slice(0, 4).map((l, i) => `"${l.id || l.class || `layer[${allLayers.indexOf(l)}]`}" (anim:"${l.anim}" + out:"${l.out}")`);
+  const side = (a) => a.split('-')[1];
+  const opposite = { left: 'right', right: 'left', up: 'down', down: 'up' };
+  return { metrics, findings: [warn('enter-and-retreat', `${retreats.length} layer(s) enter and exit on the same side: ${named.join(', ')}${retreats.length > 4 ? ', …' : ''}. Set \`out\` to slide-${opposite[side(retreats[0].anim)]}, the opposite of \`anim\`, so the layer travels one continuous direction (DIRECTION.md: paired directional exits).`)] };
 }
 
 // ---- ONE SCENE, MEASURED ---------------------------------------------------------------------------
