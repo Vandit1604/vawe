@@ -202,6 +202,14 @@ export const STAGE_CATEGORY_ORDER = {
  * before the default check-then-authored-order ranking, so an owner's must-show rules survive the cap
  * and char budget whatever their position in the source JSON. Pinning an id that does not match
  * (wrong stage/category/features) is simply a no-op, never an error.
+ *
+ * `withReceipt: true` changes the return to `{ rules, dropped }`, where `dropped` is every candidate
+ * that matched this stage/category but was not shown, each tagged with why: `feature-not-matched` (the
+ * record's `applies` feature was false for this film), `over-cap` (matched, but its category/global cap
+ * was already full) or `over-char-budget` (matched, under the cap, but the character budget was already
+ * spent). This is the answer to "from all things available, why did it reach for THIS one": the shown
+ * list alone cannot say what else existed. See harness/lib/runlog.mjs's `knowledge` field, the one place
+ * a caller records this.
  */
 function byCheckThenOrder(pin) {
   const pinIndex = new Map((pin || []).map((id, i) => [id, i]));
@@ -214,44 +222,69 @@ function byCheckThenOrder(pin) {
   };
 }
 
-/** capList(indexed, cap, maxChars, pin) -> record[], stable-sorted then walked once, capped both ways. */
-function capList(indexed, cap, maxChars, pin) {
+/**
+ * capListReceipt(indexed, cap, maxChars, pin) -> { kept: record[], dropped: {id,category,reason}[] }.
+ * Stable-sorted then walked once, capped both ways, exactly as the old capList did; the only change is
+ * that the walk now names, for everything it does NOT keep, which of the two caps stopped it. Once a
+ * cap is hit the ORIGINAL code `break`s rather than skipping ahead (a later, shorter rule might have
+ * fit under the char budget, but determinism outranks a fuller list), so every remaining candidate is
+ * tagged with the same reason that ended the walk.
+ */
+function capListReceipt(indexed, cap, maxChars, pin) {
   const sorted = [...indexed].sort(byCheckThenOrder(pin));
-  const out = [];
+  const kept = [];
+  const dropped = [];
   let chars = 0;
-  for (const { r } of sorted) {
-    if (out.length >= cap) break;
+  for (let idx = 0; idx < sorted.length; idx++) {
+    const { r } = sorted[idx];
+    if (kept.length >= cap) {
+      for (let j = idx; j < sorted.length; j++) {
+        dropped.push({ id: sorted[j].r.id, category: sorted[j].r.category, reason: 'over-cap' });
+      }
+      break;
+    }
     const len = briefLine(r).length;
-    if (out.length > 0 && maxChars != null && chars + len > maxChars) break;
-    out.push(r);
+    if (kept.length > 0 && maxChars != null && chars + len > maxChars) {
+      for (let j = idx; j < sorted.length; j++) {
+        dropped.push({ id: sorted[j].r.id, category: sorted[j].r.category, reason: 'over-char-budget' });
+      }
+      break;
+    }
+    kept.push(r);
     chars += len;
   }
-  return out;
-}
-
-/** groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory, pin) -> the grouped-mode walk. */
-function groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory, pin) {
-  const out = [];
-  for (const cat of categories) {
-    const group = matched.filter(({ r }) => r.category === cat);
-    out.push(...capList(group, capPerCategory, maxCharsPerCategory, pin));
-  }
-  return out;
+  return { kept, dropped };
 }
 
 export function rulesFor({
   stage, features = {}, categories = null, cap = 5, maxChars = 1200,
   capPerCategory = null, maxCharsPerCategory = null, pin = null, root = ROOT,
+  withReceipt = false,
 } = {}) {
   const all = loadCraftRules({ root });
-  const matched = all
-    .map((r, i) => ({ r, i }))
-    .filter(({ r }) => r.stage === stage
-      && (!categories || categories.includes(r.category))
-      && (r.applies === 'always' || !!features[r.applies]));
+  // Stage/category candidates BEFORE the feature filter, so a feature mismatch can be named as a drop
+  // reason instead of silently vanishing the way it did when this function only ever returned survivors.
+  const candidates = all.filter((r) => r.stage === stage && (!categories || categories.includes(r.category)));
+  const dropped = [];
+  const matched = [];
+  candidates.forEach((r, i) => {
+    if (r.applies === 'always' || !!features[r.applies]) matched.push({ r, i });
+    else dropped.push({ id: r.id, category: r.category, reason: 'feature-not-matched' });
+  });
 
+  let shown;
   if (categories && capPerCategory != null) {
-    return groupedRulesFor(matched, categories, capPerCategory, maxCharsPerCategory, pin);
+    shown = [];
+    for (const cat of categories) {
+      const group = matched.filter(({ r }) => r.category === cat);
+      const { kept, dropped: d } = capListReceipt(group, capPerCategory, maxCharsPerCategory, pin);
+      shown.push(...kept);
+      dropped.push(...d);
+    }
+  } else {
+    const { kept, dropped: d } = capListReceipt(matched, cap, maxChars, pin);
+    shown = kept;
+    dropped.push(...d);
   }
-  return capList(matched, cap, maxChars, pin);
+  return withReceipt ? { rules: shown, dropped } : shown;
 }

@@ -42,6 +42,28 @@ export function diffLines(a, b) {
   return lines;
 }
 
+/** knowledgeLines(runs) -> what each stage-say receipt (harness/live/stage-say.mjs) told the author,
+ * and what it had but did not: "from all things available, why it reached for something". One block per
+ * logged (film, stage) transition, oldest first; a run with no `knowledge` (every non-stage-say cmd)
+ * contributes nothing. */
+export function knowledgeLines(runs) {
+  const withKnowledge = runs.filter((r) => r.knowledge);
+  if (!withKnowledge.length) return ['(no knowledge receipts logged yet; `make dev`/`make next` runs stage-say)'];
+  const lines = [];
+  for (const r of withKnowledge) {
+    const { stage, shown, dropped } = r.knowledge;
+    lines.push(`stage ${stage}: shown ${shown.length ? shown.join(', ') : '(none)'}`);
+    const byReason = new Map();
+    for (const d of dropped) {
+      if (!byReason.has(d.reason)) byReason.set(d.reason, []);
+      byReason.get(d.reason).push(d.id);
+    }
+    if (!byReason.size) { lines.push('  dropped: none'); continue; }
+    for (const [reason, ids] of byReason) lines.push(`  dropped (${reason}): ${ids.join(', ')}`);
+  }
+  return lines;
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const film = process.argv[2];
@@ -58,4 +80,6 @@ if (isMain) {
   for (const line of formatRows(runs)) console.log('  ' + line);
   console.log(`\ndiff, last two runs:`);
   for (const line of diffLines(runs[runs.length - 2], runs[runs.length - 1])) console.log('  ' + line);
+  console.log(`\nknowledge shown to the author (${runs.length} run(s) considered):`);
+  for (const line of knowledgeLines(runs)) console.log('  ' + line);
 }
