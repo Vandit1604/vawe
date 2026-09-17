@@ -53,6 +53,10 @@
 //              distinguishing "never violated" from "never run". Logged only when the hook actually
 //              speaks (shown.length > 0), the same gate its own console.error already uses: the hook is
 //              silent on a fine file, so this adds no line where it was already quiet.
+//     sceneLive: { file, shown: [ruleId,...], withheld: [ruleId,...] } | null
+//              the same shape as `craftLive`, for harness/live/scene-live.mjs's own four independent
+//              checks (pictorial %, hand-keyed motion, single bg window, unjustified audio.silent).
+//              Same reasoning, same cadence: logged only when the hook speaks.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -87,6 +91,7 @@ export function appendRun(film, record = {}) {
     knowledge: record.knowledge || null,
     refusal: record.refusal || null,
     craftLive: record.craftLive || null,
+    sceneLive: record.sceneLive || null,
     wallMs: Number.isFinite(record.wallMs) ? record.wallMs : null,
   };
   const out = runsPathFor(film);

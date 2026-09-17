@@ -88,6 +88,18 @@ export function craftLiveLines(runs) {
   });
 }
 
+/** sceneLiveLines(runs) -> the same shown/withheld split as craftLiveLines, for scene-live.mjs's own
+ * four checks. Oldest first; a run with no `sceneLive` contributes nothing. */
+export function sceneLiveLines(runs) {
+  const withFindings = runs.filter((r) => r.sceneLive);
+  if (!withFindings.length) return ['(no scene-live findings logged; the hook is silent on a fine save)'];
+  return withFindings.flatMap((r) => {
+    const { file, shown, withheld } = r.sceneLive;
+    return [`${file}: shown ${shown.join(', ')}`,
+      `  withheld (ran clean): ${withheld.length ? withheld.join(', ') : 'none'}`];
+  });
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const film = process.argv[2];
@@ -110,4 +122,6 @@ if (isMain) {
   for (const line of refusalLines(runs)) console.log('  ' + line);
   console.log(`\ncraft-live findings (${runs.length} run(s) considered):`);
   for (const line of craftLiveLines(runs)) console.log('  ' + line);
+  console.log(`\nscene-live findings (${runs.length} run(s) considered):`);
+  for (const line of sceneLiveLines(runs)) console.log('  ' + line);
 }
