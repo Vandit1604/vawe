@@ -22,6 +22,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { extractKitBlock } from '../lib/stagekit.mjs';
+import { appendRun } from '../lib/runlog.mjs';
+
+// The full family of checks scene() and fragment() can each fire, in the order they are evaluated.
+// Recorded so the run log can say which of a family ran CLEAN on a save, not only which one spoke:
+// "never fired" and "never checked" look identical from the console alone.
+const SCENE_CHECKS = ['pair-entrances-exits', 'logo-prominence', 'emoji-no-picture'];
+const FRAGMENT_CHECKS = ['kit-intact', 'storyboard-order'];
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
@@ -46,13 +53,14 @@ const name = (L, i) => `${L.type || '?'}${L.id ? `#${L.id}` : ''} (layer ${i + 1
 
 /** CLAUDE.md · "Launch-video rules" and "Icons & images", measured on one scene. */
 function scene(rel, file) {
-  if (/\.(expanded|animatic|beatsync|template)\.json$/.test(rel)) return [];
+  if (/\.(expanded|animatic|beatsync|template)\.json$/.test(rel)) return { say: [], fired: [] };
   let j;
-  try { j = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return []; }   // mid-edit, not a finding
-  if (j.module !== 'scene') return [];
+  try { j = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return { say: [], fired: [] }; }   // mid-edit, not a finding
+  if (j.module !== 'scene') return { say: [], fired: [] };
   const all = flatten(j.layers);
-  if (all.length < 3) return [];                       // a fragment or a scratch file, not a film yet
+  if (all.length < 3) return { say: [], fired: [] };    // a fragment or a scratch file, not a film yet
   const say = [];
+  const fired = [];
 
   // LAUNCH-VIDEO RULE 3 · "Pair entrances with their exits, directionally."
   // core/clips.js:77 is the owner of the direction: `slide-left` "enters from the left edge; as an
@@ -66,6 +74,7 @@ function scene(rel, file) {
     say.push(`  so the same word twice walks the layer back out the door it came in. One direction of`);
     say.push(`  travel per beat: anim:"slide-right" + out:"slide-left". 38 layers in the library pair two`);
     say.push(`  slides and only 6, across 4 films, name the same direction, so this is rare and it reads.`);
+    fired.push('pair-entrances-exits');
   }
 
   // LAUNCH-VIDEO RULE 2 · "Give the logo prominence." A mark sized like a bullet reads as punctuation.
@@ -83,6 +92,7 @@ function scene(rel, file) {
       say.push(`  the logo is ${small.map(([L, i]) => `${Math.max(+L.w || 0, +L.h || 0)}px on ${name(L, i)}`).join(', ')}.`);
       say.push(`  CLAUDE.md wants ~100px+ beside a title and 150px+ on an end card. Under that a mark sits`);
       say.push(`  next to the headline as punctuation rather than as the thing the film is about.`);
+      fired.push('logo-prominence');
     }
   }
 
@@ -96,9 +106,10 @@ function scene(rel, file) {
       say.push(`  ${em.map(([L, i]) => name(L, i)).join(', ')}. The emoji IS the picture in this film.`);
       say.push(`  \`make capture\` takes real product UI, \`make assets\` fetches a real logo, and`);
       say.push(`  engine-doctrine/CRAFT/IMAGERY.md carries the rest of the ladder with emoji at the bottom of it.`);
+      fired.push('emoji-no-picture');
     }
   }
-  return say;
+  return { say, fired, filmKey: path.basename(rel, '.json') };
 }
 
 /**
@@ -120,6 +131,7 @@ function scene(rel, file) {
 // the file. Any size, shadow, radius or spacing an author writes is theirs to write.
 function fragment(rel, file) {
   const out = [];
+  const fired = [];
   const raw = fs.readFileSync(file, 'utf8');
   const kit = extractKitBlock(raw);
   // 0. THE KIT BLOCK IS INTACT. Said first because everything below is measured against it, and said
@@ -131,10 +143,12 @@ function fragment(rel, file) {
     out.push('  the STAGEKIT markers are present but the block no longer parses, so some CSS was written',
       '  INSIDE it. The first `</style>` in a fragment closes the KIT, not your own styles: append to the',
       '  SECOND one. Every tool that strips the kit before judging a fragment is now judging the kit.');
+    fired.push('kit-intact');
   } else if (!kit) {
     out.push('  no STAGEKIT block. Paste `buildKit().block` verbatim, markers and all, not the generated',
       '  `<film>.kit.css` sidecar: the markers are the boundary between what you wrote and what the',
       '  generator did, and four separate checks depend on that boundary (engine-doctrine/MISTAKES.md #594).');
+    fired.push('kit-intact');
   }
   // 1. THE ROSTER ORDER. The scene decider is third, after storyboard and subject. A fragment written
   //    before the beat table exists is a guess at the count and an invented set of motion handles.
@@ -146,9 +160,10 @@ function fragment(rel, file) {
       `  subject (2), scene (3), and scene is the role that writes THIS file. Written first, the fragment`,
       `  count is a guess and the motion handles are invented after the fact rather than read off the`,
       `  plan's own \`motion:\` line. engine-doctrine/MISTAKES.md #591.`);
+    fired.push('storyboard-order');
   }
 
-  return out;
+  return { say: out, fired, filmKey: path.basename(film) };
 }
 
 function engine(rel, file) {
@@ -180,12 +195,29 @@ process.stdin.on('end', () => {
   if (rel.startsWith('..')) process.exit(0);
 
   const inScenes = rel.startsWith('films/scene/') && fs.existsSync(file);
-  const say = inScenes && rel.endsWith('.json') ? scene(rel, file)
-    : inScenes && rel.endsWith('.html') ? fragment(rel, file)
-    : engine(rel, file);
+  // scene()/fragment() report {say, fired, filmKey} so the run log can record the withheld half;
+  // engine() has no film to log against (a capture-path or new-gate save is not scoped to one film), so
+  // it keeps returning bare lines.
+  const isScene = inScenes && rel.endsWith('.json');
+  const isFragment = inScenes && rel.endsWith('.html');
+  const result = isScene ? scene(rel, file) : isFragment ? fragment(rel, file) : { say: engine(rel, file) };
+  const say = result.say;
   if (!say.length) process.exit(0);                    // the reward for work doing fine is silence
 
   console.error(`${path.basename(rel)}\n${say.join('\n')}\n`
     + `  Nothing here blocks. These are CLAUDE.md's own rules, measured on this file.`);
+
+  // The receipt: which checks in this file's family fired (shown above) and which ran clean on the
+  // same save (withheld). Logged only now, the same gate the console.error above already used: the
+  // hook is silent on a fine save, so nothing is logged for one either.
+  if ((isScene || isFragment) && result.filmKey) {
+    const checks = isScene ? SCENE_CHECKS : FRAGMENT_CHECKS;
+    try {
+      appendRun(result.filmKey, {
+        cmd: 'craft-live',
+        craftLive: { file: rel, shown: result.fired, withheld: checks.filter((id) => !result.fired.includes(id)) },
+      });
+    } catch { /* the receipt is a nudge too; never let a log failure touch the printed findings above */ }
+  }
   process.exit(2);
 });

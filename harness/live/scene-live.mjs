@@ -39,8 +39,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { PRESETS } from '../../core/backgrounds/presets.js';
+import { appendRun } from '../lib/runlog.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
+
+// The four independent checks below, in the order they run. Recorded so the run log can say which
+// ran CLEAN on a save, not only which one spoke: "never fired" and "never checked" look identical from
+// the console alone.
+const CHECKS = ['pictorial-share', 'hand-keyed-motion', 'single-bg-window', 'unjustified-silence'];
 
 // ONE OWNER. This set is copied from harness/dev/library-stats.mjs:33, which is the script that prints
 // every figure CLAUDE.md quotes. If the two ever disagree, the numbers in the doc stop matching the
@@ -123,6 +129,7 @@ process.stdin.on('end', () => {
   const pctK = Math.round((keyedLayers.length / layers.length) * 100);
 
   const say = [];
+  const fired = [];
   // Each line names the measurement, then what the library does, then the film that argues otherwise,
   // then a concrete next edit where one can be made honestly.
   if (pict === 0) {
@@ -141,6 +148,7 @@ process.stdin.on('end', () => {
       const dir = brandAssets(rel);
       if (dir) say.push(`  assets/brands/${path.basename(dir)}/ exists (\`ls ${path.relative(ROOT, dir)}\`); a real image from there beats an invented one.`);
     }
+    fired.push('pictorial-share');
   }
   if (!keyedLayers.length) {
     const unkeyed = layers.filter((L) => !(Array.isArray(L.motion) && L.motion.length) && L.type !== 'camera');
@@ -154,6 +162,7 @@ process.stdin.on('end', () => {
     if (longest.length) {
       say.push(`  candidates from THIS film, on screen longest: ${longest.map((L) => `"${name(L)}" (${L.duration ?? '?'}s)`).join(', ')}.`);
     }
+    fired.push('hand-keyed-motion');
   }
   if (bg.length <= 1) {
     const used = new Set(bg.map((b) => b && b.preset).filter(Boolean));
@@ -164,12 +173,24 @@ process.stdin.on('end', () => {
       say.push(`  this film has not tried: ${suggestions.map((p) => `\`${p.name}\` (${p.blurb})`).join(' · ')}.`);
       say.push(`  or hand-author one: an \`html\` layer at full-bleed z, behind everything else.`);
     }
+    fired.push('single-bg-window');
   }
   if (j.audio && j.audio.silent && !j.audio._why) {
     say.push(`  \`audio.silent\` with no \`_why\`. 119 scenes declare the silence and only 40 justify it.`);
     say.push(`  quality/gates/audio-check.mjs will stop you at ship; a sentence here settles it now.`);
+    fired.push('unjustified-silence');
   }
   if (!say.length) process.exit(0);              // the reward for a film doing fine is silence
+
+  // The receipt: which of the four checks fired (shown below) and which ran clean on this same save.
+  // Logged only now, the same gate the console.error below already uses: a fine save prints nothing
+  // and logs nothing.
+  try {
+    appendRun(path.basename(rel, '.json'), {
+      cmd: 'scene-live',
+      sceneLive: { file: rel, shown: fired, withheld: CHECKS.filter((id) => !fired.includes(id)) },
+    });
+  } catch { /* the receipt is a nudge too; never let a log failure touch the printed findings below */ }
 
   console.error(`${path.basename(rel)} · ${layers.length} layers · ${pctP}% pictorial · ${pctK}% hand-keyed\n`
     + say.join('\n')

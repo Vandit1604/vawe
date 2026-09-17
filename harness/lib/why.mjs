@@ -64,6 +64,42 @@ export function knowledgeLines(runs) {
   return lines;
 }
 
+/** refusalLines(runs) -> every PreToolUse deny stage-gate.mjs logged for this film: which rule, which
+ * file, and the reason shown to the model. Oldest first; a run with no `refusal` contributes nothing. */
+export function refusalLines(runs) {
+  const refusals = runs.filter((r) => r.refusal);
+  if (!refusals.length) return ['(no refusals logged; stage-gate.mjs has not denied a write for this film)'];
+  return refusals.map((r) => {
+    const time = (r.at || '').replace('T', ' ').slice(0, 19);
+    return `${time}  [${r.refusal.rule}] ${r.refusal.file}: ${r.refusal.reason.split('\n')[0]}`;
+  });
+}
+
+/** craftLiveLines(runs) -> what harness/live/craft-live.mjs printed on each save it spoke about, and
+ * which sibling checks in the same family ran clean instead. Oldest first; a run with no `craftLive`
+ * contributes nothing. */
+export function craftLiveLines(runs) {
+  const withFindings = runs.filter((r) => r.craftLive);
+  if (!withFindings.length) return ['(no craft-live findings logged; the hook is silent on a fine save)'];
+  return withFindings.flatMap((r) => {
+    const { file, shown, withheld } = r.craftLive;
+    return [`${file}: shown ${shown.join(', ')}`,
+      `  withheld (ran clean): ${withheld.length ? withheld.join(', ') : 'none'}`];
+  });
+}
+
+/** sceneLiveLines(runs) -> the same shown/withheld split as craftLiveLines, for scene-live.mjs's own
+ * four checks. Oldest first; a run with no `sceneLive` contributes nothing. */
+export function sceneLiveLines(runs) {
+  const withFindings = runs.filter((r) => r.sceneLive);
+  if (!withFindings.length) return ['(no scene-live findings logged; the hook is silent on a fine save)'];
+  return withFindings.flatMap((r) => {
+    const { file, shown, withheld } = r.sceneLive;
+    return [`${file}: shown ${shown.join(', ')}`,
+      `  withheld (ran clean): ${withheld.length ? withheld.join(', ') : 'none'}`];
+  });
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const film = process.argv[2];
@@ -82,4 +118,10 @@ if (isMain) {
   for (const line of diffLines(runs[runs.length - 2], runs[runs.length - 1])) console.log('  ' + line);
   console.log(`\nknowledge shown to the author (${runs.length} run(s) considered):`);
   for (const line of knowledgeLines(runs)) console.log('  ' + line);
+  console.log(`\nrefusals (stage-gate.mjs, ${runs.length} run(s) considered):`);
+  for (const line of refusalLines(runs)) console.log('  ' + line);
+  console.log(`\ncraft-live findings (${runs.length} run(s) considered):`);
+  for (const line of craftLiveLines(runs)) console.log('  ' + line);
+  console.log(`\nscene-live findings (${runs.length} run(s) considered):`);
+  for (const line of sceneLiveLines(runs)) console.log('  ' + line);
 }
