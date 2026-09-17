@@ -5,8 +5,11 @@
 // every center-sampling gate steps right over. `make beats` samples beat midpoints; `make audit` judges
 // the settled frame; `make probe` checks purity. None of them look at the 3-frame window where two beats
 // cross. This gate does exactly that: for every authored transition boundary (cut · seam · sting · a
-// beat's start cluster), it pulls the frames straddling the boundary out of the RENDERED mp4 and flags a
-// luminance DIP that is present at the seam but not just outside it, the signature of a flash.
+// beat's start cluster), it pulls the frames straddling the boundary out of the RENDERED mp4 and checks
+// two things: a luminance DIP present at the seam but not just outside it (the signature of a flash),
+// and a colour-blind EMPTINESS drop, the stage's spread of grey collapsing toward flat regardless of
+// which way the brightness moved. The dip alone missed a blank WHITE frame between two lit beats: it
+// went brighter, not darker, so it never dipped, it only ever drained to flat (engine-doctrine/MISTAKES.md#144).
 //
 //   node quality/gates/seam-snap.mjs films/scene/<file>.json     ·     make seam-check D=<file>
 //
@@ -17,10 +20,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { flattenLayers } from '../../harness/lib/layers.mjs';
+import { flattenLayers, nearestBeats } from '../../harness/lib/layers.mjs';
 import { loadScene } from '../../core/engine/expand.js';
-import { inferCuts } from '../../core/timeline/junctions.js';
-import { edgeReadingAt } from '../../harness/lib/frame-forensics.mjs';
+import { allBoundaries } from '../../core/timeline/junctions.js';
+import { edgeReadingAt, gridStatsAt, emptinessAt } from '../../harness/lib/frame-forensics.mjs';
 import { sceneDims } from '../../harness/lib/layer-boxes.mjs';
 
 import { gradeable } from './tile.mjs';
@@ -85,14 +88,14 @@ const fps = (() => {
   return Math.round(v);
 })();
 
-// mean luminance of one frame, cheaply: scale the frame to 1×1 and read its single RGB pixel. That 1×1
-// average IS the frame's mean colour; Rec.601 luma of it is the frame brightness in [0,1].
+// mean luminance of one frame (gridStatsAt, harness/lib/frame-forensics.mjs), the dip check's own
+// statistic. Cached per frame index: before/after/window sampling below call this on the same handful
+// of frames more than once. The colour-blind spread statistic from the same decode is emptinessAt's
+// own concern now (below), shared with plan-vs-render.mjs.
+const lumaCache = new Map();
 function lumaAt(frameIdx) {
-  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vf', `select=eq(n\\,${frameIdx}),scale=1:1`,
-    '-frames:v', '1', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { maxBuffer: 1 << 20 });
-  const b = r.stdout;
-  if (!b || b.length < 3) return null;
-  return (0.299 * b[0] + 0.587 * b[1] + 0.114 * b[2]) / 255;
+  if (!lumaCache.has(frameIdx)) lumaCache.set(frameIdx, gridStatsAt(mp4, frameIdx)?.luma ?? null);
+  return lumaCache.get(frameIdx);
 }
 
 // total frame count
@@ -108,29 +111,12 @@ if (!total) {
 }
 
 // ── collect transition boundaries (seconds) ──────────────────────────────────────────────────────
+// declared (cuts/seams/stings) + inferred (a cluster of layer-starts after a gap, its transition_in):
+// one list (core/timeline/junctions.js allBoundaries), shared with plan-vs-render.mjs's own
+// transformation-at-the-end check so "what counts as a boundary" cannot drift between the two.
 const flat = flattenLayers(data.layers);
-const bounds = new Set();
-
-// name the beat on either side of a boundary (track 0 is background, never the beat itself).
-// Nearest by start/end, not an exact frame match, because a beat rarely starts on the sampled frame.
-const content = flat.filter((l) => (l.track ?? 1) !== 0 && typeof l.start === 'number');
-function beatsAround(tSec) {
-  let out = null, outEnd = -Infinity, inn = null, inStart = Infinity;
-  for (const l of content) {
-    const end = l.start + (l.duration ?? 0);
-    if (end <= tSec + 0.05 && end > outEnd) { outEnd = end; out = l.id; }
-    if (l.start >= tSec - 0.05 && l.start < inStart) { inStart = l.start; inn = l.id; }
-  }
-  return { out: out || '(nothing)', inn: inn || '(nothing)' };
-}
-for (const c of data.cuts || []) if (typeof c.t === 'number') bounds.add(c.t);
-for (const s of data.seams || []) if (typeof s.t === 'number') bounds.add(s.t);
-for (const s of data.stings || []) if (typeof s.t === 'number') bounds.add(s.t);
-// beat starts: a cluster of layer-starts after a gap is a beat boundary (its transition_in). The
-// inference itself lives in core/timeline/junctions.js now (inferCuts), beside shotWindows, so
-// core/engine/produce.js's baseline pass reads the same one copy instead of a second one drifting.
-for (const t of inferCuts(flat)) bounds.add(t);
-const seams = [...bounds].map((t) => Math.round(t * fps)).filter((n) => n > 2 && n < total - 2).sort((a, b) => a - b);
+const beatsAround = (tSec) => nearestBeats(flat, tSec);
+const seams = allBoundaries(data, flat).map((t) => Math.round(t * fps)).filter((n) => n > 2 && n < total - 2);
 
 if (!seams.length) { console.log('✓ seam-snap: no transition boundaries to sample (single-beat scene)'); f.emit(); process.exit(0); }
 
@@ -139,11 +125,31 @@ if (!seams.length) { console.log('✓ seam-snap: no transition boundaries to sam
 // local neighbours (not a global threshold) makes this theme-agnostic: an intentionally dark scene has
 // dark neighbours too, so it never false-positives; only an anomalous dip at the crossing fires.
 const findings = [];
+const emptyFindings = [];
 const sheetFrames = [];
 // A boundary whose frames would not decode was `continue`d past, and a run that skipped every boundary
 // printed the same tick as a run that cleared them. Count them: an unread seam is the one thing this
 // gate is certain it does NOT know.
 const unread = [];
+
+// HOW LONG does the stage stay empty, not just whether it dipped or drained. Luma (and spread) alone
+// recover as soon as the frame changes, before there is anything ON it to read: at this exact defect
+// the luma was back within a handful of frames while the frame stayed CONTENT-FREE for several more.
+// So walk forward measuring structure (edgeReadingAt, the same probe seam-forensics.mjs's resurrection
+// check uses) until it clears a floor read off a settled frame just outside the seam, capped at 2s
+// (60f @30fps): the grammar this doc enforces is a moment, never a hold. Shared by both findings below,
+// since both ask the same question once a trigger frame is found.
+function measureEmptySec(nt, triggerFrame) {
+  const CAP = fps * 2;
+  const settledEdge = edgeReadingAt(mp4, Math.min(total - 1, nt + 6), { x: 0, y: 0, w: W, h: H }, W, H) ?? 0;
+  const floor = Math.max(15, settledEdge * 0.5);
+  for (let k = 0; k <= CAP; k++) {
+    const e = edgeReadingAt(mp4, Math.min(total - 1, triggerFrame + k), { x: 0, y: 0, w: W, h: H }, W, H);
+    if (e != null && e >= floor) return k / fps;
+  }
+  return CAP / fps;
+}
+
 for (const nt of seams) {
   const before = lumaAt(Math.max(0, nt - 6));
   const after = lumaAt(Math.min(total - 1, nt + 6));
@@ -153,29 +159,22 @@ for (const nt of seams) {
   if (before == null || after == null || win.length < 5) { unread.push(nt); continue; }
   const outside = Math.min(before, after);
   const dip = win.reduce((m, w) => (w.l < m.l ? w : m), win[0]);
+  const { out, inn } = beatsAround(nt / fps);
   // flag if the darkest seam frame falls to <55% of the darker neighbour AND the neighbours weren't
   // already near-black (so a genuinely dark passage never trips it). 0.06 ≈ a near-black floor.
   if (outside > 0.06 && dip.l < outside * 0.55) {
-    // HOW LONG does the stage stay empty, not just whether it dipped. Luma alone recovers as soon as
-    // the frame brightens, before there is anything ON it to read: at this exact defect the luma was
-    // back within a handful of frames while the frame stayed CONTENT-FREE for several more. So walk
-    // forward measuring structure (edgeReadingAt, the same probe seam-forensics.mjs's resurrection
-    // check uses) until it clears a floor read off a settled frame just outside the seam, capped at 2s
-    // (60f @30fps): the grammar this doc enforces is a moment, never a hold.
-    const CAP = fps * 2;
-    const settledEdge = edgeReadingAt(mp4, Math.min(total - 1, nt + 6), { x: 0, y: 0, w: W, h: H }, W, H) ?? 0;
-    const floor = Math.max(15, settledEdge * 0.5);
-    let emptyFrames = CAP;
-    for (let k = 0; k <= CAP; k++) {
-      const e = edgeReadingAt(mp4, Math.min(total - 1, dip.f + k), { x: 0, y: 0, w: W, h: H }, W, H);
-      if (e != null && e >= floor) { emptyFrames = k; break; }
-    }
-    const { out, inn } = beatsAround(nt / fps);
     findings.push({
       t: (nt / fps).toFixed(2), frame: dip.f, dip: dip.l.toFixed(3), outside: outside.toFixed(3),
-      emptySec: (emptyFrames / fps).toFixed(2), out, inn,
+      emptySec: measureEmptySec(nt, dip.f).toFixed(2), out, inn,
     });
   }
+  // ── the emptiness check, colour-blind (harness/lib/frame-forensics.mjs emptinessAt) ────────────────
+  // An empty stage has near-zero spread whatever its ground colour, so this catches the case the dip
+  // check structurally cannot: a blank frame BRIGHTER than its neighbours (a white ground) never dips,
+  // it drains to flat. Shared with plan-vs-render.mjs's transformation-at-the-end check, one arithmetic
+  // for "what counts as empty" rather than two that drift.
+  const empty = emptinessAt(mp4, fps, total, nt);
+  if (empty) emptyFindings.push({ t: (nt / fps).toFixed(2), ...empty, emptySec: empty.emptySec.toFixed(2), out, inn });
 }
 
 // ── contact sheet at the seams (the eye is the backstop the numbers can't be) ─────────────────────
@@ -204,14 +203,15 @@ for (const nt of unread) {
   console.error(`  ? boundary at ${(nt / fps).toFixed(2)}s (frame ${nt}) would not decode, NOT checked.`);
   f.warn('seam-unread', `boundary at ${(nt / fps).toFixed(2)}s (frame ${nt}) would not decode, NOT checked`, { at: `frame ${nt}` });
 }
-if (!findings.length && !unread.length) {
-  console.log(`✓ seam-snap clean. No luminance flash at any transition (read ${SHEET} to confirm the eye agrees)`);
+const total_findings = findings.length + emptyFindings.length;
+if (!total_findings && !unread.length) {
+  console.log(`✓ seam-snap clean. No luminance flash and no empty stage at any transition (read ${SHEET} to confirm the eye agrees)`);
   f.emit();
   process.exit(0);
 }
-if (!findings.length) {
+if (!total_findings) {
   console.error(`\n✗ seam-snap: ${unread.length} of ${seams.length} boundary(ies) could not be read out of out/${name}.mp4.`);
-  console.error('  No flash was found at the ones that decoded, and that is not a verdict on the ones that did not.');
+  console.error('  No flash or empty stage was found at the ones that decoded, and that is not a verdict on the ones that did not.');
   f.emit();
   process.exit(2);
 }
@@ -225,6 +225,14 @@ for (const seam of findings) {
   f.fail('seam-flash', `seam "${seam.out}" -> "${seam.inn}" at ${seam.t}s: luma dips to ${seam.dip} vs ${seam.outside} just outside, empty ${seam.emptySec}s before content reads. ${fix}`,
     { at: `frame ${seam.frame}`, doc: 'engine-doctrine/MISTAKES.md#144' });
 }
-console.error(`\n✗ seam-snap: ${findings.length} transition flash(es). The center-sampling gates cannot see these, fix the seam compositing or the clip timing, then re-render.`);
+for (const seam of emptyFindings) {
+  // same fix as a flash: the stage went empty either way, only the SIGN of the luma change told them
+  // apart (a dip on a dark ground, a drain-to-flat on any ground). One overlap fixes both.
+  const fix = `overlap "${seam.out}"'s exit with "${seam.inn}"'s entrance so the stage never empties (TRANSITIONS.md: no transition-dip)`;
+  console.error(`  ✗ seam "${seam.out}" → "${seam.inn}" at ${seam.t}s: spread drops to ${seam.spread} vs ${seam.outsideSpread} just outside (32x18 grid, colour-blind), empty ${seam.emptySec}s before content reads. ${fix}.`);
+  f.fail('seam-empty', `seam "${seam.out}" -> "${seam.inn}" at ${seam.t}s: spread drops to ${seam.spread} vs ${seam.outsideSpread} just outside (32x18 grid, colour-blind), empty ${seam.emptySec}s before content reads. ${fix}`,
+    { at: `frame ${seam.frame}`, doc: 'engine-doctrine/MISTAKES.md#144' });
+}
+console.error(`\n✗ seam-snap: ${findings.length} transition flash(es), ${emptyFindings.length} empty stage(s). The center-sampling gates cannot see these, fix the seam compositing or the clip timing, then re-render.`);
 f.emit();
 process.exit(1);

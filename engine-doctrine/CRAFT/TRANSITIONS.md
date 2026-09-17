@@ -393,7 +393,10 @@ Doctrine carries the taste; the gates backstop the source-decidable subset:
 - **the frame must not go empty across a joint**: `make seam-check` reads the rendered mp4 at every
   boundary for a luminance dip, and now measures how long content takes to reappear once it dips
   (`seam-flash`, MISTAKES #144). A one-frame dip is a flash; several frames of measured emptiness is
-  the outgoing beat leaving before the incoming one arrives, named with both beats and the fix.
+  the outgoing beat leaving before the incoming one arrives, named with both beats and the fix. It also
+  checks a second, colour-blind statistic from the same decode: the spread of grey across a small grid
+  collapsing toward flat (`seam-empty`). A blank frame on a WHITE ground never dips, it only drains, so
+  the luma check alone missed it; spread catches an empty stage whatever colour it is empty in.
 - **the earned seam**: `make direct` suggests ONE two-scene seam at the payoff boundary (the transition
   into the longest-held beat), matched to the brand personality (punchy → whipPan, calm → cinematicZoom),
   and applies it on `WRITE=1`. Everything else stays an invisible cut. This is the restraint rule made
