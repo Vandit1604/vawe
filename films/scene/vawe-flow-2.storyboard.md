@@ -10,7 +10,7 @@ format: 1920x1080
 theme: "themes/vawe.json"
 duration: 17.45s
 spectacle: "beat 7 (Your films) · the value FLIPS, from the dark editor to a white field, and that white ground then takes a light wash of each playing film's own colour as the strip browses, live footage not stills · the film's one loud moment"
-not: "no hard cut anywhere, no centred slide deck, no gradient hero, no stock photography, no copy vawe cannot back, no second typeface, no sound bed, no swipe-to-pick moment standing beside Your films, no static camera hold longer than a beat needs"
+not: "no hard cut anywhere, no centred slide deck, no gradient hero, no stock photography, no copy vawe cannot back, no second typeface, no sound bed, no static camera hold longer than a beat needs"
 craft:
     content: "Measured act by act against example-madera, not against a fixed bar. Its opening act holds one line over one image and so does ours; its middle act carries a working surface with real interface detail, which ours answers with the studio timeline at full interface density (seven lanes, real clip names, a moving playhead) rather than a simplified diagram; its closing act resolves to a mark, as ours does. The one act where we deliberately exceed the reference is Your films, because that is this film's named spectacle and the reference has no equivalent."
     imagery: "Four real rendered films (plinth-ad, saas-hero-launch, argus-launch, vawe-launch), taken from site/public/assets/films/ where the site already publishes them, played as live footage rather than stills, which is what the spectacle line requires. Their treatment is the ground itself: each one's own colour is eyedropped at the source-time it is on screen and washed into the ground behind it, so the imagery earns its place by changing the frame around it. Two authored textures (tile-grid.jpg, grain-blue.png) carry the two type-only cards and are the only non-footage images in the film. No stock photography, per the not: list."
@@ -200,32 +200,23 @@ craft:
 
 ## Beat 8: Your films (9.88s-15.14s)
 - type: payoff_withheld
-- shot: wide, full-bleed horizontal film strip, camera tracking then pushing to centre
-- onscreen: "(the timeline's own Frames row grows into a film strip, the camera tracks past three playing films, then pushes into vawe launch)"
+- shot: wide, a stack of playing film cards, a cursor swiping the top one away each time
+- onscreen: "(the timeline's own Frames row grows into a stack of film cards; a cursor swipes the top card off three times, in the stack's own order, until vawe launch is the one left on top)"
 - trigger: the timeline finishing its build frees the frame for what it produced
-- mechanism: the timeline's Frames row (four of its seven thumbnails, measured) grows directly into four big playing film cards on one horizontal strip, a shared-element morph with no fade-swap; the camera tracks the strip past looks-reel, explainer and vawe-teaser at about 1.2s readable-hold each, then settles about 1.5s on vawe launch with its in-point on the wordmark; the camera then pushes in until that word matches the mark beat's own wordmark position, while the ground turns from dark to white under the crossfade
-- eye: the timeline's Frames row -> the same frames growUp into a strip of four playing films -> the camera pans past looks-reel, explainer, vawe-teaser in turn -> vawe launch, settled and the camera pushes in
-- becomes: the timeline's thumbnail row becomes the film strip; the strip becomes just vawe launch, pushed in on its own logo
-- why: the owner rejected the flyin corridor (two mirrored walls); the frames the viewer just watched being built are the same frames that become the films, a same-object relationship, so the strip states its own logic instead of an arbitrary set-piece
+- mechanism: the timeline's Frames row grows directly into a stack of four playing film cards (plinth, meridian, argus, vawe launch, deepest to top of reveal order), a shared-element morph with no fade-swap; a cursor arrives on the stack and swipes three times, each swipe carrying the front card off-frame with motion blur while the card underneath eases up into its place, alternating the swipe's exit side each time (owner note: `docs/transitions-vary-direction`); vawe launch is the card nothing else ever covers, so the third swipe leaves it alone, on top, un-occluded; the camera then pushes in until vawe launch's own wordmark matches the mark beat's own wordmark position, while the ground turns from dark to white under the crossfade
+- eye: the timeline's Frames row -> the frames growUp into a stacked deck -> the cursor arrives and swipes, one card at a time, left-right-left -> vawe launch alone on top, and the camera pushes in
+- becomes: the timeline's thumbnail row becomes the film stack; the stack becomes just vawe launch, pushed in on its own logo
+- why: the owner's own instruction, a stack a cursor swipes through rather than a flat carousel or the earlier abandoned 3x2 wall; vawe launch is authored so nothing ever paints over it, because the next beat's logo grows out of this card and `plan-vs-render` now checks that handoff never goes empty in the rendered pixels
 - duration: 5.26s (before the film's own slower 0.85 tempo)
 - transition_why: new-place-energy · momentum · expressive
 - object_in: center@1332x56
 - object_out: center@640x360
-- motion: [data-part="film-card"]@growUp:cinematic
+- motion: keyed per-card `motion` tracks (films-stack, films/scene/vawe-flow-2.json) plus one `cursor` layer's own `path`/`clicks`, never CSS
 - archetype: full-bleed-row
 - weight: peak
-- picture: the strip's four films playing at once as the camera tracks past them, then vawe launch alone, pushed in on its own wordmark
-- design: JSON group only (films-strip, films/scene/vawe-flow-2.json), no HTML fragment for the strip itself
+- picture: a stack of film cards reading depth via scale/rotation/offset, the cursor swiping the front one away, vawe launch left alone on top and pushed in on its own wordmark
+- design: JSON group only (films-stack, films/scene/vawe-flow-2.json). No HTML fragment: the owner's own instruction for this stack is the film cards and nothing else, no surrounding chrome, so the card's own shadow/radius/caption-scrim is native `rect`/`text`/`video` layers, not markup
 - fragment: none
-
-<!-- NOTE on the cut pick/cards act: example-madera's own swipe-card act (its original act 3) is not
-     reproduced here as a literal "choose between three options" moment. The owner's brief never asks
-     the viewer to pick; it asks for real films to play while the ground takes vawe launch's own colour
-     once the wall drifts and the camera pushes in. That is exactly the card act's one load-bearing
-     device (per-item ground retint), so the device is kept and reused inside beat 8 above, and the
-     literal swipe-to-choose framing is cut. Keeping both would mean vawe appears to pick a film for the
-     viewer twice, once literally and once as a device, which is the duplicate this film explicitly
-     excludes (see `not:` above). -->
 
 ## Beat 9: The mark (14.86s-17.34s)
 - type: payoff_withheld
