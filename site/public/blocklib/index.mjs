@@ -105,6 +105,13 @@ const FAMILY_FILES = Object.keys(FAMILY_MODULES).sort();
 export const EXPORTS = {};
 // family → its module's CATEGORY. What the site groups the browsing rail by.
 export const CATEGORY_OF = {};
+// factory name -> the background a PREVIEW of this block should sit on. Optional, and declared in the
+// module that owns the blocks for the same reason CATEGORY is: nothing should keep a name-to-ground
+// table in sync by hand. scripts/site/blocks-scenes.mjs renders every preview on `plain` otherwise,
+// which is right for an opaque block and wrong for a frosted one: the Surfaces family exists to blur a
+// moving backdrop, so over flat white it has nothing to blur and reads as an empty washed-out box.
+// That is what the arsenal grid has been showing. A module that declares nothing keeps `plain`.
+export const PREVIEW_BG_OF = {};
 // family → option table, merged from every `<FAM>_SCHEMAS` export. blocks/schema.mjs re-exports it.
 export const SCHEMAS = {};
 // The REGISTRY. Bare family names plus the manifest's namespaced `family.variant` entries. The object
@@ -141,6 +148,7 @@ for (const file of FAMILY_FILES) {
     }
     ownerOf[name] = file;
     CATEGORY_OF[name] = mod.CATEGORY;
+    if (mod.PREVIEW_BG) PREVIEW_BG_OF[name] = mod.PREVIEW_BG;
   }
 
   Object.assign(EXPORTS, mod);

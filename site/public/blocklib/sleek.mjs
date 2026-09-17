@@ -12,6 +12,14 @@
 // declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
 export const CATEGORY = 'Surfaces';
 
+// The ground a PREVIEW of these blocks sits on (blocks/index.mjs `PREVIEW_BG_OF`). Every other family
+// previews on `plain`, which is correct for an opaque block. These are frosted: `frost()` blurs what is
+// BEHIND the panel, so over flat white there is nothing to blur and the panel reads as an empty washed
+// box. That is not what the block does in a film, and a catalogue that shows a block doing nothing is
+// worse than no catalogue.
+export const PREVIEW_BG = 'aurora';
+
+
 
 const WHITE_HAIR = 'rgba(255,255,255,0.14)';
 
