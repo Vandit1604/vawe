@@ -78,6 +78,8 @@ palette:
   studio-accent: "#0a87ff"
   studio-ink-2: "#d8d8da"
   studio-ink-3: "#97969b"
+  film-scrim: "linear-gradient(to top, rgba(10, 15, 25, 0.9) 0%, rgba(10, 15, 25, 0.9) 20%, rgba(10, 15, 25, 0) 52%)"
+  film-caption-fg: "#ffffff"
 ---
 
 This film's look: a Warp-style teal-black glass terminal on cobalt, a dark timeline wearing the studio's own editor tokens,
