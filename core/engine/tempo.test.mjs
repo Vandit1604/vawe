@@ -62,6 +62,13 @@ test('a station target reference (an id string, not a number) is left untouched 
   assert.ok(Array.isArray(d.camera) && d.camera.length >= 2);
 });
 
+test('a cue authored at time T lands at T/tempo, same as any other point-in-time field', () => {
+  const d = expandScene(scene({ tempo: 0.85, audio: { cues: [{ t: 2.9435, name: 'tick' }] } }));
+  // 2.9435 / 0.85 = 3.4629...; snapped to the nearest 1/60s frame.
+  assert.equal(d.audio.cues[0].t, Math.round((2.9435 / 0.85) * 60) / 60);
+  assert.equal(d.audio.cues[0].name, 'tick');
+});
+
 test('an out-of-range tempo is refused', () => {
   assert.throws(() => expandScene(scene({ tempo: 3 })), /between 0\.5 and 2/);
   assert.throws(() => expandScene(scene({ tempo: 0.1 })), /between 0\.5 and 2/);
