@@ -3,7 +3,7 @@
     "id": "content.per-act-density",
     "category": "content",
     "stage": "design",
-    "applies": "hasImages",
+    "applies": "always",
     "check": "plain-content",
     "adapt": null,
     "brief": "A film is compared to its reference PER ACT, dense where the reference is dense, quiet where the reference is quiet.",

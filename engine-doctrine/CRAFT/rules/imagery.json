@@ -3,7 +3,7 @@
   "id": "imagery.visual-ladder",
   "category": "imagery",
   "stage": "design",
-  "applies": "hasImages",
+  "applies": "always",
   "check": null,
   "adapt": null,
   "brief": "Prefer the lightest real visual: captured real UI (make capture) first, a raw stock photo last",
