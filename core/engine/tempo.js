@@ -4,11 +4,16 @@
 // `expandScene`, as a pure rewrite of the scene's own numbers: every downstream consumer (bake,
 // lower, render) sees ordinary authored times and never has to know tempo existed.
 //
-// Footage and audio are excluded on purpose. A `video` layer's window (`start`/`duration`) is a TIME
-// field like any other, so it grows too, but core/layers/video.js maps window time straight to source
-// time at rate 1 (`raw = f + (t-start)*rate`), so a longer window just shows MORE of the source at its
-// native speed, never a slowed frame. The audio bed is untouched entirely: the mixer already trims or
-// loops it to whatever window length it is given.
+// Footage and the music BED are excluded on purpose. A `video` layer's window (`start`/`duration`) is
+// a TIME field like any other, so it grows too, but core/layers/video.js maps window time straight to
+// source time at rate 1 (`raw = f + (t-start)*rate`), so a longer window just shows MORE of the source
+// at its native speed, never a slowed frame. The music bed is untouched entirely: the mixer already
+// trims or loops it to whatever window length it is given.
+//
+// A CUE is not a bed. `audio.cues[].t` is a point event pinned to one instant in the film's own
+// clock, the same shape as `transitions[].t`, so it scales exactly like every other point-in-time
+// field. (2026-09-17: this used to be lumped into the "audio is excluded" reasoning above, which is
+// only true of a bed; see engine-doctrine/MISTAKES.md for the incident.)
 //
 // FRAME-GRID SNAPPING: two authored times that met exactly (a layer's end landing on the next layer's
 // start) can drift apart after a /tempo division lands on a repeating decimal (4.85/0.85 =
@@ -36,6 +41,7 @@ const CAPTION_TIME_KEYS = ['start', 'duration'];
 // other and must scale the same way, or a film's `beats[]` would read stale against every layer start
 // that scaled off it.
 const BEAT_TIME_KEYS = ['start', 'duration'];
+const AUDIO_CUE_TIME_KEYS = ['t'];
 
 function scaleWindow(w, inv) {
   if (!w || typeof w !== 'object') return;
@@ -109,6 +115,7 @@ export function resolveTempo(data) {
   if (Array.isArray(data.bg)) for (const w of data.bg) scaleWindow(w, inv);
   if (Array.isArray(data.transitions)) for (const T of data.transitions) scaleKeys(T, TRANSITION_TIME_KEYS, inv);
   if (Array.isArray(data.captions)) for (const C of data.captions) scaleCaption(C, inv);
+  if (Array.isArray(data.audio?.cues)) for (const cue of data.audio.cues) scaleKeys(cue, AUDIO_CUE_TIME_KEYS, inv);
   if (data.cameraMove) {
     const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
     for (const s of specs) scaleCameraSpec(s, inv);
