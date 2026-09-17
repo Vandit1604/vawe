@@ -162,6 +162,24 @@ export function inferCuts(layers, duration = Infinity) {
   return out;
 }
 
+/**
+ * allBoundaries(scene, layers) → every junction a caller who reads pixels at a boundary cares about,
+ * sorted: the three declared surfaces (`cuts`/`seams`/`stings`, lowered from `transitions[]` by the
+ * time a caller has `scene`) plus `inferCuts` above. One list, because quality/gates/seam-snap.mjs
+ * built it inline first and quality/gates/plan-vs-render.mjs needed the same answer (which junction is
+ * the film's LAST) for a different reason, its own transformation-at-the-end check; two copies of
+ * "what counts as a boundary" is the drift this file's own header already warns the rest of this repo
+ * about for `inferCuts`.
+ */
+export function allBoundaries(scene, layers) {
+  const bounds = new Set();
+  for (const c of scene.cuts || []) if (c && typeof c.t === 'number') bounds.add(c.t);
+  for (const s of scene.seams || []) if (s && typeof s.t === 'number') bounds.add(s.t);
+  for (const s of scene.stings || []) if (s && typeof s.t === 'number') bounds.add(s.t);
+  for (const t of inferCuts(layers)) bounds.add(t);
+  return [...bounds].sort((a, b) => a - b);
+}
+
 // ---------------------------------------------------------------------------------------------------
 // CONTENT-AWARE CUT STYLE. inferCuts (above) finds WHERE a film likely turns, purely from the GAP
 // between beat starts. It knows nothing about what sits on either side of that gap, and the owner's
