@@ -31,10 +31,14 @@ const RATCHET = path.join(ROOT, 'quality/baselines/output-contract-ratchet.json'
 // output as it runs, the same reason compare.mjs is exempt: capturing that through findings.mjs would
 // defer it all to one flush at the end, and a child's inherited output could not be silenced under
 // --json anyway, so the contract's own "nothing but JSON on stdout" rule could not hold for it.
+// gate-classification.mjs REGENERATES engine-doctrine/GATE-CLASSIFICATION.md (the doc-map.mjs/
+// effects-catalog.mjs pattern); its one printed line reports what it wrote, not a finding about a
+// film, the same reason next.mjs and stage.mjs are exempt for navigation instead of a verdict.
 const EXEMPT = new Set([
   'lib-test.mjs', 'output-contract.mjs', 'compare.mjs', 'gate-mutation.mjs',
   'next.mjs', 'stage.mjs', 'rubric.mjs', 'legacy-unfold.mjs',
   'contrast-regression.mjs', 'measure-regression.mjs', 'review.mjs',
+  'gate-classification.mjs',
 ]);
 
 /** A gate CONFORMS when it renders through findings.mjs. It is a MIGRATION TARGET when it prints its own
