@@ -70,6 +70,77 @@ export function meanColorAt(mp4, frameIdx, box, W, H) {
 }
 
 /**
+ * gridStatsAt(mp4, frameIdx) → { luma, spread } in [0,1], or null if the frame would not decode. One
+ * decode of the WHOLE frame, scaled to a small grid (32x18) instead of 1x1: the grid's mean IS the same
+ * frame-mean a 1x1 scale gives (seam-snap.mjs's original lumaAt trick), and its max-min gives a SECOND,
+ * colour-blind statistic for free: an empty stage has near-zero spread whatever its ground colour is,
+ * where luma alone only ever catches a stage getting DARKER. Shared so seam-snap.mjs (every transition
+ * boundary) and plan-vs-render.mjs (one promised boundary, named by the storyboard's own prose) measure
+ * emptiness the same one way rather than two copies that drift.
+ */
+export function gridStatsAt(mp4, frameIdx) {
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vf', `select=eq(n\\,${frameIdx}),scale=32:18`,
+    '-frames:v', '1', '-f', 'rawvideo', '-pix_fmt', 'gray', '-'], { maxBuffer: 1 << 20 });
+  const b = r.stdout;
+  if (!b || b.length < 32 * 18) return null;
+  let sum = 0, min = 255, max = 0;
+  for (const v of b) { sum += v; if (v < min) min = v; if (v > max) max = v; }
+  return { luma: sum / b.length / 255, spread: (max - min) / 255 };
+}
+
+/**
+ * emptinessAt(mp4, fps, total, nt) → { frame, spread, outsideSpread, emptySec } | null: nt (a frame
+ * index) reads as an EMPTY stage, colour-blind, or null if it does not. Shared by seam-snap.mjs (every
+ * transition boundary) and plan-vs-render.mjs (the one join its transformation-at-the-end check names),
+ * so "what counts as empty" is one arithmetic, not two that drift.
+ *
+ * THE OUTSIDE REFERENCE WALKS rather than sampling a fixed ±6 frames. An empty stretch measured at
+ * 0.2-0.3s already reaches a fixed ±6-frame sample at 30fps, so a fixed offset would land the "outside"
+ * reference INSIDE the empty stretch and compare emptiness to itself, never firing (measured on the
+ * exemplar this closes, engine-doctrine/MISTAKES.md#144). So this walks further out, one frame at a
+ * time, until it finds real structure (spread > 0.06) or gives up at a 2s cap.
+ *
+ * THE DROP MUST OUTLAST ONE FRAME. A 32x18 grid can read spread near zero on a frame that is a hard
+ * cut's one-frame colour-flat pass-through (a wipe or dissolve midpoint), recovered the very next
+ * frame; that is a cut, not this defect. edgeReadingAt cannot tell the two apart on a grained or
+ * textured ground, it reads the SAME "structure" whether or not anything is on screen (measured on
+ * this same exemplar), so the walk that confirms duration re-uses spread, not edges.
+ */
+export function emptinessAt(mp4, fps, total, nt) {
+  const clampF = (f) => Math.max(0, Math.min(total - 1, f));
+  const cache = new Map();
+  const spreadAt = (f) => {
+    const cf = clampF(f);
+    if (!cache.has(cf)) cache.set(cf, gridStatsAt(mp4, cf)?.spread ?? null);
+    return cache.get(cf);
+  };
+  const CAP = fps * 2;
+  const outsideSpreadAt = (dir) => {
+    let last = null;
+    for (let k = 6; k <= CAP; k++) {
+      last = spreadAt(nt + dir * k);
+      if (last != null && last > 0.06) return last;
+    }
+    return last;
+  };
+  const before = outsideSpreadAt(-1), after = outsideSpreadAt(1);
+  const win = [];
+  for (let d = -2; d <= 2; d++) { const sp = spreadAt(nt + d); if (sp != null) win.push({ f: clampF(nt + d), l: sp }); }
+  if (before == null || after == null || win.length < 5) return null;
+  const outside = Math.min(before, after);
+  const drained = win.reduce((m, w) => (w.l < m.l ? w : m), win[0]);
+  if (!(outside > 0.06 && drained.l < outside * 0.3)) return null;
+  const floor = outside * 0.3;
+  let k = CAP;
+  for (let d2 = 0; d2 <= CAP; d2++) {
+    const sp = spreadAt(drained.f + d2);
+    if (sp != null && sp >= floor) { k = d2; break; }
+  }
+  if (k < 2) return null;
+  return { frame: drained.f, spread: Math.round(drained.l * 255), outsideSpread: Math.round(outside * 255), emptySec: k / fps };
+}
+
+/**
  * edgeReadingAt(mp4, frameIdx, box, W, H) → a single 0..255 number describing how much STRUCTURE (hard
  * edges: a glyph, an icon, a card border) sits in the box, via ffmpeg's own edgedetect filter rather
  * than a hand-rolled Sobel. Blind spot: a colour-only change with no hard edge (a wash fading in) reads
