@@ -20,11 +20,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { stageOf, filePaths, ROOT } from '../../quality/gates/stage.mjs';
+import { appendRun } from '../lib/runlog.mjs';
 
-const deny = (reason) => {
+// A DENY leaves no other trace: stdout carries the reason back to the model and nothing else sees it.
+// So every deny is also logged to the run log, under the film the write was ATTEMPTED against (even
+// one that has no plan yet: `stemOf` derives a key from the filename alone, same as the "no storyboard
+// claims this file" branch below already does to name the file in its own message). This never throws
+// and never delays the deny: the log write happens after `process.stdout.write`, wrapped so a log
+// failure can't turn a refusal into a hang or a stack trace shown to the model instead of the reason.
+const deny = (reason, rule, film) => {
   process.stdout.write(JSON.stringify({
     hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: reason },
   }));
+  try { appendRun(film, { cmd: 'stage-gate', refusal: { rule, file: film, reason } }); } catch { /* never let the receipt affect the deny */ }
   process.exit(0);
 };
 const allow = () => process.exit(0);
@@ -69,7 +77,8 @@ process.stdin.on('end', () => {
     const n = stemOf(rel);
     deny('`approved:` is the USER\'s signature on the plan and an agent may not write it. Show the plan '
       + `with \`make studio D=films/scene/${n}.json\` (press 1), then ask the user to run `
-      + `\`/vawe-approve ${n}\`. AGENTS.md: nothing is rendered until the plan is LOCKED and the user signs off.`);
+      + `\`/vawe-approve ${n}\`. AGENTS.md: nothing is rendered until the plan is LOCKED and the user signs off.`,
+      'approval-is-human', n);
   }
   // A storyboard itself is always writable: it is stage 2, and denying it would deny the way out of
   // every other denial here.
@@ -83,7 +92,8 @@ process.stdin.on('end', () => {
       + 'fragment. AGENTS.md orders the deciders storyboard (1), subject (2), scene (3), and scene is the '
       + 'role that writes this file. The beat table is what decides how many fragments exist and names the '
       + 'selectors each must expose (engine-doctrine/MISTAKES.md #591).\nNext: write the storyboard first, '
-      + '`make scaffold OUT=films/scene/<film>.json THEME=<theme> DUR=<seconds>`.');
+      + '`make scaffold OUT=films/scene/<film>.json THEME=<theme> DUR=<seconds>`.',
+      'no-storyboard', stemOf(rel));
   }
   const p = filePaths(film);
   const st = stageOf(film);
@@ -94,7 +104,8 @@ process.stdin.on('end', () => {
     deny(`no storyboard for ${film}, so this fragment cannot be written yet. AGENTS.md orders the deciders `
       + 'storyboard (1), subject (2), scene (3), and scene is the role that writes this file. Written first, the '
       + 'fragment count is a guess and the motion handles are invented instead of read off the plan\'s own '
-      + `\`motion:\` line (engine-doctrine/MISTAKES.md #591).\nNext: ${st.next}`);
+      + `\`motion:\` line (engine-doctrine/MISTAKES.md #591).\nNext: ${st.next}`,
+      'no-storyboard', film);
   }
 
   // 3. NO FILM BEFORE THE PLAN IS SIGNED. Writing layers is building; building before approval is the
@@ -105,7 +116,8 @@ process.stdin.on('end', () => {
     if (layers > 0) {
       deny(`${film}'s plan is not approved, so the scene may not be filled in yet (stage: ${st.stage}). `
         + 'A shell with an empty `layers` is fine; layers are the film.\n'
-        + `Next: ${st.next}`);
+        + `Next: ${st.next}`,
+        'unapproved-layers', film);
     }
   }
   allow();
