@@ -368,11 +368,15 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
 {
   const need = dur >= 8 ? Math.min(6, 3 + Math.floor(dur / 8)) : 0;
   if (need && vocab.length < need) {
-    const reach = HIGH_VALUE.filter(([k]) => !sig[k]).map(([k, v]) => {
-      const ae = aeRecipeFor(k);
-      return ae ? `${v} → ${ae}` : v;
-    }).slice(0, 5);
-    raise('feature-poverty', `this film uses ${vocab.length} expressive famil(y/ies) (${vocab.join(', ') || 'none'}); a ${Math.round(dur * 10) / 10}s film should reach for about ${need}. The engine has ~15 families and this draws from the top of the box. Reach for one of: ${reach.join(' · ')}. Rank them for THIS film with \`make preflight\`, or search: \`make arsenal Q="<the feeling>"\`.`, { durationSec: dur });
+    // ONE next family, not a shopping list: a finding with five alternatives and two inlined AE recipe
+    // paragraphs buries the sentence that matters (engine-doctrine/TASTE.md, "feature-poverty" audit). Pick
+    // the single highest-ranked missing family (HIGH_VALUE is already ordered by value) and, only for
+    // that one, cite its AE recipe. The rest stay reachable via `make arsenal`, not inlined here.
+    const missing = HIGH_VALUE.filter(([k]) => !sig[k]);
+    const [topKey, topLabel] = missing[0] || [];
+    const ae = topKey ? aeRecipeFor(topKey) : null;
+    const others = missing.length - 1;
+    raise('feature-poverty', `this film uses ${vocab.length} expressive famil(y/ies) (${vocab.join(', ') || 'none'}); a ${Math.round(dur * 10) / 10}s film should reach for about ${need}. Add ${topLabel}${ae ? `, per ${ae}` : ''}.${others > 0 ? ` (${others} other unused famil${others === 1 ? 'y' : 'ies'}: \`make arsenal Q="<the feeling>"\`.)` : ''}`, { durationSec: dur });
   }
 }
 
