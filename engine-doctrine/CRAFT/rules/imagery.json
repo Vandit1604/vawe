@@ -1,92 +1,92 @@
 [
-  {
-    "id": "imagery.visual-ladder",
-    "category": "imagery",
-    "stage": "design",
-    "applies": "hasImages",
-    "check": null,
-    "adapt": null,
-    "brief": "Prefer the lightest real visual: captured real UI (make capture) first, a raw stock photo last",
-    "doc": "engine-doctrine/CRAFT/IMAGERY.md"
-  },
-  {
-    "id": "imagery.always-treat",
-    "category": "imagery",
-    "stage": "design",
-    "applies": "hasImages",
-    "check": null,
-    "adapt": null,
-    "brief": "Never embed a raw flat image. Every image must have motion treatment",
-    "doc": "engine-doctrine/CRAFT/IMAGERY.md"
-  },
-  {
-    "id": "imagery.licensing",
-    "category": "imagery",
-    "stage": "design",
-    "applies": "hasImages",
-    "check": null,
-    "adapt": null,
-    "brief": "Never embed copyrighted material into a published video (it triggers Content ID claims)",
-    "doc": "engine-doctrine/CRAFT/IMAGERY.md"
-  },
-  {
-    "id": "imagery.named-brand-shows-mark",
-    "category": "imagery",
-    "stage": "design",
-    "applies": "hasImages",
-    "check": null,
-    "adapt": null,
-    "brief": "Whenever a company/product/tool is named, show its mark",
-    "doc": "engine-doctrine/CRAFT/IMAGERY.md"
-  },
-  {
-    "id": "imagery.no-mixed-icon-families",
-    "category": "imagery",
-    "stage": "design",
-    "applies": "hasImages",
-    "check": null,
-    "adapt": null,
-    "brief": "Never mix icon families: one stroke set, one weight",
-    "doc": "engine-doctrine/CRAFT/IMAGERY.md"
-  },
-  {
-    "id": "imagery.fetch-safely",
-    "category": "imagery",
-    "stage": "design",
-    "applies": "hasImages",
-    "check": null,
-    "adapt": null,
-    "brief": "Use make assets for logos, and if you curl one by hand, use -f",
-    "doc": "engine-doctrine/CRAFT/IMAGERY.md"
-  },
-  {
-    "id": "imagery.logo-prominence",
-    "category": "imagery",
-    "stage": "design",
-    "applies": "hasImages",
-    "check": null,
-    "adapt": null,
-    "brief": "A mark reads as the brand, next to the title and on the end card",
-    "doc": "engine-doctrine/RULES/logo-prominence.md"
-  },
-  {
-    "id": "imagery.svg-inline",
-    "category": "imagery",
-    "stage": "design",
-    "applies": "always",
-    "check": null,
-    "adapt": null,
-    "brief": "An svg layer is inline geometry, not a file reference",
-    "doc": "engine-doctrine/RULES/svg-inline.md"
-  },
-  {
-    "id": "imagery.no-css-clock",
-    "category": "imagery",
-    "stage": "design",
-    "applies": "hasHtml",
-    "check": null,
-    "adapt": null,
-    "brief": "The engine owns the clock: no CSS animation, transition, opacity, or filter",
-    "doc": "engine-doctrine/RULES/no-css-clock.md"
-  }
+ {
+  "id": "imagery.visual-ladder",
+  "category": "imagery",
+  "stage": "design",
+  "applies": "hasImages",
+  "check": null,
+  "adapt": null,
+  "brief": "Prefer the lightest real visual: captured real UI (make capture) first, a raw stock photo last",
+  "doc": "engine-doctrine/CRAFT/IMAGERY.md"
+ },
+ {
+  "id": "imagery.always-treat",
+  "category": "imagery",
+  "stage": "design",
+  "applies": "hasImages",
+  "check": null,
+  "adapt": null,
+  "brief": "Never embed a raw flat image. Every image must have motion treatment",
+  "doc": "engine-doctrine/CRAFT/IMAGERY.md"
+ },
+ {
+  "id": "imagery.licensing",
+  "category": "imagery",
+  "stage": "design",
+  "applies": "hasImages",
+  "check": null,
+  "adapt": null,
+  "brief": "Never embed copyrighted material into a published video (it triggers Content ID claims)",
+  "doc": "engine-doctrine/CRAFT/IMAGERY.md"
+ },
+ {
+  "id": "imagery.named-brand-shows-mark",
+  "category": "imagery",
+  "stage": "design",
+  "applies": "hasTextBeats",
+  "check": null,
+  "adapt": null,
+  "brief": "Whenever a company/product/tool is named, show its mark",
+  "doc": "engine-doctrine/CRAFT/IMAGERY.md"
+ },
+ {
+  "id": "imagery.no-mixed-icon-families",
+  "category": "imagery",
+  "stage": "design",
+  "applies": "hasImages",
+  "check": null,
+  "adapt": null,
+  "brief": "Never mix icon families: one stroke set, one weight",
+  "doc": "engine-doctrine/CRAFT/IMAGERY.md"
+ },
+ {
+  "id": "imagery.fetch-safely",
+  "category": "imagery",
+  "stage": "design",
+  "applies": "hasImages",
+  "check": null,
+  "adapt": null,
+  "brief": "Use make assets for logos, and if you curl one by hand, use -f",
+  "doc": "engine-doctrine/CRAFT/IMAGERY.md"
+ },
+ {
+  "id": "imagery.logo-prominence",
+  "category": "imagery",
+  "stage": "design",
+  "applies": "hasImages",
+  "check": null,
+  "adapt": null,
+  "brief": "A mark reads as the brand, next to the title and on the end card",
+  "doc": "engine-doctrine/RULES/logo-prominence.md"
+ },
+ {
+  "id": "imagery.svg-inline",
+  "category": "imagery",
+  "stage": "design",
+  "applies": "always",
+  "check": null,
+  "adapt": null,
+  "brief": "An svg layer is inline geometry, not a file reference",
+  "doc": "engine-doctrine/RULES/svg-inline.md"
+ },
+ {
+  "id": "imagery.no-css-clock",
+  "category": "imagery",
+  "stage": "design",
+  "applies": "hasHtml",
+  "check": null,
+  "adapt": null,
+  "brief": "The engine owns the clock: no CSS animation, transition, opacity, or filter",
+  "doc": "engine-doctrine/RULES/no-css-clock.md"
+ }
 ]
