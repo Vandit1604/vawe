@@ -8,8 +8,8 @@
     "reactionBar"
   ],
   "dimensions": {
-    "width": 262,
-    "height": 79
+    "width": 257,
+    "height": 87
   },
   "install": {
     "kind": "scene-layer",
