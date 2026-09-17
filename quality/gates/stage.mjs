@@ -55,7 +55,46 @@ export function filePaths(arg) {
     mp4: path.join(ROOT, 'out', path.basename(base) + '.mp4') };
 }
 
+// A GATE VERDICT IS CACHED ON ITS INPUTS, because this runs on every keystroke.
+//
+// stageOf() is called by harness/live/stage-say.mjs, a PreToolUse hook, so it pays its cost once per
+// turn. Measured on a real film: storyboard-check 2.9s, frame-check 22.4s, because frame-check opens a
+// browser and measures every fragment. The hook's budget is 30s, so it timed out and the author lost
+// the stage line entirely, which is the one thing the hook exists to print.
+//
+// A film's stage cannot change unless the film's own files change, so the verdict is keyed on a
+// fingerprint of them: the scene, the storyboard, the design sheet and every fragment beside it, by
+// size and mtime. Cheap to compute (a stat each) and exact enough: a save changes mtime, and that is
+// precisely when a verdict may differ. A cache miss costs what it always cost.
+const fingerprint = (file) => {
+  const base = String(file).replace(/\.(json|storyboard\.md|design\.md)$/, '');
+  const dir = path.dirname(base);
+  let names = [];
+  try { names = fs.readdirSync(dir).filter((n) => n.startsWith(path.basename(base) + '.') || n === path.basename(base) + '.json'); }
+  catch { /* the film may not exist yet, which the empty fingerprint below records honestly */ }
+  return names.sort().map((n) => {
+    try { const st = fs.statSync(path.join(dir, n)); return `${n}:${st.size}:${st.mtimeMs}`; }
+    catch { return `${n}:gone`; }
+  }).join('|');
+};
+
+const CACHE = path.join(ROOT, '.vawe-data/stage-gate-cache.json');
+const readCache = () => { try { return JSON.parse(fs.readFileSync(CACHE, 'utf8')); } catch { return {}; } };
+
 const gatePasses = (script, file) => {
+  const key = `${script}::${file}`;
+  const fp = fingerprint(file);
+  const cache = readCache();
+  if (cache[key] && cache[key].fp === fp) return cache[key].ok;
+  const ok = runGate(script, file);
+  try {
+    fs.mkdirSync(path.dirname(CACHE), { recursive: true });
+    fs.writeFileSync(CACHE, JSON.stringify({ ...cache, [key]: { fp, ok } }));
+  } catch { /* a cache write failure costs a re-run, never a wrong answer */ }
+  return ok;
+};
+
+const runGate = (script, file) => {
   try { execFileSync(process.execPath, [path.join(ROOT, script), file], { encoding: 'utf8', stdio: 'pipe' }); return true; }
   catch { return false; }
 };
