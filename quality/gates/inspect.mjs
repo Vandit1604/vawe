@@ -75,6 +75,8 @@ for (const b of intent.beats || []) {
   // a failure should say what was supposed to be happening here, not just which string went missing.
   if (b.object) bits.push(`at this moment the object should be: ${b.object}`);
   if (b.becomes) bits.push(`and the junction should deliver: ${b.becomes}`);
+  if (missing.length) bits.push(`fix: add a layer whose text/block matches ${JSON.stringify(missing[0])}, on screen at ${at}s (start <= ${at} <= start+duration)`);
+  else if (b.mustAnimate && !hasMotion) bits.push(`fix: give a layer live at ${at}s an anim/split/preset/ken, or extend one that already has one to cover ${at}s`);
   f.fail('unmet-beat', bits.join('; '), { at: `@${at}s${window} ${b.name || ''}`.trim() });
 }
 console.log(`\n  ${pass} pass · ${fail} fail\n`);
