@@ -1,122 +1,122 @@
 [
-  {
-    "id": "transitions.hard-cut-default",
-    "category": "transitions",
-    "stage": "direct",
-    "applies": "hasBoundaries",
-    "check": "no-transition",
-    "adapt": null,
-    "brief": "Default to a hard cut; earn ONE primary transition for ~60-70% of cuts plus 1-2 bolder accents reserved for the payoff",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#agent-summary"
-  },
-  {
-    "id": "transitions.rule-of-six",
-    "category": "transitions",
-    "stage": "direct",
-    "applies": "hasBoundaries",
-    "check": null,
-    "adapt": null,
-    "brief": "Choose each seam by the relationship and feeling between its two beats (Murch's Rule of Six: emotion 51%), never by habit",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#agent-summary"
-  },
-  {
-    "id": "transitions.one-cut-family",
-    "category": "transitions",
-    "stage": "direct",
-    "applies": "hasBoundaries",
-    "check": "cut-families",
-    "adapt": null,
-    "brief": "one cut family per film; ≥3 families = FAIL (make direct)",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#what-the-gate-enforces-make-direct-make-critique"
-  },
-  {
-    "id": "transitions.crossfade-mud",
-    "category": "transitions",
-    "stage": "direct",
-    "applies": "hasBoundaries",
-    "check": "crossfade-mud",
-    "adapt": null,
-    "brief": "Straight cuts are the meat; dissolves/fades/wipes are seasoning",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#restraint-the-invisible-cut-dominates"
-  },
-  {
-    "id": "transitions.covered-move",
-    "category": "transitions",
-    "stage": "direct",
-    "applies": "hasBoundaries",
-    "check": "covered-move",
-    "adapt": null,
-    "brief": "A full-bleed layer above must not start mid-move and hide it before it plays",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#track-decides-stacking-array-order-breaks-a-tie"
-  },
-  {
-    "id": "transitions.flat-seams",
-    "category": "transitions",
-    "stage": "direct",
-    "applies": "hasBoundaries",
-    "check": "flat-seams",
-    "adapt": null,
-    "brief": "make direct warns (flat-seams) when a film has two or more boundaries and every one rides a gentle curve with no speed ramp anywhere",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#speed-is-the-anti-repetition-lever"
-  },
-  {
-    "id": "transitions.seam-ghost",
-    "category": "transitions",
-    "stage": "direct",
-    "applies": "hasBoundaries",
-    "check": "seam-ghost",
-    "adapt": null,
-    "brief": "An outgoing layer still visible, fading, several frames past the transition's own declared dur",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-ghost"
-  },
-  {
-    "id": "transitions.seam-resurrection",
-    "category": "transitions",
-    "stage": "direct",
-    "applies": "hasBoundaries",
-    "check": "seam-resurrection",
-    "adapt": null,
-    "brief": "A layer redrawn after its own authored end",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-resurrection"
-  },
-  {
-    "id": "transitions.seam-split",
-    "category": "transitions",
-    "stage": "direct",
-    "applies": "hasBoundaries",
-    "check": "seam-split",
-    "adapt": "seam-split",
-    "brief": "One step several times the size of the rest is a hard background swap disguised inside a soft layer dissolve",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-split-seam"
-  },
-  {
-    "id": "transitions.unreasoned",
-    "category": "transitions",
-    "stage": "plan",
-    "applies": "hasBoundaries",
-    "check": "transition-unreasoned",
-    "adapt": null,
-    "brief": "This is the thought process. Run it in order; stop when the transition is chosen.",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam"
-  },
-  {
-    "id": "transitions.boundary-uncovered",
-    "category": "transitions",
-    "stage": "plan",
-    "applies": "hasBoundaries",
-    "check": "boundary-uncovered",
-    "adapt": null,
-    "brief": "What is the RELATIONSHIP between the two beats?",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam"
-  },
-  {
-    "id": "transitions.reason-mismatch",
-    "category": "transitions",
-    "stage": "plan",
-    "applies": "hasBoundaries",
-    "check": "transition-reason-mismatch",
-    "adapt": null,
-    "brief": "The meta-rule again: if a seam can't answer (1)-(5) with a real relationship or feeling, it is a hard cut.",
-    "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam"
-  }
+ {
+  "id": "transitions.hard-cut-default",
+  "category": "transitions",
+  "stage": "direct",
+  "applies": "always",
+  "check": "no-transition",
+  "adapt": null,
+  "brief": "Default to a hard cut; earn ONE primary transition for ~60-70% of cuts plus 1-2 bolder accents reserved for the payoff",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#agent-summary"
+ },
+ {
+  "id": "transitions.rule-of-six",
+  "category": "transitions",
+  "stage": "direct",
+  "applies": "always",
+  "check": null,
+  "adapt": null,
+  "brief": "Choose each seam by the relationship and feeling between its two beats (Murch's Rule of Six: emotion 51%), never by habit",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#agent-summary"
+ },
+ {
+  "id": "transitions.one-cut-family",
+  "category": "transitions",
+  "stage": "direct",
+  "applies": "always",
+  "check": "cut-families",
+  "adapt": null,
+  "brief": "one cut family per film; \u22653 families = FAIL (make direct)",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#what-the-gate-enforces-make-direct-make-critique"
+ },
+ {
+  "id": "transitions.crossfade-mud",
+  "category": "transitions",
+  "stage": "direct",
+  "applies": "hasBoundaries",
+  "check": "crossfade-mud",
+  "adapt": null,
+  "brief": "Straight cuts are the meat; dissolves/fades/wipes are seasoning",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#restraint-the-invisible-cut-dominates"
+ },
+ {
+  "id": "transitions.covered-move",
+  "category": "transitions",
+  "stage": "direct",
+  "applies": "hasBoundaries",
+  "check": "covered-move",
+  "adapt": null,
+  "brief": "A full-bleed layer above must not start mid-move and hide it before it plays",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#track-decides-stacking-array-order-breaks-a-tie"
+ },
+ {
+  "id": "transitions.flat-seams",
+  "category": "transitions",
+  "stage": "direct",
+  "applies": "hasBoundaries",
+  "check": "flat-seams",
+  "adapt": null,
+  "brief": "make direct warns (flat-seams) when a film has two or more boundaries and every one rides a gentle curve with no speed ramp anywhere",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#speed-is-the-anti-repetition-lever"
+ },
+ {
+  "id": "transitions.seam-ghost",
+  "category": "transitions",
+  "stage": "direct",
+  "applies": "hasBoundaries",
+  "check": "seam-ghost",
+  "adapt": null,
+  "brief": "An outgoing layer still visible, fading, several frames past the transition's own declared dur",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-ghost"
+ },
+ {
+  "id": "transitions.seam-resurrection",
+  "category": "transitions",
+  "stage": "direct",
+  "applies": "hasBoundaries",
+  "check": "seam-resurrection",
+  "adapt": null,
+  "brief": "A layer redrawn after its own authored end",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-resurrection"
+ },
+ {
+  "id": "transitions.seam-split",
+  "category": "transitions",
+  "stage": "direct",
+  "applies": "hasBoundaries",
+  "check": "seam-split",
+  "adapt": "seam-split",
+  "brief": "One step several times the size of the rest is a hard background swap disguised inside a soft layer dissolve",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-split-seam"
+ },
+ {
+  "id": "transitions.unreasoned",
+  "category": "transitions",
+  "stage": "plan",
+  "applies": "hasBoundaries",
+  "check": "transition-unreasoned",
+  "adapt": null,
+  "brief": "This is the thought process. Run it in order; stop when the transition is chosen.",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam"
+ },
+ {
+  "id": "transitions.boundary-uncovered",
+  "category": "transitions",
+  "stage": "plan",
+  "applies": "hasBoundaries",
+  "check": "boundary-uncovered",
+  "adapt": null,
+  "brief": "What is the RELATIONSHIP between the two beats?",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam"
+ },
+ {
+  "id": "transitions.reason-mismatch",
+  "category": "transitions",
+  "stage": "plan",
+  "applies": "hasBoundaries",
+  "check": "transition-reason-mismatch",
+  "adapt": null,
+  "brief": "The meta-rule again: if a seam can't answer (1)-(5) with a real relationship or feeling, it is a hard cut.",
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-seam"
+ }
 ]
