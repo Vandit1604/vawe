@@ -81,6 +81,23 @@ for (const f of fs.readdirSync(FILMS).filter((n) => n.endsWith('.mp4')).sort()) 
   const db = peakDb(film);
   if (db !== null) row.peakDb = +db.toFixed(1);
 
+  // WHEN THIS FILM WENT PUBLIC, for the showcase page's VideoObject (site/lib/schema.ts). Google will
+  // not award a video rich result without `uploadDate`, and that is the one rich result a video
+  // product should have, so the choice was between a real date and no feature.
+  //
+  // The commit that ADDED the mp4 is that date, and it is not a build artefact: this file is only in
+  // the repo because someone published it, and the day they did is the day it went public. `--diff-
+  // filter=A` with `--follow` reads the ADD, so a later re-render does not move a date that has
+  // already happened. Captured here, at generate time, because the Dockerfile's build context has no
+  // `.git`: asking git from the site build would work locally and return nothing in the image, which
+  // is the exact split this repo keeps logging.
+  const added = spawnSync('git', ['log', '--follow', '--diff-filter=A', '--format=%cs', '-1', '--', film],
+    { cwd: ROOT, encoding: 'utf8' });
+  const published = String(added.stdout || '').trim();
+  // An untracked film has no publish date. Say nothing rather than guess: a VideoObject carrying
+  // today's date for a file nobody published is a fabrication in a machine-readable format.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(published)) row.published = published;
+
   // The scene is the authority on what the film was meant to be. Four of the six film sources are
   // gitignored as content, so on a fresh clone it is simply absent: that is a fact about the checkout,
   // not about the film, and a check which cannot check says so rather than passing or failing. Same

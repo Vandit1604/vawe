@@ -88,12 +88,17 @@ function isoDuration(seconds: number): string {
 }
 
 // VideoObject, built ONLY from what films.json + the public asset directory genuinely hold: a real
-// mp4 (contentUrl), a real poster jpg (thumbnailUrl) and a real measured duration. `uploadDate` is
-// deliberately omitted: Google lists it as required for video rich-result eligibility, but nothing
-// in this repo records when a film was published. A git commit date on the asset would be a build
-// artefact, not an editorial publish date, and typing today's date would be a fabricated field, so
-// this object ships without it rather than inventing one.
-export function videoObjectSchema(film: { slug: string; brand: string; seconds: number }) {
+// mp4 (contentUrl), a real poster jpg (thumbnailUrl), a real measured duration and a real publish
+// date.
+//
+// `uploadDate` IS SET, and the reasoning is worth keeping because it was nearly left out. Google
+// lists it as required for video rich-result eligibility, so omitting it forfeits the one rich
+// result a video product should have. The date is the commit that ADDED the mp4, captured at
+// generate time by scripts/site/films-json.mjs. That is not a build artefact: the file is only in
+// the repo because someone published it, and the day they did is the day it went public. A film
+// with no such date carries no `uploadDate` rather than a guessed one, because a fabricated date in
+// a machine-readable field is worse than an absent one.
+export function videoObjectSchema(film: { slug: string; brand: string; seconds: number; published?: string }) {
   return {
     "@context": "https://schema.org",
     "@type": "VideoObject",
@@ -102,6 +107,7 @@ export function videoObjectSchema(film: { slug: string; brand: string; seconds: 
     thumbnailUrl: `${SITE_URL}/assets/films/${film.slug}.jpg`,
     contentUrl: `${SITE_URL}/assets/films/${film.slug}.mp4`,
     duration: isoDuration(film.seconds),
+    ...(film.published ? { uploadDate: film.published } : {}),
   };
 }
 

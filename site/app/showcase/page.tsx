@@ -76,11 +76,13 @@ function FilmTile({ film }: { film: Film }) {
 
 export default function Showcase() {
   const [hero, ...rest] = FILMS;
-  // One VideoObject per film that genuinely has a duration on file (films.json). Missing
-  // `uploadDate`: see the comment on videoObjectSchema in lib/schema.ts for why.
+  // One VideoObject per film that genuinely has a duration on file (films.json), carrying the real
+  // publish date that file also records. See the comment on videoObjectSchema in lib/schema.ts.
   const videoSchemas = FILMS
-    .map((f) => (films as Record<string, { seconds: number }>)[f.slug])
-    .map((entry, i) => (entry ? videoObjectSchema({ slug: FILMS[i].slug, brand: FILMS[i].brand, seconds: entry.seconds }) : null))
+    .map((f) => (films as Record<string, { seconds: number; published?: string }>)[f.slug])
+    .map((entry, i) => (entry
+      ? videoObjectSchema({ slug: FILMS[i].slug, brand: FILMS[i].brand, seconds: entry.seconds, published: entry.published })
+      : null))
     .filter((v): v is NonNullable<typeof v> => v !== null);
 
   return (
