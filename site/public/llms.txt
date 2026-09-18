@@ -9,6 +9,9 @@
 - [arsenal/type](https://vawe.dev/arsenal/type): The engine's typographic vocabulary as specimens: kinetic presets, per-layer text mechanics and typographic beats, each playing in the real engine with the JSON that produces it.
 - [playground](https://vawe.dev/playground): Turn the dials on the engine's generators in your browser. The same pure functions the renderer calls, with their real option schemas.
 - [editor](https://vawe.dev/editor): Edit a scene JSON and watch it render live. The real engine, running in your browser.
+- [determinism](https://vawe.dev/determinism): renderFrame(n) is a pure function of n: the same scene JSON produces byte-identical frames on any machine, in any order. How Vawe proves it, and why that lets a long render split across parallel browser tabs.
+- [json-to-video](https://vawe.dev/json-to-video): What a Vawe scene file actually contains: one JSON document, 24 layer types, five named canvases, validated before a single frame renders. How the file becomes an mp4.
+- [ai-agents](https://vawe.dev/ai-agents): An MCP server an agent calls directly to write, draft and export a video: free watermarked iteration, a paid clean export, and a file server that default-denies everything the render does not need.
 
 ## Docs
 - [aspect-ratios](https://vawe.dev/docs/aspect-ratios): Render one scene to 16:9, 9:16, 1:1, and more from a single source, using relative coordinates, pins, and a 12-column grid.
