@@ -160,6 +160,7 @@ export default function Determinism() {
               <a href="/ai-agents">How an agent writes the JSON</a>
               <a href="/docs/determinism">The technical reference in the docs</a>
               <a href="/editor">Break a render on purpose, in the editor</a>
+              <a href="/when-determinism-matters">When this property is the reason to pick an engine</a>
             </div>
           </section>
         </main>

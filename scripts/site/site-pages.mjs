@@ -40,6 +40,12 @@ const ROUTES = [
   { path: '/determinism', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/json-to-video', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/ai-agents', priority: 0.7, changeFrequency: 'monthly' },
+  // Two comparison/decision pages added after researching what actually ranks for "Remotion
+  // alternative" and "JSON to video API" (2026-09-19). changeFrequency is monthly, not weekly:
+  // both cite dated, external facts (a competitor's license, a competitor's pricing page) that
+  // need a human re-check, not an automated one, when they go stale.
+  { path: '/remotion-alternatives', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/when-determinism-matters', priority: 0.7, changeFrequency: 'monthly' },
 ];
 
 // fumadocs routes content/docs/<slug>.mdx at /docs/<slug>, and index.mdx at /docs itself.
