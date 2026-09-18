@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 import { flattenLayers, nearestBeats } from '../../harness/lib/layers.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { allBoundaries } from '../../core/timeline/junctions.js';
-import { edgeReadingAt, gridStatsAt, emptinessAt } from '../../harness/lib/frame-forensics.mjs';
+import { edgeReadingAt, gridStatsAt, gridStatsSweep, emptinessAt } from '../../harness/lib/frame-forensics.mjs';
 import { sceneDims } from '../../harness/lib/layer-boxes.mjs';
 
 import { gradeable } from './tile.mjs';
@@ -118,7 +118,12 @@ const flat = flattenLayers(data.layers);
 const beatsAround = (tSec) => nearestBeats(flat, tSec);
 const seams = allBoundaries(data, flat).map((t) => Math.round(t * fps)).filter((n) => n > 2 && n < total - 2);
 
-if (!seams.length) { console.log('✓ seam-snap: no transition boundaries to sample (single-beat scene)'); f.emit(); process.exit(0); }
+// NOT an early exit any more. A film with zero declared/inferred boundaries (a flow-seam film: every
+// join is inside per-layer motion, none of it a cut/seam/sting/start-cluster) used to stop here and
+// never look at the file at all, that is exactly the exemplar this gate now exists to catch
+// (engine-doctrine/MISTAKES.md#144, vawe-flow-2's 9.0s hole: 0 boundaries, 1 real empty stage). The
+// per-boundary loop below is simply a no-op on an empty `seams`, and the whole-film sweep after it
+// still runs.
 
 // ── for each boundary, compare the seam window to the frames just outside it ──────────────────────
 // A flash is a luminance dip PRESENT at the seam and ABSENT 6 frames to either side. Comparing to the
@@ -177,6 +182,68 @@ for (const nt of seams) {
   if (empty) emptyFindings.push({ t: (nt / fps).toFixed(2), ...empty, emptySec: empty.emptySec.toFixed(2), out, inn });
 }
 
+// ── whole-film sweep: an empty stage can happen anywhere, not only where a boundary was inferred ──
+// allBoundaries() (core/timeline/junctions.js) names cuts/seams/stings and CLUSTERS of layer-starts
+// after a gap. A film whose joins are flow-seams in per-layer motion, not a declared transition and not
+// a start-cluster, passes no frame near its own hole to either check above: the boundary machinery
+// simply never nominates the timestamp. An empty stage is a fact about the PIXELS, not about which
+// mechanism the film used to cross a beat, so it can be anywhere in the timeline and has to be looked
+// for everywhere, not only at the instants a mechanism-counting pass already picked out.
+//
+// Decoding every frame to do that is the one thing this gate must not do. So this walks the WHOLE
+// film at a coarse stride, no finer than a hole the grammar (engine-doctrine/MISTAKES.md#144: "a
+// moment, never a hold") would ever call acceptable, and only pays for the expensive per-frame duration
+// walk (emptinessAt's own) once a coarse sample actually reads empty. One sample every 0.15s cannot
+// step clean over a hole shorter than that, because a hole under that length is not the drained-stage
+// defect this gate exists to catch, it is the frame-flat pass-through of an ordinary cut.
+const SWEEP_STRIDE = Math.max(2, Math.round(fps * 0.15));
+// A hole this sweep already reported by the exact frame emptinessAt returned, buffered by ±1s so the
+// duration walk's own recovery point can't be mistaken for a second, separate hole starting right after
+// the first, is never reported twice. Boundaries already found above (findings, emptyFindings) go in
+// the same list up front: a hole a declared boundary already named is not a second finding here.
+const covered = [];
+for (const s of findings) covered.push([s.frame - fps, s.frame + Math.round(Number(s.emptySec) * fps) + fps]);
+for (const s of emptyFindings) covered.push([s.frame - fps, s.frame + Math.round(Number(s.emptySec) * fps) + fps]);
+const isCovered = (n) => covered.some(([lo, hi]) => n >= lo && n <= hi);
+
+const sweepFindings = [];
+// ONE decode for the coarse pass (harness/lib/frame-forensics.mjs gridStatsSweep). Calling gridStatsAt
+// in a loop costs a full decode from frame 0 on every sample, which made this sweep quadratic in film
+// length: 60s of wall clock on a 22s film. The one-pass form is 0.24s for the same 74 samples.
+const coarse = gridStatsSweep(mp4, SWEEP_STRIDE);
+let lastClean = 6, ci = 0;
+while (ci < coarse.length) {
+  const sweepNt = coarse[ci].frame;
+  if (sweepNt <= 6 || sweepNt >= total - 6) { ci++; continue; }
+  const g = coarse[ci];
+  if (g.spread > 0.06 || isCovered(sweepNt)) { lastClean = sweepNt; ci++; continue; }
+  // REFINE: the coarse sample only proves a hole exists somewhere in [lastClean, sweepNt]; binary
+  // search that gap for the true onset frame so the reported start isn't off by up to a stride.
+  let lo = lastClean, hi = sweepNt;
+  while (hi - lo > 1) {
+    const mid = Math.floor((lo + hi) / 2);
+    const gm = gridStatsAt(mp4, mid);
+    if (gm != null && gm.spread > 0.06) lo = mid; else hi = mid;
+  }
+  // land emptinessAt's own ±2 window ON the onset (not straddling it), then let its walk, the SAME
+  // arithmetic every boundary above already used, confirm the drop and measure how long it holds.
+  const onset = Math.min(total - 1, hi + 2);
+  const empty = emptinessAt(mp4, fps, total, onset);
+  if (empty && !isCovered(empty.frame)) {
+    const { out, inn } = beatsAround(empty.frame / fps);
+    sweepFindings.push({ t: (empty.frame / fps).toFixed(2), ...empty, emptySec: empty.emptySec.toFixed(2), out, inn });
+    covered.push([empty.frame - fps, empty.frame + Math.round(empty.emptySec * fps) + fps]);
+    sheetFrames.push(empty.frame);
+    const resume = empty.frame + Math.round(empty.emptySec * fps) + SWEEP_STRIDE;
+    while (ci < coarse.length && coarse[ci].frame < resume) ci++;
+  } else {
+    // the coarse dip didn't confirm (a genuinely dark, low-contrast beat: emptinessAt's own outside>0.06
+    // gate refused it, same as it would at a declared boundary), move past it and keep sweeping.
+    ci++;
+  }
+  lastClean = ci < coarse.length ? coarse[ci].frame : total;
+}
+
 // ── contact sheet at the seams (the eye is the backstop the numbers can't be) ─────────────────────
 // per scene, so two authors running at once cannot read each other's seams (same reason as beats.mjs)
 const SLUG = path.basename(dataArg, '.json');
@@ -203,9 +270,9 @@ for (const nt of unread) {
   console.error(`  ? boundary at ${(nt / fps).toFixed(2)}s (frame ${nt}) would not decode, NOT checked.`);
   f.warn('seam-unread', `boundary at ${(nt / fps).toFixed(2)}s (frame ${nt}) would not decode, NOT checked`, { at: `frame ${nt}` });
 }
-const total_findings = findings.length + emptyFindings.length;
+const total_findings = findings.length + emptyFindings.length + sweepFindings.length;
 if (!total_findings && !unread.length) {
-  console.log(`✓ seam-snap clean. No luminance flash and no empty stage at any transition (read ${SHEET} to confirm the eye agrees)`);
+  console.log(`✓ seam-snap clean. No luminance flash and no empty stage anywhere in the film (read ${SHEET} to confirm the eye agrees)`);
   f.emit();
   process.exit(0);
 }
@@ -233,6 +300,15 @@ for (const seam of emptyFindings) {
   f.fail('seam-empty', `seam "${seam.out}" -> "${seam.inn}" at ${seam.t}s: spread drops to ${seam.spread} vs ${seam.outsideSpread} just outside (32x18 grid, colour-blind), empty ${seam.emptySec}s before content reads. ${fix}`,
     { at: `frame ${seam.frame}`, doc: 'engine-doctrine/MISTAKES.md#144' });
 }
-console.error(`\n✗ seam-snap: ${findings.length} transition flash(es), ${emptyFindings.length} empty stage(s). The center-sampling gates cannot see these, fix the seam compositing or the clip timing, then re-render.`);
+for (const seam of sweepFindings) {
+  // same drained-stage defect as seam-empty, found by sweeping the whole film instead of a declared
+  // boundary: no cut/seam/sting/start-cluster names this moment, so nothing else would ever have
+  // looked here. The fix is the same overlap either way.
+  const fix = `overlap "${seam.out}"'s exit with "${seam.inn}"'s entrance so the stage never empties (TRANSITIONS.md: no transition-dip)`;
+  console.error(`  ✗ empty stage at ${seam.t}s (no declared boundary nearby): "${seam.out}" -> "${seam.inn}", spread drops to ${seam.spread} vs ${seam.outsideSpread} (32x18 grid, colour-blind), empty ${seam.emptySec}s before content reads. ${fix}.`);
+  f.fail('seam-empty', `empty stage at ${seam.t}s with no declared boundary nearby: "${seam.out}" -> "${seam.inn}", spread drops to ${seam.spread} vs ${seam.outsideSpread} (32x18 grid, colour-blind), empty ${seam.emptySec}s before content reads`,
+    { at: `${seam.t}s (frame ${seam.frame})`, fix, doc: 'engine-doctrine/MISTAKES.md#144' });
+}
+console.error(`\n✗ seam-snap: ${findings.length} transition flash(es), ${emptyFindings.length + sweepFindings.length} empty stage(s) (${sweepFindings.length} away from any declared boundary). The center-sampling gates cannot see these, fix the seam compositing or the clip timing, then re-render.`);
 f.emit();
 process.exit(1);

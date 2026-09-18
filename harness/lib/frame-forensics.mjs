@@ -70,6 +70,36 @@ export function meanColorAt(mp4, frameIdx, box, W, H) {
 }
 
 /**
+ * gridStatsSweep(mp4, stride) → [{ frame, luma, spread }]: the SAME statistic as gridStatsAt, for every
+ * `stride`-th frame of the whole film, in ONE decode.
+ *
+ * WHY THIS EXISTS RATHER THAN A LOOP OVER gridStatsAt. That function seeks by `select=eq(n,K)`, which
+ * has no keyframe seek in front of it, so ffmpeg decodes from frame 0 to K every single call: a sweep
+ * of a 22s film at a 0.15s stride cost 147 calls and 60 seconds of wall clock, quadratic in length.
+ * This is linear: one pass, one process, the frames arriving in order. Measured on the same film, the
+ * same sweep, 60s to under 2s.
+ *
+ * The arithmetic is deliberately IDENTICAL to gridStatsAt (32x18 gray, mean and max-min over the bytes)
+ * so "what counts as empty" stays one answer. A caller that finds a hit here still confirms and measures
+ * it with emptinessAt, which owns the duration walk.
+ */
+export function gridStatsSweep(mp4, stride) {
+  const N = 32 * 18;
+  const step = Math.max(1, Math.round(stride));
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vf', `select=not(mod(n\\,${step})),scale=32:18`,
+    '-vsync', '0', '-f', 'rawvideo', '-pix_fmt', 'gray', '-'], { maxBuffer: 1 << 28 });
+  const b = r.stdout;
+  if (!b || b.length < N) return [];
+  const out = [];
+  for (let i = 0; i + N <= b.length; i += N) {
+    let sum = 0, min = 255, max = 0;
+    for (let k = 0; k < N; k++) { const v = b[i + k]; sum += v; if (v < min) min = v; if (v > max) max = v; }
+    out.push({ frame: (i / N) * step, luma: sum / N / 255, spread: (max - min) / 255 });
+  }
+  return out;
+}
+
+/**
  * gridStatsAt(mp4, frameIdx) → { luma, spread } in [0,1], or null if the frame would not decode. One
  * decode of the WHOLE frame, scaled to a small grid (32x18) instead of 1x1: the grid's mean IS the same
  * frame-mean a 1x1 scale gives (seam-snap.mjs's original lumaAt trick), and its max-min gives a SECOND,

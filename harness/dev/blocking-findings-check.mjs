@@ -97,7 +97,11 @@ function splitTopArgs(inner) {
   return args;
 }
 
-const hasKey = (text, key) => new RegExp(`\\b${key}\\s*:`).test(text);
+// SHORTHAND COUNTS. `{ at, fix, doc: '...' }` sets the same two fields as `{ at: at, fix: fix }`, and
+// a scanner that only matched `key:` read the shorthand form as ABSENT and failed a gate that had done
+// exactly what this ratchet asks for. So match either `key:` or `key` followed by a comma or the
+// closing brace, which is the only other shape a property name can legally take in an object literal.
+const hasKey = (text, key) => new RegExp(`\\b${key}\\s*(?::|,|\\}|$)`).test(text);
 const isWaived = (text) => /\bwaived\s*:\s*true\b/.test(text);
 
 /** One entry per BLOCKING (non-waived) finding call this scan can see, with what it could tell. */
