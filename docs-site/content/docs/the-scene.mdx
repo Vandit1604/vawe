@@ -4,7 +4,7 @@ description: The top-level fields a scene JSON is built from, from duration and 
 icon: FileJson
 ---
 
-A scene is one JSON object. It always starts with `"module": "scene"`, and the only required content is a `layers` array with at least one layer. Everything else has a sensible default.
+A Vawe scene is one JSON object, the only file a video needs. It always starts with `"module": "scene"`, and the only required content is a `layers` array with at least one layer; everything else has a sensible default. A scene names its layers, an optional camera track for pushes and pans, a theme that drives palette and fonts, a duration in seconds, and a frame rate. Layers are the video: each one renders back to front by track, appears at a start time, lives for a duration, animates in, and animates out. That single file is deterministic, so the same scene JSON always renders the same video, byte for byte, no matter which machine renders it or what order the frames come out in, and the mp4 it produces is a build artifact you can delete and regenerate at any time.
 
 ```json
 {

@@ -4,17 +4,11 @@ description: Why renderFrame(n) is a pure function of the frame number, what tha
 icon: Fingerprint
 ---
 
-The same JSON renders byte-identical frames every time, in any order, on any machine. This is the property the whole engine is built around, and it is not an accident of implementation. It is enforced.
+Vawe is a deterministic motion-graphics engine, and this is the property the whole engine is built around: the same JSON renders byte-identical frames every time, in any order, on any machine. It is not an accident of implementation. It is enforced.
 
 ## renderFrame(n) is pure
 
-Frame `n` depends only on `n`. To make that true, a virtual clock is installed before the first frame renders, and it coerces every source of ambient state to frame time:
-
-- `Date` and `Date.now()` return the current frame's timestamp, not the wall clock.
-- `requestAnimationFrame` and `setTimeout` fire against frame time.
-- `Math.random` is seeded, so a "random" scatter is the same scatter on every render.
-
-There is no reading of the real clock and no unseeded randomness anywhere in a scene. A value that looks random, like the particle positions in a shader sting, comes from a hash of a seed and the frame, so it is reproducible down to the pixel.
+`renderFrame(n)` depends only on `n`. A virtual clock is installed before the first frame renders, and it coerces every source of ambient state to frame time: `Date` and `Date.now()` return the current frame's timestamp rather than the wall clock, `requestAnimationFrame` and `setTimeout` fire against frame time, and `Math.random` is seeded, so a "random" scatter is the same scatter on every render. There is no reading of the real clock and no unseeded randomness anywhere in a scene, which is what lets a headless Chrome tab seek straight to any frame and get the correct picture on the first try. A value that looks random, like the particle positions in a shader sting, comes from a hash of a seed and the frame, so it is reproducible down to the pixel, on the machine that authored it and on any machine that renders it again.
 
 ## What determinism buys you
 

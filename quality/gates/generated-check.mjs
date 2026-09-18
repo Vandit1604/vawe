@@ -48,6 +48,10 @@ const GENERATORS = [
   // (see scripts/site/site-pages.mjs). So the list is generated here and committed, and this gate is
   // what stops it drifting the day someone adds or renames a docs page.
   ['site pages', ['scripts/site/site-pages.mjs'], ['site/lib/site-pages.json']],
+  // Reads site/lib/site-pages.json + site/lib/arsenal.json, so it must run after both are current.
+  // Not a fix for AI-search visibility on its own (Google's guidance treats llms.txt as ineffective,
+  // see scripts/site/llms-txt.mjs's header); registered here so it cannot go stale unnoticed either.
+  ['llms.txt', ['scripts/site/llms-txt.mjs'], ['site/public/llms.txt']],
 ];
 
 const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' }).stdout || '';
