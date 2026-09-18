@@ -69,6 +69,15 @@ test('a cue authored at time T lands at T/tempo, same as any other point-in-time
   assert.equal(d.audio.cues[0].name, 'tick');
 });
 
+test('spectacle.at scales with tempo, so the window check it feeds cannot disagree with itself', () => {
+  const d = expandScene(scene({ tempo: 0.85, spectacle: { at: 11.09, of: 'a', device: 'flash', why: 'the peak' } }));
+  // core/timeline/spectacle.js compares `at` DIRECTLY against layer windows, and those are scaled, so
+  // an unscaled `at` made the same check pass in one caller and fail in another on the same film.
+  assert.ok(Math.abs(d.spectacle.at - Math.round((11.09 / 0.85) * 60) / 60) < 1e-9);
+  assert.equal(d.spectacle.of, 'a');
+  assert.equal(d.spectacle.device, 'flash');
+});
+
 test('an out-of-range tempo is refused', () => {
   assert.throws(() => expandScene(scene({ tempo: 3 })), /between 0\.5 and 2/);
   assert.throws(() => expandScene(scene({ tempo: 0.1 })), /between 0\.5 and 2/);
