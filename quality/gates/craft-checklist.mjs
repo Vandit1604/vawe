@@ -56,16 +56,21 @@ function walkLayers(layers, fn) {
   }
 }
 
-// A "product screen" is the specific `hasHtml` case SCREENS.md is actually about (an editor, a results
-// grid, a dashboard, a chat, a card, per `make screen KIND=`), not any hand-authored fragment: a title
-// card or a kinetic-type beat is also `html` and SCREENS.md's confirm question ("does the screen fill
-// most of the frame…") does not apply to either. There is no structural flag for this on the layer
-// (engine-doctrine/CRAFT/SCREENS.md is answered by an author, not computed), so the same noun vocabulary
-// storyboard-check.mjs already uses for its `plain-content` warning (CONTENT_NOUN_RE) is reused here,
-// scoped the SAME WAY that check scopes it: per beat, over the fields a beat actually describes its
-// picture in (`onscreen`/`picture`/`mechanism`/`object`), never the whole storyboard's prose. A whole-
-// text scan matched "ui" inside unrelated sentences (a craft note mentioning "ui-skills") and made
-// CONTENT.md fire on 32 of 41 films instead of the handful that actually plan a screen; measured,
+// A "product screen" is what SCREENS.md is actually about (an editor, a results grid, a dashboard, a
+// chat, a card, per `make screen KIND=`): a BEAT that WANTS one, not a layer TYPE. Gating this on
+// `hasHtml` (the original shape of this feature) made the rule unreachable on the exact anti-pattern
+// it exists to catch: a film that screenshots a product screen as a plain `image` layer never sets
+// `hasHtml`, so the doc stayed silent on it forever (`harness/lib/craft-rules.mjs`'s `rulesFor` receipt
+// reports it dropped as `feature-not-matched` on every such film). A title card or a kinetic-type beat
+// is also `html` and SCREENS.md's confirm question ("does the screen fill most of the frame…") does
+// not apply to either, so `hasHtml` was never even the right signal for the films it DID match.
+// There is no structural flag for this on the layer (engine-doctrine/CRAFT/SCREENS.md is answered by
+// an author, not computed), so the same noun vocabulary storyboard-check.mjs already uses for its
+// `plain-content` warning (CONTENT_NOUN_RE) is reused here, scoped the SAME WAY that check scopes it:
+// per beat, over the fields a beat actually describes its picture in (`onscreen`/`picture`/`mechanism`/
+// `object`), never the whole storyboard's prose, and never the layer type the author happened to use.
+// A whole-text scan matched "ui" inside unrelated sentences (a craft note mentioning "ui-skills") and
+// made CONTENT.md fire on 32 of 41 films instead of the handful that actually plan a screen; measured,
 // then scoped to beats the same way storyboard-check.mjs already had to learn this.
 const SCREEN_NOUN_RE = /\b(screen|editor|dashboard|grid|chat|card|window|ui)\b/i;
 function beatNamesScreen(storyboardText) {
@@ -95,15 +100,21 @@ export function computeFeatures(scene, storyboardText) {
   const hasAudio = !silent && !!((typeof a.music === 'string' && a.music)
     || (typeof a.vo === 'string' && a.vo) || a.auto === true
     || (Array.isArray(a.cues) && a.cues.length > 0));
-  // No storyboard yet to read (unplanned film): keep the broad, conservative reading so an unapproved
-  // film still gets every applicable doc, exactly as it did before this feature existed.
-  const hasProductScreen = hasHtml && (storyboardText == null || beatNamesScreen(storyboardText));
+  // "wants a screen" is a claim about the BEAT (does its plan call for an editor/dashboard/grid/chat/
+  // card), never about which layer type the author reached for to build it, so it does not read
+  // hasHtml/hasImages/anything else structural. Unlike every other feature above, there is no
+  // structural fallback when there is no storyboard to read: "broad, conservative" for a feature with
+  // a real structural signal means "assume yes", but here the only signal IS the beat text, so with no
+  // storyboard the honest answer is "unknown", not "yes" (measured: defaulting an unplanned film to
+  // true fired this on 49 of 56 films in the corpus, nearly all of them via the no-storyboard default
+  // rather than an actual beat naming a screen; scoped to storyboardText != null it fires on 13).
+  const wantsProductScreen = storyboardText != null && beatNamesScreen(storyboardText);
   return {
     always: true,
     short: Number.isFinite(dur) && dur < 15,
     long: Number.isFinite(dur) && dur >= 15,
     hasImages, hasTextBeats, hasHtml, hasKinetic,
-    hasProductScreen,
+    wantsProductScreen,
     hasBoundaries: boundaries >= 1,
     hasAudio,
     silent,
