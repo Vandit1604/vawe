@@ -31,6 +31,16 @@ const arsenal = JSON.parse(fs.readFileSync(path.join(ROOT, 'site/lib/arsenal.jso
 // only in the sense that a stale llms.txt would sit un-regenerated, so re-run this file after editing
 // a route's metadata.
 const ROUTE_COPY = {
+  // The three intent pages. Copied verbatim from each page's own pageMetadata() description, which is
+  // the rule for every entry in this table: one sentence, one owner, and llms.txt never invents copy.
+  '/determinism': 'renderFrame(n) is a pure function of n: the same scene JSON produces byte-identical '
+    + 'frames on any machine, in any order. How Vawe proves it, and why that lets a long render split '
+    + 'across parallel browser tabs.',
+  '/json-to-video': 'What a Vawe scene file actually contains: one JSON document, 24 layer types, five '
+    + 'named canvases, validated before a single frame renders. How the file becomes an mp4.',
+  '/ai-agents': 'An MCP server an agent calls directly to write, draft and export a video: free '
+    + 'watermarked iteration, a paid clean export, and a file server that default-denies everything '
+    + 'the render does not need.',
   '/': 'Motion graphics without a motion designer. Vawe renders video from a text file, so you or an '
     + 'AI agent can write a film the way you write anything else, and re-render it the day the '
     + 'numbers change.',
