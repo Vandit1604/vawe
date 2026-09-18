@@ -9,6 +9,7 @@ import { SourceViewer } from "./components/SourceViewer";
 import { ProofHash, ProofAspect } from "./components/proofs";
 import LINES from "../lib/scene-lines.json";
 import EFFECTS from "../lib/effects-counts.json";
+import { organizationSchema, websiteSchema, softwareApplicationSchema, jsonLdScript } from "../lib/schema";
 import "./landing.css";
 
 /* THE LANDING PAGE.
@@ -84,6 +85,11 @@ const WALL = (() => {
 export default function Home() {
   return (
     <div className="shell">
+      {/* Entity resolution for AI Overviews / AI Mode: what Vawe IS, before a reader or a crawler
+          reads a word of copy. Built in site/lib/schema.ts from real repo data, never typed here. */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(organizationSchema())} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(websiteSchema())} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(softwareApplicationSchema())} />
       <main>
         <div className="hero-wrap">
           {/* The band is the engine's own output under a cobalt scrim: the loudest surface on the
