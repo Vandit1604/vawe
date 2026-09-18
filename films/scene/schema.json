@@ -1118,7 +1118,7 @@
   },
   "spectacle": {
    "type": "object",
-   "label": "The film's ONE loud moment, nominated: { at, of, device, why }. `device` is a shader sting name (flash | chromaticSplit | glitch | streak | whipPan | ripple | sdfIris | vortex | lens | dispersion | iridescence | cinematicZoom) written at `at`. The other half is what makes it real: with a spectacle declared the engine pulls EVERY competing amplitude dial in the film down to 55% (other stings, seams, composite-look strength, glow/beam intensity, kick scale), and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained, and the engine keeps it. core/timeline/spectacle.js.",
+   "label": "The film's ONE loud moment, nominated: { at, of, device, why }. `device` is EITHER a shader sting name (flash | chromaticSplit | glitch | streak | whipPan | ripple | sdfIris | vortex | lens | dispersion | iridescence | cinematicZoom), written at `at` and injected · OR \"<kind>:<name>\" naming a cut, seam, kinetic preset, or another layer this film ALREADY builds (verified at `at`, never injected). The other half is what makes it real: with a spectacle declared the engine pulls EVERY competing amplitude dial in the film down to 55% (other stings, seams, composite-look strength, glow/beam intensity, kick scale), and exempts the layer named by `of` (and the device's own layer, when it named one). Naming the peak is a promise the rest stays restrained, and the engine keeps it. core/timeline/spectacle.js.",
    "fields": {
     "at": {
      "type": "number",
@@ -1132,22 +1132,8 @@
     },
     "device": {
      "type": "string",
-     "label": "The gesture, from what the engine already ships",
-     "required": true,
-     "enum": [
-      "flash",
-      "chromaticSplit",
-      "glitch",
-      "streak",
-      "whipPan",
-      "ripple",
-      "sdfIris",
-      "vortex",
-      "lens",
-      "dispersion",
-      "iridescence",
-      "cinematicZoom"
-     ]
+     "label": "A shader sting name (injected), or \"<kind>:<name>\" for a cut, seam, kinetic preset, or layer this film already builds (verified, not injected). Legal names span multiple registries plus this film's own layer ids, so intentionally NOT enumerated here: core/timeline/spectacle.js resolveDevice is the drift-proof guard.",
+     "required": true
     },
     "why": {
      "type": "string",
