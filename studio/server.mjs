@@ -32,6 +32,8 @@ import { parseStoryboard, timeline, fieldIn, blocksOf, referenceDevices } from '
 import { fragPage, FULLBLEED_RE, INSET_RE } from '../harness/lib/frag-page.mjs';
 import { stageOf } from '../quality/gates/stage.mjs';
 import { extractKitBlock } from '../harness/lib/stagekit.mjs';
+import { bgPreset, bgPaletteFrom, BG_NAMES } from '../core/backgrounds/index.js';
+import { isLightBg } from '../core/color/engine.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataArg = process.env.D || process.argv[2];
@@ -506,6 +508,34 @@ const studioRoutes = (req, res) => {
       const src = fs.readFileSync(sbPath, 'utf8');
       const sb = parseStoryboard(src);
       const blocks = blocksOf(src);
+      // A fragment-less beat is still drawn, from its storyboard fields, on the film's own colours
+      // (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md archetypes): a grey box says nothing about what a beat
+      // SHOWS, and this repo's whole point is that the picture is the only thing worth approving.
+      let themeJson = null;
+      try { themeJson = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'themes', THEME_NAME + '.json'), 'utf8')); } catch { /* sketch falls back to studio's own greys */ }
+      const palette = themeJson ? themeJson.palette : null;
+      // the bg palette a `ground:` name resolves against, DERIVED the same way films/scene/scene.js and
+      // harness/dev/candidates.mjs already derive it: the theme's own `bg` block wins, else it is built
+      // from the palette. Reusing bgPreset()/isLightBg() here (rather than a hand-kept light/dark preset
+      // list) means a declared ground gets the SAME colour the engine would actually paint, from the one
+      // place that knows how: a name alone (`accent`) is not light or dark, the theme is.
+      const bgPal = themeJson ? ((themeJson.bg) || bgPaletteFrom(themeJson.palette)) : undefined;
+      // groundSwatch(name) -> {css, tone} | null. `null` for an undeclared or unrecognised name: the
+      // caller must show absence AS absence (engine-doctrine's own rule for this pane), never a plausible
+      // grey that reads as a decision nobody made.
+      const groundSwatch = (name) => {
+        if (!name || !BG_NAMES.includes(name)) return null;
+        try {
+          const { base } = bgPreset(name, undefined, bgPal) || {};
+          if (!base) return null;
+          const sample = base.color ?? base.from ?? null;
+          const css = base.kind === 'solid' ? base.color
+            : base.kind === 'linear' ? `linear-gradient(135deg, ${base.from}, ${base.to})`
+            : base.kind === 'radial' ? `radial-gradient(circle at ${Math.round((base.cx ?? 0.5) * 100)}% ${Math.round((base.cy ?? 0.5) * 100)}%, ${base.from}, ${base.to})`
+            : null;
+          return css ? { css, tone: sample == null ? null : (isLightBg(sample) ? 'light' : 'dark') } : null;
+        } catch { return null; }
+      };
       // `fragment:` is the studio's own field, so it is read off the raw block; everything else comes
       // from the shared reader, because a second storyboard parser is the drift that reader prevents.
       const beats = timeline(sb).beats.map((b, i) => {
@@ -513,16 +543,12 @@ const studioRoutes = (req, res) => {
         return { ...b, fragment: frag && fs.existsSync(path.join(REPO_ROOT, frag)) ? frag : null,
           archetype: (fieldIn(blocks[i], 'archetype') || '').trim(),
           weight: (fieldIn(blocks[i], 'weight') || '').trim(),
-          borrows: (fieldIn(blocks[i], 'borrows') || '').trim() };
+          borrows: (fieldIn(blocks[i], 'borrows') || '').trim(),
+          groundSwatch: groundSwatch(b.ground) };
       });
       let gateOut = '';
       try { gateOut = execFileSync(process.execPath, [path.join(REPO_ROOT, 'quality/gates/storyboard-check.mjs'), sbPath], { encoding: 'utf8' }); }
       catch (e) { gateOut = String(e.stdout || '') + String(e.stderr || ''); }
-      // A fragment-less beat is still drawn, from its storyboard fields, on the film's own colours
-      // (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md archetypes): a grey box says nothing about what a beat
-      // SHOWS, and this repo's whole point is that the picture is the only thing worth approving.
-      let palette = null;
-      try { palette = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'themes', THEME_NAME + '.json'), 'utf8')).palette; } catch { /* sketch falls back to studio's own greys */ }
       reply({ ok: true, file: path.relative(REPO_ROOT, sbPath), theme: THEME_NAME, palette,
         message: sb.message, audience: sb.audience, pace: sb.pace, spectacle: sb.spectacle, not: sb.not,
         format: sb.format, duration: sb.duration, beats, devices: referenceDevices(src),
