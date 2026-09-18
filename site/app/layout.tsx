@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     "vibe coding", "AI agent video", "video as code", "deterministic rendering",
   ],
   icons: { icon: "/assets/favicon.svg" },
+  alternates: { canonical: "/" },
   openGraph: {
     title: TITLE,
     description: BLURB,

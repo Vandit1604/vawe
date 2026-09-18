@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
+import { pageMetadata } from "../../components/seo";
 import blocks from "../../../lib/blocks.json";
 import frames from "../../../lib/block-frames.json";
 import { Stage, Copy } from "./Stage";
@@ -28,11 +29,16 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ name: string }> }): Promise<Metadata> {
   const { name } = await params;
   const b = ALL.find((x) => x.name === name);
-  if (!b) return { title: "Vawe · block" };
-  return {
+  if (!b) return { title: "Vawe · block", alternates: { canonical: `/arsenal/${name}` } };
+  // Every block has a poster PNG (public/assets/blocks/<name>.png), but it's a tightly-cropped
+  // component screenshot sized for an inline preview (as small as 194x78) rather than a landscape
+  // frame, so it reads as a broken sliver at social-card size. Not equivalent to the effects' 640x360
+  // stills; the generated card is the honest choice here.
+  return pageMetadata({
     title: `Vawe · ${b.name}`,
     description: `${b.name}: ${b.blurb}. A deterministic, theme-aware Vawe block you drop into a scene.`,
-  };
+    path: `/arsenal/${name}`,
+  });
 }
 
 export default async function BlockDetail({ params }: { params: Promise<{ name: string }> }) {
