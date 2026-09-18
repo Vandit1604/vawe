@@ -11,6 +11,7 @@ import { EffectStage } from "./EffectStage";
 import { deriveKnobs } from "./knobs";
 import index from "../../../../lib/effects.json";
 import bodies from "../../../../lib/effects-body.json";
+import { breadcrumbSchema, jsonLdScript } from "../../../../lib/schema";
 import "../effects.css";
 
 /* /arsenal/effects/[stem] — one effect, one page, the way a component library gives each
@@ -131,9 +132,16 @@ export default async function EffectDetail({ params }: { params: Promise<{ stem:
   const json = snippet(BODY[stem]);
   const { knobs, bodyType } = deriveKnobs(json, entry.name);
   const related = relatedFor(family, entry);
+  const breadcrumb = breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Arsenal", url: "/arsenal" },
+    { name: family.title, url: `/arsenal?axis=${encodeURIComponent("effect:" + family.tag)}` },
+    { name: entry.name, url: `/arsenal/effects/${entry.stem}` },
+  ]);
 
   return (
     <div className="shell">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumb)} />
       <Header active="arsenal" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>

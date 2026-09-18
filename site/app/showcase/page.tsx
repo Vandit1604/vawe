@@ -6,6 +6,7 @@ import { Footer } from "../components/Footer";
 import films from "../../lib/films.json";
 import { SourceViewer } from "../components/SourceViewer";
 import LINES from "../../lib/scene-lines.json";
+import { videoObjectSchema, jsonLdScript } from "../../lib/schema";
 import "./showcase.css";
 
 const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
@@ -75,9 +76,18 @@ function FilmTile({ film }: { film: Film }) {
 
 export default function Showcase() {
   const [hero, ...rest] = FILMS;
+  // One VideoObject per film that genuinely has a duration on file (films.json). Missing
+  // `uploadDate`: see the comment on videoObjectSchema in lib/schema.ts for why.
+  const videoSchemas = FILMS
+    .map((f) => (films as Record<string, { seconds: number }>)[f.slug])
+    .map((entry, i) => (entry ? videoObjectSchema({ slug: FILMS[i].slug, brand: FILMS[i].brand, seconds: entry.seconds }) : null))
+    .filter((v): v is NonNullable<typeof v> => v !== null);
 
   return (
     <div className="shell">
+      {videoSchemas.map((v, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(v)} />
+      ))}
       <Header active="showcase" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>
