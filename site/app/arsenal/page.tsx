@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { Arsenal, type Arsenal as Data } from "./Arsenal";
+import { pageMetadata } from "../components/seo";
 import data from "../../lib/arsenal.json";
 import "./arsenal.css";
 
@@ -15,12 +15,13 @@ import "./arsenal.css";
 
 const D = data as Data;
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Vawe · arsenal",
   description:
     `Everything the Vawe engine is made of: ${D.total} blocks and effects, searchable, ` +
     `each with the JSON that uses it and ${D.live} of them playing in the real engine.`,
-};
+  path: "/arsenal",
+});
 
 export default function ArsenalPage() {
   return (

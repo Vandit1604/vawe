@@ -26,6 +26,13 @@ export async function generateStaticParams() {
   return source.generateParams();
 }
 
+// This app has no metadataBase: it is proxied under https://vawe.dev/docs in production but built
+// and previewed from its own origin, so a relative `alternates.canonical` would resolve against
+// THAT origin instead. `page.url` already carries the "/docs" prefix (lib/source.ts sets
+// `baseUrl: '/docs'`), so the canonical only needs the real site's origin prepended, written out
+// literally rather than left to Next to infer.
+const SITE = 'https://vawe.dev';
+
 export async function generateMetadata(props: {
   params: Promise<{ slug?: string[] }>;
 }): Promise<Metadata> {
@@ -33,8 +40,25 @@ export async function generateMetadata(props: {
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  const { title, description } = page.data;
+  const url = `${SITE}${page.url}`;
   return {
-    title: page.data.title,
-    description: page.data.description,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      type: 'article',
+      url,
+      siteName: 'Vawe docs',
+      images: [{ url: `${SITE}/assets/og.png`, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`${SITE}/assets/og.png`],
+    },
   };
 }
