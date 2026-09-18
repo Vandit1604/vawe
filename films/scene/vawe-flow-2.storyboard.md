@@ -8,7 +8,7 @@ attention: "the eye follows the camera as it flattens out of a tilt, then the in
 threads: "a cursor and a caret that cause every change + one exit axis per act (x for the terminal/timeline/films chain, y only for the final rise into the mark) + a ground that takes its colour from whatever is on screen + one continuous camera travel, never still"
 format: 1920x1080
 theme: "themes/vawe.json"
-duration: 22.03s
+duration: 23.03s
 spectacle: "beat 8 (Your films) · the value FLIPS, from the dark editor to a white field, and that white ground then takes a light wash of each playing film's own colour as the strip browses, live footage not stills · the film's one loud moment"
 not: "no hard cut anywhere, no centred slide deck, no gradient hero, no stock photography, no copy vawe cannot back, no second typeface, no sound bed, no static camera hold longer than a beat needs"
 craft:
@@ -138,7 +138,7 @@ craft:
 - transition_why: same-object · continuity · invisible
 - fragment: films/scene/vawe-flow-2.terminal.html
 
-## Beat 5b: Type-only card, tile grid (7.4s-8.52s)
+## Beat 5b: Type-only card, tile grid (7.4s-9.51s)
 - type: type_only
 - shot: full-bleed, one line of white type over a still image
 - onscreen: "Every film here fits in one file."
@@ -156,7 +156,7 @@ craft:
 - picture: the tile-grid photo, full-bleed, with "Every film here fits in one file." set large and left-aligned inside the safe margin
 - fragment: none, an image + text layer pair (card-a-bg, card-a-text)
 
-## Beat 6: Terminal chains to timeline (8.52s-9.34s)
+## Beat 6: Terminal chains to timeline (9.51s-10.44s)
 - type: product_surface
 - shot: wide, empty ground with one track entering left
 - onscreen: "(the terminal's own ink ground, motion-blurring away, as a single timeline track and one clip slide in from the left)"
@@ -178,7 +178,7 @@ craft:
 - design: make screen F=films/scene/vawe-flow-2.timeline.html KIND=dashboard REF=example-madera ACT=2
 - fragment: films/scene/vawe-flow-2.timeline.html
 
-## Beat 7: Timeline assembles from the left (9.34s-12.05s)
+## Beat 7: Timeline assembles from the left (10.44s-13.03s)
 - type: product_surface
 - shot: medium-wide, timeline filling from the left, camera panning with it
 - onscreen: "(vawe's own multi-track timeline: tracks, clip thumbnails, a playhead)"
@@ -198,7 +198,7 @@ craft:
 - transition_why: same-object · continuity · invisible
 - fragment: films/scene/vawe-flow-2.timeline.html
 
-## Beat 8: Your films (12.05s-18.47s)
+## Beat 8: Your films (13.03s-19.47s)
 - type: payoff_withheld
 - shot: wide, a stack of playing film cards, a cursor swiping the top one away each time
 - onscreen: "(the timeline's own Frames row grows into a stack of film cards; a cursor swipes the top card off three times, in the stack's own order, until vawe launch is the one left on top)"
@@ -218,7 +218,7 @@ craft:
 - design: JSON group only (films-stack, films/scene/vawe-flow-2.json). No HTML fragment: the owner's own instruction for this stack is the film cards and nothing else, no surrounding chrome, so the card's own shadow/radius/caption-scrim is native `rect`/`text`/`video` layers, not markup
 - fragment: none
 
-## Beat 9: The mark (18.47s-22.03s)
+## Beat 9: The mark (19.47s-23.03s)
 - type: payoff_withheld
 - shot: medium close, mark and wordmark centred
 - onscreen: "(the vawe mark, drawn as a line, then the wordmark growing out of it)"
