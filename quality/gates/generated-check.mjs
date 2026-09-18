@@ -44,6 +44,10 @@ const GENERATORS = [
   // `description`, and only an agent regenerating it by hand noticed 110 files were behind. A
   // generated tree with a checker nobody calls is a generated tree with no checker.
   ['registry', ['scripts/site/registry.mjs'], ['blocks/catalog', 'registry']],
+  // The sitemap needs the docs URLs, and the site builds BEFORE docs-site exists in the Docker image
+  // (see scripts/site/site-pages.mjs). So the list is generated here and committed, and this gate is
+  // what stops it drifting the day someone adds or renames a docs page.
+  ['site pages', ['scripts/site/site-pages.mjs'], ['site/lib/site-pages.json']],
 ];
 
 const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' }).stdout || '';

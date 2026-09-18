@@ -1,0 +1,130 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "priority": 1,
+      "changeFrequency": "weekly"
+    },
+    {
+      "path": "/features",
+      "priority": 0.9,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/showcase",
+      "priority": 0.9,
+      "changeFrequency": "weekly"
+    },
+    {
+      "path": "/arsenal",
+      "priority": 0.8,
+      "changeFrequency": "weekly"
+    },
+    {
+      "path": "/arsenal/type",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/playground",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/editor",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
+    }
+  ],
+  "docs": [
+    {
+      "path": "/docs/aspect-ratios",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/audio",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/backgrounds-and-images",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/blocks",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/brand-reflection",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/cli",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/determinism",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/layers",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/motion",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/prompting",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/quality-gates",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/quickstart",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/reading-your-film",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/the-scene",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/themes",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/troubleshooting",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    }
+  ],
+  "counts": {
+    "routes": 7,
+    "docs": 17
+  }
+}
