@@ -42,6 +42,13 @@ const CAPTION_TIME_KEYS = ['start', 'duration'];
 // that scaled off it.
 const BEAT_TIME_KEYS = ['start', 'duration'];
 const AUDIO_CUE_TIME_KEYS = ['t'];
+// `spectacle.at` is a point in time, the same shape as a cue's `t` and a transition's `at`, and it is
+// compared DIRECTLY against layer windows by core/timeline/spectacle.js. Leaving it unscaled made that
+// comparison disagree with itself: the contact-sheet path read authored windows and the render page
+// read viewer windows, so on a film with a tempo NO value of `at` satisfied both, and the block could
+// not be landed at all. Same class as the cue bug one file over (engine-doctrine/MISTAKES.md #629): a
+// time key that something else compares against scaled times has to be scaled with them.
+const SPECTACLE_TIME_KEYS = ['at'];
 
 function scaleWindow(w, inv) {
   if (!w || typeof w !== 'object') return;
@@ -116,6 +123,7 @@ export function resolveTempo(data) {
   if (Array.isArray(data.transitions)) for (const T of data.transitions) scaleKeys(T, TRANSITION_TIME_KEYS, inv);
   if (Array.isArray(data.captions)) for (const C of data.captions) scaleCaption(C, inv);
   if (Array.isArray(data.audio?.cues)) for (const cue of data.audio.cues) scaleKeys(cue, AUDIO_CUE_TIME_KEYS, inv);
+  if (data.spectacle && typeof data.spectacle === 'object') scaleKeys(data.spectacle, SPECTACLE_TIME_KEYS, inv);
   if (data.cameraMove) {
     const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
     for (const s of specs) scaleCameraSpec(s, inv);
