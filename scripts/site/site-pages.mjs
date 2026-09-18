@@ -40,6 +40,12 @@ const ROUTES = [
   { path: '/determinism', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/json-to-video', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/ai-agents', priority: 0.7, changeFrequency: 'monthly' },
+  // Two use-case pages: a job in a searcher's own words, proven with a real rendered film and
+  // cited against the doctrine that actually built it. Only two, not the five-to-six the engine's
+  // own route table names, because only the launch-video route has real film artefacts behind it
+  // (see each page's own header comment and the task report for what was deliberately not built).
+  { path: '/launch-video', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/product-tour-video', priority: 0.7, changeFrequency: 'monthly' },
 ];
 
 // fumadocs routes content/docs/<slug>.mdx at /docs/<slug>, and index.mdx at /docs itself.

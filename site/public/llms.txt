@@ -12,6 +12,8 @@
 - [determinism](https://vawe.dev/determinism): renderFrame(n) is a pure function of n: the same scene JSON produces byte-identical frames on any machine, in any order. How Vawe proves it, and why that lets a long render split across parallel browser tabs.
 - [json-to-video](https://vawe.dev/json-to-video): What a Vawe scene file actually contains: one JSON document, 24 layer types, five named canvases, validated before a single frame renders. How the file becomes an mp4.
 - [ai-agents](https://vawe.dev/ai-agents): An MCP server an agent calls directly to write, draft and export a video: free watermarked iteration, a paid clean export, and a file server that default-denies everything the render does not need.
+- [launch-video](https://vawe.dev/launch-video): How Vawe builds a product launch video: real captured UI, not invented mockups, on the six-beat spine the engine's own doctrine defines. Three rendered films, each one an open JSON file.
+- [product-tour-video](https://vawe.dev/product-tour-video): A chaptered product tour or feature-update video, built as one JSON file: three chapters, a continuous progress rail, one tracked issue carried through. The real rendered film that proves it.
 
 ## Docs
 - [aspect-ratios](https://vawe.dev/docs/aspect-ratios): Render one scene to 16:9, 9:16, 1:1, and more from a single source, using relative coordinates, pins, and a 12-column grid.

@@ -49,6 +49,16 @@
       "path": "/ai-agents",
       "priority": 0.7,
       "changeFrequency": "monthly"
+    },
+    {
+      "path": "/launch-video",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/product-tour-video",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
     }
   ],
   "docs": [
@@ -139,7 +149,7 @@
     }
   ],
   "counts": {
-    "routes": 10,
+    "routes": 12,
     "docs": 17
   }
 }
