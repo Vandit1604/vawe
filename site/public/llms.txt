@@ -12,6 +12,8 @@
 - [determinism](https://vawe.dev/determinism): renderFrame(n) is a pure function of n: the same scene JSON produces byte-identical frames on any machine, in any order. How Vawe proves it, and why that lets a long render split across parallel browser tabs.
 - [json-to-video](https://vawe.dev/json-to-video): What a Vawe scene file actually contains: one JSON document, 24 layer types, five named canvases, validated before a single frame renders. How the file becomes an mp4.
 - [ai-agents](https://vawe.dev/ai-agents): An MCP server an agent calls directly to write, draft and export a video: free watermarked iteration, a paid clean export, and a file server that default-denies everything the render does not need.
+- [remotion-alternatives](https://vawe.dev/remotion-alternatives): "Remotion alternative" returns two different products: a hosted JSON video API, or a self-hosted rendering engine. What Remotion's own license requires, what Vawe and HyperFrames give away free, and where a hosted API fits instead. Read 2026-09-19.
+- [when-determinism-matters](https://vawe.dev/when-determinism-matters): Byte-identical rendering is a real property, not a universal one. When it decides which engine to pick, and when a human editing a timeline by eye makes it beside the point.
 
 ## Docs
 - [aspect-ratios](https://vawe.dev/docs/aspect-ratios): Render one scene to 16:9, 9:16, 1:1, and more from a single source, using relative coordinates, pins, and a 12-column grid.

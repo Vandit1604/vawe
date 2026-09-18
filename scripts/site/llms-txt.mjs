@@ -41,6 +41,12 @@ const ROUTE_COPY = {
   '/ai-agents': 'An MCP server an agent calls directly to write, draft and export a video: free '
     + 'watermarked iteration, a paid clean export, and a file server that default-denies everything '
     + 'the render does not need.',
+  '/remotion-alternatives': '"Remotion alternative" returns two different products: a hosted JSON '
+    + 'video API, or a self-hosted rendering engine. What Remotion\'s own license requires, what Vawe '
+    + 'and HyperFrames give away free, and where a hosted API fits instead. Read 2026-09-19.',
+  '/when-determinism-matters': 'Byte-identical rendering is a real property, not a universal one. '
+    + 'When it decides which engine to pick, and when a human editing a timeline by eye makes it '
+    + 'beside the point.',
   '/': 'Motion graphics without a motion designer. Vawe renders video from a text file, so you or an '
     + 'AI agent can write a film the way you write anything else, and re-render it the day the '
     + 'numbers change.',
