@@ -209,6 +209,9 @@ export default function Home() {
                     count of the file that made it. It read "Made without a timeline or a designer.",
                     which is a description of the process and a second copy of the h1's promise. */}
                 <h2 className="h2">Every film here fits in one file.</h2>
+                <Link className="ilink" href="/json-to-video" style={{ display: "block", marginTop: 6 }}>
+                  What&apos;s in that file →
+                </Link>
               </div>
               <Link href="/showcase">
                 See the full showcase <span className="arw">→</span>

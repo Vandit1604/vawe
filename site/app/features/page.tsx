@@ -78,7 +78,8 @@ export default function Features() {
               it renders first or last. That is what lets one film shard across parallel browser
               tabs and what makes two renders of a scene diff-able.{" "}
               <code>make probe</code> renders sampled frames in scrambled order and diffs the DOM,
-              which tests the property rather than restating it.
+              which tests the property rather than restating it.{" "}
+              <a className="ilink" href="/determinism">How that proof works, in full →</a>
             </p>
             <span className="tag">guarded by make probe</span>
             </div>

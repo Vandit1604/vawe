@@ -1,0 +1,32 @@
+/* intent.css: shared by the three answer-a-real-question pages (/determinism, /json-to-video,
+   /ai-agents). Same shape as app/features/features.css's .fsec — two-column argument-plus-proof
+   rows on a hairline, .phead/.tag/.codeblock/.demo-media/.btn all still come from globals.css —
+   but three routes now want the row, which is DESIGN.md's own bar for promoting a rule out of a
+   single page's stylesheet. Class prefixed .isec (intent section) so it never collides with
+   .fsec if both ship on the same build. */
+.isec{padding:48px 0 8px;border-top:1px solid var(--line);margin-top:8px;
+  display:grid;grid-template-columns:minmax(0,7fr) minmax(0,6fr);
+  gap:clamp(28px,4vw,56px);align-items:start}
+.isec:first-of-type{border-top:0}
+.isec h2{font-size:clamp(1.5rem,3.2vw,2.2rem);line-height:1.06;letter-spacing:-.026em;
+  font-weight:800;text-wrap:balance;max-width:20ch}
+.isec p{color:var(--ink-2);font-size:1.05rem;line-height:1.65;margin-top:14px;max-width:60ch}
+.isec p code{font-family:var(--font-mono),monospace;font-size:.9em;background:var(--bg-2);
+  border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink)}
+.isec-art > .codeblock{margin-top:6px;max-width:none}
+.isec-art .cite{display:block;margin-top:10px;font-family:var(--font-mono),monospace;
+  font-size:12px;color:var(--muted)}
+.iend{padding:52px 0 80px;border-top:1px solid var(--line);margin-top:40px}
+.iend .h2{max-width:24ch}
+.iend .lead{margin-top:14px;max-width:64ch}
+.iend .hero-cta{justify-content:flex-start;margin-top:24px}
+/* The cross-links between the three intent pages: plain, mono, quiet, the tag register already
+   used for inert-but-useful metadata elsewhere on the site. */
+.irelated{margin-top:18px;display:flex;gap:18px;flex-wrap:wrap}
+.irelated a{font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--accent);
+  text-decoration:none}
+.irelated a:hover{text-decoration:underline;text-underline-offset:3px}
+@media (max-width:900px){
+  .isec{grid-template-columns:minmax(0,1fr);gap:0}
+  .isec-art{margin-top:22px}
+}
