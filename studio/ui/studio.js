@@ -277,7 +277,41 @@
      +(d.format?'<span>Format <b>'+esc(d.format)+'</b></span>':'')+'</div>'
      +(d.spectacle||d.not?'<dl class=planspine>'+planRow('Spectacle',d.spectacle)+planRow('Not',d.not)+'</dl>':'')
      +gateChips(d.findings)
+     +colorStrip(d.beats)
      +'</div>';
+ }
+ // ---- THE COLOUR STRIP: one swatch per beat, storyboard order, seams marked between them ---------
+ // "when storyboarding the frames do we see colors across frames and how transitions will handle the
+ // colors" (the owner's own words). Today that arc is one paragraph of frontmatter prose nobody sees
+ // until the film renders; this draws it here, in the state where approval happens.
+ //
+ // EVERY VALUE HERE IS DECLARED, NONE IS COMPUTED BY THIS PANE. A beat's swatch colour is
+ // `groundSwatch` (studio/server.mjs), the engine's own bgPreset() output for that beat's `ground:`
+ // name under the film's real theme, so this can never show a colour the render would not. A seam's
+ // arrow is `transition_value` (harness/lib/contract.mjs, closed vocabulary: dark->light · light->dark
+ // · held), read off the ONE storyboard parser like every other field on this pane. Nothing is stored
+ // or classified twice.
+ //
+ // ABSENCE IS ITS OWN SHAPE, never a plausible grey: a beat with no `ground:` gets a hatched tile and a
+ // beat-to-beat join with no `transition_value:` gets a bare "?", both in the gate's own warning colour
+ // (var(--hz-beat)), because an undeclared decision reads as a decision nobody made otherwise.
+ function seamChip(v){
+   if(!v) return '<span class="cseam none" title="no transition_value declared for this join">?</span>';
+   if(v==='held') return '<span class="cseam held" title="transition_value: held">held</span>';
+   return '<span class="cseam flip '+(v==='dark->light'?'up':'down')+'" title="transition_value: '+esc(v)+'">'
+     +(v==='dark->light'?'dark → light':'light → dark')+'</span>';
+ }
+ function colorStrip(beats){
+   if(!beats||!beats.length) return '';
+   const cells=beats.map((b,i)=>{
+     const sw=b.groundSwatch;
+     const swatch=sw?'<span class=cswatch style="background:'+esc(sw.css)+'" title="'+esc(b.name)+' · ground: '+esc(b.ground)+' ('+esc(sw.tone||'?')+')"></span>'
+       :'<span class="cswatch none" title="'+esc(b.name)+' · no ground declared" aria-label="no ground declared">?</span>';
+     const join=i>0?'<span class=cjoin>'+seamChip(beats[i].transition_value)+'</span>':'';
+     return join+'<span class=ccell>'+swatch+'<b>'+(i+1)+'</b></span>';
+   }).join('');
+   return '<div id=colorstrip role=group aria-label="colour arc: one swatch per beat, storyboard order">'
+     +'<h4>Colour arc</h4><div id=cstrip>'+cells+'</div></div>';
  }
  function beatPicture(b,pal){
    if(b.fragment) return '<div class=pstage><iframe loading=lazy title="'+esc(b.name)+'" src="/__frag?src='+encodeURIComponent(b.fragment)+'"></iframe></div>';
