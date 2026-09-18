@@ -1430,6 +1430,13 @@ blocking-findings-check: ## [maintenance] a blocking finding must name what/wher
 generated-check: ## [maintenance] run every generator, then ask git what moved.
 	@node quality/gates/generated-check.mjs $(if $(WRITE),--write,) $(if $(JSON),--json,)
 
+# seo-surface: canonical + opengraph-image + sitemap-vs-registries + JSON-LD, in one gate.
+# sitemap.ts/robots.ts/seo.ts/ogCard.tsx/schema.ts are all generated surfaces with no write-time check
+# of their own (a new route, a renamed docs page, a deleted card, a broken JSON-LD field: none of them
+# fail a build). Four hard assertions, no ratchet: today's count is 0 for all of them.
+seo-surface: ## [maintenance] canonical + og-image + sitemap-vs-registries + JSON-LD, all hard
+	@node quality/gates/seo-surface.mjs $(if $(JSON),--json,)
+
 effects-check: ## [engine] fail if engine-doctrine/EFFECTS.md is stale vs the registries
 	node scripts/site/effects-catalog.mjs --check
 
