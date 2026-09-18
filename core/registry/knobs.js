@@ -265,7 +265,7 @@ export function knobsFor(family, preset) {
 // cheap thing to write. That is the actual lack: authors were not failing to be restrained, they had
 // no way to say WHERE the restraint was being spent.
 //
-// The walk that applies these numbers to a scene is core/spectacle.js; the vocabulary and the
+// The walk that applies these numbers to a scene is core/timeline/spectacle.js; the vocabulary and the
 // arithmetic are here, beside the other dials, and they are pure so a gate can test them.
 
 // THE DEVICES, and every one of them already ships. `device` names a SHADER STING (core/stings.js).
@@ -300,7 +300,7 @@ export const SPECTACLE_DEVICES = defineRegistry('spectacle device',
   catalog: {
     title: 'Spectacle devices',
     tag: 'scene',
-    intro: '`"spectacle": { "at", "of", "device", "why" }`. The film NOMINATES its one loud moment. `device` is written as a shader sting at `at`, above the film; the other half is what makes it real, because with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained. `core/timeline/spectacle.js`.',
+    intro: '`"spectacle": { "at", "of", "device", "why" }`. The film NOMINATES its one loud moment. A shader `device` (below) is written as a sting at `at`, above the film; a non-shader one ("cut:<name>", "seam:<name>", "kinetic:<name>", "layer:<id>") names a mechanism the film ALREADY builds and is only verified, never injected. Either way the other half is what makes it real: with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of` (and the device\'s own layer, when it named one). Naming the peak is a promise the rest stays restrained. `core/timeline/spectacle.js`.',
     usage: (n, { j }) => j({ spectacle: { at: 2.4, of: 'hero', device: n, why: 'the one loud moment, and every other dial drops to 55%' } }),
     noPreview: 'a spectacle is a whole film turning its other dials down. One clip cannot show the restraint that makes it work.',
   },

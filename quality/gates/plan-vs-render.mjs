@@ -109,7 +109,7 @@ const walk = (L, fn) => { if (!L || typeof L !== 'object') return; fn(L); (L.chi
 // WHY THE QUESTION IS WORTH ASKING. `effect-soup` fails a film that shouts on every beat and
 // `plain-slideshow` fails one that never shouts at all. Neither asks WHICH moment is the loudest, so a
 // film can sit safely between the two bounds, pass both, and still be flat: evenly loud is not the same
-// as shaped. Nominating a peak is also a promise the rest stays restrained, which is what core/spectacle.js
+// as shaped. Nominating a peak is also a promise the rest stays restrained, which is what core/timeline/spectacle.js
 // enforces once the block exists.
 //
 // THE TRIGGER IS NARROW ON PURPOSE. Measured over the 110 scenes in films/scene, EVERY one of them
@@ -123,7 +123,7 @@ const walk = (L, fn) => { if (!L || typeof L !== 'object') return; fn(L); (L.chi
 // instant is the loudest is shapeless, and no other gate here will say so.
 const SPECTACLE_MIN_BOUNDARIES = 2, SPECTACLE_MIN_DUR = 12;
 function nominationNote() {
-  if (d.spectacle != null) return null;                    // nominated; core/spectacle.js takes it from here
+  if (d.spectacle != null) return null;                    // nominated; core/timeline/spectacle.js takes it from here
   if (sb && sb.spectacle) return null;                     // the storyboard names one, so `spectacle-not-built` owns this
   // COUNT `transitions` TOO. It is the documented unified surface and it lowers to cuts/seams/stings
   // before the engine renders, so a film that declares its boundaries the documented way has structure
@@ -149,7 +149,9 @@ function nominationNote() {
     + `and no plan naming one. Nothing else in the ladder asks this. \`effect-soup\` fails a film that shouts on every beat and \`plain-slideshow\` fails one `
     + `that never shouts, so a film can sit between them, pass both, and still be evenly loud, which is not the same as shaped. `
     + `Name the one moment the film is allowed to shout, and buy it by quietening the rest: `
-    + `\`"spectacle": { "at": <seconds>, "of": "<layer id>", "device": "<device>", "why": "<what the moment is for>" }\` (core/spectacle.js). `
+    + `\`"spectacle": { "at": <seconds>, "of": "<layer id>", "device": "<device>", "why": "<what the moment is for>" }\` (core/timeline/spectacle.js). `
+    + `\`device\` is a shader sting name (injected) OR "<kind>:<name>" naming a cut, seam, kinetic preset, or another `
+    + `layer this film ALREADY builds (verified, never injected), e.g. "seam:dissolve" or "layer:gnd-reveal". `
     + `If this film is deliberately flat, say so: {"authoring":{"allow":["no-spectacle-nominated"],"_why":{"no-spectacle-nominated":"..."}}}.` };
 }
 // It PRINTS, and it never counts. This finding is advisory in both directions: it is a question about
@@ -584,7 +586,9 @@ if (sb && sb.spectacle) {
   if (!isObj(d.spectacle)) {
     warn('spectacle-not-built', `${sbPath} declares a spectacle: ${sb.spectacle}. ${file} has no \`spectacle\` block, so the film has no peak. `
       + `The plan names the one moment the film is allowed to shout, and naming it is also a promise that every other beat stays restrained; neither half was built. `
-      + `Add \`"spectacle": { "at": <seconds>, "of": "<layer id>", "device": "<device>", "why": "<what the moment is for>" }\` to the scene (core/spectacle.js), or drop the line from the plan.`);
+      + `Add \`"spectacle": { "at": <seconds>, "of": "<layer id>", "device": "<device>", "why": "<what the moment is for>" }\` to the scene (core/timeline/spectacle.js). `
+      + `If the plan's peak is not a shader sting, name what it already is instead: "cut:<name>", "seam:<name>", "kinetic:<name>", `
+      + `or "layer:<id>" for a mechanism (a ground change, a match cut) this film builds as its own layer. Or drop the line from the plan.`);
   } else if (spanned.length) {
     const loc = plannedSpectacleBeat(sb.spectacle, spanned);
     if (!loc) {
