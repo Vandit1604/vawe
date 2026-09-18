@@ -135,6 +135,7 @@ export default function JsonToVideo() {
               <a href="/determinism">Why the same file always renders the same bytes</a>
               <a href="/docs/the-scene">The full scene reference in the docs</a>
               <a href="/arsenal">Every layer, effect and preset, searchable</a>
+              <a href="/remotion-alternatives">How this compares to other JSON video formats</a>
             </div>
           </section>
         </main>
