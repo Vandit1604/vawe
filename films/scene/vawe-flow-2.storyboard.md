@@ -8,8 +8,8 @@ attention: "the eye follows the camera as it flattens out of a tilt, then the in
 threads: "a cursor and a caret that cause every change + one exit axis per act (x for the terminal/timeline/films chain, y only for the final rise into the mark) + a ground that takes its colour from whatever is on screen + one continuous camera travel, never still"
 format: 1920x1080
 theme: "themes/vawe.json"
-duration: 17.45s
-spectacle: "beat 7 (Your films) · the value FLIPS, from the dark editor to a white field, and that white ground then takes a light wash of each playing film's own colour as the strip browses, live footage not stills · the film's one loud moment"
+duration: 22.03s
+spectacle: "beat 8 (Your films) · the value FLIPS, from the dark editor to a white field, and that white ground then takes a light wash of each playing film's own colour as the strip browses, live footage not stills · the film's one loud moment"
 not: "no hard cut anywhere, no centred slide deck, no gradient hero, no stock photography, no copy vawe cannot back, no second typeface, no sound bed, no static camera hold longer than a beat needs"
 craft:
     content: "Measured act by act against example-madera, not against a fixed bar. Its opening act holds one line over one image and so does ours; its middle act carries a working surface with real interface detail, which ours answers with the studio timeline at full interface density (seven lanes, real clip names, a moving playhead) rather than a simplified diagram; its closing act resolves to a mark, as ours does. The one act where we deliberately exceed the reference is Your films, because that is this film's named spectacle and the reference has no equivalent."
@@ -20,7 +20,7 @@ craft:
     density: "A change every half second or less, studied frame by frame off example-madera at 60fps. Each beat carries a camera move, an entrance, an action and an exit, same as the reference."
     direction: "The restraint is that nothing ever cuts and the camera never stops. One continuous travel carries the whole film: tilted and wide at the open, flattening and pushing in as the install and the request type, then panning through the timeline, the films ring and the mark. The spectacle earns its place by being the one place the ground itself changes colour more than once, driven by real content, not a flat brand wash."
     film-structure: "A cursor and a typing caret hold the film and cause each change. Beats join by a fast exit on one axis with motion blur, the next arrival on the same axis, and a frame of empty ground between (example-madera's flow-seam), except the final rise into the mark, which changes axis the way the reference's own closing beat does."
-    fragment-exemplars: "vawe-flow-2.terminal.html (beats 1-4, an editor-kind screen), vawe-flow-2.timeline.html (beats 5-6, a dashboard-kind screen), vawe-flow-2.films.html (beat 7, a grid-kind screen). The logo beat (8) is vector mark layers, not an HTML fragment mock."
+    fragment-exemplars: "vawe-flow-2.terminal.html (beats 2-5, an editor-kind screen), vawe-flow-2.timeline.html (beats 6-7, a dashboard-kind screen), vawe-flow-2.mark.html (beat 9, the mark). Beat 8 (Your films) uses no fragment: it is a stack of real film layers playing their own mp4s."
     html-fragments: "Every move comes from the engine: keyframe tracks for position, rotation and blur, `typing`+`vars` for the per-word colour flash, `parts`/`drawOn` for the logo's line. No CSS animation or transition."
     layout: "Asymmetric while things move: the terminal sits tilted and low at first, widening and flattening as the camera travels; the timeline builds from the left edge; the films ring holds full width; the mark alone is centred at the end."
     motion-craft: "Hand-keyed with real deceleration: arrivals ease out, exits accelerate past 480 px/s so the automatic motion blur smears them, and one continuous camera travel carries every beat, never resetting or holding still mid-film."
@@ -40,7 +40,7 @@ craft:
      motion blur, arrival on the same axis, a frame of empty ground between) but now sit inside a film
      that is moving throughout, not only at the joins. Reference: refs/example-madera/pages/ (all 782
      frames at 60fps) and grammar/example-madera.json's per-shot moves. No reference content is used. -->
-## Beat 1: Type-only card, grain gradient (0s-1.2s)
+## Beat 1: Type-only card, grain gradient (0s-1.12s)
 - type: type_only
 - shot: full-bleed, one line of white type over a still image
 - onscreen: "Nothing here looks like a template."
@@ -58,7 +58,7 @@ craft:
 - fragment: none, an image + text layer pair (card-b-bg, card-b-text)
 
 
-## Beat 2: Terminal, wide and tilted (0.95s-2.15s)
+## Beat 2: Terminal, wide and tilted (1.12s-2.53s)
 - type: hook
 - shot: wide, tilted in perspective, subject low and off-centre, settling toward flat and centred
 - onscreen: "a macOS terminal window (traffic-light dots, centred title, a left column of timestamps beside prior command lines: an italic monospace command word, then a softly rounded output panel, one success green, one error red), seen at a tilt like a screen turning to face you"
@@ -79,7 +79,7 @@ craft:
 - transition_why: new-place-energy · momentum · expressive
 - fragment: films/scene/vawe-flow-2.terminal.html
 
-## Beat 3: Install, typed and done (2.15s-4.0s)
+## Beat 3: Install, typed and done (2.53s-5.05s)
 - type: product_surface
 - shot: close on the new command row, lower-middle
 - onscreen: "npm install -g vawe, then added 1 package in 1.2s / vawe installed. run npx vawe <scene.json> to render"
@@ -99,7 +99,7 @@ craft:
 - transition_why: same-object · continuity · invisible
 - fragment: films/scene/vawe-flow-2.terminal.html
 
-## Beat 4: Typed prompt, camera zooms in (4.0s-5.62s)
+## Beat 4: Typed prompt, camera zooms in (5.05s-6.25s)
 - type: product_surface
 - shot: close on the prompt bar, lower third, the camera pushing in as it types
 - onscreen: "make a 12 second launch film"
@@ -119,7 +119,7 @@ craft:
 - transition_why: same-object · continuity · invisible
 - fragment: films/scene/vawe-flow-2.terminal.html
 
-## Beat 5: Send and render (5.62s-6.32s)
+## Beat 5: Send and render (6.25s-7.4s)
 - type: product_surface
 - shot: close on the return glyph, lower-right
 - onscreen: "make a 12 second launch film"
@@ -138,7 +138,7 @@ craft:
 - transition_why: same-object · continuity · invisible
 - fragment: films/scene/vawe-flow-2.terminal.html
 
-## Beat 5b: Type-only card, tile grid (6.32s-7.22s)
+## Beat 5b: Type-only card, tile grid (7.4s-8.52s)
 - type: type_only
 - shot: full-bleed, one line of white type over a still image
 - onscreen: "Every film here fits in one file."
@@ -156,7 +156,7 @@ craft:
 - picture: the tile-grid photo, full-bleed, with "Every film here fits in one file." set large and left-aligned inside the safe margin
 - fragment: none, an image + text layer pair (card-a-bg, card-a-text)
 
-## Beat 6: Terminal chains to timeline (7.22s-8.02s)
+## Beat 6: Terminal chains to timeline (8.52s-9.34s)
 - type: product_surface
 - shot: wide, empty ground with one track entering left
 - onscreen: "(the terminal's own ink ground, motion-blurring away, as a single timeline track and one clip slide in from the left)"
@@ -178,7 +178,7 @@ craft:
 - design: make screen F=films/scene/vawe-flow-2.timeline.html KIND=dashboard REF=example-madera ACT=2
 - fragment: films/scene/vawe-flow-2.timeline.html
 
-## Beat 7: Timeline assembles from the left (8.02s-9.97s)
+## Beat 7: Timeline assembles from the left (9.34s-12.05s)
 - type: product_surface
 - shot: medium-wide, timeline filling from the left, camera panning with it
 - onscreen: "(vawe's own multi-track timeline: tracks, clip thumbnails, a playhead)"
@@ -198,7 +198,7 @@ craft:
 - transition_why: same-object · continuity · invisible
 - fragment: films/scene/vawe-flow-2.timeline.html
 
-## Beat 8: Your films (9.88s-15.14s)
+## Beat 8: Your films (12.05s-18.47s)
 - type: payoff_withheld
 - shot: wide, a stack of playing film cards, a cursor swiping the top one away each time
 - onscreen: "(the timeline's own Frames row grows into a stack of film cards; a cursor swipes the top card off three times, in the stack's own order, until vawe launch is the one left on top)"
@@ -218,7 +218,7 @@ craft:
 - design: JSON group only (films-stack, films/scene/vawe-flow-2.json). No HTML fragment: the owner's own instruction for this stack is the film cards and nothing else, no surrounding chrome, so the card's own shadow/radius/caption-scrim is native `rect`/`text`/`video` layers, not markup
 - fragment: none
 
-## Beat 9: The mark (14.86s-17.34s)
+## Beat 9: The mark (18.47s-22.03s)
 - type: payoff_withheld
 - shot: medium close, mark and wordmark centred
 - onscreen: "(the vawe mark, drawn as a line, then the wordmark growing out of it)"
