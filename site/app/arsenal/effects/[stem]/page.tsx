@@ -139,7 +139,7 @@ export default async function EffectDetail({ params }: { params: Promise<{ stem:
   const breadcrumb = breadcrumbSchema([
     { name: "Home", url: "/" },
     { name: "Arsenal", url: "/arsenal" },
-    { name: family.title, url: `/arsenal?axis=${encodeURIComponent("effect:" + family.tag)}` },
+    { name: family.title, url: `/arsenal/effects/family/${family.id}` },
     { name: entry.name, url: `/arsenal/effects/${entry.stem}` },
   ]);
 
@@ -154,7 +154,7 @@ export default async function EffectDetail({ params }: { params: Promise<{ stem:
 
             <div className="phead" style={{ padding: 0, maxWidth: "none" }}>
               <span className="kicker">
-                <span className="dot" /> {family.tag} · {family.title}
+                <span className="dot" /> {family.tag} · <Link href={`/arsenal/effects/family/${family.id}`}>{family.title}</Link>
                 {!family.noPreview && !entry.noPreview && <> · <span className="tag fxtag-live">plays live</span></>}
               </span>
               <h1 className="mono">{entry.name}</h1>
