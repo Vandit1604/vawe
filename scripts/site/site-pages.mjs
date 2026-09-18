@@ -34,6 +34,12 @@ const ROUTES = [
   { path: '/arsenal/type', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/playground', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/editor', priority: 0.7, changeFrequency: 'monthly' },
+  // The three intent pages the "actually work on SEO correctly" pass is allowed to add: real
+  // demand, no page on vawe.dev before this, each answering a question the repo backs with running
+  // code. See each page's own header comment for the search evidence.
+  { path: '/determinism', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/json-to-video', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/ai-agents', priority: 0.7, changeFrequency: 'monthly' },
 ];
 
 // fumadocs routes content/docs/<slug>.mdx at /docs/<slug>, and index.mdx at /docs itself.

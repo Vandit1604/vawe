@@ -289,7 +289,8 @@ export function EditorClient() {
         Every frame comes from the same <code>renderFrame(n)</code> the renderer screenshots to make an
         mp4. For a file with sound and grain: <code>make video D=scene.json</code>. To have Claude write
         a scene, give it <a href="/vawe-rules.md" target="_blank" rel="noreferrer"><code>vawe-rules.md</code></a>,
-        generated from the engine so it cannot drift.
+        generated from the engine so it cannot drift. Any other agent can call the render itself:{" "}
+        <a href="/ai-agents">the MCP server, for an agent that renders its own draft →</a>
       </p>
     </>
   );

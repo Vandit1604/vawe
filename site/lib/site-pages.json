@@ -34,6 +34,21 @@
       "path": "/editor",
       "priority": 0.7,
       "changeFrequency": "monthly"
+    },
+    {
+      "path": "/determinism",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/json-to-video",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/ai-agents",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
     }
   ],
   "docs": [
@@ -124,7 +139,7 @@
     }
   ],
   "counts": {
-    "routes": 7,
+    "routes": 10,
     "docs": 17
   }
 }
