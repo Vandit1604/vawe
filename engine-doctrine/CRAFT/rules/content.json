@@ -23,7 +23,7 @@
     "id": "content.designed-screens",
     "category": "content",
     "stage": "design",
-    "applies": "hasProductScreen",
+    "applies": "wantsProductScreen",
     "check": null,
     "adapt": null,
     "brief": "R2, screens: a product screen in a film is DESIGNED for the video by default, not a plain mock.",

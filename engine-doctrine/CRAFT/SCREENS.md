@@ -2,7 +2,7 @@
 when: you are about to author a product screen (an editor, a results grid, a dashboard, a chat, a card) for a film, or a screen previews as a grey box, with tiny type, or with something clipped
 answers: "why a product screen is designed for the video, not a plain mock · the one make screen command · what the video-readiness and clipping checks catch and why · how a screen is measured against a reference act · where a theme comes from when the user has none, and which ui-skills were used"
 group: look
-applies-when: hasProductScreen
+applies-when: wantsProductScreen
 confirm: "does the screen fill most of the frame with display-size type, real images shown whole, and one accent, and does `make screen` report no anti-patterns, no text under 28px, nothing clipped, and fill/detail at or above 80% of the reference act?"
 ---
 
