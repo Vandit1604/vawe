@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
+import { pageMetadata } from "../../components/seo";
 import "./type.css";
 import { TypeBrowser, type Group } from "./TypeBrowser";
 import catalogue from "../../../lib/type-specimens.json";
@@ -21,11 +21,12 @@ const C = catalogue as unknown as {
   groups: Group[];
 };
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Vawe · typography",
   description:
     "The engine's typographic vocabulary as specimens: kinetic presets, per-layer text mechanics and typographic beats, each playing in the real engine with the JSON that produces it.",
-};
+  path: "/arsenal/type",
+});
 
 export default function TypePage() {
   return (

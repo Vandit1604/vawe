@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { PlaygroundClient } from "../PlaygroundClient";
+import { pageMetadata } from "../../components/seo";
 import "../playground.css";
 
 /**
@@ -16,10 +17,14 @@ import "../playground.css";
  * enumerate names would fork the engine into a webpack copy that drifts from the one /editor boots.
  * An unknown name is handled where the registry actually is: on the client, which shows the library.
  */
-export const metadata: Metadata = {
-  title: "Playground · vawe",
-  description: "Turn the dials on the engine's generators in your browser.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ name: string }> }): Promise<Metadata> {
+  const { name } = await params;
+  return pageMetadata({
+    title: "Playground · vawe",
+    description: "Turn the dials on the engine's generators in your browser.",
+    path: `/playground/${name}`,
+  });
+}
 
 export default async function GeneratorPage({ params }: { params: Promise<{ name: string }> }) {
   const { name } = await params;

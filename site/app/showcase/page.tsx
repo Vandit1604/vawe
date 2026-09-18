@@ -1,21 +1,22 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Clip } from "../components/Clip";
 import { Footer } from "../components/Footer";
 import films from "../../lib/films.json";
 import { SourceViewer } from "../components/SourceViewer";
+import { pageMetadata } from "../components/seo";
 import LINES from "../../lib/scene-lines.json";
 import { videoObjectSchema, jsonLdScript } from "../../lib/schema";
 import "./showcase.css";
 
 const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Vawe · showcase",
   description:
     "Finished films rendered by Vawe, each one a JSON file you can open in the editor. Six launch films and one scene cropped to three canvases.",
-};
+  path: "/showcase",
+});
 
 /* /showcase · WHAT THE ENGINE MADE. Nothing else.
  *
