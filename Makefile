@@ -1416,6 +1416,13 @@ judge-census: ## [judge] count judge fix codes by dimension and beat position (n
 output-contract: ## [maintenance] every reporting gate renders through harness/lib/findings.mjs (tight prose + --json).
 	@node quality/gates/output-contract.mjs $(if $(JSON),--json,) $(if $(STAMP),--stamp,)
 
+# blocking-findings-check: a BLOCKING finding must name what it saw, where (`at`), and the one fix
+# (`fix`); a doc pointer belongs in `doc`, not `fix`. Ratchets the count of blocking finding calls in
+# quality/gates/ still missing `at`/`fix` DOWN, same shape as harness/dev/prose-check.mjs. --stamp
+# lowers the ceiling after a batch adopts it. Not wired into pre-push or CI yet.
+blocking-findings-check: ## [maintenance] a blocking finding must name what/where/fix, ratcheted
+	@node harness/dev/blocking-findings-check.mjs $(if $(JSON),--json,) $(if $(STAMP),--stamp,)
+
 # generated-check: run every generator, then ask git what moved. Three artefacts had no drift check at
 # all and one of them, site/lib/arsenal.json, went 67 items stale while still advertising a deleted
 # sound cue. WRITE=1 regenerates and exits 0; without it the run fails and leaves the files in place so
