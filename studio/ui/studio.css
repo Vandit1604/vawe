@@ -400,6 +400,23 @@
  #plangate{margin:14px 0 0;display:flex;flex-wrap:wrap;gap:6px}
  #plangate span{font:500 12px/1 Anybody,system-ui,sans-serif;padding:6px 9px;border-radius:6px;background:rgba(232,162,58,.14);color:var(--hz-beat)}
  #plangate span.err{background:var(--bad-bg);color:var(--bad)}
+ /* ---- the colour strip: one swatch per beat, storyboard order, seams marked between them ---- */
+ #colorstrip{margin:14px 0 0}
+ #colorstrip h4{margin:0 0 8px;font:500 11px/1 Anybody,system-ui,sans-serif;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3)}
+ #cstrip{display:flex;align-items:center;gap:0;overflow-x:auto;padding:2px}
+ .ccell{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
+ .ccell b{font:500 10.5px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+ .cswatch{width:44px;height:32px;border-radius:var(--r-pill);box-shadow:inset 0 0 0 1px var(--line-2)}
+ /* undeclared ground: a hatch in the gate's own warning colour, never a plausible grey, so an
+    unmade decision cannot be mistaken for a made one (a black preset is a real, solid tile). */
+ .cswatch.none{display:grid;place-items:center;background:repeating-linear-gradient(135deg,var(--hz-beat) 0 2px,transparent 2px 8px),var(--field);
+   color:var(--hz-beat);font:600 12px/1 var(--mono);opacity:.85}
+ .cjoin{flex:none;display:flex;align-items:center;padding:0 6px;align-self:center;margin-top:-16px}
+ .cseam{font:500 10px/1 Anybody,system-ui,sans-serif;white-space:nowrap;padding:4px 6px;border-radius:5px}
+ .cseam.none{color:var(--hz-beat);background:rgba(232,162,58,.14)}
+ .cseam.held{color:var(--ink-3);background:var(--panel-2)}
+ .cseam.flip{color:#6fb6ff;background:var(--accent-soft)}
+ .cseam.flip.down{color:var(--ink-2);background:var(--panel-2)}
  .copycmd{height:36px;gap:14px;padding:0 12px;background:var(--field);font:12.5px var(--mono);color:var(--ink)}
  .copycmd:hover{background:var(--raised)}
  .copycmd span{font:500 12px Anybody,system-ui,sans-serif;color:var(--ink-3)}
