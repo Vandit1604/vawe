@@ -49,6 +49,11 @@
 !site
 !docs-site
 !NOTICE
+# The engine's own package.json: site/lib/schema.ts imports it for the real description, version and
+# licence in the SoftwareApplication JSON-LD. This is an allowlist (`**` then negations), so a file
+# nobody thought to un-ignore is simply absent, which is how the first attempt at this shipped a
+# build that died on "Module not found: Can't resolve '../../package.json'".
+!package.json
 **/node_modules
 **/.next
 **/.source
