@@ -42,6 +42,17 @@ const FONTS = [
   // against. Bump it deliberately, re-save the baselines, never as a side effect of a fetch.
   ['GeistMono.woff2',               '@fontsource-variable/geist-mono',          '5.2.8', 'geist-mono-latin-wght-normal.woff2',          'OFL 1.1'],
   ['JetBrainsMono.woff2',           '@fontsource-variable/jetbrains-mono',      '5.3.0', 'jetbrains-mono-latin-wght-normal.woff2',      'OFL 1.1'],
+  // STATIC .woff INSTANCES, for the OG cards only. site/app/components/ogCard.tsx renders with
+  // next/og (Satori), which needs real font BYTES and reads ttf, otf and woff but NOT woff2, which
+  // is the only format the variable packages above ship. The first attempt cut static TTFs out of
+  // those woff2 files with fonttools and COMMITTED them, which breaks this repo's oldest asset rule:
+  // "no font binary ships from this repo, paid or not" (.gitignore:10). Fontsource's non-variable
+  // packages already publish exactly these instances as .woff, so they are fetched here like every
+  // other face, land in the gitignored assets/fonts/, and are vendored into the site by
+  // scripts/site/site-engine.mjs. Nothing is converted and nothing is committed.
+  ['Anybody-800.woff',              '@fontsource/anybody',                     '5.3.0', 'anybody-latin-800-normal.woff',               'OFL 1.1'],
+  ['Anybody-400.woff',              '@fontsource/anybody',                     '5.3.0', 'anybody-latin-400-normal.woff',               'OFL 1.1'],
+  ['JetBrainsMono-400.woff',        '@fontsource/jetbrains-mono',              '5.3.0', 'jetbrains-mono-latin-400-normal.woff',        'OFL 1.1'],
   ['PlusJakartaSans.woff2',         '@fontsource-variable/plus-jakarta-sans',   '5.3.0', 'plus-jakarta-sans-latin-wght-normal.woff2',   'OFL 1.1'],
   ['HankenGrotesk.woff2',           '@fontsource-variable/hanken-grotesk',      '5.3.0', 'hanken-grotesk-latin-wght-normal.woff2',      'OFL 1.1'],
   ['BricolageGrotesque.woff2',      '@fontsource-variable/bricolage-grotesque', '5.3.0', 'bricolage-grotesque-latin-wght-normal.woff2', 'OFL 1.1'],
@@ -59,8 +70,12 @@ const FONTS = [
 
 const urlOf = (pkg, ver, file) => `${CDN}/${pkg}@${ver}/files/${file}`;
 const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
-// woff2 files start with the ASCII magic "wOF2"
-const isWoff2 = (buf) => buf.length > 4 && buf[0] === 0x77 && buf[1] === 0x4f && buf[2] === 0x46 && buf[3] === 0x32;
+// woff2 files start with the ASCII magic "wOF2"; woff1 starts with "wOFF". The check reads the MAGIC
+// and compares it to what the destination filename claims, so a CDN serving an HTML error page or the
+// wrong format under the right name is caught either way. It used to accept woff2 alone, which was
+// correct until the OG cards needed static .woff instances (Satori reads woff, never woff2).
+const magic = (buf) => (buf.length > 4 ? String.fromCharCode(buf[0], buf[1], buf[2], buf[3]) : '');
+const formatOk = (name, buf) => (name.endsWith('.woff2') ? magic(buf) === 'wOF2' : magic(buf) === 'wOFF');
 
 // A MISSING LOCK IS NOT AN EMPTY LOCK. This used to swallow the read and return {}, so a wrong path
 // read as "no face is locked" and every font then failed as unlocked: a stale path hidden by a silent
@@ -91,7 +106,7 @@ async function grab([name, pkg, ver, file]) {
     const res = await fetch(urlOf(pkg, ver, file), { redirect: 'follow' });
     if (!res.ok) return { name, status: 'fail', why: `HTTP ${res.status}` };
     const buf = Buffer.from(await res.arrayBuffer());
-    if (!isWoff2(buf)) return { name, status: 'fail', why: 'not a woff2 file' };
+    if (!formatOk(name, buf)) return { name, status: 'fail', why: `not a ${name.endsWith('.woff2') ? 'woff2' : 'woff'} file (magic "${magic(buf)}")` };
     const got = sha256(buf);
     // The pin is only worth what the check is worth: refuse to WRITE bytes the lock does not name,
     // so a re-published version cannot enter the tree and be discovered later as 57 changed scenes.

@@ -40,7 +40,12 @@ export default async function Image({ params }: { params: Promise<{ name: string
     renderOgCard({
       tag: `${cat(b)} · ${b.family}`,
       title: b.name,
-      description: `${b.blurb} A deterministic, theme-aware Vawe block you drop into a scene.`,
+      // The SAME sentence page.tsx puts in the meta description, punctuation included. It read
+      // `${b.blurb} A deterministic...` here and `${b.name}: ${b.blurb}. A deterministic...` there,
+      // so the card rendered "output answers after it A deterministic, theme-aware Vawe block",
+      // two sentences run together with no stop. A card and its page must not describe the page
+      // differently, and neither should be missing a full stop.
+      description: `${b.blurb}. A deterministic, theme-aware Vawe block you drop into a scene.`,
       path: `/arsenal/${name}`,
       panel: { kind: "code", text: snippet },
     }),
