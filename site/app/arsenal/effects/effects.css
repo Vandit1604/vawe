@@ -111,6 +111,10 @@
 .fxpage .backlink{color:var(--muted);font-family:var(--font-mono),monospace;font-size:13px;
   display:inline-block;margin-bottom:22px;transition:color .2s}
 .fxpage .backlink:hover{color:var(--accent)}
+/* The family name in the kicker links to its new hub page; the kicker itself is already accent-
+   colored (globals.css), so an underline is the only affordance a link needs there. */
+.fxpage .kicker a{text-decoration:underline;text-underline-offset:2px;text-decoration-color:var(--accent-line)}
+.fxpage .kicker a:hover{text-decoration-color:currentColor}
 .fxpage h1{font-size:clamp(1.6rem,3vw,2.2rem);letter-spacing:-.01em;margin-top:2px}
 .fxpage .phead p{color:var(--ink-2);font-size:15px;line-height:1.6;max-width:64ch;margin-top:10px}
 
