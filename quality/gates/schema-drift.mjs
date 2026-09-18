@@ -34,7 +34,6 @@ import { ADJUST_REGISTRY } from '../../core/layers/adjust.js';
 import { PRESENTATIONS, TIMINGS } from '../../core/cuts/index.js';
 import { SHADER_FX } from '../../core/stings/index.js';
 import { SEAM_FX } from '../../core/timeline/seams.js';
-import { SPECTACLE_DEVICES } from '../../core/registry/knobs.js';
 import { BG_NAMES } from '../../core/backgrounds/index.js';
 import { CAP_STYLE_NAMES } from '../../core/type/captions.js';
 import { PLACEMENT_REGISTRY } from '../../core/layout/safe.js';
@@ -133,7 +132,12 @@ const OWNED = [
   { path: 'stings.item.fx',     want: SHADER_FX,                               src: 'core/stings.js SHADER_FX' },
   { path: 'seams.item.fx',      want: SEAM_FX,                                 src: 'core/seams.js SEAM_FX' },
   { path: 'seams.item.timing',  want: Object.keys(TIMINGS),                    src: 'core/cuts.js TIMINGS' },
-  { path: 'spectacle.fields.device', want: SPECTACLE_DEVICES.names,           src: 'core/knobs.js SPECTACLE_DEVICES' },
+  // `spectacle.fields.device` used to enumerate here (SPECTACLE_DEVICES.names, the twelve shaders). It
+  // no longer can: a device is EITHER a shader sting OR "<kind>:<name>" naming a cut/seam/kinetic
+  // preset/layer this film already builds, and the second half's legal names are per-FILM (a layer id)
+  // or span four registries picked by prefix, neither of which a flat enum can state. Same shape as
+  // `transitions.item.fx` below: intentionally NOT enumerated, and core/timeline/spectacle.js's
+  // resolveDevice (run by core/validate/validate.mjs) is the drift-proof guard instead.
   // unified transitions: `timing` mirrors TIMINGS; `fx` is intentionally NOT enumerated (its valid set
   // is the union of all four registries. The router in transitions-lower.js is the drift-proof guard).
   { path: 'transitions.item.timing', want: Object.keys(TIMINGS),               src: 'core/cuts.js TIMINGS' },

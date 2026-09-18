@@ -62,8 +62,11 @@ not: "the defaults this film refuses, in your own words"
   the prose in `not:` at all, ever; the line exists so the decision gets made.
 
   BUT WRITING THE PEAK DOWN IS NOT BUILDING IT, exactly as with `becomes:` below. The film-side half is a
-  scene block, `"spectacle": { "at", "of", "device", "why" }` (core/spectacle.js), which writes the device
-  as a sting at `at` and pulls every competing amplitude dial in the film down around it.
+  scene block, `"spectacle": { "at", "of", "device", "why" }` (core/timeline/spectacle.js), which pulls every
+  competing amplitude dial in the film down around `at`. `device` is either a shader sting name, written as a
+  sting at `at` (injected, the engine's own gesture), or "<kind>:<name>" naming a cut, seam, kinetic preset,
+  or another layer the film ALREADY builds (a ground change, a match cut, …): nothing is injected for those,
+  the block only verifies the named mechanism is really there at `at`.
   `make plan-check D=<file>` reads this line and the scene together: it warns `spectacle-not-built` when
   the plan names a peak the JSON never builds, and `spectacle-in-wrong-beat` when the block's `at` lands
   outside the beat named here. So NAME THE BEAT in this line, as "beat 4" or by the beat's own title, or
