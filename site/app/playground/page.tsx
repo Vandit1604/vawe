@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { PlaygroundClient } from "./PlaygroundClient";
+import { pageMetadata } from "../components/seo";
 import "./playground.css";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Playground · vawe",
   description:
     "Turn the dials on the engine's generators in your browser. The same pure functions the renderer calls, with their real option schemas.",
-};
+  path: "/playground",
+});
 
 export default function PlaygroundPage() {
   return (

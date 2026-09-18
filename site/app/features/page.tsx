@@ -1,15 +1,16 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { Clip } from "../components/Clip";
 import { Footer } from "../components/Footer";
+import { pageMetadata } from "../components/seo";
 import "./features.css";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Vawe · features",
   description:
     "The decisions the engine makes for you: a clock that refuses wall time, a motion director that picks every cut, and a gate ladder that rejects correct-but-generic output.",
-};
+  path: "/features",
+});
 
 /* /features · WHAT THE ENGINE DECIDES.
  *

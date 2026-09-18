@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
 import { Header } from "../components/Header";
 import { EditorClient } from "./EditorClient";
+import { pageMetadata } from "../components/seo";
 import "./editor.css";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Vawe · editor",
   description: "Edit a scene JSON and watch it render live. The real engine, running in your browser.",
-};
+  path: "/editor",
+});
 
 export default function EditorPage() {
   return (

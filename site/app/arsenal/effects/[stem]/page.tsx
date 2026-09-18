@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Header } from "../../../components/Header";
 import { Footer } from "../../../components/Footer";
+import { pageMetadata } from "../../../components/seo";
 import { Rich, type Index, type Family, type Entry } from "../shared";
 import { EffectStage } from "./EffectStage";
 import { deriveKnobs } from "./knobs";
@@ -116,12 +117,15 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ stem: string }> }): Promise<Metadata> {
   const { stem } = await params;
   const hit = find(stem);
-  if (!hit) return { title: "Vawe · effects" };
+  if (!hit) return { title: "Vawe · effects", alternates: { canonical: `/arsenal/effects/${stem}` } };
   const { family, entry } = hit;
-  return {
+  // The card itself (opengraph-image.tsx, next to this file) puts the real still or the real JSON
+  // on the image; this only supplies the text half.
+  return pageMetadata({
     title: `Vawe · ${entry.name}`,
     description: entry.desc || `${entry.name}, from the ${family.title} family in the Vawe effects arsenal, with the JSON that uses it.`,
-  };
+    path: `/arsenal/effects/${stem}`,
+  });
 }
 
 export default async function EffectDetail({ params }: { params: Promise<{ stem: string }> }) {
