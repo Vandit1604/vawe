@@ -51,6 +51,17 @@ COPY harness/media/fonts.lock.json ./harness/media/fonts.lock.json
 RUN node generators/media/fonts.mjs
 
 # --- the site ---
+# The REPO ROOT package.json, because site/lib/schema.ts imports `../../package.json` to read the
+# engine's real description, version, licence and repo URL into the SoftwareApplication JSON-LD
+# rather than retyping them. From /src/site/lib that resolves to /src/package.json, which was not in
+# the image, so the site built clean on every laptop and died here with "Module not found: Can't
+# resolve '../../package.json'". The same class as the assets/plinth line below: a path that exists
+# in a checkout is not a path that exists in a build context.
+#
+# Copied at /src, ABOVE the site's own npm ci, so it is a layer that only busts when the engine's
+# version or description actually changes. docker-check reads COPY lines and cannot see what a JS
+# import resolves to, which is why this arrived as a failed deploy rather than a failed gate.
+COPY package.json ./package.json
 COPY site/package.json site/package-lock.json ./site/
 WORKDIR /src/site
 RUN npm ci
