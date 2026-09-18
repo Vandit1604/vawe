@@ -57,14 +57,20 @@ export function beatStarts(scene, dur, sceneFile) {
 }
 
 // the representative frame per beat: [{ i, start, t, label }]. `t` is clamped inside the film.
+//
+// THE LABEL NAMES `t`, NEVER `start`. It used to name the beat's start while the picture below it came
+// from up to CAP seconds later, so the sheet said one time and showed another. On vawe-flow-2 that put
+// a black mid-transition frame under the caption "beat 8 @8.0s", where the film is a full blue title:
+// the eye reported a defect at a second that has none, and the author looked there and found nothing.
+// The one gate that SEES must not mislabel what it saw, so both times are printed and `t` leads.
 export function beatsOf(scene, dur, sceneFile) {
   const { beats, duration } = beatStarts(scene, dur, sceneFile);
   return beats.map((b, i) => {
     const next = beats[i + 1] ?? duration;
+    const t = Math.max(0, Math.min(duration - 0.1, b + Math.min(CAP, (next - b) * INTO)));
     return {
-      i, start: b,
-      t: Math.max(0, Math.min(duration - 0.1, b + Math.min(CAP, (next - b) * INTO))),
-      label: `beat ${i + 1} @${b.toFixed(1)}s`,
+      i, start: b, t,
+      label: `beat ${i + 1} @${t.toFixed(1)}s (starts ${b.toFixed(1)}s)`,
     };
   });
 }
