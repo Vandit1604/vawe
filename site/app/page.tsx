@@ -168,10 +168,11 @@ export default function Home() {
               artifact you can delete and regenerate at any time. <code>renderFrame(n)</code> is a
               pure function of the frame number, so the same JSON always produces byte-identical
               pixels, no matter which machine renders it or in what order the frames come out. That
-              purity is not a suggestion: anything that reads a real clock, the actual{" "}
-              <code>Date</code>, <code>requestAnimationFrame</code>, or unseeded{" "}
-              <code>Math.random</code>, is refused before a pixel is drawn, so nothing about the
-              picture depends on when or where the render ran.
+              purity is coerced, not merely asked for: the engine installs a virtual clock, so{" "}
+              <code>Date.now</code>, <code>requestAnimationFrame</code> and <code>Math.random</code>{" "}
+              all become pure functions of the frame being drawn, even inside a third-party library
+              that never heard of Vawe. Nothing about the picture depends on when or where the
+              render ran.
             </p>
             <div className="pf">
               <div>
