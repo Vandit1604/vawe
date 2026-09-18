@@ -5,6 +5,7 @@ import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import blocks from "../../../lib/blocks.json";
 import frames from "../../../lib/block-frames.json";
+import { breadcrumbSchema, jsonLdScript } from "../../../lib/schema";
 import { Stage, Copy } from "./Stage";
 import "./detail.css";
 
@@ -55,8 +56,15 @@ export default async function BlockDetail({ params }: { params: Promise<{ name: 
   "start": 0.5, "duration": 4
 }`;
 
+  const breadcrumb = breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Arsenal", url: "/arsenal" },
+    { name: b.name, url: `/arsenal/${b.name}` },
+  ]);
+
   return (
     <div className="shell">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumb)} />
       <Header active="arsenal" />
       <div className="wrap">
         <main id="content" tabIndex={-1}>
