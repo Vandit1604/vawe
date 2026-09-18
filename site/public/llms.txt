@@ -1,0 +1,30 @@
+# Vawe
+> Motion graphics without a motion designer. Vawe renders video from a text file, so you or an AI agent can write a film the way you write anything else, and re-render it the day the numbers change.
+
+## Site
+- [Home](https://vawe.dev/): Motion graphics without a motion designer. Vawe renders video from a text file, so you or an AI agent can write a film the way you write anything else, and re-render it the day the numbers change.
+- [features](https://vawe.dev/features): The decisions the engine makes for you: a clock that refuses wall time, a motion director that picks every cut, and a gate ladder that rejects correct-but-generic output.
+- [showcase](https://vawe.dev/showcase): Finished films rendered by Vawe, each one a JSON file you can open in the editor. Six launch films and one scene cropped to three canvases.
+- [arsenal](https://vawe.dev/arsenal): Everything the Vawe engine is made of: 879 blocks and effects, searchable, each with the JSON that uses it and 517 of them playing in the real engine.
+- [arsenal/type](https://vawe.dev/arsenal/type): The engine's typographic vocabulary as specimens: kinetic presets, per-layer text mechanics and typographic beats, each playing in the real engine with the JSON that produces it.
+- [playground](https://vawe.dev/playground): Turn the dials on the engine's generators in your browser. The same pure functions the renderer calls, with their real option schemas.
+- [editor](https://vawe.dev/editor): Edit a scene JSON and watch it render live. The real engine, running in your browser.
+
+## Docs
+- [aspect-ratios](https://vawe.dev/docs/aspect-ratios): Render one scene to 16:9, 9:16, 1:1, and more from a single source, using relative coordinates, pins, and a 12-column grid.
+- [audio](https://vawe.dev/docs/audio): The Go PCM mixer, automatic sound design derived from a scene's own cuts and stings, the reusable SFX library, and burned-in captions.
+- [backgrounds-and-images](https://vawe.dev/docs/backgrounds-and-images): The background presets tied to the brand palette, and how to bring real assets (captures, logos, photos, icons) into a scene.
+- [blocks](https://vawe.dev/docs/blocks): The block registry of ready-made, theme-aware components, and comps for reusing your own clusters within a scene.
+- [brand-reflection](https://vawe.dev/docs/brand-reflection): The capture-first workflow for turning a real website into an on-brand video, studying the site before authoring a single layer.
+- [cli](https://vawe.dev/docs/cli): The bin/vawe binary and its flags, plus the make wrappers for rendering, previewing, and shipping a video.
+- [determinism](https://vawe.dev/docs/determinism): Why renderFrame(n) is a pure function of the frame number, what that buys you, and how the engine proves it.
+- [Introduction](https://vawe.dev/docs): Vawe turns one self-describing JSON file into one rendered video, deterministically. Here is what that means and why it is built this way.
+- [layers](https://vawe.dev/docs/layers): Every layer type in the scene vocabulary, the fields each one accepts, and the fields they all share.
+- [motion](https://vawe.dev/docs/motion): The kinetic typography presets, cut presentations, and shader stings, plus how each brand moves in its own personality.
+- [prompting](https://vawe.dev/docs/prompting): You do not write the JSON by hand. You write a five line brief and let an agent compose the scene. Here is what to say, and what to leave alone.
+- [quality-gates](https://vawe.dev/docs/quality-gates): The ladder of checks a video climbs before it ships, from schema validation to a vision gate that scores the rendered frames.
+- [quickstart](https://vawe.dev/docs/quickstart): Build the binary, render the sample video, and write your first scene from scratch.
+- [reading-your-film](https://vawe.dev/docs/reading-your-film): Every gate here reads structure. None of them can see whether a film is good. These six tools put the frames in front of you, and each one shows something the others hide.
+- [the-scene](https://vawe.dev/docs/the-scene): The top-level fields a scene JSON is built from, from duration and theme to cameras, backgrounds, and stings.
+- [themes](https://vawe.dev/docs/themes): How a theme defines a brand's palette, type, motion, and backdrop, and why every key is required.
+- [troubleshooting](https://vawe.dev/docs/troubleshooting): Symptom to cause, for the failures that actually repeat. Most of these are the engine accepting something and then quietly not doing it, which is the hardest kind to debug from the outside.

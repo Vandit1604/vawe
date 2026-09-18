@@ -4,14 +4,14 @@ description: Vawe turns one self-describing JSON file into one rendered video, d
 icon: Sparkles
 ---
 
-Vawe reads a single JSON file and renders a video from it. No timeline, no editor, no dragging clips around. You describe the scene, and the engine draws every frame.
+Vawe is a deterministic motion-graphics engine: it reads a single, self-describing JSON file and renders a video from it, with no timeline, no editor, and no dragging clips around. A scene JSON names its layers, a camera, a theme, and a duration, and that file is the only source of truth; the mp4 is a build artifact you can delete and regenerate at any time. The render itself is deterministic: `renderFrame(n)` is a pure function of the frame number, so the same JSON always produces byte-identical pixels no matter what order the frames render in or which machine renders them. A Go service drives headless Chrome through `chromedp`, seeking `renderFrame(n)` frame by frame across parallel tabs and capturing each as a PNG, then `ffmpeg` stitches the sequence into an H.264 mp4. You describe the scene once, and the engine draws every one of those frames.
 
 ```bash
 ./bin/vawe films/scene/sample.json
 # → out/sample.mp4
 ```
 
-That is the whole loop. The JSON is the source of truth; the mp4 is a build artifact you can delete and regenerate at any time.
+That is the whole loop.
 
 ## What makes it different
 
