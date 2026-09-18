@@ -161,8 +161,17 @@ export default function Home() {
             <div className="kicker">what you can promise a client</div>
             <h2 className="h2">What you approve is what ships.</h2>
             <p className="lead">
-              Nothing here asks you to be careful. Anything that reads a real clock is refused before a
-              pixel is drawn, so a film cannot drift between renders.
+              Vawe is a deterministic motion-graphics engine: it turns one self-describing JSON file
+              into one rendered video, with no timeline and no editor and no dragging clips around.
+              You describe the scene and the engine draws every frame. A scene JSON names its layers,
+              a camera, and a theme, and that file is the only source of truth; the mp4 is a build
+              artifact you can delete and regenerate at any time. <code>renderFrame(n)</code> is a
+              pure function of the frame number, so the same JSON always produces byte-identical
+              pixels, no matter which machine renders it or in what order the frames come out. That
+              purity is not a suggestion: anything that reads a real clock, the actual{" "}
+              <code>Date</code>, <code>requestAnimationFrame</code>, or unseeded{" "}
+              <code>Math.random</code>, is refused before a pixel is drawn, so nothing about the
+              picture depends on when or where the render ran.
             </p>
             <div className="pf">
               <div>
