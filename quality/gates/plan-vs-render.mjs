@@ -22,12 +22,16 @@
 // the pixels, and it belongs to `make judge` and to your eyes. A green run here means the film is not
 // EMPTY where it promised to be full. It does not mean the promise was kept.
 //
-// THE PROSE FIELDS. The intent sidecar carries the beat spans and the `becomes:` lines and nothing else.
-// Two frontmatter decisions never reach it, and both are decisions ABOUT the render: `spectacle:` names
-// the film's one loud moment, and `pace:` budgets its seconds per idea. So this gate reads the storyboard
-// itself as a second input, alongside the sidecar, and joins those two lines to the film. Without that
-// they are fields an author fills and no code reads, which is worse than no field at all, the plan looks
-// complete and the film is unchanged (engine-doctrine/MISTAKES.md #219, #383, #387, #400).
+// THE PROSE FIELDS. The intent sidecar carries the beat spans and the `becomes:` lines, and both are
+// themselves read off the storyboard's own `(0s-3s)` headings (scripts/brand/intent-from-storyboard.mjs):
+// the sidecar is a cache of the storyboard, not a second source, so this gate reads it when present and
+// falls back to the storyboard directly when it is not, rather than skipping every beat-span check on a
+// film nobody ran `make intent` against. Two frontmatter decisions never reach the sidecar either way,
+// and both are decisions ABOUT the render: `spectacle:` names the film's one loud moment, and `pace:`
+// budgets its seconds per idea. So this gate reads the storyboard as a second input regardless of which
+// source the beat spans came from, and joins those two lines to the film. Without that they are fields
+// an author fills and no code reads, which is worse than no field at all, the plan looks complete and
+// the film is unchanged (engine-doctrine/MISTAKES.md #219, #383, #387, #400).
 //
 //   node quality/gates/plan-vs-render.mjs <scene.json> [--intent p] [--sb storyboard.md] [--strict]
 //   make plan-check D=<file>
@@ -333,24 +337,43 @@ if (endClause) {
   }
 }
 
-// No sidecar is not a pass and not a failure: there is no plan to check the film against. Say which,
-// and how to make one, rather than printing a tick for work nobody did. The peak question, and the
-// threads promise above, both survive it: neither needs a beat sidecar, only the storyboard.
-if (!fs.existsSync(intentPath)) {
-  console.log(`\n  plan vs render · ${file}`);
-  console.log(`  ○ no plan to check against: no sidecar at ${intentPath}.`);
-  console.log(`    Write the storyboard, then \`make intent SB=<storyboard.md> D=${file}\`.\n`);
-  const threadFails = findings.filter((f) => !allow.has(f.code));
-  if (threadFails.length) {
-    const F0 = gateFindings({ scene: file, indent: '  ',
-      line: (r, g) => `  ${g} [${r.code}] ${r.summary}\n` });
-    for (const f of threadFails) F0.warn(f.code, f.msg);
-    F0.emit();
+// THE SIDECAR IS A CACHE, NOT A SECOND SOURCE. scripts/brand/intent-from-storyboard.mjs builds
+// `.intent.json` from exactly two things the storyboard already carries: each beat's own
+// `(0s-3s)` heading range, as `span`, and its `becomes:` line. So the sidecar is the storyboard's
+// beat spans, written out once, and there is nothing beat-span checks below need that the
+// storyboard itself does not already hold. Read the sidecar when it exists (an author may have
+// hand-corrected it after generation, and that correction should win); otherwise read the same
+// two fields straight off the storyboard, so a film gets checked before anyone runs `make intent`.
+// This is the fix for the 38-of-44 films that had no sidecar and so never reached a single check
+// below: reading storyboard-derived beats HERE, once, means every check downstream (junction-is-
+// static, beat-holds-still, held-through-the-change, unplanned-junction, plan-overruns-render,
+// spectacle-beat-unnamed, spectacle-in-wrong-beat, pace-not-kept) now runs off it too, with no
+// change to what any of them measure.
+//
+// A storyboard beat with no timed heading cannot be trusted for a span (there is nothing to
+// derive), so it is skipped individually and named, never guessed: guessing here is exactly the
+// "declared value nobody decided" failure this file already refuses to manufacture for spectacle.
+function planBeatsFromStoryboard(sbv) {
+  const beats = [], skipped = [];
+  for (const b of sbv.beats) {
+    if (b.start == null || b.end == null) { skipped.push(b.name); continue; }
+    beats.push({ name: b.name, span: [b.start, b.end], becomes: b.becomes || undefined });
   }
-  printNomination();
-  process.exit(threadFails.length ? (strict ? 1 : 0) : 0);
+  return { beats, skipped };
 }
-const intent = JSON.parse(fs.readFileSync(intentPath, 'utf8'));
+let planSource = null;   // 'sidecar' | 'storyboard' | null (no plan at all)
+let beats = [];
+let skippedBeats = [];
+if (fs.existsSync(intentPath)) {
+  const intent = JSON.parse(fs.readFileSync(intentPath, 'utf8'));
+  beats = (Array.isArray(intent.beats) ? intent.beats : []).filter((b) => b && typeof b === 'object');
+  planSource = 'sidecar';
+} else if (sb && sb.beats.length) {
+  const derived = planBeatsFromStoryboard(sb);
+  beats = derived.beats;
+  skippedBeats = derived.skipped;
+  planSource = 'storyboard';
+}
 
 // ---------- what the render actually does, as a list of moments ----------
 // An EVENT is a moment the frame provably changes: a content layer arriving or leaving, a declared
@@ -404,9 +427,14 @@ const moverSpans = T.content.filter(CONTINUOUS).map((L) => {
 });
 
 // ---------- the plan ----------
-const beats = (Array.isArray(intent.beats) ? intent.beats : []).filter((b) => b && typeof b === 'object');
-console.log(`\n  plan vs render · ${file} vs ${intentPath}`);
+console.log(`\n  plan vs render · ${file}${planSource === 'sidecar' ? ` vs ${intentPath}` : ''}`);
 console.log(`  ${beats.length} planned beat(s) · film runs ${s(T.duration)} · ${events.length} render event(s)`);
+if (planSource === 'storyboard') {
+  console.log(`  ○ no ${intentPath} sidecar: beat spans and \`becomes:\` read straight off ${sbPath} instead (same fields \`make intent\` would have cached).`);
+  if (skippedBeats.length) console.log(`  ○ skipped ${skippedBeats.length} beat(s) with no (0s-3s) heading range, so no span could be read: ${skippedBeats.join(', ')}.`);
+} else if (planSource === null) {
+  console.log(`  ○ no plan to check against: no ${intentPath} sidecar and no storyboard beside this scene.`);
+}
 // Say out loud whether the prose half of the plan is in play. The sidecar drops `spectacle:` and `pace:`,
 // so with no storyboard those two decisions go unchecked, and an unchecked decision should never look
 // like a passed one.
@@ -415,10 +443,18 @@ else console.log(`  ○ no storyboard found beside this scene, so \`spectacle:\`
 console.log('');
 
 const spanned = beats.filter((b) => Array.isArray(b.span) && b.span.length === 2 && b.span.every((x) => Number.isFinite(x)));
-if (!spanned.length) {
-  warn('plan-has-no-spans', `no beat in ${intentPath} carries a \`span\`, so there is nothing to line the film up against. `
-    + `Spans come from the (0s-3s) ranges in the storyboard headings. Re-run \`make intent SB=<storyboard.md> D=${file}\` `
-    + `against a storyboard whose headings are timed, and this gate starts working.`);
+if (planSource === null) {
+  // Nothing to check the film against, and nothing was promised: this is not a broken plan, it is
+  // an absent one, which is a different fact (doctrine already names the difference: a plan nobody
+  // made is worse than no plan, never the same as one). Say so, but do not warn or fail on it; the
+  // thread/transformation/fragment/spectacle-nomination checks above already ran with no plan at all.
+} else if (!spanned.length) {
+  warn('plan-has-no-spans', planSource === 'sidecar'
+    ? `no beat in ${intentPath} carries a \`span\`, so there is nothing to line the film up against. `
+      + `Spans come from the (0s-3s) ranges in the storyboard headings. Re-run \`make intent SB=<storyboard.md> D=${file}\` `
+      + `against a storyboard whose headings are timed, and this gate starts working.`
+    : `no beat heading in ${sbPath} carries a (0s-3s) time range, so there is nothing to line the film up against. `
+      + `Time every beat's heading, and this gate starts working (no sidecar needed).`);
 } else {
   // 1. does the plan describe THIS film, or a different-length one?
   const planEnd = Math.max(...spanned.map((b) => b.span[1]));
