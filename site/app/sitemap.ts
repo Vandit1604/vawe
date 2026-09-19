@@ -78,10 +78,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   }
 
-  // The 13 block category hubs, the block twin of the 58 family hubs above: same registry, same
-  // loop shape, keyed on the category name instead of the family id.
-  const blockCategories = new Set((blocks as Block[]).map((b) => b.category ?? "Core"));
-  for (const category of blockCategories) {
+  // The block category hubs, the block twin of the 58 family hubs above: same registry, same loop
+  // shape, keyed on the category name instead of the family id.
+  //
+  // A CATEGORY OF ONE IS SKIPPED, because no page is generated for it. `Camera` holds a single block
+  // and its hub was 47 words that restated the leaf, so /arsenal links that category straight to the
+  // block instead. A sitemap listing a URL with no page behind it is the thing this file was written
+  // to make impossible, so the rule has to be the same rule in both places.
+  const blockCount = new Map<string, number>();
+  for (const b of blocks as Block[]) {
+    const c = b.category ?? "Core";
+    blockCount.set(c, (blockCount.get(c) ?? 0) + 1);
+  }
+  for (const [category, n] of blockCount) {
+    if (n < 2) continue;
     entries.push({
       url: `${BASE}/arsenal/category/${category.toLowerCase()}`,
       lastModified: built,
