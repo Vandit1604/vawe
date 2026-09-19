@@ -13,11 +13,16 @@ import type { MetadataRoute } from "next";
  *
  * The two disallows are not content. /api is machinery, and /deck.html is a pitch deck that exists at
  * a fixed URL for sharing, not a page anyone should reach from a search result.
+ *
+ * NO `host` FIELD. Google's robots.txt parser recognizes exactly four rules: user-agent, disallow,
+ * allow, sitemap (developers.google.com/search/docs/crawling-indexing/robots/create-robots-txt,
+ * "Google's crawlers support the following rules..."). `Host:` was a Yandex-only extension; Google
+ * ignores it. Printing a line the target crawler never reads is the same "looks like a directive but
+ * isn't" problem this file's own header warns against, so it stays out.
  */
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [{ userAgent: "*", allow: "/", disallow: ["/api/", "/deck.html"] }],
     sitemap: "https://vawe.dev/sitemap.xml",
-    host: "https://vawe.dev",
   };
 }
