@@ -46,6 +46,11 @@ const ROUTES = [
   // need a human re-check, not an automated one, when they go stale.
   { path: '/remotion-alternatives', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/when-determinism-matters', priority: 0.7, changeFrequency: 'monthly' },
+  // A fifth comparison page: HyperFrames is Vawe's closest self-hosted, Apache-2.0, agent-facing
+  // peer (researched 2026-09-19), unlike Remotion which is a licensing-threshold story. Same
+  // monthly cadence as the two pages above, for the same reason: it cites another project's own
+  // docs and needs a human re-check when they change, not an automated one.
+  { path: '/hyperframes-alternatives', priority: 0.7, changeFrequency: 'monthly' },
   // Two use-case pages: a job in a searcher's own words, proven with a real rendered film and
   // cited against the doctrine that actually built it. Only two, not the five-to-six the engine's
   // own route table names, because only the launch-video route has real film artefacts behind it

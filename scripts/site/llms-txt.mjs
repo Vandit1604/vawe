@@ -47,6 +47,9 @@ const ROUTE_COPY = {
   '/when-determinism-matters': 'Byte-identical rendering is a real property, not a universal one. '
     + 'When it decides which engine to pick, and when a human editing a timeline by eye makes it '
     + 'beside the point.',
+  '/hyperframes-alternatives': "HyperFrames is HeyGen's self-hosted, Apache-2.0, agent-facing "
+    + 'rendering engine, the closest peer Vawe has. Same license, same headless-Chrome shape, '
+    + 'different composition language and a different way of enforcing determinism. Read 2026-09-19.',
   '/': 'Motion graphics without a motion designer. Vawe renders video from a text file, so you or an '
     + 'AI agent can write a film the way you write anything else, and re-render it the day the '
     + 'numbers change.',
