@@ -1,6 +1,7 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
+import MCP from "../../lib/mcp-tools.json";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
@@ -20,14 +21,11 @@ export const metadata = pageMetadata({
 const INSTALL = `claude mcp add vawe -- node $PWD/mcp/server.mjs
 node mcp/smoke.mjs   # proves it end to end`;
 
-const TOOLS: [string, string][] = [
-  ["vawe_guide", "scene format + effect vocabulary, call once"],
-  ["vawe_reflect", "a brand site's real colours + fonts"],
-  ["vawe_capabilities", "every look, preset, cut and block, read live"],
-  ["vawe_examples", "worked scenes to learn structure from"],
-  ["vawe_draft", "scene -> watermarked video + gate verdicts, free, repeat"],
-  ["vawe_export", "the clean file, one or more aspect ratios, paid"],
-];
+// READ, NOT TYPED. This list used to be six hand-written pairs under a heading that said "Ten
+// tools", against a server that registers eleven. site/lib/mcp-tools.json is generated from the
+// registerTool calls in mcp/server.mjs (scripts/site/mcp-tools.mjs) and held current by
+// generated-check, so the page cannot disagree with the server again.
+const TOOLS: [string, string][] = MCP.tools.map((t) => [t.name, t.title]);
 
 export default function AiAgents() {
   return (
@@ -49,7 +47,7 @@ export default function AiAgents() {
 
           <section className="isec">
             <div className="isec-text">
-              <h2>Ten tools, one loop.</h2>
+              <h2>{MCP.count} tools, one loop.</h2>
               <p>
                 An agent calls <code>vawe_guide</code> once for the authoring vocabulary, then
                 composes a scene and calls <code>vawe_draft</code> to render it. A draft is free and

@@ -48,6 +48,10 @@ const GENERATORS = [
   // (see scripts/site/site-pages.mjs). So the list is generated here and committed, and this gate is
   // what stops it drifting the day someone adds or renames a docs page.
   ['site pages', ['scripts/site/site-pages.mjs'], ['site/lib/site-pages.json']],
+  // Three pages claimed three different MCP tool counts on the same day (six, ten, four) against a
+  // server registering eleven. site/CLAUDE.md's law is that site numbers are never typed; this is how
+  // that one stops being typed.
+  ['mcp tools', ['scripts/site/mcp-tools.mjs'], ['site/lib/mcp-tools.json']],
   // Reads site/lib/site-pages.json + site/lib/arsenal.json, so it must run after both are current.
   // Not a fix for AI-search visibility on its own (Google's guidance treats llms.txt as ineffective,
   // see scripts/site/llms-txt.mjs's header); registered here so it cannot go stale unnoticed either.
