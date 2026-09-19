@@ -121,7 +121,7 @@ export default function WhenDeterminismMatters() {
           </section>
         </main>
       </div>
-      <Footer />
+      <Footer active="/when-determinism-matters" />
     </div>
   );
 }

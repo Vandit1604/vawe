@@ -140,7 +140,7 @@ export default function JsonToVideo() {
           </section>
         </main>
       </div>
-      <Footer />
+      <Footer active="/json-to-video" />
     </div>
   );
 }

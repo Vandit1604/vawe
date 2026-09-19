@@ -166,7 +166,7 @@ export default function Features() {
           </section>
         </main>
 
-        <Footer note="one open canvas of primitives" />
+        <Footer note="one open canvas of primitives" active="/features" />
       </div>
     </div>
   );

@@ -19,10 +19,11 @@ const NAV = [
 // The docs are a separate fumadocs app (docs-site/) served at /docs via a rewrite in
 // next.config.mjs, so this is just a path — no origin to configure, and nothing to get wrong in
 // production. It used to fall back to a localhost URL, which shipped a dead link to every visitor.
-const DOCS_URL = "/docs";
+// Exported so Footer.tsx points at the same two URLs instead of re-typing them.
+export const DOCS_URL = "/docs";
 
 // The engine repository, public since 2026-09-16.
-const REPO_URL = "https://github.com/Vandit1604/vawe";
+export const REPO_URL = "https://github.com/Vandit1604/vawe";
 
 export function Header({ active, variant = "solid" }: { active?: string; variant?: "solid" | "pill" }) {
   return (

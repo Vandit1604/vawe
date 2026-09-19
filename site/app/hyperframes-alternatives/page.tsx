@@ -222,7 +222,7 @@ export default function HyperframesAlternatives() {
           </section>
         </main>
       </div>
-      <Footer />
+      <Footer active="/hyperframes-alternatives" />
     </div>
   );
 }

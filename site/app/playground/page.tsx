@@ -37,7 +37,7 @@ export default function PlaygroundPage() {
           <PlaygroundClient />
         </main>
       </div>
-      <Footer />
+      <Footer active="/playground" />
     </div>
   );
 }
