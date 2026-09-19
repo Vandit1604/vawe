@@ -301,3 +301,26 @@ span.ar-step { color: var(--muted); opacity: .45; }   /* the end of the run, sho
 .ar-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 /* Inside a chip the marker sits in flow rather than pinned to a picture that is not there. */
 .ar-chip .ar-live { position: static; box-shadow: none; }
+
+/* The family index at the foot of /arsenal. Hairlines for structure, one elevation step and only on
+   hover, mono for the count because it is a literal and sans for the name because it is prose: the
+   register this file's own comments set. No new tokens; every value below already ships. */
+.ar-fams { margin-top: 56px; border-top: 1px solid var(--line); padding-top: 28px; }
+.ar-fams h2 { font-size: 19px; letter-spacing: -0.012em; margin: 0 0 4px; }
+.ar-fams-sub { color: var(--muted); margin: 0 0 18px; }
+.ar-fams-list {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+.ar-fams-list a {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px;
+  color: var(--ink); text-decoration: none;
+}
+.ar-fams-list a:hover { border-color: var(--line-2); background: var(--bg-2); }
+.ar-fams-name { flex: 1; }
+.ar-fams-n {
+  font-family: var(--mono, "JetBrains Mono", monospace);
+  font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums;
+}
