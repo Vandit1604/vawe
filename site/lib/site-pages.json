@@ -59,6 +59,16 @@
       "path": "/when-determinism-matters",
       "priority": 0.7,
       "changeFrequency": "monthly"
+    },
+    {
+      "path": "/launch-video",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/product-tour-video",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
     }
   ],
   "docs": [
@@ -149,7 +159,7 @@
     }
   ],
   "counts": {
-    "routes": 12,
+    "routes": 14,
     "docs": 17
   }
 }

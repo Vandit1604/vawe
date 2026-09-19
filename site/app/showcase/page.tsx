@@ -8,6 +8,7 @@ import { pageMetadata } from "../components/seo";
 import LINES from "../../lib/scene-lines.json";
 import { videoObjectSchema, jsonLdScript } from "../../lib/schema";
 import "./showcase.css";
+import "../components/intent.css";
 
 const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
 
@@ -103,6 +104,10 @@ export default function Showcase() {
               Every film here is a single text file. Open it in the editor and the scene that made
               it is the thing you edit.
             </p>
+            <div className="irelated">
+              <a href="/launch-video">Making a product launch video? Start here.</a>
+              <a href="/product-tour-video">A feature tour with more than one thing to show?</a>
+            </div>
           </section>
 
           <section className="films">

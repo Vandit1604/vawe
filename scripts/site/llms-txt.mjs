@@ -61,6 +61,12 @@ const ROUTE_COPY = {
   '/playground': 'Turn the dials on the engine\'s generators in your browser. The same pure functions '
     + 'the renderer calls, with their real option schemas.',
   '/editor': 'Edit a scene JSON and watch it render live. The real engine, running in your browser.',
+  '/launch-video': "How Vawe builds a product launch video: real captured UI, not invented mockups, "
+    + "on the six-beat spine the engine's own doctrine defines. Three rendered films, each one an "
+    + 'open JSON file.',
+  '/product-tour-video': 'A chaptered product tour or feature-update video, built as one JSON file: '
+    + 'three chapters, a continuous progress rail, one tracked issue carried through. The real '
+    + 'rendered film that proves it.',
 };
 
 function frontmatterDescription(slug) {
