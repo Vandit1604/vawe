@@ -63,7 +63,7 @@ function Thumb({ it, axisLabel }: { it: Item; axisLabel: string }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={it.s}
-        alt=""
+        alt={`${it.n}, a rendered still`}
         loading="lazy"
         decoding="async"
         data-fit={FIT[it.k as keyof typeof FIT] ?? "cover"}
