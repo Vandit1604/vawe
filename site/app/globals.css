@@ -163,7 +163,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .foot-links{display:flex;flex-wrap:wrap;gap:8px}
 .foot-links a{padding:8px 15px;border-radius:999px;font-size:14px;font-weight:500;color:#fff;
   background:rgba(11,31,84,.22);border:1px solid rgba(255,255,255,.26);
-  transition:background .2s var(--ease)}
+  transition:background .15s var(--ease)}
 .foot-links a:hover{background:rgba(11,31,84,.4)}
 .foot-rule{height:1px;background:rgba(255,255,255,.28)}
 /* full white, not .86: faded white over cobalt composites to rgb(224,233,252) => 4.25:1, under AA.
@@ -887,3 +887,43 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* The sticky toolbar is one row on desktop and three on a phone, so a family anchored under it
    lands with its heading hidden. The offset is the bar, and the bar is taller here. */
 @media (max-width:760px){ .fxfam{scroll-margin-top:150px} }
+
+/* ===== FOOTER NAV, shared by both footer variants ==========================================
+ * The site used to end two different ways: a cobalt band with pills on the home page, a hairline
+ * rule with grey links everywhere else. It now ends one way, so this styles the grouped nav that
+ * both variants render.
+ *
+ * Shaped by `jakubkrehel/better-ui` (ui-skills). TAKEN, and each is a specific value from it, not a
+ * range: motion restraint, so the pill hover is 150ms rather than the 200ms it inherited, because a
+ * footer link is a high-frequency target and "a custom animation there charges its attention cost on
+ * every trigger"; scale(0.96) on press, "always 0.96, anything below 0.95 feels exaggerated"; and
+ * transition only what changes, naming background and scale rather than `all`.
+ * REJECTED: its "shadows for elevation, borders for structure" default. site/DESIGN.md says
+ * hairlines instead of shadows and it owns that question, so the pills keep their 1px border.
+ *
+ * `foot-band-plain` carries no film, so it needs its own bottom padding: the bookend gets that from
+ * the CTA block above it. */
+.foot-band-plain{padding-block:clamp(44px,5vw,64px)}
+.foot-nav{display:grid;gap:26px 40px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.foot-col{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+/* FULL WHITE, NOT A FADED ONE, and this is the site's own rule catching me. The header shipped at
+ * rgba(255,255,255,.62) and measured 2.95:1 on the cobalt band where 12px text needs 4.5. Raising
+ * the alpha does not rescue it: white has to reach 92% to pass, which is no longer a muted colour.
+ * site/CLAUDE.md rule 2 already says this about the accent ("cobalt on its own tint at 75% measures
+ * 3.08:1 against a required 4.5") and the same physics apply to white on cobalt. So the hierarchy is
+ * carried by SIZE, CASE and TRACKING, which cost no contrast, and never by opacity. */
+.foot-h{font-family:var(--font-mono),monospace;font-size:12px;letter-spacing:.06em;
+  text-transform:uppercase;color:#fff;margin-bottom:2px}
+/* Links and the current page share one shape, so the row does not jump when a page is the current
+ * one: the current item keeps the pill's geometry and drops only its border and its hover. */
+.foot-col a,.foot-col [aria-current="page"]{display:inline-flex;align-items:center;min-height:36px;
+  padding:6px 13px;border-radius:999px;font-size:14px;font-weight:500;color:#fff;
+  border:1px solid transparent;text-decoration:none;
+  transition:background .15s var(--ease),scale .15s var(--ease)}
+.foot-col a{background:rgba(11,31,84,.22);border-color:rgba(255,255,255,.26)}
+.foot-col a:hover{background:rgba(11,31,84,.4)}
+.foot-col a:active{scale:.96}
+/* YOU ARE HERE, said by inverting the pill rather than dimming it. Dimmed white measured 2.75:1,
+ * worse than the header. Inverted, the current page is the one filled pill in the footer: it reads
+ * instantly, it cannot be clicked, and it is the highest-contrast thing in the band. */
+.foot-col [aria-current="page"]{background:#fff;color:var(--accent);cursor:default}

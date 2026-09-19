@@ -53,24 +53,33 @@ function FooterNav({ active }: { active?: string }) {
   );
 }
 
-/* `bookend` closes the page on the same material it opened on: the contentless backdrop scene
- * under cobalt. Never a capability clip — those all carry copy, which blurs into drifting smudges
- * behind the CTA. Interior pages keep the plain hairline footer.
+/* ONE FOOTER, ONE STYLE, EVERY PAGE.
  *
- * The bookend does NOT get the fuller grouped nav below: the home page's own header already carries
- * the full top nav (Editor, Showcase, Arsenal, Playground, Features), and `foot-links` above already
- * repeats the product surfaces as the page's closing move. A second, larger multi-column nav on a
- * cobalt band that is deliberately kept content-free to protect the render behind it (see the
- * `.bookend` rule in globals.css) would compete with the CTA it exists to deliver. The topic, job and
- * comparison pages the grouped nav below adds are reached from every interior page instead. */
+ * `bookend` closes the home page on the material it opened on: the contentless backdrop scene under
+ * cobalt. Never a capability clip, those all carry copy, which blurs into drifting smudges behind
+ * the CTA.
+ *
+ * Interior pages used to get a different footer entirely: a hairline rule, grey links, no band. Two
+ * footers meant the site ended two different ways depending which page you were on, and the owner's
+ * call is that it ends one way. So both variants are the same cobalt band carrying the same grouped
+ * nav, and the bookend adds the CTA and the film ABOVE that shared base rather than replacing it.
+ * The navigation a reader finds at the bottom of any page is now the same navigation.
+ *
+ * The accent is used at full bleed here, which `site/DESIGN.md`'s 60/30/10 reading would normally
+ * spend more carefully. A footer band is the one place that is right: it is the page's last frame,
+ * it is below the fold on every page, and it is the only element on the site that appears on all of
+ * them, so making it the brand's colour is what makes the site read as one site. */
 export function Footer({ note = "one JSON, one video", bookend = false, active }: { note?: string; bookend?: boolean; active?: string }) {
   if (!bookend) {
     return (
-      <footer className="wrap foot-plain">
-        <FooterNav active={active} />
-        <div className="foot">
-          <span>© 2026 Vawe · free to experiment with while it is early</span>
-          <span className="mono">{note}</span>
+      <footer className="bookend foot-band foot-band-plain">
+        <div className="wrap foot-in on-accent">
+          <FooterNav active={active} />
+          <div className="foot-rule" />
+          <div className="foot-meta">
+            <span>© 2026 Vawe · free to experiment with while it is early</span>
+            <span className="mono">{note}</span>
+          </div>
         </div>
       </footer>
     );
@@ -90,12 +99,7 @@ export function Footer({ note = "one JSON, one video", bookend = false, active }
             Explore features <span className="arw">→</span>
           </a>
         </div>
-        <div className="foot-links">
-          <a href="/arsenal">Arsenal</a>
-          <a href="/showcase">Showcase</a>
-          <a href="/editor">Editor</a>
-          <a href="/features">Features</a>
-        </div>
+        <FooterNav active={active} />
         <div className="foot-rule" />
         {/* No licence badge here. Vawe is Apache 2.0, plain and permissive, so there is no tier
             or limit to state. The LICENSE file is still in the repo for anyone who goes looking.
