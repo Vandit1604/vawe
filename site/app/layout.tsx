@@ -25,7 +25,15 @@ export const metadata: Metadata = {
     "video from code", "AI video generation", "motion graphics engine", "programmatic video",
     "vibe coding", "AI agent video", "video as code", "deterministic rendering",
   ],
-  icons: { icon: "/assets/favicon.svg" },
+  // Google Search's favicon crawler does not support SVG (its documented formats are BMP, GIF,
+  // ICO, PNG, JPEG, PPM and TIFF), so the SVG mark ships first for browsers that do, and a real
+  // 96x96 PNG rendered from the same mark (public/assets/favicon-96.png) covers Search itself.
+  icons: {
+    icon: [
+      { url: "/assets/favicon.svg", type: "image/svg+xml" },
+      { url: "/assets/favicon-96.png", type: "image/png", sizes: "96x96" },
+    ],
+  },
   alternates: { canonical: "/" },
   openGraph: {
     title: TITLE,

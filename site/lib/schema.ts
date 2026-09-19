@@ -27,7 +27,11 @@ export function organizationSchema() {
     "@type": "Organization",
     name: "Vawe",
     url: SITE_URL,
-    logo: `${SITE_URL}/assets/favicon.svg`,
+    // Google's logo guidance requires "at minimum" 112x112px (developers.google.com/search/docs/
+    // appearance/structured-data/logo). The mark itself is a 32x32 viewBox SVG, so this points at a
+    // 512x512 PNG rendered from that same SVG rather than the vector file, whose intrinsic pixel
+    // size a crawler cannot be relied on to read as anything above the viewBox.
+    logo: `${SITE_URL}/assets/favicon-512.png`,
     sameAs: [REPO_URL],
   };
 }

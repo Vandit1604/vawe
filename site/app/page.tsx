@@ -259,7 +259,7 @@ export default function Home() {
             <div className="fxwall">
               {WALL.map((fx) => (
                 <figure className="fx" key={fx.stem}>
-                  <img src={`/assets/effects/${fx.stem}.jpg`} alt="" loading="lazy" width={320} height={180} />
+                  <img src={`/assets/effects/${fx.stem}.jpg`} alt={`${fx.name}, a still from its preview`} loading="lazy" width={320} height={180} />
                   <figcaption>
                     {fx.name}
                     <span className="fxfam">{fx.family}</span>
