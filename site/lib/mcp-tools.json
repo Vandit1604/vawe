@@ -1,0 +1,60 @@
+{
+  "count": 11,
+  "tools": [
+    {
+      "name": "vawe_guide",
+      "title": "Vawe authoring guide",
+      "description": "How to write a scene. Call with no arguments FIRST: that returns a short reference "
+    },
+    {
+      "name": "vawe_upload",
+      "title": "Upload an image or font to use in a scene",
+      "description": "Send a file as base64 and get back the `src` path to put in a scene layer. Use this "
+    },
+    {
+      "name": "vawe_logo",
+      "title": "Fetch a brand logo (simple-icons)",
+      "description": "Get a brand mark by its simple-icons slug (e.g. \"stripe\", \"github\", \"openai\") as an "
+    },
+    {
+      "name": "vawe_photo",
+      "title": "Fetch an openly-licensed photo",
+      "description": "Search CC0 / public-domain photos and get one back as an src. No credit line needed, "
+    },
+    {
+      "name": "vawe_reflect",
+      "title": "Read a brand\\",
+      "description": "Give a URL and get back the site\\"
+    },
+    {
+      "name": "vawe_examples",
+      "title": "Worked example scenes",
+      "description": "List real, shipped scenes to learn structure from, or pass a name to get its full "
+    },
+    {
+      "name": "vawe_capabilities",
+      "title": "The full block + effect vocabulary",
+      "description": "Every composite look, kinetic preset, cut, and block the engine has, read live from "
+    },
+    {
+      "name": "vawe_next",
+      "title": "What stage this film is in, and the one next step",
+      "description": "The authoring ladder has eight stages (brief, plan, approval, design, assemble, "
+    },
+    {
+      "name": "vawe_draft",
+      "title": "Render a free watermarked draft",
+      "description": "Submit a scene JSON. Validates immediately, then renders in the BACKGROUND and "
+    },
+    {
+      "name": "vawe_export",
+      "title": "Export the clean video",
+      "description": "Re-renders the latest revision without the watermark, priced by duration. Pass "
+    },
+    {
+      "name": "vawe_status",
+      "title": "Video status",
+      "description": "Status, URLs and the last gate report for a video. Omit video_id to list yours."
+    }
+  ]
+}

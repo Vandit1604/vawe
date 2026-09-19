@@ -1,6 +1,7 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
+import MCP from "../../lib/mcp-tools.json";
 import effects from "../../lib/effects.json";
 import blocks from "../../lib/blocks.json";
 import "../components/intent.css";
@@ -129,7 +130,7 @@ export default function HyperframesAlternatives() {
                 HyperFrames ships 21 skills an agent loads on demand (a router skill plus creation
                 workflows and domain skills, installed with <code>npx skills add heygen-com/hyperframes</code>),
                 paired with a non-interactive CLI: <code>npx hyperframes init</code>,{" "}
-                <code>preview</code>, <code>render</code>. Vawe ships an MCP server with four tools
+                <code>preview</code>, <code>render</code>. Vawe ships an MCP server with {MCP.count} tools
                 (<code>vawe_guide</code>, <code>vawe_draft</code>, <code>vawe_export</code>,{" "}
                 <code>vawe_status</code>) that a calling model invokes directly inside the conversation,
                 no separate CLI install step for the agent side (<code>mcp/server.mjs</code>). Both are
@@ -196,7 +197,7 @@ export default function HyperframesAlternatives() {
                     <td>Apache-2.0, no size clause</td>
                     <td>scene JSON, 24 layer types</td>
                     <td>coerces Date.now/rAF/Math.random into pure functions of the frame</td>
-                    <td>MCP server, 4 tools (<code>mcp/</code>)</td>
+                    <td>MCP server, {MCP.count} tools (<code>mcp/</code>)</td>
                   </tr>
                   <tr>
                     <td>HyperFrames</td>
