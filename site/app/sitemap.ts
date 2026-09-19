@@ -27,7 +27,7 @@ import blocks from "../lib/blocks.json";
 
 const BASE = "https://vawe.dev";
 
-type EffectsIndex = { list: { entries: { stem: string }[] }[] };
+type EffectsIndex = { list: { id: string; entries: { stem: string }[] }[] };
 type Block = { name: string };
 
 // One timestamp for the whole file. A per-URL mtime would claim these pages change independently,
@@ -55,6 +55,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.6,
       });
     }
+  }
+
+  // The 58 family hubs. Same registry, same loop shape as the leaves above, keyed on the family
+  // instead of the entry. Without these the hubs exist and nothing can find them, which is the exact
+  // defect this whole file was written to fix: 879 real pages with no discovery path.
+  for (const family of (effects as EffectsIndex).list) {
+    entries.push({
+      url: `${BASE}/arsenal/effects/family/${family.id}`,
+      lastModified: built,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
   }
 
   for (const block of blocks as Block[]) {
