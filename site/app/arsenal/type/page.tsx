@@ -124,7 +124,7 @@ export default function TypePage() {
           </section>
         </main>
 
-        <Footer note="every specimen is the real engine, playing the JSON beside it" />
+        <Footer note="every specimen is the real engine, playing the JSON beside it" active="/arsenal/type" />
       </div>
     </div>
   );

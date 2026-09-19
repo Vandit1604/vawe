@@ -219,7 +219,7 @@ paid "Company License":
           </section>
         </main>
       </div>
-      <Footer />
+      <Footer active="/remotion-alternatives" />
     </div>
   );
 }

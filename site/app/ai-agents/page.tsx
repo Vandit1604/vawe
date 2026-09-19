@@ -147,7 +147,7 @@ export default function AiAgents() {
           </section>
         </main>
       </div>
-      <Footer />
+      <Footer active="/ai-agents" />
     </div>
   );
 }
