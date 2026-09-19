@@ -128,7 +128,7 @@ export default function ArsenalPage() {
             </ul>
           </section>
         </main>
-        <Footer note="generated from the engine registries" />
+        <Footer note="generated from the engine registries" active="/arsenal" />
       </div>
     </div>
   );

@@ -177,7 +177,7 @@ export default function LaunchVideo() {
           </section>
         </main>
       </div>
-      <Footer />
+      <Footer active="/launch-video" />
     </div>
   );
 }

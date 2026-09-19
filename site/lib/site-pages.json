@@ -3,77 +3,107 @@
     {
       "path": "/",
       "priority": 1,
-      "changeFrequency": "weekly"
+      "changeFrequency": "weekly",
+      "group": "home",
+      "label": "Home"
     },
     {
       "path": "/features",
       "priority": 0.9,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "product",
+      "label": "Features"
     },
     {
       "path": "/showcase",
       "priority": 0.9,
-      "changeFrequency": "weekly"
+      "changeFrequency": "weekly",
+      "group": "product",
+      "label": "Showcase"
     },
     {
       "path": "/arsenal",
       "priority": 0.8,
-      "changeFrequency": "weekly"
+      "changeFrequency": "weekly",
+      "group": "product",
+      "label": "Arsenal"
     },
     {
       "path": "/arsenal/type",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "product",
+      "label": "Arsenal by type"
     },
     {
       "path": "/playground",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "product",
+      "label": "Playground"
     },
     {
       "path": "/editor",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "product",
+      "label": "Editor"
     },
     {
       "path": "/determinism",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "topic",
+      "label": "Determinism"
     },
     {
       "path": "/json-to-video",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "topic",
+      "label": "JSON to video"
     },
     {
       "path": "/ai-agents",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "topic",
+      "label": "AI agents"
     },
     {
       "path": "/remotion-alternatives",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "comparison",
+      "label": "Remotion alternatives"
     },
     {
       "path": "/when-determinism-matters",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "comparison",
+      "label": "When determinism matters"
     },
     {
       "path": "/hyperframes-alternatives",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "comparison",
+      "label": "HyperFrames alternatives"
     },
     {
       "path": "/launch-video",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "job",
+      "label": "Launch video"
     },
     {
       "path": "/product-tour-video",
       "priority": 0.7,
-      "changeFrequency": "monthly"
+      "changeFrequency": "monthly",
+      "group": "job",
+      "label": "Product tour video"
     }
   ],
   "docs": [

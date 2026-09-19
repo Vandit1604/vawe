@@ -116,7 +116,7 @@ export default function ProductTourVideo() {
           </section>
         </main>
       </div>
-      <Footer />
+      <Footer active="/product-tour-video" />
     </div>
   );
 }
