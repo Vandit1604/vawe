@@ -44,6 +44,18 @@ const hasStill = (stem: string) => fs.existsSync(path.join(PUBLIC_DIR, "assets/e
 // which cannot render the Rich() markup the page itself uses.
 const plain = (text: string) => text.replace(/`([^`]+)`/g, "$1").replace(/\*\*([^*]+)\*\*/g, "$1");
 
+// A hard `.slice(0, N)` cut the description mid-word on 31 of the 58 families ("...the nu",
+// "...camera stays "), which fails Google's own snippet guidance: "A meta description tag
+// generally informs and interests users with a short, relevant summary"
+// (developers.google.com/search/docs/appearance/snippet). Google truncates on its own to fit the
+// SERP, so this only needs to stop at a whole word rather than mid-token.
+function truncateAtWord(text: string, max: number): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd();
+}
+
 function find(id: string): { family: Family; index: number } | null {
   const i = ix.list.findIndex((f) => f.id === id);
   return i === -1 ? null : { family: ix.list[i], index: i };
@@ -66,7 +78,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const label = /effects?\b/i.test(family.title) ? family.title : `${family.title} effects`;
   return pageMetadata({
     title: `Vawe · ${label}`,
-    description: `${family.count} ${family.title.toLowerCase()} effect${family.count === 1 ? "" : "s"} (${family.tag}) in the Vawe arsenal. ${plain(family.intro)}`.slice(0, 300),
+    description: truncateAtWord(`${family.count} ${family.title.toLowerCase()} effect${family.count === 1 ? "" : "s"} (${family.tag}) in the Vawe arsenal. ${plain(family.intro)}`, 300),
     path: `/arsenal/effects/family/${id}`,
   });
 }
