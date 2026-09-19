@@ -30,7 +30,7 @@ export default function PlaygroundPage() {
                 docs/crawling-indexing/javascript/javascript-seo-basics: "server-side or pre-rendering
                 is still a great idea because it makes your website faster for users and crawlers, and
                 not all bots can run JavaScript." The dials themselves stay client-only: the engine
-                that draws them is a runtime import of core/generators.js, not a build-time registry
+                that draws them is a runtime import of core/generators/generators.js, not a build-time registry
                 this page could read without duplicating it. */}
             <p>{PLAYGROUND_DESCRIPTION}</p>
           </header>
