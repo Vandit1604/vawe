@@ -115,6 +115,7 @@ export default function WhenDeterminismMatters() {
             <div className="irelated">
               <a href="/json-to-video">What the scene JSON actually contains</a>
               <a href="/remotion-alternatives">Remotion alternatives, categorized</a>
+              <a href="/hyperframes-alternatives">Vawe vs HyperFrames, the closer comparison</a>
               <a href="/ai-agents">Why drafts are free and exports are not</a>
             </div>
           </section>

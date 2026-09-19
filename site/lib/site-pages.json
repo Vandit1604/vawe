@@ -61,6 +61,11 @@
       "changeFrequency": "monthly"
     },
     {
+      "path": "/hyperframes-alternatives",
+      "priority": 0.7,
+      "changeFrequency": "monthly"
+    },
+    {
       "path": "/launch-video",
       "priority": 0.7,
       "changeFrequency": "monthly"
@@ -159,7 +164,7 @@
     }
   ],
   "counts": {
-    "routes": 14,
+    "routes": 15,
     "docs": 17
   }
 }

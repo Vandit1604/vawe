@@ -214,6 +214,7 @@ paid "Company License":
               <a href="/determinism">Why the same scene always renders the same bytes</a>
               <a href="/ai-agents">The MCP server, and why exports are the only paid call</a>
               <a href="/when-determinism-matters">When determinism is the reason to pick an engine</a>
+              <a href="/hyperframes-alternatives">Vawe vs HyperFrames, the closer comparison</a>
             </div>
           </section>
         </main>
