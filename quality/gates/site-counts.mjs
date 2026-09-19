@@ -46,6 +46,7 @@ const size = (o) => (Array.isArray(o) ? o.length : Object.keys(o).length);
 
 // The grid is CATALOG minus full-frame overlays: the same set the site's /blocks page lists, so the
 // number the copy quotes and the number the page renders are the same number by construction.
+const MCP_TOOLS = JSON.parse(fs.readFileSync(path.join(root, 'site/lib/mcp-tools.json'), 'utf8'));
 const grid = CATALOG.filter((e) => !e.overlay);
 
 const TRUTH = {
@@ -60,6 +61,20 @@ const TRUTH = {
   cuts: size(PRESENTATIONS),
   'cut presentations': size(PRESENTATIONS),
   'ambient shader looks': size(AMBIENT_FX),
+  // MCP TOOLS, added after docs-site/content/docs/mcp.mdx typed "11 tools" in the same sentence that
+  // promised the number "cannot drift from the code". It could: this gate already walks docs-site
+  // (see the comment above about layers.mdx claiming fourteen types), but `tools` was not a subject
+  // it knew, so nothing compared the claim to anything. Three pages disagreed about this very count
+  // earlier today, six against ten against four, over a server registering eleven.
+  //
+  // Read from the generated site/lib/mcp-tools.json rather than from mcp/server.mjs directly: that
+  // file is the one owner of the count (scripts/site/mcp-tools.mjs), generated-check holds it
+  // current, and a second reader of the same source is the duplicate-vocabulary shape this repo
+  // keeps logging.
+  // NOT a bare `tools` subject, which was tried and immediately invented four findings: "3 tools" in
+  // aspect-ratios.mdx and "6 tools" in reading-your-film.mdx are about other things entirely. A
+  // subject this gate matches has to be a phrase that can only mean one count.
+  'mcp tools': MCP_TOOLS.count,
   'canvas fx': size(CANVAS_FX_NAMES),
   // The layer vocabulary is the one count a reader USES rather than admires: a docs page that names
   // fourteen types when the registry holds twenty-three does not merely misreport a size, it hides
