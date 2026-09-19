@@ -1,11 +1,16 @@
 // scripts/site/llms-txt.mjs: emits site/public/llms.txt, served at vawe.dev/llms.txt.
 //
-// WHY IT EXISTS DESPITE THE EVIDENCE AGAINST IT. Google's own guidance treats llms.txt as ineffective:
-// it is not a citation lever for Google AI Overviews or AI Mode (see ~/.claude/skills/seo-geo). This
-// file is built anyway because it costs one generator, and because ChatGPT and Perplexity are a
-// separate question that guidance does not settle either way. It is not presented as a fix for the
-// measured problem (vawe.dev not ranking); the fix for that is the citable prose on the pages
-// themselves. This is a near-free hedge on a surface Google's guidance does not cover, nothing more.
+// WHY IT EXISTS DESPITE GOOGLE SAYING IT DOES NOTHING FOR GOOGLE.
+// developers.google.com/search/docs/fundamentals/ai-optimization-guide, stated as plainly as a
+// Google doc gets: "You don't need to create new machine readable files, AI text files, markup, or
+// Markdown to appear in Google Search (including its generative AI capabilities), as Google Search
+// itself doesn't use them," naming llms.txt specifically, and such a file "will neither harm nor
+// help your site's visibility or rankings in Google Search." That is Google's position, not a
+// summary of it, and this file is built anyway on the strength of two things it does NOT settle:
+// it costs one generator to maintain, and ChatGPT and Perplexity's own crawlers are a separate
+// question the guidance never reaches. It is not presented as a fix for the measured problem
+// (vawe.dev not ranking on Google); the fix for that is the citable prose on the pages themselves.
+// This is a near-free hedge on engines the guidance does not cover, nothing more.
 //
 // EVERY FACT HERE IS DERIVED, following the same rule as every other generated file in this repo:
 // - the docs list and each description come from site/lib/site-pages.json + each MDX's own
