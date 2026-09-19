@@ -61,8 +61,13 @@ function find(id: string): { category: Category; index: number } | null {
   return i === -1 ? null : { category: CATEGORIES[i], index: i };
 }
 
+// A CATEGORY OF ONE GETS NO PAGE. `Camera` holds a single block, and its hub rendered 47 words of
+// real content: the name, "1 block across 1 family", and that block's own name and blurb, which is a
+// leaf page with extra words. /arsenal lists every category either way and links the single-block
+// ones straight to the block, so the taxonomy a reader browses stays complete while no page exists
+// that adds nothing to the one below it.
 export function generateStaticParams() {
-  return CATEGORIES.map((c) => ({ id: c.slug }));
+  return CATEGORIES.filter((c) => c.blocks.length > 1).map((c) => ({ id: c.slug }));
 }
 
 function truncateAtWord(text: string, max: number): string {

@@ -32,8 +32,29 @@ const CATEGORIES = (() => {
     const c = b.category ?? "Core";
     counts.set(c, (counts.get(c) ?? 0) + 1);
   }
+  // A CATEGORY OF ONE GETS NO HUB, IT GETS ITS BLOCK. `Camera` holds exactly one block, and its hub
+  // rendered 47 words of real content: the category name, "1 block across 1 family", and that one
+  // block's name and blurb. That is a leaf page with extra words, which is the thin end of what
+  // Google calls scaled content abuse ("many pages are generated for the primary purpose of
+  // manipulating search rankings and not helping users",
+  // developers.google.com/search/docs/essentials/spam-policies).
+  //
+  // So the taxonomy stays complete in the navigation, every category is listed and clickable, and the
+  // single-block ones link straight to the block. Nothing is hidden from a reader and nothing exists
+  // that adds nothing. The hub route's own generateStaticParams applies the same rule, so no such
+  // page is generated at all.
+  const only = new Map<string, string>();
+  for (const b of blocks as { category?: string; name: string }[]) {
+    const c = b.category ?? "Core";
+    if (counts.get(c) === 1) only.set(c, b.name);
+  }
   return [...counts.entries()]
-    .map(([title, count]) => ({ id: title.toLowerCase(), title, count }))
+    .map(([title, count]) => ({
+      id: title.toLowerCase(),
+      title,
+      count,
+      href: only.has(title) ? `/arsenal/${only.get(title)}` : `/arsenal/category/${title.toLowerCase()}`,
+    }))
     .sort((a, b) => a.title.localeCompare(b.title));
 })();
 
@@ -98,7 +119,7 @@ export default function ArsenalPage() {
             <ul className="ar-fams-list">
               {CATEGORIES.map((c) => (
                 <li key={c.id}>
-                  <a href={`/arsenal/category/${c.id}`}>
+                  <a href={c.href}>
                     <span className="ar-fams-name">{c.title}</span>
                     <span className="ar-fams-n">{c.count}</span>
                   </a>
