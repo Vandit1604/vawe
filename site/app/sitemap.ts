@@ -28,7 +28,7 @@ import blocks from "../lib/blocks.json";
 const BASE = "https://vawe.dev";
 
 type EffectsIndex = { list: { id: string; entries: { stem: string }[] }[] };
-type Block = { name: string };
+type Block = { name: string; category?: string };
 
 // One timestamp for the whole file. A per-URL mtime would claim these pages change independently,
 // and they do not: they are all regenerated together from the registries by one build.
@@ -75,6 +75,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: built,
       changeFrequency: "monthly",
       priority: 0.6,
+    });
+  }
+
+  // The 13 block category hubs, the block twin of the 58 family hubs above: same registry, same
+  // loop shape, keyed on the category name instead of the family id.
+  const blockCategories = new Set((blocks as Block[]).map((b) => b.category ?? "Core"));
+  for (const category of blockCategories) {
+    entries.push({
+      url: `${BASE}/arsenal/category/${category.toLowerCase()}`,
+      lastModified: built,
+      changeFrequency: "monthly",
+      priority: 0.7,
     });
   }
 
