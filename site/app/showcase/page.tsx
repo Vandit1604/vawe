@@ -165,7 +165,7 @@ export default function Showcase() {
           </section>
         </main>
 
-        <Footer note="every clip is one JSON scene" />
+        <Footer note="every clip is one JSON scene" active="/showcase" />
       </div>
     </div>
   );

@@ -226,6 +226,21 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .foot a{color:var(--ink-2)} .foot a:hover{color:var(--accent)}
 .foot .mono{font-family:var(--font-mono),monospace}
+/* Site nav on every plain footer (18 of 19 pages). Every column is grouped by meaning (product /
+   topic / job / comparison / docs), never one flat pile, and `gap` alone expresses both the tight
+   rhythm inside a column and the generous one between columns: pbakaus/layout's "group by meaning,
+   use proximity before decoration" taken as-is, so no per-column border or card was added. */
+.foot-plain{padding-top:56px}
+.foot-nav{display:flex;flex-wrap:wrap;gap:36px 56px;padding-bottom:8px}
+.foot-col{display:flex;flex-direction:column;gap:10px;min-width:132px}
+.foot-h{font-family:var(--font-mono),monospace;font-size:12px;letter-spacing:.02em;color:var(--muted);
+  text-transform:uppercase}
+.foot-col a,.foot-col span[aria-current]{font-size:14px;line-height:1.3}
+.foot-col a{color:var(--ink-2)}
+.foot-col a:hover{color:var(--accent)}
+/* The current page's own entry: not a link (never link a page to itself), set apart by weight and
+   ink rather than by the cobalt accent, which this site reserves for things you can act on. */
+.foot-col span[aria-current]{color:var(--ink);font-weight:600}
 /* =========================================================
    INTERIOR PAGE HEAD + editorial rows
    ========================================================= */

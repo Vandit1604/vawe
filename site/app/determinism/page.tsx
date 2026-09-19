@@ -165,7 +165,7 @@ export default function Determinism() {
           </section>
         </main>
       </div>
-      <Footer />
+      <Footer active="/determinism" />
     </div>
   );
 }
