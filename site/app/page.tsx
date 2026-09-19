@@ -85,8 +85,12 @@ const WALL = (() => {
 export default function Home() {
   return (
     <div className="shell">
-      {/* Entity resolution for AI Overviews / AI Mode: what Vawe IS, before a reader or a crawler
-          reads a word of copy. Built in site/lib/schema.ts from real repo data, never typed here. */}
+      {/* Organization, WebSite, SoftwareApplication: what Vawe IS, before a reader or a crawler reads
+          a word of copy. Not an AI-visibility play: developers.google.com/search/docs/fundamentals/
+          ai-optimization-guide says plainly, "Structured data isn't required for generative AI search,
+          and there's no special schema.org markup you need to add." It earns ordinary Search features
+          instead (knowledge-panel and sitelinks-search-box entity data), which is worth having on its
+          own. Built in site/lib/schema.ts from real repo data, never typed here. */}
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(organizationSchema())} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(websiteSchema())} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(softwareApplicationSchema())} />
@@ -161,18 +165,13 @@ export default function Home() {
             <div className="kicker">what you can promise a client</div>
             <h2 className="h2">What you approve is what ships.</h2>
             <p className="lead">
-              Vawe is a deterministic motion-graphics engine: it turns one self-describing JSON file
-              into one rendered video, with no timeline and no editor and no dragging clips around.
-              You describe the scene and the engine draws every frame. A scene JSON names its layers,
-              a camera, and a theme, and that file is the only source of truth; the mp4 is a build
-              artifact you can delete and regenerate at any time. <code>renderFrame(n)</code> is a
-              pure function of the frame number, so the same JSON always produces byte-identical
-              pixels, no matter which machine renders it or in what order the frames come out. That
-              purity is coerced, not merely asked for: the engine installs a virtual clock, so{" "}
-              <code>Date.now</code>, <code>requestAnimationFrame</code> and <code>Math.random</code>{" "}
-              all become pure functions of the frame being drawn, even inside a third-party library
-              that never heard of Vawe. Nothing about the picture depends on when or where the
-              render ran.
+              Nothing here asks you to be careful. <code>renderFrame(n)</code> is a pure function of
+              the frame number, so the same JSON always produces byte-identical pixels, no matter
+              which machine renders it or in what order the frames come out. That purity is coerced,
+              not merely asked for: the engine installs a virtual clock, so <code>Date.now</code>,{" "}
+              <code>requestAnimationFrame</code> and <code>Math.random</code> all become pure
+              functions of the frame being drawn, even inside a third-party library that never heard
+              of Vawe. Nothing about the picture depends on when or where the render ran.
             </p>
             <div className="pf">
               <div>
