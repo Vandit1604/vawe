@@ -4,6 +4,7 @@ import { Arsenal, type Arsenal as Data } from "./Arsenal";
 import { pageMetadata } from "../components/seo";
 import data from "../../lib/arsenal.json";
 import effects from "../../lib/effects.json";
+import blocks from "../../lib/blocks.json";
 import "./arsenal.css";
 
 /* /arsenal — what the engine is MADE OF, next door to /showcase, which is what it has MADE.
@@ -20,6 +21,21 @@ const D = data as Data;
 const FAMILIES = (effects as { list: { id: string; title: string; count: number }[] }).list
   .map((f) => ({ id: f.id, title: f.title, count: f.count }))
   .sort((a, b) => a.title.localeCompare(b.title));
+
+// The block twin of FAMILIES above: 13 real groups (blocks.json's own `category` field), against
+// 97 block families where 57 hold exactly one block, too thin to browse. `id` matches the slug
+// site/app/arsenal/category/[id]/page.tsx derives from the same field, so this link can never point
+// at a hub that does not exist.
+const CATEGORIES = (() => {
+  const counts = new Map<string, number>();
+  for (const b of blocks as { category?: string }[]) {
+    const c = b.category ?? "Core";
+    counts.set(c, (counts.get(c) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([title, count]) => ({ id: title.toLowerCase(), title, count }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+})();
 
 export const metadata = pageMetadata({
   title: "Vawe · arsenal",
@@ -64,6 +80,27 @@ export default function ArsenalPage() {
                   <a href={`/arsenal/effects/family/${f.id}`}>
                     <span className="ar-fams-name">{f.title}</span>
                     <span className="ar-fams-n">{f.count}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* THE CATEGORY INDEX, the block twin of the family index above and built for the same
+            * reason: 185 blocks each had a leaf page and no layer above them, reachable only by
+            * already knowing one member. Same markup, same CSS classes, so the two lists read as
+            * one pattern rather than two. */}
+          <section className="ar-fams" aria-labelledby="cats-h">
+            <h2 id="cats-h">Browse by category</h2>
+            <p className="ar-fams-sub">
+              Every block belongs to one category. {CATEGORIES.length} of them, each with its own page.
+            </p>
+            <ul className="ar-fams-list">
+              {CATEGORIES.map((c) => (
+                <li key={c.id}>
+                  <a href={`/arsenal/category/${c.id}`}>
+                    <span className="ar-fams-name">{c.title}</span>
+                    <span className="ar-fams-n">{c.count}</span>
                   </a>
                 </li>
               ))}

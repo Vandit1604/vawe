@@ -16,6 +16,7 @@ type Frame = { x: number; y: number; w: number; h: number };
 const ALL = blocks as Block[];
 const FRAMES = frames as Record<string, Frame>;
 const cat = (b: Block) => b.category ?? "Core";
+const catSlug = (c: string) => c.toLowerCase();
 const asset = (name: string, ext: string) => `/assets/blocks/${name.replace(/[^a-z0-9.]/gi, "_")}.${ext}`;
 
 // Values are whatever the block's real prop table holds — numbers, strings, arrays, nested objects.
@@ -100,7 +101,8 @@ export default async function BlockDetail({ params }: { params: Promise<{ name: 
               <h1 className="mono">{b.name}</h1>
               <p className="bx-blurb">{b.blurb}</p>
               <p className="bx-tags mono">
-                {cat(b)}<span aria-hidden="true"> · </span>{b.family}
+                <Link href={`/arsenal/category/${catSlug(cat(b))}`}>{cat(b)}</Link>
+                <span aria-hidden="true"> · </span>{b.family}
               </p>
             </header>
 
