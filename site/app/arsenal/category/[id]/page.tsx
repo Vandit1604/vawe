@@ -137,7 +137,7 @@ export default async function CategoryHub({ params }: { params: Promise<{ id: st
                   <Link className="ar-card" href={`/arsenal/${b.name}`}>
                     <span className="ar-thumb">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={asset(b.name)} alt="" loading="lazy" decoding="async" data-fit="contain" />
+                      <img src={asset(b.name)} alt={`The ${b.name} block, rendered still`} loading="lazy" decoding="async" data-fit="contain" />
                     </span>
                     <span className="ar-meta">
                       <code>{b.name}</code>

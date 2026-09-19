@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { MetadataRoute } from "next";
 import pages from "../lib/site-pages.json";
 import effects from "../lib/effects.json";
@@ -30,6 +33,21 @@ const BASE = "https://vawe.dev";
 type EffectsIndex = { list: { id: string; entries: { stem: string }[] }[] };
 type Block = { name: string; category?: string };
 
+// Google's image sitemap extension (image:loc per url) is for images a crawler might otherwise
+// miss, which describes these: every effect/block still is drawn from a registry into a client
+// grid (Arsenal.tsx) rather than sitting in static markup. Only list a file that is actually on
+// disk, the same rule effects/[stem]/page.tsx's own hasStill() already applies to the still shown
+// on the page itself, so the sitemap never claims an image no page has.
+const PUBLIC_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "../public");
+const stillFor = (stem: string) =>
+  fs.existsSync(path.join(PUBLIC_DIR, "assets/effects", `${stem}.jpg`))
+    ? `${BASE}/assets/effects/${stem}.jpg`
+    : null;
+const blockImageFor = (name: string) =>
+  fs.existsSync(path.join(PUBLIC_DIR, "assets/blocks", `${name}.png`))
+    ? `${BASE}/assets/blocks/${name}.png`
+    : null;
+
 // One timestamp for the whole file. A per-URL mtime would claim these pages change independently,
 // and they do not: they are all regenerated together from the registries by one build.
 const built = new Date();
@@ -48,11 +66,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   for (const family of (effects as EffectsIndex).list) {
     for (const entry of family.entries) {
+      const still = stillFor(entry.stem);
       entries.push({
         url: `${BASE}/arsenal/effects/${entry.stem}`,
         lastModified: built,
         changeFrequency: "monthly",
         priority: 0.6,
+        ...(still ? { images: [still] } : {}),
       });
     }
   }
@@ -70,11 +90,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   for (const block of blocks as Block[]) {
+    const img = blockImageFor(block.name);
     entries.push({
       url: `${BASE}/arsenal/${block.name}`,
       lastModified: built,
       changeFrequency: "monthly",
       priority: 0.6,
+      ...(img ? { images: [img] } : {}),
     });
   }
 
