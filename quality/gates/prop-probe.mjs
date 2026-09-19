@@ -330,7 +330,8 @@ const { server, port } = await serveRepo();
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 
 const findings = [];   // { type, prop }
-const errors = [];     // { type, error }
+const errors = [];     // { type, error }   a real engine error: this type is BROKEN
+const unchecked = [];  // { type, props }   the page never answered in time: this type is UNKNOWN
 
 // TWELVE LAYERS PER SCENE, and the number is load-bearing. A `three` or `globe` layer owns a WebGL
 // context and a browser hands out about sixteen; forty-six in one page fails inside three.js with a
@@ -355,12 +356,32 @@ for (const type of types) {
   // one here: this gate asks "does the engine read this prop", not "does this scene look directed".
   fs.writeFileSync(file, JSON.stringify({ module: 'scene', produced: false, theme: 'default', duration: 4, bg: [{ preset: 'plain' }], layers }, null, 1));
 
-  const page = await browser.newPage();
-  await page.evaluateOnNewDocument(() => { window.__PROP_PROBE = []; });
+  // A TIMEOUT IS A STATEMENT ABOUT THIS MACHINE, NOT ABOUT THE LAYER, and this gate used to conflate
+  // the two. `waitForEngine` returns the literal string 'timeout' when the page does not park
+  // __engineReady in time, and that was pushed into `errors` beside a real __engineError, so a loaded
+  // machine produced `✗ probe-boot-error` and blocked the push. Measured back to back on an idle
+  // machine: one run failed on `composition` with 'timeout', the next passed clean, and an earlier
+  // pair failed on `three` and then passed. The failing type moved every time, which is the signature
+  // of load rather than of a defect.
+  //
+  // So: boot is retried ONCE on a timeout, in a fresh page. A second timeout is reported as a type
+  // that was NOT CHECKED (a warning naming the machine), never as a type that failed. The safety
+  // property is unchanged, because an unchecked type is still reported and never silently passed:
+  // the same shape seam-snap's requireTool uses when ffmpeg is missing, and what SAFEGUARDS.md means
+  // by refusing only for determinism, approval and data loss.
   const url = `http://127.0.0.1:${port}/films/scene/scene.html`
     + `?data=${encodeURIComponent(`/out/.tmp_prop-probe/${type}-${c}.json`)}&fps=30`;
-  await page.goto(url, { waitUntil: 'load' });
-  const err = await waitForEngine(page, { throwOnTimeout: false });
+  let page = null;
+  let err = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (page) await page.close();
+    page = await browser.newPage();
+    await page.evaluateOnNewDocument(() => { window.__PROP_PROBE = []; });
+    await page.goto(url, { waitUntil: 'load' });
+    err = await waitForEngine(page, { throwOnTimeout: false });
+    if (err !== 'timeout') break;   // a real engine error is answered on the first try; only load is retried
+  }
+  if (err === 'timeout') { unchecked.push({ type, props: props.join(' ') }); await page.close(); continue; }
   if (err) { errors.push({ type, error: `${props.join(' ')}\n    ${String(err).slice(0, 400)}` }); await page.close(); continue; }
 
   // A frame can throw from inside a primitive (a dial the probe gave a shape the fx cannot draw), and
@@ -447,6 +468,15 @@ for (const e of errors) findingsOut.fail('probe-boot-error', `${e.type}: ${e.err
   fix: 'the probe scene did not boot for this type: fix the base layer or the probe value, this type was NOT checked',
 });
 if (errors.length) console.log('\nA type whose probe scene did not boot was NOT checked. Fix the base layer or the value.');
+// Reported, never silent, and never blocking: this run simply does not know about these types.
+for (const u of unchecked) {
+  console.log(`  ? ${u.type}: the probe page did not boot within the timeout, twice. NOT checked on this run.`);
+  findingsOut.warn('probe-boot-timeout', `${u.type}: the probe page did not boot in time on two attempts, so this type was NOT checked`, {
+    at: u.type,
+    fix: 're-run `make prop-probe` on a quieter machine; this says nothing about the layer, only that the page did not answer',
+  });
+}
+if (unchecked.length) console.log(`\n${unchecked.length} type(s) went unchecked because the page did not boot in time. That is a fact about this machine, not about the engine.`);
 if (live.length) {
   console.log(`\n${live.length} prop${live.length === 1 ? '' : 's'} set and never read. Each one is a value the`
     + ` engine accepts and ignores: fix the reader, delete the declaration, or waive it with a reason`
