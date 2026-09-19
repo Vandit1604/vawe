@@ -1,0 +1,80 @@
+---
+title: Camera moves
+description: The named, calculated camera generators, cameraMove sugar, aiming a shot at a layer by id, and depth parallax.
+icon: Camera
+---
+
+The scene's `camera` field is a raw keyframe track: `[{t, s, x, y, rx, ry, ease}]`. You can hand-type it, but a hand-typed multi-keyframe push almost always breaks a subtle rule: every interior keyframe needs a linear ease, or the camera decelerates to a stop and re-accelerates at each one, which reads as a shaking zoom. `cameraMove` is sugar that writes a correct keyframe track for you, from a named move and a few parameters.
+
+## The sugar
+
+```json
+{ "cameraMove": { "move": "slowPush", "start": 0, "dur": 5.4, "from": 1, "to": 1.04 } }
+```
+
+Set at the scene root, not on a layer. It bakes into the raw `camera` track when the scene loads. Pass an array to chain several moves across the film:
+
+```json
+{
+  "cameraMove": [
+    { "move": "slowPush", "start": 0, "dur": 5.4, "from": 1, "to": 1.04 },
+    { "move": "slowPush", "start": 5.8, "dur": 6.0, "from": 1.04, "to": 1.1 }
+  ]
+}
+```
+
+A move holds its end pose until another leg changes it: a `diveIn` that pushes to `to: 1.6` stays at 1.6 for the rest of the film unless a later leg brings it back, for example `{"move": "slowPush", "to": 1}`.
+
+## The moves
+
+There are **14 named moves**, all pure functions of their parameters (`core/camera-moves/index.js`):
+
+| Move | Params | What it does |
+|---|---|---|
+| `slowPush` | `from, to, dur` | A gentle continuous zoom in. The default "the frame is alive" move. |
+| `diveIn` | `tx, ty, to, dur` | Zooms into a target point, which travels to frame centre as the scale grows. |
+| `panFollow` | `dx, dy, dur` | Translates at constant speed to track content that grows in one direction. |
+| `workspaceZoomOut` | `from, to, tx, ty, dur` | Starts pushed into a detail and pulls back to reveal the whole. The opposite of `diveIn`. |
+| `orbit` | `deg, dur, s` | A gentle 3D swing around the frame. Keep `deg` under 15 or the composition comes apart. |
+| `multiPhase` | `legs: [{dur, s, x, y}]` | Chains several legs (push, hold, settle) into one journey. |
+| `travel` | `stations: [{tx, ty, s, dur, dwell}]` | Flies station to station across a canvas larger than the frame. The camera move that replaces a cut. |
+| `truck` | `dx, dur, s` | A plain lateral move, linear, so it reads as tracking rather than a lurch. |
+| `cameraShake` | (impact params) | A decaying handheld shake that settles instead of stopping dead, for an impact moment. |
+| `punchIn` | (crash-zoom params) | A fast zoom that overshoots and rings back, for a hard reveal. |
+| `dollyZoom` | (vertigo params) | The lens ramps while the camera holds distance, so a subject keeps its size while the world behind it rushes. Needs layers set at different `plane` depths. |
+| `followCursor` | `cursor: "<layer id>"` | Derived, not typed: reads a `cursor` layer's own path and clicks, and frames each press. |
+| `driftHold` | (micro-drift params) | A held frame that never fully stops: a small figure-eight drift instead of a dead hold. |
+| `followLayer` | `id: "<layer id>"` | Tracks a layer's live position by id, at render time, rather than a fixed point. |
+
+```json
+{ "cameraMove": { "move": "diveIn", "start": 1.0, "dur": 2.2, "tx": 960, "ty": 420, "to": 1.6 } }
+```
+
+## Aim at a layer instead of typing pixels
+
+`diveIn` and each `travel` station can name a layer instead of hand-typed coordinates:
+
+```json
+{ "cameraMove": { "move": "diveIn", "start": 1.0, "dur": 2.2, "target": "#cta", "margin": 0.1 } }
+```
+
+This resolves the layer's own authored box (it needs a numeric `x`/`y` and a declared `w`/`h` or `size`), picks the largest scale that keeps the box inside the frame with a margin (a fraction of the frame, default `0.06`), and prints the numbers it resolved. If the push would crop the target past a safe headroom, it clamps the scale automatically rather than cropping it; add `"crop": true` if you want the exact scale you asked for anyway.
+
+## The camera as the transition
+
+`travel` can replace cuts entirely: lay a film's beats out as stations on one oversized canvas, then fly the camera from station to station instead of cutting between them. The camera is global and never resets at a beat boundary, so the flight reads as one continuous move through space rather than a series of shots.
+
+<Callout title="Depth, or it is a slide">
+Every layer sits at the same depth (`z: 0`) unless you give it a `plane` modifier. Trucking the camera past a flat scene moves every layer by exactly the same amount, which looks like a picture sliding, not a camera moving through a place. Stand layers apart with `"modifiers": [{ "plane": -600 }]` behind the subject or `{ "plane": { "z": 240 } }` in front of it, and the parallax between them is what actually reads as depth.
+</Callout>
+
+## When to reach for one
+
+- **A held frame under text or a stat:** `slowPush`, small (`to` around 1.05 to 1.15).
+- **Drawing the eye to one thing:** `diveIn` with a `target`.
+- **A "here's the whole thing" payoff after a detail:** `workspaceZoomOut`.
+- **Moving between two elements with no cut at all:** `travel`.
+- **A still shot that should not feel dead:** `driftHold`.
+- **A UI demo where the pointer does the work:** `followCursor`, bound to the cursor layer's own path.
+
+Vary the verb across a film (push, then a hold, then a settle) rather than the same move three beats in a row; motion choices read as pacing to a viewer even when they cannot name what changed.

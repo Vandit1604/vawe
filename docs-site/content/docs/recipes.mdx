@@ -1,0 +1,61 @@
+---
+title: Recipes
+description: Motion measured off a real reference video, applied to your own layers by id through the top-level recipes array.
+icon: BookOpen
+---
+
+A recipe is one thing a real film does, measured frame by frame off that film, and written so any scene can reuse it: how one act hands off to the next, how the camera moves through a moment, how a line of text arrives on screen. The measurement lives in `recipes/recipes.json`; every entry names the reference clip and the exact second it came from.
+
+A recipe owns motion and structure only. It never owns your layers, your copy, or your colours: you write those yourself, then point a recipe at the layer ids you already gave them.
+
+## Using one
+
+Add a `recipes` array at the scene's root, one line per moment:
+
+```json
+{
+  "recipes": [
+    { "recipe": "flow-seam", "at": 1.9, "out": "window", "in": "tagline", "ground": ["g1", "g2"] },
+    { "recipe": "window-dolly", "from": 0, "to": 1.9, "target": "window" },
+    { "recipe": "word-by-word", "at": 1.9, "layer": "tagline" }
+  ]
+}
+```
+
+Then expand the scene before rendering, the same step blocks go through:
+
+```bash
+make expand D=films/scene/my-video.json
+```
+
+The expander turns each line into the engine's own named capability on the layers or camera you already declared: nothing new reaches the renderer, so the render stays exactly as deterministic as one you hand-authored.
+
+## The five shipped recipes
+
+| Recipe | Kind | Does |
+|---|---|---|
+| `flow-seam` | seam | One act leaves on an axis, a frame of empty ground, the next act arrives on the same axis. |
+| `window-dolly` | camera | A camera push toward a named layer, timed to a boundary. |
+| `word-by-word` | enter | A line of text arrives one word at a time in reading order. |
+| `object-wipe` | seam | An outgoing layer wipes off as the incoming one wipes on, sharing one directional sweep. |
+| `colour-wipe` | seam | A flat colour sweeps across the frame to carry one beat into the next. |
+
+## What a recipe compiles to
+
+A recipe never invents its own motion language. Each `kind` writes into a specific part of the engine you can also write by hand:
+
+| kind | writes | example |
+|---|---|---|
+| `seam` | plain `motion` keyframes on the outgoing and incoming layers, computed from their own boxes and the canvas | `flow-seam` |
+| `camera` | a [`cameraMove`](/docs/camera) leg | `window-dolly` |
+| `enter` | a text layer's own split-text sugar (`split`, `preset`) | `word-by-word` |
+
+Because of that, a recipe can refuse. If the reference genuinely does something the engine has no name for yet, the recipe says so instead of faking it with something close enough. That refusal is useful: it points at a real gap in the engine rather than hiding it behind an approximation.
+
+## Recipes can stack
+
+Order matters when two recipes touch the same layer. A `flow-seam` line whose incoming layer already carries a `word-by-word` split from an earlier line skips the whole-layer slide it would otherwise write, because the split already owns how the layer arrives; the seam only decides when it starts. Put the line that sets `split` first, and a later line always wins any field both would write.
+
+## When to reach for a recipe instead of hand-authoring
+
+Reach for a recipe when you want a film to move the way a specific real film moves, not the way you imagine it should. A recipe is measured off actual frames, so it carries timing a person would otherwise have to guess and re-guess by eye. Hand-author when no recipe covers the moment, or when `make arsenal Q="…"` turns up a named engine capability that already does exactly what you need without indirection.

@@ -1,0 +1,75 @@
+---
+title: MCP server
+description: Run vawe as an MCP server so a calling agent's own model writes the scene, and this repo renders it.
+icon: Plug
+---
+
+Vawe ships an MCP server (`mcp/server.mjs`) that turns the whole engine into a set of tools another agent can call. The calling model writes the scene JSON on its own tokens; this server validates it, renders it, and hands back a video.
+
+## Connect it
+
+```bash
+make build                                       # once: bin/vawe
+claude mcp add vawe -- node $PWD/mcp/server.mjs  # wire into Claude Code
+```
+
+Any MCP client works the same way, point it at `node mcp/server.mjs` over stdio. To try it without wiring up a client first:
+
+```bash
+npx @modelcontextprotocol/inspector node mcp/server.mjs
+```
+
+## The tools
+
+The server registers **11 tools**. That count is read straight off `mcp/server.mjs` by `scripts/site/mcp-tools.mjs` into `site/lib/mcp-tools.json`, so it cannot drift from the code.
+
+| Tool | Does |
+|---|---|
+| `vawe_guide` | The scene format and the effect vocabulary. Call it first, with no arguments. |
+| `vawe_reflect` | A brand site's real colours and fonts, read from the page source, not a screenshot. |
+| `vawe_logo` | A brand mark by its simple-icons slug, returned as a usable `src`. |
+| `vawe_photo` | A CC0 or public-domain photo, returned as a usable `src`. |
+| `vawe_upload` | Your own image or font file, returned as a usable `src`. |
+| `vawe_capabilities` | Every look, kinetic preset, cut, and block, read live from the registries. |
+| `vawe_examples` | Worked, shipped scenes to learn structure from. |
+| `vawe_next` | What stage a film is in, and the one next command. |
+| `vawe_draft` | Scene JSON in, a free watermarked video and gate verdicts out. |
+| `vawe_export` | The same video, clean, in one or more aspect ratios. This is the paid step. |
+| `vawe_status` | A video's status, its URLs, and its last gate report. |
+
+## The loop
+
+`vawe_draft` renders in the background and returns a `video_id` right away, because a real render takes longer than most clients will hold a tool call open. Poll `vawe_status(video_id)` until it reports `drafted`, read the gate verdicts it returns, fix the scene, and call `vawe_draft` again with the same `video_id`. Drafts are free and watermarked, so you can iterate as many times as the video needs.
+
+When a draft is good, `vawe_export(video_id)` re-renders the same scene without the watermark. Nothing is re-authored at export time: it renders from the exact scene file the last draft used, so the clean file can never drift from the one you approved.
+
+## Pricing
+
+Export is priced by the video's length, not charged per render (`mcp/pricing.mjs`):
+
+| Length | Price |
+|---|---|
+| up to 15s | $9 |
+| up to 30s | $19 |
+| up to 60s | $39 |
+| over 60s | $79 |
+
+Billing is off by default (`VAWE_BILLING=off`), which grants every export for free. This is the right setting while you are building, and for anyone self-hosting the engine. Turn it on and point `VAWE_CHECKOUT_URL` at a checkout that marks a video paid on webhook.
+
+## Config
+
+| env | default | |
+|---|---|---|
+| `VAWE_DATA` | `.vawe-data/` | Where records, scenes, drafts, and exports are written. |
+| `VAWE_OWNER` | `anon` | Who owns the videos made over this connection. |
+| `VAWE_PUBLIC_BASE` | unset | URL prefix for delivered files. Unset returns a `file://` path. |
+| `VAWE_BILLING` | `off` | `on` requires payment before export. |
+| `VAWE_CHECKOUT_URL` | unset | Required once billing is on. |
+
+<Callout title="No auth yet">
+`VAWE_OWNER` is a self-declared string, not a credential: it scopes one connection's videos from another's, but it is not proof of identity. That is fine for a single machine talking to itself over stdio. Do not expose this server on the open network until real auth sits in front of it.
+</Callout>
+
+## What stays server-side
+
+`vawe_guide` and `vawe_capabilities` hand over the whole public vocabulary, because that vocabulary is already public: it is the same one this docs site describes. What the server never sends back is the judgment that makes a render good: the block implementations themselves, the accumulated doctrine behind them, and the gates that score a render. A caller gets a verdict, never the rule that produced it.
