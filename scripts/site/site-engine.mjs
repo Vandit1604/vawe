@@ -196,5 +196,30 @@ if (missing.length || unshippable.length || uncopied.length) {
   process.exit(1);
 }
 
+// ── the URLs the site fetches at RUNTIME, which no static check can see ──────────────────────────
+// /playground loads the generator registry with a dynamic import of a STRING at run time. When that
+// file moved to core/generators/generators.js in the formats/->films/ rename (a8617ac0, 2026-09-16)
+// the string did not move with it, so the page served a dead engine for three days behind an HTTP
+// 200: every visitor read "The engine did not load" while the route itself looked healthy.
+//
+// Nothing could have caught it. A bundler never resolves a runtime string, docker-context-check's
+// import scan reads static specifiers and says so, and doc-refs reads docs. The only thing that can
+// is asking whether the vendored file is actually there under the path the site will ask for. That
+// is this file's own business, because this file is what puts it there.
+//
+// One entry per URL the site hard-codes. Adding a route that fetches a vendored path adds a line.
+const RUNTIME_URLS = [
+  ['/core/generators/generators.js', 'site/app/playground/PlaygroundClient.tsx ENGINE_URL'],
+];
+const deadUrls = RUNTIME_URLS.filter(([u]) => !fs.existsSync(path.join(root, 'site/public', u.replace(/^\//, ''))));
+if (deadUrls.length) {
+  for (const [u, who] of deadUrls) {
+    console.error(`✗ ${who} fetches ${u} at runtime and site/public${u} does not exist.`);
+  }
+  console.error('  The page will return 200 and then fail in the browser, which is how this last went');
+  console.error('  unnoticed for three days. Fix the path, or vendor the file it names.');
+  process.exit(1);
+}
+
 if (DRY) console.log(drift ? `\n~ ${drift} file(s) drifted, run without --check` : '\n✓ site engine in sync');
 else console.log(`✓ engine → site/public  (${copied} file(s), ${(bytes / 1024) | 0}KB)`);

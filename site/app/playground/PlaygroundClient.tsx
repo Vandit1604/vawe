@@ -4,12 +4,12 @@
  * The generator playground: dials on the right, the live generator on the left.
  *
  * NOTHING HERE KNOWS WHAT A LIGHTFIELD IS. It reads `GENERATORS` out of the vendored engine
- * (core/generators.js) and builds the panel from each generator's declarative schema, so adding a
+ * (core/generators/generators.js) and builds the panel from each generator's declarative schema, so adding a
  * generator to the registry is the whole job of putting it on this page. A hand-kept list of dials
  * over here would be a second source of truth that goes stale in silence, which is exactly how
  * site/public froze 77 files behind core/ (engine-doctrine/MISTAKES.md #271).
  *
- * The engine is loaded at RUNTIME with a dynamic import of "/core/generators.js", not bundled. Two
+ * The engine is loaded at RUNTIME with a dynamic import of "/core/generators/generators.js", not bundled. Two
  * reasons, and the second is the real one: the site vendors core/ into public/ as static files, so
  * bundling would fork the engine into a webpack copy that drifts from the one /editor boots. This
  * way the page runs the same file the renderer does.
@@ -69,7 +69,17 @@ type Engine = {
 // A RUNTIME url, held in a variable on purpose. As a literal, TypeScript tries to resolve it as a
 // module path and fails, because it is not one: it is a static file the site serves at the root. The
 // variable also keeps the bundler out of it, which is the point of the whole arrangement.
-const ENGINE_URL = "/core/generators.js";
+// THE PATH MOVED AND THIS STRING DID NOT. It read "/core/generators.js" until 2026-09-19, and the
+// file became core/generators/generators.js on 2026-09-16 in the formats/ to films/ rename
+// (a8617ac0). So /playground served a dead engine for three days behind an HTTP 200, and every
+// visitor got "The engine did not load" while the page itself looked fine.
+//
+// Nothing could have caught it. It is a runtime URL in a string, not an import, so the bundler never
+// resolves it, docker-context-check's cross-app import scan cannot see it (it reads static import
+// specifiers, and says so), and doc-refs only reads docs. The one thing that would have: asking the
+// built site for the URL. site-engine.mjs now does exactly that, because a vendored path nobody
+// fetches is a path nobody has checked.
+const ENGINE_URL = "/core/generators/generators.js";
 // /blocklib and NOT /blocks: site/next.config.mjs 308s `/blocks/:name` to `/arsenal/:name`,
 // because the old /blocks page moved there. A redirect cannot tell a page path from a static
 // file, so a module vendored to /blocks/index.mjs answers 404 at /arsenal/index.mjs.
@@ -513,7 +523,7 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
   if (bootErr) {
     return (
       <p className="pgnote pgbad">
-        The engine did not load: {bootErr}. It is served from <code>/core/generators.js</code>; if you
+        The engine did not load: {bootErr}. It is served from <code>/core/generators/generators.js</code>; if you
         are running the site locally, <code>npm run predev</code> publishes it.
       </p>
     );
