@@ -6,13 +6,28 @@
 import { mergeProps, propsOf } from '../registry/props.js';
 import { defineRegistry } from '../registry/registry.js';
 import { motionAt } from '../timeline/sequence.js';
+import { ensureContrast } from '../color/engine.js';
+
+// A real pointer is a light shape with a DARK outline: the fill separates it from a light ground, the
+// outline separates it from a dark one. Always white here was backwards (core/color/engine.js owns
+// the one WCAG contrast check every consumer shares; this does not add a second). `'#141414'`, not
+// pure black, is the engine's own near-black ink literal (used as the default ink everywhere else in
+// this file) rather than a second grey invented for this one spot.
+const outlineFor = (color) => ensureContrast('#ffffff', color, { min: 3, dark: '#141414' });
+
+// The two shapes a real OS pointer look applies to: an arrow and a pointing hand, both drawn with a
+// fill AND an outline. `ibeam` (a caret, stroke only) and `block` (a terminal cell, one flat fill) are
+// not pointer glyphs and keep tracking the theme's own ink by default, see glyphColor below.
+const POINTER_STYLES = new Set(['arrow', 'hand']);
 
 // STYLE DRAWING, one function per name: (color, sz) -> the glyph markup, in a `sz`x`sz` box, origin
-// top-left. `arrow` is the ORIGINAL pixels, byte-identical, because scenes already shipped depending
-// on exactly this path.
-const drawArrow = (color, sz) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" style="position:absolute;left:0;top:0;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.35))"><path d="M5 2.5 L5 19.5 L9.4 15.4 L12.3 21.3 L14.9 20.1 L12 14.3 L18.2 13.8 Z" fill="${color}" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
+// top-left. `arrow`'s PATH is the ORIGINAL pixels, byte-identical, because scenes already shipped
+// depending on exactly it. Its default COLOUR changed (see glyphColor/POINTER_STYLES below): every
+// scanned scene left `color` unset, so this is a deliberate visible change to all of them, not a
+// silent one.
+const drawArrow = (color, sz) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" style="position:absolute;left:0;top:0;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.35))"><path d="M5 2.5 L5 19.5 L9.4 15.4 L12.3 21.3 L14.9 20.1 L12 14.3 L18.2 13.8 Z" fill="${color}" stroke="${outlineFor(color)}" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
 
-const drawHand = (color, sz) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" style="position:absolute;left:0;top:0;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.35))"><path d="M9 3.2a1.1 1.1 0 0 1 2.2 0v6.9l.9-.2a1.4 1.4 0 0 1 1.7.9l.2.6.7-.1a1.4 1.4 0 0 1 1.7 1l.7 2.7c.5 2-.5 4-2.4 4.8l-1.2.5a4.6 4.6 0 0 1-5.4-1.5l-2.2-3a1.6 1.6 0 0 1 2.4-2.1l.2.2V3.2Z" fill="${color}" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+const drawHand = (color, sz) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" style="position:absolute;left:0;top:0;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.35))"><path d="M9 3.2a1.1 1.1 0 0 1 2.2 0v6.9l.9-.2a1.4 1.4 0 0 1 1.7.9l.2.6.7-.1a1.4 1.4 0 0 1 1.7 1l.7 2.7c.5 2-.5 4-2.4 4.8l-1.2.5a4.6 4.6 0 0 1-5.4-1.5l-2.2-3a1.6 1.6 0 0 1 2.4-2.1l.2.2V3.2Z" fill="${color}" stroke="${outlineFor(color)}" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
 
 const drawIbeam = (color, sz) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" style="position:absolute;left:0;top:0;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35))"><path d="M8 3.2h8M12 3.2v17.6M8 20.8h8" stroke="${color}" stroke-width="2.1" stroke-linecap="round" fill="none"/></svg>`;
 
@@ -174,9 +189,12 @@ export function frame(kit, el, L, t, scene, { path, clicks, style, styleAt, snap
   if (glyphEl && el.__curStyle !== curStyle) {
     el.__curStyle = curStyle;
     const draw = CURSOR_STYLES.pick(curStyle);
-    // `arrow`'s ink stays its ORIGINAL literal default; every other style defaults to the theme's own
-    // ink, per this feature's brief ("each SVG drawn in the theme colour by default").
-    const glyphColor = color || (curStyle === 'arrow' ? '#141414' : (kit.theme?.palette?.ink || '#141414'));
+    // A POINTER shape (arrow/hand) defaults to a plain white system cursor now (owner reference:
+    // "Universal Cursors" by 123done, white fill + dark outline on every one) rather than the theme's
+    // ink, because nobody authoring a demo should have to ask for the normal-looking pointer. ibeam
+    // and block are not pointer glyphs (a text caret, a terminal cell) and keep matching the theme's
+    // own ink, per this feature's original brief ("each SVG drawn in the theme colour by default").
+    const glyphColor = color || (POINTER_STYLES.has(curStyle) ? '#ffffff' : (kit.theme?.palette?.ink || '#141414'));
     glyphEl.innerHTML = draw(glyphColor, size ?? 34);
   }
   // `block`'s blink: opacity on a FIXED CADENCE DERIVED FROM t, never a timer, so seeking to any frame
