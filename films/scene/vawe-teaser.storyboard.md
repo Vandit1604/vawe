@@ -35,7 +35,7 @@ not: "no narration, no logo lockup, no gradient, no cuts, no second element on t
 - rest: none. Two seconds of a still white word is the restraint the spectacle line is paid for with
 - why: state the promise in the cheapest possible way, so the treatment that follows is clearly happening TO something
 - duration: 2.4s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: It heats, and melts (2.4s-4.4s)
 - type: transformation
@@ -52,7 +52,7 @@ not: "no narration, no logo lockup, no gradient, no cuts, no second element on t
 - rest: none. This beat is all change
 - why: the payoff has to be a REVEAL and not a caption, and the only way to reveal a word is to make it briefly unreadable
 - duration: 2s
-- transition_in: none, the beat is a state change of the same object
+- transition_in: fx:none
 
 ## Beat 3: The address, plain (4.4s-6s)
 - type: cta
@@ -69,4 +69,4 @@ not: "no narration, no logo lockup, no gradient, no cuts, no second element on t
 - rest: none
 - why: the one thing to remember is the address, and it lands last, alone, with nothing competing
 - duration: 1.6s
-- transition_in: none
+- transition_in: fx:none

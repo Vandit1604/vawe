@@ -27,7 +27,7 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - rest: the constellation backdrop drifts under everything
 - why: name the thing, and let one line do the work of three
 - duration: 4.4s
-- transition_in: cut
+- transition_in: fx:none
 - backdrop: constellation
 
 ## Beat 2: Chapter 1, Intake (4.4s-9.2s)
@@ -44,7 +44,7 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - rest: the backdrop drifts; the board holds
 - why: introduce the through-line issue the next two chapters follow
 - duration: 4.8s
-- transition_in: cut (blur)
+- transition_in: fx:blur
 - backdrop: deep
 
 ## Beat 3: Chapter 2, Plan (9.2s-14s)
@@ -61,7 +61,7 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - rest: the bars hold once wiped; the backdrop drifts
 - why: show the plan the issue now sits inside, and put the word Agents on screen before the agent exists
 - duration: 4.8s
-- transition_in: cut (riseBlur)
+- transition_in: fx:riseBlur
 - backdrop: ink
 
 ## Beat 4: Chapter 3, Build (14s-18.6s)
@@ -78,7 +78,7 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - rest: the typing IS the rest motion
 - why: this is the spectacle. The plan does not describe the agent, it turns into it
 - duration: 4.6s
-- transition_in: hard cut (none, the match IS the transition)
+- transition_in: fx:none
 - backdrop: dark
 
 ## Beat 5: Result (18.6s-22.4s)
@@ -95,7 +95,7 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - rest: the chips hold
 - why: close the through-line. The issue raised in chapter 1 is finished here
 - duration: 3.8s
-- transition_in: cut (blur)
+- transition_in: fx:blur
 - backdrop: deep
 
 ## Beat 6: Payoff (22.4s-26.6s)
@@ -112,7 +112,7 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - rest: none, the count carries it
 - why: scale. Three chapters showed one issue; this says how many there are
 - duration: 4.2s
-- transition_in: cut (riseBlur)
+- transition_in: fx:riseBlur
 - backdrop: spotlight
 
 ## Beat 7: Statement (26.6s-29.6s)
@@ -129,7 +129,7 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - rest: the backdrop drifts under a held frame
 - why: name the thesis once, at the end, where it can be believed
 - duration: 3s
-- transition_in: cut (blur)
+- transition_in: fx:blur
 - backdrop: constellation
 
 ## Beat 8: CTA (29.6s-34s)
@@ -146,5 +146,5 @@ This video tells a forker that a three-chapter product tour is a shape, not a sc
 - rest: the rail across the top reaches full width on the last frame
 - why: the film ends on the product name, not on a claim about it
 - duration: 4.4s
-- transition_in: cut (riseBlur)
+- transition_in: fx:riseBlur
 - backdrop: aurora

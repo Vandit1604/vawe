@@ -44,7 +44,7 @@ This video tells a developer that a file they write once is read by every agent 
 - rest: the card's rows are still arriving through the hold
 - why: state the thesis and show the artifact in the same frame
 - duration: 5.8s
-- transition_in: cut (blur)
+- transition_in: fx:blur
 - backdrop: paper
 
 ## Beat 3: Anatomy (11s-19.6s)
@@ -61,7 +61,7 @@ This video tells a developer that a file they write once is read by every agent 
 - rest: sections keep arriving for eight seconds; nothing holds still
 - why: make the abstraction concrete before any claim is made about it
 - duration: 8.6s
-- transition_in: match (the card continues across the cut)
+- transition_in: fx:matchCut
 - backdrop: paper
 
 ## Beat 4: Detail (19.6s-23.5s)
@@ -78,7 +78,7 @@ This video tells a developer that a file they write once is read by every agent 
 - rest: the caret
 - why: show that the file is written by a person, not filled in from a form
 - duration: 3.9s
-- transition_in: cut (blur)
+- transition_in: fx:blur
 - backdrop: paper
 
 ## Beat 5: Reach (23.5s-27s)
@@ -95,7 +95,7 @@ This video tells a developer that a file they write once is read by every agent 
 - rest: none, the ring is the motion
 - why: this is the whole argument, and it is the only beat allowed to be loud
 - duration: 3.5s
-- transition_in: cut (wipe)
+- transition_in: fx:wipe
 - backdrop: paperShapes
 
 ## Beat 6: Proof (27s-32.2s)
@@ -112,7 +112,7 @@ This video tells a developer that a file they write once is read by every agent 
 - rest: the typing
 - why: prove the mechanism instead of asserting it
 - duration: 5.2s
-- transition_in: cut (wipe)
+- transition_in: fx:wipe
 - backdrop: paper
 
 ## Beat 7: Consent (32.2s-38.8s)
@@ -129,7 +129,7 @@ This video tells a developer that a file they write once is read by every agent 
 - rest: the cursor's travel
 - why: the file grows only with permission, and that has to be shown, not stated
 - duration: 6.6s
-- transition_in: cut (blur)
+- transition_in: fx:blur
 - backdrop: soft
 
 ## Beat 8: Compounding (38.8s-42.3s)
@@ -146,7 +146,7 @@ This video tells a developer that a file they write once is read by every agent 
 - rest: none, the count carries it
 - why: scale the single act of consent into a relationship
 - duration: 3.5s
-- transition_in: cut (wipe)
+- transition_in: fx:wipe
 - backdrop: paperDots
 
 ## Beat 9: Quality (42.3s-47.4s)
@@ -163,7 +163,7 @@ This video tells a developer that a file they write once is read by every agent 
 - rest: the ring is still drawing through the hold
 - why: answer the obvious objection before the end card asks for anything
 - duration: 5.1s
-- transition_in: cut (wipe)
+- transition_in: fx:wipe
 - backdrop: soft
 
 ## Beat 10: Recap (47.4s-50s)
@@ -180,7 +180,7 @@ This video tells a developer that a file they write once is read by every agent 
 - rest: the backdrop shapes drift
 - why: put the whole argument back into one frame before asking
 - duration: 2.6s
-- transition_in: cut (wipe)
+- transition_in: fx:wipe
 - backdrop: paperShapes
 
 ## Beat 11: CTA (50s-53s)
@@ -197,5 +197,5 @@ This video tells a developer that a file they write once is read by every agent 
 - rest: the wash drifts under a held frame
 - why: end on the product, not on a claim about it
 - duration: 3s
-- transition_in: cut (blur)
+- transition_in: fx:blur
 - backdrop: gradientWash

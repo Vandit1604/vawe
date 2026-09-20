@@ -72,7 +72,7 @@ craft:
 - narration: Corva doesn't.
 - why: the exception has to land inside the same box as the complaint, or it reads as a new claim instead of an answer to this one
 - duration: 1.7s
-- transition_in: cut (same background)
+- transition_in: fx:none
 
 ## Beat 3: the document opens (4.2s-7.3s)
 - type: build
@@ -87,7 +87,7 @@ craft:
 - narration: Ask it anything. It opens the real document. The exact sentence it read.
 - why: show the mechanism before naming it a citation
 - duration: 3.1s
-- transition_in: dissolve 0.5s
+- transition_in: fx:dissolve dur=0.5
 
 ## Beat 4: the citation resolves (7.3s-11.2s)
 - type: payoff
@@ -102,7 +102,7 @@ craft:
 - narration: Not a summary. The source itself.
 - why: this is the SPECTACLE beat (7.3s, verified-badge, device flash), the one accent-colour pop the whole film earns
 - duration: 3.9s
-- transition_in: none (continues beat 3's card, same layer)
+- transition_in: fx:none
 
 ## Beat 5: the contrast, stated plainly (11.2s-16.2s)
 - type: agitation / turn
@@ -117,7 +117,7 @@ craft:
 - narration: A guess you have to trust. Or a citation you can check.
 - why: say the thesis once, in the plainest possible form, right after showing it
 - duration: 5.0s
-- transition_in: dissolve 0.5s
+- transition_in: fx:dissolve dur=0.5
 
 ## Beat 6: the stat, counted (16.2s-20.6s)
 - type: proof
@@ -132,7 +132,7 @@ craft:
 - narration: Every answer, traced to its source. Nothing to take on faith.
 - why: a specific number beats a dry claim; the film earns its "show, don't tell" mandate with a real animated count, not a static stat
 - duration: 4.4s
-- transition_in: dissolve 0.5s
+- transition_in: fx:dissolve dur=0.5
 
 ## Beat 7: the close (20.6s-24.0s)
 - type: payoff / end card
@@ -147,4 +147,4 @@ craft:
 - narration: Corva. The passage, not the summary.
 - why: the payoff was never spoiled; it lands last, as the name
 - duration: 3.4s
-- transition_in: dissolve 0.5s
+- transition_in: fx:dissolve dur=0.5

@@ -56,7 +56,7 @@
 // blocks in the ladder unless the scene waives it. The 68 films that were flat when this was adopted
 // (2026-09-05) were folded into an explicit per-scene waiver by quality/gates/legacy-fold.mjs. All
 // block under --strict.
-// Waive a deliberate break with {"authoring":{"allow":["dead-air", ...]}}.
+// Waive it, a break for cause or a chosen absence the check cannot see, with {"authoring":{"allow":["dead-air", ...]}}.
 import fs from 'node:fs';
 import path from 'node:path';
 import { sceneTiming, spanOf, num, SPECK, sceneView, inView } from './scene-timing.mjs';
@@ -338,7 +338,7 @@ F.emit();
 if (!findings.length) console.log('    ✓ the timeline holds: content on screen throughout, every beat carries something');
 
 if (fails.length || (strict && warns.length)) {
-  console.log(`\n  ✗ beat check: the timeline has holes. Fix them, or waive a deliberate break with {"authoring":{"allow":[...]}}.\n`);
+  console.log(`\n  ✗ beat check: the timeline has holes. Fix them, or waive it (a break for cause, or a chosen absence) with {"authoring":{"allow":[...]}}.\n`);
   process.exit(1);
 }
 console.log(warns.length ? `\n  beat check cleared with ${warns.length} nudge(s).\n` : `\n  ✓ beat check clear.\n`);

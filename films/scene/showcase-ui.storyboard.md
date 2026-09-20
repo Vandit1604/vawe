@@ -26,7 +26,7 @@ not: "no narration, no gradient hero, no slogan on a black card, no stock photog
 - rest: the dot matrix drifts behind the window; nothing else moves through the hold
 - why: earn the doubt. If the viewer does not first believe it is a recording, the payoff has nothing to overturn.
 - duration: 3.4s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: Proof (3.4s-6.7s)
 - type: feature_showcase
@@ -42,7 +42,7 @@ not: "no narration, no gradient hero, no slogan on a black card, no stock photog
 - rest: none. The whole beat is the travel.
 - why: state the claim while the frame is doing the thing a capture cannot do, so the copy and the picture carry it together
 - duration: 3.3s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 3: Payoff (6.7s-10.6s)
 - type: benefit_highlight
@@ -58,4 +58,4 @@ not: "no narration, no gradient hero, no slogan on a black card, no stock photog
 - rest: none. The dissolve is the motion.
 - why: name the thing. The whole film exists for this one sentence and it lands last.
 - duration: 3.9s
-- transition_in: riseBlur
+- transition_in: fx:riseBlur

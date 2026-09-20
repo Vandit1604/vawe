@@ -29,7 +29,7 @@ format: 1920x1080
 - narration: This is the whole video. One file.
 - why: establish the object at its smallest so every later shape reads as the same thing growing
 - duration: 3.0s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: The file opens (3.0s-6.6s)
 - type: product_intro
@@ -43,7 +43,7 @@ format: 1920x1080
 - narration: Change one number in here and the whole film re-cuts itself.
 - why: the claim is spoken while the object is doing the thing the claim describes
 - duration: 3.6s
-- transition_in: none (the object never leaves)
+- transition_in: fx:none
 
 ## Beat 3: The output (6.6s-11.0s)
 - type: feature_showcase
@@ -57,7 +57,7 @@ format: 1920x1080
 - narration: What comes out is not a preview. It is the film.
 - why: show the product of the claim rather than restate the claim in bigger type
 - duration: 4.4s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 4: One video (11.0s-14.6s)
 - type: payoff
@@ -71,4 +71,4 @@ format: 1920x1080
 - narration: No timeline. No re-export. Just the file.
 - why: the payoff lands on the thing the file made, so the last frame is output and not a promise
 - duration: 3.6s
-- transition_in: none
+- transition_in: fx:none
