@@ -55,9 +55,9 @@ Twenty seconds, silent, to somebody who has scrolled past a hundred product vide
 - shot: a five by five wall of real rendered frames
 - camera: hold, no move, so every bit of the motion is the wall arriving
 - picture: 25 actual frames from the effects library, each with its mono caption
-- onscreen: "566 effects. No templates."
+- onscreen: "694 effects. No templates."
 - mechanism: the whole wall staggers in at 0.028 per tile, 0.6s end to end, one gesture not 25 entrances
-- becomes: a claim about range becomes a wall of evidence, and one product becomes 566 things it can do
+- becomes: a claim about range becomes a wall of evidence, and one product becomes 694 things it can do
 - layout: a real grid inset to the safe area, x110 w1700, y210 h660
 - style: white ground, the loudest frame in the film
 - why: it answers "is this just templates" with evidence instead of a sentence
