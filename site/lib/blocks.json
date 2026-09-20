@@ -2,7 +2,7 @@
   {
     "name": "card",
     "family": "card",
-    "blurb": "elevated card · tinted panel · pill tags · CTA arrow",
+    "blurb": "a raised info card: a heading, a line of body text, tag pills, and a call-to-action link under a hairline at the bottom",
     "props": {
       "w": 540,
       "h": 300,
@@ -14,12 +14,13 @@
         "Count"
       ]
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "codeBlock",
     "family": "codeBlock",
-    "blurb": "code card; syntax-coloured lines",
+    "blurb": "a code snippet card: lines of code write themselves in one by one, syntax-coloured, like a syntax-highlighted editor screenshot",
     "props": {
       "w": 540,
       "dark": true,
@@ -44,12 +45,13 @@
         }
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "terminal",
     "family": "terminal",
-    "blurb": "command prompt; command types in, output answers after it",
+    "blurb": "a terminal window: a shell command types itself in character by character, then its output prints below",
     "props": {
       "w": 540,
       "command": "make video",
@@ -58,62 +60,68 @@
         "done → out.mp4"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "terminalPro",
     "family": "terminalPro",
-    "blurb": "a deploy terminal built from layer primitives: every line its own timed, measurable object",
+    "blurb": "a full deploy terminal built from real boxes: typed command, a live percent counter over its track, a file diff, a spinner turning into a checkmark",
     "props": {
       "w": 820,
       "command": "npm run deploy"
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "terminalHtml",
     "family": "terminalHtml",
-    "blurb": "the same terminal as one hand-authored surface: box gradient, per-token syntax colour, a caret on the reveal edge",
+    "blurb": "the same deploy terminal as one hand-drawn console surface: gradient glass, per-word command colouring, a blinking text cursor",
     "props": {
       "w": 820
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "loadingBar",
     "family": "loadingBar",
-    "blurb": "determinate fill wipes L→R, lands ✓ done",
+    "blurb": "a progress bar: a track fills left to right to a set percent and finishes with a green done checkmark",
     "props": {
       "w": 340,
       "fillDur": 1.6,
       "label": "rendering"
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "deploySuccess",
     "family": "deploySuccess",
-    "blurb": "CI cascade → green \"Deployed to production\" card",
+    "blurb": "a CI/CD pipeline status: build steps queue then run then check off, ending on a green deployed card with the live URL",
     "props": {
       "w": 520
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "browserFrame",
     "family": "browserFrame",
-    "blurb": "window chrome (traffic dots + URL bar)",
+    "blurb": "a fake browser window: traffic-light dots and a URL bar framing a screenshot or any content drawn inside it.",
     "props": {
       "w": 540,
       "h": 300,
       "url": "example.com"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "pillRow",
     "family": "pillRow",
-    "blurb": "horizontal row of chip tags",
+    "blurb": "a horizontal row of rounded chip tags, for labels, filters, or categories side by side.",
     "props": {
       "items": [
         "deterministic",
@@ -121,40 +129,44 @@
         "no timeline"
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "statBig",
     "family": "statBig",
-    "blurb": "scale-contrast stat, huge count + tiny label",
+    "blurb": "one huge number with a tiny label under it, for a single headline stat or KPI callout",
     "props": {
       "to": 1950,
       "label": "frames",
       "size": 120
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "colorCycle",
     "family": "colorCycle",
-    "blurb": "one word cycling through hues",
+    "blurb": "one word that changes colour again and again, repainted through a rainbow of hues in a fixed order",
     "props": {
       "word": "colour",
       "size": 64,
       "each": 0.4
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "splitFlapBoard",
     "family": "splitFlapBoard",
-    "blurb": "a mechanical departure board · a drum per character steps through the alphabet and lands",
+    "blurb": "an airport or train station split-flap departure board where each letter flips through the alphabet to land on a word",
     "props": {
       "word": "SHIPPED",
       "label": "status",
       "size": 88
     },
-    "category": "Type"
+    "category": "Type",
+    "categoryIntro": "Reach for Type blocks for a mechanical, high-craft title treatment beyond plain kinetic text."
   },
   {
     "name": "splitFlapBoard.small",
@@ -165,21 +177,23 @@
       "size": 52,
       "steps": 10
     },
-    "category": "Type"
+    "category": "Type",
+    "categoryIntro": "Reach for Type blocks for a mechanical, high-craft title treatment beyond plain kinetic text."
   },
   {
     "name": "stripeCard",
     "family": "stripeCard",
-    "blurb": "recognizably-Stripe payments card",
+    "blurb": "a payments checkout card that copies Stripe's real look: amount, a small spend graph, a Pay button",
     "props": {
       "w": 340
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "barChart",
     "family": "barChart",
-    "blurb": "labeled bars scaled to max",
+    "blurb": "a bar chart: labeled vertical bars scaled to the tallest one, for comparing values side by side",
     "props": {
       "w": 520,
       "h": 240,
@@ -206,12 +220,13 @@
         }
       ]
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "diff",
     "family": "diff",
-    "blurb": "code diff card (+/- coloured)",
+    "blurb": "a git diff card: added and removed code lines highlighted in green and red bands, like a pull request review",
     "props": {
       "w": 520,
       "lines": [
@@ -229,35 +244,38 @@
         }
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "quote",
     "family": "quote",
-    "blurb": "pull quote + attribution",
+    "blurb": "a big pull quote with the person's name credited underneath, for a testimonial or a line to remember",
     "props": {
       "w": 540,
       "text": "One JSON becomes one video.",
       "author": "vawe"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "notification",
     "family": "notification",
-    "blurb": "toast card (dot + title + body)",
+    "blurb": "a light system alert card that slides in from the edge, a status dot, a heading and a message, arrives and leaves like a phone banner.",
     "props": {
       "w": 440,
       "title": "Render complete",
       "body": "out.mp4 is ready",
       "accent": "var(--up)"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "kpiRow",
     "family": "kpiRow",
-    "blurb": "row of stat cells (value + label)",
+    "blurb": "a row of numbers side by side, each with a small label under it, and the numbers count up",
     "props": {
       "items": [
         {
@@ -274,23 +292,25 @@
         }
       ]
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "callout",
     "family": "callout",
-    "blurb": "info/success/warn strip",
+    "blurb": "a coloured info, success, or warning strip with a solid left bar and one line of text, for a note inline in a page.",
     "props": {
       "w": 540,
       "text": "Same input, byte-identical output.",
       "tone": "success"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "comparison",
     "family": "comparison",
-    "blurb": "two columns (Before/After · Others/Us)",
+    "blurb": "before and after, or us versus them, shown as two columns of bullet points side by side",
     "props": {
       "w": 560,
       "leftTitle": "Templates",
@@ -304,7 +324,8 @@
         "Per-brand"
       ]
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "codeBlock.light",
@@ -320,7 +341,8 @@
         "✓ out/video.mp4"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "callout.info",
@@ -331,7 +353,8 @@
       "text": "Layers compose from a single canvas.",
       "tone": "info"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "callout.warn",
@@ -342,7 +365,8 @@
       "text": "No em-dashes in on-screen copy.",
       "tone": "warn"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "comparison.beforeAfter",
@@ -361,7 +385,8 @@
         "Byte-identical"
       ]
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "notification.warn",
@@ -373,7 +398,8 @@
       "body": "opt in only for filmic brands",
       "accent": "var(--warn)"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "statBig.currency",
@@ -385,12 +411,13 @@
       "label": "market",
       "size": 120
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "lineChart",
     "family": "lineChart",
-    "blurb": "trend line in a hairline card",
+    "blurb": "a line graph over time: a trend line in a hairline card, optionally filled to an area chart",
     "props": {
       "w": 540,
       "h": 240,
@@ -422,7 +449,8 @@
         }
       ]
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "lineChart.area",
@@ -452,12 +480,13 @@
         }
       ]
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "donutChart",
     "family": "donutChart",
-    "blurb": "ring segments + legend",
+    "blurb": "a pie chart drawn as a ring: coloured segments of a whole plus a legend of labels",
     "props": {
       "w": 320,
       "label": "traffic",
@@ -476,12 +505,13 @@
         }
       ]
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "stackedBar",
     "family": "stackedBar",
-    "blurb": "multi-series stacked bars",
+    "blurb": "a stacked bar chart: multiple series piled in one bar per category to show a total and its parts",
     "props": {
       "w": 520,
       "h": 260,
@@ -520,12 +550,13 @@
         }
       ]
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "card.pricing",
     "family": "pricingCard",
-    "blurb": "plan · price · features · CTA",
+    "blurb": "a pricing plan card: plan name, price per month, a ticked list of what you get, a sign up button",
     "props": {
       "w": 340,
       "plan": "Pro",
@@ -538,12 +569,13 @@
       "cta": "Start free",
       "highlight": true
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "card.stat",
     "family": "statCard",
-    "blurb": "boxed KPI with delta chip",
+    "blurb": "a boxed metric: a label, a number counting up, a chip saying how much it went up",
     "props": {
       "w": 340,
       "to": 1950,
@@ -551,24 +583,26 @@
       "delta": "+12%",
       "deltaUp": true
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "card.profile",
     "family": "profileCard",
-    "blurb": "avatar · name · role",
+    "blurb": "a person's photo beside their name, with their job title under it",
     "props": {
       "w": 360,
       "name": "Ada Lovelace",
       "role": "Founding Engineer",
       "initials": "AL"
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "fileTree",
     "family": "fileTree",
-    "blurb": "indented file/folder tree",
+    "blurb": "a project file explorer: an indented list of folders and files, rows expanding in top to bottom like a sidebar",
     "props": {
       "w": 360,
       "items": [
@@ -605,12 +639,13 @@
         }
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "logLines",
     "family": "logLines",
-    "blurb": "log stream (timestamp + level colour)",
+    "blurb": "a console log feed: timestamped lines stream in fast, colour-coded by info, warning and error level",
     "props": {
       "w": 540,
       "lines": [
@@ -636,7 +671,8 @@
         }
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "logLines.light",
@@ -656,12 +692,13 @@
         }
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "commitRow",
     "family": "commitRow",
-    "blurb": "git history list",
+    "blurb": "a git commit history list: hash, message, author and time per row, like a GitHub commits page",
     "props": {
       "w": 540,
       "commits": [
@@ -679,22 +716,24 @@
         }
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "phoneFrame",
     "family": "phoneFrame",
-    "blurb": "phone shell (draw content on top)",
+    "blurb": "a phone shaped shell: dark bezel, notch, status clock, screen area to draw your app content into for a mobile mockup.",
     "props": {
       "w": 230,
       "h": 440
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "tabBar",
     "family": "tabBar",
-    "blurb": "segmented control",
+    "blurb": "a row of tabs or a segmented control whose selected pill actually slides from one tab to another.",
     "props": {
       "w": 500,
       "active": 1,
@@ -704,12 +743,13 @@
         "Export"
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "checklist",
     "family": "checklist",
-    "blurb": "checked / unchecked items",
+    "blurb": "a checklist of items with checkboxes ticking off one by one, done rows dim to read as completed.",
     "props": {
       "w": 460,
       "items": [
@@ -731,12 +771,13 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "table",
     "family": "table",
-    "blurb": "data table (header + rows)",
+    "blurb": "a table of rows and columns: a header plus data rows divided by hairlines, rows fill in one after another.",
     "props": {
       "w": 560,
       "cols": [
@@ -762,12 +803,13 @@
         ]
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "timeline",
     "family": "timeline",
-    "blurb": "vertical rail of events",
+    "blurb": "a vertical rail of dated events with dots and a connecting line, each entry lands beside its dot in sequence.",
     "props": {
       "w": 460,
       "items": [
@@ -788,12 +830,13 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "stepFlow",
     "family": "stepFlow",
-    "blurb": "horizontal numbered steps",
+    "blurb": "a horizontal row of numbered steps with connectors that fill in as progress moves from one step to the next.",
     "props": {
       "w": 560,
       "active": 2,
@@ -804,12 +847,13 @@
         "Upload"
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "kanban",
     "family": "kanban",
-    "blurb": "columns of cards",
+    "blurb": "a kanban board: columns of small cards dealt in reading order, for a task board or pipeline view.",
     "props": {
       "w": 560,
       "columns": [
@@ -835,12 +879,13 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "chatBubble",
     "family": "chatBubble",
-    "blurb": "a message thread",
+    "blurb": "a text message thread, chat bubbles left and right like iMessage or WhatsApp",
     "props": {
       "w": 460,
       "messages": [
@@ -860,12 +905,13 @@
         }
       ]
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "tweetCard",
     "family": "tweetCard",
-    "blurb": "a post card + counts",
+    "blurb": "a tweet or X post card: avatar, handle, body text, like and reply counts",
     "props": {
       "w": 480,
       "name": "Vawe",
@@ -875,12 +921,13 @@
       "reposts": "340",
       "text": "One JSON. One video. Deterministic, no timeline."
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "avatarStack",
     "family": "avatarStack",
-    "blurb": "overlapping avatars + overflow",
+    "blurb": "overlapping circular profile pictures in a row with a +N overflow count",
     "props": {
       "extra": 8,
       "avatars": [
@@ -898,23 +945,25 @@
         }
       ]
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "toast",
     "family": "toast",
-    "blurb": "dark snackbar + action",
+    "blurb": "a dark snackbar with a status dot, a message, and an optional action link, the popup that says something just happened.",
     "props": {
       "w": 420,
       "message": "Video rendered to out.mp4",
       "action": "Open"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "reactionBar",
     "family": "reactionBar",
-    "blurb": "reaction count pills",
+    "blurb": "emoji reaction pills with counts, like the reactions under a Slack or Discord message",
     "props": {
       "reactions": [
         {
@@ -932,12 +981,13 @@
         }
       ]
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "logoWall",
     "family": "logoWall",
-    "blurb": "grid of wordmarks / logos",
+    "blurb": "a grid of company wordmarks or logo images, for a social proof or partner strip.",
     "props": {
       "w": 560,
       "logos": [
@@ -961,72 +1011,79 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "badge",
     "family": "badge",
-    "blurb": "CI-shield token (label · value)",
+    "blurb": "a small label plus coloured value chip, like a CI shield or a status token (e.g. version, warning, beta).",
     "props": {
       "label": "build",
       "value": "passing",
       "tone": "ok"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "badge.version",
     "family": "badge",
-    "blurb": "version badge",
+    "blurb": "a small chip showing which release is running, like a v2.1.0 shield in a README",
     "props": {
       "label": "vawe",
       "value": "v2.0",
       "tone": "accent"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "gauge",
     "family": "gauge",
-    "blurb": "semicircular meter",
+    "blurb": "a speedometer-style dial: a semicircular meter needle showing one value against a max",
     "props": {
       "w": 300,
       "value": 72,
       "label": "coverage"
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "progressRing",
     "family": "progressRing",
-    "blurb": "circular progress + % label",
+    "blurb": "a circular progress ring with the percent complete written in its centre",
     "props": {
       "size": 150,
       "value": 68,
       "label": "render"
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "banner",
     "family": "banner",
-    "blurb": "accent announcement bar",
+    "blurb": "a full width coloured announcement bar with an icon, a message, and an optional CTA chip, spans the whole row edge to edge.",
     "props": {
       "w": 560,
       "text": "Now with 60fps export",
       "cta": "See how"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "spinner",
     "family": "spinner",
-    "blurb": "looping Lottie (deterministic)",
+    "blurb": "a small looping loading spinner animation for a busy or working state",
     "props": {
       "size": 90,
       "label": "rendering"
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.py",
@@ -1048,7 +1105,8 @@
         }
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "terminal.git",
@@ -1062,7 +1120,8 @@
         "main -> main"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "terminal.install",
@@ -1076,12 +1135,13 @@
         "added 1 package"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "diff.config",
     "family": "diff",
-    "blurb": "config diff",
+    "blurb": "a settings or yaml file changing: removed lines in red above the new ones in green",
     "props": {
       "w": 520,
       "lines": [
@@ -1099,7 +1159,8 @@
         }
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "barChart.green",
@@ -1128,7 +1189,8 @@
         }
       ]
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "lineChart.down",
@@ -1158,7 +1220,8 @@
         }
       ]
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "donutChart.two",
@@ -1180,7 +1243,8 @@
         }
       ]
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "stackedBar.three",
@@ -1221,7 +1285,8 @@
         }
       ]
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "gauge.warn",
@@ -1233,7 +1298,8 @@
       "color": "var(--warn)",
       "label": "health"
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "gauge.full",
@@ -1245,7 +1311,8 @@
       "color": "var(--up)",
       "label": "passing"
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "progressRing.done",
@@ -1257,7 +1324,8 @@
       "color": "var(--up)",
       "label": "complete"
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "progressRing.low",
@@ -1269,7 +1337,8 @@
       "color": "var(--warn)",
       "label": "battery"
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "kpiRow.money",
@@ -1291,7 +1360,8 @@
         }
       ]
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "statBig.time",
@@ -1303,7 +1373,8 @@
       "label": "render time",
       "size": 120
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "card.stat.down",
@@ -1316,7 +1387,8 @@
       "delta": "-8%",
       "deltaUp": false
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "card.stat.plain",
@@ -1328,7 +1400,8 @@
       "label": "blocks",
       "delta": ""
     },
-    "category": "Data"
+    "category": "Data",
+    "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
   },
   {
     "name": "card.pricing.free",
@@ -1346,7 +1419,8 @@
       "cta": "Get started",
       "highlight": false
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "card.pricing.team",
@@ -1364,7 +1438,8 @@
       "cta": "Contact us",
       "highlight": false
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "notification.error",
@@ -1376,7 +1451,8 @@
       "body": "em-dash in on-screen copy",
       "accent": "var(--down)"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "checklist.todo",
@@ -1396,7 +1472,8 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "table.pricing",
@@ -1427,12 +1504,13 @@
         ]
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "timeline.release",
     "family": "timeline",
-    "blurb": "release timeline",
+    "blurb": "dated shipping milestones down a rail, for a changelog or a roadmap",
     "props": {
       "w": 460,
       "items": [
@@ -1453,7 +1531,8 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "stepFlow.start",
@@ -1469,7 +1548,8 @@
         "Upload"
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "stepFlow.done",
@@ -1485,7 +1565,8 @@
         "Upload"
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "kanban.two",
@@ -1511,7 +1592,8 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "tabBar.four",
@@ -1527,7 +1609,8 @@
         "Audio"
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "toast.error",
@@ -1540,7 +1623,8 @@
       "icon": "!",
       "accent": "var(--down)"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "toast.info",
@@ -1553,7 +1637,8 @@
       "icon": "i",
       "accent": "var(--accent)"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "logLines.errors",
@@ -1579,7 +1664,8 @@
         }
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "chatBubble.support",
@@ -1600,12 +1686,13 @@
         }
       ]
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "avatarStack.large",
     "family": "avatarStack",
-    "blurb": "larger avatar stack",
+    "blurb": "the same overlapping profile pictures at a bigger size, for a hero or a title card",
     "props": {
       "size": 64,
       "extra": 24,
@@ -1627,7 +1714,8 @@
         }
       ]
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "reactionBar.love",
@@ -1650,7 +1738,8 @@
         }
       ]
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "logoWall.four",
@@ -1674,29 +1763,32 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "badge.warn",
     "family": "badge",
-    "blurb": "badge, warning",
+    "blurb": "an amber chip that flags something needing attention, a caution token",
     "props": {
       "label": "coverage",
       "value": "62%",
       "tone": "warn"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "badge.info",
     "family": "badge",
-    "blurb": "badge, info",
+    "blurb": "a blue chip carrying a neutral fact, no alarm attached",
     "props": {
       "label": "docs",
       "value": "latest",
       "tone": "info"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "banner.info",
@@ -1709,7 +1801,8 @@
       "accent": "var(--accent)",
       "icon": "i"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "banner.warn",
@@ -1721,7 +1814,8 @@
       "accent": "var(--warn)",
       "icon": "!"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "spinner.small",
@@ -1730,18 +1824,20 @@
     "props": {
       "size": 56
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "quote.customer",
     "family": "quote",
-    "blurb": "customer quote",
+    "blurb": "a testimonial pulled big, with the person and their company credited underneath",
     "props": {
       "w": 540,
       "text": "We shipped a launch film in an afternoon.",
       "author": "a happy user"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "terminal.build",
@@ -1755,7 +1851,8 @@
         "✓ done → out.mp4"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "checklist.done",
@@ -1778,7 +1875,8 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "kpiRow.time",
@@ -1800,7 +1898,8 @@
         }
       ]
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "badge.beta",
@@ -1811,18 +1910,20 @@
       "value": "beta",
       "tone": "accent"
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "lowerThird.cleanBar",
     "family": "lowerThird",
-    "blurb": "hairline plate · name over role · the quiet one",
+    "blurb": "a name plate low in the frame: the speaker's name over their job title, on a hairline plate",
     "props": {
       "variant": "cleanBar",
       "name": "Ana Roth",
       "role": "Principal engineer, Platform"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.boldBlock",
@@ -1833,7 +1934,8 @@
       "name": "Ana Roth",
       "role": "Principal engineer"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.bild",
@@ -1844,7 +1946,8 @@
       "name": "Sold out",
       "role": "in four minutes"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.darkCard",
@@ -1855,7 +1958,8 @@
       "name": "Kite Studio",
       "role": "Lisbon, Portugal"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.sideRule",
@@ -1866,7 +1970,8 @@
       "name": "Ana Roth",
       "role": "Principal engineer"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.kickerName",
@@ -1877,7 +1982,8 @@
       "name": "Northwind",
       "role": "Now in beta"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.accentUnderline",
@@ -1888,7 +1994,8 @@
       "name": "Ana Roth",
       "role": "Principal engineer"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.maskReveal",
@@ -1899,7 +2006,8 @@
       "name": "One source",
       "role": "every ratio"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.softPill",
@@ -1910,7 +2018,8 @@
       "name": "Northwind",
       "role": "v2.1"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.colourBlock",
@@ -1921,7 +2030,8 @@
       "name": "Ana Roth",
       "role": "Principal engineer"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.stackBars",
@@ -1932,7 +2042,8 @@
       "name": "Ana Roth",
       "role": "Principal engineer"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "lowerThird.newsTicker",
@@ -1943,7 +2054,8 @@
       "name": "Renders every frame in parallel",
       "role": "live"
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "codeBlock.midnight",
@@ -1960,7 +2072,8 @@
         "encode(frames, 'out.mp4')"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.ember",
@@ -1977,7 +2090,8 @@
         "clip.save('out.mp4')"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.forest",
@@ -1994,7 +2108,8 @@
         "git push origin main"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.ocean",
@@ -2011,7 +2126,8 @@
         "  \"fps\": 30 }"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.neon",
@@ -2028,7 +2144,8 @@
         "  postMessage(f) }"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.paper",
@@ -2045,48 +2162,52 @@
         "- [ ] captions pass"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "nowPlaying",
     "family": "nowPlaying",
-    "blurb": "music-player card · artwork, progress, transport",
+    "blurb": "a music player card: album artwork, a scrubbing progress bar, and play/skip transport controls",
     "props": {
       "w": 380,
       "track": "Golden Hour",
       "artist": "Field Notes",
       "progress": 0.62
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "videoLowerThird",
     "family": "videoLowerThird",
-    "blurb": "creator lower third · avatar, subs, red CTA",
+    "blurb": "a YouTube-style creator lower third: avatar, subscriber count, and a red subscribe CTA",
     "props": {
       "w": 520,
       "channel": "Studio Vawe",
       "subscribers": "128K subscribers",
       "cta": "Subscribe"
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "followCard",
     "family": "followCard",
-    "blurb": "name over handle, pill CTA",
+    "blurb": "a social profile follow card: name over @handle next to a follow button pill",
     "props": {
       "w": 360,
       "name": "Ana Roth",
       "handle": "anaroth",
       "cta": "Follow"
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "searchEngine.home",
     "family": "searchEngine",
-    "blurb": "search home. Wordmark + pill, query types in (keys click)",
+    "blurb": "a search engine home page: a wordmark over a rounded search box, the query typing itself in",
     "props": {
       "variant": "home",
       "w": 540,
@@ -2113,12 +2234,13 @@
         }
       ]
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "searchEngine.results",
     "family": "searchEngine",
-    "blurb": "search results, ranked links, cursor clicks one",
+    "blurb": "the search results page: a ranked list of links, with a cursor clicking one",
     "props": {
       "variant": "results",
       "w": 540,
@@ -2137,7 +2259,8 @@
         }
       ]
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "codeBlock.ink",
@@ -2155,7 +2278,8 @@
         "}"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.dusk",
@@ -2172,7 +2296,8 @@
         "scene.render 'out.mp4'"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.slate",
@@ -2189,7 +2314,8 @@
         "enc.WriteTo(\"out.mp4\")"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.aurora",
@@ -2206,7 +2332,8 @@
         "return 1 + v * 0.18"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.linen",
@@ -2223,7 +2350,8 @@
         "Deterministic to the frame."
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeBlock.frost",
@@ -2240,12 +2368,13 @@
         "return box.x1 - box.x0"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "feedRow",
     "family": "feedRow",
-    "blurb": "feed item · avatar, name, timestamp, body",
+    "blurb": "one row of a social or activity feed: avatar, name, handle, timestamp, and a line of body text.",
     "props": {
       "w": 520,
       "name": "Wren Alcott",
@@ -2253,12 +2382,13 @@
       "time": "just now",
       "body": "Moved the Fieldwork draft into the shared workspace."
     },
-    "category": "App"
+    "category": "App",
+    "categoryIntro": "Reach for App blocks to assemble a mobile or account screen from real UI rows, like feeds, settings, and onboarding."
   },
   {
     "name": "listRow",
     "family": "listRow",
-    "blurb": "generic list item · icon tile, title over sub, trailing detail",
+    "blurb": "a generic list item: leading icon tile, title over a subtitle, trailing detail like a date or count, the workhorse app row.",
     "props": {
       "w": 520,
       "icon": "✉",
@@ -2266,12 +2396,13 @@
       "sub": "Kite Studio",
       "meta": "Today"
     },
-    "category": "App"
+    "category": "App",
+    "categoryIntro": "Reach for App blocks to assemble a mobile or account screen from real UI rows, like feeds, settings, and onboarding."
   },
   {
     "name": "settingsRow",
     "family": "settingsRow",
-    "blurb": "settings row · label + toggle, chevron or value",
+    "blurb": "a settings row: a label with a toggle switch, a chevron into a sub-screen, or a current value shown as text.",
     "props": {
       "w": 520,
       "label": "Sync across devices",
@@ -2279,12 +2410,13 @@
       "control": "toggle",
       "value": true
     },
-    "category": "App"
+    "category": "App",
+    "categoryIntro": "Reach for App blocks to assemble a mobile or account screen from real UI rows, like feeds, settings, and onboarding."
   },
   {
     "name": "profileHeader",
     "family": "profileHeader",
-    "blurb": "account header · avatar over name, handle, stat row",
+    "blurb": "the top of an account screen: avatar over a name and @handle, with a small row of stat counts below.",
     "props": {
       "w": 460,
       "name": "Wren Alcott",
@@ -2304,12 +2436,13 @@
         }
       ]
     },
-    "category": "App"
+    "category": "App",
+    "categoryIntro": "Reach for App blocks to assemble a mobile or account screen from real UI rows, like feeds, settings, and onboarding."
   },
   {
     "name": "onboardCard",
     "family": "onboardCard",
-    "blurb": "onboarding pane · progress dots, title, body, CTA",
+    "blurb": "one pane of a first-run onboarding flow: progress dots, a title, body copy, and a CTA button.",
     "props": {
       "w": 460,
       "step": 2,
@@ -2318,12 +2451,13 @@
       "body": "Choose where new drafts are saved. You can change this later.",
       "cta": "Continue"
     },
-    "category": "App"
+    "category": "App",
+    "categoryIntro": "Reach for App blocks to assemble a mobile or account screen from real UI rows, like feeds, settings, and onboarding."
   },
   {
     "name": "emptyState",
     "family": "emptyState",
-    "blurb": "zero state · icon tile, what is missing, the action that fills it",
+    "blurb": "a zero state panel with dashed border: an icon, a line saying what is missing, and a button that fills it.",
     "props": {
       "w": 460,
       "icon": "☐",
@@ -2331,12 +2465,13 @@
       "body": "Anything you save shows up in this list.",
       "cta": "Add the first one"
     },
-    "category": "App"
+    "category": "App",
+    "categoryIntro": "Reach for App blocks to assemble a mobile or account screen from real UI rows, like feeds, settings, and onboarding."
   },
   {
     "name": "pointer",
     "family": "pointer",
-    "blurb": "mouse pointer · travels to a target and clicks it (ripple)",
+    "blurb": "a mouse cursor that travels across the screen to a target and clicks it, with a click ripple.",
     "props": {
       "to": {
         "dx": 300,
@@ -2345,27 +2480,30 @@
       "clickAt": 1.3,
       "size": 44
     },
-    "category": "Interaction"
+    "category": "Interaction",
+    "categoryIntro": "Reach for Interaction blocks to show a hand or cursor actually touching the interface: a click, a tap, a keypress."
   },
   {
     "name": "tapRipple",
     "family": "tapRipple",
-    "blurb": "touch tap · contact dot and an expanding ring, for phone demos",
+    "blurb": "a finger tap on a touchscreen: a contact dot and an expanding ring at the point touched, for phone demos.",
     "props": {
       "at": 4.2,
       "size": 150
     },
-    "category": "Interaction"
+    "category": "Interaction",
+    "categoryIntro": "Reach for Interaction blocks to show a hand or cursor actually touching the interface: a click, a tap, a keypress."
   },
   {
     "name": "keyboard",
     "family": "keyboard",
-    "blurb": "phone keyboard · qwerty keys, rises up into frame",
+    "blurb": "an on-screen phone keyboard, qwerty keys or a numeric keypad, that slides up from the bottom edge.",
     "props": {
       "w": 420,
       "layout": "qwerty"
     },
-    "category": "Interaction"
+    "category": "Interaction",
+    "categoryIntro": "Reach for Interaction blocks to show a hand or cursor actually touching the interface: a click, a tap, a keypress."
   },
   {
     "name": "keyboard.numeric",
@@ -2375,23 +2513,25 @@
       "w": 300,
       "layout": "numeric"
     },
-    "category": "Interaction"
+    "category": "Interaction",
+    "categoryIntro": "Reach for Interaction blocks to show a hand or cursor actually touching the interface: a click, a tap, a keypress."
   },
   {
     "name": "pressButton",
     "family": "pressButton",
-    "blurb": "CTA that depresses and releases when it is clicked",
+    "blurb": "a CTA button that visibly depresses and springs back when clicked, the payoff for a pointer tap on a button.",
     "props": {
       "w": 280,
       "label": "Start a project",
       "pressAt": 1
     },
-    "category": "Interaction"
+    "category": "Interaction",
+    "categoryIntro": "Reach for Interaction blocks to show a hand or cursor actually touching the interface: a click, a tap, a keypress."
   },
   {
     "name": "splitScreen",
     "family": "splitScreen",
-    "blurb": "two panes, one geometry · second pane lands behind the first",
+    "blurb": "the screen divided into two side-by-side panes, or a small inset video in the corner like picture-in-picture",
     "props": {
       "w": 540,
       "h": 96,
@@ -2417,7 +2557,8 @@
         }
       }
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "splitScreen.pip",
@@ -2452,12 +2593,13 @@
         }
       }
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "screenSwap",
     "family": "screenSwap",
-    "blurb": "screen A becomes screen B in place (wipe, no travel)",
+    "blurb": "one app screen replaces another in the same spot, either a wipe or a slide, like swiping between phone screens",
     "props": {
       "w": 460,
       "hold": 2.4,
@@ -2496,7 +2638,8 @@
         }
       ]
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "screenSwap.slide",
@@ -2538,12 +2681,13 @@
         }
       ]
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "socialProof",
     "family": "socialProof",
-    "blurb": "avatar stack + the line it proves (caption owned by the block)",
+    "blurb": "an avatar stack next to a trust line, like Trusted by 8,000 teams, for social proof",
     "props": {
       "extra": 8,
       "size": 48,
@@ -2564,12 +2708,13 @@
         }
       ]
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "installCard",
     "family": "installCard",
-    "blurb": "app-store row · stars sweep to the rating, then install",
+    "blurb": "an app store listing row: icon, star rating that sweeps in, and an Install button",
     "props": {
       "w": 420,
       "icon": "◆",
@@ -2579,7 +2724,8 @@
       "ratings": 1204,
       "cta": "Install"
     },
-    "category": "Social"
+    "category": "Social",
+    "categoryIntro": "Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing."
   },
   {
     "name": "tabBar.switch",
@@ -2596,7 +2742,8 @@
         "Export"
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "tabBar.icons",
@@ -2627,7 +2774,8 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "stepFlow.build",
@@ -2646,7 +2794,8 @@
         "Upload"
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "notification.stack",
@@ -2676,7 +2825,8 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "toast.stack",
@@ -2703,7 +2853,8 @@
         }
       ]
     },
-    "category": "Interface"
+    "category": "Interface",
+    "categoryIntro": "Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges."
   },
   {
     "name": "comparison.screens",
@@ -2732,12 +2883,13 @@
         }
       }
     },
-    "category": "Core"
+    "category": "Core",
+    "categoryIntro": "Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds."
   },
   {
     "name": "glassCard",
     "family": "glassCard",
-    "blurb": "frosted glass panel (blurs the moving bg behind it) + sheen",
+    "blurb": "a frosted glass panel that blurs the moving content it sits over, like iOS or macOS translucency",
     "props": {
       "w": 560,
       "h": 300,
@@ -2745,24 +2897,26 @@
       "title": "Backdrop blur",
       "desc": "It blurs whatever moves behind it."
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "meshPanel",
     "family": "meshPanel",
-    "blurb": "soft mesh-gradient surface (stacked accent blobs)",
+    "blurb": "a soft blurry gradient background made of overlapping colour blobs, calm and branded",
     "props": {
       "w": 560,
       "h": 320,
       "title": "Mesh gradient",
       "desc": "A calm branded surface behind copy."
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "spotlightCard",
     "family": "spotlightCard",
-    "blurb": "dark card with a soft spotlight glow washing from a corner",
+    "blurb": "a dark card lit by a soft glow from one corner or edge, like a spotlight in a dark room",
     "props": {
       "w": 560,
       "h": 300,
@@ -2770,24 +2924,26 @@
       "title": "Spotlight",
       "desc": "The light directs the eye."
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "borderBeamCard",
     "family": "borderBeamCard",
-    "blurb": "glass card with a light TRAVELLING its border (animated beam)",
+    "blurb": "a glass card with a bright line of light chasing around its border, like a loading ring on the edge",
     "props": {
       "w": 560,
       "h": 260,
       "title": "Border beam",
       "desc": "A light travels the border."
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "bento",
     "family": "bento",
-    "blurb": "asymmetric bento grid: one hero cell + supporting cells (scale contrast)",
+    "blurb": "an asymmetric grid of boxes in different sizes, one big hero box and smaller ones around it, like a bento box or an Apple feature grid",
     "props": {
       "w": 760,
       "h": 420,
@@ -2809,27 +2965,30 @@
         }
       ]
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "scanGate",
     "family": "scanGate",
-    "blurb": "autofocus gate: a band travels the frame, the brackets contract onto the target and lock",
+    "blurb": "an autofocus targeting reticle: a scan line sweeps the frame and brackets snap shut and lock onto the subject",
     "props": {
       "w": 760,
       "h": 460,
       "label": "LOCK · f/1.8"
     },
-    "category": "Camera"
+    "category": "Camera",
+    "categoryIntro": "Reach for the Camera block to draw the eye to one target with a locking autofocus gate."
   },
   {
     "name": "flowchart",
     "family": "flowchart",
-    "blurb": "landscape decision flow · nodes pop in, connectors draw on in order, yes/no ride the edges",
+    "blurb": "a flowchart: boxes connected by lines that draw themselves on, with yes/no labels on the branches",
     "props": {
       "step": 0.16
     },
-    "category": "Diagrams"
+    "category": "Diagrams",
+    "categoryIntro": "Reach for Diagrams blocks to walk a viewer through a decision flow or a network of nodes."
   },
   {
     "name": "flowchart.vertical",
@@ -2839,22 +2998,24 @@
       "variant": "vertical",
       "step": 0.16
     },
-    "category": "Diagrams"
+    "category": "Diagrams",
+    "categoryIntro": "Reach for Diagrams blocks to walk a viewer through a decision flow or a network of nodes."
   },
   {
     "name": "nodeGraph",
     "family": "nodeGraph",
-    "blurb": "non-hierarchical graph · author-placed nodes, routed edges, one node lit",
+    "blurb": "a network diagram of nodes and connecting edges, not a top-down tree, with one node highlighted",
     "props": {
       "highlight": "core",
       "step": 0.14
     },
-    "category": "Diagrams"
+    "category": "Diagrams",
+    "categoryIntro": "Reach for Diagrams blocks to walk a viewer through a decision flow or a network of nodes."
   },
   {
     "name": "glassWidgets",
     "family": "glassWidgets",
-    "blurb": "frosted widget cluster: one big showcase panel + small stat tiles + chips (scale contrast, not a grid)",
+    "blurb": "a cluster of frosted iOS-style widgets: one big showcase panel plus small stat tiles and chips",
     "props": {
       "w": 1080,
       "h": 520,
@@ -2878,12 +3039,13 @@
         "pure(n)"
       ]
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "glassNotification",
     "family": "glassNotification",
-    "blurb": "frosted alerts fly in from the right and stack, each card narrower than the one above it",
+    "blurb": "frosted push notifications sliding in from the side and stacking up, like a phone lock screen",
     "props": {
       "w": 520,
       "items": [
@@ -2907,12 +3069,13 @@
         }
       ]
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "glassMenu",
     "family": "glassMenu",
-    "blurb": "frosted command panel: icon column, rows, separators, one row lit with the accent",
+    "blurb": "a frosted right-click or context menu: icon column, list of rows, one row highlighted",
     "props": {
       "w": 440,
       "title": "ACTIONS",
@@ -2943,12 +3106,13 @@
         }
       ]
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "glassControls",
     "family": "glassControls",
-    "blurb": "frosted media panels SPREAD out of one collapsed point: scrubber, transport, level meter",
+    "blurb": "a frosted media player bar: scrubber, play and transport buttons, a volume or level meter",
     "props": {
       "w": 760,
       "track": "Deterministic render",
@@ -2957,12 +3121,13 @@
       "progress": 0.34,
       "bars": 9
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "glassHome",
     "family": "glassHome",
-    "blurb": "frosted launcher grid led by one wide widget tile; tiles arrive on the diagonal",
+    "blurb": "a frosted phone home screen: a grid of app icon tiles plus one wide widget",
     "props": {
       "cols": 4,
       "size": 132,
@@ -3006,12 +3171,13 @@
         }
       ]
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "glassDock",
     "family": "glassDock",
-    "blurb": "floating frosted dock strip with one item magnified, its neighbours swelling toward it",
+    "blurb": "a floating frosted taskbar or dock strip where the icon under the cursor grows bigger, like the macOS dock",
     "props": {
       "magnify": 2,
       "items": [
@@ -3037,12 +3203,13 @@
         }
       ]
     },
-    "category": "Surfaces"
+    "category": "Surfaces",
+    "categoryIntro": "Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light."
   },
   {
     "name": "codeTyping",
     "family": "codeTyping",
-    "blurb": "live coding: one character frontier crosses the snippet, the caret riding it",
+    "blurb": "code being typed live in an editor: a text cursor runs across the snippet revealing one character at a time",
     "props": {
       "w": 620,
       "label": "server.ts",
@@ -3055,12 +3222,13 @@
         "}"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeHighlight",
     "family": "codeHighlight",
-    "blurb": "a band sweeps down to one line while the context dims out of the way",
+    "blurb": "a code editor spotlight: the surrounding lines dim while a highlighted band sweeps down onto one target line",
     "props": {
       "w": 620,
       "label": "server.ts",
@@ -3073,12 +3241,13 @@
         "}"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeScroll",
     "family": "codeScroll",
-    "blurb": "a viewport onto a long file: it scrolls until the target line centres, then lights it",
+    "blurb": "an editor auto-scrolling through a long file until the target line reaches the middle and lights up",
     "props": {
       "w": 620,
       "label": "router.ts",
@@ -3101,12 +3270,13 @@
         "}"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeDiff",
     "family": "codeDiff",
-    "blurb": "the edit PERFORMED: removals collapse red, additions expand green, in edit order",
+    "blurb": "a code edit replayed as it happened: the old line collapses away in red while the new line types in green",
     "props": {
       "w": 620,
       "label": "route.ts",
@@ -3124,12 +3294,13 @@
         "  return t.handle(req);"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeMorph",
     "family": "codeMorph",
-    "blurb": "a refactor as a transformation: shared tokens glide, the rest fade out and in",
+    "blurb": "a code refactor shown as a shape-shift: shared words glide into their new position while the rest fades out and in",
     "props": {
       "w": 620,
       "label": "refactor",
@@ -3142,12 +3313,13 @@
         "return items.filter(fn);"
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "codeFlight",
     "family": "codeFlight",
-    "blurb": "discrete snippets fly in from alternating sides and assemble into one program",
+    "blurb": "separate code snippets fly in from opposite sides of the screen and snap together into one finished file",
     "props": {
       "w": 620,
       "label": "assemble",
@@ -3174,12 +3346,13 @@
         }
       ]
     },
-    "category": "Code"
+    "category": "Code",
+    "categoryIntro": "Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor."
   },
   {
     "name": "usMapHex",
     "family": "usMapHex",
-    "blurb": "US hex cartogram: every state the same size, so the reading is the value not the acreage",
+    "blurb": "a hex map of the United States: every state drawn as one same-size hexagon so colour reads value, not land area",
     "props": {
       "w": 820,
       "legend": "M",
@@ -3258,12 +3431,13 @@
         }
       ]
     },
-    "category": "Maps"
+    "category": "Maps",
+    "categoryIntro": "Reach for Maps blocks to place a value on real geography, by state, by city, or along a route."
   },
   {
     "name": "usMap",
     "family": "usMap",
-    "blurb": "US choropleth by state (Albers USA, AK/HI inset) with value labels + a gradient legend",
+    "blurb": "a map of the United States coloured state by state, a choropleth with a legend and value labels per state",
     "props": {
       "w": 820,
       "h": 500,
@@ -3311,12 +3485,13 @@
         }
       ]
     },
-    "category": "Maps"
+    "category": "Maps",
+    "categoryIntro": "Reach for Maps blocks to place a value on real geography, by state, by city, or along a route."
   },
   {
     "name": "worldMap",
     "family": "worldMap",
-    "blurb": "world choropleth by ISO alpha-3 (Natural Earth I), data countries arrive over a live base map",
+    "blurb": "a world map coloured country by country, a global choropleth with a legend for the data shown",
     "props": {
       "w": 900,
       "h": 470,
@@ -3356,12 +3531,13 @@
         }
       ]
     },
-    "category": "Maps"
+    "category": "Maps",
+    "categoryIntro": "Reach for Maps blocks to place a value on real geography, by state, by city, or along a route."
   },
   {
     "name": "usMapBubble",
     "family": "usMapBubble",
-    "blurb": "proportional circles at city coordinates (AREA is the value) with name + value callouts",
+    "blurb": "a map of the United States with circles sized by value at each city, a proportional bubble map",
     "props": {
       "w": 820,
       "h": 500,
@@ -3385,12 +3561,13 @@
         }
       ]
     },
-    "category": "Maps"
+    "category": "Maps",
+    "categoryIntro": "Reach for Maps blocks to place a value on real geography, by state, by city, or along a route."
   },
   {
     "name": "usMapFlow",
     "family": "usMapFlow",
-    "blurb": "origin to destination arcs that DRAW ON, stroke weight by volume, one hub node called out",
+    "blurb": "a map of the United States with arrows drawn between cities showing flow or movement from an origin to destinations",
     "props": {
       "w": 820,
       "h": 500,
@@ -3418,12 +3595,13 @@
         }
       ]
     },
-    "category": "Maps"
+    "category": "Maps",
+    "categoryIntro": "Reach for Maps blocks to place a value on real geography, by state, by city, or along a route."
   },
   {
     "name": "textCursor",
     "family": "textCursor",
-    "blurb": "a caret that bleeds light: an accent glow on the cell, a red/cyan fringe on the type converging as the line settles",
+    "blurb": "a blinking text cursor typing a word, with a glowing red/cyan light-fringe on the letters as it lands",
     "props": {
       "w": 900,
       "body": "Ship it",
@@ -3431,7 +3609,8 @@
       "cursor": "block",
       "spread": 18
     },
-    "category": "Effects"
+    "category": "Effects",
+    "categoryIntro": "Reach for Effects blocks for a one-off visual flourish, like a caret glow or a metaball word cycle, that a plain layer cannot produce alone."
   },
   {
     "name": "textCursor.bar",
@@ -3444,12 +3623,13 @@
       "cursor": "bar",
       "spread": 22
     },
-    "category": "Effects"
+    "category": "Effects",
+    "categoryIntro": "Reach for Effects blocks for a one-off visual flourish, like a caret glow or a metaball word cycle, that a plain layer cannot produce alone."
   },
   {
     "name": "parallaxZoom",
     "family": "parallaxZoom",
-    "blurb": "one card eats the frame: the centre cell scales to fill the board while its eight neighbours travel outward and dim",
+    "blurb": "a grid of cards where the centre card zooms to fill the whole frame while the rest slide outward and fade",
     "props": {
       "w": 1200,
       "h": 760,
@@ -3482,12 +3662,13 @@
         }
       ]
     },
-    "category": "Effects"
+    "category": "Effects",
+    "categoryIntro": "Reach for Effects blocks for a one-off visual flourish, like a caret glow or a metaball word cycle, that a plain layer cannot produce alone."
   },
   {
     "name": "parallaxUnzoom",
     "family": "parallaxUnzoom",
-    "blurb": "the same board run backwards: the hero starts filling the frame and retreats into its cell as the ring arrives",
+    "blurb": "the reverse of a zoom-in: one card fills the frame first, then shrinks back into a grid of cards around it",
     "props": {
       "w": 1200,
       "h": 760,
@@ -3520,12 +3701,13 @@
         }
       ]
     },
-    "category": "Effects"
+    "category": "Effects",
+    "categoryIntro": "Reach for Effects blocks for a one-off visual flourish, like a caret glow or a metaball word cycle, that a plain layer cannot produce alone."
   },
   {
     "name": "morphText",
     "family": "morphText",
-    "blurb": "a gooey word cycle: each word melts into the next through a metaball filter, no letter correspondence",
+    "blurb": "a gooey word swap: one word melting into the next through a metaball blur, letters with no correspondence",
     "props": {
       "w": 900,
       "words": [
@@ -3537,12 +3719,13 @@
       "size": 120,
       "hold": 0.8
     },
-    "category": "Effects"
+    "category": "Effects",
+    "categoryIntro": "Reach for Effects blocks for a one-off visual flourish, like a caret glow or a metaball word cycle, that a plain layer cannot produce alone."
   },
   {
     "name": "redditPost",
     "family": "redditPost",
-    "blurb": "a link-aggregator post: the vote rail left of the title, subreddit line, body, comment count",
+    "blurb": "a Reddit-style post: upvote arrows beside the title, subreddit name, body text, comment count",
     "props": {
       "w": 620,
       "sub": "programming",
@@ -3554,12 +3737,13 @@
       "comments": 188,
       "voted": "up"
     },
-    "category": "Effects"
+    "category": "Effects",
+    "categoryIntro": "Reach for Effects blocks for a one-off visual flourish, like a caret glow or a metaball word cycle, that a plain layer cannot produce alone."
   },
   {
     "name": "uiReveal3d",
     "family": "uiReveal3d",
-    "blurb": "UI rows folding up out of depth: each hinges at its top edge in real perspective, one after another",
+    "blurb": "rows of a UI folding upright out of the floor in 3D perspective, one after another",
     "props": {
       "w": 680,
       "items": [
@@ -3585,6 +3769,7 @@
         }
       ]
     },
-    "category": "Effects"
+    "category": "Effects",
+    "categoryIntro": "Reach for Effects blocks for a one-off visual flourish, like a caret glow or a metaball word cycle, that a plain layer cannot produce alone."
   }
 ]

@@ -24,18 +24,19 @@ import "../../effects/effects.css";
  * so a renamed or added category lands here with no edit, the same way generateStaticParams for
  * /arsenal/[name] never types a block name.
  *
- * WHAT THE PAGE SAYS ABOUT A CATEGORY: blocks.json carries a `blurb` per block, never a per-category
- * summary. Inventing one would be marketing copy standing in for a fact the registry does not hold,
- * so this page states only what is true and computed: how many blocks, how many families, and the
- * blocks themselves, each showing its own real blurb.
+ * WHAT THE PAGE SAYS ABOUT A CATEGORY: blocks.json now carries a `categoryIntro` per block (same
+ * value for every block in one category), sourced from blocks/index.mjs's CATEGORY_INTRO map, one
+ * sentence saying WHEN you'd reach for the category rather than what it contains. The page still
+ * states the computed facts too: how many blocks, how many families, and the blocks themselves, each
+ * showing its own real blurb.
  */
 
-type Block = { name: string; family: string; blurb: string; category?: string; props: Record<string, unknown> };
+type Block = { name: string; family: string; blurb: string; category?: string; categoryIntro?: string; props: Record<string, unknown> };
 
 const ALL = blocks as Block[];
 const cat = (b: Block) => b.category ?? "Core";
 
-type Category = { name: string; slug: string; blocks: Block[]; families: number };
+type Category = { name: string; slug: string; blocks: Block[]; families: number; intro: string };
 
 const CATEGORIES: Category[] = (() => {
   const map = new Map<string, Block[]>();
@@ -50,6 +51,9 @@ const CATEGORIES: Category[] = (() => {
       slug: slug(name),
       blocks: [...list].sort((a, b) => a.name.localeCompare(b.name)),
       families: new Set(list.map((b) => b.family)).size,
+      // Every block in a category carries the same categoryIntro (blocks/index.mjs's CATEGORY_INTRO
+      // keyed by the category, not the block), so the first one's is the category's.
+      intro: list[0]?.categoryIntro ?? '',
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 })();
@@ -119,6 +123,7 @@ export default async function CategoryHub({ params }: { params: Promise<{ id: st
             <div className="phead" style={{ padding: 0, maxWidth: "none" }}>
               <span className="kicker"><span className="dot" /> {category.name} · category</span>
               <h1 className="mono">{category.name}</h1>
+              {category.intro ? <p>{category.intro}</p> : null}
               <p>
                 {category.blocks.length} block{category.blocks.length === 1 ? "" : "s"} in the Vawe
                 arsenal, across {category.families} famil{category.families === 1 ? "y" : "ies"}.
