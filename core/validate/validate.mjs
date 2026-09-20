@@ -39,7 +39,7 @@ import { GSAP_FX, GSAP_REGISTRY } from '../engine/gsap-effects.js';
 import { timeCssUsed } from '../type/sanitize-html.js';
 import { EASINGS, isEasingName } from '../motion/motion.js';
 import { resolveSeconds, FEEL } from '../registry/vocab.js';
-import { bgPreset, bgOverErrors, bgOptKeys , BG_NAMES } from '../backgrounds/index.js';
+import { bgPreset, bgOverErrors, bgOptKeys , BG_NAMES, FX_PARAMS } from '../backgrounds/index.js';
 import { KNOBS, knobsFor } from '../registry/knobs.js';
 import { mergePan } from '../timeline/pan-resolve.mjs';
 import { motionAt, keyHandleErrors } from '../timeline/sequence.js';
@@ -615,7 +615,13 @@ export function externalHtmlErrors(cfg, read) {
 // The keys a bg WINDOW owns. Everything else that matches a preset parameter belongs under `opts`.
 // Listed rather than derived: a window's own vocabulary is small and stable, and deriving it from the
 // schema would make this check silently weaker the moment the schema grew a key.
-const BG_WINDOW_KEYS = new Set(['preset', 'use', 'value', 'html', 'src', 'from', 'to', 't', 'tone', 'opts', 'mode', 'seed']);
+const BG_WINDOW_KEYS = new Set(['preset', 'use', 'value', 'html', 'src', 'from', 'to', 't', 'tone', 'opts', 'mode', 'seed', 'base', 'fx', 'breathe']);
+
+// The fx vocabulary a COMPOSED window (`base`+`fx`, no preset) may draw on: exactly the painters a
+// preset itself compiles down to (core/backgrounds/fx.js via FX_IMPL, core/backgrounds/index.js). A
+// preset is a named recipe over this vocabulary; composing directly means writing the same vocabulary
+// yourself, never a second one.
+const BG_BASE_KINDS = new Set(['solid', 'linear', 'radial', 'conic']);
 
 // BACKGROUND WINDOWS. Two rules the schema walk cannot express, both about the hand-authored (`html`)
 // backdrop introduced alongside the canvas presets.
@@ -655,7 +661,8 @@ export function bgErrors(cfg) {
     // dropped, which is the silent-substitution failure this codebase keeps paying for.
     // `src` is `html` in a file, so it belongs in the same one-source set: it does not layer over a
     // preset, and naming it beside `html` is the same ambiguity one level down.
-    const sources = ['html', 'src', 'preset', 'use'].filter((k) => b[k] != null);
+    const composed = b.base != null || b.fx != null;
+    const sources = ['html', 'src', 'preset', 'use', ...(composed ? ['base/fx'] : [])].filter((k) => k === 'base/fx' || b[k] != null);
     if (sources.length > 1)
       // The message names the PAIR that actually collided. It used to explain html-versus-preset
       // whatever the conflict was, so `html` beside `src` was refused with a sentence about canvas
@@ -663,10 +670,40 @@ export function bgErrors(cfg) {
       out.push(`${at} declares ${sources.map((s) => `\`${s}\``).join(' and ')}, a window has ONE backdrop. `
         + (b.html != null && b.src != null
           ? '`src` IS `html`, in a file, so naming both says the same backdrop twice and only one can win. Keep the file and drop the inline copy, or the other way round.'
-          : '`html` and `src` paint in the DOM, `preset` and `use` paint on canvas; they do not layer. Split them into two windows (with `from`/`to`) if you want both in one video.'));
+          : '`html`/`src` paint in the DOM, `preset` and `base`+`fx` paint on canvas; they do not layer. Split them into two windows (with `from`/`to`) if you want both in one video.'));
+    // NO SOURCE AT ALL used to fall back to `preset: "paper"` in silence, exactly the "the engine picked
+    // it, so nobody ever designed one again" failure the schema's own hint warns against, one level down
+    // from theme.bgDefault (core/backgrounds/theme-rotation.js). Decide it: a preset, a composition, the
+    // theme's own default, or a hand-authored fragment.
+    if (!sources.length && b.use == null)
+      out.push(`${at} names no backdrop: no \`preset\`, no \`base\`/\`fx\` composition, no \`use\`, no \`html\`/\`src\`. The engine will not pick one for you. Say \`{"preset": "plain"}\` for a deliberately flat field, compose one from \`{"base": {...}, "fx": [...]}\`, or hand-author with \`html\`/\`src\`.`);
+    if (composed) {
+      if (b.preset != null || b.html != null || b.src != null) { /* already reported above as a source conflict */ }
+      else {
+        if (b.base != null && (!isObj(b.base) || !BG_BASE_KINDS.has(b.base.kind)))
+          out.push(`${at}.base needs a \`kind\`: one of ${[...BG_BASE_KINDS].join(', ')} (core/backgrounds/fx.js paintBase).`);
+        if (b.base == null)
+          out.push(`${at} composes \`fx\` with no \`base\`. A preset always paints a base under its fx; without one the canvas stays transparent and the frame is whatever sits behind it.`);
+        if (b.fx != null && !Array.isArray(b.fx))
+          out.push(`${at}.fx must be an array of {type, ...} painters, the same vocabulary a preset compiles to.`);
+        (Array.isArray(b.fx) ? b.fx : []).forEach((f, fi) => {
+          if (!isObj(f) || !f.type) { out.push(`${at}.fx[${fi}] needs a \`type\`: one of ${Object.keys(FX_PARAMS).join(', ')}.`); return; }
+          if (!(f.type in FX_PARAMS)) out.push(`${at}.fx[${fi}] type "${f.type}" is not a known painter.${nearest(f.type, Object.keys(FX_PARAMS))}`);
+        });
+        if (b.opts != null)
+          out.push(`${at} sets \`opts\` on a composed (\`base\`/\`fx\`) backdrop, \`opts\` retunes a named PRESET's fx. Composing directly, just write the values on each \`fx\` entry.`);
+        if (b.tone != null)
+          out.push(`${at} sets \`tone\` on a composed backdrop, \`tone\` is for a hand-authored (\`html\`) one. The engine reads a composed window's lightness off \`base\` itself.`);
+      }
+      return;
+    }
     const authored = b.html != null || b.src != null;
     if (!authored) {
       if (b.tone != null) out.push(`${at} sets \`tone\` but has no \`html\`, tone declares the lightness of a HAND-AUTHORED backdrop so the engine knows which text ink to default to. A preset's lightness is already known.`);
+      // No `preset` and no `use`: the "no source" error above already said so. There is no name here
+      // to resolve a known-preset shape against any more (the `|| 'paper'` default is gone), so the
+      // preset-parameter checks below have nothing to check.
+      if (b.preset == null && b.use == null) return;
       // `opts` tunes the fx a preset is made of, so the vocabulary is PER PRESET: `liquid` takes
       // scale/speed/warp/edge0…, `paperDots` takes spacing/period/drift…. Anything else used to be
       // accepted by the schema, dropped by applyBgOver and never read, correct-looking JSON, unchanged
