@@ -605,7 +605,7 @@
    "label": "Background windows (canvas, theme palette)",
    "required": true,
    "minItems": 1,
-   "hint": "the backdrop is the largest area of the frame, so the engine will not pick it for you. Use `\"bg\": [{ \"preset\": \"plain\" }]` for a deliberately flat field, a living preset (dotmatrix \u00b7 gradientWash \u00b7 blobs \u00b7 metallic \u00b7 metallicSheen \u00b7 aurora \u00b7 \u2026), or `{ \"html\": \"\u2026\" }` to hand-author one. See docs backgrounds-and-images.",
+   "hint": "the backdrop is the largest area of the frame, so the engine will not pick it for you. Use `\"bg\": [{ \"preset\": \"plain\" }]` for a deliberately flat field, a living preset (dotmatrix \u00b7 gradientWash \u00b7 blobs \u00b7 metallic \u00b7 metallicSheen \u00b7 aurora \u00b7 \u2026, each one a named recipe over the same vocabulary), `{ \"base\": {...}, \"fx\": [...] }` to compose that vocabulary yourself, or `{ \"html\": \"\u2026\" }` to hand-author one. See docs backgrounds-and-images.",
    "item": {
     "html": {
      "type": "string",
@@ -671,6 +671,14 @@
     "opts": {
      "type": "object",
      "label": "Per-video tuning of THIS preset's fx. Meta knobs scale what the preset baked in: { intensity, dotAlpha, drift, grain }. Every other key is passed straight to the fx that reads it, so the fx's own parameters work by name (liquid: scale, speed, warp, edge0, edge1, gloss, res \u00b7 dots: spacing, period, k, driftX, driftY \u00b7 metallic: count, waves, glow, sweep \u00b7 particles: count, speed, connectDist). A key this preset's fx do not read is an ERROR, and the message lists the ones they do."
+    },
+    "base": {
+     "type": "object",
+     "label": "Compose a backdrop yourself instead of naming a preset: the flat field under your `fx`. `{kind:\"solid\", color}` or `{kind:\"linear\"|\"radial\"|\"conic\", from, to, cx, cy, angle}`. Same shape a preset's own `build()` returns; write `fx` alongside it. One of `preset` / `base`+`fx` / `use` / `html`+`src` per window, never two."
+    },
+    "fx": {
+     "type": "array",
+     "label": "Compose a backdrop yourself: an ordered list of `{type, ...}` painters, the SAME vocabulary every preset is built from (core/backgrounds/fx.js) \u2014 type: dots|particles|aurora|softwash|spotlight|metallic|liquid|grain|gradientFill, each with its own parameters read straight off the painter. Paired with `base`; `opts` does not apply here, write the values directly."
     },
     "seed": {
      "type": "number",
