@@ -47,6 +47,9 @@ const size = (o) => (Array.isArray(o) ? o.length : Object.keys(o).length);
 // The grid is CATALOG minus full-frame overlays: the same set the site's /blocks page lists, so the
 // number the copy quotes and the number the page renders are the same number by construction.
 const MCP_TOOLS = JSON.parse(fs.readFileSync(path.join(root, 'site/lib/mcp-tools.json'), 'utf8'));
+// Read the SAME way MCP_TOOLS is: from the generated file, not a second walk of the effect families.
+// Kept OUT of TRUTH on purpose; see the film-copy check below for why.
+const EFFECTS_TOTAL = JSON.parse(fs.readFileSync(path.join(root, 'site/lib/effects.json'), 'utf8')).total;
 const grid = CATALOG.filter((e) => !e.overlay);
 
 const TRUTH = {
@@ -281,6 +284,53 @@ for (const rel of FILES) {
       for (const err of validateAll(schema, scene)) fail(err);
     }
   }
+}
+
+// ── FILM COPY CAN CLAIM A NUMBER ABOUT VAWE ITSELF, AND ONLY THAT NUMBER IS CHECKABLE ───────────────
+// films/scene held one film that made a claim about the ENGINE rather than about a fictional product
+// on screen: vawe-launch.json's own on-screen text read "566 effects. No templates." against a
+// registry (site/lib/effects.json) that had since grown to 694. Nothing walked films/scene at all, so
+// the flagship launch video shipped a false claim about the thing it was launching.
+//
+// EVERY OTHER NUMBER IN A FILM IS BRAND FICTION AND MUST NOT BE TOUCHED. plinth-ad's "12,400 agents",
+// argus-launch's "-61%", preface-launch's "22 proposals": these are a fictional demo company's own
+// figures, correct by construction because nobody but the film author decided them, and a registry
+// has nothing to compare them against. So this does not reuse ALL_SUBJECTS/numFirst: `effects` is not
+// a TRUTH key. Bare "effects" is checked nowhere else in this file for the same reason `families` and
+// `tools` were scoped before it: engine-doctrine alone quotes at least half a dozen PAST effect counts
+// as prose (558, 559, 566, 630, 639, 693 all appear in MISTAKES.md, AI-AGENT-BOOK.md, arsenal.mjs's
+// own header, STUDIO-DESIGN.md), every one a true sentence about a moment the registry has since moved
+// past. Widening the generic matcher to know the word "effects" would report all of them.
+//
+// So the phrase this matches has to be one that can only be a vawe claim, the same rule `mcp tools`
+// was scoped by. "No templates" is vawe's own tagline (AGENTS.md: "No templates" is how this engine
+// describes itself), and no fictional product's ad copy pairs an effects count with it: measured
+// across every scene present in this checkout, the only line where "effects" and "template" share a
+// line is the real defect. A count elsewhere in the same film about a fictional product's own effects
+// ("Nine effects, costed by hand.", showcase-type-labour.json, about After Effects itself) has no
+// "template" beside it and is left alone.
+//
+// films/scene/*.json is gitignored except the framework's own sample/schema/showcase set
+// (.gitignore:84), so on a fresh checkout the brand-fiction films (plinth-ad, argus-launch, the actual
+// vawe-launch.json among them) are simply not on disk. A directory with fewer files than the full
+// library is not a check that failed to see: it is what git promised. This walks whatever files ARE
+// present and says nothing about ones that are not, the same shape films-json.mjs's `blind` list uses.
+const FILM_DIR = path.join(root, 'films/scene');
+const filmFiles = fs.existsSync(FILM_DIR) ? fs.readdirSync(FILM_DIR).filter((f) => f.endsWith('.json')) : [];
+const EFFECTS_CLAIM = new RegExp(`\\b(\\d+|${WORDS.join('|')})[ \\u00a0-]+effects?\\b`, 'i');
+for (const name of filmFiles) {
+  const rel = `films/scene/${name}`;
+  const lines = fs.readFileSync(path.join(FILM_DIR, name), 'utf8').split('\n');
+  lines.forEach((line, i) => {
+    const prev = i > 0 ? lines[i - 1] : '';
+    if (/site-counts-allow:\s*(?!-->)(?!\*\/)\S/.test(line) || /site-counts-allow:\s*(?!-->)(?!\*\/)\S/.test(prev)) return;
+    if (!/template/i.test(line)) return;
+    const m = EFFECTS_CLAIM.exec(line);
+    if (!m) return;
+    const stated = isNaN(+m[1]) ? WORDS.indexOf(m[1].toLowerCase()) : +m[1];
+    if (stated === EFFECTS_TOTAL) return;
+    bad.push({ rel, line: i + 1, subject: 'effects', stated, real: EFFECTS_TOTAL, text: line.trim().slice(0, 96) });
+  });
 }
 
 for (const b of bad) {
