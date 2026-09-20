@@ -105,6 +105,26 @@ const FAMILY_FILES = Object.keys(FAMILY_MODULES).sort();
 export const EXPORTS = {};
 // family → its module's CATEGORY. What the site groups the browsing rail by.
 export const CATEGORY_OF = {};
+// category label → one sentence saying WHEN you'd reach for it, never what it contains (the grid
+// already shows that). A category is a coarse label several modules share (four modules all set
+// CATEGORY = 'Code'), so unlike CATEGORY_OF this cannot be owned per-module: it is one closed map,
+// kept here beside the categories it describes. DRAFT COPY: the site owner corrects these, this map
+// only exists so a hub states something rather than nothing.
+export const CATEGORY_INTRO = {
+  App: 'Reach for App blocks to assemble a mobile or account screen from real UI rows, like feeds, settings, and onboarding.',
+  Camera: 'Reach for the Camera block to draw the eye to one target with a locking autofocus gate.',
+  Code: 'Reach for Code blocks to show a codebase in motion, from a synced terminal to a live diff or refactor.',
+  Core: 'Reach for Core blocks for the general marketing furniture a launch video keeps needing: cards, quotes, comparisons, lower thirds.',
+  Data: 'Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption.',
+  Diagrams: 'Reach for Diagrams blocks to walk a viewer through a decision flow or a network of nodes.',
+  Effects: 'Reach for Effects blocks for a one-off visual flourish, like a caret glow or a metaball word cycle, that a plain layer cannot produce alone.',
+  Interaction: 'Reach for Interaction blocks to show a hand or cursor actually touching the interface: a click, a tap, a keypress.',
+  Interface: 'Reach for Interface blocks for the everyday chrome of a product screen: toasts, tabs, tables, and badges.',
+  Maps: 'Reach for Maps blocks to place a value on real geography, by state, by city, or along a route.',
+  Social: 'Reach for Social blocks to show a product living inside a feed, a chat thread, or an app store listing.',
+  Surfaces: 'Reach for Surfaces blocks when the background itself should carry the polish, with frosted glass, mesh gradients, or a travelling light.',
+  Type: 'Reach for Type blocks for a mechanical, high-craft title treatment beyond plain kinetic text.',
+};
 // factory name -> the background a PREVIEW of this block should sit on. Optional, and declared in the
 // module that owns the blocks for the same reason CATEGORY is: nothing should keep a name-to-ground
 // table in sync by hand. scripts/site/blocks-scenes.mjs renders every preview on `plain` otherwise,
@@ -183,6 +203,14 @@ if (uncatalogued.length) {
     + `A factory with no row is invisible: it is in no catalog, no doc, no registry item and no search. `
     + `Add \`{ name: '${uncatalogued[0]}', family: '${uncatalogued[0]}', blurb: '<one line>', props: { … } }\` to blocks/catalog.mjs. `
     + `If it is a shared helper and not a block, add it to NOT_A_BLOCK in blocks/index.mjs WITH A REASON.`);
+}
+
+// A category with no intro would ship a hub with an empty sentence, exactly the gap this map exists
+// to close. Caught here rather than left for a reviewer to notice the blank paragraph on the site.
+const uncategorized = [...new Set(Object.values(CATEGORY_OF))].filter((c) => !CATEGORY_INTRO[c]);
+if (uncategorized.length) {
+  throw new Error(`blocks/index.mjs: CATEGORY_INTRO has no entry for: ${uncategorized.join(', ')}. `
+    + `Add a one-sentence "when you'd reach for this" line for each to CATEGORY_INTRO.`);
 }
 
 Object.assign(BLOCKS, EXPORTS);
