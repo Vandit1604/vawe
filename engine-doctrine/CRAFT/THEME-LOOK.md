@@ -48,15 +48,25 @@ over the theme (the theme is a DEFAULT, never a constraint an author cannot over
 | Key | Shape | Checked against |
 |---|---|---|
 | `backdrop` | non-empty array of bg preset names, **scaffold-only** (see below) | `core/backgrounds/index.js` `BG_NAMES` |
-| `scale` | `{hook, headline, body, caption}`, each a number | (structural only, no registry) |
+| `scale` | `{hook, headline, body, caption}`, each a number | shape-checked only; the role NAMES are fixed (`LOOK_SCALE_KEYS`), not a registry an author picks a value from |
 | `layout` | `{anchor: left\|center\|right, margin: number}` | `anchor` against a fixed enum |
 | `marks` | `{logo: path, endCardSize: number, headlineSize: number}` | (structural only, `logo` is a path an author must keep valid) |
 | `cuts` | `{default, accent}`, each a transition name | `core/transitions/catalog.js` `TRANSITIONS` (anim + cut + sting + seam, one merged catalog) |
 | `field` | `{grain, vignette}`, each a number | (structural only) |
 
 Every field is optional; a theme with no `look` behaves exactly as it did before this existed. Writing
-one key does not require the others: a theme can fix only `backdrop` and leave scale/layout/cuts
-undecided.
+one key does not require the others: a theme can fix only `backdrop` and leave layout/marks/cuts/field
+undecided (`scale` is never truly undecided, see "The computed look" below).
+
+### Naming a text size instead of guessing a number
+
+A layer's `size` accepts the role name directly: `"size": "headline"` instead of `"size": 64`.
+`resolveTextSize`/`bakeTextSizeRoles` (`core/engine/produce.js`, called from `core/engine/boot.js`
+before the layout pass) look the role up in `resolveLook(theme).scale` and lower it to a number before
+render, so the frame is unchanged from writing the number by hand. An unknown role (a typo, or a role
+the theme carries no scale for) throws and names every role the theme's `look.scale` actually defines,
+the same refusal shape `resolveJunction` uses for `"cut@1"`. Every theme has a `scale` to resolve
+against, authored or computed (see below), so the four roles work on any theme.
 
 **`backdrop` is a scaffold-only authoring hint, and the engine deliberately does not read it.** `make
 scaffold TYPE=<type> THEME=<name>` seeds a new film's `bg[]` from it (see "How the scaffold uses it"
@@ -142,9 +152,9 @@ bloomberg, duolingo, nike, vercel) carry one. `themes/default.json` and `themes/
 `themes/stripe.json` do not yet; a theme with no `look` is not an error, it is a theme that has not
 been given one.
 
-## The computed look, for the other 28
+## The computed look, for the other 31
 
-Only 3 of the 31 themes in the registry carry an authored `look`, so an engine default reading
+Only 3 of the 34 themes in the registry carry an authored `look`, so an engine default reading
 `theme.look` alone would do nothing for nearly all of them, `themes/default.json` included. `computedLook(theme, { isLightBg })` and `resolveLook(theme,
 opts)` (`core/registry/theme-contract.js`, beside `lookErrors`) close that gap: `resolveLook` returns
 `{...computedLook(theme), ...(theme.look||{})}`, so an authored key always wins over the computed one,
