@@ -141,6 +141,7 @@ Top-level scene keys that change what the camera DOES rather than where it goes.
 | `driftHold` | a held frame that is never dead: a sub-12px Lissajous micro-drift, x and y at different frequencies so it breathes instead of walking a diagonal |
 | `followCursor` | THE CAMERA FOLLOWS THE CURSOR: derived from the `path` and `clicks` on a `cursor` layer, so the pointer stays the single owner of where the camera goes. It pushes toward the spot the pointer is about to click, arrives just BEFORE the click, holds across it and releases. Clicks too close in time or space share one framing, so six clicks are never six crash zooms |
 | `followLayer` | CAMERA TRACKS A LAYER BY ID, at RENDER time, off the same live-box accessor `follow` (the layer track) reads. Holds still while the target sits inside a soft margin of frame centre, translating only the minimum to keep it in once it would cross the edge, rather than rigidly re-centring it every frame (which reads as the world sliding, not the camera tracking). Zoom is HELD (`to`), not framed. The one move here `bakeCameraMove` resolves onto `data.cameraFollow`, not `data.camera`, and it cannot be composed with another leg |
+| `hold` | the camera is LOCKED OFF: zero motion, on purpose. Not driftHold, which keeps breathing; this emits no keyframes at all, the explicit way to declare "no camera" instead of leaving `camera:` blank |
 | `multiPhase` | chain legs into one journey (push, hold-drift, settle) |
 | `orbit` | a gentle 3D swing around the frame (ry through 0) |
 | `panFollow` | camera pans to track downward-growing content (terminal) |
@@ -1160,4 +1161,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_710 effects across 60 families. Regenerate: `make effects`._
+_711 effects across 60 families. Regenerate: `make effects`._
