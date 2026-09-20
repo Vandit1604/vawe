@@ -34,9 +34,10 @@ import { dollyZoom } from './dolly-zoom.js';
 import { followCursor } from './follow-cursor.js';
 import { driftHold } from './drift-hold.js';
 import { followCamera } from './follow.js';
+import { hold } from './hold.js';
 
 export { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake,
-  punchIn, dollyZoom, followCursor, driftHold, followCamera };
+  punchIn, dollyZoom, followCursor, driftHold, followCamera, hold };
 
 // name → generator, each carrying its own catalogue row. The descriptions used to live in a hand-kept
 // map inside scripts/site/effects-catalog.mjs, which knew eight of the eleven: cameraShake, punchIn and
@@ -57,6 +58,7 @@ export const CAMERA_MOVES = {
   dollyZoom: withBlurb('THE VERTIGO SHOT: the lens ramps while the camera holds its distance, so the subject on the picture plane keeps its exact size and the world BEHIND it rushes in or falls away · the only move here that changes the relationship between planes rather than the framing, and it needs layers standing at a `plane` depth or there is nothing to counter-scale against', dollyZoom),
   followCursor: withBlurb('THE CAMERA FOLLOWS THE CURSOR: derived from the `path` and `clicks` on a `cursor` layer, so the pointer stays the single owner of where the camera goes. It pushes toward the spot the pointer is about to click, arrives just BEFORE the click, holds across it and releases. Clicks too close in time or space share one framing, so six clicks are never six crash zooms', followCursor),
   driftHold: withBlurb('a held frame that is never dead: a sub-12px Lissajous micro-drift, x and y at different frequencies so it breathes instead of walking a diagonal', driftHold),
+  hold: withBlurb('the camera is LOCKED OFF: zero motion, on purpose. Not driftHold, which keeps breathing; this emits no keyframes at all, the explicit way to declare "no camera" instead of leaving `camera:` blank', hold),
   // NOT named `follow`: that word is already a shot-word alias for `panFollow` (core/registry/vocab.js
   // CAMERA_WORDS), so `{move:"follow"}` would silently resolve to a different move than this one, the
   // exact silent-substitution class this engine refuses everywhere else. `followLayer` is unambiguous.

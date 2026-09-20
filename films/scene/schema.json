@@ -2897,8 +2897,8 @@
      "label": "Sound-effect cues, each { t, and then either `name` for a baked sample or `voice` + `params` for a synthesised one }. THIS is where cues live (the engine reads `audio.cues`); there is no top-level `sfx`.",
      "item": {
       "t": {
-       "type": "number",
-       "label": "Cue time (s)",
+       "type": "number|string",
+       "label": "Cue time (s), or a relative reference like \"install.end+0.2\" (core/timeline/relative-time.js) so the cue pins to the MOMENT a layer arrives instead of a number an author has to recompute by hand every time that layer moves.",
        "required": true
       },
       "name": {

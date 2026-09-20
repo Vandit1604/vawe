@@ -14,9 +14,17 @@
 // `duration`; an offset ("+0.5"/"-0.2") is optional. Bare id = that layer's start.
 //
 // FIELDS, taken from core/engine/tempo.js's own time-field table, ABSOLUTE ones only (never a
-// duration): `layers[].start` (multi-pass: a target may itself be relative), `transitions[].at`, and
-// `cameraMove[].start` (or the single-spec object form). `cameraMove.stations[]` carries no absolute
-// time key in that table (only `dur`/`dwell`, both durations), so it is not a target here.
+// duration): `layers[].start` (multi-pass: a target may itself be relative), `transitions[].at`,
+// `cameraMove[].start` (or the single-spec object form), and `audio.cues[].t`. `cameraMove.stations[]`
+// carries no absolute time key in that table (only `dur`/`dwell`, both durations), so it is not a
+// target here.
+//
+// `audio.cues[].t` used to be the one field in this table an author could only pin by copying a number:
+// "when the install line lands" had no name, only whatever second the author computed by hand, and a
+// layer moving an inch left it stale with nothing to say so (a cue fired 1.1s early on `vawe-flow-2`
+// because the value copied in was a part's `delay`, relative to its parent, not the absolute time that
+// delay resolves to). Accepting the SAME reference grammar every other absolute field already accepts
+// lets a cue read "installLine.end+0.1" instead, so moving the layer moves the cue with it.
 //
 // BEAT TARGETS ("beat:<id>.start"/"beat:<id>.end", plus offset), a SEPARATE grammar from the layer-id
 // one above, only live where `data.beats` (`{id,start,duration}[]`, item 3) is present. The `beat:`
@@ -169,6 +177,9 @@ export function resolveRelativeTimes(data) {
     for (const s of specs) if (s && typeof s.start === 'string')
       s.start = isBeatTarget(s.start) ? resolveBeatRef(s.start, 'cameraMove "start"') : resolveRef(s.start, byId, 'cameraMove "start"');
   }
+  if (data.audio && Array.isArray(data.audio.cues)) for (const c of data.audio.cues)
+    if (c && typeof c.t === 'string')
+      c.t = isBeatTarget(c.t) ? resolveBeatRef(c.t, 'audio cue "t"') : resolveRef(c.t, byId, 'audio cue "t"');
 
   // BG WINDOWS: `beat:` ONLY. A bare id/`cut@1` string stays untouched, still owned entirely by
   // core/timeline/junctions.js `bindWindowsToJunctions`; only the `beat:`-prefixed form is this
