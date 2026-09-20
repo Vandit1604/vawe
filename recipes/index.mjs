@@ -1,7 +1,7 @@
 // recipes/index.mjs: load recipes/recipes.json and refuse any entry that is not copied from a real film.
 import { readFileSync } from 'node:fs';
 
-const KINDS = ['spine', 'seam', 'enter', 'exit', 'camera', 'ground'];
+const KINDS = ['spine', 'seam', 'enter', 'exit', 'camera', 'ground', 'cursor'];
 
 export function checkRecipe(name, r) {
   const bad = (why) => { throw new Error(`recipe "${name}": ${why}. See recipes/README.md.`); };

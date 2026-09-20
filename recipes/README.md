@@ -39,6 +39,7 @@ argument for building recipes this way rather than as hand-authored one-offs.
 | `seam` | plain `motion` keys on the outgoing/incoming layers, computed from their boxes and the canvas | `flow-seam` |
 | `camera` | a `cameraMove` leg (`core/camera-moves/`, e.g. `diveIn`) | `window-dolly` |
 | `enter` | a layer's split-text sugar (`split`, `preset`, `each`, `stagger`) | `word-by-word` |
+| `cursor` | a `cursor` layer's own `snapTo`/`clicks`/`styleAt` (`core/layers/cursor.js`) | `hover-click` |
 | `spine` `exit` `ground` | not yet built; `recipes/index.mjs` accepts the kind, `recipes/expand.mjs` has no expander for it yet | - |
 
 **Recipes can compose.** A `flow-seam` line whose `in` layer already carries `split: "word"` (written
