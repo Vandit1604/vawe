@@ -586,7 +586,12 @@ export function bakeCameraMove(data, frame) {
   // alone: not every move keys a flat span (`travel` visits several stations with per-station dwells,
   // `cameraShake` pre-samples one key per rendered frame), so the keyframes it actually produced are the
   // only honest account of when it is live.
+  // `hold` (core/camera-moves/hold.js) is a real move that emits ZERO keyframes on purpose: there is no
+  // camera to fake a path for. Its window can't come from kf then, so it falls back to the spec's own
+  // start/dur, the same seconds assemble.mjs windowed it to. Every other move keys at least one frame,
+  // so this only ever engages for the one move that deliberately has none.
   const windows = built.map(({ spec, kf }) => {
+    if (!kf.length) return { move: spec.move, from: spec.start ?? 0, to: (spec.start ?? 0) + (spec.dur ?? 0) };
     const ts = kf.map((k) => k.t);
     return { move: spec.move, from: Math.min(...ts), to: Math.max(...ts) };
   });
