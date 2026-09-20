@@ -65,7 +65,7 @@ destination: web
 - onscreen: scene.json · 1920 x 1080 · 30fps · {
 - why: the first cut of this beat held a blank white frame for two seconds, which is where a viewer decides to leave. The gutter states the whole shape of the file before a word of it exists, so the beat carries something and the next one arrives at 1.0s instead of 2.3s
 - duration: 1.0s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 2: It says a word (1.0s-3.5s)
 - type: build
@@ -78,7 +78,7 @@ destination: web
 - onscreen: "text": "Ship it"  ·  Ship it  ·  sans · weight 700
 - why: the smallest possible demonstration, and the one that teaches the law the other three obey. It has to LOOK smallest: the number that follows is twice its size and the picture eight times its area, and an escalation only reads if the first step is low
 - duration: 2.5s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 3: It says a number (3.5s-6.2s)
 - type: build
@@ -91,7 +91,7 @@ destination: web
 - onscreen: "count": 2500000000  ·  2.5B
 - why: the second subject has to be genuinely unlike the first, or the film is one demonstration repeated
 - duration: 2.7s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 4: It says a picture (6.2s-9.4s)
 - type: build
@@ -104,7 +104,7 @@ destination: web
 - onscreen: "image": "/card.png"
 - why: type and numbers are things a slide can do. A real image is the first thing that is not
 - duration: 3.2s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 5: It says how to look at it (9.4s-15.5s)
 - type: turn
@@ -118,7 +118,7 @@ destination: web
 - onscreen: "camera": {"move": "diveIn"}
 - why: the escalation only pays if the last demonstration displaces the earlier ones, and this is the one that does
 - duration: 6.1s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 6: And that was the film (15.5s-17.0s)
 - type: close
@@ -131,4 +131,4 @@ destination: web
 - onscreen: One file. One video.
 - why: the first frame was an empty file and the last is the film it made, which is the bookend closing. The first cut snapped the plane flat at 15.8s and spent its last three seconds square, which threw away the only thing beat 5 had built
 - duration: 1.5s
-- transition_in: none
+- transition_in: fx:none

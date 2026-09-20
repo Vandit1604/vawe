@@ -73,7 +73,14 @@ import { isWaivedBy, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// ---- THE ONE EXCUSE MECHANISM ------------------------------------------------------------------------
+// ---- THE ONE WAIVER MECHANISM ------------------------------------------------------------------------
+//
+// One mechanism, two different things it says: a rule broken for cause, and a chosen absence a static
+// rule cannot otherwise see (no continuous object, a still frame, no transition, a deliberately quiet
+// ending). Measured across the library, about half of real `allow` use is the second case, an author
+// declaring "I chose this" rather than "I broke this" (AGENTS.md "Stage 7, render: waivers" names the
+// codes it shows up on most). Both still cost the same one sentence under `_why`, and neither is
+// ratcheted or graded here: this file only enforces that the sentence exists, same as it always did.
 //
 // This used to be three: `authoring.allow` + `_why` in the scene (a person decided, and wrote why),
 // `quality/gates/legacy-manifest.json` (a date says nobody has looked yet), and a ratchet engine
@@ -86,8 +93,9 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 // machinery that read it were deleted here. A ratchet exists to answer one question over time: has this
 // rule's debt been paid down enough to stop grandfathering the past? Once the library is folded, that
 // question has one answer, an explicit waiver on a real scene, and a rule can go straight to being a
-// PLAIN BLOCK: it fires or it doesn't, and `authoring.allow` is the only door out, for old debt and a
-// deliberate new exception alike. See engine-doctrine/TASTE.md and AGENTS.md "Waivers, legacy, and the difference".
+// PLAIN BLOCK: it fires or it doesn't, and `authoring.allow` is the only door out, for old debt, a
+// deliberate new exception, and a chosen absence declared on purpose alike. See engine-doctrine/TASTE.md
+// and AGENTS.md "Waivers, legacy, and the difference".
 //
 // HARD_CODES below (was RATCHET_CODES) is still where a code opts into "no reports tier, no free pass":
 // if it fires and the scene has not waived it, the run stops. Two codes were retired rather than folded,
@@ -246,11 +254,12 @@ try { scene = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.e
 // testing a Set directly, so a code no gate here tags with an instance (still most of them: see the
 // report this phase left) is simply one whose only matching shape is the bare entry.
 const allowRaw = (scene.authoring && Array.isArray(scene.authoring.allow)) ? scene.authoring.allow : [];
-// A WAIVER MUST STATE ITS REASON. The doctrine has always said a waiver is a deliberate exception with
-// a written cause; the audit says otherwise. Across the tracked library `no-continuous-object` is
-// waived 6 times with 0 reasons and `dead-air` 3 times with 0, while `no-visual-vocabulary` carried a
-// reason on every single one, and that difference is exactly the difference between a rule people
-// argue with and a keyword that makes a gate stop talking (engine-doctrine/MISTAKES.md #209).
+// A WAIVER MUST STATE ITS REASON. The doctrine has always said a waiver, whether it breaks a rule for
+// cause or declares a chosen absence the rule cannot see, carries a written cause; the audit says
+// otherwise. Across the tracked library `no-continuous-object` is waived 6 times with 0 reasons and
+// `dead-air` 3 times with 0, while `no-visual-vocabulary` carried a reason on every single one, and
+// that difference is exactly the difference between a decision people can read and a keyword that
+// makes a gate stop talking (engine-doctrine/MISTAKES.md #209).
 //
 // Nothing here judges whether the reason is GOOD. It cannot. It only makes waiving cost one sentence,
 // which is the whole mechanism: the cost is what turns a reflex back into a decision, and a bad reason
@@ -261,7 +270,7 @@ const allowRaw = (scene.authoring && Array.isArray(scene.authoring.allow)) ? sce
   const bareNoReason = allowRaw.filter((k) => !(typeof why[k] === 'string' && why[k].trim().length >= 12));
   if (bareNoReason.length) {
     console.error(`\n✗ author-check · ${bareNoReason.length} waiver(s) with no stated reason: ${bareNoReason.join(', ')}`);
-    console.error('  A waiver is a deliberate exception, and a deliberate exception has a cause someone can read.');
+    console.error('  A waiver is a decision, a rule broken for cause or a chosen absence declared, and either one has a cause someone can read.');
     console.error('  Add one line each under `authoring._why`, naming what the rule would have you do and why');
     console.error('  this film is right not to:\n');
     console.error('    "authoring": {');
@@ -723,7 +732,7 @@ if (judgements.length) {
   console.log('\n  CRAFT JUDGEMENTS: this target\'s opinion; the engine renders these regardless:');
   judgements.forEach(line);
 }
-if (waivers.length) console.log(`  (waivers come from "authoring.allow" in the scene, deliberate rule breaks)`);
+if (waivers.length) console.log(`  (waivers come from "authoring.allow" in the scene: a rule broken for cause, or a chosen absence declared, either way with a _why)`);
 console.log(`\n  Every one of the ${TOTAL} steps ran. ${results.length} returned a verdict; the rest print and advise.`);
 const reported = results.filter((r) => r.reported);
 // Printed findings from a gate that PASSED. Neither `failed` nor `reported` covers them, and before this
@@ -795,7 +804,7 @@ if (failedStrict.length) {
     console.log(`  Run \`make ship D=${file}\` when you want the ladder to mean something.\n`);
     process.exit(0);
   }
-  console.log(`\n✗ author-check FAILED: ${failedStrict.map((r) => r.name).join(', ')}. Fix, or waive a deliberate break via {"authoring":{"allow":[...]}}. ${strict ? '(--strict: warnings also block.)' : ''}\n`);
+  console.log(`\n✗ author-check FAILED: ${failedStrict.map((r) => r.name).join(', ')}. Fix, or declare it via {"authoring":{"allow":[...]}} with a _why (a break for cause or a chosen absence). ${strict ? '(--strict: warnings also block.)' : ''}\n`);
   process.exit(1);
 }
 console.log(`\n✓ author-check passed${waivers.length ? ` (${waivers.length} waived)` : ''}. Static ladder green, now do the judge step above before shipping.\n`);

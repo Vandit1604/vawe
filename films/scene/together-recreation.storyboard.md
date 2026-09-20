@@ -51,7 +51,7 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - rest: none, the typing fills it
 - why: the reference withholds the brand for two seconds and that withholding is the hook
 - duration: 2.75s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: Product (2.55s-6.5s)
 - type: product_intro
@@ -70,7 +70,7 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - rest: neither surface ever stops travelling
 - why: show the product, then pick out of it the object the film will later push into
 - duration: 3.95s
-- transition_in: fade
+- transition_in: fx:fade
 
 ## Beat 3: Claim (6.5s-8.9s)
 - type: benefit_highlight
@@ -89,7 +89,7 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - rest: none
 - why: this is the reference's signature type move and the film is a test of whether we can do it
 - duration: 2.4s
-- transition_in: fade
+- transition_in: fx:fade
 
 ## Beat 4: Models (8.9s-12.1s)
 - type: feature_showcase
@@ -108,7 +108,7 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - rest: the card keeps settling through the whole beat
 - why: the proof behind the claim, named
 - duration: 3.2s
-- transition_in: fade
+- transition_in: fx:fade
 
 ## Beat 5: Ask (12.1s-16.2s)
 - type: feature_showcase
@@ -127,7 +127,7 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - rest: none, the push carries it
 - why: the whole film exists to end on the act of asking
 - duration: 4.1s
-- transition_in: fade
+- transition_in: fx:fade
 
 ## Beat 6: Close (16.2s-19.8s)
 - type: cta
@@ -146,4 +146,4 @@ not: "no hard cuts anywhere (the study measured peak scene score 0.113) · no th
 - rest: none
 - why: the reference closes on where the compute lives, and that is its actual differentiator
 - duration: 3.6s
-- transition_in: fade
+- transition_in: fx:fade

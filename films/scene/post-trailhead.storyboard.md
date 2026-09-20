@@ -76,7 +76,7 @@ craft:
 - onscreen: "ROUTE PLANNING" / "Draw the route. The climb comes with it."
 - why: the payoff line names the same idea AFTER it has been shown, so the hook is allowed to promise it
 - duration: 5.3s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 2: the route drawn, the climb proven (5.3s-18.3s)
 - type: demo (mechanism + click + consequence)
@@ -93,7 +93,7 @@ craft:
 - onscreen: none (the panel's own chrome: "Trailhead", "Ridge Loop · Sierra", "Save route", "1,180 ft climb · 5.4 mi")
 - why: this is the whole reason the film exists; it gets the most time and the only click
 - duration: 13.0s
-- transition_in: fade (cut mech: seam)
+- transition_in: fx:fade mech=seam
 
 ## Beat 3: what was proven, and the close (18.3s-24.1s)
 - type: payoff + close
@@ -110,4 +110,4 @@ craft:
 - onscreen: "The climb, visible before the first step." / "Trailhead" / "Plan the walk you can actually see."
 - why: the payoff names what beat 2 showed, and lands last, per the hook-suspense-payoff spine
 - duration: 5.8s
-- transition_in: cinematicZoom (mech: seam)
+- transition_in: fx:cinematicZoom mech=seam

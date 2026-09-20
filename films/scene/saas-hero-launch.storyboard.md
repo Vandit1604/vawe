@@ -27,7 +27,7 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - rest: the blob field never stops drifting, 14% scale over the beat
 - why: state the claim before anything has to be believed
 - duration: 5.2s
-- transition_in: cut
+- transition_in: fx:none
 - backdrop: dotmatrix
 
 ## Beat 2: Proof (5.2s-9.8s)
@@ -44,7 +44,7 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - rest: the field keeps drifting; nothing else moves
 - why: one line of borrowed credibility before the demo
 - duration: 4.6s
-- transition_in: cut (rise)
+- transition_in: fx:rise
 - backdrop: paper
 
 ## Beat 3: Demo (9.8s-15.2s)
@@ -61,7 +61,7 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - rest: the checklist rows arrive one at a time
 - why: show-don't-tell. The only beat that demonstrates anything
 - duration: 5.4s
-- transition_in: cut (punch)
+- transition_in: fx:punch
 - backdrop: soft
 
 ## Beat 4: Reverse (15.2s-20s)
@@ -78,7 +78,7 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - rest: the camera push IS the rest motion, and it is released at the cut
 - why: a rollout nobody can undo is a threat, not a feature
 - duration: 4.8s
-- transition_in: cut (zoom)
+- transition_in: fx:zoom
 - backdrop: gradientWash
 
 ## Beat 5: Payoff (20s-25.4s)
@@ -95,7 +95,7 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - rest: none, the count carries it
 - why: land the scale the demo implied, on the frame where the form changes
 - duration: 5.4s
-- transition_in: hard cut (none, the match IS the transition)
+- transition_in: fx:none
 - backdrop: accentPlain
 
 ## Beat 6: Capability (25.4s-30s)
@@ -112,7 +112,7 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - rest: the chip turns over four times; the cards hold
 - why: name the surface area without demonstrating four more things
 - duration: 4.6s
-- transition_in: cut (punch)
+- transition_in: fx:punch
 - backdrop: paperShapes
 
 ## Beat 7: CTA (30s-35s)
@@ -129,5 +129,5 @@ This video tells a forker that the shape of a launch film is reusable even when 
 - rest: the mark bobs 12px twice across the beat
 - why: the bookend. The hero's button returns as the last thing on screen, on an inverted ground
 - duration: 5.0s
-- transition_in: cut (rise)
+- transition_in: fx:rise
 - backdrop: ink
