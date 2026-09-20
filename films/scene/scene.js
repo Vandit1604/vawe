@@ -208,16 +208,26 @@ boot((data, fps, theme, canvas) => {
     // picker, bgAt) keeps asking the one question it already asks: does this window have `html`?
     if (b.html != null || b.src != null)
       return { from: atTime(b.from, `bg[${bi}].from`) ?? 0, to: atTime(b.to, `bg[${bi}].to`) ?? 1e9, html: htmlSource(b, window.__html, 'bg window'), tone: b.tone, spec: null };
-    const spec = applyBgOver(bgPreset(b.preset || 'paper', b.value, (theme && theme.bg) || bgPaletteFrom(theme && theme.palette) || undefined), b.opts);
+    // A preset is a NAMED RECIPE over `{base, fx}` (core/backgrounds/presets.js); `base`+`fx` is the
+    // same vocabulary, composed by hand instead of by name. No fallback name here any more: a window
+    // naming neither used to render `paper` in silence (`b.preset || 'paper'`), the exact "the engine
+    // picked it, so nobody ever designed one again" failure the theme.bgDefault throw two lines up
+    // already refuses for `use:"theme"`. The validator (bgErrors) catches this before render; this
+    // throw is the backstop for anything that reaches the renderer unvalidated.
+    if (b.preset == null && b.base == null && b.fx == null)
+      throw new Error(`bg[${bi}] names no backdrop: no preset, no base/fx composition, no use, no html/src.`);
+    const spec = b.preset != null
+      ? applyBgOver(bgPreset(b.preset, b.value, (theme && theme.bg) || bgPaletteFrom(theme && theme.palette) || undefined), b.opts)
+      : { base: b.base ? { ...b.base } : null, fx: (b.fx || []).map((f) => ({ ...f })) };
     // grain is OPT-IN (`"grain": true`), strip the in-engine canvas grain unless a video asks for
     // it, matching the ffmpeg pass. Default-off: no per-frame speck crawl over sharp text.
     if (data.grain !== true) spec.fx = (spec.fx || []).filter((f) => f.type !== 'grain');
-    const sd = b.seed != null ? b.seed : hashSeed(String((theme && theme.name) || 'x') + ':' + (b.preset || 'paper')) % 1000;
+    const sd = b.seed != null ? b.seed : hashSeed(String((theme && theme.name) || 'x') + ':' + (b.preset || 'composed')) % 1000;
     for (const f of spec.fx || []) if (f.seed == null) f.seed = sd;
     // `breathe` is OPT-IN (see drawBg): a canvas-painted window held nothing but its own preset motion
     // until now, so this is authoring, not a fallback. `true` uses the old feel (2% scale, ~18s period);
     // an object overrides `amp`/`period`.
-    return { from: atTime(b.from, `bg[${bi}].from`) ?? 0, to: atTime(b.to, `bg[${bi}].to`) ?? 1e9, preset: b.preset || 'paper', value: b.value, spec, breathe: b.breathe ?? null };
+    return { from: atTime(b.from, `bg[${bi}].from`) ?? 0, to: atTime(b.to, `bg[${bi}].to`) ?? 1e9, preset: b.preset, value: b.value, spec, breathe: b.breathe ?? null };
   });
   // --alpha exports a compositable OVERLAY, so the backdrop is the compositor's job, not the scene's.
   // Suppressing it here is what makes the alpha channel real: core/tokens.css clears CSS backgrounds
