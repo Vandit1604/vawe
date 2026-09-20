@@ -1,9 +1,11 @@
-// core/backgrounds/presets.js: THE PRESET LIBRARY, one entry per named background a scene author
+// core/backgrounds/presets.js: THE RECIPE LIBRARY, one entry per named background a scene author
 // picks (`bg[].preset`). Each entry is { name, blurb, build(P, grain) }: `build` composes the
 // palette P (see palette.js) and the shared `grain` fx object into a `{ base, fx:[...] }` spec, using
-// the painters in ./fx.js. core/backgrounds/index.js is the generic RUNNER: it looks a name up here,
-// calls build(), and wires renderBg/registry/opts around the result. Adding a preset is adding one
-// entry here, never touching the runner.
+// the painters in ./fx.js. That `{base, fx}` shape IS the authored vocabulary: a scene author can
+// write it directly (`bg[].base` + `bg[].fx`, films/scene/scene.js) instead of naming a recipe here,
+// composing the same painters by hand. A preset is a recipe over that vocabulary, never a second one:
+// adding a preset means adding one entry here, never touching the runner (core/backgrounds/index.js)
+// or the fx painters themselves.
 //
 // EVERY blurb says whether the field MOVES, because that is the fact an author cannot read off a still
 // and quality/gates/beat-check.mjs warns on a whole film built from flat ones. FLAT = base gradient +
