@@ -16,7 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CATALOG } from '../../blocks/catalog.mjs';
-import { CATEGORY_OF } from '../../blocks/index.mjs';
+import { CATEGORY_OF, CATEGORY_INTRO } from '../../blocks/index.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(root, 'site/lib/blocks.json');
@@ -33,7 +33,10 @@ const OUT = path.join(root, 'site/lib/blocks.json');
 // any more, so the hazard and the workaround are both gone.
 
 const grid = CATALOG.filter((e) => !e.overlay)
-  .map(({ name, family, blurb, props }) => ({ name, family, blurb, props, category: CATEGORY_OF[family] || 'Core' }));
+  .map(({ name, family, blurb, props }) => {
+    const category = CATEGORY_OF[family] || 'Core';
+    return { name, family, blurb, props, category, categoryIntro: CATEGORY_INTRO[category] };
+  });
 
 const body = JSON.stringify(grid, null, 2) + '\n';
 // `--check` (make blocks-json CHECK=1) reports the drift this file was written to remove, rather than

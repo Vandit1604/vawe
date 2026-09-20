@@ -37,12 +37,20 @@ export function Header({ active, variant = "solid" }: { active?: string; variant
           <WaveGlyph />
           Vawe
         </Link>
+        {/* Same active-hint mechanism Footer.tsx uses: the current page is a <span aria-current="page">,
+            never an <a>, so the page never links to itself and assistive tech is told which page it is. */}
         <nav className="nav">
-          {NAV.map((n) => (
-            <Link key={n.key} href={n.href} className={active === n.key ? "on" : undefined}>
-              {n.label}
-            </Link>
-          ))}
+          {NAV.map((n) =>
+            active === n.key ? (
+              <span key={n.key} aria-current="page">
+                {n.label}
+              </span>
+            ) : (
+              <Link key={n.key} href={n.href}>
+                {n.label}
+              </Link>
+            ),
+          )}
           <a href={DOCS_URL}>Docs</a>
         </nav>
         {/* Sibling of <nav>, not a child: it is an action, not navigation. Structurally it also
