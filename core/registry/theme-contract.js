@@ -109,7 +109,8 @@ export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRI
     // the theme's own suggested rotation, read by `make scaffold` to seed `bg[]`; a film's own `bg`
     // array is what actually renders, and the engine will not fall back to this list on your behalf.
     backdrop: 'ordered bg preset names the brand turns through, one window per beat: scaffold-only, seeds `make scaffold`\'s `bg[]`, never read at render (bg is required, engine-doctrine/MISTAKES.md #159)',
-    scale: 'type sizes at 16:9 for hook / headline / body / caption',
+    scale: 'how big text should be: named px sizes for the hook / headline / body / caption roles at '
+      + '16:9, so a layer writes `"size": "headline"` instead of guessing a number',
     layout: 'the anchor band (left/center/right) and margin every beat composes against',
     marks: 'the logo path plus its end-card and headline-adjacent sizes',
     cuts: 'the default and accent cut/transition names the brand favours',
