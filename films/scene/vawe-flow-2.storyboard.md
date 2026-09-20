@@ -223,10 +223,10 @@ craft:
 - shot: medium close, mark and wordmark centred
 - onscreen: "(the vawe mark, drawn as a line, then the wordmark growing out of it)"
 - trigger: the last film's exit clears the frame for the close
-- mechanism: small cobalt marks gather from off-frame and trace the vawe mark's outline as a line that draws itself on; as the last stroke lands, the wordmark "vawe" grows out from the mark's own position to its resting size beside it, then holds; the camera's one continuous travel comes to rest here, its only stop in the film
-- eye: scattered marks gathering off-frame -> the drawn line traces the vawe mark's outline -> the wordmark growing out beside it, held
-- becomes: scattered marks become a drawn line, which becomes the vawe mark with its wordmark grown out beside it, held still
-- why: the only still moment in the film, earned by everything before it moving; "text should come out of the logo as well" is the owner's own line
+- mechanism: the vawe mark's outline draws itself on as a line; as the last stroke lands, the wordmark "vawe" grows out from the mark's own position to its resting size beside it, letter by letter, then holds; the camera's one continuous travel comes to rest here, its only stop in the film. (the earlier plan for cobalt marks gathering from off-frame before the trace was checked against the engine's own vocabulary, `make arsenal`, and found no owner: no mechanism here scatters and converges a mark onto a path; building one bespoke for this beat would be a private effect with no owner, so it is dropped rather than faked)
+- eye: the drawn line traces the vawe mark's outline -> the wordmark growing out beside it, letter by letter -> held
+- becomes: a drawn line becomes the vawe mark, which becomes the vawe mark with its wordmark grown out beside it, held still
+- why: the only still moment in the film, earned by everything before it moving; "text should come out of the logo as well" is the owner's own line, now built as a per-letter growth timed off the last stroke landing
 - transition_why: rhyme · arrival · expressive
 - duration: 1.82s
 - recipe: flow-seam at=9.6 out=films in=logo axis=y
