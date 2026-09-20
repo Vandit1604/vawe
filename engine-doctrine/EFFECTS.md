@@ -907,7 +907,7 @@ A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default 
 | `field` | grain and vignette defaults for the backdrop |
 | `layout` | the anchor band (left/center/right) and margin every beat composes against |
 | `marks` | the logo path plus its end-card and headline-adjacent sizes |
-| `scale` | type sizes at 16:9 for hook / headline / body / caption |
+| `scale` | how big text should be: named px sizes for the hook / headline / body / caption roles at 16:9, so a layer writes `"size": "headline"` instead of guessing a number |
 
 ## Easings  `[timing]`
 
