@@ -235,5 +235,62 @@
         "note": "not independently measurable at 4 frames' resolution; a convention default so the sweep does not read as a linear mechanical slide"
       }
     }
+  },
+
+  "hover-click": {
+    "kind": "cursor",
+    "blurb": "a cursor eases onto a named control's live box, switches to a hand, and clicks it: the one move every cursor demo in this library already makes by hand-typing pixels",
+    "sources": [
+      {
+        "ref": "brew-native",
+        "t": 6.3,
+        "note": "cursor arrives over the install button at 0.8s into its own path, clicks 0.15s later"
+      },
+      {
+        "ref": "example-product-promo",
+        "t": 6.2,
+        "note": "same shape: arrives at 0.8s, clicks at 0.95s, 0.15s after arrival"
+      },
+      {
+        "ref": "preface-launch",
+        "t": 34.5,
+        "note": "arrives at 1.3s, clicks at 1.5s, 0.2s after arrival"
+      },
+      {
+        "ref": "vawe-flow-2",
+        "t": 12.5,
+        "note": "arrives at 0.5s, clicks at 0.6629s, 0.163s after arrival"
+      },
+      {
+        "ref": "quality/runs/evals/briefs/demo.json",
+        "t": 5.7,
+        "note": "the vawe-type-demo worked example: cursor and click land on 'save-btn' at the same instant, no gap. Not a filmed clip like the other sources here, this engine's own canonical demo, kept as a source because every number above still had to be typed as raw pixels by hand until this recipe existed"
+      }
+    ],
+    "slots": {
+      "at": "seconds: when the cursor arrives on the target's box",
+      "cursor": "layer id: the `cursor` layer",
+      "target": "layer id: the control being clicked"
+    },
+    "params": {
+      "edge": {
+        "default": "center",
+        "note": "which point on the target's live box the cursor lands on (core/layers/cursor.js EDGES: center/above/below/left/right); center matches every measured source"
+      },
+      "approach": {
+        "default": 0.6,
+        "unit": "s",
+        "note": "the snapTo ease-in window before arrival (core/layers/cursor.js resolveSnap default). Not a value measured off one clip: real approach distances range 0.8s to 5.5s across the sources above, so this keeps the engine's own default rather than fabricate one number for every layout"
+      },
+      "clickDelay": {
+        "default": 0.15,
+        "unit": "s",
+        "note": "gap from arrival to click: measured 0.15s (brew-native, example-product-promo), 0.163s (vawe-flow-2), 0.2s (preface-launch), 0s (the worked demo). 0.15s is the plurality"
+      },
+      "style": {
+        "default": "hand",
+        "note": "the shape the cursor switches to for the approach, before the click: a hand reads as hovering something clickable (core/layers/cursor.js CURSOR_STYLES)"
+      }
+    }
   }
 }

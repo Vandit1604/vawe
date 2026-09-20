@@ -29,9 +29,13 @@ can run longer than its neighbours: give the click room to read before the conse
 - **Quiet register.** A demo IS the interface being demonstrated, so it inherits the UI-adjacent
   restraint rule: the click and its consequence are the one thing allowed to be loud
   (`engine-doctrine/CRAFT/MOTION-REGISTERS.md` §1, `register: 'quiet'` in `type-spines.mjs`).
-- **A real cursor path.** The `cursor` layer follows `path:[{t,x,y}]` (times LOCAL to the layer's own
-  `start`, coordinates absolute screen px when the layer carries no `x`/`y` of its own) and fires a
-  ripple at each time in `clicks:[t...]`.
+- **Aim the cursor at the control, not at pixels.** `{ "recipe": "hover-click", "at": <s>, "cursor":
+  "<cursor layer id>", "target": "<control layer id>" }` (`recipes/recipes.json`) eases the cursor onto
+  the target's own LIVE box (`snapTo`), switches it to a hand, and clicks (`core/layers/cursor.js`).
+  This is the default: it survives a later reflow of the control, which a hand-typed `{t,x,y}` does not.
+  Hand-type `path:[{t,x,y}]` (times LOCAL to the layer's own `start`, coordinates absolute screen px
+  when the layer carries no `x`/`y` of its own) and `clicks:[t...]` only when there is no real layer to
+  name, e.g. clicking a point inside a captured image with no `component` box under it.
 - **A click with a CONSEQUENCE.** Whatever changes after the click (a chip appears, a state flips) must
   start at or just after the click time, never on its own independent schedule: the causality is the
   whole point of a demo, and a coincidental timing reads as fake the moment anyone looks twice.
