@@ -329,6 +329,35 @@ function expandEnterLine(scene, line) {
   if (line.exit) L.exit = { ...line.exit };
 }
 
+// expandCursorLine: `hover-click` -> the cursor layer's OWN `snapTo`/`clicks`/`styleAt`, the props
+// core/layers/cursor.js already exposes for exactly this. Every source measured for this recipe
+// hand-typed the target's screen px instead of naming it; this writes the same three props an author
+// could type by hand, aimed at a layer id rather than a guessed coordinate.
+function expandCursorLine(scene, line) {
+  const name = line.recipe;
+  const bad = (why) => { throw new Error(`recipe "${name}": ${why}`); };
+  const recipe = pickRecipe(name);
+  if (recipe.kind !== 'cursor') bad(`expand.mjs only expands kind "cursor" here, got "${recipe.kind}"`);
+  for (const slot of ['at', 'cursor', 'target']) if (line[slot] == null) bad(`missing slot "${slot}"`);
+
+  const cur = findLayer(scene, line.cursor);
+  if (!cur) bad(`no layer id "${line.cursor}" (the "cursor" slot)`);
+  if (cur.type !== 'cursor') bad(`"${line.cursor}" is a "${cur.type}" layer, not "cursor" (the "cursor" slot)`);
+  if (!findLayer(scene, line.target)) bad(`no layer id "${line.target}" (the "target" slot)`);
+
+  const edge = paramOf(name, recipe, 'edge', line.params);
+  const approach = paramOf(name, recipe, 'approach', line.params);
+  const clickDelay = paramOf(name, recipe, 'clickDelay', line.params);
+  const style = paramOf(name, recipe, 'style', line.params);
+
+  const at = line.at;
+  cur.snapTo = [...(cur.snapTo || []), { t: at, id: line.target, edge, dur: approach }];
+  cur.clicks = [...(cur.clicks || []), at + clickDelay];
+  // Switched shape starts easing in alongside the approach, so the hand is already showing well before
+  // the click lands rather than popping the instant the box is reached.
+  cur.styleAt = [...(cur.styleAt || []), { t: Math.max(0, at - approach), style }];
+}
+
 // aspectKey names the canvas a seam's travel (exitPx/enterPx, off sceneDims) should measure against.
 // Omitted (default '') keeps sceneDims' own default, the scene's own declared aspect: core/engine/expand.js
 // passes the render's actual aspect key through here, from internal/render/expand.go, so a flow-seam
@@ -354,6 +383,7 @@ export function expandRecipes(scene, aspectKey = '') {
     }
     else if (kind === 'camera') expandCameraLine(out, line);
     else if (kind === 'enter') expandEnterLine(out, line);
+    else if (kind === 'cursor') expandCursorLine(out, line);
     else throw new Error(`recipe "${line.recipe}": expand.mjs does not yet expand kind "${kind}"`);
   }
   return out;
