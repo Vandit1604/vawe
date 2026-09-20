@@ -55,7 +55,7 @@ duration: 14s
 - onscreen: You write the film as a text file. | vawe films/scene/shader-path.json
 - why: the claim of the film is on screen in beat one, as a command rather than as a sentence
 - duration: 2.99s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: It runs (3.33s-5.01s)
 - type: proof
@@ -72,7 +72,7 @@ duration: 14s
 - onscreen: No timeline. No motion designer.
 - why: the states are the evidence that a text file is really the input, and they are true numbers
 - duration: 1.68s
-- transition_in: none (the object never leaves)
+- transition_in: fx:none
 
 ## Beat 3: The border (5.01s-6.36s)
 - type: turn
@@ -90,7 +90,7 @@ duration: 14s
 - narration: none, and there is none anywhere: this film has no voice
 - why: the lap is the promise that the panel itself is about to do something
 - duration: 1.35s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 4: The interior turns (6.36s-7.71s)
 - type: reveal
@@ -107,7 +107,7 @@ duration: 14s
 - onscreen: This is what comes out.
 - why: the transformation has to happen in place, or it is a cut to a second thing
 - duration: 1.35s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 5: The fan (7.71s-9.73s)
 - type: payoff
@@ -124,7 +124,7 @@ duration: 14s
 - onscreen: none
 - why: range is the argument, and range cannot be shown with one specimen
 - duration: 2.02s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 6: The cycle (9.73s-11.07s)
 - type: feature_showcase
@@ -144,7 +144,7 @@ duration: 14s
 - onscreen: Same file, any shape.
 - why: the swap is the proof of the claim the line makes
 - duration: 1.34s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 7: From one text file (11.07s-14.0s)
 - type: cta
@@ -161,4 +161,4 @@ duration: 14s
 - onscreen: From one text file. | vawe | vawe.dev
 - why: the payoff lands only after the viewer has watched the file turn into the pictures
 - duration: 2.93s
-- transition_in: none (the terminal is the continuous object across this seam)
+- transition_in: fx:none

@@ -51,7 +51,7 @@
 //       here that needs NO plan, so it also runs on a film with no sidecar and no storyboard, which is
 //       exactly the film most likely to have no peak. See "the peak, asked about even when there is no
 //       plan" below for its trigger and the measured dose behind it.
-// Waive a deliberate break with {"authoring":{"allow":["beat-holds-still", ...]}}.
+// Waive it, a break for cause or a chosen absence the check cannot see, with {"authoring":{"allow":["beat-holds-still", ...]}}.
 import fs from 'node:fs';
 import path from 'node:path';
 import { sceneTiming, num } from './scene-timing.mjs';

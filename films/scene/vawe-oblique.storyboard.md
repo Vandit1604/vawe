@@ -75,7 +75,7 @@ copying a shape without its role.
 - rest: none, the word by word reveal fills the beat
 - why: state the whole promise in six words, so every later beat is proof and not exposition
 - duration: 2.6s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: Write (2.6s-6.6s)
 - archetype: split
@@ -99,7 +99,7 @@ copying a shape without its role.
 - rest: the scroll never fully stops between its stops
 - why: prove the input is a real readable artifact, not a diagram of one
 - duration: 4s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 3: Build (6.6s-10s)
 - archetype: other (a left-aligned transcript, no container at all)
@@ -122,7 +122,7 @@ copying a shape without its role.
 - rest: none, the typing fills the beat
 - why: name the one command, because the whole promise is that there is only one
 - duration: 3.4s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 4: Get (10s-13.2s)
 - archetype: hero-object
@@ -144,7 +144,7 @@ copying a shape without its role.
 - rest: none, the landing carries it
 - why: pay off the hook. The viewer watched the input and now sees the output, with nothing in between hidden
 - duration: 3.2s
-- transition_in: cinematicZoom
+- transition_in: fx:cinematicZoom
 
 ## Beat 5: Range (13.2s-15.6s)
 - archetype: full-bleed-row
@@ -167,7 +167,7 @@ copying a shape without its role.
 - rest: a slow drift across the fan
 - why: show the range without claiming a number the frame does not show
 - duration: 2.4s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 6: Proof (15.6s-17.6s)
 - archetype: symmetric-pair
@@ -190,7 +190,7 @@ copying a shape without its role.
 - rest: 1% breathe on both panes together, so they stay identical even while moving
 - why: determinism is the only claim here that a viewer cannot check by eye, so show it rather than say it
 - duration: 2s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 7: CTA (17.6s-20s)
 - archetype: lockup
@@ -213,4 +213,4 @@ copying a shape without its role.
 - rest: none. The film stops.
 - why: one next step, and it closes the bookend the blurred type opened
 - duration: 2.4s
-- transition_in: fade
+- transition_in: fx:fade

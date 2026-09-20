@@ -28,7 +28,7 @@ This video tells an author that a cut is a joint the film already has, and the j
 - rest: the strip keeps filling through the hold
 - why: state the claim as a question the eye has to answer, so the match cut has something to land on
 - duration: 2.8s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: Build (2.8s-5.6s)
 - type: build
@@ -44,7 +44,7 @@ This video tells an author that a cut is a joint the film already has, and the j
 - rest: the drifting dot grid, and the strip filling
 - why: the sentence is left unfinished on purpose, so the ear is also waiting at the joint
 - duration: 2.8s
-- transition_in: punch
+- transition_in: fx:punch
 
 ## Beat 3: Proof (5.6s-7.6s)
 - type: proof
@@ -60,7 +60,7 @@ This video tells an author that a cut is a joint the film already has, and the j
 - rest: none. The frame holds while the eye reads the number
 - why: the number on the card IS the cut's time, so the claim "the joint owns the time" is shown before it is said
 - duration: 2.0s
-- transition_in: none (the match cut is hard by definition)
+- transition_in: fx:none
 
 ## Beat 4: Payoff (7.6s-10.8s)
 - type: payoff
@@ -76,4 +76,4 @@ This video tells an author that a cut is a joint the film already has, and the j
 - rest: the strip holds finished, nothing else moves
 - why: name the rule only after the eye has already seen it work
 - duration: 3.2s
-- transition_in: zoom
+- transition_in: fx:zoom

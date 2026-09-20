@@ -36,7 +36,7 @@ destination: reels
 - narration: You built it by hand,
 - why: open mid-thought so the first cut is a comma and not a door
 - duration: 2.8s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: and it looked good (2.8s-5.4s)
 - type: build
@@ -50,7 +50,7 @@ destination: reels
 - narration: and it looked good,
 - why: the setup has to be genuinely attractive or the reversal is not a reversal
 - duration: 2.6s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 3: until the number moved (5.4s-8.2s)
 - type: problem
@@ -64,7 +64,7 @@ destination: reels
 - narration: until one number moved,
 - why: the turn, and it lands on a picture of the damage rather than a word for it
 - duration: 2.8s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 4: and now it is Friday again (8.2s-11.2s)
 - type: agitation
@@ -78,7 +78,7 @@ destination: reels
 - narration: and now it is Friday again.
 - why: the cost is repetition, so the frame has to repeat until it is uncomfortable
 - duration: 3.0s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 5: describe it once (11.2s-15.0s)
 - type: payoff
@@ -92,4 +92,4 @@ destination: reels
 - narration: So describe it once instead.
 - why: the sentence finally reaches a full stop, on the thing that ends the loop
 - duration: 3.8s
-- transition_in: cut
+- transition_in: fx:none

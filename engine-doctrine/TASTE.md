@@ -115,7 +115,8 @@ make author-check D=<file> [VS=<brand>]           # THE LADDER. Every step, ever
                                                   # one as it goes, and says "nothing found" when a step
                                                   # is clean. Measured: 1.4s end to end on a 19.6s film,
                                                   # browser launch included.
-                                                  # Waive a deliberate break with the FULL shape. A bare
+                                                  # Waive it (a break for cause, or a chosen absence the
+                                                  # check cannot see) with the FULL shape. A bare
                                                   # allow array blocks (author-check.mjs):
                                                   #   {"authoring":{"allow":["dead-air"],
                                                   #     "_why":{"dead-air":"why this film is the exception"}}}

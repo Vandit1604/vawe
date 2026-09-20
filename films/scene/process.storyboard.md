@@ -54,7 +54,7 @@ source: engine-doctrine/MISTAKES.md #211 (the layout audit measured a rotating l
 - onscreen: "Nothing came near the edge." / "The safe-zone audit failed it at every rotation."
 - why: the contradiction is the open loop, and the picture states it before the words do
 - duration: 3.2s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 2: shrink it 40 percent (3.2s-6.1s)
 - type: problem
@@ -67,7 +67,7 @@ source: engine-doctrine/MISTAKES.md #211 (the layout audit measured a rotating l
 - onscreen: "Shrink it 40 percent." / "The only change that passed. The film got worse."
 - why: the wrong answer has to be shown working, or the middle of the film has no cost
 - duration: 2.9s
-- transition_in: content turnover (no root cut; the film is one take)
+- transition_in: fx:none
 
 ## Beat 3: 255px of clearance (6.1s-9.2s)
 - type: evidence
@@ -80,7 +80,7 @@ source: engine-doctrine/MISTAKES.md #211 (the layout audit measured a rotating l
 - onscreen: "255px of clearance." / "Measured as 139px over the edge."
 - why: this is the payoff of the open question, and it is a quantity, so it is a length and not a numeral
 - duration: 3.1s
-- transition_in: content turnover (no root cut; the film is one take)
+- transition_in: fx:none
 
 ## Beat 4: fix two of three (9.2s-12.0s)
 - type: reversal
@@ -93,7 +93,7 @@ source: engine-doctrine/MISTAKES.md #211 (the layout audit measured a rotating l
 - onscreen: "Fix two of three. Nothing moves." / "Unclamped, one clean scene became seven failures."
 - why: the most counterintuitive moment goes last before the payoff, and the middle of a process is where it looks like a mistake
 - duration: 2.8s
-- transition_in: content turnover (no root cut; the film is one take)
+- transition_in: fx:none
 
 ## Beat 5: only fixing all three worked (12.0s-15.0s)
 - type: payoff
@@ -106,4 +106,4 @@ source: engine-doctrine/MISTAKES.md #211 (the layout audit measured a rotating l
 - onscreen: "Only fixing all three worked." / "Two scenes changed. Fail to pass. Zero regressions."
 - why: the bookend closes on the corrected shot, and the idea is what is left over rather than what is said
 - duration: 3.0s
-- transition_in: content turnover (no root cut; the film is one take)
+- transition_in: fx:none

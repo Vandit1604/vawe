@@ -99,13 +99,23 @@ Claude Code loads `vawe-video-planning`; others read `engine-doctrine/CRAFT/AUTH
 
 ## Stage 7, render: waivers  `[gated: quality/gates/author-check.mjs]`
 
-A rule you deliberately break is waived IN THE SCENE, with a reason. A waiver with no `_why` blocks:
+`authoring.allow` + `_why` is the one mechanism, and it covers two different cases with the one
+sentence, never two mechanisms: a rule broken for cause, and a chosen absence a static rule cannot
+otherwise see (no continuous object, a still frame, no transition, an ending with nothing after it).
+Neither is an apology. Measured across the library, half of real waiver use is the second case, an
+author declaring "I chose this", not "I broke this" (`no-continuous-object`, `dead-air`,
+`plain-slideshow`, `static-bg`, `no-transition`, `ends-on-nothing` are the codes this shows up on
+most). The `_why` is what turns a reflex into a recorded decision either way, the same split
+`quality/gates/audio-check.mjs` already draws for sound: chosen quiet and an audio block nobody
+considered are not the same finding, and a waived rule and a declared absence are not the same finding
+either, even though both are written with the one field. A waiver with no `_why` blocks:
 
 ```json
 "authoring": { "allow": ["dead-air"], "_why": { "dead-air": "the held frame IS the beat" } }
 ```
 
-`authoring.allow` + `_why` is the one excuse mechanism: a rule fires or not, and the only door out is a reason written in the scene.
+The only door out of a fired rule is a reason written in the scene, whether that reason is "I broke
+this on purpose" or "I chose this absence on purpose."
 
 ## Changing the ENGINE, not a film?  `[live: harness/live/craft-live.mjs]`
 

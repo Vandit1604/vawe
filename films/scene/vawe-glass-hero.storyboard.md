@@ -37,7 +37,7 @@ detail behind it, and a busy ground is the cheap way to supply it. Here the deta
 - rest: the ground drifts 1.15% per second under everything. Nothing else idles
 - why: state the Before in three words and let the lens walk into the claim
 - duration: 3.9s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: It reaches the type (3.9s-8.2s)
 - type: proof
@@ -54,7 +54,7 @@ detail behind it, and a busy ground is the cheap way to supply it. Here the deta
 - rest: none on the spectacle. The slab holds dead still for 1.6s before it moves, so the surge has something to break
 - why: this is the whole claim, shown rather than described. Type is the densest detail on a white frame
 - duration: 4.3s
-- transition_in: blur
+- transition_in: fx:blur
 
 ## Beat 3: One straight edge, bent (8.2s-10.9s)
 - type: payoff
@@ -71,4 +71,4 @@ detail behind it, and a busy ground is the cheap way to supply it. Here the deta
 - rest: the lens drifts. The bend does not change
 - why: name the recipe while the proof is still in frame, so nobody has to take it on trust
 - duration: 2.7s
-- transition_in: blur
+- transition_in: fx:blur

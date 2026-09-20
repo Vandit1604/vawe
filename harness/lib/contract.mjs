@@ -954,7 +954,9 @@ const TRANSITION_LINE_RE = /^fx\s*:\s*([A-Za-z][A-Za-z0-9-]*)\s*((?:\s+\w+\s*=\s
 const TRANSITION_PARAM_RE = /(\w+)\s*=\s*(\S+)/g;
 const TRANSITION_DIR_WORDS = ['left', 'right', 'up', 'down'];
 
-/** parseTransitionIn(raw) → {fx,timing?,dur?,dir?} | null (prose, no decision stated) | {error}. */
+const TRANSITION_MECH_NAMES = ['cut', 'seam', 'sting'];
+
+/** parseTransitionIn(raw) → {fx,timing?,dur?,dir?,mech?} | null (prose, no decision stated) | {error}. */
 export function parseTransitionIn(raw) {
   if (!raw) return null;
   const m = TRANSITION_LINE_RE.exec(String(raw).trim());
@@ -971,8 +973,8 @@ export function parseTransitionIn(raw) {
   let pm; TRANSITION_PARAM_RE.lastIndex = 0;
   while ((pm = TRANSITION_PARAM_RE.exec(paramsRaw))) {
     const [, key, valRaw] = pm;
-    if (!['timing', 'dur', 'dir'].includes(key)) {
-      return { error: `transition_in "${key}" is not a known param. Known: timing, dur, dir.` };
+    if (!['timing', 'dur', 'dir', 'mech'].includes(key)) {
+      return { error: `transition_in "${key}" is not a known param. Known: timing, dur, dir, mech.` };
     }
     if (key === 'timing') {
       if (!TIMING_NAMES.includes(valRaw)) {
@@ -989,6 +991,12 @@ export function parseTransitionIn(raw) {
       if (TRANSITION_DIR_WORDS.includes(valRaw)) out.dir = valRaw;
       else if (Number.isFinite(n)) out.dir = n;
       else return { error: `transition_in dir "${valRaw}" is not left|right|up|down or a number of degrees.` };
+    } else if (key === 'mech') {
+      if (!TRANSITION_MECH_NAMES.includes(valRaw)) {
+        return { error: `transition_in mech "${valRaw}" is not one of ${TRANSITION_MECH_NAMES.join(', ')}.` };
+      }
+      try { boundaryMechanism(fx, valRaw); } catch (e) { return { error: e.message }; }
+      out.mech = valRaw;
     }
   }
   return out;

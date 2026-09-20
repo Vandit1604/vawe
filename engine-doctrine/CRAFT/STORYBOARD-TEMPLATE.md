@@ -273,6 +273,13 @@ not: "the defaults this film refuses, in your own words"
   An ambiguous name is an ERROR listing every `kind:name` choice. A decisive-looking but unknown token
   is an ERROR naming the nearest real names. Free prose is a WARNING, never silently dropped, naming
   the 3 best-ranked entries as ready `use:` lines.
+    `transition_in:` IS WRITTEN `fx:<name> [timing=<t>] [dur=<s>] [dir=<left|right|up|down>] [mech=<cut|seam|sting>]`,
+  read against the same transition catalog `make transitions` lists. A hard cut with no visual
+  transition is still a decision, and it is written `fx:none`, never the bare word "cut": a bare word
+  does not reach the engine and is reported as prose, waiting to be built. Naming an entrance effect
+  on the incoming layer itself (a blur, a wipe, a rise) belongs on `mechanism:`/`motion:`, not folded
+  into `transition_in:` as a parenthetical; `transition_in:` answers one question only, what happens
+  AT the boundary between the two beats.
     A KIND WITH ITS OWN FIELD IS REFUSED, NOT A SECOND SPELLING OF IT: a camera move or camera word
   belongs on `camera:`; a cut, a seam fx, a sting fx, or a cut timing belongs on `transition_in:`; a
   move shape or a path curve belongs on `move:`; a part entrance belongs on `motion:`; an idle belongs
@@ -405,7 +412,7 @@ not: "the defaults this film refuses, in your own words"
 - rest: 1.5% breathing scale on the headline through the hold
 - why: open loop, pose the question the payoff answers (curiosity before any claim)
 - duration: 6s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: Build (6s-12s)
 - type: product_intro

@@ -180,7 +180,7 @@ destination: web
 - onscreen: See the film before you render it.
 - why: the viewer has to meet the bar as a caret before it can mean anything as a playhead, and a line that erases itself leaves the bar as the only thing on screen
 - duration: 2.6s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 2: The bar lands on a clock (2.6s-5.6s)
 - type: product_intro
@@ -194,7 +194,7 @@ destination: web
 - onscreen: Every layer, on one clock.
 - why: the claim only lands if the viewer sees the actual product surface making it, so this beat spends its seconds on captured UI and four words
 - duration: 3.0s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 3: The scrub (5.6s-8.8s)
 - type: feature_showcase
@@ -208,7 +208,7 @@ destination: web
 - onscreen: Scrub it. No render.
 - why: this is the turn, and it has to arrive while the viewer is enjoying the smoothness so the hole reads as a problem rather than a feature
 - duration: 3.2s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 4: The hole (8.8s-12.4s)
 - type: problem
@@ -222,7 +222,7 @@ destination: web
 - onscreen: 1.2 seconds of nothing.
 - why: the cost has to be a number the viewer can see the size of, so the band is measured on screen instead of described. The number is not written by hand: beat-check found this hole in a real scene and the studio drew it
 - duration: 3.6s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 5: Fixed on the clock (12.4s-16.0s)
 - type: payoff
@@ -236,4 +236,4 @@ destination: web
 - onscreen: Fixed here. Then rendered.
 - why: the film must end on the fix happening rather than on a sentence about fixing, so the last thing that moves is the render completing
 - duration: 3.6s
-- transition_in: cut
+- transition_in: fx:none
