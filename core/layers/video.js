@@ -70,6 +70,11 @@ export function build(kit, el, L, { src, w, h, radius, fit, poster, in: inPoint,
   // cover only when there is a box to cover, the same guard image.js needs: with one axis declared,
   // `height:100%` has nothing to resolve against and the element collapses to zero.
   if (w && h) v.style.objectFit = fit || 'cover';
+  // `border`/`shadow`/`elevation`/`glow` are the ONE shared box treatment every other layer already
+  // has (kit.chipBox, core/layers/util.js): a video never asked for it before because nothing had, so
+  // "no video border" read as a rule rather than a gap. It is a no-op guard-return when none of those
+  // props is set, so an existing film with none renders byte-identical.
+  kit.chipBox(el, L);
   el.__video = v;
 }
 
