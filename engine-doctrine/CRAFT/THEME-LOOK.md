@@ -152,9 +152,9 @@ bloomberg, duolingo, nike, vercel) carry one. `themes/default.json` and `themes/
 `themes/stripe.json` do not yet; a theme with no `look` is not an error, it is a theme that has not
 been given one.
 
-## The computed look, for the other 31
+## The computed look, for the other 28
 
-Only 3 of the 34 themes in the registry carry an authored `look`, so an engine default reading
+Only 3 of the 31 themes in the registry carry an authored `look`, so an engine default reading
 `theme.look` alone would do nothing for nearly all of them, `themes/default.json` included. `computedLook(theme, { isLightBg })` and `resolveLook(theme,
 opts)` (`core/registry/theme-contract.js`, beside `lookErrors`) close that gap: `resolveLook` returns
 `{...computedLook(theme), ...(theme.look||{})}`, so an authored key always wins over the computed one,
