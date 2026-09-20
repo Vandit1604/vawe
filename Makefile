@@ -408,7 +408,14 @@ ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit A
 	node harness/lib/record-render.mjs ship $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log $$((t1-t0)) 2>/dev/null || true
 	@node quality/gates/render-verify.mjs $(D)
 	@$(if $(NOSPLIT),echo "  · motion split skipped (NOSPLIT=1)",node quality/gates/motion-split.mjs $(D))
-	node quality/audit.mjs $(D) --aspect $(if $(ASPECT),$(ASPECT),all)
+	# AUDIT WHAT WE RENDERED, not every canvas that exists. This said `all`, so a film declaring
+	# `aspect: "16:9"` shipped ONE mp4 and was then graded on four canvases, failing on crops it never
+	# promised and never produced. quality/audit.mjs's own header calls that out: "Auditing one aspect
+	# while the CLI ships four is a gate that agrees with itself and not with the output. Default stays
+	# the scene's own aspect, so a single-aspect scene costs nothing." The same sentence forbids the
+	# reverse, which is what this line was doing. Pass ASPECT= to render AND audit several; the two
+	# now always agree, because both read the same variable.
+	node quality/audit.mjs $(D) $(if $(ASPECT),--aspect $(ASPECT),)
 	@node quality/gates/seam-snap.mjs $(D) $(if $(JSON),--json,)
 	@node quality/gates/seam-forensics.mjs $(D)
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
