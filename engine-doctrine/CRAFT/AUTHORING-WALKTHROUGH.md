@@ -128,9 +128,10 @@ on the **ambition floor** (`plain-slideshow`, too little motion; the inverse of 
 book tells do NOT block.** `linear-motion`, `monotone-timing`, `enter-and-retreat` and `effect-soup` are
 every one of them `warn()` in `harness/author/motion-director.mjs`, which exits only on FAIL-tier codes
 and has no `--strict` path. Directed lives between soup and slideshow. WARN-tier findings
-you read and reach past. A deliberate rule break you stand behind → waive it in the scene, **with its
-reason**, because a bare `allow` array blocks in the always-on half (`author-check.mjs:74-83` wants a
-`_why` of at least 12 characters per waived code):
+you read and reach past. A rule you stand behind breaking, or an absence you chose on purpose that the
+rule cannot see either way → waive it in the scene, **with its reason**, because a bare `allow` array
+blocks in the always-on half (`author-check.mjs:74-83` wants a `_why` of at least 12 characters per
+waived code):
 
 ```json
 "authoring": {

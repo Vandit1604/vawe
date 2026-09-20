@@ -59,7 +59,7 @@ claim, no specification, no rating.
 - rest: the arm never stops. It is a metronome
 - why: open on the thing every musician has done, setting a number and then not playing it
 - duration: 3.4s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: The correction (3.4s-6.2s)
 - type: proof
@@ -76,7 +76,7 @@ claim, no specification, no rating.
 - rest: THE NAMED PEAK. Everything else in the film is restrained so this reads as the one loud moment
 - why: this is the product working, and it is a motion, so it has to be shown as one
 - duration: 2.8s
-- transition_in: none
+- transition_in: fx:none
 
 ## Beat 3: Settled (6.2s-10s)
 - type: payoff
@@ -93,4 +93,4 @@ claim, no specification, no rating.
 - rest: the arm keeps swinging through the last frame. A metronome that stops is a metronome that is off
 - why: pay off the loop by naming the tempo only after the film has shown it being found
 - duration: 3.8s
-- transition_in: none
+- transition_in: fx:none

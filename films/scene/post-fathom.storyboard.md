@@ -70,7 +70,7 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - rest: the depth rule keeps falling through the hold
 - why: open loop. A reading past where the viewer's own gear quits is a question, not a claim
 - duration: 3.5s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: The instrument (3.5s-7s)
 - type: product_intro
@@ -88,7 +88,7 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - rest: the depth rule keeps falling
 - why: answer where the number came from before making any claim about it
 - duration: 3.5s
-- transition_in: whip
+- transition_in: fx:whip
 
 ## Beat 3: The mechanism (7s-11s)
 - type: proof
@@ -106,7 +106,7 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - rest: this is the peak. The depth rule keeps falling and nothing else is added
 - why: THE SPECTACLE. The only beat where the product opens, and the only one that earns a close shot
 - duration: 4s
-- transition_in: whip
+- transition_in: fx:whip
 
 ## Beat 4: Payoff (11s-14.5s)
 - type: payoff
@@ -124,7 +124,7 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - rest: the depth rule reaches the bottom of the frame and stops. The descent is over
 - why: pay off the loop the hook opened, on the film's only bright frame
 - duration: 3.5s
-- transition_in: whip
+- transition_in: fx:whip
 
 ## Beat 5: Close (14.5s-17.3s)
 - type: cta
@@ -142,4 +142,4 @@ profile (a descent to 41 metres, a 38-minute run time). Nothing claims a real ce
 - rest: none. The rule has arrived and holding still is the point
 - why: close on the name, at the bottom of the descent
 - duration: 2.8s
-- transition_in: dissolve
+- transition_in: fx:dissolve

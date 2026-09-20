@@ -28,7 +28,7 @@ This video tells an author that a sting is punctuation, and punctuation lands on
 - rest: the playhead keeps walking through the hold
 - why: name the problem before the film performs the answer, so the sting has something to punctuate
 - duration: 2.9s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: Turn (2.9s-5.35s)
 - type: proof
@@ -44,7 +44,7 @@ This video tells an author that a sting is punctuation, and punctuation lands on
 - rest: none. The word holds while the ground comes back up
 - why: the moment IS the argument, so it is shown as a moment and not described as one
 - duration: 2.45s
-- transition_in: punch
+- transition_in: fx:punch
 
 ## Beat 3: Payoff (5.35s-8.0s)
 - type: payoff
@@ -60,4 +60,4 @@ This video tells an author that a sting is punctuation, and punctuation lands on
 - rest: the playhead runs out to the end of the grid
 - why: the same texture at half the dose proves the sting is a dial, not a decoration
 - duration: 2.65s
-- transition_in: zoom
+- transition_in: fx:zoom

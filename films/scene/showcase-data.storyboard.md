@@ -31,7 +31,7 @@ not: "no narration, no abstract particle field, no chart standing in for the cla
 - rest: the dot matrix drifts; the chip holds still once it lands
 - why: put the evidence on screen before making any claim about it
 - duration: 3.35s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 2: Proof (3.35s-6.65s)
 - type: feature_showcase
@@ -48,7 +48,7 @@ not: "no narration, no abstract particle field, no chart standing in for the cla
 - rest: none. The arrival is the beat.
 - why: show the comparison instead of asserting it. Two strings side by side are the whole proof.
 - duration: 3.3s
-- transition_in: cut
+- transition_in: fx:none
 
 ## Beat 3: Payoff (6.65s-9.8s)
 - type: benefit_highlight
@@ -65,4 +65,4 @@ not: "no narration, no abstract particle field, no chart standing in for the cla
 - rest: none. The reveal runs to the last frame.
 - why: name the mechanism. A promise with a reason behind it is the thing an engineer can check.
 - duration: 3.15s
-- transition_in: riseBlur
+- transition_in: fx:riseBlur
