@@ -683,7 +683,7 @@ const SELECTOR = {
   produces: 'layers',
   ready: true,
   render: (o) => [{
-    type: 'text', x: 160, y: 460, w: 1600, align: 'center', size: 130, weight: 700,
+    type: 'text', pin: 'stage', y: 460, align: 'center', size: 130, weight: 700,
     color: 'var(--text)', start: 0, duration: 5, anim: 'none',
     text: sanitizeHtml(pick(o, 'text', SELECTOR_SCHEMA)),
     split: 'char', preset: pick(o, 'preset', SELECTOR_SCHEMA),
