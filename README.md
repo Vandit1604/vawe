@@ -4,9 +4,13 @@ answers: what vawe is, how to install it, and the one command that turns a JSON 
 group: project
 ---
 
-<div align="center">
+# Vawe: one JSON in, one mp4 out
+```bash
+echo '{"module":"scene","theme":"default","bg":[{"preset":"plain"}],"layers":[{"type":"text","text":"hi"}]}' > scene.json
+npx vawe scene.json --draft   # → scene.mp4
+```
 
-# Vawe
+<div align="center">
 
 ### one JSON → one video. deterministic to the frame.
 
@@ -82,6 +86,20 @@ A scene is one JSON:
   ],
   "audio": { "silent": true } }
 ```
+
+## For agents
+
+A vawe film is one self-describing JSON, module `"scene"` (no other module exists).
+[`films/scene/schema.json`](films/scene/schema.json) is the full contract; read
+[`engine-doctrine/PRIMITIVES.md`](engine-doctrine/PRIMITIVES.md) for the layer vocabulary before writing one, and
+[`films/scene/sample.json`](films/scene/sample.json) for a worked example, rather than guessing at either from the
+snippet above.
+
+This repo also ships an MCP server, `mcp/server.mjs`. A caller wires it in
+(`claude mcp add vawe -- node mcp/server.mjs` from a checkout), and its tools hand over the scene
+vocabulary, render a watermarked draft, and export the clean file, so the caller's own model can write
+and render a scene without reading any of the doctrine above by hand. Every tool it registers, what
+each one does, and how a draft becomes a paid export: [`mcp/README.md`](mcp/README.md).
 
 ## The loop
 
