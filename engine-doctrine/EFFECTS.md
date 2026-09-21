@@ -48,16 +48,15 @@
 
 ## Motion voices (tactile sound)  `[audio]`
 
-The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the five can also be placed by hand as `audio.cues[]`. Doctrine: `engine-doctrine/CRAFT/SOUND.md`.
+The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `whoosh` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` blooms on the moment. These six are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the six can also be placed by hand as `audio.cues[]`. Doctrine: `engine-doctrine/CRAFT/SOUND.md`.
 
 | name | what / when |
 |---|---|
-| `bloom` | something OPENS: placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut. Slower in than the others, because an opening is not an arrival |
+| `bloom` | something OPENS: placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut, and on a declared `spectacle`. Slower in than the others, because an opening is not an arrival |
 | `chime` | a small bright accent where a moment resolves. Noticed rather than announced, so it survives repetition better than a sting does |
 | `droplet` | something falls into place: a short pitched drop, placed automatically on a `drop` or `zoom` cut. The lightest of the arrival sounds |
 | `impact` | something heavy ARRIVES and lands hard: a hit with an edge, a mass and a room, in that order. A frame-sized card reaching its mark, a panel slamming home |
 | `pluck` | punctuation, for a small element or a counter digit. Quiet on purpose: this is the one that becomes a machine gun, and the density rules exist because of it |
-| `riser` | a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. Tension, suspense, a countdown to what a declared `spectacle` names |
 | `whoosh` | air moving past. One camera gesture, one whoosh, never one per keyframe: the sound rises as the move starts and falls away as it passes |
 
 ## Backgrounds  `[background]`
@@ -1161,4 +1160,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_711 effects across 60 families. Regenerate: `make effects`._
+_710 effects across 60 families. Regenerate: `make effects`._
