@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// harness/live/scene-live.mjs - the four numbers CLAUDE.md argues from, measured on the film you just
+// harness/live/scene-live.mjs - the five numbers CLAUDE.md argues from, measured on the film you just
 // saved, at the moment the JSON is still open.
 //
 // WHY THIS EXISTS, AS A NUMBER. `node quality/gates/rung.mjs` reports the enforcement ladder over this
@@ -43,10 +43,56 @@ import { appendRun } from '../lib/runlog.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
-// The four independent checks below, in the order they run. Recorded so the run log can say which
+// The five independent checks below, in the order they run. Recorded so the run log can say which
 // ran CLEAN on a save, not only which one spoke: "never fired" and "never checked" look identical from
 // the console alone.
-const CHECKS = ['pictorial-share', 'hand-keyed-motion', 'single-bg-window', 'unjustified-silence'];
+const CHECKS = ['pictorial-share', 'hand-keyed-motion', 'single-bg-window', 'unjustified-silence', 'numeric-in-beat-cue'];
+
+// A cue's `t` names another layer's `id` the same way a layer's own `start` can (core/timeline/
+// relative-time.js): bare id = that layer's start, `id.end` = start+duration, plus an optional
+// offset. Same recursion as that resolver's eachLayerDeep, so a nested layer's id is found too.
+function idBoundaries(layers, out) {
+  for (const L of layers || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (L.id && typeof L.start === 'number') {
+      out.push({ id: L.id, t: L.start, end: false });
+      if (typeof L.duration === 'number') out.push({ id: L.id, t: L.start + L.duration, end: true });
+    }
+    idBoundaries(L.children, out);
+    idBoundaries(L.layers, out);
+  }
+}
+
+// A cue an author typed as a plain number that happens to sit close to a real layer arrival is very
+// likely marking THAT arrival, the exact failure `core/timeline/relative-time.js` was built to close:
+// a hand-copied number is a snapshot, and it goes stale the moment the layer it was measuring moves
+// (vawe-flow-2 shipped two cues 1118ms and 765ms early this way). 1.5s is measured, not guessed: across
+// every gate-visible film with both a numeric cue and an id-bearing layer, the median cue-to-nearest-
+// boundary distance is 0.44s and the 75th percentile is 1.32s (node harness/dev/library-stats.mjs would
+// print this if it tracked cues; measured by hand against films/scene/*.json for this hook).
+const CUE_NEAR_S = 1.5;
+function nearbyCueSuggestions(j) {
+  const cues = (j.audio && Array.isArray(j.audio.cues)) ? j.audio.cues : [];
+  const numeric = cues.filter((c) => c && typeof c.t === 'number');
+  if (!numeric.length) return [];
+  const boundaries = [];
+  idBoundaries(j.layers, boundaries);
+  if (!boundaries.length) return [];             // nothing an author could reference; don't guess
+  const out = [];
+  for (const c of numeric) {
+    let best = null;
+    for (const b of boundaries) {
+      const d = Math.abs(c.t - b.t);
+      if (!best || d < best.d) best = { ...b, d };
+    }
+    if (best && best.d <= CUE_NEAR_S) {
+      const offset = Math.round((c.t - best.t) * 1000) / 1000;
+      const ref = best.id + (best.end ? '.end' : '') + (Math.abs(offset) < 0.005 ? '' : (offset > 0 ? `+${offset}` : `${offset}`));
+      out.push({ cue: c, ref });
+    }
+  }
+  return out;
+}
 
 // ONE OWNER. This set is copied from harness/dev/library-stats.mjs:33, which is the script that prints
 // every figure CLAUDE.md quotes. If the two ever disagree, the numbers in the doc stop matching the
@@ -180,6 +226,14 @@ process.stdin.on('end', () => {
     say.push(`  quality/gates/audio-check.mjs will stop you at ship; a sentence here settles it now.`);
     fired.push('unjustified-silence');
   }
+  const cueSuggestions = nearbyCueSuggestions(j);
+  if (cueSuggestions.length) {
+    say.push(`  ${cueSuggestions.length} cue${cueSuggestions.length > 1 ? 's' : ''} written as a plain number that sits close to a real layer's`);
+    say.push(`  arrival: a hand-copied number is a snapshot and goes stale the moment that layer moves`);
+    say.push(`  (this is how vawe-flow-2 shipped two cues 1.1s and 0.8s early). Name the layer instead:`);
+    for (const { cue, ref } of cueSuggestions.slice(0, 2)) say.push(`    "t": ${cue.t} -> "t": "${ref}"`);
+    fired.push('numeric-in-beat-cue');
+  }
   if (!say.length) process.exit(0);              // the reward for a film doing fine is silence
 
   // The receipt: which of the four checks fired (shown below) and which ran clean on this same save.
@@ -194,6 +248,6 @@ process.stdin.on('end', () => {
 
   console.error(`${path.basename(rel)} · ${layers.length} layers · ${pctP}% pictorial · ${pctK}% hand-keyed\n`
     + say.join('\n')
-    + `\n  Nothing here blocks. These are the four numbers CLAUDE.md argues from, measured on this file.`);
+    + `\n  Nothing here blocks. These are the five numbers CLAUDE.md argues from, measured on this file.`);
   process.exit(2);
 });
