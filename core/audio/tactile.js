@@ -229,6 +229,23 @@ function counterCues(layers, out) {
 // `count` comes from the caller because only the DOM knows how many elements a selector matched;
 // absent, nothing sounds, because a guessed count would put plucks where nothing moves.
 const PART_MIN_GAP = 0.2, PART_MAX = 6;
+
+// HOW LOUD A PART TRAIN IS, and it was 0.08 until it was measured against a real mix.
+//
+// Measured on vawe-flow-2: the timeline act's seven clip arrivals peaked at -18.9 dB and sat at a
+// -27.7 dB median, against -6.9 dB for the opening impact and -13.5 dB for the spectacle. Twelve dB
+// down is roughly a quarter as loud, so the sounds were there, on their events, and inaudible. The
+// owner heard "the timeline sound beat is off" twice, and both times every gate was green.
+//
+// 0.08 was guarding against the machine gun, the failure `pluck`'s own blurb names. But PART_MIN_GAP
+// and PART_MAX already guard it, and better: the train is thinned to an even 0.2s spacing and capped
+// at six hits before a gain is ever chosen. Two mechanisms on one failure, and the quieter one was
+// costing every part train its audibility. This is the one that goes.
+//
+// 0.16 is +6 dB, which puts a clip arrival near the spectacle's own level and still well under the
+// opening impact. A part is punctuation, so it stays the quietest voice in the film; it is no longer
+// quieter than the room.
+const PART_GAIN = 0.16;
 function partCues(layers, out) {
   for (const L of layers) {
     if (!L || !Array.isArray(L.parts) || L.sound === false) continue;
@@ -243,7 +260,7 @@ function partCues(layers, out) {
       const every = step > 0 ? Math.max(1, Math.ceil(PART_MIN_GAP / step)) : n;
       let emitted = 0;
       for (let i = 0; i < n && emitted < PART_MAX; i += every, emitted++)
-        out.push({ t: r3(st + i * step), name: 'pluck', w: 0.2, gain: 0.08 });
+        out.push({ t: r3(st + i * step), name: 'pluck', w: 0.2, gain: PART_GAIN });
     }
   }
 }
