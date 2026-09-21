@@ -19,7 +19,7 @@ const flatDepth = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object')
 import { assertKeyHandles } from '../timeline/sequence.js';
 import { bakeTimeRemap } from '../timeline/time.js';
 import { loadBeatGrid } from '../beats/index.js';
-import { safeArea, ASPECTS, sceneDims, PLACEMENT, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from '../layout/safe.js';
+import { safeArea, ASPECTS, sceneDims, PLACEMENT, COMPOSITION_MARGIN, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from '../layout/safe.js';
 import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from '../type/ransom.js';
@@ -80,6 +80,9 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
       : (v === 'right' || v === 'bottom') ? hi - est
       // roughly two-thirds down the safe box: PLACEMENT's "text-band", the y half of `pin:"text-band"`.
       : v === 'text-band' ? lo + 0.63 * (hi - lo)
+      // the composition column's left edge (PLACEMENT's "stage" and "lower-band"): COMPOSITION_MARGIN
+      // of the canvas width, never inside the safe box's own bleed/chrome inset (`lo`).
+      : v === 'stage-left' ? Math.max(lo, dim * COMPOSITION_MARGIN)
       : null;
   const num = (v, dim, size, lo, hi, est = size) => {
     if (typeof v !== 'string') return v;
@@ -103,10 +106,16 @@ export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = 
       const [px, py, wFrac] = PIN[L.pin];
       if (px != null && L.x == null) L.x = px;
       if (py != null && L.y == null) L.y = py;
-      // The three anchors (`stage`, …) carry a width nobody has to hand-type: a fraction of the safe
-      // box, applied only when the layer declares none of its own (the same "author wins" rule every
+      // `stage`'s width nobody has to hand-type: a fraction of the SAFE box for a generic edge pin, or
+      // (for the `stage-left` keyword) the mirror image of its own composition-margin inset, so the
+      // column stays centred on the canvas even when that margin sits inside the safe box, not on its
+      // edge. Applied only when the layer declares none of its own (the same "author wins" rule every
       // other pin field already follows).
-      if (wFrac != null && L.w == null) L.w = Math.round(wFrac * (safe.x1 - safe.x0));
+      if (wFrac != null && L.w == null) {
+        L.w = px === 'stage-left'
+          ? Math.round(W - 2 * Math.max(safe.x0, W * COMPOSITION_MARGIN))
+          : Math.round(wFrac * (safe.x1 - safe.x0));
+      }
     }
     // 12-col grid: col "3" (one column) or "2-7" (a span) → x + w from a gutter grid (col overrides pin-x).
     // The grid spans the SAFE box, not the canvas, for the same reason the edge keywords do: a column
