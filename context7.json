@@ -1,0 +1,45 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Vawe",
+  "description": "One self-describing JSON becomes one frame-perfect video. A deterministic motion-graphics engine for people and coding agents: write a scene as data, render an mp4, get the same bytes every time.",
+  "branch": "main",
+  "folders": [
+    "engine-doctrine",
+    "skills",
+    "docs-site/content",
+    "mcp",
+    "recipes",
+    "cli"
+  ],
+  "excludeFolders": [
+    "quality",
+    "site",
+    "harness",
+    "assets",
+    "films",
+    "out",
+    "node_modules",
+    "refs",
+    "engine-doctrine/RESEARCH",
+    "engine-doctrine/CODEMAPS"
+  ],
+  "excludeFiles": [
+    "engine-doctrine/MISTAKES.md",
+    "engine-doctrine/EFFECTS.md",
+    "engine-doctrine/CRAFT/PARITY-AUDIT.md",
+    "engine-doctrine/CRAFT/BLOCKS-HTML-STATUS.md"
+  ],
+  "rules": [
+    "A film is ONE self-describing JSON with \"module\": \"scene\". There is exactly one module and there are no templates: compose every video from primitives rather than copying a structure.",
+    "renderFrame(n) is pure in n. A frame may never depend on wall-clock time, randomness without a seed, or any state outside the scene. This is the load-bearing invariant of the whole engine.",
+    "Read films/scene/schema.json for the contract before writing a scene. It is the source of truth for every field.",
+    "A scene needs only five keys to exist: module, theme, duration, layers and bg. Everything else is optional.",
+    "Author a boundary through transitions[] only. cuts, stings and seams are its lowered internal form and the validator refuses them written directly.",
+    "Reference things by name rather than by number where the engine allows it. A cursor aims at a layer with snapTo, a layer sits at a named place with pin, text takes a role with size: \"headline\", and a time can be written against another layer, as start: \"someLayerId+0.4\". A number is right when it is a decision; a reference is right when it is a relationship.",
+    "Never write an em dash (U+2014) in on-screen text. The validator rejects it.",
+    "Prefer a camera move and a boundary treatment over a stack of layers that appear and disappear. A film with neither reads as a slideshow.",
+    "camera: hold is a real declaration meaning the camera is locked off. It is not an alias of driftHold, which breathes.",
+    "Sound is derived, not hand-placed: audio.tactile reads the timeline you already wrote and a cue is derived at every cut and seam. Pin a hand-placed cue to an event rather than to a clock.",
+    "Run make author-check D=<file> before shipping a scene, then make judge after rendering. The judge is the only step that sees the output."
+  ]
+}
