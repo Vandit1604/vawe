@@ -32,6 +32,21 @@ const TELL_RE = new RegExp(`\\b(${TELLS.join('|')})\\b`, 'gi');
 const FIELD_RE = /"(?:type|preset|anim|block)"\s*:\s*"([\w-]+)"/g;
 const STOPWORDS = new Set(['with', 'that', 'this', 'from', 'into', 'over', 'onto', 'then', 'while']);
 
+// A cursor's OWN vocabulary (`snapTo`/`clicks`/`styleAt`, aimed at a target layer id, recipes.json
+// "hover-click") already covers "arrive on a control and click it". The generic tell scan above
+// never catches an author who hand-types that arrival as pixel coordinates instead: `"type":
+// "cursor"` is itself a legitimate field value, so the word "cursor" gets cancelled as already-used
+// (see deviceWordsIn below) and a raw `"x": 820, "y": 400` reads as ordinary composition, not a
+// device tell. This is a second, NARROW check for exactly that one measured gap (3,831 hand-typed
+// `x` values across the library, zero uses of `snapTo`), not a second nudge mechanism: it shares the
+// same log, state and message shape as the generic path in handleEdit.
+const CURSOR_PATH_RE = /"type"\s*:\s*"cursor"[\s\S]{0,400}?"path"\s*:\s*\[\s*\{\s*"t"\s*:[\s\S]{0,80}?"x"\s*:\s*-?\d/;
+function handTypedCursorPath(text) {
+  return CURSOR_PATH_RE.test(text)
+    && !/"snapTo"\s*:/.test(text)
+    && !/"recipe"\s*:\s*"hover-click"/.test(text);
+}
+
 function ensureDataDir() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
@@ -123,12 +138,24 @@ function handleEdit(file, addedText) {
   if (!isJson && !isHtml && !isBoard) return;
   if (typeof addedText !== 'string' || !addedText) return;
 
-  const { words } = deviceWordsIn(rel, addedText);
-  if (!words.length) return;                              // no device word: silent
-
   const state = readState();
   const last = state[rel] || 0;
   if (Date.now() - last < RATE_LIMIT_MS) return;           // one nudge per file per 10 minutes
+
+  // Narrow cursor-path check first: fires before the generic scan below would cancel it out.
+  if (isJson && handTypedCursorPath(addedText) && !recentSearchOverlaps(['cursor', 'snapto', 'hover-click'])) {
+    const query = 'cursor target click';
+    const names = topNames(query);
+    if (names.length) {
+      state[rel] = Date.now();
+      writeState(state);
+      console.error(`search first: make arsenal Q="${query}" -> ${names.join(', ')}`);
+      process.exit(2);
+    }
+  }
+
+  const { words } = deviceWordsIn(rel, addedText);
+  if (!words.length) return;                              // no device word: silent
 
   if (recentSearchOverlaps(words)) return;                 // a matching search already happened
 
