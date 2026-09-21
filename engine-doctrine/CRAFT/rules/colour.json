@@ -88,5 +88,15 @@
     "adapt": null,
     "brief": "A headline sits on a flat patch, never a blob or a gradient hot spot",
     "doc": "engine-doctrine/RULES/text-on-flat.md"
+  },
+  {
+    "id": "colour.theme-look-fixed",
+    "category": "colour",
+    "stage": "design",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "look is deliberately small: only the things a scaffold or an author was already re-deciding by hand",
+    "doc": "engine-doctrine/CRAFT/THEME-LOOK.md"
   }
 ]
