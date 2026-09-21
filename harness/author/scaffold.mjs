@@ -138,6 +138,9 @@ if (CONTINUOUS_ACTION) {
       `- onscreen: "<fill: the on-screen copy for this beat>"`,
       `- mechanism: <fill: how this state change moves, decided at the direct stage (AGENTS.md stage 6)>`,
       `- becomes: <fill: the ${i === 0 ? 'bare stage' : 'previous state'} becomes "${label}">`,
+      // CAMERA fill marker on the resolve state only, the beat the payoff lands on: same reasoning as
+      // beatSection below, not a new field, just the first time scaffold asks for one.
+      ...(isLast ? [`- camera: <fill: a move from \`make arsenal Q="camera moves"\`, e.g. slowPush to=1.06, or delete this line if the camera holds still here on purpose>`] : []),
       `- why: ${isFirst ? 'open loop, pose the question the last frame answers' : isLast ? 'the press has a consequence, and the consequence is the last thing you see' : 'show the object doing the thing, not a claim about it'}`,
       `- duration: ${(bounds[i + 1] - bounds[i]).toFixed(2)}s`,
       '',
@@ -223,6 +226,14 @@ ${states.map(stateSection).join('\n')}`;
   function beatSection(s, i) {
     const isPayoff = i === payoffIdx;
     const isFirst = i === 0, isLast = i === spans.length - 1;
+    // CAMERA gets a fill marker on exactly one beat: the loudest one, same beat `spectacle:` already
+    // points at (payoffIdx, or beat 1 when a 2-beat film has no dedicated payoff slot). Not a new field:
+    // harness/lib/contract.mjs parseCameraLine/resolvedCamera and assemble.mjs already read `camera:` on
+    // any beat, this scaffold just never asked for it. One marker, in the same fill-in pass as
+    // mechanism/motion, so choosing a move costs nothing beyond replacing a line already in front of the
+    // author; deleting it (the same opt-out object_in/motion already use) is a real "no" for a beat that
+    // means to hold still, never a silent default.
+    const wantsCamera = i === (payoffIdx >= 0 ? payoffIdx : 0);
     const why = isFirst ? 'open loop, pose the question the payoff answers'
       : isLast ? 'one clear next step, remove the risk'
       : isPayoff ? 'land the payoff, answer the open loop from beat 1 (the bookend)'
@@ -247,6 +258,7 @@ ${states.map(stateSection).join('\n')}`;
       // one continuous object above. Same convention as object_in/out: an unfilled marker, never a
       // guessed value, and delete the line entirely if nothing but the continuous object moves here.
       `- motion: "<fill: <selector>@<kind>:<band>, e.g. [data-part=\\"headline\\"]@slide-left:energy>"`,
+      ...(wantsCamera ? [`- camera: <fill: a move from \`make arsenal Q="camera moves"\`, e.g. slowPush to=1.06, or delete this line if the camera holds still here on purpose>`] : []),
       `- why: ${why}`,
       `- duration: ${s.dur}s`,
       '',
