@@ -182,24 +182,68 @@ function arrivalCues(layers, canvas, out) {
   }
 }
 
-// A CAMERA MOVE. Contiguous keyframes that actually change are ONE move, so a punch-in and its
-// release whoosh once for their whole span instead of twice a third of a second apart.
-function cameraCues(camera, out) {
-  const kf = (camera || []).filter((k) => k && Number.isFinite(+k.t)).slice().sort((a, b) => +a.t - +b.t);
-  const moved = (a, b) => Math.abs((b.s ?? 1) - (a.s ?? 1)) > 0.02
-    || Math.abs((b.x ?? 0) - (a.x ?? 0)) + Math.abs((b.y ?? 0) - (a.y ?? 0)) > 15
-    || Math.abs((b.rx ?? 0) - (a.rx ?? 0)) + Math.abs((b.ry ?? 0) - (a.ry ?? 0)) + Math.abs((b.roll ?? 0) - (a.roll ?? 0)) > 0.5;
+// CONTIGUOUS MOVED SPANS. Keyframes that actually change, walked as ONE move each, so a punch-in and
+// its release whoosh once for their whole span instead of twice a third of a second apart. Shared by
+// `cameraCues` (the scene's camera) and `layerMotionCues` (a layer's own `motion` track) below: same
+// question, "did anything actually move between these two keyframes", asked of two different keyframe
+// vocabularies, not two different mechanisms.
+function movedSpans(kf, moved, onSpan) {
   let i = 0;
   while (i < kf.length - 1) {
     if (!moved(kf[i], kf[i + 1])) { i++; continue; }
     let j = i + 1;
     while (j < kf.length - 1 && moved(kf[j], kf[j + 1])) j++;
-    const dur = +kf[j].t - +kf[i].t;
+    onSpan(kf[i], kf[j], +kf[j].t - +kf[i].t);
+    i = j;
+  }
+}
+
+// A CAMERA MOVE.
+function cameraCues(camera, out) {
+  const kf = (camera || []).filter((k) => k && Number.isFinite(+k.t)).slice().sort((a, b) => +a.t - +b.t);
+  const moved = (a, b) => Math.abs((b.s ?? 1) - (a.s ?? 1)) > 0.02
+    || Math.abs((b.x ?? 0) - (a.x ?? 0)) + Math.abs((b.y ?? 0) - (a.y ?? 0)) > 15
+    || Math.abs((b.rx ?? 0) - (a.rx ?? 0)) + Math.abs((b.ry ?? 0) - (a.ry ?? 0)) + Math.abs((b.roll ?? 0) - (a.roll ?? 0)) > 0.5;
+  movedSpans(kf, moved, (from, to, dur) => {
     // A longer move is a bigger gesture, so it is louder. It cannot be LONGER: the cue is a baked
     // wav of fixed length and nothing here can stretch it (see the report note on parameters).
-    if (dur >= 0.2) out.push({ t: +kf[i].t, name: 'whoosh', w: 0.7,
-      gain: r3(0.16 + 0.16 * Math.min(1, dur / 2)) });
-    i = j;
+    if (dur >= 0.2) out.push({ t: +from.t, name: 'whoosh', w: 0.7, gain: r3(0.16 + 0.16 * Math.min(1, dur / 2)) });
+  });
+}
+
+// A LAYER'S OWN MOTION TRACK. `L.motion` keyframes move a layer's whole container independently of
+// its `parts` children: a card sliding up into frame, then flying off-screen at the end, is two big
+// visual events that have nothing to do with the small plucks its children make. `arrivalCues` above
+// skips a layer with `parts` on the assumption "the parts ARE this layer's arrival", which is right
+// for a layer that only ever appears via its children staggering in. It is wrong for a layer that
+// ALSO carries `motion`: that container move is a separate, often much larger, event, and until now
+// it had no voice at all, whether or not the layer had `parts` (`arrivalCues` only ever considers
+// `L.start`, never an exit; `cameraCues` only ever reads `scene.camera`, never a layer's own track).
+// Measured on vawe-flow-2's timeline act: the card's slide-up entrance (the act's biggest visual
+// delta) and its slide-off exit (a real event with zero audio, `audio-render-check` cannot see it
+// because it does not derive tactile cues at all) both landed here, both silent.
+function layerMotionCues(layers, canvas, out) {
+  const moved = (a, b) => Math.abs((b.scale ?? a.scale ?? 1) - (a.scale ?? 1)) > 0.02
+    || Math.abs((b.x ?? a.x ?? 0) - (a.x ?? 0)) + Math.abs((b.y ?? a.y ?? 0) - (a.y ?? 0)) > 15
+    || Math.abs((b.rotX ?? a.rotX ?? 0) - (a.rotX ?? 0)) + Math.abs((b.rotY ?? a.rotY ?? 0) - (a.rotY ?? 0)) > 0.5;
+  for (const L of layers) {
+    if (!L || SILENT_TYPES.has(L.type) || L.sound === false || L.anim === 'none') continue;
+    if (!Array.isArray(L.motion) || L.motion.length < 2) continue;
+    const { area } = prominenceOf(L, canvas);
+    // NO groundArea CEILING HERE, unlike `arrivalCues`. That ceiling exists to stop a STATIC
+    // full-bleed condition-of-frame layer (a crossfading backdrop) from reading as an arrival; it
+    // never moves, so nothing in `moved()` below would fire for it anyway. A full-frame layer that
+    // actually translates or scales through its own `motion` track (a card sliding up to fill the
+    // screen, then flying off it) is a real event regardless of how much of the canvas it covers.
+    if (area < DENSITY.floorArea) continue;
+    const p = clamp(Math.sqrt(clamp(area, 0, 1)), 0, 1);
+    const heavy = p >= 0.28;
+    const base = +(L.start ?? 0);
+    const kf = L.motion.filter((k) => k && Number.isFinite(+k.t)).slice().sort((a, b) => +a.t - +b.t);
+    movedSpans(kf, moved, (from) => out.push({
+      t: r3(base + +from.t), name: heavy ? 'impact' : 'whoosh',
+      gain: r3((heavy ? 0.22 : 0.14) + (heavy ? 0.3 : 0.18) * p), w: r3(0.3 + 0.5 * p),
+    }));
   }
 }
 
@@ -326,6 +370,7 @@ export function derive(scene = {}, opts = {}) {
   const cfg = opts.config === true ? {} : (opts.config || {});
   const out = [];
   arrivalCues(scene.layers || [], canvas, out);
+  layerMotionCues(scene.layers || [], canvas, out);
   cameraCues(scene.camera, out);
   counterCues(scene.layers || [], out);
   partCues(scene.layers || [], out);
