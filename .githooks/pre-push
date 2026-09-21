@@ -43,6 +43,15 @@
 # ogCard.tsx and schema.ts each generate a fact (a canonical, a share card, a sitemap URL, a JSON-LD
 # object) that nothing else checks at write time, and every one of them is invisible in a diff. Pure
 # file reads plus running schema.ts's own builders; no browser, no build.
+# coverage joins the list for the same reason doc-refs does, and needs the same full local library to
+# mean anything: quality/gates/coverage.mjs asks whether any AUTHORED scene actually USES a piece of
+# engine vocabulary, not whether the value works. It crashed on every run for six days (a `parts` shape
+# change it never learned) and nobody noticed, because it lived in neither this file nor CI. It is here
+# now, and its own adoption ratchet (quality/baselines/coverage-ratchet.json) fails the push if engine
+# adoption FALLS, the direction that matters: a capability the library used to reach going back to zero
+# is a regression the same way a broken test is. It is NOT in gates.yml for the reason doc-refs is not:
+# films/scene/*.json is gitignored, so a CI clone sees a fraction of the AUTHORED library and would
+# ratchet against a population it cannot see. Pure file reads, well under a second.
 # docker-check is here for the reason every other gate on this line is: the failure it catches is
 # invisible from the repo and from every local run. A COPY of a path git does not carry builds fine on
 # a machine that has the path and dies on the server, which has only the clone. assets/plinth was
@@ -82,8 +91,8 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
   fi
 done
 
-echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface) …"
-if ! make schema-check lib-test craft-coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface; then
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface) …"
+if ! make schema-check lib-test craft-coverage coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi

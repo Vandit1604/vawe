@@ -65,6 +65,14 @@ const used = { anim: new Set(), preset: new Set(), cut: new Set(), sting: new Se
   idle: new Set(), part: new Set(), three: new Set(), cue: new Set(), block: new Set(),
   moveShape: new Set(), pathCurve: new Set() };
 
+// CONDITIONAL ADOPTION. Raw "N films used X" is noise here: a film picks a set of mechanisms on
+// purpose and is never meant to use all of them, so a low count alone proves nothing. The signal is
+// "of the films that reached for this AT ALL, how many got the better form": 18 films authored a
+// cursor and 0 of 18 reached for `snapTo`; 166 films set a text size and 0 used a size ROLE
+// (core/engine/produce.js resolveTextSize) instead of a raw px number. Tracked as base/better pairs
+// so the report can say the fraction, not just the count.
+const conditional = { cursor: { base: 0, better: 0 }, textSize: { base: 0, better: 0 } };
+
 const idleNameOf = (v) => (v && typeof v === 'object' ? v.name : v);
 
 for (const { j, raw } of scenes) {
@@ -92,7 +100,10 @@ for (const { j, raw } of scenes) {
     if (l.filter) used.look.add(String(l.filter).split(':')[0].trim());
     if (l.idle) used.idle.add(idleNameOf(l.idle));
     if (l.three) used.three.add(l.three);
-    for (const p of l.parts || []) if (p?.anim) used.part.add(p.anim);
+    // `parts` is one spec OR an array of them (films/scene/schema.json), same dual shape validate.mjs:859
+    // and motion-ir.js:80 already normalize. This line assumed array-only and threw the moment an
+    // author wrote a single object, which is the common case for one part.
+    for (const p of Array.isArray(l.parts) ? l.parts : l.parts ? [l.parts] : []) if (p?.anim) used.part.add(p.anim);
   }
   // Same split again: the vocabulary above is what the ENGINE renders (lowered), the props are what the
   // author wrote. A layer's `transition` is gone from the lowered copy by the time this runs.
@@ -101,6 +112,8 @@ for (const { j, raw } of scenes) {
   for (const l of layersOf(raw)) {
     for (const k of Object.keys(l)) used.prop.add(k);
     if (l.type === 'block' && l.block) used.block.add(l.block);
+    if (l.type === 'cursor') { conditional.cursor.base++; if (l.snapTo && l.snapTo.length) conditional.cursor.better++; }
+    if (typeof l.size !== 'undefined' && l.size !== null) { conditional.textSize.base++; if (typeof l.size === 'string') conditional.textSize.better++; }
   }
 }
 
@@ -172,6 +185,20 @@ export function darkVocabularySummary() {
   return { total, dark, groups: gaps.length, unusedProps: unusedProps.length };
 }
 
+// adoptionCount() -> how much of the engine's vocabulary the AUTHORED library actually reaches: every
+// name any group counted as used, plus every schema prop some scene set. This is the ONE number the
+// ratchet below tracks. THE DIRECTION IS THE DESIGN DECISION: adoption must not FALL. A capability a
+// film used going back to zero is a regression the same way a test going from pass to fail is, and
+// catching that is also what makes this gate a deletion tool the other way: a name that never moves
+// off zero across many stamps is a candidate for removal, not promotion.
+function adoptionCount() {
+  const usedNames = GROUPS.reduce((n, [, all, seen]) => n + all.filter((v) => seen.has(v)).length, 0);
+  const usedProps = schemaProps.size - unusedProps.length;
+  return usedNames + usedProps;
+}
+
+const RATCHET = path.join(repoRoot, 'quality/baselines/coverage-ratchet.json');
+
 // Only print the report (and only exit through the WARN-tier gate) when run directly. Importing this
 // module for `darkVocabularySummary()` (make scaffold) must be silent and side-effect-free.
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
@@ -189,17 +216,60 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   const annotate = (p) => reachVerdicts.has(p) ? `${p} (${reachVerdicts.get(p)})` : p;
   const byVerdict = (a, b) => (reachVerdicts.get(a) === 'unreachable' ? -1 : 0) - (reachVerdicts.get(b) === 'unreachable' ? -1 : 0);
 
+  console.log('\n── conditional adoption (of the films that reached for this, how many got the better form)\n');
+  const pct = (b, t) => (t ? Math.round((b / t) * 100) : 0);
+  console.log(`   cursor → snapTo          ${conditional.cursor.better}/${conditional.cursor.base} cursor layer(s) snap to a live target (${pct(conditional.cursor.better, conditional.cursor.base)}%)`);
+  console.log(`   text size → size role    ${conditional.textSize.better}/${conditional.textSize.base} sized text layer(s) use a role, not a raw px number (${pct(conditional.textSize.better, conditional.textSize.base)}%)`);
+
   console.log('\n── unexercised vocabulary (nothing renders these, so nothing would notice a regression)\n');
 
-  // WARN tier by design (always exits 0): unused vocabulary is a fact to act on, not a build failure.
+  // WARN tier by design for the vocabulary list itself: unused vocabulary is a fact to act on, not a
+  // build failure. The ADOPTION RATCHET below is the one thing in this file that can fail a run.
   const f = gateFindings({ line: (r) => `   ${r.summary}` });
   for (const [label, unused] of gaps) f.warn('unexercised', `${label}: ${unused.length}\n      ${unused.join(', ')}\n`, { at: label });
   if (unusedProps.length) {
     const sorted = [...unusedProps].sort(byVerdict);
     f.warn('unexercised-prop', `schema props no scene sets: ${unusedProps.length} (verdict from quality/baselines/reach.json where known)\n      ${sorted.map(annotate).join(', ')}\n`);
   }
+
+  // THE RATCHET. Same shape as output-contract.mjs and harness/dev/blocking-findings-check.mjs: count
+  // today, compare to a stamped baseline, --stamp to move the baseline on purpose. The direction here
+  // is the opposite of those two (they ratchet a defect count DOWN); this ratchets adoption UP, because
+  // a capability the library already reached that falls back to zero use is a regression this gate
+  // exists to catch, not noise to average away.
+  const adoption = adoptionCount();
+  const prior = (() => { try { return JSON.parse(fs.readFileSync(RATCHET, 'utf8')); } catch { return null; } })();
+  let ratchetFailed = false;
+
+  if (process.argv.includes('--stamp')) {
+    fs.mkdirSync(path.dirname(RATCHET), { recursive: true });
+    fs.writeFileSync(RATCHET, `${JSON.stringify({ adoption, authoredFilms: scenes.length }, null, 1)}\n`);
+    console.log(`\n  ✓ adoption ratchet stamped at ${adoption} name(s)/prop(s) used, across ${scenes.length} AUTHORED film(s)`
+      + `${prior ? `, ${adoption >= prior.adoption ? 'up' : 'DOWN'} from ${prior.adoption}` : ''}\n`);
+  } else if (prior && adoption < prior.adoption) {
+    ratchetFailed = true;
+    f.fail('coverage-adoption-fell', `engine adoption fell to ${adoption} name(s)/prop(s) used, down from the stamped ${prior.adoption} `
+      + `(across ${prior.authoredFilms ?? '?'} AUTHORED film(s) at stamp time, ${scenes.length} now)`, {
+      at: 'quality/baselines/coverage-ratchet.json',
+      fix: 'a scene that used to exercise a layer type, anim, preset, cut, sting, look, fx, idle, part, '
+        + 'three scene, sound cue, block, storyboard shape/curve, or schema prop stopped. Diff this run '
+        + "against the ratchet's authoredFilms count and the vocabulary lists above to find which name "
+        + 'went dark, then restore the scene that used it or, if the drop is deliberate, re-stamp: '
+        + 'node quality/gates/coverage.mjs --stamp',
+    });
+  } else if (prior && adoption > prior.adoption) {
+    console.log(`\n  ~ adoption rose to ${adoption}, above the stamped ${prior.adoption}. Raise the ratchet: `
+      + 'node quality/gates/coverage.mjs --stamp\n');
+  } else if (!prior) {
+    console.log('\n  (no adoption ratchet stamped yet: node quality/gates/coverage.mjs --stamp)\n');
+  } else {
+    console.log(`\n  ✓ adoption holds at the ratchet (${prior.adoption})\n`);
+  }
+
   f.emit();
 
   console.log('Conformance proves these WORK; coverage says nothing USES them. The audio path had zero of');
   console.log('both, which is why the cuts array produced no sound for as long as it existed (#23).');
+
+  if (ratchetFailed) process.exit(1);
 }
