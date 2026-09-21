@@ -91,7 +91,7 @@ export const MOTION_CUE_REGISTRY = defineRegistry('motion voice', Object.fromEnt
   catalog: {
     title: 'Motion voices (tactile sound)',
     tag: 'audio',
-    intro: 'The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number\'s own easing curve, a declared `spectacle` blooms on the moment. These six are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the five can also be placed by hand as `audio.cues[]`. Doctrine: `engine-doctrine/CRAFT/SOUND.md`.',
+    intro: 'The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `whoosh` per gesture, a counter plucks on the number\'s own easing curve, a declared `spectacle` blooms on the moment. These six are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the six can also be placed by hand as `audio.cues[]`. Doctrine: `engine-doctrine/CRAFT/SOUND.md`.',
     usage: (n, { j }) => j({ audio: { cues: [{ t: 1.2, name: n }] } }),
     noPreview: 'a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.',
   },
