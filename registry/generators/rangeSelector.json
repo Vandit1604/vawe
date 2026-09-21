@@ -31,9 +31,8 @@
     "layers": [
       {
         "type": "text",
-        "x": 160,
+        "pin": "stage",
         "y": 460,
-        "w": 1600,
         "align": "center",
         "size": 130,
         "weight": 700,

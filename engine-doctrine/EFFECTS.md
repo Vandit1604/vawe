@@ -706,7 +706,7 @@ A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: fli
 | `left` | pinned to the left safe edge, vertically centred |
 | `lower-band` | a thin strip near the bottom safe edge, left-anchored: where a closing rule or a small persistent label sits |
 | `right` | pinned to the right safe edge, vertically centred |
-| `stage` | the full-width content column between the left and right safe margins, at any aspect ratio: kit.mjs's hand-typed x:160/w:1600 anchor, portable |
+| `stage` | the full-width content column between the left and right composition margins, at any aspect ratio: the repo's hand-typed x:160/w:1600 anchor, portable |
 | `text-band` | the horizontal strip roughly two-thirds down the frame where a headline or a sub-line usually sits |
 | `thirds-b` | centred horizontally, sat on the lower third line |
 | `thirds-bl` | lands on the lower-left rule-of-thirds power point |
