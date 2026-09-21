@@ -32,7 +32,7 @@ groups them so a reader sees seven concerns, not twenty-one names.
 | 5 | **assemble** | the frames become a scene | `make assemble D=` |
 | 6 | **direct** | motion, then transitions, then sound, in that order | `make critics D= DECIDERS=1` |
 | 7 | **render** | | `make ship D=` |
-| 8 | **judge** | the only step that SEES | `make judge D=` → `make ledger D=`, then **vawe-review-loop** for the stopping rule (STOP-done · STOP-converged · STOP-hand-it-back) and the rule that a PASS is never self-recorded |
+| 8 | **judge** | the only step that SEES | **vawe-audit** composes `make check`/`audio-check`/`audit`/`beats`/`reveal`/`judge`/`ledger` into one verdict; **vawe-review-loop** owns the FIX loop and the stopping rule (STOP-done · STOP-converged · STOP-hand-it-back); a PASS is never self-recorded |
 
 **Three transitions are refused, not requested** (agents have run this order backwards before: `make arsenal MISTAKES=1 Q="stage order"`): `harness/live/stage-gate.mjs` denies, at `PreToolUse`, a fragment no storyboard claims · `layers` into an unapproved film · writing `approved:` at all, the user's signature and never an agent's. The way out is the missing artefact, never a flag. `harness/live/stage-say.mjs` re-states the open stage every turn; `make next D=<film>` runs its step.
 
