@@ -142,12 +142,17 @@ const stageDir = path.join(ROOT, '.vawe-data', 'scenes');
 fs.mkdirSync(stageDir, { recursive: true });
 const staged = path.join(stageDir, `${base}.json`);
 
+// The expander's real interface is `<scene.json> [aspectKey]`, printing the expanded scene to
+// STDOUT (harness/author/expand-blocks.mjs), the same contract internal/render/expand.go uses on the
+// Go side. It is not `<scene.json> <outFile>`; passing `staged` as a second arg would be silently
+// read as an aspect key and the staged file would never be written.
 const expander = path.join(ROOT, 'harness', 'author', 'expand-blocks.mjs');
 if (fs.existsSync(expander)) {
-  const r = spawnSync(process.execPath, [expander, path.resolve(scene), staged], { encoding: 'utf8' });
+  const r = spawnSync(process.execPath, [expander, path.resolve(scene)], { encoding: 'utf8' });
   if (r.status !== 0) {
     die('could not expand the scene', (r.stderr || r.stdout || '').trim().split('\n').slice(0, 4).join('\n  '));
   }
+  fs.writeFileSync(staged, r.stdout);
 } else {
   fs.copyFileSync(scene, staged);
 }
