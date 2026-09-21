@@ -25,6 +25,7 @@ export const metadata = pageMetadata({
  */
 
 const SAMPLE = `{
+  "$schema": "./schema.json",
   "module": "scene",
   "theme": "default",
   "aspect": "9:16",
@@ -47,19 +48,23 @@ const SAMPLE = `{
       "type": "text", "text": "Every frame,", "font": "sans",
       "x": 100, "y": 340, "w": 790, "size": 108, "weight": 800,
       "split": "char", "preset": "blur", "each": 0.7, "stagger": 0.03,
-      "start": 3.7, "duration": 3.9
+      "start": 3.7, "duration": 3.9, "anim": "none", "exitDur": 0
     },
     {
       "type": "text", "text": "deterministic.", "font": "serif",
       "x": 100, "y": 490, "w": 790, "size": 126, "split": "line",
-      "preset": "up", "each": 0.7, "start": 4.2, "duration": 3.4
+      "preset": "up", "each": 0.7, "start": 4.2, "duration": 3.4,
+      "anim": "none", "exitDur": 0
     }
   ],
   "captions": [
     { "t0": 0.4, "t1": 3.4, "text": "Motion graphics from pure data" },
     { "t0": 3.8, "t1": 7.2, "text": "Every frame, deterministic" }
   ],
-  "audio": { "silent": true },
+  "audio": {
+    "silent": true,
+    "_why": "the sample is read beside its JSON in a docs page, never in a feed; sound would teach a mixer, not the schema"
+  },
   "bg": [{ "t": 0, "preset": "soft" }]
 }`;
 
