@@ -118,5 +118,25 @@
     "adapt": null,
     "brief": "A layer or the camera may not jump more than 600 px/s or 0.6 scale/s between two frames outside a cut.",
     "doc": "engine-doctrine/RULES/no-jolt.md#a-move-never-jumps-speed-frame-to-frame"
+  },
+  {
+    "id": "motion.frame-parts-not-block",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "hasHtml",
+    "check": "static-figure",
+    "adapt": null,
+    "brief": "Animate its children piece by piece with parts (bars grow, then the line draws, then the dots pop), never as one block.",
+    "doc": "engine-doctrine/CRAFT/AUTHOR-THE-FRAME.md"
+  },
+  {
+    "id": "motion.pick-register-first",
+    "category": "motion",
+    "stage": "direct",
+    "applies": "always",
+    "check": null,
+    "adapt": null,
+    "brief": "Pick the register before you pick the restraint level.",
+    "doc": "engine-doctrine/CRAFT/MOTION-REGISTERS.md"
   }
 ]
