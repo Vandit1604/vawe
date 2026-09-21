@@ -104,8 +104,13 @@ export async function collect() {
         // `aka` is the searchable-but-unprinted half of a description: the words a person types that
         // an honest blurb cannot carry ("handheld" for `driftHold`, "kerning" for `expandIn`). It joins
         // the corpus below and never reaches the output, so a synonym cannot turn a blurb into keyword soup.
+        // `docs` is the doctrine route (core/registry/registry.js's `docs` option): today only the 24
+        // layer types carry one, and only 18 of those have real craft doctrine beyond their own blurb.
+        // Printed as a doc path, never inlined prose, same as a craft rule's `doc` below: an agent opens
+        // the real page only when the blurb was not enough.
+        const docEntry = reg.docs && reg.docs[name];
         out.push({ name, kind: reg.kind, slot: reg.slot || null, blurb: at(reg.blurbs, name),
-          aka: at(reg.aka, name, []), pitfall: at(reg.pitfalls, name) });
+          aka: at(reg.aka, name, []), pitfall: at(reg.pitfalls, name), doc: docEntry ? docEntry.doc : null });
       }
     }
   }
@@ -452,6 +457,7 @@ export function rankQuery(allIn, query, { kind = null, n = 8, guessN = 3 } = {})
 
   const shape = (e) => ({
     name: e.name, kind: e.kind, slot: e.slot, blurb: e.blurb, pitfall: e.pitfall || null,
+    doc: e.doc || null,
     coverage: e.c, score: e.s, used: u.count(e.name), isNew: fresh.has(e.name),
     snippet: snippet(e),
   });
@@ -705,6 +711,7 @@ async function main() {
     console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${e.used === 0 ? '0 scenes so far, an option worth trying' : `${e.used} scene(s)`}`);
     if (e.blurb) console.log(`      ${e.blurb}`);
     if (e.pitfall) console.log(`      pitfall: ${e.pitfall}`);
+    if (e.doc) console.log(`      doc: ${e.doc}`);
     if (e.snippet) console.log(`      ${e.snippet}`);
     console.log('');
   }  if (result.rules.length) {

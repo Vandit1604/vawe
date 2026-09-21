@@ -73,11 +73,12 @@ export function checkCovered(kind, entries, blurbs) {
     + '  If they genuinely belong somewhere else, say so in a sentence: noBlurbs: \'why\'.');
 }
 
-export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog, pitfalls } = {}) {
+export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog, pitfalls, docs } = {}) {
   if (!entries || typeof entries !== 'object') throw new Error(`defineRegistry("${kind}"): entries must be an object`);
   if (catalog) checkCatalog(kind, catalog);
   if (aka) checkAka(kind, entries, aka);
   if (pitfalls) checkPitfalls(kind, entries, pitfalls);
+  if (docs) checkDocs(kind, entries, docs);
   // The blurb IS the retrieval index (harness/author/arsenal.mjs ranks on name + kind + blurb + aka and
   // nothing else), so the same refusal blurbsOf applies is applied to a blurbs map handed in directly.
   // Most registries do not go through blurbsOf; without this the rule would cover a third of them.
@@ -92,6 +93,7 @@ export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog, pitf
     blurbs: blurbs || null,
     aka: aka || null,
     pitfalls: pitfalls || null,
+    docs: docs || null,
     catalog: catalog || null,
     get names() { return Object.keys(entries); },
     has,
@@ -152,6 +154,37 @@ function checkAka(kind, entries, aka) {
     if (!Object.prototype.hasOwnProperty.call(entries, name)) bad(`names "${name}", which is not an entry here`);
     if (!Array.isArray(words) || !words.length) bad(`["${name}"] must be a non-empty array of words`);
     for (const w of words) if (typeof w !== 'string' || !w.trim()) bad(`["${name}"] contains something that is not a word`);
+  }
+}
+
+const DOC_RE = /^engine-doctrine\/[^\s]+\.md(#[a-z0-9-]+)?$/;
+const EM_DASH = String.fromCharCode(0x2014);
+
+/**
+ * checkDocs(kind, entries, docs): the OPTIONAL doctrine-pointer map, `name -> { doc, brief }`, refused
+ * at LOAD if it names something that is not here or is shaped wrong. Mirrors `checkAka`/`checkPitfalls`
+ * on purpose: same refusal-at-definition shape, and the same reason (a pointer nobody validates rots
+ * silently). This only checks SHAPE, no filesystem: `core/` is loaded in the browser during render, so
+ * the file-exists/anchor-exists/quote-still-matches freshness check (the part that actually catches
+ * drift) lives Node-side in `harness/lib/registry-docs.mjs`, which reuses craft-rules.mjs's own doc
+ * checker rather than a second one. One owner for "is this doc pointer still true", whether the pointer
+ * sits on a craft rule or a registry entry.
+ *
+ * `brief` is a short VERBATIM quote from the doc (never the entry's own blurb restated: the Node-side
+ * check fails loudly the day the doc's wording moves out from under it), which is what lets the pointer
+ * be trusted rather than merely present.
+ */
+function checkDocs(kind, entries, docs) {
+  const bad = (why) => { throw new Error(`defineRegistry("${kind}"): docs ${why}`); };
+  if (typeof docs !== 'object') bad('must be a name → { doc, brief } object');
+  for (const [name, d] of Object.entries(docs)) {
+    if (!Object.prototype.hasOwnProperty.call(entries, name)) bad(`names "${name}", which is not an entry here`);
+    if (!d || typeof d.doc !== 'string' || !DOC_RE.test(d.doc)) {
+      bad(`["${name}"].doc must be "engine-doctrine/....md" or "engine-doctrine/....md#anchor", got ${JSON.stringify(d && d.doc)}`);
+    }
+    if (typeof d.brief !== 'string' || !d.brief.trim()) bad(`["${name}"].brief must be a non-empty quoted string`);
+    if (d.brief.length > 160) bad(`["${name}"].brief is ${d.brief.length} chars, over the 160 cap`);
+    if (d.brief.includes(EM_DASH)) bad(`["${name}"].brief contains an em dash`);
   }
 }
 
