@@ -88,5 +88,15 @@
     "adapt": null,
     "brief": "Size for video, not for the web",
     "doc": "engine-doctrine/RULES/video-scale.md"
+  },
+  {
+    "id": "layout.surface-register",
+    "category": "layout",
+    "stage": "design",
+    "applies": "hasHtml",
+    "check": null,
+    "adapt": null,
+    "brief": "Pick ONE of the 8 visual styles as the register, do not mix.",
+    "doc": "engine-doctrine/CRAFT/SURFACES.md"
   }
 ]
