@@ -399,6 +399,13 @@ timings: ## [check] real wall-clock timing per step, from the run log (D=, N=10)
 render-verify: ## [check] does the rendered mp4's duration match what the scene declares? (D=<file>, render first)
 	node quality/gates/render-verify.mjs $(D)
 
+# make audio-render-check D=<file>: does the rendered mp4 actually SOUND each declared cue at the time
+# it declared it? The audio twin of plan-vs-render: reads the mixed track once, finds onsets, compares
+# them against the LOWERED (tempo-resolved) cue timeline, tolerance 150ms. WARN by default; STRICT=1
+# blocks on a cue that is not heard (never on the reverse direction, which is advisory only).
+audio-render-check: ## [check] does the rendered mp4 sound each declared cue when it declares it? (D=<file>, render first)
+	node quality/gates/audio-render-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
+
 ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit ASPECT=all -> seams -> forensics
 	@$(if $(D),node harness/lib/ensure-preflight.mjs $(D),)
 	RUNLOG_CMD=ship node harness/lib/run-author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
@@ -418,6 +425,7 @@ ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit A
 	node quality/audit.mjs $(D) $(if $(ASPECT),--aspect $(ASPECT),)
 	@node quality/gates/seam-snap.mjs $(D) $(if $(JSON),--json,)
 	@node quality/gates/seam-forensics.mjs $(D)
+	@node quality/gates/audio-render-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
 	@node quality/gates/no-judge.mjs $(D)
 

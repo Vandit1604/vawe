@@ -77,6 +77,23 @@ const check = (label, ok) => { console.log(`${ok ? 'ok  ' : 'FAIL'}  ${label}`);
   check('brew-launch-act1: stays silent on hand-keyed motion', !/no hand-keyed motion track/.test(out));
 }
 
+// --- vawe-flow-2.json: real film, real bug. Two of its audio.cues[].t are plain numbers sitting
+// close to a layer arrival (the exact shape that shipped 1118ms and 765ms early). The hook should
+// name each one and offer a real relative-time reference back to a real layer id in this film. ---
+{
+  const rel = 'films/scene/vawe-flow-2.json';
+  const j = JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
+  const ids = new Set();
+  (function walk(ls) { for (const L of ls || []) { if (L && L.id) ids.add(L.id); walk(L.children); walk(L.layers); } })(j.layers);
+  const { status, out } = run(rel);
+  check('vawe-flow-2: exits 2 (numeric-cue finding)', status === 2);
+  check('vawe-flow-2: names the numeric-cue gap', /plain number/.test(out));
+  const refs = [...out.matchAll(/-> "t": "([^"]+)"/g)].map((m) => m[1]);
+  check('vawe-flow-2: names at least one replacement reference', refs.length > 0);
+  check('vawe-flow-2: every replacement references a real layer id in this film',
+    refs.every((r) => ids.has(r.replace(/\.end/, '').replace(/[+-][\d.]+$/, ''))));
+}
+
 // --- post-corva.json: already has every sidecar wired. A film doing fine gets silence. ---
 {
   const rel = 'films/scene/post-corva.json';
