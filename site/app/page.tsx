@@ -251,10 +251,10 @@ export default function Home() {
               </Link>
             </div>
             <p className="lead">
-              You compose a film from primitives the way you would write anything else, rather than
-              pouring data into a layout someone else already composed. {EFFECTS.total} effects ship today,{" "}
-              {EFFECTS.previewed} of them with a rendered preview. Below is one frame from each
-              family that has one.
+              This is code to video, not data poured into a layout someone else already composed:
+              you compose a film from primitives the way you would write anything else.{" "}
+              {EFFECTS.total} effects ship today, {EFFECTS.previewed} of them with a rendered
+              preview. Below is one frame from each family that has one.
             </p>
             <div className="fxwall">
               {WALL.map((fx) => (
