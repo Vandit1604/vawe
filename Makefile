@@ -406,6 +406,14 @@ render-verify: ## [check] does the rendered mp4's duration match what the scene 
 audio-render-check: ## [check] does the rendered mp4 sound each declared cue when it declares it? (D=<file>, render first)
 	node quality/gates/audio-render-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
+# make motion-sound-check D=<file>: does a SOUND land where the PICTURE moves, whatever the JSON
+# declared? audio-render-check.mjs above asks "is a declared cue heard on time"; this asks a plainer
+# question over the same render, does a big visual change ever come with sound, and does sound ever
+# play over a frame that barely moves. Report-only, never blocks: a silent cut and a held frame under
+# narration are real authorial choices this gate cannot tell from an oversight by pixels alone.
+motion-sound-check: ## [check] does a sound land where the picture moves in the rendered mp4? (D=<file>, render first)
+	node quality/gates/motion-sound-check.mjs $(D)
+
 ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit ASPECT=all -> seams -> forensics
 	@$(if $(D),node harness/lib/ensure-preflight.mjs $(D),)
 	RUNLOG_CMD=ship node harness/lib/run-author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
