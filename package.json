@@ -13,10 +13,11 @@
   "//": "Rendering is the Go service: `make render M=<format>` / `make all` (see Makefile).",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "d3-geo": "^3.1.1",
     "zod": "^4.4.3"
   },
+  "//d3-geo-note": "SHIPPED, not dev-only: blocks/index.mjs (in the package) eagerly imports every block factory, including blocks/geo.mjs, which bare-imports d3-geo (core/engine/expand.js:10). harness/author/expand-blocks.mjs, the Node-side expander cli/vawe.mjs shells out to for every render, therefore needs d3-geo present even for a scene with no geo block. Devdependency until 2026-09-22: broke the very first `npx vawe` render with ERR_MODULE_NOT_FOUND.",
   "devDependencies": {
-    "d3-geo": "^3.1.1",
     "fontkit": "^2.0.4",
     "oxlint": "^1.80.0",
     "puppeteer": "^23.6.0",
@@ -54,10 +55,14 @@
     "films/scene/props.js",
     "films/scene/scene.css",
     "assets/vendor/",
+    "assets/geo/",
+    "recipes/",
     "films/scene/schema.json",
     "films/scene/sample.json",
     "harness/author/expand-blocks.mjs",
+    "harness/media/clip-audio.mjs",
     "generators/media/fonts.mjs",
+    "generators/media/voice-cue.mjs",
     "assets/fonts/",
     "bin/",
     "NOTICE"

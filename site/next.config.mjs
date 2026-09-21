@@ -25,6 +25,21 @@ const nextConfig = {
   // for good and each one was linked from outside the app — a 404 is a worse answer than a hop.
   async redirects() {
     return [
+      // www.vawe.dev and vawe.dev both served 200 with no redirect between them, so Google split
+      // the site's crawl and its link authority across two hostnames for the same 984 pages (GSC
+      // confirmed both being indexed). `alternates.canonical` in app/layout.tsx already names the
+      // apex as canonical, but a canonical tag only advises; it does not stop the second hostname
+      // from being crawled and ranked on its own. A real 308 here does that, and it lives HERE
+      // rather than at the Coolify/proxy layer: this app is the one thing both hostnames point at
+      // (Coolify's own multi-domain redirect toggle is dashboard state, not something this repo can
+      // commit or review), and Next's `has: [{ type: "host" }]` match runs on the Host header the
+      // proxy forwards, which Coolify's default Traefik config passes through unmodified.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.vawe.dev" }],
+        destination: "https://vawe.dev/:path*",
+        permanent: true,
+      },
       { source: "/blocks", destination: "/arsenal", permanent: true },
       { source: "/blocks/:name", destination: "/arsenal/:name", permanent: true },
       // The effects index is gone as a page: /arsenal indexes blocks and effects together, so the
