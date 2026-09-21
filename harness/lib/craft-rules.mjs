@@ -76,8 +76,13 @@ function checkBrief(rec) {
   return errs;
 }
 
-/** checkDoc(rec, root): doc path shape, file existence, anchor existence, and the freshness quote. */
-function checkDoc(rec, root) {
+/**
+ * checkDoc({doc, brief}, root): doc path shape, file existence, anchor existence, and the freshness
+ * quote. Exported so anything else that carries a `{ doc, brief }` pointer (a registry entry's
+ * doctrine route, `core/registry/registry.js`'s `docs` option) reuses this exact check rather than a
+ * second one: one owner for "is this doc pointer still true", whatever record it hangs off.
+ */
+export function checkDoc(rec, root) {
   const errs = [];
   if (typeof rec.doc !== 'string' || !/^engine-doctrine\/[^\s]+\.md(#[a-z0-9-]+)?$/.test(rec.doc)) {
     errs.push(`doc "${rec.doc}" must be "engine-doctrine/....md" or "engine-doctrine/....md#anchor"`);
