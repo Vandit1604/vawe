@@ -4,7 +4,7 @@ description: Vawe turns one self-describing JSON file into one rendered video, d
 icon: Sparkles
 ---
 
-Vawe is a deterministic motion-graphics engine: it reads a single, self-describing JSON file and renders a video from it, with no timeline, no editor, and no dragging clips around. A scene JSON names its layers, a camera, a theme, and a duration, and that file is the only source of truth; the mp4 is a build artifact you can delete and regenerate at any time. The render itself is deterministic: `renderFrame(n)` is a pure function of the frame number, so the same JSON always produces byte-identical pixels no matter what order the frames render in or which machine renders them. A Go service drives headless Chrome through `chromedp`, seeking `renderFrame(n)` frame by frame across parallel tabs and capturing each as a PNG, then `ffmpeg` stitches the sequence into an H.264 mp4. You describe the scene once, and the engine draws every one of those frames.
+Vawe is a deterministic motion-graphics engine: it renders video from JSON, reading a single, self-describing file with no timeline, no editor, and no dragging clips around. This is what it means to generate video programmatically here: the JSON is the whole input and the mp4 is a build artifact of it, never the other way round. A scene JSON names its layers, a camera, a theme, and a duration, and that file is the only source of truth; the mp4 is a build artifact you can delete and regenerate at any time. The render itself is deterministic: `renderFrame(n)` is a pure function of the frame number, so the same JSON always produces byte-identical pixels no matter what order the frames render in or which machine renders them. A Go service drives headless Chrome through `chromedp`, seeking `renderFrame(n)` frame by frame across parallel tabs and capturing each as a PNG, then `ffmpeg` stitches the sequence into an H.264 mp4. You describe the scene once, and the engine draws every one of those frames.
 
 ```bash
 ./bin/vawe films/scene/sample.json
@@ -22,6 +22,8 @@ Two ideas do most of the work.
 **Every frame is a pure function of its number.** `renderFrame(n)` depends only on `n`. A virtual clock coerces `Date`, `requestAnimationFrame`, timers, and `Math.random` to frame time, so there is no wall clock and no unseeded randomness anywhere. The same JSON produces byte-identical frames no matter what order they render in. That is what lets frames shard across parallel headless Chrome tabs, and it is what makes a video reproducible and diff-able. Read more in [Determinism](/docs/determinism).
 
 ## How a render actually works
+
+`./bin/vawe` is a headless video renderer CLI: it opens no window, and the same command runs the same way on a laptop or inside CI.
 
 ```text
 data.json
