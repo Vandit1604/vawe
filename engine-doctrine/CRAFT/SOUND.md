@@ -435,7 +435,7 @@ memory before ffmpeg muxes it.
   "loudness":  -14,                       // LUFS target at the mux (socials)
   "auto":       true,                     // DRAFT ONLY: score every cut + sting automatically (§4)
   "bridges":  [{ "bridge": "j", "at": "cut@1", "sound": "tense", "lead": 0.8 }],  // J/L-cuts (§2)
-  "cues":     [{ "t": 3.2, "name": "chime", "gain": 0.6 }],
+  "cues":     [{ "t": "installLine.end+0.1", "name": "chime", "gain": 0.6 }],
   "sfxGain":    0.8,                      // master over every cue, authored and derived
   "vo":        "voice.wav",
   "voWords":   "voice.words.json",        // [{w,t}] → make vo-captions builds timed captions
@@ -453,6 +453,18 @@ give same bytes. That is a genuinely good property and it is worth keeping.
 
 A cue is honest only when it names something the viewer SEES happen. A `press` with no button on screen
 is a lie; cut it.
+
+**Name the moment, never copy its number.** A cue that marks something inside a beat, the install line
+landing, the counter finishing, the mark settling, is about a LAYER, not a timestamp. `"t": 3.8935` is
+a snapshot of where that layer happened to sit when you typed it; direction moves layers constantly, and
+nothing marks the cue stale when they do. `vawe-flow-2` shipped with two cues 1118ms and 765ms early
+this exact way. Write `"t": "installLine.end+0.1"` instead: any string a layer `start` field accepts
+(`core/timeline/relative-time.js`) also works here, bare `id` = that layer's start, `id.end` = start
+plus its `duration`, an optional `+`/`-` offset for "a beat after it lands." The film keeps sounding
+right when the layer moves, because the cue is now pinned to the same thing you are. `harness/live/
+scene-live.mjs` nudges (never blocks) when a saved film has a plain-number cue sitting close to a real
+layer arrival, and names the exact reference to replace it with. A cue with nothing to reference (an
+intro sting before any layer lands, a beat that owns no `id`) stays a plain number; that is not the gap.
 
 **A cue may synthesize its own sound instead of naming a baked one**: `{"t":1,"voice":"chime","params":{"freq":800}}`
 in place of `name`. `voice` picks a live entry in `core/audio/kit.mjs`'s `CUES` table (the same synth
