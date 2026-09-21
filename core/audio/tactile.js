@@ -53,7 +53,7 @@ import { staggerStep } from '../type/type.js';
 // A trimmed list is not a fix if the code that WRITES the names is somewhere else, and it was.
 // `thud` is now `impact` and `travel` is now `whoosh`; `riser` is a name again, rebuilt without noise.
 // All three voicings are in core/audio-kit.mjs under `swarm`.
-export const MOTION_CUES = ['pluck', 'droplet', 'chime', 'bloom', 'impact', 'whoosh', 'riser'];
+export const MOTION_CUES = ['pluck', 'droplet', 'chime', 'bloom', 'impact', 'whoosh'];
 
 // THE FIVE ARE CATALOGUED AND THE OTHER FIFTEEN ARE NOT, and that looks like two decisions in
 // opposite directions until you see that CUES is TWO vocabularies in one map.
@@ -85,14 +85,13 @@ export const MOTION_CUE_REGISTRY = defineRegistry('motion voice', Object.fromEnt
     whoosh: 'air moving past. One camera gesture, one whoosh, never one per keyframe: the sound rises as the move starts and falls away as it passes',
     droplet: 'something falls into place: a short pitched drop, placed automatically on a `drop` or `zoom` cut. The lightest of the arrival sounds',
     chime: 'a small bright accent where a moment resolves. Noticed rather than announced, so it survives repetition better than a sting does',
-    bloom: 'something OPENS: placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut. Slower in than the others, because an opening is not an arrival',
-    riser: 'a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. Tension, suspense, a countdown to what a declared `spectacle` names',
+    bloom: 'something OPENS: placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut, and on a declared `spectacle`. Slower in than the others, because an opening is not an arrival',
     pluck: 'punctuation, for a small element or a counter digit. Quiet on purpose: this is the one that becomes a machine gun, and the density rules exist because of it',
   },
   catalog: {
     title: 'Motion voices (tactile sound)',
     tag: 'audio',
-    intro: 'The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number\'s own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the five can also be placed by hand as `audio.cues[]`. Doctrine: `engine-doctrine/CRAFT/SOUND.md`.',
+    intro: 'The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote: a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number\'s own easing curve, a declared `spectacle` blooms on the moment. These six are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the five can also be placed by hand as `audio.cues[]`. Doctrine: `engine-doctrine/CRAFT/SOUND.md`.',
     usage: (n, { j }) => j({ audio: { cues: [{ t: 1.2, name: n }] } }),
     noPreview: 'a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.',
   },
@@ -107,11 +106,6 @@ export const DENSITY = {
   floorArea: 0.0015, // a layer smaller than 0.15% of the frame is punctuation, not an arrival
   groundArea: 0.92,  // a layer covering 92%+ of the frame is the GROUND, not a thing that arrived
 };
-
-// How long the baked `riser` runs. The cue carries no parameters, so the only way a riser can END on
-// the spectacle is to start it its own length before. Authorable, because the day the baked riser
-// changes length this number is what has to move with it.
-export const RISER_LEAD = 0.9;
 
 const r3 = (v) => Math.round(v * 1000) / 1000;
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
@@ -254,12 +248,22 @@ function partCues(layers, out) {
   }
 }
 
-// THE SPECTACLE. A riser that ENDS on the nominated moment, which is the one cue in the film allowed
-// to be loud. It is also the one cue the density cap may not drop: the film named this instant.
-function spectacleCue(spectacle, lead, out) {
+// THE SPECTACLE. One cue ON the nominated moment, the one cue in the film allowed to be loud, and
+// the one the density cap may not drop: the film named this instant.
+//
+// IT LANDS ON THE MOMENT, IT DOES NOT BUILD INTO IT. This used to be a `riser` starting RISER_LEAD
+// seconds early so the build ended on the beat. Two things were wrong with that. The listening pass
+// in quality/baselines/sound-verdicts.json had already filed `riser` under `weak`, and the owner
+// rejected it again by ear: a build into a moment reads as a trailer, not as motion design. And a
+// cue that starts early is the only cue in the derivation whose time is not the time it means, which
+// is the same stale-number shape that put two cues a second early in vawe-flow-2.
+//
+// `bloom` is one of the six the same listening pass marked `keep`, and it opens rather than hits,
+// which is what a spectacle is: the frame arriving at its loudest idea, not being struck.
+function spectacleCue(spectacle, out) {
   const at = spectacle && +spectacle.at;
   if (!Number.isFinite(at) || at <= 0) return;
-  out.push({ t: r3(Math.max(0, at - lead)), name: 'riser', w: 1, gain: 0.45, protect: true });
+  out.push({ t: r3(at), name: 'bloom', w: 1, gain: 0.45, protect: true });
 }
 
 // ---- density: the part that decides what does NOT sound ------------------------------------------
@@ -308,7 +312,7 @@ export function derive(scene = {}, opts = {}) {
   cameraCues(scene.camera, out);
   counterCues(scene.layers || [], out);
   partCues(scene.layers || [], out);
-  spectacleCue(scene.spectacle, cfg.riserLead ?? RISER_LEAD, out);
+  spectacleCue(scene.spectacle, out);
   const dur = +scene.duration || Infinity;
   return out.filter((c) => Number.isFinite(c.t) && c.t >= 0 && c.t < dur);
 }
