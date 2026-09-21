@@ -695,13 +695,14 @@ async function main() {
     console.log(`  and say so, rather than building on the ${ranked.length} below.\n`);
     console.log(`  Nearest by wording only, WEAK GUESSES, not answers:\n`);
   } else {
-    console.log(`  ${ranked.length} matched · ${nFresh} newer than ${WINDOW_DAYS} days · ${nUnused} never used here.`
-      + `\n  New and unused is not a recommendation. It means you may not know it is there.`
+    console.log(`  ${ranked.length} matched · ${nFresh} newer than ${WINDOW_DAYS} days.`
+      + `\n  ${nUnused} of these have shipped in 0 films so far. That counts the library's PAST, not this`
+      + `\n  film: it is not a caution against the ${nUnused === 1 ? 'one' : nUnused}, it is a gap you may be about to close.`
       + `\n  ${result.usage.note}\n`);
   }
   for (const e of ranked) {
     console.log(`  ${e.name}${e.isNew ? `   ← NEW, added in the last ${WINDOW_DAYS} days` : ''}`);
-    console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${e.used === 0 ? 'NEVER used in this library' : `${e.used} scene(s)`}`);
+    console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${e.used === 0 ? '0 scenes so far, an option worth trying' : `${e.used} scene(s)`}`);
     if (e.blurb) console.log(`      ${e.blurb}`);
     if (e.pitfall) console.log(`      pitfall: ${e.pitfall}`);
     if (e.snippet) console.log(`      ${e.snippet}`);
