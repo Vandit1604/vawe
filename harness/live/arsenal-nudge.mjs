@@ -112,13 +112,17 @@ function recentSearchOverlaps(words) {
   });
 }
 
+/** The names arsenal would answer with, each carrying its doc route when it has one (a layer type's
+ * craft doctrine, core/registry/registry.js's `docs` option). Printed as "name (doc: <path>)" so the
+ * nudge that already tells an author what to search for also hands them the doctrine directly, rather
+ * than a second message an author has to go run `make arsenal` again to see. */
 function topNames(query) {
   const r = spawnSync('node', [path.join(ROOT, 'harness/author/arsenal.mjs'), query, '--json', '--n', '3'],
     { cwd: ROOT, encoding: 'utf8', timeout: 4000 });
   if (r.status !== 0 || !r.stdout) return [];
   try {
     const parsed = JSON.parse(r.stdout);
-    return (parsed.results || []).map((e) => e.name);
+    return (parsed.results || []).map((e) => (e.doc ? `${e.name} (doc: ${e.doc})` : e.name));
   } catch { return []; }
 }
 

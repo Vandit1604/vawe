@@ -60,7 +60,58 @@ export const LAYER_BLURBS = blurbsOf('layer type', REGISTRY);
 // hardcoded special case reading LAYER_TYPES + LAYER_BLURBS because layer types were not a registry
 // (engine-doctrine/MISTAKES.md #551: `beam`, whose blurb says "a light that travels the rounded-rect border", was
 // invisible to a query naming exactly that). All of it is one declaration now.
+// LAYER_DOCS: the doctrine route for the 24 layer types, and only the 24. This is the one vocabulary
+// where a wrong choice is a real craft decision (which type of primitive to reach for, and how to use
+// it well), not a catalogue row where the blurb already is the whole story, so it is the one place
+// `defineRegistry`'s `docs` option gets used today. `{ doc, brief }`: `brief` is a VERBATIM quote from
+// the doc, checked at load (Node-side: harness/lib/registry-docs.mjs, reusing craft-rules.mjs's own doc
+// checker) so the pointer fails loudly the day the doc's own wording moves out from under it, the same
+// freshness contract engine-doctrine/CRAFT/rules/*.json already proves for a craft rule's `doc`.
+//
+// NOT EVERY TYPE IS HERE. Six have no doctrine beyond this file's own blurb (verified by opening every
+// doc that mentions the word, most hits were the word used for something else): `video`, `clip`,
+// `board`, `doc`, `globe`, `particles`. That is reported as a gap, not silently patched with new prose.
+const LAYER_DOCS = {
+  text: { doc: 'engine-doctrine/PRIMITIVES.md#kinetic-type-coretypetypejs-31-presets-charwordline-splits',
+    brief: 'JSON knobs on a layer' },
+  count: { doc: 'engine-doctrine/CRAFT/MOTION-REGISTERS.md#3-seven-motion-devices-not-two',
+    brief: 'a number has no mass and overshoot paints a false value for several frames' },
+  image: { doc: 'engine-doctrine/CRAFT/IMAGERY.md',
+    brief: 'Prefer the lightest real visual: captured real UI' },
+  group: { doc: 'engine-doctrine/PRIMITIVES.md#the-open-canvas-filmsscene',
+    brief: 'group is the DEFAULT for anything with a spatial relationship' },
+  rect: { doc: 'engine-doctrine/CRAFT/LAYOUT.md#0-guardrails-you-build-for-the-web-video-frames-are-not-pages',
+    brief: 'a rect with a motion track on w, or parts with drawOn' },
+  glow: { doc: 'engine-doctrine/CRAFT/EYE-TRACE.md#the-eye-is-steered-not-only-ranked',
+    brief: 'A glow that arrives cold and wide, tightens, and goes hot as the beat resolves.' },
+  beam: { doc: 'engine-doctrine/CRAFT/EYE-TRACE.md#the-eye-is-steered-not-only-ranked',
+    brief: 'A beam used as a matte means the words do not fade in, they are found.' },
+  svg: { doc: 'engine-doctrine/RULES/svg-inline.md',
+    brief: 'The svg layer type has no src field.' },
+  cursor: { doc: 'engine-doctrine/PRIMITIVES.md#the-open-canvas-filmsscene',
+    brief: 'cursor in full.' },
+  html: { doc: 'engine-doctrine/CRAFT/HTML-FRAGMENTS.md',
+    brief: 'Writing HTML fragments, and making them move' },
+  component: { doc: 'engine-doctrine/CRAFT/RECREATION.md',
+    brief: 'Reflecting a live SITE rather than a film? This step is the whole job.' },
+  shader: { doc: 'engine-doctrine/PRIMITIVES.md#ambient-shader-looks-coresurfacesshaders-ambientjs-23-continuous-webgl-fields-the-shader-layer',
+    brief: 'these are LOOPING looks placed as a shader layer, pure in local t' },
+  lottie: { doc: 'engine-doctrine/MISTAKES.md#136-a-lottie-layer-with-a-root-relative-src-silently-rendered-empty-no-warning',
+    brief: 'preloadLottie now normalises a non-absolute src to root-relative' },
+  paint: { doc: 'engine-doctrine/PRIMITIVES.md#the-open-canvas-filmsscene',
+    brief: 'a canvas sized to the layer box, redrawn every frame from local time' },
+  raymarch: { doc: 'engine-doctrine/PRIMITIVES.md#raymarched-3d-coresurfacesraymarch-fxjs-the-raymarch-layer-type-6-scenes',
+    brief: 'A fullscreen quad plus a signed distance field IS a renderer: march a ray' },
+  three: { doc: 'engine-doctrine/PRIMITIVES.md#the-open-canvas-filmsscene',
+    brief: 'Adding a canvas-drawn look = adding a file to core/surfaces/ and a line' },
+  composition: { doc: 'engine-doctrine/CRAFT/AUTHOR-THE-FRAME.md#the-full-ceiling-a-hand-authored-timeline-per-beat-via-composition',
+    brief: 'when a beat needs MORE than that, overlapping tweens, cross-timed hand-offs' },
+  adjust: { doc: 'engine-doctrine/CRAFT/GRAMMAR.md#there-are-three-ways-to-invert-a-frame-not-one',
+    brief: 'The third is a glow or beam layer, or an adjust layer grading everything beneath.' },
+};
+
 export const LAYER_REGISTRY = defineRegistry('layer type', REGISTRY, { slot: 'layers[].type', blurbs: LAYER_BLURBS,
+  docs: LAYER_DOCS,
   catalog: {
     title: 'Layer types',
     tag: 'layer',

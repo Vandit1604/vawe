@@ -8883,6 +8883,18 @@ const FLOOR = 1800;
   }
 }
 
+// ---- registry doc pointers: the freshness check, same contract as craft-rules' own doc field --------
+// A registry entry's `docs[name] = { doc, brief }` (core/registry/registry.js's `docs` option, used by
+// the 18 layer types with real craft doctrine beyond their own blurb, core/layers/index.js) is checked
+// here the same way engine-doctrine/CRAFT/rules/*.json is checked: the file exists, the anchor exists,
+// and the quoted `brief` still appears in that section. A stale quote fails HERE, loudly, rather than
+// rotting silently the way an unchecked pointer would.
+{
+  const { validateRegistryDocs } = await import('../../harness/lib/registry-docs.mjs');
+  const problems = await validateRegistryDocs();
+  ok(`registry docs: every doc pointer's file/anchor/quote checks out${problems.length ? `: ${problems.join('; ')}` : ''}`, problems.length === 0);
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 if (!fail && pass < FLOOR) {
   console.error(`\n✗ ${pass} assertions ran, below the floor of ${FLOOR}. Nothing FAILED, so something`);
