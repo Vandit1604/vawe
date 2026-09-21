@@ -186,9 +186,14 @@ const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.auth
 // FIX 6: the two SLIDESHOW waivers must be BACKED BY A PLAN. `no-continuous-object` and `plain-slideshow`
 // are the rules a reflex `allow` silences, so honour their waiver only when the storyboard beside this
 // scene names `threads:` (what holds the film, engine-doctrine/CRAFT/FILM-STRUCTURE.md). A waiver with a `_why` but
-// no named device is the "make the gate stop talking" move; here it is simply not honoured, the finding
-// stands, and the ratchet in author-check decides severity (new work blocks, the legacy library is frozen).
-// So this tightens NEW films without breaking the many legacy scenes that waive these by habit.
+// no named device is the "make the gate stop talking" move; here it is simply not honoured, and this
+// gate reports the finding as FAILing whichever film it is, old or new.
+//
+// SEVERITY (blocks or not) is decided one level up, in author-check.mjs's HARD_CODES step, against
+// quality/baselines/direction-floor-corpus.json (the frozen list of films that predate this rule): a
+// film on that list still gets the plain bare-waiver forgiveness the library's 51 existing waivers on
+// these two codes already rely on; a film NOT on it gets forgiven only by what THIS gate already
+// honoured above, a plan-backed waiver. So this tightens NEW films without breaking legacy ones.
 const PLAN_BACKED_WAIVERS = new Set(['no-continuous-object', 'plain-slideshow']);
 let planThreads = '';
 try {
