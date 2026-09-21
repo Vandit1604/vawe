@@ -22,6 +22,9 @@
   { "at": 11.5, "fx": "cinematicZoom", "dur": 0.45, "mech": "seam" }
  ],
  "sceneUnits": true,
+ "recipes": [
+  { "recipe": "hover-click", "at": 5.7, "cursor": "cursor", "target": "save-btn", "params": { "approach": 5.7, "clickDelay": 0 } }
+ ],
  "layers": [
   { "type": "text", "text": "Draw the route. The climb comes with it.", "size": 88, "weight": 650, "w": 1400, "x": 160, "y": 400, "split": "word", "preset": "up", "dist": 24, "stagger": 0.05, "each": 0.38, "start": 0, "duration": 2.4, "out": "fade", "exitDur": 0.3 },
 
@@ -43,15 +46,12 @@
     ]
   },
 
-  { "type": "cursor", "path": [
-      { "t": 0, "x": 560, "y": 420 },
-      { "t": 0.5, "x": 600, "y": 476, "ease": "easeOutCubic" },
-      { "t": 1.75, "x": 820, "y": 616, "ease": "easeInOutSine" },
-      { "t": 3.0, "x": 1000, "y": 526, "ease": "easeInOutSine" },
-      { "t": 4.25, "x": 1180, "y": 696, "ease": "easeInOutSine" },
-      { "t": 5.5, "x": 1340, "y": 616, "ease": "easeOutCubic" },
-      { "t": 5.7, "x": 1365, "y": 632, "ease": "easeOutCubic" }
-    ], "clicks": [5.7], "start": 3.0, "duration": 6.2, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
+  { "type": "html", "id": "save-btn", "x": 1270, "y": 602, "w": 190, "h": 60, "start": 2.8, "duration": 8.2, "anim": "fade", "enterDur": 0.01, "out": "fade", "exitDur": 0.01,
+    "html": "<div style=\"width:100%;height:100%\"></div>" },
+
+  { "type": "cursor", "id": "cursor", "path": [
+      { "t": 0, "x": 560, "y": 420 }
+    ], "start": 3.0, "duration": 6.2, "anim": "fade", "enterDur": 0.3, "out": "fade", "exitDur": 0.3 },
 
   { "type": "text", "text": "The climb, visible before the first step.", "size": 60, "weight": 640, "w": 1400, "x": 160, "y": 420, "start": 11.5, "duration": 2.4, "anim": "slide-up", "enterDur": 0.5, "out": "fade", "exitDur": 0 },
   { "type": "text", "text": "Trailhead", "size": 44, "weight": 700, "x": 160, "y": 520, "start": 12.6, "duration": 2.4, "anim": "fade", "enterDur": 0.4, "out": "fade", "exitDur": 0 },
