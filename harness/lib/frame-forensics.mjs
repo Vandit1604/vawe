@@ -100,6 +100,35 @@ export function gridStatsSweep(mp4, stride) {
 }
 
 /**
+ * frameDeltaSweep(mp4, gw, gh) → [{ frame, delta }]: for EVERY decoded frame of the whole film, in ONE
+ * decode, the max per-pixel |Δ| (0..1) against the frame right before it, on a `gw`x`gh` downscaled
+ * gray grid. Frame 0 gets `delta: 0` (nothing precedes it).
+ *
+ * SAME SHAPE AS gridStatsSweep, one process, frames arriving in order, no seek-and-redecode per
+ * sample: quality/gates/motion-sound-check.mjs needs frame-to-frame CHANGE (does the picture move
+ * between consecutive frames), which is a different question from gridStatsSweep's per-frame luma/
+ * spread, so it is a sibling function over the same one-pass pattern rather than a second one invented
+ * from nothing. No stride: a slide-in a stride would skip land between two sampled frames and read as
+ * "nothing moved", so every frame is decoded.
+ */
+export function frameDeltaSweep(mp4, gw = 64, gh = 36) {
+  const N = gw * gh;
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vf', `scale=${gw}:${gh},format=gray`,
+    '-vsync', '0', '-f', 'rawvideo', '-pix_fmt', 'gray', '-'], { maxBuffer: 1 << 29 });
+  const b = r.stdout;
+  if (!b || b.length < N) return [];
+  const out = [];
+  let prev = null;
+  for (let i = 0, frame = 0; i + N <= b.length; i += N, frame++) {
+    let maxDelta = 0;
+    if (prev) for (let k = 0; k < N; k++) { const d = Math.abs(b[i + k] - prev[k]); if (d > maxDelta) maxDelta = d; }
+    out.push({ frame, delta: maxDelta / 255 });
+    prev = b.subarray(i, i + N);
+  }
+  return out;
+}
+
+/**
  * gridStatsAt(mp4, frameIdx) → { luma, spread } in [0,1], or null if the frame would not decode. One
  * decode of the WHOLE frame, scaled to a small grid (32x18) instead of 1x1: the grid's mean IS the same
  * frame-mean a 1x1 scale gives (seam-snap.mjs's original lumaAt trick), and its max-min gives a SECOND,
