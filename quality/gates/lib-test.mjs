@@ -3498,13 +3498,17 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   // THE SPECTACLE. A riser that ENDS on the nominated moment, and the cap may not drop it.
   const spec = tactileCues({ duration: 30, spectacle: { at: 12, of: 'ring', device: 'ripple' },
     layers: Array.from({ length: 40 }, (_, i) => ({ type: 'rect', start: 11 + i * 0.02, w: 900, h: 500 })) }, { canvas });
-  const riser = spec.find((c) => c.name === 'riser');
-  ok('tactile: the spectacle rises INTO its moment and ends there',
-     !!riser && Math.abs(riser.t + RISER_LEAD - 12) < 1e-6);
-  ok('tactile: the density cap may not drop the moment the film nominated', !!riser);
-  ok('tactile: no spectacle, no riser',
-     tactileCues({ duration: 6, layers: [{ type: 'rect', start: 2, w: 900, h: 500 }] }, { canvas })
-       .every((c) => c.name !== 'riser'));
+  // The spectacle lands ON its moment. It used to be a `riser` led in early so the build ended on the
+  // beat; the listening pass filed `riser` under `weak` and the owner rejected it by ear, so the cue
+  // is now a `bloom` at the moment itself, and its time is the time it means.
+  const bloomAt = spec.find((c) => c.name === 'bloom' && Math.abs(c.t - 12) < 1e-6);
+  // `protect` is an internal flag the density pass consumes, so it is not on the emitted cue. That it
+  // SURVIVED is the real assertion, and the next line makes it against 40 arrivals crowding the same
+  // second, which is exactly what the cap would otherwise drop it for.
+  ok('tactile: the spectacle sounds ON its moment, not before it', !!bloomAt);
+  ok('tactile: the density cap may not drop the moment the film nominated', !!bloomAt);
+  ok('tactile: nothing in the derivation reaches for a riser any more',
+     spec.every((c) => c.name !== 'riser'));
 
   // DENSITY. The design problem, not the mapping.
   const hail = { duration: 30, layers: Array.from({ length: 120 },
