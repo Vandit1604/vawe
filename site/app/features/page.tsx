@@ -59,8 +59,9 @@ export default function Features() {
             </span>
             <h1>What the engine decides.</h1>
             <p>
-              Three of them, and none is a setting you pass. They are the reason the output is
-              reproducible, shaped, and not generic.
+              Three of them, and none is a setting you pass. Together they are what it takes to
+              automate video creation without the result going generic: the reason the output is
+              reproducible, shaped, and still worth watching.
             </p>
           </section>
 

@@ -1,4 +1,5 @@
 import { Header } from "../components/Header";
+import { Clip } from "../components/Clip";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
@@ -6,7 +7,7 @@ import "../components/intent.css";
 export const metadata = pageMetadata({
   title: "Vawe · JSON to video",
   description:
-    "What a Vawe scene file actually contains: one JSON document, 24 layer types, five named canvases, validated before a single frame renders. How the file becomes an mp4.",
+    "Make a video with code: the exact JSON that renders below it, and how the format works. One JSON document, 24 layer types, five named canvases, validated before a single frame renders.",
   path: "/json-to-video",
 });
 
@@ -15,14 +16,56 @@ export const metadata = pageMetadata({
  * one in its own metadata keywords without a page that explains the shape of the JSON itself. This
  * page states the scene contract as it exists in the repo today: no invented schema, no numbers
  * pulled from anywhere but core/layers/index.js and core/layout/safe.js.
+ *
+ * The opening section used to show a truncated, non-runnable JSON stub next to nothing. It now
+ * shows the real, complete films/scene/sample.json (the file the repo itself keeps for exactly
+ * this: its own audio._why field says "the sample is read beside its JSON in a docs page") next to
+ * the actual mp4 that file renders to. Both are real and both are here so a reader, human or agent,
+ * can copy the left side and get the right side, rather than being told the mapping exists.
  */
 
 const SAMPLE = `{
+  "$schema": "./schema.json",
   "module": "scene",
-  "theme": "argus",
-  "aspect": "16:9",
-  "duration": 23,
-  "layers": [ /* text, image, group, ... */ ]
+  "theme": "default",
+  "aspect": "9:16",
+  "duration": 7.6,
+  "captionMode": "sentence",
+  "layers": [
+    {
+      "type": "text", "text": "Motion graphics",
+      "x": 100, "y": 340, "w": 860, "size": 84, "weight": 800,
+      "split": "word", "preset": "up", "stagger": 0.09, "each": 0.5,
+      "start": 0.2, "duration": 3.5
+    },
+    {
+      "type": "text", "text": "from pure <b>data.</b>",
+      "x": 100, "y": 470, "w": 860, "size": 84, "weight": 800,
+      "split": "word", "preset": "up", "stagger": 0.09, "each": 0.5,
+      "start": 0.7, "duration": 3
+    },
+    {
+      "type": "text", "text": "Every frame,", "font": "sans",
+      "x": 100, "y": 340, "w": 790, "size": 108, "weight": 800,
+      "split": "char", "preset": "blur", "each": 0.7, "stagger": 0.03,
+      "start": 3.7, "duration": 3.9, "anim": "none", "exitDur": 0
+    },
+    {
+      "type": "text", "text": "deterministic.", "font": "serif",
+      "x": 100, "y": 490, "w": 790, "size": 126, "split": "line",
+      "preset": "up", "each": 0.7, "start": 4.2, "duration": 3.4,
+      "anim": "none", "exitDur": 0
+    }
+  ],
+  "captions": [
+    { "t0": 0.4, "t1": 3.4, "text": "Motion graphics from pure data" },
+    { "t0": 3.8, "t1": 7.2, "text": "Every frame, deterministic" }
+  ],
+  "audio": {
+    "silent": true,
+    "_why": "the sample is read beside its JSON in a docs page, never in a feed; sound would teach a mixer, not the schema"
+  },
+  "bg": [{ "t": 0, "preset": "soft" }]
 }`;
 
 export default function JsonToVideo() {
@@ -37,27 +80,32 @@ export default function JsonToVideo() {
             </span>
             <h1>One JSON file. One rendered video.</h1>
             <p>
-              There is exactly one module: <code>scene</code>. Every Vawe film starts as a single
-              JSON document declaring its theme, its canvas and an open list of layers, and ends as
-              one mp4. Nothing else is required to render.
+              This is how you make a video with code here: write the scene as data, and a headless
+              renderer turns it into an mp4. There is exactly one module, <code>scene</code>, and
+              every film starts as a single JSON document declaring its theme, its canvas and an
+              open list of layers. Nothing else is required to render.
             </p>
           </section>
 
-          <section className="isec">
+          <section className="isec iproof">
             <div className="isec-text">
-              <h2>The document itself.</h2>
+              <h2>The document, and the video it renders.</h2>
               <p>
-                A scene starts with <code>{"{"} "module": "scene" {"}"}</code> and adds a theme, an
-                aspect ratio, a duration in seconds and a <code>layers</code> array. Every shipped
-                sample opens the same way, and the render CLI reads the <code>module</code> field
-                straight off the file to pick the right renderer if one is not passed explicitly.
+                This is the real file, unedited: <code>films/scene/sample.json</code>, the sample
+                the repo itself keeps for exactly this comparison. Copy it, run{" "}
+                <code>./bin/vawe films/scene/sample.json</code>, and this is the mp4 that comes out.
+                No project setup, no timeline, no separate schema to learn first.
               </p>
-              <span className="cite">films/scene/sample.json:3 · renderer/cmd/render/main.go</span>
+              <span className="cite">films/scene/sample.json · renderer/cmd/render/main.go:30</span>
             </div>
-            <div className="isec-art">
-              <div className="codeblock">
-                <div className="lbl">films/scene/*.json</div>
+            <div className="isec-art iproof-art">
+              <div className="codeblock iproof-code">
+                <div className="lbl">films/scene/sample.json</div>
                 <pre className="code">{SAMPLE}</pre>
+              </div>
+              <div className="iproof-video">
+                <Clip src="/assets/sample.mp4" poster="/assets/sample.jpg" />
+                <span className="cite">out/sample.mp4, rendered from the file on the left</span>
               </div>
             </div>
           </section>

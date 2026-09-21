@@ -31,6 +31,22 @@
   .isec-art{margin-top:22px}
 }
 
+/* .iproof: the JSON-and-its-video pair on /json-to-video, above the fold. The claim the rest of
+   the page argues in prose, shown instead: the file on the left is the file that made the clip on
+   the right. Code and video sit side by side on a wide viewport so both are visible without
+   scrolling; the video is 9:16 (films/scene/sample.json's own aspect) so it is shown at the shape
+   it actually renders, never cropped to fit a 16:9 slot it was not authored for. */
+.iproof-art{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.iproof-code{flex:1 1 320px;margin:6px 0 0;max-width:420px}
+.iproof-code pre{font-size:11.5px;line-height:1.6}
+.iproof-video{flex:0 0 176px;margin-top:6px}
+.iproof-video video{width:176px;aspect-ratio:9/16;border-radius:14px;border:1px solid var(--line);
+  box-shadow:var(--shadow-2);display:block;object-fit:cover;background:#0f1620}
+.iproof-video .cite{margin-top:10px;display:block;max-width:176px}
+@media (max-width:640px){
+  .iproof-code{max-width:none}
+}
+
 /* .itable: the one dense comparison table two intent pages now need (/remotion-alternatives,
    /when-determinism-matters). Hairlines only, per DESIGN.md's no-shadow rule; wrapped in
    .itable-wrap so a wide row scrolls inside itself on mobile instead of the page. Header row
