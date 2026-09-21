@@ -20,7 +20,6 @@
   "motion-voices-tactile-sound--droplet": "{\n  \"audio\": {\n    \"cues\": [\n      {\n        \"t\": 1.2,\n        \"name\": \"droplet\"\n      }\n    ]\n  }\n}",
   "motion-voices-tactile-sound--impact": "{\n  \"audio\": {\n    \"cues\": [\n      {\n        \"t\": 1.2,\n        \"name\": \"impact\"\n      }\n    ]\n  }\n}",
   "motion-voices-tactile-sound--pluck": "{\n  \"audio\": {\n    \"cues\": [\n      {\n        \"t\": 1.2,\n        \"name\": \"pluck\"\n      }\n    ]\n  }\n}",
-  "motion-voices-tactile-sound--riser": "{\n  \"audio\": {\n    \"cues\": [\n      {\n        \"t\": 1.2,\n        \"name\": \"riser\"\n      }\n    ]\n  }\n}",
   "motion-voices-tactile-sound--whoosh": "{\n  \"audio\": {\n    \"cues\": [\n      {\n        \"t\": 1.2,\n        \"name\": \"whoosh\"\n      }\n    ]\n  }\n}",
   "backgrounds--accent": "{\n  \"bg\": [\n    {\n      \"preset\": \"accent\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
   "backgrounds--accentplain": "{\n  \"bg\": [\n    {\n      \"preset\": \"accentPlain\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
@@ -76,6 +75,7 @@
   "camera-moves--drifthold": "{\n  \"cameraMove\": {\n    \"move\": \"driftHold\"\n  }\n}",
   "camera-moves--followcursor": "{\n  \"cameraMove\": {\n    \"move\": \"followCursor\"\n  }\n}",
   "camera-moves--followlayer": "{\n  \"cameraMove\": {\n    \"move\": \"followLayer\"\n  }\n}",
+  "camera-moves--hold": "{\n  \"cameraMove\": {\n    \"move\": \"hold\"\n  }\n}",
   "camera-moves--multiphase": "{\n  \"cameraMove\": {\n    \"move\": \"multiPhase\"\n  }\n}",
   "camera-moves--orbit": "{\n  \"cameraMove\": {\n    \"move\": \"orbit\"\n  }\n}",
   "camera-moves--panfollow": "{\n  \"cameraMove\": {\n    \"move\": \"panFollow\"\n  }\n}",
@@ -280,6 +280,22 @@
   "blend-modes--saturation": "{\n  \"mixBlend\": \"saturation\"\n}",
   "blend-modes--screen": "{\n  \"mixBlend\": \"screen\"\n}",
   "blend-modes--soft-light": "{\n  \"mixBlend\": \"soft-light\"\n}",
+  "cursor-styles--arrow": {
+    "type": "cursor",
+    "style": "arrow"
+  },
+  "cursor-styles--block": {
+    "type": "cursor",
+    "style": "block"
+  },
+  "cursor-styles--hand": {
+    "type": "cursor",
+    "style": "hand"
+  },
+  "cursor-styles--ibeam": {
+    "type": "cursor",
+    "style": "ibeam"
+  },
   "depths-parallax-planes--back": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"depth\": \"back\"\n}",
   "depths-parallax-planes--far": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"depth\": \"far\"\n}",
   "depths-parallax-planes--front": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"depth\": \"front\"\n}",
@@ -474,6 +490,7 @@
   "filter-presets--vignette": "{\n  \"type\": \"image\",\n  \"src\": \"assets/shot.png\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"filter\": \"vignette\"\n}",
   "kinetic-text-presets--assemble": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"word\",\n  \"preset\": \"assemble\",\n  \"each\": 0.5,\n  \"stagger\": 0.05\n}",
   "kinetic-text-presets--blur": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"word\",\n  \"preset\": \"blur\",\n  \"each\": 0.5,\n  \"stagger\": 0.05\n}",
+  "kinetic-text-presets--blurup": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"word\",\n  \"preset\": \"blurUp\",\n  \"each\": 0.5,\n  \"stagger\": 0.05\n}",
   "kinetic-text-presets--bounce": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"word\",\n  \"preset\": \"bounce\",\n  \"each\": 0.5,\n  \"stagger\": 0.05\n}",
   "kinetic-text-presets--chroma": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"word\",\n  \"preset\": \"chroma\",\n  \"each\": 0.5,\n  \"stagger\": 0.05\n}",
   "kinetic-text-presets--colorwave": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"word\",\n  \"preset\": \"colorWave\",\n  \"each\": 0.5,\n  \"stagger\": 0.05\n}",
@@ -524,6 +541,7 @@
   "stagger-order-from--first": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"char\",\n  \"preset\": \"up\",\n  \"each\": 0.5,\n  \"stagger\": {\n    \"amount\": 0.6,\n    \"from\": \"first\"\n  }\n}",
   "stagger-order-from--last": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"char\",\n  \"preset\": \"up\",\n  \"each\": 0.5,\n  \"stagger\": {\n    \"amount\": 0.6,\n    \"from\": \"last\"\n  }\n}",
   "stagger-order-from--random": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"char\",\n  \"preset\": \"up\",\n  \"each\": 0.5,\n  \"stagger\": {\n    \"amount\": 0.6,\n    \"from\": \"random\"\n  }\n}",
+  "stagger-order-from--typewriter": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"char\",\n  \"preset\": \"up\",\n  \"each\": 0.15,\n  \"stagger\": {\n    \"from\": \"typewriter\",\n    \"cps\": 24\n  }\n}",
   "theme-look-keys--backdrop": {
     "theme": {
       "look": {
@@ -704,6 +722,15 @@
   "shader-stings--warp": "{\n  \"stings\": [\n    {\n      \"t\": 2.4,\n      \"fx\": \"warp\"\n    }\n  ]\n}",
   "shader-stings--whippan": "{\n  \"stings\": [\n    {\n      \"t\": 2.4,\n      \"fx\": \"whipPan\"\n    }\n  ]\n}",
   "shader-stings--wipe": "{\n  \"stings\": [\n    {\n      \"t\": 2.4,\n      \"fx\": \"wipe\"\n    }\n  ]\n}",
+  "transition-relationships--act-break": "{\n  \"transition_why\": \"act-break · <feeling> · <invisible|expressive>\"\n}",
+  "transition-relationships--continuity": "{\n  \"transition_why\": \"continuity · <feeling> · <invisible|expressive>\"\n}",
+  "transition-relationships--contrast": "{\n  \"transition_why\": \"contrast · <feeling> · <invisible|expressive>\"\n}",
+  "transition-relationships--new-place-energy": "{\n  \"transition_why\": \"new-place-energy · <feeling> · <invisible|expressive>\"\n}",
+  "transition-relationships--rhyme": "{\n  \"transition_why\": \"rhyme · <feeling> · <invisible|expressive>\"\n}",
+  "transition-relationships--same-action": "{\n  \"transition_why\": \"same-action · <feeling> · <invisible|expressive>\"\n}",
+  "transition-relationships--same-object": "{\n  \"transition_why\": \"same-object · <feeling> · <invisible|expressive>\"\n}",
+  "transition-relationships--spatial-travel": "{\n  \"transition_why\": \"spatial-travel · <feeling> · <invisible|expressive>\"\n}",
+  "transition-relationships--time": "{\n  \"transition_why\": \"time · <feeling> · <invisible|expressive>\"\n}",
   "per-frame-accent-layers--beam-border-border-beam": "{\n  \"type\": \"beam\",\n  \"mode\": \"border\",\n  \"x\": 300,\n  \"y\": 430,\n  \"w\": 1320,\n  \"h\": 220,\n  \"radius\": 22,\n  \"thickness\": 3,\n  \"speed\": 0.5,\n  \"start\": 0,\n  \"duration\": 6\n}",
   "per-frame-accent-layers--beam-shine-sheen-sweep": "{\n  \"type\": \"beam\",\n  \"mode\": \"shine\",\n  \"x\": 300,\n  \"y\": 430,\n  \"w\": 1320,\n  \"h\": 220,\n  \"radius\": 22,\n  \"thickness\": 3,\n  \"speed\": 0.5,\n  \"start\": 0,\n  \"duration\": 6\n}",
   "vector-layer-logos-icons--svg-draw-stroke-draws-on": "{\n  \"type\": \"svg\",\n  \"d\": \"M60 8 L112 100 L8 100 Z\",\n  \"stroke\": \"#fff\",\n  \"strokeWidth\": 6,\n  \"x\": 840,\n  \"y\": 420,\n  \"w\": 240,\n  \"start\": 0,\n  \"duration\": 6\n}",
