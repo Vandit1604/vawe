@@ -108,6 +108,18 @@ export function sceneDims(cfg = {}, key = '') {
 // value core/boot.js already used to place with; keeping it means this change moves no existing pixel.
 export const MARGIN = 0.06;
 
+// COMPOSITION_MARGIN: a LOOK, not a safety floor. Where a content column's left/right edge sits, as a
+// fraction of the canvas WIDTH. Different question from MARGIN above: MARGIN exists so a camera push
+// never crops a safe-edge layer (MAX_ZOOM below), COMPOSITION_MARGIN exists so a headline column reads
+// well. Conflating the two was the bug `pin:"stage"` shipped with (engine-doctrine, this file's own
+// header): it resolved to the bleed floor and produced a 1790px column on a 1920px frame, edge to edge.
+//
+// 1/12, because that is the fraction already hand-typed across the repo: x:160, w:1600 at the 1920
+// stage every launch film was measured against, and 160/1920 is exactly 1/12. Kept as a fraction, not
+// the pixel, so `pin:"stage"` lands right at any of the five canvases instead of only the one it was
+// measured on.
+export const COMPOSITION_MARGIN = 1 / 12;
+
 /**
  * MAX_ZOOM: the largest uniform zoom the margin can absorb before edge-pinned content is CROPPED.
  *
@@ -222,15 +234,13 @@ export const PLACEMENT = {
   'thirds-bl': ['third1', 'third2'], 'thirds-br': ['third2', 'third2'],
   'thirds-t': ['center', 'third1'], 'thirds-b': ['center', 'third2'],
   'thirds-l': ['third1', 'center'], 'thirds-r': ['third2', 'center'],
-  // The de-facto anchors every launch film already hand-types as pixels: `x:160, w:1600` three times
-  // in blueprints/kit.mjs, the same margin in harness/author/scaffold.mjs, and the y:1010 accent rule
-  // the scaffold's continuous object sits on. Named here so a film can ask for them at any of the five
-  // aspects instead of the one 1920x1080 stage those constants were measured against. Nothing calls
-  // these yet (blueprints/kit.mjs and scaffold.mjs still write their own numbers, deliberately, so this
-  // commit changes no rendered frame); a later pass points those call sites here.
-  stage: ['left', null, 1],       // the full-width content column between the left and right safe edges
+  // The de-facto anchor every launch film already hand-types as pixels: `x:160, w:1600` at the 1920
+  // stage those constants were measured against. `stage-left` (below, resolved in
+  // core/engine/boot.js's `kw()`) reads COMPOSITION_MARGIN instead of the bleed floor `left` reads, so
+  // `pin:"stage"` lands on the composition column, not edge to edge with the frame.
+  stage: ['stage-left', null, 1], // the full-width content column between the left and right composition margins
   'text-band': [null, 'text-band'], // roughly two-thirds down the safe box, where a headline/sub sits
-  'lower-band': ['left', 'bottom'], // the stage's left edge, flush to the safe bottom: a closing rule
+  'lower-band': ['stage-left', 'bottom'], // the stage's left edge, flush to the safe bottom: a closing rule
 };
 
 export const PLACEMENT_REGISTRY = defineRegistry('placement', PLACEMENT, {
@@ -253,7 +263,7 @@ export const PLACEMENT_REGISTRY = defineRegistry('placement', PLACEMENT, {
     'thirds-b': 'centred horizontally, sat on the lower third line',
     'thirds-l': 'vertically centred, sat on the left third line',
     'thirds-r': 'vertically centred, sat on the right third line',
-    stage: 'the full-width content column between the left and right safe margins, at any aspect ratio: kit.mjs\'s hand-typed x:160/w:1600 anchor, portable',
+    stage: 'the full-width content column between the left and right composition margins, at any aspect ratio: the repo\'s hand-typed x:160/w:1600 anchor, portable',
     'text-band': 'the horizontal strip roughly two-thirds down the frame where a headline or a sub-line usually sits',
     'lower-band': 'a thin strip near the bottom safe edge, left-anchored: where a closing rule or a small persistent label sits',
   },
