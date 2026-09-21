@@ -1,7 +1,7 @@
 {
-  "total": 694,
-  "previewed": 332,
-  "families": 58,
+  "total": 710,
+  "previewed": 335,
+  "families": 60,
   "tags": [
     [
       "asset",
@@ -9,7 +9,7 @@
     ],
     [
       "audio",
-      7
+      6
     ],
     [
       "background",
@@ -17,7 +17,7 @@
     ],
     [
       "camera",
-      15
+      16
     ],
     [
       "canvas",
@@ -61,7 +61,7 @@
     ],
     [
       "per-layer",
-      88
+      92
     ],
     [
       "per-layer/scene",
@@ -85,11 +85,11 @@
     ],
     [
       "text",
-      46
+      48
     ],
     [
       "text/parts",
-      5
+      6
     ],
     [
       "theme",
@@ -105,7 +105,7 @@
     ],
     [
       "transition",
-      88
+      97
     ]
   ],
   "list": [
@@ -238,17 +238,17 @@
       "id": "motion-voices-tactile-sound",
       "title": "Motion voices (tactile sound)",
       "tag": "audio",
-      "intro": "The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote · a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `travel` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` gets a riser that ends on the moment. These five are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the five can also be placed by hand as `audio.cues[]`. Doctrine · `engine-doctrine/CRAFT/SOUND.md`.",
+      "intro": "The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote · a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `whoosh` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` blooms on the moment. These six are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the six can also be placed by hand as `audio.cues[]`. Doctrine · `engine-doctrine/CRAFT/SOUND.md`.",
       "mode": "table",
       "note": null,
       "noPreview": "a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.",
-      "count": 7,
+      "count": 6,
       "undescribed": 0,
       "entries": [
         {
           "name": "bloom",
           "stem": "motion-voices-tactile-sound--bloom",
-          "desc": "something OPENS · placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut. Slower in than the others, because an opening is not an arrival",
+          "desc": "something OPENS · placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut, and on a declared `spectacle`. Slower in than the others, because an opening is not an arrival",
           "scene": null,
           "noPreview": null
         },
@@ -277,13 +277,6 @@
           "name": "pluck",
           "stem": "motion-voices-tactile-sound--pluck",
           "desc": "punctuation, for a small element or a counter digit. Quiet on purpose · this is the one that becomes a machine gun, and the density rules exist because of it",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "riser",
-          "stem": "motion-voices-tactile-sound--riser",
-          "desc": "a build INTO a moment, and it has to END on the moment, so the derivation starts it RISER_LEAD seconds early. Tension, suspense, a countdown to what a declared `spectacle` names",
           "scene": null,
           "noPreview": null
         },
@@ -679,7 +672,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "a camera move is only legible against a scene laid out for it, which is the film, not a swatch.",
-      "count": 14,
+      "count": 15,
       "undescribed": 0,
       "entries": [
         {
@@ -721,6 +714,13 @@
           "name": "followLayer",
           "stem": "camera-moves--followlayer",
           "desc": "CAMERA TRACKS A LAYER BY ID, at RENDER time, off the same live-box accessor `follow` (the layer track) reads. Holds still while the target sits inside a soft margin of frame centre, translating only the minimum to keep it in once it would cross the edge, rather than rigidly re-centring it every frame (which reads as the world sliding, not the camera tracking). Zoom is HELD (`to`), not framed. The one move here `bakeCameraMove` resolves onto `data.cameraFollow`, not `data.camera`, and it cannot be composed with another leg",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "hold",
+          "stem": "camera-moves--hold",
+          "desc": "the camera is LOCKED OFF · zero motion, on purpose. Not driftHold, which keeps breathing; this emits no keyframes at all, the explicit way to declare \"no camera\" instead of leaving `camera:` blank",
           "scene": null,
           "noPreview": null
         },
@@ -1596,7 +1596,7 @@
         {
           "name": "cursor",
           "stem": "layer-types--cursor",
-          "desc": "a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time, the spine of a product demo",
+          "desc": "a pointer that follows [{t,x,y}] keyframes (`path`) or eases magnetically onto another layer's live box (`snapTo`), fires a ripple at `clicks`, can change shape mid-move (`style`/`styleAt` · arrow/hand/ibeam/block), carry a name tag (`label`), and drag another layer along with it (`carry`)",
           "scene": null,
           "noPreview": null
         },
@@ -1694,7 +1694,7 @@
         {
           "name": "text",
           "stem": "layer-types--text",
-          "desc": "theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too",
+          "desc": "theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink",
           "scene": null,
           "noPreview": null
         },
@@ -2448,6 +2448,47 @@
           "name": "soft-light",
           "stem": "blend-modes--soft-light",
           "desc": "as if a diffuse lamp shone through the layer · a gentle wash rather than a hit",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "cursor-styles",
+      "title": "Cursor styles",
+      "tag": "per-layer",
+      "intro": "What shape a `cursor` layer draws (`\"style\": \"hand\"`), and how it can change mid-move (`styleAt`). Arrow is the pointer default; hand/ibeam/block read as hovering a control, hovering text, or a terminal caret.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a cursor style is a shape, not a motion: every pointer demo on this page already shows one moving. A still swatch of a hand or an I-beam sitting on a blank frame says nothing a name does not already say.",
+      "count": 4,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "arrow",
+          "stem": "cursor-styles--arrow",
+          "desc": "the default macOS pointer arrow, unchanged pixels from before this registry existed",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "block",
+          "stem": "cursor-styles--block",
+          "desc": "a filled terminal cell that blinks on a fixed cadence, a block text cursor",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "hand",
+          "stem": "cursor-styles--hand",
+          "desc": "a pointing hand, for hovering a clickable button or link in a product demo",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "ibeam",
+          "stem": "cursor-styles--ibeam",
+          "desc": "a text-selection I-beam, for hovering editable or selectable text",
           "scene": null,
           "noPreview": null
         }
@@ -3332,7 +3373,7 @@
         {
           "name": "stage",
           "stem": "placement--stage",
-          "desc": "the full-width content column between the left and right safe margins, at any aspect ratio · kit.mjs's hand-typed x · 160/w · 1600 anchor, portable",
+          "desc": "the full-width content column between the left and right composition margins, at any aspect ratio · the repo's hand-typed x · 160/w · 1600 anchor, portable",
           "scene": null,
           "noPreview": null
         },
@@ -3426,7 +3467,7 @@
       "id": "spectacle-devices",
       "title": "Spectacle devices",
       "tag": "scene",
-      "intro": "`\"spectacle\": { \"at\", \"of\", \"device\", \"why\" }`. The film NOMINATES its one loud moment. `device` is written as a shader sting at `at`, above the film; the other half is what makes it real, because with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of`. Naming the peak is a promise the rest stays restrained. `core/timeline/spectacle.js`.",
+      "intro": "`\"spectacle\": { \"at\", \"of\", \"device\", \"why\" }`. The film NOMINATES its one loud moment. A shader `device` (below) is written as a sting at `at`, above the film; a non-shader one (\"cut · <name>\", \"seam · <name>\", \"kinetic · <name>\", \"layer · <id>\") names a mechanism the film ALREADY builds and is only verified, never injected. Either way the other half is what makes it real · with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of` (and the device's own layer, when it named one). Naming the peak is a promise the rest stays restrained. `core/timeline/spectacle.js`.",
       "mode": "table",
       "note": null,
       "noPreview": "a spectacle is a whole film turning its other dials down. One clip cannot show the restraint that makes it work.",
@@ -3944,7 +3985,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 31,
+      "count": 33,
       "undescribed": 0,
       "entries": [
         {
@@ -3959,6 +4000,13 @@
           "stem": "kinetic-text-presets--blur",
           "desc": "resolve out of blur · calm, premium",
           "scene": "/assets/effects/kinetic-text-presets--blur.json",
+          "noPreview": null
+        },
+        {
+          "name": "blurUp",
+          "stem": "kinetic-text-presets--blurup",
+          "desc": "letters lift and sharpen out of blur together · the default kinetic headline",
+          "scene": "/assets/effects/kinetic-text-presets--blurup.json",
           "noPreview": null
         },
         {
@@ -3978,7 +4026,7 @@
         {
           "name": "colorWave",
           "stem": "kinetic-text-presets--colorwave",
-          "desc": "the accent sweeps word by word along a line, each unit lighting then settling to the resting colour",
+          "desc": "the accent sweeps word by word along a line, each unit lighting then settling to the resting colour · `colors` gives EACH unit its OWN arrival colour instead of one shared accent, per-word colour before the line settles to one ink",
           "scene": "/assets/effects/kinetic-text-presets--colorwave.json",
           "noPreview": null
         },
@@ -4008,6 +4056,13 @@
           "stem": "kinetic-text-presets--elastic",
           "desc": "elastic scale pop with visible wobble · playful brands only",
           "scene": "/assets/effects/kinetic-text-presets--elastic.json",
+          "noPreview": null
+        },
+        {
+          "name": "fade",
+          "stem": "kinetic-text-presets--fade",
+          "desc": "plain opacity fade, no motion at all · the neutral entrance, and the neutral exit reversed",
+          "scene": "/assets/effects/kinetic-text-presets--fade.json",
           "noPreview": null
         },
         {
@@ -4146,7 +4201,7 @@
         {
           "name": "up",
           "stem": "kinetic-text-presets--up",
-          "desc": "words/chars rise into place · the default kinetic headline",
+          "desc": "words/chars rise into place, no blur · the plain lift",
           "scene": "/assets/effects/kinetic-text-presets--up.json",
           "noPreview": null
         },
@@ -4305,7 +4360,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 5,
+      "count": 6,
       "undescribed": 0,
       "entries": [
         {
@@ -4341,6 +4396,13 @@
           "stem": "stagger-order-from--random",
           "desc": "a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek",
           "scene": "/assets/effects/stagger-order-from--random.json",
+          "noPreview": null
+        },
+        {
+          "name": "typewriter",
+          "stem": "stagger-order-from--typewriter",
+          "desc": "types one character at a time at a fixed TYPING RATE (`cps`, chars/sec) instead of a shared budget, so any split layer can reveal char by char at a chosen speed and still use a preset, a colour ramp, or a reversed exit",
+          "scene": "/assets/effects/stagger-order-from--typewriter.json",
           "noPreview": null
         }
       ]
@@ -4394,7 +4456,7 @@
         {
           "name": "scale",
           "stem": "theme-look-keys--scale",
-          "desc": "type sizes at 16 · 9 for hook / headline / body / caption",
+          "desc": "how big text should be · named px sizes for the hook / headline / body / caption roles at 16 · 9, so a layer writes `\"size\": \"headline\"` instead of guessing a number",
           "scene": null,
           "noPreview": null
         }
@@ -5440,6 +5502,82 @@
           "stem": "shader-stings--wipe",
           "desc": "a directional band sweeping across the frame. The plainest geometric transition, and it always reads.",
           "scene": "/assets/effects/shader-stings--wipe.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "transition-relationships",
+      "title": "Transition relationships",
+      "tag": "transition",
+      "intro": "Name the RELATIONSHIP between two beats first, then pick from its candidates, per engine-doctrine/CRAFT/TRANSITIONS.md's decision procedure. Write the reason in the scene as `transition_why: \"<relationship> · <feeling> · <invisible|expressive>\"` on the arriving beat.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a relationship is a word chosen in a beat's `transition_why:` line, not a layer or effect that renders by itself. Preview the transition it names instead (fade, dissolve, whipPan, ...).",
+      "count": 9,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "act-break",
+          "stem": "transition-relationships--act-break",
+          "desc": "a beginning or an ending, an act break · open or close the film or a major section. Candidates · fade.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "continuity",
+          "stem": "transition-relationships--continuity",
+          "desc": "nothing · invisible, respects momentum. Two beats are one continuous thought. Candidates · none.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "contrast",
+          "stem": "transition-relationships--contrast",
+          "desc": "shock, jolt · end on maximum tonal contrast; wake from a dream. Candidates · none, flashWhite.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "new-place-energy",
+          "stem": "transition-relationships--new-place-energy",
+          "desc": "frantic energy, momentum, \"meanwhile\" · an energetic location or time change. Candidates · whipPan, wipe.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "rhyme",
+          "stem": "transition-relationships--rhyme",
+          "desc": "\"these two things are the same\" · bridge scenes by a visual or compositional rhyme. Candidates · none.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "same-action",
+          "stem": "transition-relationships--same-action",
+          "desc": "seamless, energy carried through · cut on a movement so the eye rides it past the seam. Candidates · match-on-action.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "same-object",
+          "stem": "transition-relationships--same-object",
+          "desc": "magic · the same identity across states, the highest-craft continuity there is. Candidates · shared-element morph.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "spatial-travel",
+          "stem": "transition-relationships--spatial-travel",
+          "desc": "one world · the beats are PLACES, not claims. The content has a spatial logic worth walking. Candidates · camera travel.",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "time",
+          "stem": "transition-relationships--time",
+          "desc": "passage of time, a connection, gentleness · link two images, soften, show time passing. Candidates · dissolve, fade.",
+          "scene": null,
           "noPreview": null
         }
       ]
