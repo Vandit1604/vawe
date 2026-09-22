@@ -88,6 +88,14 @@ test('both fragment naming conventions resolve to the right film', () => {
   assert.equal(run('films/scene/_hinge-hook.html', '<div></div>').denied, false);
 });
 
+test('a hook that exists to refuse must not permit by failing: malformed stdin denies, not allows', () => {
+  const r = spawnSync('node', [HOOK], { encoding: 'utf8', input: 'not json' });
+  assert.equal(r.status, 0, 'the hook always exits 0; it answers with JSON, it does not throw');
+  const d = JSON.parse(r.stdout).hookSpecificOutput;
+  assert.equal(d.permissionDecision, 'deny');
+  assert.match(d.permissionDecisionReason, /could not parse/);
+});
+
 test('nothing outside films/scene is this hook\'s business', () => {
   assert.equal(run('README.md', 'hi').denied, false);
   assert.equal(run('core/layers/text.js', 'export {}').denied, false);
