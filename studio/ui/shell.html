@@ -19,9 +19,8 @@
  <nav id=states aria-label=state>
   <button data-state=plan aria-pressed=false title="Plan (1)"><svg viewBox="0 0 20 20"><rect x=3 y=4 width=14 height=12 rx=2 /><path d="M3 9h14M8 9v7"/></svg><span>Plan</span></button>
   <button data-state=make aria-pressed=true title="Make (2)"><svg viewBox="0 0 20 20"><rect x=3 y=4 width=14 height=9 rx=2 /><path d="M3 16h14M6 16v-3M14 16v-3"/><path class=solid d="M9 6.8v3.4l2.8-1.7z"/></svg><span>Make</span></button>
-  <button data-state=look aria-pressed=false title="Look (3)"><svg viewBox="0 0 20 20"><rect x=3 y=3.5 width=6 height=5.5 rx=1.2 /><rect x=11 y=3.5 width=6 height=5.5 rx=1.2 /><rect x=3 y=11 width=6 height=5.5 rx=1.2 /><rect x=11 y=11 width=6 height=5.5 rx=1.2 /></svg><span>Look</span></button>
-  <button data-state=ship aria-pressed=false title="Ship (4)"><svg viewBox="0 0 20 20"><path d="M10 12.5V3.5M6.5 7L10 3.5 13.5 7"/><path d="M4 11v3.5A1.5 1.5 0 005.5 16h9a1.5 1.5 0 001.5-1.5V11"/></svg><span>Ship</span></button>
-  <button data-state=sound aria-pressed=false title="Sound (5)"><svg viewBox="0 0 20 20"><path d="M6 15V6l8-2v9"/><circle cx=4.5 cy=15 r=2 /><circle cx=12.5 cy=13 r=2 /></svg><span>Sound</span></button>
+  <button data-state=ship aria-pressed=false title="Ship (3)"><svg viewBox="0 0 20 20"><path d="M10 12.5V3.5M6.5 7L10 3.5 13.5 7"/><path d="M4 11v3.5A1.5 1.5 0 005.5 16h9a1.5 1.5 0 001.5-1.5V11"/></svg><span>Ship</span></button>
+  <button data-state=sound aria-pressed=false title="Sound (4)"><svg viewBox="0 0 20 20"><path d="M6 15V6l8-2v9"/><circle cx=4.5 cy=15 r=2 /><circle cx=12.5 cy=13 r=2 /></svg><span>Sound</span></button>
   <button id=keyshelp class=ib popovertarget=keys aria-label="keyboard shortcuts" title=Keys><svg viewBox="0 0 20 20"><rect x=2.5 y=5.5 width=15 height=9 rx=2 /><path d="M5.5 8.5h1M9.5 8.5h1M13.5 8.5h1M7 11.5h6"/></svg></button>
  </nav>
  <div id=keys popover aria-label="keyboard shortcuts">
@@ -31,7 +30,7 @@
    <dt><kbd>shift</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd></dt><dd>Second</dd>
    <dt><kbd>home</kbd><kbd>end</kbd></dt><dd>Start, end</dd>
    <dt><kbd>&uarr;</kbd><kbd>&darr;</kbd></dt><dd>Layer</dd>
-   <dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd><kbd>5</kbd></dt><dd>Plan, make, look, ship, sound</dd>
+   <dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></dt><dd>Plan, make, ship, sound</dd>
    <dt><kbd>esc</kbd></dt><dd>Deselect</dd>
   </dl>
  </div>
@@ -82,16 +81,18 @@
 
   <div id=pane>
    <section id=planpane>
-    <div class=panehead><b>Plan</b><span id=planpath></span><span class=sp></span><button id=planredraw>Reload</button></div>
+    <div class=panehead><b>Plan</b><span id=planpath></span><span class=sp></span>
+     <div class=seg role=group aria-label="plan view"><button data-sub=frames aria-pressed=true>Frames</button><button data-sub=sheets aria-pressed=false>Rendered sheets</button></div>
+     <button id=planredraw>Reload</button></div>
     <div class=paneview id=planview><div id=planbody></div><div class=empty id=plannote hidden></div></div>
-   </section>
-   <section id=lookpane>
-    <div class=panehead>
-     <div class=seg role=group aria-label=sheet><button data-sheet=beats aria-pressed=true>Beats</button><button data-sheet=frames aria-pressed=false>Key frames</button><button data-sheet=seams aria-pressed=false>Seams</button></div>
-     <span class=sp></span><span id=lookstat></span>
+    <div id=lookpane hidden>
+     <div class=panehead>
+      <div class=seg role=group aria-label=sheet><button data-sheet=beats aria-pressed=true>Beats</button><button data-sheet=frames aria-pressed=false>Key frames</button><button data-sheet=seams aria-pressed=false>Seams</button></div>
+      <span class=sp></span><span id=lookstat></span>
+     </div>
+     <div id=sheetwrap><button id=sheetzoom hidden aria-label="show the sheet at real pixels" aria-pressed=false><img id=sheet alt="contact sheet"></button><div id=sheetnote hidden></div></div>
+     <div id=jump hidden></div>
     </div>
-    <div id=sheetwrap><button id=sheetzoom hidden aria-label="show the sheet at real pixels" aria-pressed=false><img id=sheet alt="contact sheet"></button><div id=sheetnote hidden></div></div>
-    <div id=jump hidden></div>
    </section>
    <section id=shippane>
     <div class=panehead><b>Beat-check</b><span class=sp></span><span id=shipstat></span></div>
