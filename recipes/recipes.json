@@ -292,5 +292,147 @@
         "note": "the shape the cursor switches to for the approach, before the click: a hand reads as hovering something clickable (core/layers/cursor.js CURSOR_STYLES)"
       }
     }
+  },
+  "orbit-path": {
+    "kind": "warp",
+    "blurb": "motionPath: a layer flies a real curved path instead of a straight motion-key tween, GSAP MotionPathPlugin driving position off an authored SVG curve",
+    "sources": [
+      {
+        "ref": "films/scene/reach-warp-props.json",
+        "t": 3.6,
+        "note": "not a filmed clip: quality/baselines/reach.json named motionPath a validated, GSAP-wired field with zero authored uses and no named capability pointing an author at it, so this engine's own probe is the source until a real film reaches for it"
+      }
+    ],
+    "slots": {
+      "at": "seconds: when the layer starts its run",
+      "layer": "layer id",
+      "path": "an SVG path `d` string, in the layer's own local px"
+    },
+    "params": {
+      "dur": {
+        "default": 3,
+        "unit": "s"
+      },
+      "ease": {
+        "default": "power1.inOut",
+        "note": "any GSAP ease name (core/motion/motion.js GSAP_EASE)"
+      },
+      "align": {
+        "default": "self",
+        "note": "GSAP MotionPathPlugin `align`: \"self\" moves the layer's own box along the path"
+      },
+      "autoRotate": {
+        "default": false,
+        "note": "true turns the layer to face the path's own tangent as it travels"
+      },
+      "curviness": {
+        "default": 1,
+        "note": "GSAP's smoothing of the control points between path keys; 1 is untouched"
+      }
+    }
+  },
+  "line-reveal": {
+    "kind": "warp",
+    "blurb": "splitText: each LINE of a text layer masks and slides up from behind on its own stagger, GSAP SplitText at line granularity (char/word stay with the engine's own `split`)",
+    "sources": [
+      {
+        "ref": "films/scene/reach-warp-props.json",
+        "t": 7.2,
+        "note": "not a filmed clip: splitText was validated and GSAP-wired with zero authored uses, and its only near-hit in the docs was the unrelated internal `split` helper, a false friend for a search"
+      }
+    ],
+    "slots": {
+      "at": "seconds: when the layer starts revealing",
+      "layer": "layer id: a multi-line text layer"
+    },
+    "params": {
+      "dur": {
+        "default": 0.7,
+        "unit": "s",
+        "note": "per-line reveal time (SplitText's own default, core/scene.js)"
+      },
+      "ease": {
+        "default": "power3.out"
+      },
+      "stagger": {
+        "default": 0.09,
+        "unit": "s",
+        "note": "gap between one line's reveal starting and the next"
+      },
+      "mask": {
+        "default": true,
+        "note": "false drops the clip mask and fades the line in instead of sliding it up from behind one"
+      }
+    }
+  },
+  "scatter-burst": {
+    "kind": "warp",
+    "blurb": "physics: a layer's own split characters fly apart under real velocity/gravity/friction, GSAP Physics2DPlugin giving each an index-based angle spread so the scatter is wide and deterministic, never a shared straight-line tween",
+    "sources": [
+      {
+        "ref": "films/scene/reach-warp-props.json",
+        "t": 10.8,
+        "note": "not a filmed clip: physics was validated and GSAP-wired, zero authored uses, the plan's own confirmed unreachable example"
+      }
+    ],
+    "slots": {
+      "at": "seconds: when the layer starts scattering",
+      "layer": "layer id: a `split:\"char\"` (or `\"word\"`) text layer"
+    },
+    "params": {
+      "velocity": {
+        "default": 300,
+        "note": "px/s at launch"
+      },
+      "angle": {
+        "default": -90,
+        "unit": "deg",
+        "note": "the centre launch angle, -90 is straight up; each split unit spreads around it"
+      },
+      "gravity": {
+        "default": 400,
+        "note": "px/s^2 pulling the scatter back down"
+      },
+      "friction": {
+        "default": 0,
+        "note": "0-1, air drag on the launch velocity"
+      },
+      "spread": {
+        "default": 180,
+        "unit": "deg",
+        "note": "total angle the split units fan across, centred on `angle`"
+      },
+      "dur": {
+        "default": 2,
+        "unit": "s"
+      }
+    }
+  },
+  "time-ramp": {
+    "kind": "warp",
+    "blurb": "timeRemap: a layer's own clock warps under a named shape (whip/hold/freeze/rewind), so everything it does, motion, count, idle, speeds and slows together instead of one property being eased alone",
+    "sources": [
+      {
+        "ref": "films/scene/reach-warp-props.json",
+        "t": 15.0,
+        "note": "core/timeline/time.js's SHAPES already carry real measured uses under their own names (`whip` alone: core/timeline/time.js catalog); the gap this recipe closes is that `timeRemap`, the field name itself, answered no search for it, only its shape names did"
+      }
+    ],
+    "slots": {
+      "at": "seconds: when the layer starts (also its motion track's own clock)",
+      "layer": "layer id"
+    },
+    "params": {
+      "shape": {
+        "default": "whip",
+        "enum": [
+          "whip",
+          "hold",
+          "freeze",
+          "rewind"
+        ],
+        "note": "core/timeline/time.js TIME_REMAP_REGISTRY names; each is a catalogued, measured clock curve, not an invented one"
+      }
+    }
   }
 }
