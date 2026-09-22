@@ -85,6 +85,19 @@ const sha = (v) => crypto.createHash('sha256').update(v).digest('hex').slice(0, 
 let digest = null;
 try { digest = JSON.parse(fs.readFileSync(DIGEST, 'utf8')); } catch { /* no digest yet */ }
 const digestNow = {};
+const NOW_FONT = fontState();
+// Each entry carries ITS OWN font stamp, not one global field for the whole digest. A checkout only
+// ever sees PART of the library (films/scene/*.json is gitignored, a fresh worktree can hold 58 of
+// 195 films), so a save from here must never overwrite entries for films it cannot see, and a save
+// under a font state the committed digest was not saved under must not silently relabel old entries
+// as if they were captured under the new one. Old digests wrote a flat name -> hash map under one
+// top-level `font`; read those the same way, under that one recorded state.
+const digestEntry = (name) => {
+  const raw = digest && digest.scenes && digest.scenes[name];
+  if (raw == null) return null;
+  if (typeof raw === 'string') return { sig: raw, font: digest.font && digest.font.hash };
+  return raw;
+};
 const ONLY = args.find((a) => !a.startsWith('--')); // optional: sweep just one scene by name
 
 // Every shipped SCENE: films/scene/*.json with module:"scene", except the schema and _-prefixed
@@ -126,7 +139,7 @@ const freshBrowser = async () => {
   sinceLaunch = 0;
 };
 
-const identical = [], changed = [], quarantined = [], errored = [], saved = [], nobaseline = [];
+const identical = [], changed = [], quarantined = [], errored = [], saved = [], nobaseline = [], staleFontDigest = [];
 for (const scene of scenes) {
   const name = scene.replace(/\.json$/, '');
   let cfg = {}, raw = '';
@@ -186,10 +199,11 @@ for (const scene of scenes) {
       // NO LOCAL BASELINE, BUT THE DIGEST IS TRACKED, so a fresh clone and every CI runner still get a
       // verdict instead of a shrug. It says WHETHER the scene moved and cannot say what moved; the
       // message says so rather than letting a reader assume the full net ran.
-      const was = digest && digest.scenes && digest.scenes[name];
+      const was = digestEntry(name);
       if (!was) nobaseline.push(name);
-      else if (was === sigHash) identical.push(name);
-      else changed.push({ name, diffs: [`signature ${was} → ${sigHash} (digest only: no full baseline in this checkout, so WHAT moved is not available here. Run \`make snap-all SAVE=1\` on a tree with the films to see it.)`] });
+      else if (was.font !== NOW_FONT.hash) staleFontDigest.push(name);
+      else if (was.sig === sigHash) identical.push(name);
+      else changed.push({ name, diffs: [`signature ${was.sig} → ${sigHash} (digest only: no full baseline in this checkout, so WHAT moved is not available here. Run \`make snap-all SAVE=1\` on a tree with the films to see it.)`] });
       await page.close(); continue;
     }
     const base = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -209,11 +223,12 @@ for (const e of errored) f.fail('render-error', e);
 if (!SAVE) {
   for (const c of changed) f.fail('scene-changed', `${c.name}: ${c.diffs.length} change(s): ${c.diffs.slice(0, 12).join(' · ')}${c.diffs.length > 12 ? ` … +${c.diffs.length - 12} more` : ''}`, { at: c.name });
   for (const n of nobaseline) f.note('no-baseline', `${n}: determinism-checked, but no baseline to diff against, run \`make snap-all SAVE=1\``, { at: n });
-  if (!identical.length && !changed.length && nobaseline.length) f.fail('nothing-compared', `all ${nobaseline.length} scene(s) lack a baseline, this gate checked NOTHING`);
+  for (const n of staleFontDigest) f.note('digest-font-mismatch', `${n}: digest entry recorded under a different font state than this run, cannot compare, run \`make fonts\` to match it or re-save from a checkout in that state`, { at: n });
+  if (!identical.length && !changed.length && (nobaseline.length || staleFontDigest.length)) f.fail('nothing-compared', `all ${nobaseline.length + staleFontDigest.length} scene(s) lack a comparable baseline, this gate checked NOTHING`);
 }
 console.log(`\n==== SNAP-ALL · ${scenes.length} scenes ====`);
 if (!SAVE) {
-  const now = fontState();
+  const now = NOW_FONT;
   let was = null;
   try { was = JSON.parse(fs.readFileSync(STAMP, 'utf8')); } catch { /* baselines predating the stamp */ }
   // EACH ARM STANDS ALONE. These were an if/else-if chain, and inserting the checkout note between the
@@ -240,23 +255,35 @@ if (!SAVE) {
       + `    Run \`make fonts\` to restore the recorded set, or re-save the baselines once the font state is the one you mean to verify against.`);
 }
 if (SAVE) {
-  const fsNow = fontState();
+  const fsNow = NOW_FONT;
   fs.writeFileSync(STAMP, JSON.stringify({ ...fsNow, root: repoRoot }, null, 2) + '\n');
+  // MERGE, never replace. A checkout only ever sees PART of the library (films/scene/*.json is
+  // gitignored, a fresh worktree can hold 58 of 195 films), so writing digestNow alone would erase
+  // every scene this checkout cannot see, the exact loss a partial-view save nearly shipped. Each
+  // entry keeps its own font stamp, so a scene saved earlier under a different font state stays a
+  // valid, self-labelled record rather than being silently relabelled under this run's state.
+  const merged = {};
+  if (digest && digest.scenes) for (const name of Object.keys(digest.scenes)) merged[name] = digestEntry(name);
+  for (const name of Object.keys(digestNow)) merged[name] = { sig: digestNow[name], font: fsNow.hash };
   // Sorted, because an unsorted map re-orders itself on every save and the tracked file would show a
   // diff on a run that changed nothing. Deterministic output is the same rule the renders obey.
-  fs.writeFileSync(DIGEST, JSON.stringify({ font: fsNow, scenes: Object.fromEntries(Object.keys(digestNow).sort().map((k) => [k, digestNow[k]])) }, null, 1) + '\n');
-  console.log(`✓ ${saved.length} baselines saved → quality/baselines/snap/scenes/  (font state ${fsNow.hash}, ${fsNow.n} face(s))`);
+  fs.writeFileSync(DIGEST, JSON.stringify({ scenes: Object.fromEntries(Object.keys(merged).sort().map((k) => [k, merged[k]])) }, null, 1) + '\n');
+  console.log(`✓ ${saved.length} baselines saved → quality/baselines/snap/scenes/  (font state ${fsNow.hash}, ${fsNow.n} face(s); digest now ${Object.keys(merged).length} scene(s), ${Object.keys(digestNow).length} refreshed this run)`);
   if (quarantined.length) { console.log(`\n⚠ ${quarantined.length} QUARANTINED (non-deterministic, NOT baselined):`); for (const q of quarantined) { console.log(`  ✗ ${q.name}`); for (const s of q.sample) console.log(`      order-diff: ${s}`); } }
   if (errored.length) { console.log(`\n⚠ ${errored.length} errored (skipped):`); for (const e of errored) console.log(`  ✗ ${e}`); }
   process.exit(quarantined.length || errored.length ? 1 : 0);
 }
-console.log(`✓ identical: ${identical.length}   △ changed: ${changed.length}   ✗ quarantined: ${quarantined.length}   ⚠ errored: ${errored.length}   ○ no-baseline: ${nobaseline.length}`);
+console.log(`✓ identical: ${identical.length}   △ changed: ${changed.length}   ✗ quarantined: ${quarantined.length}   ⚠ errored: ${errored.length}   ○ no-baseline: ${nobaseline.length}   ~ stale-font: ${staleFontDigest.length}`);
 // NAME them, always. A scene with no baseline has no regression net at all, which is worse than one that
 // merely changed, and the old line both withheld the names and suppressed itself whenever anything else
 // was off, so the very runs where you most need to know were the runs that said nothing.
 if (nobaseline.length) {
   console.log(`\n○ NO BASELINE (determinism-checked, but nothing to diff against, run \`make snap-all SAVE=1\`):`);
   for (const n of nobaseline) console.log(`  ${n}`);
+}
+if (staleFontDigest.length) {
+  console.log(`\n~ DIGEST UNDER A DIFFERENT FONT STATE (determinism-checked, a digest entry exists but was recorded under a font state this run does not have):`);
+  for (const n of staleFontDigest) console.log(`  ${n}`);
 }
 if (quarantined.length) { console.log(`\n✗ NON-DETERMINISTIC (quarantined):`); for (const q of quarantined) { console.log(`  ${q.name}`); for (const s of q.sample) console.log(`      ${s}`); } }
 for (const c of changed) { console.log(`\n△ ${c.name} (${c.diffs.length} change(s)):`); for (const d of c.diffs.slice(0, 12)) console.log(`    ${d}`); if (c.diffs.length > 12) console.log(`    … +${c.diffs.length - 12} more`); }
@@ -272,8 +299,9 @@ if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) co
 // comparisons is a different statement, and it is the one that must be loud. Same lesson as the
 // `paints-nothing` census (engine-doctrine/MISTAKES.md #437): a clean result over an empty denominator is not a
 // pass, it is a gate that never ran.
-if (!identical.length && !changed.length && nobaseline.length) {
-  console.error(`\n✗ nothing to compare: all ${nobaseline.length} scene(s) lack a baseline, so this gate checked NOTHING.`);
+if (!identical.length && !changed.length && (nobaseline.length || staleFontDigest.length)) {
+  const n = nobaseline.length + staleFontDigest.length;
+  console.error(`\n✗ nothing to compare: all ${n} scene(s) lack a comparable baseline, so this gate checked NOTHING.`);
   console.error('  quality/baselines/snap/ is gitignored, so a fresh clone starts here. Run `make snap-all SAVE=1` to record');
   console.error('  the baselines for THIS machine first, then re-run to diff against them.');
   process.exit(1);
