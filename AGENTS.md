@@ -54,7 +54,7 @@ Skills live in `skills/` as plain docs; Claude Code loads them on demand, others
 | Reflect a website or a film | n/a | `make sections`/[`RECREATION.md`](engine-doctrine/CRAFT/RECREATION.md); `make study`/[`REFERENCE-STUDY.md`](engine-doctrine/CRAFT/REFERENCE-STUDY.md) |
 | Direction, captions, sound, theme defaults | n/a | [`DIRECTION.md`](engine-doctrine/CRAFT/DIRECTION.md) · [`CAPTIONS.md`](engine-doctrine/CRAFT/CAPTIONS.md) · [`THEME-LOOK.md`](engine-doctrine/CRAFT/THEME-LOOK.md) |
 
-**Gates, one command:** `make author-check D=<file>` (validate · beats · assets · inspect · plan-vs-render always on; style gates report only, `TASTE=1` blocks: `engine-doctrine/TASTE.md`). Then `make probe` → `audit` → `beats` → `ledger` → **`make judge`** (the gate that SEES, required post-render, `engine-doctrine/JUDGE.md`).
+**Gates, one command:** `make author-check D=<file>` (validate · beats · backdrop-turn · assets · inspect · plan-vs-render always on; style gates report only, `TASTE=1` blocks: `engine-doctrine/TASTE.md`). Then `make probe` → `audit` → `beats` → `ledger` → **`make judge`** (the gate that SEES, required post-render, `engine-doctrine/JUDGE.md`).
 
 ## The full command list (stages 2, 5, 7, 8)  `[ref: make list]`
 
