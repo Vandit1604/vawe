@@ -352,6 +352,18 @@ export function buildPlanJudgeBrief(arg) {
       + 'generative: light, particles, a shader), or only a colour, a number or an adjective that could '
       + 'be written without looking at the reference? (code: field-craft)',
     '',
+    // BEFORE the storyboard, not after it. The storyboard is the bulk of this brief, and anything
+    // printed past it is the first thing an output filter drops: `make plan-judge` piped through the
+    // terminal's own truncation cut this block every time, so the one instruction that makes
+    // field-craft answerable never reached the reader. An instruction that arrives after the material
+    // it governs is an instruction nobody follows.
+    ...(study ? [
+      `Reference study for the clip this storyboard cites (${study.source}). OPEN THESE FIRST: `
+        + `field-craft cannot be answered from the text below, only from what these show.`,
+      `  · ${study.sheet} (contact sheet, one row per shot)`,
+      `  · ${study.frames}/ (the individual frames behind it)`,
+      '',
+    ] : []),
     `The storyboard (${fragments.length} fragment(s) written so far, ${scene.duration || fm.field('duration') || '?'} target):`,
     '```',
     sbText,
@@ -360,15 +372,6 @@ export function buildPlanJudgeBrief(arg) {
   if (fragments.length) {
     lines.push('', 'Fragments already written:');
     for (const f of fragments) lines.push(`  · ${f}`);
-  }
-  if (study) {
-    lines.push(
-      '',
-      `Reference study for the clip this storyboard cites (${study.source}): open these before judging `
-        + `field-craft, the craft block is written against what they show, not the other way round.`,
-      `  · ${study.sheet} (contact sheet, one row per shot)`,
-      `  · ${study.frames}/ (the individual frames behind it)`,
-    );
   }
   if (themeTokens) lines.push('', `Theme tokens (${themeRel}):`, '```json', JSON.stringify(themeTokens, null, 2), '```');
   if (rules.length) {
