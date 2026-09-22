@@ -47,6 +47,8 @@ try { d = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { console.error
 if (d.module !== 'scene') { console.log(`  dissolve check · ${file}: not a scene module, nothing to check.`); process.exit(0); }
 const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.authoring.allow : []);
 
+// No craft literature on dissolve-legibility thresholds exists (these grade OUR OWN compositor's
+// crossfade output, not a general editing question): engine-doctrine/RESEARCH/TIMING-SOURCES.md part 4/6.
 const VISIBLE = 0.15;   // opacity at which a glyph is legible enough to muddy the one behind it
 const MUDDY = 0.12;     // share of the driving variable's range both may share before it reads as mush
 const STEPS = 101;

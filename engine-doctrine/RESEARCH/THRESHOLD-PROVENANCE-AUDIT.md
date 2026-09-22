@@ -210,3 +210,111 @@ URL or one of the category-1/2/3 keywords. This table is a snapshot from
 node quality/gates/threshold-provenance.mjs          # summary + ratchet check
 node quality/gates/threshold-provenance.mjs --list    # the sourceless worklist
 ```
+
+## Task 1 (`.claude/plans/numbers-out-principles-in.plan.md`): the three-way split
+
+The 86 sourceless constants above are not one kind of thing. Split by what each one decides:
+
+- **Group A, motion design judgement.** A craft opinion about how a film should look or move: a hold
+  length, a camera speed, a coverage floor, a pacing floor. In scope for this plan.
+- **Group B, measurement machinery.** A sampling step, a floating-point epsilon, a pixel-diff noise
+  floor, a bucket size, a QA tolerance between the plan and the render. Makes a measurement WORK; judges
+  nothing about a film. Out of scope.
+- **Group C, signal thresholds with a real standard nearby.** Audio dB floors, colour/saturation
+  tolerances. A separate pass (published loudness and colour standards), out of scope here.
+
+Counts: **34 Group A, 45 Group B, 7 Group C.** Every constant is named below with a one-line reason.
+Three could not be placed by the mechanical A/B/C read alone and are called out as findings, not folded
+in by a coin toss: `MIN_REASON_LEN`, `waiver-drift.mjs`'s `DRIFT`, and `mistakes-dupes.mjs`'s
+`THRESHOLD` are not about a film at all (a waiver's prose length, how much of the library shares a
+waiver code, how similar two mistake-log headings are); they are grouped with B on the closest fit
+(they decide a verdict the same mechanical way B's constants do) but are process/text machinery, not
+motion measurement. Two infrastructure limits (`docker-context.mjs`'s `BUDGET_MB`, a build-context size
+cap, and `prop-probe.mjs`'s `PER_SCENE`, a WebGL context-count ceiling) are grouped with B for the same
+reason: neither is motion design, neither is out of scope for any reason but domain.
+
+### Group A: 34 constants, researched in `TIMING-SOURCES.md` (Task 2) and changed in Task 3
+
+| file:line | name | value | one-line reason it is a craft opinion |
+|---|---|---|---|
+| beat-check.mjs:92 | DEAD_AIR | 0.4 | how long a content gap reads as a breath vs a stall |
+| beat-check.mjs:93 | TAIL | 0.2 | how much of the closing frame must carry content |
+| choreo.mjs:69(60) | FAST_RATIO | 0.6 | how much faster an exit must be than its entrance to read as emphasised |
+| choreo.mjs:248 | CAMERA_COVERAGE_FLOOR | 0.4 | how much of the runtime the camera must actually travel |
+| choreo.mjs:248 | CAMERA_COVERAGE_MIN_DURATION | 6 | film length below which camera coverage isn't judged |
+| choreo.mjs:256 | CAMERA_TRAILING_FREEZE | 3 | how long the camera may hold still before the ending reads as unfinished |
+| critique.mjs:165 | MIN_TYPE_HOLD | 0.4 | how long a typed line must hold after finishing before the cut |
+| critique.mjs:254 | CAMERA_PUSH_S | 1.15 | how much camera scale counts as "pushed in" during typing |
+| critique.mjs:254 | CAMERA_MOVE_PX | 4 | how much camera pan counts as "tracking" the typing |
+| direction-floor.mjs:455 | CONTINUITY_MAX_DUR | 15 | film length above which chaptered (no-single-spine) structure is legitimate |
+| direction-floor.mjs:640 | TURNOVER_MIN | 2 | how many layers must turn over at once to count as a scene-change boundary |
+| dissolve-check.mjs:50 | VISIBLE | 0.15 | opacity at which a glyph is legible enough to muddy the one behind it |
+| dissolve-check.mjs:51 | MUDDY | 0.12 | how much overlap in a dissolve reads as illegible mush |
+| eye-trace.mjs:86 | JUMP_FAR | 0.30 | how far a cut may move the eye before the jump itself is unusual |
+| eye-trace.mjs:267 | SEARCH | 1.5 | how long the eye is given to find the new focal point after a cut |
+| frame-check.mjs:57 | SCALE_DRIFT_MAX | 7 | how many distinct literal sizes a film's fragments may use before it stops reading as one film |
+| motion-audit.mjs:69 | HOLDW | 0.5 | how long a payoff must sit steady before its exit counts as "settled" |
+| motion-audit.mjs:623 | TRAIL_WINDOW | 0.4 | how soon after a leader stops a trailing layer's own motion still reads as follow-through |
+| motion-floor.mjs:48 | DEAD | 0.13 | how little pixel change in a window counts as "nothing happening" |
+| motion-floor.mjs:51 | LOCAL_SHARE | 0.08 | how concentrated a change must be to read as "arrived here" vs ambient |
+| motion-sound-check.mjs:144 | STILL_FLOOR | 0.06 | how little visual change counts as "the frame is not moving" |
+| pace-check.mjs:37 | FLOOR | 1.0 | events/second below which a film reads as asleep |
+| pace-check.mjs:38 | HOLD | 4.0 | how long nothing may arrive or leave before a hold reads as a stall |
+| plan-vs-render.mjs:124 | SPECTACLE_MIN_BOUNDARIES | 2 | declared boundaries above which a film is expected to nominate a spectacle peak |
+| plan-vs-render.mjs:124 | SPECTACLE_MIN_DUR | 12 | runtime above which a film is expected to nominate a spectacle peak |
+| read-check.mjs:124 | PROSE_WORDS | 4 | word count above which a text event is graded as "read", not "glanced at" |
+| read-check.mjs:125 | PROSE_SIZE | 28 | type size above which a text event is graded as prose, not reference material |
+| read-check.mjs:131 | OTHER_WPS | 3 | reading rate for a short label, distinct from the read-twice rate |
+| scene-timing.mjs:457 | FULL_FRAME_SHARE | 0.8 | how much of the canvas a beat's content must fill to justify a held camera pose |
+| scene-timing.mjs:483 | HANDOFF_WINDOW | 0.25 | how close an exit and the next entrance must land to count as one handoff |
+| storyboard-check.mjs:156 | SPINE_MAX_S | 15 | film length below which a named holding device (thread/object) is required |
+| harness/lib/contract.mjs:613 | FULL_FRAME_OBJECT_AREA | 1,400,000 | px² above which a centred object counts as "full frame" evidence for a normal-camera shot |
+| harness/lib/safeguards.mjs:72 | SHORT_FILM_FLOOR_SEC | 12 | film length below which "not enough features" stops being a fair question |
+
+(33 rows; `motion-floor.mjs:48`'s `DEAD` and `:51`'s `LOCAL_SHARE` are exported and used a second time by
+`choreo.mjs`, which is why the file only needed one entry each above despite two call sites; counted once.)
+
+### Group B: 45 constants, out of scope, untouched
+
+Sampling/epsilon/bucket machinery that makes a measurement work, never itself a craft bar:
+`covered-move.mjs` `EPS` `VISIBLE_STEPS` `OPAQUE_STEPS`; `scene-timing.mjs`/`contract.mjs`'s shared
+`REST_S_EPS`/`REST_PX_EPS`/`REST_DEG_EPS` (both files); `scene-timing.mjs` `EPS` (1e-6); `direction-floor.mjs`
+`EPS` (0.15, ~4 frames); `dissolve-check.mjs` `STEPS`; `png-diff.mjs` `NOISE`; `choreo.mjs` `SPEED_EPS`;
+`critique.mjs` `TILT_TOL`/`TILT_TIME_TOL`; `motion-floor.mjs` `RIGID_EXPLAIN`/`RIGID_EXTENT` (camera-vs-
+content classification math, not a "how much motion is good" bar); `motion-sound-check.mjs` `BUCKET_S`;
+`audio-render-check.mjs` `MERGE_S`/`TOL_S`; `beats-of.mjs` `CLUSTER` (a fallback heuristic's own merge
+window, only used when no storyboard exists to read the real beat table from); `eye-trace.mjs`/
+`motion-audit.mjs`/`read-check.mjs`'s three `FPS = 30` (the render's own fixed frame rate, arguably
+medium/category-2 rather than unsourced, see the note above this section).
+
+Render-fidelity QA (does the render match the plan, an engineering tolerance, not a perceptual one):
+`plan-vs-render.mjs` `NEAR`/`STILL`/`DRIFT`/`OVERRUN`/`BEAT_TOL`; `study-verify.mjs` `TOL`.
+
+Self-referential pipeline/artifact detection (measuring OUR OWN renderer or diffing tool, not craft):
+`seam-forensics.mjs` `GHOST_FLOOR`/`GHOST_RATIO`/`RES_FLOOR` (one render, `out/demo.mp4`, fixed a real
+ghosting bug, not a taste call); `sweep-static.mjs` `MIN_DURATION_FOR_CHECK`/`CHANGE_THRESHOLD`/
+`SAMPLE_COUNT` (frozen-render bug detection, all three parts of one detector).
+
+Process/statistics, not motion at all: `reference-bars.mjs` `MIN_REFERENCES` (a sample-size floor on
+the reference bank itself); `waivers.mjs` `MIN_REASON_LEN` (a waiver's prose length); `waiver-drift.mjs`
+`DRIFT` (how much of the library shares one waiver code); `mistakes-dupes.mjs` `THRESHOLD` (text
+similarity between two mistake-log headings).
+
+Infrastructure, not motion design or a film measurement of any kind: `docker-context.mjs` `BUDGET_MB`
+(a build-context size cap); `prop-probe.mjs` `PER_SCENE` (a WebGL context-count ceiling, "the number is
+load-bearing" per its own comment, unrelated to any film's quality).
+
+### Group C: 7 constants, a separate pass, untouched
+
+`audio-render-check.mjs` `ONSET_DB`/`NOISE_FLOOR_DB`; `motion-sound-check.mjs` `SILENCE_DB`/`LOUD_DB`;
+`sfx-audit.mjs` `AUDIBLE`; `designspec-check.mjs` `TOL`/`NEUTRAL_SAT`; `ground-arc.mjs` `LIGHT`/`DARK`.
+(That is 9 named constants across 7 decision points; `designspec-check.mjs` and `ground-arc.mjs` each
+carry two on one line.) Signal/colour domain: real standards exist nearby (EBU R128, ITU-R BT.601/709,
+WCAG contrast) but mapping them is a colour/loudness research pass, not this one; see `TIMING-SOURCES.md`
+part 4 for the two it already touched (`SILENCE_DB`/`LOUD_DB` against EBU R128, wrong unit; `NOISE_FLOOR_DB`/
+`AUDIBLE` share one unsourced number, an internal-consistency note).
+
+**Nothing was left unclassified after this pass**; the three called out above (`MIN_REASON_LEN`,
+`waiver-drift.mjs`'s `DRIFT`, `mistakes-dupes.mjs`'s `THRESHOLD`) are placed in Group B on the "decides a
+verdict the same mechanical way" test, flagged as not really about motion so the placement is not read as
+silent.
