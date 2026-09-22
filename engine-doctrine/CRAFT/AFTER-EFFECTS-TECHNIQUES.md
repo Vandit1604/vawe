@@ -10,11 +10,11 @@ group: reference
 
 ## AGENT SUMMARY
 
-- 26 named After Effects recipes below, each with its real numbers and a HAVE / PARTLY / LACK verdict against this engine. The TABLE below is the current verdict; where a per-recipe section disagrees with the table, treat that as unresolved drift, not settled fact.
+- 26 named After Effects recipes below, each with the numbers its own sources state and a HAVE / PARTLY / LACK verdict against this engine. The TABLE below is the verdict of record; a per-recipe section that disagrees with it is drift to fix, not a second opinion.
 - `[eye]`: a reference catalog, not a gate. Cross-check `make arsenal Q="…"` before building any of these by hand.
-- Checkable action: for the recipe you want, does its verdict say HAVE (use it), PARTLY (the shape exists, the dial does not), or LACK (build it, ranked in "The ten to build first")?
+- Checkable action: for the recipe you want, does its verdict say HAVE (use it), PARTLY (the shape exists, the dial does not), or LACK (build it, ranked in "What was on the build list")?
 
-This engine ships 559 effects. More atoms are worthless. What a motion designer actually carries in
+This engine names 914 things across 65 vocabularies (`node harness/author/arsenal.mjs --census`). More atoms are worthless. What a motion designer actually carries in
 their head is not a list of effects, it is a list of **recipes**: ordered procedures with names, each
 combining several operations over time, each with numbers that practitioners argue about. `overshoot`
 is not an effect, it is "pass the target by this much and settle back over that long". `follow-through`
@@ -116,8 +116,8 @@ Direction is a decision, not a default: top-to-bottom, left-to-right, or centre-
 representative items and bring the rest as one block.
 
 **Verdict: HAVE.** `stagger` and `each` on any `split` text layer, `stagger` on `parts` for hand-written
-markup, and `cardCascade` and `chipGrid` as whole beats. Worth noting the measured gap: only 6 of 161
-scenes used `parts` when it was audited, so this is under-used rather than missing.
+markup, and `cardCascade` and `chipGrid` as whole beats. Worth noting the measured gap: 30 of the 197
+scenes in `films/scene/` carry `parts`, so this is under-used rather than missing.
 
 **Routed from the plan today.** The `word-by-word` recipe (`recipes/recipes.json`): a line arrives one
 word after another, each rising into place, in place of one block sliding in.
@@ -158,11 +158,12 @@ sine gets the frequency backwards and reads wrong.
 **When it is wrong.** Serious brands, dense grids, anything a viewer must read immediately. An
 overshooting paragraph is a paragraph you read twice.
 
-**Verdict: PARTLY.** The engine has the curves: `easeOutBack`, `easeOutElastic`, `easeOutSettle`,
-`springEase`, `springStiff`, and named entrances that overshoot (`popIn`, `backIn`, `charOvershoot`,
-`spinIn`, `elasticIn`). What it has no word for is the **dial**: an author cannot say "overshoot this by
-12% and settle over 0.4s" on an arbitrary layer. They pick a preset and take its baked amount. That is
-the gap, and it is the cheapest one on this list to close.
+**Verdict: HAVE.** The curves are `easeOutBack`, `easeOutElastic`, `easeOutSettle`, `springEase` and
+`springStiff`, and the entrances that overshoot by name are `popIn`, `backIn`, `charOvershoot`, `spinIn`
+and `elasticIn`. The dial exists as well: `overshoot: 0.12` on any warpable entrance warps that
+entrance's own curve (`overshootEase`, `core/motion/motion.js:601`, read off the element at
+`core/timeline/clips.js:124`). The settle time is `enterDur` and there is no second `settle` prop,
+because one number with two spellings drifts.
 
 **Sources:** https://motionscript.com/articles/bounce-and-overshoot.html ·
 https://mtmograph.com/blogs/tools/the-bounce-and-overshoot-animation-trick-every-motion-designer-should-know ·
@@ -220,11 +221,13 @@ the wind-up: a heavy object anticipates for longer, a light one barely at all.
 **When it is wrong.** Anywhere the viewer is already looking, and on anything informational. Anticipation
 buys attention, and buying attention you already have costs you time.
 
-**Verdict: LACK.** Nothing in this engine winds up. `popOut` is described as shrinking "with a small
-anticipation swell first", which is one baked exit, and that is the whole of it. Note that the house rule
-against enter-and-retreat is about a full round trip, and anticipation is not that: it is a fractional
-counter-move that is immediately consumed by the main travel. The two are compatible, and this is the
-highest-value hole on the list.
+**Verdict: HAVE.** `anticipate: 0.15` is a fractional counter-move before a directional entrance,
+applied as a warp of that entrance's own easing (`anticipateEase`, `core/motion/motion.js:577`, read at
+`core/timeline/clips.js:124`). It is opt-out rather than opt-in: a qualifying layer that names none gets
+one, the amount derived from the theme's `bounce` (`anticipateFromMotion`, `core/motion/motion.js:804`;
+the rule and its `anticipate: false` sentinel are at `core/engine/produce.js:178-195`). The house rule
+against enter-and-retreat is about a full round trip; a wind-up the main travel immediately consumes is
+not that.
 
 **Sources:** https://aaronbjork.com/12-Principles-of-Animation-for-Motion-Design ·
 https://www.howinteractivedesign.com/web-design-resources-technology/12-basic-principles-animation-motion-design/
@@ -279,7 +282,7 @@ word at 24fps.
 **When it is wrong.** As a substitute for a picture. A film of pure kinetic type is still a film of type,
 and this repo's own doctrine is blunt about it: see [`SHOW-DONT-TELL.md`](SHOW-DONT-TELL.md).
 
-**Verdict: HAVE, generously.** 31 kinetic text presets with `split`, `preset`, `each` and `stagger`, plus
+**Verdict: HAVE, generously.** 33 kinetic text presets with `split`, `preset`, `each` and `stagger`, plus
 `wordBlast`, `kineticHook` and `propSentence` as whole beats. The engine is stronger here than a stock
 After Effects install.
 
@@ -383,10 +386,11 @@ route: drive Scale from `length(velocityAtTime(time), velocityAtTime(time-0.03))
 **When it is wrong.** Anything with a rigid identity. A logo that squashes is a damaged logo. Text is
 usually wrong too, because the letterforms carry the deformation and read as a bad font.
 
-**Verdict: PARTLY.** `stretch` is a text preset that smears horizontally and snaps true, `fall` lands with
-a small squash, and `squeeze` is a cut that smears along the travel axis. All three are baked shapes.
-There is no modifier that reads a layer's own velocity and deforms from it, which is what makes squash
-read as physics rather than as a preset.
+**Verdict: HAVE.** `squash` is a modifier (`core/fx/squash.js`, registered at `core/fx/index.js:35`)
+that reads the layer's own velocity, stretches the travel axis and squeezes the perpendicular one by the
+reciprocal, so the volume holds. It deforms along the DOMINANT axis: an arbitrary axis needs a
+three-function transform and the tracks own `transform`. The baked shapes remain for the cases that want
+them: `stretch` as a text preset, `fall`, and the `squeeze` cut.
 
 **Source:** https://www.clipstudio.net/en/animation/12-principles/
 
@@ -594,11 +598,11 @@ thing thrown up arcs over, a thing entering from the side arcs down into place.
 **When it is wrong.** UI motion, where a curved path reads as drunk, and any travel under about 100px,
 where the arc is invisible and only costs frames.
 
-**Verdict: PARTLY.** `alongPath` sets a line of type on a curve and can send it travelling along one,
-which is the general case and the only way to bend a headline. But a normal layer's keyed `x`/`y`
-interpolate straight between motion keys, so an arc has to be hand-keyed with intermediate points. That
-is the same complaint After Effects gets, and it is a smaller hole than it looks, because most beats here
-travel short distances.
+**Verdict: HAVE.** `ease: "through"` on a motion key computes that key's tangent from its neighbours, so
+the path rounds a corner instead of turning it (`core/timeline/sequence.js:349`). Measured, a three-key
+apex turns 22 degrees where `linear` turns 66. A key cannot carry both `through` and a handle, because
+one computes the velocity and the other authors it (`core/timeline/sequence.js:391`). `alongPath`
+remains the way to bend a line of type along a curve.
 
 **Source:** https://www.adobe.com/in/creativecloud/roc/blog/video/animation-principles.html
 
@@ -621,10 +625,11 @@ and End points keyed across the frame, blur **20 to 60px** on it to set the soft
 **When it is wrong.** When a plain wipe would do. This is the expensive general mechanism, and reaching
 for it to get a left-to-right reveal is work you did not need to do.
 
-**Verdict: PARTLY.** `clip` as a layer, `occlude` to hide a layer where another covers it, and the
-`wipe-*` / `iris` / `softiris` / `softwipe` family cover the common cases. What is missing is the general
-one: naming ANY layer as the luminance source for another layer's alpha. Given that the engine already has
-`paint` fields, shader stings and hand-authored html, that general form would compose with a lot.
+**Verdict: HAVE.** The `matte` modifier (`core/fx/matte.js`, registered at `core/fx/index.js:35`) names
+a layer as the luminance source for this layer's alpha, and the matte moves. It takes that source layer's
+own image or gradient, because a browser cannot read one live element's pixels as another's alpha. The
+narrower cases still stand where they fit: `clip` as a layer, `occlude` to hide a layer where another
+covers it, and the `wipe-*` / `iris` / `softiris` / `softwipe` family.
 
 **Source:** https://elements.envato.com/learn/how-to-make-mattes-in-after-effects
 
@@ -797,52 +802,34 @@ as the default.
 
 ---
 
-## The ten to build first
+## What was on the build list
 
-Ranked by value over cost. Each says which of the three shelves it belongs on, because the shelf decides
-who writes it.
+Ten recipes were ranked here by value over cost. **Items 1 to 7 shipped.** Each one settled a design
+question on the way in, and those answers are the reason the engine has one spelling per fact:
 
-> **ITEMS 1 TO 7 ARE BUILT.** The per-recipe sections below still carry the verdict they were
-> researched with; the TABLE above is the current one. What shipped, and where it differs from the plan:
-> `anticipate` and `overshoot` are one mechanism (both ARE the easing of an entrance, so both are a warp
-> of the anim's own curve, `core/motion/motion.js`); `settle` is NOT a second prop, because `enterDur` already
-> owns that number and a second spelling of it would be a fork; `step` is a layer prop rather than a
-> modifier, because a modifier runs LAST and a clock has to be quantised before anything reads it;
-> `squash` deforms along the DOMINANT axis, because an arbitrary axis needs a three-function transform
-> and the tracks own `transform`; `matte` takes the source layer's own image or gradient, because a
-> browser cannot read one live element's pixels as another's alpha; and motion blur (recipe #4) needed
-> only the shutter angle, since the blur itself was already automatic (engine-doctrine/MISTAKES.md #520).
-> Items 8, 9 and 10 are not built.
+1. **Anticipation** (#5). `anticipate: 0.15`, a counter-move worth 15% of the travel over 2 to 4 frames.
+   It and `overshoot` are one mechanism, because both ARE the easing of an entrance and therefore a warp
+   of the anim's own curve (`core/motion/motion.js`).
+2. **The overshoot dial** (#3). `overshoot`, the amount practitioners argue over at 8 to 15%. There is no
+   second `settle` prop: `enterDur` already owns that number, and a second spelling of it is a fork.
+3. **`squash`** (#11). Reads the layer's own velocity, the read shared with `ghost`'s lookback. It
+   deforms along the DOMINANT axis, because an arbitrary axis needs a three-function transform and the
+   tracks own `transform`.
+4. **`step`** (#24). Quantises a layer's clock, `step: 15` being on twos in a 30fps film. It is a layer
+   prop and not a modifier, because a modifier runs LAST and a clock has to be quantised before anything
+   reads it.
+5. **`matte`** (#20). Names a layer as the luminance source for another's alpha. It takes that source
+   layer's own image or gradient, because a browser cannot read one live element's pixels as another's.
+6. **Motion blur as a scene default** (#4). Only the shutter angle was needed: the blur itself was
+   already automatic above 480 px/s (`core/tracks/motion.js`; `engine-doctrine/MISTAKES.md` #520). The
+   old design asked every author to remember, which is a per-call-site opt-in and therefore not a default.
+7. **`lag`** (#6). A layer follows another's motion 1 to 3 frames late and overruns its stop, `amp 0.05,
+   freq 4, decay 8` after Ebberts. It needed a new concept, a motion relationship between two layers.
 
-**A new easing or entrance dial. Cheapest shelf, changes every film.**
+Speed ramp (#25) and arcs (#19) were parked here as too expensive and too small respectively. Both now
+ship: `timeRemap` keys and `timeWarp` for the first, `ease: "through"` for the second.
 
-1. **Anticipation** (#5, LACK). A fractional counter-move before every directional entrance, expressed as
-   one number: `anticipate: 0.15` meaning 15% of the travel, back, over 2 to 4 frames, then straight into
-   the main move. It is a curve, it needs no new layer type, and it is the loudest missing principle in
-   the engine. Build it as an easing plus an entrance flag, in `core/motion/motion.js`.
-2. **The overshoot dial** (#3, PARTLY). Every overshooting preset here bakes its own amount. Expose the
-   pair the practitioners argue about, `overshoot` (8 to 15% typical) and `settle` (0.3 to 0.5s), on any
-   entrance, so an author can tune weight without changing preset. Also `core/motion/motion.js`.
-
-**A per-layer modifier. `core/fx/`, where `ghost` already lives, so the pattern is proven.**
-
-3. **`squash`** (#11, LACK as physics). Read the layer's own velocity, stretch the travel axis and squeeze
-   the perpendicular one by the reciprocal. `ghost` already samples the motion track a few frames back, so
-   the velocity read is written and can be shared. One fact, one owner.
-4. **`step`** (#24, LACK). Quantise a layer's `t` to N updates per second, default 15 in a 30fps film.
-   Perhaps ten lines. It opens the entire hand-drawn register, which the engine cannot currently reach at
-   all, and it is trivially pure.
-5. **`matte`** (#20, PARTLY). Name any layer as the luminance source for this layer's alpha. It is the
-   general case of the whole wipe family, and it composes with `paint` fields, shader looks and
-   hand-authored html, all of which already exist. High leverage per line.
-6. **Motion blur as a scene default** (#4, PARTLY). `ghost` in blur mode is correct and nobody switches it
-   on. Give the scene a `shutter` setting that applies the existing sampler to every layer moving faster
-   than a threshold, with per-layer opt-out. This is the "fix it at the root" shape: the current design
-   asks every author to remember, which is a per-call-site opt-in and therefore not a default at all.
-7. **`lag`** (#6, LACK). A layer follows another layer's motion 1 to 3 frames late and overruns its stop,
-   `amp 0.05, freq 4, decay 8` after Ebberts. This is the one modifier here that needs a new concept, a
-   motion relationship between two layers, so it is the most expensive of the six and still worth it: it
-   is half of what makes motion read as animated rather than moved.
+**Three remain unbuilt.** Each says which shelf it belongs on, because the shelf decides who writes it.
 
 **A recipe (recipes/README.md). Motion measured off a real film, applied to layers the author names.**
 
@@ -854,18 +841,13 @@ who writes it.
 **A composition. A bespoke overlapping timeline in `core/compositions/index.js`, which has only two
 entries and should have more.**
 
-9. **`matchCut`** (#22, PARTLY). Two shapes placed in register across a junction, the outgoing one handing
+9. **`matchCut`** (#22). Two shapes placed in register across a junction, the outgoing one handing
    its silhouette to the incoming one, with the alignment computed rather than eyeballed. It is exactly
    the overlapping-tween case compositions exist for, and it gives the film-structure doctrine a device
    instead of only a paragraph.
-10. **`shapeMorphRoute`** (#21, PARTLY). Morph with per-vertex routing, so a mark takes an arc into its
+10. **`shapeMorphRoute`** (#21). Morph with per-vertex routing, so a mark takes an arc into its
     next form rather than the straight line every vertex takes by default. It needs the same machinery as
     #9 and should follow it.
-
-**Deliberately not on the list.** Speed ramp (#25) is the most interesting missing item and the most
-expensive: it touches the render-purity contract, and it should wait until something in a real film
-actually needs it. Arcs (#19) are a real gap and a small one, because most beats here travel short
-distances where the bow would be invisible.
 
 ## Provenance
 
@@ -876,5 +858,12 @@ inventory), [`recipes/README.md`](../../recipes/README.md) (structure measured o
 **Do not re-add:** recipe #24 (Animate on twos) as LACK, or a note that its verdict disagreed with the
 summary table. Both now say HAVE (`step`). Recipe #4 (Motion blur) as PARTLY / opt-in / requiring an
 authored motion track: motion blur is automatic above 480 px/s with a default 0.16 shutter
-(`core/tracks/motion.js`; `engine-doctrine/MISTAKES.md` #520).
+(`core/tracks/motion.js`; `engine-doctrine/MISTAKES.md` #520). Recipes #3, #5, #11, #19 and #20 as
+PARTLY or LACK in their own sections while the table says HAVE: all five shipped, and the sections were
+rewritten against the code on 2026-09-23.
+
+**On the numbers.** Every figure in a recipe is a starting dial from the source named under it, and the
+sources are practitioner tutorials, not standards. Where a number comes from one person's video or blog
+post it is that person's setting, reported here because it is a place to start arguing from, never
+because anything measured it.
 

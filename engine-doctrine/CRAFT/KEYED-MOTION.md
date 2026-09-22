@@ -78,7 +78,7 @@ mechanical move, so it gets curves.
 **The failure this prevents.** Two keys plus `easeInOutCubic` produces a glide. Glide is right for a
 card arriving and wrong for anything a hand or a machine is doing. `easeInOutCubic` also zeroes velocity
 at BOTH ends of every segment, so a dense chain accelerates and stops once per key and the move pulses.
-The same defect fixed for the camera in [`../MISTAKES.md`](../MISTAKES.md) #125 and left standing as the
+The same defect fixed for the camera in [`../MISTAKES.md`](../MISTAKES.md) #128 and left standing as the
 per-layer default until now. **This is automatic below 0.14s per segment.**
 
 ---
@@ -111,8 +111,9 @@ including the scrim and the things that are meant to stay put. Panning three cho
 
 **The cost, and it is the point.** The engine gives you no way to SAY this, so the author typed the
 same six deltas three times and kept them in sync by hand. A time-shift error in one of them is
-invisible in the JSON and obvious on screen. See `panWith` in [`../PRIMITIVES.md`](../PRIMITIVES.md);
-before that existed, this was the sharpest edge in the file.
+invisible in the JSON and obvious on screen. See `panWith` (`core/timeline/pan-resolve.mjs`), which
+copies another layer's motion track onto this one; before that existed, this was the sharpest edge in
+the file.
 
 ---
 

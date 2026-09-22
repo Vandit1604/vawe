@@ -34,7 +34,7 @@ rendition Pinterest serves; the HLS ladder tops out at the same size.
 > argument is that it is built out of travel rather than out of cuts.
 
 Everything below is measured off the file, not remembered. Frames live in
-`refs/together-chat/frames/`, which is **local only**: `.gitignore:106` keeps third-party
+`refs/together-chat/frames/`, which is **local only**: `.gitignore:196` keeps third-party
 marketing films out of the repo on purpose, and that covers their frames too. Section 11 rebuilds the
 video and every strip in one paste.
 
@@ -195,7 +195,8 @@ Measured, not eyeballed: four 40x40 corner patches sampled at **0.9s, 5.0s, 8.0s
 **maximum channel delta of 0** against each other, mean RGB `(253,253,253)` at every one. The backdrop is
 byte-identical across the film.
 
-This is a direct, deliberate breach of `CLAUDE.md` rule 2a0, and the film is better for it. The rule is
+This is a direct, deliberate breach of the rule in [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md)
+("the background is decoration, it is never information"), and the film is better for it. The rule is
 right about the failure it was written for, which is a static field chosen by default. This background was
 chosen. The reason it works is structural: **the subject is moving in every one of the 14 phrases**, so
 the frame never needs the backdrop to keep it alive. A moving background under this film would fight the
@@ -315,7 +316,7 @@ logo, product screens and copy appear nowhere in it.
 
 ## 11. Rebuild the video and every strip
 
-`refs/` is gitignored (`.gitignore:106`), so neither the film nor its frames are in the repo. Both come
+`refs/` is gitignored (`.gitignore:196`), so neither the film nor its frames are in the repo. Both come
 back from this. `yt-dlp` is not installed here; the pin page carries the direct mp4 in its metadata.
 
 ```bash
