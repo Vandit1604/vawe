@@ -190,7 +190,7 @@ The profile is the coordination; `vawe_reflect` is the colour precision.
 
 > **You will read this list of eight, pick the one that feels right, and write the justification
 > afterwards. That is not a decision, it is a menu.** It happened here on a live film: an agent read this
-> repo's anti-default doctrine in full, picked a theme off a menu of 35, and produced its reasoning after
+> repo's anti-default doctrine in full, picked a theme off a menu of 34, and produced its reasoning after
 > the pick. The same reflex shows up about faces, and the fix generalises:
 > ***"Reject your first instinct. The first one that feels right is usually your training-data default for
 > that register. If you picked it last time too, find something else."***

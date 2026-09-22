@@ -135,10 +135,10 @@ video starts ahead.
    sheet. Read it: one beat per idea, note the copy, the layout, the palette per beat.
    **You will sample the middle of each beat, and the middle is the one frame that hides everything you
    came to learn.** A beat-MIDDLE frame shows the settled state, which is where nothing is moving. Doing
-   this missed the dolly, the gradient fill AND the orange colour-wave on one film, three separate times
-   (`../MISTAKES.md` #124). A still frame carries composition and colour and nothing about time; for a
-   continuous effect it is the least informative test there is, because it is exactly the frame where a
-   wrong speed looks right (#155). You MUST also sample: (a) the **entrance** at high fps
+   this missed the dolly, the gradient fill AND the orange colour-wave on one film, three separate times.
+   A still frame carries composition and colour and nothing about time; for a continuous effect it is the
+   least informative test there is, because it is exactly the frame where a wrong speed looks right. One
+   background matched that way ran about 2.5x too fast in motion (`../MISTAKES.md` #161). You MUST also sample: (a) the **entrance** at high fps
    (`fps=12`, first ~0.5s): is the word oversized/blurred and settling (a dolly-in)?; (b) the **exit**
    (`fps=12`, last ~0.5s): does it scale UP + blur to leave (a dolly-out)?; (c) a **hard-zoomed crop of
    the text** (`crop=…,scale=up`): is the fill a flat colour or a GRADIENT / colour-wave?
@@ -165,7 +165,7 @@ These are what a good reference does that our defaults do NOT. Reach for them on
    drifting). This is the single biggest "alive vs slideshow" lever. Our default holds still; add a
    `camera` track (`s: 1.03 → 1.12` across each beat) or per-layer `motion` scale. *(Brew: the UI beats
    push 34%→71% area in ~1s: a big dolly-in.)*
-   **Keep it SMOOTH** (MISTAKES #125): one MONOTONIC move, never a reversal (don't zoom in then snap
+   **Keep it SMOOTH** (MISTAKES #128): one MONOTONIC move, never a reversal (don't zoom in then snap
    out). For a multi-keyframe camera push set `ease:"linear"` on the interior keyframes, the default
    easeInOutCubic zeroes velocity at every keyframe, so a chained push pulses/shakes. Per-beat push is
    cleanest as a per-layer `motion.scale` (`ease:"linear"`) that resets naturally per element: one

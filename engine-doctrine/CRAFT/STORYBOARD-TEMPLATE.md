@@ -500,7 +500,7 @@ the last beat next to a real change.
 **One finding did survive, because frames were pulled and looked at.** From 5.0s to 7.0s all three
 of ours change nothing but the backdrop, and at 6.5s two of them are a black plate with a single
 dot on it. The reference's emptiest second still has the carried object turning in frame. That hole
-is now a blocking gate (`dead-air`, MISTAKES #165). It went unseen for a whole render cycle because
+is now a blocking gate (`dead-air`, MISTAKES #171). It went unseen for a whole render cycle because
 the gate asked whether a layer window was open, not whether anything was in the frame.
 
 The lesson is the method, not the numbers. A count over a whole film is a hypothesis. Pull the
