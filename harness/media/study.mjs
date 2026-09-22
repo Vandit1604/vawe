@@ -53,7 +53,7 @@ import { fileURLToPath } from 'node:url';
 import { drawtext } from '../author/sheets.mjs';
 import { ffmpegOrDie } from '../lib/scratch.mjs';
 import { measureSpan } from './content.mjs';
-import { clusterCuts, detectCuts, detectSeams, detectPans, detectCrossfades, frameSeries, mergeJoints } from './shot-detect.mjs';
+import { clusterCuts, detectCuts, detectSeams, detectPans, detectCrossfades, frameSeries, mergeJoints, motionDeltaSeries } from './shot-detect.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -290,9 +290,9 @@ fs.mkdirSync(dir, { recursive: true });
 // live in shot-detect.mjs and this file imports them, rather than duplicating them for
 // harness/media/ingest.mjs to import safely (importing THIS file used to also run its whole CLI).
 const LUMA = frameSeries(VIDEO, 'scale=160:90,signalstats');
-// The first difference frame is the frame against itself and reads 0. Dropped rather than averaged in,
-// because "how much did this change from the one before" has no answer for the first frame.
-const DELTA = frameSeries(VIDEO, 'scale=160:90,tblend=all_mode=difference,signalstats').slice(1);
+// motionDeltaSeries (shot-detect.mjs) owns this chain now: the top-level medianFrameDelta figure
+// below reuses this SAME array rather than a second decode with a second copy of the filter string.
+const DELTA = motionDeltaSeries(VIDEO);
 // Scaled bigger than LUMA/DELTA (410x270, not 160x90): edge detail is finer-grained than luma, and a
 // letterform that survives 410x270 can vanish at 160x90. Cost is one more decode of the same film.
 const EDGE = frameSeries(VIDEO, `scale=410:270,edgedetect=low=${EDGE_LOW}:high=${EDGE_HIGH},signalstats`);
@@ -790,6 +790,31 @@ fs.writeFileSync(path.join(dir, 'pages.md'),
   + pagesMeta.map((pg) => `page ${String(pg.page).padStart(3, '0')} (${pg.t0}-${pg.t1}s): <fill: what happens on this page>`).join('\n')
   + '\n');
 
+// medianFrameDelta / longestHoldS: the two figures a reference-bars reader needs, and the reason
+// prose ("median frame delta ~0.23", "median frame delta 0.08") could not be checked by any gate.
+//
+// BOTH READ OFF DELTA/STILL_FLOOR ABOVE, not harness/lib/frame-forensics.mjs's frameDeltaSweep. A
+// first pass used frameDeltaSweep (a 64x36 grid, max per-pixel delta) and got 0.039/0.020 against the
+// prose's 0.08/0.23; DELTA (160x90, tblend=difference, mean YAVG) gives 0.098/0.212, the measure the
+// prose actually agrees with, because it is the measure this file's own `motion`/`peak`/`held` per-
+// shot fields were already reading. "How much does this film move" already had an owner; the fix is
+// citing it, not adding a second one. longestHoldS moves to the same measure ON PURPOSE: a hold and
+// the delta that names "quiet" must read off one scale, or study.json could disagree with itself
+// about what "held" means. medianFrameDelta reuses the DELTA array already decoded above (line ~294),
+// never a second ffmpeg pass.
+const deltaValues = DELTA.map((f) => f.v);
+const sortedDeltaValues = [...deltaValues].sort((a, b) => a - b);
+const medianFrameDelta = sortedDeltaValues.length
+  ? fx(sortedDeltaValues.length % 2 ? sortedDeltaValues[(sortedDeltaValues.length - 1) / 2]
+      : (sortedDeltaValues[sortedDeltaValues.length / 2 - 1] + sortedDeltaValues[sortedDeltaValues.length / 2]) / 2, 3)
+  : null;
+let longestHoldFrames = 0, runFrames = 0;
+for (const f of DELTA) {
+  if (f.v < STILL_FLOOR) { runFrames++; if (runFrames > longestHoldFrames) longestHoldFrames = runFrames; }
+  else runFrames = 0;
+}
+const longestHoldS = DELTA.length ? fx(longestHoldFrames / fps, 2) : null;
+
 // ── the study ─────────────────────────────────────────────────────────────────────────────────────
 const study = {
   source: (() => { const r = path.relative(ROOT, path.resolve(VIDEO)); return r.startsWith('..') ? path.resolve(VIDEO) : r; })(),
@@ -805,6 +830,7 @@ const study = {
     panFloor: PAN_FLOOR, pansFound: pans.length,
     crossfadeBand: [CROSSFADE_LO, CROSSFADE_HI], crossfadesFound: crossfades.length,
     shots: shots.length, medianShot: fx(median), cutsPerMinute: fx((shots.length / duration) * 60, 1),
+    medianFrameDelta, longestHoldS,
   },
   coverage: { frames: DECODED_FRAMES, unique: uniqueFrames.length, pages: pagesMeta.length, ledger: 'incomplete' },
   shots: shots.map((s) => ({ i: s.i, t0: fx(s.t0), t1: fx(s.t1), len: fx(s.len),
