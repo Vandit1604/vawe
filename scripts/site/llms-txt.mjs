@@ -77,10 +77,16 @@ const ROUTE_COPY = {
     + 'rendered film that proves it.',
 };
 
+// A missing or malformed `description:` line used to fall back to '' here, so a broken doc page
+// published an empty line to llms.txt with nothing said about it. scripts/site/mcp-tools.mjs gets
+// this right and says why: "a generator that silently emits an empty list is worse than one that
+// stops." This does the same: collect every offending slug and refuse to write the file at all,
+// rather than ship a blank sentence next to whichever page's frontmatter drifted.
 function frontmatterDescription(slug) {
   const text = fs.readFileSync(path.join(DOCS, `${slug}.mdx`), 'utf8');
   const m = text.match(/^description:\s*(.+)$/m);
-  return m ? m[1].trim() : '';
+  if (!m || !m[1].trim()) throw new Error(`${slug}.mdx has no \`description:\` frontmatter line, or it is empty`);
+  return m[1].trim();
 }
 
 const pages = JSON.parse(fs.readFileSync(path.join(ROOT, 'site/lib/site-pages.json'), 'utf8'));
@@ -95,13 +101,22 @@ const site = pages.routes
   .map((r) => `- [${r.path === '/' ? 'Home' : r.path.replace(/^\//, '')}](https://vawe.dev${r.path}): ${ROUTE_COPY[r.path]}`)
   .join('\n');
 
+const docErrors = [];
 const docs = pages.docs
   .map((d) => {
     const slug = d.path === '/docs' ? 'index' : d.path.replace('/docs/', '');
-    const desc = frontmatterDescription(slug);
+    let desc = '';
+    try { desc = frontmatterDescription(slug); }
+    catch (err) { docErrors.push(err.message); }
     return `- [${slug === 'index' ? 'Introduction' : slug}](https://vawe.dev${d.path}): ${desc}`;
   })
   .join('\n');
+
+if (docErrors.length) {
+  console.error(`✗ llms-txt: ${docErrors.length} doc page(s) with a missing/empty description:`);
+  for (const e of docErrors) console.error(`  ${e}`);
+  process.exit(1);
+}
 
 const out = `# Vawe
 > ${ROUTE_COPY['/']}

@@ -68,9 +68,22 @@ export const LAYER_BLURBS = blurbsOf('layer type', REGISTRY);
 // checker) so the pointer fails loudly the day the doc's own wording moves out from under it, the same
 // freshness contract engine-doctrine/CRAFT/rules/*.json already proves for a craft rule's `doc`.
 //
-// NOT EVERY TYPE IS HERE. Six have no doctrine beyond this file's own blurb (verified by opening every
-// doc that mentions the word, most hits were the word used for something else): `video`, `clip`,
-// `board`, `doc`, `globe`, `particles`. That is reported as a gap, not silently patched with new prose.
+// The six that USED to have no doctrine beyond this file's own blurb: `video`, `clip`, `board`, `doc`,
+// `globe`, `particles`. All six turned out reachable already, `make arsenal` returns a blurb row for
+// every layer type unconditionally (blurbsOf above, no `docs` needed for that), so none was missing a
+// FIND path, only a doctrine one. Opening every real hit (not the word used for something else) found
+// craft prose for five of them already written and simply unlinked: `clip`/`board`/`doc` share a
+// bullet each in PRIMITIVES.md's light/depth/density list, `globe` has a real placement case study in
+// LAYOUT.md, and `particles` has real per-preset "when" guidance generated into EFFECTS.md from its own
+// registry. `video`, the most-used of the six (real footage, 4 layers in films/scene/vawe-flow-2.json)
+// was the one with genuinely nothing: a new bullet was added next to `clip`'s in PRIMITIVES.md. None of
+// the six is a deletion candidate on the evidence found: each has a real consumer (core/layers/*.js),
+// each was already discoverable, and `board`/`globe` have real (if sparse) corpus usage. `clip`/`doc`/
+// `particles` show zero corpus usage today; `reach.json`'s own method calls that shape "unwanted"
+// (documented, reachable, simply unchosen), not "unreachable", and `unwanted` is not its removal
+// bucket. `doc` (a markdown/diff FILE card) is the narrowest of the six, useful mainly to a dev-tool
+// product recreation, and is the one worth a second look if it is still unused after a few more of
+// those; that is a note for the next audit, not a case for deleting a working primitive today.
 const LAYER_DOCS = {
   text: { doc: 'engine-doctrine/PRIMITIVES.md#kinetic-type-coretypetypejs-31-presets-charwordline-splits',
     brief: 'JSON knobs on a layer' },
@@ -108,6 +121,18 @@ const LAYER_DOCS = {
     brief: 'when a beat needs MORE than that, overlapping tweens, cross-timed hand-offs' },
   adjust: { doc: 'engine-doctrine/CRAFT/GRAMMAR.md#there-are-three-ways-to-invert-a-frame-not-one',
     brief: 'The third is a glow or beam layer, or an adjust layer grading everything beneath.' },
+  video: { doc: 'engine-doctrine/PRIMITIVES.md#light-depth-density-july-11-the-looks-like-the-site-vocabulary',
+    brief: 'Reach for it over `clip` when the footage is real captured or licensed video' },
+  clip: { doc: 'engine-doctrine/PRIMITIVES.md#light-depth-density-july-11-the-looks-like-the-site-vocabulary',
+    brief: 'a generated/any video played DETERMINISTICALLY as a preloaded PNG frame sequence' },
+  board: { doc: 'engine-doctrine/PRIMITIVES.md#light-depth-density-july-11-the-looks-like-the-site-vocabulary',
+    brief: 'dim + fade it behind a foreground card for real density' },
+  doc: { doc: 'engine-doctrine/PRIMITIVES.md#light-depth-density-july-11-the-looks-like-the-site-vocabulary',
+    brief: 'a markdown/source FILE card from pure data' },
+  globe: { doc: 'engine-doctrine/CRAFT/LAYOUT.md#how-this-actually-goes-wrong-here',
+    brief: 'The fix was one column: the globe centred at 1200 wide and running past the' },
+  particles: { doc: 'engine-doctrine/EFFECTS.md#particles-presets-particles-layer',
+    brief: 'a fast radial flash from the box centre, additive-blended, gone in under a second' },
 };
 
 export const LAYER_REGISTRY = defineRegistry('layer type', REGISTRY, { slot: 'layers[].type', blurbs: LAYER_BLURBS,
