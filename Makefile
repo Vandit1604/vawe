@@ -138,6 +138,14 @@ blocks-audit: ## [maintenance] do the block FACTORIES obey the copy rules the vi
 dead-branch: ## [maintenance] a ternary whose arms are identical: a decision that decides nothing
 	@node quality/gates/dead-branch.mjs $(if $(JSON),--json,)
 
+# make inert-check: a mechanism that is wired and does nothing, and nothing reports the inertness.
+# coverage.mjs crashed for six days in neither this file's callers nor CI; audit-scenes.yml failed
+# five weeks into nobody's inbox. This is the general check for that shape: a standing gate absent
+# from both pre-push and every workflow, a generator that can write an empty result without failing,
+# a scheduled workflow nothing polls, a baseline a CI checkout can never see.
+inert-check: ## [maintenance] a Makefile gate, a generator or a scheduled workflow that is wired and does nothing
+	@node quality/gates/inert-check.mjs $(if $(JSON),--json,)
+
 # make doc-refs · every `make <target>` and every repo path the docs NAME must exist, and every
 # Makefile recipe must run a script that exists. Docs are read as instructions: a wrong one is worse
 # than a missing one, because an author types it and then distrusts the whole file. `craft-coverage`
