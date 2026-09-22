@@ -87,7 +87,7 @@ copy a structure wholesale (the ledger flags it). Build in the [`README.md`](REA
 
 1. **Beats**: layer `start`/`duration` per the lock sheet's timing.
 2. **Anchor**: placement via `pin`/`col`/`align`, never eyeballed `x` (a text layer with `w` needs
-   `align` or it reads off-centre, [`../MISTAKES.md`](../MISTAKES.md) #15).
+   `align` or it reads off-centre, [`../MISTAKES.md`](../MISTAKES.md) #50).
 3. **Per-beat motion**, from [`MOTION-SNIPPETS.md`](../MOTION-SNIPPETS.md): entrances ease-out, the
    hero moves last/most, ONE motion idea per beat. Vary durations ([`DIRECTION.md`](DIRECTION.md) §2).
 4. **Support = blocks.** The hero's claim is proved by a block (the strength meter, a chart), plus a
@@ -107,10 +107,15 @@ This is the `make check` phase of the one spine in
 nothing blocks yet.
 
 ```bash
-make author-check D=films/scene/passwords.json           # validate · beats · assets · inspect · plan-vs-render
+make author-check D=films/scene/passwords.json           # the always-on gates: validate · beats · storyboard
+                                                          #     · assets · inspect · plan-vs-render · motion, and more
 TASTE=1 make author-check D=films/scene/passwords.json  # ...+ critique · direct · floor · dissolve
                                                           #     designspec · copy · pace
 ```
+
+The full ladder is longer than either line above names: read it off `LADDER` in
+[`quality/gates/author-check.mjs`](../../quality/gates/author-check.mjs) rather than trusting a fixed
+count here, it changes as gates are added.
 
 **The style gates always run; `TASTE=1` only promotes them to blocking.** A bare `make author-check`
 runs the always-on half, which catches a film that is BROKEN: schema and em-dash (`validate`), timeline
@@ -163,7 +168,7 @@ make why   D=films/scene/passwords.json             # what the last few dev/chec
 `/tmp/judge/sheet.png` against `/tmp/judge/rubric.md` and score every frame on all six dimensions
 (readability · hierarchy · composition · brand + asset fidelity · produced-not-generated · value).
 **If your eye catches a flaw, it is a FIX**, never rationalize one you noticed
-([`../JUDGE.md`](../JUDGE.md), [`../MISTAKES.md`](../MISTAKES.md) #15). Fix the JSON, re-render.
+([`../JUDGE.md`](../JUDGE.md)). Fix the JSON, re-render.
 
 ## Step 6: Prove it isn't a repeat, then log it
 

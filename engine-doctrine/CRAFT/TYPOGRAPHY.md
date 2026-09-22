@@ -60,9 +60,10 @@ source before you argue with any of it.
 - **Weight contrast must be extreme. You default to 400 vs 700. Video needs 300 vs 900.** *"The difference
   must be visible in motion at a glance."* Measured here across the 138 scene files that declare a font
   weight: every one of the 2,417 declarations sits between **400 and 800**, and the two commonest values
-  are 500 and 600. **Zero declarations at or below 300. Zero at or above 900.** Eleven `@font-face` rules
-  in `core/tokens.css` load the full `100 900` range, so the light and black ends are paid for, loaded,
-  and never used.
+  are 500 and 600. **Zero declarations at or below 300. Zero at or above 900**, as of that count; the
+  library has grown since (197 scene files now), so re-run the grep before repeating the "zero" claim.
+  Thirteen `@font-face` rules in `core/tokens.css` load the full `100 900` range, so the light and black
+  ends are paid for, loaded, and mostly unused.
 - **Video sizes, not web sizes. You will try to use 14px. Don't.** Full-screen viewing: body 20px minimum,
   headlines 60px+, data labels 16px. **In a phone feed** (`"destination": "tiktok" | "reels" | "shorts"`)
   the video plays small inside a scrolling column, so scale up: body ≥32px, headlines ≥90px, labels ≥24px.

@@ -31,9 +31,10 @@ house contract in `harness/lib/findings.mjs`, which `engine-doctrine/MISTAKES.md
 
 ## How
 
-Use `gateFindings()` to render and `emitJson()` under `--json` (see the 14 gates that already do, e.g.
-`quality/gates/discovery.mjs`). The aggregator reads records via `VAWE_FINDINGS_OUT`, so a gate writes
-its records there while printing prose to stdout exactly as before.
+Use `gateFindings()` to render and `emitJson()` under `--json` (nearly every gate now does, e.g.
+`quality/gates/discovery.mjs`; `grep -rl gateFindings quality/gates/*.mjs` is the live count). The
+aggregator reads records via `VAWE_FINDINGS_OUT`, so a gate writes its records there while printing
+prose to stdout exactly as before.
 
 ## Reaching JSON from a command
 
