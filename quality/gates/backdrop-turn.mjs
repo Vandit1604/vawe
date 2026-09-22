@@ -17,11 +17,15 @@
 // whatever moves on top of it is doing the film's only work. No external number decides this, only
 // whether two of the film's own windows read the same or different.
 //
-// REPORTS, never blocks (engine-doctrine/TASTE.md, "one process, two severities"): this rule has never
-// applied to the library before today, so day one is a census, not a wall.
+// BLOCKS, wired into quality/gates/author-check.mjs's LADDER (tier: blocks). The owner reviewed the
+// census this file already printed, 142 of 181 graded films firing, and confirmed it reads the library
+// correctly rather than over-firing, then asked for it to stop a film. The standard
+// `authoring.allow: ["backdrop-never-turns"]` + `_why` waiver is the only door out, same as every other
+// blocking rule; no exemption list, no second mechanism. Untouched films are unaffected: author-check
+// runs on changed scenes only (.github/workflows/scene-check.yml).
 //
-//   node quality/gates/backdrop-turn.mjs <scene.json>
-//   node quality/gates/backdrop-turn.mjs                 (census: every films/scene/*.json)
+//   node quality/gates/backdrop-turn.mjs <scene.json>    (exits 1 if backdrop-never-turns fires)
+//   node quality/gates/backdrop-turn.mjs                 (census: every films/scene/*.json, exits 0)
 //   make backdrop-turn [D=scene.json]
 import fs from 'node:fs';
 import path from 'node:path';
@@ -68,9 +72,11 @@ function main() {
   if (file) {
     const f = gateFindings({ scene: file });
     const fired = checkOne(file, true);
-    if (fired) f.warn('backdrop-never-turns', 'the backdrop holds one preset for the whole film (direction.world-turns): either the tone turns somewhere, or this is a declared slide with effects on it.');
+    if (fired === true) f.fail('backdrop-never-turns', 'the backdrop holds one preset for the whole film (direction.world-turns): either the tone turns somewhere, or this is a declared slide with effects on it.');
+    else if (fired === null) console.log(`  · backdrop-turn · ${path.basename(file)}: no bg[] declared, not gradeable`);
     else console.log(`  ✓ backdrop-turn · ${path.basename(file)}`);
     f.emit();
+    if (fired === true) process.exitCode = 1;
     return;
   }
   const pop = population('backdrop-turn · corpus', { dir: SCENE_DIR, quiet: true });
@@ -85,7 +91,7 @@ function main() {
   }
   console.log(`\n  backdrop-turn · ${pop.n} film(s), ${graded} graded (${ungraded} carry no bg[], ${unreadable} unreadable)`);
   console.log(`  backdrop-never-turns fires on ${fired} of ${graded} graded film(s)`);
-  console.log(`  REPORT tier: nothing here blocks. quality/gates/threshold-provenance.mjs is unaffected, no new constant.`);
+  console.log(`  This census mode always exits 0. A single-scene run (node ${path.basename(import.meta.url)} <scene.json>) blocks in author-check's ladder.`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main();
