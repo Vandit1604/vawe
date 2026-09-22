@@ -181,9 +181,8 @@ against the message.
 
 **What could not be found:** any studio, in a process page, podcast transcript or interview,
 stating a rule for choosing between a continuous object, a match-cut chain, a motif, and a metric cut rate.
-The UI-motion literature generally was a dead end for this question: it is rigorous about how a *single*
-transition should feel (duration, easing, transform over layout) and says nothing about how a *film* is
-held together. Most searches for studio structural process returned SEO listicles ranking motion studios.
+Most searches for studio structural process returned SEO listicles ranking motion studios. The UI-motion
+literature was the other dead end, for the reason and with the sources given in note 5's neighbour below.
 Treat any confident decision framework on this topic, including Part 4 below, as inference.
 
 ---
