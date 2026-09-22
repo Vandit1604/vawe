@@ -1,6 +1,6 @@
 ---
 when: "you want the named procedure a motion designer would reach for, and the engine word for it (or the news that there isn't one)"
-answers: "26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine (23 HAVE, 3 PARTLY, 0 LACK as of 2026-08-29) · what is left and where it would live"
+answers: "26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine (25 HAVE, 1 PARTLY, 0 LACK as of 2026-09-23) · what is left and where it would live"
 group: reference
 ---
 
