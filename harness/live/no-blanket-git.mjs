@@ -44,7 +44,18 @@ let raw = '';
 process.stdin.on('data', (d) => { raw += d; });
 process.stdin.on('end', () => {
   let cmd = '';
-  try { cmd = (JSON.parse(raw).tool_input || {}).command || ''; } catch { process.exit(0); }
+  try {
+    cmd = (JSON.parse(raw).tool_input || {}).command || '';
+  } catch (e) {
+    // This hook's ONE job is to refuse four commands. A payload it cannot parse might be hiding
+    // exactly one of them, and it has no way to check: fail closed, not open, same reason as
+    // stage-gate.mjs. Refusing an occasional malformed Bash call is cheaper than the data loss this
+    // hook exists to prevent.
+    process.stderr.write('BLOCKED: no-blanket-git could not parse the PreToolUse payload it was given, so '
+      + `it cannot tell whether this command is one of the four it refuses. JSON.parse failed: ${e.message}.\n\n`
+      + 'Retry the command; if this repeats, the tool call is sending no-blanket-git malformed stdin.\n');
+    process.exit(2);
+  }
   const parts = commandsIn(cmd);
   for (const [re, name, why] of BANNED) {
     if (parts.some((p) => re.test(p))) {

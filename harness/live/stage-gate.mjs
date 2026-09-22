@@ -66,7 +66,15 @@ process.stdin.on('end', () => {
     const inp = JSON.parse(raw).tool_input || {};
     file = inp.file_path || '';
     text = String(inp.content ?? inp.new_string ?? '');
-  } catch { allow(); }
+  } catch (e) {
+    // This hook's ONE job is to refuse three writes. A malformed payload means it cannot tell
+    // whether this write is one of them, so it cannot vouch for it either: fail closed, not open.
+    // A gate that permits on its own confusion is not a gate.
+    deny('stage-gate could not parse the PreToolUse payload it was given, so it cannot tell '
+      + `whether this write needs a plan behind it. JSON.parse failed: ${e.message}. Retry the write; `
+      + 'if this repeats, the tool call is sending stage-gate malformed stdin.',
+      'unparsable-input', 'unparsable-input');
+  }
   if (!file) allow();
   const rel = path.relative(ROOT, file);
   if (rel.startsWith('..') || !rel.startsWith('films/scene/')) allow();
