@@ -315,6 +315,7 @@ const LADDER = [
   ['validate', 'blocks', 'the schema, the vocabulary, and em-dashes in on-screen text'],
   ['storyboard', 'blocks', 'whether this film has a written plan, and whether the plan holds together'],
   ['beats', 'blocks', 'the clock: dead air, an empty closing frame, a backdrop that cannot move'],
+  ['backdrop-turn', 'blocks', 'the world: do the film\'s own bg windows disagree at least once, or is it one tone held the whole way'],
   ['sweep-static', 'reports', 'the RENDERED pixels: did anything move, or is the whole film frozen (needs a render; hard code)'],
   ['jolt', 'reports', 'frame-to-frame speed jumps on any layer or the camera, plus motion-floor dead windows (needs a current render)'],
   ['edge', 'reports', 'a full-bleed layer stops covering the frame while on screen (edge-reveal)'],
@@ -509,6 +510,13 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
 //     a backdrop that structurally cannot move. Every other gate reads the scene as a bag of layers; this
 //     one walks the clock. Blocking, waivable by code.
 record('beats', runGate('beats', 'beat check (timeline holes)', 'quality/gates/beat-check.mjs', strict ? ['--strict'] : []), { waivable: true });
+
+// 1b1. backdrop-turn. Does the film's own declared bg[] windows disagree with each other at least
+//     once, or does one tone hold for the whole run? Reads the authored JSON only, same as beats above,
+//     so it sits beside it and ahead of anything that needs a render. No bg[] at all (a film that
+//     paints its backdrop through a layer instead) is not gradeable and never fails: see
+//     quality/gates/backdrop-turn.mjs `turns()`. Owner-confirmed blocker: engine-doctrine/RULES/world-turns.md.
+record('backdrop-turn', runGate('backdrop-turn', 'backdrop-turn (does the world turn)', 'quality/gates/backdrop-turn.mjs', []), { waivable: true });
 
 // sweep-static. The pixels-moved check, the post-render twin of beats' declared-backdrop check. It reads
 // the RENDERED mp4, so before a render it reports "render first" and finds nothing; once rendered, a film
