@@ -2,7 +2,7 @@
 when: "\"what holds this film together across its cuts\""
 answers: the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last
 group: crosscutting
-codes: continuity, no-continuous-object, no-continuous-object-inferred, becomes-is-preset, chain-breaks, missing-object-field, single-thread, stub-why, trigger-is-mechanism, trigger-is-sequence, object-diverges, object-not-built, unmet-beat
+codes: continuity, no-continuous-object, no-continuous-object-inferred, becomes-is-preset, chain-breaks, missing-object-field, single-thread, stub-why, trigger-is-a-mechanism, trigger-is-a-sequence, object-diverges, object-not-built, unmet-beat
 applies-when: short
 confirm: "what holds this film across its cuts?"
 ---
@@ -12,7 +12,7 @@ confirm: "what holds this film across its cuts?"
 ## AGENT SUMMARY
 
 - Name what holds the film across each cut: a spatial device (transforming object, match cut via `matches`, camera travel), a verbal/aural one (unfinished sentence, sound bridge, bookend), a temporal one (metric/rhythmic cutting, music-led), or a conceptual one (motif, escalation, intellectual montage). Pick from Part 1, land on at least two threads (Part 4, Q6).
-- Enforced by `[gated]` codes `continuity`, `no-continuous-object`, `no-continuous-object-inferred` (opt-in via `TASTE=1` or `make direction-floor`; the gate sees only the transforming-object device, so waive with a named `_why` when another device carries the film).
+- Enforced by `[gated]` codes `continuity`, `no-continuous-object`, `no-continuous-object-inferred` (always run by `make author-check`; `TASTE=1` decides only whether findings block; the gate sees only the transforming-object device, so waive with a named `_why` when another device carries the film).
 - Checkable action: what holds this film across its cuts?
 
 This library has one answer to that question. One object survives every cut and changes there.
@@ -194,12 +194,12 @@ Treat any confident decision framework on this topic, including Part 4 below, as
 provenance: "The reference in this repo (`higgsfield.mp4`, first 5 seconds, recreated in
 `films/scene/higgsfield-recreation.json`) is not a sequence of beats. It is one continuous action." The
 gate generalised that single sample into a floor for every film under 15 seconds
-(`CONTINUITY_MAX_DUR = 15` in `quality/gates/direction-floor.mjs:134`).
+(`CONTINUITY_MAX_DUR = 15` in `quality/gates/direction-floor.mjs:455`).
 
 The sample was a good one. A five-second product film with one subject and one process is exactly the case
 the transforming-object device was made for. The generalisation is the problem.
 
-**What the gate measures.** `continuity()` in `quality/gates/direction-floor.mjs:197` walks each boundary,
+**What the gate measures.** `continuity()` in `quality/gates/direction-floor.mjs:579` walks each boundary,
 finds layers visible on both sides, and keeps only those whose pose differs across it. That is spatial
 persistence plus a state change. In Murch's ranking it is item six, the 4% item. **Our only blocking
 structural rule enforces the thing Murch says to sacrifice first.**
@@ -224,12 +224,12 @@ must be.
 the only one it can see. A keyed `w`/`h` on a rectangle passes. A motif does not. Eighteen short films in
 `films/scene/` carry an explicit `no-continuous-object` waiver, and three consecutive films were one
 rectangle changing size and passed everything. That is the shape of a gate teaching a habit rather than
-catching a defect. CLAUDE.md 2a001 already says so; this page adds the reason. **The gate did not merely
+catching a defect. This page adds the reason. **The gate did not merely
 fail to see the alternatives. It made one alternative free and all the others expensive.**
 
 Two smaller costs worth recording. Our films ship silent by default, which removes the sound bridge and
 weakens music-led structure, so we are working with fewer registers than the sources assume. And
-`beats-wrapped-as-units` (`direction-floor.mjs:229`) shows the engine's default timing actively truncates
+`beats-wrapped-as-units` (`quality/gates/beat-check.mjs:274`) shows the engine's default timing actively truncates
 any layer that tries to cross a cut, so the one device we mandate is also the one the renderer fights
 until the author sets `acrossBeats`.
 

@@ -34,8 +34,9 @@ Every rule is tagged:
 > **The fastest way to obey all of this: compose from [`recipes/`](../../recipes/README.md)**,
 > directed motion measured off a real film, so you start from directed motion instead of a blank
 > `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make direct`) is the ceiling, too much,
-> undirected; the **ambition floor** (`make direction-floor`, opt-in via `TASTE=1`) is the floor, too plain,
-> a slideshow. A directed video sits between them.
+> undirected; the **ambition floor** (`make direction-floor`) is the floor, too plain, a slideshow, and
+> its hardest checks (`no-continuous-object` among them) block on every `make author-check` run, not only
+> under `TASTE=1`. A directed video sits between them.
 
 ---
 
@@ -242,10 +243,9 @@ Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yo
 
 ## Reading `make direct`: every finding carries a census
 
-Twelve checks run in `harness/author/motion-director.mjs` and eleven of them warn. Across the 135
-gate-visible scenes, 104 trip at least one. That is 77% of the library meeting the same wall of prose,
-film after film, and a warning nobody reads is a rule that has already been repealed with nobody
-writing it down.
+Sixteen checks run in `harness/author/motion-director.mjs`; only two of them (`profile`, `cut-families`)
+can fail, the rest warn. Re-run the census before quoting a trip rate here, the library's scene count
+moves and a stale percentage reads as false precision.
 
 The rules did not change. What each finding now carries is two numbers.
 
@@ -292,8 +292,9 @@ verdict and exits 0.
 
 **Read [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) before you reach for this rule.** It is one device out of
 about eighteen that hold a short film together, it is the cheapest of them, and in Murch's own ranking it is
-the 4% item, the one he says to sacrifice first. It is also **opt-in**: `TASTE=1 make author-check`, or
-`make direction-floor D=<file>`. Run it when the film's CONTENT is continuous, which is a single-subject
+the 4% item, the one he says to sacrifice first. It **blocks on every `make author-check` run**,
+`TASTE=1` or not; a film exempt from it needs a waiver with a `_why`, never a flag. Run it when the
+film's CONTENT is continuous, which is a single-subject
 product film, a process shown end to end, or a demo where the UI is the subject. On a manifesto, a vignette
 anthology, a comparison built on its junctions, or a metric-cut list film it is wrong by construction.
 
