@@ -1,13 +1,24 @@
 // harness/lib/reference-bars.mjs: what the studied EXTERNAL references say, read off refs/*/study.json.
 //
-// A quality bar should measure this engine against the outside world, not against the films we have
-// already made (that is variety pressure, `library-top5-only`'s job, and stays relative on purpose).
+// NOT THE ROUTE TO AN ABSOLUTE QUALITY BAR. It reads as an outside measurement, not a corpus of our
+// own films, but "measured a few real clips" and "cite a published standard" are still two different
+// evidence classes (the four-category test in engine-doctrine's rules-from-sources plan): a bank of
+// five clips is a better SAMPLE of the same weaker kind of evidence, not a stronger one. Concretely,
+// harness/lib/genre-pacing.mjs's held-state cap used to read `longestHoldS` off this bank and swung
+// 2.6s-3.6s, a 38% move, off the SAME two clips depending only on which delta metric read them. It
+// tried quality/gates/read-check.mjs's already-sourced MAX_HOLD next, and that failed too, for a
+// different reason: MAX_HOLD is sourced for TIME TO READ PROSE, and a held beat need carry no prose at
+// all, so the citation does not reach the question (genre-pacing.mjs's header has the full argument).
+// There is no held-state CAP left; the judgement moved to `make plan-judge`'s `beat-pacing` code, an
+// agent looking at the plan. This file still runs, and a caller may still REPORT what it measured next
+// to a finding as evidence an author can weigh, it just never gets to DECIDE a threshold on its own.
+//
 // Two of the numbers a bar needs used to live only as PROSE, hand-quoted from a study nobody could
 // re-check: films/scene/pin-recreation.storyboard.md ("median frame delta ~0.23") and
 // films/scene/latch-recreation.prompt.md ("median frame delta 0.08, a fully held final 2.5s"). No
 // gate can read a sentence, so a bar could not cite either figure. `make study` already writes the
 // machine-readable form, refs/<name>/study.json (harness/media/study.mjs); this is the one reader
-// that turns every such file on disk into one external bar, so a gate imports THIS, never a second
+// that turns every such file on disk into one external bar, so a caller imports THIS, never a second
 // hand-rolled read of refs/.
 //
 // AN EMPTY BANK IS A STATED FALLBACK, NEVER A SILENT DEFAULT. refs/ is gitignored (CLAUDE.md, "Never

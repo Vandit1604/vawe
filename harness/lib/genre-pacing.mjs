@@ -1,33 +1,44 @@
-// harness/lib/genre-pacing.mjs: one owner for "how long can a beat hold one state", per film type.
+// harness/lib/genre-pacing.mjs: what MOTION-CRAFT.md says a beat's length should be, per genre. A
+// REPORTING table, not a bar: read the file's own header below for why.
 //
-// engine-doctrine/MOTION-CRAFT.md already names this per genre ("Genre pacing tables", beat length in
-// seconds). quality/gates/storyboard-check.mjs used to carry a second, different number instead: a flat
-// ~1.5s, justified only by "the reference film never holds a single state longer than about 1.5
-// seconds" for ONE film, applied to every film of every type. A product walkthrough is allowed a 5-8s
-// beat by the doctrine table and was warned at 1.5s by the gate. This file is the single
-// machine-readable copy of that table: mirror the numbers here if MOTION-CRAFT.md's table ever moves,
-// do not add a third copy anywhere else.
+// engine-doctrine/MOTION-CRAFT.md names this per genre ("Genre pacing tables", beat length in
+// seconds). quality/gates/storyboard-check.mjs used to enforce a flat ~1.5s instead, justified only by
+// "the reference film never holds a single state longer than about 1.5 seconds" for ONE film, applied
+// to every film of every type. A product walkthrough is allowed a 5-8s beat by the doctrine table and
+// was warned at 1.5s by the gate. Then it enforced a fallback read off the reference bank
+// (harness/lib/reference-bars.mjs), then off quality/gates/read-check.mjs's subtitling MAX_HOLD. All
+// three were wrong the same way: MAX_HOLD is sourced for TIME TO READ PROSE (BBC/Netflix subtitling),
+// and a held beat need carry no prose at all (a static product screen, a still shot). The argument that
+// disqualified the reference bank and the per-word formula (no source reaches a beat with nothing to
+// read) disqualifies MAX_HOLD too, for the same reason. No perception or craft literature answers "how
+// long may an arbitrary VISUAL state hold", because the answer depends on what the beat is SHOWING,
+// which is a craft judgement, not a measurable constant.
 //
-// GENRE, not scaffold TYPE. No storyboard records its scaffold type (launch/explainer/demo/sting/
-// talking-head/recreation, harness/author/type-spines.mjs) after scaffold runs, so this gate has no
-// `type:` field to read. `classifyType()` below derives it from content already on the page instead:
-// the `framework:` line, a `refs/*.mp4` capture path (a recreation always names the clip it measured),
-// or the filename, in that priority order. A storyboard none of these signals name gets DEFAULT_MAX_S,
-// the gate's old flat number, unchanged: this file only ever WIDENS the check for a film it can
-// positively place, never narrows it for one it cannot.
+// So there is no held-state CAP in this file, and none belongs here. What is left:
+//   - GENRE_PACING below, MOTION-CRAFT.md's own table, reported honestly as this repo's internal
+//     doctrine (no external citation, never claimed to have one).
+//   - a beat that carries readable prose is quality/gates/read-check.mjs's job, already cited (BBC
+//     subtitling 2-5s band, argued over Netflix's 7s) and unaffected by any of this.
+//   - the actual judgement, "does this beat earn its seconds, none padded or starved", now lives at
+//     `make plan-judge`'s `beat-pacing` finding code (harness/author/critics.mjs, harness/lib/
+//     plan-judge-codes.mjs): an agent looking at the plan, because that is a craft question and an
+//     agent can answer it where an exit code never could.
 import { readReferenceBars, MIN_REFERENCES } from './reference-bars.mjs';
 
-// No genre band comes close to this. Product walkthrough, the loosest named band, tops out at 8s; a
-// 12s single-change beat is still called a defect regardless of genre, so the absolute ceiling sits a
-// full margin above 8 and short of 12.
+// No genre band names anything past this. Product walkthrough, the loosest band below, tops out at 8s.
+// Same status as the bands themselves: MOTION-CRAFT.md's own margin, not an external citation.
 export const CEILING_S = 10;
 
-// engine-doctrine/MOTION-CRAFT.md "Genre pacing tables".
+// engine-doctrine/MOTION-CRAFT.md "Genre pacing tables". House craft doctrine, not a published
+// standard: no citation is claimed for these numbers, and none should be invented. Reported as what
+// this repo's own doctrine says, for an author or `plan-judge` to weigh, never enforced as a bar.
 export const GENRE_PACING = {
   launch: { maxS: 7, doc: 'Launch film (30-60s): 4-7s' },
   walkthrough: { maxS: 8, doc: 'Product walkthrough: 5-8s' },
   shorts: { maxS: 4, doc: 'Shorts (games/facts): 2-4s' },
 };
+export const GENRE_PACING_SOURCE = 'engine-doctrine/MOTION-CRAFT.md "Genre pacing tables": this '
+  + 'repo\'s own craft doctrine, no external citation claimed';
 
 // scaffold TYPE -> genre bucket.
 //   demo is a screen-recorded UI mechanism (harness/author/type-spines.mjs recordedPan/verdictProof),
@@ -35,7 +46,7 @@ export const GENRE_PACING = {
 //   explainer explains a topic/article/data with invented visuals (engine-doctrine/CRAFT/ROUTING.md),
 //   the "games/facts" shorts row.
 //   sting is one beat, 4-8s, kinetic register: nearer the launch band's cadence than the other two.
-// talking-head has no row of its own in MOTION-CRAFT.md and falls through to DEFAULT_MAX_S below.
+// talking-head and anything classifyType() cannot place have no row here and get no reported band.
 const TYPE_GENRE = {
   launch: 'launch',
   demo: 'walkthrough',
@@ -45,45 +56,36 @@ const TYPE_GENRE = {
 
 // recreation is deliberately NOT in TYPE_GENRE: harness/author/type-spines.mjs says a recreation
 // "inherits whatever register the studied source film is in", so it commits to no genre band of its
-// own. It still answers to the absolute ceiling, nothing else.
+// own. It still gets a reported band, the same absolute margin, same uncited status.
 const RECREATION_MAX_S = CEILING_S;
 
-// DEFAULT: the held-state cap for any film classifyType() cannot place (most of the corpus: no
-// storyboard signal here recognizes it) and for talking-head, which has no MOTION-CRAFT.md row of its
-// own. It used to be a flat 3.0s, the doubled residue of "the reference film never holds a single
-// state longer than about 1.5 seconds" for ONE film. The plan was for it to cite a measured EXTERNAL
-// reference instead (harness/lib/reference-bars.mjs, refs/*/study.json's `longestHoldS`), and it still
-// will, once the bank has enough of them: MEASURED, with the two references studied so far, changing
-// only which delta metric read them swung this constant between 2.6s and 3.6s off the SAME two clips,
-// a 38% swing with zero new data. That is not a bar, it is noise wearing a bar's clothes, which is
-// exactly what `readReferenceBars`'s `ready` flag (MIN_REFERENCES, reference-bars.mjs) exists to
-// refuse: below it, this file REPORTS what the bank measured without ENFORCING it.
-//
-// refs/ is gitignored, so on CI and a fresh clone the bank is empty; that and "the bank exists but is
-// still thin" both land on the SAME fallback, the old number, STATED as uncalibrated rather than
-// silently reused (harness/lib/reference-bars.mjs's own contract: a bank that isn't ready must never
-// read as a confident measurement, whether it is empty or merely small).
-const UNCALIBRATED_MAX_S = 3.0;
-const bank = readReferenceBars();
-export const DEFAULT_MAX_S = (bank.ready && bank.longestHoldS != null)
-  ? Math.round(bank.longestHoldS * 10) / 10
-  : UNCALIBRATED_MAX_S;
-// Printed wherever DEFAULT_MAX_S is quoted (storyboard-check.mjs), so a thin bank never reads as more
-// authoritative than it is, and so the evidence it DOES carry is visible even while it isn't deciding.
-export const DEFAULT_MAX_S_SOURCE = (bank.ready && bank.longestHoldS != null)
-  ? `measured longest hold across ${bank.n} external references (${bank.names.join(', ')})`
-  : (bank.n > 0
-      ? `uncalibrated: the bank holds ${bank.n} of the ${MIN_REFERENCES} external references it needs `
-        + `to set this bar (${bank.names.join(', ')}); what it has measured so far, longest hold `
-        + `${bank.longestHoldS != null ? `${bank.longestHoldS}s` : 'unmeasured'}, is reported, not enforced`
-      : `uncalibrated: ${bank.reason || 'no external reference on disk'}`);
+// The reference bank (refs/*/study.json, harness/lib/reference-bars.mjs) is a real measurement of real
+// external clips, and worth printing next to a beat-pacing observation as evidence an author can weigh.
+// It is not a source for a threshold here: `MIN_REFERENCES` clips is a better SAMPLE of the same
+// weaker evidence class a corpus always is, not a stronger one (the swing this bank produced when it
+// WAS wired to a constant, 2.6s-3.6s off the same two clips with zero new data, is exactly that
+// weakness showing). Measured, reported, never decided by.
+export const referenceBank = readReferenceBars();
+export function describeReferenceBank() {
+  const bank = referenceBank;
+  if (!bank.n) return `reference bank: ${bank.reason || 'no external reference on disk'} (measured evidence, not a bar)`;
+  const measured = bank.longestHoldS != null ? `${bank.longestHoldS}s` : 'unmeasured';
+  return `reference bank (measured evidence, not a bar): longest hold measured ${measured} `
+    + `across ${bank.n}${bank.n < MIN_REFERENCES ? ` of the ${MIN_REFERENCES} references it would want for a stable read` : ''} `
+    + `(${bank.names.join(', ')})`;
+}
 
-/** thresholdFor(type) -> the held-state cap in seconds for a classified film type. */
+/**
+ * thresholdFor(type) -> what MOTION-CRAFT.md's doctrine reports for a classified film type, in
+ * seconds, or null when nothing here has a band for it (most of the corpus: `classifyType()` places
+ * only launch/demo/explainer/sting/recreation). NEVER a bar to enforce, see the file header: a caller
+ * may only REPORT this number next to a long beat, worded plainly as uncited house doctrine.
+ */
 export function thresholdFor(type) {
   if (type === 'recreation') return RECREATION_MAX_S;
   const genre = type && TYPE_GENRE[type];
   const band = genre && GENRE_PACING[genre];
-  return band ? Math.min(band.maxS, CEILING_S) : DEFAULT_MAX_S;
+  return band ? Math.min(band.maxS, CEILING_S) : null;
 }
 
 const REF_CLIP_RE = /refs\/[\w.-]+\.(mp4|mov)/i;
