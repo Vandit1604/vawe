@@ -205,12 +205,25 @@
    [...document.querySelectorAll('#states button[data-state]')].forEach(b=>
      b.setAttribute('aria-pressed',String(b.dataset.state===s)));
    if(s==='make') fit();
-   if(s==='plan') drawPlan();
-   if(s==='look') showSheet(sheetKind);
+   if(s==='plan'){ drawPlan(); if(planSub==='sheets') showSheet(sheetKind); }
    if(s==='ship') drawShip();
    if(s==='sound') drawSound();
  }
  document.querySelectorAll('#states button[data-state]').forEach(b=>b.addEventListener('click',()=>setState(b.dataset.state)));
+
+ // ---- PLAN's two sub-views: the composed frames (default), and the rendered contact sheets that
+ // used to be their own "Look" nav entry. One place answers both "what is in this beat" and "what did
+ // it look like once assembled", because approving a plan and checking it against the render are the
+ // same errand, not two.
+ let planSub='frames';
+ const planviewEl=$('planview'), lookpaneEl=$('lookpane');
+ function setPlanSub(sub){
+   planSub=sub;
+   [...document.querySelectorAll('#planpane .panehead .seg [data-sub]')].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sub===sub)));
+   planviewEl.hidden=sub!=='frames'; lookpaneEl.hidden=sub!=='sheets';
+   if(sub==='sheets') showSheet(sheetKind);
+ }
+ document.querySelectorAll('#planpane .panehead .seg [data-sub]').forEach(b=>b.addEventListener('click',()=>setPlanSub(b.dataset.sub)));
 
  // ---- PLAN: the film as its own frames, not as grey boxes ---------------------------------------
  // The person signing a plan off judges what is in the frame (engine-doctrine/MISTAKES.md #592), so every beat that
@@ -235,11 +248,30 @@
  const archBoxes=(name)=>ARCH_BOXES[String(name||'').trim().split(/\s+\(/)[0]]||[[460,240,1000,600]];
  // any one of these is a real authoring decision, so drawing from it is honest
  const hasPicture=(b)=>!!(b.picture||b.object||b.archetype||(b.onscreen&&b.onscreen.length)||b.mechanism||b.becomes);
- function sketchSvg(b,pal){
-   const p=pal||{}, bg=p.bg||'#171717', surface=p.surface||'rgba(255,255,255,.08)', edge=p.lineStrong||p.line||'rgba(255,255,255,.3)';
-   return '<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg"><rect width="1920" height="1080" fill="'+bg+'"/>'
-     +archBoxes(b.archetype).map(([x,y,w,h])=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="18" fill="'+surface
-       +'" stroke="'+edge+'" stroke-width="3" stroke-dasharray="14 10"/>').join('')+'</svg>';
+ // ---- THE COMPOSED FRAME: real declared material in place, never a blank box (engine-doctrine/MISTAKES.md #592) ----
+ // Before a fragment exists this is the only honest frame there is: the archetype's own boxes (a real
+ // authoring decision, `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`'s closed list), each holding the
+ // beat's OWN on-screen copy in place, on its OWN declared ground colour when one exists. Nothing here
+ // is invented: a box with no onscreen line for it, or a beat with no ground:, says so in place rather
+ // than drawing a plausible box or colour nobody decided. That is the honest-unknown this pane needs
+ // (the colour arc already draws it this way for ground: this is the same rule applied to the frame).
+ function composeFrame(b,pal){
+   const boxes=archBoxes(b.archetype);
+   const words=(b.onscreen||[]).filter(l=>l&&!declined(l));
+   const ground=b.groundSwatch;
+   const cells=boxes.map(([x,y,w,h],i)=>{
+     const pc=(v,total)=>(v/total*100).toFixed(2)+'%';
+     const text=words[i]||(i===0?b.object:'');
+     const style='left:'+pc(x,1920)+';top:'+pc(y,1080)+';width:'+pc(w,1920)+';height:'+pc(h,1080);
+     return '<div class=cbox style="'+style+'">'+(text
+       ?'<span class=ctxt>'+esc(text)+'</span>'
+       :'<span class=cempty>no onscreen line for this box</span>')+'</div>';
+   }).join('');
+   const style=ground?' style="background:'+esc(ground.css)+'"':'';
+   return '<div class="pstage compose'+(ground?'':' noground')+(b.archetype?'':' noarch')+'"'+style+'>'+cells
+     +(ground?'':'<span class=cflag title="no ground: declared for this beat">ground undeclared</span>')
+     +(b.archetype?'':'<span class="cflag carch" title="no archetype: declared; a generic box is shown">archetype undeclared</span>')
+     +'</div>';
  }
  // A STORYBOARD SAYS "NO COPY" IN PROSE: "onscreen: (none, the mark itself is the only mark)" is the
  // author declining the slot, not words that will be in the film, so it is never shown as copy.
@@ -278,6 +310,7 @@
      +(d.spectacle||d.not?'<dl class=planspine>'+planRow('Spectacle',d.spectacle)+planRow('Not',d.not)+'</dl>':'')
      +gateChips(d.findings)
      +colorStrip(d.beats)
+     +feedbackBlock(d.feedback,null)
      +'</div>';
  }
  // ---- THE COLOUR STRIP: one swatch per beat, storyboard order, seams marked between them ---------
@@ -315,8 +348,9 @@
  }
  function beatPicture(b,pal){
    if(b.fragment) return '<div class=pstage><iframe loading=lazy title="'+esc(b.name)+'" src="/__frag?src='+encodeURIComponent(b.fragment)+'"></iframe></div>';
-   if(hasPicture(b)) return '<div class="pstage sketch">'+sketchSvg(b,pal)+'<span class=psketchtag>Sketch</span></div>';
-   return '<div class="pstage none"><b>No picture decided</b></div>';
+   if(hasPicture(b)) return composeFrame(b,pal)+'<p class=pstagenote>Composed from the storyboard\'s own fields. No fragment authored yet '
+     +'(<code>node harness/author/stagekit.mjs</code>, then author the fragment) is what would replace this with the real markup.</p>';
+   return '<div class="pstage none"><b>No picture decided</b><span>this beat names no picture, object, archetype, mechanism or onscreen line yet. Fill those in the storyboard first.</span></div>';
  }
  // One beat is one row: the picture on the left at the film's real ratio, what it says and why on the right
  function beatHtml(b,i,prevArch,pal){
@@ -328,8 +362,48 @@
      +(b.archetype&&prevArch===b.archetype?'<span class="ptag repeat">Repeat</span>':'')
      +'</header>'+beatPicture(b,pal)+'<div>'
      +(words.length?'<ul class=pcopy>'+words.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>':'')
-     +'<dl>'+planRow('Why',b.why)+planRow('Eye',b.eye)+'</dl></div></section>';
+     +'<dl>'+planRow('Picture',b.picture)+planRow('Object',b.object)+planRow('Shot',b.shot)+planRow('Placement',b.placement)+planRow('Why',b.why)+'</dl>'
+     +motionBlock(b)+feedbackBlock(b.feedback,i)+'</div></section>';
  }
+ // ---- HOW IT ANIMATES, in the beat's own words -----------------------------------------------
+ // "how they will be animated, written in english" (the owner's own words). No new vocabulary: this
+ // reads the fields a beat already declares (`becomes:`, `mechanism:`, `eye:`, `camera:`, `move:`,
+ // `motion:`, `transition_in:`/`transition_why:`/`transition_value:`) and shows them legibly, in
+ // storyboard order, rather than inventing a keyframe grammar this repo does not have. `becomes:` and
+ // `mechanism:` are already prose (the before/after and the how); `move:`/`motion:`/`camera:` are the
+ // engine's own compact grammar strings and are shown as declared, not re-narrated.
+ function motionBlock(b){
+   const seam=b.transition_in?(b.transition_in+(b.transition_why?' · '+b.transition_why:'')):null;
+   const rows=[planRow('Becomes',b.becomes),planRow('Mechanism',b.mechanism),planRow('Eye',b.eye),
+     planRow('Camera',b.camera),planRow('Move',b.move),planRow('Motion',b.motion),planRow('Transition in',seam)].join('');
+   return rows?'<h4 class=psub>How it animates</h4><dl>'+rows+'</dl>':'';
+ }
+ // ---- FEEDBACK, written straight into the storyboard --------------------------------------------
+ // "in plan mode itself i should be able to give feedback in studio so i can do changes there only"
+ // (the owner). The storyboard file is the only store: a submit POSTs to /api/plan/feedback, the
+ // server appends a `- feedback:` line into this beat's own block (or the frontmatter for a film-level
+ // note, `beatIdx===null`), and the pane re-fetches the plan, so what is shown here is always exactly
+ // what is on disk, never a second copy that could drift from it.
+ function feedbackBlock(list,beatIdx){
+   const items=(list||[]).map((t)=>'<li>'+esc(t)+'</li>').join('');
+   return '<div class=pfeedback>'
+     +(items?'<h4 class=psub>Feedback</h4><ul class=pflist>'+items+'</ul>':'')
+     +'<form class=pfform data-beat="'+(beatIdx==null?'':beatIdx)+'">'
+     +'<input type=text placeholder="Leave feedback on this '+(beatIdx==null?'film':'beat')+'…" maxlength=500 required>'
+     +'<button type=submit>Add</button></form></div>';
+ }
+ planBody.addEventListener('submit',(e)=>{
+   const form=e.target.closest('.pfform'); if(!form) return;
+   e.preventDefault();
+   const input=form.querySelector('input'), text=input.value.trim(); if(!text) return;
+   const beat=form.dataset.beat===''?null:Number(form.dataset.beat);
+   const btn=form.querySelector('button'); btn.disabled=true; btn.textContent='Adding…';
+   fetch('/api/plan/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({beat,text})})
+     .then((r)=>r.json()).then((d)=>{
+       if(!d.ok){ btn.disabled=false; btn.textContent='Add'; say('feedback not saved: '+(d.error||'unknown error')); return; }
+       say('feedback saved to the storyboard'); drawPlan(true);
+     }).catch((err)=>{ btn.disabled=false; btn.textContent='Add'; say('feedback not saved: '+err.message); });
+ });
  function drawPlan(force){
    if(planDrawn&&!force) return;
    planDrawn=true; planPath.textContent='reading…';
@@ -362,10 +436,12 @@
        ()=>{ name.textContent='Copy failed'; back(); }); });
  }).catch(()=>{});
 
- // ---- LOOK: the film as a STRIP, which is a different question from a frame ----------------------
+ // ---- PLAN / Rendered sheets: the film as a STRIP, which is a different question from a frame -----
  // Scrubbing tells you what a frame IS. A strip tells you whether the film WORKS, and the two sheets
  // here are the ones this repo already makes and least often reads: every beat in · mid · out, and
- // both sides of every transition pulled out of the rendered mp4. Neither needs new engine work.
+ // both sides of every transition pulled out of the rendered mp4. Neither needs new engine work. This
+ // used to be its own "Look" state; it is now Plan's second sub-view (setPlanSub above), because
+ // approving what a beat shows and checking what it rendered to are the same errand.
  const sheetImg=$('sheet'), sheetBtn=$('sheetzoom'), sheetNote=$('sheetnote'), lookStat=$('lookstat');
  // THE SHEET'S REAL SIZE, SENT WITH IT. The server reads the PNG's IHDR and answers X-Dim; the page
  // writes it to the width/height ATTRIBUTES, so the box is the right shape before a byte is decoded.
@@ -1186,7 +1262,7 @@
      if(!document.querySelector(':popover-open')&&(selIdx>=0||!propsEl.hidden)) setSel(-1); return; }
    if(typing()||e.metaKey||e.ctrlKey||e.altKey) return;
    // the states, in the order they are asked. Cheap to move between, so they are one keystroke apart.
-   const st={'1':'plan','2':'make','3':'look','4':'ship','5':'sound'}[e.key];
+   const st={'1':'plan','2':'make','3':'ship','4':'sound'}[e.key];
    if(st){ e.preventDefault(); setState(st); return; }
    const step=e.shiftKey?fps:1;
    if(e.key==='ArrowRight'){ e.preventDefault(); go(n+step); }

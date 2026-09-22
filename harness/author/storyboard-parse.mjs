@@ -188,6 +188,10 @@ export function parseStoryboard(src) {
       // itself. A beat may write several, so this is `fieldAllIn`, not `f`, the one field on this
       // object that is a list rather than a single string.
       uses: fieldAllIn(b, 'use'),
+      // A NOTE FROM THE APPROVAL PANE, written back into the ONE plan file rather than a second store
+      // (studio/server.mjs's /api/plan/feedback appends it here). A beat may collect several, so this
+      // is `fieldAllIn` like `use:` above, never a single overwritten value.
+      feedback: fieldAllIn(b, 'feedback'),
     };
   });
   const { name: objectName, src: objectSrc } = parseObjectLine(field('object'));
