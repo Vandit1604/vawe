@@ -25,7 +25,7 @@ import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
-import { classifyType, thresholdFor, DEFAULT_MAX_S, DEFAULT_MAX_S_SOURCE } from '../../harness/lib/genre-pacing.mjs';
+import { classifyType, thresholdFor, DEFAULT_MAX_S, DEFAULT_MAX_S_SOURCE, describeReferenceBank } from '../../harness/lib/genre-pacing.mjs';
 import { isWaivedBy } from '../../harness/lib/waivers.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -420,10 +420,10 @@ for (const b of blocks) {
     const span = spans[n - 1];
     if (span.start != null && span.end - span.start >= holdMaxS && changes.length <= 1) {
       const typeArticle = filmType && /^[aeiou]/i.test(filmType) ? 'an' : 'a';
-      // The default cap cites its own provenance (a measured external reference, or "uncalibrated"
-      // when refs/ is empty) rather than let a bank of two clips, or the absence of one, read as a
-      // fact nobody can check (harness/lib/reference-bars.mjs's own contract).
-      const capSource = holdMaxS === DEFAULT_MAX_S ? `, ${DEFAULT_MAX_S_SOURCE}` : '';
+      // The default cap cites its own provenance (read-check.mjs's already-sourced MAX_HOLD, never a
+      // number read off our own films) plus, separately, what the reference bank measured, printed as
+      // evidence an author can weigh and never as the reason the cap fired.
+      const capSource = holdMaxS === DEFAULT_MAX_S ? `, ${DEFAULT_MAX_S_SOURCE}; ${describeReferenceBank()}` : '';
       warn('held-state-too-long', `beat "${title}": held-state-too-long, ${(span.end - span.start).toFixed(2)}s spent on one change, at or past the ${holdMaxS.toFixed(1)}s cap for ${filmType ? `${typeArticle} ${filmType} film` : 'an unclassified film'} (engine-doctrine/MOTION-CRAFT.md "Genre pacing tables"${filmType === 'recreation' ? '; recreation has no band of its own there and inherits its source\'s rhythm, so only the absolute ceiling applies' : ''}${capSource}). Either name the second change or split the beat.`);
     }
     // ── THE PICTURE'S OWN DECISIONS ──────────────────────────────────────────────────────────────
