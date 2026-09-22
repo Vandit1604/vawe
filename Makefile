@@ -168,6 +168,13 @@ skill-reach: ## [maintenance] every skills/*/SKILL.md is routed to from AGENTS.m
 rung: ## [maintenance] which rules in CLAUDE.md and engine-doctrine/CRAFT are enforced by something, and which are only prose?
 	@node quality/gates/rung.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp) $(if $(JSON),--json,)
 
+# make provenance: which quality/gates + harness/lib constants decide a verdict with no cited source?
+# read-check.mjs is the model: every constant names its source and converts its units. A new threshold
+# added with no citation is refused; the existing backlog is ratcheted, not walled off in one day.
+# LIST=1 prints the sourceless worklist instead; STAMP=1 records today's sourceless count as the ceiling.
+provenance: ## [maintenance] which verdict-deciding constants have no cited source, and does that count only fall?
+	@node quality/gates/threshold-provenance.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp) $(if $(JSON),--json,)
+
 # make docs-drift: ROADMAP/PRIMITIVES list shipped effects as missing, or quote a stale count. It decayed this way twice and
 # routed two planning passes at work that already existed; its own closing warning says nothing
 # checked it. Now something does.

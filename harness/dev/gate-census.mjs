@@ -77,7 +77,7 @@ export const REPO_CHECKS = [
   'docker-context.mjs', 'docker-context-check.mjs', 'docs-drift.mjs', 'feature-audit.mjs', 'gate-mutation.mjs', 'generated-check.mjs',
   'glyphs-audit.mjs', 'knobs-audit.mjs', 'layer-props.mjs', 'legacy-fold.mjs', 'legacy-unfold.mjs',
   'lint-test.mjs', 'mistakes-dupes.mjs', 'motion-audit.mjs', 'no-judge.mjs', 'output-contract.mjs',
-  'prop-probe.mjs', 'rung.mjs', 'schema-drift.mjs', 'sfx-audit.mjs', 'silent-fallback.mjs',
+  'prop-probe.mjs', 'rung.mjs', 'schema-drift.mjs', 'sfx-audit.mjs', 'silent-fallback.mjs', 'threshold-provenance.mjs',
   'sim-audit.mjs', 'site-counts.mjs', 'theme-look-spread.mjs', 'transitions-catalog.mjs', 'unused.mjs',
   'discovery.mjs',
 ];
