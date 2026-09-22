@@ -190,7 +190,7 @@ Notes that matter per critic:
 
 - **bg-motion exists because of a real failure.** A lime-on-black liquid field was "matched" against one
   still, and in motion it ran about 2.5x too fast with folds half the size, reading as directional
-  ribbons where the reference had rounded lobes ([`../MISTAKES.md`](../MISTAKES.md) #155). **A still
+  ribbons where the reference had rounded lobes ([`../MISTAKES.md`](../MISTAKES.md) #161). **A still
   frame carries composition and colour and nothing about time.** For a continuous effect it is the least
   informative test there is: it is exactly the frame where a wrong speed looks right. Hand this critic a
   strip or do not ask it.
@@ -216,8 +216,7 @@ Notes that matter per critic:
    file is how you get a scene nobody chose. Also, a critic that can fix will fix instead of finding.
 4. **A critic is evidence, not a ruling.** If it flags something you can look at yourself and the flaw
    is not there, it is wrong. Look before you act. The reverse is heavier: if a critic flags something
-   and your eye confirms it, that is a FIX, never a rationalization
-   ([`../MISTAKES.md`](../MISTAKES.md) #15).
+   and your eye confirms it, that is a FIX, never a rationalization.
 5. **Feed the fixes back through the gates, not through the panel.** Re-run `make author-check` and the
    sheet-producing commands after the edits, then re-panel only the critics whose input changed.
 

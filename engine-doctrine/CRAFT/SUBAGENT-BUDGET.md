@@ -104,7 +104,7 @@ Two rules borrowed from a reference system's dispatch doc, both learned here the
 can report success and have delivered nothing: the authored films in `films/scene/` are GITIGNORED, so
 a worktree fan-out over scenes merges cleanly, reports success, and brings back only the tracked files.
 Four agents did exactly that, and it was caught only because one of them said so in its report
-(`../MISTAKES.md` #377). If the artifact is not on disk where you expect it, re-dispatch once; do not
+(`../MISTAKES.md` #391). If the artifact is not on disk where you expect it, re-dispatch once; do not
 treat "the agent finished" as "the work exists".
 
 **Dispatch in WAVES of the concurrency cap. Never merge two units of work into one agent to fit the
@@ -119,7 +119,7 @@ of them did not match.
 **You will read a gate's finding count and dispatch agents to fix the films. Look at ONE first.** The
 contrast gate reported 33 scenes with hard failures; the first one examined was flagged at 1.0:1 for a
 button that was 0.067 seconds into its fade-in and completely legible two frames later
-([`../MISTAKES.md`](../MISTAKES.md) #376). Fixing the gate took the number 33 to 32 with zero scenes newly
+([`../MISTAKES.md`](../MISTAKES.md) #390). Fixing the gate took the number 33 to 32 with zero scenes newly
 failing. Two further attempts at the second, real defect in the same gate each took the library to 57 and
 broke a worse case than they fixed, and neither shipped. **A single scene going PASS to FAIL is a
 regression until proven otherwise**, and a fan-out launched off an unexamined finding count spends 65,000
