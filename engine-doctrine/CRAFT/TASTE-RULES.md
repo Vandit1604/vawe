@@ -62,11 +62,12 @@ the part you skip.
 - **Ease-out for entering, ease-in for leaving, ease-in-out for moving between positions. You get this
   backwards constantly.** *"Ease-in for entrances feels sluggish. Ease-out for exits feels reluctant."*
 - **Entrances take longer than exits.** *"A card takes 0.4s to appear but 0.25s to disappear."* The engine
-  has a field for exactly this: `theme.motion.exitRatio`, which defaults to `1` and is set to `0.45` by
-  exactly one theme ([KEYED-MOTION.md](KEYED-MOTION.md)).
+  has a field for exactly this: `theme.motion.exitRatio`. A theme without its own value now gets one
+  derived from its pace (`exitRatioFromMotion`, `core/motion/motion.js`) rather than a flat 1; 11 of 41
+  themes still hand-author their own number, from 0.35 to 0.6 ([KEYED-MOTION.md](KEYED-MOTION.md)).
 - **Subtle reads as static at 30fps.** *"Err toward more movement than feels safe."* Measured here: two
   films authored as improvements on a third both came out SLOWER than the film they criticised, at 0.95
-  and 0.85 events per second against a library median of 1.20 ([`../MISTAKES.md`](../MISTAKES.md) #322).
+  and 0.85 events per second against a library median of 1.20 ([`../MISTAKES.md`](../MISTAKES.md) #336).
   `make pace-check` fails below 1.0.
 
 **One accusation this repo has to add for itself, because their engine has no counter layer:** you will

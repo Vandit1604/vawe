@@ -105,7 +105,7 @@ never read at render; the rotation lives on the field already read at render (`b
 fires when the author already wrote the opt-in the engine has always honoured.
 
 `look` used to carry an eighth key, `cues`: a fixed per-theme list of audio cue names. It is gone.
-`buildSfx` (`films/scene/scene.js:1593-1602`) already derives every cue from the `CUT_CUE`/`SEAM_CUE`
+`buildSfx` (`films/scene/scene.js:1713`) already derives every cue from the `CUT_CUE`/`SEAM_CUE`
 tables in `core/audio/cues.js`, keyed on the transition actually used at each joint, so a fixed list
 could never say which cue replaces which as a film's cut family changes beat to beat. It would have
 been a second, disagreeing owner of a fact `buildSfx` already owns.
@@ -205,7 +205,7 @@ reason.
   so a theme with no `marks` stays without one until it declares its own.
 
 (`cues` used to be a third uncomputed key. It is gone from `LOOK_KEYS` entirely: `buildSfx`
-(`films/scene/scene.js:1593-1602`) already derives every cue from the transition actually used at
+(`films/scene/scene.js:1713`) already derives every cue from the transition actually used at
 each joint, so a fixed per-theme cue list was a second, disagreeing owner of the same fact rather than
 something worth computing a default for.)
 
