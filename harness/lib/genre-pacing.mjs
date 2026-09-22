@@ -15,7 +15,7 @@
 // or the filename, in that priority order. A storyboard none of these signals name gets DEFAULT_MAX_S,
 // the gate's old flat number, unchanged: this file only ever WIDENS the check for a film it can
 // positively place, never narrows it for one it cannot.
-import { readReferenceBars } from './reference-bars.mjs';
+import { readReferenceBars, MIN_REFERENCES } from './reference-bars.mjs';
 
 // No genre band comes close to this. Product walkthrough, the loosest named band, tops out at 8s; a
 // 12s single-change beat is still called a defect regardless of genre, so the absolute ceiling sits a
@@ -51,26 +51,32 @@ const RECREATION_MAX_S = CEILING_S;
 // DEFAULT: the held-state cap for any film classifyType() cannot place (most of the corpus: no
 // storyboard signal here recognizes it) and for talking-head, which has no MOTION-CRAFT.md row of its
 // own. It used to be a flat 3.0s, the doubled residue of "the reference film never holds a single
-// state longer than about 1.5 seconds" for ONE film. It now cites a measured EXTERNAL reference
-// instead (harness/lib/reference-bars.mjs, refs/*/study.json's `longestHoldS`, itself derived in
-// harness/media/study.mjs from harness/media/shot-detect.mjs's motionDeltaSeries, the same per-frame
-// motion measure that file's own `motion`/`peak`/`held` shot fields already read): the longest hold
-// either studied clip actually sustains, so the cap answers to something outside this repo's own
-// corpus rather than one film's prose, doubled.
+// state longer than about 1.5 seconds" for ONE film. The plan was for it to cite a measured EXTERNAL
+// reference instead (harness/lib/reference-bars.mjs, refs/*/study.json's `longestHoldS`), and it still
+// will, once the bank has enough of them: MEASURED, with the two references studied so far, changing
+// only which delta metric read them swung this constant between 2.6s and 3.6s off the SAME two clips,
+// a 38% swing with zero new data. That is not a bar, it is noise wearing a bar's clothes, which is
+// exactly what `readReferenceBars`'s `ready` flag (MIN_REFERENCES, reference-bars.mjs) exists to
+// refuse: below it, this file REPORTS what the bank measured without ENFORCING it.
 //
-// refs/ is gitignored, so on CI and a fresh clone the bank is empty and this falls back to the old
-// number, STATED as uncalibrated rather than silently reused (harness/lib/reference-bars.mjs's own
-// contract: an empty bank must never read as a confident measurement).
+// refs/ is gitignored, so on CI and a fresh clone the bank is empty; that and "the bank exists but is
+// still thin" both land on the SAME fallback, the old number, STATED as uncalibrated rather than
+// silently reused (harness/lib/reference-bars.mjs's own contract: a bank that isn't ready must never
+// read as a confident measurement, whether it is empty or merely small).
 const UNCALIBRATED_MAX_S = 3.0;
 const bank = readReferenceBars();
-export const DEFAULT_MAX_S = (bank.n > 0 && bank.longestHoldS != null)
+export const DEFAULT_MAX_S = (bank.ready && bank.longestHoldS != null)
   ? Math.round(bank.longestHoldS * 10) / 10
   : UNCALIBRATED_MAX_S;
-// Printed wherever DEFAULT_MAX_S is quoted (storyboard-check.mjs), so a bank of two clips never reads
-// as more authoritative than it is: the sample size travels with the number, not just the number.
-export const DEFAULT_MAX_S_SOURCE = (bank.n > 0 && bank.longestHoldS != null)
-  ? `measured longest hold across ${bank.n} external reference${bank.n === 1 ? '' : 's'} (${bank.names.join(', ')}), a thin sample`
-  : `uncalibrated: ${bank.reason || 'no external reference on disk'}`;
+// Printed wherever DEFAULT_MAX_S is quoted (storyboard-check.mjs), so a thin bank never reads as more
+// authoritative than it is, and so the evidence it DOES carry is visible even while it isn't deciding.
+export const DEFAULT_MAX_S_SOURCE = (bank.ready && bank.longestHoldS != null)
+  ? `measured longest hold across ${bank.n} external references (${bank.names.join(', ')})`
+  : (bank.n > 0
+      ? `uncalibrated: the bank holds ${bank.n} of the ${MIN_REFERENCES} external references it needs `
+        + `to set this bar (${bank.names.join(', ')}); what it has measured so far, longest hold `
+        + `${bank.longestHoldS != null ? `${bank.longestHoldS}s` : 'unmeasured'}, is reported, not enforced`
+      : `uncalibrated: ${bank.reason || 'no external reference on disk'}`);
 
 /** thresholdFor(type) -> the held-state cap in seconds for a classified film type. */
 export function thresholdFor(type) {
