@@ -26,7 +26,7 @@ groups them so a reader sees seven concerns, not twenty-one names.
 | # | stage | what happens | the command |
 |---|---|---|---|
 | 1 | **brief** | ask what the product is, and the four other things a site would have given | `make quiz NAME= URL=` |
-| 2 | **plan** | the beat table, the through-line, the spectacle, the exclusions | `make ideate` → `make scaffold` → `make storyboard-check` |
+| 2 | **plan** | the beat table, the through-line, the spectacle, the exclusions | `make ideate` → `make scaffold` → `make storyboard-check` → `make plan-judge` |
 | 3 | **design** | the theme is settled and every frame the plan named is drawn | stage kit → `make design-spec` → the reference's grammar → the smallest useful `ui-skills` set → `make preview` → look at it |
 | 4 | **approval** | the drawn frames are SHOWN and a person says yes | `make studio D=`, share `http://127.0.0.1:8799/studio` with the approval request, then the USER runs `/vawe-approve` |
 | 5 | **assemble** | the frames become a scene | `make assemble D=` |

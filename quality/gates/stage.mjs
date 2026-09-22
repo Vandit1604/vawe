@@ -18,8 +18,9 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../harness/author/storyboard-parse.mjs';
+import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { parseFragmentSpec } from '../../harness/lib/contract.mjs';
-import { population, LIBRARY } from '../../harness/lib/census.mjs';
+import { population, LIBRARY, isTemplate } from '../../harness/lib/census.mjs';
 import { route } from '../../harness/author/route.mjs';
 import { scratchBase } from '../../harness/lib/scratch.mjs';
 // score/toks/coverageIn/CONFIDENT: the SAME ranker `make arsenal` uses (harness/author/arsenal.mjs),
@@ -122,13 +123,35 @@ export function stageOf(arg) {
   // must still read as pre-assemble here, or every later stage check built on `layers > 0` fires early.
   const layers = (scene && Array.isArray(scene.layers) ? scene.layers : []).filter((l) => !(l && l._scaffold)).length;
 
+  // THE PLAN JUDGE MAY BE REQUIRED TO HAVE RUN, NEVER TO HAVE PASSED. `exists && !stale` is "the eye
+  // looked at THIS version of the storyboard"; it says nothing about what it found, because findings
+  // never gate a stage (harness/lib/receipt.mjs's hash already refuses a stale read on its own: a
+  // receipt whose subject moved reads `stale: true`, never a false PASS over an outdated plan).
+  //
+  // AN EXISTING `approved:` LINE ALSO SATISFIES IT. The judge exists to inform the owner's signature,
+  // not to be imposed after it: `approved:` is a fact only a human writes (harness/live/stage-gate.mjs
+  // refuses it from an agent), so a plan a person already signed off has already cleared a higher bar
+  // than this gate asks for. Without this, every already-approved film in the library reads backwards
+  // (measured: 4 films at assemble/direct/render, none of them at plan judgement, regress to PLAN the
+  // day this ships) the moment this gate exists, which is the exact failure `design before approval`
+  // (474981ba) measured and refused to reintroduce: "every approved film stays approved." A film still
+  // waiting for its first signature is not exempted: this only reads an `approved:` already on disk.
+  const planJudge = sbExists ? readReceipt('plan-judge', p.sb) : { exists: false, stale: false };
+  const planJudgeRan = !!approved || (planJudge.exists && !planJudge.stale);
+  const structurallyOk = sbExists && gatePasses('quality/gates/storyboard-check.mjs', p.sb);
+
   const S = [
     { id: 'brief', done: fs.existsSync(p.brief) || sbExists,
       why: 'nobody has asked what this film is about. A brief is five lines and any of them missing changes the film.',
       next: `make quiz NAME=${p.name} URL=<the product site>   (no site? engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md, and write ${path.relative(ROOT, p.brief)} by hand)` },
-    { id: 'plan', done: sbExists && gatePasses('quality/gates/storyboard-check.mjs', p.sb),
-      why: sbExists ? 'the storyboard exists and does not pass its own gate yet.' : 'there is no storyboard. Every role that writes into the film transcribes it, so a gap here becomes an invention further down.',
-      next: sbExists ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}` : `make scaffold OUT=${p.base}.json THEME=<theme> DUR=<seconds>   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, engine-doctrine/CRAFT/IDEATE.md)` },
+    { id: 'plan', done: structurallyOk && planJudgeRan,
+      why: !sbExists ? 'there is no storyboard. Every role that writes into the film transcribes it, so a gap here becomes an invention further down.'
+        : !structurallyOk ? 'the storyboard exists and does not pass its own gate yet.'
+        : planJudge.exists && planJudge.stale ? `the plan judge's last verdict is stale: ${path.relative(ROOT, p.sb)} changed since it ran.`
+        : 'the storyboard passes its own gate, but nothing has judged it as a PLAN yet: one through-line, beats that earn their seconds, a spectacle that is actually loudest, an eye path that holds, motion that varies. An exit code cannot answer any of those.',
+      next: !sbExists ? `make scaffold OUT=${p.base}.json THEME=<theme> DUR=<seconds>   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, engine-doctrine/CRAFT/IDEATE.md)`
+        : !structurallyOk ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}`
+        : `make plan-judge D=${p.base}.json   (findings only; the owner still signs off at approval)` },
     { id: 'design', done: sbExists && missingFrags.length === 0 && gatePasses('quality/gates/frame-check.mjs', p.scene),
       why: missingFrags.length
         ? `${missingFrags.length} fragment(s) the plan names do not exist yet: ${missingFrags.join(', ')}`
@@ -165,14 +188,27 @@ export function stageOf(arg) {
  * bad film should not blind the roster to the rest.
  */
 export function roster({ all = false, cap = 12 } = {}) {
-  const pop = population('stage roster', { filter: LIBRARY, quiet: true });
+  const scenePop = population('stage roster (scene)', { filter: LIBRARY, quiet: true });
+  // LIBRARY requires a parseable scene.json, so a film still at brief/plan/design/approval that has
+  // not been SCAFFOLDED yet has no scene.json and is invisible to scenePop alone, which is exactly the
+  // population `make stage` exists to shepherd: a film can sit at approval indefinitely and never
+  // appear in the one command that answers "what is in flight" (measured: latch-recreation, a
+  // storyboard and a prompt, no scene.json, reads APPROVAL by `stageOf` directly but was absent from
+  // `--all` entirely). A `.storyboard.md` sidecar is LIBRARY's own signal a person planned a film
+  // (census.mjs's comment above LIBRARY), so the honest population is the UNION of both walks,
+  // deduplicated by basename so a film that already has both is counted once. Both walks go through
+  // population() so a blind checkout still says so for either kind, never a hand-rolled readdirSync.
+  const sbPop = population('stage roster (storyboard only)', { ext: '.storyboard.md',
+    filter: (f) => f !== 'schema.storyboard.md' && !isTemplate(f), quiet: true });
+  const sceneBases = new Set(scenePop.names.map((f) => f.replace(/\.json$/, '')));
+  const sbOnlyBases = sbPop.names.map((f) => f.replace(/\.storyboard\.md$/, '')).filter((b) => !sceneBases.has(b));
+  const bases = [...scenePop.names.map((f) => f.replace(/\.json$/, '')), ...sbOnlyBases];
   // A LEADING UNDERSCORE IS THIS REPO'S SCRATCH CONVENTION, and 164 of the 176 films in this library
   // are probes: _catalog-1, _camera-blur-probe, _auto-orient. Listing them alphabetically puts every
   // throwaway ahead of every real film, so the front door opened on 176 rows of test scenes. A front
   // door that answers with the whole directory is not an answer. `--all` still prints everything.
-  const names = all ? pop.names : pop.names.filter((f) => !path.basename(f).startsWith('_'));
-  const rows = names.map((f) => {
-    const base = f.replace(/\.json$/, '');
+  const names = all ? bases : bases.filter((f) => !path.basename(f).startsWith('_'));
+  const rows = names.map((base) => {
     try { const st = stageOf(base); return { name: st.name, stage: st.stage, next: st.next, ok: true }; }
     catch (err) { return { name: base, stage: 'error', next: String(err && err.message || err), ok: false }; }
   });
@@ -181,7 +217,8 @@ export function roster({ all = false, cap = 12 } = {}) {
   // Furthest from done first, then capped: the rows that matter are the unfinished ones, and a film
   // already at judge needs no prompting. `total` counts what was found, `rows` is what is worth reading.
   const shown = all ? rows : rows.slice(0, cap);
-  return { n: rows.length, total: pop.names.length, rows: shown, hidden: rows.length - shown.length, worst };
+  return { n: rows.length, total: bases.length, rows: shown, hidden: rows.length - shown.length, worst,
+    sceneCount: scenePop.names.length, storyboardOnlyCount: sbOnlyBases.length };
 }
 
 // ADOPTION: a WORKLIST, never a gate. Measured (AGENTS.md's build brief): the core carries 790 named
