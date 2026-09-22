@@ -740,44 +740,19 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   .pgscene { max-height: none; }
   .pggroup { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
-/* ── the library ───────────────────────────────────────────────────────────────────────────────
-   A wall of looks, each one the REAL generator rendered still at card size, not a poster. Mirrors
-   the block catalog's own card wall (blocks/catalog.css); the difference is that a field costs a few
-   gradients, so every card here can be live where a block needs a poster and a click to play. */
-.lgrid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(184px, 1fr));
-  gap: 12px; margin-bottom: 20px;
-}
-.lcard {
-  display: grid; gap: 2px; padding: 0 0 10px; text-align: left; cursor: pointer; font: inherit;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
-  transition: transform .16s var(--ease), border-color .2s, box-shadow .2s var(--ease);
-}
-.lcard:hover { transform: translateY(-2px); border-color: var(--accent-line); box-shadow: var(--shadow-2); }
-.lcard.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.lcard:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.lcard-shot { display: block; position: relative; aspect-ratio: 16/10; overflow: hidden; background: #05070c; }
-.lcard-name { padding: 8px 11px 0; font-size: 13.5px; font-weight: 600; color: var(--ink); }
-.lcard-blurb {
-  padding: 0 11px; font-size: 11px; line-height: 1.4; color: var(--muted);
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
+/* ── the playground's own breadcrumb ──────────────────────────────────────────────────────────
+   `.lgrid` / `.lcard` (the old card wall) and the poster scroll that replaced it are both gone:
+   PlaygroundClient.tsx now lists every generator in a persistent rail (playground.css's `.pg-rail`)
+   instead of a page of live cards, so nothing here has to render more than a name until a person
+   picks one. `.lback` and `.lheld` are what is left: the small "back to the rail" line above a
+   picked generator, and the "N more held back" note under the rail. */
 .lback { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; font-size: 13px; }
-.lback button {
-  font: inherit; font-size: 13px; color: var(--accent); background: none; border: 0; cursor: pointer; padding: 0;
+.lback a {
+  font: inherit; font-size: 13px; color: var(--accent); text-decoration: none;
 }
-.lback button:hover { text-decoration: underline; }
+.lback a:hover { text-decoration: underline; }
 .lback strong { color: var(--ink); font-size: 15px; }
 .lback span { color: var(--muted); margin-left: auto; font-size: 12px; }
-/* browsing shows more of the wall, so the cards get more room than they do beside a panel.
-   TWO UP, NOT FOUR. `minmax(232px, 1fr)` put four generators across at 1440 and each one landed at
-   ~380px, which is a swatch. The subject of this page is a light FIELD: a soft mass under a glow, a
-   ramp over concentric arcs, phosphor bloom under scanlines. None of that survives being shown at
-   thumbnail size, and the page then stopped at 800px with a screen of dead space under it, so the
-   width was being spent on nothing. Four peers do belong in equal cells, that part was right; the
-   cell size was the grid default rather than a decision. The gap grows with them: a 16px gutter
-   between 540px pictures reads as a seam, not a rhythm. */
-.pgpage .lgrid { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 26px; }
 .lheld { margin-top: 16px; color: var(--muted); font-size: 13px; max-width: 42rem; line-height: 1.6; }
 /* ===== /type — THE TYPOGRAPHIC VOCABULARY =====================================================
    The same two-media card /blocks uses (a still, and the real engine behind it on press), sized
