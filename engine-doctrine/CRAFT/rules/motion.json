@@ -34,7 +34,7 @@
     "category": "motion",
     "stage": "direct",
     "applies": "always",
-    "check": null,
+    "check": "exit-not-emphasised",
     "adapt": null,
     "brief": "An exit also runs faster than its entrance, derived from the theme's pace (`exitRatioFromMotion`, table below), for emphasis.",
     "doc": "engine-doctrine/RULES/ease-direction.md"

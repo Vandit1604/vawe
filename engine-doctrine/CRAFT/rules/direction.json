@@ -104,7 +104,7 @@
     "category": "direction",
     "stage": "direct",
     "applies": "always",
-    "check": null,
+    "check": "backdrop-never-turns",
     "adapt": null,
     "brief": "The backdrop changes tone per beat, or the film is a slide with effects on it",
     "doc": "engine-doctrine/RULES/world-turns.md"
