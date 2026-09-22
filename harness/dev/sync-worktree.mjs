@@ -141,8 +141,47 @@ if (verifyPath) {
     + `  node harness/dev/sync-worktree.mjs ${WT}`);
 }
 
+// IS "MAIN" STILL WHERE THE LIBRARY LIVES? Everything a worktree copies is GITIGNORED, so git's own
+// definition of the main checkout (the first `worktree list` stanza, resolved above) says nothing
+// about which checkout actually holds the films. The two can drift apart, and on this machine they
+// did: the main checkout sat detached on a 220-commit-old HEAD holding 58 scenes while the working
+// checkout held 197, so every new worktree was synced a third of the library and every gate run
+// inside one reported a confident green over a population it could not see.
+//
+// census.mjs already refuses a sweep whose ANCHOR holds more than it does. This is the same check in
+// the other direction and at the other end: a linked worktree holding MORE than main proves main is
+// not the source any more. Counting only, no hashing, and only the patterns actually copied.
+function linkedWorktrees() {
+  let out;
+  try { out = execFileSync('git', ['worktree', 'list', '--porcelain'], { cwd: MAIN, encoding: 'utf8' }); }
+  catch { return []; }
+  return out.split('\n\n').slice(1)
+    .map((st) => (st.split('\n').find((l) => l.startsWith('worktree ')) || '').slice('worktree '.length))
+    .filter(Boolean)
+    .map((d) => path.resolve(d))
+    .filter((d) => d !== path.resolve(MAIN));
+}
+
+function refuseIfMainIsNotTheSource(patterns) {
+  const others = linkedWorktrees();
+  if (!others.length) return;
+  for (const pat of patterns) {
+    const mine = expand(pat, MAIN).reduce((n, m) => n + listFiles(path.join(MAIN, m)).length, 0);
+    for (const other of others) {
+      const theirs = expand(pat, other).reduce((n, m) => n + listFiles(path.join(other, m)).length, 0);
+      if (theirs > mine) {
+        die(`"${pat}": the main checkout holds ${mine} file(s), but ${other} holds ${theirs}.\n`
+          + `  Everything synced here is gitignored, so git's "main checkout" is not proof of where the\n`
+          + `  library lives, and syncing from it would install the SMALLER copy over this worktree.\n`
+          + `  Fix the main checkout first (copy the missing files into ${MAIN}), then re-run.`);
+      }
+    }
+  }
+}
+
 // APPLY MODE: full pass, writes files and the manifest.
 const patterns = loadInclude();
+refuseIfMainIsNotTheSource(patterns);
 const manifest = loadManifest();
 let copied = 0, keptLocal = 0;
 const conflicts = [];
