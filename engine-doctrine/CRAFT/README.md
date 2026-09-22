@@ -137,7 +137,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [AE-TECHNIQUES.md](AE-TECHNIQUES.md) | you want a motion-design technique with the numbers a practitioner actually states, and the engine word for it | 12 techniques studied from one After Effects channel · the ordered recipe and the step nobody guesses · the stated values · where each one lands in this engine · default or per-film option |
+| [AE-TECHNIQUES.md](AE-TECHNIQUES.md) | you want a motion-design technique one practitioner states the dials for, and the engine word for it | 12 techniques studied from one After Effects channel · the ordered recipe and the step nobody guesses · the values that practitioner states, which are settings and not standards · where each one lands in this engine · default or per-film option |
 | [AFTER-EFFECTS-TECHNIQUES.md](AFTER-EFFECTS-TECHNIQUES.md) | you want the named procedure a motion designer would reach for, and the engine word for it (or the news that there isn't one) | 26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine (25 HAVE, 1 PARTLY, 0 LACK as of 2026-09-23) · what is left and where it would live |
 | [EDITING.md](EDITING.md) | you want autocomplete or inline errors while typing a scene JSON, in an editor | the .vscode/settings.json json.schemas mapping · the per-scene $schema pointer convention · what real field-level autocomplete needs · the follow-up that would fix it |
 | [SAAS-MOTION-DEMAND.md](SAAS-MOTION-DEMAND.md) | you are about to build a new effect and want to know whether SaaS product films actually use it | 20 effects ranked by how many independent sources name them · the numbers each source states · SHIPPED/PARTLY/MISSING against this engine · a three-item build queue · what purity forbids |
@@ -164,7 +164,9 @@ including everything outside CRAFT, is [`../INDEX.md`](../INDEX.md)._
   line,lineStrong,text,text2,dim,ink,accent,accentDim,accentGlow,up,down}`, `type.{sans,serif,mono,num}`,
   and 3 `gradient` stops. No fallback look, COLOR/TYPOGRAPHY map to exactly these keys.
 - **Bundled faces** (`core/tokens.css`): Inter, Inter Display, Space Grotesk, Instrument Serif, Geist,
-  Geist Mono, Plus Jakarta Sans, JetBrains Mono, Hanken Grotesk, Caveat (Söhne is local/licensed).
+  Geist Mono, Plus Jakarta Sans, JetBrains Mono, Hanken Grotesk, Caveat, Anybody, Manrope, Fraunces
+  (Söhne is local/licensed; several more brand-recreation faces also live in `core/tokens.css` for
+  specific themes and are not listed here).
 - **Real registries** the guides cover in full: 31 composite looks (`core/looks/index.js`), 35 shader stings
   (`SHADER_FX` in `core/stings/index.js`), the palette-driven bg presets (`core/backgrounds/index.js`).
 - **Doctrine**: colours ONLY from the brand (eyedrop, `make palette`); dominance decided by LOOKING;
