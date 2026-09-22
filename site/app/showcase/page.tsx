@@ -15,7 +15,7 @@ const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0
 export const metadata = pageMetadata({
   title: "Vawe · showcase",
   description:
-    "Finished films rendered by Vawe, each one a JSON file you can open in the editor. Six launch films and one scene cropped to three canvases.",
+    "What the engine made: one scene cropped to three canvases today, with baseline launch films on the way, each one a JSON file you can open in the editor.",
   path: "/showcase",
 });
 
@@ -41,19 +41,12 @@ type Film = { slug: string; brand: string; template?: boolean };
 // exists to catch. `scripts/site/films-json.mjs` ffprobes the mp4s the site actually serves.
 const durOf = (slug: string) => (films as Record<string, { label: string }>)[slug]?.label ?? "";
 
-// Three of these used to be pixel recreations of other companies' marketing pages, shipped whole:
-// their headlines, their gradients, their copy. A recreation is also useless to anybody else, because
-// a finished film of someone else's website is not a starting point. All three were converted rather
-// than deleted: same composition, same timing, same camera, same beat structure, with the borrowed
-// identity taken out and the copy, palette and mark made fillable. They are the templates below.
-const FILMS: Film[] = [
-  { slug: "preface-launch", brand: "Preface", template: true },
-  { slug: "saas-hero-launch", brand: "SaaS hero launch", template: true },
-  { slug: "product-feature-tour", brand: "Product feature tour", template: true },
-  { slug: "argus-launch", brand: "Argus" },
-  { slug: "threadcite-open", brand: "ThreadCite" },
-  { slug: "plinth-ad", brand: "Plinth" },
-];
+// EMPTY ON PURPOSE. The six films this page used to list could not be re-rendered from their
+// source and four carried paths broken by the films rename, so none of them represented the
+// engine honestly. They were removed rather than patched over. This array is the one place a new
+// baseline film gets added once it is authored, reviewed and approved; nothing stands in for it
+// until then.
+const FILMS: Film[] = [];
 
 const RATIOS = [
   { slug: "aspect-169", label: "16:9", cls: "a169" },
@@ -78,6 +71,7 @@ function FilmTile({ film }: { film: Film }) {
 
 export default function Showcase() {
   const [hero, ...rest] = FILMS;
+  const hasFilms = FILMS.length > 0;
   // One VideoObject per film that genuinely has a duration on file (films.json), carrying the real
   // publish date that file also records. See the comment on videoObjectSchema in lib/schema.ts.
   const videoSchemas = FILMS
@@ -101,8 +95,8 @@ export default function Showcase() {
             </span>
             <h1>No house style. One JSON format.</h1>
             <p>
-              Every film here is a single text file. Open it in the editor and the scene that made
-              it is the thing you edit.
+              A film in this engine is a single text file. Open it in the editor and the scene
+              that made it is the thing you edit.
             </p>
             <div className="irelated">
               <a href="/launch-video">Making a product launch video? Start here.</a>
@@ -111,22 +105,29 @@ export default function Showcase() {
           </section>
 
           <section className="films">
-            <h2 className="h2">Six films.</h2>
-            {/* The one fact a clip cannot show. It used to sit on all six cards as the word
-                `reflected`, which is six repeats of one idea; it belongs here once. */}
-            <p className="scsub">
-              Four are real products. Two are templates: open the JSON, swap the copy and the
-              theme, keep the film.
-            </p>
-
-            <div className="filmgrid">
-              <div className="film-hero">
-                <FilmTile film={hero} />
-              </div>
-              {rest.map((f) => (
-                <FilmTile film={f} key={f.slug} />
-              ))}
-            </div>
+            {hasFilms ? (
+              <>
+                <h2 className="h2">Films.</h2>
+                <div className="filmgrid">
+                  <div className="film-hero">
+                    <FilmTile film={hero} />
+                  </div>
+                  {rest.map((f) => (
+                    <FilmTile film={f} key={f.slug} />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="h2">No films yet.</h2>
+                <p className="scsub">
+                  The films that used to sit here could not be re-rendered from their source, so
+                  they came down rather than stay stale. New baseline films go here once they are
+                  authored, approved and rendered. Until then, the scene below is the real proof:
+                  one JSON file, three canvases, cropped from the same render.
+                </p>
+              </>
+            )}
           </section>
 
           {/* Full width, not a half-column. In the two-up row this beat put a 9:16 clip at 63px

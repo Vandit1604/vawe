@@ -1,27 +1,21 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
-import { Clip } from "../components/Clip";
-import { SourceViewer } from "../components/SourceViewer";
 import { pageMetadata } from "../components/seo";
-import films from "../../lib/films.json";
-import LINES from "../../lib/scene-lines.json";
 import "../components/intent.css";
-
-const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
-const durOf = (slug: string) => (films as Record<string, { label: string }>)[slug]?.label ?? "";
 
 export const metadata = pageMetadata({
   title: "Vawe · product tour video",
   description:
-    "A chaptered product tour or feature-update video, built as one JSON file: three chapters, a continuous progress rail, one tracked issue carried through. The real rendered film that proves it.",
+    "A chaptered product tour or feature-update video, built as one JSON file: three chapters, a continuous progress rail, one tracked issue carried through.",
   path: "/product-tour-video",
 });
 
 /* /product-tour-video · second of the three use-case pages, and the one that exists because a
- * single film in the repo genuinely takes a different shape from the other five: not one
- * six-beat launch run, but three chapters. films/scene/product-feature-tour.storyboard.md is the
- * only source for every structural claim on this page; the rendered duration is read from
- * site/lib/films.json, never retyped from the storyboard's own (shorter, pre-recut) figure.
+ * single film in the repo genuinely took a different shape from the others: not one six-beat
+ * launch run, but three chapters. That film, product-feature-tour, could not be re-rendered from
+ * its source and came down site-wide along with the rest of the stale set; the two sections that
+ * narrated its clip went with it. What remains here is the doctrine, still true without a film to
+ * show it: a product tour still routes as a launch video, chaptered instead of six fixed beats.
  */
 
 export default function ProductTourVideo() {
@@ -36,50 +30,20 @@ export default function ProductTourVideo() {
             </span>
             <h1>A feature tour with more than one thing to show.</h1>
             <p>
-              Some products have three features worth a beat each, not one. This engine has a real,
-              rendered film built that way: three chapters, one issue carried through all of them,
-              and a progress rail that never leaves the frame.
+              Some products have three features worth a beat each, not one. This shape carries a
+              continuous accent rail across the top and one issue tracked through every chapter, so
+              the film reads as one object changing state, not several unrelated shots.
             </p>
           </section>
 
           <section className="isec">
-            <div className="isec-text">
-              <h2>One issue, tracked through three chapters.</h2>
+            <div className="isec-text" style={{ gridColumn: "1 / -1", maxWidth: "70ch" }}>
+              <h2>No rendered example here right now.</h2>
               <p>
-                <code>product-feature-tour</code> follows Star-Story-Solution: the product is the
-                star, and the three chapters are the story of one issue, labelled NW-1184, moving
-                through it, raised in chapter one, scheduled in chapter two, closed by an agent in
-                chapter three. The end card is the solution. A continuous accent rail across the top
-                fills with the film&apos;s own progress and flinches on every cut, so the whole film
-                reads as one object changing state, not eight unrelated shots.
+                The film that proved this shape, <code>product-feature-tour</code>, could not be
+                re-rendered from its source and came down with the rest of the stale set.{" "}
+                <a href="/showcase">See /showcase</a> for what the engine has rendered today.
               </p>
-              <span className="cite">films/scene/product-feature-tour.storyboard.md</span>
-            </div>
-            <div className="isec-art">
-              <div className="fmedia">
-                <Clip
-                  src="/assets/films/product-feature-tour.mp4"
-                  poster="/assets/films/product-feature-tour.jpg"
-                />
-              </div>
-              <span className="cite">
-                product-feature-tour · {durOf("product-feature-tour")} · template
-              </span>
-              <SourceViewer name="product-feature-tour" lines={lineCount("product-feature-tour")} />
-            </div>
-          </section>
-
-          <section className="isec">
-            <div className="isec-text">
-              <h2>The match cut that hands the plan to the work.</h2>
-              <p>
-                At 14 seconds in, the roadmap bar labelled &quot;Agents&quot; does not leave the
-                frame. It IS the agent panel in the next chapter, handed over in its own pose with
-                no entrance and no exit, and that panel then types the fix out character by
-                character. The plan becomes the work in one cut, which is the one moment the film
-                raises its voice; every other shot holds one idea at one volume.
-              </p>
-              <span className="cite">films/scene/product-feature-tour.storyboard.md, &quot;spectacle&quot;</span>
             </div>
           </section>
 
