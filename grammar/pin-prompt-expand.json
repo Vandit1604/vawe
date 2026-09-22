@@ -1,0 +1,98 @@
+{
+ "name": "pin-prompt-expand",
+ "source": "pin-890657263828171584.mp4",
+ "hash": "cc0aef8870cb6e48",
+ "measured": {
+  "duration": 6.04,
+  "width": 720,
+  "height": 720,
+  "fps": 30,
+  "aspect": "720:720",
+  "hasAudio": true,
+  "shotDetection": "none",
+  "threshold": 0.3,
+  "peakSceneScore": 0,
+  "nearMisses": 0,
+  "seamThreshold": 0.3,
+  "seamsFound": 0,
+  "panFloor": 6,
+  "pansFound": 0,
+  "crossfadeBand": [
+   0.5,
+   5
+  ],
+  "crossfadesFound": 0,
+  "shots": 1,
+  "medianShot": 6.04,
+  "cutsPerMinute": 9.9
+ },
+ "coverage": {
+  "frames": 181,
+  "unique": 78,
+  "pages": 4,
+  "ledger": "complete"
+ },
+ "shots": [
+  {
+   "i": 1,
+   "t0": 0,
+   "len": 6.04,
+   "ground": "dark",
+   "groundLuma": 48.3,
+   "groundHex": "#232325",
+   "luma": 53.6,
+   "accent": "#7822dd",
+   "motion": 0.21,
+   "peak": 1.25,
+   "held": 0.93,
+   "frames": 179,
+   "joint": null,
+   "jointKind": null,
+   "curve": [
+    0.4,
+    0.4,
+    0.4,
+    0.3,
+    0.2,
+    0.2,
+    0.2,
+    0.5,
+    1.2,
+    1.2,
+    0.2,
+    0.2,
+    0.1,
+    0.1,
+    0.2,
+    0.3,
+    0.2,
+    0.1,
+    0.1,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.4
+   ],
+   "onScreen": "\"What's on your mind today?\" heading above an empty pill that fills with a typed prompt and expands",
+   "moves": "the pill only: fades in empty, types a prompt word by word, widens then grows a second line around 1.8-3.5s, then holds still to the end",
+   "trigger": "nothing; one continuous shot, no next shot"
+  }
+ ],
+ "pace": {
+  "medianShot": 6.04,
+  "perMinute": 9.9
+ },
+ "groundPattern": "dark",
+ "motionBand": {
+  "lo": 0.21,
+  "hi": 0.21
+ },
+ "seams": [],
+ "pans": [],
+ "crossfades": [],
+ "conflicts": [],
+ "threads": "the prompt pill itself, held on screen the whole shot and only ever changing state",
+ "spectacle": "the pill's own expansion as the prompt types in and wraps to a second line",
+ "takeaway": "one continuous shot, one event near the 30-35% mark (the box growing to fit a typed prompt), everything else flat"
+}
