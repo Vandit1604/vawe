@@ -1266,6 +1266,16 @@ evals-compare: build ## [engine] before/after sheets stacked per brief plus comp
 critics: ## [judge] THE ROSTER (engine-doctrine/CRAFT/SUBAGENTS.md): critics bare, deciders with DECIDERS=1.
 	node harness/author/critics.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(DECIDERS),--deciders) $(if $(RECORD),--record $(RECORD))
 
+# make plan-judge D=<film|storyboard.md> [RECORD=<verdict.json>] [SHOW=1]: the plan judge, at the stage
+# it belongs in (AGENTS.md stage 2). Bare: composes and prints ONE brief, built from the real storyboard,
+# for an Agent call the harness makes, not this script (harness/author/critics.mjs's own contract).
+# RECORD=<file>: given the agent's { findings: [...] } back, writes the receipt to
+# quality/baselines/approved/plan-judge/<name>.json (stale the moment the storyboard changes). SHOW=1:
+# read the recorded verdict back, refusing rather than showing one recorded against an older storyboard.
+# Findings only: no verdict here approves anything, the owner still signs off at approval.
+plan-judge: ## [judge] the plan judge (AGENTS.md stage 2): composes a brief bare, records with RECORD=, reads back with SHOW=1.
+	node harness/author/critics.mjs $(D) $(if $(RECORD),--record-plan $(RECORD),$(if $(SHOW),--show-plan-verdict,--plan-judge))
+
 # make core-node-boundary: core/ is fetched and evaluated by a BROWSER, so a `node:fs` or
 # `node:path` import inside it is a file that cannot run where it claims to run. core/audio/kit.mjs
 # carried one for its whole life and only survived because nothing imported it. Not a gate: a
