@@ -157,7 +157,8 @@ function arrivalCues(layers, canvas, out) {
   for (const L of layers) {
     if (!L || SILENT_TYPES.has(L.type)) continue;
     if (L.anim === 'none' || L.sound === false) continue;
-    if (Array.isArray(L.parts) && L.parts.length) continue;   // the parts ARE this layer's arrival
+    const partsOf = Array.isArray(L.parts) ? L.parts : L.parts ? [L.parts] : [];
+    if (partsOf.length) continue;   // the parts ARE this layer's arrival, single spec or array alike
     if (L.type === 'count') continue;                         // and so are a counter's own plucks
     const { area, w, h } = prominenceOf(L, canvas);
     if (area < DENSITY.floorArea) continue;
@@ -292,8 +293,9 @@ const PART_MIN_GAP = 0.2, PART_MAX = 6;
 const PART_GAIN = 0.16;
 function partCues(layers, out) {
   for (const L of layers) {
-    if (!L || !Array.isArray(L.parts) || L.sound === false) continue;
-    for (const p of L.parts) {
+    if (!L || !L.parts || L.sound === false) continue;
+    const partList = Array.isArray(L.parts) ? L.parts : [L.parts];
+    for (const p of partList) {
       const n = +(p.count ?? 0);
       if (!(n > 0)) continue;
       const st = +(L.start ?? 0) + +(p.delay ?? 0), step = Math.max(0, staggerStep(p.stagger, n, 0.06));

@@ -246,21 +246,37 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // was ever baked, so a camera-less film says nothing here. FULL_FRAME/40%/6s are read off the one
   // measured regression (vawe-flow-2: 4.2s of legs over 13.3s), not tuned further.
   const CAMERA_COVERAGE_FLOOR = 0.4, CAMERA_COVERAGE_MIN_DURATION = 6;
-  let cameraCoverageFloor = null;
+  // CAMERA-RUNS-OUT: a STATION-based leg (travel, and anything else that keys a finite path) holds its
+  // last pose once its own keyframes end (cameraAt, core/timeline/sequence.js: "holds the last frame
+  // past the end") - silently, no cut, no warning. vawe-flow-2 shipped exactly this: a `travel` whose
+  // station list ended partway through a beat, fixed by hand-adding three more stations. The floor
+  // below catches a LOW-RATIO film; it would not have caught vawe-flow-2, whose legs still covered
+  // most of the runtime, just not the TAIL. This catches the tail specifically: nothing moves the
+  // camera again before the film ends. 3s is a beat-scale floor, not tuned further than that read.
+  const CAMERA_TRAILING_FREEZE = 3;
+  let cameraCoverageFloor = null, cameraRunsOut = null;
   if (T.scene.camera && Array.isArray(T.scene.camera) && T.scene.camera.length > 1 && T.duration > CAMERA_COVERAGE_MIN_DURATION) {
     const legs = [...T.cameraLegSpans].sort((a, b) => a[0] - b[0]);
     const covered = legs.reduce((s, [a, b]) => s + (b - a), 0);
     const coverage = T.duration > 0 ? covered / T.duration : 0;
+    const gaps = [];
+    let cursor = 0;
+    for (const [a, b] of legs) { if (a > cursor) gaps.push([cursor, a]); cursor = Math.max(cursor, b); }
+    if (cursor < T.duration) gaps.push([cursor, T.duration]);
     if (coverage < CAMERA_COVERAGE_FLOOR) {
-      const gaps = [];
-      let cursor = 0;
-      for (const [a, b] of legs) { if (a > cursor) gaps.push([cursor, a]); cursor = Math.max(cursor, b); }
-      if (cursor < T.duration) gaps.push([cursor, T.duration]);
       const spanStr = gaps.map(([a, b]) => `${+a.toFixed(2)}s-${+b.toFixed(2)}s`).join(' and ');
       cameraCoverageFloor = `camera-coverage-floor: the camera travels for ${covered.toFixed(2)}s of ${T.duration}s `
         + `(${Math.round(coverage * 100)}%, under the ${Math.round(CAMERA_COVERAGE_FLOOR * 100)}% floor); `
         + `camera holds still ${spanStr}. Recipe legs join hand-authored cameraMove legs back to back, `
         + `they do not replace covering the film; chain the legs so the camera moves across the gap.`;
+    }
+    const trailing = T.duration - cursor;
+    if (trailing > CAMERA_TRAILING_FREEZE) {
+      cameraRunsOut = `camera-runs-out: the camera's last leg ends at ${cursor.toFixed(2)}s and nothing `
+        + `moves it again for the final ${trailing.toFixed(2)}s of ${T.duration}s. A station-based move `
+        + `(travel, multiPhase) holds its last pose once its stations run out; add stations (or another `
+        + `leg) that reach the film's end, or author the hold on purpose with a still move (hold, `
+        + `driftHold) so it reads as a choice instead of a move that stopped short.`;
     }
   }
 
@@ -356,6 +372,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (cameraCoverageFloor) {
     console.log(`  ~ ${cameraCoverageFloor}`);
     f.warn('camera-coverage-floor', cameraCoverageFloor);
+  }
+  if (cameraRunsOut) {
+    console.log(`  ~ ${cameraRunsOut}`);
+    f.warn('camera-runs-out', cameraRunsOut);
   }
   console.log('');
   process.exit(0);

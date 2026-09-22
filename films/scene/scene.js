@@ -1695,8 +1695,15 @@ const boxOf = (id) => boxes.get(id) || null;
   // How many elements a `parts` selector matched. The ONE fact core/audio-tactile.js cannot read off
   // the JSON, because only the built DOM knows it. Deterministic: the markup is static.
   const partCount = (el, sel) => { try { return el.querySelectorAll(sel).length; } catch { return 0; } };
-  const withPartCounts = ({ L, el }) => (Array.isArray(L.parts) && L.parts.length
-    ? { ...L, parts: L.parts.map((p) => ({ ...p, count: partCount(el, p.select) })) } : L);
+  const withPartCounts = ({ L, el }) => {
+    if (Array.isArray(L.parts) && L.parts.length)
+      return { ...L, parts: L.parts.map((p) => ({ ...p, count: partCount(el, p.select) })) };
+    // A single-spec `parts` (schema: "One spec {...} OR an array of them") skipped this resolver
+    // entirely and reached core/audio/tactile.js with no `count`, so it silently produced no cue.
+    if (L.parts && typeof L.parts === 'object')
+      return { ...L, parts: { ...L.parts, count: partCount(el, L.parts.select) } };
+    return L;
+  };
   // TOP-LEVEL layers, plus the group children that declare a `delay`. A group is ONE object and it
   // lands once: voicing its six children as six arrivals at the identical instant is the hailstorm
   // core/audio-tactile.js exists to avoid. A child with a delay is different, it is a declared
