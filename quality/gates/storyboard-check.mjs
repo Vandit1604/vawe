@@ -25,7 +25,7 @@ import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
-import { classifyType, thresholdFor, DEFAULT_MAX_S, DEFAULT_MAX_S_SOURCE } from '../../harness/lib/genre-pacing.mjs';
+import { classifyType, thresholdFor, GENRE_PACING_SOURCE, describeReferenceBank } from '../../harness/lib/genre-pacing.mjs';
 import { isWaivedBy } from '../../harness/lib/waivers.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -93,11 +93,14 @@ const sceneForWaivers = sceneJsonPath && fs.existsSync(sceneJsonPath)
 const allowRaw = (sceneForWaivers?.authoring && Array.isArray(sceneForWaivers.authoring.allow)) ? sceneForWaivers.authoring.allow : [];
 
 const gf = gateFindings();
-// errs/warns drive the console prose below, unchanged; err()/warn() mirror each one into gf so --json
-// (and the VAWE_FINDINGS_OUT side channel) carry the same facts as records.
-const errs = [], warns = [];
+// errs/warns/notes drive the console prose below, unchanged; err()/warn()/note() mirror each one into
+// gf so --json (and the VAWE_FINDINGS_OUT side channel) carry the same facts as records. `note` is
+// severity 'info': a fact worth printing with no bar behind it, never a blocker, never counted as a
+// "finding" by author-check's own glyph-scrape (✗/~ only).
+const errs = [], warns = [], notes = [];
 const err = (code, msg, extra) => { errs.push(msg); gf.fail(code, msg, extra); };
 const warn = (code, msg, extra) => { warns.push(msg); gf.warn(code, msg, extra); };
+const note = (code, msg, extra) => { notes.push(msg); gf.note(code, msg, extra); };
 // ── THE PICTURE, ACROSS THE FILM ────────────────────────────────────────────────────────────────
 // Two rules that only exist between beats, so no per-beat check can see them. Both silent on a
 // storyboard that declares neither field, for the reason the per-beat versions are.
@@ -414,17 +417,26 @@ for (const b of blocks) {
     if (!changes.length && ANIM_VOCAB.test(becomes)) {
       warn('becomes-is-preset', `beat "${title}": becomes-is-a-preset, "${becomes}". That is the mechanism, not the transformation: \`mechanism:\` already answers how it moves; \`becomes:\` answers what it turned into.`);
     }
-    // A beat is a hold for as long as nothing in it changes. How long a hold is ALLOWED depends on the
-    // film's type (harness/lib/genre-pacing.mjs, engine-doctrine/MOTION-CRAFT.md "Genre pacing tables"):
-    // pacing is subjective to the type of video, not one number for every film.
+    // A beat is a hold for as long as nothing in it changes. NO EXTERNAL OR HOUSE SOURCE SETS A
+    // CEILING ON A HELD VISUAL STATE: the answer depends on what the beat is SHOWING, a craft
+    // judgement, not a measurable constant (harness/lib/genre-pacing.mjs's header has the full
+    // argument, including why read-check.mjs's subtitling MAX_HOLD was tried here and rejected, for
+    // the same reason a per-word formula was: a held beat need carry no prose at all). So this fires
+    // only against `thresholdFor()`'s reported MOTION-CRAFT.md band, when one is known, worded as a
+    // NOTE, not a cap: printed for an author or `make plan-judge`'s `beat-pacing` code to weigh, never
+    // as a finding this gate enforces.
     const span = spans[n - 1];
-    if (span.start != null && span.end - span.start >= holdMaxS && changes.length <= 1) {
+    if (holdMaxS != null && span.start != null && span.end - span.start >= holdMaxS && changes.length <= 1) {
       const typeArticle = filmType && /^[aeiou]/i.test(filmType) ? 'an' : 'a';
-      // The default cap cites its own provenance (a measured external reference, or "uncalibrated"
-      // when refs/ is empty) rather than let a bank of two clips, or the absence of one, read as a
-      // fact nobody can check (harness/lib/reference-bars.mjs's own contract).
-      const capSource = holdMaxS === DEFAULT_MAX_S ? `, ${DEFAULT_MAX_S_SOURCE}` : '';
-      warn('held-state-too-long', `beat "${title}": held-state-too-long, ${(span.end - span.start).toFixed(2)}s spent on one change, at or past the ${holdMaxS.toFixed(1)}s cap for ${filmType ? `${typeArticle} ${filmType} film` : 'an unclassified film'} (engine-doctrine/MOTION-CRAFT.md "Genre pacing tables"${filmType === 'recreation' ? '; recreation has no band of its own there and inherits its source\'s rhythm, so only the absolute ceiling applies' : ''}${capSource}). Either name the second change or split the beat.`);
+      const recreationNote = filmType === 'recreation'
+        ? '; recreation has no band of its own there and inherits its source\'s rhythm, so only the absolute ceiling applies' : '';
+      note('held-state-too-long', `beat "${title}": held one state for ${(span.end - span.start).toFixed(2)}s, past `
+        + `the ${holdMaxS.toFixed(1)}s band ${GENRE_PACING_SOURCE} reports for ${filmType ? `${typeArticle} ${filmType} film` : 'this film'}`
+        + `${recreationNote}. This is a REPORT, not a bar: no external or house source sets a ceiling on how long an `
+        + `arbitrary visual state may hold, only on how long readable PROSE may hold (that is read-check.mjs's job, `
+        + `already cited: BBC subtitling, 2-5s). If this beat's text is prose, look there. Otherwise judge it by eye, `
+        + `or with \`make plan-judge\`'s \`beat-pacing\` finding. ${describeReferenceBank()}. Either name the second `
+        + `change or split the beat if it earns it.`);
     }
     // ── THE PICTURE'S OWN DECISIONS ──────────────────────────────────────────────────────────────
     // `picture:` and `style:` are prose, and prose is where the wrong object hides: a beat that
@@ -657,6 +669,7 @@ if (links.length) {
 }
 for (const e of errs) console.error(`    ✗ ${e}`);
 for (const w of warns) console.log(`    ~ ${w}`);
+for (const n of notes) console.log(`    · ${n}`);
 if (errs.length) { console.error(`\n✗ storyboard incomplete, ${errs.length} blocker(s). Fill them, then present the proposal for approval before authoring JSON.`); process.exit(1); }
 // `<fill: …>` IS the repo's placeholder convention, `intent-from-storyboard.mjs` already refuses to emit
 // a `mustShow` for one, and this gate had never heard of it. So a storyboard where every single line was
