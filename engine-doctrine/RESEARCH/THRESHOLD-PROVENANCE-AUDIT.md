@@ -1,3 +1,9 @@
+---
+when: "adding or changing a constant that decides a gate verdict"
+answers: "every verdict-deciding constant in the gates, its source category, and the count that carries no source at all"
+group: process
+---
+
 # Threshold provenance audit
 
 Task 3 of `.claude/plans/rules-from-sources.plan.md`. A sweep of `quality/gates/*.mjs` and
