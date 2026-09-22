@@ -120,7 +120,13 @@ process.stdin.on('end', () => {
   //    contract this repo states in two places and kept losing.
   if (rel === `films/scene/${film}.json` && !st.approved) {
     let layers = 0;
-    try { const d = JSON.parse(text); layers = Array.isArray(d.layers) ? d.layers.length : 0; } catch { layers = /"layers"\s*:\s*\[\s*\{/.test(text) ? 1 : 0; }
+    // `_scaffold: true` marks `make scaffold`'s own single placeholder layer (harness/author/
+    // scaffold.mjs), written only so films/scene/schema.json's `minItems: 1` on `layers` passes before
+    // any real content exists. It is not the film this rule exists to keep out, so it does not count.
+    try {
+      const d = JSON.parse(text);
+      layers = Array.isArray(d.layers) ? d.layers.filter((l) => !(l && l._scaffold)).length : 0;
+    } catch { layers = /"layers"\s*:\s*\[\s*\{/.test(text) ? 1 : 0; }
     if (layers > 0) {
       deny(`${film}'s plan is not approved, so the scene may not be filled in yet (stage: ${st.stage}). `
         + 'A shell with an empty `layers` is fine; layers are the film.\n'
