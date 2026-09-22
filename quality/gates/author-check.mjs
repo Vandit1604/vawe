@@ -70,7 +70,6 @@ import { codeDocMap, docMap } from './doc-map.mjs';
 import { readFindings } from '../../harness/lib/findings.mjs';
 import { LIBRARY } from '../../harness/lib/census.mjs';
 import { isWaivedBy, bareWaiverCoverage, hasReason } from '../../harness/lib/waivers.mjs';
-import { knownFilms } from './direction-floor-corpus.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -768,17 +767,12 @@ console.log(`      If your eye catches a flaw, it is a FIX, never ship one you n
 // sits in. This re-runs nothing: every code below came out of a gate that already ran in the ladder
 // above, so the cost is a Set lookup on a code we already have.
 //
-// THE AMBITION FLOOR IS THE ONE EXCEPTION, AND IT IS DELIBERATE. Owner's ruling on a plain slideshow:
-// "Block only for new films." `plain-slideshow` and `no-continuous-object` already carry a stricter
-// waiver test inside direction-floor.mjs itself (PLAN_BACKED_WAIVERS: a bare `_why` is not enough, the
-// storyboard must name `threads:`), but that test is for EVERY film, and a bare `_why` with no plan is
-// exactly how half the library's 51 existing waivers on these two codes are written. Refusing those
-// outright here would be re-litigating film work this task does not own. So the plain `isWaivedBy`
-// forgiveness below (a `_why`, nothing more) stays for a film direction-floor-corpus.mjs's frozen
-// baseline already knows about; a film NOT in that baseline gets no such forgiveness for these two
-// codes; only a waiver direction-floor.mjs itself already honoured (plan-backed) keeps it off this
-// list, because an honoured waiver never reaches `blockCodes` in the first place (`runGate`'s `live`
-// filter drops it before this loop ever sees it).
+// THE AMBITION FLOOR IS NO LONGER GRANDFATHERED. `plain-slideshow` and `no-continuous-object` already
+// carry a stricter waiver test inside direction-floor.mjs itself (PLAN_BACKED_WAIVERS: a bare `_why`
+// is not enough, the storyboard must name `threads:`); a bare `isWaivedBy` `_why` with no named plan
+// does not clear either code, for any film, old or new. Only a waiver direction-floor.mjs itself
+// already honoured (plan-backed) keeps it off this list, because an honoured waiver never reaches
+// `blockCodes` in the first place (`runGate`'s `live` filter drops it before this loop ever sees it).
 const AMBITION_CODES = new Set(['plain-slideshow', 'no-continuous-object']);
 {
   const seen = new Map();
@@ -789,28 +783,26 @@ const AMBITION_CODES = new Set(['plain-slideshow', 'no-continuous-object']);
   // .expanded/.animatic/.captioned/.directed/.intent) from the library; blocking one anyway would be a
   // population mismatch, not a finding: you would fix the SOURCE, not the derivative.
   const inLibrary = LIBRARY(path.basename(file), file);
-  const isNewFilm = inLibrary && !knownFilms().has(path.basename(file));
   const blocked = [];
   for (const [c, step] of seen) {
     if (!inLibrary) continue;
-    const ambitionOnNewFilm = isNewFilm && AMBITION_CODES.has(c);
+    const isAmbitionCode = AMBITION_CODES.has(c);
     // None of HARD_CODES sets `at` on its finding today (no gate that raises one names a beat, layer or
     // value), so only a BARE waiver can ever match here; isWaivedBy(allowRaw, c) with no instance is
     // exactly that. A scoped entry like "static-bg@beat:2" would parse but never match this code.
-    if (isWaivedBy(allowRaw, c) && !ambitionOnNewFilm) continue;   // waived, with a `_why` the always-on half checks
-    blocked.push([c, step, ambitionOnNewFilm]);
+    if (isWaivedBy(allowRaw, c) && !isAmbitionCode) continue;   // waived, with a `_why` the always-on half checks
+    blocked.push([c, step, isAmbitionCode]);
   }
   if (blocked.length) {
     console.log(`\n  ✗ ${blocked.length} hard code(s) BLOCK this film. They are not new rules: they are the`);
     console.log(`    house-style findings above, made binding regardless of TASTE=1.`);
-    for (const [c, step, ambitionOnNewFilm] of blocked) {
+    for (const [c, step, isAmbitionCode] of blocked) {
       console.log(`      [${c}] (step ${step})`);
       const d = docFor(c); if (d) console.log(`          read: ${d}`);
-      if (ambitionOnNewFilm) {
-        console.log(`          this is a NEW film (not in quality/baselines/direction-floor-corpus.json), so a bare`);
-        console.log(`          waiver does not clear this one: write a storyboard beside it naming the device that`);
-        console.log(`          holds the film in its \`threads:\` frontmatter line, or actually reach past the`);
-        console.log(`          slideshow (kinetic type, a camera move, a continuous object across the cut).`);
+      if (isAmbitionCode) {
+        console.log(`          a bare waiver does not clear this one: write a storyboard beside it naming the`);
+        console.log(`          device that holds the film in its \`threads:\` frontmatter line, or actually reach`);
+        console.log(`          past the slideshow (kinetic type, a camera move, a continuous object across the cut).`);
       }
     }
     console.log(`\n    Fix them, or decide against one in the scene and say why:`);
