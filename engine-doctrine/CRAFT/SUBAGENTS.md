@@ -102,6 +102,20 @@ default is pure cost.
 | **sound** | the audio block | cue punctuation is automatic now; choosing a bed is a register decision, and the engine stays silent when it has no input |
 | type · colour · layout · backdrop | nothing | these resolve from the theme. A decider here would re-decide what the brand already decided |
 
+**`storyboard` runs twice, at two different stages, in two different modes.** The row above is its
+WRITE mode: it authors or revises the storyboard file, and belongs wherever this roster runs (`make
+critics D=<file> DECIDERS=1`, AGENTS.md stage 6). Before that, at AGENTS.md **stage 2, plan**, the same
+role runs as a JUDGE instead: `make plan-judge D=<file>` composes a brief from THIS storyboard's own
+text, theme tokens and craft rules (reusing this table's categories and `rulesFor`, never a second
+assembler) and hands it to a fresh Agent call that reports findings only, never a write, never a PASS.
+`quality/gates/storyboard-check.mjs` already owns structure (fields present, holds inside the genre
+band, no placeholder copy); the plan judge answers what an exit code cannot: one through-line, beats
+that earn their seconds, a spectacle that is actually loudest, an eye path that holds, motion that
+varies. `make stage` may require the plan judge HAS RUN before a film leaves plan, never that it
+passed: findings are advisory, and the owner still signs the plan off at approval (stage 4). A verdict
+is recorded against a hash of the storyboard it read (`harness/lib/receipt.mjs`); a storyboard edited
+since is refused as stale rather than shown as current (`make plan-judge D=<file> SHOW=1`).
+
 **The order is a dependency, not a preference.** The storyboard first, because it is the lock artefact
 and every role below reads it. Then subject, because a cut cannot be chosen without knowing what sits on
 either side of it. Then the scene fragments, written by an author who already knows what has to move and

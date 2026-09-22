@@ -19,10 +19,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { writeReceipt } from '../lib/receipt.mjs';
-import { stageOf } from '../../quality/gates/stage.mjs';
+import { writeReceipt, readReceipt, hashOf, receiptPath } from '../lib/receipt.mjs';
+import { stageOf, filePaths } from '../../quality/gates/stage.mjs';
 import { computeFeatures } from '../../quality/gates/craft-checklist.mjs';
 import { rulesFor, briefLine } from '../lib/craft-rules.mjs';
+import { frontmatter } from './storyboard-parse.mjs';
+import { PLAN_JUDGE_CODES, isPlanJudgeCode } from '../lib/plan-judge-codes.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -260,6 +262,91 @@ export function buildRoster(scenePath) {
   return { ...ctx, roster };
 }
 
+// buildPlanJudgeBrief: THE PLAN JUDGE, at the stage it belongs in.
+//
+// engine-doctrine/CRAFT/SUBAGENTS.md's `storyboard` decider (DECIDERS[0] above) is the only role whose
+// job is "decide the film as a whole: the beats, the through-line, the motion plan and the cut plan",
+// which is exactly the judgement a plan needs and exactly what quality/gates/storyboard-check.mjs
+// cannot give it (that gate checks structure: fields present, holds inside the genre band, no
+// placeholder copy; it does not and cannot say whether the film is worth making). Reusing that role's
+// own categories and rulesFor call, not a second assembler, is the point: two ways to compose a brief
+// is the drift this repo fights hardest.
+//
+// UNLIKE the storyboard DECIDER, this brief never asks for a write. It is a CRITIC in
+// SUBAGENTS.md's own sense: it reports findings against a closed code set (harness/lib/plan-judge-codes.mjs)
+// and the main thread/owner still signs off at approval (AGENTS.md stage 4). A PASS is never
+// self-recorded, so this brief never offers one to return.
+//
+// Works from the storyboard ALONE: a plan-stage film may have no scene.json yet (scaffold not run) or
+// one with no fragments (design not started), and this must judge it anyway, before either exists.
+export function buildPlanJudgeBrief(arg) {
+  const p = filePaths(arg);
+  if (!fs.existsSync(p.sb)) throw new Error(`no storyboard at ${path.relative(repoRoot, p.sb)}`);
+  const sbText = fs.readFileSync(p.sb, 'utf8');
+  const fm = frontmatter(sbText);
+  const sceneExists = fs.existsSync(p.scene);
+  const scene = sceneExists ? (() => { try { return JSON.parse(fs.readFileSync(p.scene, 'utf8')); } catch { return {}; } })() : {};
+  const features = computeFeatures(scene, sbText);
+  const fragments = sceneExists
+    ? flatLayers(scene.layers).filter((L) => L.type === 'html' && typeof L.src === 'string').map((L) => L.src)
+    : [];
+  const themeRel = scene.theme ? `themes/${scene.theme}.json` : fm.field('theme');
+  let themeTokens = null;
+  if (themeRel) {
+    try {
+      const t = JSON.parse(fs.readFileSync(path.resolve(repoRoot, themeRel), 'utf8'));
+      themeTokens = { palette: t.palette, vars: t.vars };
+    } catch { /* not every plan-stage film has a resolvable theme yet, not fatal to this brief */ }
+  }
+  const decider = DECIDERS.find((d) => d.name === 'storyboard');
+  const categories = DECIDER_CATEGORIES.storyboard;
+  const rules = rulesFor({ stage: 'plan', features, categories, maxChars: 1200 });
+  const digest = hashOf(p.sb);
+
+  const lines = [
+    `You are the plan judge for ${path.relative(repoRoot, p.sb)}.`,
+    `You REPORT findings only. You do not write into the storyboard or the scene, and you never `
+      + `record PASS: the owner still signs the plan off, at approval (AGENTS.md stage 4, /vawe-approve).`,
+    `You exist because ${decider.why}.`,
+    `This judges craft, not structure. quality/gates/storyboard-check.mjs already owns structure `
+      + `(fields present, holds inside the genre band, no placeholder copy) and keeps it; the questions `
+      + `below are the ones an exit code cannot answer.`,
+    '',
+    `Judge exactly these five questions. Return a finding ONLY where the plan actually falls short: a `
+      + `brief that could describe any film is a failed brief, so do not pad the list.`,
+    '  - through-line: is there ONE through-line, or several competing ones? (code: through-line)',
+    '  - beat-pacing: does every beat earn its seconds, none padded or starved? (code: beat-pacing)',
+    '  - spectacle: is the nominated SPECTACLE actually the loudest moment, or does something else upstage it? (code: spectacle)',
+    '  - eye-path: does the eye path hold across beats, or does attention have nowhere to land? (code: eye-path)',
+    '  - motion-variety: does the motion plan vary, or repeat one idea beat after beat? (code: motion-variety)',
+    '',
+    `The storyboard (${fragments.length} fragment(s) written so far, ${scene.duration || fm.field('duration') || '?'} target):`,
+    '```',
+    sbText,
+    '```',
+  ];
+  if (fragments.length) {
+    lines.push('', 'Fragments already written:');
+    for (const f of fragments) lines.push(`  · ${f}`);
+  }
+  if (themeTokens) lines.push('', `Theme tokens (${themeRel}):`, '```json', JSON.stringify(themeTokens, null, 2), '```');
+  if (rules.length) {
+    lines.push('', `Craft rules for this role (${categories.join(', ')}):`);
+    for (const r of rules) lines.push(`  ${briefLine(r)}`);
+  }
+  lines.push(
+    '',
+    'Standing rules: no em-dashes anywhere. Do not delegate to sub-agents. Report only, never fix.',
+    `Return ONLY this JSON shape, no prose: { "findings": [ { "code": "<one of ${PLAN_JUDGE_CODES.join('|')}>", "note": "..." } ] }`,
+    '(empty findings array if the plan holds on all five).',
+    '',
+    `Digest of the storyboard this brief was built from, so a recorded verdict can be checked for `
+      + `staleness later: ${digest}`,
+  );
+  return { storyboard: path.relative(repoRoot, p.sb), scene: sceneExists ? path.relative(repoRoot, p.scene) : null,
+    digest, prompt: lines.filter((l) => l !== null).join('\n') };
+}
+
 // Every on-screen string in beat order, for the `copy` critic. "Beat order" here means layer order in
 // the JSON, the only order the tool can see without rendering.
 function copyLines(scene) {
@@ -297,6 +384,72 @@ export function buildPanel(scenePath, vs) {
 
 // ---- CLI --------------------------------------------------------------------------------------------
 function main() {
+  const argv = process.argv;
+  const flagPos = (flag) => { const i = argv.indexOf(flag); return i >= 0 ? argv[i + 1] : null; };
+  const filmArg = () => argv.find((a, i) => i >= 2 && !a.startsWith('--')
+    && argv[i - 1] !== '--record-plan' && argv[i - 1] !== '--record' && argv[i - 1] !== '--vs');
+
+  // THE PLAN JUDGE (harness/author/critics.mjs's own contract: compose and print, never launch).
+  // Works from the storyboard alone, so it runs at plan stage before a scene.json necessarily exists.
+  if (argv.includes('--plan-judge')) {
+    const arg = filmArg();
+    if (!arg) { console.error('usage: node harness/author/critics.mjs <film|storyboard.md> --plan-judge'); process.exit(2); }
+    let brief;
+    try { brief = buildPlanJudgeBrief(arg); }
+    catch (e) { console.error(`✗ ${e.message}`); process.exit(2); }
+    console.log(`\n  PLAN JUDGE · ${brief.storyboard}\n`);
+    console.log('  Launch ONE Agent call with this brief. It reports findings only, never a write, never a PASS.\n');
+    console.log(brief.prompt);
+    console.log(`\n  When it reports, record the findings:`);
+    console.log(`    node harness/author/critics.mjs ${arg} --record-plan <verdict.json>\n`);
+    return;
+  }
+
+  if (argv.includes('--record-plan')) {
+    const arg = filmArg();
+    const verdictFile = flagPos('--record-plan');
+    if (!arg || !verdictFile) { console.error('usage: node harness/author/critics.mjs <film> --record-plan <verdict.json>'); process.exit(2); }
+    const p = filePaths(arg);
+    if (!fs.existsSync(p.sb)) { console.error(`✗ no storyboard at ${path.relative(repoRoot, p.sb)}`); process.exit(2); }
+    let verdict;
+    try { verdict = JSON.parse(fs.readFileSync(path.resolve(repoRoot, verdictFile), 'utf8')); }
+    catch (e) { console.error(`✗ ${verdictFile} is not valid JSON: ${e.message}`); process.exit(2); }
+    const findings = Array.isArray(verdict.findings) ? verdict.findings : [];
+    const bad = findings.find((fd) => !isPlanJudgeCode(fd && fd.code));
+    if (bad) {
+      console.error(`✗ "${bad && bad.code}" is not a plan-judge finding code. Valid codes: ${PLAN_JUDGE_CODES.join(', ')}`);
+      process.exit(2);
+    }
+    const rec = writeReceipt('plan-judge', p.sb, { findings, ranAt: new Date().toISOString() });
+    if (!rec) { console.error(`✗ could not write the plan-judge receipt (is ${p.sb} readable?)`); process.exit(1); }
+    console.log(`  ✓ plan-judge verdict recorded: ${findings.length} finding(s) · `
+      + `${path.relative(repoRoot, receiptPath('plan-judge', p.sb))}`);
+    console.log(`  Findings only. This does not approve the film; the owner still signs off at approval `
+      + `(make studio D=${p.base}.json, then /vawe-approve).`);
+    return;
+  }
+
+  // Read back a recorded plan-judge verdict. REFUSES rather than reporting a pass over a plan it can no
+  // longer see: a receipt whose hash disagrees with the storyboard on disk was recorded against a
+  // version that has since moved, and showing it as current is the exact context-rot this role exists
+  // to prevent. Mirrors harness/lib/census.mjs's refuse().
+  if (argv.includes('--show-plan-verdict')) {
+    const arg = filmArg();
+    if (!arg) { console.error('usage: node harness/author/critics.mjs <film> --show-plan-verdict'); process.exit(2); }
+    const p = filePaths(arg);
+    const r = readReceipt('plan-judge', p.sb);
+    if (!r.exists) { console.log(`  no plan-judge verdict recorded for ${path.relative(repoRoot, p.sb)}`); return; }
+    if (r.stale) {
+      console.error(`\n  ✗ plan-judge verdict: STALE. ${path.relative(repoRoot, p.sb)} changed since this verdict `
+        + `was recorded (recorded hash ${r.receipt.hash}, current ${r.hash}).\n`
+        + `    Refusing rather than reporting a pass over a plan this verdict can no longer see.\n`
+        + `    Re-run: node harness/author/critics.mjs ${arg} --plan-judge\n`);
+      process.exit(3);
+    }
+    console.log(JSON.stringify(r.receipt, null, 2));
+    return;
+  }
+
   const file = process.argv.find((a) => a.endsWith('.json') && !a.includes('--record'));
   const recordIdx = process.argv.indexOf('--record');
   const recordFile = recordIdx >= 0 ? process.argv[recordIdx + 1] : null;
