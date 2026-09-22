@@ -1022,14 +1022,18 @@ up. One event per screen. Mark each row above KEEP or CUT before you write a sto
 
 ## Carry forward
 
-Answer these three, then run \`make storyboard-draft\` (or write the storyboard by hand) and paste the
-answers in. The storyboard is where they turn into our film.
+Open \`${rel(sheet)}\` and \`${rel(frames)}/\` before answering below. Answer these four, then run
+\`make storyboard-draft\` (or write the storyboard by hand) and paste the answers in. The storyboard is
+where they turn into our film.
 
 - **pace:** median shot ${study.measured.medianShot}s. Our library runs 2.5-4s beats. Do we match this reference, and can we?
 - **threads:** what survives a cut here? Name it, then name OUR version of it in our own subject.
 - **spectacle:** which single shot is the loud one, and what makes it loud?
+- **field:** look at the ground in the sheet, not a colour you'd eyedrop from it. Is it flat, textured,
+  or generative (light, particles, a shader)? Name the specific look, not a hex.
 
-Storyboard fields these feed: \`pace:\`, \`threads:\`/\`object:\`, \`spectacle:\`.
+Storyboard fields these feed: \`pace:\`, \`threads:\`/\`object:\`, \`spectacle:\`, \`color:\` (the field line,
+not a swatch).
 See \`engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md\` and \`engine-doctrine/CRAFT/REFERENCE-STUDY.md\`.
 
 ## Write recipe candidates

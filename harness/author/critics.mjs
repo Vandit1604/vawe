@@ -262,6 +262,34 @@ export function buildRoster(scenePath) {
   return { ...ctx, roster };
 }
 
+// findCitedStudy: does this storyboard cite a refs/ clip, and did `make study` already look at it?
+//
+// A craft line like "one eyedropped violet/magenta haze" is text describing a picture nobody in the
+// brief can see. The judge can only check field-craft against the actual frames, so if the storyboard
+// names a refs/<clip> and refs/study.mjs already wrote a sheet.png + frames/ for it (harness/media/
+// study.mjs:696), this hands those paths to the judge. No citation, or a citation nothing has studied
+// yet: this returns null and field-craft is judged from the storyboard's own claims, the same as
+// every other question here.
+function findCitedStudy(sbText) {
+  const m = sbText.match(/refs\/[\w.-]+\.(?:mp4|mov|webm)/);
+  if (!m) return null;
+  const cited = m[0];
+  const refsDir = path.resolve(repoRoot, 'refs');
+  if (!fs.existsSync(refsDir)) return null;
+  for (const name of fs.readdirSync(refsDir)) {
+    const studyJson = path.join(refsDir, name, 'study.json');
+    if (!fs.existsSync(studyJson)) continue;
+    let study;
+    try { study = JSON.parse(fs.readFileSync(studyJson, 'utf8')); } catch { continue; }
+    if (study.source !== cited) continue;
+    const sheet = path.join(refsDir, name, 'sheet.png');
+    const frames = path.join(refsDir, name, 'frames');
+    if (!fs.existsSync(sheet) || !fs.existsSync(frames)) continue;
+    return { source: cited, sheet: path.relative(repoRoot, sheet), frames: path.relative(repoRoot, frames) };
+  }
+  return null;
+}
+
 // buildPlanJudgeBrief: THE PLAN JUDGE, at the stage it belongs in.
 //
 // engine-doctrine/CRAFT/SUBAGENTS.md's `storyboard` decider (DECIDERS[0] above) is the only role whose
@@ -302,6 +330,7 @@ export function buildPlanJudgeBrief(arg) {
   const categories = DECIDER_CATEGORIES.storyboard;
   const rules = rulesFor({ stage: 'plan', features, categories, maxChars: 1200 });
   const digest = hashOf(p.sb);
+  const study = findCitedStudy(sbText);
 
   const lines = [
     `You are the plan judge for ${path.relative(repoRoot, p.sb)}.`,
@@ -312,13 +341,16 @@ export function buildPlanJudgeBrief(arg) {
       + `(fields present, holds inside the genre band, no placeholder copy) and keeps it; the questions `
       + `below are the ones an exit code cannot answer.`,
     '',
-    `Judge exactly these five questions. Return a finding ONLY where the plan actually falls short: a `
+    `Judge exactly these six questions. Return a finding ONLY where the plan actually falls short: a `
       + `brief that could describe any film is a failed brief, so do not pad the list.`,
     '  - through-line: is there ONE through-line, or several competing ones? (code: through-line)',
     '  - beat-pacing: does every beat earn its seconds, none padded or starved? (code: beat-pacing)',
     '  - spectacle: is the nominated SPECTACLE actually the loudest moment, or does something else upstage it? (code: spectacle)',
     '  - eye-path: does the eye path hold across beats, or does attention have nowhere to land? (code: eye-path)',
     '  - motion-variety: does the motion plan vary, or repeat one idea beat after beat? (code: motion-variety)',
+    '  - field-craft: does the craft block describe an actual visible surface treatment (flat, textured, '
+      + 'generative: light, particles, a shader), or only a colour, a number or an adjective that could '
+      + 'be written without looking at the reference? (code: field-craft)',
     '',
     `The storyboard (${fragments.length} fragment(s) written so far, ${scene.duration || fm.field('duration') || '?'} target):`,
     '```',
@@ -329,6 +361,15 @@ export function buildPlanJudgeBrief(arg) {
     lines.push('', 'Fragments already written:');
     for (const f of fragments) lines.push(`  · ${f}`);
   }
+  if (study) {
+    lines.push(
+      '',
+      `Reference study for the clip this storyboard cites (${study.source}): open these before judging `
+        + `field-craft, the craft block is written against what they show, not the other way round.`,
+      `  · ${study.sheet} (contact sheet, one row per shot)`,
+      `  · ${study.frames}/ (the individual frames behind it)`,
+    );
+  }
   if (themeTokens) lines.push('', `Theme tokens (${themeRel}):`, '```json', JSON.stringify(themeTokens, null, 2), '```');
   if (rules.length) {
     lines.push('', `Craft rules for this role (${categories.join(', ')}):`);
@@ -338,7 +379,7 @@ export function buildPlanJudgeBrief(arg) {
     '',
     'Standing rules: no em-dashes anywhere. Do not delegate to sub-agents. Report only, never fix.',
     `Return ONLY this JSON shape, no prose: { "findings": [ { "code": "<one of ${PLAN_JUDGE_CODES.join('|')}>", "note": "..." } ] }`,
-    '(empty findings array if the plan holds on all five).',
+    '(empty findings array if the plan holds on all six).',
     '',
     `Digest of the storyboard this brief was built from, so a recorded verdict can be checked for `
       + `staleness later: ${digest}`,
