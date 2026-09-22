@@ -1,7 +1,12 @@
 "use client";
 
 /**
- * The generator playground: dials on the right, the live generator on the left.
+ * The generator playground: a rail of names on the left, the picked one's preview and dials on the
+ * right. ONE GENERATOR BOOTS AT A TIME. The page used to scroll every generator and block family past
+ * as a wall of live posters, each one mounting its own engine or rAF loop while it was near the
+ * viewport, which is more than a name-and-a-picture list needs to cost: nothing here has to be
+ * running for someone to find the thing they want to turn. The rail costs nothing to render, and only
+ * the selected generator, in the right-hand pane, ever boots.
  *
  * NOTHING HERE KNOWS WHAT A LIGHTFIELD IS. It reads `GENERATORS` out of the vendored engine
  * (core/generators/generators.js) and builds the panel from each generator's declarative schema, so adding a
@@ -16,20 +21,9 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useSceneEngine } from "../components/useSceneEngine";
 import { useStageFit } from "../components/useStageFit";
-// THE ENGINE, IN THE COMPONENT /arsenal ALREADY USES FOR THIS. BlockLive puts a block on screen with
-// the real renderer and frames it identically to its still, so the two land in the same box and the
-// picture does not jump when the engine arrives. This page had a hand-rolled preview that could only
-// animate a block animating through CSS custom properties, which almost none do.
-import { BlockLive } from "../arsenal/BlockLive";
-// THE MEASURED INK RECT OF EVERY BLOCK, and not a table invented here. `make blocks-scenes` writes
-// it by rendering each block alone on a 1920x1080 canvas and measuring what it actually painted,
-// /arsenal's detail page already imports the same file, and this page needs the same fact for the
-// same reason: a poster should be the shape of the thing inside it. Measured, not guessed:
-// morphText's real bounds are 944x194, so a 16:9 poster gave it a box two and a half times its own
-// height and the word sat marooned in the middle of it.
-import FRAMES from "../../lib/block-frames.json";
 
 type Spec = {
   kind: "int" | "unit" | "num" | "hex" | "enum" | "group" | "hexlist"
@@ -84,6 +78,12 @@ const ENGINE_URL = "/core/generators/generators.js";
 // because the old /blocks page moved there. A redirect cannot tell a page path from a static
 // file, so a module vendored to /blocks/index.mjs answers 404 at /arsenal/index.mjs.
 const BLOCKS_URL = "/blocklib/index.mjs";
+// resolveTheme/applyTheme, THE ENGINE'S OWN theme→CSS-vars step (core/engine/boot.js, the scene
+// iframe runs it too). A `color`-kind field can default to `var(--text)` or a `color-mix(...)`
+// expression rather than a hex, because that is how a block stays theme-following (blocks/schema.mjs
+// says so). Reused here rather than re-typed so this page's colour swatches can never drift from what
+// the theme actually says `--text` is: only boot.js's applyTheme decides that mapping.
+const BOOT_URL = "/core/engine/boot.js";
 
 // ── THE PICK LIST ────────────────────────────────────────────────────────────────────────────────
 // THIS PAGE IS AN EDIT, NOT AN INDEX, and that distinction is the whole reason it is worth opening.
@@ -295,29 +295,36 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
     return () => { alive = false; };
   }, []);
 
-  // Adopt the name from the path exactly once, when the engine arrives. An unknown name falls through
-  // to the library rather than 404ing: the registry is the only thing that knows what exists, and it
-  // lives here.
-  const adopted = useRef(false);
+  // Follow the ROUTE, every time it changes, not just on first arrival. The rail below navigates with
+  // real `<Link>`s now rather than in-page state, so `initial` changes on every pick and this has to
+  // track it each time, not adopt it once. An unknown name falls through to the index rather than
+  // 404ing: the registry is the only thing that knows what exists, and it lives here.
   useEffect(() => {
-    if (!engine || adopted.current) return;
-    adopted.current = true;
-    if (!initial) return;
+    if (!engine) { setWhich(null); return; }
+    if (!initial) { setWhich(null); return; }
     const i = engine.GENERATORS.findIndex((g) => g.name === initial);
-    if (i >= 0) setWhich(i);
+    setWhich(i >= 0 ? i : null);
   }, [engine, initial]);
 
   const gen = which == null ? null : (engine?.GENERATORS[which] ?? null);
 
-  // Keep the address bar honest without a navigation: replaceState, so opening a generator and going
-  // back does not stack history entries nobody asked for.
+  // Seed the engine's OWN resolved theme colours onto this page's `:root`, once, so a `color`-kind
+  // field defaulting to `var(--text)` or a `color-mix(...)` (blocks/schema.mjs) can show its REAL
+  // current colour rather than the bare expression. `applyTheme` is the one place a theme's palette
+  // becomes CSS custom properties (core/engine/boot.js), and every preview here already renders the
+  // "vawe" theme, so reusing it rather than re-typing the palette→var mapping is the only way this
+  // cannot drift when a theme adds a token. Failing quietly here still leaves the field editable, just
+  // without the swatch, so it is logged rather than surfaced.
   useEffect(() => {
-    if (!engine) return;
-    const path = gen ? `/playground/${gen.name}` : "/playground";
-    if (window.location.pathname !== path) {
-      window.history.replaceState(null, "", path + window.location.search);
-    }
-  }, [engine, gen]);
+    let alive = true;
+    import(/* webpackIgnore: true */ BOOT_URL)
+      .then(async (m) => {
+        const theme = await m.resolveTheme("vawe");
+        if (alive) m.applyTheme(theme);
+      })
+      .catch((e) => console.error("playground: could not resolve theme tokens for colour fields", e));
+    return () => { alive = false; };
+  }, []);
 
   // Reset to a generator's own defaults when it changes, and read a shared link on first load.
   useEffect(() => {
@@ -530,32 +537,48 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
   }
   if (!engine) return <p className="pgnote">Loading the engine…</p>;
 
-  if (which == null) {
-    return (
-      <>
-        <p className="pglede">
-          The engine’s generators and its block families, running here rather than in a render.
-          Every poster is the real thing, moving while it is on screen. Open one to turn its dials.
+  // THE RAIL: every name, ALWAYS on screen, a real `<Link>` per entry. This is the whole fix for
+  // "the generators are not all trying to boot on a single page": the old index scrolled all 29
+  // posters into view and mounted an engine for every one near the viewport (bounded, but never
+  // zero). A name costs nothing to render, so the rail can list every one of them and still boot
+  // NOTHING until a person picks one, which the right-hand pane below alone ever does.
+  const rail = (
+    <div className="rail-col">
+      <p className="pg-rail-kicker">generators</p>
+      <nav className="rail pg-rail" aria-label="generators">
+        {engine.GENERATORS.map((g) => (
+          <Link key={g.name} href={`/playground/${g.name}`} scroll={false}
+            aria-current={gen?.name === g.name ? "page" : undefined}>
+            <span>{g.name}</span>
+            <em>{g.origin === "block" ? (g.group || "block") : "generator"}</em>
+          </Link>
+        ))}
+      </nav>
+      {engine.HELD_BACK > 0 && (
+        <p className="lheld">
+          {engine.HELD_BACK} more {engine.HELD_BACK === 1 ? "look is" : "looks are"} built and held
+          back: each one is measured against a reference on every run and is not close enough yet.
         </p>
-        {/* A SCROLL, NOT A WALL. The grid put two 420px cards abreast and asked the eye to compare
-            them, which is why nothing was allowed to move. One poster at a time is a different
-            question: not "which of these", but "what is this". So they are full width and they run. */}
-        <div className="pgscroll">
-          {engine.GENERATORS.map((g, i) => (
-            <Poster key={g.name} gen={g} engine={engine} onPick={() => setWhich(i)} />
-          ))}
+      )}
+    </div>
+  );
+
+  if (which == null || !gen || !opts) {
+    return (
+      <div className="rail-layout pg-layout">
+        {rail}
+        <div className="pg-main">
+          <div className="pg-empty">
+            <p className="pg-empty-kicker">nothing booted</p>
+            <p className="pglede">
+              The engine’s generators and its block families, one at a time. Pick a name on the left
+              to turn its dials; nothing on this page runs until you do.
+            </p>
+          </div>
         </div>
-        {engine.HELD_BACK > 0 && (
-          <p className="lheld">
-            {engine.HELD_BACK} more {engine.HELD_BACK === 1 ? "look is" : "looks are"} built and held
-            back: each one is measured against a reference on every run and is not close enough yet.
-          </p>
-        )}
-      </>
+      </div>
     );
   }
-
-  if (!gen || !opts) return <p className="pgnote">Loading the engine…</p>;
 
   // Only what was changed. Short, and more usefully READABLE: it says what this person did, which is
   // the thing worth pasting into a scene or into an issue.
@@ -568,104 +591,107 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
     (Object.keys(patch).length ? `?o=${btoa(JSON.stringify(patch))}` : "");
 
   return (
-    <div className="pg">
-      <div className="lback">
-        <button onClick={() => setWhich(null)}>← all looks</button>
-        <strong>{gen.name}</strong>
-        <span>{engine.GENERATORS.length} in the library</span>
-      </div>
+    <div className="rail-layout pg-layout">
+      {rail}
+      <div className="pg-main">
+        <div className="lback">
+          <Link href="/playground">← playground</Link>
+          <strong>{gen.name}</strong>
+          <span>{engine.GENERATORS.length} in the library</span>
+        </div>
 
-      <div className="pggrid">
-        <div className={`pgstage${err && made ? " is-stale" : ""}`}>
-          {sceneUrl
-            ? <ScenePreview url={sceneUrl} title={`${gen.name} preview`} />
-            : <div className="pgfield" ref={stage} aria-label={`${gen.name} preview`} />}
-          {(err || toolErr) && (
-            <div className="pgerr" role="status">
-              <p>{err ?? toolErr}</p>
-              {/* Sibling, not a nested span: inside the paragraph the two strings ran together in
-                  textContent, so a screen reader read "got 0the picture above is the last one". */}
-              {err && made && <p className="pgheld">the picture above is the last one that rendered</p>}
-            </div>
+        <div className="pggrid">
+          <div className={`pgstage${err && made ? " is-stale" : ""}`}>
+            {sceneUrl
+              ? <ScenePreview url={sceneUrl} title={`${gen.name} preview`} />
+              : <div className="pgfield" ref={stage} aria-label={`${gen.name} preview`} />}
+            {(err || toolErr) && (
+              <div className="pgerr" role="status">
+                <p>{err ?? toolErr}</p>
+                {/* Sibling, not a nested span: inside the paragraph the two strings ran together in
+                    textContent, so a screen reader read "got 0the picture above is the last one". */}
+                {err && made && <p className="pgheld">the picture above is the last one that rendered</p>}
+              </div>
+            )}
+          </div>
+
+          <div className="pgpanel">
+            <p className="pgblurb">{gen.blurb}</p>
+            {gen.presets && (
+              <div className="pgpresets">
+                {Object.keys(gen.presets).map((k) => (
+                  <button key={k} className={preset === k ? "on" : undefined}
+                    onClick={() => apply(deepMerge(engine.defaultsOf(gen.schema), gen.presets![k]), k)}>{k}</button>
+                ))}
+              </div>
+            )}
+            {groupControls(shown).map(([group, items]) => (
+              <fieldset key={group ?? "_"} className="pggroup">
+                {group && (
+                  <legend>
+                    {LABELS[group] ?? group}
+                    <button className="pgroll" title={`randomise ${group} only`}
+                      onClick={() => rollSection(group)} aria-label={`randomise ${group}`}>↻</button>
+                  </legend>
+                )}
+                {items.map((c) => (
+                  <Row key={c.path} c={c} value={get(opts, c.path)} onChange={change} />
+                ))}
+              </fieldset>
+            ))}
+          </div>
+        </div>
+
+        <div className="pgbar">
+          {/* One copy control. Three buttons of equal weight made the person choose before they knew the
+              difference; options is what almost everyone wants, and the other two are a keystroke away. */}
+          <div className="pgcopy">
+            <button className="btn btn-ghost" onClick={() => copy("options", patchJson)}>
+              {copied ? "copied" : "copy options"}
+            </button>
+            <select aria-label="copy something else" value=""
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === "html" && made) copy("html", typeof made === "string" ? made : JSON.stringify(made, null, 2));
+                if (v === "link") copy("link", link);
+                if (v === "image") copyImage();
+                if (v === "png" || v === "file") download(v === "png" ? "png" : "html");
+                e.target.value = "";
+              }}>
+              <option value="" disabled>…</option>
+              <option value="png">download PNG (4K)</option>
+              <option value="file">download HTML</option>
+              <option value="image">copy image (1080p)</option>
+              <option value="html">copy HTML</option>
+              <option value="link">copy link</option>
+            </select>
+          </div>
+          <button className="btn btn-ghost" onClick={() => {
+            // Randomise WITHIN what each field declares, and seed it from the value on screen so a
+            // colour keeps its lightness: rolling that uniformly makes a bright ground and a dark bloom,
+            // and every result looks broken. `skipped` is shown rather than swallowed, because a field
+            // with no declared range is a gap in the schema and the person turning dials should see it.
+            const skipped: string[] = [];
+            setPreset(null);
+            apply(engine.randomOptions(gen.schema, Math.random, {}, skipped, opts));
+            setNoDial(skipped);
+          }}>randomise</button>
+
+          {noDial.length > 0 && (
+            <span className="pgmeta pgskip" title="these fields declare no range, so randomise leaves them alone">
+              left alone: {noDial.join(", ")}
+            </span>
           )}
-        </div>
-
-        <div className="pgpanel">
-          <p className="pgblurb">{gen.blurb}</p>
-          {gen.presets && (
-            <div className="pgpresets">
-              {Object.keys(gen.presets).map((k) => (
-                <button key={k} className={preset === k ? "on" : undefined}
-                  onClick={() => apply(deepMerge(engine.defaultsOf(gen.schema), gen.presets![k]), k)}>{k}</button>
-              ))}
-            </div>
-          )}
-          {groupControls(shown).map(([group, items]) => (
-            <fieldset key={group ?? "_"} className="pggroup">
-              {group && (
-                <legend>
-                  {LABELS[group] ?? group}
-                  <button className="pgroll" title={`randomise ${group} only`}
-                    onClick={() => rollSection(group)} aria-label={`randomise ${group}`}>↻</button>
-                </legend>
-              )}
-              {items.map((c) => (
-                <Row key={c.path} c={c} value={get(opts, c.path)} onChange={change} />
-              ))}
-            </fieldset>
-          ))}
-        </div>
-      </div>
-
-      <div className="pgbar">
-        {/* One copy control. Three buttons of equal weight made the person choose before they knew the
-            difference; options is what almost everyone wants, and the other two are a keystroke away. */}
-        <div className="pgcopy">
-          <button className="btn btn-ghost" onClick={() => copy("options", patchJson)}>
-            {copied ? "copied" : "copy options"}
-          </button>
-          <select aria-label="copy something else" value=""
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === "html" && made) copy("html", typeof made === "string" ? made : JSON.stringify(made, null, 2));
-              if (v === "link") copy("link", link);
-              if (v === "image") copyImage();
-              if (v === "png" || v === "file") download(v === "png" ? "png" : "html");
-              e.target.value = "";
-            }}>
-            <option value="" disabled>…</option>
-            <option value="png">download PNG (4K)</option>
-            <option value="file">download HTML</option>
-            <option value="image">copy image (1080p)</option>
-            <option value="html">copy HTML</option>
-            <option value="link">copy link</option>
-          </select>
-        </div>
-        <button className="btn btn-ghost" onClick={() => {
-          // Randomise WITHIN what each field declares, and seed it from the value on screen so a
-          // colour keeps its lightness: rolling that uniformly makes a bright ground and a dark bloom,
-          // and every result looks broken. `skipped` is shown rather than swallowed, because a field
-          // with no declared range is a gap in the schema and the person turning dials should see it.
-          const skipped: string[] = [];
-          setPreset(null);
-          apply(engine.randomOptions(gen.schema, Math.random, {}, skipped, opts));
-          setNoDial(skipped);
-        }}>randomise</button>
-
-        {noDial.length > 0 && (
-          <span className="pgmeta pgskip" title="these fields declare no range, so randomise leaves them alone">
-            left alone: {noDial.join(", ")}
+          <span className="pgmeta">
+            {Object.keys(patch).length ? `${countLeaves(patch)} changed from the defaults` : "at the defaults"}
           </span>
-        )}
-        <span className="pgmeta">
-          {Object.keys(patch).length ? `${countLeaves(patch)} changed from the defaults` : "at the defaults"}
-        </span>
-      </div>
+        </div>
 
-      <details className="pgjson">
-        <summary>the options, as a scene would carry them</summary>
-        <pre>{patchJson === "{}" ? "// nothing changed yet" : patchJson}</pre>
-      </details>
+        <details className="pgjson">
+          <summary>the options, as a scene would carry them</summary>
+          <pre>{patchJson === "{}" ? "// nothing changed yet" : patchJson}</pre>
+        </details>
+      </div>
     </div>
   );
 }
@@ -674,6 +700,9 @@ function Row({ c, value, onChange }:
   { c: Control; value: unknown; onChange: (p: string, v: unknown) => void }) {
   const { spec, path, key } = c;
   const id = `pg-${path.replace(/\./g, "-")}`;
+  // Called unconditionally (rules of hooks), and a no-op for every kind but `color`: see the branch
+  // below for what it resolves and why.
+  const resolvedColor = useResolvedColour(spec.kind === "color" ? String(value ?? "") : null);
 
   if (spec.kind === "enum") {
     return (
@@ -743,16 +772,27 @@ function Row({ c, value, onChange }:
   // `color` is NOT `hex`. A block's real defaults are `var(--accent)` and `color-mix(...)`, because a
   // block reskins per theme, so the field has to accept an expression as well as a literal. A colour
   // well alone would force every one of them to a hex and quietly break the theming that is the point.
+  //
+  // BUT A RAW EXPRESSION IS NOT A CONTROL. Showing "var(--text)" in a text field and stopping there
+  // used to be the whole of this branch, which is a string with no visual meaning and no colour well
+  // at all unless someone had already turned it into a literal. `useResolvedColour` asks the browser
+  // what the theme's `--text` (or `color-mix(...)`) actually paints right now, the same way the
+  // engine itself resolves it, so the well ALWAYS shows a real swatch: the resolved colour while the
+  // field is untouched, the literal once someone has picked one. Touching the well always writes a
+  // literal hex, which is what a colour well can express and what this kind already accepts, so the
+  // written value is never a lie about what a browser control produced; leaving it alone keeps the
+  // field theme-following, unchanged, forever.
   if (spec.kind === "color") {
     const v = String(value ?? "");
     const literal = /^#[0-9a-f]{6}$/i.test(v);
+    const swatch = literal ? v : (resolvedColor ?? "#808080");
     return (
       <label className="pgrow" htmlFor={id}>
         <span>{key}</span>
         <span className="pghex">
-          {literal && <input type="color" value={v} onChange={(e) => onChange(path, e.target.value)} />}
-          <input id={id} type="text" className="pgtext pgtext-sm" value={v}
-            onChange={(e) => onChange(path, e.target.value)} />
+          <input type="color" value={swatch} onChange={(e) => onChange(path, e.target.value)}
+            title={literal ? undefined : `follows the theme's ${v}; picking a colour here fixes it instead`} />
+          <code>{v}</code>
         </span>
       </label>
     );
@@ -807,440 +847,6 @@ function Row({ c, value, onChange }:
   );
 }
 
-/** Put a block or generator FRAGMENT on the page without letting its CSS out.
- *
- *  THE BUG THIS EXISTS FOR, because innerHTML looked obviously right. A block's html carries its own
- *  `<style>`, written for the engine's scene document where it is the only thing in the frame, so its
- *  selectors are short and global: `.l { position: absolute; … }`. Injected straight into the site
- *  page, one of 103 posters styled EVERY `.l` in the document and painted a 1253 x 79002 rectangle
- *  over the whole playground, heading included. Nothing errored. The page simply went dark.
- *
- *  A shadow root is the fix and it is the cheap one: styles stay in, custom properties still inherit
- *  through the boundary, so the `--p` / `--i` channels the layer declares keep working. The
- *  alternative was an iframe per poster, which is what /blocks refuses to do and would be
- *  indefensible a hundred times over.
- *
- *  `w` is the fragment's own authored width. It is laid out at that width and SCALED to the box, so a
- *  900px block reads the same shape here as in a render rather than being cropped by a narrow column.
- *
- *  `aspect` is the POSTER's shape, and the inner box takes it rather than assuming 16:9. It used to
- *  assume: `ih = iw * 9 / 16` gave morphText a 900x506 box to sit in when the block's own measured
- *  bounds are 944x194, so the word was laid out in the middle of a box two and a half times its own
- *  height and then scaled as a whole. That empty space is what made a fragment look lost in its
- *  poster. Both boxes are the same shape now, so the fit is a fit rather than a letterbox. */
-function mountFragment(host: HTMLElement, html: string, w: number, aspect = 16 / 9) {
-  const root = (host as HTMLElement & { _shadow?: ShadowRoot })._shadow
-    || ((host as HTMLElement & { _shadow?: ShadowRoot })._shadow = host.attachShadow({ mode: "open" }));
-  const box = host.getBoundingClientRect();
-  // A FRAGMENT NEEDS A FRAME, and without one a full-bleed generator collapses. A look that emits
-  // html is written for the whole canvas and sizes itself in percentages, so dropping it into an
-  // auto-height box gives its children 100% of nothing and the poster paints its own background and
-  // nothing else. A block carries its authored width instead, and gets that. Either way the inner box
-  // is a REAL rectangle at the size the fragment expects, and the scale takes it down to the poster.
-  const iw = w > 0 ? w : CW;
-  const ih = Math.round(iw / aspect);
-  // FIT BOTH AXES. Scaling by width alone was safe only while the box was always 16:9 and the inner
-  // box was built to match; now that a poster takes its item's own shape, a fragment taller than its
-  // box would be cropped by .fit's overflow rather than shrunk to fit.
-  const scale = box.width > 0 && box.height > 0
-    ? Math.min(box.width / iw, box.height / ih) : 1;
-  root.innerHTML = `<style>
-    :host { display: block; }
-    /* Absolute centring, not grid centring. The inner box is 1920 wide inside a poster around 1100
-       wide, and a grid item larger than its cell is clamped to the start edge rather than allowed to
-       overflow both ways, so every full-frame fragment sat in the bottom-right corner. */
-    .fit { position: relative; width: 100%; height: 100%; overflow: hidden; }
-    /* The position below is load-bearing: a fragment lays itself out with absolutely positioned
-       children, and with no containing block here they resolve against the viewport and land in a
-       corner of the poster instead of filling it. */
-    .in { position: absolute; left: 50%; top: 50%; width: ${iw}px; height: ${ih}px;
-          transform: translate(-50%, -50%) scale(${scale}); transform-origin: center; }
-  </style><div class="fit"><div class="in">${html}</div></div>`;
-}
-
-/** Empty a poster back to nothing: the shadow root's contents, any canvas, and the channels the loop
- *  wrote on the host.
- *
- *  THE MEASUREMENT THIS EXISTS FOR. Scrolling the library top → bottom → top took the document from
- *  889 nodes to 1338 to 2172, and it never came back down: the IntersectionObserver stopped the rAF
- *  loop when a poster left, but nothing removed what the poster had built, so a shadow root and its
- *  ~250 nodes stayed for the life of the page. Thirteen of them survived one pass. The observer
- *  already knew the poster was gone; only the other half of the sentence was missing.
- *
- *  The shadow ROOT itself stays: attachShadow is one-way, and the host is reused when the poster
- *  comes back. Emptying it is what returns the nodes. */
-function clearPoster(host: HTMLElement) {
-  const root = (host as HTMLElement & { _shadow?: ShadowRoot })._shadow;
-  if (root) root.replaceChildren();
-  host.replaceChildren();
-  // The loop wrote --t and the layer's own channels straight onto the host. Nothing reads them once
-  // the fragment is gone, but leaving them means a re-mount inherits the frame it stopped on.
-  host.removeAttribute("style");
-}
-
-/** A layer may declare ONE duration for every channel, or one PER CHANNEL.
- *
- *  scanGate does the second: `varsDur: {'--scan': 2.25, '--lock': 0.45}` with delays to match, and
- *  `Number({...})` is NaN, so `Number(l.varsDur ?? 1.4) || 1.4` collapsed both channels onto one
- *  1.4s clock. The band and the brackets ran together instead of the brackets landing after the band
- *  had crossed. Read the shape the layer actually wrote. */
-const chan = (v: unknown, key: string, dflt: number): number => {
-  const raw = v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>)[key] : v;
-  const n = Number(raw);
-  return Number.isFinite(n) && n > 0 ? n : dflt;
-};
-
-/** How a poster is going to draw, decided once from what the item actually returns.
- *
- *  THE MEASUREMENT THAT DECIDED THIS. Screenshotting every poster twice, 700ms apart: THREE of the
- *  twenty-three changed. colonnade, bands and scanGate. The other twenty were pictures of a motion
- *  engine sitting still, and ten of those were not pictures at all, they were empty black boxes.
- *
- *  Both failures are the same failure, and it is this file's own hand-rolled preview. It mounts a
- *  fragment and writes the CSS custom properties the layer declares in `vars`, so it can only animate
- *  a block that happens to animate through `vars`. Almost none do: a block moves on the ENGINE's
- *  timeline, through `anim`, `enterDur`, `parts` and keyframes, which live in the renderer and not in
- *  a custom property. And a block built from `group`, `text` and `rect` layers carries no fragment to
- *  mount at all, which is where the ten black boxes came from: glassCard, meshPanel, spotlightCard,
- *  borderBeamCard, screenSwap, glassDock, colorCycle, splitFlapBoard, grainOverlay, rangeSelector.
- *
- *  So a block family stops being previewed by this file and is handed to the ENGINE, through the
- *  component /arsenal already uses for exactly this: `BlockLive`, over the still that
- *  `make blocks-scenes` renders for it. Both artefacts already exist for 13 of the 15 families here,
- *  both are generated from the code on every build, and BlockLive already carries the framing maths
- *  that makes the still and the live render land in the same box, so nothing jumps when the engine
- *  arrives. This page had a worse copy of a solved problem.
- *
- *  A GENERATOR IS NOT A BLOCK and keeps the local paths, deliberately. `bands` and `colonnade` are
- *  two of the three things that already moved: a shader drawn by the engine's own ambient layer, and
- *  a self-contained fragment on a `--t` clock. Both are correct, both cost a rAF rather than an
- *  iframe, and neither has a block scene to point BlockLive at.
- *
- *  THE RULE IS ONE LINE: if an item emits scene LAYERS, the engine renders it. Layers are the
- *  engine's own input format, so anything else this file did with them was a re-implementation. The
- *  two exceptions below are not softenings of that rule, they are cases where the item is not layers.
- *
- *    scene   anything that emits layers. The engine renders it, over a still where the build made
- *            one. That is 15 of the 23, and 11 of them showed nothing at all before.
- *    html    a generator emitting an html STRING, which is not a scene layer and has no timeline: a
- *            self-contained backdrop fragment on a --t clock, in a shadow root. This is what
- *            colonnade is, and colonnade was one of the three things that already moved.
- *    shader  a shader LAYER. It is layers, so the rule says engine, and this is the one place a
- *            cheaper path is genuinely equivalent: core/shaders-ambient.js is the same code the
- *            renderer runs for that layer, it takes `t` as an argument, and it costs one canvas
- *            instead of a whole engine. bands was the other thing that already moved.
- *    none    the item refused to render at all, and the poster says so instead of going black. */
-type Mode = "scene" | "html" | "shader" | "none";
-
-type Frame = { x: number; y: number; w: number; h: number };
-const FRAME_OF = FRAMES as Record<string, Frame>;
-// The whole canvas, for an item the build measured no crop rect around. blocks-scenes.mjs skips
-// `overlay` families on purpose, because a rect around something that IS the frame means nothing, so
-// the honest window for one of those is the frame itself. Generators compose on the full canvas too.
-const FULL: Frame = { x: 0, y: 0, w: 1920, h: 1080 };
-// The same names blocks-scenes.mjs writes, and the same sanitiser /arsenal's detail page uses.
-const asset = (name: string, ext: string) => `/assets/blocks/${name.replace(/[^a-z0-9.]/gi, "_")}.${ext}`;
-
-function modeOf(made: string | Layer[] | null): Mode {
-  if (typeof made === "string") return "html";
-  if (!Array.isArray(made) || !made.length) return "none";
-  return (made[0] as Record<string, unknown>).type === "shader" ? "shader" : "scene";
-}
-
-/** The poster's own shape: the aspect of the rect the build measured around the item, exactly.
- *
- *  NOT CLAMPED, AND THE CLAMP IS WHY. A first version held this between 16:9 and 3.2:1, reasoning
- *  that a very wide block becomes a letterbox slot too shallow to read. What it actually produced was
- *  the bug it was written to fix. BlockLive maps the measured rect onto the box by WIDTH, so a box
- *  that is not the rect's shape does not letterbox the picture, it leaves the difference empty at the
- *  bottom: morphText is 944x194, the clamp gave it a 3.2:1 box, and the word sat in the top two
- *  thirds of it with 85px of nothing underneath. Any clamp in either direction does this, because the
- *  box and the content can only agree at one number and that number is the item's own.
- *
- *  So the poster is the shape of the thing in it, which is the rule /arsenal already states for the
- *  same artefacts: "a block poster is cropped to the block's own bounds, so its aspect is whatever
- *  the block is". 16:9 is the fallback rather than a floor, and it applies only where nothing
- *  measured the item: a generator composes on the whole canvas, so the whole canvas is its shape. */
-function aspectOf(gen: Generator, made: string | Layer[] | null): number {
-  const f = FRAME_OF[gen.name];
-  if (f && f.w > 0 && f.h > 0) return f.w / f.h;
-  const l = Array.isArray(made) ? (made[0] as Record<string, number>) : null;
-  if (l && Number(l.w) > 0 && Number(l.h) > 0) return Number(l.w) / Number(l.h);
-  return 16 / 9;
-}
-
-/** Does this reader want motion? Read once, and read as STATE rather than at effect time, because a
- *  scene poster decides whether to boot an engine at all on the answer and that is a render decision.
- *  Live, so a reader who changes the OS setting is answered without a reload. */
-function useStill() {
-  const [still, setStill] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const read = () => setStill(mq.matches);
-    read();
-    mq.addEventListener("change", read);
-    return () => mq.removeEventListener("change", read);
-  }, []);
-  return still;
-}
-
-/** One poster in the library scroll: the real generator, at full width, MOVING while it is on screen.
- *
- *  It is the REAL generator, not a screenshot. A poster would be a second artefact to keep in step with
- *  the code, and site/public froze 77 files behind core/ the last time this repo had one of those
- *  (engine-doctrine/MISTAKES.md #271).
- *
- *  IT MOVES NOW, AND THAT REVERSES A DELIBERATE DECISION, so here is the old one and why it does not
- *  hold any more. ScenePreview set `playing: false` and said: "A field is judged against a still
- *  reference; a picture that changes while you look at it cannot be compared to one that does not."
- *  That argument is about a GRID, where a dozen fields sit side by side and the eye is comparing them.
- *  This is a scroll: one or two posters are on screen at a time and nothing is being compared, so the
- *  cost is gone and what is left is that a motion engine was advertising itself with stills.
- *
- *  STILL AND LIVE, BOTH, and the still is the one that is always there. Every poster is an <img> of
- *  the frame the build rendered: it costs one request, it is correct on the first paint, it is what a
- *  reader who does not want motion keeps, and it is a picture somebody can take away. The engine
- *  mounts OVER it while the poster is on screen and fades in when it reports ready, so the boot is
- *  never a black rectangle and the swap never moves the picture. That is not a new arrangement: it is
- *  what /arsenal's block page does, in the same component, and this is the scrolling version of it.
- *
- *  "NO IFRAME" USED TO BE WRITTEN HERE, and it was wrong in a way worth recording, because it sounds
- *  like restraint. Refusing the engine did not avoid a renderer, it forced a WORSE one: a hand-rolled
- *  preview that could animate a block only if the block happened to animate through CSS custom
- *  properties. Twenty of twenty-three posters were stills and ten were empty, on a page whose whole
- *  claim is that the engine moves. The cost the refusal was protecting against is real but it is a
- *  cost of COUNT, not of kind, and the count here is bounded by the viewport rather than by the
- *  library: the observer mounts the engine for what is on screen and unmounts it behind you.
- *
- *  ONLY WHILE VISIBLE, and only if the reader wants motion. `prefers-reduced-motion: reduce` never
- *  boots an engine and never starts a loop at all: the still is left in place, which is a held frame
- *  of the finished picture rather than of whichever instant the clock stopped on. */
-function Poster({ gen, engine, onPick }:
-  { gen: Generator; engine: Engine; onPick: () => void }) {
-  const box = useRef<HTMLDivElement>(null);
-  const [near, setNear] = useState(false);
-  const [live, setLive] = useState(false);
-  const stillOnly = useStill();
-  // A still that 404s is a state, not a crash, and /arsenal answers the same case the same way
-  // rather than showing a broken glyph.
-  const [noStill, setNoStill] = useState(false);
-  const made = useMemo(() => {
-    try {
-      const preset = Object.values(gen.presets || {})[0] || {};
-      return gen.render(deepMerge(engine.defaultsOf(gen.schema), preset));
-    } catch { return null; }
-  }, [gen, engine]);
-  const mode = useMemo(() => modeOf(made), [made]);
-  const aspect = useMemo(() => aspectOf(gen, made), [gen, made]);
-  // The build's own crop rect where it measured one, the whole canvas where it did not.
-  const frame = FRAME_OF[gen.name] ?? FULL;
-  // A STILL EXISTS ONLY WHERE THE BUILD RENDERED ONE, so it is asked for and allowed to fail rather
-  // than assumed: `noStill` is what the <img> reports back.
-  const poster = FRAME_OF[gen.name] ? asset(gen.name, "png") : null;
-
-  // rootMargin, so a poster is drawing before it reaches the viewport and never arrives blank.
-  // 200px, DOWN FROM 300px, because a scene poster now boots an ENGINE rather than starting a rAF
-  // loop, and this margin is the only thing deciding how many of those exist at once. Measured at
-  // 1280x900 with the whole page walked: 4 engines settled in the band, 5 at the peak of a fast
-  // scroll, and every one of them gone again by the time the scroll stops somewhere else.
-  useEffect(() => {
-    const el = box.current;
-    if (!el || typeof IntersectionObserver === "undefined") { setNear(true); return; }
-    const io = new IntersectionObserver((es) => setNear(es.some((e) => e.isIntersecting)),
-      { rootMargin: "200px 0px" });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  // The engine is a React child, so leaving view UNMOUNTS it: the iframe, its document and its heap
-  // go with it. Nothing here has to remember to tear that down.
-  const wantsEngine = mode === "scene" && near && !stillOnly;
-  useEffect(() => { if (!wantsEngine) setLive(false); }, [wantsEngine]);
-  const onReady = useCallback(() => setLive(true), []);
-
-  // THE SCENE THE BUILD ALREADY RENDERED, where there is one: it is the scene the still was made
-  // from, so the still and the live render are the same picture and the swap is invisible. Where
-  // there is none, wrap the layers in the smallest scene that will render them, and do it ONLY while
-  // the poster is on screen: a blob per poster held for the life of the page is the leak this pass
-  // exists to remove, not one to add.
-  const [blob, setBlob] = useState<string | null>(null);
-  useEffect(() => {
-    if (!wantsEngine || poster || !Array.isArray(made)) { setBlob(null); return; }
-    const url = sceneBlob(made, gen.overlay ? "black" : "plain");
-    setBlob(url);
-    return () => { setBlob(null); URL.revokeObjectURL(url); };
-  }, [wantsEngine, poster, made, gen.overlay]);
-  const src = poster ? asset(gen.name, "json") : blob;
-
-  useEffect(() => {
-    const el = box.current;
-    // The engine and the still own their own box; nothing imperative may touch it. Mounting a shadow
-    // root here would only be a second empty one to tear down.
-    if (!el || mode === "scene" || mode === "none") return;
-    // GONE MEANS EMPTIED. Returning here without clearing is what made the node count a ratchet.
-    if (!near) { clearPoster(el); return; }
-    const frozen = stillOnly;
-    let raf = 0;
-    const t0 = performance.now();
-
-    if (typeof made === "string") {
-      mountFragment(el, made, 0, aspect);
-      const tick = (now: number) => {
-        el.style.setProperty("--t", String(((now - t0) / 1000) % 4));
-        raf = requestAnimationFrame(tick);
-      };
-      if (frozen) el.style.setProperty("--t", "0"); else raf = requestAnimationFrame(tick);
-      return () => { cancelAnimationFrame(raf); clearPoster(el); };
-    }
-
-    const layer = Array.isArray(made) ? (made[0] as Record<string, unknown>) : null;
-    if (!layer) return;
-
-    // An HTML layer: write the channels the layer itself declares, on a loop the length it asks for.
-    if (layer.type === "html" && typeof layer.html === "string") {
-      mountFragment(el, layer.html as string, Number(layer.w) || 0, aspect);
-      const vars = (layer.vars || {}) as Record<string, [number, number] | number[]>;
-      // Written on the HOST, not inside the shadow root: a custom property inherits through a shadow
-      // boundary, so this is the one channel that still reaches the fragment.
-      // EACH CHANNEL ON ITS OWN CLOCK, because a layer is allowed to give each one its own.
-      const keys = Object.keys(vars);
-      const span = (k: string) => chan(layer.varsDelay, k, 0) + chan(layer.varsDur, k, 1.4);
-      const write = (now: number) => {
-        for (const k of keys) {
-          const range = vars[k];
-          const [a, b] = Array.isArray(range) ? [Number(range[0]), Number(range[1])] : [0, 1];
-          const d = chan(layer.varsDelay, k, 0), dur = chan(layer.varsDur, k, 1.4);
-          const p = Math.max(0, Math.min(1, (now - d) / dur));
-          el.style.setProperty(k, String(a + (b - a) * p));
-        }
-      };
-      // A beat of rest after the LAST channel finishes, so a cycle reads as a cycle.
-      const loop = keys.reduce((m, k) => Math.max(m, span(k)), 0) + 1.2;
-      const tick = (t: number) => {
-        write(((t - t0) / 1000) % loop);
-        raf = requestAnimationFrame(tick);
-      };
-      // Held on the frame every channel has finished, which is the composed picture rather than
-      // whichever channel happened to be longest.
-      if (frozen) write(loop); else raf = requestAnimationFrame(tick);
-      return () => { cancelAnimationFrame(raf); clearPoster(el); };
-    }
-
-    if (layer.type !== "shader") return;
-    let live = true;
-    let inst: { canvas: HTMLCanvasElement; draw: (...a: unknown[]) => void; dispose?: () => void } | null = null;
-    Promise.all([
-      import(/* webpackIgnore: true */ AMBIENT_URL),
-      import(/* webpackIgnore: true */ PALETTE_URL),
-    ]).then(([m, p]) => {
-      if (!live) return;
-      inst = m.createAmbientLayer(960, 540);
-      // `draw` wants GL float triples, not hex, and the CONVERSION IS THE ENGINE'S. A hand-rolled
-      // parseInt here would be a second implementation of core/surfaces/palette.js, and would already
-      // be behind it: a stop may carry its own position along the ramp as `#rrggbb@0.42`.
-      const pal = (layer.colors as string[] | undefined)?.length
-        ? (p as { palette: (l: unknown) => unknown }).palette({ colors: layer.colors })
-        : null;
-      // ALL SIX PARAMETER VECTORS. An earlier version passed two, so every card of `bands` and
-      // `spectrum` was drawn with the other four defaulted to zero: no gradient, no converge, no light
-      // shape, no zoom. Not a small approximation of the generator, a different picture.
-      const paint = (t: number) => inst!.draw(layer.shader, t, layer.seed ?? 0, pal,
-        layer.intensity ?? 1, layer.params, layer.params2, layer.params3, layer.params4,
-        layer.params5, layer.params6);
-      // aria-hidden, because the canvas sits INSIDE a button that already carries the generator's name
-      // and its description. Without it a screen reader announces the label, then an unlabelled
-      // graphic: the same thing said twice with the second half empty.
-      inst!.canvas.setAttribute("aria-hidden", "true");
-      el.replaceChildren(inst!.canvas);
-      inst!.canvas.style.width = "100%";
-      inst!.canvas.style.height = "100%";
-      inst!.canvas.style.display = "block";
-      paint(0);
-      if (!frozen) {
-        const tick = (now: number) => { paint((now - t0) / 1000); raf = requestAnimationFrame(tick); };
-        raf = requestAnimationFrame(tick);
-      }
-    }).catch((e) => {
-      // Never silent. A blank poster that swallowed its reason is indistinguishable from one that has
-      // nothing to draw, and this repo has paid for that confusion more than once.
-      console.error(`playground: ${gen.name} poster could not draw`, e);
-    });
-    // dispose() frees the GL context; replaceChildren takes the canvas element out of the document.
-    // Doing only the first left a dead canvas in the tree for the rest of the session.
-    return () => { live = false; cancelAnimationFrame(raf); inst?.dispose?.(); clearPoster(el); };
-  }, [made, near, mode, stillOnly, gen.name]);
-
-  // WHAT KIND OF THING THIS IS, said on the poster rather than discovered by clicking it. An engine
-  // generator opens on a fragment and its own dials; a block family opens on a scene the engine
-  // renders. They are different objects and they behaved differently on arrival with nothing
-  // announcing it.
-  const kind = gen.origin === "block" ? (gen.group || "block") : "generator";
-
-  // What the poster is doing RIGHT NOW, in one word, because the owner asked for both states and a
-  // reader cannot tell a paused engine from a picture of one. "live" is claimed only once the engine
-  // has reported ready: saying it while the iframe is still booting is the claim being false for the
-  // second that matters.
-  // A FRAGMENT MOVES ONLY IF IT READS THE CLOCK, and whether it does is in the markup rather than in
-  // an assumption. Measured: of the four generators emitting an html string, only colonnade contains
-  // `var(--t)`. crt, thermalBlur and keyframeHandle carry no clock of any kind, so no loop this page
-  // runs can move them, and calling them "live" was the label being false on three posters.
-  const readsClock = typeof made === "string" && /var\(\s*--t\b/.test(made);
-  const state = mode === "none" ? "no preview"
-    : stillOnly ? "still"
-    : mode === "scene" ? (live ? "live" : "still")
-    : mode === "shader" || readsClock ? "live"
-    : "still";
-
-  return (
-    <button className="pgposter" onClick={onPick} type="button"
-      style={{ "--pg-aspect": String(aspect) } as React.CSSProperties}>
-      <span className="pgposter-shot" data-mode={mode} aria-hidden>
-        {/* THE STILL FIRST, AND IT STAYS. It is the first paint, it is the whole answer under
-            reduced motion, and it is the bed the engine fades in over, so a boot is never a black
-            rectangle and the swap never moves the picture. */}
-        {poster && !noStill && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={poster} alt="" loading="lazy" decoding="async" onError={() => setNoStill(true)} />
-        )}
-        {/* Nothing rendered a still for this one, so the stripe is the bed instead of a black hole,
-            and the engine covers it when it arrives. The line states a FACT rather than promising a
-            picture: it read "live only" for a while, which was a promise grainOverlay cannot keep. It
-            is a 12% noise rect in `overlay` blend, a texture modifier with no picture of its own, and
-            that is exactly why the build rendered no still for it either. */}
-        {(mode === "none" || !poster || noStill) && (
-          <span className="pgposter-none">
-            <span className="pgposter-none-tag">{kind}</span>
-            <span className="pgposter-none-why">
-              {mode === "none" ? "nothing to render"
-                : gen.overlay ? "a full-frame overlay, so no still" : "no still was rendered"}
-            </span>
-          </span>
-        )}
-        {wantsEngine && src && (
-          <BlockLive name={gen.name} src={src} frame={frame} playing onReady={onReady} />
-        )}
-        {/* The generator paths draw straight into this box. It is empty for a scene poster and costs
-            nothing there. */}
-        <span ref={box} className="pgposter-live" />
-      </span>
-      <span className="pgposter-meta">
-        <span className="pgposter-tags">
-          {/* Inert data about the entry, so both of these are ink and not cobalt: the site keeps the
-              accent for things you can act on. */}
-          <span className="pgposter-kind" data-origin={gen.origin ?? "engine"}>{kind}</span>
-          <span className="pgposter-state" data-state={state}>{state}</span>
-        </span>
-        <span className="pgposter-name">{gen.name}</span>
-        <span className="pgposter-blurb">{gen.blurb}</span>
-        {/* NOT HOVER-ONLY. It was the single thing saying the poster is a control, and a touch screen
-            has no hover, so on a phone nothing said so at all. better-ui puts it plainly: every
-            animated state change needs a static cue as well. */}
-        <span className="pgposter-go" aria-hidden>turn its dials →</span>
-      </span>
-    </button>
-  );
-}
-
 /** The engine iframe, the same hook /blocks and /editor use, so the site runs one engine.
  *
  *  It wears `.sp-stage`, not a class of its own. The hook names the iframe `sp-frame`, and that pair
@@ -1248,18 +854,71 @@ function Poster({ gen, engine, onPick }:
  *  instead crops the scene to its top-left corner, which is exactly what the first version here did.
  *  useStageFit does that scaling, and /editor does it with the same call.
  *
- *  STILL, DELIBERATELY, and unlike the library posters. The posters move because a scroll shows one
- *  at a time and nothing is being compared. This is the detail view, where the motion a person came
- *  for is the DIALS: a scene looping underneath while you drag a slider makes it impossible to tell
- *  which change was yours. One frame is drawn explicitly, because with no loop nobody else would draw
- *  it, and it is the MIDDLE one: the engine gives every layer an entrance envelope, so frame 0 is the
- *  instant before the picture arrives and the stage came up white. Halfway is past every entrance and
- *  before any exit. */
+ *  STILL, DELIBERATELY. The motion a person came to this page for is the DIALS: a scene looping
+ *  underneath while you drag a slider makes it impossible to tell which change was yours. One frame
+ *  is drawn explicitly, because with no loop nobody else would draw it, and it is the MIDDLE one: the
+ *  engine gives every layer an entrance envelope, so frame 0 is the instant before the picture arrives
+ *  and the stage came up white. Halfway is past every entrance and before any exit. */
 function ScenePreview({ url, title }: { url: string; title: string }) {
   const { hostRef, meta, renderFrame } = useSceneEngine({ dataUrl: url, aspect: "16:9", title, playing: false });
   useEffect(() => { if (meta) renderFrame(Math.floor(meta.totalFrames / 2)); }, [meta, renderFrame]);
   useStageFit(hostRef, meta);
   return <div className="sp-stage pgscene" ref={hostRef} aria-label={title} />;
+}
+
+// A shared, offscreen probe element. One per page rather than one per colour field: creating and
+// discarding a DOM node on every keystroke of every dial is wasted work a single reused element avoids.
+let colourProbe: HTMLDivElement | null = null;
+let colourCanvas: HTMLCanvasElement | null = null;
+
+/** What a CSS colour EXPRESSION actually paints, right now, resolved by the browser rather than
+ *  guessed by a second copy of the theme's palette table. Setting `color` on a real element and
+ *  reading it back with `getComputedStyle` resolves `var(--text)` and `color-mix(in srgb, ...)`
+ *  exactly as the engine's own scene document would, because both are the SAME CSS engine looking at
+ *  the SAME custom properties: the theme-seeding effect above writes them onto this page's `:root`
+ *  with the engine's own `applyTheme`, and a probe anywhere in this document inherits them.
+ *
+ *  THE CANVAS STEP IS NOT DECORATION. `getComputedStyle` does not always answer in `rgb()`: a
+ *  `color-mix()` with any transparency comes back as `color(srgb 0.14 0.39 0.92 / 0.14)`, whose
+ *  numbers are 0-1 floats, not 0-255 bytes, and a regex expecting `rgb()` read that `0.14` as if it
+ *  were a channel and produced a wrong, unreadable swatch. A 1x1 canvas parses ANY valid CSS colour
+ *  (canvas fillStyle follows the same grammar) and, painted over white first, hands back the exact
+ *  bytes this page's own white ground would show, alpha included. */
+function resolveTokenColour(expr: string): string | null {
+  if (typeof document === "undefined") return null;
+  try {
+    if (!colourProbe) {
+      colourProbe = document.createElement("div");
+      colourProbe.style.cssText = "position:fixed;left:-9999px;top:-9999px;width:0;height:0;pointer-events:none";
+      document.body.appendChild(colourProbe);
+    }
+    colourProbe.style.color = "";
+    colourProbe.style.color = expr;
+    const resolved = getComputedStyle(colourProbe).color;
+
+    if (!colourCanvas) { colourCanvas = document.createElement("canvas"); colourCanvas.width = 1; colourCanvas.height = 1; }
+    const ctx = colourCanvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 1, 1);
+    ctx.fillStyle = resolved; ctx.fillRect(0, 0, 1, 1);
+    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+    return "#" + [r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("");
+  } catch {
+    return null;
+  }
+}
+
+/** Resolves a `color`-kind field's value to a real hex for the colour well, ONLY when it is not
+ *  already one: a literal hex needs no resolving and is passed `null` by the caller. Runs in an
+ *  effect because it reads computed style, which is a browser-only operation and one render behind
+ *  is fine for a swatch nobody is validating against. */
+function useResolvedColour(expr: string | null): string | null {
+  const [resolved, setResolved] = useState<string | null>(null);
+  useEffect(() => {
+    if (!expr) { setResolved(null); return; }
+    setResolved(resolveTokenColour(expr));
+  }, [expr]);
+  return resolved;
 }
 
 function groupControls(cs: Control[]): [string | null, Control[]][] {
