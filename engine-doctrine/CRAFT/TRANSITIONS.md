@@ -48,7 +48,7 @@ deep dive for the cut**: the theory and the decision procedure. Read it when you
 given transition is there.
 
 > **The inventory (what exists) is `core/transitions/catalog.js`, run `make transitions`.** It catalogs all
-> ~90 transitions across the four mechanisms (`anim` per-layer · `cut` one root · `sting` overlay ·
+> 106 transitions across the four mechanisms (`anim` per-layer · `cut` one root · `sting` overlay ·
 > `seam` two-scene), marks the basics, and is derived from the source registries so it can't drift.
 > This doc is the *decision* layer; that catalog is the *inventory*. The basic two-scene transitions
 > (`seam` fx `slide · push · uncover · wipe · dissolve`, all dir-aware) are the fundamentals every tool
@@ -232,7 +232,7 @@ PLACES with a spatial logic (a dashboard, then a panel inside it, then a detail)
 
 `tx`/`ty` are the STAGE point to centre; `s` the zoom; `dur` the flight INTO a station; `dwell` the hold
 once there. Station 0 is the start, so it has no `dur`. Interiors run linear on purpose (an eased curve
-at each stop would zero velocity and break one flight into N hops, MISTAKES #125). This is a
+at each stop would zero velocity and break one flight into N hops, MISTAKES #128). This is a
 `choreographed`-adjacent scene: it carries no per-beat `cuts`, so it never triggers scene-unit swaps.
 
 ---
@@ -301,7 +301,7 @@ the engine actually does (a layer `cut`/`out`, a sting overlay, a Seam D two-sce
 
 | Transition | Signifies / feeling | Reach for it when | In this engine |
 |---|---|---|---|
-| **Hard cut** | nothing: invisible, respects momentum | the default; two beats are one continuous thought | back-to-back beats, overlap so no dip (MISTAKES #120) |
+| **Hard cut** | nothing: invisible, respects momentum | the default; two beats are one continuous thought | back-to-back beats, overlap so no dip (MISTAKES #123) |
 | **Cross-dissolve** | passage of time · a connection · gentleness | link two images, soften, show time passing | soft `cut`/`out` (`fade`/`blur`), or Seam D `crossWarp` |
 | **Fade to black** | a beginning or an ending · an act break · closure | open/close the film or a major section | `fade` to `bg`, held; Seam D `flashWhite` (to white = dreamlike) |
 | **Wipe** | playful · deliberate · artificial (shows the seam) | an energetic location/time change | cut `wipe`; sting `wipe`/`doors`/`blinds` |
