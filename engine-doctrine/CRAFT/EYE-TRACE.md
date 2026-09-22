@@ -2,7 +2,7 @@
 when: a cut moves the subject across the frame
 answers: "where the eye is at each cut · the attention ranking · our 0.30 threshold and where it came from · why it reports"
 group: look
-codes: camera-aimed-at-nothing, eye-trace
+codes: eye-trace, camera-aimed-at-nothing
 ---
 
 # Eye-trace: where the viewer is looking when you cut
@@ -10,7 +10,7 @@ codes: camera-aimed-at-nothing, eye-trace
 ## AGENT SUMMARY
 
 - At each cut, put the incoming subject at or near the screen point the eye was on before the cut. Do not make the eye cross the frame at a junction.
-- `[ref: node quality/gates/eye-trace.mjs <scene.json>]` (codes: `camera-aimed-at-nothing`, `eye-trace`). It REPORTS only and never blocks: Murch ranks eye-trace 4th of 6, at 7%, below emotion/story/rhythm, so a cut that serves the story is allowed to cost the eye a journey.
+- `[ref: node quality/gates/eye-trace.mjs <scene.json>]` (code: `eye-trace`). It REPORTS only and never blocks: Murch ranks eye-trace 4th of 6, at 7%, below emotion/story/rhythm, so a cut that serves the story is allowed to cost the eye a journey. `camera-aimed-at-nothing` is a related but separate finding, owned by `quality/gates/beat-check.mjs`, not this gate: it fires when the camera has travelled off content that is still alive.
 - Checkable action: where is the eye at the start of this shot, where should it be at the end, and what moves it?
 
 Murch ranks eye-trace fourth of six, at 7%, under emotion (51%), story (23%) and rhythm (10%).
@@ -112,11 +112,11 @@ the eye at the START of this shot, where should it be at the END, and what moves
 No source publishes a distance threshold. Every one says "avoid making the eye travel" and none says
 how far. So these came from this library, not from a citation, and they must never be cited to one.
 
-**`JUMP_FAR = 0.30`** of the frame diagonal. It is the 90th percentile of the junctions in this library
-where the focal SUBJECT actually changes. Of 185 junctions across 135 scenes, 132 hold one subject
-across the cut and travel zero by construction; the other 53 distribute median 0.15, p75 0.19,
-p90 0.30, max 0.53. So one junction in ten in a normal film here is expected to clear it. Re-derive it
-with `--census` when the library grows.
+**`JUMP_FAR = 0.30`** of the frame diagonal. It was the 90th percentile of the junctions where the focal
+SUBJECT actually changes, measured when the library was smaller; re-run `--census` before quoting a
+distribution here; a stale percentile becomes a threshold nobody re-checked. As of this audit, 288
+junctions across 177 scenes, 163 (57%) hold one subject and travel zero by construction; the other 125
+distribute median 0.064, p75 0.171, p90 0.327, max 3.739, with 15 of them (12%) over `JUMP_FAR`.
 
 **`RECOVER = 0.30s`** for a full-diagonal jump, scaled linearly with distance. The sources say
 re-acquisition costs "a fraction of a second" and publish no number.
@@ -127,9 +127,9 @@ Re-acquisition costs time, so a run of short beats each demanding a jump never l
 up. Three ways to measure that, and only two of them discriminate.
 
 - **`reacquire`**: the share of runtime the eye spends travelling. This separates films. The busiest
-  in this library sits at 1.8%; most sit under 1%.
+  in this library sits at 7.11% (`together-recreation`); most sit under 1%.
 - **`peak`**: the classic running debt in seconds, a jump adding cost and the next beat paying it off.
-  It is **INERT** here and probably everywhere: it peaks at 0.38s across the whole library, because one
+  It is **INERT** here and probably everywhere: it peaks at 1.41s across the whole library, because one
   saccade never outruns one beat. Kept and printed so nobody rebuilds it expecting it to fire.
 - **`no-time-to-catch-up`**: a jump over `JUMP_FAR` followed by a beat SHORTER than that film's own
   median. This is the pairing the source names and it fires. Two films in this library trip it.

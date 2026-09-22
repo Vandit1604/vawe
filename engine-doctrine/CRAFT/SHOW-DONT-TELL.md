@@ -19,8 +19,9 @@ A film can be well written, locked to the palette, cut in time and directed hard
 viewer nothing. Every layer that carries information is a word. The viewer reads it, believes it or
 does not, and moves on. Measured across this library when the gate landed: **52 of 93 shipped scenes
 carried no large pictorial layer at all.** Re-measured over the gate-visible scenes: **64 of 148 carry
-zero pictorial layers of any size, last measured** (run `node quality/gates/waiver-drift.mjs` for the
-current count), and the median film gives **5% of its layers to picture.** That
+zero pictorial layers of any size, last measured**, and the median film gives **5% of its layers to
+picture.** Both are snapshots: no gate counts pictorial layers today, so there is no command that
+reports the current figure. That
 was not a house style anyone chose. It is what you get when nobody is asked the question. It is debt,
 not a pattern to copy.
 
@@ -43,8 +44,8 @@ typography wearing a great deal of decoration, and all three fail this gate. `cr
 pictorial layers and not one of them is large, because they are all logos and marks. The house habit is
 shipping icons, not shipping explanations.
 
-**This is the same rule CLAUDE.md already makes about backgrounds** (2a0: the background is decoration,
-it is never information). One idea, applied twice. There the point is that a moving backdrop does not
+**This is the same rule [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md) already makes about backgrounds**
+("the background is decoration, it is never information"). One idea, applied twice. There the point is that a moving backdrop does not
 excuse an empty frame. Here it is that a decorated frame does not excuse an unillustrated claim.
 
 ## 2. Find the thing in your content that wants a picture

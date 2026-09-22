@@ -62,17 +62,17 @@ the part you skip.
 - **Ease-out for entering, ease-in for leaving, ease-in-out for moving between positions. You get this
   backwards constantly.** *"Ease-in for entrances feels sluggish. Ease-out for exits feels reluctant."*
 - **Entrances take longer than exits.** *"A card takes 0.4s to appear but 0.25s to disappear."* The engine
-  has a field for exactly this: `theme.motion.exitRatio`, which defaults to `1` and is set to `0.45` by
-  exactly one theme ([KEYED-MOTION.md](KEYED-MOTION.md)).
+  has a field for exactly this: `theme.motion.exitRatio`. A theme without its own value now gets one
+  derived from its pace (`exitRatioFromMotion`, `core/motion/motion.js`) rather than a flat 1; 13 of 31
+  themes still hand-author their own number, from 0.35 to 0.6 ([KEYED-MOTION.md](KEYED-MOTION.md)).
 - **Subtle reads as static at 30fps.** *"Err toward more movement than feels safe."* Measured here: two
   films authored as improvements on a third both came out SLOWER than the film they criticised, at 0.95
-  and 0.85 events per second against a library median of 1.20 ([`../MISTAKES.md`](../MISTAKES.md) #322).
+  and 0.85 events per second against a library median of 1.20 ([`../MISTAKES.md`](../MISTAKES.md) #336).
   `make pace-check` fails below 1.0.
 
 **One accusation this repo has to add for itself, because their engine has no counter layer:** you will
 put a spring or an overshoot ease on a `count`. Don't. `core/layers/count.js` runs the value through
-whatever ease it is handed, so overshoot paints a number that is **not true** for several frames. The
-house motion guide recommended it, twice, for a year ([`../MISTAKES.md`](../MISTAKES.md) #385).
+whatever ease it is handed, so overshoot paints a number that is **not true** for several frames.
 `countEaseErrors` in `core/validate/validate.mjs` now refuses it. Overshoot is a claim about MASS, and a number
 has none.
 
@@ -119,7 +119,7 @@ this engine actually shipped (`engine-doctrine/MISTAKES.md`).
   the next label; a card moves, it is not replaced). One continuous film, one camera.
 - **The white flash / backdrop reveal**: a moving cut (cube, roll, spin) or a fading background reveals
   a light page body behind dark content. → Match the backdrop to the content (`bg:"dark"` under a dark
-  film), and hold full-bleed backgrounds with `exitDur:0` so they never fade out. (MISTAKES #114/#116.)
+  film), and hold full-bleed backgrounds with `exitDur:0` so they never fade out.
 - **The monotone**: every entrance is the same 0.45s. Reads as a machine narrating. → Timing is a
   voice: ambient 0.8–1.2s, thesis 0.5s, payoff 0.25–0.35s (MOTION-CRAFT rule 1).
 - **The chord that should be an arpeggio** (and vice-versa): a group all enters at once (screenshot) or
@@ -202,7 +202,7 @@ The split: prose carries the taste; a gate backstops only the source-decidable s
 | A dial set on a preset that ignores it | `make knobs-audit` |
 | Monotone timing; payoff doesn't settle | `make motion` |
 | Design repeats a shipped one | `make ledger` |
-| Effect soup / no continuity / mixed cut family | **judgment** (the planned `make direct` gate) |
+| Effect soup / no continuity / mixed cut family | **judgment** (`make direct`) |
 | Does it FEEL right | **judgment** (`make judge` vision pass) |
 
 The last two rows are why a human verdict per beat still matters. A gate proves it did not break a

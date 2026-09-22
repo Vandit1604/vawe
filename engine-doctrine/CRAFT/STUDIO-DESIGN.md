@@ -10,18 +10,20 @@ group: reference
 
 - Read this before adding a feature to `make studio` (`studio/server.mjs`): it holds the COPY/REJECT
   verdict (§2) and the ranked build list with costs (§3) for every candidate feature, each with a reason.
-- `studio/server.mjs` is ONE file: no build step, no dependency, no framework, light theme by
-  default. A feature that needs a bundler, a component tree, or a second way to say what the JSON
-  already says is a bad borrow, no matter how good it looks in another editor.
+- `make studio`'s server (`studio/server.mjs`) has no build step, no dependency, no framework; the page
+  is split into `studio/page.mjs` plus `studio/ui/shell.html`, `studio.css` and `studio.js` for syntax
+  highlighting and a linter, and ships dark-only, no light/dark toggle. A feature that needs a bundler, a
+  component tree, or a second way to say what the JSON already says is a bad borrow, no matter how good
+  it looks in another editor.
 - Checkable action: before building, find your feature's row in §2; if it says REJECT, read the reason
   before reopening the question. `[ref: studio/server.mjs]`
 
 Other developer-facing video editors exist, further ahead on features, built on formats ours does not
 use. This file states which editing decisions belong here, and why, on this engine's own terms.
 
-**The constraint that decides every row below.** `studio/server.mjs` is ONE file: a Node server
-plus a page written as a template literal, no build step, no dependency, no framework, light theme by
-default because vawe is a white-first product. The scene it edits is a JSON file that a human or an
+**The constraint that decides every row below.** `make studio`'s Node server has no build step, no
+dependency, no framework; the page it serves is dark-only, no light/dark toggle. The scene it edits is
+a JSON file that a human or an
 agent opens and edits directly. A feature that needs a bundler, a component tree, or a second way to
 say something the JSON already says is a bad borrow, no matter how good it looks in another editor.
 
@@ -58,7 +60,7 @@ The plan and the film are still in two places. `make panels` renders the storybo
 | COPY | in and out points that bound playback and the draft render | Cheap on a scrubber that already owns the clock, and it makes iterating on one beat of a 30s film possible. |
 | COPY | a per-layer hide toggle | Answers "what is under that" without editing the file. Ours stays preview-only (see the REJECT row). |
 | COPY | onion-skin proof of a move | `make reveal` proves this reads well as a sheet. On a selected layer in the studio it is the thing that makes a keyed track legible. |
-| COPY | search by intent, not a browse grid | 566 effects and 217 blocks cannot be browsed. Rank them against a plain-English description of the beat. `engine-doctrine/EFFECTS.md` and `blocks/index.mjs` are already the index. |
+| COPY | search by intent, not a browse grid | 914 named things across 65 vocabularies, 100 of them blocks, cannot be browsed (`node harness/author/arsenal.mjs --census`). Rank them against a plain-English description of the beat. `engine-doctrine/EFFECTS.md` and `blocks/index.mjs` are already the index. |
 | COPY | one implementation, two surfaces | Studio's write path must call the same functions the CLI authoring scripts call, exactly as it re-runs `quality/gates/beat-check.mjs` rather than restating its rules. A second definition drifts. |
 | COPY | stop at the preview and wait for approval | Already our doctrine (`make judge`). Any render button added to the studio must not become a reason to skip the eye. |
 | REJECT | a schema-generated prop form | That control only makes sense when props live in typed source and cannot be edited as text. Ours are JSON already: the picker shows the authored object, and a generated form would be a second, lossier view of the same bytes. |
@@ -70,7 +72,7 @@ The plan and the film are still in two places. `make panels` renders the storybo
 | REJECT | an "Ask AI" panel in the editor | The agent is already outside the browser driving the session. Build the context endpoint it can read; do not build a chat box inside a template literal. |
 | REJECT | a second lightweight player | Ours is one file with no build step and no editor chrome to shed. Splitting it buys nothing and doubles the surface. |
 | REJECT | a flag that turns the editing half off | A second mode nobody runs is a second mode nobody tests. Every write here is undoable and surgical; that is the safety. |
-| REJECT | dark-first chrome | Deliberate. Light is the default because vawe is a white-first product; a dark creative-tool look is named as an anti-reference. The toggle stays. |
+| REJECT | a light-mode toggle | The shipped chrome is dark-only, a deliberate creative-tool look; vawe's own white-first product identity lives in the rendered films, not in the tool that edits them. |
 
 ## 3. The ranked build list
 
@@ -83,7 +85,7 @@ Cost is measured against this one file with no build step.
 | 3 | **Generalise the write.** `POST /api/set {layer, path, value}` on top of `propSpan` and `layerSpan`, which `harness/author/patch-motion.mjs` already exports. Every write pushes the whole file onto the existing undo stack, so undo covers everything at once. | medium | Editing a number without leaving the studio, and items 5, 6 and 8, which are all writes. |
 | 4 | **The plan beside the film.** Draw the storyboard's beat spans as a band on the timeline ruler, and put the `make panels` sheet behind a key as an overlay. The storyboard path is already resolved by the authoring ladder. | medium | Seeing the promise and the render on one clock, which is the question `plan-check` answers in text and nobody reads at the moment of the edit. |
 | 5 | **In and out points.** `i`, `o`, `x` on the scrubber. Playback loops the range, and the range is offered as the draft render window. | cheap | Iterating on one beat of a long film instead of scrubbing past it every time. |
-| 6 | **Search the arsenal.** A key opens a box, you type what the beat should do, and the studio ranks effects, blocks and themes by word overlap against their own descriptions. Selecting one copies the JSON snippet; it does not insert it. | medium | The 566 effects that are currently reachable only by reading a generated 849-line file. Rank by intent, don't auto-install. |
+| 6 | **Search the arsenal.** A key opens a box, you type what the beat should do, and the studio ranks effects, blocks and themes by word overlap against their own descriptions. Selecting one copies the JSON snippet; it does not insert it. | medium | The 914 named things that are currently reachable only by reading a generated 1,163-line file. Rank by intent, don't auto-install. |
 | 7 | **Per-layer hide.** A toggle on each bar, preview only, held in the page, never written to disk. | cheap | Answering "what is behind that" during a layout argument. |
 | 8 | **Key deletion and key drag.** Click a tick on a bar to select the key, delete it, or drag it along the bar to retime. Same patcher, same undo. | medium | The other half of the one interaction we already have. Dense keys are cheap to place today and expensive to correct. |
 | 9 | **Onion skin.** For the selected layer, draw its position at N sampled frames as ghosts over the stage. | medium | Reading a keyed track as a path, which is the thing a bar with ticks cannot show. |

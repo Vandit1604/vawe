@@ -31,7 +31,7 @@ the [`../MISTAKES.md`](../MISTAKES.md) numbers in the margin are the receipts.
 - **Map the beats.** `make filmstrip VIDEO=ref.mp4` → a labelled contact sheet. One idea per beat;
   note the copy, layout, palette per beat.
 - **You will sample the middle of the beat. Don't.** It is the single most repeated failure here: the
-  middle shows the settled state and hides the motion that carries the craft (MISTAKES #124), and for a
+  middle shows the settled state and hides the motion that carries the craft, and for a
   continuously moving field it is the exact frame where a wrong speed looks right (#155). Sample
   the **entrance** (high fps, first ~0.5s): is the word oversized + blurred, settling (a dolly-in)?
   the **exit**: does it scale UP + blur to leave (a dolly-out)? a **zoomed crop of the text**: flat
@@ -80,7 +80,7 @@ often cuts MORE than the reference). It is three things: (1) FRAME EMPTINESS, on
 carries a fraction of a full product frame; (2) TELLING not SHOWING, a claim beat ("On brand. Every
 time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured. Rules:
 - **Every claim beat is backed by the surface that proves it.** Revenue → the revenue UI; integrates →
-  the ESP grid; on-brand → the collage. A claim with no artifact fails the value gate (MISTAKES #129).
+  the ESP grid; on-brand → the collage. A claim with no artifact fails the value gate.
 - **Big-type-on-black is a hook or a transition, never the whole film.** A launch film SHOWS the product.
 - **Density = information per frame** (a real surface + a hero line + support), not cuts per second.
 - **Use most of what you captured.** 15 surfaces captured and 1 used means the film substituted type for
@@ -90,17 +90,17 @@ time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured.
 
 ### 3. Build it (the aliveness the reference has, our primitives)
 - **Centered + constant motion, NOT asymmetry.** The reference settles centered and stays in motion
-  the whole time; the motion gives the dynamism, not an off-centre layout (MISTAKES #124/#125). Reach
+  the whole time; the motion gives the dynamism, not an off-centre layout. Reach
   for the cinematic director: `make cinematic D=<file> WRITE=1` adds a smooth camera push + a per-hero
   **dolly** (oversized → settle → bigger-out + motion-blur) derived from your own beats.
 - **Smooth the camera.** One monotonic move, no reversals; `ease:"linear"` on interior camera
-  keyframes (the default easeInOutCubic zeroes velocity at each keyframe and pulses, MISTAKES #125).
+  keyframes (the default easeInOutCubic zeroes velocity at each keyframe and pulses, MISTAKES #128).
 - **The premium type tells:** `gradient:{from,to,angle}` fill on heroes; `typing:true` for input beats;
   `preset:"colorWave"` for a per-word accent colour-wave. (See the map in REFERENCE-STUDY.md.)
 
 ### 4. Score it (sound is part of the recreation)
 - `audio:{auto:true}` derives a cue per cut, seam and sting; add a bed (`audio.music`,
-  `make audio-bed`), `musicFade:{in,out}` and `musicDuck`. Every seam is cued (MISTAKES #126); typing
+  `make audio-bed`), `musicFade:{in,out}` and `musicDuck`. Every seam is cued (MISTAKES #129); typing
   uses the soft `key` voicing, not the sharp `press` (which stays for punch/flash hits).
 
 ### 5. Cut it TO the track (beat-sync)

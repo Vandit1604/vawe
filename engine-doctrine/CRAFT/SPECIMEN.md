@@ -27,7 +27,7 @@ harness. A harness is legible and it is never beautiful, and it is the thing we 
 
 The measurement, over `films/scene/_*.json`:
 
-| | the 35 scratch scenes | the 120 shipped films |
+| | the 54 scratch scenes | the 143 shipped films |
 |---|---|---|
 | contact-sheet shaped (4+ sibling layers of one type stepping across x or y) | **27 (77%)** | n/a |
 | more than one `bg` window | **0 (0%)** | 28 (23%) |

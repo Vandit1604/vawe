@@ -147,7 +147,7 @@ new extension point should use one of them rather than invent a fourth:
   together by two gates, and the id those other three were keyed by was a slug of the section title, so
   renaming a section orphaned its usage and its preview in silence. A half-written block is refused at
   load rather than by a gate.
-- **`paramsOf`** (`core/camera-moves/index.js:216`), refuses an unknown parameter by reading the generator's
+- **`paramsOf`** (`core/camera-moves/index.js:74`), refuses an unknown parameter by reading the generator's
   OWN signature. Nobody maintains that list, so it cannot drift.
 - **`createKit(ctx)`** (`core/layers/util.js`): dependency injection for layer builders. A capability
   added to the ctx reaches every primitive at once, with no signature change at any call site. The frame
@@ -183,14 +183,13 @@ chose correctness" from a hope into a record.
 
 **Two things already true that a reader should not have to rediscover:**
 
-- **The worker cap is `min(NumCPU - 1, 6)`** (`renderer/cmd/render/main.go:60`). On a 10-core machine that
-  leaves four cores idle, and memory is not the reason: an extra tab costs one renderer process and
-  about 118 MB, so nine tabs is roughly 1 GB. Whether the cap is a leftover or a deliberate ceiling
-  is not written down anywhere.
-- **Worker count and determinism are coupled**, so raising the cap is not purely a speed change.
-  `renderer/internal/scene/scene.go` records two renders of identical code differing on 373 of 1890 captures
-  at one worker and 1078 at four. Any speed experiment on the pool measures frame agreement too, or
-  it is trading correctness for time without saying so.
+- **The worker cap is `max(1, min(NumCPU - 1, 6))`** (`renderer/cmd/render/main.go:72`), and the comment
+  above that line now carries the measurement: on a 10-core M4, 1 to 6 workers is worth 2.4x wall clock,
+  6 to 9 buys 2-7%, inside the run-to-run spread, for three more renderer processes and about 350 MB. The
+  cap is a measured ceiling, not a leftover.
+- **Worker count and determinism used to be coupled.** That bug is fixed: the same comment records frame
+  agreement now equal at 1, 6 and 9 workers (0 of 900 differing captures against itself at each), so a
+  speed experiment on the pool no longer has to also measure correctness.
 
 **Do not optimise on a guess either.** The same rule that governs a rendering bug governs a slow one:
 measure, name the number, then change one thing. This file already carries four wrong explanations

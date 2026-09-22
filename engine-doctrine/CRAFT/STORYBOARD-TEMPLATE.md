@@ -29,7 +29,7 @@ not: "the defaults this film refuses, in your own words"
   film across its cuts), and per-beat `shot:`/`layout:`/`becomes:`/`trigger:`/`picture:`, then watch
   `make animatic SB=<file>` before writing any JSON.
 - Enforced by `[gated: quality/gates/storyboard-check.mjs]` (presence of `spectacle:`/`not:`, plus
-  `pace-not-chosen` and `timeline-hole`) and `[gated: quality/gates/plan-vs-render.mjs]` once a scene
+  `timeline-hole`), `[gated: quality/gates/plan-vs-render.mjs]` (`pace-not-chosen`) once a scene
   exists; `[ref: make panels]` / `[ref: make animatic]` draw what each field means but check nothing.
 - Confirm: are `spectacle:` and `not:` both filled, and have you watched `make animatic` before
   writing any scene JSON?
@@ -500,7 +500,7 @@ the last beat next to a real change.
 **One finding did survive, because frames were pulled and looked at.** From 5.0s to 7.0s all three
 of ours change nothing but the backdrop, and at 6.5s two of them are a black plate with a single
 dot on it. The reference's emptiest second still has the carried object turning in frame. That hole
-is now a blocking gate (`dead-air`, MISTAKES #165). It went unseen for a whole render cycle because
+is now a blocking gate (`dead-air`, MISTAKES #171). It went unseen for a whole render cycle because
 the gate asked whether a layer window was open, not whether anything was in the frame.
 
 The lesson is the method, not the numbers. A count over a whole film is a hypothesis. Pull the

@@ -71,8 +71,8 @@ Two things break when the fragments are written first, and neither is visible af
 
 So the order is: write the beat table, run `make storyboard-check`, sort the beats, then author only the
 fragments the table asked for, against the selectors it already named. Review both halves together with
-`make studio SB=<file>.storyboard.md`, which serves the plan with every beat's real fragment live inside
-it. `engine-doctrine/MISTAKES.md` #591 is this rule being broken, with the excuse.
+`make studio D=<file>.json`, which serves the plan with every beat's real fragment live inside
+it (the storyboard sidecar is found automatically, `<file>.storyboard.md`). `engine-doctrine/MISTAKES.md` #591 is this rule being broken, with the excuse.
 
 ## How many fragments does a film need?
 
@@ -156,8 +156,7 @@ This is the most flexible and the most hand-rolled. Use it for a shape whose geo
 **The most useful feature almost nobody uses.** 8 of 164 scenes reach for it, against 62 that carry an
 `html` layer, and when the paired exit was added the count was 0 of 13 block files and 6 of 161 scenes.
 Two agents building the same figure both concluded "an html layer leaves as one card" and
-reported it as a fact about the medium. It was a feature they had not found (`core/motion/parts.js`,
-[`../MISTAKES.md`](../MISTAKES.md) #410).
+reported it as a fact about the medium. It was a feature they had not found (`core/motion/parts.js`).
 
 `parts` is a CSS selector into your own markup. Every matched element gets an engine-driven, **seeked**
 entrance with a stagger, and `out: true` gives it the paired exit:
@@ -274,15 +273,15 @@ with real computed styles. That is where it works, and it is the only place it i
 scene: the theme colour/font lock plus the copy and effect-dose rules. Both must be clean before you render.
 
 <!-- doc-refs-allow: make slop · this line records the target's retirement -->
-> `make slop` was RETIRED in 2026-08 (`engine-doctrine/MISTAKES.md` #326). It ran the 41 borrowed rules over a DOM
+> `make slop` was RETIRED in 2026-08 (`engine-doctrine/MISTAKES.md` #340). It ran the 41 borrowed rules over a DOM
 > dump that inlined three CSS properties (`font-family`, `color`, `background`) so every rule about a
 > border, a shadow, a glow or spacing had no evidence and returned nothing. Its silence read as a pass on
 > the whole library. The two counts in this paragraph are different things, and reading them as one is
 > why they look contradictory: the retired gate RAN **41** rules, and **38** were then examined
-> one by one for the fork (`engine-doctrine/MISTAKES.md` #326). Of those 38, **6 were worth keeping**: most were
+> one by one for the fork (`engine-doctrine/MISTAKES.md` #340). Of those 38, **6 were worth keeping**: most were
 > already measured better here, four had no subject in our artifacts at all, and five would have fired on
 > the engine's OWN features (the `glow` layer, the card recipe at `core/layers/doc.js:25`, the `eyebrow`
-> blueprint prop, the blinds-wipe mask in `core/cuts/index.js:130` that `lib-test` asserts).
+> blueprint prop, the blinds-wipe mask in `core/transitions/catalog.js:28` and `core/stings/units/blinds.js` that `lib-test` asserts).
 
 ## The stage kit: a foundation, not a reset
 

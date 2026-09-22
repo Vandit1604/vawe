@@ -1,6 +1,6 @@
 ---
-when: "you want a motion-design technique with the numbers a practitioner actually states, and the engine word for it"
-answers: "12 techniques studied from one After Effects channel · the ordered recipe and the step nobody guesses · the stated values · where each one lands in this engine · default or per-film option"
+when: "you want a motion-design technique one practitioner states the dials for, and the engine word for it"
+answers: "12 techniques studied from one After Effects channel · the ordered recipe and the step nobody guesses · the values that practitioner states, which are settings and not standards · where each one lands in this engine · default or per-film option"
 group: reference
 ---
 
@@ -14,7 +14,12 @@ group: reference
 
 Source of the study: the **Stephan Zammit** YouTube channel, <https://www.youtube.com/@stephanzammit>.
 Forty videos listed; twelve watched for technique. Nothing below is quoted. Every recipe is rewritten
-from what the work shows, and every number is one the videos state out loud.
+from what the work shows.
+
+**Read every NUMBERS field as one practitioner's setting.** These figures are values one designer said
+out loud while working, not measurements and not a standard. They are useful because a stated dial is a
+place to start arguing from, and they carry no more authority than that. Where a number here decides
+something in the engine, it needs a source of its own.
 
 Read this beside `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`, which already carries 26 named AE recipes with
 a HAVE/PARTLY/LACK verdict each. This file does not repeat those. It adds the techniques that come from
@@ -171,7 +176,7 @@ the animation you already made becomes legible for the first time.
 **NUMBERS** seven duplicates. A constant per-copy offset (dragged, not typed, in the source).
 
 **ENGINE MAPPING** Present under another name. `motionDefaults.stagger` defaults to **0.045s**
-(`core/motion/motion.js:718`), which is 1.35 frames at 30fps, and `parts` carries a per-element `stagger` into
+(`DEFAULT_MOTION`, `core/motion/motion.js:779`), which is 1.35 frames at 30fps, and `parts` carries a per-element `stagger` into
 hand-authored HTML (`core/motion/parts.js`). The gap is that stagger is a scalar here, and the technique wants
 it applied to a set of layers that are copies of one thing. See entry 4.
 
@@ -199,17 +204,16 @@ ripple from a centre, and a brush stroke without changing anything but the path 
 settle. Sticky delay 1 second, which is what turns the pass into a drawn trail. Linked corner radius 0
 to 50; linked size 80 at rest.
 
-**ENGINE MAPPING** Absent. `make arsenal Q="stagger a grid of clones with a falloff from a point"`
-returns `chipGrid`, `gridPixelateWipe` and `iris`: a blueprint, a sting, and a cut. None of them is a
-falloff. This is the one entry in this file that is a genuinely new vocabulary, and it should be built
-with `defineRegistry` (`core/registry/vocab.js`) plus the `createKit(ctx)` injection point in
-`core/layers/util.js`, so the falloff reaches every layer builder with no signature change. The dynamics
-half is already solvable: `springEase({response, dampingFraction})` in `core/motion/motion.js` is the overshoot,
-and `sticky` is a per-element hold on the same eased value.
+**ENGINE MAPPING** Shipped. `core/tracks/effector.js` is a track, not a `parts` mode: a `parts` timeline
+is scheduled once at build time, while an effector's per-child transform is a function of the point's
+CURRENT position and has to be computed every frame, so it composes with `parts` (bring the grid in
+pose-to-pose, then wash the effector across it) rather than replacing it. `springEase({response,
+dampingFraction})` (`core/motion/motion.js`) is the overshoot; `sticky` is a per-element hold on the same
+eased value.
 
-**DEFAULT OR OPTION** Option, and a large one. But it is the highest-value item here, because it makes
-"many things react to one thing" authorable at all, and this library's median film gives 6 percent of its
-layers to picture partly because a field of reacting elements is currently hand-written or not written.
+**DEFAULT OR OPTION** Option. It makes "many things react to one thing" authorable, where this library's
+median film gave 6 percent of its layers to picture partly because a field of reacting elements had to
+be hand-written before this shipped.
 
 ---
 
@@ -347,7 +351,7 @@ evolution as time times 20. The particle variant: rectangles at 2 and 4 px, repe
 rotation 45 degrees, wiggle at 15 per second with amplitude 25 wrapped in a posterize-time, then the
 whole repeater duplicated.
 
-**ENGINE MAPPING** `core/backgrounds/index.js:276` has `grain(ctx, w, h, t, o)`, seeded per frame and index,
+**ENGINE MAPPING** `core/backgrounds/fx.js:271` has `grain(ctx, w, h, t, o)`, seeded per frame and index,
 holding each pattern for **2 frames by default** because per-frame grain crawls on static type. That is
 FRAME grain. This technique is LAYER grain, shaped by one layer's alpha, coloured per band, and parented
 to the subject. `make arsenal Q="grain noise texture over the whole frame"` returns the `grain` sting
@@ -417,8 +421,8 @@ centres zeroed, then expression-added to the null position. Opacity keyed 100, 0
 `edgeGlow` and `halationFilm`, `core/looks/filters.js` has `bloom` and `chromaGlow`, and `modifiers` carries a
 `matte`. `make arsenal Q="light sweep reveals text through a mask"` returns `maskReveal`, `highlight` and
 the `lightLeak` shader, all of which are sweeps, not sources. Step 5 is the part this repo would insist
-on regardless: one fact, one owner. A light whose position is written in two effect centres is exactly the
-drift `engine-doctrine/MISTAKES.md` #423 describes.
+on regardless: one fact, one owner. A light whose position is written in two effect centres is the same
+drift `engine-doctrine/MISTAKES.md` warns against elsewhere: one value, kept in two places, will disagree.
 
 **DEFAULT OR OPTION** Option. But "what is lit is what is read" belongs in `engine-doctrine/CRAFT/EYE-TRACE.md` as
 doctrine, not just as a look.
@@ -483,14 +487,17 @@ path (4). That is where the next work is.
 **Four of the twelve are one dial away.** Smoothness on a range selector (5), a rate warp on an idle (2),
 a falloff amount (4), an inherited-rotation flag (12). None needs a new subsystem.
 
-**One is a new vocabulary and it is the effector (4).** Everything else in this file either exists,
-is a look, or is a dial. The effector is the only entry that makes a class of film authorable that is not
-authorable now.
+**The effector (4) shipped since this study**, as `core/tracks/effector.js`. It was the one entry here
+that needed a genuinely new vocabulary rather than a dial or a look; everything else in this file
+already existed in one of those two forms.
 
 ## Provenance
 
 Source: the **Stephan Zammit** YouTube channel, <https://www.youtube.com/@stephanzammit> (forty videos
-listed, twelve watched for technique). Companion reference: `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`.
+listed, twelve watched for technique). Every stated number is that practitioner's own setting, not a
+standard. Companion reference: `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`, which carries the 26
+named recipes; this file is cited by entry NUMBER from `core/timeline/velocity-cut.js`, `core/fx/upright.js`,
+`core/motion/effector.js`, `core/type/type.js` and `films/scene/schema.json`, so entries are never renumbered.
 
 **Do not re-add:** framing entry 1's camera-blur fix or entry 1's velocity-cut mechanism as an open gap
 still to close, or entry 1's "two of the three arrived after this entry was first written" as live

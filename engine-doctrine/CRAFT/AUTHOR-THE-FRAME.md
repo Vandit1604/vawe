@@ -11,7 +11,7 @@ codes: paints-nothing, static-figure
 
 - Author a bespoke chart, tree, or diagram as raw SVG inside an `html` layer; static SVG survives sanitization.
 - Animate its children piece by piece with `parts` (bars grow, then the line draws, then the dots pop), never as one block. For a hand-authored timeline across a whole beat, write a `composition` builder instead.
-- Enforced by `[gated]` `paints-nothing` (a layer that painted nothing in its own box) and `static-figure` (a 3+-child figure that arrived as one block); `direction-floor.mjs` reports `static-figure` under `TASTE=1`.
+- Enforced by `[gated]` `paints-nothing` (a layer that painted nothing in its own box) and `static-figure` (a 3+-child figure that arrived as one block); `direction-floor.mjs` reports `static-figure` as a warning always, and blocks on it only with `--strict` (`STRICT=1`).
 - Checkable action: does this figure build piece by piece (`parts`, staggered), or does it land as one static block?
 
 A beat authored as a **hand-authored HTML+SVG file**, a bespoke dataviz, a spatial org-tree, exact
@@ -94,7 +94,7 @@ input can name a comp and fill labels but cannot inject script (the inline-`<scr
 layer defends). To ADD a comp, write a builder in `core/compositions/index.js` that: (1) builds the beat's
 static DOM into `el` (any `props` string as `textContent`/attr, never innerHTML); (2) authors PAUSED tweens
 via `ctx.gsap` with `delay` offset by `ctx.start` and `immediateRender:true`, no `Date.now`/`Math.random`.
-`seekAll` drives it → pure in n (`make probe` proves it). Rules learned the hard way (MISTAKES #148): every
+`seekAll` drives it → pure in n (`make probe` proves it). Rules learned the hard way (MISTAKES #154): every
 tween is a `fromTo` (never `gsap.to(...immediateRender:false)`. It sticks the end value on backward seek);
 a travelling element uses ONE keyframed `fromTo`; never tween between two `var()` colour strings.
 

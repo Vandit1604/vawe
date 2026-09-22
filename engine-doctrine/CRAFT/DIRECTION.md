@@ -24,26 +24,22 @@ read as amateur when every layer renders fine?"*
 Every rule is tagged:
 - **`[gated]`**: a gate catches it mechanically (named in the rule). Run `make author-check D=<file>`.
 - **`[eye]`**: no static gate can see it; only `make judge` + your own eye. If your eye catches it,
-  it is a FIX, never a rationalization ([`../JUDGE.md`](../JUDGE.md), [`../MISTAKES.md`](../MISTAKES.md) #15).
+  it is a FIX, never a rationalization ([`../JUDGE.md`](../JUDGE.md)).
 
-> This is the **Motion** and **Story-spine** doctrine from [`../TASTE.md`](../TASTE.md). The mechanics of
-> *which curve / which cut* live in [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md); the copy-paste JSON in
-> [`../MOTION-SNIPPETS.md`](../MOTION-SNIPPETS.md); the feeling layer in [`TASTE-RULES.md`](TASTE-RULES.md).
-> This file is *why*: the principles those apply.
+> This is the **Motion** and **Story-spine** doctrine from [`../TASTE.md`](../TASTE.md), and it is the
+> *why*. The mechanics of *which curve / which cut* live in [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md),
+> the copy-paste JSON in [`../MOTION-SNIPPETS.md`](../MOTION-SNIPPETS.md), and the accusing version of
+> §1 and §2 in [`TASTE-RULES.md`](TASTE-RULES.md) § "Guardrails", which forbids by name the defaults an
+> author here reaches for: one ease everywhere, one duration everywhere, one entrance direction
+> everywhere, everything starting at t=0, entrances slower than exits. Read the guardrails first; read
+> this when you need to know why they are the guardrails.
 
 > **The fastest way to obey all of this: compose from [`recipes/`](../../recipes/README.md)**,
 > directed motion measured off a real film, so you start from directed motion instead of a blank
 > `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make direct`) is the ceiling, too much,
-> undirected; the **ambition floor** (`make direction-floor`, opt-in via `TASTE=1`) is the floor, too plain,
-> a slideshow. A directed video sits between them.
-
----
-
-> **The accusing version of §1 and §2 lives in [`TASTE-RULES.md`](TASTE-RULES.md) § "Guardrails".** It
-> names the exact defaults an author here reaches for (one ease everywhere, one duration everywhere, one
-> entrance direction everywhere, everything starting at t=0, entrances slower than exits) and forbids each
-> one, borrowed close to verbatim from the reference system. This file is the reasoning under those
-> guardrails. Read the guardrails first; read this when you need to know why.
+> undirected; the **ambition floor** (`make direction-floor`) is the floor, too plain, a slideshow, and
+> its hardest checks (`no-continuous-object` among them) block on every `make author-check` run, not only
+> under `TASTE=1`. A directed video sits between them.
 
 ## 1. First principles of motion (Disney's 12, only the ones type/graphics obey)
 
@@ -82,7 +78,7 @@ another mid-shot. What has no form here is the draughtsmanship half: nobody is d
 | Principle | Here | How |
 |---|---|---|
 | **Squash and stretch** | **shipped** | the `squash` modifier, scaling non-uniformly off the layer's own velocity with the reciprocal kept, so it deforms rather than zooming. Wrong for anything with a rigid identity: a logo that squashes is a damaged logo |
-| **Arcs** | **partly** | `ease: "through"` rounds the corner AT an interior key, so a polyline of keys becomes a curve: a three-key apex turns 22 degrees where `linear` turns 66. It cannot bow a TWO-key segment, which is what AE's spatial bezier does. For that, `motionPath`, a different mechanism on a different clock that cannot combine with a keyed track |
+| **Arcs** | **shipped, with one limit** | `ease: "through"` rounds the corner AT an interior key, so a polyline of keys becomes a curve: a three-key apex turns 22 degrees where `linear` turns 66 (`core/timeline/sequence.js:349`). It cannot bow a TWO-key segment, which is what AE's spatial bezier does. For that, `motionPath` (`core/timeline/motion-ir.js`, `core/motion/path-curves.js`), a different mechanism on a different clock that cannot combine with a keyed track |
 
 ## Directing the eye: every device names its target
 
@@ -242,10 +238,9 @@ Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yo
 
 ## Reading `make direct`: every finding carries a census
 
-Twelve checks run in `harness/author/motion-director.mjs` and eleven of them warn. Across the 135
-gate-visible scenes, 104 trip at least one. That is 77% of the library meeting the same wall of prose,
-film after film, and a warning nobody reads is a rule that has already been repealed with nobody
-writing it down.
+Sixteen checks run in `harness/author/motion-director.mjs`; only two of them (`profile`, `cut-families`)
+can fail, the rest warn. Re-run the census before quoting a trip rate here, the library's scene count
+moves and a stale percentage reads as false precision.
 
 The rules did not change. What each finding now carries is two numbers.
 
@@ -292,8 +287,9 @@ verdict and exits 0.
 
 **Read [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) before you reach for this rule.** It is one device out of
 about eighteen that hold a short film together, it is the cheapest of them, and in Murch's own ranking it is
-the 4% item, the one he says to sacrifice first. It is also **opt-in**: `TASTE=1 make author-check`, or
-`make direction-floor D=<file>`. Run it when the film's CONTENT is continuous, which is a single-subject
+the 4% item, the one he says to sacrifice first. It **blocks on every `make author-check` run**,
+`TASTE=1` or not; a film exempt from it needs a waiver with a `_why`, never a flag. Run it when the
+film's CONTENT is continuous, which is a single-subject
 product film, a process shown end to end, or a demo where the UI is the subject. On a manifesto, a vignette
 anthology, a comparison built on its junctions, or a metric-cut list film it is wrong by construction.
 

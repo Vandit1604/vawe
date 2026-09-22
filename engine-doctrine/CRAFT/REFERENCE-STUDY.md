@@ -135,10 +135,10 @@ video starts ahead.
    sheet. Read it: one beat per idea, note the copy, the layout, the palette per beat.
    **You will sample the middle of each beat, and the middle is the one frame that hides everything you
    came to learn.** A beat-MIDDLE frame shows the settled state, which is where nothing is moving. Doing
-   this missed the dolly, the gradient fill AND the orange colour-wave on one film, three separate times
-   (`../MISTAKES.md` #124). A still frame carries composition and colour and nothing about time; for a
-   continuous effect it is the least informative test there is, because it is exactly the frame where a
-   wrong speed looks right (#155). You MUST also sample: (a) the **entrance** at high fps
+   this missed the dolly, the gradient fill AND the orange colour-wave on one film, three separate times.
+   A still frame carries composition and colour and nothing about time; for a continuous effect it is the
+   least informative test there is, because it is exactly the frame where a wrong speed looks right. One
+   background matched that way ran about 2.5x too fast in motion (`../MISTAKES.md` #161). You MUST also sample: (a) the **entrance** at high fps
    (`fps=12`, first ~0.5s): is the word oversized/blurred and settling (a dolly-in)?; (b) the **exit**
    (`fps=12`, last ~0.5s): does it scale UP + blur to leave (a dolly-out)?; (c) a **hard-zoomed crop of
    the text** (`crop=…,scale=up`): is the fill a flat colour or a GRADIENT / colour-wave?
@@ -165,7 +165,7 @@ These are what a good reference does that our defaults do NOT. Reach for them on
    drifting). This is the single biggest "alive vs slideshow" lever. Our default holds still; add a
    `camera` track (`s: 1.03 → 1.12` across each beat) or per-layer `motion` scale. *(Brew: the UI beats
    push 34%→71% area in ~1s: a big dolly-in.)*
-   **Keep it SMOOTH** (MISTAKES #125): one MONOTONIC move, never a reversal (don't zoom in then snap
+   **Keep it SMOOTH** (MISTAKES #128): one MONOTONIC move, never a reversal (don't zoom in then snap
    out). For a multi-keyframe camera push set `ease:"linear"` on the interior keyframes, the default
    easeInOutCubic zeroes velocity at every keyframe, so a chained push pulses/shakes. Per-beat push is
    cleanest as a per-layer `motion.scale` (`ease:"linear"`) that resets naturally per element: one
@@ -175,8 +175,9 @@ These are what a good reference does that our defaults do NOT. Reach for them on
    zooms out as the incoming zooms in. Use `transitions[{fx:"zoom"|"punch"|"whipPan"}]`, not a bg swap.
 3. **Massive scale + frame bleed.** The hero word FILLS or exceeds the frame (letters cropped at the
    edges). Scale contrast (one huge word, tiny everything-else) reads as confident. Our timid centered
-   headline is the amateur tell. *(Constraint: our `size` caps at 260; for true frame-fill push the
-   `camera` in on the beat, or see the harvest note below.)*
+   headline is the amateur tell. *(`size` has no engine-enforced cap; shipped films already reach 400.
+   Reaching for it is a choice most authors don't make, not a limit; push the `camera` in on the beat
+   too if the word still needs to fill more of the frame.)*
 4. **Asymmetry, never dead-center.** Hero words sit low-left or offset, not centered. Dead-center is the
    AI-slop tell (`make designspec-check` flags it). Left-align (`align:"left"`, `x` low) the type beats; reserve
    centering for a deliberate brand lockup.
@@ -218,13 +219,14 @@ What our v1 got wrong, and the habit that fixed it:
 
 Result: the motion went from "inspired by" to "reads like the same film." What's still bounded (be
 honest): the exact **font** and **logo/product assets** (we don't have Brew's source), and **frame-fill
-scale** (the `size ≤ 260` cap: the reference "Today." is ~2× ours).
+scale** (the reference "Today." reads roughly 2x the size this beat used, though nothing in the engine
+caps it: authors just don't reach that far by habit).
 
 ## Framework harvest from this study
 
-- **`size` caps at 260**, which blocks the frame-filling hero scale premium refs use. Options to reach it
-  without hacking: push the `camera` in on the beat (works today), or add a fit-to-width / higher hero cap
-  to the text layer. **Logged for the engine.**
+- **Frame-filling hero scale is rare in this library though nothing caps it.** `size` has no
+  engine-enforced ceiling (shipped films already reach 400); push it further, or push the `camera` in on
+  the beat, when a hero word needs to fill more of the frame than habit usually gives it.
 - The measurement tool's low-contrast + blur-in-place limits (a light word on a same-hue bg defeats the
   corner-median background) are documented in [MEASURE.md](MEASURE.md), a future OpenCV/optical-flow
   upgrade would fix them.

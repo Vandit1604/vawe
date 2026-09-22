@@ -62,8 +62,9 @@ Borrowed close to verbatim from the reference system's `video-composition.md`, `
   panels, hairline rules. Pure solid `#000` reads as 'nothing loaded.'"* Their count is 2 to 5 decorative
   elements per scene, sharing ONE ambient motion. A scene with one decorative is under-dressed.
 - **Static decoratives feel dead.** *"All decoratives should have slow ambient animation: breathing,
-  drift, pulse."* This is the same rule `CLAUDE.md` 2a0 makes about the backdrop, applied to everything
-  else in the frame.
+  drift, pulse."* This is the same rule [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md) makes about
+  the backdrop ("the background is decoration, it is never information"), applied to everything else in
+  the frame.
 - **Decoration must not become content.** *"Decorative treatment must not become new user-facing content,
   new scenes, or unrequested claims."* [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) is the other half: a
   decorated frame does not excuse an unillustrated claim, and their 6 to 10 visual roles is a starting
