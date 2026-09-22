@@ -94,7 +94,7 @@ input can name a comp and fill labels but cannot inject script (the inline-`<scr
 layer defends). To ADD a comp, write a builder in `core/compositions/index.js` that: (1) builds the beat's
 static DOM into `el` (any `props` string as `textContent`/attr, never innerHTML); (2) authors PAUSED tweens
 via `ctx.gsap` with `delay` offset by `ctx.start` and `immediateRender:true`, no `Date.now`/`Math.random`.
-`seekAll` drives it → pure in n (`make probe` proves it). Rules learned the hard way (MISTAKES #148): every
+`seekAll` drives it → pure in n (`make probe` proves it). Rules learned the hard way (MISTAKES #154): every
 tween is a `fromTo` (never `gsap.to(...immediateRender:false)`. It sticks the end value on backward seek);
 a travelling element uses ONE keyframed `fromTo`; never tween between two `var()` colour strings.
 
