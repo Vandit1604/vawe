@@ -69,6 +69,9 @@ const REGISTRY = {
     doc: 'engine-doctrine/CRAFT/DIRECTION.md',
     applies: (f, ctx) => typeof (ctx && ctx.durationSec) === 'number',
     adapt: (f, ctx) => {
+      // No external source on a minimum runtime for "expects a feature count"; already the least risky
+      // Group A constant, since `adapt` below returns 'skip' (never a hard fail) under this floor, so
+      // it already behaves as a report rather than a bar. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
       const SHORT_FILM_FLOOR_SEC = 12;
       if (ctx.durationSec < SHORT_FILM_FLOOR_SEC) {
         return { verdict: 'skip', value: ctx.durationSec,

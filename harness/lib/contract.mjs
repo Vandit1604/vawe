@@ -607,9 +607,11 @@ const NORMAL_EYE_START_RE = /\b(whole|full)\s+(frame|window|screen|app|compositi
 // camera/shot of its own: with either present, those are the decisive signal and prose is not asked
 // to guess past them.
 const NORMAL_PICTURE_RE = /\bfull(?:[\s-])?(?:frame|screen)\b|\bfills?\s+the\s+frame\b|\bwhole\s+(?:app|window|screen|frame)\b/i;
-// A "full frame" object_in: centred and covering most of a standard canvas, regardless of which of the
-// five aspect ratios (engine-doctrine/AGENTS.md) is in play - 1,400,000px^2 clears every one of them (smallest is
-// 1080x1080 = 1,166,400) while still excluding a merely large card or panel.
+// FULL_FRAME_OBJECT_AREA: a "full frame" object_in, centred and covering most of a standard canvas,
+// regardless of which of the five aspect ratios (engine-doctrine/AGENTS.md) is in play - 1,400,000px^2
+// clears every one of them (smallest is 1080x1080 = 1,166,400) while still excluding a merely large
+// card or panel. MEDIUM-DERIVED (category 2), not invented: provably clears the smallest of the five
+// canvas sizes AGENTS.md declares. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
 const FULL_FRAME_OBJECT_AREA = 1_400_000;
 
 /** normalCameraEvidence(b) -> the matched evidence string, or null. Exported (not just the boolean
