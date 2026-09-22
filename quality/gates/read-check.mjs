@@ -121,12 +121,19 @@ export const MAX_HOLD = 5;
 export const GAP_JOIN = 3 / FPS;         // 0.1s
 export const GAP_MIN = 15 / FPS;         // 0.5s
 export const CUT_SNAP = 0.5;
+// PROSE_WORDS/PROSE_SIZE decide ELIGIBILITY for the already-cited hold-time rules above (MIN_LIFE,
+// CPS_WALL, HOLD_PER_WORD), not a bar of their own. Potter & Levy's RSVP "gist" research supports the
+// qualitative exclusion (a short or large string is apprehended at a glance, not read at the read-twice
+// rate) but no source publishes a word-count or point-size line. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 3/6.
 export const PROSE_WORDS = 4;
 export const PROSE_SIZE = 28;
 // MIN_READABLE_HOLD: about 1.2s, the owner's floor on any held frame, clip or card alike, because
 // that is roughly how long a viewer needs to register one still thing before it moves again
-// (engine-doctrine/RULES/readable-hold.md). OTHER_WPS: 3 words/second, a single quick read (not the read-twice
-// rate HOLD_PER_WORD encodes), for a short label that is real words but not full prose.
+// (engine-doctrine/RULES/readable-hold.md). OTHER_WPS: 3 words/second (180 wpm), a single quick read
+// (not the read-twice rate HOLD_PER_WORD encodes), for a short label that is real words but not full
+// prose. SOURCED: Ofcom's Code on Television Access Services, https://www.ofcom.org.uk/__data/assets/pdf_file/0020/97040/Access-service-code-Jan-2017.pdf
+// (already this file's own family, see CPS_WALL/MIN_LIFE above) sets 160-180 wpm pre-recorded, up to
+// 200 wpm live; OTHER_WPS's 180 wpm sits inside that band. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
 export const MIN_READABLE_HOLD = 1.2;
 export const OTHER_WPS = 3;
 // A layer type that is watched, not read: a viewer needs a beat to register it even with no words.

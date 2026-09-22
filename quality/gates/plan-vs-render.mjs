@@ -121,6 +121,9 @@ const walk = (L, fn) => { if (!L || typeof L !== 'object') return; fn(L); (L.chi
 // and boundaries>=3 is 19. 24 is the point where the finding still reads as a finding.
 // A one-shot 6s hook does not need a nominated peak; a 20s film across six cuts that never says which
 // instant is the loudest is shapeless, and no other gate here will say so.
+// No external source: "does this film need a nominated spectacle peak" is this engine's own structural
+// convention, argued at length above from this library's own measurement, not published anywhere else.
+// engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
 const SPECTACLE_MIN_BOUNDARIES = 2, SPECTACLE_MIN_DUR = 12;
 function nominationNote() {
   if (d.spectacle != null) return null;                    // nominated; core/timeline/spectacle.js takes it from here

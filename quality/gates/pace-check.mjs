@@ -33,7 +33,10 @@ const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv
 const strict = process.argv.includes('--strict');
 
 // Calibrated on the committed library, films only. Median is 1.20 and p90 is 1.92; a fixture or a
-// backdrop sits nearer 0.15 and is meant to.
+// backdrop sits nearer 0.15 and is meant to. No external source: Cinemetrics/ASL literature answers a
+// different question (whole-film average shot length, not events-per-second for motion graphics) and no
+// motion-graphics-pacing standard was found. Ours, same shape as eye-trace.mjs's JUMP_FAR.
+// engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
 const FLOOR = 1.0;          // below this a film is asleep
 const HOLD = 4.0;           // seconds with nothing arriving or leaving
 import { loadScene } from '../../core/engine/expand.js';
