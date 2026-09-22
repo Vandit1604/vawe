@@ -268,7 +268,7 @@ memory. Today there are three.
 | Tell | Fires when | Source |
 |---|---|---|
 | `habitual-pace` | pace sits in 2.5 to 4s | `FILM-STRUCTURE.md`: "Our films sit at 2.5 to 4 seconds a beat" |
-| `the-free-device` | the thread is the transforming object | `AGENTS.md` (checker's own `doc:` field; the quoted line itself lives in `FILM-STRUCTURE.md`): "a keyed `w`/`h` on a rectangle passes and a motif does not" |
+| `the-free-device` | the thread is the transforming object | `FILM-STRUCTURE.md`: "A keyed `w`/`h` on a rectangle passes. A motif does not." |
 | `slideshow-shape` | four beats or fewer across a full runtime | `AGENTS.md`, the `plain-slideshow` floor |
 
 ### The threshold is 0.10, and why that number
