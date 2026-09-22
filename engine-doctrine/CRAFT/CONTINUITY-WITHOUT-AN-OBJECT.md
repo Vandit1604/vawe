@@ -11,7 +11,7 @@ group: crosscutting
 - A film does not need one object to survive a cut. Carry continuity in TWO OR MORE registers at once
   (unfinished sentence, match cut, camera travel, rhythm, counter, question); a transforming prop is the
   cheapest register and the one Murch ranks last (4%).
-- `no-continuous-object` (opt-in, `TASTE=1 make author-check` or `make direction-floor`) sees only the
+- `no-continuous-object` blocks on every `make author-check` run, `TASTE=1` or not, and sees only the
   prop register. A film held by the other registers needs a waiver with a `_why` naming the thread.
 - Checkable action: how many threads carry this film across its cuts, and in which registers?
 

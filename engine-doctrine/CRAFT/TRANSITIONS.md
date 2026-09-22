@@ -460,7 +460,7 @@ found.
 ### Track decides stacking; array order breaks a tie
 
 `track` sets which layer paints on top (`core/timeline/clips.js` writes zIndex off `data-track`,
-`films/scene/scene.js:597` sets `data-track` to `L.track ?? idx`). Two layers on the same track tie,
+`films/scene/scene.js:550` sets `data-track` to `L.track ?? idx`). Two layers on the same track tie,
 and the tie breaks by their order in `layers[]`: the one written later draws on top.
 A full-bleed layer above must not start mid-move and hide it before it plays, or it reads as a hard cut
 nobody authored. `quality/gates/covered-move.mjs` (`make covered-move D=<file>`) reports

@@ -11,7 +11,7 @@ codes: paints-nothing, static-figure
 
 - Author a bespoke chart, tree, or diagram as raw SVG inside an `html` layer; static SVG survives sanitization.
 - Animate its children piece by piece with `parts` (bars grow, then the line draws, then the dots pop), never as one block. For a hand-authored timeline across a whole beat, write a `composition` builder instead.
-- Enforced by `[gated]` `paints-nothing` (a layer that painted nothing in its own box) and `static-figure` (a 3+-child figure that arrived as one block); `direction-floor.mjs` reports `static-figure` under `TASTE=1`.
+- Enforced by `[gated]` `paints-nothing` (a layer that painted nothing in its own box) and `static-figure` (a 3+-child figure that arrived as one block); `direction-floor.mjs` reports `static-figure` as a warning always, and blocks on it only with `--strict` (`STRICT=1`).
 - Checkable action: does this figure build piece by piece (`parts`, staggered), or does it land as one static block?
 
 A beat authored as a **hand-authored HTML+SVG file**, a bespoke dataviz, a spatial org-tree, exact

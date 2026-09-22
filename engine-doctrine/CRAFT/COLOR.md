@@ -47,7 +47,7 @@ Two more of theirs, and both are rules we did not have:
   Light backgrounds need texture to avoid the blank-slide feel. Don't switch to dark. Make light
   cinematic."* This repo has the receipts for getting that backwards in both directions: a dark video
   built for a white site is [`../MISTAKES.md`](../MISTAKES.md) #1, and two beats of dark text on a dark
-  backdrop shipped for their whole runtime because a token name assumed a theme family (#373, #375).
+  backdrop shipped for their whole runtime because a token name lied about its theme family (#387).
 - **Declare the palette up front. Don't invent colours per element.** Our version is stronger and already
   written: colours come only from the brand, and `make designspec-check` locks them.
 
@@ -105,7 +105,7 @@ with content, so it follows the plain-vs-busy rule (see [DENSITY.md](DENSITY.md)
 
 - **Reach for a gradient/atmospheric bg** (`aurora` · `mesh` · `brandglow` · `spotlight` · `soft` · `constellation`)
   on **low-copy vibe beats**. The hook, a CTA, a transition, an emotional beat. It sets register in the negative space.
-- **Go flat** (`plain` · `paper` · `dark` · `ink` · `deep` · `accentPlain`) on **high-copy and payoff beats**, a big
+- **Go flat** (`plain` · `paper` · `dark` · `deep` · `accentPlain`) on **high-copy and payoff beats**, a big
   number, a bold line, a UI capture that must breathe. Never put a gradient behind the thing the beat exists to land.
 - **Only use a gradient the real site has.** A flat/minimal brand gets a flat field; inventing an `aurora` for a brand
   that has none is off-brand (see [../MISTAKES.md](../MISTAKES.md)). The theme's 3 `gradient` stops feed these presets, so
