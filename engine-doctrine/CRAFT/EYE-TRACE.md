@@ -127,9 +127,9 @@ Re-acquisition costs time, so a run of short beats each demanding a jump never l
 up. Three ways to measure that, and only two of them discriminate.
 
 - **`reacquire`**: the share of runtime the eye spends travelling. This separates films. The busiest
-  in this library sits at 1.8%; most sit under 1%.
+  in this library sits at 7.11% (`together-recreation`); most sit under 1%.
 - **`peak`**: the classic running debt in seconds, a jump adding cost and the next beat paying it off.
-  It is **INERT** here and probably everywhere: it peaks at 0.38s across the whole library, because one
+  It is **INERT** here and probably everywhere: it peaks at 1.41s across the whole library, because one
   saccade never outruns one beat. Kept and printed so nobody rebuilds it expecting it to fire.
 - **`no-time-to-catch-up`**: a jump over `JUMP_FAR` followed by a beat SHORTER than that film's own
   median. This is the pairing the source names and it fires. Two films in this library trip it.

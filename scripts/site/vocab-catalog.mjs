@@ -66,7 +66,7 @@ const FAMILIES = [
     + 'and a word would slip past the range unread.',
     Object.entries(DURATION).map(([w, s]) => [w, `\`${s}\`s`])],
   ['Camera', 'cameraMove.move', 'The shot, described. `{ "cameraMove": { "move": "pull back", "dur": 3 } }`. '
-    + 'The move\'s own params are unchanged and still come from `core/camera-moves.js`.',
+    + 'The move\'s own params are unchanged and still come from `core/camera-moves/index.js`.',
     Object.entries(CAMERA_WORDS).map(([w, t]) => [w, `\`"${t}"\``])],
 ];
 
@@ -88,6 +88,10 @@ out.push('---');
 out.push('when: "you know the FEELING you want and not the engine name for it"');
 out.push('answers: "the plain words the engine resolves in a real slot: feel to an easing, duration to seconds, a shot description to a camera move"');
 out.push('group: crosscutting');
+  // `low-vocab` is direction-floor's code for a film that reaches for none of these words, and
+  // craft-coverage routes a code to the doc that settles it. Emitted here because a regeneration that
+  // dropped it silently unrouted the code.
+  out.push('codes: low-vocab');
 out.push('---');
 out.push('');
 out.push('# VOCABULARY: plain words the engine accepts');
