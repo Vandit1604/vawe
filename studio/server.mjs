@@ -28,7 +28,7 @@ import { sceneDims } from '../core/layout/safe.js';
 import { resolveBridges } from '../core/audio/bridges.js';
 import { scratch } from '../harness/lib/scratch.mjs';
 import { studioPage } from './page.mjs';
-import { parseStoryboard, timeline, fieldIn, blocksOf, referenceDevices } from '../harness/author/storyboard-parse.mjs';
+import { parseStoryboard, timeline, fieldIn, fieldAllIn, blocksOf, frontmatter, referenceDevices } from '../harness/author/storyboard-parse.mjs';
 import { fragPage, FULLBLEED_RE, INSET_RE } from '../harness/lib/frag-page.mjs';
 import { stageOf } from '../quality/gates/stage.mjs';
 import { extractKitBlock } from '../harness/lib/stagekit.mjs';
@@ -549,11 +549,68 @@ const studioRoutes = (req, res) => {
       let gateOut = '';
       try { gateOut = execFileSync(process.execPath, [path.join(REPO_ROOT, 'quality/gates/storyboard-check.mjs'), sbPath], { encoding: 'utf8' }); }
       catch (e) { gateOut = String(e.stdout || '') + String(e.stderr || ''); }
+      // Film-level feedback lives in the frontmatter, the same `feedback:` bullet a beat carries,
+      // just not owned by any one beat; `fieldAllIn` against its raw head text keeps this a second
+      // reader of the SAME field name, not a second field.
+      const filmFeedback = fieldAllIn(frontmatter(src).head, 'feedback');
       reply({ ok: true, file: path.relative(REPO_ROOT, sbPath), theme: THEME_NAME, palette,
         message: sb.message, audience: sb.audience, pace: sb.pace, spectacle: sb.spectacle, not: sb.not,
-        format: sb.format, duration: sb.duration, beats, devices: referenceDevices(src),
+        format: sb.format, duration: sb.duration, beats, feedback: filmFeedback, devices: referenceDevices(src),
         findings: [...gateOut.matchAll(/^\s*([✗~✓])\s+(.+)$/gm)].map((m) => ({ kind: m[1], line: m[2].trim() })) });
     } catch (e) { reply({ ok: false, error: 'could not read the storyboard: ' + e.message }, 500); }
+    return true;
+  }
+
+  // ---- FEEDBACK FROM THE APPROVAL PANE: written into the ONE plan file, never a second store --------
+  // "in plan mode itself i should be able to give feedback in studio so i can do changes there only"
+  // (the owner's own words). The storyboard stays the source of truth: this appends a `- feedback:`
+  // line into the beat's own block (or, with no beat index, near the top of the frontmatter for a
+  // film-level note), the same `- key: value` shape every other field on a beat already uses, so the
+  // next author (or agent) reads it the same way they read `why:` or `mechanism:`. It NEVER touches
+  // `approved:`: that line is the user's own signature, written only by `/vawe-approve`
+  // (harness/live/stage-gate.mjs refuses it from anywhere else), and this handler cannot write it
+  // because it only ever appends a `feedback:` line, nothing else.
+  if (req.method === 'POST' && url === '/api/plan/feedback') {
+    let raw = '';
+    req.on('data', (c) => { raw += c; if (raw.length > 1e5) req.destroy(); });
+    req.on('end', () => {
+      const reply = (o, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(o)); };
+      let beat = null, textIn = '';
+      try { const q = JSON.parse(raw || '{}'); textIn = String(q.text || '').trim(); beat = Number.isInteger(q.beat) ? q.beat : null; }
+      catch (e) { return reply({ ok: false, error: 'bad request: ' + e.message }, 400); }
+      if (!textIn) return reply({ ok: false, error: 'empty feedback' }, 400);
+      // A comment is a person's words about the film; it is never a vector for the one write this repo
+      // refuses everywhere else. No text can smuggle a fake `approved:` line onto the plan through here.
+      if (/^\s*approved\s*:/im.test(textIn)) return reply({ ok: false, error: 'feedback cannot write "approved:"; only /vawe-approve can sign the plan' }, 400);
+      const sbPath = storyboardPath();
+      if (!sbPath) return reply({ ok: false, error: 'no storyboard for this scene' }, 404);
+      try {
+        const src = fs.readFileSync(sbPath, 'utf8');
+        const stamp = new Date().toISOString().slice(0, 10);
+        const line = `- feedback: "${textIn.replace(/"/g, "'")}" (studio, ${stamp})`;
+        let out;
+        if (beat == null) {
+          // FILM-LEVEL: no single beat owns this note, so it goes at the top of the body, right after
+          // the frontmatter's closing `---`, in the same bullet shape every beat field already uses.
+          const m = /^---\n[\s\S]*?\n---\n/.exec(src);
+          if (!m) return reply({ ok: false, error: 'storyboard has no frontmatter to attach a film-level note after' }, 500);
+          out = src.slice(0, m[0].length) + '\n' + line + '\n' + src.slice(m[0].length);
+        } else {
+          // PER-BEAT: beat identity is the Nth `## ` heading, the same order `blocksOf`/`timeline`
+          // already hand every other reader of this file, so an index from /api/plan lands on the same
+          // beat here. Appended as this beat's LAST field, right before the next `## ` heading (or EOF),
+          // so nothing already written in the block moves.
+          const starts = [...src.matchAll(/^##\s+/gm)].map((m2) => m2.index);
+          if (beat < 0 || beat >= starts.length) return reply({ ok: false, error: `no beat ${beat} in this storyboard (it has ${starts.length})` }, 400);
+          const blockStart = starts[beat], blockEnd = beat + 1 < starts.length ? starts[beat + 1] : src.length;
+          const block = src.slice(blockStart, blockEnd);
+          const trimmed = block.replace(/\s+$/, ''), trailer = block.slice(trimmed.length) || '\n\n';
+          out = src.slice(0, blockStart) + trimmed + '\n' + line + trailer + src.slice(blockEnd);
+        }
+        fs.writeFileSync(sbPath, out);
+        reply({ ok: true });
+      } catch (e) { reply({ ok: false, error: 'could not write feedback: ' + e.message }, 500); }
+    });
     return true;
   }
 

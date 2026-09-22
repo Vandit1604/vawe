@@ -86,18 +86,9 @@ test('stage 2, plan: a storyboard exists and fails its own gate', () => {
   assert.match(st.next, /storyboard-check/);
 });
 
-test('stage 3, approval: the storyboard passes its gate and nobody has signed it', () => {
-  passingStoryboard('stagetest-approval');
-  const st = stageOf('stagetest-approval');
-  assert.equal(st.stage, 'approval');
-  assert.equal(st.approved, null);
-  assert.match(st.next, /\/vawe-approve/);
-});
-
-test('stage 4, design: approved, and a beat names a fragment that does not exist', () => {
+test('stage 3, design: the storyboard passes its gate and a beat names a fragment that does not exist', () => {
   write('stagetest-design.storyboard.md', [
     '---',
-    'approved: "2026-09-09"',
     'message: "A fixture film, so the derivation has a plan to grade."',
     'audience: "the test runner"',
     'threads: "one object, carried"',
@@ -131,6 +122,14 @@ test('stage 4, design: approved, and a beat names a fragment that does not exist
   assert.equal(st.stage, 'design');
   assert.equal(st.missingFrags.length, 2);
   assert.match(st.next, /stagekit\.mjs/);
+});
+
+test('stage 4, approval: frames match the plan and nobody has signed it', () => {
+  passingStoryboard('stagetest-approval');
+  const st = stageOf('stagetest-approval');
+  assert.equal(st.stage, 'approval');
+  assert.equal(st.approved, null);
+  assert.match(st.next, /\/vawe-approve/);
 });
 
 test('stage 5, assemble: approved, frames match the plan, the scene JSON has no layers', () => {
@@ -177,7 +176,7 @@ test('stage 8, judge: rendered, and judge is never marked done on its own', () =
 
 test('the order is always the same eight stages, regardless of where a film sits', () => {
   const st = stageOf('stagetest-nothing-here-at-all');
-  assert.deepEqual(st.order, ['brief', 'plan', 'approval', 'design', 'assemble', 'direct', 'render', 'judge']);
+  assert.deepEqual(st.order, ['brief', 'plan', 'design', 'approval', 'assemble', 'direct', 'render', 'judge']);
 });
 
 // ---- make next: it runs ONE command, and refuses entirely at approval ----
