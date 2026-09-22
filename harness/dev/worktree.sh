@@ -35,7 +35,16 @@ if [ "$cmd" = "rm" ]; then
 fi
 [ "$cmd" = "add" ] || { echo "usage: worktree.sh add|rm <name>" >&2; exit 2; }
 
-git -C "$ROOT" worktree add -q -b "wt-$name" "$WT" HEAD
+# BRANCH FROM origin/main, NOT FROM $ROOT's HEAD. $ROOT is git's main checkout, and on a machine
+# where the work happens in a linked worktree it can sit detached on a commit hundreds behind: it did,
+# at 79adcd80, 220 commits back. `worktree add ... HEAD` reads THAT HEAD, so every agent handed a fresh
+# worktree started on stale code and could not see today's work. Two agents in one session rebuilt
+# their worktrees by hand after hitting it. origin/main is the branch this repo pushes to directly, so
+# it is the honest base; ROOT's HEAD is only a fallback for a clone with no remote, and the base is
+# printed either way so a wrong one is visible rather than silent.
+BASE="$(git -C "$ROOT" rev-parse --verify -q origin/main || git -C "$ROOT" rev-parse HEAD)"
+echo "  base: $(git -C "$ROOT" log --oneline -1 "$BASE")"
+git -C "$ROOT" worktree add -q -b "wt-$name" "$WT" "$BASE"
 # shared, read-only
 for d in node_modules site/node_modules; do
   [ -d "$ROOT/$d" ] && ln -sfn "$ROOT/$d" "$WT/$d"
@@ -64,7 +73,12 @@ if [ ! -f "$ROOT/.worktreeinclude" ]; then
   echo "✗ .worktreeinclude is missing: a worktree built without it cannot render. Aborting." >&2
   exit 1
 fi
-node "$ROOT/harness/dev/sync-worktree.mjs" "$WT"
+# Run the sync script from the NEW worktree, not from $ROOT. $ROOT's TRACKED files are whatever its
+# HEAD holds, and a stale detached HEAD does not have this script at all: every `worktree.sh add` in
+# one session died here with MODULE_NOT_FOUND after the worktree was already made, so each agent was
+# handed a worktree with no library and had to copy it in by hand. The new worktree is checked out at
+# $BASE, so it always carries the current script.
+node "$WT/harness/dev/sync-worktree.mjs" "$WT"
 
 # Prove it is usable rather than assuming. A worktree that cannot see the library is worse than none,
 # because every gate in it reports a confident green.
