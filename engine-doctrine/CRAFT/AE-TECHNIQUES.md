@@ -1,6 +1,6 @@
 ---
-when: "you want a motion-design technique with the numbers a practitioner actually states, and the engine word for it"
-answers: "12 techniques studied from one After Effects channel · the ordered recipe and the step nobody guesses · the stated values · where each one lands in this engine · default or per-film option"
+when: "you want a motion-design technique one practitioner states the dials for, and the engine word for it"
+answers: "12 techniques studied from one After Effects channel · the ordered recipe and the step nobody guesses · the values that practitioner states, which are settings and not standards · where each one lands in this engine · default or per-film option"
 group: reference
 ---
 
@@ -14,7 +14,12 @@ group: reference
 
 Source of the study: the **Stephan Zammit** YouTube channel, <https://www.youtube.com/@stephanzammit>.
 Forty videos listed; twelve watched for technique. Nothing below is quoted. Every recipe is rewritten
-from what the work shows, and every number is one the videos state out loud.
+from what the work shows.
+
+**Read every NUMBERS field as one practitioner's setting.** These figures are values one designer said
+out loud while working, not measurements and not a standard. They are useful because a stated dial is a
+place to start arguing from, and they carry no more authority than that. Where a number here decides
+something in the engine, it needs a source of its own.
 
 Read this beside `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`, which already carries 26 named AE recipes with
 a HAVE/PARTLY/LACK verdict each. This file does not repeat those. It adds the techniques that come from
@@ -171,7 +176,7 @@ the animation you already made becomes legible for the first time.
 **NUMBERS** seven duplicates. A constant per-copy offset (dragged, not typed, in the source).
 
 **ENGINE MAPPING** Present under another name. `motionDefaults.stagger` defaults to **0.045s**
-(`core/motion/motion.js:718`), which is 1.35 frames at 30fps, and `parts` carries a per-element `stagger` into
+(`DEFAULT_MOTION`, `core/motion/motion.js:779`), which is 1.35 frames at 30fps, and `parts` carries a per-element `stagger` into
 hand-authored HTML (`core/motion/parts.js`). The gap is that stagger is a scalar here, and the technique wants
 it applied to a set of layers that are copies of one thing. See entry 4.
 
@@ -347,7 +352,7 @@ evolution as time times 20. The particle variant: rectangles at 2 and 4 px, repe
 rotation 45 degrees, wiggle at 15 per second with amplitude 25 wrapped in a posterize-time, then the
 whole repeater duplicated.
 
-**ENGINE MAPPING** `core/backgrounds/index.js:276` has `grain(ctx, w, h, t, o)`, seeded per frame and index,
+**ENGINE MAPPING** `core/backgrounds/fx.js:271` has `grain(ctx, w, h, t, o)`, seeded per frame and index,
 holding each pattern for **2 frames by default** because per-frame grain crawls on static type. That is
 FRAME grain. This technique is LAYER grain, shaped by one layer's alpha, coloured per band, and parented
 to the subject. `make arsenal Q="grain noise texture over the whole frame"` returns the `grain` sting
@@ -490,7 +495,10 @@ authorable now.
 ## Provenance
 
 Source: the **Stephan Zammit** YouTube channel, <https://www.youtube.com/@stephanzammit> (forty videos
-listed, twelve watched for technique). Companion reference: `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`.
+listed, twelve watched for technique). Every stated number is that practitioner's own setting, not a
+standard. Companion reference: `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md`, which carries the 26
+named recipes; this file is cited by entry NUMBER from `core/timeline/velocity-cut.js`, `core/fx/upright.js`,
+`core/motion/effector.js`, `core/type/type.js` and `films/scene/schema.json`, so entries are never renumbered.
 
 **Do not re-add:** framing entry 1's camera-blur fix or entry 1's velocity-cut mechanism as an open gap
 still to close, or entry 1's "two of the three arrived after this entry was first written" as live
