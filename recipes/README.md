@@ -40,6 +40,7 @@ argument for building recipes this way rather than as hand-authored one-offs.
 | `camera` | a `cameraMove` leg (`core/camera-moves/`, e.g. `diveIn`) | `window-dolly` |
 | `enter` | a layer's split-text sugar (`split`, `preset`, `each`, `stagger`) | `word-by-word` |
 | `cursor` | a `cursor` layer's own `snapTo`/`clicks`/`styleAt` (`core/layers/cursor.js`) | `hover-click` |
+| `warp` | ONE GSAP-backed layer field the engine already reads: `motionPath`, `splitText`, `physics` or `timeRemap` (`films/scene/scene.js` applyGsapHooks, `core/timeline/time.js`). No travel or box math, unlike the other kinds: a warp recipe is a named, searchable route to a primitive an author could already write by hand | `orbit-path`, `line-reveal`, `scatter-burst`, `time-ramp` |
 | `spine` `exit` `ground` | not yet built; `recipes/index.mjs` accepts the kind, `recipes/expand.mjs` has no expander for it yet | - |
 
 **Recipes can compose.** A `flow-seam` line whose `in` layer already carries `split: "word"` (written
@@ -62,9 +63,9 @@ line always wins a field both would write (recipes/expand.mjs).
 
 | field | rule |
 |---|---|
-| `kind` | one of `spine` `seam` `enter` `exit` `camera` `ground` |
+| `kind` | one of `spine` `seam` `enter` `exit` `camera` `ground` `cursor` `warp` |
 | `blurb` | what it does, in words an author would search for |
-| `sources` | **required, at least one.** `ref` names `refs/_clips/<ref>.mp4`, `t` is the second in that video. A recipe with no source is refused at load |
+| `sources` | **required, at least one.** `ref` names `refs/_clips/<ref>.mp4`, `t` is the second in that video. A recipe with no source is refused at load. Two recipes break this and say so in their own `note`: `hover-click`'s fifth source and every `warp` recipe cite this engine's own probe scene instead of a filmed clip, because the capability they name had zero authored uses anywhere to measure off (`quality/baselines/reach.json`) |
 | `slots` | what the author must hand it: times and layer ids |
 | `params` | every tunable, each with a MEASURED `default`. A default measured off one source is marked `"one-source": true` until a second source agrees |
 
@@ -76,6 +77,7 @@ In a scene or a storyboard beat, one line per kind:
 { "recipe": "flow-seam", "at": 1.9, "out": "window", "in": "tagline", "ground": ["g1", "g2"] }
 { "recipe": "window-dolly", "from": 0, "to": 1.9, "target": "window" }
 { "recipe": "word-by-word", "at": 1.9, "layer": "tagline" }
+{ "recipe": "scatter-burst", "at": 4.2, "layer": "boom", "params": { "velocity": 260 } }
 ```
 
 The expander turns each line into the named core capability above on the layers (or the scene's own
