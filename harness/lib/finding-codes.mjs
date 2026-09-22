@@ -38,7 +38,12 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const ROOTS = ['quality/gates', 'harness/author'];
 
 const PATTERNS = [
-  /\b(?:fail|warn|say|err)\(\s*'([a-z][a-z0-9-]{2,})'/g,  // the shared gate convention (read-check.mjs names its own helper `say`, storyboard-check.mjs names its own `err`)
+  // `note` joined this list the day two gates were DEMOTED to it. When a bar nothing external can
+  // justify is removed, the gate keeps measuring and reports through `note` instead of `warn`, and its
+  // codes vanished from this scan the moment it stopped blocking. doc-map then told two CRAFT docs to
+  // delete their pointers to codes that are still emitted every run. Same shape as the `err` miss
+  // above: a real emitter that no pattern named.
+  /\b(?:fail|warn|say|err|note)\(\s*'([a-z][a-z0-9-]{2,})'/g,  // the shared gate convention (read-check.mjs names its own helper `say`, storyboard-check.mjs names its own `err`)
   /[✗~⚠]\s*\\?\[([a-z][a-z0-9-]{2,})\\?\]/g,              // the printed form
   /\bsev\s*:\s*'([a-z][a-z0-9-]{2,})'/g,                  // designspec-check's finding objects
   /\ballow(?:ed)?\.has\('([a-z][a-z0-9-]{2,})'\)/g,       // a gate reading its own waiver
