@@ -54,7 +54,11 @@ tweaked blind inside a 2000-frame render. The loop:
    HTML fragment for true connective tissue (a hook, a CTA). Hand-writing? Load [`taste-skill`] +
    [`impeccable`] first (Anti-Default Discipline), then this guide's design spec.
 2. **Preview it standalone**: `make preview HTML=<file> THEME=<brand>` → `/tmp/preview.png`. Read the shot.
-3. **Gate the craft**: `make designspec-check D=<file>` (impeccable detector, 41 rules, no LLM) must be clean.
+3. **Gate the craft**: `make impeccable D=<file>` is the anti-slop detector on the raw fragment, no LLM
+   (`skills/impeccable/scripts/detect.mjs`). `make designspec-check D=<file>` is a different gate and
+   locks a different thing, the theme: an off-palette colour, a font outside the theme's roles, and the
+   optional radius and shadow lock (`off-colour`, `off-font`, `off-radius`, `off-shadow`, `ruled-grid`,
+   `dead-token`). Run both, and both must be clean.
 4. **Drop it in**, only a vetted surface enters the scene. Now the render is composing known-good parts.
 
 Building first is what stops the "tweak coords blind, re-render, repeat" spiral that eats a session.

@@ -79,7 +79,7 @@ instead of rebuilding it.
 
 ### `bgDefault` can now be a ROTATION, not only a single backdrop
 
-Measured across `films/scene/`: 85 of 119 films (71%) paint exactly one `bg` window for the whole
+Measured across `films/scene/`: 143 of the 182 scenes with a `bg` array (79%) paint exactly one window for the whole
 runtime, however many times the film cuts. That is not the mistake `backdrop` above guards against: an
 author who writes `bg:[{use:"theme"}]` has already asked for the theme's own backdrop, the same
 explicit door `bgDefault` opened as a single spec. `theme.bgDefault` now accepts an ARRAY of specs (a
@@ -146,15 +146,14 @@ Refuses by name, rather than rendering a blank sheet, when the theme has no `loo
 
 ## Where a theme's `look` lives today
 
-`themes/vawe.json` (the real brand, derived from `site/app/globals.css`), `themes/together-chat.json`,
-`themes/vawe-film.json`, and all six `themes/presets/*.json` (the taste-anchor profiles: a24, apple,
-bloomberg, duolingo, nike, vercel) carry one. `themes/default.json` and `themes/linear.json`/
-`themes/stripe.json` do not yet; a theme with no `look` is not an error, it is a theme that has not
-been given one.
+Three themes carry one: `themes/vawe.json` (the real brand, derived from `site/app/globals.css`),
+`themes/together-chat.json` and `themes/vawe-film.json`. `themes/default.json` and
+`themes/linear.json`/`themes/stripe.json` do not; a theme with no `look` is not an error, it is a theme
+that has not been given one.
 
 ## The computed look, for the other 28
 
-Only 3 of the 31 themes in the registry carry an authored `look`, so an engine default reading
+Only 3 of the 31 themes in `themes/` carry an authored `look`, so an engine default reading
 `theme.look` alone would do nothing for nearly all of them, `themes/default.json` included. `computedLook(theme, { isLightBg })` and `resolveLook(theme,
 opts)` (`core/registry/theme-contract.js`, beside `lookErrors`) close that gap: `resolveLook` returns
 `{...computedLook(theme), ...(theme.look||{})}`, so an authored key always wins over the computed one,

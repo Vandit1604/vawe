@@ -58,10 +58,11 @@ source before you argue with any of it.
 - **One expressive font per scene.** *"You pick two interesting fonts trying to make it 'better.' One
   performs, one recedes."*
 - **Weight contrast must be extreme. You default to 400 vs 700. Video needs 300 vs 900.** *"The difference
-  must be visible in motion at a glance."* Measured here across the 138 scene files that declare a font
-  weight: every one of the 2,417 declarations sits between **400 and 800**, and the two commonest values
-  are 500 and 600. **Zero declarations at or below 300. Zero at or above 900**, as of that count; the
-  library has grown since (197 scene files now), so re-run the grep before repeating the "zero" claim.
+  must be visible in motion at a glance."* Measured here across the 162 scene files that declare a font
+  weight: of 2,142 declarations, the two commonest values are 600 and 500, and almost all of them sit
+  between 400 and 800. The extremes are still a rounding error: **one declaration at 300**
+  (`showcase-type.json`) and **five at 900**, across two films (`vawe-launch.json`, `_t-knobs.json`).
+  Re-run the grep before repeating any of these figures.
   Thirteen `@font-face` rules in `core/tokens.css` load the full `100 900` range, so the light and black
   ends are paid for, loaded, and mostly unused.
 - **Video sizes, not web sizes. You will try to use 14px. Don't.** Full-screen viewing: body 20px minimum,
