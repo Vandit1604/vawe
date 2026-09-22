@@ -114,9 +114,12 @@ hierarchy and the cobalt glow in `engine-doctrine/animation.html`.
 - **A relative path inside the fragment resolves against the PAGE, not against the fragment's folder.**
   Moving markup into `films/scene/` does not make `./logo.svg` mean the file beside it. Write asset
   paths from the repo root.
-- **`sanitizeHtml` strips any absolute `src`/`href`** (`core/type/sanitize-html.js`), so an `<img src="/…">`
-  that renders in your browser renders empty in the film. The preview shows the fragment BEFORE the
-  sanitiser, so a picture that is right here can still be wrong in the render. Check the beats sheet.
+- **`sanitizeHtml` strips an absolute `src`/`href` that leaves the served roots**
+  (`core/type/sanitize-html.js:33-49`): `core/`, `themes/`, `films/`, `assets/`, `.vawe-data/scenes/` and
+  `.vawe-data/uploads/` are served, so `<img src="/assets/…">` survives and `<iframe src="/docs/…">`,
+  `//host/…` and any `scheme:` URL do not. A stripped one renders empty in the film, and the preview
+  shows the fragment BEFORE the sanitiser, so a picture that is right here can still be wrong in the
+  render. Check the beats sheet.
 
 ### 2. Style frames, before any motion exists
 

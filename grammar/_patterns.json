@@ -32,7 +32,7 @@
    ],
    "what": "Consecutive beats alternate dark and light, so no cut needs an effect on it.",
    "why": "The inversion IS the transition. `pin-72761350251141725` has no continuous object, no camera and no shared subject across seven shots, and still reads as one film purely because the ground alternates. `pin-333759022406800725` does it within a single hue, which is the gentler form.",
-   "ours": "bg windows with no from/to bind to the joints in order (core/junctions.js), so the cuts own the numbers. 84% of our library paints ONE window for the whole runtime."
+   "ours": "bg windows with no from/to bind to the joints in order (core/timeline/junctions.js), so the cuts own the numbers. 84% of our library paints ONE window for the whole runtime."
   },
   {
    "name": "There are three ways to invert a frame, not one",
