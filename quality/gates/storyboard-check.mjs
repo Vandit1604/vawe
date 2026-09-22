@@ -26,6 +26,7 @@ import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { classifyType, thresholdFor } from '../../harness/lib/genre-pacing.mjs';
+import { isWaivedBy } from '../../harness/lib/waivers.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -81,6 +82,15 @@ if (process.argv.includes('--ratchet')) {
 const f = process.argv.slice(2).find((a) => !a.startsWith('--'));
 if (!f || !fs.existsSync(f)) { console.error('usage: storyboard-check <STORYBOARD.md>  (template: engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md)'); process.exit(2); }
 const src = fs.readFileSync(f, 'utf8');
+
+// The one waiver mechanism (`authoring.allow` + `_why` in the scene JSON, AGENTS.md), read here too:
+// a plan-time blocker earns the same door out as every JSON-side rule, never a second excuse path.
+// Before `make assemble` runs there is no JSON yet, so `allowRaw` is empty and a beat that genuinely
+// names no real material still passes, because it never uses a content noun in the first place.
+const sceneJsonPath = /\.storyboard\.md$/.test(f) ? f.replace(/\.storyboard\.md$/, '.json') : null;
+const sceneForWaivers = sceneJsonPath && fs.existsSync(sceneJsonPath)
+  ? (() => { try { return JSON.parse(fs.readFileSync(sceneJsonPath, 'utf8')); } catch { return null; } })() : null;
+const allowRaw = (sceneForWaivers?.authoring && Array.isArray(sceneForWaivers.authoring.allow)) ? sceneForWaivers.authoring.allow : [];
 
 const gf = gateFindings();
 // errs/warns drive the console prose below, unchanged; err()/warn() mirror each one into gf so --json
@@ -263,11 +273,16 @@ sbBeats.forEach((b, i) => {
 // engine-doctrine/CRAFT/CONTENT.md: real content (a capture, a real photo, a screen designed for the video) is
 // what makes a beat DENSE where the reference is dense; a beat that only DESCRIBES a screen and stops
 // is the grey mock the owner named directly ("their content is designed for the video; ours is
-// plain"). WARNING ONLY: a storyboard is legitimately written before design time picks the real
-// source (stage 4, AGENTS.md), so this can never block a plan from existing, only flag a gap for it.
+// plain"). A BLOCKER, not a warning (the owner's own words: "no made-up content... always ask for
+// these details explicitly"): a film that never names a real source for the content it draws reached
+// approval with nothing to show, and nothing stopped it (harness/author/approve.mjs runs this gate as
+// its one precondition). This does not fire on a film that names no content noun at all, so a
+// legitimately asset-free film (a sting, a chart-only explainer, a pure type film) is never touched;
+// a beat that DOES declare a real source, or is waived with a `_why` (the one waiver mechanism,
+// AGENTS.md), still passes.
 const CONTENT_NOUN_RE = /\b(screen|window|app|ui|dashboard|grid|card|product|photo)\b/i;
 const REAL_ASSET_RE = /assets\/|\.vawe-data\/uploads\//;
-const REAL_COMMAND_RE = /\bmake\s+(capture|sections|screen)\b/i;
+const REAL_COMMAND_RE = /\bmake\s+(capture|sections|screen|assets|photos|gen-image|gen-video|gen-clip)\b/i;
 
 // A RECIPE: structure measured off a real film (recipes/README.md), applied to layers the author
 // already named. One parser, shared with assemble.mjs (harness/lib/contract.mjs parseRecipeLine), so
@@ -286,7 +301,7 @@ function recipeLineFindings(b, title) {
     + `slot(s): ${rp.missingSlots.join(', ')}. recipes/README.md.`);
 }
 
-function plainContentWarning(b, title) {
+function plainContentCheck(b, title) {
   const text = ['onscreen', 'picture', 'mechanism', 'object'].map((k) => fieldIn(b, k) || '').join(' ');
   const noun = (CONTENT_NOUN_RE.exec(text) || [])[1];
   if (!noun) return;
@@ -297,16 +312,20 @@ function plainContentWarning(b, title) {
     const fragPath = fragRaw.includes('/') ? path.resolve(ROOT, fragRaw) : path.join(path.dirname(f), fragRaw);
     if (fs.existsSync(fragPath)) return;   // the fragment already exists on disk: a real source
   }
+  if (isWaivedBy(allowRaw, 'plain-content', title)) return;   // {"authoring":{"allow":["plain-content@<title>"],"_why":{...}}}
   if (/^photo$/i.test(noun)) {
-    warn('plain-content', `beat "${title}": names a photo with no real source stated. Get a real one: `
-      + '`make photos` (engine-doctrine/CRAFT/IMAGERY.md), never an invented image.');
+    err('plain-content', `beat "${title}": names a photo with no real source stated. ASK for the real image, `
+      + 'do not invent one. Get it with `make photos` (engine-doctrine/CRAFT/IMAGERY.md), or `make gen-image` '
+      + 'if none exists to capture; never draw an invented photo.');
     return;
   }
-  warn('plain-content', `beat "${title}": names a ${noun.toLowerCase()} but no real source is stated (no `
-    + '`fragment:` file that exists on disk, no assets/ or .vawe-data/uploads/ path, no capture/sections/screen '
-    + 'mention). A real screen already exists? `make capture` or `make sections URL=<site>`. Otherwise design one '
-    + 'for this beat: `make screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [REF=<ref> ACT=<n>] '
-    + '[THEME=<name>]` (engine-doctrine/CRAFT/SCREENS.md).');
+  err('plain-content', `beat "${title}": names a ${noun.toLowerCase()} but no real source is stated (no `
+    + '`fragment:` file that exists on disk, no assets/ or .vawe-data/uploads/ path, no capture/sections/'
+    + 'screen/assets/photos mention). ASK for the real source, do not invent one. A real screen already exists? '
+    + '`make capture` or `make sections URL=<site>`. Otherwise design one for this beat: `make screen '
+    + 'F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [REF=<ref> ACT=<n>] [THEME=<name>]` '
+    + '(engine-doctrine/CRAFT/SCREENS.md). Chosen absence, not a gap? Waive it: '
+    + `{"authoring":{"allow":["plain-content@${title}"],"_why":{"plain-content@${title}":"…"}}}.`);
 }
 
 // ── the vocabulary that separates a MECHANISM from a TRANSFORMATION ──────────────────────────────
@@ -360,7 +379,7 @@ for (const b of blocks) {
   if (shortFilm && hasObject && !has('object')) err('beat-missing-object', `beat "${title}" is missing \`object:\`. This film declares \`object: "${field('object')}"\`, so say what it has become in this beat (or where it is, if it is not born yet). Every cut must read "the X becomes the Y". If the object is not really what holds this film, drop it and name the real devices in \`threads:\`.`);
   const missing = REQ.filter((k) => !has(k));
   if (missing.length) err('beat-missing-fields', `beat "${title}" is missing: ${missing.map((m) => `\`${m}\``).join(', ')} (every beat needs a type, its on-screen cues, and a WHY).`);
-  plainContentWarning(b, title);
+  plainContentCheck(b, title);
   // A beat that plans its frame with `make screen F=` and no matching `fragment:` has a frame no reader
   // can see: the stage, frame-check and the studio read `fragment:` only, so the film skips design.
   const screenFile = (/\bmake\s+screen\s+F=(\S+)/i.exec(b) || [])[1];
