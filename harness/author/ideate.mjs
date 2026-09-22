@@ -535,8 +535,11 @@ function runFromRef(ref, clipArg, { ask: askFlag, answersPath } = {}) {
     process.exit(1);
   }
   const grammar = JSON.parse(fs.readFileSync(grammarPath, 'utf8'));
-  if (!Array.isArray(grammar.seams) || !grammar.seams.length) {
-    console.error(`ideate: ${path.relative(ROOT, grammarPath)} has no measured seams yet. Re-run the study.`);
+  // A study always writes `shots` (>= 1) and `seams` as arrays; `seams: []` is a MEASURED zero-cut
+  // reference (one continuous shot, skills/vawe-continuous-action/SKILL.md), not an incomplete one, so
+  // it is never refused here. Only a malformed/pre-study grammar file (missing either array) is.
+  if (!Array.isArray(grammar.shots) || !grammar.shots.length || !Array.isArray(grammar.seams)) {
+    console.error(`ideate: ${path.relative(ROOT, grammarPath)} is not a measured study. Re-run the study.`);
     process.exit(1);
   }
   // Forward-compat with the fuller-coverage study (refs/<name>/pages*, grammar.coverage.ledger): once
