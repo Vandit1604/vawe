@@ -402,9 +402,9 @@ Doctrine carries the taste; the gates backstop the source-decidable subset:
   and applies it on `WRITE=1`. Everything else stays an invisible cut. This is the restraint rule made
   operational: straight cuts are the meat, the seam is the one seasoning reserved for the hero.
 - **no transition-dip**: the stage never goes empty between beats; the transition IS the exit
-  (`make critique`, rule `transition-dip`, MISTAKES #120).
+  (`make critique`, rule `transition-dip`).
 - **no typing/reveal cut off**: a time-based reveal completes before its seam (`make critique`,
-  `typing-cutoff`, MISTAKES #119).
+  `typing-cutoff`, MISTAKES #122).
 - **restraint**: a primary used on ~all cuts (monotone) or accents with no earned reason are judgment
   calls the planning skill and `make judge` review; the vision judge scores whether each seam reads.
 
