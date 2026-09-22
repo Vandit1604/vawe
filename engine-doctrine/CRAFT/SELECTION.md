@@ -100,7 +100,7 @@ principles of animation: slow-in/slow-out, anticipation, follow-through.)
 ## 4. Composite looks / stings / shaders, the texture and era
 
 Reach for one only on the **2–3 earned beats** (hero reveal · act break · CTA). **Pick the era of the
-story, not the loudest effect.** Two registries: *looks* (`core/looks/index.js`, a held texture over a beat)
+story, not the loudest effect.** Two registries: *looks* (`LOOKS` in `core/looks/presets.js`, a held texture over a beat)
 and *stings* (`SHADER_FX` in `core/stings/index.js`, a shader that peaks AT a cut). Complete coverage below,
 grouped by the register each evokes: pick the group your story is in, then one member.
 
@@ -268,8 +268,8 @@ memory. Today there are three.
 | Tell | Fires when | Source |
 |---|---|---|
 | `habitual-pace` | pace sits in 2.5 to 4s | `FILM-STRUCTURE.md`: "Our films sit at 2.5 to 4 seconds a beat" |
-| `the-free-device` | the thread is the transforming object | `CLAUDE.md`: "a keyed `w`/`h` on a rectangle passes and a motif does not" |
-| `slideshow-shape` | four beats or fewer across a full runtime | `CLAUDE.md`, the `plain-slideshow` floor |
+| `the-free-device` | the thread is the transforming object | `AGENTS.md` (checker's own `doc:` field; the quoted line itself lives in `FILM-STRUCTURE.md`): "a keyed `w`/`h` on a rectangle passes and a motif does not" |
+| `slideshow-shape` | four beats or fewer across a full runtime | `AGENTS.md`, the `plain-slideshow` floor |
 
 ### The threshold is 0.10, and why that number
 

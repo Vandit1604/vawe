@@ -29,7 +29,7 @@ not: "the defaults this film refuses, in your own words"
   film across its cuts), and per-beat `shot:`/`layout:`/`becomes:`/`trigger:`/`picture:`, then watch
   `make animatic SB=<file>` before writing any JSON.
 - Enforced by `[gated: quality/gates/storyboard-check.mjs]` (presence of `spectacle:`/`not:`, plus
-  `pace-not-chosen` and `timeline-hole`) and `[gated: quality/gates/plan-vs-render.mjs]` once a scene
+  `timeline-hole`), `[gated: quality/gates/plan-vs-render.mjs]` (`pace-not-chosen`) once a scene
   exists; `[ref: make panels]` / `[ref: make animatic]` draw what each field means but check nothing.
 - Confirm: are `spectacle:` and `not:` both filled, and have you watched `make animatic` before
   writing any scene JSON?
