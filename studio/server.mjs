@@ -201,7 +201,23 @@ const directionFloorFindings = (file) => {
   return out.split('\n').map((l) => l.trim()).filter((l) => /^[^[]*\[[a-z-]+\]/.test(l));
 };
 
-const page = () => studioPage({ fmt: 'scene', dataUrl, title: path.basename(dataArg) });
+// FOUR PANES, FOUR ROUTES. "should we make the pages per url so we can control what to open properly
+// as well as agent can also specifically check" (the owner's own words): before this, every route
+// answered '/studio' and always opened on Make, so an agent (or a shared link) could only ever verify
+// that the shell booted, never a specific pane. /studio/<pane> opens directly on that pane; bare
+// '/studio' still works and picks a pane off the film's own stage.
+const PANES = ['plan', 'make', 'ship', 'sound'];
+// Reuses stageOf's own verdict (quality/gates/stage.mjs), the ONE place stage order lives: this only
+// maps that verdict to a pane, it never re-derives what stage the film is in. A film with no scene yet
+// (brief..approval) has nothing to scrub, so it opens where the approval workflow lives; a film with
+// layers but nothing shipped opens on Make; a rendered or judged film opens on Ship.
+const paneForStage = (stage) => {
+  if (['brief', 'plan', 'design', 'approval'].includes(stage)) return 'plan';
+  if (['assemble', 'direct'].includes(stage)) return 'make';
+  return 'ship';
+};
+const defaultPane = () => { try { return paneForStage(stageOf(dataArg).stage); } catch { return 'make'; } };
+const page = (state) => studioPage({ fmt: 'scene', dataUrl, title: path.basename(dataArg), state: state || defaultPane() });
 
 // stage.mjs writes the next step as one string: a command, sometimes followed by ", then ..." or a
 // "   (note)". The stage chip copies only what can be run, so the two are sent apart.
@@ -360,11 +376,15 @@ const SHEETS = {
            what: 'every beat, in · mid · out' },
   // preview.mjs names its sheet after the FORMAT, not the scene (/tmp/preview_scene.png), so two studios
   // on two scenes would overwrite each other's. Copied to a per-scene path the moment it lands, which
-  // narrows that to the width of one run rather than the width of a session.
+  // narrows that to the width of one run rather than the width of a session: `after` only fires on a
+  // run that actually SUCCEEDED for THIS scene (the caller passes `err`), and only trusts the shared
+  // file if its mtime is at or after the run's own start, never a leftover from a run this studio never
+  // made. Missing either check, a stale scaffold sheet from an unrelated film sat behind this route and
+  // was served as pin-recreation's own frames: real bytes, real 200, the wrong film entirely.
   frames: { file: () => scratch('look', `${SLUG}.png`), args: ['harness/author/preview.mjs', 'scene', '--data', dataArg],
             what: 'the key frames of the whole film',
-            after: () => { const src = '/tmp/preview_scene.png';
-              if (fs.existsSync(src)) fs.copyFileSync(src, scratch('look', `${SLUG}.png`)); } },
+            after: (err, startedAt) => { if (err) return; const src = '/tmp/preview_scene.png';
+              if (fs.existsSync(src) && fs.statSync(src).mtimeMs >= startedAt) fs.copyFileSync(src, scratch('look', `${SLUG}.png`)); } },
   seams: { file: () => `/tmp/seams/${SLUG}.png`, args: ['quality/gates/seam-snap.mjs', dataArg],
            what: 'the frames straddling every transition, out of the rendered mp4',
            // seam-snap reads PIXELS, so it cannot run without one. Said plainly rather than drawn as
@@ -480,7 +500,10 @@ const studioRoutes = (req, res) => {
   const url = req.url.split('?')[0];
   // no-store, because this shell is edited while it is being looked at: with no validator on the
   // response Chrome cached it heuristically and a reload showed the previous version of the tool.
-  if (url === '/' || url === '/studio') { res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' }); res.end(page()); return true; }
+  if (url === '/' || url === '/studio' || (url.startsWith('/studio/') && PANES.includes(url.slice('/studio/'.length)))) {
+    const pane = url.startsWith('/studio/') ? url.slice('/studio/'.length) : undefined;
+    res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' }); res.end(page(pane)); return true;
+  }
   // studio.css and studio.js are edited right alongside the shell, so they get the same no-store: the
   // static handler below has no validator either and Chrome cached the old JS the same way it once
   // cached the old page.
@@ -808,8 +831,9 @@ const studioRoutes = (req, res) => {
     const stale = !fs.existsSync(png) || fs.statSync(dataArg).mtimeMs > fs.statSync(png).mtimeMs
       || (kind === 'seams' && fs.statSync(MP4).mtimeMs > fs.statSync(png).mtimeMs);
     if (!stale) return send(), true;
+    const startedAt = Date.now();
     run(kind, S.args, (err, stdout, stderr) => {
-      if (S.after) { try { S.after(); } catch { /* the existence check below is the real verdict */ } }
+      if (S.after) { try { S.after(err, startedAt); } catch { /* the existence check below is the real verdict */ } }
       // seam-snap exits 1 when it FINDS a flash and still writes its sheet, which is the run you most
       // want to look at. So the sheet decides, not the exit code.
       if (fs.existsSync(png)) return send();
@@ -927,6 +951,33 @@ async function preflight() {
         return null;
       } finally { await close(); }
     } },
+    // EVERY PANE, ITS OWN URL. "agent should have all the endpoints and if there is error on those it
+    // should fix them acc. to the stage it is on" (the owner's own words): before this, checking a route
+    // returned 200 was the whole test, which is exactly how a plain-text error body wearing a 200 slipped
+    // through. Each pane route must carry the pane it claims (data-state="<pane>" in the served shell),
+    // not just answer.
+    ...PANES.map((pane) => ({ name: `pane:${pane}`, run: async () => {
+      const r = await fetch(`${base}/studio/${pane}`);
+      if (!r.ok) return `GET /studio/${pane} -> ${r.status}`;
+      const body = await r.text();
+      return body.includes(`data-state=${pane}`) ? null : `GET /studio/${pane} did not open on the ${pane} pane`;
+    } })),
+    // THE SHEETS THE PLAN PANE'S "Rendered sheets" SUB-VIEW ACTUALLY SHOWS. A 200 alone proved nothing:
+    // beats and seams already explain themselves with X-Scene-Error/X-Needs-Render, and frames used to
+    // hand back a real PNG that was somebody else's film, still a 200, still "safe to share". Each kind
+    // is now judged by what it drew, not by its status code, and a kind that cannot draw yet on a
+    // pre-assemble film is a NAMED note, never folded into a silent pass.
+    ...Object.keys(SHEETS).map((kind) => ({ name: `sheet:${kind}`, run: async () => {
+      const r = await fetch(`${base}/__sheet?kind=${kind}&t=${Date.now()}`);
+      if (!r.ok) return `GET /__sheet?kind=${kind} -> ${r.status}`;
+      if (r.headers.get('X-Needs-Render')) return { note: `sheet ${kind}: ${(await r.text()).trim().slice(0, 120)}` };
+      if (r.headers.get('X-Scene-Error')) {
+        const body = (await r.text()).trim();
+        return preAssemble ? { note: `sheet ${kind}: no scene yet (${stageLine})` } : `sheet ${kind} drew no sheet:\n${body.slice(0, 200)}`;
+      }
+      if ((r.headers.get('Content-Type') || '') !== 'image/png') return `sheet ${kind} answered 200 with no image and no explanation header`;
+      return null;
+    } })),
   ];
   const results = await Promise.all(checks.map(async (c) => {
     try { return { name: c.name, result: await c.run() }; }
@@ -934,9 +985,16 @@ async function preflight() {
   }));
   const notes = results.filter((r) => r.result && typeof r.result === 'object');
   const failed = results.filter((r) => r.result && typeof r.result === 'string');
+  // "safe to share" is a claim that whoever opens this link sees the real film, not an explanation of
+  // its absence. A NOTE means some pane cannot show real content yet (a pre-assemble film has no scene
+  // to sheet or scrub), which is a true and honest thing to say, but it is not the same claim as "safe
+  // to share" and must never be printed as one (pin-recreation, approval stage: the acceptance test
+  // this preflight has to pass).
   if (failed.length) {
-    console.log(`  ⚠ studio preflight: ${results.length - failed.length}/${results.length} ok, fix before sharing this link`);
+    console.log(`  ⚠ studio preflight: ${results.length - failed.length - notes.length}/${results.length} ok, fix before sharing this link`);
     for (const f of failed) console.log(`    ✗ ${f.name}: ${f.result}`);
+  } else if (notes.length) {
+    console.log(`  · studio preflight: ${results.length - notes.length}/${results.length} ok, ${notes.length} pane(s) explain a real limit, read them before sharing`);
   } else {
     console.log(`  ✓ studio preflight: every pane renders or explains itself, this link is safe to share`);
   }

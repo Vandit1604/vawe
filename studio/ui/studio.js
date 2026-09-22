@@ -218,6 +218,9 @@ function preAssembleNote(){
    keepFocus(document.querySelector('#states button[data-state="'+s+'"]'));
    [...document.querySelectorAll('#states button[data-state]')].forEach(b=>
      b.setAttribute('aria-pressed',String(b.dataset.state===s)));
+   // Each pane has its own route (/studio/plan etc, studio/server.mjs), so the address bar always names
+   // the pane on screen: an agent (or a bookmark) can come straight back to the one that was broken.
+   if(history.replaceState) history.replaceState(null,'','/studio/'+s);
    if(s==='make') fit();
    if(s==='plan'){ drawPlan(); if(planSub==='sheets') showSheet(sheetKind); }
    if(s==='ship') drawShip();
@@ -1137,6 +1140,13 @@ function preAssembleNote(){
    try{ timeline(); }catch{}
    try{ fetch('/__err',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({title:title,detail:detail})}); }catch{}
+   // A direct hit on /studio/sound or /studio/ship (each pane's own route, so an agent can open one
+   // without passing through Make first) draws its pane BEFORE the iframe has had a chance to report
+   // boot failure, since that report is async. Both panes already know how to show "no scene yet"
+   // (window.sceneFailed above); they just never got asked to redraw once it became true, so the pane
+   // sat on "Loading..." forever. Redraw whichever of the two is on screen right now.
+   const st=document.body.dataset.state;
+   if(st==='sound') drawSound(); else if(st==='ship') drawShip();
  }
  function ready(deadline){ const w=sc.contentWindow;
    if(w.__engineError){
@@ -1624,4 +1634,8 @@ function preAssembleNote(){
    lanes.setPointerCapture(e.pointerId); seek(e); });
  // only a press the lanes captured scrubs: an eye click never captures, so holding it must not move the playhead
  lanes.addEventListener('pointermove',e=>{ if((e.buttons&1)&&lanes.hasPointerCapture(e.pointerId)) seek(e); });
- drawCrumbs(); setState('make');
+ // The server already knows which stage this film is in (/api/stage, quality/gates/stage.mjs) and picks
+ // the pane a plan/approval-stage film should open on: `document.body.dataset.state` is written into the
+ // shell at that point (page.mjs, studio/server.mjs paneForStage). A direct hit on /studio/<pane> sets
+ // the same attribute to that pane. Never re-derive the stage here, just read what the server decided.
+ drawCrumbs(); setState(document.body.dataset.state||'make');
