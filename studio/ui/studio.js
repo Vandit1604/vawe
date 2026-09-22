@@ -2,6 +2,20 @@
  const sc=$('sc'),read=$('read'),play=$('play');
  const lanes=$('lanes'),ruler=$('ruler'),rows=$('rows'),ph=$('ph');
  let fps=30,total=0,n=0,playing=false,W=1920,H=1080,dur=1,model=null;
+// The stage chip's own fetch below is the ONE place `/api/stage` is read; cached here so a scene/look/
+// sound pane that finds no engine can say WHICH stage the film is in and the one command that moves it,
+// instead of re-deriving that (make stage already owns it) or just printing a raw boot failure.
+let stageInfo=null;
+// A pre-assemble film (AGENTS.md stages brief..approval) has no `layers` yet on purpose
+// (harness/author/scaffold.mjs writes only a declared placeholder) so the engine's own validator
+// refusing to boot it is not a bug to report, it is the expected shape of an unbuilt film. One line,
+// reused by every pane that would otherwise show a raw engine error for this exact, ordinary case.
+function preAssembleNote(){
+  if(!stageInfo||!stageInfo.ok) return null;
+  const order=stageInfo.order||[], at=order.indexOf(stageInfo.stage), asm=order.indexOf('assemble');
+  if(at<0||asm<0||at>=asm) return null; // already assembled, or the stage could not be read: show the real error
+  return 'This film has no scene yet: it is at the '+stageInfo.stage+' stage.\nNext: '+(stageInfo.command||stageInfo.next);
+}
  // ---- GEOMETRY IS MEASURED ONCE PER CHANGE, NEVER PER EVENT ---------------------------------------
  // Every hover used to read the ruler's rect, the peek's own offsetWidth and the timeline panel's rect
  // and then write three style properties, which is a forced synchronous layout inside a pointermove,
@@ -424,6 +438,7 @@
  // READ-ONLY: the stage comes from the files on disk (quality/gates/stage.mjs), so the chip cannot claim
  // a stage the repo is not in. Clicking it copies the one next command.
  fetch('/api/stage').then(r=>r.json()).then(d=>{
+   stageInfo=d;
    if(!d||!d.ok) return;
    const chip=$('stagechip'), name=$('stagename'), at=d.order.indexOf(d.stage), label=cap(d.stage);
    name.textContent=label;
@@ -642,7 +657,12 @@
    const note=$('soundnote'), body=$('soundbody');
    const eng=sc.contentWindow&&sc.contentWindow.__engine;
    if(!model||!eng||!eng.meta){ note.hidden=false; body.innerHTML='';
-     note.innerHTML='<h2>Loading&hellip;</h2><p>Waiting for the scene to boot.</p>'; $('soundstat').textContent=''; return; }
+     // A scene that failed to boot never sets `eng`, so this branch would otherwise say "Loading…"
+     // forever. `window.sceneFailed` (set by fail()) tells the two states apart.
+     if(window.sceneFailed){ const pre=preAssembleNote();
+       note.innerHTML='<h2>No sound yet</h2><p>'+esc(pre||'The scene did not load, so there is nothing to derive sound from yet.')+'</p>'; }
+     else note.innerHTML='<h2>Loading&hellip;</h2><p>Waiting for the scene to boot.</p>';
+     $('soundstat').textContent=''; return; }
    // The label is reconstructed once per draw, off the SAME flattened layer tree (group children
    // included, studio/server.mjs's model only lists the top level) rather than re-walked per row.
    const flat=flattenLayers(model);
@@ -1099,26 +1119,38 @@
  const errBox=$('err');
  // AN ERROR YOU CANNOT COPY IS AN ERROR YOU RETYPE BY HAND. The text is selectable, one button copies
  // it, and it is POSTed to the server so the terminal that started studio hears about it too.
- function fail(title,detail){ errBox.hidden=false;
+ // `note`, when given, is the plain-language explanation (e.g. which stage the film is in and the
+ // one command that moves it forward): shown OPEN, above the fold. `detail` is the engine's own raw
+ // error, kept behind the collapsed "Output" disclosure, still one click away, never the first thing read.
+ function fail(title,detail,note){ errBox.hidden=false;
    window.sceneFailed=true;
-   errBox.innerHTML='<b></b><details><summary>Output</summary><pre></pre></details><button class="ecopy">Copy</button>';
+   errBox.innerHTML='<b></b>'+(note?'<p class=failnote></p>':'')+'<details><summary>Output</summary><pre></pre></details><button class="ecopy">Copy</button>';
    ['prev','play','next','zin','zout','key','candgo'].forEach(id=>{ const e=$(id); if(e) e.disabled=true; });
-   errBox.querySelector('b').textContent='Scene did not load';
+   errBox.querySelector('b').textContent=title;
+   if(note){ const p=errBox.querySelector('.failnote'); p.textContent=note;
+     p.style.cssText='white-space:pre-wrap;user-select:text;margin:.5em 0'; }
    const pre=errBox.querySelector('pre');
    pre.textContent=detail; pre.style.cssText='white-space:pre-wrap;user-select:text;margin:.5em 0;font:12px/1.5 ui-monospace,monospace';
    const btn=errBox.querySelector('.ecopy');
-   btn.onclick=()=>{ navigator.clipboard.writeText(title+String.fromCharCode(10)+detail).then(()=>{btn.textContent='copied';setTimeout(()=>btn.textContent='copy',1200);}); };
-   read.textContent='scene did not load';
+   btn.onclick=()=>{ navigator.clipboard.writeText(title+String.fromCharCode(10)+(note?note+String.fromCharCode(10,10):'')+detail).then(()=>{btn.textContent='copied';setTimeout(()=>btn.textContent='copy',1200);}); };
+   read.textContent=title;
    try{ timeline(); }catch{}
    try{ fetch('/__err',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({title:title,detail:detail})}); }catch{}
  }
  function ready(deadline){ const w=sc.contentWindow;
-   if(w.__engineError) return fail('this scene does not render',String(w.__engineError));
+   if(w.__engineError){
+     const note=preAssembleNote();
+     return fail(note?'No scene yet':'This scene does not render',String(w.__engineError),note);
+   }
    if(!w.__engineReady||!w.__engine){
      const dl=deadline||Date.now()+20000;
-     if(Date.now()>dl) return fail('the scene never signalled ready',
-       'No __engineReady and no __engineError after 20s. The page failed before core/boot.js could report, open '+sc.src+' directly and read the console.');
+     if(Date.now()>dl){
+       const note=preAssembleNote();
+       return fail(note?'No scene yet':'The scene never signalled ready',
+         'No __engineReady and no __engineError after 20s. The page failed before core/boot.js could report, open '+sc.src+' directly and read the console.',
+         note);
+     }
      return setTimeout(()=>ready(dl),80); }
    errBox.hidden=true;
    const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; fit(); timeline(); n=0; draw(); }
