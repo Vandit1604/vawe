@@ -5,10 +5,13 @@
 // evidence classes (the four-category test in engine-doctrine's rules-from-sources plan): a bank of
 // five clips is a better SAMPLE of the same weaker kind of evidence, not a stronger one. Concretely,
 // harness/lib/genre-pacing.mjs's held-state cap used to read `longestHoldS` off this bank and swung
-// 2.6s-3.6s, a 38% move, off the SAME two clips depending only on which delta metric read them; it now
-// defers to quality/gates/read-check.mjs's already-sourced MAX_HOLD instead. This file still runs, and
-// a caller may still REPORT what it measured next to a finding as evidence an author can weigh, it
-// just no longer gets to DECIDE a threshold on its own.
+// 2.6s-3.6s, a 38% move, off the SAME two clips depending only on which delta metric read them. It
+// tried quality/gates/read-check.mjs's already-sourced MAX_HOLD next, and that failed too, for a
+// different reason: MAX_HOLD is sourced for TIME TO READ PROSE, and a held beat need carry no prose at
+// all, so the citation does not reach the question (genre-pacing.mjs's header has the full argument).
+// There is no held-state CAP left; the judgement moved to `make plan-judge`'s `beat-pacing` code, an
+// agent looking at the plan. This file still runs, and a caller may still REPORT what it measured next
+// to a finding as evidence an author can weigh, it just never gets to DECIDE a threshold on its own.
 //
 // Two of the numbers a bar needs used to live only as PROSE, hand-quoted from a study nobody could
 // re-check: films/scene/pin-recreation.storyboard.md ("median frame delta ~0.23") and
