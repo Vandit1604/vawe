@@ -1,3 +1,9 @@
+---
+when: "about to justify a timing number in a gate, or asked where a threshold came from"
+answers: "which external sources publish real timing numbers (Cinemetrics, Material Design 3, Ofcom, EBU) · which of our 86 sourceless constants they can justify · which questions no source answers"
+group: reference
+---
+
 # Timing sources: what external work can and cannot justify our 86 sourceless constants
 
 Task from the owner's principle: rules decide films, films never decide rules. `THRESHOLD-PROVENANCE-AUDIT.md`
