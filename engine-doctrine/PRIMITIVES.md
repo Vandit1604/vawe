@@ -295,6 +295,35 @@ baked default is usually why: override it.
 `driveClips(root, t)` runs any `[data-start]` element's window/enter/exit/z-track (12 anim names);
 `registerTimeline`/`seekAll` seek paused GSAP/WAAPI timelines deterministically.
 
+## Entrance dials: `anticipate` and `overshoot` (per-layer, on `up`/`rise`/`pop`/`scale`/`lift`/`slide-*` only)
+
+Both bend the EASE of an entrance that already has travel, never a still layer into motion. `anticipate`
+(0.01-0.6) winds the layer back along its own travel axis for ~3 frames before it goes forward;
+`overshoot` (0.01-0.6) replaces the entrance's own curve with one that sails past rest by that fraction
+and rings down. Every qualifying entrance gets `anticipate` BY DEFAULT (`core/engine/produce.js`
+`applyAnticipateDefault`, amount derived from the theme's own `bounce`), excluding the film's first wave
+and `type:"count"`. `anticipate: false` opts one layer back out; a number overrides the derived amount.
+`engine-doctrine/RULES/anticipate-default.md` is the full rule.
+
+`overshoot` has no default and is rarely worth authoring: the same shape is already reachable, named and
+catalogued as the `overshoot` KEYFRAME HANDLE (`core/motion/motion.js` HANDLE_REGISTRY, slot
+`easeOut`/`easeIn`, on any `motion`/`camera` key), so a hand-authored move already has this curve one
+word away without a second, entrance-only field.
+
+## GSAP-backed layer primitives (`films/scene/scene.js` applyGsapHooks, loaded only when a scene uses one)
+
+Four fields, each a thin pass-through to one GSAP plugin, real and validated but with no named
+capability pointing an author at them (`quality/baselines/reach.json`). Each also has a `warp`-kind
+recipe (`recipes/recipes.json`) that writes the same field with named, measured defaults:
+`orbit-path`/`line-reveal`/`scatter-burst`/`time-ramp`.
+
+| field | what it does | recipe |
+|---|---|---|
+| `motionPath` | `{ path, align, autoRotate, curviness, dur, ease }`. Flies the layer along an SVG path (GSAP MotionPathPlugin), a closed-form position so it stays pure per frame. | `orbit-path` |
+| `splitText` | `{ mask, dur, ease, stagger }`. Masks each LINE of a text layer and slides it up from behind on its own stagger (GSAP SplitText). Line-level only; `split` still owns char/word, and the two are refused together. | `line-reveal` |
+| `physics` | `{ velocity, angle, gravity, friction, spread, dur }`. Velocity/gravity/friction scatter (GSAP Physics2DPlugin). On a `split` layer each unit gets an index-based angle spread, deterministic, no randomness. | `scatter-burst` |
+| `timeRemap` | a named shape (`whip`/`hold`/`freeze`/`rewind`, `core/timeline/time.js` TIME_REMAP_REGISTRY) or raw `[{t, at}]` keys. Warps the layer's OWN clock, so motion, count, idle and typing all speed and slow together, not one property eased alone. `timeWarp` is the one-easing sibling; the two are refused together. | `time-ramp` |
+
 ## Motion tracks (per-layer element choreography)
 
 Any layer takes an optional `motion: [{t, x, y, scale, rot, opacity, ease}]` keyframe track, the

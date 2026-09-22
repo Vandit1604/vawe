@@ -358,6 +358,53 @@ function expandCursorLine(scene, line) {
   cur.styleAt = [...(cur.styleAt || []), { t: Math.max(0, at - approach), style }];
 }
 
+// expandWarpLine: kind "warp", four recipes (orbit-path/line-reveal/scatter-burst/time-ramp), each
+// writing ONE GSAP-backed layer field the engine already reads (films/scene/scene.js applyGsapHooks,
+// core/timeline/time.js) and nothing else. Unlike seam/camera/enter, a warp recipe has no travel or
+// box math to compute: it is a named, arsenal-searchable route to a primitive an author could already
+// write by hand, so the whole expander is "pick the params, write the field".
+function expandWarpLine(scene, line) {
+  const name = line.recipe;
+  const bad = (why) => { throw new Error(`recipe "${name}": ${why}`); };
+  const recipe = pickRecipe(name);
+  if (recipe.kind !== 'warp') bad(`expand.mjs only expands kind "warp" here, got "${recipe.kind}"`);
+  for (const slot of ['at', 'layer']) if (line[slot] == null) bad(`missing slot "${slot}"`);
+  const L = findLayer(scene, line.layer);
+  if (!L) bad(`no layer id "${line.layer}" (the "layer" slot)`);
+  L.start = line.at;
+
+  if (name === 'orbit-path') {
+    if (line.path == null) bad('missing slot "path"');
+    if (L.motionPath) bad(`"${line.layer}" already has "motionPath"; the recipe would overwrite it`);
+    L.motionPath = { path: line.path,
+      align: paramOf(name, recipe, 'align', line.params),
+      autoRotate: paramOf(name, recipe, 'autoRotate', line.params),
+      curviness: paramOf(name, recipe, 'curviness', line.params),
+      dur: paramOf(name, recipe, 'dur', line.params),
+      ease: paramOf(name, recipe, 'ease', line.params) };
+  } else if (name === 'line-reveal') {
+    if (L.split) bad(`"${line.layer}" already carries "split: ${JSON.stringify(L.split)}"; splitText re-wraps the same text and the two splitters would fight`);
+    if (L.splitText) bad(`"${line.layer}" already has "splitText"; the recipe would overwrite it`);
+    L.splitText = { mask: paramOf(name, recipe, 'mask', line.params),
+      dur: paramOf(name, recipe, 'dur', line.params),
+      ease: paramOf(name, recipe, 'ease', line.params),
+      stagger: paramOf(name, recipe, 'stagger', line.params) };
+  } else if (name === 'scatter-burst') {
+    if (!L.split) bad(`"${line.layer}" has no "split"; physics needs split units to scatter, a whole unsplit layer just flies as one`);
+    if (L.physics) bad(`"${line.layer}" already has "physics"; the recipe would overwrite it`);
+    L.physics = { velocity: paramOf(name, recipe, 'velocity', line.params),
+      angle: paramOf(name, recipe, 'angle', line.params),
+      gravity: paramOf(name, recipe, 'gravity', line.params),
+      friction: paramOf(name, recipe, 'friction', line.params),
+      spread: paramOf(name, recipe, 'spread', line.params),
+      dur: paramOf(name, recipe, 'dur', line.params) };
+  } else if (name === 'time-ramp') {
+    if (L.timeRemap != null) bad(`"${line.layer}" already has "timeRemap"; the recipe would overwrite it`);
+    if (L.timeWarp != null) bad(`"${line.layer}" already has "timeWarp"; timeRemap and timeWarp are refused together (core/timeline/time.js)`);
+    L.timeRemap = paramOf(name, recipe, 'shape', line.params);
+  } else bad(`expand.mjs has no warp expander for "${name}"`);
+}
+
 // aspectKey names the canvas a seam's travel (exitPx/enterPx, off sceneDims) should measure against.
 // Omitted (default '') keeps sceneDims' own default, the scene's own declared aspect: core/engine/expand.js
 // passes the render's actual aspect key through here, from internal/render/expand.go, so a flow-seam
@@ -384,6 +431,7 @@ export function expandRecipes(scene, aspectKey = '') {
     else if (kind === 'camera') expandCameraLine(out, line);
     else if (kind === 'enter') expandEnterLine(out, line);
     else if (kind === 'cursor') expandCursorLine(out, line);
+    else if (kind === 'warp') expandWarpLine(out, line);
     else throw new Error(`recipe "${line.recipe}": expand.mjs does not yet expand kind "${kind}"`);
   }
   return out;
