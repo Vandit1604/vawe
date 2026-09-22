@@ -249,15 +249,13 @@ keyframe. Amplitude is the size of the drag, frequency is how often it wobbles, 
 **When it is wrong.** Rigid objects. A card, a chip and a screenshot are boards, and a board that drags
 reads as jelly. This is for things with implied mass or implied flexibility.
 
-**Verdict: LACK.** Stagger is not follow-through and the difference matters: stagger delays a whole
+**Verdict: HAVE.** Stagger is not follow-through and the difference matters: stagger delays a whole
 entrance on a SIBLING, follow-through makes a CHILD lag a parent's continuous motion and overrun its
-stop. This engine has no parent-child motion relationship at all outside the camera and `plane`. The
-nearest thing is `kick`, which shoves a layer on the film's joints, but that fires off the edit, not off
-another layer's velocity.
-
-**Routed from the plan today.** Built since this verdict was written (see "The ten to build first," item
-7): `modifiers: [{ "lag": "card" }]` (`core/fx/lag.js`) makes one layer follow another's motion late and
-overrun its stop, `amp 0.05, freq 4, decay 8` after Ebberts. The table above now reads HAVE.
+stop. This engine had no parent-child motion relationship outside the camera and `plane` until
+`modifiers: [{ "lag": "card" }]` (`core/fx/lag.js`, built after this recipe was first researched): it
+makes one layer follow another's motion late and overrun its stop, `amp 0.05, freq 4, decay 8` after
+Ebberts. `kick`, which shoves a layer on the film's joints, remains a different thing: it fires off the
+edit, not off another layer's velocity.
 **Measured on the reference.** `<measured on example-madera by make choreo>`
 
 **Sources:** https://motionscript.com/articles/bounce-and-overshoot.html ·
