@@ -10,18 +10,20 @@ group: reference
 
 - Read this before adding a feature to `make studio` (`studio/server.mjs`): it holds the COPY/REJECT
   verdict (§2) and the ranked build list with costs (§3) for every candidate feature, each with a reason.
-- `studio/server.mjs` is ONE file: no build step, no dependency, no framework, light theme by
-  default. A feature that needs a bundler, a component tree, or a second way to say what the JSON
-  already says is a bad borrow, no matter how good it looks in another editor.
+- `make studio`'s server (`studio/server.mjs`) has no build step, no dependency, no framework; the page
+  is split into `studio/page.mjs` plus `studio/ui/shell.html`, `studio.css` and `studio.js` for syntax
+  highlighting and a linter, and ships dark-only, no light/dark toggle. A feature that needs a bundler, a
+  component tree, or a second way to say what the JSON already says is a bad borrow, no matter how good
+  it looks in another editor.
 - Checkable action: before building, find your feature's row in §2; if it says REJECT, read the reason
   before reopening the question. `[ref: studio/server.mjs]`
 
 Other developer-facing video editors exist, further ahead on features, built on formats ours does not
 use. This file states which editing decisions belong here, and why, on this engine's own terms.
 
-**The constraint that decides every row below.** `studio/server.mjs` is ONE file: a Node server
-plus a page written as a template literal, no build step, no dependency, no framework, light theme by
-default because vawe is a white-first product. The scene it edits is a JSON file that a human or an
+**The constraint that decides every row below.** `make studio`'s Node server has no build step, no
+dependency, no framework; the page it serves is dark-only, no light/dark toggle. The scene it edits is
+a JSON file that a human or an
 agent opens and edits directly. A feature that needs a bundler, a component tree, or a second way to
 say something the JSON already says is a bad borrow, no matter how good it looks in another editor.
 
@@ -70,7 +72,7 @@ The plan and the film are still in two places. `make panels` renders the storybo
 | REJECT | an "Ask AI" panel in the editor | The agent is already outside the browser driving the session. Build the context endpoint it can read; do not build a chat box inside a template literal. |
 | REJECT | a second lightweight player | Ours is one file with no build step and no editor chrome to shed. Splitting it buys nothing and doubles the surface. |
 | REJECT | a flag that turns the editing half off | A second mode nobody runs is a second mode nobody tests. Every write here is undoable and surgical; that is the safety. |
-| REJECT | dark-first chrome | Deliberate. Light is the default because vawe is a white-first product; a dark creative-tool look is named as an anti-reference. The toggle stays. |
+| REJECT | a light-mode toggle | The shipped chrome is dark-only, a deliberate creative-tool look; vawe's own white-first product identity lives in the rendered films, not in the tool that edits them. |
 
 ## 3. The ranked build list
 
