@@ -38,7 +38,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const ROOTS = ['quality/gates', 'harness/author'];
 
 const PATTERNS = [
-  /\b(?:fail|warn|say)\(\s*'([a-z][a-z0-9-]{2,})'/g,      // the shared gate convention (read-check.mjs names its own helper `say`)
+  /\b(?:fail|warn|say|err)\(\s*'([a-z][a-z0-9-]{2,})'/g,  // the shared gate convention (read-check.mjs names its own helper `say`, storyboard-check.mjs names its own `err`)
   /[✗~⚠]\s*\\?\[([a-z][a-z0-9-]{2,})\\?\]/g,              // the printed form
   /\bsev\s*:\s*'([a-z][a-z0-9-]{2,})'/g,                  // designspec-check's finding objects
   /\ballow(?:ed)?\.has\('([a-z][a-z0-9-]{2,})'\)/g,       // a gate reading its own waiver
