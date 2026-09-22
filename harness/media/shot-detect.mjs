@@ -139,6 +139,21 @@ export function frameSeries(video, chain) {
   return out;
 }
 
+/**
+ * motionDeltaSeries(video) -> [{t, v}]: per-frame motion, the YAVG of the absolute difference between
+ * consecutive frames on a 160x90 grid (frameSeries with its own tblend=difference chain). Frame 0 is
+ * dropped: "how much did this change from the frame before" has no answer for the first frame.
+ *
+ * ONE OWNER for "how much does this picture move". study.mjs's own per-shot `motion`/`peak`/`held`
+ * fields, its STILL_FLOOR (the same floor internal/scene/scene.go prints beside a render), and
+ * harness/lib/reference-bars.mjs's bank-wide `medianFrameDelta` all read off this one series; factored
+ * out from study.mjs's old module-scope `DELTA` constant so a second caller reuses it instead of
+ * re-typing the filter chain.
+ */
+export function motionDeltaSeries(video) {
+  return frameSeries(video, 'scale=160:90,tblend=all_mode=difference,signalstats').slice(1);
+}
+
 // ── four kinds of joint, one boundary list ──────────────────────────────────────────────────────
 // Two joints found within `minShot` of each other are the same moment measured two ways, and the more
 // EXACT measurement wins: a cut is an exact scene-score peak, a seam a run of low-edge frames, a
