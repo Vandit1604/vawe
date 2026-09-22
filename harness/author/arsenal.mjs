@@ -42,7 +42,7 @@ import { emitJson } from '../lib/findings.mjs';
 // (.gitignore:93), so "used in 34 films" was a number nobody else could reproduce. `population` is the
 // one owner of "which films can this checkout see, and is it blind to some of them" (its own header);
 // reusing it means a partial checkout SAYS so instead of quietly undercounting.
-import { population, LIBRARY } from '../lib/census.mjs';
+import { population, AUTHORED } from '../lib/census.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -242,10 +242,19 @@ export async function collect() {
 // should say so and keep answering, not exit(3) on an author who typed a query. A caller that shows
 // `used` MUST print `blind` where it would have printed the count (population's own contract) so a
 // partial number never reads as a complete one.
+//
+// AUTHORED, not LIBRARY, and the difference is the whole point of the number. LIBRARY counts every
+// source scene in films/scene, and about half of them are catalogue tiles, probes and one-thing demos
+// that were never planned as films. `make demo Q="..."` writes one every time an author asks a
+// question, so the population grows with QUESTIONS asked rather than with films made, and an effect
+// used once in a film plus nine times in demos of itself read as "used in 10 films". Every agent sees
+// this figure on every search, so it steers what gets reached for, and it was measured against a
+// population that is 53% not-films. AUTHORED is the same population minus anything with no
+// `.storyboard.md` sidecar: a person planned it, so it is a film.
 const CACHE = { counts: null };
 function usage() {
   if (CACHE.counts) return CACHE.counts;
-  const { names, n, blind } = population('arsenal · usage corpus', { filter: LIBRARY, quiet: true, soft: true });
+  const { names, n, blind } = population('arsenal · usage corpus', { filter: AUTHORED, quiet: true, soft: true });
   const dir = path.join(repoRoot, 'films/scene');
   const texts = [];
   for (const f of names) {
@@ -255,7 +264,7 @@ function usage() {
     texts, n, blind: blind || null,
     count: (name) => texts.reduce((c, t) => c + (t.includes(`"${name}"`) ? 1 : 0), 0),
     // What "used in N films" means, and the command that reproduces N without trusting this tool's word.
-    note: () => `usage counted across ${n} shipped scene(s) in films/scene, reproducible via `
+    note: () => `usage counted across ${n} planned film(s) in films/scene, reproducible via `
       + `\`node harness/lib/census.mjs\`${blind ? ` (PARTIAL: ${blind.split('\n')[0]})` : ''}`,
   };
   return CACHE.counts;
