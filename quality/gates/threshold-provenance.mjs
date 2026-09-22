@@ -23,7 +23,7 @@
 // bound, a display cap, a decode sample rate for an analysis pipeline: none of these decide whether a
 // FILM passes or fails, so none of them need a citation. They decide how the gate LOOKS at the film, not
 // what it demands of it. `FORMULA` below is that list, one entry per name, each with the one-line
-// reason it is not a quality bar — found and hand-checked during the audit this gate enforces
+// reason it is not a quality bar, found and hand-checked during the audit this gate enforces
 // (engine-doctrine/RESEARCH/THRESHOLD-PROVENANCE-AUDIT.md). A name reaches this list by being read, not
 // by looking short or boring; `SPECTACLE_MIN_BOUNDARIES` and `CAMERA_COVERAGE_FLOOR` look exactly as
 // small and boring and are NOT on it, because both decide a verdict and both are tuned off this
