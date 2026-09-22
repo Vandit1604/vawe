@@ -25,6 +25,7 @@ import { resolvePx } from '../../harness/lib/placement-resolve.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
+import { classifyType, thresholdFor } from '../../harness/lib/genre-pacing.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -135,6 +136,13 @@ for (const k of ['audience', 'arc', 'format', 'duration']) if (!field(k)) warn('
 // The object spine keeps its own shape when it IS the answer, object_t0 · object_states · object_last in
 // the frontmatter (anything under a `##` heading is parsed as a beat), plus an `object:` line per beat,
 // because a declared spine that no beat locates is a claim nobody kept.
+// ── pacing is subjective to the type of video (the owner's steer), not one number for every film.
+// filmType is derived structurally (harness/lib/genre-pacing.mjs): no storyboard records its scaffold
+// type, so this reads the same content signals a human would (the `framework:` line, a captured
+// `refs/*.mp4` clip, the filename) rather than trust a field nothing writes.
+const filmType = classifyType(src, path.basename(f));
+const holdMaxS = thresholdFor(filmType);
+
 const SPINE_MAX_S = 15;
 const durRaw = field('duration');
 const durSec = parseDur(durRaw);
@@ -387,11 +395,13 @@ for (const b of blocks) {
     if (!changes.length && ANIM_VOCAB.test(becomes)) {
       warn('becomes-is-preset', `beat "${title}": becomes-is-a-preset, "${becomes}". That is the mechanism, not the transformation: \`mechanism:\` already answers how it moves; \`becomes:\` answers what it turned into.`);
     }
-    // A beat is a hold for as long as nothing in it changes. The reference film never sat on one state
-    // for more than ~1.5s; a 3s beat carrying a single change is two seconds of watching it not happen.
+    // A beat is a hold for as long as nothing in it changes. How long a hold is ALLOWED depends on the
+    // film's type (harness/lib/genre-pacing.mjs, engine-doctrine/MOTION-CRAFT.md "Genre pacing tables"):
+    // pacing is subjective to the type of video, not one number for every film.
     const span = spans[n - 1];
-    if (span.start != null && span.end - span.start >= 3.0 && changes.length <= 1) {
-      warn('held-state-too-long', `beat "${title}": held-state-too-long, ${(span.end - span.start).toFixed(2)}s spent on one change. The reference film never holds a single state longer than about 1.5 seconds, so a 3s+ beat with one change is a 3s hold. Either name the second change or split the beat.`);
+    if (span.start != null && span.end - span.start >= holdMaxS && changes.length <= 1) {
+      const typeArticle = filmType && /^[aeiou]/i.test(filmType) ? 'an' : 'a';
+      warn('held-state-too-long', `beat "${title}": held-state-too-long, ${(span.end - span.start).toFixed(2)}s spent on one change, at or past the ${holdMaxS.toFixed(1)}s cap for ${filmType ? `${typeArticle} ${filmType} film` : 'an unclassified film'} (engine-doctrine/MOTION-CRAFT.md "Genre pacing tables"${filmType === 'recreation' ? '; recreation has no band of its own there and inherits its source\'s rhythm, so only the absolute ceiling applies' : ''}). Either name the second change or split the beat.`);
     }
     // ── THE PICTURE'S OWN DECISIONS ──────────────────────────────────────────────────────────────
     // `picture:` and `style:` are prose, and prose is where the wrong object hides: a beat that
