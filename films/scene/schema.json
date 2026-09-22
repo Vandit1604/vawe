@@ -1588,8 +1588,8 @@
      "label": "Enter window (s, cut layers), or a duration word (core/registry/vocab.js): instant | fast | medium | slow | luxurious. It is ALSO the settle time of an `overshoot`: the ring is mapped into this window and lands exactly at rest at the end of it."
     },
     "anticipate": {
-     "type": "number",
-     "label": "ANTICIPATION: the layer winds BACK along its own travel axis by this fraction of the distance over ~3 frames, then goes straight into the entrance. 0.1 to 0.2 is the band motion designers quote. Real on the entrances that move through space or scale (rise/up, pop/scale, lift, slide-*); refused by name on fade, defocus, the wipes, iris and clock, which have no travel to bend."
+     "type": "number|boolean",
+     "label": "ANTICIPATION: the layer winds BACK along its own travel axis by this fraction of the distance over ~3 frames, then goes straight into the entrance. 0.1 to 0.2 is the band motion designers quote. Real on the entrances that move through space or scale (rise/up, pop/scale, lift, slide-*); refused by name on fade, defocus, the wipes, iris and clock, which have no travel to bend. Every qualifying entrance gets this by default (core/engine/produce.js applyAnticipateDefault); `anticipate: false` is the OPT-OUT sentinel that strips it back off one layer, engine-doctrine/RULES/anticipate-default.md. A number is an explicit override of the theme-derived amount."
     },
     "overshoot": {
      "type": "number",
