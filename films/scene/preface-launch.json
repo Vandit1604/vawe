@@ -3,11 +3,15 @@
  "authoring": {
   "allow": [
    "dead-air",
-   "aphoristic-cadence"
+   "aphoristic-cadence",
+   "no-preflight",
+   "craft-unvisited"
   ],
   "_why": {
    "dead-air": "the beat joints are hard cuts, and each one holds an all-but-empty frame for a few frames either side of the blur; that gap IS the cut, not a hole in the timeline.",
-   "aphoristic-cadence": "the flagged line is \"Deep work 7 to 11am. No meetings Wednesdays.\" Both halves are concrete facts out of the file the film is about, and the beat quotes them back as the source of an answer. The tell is looking at the full stop, not at the content."
+   "aphoristic-cadence": "the flagged line is \"Deep work 7 to 11am. No meetings Wednesdays.\" Both halves are concrete facts out of the file the film is about, and the beat quotes them back as the source of an answer. The tell is looking at the full stop, not at the content.",
+   "no-preflight": "this pass is a motion/transitions/sound rework of an existing film under an explicit brief that forbids writing or approving the storyboard; the decision chain preflight would write belongs to the plan stage, not this pass.",
+   "craft-unvisited": "the 13 craft: answers live in the storyboard frontmatter, which this pass is explicitly forbidden from editing; unanswered here, not unaddressed in fact."
   }
  },
  "orientation": "landscape",
@@ -20,18 +24,24 @@
  "bg": [
   {
    "preset": "plain",
-   "value": "light"
+   "value": "light",
+   "from": 0,
+   "to": 5.2
   },
   {
    "preset": "paper",
-   "value": "light"
+   "value": "light",
+   "from": 5.2,
+   "to": 11
   },
   {
    "preset": "paper",
    "value": "light",
    "opts": {
     "grain": 0.5
-   }
+   },
+   "from": 11,
+   "to": 19.6
   },
   {
    "preset": "paperDots",
@@ -39,25 +49,33 @@
    "opts": {
     "dotAlpha": 0.35,
     "drift": 0.6
-   }
+   },
+   "from": 19.6,
+   "to": 23.5
   },
   {
    "preset": "paperShapes",
    "value": "light",
    "opts": {
     "intensity": 0.4
-   }
+   },
+   "from": 23.5,
+   "to": 27
   },
   {
    "preset": "paper",
-   "value": "light"
+   "value": "light",
+   "from": 27,
+   "to": 32.2
   },
   {
    "preset": "soft",
    "value": "light",
    "opts": {
     "intensity": 0.45
-   }
+   },
+   "from": 32.2,
+   "to": 38.8
   },
   {
    "preset": "paperDots",
@@ -65,28 +83,36 @@
    "opts": {
     "dotAlpha": 0.4,
     "drift": 0.9
-   }
+   },
+   "from": 38.8,
+   "to": 42.3
   },
   {
    "preset": "soft",
    "value": "light",
    "opts": {
     "intensity": 0.5
-   }
+   },
+   "from": 42.3,
+   "to": 47.4
   },
   {
    "preset": "paperShapes",
    "value": "light",
    "opts": {
     "intensity": 0.5
-   }
+   },
+   "from": 47.4,
+   "to": 50
   },
   {
    "preset": "gradientWash",
    "value": "light",
    "opts": {
     "intensity": 0.35
-   }
+   },
+   "from": 50,
+   "to": 53
   }
  ],
  "camera": [
@@ -150,6 +176,19 @@
    "x": 0,
    "y": 0
   }
+ ],
+ "beats": [
+  { "id": "scene1", "start": 0, "duration": 5.2 },
+  { "id": "scene2", "start": 5.2, "duration": 5.8 },
+  { "id": "scene3", "start": 11, "duration": 8.6 },
+  { "id": "scene4", "start": 19.6, "duration": 3.9 },
+  { "id": "scene5", "start": 23.5, "duration": 3.5 },
+  { "id": "scene6", "start": 27, "duration": 5.2 },
+  { "id": "scene7", "start": 32.2, "duration": 6.6 },
+  { "id": "scene8", "start": 38.8, "duration": 3.5 },
+  { "id": "scene9", "start": 42.3, "duration": 5.1 },
+  { "id": "scene10", "start": 47.4, "duration": 2.6 },
+  { "id": "scene11", "start": 50, "duration": 3 }
  ],
  "layers": [
   {
@@ -2139,64 +2178,25 @@
  "storyboard": "films/scene/preface-launch.storyboard.md",
  "transitions": [
   {
-   "at": 5.2,
-   "mech": "cut",
-   "fx": "blur",
-   "dur": 0.4
-  },
-  {
-   "at": 11,
-   "mech": "cut",
-   "fx": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "at": 19.6,
-   "mech": "cut",
-   "fx": "blur",
-   "dur": 0.4
-  },
-  {
    "at": 23.5,
    "mech": "cut",
-   "fx": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "at": 27,
-   "mech": "cut",
-   "fx": "riseBlur",
-   "dur": 0.42
+   "fx": "zoom",
+   "dur": 0.42,
+   "_why": "detail -> reach: scale jump into the spectacle ring, the one earned accent before the loud beat. cut not seam: the ring's spokes and the camera dive start inside this window and a seam would freeze them."
   },
   {
    "at": 32.2,
    "mech": "cut",
    "fx": "blur",
-   "dur": 0.4
-  },
-  {
-   "at": 38.8,
-   "mech": "cut",
-   "fx": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "at": 42.3,
-   "mech": "cut",
-   "fx": "riseBlur",
-   "dur": 0.42
-  },
-  {
-   "at": 47.4,
-   "mech": "cut",
-   "fx": "riseBlur",
-   "dur": 0.42
+   "dur": 0.4,
+   "_why": "proof -> consent: the trust pivot from reading to writing, the tone softens so the cut does too"
   },
   {
    "at": 50,
    "mech": "cut",
-   "fx": "blur",
-   "dur": 0.4
+   "fx": "punch",
+   "dur": 0.42,
+   "_why": "recap -> CTA: the payoff, the boldest seam in the film, reserved for the ask. cut not seam: the CTA's own punch-in camera keyframe starts inside this window and a seam would freeze it."
   }
  ]
 }
