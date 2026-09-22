@@ -24,7 +24,7 @@ import { stageOf, filePaths } from '../../quality/gates/stage.mjs';
 import { computeFeatures } from '../../quality/gates/craft-checklist.mjs';
 import { rulesFor, briefLine } from '../lib/craft-rules.mjs';
 import { frontmatter } from './storyboard-parse.mjs';
-import { PLAN_JUDGE_CODES, isPlanJudgeCode } from '../lib/plan-judge-codes.mjs';
+import { PLAN_JUDGE_CODES, isPlanJudgeCode, rankPlanJudgeFindings } from '../lib/plan-judge-codes.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -414,15 +414,20 @@ function main() {
     let verdict;
     try { verdict = JSON.parse(fs.readFileSync(path.resolve(repoRoot, verdictFile), 'utf8')); }
     catch (e) { console.error(`✗ ${verdictFile} is not valid JSON: ${e.message}`); process.exit(2); }
-    const findings = Array.isArray(verdict.findings) ? verdict.findings : [];
-    const bad = findings.find((fd) => !isPlanJudgeCode(fd && fd.code));
+    const rawFindings = Array.isArray(verdict.findings) ? verdict.findings : [];
+    const bad = rawFindings.find((fd) => !isPlanJudgeCode(fd && fd.code));
     if (bad) {
       console.error(`✗ "${bad && bad.code}" is not a plan-judge finding code. Valid codes: ${PLAN_JUDGE_CODES.join(', ')}`);
       process.exit(2);
     }
+    // Recorded in Murch's Rule of Six order (harness/lib/plan-judge-codes.mjs, PLAN_JUDGE_PRIORITY),
+    // never in the order the judge happened to report them: a reader of the receipt sees which finding
+    // matters most first, the same ordering a working editor would apply by hand.
+    const findings = rankPlanJudgeFindings(rawFindings);
     const rec = writeReceipt('plan-judge', p.sb, { findings, ranAt: new Date().toISOString() });
     if (!rec) { console.error(`✗ could not write the plan-judge receipt (is ${p.sb} readable?)`); process.exit(1); }
-    console.log(`  ✓ plan-judge verdict recorded: ${findings.length} finding(s) · `
+    console.log(`  ✓ plan-judge verdict recorded: ${findings.length} finding(s), ordered by Murch's Rule of Six `
+      + `(emotion > story > rhythm > eye-trace > plane/continuity) · `
       + `${path.relative(repoRoot, receiptPath('plan-judge', p.sb))}`);
     console.log(`  Findings only. This does not approve the film; the owner still signs off at approval `
       + `(make studio D=${p.base}.json, then /vawe-approve).`);
