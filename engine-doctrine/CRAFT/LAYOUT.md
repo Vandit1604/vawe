@@ -126,14 +126,15 @@ reserves **two lines**; a caption longer than that grows UPWARD past it, so trea
 of the keep-out and not the whole of it.
 
 At 1080x1920: `web` reserves y 1522..1690 across all three skins, `tiktok` 1176..1340. The whole band
-moves up with the chrome, because on TikTok the caption itself moves up with it (#392).
+moves up with the chrome, because on TikTok the caption itself moves up with it
+([`../MISTAKES.md`](../MISTAKES.md) #409).
 
 `make audit` warns **`caption-band`** when settled content overlaps the strip by more than 8px, **on a
 film that declares `captions`**, and holds the band for the whole runtime rather than only inside a
-caption window. Held on every film instead, it fires on **69 of 103** shipped scenes, which is a report
-about the library rather than a gate; scoped to captioned films it fires on **none** of them today, so
-it guards the next captioned film rather than catching an existing one. The measurement and the
-argument: `engine-doctrine/MISTAKES.md` #395.
+caption window. Held on every film instead, it fired on **69 of 103** shipped scenes at last count
+(the library has since grown to 197 films; re-run `make audit` over the whole set for a current figure);
+scoped to captioned films it fired on **none** of them at that count, so it guards the next captioned
+film rather than catching an existing one.
 
 ## 6. Archetype → intent (pick by the beat's job, then rotate)
 
@@ -241,7 +242,7 @@ subject and cropping it are two different statements, not a tidy version and a s
 ### Why these are in the storyboard, not the audit
 
 Every one of them is decided when you choose the shot, and none of them can be repaired later by moving
-a layer twenty pixels. `storyboard-check` asks for `shot:`, `camera:`, `picture:` and `placement:` for
+a layer twenty pixels. The storyboard carries `shot:`, `layout:` and `picture:` per beat for
 exactly this reason: the composition is a plan, and the JSON transcribes it.
 
 

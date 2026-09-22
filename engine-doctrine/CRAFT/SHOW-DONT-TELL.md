@@ -43,8 +43,8 @@ typography wearing a great deal of decoration, and all three fail this gate. `cr
 pictorial layers and not one of them is large, because they are all logos and marks. The house habit is
 shipping icons, not shipping explanations.
 
-**This is the same rule CLAUDE.md already makes about backgrounds** (2a0: the background is decoration,
-it is never information). One idea, applied twice. There the point is that a moving backdrop does not
+**This is the same rule [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md) already makes about backgrounds**
+("the background is decoration, it is never information"). One idea, applied twice. There the point is that a moving backdrop does not
 excuse an empty frame. Here it is that a decorated frame does not excuse an unillustrated claim.
 
 ## 2. Find the thing in your content that wants a picture
