@@ -54,6 +54,7 @@ import { drawtext } from '../author/sheets.mjs';
 import { ffmpegOrDie } from '../lib/scratch.mjs';
 import { measureSpan } from './content.mjs';
 import { clusterCuts, detectCuts, detectSeams, detectPans, detectCrossfades, frameSeries, mergeJoints } from './shot-detect.mjs';
+import { frameDeltaSweep } from '../lib/frame-forensics.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -790,6 +791,29 @@ fs.writeFileSync(path.join(dir, 'pages.md'),
   + pagesMeta.map((pg) => `page ${String(pg.page).padStart(3, '0')} (${pg.t0}-${pg.t1}s): <fill: what happens on this page>`).join('\n')
   + '\n');
 
+// medianFrameDelta / longestHoldS: the two figures a reference-bars reader needs, and the reason
+// prose ("median frame delta ~0.23", "a fully held final 2.5s") could not be checked by any gate.
+// Same sweep motion-sound-check.mjs already runs over a RENDER (frameDeltaSweep, one decode, max
+// per-pixel gray delta on a 64x36 grid): reusing it here means a reference clip and our own render
+// land on the same scale, never a second delta implementation.
+// QUIET_FLOOR mirrors motion-sound-check.mjs's own STILL_FLOOR (0.06 on this same grid): a hold is a
+// run of consecutive frames whose delta never clears that floor, and its length in seconds is the
+// longest such run. One owner for "quiet" on this grid, not two numbers that can drift apart.
+const deltaSweep = frameDeltaSweep(VIDEO, 64, 36);
+const QUIET_FLOOR = 0.06;
+const deltas = deltaSweep.slice(1).map((f) => f.delta); // frame 0 carries no delta (nothing precedes it)
+const sortedDeltas = [...deltas].sort((a, b) => a - b);
+const medianFrameDelta = sortedDeltas.length
+  ? fx(sortedDeltas.length % 2 ? sortedDeltas[(sortedDeltas.length - 1) / 2]
+      : (sortedDeltas[sortedDeltas.length / 2 - 1] + sortedDeltas[sortedDeltas.length / 2]) / 2, 3)
+  : null;
+let longestHoldFrames = 0, runFrames = 0;
+for (const d of deltas) {
+  if (d < QUIET_FLOOR) { runFrames++; if (runFrames > longestHoldFrames) longestHoldFrames = runFrames; }
+  else runFrames = 0;
+}
+const longestHoldS = deltaSweep.length ? fx(longestHoldFrames / fps, 2) : null;
+
 // ── the study ─────────────────────────────────────────────────────────────────────────────────────
 const study = {
   source: (() => { const r = path.relative(ROOT, path.resolve(VIDEO)); return r.startsWith('..') ? path.resolve(VIDEO) : r; })(),
@@ -805,6 +829,7 @@ const study = {
     panFloor: PAN_FLOOR, pansFound: pans.length,
     crossfadeBand: [CROSSFADE_LO, CROSSFADE_HI], crossfadesFound: crossfades.length,
     shots: shots.length, medianShot: fx(median), cutsPerMinute: fx((shots.length / duration) * 60, 1),
+    medianFrameDelta, longestHoldS,
   },
   coverage: { frames: DECODED_FRAMES, unique: uniqueFrames.length, pages: pagesMeta.length, ledger: 'incomplete' },
   shots: shots.map((s) => ({ i: s.i, t0: fx(s.t0), t1: fx(s.t1), len: fx(s.len),

@@ -15,6 +15,7 @@
 // or the filename, in that priority order. A storyboard none of these signals name gets DEFAULT_MAX_S,
 // the gate's old flat number, unchanged: this file only ever WIDENS the check for a film it can
 // positively place, never narrows it for one it cannot.
+import { readReferenceBars } from './reference-bars.mjs';
 
 // No genre band comes close to this. Product walkthrough, the loosest named band, tops out at 8s; a
 // 12s single-change beat is still called a defect regardless of genre, so the absolute ceiling sits a
@@ -47,10 +48,28 @@ const TYPE_GENRE = {
 // own. It still answers to the absolute ceiling, nothing else.
 const RECREATION_MAX_S = CEILING_S;
 
-// DEFAULT: the gate's behaviour before this file existed, kept for any film classifyType() cannot
-// place (most of the corpus: no storyboard signal here recognizes it) and for talking-head, which has
-// no MOTION-CRAFT.md row of its own.
-export const DEFAULT_MAX_S = 3.0;
+// DEFAULT: the held-state cap for any film classifyType() cannot place (most of the corpus: no
+// storyboard signal here recognizes it) and for talking-head, which has no MOTION-CRAFT.md row of its
+// own. It used to be a flat 3.0s, the doubled residue of "the reference film never holds a single
+// state longer than about 1.5 seconds" for ONE film. It now cites a measured EXTERNAL reference
+// instead (harness/lib/reference-bars.mjs, refs/*/study.json's `longestHoldS`, itself
+// harness/lib/frame-forensics.mjs's frameDeltaSweep): the longest hold either studied clip actually
+// sustains, so the cap answers to something outside this repo's own corpus rather than one film's
+// prose, doubled.
+//
+// refs/ is gitignored, so on CI and a fresh clone the bank is empty and this falls back to the old
+// number, STATED as uncalibrated rather than silently reused (harness/lib/reference-bars.mjs's own
+// contract: an empty bank must never read as a confident measurement).
+const UNCALIBRATED_MAX_S = 3.0;
+const bank = readReferenceBars();
+export const DEFAULT_MAX_S = (bank.n > 0 && bank.longestHoldS != null)
+  ? Math.round(bank.longestHoldS * 10) / 10
+  : UNCALIBRATED_MAX_S;
+// Printed wherever DEFAULT_MAX_S is quoted (storyboard-check.mjs), so a bank of two clips never reads
+// as more authoritative than it is: the sample size travels with the number, not just the number.
+export const DEFAULT_MAX_S_SOURCE = (bank.n > 0 && bank.longestHoldS != null)
+  ? `measured longest hold across ${bank.n} external reference${bank.n === 1 ? '' : 's'} (${bank.names.join(', ')}), a thin sample`
+  : `uncalibrated: ${bank.reason || 'no external reference on disk'}`;
 
 /** thresholdFor(type) -> the held-state cap in seconds for a classified film type. */
 export function thresholdFor(type) {
