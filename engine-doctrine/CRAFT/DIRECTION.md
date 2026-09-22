@@ -78,7 +78,7 @@ another mid-shot. What has no form here is the draughtsmanship half: nobody is d
 | Principle | Here | How |
 |---|---|---|
 | **Squash and stretch** | **shipped** | the `squash` modifier, scaling non-uniformly off the layer's own velocity with the reciprocal kept, so it deforms rather than zooming. Wrong for anything with a rigid identity: a logo that squashes is a damaged logo |
-| **Arcs** | **partly** | `ease: "through"` rounds the corner AT an interior key, so a polyline of keys becomes a curve: a three-key apex turns 22 degrees where `linear` turns 66. It cannot bow a TWO-key segment, which is what AE's spatial bezier does. For that, `motionPath`, a different mechanism on a different clock that cannot combine with a keyed track |
+| **Arcs** | **shipped, with one limit** | `ease: "through"` rounds the corner AT an interior key, so a polyline of keys becomes a curve: a three-key apex turns 22 degrees where `linear` turns 66 (`core/timeline/sequence.js:349`). It cannot bow a TWO-key segment, which is what AE's spatial bezier does. For that, `motionPath` (`core/timeline/motion-ir.js`, `core/motion/path-curves.js`), a different mechanism on a different clock that cannot combine with a keyed track |
 
 ## Directing the eye: every device names its target
 
