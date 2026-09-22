@@ -162,13 +162,23 @@ function linkedWorktrees() {
     .filter((d) => d !== path.resolve(MAIN));
 }
 
+// SCRATCH DOES NOT COUNT. A `_`-prefixed file is this repo's existing convention for a probe or a
+// fixture that belongs to whoever made it (census.mjs's `unused` already drops them for the same
+// reason), so it is authored IN a worktree and never comes from main. Counting them made this guard
+// refuse a legitimate sync the day after it shipped: five `_shader-*.json` probes in one worktree put
+// it at 202 against main's 197, and an agent was told to go fix a main checkout that was not broken.
+// A guard that cries wolf gets bypassed, which would put back the exact blindness it exists to catch.
+const countable = (dir, pat) =>
+  expand(pat, dir).reduce((n, m) => n + listFiles(path.join(dir, m))
+    .filter((f) => !path.basename(f).startsWith('_')).length, 0);
+
 function refuseIfMainIsNotTheSource(patterns) {
   const others = linkedWorktrees();
   if (!others.length) return;
   for (const pat of patterns) {
-    const mine = expand(pat, MAIN).reduce((n, m) => n + listFiles(path.join(MAIN, m)).length, 0);
+    const mine = countable(MAIN, pat);
     for (const other of others) {
-      const theirs = expand(pat, other).reduce((n, m) => n + listFiles(path.join(other, m)).length, 0);
+      const theirs = countable(other, pat);
       if (theirs > mine) {
         die(`"${pat}": the main checkout holds ${mine} file(s), but ${other} holds ${theirs}.\n`
           + `  Everything synced here is gitignored, so git's "main checkout" is not proof of where the\n`
