@@ -1330,6 +1330,9 @@ direction-floor: ## [check] ambition floor, fail a plain slideshow (too little m
 beat-check: ## [check] timeline gate: dead air, empty last frame, empty cut window, dead backdrop (D=<file> [STRICT=1])
 	node quality/gates/beat-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
+backdrop-turn: ## [check] REPORTS: does the backdrop change tone anywhere, or hold one preset the whole film (D=scene.json, bare=census)
+	node quality/gates/backdrop-turn.mjs $(D)
+
 # make impeccable D="a.html b.html": the bundled impeccable anti-slop detector on raw HTML fragments
 # (local, no network, token-efficient). the RENDERED-scene twin of this was retired (engine-doctrine/MISTAKES.md #340);
 # this is for a hand-written fragment BEFORE it goes into a scene. Build HTML through impeccable, not by eye.

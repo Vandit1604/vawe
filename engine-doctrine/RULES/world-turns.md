@@ -4,6 +4,7 @@ when: authoring the bg block of any scene
 holds: live (harness/live/scene-live.mjs warns on one bg window for the whole runtime)
 answers: "why the backdrop must change tone per beat, and the 82% of the library that ships one window"
 group: look
+codes: [backdrop-never-turns]
 ---
 # The backdrop changes tone per beat, or the film is a slide with effects on it
 
