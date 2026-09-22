@@ -467,7 +467,7 @@ export function rankQuery(allIn, query, { kind = null, n = 8, guessN = 3 } = {})
   const shape = (e) => ({
     name: e.name, kind: e.kind, slot: e.slot, blurb: e.blurb, pitfall: e.pitfall || null,
     doc: e.doc || null,
-    coverage: e.c, score: e.s, used: u.count(e.name), isNew: fresh.has(e.name),
+    coverage: e.c, score: e.s, isNew: fresh.has(e.name),
     snippet: snippet(e),
   });
 
@@ -475,7 +475,6 @@ export function rankQuery(allIn, query, { kind = null, n = 8, guessN = 3 } = {})
     query,
     confident: answersRaw.length > 0,
     all: all.length,
-    usage: { films: u.n, blind: u.blind, note: u.note() },
     results: selected.map(shape),
     rules: kind ? [] : allIn.filter((e) => e.kind === 'rule')
       .map((e) => ({ e, s: score(e, qt) })).filter((r) => r.s > 0)
@@ -701,7 +700,6 @@ async function main() {
 
   // The tally is line 2 on purpose: `make preflight` prints its own header and keeps the rest, so this is
   // the line an author skimming a preflight actually reads.
-  const nUnused = ranked.filter((e) => e.used === 0).length;
   const nFresh = ranked.filter((e) => e.isNew).length;
   console.log(`\n  ARSENAL · "${query}"`);
   if (!result.confident) {
@@ -710,14 +708,11 @@ async function main() {
     console.log(`  and say so, rather than building on the ${ranked.length} below.\n`);
     console.log(`  Nearest by wording only, WEAK GUESSES, not answers:\n`);
   } else {
-    console.log(`  ${ranked.length} matched · ${nFresh} newer than ${WINDOW_DAYS} days.`
-      + `\n  ${nUnused} of these have shipped in 0 films so far. That counts the library's PAST, not this`
-      + `\n  film: it is not a caution against the ${nUnused === 1 ? 'one' : nUnused}, it is a gap you may be about to close.`
-      + `\n  ${result.usage.note}\n`);
+    console.log(`  ${ranked.length} matched · ${nFresh} newer than ${WINDOW_DAYS} days.\n`);
   }
   for (const e of ranked) {
     console.log(`  ${e.name}${e.isNew ? `   ← NEW, added in the last ${WINDOW_DAYS} days` : ''}`);
-    console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''} · ${e.used === 0 ? '0 scenes so far, an option worth trying' : `${e.used} scene(s)`}`);
+    console.log(`      ${e.kind}${e.slot ? ` · goes in \`${e.slot}\`` : ''}`);
     if (e.blurb) console.log(`      ${e.blurb}`);
     if (e.pitfall) console.log(`      pitfall: ${e.pitfall}`);
     if (e.doc) console.log(`      doc: ${e.doc}`);
