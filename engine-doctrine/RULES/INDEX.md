@@ -46,7 +46,7 @@ design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Re
 | [`svg-inline`](svg-inline.md) | writing an svg layer or a src path | eye |
 | [`no-css-clock`](no-css-clock.md) | hand-writing an html layer | built: `core/layers/html.js` |
 | [`one-cut-family`](one-cut-family.md) | choosing the cut between two beats | warns: `make direct` |
-| [`world-turns`](world-turns.md) | authoring bg | live: `harness/live/scene-live.mjs` |
+| [`world-turns`](world-turns.md) | authoring bg | gated: `backdrop-turn.mjs`, BLOCKS; live: `harness/live/scene-live.mjs` |
 | [`continuous-object`](continuous-object.md) | deciding what holds the film across cuts | gated: `direction-floor.mjs`, BLOCKS |
 | [`banned-defaults`](banned-defaults.md) | choosing type, colour, or layout | gated: `designspec-check.mjs` |
 | [`payoff-last`](payoff-last.md) | ordering beats and the hook | eye |

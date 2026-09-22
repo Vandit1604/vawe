@@ -12,7 +12,7 @@ group: crosscutting
   demo, a proof); cut a beat if the viewer loses nothing when it's gone.
 - Route through the three spines (house-style, composition, motion, direction, film structure,
   story-spine) before authoring from your own priors.
-- Enforced by `make author-check D=<file>` every time (BLOCKS: validate, beats, inspect,
+- Enforced by `make author-check D=<file>` every time (BLOCKS: validate, beats, backdrop-turn, inspect,
   plan-vs-render; REPORTS: critique, direct, floor, dissolve, designspec, copy, pace, hero,
   treatment, waiver-drift, promoted to blocking by `TASTE=1`), then post-render `make judge`.
 - `floor` (direction-floor.mjs) also reports whether THIS film is a template: `library-top5-only`
@@ -106,8 +106,8 @@ effect-soup video can no longer ship silently:
 make author-check D=<file> [VS=<brand>]           # THE LADDER. Every step, every time (15 or 16 of
                                                   # them: the intent sidecar and a landscape canvas each
                                                   # add one).
-                                                  # BLOCKS:  validate · beats · inspect · plan-vs-render
-                                                  #          (assets joins them under STRICT=1)
+                                                  # BLOCKS:  validate · beats · backdrop-turn · inspect ·
+                                                  #          plan-vs-render (assets joins them under STRICT=1)
                                                   # REPORTS: storyboard · critique · direct · floor ·
                                                   #          dissolve · designspec · copy · pace · hero ·
                                                   #          treatment · waiver-drift
