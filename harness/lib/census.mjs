@@ -162,6 +162,10 @@ export const LIBRARY_WITH_DERIVATIVES = (f, abs) => f !== 'schema.json' && !isTe
 // re-measures. A non-motion sweep (waiver-drift's own census, `library-stats.mjs`, `unused.mjs`, …)
 // stays on LIBRARY: whether a film waives a rule or carries a beat blueprint has nothing to do with
 // whether a person planned it, and narrowing those to AUTHORED would just as wrongly shrink the count.
+// `harness/author/arsenal.mjs`'s usage count walks AUTHORED for a different reason than motion: its
+// "used in N films" figure is read by an agent on every search and steers what gets reached for, and
+// `make demo` writes a new one-thing demo every time somebody asks a question, so on LIBRARY the
+// population grows with QUESTIONS asked rather than with films made.
 export const AUTHORED = (f, abs) => f !== 'schema.json' && !isTemplate(f) && !DERIVATIVE.test(f) && isSceneJSON(abs)
   && fs.existsSync(path.join(path.dirname(abs), `${path.basename(f, '.json')}.storyboard.md`));
 
