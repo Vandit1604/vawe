@@ -16,9 +16,10 @@ codes: no-bg-motion, off-radius, off-shadow, ruled-grid, static-bg
   (`make designspec-check D=<file>`), only then drop it into the scene.
 - Lock the one-page design spec (colours, typography, rounded, borders, shadows, spacing, motion,
   components) before authoring a bespoke surface; every block/fragment obeys it.
-- Enforced by `[gated: quality/gates/designspec-check.mjs]` (codes: `no-bg-motion`, `off-radius`,
-  `off-shadow`, `ruled-grid`, `static-bg`), which automates colours and typography of the post-build
-  check; corners, spacing, depth and the negative list are `[eye]`.
+- Enforced by `[gated: quality/gates/designspec-check.mjs]` (codes: `off-radius`, `off-shadow`,
+  `off-colour`, `off-font`, `ruled-grid`, `dead-token`), which automates colours and typography of the
+  post-build check; `no-bg-motion` is `direction-floor.mjs`'s and `static-bg` is `beat-check.mjs`'s, a
+  separate finding on a related question; corners, spacing, depth and the negative list are `[eye]`.
 - Confirm: did you build and gate the fragment BEFORE dropping it into the scene, and does every
   colour/font in it trace back to the spec table?
 
@@ -53,7 +54,11 @@ tweaked blind inside a 2000-frame render. The loop:
    HTML fragment for true connective tissue (a hook, a CTA). Hand-writing? Load [`taste-skill`] +
    [`impeccable`] first (Anti-Default Discipline), then this guide's design spec.
 2. **Preview it standalone**: `make preview HTML=<file> THEME=<brand>` → `/tmp/preview.png`. Read the shot.
-3. **Gate the craft**: `make designspec-check D=<file>` (impeccable detector, 41 rules, no LLM) must be clean.
+3. **Gate the craft**: `make impeccable D=<file>` is the anti-slop detector on the raw fragment, no LLM
+   (`skills/impeccable/scripts/detect.mjs`). `make designspec-check D=<file>` is a different gate and
+   locks a different thing, the theme: an off-palette colour, a font outside the theme's roles, and the
+   optional radius and shadow lock (`off-colour`, `off-font`, `off-radius`, `off-shadow`, `ruled-grid`,
+   `dead-token`). Run both, and both must be clean.
 4. **Drop it in**, only a vetted surface enters the scene. Now the render is composing known-good parts.
 
 Building first is what stops the "tweak coords blind, re-render, repeat" spiral that eats a session.
@@ -81,7 +86,7 @@ a spec nobody re-reads is a spec that was decoration.
 
 1. **Colours**: every hex in the composition appears in the spec's palette. **Flag any invented colour.**
 2. **Typography**: families and weights match the spec. **No substitutions.** This engine has substituted
-   a face silently more than once ([`../MISTAKES.md`](../MISTAKES.md) #10, #22, #317).
+   a face silently more than once ([`../MISTAKES.md`](../MISTAKES.md) #10, #22).
 3. **Corners**: `border-radius` values match the declared radius scale.
 4. **Spacing**: padding and gap fall inside the declared density range.
 5. **Depth**: shadow usage matches the declared level. Flat means none.
@@ -112,7 +117,7 @@ Effects to move over these surfaces: [EFFECTS.md](../EFFECTS.md) · skills: `vaw
 order the film turns, give none of them a `from`/`to`, and the engine binds window `i` to the joint
 after it (`core/timeline/junctions.js`), so the cuts you already wrote own the numbers. Judge motion
 across 4+ frame timestamps, never on one still: a still hides speed, scale and direction
-([`../MISTAKES.md`](../MISTAKES.md) #155). `node harness/dev/library-stats.mjs` prints how many
+([`../MISTAKES.md`](../MISTAKES.md) #161). `node harness/dev/library-stats.mjs` prints how many
 gate-visible scenes still paint one window for the whole runtime; never quote that count from memory.
 
 ## `ruled-grid`: opt in, don't default into one

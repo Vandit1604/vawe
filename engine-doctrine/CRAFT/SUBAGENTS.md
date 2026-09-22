@@ -95,9 +95,9 @@ default is pure cost.
 | Role | Writes | Has a job because |
 |---|---|---|
 | **storyboard** | the storyboard file | it is the only artefact that decides the film as a whole: the beats, the through-line, the motion plan and the cut plan. Everything below transcribes it |
-| **subject** | a beat's subject slot | 36% of films carry no pictorial layer at all, and choosing what a beat SHOWS is the one thing the engine must never do alone (`../MISTAKES.md` #159) |
+| **subject** | a beat's subject slot | choosing what a beat SHOWS is the one thing the engine must never do alone: the last time it chose for itself, it picked the background and so nobody ever designed one (`../MISTAKES.md` #159) |
 | **scene** (one per scene) | one fragment file | HTML renders instantly, so the agent can look at its own work and iterate with no render. This is the loop, not a critique |
-| **motion** | `motion[]` tracks and `idle` | the engine now moves nothing nobody asked to move, so a keyed track is always a decision. 74 of 186 films carry one and it is almost always the same one: the continuous object travelling through |
+| **motion** | `motion[]` tracks and `idle` | the engine now moves nothing nobody asked to move, so a keyed track is always a decision. 81 of the 184 scenes in `films/scene/` carry a `motion[]` track and it is almost always the same one: the continuous object travelling through |
 | **transition** | `transitions[]` | the engine infers cuts from TIMING and narrows them by structure, but the rhetorical relationship between two beats is not in the data |
 | **sound** | the audio block | cue punctuation is automatic now; choosing a bed is a register decision, and the engine stays silent when it has no input |
 | type · colour · layout · backdrop | nothing | these resolve from the theme. A decider here would re-decide what the brand already decided |
@@ -190,7 +190,7 @@ Notes that matter per critic:
 
 - **bg-motion exists because of a real failure.** A lime-on-black liquid field was "matched" against one
   still, and in motion it ran about 2.5x too fast with folds half the size, reading as directional
-  ribbons where the reference had rounded lobes ([`../MISTAKES.md`](../MISTAKES.md) #155). **A still
+  ribbons where the reference had rounded lobes ([`../MISTAKES.md`](../MISTAKES.md) #161). **A still
   frame carries composition and colour and nothing about time.** For a continuous effect it is the least
   informative test there is: it is exactly the frame where a wrong speed looks right. Hand this critic a
   strip or do not ask it.
@@ -216,8 +216,7 @@ Notes that matter per critic:
    file is how you get a scene nobody chose. Also, a critic that can fix will fix instead of finding.
 4. **A critic is evidence, not a ruling.** If it flags something you can look at yourself and the flaw
    is not there, it is wrong. Look before you act. The reverse is heavier: if a critic flags something
-   and your eye confirms it, that is a FIX, never a rationalization
-   ([`../MISTAKES.md`](../MISTAKES.md) #15).
+   and your eye confirms it, that is a FIX, never a rationalization.
 5. **Feed the fixes back through the gates, not through the panel.** Re-run `make author-check` and the
    sheet-producing commands after the edits, then re-panel only the critics whose input changed.
 
@@ -277,5 +276,6 @@ there is one owner of the text, not a copy in every brief).
 
 ## Provenance
 
-**Do not re-add:** the claim that an `ab` critic runs today. It shipped (`05a5123`) and was removed
-(`cc2dfc2`, 2026-08-05) with five other tools. Use `make compare` and judge by eye instead.
+**Do not re-add:** the claim that an `ab` critic runs today. It shipped and was removed in August 2026
+with five other tools; neither commit hash this note used to carry resolves in this repository any more.
+Use `make compare` and judge by eye instead.

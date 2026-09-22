@@ -78,7 +78,7 @@ mechanical move, so it gets curves.
 **The failure this prevents.** Two keys plus `easeInOutCubic` produces a glide. Glide is right for a
 card arriving and wrong for anything a hand or a machine is doing. `easeInOutCubic` also zeroes velocity
 at BOTH ends of every segment, so a dense chain accelerates and stops once per key and the move pulses.
-The same defect fixed for the camera in [`../MISTAKES.md`](../MISTAKES.md) #125 and left standing as the
+The same defect fixed for the camera in [`../MISTAKES.md`](../MISTAKES.md) #128 and left standing as the
 per-layer default until now. **This is automatic below 0.14s per segment.**
 
 ---
@@ -111,8 +111,9 @@ including the scrim and the things that are meant to stay put. Panning three cho
 
 **The cost, and it is the point.** The engine gives you no way to SAY this, so the author typed the
 same six deltas three times and kept them in sync by hand. A time-shift error in one of them is
-invisible in the JSON and obvious on screen. See `panWith` in [`../PRIMITIVES.md`](../PRIMITIVES.md);
-before that existed, this was the sharpest edge in the file.
+invisible in the JSON and obvious on screen. See `panWith` (`core/timeline/pan-resolve.mjs`), which
+copies another layer's motion track onto this one; before that existed, this was the sharpest edge in
+the file.
 
 ---
 
@@ -260,7 +261,8 @@ box the browser laid out, the same measurement `boxOf` answers from. It has to b
 retyped, because the real width of a word depends on the theme's face: the same 180px `LATENCY` measures
 781px in `vawe`, 837px in `linear` and 796px in `higgsfield`, and no number an author types tracks all
 three. Until 2026-08 an unsized side scored 0x0: the scale collapsed to 1 and the centre landed
-on the layer's top-left corner, silently misplacing the handover (`engine-doctrine/MISTAKES.md` #461).
+on the layer's top-left corner, silently misplacing the handover: one card landed 401px from where it
+was asked for, with no error (`engine-doctrine/MISTAKES.md` #484).
 A form that measures nothing on either axis is now refused by name.
 
 `validate` fails a `becomes` whose two layers do not meet at the boundary, naming the gap in seconds. A
@@ -281,7 +283,7 @@ When a film has the right spine and still feels cheap, in order of how often it 
 - [`../../skills/vawe-continuous-action/SKILL.md`](../../skills/vawe-continuous-action/SKILL.md). The grammar: one object, every cut a state change
 - [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md), which curve, which cut, when
 - [`DIRECTION.md`](DIRECTION.md): pacing and restraint, and the gates that enforce them
-- [`../MISTAKES.md`](../MISTAKES.md) #164: this film trips the continuity gate at its sensitive threshold; the exemplar is not gate-clean, and that is a fact about the gate
+- This film trips the continuity gate at its sensitive threshold; the exemplar is not gate-clean, and that is a fact about the gate
 
 ## The box track (`w` / `h`): resizing is not scaling
 
@@ -289,7 +291,7 @@ When a film has the right spine and still feels cheap, in order of how often it 
 lives in and lets the content re-fit. That is the difference between zooming a photo grid and
 reflowing one, and it is what a collapsing sidebar, an expanding card and every FLIP transition are
 made of. Before it existed the only ways to attempt those were to scale (the picture stretches) or to
-cross-fade two layouts (a slideshow across a cut). See `engine-doctrine/MISTAKES.md` #206.
+cross-fade two layouts (a slideshow across a cut). See `engine-doctrine/MISTAKES.md` #212.
 
 ```json
 { "type": "image", "src": "…", "x": 540, "y": 150, "w": 374, "h": 250, "radius": 6,

@@ -79,7 +79,7 @@ instead of rebuilding it.
 
 ### `bgDefault` can now be a ROTATION, not only a single backdrop
 
-Measured across `films/scene/`: 85 of 119 films (71%) paint exactly one `bg` window for the whole
+Measured across `films/scene/`: 143 of the 182 scenes with a `bg` array (79%) paint exactly one window for the whole
 runtime, however many times the film cuts. That is not the mistake `backdrop` above guards against: an
 author who writes `bg:[{use:"theme"}]` has already asked for the theme's own backdrop, the same
 explicit door `bgDefault` opened as a single spec. `theme.bgDefault` now accepts an ARRAY of specs (a
@@ -105,7 +105,7 @@ never read at render; the rotation lives on the field already read at render (`b
 fires when the author already wrote the opt-in the engine has always honoured.
 
 `look` used to carry an eighth key, `cues`: a fixed per-theme list of audio cue names. It is gone.
-`buildSfx` (`films/scene/scene.js:1593-1602`) already derives every cue from the `CUT_CUE`/`SEAM_CUE`
+`buildSfx` (`films/scene/scene.js:1713`) already derives every cue from the `CUT_CUE`/`SEAM_CUE`
 tables in `core/audio/cues.js`, keyed on the transition actually used at each joint, so a fixed list
 could never say which cue replaces which as a film's cut family changes beat to beat. It would have
 been a second, disagreeing owner of a fact `buildSfx` already owns.
@@ -146,15 +146,15 @@ Refuses by name, rather than rendering a blank sheet, when the theme has no `loo
 
 ## Where a theme's `look` lives today
 
-`themes/vawe.json` (the real brand, derived from `site/app/globals.css`), `themes/together-chat.json`,
-`themes/vawe-film.json`, and all six `themes/presets/*.json` (the taste-anchor profiles: a24, apple,
-bloomberg, duolingo, nike, vercel) carry one. `themes/default.json` and `themes/linear.json`/
-`themes/stripe.json` do not yet; a theme with no `look` is not an error, it is a theme that has not
-been given one.
+<!-- site-counts-allow: "Three themes" is how many carry a `look`, not the size of the theme registry -->
+Three themes carry one: `themes/vawe.json` (the real brand, derived from `site/app/globals.css`),
+`themes/together-chat.json` and `themes/vawe-film.json`. `themes/default.json` and
+`themes/linear.json`/`themes/stripe.json` do not; a theme with no `look` is not an error, it is a theme
+that has not been given one.
 
 ## The computed look, for the other 28
 
-Only 3 of the 31 themes in the registry carry an authored `look`, so an engine default reading
+Only 3 of the 31 themes in `themes/` carry an authored `look`, so an engine default reading
 `theme.look` alone would do nothing for nearly all of them, `themes/default.json` included. `computedLook(theme, { isLightBg })` and `resolveLook(theme,
 opts)` (`core/registry/theme-contract.js`, beside `lookErrors`) close that gap: `resolveLook` returns
 `{...computedLook(theme), ...(theme.look||{})}`, so an authored key always wins over the computed one,
@@ -205,7 +205,7 @@ reason.
   so a theme with no `marks` stays without one until it declares its own.
 
 (`cues` used to be a third uncomputed key. It is gone from `LOOK_KEYS` entirely: `buildSfx`
-(`films/scene/scene.js:1593-1602`) already derives every cue from the transition actually used at
+(`films/scene/scene.js:1713`) already derives every cue from the transition actually used at
 each joint, so a fixed per-theme cue list was a second, disagreeing owner of the same fact rather than
 something worth computing a default for.)
 

@@ -122,11 +122,11 @@ timing"), now with the published band it sits inside rather than just the direct
 ### Stagger: 50-200ms between related elements
 
 MD3 and Kowalski's STANDARDS both name a 50-200ms band for staggering related elements, which our own
-`stagger` default of 45ms (`MOTION-CRAFT.md`) sits just under, and our documented "60-120ms" hierarchy
+`stagger` default of 45ms (`../MOTION-CRAFT.md`) sits just under, and our documented "60-120ms" hierarchy
 band (`DIRECTION.md` §1, Follow-through row) sits inside.
 
 **Where this leaves our existing tables.** `TASTE-RULES.md`'s cause->feeling ease table and
-`MOTION-CRAFT.md`'s speed-dial table already carry numeric ranges, not bare adjectives; they do not
+`../MOTION-CRAFT.md`'s speed-dial table already carry numeric ranges, not bare adjectives; they do not
 need rewriting. What they lacked was the external convergence proving those ranges are not house
 invention. That convergence is stated here, once, so a future reader does not have to re-derive it.
 
@@ -178,10 +178,10 @@ noise, and the metric cannot tell them apart.
 says "nothing scores this and nothing will" about the film's energy-over-time shape, and
 `engine-doctrine/CRAFT/FILM-STRUCTURE.md` already treats several structural devices (a motif, a sound bridge, an
 unfinished sentence) as things no static gate can verify. That is not a gap in this engine's tooling;
-it is the correct description of where the whole field's measurement stops. The two deleted gates
-`DIRECTION.md` names, `visual-vocabulary` and the retired `slop` gate, both failed the same way: they
-measured a PROXY (layer area, a DOM-dump rule count) and let the proxy stand in for the judgement it
-could not make. Keeping `make judge` as an eye-only, mandatory, unscored step is the correct response
+it is the correct description of where the whole field's measurement stops. The retired `slop` gate
+`DIRECTION.md` names failed this way: it measured a PROXY (a DOM-dump rule count) and let the proxy
+stand in for the judgement it could not make. Keeping `make judge` as an eye-only, mandatory, unscored
+step is the correct response
 to a field with no accepted quality metric, not a workaround for one this repo has failed to build.
 
 ---

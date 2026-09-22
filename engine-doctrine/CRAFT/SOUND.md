@@ -69,9 +69,9 @@ automatically unless it says `audio.auto: false`. Measured across `films/scene/`
 that flip: scenes that resolve at least one cue went from **18 to 68**. Run `make audio-check` to see
 the live census; it is the first thing this document is for.
 
-What is still true, and still the open problem, is the MUSIC BED: **119 films declare
-`audio.silent:true` (39 of them say why), and 12 name no `audio` block and have no junction to derive a
-cue from either, so they are silent with nobody having decided that.** Not the mute-by-reflex problem
+What is still true, and still the open problem, is the MUSIC BED: **116 of the 184 scenes in
+`films/scene/` declare `audio.silent:true` and only 34 of those say why, and 19 name no `audio` block at
+all, so they are silent with nobody having decided that.** Not the mute-by-reflex problem
 this section originally measured, cue derivation now closes most of it for free, but the bed. Sound is
 still the default the doctrine argues for; silence is still a device with a reason you write down; the
 work left is picking beds, not deriving cues.
@@ -129,9 +129,10 @@ It does not follow that the film should ship mute. A film that works silent AND 
 strictly better than the same film mute. Sound is the default; silence is a device with a reason
 you write down.
 
-**You will ship it mute and never notice you decided anything.** Five films in six here did exactly that,
-and not one of the 90 says why. Silence closes a whole quarter of the structural vocabulary, including the
-sound bridge, which is a continuous object the picture never has to carry.
+**You will ship it mute and never notice you decided anything.** Most of this library did exactly that,
+and the census above says how many of them wrote down why. Silence closes a whole quarter of the
+structural vocabulary, including the sound bridge, which is a continuous object the picture never has to
+carry.
 
 > **Give every film sound. If it is better mute, say so in one line and mean it.**
 >
@@ -445,14 +446,16 @@ memory before ffmpeg muxes it.
 }
 ```
 
-**The cues** (`core/audio/kit.mjs`, baked by `make audio`): `chime · sparkle · droplet · bloom ·
-whisper · tick · press · key · release · toggle · success · error · page · loading · ready`, plus the
-baked aliases `whoosh · reveal · click · pop`. They are **synthesized from parameters**, noise, a
-biquad, an envelope, seeded and deterministic, so they carry no licence at all and same params always
-give same bytes. That is a genuinely good property and it is worth keeping.
+**The cues** (`CUES` in `core/audio/kit.mjs:270`, baked by `make audio`): `pluck · chime · sparkle ·
+droplet · bloom · success · ready · whoosh · riser · drop · impact · swell · braam`. Thirteen, because
+ten were removed after a listening pass: every cue that was kept has zero noise layers, and the chance
+of rejection rose with the noise-layer count (`core/audio/kit.mjs:196`,
+`quality/baselines/sound-verdicts.json`). They are **synthesized from parameters**, noise, a biquad, an
+envelope, seeded and deterministic, so they carry no licence at all and same params always give same
+bytes. That is a genuinely good property and it is worth keeping.
 
-A cue is honest only when it names something the viewer SEES happen. A `press` with no button on screen
-is a lie; cut it.
+A cue is honest only when it names something the viewer SEES happen. A `pluck` with nothing landing on
+screen is a lie; cut it.
 
 **Name the moment, never copy its number.** A cue that marks something inside a beat, the install line
 landing, the counter finishing, the mark settling, is about a LAYER, not a timestamp. `"t": 3.8935` is
@@ -515,7 +518,7 @@ is a workaround rather than the dial.
 | `make tts` · `make vo-captions D=…` | narration, and karaoke captions from its word timings |
 | `make pace-from-vo VO=….words.json` | propose beat timings that land reveals on the voice |
 
-### Caption styles: eight, and what each one uses to say "here"
+### Caption styles: eight of the nineteen, and what each one uses to say "here"
 
 `"captionStyle": "<name>"` layers a word-timed treatment on the pop caption layout. The words come
 from `capWords()` (`core/type/captions.js`): the author's own `words:[{t0,t1}]` when a line carries them,
@@ -524,7 +527,9 @@ style is a pure function of one word's progress, so a cold seek and a warm one p
 
 Each style carries **three** word states, and a viewer must be able to tell all three apart in a
 single frame: what is coming, what is being said, and what has already been said. A style with only
-two states is a progress bar with no memory. Pick by the channel you want the caption to speak in.
+two states is a progress bar with no memory. Pick by the channel you want the caption to speak in. The
+eight below are the ones worth choosing between deliberately; `CAP_STYLES` (`core/type/captions.js:57`)
+carries nineteen, and [`CAPTIONS.md`](CAPTIONS.md) lists them all.
 
 | Style | The channel | Reach for it when |
 |---|---|---|
