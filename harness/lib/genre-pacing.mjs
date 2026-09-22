@@ -52,10 +52,11 @@ const RECREATION_MAX_S = CEILING_S;
 // storyboard signal here recognizes it) and for talking-head, which has no MOTION-CRAFT.md row of its
 // own. It used to be a flat 3.0s, the doubled residue of "the reference film never holds a single
 // state longer than about 1.5 seconds" for ONE film. It now cites a measured EXTERNAL reference
-// instead (harness/lib/reference-bars.mjs, refs/*/study.json's `longestHoldS`, itself
-// harness/lib/frame-forensics.mjs's frameDeltaSweep): the longest hold either studied clip actually
-// sustains, so the cap answers to something outside this repo's own corpus rather than one film's
-// prose, doubled.
+// instead (harness/lib/reference-bars.mjs, refs/*/study.json's `longestHoldS`, itself derived in
+// harness/media/study.mjs from harness/media/shot-detect.mjs's motionDeltaSeries, the same per-frame
+// motion measure that file's own `motion`/`peak`/`held` shot fields already read): the longest hold
+// either studied clip actually sustains, so the cap answers to something outside this repo's own
+// corpus rather than one film's prose, doubled.
 //
 // refs/ is gitignored, so on CI and a fresh clone the bank is empty and this falls back to the old
 // number, STATED as uncalibrated rather than silently reused (harness/lib/reference-bars.mjs's own

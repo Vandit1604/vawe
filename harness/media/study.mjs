@@ -53,8 +53,7 @@ import { fileURLToPath } from 'node:url';
 import { drawtext } from '../author/sheets.mjs';
 import { ffmpegOrDie } from '../lib/scratch.mjs';
 import { measureSpan } from './content.mjs';
-import { clusterCuts, detectCuts, detectSeams, detectPans, detectCrossfades, frameSeries, mergeJoints } from './shot-detect.mjs';
-import { frameDeltaSweep } from '../lib/frame-forensics.mjs';
+import { clusterCuts, detectCuts, detectSeams, detectPans, detectCrossfades, frameSeries, mergeJoints, motionDeltaSeries } from './shot-detect.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -291,9 +290,9 @@ fs.mkdirSync(dir, { recursive: true });
 // live in shot-detect.mjs and this file imports them, rather than duplicating them for
 // harness/media/ingest.mjs to import safely (importing THIS file used to also run its whole CLI).
 const LUMA = frameSeries(VIDEO, 'scale=160:90,signalstats');
-// The first difference frame is the frame against itself and reads 0. Dropped rather than averaged in,
-// because "how much did this change from the one before" has no answer for the first frame.
-const DELTA = frameSeries(VIDEO, 'scale=160:90,tblend=all_mode=difference,signalstats').slice(1);
+// motionDeltaSeries (shot-detect.mjs) owns this chain now: the top-level medianFrameDelta figure
+// below reuses this SAME array rather than a second decode with a second copy of the filter string.
+const DELTA = motionDeltaSeries(VIDEO);
 // Scaled bigger than LUMA/DELTA (410x270, not 160x90): edge detail is finer-grained than luma, and a
 // letterform that survives 410x270 can vanish at 160x90. Cost is one more decode of the same film.
 const EDGE = frameSeries(VIDEO, `scale=410:270,edgedetect=low=${EDGE_LOW}:high=${EDGE_HIGH},signalstats`);
@@ -792,27 +791,29 @@ fs.writeFileSync(path.join(dir, 'pages.md'),
   + '\n');
 
 // medianFrameDelta / longestHoldS: the two figures a reference-bars reader needs, and the reason
-// prose ("median frame delta ~0.23", "a fully held final 2.5s") could not be checked by any gate.
-// Same sweep motion-sound-check.mjs already runs over a RENDER (frameDeltaSweep, one decode, max
-// per-pixel gray delta on a 64x36 grid): reusing it here means a reference clip and our own render
-// land on the same scale, never a second delta implementation.
-// QUIET_FLOOR mirrors motion-sound-check.mjs's own STILL_FLOOR (0.06 on this same grid): a hold is a
-// run of consecutive frames whose delta never clears that floor, and its length in seconds is the
-// longest such run. One owner for "quiet" on this grid, not two numbers that can drift apart.
-const deltaSweep = frameDeltaSweep(VIDEO, 64, 36);
-const QUIET_FLOOR = 0.06;
-const deltas = deltaSweep.slice(1).map((f) => f.delta); // frame 0 carries no delta (nothing precedes it)
-const sortedDeltas = [...deltas].sort((a, b) => a - b);
-const medianFrameDelta = sortedDeltas.length
-  ? fx(sortedDeltas.length % 2 ? sortedDeltas[(sortedDeltas.length - 1) / 2]
-      : (sortedDeltas[sortedDeltas.length / 2 - 1] + sortedDeltas[sortedDeltas.length / 2]) / 2, 3)
+// prose ("median frame delta ~0.23", "median frame delta 0.08") could not be checked by any gate.
+//
+// BOTH READ OFF DELTA/STILL_FLOOR ABOVE, not harness/lib/frame-forensics.mjs's frameDeltaSweep. A
+// first pass used frameDeltaSweep (a 64x36 grid, max per-pixel delta) and got 0.039/0.020 against the
+// prose's 0.08/0.23; DELTA (160x90, tblend=difference, mean YAVG) gives 0.098/0.212, the measure the
+// prose actually agrees with, because it is the measure this file's own `motion`/`peak`/`held` per-
+// shot fields were already reading. "How much does this film move" already had an owner; the fix is
+// citing it, not adding a second one. longestHoldS moves to the same measure ON PURPOSE: a hold and
+// the delta that names "quiet" must read off one scale, or study.json could disagree with itself
+// about what "held" means. medianFrameDelta reuses the DELTA array already decoded above (line ~294),
+// never a second ffmpeg pass.
+const deltaValues = DELTA.map((f) => f.v);
+const sortedDeltaValues = [...deltaValues].sort((a, b) => a - b);
+const medianFrameDelta = sortedDeltaValues.length
+  ? fx(sortedDeltaValues.length % 2 ? sortedDeltaValues[(sortedDeltaValues.length - 1) / 2]
+      : (sortedDeltaValues[sortedDeltaValues.length / 2 - 1] + sortedDeltaValues[sortedDeltaValues.length / 2]) / 2, 3)
   : null;
 let longestHoldFrames = 0, runFrames = 0;
-for (const d of deltas) {
-  if (d < QUIET_FLOOR) { runFrames++; if (runFrames > longestHoldFrames) longestHoldFrames = runFrames; }
+for (const f of DELTA) {
+  if (f.v < STILL_FLOOR) { runFrames++; if (runFrames > longestHoldFrames) longestHoldFrames = runFrames; }
   else runFrames = 0;
 }
-const longestHoldS = deltaSweep.length ? fx(longestHoldFrames / fps, 2) : null;
+const longestHoldS = DELTA.length ? fx(longestHoldFrames / fps, 2) : null;
 
 // ── the study ─────────────────────────────────────────────────────────────────────────────────────
 const study = {
