@@ -1,0 +1,41 @@
+name: gate mutation (does each gate actually fire?)
+
+# quality/gates/gate-mutation.mjs's own thesis: "a gate that cannot fail is worse than no gate". It was
+# unwired everywhere (inert-check.mjs, 2026-09-22): not in pre-push, not in any workflow, and unlike
+# every other standing gate it had no workflow_dispatch entry either, so nobody could even run it from
+# CI by hand.
+#
+# It stays OUT of the push-triggered gates.yml on purpose: measured end to end on this branch, one run
+# takes 13 minutes, an order of magnitude past what a push-blocking check should cost, and it feeds each
+# gate a fixture built to trip it (mutating tracked source in place, one case at a time) rather than
+# doing pure reads. A slow gate wired to block every push teaches everyone to reach for --no-verify,
+# which disables every other gate on the line with it.
+#
+# workflow_dispatch only, no schedule: this run already found 21 of its own cases failing (several gates
+# not firing, two fixtures gone stale), a real finding this task does not fix. A scheduled run of a gate
+# already known to be red would be exactly the unpolled-schedule failure mode inert-check's section 3
+# looks for. Run it by hand (Actions tab, or `gh workflow run gate-mutation.yml`) once those findings
+# have an owner.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  gate-mutation:
+    name: mutation-test every gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: make gate-test
+        run: make gate-test

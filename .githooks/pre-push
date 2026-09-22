@@ -74,6 +74,16 @@
 # site build reads (derived from the Dockerfile's own COPY lines). A push that never touches the site
 # pays nothing. This is the local half of the ten-day vawe.dev outage: three stacked build breaks that
 # every local check passed, because none of them ran the build.
+#
+# The eight below joined together (2026-09-22, quality/gates/inert-check.mjs found all of them standing
+# in the Makefile and reached by neither this file nor CI). Each needs a file a fresh CI clone does not
+# carry (a source woff2, a baked sim, a judge receipt) or is the check that found the other seventeen, so
+# they belong here rather than in gates.yml: glyphs-audit (assets/fonts/*.woff2, gitignored), sim-audit
+# and docker-context (assets/baked, gitignored, both self-heal to a pass when it is absent rather than
+# guessing), judge-census (quality/baselines/approved/judge/, gitignored, a count only). rung, sfx-check,
+# audit-test and inert-check carry no such dependency; they are here because pre-push is where a push-time
+# check that already passes belongs, same as the fourteen above them. All eight pass today. Pure file
+# reads plus, for sim-audit and glyphs-audit, one hash each; well under a second combined.
 while read -r _local_ref local_sha _remote_ref remote_sha; do
   [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue   # a branch deletion
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
@@ -91,8 +101,8 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
   fi
 done
 
-echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface) …"
-if ! make schema-check lib-test craft-coverage coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface; then
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check) …"
+if ! make schema-check lib-test craft-coverage coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung sfx-check audit-test glyphs-audit sim-audit docker-context judge-census inert-check; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi
