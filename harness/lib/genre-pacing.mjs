@@ -16,6 +16,7 @@
 // the gate's old flat number, unchanged: this file only ever WIDENS the check for a film it can
 // positively place, never narrows it for one it cannot.
 import { readReferenceBars, MIN_REFERENCES } from './reference-bars.mjs';
+import { MAX_HOLD as READ_CHECK_MAX_HOLD } from '../../quality/gates/read-check.mjs';
 
 // No genre band comes close to this. Product walkthrough, the loosest named band, tops out at 8s; a
 // 12s single-change beat is still called a defect regardless of genre, so the absolute ceiling sits a
@@ -51,32 +52,40 @@ const RECREATION_MAX_S = CEILING_S;
 // DEFAULT: the held-state cap for any film classifyType() cannot place (most of the corpus: no
 // storyboard signal here recognizes it) and for talking-head, which has no MOTION-CRAFT.md row of its
 // own. It used to be a flat 3.0s, the doubled residue of "the reference film never holds a single
-// state longer than about 1.5 seconds" for ONE film. The plan was for it to cite a measured EXTERNAL
-// reference instead (harness/lib/reference-bars.mjs, refs/*/study.json's `longestHoldS`), and it still
-// will, once the bank has enough of them: MEASURED, with the two references studied so far, changing
-// only which delta metric read them swung this constant between 2.6s and 3.6s off the SAME two clips,
-// a 38% swing with zero new data. That is not a bar, it is noise wearing a bar's clothes, which is
-// exactly what `readReferenceBars`'s `ready` flag (MIN_REFERENCES, reference-bars.mjs) exists to
-// refuse: below it, this file REPORTS what the bank measured without ENFORCING it.
+// state longer than about 1.5 seconds" for ONE film, then, briefly, a number read off the reference
+// bank (harness/lib/reference-bars.mjs, refs/*/study.json's `longestHoldS`). The bank swung this
+// constant between 2.6s and 3.6s, a 38% move off the SAME two clips with zero new data, just from
+// which delta metric read them: a measured film is still a film, and "how long may one thing hold"
+// is not a question a corpus can answer any better than one film could, only with a wider margin of
+// error. The bank stays for what it is, a true description of real work (`readReferenceBars` below,
+// still called, still printed next to this constant), but it is no longer the route to this bar.
 //
-// refs/ is gitignored, so on CI and a fresh clone the bank is empty; that and "the bank exists but is
-// still thin" both land on the SAME fallback, the old number, STATED as uncalibrated rather than
-// silently reused (harness/lib/reference-bars.mjs's own contract: a bank that isn't ready must never
-// read as a confident measurement, whether it is empty or merely small).
-const UNCALIBRATED_MAX_S = 3.0;
-const bank = readReferenceBars();
-export const DEFAULT_MAX_S = (bank.ready && bank.longestHoldS != null)
-  ? Math.round(bank.longestHoldS * 10) / 10
-  : UNCALIBRATED_MAX_S;
-// Printed wherever DEFAULT_MAX_S is quoted (storyboard-check.mjs), so a thin bank never reads as more
-// authoritative than it is, and so the evidence it DOES carry is visible even while it isn't deciding.
-export const DEFAULT_MAX_S_SOURCE = (bank.ready && bank.longestHoldS != null)
-  ? `measured longest hold across ${bank.n} external references (${bank.names.join(', ')})`
-  : (bank.n > 0
-      ? `uncalibrated: the bank holds ${bank.n} of the ${MIN_REFERENCES} external references it needs `
-        + `to set this bar (${bank.names.join(', ')}); what it has measured so far, longest hold `
-        + `${bank.longestHoldS != null ? `${bank.longestHoldS}s` : 'unmeasured'}, is reported, not enforced`
-      : `uncalibrated: ${bank.reason || 'no external reference on disk'}`);
+// ONE OWNER, NOT A SECOND ONE MEASURED FROM OUR OWN FILMS. `quality/gates/read-check.mjs`'s MAX_HOLD
+// answers the identical question, "how long may one unchanged thing sit", already sourced: the BBC's
+// 2-5s subtitling band, chosen there over Netflix's 7s and argued, not averaged. A storyboard beat
+// that changes nothing for 5s is exactly the defect read-check already refuses for one held line of
+// text; nothing about a beat with no prose in it makes that ceiling wrong, so this file imports it
+// rather than re-deriving a second number for the same defect. Deriving a per-beat cap the way
+// HOLD_PER_WORD derives its reading time (words * 0.6) was the other option on the table, but
+// HOLD_PER_WORD is sourced for TIME TO READ PROSE (ssw.com.au); a storyboard beat need carry no words
+// at all (a held product screen, a static shot), so that formula has no source that reaches a
+// beat with nothing to read, and inventing one here would be exactly the "corpus stands in for a
+// citation" mistake this file exists to remove.
+export const DEFAULT_MAX_S = READ_CHECK_MAX_HOLD;
+export const DEFAULT_MAX_S_SOURCE = 'read-check.mjs MAX_HOLD, BBC subtitling 2-5s band '
+  + '(same defect: how long may one unchanged thing sit)';
+
+// The bank is still measured and still worth reading, just not as this constant's source: printed
+// alongside a held-state finding as evidence an author can weigh, never as the number deciding it.
+export const referenceBank = readReferenceBars();
+export function describeReferenceBank() {
+  const bank = referenceBank;
+  if (!bank.n) return `reference bank: ${bank.reason || 'no external reference on disk'} (reporting only, not this bar's source)`;
+  const measured = bank.longestHoldS != null ? `${bank.longestHoldS}s` : 'unmeasured';
+  return `reference bank (reporting only, not this bar's source): longest hold measured ${measured} `
+    + `across ${bank.n}${bank.n < MIN_REFERENCES ? ` of the ${MIN_REFERENCES} references it would want for a stable read` : ''} `
+    + `(${bank.names.join(', ')})`;
+}
 
 /** thresholdFor(type) -> the held-state cap in seconds for a classified film type. */
 export function thresholdFor(type) {

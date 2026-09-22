@@ -15,12 +15,22 @@
 // storyboard-check proves nothing about the film.
 //
 // WHAT AN EVENT IS. Any moment a layer arrives or leaves, plus every cut. It is deliberately crude: it
-// cannot see a count ticking or a route drawing, so a film can score badly and be fine. That is why the
-// floor is set at the library's own tenth percentile among FILMS rather than at its median, the aim is
-// to catch a film that is asleep, not to push everything toward the same rhythm.
+// cannot see a count ticking or a route drawing, so a film can score badly and be fine.
 //
 // It cannot see the opposite failure either. A film can hit any number here by strobing its layers, and
 // `direction-floor`'s effect-soup check is the ceiling that answers for that.
+//
+// FLOOR IS REPORTING ONLY, NOT A BAR. It used to fail a film under 1.0 events/s, "this library's own
+// tenth percentile among films" (this file's prior header). That is corpus-derived, the exact defect
+// named in engine-doctrine's rules-from-sources plan: a threshold justified by our own films is a
+// finding, not a bar, unless it is a RELATIVE check by design (`direction-floor`'s corpus checks are;
+// this metric asks an absolute question, "is this film asleep", so it is not). No editing-rhythm
+// literature publishes a cuts-or-arrivals-per-second floor for a metric this bespoke (this gate's own
+// events include layer arrivals and departures, not shot cuts, so even a published average-shot-length
+// figure would not transfer), and this gate's own header already admits the measure is too crude to
+// trust as a verdict (it cannot see a count ticking or a route drawing). Rather than invent a source
+// nobody could check, FLOOR stays as a number worth PRINTING (the eps count below it, and the "asleep"
+// flag in the census), and stops being a number that fails a film.
 import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';
@@ -32,9 +42,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
 const strict = process.argv.includes('--strict');
 
-// Calibrated on the committed library, films only. Median is 1.20 and p90 is 1.92; a fixture or a
-// backdrop sits nearer 0.15 and is meant to.
-const FLOOR = 1.0;          // below this a film is asleep
+// FLOOR: reporting only, see the header. Calibrated on the committed library, films only: median is
+// 1.20 and p90 is 1.92; a fixture or a backdrop sits nearer 0.15 and is meant to. Kept as the line
+// under which the census flags a film "asleep", never as a reason this gate fails one.
+const FLOOR = 1.0;
 const HOLD = 4.0;           // seconds with nothing arriving or leaving
 import { loadScene } from '../../core/engine/expand.js';
 import { measureEvents } from '../../harness/lib/pace-events.mjs';
@@ -65,9 +76,9 @@ if (!file) {
     if (m) rows.push([f.split('/').pop().replace('.json', ''), m]);
   }
   rows.sort((a, b) => a[1].eps - b[1].eps);
-  console.log('\n  pace census · events per second · a film with copy should clear ' + FLOOR.toFixed(1) + '\n');
+  console.log('\n  pace census · events per second · reporting only, ' + FLOOR.toFixed(1) + ' ev/s is this library\'s own tenth percentile, not an external bar\n');
   for (const [n, m] of rows) {
-    const flag = m.copy && m.eps < FLOOR ? '  ← asleep' : '';
+    const flag = m.copy && m.eps < FLOOR ? '  ← slow (reported, not failed)' : '';
     console.log(`  ${n.padEnd(30)} ${m.eps.toFixed(2).padStart(5)} ev/s   ${String(m.dur).padStart(5)}s   `
       + `${m.copy ? String(m.copy).padStart(3) + ' line(s)' : '  no copy'}   longest hold ${m.hold.toFixed(1)}s${flag}`);
   }
@@ -85,29 +96,28 @@ if (!file) {
 const m = measure(path.resolve(ROOT, file));
 if (!m) { console.error(`✗ ${file}: no layers or no duration`); process.exit(2); }
 const problems = [];
-if (m.copy && m.eps < FLOOR && !m.allow.includes('slow-pace')) {
-  problems.push(`${m.eps.toFixed(2)} events/s over ${m.dur}s (${m.events} event(s)), below the floor of ${FLOOR.toFixed(2)}, `
-    + `which is this library's tenth percentile among films. For scale: the median film is 1.20 and the one this `
-    + `replaces is 1.79. Cut the duration before adding layers: a slow film is almost always a film that is too long.`);
-}
+// FLOOR no longer files a finding, see the header: it is corpus-derived and this gate's own crude
+// measure cannot carry an absolute bar. Still printed, next to the number it describes.
+const asleep = m.copy && m.eps < FLOOR;
 if (m.hold > HOLD && !m.allow.includes('slow-pace')) {
   problems.push(`${m.hold.toFixed(1)}s from ${m.at.toFixed(1)}s with nothing arriving or leaving, against a cap of `
     + `${HOLD.toFixed(1)}s. A held frame is a device; ${HOLD}s of one is a stall.`);
 }
 
 console.log(`\n  pace · ${file}  ${m.eps.toFixed(2)} events/s · ${m.events} event(s) over ${m.dur}s · longest hold `
-  + `${m.hold.toFixed(1)}s from ${m.at.toFixed(1)}s  (floor ${FLOOR.toFixed(2)} ev/s · hold cap ${HOLD.toFixed(1)}s)`);
+  + `${m.hold.toFixed(1)}s from ${m.at.toFixed(1)}s  (${FLOOR.toFixed(2)} ev/s is this library's tenth percentile, `
+  + `reported not enforced · hold cap ${HOLD.toFixed(1)}s)`);
+if (asleep) {
+  console.log(`  ⚠ ${m.eps.toFixed(2)} events/s is below this library's own tenth percentile (${FLOOR.toFixed(2)}), `
+    + `reported as a finding, not enforced as a bar: no external source publishes an events-per-second floor for `
+    + `this gate's bespoke, deliberately crude measure. For scale: the median film is 1.20 ev/s.\n`);
+}
 if (!problems.length) {
-  // THE FLOOR ONLY APPLIES TO A FILM WITH COPY, and a scene with none used to read the same green line as
-  // one that cleared the bar. Say which of the two rules ran, so a fixture cannot borrow a film's tick.
   const waived = m.allow.includes('slow-pace');
   console.log(waived
-    ? `  ○ pace rules WAIVED by {"authoring":{"allow":["slow-pace"]}}, neither the ${FLOOR.toFixed(2)} ev/s floor\n`
-      + `    nor the ${HOLD.toFixed(1)}s hold cap was applied. The numbers above are measured; no verdict was reached.\n`
-    : m.copy
-    ? `  ✓ it keeps moving, ${m.copy} line(s) of copy, so both rules applied\n`
-    : `  ✓ within the hold cap. NO COPY in this scene, so the ${FLOOR.toFixed(2)} ev/s floor did not apply:\n`
-      + `    a backdrop or a determinism fixture is meant to be still and is never failed for it.\n`);
+    ? `  ○ pace rules WAIVED by {"authoring":{"allow":["slow-pace"]}}, the ${HOLD.toFixed(1)}s hold cap was not `
+      + `applied. The numbers above are measured; no verdict was reached.\n`
+    : `  ✓ within the hold cap${asleep ? ' (the events/s finding above is reported, not a failure)' : ''}\n`);
   process.exit(0);
 }
 // Both problems are filed under the one code this gate has ever emitted, `pace`; the specific
