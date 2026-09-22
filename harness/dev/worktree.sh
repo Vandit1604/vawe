@@ -18,7 +18,13 @@
 #                 this whole mechanism exists to prevent.
 #   bin/vawe      SYMLINK. Built once, read many.
 set -euo pipefail
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# The main checkout, per GIT'S OWN definition (first entry of `worktree list`), not the path this
+# script happens to live at. `harness/dev/worktree.sh` is a TRACKED file, so it is present, unchanged,
+# in every worktree too; resolving ROOT from BASH_SOURCE's relative path silently picks whichever
+# worktree the caller's cwd was in, and this script would nest a new worktree inside that one instead
+# of the real .claude/worktrees/. sync-worktree.mjs uses the same `worktree list` lookup, so this is
+# one definition of "main", not a second one growing alongside it.
+ROOT="$(git worktree list --porcelain | awk '/^worktree /{print $2; exit}')"
 cmd="${1:-}"; name="${2:-}"
 [ -n "$name" ] || { echo "usage: worktree.sh add|rm <name>" >&2; exit 2; }
 WT="$ROOT/.claude/worktrees/$name"
@@ -48,22 +54,17 @@ ln -sfn "$ROOT/.vawe-data" "$WT/.vawe-data" 2>/dev/null || true
 #
 # That is engine-doctrine/MISTAKES.md #450 in another costume: a hand-kept scope drifting from the vocabulary it
 # claims to cover. A manifest with two implementations has no implementation.
-INCLUDE="$ROOT/.worktreeinclude"
-if [ -f "$INCLUDE" ]; then
-  while IFS= read -r pat; do
-    case "$pat" in ''|'#'*) continue ;; esac
-    # `git ls-files` will not list these (that is why they are here), so the patterns are expanded by
-    # the shell against the real tree and copied path by path, preserving the directory shape.
-    for src in $(cd "$ROOT" && eval ls -d $pat 2>/dev/null); do
-      [ -e "$ROOT/$src" ] || continue
-      mkdir -p "$WT/$(dirname "$src")"
-      cp -a "$ROOT/$src" "$WT/$(dirname "$src")/" 2>/dev/null || true
-    done
-  done < "$INCLUDE"
-else
+#
+# THE COPY ITSELF IS NOW `sync-worktree.mjs`, not a second copy loop. Main can keep moving after this
+# worktree is created (an owner edits a film while an agent's worktree sits open for hours), and
+# nothing here would notice; `sync-worktree.mjs` is the one place that both makes the first copy and
+# can safely re-run later to catch a worktree up, because it is the one place that keeps the
+# hash manifest a re-run needs to tell "main moved on" from "I edited this" apart.
+if [ ! -f "$ROOT/.worktreeinclude" ]; then
   echo "✗ .worktreeinclude is missing: a worktree built without it cannot render. Aborting." >&2
   exit 1
 fi
+node "$ROOT/harness/dev/sync-worktree.mjs" "$WT"
 
 # Prove it is usable rather than assuming. A worktree that cannot see the library is worse than none,
 # because every gate in it reports a confident green.
@@ -79,6 +80,6 @@ while IFS= read -r pat; do
   c_wt=$(cd "$WT" && eval ls -d $pat 2>/dev/null | wc -l | tr -d ' ')
   printf '  %-34s %s of %s\n' "$pat" "$c_wt" "$c_main"
   [ "$c_wt" = "$c_main" ] || { echo "✗ $pat, $c_wt of $c_main arrived. A worktree missing this renders a substitute and every gate in it reports a confident green." >&2; fail=1; }
-done < "$INCLUDE"
+done < "$ROOT/.worktreeinclude"
 echo "✓ $WT  (branch wt-$name)   node_modules: shared   bin/vawe: shared"
 [ "$fail" = 0 ] || { echo "✗ refusing to hand over an incomplete worktree." >&2; exit 1; }
