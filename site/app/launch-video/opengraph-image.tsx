@@ -8,7 +8,7 @@ export default function Image() {
     tag: "launch video",
     title: "Vawe · launch video",
     description:
-      "How Vawe builds a product launch video: real captured UI, not invented mockups, on the six-beat spine the engine's own doctrine defines. Three rendered films, each one an open JSON file.",
+      "How Vawe builds a product launch video: real captured UI, not invented mockups, on the six-beat spine the engine's own doctrine defines.",
     path: "/launch-video",
   });
 }

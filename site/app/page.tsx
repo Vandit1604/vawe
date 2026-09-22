@@ -5,9 +5,7 @@ import { Header } from "./components/Header";
 import { HeroEditor } from "./components/HeroEditor";
 import { Clip } from "./components/Clip";
 import { Footer } from "./components/Footer";
-import { SourceViewer } from "./components/SourceViewer";
 import { ProofHash, ProofAspect } from "./components/proofs";
-import LINES from "../lib/scene-lines.json";
 import EFFECTS from "../lib/effects-counts.json";
 import { organizationSchema, websiteSchema, softwareApplicationSchema, jsonLdScript } from "../lib/schema";
 import "./landing.css";
@@ -21,28 +19,19 @@ import "./landing.css";
  * What it does instead is run the engine three times in three registers. The hero is a live,
  * editable scene rendering in the reader's own browser, and it can be broken on purpose so the
  * refusal is a thing that happens rather than a thing we claim. The proofs are two drawings whose
- * geometry IS the claim. The films are finished work with the line count of the file that made
- * each one. Nothing on this page asks to be believed.
+ * geometry IS the claim. Nothing on this page asks to be believed.
  *
  * The section that used to sit between the hero and the films was three claims on a 250vh pinned
  * runway. It is gone. It spent three and a half screens delivering three sentences, it needed a
  * second layout for reduced motion and a third for no-JS, and pinning is the marketing default
  * this page is supposed to reach past. Two of its diagrams survived; the runway did not.
+ *
+ * THE FILMS SECTION IS OUT, on purpose, not by oversight. The seven films it used to show could not
+ * be re-rendered from source and four carried broken paths after the films rename, so they were
+ * removed site-wide rather than left to misrepresent the engine. This page does not show a fake or
+ * placeholder film in their place; /showcase carries the honest empty state and the note on what a
+ * baseline film needs before it can return here.
  */
-
-const lines = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
-
-type Film = { slug: string; brand: string; dur: string; note?: string };
-
-/* Three, not six. /showcase carries the set; the landing carries the argument, and the argument is
- * one film large enough to read plus two beside it for range. The first is a launch film, the
- * second a product tour, the third a fillable template, so the row is three KINDS of work rather
- * than three of the same. */
-const FILMS: Film[] = [
-  { slug: "preface-launch", brand: "Preface", dur: "0:53" },
-  { slug: "argus-launch", brand: "Argus", dur: "0:23" },
-  { slug: "saas-hero-launch", brand: "SaaS hero", dur: "0:45", note: "template" },
-];
 
 /* THE ARSENAL WALL, read off what actually ships rather than typed.
  *
@@ -191,44 +180,6 @@ export default function Home() {
                 </p>
                 <ProofAspect />
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ===== THE FILMS =====
-            The only section on the page that shows finished work, and the line count is why it is
-            here rather than on /showcase alone. A film is not a video file on this site, it is a
-            file you can open, read and edit, and the number says how big that file is. */}
-        <section className="section alt">
-          <div className="wrap">
-            <div className="gal-head">
-              <div>
-                <div className="kicker">what came out of it</div>
-                {/* The claim the three tiles below can be checked against: each carries the line
-                    count of the file that made it. It read "Made without a timeline or a designer.",
-                    which is a description of the process and a second copy of the h1's promise. */}
-                <h2 className="h2">Every film here fits in one file.</h2>
-                <Link className="ilink" href="/json-to-video" style={{ display: "block", marginTop: 6 }}>
-                  What&apos;s in that file →
-                </Link>
-              </div>
-              <Link href="/showcase">
-                See the full showcase <span className="arw">→</span>
-              </Link>
-            </div>
-            <div className="filmgrid">
-              {FILMS.map((f, i) => (
-                <figure key={f.slug} className={i === 0 ? "film film-hero" : "film"}>
-                  <div className="fmedia">
-                    <Clip src={`/assets/films/${f.slug}.mp4`} poster={`/assets/films/${f.slug}.jpg`} />
-                  </div>
-                  <figcaption>
-                    <span className="fbrand">{f.brand}</span>
-                    <span className="fdur">{f.note ? `${f.note} · ${f.dur}` : f.dur}</span>
-                    <SourceViewer name={f.slug} lines={lines(f.slug)} />
-                  </figcaption>
-                </figure>
-              ))}
             </div>
           </div>
         </section>
