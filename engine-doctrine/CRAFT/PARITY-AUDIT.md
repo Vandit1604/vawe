@@ -13,6 +13,11 @@ group: look
   each has a measured verdict, a fixed/open gap, and the file:line to check against the standard recipe.
 - All seven were BEHIND the published recipe on at least one axis; most are now CLOSED/fixed. Read the
   per-effect "Verdict" and "The gap" before assuming the shipped default is already correct.
+- **The `file:line` citations in this doc drift**: a 2026-09 accuracy audit found several files this doc
+  cites have since split or moved (`core/type/type.js` kinetic presets now live in `core/kinetic/presets.js`,
+  `core/backgrounds/index.js` functions now live in `core/backgrounds/fx.js`/`presets.js`), so a line
+  number here can point at the wrong line or the wrong file. The named VALUES checked as still correct
+  where sampled; locate by symbol name (`grep -rn`) rather than trusting a cited line number.
 
 `engine-doctrine/CRAFT/SAAS-MOTION-DEMAND.md` found that nine of the ten most-demanded SaaS motion effects
 already ship here. This audit asks the harder question about seven of them: **shipping is not the same
