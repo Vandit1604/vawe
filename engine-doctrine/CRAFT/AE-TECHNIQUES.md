@@ -417,8 +417,8 @@ centres zeroed, then expression-added to the null position. Opacity keyed 100, 0
 `edgeGlow` and `halationFilm`, `core/looks/filters.js` has `bloom` and `chromaGlow`, and `modifiers` carries a
 `matte`. `make arsenal Q="light sweep reveals text through a mask"` returns `maskReveal`, `highlight` and
 the `lightLeak` shader, all of which are sweeps, not sources. Step 5 is the part this repo would insist
-on regardless: one fact, one owner. A light whose position is written in two effect centres is exactly the
-drift `engine-doctrine/MISTAKES.md` #423 describes.
+on regardless: one fact, one owner. A light whose position is written in two effect centres is the same
+drift `engine-doctrine/MISTAKES.md` warns against elsewhere: one value, kept in two places, will disagree.
 
 **DEFAULT OR OPTION** Option. But "what is lit is what is read" belongs in `engine-doctrine/CRAFT/EYE-TRACE.md` as
 doctrine, not just as a look.
