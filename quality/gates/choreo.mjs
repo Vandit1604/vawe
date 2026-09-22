@@ -54,9 +54,13 @@ export function frameSummary(prof, start, end) {
 // is picked up here with no second list to maintain). `easeInOutX` is EXCLUDED on purpose: it
 // decelerates first, so a departure keyed to it still leaves the way it arrived, softly.
 export const ACCEL_EASES = new Set([...Object.keys(EASINGS).filter((n) => /^easeIn(?!Out)/.test(n)), 'rush']);
-// The owner's own default ratio, applied regardless of what any reference measures (see madera's
-// grounding line in the CLI output below): an unemphasised exit is one that is not at least this much
-// shorter than its entrance.
+// FAST_RATIO: the owner's own default ratio, applied regardless of what any reference measures (see
+// madera's grounding line in the CLI output below): an unemphasised exit is one that is not at least
+// this much shorter than its entrance. SOURCED as a PRINCIPLE: multiple published UI motion guides state
+// the same exit/entrance asymmetry, e.g. https://www.nngroup.com/articles/animation-duration/ and
+// https://www.72technologies.com/blog/motion-budget-ui-animation-ratios, whose own examples give
+// exit:entrance ratios of 50%-75%. No single published number to adopt (the range disagrees with
+// itself); 0.6 sits inside it. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
 export const FAST_RATIO = 0.6;
 export const SUGGESTED_EASE = 'rush'; // the engine's own name for "accelerate away" (core/motion/motion.js)
 
@@ -244,7 +248,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // its own few seconds while cameraAt held the last pose everywhere else (recipes/expand.mjs appends
   // recipe legs to hand legs; it does not chain them). `camKfs.length` under 2 means no camera array
   // was ever baked, so a camera-less film says nothing here. FULL_FRAME/40%/6s are read off the one
-  // measured regression (vawe-flow-2: 4.2s of legs over 13.3s), not tuned further.
+  // measured regression (vawe-flow-2: 4.2s of legs over 13.3s), not tuned further. No published
+  // cinematography source sets a camera-coverage percentage in these units; camera dramaturgy has no
+  // numeric literature (engine-doctrine/RESEARCH/TIMING-SOURCES.md part 4/6). This whole file is
+  // REPORT ONLY (see the header), so the missing citation is recorded, not used to soften anything.
   const CAMERA_COVERAGE_FLOOR = 0.4, CAMERA_COVERAGE_MIN_DURATION = 6;
   // CAMERA-RUNS-OUT: a STATION-based leg (travel, and anything else that keys a finite path) holds its
   // last pose once its own keyframes end (cameraAt, core/timeline/sequence.js: "holds the last frame
@@ -253,6 +260,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // below catches a LOW-RATIO film; it would not have caught vawe-flow-2, whose legs still covered
   // most of the runtime, just not the TAIL. This catches the tail specifically: nothing moves the
   // camera again before the film ends. 3s is a beat-scale floor, not tuned further than that read.
+  // No external source: camera dramaturgy has no published thresholds (see the note above).
   const CAMERA_TRAILING_FREEZE = 3;
   let cameraCoverageFloor = null, cameraRunsOut = null;
   if (T.scene.camera && Array.isArray(T.scene.camera) && T.scene.camera.length > 1 && T.duration > CAMERA_COVERAGE_MIN_DURATION) {

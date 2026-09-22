@@ -162,6 +162,11 @@ for (const b of beats) {
 // ---- 9. typing-cutoff: a typed line must finish AND hold a beat before the layer exits, or the cut
 //        lands mid-type. type-time = chars / cps (typing:true = 24/s); it must fit inside `duration`
 //        with a ~0.4s hold. The engine types halfway and cuts in silence otherwise (engine-doctrine/MISTAKES.md).
+// MIN_TYPE_HOLD: Netflix's Timed Text Style Guide sets 0.833s (20 frames@24fps, read-check.mjs's cited
+// MIN_LIFE) as the floor for one readable text EVENT to register; ours is roughly half that. Not
+// aligned, on purpose: a typed line's post-type hold asks the eye to register the line is DONE, not to
+// read it again from nothing the way a fresh subtitle event does, so the two floors answer related but
+// different questions. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 3/6.
 const MIN_TYPE_HOLD = 0.4;
 for (const l of layers) {
   if (!l.typing || l.type !== 'text') continue;
@@ -251,6 +256,9 @@ for (const l of layers) {
 // this whole cluster answers: type without a push reads as a static caption, not a live terminal. Fires
 // when the camera is neither scaled in (s >= 1.15, an arbitrary but named "clearly pushed in" floor)
 // NOR moving toward the line during the typing window (start -> when the caret reaches the end).
+// No published source sets a camera push scale or pan-pixel floor (camera dramaturgy has no numeric
+// literature: engine-doctrine/RESEARCH/TIMING-SOURCES.md part 4/6). This already reports as a WARN, not
+// a FAIL (see below), so the missing citation is recorded here rather than used to change severity.
 const CAMERA_PUSH_S = 1.15, CAMERA_MOVE_PX = 4;
 if (Array.isArray(d.camera) && d.camera.length) {
   for (const l of layers) {
