@@ -18,6 +18,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../harness/author/storyboard-parse.mjs';
+import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { parseFragmentSpec } from '../../harness/lib/contract.mjs';
 import { population, LIBRARY } from '../../harness/lib/census.mjs';
 import { route } from '../../harness/author/route.mjs';
@@ -122,13 +123,26 @@ export function stageOf(arg) {
   // must still read as pre-assemble here, or every later stage check built on `layers > 0` fires early.
   const layers = (scene && Array.isArray(scene.layers) ? scene.layers : []).filter((l) => !(l && l._scaffold)).length;
 
+  // THE PLAN JUDGE MAY BE REQUIRED TO HAVE RUN, NEVER TO HAVE PASSED. `exists && !stale` is "the eye
+  // looked at THIS version of the storyboard"; it says nothing about what it found, because findings
+  // never gate a stage (harness/lib/receipt.mjs's hash already refuses a stale read on its own: a
+  // receipt whose subject moved reads `stale: true`, never a false PASS over an outdated plan).
+  const planJudge = sbExists ? readReceipt('plan-judge', p.sb) : { exists: false, stale: false };
+  const planJudgeRan = planJudge.exists && !planJudge.stale;
+  const structurallyOk = sbExists && gatePasses('quality/gates/storyboard-check.mjs', p.sb);
+
   const S = [
     { id: 'brief', done: fs.existsSync(p.brief) || sbExists,
       why: 'nobody has asked what this film is about. A brief is five lines and any of them missing changes the film.',
       next: `make quiz NAME=${p.name} URL=<the product site>   (no site? engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md, and write ${path.relative(ROOT, p.brief)} by hand)` },
-    { id: 'plan', done: sbExists && gatePasses('quality/gates/storyboard-check.mjs', p.sb),
-      why: sbExists ? 'the storyboard exists and does not pass its own gate yet.' : 'there is no storyboard. Every role that writes into the film transcribes it, so a gap here becomes an invention further down.',
-      next: sbExists ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}` : `make scaffold OUT=${p.base}.json THEME=<theme> DUR=<seconds>   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, engine-doctrine/CRAFT/IDEATE.md)` },
+    { id: 'plan', done: structurallyOk && planJudgeRan,
+      why: !sbExists ? 'there is no storyboard. Every role that writes into the film transcribes it, so a gap here becomes an invention further down.'
+        : !structurallyOk ? 'the storyboard exists and does not pass its own gate yet.'
+        : planJudge.exists && planJudge.stale ? `the plan judge's last verdict is stale: ${path.relative(ROOT, p.sb)} changed since it ran.`
+        : 'the storyboard passes its own gate, but nothing has judged it as a PLAN yet: one through-line, beats that earn their seconds, a spectacle that is actually loudest, an eye path that holds, motion that varies. An exit code cannot answer any of those.',
+      next: !sbExists ? `make scaffold OUT=${p.base}.json THEME=<theme> DUR=<seconds>   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, engine-doctrine/CRAFT/IDEATE.md)`
+        : !structurallyOk ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}`
+        : `make plan-judge D=${p.base}.json   (findings only; the owner still signs off at approval)` },
     { id: 'design', done: sbExists && missingFrags.length === 0 && gatePasses('quality/gates/frame-check.mjs', p.scene),
       why: missingFrags.length
         ? `${missingFrags.length} fragment(s) the plan names do not exist yet: ${missingFrags.join(', ')}`
