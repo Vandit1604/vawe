@@ -146,6 +146,7 @@ Refuses by name, rather than rendering a blank sheet, when the theme has no `loo
 
 ## Where a theme's `look` lives today
 
+<!-- site-counts-allow: "Three themes" is how many carry a `look`, not the size of the theme registry -->
 Three themes carry one: `themes/vawe.json` (the real brand, derived from `site/app/globals.css`),
 `themes/together-chat.json` and `themes/vawe-film.json`. `themes/default.json` and
 `themes/linear.json`/`themes/stripe.json` do not; a theme with no `look` is not an error, it is a theme
