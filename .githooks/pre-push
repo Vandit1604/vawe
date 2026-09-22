@@ -101,8 +101,8 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
   fi
 done
 
-echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check) …"
-if ! make schema-check lib-test craft-coverage coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung sfx-check audit-test glyphs-audit sim-audit docker-context judge-census inert-check; then
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + provenance + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check) …"
+if ! make schema-check lib-test craft-coverage coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung provenance sfx-check audit-test glyphs-audit sim-audit docker-context judge-census inert-check; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi
