@@ -153,6 +153,9 @@ for (const k of ['audience', 'arc', 'format', 'duration']) if (!field(k)) warn('
 const filmType = classifyType(src, path.basename(f));
 const holdMaxS = thresholdFor(filmType);
 
+// No external source (Cinemetrics/ASL literature does not map: whole-film average shot length answers
+// a different question than "below what runtime is a named holding device required").
+// engine-doctrine/RESEARCH/TIMING-SOURCES.md part 3/6.
 const SPINE_MAX_S = 15;
 const durRaw = field('duration');
 const durSec = parseDur(durRaw);

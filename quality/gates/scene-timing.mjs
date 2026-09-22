@@ -454,6 +454,9 @@ export function sceneTiming(input) {
   // contract.mjs's `cameraStillHeldWarnings`: it reads the BAKED camera (`d.camera`, already resolved
   // from every `cameraMove`/recipe leg) rather than re-parsing the plan, so it catches whatever actually
   // reached the JSON, including a hand-authored `camera[]` array the plan-side gate never sees.
+  // Unlike contract.mjs's FULL_FRAME_OBJECT_AREA (a fixed px^2 provably derived from the five canvas
+  // sizes), this is a SHARE with no equivalent derivation: 80% is asserted, not computed from the
+  // aspect ratios. No external source. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
   const FULL_FRAME_SHARE = 0.8;
   const REST_S_EPS = 0.02, REST_PX_EPS = 1, REST_DEG_EPS = 1;
   const restCam = (c) => !c || (Math.abs(c.s - 1) < REST_S_EPS && Math.abs(c.x) < REST_PX_EPS && Math.abs(c.y) < REST_PX_EPS
@@ -480,6 +483,8 @@ export function sceneTiming(input) {
   // not an imported UI number; it is this film's own declared handoffs, which land at 0s gap by
   // construction (a flow-seam boundary IS the shared instant), widened to half a motion-floor window
   // (0.25s) so an entrance a few frames early or late still counts as the same handoff, not a miss.
+  // DERIVED, not invented: half of motion-floor.mjs's own WINDOW_S (0.5s), which IS cited (see
+  // THRESHOLD-PROVENANCE-AUDIT.md's 7-cited list). engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
   const HANDOFF_WINDOW = 0.25;
   const rectOf = (L) => {
     const b = boxOf(L);
