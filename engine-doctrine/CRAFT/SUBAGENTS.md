@@ -257,6 +257,7 @@ there is one owner of the text, not a copy in every brief).
 - Never write an `approved:` line, and never drop one that is already there, because only the user's own signature counts as approval.
 - Start any server on your own port, and stop it by PID, because stopping by name kills whatever else is listening on that name, including another session's.
 - Work inside a render budget stated in the brief, and when it runs out, stop and report rather than rendering again, because renders are the most expensive step and a budget only holds if it is obeyed.
+- Run `make ship`/`make dev` and every other long command in the foreground and wait for it yourself; never end your turn saying you are waiting for one to finish, because nothing wakes a stalled agent and the task then sits untouched until a human notices.
 - Scene JSON is gitignored, so any film work that edits it runs in the lead's checkout, never a worktree, because a worktree cannot carry the edit home through a merge.
 <!-- worktree-contract:end -->
 
