@@ -24,12 +24,15 @@ read as amateur when every layer renders fine?"*
 Every rule is tagged:
 - **`[gated]`**: a gate catches it mechanically (named in the rule). Run `make author-check D=<file>`.
 - **`[eye]`**: no static gate can see it; only `make judge` + your own eye. If your eye catches it,
-  it is a FIX, never a rationalization ([`../JUDGE.md`](../JUDGE.md), [`../MISTAKES.md`](../MISTAKES.md) #15).
+  it is a FIX, never a rationalization ([`../JUDGE.md`](../JUDGE.md)).
 
-> This is the **Motion** and **Story-spine** doctrine from [`../TASTE.md`](../TASTE.md). The mechanics of
-> *which curve / which cut* live in [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md); the copy-paste JSON in
-> [`../MOTION-SNIPPETS.md`](../MOTION-SNIPPETS.md); the feeling layer in [`TASTE-RULES.md`](TASTE-RULES.md).
-> This file is *why*: the principles those apply.
+> This is the **Motion** and **Story-spine** doctrine from [`../TASTE.md`](../TASTE.md), and it is the
+> *why*. The mechanics of *which curve / which cut* live in [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md),
+> the copy-paste JSON in [`../MOTION-SNIPPETS.md`](../MOTION-SNIPPETS.md), and the accusing version of
+> §1 and §2 in [`TASTE-RULES.md`](TASTE-RULES.md) § "Guardrails", which forbids by name the defaults an
+> author here reaches for: one ease everywhere, one duration everywhere, one entrance direction
+> everywhere, everything starting at t=0, entrances slower than exits. Read the guardrails first; read
+> this when you need to know why they are the guardrails.
 
 > **The fastest way to obey all of this: compose from [`recipes/`](../../recipes/README.md)**,
 > directed motion measured off a real film, so you start from directed motion instead of a blank
@@ -37,14 +40,6 @@ Every rule is tagged:
 > undirected; the **ambition floor** (`make direction-floor`) is the floor, too plain, a slideshow, and
 > its hardest checks (`no-continuous-object` among them) block on every `make author-check` run, not only
 > under `TASTE=1`. A directed video sits between them.
-
----
-
-> **The accusing version of §1 and §2 lives in [`TASTE-RULES.md`](TASTE-RULES.md) § "Guardrails".** It
-> names the exact defaults an author here reaches for (one ease everywhere, one duration everywhere, one
-> entrance direction everywhere, everything starting at t=0, entrances slower than exits) and forbids each
-> one, borrowed close to verbatim from the reference system. This file is the reasoning under those
-> guardrails. Read the guardrails first; read this when you need to know why.
 
 ## 1. First principles of motion (Disney's 12, only the ones type/graphics obey)
 
