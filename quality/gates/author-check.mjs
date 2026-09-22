@@ -69,7 +69,7 @@ import { spawnSync } from 'node:child_process';
 import { codeDocMap, docMap } from './doc-map.mjs';
 import { readFindings } from '../../harness/lib/findings.mjs';
 import { LIBRARY } from '../../harness/lib/census.mjs';
-import { isWaivedBy, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
+import { isWaivedBy, bareWaiverCoverage, hasReason } from '../../harness/lib/waivers.mjs';
 import { knownFilms } from './direction-floor-corpus.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -268,7 +268,7 @@ const allowRaw = (scene.authoring && Array.isArray(scene.authoring.allow)) ? sce
 // scoped waiver ("dead-air@beat:3") needs its own reason under that exact key, not under the bare code.
 {
   const why = (scene.authoring && (scene.authoring._why || scene.authoring.why || scene.authoring.reason)) || {};
-  const bareNoReason = allowRaw.filter((k) => !(typeof why[k] === 'string' && why[k].trim().length >= 12));
+  const bareNoReason = allowRaw.filter((k) => !hasReason(why, k));
   if (bareNoReason.length) {
     console.error(`\n✗ author-check · ${bareNoReason.length} waiver(s) with no stated reason: ${bareNoReason.join(', ')}`);
     console.error('  A waiver is a decision, a rule broken for cause or a chosen absence declared, and either one has a cause someone can read.');

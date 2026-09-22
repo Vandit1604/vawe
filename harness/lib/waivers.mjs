@@ -34,6 +34,19 @@ export function isWaivedBy(allow, code, at) {
   return (allow || []).some((e) => waiverCovers(e, code, at));
 }
 
+// THE ONE BAR FOR "HAS A REASON". AGENTS.md: "a waiver with no `_why` blocks." author-check.mjs enforces
+// this on the one film it is given; waiver-drift.mjs is the only thing that ever looks at the WHOLE
+// library, and used to check `_why` with its own ad hoc console-only logic that skipped a waiver
+// entirely once it was unique to one film (see waiver-drift.mjs's per-scene loop). Two places testing
+// "is this a real reason" is how they drift apart; this is the one predicate both call now.
+export const MIN_REASON_LEN = 12;
+
+/** Does `why[entry]` (the `authoring._why` map, keyed by the raw allow entry) hold a real reason? */
+export function hasReason(why, entry) {
+  const v = why && why[entry];
+  return typeof v === 'string' && v.trim().length >= MIN_REASON_LEN;
+}
+
 /**
  * Group `allow` into the two shapes reporting needs: which codes are waived BARE (film-wide, whatever
  * instance fires), and which codes carry one or more specific instances only.
