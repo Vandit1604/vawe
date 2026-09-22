@@ -1,7 +1,7 @@
 // harness/lib/plan-judge-codes.mjs: the closed set of finding codes the plan judge may use.
 //
 // Same shape as harness/lib/judge-codes.mjs (the vision judge's own closed set), one owner per fact:
-// the five questions are named in prose in harness/author/critics.mjs's buildPlanJudgeBrief, this is
+// the six questions are named in prose in harness/author/critics.mjs's buildPlanJudgeBrief, this is
 // where they exist as data a recorded verdict is checked against. An unknown code is refused rather
 // than silently minting a new category, same reasoning judge-codes.mjs gives for its own seven.
 export const PLAN_JUDGE_CODES = Object.freeze([
@@ -10,6 +10,7 @@ export const PLAN_JUDGE_CODES = Object.freeze([
   'spectacle',
   'eye-path',
   'motion-variety',
+  'field-craft',
 ]);
 
 const CODE_SET = new Set(PLAN_JUDGE_CODES);
@@ -31,9 +32,9 @@ export function assertPlanJudgeCode(code) {
 // six reasons to cut, in HIS descending order: emotion (51%), story (23%), rhythm (10%), eye-trace
 // (7%), the two-dimensional plane of the screen (5%), three-dimensional space/continuity (4%).
 //
-// The five plan-judge codes are not Murch's six names, they are this repo's own five questions
-// (harness/author/critics.mjs's buildPlanJudgeBrief), so each one is placed at the Murch category its
-// question actually asks, not matched by string:
+// The five original plan-judge codes are not Murch's six names, they are this repo's own five
+// questions (harness/author/critics.mjs's buildPlanJudgeBrief), so each one is placed at the Murch
+// category its question actually asks, not matched by string:
 //   spectacle       -> emotion:   "is the nominated SPECTACLE the loudest moment" IS the emotional peak
 //   through-line     -> story:     "is there ONE through-line" is Murch's story question by name
 //   beat-pacing      -> rhythm:    "does every beat earn its seconds" is a cutting-rhythm question
@@ -44,12 +45,21 @@ export function assertPlanJudgeCode(code) {
 //                       ranks and sits last.
 // Five codes over six categories is a lossy fit, not a hidden sixth number: nothing here adds a
 // percentage back in (see the ratchet note below), only an ORDER.
+//
+// field-craft is the sixth code and sits OUTSIDE Murch's six on purpose: Murch's list ranks reasons
+// to CUT, one shot against the next; field-craft asks whether a single craft line is checkable against
+// a picture at all ("one eyedropped violet/magenta haze" names a hex, not a treatment). That is a
+// precondition on the other five, not a rival cutting reason, so it does not compete for one of
+// Murch's ranks. It is placed LAST by convention, after the lowest Murch rank: a plan that fails it is
+// wrong about what the reference shows, which is worth flagging, but the ranking above still orders
+// findings by what an editor would fix first once the plan is grounded in the right picture.
 export const PLAN_JUDGE_PRIORITY = Object.freeze([
   'spectacle',
   'through-line',
   'beat-pacing',
   'eye-path',
   'motion-variety',
+  'field-craft',
 ]);
 
 const PRIORITY_INDEX = new Map(PLAN_JUDGE_PRIORITY.map((code, i) => [code, i]));
