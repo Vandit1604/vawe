@@ -93,7 +93,7 @@ Claude Code loads `vawe-video-planning`; others read `engine-doctrine/CRAFT/AUTH
 - **HTML first**, no CSS `animation`/`transition`/`opacity`/`filter`: use `parts` for a seeked entrance. [`HTML-FRAGMENTS.md`](engine-doctrine/CRAFT/HTML-FRAGMENTS.md).
 - **Name the effect before you build it**, don't approximate by eye. Claude Code loads `vawe-name-the-effect`; others read that skill under `skills/`.
 - **Show, don't only tell.** [`SHOW-DONT-TELL.md`](engine-doctrine/CRAFT/SHOW-DONT-TELL.md). **Empty space is a decision.** [`LAYOUT.md`](engine-doctrine/CRAFT/LAYOUT.md).
-- **Real assets first, emoji last**: `make capture`/`make assets` (never a bare `curl`); never embed copyrighted material. [`IMAGERY.md`](engine-doctrine/CRAFT/IMAGERY.md).
+- **Real assets first, emoji last**: `make capture`/`make assets` (never a bare `curl`); never embed copyrighted material. [`IMAGERY.md`](engine-doctrine/CRAFT/IMAGERY.md). **Enforced, not just stated**: `make storyboard-check` blocks a beat that names a screen or a photo with no real source, the same precondition `/vawe-approve` already runs.
 - **Content is measured against the reference, per act**, never a fixed bar. [`CONTENT.md`](engine-doctrine/CRAFT/CONTENT.md).
 - **Launch videos:** crawl EVERY page, real logo size, pair entrances with exits directionally. [`HTML-FRAGMENTS.md`](engine-doctrine/CRAFT/HTML-FRAGMENTS.md).
 

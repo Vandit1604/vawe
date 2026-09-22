@@ -57,8 +57,15 @@ against a global bar: a busy number is not automatically good, and a quiet act i
 defect. `make ideate --annotate <ref>` writes this per act into the reference's own film prompt
 (`grammar/<ref>.prompt.md`) in words, e.g. `content: dense real material, fills about a third of the
 frame, photographic (fill 0.34, detail 12.2, photo 0.28)` or `content: quiet, type on ground only`.
-`storyboard-check` warns `plain-content` on a beat that names a screen/window/app/UI/dashboard/grid/
-card/product/photo with no real source stated for it.
+`storyboard-check` BLOCKS on `plain-content` when a beat names a screen/window/app/UI/dashboard/grid/
+card/product/photo with no real source stated for it (no `fragment:` file on disk, no `assets/` or
+`.vawe-data/uploads/` path, no `make capture`/`sections`/`screen`/`assets`/`photos`/`gen-image`/
+`gen-video`/`gen-clip` mention). `harness/author/approve.mjs` runs this gate as the one precondition
+for a user's sign-off, so a plan cannot reach approval naming a screen or a photo it has no real
+source for. A film that names no content noun at all never trips this: a chart-only explainer, a
+sting, a pure type film pass untouched. A chosen absence (a beat that draws a screen ON PURPOSE with
+no real capture behind it) is a waiver, the one mechanism: `{"authoring":{"allow":
+["plain-content@<beat title>"],"_why":{"plain-content@<beat title>":"…"}}}`.
 
 ## R1: theme source (owner ruling)
 
