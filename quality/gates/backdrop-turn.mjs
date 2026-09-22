@@ -31,7 +31,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadScene } from '../../core/engine/expand.js';
-import { population, SCENE_DIR } from '../../harness/lib/census.mjs';
+import { population, SCENE_DIR, AUTHORED } from '../../harness/lib/census.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -79,7 +79,18 @@ function main() {
     if (fired === true) process.exitCode = 1;
     return;
   }
-  const pop = population('backdrop-turn · corpus', { dir: SCENE_DIR, quiet: true });
+  // AUTHORED, not every .json on disk. This census ran unfiltered once and reported "142 of 181
+  // films never turn". films/scene holds 197 .json files and 42 of them are planned films: the rest
+  // are catalogue tiles (`_catalog-1` through `_catalog-26`, one frozen frame per block), probes,
+  // skill fixtures, plain twins, and sidecars that are not scenes at all (`*.intent.json`,
+  // `*.cuts.json`, `hinge.vo.words.json`, `schema.json`, all of which the unfiltered run graded and
+  // filed as "no bg[], not gradeable"). A catalogue tile is one held frame; its backdrop was never
+  // going to turn, and harness/lib/census.mjs's own header calls grading one of those for motion
+  // grading a paint chip for plot. Filtered, the real answer is 24 turn and 18 do not.
+  //
+  // This filter changes the CENSUS only. Blocking is per film, through author-check's LADDER, and
+  // grades whatever film it is pointed at.
+  const pop = population('backdrop-turn · corpus', { dir: SCENE_DIR, filter: AUTHORED, quiet: true });
   let fired = 0, graded = 0, ungraded = 0, unreadable = 0;
   for (const name of pop.names) {
     const rel = path.join(SCENE_DIR, name);
