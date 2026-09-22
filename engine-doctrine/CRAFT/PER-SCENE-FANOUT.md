@@ -64,9 +64,10 @@ and the built film would ignore it. `x`, `y`, `w`, `h`, `rot` and `opacity` are 
 `layers[].motion[]` can already key (`films/scene/schema.json`), so `make assemble` now writes
 `w`/`h`/`rot`/`opacity` keys whenever the chain actually uses one (a film that states no pose beyond
 placement builds the identical track it always did). A pose mismatch at a handoff is a chain error
-exactly like a placement mismatch, named on both sides. What this cannot do: a shape morph (rectangle
-to pill to circle) needs a keyable corner radius the engine does not expose to `motion[]` yet, so reach
-for `morph` or `becomes` directly on a layer for that.
+exactly like a placement mismatch, named on both sides. A shape morph (rectangle to pill to circle) now
+also keys through `motion[]`: `object_in`/`object_out` take a trailing `/radius:<px>` field alongside
+`/rot:` and `/op:` (`harness/lib/contract.mjs`, `harness/author/assemble.mjs`), so reach for `morph` or
+`becomes` only when the morph is not a simple radius sweep.
 
 ## The motion plan: what else moves
 
