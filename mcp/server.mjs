@@ -289,7 +289,7 @@ function listFilms() {
 
 server.registerTool('vawe_next', {
   title: 'What stage this film is in, and the one next step',
-  description: 'The authoring ladder has eight stages (brief, plan, approval, design, assemble, '
+  description: 'The authoring ladder has eight stages (brief, plan, design, approval, assemble, '
     + 'direct, render, judge) and this is the only question an agent outside the repo could not ask '
     + 'before: where is this film, and what is the ONE next command. Pass a film name (same as you\'d '
     + 'give `make stage D=`) or omit it to list films on disk and whether each has shipped. Approval '

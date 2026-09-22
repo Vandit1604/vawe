@@ -40,7 +40,7 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 
 // Same order stageOf() builds S in. A second copy, not a derived one, because ranking the roster needs
 // the order BEFORE any single film's stageOf() has run.
-export const STAGE_ORDER = ['brief', 'plan', 'approval', 'design', 'assemble', 'direct', 'render', 'judge'];
+export const STAGE_ORDER = ['brief', 'plan', 'design', 'approval', 'assemble', 'direct', 'render', 'judge'];
 
 /** Every path a film owns, resolved the same way author-check and studio resolve them. */
 export function filePaths(arg) {
@@ -124,14 +124,14 @@ export function stageOf(arg) {
     { id: 'plan', done: sbExists && gatePasses('quality/gates/storyboard-check.mjs', p.sb),
       why: sbExists ? 'the storyboard exists and does not pass its own gate yet.' : 'there is no storyboard. Every role that writes into the film transcribes it, so a gap here becomes an invention further down.',
       next: sbExists ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}` : `make scaffold OUT=${p.base}.json THEME=<theme> DUR=<seconds>   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, engine-doctrine/CRAFT/IDEATE.md)` },
-    { id: 'approval', done: !!approved,
-      why: 'the plan passes and nobody has signed it off. Nothing is rendered until the plan is LOCKED and the user signs off.',
-      next: `make studio D=${p.base}.json, then share http://127.0.0.1:8799/studio (it opens on the plan) so anyone can see it, then the USER runs /vawe-approve ${p.name}` },
     { id: 'design', done: sbExists && missingFrags.length === 0 && gatePasses('quality/gates/frame-check.mjs', p.scene),
       why: missingFrags.length
         ? `${missingFrags.length} fragment(s) the plan names do not exist yet: ${missingFrags.join(', ')}`
         : 'the fragments exist and do not match what their beats planned: run frame-check and read it.',
       next: missingFrags.length ? `node harness/author/stagekit.mjs ${p.base}.json, then author each fragment: stage kit → the reference's grammar → the smallest useful ui-skills set (command npx -y ui-skills categories) → make preview HTML=<frag> THEME=<theme> → look at it` : `make frame-check D=${p.base}.json` },
+    { id: 'approval', done: !!approved,
+      why: 'the frames pass and nobody has signed the plan off. Nothing is rendered until the plan is LOCKED and the user signs off.',
+      next: `make studio D=${p.base}.json, then share http://127.0.0.1:8799/studio (it opens on the plan, drawn from the real frames) so anyone can see it, then the USER runs /vawe-approve ${p.name}` },
     { id: 'assemble', done: layers > 0,
       why: 'the frames are approved and the scene JSON has no layers, so there is no film yet.',
       next: `make assemble D=${p.base}.json` },
