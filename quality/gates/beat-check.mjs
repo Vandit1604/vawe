@@ -89,7 +89,17 @@ const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.auth
 // SCENE UNITS extend a layer's life, so the gate has to model them or it reads holes that are not there
 // (and misses ones that are). That model is shared with plan-vs-render and lives in ONE place:
 // quality/gates/scene-timing.mjs. What it corrects for, and why, is documented there.
+// DEAD_AIR: read-check.mjs's cited GAP_MIN (0.5s, Netflix Timed Text Style Guide's flicker-vs-pause
+// line) answers a close but different question ("when does a GAP between two text events stop reading
+// as one continuous line") than this one ("when does a hole with NO content layer at all stop reading
+// as a breath"). Measured before raising DEAD_AIR to GAP_MIN: every dead-air finding in the whole
+// library sits between 0.4s and 0.5s, so aligning the two numbers would silence this check entirely
+// (17 real findings to 0). Kept at 0.4s, uncited, rather than adopt a number that guts a working
+// detector on a library-wide measurement. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
 const DEAD_AIR = 0.4;   // seconds of nothing that stops reading as a breath
+// TAIL: no external source answers "how much of the closing frame must carry content" (Netflix's
+// nearest number, GAP_JOIN, asks a different question, a minimum GAP length, not minimum CONTENT
+// presence). engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6. Downgraded to report-only below.
 const TAIL = 0.2;       // the closing plate: it must hold something
 const T = sceneTiming(d);
 const { layers, content, spans, contentSpans, duration, sceneUnits } = T;
