@@ -22,5 +22,17 @@ for (const [command, shouldBlock, why] of cases) {
   if (!ok) bad++;
   console.log(`${ok ? 'ok  ' : 'FAIL'}  ${blocked ? 'block' : 'allow'}  ${why}`);
 }
-console.log(bad === 0 ? `\nall ${cases.length} cases correct` : `\n${bad} of ${cases.length} WRONG`);
+
+// This hook exists to refuse four commands; a payload it cannot parse might be hiding one of them, so
+// it must block rather than wave the call through. Same reasoning as stage-gate.mjs's own case.
+{
+  const r = spawnSync('node', [HOOK], { input: 'not json', encoding: 'utf8' });
+  const blocked = r.status === 2 && /could not parse/.test(r.stderr);
+  const ok = blocked;
+  if (!ok) bad++;
+  console.log(`${ok ? 'ok  ' : 'FAIL'}  block  malformed stdin must deny, not permit`);
+}
+
+const total = cases.length + 1;
+console.log(bad === 0 ? `\nall ${total} cases correct` : `\n${bad} of ${total} WRONG`);
 process.exit(bad === 0 ? 0 : 1);
