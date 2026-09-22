@@ -63,7 +63,7 @@ the part you skip.
   backwards constantly.** *"Ease-in for entrances feels sluggish. Ease-out for exits feels reluctant."*
 - **Entrances take longer than exits.** *"A card takes 0.4s to appear but 0.25s to disappear."* The engine
   has a field for exactly this: `theme.motion.exitRatio`. A theme without its own value now gets one
-  derived from its pace (`exitRatioFromMotion`, `core/motion/motion.js`) rather than a flat 1; 14 of 34
+  derived from its pace (`exitRatioFromMotion`, `core/motion/motion.js`) rather than a flat 1; 13 of 31
   themes still hand-author their own number, from 0.35 to 0.6 ([KEYED-MOTION.md](KEYED-MOTION.md)).
 - **Subtle reads as static at 30fps.** *"Err toward more movement than feels safe."* Measured here: two
   films authored as improvements on a third both came out SLOWER than the film they criticised, at 0.95
