@@ -1,29 +1,26 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
-import { Clip } from "../components/Clip";
-import { SourceViewer } from "../components/SourceViewer";
 import { pageMetadata } from "../components/seo";
-import films from "../../lib/films.json";
-import LINES from "../../lib/scene-lines.json";
 import "../components/intent.css";
-
-const lineCount = (name: string) => (LINES as Record<string, number>)[name] ?? 0;
-const durOf = (slug: string) => (films as Record<string, { label: string }>)[slug]?.label ?? "";
 
 export const metadata = pageMetadata({
   title: "Vawe · launch video",
   description:
-    "How Vawe builds a product launch video: real captured UI, not invented mockups, on the six-beat spine the engine's own doctrine defines. Three rendered films, each one an open JSON file.",
+    "How Vawe builds a product launch video: real captured UI, not invented mockups, on the six-beat spine the engine's own doctrine defines.",
   path: "/launch-video",
 });
 
 /* /launch-video · fourth intent page, and the first of three use-case pages built from
  * engine-doctrine/CRAFT/ROUTING.md's route table rather than a feature or a question. Someone
  * searching "product launch video" or "SaaS launch video" is naming a JOB, not this engine's
- * vocabulary, so the page answers in that wording and proves it with the same three films
- * /showcase already ships: argus-launch and threadcite-open (real products, not templates per
- * that page's own FILMS array) and saas-hero-launch (a template, marked as one there too). Every
- * claim below cites the file that makes it true; nothing here is a number this page invented.
+ * vocabulary, so the page answers in that wording.
+ *
+ * IT USED TO PROVE EACH CLAIM WITH A NAMED FILM: argus-launch, threadcite-open, saas-hero-launch,
+ * vawe-launch, each with its own clip and a citation into that film's storyboard or lock sheet.
+ * None of those films could be re-rendered from source, so they came down site-wide, and the
+ * per-film sections went with them rather than narrate a clip that is no longer there. This page
+ * now states the doctrine only and points to /showcase for the honest word on what is rendered
+ * today. New baseline films earn their sections back here once they exist.
  */
 
 export default function LaunchVideo() {
@@ -56,15 +53,6 @@ export default function LaunchVideo() {
               </p>
               <span className="cite">engine-doctrine/CRAFT/ROUTING.md, priority row 2</span>
             </div>
-            <div className="isec-art">
-              <div className="fmedia">
-                <Clip src="/assets/films/argus-launch.mp4" poster="/assets/films/argus-launch.jpg" />
-              </div>
-              <span className="cite">
-                argus-launch · {durOf("argus-launch")} · a real product, not a template
-              </span>
-              <SourceViewer name="argus-launch" lines={lineCount("argus-launch")} />
-            </div>
           </section>
 
           <section className="isec">
@@ -78,66 +66,17 @@ export default function LaunchVideo() {
               </p>
               <span className="cite">skills/vawe-type-launch/SKILL.md</span>
             </div>
-            <div className="isec-art">
-              <div className="fmedia">
-                <Clip
-                  src="/assets/films/threadcite-open.mp4"
-                  poster="/assets/films/threadcite-open.jpg"
-                />
-              </div>
-              <span className="cite">
-                threadcite-open · {durOf("threadcite-open")} · a real product, not a template
-              </span>
-              <SourceViewer name="threadcite-open" lines={lineCount("threadcite-open")} />
-            </div>
           </section>
 
           <section className="isec">
-            <div className="isec-text">
-              <h2>A film built to be refilled.</h2>
+            <div className="isec-text" style={{ gridColumn: "1 / -1", maxWidth: "70ch" }}>
+              <h2>No rendered example here right now.</h2>
               <p>
-                <code>saas-hero-launch</code> ships as one of the site&apos;s two launch templates:
-                the same cut, the same camera, the same beat timing, with the copy, the theme and
-                the logo left open to swap. Its own storyboard names the frame it follows: hook,
-                proof, demo, reverse, number, capability, CTA, built on the FAB structure (feature,
-                advantage, benefit) because a launch film for a product with no real pain to agitate
-                has a claim, a demonstration and a number instead.
+                This page proved the spine above against named films: a real product, a fillable
+                template, and the engine&apos;s own launch film. None of the three could be
+                re-rendered from its source, so all of them came down rather than sit here stale.{" "}
+                <a href="/showcase">See /showcase</a> for what the engine has rendered today.
               </p>
-              <span className="cite">films/scene/saas-hero-launch.storyboard.md</span>
-            </div>
-            <div className="isec-art">
-              <div className="fmedia">
-                <Clip
-                  src="/assets/films/saas-hero-launch.mp4"
-                  poster="/assets/films/saas-hero-launch.jpg"
-                />
-              </div>
-              <span className="cite">
-                saas-hero-launch · {durOf("saas-hero-launch")} · template
-              </span>
-              <SourceViewer name="saas-hero-launch" lines={lineCount("saas-hero-launch")} />
-            </div>
-          </section>
-
-          <section className="isec">
-            <div className="isec-text">
-              <h2>The continuous object and the hue-turning field.</h2>
-              <p>
-                <code>vawe-launch</code>, the engine&apos;s own launch film for itself, is the
-                clearest real example of two rules this type leans on hardest: one object (a single
-                surface) that persists and changes identity across every cut, and a backdrop that
-                turns tone at each cut rather than holding one still colour. Its lock sheet settles
-                the grammar before a frame exists: the ground alternates cobalt and white across the
-                joins, every cut lands on a beat boundary, and the camera does one push and nothing
-                else, &quot;the film is cut, not flown.&quot;
-              </p>
-              <span className="cite">films/scene/vawe-launch.lock.md</span>
-            </div>
-            <div className="isec-art">
-              <div className="fmedia">
-                <Clip src="/assets/films/vawe-launch.mp4" poster="/assets/films/vawe-launch.jpg" />
-              </div>
-              <span className="cite">vawe-launch · {durOf("vawe-launch")}</span>
             </div>
           </section>
 
