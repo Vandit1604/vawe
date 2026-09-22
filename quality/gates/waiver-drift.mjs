@@ -37,7 +37,7 @@ import { spawnSync } from 'node:child_process';
 import { population, LIBRARY, AUTHORED } from '../../harness/lib/census.mjs';
 import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
 import { codeFiresOn, gateForCode } from '../../harness/lib/code-fires.mjs';
-import { splitWaiver, groupWaivers, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
+import { splitWaiver, groupWaivers, bareWaiverCoverage, hasReason, MIN_REASON_LEN } from '../../harness/lib/waivers.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENES = path.join(ROOT, 'films', 'scene');
@@ -86,13 +86,26 @@ const pop = population('waiver census', { filter: LIBRARY, quiet: true });
 // being repealed, and an instance-scoped waiver ("dead-air@beat:3") is still one film choosing to
 // break that rule, same as a bare one. The instance half matters to author-check (which finding it
 // excuses); it does not change whether the film is on this list.
+// REASONLESS and DUPLICATE, gathered in the same pass. `reasonless` is the library-wide twin of
+// author-check's per-film block (AGENTS.md: "a waiver with no `_why` blocks"): author-check only ever
+// sees the one film it is handed, so a film whose waiver was never re-checked after it was written
+// stays reasonless forever. `reasonText` collects every real reason so a verbatim copy across films
+// (or across codes in the same film) shows up as its own finding, never mistaken for two decisions.
+const reasonless = [];              // [{ film, entry }]
+const reasonText = new Map();       // normalized reason -> [{ film, entry }]
 for (const f of pop.names) {
   let d; try { d = JSON.parse(fs.readFileSync(path.join(SCENES, f), 'utf8')); } catch { continue; }
   total++;
+  const name = path.basename(f, '.json');
+  const why = (d.authoring && (d.authoring._why || d.authoring.why || d.authoring.reason)) || {};
   for (const entry of (d.authoring?.allow || [])) {
     const { code } = splitWaiver(entry);
     if (!tally.has(code)) tally.set(code, []);
-    tally.get(code).push(path.basename(f, '.json'));
+    tally.get(code).push(name);
+    if (!hasReason(why, entry)) { reasonless.push({ film: name, entry }); continue; }
+    const norm = why[entry].trim().toLowerCase();
+    if (!reasonText.has(norm)) reasonText.set(norm, []);
+    reasonText.get(norm).push({ film: name, entry });
   }
 }
 
@@ -166,10 +179,19 @@ if (file) {
       f.warn('dead-waiver', `${entry}: no gate emits this code any more (${RETIRED.get(c)}), delete it from "authoring.allow"`, { at: entry });
       continue;
     }
-    const others = (tally.get(c) || []).filter((n) => n !== name);
-    const pct = Math.round(share(c) * 100);
-    if (!others.length) { console.log(`  ✓ ${entry}${scope}: waived here and nowhere else. That is a decision.`); continue; }
+    // The reason check runs on EVERY waiver, shared or not. It used to sit after the "waived here and
+    // nowhere else" early return below, so a bare waiver unique to one film was praised as "a decision"
+    // even carrying no `_why` at all: exactly the 42% that shipped with no reason despite AGENTS.md's
+    // "a waiver with no `_why` blocks" (author-check.mjs only ever checks the one film it is handed;
+    // this is the only pass that sees the whole library).
     const why = d.authoring?._why?.[entry];
+    if (!hasReason(d.authoring && (d.authoring._why || d.authoring.why || d.authoring.reason), entry)) {
+      console.log(`  ✗ ${entry}${scope}: NO REASON. AGENTS.md: a waiver with no \`_why\` blocks.`);
+      f.warn('waiver-no-reason', `${entry}: no \`_why\` (or under ${MIN_REASON_LEN} chars) on ${name}`, { at: entry });
+    }
+    const others = (tally.get(c) || []).filter((n) => n !== name);
+    if (!others.length) { console.log(`  ✓ ${entry}${scope}: waived here and nowhere else. That is a decision.`); continue; }
+    const pct = Math.round(share(c) * 100);
     const line = `${entry}${scope}: also waived by ${others.length} other film(s) (${pct}% of the library, by code): ${others.slice(0, 6).join(', ')}${others.length > 6 ? ', …' : ''}`;
     if (share(c) >= DRIFT) {
       console.log(`  ~ ${line}`);
@@ -180,7 +202,10 @@ if (file) {
       console.log(`  · ${line}`);
       f.note('waiver-shared', line, { at: entry });
     }
-    if (!why) console.log(`      and it carries no \`_why\`, so the argument for breaking it does not exist.`);
+    if (why && reasonText.has(why.trim().toLowerCase()) && reasonText.get(why.trim().toLowerCase()).length > 1) {
+      console.log(`      and this exact reason is copied verbatim onto another waiver: run the whole-library`);
+      console.log(`      census (no <scene.json> argument) for the full duplicate list.`);
+    }
   }
   // A BARE entry excuses its code film-wide; say how many LIVE findings that hides right now, the same
   // notice author-check.mjs prints mid-ladder, so waiver-drift and the ladder never disagree about it.
@@ -251,6 +276,36 @@ for (const [c, films] of drifted) {
   f.warn('waiver-drift', `${c} is waived by ${films.length} film(s), ${pct}% of the library, and has stopped being a rule`, { at: c });
 }
 
+// ---- REASONLESS, the library-wide half of author-check's own rule ------------------------------
+//
+// AGENTS.md: "a waiver with no `_why` blocks." author-check.mjs enforces that, correctly, on the ONE
+// film it is handed. Nothing else in this repo ever re-checks a waiver once it ships: films/scene/ is
+// gitignored (.gitignore:61), pre-push never touches it, and `make lib-test` is pure unit tests on the
+// motion primitives. So a waiver added without immediately re-running author-check on that film stays
+// reasonless forever, invisible to everything except this census. This is the count that matters.
+if (reasonless.length) {
+  const byFilm = new Map();
+  for (const { film, entry } of reasonless) { if (!byFilm.has(film)) byFilm.set(film, []); byFilm.get(film).push(entry); }
+  console.log(`\n  ✗ REASONLESS: ${reasonless.length} waiver(s) with no \`_why\` (or under ${MIN_REASON_LEN} chars),`
+    + ` in ${byFilm.size} film(s):\n`);
+  for (const [film, entries] of [...byFilm.entries()].sort()) console.log(`      ${film.padEnd(30)} ${entries.join(', ')}`);
+  console.log(`\n  Each is an author's own to write; this only counts them. Re-run author-check on a film to`);
+  console.log(`  block on its own reasonless waivers: node quality/gates/author-check.mjs <scene.json>\n`);
+}
+
+// ---- DUPLICATE REASONS: a reason copied is not a reason for either waiver it sits on -----------
+const duped = [...reasonText.entries()].filter(([, hits]) => hits.length > 1);
+if (duped.length) {
+  console.log(`\n  ✗ DUPLICATE REASONS: ${duped.length} reason(s) copied verbatim across more than one waiver:\n`);
+  for (const [text, hits] of duped) {
+    console.log(`      "${text}"`);
+    for (const { film, entry } of hits) console.log(`        ${film.padEnd(30)} ${entry}`);
+    f.warn('waiver-reason-duplicate', `reason "${text}" copied verbatim onto ${hits.length} waiver(s): `
+      + `${hits.map((h) => `${h.film}:${h.entry}`).join(', ')}`, { at: text });
+  }
+  console.log('');
+}
+
 // ---- THE LEGACY-WAIVER RATCHET (opt-in: --ratchet) --------------------------------------------
 //
 // `quality/gates/legacy-fold.mjs` wrote 562 `"legacy: grandfathered …"` waivers into scenes so the
@@ -288,7 +343,7 @@ if (process.argv.includes('--ratchet')) {
       let d; try { d = JSON.parse(fs.readFileSync(abs, 'utf8')); } catch { continue; }
       if (!codeFiresOn(code, abs, d)) continue;
       const why = d.authoring?._why?.[code];
-      const isRealDecision = typeof why === 'string' && why.trim().length >= 12 && !why.startsWith('legacy:');
+      const isRealDecision = hasReason(d.authoring?._why, code) && !why.startsWith('legacy:');
       if (!isRealDecision) n++; // a real, human `_why` is a decision and does not count as debt
     }
     current[code] = n;
