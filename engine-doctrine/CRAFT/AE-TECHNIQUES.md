@@ -204,17 +204,16 @@ ripple from a centre, and a brush stroke without changing anything but the path 
 settle. Sticky delay 1 second, which is what turns the pass into a drawn trail. Linked corner radius 0
 to 50; linked size 80 at rest.
 
-**ENGINE MAPPING** Absent. `make arsenal Q="stagger a grid of clones with a falloff from a point"`
-returns `chipGrid`, `gridPixelateWipe` and `iris`: a blueprint, a sting, and a cut. None of them is a
-falloff. This is the one entry in this file that is a genuinely new vocabulary, and it should be built
-with `defineRegistry` (`core/registry/vocab.js`) plus the `createKit(ctx)` injection point in
-`core/layers/util.js`, so the falloff reaches every layer builder with no signature change. The dynamics
-half is already solvable: `springEase({response, dampingFraction})` in `core/motion/motion.js` is the overshoot,
-and `sticky` is a per-element hold on the same eased value.
+**ENGINE MAPPING** Shipped. `core/tracks/effector.js` is a track, not a `parts` mode: a `parts` timeline
+is scheduled once at build time, while an effector's per-child transform is a function of the point's
+CURRENT position and has to be computed every frame, so it composes with `parts` (bring the grid in
+pose-to-pose, then wash the effector across it) rather than replacing it. `springEase({response,
+dampingFraction})` (`core/motion/motion.js`) is the overshoot; `sticky` is a per-element hold on the same
+eased value.
 
-**DEFAULT OR OPTION** Option, and a large one. But it is the highest-value item here, because it makes
-"many things react to one thing" authorable at all, and this library's median film gives 6 percent of its
-layers to picture partly because a field of reacting elements is currently hand-written or not written.
+**DEFAULT OR OPTION** Option. It makes "many things react to one thing" authorable, where this library's
+median film gave 6 percent of its layers to picture partly because a field of reacting elements had to
+be hand-written before this shipped.
 
 ---
 
@@ -488,9 +487,9 @@ path (4). That is where the next work is.
 **Four of the twelve are one dial away.** Smoothness on a range selector (5), a rate warp on an idle (2),
 a falloff amount (4), an inherited-rotation flag (12). None needs a new subsystem.
 
-**One is a new vocabulary and it is the effector (4).** Everything else in this file either exists,
-is a look, or is a dial. The effector is the only entry that makes a class of film authorable that is not
-authorable now.
+**The effector (4) shipped since this study**, as `core/tracks/effector.js`. It was the one entry here
+that needed a genuinely new vocabulary rather than a dial or a look; everything else in this file
+already existed in one of those two forms.
 
 ## Provenance
 
