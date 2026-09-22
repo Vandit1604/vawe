@@ -437,6 +437,12 @@ The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-d
   `renderFrame(n)` swaps a preloaded `<img>` src per frame (no `<video>`, no async decode → purity holds).
   `loop` wraps, `speed` scales playback. Generated imagery: `make gen-image Q="…" NAME=<name>` → a normal
   `image` layer. (Generation needs `KIE_API_KEY`; `gen-clip` works on any local mp4 with no key.)
+- `{type:"video", src, in?, out?, rate?, contentStart?, fit?, radius?, audio?}` → real footage,
+  SEEKED to a computed source time every frame and never played, so the picture stays as deterministic
+  as a still (`renderFrame(n)` pure in `n`). `in`/`out` clip the SOURCE, `contentStart` sets when the
+  clip's own zero lands against the scene clock. Reach for it over `clip` when the footage is real
+  captured or licensed video rather than a generated frame sequence, or when the clip's own sound
+  (`audio: true | {gain, duck}`) needs pulling into the mix.
 - `{type:"lottie", src:"/assets/lottie/<name>.json", x, y, w, h, loop?, speed?, fit?}`
   → an **After Effects (Bodymovin) animation played DETERMINISTICALLY**. The runtime (lottie-web SVG,
   MIT, loaded only when a scene uses it) is driven by ABSOLUTE seek, `goToAndStop((t-start)*fr, true)`
