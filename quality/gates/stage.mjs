@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { parseStoryboard, blocksOf, fieldIn, frontmatter } from '../../harness/author/storyboard-parse.mjs';
 import { readReceipt } from '../../harness/lib/receipt.mjs';
 import { parseFragmentSpec } from '../../harness/lib/contract.mjs';
-import { population, LIBRARY } from '../../harness/lib/census.mjs';
+import { population, LIBRARY, isTemplate } from '../../harness/lib/census.mjs';
 import { route } from '../../harness/author/route.mjs';
 import { scratchBase } from '../../harness/lib/scratch.mjs';
 // score/toks/coverageIn/CONFIDENT: the SAME ranker `make arsenal` uses (harness/author/arsenal.mjs),
@@ -188,14 +188,27 @@ export function stageOf(arg) {
  * bad film should not blind the roster to the rest.
  */
 export function roster({ all = false, cap = 12 } = {}) {
-  const pop = population('stage roster', { filter: LIBRARY, quiet: true });
+  const scenePop = population('stage roster (scene)', { filter: LIBRARY, quiet: true });
+  // LIBRARY requires a parseable scene.json, so a film still at brief/plan/design/approval that has
+  // not been SCAFFOLDED yet has no scene.json and is invisible to scenePop alone, which is exactly the
+  // population `make stage` exists to shepherd: a film can sit at approval indefinitely and never
+  // appear in the one command that answers "what is in flight" (measured: latch-recreation, a
+  // storyboard and a prompt, no scene.json, reads APPROVAL by `stageOf` directly but was absent from
+  // `--all` entirely). A `.storyboard.md` sidecar is LIBRARY's own signal a person planned a film
+  // (census.mjs's comment above LIBRARY), so the honest population is the UNION of both walks,
+  // deduplicated by basename so a film that already has both is counted once. Both walks go through
+  // population() so a blind checkout still says so for either kind, never a hand-rolled readdirSync.
+  const sbPop = population('stage roster (storyboard only)', { ext: '.storyboard.md',
+    filter: (f) => f !== 'schema.storyboard.md' && !isTemplate(f), quiet: true });
+  const sceneBases = new Set(scenePop.names.map((f) => f.replace(/\.json$/, '')));
+  const sbOnlyBases = sbPop.names.map((f) => f.replace(/\.storyboard\.md$/, '')).filter((b) => !sceneBases.has(b));
+  const bases = [...scenePop.names.map((f) => f.replace(/\.json$/, '')), ...sbOnlyBases];
   // A LEADING UNDERSCORE IS THIS REPO'S SCRATCH CONVENTION, and 164 of the 176 films in this library
   // are probes: _catalog-1, _camera-blur-probe, _auto-orient. Listing them alphabetically puts every
   // throwaway ahead of every real film, so the front door opened on 176 rows of test scenes. A front
   // door that answers with the whole directory is not an answer. `--all` still prints everything.
-  const names = all ? pop.names : pop.names.filter((f) => !path.basename(f).startsWith('_'));
-  const rows = names.map((f) => {
-    const base = f.replace(/\.json$/, '');
+  const names = all ? bases : bases.filter((f) => !path.basename(f).startsWith('_'));
+  const rows = names.map((base) => {
     try { const st = stageOf(base); return { name: st.name, stage: st.stage, next: st.next, ok: true }; }
     catch (err) { return { name: base, stage: 'error', next: String(err && err.message || err), ok: false }; }
   });
@@ -204,7 +217,8 @@ export function roster({ all = false, cap = 12 } = {}) {
   // Furthest from done first, then capped: the rows that matter are the unfinished ones, and a film
   // already at judge needs no prompting. `total` counts what was found, `rows` is what is worth reading.
   const shown = all ? rows : rows.slice(0, cap);
-  return { n: rows.length, total: pop.names.length, rows: shown, hidden: rows.length - shown.length, worst };
+  return { n: rows.length, total: bases.length, rows: shown, hidden: rows.length - shown.length, worst,
+    sceneCount: scenePop.names.length, storyboardOnlyCount: sbOnlyBases.length };
 }
 
 // ADOPTION: a WORKLIST, never a gate. Measured (AGENTS.md's build brief): the core carries 790 named
