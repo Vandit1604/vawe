@@ -26,6 +26,18 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
+// MIN_REFERENCES IS MEASURED, NOT CHOSEN BY TASTE. The two references on disk when this file was
+// written disagreed with each other by enough to swing genre-pacing.mjs's DEFAULT_MAX_S between 2.6s
+// and 3.6s depending only on which delta metric measured them, a 1.0s (38%) swing off the SAME two
+// clips with no new data at all, and that swing moved held-state-too-long findings across the corpus
+// from 71 to 42. At n=2, one atypical reference is half the bank; the swing above is what "half the
+// bank is one clip" costs in practice. Requiring 5 caps any single reference's share of the bank at a
+// fifth, the same logic a percentile estimate uses to refuse to trust n<5: below it, `readReferenceBars`
+// still measures and returns everything it can (a caller REPORTS the evidence), but `ready` says false
+// and no caller may treat the bank's numbers as a bar to enforce. Raise this only when a wider swing
+// test, run the same way, shows 5 references no longer move the cap by a margin nobody would accept.
+export const MIN_REFERENCES = 5;
+
 function median(nums) {
   if (!nums.length) return null;
   const s = [...nums].sort((a, b) => a - b);
@@ -34,9 +46,13 @@ function median(nums) {
 }
 
 /**
- * readReferenceBars(refsDir = ROOT/refs) -> the external bar, or a stated empty-bank fallback.
+ * readReferenceBars(refsDir = ROOT/refs) -> the external bar, ALWAYS measured when there is anything
+ * to measure, whether or not it clears MIN_REFERENCES.
  *
- * On a bank with at least one study: { n, names, medianShotS, longestHoldS, medianFrameDelta }.
+ * On a bank with at least one study: { n, ready, names, medianShotS, longestHoldS, medianFrameDelta }.
+ *   ready            n >= MIN_REFERENCES. A caller may only ENFORCE the numbers below when this is
+ *                    true; below it, the bank still REPORTS them (the evidence an author can read
+ *                    next to the library number still in force), it just does not get to decide.
  *   medianShotS      median of each reference's own median shot length (`measured.medianShot`).
  *   longestHoldS     the single LONGEST measured hold seen in any reference (`measured.longestHoldS`,
  *                    harness/media/study.mjs, derived from its own per-shot motion measure,
@@ -46,11 +62,11 @@ function median(nums) {
  * A field is null, not omitted, when no study on disk carries that number (an old study.json predating
  * Task 2's fields still counts toward `n` and toward whichever fields it does carry).
  *
- * On an empty bank: { n: 0, reason }.
+ * On an empty bank: { n: 0, ready: false, reason }.
  */
 export function readReferenceBars(refsDir = path.join(ROOT, 'refs')) {
   if (!fs.existsSync(refsDir)) {
-    return { n: 0, reason: `${path.relative(ROOT, refsDir)} does not exist (refs/ is gitignored; empty on CI and a fresh clone, by design)` };
+    return { n: 0, ready: false, reason: `${path.relative(ROOT, refsDir)} does not exist (refs/ is gitignored; empty on CI and a fresh clone, by design)` };
   }
   const names = [];
   const shotLens = [];
@@ -69,10 +85,11 @@ export function readReferenceBars(refsDir = path.join(ROOT, 'refs')) {
     if (typeof m.medianFrameDelta === 'number') deltas.push(m.medianFrameDelta);
   }
   if (!names.length) {
-    return { n: 0, reason: `${path.relative(ROOT, refsDir)} exists but carries no refs/*/study.json (run \`make study VIDEO=<clip> NAME=<name>\` first)` };
+    return { n: 0, ready: false, reason: `${path.relative(ROOT, refsDir)} exists but carries no refs/*/study.json (run \`make study VIDEO=<clip> NAME=<name>\` first)` };
   }
   return {
     n: names.length,
+    ready: names.length >= MIN_REFERENCES,
     names,
     medianShotS: median(shotLens),
     longestHoldS: holds.length ? Math.max(...holds) : null,
