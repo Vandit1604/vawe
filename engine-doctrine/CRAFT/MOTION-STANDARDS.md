@@ -92,7 +92,7 @@ layer's own `origin` prop now reaches `transformOrigin` (`applyOrigin`, `core/la
 transform-origin keyword or length pair; a `three` globe keeps `origin` as its route's [lon, lat] start,
 a separate meaning dispatched on the value's shape. `grammar/_gaps.json` records this gap as FIXED.
 
-**The strong ease-out is not the default.** See above.
+**Fixed: the strong ease-out is now the default.** See above.
 
 **`linear` is 26% of our keyed easings** (317 of 1,216). Part of that is correct and deliberate:
 `harness/author/track.mjs` emits linear interiors for a measured shape, and `core/timeline/sequence.js`
