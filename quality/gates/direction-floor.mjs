@@ -157,6 +157,11 @@ const aeRecipeFor = (key) => {
 const file = process.argv[2];
 const strict = process.argv.includes('--strict');
 if (!file) { console.error('usage: node quality/gates/direction-floor.mjs <scene.json> [--strict]'); process.exit(2); }
+// A film at `plan` (AGENTS.md stage 2) names a scene.json that `make assemble` has not written yet
+// (harness/author/scaffold.mjs writes the storyboard first): studio/server.mjs runs this gate on
+// every film it opens, so a raw ENOENT here used to reach an author's terminal as an uncaught crash
+// trace instead of the ordinary "nothing to floor yet" it actually is.
+if (!fs.existsSync(file)) { console.error(`direction-floor: no scene at ${file} yet, nothing to floor.`); process.exit(2); }
 // The floor coaches on the RAW AUTHORED scene (what you wrote), NOT the produced one, the engine injects
 // the baseline at render (core/engine/produce.js), so these WARNs read as "author this deliberately instead of
 // leaning on the injected default." Judging the produced scene would mask the very conditions this gate

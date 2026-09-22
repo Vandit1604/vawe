@@ -4,9 +4,10 @@
 // a film) are retired (recipes/README.md), so this no longer WRITES the film's layers. It writes the
 // two things a plan needs before any layer exists: a `<out-basename>.storyboard.md` sidecar carrying
 // the beat table the planning gates ask for, and a scene shell (`module`/`theme`/`aspect`/`duration`/
-// `energy`, `layers: []`) at the exact shape an approved plan has before `make assemble` fills it in
-// (AGENTS.md stage 2/5). The film's own PROMPT, what it says and shows, is written first with
-// `make ideate` (skills/vawe:ideate), never guessed here.
+// `energy`, a declared-placeholder `bg` and a single `_scaffold`-tagged layer, never real content) at
+// the exact shape an approved plan has before `make assemble` fills it in for real (AGENTS.md stage
+// 2/5). The film's own PROMPT, what it says and shows, is written first with `make ideate`
+// (skills/vawe:ideate), never guessed here.
 //
 //   node harness/author/scaffold.mjs --out films/scene/<name>.json [--dur 13] [--theme default] [--beats 5]
 //   make scaffold OUT=films/scene/<name>.json DUR=13 THEME=default BEATS=5
@@ -92,8 +93,22 @@ function craftLinesFor(scene) {
     : '    (none relevant yet)';
 }
 
-// The scene shell every plan gets: no layers. `make assemble` fills `layers` in once the plan is
-// approved (AGENTS.md stage 5); writing anything here would be the JSON a person never signed off on.
+// The scene shell every plan gets: no real content. `make assemble` fills `layers` in once the plan
+// is approved (AGENTS.md stage 5); writing anything here would be the JSON a person never signed off
+// on. But `bg` and `layers` are both `required`/`minItems: 1` in films/scene/schema.json, so an empty
+// shell fails `make validate` on arrival (the bug this scaffold used to ship). The fix is not to
+// weaken either check, it is to write a DECLARED PLACEHOLDER for both, the same move the schema's own
+// hint names for `bg` (`{ "preset": "plain" }`, a deliberately flat field) and quality/gates/audio-
+// check.mjs already makes for sound (`{ "silent": true, "_why": "..." }`, a chosen absence, not an
+// oversight). A placeholder `bg` alone still leaves `layers: []`, so one placeholder layer joins it:
+// not content, a REPLACE-marked stand-in an author or `make studio` can tell apart from a real frame
+// on sight, exactly like the `<fill: ...>` markers the storyboard already writes. `make assemble`
+// (AGENTS.md stage 5, after approval) throws this array away and writes the real one. It is tagged
+// `_scaffold: true` so `quality/gates/stage.mjs` (and the `harness/live/stage-gate.mjs` hook reading
+// the same `layers > 0` signal) still see zero layers: neither treats it as "the film" they exist to
+// keep out before sign-off, and both would misfire early if a bare length check counted it.
+const PLACEHOLDER_NOTE = 'REPLACE: bg and this one layer are scaffold placeholders, not a design. '
+  + 'Fill in at the design stage (AGENTS.md): stage kit -> make design-spec -> make preview.';
 const scene = {
   module: 'scene',
   theme,
@@ -102,8 +117,21 @@ const scene = {
   aspect: '16:9',
   duration: dur,
   energy: 'brand',
-  ...(sig ? { note: `REPLACE: what this film says. Composed to the shape of ${exemplar.file} (${exemplar.register || exemplar.teaches}), study it.` } : {}),
-  layers: [],
+  note: sig
+    ? `${PLACEHOLDER_NOTE} Composed to the shape of ${exemplar.file} (${exemplar.register || exemplar.teaches}), study it.`
+    : PLACEHOLDER_NOTE,
+  // Deliberately flat, per the schema's own hint on `bg` (`films/scene/schema.json`): not a chosen
+  // look, a stated absence of one.
+  bg: [{ preset: 'plain' }],
+  layers: [
+    {
+      type: 'text',
+      _scaffold: true,
+      text: 'REPLACE: no design yet, this is a scaffold placeholder',
+      x: 100, y: 480, w: 1720, size: 40, weight: 600,
+      start: 0, duration: dur,
+    },
+  ],
 };
 const craftLines = craftLinesFor(scene);
 
@@ -126,11 +154,17 @@ if (CONTINUOUS_ACTION) {
   const p2 = +Math.max(p1 + 0.6, dur * 0.65).toFixed(2);
 
   // Three STATE sections, not four cards: t0 (offscreen/idle) -> composed -> resolved. Each carries
-  // `object:`/`becomes:` (storyboard-check's SPINE_MAX_S branch).
+  // `object:`/`becomes:` (storyboard-check's SPINE_MAX_S branch). `states` holds 4 WAYPOINTS (t0, the
+  // two co.states, last); `bounds` holds the 3 TIME WINDOWS between them, one fewer. A section is one
+  // window, labeled by the waypoint it arrives at (`states[i + 1]`), so the loop below runs over
+  // `bounds`'s 3 windows, never over `states` itself: mapping over all 4 waypoints previously read
+  // `bounds[3]` (undefined) for the last one, printing a "6.04s-undefineds" window with a NaN duration.
   const states = [co.t0, ...co.states, co.last];
   const bounds = [0, p1, p2, dur];
-  const stateSection = (label, i) => {
-    const isFirst = i === 0, isLast = i === states.length - 1;
+  const windows = bounds.length - 1; // 3: Name, Compose, Resolve
+  const stateSection = (i) => {
+    const label = states[i + 1];
+    const isFirst = i === 0, isLast = i === windows - 1;
     return [
       `## Beat ${i + 1}: ${isFirst ? 'Name' : isLast ? 'Resolve' : 'Compose'} (${bounds[i]}s-${bounds[i + 1]}s)`,
       `- type: ${isFirst ? 'hook' : isLast ? 'payoff_withheld' : 'product_surface'}`,
@@ -169,10 +203,10 @@ ${craftLines}
      Write the film's prompt first (\`make ideate\`), then replace every \`REPLACE:\`/\`<fill: ...>\` marker,
      then \`make storyboard-check SB=${path.relative(ROOT, storyboardPathFor(out))}\`. -->
 
-${states.map(stateSection).join('\n')}`;
+${Array.from({ length: windows }, (_, i) => stateSection(i)).join('\n')}`;
 
   writeScaffold(scene, storyboard, [
-    `✓ scaffold: CONTINUOUS ACTION plan, one object ("${co.object}") across ${dur}s -> ${out} (layers: [])`,
+    `✓ scaffold: CONTINUOUS ACTION plan, one object ("${co.object}") across ${dur}s -> ${out} (no design yet, layers are a placeholder)`,
     `  ${dur}s < CONTINUOUS_ACTION_MAX_S (${CONTINUOUS_ACTION_MAX_S}s): skills/vawe-continuous-action/SKILL.md, not the beat rotation.`,
     ...(typeArg ? [`  TYPE=${typeArg} spine: skills/vawe-type-${typeArg}/SKILL.md carries this type's rules and worked example.`] : []),
     ...(sig ? [`  nearest proven film: ${exemplar.file} (${exemplar.register || exemplar.teaches}): study films/scene/${exemplar.file}.`] : []),
@@ -288,7 +322,7 @@ ${craftLines}
 ${spans.map(beatSection).join('\n')}`;
 
   writeScaffold(scene, storyboard, [
-    `✓ scaffold: ${names.length}-beat plan (${names.join(' -> ')}) across ${dur}s -> ${out} (layers: [])`,
+    `✓ scaffold: ${names.length}-beat plan (${names.join(' -> ')}) across ${dur}s -> ${out} (no design yet, layers are a placeholder)`,
     ...(typeArg ? [`  TYPE=${typeArg} spine: skills/vawe-type-${typeArg}/SKILL.md carries this type's rules and worked example.`] : []),
     ...(sig ? [`  nearest proven film: ${exemplar.file} (${exemplar.register || exemplar.teaches}): study films/scene/${exemplar.file}.`]
       : (!spine ? [`  no exemplar matched "${likeText.trim()}"; pass --like "<brief>" to name the nearest proven film to study.`] : [])),

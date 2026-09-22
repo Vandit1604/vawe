@@ -37,7 +37,13 @@ import { isLightBg } from '../core/color/engine.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataArg = process.env.D || process.argv[2];
-if (!dataArg || !fs.existsSync(dataArg)) { console.error('usage: make studio D=films/scene/<file>.json [PORT=8799]'); process.exit(2); }
+// A film at `plan` (AGENTS.md stage 2) has a storyboard and no scene.json yet: `make scaffold` writes
+// both together, but the storyboard is what the Plan pane needs, so a film named by its future
+// scene.json path (not yet on disk) still opens on the plan instead of refusing outright. Every other
+// route already tolerates a missing/unparsable dataArg (`THEME_NAME`, `storyboardPath()`, and the
+// engine's own boot() all fail readable rather than throw raw), so this only widens the ONE hard gate.
+const hasStoryboard = !!dataArg && fs.existsSync(dataArg.replace(/\.json$/, '.storyboard.md'));
+if (!dataArg || (!fs.existsSync(dataArg) && !hasStoryboard)) { console.error('usage: make studio D=films/scene/<file>.json [PORT=8799]'); process.exit(2); }
 const dataUrl = '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/');
 // The film's theme, read once. The plan pane previews every fragment on it, and a fragment previewed
 // on the wrong palette is a different picture with no warning (engine-doctrine/MISTAKES.md #382).
@@ -807,8 +813,17 @@ const studioRoutes = (req, res) => {
       // seam-snap exits 1 when it FINDS a flash and still writes its sheet, which is the run you most
       // want to look at. So the sheet decides, not the exit code.
       if (fs.existsSync(png)) return send();
+      // A pre-assemble film (AGENTS.md stages brief..approval) has no `layers` yet on purpose; the
+      // engine refusing to boot it is expected, not a defect worth an engine stack trace up front.
+      // `stageOf` (quality/gates/stage.mjs, the same reader `make stage` prints from) says so plainly.
+      let preface = '';
+      try {
+        const st = stageOf(dataArg);
+        const asm = st.order.indexOf('assemble');
+        if (asm >= 0 && st.order.indexOf(st.stage) < asm) preface = `this film has no scene yet: it is at the ${st.stage} stage. Next: ${st.next}\n\n`;
+      } catch { /* best-effort: fall through to the raw error alone */ }
       // 200 with a header, not 500: a scene that cannot render is a state the page shows, not a failed request
-      text(200, `${kind} drew no sheet:\n${String(stderr || stdout || (err && err.message) || '').trim().slice(0, 900)}`, { 'X-Scene-Error': '1' });
+      text(200, `${preface}${kind} drew no sheet:\n${String(stderr || stdout || (err && err.message) || '').trim().slice(0, 900)}`, { 'X-Scene-Error': '1' });
     });
     return true;
   }
@@ -862,6 +877,73 @@ const studioRoutes = (req, res) => {
 const oops = (e) => { console.error(e.code === 'EADDRINUSE' ? `✗ port ${PORT} is busy, set a free one: make studio D=${dataArg} PORT=8800` : e.message); process.exit(1); };
 const { server } = await serveRepo({ port: PORT, route: studioRoutes }).catch((e) => (oops(e), {}));
 server.on('error', oops);
+
+// PREFLIGHT: "before opening the studio test all errors" (the owner's own words, after a shared
+// studio link opened onto a raw engine crash). Automatic, not a second command an author has to
+// remember to run first: the whole point is that a broken link never leaves this terminal. Hits the
+// same routes every pane calls (not a re-derivation of what a pane does, just the pane's own request),
+// so a route that started throwing shows up here before it shows up in someone else's browser.
+async function preflight() {
+  const base = `http://127.0.0.1:${PORT}`;
+  // Read once: `stageOf` already knows whether this film is pre-assemble (AGENTS.md stages
+  // brief..approval, `layers` empty on purpose), so the scene check below can tell "nothing to show
+  // yet, and that is correct" from "this is broken" instead of folding both into one green light.
+  let preAssemble = false, stageLine = '';
+  try {
+    const st = stageOf(dataArg);
+    const asm = st.order.indexOf('assemble');
+    preAssemble = asm >= 0 && st.order.indexOf(st.stage) < asm;
+    stageLine = `${st.stage} stage. Next: ${st.next}`;
+  } catch { /* stage unknown: the scene check below falls back to treating any X-Scene-Error as a fail */ }
+
+  const checks = [
+    { name: 'server', run: async () => { const r = await fetch(`${base}/studio`); return r.ok ? null : `GET /studio -> ${r.status}`; } },
+    { name: 'stage', run: async () => { const r = await fetch(`${base}/api/stage`); const d = await r.json();
+      return r.ok && d && typeof d.ok === 'boolean' ? null : `GET /api/stage did not return a stage verdict`; } },
+    { name: 'plan', run: async () => { const r = await fetch(`${base}/api/plan`); const d = await r.json();
+      if (!r.ok || !d || typeof d.ok !== 'boolean') return 'GET /api/plan did not return JSON';
+      if (d.ok && !Array.isArray(d.beats)) return 'GET /api/plan says ok but names no beats array';
+      if (!d.ok && !d.error) return 'GET /api/plan failed with no error to show an author';
+      return null; } },
+    { name: 'timeline', run: async () => { const r = await fetch(`${base}/api/timeline`); const d = await r.json();
+      return r.ok && d ? null : 'GET /api/timeline did not return JSON'; } },
+    // THE MAKE PANE'S OWN IFRAME, loaded exactly as it is (same URL page.mjs writes into shell.html):
+    // `/__sheet?kind=frames` (harness/author/preview.mjs) turned out NOT to be this check, it renders
+    // past an invalid scene where the live iframe does not, which is how the bug this preflight exists
+    // to catch (pin-recreation opening onto a raw `boot()` stack trace) slipped past an earlier draft
+    // of this same check. A crash or a hang here is always a FAIL. `__engineError` is a fail too,
+    // UNLESS the film is pre-assemble, where it is the expected, correct shape of an unbuilt film
+    // (harness/author/scaffold.mjs's own placeholder) and gets NAMED rather than counted as green.
+    { name: 'scene', run: async () => {
+      const { close, page } = await launchPage({ width: 640, height: 360 });
+      try {
+        await page.goto(`${base}/films/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=30`, { waitUntil: 'load' });
+        const err = await waitForEngine(page, { timeout: 15000, throwOnTimeout: false });
+        if (err === 'timeout') return 'the Make pane never signalled ready (no __engineReady, no __engineError) within 15s';
+        if (err) {
+          if (preAssemble) return { note: `scene/look/sound: no scene yet (${stageLine})` };
+          return `the Make pane's scene does not boot, and this film is past the assemble stage:\n${err.split('\n').slice(0, 3).join('\n')}`;
+        }
+        return null;
+      } finally { await close(); }
+    } },
+  ];
+  const results = await Promise.all(checks.map(async (c) => {
+    try { return { name: c.name, result: await c.run() }; }
+    catch (e) { return { name: c.name, result: String(e.message || e) }; }
+  }));
+  const notes = results.filter((r) => r.result && typeof r.result === 'object');
+  const failed = results.filter((r) => r.result && typeof r.result === 'string');
+  if (failed.length) {
+    console.log(`  ⚠ studio preflight: ${results.length - failed.length}/${results.length} ok, fix before sharing this link`);
+    for (const f of failed) console.log(`    ✗ ${f.name}: ${f.result}`);
+  } else {
+    console.log(`  ✓ studio preflight: every pane renders or explains itself, this link is safe to share`);
+  }
+  for (const nt of notes) console.log(`    · ${nt.result.note}`);
+}
+await preflight();
+
 console.log(`\n  ▶ vawe studio: ${path.basename(dataArg)}`);
 console.log(`    open  http://127.0.0.1:${PORT}/studio`);
 console.log(`    ← → a frame · shift+← → a second · home/end the ends · space plays · 1-5 switch state`);
