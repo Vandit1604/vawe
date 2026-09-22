@@ -115,7 +115,12 @@ export function stageOf(arg) {
     ? blocksOf(sbSrc).map((b) => parseFragmentSpec(fieldIn(b, 'fragment')).path).filter(Boolean)
     : [];
   const missingFrags = [...new Set(fragments)].filter((f) => !fs.existsSync(path.join(ROOT, f)));
-  const layers = (scene && Array.isArray(scene.layers) ? scene.layers : []).length;
+  // `_scaffold: true` marks the ONE placeholder layer `make scaffold` writes so a fresh plan-stage
+  // scene has a layer to satisfy films/scene/schema.json's `minItems: 1` (harness/author/scaffold.mjs)
+  // without lying about the film being built. It is not the film, so it must not count as one: `make
+  // assemble` (AGENTS.md stage 5) replaces `layers` outright, but a film sitting at design/approval
+  // must still read as pre-assemble here, or every later stage check built on `layers > 0` fires early.
+  const layers = (scene && Array.isArray(scene.layers) ? scene.layers : []).filter((l) => !(l && l._scaffold)).length;
 
   const S = [
     { id: 'brief', done: fs.existsSync(p.brief) || sbExists,
