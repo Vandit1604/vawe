@@ -84,13 +84,13 @@ overshoots to 1.068 and `spring-bouncy` to 1.205, which is their "bounce 0.1 to 
 What we do not have is their **`{ duration, bounce }`** form, which is the one a person can reason
 about: our springs are named presets, so choosing a bounce means guessing which name has it.
 
-## What we are MISSING
+## What we used to be MISSING
 
-**Origin-aware motion is not authorable.** Their strongest single technique: a popover scales from the
-button that opened it, not from its own centre, so the motion explains where the thing came from.
-`transformOrigin` is written in six engine files and **no layer prop reaches it**. (`origin` in the
-schema is a globe's route start, which is how this was nearly missed.) Every scale in every one of our
-films grows from its own centre. Logged in `grammar/_gaps.json`.
+**Origin-aware motion is now authorable.** Their strongest single technique: a popover scales from the
+button that opened it, not from its own centre, so the motion explains where the thing came from. A
+layer's own `origin` prop now reaches `transformOrigin` (`applyOrigin`, `core/layers/util.js`), a CSS
+transform-origin keyword or length pair; a `three` globe keeps `origin` as its route's [lon, lat] start,
+a separate meaning dispatched on the value's shape. `grammar/_gaps.json` records this gap as FIXED.
 
 **The strong ease-out is not the default.** See above.
 
