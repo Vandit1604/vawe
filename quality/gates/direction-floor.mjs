@@ -194,11 +194,9 @@ const allow = new Set((d.authoring && Array.isArray(d.authoring.allow)) ? d.auth
 // no named device is the "make the gate stop talking" move; here it is simply not honoured, and this
 // gate reports the finding as FAILing whichever film it is, old or new.
 //
-// SEVERITY (blocks or not) is decided one level up, in author-check.mjs's HARD_CODES step, against
-// quality/baselines/direction-floor-corpus.json (the frozen list of films that predate this rule): a
-// film on that list still gets the plain bare-waiver forgiveness the library's 51 existing waivers on
-// these two codes already rely on; a film NOT on it gets forgiven only by what THIS gate already
-// honoured above, a plan-backed waiver. So this tightens NEW films without breaking legacy ones.
+// SEVERITY (blocks or not) is decided one level up, in author-check.mjs's HARD_CODES step: no film is
+// grandfathered, so every film is forgiven only by what THIS gate already honoured above, a
+// plan-backed waiver. A bare `_why` with no named device does not clear these two codes for any film.
 const PLAN_BACKED_WAIVERS = new Set(['no-continuous-object', 'plain-slideshow']);
 let planThreads = '';
 try {
