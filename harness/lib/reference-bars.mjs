@@ -39,7 +39,8 @@ function median(nums) {
  * On a bank with at least one study: { n, names, medianShotS, longestHoldS, medianFrameDelta }.
  *   medianShotS      median of each reference's own median shot length (`measured.medianShot`).
  *   longestHoldS     the single LONGEST measured hold seen in any reference (`measured.longestHoldS`,
- *                    harness/media/study.mjs, frameDeltaSweep-derived): the hold-length bar wants the
+ *                    harness/media/study.mjs, derived from its own per-shot motion measure,
+ *                    harness/media/shot-detect.mjs's motionDeltaSeries): the hold-length bar wants the
  *                    longest a real reference has shown to be a deliberate choice, not an average.
  *   medianFrameDelta median of each reference's own median frame delta (`measured.medianFrameDelta`).
  * A field is null, not omitted, when no study on disk carries that number (an old study.json predating
