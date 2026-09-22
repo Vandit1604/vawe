@@ -824,7 +824,7 @@ export function knobErrors(cfg) {
       }
     }
     (Array.isArray(L.children) ? L.children : []).forEach((C, j) => visit(C, `${at}.children[${j}]`));
-    (Array.isArray(L.parts) ? L.parts : []).forEach((P, j) => visit(P, `${at}.parts[${j}]`));
+    (Array.isArray(L.parts) ? L.parts : L.parts ? [L.parts] : []).forEach((P, j) => visit(P, `${at}.parts[${j}]`));
     (Array.isArray(L.planes) ? L.planes : []).forEach((P, j) => visit(P, `${at}.planes[${j}]`));
   };
   (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => visit(L, `layers[${i}]`));

@@ -65,7 +65,7 @@ function scaleLayer(L, inv, mul) {
   if (!L || typeof L !== 'object') return;
   scaleKeys(L, LAYER_TIME_KEYS, inv);
   if (Array.isArray(L.motion)) for (const kf of L.motion) if (kf && typeof kf.t === 'number') kf.t = snapTime(kf.t * inv);
-  if (Array.isArray(L.parts)) for (const p of L.parts) scaleKeys(p, PART_TIME_KEYS, inv);
+  if (L.parts) for (const p of (Array.isArray(L.parts) ? L.parts : [L.parts])) scaleKeys(p, PART_TIME_KEYS, inv);
   // A layer's own `bg` is a colour string almost always, but carries the same window-array shape
   // (`{preset,from,to}`) as the scene-level `bg` when a layer opts into its own backdrop windows.
   if (Array.isArray(L.bg)) for (const w of L.bg) scaleWindow(w, inv);
