@@ -1,6 +1,6 @@
 ---
 when: "you want the named procedure a motion designer would reach for, and the engine word for it (or the news that there isn't one)"
-answers: "26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine (25 HAVE, 1 PARTLY, 0 LACK as of 2026-09-23) · what is left and where it would live"
+answers: "26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine (26 HAVE, 0 PARTLY, 0 LACK as of 2026-09-23) · what is left and where it would live"
 group: reference
 ---
 
@@ -58,7 +58,7 @@ Ranked by how often the recipe appears in real commercial motion work, most-used
 | 12 | **2.5D parallax** | flat layers at depths, near ones move further | **HAVE** | `plane` modifier plus a camera move |
 | 13 | **Whip pan** | the frame smears sideways and lands on the next shot | **HAVE** | `whipPan` sting/seam, `whip` and `skewWhip` cuts |
 | 14 | **Rack focus** | one plane pulls sharp while the other goes soft | **HAVE** | `focusRack` beat, `defocus`, `zoomBlur` |
-| 15 | **Counter roll-up** | a number climbs to its value on screen | **PARTLY** | `count` layer counts, digits do not roll |
+| 15 | **Counter roll-up** | a number climbs to its value on screen | **HAVE** | `count` layer, `roll: true` for a per-digit odometer wheel |
 | 16 | **Light sweep / shine** | a bright bar crosses a mark and leaves | **HAVE** | `beam` layer, `streak` sting and spectacle |
 | 17 | **Moving hold** | a "still" frame that never fully stops | **HAVE** | `idle: breathe/drift`, `cameraMove: driftHold` |
 | 18 | **Echo / motion trail** | copies of the layer at earlier times | **HAVE** | `ghost` trail mode, `echoRing` beat |
@@ -491,10 +491,10 @@ the whole illusion.
 
 **When it is wrong.** Small numbers. Counting to 7 is a stunt, not information. Use a unit suffix instead.
 
-**Verdict: PARTLY.** The `count` layer does the first recipe well and compacts at 1e6, and `statReveal` is
-the whole beat. Nothing does the second: no per-digit vertical roll anywhere in the engine. `wordSlot` is
-its sibling for words and `slotSwap` for whole slots, so the pattern is established and the numeric case
-is missing.
+**Verdict: HAVE.** The `count` layer does the first recipe well and compacts at 1e6, and `statReveal` is
+the whole beat. The second now ships too: `"roll": true` drives a per-digit vertical wheel
+(`rollOffsets`, `core/layers/count.js`), one offset in [0,11) per digit of the formatted text. `wordSlot`
+is its sibling for words and `slotSwap` for whole slots.
 
 **Sources:** https://blog.nobledesktop.com/learn/after-effects/number-counter ·
 https://creativecow.net/rolling-number-counter-with-expressions-after-effects-tutorial/
