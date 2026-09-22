@@ -452,6 +452,12 @@ const dur = d.duration || flat.reduce((m, l) => Math.max(m, (l.start ?? 0) + (l.
 // `vawe-continuous-action` skill) is a CONTINUOUS OBJECT: one thing on screen across the cut, and it
 // TRANSFORMS there. Both halves are required. A fixed logo or a watermark riding every cut is not a
 // spine, it is furniture. Short films only: a 60s explainer legitimately has chapters.
+// No external source sets where chaptered structure becomes legitimate (Cinemetrics/ASL literature
+// answers a different question, whole-film average shot length, not a per-film continuity ceiling;
+// engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6). This stays a hard fail below it on purpose: the
+// comment at the `fail('no-continuous-object', ...)` call records that a WARN here let real slideshows
+// through and was reverted, so the missing citation is reported here rather than used to soften the
+// gate.
 const CONTINUITY_MAX_DUR = 15;   // seconds: above this, chaptered structure is legitimate
 const EPS = 0.15;                // ~4 frames either side: a layer must genuinely survive, not graze
 const round3 = (v) => (typeof v === 'number' ? Math.round(v * 1000) / 1000 : v);
@@ -637,6 +643,9 @@ if (bounds.length && dur < CONTINUITY_MAX_DUR) {
 // it stays invisible here, which is the point. An earlier attempt that inferred a boundary from any
 // start-cluster fired on nearly every short scene including the good ones (#163); this one is
 // deliberately narrow, because a gate that cries wolf is worse than no gate at all (#25, #159).
+// No published source answers "how many layers must turn over at once to count as a scene change": this
+// is an engine-internal detection question about our own layer model, not a film-editing question any
+// external work addresses (engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6).
 const TURNOVER_MIN = 2;   // layers leaving AND arriving, a CARD swaps, not a line
 const STEP = 1 / 30;      // one frame
 const visAt = (t) => spineCandidates.filter((l) => { const [s, e] = visible(l); return s <= t && e > t; });
