@@ -141,6 +141,9 @@ for (const idx of bucketIdxs) {
 }
 
 // ---- direction B: sound plays over a run of frames that do not move ------------------------------
+// STILL_FLOOR: no external source answers "how little pixel change counts as stillness" as a standalone
+// perceptual claim (same shape as motion-floor.mjs's DEAD). LOUD_DB is Group C (a colour/signal
+// constant, a separate pass). engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
 const STILL_FLOOR = 0.06, LOUD_DB = -28, HOLD_S = 0.6;
 const HOLD_BUCKETS = Math.round(HOLD_S / BUCKET_S);
 let runStart = null;

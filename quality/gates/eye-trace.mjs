@@ -83,6 +83,9 @@ const DT = 1 / FPS;
 // junction in ten in a normal film here is expected to exceed it, and a film that exceeds it often is
 // unusual for THIS library rather than wrong by some published standard. Re-derive with --census
 // after the library grows; do not round it to look tidy.
+// Cinemetrics/ASL literature does not map to this question (whole-film average shot length is not a
+// per-cut eye-travel distance): engine-doctrine/RESEARCH/TIMING-SOURCES.md part 3/6. This constant is
+// ours, calibrated on this library's own distribution, as the comment above already says.
 export const JUMP_FAR = 0.30;      // fraction of the frame diagonal
 export const W = { bright: 0.35, large: 0.30, focus: 0.20, moving: 0.15 };
 // a layer inside its entrance/exit ramp is moving even with no keyed track. Nominal, not measured:
@@ -264,6 +267,10 @@ export function trace(scene) {
   // (brew-launch-act1). What the eye actually acquires is the FIRST thing the new shot puts up, so
   // that is what gets scored. The search is bounded by the neighbouring junctions so it can never
   // reach across a cut and score the wrong shot, and both sampled times are reported.
+  // Rayner-style fixation research (reading fixations ~200-250ms, scene-viewing ~300-400ms) is a LOOSE
+  // analogy at best: the eye likely finds something within one or two fixations, well under 1s, so this
+  // search window is generous rather than a tight citation. No source publishes "how long before a
+  // viewer gives up looking for the new focal point after a cut". engine-doctrine/RESEARCH/TIMING-SOURCES.md part 3/6.
   const SEARCH = 1.5;
   const nearest = (from, dir, limit) => {
     for (let k = 1; k <= Math.round(Math.min(SEARCH, limit) * FPS); k++) {

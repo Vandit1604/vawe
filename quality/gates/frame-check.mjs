@@ -54,6 +54,9 @@ const warn = (code, msg, extra) => { warns.push(msg); gf.warn(code, msg, extra);
 // fragments have drifted onto many different type scales.
 // SCALE_DRIFT_MAX: more distinct literal sizes than this across one film's fragments and the frames
 // stop reading as one film (engine-doctrine/CRAFT/HTML-FRAGMENTS.md's "seven frames, eight invented sizes" case).
+// Self-referential (our own fragment-authoring consistency, not a general design-system question): no
+// external source sets a "how many sizes before it stops reading as one film" line.
+// engine-doctrine/RESEARCH/TIMING-SOURCES.md part 4/6.
 const SCALE_DRIFT_MAX = 7;
 // A film that has DECLARED its values (`<film>.design.md`) gets the stricter per-value check below
 // instead: `scale-drift` is the coarse "too many sizes" warn for a film that never opted in, and it

@@ -66,6 +66,9 @@ let formats = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--st
 if (!formats.length) formats = fs.readdirSync(path.join(repoRoot, 'films')).filter((f) => fs.existsSync(path.join(repoRoot, 'films', f, 'sample.json'))).sort();
 
 const FPS = 30;
+// Material Design 3 / Apple HIG publish duration tokens for how long a UI element's OWN transition
+// should run, a different question from how long a payoff must sit steady before it may exit. No
+// source maps to this one. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
 const HOLDW = 0.5;              // settle window: payoffs must be steady for this long before the exit
 // The FAIL tier has never once been enforced (see the windows block in audit()), so turning it on is a
 // severity change across the whole library and not a side effect of fixing the windows. `report` names
@@ -620,6 +623,11 @@ function layerTrace(row, F, dt) {
 // naming the candidate is the whole point, and naming the caveat beside it is what keeps this honest,
 // since the schema's own note is blunt: "wrong on a rigid board: a card that drags reads as jelly."
 // This never claims to know a board from a token, so it says both and leaves the call to the author.
+// TRAIL_WINDOW: PRINCIPLE, no number. Disney's follow-through/overlapping-action principle (Thomas &
+// Johnston, "The Illusion of Life: Disney Animation", 1981, https://en.wikipedia.org/wiki/Twelve_basic_principles_of_animation)
+// says loosely-attached parts keep moving after the main mass stops and settle at different rates; no
+// source publishes a frame/second figure for the lag. Matches this file's own stance below (naming a
+// candidate, not a verdict). engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
 const TRAIL_WINDOW = 0.4; // seconds a trailing layer's own motion may start after the leader's stop
 function dragCandidates(layers) {
   const movers = layers.filter((L) => L.peakVelocity > 0);

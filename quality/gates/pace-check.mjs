@@ -49,13 +49,15 @@ const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv
 // `--strict` is accepted and ignored: neither FLOOR nor HOLD blocks any more (see the header), so
 // there is nothing left for strict mode to escalate.
 
-// FLOOR: reporting only, see the header. Calibrated on the committed library, films only: median is
-// 1.20 and p90 is 1.92; a fixture or a backdrop sits nearer 0.15 and is meant to. Kept as the line
-// under which the census flags a film "asleep", never as a reason this gate fails one.
-const FLOOR = 1.0;
-// HOLD: reporting only, see the header. No source, not even a corpus one; kept as the line the report
-// flags a long hold against, never as a reason this gate fails one.
-const HOLD = 4.0;
+// FLOOR and HOLD: REPORTING ONLY. Both are ours, and both stay because the report needs a line to
+// flag against, never because either can fail a film.
+// Calibrated on the committed library, films only: median is 1.20 and p90 is 1.92; a fixture or a
+// backdrop sits nearer 0.15 and is meant to. No external source exists. Cinemetrics and the average
+// shot length literature answer a different question (whole-film ASL, not events per second for
+// motion graphics), and no motion-graphics pacing standard was found. Same shape as eye-trace.mjs's
+// JUMP_FAR. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
+const FLOOR = 1.0;          // below this the census calls a film asleep
+const HOLD = 4.0;           // seconds with nothing arriving or leaving
 import { loadScene } from '../../core/engine/expand.js';
 import { measureEvents } from '../../harness/lib/pace-events.mjs';
 

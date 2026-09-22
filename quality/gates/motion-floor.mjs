@@ -45,9 +45,12 @@ export const GW = 96, GH = 54;
 export const WINDOW_S = 0.5;
 // A window is DEAD below this. Not a preference: the reference's own quietest window measures 0.42 on
 // this scale and its median is 1.33, so a tenth of its median is comfortably under anything it does.
+// No external source: this is corpus-derived from our own reference, not a published perceptual floor.
+// engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
 export const DEAD = 0.13;
 // 80% of the change inside this share of the frame means "something arrived here". Above it, the change
 // is spread and the motion is ambient. Both real films measured 3-4%; 8% is a wide margin around that.
+// No external source: corpus-derived from two films, same caveat as DEAD above.
 export const LOCAL_SHARE = 0.08;
 
 // A large uniform region sliding rigidly has the SAME share signature as a reveal: its interior matches
