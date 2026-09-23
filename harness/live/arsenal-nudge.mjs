@@ -8,10 +8,17 @@
 // TWO ROLES, ONE FILE.
 //   PostToolUse/Bash: an arsenal search just ran. Log it (silently) so the second role can tell a
 //   fresh search from a stale one.
-//   PostToolUse/Edit|Write on a scene file: look at what THIS edit added. If it reads like a
-//   hand-built device (a CSS/HTML tell, or a storyboard mechanism) with no recent matching search,
-//   name the search to run and the top few things it would find. Never blocks (exit 2 only carries
-//   the message, same contract as beat-surfacer.mjs/craft-live.mjs).
+//   PostToolUse/Edit|Write on a scene file OR a `core/` engine file: look at what THIS edit added. If
+//   it reads like a hand-built device (a CSS/HTML tell, a storyboard mechanism, or a newly named
+//   `core/` capability) with no recent matching search, name the search to run and the top few things
+//   it would find. Never blocks (exit 2 only carries the message, same contract as
+//   beat-surfacer.mjs/craft-live.mjs).
+//
+// THE ENGINE-PRIMITIVE GAP THIS CLOSED. A radial blur was nearly rebuilt from scratch on top of
+// `zoomBlur`, which already did it (core/resample/effects.js). The scene-file scan above never saw
+// this: it only watches `films/scene/`. The `core/` branch below is the same nudge, narrowed to a
+// NEWLY NAMED capability (a quoted registry entry or an `export function`/`export const`), never a
+// body edit to code that already exists, so touching an existing effect stays silent.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -102,6 +109,29 @@ function deviceWordsIn(rel, text) {
   return { words: [...words], used };
 }
 
+// `core/` capability names: a quoted registry entry ('radialBlur') or an export declaration
+// (export function radialBlur). camelCase-split so a compound name still matches a bare TELL word
+// ("radialBlur" -> "radial", "blur"); a name with no tell word (clampCenter) never fires.
+const CORE_QUOTED_RE = /['"]([A-Za-z][A-Za-z0-9]*)['"]/g;
+const CORE_EXPORT_RE = /^export\s+(?:function|const|class)\s+([A-Za-z_$][A-Za-z0-9_$]*)/gm;
+
+function splitCamel(name) {
+  return name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().split(/[\s_-]+/).filter(Boolean);
+}
+
+function coreDeviceWordsIn(text) {
+  const names = [];
+  for (const m of text.matchAll(CORE_QUOTED_RE)) names.push(m[1]);
+  for (const m of text.matchAll(CORE_EXPORT_RE)) names.push(m[1]);
+  const words = new Set();
+  for (const name of names) {
+    for (const w of splitCamel(name)) {
+      if (TELLS.includes(w)) words.add(w);
+    }
+  }
+  return [...words];
+}
+
 function recentSearchOverlaps(words) {
   if (!words.length) return false;
   const now = Date.now();
@@ -139,12 +169,31 @@ function handleEdit(file, addedText) {
   const isJson = rel.startsWith('films/scene/') && rel.endsWith('.json');
   const isHtml = rel.startsWith('films/scene/') && rel.endsWith('.html');
   const isBoard = rel.startsWith('films/scene/') && rel.endsWith('.storyboard.md');
-  if (!isJson && !isHtml && !isBoard) return;
+  const isCore = rel.startsWith('core/') && rel.endsWith('.js');
+  if (!isJson && !isHtml && !isBoard && !isCore) return;
   if (typeof addedText !== 'string' || !addedText) return;
 
   const state = readState();
   const last = state[rel] || 0;
   if (Date.now() - last < RATE_LIMIT_MS) return;           // one nudge per file per 10 minutes
+
+  // A new engine primitive: same failure shape (radial blur nearly rebuilt on top of zoomBlur), a
+  // different vocabulary. `core/` names a capability as a quoted registry entry (`RESAMPLE_FX`'s
+  // `'zoomBlur'`) or an `export function`/`export const` declaration, never a CSS/HTML tell, so this
+  // is its own narrow scan: only a NEWLY NAMED capability whose name reads as a device tell, never a
+  // body edit to one that already exists (nothing quoted or exported: silent).
+  if (isCore) {
+    const words = coreDeviceWordsIn(addedText);
+    if (!words.length) return;
+    if (recentSearchOverlaps(words)) return;
+    const query = words.slice(0, 3).join(' ');
+    const names = topNames(query);
+    if (!names.length) return;
+    state[rel] = Date.now();
+    writeState(state);
+    console.error(`search first: make arsenal Q="${query}" -> ${names.join(', ')}`);
+    process.exit(2);
+  }
 
   // Narrow cursor-path check first: fires before the generic scan below would cancel it out.
   if (isJson && handTypedCursorPath(addedText) && !recentSearchOverlaps(['cursor', 'snapto', 'hover-click'])) {

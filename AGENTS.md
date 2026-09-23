@@ -70,7 +70,7 @@ make content-check D=<f> REF=<r>  # is this film's content as rich as the refere
 make study REF=<url>              # the film-side twin of `make sections`, a reference to hold a film to
 ```
 
-Single-shot: `./bin/vawe path/to/video.json` (`--draft` = fast), JSON starting `"module": "scene"`, saved as `films/scene/<topic>.json`. Read `sample.json` and an existing video first, never copy a structure wholesale. **On demand:** `make arsenal Q="…"` searches every effect/block (`MISTAKES=1` the mistake log, `THEME=<name>` a theme's look); `make demo Q="…"` writes a ten-second film about one thing (`engine-doctrine/CRAFT/SPECIMEN.md`). Making something good: `engine-doctrine/TASTE.md`. **A hand-built device (a CSS caret, a raw progress bar) saved with no recent `make arsenal` search first is nudged to search before it ships**: `harness/live/arsenal-nudge.mjs`.
+Single-shot: `./bin/vawe path/to/video.json` (`--draft` = fast), JSON starting `"module": "scene"`, saved as `films/scene/<topic>.json`. Read `sample.json` and an existing video first, never copy a structure wholesale. **On demand:** `make arsenal Q="…"` searches every effect/block (`MISTAKES=1` the mistake log, `THEME=<name>` a theme's look); `make demo Q="…"` writes a ten-second film about one thing (`engine-doctrine/CRAFT/SPECIMEN.md`). Making something good: `engine-doctrine/TASTE.md`. Search before you build anything by hand: see "Changing the ENGINE, not a film?" below, the same rule covers a film device and an engine primitive.
 
 ## Direction: deciders write, critics report (stage 6)  `[ref: make critics]`
 
@@ -125,6 +125,8 @@ this", not "I broke this": `no-continuous-object`, `dead-air`, `plain-slideshow`
 `no-transition`, `ends-on-nothing` are the codes this shows up on most.
 
 ## Changing the ENGINE, not a film?  `[live: harness/live/craft-live.mjs]`
+
+**Search before you build.** Run `make arsenal Q="…"` before hand-building anything, a scene device (a CSS caret, a progress bar) or a new engine primitive (a resample fx, a shader, a kinetic preset): the closest match already in the registry is cheaper than rebuilding it. `harness/live/arsenal-nudge.mjs` nudges this at save.
 
 **EVERY EFFECT COMPOSES; NONE IS A SPECIAL CASE.** A new look is a combination of things the engine
 already owns (a unit, a clock, an order, a property, an exit), never a private code path that owns its
