@@ -78,7 +78,15 @@ Single-shot: `./bin/vawe path/to/video.json` (`--draft` = fast), JSON starting `
 
 ## Stage 1, brief: ask before you build  `[gated: quality/gates/author-check.mjs#no-storyboard]`
 
-Claude Code loads `vawe-video-planning`; others read `engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md`. Do not open a JSON file first: nothing renders until the plan is LOCKED and the user signs off, presented as `make studio D=<file>.json`, `plan` state (real hand-written fragments, live, never grey boxes), and you wait. Five lines carry the whole request, any may be missing (SUBJECT, DATA, PAYOFF, AUDIENCE, FEELING); everything else is yours to decide. Plus two you fill yourself, unasked: `SPECTACLE` (the ONE exaggerated moment, named) and `NOT` (what this film explicitly does not do, derived from recent films by `make preflight D=<file>` rather than memory; waivable per-beat with `_why`).
+**Do not open a JSON file first.** Nothing renders until the plan is LOCKED and the user signs off,
+presented as `make studio D=<file>.json`, `plan` state (real hand-written fragments, live, never grey
+boxes), and you wait. Claude Code loads `vawe-video-planning`; others read
+`engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md`.
+
+Five lines carry the whole request, any may be missing (SUBJECT, DATA, PAYOFF, AUDIENCE, FEELING);
+everything else is yours to decide. Plus two you fill yourself, unasked: `SPECTACLE` (the ONE
+exaggerated moment, named) and `NOT` (what this film explicitly does not do, derived from recent films
+by `make preflight D=<file>` rather than memory; waivable per-beat with `_why`).
 
 **Never hand-author from a blank JSON**: `make ideate` writes the film's prompt first (`engine-doctrine/CRAFT/IDEATE.md`), then `make scaffold` writes the storyboard sidecar and scene shell; compose motion from `recipes/` or `make arsenal Q="…"`.
 
@@ -99,27 +107,35 @@ Claude Code loads `vawe-video-planning`; others read `engine-doctrine/CRAFT/AUTH
 
 ## Stage 7, render: waivers  `[gated: quality/gates/author-check.mjs]`
 
-`authoring.allow` + `_why` is the one mechanism, and it covers two different cases with the one
-sentence, never two mechanisms: a rule broken for cause, and a chosen absence a static rule cannot
-otherwise see (no continuous object, a still frame, no transition, an ending with nothing after it).
-Neither is an apology. Measured across the library, half of real waiver use is the second case, an
-author declaring "I chose this", not "I broke this" (`no-continuous-object`, `dead-air`,
-`plain-slideshow`, `static-bg`, `no-transition`, `ends-on-nothing` are the codes this shows up on
-most). The `_why` is what turns a reflex into a recorded decision either way, the same split
-`quality/gates/audio-check.mjs` already draws for sound: chosen quiet and an audio block nobody
-considered are not the same finding, and a waived rule and a declared absence are not the same finding
-either, even though both are written with the one field. A waiver with no `_why` blocks:
+`authoring.allow` + `_why` is the one mechanism. A waiver with no `_why` blocks:
 
 ```json
 "authoring": { "allow": ["dead-air"], "_why": { "dead-air": "the held frame IS the beat" } }
 ```
 
+One field covers two different cases, never two mechanisms: a rule broken for cause, and a chosen
+absence a static rule cannot otherwise see (no continuous object, a still frame, no transition, an
+ending with nothing after it). Neither is an apology; `quality/gates/audio-check.mjs` already draws the
+same split for sound, where chosen quiet and an audio block nobody considered are not the same finding.
 The only door out of a fired rule is a reason written in the scene, whether that reason is "I broke
 this on purpose" or "I chose this absence on purpose."
 
+Measured across the library, half of real waiver use is the second case, an author declaring "I chose
+this", not "I broke this": `no-continuous-object`, `dead-air`, `plain-slideshow`, `static-bg`,
+`no-transition`, `ends-on-nothing` are the codes this shows up on most.
+
 ## Changing the ENGINE, not a film?  `[live: harness/live/craft-live.mjs]`
 
-**EVERY EFFECT COMPOSES; NONE IS A SPECIAL CASE.** A new look is a combination of things the engine already owns (a unit, a clock, an order, a property, an exit), never a private code path that owns its own timing, its own colour ramp or its own reveal. The test before writing: name which existing mechanism each half of the effect uses. If one half has no owner yet, add the owner, not the effect. Measured cost of ignoring this: `typing` was built as its own path, so it could use none of the 32 kinetic presets, no transform, no filter and no exit, and its per-word colour ramp was a private copy of `colorWave`. The gaps that produced (per-character colour, a scattered exit) read as missing features and were one missing composition (`engine-doctrine/CRAFT/KEYED-MOTION.md`, `core/type/type.js` stagger orders, `core/tracks/units.js` exits).
+**EVERY EFFECT COMPOSES; NONE IS A SPECIAL CASE.** A new look is a combination of things the engine
+already owns (a unit, a clock, an order, a property, an exit), never a private code path that owns its
+own timing, its own colour ramp or its own reveal. The test before writing: name which existing
+mechanism each half of the effect uses; if one half has no owner yet, add the owner, not the effect.
+
+Measured cost of ignoring this: `typing` was built as its own path, so it could use none of the 32
+kinetic presets, no transform, no filter and no exit, and its per-word colour ramp was a private copy of
+`colorWave`. The gaps that produced (per-character colour, a scattered exit) read as missing features
+and were one missing composition (`engine-doctrine/CRAFT/KEYED-MOTION.md`, `core/type/type.js` stagger
+orders, `core/tracks/units.js` exits).
 
 Five rules govern any change to `core/`, `internal/`, a gate, or the capture path, plus what this engine took from the agent harness: `engine-doctrine/CRAFT/ENGINE-CHANGES.md`. Two are decidable from a path and the hook says them at the keystroke; elsewhere, read the doc by hand. Touched motion, backgrounds, type or layout? Ship a before/after: `make evals-compare` (`engine-doctrine/EVALS.md`). Editing `scene.html`? Claude Code reads `vawe-scene-authoring` first, others read that skill under `skills/`; system map `engine-doctrine/CODEMAPS/ARCHITECTURE.md`; run `make probe` after.
 
