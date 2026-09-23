@@ -103,7 +103,7 @@ export const PROPS = {
   bg: {}, border: {}, shadow: {}, elevation: {}, glow: {}, pad: {}, radius: {}, on: { when: 'elevation' },
   intensity: { when: 'glow' },
   // decoration: glass / crt / progressive blur / border trail / mask / look / reflect / logotype / base opacity
-  glass: {}, crt: {}, progressiveBlur: {}, borderTrail: {}, mask: {}, filter: {}, lookOpts: { when: 'filter' },
+  glass: {}, crt: {}, progressiveBlur: {}, borderTrail: {}, mask: {}, falloff: {}, filter: {}, lookOpts: { when: 'filter' },
   fade: {}, reflect: {}, logotype: {}, opacity: {}, css: {},
   // layoutGroup
   layout: {}, gridCols: { when: 'layout' }, colw: { when: 'layout' }, colGap: {}, gap: {}, rowGap: {},
@@ -133,6 +133,39 @@ export function crtSpec(o = {}) {
     layers.push(`repeating-linear-gradient(to bottom, rgba(0,0,0,${lines.toFixed(3)}) 0 ${scan}px, transparent ${scan}px ${gap}px)`);
   }
   return { filter, background: layers.join(',') };
+}
+
+// falloffMask(o) -> a CSS mask-image radial-gradient string. Pure, exported for the same reason
+// crtSpec/presetSpec are: testable with plain node, no DOM.
+//
+// THE AE GRADIENT-RAMP ROLE, generalised to any layer instead of owned by one effect. Volumetric
+// light in After Effects is never one filter: a coloured solid (the layer's own paint), a feathered
+// mask (WHERE the light is) and a gradient ramp (the falloff, 1 at the source, 0 with distance),
+// composited with a blend. This function is only the third piece, because the first two already exist
+// on every layer (its own colour/texture) and `mask-image` already reads alpha, not a second channel
+// this engine would have to invent. `fade:"edges"` (below, applyFalloff) proved the wiring: a fixed
+// radial alpha mask on any layer's own element. `falloff` is the parametric, invertible version of
+// the same primitive, not a second mechanism next to it.
+//
+// o: { cx, cy: 0..1 within the layer's own box (default 0.5, matches glow's cx/cy convention) ·
+//      radius: 0..~1.5, fraction of the box where alpha reaches its far end (default 0.6) ·
+//      feather: 0..1, fraction of radius that stays at the near value before the ramp starts (default 0.35) ·
+//      amount: 0..1, the far end's alpha (default 1: fully opaque/transparent). A vignette wants a
+//        DIM, not a cut: `amount:0.6` stops the ramp at 60% alpha instead of a hard edge ·
+//      invert: swap the ramp, 0 at the source growing to `amount` with distance, the vignette shape }
+//
+// mask-image reads the ALPHA channel here (opaque vs transparent), the same convention `fade` and
+// `mask` already use in this file: the colour named in the gradient is never shown, only its alpha.
+export function falloffMask(o = {}) {
+  const cx = ((o.cx ?? 0.5) * 100).toFixed(1);
+  const cy = ((o.cy ?? 0.5) * 100).toFixed(1);
+  const r = Math.max(1, (o.radius ?? 0.6) * 100);
+  const feather = Math.max(0, Math.min(1, o.feather ?? 0.35));
+  const inner = Math.max(0, r * (1 - feather));
+  const amount = Math.max(0, Math.min(1, o.amount ?? 1));
+  const near = `rgba(0,0,0,${o.invert ? 0 : 1})`, far = `rgba(0,0,0,${o.invert ? amount : 1 - amount})`;
+  const stops = `${near} 0%, ${near} ${inner.toFixed(1)}%, ${far} ${r.toFixed(1)}%`;
+  return `radial-gradient(${r.toFixed(1)}% ${r.toFixed(1)}% at ${cx}% ${cy}%, ${stops})`;
 }
 
 export function createKit(ctx) {
@@ -491,6 +524,17 @@ export function createKit(ctx) {
     applyProgressiveBlur(el, L);
     applyBorderTrail(el, L);
     if (L.mask) { checkDropped(L, { maskImage: L.mask }); el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
+    // `falloff`: the parametric, invertible radial ramp. Mutually exclusive with raw `mask`, the same
+    // shape as the `fade`/`cut` refusal above: two ways to spell one layer's mask is the fork this
+    // engine's own doctrine names as its most common source of drift, not a feature.
+    if (L.falloff) {
+      if (L.mask) throw new Error(`layer "${L.id || L.type}": \`mask\` and \`falloff\` both set. `
+        + `\`falloff\` is the parametric radial ramp (cx/cy/radius/feather/invert); \`mask\` is raw CSS `
+        + `for the same slot. Drop one.`);
+      const g = falloffMask(L.falloff);
+      checkDropped(L, { maskImage: g });
+      el.style.webkitMaskImage = g; el.style.maskImage = g;
+    }
     applyFade(el, L);   // resolves L.filter / named looks / L.lookOpts too
     if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;
     if (L.logotype) el.setAttribute('data-logotype', '1');
