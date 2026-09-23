@@ -248,48 +248,6 @@ function preAssembleNote(){
  // decides yes or no on; the fields written for the agents that build the film stay in the storyboard.
  const planPath=$('planpath'), planNote=$('plannote'), planBody=$('planbody');
  let planDrawn=false;
- // ---- the SKETCH: what a fragment-less beat still shows -----------------------------------------
- // The storyboard already decided a composition (archetype:, the closed list storyboard-check enforces),
- // so a beat with no fragment still gets that layout as boxes on the film's own 1920x1080 canvas. The
- // sketch draws no words: the beat's own words sit beside it, and drawing them twice says nothing new.
- const ARCH_BOXES={
-   centred:[[560,210,800,660]],
-   split:[[110,240,800,600],[1010,240,800,600]],
-   'hero-object':[[260,90,1400,660],[260,820,1400,190]],
-   'asymmetric-baseline':[[130,520,880,420]],
-   'full-bleed-row':[[0,380,1920,320]],
-   'symmetric-pair':[[300,290,560,500],[1060,290,560,500]],
-   lockup:[[560,150,500,520],[460,730,900,180]],
- };
- // an archetype the closed list does not name (blank, or "other (a reason)") still gets ONE centred box
- const archBoxes=(name)=>ARCH_BOXES[String(name||'').trim().split(/\s+\(/)[0]]||[[460,240,1000,600]];
- // any one of these is a real authoring decision, so drawing from it is honest
- const hasPicture=(b)=>!!(b.picture||b.object||b.archetype||(b.onscreen&&b.onscreen.length)||b.mechanism||b.becomes);
- // ---- THE COMPOSED FRAME: real declared material in place, never a blank box (engine-doctrine/MISTAKES.md #592) ----
- // Before a fragment exists this is the only honest frame there is: the archetype's own boxes (a real
- // authoring decision, `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`'s closed list), each holding the
- // beat's OWN on-screen copy in place, on its OWN declared ground colour when one exists. Nothing here
- // is invented: a box with no onscreen line for it, or a beat with no ground:, says so in place rather
- // than drawing a plausible box or colour nobody decided. That is the honest-unknown this pane needs
- // (the colour arc already draws it this way for ground: this is the same rule applied to the frame).
- function composeFrame(b,pal){
-   const boxes=archBoxes(b.archetype);
-   const words=(b.onscreen||[]).filter(l=>l&&!declined(l));
-   const ground=b.groundSwatch;
-   const cells=boxes.map(([x,y,w,h],i)=>{
-     const pc=(v,total)=>(v/total*100).toFixed(2)+'%';
-     const text=words[i]||(i===0?b.object:'');
-     const style='left:'+pc(x,1920)+';top:'+pc(y,1080)+';width:'+pc(w,1920)+';height:'+pc(h,1080);
-     return '<div class=cbox style="'+style+'">'+(text
-       ?'<span class=ctxt>'+esc(text)+'</span>'
-       :'<span class=cempty>no onscreen line for this box</span>')+'</div>';
-   }).join('');
-   const style=ground?' style="background:'+esc(ground.css)+'"':'';
-   return '<div class="pstage compose'+(ground?'':' noground')+(b.archetype?'':' noarch')+'"'+style+'>'+cells
-     +(ground?'':'<span class=cflag title="no ground: declared for this beat">ground undeclared</span>')
-     +(b.archetype?'':'<span class="cflag carch" title="no archetype: declared; a generic box is shown">archetype undeclared</span>')
-     +'</div>';
- }
  // A STORYBOARD SAYS "NO COPY" IN PROSE: "onscreen: (none, the mark itself is the only mark)" is the
  // author declining the slot, not words that will be in the film, so it is never shown as copy.
  const declined=(l)=>/^\s*\(?\s*none\b/i.test(l) || /^\s*\(.*\)\s*$/.test(l);
@@ -302,11 +260,6 @@ function preAssembleNote(){
      +'<ul><li><code>&lt;name&gt;.storyboard.md</code></li>'
      +'<li><code>make storyboard-check SB=&lt;file&gt;</code></li></ul>';
  }
- // 1920x1080 is wider than this pane, so each fragment is SCALED rather than resized: a fragment
- // reflowed to a narrow viewport is a different picture, and this pane exists to show the real one.
- function fitPlan(){ planBody.querySelectorAll('.pstage iframe').forEach(f=>{
-   f.style.transform='scale('+(f.parentElement.clientWidth/1920)+')'; }); }
- addEventListener('resize',fitPlan);
  const planRow=(label,v)=>v?'<div class=prow><dt>'+label+'</dt><dd>'+esc(v)+'</dd></div>':'';
  // the film as a whole: its message, who it is for, how long, what shape, its one loud moment and what it
  // refuses, and only the storyboard gate's warnings and errors
@@ -363,21 +316,28 @@ function preAssembleNote(){
    return '<div id=colorstrip role=group aria-label="colour arc: one swatch per beat, storyboard order">'
      +'<h4>Colour arc</h4><div id=cstrip>'+cells+'</div></div>';
  }
- function beatPicture(b,pal){
-   if(b.fragment) return '<div class=pstage><iframe loading=lazy title="'+esc(b.name)+'" src="/__frag?src='+encodeURIComponent(b.fragment)+'"></iframe></div>';
-   if(hasPicture(b)) return composeFrame(b,pal)+'<p class=pstagenote>Composed from the storyboard\'s own fields. No fragment authored yet '
-     +'(<code>node harness/author/stagekit.mjs</code>, then author the fragment) is what would replace this with the real markup.</p>';
-   return '<div class="pstage none"><b>No picture decided</b><span>this beat names no picture, object, archetype, mechanism or onscreen line yet. Fill those in the storyboard first.</span></div>';
+ // ---- THE PICTURE: a real rendered still of the assembled scene at this beat's start, or the honest
+ // reason there is none yet. Never a shape, never a fragment previewed alone (MISTAKES.md #592, and
+ // the owner's own words: "plan should only show complete rendered sheet actual how it will look in
+ // video"). `frames[i]` comes from /api/plan-frames, one entry per beat, built server-side by seeking
+ // the real scene.html this studio already boots.
+ function beatPicture(b,i,frames){
+   const f=(frames||[])[i];
+   if(f&&f.src) return '<div class=pstage><img loading=lazy alt="'+esc(b.name)+' at '+f.t+'s"'
+     +' width="'+f.w+'" height="'+f.h+'" src="'+esc(f.src)+'"></div>';
+   const why=(f&&f.missing)||'the rendered frames have not loaded yet.';
+   return '<div class="pstage none"><b>No rendered frame yet</b><span>'+esc(why)+'</span>'
+     +(f&&f.cmd?'<code>'+esc(f.cmd)+'</code>':'')+'</div>';
  }
  // One beat is one row: the picture on the left at the film's real ratio, what it says and why on the right
- function beatHtml(b,i,prevArch,pal){
+ function beatHtml(b,i,prevArch,frames){
    const words=(b.onscreen||[]).filter(l=>l&&!declined(l)&&l.split(/\s+/).length<=12&&!/[()]/.test(l));
    return '<section class=pbeat id="pbeat-'+(i+1)+'"><header><span class=pn>'+(i+1)+'</span><h3>'+esc(b.name)+'</h3>'
      +'<span class=pmeta>'+(+b.start).toFixed(1)+'s to '+(+b.end).toFixed(1)+'s</span>'
      +'<span class="pmeta pdur">'+(b.end-b.start).toFixed(1)+'s</span><span class=sp></span>'
      +(b.weight==='peak'?'<span class="ptag peak">Peak</span>':'')
      +(b.archetype&&prevArch===b.archetype?'<span class="ptag repeat">Repeat</span>':'')
-     +'</header>'+beatPicture(b,pal)+'<div>'
+     +'</header>'+beatPicture(b,i,frames)+'<div>'
      +(words.length?'<ul class=pcopy>'+words.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>':'')
      +'<dl>'+planRow('Picture',b.picture)+planRow('Object',b.object)+planRow('Shot',b.shot)+planRow('Placement',b.placement)+planRow('Why',b.why)+'</dl>'
      +motionBlock(b)+feedbackBlock(b.feedback,i)+'</div></section>';
@@ -421,18 +381,27 @@ function preAssembleNote(){
        say('feedback saved to the storyboard'); drawPlan(true);
      }).catch((err)=>{ btn.disabled=false; btn.textContent='Add'; say('feedback not saved: '+err.message); });
  });
+ // Two fetches: the storyboard's own fields, and the rendered still per beat (/api/plan-frames, which
+ // seeks the real scene.html server-side and can take a couple of seconds the first time). Neither
+ // blocks the other's failure: a storyboard with no scene yet still shows its words, with an honest
+ // "no rendered frame yet" in place of a picture.
  function drawPlan(force){
    if(planDrawn&&!force) return;
    planDrawn=true; planPath.textContent='reading…';
-   fetch('/api/plan?t='+Date.now()).then(r=>r.json()).then(d=>{
+   Promise.all([
+     fetch('/api/plan?t='+Date.now()).then(r=>r.json()),
+     fetch('/api/plan-frames?t='+Date.now()).then(r=>r.json()).catch(()=>({frames:[]})),
+   ]).then(([d,pf])=>{
      planPath.textContent='';
      if(!d.ok) return planEmpty(d.error||'no storyboard');
      planNote.hidden=true;
+     const frames=(pf&&pf.frames)||[];
      let prev='';
-     planBody.innerHTML=planHead(d)+d.beats.map((b,i)=>{ const s=beatHtml(b,i,prev,d.palette); prev=b.archetype||''; return s; }).join('');
-     // The iframes have no layout until the pane is visible, so fit twice: now, and once they load.
-     fitPlan(); planBody.querySelectorAll('.pstage iframe').forEach(f=>f.addEventListener('load',fitPlan));
+     planBody.innerHTML=planHead(d)+d.beats.map((b,i)=>{ const s=beatHtml(b,i,prev,frames); prev=b.archetype||''; return s; }).join('');
      say('the plan is drawn, '+d.beats.length+' beats');
+     // The frame render is still running server-side (a scene launch + N seeks): come back for the
+     // pictures once it finishes, rather than leaving every beat on "not loaded yet" forever.
+     if(pf&&pf.busy) setTimeout(()=>drawPlan(true),1500);
    }).catch(e=>{ planPath.textContent=''; planEmpty('could not read the plan: '+e.message); });
  }
  $('planredraw').addEventListener('click',()=>drawPlan(true));
@@ -1140,11 +1109,18 @@ function preAssembleNote(){
    try{ timeline(); }catch{}
    try{ fetch('/__err',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({title:title,detail:detail})}); }catch{}
-   // A direct hit on /studio/sound or /studio/ship (each pane's own route, so an agent can open one
-   // without passing through Make first) draws its pane BEFORE the iframe has had a chance to report
-   // boot failure, since that report is async. Both panes already know how to show "no scene yet"
-   // (window.sceneFailed above); they just never got asked to redraw once it became true, so the pane
-   // sat on "Loading..." forever. Redraw whichever of the two is on screen right now.
+   redrawLiveEnginePanes();
+ }
+ // A direct hit on /studio/sound or /studio/ship (each pane's own route, so an agent can open one
+ // without passing through Make first) draws its pane BEFORE either of its two async inputs is ready:
+ // the iframe's own boot (`sc.contentWindow.__engine`, read directly by drawSound()) and the server
+ // fetch (`model`, from timeline() below, read by both drawSound() and drawShip()). Sound needs BOTH.
+ // Called once, on the FIRST of the two to resolve, it stayed on "Loading... Waiting for the scene to
+ // boot" even once both had actually landed, because nothing ever asked it to redraw a second time.
+ // Called from every place either input can finish (fail() and ready() for the boot, timeline()'s own
+ // fetch for the model), so whichever settles LAST is the one that redraws the pane, not only a click
+ // that happens to land after both already have.
+ function redrawLiveEnginePanes(){
    const st=document.body.dataset.state;
    if(st==='sound') drawSound(); else if(st==='ship') drawShip();
  }
@@ -1163,7 +1139,8 @@ function preAssembleNote(){
      }
      return setTimeout(()=>ready(dl),80); }
    errBox.hidden=true;
-   const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; fit(); timeline(); n=0; draw(); }
+   const m=w.__engine.meta||{}; fps=m.fps||30; dur=m.duration||5; total=Math.max(1,Math.round(dur*fps)); W=m.width||1920;H=m.height||1080; fit(); timeline(); n=0; draw();
+   redrawLiveEnginePanes(); }
  sc.addEventListener('load',()=>ready()); addEventListener('resize',fit);
  // A LABEL MEASURED IN THE FALLBACK FACE IS THE WRONG WIDTH. The first paint can land before
  // JetBrains Mono has loaded, and the ruler then chose a 1s stride the real face has no room for:
@@ -1409,7 +1386,11 @@ function preAssembleNote(){
  paint=function(m){ paintRows(m); if(lastStrip) markStill(lastStrip); };
  function timeline(){
    fetch('/api/timeline').then(r=>r.json()).then(m=>{ model=m; loadHidden(); $('undo').disabled=!(m.undo>0); drawCrumbs();
-     if(insideLayer) paintInside(); else paint(m); drawJump(); })
+     if(insideLayer) paintInside(); else paint(m); drawJump();
+     // Sound and Ship both read `model`, not just the iframe's engine: Sound needs BOTH it and
+     // `eng.meta`, so whichever of the two async loads (this fetch, the iframe boot) finishes LAST is
+     // the one that has to trigger the redraw, or the pane is stuck on whatever it showed at the first.
+     redrawLiveEnginePanes(); })
      .catch(e=>{ $('tlwhat').textContent='timeline unavailable: '+e; });
  }
  // name each bar: consume the first unclaimed JSON layer that starts at the same instant. A layer the
