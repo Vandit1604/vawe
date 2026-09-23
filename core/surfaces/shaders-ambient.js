@@ -50,6 +50,13 @@ export const AMBIENT_SHADERS = {
   bands: 'a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; engine-doctrine/LIGHTFIELD.md',
   godRays: 'shafts of light: sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point. it is BRIGHT through the middle, so drop `intensity` toward 0.4 before putting white type over it',
   curlSmoke: 'a rising plume of ink or smoke that rolls into vortices as it climbs, its filaments stretching and folding. slow, continuous, and never repeating; the one field here with real fluid motion rather than a drifting pattern',
+  // APPENDED, not inserted: see the note above u_fx that says the index of a name here is the wire
+  // format. A literal port of pbakaus/radiant's chromatic-bloom.html (MIT), not a rewrite into this
+  // file's own style; see the u_fx branch for the source line references and what changed and why.
+  chromaticBloom: 'twelve luminous colour orbs (five vivid, seven dim) drifting and blending on black, each on its own noisy orbit, with a vignette and grain over the top. ported from pbakaus/radiant',
+  auroraCurtain: 'six vertical curtain lines undulating top to bottom, each drifting sideways on its own noise offset, fading warm to cool along its length. ported from pbakaus/radiant',
+  auroraVeil: 'seven wide aurora ribbons undulating over a starfield, with a frosted ice ground plane reflecting them below the horizon. the richest field here after bands. ported from pbakaus/radiant',
+  laserLabyrinth: 'six volumetric light cones sweeping down from just above the top edge through drifting fog, three dim and far, three bright and near with a rhythmic beat snap. ported from pbakaus/radiant',
 };
 export const AMBIENT_FX = Object.keys(AMBIENT_SHADERS);
 
@@ -201,6 +208,151 @@ vec3 ramp(float u){
     c = mix(c, toOk(P(i+1, vec3(1.0))), clamp((x - a) / max(b - a, 1e-4), 0.0, 1.0));
   }
   return fromOk(c); }
+
+// chromaticBloom's own cbHash/cbNoise/cbOrb: renamed-only copies of pbakaus/radiant's
+// chromatic-bloom.html hash()/noise()/orb() (source lines 58-71 and 91-95). This file already owns
+// functions named hash() and noise() with a different formula, so calling those instead would change
+// the picture the source draws, which is the porting this was asked not to do; the fix is a name each,
+// not a rewrite. filmGrain() from the source is left out: it is declared there but never called (the
+// grain the source composites is computed inline in main(), source lines 220-221), so it is dead code
+// and skipping it changes nothing.
+float cbHash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float cbNoise(vec2 p){
+  vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+  float a = cbHash(i), b = cbHash(i+vec2(1.0,0.0)), c = cbHash(i+vec2(0.0,1.0)), d = cbHash(i+vec2(1.0,1.0));
+  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y);
+}
+vec3 cbOrb(vec2 uv, vec2 center, vec3 color, float radius, float intensity){
+  float d = length(uv - center);
+  float k = 1.0 / (radius*radius);
+  float glow = exp(-d*d*k) * intensity;
+  return color * glow;
+}
+
+// auroraCurtain's own acHash/acNoise/acCurtainLine: renamed-only copies of pbakaus/radiant's
+// aurora-curtain.html hash()/noise()/curtainLine() (source lines 63-98). Same reason as cbHash above:
+// this file's own hash()/noise() are a different formula.
+float acHash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float acNoise(vec2 p){
+  vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+  float a = acHash(i), b = acHash(i+vec2(1.0,0.0)), c = acHash(i+vec2(0.0,1.0)), d = acHash(i+vec2(1.0,1.0));
+  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y);
+}
+vec3 acCurtainLine(vec2 uv, float speed, float freq, vec3 c, float tt){
+  uv.x += smoothstep(1.0, 0.0, abs(uv.y)) * sin(tt*speed + uv.y*freq) * 0.2;
+  float lw = 0.06 * smoothstep(0.2, 0.9, abs(uv.y));
+  float l = smoothstep(lw, 0.0, abs(uv.x) - 0.004);
+  float fade = smoothstep(1.0, 0.3, abs(uv.y));
+  return l * c * fade;
+}
+
+// auroraVeil's own avHash/avHash1/avNoise/avRibbon/avStars/avHexDist/avCrystal: renamed-only copies of
+// pbakaus/radiant's aurora-veil.html hash()/hash1()/noise()/auroraRibbon()/bgStars()/hexDist()/
+// crystalPattern() (source lines 65-217). fbm() (source lines 81-93) is declared there but never
+// called anywhere in the source (the ribbons and the ice pattern each carry their own noise calls
+// instead), so it is dead code and skipping it changes nothing, the same omission chromaticBloom
+// already made for the source's own filmGrain().
+float avHash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float avHash1(float n){ return fract(sin(n) * 43758.5453123); }
+float avNoise(vec2 p){
+  vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+  float a = avHash(i), b = avHash(i+vec2(1.0,0.0)), c = avHash(i+vec2(0.0,1.0)), d = avHash(i+vec2(1.0,1.0));
+  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y);
+}
+float avRibbon(vec2 uv, float tt, float ribbonX, float ribbonWidth, float waveFreq, float waveAmp, float phase){
+  float centerX = ribbonX + sin(tt*0.15 + phase)*0.25;
+  float wave1 = sin(uv.y*waveFreq + tt*0.9 + phase) * waveAmp;
+  float wave2 = sin(uv.y*waveFreq*2.3 + tt*1.3 + phase*1.7) * waveAmp*0.5;
+  float wave3 = sin(uv.y*waveFreq*0.4 + tt*0.35 + phase*0.6) * waveAmp*1.2;
+  float wave4 = sin(uv.y*waveFreq*3.7 + tt*1.8 + phase*2.3) * waveAmp*0.2;
+  float waveOffset = wave1+wave2+wave3+wave4;
+  float dx = uv.x - (centerX + waveOffset);
+  float ribbon = exp(-dx*dx/(ribbonWidth*ribbonWidth));
+  float brightBand = 0.5+0.5*sin(uv.y*2.5 + tt*0.7 + phase*2.0);
+  brightBand *= 0.5+0.5*sin(uv.y*5.0 - tt*0.9 + phase);
+  float shimmer = 0.7+0.3*sin(tt*2.5 + phase*3.0 + uv.y*8.0);
+  shimmer *= 0.8+0.2*sin(tt*1.7 + phase*1.1 + uv.x*6.0);
+  float verticalFade = smoothstep(-0.35,-0.05,uv.y) * smoothstep(0.75,0.35,uv.y);
+  float detail = avNoise(vec2(uv.x*6.0, uv.y*10.0 + tt*0.5 + phase));
+  detail = 0.6 + 0.4*detail;
+  return ribbon*brightBand*verticalFade*detail*shimmer;
+}
+float avStars(vec2 uv, float tt){
+  float stars = 0.0;
+  for(int i=0;i<120;i++){
+    float fi = float(i);
+    vec2 pos = vec2(avHash1(fi*17.31+100.0)*2.8-1.4, avHash1(fi*11.97+200.0)*1.4-0.3);
+    float d = length(uv-pos);
+    float twinkleSpeed = 0.5 + avHash1(fi*3.3+300.0)*2.0;
+    float twinkle = 0.3 + 0.7*sin(tt*twinkleSpeed + fi*2.7);
+    twinkle = max(twinkle, 0.0); twinkle *= twinkle;
+    float size = 0.0008 + avHash1(fi*5.5+400.0)*0.002;
+    float brightness = 0.4 + avHash1(fi*7.7+500.0)*0.6;
+    stars += smoothstep(size, 0.0, d) * twinkle * brightness;
+    if(brightness > 0.7) stars += smoothstep(size*5.0, 0.0, d) * twinkle * 0.08;
+  }
+  return stars;
+}
+float avHexDist(vec2 p){ p = abs(p); return max(p.x + p.y*0.577350269, p.y*1.154700538); }
+float avCrystal(vec2 uv, float tt){
+  float scale = 12.0;
+  vec2 p = uv*scale;
+  vec2 r = vec2(1.0, 1.732);
+  vec2 h = r*0.5;
+  vec2 a = mod(p, r) - h;
+  vec2 b = mod(p - h, r) - h;
+  vec2 gv = (dot(a,a) < dot(b,b)) ? a : b;
+  float hd = avHexDist(gv);
+  float edge = smoothstep(0.45,0.40,hd) - smoothstep(0.40,0.35,hd);
+  float angle = atan(gv.y, gv.x);
+  float branch = abs(sin(angle*3.0));
+  float branchLine = smoothstep(0.04,0.0,abs(branch-0.5)*hd);
+  branchLine *= smoothstep(0.0,0.15,hd) * smoothstep(0.45,0.25,hd);
+  float subBranch = abs(sin(angle*6.0));
+  float subLine = smoothstep(0.03,0.0,abs(subBranch-0.5)*hd);
+  subLine *= smoothstep(0.1,0.2,hd) * smoothstep(0.4,0.3,hd);
+  float crystal = edge*0.6 + branchLine*0.4 + subLine*0.2;
+  float shimmer = 0.7 + 0.3*sin(tt*0.2 + avHash(floor(p/r))*6.28);
+  crystal *= shimmer;
+  return crystal;
+}
+
+// laserLabyrinth's own llHash/llHash3/llNoise3d/llFbm/llConeColor: renamed-only copies of
+// pbakaus/radiant's laser-labyrinth.html hash()/hash3()/noise3d()/fbm()/coneColor() (source lines
+// 55-121).
+float llHash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float llHash3(vec3 p){ return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
+float llNoise3d(vec3 p){
+  vec3 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+  float n000=llHash3(i), n100=llHash3(i+vec3(1.0,0.0,0.0)), n010=llHash3(i+vec3(0.0,1.0,0.0)), n110=llHash3(i+vec3(1.0,1.0,0.0));
+  float n001=llHash3(i+vec3(0.0,0.0,1.0)), n101=llHash3(i+vec3(1.0,0.0,1.0)), n011=llHash3(i+vec3(0.0,1.0,1.0)), n111=llHash3(i+vec3(1.0,1.0,1.0));
+  float nx00=mix(n000,n100,f.x), nx10=mix(n010,n110,f.x), nx01=mix(n001,n101,f.x), nx11=mix(n011,n111,f.x);
+  float nxy0=mix(nx00,nx10,f.y), nxy1=mix(nx01,nx11,f.y);
+  return mix(nxy0,nxy1,f.z);
+}
+float llFbm(vec3 p){
+  float v=0.0, a=0.5; vec3 shift = vec3(100.0);
+  for(int i=0;i<4;i++){ v += a*llNoise3d(p); p = p*2.0+shift; a *= 0.5; }
+  return v;
+}
+vec3 llConeColor(int idx, float hueShift){
+  vec3 c;
+  if(idx==0) c = vec3(1.0, 0.0, 0.5);
+  else if(idx==1) c = vec3(0.5, 0.05, 1.0);
+  else if(idx==2) c = vec3(0.1, 0.35, 1.0);
+  else if(idx==3) c = vec3(0.85, 0.0, 0.85);
+  else if(idx==4) c = vec3(0.15, 0.2, 1.0);
+  else c = vec3(0.85, 0.93, 1.00);
+  float cosA = cos(hueShift), sinA = sin(hueShift);
+  float lum = dot(c, vec3(0.299,0.587,0.114));
+  vec3 grey = vec3(lum);
+  vec3 diff = c - grey;
+  vec3 axis1 = normalize(vec3(1.0,-1.0,0.0));
+  vec3 axis2 = normalize(vec3(0.5,0.5,-1.0));
+  float d1 = dot(diff, axis1), d2 = dot(diff, axis2);
+  vec3 rotated = grey + axis1*(d1*cosA - d2*sinA) + axis2*(d1*sinA + d2*cosA);
+  return clamp(rotated, 0.0, 1.0);
+}
 
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res; float ar = u_res.x/u_res.y;
@@ -643,7 +795,7 @@ void main(){
     vec3 beam = mix(g2, g1, clamp(acc*0.9, 0.0, 1.0));
     col = mix(g0, g2, 0.35*haze) + beam*(acc*haze + glow*0.55) + g1*dust*acc*0.55;
     alpha = 1.0;
-  } else {                                                // curlSmoke, a rising plume
+  } else if(u_fx==22){                                    // curlSmoke, a rising plume
     float st = t*0.30;                                    // the clock, first line (see the bands note)
     // CURL NOISE for the flow (see psi/curl above), and a SEMI-LAGRANGIAN BACKTRACE for the smoke.
     //
@@ -694,6 +846,319 @@ void main(){
     ink = mix(ink, s3, smoothstep(0.30, 0.95, age));      // colour by age, so the tail cools
     col = mix(s0, ink, smoothstep(0.015, 0.42, dens));
     alpha = 1.0;
+  } else if(u_fx==23){                                    // chromaticBloom, luminous colour orbs on black
+    // LITERAL PORT of pbakaus/radiant's chromatic-bloom.html (MIT, Copyright (c) 2025 Paul Bakaus,
+    // https://github.com/pbakaus/radiant, "attribution appreciated but not required" per its README).
+    // Orb placement, drift, noise perturbation, vignette and tone mapping (source lines 96-213) are
+    // copied as-is, not rewritten into this file's own palette-ramp style. Two omissions, both because
+    // this field has to stay a pure function of (t, seed):
+    //   - u_driftSpeed (source lines 47, 187, 232) is gone. This engine already scales time by the
+    //     layer's own speed prop before any shader sees it (core/surfaces/shader.js: atOf(lt,
+    //     LL.speed)), so a second drift-speed dial here would be the same control twice.
+    //   - u_mouse (source lines 51, 190, 217-224, 244-257) is gone. There is no pointer in a headless,
+    //     seeked renderer; dropping the block reproduces the source's own idle default (mouseX=-1,
+    //     under which the block never ran), not a new behaviour.
+    // u_grain (source line 49, default 0.5) survives as u_p.x, same default.
+    // The shared tail below (desaturate 0.9, u_intensity) still applies here same as every other
+    // branch, so this field is not byte-identical to the source's own output, only its structure is.
+    float cbg = u_p.x > 0.0 ? u_p.x : 0.5;
+    vec2 cbuv = (gl_FragCoord.xy - u_res*0.5) / min(u_res.x, u_res.y);
+    vec3 cbcol = vec3(0.0);
+
+    // VIOLET SUBSTITUTION. Source lines 118-122 hardcode cobalt/orange/whiteBlue/amber/teal; this
+    // film's palette needs violet and the source has none. orange becomes violet, amber becomes
+    // magenta, teal becomes indigo, each the same saturation the source used for its own
+    // primaries. cobalt and whiteBlue are untouched, they already read as the cool end of a violet
+    // field. Positions, radii, intensities and drift (source lines 124-160) are the source's own
+    // numbers, unchanged.
+    vec3 cobalt    = vec3(0.03, 0.10, 1.00);
+    vec3 violet    = vec3(0.46, 0.05, 0.95);
+    vec3 whiteBlue = vec3(0.85, 0.93, 1.00);
+    vec3 magenta   = vec3(0.82, 0.08, 0.90);
+    vec3 indigo    = vec3(0.22, 0.05, 0.68);
+
+    float n1 = cbNoise(vec2(t*0.37, 1.0))*2.0-1.0;
+    float n2 = cbNoise(vec2(t*0.41, 2.3))*2.0-1.0;
+    float n3 = cbNoise(vec2(t*0.33, 3.7))*2.0-1.0;
+    float n4 = cbNoise(vec2(t*0.29, 5.1))*2.0-1.0;
+    float n5 = cbNoise(vec2(t*0.43, 6.9))*2.0-1.0;
+    float n6 = cbNoise(vec2(t*0.31, 8.2))*2.0-1.0;
+    float n7 = cbNoise(vec2(t*0.39, 9.5))*2.0-1.0;
+    float n8 = cbNoise(vec2(t*0.27, 10.8))*2.0-1.0;
+    float n9 = cbNoise(vec2(t*0.35, 12.1))*2.0-1.0;
+    float n10 = cbNoise(vec2(t*0.45, 13.4))*2.0-1.0;
+
+    vec2 p1 = vec2(cos(t*0.23 + 0.0)*0.55 + n1*0.08, sin(t*0.17 + 0.0)*0.35 + n2*0.06);
+    cbcol += cbOrb(cbuv, p1, cobalt, 0.30, 1.6);
+    vec2 p2 = vec2(cos(t*0.19 + 2.1)*0.50 + n3*0.09, sin(t*0.25 + 1.4)*0.38 + n4*0.07);
+    cbcol += cbOrb(cbuv, p2, violet, 0.28, 1.5);
+    vec2 p3 = vec2(cos(t*0.15 + 4.2)*0.42 + n5*0.07, sin(t*0.21 + 3.0)*0.45 + n6*0.06);
+    cbcol += cbOrb(cbuv, p3, whiteBlue, 0.26, 1.2);
+    vec2 p4 = vec2(sin(t*0.17 + 1.0)*cos(t*0.11 + 0.5)*0.55 + n7*0.08, sin(t*0.13 + 2.5)*0.35 + n8*0.06);
+    cbcol += cbOrb(cbuv, p4, magenta, 0.27, 1.3);
+    vec2 p5 = vec2(cos(t*0.13 + 5.5)*0.48 + n9*0.07, sin(t*0.19 + 4.8)*0.30 + n10*0.08);
+    cbcol += cbOrb(cbuv, p5, indigo, 0.32, 1.2);
+
+    vec3 dimCobalt  = vec3(0.08, 0.15, 0.50);
+    vec3 dimViolet1 = vec3(0.22, 0.08, 0.45);
+    vec3 dimWhite   = vec3(0.50, 0.55, 0.70);
+    vec3 dimMagenta = vec3(0.40, 0.10, 0.45);
+    vec3 dimIndigo  = vec3(0.10, 0.08, 0.35);
+    vec3 dimViolet2 = vec3(0.25, 0.15, 0.50);
+    vec3 dimRose    = vec3(0.55, 0.25, 0.30);
+
+    float sn1 = cbNoise(vec2(t*0.51, 20.0))*2.0-1.0;
+    float sn2 = cbNoise(vec2(t*0.47, 21.3))*2.0-1.0;
+    float sn3 = cbNoise(vec2(t*0.53, 22.7))*2.0-1.0;
+    float sn4 = cbNoise(vec2(t*0.43, 24.1))*2.0-1.0;
+    float sn5 = cbNoise(vec2(t*0.49, 25.5))*2.0-1.0;
+    float sn6 = cbNoise(vec2(t*0.55, 26.9))*2.0-1.0;
+    float sn7 = cbNoise(vec2(t*0.41, 28.3))*2.0-1.0;
+    float sn8 = cbNoise(vec2(t*0.57, 29.7))*2.0-1.0;
+    float sn9 = cbNoise(vec2(t*0.39, 31.1))*2.0-1.0;
+    float sn10 = cbNoise(vec2(t*0.61, 32.5))*2.0-1.0;
+    float sn11 = cbNoise(vec2(t*0.37, 33.9))*2.0-1.0;
+    float sn12 = cbNoise(vec2(t*0.59, 35.3))*2.0-1.0;
+    float sn13 = cbNoise(vec2(t*0.45, 36.7))*2.0-1.0;
+    float sn14 = cbNoise(vec2(t*0.63, 38.1))*2.0-1.0;
+
+    vec2 s1 = vec2(cos(t*0.31 + 0.7)*0.45 + sn1*0.08, sin(t*0.27 + 1.2)*0.35 + sn2*0.07);
+    cbcol += cbOrb(cbuv, s1, dimCobalt, 0.18, 0.20);
+    vec2 s2 = vec2(cos(t*0.25 + 3.1)*0.60 + sn3*0.09, sin(t*0.33 + 2.5)*0.42 + sn4*0.06);
+    cbcol += cbOrb(cbuv, s2, dimViolet1, 0.16, 0.18);
+    vec2 s3 = vec2(cos(t*0.29 + 5.3)*0.55 + sn5*0.07, sin(t*0.23 + 4.1)*0.45 + sn6*0.08);
+    cbcol += cbOrb(cbuv, s3, dimWhite, 0.14, 0.15);
+    vec2 s4 = vec2(sin(t*0.21 + 1.8)*0.58 + sn7*0.06, cos(t*0.29 + 0.3)*0.40 + sn8*0.07);
+    cbcol += cbOrb(cbuv, s4, dimMagenta, 0.17, 0.18);
+    vec2 s5 = vec2(cos(t*0.35 + 2.9)*0.52 + sn9*0.08, sin(t*0.19 + 5.7)*0.48 + sn10*0.06);
+    cbcol += cbOrb(cbuv, s5, dimIndigo, 0.15, 0.15);
+    vec2 s6 = vec2(cos(t*0.17 + 4.5)*0.62 + sn11*0.07, sin(t*0.31 + 3.3)*0.38 + sn12*0.09);
+    cbcol += cbOrb(cbuv, s6, dimViolet2, 0.16, 0.15);
+    vec2 s7 = vec2(sin(t*0.27 + 6.1)*cos(t*0.15 + 0.8)*0.50 + sn13*0.06, cos(t*0.23 + 5.0)*0.42 + sn14*0.08);
+    cbcol += cbOrb(cbuv, s7, dimRose, 0.14, 0.12);
+
+    float cbvd  = length(cbuv * vec2(1.1, 1.0));
+    float cbvig = 1.0 - smoothstep(0.5, 1.1, cbvd);
+    cbcol *= cbvig;
+    cbcol = max(cbcol, vec3(0.0));
+    cbcol = mix(cbcol, sqrt(cbcol), smoothstep(0.6, 1.5, cbcol));
+
+    float cbgrain = fract(sin(dot(gl_FragCoord.xy + fract(u_time)*100.0, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
+    cbcol += cbgrain * 0.3 * cbg;
+
+    col = cbcol; alpha = 1.0;
+  } else if(u_fx==24){                                    // auroraCurtain, vertical flowing curtain lines
+    // LITERAL PORT of pbakaus/radiant's aurora-curtain.html (MIT, Copyright (c) 2025 Paul Bakaus,
+    // https://github.com/pbakaus/radiant). The wave math, per-line drift and noise offset (source
+    // lines 78-141) are copied as-is. u_waveSpeed (source default 1.0), u_lineCount (default 6),
+    // u_amplitude (default 1.0) and u_rotation (default 0.0) are fixed at their own defaults: this
+    // engine already scales time by the layer's own speed, and the rest were live-tunable knobs with
+    // no reach from scene JSON. u_mouse (source lines 100-104) and u_dragAngle (drag-only) are
+    // dropped; the source's own idle default (no mouse, no drag) is what remains.
+    // VIOLET SUBSTITUTION: source lines 118-119 hardcode warmAmber/coolTeal; swapped for this film's
+    // magenta/cobalt, the same pair chromaticBloom already carries.
+    vec2 acuv = (gl_FragCoord.xy - 0.5*u_res) / u_res.y;
+    vec3 acMagenta = vec3(0.82, 0.08, 0.90);
+    vec3 acCobalt  = vec3(0.03, 0.10, 1.00);
+    vec3 accol = vec3(0.0);
+    for(int i=0;i<6;i++){
+      float fi = float(i);
+      float frac = fi/5.0;
+      float speed = 0.6 + frac*0.5;
+      float freq = 4.0 + frac*2.0;
+      vec3 lineCol = mix(acMagenta, acCobalt, frac) * (0.5 + frac*0.5);
+      float yBlend = smoothstep(-0.4, 0.5, acuv.y);
+      vec3 pixelCol = mix(acMagenta, acCobalt, yBlend) * (0.4 + frac*0.6);
+      lineCol = mix(lineCol, pixelCol, 0.6);
+      float drift = sin(t*0.15 + fi*1.3) * 0.03;
+      float nOff = acNoise(vec2(acuv.y*2.0 + fi*3.7, t*0.1 + fi)) * 0.015;
+      accol += acCurtainLine(acuv + vec2(nOff+drift, 0.0), speed, freq, lineCol, t);
+    }
+    float acvig = 1.0 - dot(acuv, acuv)*0.4;
+    accol *= max(acvig, 0.0);
+    col = accol; alpha = 1.0;
+  } else if(u_fx==25){                                    // auroraVeil, dramatic northern-lights curtains
+    // LITERAL PORT of pbakaus/radiant's aurora-veil.html (MIT, Copyright 2025 Paul Bakaus,
+    // github.com/pbakaus/radiant). u_mouse and the speed/intensity uniforms dropped, own defaults kept.
+    // VIOLET SUBSTITUTION: green/purple/magenta ribbon and glow mixes swapped for chromaticBloom's own
+    // cobalt/violet/whiteBlue/magenta/indigo, same pairing shape.
+    float avt = t * 0.5;
+    vec2 avuv = (gl_FragCoord.xy - u_res*0.5) / min(u_res.x, u_res.y);
+    vec3 avcol = vec3(0.012, 0.010, 0.022);
+    avcol += vec3(0.012, 0.010, 0.018) * smoothstep(0.5, -0.3, avuv.y);
+    float avstarField = avStars(avuv, u_time);
+    vec3 avstarColor = vec3(0.9, 0.88, 0.8);
+    avcol += avstarColor * avstarField;
+
+    vec3 avCobalt    = vec3(0.03, 0.10, 1.00);
+    vec3 avViolet    = vec3(0.46, 0.05, 0.95);
+    vec3 avWhiteBlue = vec3(0.85, 0.93, 1.00);
+    vec3 avMagenta   = vec3(0.82, 0.08, 0.90);
+    vec3 avIndigo    = vec3(0.22, 0.05, 0.68);
+
+    float r1 = avRibbon(avuv, avt, 0.0, 0.22, 2.5, 0.28, 0.0);
+    vec3 r1color = mix(avCobalt, avWhiteBlue, 0.5+0.5*sin(avuv.y*3.5+avt*0.3));
+    r1color = mix(r1color, avViolet, smoothstep(0.25,0.65,avuv.y)*0.4);
+
+    float r2 = avRibbon(avuv, avt*0.9, 0.35, 0.18, 2.8, 0.24, 2.1);
+    vec3 r2color = mix(avCobalt, avIndigo, 0.5+0.5*sin(avuv.y*4.0-avt*0.4+1.0));
+    r2color = mix(r2color, avMagenta, smoothstep(0.3,0.6,avuv.y)*0.35);
+
+    float r3 = avRibbon(avuv, avt*0.75, -0.30, 0.16, 3.0, 0.22, 4.3);
+    vec3 r3color = mix(avViolet, avMagenta, 0.5+0.5*sin(avuv.y*5.0+avt*0.2+2.0));
+    r3color = mix(r3color, avCobalt, smoothstep(0.1,-0.1,avuv.y)*0.3);
+
+    float r4 = avRibbon(avuv, avt*0.6, 0.15, 0.30, 1.8, 0.35, 1.0);
+    vec3 r4color = mix(avIndigo, avCobalt, 0.5+0.5*sin(avuv.y*2.0+avt*0.15));
+
+    float r5 = avRibbon(avuv, avt*1.1, -0.10, 0.10, 3.5, 0.18, 5.7);
+    vec3 r5color = mix(avWhiteBlue, avViolet, 0.5+0.5*sin(avuv.y*6.0+avt*0.5+3.0));
+
+    float r6 = avRibbon(avuv, avt*0.65, 0.55, 0.14, 2.2, 0.20, 3.5);
+    vec3 r6color = mix(avViolet, avMagenta, 0.5+0.5*sin(avuv.y*3.0-avt*0.3+1.5));
+
+    float r7 = avRibbon(avuv, avt*0.5, -0.20, 0.35, 1.5, 0.30, 6.2);
+    vec3 r7color = mix(avIndigo, avCobalt, 0.5+0.5*sin(avuv.y*2.5+avt*0.1+4.0));
+
+    float avi1 = r1*1.4, avi2 = r2*1.1, avi3 = r3*0.9, avi4 = r4*0.5, avi5 = r5*0.8, avi6 = r6*0.6, avi7 = r7*0.35;
+    vec3 avAuroraLight = r1color*avi1 + r2color*avi2 + r3color*avi3 + r4color*avi4 + r5color*avi5 + r6color*avi6 + r7color*avi7;
+    float avpulse = 0.85 + 0.15*sin(avt*0.8)*sin(avt*0.53+1.0);
+    avAuroraLight *= avpulse;
+
+    float avglowY = smoothstep(-0.3,0.0,avuv.y) * smoothstep(0.75,0.25,avuv.y);
+    float avtotal = avi1+avi2+avi3+avi4+avi5+avi6+avi7;
+    vec3 avAtmGlow = mix(vec3(0.06,0.10,0.15), vec3(0.10,0.05,0.14), 0.5+0.5*sin(avt*0.15)) * avglowY * min(avtotal,2.5) * 0.4;
+    avcol += avAuroraLight + avAtmGlow;
+    avcol -= avstarColor * avstarField * clamp(avtotal*0.5, 0.0, 1.0);
+
+    float avGroundLine = -0.35;
+    float avGroundFade = smoothstep(avGroundLine+0.05, avGroundLine-0.15, avuv.y);
+    if(avGroundFade > 0.001){
+      float perspY = max(0.001, avGroundLine - avuv.y);
+      vec2 crystalUV = vec2(avuv.x/(perspY*2.0+0.5), 1.0/(perspY*3.0));
+      crystalUV.x += avt*0.02;
+      float crystal = avCrystal(crystalUV, u_time);
+      vec3 iceColor = vec3(0.06, 0.08, 0.12);
+      vec3 iceCrystalColor = vec3(0.18, 0.22, 0.32);
+      vec3 iceSurface = mix(iceColor, iceCrystalColor, crystal*0.5);
+      vec2 reflUV = vec2(avuv.x, -avuv.y - avGroundLine*2.0);
+      float rr1 = avRibbon(reflUV, avt, 0.0, 0.25, 2.5, 0.28, 0.0) * 0.3;
+      float rr2 = avRibbon(reflUV, avt*0.9, 0.35, 0.20, 2.8, 0.24, 2.1) * 0.2;
+      float rr3 = avRibbon(reflUV, avt*0.75, -0.30, 0.18, 3.0, 0.22, 4.3) * 0.15;
+      vec3 reflectionColor = r1color*rr1 + r2color*rr2 + r3color*rr3;
+      reflectionColor *= avpulse;
+      float reflStrength = smoothstep(0.25, 0.0, perspY) * 0.6;
+      float sparkle = pow(crystal, 3.0) * reflStrength;
+      vec3 sparkleColor = vec3(0.9, 0.85, 0.7) * sparkle * 0.3;
+      iceSurface += reflectionColor*reflStrength + sparkleColor;
+      avcol = mix(avcol, iceSurface, avGroundFade);
+    }
+
+    float avHorizonDist = abs(avuv.y - avGroundLine);
+    float avHorizonGlow = exp(-avHorizonDist*avHorizonDist/0.003);
+    vec3 avHorizonColor = mix(vec3(0.08,0.06,0.16), vec3(0.12,0.05,0.18), 0.5+0.5*sin(avt*0.2)) * min(avtotal,3.0)*0.35 + vec3(0.02,0.03,0.04);
+    avcol += avHorizonColor * avHorizonGlow;
+
+    float avDist = length(avuv * vec2(0.7, 0.9));
+    float avVignette = 1.0 - smoothstep(0.5, 1.5, avDist);
+    avcol *= 0.7 + avVignette*0.3;
+    avcol = max(avcol, vec3(0.0));
+    avcol = pow(avcol, vec3(0.92, 0.95, 0.98));
+
+    col = avcol; alpha = 1.0;
+  } else {                                                // laserLabyrinth, volumetric light cones through fog
+    // LITERAL PORT of pbakaus/radiant's laser-labyrinth.html (MIT, Copyright 2025 Paul Bakaus,
+    // github.com/pbakaus/radiant). u_mouse and the speed/intensity uniforms dropped, own defaults kept.
+    // WHITE-BLUE SUBSTITUTION: coneColor idx 5 (a cyan accent) swapped for chromaticBloom's whiteBlue.
+    float llt = t * 0.5;
+    vec2 llfragUV = gl_FragCoord.xy / u_res;
+    float llar = u_res.x / u_res.y;
+    vec2 lluv = llfragUV; lluv.x = (lluv.x - 0.5) * llar;
+
+    vec3 llfogCoord = vec3(llfragUV*3.0, llt*0.08);
+    llfogCoord.y -= llt*0.03; llfogCoord.x += llt*0.015;
+    float llfogDensity = llFbm(llfogCoord);
+    vec3 llfogCoord2 = vec3(llfragUV*6.0 + 50.0, llt*0.12);
+    llfogCoord2.y -= llt*0.05;
+    float llfogDetail = llFbm(llfogCoord2);
+    float llfog = llfogDensity*0.5 + llfogDetail*0.5;
+    llfog = llfog*llfog*1.5;
+
+    vec3 llcol = vec3(0.0);
+    float llhueShift = sin(llt*0.07) * 0.2;
+    float llbeat = pow(abs(sin(llt*3.14159265/1.5)), 8.0) * 0.2;
+
+    for(int i=0;i<3;i++){
+      float fi = float(i);
+      float originX = (fi-1.0)*0.4*llar + sin(llt*0.07 + fi*2.5)*0.1*llar;
+      vec2 origin = vec2(originX, 1.05);
+      float sweepAmp = 0.4 + fi*0.1;
+      float sweepFreq = 0.3 + fi*0.11;
+      float theta = sin(llt*sweepFreq*0.7 + fi*1.9) * sweepAmp;
+      vec2 dir = vec2(sin(theta), -cos(theta));
+      vec2 toPixel = lluv - origin;
+      float along = dot(toPixel, dir);
+      float perp = abs(toPixel.x*dir.y - toPixel.y*dir.x);
+      float halfWidth = 0.13 + fi*0.015;
+      float coneWidth = halfWidth*max(along,0.0) + 0.012;
+      float inCone = exp(-perp*perp/(coneWidth*coneWidth*0.55));
+      inCone *= smoothstep(0.0, 0.08, along);
+      inCone *= exp(-along*along*0.15);
+      float fogMod = 0.25 + llfog*0.75;
+      float volumetric = inCone*fogMod;
+      vec3 coneCol = llConeColor(i, llhueShift + fi*0.15);
+      llcol += coneCol * volumetric * 0.35 * (1.0 + llbeat);
+    }
+
+    for(int i=0;i<3;i++){
+      float fi = float(i);
+      int colorIdx = i+3;
+      float originX = (fi-1.0)*0.5*llar + 0.15*llar + sin(llt*0.1 + fi*3.1 + 1.0)*0.08*llar;
+      vec2 origin = vec2(originX, 1.02);
+      float sweepAmp = 0.5 + fi*0.08;
+      float sweepFreq = 0.4 + fi*0.13;
+      float theta = sin(llt*sweepFreq + fi*2.3 + 0.7) * sweepAmp;
+      float beatFreq = 1.8 + fi*0.4;
+      float snap = pow(abs(sin(llt*beatFreq)), 6.0);
+      float snapGate = smoothstep(0.5, 0.85, sin(llt*0.7 + fi*2.094));
+      theta += snap*snapGate*0.18*sin(llt*beatFreq*0.5);
+      vec2 dir = vec2(sin(theta), -cos(theta));
+      vec2 toPixel = lluv - origin;
+      float along = dot(toPixel, dir);
+      float perp = abs(toPixel.x*dir.y - toPixel.y*dir.x);
+      float halfWidth = 0.11 + fi*0.012;
+      float coneWidth = halfWidth*max(along,0.0) + 0.01;
+      float inCone = exp(-perp*perp/(coneWidth*coneWidth*0.4));
+      float coreLine = exp(-perp*perp/(coneWidth*coneWidth*0.04));
+      inCone = inCone + coreLine*0.4;
+      inCone *= smoothstep(0.0, 0.06, along);
+      inCone *= exp(-along*along*0.1);
+      float fogMod = 0.2 + llfog*0.8;
+      float volumetric = inCone*fogMod;
+      vec3 coneCol = llConeColor(colorIdx, llhueShift + fi*0.15 + 0.5);
+      llcol += coneCol * volumetric * 0.75 * (1.0 + llbeat);
+    }
+
+    float llbrightness = dot(llcol, vec3(0.299,0.587,0.114));
+    float llwhiteBlend = smoothstep(0.4, 1.2, llbrightness);
+    llcol = mix(llcol, vec3(llbrightness*1.3), llwhiteBlend*0.5);
+
+    float llgroundHaze = smoothstep(0.2, 0.0, llfragUV.y);
+    float llhazeFog = llFbm(vec3(llfragUV.x*4.0, llfragUV.y*2.0, llt*0.05 + 10.0));
+    llcol += llcol * llgroundHaze * 0.3;
+    llcol += vec3(0.06, 0.03, 0.1) * llgroundHaze * llhazeFog;
+
+    llcol = 1.0 - exp(-llcol * 2.0);
+    float llgrain = llHash(gl_FragCoord.xy + fract(u_time)*100.0) * 0.04 - 0.02;
+    llcol += llgrain;
+
+    vec2 llvigUV = llfragUV - 0.5;
+    float llvigDist = dot(llvigUV, llvigUV);
+    float llvig = clamp(1.0 - llvigDist*0.8, 0.0, 1.0);
+    llcol *= llvig;
+    llcol = clamp(llcol, 0.0, 1.0);
+
+    col = llcol; alpha = 1.0;
   } col = mix(vec3(dot(col, vec3(0.333))), col, 0.9);       // slight desaturate → premium, not garish
   col *= (0.6 + 0.4*u_intensity);
   alpha *= clamp(u_intensity, 0.0, 1.0);
