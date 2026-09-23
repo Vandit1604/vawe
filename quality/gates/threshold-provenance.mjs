@@ -72,6 +72,9 @@ const FORMULA = new Set([
   'quality/gates/sweep-static.mjs#TILE',             // pixel tile grid for sampling
   'quality/gates/block-schema.mjs#PROBE',            // a probe server port number
   'quality/gates/audio-render-check.mjs#SR',         // decode sample rate for THIS gate's own analysis
+  'harness/lib/worktree-landed.mjs#CAP_COMMITS',     // scope cutoff for this module's own commit-by-commit
+                                                      // check; a worktree past it is reported unverified,
+                                                      // never judged landed or stranded by this number
 ]);
 
 const NUMERIC_VALUE = /^[0-9_.eE+\-*/() ]+$/;

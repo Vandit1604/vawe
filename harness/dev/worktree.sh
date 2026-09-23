@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 # harness/dev/worktree.sh: make a git worktree usable by an agent, in about a second.
 #
-#   harness/dev/worktree.sh add <name>     → .claude/worktrees/<name>, ready to run gates
+#   harness/dev/worktree.sh add <name> [scope-glob ...]  → .claude/worktrees/<name>, ready to run gates
 #   harness/dev/worktree.sh rm  <name>
 #
+# THE SCOPE GLOBS ARE OPTIONAL, and record what harness/author/critics.mjs's DECIDERS already carry
+# for deciders: the files this worktree is TOLD it owns, so worktree-status.mjs can show who owns what,
+# and a second worktree started with an overlapping scope is warned (never blocked) at creation time.
+# See harness/lib/worktree-claims.mjs. Leaving them off costs nothing beyond today's status quo.
 # WHY THIS EXISTS. `git worktree add` checks out tracked files only. This repo keeps 444M of
 # node_modules, an 11M bin/, and 108 of its 149 scenes out of git, so a bare worktree cannot run a
 # single gate, and fails QUIETLY: `layer-props` walks 41 scenes instead of 149 and prints a green tick.
@@ -26,11 +30,13 @@ set -euo pipefail
 # one definition of "main", not a second one growing alongside it.
 ROOT="$(git worktree list --porcelain | awk '/^worktree /{print $2; exit}')"
 cmd="${1:-}"; name="${2:-}"
-[ -n "$name" ] || { echo "usage: worktree.sh add|rm <name>" >&2; exit 2; }
+[ -n "$name" ] || { echo "usage: worktree.sh add|rm <name> [scope-glob ...]" >&2; exit 2; }
 WT="$ROOT/.claude/worktrees/$name"
+shift 2  # remaining args, if any, are declared scope globs (add only)
 
 if [ "$cmd" = "rm" ]; then
   git -C "$ROOT" worktree remove --force "$WT" 2>/dev/null || true
+  node "$ROOT/harness/dev/worktree-claim.mjs" rm "$name" 2>/dev/null || true
   echo "✓ removed $name"; exit 0
 fi
 [ "$cmd" = "add" ] || { echo "usage: worktree.sh add|rm <name>" >&2; exit 2; }
@@ -97,3 +103,11 @@ while IFS= read -r pat; do
 done < "$ROOT/.worktreeinclude"
 echo "✓ $WT  (branch wt-$name)   node_modules: shared   bin/vawe: shared"
 [ "$fail" = 0 ] || { echo "✗ refusing to hand over an incomplete worktree." >&2; exit 1; }
+
+# Record the claim LAST, once the worktree is proven usable. Scopes are whatever globs the caller
+# passed after <name>; none is fine, it just carries no overlap check (see the header note). Warns
+# on overlap with another LIVE worktree's declared scope, never blocks: engine-doctrine/CRAFT's
+# observability plan, Task 2.
+if [ -f "$WT/harness/dev/worktree-claim.mjs" ]; then
+  node "$WT/harness/dev/worktree-claim.mjs" add "$name" "wt-$name" "$@"
+fi

@@ -76,6 +76,44 @@ dominates the total. Cost rises faster than the number of tool calls.
 9. **Match the pattern to the work.** Measure the shape of the task first. Choose the pattern second.
    Do not start with the orchestration and fit the work to it.
 
+## The fan-out rule this session's evidence actually supports
+
+The owner's harness-engineering finding was that agents "try to do too much at once." Five real
+failures the same session named the actual shape of that, and none of them was "too many agents":
+
+1. An agent's final message claimed its report was "already delivered above." Nothing had arrived. Only
+   reading its branch showed the work was real.
+2. An agent ended its turn waiting on a monitor. It never resumes on its own; it sat until a person
+   noticed (rule 8 above already says this: "never end your turn saying you are waiting for one to
+   finish").
+3. An agent died on a rate limit mid-task, and the work had to be finished by hand.
+4. Two agents nearly collided in `harness/media/` and `engine-doctrine/RESEARCH/`, avoided only because
+   the briefs happened to name opposite files.
+5. A guard refused a legitimate sync because a parallel agent's scratch files sat in a sibling worktree.
+   Concurrency created the condition; nothing surfaced it until a person read the refusal by hand.
+
+None of the five is fixed by a lower agent count. A cap on headcount does not stop an agent from lying
+about a report it never sent, does not wake one stalled on a monitor, does not survive a rate limit, and
+does not stop two agents that both happen to touch `harness/media/`. **The rule these five actually
+support is DISJOINT SCOPES and SEQUENTIAL DEPENDENCY, never a number:**
+
+- **Disjoint scopes.** Rule 5 already says "do not send two agents to the same files," for token cost.
+  The same rule also prevents failure 4 and, as a warning rather than a lock, failure 5: declare the
+  globs a worktree owns to `worktree.sh add <name> <glob ...>` (mirroring the write-scope table
+  `harness/author/critics.mjs`'s DECIDERS already carry), and `make worktree-status` warns when a new
+  worktree's declared scope overlaps a live one's.
+- **Sequential dependency stays one agent.** Rule 8 already argues this on token cost; failures 1-3 are
+  the reliability argument for the same conclusion. A chain of dependent steps run as a fan-out cannot
+  be watched: nobody is positioned to notice agent 2 stalled, or that agent 3's report is fiction,
+  until the whole chain is expected back. One agent, watched in the foreground, catches all three as
+  they happen.
+- **Never trust a report; read the artefact.** Failure 1 is the general case `harness/dev/`
+  now backstops directly: `make worktree-status` reads commits and file activity off disk, never a
+  claim a turn typed, the same reasoning `quality/gates/stage.mjs` already applies to a film's stage.
+
+A count would have prevented none of these five, and this repo just spent two days removing count-based
+caps elsewhere. Do not reintroduce one here.
+
 ## When the cost is worth it
 
 Two cases only.
