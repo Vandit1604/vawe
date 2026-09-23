@@ -113,7 +113,7 @@ import { ENERGY, okEnergy } from '../../core/transitions/energy.js';
 import { SEAM_FX } from '../../core/timeline/seams.js';
 import { SEAM_CUE } from '../../core/audio/cues.js';
 import { resolveBridges } from '../../core/audio/bridges.js';
-import { RESAMPLE_FX } from '../../core/resample/effects.js';
+import { RESAMPLE_FX, BLUR_DIR } from '../../core/resample/effects.js';
 import { RAYMARCH_FX } from '../../core/surfaces/raymarch-fx.js';
 import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { pairActs, parsePairs, verdictOf, isPlaceholderSurface } from './content-check.mjs';
@@ -1975,20 +1975,31 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   const src = fs.readFileSync(path.join(repoRoot, 'core', 'resample', 'effects.js'), 'utf8');
   const frag = src.slice(src.indexOf('const FRAG'), src.indexOf('export function'));
   ok(`resample: ${RESAMPLE_FX.length} effects, all unique`, RESAMPLE_FX.length > 0 && new Set(RESAMPLE_FX).size === RESAMPLE_FX.length);
-  const noBranch = RESAMPLE_FX.slice(0, -1).map((_, i) => i).filter((i) => !frag.includes(`u_fx == ${i}`));
-  ok(`resample: FRAG has a branch for effects 0..${RESAMPLE_FX.length - 2}${noBranch.length ? ', missing ' + noBranch.map((i) => RESAMPLE_FX[i]).join(', ') : ''}`, noBranch.length === 0);
-  ok(`resample: last effect (${RESAMPLE_FX[RESAMPLE_FX.length - 1]}) is the trailing else`, !frag.includes(`u_fx == ${RESAMPLE_FX.length - 1}`));
-  const branchAt = (i) => {
-    const start = i === RESAMPLE_FX.length - 1 ? frag.lastIndexOf('} else {') : frag.indexOf(`u_fx == ${i}`);
-    const next = i === RESAMPLE_FX.length - 1 ? frag.length : frag.indexOf('} else', start + 4);
+  // BLUR_DIR: zoomBlur/spinBlur/directionalBlur share ONE shader branch (u_fx == 0), switched
+  // internally on u_dir, so a name in it never gets its own `u_fx == N` literal. Every other name
+  // still owns its own explicit `u_fx == N` branch, indices 2..7; the trailing else that used to be
+  // the last array name's branch is now dead defensive code (u_fx never reaches 8), so it names no fx.
+  const nonBlur = RESAMPLE_FX.filter((n) => !(n in BLUR_DIR));
+  const idxOf = (name) => RESAMPLE_FX.indexOf(name);
+  const noBranch = nonBlur.filter((n) => !frag.includes(`u_fx == ${idxOf(n)}`));
+  ok(`resample: FRAG has a branch for every non-blur effect${noBranch.length ? ', missing ' + noBranch.join(', ') : ''}`, noBranch.length === 0);
+  const branchAt = (name) => {
+    if (name in BLUR_DIR) return frag.slice(frag.indexOf('if (u_fx == 0)'), frag.indexOf('} else if (u_fx == 2)'));
+    const i = idxOf(name);
+    const start = frag.indexOf(`u_fx == ${i}`);
+    const next = frag.indexOf('} else', start + 4);
     return frag.slice(start, next > start ? next : frag.length);
   };
-  const blind = RESAMPLE_FX.filter((_, i) => !branchAt(i).includes('texture2D'));
+  const blind = RESAMPLE_FX.filter((n) => !branchAt(n).includes('texture2D'));
   ok(`resample: every effect samples the source texture${blind.length ? ', blind: ' + blind.join(', ') : ''}`, blind.length === 0);
   // amount is the one dial every effect exposes; a branch that ignores it cannot be animated,
   // which is what `amount: [from, to]` exists for.
-  const deaf = RESAMPLE_FX.filter((_, i) => !branchAt(i).includes('u_amt'));
+  const deaf = RESAMPLE_FX.filter((n) => !branchAt(n).includes('u_amt'));
   ok(`resample: every effect responds to amount${deaf.length ? ', deaf: ' + deaf.join(', ') : ''}`, deaf.length === 0);
+  // The blur family really is ONE shader branch, not three: every name in BLUR_DIR resolves to the
+  // exact same source slice. If this ever fails, the "collapse" claim is false.
+  const blurBranches = new Set(Object.keys(BLUR_DIR).map(branchAt));
+  ok('resample: the blur family (zoomBlur/spinBlur/directionalBlur) shares one shader branch', blurBranches.size === 1);
   const schema = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films', 'scene', 'schema.json'), 'utf8'));
   ok('resample: schema enum is exactly RESAMPLE_FX, in order', JSON.stringify(schema.fields.layers.item.resample.enum) === JSON.stringify(RESAMPLE_FX));
 }
