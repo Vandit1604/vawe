@@ -26,7 +26,12 @@ fs.mkdirSync(SFX, { recursive: true }); fs.mkdirSync(MUSIC, { recursive: true })
 // the deleted names are KEPT as aliases here on purpose: a shipped scene may already write
 // `audio.cues[{name:"tick"}]`, and resolving that to the nearest surviving voicing is kinder than
 // refusing to bake. What a role must never be again is an alias onto a cue that is not there.
-const ROLES = {
+// EXPORTED so quality/gates/sfx-audit.mjs can ask what this bake actually writes. It diffed the
+// baked .wav files against core/audio/kit.mjs's CUES and called the 15 aliases below orphans, which
+// is a false positive: they are deliberate redirects for scenes that already name a retired cue, and
+// `make audio` writes a file for every one of them on every run. The bake's own name set is the only
+// honest answer to "should this file exist".
+export const ROLES = {
   // auto sound-design roles the scene builder emits
   whoosh: 'whoosh',    // a real voicing now, not an alias onto a soft hiss
   reveal: 'chime',     // a sting, the thing that lands

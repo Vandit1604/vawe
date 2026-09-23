@@ -19,7 +19,11 @@ import { population } from '../../harness/lib/census.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 // CUES is the owner of which sounds exist. assets/sfx/*.wav is BAKED from it by `make audio`
 // (core/audio/kit.mjs:17), so a .wav whose name is not a cue is a leftover from an earlier bake.
-import { CUES } from '../../core/audio/kit.mjs';
+// ROLES, not CUES. CUES is the 13 synth voicings; ROLES is the 28 names `make audio` actually WRITES
+// a file for, 15 of which are deliberate aliases onto a surviving voicing so a shipped scene that
+// still names a retired cue keeps baking (generators/media/audio-bake.mjs's own comment says so).
+// Diffing against CUES called all 15 orphans and was wrong.
+import { ROLES } from '../../generators/media/audio-bake.mjs';
 const f = gateFindings();
 const SFX = path.join(repoRoot, 'assets/sfx');
 
@@ -88,7 +92,13 @@ for (const f of files) {
   // class by name and failed its cap, so this gate spent its verdict on the shape of sounds the
   // engine cannot play. A sound with no cue is a housekeeping finding, not a shape defect, and
   // saying which it is keeps the shape verdict about sounds that can actually reach a film.
-  if (!Object.prototype.hasOwnProperty.call(CUES, name)) { orphans.push(name); continue; }
+  if (!Object.prototype.hasOwnProperty.call(ROLES, name)) { orphans.push(name); continue; }
+  // AN ALIAS INHERITS A NAME, NOT AN ENVELOPE, and that is the defect this branch reports rather
+  // than forgives. `click` is a byte-for-byte copy of `pluck` (generators/media/audio-bake.mjs's
+  // ROLES redirects the retired names onto surviving voicings), so it measures 0.696s. A pluck is a
+  // musical note and 0.7s is right for it; a click fires every 0.09s and 0.7s of it is the drone
+  // this file's own header was written about. The fix is a trimmed envelope per role in the bake,
+  // not a looser cap here, so this stays a finding.
   const m = measure(path.join(SFX, f));
   const cls = CLASSES.find(([re]) => re.test(name));
   if (m == null) { bad.push({ name, why: 'unreadable or non-16-bit WAV' }); continue; }
@@ -101,8 +111,8 @@ for (const f of files) {
 }
 console.log('');
 if (orphans.length) {
-  console.log(`   ~ ${orphans.length} file(s) with no cue in the registry, not graded: ${orphans.join(', ')}`);
-  f.note('sfx-orphan', `${orphans.length} baked sound(s) have no cue in core/audio/kit.mjs and nothing can play them: `
+  console.log(`   ~ ${orphans.length} file(s) with no role in the bake, not graded: ${orphans.join(', ')}`);
+  f.note('sfx-orphan', `${orphans.length} baked sound(s) have no role in generators/media/audio-bake.mjs and nothing writes them: `
     + `${orphans.join(', ')}. Re-bake with \`make audio\` to clear them, or add the cue back.`);
   console.log('');
 }
