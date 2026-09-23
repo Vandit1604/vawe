@@ -1296,7 +1296,10 @@
       "bands",
       "godRays",
       "curlSmoke",
-      "chromaticBloom"
+      "chromaticBloom",
+      "auroraCurtain",
+      "auroraVeil",
+      "laserLabyrinth"
      ]
     },
     "shaderKeys": {
