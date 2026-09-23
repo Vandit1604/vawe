@@ -1295,7 +1295,11 @@
       "metaballs",
       "bands",
       "godRays",
-      "curlSmoke"
+      "curlSmoke",
+      "chromaticBloom",
+      "auroraCurtain",
+      "auroraVeil",
+      "laserLabyrinth"
      ]
     },
     "shaderKeys": {
