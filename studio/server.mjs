@@ -29,9 +29,7 @@ import { resolveBridges } from '../core/audio/bridges.js';
 import { scratch } from '../harness/lib/scratch.mjs';
 import { studioPage } from './page.mjs';
 import { parseStoryboard, timeline, fieldIn, fieldAllIn, blocksOf, frontmatter, referenceDevices } from '../harness/author/storyboard-parse.mjs';
-import { fragPage, FULLBLEED_RE, INSET_RE } from '../harness/lib/frag-page.mjs';
 import { stageOf } from '../quality/gates/stage.mjs';
-import { extractKitBlock } from '../harness/lib/stagekit.mjs';
 import { bgPreset, bgPaletteFrom, BG_NAMES } from '../core/backgrounds/index.js';
 import { isLightBg } from '../core/color/engine.js';
 
@@ -465,6 +463,64 @@ function stillLayers(samples) {
   return [...seen].filter(([, sigs]) => sigs.length >= 3 && sigs.every((s) => s === sigs[0])).map(([i]) => i);
 }
 
+// ---- THE PLAN'S OWN FRAMES: a real rendered still per beat, never a shape ------------------------
+// "plan should only show complete rendered sheet actual how it will look in video" (the owner's own
+// words): a fragment previewed alone, or a box drawn from `archetype:`, is a different picture from
+// what the engine actually paints (camera, other layers, the ground, transitions). This seeks the
+// SAME scene.html this studio already boots and shoots one frame per beat, one page launch and N
+// seeks, the same shape as buildStrip() above (never one browser per beat).
+//
+// A beat only gets a real frame once the scene has SOMETHING to seek: a film with zero layers has
+// nothing to paint, and says which command draws it. Beyond that, EVERY beat is rendered as-is,
+// whatever is actually on screen at its start time, because that is what "how it will look in video"
+// means: a beat-to-html-layer positional guess (assemble.mjs writes one per beat, in order) holds for
+// a fragment-per-beat film and is simply wrong for a continuous-object film (one shader/group layer
+// spanning the whole duration, no per-beat html at all), so it is not used here. The render is the
+// single source of truth for what a beat shows; nothing upstream of it gets to overrule that by name.
+let planFrames = null;
+async function buildPlanFrames() {
+  const sbPath = storyboardPath();
+  if (!sbPath) return { error: 'no storyboard for this scene' };
+  const rel = path.relative(REPO_ROOT, dataArg);
+  const beats = timeline(parseStoryboard(fs.readFileSync(sbPath, 'utf8'))).beats;
+  const sceneExists = fs.existsSync(dataArg);
+  const key = [sceneExists ? fs.statSync(dataArg).mtimeMs : 0, fs.statSync(sbPath).mtimeMs, beats.length].join(':');
+  if (planFrames && planFrames.key === key) return planFrames;
+
+  // { missing, cmd? }, never a plain string with the command baked in: the client shows the two
+  // differently (prose, then a copyable code chip), and a regex pulled out of prose is how that pairing
+  // would drift the moment either side's wording changed.
+  const allMissing = (missing, cmd) => (planFrames = { key, frames: beats.map(() => ({ missing, cmd })) });
+  if (!sceneExists) return allMissing('no scene.json yet.', `make scaffold D=${rel}`);
+  const d = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
+  if (!(Array.isArray(d.layers) && d.layers.length)) return allMissing('no scene layers yet.', `make assemble D=${rel}`);
+  const dur = Number(d.duration) || 0;
+  if (!dur) return allMissing('this scene declares no `duration`, so there is no time to seek.');
+  const fps = Number(d.fps) || 30;
+  const [VW, VH] = sceneDims(d);
+  const dir = path.join(REPO_ROOT, 'out', 'plan', SLUG);
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true });
+  const { page, close } = await launchPage({ width: VW, height: VH, scale: 1 });
+  const frames = beats.map(() => null);
+  const stamp = Date.now(); // cache-busts the img src: the jpg at this same path just changed under it
+  try {
+    await page.goto(`http://127.0.0.1:${PORT}/films/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}`,
+      { waitUntil: 'load' });
+    const bootErr = await waitForEngine(page, { timeout: 40000, throwOnTimeout: false });
+    if (bootErr) return allMissing(`the scene will not boot, so there is no frame to show: ${bootErr}`);
+    for (let i = 0; i < beats.length; i++) {
+      const t = Math.min(Math.max(beats[i].start, 0), Math.max(0, dur - 1 / fps));
+      const n = Math.round(t * fps);
+      await page.evaluate((k) => window.__engine.renderFrame(k), n);
+      await page.screenshot({ path: path.join(dir, `${i}.jpg`), type: 'jpeg', quality: 82,
+        clip: { x: 0, y: 0, width: VW, height: VH } });
+      frames[i] = { src: `/out/plan/${SLUG}/${i}.jpg?v=${stamp}`, t: +t.toFixed(2), w: VW, h: VH };
+    }
+  } finally { await close(); }
+  return (planFrames = { key, frames });
+}
+
 // ---- the render, as a job with a status ---------------------------------------------------------
 // A render is minutes, so it is started and then polled. Holding a fetch open for the whole of one is
 // how a panel ends up frozen with nothing to say for itself.
@@ -517,10 +573,13 @@ const studioRoutes = (req, res) => {
   // ---- the PLAN, as the film rather than as grey boxes -------------------------------------------
   // A film has two artefacts and studio only ever showed one. This used to serve `make panels`, one
   // grey still per beat sized from `shot:`, which answers how big and where and nothing about what is
-  // in the frame, so nobody could approve a plan from it (engine-doctrine/MISTAKES.md #592). The real pictures
-  // were on disk the whole time: every beat that names a `fragment:` has hand-written markup that
-  // renders instantly. So the plan is served as DATA and the page draws it in the studio's own room,
-  // with each beat's real fragment live beside its reasoning.
+  // in the frame, so nobody could approve a plan from it (engine-doctrine/MISTAKES.md #592). A later
+  // pass replaced that with a fragment previewed alone, or a box drawn from `archetype:`: closer, but
+  // still not the picture the film will actually show, since a fragment on its own carries none of the
+  // camera, the other layers or the transitions around it (the owner's own words: "plan should only
+  // show complete rendered sheet actual how it will look in video"). So this route serves the
+  // storyboard's own fields as DATA, and /api/plan-frames (below buildPlanFrames) serves one real
+  // rendered still per beat, seeked out of the same scene.html this studio already boots.
   // WHERE THE FILM IS, in the tool that shows the film. `make stage` answers this in a terminal, and a
   // terminal is not where anyone is looking while they work on a film.
   if (url === '/api/stage') {
@@ -537,9 +596,8 @@ const studioRoutes = (req, res) => {
       const src = fs.readFileSync(sbPath, 'utf8');
       const sb = parseStoryboard(src);
       const blocks = blocksOf(src);
-      // A fragment-less beat is still drawn, from its storyboard fields, on the film's own colours
-      // (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md archetypes): a grey box says nothing about what a beat
-      // SHOWS, and this repo's whole point is that the picture is the only thing worth approving.
+      // `archetype`/`weight`/`borrows` still travel here for the tags and the colour arc; the picture
+      // itself now comes from /api/plan-frames, never composed from these fields on the client.
       let themeJson = null;
       try { themeJson = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'themes', THEME_NAME + '.json'), 'utf8')); } catch { /* sketch falls back to studio's own greys */ }
       const palette = themeJson ? themeJson.palette : null;
@@ -704,24 +762,6 @@ const studioRoutes = (req, res) => {
     return true;
   }
 
-  // One fragment, on the film's theme, in the SAME wrapper `make preview` photographs. Sharing that
-  // wrapper is the point: two copies would drift, and the drift shows a fragment clean in one tool and
-  // wrong in the other with nothing saying which is lying.
-  if (url === '/__frag') {
-    const rel = new URL(req.url, 'http://x').searchParams.get('src') || '';
-    const file = path.join(REPO_ROOT, rel);
-    const themeFile = path.join(REPO_ROOT, 'themes', THEME_NAME + '.json');
-    if (!file.startsWith(REPO_ROOT) || !fs.existsSync(file) || !fs.existsSync(themeFile)) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('no such fragment'); return true;
-    }
-    const theme = JSON.parse(fs.readFileSync(themeFile, 'utf8'));
-    const raw = fs.readFileSync(file, 'utf8');
-    const kit = extractKitBlock(raw);
-    const own = kit ? raw.replace(kit, '') : raw;
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
-    res.end(fragPage({ raw, theme, bg: theme.palette.bg, fullBleed: FULLBLEED_RE.test(own) && INSET_RE.test(own) }));
-    return true;
-  }
 
   // ---- the page reports its own failure to the terminal ------------------------------------------
   // A boot error used to exist only inside the iframe. The terminal that started studio printed its
@@ -862,6 +902,16 @@ const studioRoutes = (req, res) => {
     return true;
   }
 
+  // ---- the plan's own frames, built on demand and cached against the scene + storyboard mtimes -----
+  if (url === '/api/plan-frames') {
+    const reply = (o) => { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(o)); };
+    if (jobs.get('plan-frames')) return reply({ busy: true }), true;
+    jobs.set('plan-frames', true);
+    buildPlanFrames().then((s) => reply(s)).catch((e) => reply({ error: String(e.message) }))
+      .finally(() => jobs.delete('plan-frames'));
+    return true;
+  }
+
   // ---- the render the seam sheet needs, started and then polled ------------------------------------
   if (url === '/api/render') {
     if (req.method === 'POST') { if (!render || render.done) startRender(); }
@@ -872,8 +922,8 @@ const studioRoutes = (req, res) => {
   }
 
   // ---- a fragment's own parts, for the inside view: what `[data-part]` it exposes to author motion on.
-  // Restricted to films/, and to a path that resolves inside the repo, same guard as /__frag: this is
-  // the one route that takes a path from the browser and reads a file with it.
+  // Restricted to films/, and to a path that resolves inside the repo: this is the one route left that
+  // takes a path from the browser and reads a file with it.
   if (url === '/api/fragment') {
     const reply = (o, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(o)); };
     const rel = new URL(req.url, 'http://x').searchParams.get('src') || '';
