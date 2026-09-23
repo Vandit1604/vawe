@@ -16,6 +16,11 @@
 // `angle` (degrees, 0 = rightward) is read only by `directionalBlur`: a smear axis an author SETS,
 // independent of the layer's own travel speed (that one is automatic motion blur, `core/tracks/motion.js`).
 //
+// `cx`/`cy` (0..1, default 0.5/0.5) and `count` (2..32, default 16) are read only by `zoomBlur`: the
+// point it radiates from and how many samples it takes. Off-centre `cx`/`cy` is what turns the pass
+// into light rays streaming from a source shape rather than a pool centred on the frame; `count`
+// trades sample quality against the render-time cost of the pass (each sample is one texture read).
+//
 // A LAYER THAT OWNS NO RASTER IS BAKED INTO ONE. Until now this file refused every type that is not an
 // image or a canvas, so eight passes could be aimed at a photograph and at nothing we compose
 // ourselves. The whole "take arbitrary content and transform it" family was out of reach. A built
@@ -87,6 +92,7 @@ export function attachResample(kit, el, L) {
     speed: spec.speed ?? 1,
     seed: spec.seed ?? L.seed ?? 0,
     angle: (spec.angle ?? L.angle ?? 0) * Math.PI / 180,
+    cx: spec.cx ?? 0.5, cy: spec.cy ?? 0.5, count: spec.count ?? 16,
     isStatic: src.isStatic,
   });
 }
@@ -173,6 +179,7 @@ async function bakeOne(el, L, spec) {
     speed: spec.speed ?? 1,
     seed: spec.seed ?? L.seed ?? 0,
     angle: (spec.angle ?? L.angle ?? 0) * Math.PI / 180,
+    cx: spec.cx ?? 0.5, cy: spec.cy ?? 0.5, count: spec.count ?? 16,
     isStatic: true,   // a baked subtree is the same texels on every frame, upload once, like an <img>
   });
 }
@@ -192,7 +199,7 @@ export function tickResample(el, L, t, active) {
   const lt = (t - start) * s.speed;
 
   // `once` for a static <img>: the texels never change, so upload on the first draw only.
-  s.r.draw(s.src, s.fx, amt, lt, s.seed, s.isStatic, s.angle);
+  s.r.draw(s.src, s.fx, amt, lt, s.seed, s.isStatic, s.angle, s.cx, s.cy, s.count);
   // Stamp the DOM so the renderer's static-frame dedup sees a resample-only frame as a change.
   // Without this a slow dissolve over a still image dedups to one frame and the effect vanishes.
   el.dataset.rs = amt.toFixed(4) + ':' + lt.toFixed(3);

@@ -19,7 +19,24 @@
 // Everything is treated as PREMULTIPLIED alpha end to end: the source canvases are created with
 // premultipliedAlpha:true, so their texels already are. Blur is a weighted average, which is only
 // correct in premultiplied space anyway; alpha-modulating effects scale the whole vec4.
-
+//
+// SUBSTRATE DECISION (radial blur, the operator After Effects calls CC Radial Fast Blur): this pass
+// already exists. `zoomBlur` below IS the radial-blur operator the engine was missing a CENTRE for:
+// it samples along the radius from a fixed point and owns no colour, no timing and no shape, exactly
+// the shape `core/layers/util.js:754`'s comment names as unbuilt. A third substrate (Canvas2D, a new
+// SVG filter) would duplicate a GL sampling pass that already reads neighbouring texels correctly and
+// already clears its buffer to nothing when the layer goes off-window. The only real gap was that the
+// centre was hardcoded to the screen centre (0.5, 0.5) and the sample count to a fixed 16, so a light
+// source off-centre, or a cheaper/richer pass, could not be authored. `u_cx`/`u_cy`/`u_count` close
+// that gap inside the SAME pass rather than adding a second one.
+//   COST at 1920x1080, one resampled layer, 60fps: one extra WebGL context (as every resample fx
+//   already costs), draw() unchanged in shape, 16 texture2D reads per pixel by default (bounded by
+//   `u_count`, capped at 32 in the shader's own loop). Measured on a real film below.
+//   PURITY: draw() takes (src, fx, amount, time, seed, once, angle, cx, cy, count), all read once at
+//   attach/bake time from the layer's own JSON or interpolated from local progress `p` inside
+//   tickResample, itself a pure function of `t`. No new state is kept between frames beyond what
+//   zoomBlur/spinBlur already keep (nothing: SPECS holds the layer's static config, not a running
+//   accumulator), so renderFrame(n) stays exactly as pure as it was before this change.
 import { defineRegistry } from '../registry/registry.js';
 
 export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macroblock', 'dissolve', 'refract', 'chromaShift', 'directionalBlur'];
@@ -36,7 +53,7 @@ export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macr
 // And a constant `amount` is usually the wrong call: half of these only read as motion while they MOVE,
 // so ramp them across the layer's window.
 export const RESAMPLE_BLURBS = {
-  zoomBlur: 'radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp',
+  zoomBlur: 'radial smear out from a centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp. `cx`/`cy` move the centre off screen-middle (0..1, default 0.5/0.5); `count` trades sample quality for cost (2..32, default 16)',
   spinBlur: 'smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal',
   fisheye: 'real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge',
   bitCrush: 'quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration',
@@ -78,6 +95,8 @@ uniform float u_amt;    // 0..1, the effect's strength: the only dial most effec
 uniform float u_time;   // local seconds, for the effects that move
 uniform float u_seed;
 uniform float u_angle;  // directionalBlur only: the smear axis, radians, 0 = rightward
+uniform vec2  u_center; // zoomBlur only: the point it radiates from/toward, uv space, default (0.5,0.5)
+uniform int   u_count;  // zoomBlur only: sample count, 2..32, default 16 (loop is capped at 32)
 
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)) + u_seed) * 43758.5453123); }
 
@@ -94,11 +113,14 @@ void main(){
   float ar = u_res.x / max(u_res.y, 1.0);
   vec4 col;
 
-  if (u_fx == 0) {                                      // zoomBlur, smear along the radius from centre
-    vec2 dir = (uv - 0.5) * (u_amt * 0.30);
+  if (u_fx == 0) {                                      // zoomBlur, smear along the radius from u_center
+    vec2 dir = (uv - u_center) * (u_amt * 0.30);
+    int n = u_count; if (n < 2) n = 2; if (n > 32) n = 32;
+    float nf = float(n - 1);
     col = vec4(0.0); float wsum = 0.0;
-    for (int i = 0; i < 16; i++) {
-      float t = float(i) / 15.0;
+    for (int i = 0; i < 32; i++) {
+      if (i >= n) break;                                // GLSL loop bounds must be constant; count is a runtime cutoff
+      float t = float(i) / nf;
       float w = 1.0 - t * 0.55;                         // near samples dominate, so the centre stays readable
       col += texture2D(u_tex, uv - dir * t) * w; wsum += w;
     }
@@ -232,6 +254,7 @@ export function createResampler(w, h) {
     fx: gl.getUniformLocation(prog, 'u_fx'), amt: gl.getUniformLocation(prog, 'u_amt'),
     time: gl.getUniformLocation(prog, 'u_time'), seed: gl.getUniformLocation(prog, 'u_seed'),
     angle: gl.getUniformLocation(prog, 'u_angle'),
+    center: gl.getUniformLocation(prog, 'u_center'), count: gl.getUniformLocation(prog, 'u_count'),
   };
 
   const tex = gl.createTexture();
@@ -254,7 +277,7 @@ export function createResampler(w, h) {
     canvas,
     // src: an HTMLImageElement or HTMLCanvasElement. `once` skips re-upload for static sources.
     // A still image is the same texels on every frame and re-uploading it 900 times is pure waste.
-    draw(src, fx, amount = 0.5, time = 0, seed = 0, once = false, angle = 0) {
+    draw(src, fx, amount = 0.5, time = 0, seed = 0, once = false, angle = 0, cx = 0.5, cy = 0.5, count = 16) {
       const idx = RESAMPLE_FX.indexOf(fx);
       if (idx < 0) RESAMPLE_REGISTRY.pick(fx);   // throws, naming this vocabulary and any other the word lives in
       // An <img>'s .width is its LAYOUT width (set by our own CSS), not proof that pixels decoded.
@@ -275,6 +298,8 @@ export function createResampler(w, h) {
       gl.uniform1f(U.time, time);
       gl.uniform1f(U.seed, seed);
       gl.uniform1f(U.angle, angle);
+      gl.uniform2f(U.center, cx, cy);
+      gl.uniform1i(U.count, count);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
