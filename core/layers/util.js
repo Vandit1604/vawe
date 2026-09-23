@@ -103,7 +103,7 @@ export const PROPS = {
   bg: {}, border: {}, shadow: {}, elevation: {}, glow: {}, pad: {}, radius: {}, on: { when: 'elevation' },
   intensity: { when: 'glow' },
   // decoration: glass / crt / progressive blur / border trail / mask / look / reflect / logotype / base opacity
-  glass: {}, crt: {}, progressiveBlur: {}, borderTrail: {}, mask: {}, filter: {}, lookOpts: { when: 'filter' },
+  glass: {}, crt: {}, progressiveBlur: {}, borderTrail: {}, mask: {}, falloff: {}, filter: {}, lookOpts: { when: 'filter' },
   fade: {}, reflect: {}, logotype: {}, opacity: {}, css: {},
   // layoutGroup
   layout: {}, gridCols: { when: 'layout' }, colw: { when: 'layout' }, colGap: {}, gap: {}, rowGap: {},
@@ -134,6 +134,90 @@ export function crtSpec(o = {}) {
   }
   return { filter, background: layers.join(',') };
 }
+
+// falloffMask(o) -> a CSS mask-image radial-gradient string. Pure, exported for the same reason
+// crtSpec/presetSpec are: testable with plain node, no DOM.
+//
+// THE AE GRADIENT-RAMP ROLE, generalised to any layer instead of owned by one effect. Volumetric
+// light in After Effects is never one filter: a coloured solid (the layer's own paint), a feathered
+// mask (WHERE the light is) and a gradient ramp (the falloff, 1 at the source, 0 with distance),
+// composited with a blend. This function is only the third piece, because the first two already exist
+// on every layer (its own colour/texture) and `mask-image` already reads alpha, not a second channel
+// this engine would have to invent. `fade:"edges"` (below, applyFalloff) proved the wiring: a fixed
+// radial alpha mask on any layer's own element. `falloff` is the parametric, invertible version of
+// the same primitive, not a second mechanism next to it.
+//
+// o: { cx, cy: 0..1 within the layer's own box (default 0.5, matches glow's cx/cy convention) ·
+//      radius: 0..~1.5, fraction of the box where alpha reaches its far end (default 0.6) ·
+//      feather: 0..1, fraction of radius that stays at the near value before the ramp starts (default 0.35) ·
+//      amount: 0..1, the far end's alpha (default 1: fully opaque/transparent). A vignette wants a
+//        DIM, not a cut: `amount:0.6` stops the ramp at 60% alpha instead of a hard edge ·
+//      invert: swap the ramp, 0 at the source growing to `amount` with distance, the vignette shape }
+//
+// mask-image reads the ALPHA channel here (opaque vs transparent), the same convention `fade` and
+// `mask` already use in this file: the colour named in the gradient is never shown, only its alpha.
+//
+// falloffCurve(o) is the ONE definition: it decides inner/outer radius and the near/far VALUES (unit-
+// less, 0..1) that every emitter ramps between. falloffMask (CSS), falloffCanvasGradient (canvas2d)
+// and FALLOFF_GLSL (a shader snippet) are three renderings of this same curve, never three curves: all
+// three interpolate LINEARLY between the same (inner, near) and (r, far) points, because that is what
+// a CSS/canvas gradient stop already does, and a GLSL emitter that used `smoothstep` instead would be
+// a second, silently different curve behind the same name. A call site whose own shape is not this
+// flat-then-linear-ramp (a smoothstep ease, a multi-stop colour blend, a Gaussian) does not fit and is
+// left as its own hand-rolled code, not bent to match.
+export function falloffCurve(o = {}) {
+  const r = Math.max(0.01, o.radius ?? 0.6);
+  const feather = Math.max(0, Math.min(1, o.feather ?? 0.35));
+  const inner = Math.max(0, r * (1 - feather));
+  const amount = Math.max(0, Math.min(1, o.amount ?? 1));
+  const near = o.invert ? 0 : 1;
+  const far = o.invert ? amount : 1 - amount;
+  return { cx: o.cx ?? 0.5, cy: o.cy ?? 0.5, r, inner, near, far };
+}
+
+// falloffAt(distFrac, curve): the curve's value (0..1, scaled by near/far) at a given distance from
+// (cx,cy), in the same fraction-of-box units as `curve.r`. The pure sample point every emitter's own
+// maths must agree with; `falloff.test.mjs`'s numeric-parity check drives this same function.
+export function falloffAt(distFrac, curve) {
+  const { inner, r, near, far } = curve;
+  if (r <= inner) return distFrac <= inner ? near : far;
+  const t = Math.max(0, Math.min(1, (distFrac - inner) / (r - inner)));
+  return near + (far - near) * t;
+}
+
+export function falloffMask(o = {}) {
+  const c = falloffCurve(o);
+  const cx = (c.cx * 100).toFixed(1), cy = (c.cy * 100).toFixed(1);
+  const r = c.r * 100, inner = c.inner * 100;
+  const near = `rgba(0,0,0,${c.near})`, far = `rgba(0,0,0,${c.far})`;
+  const stops = `${near} 0%, ${near} ${inner.toFixed(1)}%, ${far} ${r.toFixed(1)}%`;
+  return `radial-gradient(${r.toFixed(1)}% ${r.toFixed(1)}% at ${cx}% ${cy}%, ${stops})`;
+}
+
+// falloffCanvasGradient(ctx, cx, cy, radiusPx, o, colorAt): the canvas2d emitter. `colorAt(v)` turns
+// the curve's unitless near/far value into this call site's own colour string (the shared curve owns
+// no colour, same as falloffMask). Only fits a site whose gradient is genuinely this shape: one colour,
+// alpha ramping flat-then-linear from near to far. A gradient with its own colour stops (a base fill, a
+// hue sweep) or more than two ramp segments is not this curve and stays hand-rolled.
+export function falloffCanvasGradient(ctx, cx, cy, radiusPx, o, colorAt) {
+  const c = falloffCurve(o);
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, radiusPx);
+  const innerFrac = c.r > 0 ? Math.min(1, c.inner / c.r) : 0;
+  g.addColorStop(0, colorAt(c.near));
+  if (innerFrac > 0) g.addColorStop(innerFrac, colorAt(c.near));
+  g.addColorStop(1, colorAt(c.far));
+  return g;
+}
+
+// FALLOFF_GLSL: the shader emitter, a plain function any fragment shader string can splice in. `mix`
+// is GLSL's linear interpolation, the exact operation a CSS/canvas gradient stop performs, so this is
+// the same curve, not `smoothstep`'s cubic ease. Params are `curve.r`/`curve.inner`/`curve.near`/
+// `curve.far`, already in the shader's own UV-fraction units (falloffCurve does no *100 scaling).
+export const FALLOFF_GLSL = `float falloffAt(vec2 uv, vec2 c, float r, float inner, float near, float far) {
+  float d = length(uv - c);
+  float t = clamp((d - inner) / max(r - inner, 1e-5), 0.0, 1.0);
+  return mix(near, far, t);
+}`;
 
 export function createKit(ctx) {
   const { theme, inkAt, bgWinAt, ACCENT_BGS, trackingFor, splitText, icon } = ctx;
@@ -491,6 +575,17 @@ export function createKit(ctx) {
     applyProgressiveBlur(el, L);
     applyBorderTrail(el, L);
     if (L.mask) { checkDropped(L, { maskImage: L.mask }); el.style.webkitMaskImage = L.mask; el.style.maskImage = L.mask; }
+    // `falloff`: the parametric, invertible radial ramp. Mutually exclusive with raw `mask`, the same
+    // shape as the `fade`/`cut` refusal above: two ways to spell one layer's mask is the fork this
+    // engine's own doctrine names as its most common source of drift, not a feature.
+    if (L.falloff) {
+      if (L.mask) throw new Error(`layer "${L.id || L.type}": \`mask\` and \`falloff\` both set. `
+        + `\`falloff\` is the parametric radial ramp (cx/cy/radius/feather/invert); \`mask\` is raw CSS `
+        + `for the same slot. Drop one.`);
+      const g = falloffMask(L.falloff);
+      checkDropped(L, { maskImage: g });
+      el.style.webkitMaskImage = g; el.style.maskImage = g;
+    }
     applyFade(el, L);   // resolves L.filter / named looks / L.lookOpts too
     if (L.reflect) el.style.webkitBoxReflect = `below 0 linear-gradient(transparent 62%, rgba(0,0,0,${L.reflect === true ? 0.12 : L.reflect}))`;
     if (L.logotype) el.setAttribute('data-logotype', '1');

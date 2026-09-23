@@ -424,6 +424,13 @@ The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-d
   trail (roadmap-bar look). Pure gradient divs; place on a low track.
 - `fade: "right|left|top|bottom|edges"` → static edge mask on any layer. **Exclusive with `cut`**
   (cuts reset mask each frame), the builder throws.
+- `falloff: {cx, cy, radius, feather, amount, invert}` → the AE gradient-ramp role, a value going 1 at
+  a point to 0 with distance, MULTIPLIED against any layer via `mask-image` (alpha, `fade`'s own
+  mechanism, parametric and invertible). `falloff` on a shader/texture layer = light with a source;
+  on a plain solid = a glow; `invert:true` on a black rect over everything = a vignette (`amount`
+  caps the far end below full black, a dim rather than a cut). One mechanism, no colour or shape of
+  its own: it owns none of the three looks, it only multiplies whatever paint is already on the
+  layer. **Exclusive with `mask`**, same reason as `cut`/`fade`.
 - `reflect: 0.05–0.3` → floor reflection (`-webkit-box-reflect`).
 - `{type:"board", cols:[{title,count,cards:[{id,title,labels:[{t,c}]}]}]}` → populated mini-Kanban
   from data (≤4×5), elevation-1 cards; dim + fade it behind a foreground card for real density.

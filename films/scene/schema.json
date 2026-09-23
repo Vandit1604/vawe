@@ -54,6 +54,7 @@
    "exit",
    "exitDur",
    "fade",
+   "falloff",
    "filter",
    "follow",
    "font",
