@@ -11,6 +11,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CUES, renderCue, musicBed, encodeWav, wavDuration, normalize, SR } from '../../core/audio/kit.mjs';
+// The duration class per role name, owned by the gate that grades it. A role is an ALIAS onto a
+// voicing, and an alias must inherit the envelope its own name implies, not the one its target has.
+import { capFor } from '../../harness/lib/sfx-classes.mjs';
 import { CUT_CUE, SEAM_CUE } from '../../core/audio/cues.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -68,7 +71,19 @@ for (const [role, cue] of Object.entries(ROLES)) {
   // seed from the ROLE name so each file is stable and independent of table order
   const seed = [...role].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) >>> 0, 7);
   // Normalized to a common ceiling; per-cue balance is the mixer's job (sfxGain in audio.go).
-  const buf = normalize(renderCue(spec, seed), 0.8);
+  let buf = normalize(renderCue(spec, seed), 0.8);
+  // TRIM TO THE ROLE, NOT THE VOICING. `click` aliases `pluck`, a musical note for which 0.696s is
+  // right; a click fires every 0.09s and 0.7s of it is the drone this whole cue set was rebuilt over.
+  // Truncate to the role's own cap and fade the last 12ms so the cut does not click audibly.
+  const capS = capFor(role);
+  if (capS != null) {
+    const cap = Math.floor(capS * SR);
+    if (buf.length > cap) {
+      buf = buf.slice(0, cap);
+      const fade = Math.min(Math.floor(SR * 0.012), buf.length);
+      for (let i = 0; i < fade; i++) buf[buf.length - 1 - i] *= i / fade;
+    }
+  }
   fs.writeFileSync(path.join(SFX, `${role}.wav`), encodeWav(buf));
   const dur = wavDuration(buf);
   total += dur; n++;
