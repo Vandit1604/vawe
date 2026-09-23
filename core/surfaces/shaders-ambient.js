@@ -50,6 +50,10 @@ export const AMBIENT_SHADERS = {
   bands: 'a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; engine-doctrine/LIGHTFIELD.md',
   godRays: 'shafts of light: sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point. it is BRIGHT through the middle, so drop `intensity` toward 0.4 before putting white type over it',
   curlSmoke: 'a rising plume of ink or smoke that rolls into vortices as it climbs, its filaments stretching and folding. slow, continuous, and never repeating; the one field here with real fluid motion rather than a drifting pattern',
+  // APPENDED, not inserted: see the note above u_fx that says the index of a name here is the wire
+  // format. A literal port of pbakaus/radiant's chromatic-bloom.html (MIT), not a rewrite into this
+  // file's own style; see the u_fx branch for the source line references and what changed and why.
+  chromaticBloom: 'twelve luminous colour orbs (five vivid, seven dim) drifting and blending on black, each on its own noisy orbit, with a vignette and grain over the top. ported from pbakaus/radiant',
 };
 export const AMBIENT_FX = Object.keys(AMBIENT_SHADERS);
 
@@ -201,6 +205,26 @@ vec3 ramp(float u){
     c = mix(c, toOk(P(i+1, vec3(1.0))), clamp((x - a) / max(b - a, 1e-4), 0.0, 1.0));
   }
   return fromOk(c); }
+
+// chromaticBloom's own cbHash/cbNoise/cbOrb: renamed-only copies of pbakaus/radiant's
+// chromatic-bloom.html hash()/noise()/orb() (source lines 58-71 and 91-95). This file already owns
+// functions named hash() and noise() with a different formula, so calling those instead would change
+// the picture the source draws, which is the porting this was asked not to do; the fix is a name each,
+// not a rewrite. filmGrain() from the source is left out: it is declared there but never called (the
+// grain the source composites is computed inline in main(), source lines 220-221), so it is dead code
+// and skipping it changes nothing.
+float cbHash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float cbNoise(vec2 p){
+  vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+  float a = cbHash(i), b = cbHash(i+vec2(1.0,0.0)), c = cbHash(i+vec2(0.0,1.0)), d = cbHash(i+vec2(1.0,1.0));
+  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y);
+}
+vec3 cbOrb(vec2 uv, vec2 center, vec3 color, float radius, float intensity){
+  float d = length(uv - center);
+  float k = 1.0 / (radius*radius);
+  float glow = exp(-d*d*k) * intensity;
+  return color * glow;
+}
 
 void main(){
   vec2 uv = gl_FragCoord.xy / u_res; float ar = u_res.x/u_res.y;
@@ -643,7 +667,7 @@ void main(){
     vec3 beam = mix(g2, g1, clamp(acc*0.9, 0.0, 1.0));
     col = mix(g0, g2, 0.35*haze) + beam*(acc*haze + glow*0.55) + g1*dust*acc*0.55;
     alpha = 1.0;
-  } else {                                                // curlSmoke, a rising plume
+  } else if(u_fx==22){                                    // curlSmoke, a rising plume
     float st = t*0.30;                                    // the clock, first line (see the bands note)
     // CURL NOISE for the flow (see psi/curl above), and a SEMI-LAGRANGIAN BACKTRACE for the smoke.
     //
@@ -694,6 +718,107 @@ void main(){
     ink = mix(ink, s3, smoothstep(0.30, 0.95, age));      // colour by age, so the tail cools
     col = mix(s0, ink, smoothstep(0.015, 0.42, dens));
     alpha = 1.0;
+  } else {                                                // chromaticBloom, luminous colour orbs on black
+    // LITERAL PORT of pbakaus/radiant's chromatic-bloom.html (MIT, Copyright (c) 2025 Paul Bakaus,
+    // https://github.com/pbakaus/radiant, "attribution appreciated but not required" per its README).
+    // Orb placement, drift, noise perturbation, vignette and tone mapping (source lines 96-213) are
+    // copied as-is, not rewritten into this file's own palette-ramp style. Two omissions, both because
+    // this field has to stay a pure function of (t, seed):
+    //   - u_driftSpeed (source lines 47, 187, 232) is gone. This engine already scales time by the
+    //     layer's own speed prop before any shader sees it (core/surfaces/shader.js: atOf(lt,
+    //     LL.speed)), so a second drift-speed dial here would be the same control twice.
+    //   - u_mouse (source lines 51, 190, 217-224, 244-257) is gone. There is no pointer in a headless,
+    //     seeked renderer; dropping the block reproduces the source's own idle default (mouseX=-1,
+    //     under which the block never ran), not a new behaviour.
+    // u_grain (source line 49, default 0.5) survives as u_p.x, same default.
+    // The shared tail below (desaturate 0.9, u_intensity) still applies here same as every other
+    // branch, so this field is not byte-identical to the source's own output, only its structure is.
+    float cbg = u_p.x > 0.0 ? u_p.x : 0.5;
+    vec2 cbuv = (gl_FragCoord.xy - u_res*0.5) / min(u_res.x, u_res.y);
+    vec3 cbcol = vec3(0.0);
+
+    // VIOLET SUBSTITUTION. Source lines 118-122 hardcode cobalt/orange/whiteBlue/amber/teal; this
+    // film's palette needs violet and the source has none. orange becomes violet, amber becomes
+    // magenta, teal becomes indigo, each the same saturation the source used for its own
+    // primaries. cobalt and whiteBlue are untouched, they already read as the cool end of a violet
+    // field. Positions, radii, intensities and drift (source lines 124-160) are the source's own
+    // numbers, unchanged.
+    vec3 cobalt    = vec3(0.03, 0.10, 1.00);
+    vec3 violet    = vec3(0.46, 0.05, 0.95);
+    vec3 whiteBlue = vec3(0.85, 0.93, 1.00);
+    vec3 magenta   = vec3(0.82, 0.08, 0.90);
+    vec3 indigo    = vec3(0.22, 0.05, 0.68);
+
+    float n1 = cbNoise(vec2(t*0.37, 1.0))*2.0-1.0;
+    float n2 = cbNoise(vec2(t*0.41, 2.3))*2.0-1.0;
+    float n3 = cbNoise(vec2(t*0.33, 3.7))*2.0-1.0;
+    float n4 = cbNoise(vec2(t*0.29, 5.1))*2.0-1.0;
+    float n5 = cbNoise(vec2(t*0.43, 6.9))*2.0-1.0;
+    float n6 = cbNoise(vec2(t*0.31, 8.2))*2.0-1.0;
+    float n7 = cbNoise(vec2(t*0.39, 9.5))*2.0-1.0;
+    float n8 = cbNoise(vec2(t*0.27, 10.8))*2.0-1.0;
+    float n9 = cbNoise(vec2(t*0.35, 12.1))*2.0-1.0;
+    float n10 = cbNoise(vec2(t*0.45, 13.4))*2.0-1.0;
+
+    vec2 p1 = vec2(cos(t*0.23 + 0.0)*0.55 + n1*0.08, sin(t*0.17 + 0.0)*0.35 + n2*0.06);
+    cbcol += cbOrb(cbuv, p1, cobalt, 0.30, 1.6);
+    vec2 p2 = vec2(cos(t*0.19 + 2.1)*0.50 + n3*0.09, sin(t*0.25 + 1.4)*0.38 + n4*0.07);
+    cbcol += cbOrb(cbuv, p2, violet, 0.28, 1.5);
+    vec2 p3 = vec2(cos(t*0.15 + 4.2)*0.42 + n5*0.07, sin(t*0.21 + 3.0)*0.45 + n6*0.06);
+    cbcol += cbOrb(cbuv, p3, whiteBlue, 0.26, 1.2);
+    vec2 p4 = vec2(sin(t*0.17 + 1.0)*cos(t*0.11 + 0.5)*0.55 + n7*0.08, sin(t*0.13 + 2.5)*0.35 + n8*0.06);
+    cbcol += cbOrb(cbuv, p4, magenta, 0.27, 1.3);
+    vec2 p5 = vec2(cos(t*0.13 + 5.5)*0.48 + n9*0.07, sin(t*0.19 + 4.8)*0.30 + n10*0.08);
+    cbcol += cbOrb(cbuv, p5, indigo, 0.32, 1.2);
+
+    vec3 dimCobalt  = vec3(0.08, 0.15, 0.50);
+    vec3 dimViolet1 = vec3(0.22, 0.08, 0.45);
+    vec3 dimWhite   = vec3(0.50, 0.55, 0.70);
+    vec3 dimMagenta = vec3(0.40, 0.10, 0.45);
+    vec3 dimIndigo  = vec3(0.10, 0.08, 0.35);
+    vec3 dimViolet2 = vec3(0.25, 0.15, 0.50);
+    vec3 dimRose    = vec3(0.55, 0.25, 0.30);
+
+    float sn1 = cbNoise(vec2(t*0.51, 20.0))*2.0-1.0;
+    float sn2 = cbNoise(vec2(t*0.47, 21.3))*2.0-1.0;
+    float sn3 = cbNoise(vec2(t*0.53, 22.7))*2.0-1.0;
+    float sn4 = cbNoise(vec2(t*0.43, 24.1))*2.0-1.0;
+    float sn5 = cbNoise(vec2(t*0.49, 25.5))*2.0-1.0;
+    float sn6 = cbNoise(vec2(t*0.55, 26.9))*2.0-1.0;
+    float sn7 = cbNoise(vec2(t*0.41, 28.3))*2.0-1.0;
+    float sn8 = cbNoise(vec2(t*0.57, 29.7))*2.0-1.0;
+    float sn9 = cbNoise(vec2(t*0.39, 31.1))*2.0-1.0;
+    float sn10 = cbNoise(vec2(t*0.61, 32.5))*2.0-1.0;
+    float sn11 = cbNoise(vec2(t*0.37, 33.9))*2.0-1.0;
+    float sn12 = cbNoise(vec2(t*0.59, 35.3))*2.0-1.0;
+    float sn13 = cbNoise(vec2(t*0.45, 36.7))*2.0-1.0;
+    float sn14 = cbNoise(vec2(t*0.63, 38.1))*2.0-1.0;
+
+    vec2 s1 = vec2(cos(t*0.31 + 0.7)*0.45 + sn1*0.08, sin(t*0.27 + 1.2)*0.35 + sn2*0.07);
+    cbcol += cbOrb(cbuv, s1, dimCobalt, 0.18, 0.20);
+    vec2 s2 = vec2(cos(t*0.25 + 3.1)*0.60 + sn3*0.09, sin(t*0.33 + 2.5)*0.42 + sn4*0.06);
+    cbcol += cbOrb(cbuv, s2, dimViolet1, 0.16, 0.18);
+    vec2 s3 = vec2(cos(t*0.29 + 5.3)*0.55 + sn5*0.07, sin(t*0.23 + 4.1)*0.45 + sn6*0.08);
+    cbcol += cbOrb(cbuv, s3, dimWhite, 0.14, 0.15);
+    vec2 s4 = vec2(sin(t*0.21 + 1.8)*0.58 + sn7*0.06, cos(t*0.29 + 0.3)*0.40 + sn8*0.07);
+    cbcol += cbOrb(cbuv, s4, dimMagenta, 0.17, 0.18);
+    vec2 s5 = vec2(cos(t*0.35 + 2.9)*0.52 + sn9*0.08, sin(t*0.19 + 5.7)*0.48 + sn10*0.06);
+    cbcol += cbOrb(cbuv, s5, dimIndigo, 0.15, 0.15);
+    vec2 s6 = vec2(cos(t*0.17 + 4.5)*0.62 + sn11*0.07, sin(t*0.31 + 3.3)*0.38 + sn12*0.09);
+    cbcol += cbOrb(cbuv, s6, dimViolet2, 0.16, 0.15);
+    vec2 s7 = vec2(sin(t*0.27 + 6.1)*cos(t*0.15 + 0.8)*0.50 + sn13*0.06, cos(t*0.23 + 5.0)*0.42 + sn14*0.08);
+    cbcol += cbOrb(cbuv, s7, dimRose, 0.14, 0.12);
+
+    float cbvd  = length(cbuv * vec2(1.1, 1.0));
+    float cbvig = 1.0 - smoothstep(0.5, 1.1, cbvd);
+    cbcol *= cbvig;
+    cbcol = max(cbcol, vec3(0.0));
+    cbcol = mix(cbcol, sqrt(cbcol), smoothstep(0.6, 1.5, cbcol));
+
+    float cbgrain = fract(sin(dot(gl_FragCoord.xy + fract(u_time)*100.0, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
+    cbcol += cbgrain * 0.3 * cbg;
+
+    col = cbcol; alpha = 1.0;
   } col = mix(vec3(dot(col, vec3(0.333))), col, 0.9);       // slight desaturate → premium, not garish
   col *= (0.6 + 0.4*u_intensity);
   alpha *= clamp(u_intensity, 0.0, 1.0);
