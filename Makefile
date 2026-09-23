@@ -175,6 +175,13 @@ rung: ## [maintenance] which rules in CLAUDE.md and engine-doctrine/CRAFT are en
 provenance: ## [maintenance] which verdict-deciding constants have no cited source, and does that count only fall?
 	@node quality/gates/threshold-provenance.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp) $(if $(JSON),--json,)
 
+# make rule-length: how many rules across AGENTS.md, skills/*/SKILL.md and engine-doctrine/CRAFT run
+# over the length engine-doctrine/CRAFT/WRITING-FOR-AGENTS.md sets, and does that count only fall? A
+# formatting convention, not a quality bar: harness/lib/rule-length.mjs says why. LIST=1 prints the
+# over-length worklist instead; STAMP=1 records today's count as the ceiling.
+rule-length: ## [maintenance] how many rules in an agent-facing doc run over the stated length, and does that count only fall?
+	@node quality/gates/rule-length.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp) $(if $(JSON),--json,)
+
 # make docs-drift: ROADMAP/PRIMITIVES list shipped effects as missing, or quote a stale count. It decayed this way twice and
 # routed two planning passes at work that already existed; its own closing warning says nothing
 # checked it. Now something does.
