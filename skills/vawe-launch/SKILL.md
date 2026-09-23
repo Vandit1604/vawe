@@ -16,18 +16,21 @@ Lock a tiny brief. First pick a **mode**: *collaborative* (confirm key choices) 
 everything, state each with its reason). Then lock: **message** (the ONE sentence the video communicates),
 **audience**, **angle/arc**, **length** (30-90s), **destination** (YouTube/embed → 16:9 · X/LinkedIn/IG → 1:1
 · Shorts/TikTok → 9:16, sets `destination` + aspect), **narrated or silent**.
+
 **Gate:** the brief fields are locked.
 
 ## Step 1: Capture (real assets are the ground truth)
 If there's a URL: `make sections URL=… NAME=<brand>` (inventory every section), `make palette IMG=…`
 (eyedrop dominance + hexes), `make brandspec URL=…` (real fonts + weights + colour tokens), `make capture`
 (live UI clusters). Read the shots. State the brand in one sentence.
+
 **Gate:** brand captured (or, no-site: colours/fonts stated from the brief).
 
 ## Step 2: Design system (pick a preset, remix onto the brand)
 Pick the `directions/*.json` whose look fits (editorial · technical · bold · warm), then:
 `make theme-remix PRESET=<name> BRAND=<brand> BG=<#hex> ACCENT=<#hex> [TEXT=<#hex>]` → a complete,
 contrast-checked `themes/<brand>.json`. Don't hand-author a theme unless a mapping truly needs it.
+
 **Gate:** `themes/<brand>.json` exists and validates.
 
 ## Step 3: Storyboard proposal (user-gated)
@@ -40,6 +43,7 @@ emotion · transition_in). No site? Copy the template and write beats by hand. T
 then the beat table. Weight cues into the back ~50% (the reveal model). Get sign-off. Once approved, export
 the value contract: `make intent SB=<file> D=films/scene/<topic>.json` writes `<topic>.intent.json` from
 the beats' whys, so Step 6's `inspect` VERIFIES the render delivers each beat's on-screen copy + motion.
+
 **Gate:** storyboard-check passes AND the user approved (autonomous: post it as a heads-up).
 
 ## Step 3.1 (Narration (local, optional) skip if silent)
@@ -48,6 +52,7 @@ the beats' whys, so Step 6's `inspect` VERIFIES the render delivers each beat's 
 "voWords": "<topic>.vo.words.json", "music": "auto" }`. **Pace to the voice:** `make pace-from-vo
 VO=<topic>.vo.words.json` proposes each beat's start + duration from the narration, transcribe those onto
 the beats in Step 4 so the reveals land on the words.
+
 **Gate:** VO generated, or the video is silent.
 
 ## Step 4: Author the JSON (obey the spec)
@@ -61,12 +66,14 @@ A first-party hand-authored per-beat GSAP timeline in `core/compositions/index.j
 Load `vawe-creative` + `vawe-effects` + `vawe-animation` + `vawe-camera`. Beats/blocks/comps/cameraMove
 all resolve into real layers at load, no separate step. **Iterate live** without rendering: `make studio D=<file>` serves the scene
 with a frame scrubber: scrub/step, edit the JSON, reload, before you ever render an mp4.
+
 **Gate:** every storyboard beat is authored; `make validate` passes.
 
 ## Step 5: Build (optionally parallel, one sub-agent per beat)
 For a large video, decompose it: hand each beat to a sub-agent to author its layer fragment, then merge.
 The workflow `.claude/workflows/beats-parallel.mjs` (run via the Workflow tool, opt-in) does exactly this.
 For a normal video, author inline. Either way the output is one expanded scene JSON.
+
 **Gate:** the scene JSON is complete and expanded.
 
 ## Step 6: Finalize (user-gated)
@@ -78,6 +85,7 @@ three are opt-in, run `TASTE=1 make author-check`) ·
 **`make seam-check D=<file>`** (sample the transition overlaps for flashes, the class the other gates miss) →
 `make judge D=<file> VS=<brand>` (read the sheet, score every frame; a flaw you notice is a FIX) →
 `make ledger D=<file>` (anti-sameness). Pause for review, then ship. **Framework harvest** after (CLAUDE.md).
+
 **Gate:** all gates green, user approved, mp4 verified.
 
 ---
