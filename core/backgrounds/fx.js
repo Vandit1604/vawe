@@ -8,6 +8,7 @@
 import { random } from '../motion/motion.js';
 import { parseColor } from '../color/engine.js';
 import { GRADIENT_RECIPE_REGISTRY } from './gradient-recipes.js';
+import { falloffCanvasGradient } from '../layers/util.js';
 
 // ---- base fill: a tinted-neutral gradient (never pure #000/#fff). radial = spotlit, linear = flat,
 // conic = a colour wheel swept from `angle` around (cx,cy).
@@ -95,9 +96,9 @@ export function aurora(ctx, w, h, t, o = {}) {
     const jx = Math.sin(so * 7.3 + i * 2.1) * 0.12, jy = Math.cos(so * 5.7 + i * 1.7) * 0.12, jp = so * 0.9 + i;
     const cx = (b.x + jx) * w + Math.sin(t * (2 * Math.PI / (b.px / ms)) + b.ph + jp) * b.ax * ms;
     const cy = (b.y + jy) * h + Math.cos(t * (2 * Math.PI / (b.py / ms)) + b.ph + jp) * b.ay * ms;
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, b.r);
-    g.addColorStop(0, `rgba(${b.color},${o.intensity ?? 0.5})`);
-    g.addColorStop(1, `rgba(${b.color},0)`);
+    // A single-colour alpha ramp from full intensity at the blob's own centre to 0 at its own radius:
+    // exactly the falloff shape (straight line, feather:1 so there is no flat plateau to speak of).
+    const g = falloffCanvasGradient(ctx, cx, cy, b.r, { feather: 1 }, (v) => `rgba(${b.color},${v * (o.intensity ?? 0.5)})`);
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, b.r, 0, Math.PI * 2); ctx.fill();
   });
   ctx.globalCompositeOperation = 'source-over';
@@ -152,9 +153,7 @@ export function spotlight(ctx, w, h, t, o = {}) {
   const period = o.period ?? 7, color = o.color ?? '255,255,255';
   const cx = (0.5 + 0.32 * Math.sin(t * (2 * Math.PI / period))) * w;
   const cy = (o.y ?? 0.42) * h;
-  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, o.r ?? 720);
-  g.addColorStop(0, `rgba(${color},${o.intensity ?? 0.10})`);
-  g.addColorStop(1, `rgba(${color},0)`);
+  const g = falloffCanvasGradient(ctx, cx, cy, o.r ?? 720, { feather: 1 }, (v) => `rgba(${color},${v * (o.intensity ?? 0.10)})`);
   ctx.globalCompositeOperation = 'lighter';
   ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
   ctx.globalCompositeOperation = 'source-over';
