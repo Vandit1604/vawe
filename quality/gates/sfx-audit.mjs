@@ -17,6 +17,9 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 import { population } from '../../harness/lib/census.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+// CUES is the owner of which sounds exist. assets/sfx/*.wav is BAKED from it by `make audio`
+// (core/audio/kit.mjs:17), so a .wav whose name is not a cue is a leftover from an earlier bake.
+import { CUES } from '../../core/audio/kit.mjs';
 const f = gateFindings();
 const SFX = path.join(repoRoot, 'assets/sfx');
 
@@ -76,9 +79,16 @@ if (!fs.existsSync(SFX)) { console.log('~ assets/sfx is absent (gitignored, self
 // wrong with them. population() states N and refuses a checkout that should hold more.
 const files = population('sfx audit', { dir: 'assets/sfx', ext: '.wav', quiet: true }).names;
 const bad = [];
+const orphans = [];
 console.log(`── sfx shape check (${files.length} files)\n`);
 for (const f of files) {
   const name = f.replace(/\.wav$/, '');
+  // ORPHANS ARE NOT GRADED, THEY ARE REPORTED. Ten cues were removed after a listening pass
+  // (core/audio/kit.mjs) and their baked .wav files stayed on disk. Six of them match a duration
+  // class by name and failed its cap, so this gate spent its verdict on the shape of sounds the
+  // engine cannot play. A sound with no cue is a housekeeping finding, not a shape defect, and
+  // saying which it is keeps the shape verdict about sounds that can actually reach a film.
+  if (!Object.prototype.hasOwnProperty.call(CUES, name)) { orphans.push(name); continue; }
   const m = measure(path.join(SFX, f));
   const cls = CLASSES.find(([re]) => re.test(name));
   if (m == null) { bad.push({ name, why: 'unreadable or non-16-bit WAV' }); continue; }
@@ -90,6 +100,12 @@ for (const f of files) {
   if (!ok) bad.push({ name, why: `${m.audible.toFixed(2)}s of audible signal exceeds the ${cap}s cap, ${why}` });
 }
 console.log('');
+if (orphans.length) {
+  console.log(`   ~ ${orphans.length} file(s) with no cue in the registry, not graded: ${orphans.join(', ')}`);
+  f.note('sfx-orphan', `${orphans.length} baked sound(s) have no cue in core/audio/kit.mjs and nothing can play them: `
+    + `${orphans.join(', ')}. Re-bake with \`make audio\` to clear them, or add the cue back.`);
+  console.log('');
+}
 if (!bad.length) { console.log('✓ every sound effect is the shape its role claims'); f.emit(); process.exit(0); }
 for (const b of bad) {
   console.log(`  ✗ ${b.name}: ${b.why}`);
