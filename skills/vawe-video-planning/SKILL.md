@@ -365,6 +365,7 @@ off colours, untasteful imagery all show here. This is mandatory and is exactly 
 a white site rendered dark) → **`make ledger D=<file>`** (cross-video sameness vs every shipped design,
 SAME fails; fix by changing ≥2 of cut family / beat structure / layout archetype) → eyeball
 hook / payoff / CTA frames. Fix data, re-render. Never ship unverified.
+
 **Final taste check (the gate that SEES):** on the near-final cut, `make judge D=<file> VS=<brand>` →
 read `/tmp/judge/sheet.png` against `/tmp/judge/rubric.md` and score every frame (readability · hierarchy ·
 composition · brand + asset fidelity · produced-not-generated · value). If your eye catches a flaw, it's a
