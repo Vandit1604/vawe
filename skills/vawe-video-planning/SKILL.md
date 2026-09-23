@@ -243,24 +243,27 @@ enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection g
   most important element on each beat moves last or most, motion order = reading order.
 - **Easing = physics**: entrances decelerate (ease-out family), exits accelerate (rush), ambient
   loops sinusoidal. Never linear on visible moves.
-- **Choose every CUT by meaning, not habit** (`engine-doctrine/CRAFT/TRANSITIONS.md`). Run the per-seam decision
-  procedure: name the RELATIONSHIP between the two beats (continuity · time · contrast · same-object ·
-  new act) and the FEELING across it, then pick the transition that serves both. **If a seam serves
-  neither, it is a hard cut.** Most seams are invisible (hard/soft cut, overlapped so the stage never
-  dips to empty). Earn 2-3 accents by meaning (whip = energy into a payoff, iris/sdfIris = focus,
-  fade = act break, smash = contrast); reserve the boldest for the hero/payoff; make the outro simplest.
-  ONE cut family. Spraying one effect (blur) on every cut is the failure in BOTH directions, monotone
-  and soup. The LOCK SHEET's per-beat row must name each cut's *relationship + transition + why*.
+- **Choose every CUT by meaning, not habit** (`engine-doctrine/CRAFT/TRANSITIONS.md`). Run the per-seam
+  decision procedure: name the RELATIONSHIP between the two beats (continuity · time · contrast ·
+  same-object · new act) and the FEELING across it, then pick the transition that serves both. **If a
+  seam serves neither, it is a hard cut.**
+  - Most seams are invisible: hard/soft cut, overlapped so the stage never dips to empty.
+  - Earn 2-3 accents by meaning: whip = energy into a payoff, iris/sdfIris = focus, fade = act break,
+    smash = contrast. Reserve the boldest for the hero/payoff; make the outro simplest.
+  - ONE cut family per film. Spraying one effect (blur) on every cut is the failure in BOTH directions,
+    monotone and soup.
+  - The LOCK SHEET's per-beat row must name each cut's *relationship + transition + why*.
 - **Icons with names**: whenever a company/product/tool is named, show its mark (simple-icons)
   or a Lucide UI icon (`assets/icons/ui/`, MIT, stroke color baked), text-only lists of
   named things are a missed layer of craft.
 - **Background = the site's real surface, used sparingly**: the bg texture must EXIST on the real
   site. A plain/flat technical site gets a plain field (`plain`/`paper`/`accentPlain`), never invented
-  dots/shapes. Only use a patterned preset (`accent`/`dotmatrix`/`aurora`/`mesh`/`constellation`/
-  `paperShapes`) if the site itself has that texture. And even then a pattern is a SEASONING, not the
-  wallpaper: at most one or two beats (a hook or one accent moment), never throughout. Content/proof
-  beats stay plain so the content reads. Recurring mistakes + fixes live in `engine-doctrine/MISTAKES.md`; ask it
-  with `make arsenal MISTAKES=1 Q="…"` before authoring rather than reading it end to end.
+  dots/shapes; a patterned preset (`accent`/`dotmatrix`/`aurora`/`mesh`/`constellation`/`paperShapes`)
+  is allowed only if the site itself carries that texture.
+  - Even then, a pattern is a SEASONING, not the wallpaper: at most one or two beats (a hook or one
+    accent moment), never throughout. Content/proof beats stay plain so the content reads.
+  - Recurring mistakes and fixes live in `engine-doctrine/MISTAKES.md`; ask it with
+    `make arsenal MISTAKES=1 Q="…"` before authoring rather than reading it end to end.
 
 ## Step 3b.1: Every frame FIGHTS for its value (the value gate)
 

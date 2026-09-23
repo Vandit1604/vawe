@@ -23,6 +23,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { extractKitBlock } from '../lib/stagekit.mjs';
 import { appendRun } from '../lib/runlog.mjs';
+import { isAgentDoc, longestRule, RULE_LENGTH_LIMIT, RULE_LENGTH_DOC } from '../lib/rule-length.mjs';
 
 // The full family of checks scene() and fragment() can each fire, in the order they are evaluated.
 // Recorded so the run log can say which of a family ran CLEAN on a save, not only which one spoke:
@@ -166,6 +167,18 @@ function fragment(rel, file) {
   return { say: out, fired, filmKey: path.basename(film) };
 }
 
+// WRITING-FOR-AGENTS.md, at the keystroke: a rule in an agent-facing doc over the stated length is a
+// rule likely to be truncated unread. Task 3 of the rules-agents-can-read plan: reuse this hook rather
+// than add a second mechanism next to it.
+function agentDoc(rel, file) {
+  if (!isAgentDoc(rel) || !fs.existsSync(file)) return [];
+  const r = longestRule(fs.readFileSync(file, 'utf8'));
+  if (!r || r.length <= RULE_LENGTH_LIMIT) return [];
+  return [`  a rule here runs ${r.length} characters, over the ${RULE_LENGTH_LIMIT}-character convention`,
+    `  ${RULE_LENGTH_DOC} sets (roughly three sentences): "${r.excerpt}…"`,
+    `  Rewrite, never truncate: keep every fact, split the rule into rule / reason / mechanism.`];
+}
+
 function engine(rel, file) {
   if (/^internal\/(scene|render)\//.test(rel)) {
     return [`  ${rel} is the CAPTURE PATH. engine-doctrine/CRAFT/ENGINE-CHANGES.md: render one film before and`,
@@ -200,7 +213,8 @@ process.stdin.on('end', () => {
   // it keeps returning bare lines.
   const isScene = inScenes && rel.endsWith('.json');
   const isFragment = inScenes && rel.endsWith('.html');
-  const result = isScene ? scene(rel, file) : isFragment ? fragment(rel, file) : { say: engine(rel, file) };
+  const result = isScene ? scene(rel, file) : isFragment ? fragment(rel, file)
+    : { say: [...engine(rel, file), ...agentDoc(rel, file)] };
   const say = result.say;
   if (!say.length) process.exit(0);                    // the reward for work doing fine is silence
 
