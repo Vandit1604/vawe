@@ -1295,7 +1295,8 @@
       "metaballs",
       "bands",
       "godRays",
-      "curlSmoke"
+      "curlSmoke",
+      "chromaticBloom"
      ]
     },
     "shaderKeys": {
