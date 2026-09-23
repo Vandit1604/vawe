@@ -1866,6 +1866,10 @@
      "type": "string",
      "label": "CSS mask-image"
     },
+    "falloff": {
+     "type": "object",
+     "label": "a falloff: 1 at a source point, 0 with distance, multiplied against this layer through alpha. `{cx, cy}` place the source (0-1 of the box, default centre), `radius` is where it reaches 0, `feather` softens the ramp, `amount` caps how far it dims (1 = to nothing), `invert` flips it into a vignette. Owns no colour, timing or shape: it only dims what the layer already paints. Mutually exclusive with `mask`, which drives the same CSS property."
+    },
     "css": {
      "type": "object",
      "label": "Raw CSS the layer vocabulary does not name (a box gradient via `background`, `clip-path`, a layered `box-shadow`, `backdrop-filter`, `mask-image`, pseudo decoration). camelCase keys in (`boxShadow`), applied once at build time. REFUSES opacity/transform/animation/transition/position/left/top/width/height/zIndex/pointerEvents (the engine owns and rewrites those every frame), use anim/motion/parts/vars/x/y/w/h/track instead."
