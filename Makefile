@@ -1252,6 +1252,13 @@ deploy-check: ## [site] run the site's real build steps locally (site-engine + f
 worktrees: ## [maintenance] Retire agent worktrees whose work has landed.
 	@node harness/dev/worktree-prune.mjs $(if $(PRUNE),--prune,)
 
+.PHONY: worktree-status
+# What is running, on what, since when: one pass over every live worktree, derived from git and the
+# filesystem, never from a claim an agent typed. Flags a worktree that has gone quiet (STALE) and one
+# that still holds commits or files not yet proven present in main. See harness/dev/worktree-status.mjs.
+worktree-status: ## [maintenance] what is running, on what, since when: every live worktree, flagged if stale or holding unlanded work
+	@node harness/dev/worktree-status.mjs
+
 # make review. One-command health snapshot: lib-test + layout audit + a master overlay sheet
 # (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
 review: ## [engine] One-command health snapshot: lib-test + layout audit + a master overlay sheet (/tmp/review.png).
