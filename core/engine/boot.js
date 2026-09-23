@@ -566,6 +566,15 @@ export async function boot(build) {
         }));
       }
       await document.fonts.ready;
+      // `document.fonts.ready` can fulfil a tick before the font is actually usable for canvas text
+      // measurement: assertFamilies reads the face back with ctx.measureText (core/engine/fonts.js
+      // isPainting), and under CPU contention (several headless renders sharing one machine, e.g.
+      // `make studio`'s preflight launching more than one at once) the FontFaceSet can report loaded
+      // before the compositor has rasterized it, so the read-back below intermittently measures the
+      // fallback for a font that really did load. Two real animation frames give it the chance to
+      // catch up; native rAF still, installVirtualClock() has not run yet at this point in boot().
+      await new Promise((r) => requestAnimationFrame(r));
+      await new Promise((r) => requestAnimationFrame(r));
     } catch (e) {}
     // READ BACK. document.fonts.load() does not refuse a face it cannot fetch, it leaves the FontFace
     // at status "error" and the browser paints a generic. Every await above sits in a catch-all, so
