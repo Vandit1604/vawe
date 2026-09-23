@@ -272,14 +272,14 @@ function preAssembleNote(){
    if(unbuilt.length) chips.unshift([unbuilt[0].kind,unbuilt.length+' beat'+(unbuilt.length===1?'':'s')+' not assembled']);
    return chips.length?'<div id=plangate>'+chips.map(([k,t])=>'<span class="'+(k==='✗'?'err':'warn')+'">'+esc(t)+'</span>').join('')+'</div>':'';
  }
- function planHead(d){
+ function planHead(d,frames){
    return '<div id=planhead><p id=planmsg>'+esc(d.message||'No message')+'</p>'
      +'<div id=planfacts>'+(d.audience?'<span>Audience <b>'+esc(d.audience)+'</b></span>':'')
      +'<span>Duration <b>'+esc(d.duration||'?')+'s</b></span>'
      +(d.format?'<span>Format <b>'+esc(d.format)+'</b></span>':'')+'</div>'
      +(d.spectacle||d.not?'<dl class=planspine>'+planRow('Spectacle',d.spectacle)+planRow('Not',d.not)+'</dl>':'')
      +gateChips(d.findings)
-     +colorStrip(d.beats)
+     +colorStrip(d.beats,frames)
      +feedbackBlock(d.feedback,null)
      +'</div>';
  }
@@ -288,33 +288,64 @@ function preAssembleNote(){
  // colors" (the owner's own words). Today that arc is one paragraph of frontmatter prose nobody sees
  // until the film renders; this draws it here, in the state where approval happens.
  //
- // EVERY VALUE HERE IS DECLARED, NONE IS COMPUTED BY THIS PANE. A beat's swatch colour is
- // `groundSwatch` (studio/server.mjs), the engine's own bgPreset() output for that beat's `ground:`
- // name under the film's real theme, so this can never show a colour the render would not. A seam's
- // arrow is `transition_value` (harness/lib/contract.mjs, closed vocabulary: dark->light · light->dark
- // · held), read off the ONE storyboard parser like every other field on this pane. Nothing is stored
- // or classified twice.
+ // EVERY SWATCH IS THE REAL RENDERED FRAME'S OWN COLOUR, never a value read off the storyboard's
+ // `ground:` line: two authors reading the same "ground: dusk" line pictured different colours before
+ // this existed, which is exactly the gap `/api/plan-frames` (studio/server.mjs) closed for the
+ // picture beneath each beat. A swatch is a downsample of THAT SAME frame (`paintColorStrip` below),
+ // so it can never show a colour the render would not. A seam's arrow is `transition_value`
+ // (harness/lib/contract.mjs, closed vocabulary: dark->light · light->dark · held), read off the ONE
+ // storyboard parser like every other field on this pane.
  //
- // ABSENCE IS ITS OWN SHAPE, never a plausible grey: a beat with no `ground:` gets a hatched tile and a
- // beat-to-beat join with no `transition_value:` gets a bare "?", both in the gate's own warning colour
- // (var(--hz-beat)), because an undeclared decision reads as a decision nobody made otherwise.
+ // A beat with no rendered frame yet says so IN WORDS and names the command that renders one, the same
+ // honest-missing shape `beatPicture()` uses for the picture itself. Never a hatched placeholder: a
+ // shape that says nothing is indistinguishable from a colour nobody looked at.
  function seamChip(v){
    if(!v) return '<span class="cseam none" title="no transition_value declared for this join">?</span>';
    if(v==='held') return '<span class="cseam held" title="transition_value: held">held</span>';
    return '<span class="cseam flip '+(v==='dark->light'?'up':'down')+'" title="transition_value: '+esc(v)+'">'
      +(v==='dark->light'?'dark → light':'light → dark')+'</span>';
  }
- function colorStrip(beats){
+ function colorStrip(beats,frames){
    if(!beats||!beats.length) return '';
    const cells=beats.map((b,i)=>{
-     const sw=b.groundSwatch;
-     const swatch=sw?'<span class=cswatch style="background:'+esc(sw.css)+'" title="'+esc(b.name)+' · ground: '+esc(b.ground)+' ('+esc(sw.tone||'?')+')"></span>'
-       :'<span class="cswatch none" title="'+esc(b.name)+' · no ground declared" aria-label="no ground declared">?</span>';
+     const f=(frames||[])[i];
+     let swatch;
+     if(f&&f.src){
+       swatch='<span class=cswatch data-src="'+esc(f.src)+'" title="'+esc(b.name)+', dominant colour of the rendered frame at '+f.t+'s"></span>';
+     } else {
+       const why=(f&&f.missing)||'the rendered frames have not loaded yet.';
+       const cmd=f&&f.cmd;
+       swatch='<span class="cswatch none" title="'+esc(b.name)+', '+esc(why)+(cmd?' Run: '+esc(cmd):'')+'">'
+         +(cmd?'<code>'+esc(cmd)+'</code>':'<b>no frame</b>')+'</span>';
+     }
      const join=i>0?'<span class=cjoin>'+seamChip(beats[i].transition_value)+'</span>':'';
      return join+'<span class=ccell>'+swatch+'<b>'+(i+1)+'</b></span>';
    }).join('');
    return '<div id=colorstrip role=group aria-label="colour arc: one swatch per beat, storyboard order">'
      +'<h4>Colour arc</h4><div id=cstrip>'+cells+'</div></div>';
+ }
+ // paintColorStrip(): fills every swatch left blank by colorStrip (a real frame exists, its colour does
+ // not yet) by downsampling that SAME jpg to a few pixels and averaging them. Canvas, not a library: a
+ // dominant colour for a 44x32 swatch does not need k-means, it needs the frame's own average tone.
+ // Runs after the HTML lands because it needs the <img> decode; harmless to call again on a re-draw,
+ // `data-painted` skips a swatch already done.
+ function paintColorStrip(){
+   document.querySelectorAll('#cstrip .cswatch[data-src]').forEach((el)=>{
+     if(el.dataset.painted) return; el.dataset.painted='1';
+     const img=new Image();
+     img.onload=()=>{
+       try{
+         const c=document.createElement('canvas'); c.width=8; c.height=8;
+         const cx=c.getContext('2d'); cx.drawImage(img,0,0,8,8);
+         const px=cx.getImageData(0,0,8,8).data;
+         let r=0,g=0,b=0,n=px.length/4;
+         for(let i=0;i<px.length;i+=4){ r+=px[i]; g+=px[i+1]; b+=px[i+2]; }
+         el.style.background='rgb('+Math.round(r/n)+','+Math.round(g/n)+','+Math.round(b/n)+')';
+       }catch{ el.classList.add('none'); el.innerHTML='<b>unreadable</b>'; }
+     };
+     img.onerror=()=>{ el.classList.add('none'); el.innerHTML='<b>unreadable</b>'; };
+     img.src=el.dataset.src;
+   });
  }
  // ---- THE PICTURE: a real rendered still of the assembled scene at this beat's start, or the honest
  // reason there is none yet. Never a shape, never a fragment previewed alone (MISTAKES.md #592, and
@@ -397,7 +428,8 @@ function preAssembleNote(){
      planNote.hidden=true;
      const frames=(pf&&pf.frames)||[];
      let prev='';
-     planBody.innerHTML=planHead(d)+d.beats.map((b,i)=>{ const s=beatHtml(b,i,prev,frames); prev=b.archetype||''; return s; }).join('');
+     planBody.innerHTML=planHead(d,frames)+d.beats.map((b,i)=>{ const s=beatHtml(b,i,prev,frames); prev=b.archetype||''; return s; }).join('');
+     paintColorStrip();
      say('the plan is drawn, '+d.beats.length+' beats');
      // The frame render is still running server-side (a scene launch + N seeks): come back for the
      // pictures once it finishes, rather than leaving every beat on "not loaded yet" forever.

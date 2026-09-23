@@ -413,10 +413,12 @@
  .ccell{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
  .ccell b{font:500 10.5px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
  .cswatch{width:44px;height:32px;border-radius:var(--r-pill);box-shadow:inset 0 0 0 1px var(--line-2)}
- /* undeclared ground: a hatch in the gate's own warning colour, never a plausible grey, so an
-    unmade decision cannot be mistaken for a made one (a black preset is a real, solid tile). */
- .cswatch.none{display:grid;place-items:center;background:repeating-linear-gradient(135deg,var(--hz-beat) 0 2px,transparent 2px 8px),var(--field);
-   color:var(--hz-beat);font:600 12px/1 var(--mono);opacity:.85}
+ /* no rendered frame yet: words, not a shape. The command is the whole point of the tile, so it is
+    the visible content, not a decorative fill nobody can act on. */
+ .cswatch.none{display:grid;place-items:center;background:var(--field);color:var(--hz-beat);
+   font:500 9px/1.2 var(--mono);text-align:center;padding:2px;overflow:hidden}
+ .cswatch.none code{font:inherit;color:inherit;white-space:normal;word-break:break-word}
+ .cswatch.none b{font:600 9px/1 Anybody,system-ui,sans-serif;color:var(--hz-beat)}
  .cjoin{flex:none;display:flex;align-items:center;padding:0 6px;align-self:center;margin-top:-16px}
  .cseam{font:500 10px/1 Anybody,system-ui,sans-serif;white-space:nowrap;padding:4px 6px;border-radius:5px}
  .cseam.none{color:var(--hz-beat);background:rgba(232,162,58,.14)}
