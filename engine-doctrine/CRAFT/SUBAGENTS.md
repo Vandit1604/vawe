@@ -272,6 +272,7 @@ there is one owner of the text, not a copy in every brief).
 - Work inside a render budget stated in the brief, and when it runs out, stop and report rather than rendering again, because renders are the most expensive step and a budget only holds if it is obeyed.
 - Run `make ship`/`make dev` and every other long command in the foreground and wait for it yourself; never end your turn saying you are waiting for one to finish, because nothing wakes a stalled agent and the task then sits untouched until a human notices.
 - Scene JSON is gitignored, so any film work that edits it runs in the lead's checkout, never a worktree, because a worktree cannot carry the edit home through a merge.
+- Pass the paths this brief says you own as scope globs to `worktree.sh add <name> <glob ...>`, because that is what lets `make worktree-status` warn the NEXT agent before it collides with you instead of after.
 <!-- worktree-contract:end -->
 
 ## Provenance
