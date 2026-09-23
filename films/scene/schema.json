@@ -2487,7 +2487,7 @@
      "label": "A glowing arc orbiting the layer border. { color, width: px, period: s/orbit, arc: deg }. CTA/end-card emphasis."
     },
     "resample": {
-     "label": "LAYER AS TEXTURE: re-sample this layer's own pixels through a shader. Raster layers only (image/paint/shader). String, or {fx, amount, speed, seed}. amount may be [from,to] to animate. zoomBlur only: cx/cy (0..1, default 0.5/0.5) move the centre it radiates from off the frame's middle; count (2..32, default 16) trades sample quality for render cost.",
+     "label": "LAYER AS TEXTURE: re-sample this layer's own pixels through a shader. Raster layers only (image/paint/shader). String, or {fx, amount, speed, seed}. amount may be [from,to] to animate. zoomBlur/spinBlur/directionalBlur are one blur primitive with the direction field the name picks: cx/cy (0..1, default 0.5/0.5) move the point zoomBlur radiates from or spinBlur pivots on (directionalBlur ignores it, its axis is angle); count (2..32, default 16) trades sample quality for render cost on all three.",
      "enum": [
       "zoomBlur",
       "spinBlur",
