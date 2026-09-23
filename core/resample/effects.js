@@ -19,10 +19,49 @@
 // Everything is treated as PREMULTIPLIED alpha end to end: the source canvases are created with
 // premultipliedAlpha:true, so their texels already are. Blur is a weighted average, which is only
 // correct in premultiplied space anyway; alpha-modulating effects scale the whole vec4.
-
+//
+// SUBSTRATE DECISION (radial blur, the operator After Effects calls CC Radial Fast Blur): this pass
+// already exists. `zoomBlur` below IS the radial-blur operator the engine was missing a CENTRE for:
+// it samples along the radius from a fixed point and owns no colour, no timing and no shape, exactly
+// the shape `core/layers/util.js:754`'s comment names as unbuilt. A third substrate (Canvas2D, a new
+// SVG filter) would duplicate a GL sampling pass that already reads neighbouring texels correctly and
+// already clears its buffer to nothing when the layer goes off-window. The only real gap was that the
+// centre was hardcoded to the screen centre (0.5, 0.5) and the sample count to a fixed 16, so a light
+// source off-centre, or a cheaper/richer pass, could not be authored. `u_cx`/`u_cy`/`u_count` close
+// that gap inside the SAME pass rather than adding a second one.
+//   COST at 1920x1080, one resampled layer, 60fps: one extra WebGL context (as every resample fx
+//   already costs), draw() unchanged in shape, 16 texture2D reads per pixel by default (bounded by
+//   `u_count`, capped at 32 in the shader's own loop). Measured on a real film below.
+//   PURITY: draw() takes (src, fx, amount, time, seed, once, angle, cx, cy, count), all read once at
+//   attach/bake time from the layer's own JSON or interpolated from local progress `p` inside
+//   tickResample, itself a pure function of `t`. No new state is kept between frames beyond what
+//   zoomBlur/spinBlur already keep (nothing: SPECS holds the layer's static config, not a running
+//   accumulator), so renderFrame(n) stays exactly as pure as it was before this change.
+//
+// THE COLLAPSE (one blur, three direction fields): zoomBlur/spinBlur/directionalBlur, read side by
+// side, were the same weighted-average sampling loop with only the per-pixel direction differing.
+// They now draw through the ONE `u_fx == 0` branch, switched internally on `u_dir`; the three NAMES
+// stay (RESAMPLE_FX, the registry, the docs, every film that cites them), because each name is a real
+// direction field an author reaches for by INTENT (radial impact, a spinning pivot, a set smear axis),
+// not an implementation a film should have to know collapsed. What was cosmetic to unlock and what
+// was not: `cx`/`cy` previously did nothing for spinBlur (hardcoded to 0.5, 0.5) and `count` did
+// nothing for spinBlur/directionalBlur (a fixed 16-sample loop); both now read every field the pass
+// already threads through, so a spin blur can pivot off-centre, a look none of the three could reach
+// before this change (see the "combination none of the three could express" render this cost table's
+// commit ships beside).
 import { defineRegistry } from '../registry/registry.js';
 
 export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macroblock', 'dissolve', 'refract', 'chromaShift', 'directionalBlur'];
+
+// ONE BLUR, THREE DIRECTION FIELDS. zoomBlur/spinBlur/directionalBlur read side by side share their
+// sampling loop and weighting; only the per-pixel direction differs (see the `u_fx == 0` branch in
+// FRAG below). They stay three NAMES, each still its own registry entry and its own doc entry, so
+// 197 films and every doc that cites them keeps working unchanged: what collapses is the SHADER
+// branch and the GL uniform they draw through, not the authoring vocabulary. A fourth generic name
+// (picking `dir` directly) was considered and rejected: the direction space is exactly these three
+// shapes, `cx`/`cy`/`angle`/`count` already cover every dial an author needs on top of them, and a
+// fourth name would be a second way to say a thing these three already say.
+export const BLUR_DIR = { zoomBlur: 0, spinBlur: 1, directionalBlur: 2 };
 
 // RESAMPLE_BLURBS: one line per fx, next to the list the shader switches on (the `blurb` pattern of
 // blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
@@ -36,15 +75,15 @@ export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'fisheye', 'bitCrush', 'macr
 // And a constant `amount` is usually the wrong call: half of these only read as motion while they MOVE,
 // so ramp them across the layer's window.
 export const RESAMPLE_BLURBS = {
-  zoomBlur: 'radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp',
-  spinBlur: 'smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal',
+  zoomBlur: 'radial smear out from a centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp. `cx`/`cy` move the centre off screen-middle (0..1, default 0.5/0.5); `count` trades sample quality for cost (2..32, default 16)',
+  spinBlur: 'smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal. `cx`/`cy` move the pivot off screen-middle (0..1, default 0.5/0.5); `count` trades sample quality for cost (2..32, default 16)',
   fisheye: 'real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge',
   bitCrush: 'quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration',
   macroblock: 'the flat blocks and dropped tiles of a starved codec. A glitch/degrade beat, never decoration',
   dissolve: 'noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away',
   refract: 'liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do',
   chromaShift: 'radial RGB separation, the channels pulling apart from the centre outwards',
-  directionalBlur: 'a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS "Directional Blur": a look an author SETS, not a byproduct of a layer\'s own travel speed (that one is automatic, see `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4)',
+  directionalBlur: 'a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS "Directional Blur": a look an author SETS, not a byproduct of a layer\'s own travel speed (that one is automatic, see `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4). `count` trades sample quality for cost (2..32, default 16)',
 };
 
 // The registry, and with it the catalogue section that used to be hand-listed in
@@ -77,7 +116,10 @@ uniform int   u_fx;
 uniform float u_amt;    // 0..1, the effect's strength: the only dial most effects need
 uniform float u_time;   // local seconds, for the effects that move
 uniform float u_seed;
-uniform float u_angle;  // directionalBlur only: the smear axis, radians, 0 = rightward
+uniform float u_angle;  // linear dir only: the smear axis, radians, 0 = rightward
+uniform vec2  u_center; // radial/tangential dir only: the point it radiates from/pivots on, uv space, default (0.5,0.5)
+uniform int   u_count;  // blur family only: sample count, 2..32, default 16 (loop is capped at 32)
+uniform int   u_dir;    // blur family only: 0 radial (zoomBlur) · 1 tangential (spinBlur) · 2 linear (directionalBlur)
 
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)) + u_seed) * 43758.5453123); }
 
@@ -94,27 +136,47 @@ void main(){
   float ar = u_res.x / max(u_res.y, 1.0);
   vec4 col;
 
-  if (u_fx == 0) {                                      // zoomBlur, smear along the radius from centre
-    vec2 dir = (uv - 0.5) * (u_amt * 0.30);
+  if (u_fx == 0) {
+    // THE COLLAPSED BLUR PRIMITIVE: one bounded loop of u_count weighted texture reads; u_dir
+    // is the one thing that varies. zoomBlur/spinBlur/directionalBlur are presets that pick a u_dir,
+    // not three substrates: each branch below is that old fx's ORIGINAL math, unchanged, so a film
+    // written against any of the three names still renders identically at its defaults.
+    int n = u_count; if (n < 2) n = 2; if (n > 32) n = 32;
+    float nf = float(n - 1);
     col = vec4(0.0); float wsum = 0.0;
-    for (int i = 0; i < 16; i++) {
-      float t = float(i) / 15.0;
-      float w = 1.0 - t * 0.55;                         // near samples dominate, so the centre stays readable
-      col += texture2D(u_tex, uv - dir * t) * w; wsum += w;
-    }
-    col /= wsum;
 
-  } else if (u_fx == 1) {                               // spinBlur, smear along the arc, radius preserved
-    vec2 d = uv - 0.5; d.x *= ar;
-    float r = length(d), a0 = atan(d.y, d.x);
-    float sweep = u_amt * 0.45 * min(1.0, r * 3.0);     // scaled by r: the pivot itself must not smear
-    col = vec4(0.0); float wsum = 0.0;
-    for (int i = 0; i < 16; i++) {
-      float t = float(i) / 15.0 - 0.5;
-      float a = a0 + sweep * t;
-      vec2 p = vec2(cos(a), sin(a)) * r; p.x /= ar;
-      float w = 1.0 - abs(t) * 0.8;
-      col += texture2D(u_tex, p + 0.5) * w; wsum += w;
+    if (u_dir == 1) {                                   // tangential (spinBlur), arc around u_center, radius preserved
+      vec2 d = uv - u_center; d.x *= ar;
+      float r = length(d), a0 = atan(d.y, d.x);
+      float sweep = u_amt * 0.45 * min(1.0, r * 3.0);   // scaled by r: the pivot itself must not smear
+      for (int i = 0; i < 32; i++) {
+        if (i >= n) break;
+        float t = float(i) / nf - 0.5;
+        float a = a0 + sweep * t;
+        vec2 p = vec2(cos(a), sin(a)) * r; p.x /= ar;
+        float w = 1.0 - abs(t) * 0.8;
+        col += texture2D(u_tex, p + u_center) * w; wsum += w;
+      }
+
+    } else if (u_dir == 2) {                            // linear (directionalBlur), fixed angle, ignores u_center
+      vec2 dir = vec2(cos(u_angle), -sin(u_angle));     // -sin: DOM y is flipped vs. a maths angle
+      dir.x /= ar;                                      // keep the smear a straight line, not an ellipse, off-square
+      vec2 step = dir * (u_amt * 0.05);
+      for (int i = 0; i < 32; i++) {
+        if (i >= n) break;
+        float t = float(i) / nf - 0.5;                  // sample BOTH sides of the pixel, centred
+        float w = 1.0 - abs(t) * 0.7;
+        col += texture2D(u_tex, uv + step * t) * w; wsum += w;
+      }
+
+    } else {                                            // radial (zoomBlur), smear along the radius from u_center
+      vec2 dir = (uv - u_center) * (u_amt * 0.30);
+      for (int i = 0; i < 32; i++) {
+        if (i >= n) break;                              // GLSL loop bounds must be constant; count is a runtime cutoff
+        float t = float(i) / nf;
+        float w = 1.0 - t * 0.55;                       // near samples dominate, so the centre stays readable
+        col += texture2D(u_tex, uv - dir * t) * w; wsum += w;
+      }
     }
     col /= wsum;
 
@@ -185,20 +247,8 @@ void main(){
     col.b = texture2D(u_tex, uv - d * s).b;
     col.a = texture2D(u_tex, uv).a;
 
-  } else {                                              // directionalBlur, a straight-line smear at a FIXED angle
-    // Unlike zoomBlur (which radiates from the centre) every pixel in the frame smears the same amount
-    // in the same direction, the AE "Directional Blur" / a linear motion blur an author sets by hand
-    // rather than one that only appears when a layer is actually travelling.
-    vec2 dir = vec2(cos(u_angle), -sin(u_angle));       // -sin: DOM y is flipped vs. a maths angle
-    dir.x /= ar;                                        // keep the smear a straight line, not an ellipse, off-square
-    vec2 step = dir * (u_amt * 0.05);
-    col = vec4(0.0); float wsum = 0.0;
-    for (int i = 0; i < 16; i++) {
-      float t = float(i) / 15.0 - 0.5;                  // sample BOTH sides of the pixel, centred
-      float w = 1.0 - abs(t) * 0.7;
-      col += texture2D(u_tex, uv + step * t) * w; wsum += w;
-    }
-    col /= wsum;
+  } else {                                              // unreachable: RESAMPLE_FX has 9 names, u_fx never exceeds 8
+    col = texture2D(u_tex, uv);
   }
 
   gl_FragColor = col;
@@ -232,6 +282,8 @@ export function createResampler(w, h) {
     fx: gl.getUniformLocation(prog, 'u_fx'), amt: gl.getUniformLocation(prog, 'u_amt'),
     time: gl.getUniformLocation(prog, 'u_time'), seed: gl.getUniformLocation(prog, 'u_seed'),
     angle: gl.getUniformLocation(prog, 'u_angle'),
+    center: gl.getUniformLocation(prog, 'u_center'), count: gl.getUniformLocation(prog, 'u_count'),
+    dir: gl.getUniformLocation(prog, 'u_dir'),
   };
 
   const tex = gl.createTexture();
@@ -250,37 +302,97 @@ export function createResampler(w, h) {
 
   let uploaded = false;
 
+  // ONE PASS: bind `target` (null = the canvas' own default framebuffer), sample `srcTex`, run `op`'s
+  // fx/amount/angle/cx/cy/count, draw the full-screen triangle. Shared by the single-op fast path and
+  // the stack below, so there is exactly one place that sets these uniforms.
+  const pass = (target, srcTex, op) => {
+    const { fx, amount = 0.5, time = 0, seed = 0, angle = 0, cx = 0.5, cy = 0.5, count = 16 } = op;
+    const idx = RESAMPLE_FX.indexOf(fx);
+    if (idx < 0) RESAMPLE_REGISTRY.pick(fx);   // throws, naming this vocabulary and any other the word lives in
+    gl.bindFramebuffer(gl.FRAMEBUFFER, target);
+    gl.viewport(0, 0, w, h);
+    gl.useProgram(prog);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, srcTex);
+    // The blur family (zoomBlur/spinBlur/directionalBlur) all draw through the single `u_fx == 0`
+    // branch; which of the three they are is `u_dir`, not the fx index.
+    const dirMode = fx in BLUR_DIR ? BLUR_DIR[fx] : -1;
+    gl.uniform1i(U.fx, dirMode >= 0 ? 0 : idx);
+    gl.uniform1i(U.dir, dirMode);
+    gl.uniform1f(U.amt, amount);
+    gl.uniform1f(U.time, time);
+    gl.uniform1f(U.seed, seed);
+    gl.uniform1f(U.angle, angle);
+    gl.uniform2f(U.center, cx, cy);
+    gl.uniform1i(U.count, count);
+    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  };
+
+  // PING-PONG, built lazily: a single-op layer (the overwhelming common case) never allocates these,
+  // so the collapse in Task 1 costs nothing extra for the films that do not stack. Two FBOs, not one
+  // per stack depth: pass i writes the FBO pass i-1 is NOT currently bound to read from, so ping/pong
+  // is enough for any depth, the same reason a double-buffered swap chain needs only two buffers.
+  let ping = null, pong = null;
+  const makeFBO = () => {
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    const fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+    const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (status !== gl.FRAMEBUFFER_COMPLETE) throw new Error(`resample stack: offscreen framebuffer incomplete (0x${status.toString(16)})`);
+    return { fbo, tex: t };
+  };
+
+  const upload = (src, once) => {
+    // An <img>'s .width is its LAYOUT width (set by our own CSS), not proof that pixels decoded.
+    // A 404'd image reports width 1400 and naturalWidth 0. Uploading it leaves the texture
+    // INCOMPLETE, and an incomplete texture samples as opaque black, so the layer renders as a
+    // black rectangle with no error. Ask the source what it actually decoded.
+    const sw = src.naturalWidth ?? src.width, shh = src.naturalHeight ?? src.height;
+    if (!sw || !shh) throw new Error(`resample source has no pixels (${src.tagName === 'IMG' ? 'image failed to load: ' + src.src : 'empty canvas'}). A black rectangle is not an acceptable render`);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    if (!once || !uploaded) {
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+      uploaded = true;
+    }
+  };
+
   return {
     canvas,
     // src: an HTMLImageElement or HTMLCanvasElement. `once` skips re-upload for static sources.
     // A still image is the same texels on every frame and re-uploading it 900 times is pure waste.
-    draw(src, fx, amount = 0.5, time = 0, seed = 0, once = false, angle = 0) {
-      const idx = RESAMPLE_FX.indexOf(fx);
-      if (idx < 0) RESAMPLE_REGISTRY.pick(fx);   // throws, naming this vocabulary and any other the word lives in
-      // An <img>'s .width is its LAYOUT width (set by our own CSS), not proof that pixels decoded.
-      // A 404'd image reports width 1400 and naturalWidth 0. Uploading it leaves the texture
-      // INCOMPLETE, and an incomplete texture samples as opaque black, so the layer renders as a
-      // black rectangle with no error. Ask the source what it actually decoded.
-      const sw = src.naturalWidth ?? src.width, shh = src.naturalHeight ?? src.height;
-      if (!sw || !shh) throw new Error(`resample source has no pixels (${src.tagName === 'IMG' ? 'image failed to load: ' + src.src : 'empty canvas'}). A black rectangle is not an acceptable render`);
-      gl.useProgram(prog);
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, tex);
-      if (!once || !uploaded) {
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
-        uploaded = true;
+    draw(src, fx, amount = 0.5, time = 0, seed = 0, once = false, angle = 0, cx = 0.5, cy = 0.5, count = 16) {
+      upload(src, once);
+      pass(null, tex, { fx, amount, time, seed, angle, cx, cy, count });
+    },
+    // drawStack: `ops` is 1+ { fx, amount, angle, cx, cy, count }, applied IN ORDER. Each pass reads
+    // only the PREVIOUS PASS of THIS SAME draw() call, never a leftover buffer from a call for a
+    // different frame: `ping`/`pong` are overwritten from `tex` (the just-uploaded, constant-for-this-
+    // frame source) at op[0] on every invocation, so nothing here remembers frame n-1. That is the
+    // purity argument stackable-sampling-ops.plan.md Task 3 asks to be written down before any code:
+    // renderFrame(n) reads this stack fresh each call, so a backward seek reproduces it exactly.
+    drawStack(src, ops, time = 0, seed = 0, once = false) {
+      if (ops.length === 1) { this.draw(src, ops[0].fx, ops[0].amount, time, seed, once, ops[0].angle, ops[0].cx, ops[0].cy, ops[0].count); return; }
+      upload(src, once);
+      if (!ping) { ping = makeFBO(); pong = makeFBO(); }
+      let readTex = tex, writeFBO = ping, otherFBO = pong;
+      for (let i = 0; i < ops.length; i++) {
+        const last = i === ops.length - 1;
+        const op = { ...ops[i], time, seed };
+        pass(last ? null : writeFBO.fbo, readTex, op);
+        if (!last) { readTex = writeFBO.tex; [writeFBO, otherFBO] = [otherFBO, writeFBO]; }
       }
-      gl.uniform1i(U.fx, idx);
-      gl.uniform1f(U.amt, amount);
-      gl.uniform1f(U.time, time);
-      gl.uniform1f(U.seed, seed);
-      gl.uniform1f(U.angle, angle);
-      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
     // off-window must wipe, or the buffer holds whichever frame a worker drew last rather than a
     // function of t. Same reason as core/layers/paint.js and core/layers/shader.js.
-    clear() { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); },
+    clear() { gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); },
     dispose() { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); },
   };
 }
