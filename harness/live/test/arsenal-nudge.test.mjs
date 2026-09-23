@@ -36,6 +36,14 @@ function run(input, dataDir) {
 const probeHtml = () => join(ROOT, 'films/scene', ['_arsenal-nudge-probe', 'html'].join('.'));
 const probeBoard = () => join(ROOT, 'films/scene', ['_arsenal-nudge-probe', 'storyboard', 'md'].join('.'));
 const probeJson = () => join(ROOT, 'films/scene', ['_arsenal-nudge-probe', 'json'].join('.'));
+const probeCore = () => join(ROOT, 'core/resample', ['_arsenal-nudge-probe', 'js'].join('.'));
+
+// The real near-miss this widening closes: a new resample fx named with a device tell, added as a
+// quoted registry entry the way core/resample/effects.js's own RESAMPLE_FX array does it.
+const NEW_FX_ARRAY_ENTRY = "export const RESAMPLE_FX = ['zoomBlur', 'spinBlur', 'radialBlur'];";
+const EXISTING_BODY_EDIT = '  const clampedAmount = Math.min(1, Math.max(0, amount));\n'
+  + '  gl.uniform1f(loc, clampedAmount);';
+const NEW_EXPORT_NO_TELL = 'export function clampCenter(x, y) {\n  return { x: Math.min(1, x), y: Math.min(1, y) };\n}';
 
 const CARET_HTML = '<div class="typing"><span class="caret">|</span></div>'
   + '<style>.caret{animation:blink 1s infinite}</style>';
@@ -121,5 +129,24 @@ test('a cursor already using snapTo (or the hover-click recipe) is silent', () =
 test('an ordinary composed layer with plain x/y fields is silent', () => {
   const dir = scratchDir();
   const { status, out } = run({ tool_name: 'Edit', tool_input: { file_path: probeJson(), new_string: ORDINARY_CARD_JSON } }, dir);
+  assert.equal(status, 0, `expected silence, got:\n${out}`);
+});
+
+test('a new engine primitive named with a device tell nudges (the zoomBlur near-miss)', () => {
+  const dir = scratchDir();
+  const { status, out } = run({ tool_name: 'Edit', tool_input: { file_path: probeCore(), new_string: NEW_FX_ARRAY_ENTRY } }, dir);
+  assert.equal(status, 2, `expected a nudge, got:\n${out}`);
+  assert.match(out, /^search first: make arsenal Q="[^"]+" -> .+/m);
+});
+
+test('a body edit to an existing core/ effect, no new name, is silent', () => {
+  const dir = scratchDir();
+  const { status, out } = run({ tool_name: 'Edit', tool_input: { file_path: probeCore(), new_string: EXISTING_BODY_EDIT } }, dir);
+  assert.equal(status, 0, `expected silence, got:\n${out}`);
+});
+
+test('a new core/ export with no device-tell word is silent', () => {
+  const dir = scratchDir();
+  const { status, out } = run({ tool_name: 'Edit', tool_input: { file_path: probeCore(), new_string: NEW_EXPORT_NO_TELL } }, dir);
   assert.equal(status, 0, `expected silence, got:\n${out}`);
 });

@@ -116,8 +116,9 @@ video starts ahead.
    frame-delta series. **No silent fallback**: a film with none of the four is reported as ONE SHOT, with
    the evidence named, never an invented equal-slice sample. When near-misses sit just under the
    threshold it names them and tells you what to re-run. Two detectors landing on the same moment and
-   naming it differently is reported as a disagreement, never resolved silently. **Read the sheet AND the
-   pages before you trust the numbers.**
+   naming it differently is reported as a disagreement, never resolved silently.
+
+   **Read the sheet AND the pages before you trust the numbers.**
 
    **`refs/` is gitignored, and that is the boundary.** You are extracting the reference's grammar: shot
    length, cut rate, what carries across a junction. Throw away its UI, its copy and its colours. Never
