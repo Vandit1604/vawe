@@ -55,6 +55,10 @@ const WAIVERS = {
   // top-level layer per type, which cannot construct the group-child context `delay` needs to be read
   // at all, the same shape clip.loop/clip.speed are waived for.
   '(every type).delay': 'read only on a group child (core/layers/util.js addGroupChild), which this single top-level-layer-per-type harness cannot construct',
+  // Same class as `delay`, and util.js:97 already names the three together: "nothing is inherited for a
+  // child except what the group's own layout gives it (`grow`, `basis`, `delay`)". `grow` is read at
+  // core/layers/util.js:669 as flexGrow on a group CHILD, so a bare top-level layer never reaches it.
+  '(every type).grow': 'read only on a group child (core/layers/util.js:669, flexGrow), which this single top-level-layer-per-type harness cannot construct',
 };
 
 // NOT PROBED, which is a different statement from waived. A waiver says the prober reported a death
