@@ -1,6 +1,6 @@
 ---
 name: vawe-type-recreation
-description: "Playbook for matching a reference film's or site's exact look in this engine: study the grammar, take it, never the frames. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches recreation, or the request is to recreate a specific reference with no product of ours to sell."
+description: "Playbook for matching a reference film's or site's exact look in this engine: study the grammar, take it, never the frames. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches recreation, or the request is to recreate a specific reference with no product to sell."
 stage: plan
 ---
 

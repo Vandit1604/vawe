@@ -426,7 +426,7 @@ export function renderSkill(entries) {
   const fm = [
     '---',
     'name: vawe-docs',
-    'description: "Find the one document in this repo that settles a question, without reading the others. Load whenever you are about to author, judge, or change a video and want to know which guide covers it: film structure, story beats, transitions, typography, colour, layout, imagery, density, sound, subagent cost, approval stops, recreation, the QA gates, the engine architecture, or the mistake log. Generated from the frontmatter on every doc, so it cannot drift from what is on disk."',
+    'description: "Find the one document in this repo that settles a question, without reading the others. Load before authoring, judging, or changing a video, to find which guide covers it: film structure, story beats, transitions, typography, colour, layout, imagery, density, sound, subagent cost, approval stops, recreation, the QA gates, the engine architecture, or the mistake log. Generated from the frontmatter on every doc, so it cannot drift from what is on disk."',
     '---',
     '',
   ].join('\n');
