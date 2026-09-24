@@ -421,8 +421,11 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 | name | what / when |
 |---|---|
 | `aurora` | drifting colour aurora (moves) |
+| `auroraCurtain` | six vertical curtain lines undulating top to bottom, each drifting sideways on its own noise offset, fading warm to cool along its length. ported from pbakaus/radiant |
+| `auroraVeil` | seven wide aurora ribbons undulating over a starfield, with a frosted ice ground plane reflecting them below the horizon. the richest field here after bands. ported from pbakaus/radiant |
 | `bands` | a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; engine-doctrine/LIGHTFIELD.md |
 | `barrel` | the LENS, not the picture: a corner vignette with a faint violet chromatic fringe riding the far edge only |
+| `chromaticBloom` | twelve luminous colour orbs (five vivid, seven dim) drifting and blending on black, each on its own noisy orbit, with a vignette and grain over the top. ported from pbakaus/radiant |
 | `crt` | a tube: 4px RGB phosphor stripes, scanlines, a corner vignette and a refresh bar rolling down. an OVERLAY |
 | `curlSmoke` | a rising plume of ink or smoke that rolls into vortices as it climbs, its filaments stretching and folding. slow, continuous, and never repeating; the one field here with real fluid motion rather than a drifting pattern |
 | `domainWarp` | marbled ink: fBm sampled through a domain that is itself two levels of fBm, so the field folds back over itself. the classic warp, and the only field here with real interior structure |
@@ -434,6 +437,7 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 | `godRays` | shafts of light: sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point. it is BRIGHT through the middle, so drop `intensity` toward 0.4 before putting white type over it |
 | `heatShimmer` | rising warm haze in fine wavy bands, strongest low in the frame and thinning as it climbs. self-generated. It does not warp what is beneath it |
 | `kaleidoscope` | a 6-fold mirrored mandala turning slowly and fading out toward the corners. A symmetric field of its own, never a mirror of your content |
+| `laserLabyrinth` | six volumetric light cones sweeping down from just above the top edge through drifting fog, three dim and far, three bright and near with a rhythmic beat snap. ported from pbakaus/radiant |
 | `lightLeak` | three warm blobs drifting in from the edges on a loop, tinted from the palette. an OVERLAY |
 | `matrixDecode` | digital rain: near-white heads falling down 44 glyph columns at per-column speeds, each dragging a fading tail. palette stop 0 tints it |
 | `metaballs` | five signed-distance circles merging and parting on a polynomial smooth minimum, so they fuse into one body instead of overlapping |
@@ -468,13 +472,13 @@ Each resampled layer takes its own WebGL context and browsers cap those at rough
 |---|---|
 | `bitCrush` | quantise the palette down until it bands, each 0.25 of `amount` halving the bit depth, a degrade beat, never decoration |
 | `chromaShift` | radial RGB separation, the channels pulling apart from the centre outwards |
-| `directionalBlur` | a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS "Directional Blur": a look an author SETS, not a byproduct of a layer's own travel speed (that one is automatic, see `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4) |
+| `directionalBlur` | a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS "Directional Blur": a look an author SETS, not a byproduct of a layer's own travel speed (that one is automatic, see `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4). `count` trades sample quality for cost (2..32, default 16) |
 | `dissolve` | noise-thresholded erosion lit by an ember front. The way OUT of an image; ramp `amount:[0.05, 0.95]` to burn it away |
 | `fisheye` | real lens distortion: barrel above the middle of the dial, pincushion below, `0.5` the identity. Outside the source reads empty, never a stretched edge |
 | `macroblock` | the flat blocks and dropped tiles of a starved codec. A glitch/degrade beat, never decoration |
 | `refract` | liquid glass: the image BENDS along a noise gradient with per-channel dispersion and a specular glint, what a blur cannot do |
-| `spinBlur` | smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal |
-| `zoomBlur` | radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp |
+| `spinBlur` | smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal. `cx`/`cy` move the pivot off screen-middle (0..1, default 0.5/0.5); `count` trades sample quality for cost (2..32, default 16) |
+| `zoomBlur` | radial smear out from a centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp. `cx`/`cy` move the centre off screen-middle (0..1, default 0.5/0.5); `count` trades sample quality for cost (2..32, default 16) |
 
 ## Adjustment layers (grade what is BENEATH)  `[per-layer]`
 
@@ -1160,4 +1164,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_710 effects across 60 families. Regenerate: `make effects`._
+_714 effects across 60 families. Regenerate: `make effects`._

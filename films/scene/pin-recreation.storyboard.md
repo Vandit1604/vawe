@@ -1,24 +1,24 @@
 ---
-message: "One box can hold the whole six seconds: a scene brief typed in, and nothing else moving."
+message: "You describe a shot, and you are standing in it. The panel you typed into becomes the frame."
 audience: "engine reviewers judging whether vawe can hold restraint, not just spectacle"
-arc: "one continuous action: an empty scene-brief pill sits still, becomes a pill holding a typed scene description, and becomes a lit, held box with the brief inside it, payoff withheld"
-threads: "a transforming object (the scene-brief pill) plus one open question: what will vawe render from this brief? the last frame never answers it"
-object: "the vawe scene-brief pill"
-object_t0: "a narrow, empty rounded pill, centered low in the frame, placeholder text only"
-object_states: "at the turn: the pill widens and grows a second line as a one-line scene brief types into it, and gains a soft violet glow at its border"
-object_last: "the same pill, now holding the full typed brief, glow settled, held completely still. no render shown."
+arc: "one continuous action: an empty ask panel sits still, takes a typed scene description, and then opens: the shot it describes arrives inside its own box and grows until the panel's edges leave frame"
+threads: "a transforming object (the ask panel) plus one question, what will vawe render from this brief, which the last beat answers by putting the viewer inside it"
+object: "the vawe ask panel"
+object_t0: "a wide dark panel centred on black, its gradient ring cool and unlit, placeholder text and a quiet control row only"
+object_states: "at the turn: a scene brief types into the panel, the ring lights warm on one side and cool on the other, and the glyph field behind it brightens under each bloom"
+object_last: "the panel is gone as a panel: its box has grown past every edge and what is left is the shot itself, a rain-lit street, held."
 format: 1920x1080
 theme: "themes/default.json"
-duration: 6.04s
-spectacle: "the pill's own expansion and border glow as the brief finishes typing, the one moment in six seconds where anything moves fast"
-not: "no camera move, no second surface, no cut, no logo card, no CTA, no centered slide-deck layout beyond the one pill itself"
+duration: 7.0s
+spectacle: "the panel opening: the shot arrives inside its own box and the box grows until its edges leave frame. the one moment where anything moves fast"
+not: "no camera move, no cut, no logo card, no slide-deck layout beyond the one panel itself. the control row and the send button belong to the panel and are not a second surface"
 craft:
-    color: "near-black ground (#141414-ish), one eyedropped violet/magenta haze as atmosphere, never a subject"
-    density: "one hero (the pill) with its own heading above it as support; no metadata row, this film is intentionally sparse"
+    color: "near-black ground, two diffuse blooms as atmosphere, warm on one side and cool on the other, never a subject. a faint glyph field lives inside them and takes its tint from whichever bloom is nearest"
+    density: "one hero (the panel), its own control row as support, and nothing else. sparse by the ground around it, not by the panel being empty"
     direction: "restraint is the whole film: 0.21-0.25 delta everywhere except the write beat, which alone should read as loud"
-    film-structure: "a single continuous object across three states (empty, writing, held) holds the film, not a cut"
-    layout: "the pill sits low-center on an otherwise empty, asymmetric dark field; nothing else claims the frame"
-    motion-craft: "the pill's width/height and border glow are hand-keyed off the measured reference timing (about 1.8s to 3.5s), no preset fired once and left alone"
+    film-structure: "a single continuous object across four states (empty, writing, opening, arrived) holds the film. the panel never leaves screen, it becomes the frame"
+    layout: "the panel sits centred on an otherwise empty dark field, wide and short, roughly five to one; nothing else claims the frame"
+    motion-craft: "the ring's light and the blooms behind it are hand-keyed off the measured reference timing, no preset fired once and left alone"
 ---
 
 <!-- Recreation benchmark: motion grammar only (one continuous shot, one event near the 35% mark,
@@ -35,6 +35,7 @@ craft:
 - trigger: the film opens; nothing before it
 - why: name the surface, then go still, so the write beat has something to be loud against
 - duration: 1.8s
+- feedback: "looks so bad" (studio, 2026-09-24)
 
 ## Beat 2: Write (1.8s-3.9s)
 - type: product_surface
@@ -45,15 +46,29 @@ craft:
 - trigger: the empty pill has held long enough to read as waiting; the brief starts because the wait is now the point
 - why: this is the one real event in the film. everything before and after is quiet so this reads as loud
 - duration: 2.1s
+- feedback: "the chat interface is below the rain and shader and blobs of light" (studio, 2026-09-24)
 
-## Beat 3: Hold (3.9s-6.04s)
-- type: payoff_withheld
-- object: the same pill, now full, glow settled, completely still
+## Beat 3: Send (3.9s-4.42s)
+- type: product_surface
+- object: the pointer arrives on the send button and clicks it
 - onscreen: "a slow dolly into a rain-lit street, neon signs reflecting in the wet asphalt"
-- mechanism: no motion at all beyond the drifting background haze; camera and pill both hold
+- mechanism: the cursor eases in from the lower right onto the panel's own live box and fires one click at 3.75s; the brief is finished and nothing else moves
 - camera: hold
-- eye: the pill's border glow -> holds, nothing else to pull it -> the pill as a whole, left to sit
-- becomes: the writing pill becomes a held, finished pill. the brief sits there, unrendered
-- trigger: the brief has finished typing; the box has nothing left to grow into
-- why: withhold the payoff. the viewer's curiosity (what will this become?) is highest right here, and the film ends before answering it
-- duration: 2.14s
+- eye: the finished line -> the pointer crossing toward it -> the send button under the pointer
+- becomes: a written brief becomes a sent one. the control that sat unused for four seconds is used
+- trigger: the brief has finished typing; the only thing left to do is send it
+- why: the shot must be CAUSED. a video that arrives on its own is a cut; a video that arrives on a click is the product working
+- duration: 0.52s
+
+## Beat 4: Arrive (4.42s-7.0s)
+- type: payoff
+- object: the shot the words described, inside the panel's own box
+- onscreen: "a slow dolly into a rain-lit street, neon signs reflecting in the wet asphalt"
+- mechanism: the clip arrives in the panel at full width and holds; it is SEEKED per frame, never played, so a backward scrub is byte-identical. the ground turns with it, from the panel's near-black to the shot's
+- camera: hold
+- eye: the sent line -> the frame opening beneath it -> the figure walking away down the wet street
+- becomes: the panel stops being a panel and becomes a window. the brief above it is now a caption for what is underneath
+- trigger: the click landed; the render is back
+- why: the payoff is the whole argument. you describe a shot and you are standing in it, and withholding that would be a worse film than showing it
+- duration: 2.58s
+- feedback: "the search bar should expand vertically and the video should be cropped to the size of search bar horizontally" (studio, 2026-09-24)
