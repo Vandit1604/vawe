@@ -440,6 +440,16 @@ const PRESET_AKA = {
   // the neutral exit vocabulary: "leave the frame" already means something else (a whole-layer `out`),
   // so a query for a SPLIT UNIT leaving word by word needs its own words on the preset it defaults to.
   fade: ['word by word exit', 'words leave one by one', 'text disappears word by word', 'split exit'],
+  // "rainbow text" / "color sweep across letters" named the tagline gap directly and the blurb alone
+  // does not carry the phrase a person actually types for it.
+  gradient: ['rainbow text', 'colour sweep text', 'gradient text reveal'],
+  // "cross out" already belongs to `strike`; a MARKER band under running text needed its own words.
+  highlight: ['marker highlight', 'highlighter sweep', 'underline sweep'],
+  // "line drawing" / "path animation" are what an author calls an SVG stroke reveal before they know
+  // this engine's own name for it.
+  draw: ['line drawing', 'path draw', 'svg stroke animation'],
+  scale: ['zoom in text', 'grow text from small'],
+  blur: ['soft focus resolve', 'defocus in'],
 };
 export const PRESET_REGISTRY = defineRegistry('kinetic preset', PRESETS, { slot: 'preset', blurbs: PRESET_BLURBS, aka: PRESET_AKA,
   catalog: {

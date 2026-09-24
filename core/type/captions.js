@@ -404,7 +404,9 @@ export const CAPTION_BLURBS = blurbsOf('caption style', CAP_STYLES);
 // against these names. The usage snippet was corrected once already (engine-doctrine/MISTAKES.md, the note in
 // effects-json.mjs) and the prose above it was left saying the wrong thing, because prose about code
 // goes stale in silence. Moving it to the definition site is what stops that happening twice.
-export const CAP_STYLE_REGISTRY = defineRegistry('caption style', CAP_STYLES, { slot: 'captionStyle', blurbs: CAPTION_BLURBS,
+const CAPTION_AKA = { highlight: ['marker highlight', 'highlighter sweep', 'underline sweep'] };
+
+export const CAP_STYLE_REGISTRY = defineRegistry('caption style', CAP_STYLES, { slot: 'captionStyle', blurbs: CAPTION_BLURBS, aka: CAPTION_AKA,
   catalog: {
     title: 'Caption styles',
     tag: 'captions',
