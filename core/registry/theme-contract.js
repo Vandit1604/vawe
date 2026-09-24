@@ -100,8 +100,13 @@ import { defineRegistry } from './registry.js';
 // transition actually used at each joint, so a fixed list cannot say which cue replaces which. A film
 // changes its cut family beat to beat; the cue has to follow the cut, not a brand-wide preference.
 const LOOK_KEY_ENTRIES = { backdrop: 'backdrop', scale: 'scale', layout: 'layout', marks: 'marks', cuts: 'cuts', field: 'field' };
+const LOOK_KEY_AKA = {
+  cuts: ['default transition style', 'brand cut preference'],
+  field: ['backdrop texture defaults', 'grain and vignette settings'],
+};
 export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRIES, {
   slot: 'theme.look',
+  aka: LOOK_KEY_AKA,
   blurbs: {
     // SCAFFOLD-ONLY, not read at render: `bg` is a REQUIRED authoring field (core/engine/produce.js:14-16),
     // written precisely so the engine never picks the backdrop for an author again (engine-doctrine/MISTAKES.md
