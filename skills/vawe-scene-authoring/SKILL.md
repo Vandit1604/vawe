@@ -1,6 +1,6 @@
 ---
 name: vawe-scene-authoring
-description: How to author good-looking, well-spaced, well-animated Vawe scenes (films/<name>/scene.html) and data JSON. Use when creating or editing a format's scene HTML/CSS, adding animations, integrating images, or fixing spacing. Covers the renderFrame(n) purity contract, design tokens, motion primitives, the image/visual system, and the QA loop.
+description: How to author good-looking, well-spaced, well-animated Vawe scenes (the shared films/scene/scene.html shell) and data JSON (films/scene/<topic>.json). Use when creating or editing scene HTML/CSS, adding animations, integrating images, or fixing spacing. Covers the renderFrame(n) purity contract, design tokens, motion primitives, the image/visual system, and the QA loop.
 codes: canvas-order-dependent, purity-forward-mismatch, purity-render-order
 stage: assemble
 ---
@@ -9,7 +9,7 @@ stage: assemble
 
 One self-describing JSON → one rendered Short (1080×1920, 60fps final, 30fps `--draft`). Scenes are vanilla HTML/CSS/JS;
 a Go renderer (chromedp + ffmpeg) seeks to each frame and screenshots. **You almost never edit the
-Go renderer.** You write data JSON (most common) or a format's `scene.html`.
+Go renderer.** You write data JSON (most common) or the shared `films/scene/scene.html`.
 
 ## Rules, loaded before you write a layer
 

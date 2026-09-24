@@ -1,6 +1,6 @@
 ---
 name: vawe-launch
-description: "The gated end-to-end pipeline for a product-launch / promo video in this repo: brief → capture → design-system (preset remix) → storyboard proposal → local narration → author from recipes → build (optionally one sub-agent per beat) → finalize (author-check · seam-check · judge · render). Load when the user wants a launch/promo/feature video and you want the full orchestrated flow. Run each step, pass its gate, then continue; user-gated at Step 0, 3, 6."
+description: "The gated end-to-end pipeline for a product-launch / promo video in this repo: brief → capture → design-system (preset remix) → storyboard proposal → local narration → author from recipes → build (optionally one sub-agent per beat) → finalize (author-check · seam-check · judge · render). Load when the user wants a launch/promo/feature video and the full orchestrated flow is needed. Run each step, pass its gate, then continue; user-gated at Step 0, 3, 6."
 ---
 
 # vawe-launch: the orchestrated launch-video pipeline
