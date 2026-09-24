@@ -38,7 +38,7 @@ const GENERATORS = [
   ['arsenal index', ['scripts/site/arsenal-json.mjs'],
     ['site/lib/arsenal.json', 'site/lib/blocks.json']],
   ['doc map', ['quality/gates/doc-map.mjs', '--write'],
-    ['engine-doctrine/INDEX.md', 'engine-doctrine/CRAFT/README.md', 'skills/vawe-docs/SKILL.md']],
+    ['engine-doctrine/INDEX.md', 'engine-doctrine/CRAFT/README.md']],
   // blocks/catalog/ + registry/ is 216 generated files with its own `--check` mode that nothing ran.
   // It went stale the same way arsenal.json did: block blurbs changed, the tree carried the old
   // `description`, and only an agent regenerating it by hand noticed 110 files were behind. A

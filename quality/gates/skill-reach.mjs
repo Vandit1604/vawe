@@ -30,7 +30,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 // Generated, so a skill named only here has been indexed, not routed. Named explicitly rather than
 // derived, so a future generated view has to be added here on purpose, not discovered by surprise.
-const PURE_INDEX = new Set(['engine-doctrine/INDEX.md', 'skills/vawe-docs/SKILL.md']);
+const PURE_INDEX = new Set(['engine-doctrine/INDEX.md']);
 
 const read = (root, rel) => {
   const abs = path.join(root, rel);

@@ -9,7 +9,7 @@
 //
 // So there is no second table. Each skills/*/SKILL.md names its OWN stage in a `stage:` frontmatter
 // line (one of quality/gates/stage.mjs's STAGE_ORDER ids), and this module is the one place that reads
-// it back. A skill with no `stage:` is cross-cutting on purpose (vawe-docs, vawe-launch, a vendored
+// it back. A skill with no `stage:` is cross-cutting on purpose (vawe-launch, a vendored
 // skill) and simply never surfaces here; that is not an error.
 import fs from 'node:fs';
 import path from 'node:path';

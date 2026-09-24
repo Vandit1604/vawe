@@ -123,7 +123,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [SCREENS.md](SCREENS.md) | you are about to author a product screen (an editor, a results grid, a dashboard, a chat, a card) for a film, or a screen previews as a grey box, with tiny type, or with something clipped | why a product screen is designed for the video, not a plain mock · the one make screen command · what the video-readiness and clipping checks catch and why · how a screen is measured against a reference act · where a theme comes from when the user has none, and which ui-skills were used |
 | [SPECIMEN.md](SPECIMEN.md) | you are about to write a scene that PROVES a mechanism works | what a specimen is · why the subject is a picture · the series constants and why each is fixed · when it is `make catalog` instead |
 | [SURFACES.md](SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
-| [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking `type.sans/serif/mono`, sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
+| [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking a font or type face (`type.sans/serif/mono`), sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
 
 **How full · how it sounds:**
 

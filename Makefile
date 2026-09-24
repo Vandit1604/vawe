@@ -685,13 +685,20 @@ coverage: ## [check] which engine vocabulary no authored scene exercises.
 craft-coverage: ## [maintenance] keep the docs honest: every look/sting in the engine is classified in SELECTION.md, no doc names a
 	@node quality/gates/craft-coverage.mjs $(if $(JSON),--json,)
 
-# make docs, PRINT THE DOC MAP: every written thing in this repo, one line each (reach for it when…,
-# it answers…). Read the line, open only the doc you need. Same map as the `vawe-docs` skill.
-docs: ## [site] PRINT THE DOC MAP: every written thing in this repo, one line each (reach for it when…, it answers…).
-	@cat engine-doctrine/INDEX.md
+# make docs, TWO MODES ON ONE MAP. With Q= it ANSWERS one question: which document settles this, ranked
+# over the same `when:`/`answers:` frontmatter, the doc-side twin of `make arsenal Q=`. Bare, it prints
+# the whole map to browse, which is what this target always did.
+#
+# Asking beats browsing here for a measured reason. The map is 157 rows, and it used to ALSO ship as
+# `skills/vawe-docs/SKILL.md`, about 9,500 tokens against Anthropic's 5,000-token body budget. Chroma's
+# Context Rot study (18 models) measures that one long coherent document retrieves worse than short
+# independent pieces, so a bigger table was the wrong direction; that skill is retired.
+docs: ## [site] which doc settles this? Q="<your question>" [N=3]; bare, prints the whole map
+	@if [ -n "$(Q)" ]; then node harness/author/docs.mjs "$(Q)" $(if $(N),--n $(N)) $(if $(JSON),--json,); \
+	 else cat engine-doctrine/INDEX.md; fi
 
-# make doc-index, regenerate every index view from the per-doc frontmatter: engine-doctrine/INDEX.md, the
-# `vawe-docs` skill, and the table inside engine-doctrine/CRAFT/README.md. Run it after editing a doc's `when:` or
+# make doc-index, regenerate every index view from the per-doc frontmatter: engine-doctrine/INDEX.md and
+# the table inside engine-doctrine/CRAFT/README.md. Run it after editing a doc's `when:` or
 # `answers:`, or after adding a doc. The views are generated so they cannot drift from the docs.
 doc-index: ## [site] regenerate every index view from the per-doc frontmatter: engine-doctrine/INDEX.md, the `vawe-docs` skill, and
 	@node quality/gates/doc-map.mjs --write $(if $(JSON),--json,)

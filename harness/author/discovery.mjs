@@ -156,7 +156,14 @@ export const fieldBlob = (beats, keys = PROSE_FIELDS) => beats.map((b) => keys.m
 // from a beat's prose before they are handed to the same ranker, so a query built here never carries a
 // word that could only look rare because film prose talks about people and time and a blurb does not.
 const PROSE_STOP = new Set(['which', 'their', 'while', 'then', 'each', 'same', 'being', 'whose',
-  'whom', 'who', 'this', 'these', 'those', 'than', 'once', 'twice']);
+  'whom', 'who', 'this', 'these', 'those', 'than', 'once', 'twice',
+  // THE SHAPE OF A QUESTION, not its subject. A person asking "how do I choose a font" is naming one
+  // topic and three function words, and idf cannot tell those apart: measured over the 157-doc corpus,
+  // `choose` has df 1 and `font` has df 4, so the verb outweighs the noun and the one doc that happens
+  // to say "choose" wins a question about typography. These are the words a QUESTION carries that the
+  // thing being described would not, which is the same argument the sixteen above were added on.
+  'how', 'what', 'when', 'where', 'why', 'do', 'does', 'should', 'would', 'could',
+  'choose', 'choosing', 'pick', 'picking', 'use', 'using', 'make', 'making', 'get', 'find']);
 
 /** filteredToks(text) -> toks(text) with PROSE_STOP removed, the same filter tokenGroupsOf applies to
  * a beat's fields, exported so a caller working from raw text (ideate.mjs's act prose, never a beat
