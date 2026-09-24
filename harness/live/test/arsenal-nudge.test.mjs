@@ -82,6 +82,37 @@ test('a caret/typing HTML edit with no recent search nudges with real top names'
   assert.match(out, /codeTyping/);
 });
 
+// THE SUPPRESSION BUG THIS LOCKS. The log used to fall back to the WHOLE command line whenever no
+// quoted query matched, and the freshness check substring-matches against it. So a catalogue view or
+// any shell pipeline carrying a device word silenced that nudge for the full 20-minute window.
+// Measured on the real log before the fix: 29 of 96 rows were pipelines or flag runs, and `cursor`,
+// `caret` and `blur` each appeared in 9 of them.
+test('a catalogue view is not a search, so it is never logged and never suppresses a nudge', () => {
+  const dir = scratchDir();
+  for (const command of [
+    'node harness/author/arsenal.mjs --census 2>&1 | head -24',
+    'node harness/author/arsenal.mjs --new --kind block',
+    'node harness/author/arsenal.mjs --at block.glassCard',
+    'cd /x && rtk proxy grep -n "caret typing cursor" core/',
+  ]) {
+    const { status } = run({ tool_name: 'Bash', tool_input: { command } }, dir);
+    assert.equal(status, 0);
+  }
+  assert.equal(fs.existsSync(path.join(dir, 'arsenal-log.jsonl')), false,
+    'a command that asked no question must leave no record of having asked one');
+  // and the nudge still fires, which is the behaviour the old fallback silently removed
+  const { status } = run({ tool_name: 'Edit', tool_input: { file_path: probeHtml(), new_string: CARET_HTML } }, dir);
+  assert.equal(status, 2);
+});
+
+test('an unquoted query is logged as the query, not as the command line', () => {
+  const dir = scratchDir();
+  run({ tool_name: 'Bash', tool_input: { command: 'node harness/author/arsenal.mjs typing caret --n 3' } }, dir);
+  const log = fs.readFileSync(path.join(dir, 'arsenal-log.jsonl'), 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+  assert.equal(log.length, 1);
+  assert.equal(log[0].q, 'typing caret');
+});
+
 test('the same edit is silent once a matching search already ran', () => {
   const dir = scratchDir();
   run({ tool_name: 'Bash', tool_input: { command: 'make arsenal Q="typing caret cursor"' } }, dir);
