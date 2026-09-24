@@ -32,6 +32,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { newSince, WINDOW_DAYS } from './recency.mjs';
+import { rowsFrom, compactDials } from './block-dials.mjs';
 // The tokenizer lives in core/registry/registry.js, where the load-time blurb refusal also needs it. Two
 // tokenizers would eventually disagree about which words an entry is indexed under, and the refusal has
 // to grade a blurb by exactly the words this search will find it by.
@@ -143,6 +144,10 @@ export async function collect() {
       import('../../blocks/index.mjs').catch(() => null),
     ]);
     const catOf = (idx && idx.CATEGORY_OF) || {};
+    // The OPTION TABLES, read off the module this already imported. Every family declares one
+    // (blocks/index.mjs throws at load for a module that does not), and quality/gates/block-schema.mjs
+    // holds each against its factory's real signature, so these dials cannot disagree with the engine.
+    const schemas = (idx && idx.SCHEMAS) || {};
     // A FAMILY WITH NO BARE ROW WOULD OTHERWISE BE ABSENT ENTIRELY, and five were: `pricingCard`,
     // `statCard`, `profileCard`, `lowerThird` and `searchEngine` exist only as `card.pricing`,
     // `lowerThird.bild` and so on. The dotted skip below is right about why it exists and wrong about
@@ -164,7 +169,11 @@ export async function collect() {
       // `block`, because the printer renders a slot as `"<slot>": "<name>"` and that is exactly the
       // line an author writes inside a block layer. A first attempt put the whole layer JSON in here
       // and the snippet came out as nested quotes inside nested quotes, unreadable and uncopyable.
-      out.push({ name: row.name, kind: 'block', slot: 'block',
+      // `family`, because the OPTIONS live on the family, not on the row: `card.pricing` is the
+      // pricingCard factory with preset props, so its dials are pricingCard's dials. Carried on the
+      // entry so harness/author/block-dials.mjs can answer without a second catalog read.
+      out.push({ name: row.name, kind: 'block', slot: 'block', family: row.family,
+        dials: rowsFrom(schemas[row.family]),
         blurb: row.blurb || '', aka: [catOf[row.family] || '', ...(row.aka || [])].filter(Boolean),
         pitfall: row.pitfall || '' });
     }
@@ -469,6 +478,9 @@ export function rankQuery(allIn, query, { kind = null, n = 8, guessN = 3 } = {})
     doc: e.doc || null,
     coverage: e.c, score: e.s, isNew: fresh.has(e.name),
     snippet: snippet(e),
+    // The full typed rows, not the one-line summary the prose prints. A JSON consumer is not skimming,
+    // so there is no reason to hand it the abbreviated form and make it ask again.
+    dials: e.dials || null,
   });
 
   return {
@@ -717,6 +729,12 @@ async function main() {
     if (e.pitfall) console.log(`      pitfall: ${e.pitfall}`);
     if (e.doc) console.log(`      doc: ${e.doc}`);
     if (e.snippet) console.log(`      ${e.snippet}`);
+    // The dials, and the door to the rest of them. Summary here and the typed table one command away,
+    // because a query that returns six blocks must not print forty lines of ranges to say so.
+    if (e.dials && e.dials.length) {
+      console.log(`      dials: ${compactDials(e.dials)}`);
+      console.log(`      full:  make arsenal AT=block.${e.name}`);
+    }
     console.log('');
   }  if (result.rules.length) {
     console.log('  RULES (how to decide, open the doc only if you need more)');

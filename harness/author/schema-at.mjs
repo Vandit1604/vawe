@@ -225,6 +225,153 @@ function printNode(trail, node, regs) {
   console.log('');
 }
 
+// ---- the other path space: `block.<family>` --------------------------------------------------------
+//
+// THIS IS NOT A SECOND SCHEMA. films/scene/schema.json deliberately knows nothing about block props: a
+// block layer is `{type:"block", block:"<name>", …props}` and blocks/schema.mjs `resolve()` is what
+// validates those props, per family, against a table quality/gates/block-schema.mjs holds to the
+// factory's real signature. So the path `block.<family>` has no owner in schema.json and never will.
+// One tool, two disjoint path spaces, rather than a copy of one fact in both.
+//
+// The rules are converted into the schema's own node shape and handed to the SAME printers, so the
+// answer to "what may I write on a glassCard" reads exactly like the answer to "what may I write on a
+// motion keyframe". An author learns one output format, not two.
+const BLOCK_KINDS_WITH_FIELDS = new Set(['group', 'row']);
+
+function ruleNode(rule, note) {
+  const n = { type: rule.kind, label: note || undefined };
+  if (rule.def !== undefined) n.default = rule.def;
+  if (rule.min !== undefined) n.min = rule.min;
+  if (rule.max !== undefined) n.max = rule.max;
+  if (rule.kind === 'enum' && Array.isArray(rule.of)) n.enum = rule.of;
+  if (BLOCK_KINDS_WITH_FIELDS.has(rule.kind) && rule.fields) n.fields = tableNode(rule.fields);
+  if (rule.kind === 'list' && rule.of) {
+    // A list of ROWS has children worth drilling into; a list of scalars does not, and giving it an
+    // empty `item` would print a heading over nothing. The element's kind goes in the type instead.
+    if (rule.of.fields) n.item = tableNode(rule.of.fields);
+    else n.type = `list of ${rule.of.kind}`;
+  }
+  if (rule.kind === 'oneOf' && Array.isArray(rule.of)) {
+    n.type = `oneOf ${rule.of.map((a) => a.kind).join(' | ')}`;
+  }
+  return n;
+}
+
+const tableNode = (table, notes = {}) =>
+  Object.fromEntries(Object.entries(table).map(([k, r]) => [k, ruleNode(r, notes[k])]));
+
+// A BLOCK'S TABLE WANTS ITS DEFAULTS IN THE ROW, which is where this parts company with printFields.
+// A schema container's children are mostly objects you drill into, so name + type + label is the right
+// summary there. A block's children are all leaves, and the default and the range ARE the answer: an
+// author who has to run nine more commands to learn nine defaults has been told nothing useful.
+function printDials(rows, fields, regs) {
+  const w = Math.max(...rows.map((r) => r.name.length), 4);
+  const types = rows.map((r) => fields[r.name].type);
+  const tw = Math.max(...types.map((t) => t.length), 4);
+  const bounds = rows.map((r) => {
+    const bits = [];
+    if (r.def !== undefined) bits.push(`=${JSON.stringify(r.def)}`.length > 22 ? '=…' : `=${JSON.stringify(r.def)}`);
+    if (r.min !== undefined || (r.max !== undefined && r.kind !== 'str' && r.kind !== 'list')) {
+      bits.push(`${r.min ?? ''}..${r.max ?? ''}`);
+    } else if (r.max !== undefined) bits.push(`\u2264${r.max}`);
+    return bits.join(' ');
+  });
+  const bw = Math.max(...bounds.map((b) => b.length), 0);
+  rows.forEach((r, i) => {
+    const node = fields[r.name];
+    // Wider than COL on purpose: the bounds column ate the note's room at the schema's width, and the
+    // note is the one thing here that exists nowhere else an author can reach.
+    const room = ENUM_COL - (w + tw + bw + 10);
+    console.log(`    ${r.name.padEnd(w + 2)}${types[i].padEnd(tw + 2)}${bounds[i].padEnd(bw + 2)}`
+      + clip(oneLine(r.note || ''), Math.max(room, 20)));
+    const en = enumLine(node, regs, ENUM_COL);
+    if (en) console.log(`${' '.repeat(w + tw + bw + 10)}${en}`);
+  });
+}
+
+/** `AT=block` and `AT=block.<family>`. Returns false when the path is not ours, so the schema answers it. */
+async function printBlockPath(steps_, regs) {
+  const [, family] = steps_;
+  const [{ SCHEMAS, CATEGORY_OF }, { CATALOG }, dials] = await Promise.all([
+    import('../../blocks/index.mjs'),
+    import('../../blocks/catalog.mjs'),
+    import('./block-dials.mjs'),
+  ]);
+  const families = Object.keys(SCHEMAS).sort();
+
+  if (!family) {
+    const byCat = {};
+    for (const f of families) (byCat[CATEGORY_OF[f] || 'Other'] ||= []).push(f);
+    console.log(`\n  block  ·  ${families.length} block families, each with its own option table\n`);
+    for (const cat of Object.keys(byCat).sort()) {
+      console.log(`    ${cat}`);
+      console.log(wrap(byCat[cat].join(' · '), '      '));
+    }
+    console.log(`\n  Ask about one: make arsenal AT='block.${families[0]}'`);
+    console.log(`  What each one DRAWS is the other question: make arsenal Q="<what you want to show>"\n`);
+    return true;
+  }
+
+  if (!SCHEMAS[family]) {
+    // A scene writes `card.pricing`, so an author asking about that name is in the right place and
+    // holding a variant. Its options are its FAMILY's options, so answer with the family rather than
+    // refuse a name the registry really has.
+    const row = (CATALOG || []).find((r) => r && r.name === family);
+    if (row && SCHEMAS[row.family]) {
+      console.log(`\n  "${family}" is ${row.family} with preset props, so it takes ${row.family}'s options.`);
+      return printBlockPath(['block', row.family], regs);
+    }
+    let near = [];
+    try { ({ nearMisses: near } = await import('../../core/registry/registry.js')); near = near(family, families); } catch { near = []; }
+    console.log(`\n  no block family "${family}".${near.length ? ` Did you mean ${near.map((n) => `\`${n}\``).join(', ')}?` : ''}`);
+    console.log(`\n  make arsenal AT=block   lists all ${families.length}.\n`);
+    return true;
+  }
+
+  const rows = await dials.dialsFor(family, { withNotes: true });
+  const notes = Object.fromEntries(rows.filter((r) => r.note).map((r) => [r.name, r.note]));
+  const fields = tableNode(SCHEMAS[family], notes);
+
+  // ONE DIAL, asked about by name. The schema's own leaf printer already says type · default · min ·
+  // max, wraps the note in full and lists an enum's legal values with the registry it belongs to,
+  // which is exactly the shape of a block rule. Nothing about this branch is block-specific.
+  const dial = steps_[2];
+  if (dial) {
+    if (!fields[dial]) {
+      // A SCENE WRITES `card.pricing`, so `AT=block.card.pricing` is the path an author actually types,
+      // and it arrives here looking like an unknown option on the `card` family. It is a variant name:
+      // answer with the family whose options it really takes.
+      const variant = (CATALOG || []).find((r) => r && r.name === `${family}.${dial}`);
+      if (variant && SCHEMAS[variant.family]) {
+        console.log(`\n  "${family}.${dial}" is ${variant.family} with preset props, so it takes ${variant.family}'s options.`);
+        return printBlockPath(['block', variant.family], regs);
+      }
+      let near = [];
+      const legal = Object.keys(fields).sort();
+      try { ({ nearMisses: near } = await import('../../core/registry/registry.js')); near = near(dial, legal); } catch { near = []; }
+      console.log(`\n  ${family} has no option "${dial}".${near.length ? ` Did you mean ${near.map((n) => `\`${n}\``).join(', ')}?` : ''}`);
+      console.log(`\n  What IS legal on a ${family} (${legal.length}):\n`);
+      console.log(wrap(legal.join(' · '), '    '));
+      console.log('');
+      return true;
+    }
+    printNode(['block', family, dial], fields[dial], regs);
+    return true;
+  }
+
+  const blurb = ((CATALOG || []).find((r) => r && r.family === family) || {}).blurb || '';
+  console.log(`\n  block.${family}${blurb ? `  ·  ${blurb}` : ''}\n`);
+  printDials(rows, fields, regs);
+  const withNote = rows.find((r) => r.note) || rows[0];
+  console.log(`\n  ${rows.length} option(s). One in full, with its note: AT='block.${family}.${withNote.name}'`);
+  // PLACEMENT AND TIMING APPEAR IN NO TABLE, by design (blocks/schema.mjs PASSTHROUGH): the scene
+  // supplies them and a container injects them. Without this line the table reads as complete and an
+  // author concludes a block cannot be placed.
+  console.log(`  Plus x · y · start · dur on every block. Those are the scene's, not the block's, so`);
+  console.log(`  they are in no table: blocks/schema.mjs passes them through untouched.\n`);
+  return true;
+}
+
 // ---- the CLI --------------------------------------------------------------------------------------
 // Guarded the way arsenal.mjs is, because everything above is a library: quality/gates/lib-test.mjs
 // imports `resolve`, `steps` and `kindsOfEnum` and would otherwise print a schema map on import.
@@ -243,6 +390,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   }
 
   const want = steps(at);
+  if (want[0] === 'block') { await printBlockPath(want, regs); process.exit(0); }
+
   const r = resolve(schema, want);
   if (!r.error) { printNode(r.trail, r.node, regs); process.exit(0); }
 

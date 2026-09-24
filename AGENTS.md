@@ -70,7 +70,7 @@ make content-check D=<f> REF=<r>  # is this film's content as rich as the refere
 make study REF=<url>              # the film-side twin of `make sections`, a reference to hold a film to
 ```
 
-Single-shot: `./bin/vawe path/to/video.json` (`--draft` = fast), JSON starting `"module": "scene"`, saved as `films/scene/<topic>.json`. Read `sample.json` and an existing video first, never copy a structure wholesale. **On demand:** `make arsenal Q="…"` searches every effect/block (`MISTAKES=1` the mistake log, `THEME=<name>` a theme's look); `make demo Q="…"` writes a ten-second film about one thing (`engine-doctrine/CRAFT/SPECIMEN.md`). Making something good: `engine-doctrine/TASTE.md`. Search before you build anything by hand: see "Changing the ENGINE, not a film?" below, the same rule covers a film device and an engine primitive.
+Single-shot: `./bin/vawe path/to/video.json` (`--draft` = fast), JSON starting `"module": "scene"`, saved as `films/scene/<topic>.json`. Read `sample.json` and an existing video first, never copy a structure wholesale. **On demand:** `make arsenal Q="…"` searches every effect/block (`MISTAKES=1` the mistake log, `THEME=<name>` a theme's look, `AT=block.<family>` one block's dials with their ranges, defaults and notes); `make demo Q="…"` writes a ten-second film about one thing (`engine-doctrine/CRAFT/SPECIMEN.md`). Making something good: `engine-doctrine/TASTE.md`. Search before you build anything by hand: see "Changing the ENGINE, not a film?" below, the same rule covers a film device and an engine primitive.
 
 ## Direction: deciders write, critics report (stage 6)  `[ref: make critics]`
 

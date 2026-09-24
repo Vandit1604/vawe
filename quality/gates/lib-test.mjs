@@ -1577,6 +1577,33 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   });
   ok(`registry: every block is deterministic${drift.length ? ': ' + drift.map((e) => e.name).join(', ') : ''}`, drift.length === 0);
 
+  // ── THE DIALS `make arsenal` PUBLISHES ARE THE TABLE, NOT A COPY OF IT ────────────────────────
+  // harness/author/block-dials.mjs reads each family's option table and harvests the note written
+  // above each dial out of the module's SOURCE. The table half cannot drift (it is the same object),
+  // but the note half is a line scan, and the way a line scan fails is silent: one unbalanced brace
+  // and it starts attributing a note to the wrong dial, or reading a family that ended ten lines ago.
+  // So the check is that the published rows are exactly the table's keys, in the table's order, with
+  // the table's defaults, for every family, which is what a drifting scan stops being true of.
+  {
+    const { SCHEMAS } = await import('../../blocks/index.mjs');
+    const { dialsFor } = await import('../../harness/author/block-dials.mjs');
+    const bad = [];
+    for (const family of Object.keys(SCHEMAS)) {
+      const rows = await dialsFor(family, { withNotes: true });
+      const keys = Object.keys(SCHEMAS[family]);
+      if (rows.map((r) => r.name).join(',') !== keys.join(',')) { bad.push(`${family}: keys or order`); continue; }
+      for (const r of rows) {
+        if (JSON.stringify(r.def) !== JSON.stringify(SCHEMAS[family][r.name].def)) bad.push(`${family}.${r.name}: default`);
+        // A note that swallowed a line of the table itself is the shape a broken scan produces, and a
+        // key check cannot see it. Tested by the table's OWN vocabulary, not by punctuation: two real
+        // notes describe a data shape as `[{code, value}]` and `{x,y}`, so a brace proves nothing.
+        if (r.note && /\bkind:\s*'/.test(r.note)) bad.push(`${family}.${r.name}: note caught source`);
+      }
+    }
+    ok(`block-dials: every family publishes its own table, keys, order and defaults${bad.length ? ': ' + bad.slice(0, 6).join(' · ') : ''}`,
+      bad.length === 0);
+  }
+
   // ── A BLOCK THAT DEPICTS A REAL OBJECT KEEPS ITS PROPORTIONS ──────────────────────────────────
   // Every one of these was a shipped defect: a constant that happened to look right at one size and
   // described a different object at the catalog's own props. `phoneFrame` is the worked example: it
