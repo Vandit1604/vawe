@@ -75,7 +75,9 @@ export const PART_BLURBS = {
   'slide-right': 'enters from its right and, with `out`, keeps going left · the mirror of slide-left',
 };
 
-export const PART_REGISTRY = defineRegistry('part entrance', PARTS, { slot: 'parts[].anim', blurbs: PART_BLURBS,
+const PART_AKA = { 'slide-right': ['enter from the right', 'slide in from the right side'] };
+
+export const PART_REGISTRY = defineRegistry('part entrance', PARTS, { slot: 'parts[].anim', blurbs: PART_BLURBS, aka: PART_AKA,
   catalog: {
     title: 'Part entrances',
     tag: 'per-layer',

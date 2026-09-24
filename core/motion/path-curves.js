@@ -27,7 +27,9 @@ export const CURVE_BLURBS = {
   ramp: 'a straight diagonal, top-left to bottom-right',
 };
 
-export const CURVE_REGISTRY = defineRegistry('path curve', CURVES, { slot: 'move:<curve>:<band> | alongPath.curve', blurbs: CURVE_BLURBS,
+const CURVE_AKA = { ramp: ['diagonal line', 'straight diagonal path'] };
+
+export const CURVE_REGISTRY = defineRegistry('path curve', CURVES, { slot: 'move:<curve>:<band> | alongPath.curve', blurbs: CURVE_BLURBS, aka: CURVE_AKA,
   catalog: {
     title: 'Path curves (SVG "d" generators)',
     tag: 'per-layer',

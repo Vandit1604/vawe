@@ -93,7 +93,13 @@ export const ANIM_BLURBS = {
 // `defineRegistry` got `blurbs: null` and every reader that asks the registry what a name means
 // got nothing, while the blurbs three lines below were rendered into docs and enforced by
 // lib-test. Written and unread is the same as unwritten.
-export const ANIM_REGISTRY = defineRegistry('anim', ANIM, { slot: 'anim', blurbs: ANIM_BLURBS,
+// The words a real author types before they know this registry's own name for the move.
+const ANIM_AKA = {
+  scale: ['zoom in', 'grow from small'],
+  defocus: ['blur out exit', 'soft focus fade'],
+};
+
+export const ANIM_REGISTRY = defineRegistry('anim', ANIM, { slot: 'anim', blurbs: ANIM_BLURBS, aka: ANIM_AKA,
   catalog: {
     title: 'Enter / exit anims',
     tag: 'per-layer',

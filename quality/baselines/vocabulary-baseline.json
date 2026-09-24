@@ -1,4 +1,7 @@
 {
+ "core/motion/path-curves.js": [
+  "CURVE_BLURBS"
+ ],
  "core/fx/ancestor-kills.js": [
   "CAPABILITIES"
  ],

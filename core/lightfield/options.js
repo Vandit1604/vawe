@@ -93,8 +93,14 @@ export const ENVELOPE_ANCHOR_REGISTRY = defineRegistry('envelope anchor', dials(
     'Which edge an element grows FROM. An envelope is a horizon, and a horizon has a side; the far end is the one that tapers.'),
 });
 
+const SHADOW_DIRECTION_AKA = {
+  right: ['eastward shadow', 'shadow falls east'],
+  'top-right': ['upper right corner', 'northeast shadow'],
+};
+
 export const SHADOW_DIRECTION_REGISTRY = defineRegistry('shadow direction', dials(DIRECTIONS), {
   slot: 'shadow.direction',
+  aka: SHADOW_DIRECTION_AKA,
   blurbs: {
     left: 'a linear fall away to the left. A bearing and no centre, so only the move along it reaches the fall',
     right: 'a linear fall away to the right',
