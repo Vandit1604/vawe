@@ -24,6 +24,16 @@ export const BG_BLURBS = Object.fromEntries(PRESETS.map((p) => [p.name, p.blurb]
 
 const BY_NAME = new Map(PRESETS.map((p) => [p.name, p]));
 
+// BG_AKA: the words an author reaches for that a preset's own one-line blurb cannot honestly carry.
+// Never printed (see PRESET_AKA in core/kinetic/presets.js for the same contract); folded into search only.
+const BG_AKA = {
+  plain: ['solid color', 'flat color', 'no texture backdrop'],
+  paperDots: ['polka dot', 'dot grid pattern', 'light dotted texture'],
+  paperShapes: ['light geometric pattern', 'subtle shapes texture'],
+  aurora: ['northern lights', 'colour wash', 'flowing colour glow'],
+  brandglow: ['pulsing accent light', 'soft breathing glow', 'radial pulse'],
+};
+
 // `name` defaults to `paper` HERE rather than at each call site, where `b.preset || 'paper'` was
 // written three times. Absence has one documented answer; a WRONG name throws (#361).
 export function bgPreset(name = 'paper', value, P = PAL_PLINTH) {
@@ -151,7 +161,7 @@ export function bgTurnRatio(authored, durationScale) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a background preset" when someone writes it somewhere else. core/registry.js.
-export const BG_REGISTRY = defineRegistry('background preset', Object.fromEntries(BG_NAMES.map((n) => [n, n])), { slot: 'bg[].preset', blurbs: BG_BLURBS,
+export const BG_REGISTRY = defineRegistry('background preset', Object.fromEntries(BG_NAMES.map((n) => [n, n])), { slot: 'bg[].preset', blurbs: BG_BLURBS, aka: BG_AKA,
   catalog: {
     title: 'Backgrounds',
     tag: 'background',
