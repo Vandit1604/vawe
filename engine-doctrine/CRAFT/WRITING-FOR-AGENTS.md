@@ -1,7 +1,8 @@
 ---
 when: "you are writing or editing AGENTS.md, a skills/*/SKILL.md, or a brief harness/author/*.mjs composes for an agent, and want the rule to survive being read under truncation"
-answers: "the six patterns that keep a rule readable by an agent: order, length, refusal shape, capability-first, inline examples, instruction-before-material · what this doc does NOT cover (voice, tone, word choice)"
+answers: "the six patterns that keep a rule readable by an agent: order, length, refusal shape, capability-first, inline examples, instruction-before-material · the frontmatter and size contract a SKILL.md must meet · what this doc does NOT cover (voice, tone, word choice)"
 group: crosscutting
+codes: skill-contract
 ---
 
 # Writing rules an agent can actually read
@@ -46,6 +47,33 @@ how it fails or what it does not cover.
 
 **6. An instruction comes before the material it governs.** A filter that truncates long output drops
 the end first. A line placed after the thing it explains is the first line to go missing.
+
+## The frontmatter and size contract (SKILL.md only)
+
+The six patterns above cover STRUCTURE: whether a rule survives being read. This section covers the
+other half: whether a `skills/*/SKILL.md` file survives Claude Code's own discovery pass at all. Every
+number below is Anthropic's own published contract, checked by `quality/gates/skill-check.mjs` (`make
+skill-check`), not invented here.
+
+Source for every number in this section:
+https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+
+- **`name`** matches `^[a-z0-9-]+$`, at most 64 characters, matches its directory, and never names
+  "claude" or "anthropic".
+- **`description` is the RETRIEVAL field**, injected into the system prompt for every skill at
+  startup. It must be **third person**: first or second person ("you", "your") "can cause discovery
+  problems", the doc's own words. It states WHAT the skill does and WHEN to use it (a trigger clause:
+  "when", "while", "before", "after", "once"), stays under 1,024 characters, and carries no XML tag.
+- **The body** stays under 500 lines AND under about 5,000 tokens (estimate: words × 1.33, the doc's
+  own rule of thumb).
+- **Frontmatter opens at byte 0.** `harness/lib/skill-stages.mjs:23` parses it with a regex anchored
+  to the very start of the file and reads `stage:` as a single-line scalar; a file that does not open
+  with `---` on line 1, or a folded/block `stage:` value, is silently invisible to `make stage`. Not an
+  error: a skill that simply never appears.
+
+A GENERATED skill body (`skills/vawe-docs/SKILL.md`, written by `quality/gates/doc-map.mjs`) is exempt
+from the two size checks: it mirrors the whole doc corpus, and the fix for its size is trimming that
+corpus, not hand-editing a file `quality/gates/generated-check.mjs` refuses hand-edits to.
 
 ## What this is NOT
 
