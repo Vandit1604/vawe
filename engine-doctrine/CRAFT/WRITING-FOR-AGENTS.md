@@ -71,9 +71,11 @@ https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
   with `---` on line 1, or a folded/block `stage:` value, is silently invisible to `make stage`. Not an
   error: a skill that simply never appears.
 
-A GENERATED skill body (`skills/vawe-docs/SKILL.md`, written by `quality/gates/doc-map.mjs`) is exempt
-from the two size checks: it mirrors the whole doc corpus, and the fix for its size is trimming that
-corpus, not hand-editing a file `quality/gates/generated-check.mjs` refuses hand-edits to.
+A GENERATED body is not a skill. One used to exist, a vawe-docs skill written by
+`quality/gates/doc-map.mjs` from every indexed doc: about 9,500 tokens against a 5,000 budget, and no
+author could trim it, because the only fix was trimming the corpus. It is retired, and `make docs
+Q="…"` answers the same question one answer at a time. If a body has to be generated, the thing wants
+to be a lookup, not a skill.
 
 ## What this is NOT
 

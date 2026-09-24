@@ -63,13 +63,6 @@ const PERSON_RE = /\b(you|your|yours|i|we|our|ours|us|my|mine)\b/i;
 // attributed opening tag is unambiguous.
 const XML_TAG_RE = /<\/[a-zA-Z][^>]*>|<[a-zA-Z][a-zA-Z0-9_-]*\s+[a-zA-Z-][^>]*=/;
 
-// GENERATED skill bodies mirror a growing doc corpus (`quality/gates/doc-map.mjs`'s `renderSkill`),
-// never hand-authored, so the size contract below does not apply to them: an author cannot trim what a
-// generator writes, only shrink the corpus it mirrors, which is `doc-map.mjs`'s concern, not this
-// skill's. Named explicitly, the same way `skill-reach.mjs`'s own `PURE_INDEX` names this file for the
-// same reason, rather than derived, so a future generated skill is added here on purpose.
-const GENERATED_SKILL_BODIES = new Set(['vawe-docs']);
-
 // impeccable: reasoned in the same shape `blocks/index.mjs`'s `NOT_A_BLOCK` uses. A vendored
 // third-party skill; a fix here is reverted by the next upstream sync, and `doc-map.mjs`'s own
 // EXCLUDE list already carries the same reason for its reference pages.
@@ -138,14 +131,17 @@ export function run({ root = ROOT } = {}) {
       if (PERSON_RE.test(description)) problems.push('description is first/second person ("you"/"your"/"I"/"we"): retrieval text must be third person');
     }
 
-    if (!GENERATED_SKILL_BODIES.has(dir)) {
-      const body = text.slice(text.indexOf('---', 3) + 3).replace(/^\n/, '');
-      const lines = body.split('\n').length;
-      if (lines > BODY_LINES_MAX) problems.push(`body is ${lines} lines, over the ${BODY_LINES_MAX} limit`);
-      const words = body.trim() ? body.trim().split(/\s+/).length : 0;
-      const estTokens = Math.round(words * TOKENS_PER_WORD);
-      if (estTokens > BODY_TOKENS_MAX) problems.push(`body is an estimated ${estTokens} tokens (${words} words), over the ${BODY_TOKENS_MAX} limit`);
-    }
+    // NO GENERATED-BODY CARVE-OUT. There was one, for `vawe-docs`, whose body a generator wrote from a
+    // corpus that only grows: an author could not trim it, so the size contract could not apply. That
+    // skill is retired (`make docs` answers the same question), and every remaining body is
+    // hand-authored, so every body is held to the contract. A future generated skill is the wrong shape
+    // for a skill, and should be a lookup for the same reason that one was.
+    const body = text.slice(text.indexOf('---', 3) + 3).replace(/^\n/, '');
+    const lines = body.split('\n').length;
+    if (lines > BODY_LINES_MAX) problems.push(`body is ${lines} lines, over the ${BODY_LINES_MAX} limit`);
+    const words = body.trim() ? body.trim().split(/\s+/).length : 0;
+    const estTokens = Math.round(words * TOKENS_PER_WORD);
+    if (estTokens > BODY_TOKENS_MAX) problems.push(`body is an estimated ${estTokens} tokens (${words} words), over the ${BODY_TOKENS_MAX} limit`);
 
     const stage = field(fm, 'stage');
     if (stage && !STAGE_ORDER.includes(stage)) problems.push(`stage: "${stage}" is not one of STAGE_ORDER (${STAGE_ORDER.join(', ')})`);

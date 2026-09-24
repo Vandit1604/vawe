@@ -40,7 +40,7 @@ groups them so a reader sees seven concerns, not twenty-one names.
 
 ## Skill router (stages 1, 2, 4)  `[eye]`
 
-Skills live in `skills/` as plain docs; Claude Code loads them on demand, others open the doc in the last column. Full index: `engine-doctrine/CRAFT/README.md`; one-page router by frontmatter: `vawe-docs`.
+Skills live in `skills/` as plain docs; Claude Code loads them on demand, others open the doc in the last column. Full index: `engine-doctrine/CRAFT/README.md`; ask which doc settles a question: `make docs Q="…"`.
 
 `make stage`/`make next` also name the ONE skill the open stage wants, next to the command, on a line reading `skill: <name>`. That line is generated from each skill's own `stage:` frontmatter (`harness/lib/skill-stages.mjs`), never a second hand-kept table; a skill with no `stage:` is cross-cutting and just does not appear there.
 

@@ -276,7 +276,7 @@ and never edited:
 | View | For | Cost when unused |
 |---|---|---|
 | `engine-doctrine/INDEX.md` | humans, subagents, `make docs` | zero: a file on disk |
-| `skills/vawe-docs/SKILL.md` | Claude Code, which surfaces it automatically | ~100 tokens (its description) |
+| `make docs Q="…"` | any agent or person, on demand | 0 tokens until asked (was a ~9,500-token skill body) |
 | the table inside `engine-doctrine/CRAFT/README.md` | the craft index that already existed | zero |
 
 `quality/gates/doc-map.mjs` builds all three. `make doc-index` writes them; `make craft-coverage`
