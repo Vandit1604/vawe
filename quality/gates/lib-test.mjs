@@ -46,7 +46,7 @@ import { resolveFilter, parseColor, FILTER_PRESETS, FILTER_REGISTRY, ensureFilte
 import fsMod from 'node:fs';
 import { defineRegistry, registries, catalogued, checkBlurb, searchWords } from '../../core/registry/registry.js';
 import { presentIn, existingAt, newSince, WINDOW_DAYS } from '../../harness/author/recency.mjs';
-import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks, score as arsenalScore } from '../../harness/author/arsenal.mjs';
+import { collect as arsenalCollect, coverageIn, CONFIDENT, snippet as arsenalSnippet, toks as arsenalToks, score as arsenalScore, SIDE_KINDS as arsenalSideKinds } from '../../harness/author/arsenal.mjs';
 import { loadSchema, steps as atSteps, resolve as atResolve, allPaths as atPaths, childrenOf as atChildren, kindsOfEnum, fmtPath as atFmt } from '../../harness/author/schema-at.mjs';
 import { token, literal, lit, resolveColor } from '../../core/color/color.js';
 import { frame as varsFrame } from '../../core/tracks/vars.js';
@@ -6097,8 +6097,11 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
 // are ALIASES with one sentence between them, and `scale` beaten by `punch` is two names for one move.
 // TOP 3 is the bar. The report is harness/dev/blurb-retrieval.mjs; 98.1% clear it today.
 {
-  // Ranked the way rankQuery ranks: rule records sit on their own list, never in the vocabulary one.
-  const corpus = (await arsenalCollect()).filter((e) => e.kind !== 'rule');
+  // Ranked the way rankQuery ranks: a SIDE_KIND sits on its own list, never in the vocabulary one, so
+  // it must not compete here either. Read from arsenal's own SIDE_KINDS rather than naming `rule`
+  // again: when skills joined that set, a hardcoded `rule` silently started measuring 19 entries
+  // against a corpus they never rank in, which is a measurement of something the tool does not do.
+  const corpus = (await arsenalCollect()).filter((e) => !arsenalSideKinds.has(e.kind));
   const own = (name) => new Set(String(name).replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().match(/[a-z0-9]+/g) || []);
   const selfRank = (e) => {
     const lower = e.name.toLowerCase(), parts = own(e.name);
@@ -6111,8 +6114,13 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   };
   const blurbed = corpus.filter((e) => e.blurb && e.blurb.trim());
   const top3 = blurbed.filter((e) => selfRank(e) <= 3).length;
-  // 97% is a RATCHET set just under where the vocabulary sits (352/359, 98.1%), not a round number:
-  // before the six terse blurbs below it were rewritten the figure was 346/359, 96.4%, and this failed.
+  // 97% is a RATCHET set just under where the vocabulary sits, not a round number: before the six terse
+  // blurbs below it were rewritten the figure was 346/359, 96.4%, and this failed. MEASURED TODAY:
+  // 796/819, 97.19%, which is 1.6 entries of slack. Two blurbs sliding out of their own top 3 turns
+  // this red, so treat it as a live constraint when editing a blurb, not a formality.
+  //
+  // The corpus grew from 359 to 819 since that first figure, so the old 352/359 note is gone rather
+  // than left to read as current.
   ok(`at least 97% of blurbs retrieve their own entry in the top 3 (${top3}/${blurbed.length})`,
      top3 / blurbed.length >= 0.97);
   // Infinity means the blurb left NO word after the name was stripped, or the entry is absent from its
