@@ -6,16 +6,14 @@ stage: plan
 
 # Video planning: brief first, JSON second
 
-Authoring without a brief produces the same generic video for everyone. This skill front-loads
-the five decisions that actually change the output, then locks a deterministic per-brand style
-so no two brands ship the same look.
+Authoring without a brief produces the same generic video for everyone. This skill front-loads the
+decisions that change the output, then locks a per-brand style so no two brands ship the same look.
 
 ## THE CONTRACT: plan → LOCK → execute (do NOT generate first)
 
 Planning and generating are two phases with a hard gate between them. **Nothing is rendered until
-the plan is LOCKED and the user signs off.** Then execution is precise transcription of the locked
-spec, not exploration. If you find yourself "trying things" in the JSON, the plan wasn't locked,
-go back and lock it.
+the plan is LOCKED and the user signs off.** Execution then transcribes the locked spec precisely,
+not exploration. "Trying things" in the JSON means the plan wasn't locked: go back and lock it.
 
 1. **Study + brief**: WITH a brand site → Steps 1–2 (study it, derive the design language). WITHOUT
    one → Step 0.5 (MANUFACTURE the four things a site gives: a taste anchor `profile`, real assets, a
@@ -51,21 +49,18 @@ generic: centred, effect-soup, no through-line. A site silently hands you FOUR t
 without one you must MANUFACTURE all four before a single layer is authored. This is a hard gate: if
 the lock sheet is missing any of the four, the plan is not locked.
 
-1. **A taste anchor. ASK FOR IT FIRST** ([`engine-doctrine/CRAFT/CONTENT.md`](../../engine-doctrine/CRAFT/CONTENT.md), theme
-   source): a brand site gives the theme for free, a prompt with no site gives nothing, and the silent
-   failure is plain grey. `make quiz` asks a "Theme source" question exactly when no URL is known: point
-   at a reference or a theme, or say "you choose" and get one designed. **"you choose" means INVENT a
-   beautiful theme, never default to plain**: seed a palette from `skills/impeccable/scripts/palette.mjs`
-   and name a colour direction from `command npx -y ui-skills list --category color`, then record
-   `theme: invented` in the lock sheet so the decision travels with the film. Do NOT invent a palette and
-   motion feel from nothing unasked. Pick ONE reference profile from
-   [`engine-doctrine/CRAFT/SELECTION.md`](../../engine-doctrine/CRAFT/SELECTION.md) Part 2, `linear` · `apple` · `stripe`
-   · `nike` · `a24` · `bloomberg` · `duolingo` · `vercel`, chosen for the topic's register, and set
-   the scene's `profile` field to it. That profile IS the design language a site would have given: it
-   fixes the face role, pace, easing, cut family, sting/look policy, accent, and the bounce rule
-   coherently. For exact colour, name a real reference site and `vawe_reflect` it (e.g. "feels like
-   Linear" → reflect linear.app for its true hexes + face), then apply the profile's motion policy on
-   top. Ask the user which reference if it is not obvious; a named target beats an adjective.
+1. **A taste anchor. ASK FOR IT FIRST** (theme source, R1 of
+   [`engine-doctrine/CRAFT/CONTENT.md`](../../engine-doctrine/CRAFT/CONTENT.md)): a brand site gives the
+   theme for free; a prompt with no site gives nothing, and the silent failure is plain grey. `make
+   quiz` asks "Theme source" exactly when no URL is known; read CONTENT.md's R1 for what "you choose"
+   requires (invent, never default to plain). Do NOT invent a palette and motion feel unasked.
+   - Beyond CONTENT.md's theme rule, this skill also needs a reference **`profile`**: pick ONE from
+     [`SELECTION.md`](../../engine-doctrine/CRAFT/SELECTION.md) Part 2 (`linear` · `apple` · `stripe` ·
+     `nike` · `a24` · `bloomberg` · `duolingo` · `vercel`) for the topic's register, and set the scene's
+     `profile` field to it: it fixes face role, pace, easing, cut family, sting/look policy, accent and
+     bounce coherently.
+   - For exact colour, `vawe_reflect` a named real site (e.g. "feels like Linear" → reflect
+     linear.app), then apply the profile's motion policy on top. A named target beats an adjective.
 
 2. **Real assets.** A video of bare rects and text reads as a placeholder. Before authoring, gather
    real material: `vawe_logo` for any named product/company mark, `vawe_photo` for a CC0 subject the
@@ -200,11 +195,10 @@ different output: this breaks the author's own habits.
 
 ## Step 3: Storyboard on paper before JSON
 
-**First, run `make scaffold OUT=films/scene/<name>.json DUR=<n> THEME=<name>`.** It writes a scene
-an empty-layers shell with the storyboard sidecar already tiled with placeholder beats, ready for
-backdrop and sound, plus its `.storyboard.md` sidecar with the frontmatter and per-beat fields
-storyboard-check and craft-checklist ask for. Every field the plan below still has to decide is marked
-`REPLACE:`/`<fill: ...>`; fill those in place of hand-writing JSON from blank, the #1 authoring failure.
+**First, run `make scaffold OUT=films/scene/<name>.json DUR=<n> THEME=<name>`.** It writes an
+empty-layers scene shell tiled with placeholder beats, plus its `.storyboard.md` sidecar with the
+frontmatter and per-beat fields storyboard-check and craft-checklist ask for, each field the plan below
+still has to decide marked `REPLACE:`/`<fill: ...>`. Fill those in, never hand-write JSON from blank.
 
 > **Film under ~15 seconds? Load [`vawe-continuous-action`](../vawe-continuous-action/SKILL.md)
 > instead of the beat table below.** A short film is ONE continuous action, not a sequence of
@@ -230,73 +224,38 @@ then fill brand content.
 
 ## Step 3b: Choreography rules (anti-monotony)
 
-**Read `engine-doctrine/MOTION-CRAFT.md` before storyboarding**. The stored rulebook: 10 rules with their
-enforcement map, genre pacing tables, DO/DON'T pairs, and the effect-selection guide.
+**Read `engine-doctrine/MOTION-CRAFT.md` before storyboarding.** It is the stored rulebook: the 10
+rules (timing as a voice, ease-out in / accelerate out, hierarchy through offset, one hero motion per
+beat, layout-archetype rotation, and more), each with its enforcement map, genre pacing tables,
+DO/DON'T pairs and the effect-selection guide. Do not re-derive those rules here; the storyboard must
+still name each beat's layout archetype, so `motion-audit`/`direct` can check the rotation.
 
-- **Layout variety**: no layout archetype twice in a row. Rotate: split (headline left / artifact
-  right) · centered-top with full-width artifact · full-bleed statement · asymmetric card-over-board.
-  Storyboard must name each beat's archetype.
-- **Rhythm variety**: entry pace is a VOICE, not a constant. Vary `enterDur`/`each`/`stagger` per
-  beat with intent, ambient elements drift (0.8–1.2s), payoffs snap (0.25–0.35s), thesis lines are
-  luxurious (each 0.5+). Uniform 0.45s everywhere reads as monotone.
-- **Hierarchy through offset**: related elements stagger "one after another" (60–120ms); the ONE
-  most important element on each beat moves last or most, motion order = reading order.
-- **Easing = physics**: entrances decelerate (ease-out family), exits accelerate (rush), ambient
-  loops sinusoidal. Never linear on visible moves.
-- **Choose every CUT by meaning, not habit** (`engine-doctrine/CRAFT/TRANSITIONS.md`). Run the per-seam
-  decision procedure: name the RELATIONSHIP between the two beats (continuity · time · contrast ·
-  same-object · new act) and the FEELING across it, then pick the transition that serves both. **If a
-  seam serves neither, it is a hard cut.**
-  - Most seams are invisible: hard/soft cut, overlapped so the stage never dips to empty.
-  - Earn 2-3 accents by meaning: whip = energy into a payoff, iris/sdfIris = focus, fade = act break,
-    smash = contrast. Reserve the boldest for the hero/payoff; make the outro simplest.
-  - ONE cut family per film. Spraying one effect (blur) on every cut is the failure in BOTH directions,
-    monotone and soup.
-  - The LOCK SHEET's per-beat row must name each cut's *relationship + transition + why*.
+- **Choose every CUT by meaning, not habit** (`engine-doctrine/CRAFT/TRANSITIONS.md`). Name the
+  RELATIONSHIP between the two beats (continuity · time · contrast · same-object · new act) and the
+  FEELING across it, then pick the transition that serves both. **A seam serving neither is a hard cut.**
+  - Most seams are invisible (hard/soft cut, overlapped); earn 2-3 accents by meaning: whip =
+    energy into a payoff, iris/sdfIris = focus, fade = act break, smash = contrast.
+  - Reserve the boldest cut for the hero/payoff; keep ONE cut family per film. The LOCK SHEET's
+    per-beat row names each cut's *relationship + transition + why*.
 - **Icons with names**: whenever a company/product/tool is named, show its mark (simple-icons)
-  or a Lucide UI icon (`assets/icons/ui/`, MIT, stroke color baked), text-only lists of
+  or a Lucide UI icon (`assets/icons/ui/`, MIT, stroke color baked); text-only lists of
   named things are a missed layer of craft.
 - **Background = the site's real surface, used sparingly**: the bg texture must EXIST on the real
-  site. A plain/flat technical site gets a plain field (`plain`/`paper`/`accentPlain`), never invented
+  site. A plain/flat site gets a plain field (`plain`/`paper`/`accentPlain`), never invented
   dots/shapes; a patterned preset (`accent`/`dotmatrix`/`aurora`/`mesh`/`constellation`/`paperShapes`)
-  is allowed only if the site itself carries that texture.
-  - Even then, a pattern is a SEASONING, not the wallpaper: at most one or two beats (a hook or one
-    accent moment), never throughout. Content/proof beats stay plain so the content reads.
-  - Recurring mistakes and fixes live in `engine-doctrine/MISTAKES.md`; ask it with
-    `make arsenal MISTAKES=1 Q="…"` before authoring rather than reading it end to end.
+  needs that texture on the site itself.
+  - Even then, a pattern is a SEASONING on one or two beats, never the wallpaper. Recurring mistakes
+    live in `engine-doctrine/MISTAKES.md`; ask `make arsenal MISTAKES=1 Q="…"` before authoring.
 
 ## Step 3b.1: Every frame FIGHTS for its value (the value gate)
 
 The single most common failure: beats that occupy time without earning it. Before locking any beat,
-apply **the value test** ([`engine-doctrine/TASTE.md`](../../engine-doctrine/TASTE.md), the one law). If the answer is
-"nothing" or "a restatement of the headline," the beat is not done. Reimagine it until it teaches,
-proves, or delights something no other frame does. Concretely:
+apply **the value test** ([`engine-doctrine/TASTE.md`](../../engine-doctrine/TASTE.md), the one law,
+now with worked examples). If the answer is "nothing" or "a restatement of the headline," reimagine
+the beat until it teaches, proves, or delights something no other frame does.
 
-- **SHOW the real artifact, never a placeholder label.** The word "scene" / "rendered" / "output" in
-  a box proves nothing, it's a stand-in for work not done. Render an ACTUAL mini-scene (real layers
-  animating: a headline, a counstandard, a card, a themed UI) so the viewer literally watches the engine
-  work. "Show a scene getting bigger" means an actual composed scene scales up, not the string `scene`.
-- **Never claim on-screen what the video doesn't show on-screen.** If copy says "22 shader stings" or
-  "14 backdrops," those effects must visibly appear in the same breath. An unbacked claim is worse than
-  no claim: it invites the viewer to notice the absence. Cut the number or demonstrate it.
-- **Demonstrate flexibility by DOING it live.** "Any colour" is dead as text; make the actual word (or a
-  real UI) cycle through colours continuously on screen. "Any theme" = morph a real rendered card through
-  themes. The proof is the motion, not the noun.
-- **Live demo beats static list.** A grid of numbers (`n=41 …`), a checklist of gate names, or a row of
-  feature pills reads as a spec sheet, not a film. Animate the concept instead: frames re-rendering in
-  parallel, a check drawing on as each gate passes, a value changing and the output updating.
-- **Legibility of effects.** Never use a transition/effect the viewer cannot perceive at its actual size
-  and duration (e.g. `blinds` slats that are invisible in 0.4s). If it doesn't read, it isn't a feature.
-  Pick one that does (wipe, iris, push, a real cut).
-- **Anchor every element with intent.** Off-centre or floating content needs a compositional reason
-  (asymmetry, a split, an artifact it points to). Random off-centre reads as a mistake. Center, or anchor.
-- **Real product > abstract metaphor.** To say "it reads a site," show a recognizable rebuilt result
-  (a Stripe-like dashboard/gradient) forming from the input. A concrete, branded payoff beats a token list.
-- **A click must have a consequence.** If a cursor clicks a button, the next frames must show what the
-  click DID (a deploy result, a state change). A click with no visible outcome is a dead beat.
-
-These are enforcement rules, not suggestions: the LOCK SHEET's per-beat row must name the *artifact that
-earns the frame*, not just the copy. If a beat's only artifact is a word in a box, it fails the gate.
+This is an enforcement rule, not a suggestion: the LOCK SHEET's per-beat row must name the *artifact
+that earns the frame*, not just the copy. A beat whose only artifact is a word in a box fails the gate.
 
 ## Step 3c: The LOCK SHEET (freeze this, get sign-off, THEN author)
 
@@ -336,27 +295,23 @@ treatment reads as slop.
 Only after the user approves the lock sheet do you author. If a beat needs a decision the sheet
 didn't make, that's a lock-sheet gap: amend the sheet and re-confirm, don't improvise in the JSON.
 
-## Step 3d (Authoring discipline (from the real thing, with the tools) not imagination)
+## Step 3d: authoring discipline, from the real thing, not imagination
 
-Three failures that ship "renders-fine but wrong" videos (see `engine-doctrine/MISTAKES.md` #15). Do the opposite:
-- **Assets: capture, never recreate.** If the brand has a mark/mascot/illustration, `make capture` it or
-  crop it from the section screenshot (transparent the bg if needed) → an `image` layer. Recreating a brand
-  asset "from memory" is off-brand by definition: you'll draw a lookalike, not the thing.
-- **Placement: `pin`/`col`/`align`, never eyeballed `x`.** `pin:"center"` (optical) or `pin:"thirds-*"`
-  places a hero; a text layer given `w` MUST set `align` or it left-aligns inside its box and reads
-  off-centre. Don't hand-compute centering math. (`make critique` warns on the `w`-without-`align` tell.)
-- **Annotations bind to their target.** An underline/marker under a word lives in the SAME element as the
-  word (an `html` layer with the underline absolutely-positioned under the span), not a blind `x` guess.
-- **Fix flaws, don't rationalize them.** When you eyeball frames (Step 4), if your eye catches something
-  off, FIX it, never ship a flaw you already noticed. The static gates can't see composition or fidelity;
-  your eye is that gate until the vision-judge exists.
+Four failures that ship "renders-fine but wrong" videos (`engine-doctrine/MISTAKES.md` #15). Do the opposite:
+- **Assets: capture, never recreate.** `make capture` a mark/mascot/illustration, or crop it from the
+  section screenshot, into an `image` layer. A brand asset drawn "from memory" is a lookalike, not the thing.
+- **Placement: `pin`/`col`/`align`, never eyeballed `x`.** `pin:"center"` or `pin:"thirds-*"` places a
+  hero; a text layer with `w` MUST also set `align` or it left-aligns and reads off-centre.
+- **Annotations bind to their target.** An underline/marker lives in the SAME element as the word it
+  marks (an `html` layer, the underline absolutely-positioned under the span), not a blind `x` guess.
+- **Fix flaws, don't rationalize them.** Eyeballing frames (Step 4) and catching something off means
+  FIX it. Static gates can't see composition or fidelity; your eye is that gate until the vision-judge exists.
 
 ## Step 4: Author → verify (non-negotiable ladder)
 
-This step runs the `check` → `ship` → `judge` → `ledger` phases of the one spine in
-[`AGENTS.md`](../../AGENTS.md#the-process-has-one-owner-and-it-is-not-this-file) ("THE PROCESS HAS ONE
-OWNER"). `author-check`, `video`, `beats`, `reveal` and `ledger` below are the STEPS those phases run,
-not a separate ladder.
+This step runs the `check` → `ship` → `judge` → `ledger` phases of the one spine in `AGENTS.md`.
+`author-check`, `video`, `beats`, `reveal` and `ledger` below are the STEPS those phases run, not a
+separate ladder.
 
 `make validate` → `make video` → `make motion --data <file>` → `make audit M=<fmt>` (text AND
 image contrast) → **`make beats D=<file> VS=<brand>`** (FIDELITY GATE, stacks each beat beside its
@@ -367,10 +322,11 @@ SAME fails; fix by changing ≥2 of cut family / beat structure / layout archety
 hook / payoff / CTA frames. Fix data, re-render. Never ship unverified.
 
 **Final taste check (the gate that SEES):** on the near-final cut, `make judge D=<file> VS=<brand>` →
-read `/tmp/judge/sheet.png` against `/tmp/judge/rubric.md` and score every frame (readability · hierarchy ·
-composition · brand + asset fidelity · produced-not-generated · value). If your eye catches a flaw, it's a
-FIX, never rationalize one you noticed. This is the gate the static ladder above structurally can't be. See
-`engine-doctrine/JUDGE.md`.
+read `/tmp/judge/sheet.png` against `/tmp/judge/rubric.md` and score every frame (readability ·
+hierarchy · composition · brand + asset fidelity · produced-not-generated · value).
+
+A flaw your eye catches is a FIX, never a rationalization. This is the gate the static ladder above
+structurally can't be: `engine-doctrine/JUDGE.md`.
 After the user approves the shipped video: `make ledger-add D=<file>` logs it to the design
 memory (`quality/ledger/ledger.json`) so future videos are checked against it.
 <!-- doc-refs-allow: quality/ledger/ledger.json · gitignored, written on first `make ledger-add` -->

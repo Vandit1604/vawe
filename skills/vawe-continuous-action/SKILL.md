@@ -1,6 +1,6 @@
 ---
 name: vawe-continuous-action
-description: "Turn a one-line brief into a SHOOTABLE plan for a short product film built as ONE continuous action. This is ONE of the ~18 devices in engine-doctrine/CRAFT/FILM-STRUCTURE.md, the right one when the film has a single subject and a single process; read that catalogue first and pick. Load this once you have picked it, for a launch/promo/teaser under ~15s. Teaches the continuous-object spine, diegetic motion, the second-by-second budget, and emits a storyboard that make storyboard-check and make intent already consume."
+description: "Turn a one-line brief into a SHOOTABLE plan for a short product film built as ONE continuous action. This is ONE of the ~18 devices in engine-doctrine/CRAFT/FILM-STRUCTURE.md, the right one when the film has a single subject and a single process; read that catalogue first and pick. Load once this device is picked, for a launch/promo/teaser under ~15s. Teaches the continuous-object spine, diegetic motion, the second-by-second budget, and emits a storyboard that make storyboard-check and make intent already consume."
 stage: plan
 ---
 
@@ -20,31 +20,26 @@ action.** You type a prompt. You press generate. The generate button itself beco
 dot. One object is on screen from the first frame to the last and every cut is that object
 changing state.
 
-That is the grammar this skill plans in. Read it before the storyboard, not after.
+That is the grammar this skill plans in.
 
-**`make scaffold` now starts here by default, not the beat rotation.** `harness/author/type-spines.mjs`
-exports `CONTINUOUS_ACTION_MAX_S` (15s, measured off the library: films under 15s carry 0-1.3 declared
-transitions on average and are transition-free most of the time; films past it jump to 2.5+, the same
-15s already used by `storyboard-check.mjs`'s `SPINE_MAX_S` and `direction-floor.mjs`'s
-`CONTINUITY_MAX_DUR`). `make scaffold OUT=<file> TYPE=<type> DUR=<n>` under that length emits ONE
-object (`id:"spine"`), a hand-keyed track welded from `track.mjs`'s measured `pan`/`blast` shapes, zero
-`transitions`, and a storyboard with `object`/`object_t0`/`object_states`/`object_last` already filled
-from that type's own spine (`skills/vawe-type-*/SKILL.md` each say which shape their type takes at
-which length). Two types (`talking-head`, `recreation`) opt out at every length, for the same reason
-"Before you use this skill" below gives: their content is not held by one transforming prop. The
-scaffold is a skeleton to REPLACE, not a finished film; Steps 1-7 below still decide whether the object,
-the states and the transform it built are the RIGHT ones, which no scaffold can know for your brief.
+**`make scaffold` now starts here by default, not the beat rotation.** `type-spines.mjs` exports
+`CONTINUOUS_ACTION_MAX_S` (15s, the same bound `storyboard-check.mjs`/`direction-floor.mjs` use).
+`make scaffold OUT=<file> TYPE=<type> DUR=<n>` under that length emits ONE object (`id:"spine"`), a
+hand-keyed track, zero `transitions`, and a storyboard with `object`/`object_t0`/`object_states`/
+`object_last` already filled from that type's own spine.
+
+Two types (`talking-head`, `recreation`) opt out at every length, for the same reason "Before you use
+this skill" below gives: their content is not held by one transforming prop. The scaffold is a
+skeleton to REPLACE, not a finished film; Steps 1-7 below still decide whether the object, the states
+and the transform it built are the RIGHT ones, which no scaffold can know for your brief.
 
 ## Before you use this skill: it is one device, not the law
 
-This skill was written from one reference and then treated as a floor for every short film. It is not.
-[`engine-doctrine/CRAFT/FILM-STRUCTURE.md`](../../engine-doctrine/CRAFT/FILM-STRUCTURE.md) catalogues about eighteen devices
-that hold a short film together, across four registers: spatial (a match cut, a oner, camera travel,
-masking, cloning, a dolly-zoom, and this one), verbal and aural (an unfinished sentence, a sound bridge,
-a bookend, an open question), temporal (metric cutting, rhythmic cutting, a track that IS the structure),
-conceptual (a motif, intellectual montage, escalation, a through-line). Murch's Rule of Six ranks the one
-this skill teaches (three-dimensional spatial continuity) **last of six**, at 4%, and says to sacrifice
-your way up from the bottom.
+This skill was written from one reference, then treated as a floor for every short film. It is not.
+[`FILM-STRUCTURE.md`](../../engine-doctrine/CRAFT/FILM-STRUCTURE.md) catalogues about eighteen devices
+across four registers (spatial, verbal/aural, temporal, conceptual); this device is one spatial entry.
+Read that catalogue first and pick. Murch's Rule of Six ranks this register **last of six**, at 4%,
+and says to sacrifice your way up from the bottom.
 
 **Use it when the content is genuinely continuous:** one subject, one process, a product film, a demo
 where the UI is the subject. Then the object really does transform, and everything below is right.
@@ -68,8 +63,7 @@ film ends up as a rectangle that resizes four times.
 
 ## Step 1 - Name the object, then write its state at each beat
 
-Do this before any JSON exists, before any copy is written. Fill this table first. If you cannot
-fill it, you do not have a film yet.
+Do this before any JSON or copy exists. If you cannot fill this table, you do not have a film yet.
 
 | | Answer |
 |---|---|
@@ -161,11 +155,12 @@ what this is, the spine is fine and the hook is missing. Fix the hook, keep the 
 
 ### A carried background is not a licence to hide the object
 
-The ellipsis this skill recommends, hold the background and hard-cut, was tried on a real brief and broke
-its own law: a root `blur` cut hid the object for six frames, which is the object dying and being replaced.
-If a transition covers the whole stage, the spine is broken for exactly as long as the cover lasts. Put the
-cut on something ELSE in the frame, a mail row, a panel, a chip, and let the object ride through it. Check
-it: step the frames across the boundary and confirm the object is visible in every one.
+The ellipsis this skill recommends (hold the background, hard-cut) broke its own law on a real brief: a
+root `blur` cut hid the object for six frames, which is the object dying and being replaced. A
+transition covering the whole stage breaks the spine for exactly as long as the cover lasts.
+
+Put the cut on something ELSE in the frame (a mail row, a panel, a chip) and let the object ride
+through it. Check it: step the frames across the boundary and confirm the object is visible in every one.
 
 ## Step 4 - Show the product working
 
@@ -175,10 +170,9 @@ The UI is the star. Plan the real surfaces first and fit copy around them, never
   `image`. A hand-built `html` panel is acceptable only when you are reproducing a measured
   reference (as the recreation does) or the surface does not exist yet.
 - **A claim with no UI under it in the same frame is cut.** Not moved later. Cut.
-- **Slogans on black are a last resort and cost the same seconds as a working screen.** The
-  reference spends its only text-on-black beat naming the product, and spends 1.4 of its 5
-  seconds on it, and clears it completely before the product appears. That is the budget for
-  words: one line, then get out.
+- **Slogans on black are a last resort**, costing the same seconds as a working screen. The
+  reference spends 1.4 of its 5 seconds on its only text-on-black beat (naming the product), and
+  clears it before the product appears: one line, then get out.
 
 ---
 
@@ -263,16 +257,10 @@ the product did not cause.
 | 3.4s | the row unfolds downward into a note card |
 | 5.0s | title and three bullets typed inside it, held still |
 
-**Beat table:**
-
-| Time | Object state | What the viewer learns | Primitives |
-|---|---|---|---|
-| 0.0 - 1.6 | pill idle, pressed, swells, waveform runs | it records, and it is recording right now | `component` capture of the real list; `html` pill with `vars:{"--rec":[0,1]}` driving width + glyph swap; `cursor` press |
-| 1.6 - 3.2 | waveform collapses to a line, pill flattens and widens; camera pulls back | the recording becomes an item you keep | `motion` track on the pill (scaleX out, height down); `cameraMove:{"move":"workspaceZoomOut"}` |
-| 3.2 - 5.0 | match cut onto the row; row unfolds into a card; title + 3 bullets type in; hold 0.6s | it does not transcribe, it structures | hard cut with the pill in the same place and size on both sides; `rect` card on a height track; `text` title `typing:33`, bullets `typing:110`, staggered ~90ms |
-
-Zero hard cuts until 3.2s, and that one is a match cut. Three beats. One surface. The payoff (a
-finished, structured note) lands on the last frame and nothing follows it.
+Same shape as example A's beat table: three beats (0.0-1.6 record, 1.6-3.2 collapse into a kept item,
+3.2-5.0 match-cut onto the row and unfold into a structured note), zero hard cuts until 3.2s where the
+one cut is a match cut, one surface, and the payoff (a finished, structured note) lands on the last
+frame with nothing after it.
 
 The grammar transferred without a single element of the reference coming with it: different
 object, different transform, different cut count, different camera. What carried over is the

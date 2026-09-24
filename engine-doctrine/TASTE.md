@@ -352,6 +352,39 @@ Answer all three, in writing, before you move a gate back:
 And the rule that produced this cull, which is worth keeping whichever way it points: **when
 satisfying a gate would make the film worse, go and read what the gate actually measures.**
 
+## The value gate, worked examples
+
+The one law ("every frame must fight for its value", above) as concrete tests, moved here from
+`skills/vawe-video-planning/SKILL.md` so the planning skill states the rule once and points here for
+the catalogue. Before locking a beat, check it against each:
+
+- **SHOW the real artifact, never a placeholder label.** The word "scene" / "rendered" / "output" in
+  a box proves nothing; it is a stand-in for work not done. Render an ACTUAL mini-scene (real layers
+  animating: a headline, a counter, a card, a themed UI) so the viewer literally watches the engine
+  work. "Show a scene getting bigger" means an actual composed scene scales up, not the string `scene`.
+<!-- site-counts-allow: "22 shader stings"/"14 backdrops" are illustrative on-screen-copy examples, not a claim about the registry -->
+- **Never claim on-screen what the video doesn't show on-screen.** If copy says "22 shader stings" or
+  "14 backdrops," those effects must visibly appear in the same breath. An unbacked claim is worse than
+  no claim: it invites the viewer to notice the absence. Cut the number or demonstrate it.
+- **Demonstrate flexibility by DOING it live.** "Any colour" is dead as text; make the actual word (or a
+  real UI) cycle through colours continuously on screen. "Any theme" = morph a real rendered card
+  through themes. The proof is the motion, not the noun.
+- **Live demo beats static list.** A grid of numbers, a checklist of gate names, or a row of feature
+  pills reads as a spec sheet, not a film. Animate the concept instead: frames re-rendering in
+  parallel, a check drawing on as each gate passes, a value changing and the output updating.
+- **Legibility of effects.** Never use a transition/effect the viewer cannot perceive at its actual
+  size and duration (e.g. `blinds` slats invisible in 0.4s). If it doesn't read, it isn't a feature;
+  pick one that does (wipe, iris, push, a real cut).
+- **Anchor every element with intent.** Off-centre or floating content needs a compositional reason
+  (asymmetry, a split, an artifact it points to). Random off-centre reads as a mistake; centre, or anchor.
+- **Real product beats abstract metaphor.** To say "it reads a site," show a recognizable rebuilt
+  result (a Stripe-like dashboard/gradient) forming from the input, not a token list.
+- **A click must have a consequence.** If a cursor clicks a button, the next frames must show what the
+  click DID (a deploy result, a state change). A click with no visible outcome is a dead beat.
+
+These are enforcement rules, not suggestions: a storyboard's per-beat row must name the *artifact that
+earns the frame*, not just the copy. A beat whose only artifact is a word in a box fails the gate.
+
 ## Anti-slop discipline (the defaults to reach past)
 
 The enforcement lives in `skills/{taste-skill, impeccable}`, dials + a 41-rule detector.
