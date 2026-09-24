@@ -23,8 +23,13 @@
 // choosing an effect does not need the date, only "you have probably not seen this".
 import { spawnSync } from 'node:child_process';
 
-/** Where vocabularies are defined. Every `*_REGISTRY` lives under core/; beats live in blueprints. */
-export const REGISTRY_PATHS = ['core', 'blueprints/index.mjs'];
+/**
+ * Where the names `make arsenal` ranks are DEFINED. It must cover every corpus the arsenal collects
+ * from, because a name defined outside this list is absent from every historical tree and is therefore
+ * reported new forever. That was true of all 100 block families until this line was widened: `blocks/`
+ * was never here, and the bug below hid it by making the whole read fail anyway.
+ */
+export const REGISTRY_PATHS = ['core', 'blocks', 'recipes', 'engine-doctrine/CRAFT/rules'];
 
 /** A FIXED window, not "the 10 most recent". A rank always reports ten new things, including in a month
  *  when nothing landed, and that is a lie told confidently. Two weeks is a fact about the calendar, and
@@ -58,7 +63,15 @@ export function presentIn(text, names) {
 export function existingAt(commit, names, cwd) {
   const want = [...names];
   if (!commit || !want.length) return new Set();
-  const r = git(['archive', '--format=tar', commit, '--', ...REGISTRY_PATHS], cwd, 'latin1');
+  // A PATH THAT NO LONGER EXISTS MUST NARROW THE SEARCH, NEVER KILL IT, and this is written from the
+  // failure it repairs. `blueprints/index.mjs` was retired into recipes/ and this list still named it;
+  // `git archive` refuses the WHOLE call when any pathspec matches nothing, so every name came back as
+  // "already existed" and nothing in the arsenal was ever reported new again. Nothing said so: the
+  // output read `0 newer than 14 days`, which is also what a quiet fortnight looks like. Two lib-test
+  // assertions had been red for as long as it took anyone to look.
+  const paths = REGISTRY_PATHS.filter((p) => git(['ls-tree', commit, '--', p], cwd).stdout.trim());
+  if (!paths.length) return new Set(want);
+  const r = git(['archive', '--format=tar', commit, '--', ...paths], cwd, 'latin1');
   // A failure must not report "nothing existed", which would call the whole arsenal new.
   if (r.status !== 0 || !r.stdout) return new Set(want);
   return presentIn(r.stdout, want);
