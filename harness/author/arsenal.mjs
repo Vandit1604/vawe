@@ -242,6 +242,22 @@ export async function collect() {
         aka: [rec.category], pitfall: null, doc: rec.doc });
     }
   } catch { /* craft rules are optional to search: a fresh clone can still find the registries */ }
+  // SKILLS: a skill answers "what should I LOAD for this job", which nothing ranked before. It was
+  // findable only through the hand-kept router table in AGENTS.md, so an agent that had not memorised
+  // that table picked by habit. The description is the skill's own retrieval text, the same line
+  // Claude Code matches a request against, read through harness/lib/skill-stages.mjs so the stage
+  // router and this search cannot disagree about what a skill says.
+  //
+  // Dynamic import for the same reason the craft rules above use one: skill-stages.mjs imports
+  // STAGE_ORDER from quality/gates/stage.mjs, which statically imports THIS file for score/toks/
+  // coverageIn. A static import here closes that cycle and Node refuses it.
+  try {
+    const { skillIndex } = await import('../lib/skill-stages.mjs');
+    for (const sk of skillIndex()) {
+      out.push({ name: sk.name, kind: 'skill', slot: null, blurb: sk.description,
+        aka: sk.stage ? [sk.stage] : [], pitfall: null, doc: sk.doc });
+    }
+  } catch { /* skills are optional to search, the same way recipes are */ }
   return out;
 }
 
@@ -406,7 +422,7 @@ export function pasteOf(entry) {
 export function snippet(entry) {
   // A rule is prose, not a paste: the "snippet" line is the doc#anchor so an agent opens the doc
   // only if the brief above was not enough, never a JSON object nobody can paste into a scene.
-  if (entry.kind === 'rule') return entry.doc || null;
+  if (SIDE_KINDS.has(entry.kind)) return entry.doc || null;
   const obj = pasteOf(entry);
   if (!obj) return null;
   return Object.entries(obj).map(([k, v]) => `"${k}": ${jsonish(v)}`).join(', ');
@@ -446,10 +462,25 @@ export function score(entry, qt) {
 // well" without being wide enough to call a much-better match merely comparable.
 const covBand = (c) => Math.round(c * 20);
 
+// KINDS THAT RANK ON THEIR OWN LIST, never mixed into the vocabulary results. A craft rule answers
+// "how do I decide" and a skill answers "what should I load"; neither is a name you write into a
+// scene, and about a hundred rules crowded effects out of their own results when they shared a list.
+// Asking for one by name (`--kind rule`, `--kind skill`) still ranks it as the main list.
+const SIDE_KINDS = new Set(['rule', 'skill']);
+
+/** One side-list: the best `n` entries of a SIDE_KIND for this query, or [] when none match. */
+function sideList(allIn, kind, qt, n) {
+  return allIn.filter((e) => e.kind === kind)
+    .map((e) => ({ e, s: score(e, qt) })).filter((r) => r.s > 0)
+    .sort((x, y) => y.s - x.s || x.e.name.localeCompare(y.e.name)).slice(0, n)
+    .map(({ e }) => ({ name: e.name, blurb: e.blurb, snippet: snippet(e) }));
+}
+
 export function rankQuery(allIn, query, { kind = null, n = 8, guessN = 3 } = {}) {
   // Craft rule records answer a different question (how to decide) than the vocabulary (what to name),
   // and about a hundred of them crowded effects out of their own results. They rank on their own list.
-  const all = kind === 'rule' ? allIn : allIn.filter((e) => e.kind !== 'rule');
+  const all = SIDE_KINDS.has(kind) ? allIn.filter((e) => e.kind === kind)
+    : allIn.filter((e) => !SIDE_KINDS.has(e.kind));
   const qt = toks(query);
   const u = usage();
   const coverage = coverageIn(all);
@@ -488,10 +519,8 @@ export function rankQuery(allIn, query, { kind = null, n = 8, guessN = 3 } = {})
     confident: answersRaw.length > 0,
     all: all.length,
     results: selected.map(shape),
-    rules: kind ? [] : allIn.filter((e) => e.kind === 'rule')
-      .map((e) => ({ e, s: score(e, qt) })).filter((r) => r.s > 0)
-      .sort((x, y) => y.s - x.s || x.e.name.localeCompare(y.e.name)).slice(0, 3)
-      .map(({ e }) => ({ name: e.name, blurb: e.blurb, snippet: snippet(e) })),
+    rules: kind ? [] : sideList(allIn, 'rule', qt, 3),
+    skills: kind ? [] : sideList(allIn, 'skill', qt, 2),
     answers: answersRaw.map(shape),
     guesses: guessesRaw.map(shape),
   };
@@ -728,7 +757,9 @@ async function main() {
     if (e.blurb) console.log(`      ${e.blurb}`);
     if (e.pitfall) console.log(`      pitfall: ${e.pitfall}`);
     if (e.doc) console.log(`      doc: ${e.doc}`);
-    if (e.snippet) console.log(`      ${e.snippet}`);
+    // A rule and a skill are prose, so their "snippet" IS their doc path. Printing it twice under
+    // `--kind rule`/`--kind skill` read as two different answers to the same question.
+    if (e.snippet && e.snippet !== e.doc) console.log(`      ${e.snippet}`);
     // The dials, and the door to the rest of them. Summary here and the typed table one command away,
     // because a query that returns six blocks must not print forty lines of ranges to say so.
     if (e.dials && e.dials.length) {
@@ -736,7 +767,14 @@ async function main() {
       console.log(`      full:  make arsenal AT=block.${e.name}`);
     }
     console.log('');
-  }  if (result.rules.length) {
+  }
+  // SKILLS FIRST, because loading the right one changes how the whole job is done, and the effects
+  // above are what it would then have you reach for. A rule refines a decision already being made.
+  if (result.skills.length) {
+    console.log('  SKILLS (load one of these before you start)');
+    for (const k of result.skills) console.log(`  ${k.name}\n      ${k.blurb}${k.snippet ? `\n      ${k.snippet}` : ''}\n`);
+  }
+  if (result.rules.length) {
     console.log('  RULES (how to decide, open the doc only if you need more)');
     for (const r of result.rules) console.log(`  ${r.name}\n      ${r.blurb}${r.snippet ? `\n      ${r.snippet}` : ''}\n`);
   }

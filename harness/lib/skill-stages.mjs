@@ -26,18 +26,35 @@ function frontmatterField(text, key) {
   return line ? line[1].trim().replace(/^["']|["']$/g, '') : null;
 }
 
-/** Every skills/<dir>/SKILL.md that declares `stage:`, as {name, stage}. Skips a bad/missing stage. */
-export function skillStageIndex() {
+/**
+ * Every skills/<dir>/SKILL.md, as {name, stage, description, doc}. `stage` is null when the skill
+ * declares none or declares one STAGE_ORDER does not know; `description` is the skill's own retrieval
+ * text, the line Claude Code matches a request against.
+ *
+ * ONE FRONTMATTER READER. harness/author/arsenal.mjs searches skills by that description, and a second
+ * parser for the same four lines is how the stage router and the search end up disagreeing about what
+ * a skill says. The byte-0 anchor in frontmatterField is load-bearing for both.
+ */
+export function skillIndex() {
   const dirs = fs.existsSync(SKILLS_DIR)
     ? fs.readdirSync(SKILLS_DIR).filter((d) => fs.existsSync(path.join(SKILLS_DIR, d, 'SKILL.md')))
     : [];
-  const out = [];
-  for (const dir of dirs) {
-    const file = path.join(SKILLS_DIR, dir, 'SKILL.md');
-    const stage = frontmatterField(fs.readFileSync(file, 'utf8'), 'stage');
-    if (stage && STAGE_ORDER.includes(stage)) out.push({ name: dir, stage });
-  }
-  return out.sort((a, b) => a.name.localeCompare(b.name));
+  return dirs.map((dir) => {
+    const rel = `skills/${dir}/SKILL.md`;
+    const text = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    const stage = frontmatterField(text, 'stage');
+    return {
+      name: dir,
+      stage: stage && STAGE_ORDER.includes(stage) ? stage : null,
+      description: frontmatterField(text, 'description') || '',
+      doc: rel,
+    };
+  }).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Every skills/<dir>/SKILL.md that declares `stage:`, as {name, stage}. Skips a bad/missing stage. */
+export function skillStageIndex() {
+  return skillIndex().filter((s) => s.stage).map(({ name, stage }) => ({ name, stage }));
 }
 
 /** skillsForStage('direct') -> ['vawe-animation', 'vawe-camera', ...], sorted, [] when none claim it. */
