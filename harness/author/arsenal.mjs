@@ -497,11 +497,25 @@ export function rankQuery(allIn, query, { kind = null, n = 8, guessN = 3 } = {})
     .sort((a, b) => b.s - a.s || covBand(b.c) - covBand(a.c)
       || Number(u.count(b.name) === 0) - Number(u.count(a.name) === 0)
       || Number(fresh.has(b.name)) - Number(fresh.has(a.name))
-      || b.c - a.c || a.name.localeCompare(b.name))
-    .slice(0, n);
+      || b.c - a.c || a.name.localeCompare(b.name));
 
-  const answersRaw = top.filter((e) => e.c >= CONFIDENT);
-  const guessesRaw = top.filter((e) => e.c < CONFIDENT);
+  // THE CONFIDENCE SPLIT HAPPENS BEFORE THE DISPLAY CUT. `n` is a display preference, and it used to
+  // decide whether the tool believed it had an answer at all: the slice ran first and the split
+  // searched only the survivors.
+  //
+  // Scope, stated honestly because a first pass at this overstated it. At the default n=8 the old
+  // order answers correctly, so this fixes no default query. It matters when an author NARROWS the
+  // list. `score` rewards a word in the NAME (+6, +12 exact) while `coverage` asks whether the query
+  // was answered, and they disagree on purpose: a filler word carried by over 6% of the corpus has
+  // idf 0, so it buys score and no coverage. Q="northern lights" scores `hard-light`, `plus-lighter`
+  // and `soft-light` at 9 with coverage 0.000 and `aurora` at 6 with coverage 0.957 against a 0.47
+  // threshold, so `--n 4` used to print NOTHING HERE CLEARLY MATCHES while holding a 0.957 match.
+  // Asking for a shorter list should shorten the list, never withdraw the answer.
+  //
+  // Each side is sliced separately, so answers are never rationed by how many high-scoring
+  // non-answers ranked above them. The `fresh` computation above already carries this same lesson.
+  const answersRaw = top.filter((e) => e.c >= CONFIDENT).slice(0, n);
+  const guessesRaw = top.filter((e) => e.c < CONFIDENT).slice(0, n);
   const selected = answersRaw.length ? answersRaw : guessesRaw.slice(0, guessN);
 
   const shape = (e) => ({
