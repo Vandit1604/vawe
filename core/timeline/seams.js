@@ -286,7 +286,13 @@ export { isBlankRaster } from '../raster/raster.js';
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a seam fx" when someone writes it somewhere else. core/registry.js.
-export const SEAM_REGISTRY = defineRegistry('seam fx', Object.fromEntries(SEAM_FX.map((n) => [n, n])), { slot: 'seam', blurbs: SEAM_BLURBS,
+// SEAM_AKA: the plain-English words a blurb cannot honestly carry. Never printed, search only.
+const SEAM_AKA = {
+  portal: ['wormhole', 'tunnel reveal', 'vortex transition'],
+  cinematicZoom: ['push in zoom', 'dolly zoom transition'],
+};
+
+export const SEAM_REGISTRY = defineRegistry('seam fx', Object.fromEntries(SEAM_FX.map((n) => [n, n])), { slot: 'seam', blurbs: SEAM_BLURBS, aka: SEAM_AKA,
   catalog: {
     title: 'Seams (2-scene blends)',
     tag: 'transition',
