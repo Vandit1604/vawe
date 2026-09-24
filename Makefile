@@ -162,6 +162,13 @@ doc-refs: ## [maintenance] every `make <target>` and every repo path the docs NA
 skill-reach: ## [maintenance] every skills/*/SKILL.md is routed to from AGENTS.md, ROUTING.md, the Makefile, or another skill
 	@node quality/gates/skill-reach.mjs $(if $(JSON),--json,)
 
+# make skill-check: does every skills/*/SKILL.md match Anthropic's published skill-authoring contract?
+# `skill-reach` checks something POINTS at a skill; this checks the skill ITSELF: name shape, a
+# third-person description under 1024 chars with a stated trigger, frontmatter opening at byte 0 (the
+# same anchor skill-stages.mjs parses), and a body under 500 lines / ~5000 tokens. Hard, not a ratchet.
+skill-check: ## [maintenance] does every skills/*/SKILL.md match the published name/description/size contract?
+	@node quality/gates/skill-check.mjs $(if $(JSON),--json,)
+
 # make rung: which rules in CLAUDE.md and engine-doctrine/CRAFT are enforced by something, and which are only prose?
 # Every non-[eye] tag has to NAME its mechanism, and the named gate, hook, command or file:line has to
 # exist. LIST=1 prints the [eye] worklist instead; STAMP=1 records today's [eye] count as the ceiling.
