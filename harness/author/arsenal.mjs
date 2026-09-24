@@ -466,7 +466,7 @@ const covBand = (c) => Math.round(c * 20);
 // "how do I decide" and a skill answers "what should I load"; neither is a name you write into a
 // scene, and about a hundred rules crowded effects out of their own results when they shared a list.
 // Asking for one by name (`--kind rule`, `--kind skill`) still ranks it as the main list.
-const SIDE_KINDS = new Set(['rule', 'skill']);
+export const SIDE_KINDS = new Set(['rule', 'skill']);
 
 /** One side-list: the best `n` entries of a SIDE_KIND for this query, or [] when none match. */
 function sideList(allIn, kind, qt, n) {
