@@ -1915,8 +1915,8 @@
      "label": "cursor: a name tag, { text, color }, attached lower-right of the point in `color` (the Figma multiplayer-cursor convention: a tag that matches its pointer reads as one person)."
     },
     "snapTo": {
-     "type": "array",
-     "label": "cursor: a magnetic ease onto a named layer's LIVE box, [{t, id, edge, dur}]. Arrives exactly at `t` even if the target keeps moving, and holds on the live box until a later entry takes over. edge: center (default) · above · below · left · right. `dur` (default 0.6s) is the ease-in window before `t`. Refused by name for an unknown `id`."
+     "type": "array|string",
+     "label": "cursor: snaps the pointer onto a named layer's LIVE box and keeps tracking it, so the click still lands after that layer moves. Write the id as a string, e.g. 'panel', timed off this layer's first `clicks` entry; or the array form [{t, id, edge, dur}] for an explicit time or edge (center default · above · below · left · right, dur 0.6s ease-in). Prefer this over `path` coordinates when landing on something the scene already places; refused by name for an unknown `id`, or a string with no `clicks` to take its time from."
     },
     "carry": {
      "type": "array",

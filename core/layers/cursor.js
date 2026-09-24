@@ -143,8 +143,19 @@ export function expose(L, t) {
 // The props are read off these signatures (propsOf, core/props.js). No second list to drift from them.
 // `carry` is the one exception: it is read only at BOOT (core/engine/produce.js bakeCursorCarry), never
 // inside this file, so it is declared by hand below, the same shape a guarded prop keeps.
-export function build(kit, el, L, { size, x, y, color, rippleColor, style, styleAt, label } = L) {
+export function build(kit, el, L, { size, x, y, color, rippleColor, style, styleAt, label, path, snapTo } = L) {
   const sz = size ?? 34;
+  // A cursor with none of `path`, `snapTo`, `x` or `y` has no way to ever move: the (0,0) default two
+  // lines below is the base every one of those would sit ON TOP of, and with all four absent nothing
+  // moves it off that base for the layer's whole life. No error, no warning: the JSON looks like a
+  // normal cursor and the render is a pointer nailed to the top-left corner, the same accepted-then-
+  // ignored class core/layers/vocabulary.js checkLayer refuses for a dead prop. A cursor parked there
+  // ON PURPOSE still has a way to say so: write the position explicitly, `"x": 0, "y": 0`.
+  if (!path && !snapTo && x == null && y == null)
+    throw new Error(`layer${L.id ? ` "${L.id}"` : ''} (cursor): no \`path\`, \`snapTo\`, \`x\` or \`y\`, `
+      + `so this pointer would sit at (0,0) for its whole life with nothing on screen to say why. Give `
+      + `it motion: a \`path\` [{t,x,y}], a \`snapTo\` onto another layer's box, or a starting \`x\`/\`y\`. `
+      + `A cursor parked there on purpose still needs an explicit position: write \`"x": 0, "y": 0\`.`);
   // `path` coords are ABSOLUTE screen px by default: with no authored x/y, anchor the base at (0,0)
   // so a keyframe {x,y} lands the pointer there (scene.html otherwise defaults every layer to 60,240,
   // which silently offset the click target). An explicit x/y still sets the base (path = relative to it).
