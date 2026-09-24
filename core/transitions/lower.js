@@ -162,6 +162,27 @@ export function lowerScene(data) {
       s.colors.forEach((c, i) => checkStingColor(c, `stings[] at t=${s.t}: colors[${i}]`));
   }
 
+  // cursor `snapTo` STRING SUGAR: an author names the layer to land on, and this lowers it to the
+  // real array shape core/layers/cursor.js reads, [{t, id}], the same "sugar in, real form out before
+  // anything renders" contract as the boundary transitions above. The one thing sugar cannot supply is
+  // WHEN: a snap needs a moment to hang on, and the only moment already on the layer is a `clicks`
+  // entry, so the sugar takes the layer's FIRST click. No click, no guess: inventing a `t` is exactly
+  // how a silent wrong render happens (a magnet easing in at the wrong second, with nothing to say so),
+  // so this throws by name instead, pointing at both ways out.
+  const lowerSnapTo = (L) => {
+    if (!L || typeof L !== 'object') return;
+    if (typeof L.snapTo === 'string') {
+      const clicks = Array.isArray(L.clicks) ? L.clicks.filter((c) => typeof c === 'number') : [];
+      if (!clicks.length)
+        throw new Error(`layer${L.id ? ` "${L.id}"` : ''}: snapTo "${L.snapTo}" names a landing target `
+          + `but has no \`clicks\` entry to take its time from, and a snap with no moment is a missing `
+          + `decision, not a default. Either add a \`clicks\` entry (the click this snap lands on), or `
+          + `write the array form yourself with an explicit t: [{"t": <seconds>, "id": "${L.snapTo}"}].`);
+      L.snapTo = [{ t: Math.min(...clicks), id: L.snapTo }];
+    }
+    for (const c of L.children || []) lowerSnapTo(c);
+  };
+
   // A group's children are layers with the same timing props, so the words have to reach them too.
   // A word that works at the top level and silently NaNs one nesting level down is worse than no word.
   const timings = (L) => {
@@ -170,6 +191,6 @@ export function lowerScene(data) {
     for (const c of L.children || []) timings(c);
   };
 
-  for (const L of data.layers || []) timings(L);
+  for (const L of data.layers || []) { timings(L); lowerSnapTo(L); }
   return data;
 }
