@@ -60,6 +60,9 @@ export const AMBIENT_SHADERS = {
 };
 export const AMBIENT_FX = Object.keys(AMBIENT_SHADERS);
 
+// AMBIENT_AKA: the plain-English words a blurb cannot honestly carry. Never printed, search only.
+const AMBIENT_AKA = { aurora: ['northern lights', 'colour wash', 'flowing colour glow'] };
+
 const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
 const FRAG = `precision highp float;
@@ -1247,7 +1250,7 @@ export function createAmbientLayer(w = 1920, h = 1080) {
 // can say "that is a ambient shader" when someone writes it somewhere else. core/registry.js.
 // The blurbs ride along, so `make arsenal` describes a field instead of only naming it: AMBIENT_SHADERS
 // is already the one owner of those sentences and the registry was passing none of them.
-export const AMBIENT_REGISTRY = defineRegistry('ambient shader', Object.fromEntries(AMBIENT_FX.map((n) => [n, n])), { slot: 'shader', blurbs: AMBIENT_SHADERS,
+export const AMBIENT_REGISTRY = defineRegistry('ambient shader', Object.fromEntries(AMBIENT_FX.map((n) => [n, n])), { slot: 'shader', blurbs: AMBIENT_SHADERS, aka: AMBIENT_AKA,
   catalog: {
     title: 'Ambient shader fields',
     tag: 'per-frame',
