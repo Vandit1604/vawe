@@ -243,8 +243,11 @@ export const PLACEMENT = {
   'lower-band': ['stage-left', 'bottom'], // the stage's left edge, flush to the safe bottom: a closing rule
 };
 
+const PLACEMENT_AKA = { 'top-right': ['upper right corner', 'northeast corner'] };
+
 export const PLACEMENT_REGISTRY = defineRegistry('placement', PLACEMENT, {
   slot: 'pin',
+  aka: PLACEMENT_AKA,
   blurbs: {
     center: 'dead centre of the canvas, vertically at the optical centre rather than the exact middle',
     top: 'horizontally centred, pinned to the top edge of the safe area',
