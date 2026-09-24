@@ -156,11 +156,40 @@ function topNames(query) {
   } catch { return []; }
 }
 
+// A CATALOGUE VIEW IS NOT A SEARCH FOR ANYTHING. These flags print a whole vocabulary, a census or a
+// sheet; none of them is evidence that the author asked about the thing they are now hand-building.
+const CATALOGUE_VIEW = /--(census|new|at|presets|theme|mistakes|shape|for)\b/;
+
+/**
+ * The QUERY inside an arsenal command, or null when the command asked no question.
+ *
+ * WHY THIS IS NOT `cmd`. It used to be: the log fell back to the whole command line whenever no quoted
+ * query matched, and `recentSearchOverlaps` below substring-matches against it. So every flag run and
+ * every shell pipeline looked like a search for every word it happened to contain. Measured on the real
+ * log: 29 of 96 rows were pipelines or flag runs, and `cursor`, `caret` and `blur` each appeared in 9
+ * command strings, so an unrelated `grep` silenced its nudge for the full 20-minute window. A push
+ * mechanism that suppresses itself on noise is the same as not having one.
+ */
+export function queryOf(cmd) {
+  const m = /Q="([^"]*)"/.exec(cmd) || /arsenal\.mjs\s+"([^"]*)"/.exec(cmd);
+  if (m) return m[1].trim() || null;
+  if (CATALOGUE_VIEW.test(cmd)) return null;
+  // The unquoted form the CLI also accepts (`arsenal.mjs cursor caret --n 3`). Same rule arsenal's own
+  // main() uses: drop every `--flag`, drop the value a value-taking flag consumes, keep the words.
+  const after = /arsenal\.mjs\s+([^|;&>]*)/.exec(cmd);
+  if (!after) return null;
+  const args = after[1].trim().split(/\s+/).filter(Boolean);
+  const VALUE_FLAGS = new Set(['--kind', '--n']);
+  const words = args.filter((a, i) => !a.startsWith('--') && !VALUE_FLAGS.has(args[i - 1]));
+  return words.join(' ').trim() || null;
+}
+
 function handleBash(cmd) {
   if (!/(^|\s)(make\s+arsenal|node\s+harness\/author\/arsenal\.mjs)\b/.test(cmd)) return;
-  const m = /Q="([^"]*)"/.exec(cmd) || /arsenal\.mjs\s+"([^"]*)"/.exec(cmd);
+  const q = queryOf(cmd);
+  if (!q) return;                       // nothing was asked, so nothing is recorded as having been asked
   ensureDataDir();
-  fs.appendFileSync(LOG, JSON.stringify({ t: Date.now(), q: m ? m[1] : cmd }) + '\n');
+  fs.appendFileSync(LOG, JSON.stringify({ t: Date.now(), q }) + '\n');
 }
 
 function handleEdit(file, addedText) {
