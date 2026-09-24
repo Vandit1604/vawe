@@ -5870,6 +5870,9 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     ["a coloured warning strip with one line of text", "callout"],
     ["us versus them in two columns", "comparison"],
     ["subtitles at the bottom of the screen", "captions"],
+    // The SKILL family. A skill answers "what should I load before I start", which nothing ranked
+    // until skills joined the corpus; it was findable only through AGENTS.md's hand-kept router table.
+    ["matching a reference film's exact look", "vawe-type-recreation"],
     ["several series stacked in one bar", "stackedBar"],
     ["a folder and file sidebar like an editor", "fileTree"],
     ["a list of git commits with authors", "commitRow"],

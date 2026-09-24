@@ -29,7 +29,7 @@ import { spawnSync } from 'node:child_process';
  * reported new forever. That was true of all 100 block families until this line was widened: `blocks/`
  * was never here, and the bug below hid it by making the whole read fail anyway.
  */
-export const REGISTRY_PATHS = ['core', 'blocks', 'recipes', 'engine-doctrine/CRAFT/rules'];
+export const REGISTRY_PATHS = ['core', 'blocks', 'recipes', 'engine-doctrine/CRAFT/rules', 'skills'];
 
 /** A FIXED window, not "the 10 most recent". A rank always reports ten new things, including in a month
  *  when nothing landed, and that is a lie told confidently. Two weeks is a fact about the calendar, and
