@@ -14,8 +14,6 @@
 .hs-list-title{font-family:var(--font-title);font-weight:500;font-size:13px}
 .hs-list button[aria-current="true"] .hs-list-title::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
   background:var(--accent);margin-right:10px;vertical-align:2px}
-.hs-meta{font-family:var(--font-mono),monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);
-  font-variant-numeric:tabular-nums;white-space:nowrap}
 .hs-stage{padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .hs-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .hs-tabs{display:flex;gap:2px;background:var(--bg);border-radius:8px;padding:3px}
@@ -40,13 +38,11 @@
 .hs-now-title{font-family:var(--font-title);font-weight:500;font-size:13px;margin-right:auto}
 .hs-tl{position:relative;padding-bottom:2px}
 .hs-lane{display:grid;grid-template-columns:64px 1fr;align-items:start;margin-top:4px}
-.hs-lane .hs-meta{line-height:calc(var(--rows,1) * 8px + 2px);font-size:11px}
+.hs-lane .meta{line-height:calc(var(--rows,1) * 8px + 2px);font-size:11px}
 .hs-track{position:relative;height:calc(var(--rows,1) * 8px + 2px);background:var(--surface-2);border-radius:3px}
 .hs-bar{position:absolute;height:6px;border:0;padding:0;border-radius:2px;min-width:3px;cursor:pointer;opacity:.5;background:var(--lane);
   transition:opacity .15s ease}
 .hs-bar:hover,.hs-bar.on{opacity:1}
-.lane-text{--lane:var(--lane-text)} .lane-media{--lane:var(--lane-media)} .lane-shape{--lane:var(--lane-shape)}
-.lane-comp{--lane:var(--lane-comp)} .lane-cap{--lane:var(--lane-cap)} .lane-sound{--lane:var(--lane-sound)}
 .hs-playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);pointer-events:none;
   left:calc(64px + (100% - 64px) * var(--p))}
 @media (max-width:900px){
@@ -55,13 +51,6 @@
   .hs h1{order:1} .hs-sub{order:2;margin-top:-12px} .hs-actions{order:3;margin-top:0} .hs-stage{order:4} .hs-list{order:5;margin-top:0}
 }
 
-/* ===== SECTIONS: one centred column, studio panels ========================================= */
-.ls{max-width:1040px;margin:0 auto;padding-top:112px}
-.ls > h2{font-size:clamp(1.9rem,3.4vw,2.75rem);font-weight:800;letter-spacing:-.03em;line-height:1.02;text-wrap:balance;max-width:20ch}
-.ls > .ls-sub{color:var(--muted);font-size:16px;line-height:1.6;margin-top:12px;max-width:52ch}
-.ls-grid{display:grid;gap:12px;margin-top:36px}
-.ls-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.ls-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .ls-wide{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 32px;align-items:center}
 .ls-wide .ls-vis{border-bottom:0;margin:0;padding:0}
 @media (max-width:640px){ .ls-wide{grid-template-columns:minmax(0,1fr)} }
@@ -83,8 +72,7 @@
 .ls-faq details[open] summary::after{content:"−"}
 .ls-faq p{margin-top:10px;font-size:15px;line-height:1.6;color:var(--muted);max-width:60ch}
 .ls-faq a{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px}
-@media (max-width:900px){ .ls-3{grid-template-columns:1fr 1fr} }
-@media (max-width:640px){ .ls-3,.ls-2{grid-template-columns:minmax(0,1fr)} .ls-wide{grid-column:auto} .ls{padding-top:80px} }
+@media (max-width:640px){ .ls-wide{grid-column:auto} }
 
 /* ===== THE PROOF DIAGRAMS (components/proofs.tsx) =========================================
    One vocabulary, two diagrams. Cobalt is the only ink (The One Voice Rule); the neutrals are the
