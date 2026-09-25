@@ -3,13 +3,13 @@
 <style>
   /* The site's own tokens, never a second palette. site/app/globals.css is the owner. */
   :root{
-    --accent:#2563eb; --bg:#ffffff; --line:#e7eaf0; --line-2:#d7dce4;
-    --ink:#0f1620; --ink-2:#454f5e; --muted:#697182;
+    --accent:#0a87ff; --bg:#16151a; --line:#2f2e35;
+    --ink:#ffffff; --ink-2:#d8d8da; --muted:#97969b;
   }
-  @font-face{font-family:Anybody;src:url('/site/public/assets/fonts/Anybody.woff2')format('woff2');font-weight:100 900;font-stretch:50% 150%;font-display:block}
+  @font-face{font-family:Archivo;src:url('/site/public/assets/fonts/Archivo.woff2')format('woff2');font-weight:100 900;font-stretch:62% 125%;font-display:block}
   @font-face{font-family:JetBrainsMono;src:url('/site/public/assets/fonts/JetBrainsMono.woff2')format('woff2');font-weight:100 800;font-display:block}
   *{margin:0;padding:0;box-sizing:border-box}
-  body{width:1200px;height:630px;background:var(--bg);font-family:Anybody,system-ui;
+  body{width:1200px;height:630px;background:var(--bg);font-family:Archivo,system-ui;
        color:var(--ink);overflow:hidden;position:relative}
 
   /* One rule, under the masthead. The earlier version drew a four-column grid the content then
@@ -23,30 +23,27 @@
   .word{font-size:22px;font-weight:600;font-variation-settings:'wdth' 105;letter-spacing:-.015em}
   .host{margin-left:auto;font-family:JetBrainsMono;font-size:14px;color:var(--muted);letter-spacing:.02em}
 
-  /* LEFT: the input. Display type stands WIDE (wdth 105) per DESIGN.md's type roles; Swiss headings
-     are light, never bold, and the one bold word is the payoff. */
+  /* LEFT: the input. Heavy Archivo headings, as on the site (site/IDENTITY.md). */
   /* Both columns start at 168 and end at 574, so the type block and the frame block are justified
      to the same two horizontals. The gap inside the left column then sits BETWEEN the claim and the
      input that backs it, which is a decision; a ragged bottom edge would just be a leftover. */
   .left{position:absolute;left:72px;top:168px;width:474px;height:406px;
         display:flex;flex-direction:column;justify-content:space-between}
-  h1{font-size:78px;line-height:.94;font-weight:300;font-variation-settings:'wdth' 105;
-     letter-spacing:-.035em}
-  h1 em{font-style:normal;font-weight:600}
+  h1{font-size:78px;line-height:.94;font-weight:800;letter-spacing:-.035em}
+  h1 em{font-style:normal}
   .say{margin-top:20px;font-size:18px;line-height:1.5;color:var(--ink-2);max-width:34ch;
        font-variation-settings:'wdth' 100}
   /* Mono says the string is LITERAL, which is why the input gets it and the prose above never does. */
   .json{font-family:JetBrainsMono;font-size:13.5px;line-height:1.75;
         color:var(--ink-2);white-space:pre}
-  .json b{color:var(--accent);font-weight:500}
+  .json b{color:var(--ink);font-weight:500}
   .json i{font-style:normal;color:var(--muted)}
 
   /* RIGHT: the output, and it is REAL. Three frames pulled from three shipped films rather than three
      mockups. They are deliberately unalike: cobalt, warm, dark. A card claiming that one input shape
      makes any look, illustrated with three frames of the same look, would argue the opposite. */
   .right{position:absolute;left:596px;top:168px;width:532px}
-  .shot{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#fff;
-        box-shadow:0 1px 2px rgba(16,22,32,.04), 0 2px 8px rgba(16,22,32,.05)}
+  .shot{border-radius:6px;overflow:hidden;background:#212025;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
   .shot img{display:block;width:100%;height:100%;object-fit:cover}
   .hero{height:264px}
   .pairs{display:flex;gap:14px;margin-top:14px}
@@ -61,7 +58,7 @@
 
 <div class="left">
   <h1>one JSON,<br>one <em>video</em>.</h1>
-  <div class="say">A deterministic motion&#8209;graphics engine. Same input, same bytes, every time.</div>
+  <div class="say">An open source motion&#8209;graphics engine. Same input, same bytes, every time.</div>
   <div class="json"><i>{</i> <b>"module"</b>: "scene",
   <b>"duration"</b>: 12,
   <b>"layers"</b>: [ … ] <i>}</i></div>
