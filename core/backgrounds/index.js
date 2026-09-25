@@ -122,20 +122,24 @@ export function bgOverErrors(spec, over, at = 'bg opts') {
 // A key no fx here reads THROWS: it was accepted and ignored before, which is how a `liquid` window
 // carrying scale/speed/edge0 rendered completely unchanged with nothing said (engine-doctrine/MISTAKES.md #157).
 // Mutates the freshly-built spec (each bg window builds its own), so no shared state. over falsy = no-op.
+function applyMetaOver(fx, over) {
+  if (fx.type === 'dots') {
+    if (over.dotAlpha != null) { fx.peakAlpha = over.dotAlpha; fx.baseAlpha = +(over.dotAlpha * 0.3).toFixed(3); }
+    else if (over.intensity != null) fx.peakAlpha = +((fx.peakAlpha ?? 0.2) * over.intensity).toFixed(3);
+    if (over.drift != null) { fx.driftX = (fx.driftX ?? 0) * over.drift; fx.driftY = (fx.driftY ?? 0) * over.drift; }
+  } else if (fx.type === 'aurora' || fx.type === 'spotlight' || fx.type === 'softwash') {
+    if (over.intensity != null) fx.intensity = +((fx.intensity ?? (fx.type === 'softwash' ? 1 : 0.5)) * over.intensity).toFixed(3);
+  } else if (fx.type === 'grain') {
+    if (over.grain != null) fx.alpha = over.grain;
+  }
+}
+
 export function applyBgOver(spec, over) {
   if (!over || !spec) return spec;
   const bad = bgOverErrors(spec, over);
   if (bad.length) throw new Error(bad.join('\n'));
   for (const fx of spec.fx || []) {
-    if (fx.type === 'dots') {
-      if (over.dotAlpha != null) { fx.peakAlpha = over.dotAlpha; fx.baseAlpha = +(over.dotAlpha * 0.3).toFixed(3); }
-      else if (over.intensity != null) fx.peakAlpha = +((fx.peakAlpha ?? 0.2) * over.intensity).toFixed(3);
-      if (over.drift != null) { fx.driftX = (fx.driftX ?? 0) * over.drift; fx.driftY = (fx.driftY ?? 0) * over.drift; }
-    } else if (fx.type === 'aurora' || fx.type === 'spotlight' || fx.type === 'softwash') {
-      if (over.intensity != null) fx.intensity = +((fx.intensity ?? (fx.type === 'softwash' ? 1 : 0.5)) * over.intensity).toFixed(3);
-    } else if (fx.type === 'grain') {
-      if (over.grain != null) fx.alpha = over.grain;
-    }
+    applyMetaOver(fx, over);
     // pass-through: the real fx parameters, by their own names.
     for (const [k, v] of Object.entries(over)) if (!(k in META) && (FX_PARAMS[fx.type] || []).includes(k)) fx[k] = v;
   }

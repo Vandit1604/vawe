@@ -35,7 +35,7 @@ export function bgPaletteFrom(palette) {
   const p = palette;
   if (!p || !p.bg || !p.text || !p.accent) return null;   // not a palette we can read; caller falls back
   const accent = p.accent, text = p.text, bg = p.bg;
-  const bg2 = p.bg2 || bg, surface = p.surface || bg2, surface2 = p.surface2 || surface;
+  const bg2 = p.bg2 || bg, surface = p.surface || bg2;
   const light = isLightBg(bg);
   // The DARK end and the LIGHT end of the theme, whichever way round the theme itself is. A light
   // theme still needs somewhere for `dark`/`deep`/`ink` to go, and a dark theme still needs `paper`
