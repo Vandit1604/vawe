@@ -11,3 +11,4 @@ export const glsl = `                             /* thermal, iron-bow heat veil
     float sweep = smoothstep(0.05, 0.0, abs(uv.y - (1.0 - pp)));   /* sensor line rides the cut */
     c = vec4(col + vec3(0.2)*sweep, (0.85*smoothstep(0.15, 0.45, heat) + sweep*0.3) * bell);`;
 export const blurb = 'an iron-bow heat veil in coarse cells, colour mapped from luminance rather than painted on.';
+export const aka = ['thermal vision', 'heat map veil', 'iron bow heat'];
