@@ -28,7 +28,7 @@ import { defineRegistry } from '../registry/registry.js';
 // source, the array is derived, and the two cannot drift because one is computed from the other.
 export const AMBIENT_SHADERS = {
   flow: 'a soft mesh gradient: three big blobs drifting slowly over a vertical wash, the premium default',
-  aurora: 'drifting colour aurora (moves)',
+  aurora: 'a drifting colour aurora: bands of colour slowly moving and blending across the whole frame',
   plasma: 'two crossed sine waves interfering into a slow two-tone swell',
   drift: 'seven big soft bokeh discs rising up the frame and blending as they pass',
   mist: 'near-still layered noise haze. The quietest field here, for a backdrop that must move without being noticed',
@@ -61,7 +61,35 @@ export const AMBIENT_SHADERS = {
 export const AMBIENT_FX = Object.keys(AMBIENT_SHADERS);
 
 // AMBIENT_AKA: the plain-English words a blurb cannot honestly carry. Never printed, search only.
-const AMBIENT_AKA = { aurora: ['northern lights', 'colour wash', 'flowing colour glow'] };
+const AMBIENT_AKA = {
+  aurora: ['northern lights', 'colour wash', 'flowing colour glow'],
+  flow: ['mesh gradient', 'soft blob gradient', 'flowing colour blobs'],
+  plasma: ['plasma effect', 'interference waves', 'crossed sine waves'],
+  drift: ['bokeh drift', 'rising soft discs', 'floating light discs'],
+  mist: ['soft haze', 'quiet noise field', 'subtle fog backdrop'],
+  vhs: ['VHS tape effect', 'retro tape distortion', 'analog tape look'],
+  crt: ['old CRT monitor', 'tube TV look', 'scanline overlay'],
+  filmGrain: ['film grain overlay', 'grainy texture', 'dust and grain'],
+  lightLeak: ['light leak overlay', 'warm edge glow', 'film light leak'],
+  barrel: ['lens vignette', 'barrel distortion', 'corner vignette with fringing'],
+  heatShimmer: ['heat haze', 'rising heat wave', 'shimmering hot air'],
+  ripple: ['water ripples', 'caustics effect', 'rings of light on water'],
+  kaleidoscope: ['kaleidoscope effect', 'mirrored mandala', 'symmetric mirror pattern'],
+  matrixDecode: ['digital rain', 'matrix code rain', 'falling glyph columns'],
+  nebula: ['deep space nebula', 'star field with gas clouds', 'cosmic dust field'],
+  dotCrawl: ['NTSC artifact', 'chroma crawl', 'old broadcast video artifact'],
+  gateWeave: ['film projector look', 'projector gate weave', 'dusty film projection'],
+  domainWarp: ['marbled ink', 'warped fbm noise', 'folding ink pattern'],
+  voronoi: ['cellular noise', 'worley noise', 'cell pattern with lit borders'],
+  metaballs: ['blobby merging circles', 'organic merging shapes', 'metaball blend'],
+  bands: ['ramp panels', 'concentric light arcs', 'nested rounded panels of light'],
+  godRays: ['light shafts', 'crepuscular rays', 'sunbeams through canopy'],
+  curlSmoke: ['rising smoke', 'ink plume', 'swirling smoke trails'],
+  chromaticBloom: ['glowing colour orbs', 'drifting bloom orbs on black'],
+  auroraCurtain: ['aurora curtain lines', 'undulating vertical light curtains'],
+  auroraVeil: ['aurora ribbons over starfield', 'aurora veil with ice ground'],
+  laserLabyrinth: ['sweeping light cones', 'laser beams through fog'],
+};
 
 const VERT = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 
