@@ -390,7 +390,7 @@ timings: ## [check] real wall-clock timing per step, from the run log (D=, N=10)
 # make ship D=<file>. The ladder with its teeth in: full author-check, render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
 # need real pixels, so it is the one command that says a film is actually done.
-# LAST STEP: `no-judge.mjs $(D)` (single-film mode), after the render and the sheets exist, so the eye
+# LAST STEP: `ledger.mjs judged $(D)` (single-film mode), after the render and the sheets exist, so the eye
 # has a fresh mp4 and a fresh sheet to look at. It refuses a ship with no fresh judge receipt for THIS
 # render (`quality/baselines/approved/judge/<name>.json`, receipt.mjs's renderHash) and prints the exact
 # `make judge D=<file>` line plus which condition failed. There is no flag to skip it: the way out is
@@ -411,9 +411,8 @@ timings: ## [check] real wall-clock timing per step, from the run log (D=, N=10)
 # checks EVERY canvas by default (`quality/audit.mjs --aspect all` samples all five without a separate
 # render per canvas; the RENDER still ships at the scene's own aspect unless ASPECT= names one, since
 # `./bin/vawe --aspect` renders one mp4 PER listed ratio and does not understand "all" itself). The
-# seam check is the same `seam-snap.mjs` `make seam-check` calls, no longer a step to remember. The
-# forensics pass runs right after: seam-check flags a luminance flash, forensics catches the three
-# defects flat luminance can't see (a redraw, a lingering fade, a field that steps).
+# seam check is the same `quality/gates/seams.mjs` `make seam-check` calls, no longer a step to
+# remember: flash, empty stage, ghost, resurrection and split seam, all in one pass.
 # make render-verify D=<file>: does out/<name>[.-*].mp4's REAL duration match the scene's declared
 # duration? Catches a clobbered/truncated render (two renders racing one output path) that ffmpeg's
 # own exit code does not see (`./bin/vawe` reports success either way). ship/video already run it.
@@ -452,11 +451,10 @@ ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit A
 	# reverse, which is what this line was doing. Pass ASPECT= to render AND audit several; the two
 	# now always agree, because both read the same variable.
 	node quality/audit.mjs $(D) $(if $(ASPECT),--aspect $(ASPECT),)
-	@node quality/gates/seam-snap.mjs $(D) $(if $(JSON),--json,)
-	@node quality/gates/seam-forensics.mjs $(D)
+	@node quality/gates/seams.mjs $(D) $(if $(JSON),--json,)
 	@node quality/gates/audio-render-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
-	@node quality/gates/no-judge.mjs $(D)
+	@node quality/gates/ledger.mjs judged $(D)
 
 # make formats: show the scene module + where its schema/sample live (for authoring the JSON).
 # Was `make list`; W11 gave that name to the target listing below, the one question with seven
@@ -1108,18 +1106,14 @@ sfx-catalog: ## [engine] REGENERATE engine-doctrine/CRAFT/SFX-CATALOG.md from co
 studio: ## [dev] LIVE scrubbable preview (no mp4 render). Its `plan` state shows the storyboard with every beat's real fragment live in it.
 	node studio/server.mjs $(D)
 
-# make seam-check D=films/x/video.json, SAMPLE THE SEAMS: pull the frames straddling every transition
-# (cut/seam/sting/beat boundary) out of the RENDERED mp4 and flag a luminance flash in the overlap, the
-# black-flash / collision class the center-sampling gates (beats/audit/probe) structurally miss (#138).
-# Requires out/<name>.mp4 (render first). Sheet → /tmp/seams/$(notdir $(basename $(D))).png (read it, the eye is the backstop).
-seam-check: ## [check] SAMPLE THE SEAMS: pull the frames straddling every transition (cut/seam/sting/beat boundary) out of
-	@node quality/gates/seam-snap.mjs $(D) $(if $(JSON),--json,)
+# make seam-check D=films/x/video.json: every checked defect at a join in one pass (quality/gates/seams.mjs) -
+# flash, empty stage, ghost, resurrection, split seam (all pixel checks, need out/<name>.mp4, render first)
+# plus crossfade-mud (markup only, no render needed). Sheet(s) → /tmp/seams/ and /tmp/seam-forensics/
+# (read them, the eye is the backstop). `forensics` and `dissolve` are the same command under old names.
+seam-check: ## [check] every checked defect at a join: flash, empty stage, ghost, resurrection, split seam, crossfade-mud (D=<file>)
+	@node quality/gates/seams.mjs $(D) $(if $(JSON),--json,)
 
-# make forensics D=films/x/video.json: three seam defects luminance sampling can't see (seam-check
-# flags a flash; this flags a redraw, a lingering fade, or a field that steps). Requires the rendered
-# mp4, same as seam-check; run after `./bin/vawe` / `make video` / `make ship`.
-forensics: ## [ship] sample a rendered mp4's transitions for a redraw, a lingering fade, or a field that steps
-	node quality/gates/seam-forensics.mjs $(D)
+forensics: seam-check ## [ship] alias for seam-check (was seam-forensics.mjs, now merged into quality/gates/seams.mjs)
 
 # make sweep-static D=films/x/video.json, THE PIXELS-MOVED CHECK: sample 10 frames from the RENDERED mp4
 # and fail if geometry never changes across the whole film (max consecutive change < 0.5%). Complements
@@ -1494,13 +1488,13 @@ discovery: ## [engine] can an author still FIND what the engine can do?
 # report a number about its own thinness, not the library (the same reason doc-refs stays out of CI).
 # --stamp lowers the ceiling after judging a batch; it never rises unnoticed.
 no-judge: ## [judge] ratchet: rendered films with no valid judge receipt (--stamp to lower)
-	@node quality/gates/no-judge.mjs $(if $(STAMP),--stamp,) $(if $(JSON),--json,)
+	@node quality/gates/ledger.mjs unjudged $(if $(STAMP),--stamp,) $(if $(JSON),--json,)
 
 # judge-census: a COUNT of what the eye has caught across every judge receipt, never a score
 # (engine-doctrine/EVALS.md refuses one on purpose). Tallies `--fix <code>@<beat>` records by dimension
 # and by their relative position in the film (first/middle/last). Read-only, writes no baseline.
 judge-census: ## [judge] count judge fix codes by dimension and beat position (never a score)
-	@node quality/gates/judge-census.mjs $(if $(JSON),--json,)
+	@node quality/gates/ledger.mjs census $(if $(JSON),--json,)
 
 # output-contract: every reporting gate renders through harness/lib/findings.mjs (tight prose + --json).
 # Ratchets the count of gates that still print ad-hoc prose DOWN. engine-doctrine/CRAFT/COMMAND-OUTPUT.md.
@@ -1654,8 +1648,7 @@ inspect: ## [check] verify a scene against its .intent.json sidecar (D=<file>)
 plan-check: ## [check] plan vs render: does the film change where the storyboard promised it would (D=<file>)
 	node quality/gates/plan-vs-render.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 
-dissolve: ## [check] transition gate, is any text state cross-dissolved into another (D=<file>)
-	node quality/gates/dissolve-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
+dissolve: seam-check ## [check] alias for seam-check (was dissolve-check.mjs, now merged into quality/gates/seams.mjs)
 
 covered-move: ## [check] does a full-bleed layer above start mid-move and hide it (D=<file>)
 	node quality/gates/covered-move.mjs $(D)

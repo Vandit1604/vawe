@@ -1,4 +1,4 @@
-// tests/gates/ship-judge-gate.test.mjs: `make ship`'s last step, single-film mode of no-judge.mjs.
+// tests/gates/ship-judge-gate.test.mjs: `make ship`'s last step, single-film mode of `ledger.mjs judged`.
 // Same fixture shape as no-judge.test.mjs (a real receipt via harness/lib/receipt.mjs against a scene
 // JSON + a fake mp4), proving the three things the refusal must get right: no receipt at all fails and
 // names `make judge D=<file>`, a fresh receipt passes, and a receipt that predates a re-render fails
@@ -17,7 +17,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { writeReceipt, receiptPath } from '../../harness/lib/receipt.mjs';
-import { checkOne, hashFile, isJudged } from '../../quality/gates/no-judge.mjs';
+import { checkOne, hashFile, isJudged } from '../../quality/gates/ledger.mjs';
 import { renderOf } from '../../quality/gates/tile.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -35,7 +35,7 @@ fs.mkdirSync(path.dirname(mp4), { recursive: true });
 fs.writeFileSync(scenePath, JSON.stringify({ module: 'scene', layers: [] }));
 fs.writeFileSync(mp4, 'first render bytes');
 
-const runCli = () => spawnSync(process.execPath, [path.join(here, '../../quality/gates/no-judge.mjs'), scenePath], { cwd: ROOT });
+const runCli = () => spawnSync(process.execPath, [path.join(here, '../../quality/gates/ledger.mjs'), 'judged', scenePath], { cwd: ROOT });
 
 // no receipt at all: refused, names the reason and the exact command via the CLI
 {

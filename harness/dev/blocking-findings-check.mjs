@@ -7,7 +7,7 @@
 // dip and the one fix, it was acted on within the hour. Same measurement, different text: a summary
 // alone tells a reader something broke, `at` tells them where to look, `fix` tells them what to type.
 //
-// Same shape as no-judge.mjs and harness/dev/prose-check.mjs: report the count, fail only on an
+// Same shape as ledger.mjs's `unjudged` ratchet and harness/dev/prose-check.mjs: report the count, fail only on an
 // INCREASE, --stamp lowers the ceiling on purpose. The baseline lives here, not under
 // quality/baselines/, for the same reason prose-check.mjs's does: that directory is the record of what
 // a SCENE passed, and this ratchet is about the gate suite's own code, never a scene.

@@ -245,7 +245,7 @@ if (sb && sb.threads) {
 // rendered, ... the wall resolves to the claim"). Parsing WHICH BEAT a clause means would be a guess,
 // exactly what `thread-not-built`'s own restraint refuses; which JOIN it means does not need one: take
 // the render's own LAST boundary (core/timeline/junctions.js allBoundaries, the same declared-plus-
-// inferred list quality/gates/seam-snap.mjs samples every one of), since a film's last boundary is its
+// inferred list quality/gates/seams.mjs samples every one of), since a film's last boundary is its
 // own answer to "what happens at the end" regardless of which noun the prose used for it.
 //
 // WHY NOT `T.handoffs`. It looked like the natural JSON-level proxy for "do the two ends share a
@@ -285,7 +285,7 @@ if (endClause) {
       const mp4 = ready.mp4;
       const realFps = probeFps(mp4), totalFrames = probeTotalFrames(mp4);
       if (realFps && totalFrames) {
-        // same colour-blind emptiness test seam-snap.mjs runs at every boundary (harness/lib/
+        // same colour-blind emptiness test seams.mjs runs at every boundary (harness/lib/
         // frame-forensics.mjs emptinessAt), scoped here to the ONE join the storyboard's own prose
         // named, so the finding reads as a broken PROMISE, not just a broken frame.
         const empty = emptinessAt(mp4, realFps, totalFrames, Math.round(joinT * realFps));

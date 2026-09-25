@@ -68,7 +68,7 @@ if (STAGE === '95') {
   if (!fs.existsSync(mp4)) {
     need('rendered', 95, { ok: false, codes: ['not-rendered'] }, `out/${NAME}.mp4 does not exist. A 95% draft is a thing you can watch`);
   } else {
-    const seam = run('quality/gates/seam-snap.mjs');
+    const seam = run('quality/gates/seams.mjs');
     need('seams', 95, { ok: seam.ok, codes: codes(seam.out), out: seam.out, cmd: seam.cmd }, 'a luminance flash at a cut, which centre-sampling gates structurally cannot see');
     const audit = run('quality/audit.mjs');
     need('audit', 95, { ok: audit.ok, codes: codes(audit.out), out: audit.out, cmd: audit.cmd }, 'overlap, clipping, safe zones, contrast');

@@ -12,7 +12,7 @@
 // precedent: one ffmpeg pass over the whole film, not one seek per sample point. This does the same
 // for sound: one ffmpeg pass decodes the mixed track to mono PCM, one pass over the samples computes a
 // short-window loudness envelope and finds onsets (a sudden rise over the trailing floor). No library,
-// no ML, the same arithmetic seam-snap.mjs and gridStatsSweep already use for pixels, applied to audio.
+// no ML, the same arithmetic seams.mjs and gridStatsSweep already use for pixels, applied to audio.
 //
 // THE TRAP THIS EXISTS TO NOT FALL INTO. Cue times are AUTHORED times; `core/engine/tempo.js` scales
 // every one of them by 1/tempo at expand, so `vawe-flow-2.json`'s own `tempo: 0.85` would make a naive

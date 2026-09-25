@@ -80,7 +80,7 @@ but this repo's own footage, which is precisely the defect class `harness/lib/ge
 
 1. **`choreo.mjs:248` `CAMERA_COVERAGE_FLOOR`/`CAMERA_COVERAGE_MIN_DURATION`** ("read off the one
    measured regression: vawe-flow-2, 4.2s of legs over 13.3s"). One clip, not a sample.
-2. **`seam-forensics.mjs:97-99` `GHOST_FLOOR`/`GHOST_RATIO`/`RES_FLOOR`** ("pixel readings on
+2. **`seams.mjs:97-99` `GHOST_FLOOR`/`GHOST_RATIO`/`RES_FLOOR`** ("pixel readings on
    out/demo.mp4 that fixed each number"). One render, not a sample.
 3. **`motion-floor.mjs:51` `LOCAL_SHARE`** ("both real films measured 3-4%; 8% is a wide margin around
    that"). Two films.
@@ -134,9 +134,9 @@ URL or one of the category-1/2/3 keywords. This table is a snapshot from
 | quality/gates/direction-floor.mjs:455 | CONTINUITY_MAX_DUR | 15 | NONE |
 | quality/gates/direction-floor.mjs:456 | EPS | 0.15 | NONE |
 | quality/gates/direction-floor.mjs:640 | TURNOVER_MIN | 2 | NONE |
-| quality/gates/dissolve-check.mjs:50 | VISIBLE | 0.15 | NONE |
-| quality/gates/dissolve-check.mjs:51 | MUDDY | 0.12 | NONE |
-| quality/gates/dissolve-check.mjs:52 | STEPS | 101 | NONE |
+| quality/gates/seams.mjs:50 | VISIBLE | 0.15 | NONE |
+| quality/gates/seams.mjs:51 | MUDDY | 0.12 | NONE |
+| quality/gates/seams.mjs:52 | STEPS | 101 | NONE |
 | quality/gates/docker-context.mjs:28 | BUDGET_MB | 60 | NONE |
 | quality/gates/eye-trace.mjs:76 | FPS | 30 | NONE (arguably medium, see above) |
 | quality/gates/eye-trace.mjs:86 | JUMP_FAR | 0.30 | NONE (corpus-percentile in its own comment) |
@@ -185,9 +185,9 @@ URL or one of the category-1/2/3 keywords. This table is a snapshot from
 | quality/gates/scene-timing.mjs:458 | REST_PX_EPS | 1 | NONE |
 | quality/gates/scene-timing.mjs:458 | REST_DEG_EPS | 1 | NONE |
 | quality/gates/scene-timing.mjs:483 | HANDOFF_WINDOW | 0.25 | NONE |
-| quality/gates/seam-forensics.mjs:97 | GHOST_FLOOR | 4 | NONE (one render, "out/demo.mp4") |
-| quality/gates/seam-forensics.mjs:98 | GHOST_RATIO | 1.3 | NONE (one render, "out/demo.mp4") |
-| quality/gates/seam-forensics.mjs:99 | RES_FLOOR | 4 | NONE (one render, "out/demo.mp4") |
+| quality/gates/seams.mjs:97 | GHOST_FLOOR | 4 | NONE (one render, "out/demo.mp4") |
+| quality/gates/seams.mjs:98 | GHOST_RATIO | 1.3 | NONE (one render, "out/demo.mp4") |
+| quality/gates/seams.mjs:99 | RES_FLOOR | 4 | NONE (one render, "out/demo.mp4") |
 | quality/gates/sfx-audit.mjs:41 | AUDIBLE | 10 ** (-45 / 20) | NONE |
 | quality/gates/storyboard-check.mjs:156 | SPINE_MAX_S | 15 | NONE (bare, no comment) |
 | quality/gates/study-verify.mjs:85 | TOL | 0.12 | NONE |
@@ -248,8 +248,8 @@ reason: neither is motion design, neither is out of scope for any reason but dom
 | critique.mjs:254 | CAMERA_MOVE_PX | 4 | how much camera pan counts as "tracking" the typing |
 | direction-floor.mjs:455 | CONTINUITY_MAX_DUR | 15 | film length above which chaptered (no-single-spine) structure is legitimate |
 | direction-floor.mjs:640 | TURNOVER_MIN | 2 | how many layers must turn over at once to count as a scene-change boundary |
-| dissolve-check.mjs:50 | VISIBLE | 0.15 | opacity at which a glyph is legible enough to muddy the one behind it |
-| dissolve-check.mjs:51 | MUDDY | 0.12 | how much overlap in a dissolve reads as illegible mush |
+| seams.mjs:50 | VISIBLE | 0.15 | opacity at which a glyph is legible enough to muddy the one behind it |
+| seams.mjs:51 | MUDDY | 0.12 | how much overlap in a dissolve reads as illegible mush |
 | eye-trace.mjs:86 | JUMP_FAR | 0.30 | how far a cut may move the eye before the jump itself is unusual |
 | eye-trace.mjs:267 | SEARCH | 1.5 | how long the eye is given to find the new focal point after a cut |
 | frame-check.mjs:57 | SCALE_DRIFT_MAX | 7 | how many distinct literal sizes a film's fragments may use before it stops reading as one film |
@@ -279,7 +279,7 @@ reason: neither is motion design, neither is out of scope for any reason but dom
 Sampling/epsilon/bucket machinery that makes a measurement work, never itself a craft bar:
 `covered-move.mjs` `EPS` `VISIBLE_STEPS` `OPAQUE_STEPS`; `scene-timing.mjs`/`contract.mjs`'s shared
 `REST_S_EPS`/`REST_PX_EPS`/`REST_DEG_EPS` (both files); `scene-timing.mjs` `EPS` (1e-6); `direction-floor.mjs`
-`EPS` (0.15, ~4 frames); `dissolve-check.mjs` `STEPS`; `png-diff.mjs` `NOISE`; `choreo.mjs` `SPEED_EPS`;
+`EPS` (0.15, ~4 frames); `seams.mjs` `STEPS`; `png-diff.mjs` `NOISE`; `choreo.mjs` `SPEED_EPS`;
 `critique.mjs` `TILT_TOL`/`TILT_TIME_TOL`; `motion-floor.mjs` `RIGID_EXPLAIN`/`RIGID_EXTENT` (camera-vs-
 content classification math, not a "how much motion is good" bar); `motion-sound-check.mjs` `BUCKET_S`;
 `audio-render-check.mjs` `MERGE_S`/`TOL_S`; `beats-of.mjs` `CLUSTER` (a fallback heuristic's own merge
@@ -291,7 +291,7 @@ Render-fidelity QA (does the render match the plan, an engineering tolerance, no
 `plan-vs-render.mjs` `NEAR`/`STILL`/`DRIFT`/`OVERRUN`/`BEAT_TOL`; `study-verify.mjs` `TOL`.
 
 Self-referential pipeline/artifact detection (measuring OUR OWN renderer or diffing tool, not craft):
-`seam-forensics.mjs` `GHOST_FLOOR`/`GHOST_RATIO`/`RES_FLOOR` (one render, `out/demo.mp4`, fixed a real
+`seams.mjs` `GHOST_FLOOR`/`GHOST_RATIO`/`RES_FLOOR` (one render, `out/demo.mp4`, fixed a real
 ghosting bug, not a taste call); `sweep-static.mjs` `MIN_DURATION_FOR_CHECK`/`CHANGE_THRESHOLD`/
 `SAMPLE_COUNT` (frozen-render bug detection, all three parts of one detector).
 

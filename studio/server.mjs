@@ -253,7 +253,7 @@ const storyboardPath = () => {
 };
 
 // ---- the CHOOSER, and the LOOK sheets: three CLIs, spawned ------------------------------------------
-// candidates.mjs, beats.mjs and seam-snap.mjs each open a browser or a decoder, print, and exit. They
+// candidates.mjs, beats.mjs and seams.mjs each open a browser or a decoder, print, and exit. They
 // are spawned rather than imported for the reason beat-check is: they read process.argv and exit at top
 // level. Spawning also keeps them ASYNC, which matters more here than anywhere else in this file: a
 // candidate set takes about fifteen seconds and the page has to stay answerable throughout, not least
@@ -384,9 +384,9 @@ const SHEETS = {
             what: 'the key frames of the whole film',
             after: (err, startedAt) => { if (err) return; const src = '/tmp/preview_scene.png';
               if (fs.existsSync(src) && fs.statSync(src).mtimeMs >= startedAt) fs.copyFileSync(src, scratch('look', `${SLUG}.png`)); } },
-  seams: { file: () => `/tmp/seams/${SLUG}.png`, args: ['quality/gates/seam-snap.mjs', dataArg],
+  seams: { file: () => `/tmp/seams/${SLUG}.png`, args: ['quality/gates/seams.mjs', dataArg],
            what: 'the frames straddling every transition, out of the rendered mp4',
-           // seam-snap reads PIXELS, so it cannot run without one. Said plainly rather than drawn as
+           // seams.mjs reads PIXELS for this sheet, so it cannot run without one. Said plainly rather than drawn as
            // an empty grid, and the page offers the render.
            needs: () => (fs.existsSync(MP4) ? null : `seams are composited during the render, so they exist only in out/${SLUG}.mp4, and there is no such file yet.`) },
 };

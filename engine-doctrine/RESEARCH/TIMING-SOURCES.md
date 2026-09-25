@@ -107,7 +107,7 @@ block:
   shape as the `FORMULA` exclusions the provenance audit already carved out, just not mechanically
   detected as one.
 - **Dissolve muddiness, scale drift, and similarity thresholds have no craft literature.**
-  `dissolve-check.mjs`'s `VISIBLE`/`MUDDY`, `frame-check.mjs`'s `SCALE_DRIFT_MAX`,
+  `seams.mjs`'s `VISIBLE`/`MUDDY`, `frame-check.mjs`'s `SCALE_DRIFT_MAX`,
   `mistakes-dupes.mjs`'s `THRESHOLD`, `waiver-drift.mjs`'s `DRIFT` are all measuring OUR OWN pipeline's
   behaviour (does a dissolve look muddy on our renderer, does our own text drift between waiver checks).
   These are inherently self-referential; an external source cannot answer a question about our own
@@ -177,7 +177,7 @@ vs NUMBER recorded, and no invented replacement.
 | `TAIL` (`beat-check.mjs:93`) | same Netflix page, `GAP_JOIN` | **LOOSE, confirmed again.** `TAIL` asks whether the closing plate holds SOMETHING, not how long a gap may run; `GAP_JOIN` answers a different question. NONE, as part 3 already found. |
 | `MIN_TYPE_HOLD` (`critique.mjs:165`) | Netflix `MIN_LIFE`, already cited | **DISAGREE, confirmed again.** Our 0.4s sits at roughly half Netflix's 0.833s floor for one readable event. Cited in place with the argued distinction part 3 already wrote: a typed line's post-type hold is asking the eye to register the line is DONE, not asking it to read the line again from nothing, so the two floors are not answering the same question even though both are about a "long enough" line. |
 | `CAMERA_PUSH_S`, `CAMERA_MOVE_PX`, `CAMERA_COVERAGE_FLOOR`, `CAMERA_COVERAGE_MIN_DURATION`, `CAMERA_TRAILING_FREEZE` | `critique.mjs`, `choreo.mjs` | camera dramaturgy, confirmed again: no cinematography source publishes a push speed, a pan-pixel floor, a coverage percentage, or a trailing-freeze ceiling in these units. NONE, as part 4 already found. |
-| `VISIBLE`, `MUDDY` (`dissolve-check.mjs:50-51`) | self-referential (our own compositor) | NONE, confirmed again: no craft literature on dissolve legibility thresholds; these grade OUR renderer's crossfade output, not a general editing question. |
+| `VISIBLE`, `MUDDY` (`seams.mjs:50-51`) | self-referential (our own compositor) | NONE, confirmed again: no craft literature on dissolve legibility thresholds; these grade OUR renderer's crossfade output, not a general editing question. |
 | `SCALE_DRIFT_MAX` (`frame-check.mjs:57`) | self-referential (our own fragment authoring) | NONE, confirmed again: "how many distinct sizes before a film stops reading as one film" is a house-style consistency question, not sourced anywhere external. |
 | `JUMP_FAR`, `SEARCH` (`eye-trace.mjs`) | Cinemetrics (does not map), Rayner fixation research (loose analogy) | NONE / LOOSE, confirmed again from parts 1 and 3. |
 | `DEAD`, `LOCAL_SHARE` (`motion-floor.mjs:48,51`) | corpus-derived, explicitly self-admitted in the file's own comments | NONE, confirmed again. |

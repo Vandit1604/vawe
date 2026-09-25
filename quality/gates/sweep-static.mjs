@@ -8,7 +8,7 @@
 //
 //   node quality/gates/sweep-static.mjs films/scene/<file>.json   ·   make sweep-static D=<file>
 //
-// Requires out/<name>.mp4 (render first; the pixels only exist after render, same reason seam-snap.mjs
+// Requires out/<name>.mp4 (render first; the pixels only exist after render, same reason seams.mjs
 // needs the mp4 and not renderFrame). Missing or stale render: reported, not a crash, exit 0, because
 // this is a post-render gate and a caller running it pre-render should not be blocked by it.
 import fs from 'node:fs';

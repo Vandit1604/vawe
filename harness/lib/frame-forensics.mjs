@@ -1,15 +1,15 @@
 // harness/lib/frame-forensics.mjs: read PIXELS inside one authored BOX, at one frame.
 //
-// seam-snap.mjs already reads the rendered mp4 for a luminance flash across the WHOLE frame at a
+// seams.mjs already reads the rendered mp4 for a luminance flash across the WHOLE frame at a
 // boundary. Three defects survive that check because they never touch the whole-frame average: a layer
 // redrawn where it has no business being (a resurrection), an outgoing layer that keeps fading for
 // several extra frames past its own declared transition (a ghost), and a background that steps instead
 // of blending while the layers on top of it dissolve (a split seam). All three are local to a REGION and
 // a WINDOW a flash check never opens. This module is the crop-and-measure primitive the three checks in
-// quality/gates/seam-forensics.mjs share, so each stays a short function over real pixels.
+// quality/gates/seams.mjs share, so each stays a short function over real pixels.
 //
 // Every measurement here is `spawnSync('ffmpeg', …)`, real decoded pixels, never renderFrame: a seam is
-// composited during the render (core/timeline/seams.js), so it exists only in the mp4 (seam-snap.mjs's
+// composited during the render (core/timeline/seams.js), so it exists only in the mp4 (seams.mjs's
 // own reasoning, unchanged here).
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -54,7 +54,7 @@ export function probeTotalFrames(mp4) {
 }
 
 // mean RGB (0..1 each) of one crop at one frame, scaled to a single pixel: that 1×1 average IS the
-// crop's mean colour (the same trick seam-snap.mjs's lumaAt uses, cropped to a box instead of the frame).
+// crop's mean colour (the same trick seams.mjs's lumaAt uses, cropped to a box instead of the frame).
 function meanPixel(mp4, frameIdx, box, extraVf = '') {
   const r = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vf',
     `select=eq(n\\,${frameIdx}),crop=${box.w}:${box.h}:${box.x}:${box.y}${extraVf},scale=1:1`,
@@ -131,9 +131,9 @@ export function frameDeltaSweep(mp4, gw = 64, gh = 36) {
 /**
  * gridStatsAt(mp4, frameIdx) → { luma, spread } in [0,1], or null if the frame would not decode. One
  * decode of the WHOLE frame, scaled to a small grid (32x18) instead of 1x1: the grid's mean IS the same
- * frame-mean a 1x1 scale gives (seam-snap.mjs's original lumaAt trick), and its max-min gives a SECOND,
+ * frame-mean a 1x1 scale gives (seams.mjs's original lumaAt trick), and its max-min gives a SECOND,
  * colour-blind statistic for free: an empty stage has near-zero spread whatever its ground colour is,
- * where luma alone only ever catches a stage getting DARKER. Shared so seam-snap.mjs (every transition
+ * where luma alone only ever catches a stage getting DARKER. Shared so seams.mjs (every transition
  * boundary) and plan-vs-render.mjs (one promised boundary, named by the storyboard's own prose) measure
  * emptiness the same one way rather than two copies that drift.
  */
@@ -149,7 +149,7 @@ export function gridStatsAt(mp4, frameIdx) {
 
 /**
  * emptinessAt(mp4, fps, total, nt) → { frame, spread, outsideSpread, emptySec } | null: nt (a frame
- * index) reads as an EMPTY stage, colour-blind, or null if it does not. Shared by seam-snap.mjs (every
+ * index) reads as an EMPTY stage, colour-blind, or null if it does not. Shared by seams.mjs (every
  * transition boundary) and plan-vs-render.mjs (the one join its transformation-at-the-end check names),
  * so "what counts as empty" is one arithmetic, not two that drift.
  *

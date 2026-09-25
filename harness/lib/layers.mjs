@@ -4,7 +4,7 @@
 // flatten it first. Five gates did, in four slightly different ways, and the differences were all
 // accidental. Two of them dropped the guard the other three had, which is the only part that mattered:
 //
-//   seam-snap.mjs   `(ls||[]).flatMap((l) => [l, ...walk(l.children)])`, a `null` left in the array
+//   seams.mjs   `(ls||[]).flatMap((l) => [l, ...walk(l.children)])`, a `null` left in the array
 //                   (a deleted layer, a trailing comma an editor turned into a hole) threw
 //                   `TypeError: cannot read properties of null` out of the seam gate, so the check that
 //                   exists to catch a black flash reported a crash instead of a frame.
@@ -37,7 +37,7 @@ export const flattenLayer = (l) => flattenLayers([l]);
 /**
  * nearestBeats(flat, tSec) → { out, inn }, the id of the beat ENDING closest before `tSec` and the id
  * of the beat STARTING closest at-or-after it (track 0 is background, never the beat itself). Nearest
- * by start/end, not an exact frame match, because a beat rarely starts on the sampled frame. seam-snap.mjs
+ * by start/end, not an exact frame match, because a beat rarely starts on the sampled frame. seams.mjs
  * named this `beatsAround`; plan-vs-render.mjs needs the same answer to name the outgoing/incoming
  * layers at the ONE join its transformation-at-the-end check reads, so it moved here rather than
  * growing a second copy.

@@ -281,7 +281,7 @@ test('lib-test: gates', async () => {
   // EVERY GRADER, NOT JUST THE ONE THAT BIT. The judge, the seam sheet and compare all read a render
   // they did not make; a seam sheet cut from the previous render reports clean seams for a film whose
   // cuts have moved, which is the one class that gate exists to catch.
-  for (const g of ['judge.mjs', 'seam-snap.mjs']) {
+  for (const g of ['judge.mjs', 'seams.mjs']) {
     ok(`gradeable: quality/gates/${g} asks it before grading`,
       /gradeable\(/.test(fs.readFileSync(path.join(repoRoot, 'quality/gates', g), 'utf8')));
   }
@@ -320,7 +320,7 @@ test('lib-test: gates', async () => {
   // EVERY CONVERTED GATE, BY NAME. A gate that goes back to printing its findings by hand is the whole
   // bug returning, and it would return quietly, so it is named here rather than counted.
   const CONVERTED = ['quality/gates/preflight.mjs', 'quality/gates/beat-check.mjs',
-    'quality/gates/direction-floor.mjs', 'quality/gates/dissolve-check.mjs',
+    'quality/gates/direction-floor.mjs', 'quality/gates/seams.mjs',
     'quality/gates/designspec-check.mjs', 'quality/gates/copy-check.mjs', 'quality/gates/read-check.mjs',
     'quality/gates/pace-check.mjs', 'quality/gates/eye-trace.mjs', 'quality/gates/plan-vs-render.mjs',
     'harness/author/motion-director.mjs', 'quality/audit.mjs'];
@@ -340,7 +340,7 @@ test('lib-test: gates', async () => {
     layers: [{ type: 'html', id: 'mud', at: 0, dur: 4,
       html: '<div style="position:absolute;left:10%;top:20%;opacity:var(--t)">AFTER</div>'
           + '<div style="position:absolute;left:10%;top:20%;opacity:calc(1 - var(--t))">BEFORE</div>' }] }));
-  const gate = path.join(repoRoot, 'quality/gates/dissolve-check.mjs');
+  const gate = path.join(repoRoot, 'quality/gates/seams.mjs');
 
   const asJson = spawnSync('node', [gate, scene, '--json'], { encoding: 'utf8', cwd: repoRoot });
   ok('findings: --json exits with the same code the prose run does', asJson.status === 1);
@@ -351,7 +351,7 @@ test('lib-test: gates', async () => {
     parsed && parsed[0].code === 'crossfade-mud' && parsed[0].severity === 'error' && parsed[0].scene === scene);
   ok('findings: nothing but JSON reaches stdout under --json (#401: the human verdict goes to stderr)',
     asJson.stdout.trim().startsWith('[') && asJson.stdout.trim().endsWith(']')
-    && /dissolve check/.test(asJson.stderr));
+    && /double exposure/.test(asJson.stderr));
 
   // The prose is the same prose, rendered from the record.
   const prose = spawnSync('node', [gate, scene], { encoding: 'utf8', cwd: repoRoot });

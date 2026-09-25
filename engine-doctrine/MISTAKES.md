@@ -600,7 +600,7 @@ holds: none
 
 ## 144. seams flashed BLACK on every white-first scene without an explicit bg window
 `core/timeline/seams.js stageToCanvas` ,  in the no-canvas-bg branch, fill the theme base bg (read `--bg` off `.hs-stage`, fall back to computed background-color, then `#fff`) BEFORE drawing the DOM, so...
-holds: quality/gates/seam-snap.mjs
+holds: quality/gates/seams.mjs
 
 ## 145. the killer per-frame effects were missing (border-beam, aurora, meteor, flash-bloom)
 `core/layers/beam.js` (new: border-beam + shine, DOM conic ring masked to the border, re-emitted each frame + dataset-stamped).
@@ -708,7 +708,7 @@ holds: none
 
 ## 171. dead-air counted a black scrim and a 60px dot as "content on screen"
 `content` now drops both. A blackout is a rect at or over the canvas on both axes with an opaque bare-hex fill; a speck is a declared box under 8% of the canvas on both axes (under two thousandths...
-holds: quality/gates/author-check.mjs, quality/gates/dissolve-check.mjs
+holds: quality/gates/author-check.mjs, quality/gates/seams.mjs
 
 ## 172. a global `cut` blanked the whole frame, and the timeline gate called the hole a transition
 `core/cuts/index.js` gains `soloCutStyle` for the single-root path: same closed-form styles, every VISIBILITY channel (opacity, clip, mask) pinned at identity, so the transition rides on transform and...
@@ -720,7 +720,7 @@ holds: none
 
 ## 174. six gate fixtures were passing on the fixture's own filename
 Anchor on the printed FINDING shape (`[plan-has-no-spans]`, `stub-why , `), which a filename cannot produce.
-holds: quality/gates/author-check.mjs, quality/gates/dissolve-check.mjs
+holds: quality/gates/author-check.mjs, quality/gates/seams.mjs
 
 ## 175. the anti-slop detector read every ISO date as an `01 / 02 / 03` section scaffold
 `(?<![\w\-/:.])(0[1-9]|1[0-2])(?![\w\-/:.])` in `skills/impeccable/scripts/detector/engines/regex/detect-text.mjs`.
@@ -871,7 +871,7 @@ holds: none
 
 ## 211. the 60fps default, and the two gates that would have read it wrong
 The policy. A final render is 60fps, an iteration render is 30.
-holds: quality/gates/seam-snap.mjs
+holds: quality/gates/seams.mjs
 
 ## 212. the engine could move a box and scale a box, but never resize one
 `w`/`h` are keyable. `core/timeline/sequence.js` gains `resolveBoxes()` and `motionAt` returns `w`/`h`.
@@ -1627,7 +1627,7 @@ holds: none
 
 ## 394. The documented way to declare a transition was invisible to every gate
 `lowerScene()` at the point of parse in `beat-check`, `critique`, `direction-floor`, `pace-check`, `beats`, `reveal`, `motion-director` and `quality/audit.mjs`.
-holds: quality/gates/plan-vs-render.mjs, quality/gates/scene-timing.mjs, quality/gates/seam-snap.mjs
+holds: quality/gates/plan-vs-render.mjs, quality/gates/scene-timing.mjs, quality/gates/seams.mjs
 
 ## 395. A slot swap that cross-faded two words in the same box
 `over = 0`. Passes butt. The payload slot, which does pop, blinks for its `payload` offset, and a slot visibly re-filling is what this beat is a picture of.
@@ -1655,7 +1655,7 @@ holds: quality/gates/lib-test.mjs, quality/gates/plan-vs-render.mjs, quality/gat
 
 ## 401. A documented `--json` flag whose output could not be parsed, and a test that pinned a repealed rule
 Two bugs found by an agent doing unrelated work.
-holds: quality/gates/arsenal-check.mjs, quality/gates/audio-check.mjs, quality/gates/author-check.mjs, quality/gates/beat-check.mjs, quality/gates/copy-check.mjs, quality/gates/designspec-check.mjs, quality/gates/direction-floor.mjs, quality/gates/discovery.mjs, quality/gates/dissolve-check.mjs, quality/gates/generated-check.mjs, quality/gates/lib-test.mjs, quality/gates/motion-audit.mjs, quality/gates/pace-check.mjs, quality/gates/plan-vs-render.mjs, quality/gates/read-check.mjs, quality/gates/rung.mjs
+holds: quality/gates/arsenal-check.mjs, quality/gates/audio-check.mjs, quality/gates/author-check.mjs, quality/gates/beat-check.mjs, quality/gates/copy-check.mjs, quality/gates/designspec-check.mjs, quality/gates/direction-floor.mjs, quality/gates/discovery.mjs, quality/gates/seams.mjs, quality/gates/generated-check.mjs, quality/gates/lib-test.mjs, quality/gates/motion-audit.mjs, quality/gates/pace-check.mjs, quality/gates/plan-vs-render.mjs, quality/gates/read-check.mjs, quality/gates/rung.mjs
 
 ## 402. `make reveal` crashed on any single-beat film, and sampled every layer window a third too wide
 Two pre-existing bugs in `harness/author/reveal.mjs`, found by an agent adding a ghost mode and verified against `git show HEAD:` before either was touched. It crashed on a one-beat film. ffmpeg...
@@ -1679,11 +1679,11 @@ holds: none
 
 ## 407. The ninth consumer of a defect that was declared closed
 #394 fixed eight readers of the unified `transitions` surface one at a time, and that is the bug. `beat-check`, `critique`, `direction-floor`, `pace-check`, `beats`, `reveal`, `motion-director`...
-holds: quality/gates/plan-vs-render.mjs, quality/gates/scene-timing.mjs, quality/gates/seam-snap.mjs
+holds: quality/gates/plan-vs-render.mjs, quality/gates/scene-timing.mjs, quality/gates/seams.mjs
 
 ## 408. SEVEN more consumers still do not lower `transitions`, and one is `make seam-check`
 #407 closed the ninth consumer. The grep it was required to run before closing found seven more, which is the point of that rule and the reason #394's "eight consumers, fixed" was wrong. The sharp...
-holds: quality/gates/coverage.mjs, quality/gates/seam-snap.mjs, quality/gates/similarity.mjs
+holds: quality/gates/coverage.mjs, quality/gates/seams.mjs, quality/gates/similarity.mjs
 
 ## 409. Burnt-in captions rendered underneath the platform's own caption strip
 `core/engine/boot.js:325` writes `--safe-bottom` from `safeArea(w, h, destination)`.
@@ -2366,11 +2366,11 @@ holds: films/scene/scene.js (`bgCutAt`)
 
 ## 578. 101 of 181 films had no joint at all, because the only code that ever inferred one lived inside a GATE, not the engine
 `seam-snap.mjs` derived a film's likely beat boundaries (a track-bearing layer's start landing >1.2s after the previous one) to know where to sample for a flash, and never told the engine. So `sceneUnits`, `bindWindowsToJunctions`, audio-bridge cues and `shotWindows` all stayed off by default on any film that hadn't hand-authored a cut, which is most of them. The loop moved to `core/timeline/junctions.js` as `inferCuts(layers, duration)`, beside `shotWindows` for the same reason that one is there (a second copy of "where does this film turn" is this exact class of drift, #159/#358); `seam-snap.mjs` now imports it instead of keeping its own copy. `produceBaseline` injects the inferred boundaries as real `data.cuts` (absent-only: a film with a cut, a seam, or a `motion` track is untouched) styled with `look.cuts.default`, and does so BEFORE the existing `sceneUnits` default so a freshly-cut film turns its beats into cross-fading units in the same pass, not after: a `fade` cut with no scene-unit wrapper is a whole-frame fade with nothing under it, refused at render. An author who wrote `sceneUnits: false` is left alone rather than overridden, so an explicit "no" cannot be silently followed by a cut the render then refuses.
-holds: core/timeline/junctions.js (`inferCuts`), core/engine/produce.js (`produceBaseline`), quality/gates/seam-snap.mjs
+holds: core/timeline/junctions.js (`inferCuts`), core/engine/produce.js (`produceBaseline`), quality/gates/seams.mjs
 
 ## 579. an inferred cut styled every joint the same way, whether or not anything actually crossed it
 `inferCuts` (#578) told the engine WHERE a film likely turns, and `produceBaseline` styled every one of those joints with the same `look.cuts.default`, purely from the gap between beat starts. On `showcase-lumen.json` that meant a whole-frame fade wrapped a joint a layer's own window straddled (the wrapper truncates a non-`acrossBeats` layer at the beat boundary regardless of its authored duration) and a second joint where the outgoing card's box overlapped the incoming headline's box (a dissolve there reads as a muddy double-exposure, exactly what `seam-forensics` exists to catch). `chooseCutStyles`/`classifyJoint` (`core/timeline/junctions.js`) now read the relationship at each joint before picking a style: a straddling window or a `becomes` handover rules out every style but the hard cut; overlapping boxes rule out the fade-family name; only a moving layer, a medium change, or a backdrop turn promotes past the hard cut, and the accent is spent at most once per film. The distinction that keeps this from repeating #159 (the engine picking the BACKGROUND itself): ruling a name OUT is a structural fact about the two beats, never a taste call, and the names left to choose among are still only the theme's own two (`look.cuts.default`/`accent`) plus the doctrine's unconditional hard cut.
-holds: core/timeline/junctions.js (`classifyJoint`, `chooseCutStyles`), core/engine/produce.js (`produceBaseline`), quality/gates/seam-forensics.mjs (now clean on showcase-lumen.json)
+holds: core/timeline/junctions.js (`classifyJoint`, `chooseCutStyles`), core/engine/produce.js (`produceBaseline`), quality/gates/seams.mjs (now clean on showcase-lumen.json)
 
 ## 580. `size ?? 96` sat at five separate call sites, so a named text scale had five places to teach the same lesson
 Nothing let an author write `size: "headline"` and mean "this theme's headline size": `size` was always a raw px number or the same hardcoded 96 fallback, spelled out five times in `core/layers/text.js` (build's fit path, its auto-fit safety path, and `microType`). Worse, `resolveCoords` (`core/engine/boot.js`) reads `L.size` directly to estimate a text layer's height for a bottom pin, so a role string reaching that arithmetic before it lowered would have become `NaN` with no error. `bakeTextSizeRoles` (`core/engine/produce.js`) now lowers `size: "<role>"` against `look.scale` (`hook`/`headline`/`body`/`caption`) at boot, in the one gap between resolving `look` and calling `resolveCoords`; an unknown role throws and names the real ones, copying `resolveJunction`'s own refusal shape rather than silently landing on 96. `core/layers/text.js`'s five sites collapsed onto one `sizeOf(L)` default, now only reached when a layer names no size at all.
@@ -2744,7 +2744,7 @@ The fix: the label names the frame's own time and carries the beat's start besid
 holds: none
 
 ## 631. seam-snap read the film clean over a black stage, because it only looks where a boundary was inferred
-The same film drains to an empty black frame for about a fifth of a second around 9.0s: the blue tile act clears the top of the frame at 9.02s and the studio timeline is still parked below it until 9.10s, landing at 9.80s. `quality/gates/seam-snap.mjs` printed `seam-snap clean`. Its emptiness arithmetic is correct and would have fired; it never looked. The gate samples only the instants `allBoundaries()` returns, which on this film are 3.93, 7.40, 12.05 and 18.47, none near the hole. The film declares no `transitions[]` at all (its arc is "Nothing cuts") so the boundary list comes entirely from `inferCuts`, a gap-between-layer-start-clusters proxy that this film's overlapping per-layer motion gives nothing to find.
+The same film drains to an empty black frame for about a fifth of a second around 9.0s: the blue tile act clears the top of the frame at 9.02s and the studio timeline is still parked below it until 9.10s, landing at 9.80s. `quality/gates/seams.mjs` printed `seam-snap clean`. Its emptiness arithmetic is correct and would have fired; it never looked. The gate samples only the instants `allBoundaries()` returns, which on this film are 3.93, 7.40, 12.05 and 18.47, none near the hole. The film declares no `transitions[]` at all (its arc is "Nothing cuts") so the boundary list comes entirely from `inferCuts`, a gap-between-layer-start-clusters proxy that this film's overlapping per-layer motion gives nothing to find.
 The class, and it is the one `.claude/plans/gates-one-system.plan.md` was written about: a gate that counts a MECHANISM misfires on a film whose craft uses a different mechanism. An empty stage is a fact about the PIXELS and can happen anywhere, so the check that measures it must sweep the film, not visit a list of instants derived from the JSON.
 The film itself was fixed by overlapping the two acts: the timeline layer no longer parks off-frame for its first 0.49s, so it is already rising while the card is still clearing the top.
 holds: none

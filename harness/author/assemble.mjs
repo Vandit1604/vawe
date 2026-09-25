@@ -611,7 +611,7 @@ const bg = rotation
 // always is, once it has an object layer) is skipped by produce.js's own auto-injection -------------
 // mech:"seam", not the "cut" a bare fx name defaults to: a "cut" only transforms the scene ROOT (an
 // opacity ramp over the whole stack), so two beats with DIFFERENT bg presets swap hard mid-ramp rather
-// than blending, which is exactly the "hard swap disguised inside a soft transition" seam-forensics.mjs
+// than blending, which is exactly the "hard swap disguised inside a soft transition" seams.mjs
 // (#seam-split) exists to catch. "seam" is the real two-scene GPU blend, so the bg crossfades too.
 // ...WHEN THE FX CAN BE ONE. `look.cuts.default` is DERIVED from the theme's own pace
 // (core/registry/theme-contract.js), so a brisk brand resolves to `whip`, which is cut-only, and

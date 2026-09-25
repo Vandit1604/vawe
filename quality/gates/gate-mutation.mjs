@@ -733,7 +733,7 @@ const GATE_CMD = {
   motiondirector: (f) => ['node', ['harness/author/motion-director.mjs', f]],
   designspec: (f) => ['node', ['quality/gates/designspec-check.mjs', f, '--strict']],
   storyboard: (f) => ['node', ['quality/gates/storyboard-check.mjs', f]],
-  dissolve: (f) => ['node', ['quality/gates/dissolve-check.mjs', f]],
+  dissolve: (f) => ['node', ['quality/gates/seams.mjs', f]],
   assetcheck: (f) => ['node', ['quality/gates/asset-check.mjs', f, '--strict']],
   // the one gate that reads a second document: the scene and the plan it claims to deliver.
   planrender: (f, intent) => ['node', ['quality/gates/plan-vs-render.mjs', f, '--intent', intent]],

@@ -43,7 +43,7 @@ This is the sixth rule because every expensive failure this repo has had was a s
 - `quality/gates/docker-context-check.mjs` (then under `scripts/site/`) was correct and in no ladder. Every production deploy died for
   TEN DAYS while the old container kept serving.
 - `quality/gates/output-contract.mjs` was in CI and red for four runs. Nobody watches CI.
-- `quality/gates/seam-snap.mjs` printed `flash at 12.30s (frame 369)` and was ignored for ten days.
+- `quality/gates/seams.mjs` printed `flash at 12.30s (frame 369)` and was ignored for ten days.
   Rewritten to name the outgoing beat, the incoming beat, the dip and the fix, it was acted on the same
   hour. Same gate, same measurement: the finding text was the whole difference.
 - 121 films rendered with no judge receipt, because `make ship` ENDED by suggesting `make judge` instead

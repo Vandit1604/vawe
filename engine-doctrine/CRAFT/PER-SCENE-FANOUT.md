@@ -120,7 +120,7 @@ Two things it gets right that are easy to get wrong by hand:
 - **`mech: "seam"` on the transitions, not the "cut" a bare `fx` name defaults to.** A `cut` only
   transforms the scene ROOT (one opacity ramp over the whole stack), so two beats with different `bg`
   presets swap hard mid-ramp instead of blending, the exact "hard swap disguised inside a soft
-  transition" `quality/gates/seam-forensics.mjs`'s `seam-split` check exists to catch. `seam` is the
+  transition" `quality/gates/seams.mjs`'s `seam-split` check exists to catch. `seam` is the
   real two-scene GPU blend.
 - **A caused junction is staged, not fired flat.** Every html layer carries an `id` (`scene1`,
   `scene2`, …), and `assemble` keeps one SHIFTED schedule the whole file is built from. When beat *i*'s
