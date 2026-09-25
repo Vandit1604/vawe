@@ -5,3 +5,4 @@ export const glsl = `                             /* doors, panels close from bo
     float hx = abs(uv.x - 0.5), close = pp * 0.5;
     c = vec4(vec3(1.0), smoothstep(0.5 - close - 0.03, 0.5 - close, hx) * bell);`;
 export const blurb = 'panels closing in from both sides to meet in the middle.';
+export const aka = ['barn doors close', 'panel doors', 'doors close'];
