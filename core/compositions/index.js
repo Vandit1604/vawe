@@ -30,12 +30,7 @@ const drawable = (path) => { path.setAttribute('pathLength', '1'); path.style.st
 // connector into the next card, and the final card blooms with a check that draws on. One hand-authored
 // timeline. A genuine motion-graphics beat, not an assembly of primitives.
 //   props: { stages:[string,string,string] (labels), accent?:cssColor }
-function pipelineFlow(ctx) {
-  const { el, gsap, start } = ctx;
-  const labels = (Array.isArray(ctx.stages) && ctx.stages.length ? ctx.stages : ['Input', 'Engine', 'Render']).slice(0, 3);
-  const accent = ctx.accent || 'var(--accent)';
-  // `rate` compresses the whole timeline so it fits a PUNCHY beat (rate 0.6 ≈ 40% faster). Default 1.
-  const R = ctx.rate != null ? +ctx.rate : 1;
+function buildPipelineDom(el, labels, accent) {
   const W = 600, H = 200, cardW = 150, cardH = 84, gap = (W - cardW * labels.length) / (labels.length - 1);
 
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: (el.style.width ? '' : W), style: 'width:100%;height:auto;overflow:visible' });
@@ -73,15 +68,19 @@ function pipelineFlow(ctx) {
   const last = centers[centers.length - 1];
   const check = drawable(svgEl('path', { d: `M ${last.x - 16} ${last.y + 22} l 10 10 l 18 -22`, fill: 'none', stroke: accent, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0 }));
   svg.appendChild(check);
-  el.appendChild(svg);
 
-  // ---- the hand-authored timeline (paused, absolute delays from `start`) ----
-  // EVERY tween is a fromTo with immediateRender:true so its start value is PINNED at build time,
-  // seeking the paused global timeline to any t then yields the same DOM regardless of which frames
-  // rendered before it (pure in n). No `gsap.to(...immediateRender:false)`: that leaves the END value
-  // stuck when the timeline is seeked backwards, which is exactly the render-order impurity `make probe`
-  // exists to catch. The travelling token appears/moves/vanishes in ONE keyframed fromTo for the same
-  // reason. No colour tween between two `var()` strings, GSAP can't interpolate them (it snaps/NaNs).
+  return { svg, cards, links, tokens, check, centers, cardW };
+}
+
+// ---- the hand-authored timeline (paused, absolute delays from `start`) ----
+// EVERY tween is a fromTo with immediateRender:true so its start value is PINNED at build time,
+// seeking the paused global timeline to any t then yields the same DOM regardless of which frames
+// rendered before it (pure in n). No `gsap.to(...immediateRender:false)`: that leaves the END value
+// stuck when the timeline is seeked backwards, which is exactly the render-order impurity `make probe`
+// exists to catch. The travelling token appears/moves/vanishes in ONE keyframed fromTo for the same
+// reason. No colour tween between two `var()` strings, GSAP can't interpolate them (it snaps/NaNs).
+function animatePipelineFlow(gsap, start, R, dom) {
+  const { cards, links, tokens, centers, check, cardW } = dom;
   cards.forEach((g, i) => {
     gsap.fromTo(g, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5 * R, ease: 'back.out(1.7)', delay: start + i * 0.55 * R, immediateRender: true });
   });
@@ -106,6 +105,17 @@ function pipelineFlow(ctx) {
     { attr: { 'stroke-width': 3.5 }, duration: 0.24, yoyo: true, repeat: 1, ease: 'power2.inOut', delay: checkAt, immediateRender: true });
 }
 
+function pipelineFlow(ctx) {
+  const { el, gsap, start } = ctx;
+  const labels = (Array.isArray(ctx.stages) && ctx.stages.length ? ctx.stages : ['Input', 'Engine', 'Render']).slice(0, 3);
+  const accent = ctx.accent || 'var(--accent)';
+  // `rate` compresses the whole timeline so it fits a PUNCHY beat (rate 0.6 ≈ 40% faster). Default 1.
+  const R = ctx.rate != null ? +ctx.rate : 1;
+  const dom = buildPipelineDom(el, labels, accent);
+  el.appendChild(dom.svg);
+  animatePipelineFlow(gsap, start, R, dom);
+}
+
 // ---- commaSplit -----------------------------------------------------------------------------------
 // THE SENTENCE THIS REPLACES: "The commas were always columns."
 //
@@ -124,21 +134,8 @@ function pipelineFlow(ctx) {
 //          dim?, ink?, rate? }
 //   targets[i] === null drops that field (a trailing `,USD` the table has no column for).
 //   rules[i] is where comma i's rule lands. Fewer rules than commas is fine: the extras just leave.
-function commaSplit(ctx) {
-  const { el, gsap, start } = ctx;
-  const fields = (Array.isArray(ctx.fields) && ctx.fields.length ? ctx.fields : ['a', 'b']).map(String);
-  const targets = Array.isArray(ctx.targets) ? ctx.targets : fields.map((_, i) => i * 220);
-  const rules = Array.isArray(ctx.rules) ? ctx.rules : [];
-  const R = ctx.rate != null ? +ctx.rate : 1;
-  const FS = ctx.size != null ? +ctx.size : 29;
-  const ADV = FS * 0.6;                       // JetBrains Mono advances 0.6em, as everywhere else here
-  const ROW = ctx.rowY != null ? +ctx.rowY : 70;
-  const RH = ctx.ruleH != null ? +ctx.ruleH : 60;
-  const accent = ctx.accent || 'var(--accent)';
-  const dim = ctx.dim || 'var(--dim)';
-  const ink = ctx.ink || 'var(--text)';
-  const W = ctx.w != null ? +ctx.w : 808, H = ctx.h != null ? +ctx.h : 150;
-
+function buildCommaSplitDom(fields, layout) {
+  const { FS, ADV, ROW, RH, accent, dim, ink, W, H, rules } = layout;
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, style: 'width:100%;height:auto;overflow:visible' });
 
   // RAW LAYOUT: fields laid end to end with a comma between each, exactly as the file has them.
@@ -169,28 +166,33 @@ function commaSplit(ctx) {
     r.style.transformBox = 'view-box'; r.style.transformOrigin = `${rx}px ${ROW - RH / 2 + 12}px`;
     svg.appendChild(r); return r;
   });
-  el.appendChild(svg);
 
-  // ---- the timeline ----
-  // Every tween is a fromTo with immediateRender:true, so seeking to any t gives the same DOM whatever
-  // rendered before it. See the pipelineFlow note above: a bare `.to()` leaves the end value stuck when
-  // the paused global timeline is seeked backwards, which is the render-order impurity `make probe` catches.
-  const HOLD = 0.35 * R;          // let the viewer read the raw line before it moves
-  fields.forEach((_, i) => {
+  return { svg, texts, commas, bars, rawX, commaX };
+}
+
+// ---- the timeline ----
+// Every tween is a fromTo with immediateRender:true, so seeking to any t gives the same DOM whatever
+// rendered before it. See the pipelineFlow note above: a bare `.to()` leaves the end value stuck when
+// the paused global timeline is seeked backwards, which is the render-order impurity `make probe` catches.
+function animateCommaFields(gsap, start, R, HOLD, dom, targets) {
+  dom.texts.forEach((_, i) => {
     const to = targets[i];
     if (to == null) {             // a field the table has no column for: it leaves rather than lands
-      gsap.fromTo(texts[i], { opacity: 1 }, { opacity: 0, duration: 0.3 * R, ease: 'power2.in', delay: start + HOLD, immediateRender: true });
+      gsap.fromTo(dom.texts[i], { opacity: 1 }, { opacity: 0, duration: 0.3 * R, ease: 'power2.in', delay: start + HOLD, immediateRender: true });
       return;
     }
-    gsap.fromTo(texts[i], { attr: { x: rawX[i] } }, {
+    gsap.fromTo(dom.texts[i], { attr: { x: dom.rawX[i] } }, {
       attr: { x: to }, duration: 0.62 * R, ease: 'power3.inOut',
       delay: start + HOLD + i * 0.05 * R, immediateRender: true,
     });
   });
-  // THE HAND-OFF: the comma collapses to a point and the rule grows out of that same point. The two
-  // overlap deliberately, so there is a moment where the delimiter and the structure are the same mark.
-  commas.forEach((c, i) => {
-    const bar = bars[i];
+}
+
+// THE HAND-OFF: the comma collapses to a point and the rule grows out of that same point. The two
+// overlap deliberately, so there is a moment where the delimiter and the structure are the same mark.
+function animateCommaRules(gsap, start, R, HOLD, dom, rules) {
+  dom.commas.forEach((c, i) => {
+    const bar = dom.bars[i];
     if (!bar) {                   // a comma with no column to become: it just leaves
       gsap.fromTo(c, { scale: 1, opacity: 1 }, { scale: 0.18, opacity: 0, duration: 0.3 * R, ease: 'power2.in', delay: start + HOLD + 0.06 * R, immediateRender: true });
       return;
@@ -198,7 +200,7 @@ function commaSplit(ctx) {
     // The comma FLIES to the gutter and shrinks to nothing there, then the rule grows out of that exact
     // point. Linking them in SPACE and not merely in time is what makes the delimiter read as becoming
     // the structure. The rule waits for the comma to land, so it never crosses a field still in motion.
-    gsap.fromTo(c, { attr: { x: commaX[i] }, scale: 1, opacity: 1 }, {
+    gsap.fromTo(c, { attr: { x: dom.commaX[i] }, scale: 1, opacity: 1 }, {
       attr: { x: rules[i] }, scale: 0.2, opacity: 0, duration: 0.44 * R, ease: 'power3.inOut',
       delay: start + HOLD, immediateRender: true,
     });
@@ -207,6 +209,33 @@ function commaSplit(ctx) {
       delay: start + HOLD + 0.34 * R, immediateRender: true,
     });
   });
+}
+
+function commaSplit(ctx) {
+  const { el, gsap, start } = ctx;
+  const fields = (Array.isArray(ctx.fields) && ctx.fields.length ? ctx.fields : ['a', 'b']).map(String);
+  const targets = Array.isArray(ctx.targets) ? ctx.targets : fields.map((_, i) => i * 220);
+  const rules = Array.isArray(ctx.rules) ? ctx.rules : [];
+  const R = ctx.rate != null ? +ctx.rate : 1;
+  const FS = ctx.size != null ? +ctx.size : 29;
+  const ADV = FS * 0.6;                       // JetBrains Mono advances 0.6em, as everywhere else here
+  const layout = {
+    FS, ADV, rules,
+    ROW: ctx.rowY != null ? +ctx.rowY : 70,
+    RH: ctx.ruleH != null ? +ctx.ruleH : 60,
+    accent: ctx.accent || 'var(--accent)',
+    dim: ctx.dim || 'var(--dim)',
+    ink: ctx.ink || 'var(--text)',
+    W: ctx.w != null ? +ctx.w : 808,
+    H: ctx.h != null ? +ctx.h : 150,
+  };
+
+  const dom = buildCommaSplitDom(fields, layout);
+  el.appendChild(dom.svg);
+
+  const HOLD = 0.35 * R;          // let the viewer read the raw line before it moves
+  animateCommaFields(gsap, start, R, HOLD, dom, targets);
+  animateCommaRules(gsap, start, R, HOLD, dom, rules);
 }
 
 export const COMPOSITIONS = { pipelineFlow, commaSplit };
