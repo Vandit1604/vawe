@@ -260,7 +260,16 @@ export const CANVAS_FX_NAMES = Object.keys(CANVAS_FX);
 export const CANVAS_FX_BLURBS = blurbsOf('canvas fx', CANVAS_FX);
 
 // The words an author types who does not know the pass by name, never printed, only searched.
-const CANVAS_FX_AKA = { halftone: ['newspaper print', 'newspaper dots'] };
+const CANVAS_FX_AKA = {
+  halftone: ['newspaper print', 'newspaper dots'],
+  mosaic: ['pixelate', 'pixelated image', 'blocky image'],
+  dither: ['ordered dither', 'two tone bayer', 'black and white dither'],
+  stipple: ['pointillism', 'ink dot texture', 'seeded dots'],
+  ascii: ['ascii art', 'text art image', 'terminal green text'],
+  edgeDetect: ['sobel edges', 'outline only', 'blueprint lines'],
+  pixelSort: ['glitch sort', 'databend smear', 'sorted pixels glitch'],
+  crosshatch: ['pencil sketch', 'engraving lines', 'cross hatching'],
+};
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a canvas fx" when someone writes it somewhere else. core/registry.js.
