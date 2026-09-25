@@ -38,7 +38,7 @@ import { STAGE_ORDER } from './stage.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// NAME_MAX/DESC_MAX/BODY_LINES_MAX/BODY_TOKENS_MAX: platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+// NAME_MAX/DESC_MAX/BODY_LINES_MAX/BODY_TOKENS_MAX: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 // (see the header). TOKENS_PER_WORD is a documented rule of thumb from the same page ("estimate words
 // x 1.33"), a unit conversion for this gate's own estimate, not a second quality bar.
 const NAME_MAX = 64;

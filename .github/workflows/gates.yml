@@ -55,6 +55,15 @@ jobs:
       - name: framework gates
         run: make schema-check lib-test craft-coverage arsenal-check discovery generated-check output-contract seo-surface site-counts unused feature-audit lint-test
 
+      # docker-context stays in .githooks/pre-push too (a laptop with Docker still wants the local
+      # number before pushing), but what it needs is a Docker daemon, a fact about the MACHINE, not
+      # about what a clone carries, so unlike doc-refs it belongs in both places rather than only one:
+      # ubuntu-latest always has Docker, so this is where the budget gets measured for real on every
+      # push, even from a machine with no daemon (quality/gates/docker-context.mjs now reports "not
+      # measured here" and exits 0 there instead of blocking).
+      - name: docker build context budget
+        run: make docker-context
+
       # Five more inert-check found the same day, all failing on their FIRST real run: report-tier, not a
       # wall. Wiring and fixing are different jobs; blocking the push on findings nobody has looked at
       # yet just teaches everyone to reach for --no-verify. blocks-audit, dead-branch and docs-drift have

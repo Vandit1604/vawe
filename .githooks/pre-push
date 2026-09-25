@@ -88,6 +88,11 @@
 # check that already passes belongs, same as the fourteen above them. All eight pass today. Pure file
 # reads plus, for sim-audit and glyphs-audit, one hash each; well under a second combined.
 #
+# docker-context needs a Docker daemon, a fact about the machine, not the clone. It stays here so a
+# machine with Docker gets the local number before pushing, and it also runs in gates.yml on
+# ubuntu-latest, which always has Docker, so the budget is measured on every push. A laptop with no
+# daemon reports "not measured here" and exits 0 instead of blocking a push it cannot prove either way.
+#
 # skill-check and rule-length joined the same day inert-check found them: both in the Makefile, both
 # read only tracked docs (skills/*/SKILL.md, AGENTS.md, engine-doctrine/CRAFT), both pass today, both
 # under a tenth of a second. Neither is in gates.yml, matching the rest of this maintenance tier
