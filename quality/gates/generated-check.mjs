@@ -35,6 +35,8 @@ const f = gateFindings({ line: (r) => r.summary });
 const GENERATORS = [
   ['effects catalogue', ['scripts/site/effects-catalog.mjs'],
     ['engine-doctrine/EFFECTS.md', 'site/lib/effects.json', 'site/lib/effects-counts.json', 'site/lib/effects-body.json']],
+  ['vocabulary catalogue', ['scripts/site/vocab-catalog.mjs'],
+    ['engine-doctrine/CRAFT/VOCABULARY.md']],
   ['arsenal index', ['scripts/site/arsenal-json.mjs'],
     ['site/lib/arsenal.json', 'site/lib/blocks.json']],
   ['doc map', ['quality/gates/doc-map.mjs', '--write'],

@@ -63,6 +63,8 @@ Single-shot: `./bin/vawe path/to/video.json` (`--draft` = fast), JSON starting `
 
 **On demand:** `make arsenal Q="…"` searches every effect/block (`MISTAKES=1` the mistake log, `THEME=<name>` a theme's look, `AT=block.<family>` one block's dials with their ranges, defaults and notes); `make demo Q="…"` writes a ten-second film about one thing (`engine-doctrine/CRAFT/SPECIMEN.md`). Making something good: `engine-doctrine/TASTE.md`. Search before building anything by hand: see "Changing the ENGINE, not a film?" below, the same rule covers a film device and an engine primitive.
 
+Know the feeling, not the engine name? [`VOCABULARY.md`](engine-doctrine/CRAFT/VOCABULARY.md) (`make vocab`): plain words (feel, duration, camera, comparative) the engine resolves in a real slot.
+
 ## Direction: deciders write, critics report (stage 6)  `[ref: make critics]`
 
 **A CRITIC only reports; a DECIDER writes into the film and owns ONE exclusive write scope**, so two deciders can't collide. Full roster, order, write scopes: `engine-doctrine/CRAFT/SUBAGENTS.md`.

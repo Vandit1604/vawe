@@ -69,6 +69,21 @@ The shot, described. `{ "cameraMove": { "move": "pull back", "dur": 3 } }`. The 
 | `shake` | `"cameraShake"` | an impact. One hit, on the frame that takes it, never as texture. |
 | `drift hold` | `"driftHold"` | a held shot that must stay alive. The smallest move the eye still reads. |
 
+## Comparative  `[resolveComparative(word, current) (core/registry/vocab.js)]`
+
+A direction, not a value: "make it faster" names what is already there, not a new number. `resolveComparative` steps the Duration ladder above by one word from whatever is currently set, and clamps at either end. Nothing in a scene or a harness tool calls this automatically yet: it resolves today only by calling the function directly, or by name through `make arsenal Q="snappier"`.
+
+| word | resolves to | when |
+|---|---|---|
+| `faster` | one step faster | a duration is already set and it should read a touch quicker, without picking a new number by hand. |
+| `slower` | one step slower | a duration is already set and it should read a touch more deliberate, without picking a new number by hand. |
+
+**No "control" family.** Words like `subtle`, `tight`, `loose` and `aggressive` were considered
+and left out: a camera move's own params (`slowPush.to`, `cameraShake.amp`, `driftHold.ax/ay`, …)
+are named per move, not one shared dial an amount word could alias, and adding one would be a
+second mechanism for what each move already names for itself. `gentle` stays a Feel word only,
+it is not repeated here with a different meaning.
+
 ---
-_30 words across 3 families. Regenerate: `make vocab`. The full engine
+_32 words across 4 families. Regenerate: `make vocab`. The full engine
 vocabularies these alias: `engine-doctrine/EFFECTS.md` (`make effects`)._
