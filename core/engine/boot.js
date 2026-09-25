@@ -8,7 +8,10 @@ import { glLive } from './webgl.js';
 import '../layers/frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
 import { canvasKind } from '../canvas/kind.js'; // records each canvas's context kind at creation
 import { themeErrors, resolveLook, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from '../registry/theme-contract.js';
-import { isLightBg, parseColor, contrastRatio, ensureContrast } from '../color/engine.js';
+import { isLightBg, parseColor, colorAlpha, contrastRatio, ensureContrast } from '../color/engine.js';
+import { expandTheme, isTokenFile } from '../theme/roles.js';
+import { resolveTokens } from '../theme/tokens.js';
+import { resolveTokenRefs } from '../theme/refs.js';
 import { validateAll } from '../validate/validate.mjs';
 import { produceBaseline, bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, bakeTextSizeRoles } from './produce.js';
 
@@ -269,14 +272,45 @@ async function preloadVideos(data) {
 
 // resolveTheme(spec): spec is "name" (→ fetch themes/name.json) | inline object. REQUIRED.
 // No spec or a failed fetch throws; nothing silently substitutes a look.
+//
+// TOKEN-FILE ADAPTER: every theme on disk is now `tokens` + `roles` (core/theme/tokens.js,
+// core/theme/roles.js), not a hand-written `palette`/`type`/`gradient` object. `expandTheme` is the ONE
+// place that adapter runs on the render path, so applyTheme/themeErrors below, and every other consumer
+// that reads `theme.palette.X`, never has to know the file on disk changed shape at all. A theme still
+// written in the retired shape (`isTokenFile` false) throws, naming `migrate-themes.mjs`, the same
+// fail-loud posture as everything else in this function.
 export async function resolveTheme(spec) {
+  let raw;
   if (typeof spec === 'string' && spec) {
     const res = await fetch(`/themes/${spec}.json`);
     if (!res.ok) throw new Error(`theme "${spec}" not found (themes/${spec}.json), no default look exists`);
-    return await res.json();
+    raw = await res.json();
+  } else if (isObj(spec)) {
+    raw = spec;
+  } else {
+    throw new Error('data.theme is required (a theme name or an inline theme object), no default look exists');
   }
-  if (isObj(spec)) return spec;
-  throw new Error('data.theme is required (a theme name or an inline theme object), no default look exists');
+  return isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+}
+
+// resolveThemeTokenValues(spec): the SAME token-file fetch resolveTheme does, but returning the raw
+// resolved token map (not the legacy palette/type/gradient adapter), for scene JSON `"{path}"`
+// references (core/theme/refs.js). Themes not written as a token file resolve no tokens: an old-shape
+// scene using a `{ref}` string would have thrown the same "not a colour" error before this existed, so
+// nothing regresses for it.
+export async function resolveThemeTokenValues(spec) {
+  let raw;
+  if (typeof spec === 'string' && spec) {
+    const res = await fetch(`/themes/${spec}.json`);
+    if (!res.ok) return new Map();
+    raw = await res.json();
+  } else if (isObj(spec)) {
+    raw = spec;
+  } else {
+    return new Map();
+  }
+  if (!isTokenFile(raw)) return new Map();
+  return resolveTokens(raw.tokens || {}, { parseColor, colorAlpha }).values;
 }
 
 // applyTheme(theme): assert the contract, then write the palette/gradient/font vars onto :root.
@@ -506,6 +540,12 @@ export async function boot(build) {
     // reads the theme, and a later phase's named size/placement needs `look` to lower through
     // resolveCoords the same way a pin does, not one line too late to reach it.
     const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
+    // A video may reference any theme token directly ("{color.signal}"), resolved here, once, against
+    // whichever theme this render actually uses (core/theme/refs.js). Runs right after the theme itself
+    // resolves so everything downstream (resolveCoords, produceBaseline, renderFrame) only ever sees the
+    // concrete value, the same "sugar resolves at load" rule block/beat/comp already follow.
+    const tokenValues = await resolveThemeTokenValues(data.theme);
+    Object.assign(data, resolveTokenRefs(data, tokenValues));
     const look = resolveLook(theme, { isLightBg }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md);
     // an authored theme.look wins key by key, computedLook fills the rest for the 37 themes with none.
     // A NAMED size ("headline") lowers to the theme's real px number HERE, before resolveCoords: that

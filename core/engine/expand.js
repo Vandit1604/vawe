@@ -4,7 +4,10 @@
 // lowerScene(expandScene(data)), the loader every Node gate and script calls to read a scene off disk.
 //
 // NODE-ONLY BY POLICY, NOT BY CONSTRAINT: expandScene itself is pure ESM (no `fs`) and boots fine in
-// any browser that can fetch `blocks/`. The render page cannot: internal/scene's file
+// any browser that can fetch `blocks/`. `loadScene` now also reads `themes/<name>.json` off disk (to
+// resolve a scene's `{token.path}` references, core/theme/refs.js), which is why the top-level `fs`
+// import lives in this file at all: it is scoped to loadScene's own helper, never touched by expandScene.
+// The render page cannot import either half: internal/scene's file
 // server default-denies everything outside core/themes/films/assets/.vawe-data
 // (internal/scene/scene.go `served`), by design, because it renders scenes from strangers over MCP,
 // and this module's dependency on ~186 block/beat factories (one of which, blocks/geo.mjs, imports
@@ -24,6 +27,9 @@
 // Idempotent: a scene with no block/beat/comp layers passes through unchanged, so calling this twice (a
 // gate that clones and re-derives, or a Go pre-expand followed by a gate's own loadScene) never
 // double-expands.
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import * as B from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { bakeCameraMove } from './produce.js';
@@ -32,6 +38,12 @@ import { lowerScene } from '../transitions/lower.js';
 import { expandRecipes } from '../../recipes/expand.mjs';
 import { resolveTempo } from './tempo.js';
 import { resolveRelativeTimes } from '../timeline/relative-time.js';
+import { isTokenFile } from '../theme/roles.js';
+import { resolveTokens } from '../theme/tokens.js';
+import { resolveTokenRefs } from '../theme/refs.js';
+import { parseColor, colorAlpha } from '../color/engine.js';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 // An AUTHOR NOTE is not an unknown-prop finding. This repo writes notes as `_`-prefixed keys everywhere
 // (`_why`, `_template`, `_camera`); `note` is the one un-prefixed alias already in use.
@@ -214,6 +226,27 @@ export function expandScene(data, aspectKey = '') {
 // that once loadScene injects one first). A gate coaches on what the author WROTE; the engine fills
 // the baseline only on the render path, at core/engine/boot.js. Two different jobs, read the same
 // source file, never the same derived one.
+// tokenValuesFor(themeSpec): the Node-side twin of core/engine/boot.js `resolveThemeTokenValues`. A
+// string spec reads `themes/<name>.json` off disk (this file is Node-only from here down, see the
+// header: expandScene itself stays fs-free, loadScene does not need to); an inline theme object is used
+// as-is. Not a token file (the retired shape, or no theme at all) resolves no tokens, same posture as
+// the browser side: a scene with no `{ref}` sugar behaves exactly as before.
+function tokenValuesFor(themeSpec) {
+  let raw;
+  if (typeof themeSpec === 'string' && themeSpec) {
+    const p = path.join(ROOT, 'themes', `${themeSpec}.json`);
+    if (!fs.existsSync(p)) return new Map();
+    raw = JSON.parse(fs.readFileSync(p, 'utf8'));
+  } else if (themeSpec && typeof themeSpec === 'object') {
+    raw = themeSpec;
+  } else {
+    return new Map();
+  }
+  if (!isTokenFile(raw)) return new Map();
+  return resolveTokens(raw.tokens || {}, { parseColor, colorAlpha }).values;
+}
+
 export function loadScene(data) {
-  return lowerScene(expandScene(data));
+  const expanded = lowerScene(expandScene(data));
+  return resolveTokenRefs(expanded, tokenValuesFor(expanded.theme));
 }
