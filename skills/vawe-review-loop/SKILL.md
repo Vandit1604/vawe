@@ -1,6 +1,6 @@
 ---
 name: vawe-review-loop
-description: "Reviews a film just made, fixes what is wrong, and repeats until it stops improving. Load after a scene JSON renders, when the film needs to be GOOD rather than merely valid. Wraps the gates, the critic roster and make judge into one loop with a written stopping rule, so review ends on evidence instead of on the author getting bored. Use for any film about to ship."
+description: "Reviews a rendered film, fixes what is wrong, and repeats until it stops improving, wrapping the gates, the critic roster, and make judge into one loop with a written stopping rule. Load after a scene JSON renders, for any film about to ship, when it needs to be good rather than merely valid."
 stage: judge
 ---
 

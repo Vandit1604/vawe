@@ -24,6 +24,16 @@ Two mechanisms stay separate on purpose:
   breaks the harness cannot infer: a deliberate choice only the author can justify, spent as one written
   sentence per waiver.
 
+One waiver field covers two different cases, never two mechanisms: a rule broken for cause, and a
+chosen absence a static rule cannot otherwise see (no continuous object, a still frame, no transition,
+an ending with nothing after it). Neither is an apology; `quality/gates/audio-check.mjs` already draws
+the same split for sound, where chosen quiet and an audio block nobody considered are not the same
+finding. The only door out of a fired rule is a reason written in the scene, whether that reason is "I
+broke this on purpose" or "I chose this absence on purpose." Measured across the library, half of real
+waiver use is the second case, an author declaring "I chose this", not "I broke this":
+`no-continuous-object`, `dead-air`, `plain-slideshow`, `static-bg`, `no-transition`, `ends-on-nothing`
+are the codes this shows up on most.
+
 Hard refusals are the third tier and stay hard: determinism (a non-finite render target), the owner's
 own approval signature, and a construction bug (an empty beat, a plan that doesn't match the render).
 Nothing adapts those, because there is no film-context reading that makes them correct.

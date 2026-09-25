@@ -1,6 +1,6 @@
 ---
 name: vawe-scene-authoring
-description: How to author good-looking, well-spaced, well-animated Vawe scenes (the shared films/scene/scene.html shell) and data JSON (films/scene/<topic>.json). Use when creating or editing scene HTML/CSS, adding animations, integrating images, or fixing spacing. Covers the renderFrame(n) purity contract, design tokens, motion primitives, the image/visual system, and the QA loop.
+description: How to author a Vawe scene (the shared films/scene/scene.html shell) and its data JSON (films/scene/<topic>.json): the renderFrame(n) purity contract, design tokens, motion primitives, the image system, and the QA loop. Use when creating or editing scene HTML/CSS, adding animations, integrating images, or fixing spacing.
 codes: canvas-order-dependent, purity-forward-mismatch, purity-render-order
 stage: assemble
 ---
