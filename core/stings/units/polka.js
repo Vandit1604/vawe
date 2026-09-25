@@ -5,3 +5,4 @@ export const glsl = `                             /* polka, dot curtain grows to
     vec2 cell = fract(uv * vec2(12.0*u_res.x/u_res.y, 12.0)) - 0.5;
     c = vec4(vec3(1.0), smoothstep(pp*0.72, pp*0.72 - 0.12, length(cell)) * bell);`;
 export const blurb = 'a curtain of dots growing until they cover the frame.';
+export const aka = ['polka dots', 'dot curtain', 'dot reveal'];
