@@ -22,3 +22,4 @@ export const glsl = `                              /* light leak, seed-generativ
     col += sh * streak * 0.45; amax = max(amax, streak*0.55);
     c = vec4(min(col, vec3(1.5)), bell * 0.8 * clamp(amax, 0.0, 1.0));`;
 export const blurb = 'a light leak, seed-generative and multi-hue. Colour bleeding in at the edges as if the camera back opened.';
+export const aka = ['light leak', 'light leak transition', 'lens leak'];
