@@ -109,6 +109,10 @@ import { defineRegistry } from './registry.js';
 // changes its cut family beat to beat; the cue has to follow the cut, not a brand-wide preference.
 const LOOK_KEY_ENTRIES = { backdrop: 'backdrop', scale: 'scale', layout: 'layout', marks: 'marks', cuts: 'cuts', field: 'field' };
 const LOOK_KEY_AKA = {
+  backdrop: ['brand background rotation', 'which bg presets to use'],
+  scale: ['type scale', 'named text sizes'],
+  layout: ['anchor and margin', 'where content sits on the frame'],
+  marks: ['logo settings', 'brand mark sizes'],
   cuts: ['default transition style', 'brand cut preference'],
   field: ['backdrop texture defaults', 'grain and vignette settings'],
 };
@@ -125,9 +129,9 @@ export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRI
     scale: 'how big text should be: named px sizes for the hook / headline / body / caption roles at '
       + '16:9, so a layer writes `"size": "headline"` instead of guessing a number',
     layout: 'the anchor band (left/center/right) and margin every beat composes against',
-    marks: 'the logo path plus its end-card and headline-adjacent sizes',
-    cuts: 'the default and accent cut/transition names the brand favours',
-    field: 'grain and vignette defaults for the backdrop',
+    marks: 'the logo path plus its end-card and headline-adjacent sizes, both named pixel numbers',
+    cuts: 'the default and accent cut/transition names the brand favours, one for almost every boundary and one reserved for its peak-energy beat',
+    field: 'grain and vignette numbers layered over the backdrop, both 0..1 strengths',
   },
   catalog: {
     title: 'Theme look keys', tag: 'theme', intro: 'A theme (`themes/<name>.json`) may carry a `look` '
