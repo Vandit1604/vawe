@@ -1,34 +1,6 @@
 {
   "name": "merged-ignition",
   "note": "INVENTED (not selected) by harness/author/invent-look.mjs from films/scene/_concepts/gh-wrapped.storyboard.md, seed 7. Stance \"ignition\": merged starts cold and catches fire, so the one warm colour IS the event. Texture: halation: the accent bleeds a little light into the ground, and nothing else glows.",
-  "palette": {
-    "bg": "#170c0d",
-    "bg2": "#1f1414",
-    "surface": "#241819",
-    "surface2": "#2c2121",
-    "line": "rgba(115,101,101,0.1)",
-    "lineStrong": "rgba(115,101,101,0.22)",
-    "text": "#f6ebec",
-    "text2": "#afa4a5",
-    "dim": "#7b7071",
-    "ink": "#f6ebec",
-    "accent": "#ff7360",
-    "accentDim": "rgba(255,115,96,0.16)",
-    "accentGlow": "rgba(255,115,96,0.45)",
-    "up": "#ff7360",
-    "down": "#cc3e66"
-  },
-  "gradient": [
-    "#170c0d",
-    "#251212",
-    "#0d0707"
-  ],
-  "type": {
-    "sans": "Fira Sans Extra Condensed",
-    "serif": "Big Shoulders",
-    "mono": "Courier Prime",
-    "num": "Courier Prime"
-  },
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0.1,
@@ -153,5 +125,127 @@
       "min": 16
     },
     "generated": "2026-08-20"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#170c0d"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#1f1414"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#241819"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#2c2121"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "rgba(115,101,101,0.1)"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "rgba(115,101,101,0.22)"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#f6ebec"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#afa4a5"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#7b7071"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#f6ebec"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#ff7360"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(255,115,96,0.16)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(255,115,96,0.45)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#ff7360"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#cc3e66"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Fira Sans Extra Condensed"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Big Shoulders"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Courier Prime"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Courier Prime"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#170c0d"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#251212"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#0d0707"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "ink": "{color.ink}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

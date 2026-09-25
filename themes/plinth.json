@@ -1,34 +1,6 @@
 {
   "name": "plinth",
-  "note": "PlinthAI brand kit \u2014 periwinkle gradient, electric-blue accent, Inter + Instrument Serif + Geist Mono, editorial motion (softer, slightly bouncy). Palette completed to the theme contract (core/theme-contract.js) from the pack's OWN gradient stops and accent \u2014 no colour here is invented; dark-first, so text is the near-white.",
-  "palette": {
-    "text": "#f5f5f2",
-    "accent": "#1f3bff",
-    "bg": "#454e92",
-    "bg2": "#757dbb",
-    "surface": "#757dbb",
-    "surface2": "#454e92",
-    "line": "#757dbb",
-    "lineStrong": "#c7cbe8",
-    "text2": "#c7cbe8",
-    "dim": "#c7cbe8",
-    "ink": "#f5f5f2",
-    "accentDim": "#c7cbe8",
-    "accentGlow": "rgba(31,59,255,0.28)",
-    "up": "#1f3bff",
-    "down": "#c7cbe8"
-  },
-  "gradient": [
-    "#454e92",
-    "#757dbb",
-    "#c7cbe8"
-  ],
-  "type": {
-    "sans": "Inter",
-    "serif": "Instrument Serif",
-    "mono": "Geist Mono",
-    "num": "Inter"
-  },
+  "note": "PlinthAI brand kit — periwinkle gradient, electric-blue accent, Inter + Instrument Serif + Geist Mono, editorial motion (softer, slightly bouncy). Palette completed to the theme contract (core/theme-contract.js) from the pack's OWN gradient stops and accent — no colour here is invented; dark-first, so text is the near-white.",
   "motion": {
     "easing": "easeOutCubic",
     "bounce": 0.4,
@@ -38,5 +10,127 @@
     "stagger": 0.08,
     "exitRatio": 0.5,
     "_exitRatio": "product-led and even-tempered, mid-band. Asymmetric timing: an entrance is an introduction, an exit is over (engine-doctrine/CRAFT/MOTION-STANDARDS.md)."
+  },
+  "tokens": {
+    "color": {
+      "text": {
+        "$type": "color",
+        "$value": "#f5f5f2"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#1f3bff"
+      },
+      "bg": {
+        "$type": "color",
+        "$value": "#454e92"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#757dbb"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#757dbb"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#454e92"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#757dbb"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#c7cbe8"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#c7cbe8"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#c7cbe8"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#f5f5f2"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "#c7cbe8"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(31,59,255,0.28)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#1f3bff"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#c7cbe8"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Inter"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Instrument Serif"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Inter"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#454e92"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#757dbb"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#c7cbe8"
+      }
+    }
+  },
+  "roles": {
+    "text": "{color.text}",
+    "accent": "{color.accent}",
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "ink": "{color.ink}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

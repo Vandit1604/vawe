@@ -1,34 +1,6 @@
 {
   "name": "brew-dark",
   "note": "DARK-first Brew, eyedropped from the real brew.new hero (make palette → luminance 0.41, bg #1a1a1a, white text, orange send-button accent #ff742e). This is the ACTUAL product look (the launch film's cream was one film's choice; the shipped app is dark). Near-black field, near-white type, a single vivid orange accent, warm-dark cards. Bold Hanken Grotesk, Geist Mono for {{code}}. Motion: punchy easeOutBack.",
-  "palette": {
-    "bg": "#0f0f10",
-    "bg2": "#161617",
-    "surface": "#1c1c1e",
-    "surface2": "#242427",
-    "line": "rgba(255,255,255,0.10)",
-    "lineStrong": "rgba(255,255,255,0.18)",
-    "text": "#f6f3ee",
-    "text2": "#a49b92",
-    "dim": "#776f67",
-    "accent": "#ff742e",
-    "accentDim": "rgba(255,116,46,0.16)",
-    "accentGlow": "rgba(255,116,46,0.48)",
-    "up": "#3ecf8e",
-    "down": "#e5484d",
-    "ink": "#f6f3ee"
-  },
-  "gradient": [
-    "#161512",
-    "#12100e",
-    "#0b0a09"
-  ],
-  "type": {
-    "sans": "Hanken Grotesk",
-    "mono": "Geist Mono",
-    "num": "Hanken Grotesk",
-    "serif": "Hanken Grotesk"
-  },
   "motion": {
     "easing": "easeOutBack",
     "bounce": 0.16,
@@ -94,5 +66,127 @@
   },
   "bgDefault": {
     "preset": "ink"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#0f0f10"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#161617"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#1c1c1e"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#242427"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.10)"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.18)"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#f6f3ee"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#a49b92"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#776f67"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#ff742e"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(255,116,46,0.16)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(255,116,46,0.48)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#3ecf8e"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#e5484d"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#f6f3ee"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Hanken Grotesk"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Hanken Grotesk"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Hanken Grotesk"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#161512"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#12100e"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#0b0a09"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

@@ -1,36 +1,12 @@
 {
   "name": "tpot",
   "note": "TPOT (tpot.cc), derived from the real site, not invented. tpot ships BOTH modes (footer toggle, persisted as localStorage theme=light|dark); this theme is its LIGHT mode, whose values are the site's own resolved tokens, not an inversion of the dark one: --background #ffffff, --foreground #101924, --muted #f4f7fa, --muted-foreground #5d6775, --border #e2e6eb, --primary #0093eb, --accent (soft pill fill) #e6f2fb. CONTRAST WARNING: #0093eb on white is only 3.28:1: it clears AA for LARGE text (>=24px) and UI fills but NOT for body copy, so blue is display-size or a fill only; fine print uses #5d6775 (5.64:1). Faces are REAL: Manrope 600 headline at -2px tracking (measured, do NOT default to 800) + Fraunces serif for numerals (the event-date '15'/'2'/'10') + JetBrains Mono for letterspaced eyebrows ('RECAPPING TPOT'). Flat field, zero texture: the page is plain white, so bgDefault is `plain` (MISTAKES.md #2). Captured components MUST be captured with LS=\"theme=light\" or they bake dark surfaces.",
-  "palette": {
-    "bg": "#ffffff",
-    "bg2": "#f4f7fa",
-    "surface": "#ffffff",
-    "surface2": "#f4f7fa",
-    "line": "#e2e6eb",
-    "lineStrong": "#d8dce2",
-    "text": "#101924",
-    "text2": "#43474e",
-    "dim": "#5d6775",
-    "accent": "#0093eb",
-    "accentDim": "#e6f2fb",
-    "accentGlow": "rgba(0,147,235,0.28)",
-    "up": "#0093eb",
-    "down": "#5d6775",
-    "ink": "#101924"
-  },
-  "gradient": ["#ffffff", "#fbfcfd", "#f4f7fa"],
-  "type": {
-    "sans": "Manrope",
-    "serif": "Fraunces",
-    "mono": "JetBrains Mono",
-    "num": "Fraunces"
-  },
   "motion": {
     "easing": "easeOutExpo",
-    "bounce": 0.0,
+    "bounce": 0,
     "settle": 0.62,
     "enter": 28,
-    "durationScale": 1.0,
+    "durationScale": 1,
     "stagger": 0.045
   },
   "bg": {
@@ -38,16 +14,43 @@
     "tint": "200,208,218",
     "tint2": "226,230,235",
     "dotLight": "170,178,190",
-    "paperBase": ["#ffffff", "#f4f7fa"],
-    "softBase": ["#fbfcfd", "#f1f4f8"],
-    "accentBase": ["#e6f2fb", "#fbfcfd"],
-    "inkBase": ["#101924", "#0a1017"],
+    "paperBase": [
+      "#ffffff",
+      "#f4f7fa"
+    ],
+    "softBase": [
+      "#fbfcfd",
+      "#f1f4f8"
+    ],
+    "accentBase": [
+      "#e6f2fb",
+      "#fbfcfd"
+    ],
+    "inkBase": [
+      "#101924",
+      "#0a1017"
+    ],
     "border": "#e2e6eb",
-    "dark": ["#101924", "#0a1017"],
-    "darkMesh": ["#16202e", "#0a1017"],
-    "deep": ["#101924", "#070b10"],
-    "light": ["#ffffff", "#f4f7fa"],
-    "ink": ["#101924", "#0a1017"],
+    "dark": [
+      "#101924",
+      "#0a1017"
+    ],
+    "darkMesh": [
+      "#16202e",
+      "#0a1017"
+    ],
+    "deep": [
+      "#101924",
+      "#070b10"
+    ],
+    "light": [
+      "#ffffff",
+      "#f4f7fa"
+    ],
+    "ink": [
+      "#101924",
+      "#0a1017"
+    ],
     "paper": "#ffffff"
   },
   "vars": {
@@ -62,5 +65,127 @@
   },
   "bgDefault": {
     "preset": "plain"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#f4f7fa"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#f4f7fa"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#e2e6eb"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#d8dce2"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#101924"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#43474e"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#5d6775"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#0093eb"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "#e6f2fb"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(0,147,235,0.28)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#0093eb"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#5d6775"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#101924"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Manrope"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Fraunces"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Fraunces"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#fbfcfd"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#f4f7fa"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

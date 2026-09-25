@@ -1,34 +1,6 @@
 {
   "name": "vawe",
-  "note": "THE VAWE BRAND \u2014 derived from the real site (site/app/globals.css + layout.tsx), not invented. WHITE-first with one cobalt accent: bg #ffffff, accent #2563eb (5.17:1 on white, so it clears AA at any size). The site's ACTUAL faces are Anybody (next/font, wdth+wght axes) for sans + JetBrains Mono for mono/numbers \u2014 NOT Space Grotesk (that was the prior guess; corrected 2026-07). up/down mirror the site's --ok #2f7d55 / --bad #a3282d. Two-surface accent: cobalt on light, ice-blue #8fc0ff on a charcoal code slab (cobalt on #0f1620 is ~2.5:1 and unreadable). Flat field, no texture: the site is plain white, so bgDefault is `plain` (MISTAKES.md #2). `look` (W8) is the whole-film default so a vawe scaffold does not re-decide these per video: backdrop is the rotation vawe-launch actually used; scale/layout mirror globals.css's clamp() steps and .wrap max-width; cuts match motion.durationScale 0.88 / exitRatio 0.4.",
-  "palette": {
-    "bg": "#ffffff",
-    "bg2": "#f6f8fb",
-    "surface": "#ffffff",
-    "surface2": "#f6f8fb",
-    "line": "#e7eaf0",
-    "lineStrong": "#d7dce4",
-    "text": "#0f1620",
-    "text2": "#454f5e",
-    "dim": "#697182",
-    "accent": "#2563eb",
-    "accentDim": "rgba(37,99,235,0.10)",
-    "accentGlow": "rgba(37,99,235,0.30)",
-    "up": "#2f7d55",
-    "down": "#a3282d",
-    "ink": "#0f1620"
-  },
-  "gradient": [
-    "#ffffff",
-    "#f8fafc",
-    "#f1f4f9"
-  ],
-  "type": {
-    "sans": "Anybody",
-    "serif": "Anybody",
-    "mono": "JetBrains Mono",
-    "num": "JetBrains Mono"
-  },
+  "note": "THE VAWE BRAND — derived from the real site (site/app/globals.css + layout.tsx), not invented. WHITE-first with one cobalt accent: bg #ffffff, accent #2563eb (5.17:1 on white, so it clears AA at any size). The site's ACTUAL faces are Anybody (next/font, wdth+wght axes) for sans + JetBrains Mono for mono/numbers — NOT Space Grotesk (that was the prior guess; corrected 2026-07). up/down mirror the site's --ok #2f7d55 / --bad #a3282d. Two-surface accent: cobalt on light, ice-blue #8fc0ff on a charcoal code slab (cobalt on #0f1620 is ~2.5:1 and unreadable). Flat field, no texture: the site is plain white, so bgDefault is `plain` (MISTAKES.md #2). `look` (W8) is the whole-film default so a vawe scaffold does not re-decide these per video: backdrop is the rotation vawe-launch actually used; scale/layout mirror globals.css's clamp() steps and .wrap max-width; cuts match motion.durationScale 0.88 / exitRatio 0.4.",
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0.08,
@@ -97,11 +69,157 @@
     "preset": "plain"
   },
   "look": {
-    "backdrop": ["paper", "ink", "dotmatrix", "deep", "accent"],
-    "scale": { "hook": 92, "headline": 64, "body": 38, "caption": 24 },
-    "layout": { "anchor": "left", "margin": 160 },
-    "marks": { "logo": "site/public/assets/favicon.svg", "endCardSize": 160, "headlineSize": 108 },
-    "cuts": { "default": "fade", "accent": "cinematicZoom" },
-    "field": { "grain": 0, "vignette": 0 }
+    "backdrop": [
+      "paper",
+      "ink",
+      "dotmatrix",
+      "deep",
+      "accent"
+    ],
+    "scale": {
+      "hook": 92,
+      "headline": 64,
+      "body": 38,
+      "caption": 24
+    },
+    "layout": {
+      "anchor": "left",
+      "margin": 160
+    },
+    "marks": {
+      "logo": "site/public/assets/favicon.svg",
+      "endCardSize": 160,
+      "headlineSize": 108
+    },
+    "cuts": {
+      "default": "fade",
+      "accent": "cinematicZoom"
+    },
+    "field": {
+      "grain": 0,
+      "vignette": 0
+    }
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#f6f8fb"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#f6f8fb"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#e7eaf0"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#d7dce4"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#0f1620"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#454f5e"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#697182"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#2563eb"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(37,99,235,0.10)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(37,99,235,0.30)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#2f7d55"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#a3282d"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#0f1620"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Anybody"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Anybody"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#f8fafc"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#f1f4f9"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

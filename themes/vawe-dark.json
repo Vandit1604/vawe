@@ -1,30 +1,6 @@
 {
   "name": "vawe-dark",
   "note": "THE VAWE STUDIO, DARK. Not a restyle of the brand: these are the tokens `studio/server.mjs` ships behind the studio's ◐ toggle (and THEME=dark), lifted verbatim, so a film framed in this palette is framed in the instrument's own colours. Cyberpunk here means LIGHT IN A DARK ROOM, not neon-on-black: the field is the near-black stage #0b0d12, the only bright surfaces are the instrument and the frame it is previewing, and exactly two hues carry meaning. Mint #5ee0c8 (12:1) is the accent and the state of a thing that has run; #ff4d6d is the studio's own playhead-and-alarm red (6:1) and it is spent ONLY on the hazard band and its measurement, so a red in this film always means a hole. Faces are unchanged from the light brand, Anybody + JetBrains Mono, because the product did not change its typography when it turned the lights off.",
-  "palette": {
-    "bg": "#0b0d12",
-    "bg2": "#11141b",
-    "surface": "#11141b",
-    "surface2": "#161b24",
-    "line": "#222831",
-    "lineStrong": "#333b47",
-    "text": "#e6e9ef",
-    "text2": "#9aa4b2",
-    "dim": "#7c8797",
-    "accent": "#5ee0c8",
-    "accentDim": "rgba(94,224,200,0.12)",
-    "accentGlow": "rgba(94,224,200,0.34)",
-    "up": "#84e06a",
-    "down": "#ff4d6d",
-    "ink": "#e6e9ef"
-  },
-  "gradient": ["#11141b", "#0b0d12", "#06080d"],
-  "type": {
-    "sans": "Anybody",
-    "serif": "Anybody",
-    "mono": "JetBrains Mono",
-    "num": "JetBrains Mono"
-  },
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0.08,
@@ -38,16 +14,43 @@
     "tint": "40,52,72",
     "tint2": "26,34,48",
     "dotLight": "94,224,200",
-    "paperBase": ["#11141b", "#06080d"],
-    "softBase": ["#0e1117", "#06080d"],
-    "accentBase": ["#123028", "#06080d"],
-    "inkBase": ["#06080d", "#030407"],
+    "paperBase": [
+      "#11141b",
+      "#06080d"
+    ],
+    "softBase": [
+      "#0e1117",
+      "#06080d"
+    ],
+    "accentBase": [
+      "#123028",
+      "#06080d"
+    ],
+    "inkBase": [
+      "#06080d",
+      "#030407"
+    ],
     "border": "#222831",
-    "dark": ["#0b0d12", "#06080d"],
-    "darkMesh": ["#101a1e", "#06080d"],
-    "deep": ["#06080d", "#030407"],
-    "light": ["#11141b", "#0b0d12"],
-    "ink": ["#06080d", "#030407"],
+    "dark": [
+      "#0b0d12",
+      "#06080d"
+    ],
+    "darkMesh": [
+      "#101a1e",
+      "#06080d"
+    ],
+    "deep": [
+      "#06080d",
+      "#030407"
+    ],
+    "light": [
+      "#11141b",
+      "#0b0d12"
+    ],
+    "ink": [
+      "#06080d",
+      "#030407"
+    ],
     "paper": "#0b0d12"
   },
   "vars": {
@@ -63,5 +66,127 @@
   "bgDefault": {
     "preset": "plain",
     "value": "dark"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#0b0d12"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#11141b"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#11141b"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#161b24"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#222831"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#333b47"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#e6e9ef"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#9aa4b2"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#7c8797"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#5ee0c8"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(94,224,200,0.12)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(94,224,200,0.34)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#84e06a"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#ff4d6d"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#e6e9ef"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Anybody"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Anybody"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#11141b"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#0b0d12"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#06080d"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

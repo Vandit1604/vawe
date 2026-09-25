@@ -1,34 +1,6 @@
 {
   "name": "satara",
   "note": "From the Satara brand kit image: WHITE-first (off-white paper, near-black warm text) with a single vivid orange accent, plus a dark business-card treatment. Bold geometric rounded sans wordmark. Motion: confident, snappy, geometric.",
-  "palette": {
-    "bg": "#f2f1ee",
-    "bg2": "#ffffff",
-    "surface": "#ffffff",
-    "surface2": "#e9e8e3",
-    "line": "rgba(28,23,18,0.10)",
-    "lineStrong": "rgba(28,23,18,0.18)",
-    "text": "#1c1712",
-    "text2": "#4a453f",
-    "dim": "#8a857d",
-    "accent": "#f26e21",
-    "accentDim": "rgba(242,110,33,0.16)",
-    "accentGlow": "rgba(242,110,33,0.42)",
-    "up": "#f26e21",
-    "down": "#f26e21",
-    "ink": "#201914"
-  },
-  "gradient": [
-    "#ffffff",
-    "#f7f6f3",
-    "#f2f1ee"
-  ],
-  "type": {
-    "sans": "Plus Jakarta Sans",
-    "mono": "Geist Mono",
-    "num": "Plus Jakarta Sans",
-    "serif": "Plus Jakarta Sans"
-  },
   "motion": {
     "easing": "easeOutBack",
     "bounce": 0.2,
@@ -90,5 +62,127 @@
     "--on-dark": "#f7f6f3",
     "--border": "#e4e2dc",
     "--accent-soft": "rgba(242,110,33,0.16)"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#f2f1ee"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#e9e8e3"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "rgba(28,23,18,0.10)"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "rgba(28,23,18,0.18)"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#1c1712"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#4a453f"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#8a857d"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#f26e21"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(242,110,33,0.16)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(242,110,33,0.42)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#f26e21"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#f26e21"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#201914"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Plus Jakarta Sans"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Plus Jakarta Sans"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Plus Jakarta Sans"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#f7f6f3"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#f2f1ee"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

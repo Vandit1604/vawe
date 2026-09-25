@@ -1,30 +1,6 @@
 {
   "name": "vawe-site",
   "note": "Cinematic-dark theme for the Vawe landing page renders. Deep charcoal field, one ice-blue accent, Space Grotesk display + JetBrains Mono. Free faces only (no Sohne).",
-  "palette": {
-    "bg": "#14161a",
-    "bg2": "#101216",
-    "surface": "#1b1e23",
-    "surface2": "#22262c",
-    "line": "#2a2e34",
-    "lineStrong": "#3b414a",
-    "text": "#eef1f4",
-    "text2": "#c4cad2",
-    "dim": "#7d848d",
-    "accent": "#6ab8ff",
-    "accentDim": "rgba(106,184,255,0.14)",
-    "accentGlow": "rgba(106,184,255,0.40)",
-    "up": "#6ab8ff",
-    "down": "#7d848d",
-    "ink": "#0c0e11"
-  },
-  "gradient": ["#16181d", "#121419", "#0e1014"],
-  "type": {
-    "sans": "Space Grotesk",
-    "serif": "Space Grotesk",
-    "mono": "JetBrains Mono",
-    "num": "JetBrains Mono"
-  },
   "motion": {
     "easing": "easeOutCubic",
     "bounce": 0.03,
@@ -38,16 +14,43 @@
     "tint": "60,72,88",
     "tint2": "40,50,62",
     "dotLight": "70,86,104",
-    "paperBase": ["#14161a", "#0f1115"],
-    "softBase": ["#1b1e23", "#121419"],
-    "accentBase": ["#1a2330", "#101319"],
-    "inkBase": ["#0c0e11", "#08090c"],
+    "paperBase": [
+      "#14161a",
+      "#0f1115"
+    ],
+    "softBase": [
+      "#1b1e23",
+      "#121419"
+    ],
+    "accentBase": [
+      "#1a2330",
+      "#101319"
+    ],
+    "inkBase": [
+      "#0c0e11",
+      "#08090c"
+    ],
     "border": "#2a2e34",
-    "dark": ["#14161a", "#0d0f13"],
-    "darkMesh": ["#181b21", "#0d0f13"],
-    "deep": ["#121419", "#0d0f13"],
-    "light": ["#1b1e23", "#14161a"],
-    "ink": ["#0c0e11", "#08090c"],
+    "dark": [
+      "#14161a",
+      "#0d0f13"
+    ],
+    "darkMesh": [
+      "#181b21",
+      "#0d0f13"
+    ],
+    "deep": [
+      "#121419",
+      "#0d0f13"
+    ],
+    "light": [
+      "#1b1e23",
+      "#14161a"
+    ],
+    "ink": [
+      "#0c0e11",
+      "#08090c"
+    ],
     "paper": "#14161a"
   },
   "vars": {
@@ -60,5 +63,129 @@
     "--border": "#2a2e34",
     "--accent-soft": "rgba(106,184,255,0.14)"
   },
-  "bgDefault": { "preset": "deep" }
+  "bgDefault": {
+    "preset": "deep"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#14161a"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#101216"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#1b1e23"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#22262c"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#2a2e34"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#3b414a"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#eef1f4"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#c4cad2"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#7d848d"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#6ab8ff"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(106,184,255,0.14)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(106,184,255,0.40)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#6ab8ff"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#7d848d"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#0c0e11"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Space Grotesk"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Space Grotesk"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#16181d"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#121419"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#0e1014"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
+  }
 }

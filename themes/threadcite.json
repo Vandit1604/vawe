@@ -1,30 +1,6 @@
 {
   "name": "threadcite",
-  "note": "Colours pack auto-extracted from https://threadcite.live by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Motion: punchy/editorial (site is fast, confident, live-data). Palette completed to the theme contract (core/theme-contract.js) from values already in this pack (vars.--border, --muted, --accent-soft, bg.inkBase, bg.accent) \u2014 nothing invented.",
-  "palette": {
-    "bg": "#fbfaf8",
-    "text": "#0f0e0d",
-    "accent": "#e1500f",
-    "accent2": "#5f5e58",
-    "bg2": "#ffffff",
-    "surface": "#ffffff",
-    "surface2": "#fbfaf8",
-    "line": "#dad9d7",
-    "lineStrong": "#5f5e58",
-    "text2": "#2b2a29",
-    "dim": "#5f5e58",
-    "ink": "#0f0e0d",
-    "accentDim": "#f7e2d7",
-    "accentGlow": "rgba(225,80,15,0.28)",
-    "up": "#e1500f",
-    "down": "#5f5e58"
-  },
-  "type": {
-    "sans": "Plus Jakarta Sans",
-    "mono": "JetBrains Mono",
-    "serif": "Caveat",
-    "num": "Plus Jakarta Sans"
-  },
+  "note": "Colours pack auto-extracted from https://threadcite.live by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Motion: punchy/editorial (site is fast, confident, live-data). Palette completed to the theme contract (core/theme-contract.js) from values already in this pack (vars.--border, --muted, --accent-soft, bg.inkBase, bg.accent) — nothing invented.",
   "bg": {
     "accent": "225,80,15",
     "tint": "95,94,88",
@@ -89,9 +65,131 @@
     "exitRatio": 0.55,
     "_exitRatio": "reference-heavy and calm. Asymmetric timing: an entrance is an introduction, an exit is over (engine-doctrine/CRAFT/MOTION-STANDARDS.md)."
   },
-  "gradient": [
-    "#ffffff",
-    "#fbfaf8",
-    "#f7e2d7"
-  ]
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#fbfaf8"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#0f0e0d"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#e1500f"
+      },
+      "accent2": {
+        "$type": "color",
+        "$value": "#5f5e58"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#fbfaf8"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#dad9d7"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#5f5e58"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#2b2a29"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#5f5e58"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#0f0e0d"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "#f7e2d7"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(225,80,15,0.28)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#e1500f"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#5f5e58"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Plus Jakarta Sans"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Caveat"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Plus Jakarta Sans"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#fbfaf8"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#f7e2d7"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "text": "{color.text}",
+    "accent": "{color.accent}",
+    "accent2": "{color.accent2}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "ink": "{color.ink}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
+  }
 }

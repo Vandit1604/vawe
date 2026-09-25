@@ -1,40 +1,12 @@
 {
   "name": "ditherkit",
   "note": "Rebuilt from the real rendered page July 2026: brandkit misread the SPA as light/coral; the actual experience is DARK: near-black canvas, monospace Geist wordmark, ordered-dither chart fills in blue (Desktop) → purple (Mobile). Blue is the one live accent (active tab, preview button, area glow). Use ONLY these. Motion: calm, editorial, slow settle, zero bounce.",
-  "palette": {
-    "bg": "#0a0a0b",
-    "bg2": "#101013",
-    "surface": "#151518",
-    "surface2": "#0e0e11",
-    "line": "rgba(255,255,255,0.08)",
-    "lineStrong": "rgba(255,255,255,0.15)",
-    "text": "#ededed",
-    "text2": "#b6b6ba",
-    "dim": "#6e6e72",
-    "accent": "#3b82f6",
-    "accentDim": "rgba(59,130,246,0.16)",
-    "accentGlow": "rgba(59,130,246,0.40)",
-    "up": "#3b82f6",
-    "down": "#a855f7",
-    "ink": "#141418"
-  },
-  "gradient": [
-    "#0e0e14",
-    "#0a0a0d",
-    "#050507"
-  ],
-  "type": {
-    "sans": "Geist",
-    "mono": "Geist Mono",
-    "num": "Geist Mono",
-    "serif": "Geist"
-  },
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0,
     "settle": 0.4,
     "enter": 24,
-    "durationScale": 1.0,
+    "durationScale": 1,
     "stagger": 0.05
   },
   "bg": {
@@ -90,5 +62,127 @@
     "--on-dark": "#ededed",
     "--border": "#232327",
     "--accent-soft": "rgba(59,130,246,0.16)"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#0a0a0b"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#101013"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#151518"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#0e0e11"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.08)"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.15)"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#ededed"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#b6b6ba"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#6e6e72"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#3b82f6"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(59,130,246,0.16)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(59,130,246,0.40)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#3b82f6"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#a855f7"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#141418"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Geist"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Geist"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#0e0e14"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#0a0a0d"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#050507"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }
