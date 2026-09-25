@@ -287,8 +287,7 @@ const pick = (o, k, s) => o?.[k] ?? s[k]?.def;
 // One mapping, both cards. `render` is called with PARTIAL option objects (a card previews from a
 // preset that sets almost nothing), so every read falls back to the schema's own declared default
 // rather than to a literal written twice.
-function bandLayers(o, S, { gradient, w, h }) {
-  const ar = w / h;
+function bandLayers(o, S, { gradient }) {
   const shape = pick(o, 'shape', S) ?? 'panels';
   const lname = pick(o, 'lightShape', S);
   const lshape = LIGHT_SHAPES[lname];
@@ -897,127 +896,123 @@ const IDENTIFIER = 100000;          // a range wider than this is an id, not a d
 // `free` rolls a field across its whole declared range instead of nudging, and lets an enum change.
 // That is what a PER SECTION button means: the global one varies the look you have, and asking for one
 // section by name is asking for that aspect to be different, not slightly different.
-export function randomOptions(schema, rand = Math.random, out = {}, skipped = [], base = null, free = false, ctx = null) {
-  // ONE hue anchor per CALL, so every role in a palette agrees where the palette went while consecutive
-  // rolls land somewhere new. The first version cached it on the base object, which is the same object
-  // every time the panel rolls, so five rolls produced the same colour and the fix looked like a
-  // regression that had merely stopped moving.
-  ctx = ctx || { hue: rand() * 360 };
-  for (const [key, spec] of Object.entries(schema)) {
-    switch (spec.kind) {
-      case 'group': {
-        const sub = {};
-        randomOptions(spec.fields, rand, sub, skipped, base?.[key] ?? null, free, ctx);
-        out[key] = sub;
-        break;
-      }
-      case 'enum':
-        // What the thing IS. Rolling it is picking a different subject, which the presets already do.
-        out[key] = free || base?.[key] === undefined ? spec.of[Math.floor(rand() * spec.of.length)] : base[key];
-        break;
-      case 'bool':
-        out[key] = free || base?.[key] === undefined ? rand() < 0.5 : base[key];
-        break;
-      case 'unit':
-      case 'int':
-      case 'num': {
-        const min = spec.kind === 'unit' ? 0 : spec.min;
-        const max = spec.kind === 'unit' ? 1 : spec.max;
-        if (typeof min !== 'number' || typeof max !== 'number') { skipped.push(key); break; }
-        const span = max - min;
-        const from = typeof base?.[key] === 'number' ? base[key] : min + rand() * span;
-        // An identifier is rolled; a dial is nudged around where it already sits.
-        // A nudge is bounded by the smaller of 22% of the RANGE and half of where the dial already sits.
-        // The second clause is what keeps it a nudge rather than a jump, and it does two jobs. It stops
-        // `pattern.count` at 58 landing on 138. And on a SIGNED dial it preserves the sign: `sheen: -1`
-        // means an emitted silhouette and `seam: -0.6` means a bright hairline, so a roll that crosses
-        // zero does not vary the picture, it deletes the thing the picture is made of. Rolling `shadow`
-        // freely took colonnade's near-black from 23% of the frame to 3.2%, measured, while rolling
-        // `colour` freely left it at 25.1%. Contrast is composition, and composition is what a
-        // randomiser preserves.
-        // A COUNT IS PERCEPTUALLY LOGARITHMIC, and a linear nudge on one is lopsided. `bands` sits at
-        // 48 in a range to 80: plus 12 adds a quarter more stripes and is barely a change, while minus
-        // 12 removes a quarter and visibly coarsens the picture. Halving a count is an enormous visual
-        // step; adding half again is a small one. So a symmetric nudge in the number is an asymmetric
-        // nudge in the picture, and it spends half its rolls at the crude end.
-        //
-        // Looking at the renders is what settles it rather than the arithmetic. Below about 25 bands
-        // the stripes ARE the subject and they break the light into slabs; above about 40 the light is
-        // the subject and the stripes are texture over it, which is the whole idea of the generator.
-        // Half of every roll was landing in the first half.
-        //
-        // A schema declares `scale: 'log'` and the nudge becomes multiplicative. Note what this
-        // replaces: `Math.abs(from) * 0.5` was already a linear stand-in for exactly this, added
-        // because `pattern.count` at 58 rolled to 138. That clause stays for every other dial, where
-        // it is doing a different job, which is holding the sign on a signed dial.
-        const logScale = spec.scale === 'log' && min > 0 && from > 0;
-        // The same 22% of the declared range, measured in log space, and capped so a roll can never
-        // more than 1.6x or less than 1/1.6x the count.
-        const logReach = Math.min(NUDGE * Math.log(max / min), Math.log(1.6));
-        const reach = Math.min(span * NUDGE, Math.abs(from) * 0.5 || span * NUDGE);
-        const lo = from < 0 ? min : Math.max(min, 0);
-        const hi = from < 0 ? Math.min(max, 0) : max;
-        const v = free || span > IDENTIFIER
-          ? min + rand() * span
-          : logScale
-            ? Math.min(max, Math.max(min, from * Math.exp((rand() * 2 - 1) * logReach)))
-            : Math.min(hi, Math.max(lo, from + (rand() * 2 - 1) * reach));
-        out[key] = spec.kind === 'int' ? Math.round(v) : +v.toFixed(3);
-        break;
-      }
-      case 'hex': {
-        // A PALETTE IS ONE HUE WITH OFFSETS, not four independent colours.
-        //
-        // Rolling each hue over the whole circle produced a green bloom, a blue blob and a yellow wash
-        // in one frame: three unrelated light sources and nothing to look at. Measured across the five
-        // committed presets, the LIT roles span an arc of 10, 22, 39 and 40 degrees. The one outlier is
-        // `fern` at 86, and `fern` is one of the two looks that was judged bad by eye. So narrow is not
-        // a taste I am imposing; it is what everything that works here already does.
-        //
-        // So the palette's own SHAPE is kept and only its anchor moves: each role holds its hue offset
-        // from the bloom, its lightness, and roughly its saturation. Same argument as the lightness rule
-        // below it, one axis over. A roll gives the same palette in a different colour, which is a
-        // variation; four random hues is a collision.
-        const from = base?.[key];
-        const anchorHue = ctx.hue;
-        if (!from) { out[key] = hslHex(anchorHue, 45 + rand() * 45, 12 + rand() * 55); break; }
-        const me = toHsl(from);
-        // ROTATING AN ARC DOES NOT PRESERVE ITS CHARACTER, which is the hole in the paragraph above.
-        // Keeping each role's offset from the anchor keeps the palette's SHAPE, and the shape is not
-        // the whole of what makes a palette work, because hue space is not uniform. `spectrum` spans
-        // 125 degrees, from yellow-green through to blue: wide, and every colour in it clean. Rotate
-        // that same arc onto magenta and its middle now crosses red, orange and yellow, and at these
-        // stops' saturation that middle IS brown. Measured on one roll: #bb6b5f brick, #d3bb81 khaki,
-        // #dce152 mustard. Those are stops, not a mixing artefact between them.
-        //
-        // So a wide arc is COMPRESSED toward its anchor before it is rotated. The cap is 60 degrees,
-        // chosen above every preset that works (10, 22, 39, 40) and well under the one judged bad
-        // (86). The fitted palettes themselves are untouched: this runs only on a roll.
-        const arc = paletteArc(base, ctx);
-        const k = arc.span > ARC_CAP ? ARC_CAP / arc.span : 1;
-        const offset = anchorHue + signedHue(me.h - arc.anchor) * k;
-        // A little play in saturation, none in the relationship. Presets run 0.55 to 1.00.
-        const sat = clamp(me.s * 100 * (0.85 + rand() * 0.3), 40, 100);
-        out[key] = hslHex(((offset % 360) + 360) % 360, sat, me.l * 100);
-        break;
-      }
-      // `color` may hold a theme expression, and a random hex would silently drop the theming that is
-      // the whole reason that kind exists. `str`, `list`, `row`, `oneOf`, `block` and `hexlist` are
-      // content, and content is not a dial.
-      default:
-        skipped.push(key);
-    }
-  }
-  // SOME NUMBERS ARE A SET, NOT A ROW OF INDEPENDENT DIALS. The ramp positions must not cross: stop 5
-  // sitting before stop 4 is not a ramp, and the generator rightly refuses it. Rolling each one on its
-  // own produced exactly that, and the playground threw on its first random spectrum.
-  //
-  // Sorting is the whole fix, and it is the right one rather than a repair: what a caller wants from
-  // rolling these is different SPACING, and the spacing is a property of the set. Sorting varies where
-  // the ramp's features sit and can never produce an order nobody asked for.
-  //
-  // Declared with `monotone: '<name>'` on each member, so this stays a rule about a declaration and
-  // not a rule about ramps.
+
+// An identifier is rolled; a dial is nudged around where it already sits.
+// A nudge is bounded by the smaller of 22% of the RANGE and half of where the dial already sits.
+// The second clause is what keeps it a nudge rather than a jump, and it does two jobs. It stops
+// `pattern.count` at 58 landing on 138. And on a SIGNED dial it preserves the sign: `sheen: -1`
+// means an emitted silhouette and `seam: -0.6` means a bright hairline, so a roll that crosses
+// zero does not vary the picture, it deletes the thing the picture is made of. Rolling `shadow`
+// freely took colonnade's near-black from 23% of the frame to 3.2%, measured, while rolling
+// `colour` freely left it at 25.1%. Contrast is composition, and composition is what a
+// randomiser preserves.
+// A COUNT IS PERCEPTUALLY LOGARITHMIC, and a linear nudge on one is lopsided. `bands` sits at
+// 48 in a range to 80: plus 12 adds a quarter more stripes and is barely a change, while minus
+// 12 removes a quarter and visibly coarsens the picture. Halving a count is an enormous visual
+// step; adding half again is a small one. So a symmetric nudge in the number is an asymmetric
+// nudge in the picture, and it spends half its rolls at the crude end.
+//
+// Looking at the renders is what settles it rather than the arithmetic. Below about 25 bands
+// the stripes ARE the subject and they break the light into slabs; above about 40 the light is
+// the subject and the stripes are texture over it, which is the whole idea of the generator.
+// Half of every roll was landing in the first half.
+//
+// A schema declares `scale: 'log'` and the nudge becomes multiplicative. Note what this
+// replaces: `Math.abs(from) * 0.5` was already a linear stand-in for exactly this, added
+// because `pattern.count` at 58 rolled to 138. That clause stays for every other dial, where
+// it is doing a different job, which is holding the sign on a signed dial.
+// What the thing IS. Rolling it is picking a different subject, which the presets already do.
+function rollEnumField(key, spec, state) {
+  const { base, free, rand, out } = state;
+  out[key] = free || base?.[key] === undefined ? spec.of[Math.floor(rand() * spec.of.length)] : base[key];
+}
+
+function rollBoolField(key, state) {
+  const { base, free, rand, out } = state;
+  out[key] = free || base?.[key] === undefined ? rand() < 0.5 : base[key];
+}
+
+// The same 22% of the declared range, measured in log space, and capped so a roll can never
+// more than 1.6x or less than 1/1.6x the count.
+function nudgeNumber(bounds, rand) {
+  const { min, max, from, free, logScale } = bounds;
+  const span = max - min;
+  const logReach = Math.min(NUDGE * Math.log(max / min), Math.log(1.6));
+  const reach = Math.min(span * NUDGE, Math.abs(from) * 0.5 || span * NUDGE);
+  const lo = from < 0 ? min : Math.max(min, 0);
+  const hi = from < 0 ? Math.min(max, 0) : max;
+  return free || span > IDENTIFIER
+    ? min + rand() * span
+    : logScale
+      ? Math.min(max, Math.max(min, from * Math.exp((rand() * 2 - 1) * logReach)))
+      : Math.min(hi, Math.max(lo, from + (rand() * 2 - 1) * reach));
+}
+
+function rollNumberField(key, spec, state) {
+  const { base, free, rand, out, skipped } = state;
+  const min = spec.kind === 'unit' ? 0 : spec.min;
+  const max = spec.kind === 'unit' ? 1 : spec.max;
+  if (typeof min !== 'number' || typeof max !== 'number') { skipped.push(key); return; }
+  const from = typeof base?.[key] === 'number' ? base[key] : min + rand() * (max - min);
+  const logScale = spec.scale === 'log' && min > 0 && from > 0;
+  const v = nudgeNumber({ min, max, from, free, logScale }, rand);
+  out[key] = spec.kind === 'int' ? Math.round(v) : +v.toFixed(3);
+}
+
+// A PALETTE IS ONE HUE WITH OFFSETS, not four independent colours.
+//
+// Rolling each hue over the whole circle produced a green bloom, a blue blob and a yellow wash
+// in one frame: three unrelated light sources and nothing to look at. Measured across the five
+// committed presets, the LIT roles span an arc of 10, 22, 39 and 40 degrees. The one outlier is
+// `fern` at 86, and `fern` is one of the two looks that was judged bad by eye. So narrow is not
+// a taste I am imposing; it is what everything that works here already does.
+//
+// So the palette's own SHAPE is kept and only its anchor moves: each role holds its hue offset
+// from the bloom, its lightness, and roughly its saturation. Same argument as the lightness rule
+// below it, one axis over. A roll gives the same palette in a different colour, which is a
+// variation; four random hues is a collision.
+// ROTATING AN ARC DOES NOT PRESERVE ITS CHARACTER, which is the hole in the paragraph above.
+// Keeping each role's offset from the anchor keeps the palette's SHAPE, and the shape is not
+// the whole of what makes a palette work, because hue space is not uniform. `spectrum` spans
+// 125 degrees, from yellow-green through to blue: wide, and every colour in it clean. Rotate
+// that same arc onto magenta and its middle now crosses red, orange and yellow, and at these
+// stops' saturation that middle IS brown. Measured on one roll: #bb6b5f brick, #d3bb81 khaki,
+// #dce152 mustard. Those are stops, not a mixing artefact between them.
+//
+// So a wide arc is COMPRESSED toward its anchor before it is rotated. The cap is 60 degrees,
+// chosen above every preset that works (10, 22, 39, 40) and well under the one judged bad
+// (86). The fitted palettes themselves are untouched: this runs only on a roll.
+// A little play in saturation, none in the relationship. Presets run 0.55 to 1.00.
+function rotateHueToAnchor(me, anchorHue, state) {
+  const { base, rand, ctx } = state;
+  const arc = paletteArc(base, ctx);
+  const k = arc.span > ARC_CAP ? ARC_CAP / arc.span : 1;
+  const offset = anchorHue + signedHue(me.h - arc.anchor) * k;
+  const sat = clamp(me.s * 100 * (0.85 + rand() * 0.3), 40, 100);
+  return { offset, sat };
+}
+
+function rollHexField(key, spec, state) {
+  const { base, rand, ctx, out } = state;
+  const from = base?.[key];
+  const anchorHue = ctx.hue;
+  if (!from) { out[key] = hslHex(anchorHue, 45 + rand() * 45, 12 + rand() * 55); return; }
+  const me = toHsl(from);
+  const { offset, sat } = rotateHueToAnchor(me, anchorHue, state);
+  out[key] = hslHex(((offset % 360) + 360) % 360, sat, me.l * 100);
+}
+
+// SOME NUMBERS ARE A SET, NOT A ROW OF INDEPENDENT DIALS. The ramp positions must not cross: stop 5
+// sitting before stop 4 is not a ramp, and the generator rightly refuses it. Rolling each one on its
+// own produced exactly that, and the playground threw on its first random spectrum.
+//
+// Sorting is the whole fix, and it is the right one rather than a repair: what a caller wants from
+// rolling these is different SPACING, and the spacing is a property of the set. Sorting varies where
+// the ramp's features sit and can never produce an order nobody asked for.
+//
+// Declared with `monotone: '<name>'` on each member, so this stays a rule about a declaration and
+// not a rule about ramps.
+function sortMonotoneGroups(schema, out) {
   const groups = new Map();
   for (const [key, spec] of Object.entries(schema)) {
     if (!spec.monotone || typeof out[key] !== 'number') continue;
@@ -1028,6 +1023,45 @@ export function randomOptions(schema, rand = Math.random, out = {}, skipped = []
     const sorted = keys.map((k) => out[k]).sort((a, b) => a - b);
     keys.forEach((k, i) => { out[k] = sorted[i]; });
   }
+}
+
+export function randomOptions(schema, rand = Math.random, out = {}, skipped = [], base = null, free = false, ctx = null) {
+  // ONE hue anchor per CALL, so every role in a palette agrees where the palette went while consecutive
+  // rolls land somewhere new. The first version cached it on the base object, which is the same object
+  // every time the panel rolls, so five rolls produced the same colour and the fix looked like a
+  // regression that had merely stopped moving.
+  ctx = ctx || { hue: rand() * 360 };
+  const state = { base, free, rand, out, skipped, ctx };
+  for (const [key, spec] of Object.entries(schema)) {
+    switch (spec.kind) {
+      case 'group': {
+        const sub = {};
+        randomOptions(spec.fields, rand, sub, skipped, base?.[key] ?? null, free, ctx);
+        out[key] = sub;
+        break;
+      }
+      case 'enum':
+        rollEnumField(key, spec, state);
+        break;
+      case 'bool':
+        rollBoolField(key, state);
+        break;
+      case 'unit':
+      case 'int':
+      case 'num':
+        rollNumberField(key, spec, state);
+        break;
+      case 'hex':
+        rollHexField(key, spec, state);
+        break;
+      // `color` may hold a theme expression, and a random hex would silently drop the theming that is
+      // the whole reason that kind exists. `str`, `list`, `row`, `oneOf`, `block` and `hexlist` are
+      // content, and content is not a dial.
+      default:
+        skipped.push(key);
+    }
+  }
+  sortMonotoneGroups(schema, out);
   return out;
 }
 
@@ -1085,16 +1119,6 @@ function toHsl(hex) {
   const l = (mx + mn) / 2;
   return { h, s: d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1)), l };
 }
-
-const hueOf = (obj, role) => (obj && obj[role] ? toHsl(obj[role]).h : 0);
-
-const lightnessOf = (hex) => {
-  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex));
-  if (!m) return 40;
-  const n = parseInt(m[1], 16);
-  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
-  return ((Math.max(r, g, b) + Math.min(r, g, b)) / 2) * 100;
-};
 
 function hslHex(h, s, l) {
   const a = (s / 100) * Math.min(l / 100, 1 - l / 100);
