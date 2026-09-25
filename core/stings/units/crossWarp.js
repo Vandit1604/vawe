@@ -11,3 +11,4 @@ export const glsl = `                             /* crossWarp, noise-smeared di
     float rim = smoothstep(0.10, 0.0, abs(proj - edge - 0.11));
     c = vec4(vec3(1.0), (a*0.92 + rim*0.5) * bell);`;
 export const blurb = 'a noise-smeared directional veil dragging the frame sideways as it goes.';
+export const aka = ['cross warp', 'directional veil', 'noise smear'];
