@@ -83,14 +83,22 @@ export const SHAPES = {
 };
 
 export const SHAPE_BLURBS = {
-  pan: 'an irregular multi-key horizontal (or vertical) pan, linear interior keys: surges then gives up, reads as a hand scrolling, not an animation of a page',
-  blast: 'four-key punctuation: arrives oversize, settles, drifts, then grows OUT through the frame. A hard pop, never a fade',
-  drift: 'a slow ambient hold on one axis that never returns to where it began, for a layer that should keep living through a beat',
-  exit: 'a keyed departure that accelerates off-frame, opacity trailing the move: the layer is gone because it LEFT, not because it dimmed',
-  enter: 'a keyed entrance track on the layer itself rather than a preset name: rises in, overshoots slightly, settles',
+  pan: 'an irregular 6-key horizontal (or vertical) pan over 1.25s by default, linear interior keys: surges then gives up, reads as a hand scrolling, not an animation of a page',
+  blast: '4-key punctuation over 1.5s: arrives at scale 1.5, settles to 1, drifts to 1.04, then grows OUT to scale 1.9 through the frame. A hard pop, never a fade',
+  drift: 'a slow 3s ambient hold that swings +/-12px on one axis and never returns to where it began, for a layer that should keep living through a beat',
+  exit: 'a keyed 0.55s departure that accelerates 260px off-frame, opacity trailing the move: the layer is gone because it LEFT, not because it dimmed',
+  enter: 'a keyed 0.9s entrance track that rises in from 40px, overshoots slightly past 0, then settles',
 };
 
-export const SHAPE_REGISTRY = defineRegistry('move shape', SHAPES, { slot: 'move:<shape>:<band>', blurbs: SHAPE_BLURBS,
+const SHAPE_AKA = {
+  pan: ['scroll rhythm', 'hand-scrolled pan', 'irregular pan'],
+  blast: ['punch and hold', 'over-scale entrance', 'pop through the frame'],
+  drift: ['ambient hold', 'never fully still', 'living idle track'],
+  exit: ['accelerating exit', 'keyed departure', 'leaves off-frame'],
+  enter: ['keyed rise in', 'overshoot entrance', 'custom entrance track'],
+};
+
+export const SHAPE_REGISTRY = defineRegistry('move shape', SHAPES, { slot: 'move:<shape>:<band>', blurbs: SHAPE_BLURBS, aka: SHAPE_AKA,
   catalog: {
     title: 'Move shapes (measured keyframe tracks)',
     tag: 'per-layer',
