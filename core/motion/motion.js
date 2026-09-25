@@ -238,8 +238,16 @@ const HANDLES = {
   overshoot: withBlurb('arrives from BEYOND its key and settles back: the value sails about 10 per cent past and returns. The handle version of a back ease, and it needs the far side to stop it', { influence: 62, speed: -0.8 }),
 };
 
+const HANDLE_AKA = {
+  easyEase: ['ease in and out', 'the default handle', 'stops smoothly at the key'],
+  linear: ['constant speed handle', 'straight handle', 'no easing on this side'],
+  hang: ['hangs at the key', 'flat-ended handle', 'crushed toward the key'],
+  fling: ['fast exit handle', 'throws it out', 'the steep half of a snappy move'],
+  overshoot: ['sails past and settles', 'ten percent overshoot handle', 'back-ease handle'],
+};
+
 export const HANDLE_REGISTRY = defineRegistry('keyframe handle', HANDLES, {
-  blurbs: blurbsOf('keyframe handle', HANDLES), slot: 'easeOut',
+  blurbs: blurbsOf('keyframe handle', HANDLES), aka: HANDLE_AKA, slot: 'easeOut',
   catalog: {
     title: 'Keyframe handles (the graph editor)',
     tag: 'motion key',
@@ -323,7 +331,55 @@ export const EASINGS = {
 // scripts/site/effects-catalog.mjs with its usage form and its no-preview reason a file further on.
 // `skip` stays, and it is a DECISION, not a gap: 41 curves named by mechanism are better served by the
 // feel table in engine-doctrine/MOTION-CRAFT.md than by 41 near-identical sentences about acceleration.
-export const EASING_REGISTRY = defineRegistry('easing', EASINGS, { slot: 'ease',
+// THE WORDS A PERSON WOULD SAY, filled per-curve so `make arsenal` can find a named curve by feeling
+// rather than by mechanism (the FEEL table in vocab.js covers the same ground for a WORD in the `ease`
+// slot; this is the same words indexed onto the curve names themselves, since an author who already
+// typed a curve name half-remembered is still searching by feeling). Five names added by
+// `Object.assign(EASINGS, …)` below (spring-bouncy, spring-stiff, springEase) and by direct assignment
+// further down (settle, snap) do not exist on this object yet at the point `defineRegistry` runs, so
+// their aka is merged in AFTER those assignments, once EASING_AKA has been handed to the registry by
+// reference (see the Object.assign(EASING_AKA, …) below EASINGS.snap).
+const EASING_AKA = {
+  linear: ['constant speed', 'no easing', 'mechanical motion'],
+  easeInCubic: ['strong ease in', 'gathers speed', 'committed departure'],
+  easeOutCubic: ['default landing', 'standard ease out', 'everyday arrival'],
+  easeInOutCubic: ['default travel curve', 'smooth both ends', 'standard cross-frame move'],
+  easeOutQuart: ['snappy landing', 'crisp arrival', 'fast settle'],
+  easeOutExpo: ['instant arrival', 'violent landing', 'exponential settle'],
+  easeOutBack: ['overshoot landing', 'small bounce pop', 'pass and return'],
+  easeOutElastic: ['springy landing', 'wobble settle', 'rubber band landing'],
+  easeInQuart: ['heavy departure', 'strong wind-up exit', 'weighted launch'],
+  easeInExpo: ['violent departure', 'explosive exit', 'sudden launch'],
+  easeInOutExpo: ['theatrical hold and fling', 'dramatic curve', 'held then flung'],
+  easeInSine: ['gentlest departure', 'soft pickup', 'barely accelerates'],
+  easeOutSine: ['gentlest landing', 'soft fade to stop', 'quiet arrival'],
+  easeInOutSine: ['ambient drift curve', 'quietest shift', 'sine wave ease'],
+  easeOutQuint: ['very sharp arrival', 'nearly instant landing', 'extreme ease out'],
+  easeInOutQuart: ['deliberate long journey', 'unhurried travel', 'fast middle slow ends'],
+  easeInQuad: ['mild departure', 'gentle acceleration', 'soft exit'],
+  easeOutQuad: ['gentle landing', 'soft stop', 'mild ease out'],
+  easeInOutQuad: ['least dramatic curve', 'even middle ease', 'subtle travel'],
+  easeInQuint: ['extreme departure', 'almost still then gone', 'sharp exit'],
+  easeInOutQuint: ['dramatic long journey', 'lingers then hurries', 'strong hold both ends'],
+  easeInCirc: ['hard late turn', 'creeping then whipping away', 'circular exit'],
+  easeOutCirc: ['machined landing', 'flattens off fast', 'circular arrival'],
+  easeInOutCirc: ['mechanical flat curve', 'reads as machinery', 'sudden flat motion'],
+  easeInBack: ['wind-up exit', 'anticipation before launch', 'pulls back first'],
+  easeInOutBack: ['playful wind-up and overshoot', 'loud back curve', 'winds up and passes'],
+  easeInElastic: ['wobbly wind-up', 'loudest departure', 'swings before leaving'],
+  easeInOutElastic: ['wobble at both ends', 'loud elastic curve', 'double wobble'],
+  easeInBounce: ['bounces before departing', 'ball gathering bounce', 'bouncy exit'],
+  easeOutBounce: ['ball drop landing', 'bounces to rest', 'bouncy arrival'],
+  easeInOutBounce: ['cartoon bounce both ends', 'bouncy travel', 'double bounce'],
+  rush: ['leaves in a hurry', 'holds back then rushes', 'late acceleration'],
+  brake: ['decelerate in', 'slows to a stop', 'braking curve'],
+  ramp: ['slow fast slow', 'symmetric speed ramp', 'gathers then tails off'],
+  spring: ['physical landing', 'passes and falls back', 'spring physics'],
+  springStiff: ['no-overshoot spring', 'tight firm settle', 'stiff spring landing'],
+  hold: ['stepped hold', 'jump-cut value', 'parks then jumps'],
+};
+
+export const EASING_REGISTRY = defineRegistry('easing', EASINGS, { slot: 'ease', aka: EASING_AKA,
   // EVERY CURVE CARRIES ITS OWN LINE NOW, and the opt-out that used to sit here is gone with the
   // mechanism that allowed it. The argument for skipping them was that 41 near-identical sentences
   // about acceleration would match every query about slowing down and therefore distinguish nothing.
@@ -530,6 +586,16 @@ EASINGS.settle = easeOutSettle;
 // of words does not wobble. Endpoints snapped exactly (true rest on hold, no sub-pixel text blur).
 export const easeOutSnap = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : spring(t, { bounce: 0.2, settle: 0.58 }));
 EASINGS.snap = easeOutSnap;
+// These five names do not exist on EASINGS at the point EASING_REGISTRY is defined above (they are
+// added here, after it), so their words merge into the same EASING_AKA object EASING_REGISTRY already
+// holds a reference to, rather than being passed at definition time where checkAka would refuse them.
+Object.assign(EASING_AKA, {
+  'spring-bouncy': ['playful spring bounce', 'visible spring wobble', 'bouncy spring landing'],
+  'spring-stiff': ['firm no-wobble settle', 'early motion then settle', 'tight spring travel'],
+  springEase: ['damped spring settle', 'nearly-arrived creep', 'flat spring curve'],
+  settle: ['immediate move then ease', 'quick then stops dead', 'default entrance settle'],
+  snap: ['near-instant landing', 'fast with a hair of overshoot', 'default layer snap'],
+});
 // springSettle(opts): seconds for the spring's envelope to decay below eps (size your holds with this).
 export function springSettle({ bounce = 0.3, settle = 0.6, eps = 0.02 } = {}) {
   const omega = (Math.PI * 2) / settle, zeta = Math.min(0.999, Math.max(0.0001, 1 - bounce));
