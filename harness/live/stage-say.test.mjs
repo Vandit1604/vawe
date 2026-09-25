@@ -74,7 +74,13 @@ approved: "ci-fixture"
 - duration: 3s
 `;
 
-fs.writeFileSync(film, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9', duration: 9, layers: [] }));
+// Beat 2's `mechanism: popIn card` trips storyboard-check's plain-content blocker (added 2026-09-22,
+// after this fixture): a beat that names a content noun with no real source on disk. This fixture
+// beat is not a real card, so it takes the one waiver mechanism (AGENTS.md), the same door a real
+// author uses, not a second excuse path.
+fs.writeFileSync(film, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9', duration: 9, layers: [],
+  authoring: { allow: ['plain-content@Beat 2: Build (3s-6s)'],
+    _why: { 'plain-content@Beat 2: Build (3s-6s)': 'fixture beat, no real UI to capture' } } }));
 fs.writeFileSync(sb, SB);
 const rulesState = path.join(ROOT, '.vawe-data/stage-say-rules-state.json');
 const sessionState = path.join(ROOT, '.vawe-data/stage-say-session-state.json');
@@ -86,13 +92,20 @@ test('the fixture film really is at stage design (a fragment is planned and does
   assert.equal(stageOf(NAME).stage, 'design');
 });
 
-test('stage-say prints "design"-stage rule briefs, doc-qualified, at most 5', () => {
+test('stage-say prints "design"-stage rule briefs, doc-qualified, at most 2 per category', () => {
   try { fs.unlinkSync(rulesState); } catch { /* first run of the suite: nothing to clear */ }
   const out = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')], { cwd: ROOT, encoding: 'utf8' });
   assert.match(out, new RegExp(`${NAME} is at stage DESIGN`));
   const briefLines = out.split('\n').filter((l) => l.trim().startsWith('rule '));
   assert.ok(briefLines.length > 0, 'at least one always-applies design-stage rule should print');
-  assert.ok(briefLines.length <= 5, 'never more than the 5-brief cap');
+  // design is a grouped stage (STAGE_CATEGORY_ORDER in harness/lib/craft-rules.mjs): capped per
+  // category, not by one flat total, so motion-sized categories cannot crowd out the rest.
+  const perCategory = new Map();
+  for (const l of briefLines) {
+    const category = l.trim().match(/^rule ([a-z-]+)\./)[1];
+    perCategory.set(category, (perCategory.get(category) || 0) + 1);
+  }
+  for (const [category, count] of perCategory) assert.ok(count <= 2, `${category} exceeds its 2-per-category cap`);
   for (const l of briefLines) assert.match(l, /^\s*rule [a-z-]+\.[a-z0-9-]+: .+\(engine-doctrine\/.+\.md\)$/);
 });
 
