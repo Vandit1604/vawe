@@ -43,6 +43,11 @@ quality/baselines/approved/
 quality/runs/evals/runs/
 quality/runs/evals/baseline/*.mp4
 
+# make e2e: every timestamped run + latest.json is scratch, regenerated on the next run. The committed
+# reference the suite compares against is quality/baselines/snap/digest.json and
+# quality/baselines/e2e-known-broken.json, both tracked, neither under quality/runs/.
+quality/runs/e2e/
+
 # kie.ai secret + generated assets
 .kie.key
 assets/gen

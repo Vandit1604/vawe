@@ -122,4 +122,14 @@ Touched motion, backgrounds, type or layout? Ship a before/after: `make evals-co
 - Highly prefer E2E tests as the sole testing mechanism. Use them to verify complex features work. At the end of E2E tests, produce a verifiable and repeatable artifact.
 - If you must test a system in isolation, first write down all the ways it could fail, then write the code.
 
-The E2E entry points and the artifact each leaves: `make snap-all` and `make snap-blocks` (a DOM signature per scene and per block, compared against the committed `quality/baselines/snap/digest.json`), `make probe` (renderFrame purity across render orders), `make mcp-smoke` (a scene drafted through the real MCP server), `cd site && npm test` (the real engine in a browser), `make author-check D=<scene>` (the whole authoring ladder on a real film). A gate's own fixtures in `make gate-test` are written with the gate, as its list of ways to fail, and stay: they prove the gate can still fire.
+One command runs all six together, in order: `make e2e` (`harness/dev/e2e.mjs`). It leaves one
+artifact, `quality/runs/e2e/<timestamp>/report.json` + `report.md`, plus `quality/runs/e2e/latest.json`.
+A known-broken tracked scene is excused by name (`quality/baselines/e2e-known-broken.json`), never by
+loosening what counts as a pass.
+
+The six entry points, and the artifact each leaves on its own: `make snap-all` and `make snap-blocks`
+(a DOM signature per scene and per block, compared against the committed `quality/baselines/snap/digest.json`),
+`make probe` (renderFrame purity across render orders), `make mcp-smoke` (a scene drafted through the
+real MCP server), `cd site && npm test` (the real engine in a browser), `make author-check D=<scene>`
+(the whole authoring ladder on a real film). A gate's own fixtures in `make gate-test` are written with
+the gate, as its list of ways to fail, and stay: they prove the gate can still fire.
