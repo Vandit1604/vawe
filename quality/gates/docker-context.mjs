@@ -14,6 +14,14 @@
 // ignored directory when an exception could match inside it. Chasing BuildKit's matcher for a number
 // `docker build` computes for free is exactly the "a wrong gate is worse than no gate" trade CLAUDE.md
 // names, so the matcher is gone and the question is put to the authority instead.
+//
+// WHERE THIS RUNS. It is measured for real on every push to main: .github/workflows/gates.yml runs it
+// on ubuntu-latest, where Docker is always present. It also stays in .githooks/pre-push, where Docker
+// is present on some machines and not others; on a machine with no daemon it now says so and exits 0
+// (see below) rather than blocking a push it structurally cannot prove. That is not a softened gate,
+// it is the same split gates.yml already draws for doc-refs and coverage: a check stays local-only when
+// a clone cannot see what it needs, and this one is the mirror case, a check that stays in BOTH places
+// because CI can always see what it needs and a laptop only sometimes can.
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,15 +44,18 @@ const r = spawnSync('docker', ['build', '--no-cache', '--progress=plain', '-f', 
   { input: DF, encoding: 'utf8' });
 const out = String(r.stdout || '') + String(r.stderr || '');
 if (r.error?.code === 'ENOENT' || /Cannot connect to the Docker daemon/i.test(out)) {
-  // "Skipped" exited 0, and 0 from a budget gate reads as "within budget" to every caller. The docker
-  // daemon is a fact about this machine; the size of the context is a fact about the repo, and the
-  // first has never been evidence for the second. Exit 2 (could not measure), which no caller can
-  // mistake for a pass and which is not the same claim as exit 1 (over budget).
-  f.warn('docker-unavailable', 'docker is not available here, so the build context was NOT measured. '
-    + 'This says nothing about whether the context fits its budget.',
-    { fix: 'start the daemon, or run this where docker is available, and ask again' });
+  // Exit 2 read as "could not measure" to a human, but pre-push is a make list that only checks exit
+  // codes: a nonzero here blocked every push from a laptop with no Docker daemon, on a gate that can
+  // never pass there, which is exactly the shape that trains people onto --no-verify for everything.
+  // The real measurement now happens in CI (.github/workflows/gates.yml, ubuntu-latest, Docker present),
+  // so a machine without Docker owes no local proof; it owes an honest "not measured here" and exit 0,
+  // never a silent pass dressed as one. Where Docker IS available (this machine, or CI), it measures and
+  // fails over budget exactly as before.
+  f.note('docker-unavailable', 'docker is not available here, so the build context was NOT measured. '
+    + 'This says nothing about whether the context fits its budget; CI measures it on every push.',
+    { fix: 'measured in CI (gates.yml); run this by hand where docker is available to check locally' });
   f.emit();
-  process.exit(2);
+  process.exit(0);
 }
 
 const lines = out.split('\n').map((l) => l.replace(/^#\d+\s+[\d.]+\s+/, '').trim()).filter(Boolean);
