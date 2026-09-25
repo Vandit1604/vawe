@@ -10,6 +10,7 @@ export const slot = 'post';
 // Reads nothing itself: `modifiers` is read by core/fx/index.js, which declares it.
 export const PROPS = {};
 
-export function frame(kit, el, L, units, t, f, start, end, scene) {
+export function frame(ctx) {
+  const { kit, el, L, t, scene } = ctx;
   kit.renderer.modify(el, L, t, scene);
 }

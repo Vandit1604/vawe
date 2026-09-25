@@ -16,7 +16,28 @@ export const slot = 'box';
 // track exists. They are unconditional elsewhere (the layer's own box), and the union says so.
 export const PROPS = { motion: {}, w: { when: 'motion' }, h: { when: 'motion' } };
 
-export function frame(kit, el, L, units, t, f, start, end) {
+// DEPTH over time. core/clips.js:83 writes zIndex from the static data-track first, driveClips before
+// any track. Rounded because a track keyed across several siblings crosses them one at a time, which
+// is what makes a ribbon pass behind the thing it is orbiting and then in front of it again.
+function applyBoxZIndex(el, L, inWin, b) {
+  if (inWin && b.track != null) el.style.zIndex = String(Math.round(b.track));
+  else if (L.motion[0].track != null) el.style.zIndex = String(Math.round(L.motion[0].track));
+}
+
+// core/layers/image.js sizes the <img> itself in px unless the layer opted into cover-fit, in which
+// case the img is already 100%/100% and rides the wrapper. Memoised on the element since a track has
+// no build hook: `undefined` means not looked up yet, `null` is a real answer.
+function applyBoxImgSize(el, bw, bh) {
+  if (el.__hsImg === undefined) el.__hsImg = el.querySelector('img.hs-img');
+  const im = el.__hsImg;
+  if (im && im.style.width && im.style.width.endsWith('px')) {
+    if (bw != null) im.style.width = bw.toFixed(2) + 'px';
+    if (bh != null) im.style.height = bh.toFixed(2) + 'px';
+  }
+}
+
+export function frame(ctx) {
+  const { el, L, t, start, end } = ctx;
   if (!(L.motion && L.motion.length && (L.motion[0].w != null || L.motion[0].h != null || L.motion[0].track != null))) return;
   const inWin = t >= start && t < end;
   const b = inWin ? motionAt(L.motion, t - start, L.motionDelay) : null;
@@ -24,23 +45,6 @@ export function frame(kit, el, L, units, t, f, start, end) {
   const bh = inWin && b.h != null ? b.h : L.h;
   if (bw != null) el.style.width = bw.toFixed(2) + 'px';
   if (bh != null) el.style.height = bh.toFixed(2) + 'px';
-  // DEPTH over time. core/clips.js:83 writes zIndex from the static data-track on every frame, so this
-  // has to land after it and does, driveClips runs before any track. Rounded because z-index is an
-  // integer: a track keyed across several siblings crosses them one at a time, which is what makes a
-  // ribbon pass BEHIND the thing it is orbiting and then in front of it again.
-  if (inWin && b.track != null) el.style.zIndex = String(Math.round(b.track));
-  else if (L.motion[0].track != null) el.style.zIndex = String(Math.round(L.motion[0].track));
-  // core/layers/image.js sizes the <img> itself in px unless the layer opted into cover-fit (via
-  // `radius` or `ken`), in which case the img is already 100%/100% and rides the wrapper. Resizing
-  // only the wrapper in that first case would move nothing on screen and say nothing about it.
-  // Looked up once per element, not once per frame: this track runs on every frame of a keyed layer's
-  // life and the <img> is written by core/layers/image.js build() and never replaced. A track has no
-  // build hook, so the memo is taken on the first frame that needs it; `undefined` means "not looked
-  // yet" and `null` is a real answer, so a keyed rect never searches twice for an image it has not got.
-  if (el.__hsImg === undefined) el.__hsImg = el.querySelector('img.hs-img');
-  const im = el.__hsImg;
-  if (im && im.style.width && im.style.width.endsWith('px')) {
-    if (bw != null) im.style.width = bw.toFixed(2) + 'px';
-    if (bh != null) im.style.height = bh.toFixed(2) + 'px';
-  }
+  applyBoxZIndex(el, L, inWin, b);
+  applyBoxImgSize(el, bw, bh);
 }

@@ -30,7 +30,8 @@ export const PROPS = {
 const per = (v, name, dflt) =>
   (v && typeof v === 'object' && !Array.isArray(v)) ? (v[name] ?? v['*'] ?? dflt) : (v ?? dflt);
 
-export function frame(kit, el, L, units, t, f, start) {
+export function frame(ctx) {
+  const { el, L, t, start } = ctx;
   if (!(L.vars && t >= start)) return;
   for (const [name, range] of Object.entries(L.vars)) {
     const vd = per(L.varsDur, name, 1.0);

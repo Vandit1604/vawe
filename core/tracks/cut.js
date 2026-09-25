@@ -16,7 +16,8 @@ export const PROPS = {
   cx: { when: 'cut' }, cy: { when: 'cut' },
 };
 
-export function frame(kit, el, L, units, t, f, start, end) {
+export function frame(ctx) {
+  const { el, L, t, start, end } = ctx;
   if (!(L.cut && t >= start && t < end)) return;
   const enD = L.enterDur ?? 0.5, exD = L.exitDur ?? 0.5;
   const enter = enD > 0 ? clamp01((t - start) / enD) : 1;

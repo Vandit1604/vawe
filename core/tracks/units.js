@@ -33,6 +33,8 @@ function defaultStaggerStep(rawDefault, n) {
   return n > 1 ? Math.min(rawDefault, STAGGER_BUDGET / (n - 1)) : rawDefault;
 }
 
+// Kept positional (not the ctx object the rest of the pipeline takes): core/tracks/units.test.mjs
+// calls this directly with the old argument list.
 export function frame(kit, el, L, units, t, f, start, end) {
   if (!(units && !L.circle && !L.fx && t >= start && t < end)) return;
   const local = t - start;
@@ -43,7 +45,7 @@ export function frame(kit, el, L, units, t, f, start, end) {
     ? { each: kit.M.stagger, ...L.stagger }
     : (L.stagger ?? defaultStaggerStep(L.ransom ? 0.08 : kit.M.stagger, units.length));
   const each = L.each ?? 0.5;
-  animateUnits(units, local, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger, each, smoothness: L.smoothness, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...(L.presetOpts || {}) });
+  animateUnits(units, local, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger, each, smoothness: L.smoothness, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...L.presetOpts });
   exitFrame(kit, L, units, local, each, stagger);
 }
 
