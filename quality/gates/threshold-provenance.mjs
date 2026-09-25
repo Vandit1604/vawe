@@ -45,9 +45,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const RATCHET = path.join(ROOT, 'quality/baselines/threshold-provenance-ratchet.json');
 
 const DIRS = ['quality/gates', 'harness/lib'];
-// A test runner's own fixture constants are not gate thresholds; excluding the file is more honest
-// than trying to tell a fixture apart from a real one inside it.
-const EXCLUDE_FILES = new Set(['quality/gates/lib-test.mjs']);
+// A test runner's own fixture constants are not gate thresholds. The test suite now lives under
+// tests/, outside DIRS, so nothing needs excluding here any more.
+const EXCLUDE_FILES = new Set();
 
 // FORMULA constants: read and confirmed during the Task 3 audit. Each is a unit conversion, a grid or
 // display size, a loop bound, a port, or a decode/downsample rate for THIS gate's own analysis, never a

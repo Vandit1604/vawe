@@ -14,7 +14,6 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(here, '../..');
 
 const layer = (id, start) => ({ id, type: 'rect', track: 3, x: 0, y: 0, w: 200, h: 100, start, duration: 3 });
 
@@ -22,7 +21,7 @@ function runChoreo(scene) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'choreo-test-'));
   const film = path.join(dir, 'v.json');
   fs.writeFileSync(film, JSON.stringify(scene));
-  const r = spawnSync(process.execPath, [path.join(here, 'choreo.mjs'), film, '--json'], { encoding: 'utf8' });
+  const r = spawnSync(process.execPath, [path.join(here, '../../quality/gates/choreo.mjs'), film, '--json'], { encoding: 'utf8' });
   fs.rmSync(dir, { recursive: true, force: true });
   assert.equal(r.status, 0, r.stdout + r.stderr);
   // this sandbox sometimes swaps a child's stdout/stderr; read whichever stream actually got the
@@ -73,11 +72,18 @@ test('a short film under the 6s minimum is quiet regardless of coverage', () => 
   assert.equal(out.cameraCoverageFloor, null, 'a film this short is not held to the floor');
 });
 
-test('v1 (vawe-flow.json) does not false-fire', () => {
-  const r = spawnSync(process.execPath, [path.join(here, 'choreo.mjs'), 'films/scene/vawe-flow.json', '--json'],
-    { cwd: ROOT, encoding: 'utf8' });
-  assert.equal(r.status, 0, r.stdout + r.stderr);
-  const text = [r.stdout, r.stderr].find((s) => s && s.includes('"slug"')) || r.stdout;
-  const out = JSON.parse(text.slice(0, text.lastIndexOf('}') + 1));
-  assert.equal(out.cameraCoverageFloor, null, 'a real shipped film with normal camera coverage stays quiet');
+test('a multi-leg camera spanning most of a longer film does not false-fire', () => {
+  // Shape of the vawe-flow-2 regression this gate was written for, reproduced as a fixture instead of
+  // reading the real film: several legs, each covering a real span, together holding still for well
+  // under 40% of the runtime.
+  const scene = {
+    module: 'scene', theme: 'default', aspect: '16:9', duration: 20,
+    camera: [
+      { t: 0, x: 0, y: 0, s: 1 }, { t: 5, x: 40, y: 0, s: 1.1 },
+      { t: 10, x: 40, y: -20, s: 1.2 }, { t: 19, x: 0, y: 0, s: 1 },
+    ],
+    layers: [layer('a', 0), layer('b', 5), layer('c', 10), layer('d', 15)],
+  };
+  const out = runChoreo(scene);
+  assert.equal(out.cameraCoverageFloor, null, 'a multi-leg camera covering most of the film stays quiet');
 });

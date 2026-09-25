@@ -115,7 +115,7 @@ the purity contract. Use these closed-form, pure-in-`n` helpers instead:
 
 **Standard beat structure:** hook → enter (rise/pop in) → hold/guess → reveal (pop + count-up) →
 hold → exit. Count-ups: `setVal(el, value * interpolate(t,[r0,r1],[0,1],{easing:easeOutQuart}))`.
-`films/scene/scene.html` is the reference. Test primitives with `make lib-test`.
+`films/scene/scene.html` is the reference. Test primitives with `make test`.
 
 ## Images & visuals: real first, emoji last
 

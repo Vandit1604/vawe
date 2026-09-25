@@ -14,7 +14,7 @@ import assert from 'node:assert';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, '../..');
-const GATE = path.join(here, 'design-drift.mjs');
+const GATE = path.join(here, '../../quality/gates/design-drift.mjs');
 const run = (args) => spawnSync('node', [GATE, ...args], { cwd: ROOT, encoding: 'utf8', timeout: 60000 });
 
 const FRONT = `---

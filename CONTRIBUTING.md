@@ -39,7 +39,7 @@ Anything that breaks that is a bug even if it looks right. `make probe` and
 ## Before you open a PR
 
 ```bash
-node quality/gates/lib-test.mjs        # the unit suite
+make test                              # the whole test suite (tests/**/*.test.mjs + go test)
 node core/validate/validate.mjs                 # every scene still validates
 node quality/gates/code-quality.mjs    # nothing got more tangled
 ```

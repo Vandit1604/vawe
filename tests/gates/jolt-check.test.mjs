@@ -20,7 +20,7 @@ function runJolt(scene) {
   const scenePath = path.join(dir, 'film.json');
   fs.writeFileSync(scenePath, JSON.stringify(scene, null, 2));
   const findingsOut = path.join(dir, 'findings.json');
-  const r = spawnSync('node', [path.join(here, 'jolt-check.mjs'), scenePath],
+  const r = spawnSync('node', [path.join(here, '../../quality/gates/jolt-check.mjs'), scenePath],
     { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VAWE_FINDINGS_OUT: findingsOut } });
   let records = [];
   try { records = JSON.parse(fs.readFileSync(findingsOut, 'utf8')); } catch { /* no findings written */ }
