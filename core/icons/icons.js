@@ -40,7 +40,7 @@ const ICON_BLURBS = {
   file: 'a document or a single record. Use where the subject is one item of content rather than a system.',
   check: 'done, passed, verified. The mark for a gate going green or a step completing.',
   shield: 'security, protection, trust. The one to reach for on a safety or privacy claim.',
-  bolt: 'speed or power. Fast execution, an instant action, energy.',
+  bolt: 'speed or power. Fast execution, an instant action, energy: the mark for anything that happens in under a second.',
   dollar: 'money, price, revenue, cost. Any figure the viewer reads as currency.',
   link: 'a connection between two things, or a URL. Integration, reference, chaining.',
   cube: 'a package, a build artifact, a module. A discrete unit of software.',
@@ -55,7 +55,26 @@ const ICON_BLURBS = {
   layers: 'a stack, composition, depth. The mark for things built out of other things.',
 };
 
-export const ICON_REGISTRY = defineRegistry('icon', ICONS, { slot: 'svgIcon()', blurbs: ICON_BLURBS,
+const ICON_AKA = {
+  file: ['document icon', 'a record icon'],
+  check: ['checkmark', 'tick mark', 'success mark'],
+  shield: ['security icon', 'protection badge', 'trust badge'],
+  bolt: ['lightning bolt', 'speed icon', 'power icon'],
+  dollar: ['dollar sign', 'money icon', 'price icon'],
+  link: ['chain link icon', 'connection icon', 'url icon'],
+  cube: ['3D cube icon', 'package icon', 'module icon'],
+  agent: ['robot icon', 'assistant icon', 'AI worker icon'],
+  braces: ['curly braces icon', 'code icon', 'JSON icon'],
+  globe: ['world icon', 'network icon', 'earth icon'],
+  arrowRight: ['right arrow', 'forward arrow', 'next arrow'],
+  arrowLeft: ['left arrow', 'back arrow', 'previous arrow'],
+  spark: ['sparkle icon', 'AI generated icon', 'new icon'],
+  plug: ['plug icon', 'integration icon', 'connector icon'],
+  clock: ['clock icon', 'time icon', 'duration icon'],
+  layers: ['stack icon', 'layers icon', 'depth icon'],
+};
+
+export const ICON_REGISTRY = defineRegistry('icon', ICONS, { slot: 'svgIcon()', blurbs: ICON_BLURBS, aka: ICON_AKA,
   catalog: {
     title: 'Drawn icons',
     tag: 'asset',
