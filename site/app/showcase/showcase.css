@@ -1,8 +1,4 @@
-/* ===== /showcase · the lane legend and the ratio trio ======================================== */
-.sc-legend{display:flex;flex-wrap:wrap;gap:6px 18px;list-style:none;padding:0;margin:20px 0 0;font-size:14px;color:var(--ink-2)}
-.sc-legend li{display:inline-flex;align-items:center;gap:8px}
-.sc-legend li::before{content:"";width:14px;height:6px;border-radius:2px;background:var(--lane)}
-
+/* ===== /showcase · the ratio trio ======================================== */
 .sc-ratios{margin-top:36px;padding:24px}
 .sc-ratios .trio .ar{border:0;background:var(--bg)}
 
