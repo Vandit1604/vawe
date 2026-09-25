@@ -14,7 +14,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { FEEL, DURATION, CAMERA_WORDS } from '../../core/registry/vocab.js';
+import { FEEL, DURATION, CAMERA_WORDS, COMPARATIVE } from '../../core/registry/vocab.js';
 import { EASINGS } from '../../core/motion/motion.js';
 import { CAMERA_MOVE_NAMES } from '../../core/camera-moves/index.js';
 
@@ -55,6 +55,9 @@ const WHEN = {
   'punch in': 'a hard, short push on a beat. The camera reacting, not travelling.',
   shake: 'an impact. One hit, on the frame that takes it, never as texture.',
   'drift hold': 'a held shot that must stay alive. The smallest move the eye still reads.',
+
+  faster: 'a duration is already set and it should read a touch quicker, without picking a new number by hand.',
+  slower: 'a duration is already set and it should read a touch more deliberate, without picking a new number by hand.',
 };
 
 const FAMILIES = [
@@ -68,6 +71,12 @@ const FAMILIES = [
   ['Camera', 'cameraMove.move', 'The shot, described. `{ "cameraMove": { "move": "pull back", "dur": 3 } }`. '
     + 'The move\'s own params are unchanged and still come from `core/camera-moves/index.js`.',
     Object.entries(CAMERA_WORDS).map(([w, t]) => [w, `\`"${t}"\``])],
+  ['Comparative', 'resolveComparative(word, current) (core/registry/vocab.js)', 'A direction, not a value: '
+    + '"make it faster" names what is already there, not a new number. `resolveComparative` steps the '
+    + 'Duration ladder above by one word from whatever is currently set, and clamps at either end. '
+    + 'Nothing in a scene or a harness tool calls this automatically yet: it resolves today only by '
+    + 'calling the function directly, or by name through `make arsenal Q="snappier"`.',
+    Object.entries(COMPARATIVE).map(([w, dir]) => [w, dir > 0 ? 'one step slower' : 'one step faster'])],
 ];
 
 // Anti-drift, the two ways it can rot: a word aliasing something the engine no longer has, and a word
@@ -119,6 +128,12 @@ for (const [title, slot, intro, rows] of FAMILIES) {
   for (const [w, v] of rows) out.push(`| \`${w}\` | ${v} | ${WHEN[w]} |`);
   out.push('');
 }
+out.push('**No "control" family.** Words like `subtle`, `tight`, `loose` and `aggressive` were considered');
+out.push('and left out: a camera move\'s own params (`slowPush.to`, `cameraShake.amp`, `driftHold.ax/ay`, …)');
+out.push('are named per move, not one shared dial an amount word could alias, and adding one would be a');
+out.push('second mechanism for what each move already names for itself. `gentle` stays a Feel word only,');
+out.push('it is not repeated here with a different meaning.');
+out.push('');
 out.push('---');
 out.push(`_${total} words across ${FAMILIES.length} families. Regenerate: \`make vocab\`. The full engine`);
 out.push('vocabularies these alias: `engine-doctrine/EFFECTS.md` (`make effects`)._');
