@@ -12,3 +12,4 @@ export const glsl = `                             /* vortex, ink spiral pulls in
     vec3 col = mix(vec3(0.02, 0.02, 0.03), vec3(0.85, 0.9, 1.0), arms*0.5 + eye*0.6);
     c = vec4(col, (arms*0.7 + eye*0.9) * cover);`;
 export const blurb = 'an ink spiral pulling inward to a dark eye. A beat being swallowed rather than ended.';
+export const aka = ['ink vortex', 'spiral pull', 'swallow spiral'];
