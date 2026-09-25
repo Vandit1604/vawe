@@ -1126,9 +1126,9 @@ Name the RELATIONSHIP between two beats first, then pick from its candidates, pe
 | `svg:draw (stroke draws on)` | the logo or icon stroke draws its outline on, line by line, as if traced by a pen |
 | `svg:morph (shape melts into a logo)` | one path melts into another (blob into logo), optional spin |
 
-## Plain words (feel · duration · camera)  `[timing]`
+## Plain words (feel · duration · camera · comparative)  `[timing]`
 
-The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `engine-doctrine/CRAFT/VOCABULARY.md` (`make vocab`).
+The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. The comparative words are the one exception: they name a DIRECTION, not a value, and step the DURATION ladder from whatever is already there via `resolveComparative(word, current)` (core/registry/vocab.js); nothing in a scene consumes it automatically yet. When to reach for which: `engine-doctrine/CRAFT/VOCABULARY.md` (`make vocab`).
 
 | name | what / when |
 |---|---|
@@ -1138,6 +1138,7 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `drift hold` | camera → `move: "driftHold"` |
 | `elastic` | feel → `ease: "easeOutElastic"` |
 | `fast` | duration → `0.18` seconds |
+| `faster` | comparative → one step toward `instant` on the DURATION ladder |
 | `follow` | camera → `move: "panFollow"` |
 | `gentle` | feel → `ease: "easeInOutSine"` |
 | `heavy` | feel → `ease: "easeInOutQuint"` |
@@ -1154,6 +1155,7 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `sharp` | feel → `ease: "easeOutExpo"` |
 | `slow` | duration → `0.6` seconds |
 | `slow push-in` | camera → `move: "slowPush"` |
+| `slower` | comparative → one step toward `luxurious` on the DURATION ladder |
 | `smooth` | feel → `ease: "easeInOutCubic"` |
 | `snappy` | feel → `ease: "easeOutQuart"` |
 | `soft` | feel → `ease: "settle"` |
@@ -1164,4 +1166,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_714 effects across 60 families. Regenerate: `make effects`._
+_716 effects across 60 families. Regenerate: `make effects`._
