@@ -91,6 +91,9 @@ export const SHADER_FX = Object.keys(SHADER_ID);
 
 // One line per fx, pulled straight off its unit. core/registry.js refuses to boot without one.
 const STING_BLURBS = Object.fromEntries(SHADER_FX.map((n) => [n, UNITS[n].blurb]));
+// The plain phrases a person would say to reach for each sting, pulled off its unit, folded into
+// search only, never printed (core/registry/registry.js `aka`).
+const STING_AKA = Object.fromEntries(SHADER_FX.map((n) => [n, UNITS[n].aka]));
 
 // The fragment shader is assembled ONCE, at module load, from the units above: same preamble/tail as
 // the old monolith (a plain string, unchanged), same branch order, same u_fx numbering. Concatenation,
@@ -161,7 +164,7 @@ export function createShaderOverlay(parent, w = 1920, h = 1080) {
 // above `burn`: the search is honest token overlap with no notion of a common word, and three generic
 // tokens beat two specific ones. A blurb earns its entry by the words only that entry deserves.
 
-export const SHADER_REGISTRY = defineRegistry('sting fx', Object.fromEntries(SHADER_FX.map((n) => [n, n])), { slot: 'sting', blurbs: STING_BLURBS,
+export const SHADER_REGISTRY = defineRegistry('sting fx', Object.fromEntries(SHADER_FX.map((n) => [n, n])), { slot: 'sting', blurbs: STING_BLURBS, aka: STING_AKA,
   catalog: {
     title: 'Shader stings',
     tag: 'transition',
