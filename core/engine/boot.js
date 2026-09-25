@@ -22,7 +22,7 @@ const flatDepth = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object')
 import { assertKeyHandles } from '../timeline/sequence.js';
 import { bakeTimeRemap } from '../timeline/time.js';
 import { loadBeatGrid } from '../beats/index.js';
-import { safeArea, ASPECTS, sceneDims, PLACEMENT, COMPOSITION_MARGIN, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from '../layout/safe.js';
+import { safeArea, PLACEMENT, COMPOSITION_MARGIN, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from '../layout/safe.js';
 import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from '../type/ransom.js';
@@ -56,140 +56,125 @@ export const PROPS = {
   aspects: {}, x: {}, y: {}, w: {}, h: {}, size: {}, children: {},
 };
 
-export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = null) {
-  const inset = safe.margin;
-  // keywords place a layer of `size` on a canvas line. TWO different lines, on purpose:
-  //   • EDGES (left/right/top/bottom) resolve against the SAFE BOX. This is the invariant that makes
-  //     the system honest: `pin:"bottom"` lands on the safe box's bottom, so an edge pin can never
-  //     produce a safe-zone failure. It used to resolve against a 6% inset while the audit checked a
-  //     different box entirely, so the engine placed content 550px inside the zone the gate rejected.
-  //   • CENTRE / OPTICAL / THIRDS resolve against the CANVAS, because centred means centred. The safe
-  //     box is deliberately asymmetric on a phone feed (the rail is only on the right); centring in it
-  //     would push every hero off the visual centre to dodge chrome the viewer can see past anyway.
-  //     If centred content collides with chrome, that is a composition call, and the audit says so.
-  // `size` is the layer's declared extent on this axis, 0 when unset. `est` is the same thing with a
-  // text-height fallback, and ONLY the far edges (right/bottom) use it, they are the two keywords that
-  // must subtract a size to work at all, so with size 0 they placed the layer's NEAR edge on the far
-  // safe line and hung the whole layer outside it. (`pin:"bottom"` set top=1340 on a 1340 safe bottom.)
-  // centre/optical/thirds keep using the raw `size`: feeding them `est` would shift every centred layer
-  // in the repo by half a line, and a missing `w` there is already reported as `degenerate-pin` by the
-  // audit rather than papered over with a guess.
-  const kw = (v, dim, size, lo, hi, est) =>
-    v === 'center' ? (dim - size) / 2
-      : v === 'optical' ? dim * 0.46 - size / 2
-      : v === 'third1' ? dim / 3 - size / 2
-      : v === 'third2' ? (2 * dim) / 3 - size / 2
-      : (v === 'left' || v === 'top') ? lo
-      : (v === 'right' || v === 'bottom') ? hi - est
-      // roughly two-thirds down the safe box: PLACEMENT's "text-band", the y half of `pin:"text-band"`.
-      : v === 'text-band' ? lo + 0.63 * (hi - lo)
-      // the composition column's left edge (PLACEMENT's "stage" and "lower-band"): COMPOSITION_MARGIN
-      // of the canvas width, never inside the safe box's own bleed/chrome inset (`lo`).
-      : v === 'stage-left' ? Math.max(lo, dim * COMPOSITION_MARGIN)
-      : null;
-  const num = (v, dim, size, lo, hi, est = size) => {
-    if (typeof v !== 'string') return v;
-    const s = v.trim();
-    const k = kw(s, dim, size, lo, hi, est); if (k != null) return Math.round(k);
-    const m = s.match(/^(-?[\d.]+)%\s*([+-]\s*[\d.]+)?$/);
-    if (m) return Math.round((parseFloat(m[1]) / 100) * dim + (m[2] ? parseFloat(m[2].replace(/\s+/g, '')) : 0));
-    const n = parseFloat(s); return isNaN(n) ? v : n;
-  };
-  // pin → [x-keyword, y-keyword, widthFraction?]. Read from core/layout/safe.js PLACEMENT, the one
-  // table core/validate/validate.mjs's degenerate-pin check and films/scene/schema.json's `pin`
-  // enum also read now, in place of the three hand-kept copies this used to be.
-  const PIN = PLACEMENT;
-  // Children were never walked, so `pin`, `col`, `gutter` and string coords ("50%", "center") were
-  // inert inside a group, and in a `layout:"free"` group a "50%" string reached CSS as `left:50%px`,
-  // which is not a coordinate at all. `applyAt` already recurses; this did not (MISTAKES #70).
-  const allLayers = [];
-  (function walk(ls) { for (const L of ls || []) { if (!isObj(L)) continue; allLayers.push(L); if (L.children) walk(L.children); } })(data.layers);
-  for (const L of allLayers) {
-    if (L.pin && PIN[L.pin]) {
-      const [px, py, wFrac] = PIN[L.pin];
-      if (px != null && L.x == null) L.x = px;
-      if (py != null && L.y == null) L.y = py;
-      // `stage`'s width nobody has to hand-type: a fraction of the SAFE box for a generic edge pin, or
-      // (for the `stage-left` keyword) the mirror image of its own composition-margin inset, so the
-      // column stays centred on the canvas even when that margin sits inside the safe box, not on its
-      // edge. Applied only when the layer declares none of its own (the same "author wins" rule every
-      // other pin field already follows).
-      if (wFrac != null && L.w == null) {
-        L.w = px === 'stage-left'
-          ? Math.round(W - 2 * Math.max(safe.x0, W * COMPOSITION_MARGIN))
-          : Math.round(wFrac * (safe.x1 - safe.x0));
-      }
-    }
-    // 12-col grid: col "3" (one column) or "2-7" (a span) → x + w from a gutter grid (col overrides pin-x).
-    // The grid spans the SAFE box, not the canvas, for the same reason the edge keywords do: a column
-    // layout that runs under a platform's rail is not a layout.
-    if (L.col != null) {
-      const cols = L.cols || 12, g = L.gutter ?? Math.round(inset * 0.5);
-      const gridW = safe.x1 - safe.x0;
-      const colW = (gridW - (cols - 1) * g) / cols;
-      const mm = String(L.col).match(/^(\d+)(?:-(\d+))?$/);
-      if (mm) { const c1 = +mm[1], c2 = mm[2] ? +mm[2] : c1;
-        L.x = Math.round(safe.x0 + (c1 - 1) * (colW + g));
-        L.w = Math.round((c2 - c1 + 1) * colW + (c2 - c1) * g); }
-    }
-    if (typeof L.w === 'string') L.w = num(L.w, W, 0, safe.x0, safe.x1);
-    if (typeof L.h === 'string') L.h = num(L.h, H, 0, safe.y0, safe.y1);
-    const w = typeof L.w === 'number' ? L.w : 0, h = typeof L.h === 'number' ? L.h : 0;
-    // A text layer rarely declares `h`, so estimate it from the font size for the bottom edge. size*1.2
-    // is not a new invention: films/scene/scene.html uses exactly this fallback to anchor layers to
-    // each other. There is deliberately NO equivalent for width, a string's rendered width cannot be
-    // known before layout, so `pin:"right"` without `w` stays an authoring error the audit reports.
-    const hEst = h || (L.type === 'text' && L.size ? L.size * 1.2 : h);
-    if (L.x != null) L.x = num(L.x, W, w, safe.x0, safe.x1);
-    if (L.y != null) L.y = num(L.y, H, h, safe.y0, safe.y1, hEst);
-  }
+// keywords place a layer of `size` on a canvas line. TWO different lines, on purpose:
+//   • EDGES (left/right/top/bottom) resolve against the SAFE BOX, so an edge pin can never produce a
+//     safe-zone failure.
+//   • CENTRE / OPTICAL / THIRDS resolve against the CANVAS, because centred means centred; the safe
+//     box is deliberately asymmetric on a phone feed and centring in it would push a hero off-centre.
+// `size` is the layer's declared extent on this axis, 0 when unset. `est` is the same thing with a
+// text-height fallback, used ONLY by the far edges (right/bottom): with size 0 they would place the
+// layer's near edge on the far safe line and hang the whole layer outside it.
+function coordKeyword(v, dim, size, lo, hi, est) {
+  return v === 'center' ? (dim - size) / 2
+    : v === 'optical' ? dim * 0.46 - size / 2
+    : v === 'third1' ? dim / 3 - size / 2
+    : v === 'third2' ? (2 * dim) / 3 - size / 2
+    : (v === 'left' || v === 'top') ? lo
+    : (v === 'right' || v === 'bottom') ? hi - est
+    // roughly two-thirds down the safe box: PLACEMENT's "text-band", the y half of `pin:"text-band"`.
+    : v === 'text-band' ? lo + 0.63 * (hi - lo)
+    // the composition column's left edge: COMPOSITION_MARGIN of the canvas width, never inside the
+    // safe box's own bleed/chrome inset (`lo`).
+    : v === 'stage-left' ? Math.max(lo, dim * COMPOSITION_MARGIN)
+    : null;
+}
 
-  // CAPTIONS PLACE WITH THE SAME GRAMMAR AS LAYERS, and reusing it is the whole point of doing this
-  // here. A caption used to accept t0/t1/text and nothing else (films/scene/schema.json), so where
-  // it sat was a CSS constant in scene.css that no JSON could reach: an author who wanted a line at
-  // the top of the frame had no way to say so, and nothing told them the wish was unsayable. Giving
-  // captions their own placement words would have been a SECOND grammar for one job, which is the
-  // duplicate-vocabulary shape core/safe.js opens by warning about. So a caption resolves through the
-  // same `pin` table, the same edge keywords, the same "50%" strings and the same safe box.
-  // A caption that declares none of them is left untouched and scene.css still places it, which is
-  // why this cannot move a pixel of any film that has not asked it to.
+function resolveCoord(v, dim, size, lo, hi, est = size) {
+  if (typeof v !== 'string') return v;
+  const s = v.trim();
+  const k = coordKeyword(s, dim, size, lo, hi, est); if (k != null) return Math.round(k);
+  const m = s.match(/^(-?[\d.]+)%\s*([+-]\s*[\d.]+)?$/);
+  if (m) return Math.round((parseFloat(m[1]) / 100) * dim + (m[2] ? parseFloat(m[2].replace(/\s+/g, '')) : 0));
+  const n = parseFloat(s); return isNaN(n) ? v : n;
+}
+
+// Children were never walked, so `pin`, `col`, `gutter` and string coords ("50%", "center") were
+// inert inside a group (MISTAKES #70). `applyAt` already recurses; this did not.
+function flattenLayers(ls) {
+  const out = [];
+  (function walk(list) { for (const L of list || []) { if (!isObj(L)) continue; out.push(L); if (L.children) walk(L.children); } })(ls);
+  return out;
+}
+
+function applyLayerPin(L, PIN, W, safe) {
+  if (!(L.pin && PIN[L.pin])) return;
+  const [px, py, wFrac] = PIN[L.pin];
+  if (px != null && L.x == null) L.x = px;
+  if (py != null && L.y == null) L.y = py;
+  // `stage`'s width nobody has to hand-type: a fraction of the safe box for a generic edge pin, or
+  // (for `stage-left`) the mirror image of its own composition-margin inset. Applied only when the
+  // layer declares none of its own.
+  if (wFrac != null && L.w == null) {
+    L.w = px === 'stage-left'
+      ? Math.round(W - 2 * Math.max(safe.x0, W * COMPOSITION_MARGIN))
+      : Math.round(wFrac * (safe.x1 - safe.x0));
+  }
+}
+
+// 12-col grid: col "3" (one column) or "2-7" (a span) → x + w from a gutter grid (col overrides pin-x).
+// The grid spans the SAFE box, not the canvas: a column layout under a platform's rail is not a layout.
+function applyLayerCol(L, safe, inset) {
+  if (L.col == null) return;
+  const cols = L.cols || 12, g = L.gutter ?? Math.round(inset * 0.5);
+  const gridW = safe.x1 - safe.x0;
+  const colW = (gridW - (cols - 1) * g) / cols;
+  const mm = String(L.col).match(/^(\d+)(?:-(\d+))?$/);
+  if (!mm) return;
+  const c1 = +mm[1], c2 = mm[2] ? +mm[2] : c1;
+  L.x = Math.round(safe.x0 + (c1 - 1) * (colW + g));
+  L.w = Math.round((c2 - c1 + 1) * colW + (c2 - c1) * g);
+}
+
+function resolveLayerCoords(data, W, H, safe, inset, PIN) {
+  for (const L of flattenLayers(data.layers)) {
+    applyLayerPin(L, PIN, W, safe);
+    applyLayerCol(L, safe, inset);
+    if (typeof L.w === 'string') L.w = resolveCoord(L.w, W, 0, safe.x0, safe.x1);
+    if (typeof L.h === 'string') L.h = resolveCoord(L.h, H, 0, safe.y0, safe.y1);
+    const w = typeof L.w === 'number' ? L.w : 0, h = typeof L.h === 'number' ? L.h : 0;
+    // A text layer rarely declares `h`, so estimate it from the font size for the bottom edge; there
+    // is deliberately no equivalent for width (a string's rendered width cannot be known before layout).
+    const hEst = h || (L.type === 'text' && L.size ? L.size * 1.2 : h);
+    if (L.x != null) L.x = resolveCoord(L.x, W, w, safe.x0, safe.x1);
+    if (L.y != null) L.y = resolveCoord(L.y, H, h, safe.y0, safe.y1, hEst);
+  }
+}
+
+// CAPTIONS PLACE WITH THE SAME GRAMMAR AS LAYERS: the same `pin` table, the same edge keywords, the
+// same "50%" strings and the same safe box, rather than a second placement grammar for one job.
+// A PIN MOVES THE CAPTION VERTICALLY AND, WITHOUT A WIDTH, ONLY VERTICALLY: a caption declares no
+// width by default (scene.css pins both edges), so the x-keyword waits for a `w` to centre against.
+function resolveCaptionCoords(data, W, H, safe, PIN) {
   const capDefaults = CAPTION_SKINS[captionSkin(data)];
   for (const C of data.captions || []) {
     if (!isObj(C)) continue;
-    // A PIN MOVES THE CAPTION VERTICALLY AND, WITHOUT A WIDTH, ONLY VERTICALLY. `pin` centres a BOX,
-    // and a caption declares no width by default: scene.css pins its left AND right edges, so the box
-    // is the stylesheet's. Applying the pin's x-keyword anyway releases the right edge, leaves the
-    // width to shrink-to-fit, and lands the text's LEFT edge on the centre line, which is exactly the
-    // `degenerate-pin` failure CLAUDE.md already names for layers, reproduced here on the first frame
-    // this hook ever rendered. So the x-keyword waits for a `w` to centre against, and `pin:"top"`
-    // does the obvious thing: same box, moved to the top. A pin that names a horizontal EDGE and
-    // carries no `w` is refused by core/validate.mjs rather than half-applied in silence.
     if (C.pin && PIN[C.pin]) {
       const [px, py] = PIN[C.pin];
       if (C.x == null && C.w != null) C.x = px;
       if (C.y == null) C.y = py;
     }
-    if (typeof C.w === 'string') C.w = num(C.w, W, 0, safe.x0, safe.x1);
+    if (typeof C.w === 'string') C.w = resolveCoord(C.w, W, 0, safe.x0, safe.x1);
     const w = typeof C.w === 'number' ? C.w : 0;
-    // A caption never declares a height and its band is two lines by contract (core/safe.js
-    // CAPTION_LINES), so `pin:"bottom"` has a real extent to subtract instead of hanging the band
-    // off the bottom safe line the way a sizeless layer used to.
+    // A caption never declares a height and its band is two lines by contract (CAPTION_LINES), so
+    // `pin:"bottom"` has a real extent to subtract.
     const hEst = CAPTION_LINES * Math.ceil((C.size || capDefaults.fontPx) * 1.05);
-    if (C.x != null) C.x = num(C.x, W, w, safe.x0, safe.x1);
-    if (C.y != null) C.y = num(C.y, H, 0, safe.y0, safe.y1, hEst);
+    if (C.x != null) C.x = resolveCoord(C.x, W, w, safe.x0, safe.x1);
+    if (C.y != null) C.y = resolveCoord(C.y, H, 0, safe.y0, safe.y1, hEst);
   }
+}
 
-  // THE BOUNDS CHECK LIVES HERE, at the one funnel where a relative coordinate becomes a pixel, so an
-  // effect never carries placement logic of its own: one check instead of one per factory. It grades
-  // only SETTLED boxes (core/safe.js outOfFrame), because a layer sliding in from off-frame is a
-  // legitimate entrance and grading it manufactures findings (engine-doctrine/MISTAKES.md #376).
-  //
-  // REPORT ONLY, off by default. It prints under `?bounds` in the browser or FRAME_BOUNDS=1 in node,
-  // and it never throws: whether the engine should REFUSE a settled off-frame box is a decision for a
-  // human holding the count of shipped films it would fail.
-  //
-  // TOP-LEVEL LAYERS ONLY. A group child's x/y is relative to its group, so measuring it against the
-  // canvas would report the wrong number with total confidence.
+export function resolveCoords(data, W, H, safe = safeArea(W, H, 'web'), frame = null) {
+  // pin → [x-keyword, y-keyword, widthFraction?]. Read from core/layout/safe.js PLACEMENT, the one
+  // table core/validate/validate.mjs's degenerate-pin check and films/scene/schema.json's `pin`
+  // enum also read now, in place of the three hand-kept copies this used to be.
+  const PIN = PLACEMENT;
+  resolveLayerCoords(data, W, H, safe, safe.margin, PIN);
+  resolveCaptionCoords(data, W, H, safe, PIN);
+
+  // THE BOUNDS CHECK LIVES HERE, at the one funnel where a relative coordinate becomes a pixel. It
+  // grades only SETTLED boxes (a layer sliding in from off-frame is a legitimate entrance,
+  // engine-doctrine/MISTAKES.md #376), report only (never throws), and TOP-LEVEL LAYERS ONLY: a
+  // group child's x/y is relative to its group.
   return boundsCheckOn()
     ? reportBounds((data.layers || []).filter(isObj), frame || { W, H, safe })
     : [];
@@ -426,6 +411,8 @@ export function installVirtualClock() {
       virtualizeTimers();
       vt.frame = frame; vt.ms = (frame / fps) * 1000;
       rnd = (frame * 2654435761) | 0; // reseed: same frame → same random sequence
+      // timers is mutated (delete) mid-loop, so the snapshot is required, not a style choice.
+      // oxlint-disable-next-line unicorn/no-useless-spread
       for (const [id, tm] of [...timers]) if (tm.at <= vt.ms) { timers.delete(id); tm.cb(...tm.a); }
       const q = [...rafQ.values()]; rafQ.clear(); for (const cb of q) cb(vt.ms);
     },
@@ -446,298 +433,239 @@ export function installVirtualClock() {
 //   build(data, fps, theme) -> { fps, duration, stings, sfx, renderFrame(n) }
 // Film grain is applied as a post-process at encode time (ffmpeg), not here, the CSS/canvas
 // approach never composited in headless Chrome, so it was removed.
+// Load every face the CSS declares, derived from the @font-face rules (core/fonts.js) rather than a
+// hand-kept list, so vendoring a font is the only step.
+async function loadRegisteredFontsBestEffort() {
+  try { await loadRegistered(); } catch { /* best-effort */ }
+}
+
+// Validates data + inline theme against the format's schema BEFORE building/rendering. A schema
+// that is missing or unparseable skips validation (a tooling gap, not a data error); a real
+// validation error re-throws.
+async function validateSceneData(data) {
+  if (!data.module) return;
+  try {
+    const schema = await fetchJson(`/films/${data.module}/schema.json`, 'schema');
+    const errors = validateAll(schema, data);
+    if (errors.length) throw new Error(`invalid data for "${data.module}":\n  - ${errors.join('\n  - ')}`);
+  } catch (e) {
+    if (e instanceof Error && e.message.startsWith('invalid data')) throw e;
+  }
+}
+
+// PER-ASPECT OVERRIDES: `aspects` is a map of aspect key -> partial layer props, merged over the
+// layer for THIS canvas only, applied before resolveCoords so an overridden w/h/x/y resolves like
+// any other.
+function applyAspectOverrides(ls, aspectKey) {
+  for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (L.aspects && L.aspects[aspectKey]) Object.assign(L, L.aspects[aspectKey]);
+    if (L.children) applyAspectOverrides(L.children, aspectKey);
+  }
+}
+
+// `?nobg=1` swaps the backdrop for a flat plain/dark ground so a film's motion can be measured with
+// the ground removed, without a second scene file (which would change the tone the layers were
+// authored against).
+function applyNobgParam(data, params) {
+  if (params.get('nobg') == null) return;
+  const tone = (Array.isArray(data.bg) ? data.bg[0] : data.bg)?.tone;
+  const dark = tone === 'dark' || /dark|deep|ink/.test(String((Array.isArray(data.bg) ? data.bg[0] : data.bg)?.preset || ''));
+  data.bg = [{ preset: dark ? 'dark' : 'plain' }];
+}
+
+// ONE FRAME OBJECT, built once, pre-first-frame: size, ratio, destination and the safe box in a
+// single value everything downstream receives, so the audit overlay and resolveCoords can never
+// disagree about where the bottom edge is (they used to be two separate calls).
+function resolveRenderFrame(data, params) {
+  const landscape = data.orientation === 'landscape' || data.orient === 'landscape';
+  const aspectKey = params.get('aspect') || data.aspect || (landscape ? '16:9' : '9:16');
+  const frame = frameOf(data, aspectKey);
+  const { W: width, H: height, safe } = frame;
+  document.documentElement.dataset.orient = width > height ? 'landscape' : 'portrait';
+  document.documentElement.dataset.aspect = aspectKey;
+  const rootStyle = document.documentElement.style;
+  rootStyle.setProperty('--vw', width + 'px');
+  rootStyle.setProperty('--vh', height + 'px');
+  rootStyle.setProperty('--safe-top', safe.y0 + 'px');
+  rootStyle.setProperty('--safe-bottom', (height - safe.y1) + 'px');
+  rootStyle.setProperty('--safe-left', safe.x0 + 'px');
+  rootStyle.setProperty('--safe-right', (width - safe.x1) + 'px');
+  if (params.get('alpha')) document.documentElement.classList.add('alpha'); // transparent overlay export
+  applyAspectOverrides(data.layers, aspectKey);
+  // `cameraMove` sugar → real `camera` keys BEFORE the per-aspect override pass, so an authored
+  // move's keys can be overridden per canvas like any hand-written one.
+  bakeCameraMove(data, frame);
+  if (data.camera) for (const k of data.camera) if (k && k.aspects && k.aspects[aspectKey]) Object.assign(k, k.aspects[aspectKey]);
+  bakeCursorCarry(data); // `carry` sugar on a `cursor` layer → a real `follow` on the dragged layer
+  applyNobgParam(data, params);
+  if (params.get('bounds') != null) globalThis.__FRAME_BOUNDS_CHECK = true;
+  return { frame, width, height, safe, aspectKey };
+}
+
+function bakeTimeRemaps(data) {
+  // `timeRemap` resolves ONCE, here, rather than per frame inside layerTime: a bad key list names
+  // its layer at boot, and remapAt runs the same handle solver a motion track gets.
+  for (const L of flatDepth(data.layers)) {
+    if (L.timeRemap == null) continue;
+    bakeTimeRemap(L);
+    assertKeyHandles(L.timeRemap, `layer "${L.id || L.type || '?'}" timeRemap`);
+  }
+}
+
+function checkNoSurvivingDepth(data) {
+  for (const L of flatDepth(data.layers)) if (L.depth != null)
+    throw new Error(`\`depth\` survived bakeDepth on a ${L.type || 'text'} layer, it would render as nothing`);
+}
+
+// Theme, token refs, look and every produce-time bake, in the order resolveCoords and
+// produceBaseline need them (theme before resolveCoords, camera baked before depth/focus).
+async function resolveThemeAndBake(data, frame, width, height, safe) {
+  const rawTheme = await fetchThemeFile(data.theme);
+  const theme = await resolveTheme(rawTheme); // taste: palette/gradient/fonts/motion
+  const tokenValues = await resolveThemeTokenValues(rawTheme);
+  Object.assign(data, resolveTokenRefs(data, tokenValues));
+  const look = resolveLook(theme, { isLightBg }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md)
+  bakeTextSizeRoles(data, look);
+  resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px
+  produceBaseline(data, theme, frame, look);
+  if (data.cameraMove) throw new Error('cameraMove survived produceBaseline, it would render as nothing');
+  bakeDepth(data);
+  bakeFocus(data);
+  assertKeyHandles(data.camera, 'camera');
+  bakeTimeRemaps(data);
+  checkNoSurvivingDepth(data);
+  applyTheme(theme); // once, pre-first-frame: pure (identical every frame)
+  return theme;
+}
+
+// The fonts the THEME actually declares, at every weight a scene might use, so a brand's face is
+// never silently swapped for the generic fallback. Best-effort: assertFamilies below is the real
+// check, since document.fonts.load() does not refuse a face it cannot fetch.
+async function loadThemeFonts(theme, data) {
+  try {
+    const fams = [...new Set(Object.values(theme.type || {}))].filter(Boolean);
+    await Promise.all(fams.flatMap((fam) => [400, 500, 600, 700, 800].map((w) => document.fonts.load(`${w} 100px '${fam}'`))));
+    // ransom stamps its own faces onto glyphs after build, so the theme's type map never lists them.
+    if (JSON.stringify(data).includes('"ransom"')) {
+      await Promise.allSettled(RANSOM_FACES.flatMap((f) => {
+        const loads = [document.fonts.load(`${f.weight} 100px '${f.family}'`)];
+        if (f.italic) loads.push(document.fonts.load(`italic ${f.weight} 100px '${f.family}'`));
+        return loads;
+      }));
+    }
+    await document.fonts.ready;
+    // Two real rAFs: document.fonts.ready can fulfil a tick before the compositor has actually
+    // rasterized the face, which intermittently measures the fallback for a font that really loaded.
+    await new Promise((r) => requestAnimationFrame(r));
+    await new Promise((r) => requestAnimationFrame(r));
+  } catch { /* best-effort */ }
+  assertFamilies(REQUIRED.type.map((k) => (theme.type || {})[k]), `theme "${theme?.name || 'inline'}"`);
+}
+
+// One preloader per asset kind (core/preload.js), each populating a static window.__* table before
+// the virtual clock so renderFrame(n) never touches async. three/html/images throw loudly on a
+// missing runtime, fragment or repo-local 404; the rest degrade quietly.
+async function preloadAllAssets(data) {
+  await preloadSpectrum(data);
+  await preloadImages(data);
+  await preloadVideos(data);
+  await preloadThree(data);
+  await preloadCobe(data);
+  await preloadCanvasFx(data);
+  await preloadComponents(data);
+  await preloadHtml(data);
+  await preloadEmbeddedImages();
+  await preloadClips(data);
+  await preloadLottie(data);
+  await preloadGsap(data);
+  await preloadRansomSprites(data);
+}
+
+// SEAM D + RESAMPLE BAKE: rasterise the beats either side of every seam, and any resample target
+// with no raster of its own, into static textures ONCE before the render loop. Resamples bake first
+// because bakeSeams drives renderFrame itself and would leave the DOM on an arbitrary frame.
+async function bakeSceneSeams(scene) {
+  await bakeResamples();
+  if (typeof scene.bakeSeams === 'function') {
+    try { await scene.bakeSeams(); } catch (e) { console.warn('seam bake:', e); }
+  }
+}
+
+function wireEngine(scene, fps, width, height, vclock) {
+  const totalFrames = Math.round(scene.duration * fps);
+  window.__engine = {
+    meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [], bridges: scene.bridges || [], beatSync: scene.beatSync || '' },
+    renderFrame: (n) => { vclock.set(n, fps); scene.renderFrame(n); },
+    auditFonts: () => auditFonts(document.querySelector('.stage')),
+  };
+}
+
+// frameSig(n): cheap content signature for the renderer's static-frame dedup: every per-frame DOM
+// write plus canvas pixels, downsampled through a 24x14 probe. A LIVE 2D canvas (grain/drift below
+// probe resolution) never dedups; canvasKind, never getContext, which would itself create a context
+// on the meta tab and rasterize it differently from every worker (engine-doctrine/MISTAKES.md #507).
+function installFrameSig() {
+  const probe = document.createElement('canvas'); probe.width = 24; probe.height = 14;
+  const pctx = probe.getContext('2d', { willReadFrequently: true });
+  const fnv = (h, s) => { for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h; };
+  window.__engine.frameSig = (n) => {
+    window.__engine.renderFrame(n);
+    let h = fnv(2166136261, document.body.innerHTML);
+    for (const cv of document.querySelectorAll('canvas')) {
+      if (!cv.width || cv.style.display === 'none') continue;
+      const kind = canvasKind(cv);
+      if (!kind) continue;
+      if (kind === '2d') { h = fnv(h, 'live2d:' + n); continue; }
+      try {
+        pctx.clearRect(0, 0, 24, 14); pctx.drawImage(cv, 0, 0, 24, 14);
+        const d = pctx.getImageData(0, 0, 24, 14).data;
+        let acc = '';
+        for (let i = 0; i < d.length; i += 8) acc += d[i] + ',' + d[i + 3] + ';';
+        h = fnv(h, acc);
+      } catch { h = fnv(h, 'opaque-canvas:' + n); }
+    }
+    return h.toString(36);
+  };
+}
+
+// A LOST CONTEXT IS THE CAP ARRIVING BY THE OTHER DOOR: past ~16 concurrent WebGL contexts some
+// drivers drop an OLDER one rather than refuse a new one, exit 0, no error. Checked here, before
+// readiness goes up, and named rather than recovered: recovery would make a frame depend on when
+// the loss happened, which renderFrame(n) forbids.
+function checkWebglLive() {
+  const { live, lost } = glLive();
+  if (lost) throw new Error(`${lost} of ${live} WebGL contexts were lost before the first frame. `
+    + `Browsers cap concurrent contexts at roughly 16 and some drivers drop an OLDER one rather `
+    + `than refuse a new one, so those layers would render BLANK with no error. Use fewer `
+    + `WebGL-backed layers at once (shader · paint · raymarch · three · globe · sting · seam · a `
+    + `resampled layer takes one each), or split the beats so they do not co-exist.`);
+}
+
 export async function boot(build) {
   const params = new URLSearchParams(location.search);
   const dataUrl = params.get('data');
   const fps = Number(params.get('fps')) || FPS;
   try {
-    try {
-      // Load every face the CSS declares. This list used to be hardcoded, which meant a newly
-      // vendored family rendered as a generic until someone remembered to add it here, that is
-      // exactly how Geist, Anybody and Manrope each shipped wrong. It is now DERIVED from the
-      // @font-face rules, so vendoring a font is the only step. See core/fonts.js.
-      await loadRegistered();
-    } catch (e) {}
+    await loadRegisteredFontsBestEffort();
     if (!dataUrl) throw new Error('no ?data= in the scene URL, nothing names the JSON to render');
     const data = await fetchJson(dataUrl, 'scene data');
-    // validate data + inline theme against the format's schema BEFORE building/rendering, a bad
-    // JSON fails here with a readable message instead of a broken video (or a wasted render).
-    if (data.module) {
-      try {
-        const schema = await fetchJson(`/films/${data.module}/schema.json`, 'schema');
-        const errors = validateAll(schema, data);
-        if (errors.length) throw new Error(`invalid data for "${data.module}":\n  - ${errors.join('\n  - ')}`);
-      } catch (e) {
-        if (e instanceof Error && e.message.startsWith('invalid data')) throw e; // real validation error
-        // schema missing/unparseable → skip validation (don't block on tooling gaps)
-      }
-    }
-    // canvas SIZE by aspect. Priority: ?aspect= URL param (multi-output render) > data.aspect >
-    // orientation fallback (the historic 16:9 / 9:16 defaults). The meta dims flow to the Go renderer,
-    // which sizes its screenshot to them, so one source renders at any aspect with no engine change.
-    const landscape = data.orientation === 'landscape' || data.orient === 'landscape';
-    const aspectKey = params.get('aspect') || data.aspect || (landscape ? '16:9' : '9:16');
-    // ONE FRAME OBJECT, built once, pre-first-frame: size, ratio, destination and the safe box in a
-    // single value that everything downstream RECEIVES. Nothing computes the frame twice, this used
-    // to be a sceneDims() call here and a safeArea() call thirty lines below, which is the shape that
-    // let the audit overlay and resolveCoords disagree about where the bottom edge was.
-    const frame = frameOf(data, aspectKey);
-    const { W: width, H: height, safe } = frame;
-    document.documentElement.dataset.orient = width > height ? 'landscape' : 'portrait';
-    document.documentElement.dataset.aspect = aspectKey;
-    // The canvas is set HERE, from the aspect we just resolved, never inferred from data-orient. It used
-    // to come only from tokens.css, which keys on portrait/landscape, a binary that cannot describe five
-    // ratios. So 1:1 and 4:5 got a 1080x1920 stage and 4:3 got a 1920x1080 one: the stage was not the
-    // frame, it was a standard stage with the overflow cropped off. Anything anchored to the stage rather
-    // than to a layer (a background, the .hs-cap bar at bottom:300px) landed outside the visible frame.
-    const rootStyle = document.documentElement.style;
-    rootStyle.setProperty('--vw', width + 'px');
-    rootStyle.setProperty('--vh', height + 'px');
-    // ONE safe area, the frame object's own, written to CSS so the ?debug=safe overlay draws the SAME box
-    // the audit checks and resolveCoords places against. `destination` names the chrome (a phone feed
-    // paints over the frame; a website does not) and defaults to `web`, so a tall canvas no longer
-    // inherits TikTok's caption strip merely for being tall.
-    rootStyle.setProperty('--safe-top', safe.y0 + 'px');
-    rootStyle.setProperty('--safe-bottom', (height - safe.y1) + 'px');
-    rootStyle.setProperty('--safe-left', safe.x0 + 'px');
-    rootStyle.setProperty('--safe-right', (width - safe.x1) + 'px');
-    if (params.get('alpha')) document.documentElement.classList.add('alpha'); // transparent overlay export
-    // PER-ASPECT OVERRIDES. Some beats genuinely need a different COMPOSITION at 9:16 than at 16:9, not
-    // the same one re-solved: a two-column split has no portrait equivalent, it becomes a stack. Until
-    // now there was no way to say so, so "any aspect" held only while the author hand-tuned one ratio
-    // and hoped. `at` is a map of aspect key -> partial layer props, merged over the layer for THIS
-    // canvas only. Applied BEFORE resolveCoords so an overridden w/h/x/y resolves like any other.
-    const applyAt = (ls) => { for (const L of ls || []) {
-      if (!L || typeof L !== 'object') continue;
-      if (L.aspects && L.aspects[aspectKey]) Object.assign(L, L.aspects[aspectKey]);
-      if (L.children) applyAt(L.children);
-    } };
-    applyAt(data.layers);
-    // `cameraMove` sugar → real `camera` keys BEFORE the per-aspect override pass, so an authored move's
-    // keys can be overridden per canvas like any hand-written one.
-    bakeCameraMove(data, frame);
-    if (data.camera) for (const k of data.camera) if (k && k.aspects && k.aspects[aspectKey]) Object.assign(k, k.aspects[aspectKey]);
-    // `carry` sugar (on a `cursor` layer) → a real `follow` on the dragged layer. Runs after the
-    // per-aspect override pass above so it sees the FINAL layer tree for this canvas.
-    bakeCursorCarry(data);
-    // `?bounds` turns on the settled-off-frame REPORT inside resolveCoords. Read before it runs, and it
-    // only prints: nothing about a render changes, so renderFrame(n) stays a pure function of n.
-    // `?nobg=1` PAINTS NO BACKDROP, so the film's motion can be measured with the ground removed.
-    // The renderer's motion figure is a property of the FRAME, so a moving backdrop flatters it exactly
-    // as much as moving content does: a film here measured 2% still and 1.25 on `aurora` and 75% still
-    // and 0.29 on a static ground with NOT ONE LAYER CHANGED, and I read the 1.25 as evidence a fix had
-    // worked. The difference between the two renders is the number an author actually needs.
-    //
-    // A PARAM AND NOT A SECOND SCENE FILE, because the thing being measured has to be the same film
-    // with one variable removed. Substituting `plain` keeps `bg` a required field and keeps the tone
-    // the layers were written against, so the ink does not flip and the measurement stays about motion.
-    if (params.get('nobg') != null) {
-      const tone = (Array.isArray(data.bg) ? data.bg[0] : data.bg)?.tone;
-      const dark = tone === 'dark' || /dark|deep|ink/.test(String((Array.isArray(data.bg) ? data.bg[0] : data.bg)?.preset || ''));
-      data.bg = [{ preset: dark ? 'dark' : 'plain' }];
-    }
-    if (params.get('bounds') != null) globalThis.__FRAME_BOUNDS_CHECK = true;
-    // Theme resolved BEFORE resolveCoords now (it used to run one line after): nothing between the two
-    // reads the theme, and a later phase's named size/placement needs `look` to lower through
-    // resolveCoords the same way a pin does, not one line too late to reach it.
-    const rawTheme = await fetchThemeFile(data.theme);
-    const theme = await resolveTheme(rawTheme); // taste: palette/gradient/fonts/motion
-    // A video may reference any theme token directly ("{color.signal}"), resolved here, once, against
-    // whichever theme this render actually uses (core/theme/refs.js). Runs right after the theme itself
-    // resolves so everything downstream (resolveCoords, produceBaseline, renderFrame) only ever sees the
-    // concrete value, the same "sugar resolves at load" rule block/beat/comp already follow.
-    const tokenValues = await resolveThemeTokenValues(rawTheme);
-    Object.assign(data, resolveTokenRefs(data, tokenValues));
-    const look = resolveLook(theme, { isLightBg }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md);
-    // an authored theme.look wins key by key, computedLook fills the rest for the 37 themes with none.
-    // A NAMED size ("headline") lowers to the theme's real px number HERE, before resolveCoords: that
-    // function reads `L.size` directly to estimate a text layer's height for a bottom pin, and a string
-    // reaching that arithmetic would silently become NaN (core/engine/produce.js bakeTextSizeRoles).
-    bakeTextSizeRoles(data, look);
-    resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px for THIS canvas
-    produceBaseline(data, theme, frame, look); // FORCE the produced baseline (living bg · camera · sceneUnits) into any
-    // scene that didn't specify it: absent-only, theme-aware, additive (never rewrites an authored layer),
-    // `"produced":false` opts out. Pure: mutates data once, pre-first-frame, so renderFrame stays deterministic.
-    // Nothing downstream reads `cameraMove` (renderFrame reads data.camera). If one survives this far it
-    // is a field written and then ignored. The failure this whole path exists to make impossible.
-    // `look` is not consumed here yet: phases 2-5 add the actual defaults inside produceBaseline itself.
-    if (data.cameraMove) throw new Error('cameraMove survived produceBaseline, it would render as nothing');
-    // `depth` sugar -> the real `plane` modifier. AFTER the camera is baked, because the lens it resolves
-    // against is the camera's, and before the first frame, because nothing at render time reads the word.
-    bakeDepth(data);
-    bakeFocus(data);
-    // CAMERA KEYS get the same refusal a layer's motion track gets from resolveKeyedProps, because
-    // they run through the same interpolator (core/sequence.js segmentAt). A camera track is not
-    // walked by resolveKeyedProps, so without this line the handle system would be enforced on layers
-    // and unenforced on the camera, which is the exact drift the interpolator was unified to end.
-    assertKeyHandles(data.camera, 'camera');
-    // `timeRemap` resolves ONCE, here, rather than on every frame inside layerTime: a bad key list
-    // now names its layer at boot, and the per-frame read stops re-validating and re-allocating.
-    // Then the same handle refusal a motion track gets, because remapAt runs the same solver.
-    for (const L of flatDepth(data.layers)) {
-      if (L.timeRemap == null) continue;
-      bakeTimeRemap(L);
-      assertKeyHandles(L.timeRemap, `layer "${L.id || L.type || '?'}" timeRemap`);
-    }
-    // Same refusal as the line above, for the same reason: a field written and then ignored is the one
-    // outcome this path exists to make impossible. `make expand` is not an escape here, the bake is at
-    // boot, so a scene that still carries one has hit a bug rather than skipped a step.
-    for (const L of flatDepth(data.layers)) if (L.depth != null)
-      throw new Error(`\`depth\` survived bakeDepth on a ${L.type || 'text'} layer, it would render as nothing`);
-    applyTheme(theme); // once, pre-first-frame: pure (identical every frame)
-    // load the fonts the THEME actually declares (not just the static list above) at every weight a
-    // scene might use, so a brand's face is never silently swapped for the generic fallback. This is
-    // the "load what you use" rule: tie each font to a render-blocking handle so it can't
-    // silently fall back.
-    try {
-      const fams = [...new Set(Object.values(theme.type || {}))].filter(Boolean);
-      await Promise.all(fams.flatMap((fam) => [400, 500, 600, 700, 800].map((w) => document.fonts.load(`${w} 100px '${fam}'`))));
-      // ransom stamps its OWN faces (incl. weight 900 + italics) onto glyphs after build, so the theme's
-      // type map never lists them; without loading them here the first frame races the font download and
-      // the note renders non-deterministically. Same detect-in-the-JSON idiom as the lazy three.js load.
-      if (JSON.stringify(data).includes('"ransom"')) {
-        // Load the NORMAL file for every face unconditionally: an italic face whose @font-face is
-        // normal-only (Fraunces) is painted as a synthesised oblique of the normal file, so THAT is
-        // what must be ready, awaiting only the italic variant matches nothing and leaves the real
-        // font racing. Where a true italic file exists (Instrument Serif) load it too. allSettled so
-        // one unmatched style never aborts the batch.
-        await Promise.allSettled(RANSOM_FACES.flatMap((f) => {
-          const loads = [document.fonts.load(`${f.weight} 100px '${f.family}'`)];
-          if (f.italic) loads.push(document.fonts.load(`italic ${f.weight} 100px '${f.family}'`));
-          return loads;
-        }));
-      }
-      await document.fonts.ready;
-      // `document.fonts.ready` can fulfil a tick before the font is actually usable for canvas text
-      // measurement: assertFamilies reads the face back with ctx.measureText (core/engine/fonts.js
-      // isPainting), and under CPU contention (several headless renders sharing one machine, e.g.
-      // `make studio`'s preflight launching more than one at once) the FontFaceSet can report loaded
-      // before the compositor has rasterized it, so the read-back below intermittently measures the
-      // fallback for a font that really did load. Two real animation frames give it the chance to
-      // catch up; native rAF still, installVirtualClock() has not run yet at this point in boot().
-      await new Promise((r) => requestAnimationFrame(r));
-      await new Promise((r) => requestAnimationFrame(r));
-    } catch (e) {}
-    // READ BACK. document.fonts.load() does not refuse a face it cannot fetch, it leaves the FontFace
-    // at status "error" and the browser paints a generic. Every await above sits in a catch-all, so
-    // that rejection went on the floor. Ask the browser which of the theme's OWN families is actually
-    // painting, before the first frame is captured. See assertFamilies in core/fonts.js.
-    // The CONTRACT's four roles, not Object.values(theme.type): a theme may park a non-family flag in
-    // there (themes/ledgerline-*.json carry `"optical": true`), and the load loop above turns that into
-    // document.fonts.load("400 100px 'true'"). A nonsense request nobody reads the answer to.
-    assertFamilies(REQUIRED.type.map((k) => (theme.type || {})[k]), `theme "${theme?.name || 'inline'}"`);
-    // The awaited readiness phase: one preloader per asset kind (core/preload.js), each populating a
-    // static window.__* table BEFORE the virtual clock, so renderFrame(n) never touches async and stays
-    // pure in n. Order preserved from when these were inlined here (spectrum → images → three → canvasFx
-    // → components → clips → lottie). three, html and images throw loudly if what they need is absent.
-    // A missing runtime, a missing fragment or a repo-local file that 404s leaves a hole nothing can
-    // recover. The rest degrade quietly. Images name the write site and the path (preloadImages above);
-    // a REMOTE image stays soft on purpose, since a dead CDN is not the author's mistake.
-    await preloadSpectrum(data);
-    await preloadImages(data); // web/local images ready before any frame is captured
-    await preloadVideos(data); // and footage decoded to its first frame, so the first seek has a source
-    await preloadThree(data);
-    await preloadCobe(data);
-    await preloadCanvasFx(data);
-    await preloadComponents(data);
-    await preloadHtml(data);
-    await preloadEmbeddedImages(); // the <img>s inside what those two just fetched
-    await preloadClips(data);
-    await preloadLottie(data);
-    await preloadGsap(data);
-    await preloadRansomSprites(data);
+    await validateSceneData(data);
+    const { frame, width, height, safe, aspectKey } = resolveRenderFrame(data, params);
+    const theme = await resolveThemeAndBake(data, frame, width, height, safe);
+    await loadThemeFonts(theme, data);
+    await preloadAllAssets(data);
     // The beat grid the scene names, fetched ONCE here (I/O belongs at boot, never in a frame).
-    // The snap itself happens inside build(), after the unified transition surface is lowered, a
-    // cut written as `transitions` does not exist as a cut time until then. core/beat-bind.js.
     const beats = await loadBeatGrid(data, fetchJson);
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
-    // `safe` rides along so the scene view can hand it to a layer without a second call to safeArea:
-    // the safe box is a function of destination as well as size, and two callers computing it is how
-    // the audit overlay and resolveCoords once disagreed about where the bottom edge was. That
-    // instinct is now the law, and `frame` below is the whole of it in one value.
-    // The frame rides along WHOLE, beside the width/height/safe keys the view already reads. That is
-    // what lets createKit hand every layer primitive a frame without a second safeArea() call and
-    // without a signature change at any of the call sites.
     const scene = build(data, fps, theme, { width, height, aspect: aspectKey, safe, frame, beats });
-    // SEAM D: rasterise the beats either side of every seam into static textures ONCE, before the
-    // render loop. Awaited here (async raster is fine at build); renderFrame then only samples them,
-    // so it stays pure in n. A scene with no `seams` returns immediately, zero cost, zero DOM change.
-    // RESAMPLE BAKE: a resample aimed at a layer that owns no raster (text · rect · group · svg ·
-    // component · html) turns that subtree into a static texture here, ONCE. Before bakeSeams on
-    // purpose, bakeSeams drives renderFrame itself and would leave the DOM on an arbitrary frame,
-    // which would make what a bake captured depend on how many seams the film has. It throws rather
-    // than degrades: a source that will not serialise must name itself, not render a hole.
-    await bakeResamples();
-    if (typeof scene.bakeSeams === 'function') {
-      try { await scene.bakeSeams(); } catch (e) { console.warn('seam bake:', e); }
-    }
-    const totalFrames = Math.round(scene.duration * fps);
+    await bakeSceneSeams(scene);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
-    window.__engine = {
-      // `segments: scene.segments || []` was here and no scene has ever set it: there is one format and
-      // films/scene/scene.js never returns the key. Its one reader, quality/gates/motion-audit.mjs,
-      // took the empty array as "this film declares no windows" and disabled its whole FAIL tier. The
-      // film's joints are its cuts and seams, core/junctions.js owns reading them, and a second way to
-      // say that is the drift MISTAKES #159 and #358 are both about. engine-doctrine/MISTAKES.md #425.
-      meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [], bridges: scene.bridges || [], beatSync: scene.beatSync || '' },
-      renderFrame: (n) => { vclock.set(n, fps); scene.renderFrame(n); },
-      // Font audit is a FUNCTION, not a value: it inspects the families the DOM actually asks for,
-      // so it must run against a rendered frame (layers that are not up yet declare nothing).
-      auditFonts: () => auditFonts(document.querySelector('.stage')),
-    };
-    // frameSig(n): cheap content signature for the renderer's static-frame dedup, covers every
-    // per-frame write (inline styles/text/attrs via innerHTML) plus canvas pixels (downsampled
-    // through a 24×14 probe; drawImage works for 2d AND webgl-with-preserveDrawingBuffer).
-    // Unreadable canvases poison the hash with the frame number → those frames never dedup.
-    {
-      const probe = document.createElement('canvas'); probe.width = 24; probe.height = 14;
-      const pctx = probe.getContext('2d', { willReadFrequently: true });
-      const fnv = (h, s) => { for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h; };
-      window.__engine.frameSig = (n) => {
-        window.__engine.renderFrame(n);
-        let h = fnv(2166136261, document.body.innerHTML);
-        for (const cv of document.querySelectorAll('canvas')) {
-          if (!cv.width || cv.style.display === 'none') continue;
-          // ASK canvasKind, NEVER getContext. getContext('2d') CREATES the context it is meant to
-          // report, so probing here used to turn context-less canvases into 2D ones on the meta tab
-          // alone, and that tab then rasterized every later frame differently from every worker tab
-          // (engine-doctrine/MISTAKES.md #507). A canvas with no kind holds no context and paints nothing.
-          const kind = canvasKind(cv);
-          if (!kind) continue;
-          // visible 2D canvases repaint time-varying fx (grain/drift) BELOW probe resolution,
-          // proven by an anchor-verification failure. Never dedup frames where one is live.
-          if (kind === '2d') { h = fnv(h, 'live2d:' + n); continue; }
-          try { // webgl overlays (shader stings) are keyed draws, sampling them is sound
-            pctx.clearRect(0, 0, 24, 14); pctx.drawImage(cv, 0, 0, 24, 14);
-            const d = pctx.getImageData(0, 0, 24, 14).data;
-            let acc = '';
-            for (let i = 0; i < d.length; i += 8) acc += d[i] + ',' + d[i + 3] + ';';
-            h = fnv(h, acc);
-          } catch (e) { h = fnv(h, 'opaque-canvas:' + n); }
-        }
-        return h.toString(36);
-      };
-    }
-    // Signal readiness BEFORE the warm first frame. renderFrame() is what first virtualizes the page
-    // timers (via the clock), and chromedp observes __engineReady in rAF-polling mode, so readiness
-    // must be visible while rAF is still native. The warm renderFrame(0) then flips timers to virtual;
-    // the Poll's already-scheduled native rAF callback still fires and catches the flag.
-    // A LOST CONTEXT IS THE CAP ARRIVING BY THE OTHER DOOR, and until now nothing said so. glContext
-    // refuses a context the browser DECLINES to create, which is what core/webgl.js was written for.
-    // But past the cap some drivers hand one out and then drop an older one instead: 21 resampled
-    // layers came back `{live:21, lost:5}`. Five surfaces that will paint nothing, exit 0, no error.
-    // The loss counter existed and only the counter did. `__engineError` is read exactly once, at
-    // readiness (internal/scene/scene.go:200), so the check belongs HERE, before the flag goes up, and
-    // it names the number rather than recovering: recovery would make a frame depend on when the loss
-    // happened, which renderFrame(n) forbids.
-    {
-      const { live, lost } = glLive();
-      if (lost) throw new Error(`${lost} of ${live} WebGL contexts were lost before the first frame. `
-        + `Browsers cap concurrent contexts at roughly 16 and some drivers drop an OLDER one rather `
-        + `than refuse a new one, so those layers would render BLANK with no error. Use fewer `
-        + `WebGL-backed layers at once (shader · paint · raymarch · three · globe · sting · seam · a `
-        + `resampled layer takes one each), or split the beats so they do not co-exist.`);
-    }
+    wireEngine(scene, fps, width, height, vclock);
+    installFrameSig();
+    checkWebglLive();
+    // Signal readiness BEFORE the warm first frame: renderFrame() first virtualizes the page timers,
+    // and chromedp observes __engineReady in rAF-polling mode while rAF is still native.
     window.__engineReady = true;
     window.__engine.renderFrame(0);
   } catch (e) {
