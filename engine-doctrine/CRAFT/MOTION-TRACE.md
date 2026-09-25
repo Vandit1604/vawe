@@ -67,9 +67,8 @@ board: a card that drags reads as jelly.
 
 The caveat is not decorative: `lag`'s own schema note is "wrong on a rigid board, a card that drags
 reads as jelly", and this trace cannot tell a card from a token. It names the candidate and the
-caveat in the same breath and leaves the call to whoever is reading it, the same shape
-`harness/live/scene-live.mjs` uses for `unusedPresets`. No pass/fail here either: a film with no
-candidates said nothing wrong, and a film with one is not required to act on it.
+caveat in the same breath and leaves the call to whoever is reading it. No pass/fail here either: a
+film with no candidates said nothing wrong, and a film with one is not required to act on it.
 
 ## What it cannot show
 

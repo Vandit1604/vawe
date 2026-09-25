@@ -464,10 +464,9 @@ nothing marks the cue stale when they do. `vawe-flow-2` shipped with two cues 11
 this exact way. Write `"t": "installLine.end+0.1"` instead: any string a layer `start` field accepts
 (`core/timeline/relative-time.js`) also works here, bare `id` = that layer's start, `id.end` = start
 plus its `duration`, an optional `+`/`-` offset for "a beat after it lands." The film keeps sounding
-right when the layer moves, because the cue is now pinned to the same thing you are. `harness/live/
-scene-live.mjs` nudges (never blocks) when a saved film has a plain-number cue sitting close to a real
-layer arrival, and names the exact reference to replace it with. A cue with nothing to reference (an
-intro sting before any layer lands, a beat that owns no `id`) stays a plain number; that is not the gap.
+right when the layer moves, because the cue is now pinned to the same thing you are. A cue with
+nothing to reference (an intro sting before any layer lands, a beat that owns no `id`) stays a plain
+number; that is not the gap.
 
 **A cue may synthesize its own sound instead of naming a baked one**: `{"t":1,"voice":"chime","params":{"freq":800}}`
 in place of `name`. `voice` picks a live entry in `core/audio/kit.mjs`'s `CUES` table (the same synth
