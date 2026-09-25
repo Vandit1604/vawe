@@ -161,7 +161,38 @@ export const FX_DUR = Object.fromEntries(
 // that and its blurb even says "tracking". Type vocabulary has three words for one thing and a blurb
 // can only use one, so the words a person searches with that a blurb cannot honestly carry ride along
 // as `aka`, searched and never printed.
-const GSAP_AKA = { expandIn: ['kerning', 'letter-spacing', 'letterspacing', 'tracking out'] };
+const GSAP_AKA = {
+  expandIn: ['kerning', 'letter-spacing', 'letterspacing', 'tracking out'],
+  zoomBlur: ['pull focus', 'camera rack focus', 'defocus zoom in'],
+  blurIn: ['resolve into focus', 'defocus entrance', 'unblur in place'],
+  elasticIn: ['rubber band in', 'wobble in', 'springy pop in'],
+  bounceIn: ['drop and bounce', 'cartoon bounce entrance', 'ball drop in'],
+  backIn: ['rise and overshoot', 'fade up with a spring', 'pop past the mark'],
+  dropIn: ['heavy drop in', 'fall and bounce', 'drop from above'],
+  spinIn: ['spin and grow', 'rotate in', 'logo spin reveal'],
+  rollIn: ['roll in from the left', 'wheel arrival', 'rotate while sliding in'],
+  skewIn: ['sheared slide in', 'skew and straighten', 'velocity slide'],
+  flipInX: ['flip up on x axis', 'hinge up entrance', 'card flip vertical'],
+  flipInY: ['flip in on y axis', 'page turn entrance', 'card flip horizontal'],
+  clipUp: ['bottom to top wipe', 'mask uncover up', 'reveal from below'],
+  maskReveal: ['left to right wipe', 'editorial headline reveal', 'mask uncover sideways'],
+  revealUp: ['clip and lift reveal', 'uncover and rise', 'wipe up with a lift'],
+  tiltIn: ['door swing entrance', 'hinge open from the left', 'swing into frame'],
+  driftIn: ['soft diagonal float in', 'quiet blur entrance', 'atmosphere entrance'],
+  glitchIn: ['glitch entrance', 'stepped snap in', 'digital glitch reveal'],
+  foldIn: ['unfold from the top', 'dropdown entrance', 'panel unfold'],
+  charFold: ['per-letter unfold', 'kinetic type fold', 'glyph by glyph unfold'],
+  charTilt: ['per-letter swing', 'kinetic type tilt', 'glyph by glyph tilt'],
+  charBlurCascade: ['per-letter blur cascade', 'kinetic type blur reveal', 'glyph by glyph blur'],
+  charOvershoot: ['per-letter pop', 'kinetic type overshoot', 'glyph by glyph spring'],
+  float: ['floating loop', 'gentle bob loop', 'idle rise and fall'],
+  pulse: ['pulsing loop', 'breathing scale loop', 'draw attention pulse'],
+  breathe: ['slow breathing loop', 'ambient swell loop', 'calm breathe loop'],
+  wobble: ['rocking loop', 'restless wobble loop', 'warning wobble'],
+  swing: ['pendulum loop', 'hanging swing loop', 'rocking pendulum'],
+  drift: ['sideways drift loop', 'background parallax loop', 'slow wander loop'],
+  heartbeat: ['throbbing loop', 'urgent pulse loop', 'live recording throb'],
+};
 
 // Registered so a name in the WRONG SLOT is diagnosable: `anim:"popIn"` is told popIn is a gsap effect.
 // Three shipped layers made exactly that mistake and silently faded for months (engine-doctrine/MISTAKES.md #355).
