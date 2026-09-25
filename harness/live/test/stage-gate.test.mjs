@@ -32,8 +32,13 @@ function run(rel, content = '') {
 const SB = 'films/scene/stage-gate-fixture.storyboard.md';
 const FILM = 'films/scene/stage-gate-fixture.json';
 const FRAG = 'films/scene/_stage-gate-fixture.hook.html';
+// A second fragment on the SAME fixture film, named with the other convention (film-part, dash) so
+// the naming-convention test does not have to borrow a real film off the roster: `hinge`, the fixture's
+// old borrowed dash-convention example, never had a tracked storyboard, so it denied on `no-storyboard`
+// the moment it stopped existing on the machine that wrote the test.
+const FRAG2 = 'films/scene/_stage-gate-fixture-alt.html';
 const abs = (rel) => path.join(ROOT, rel);
-const FIXTURES = [SB, FILM, FRAG];
+const FIXTURES = [SB, FILM, FRAG, FRAG2];
 
 before(() => {
   fs.writeFileSync(abs(SB), [
@@ -47,7 +52,12 @@ before(() => {
     '- fragment: films/scene/_stage-gate-fixture.hook.html',
     '- onscreen: "one line"',
     '',
+    '## 2. build (2.0-4.0)',
+    '- fragment: films/scene/_stage-gate-fixture-alt.html',
+    '- onscreen: "another line"',
+    '',
   ].join('\n'));
+  fs.writeFileSync(abs(FRAG2), '<div></div>\n');
   fs.writeFileSync(abs(FILM), JSON.stringify({ module: 'scene', layers: [] }, null, 1) + '\n');
   fs.writeFileSync(abs(FRAG), '<div></div>\n');
 });
@@ -83,9 +93,12 @@ test('a fragment no storyboard claims is denied, and one with a plan behind it i
 
 test('both fragment naming conventions resolve to the right film', () => {
   // `_film.part.html` and `_film-part.html` both live in this repo. Splitting on a separator picks the
-  // wrong film on one of them, which is why the hook looks the owner up instead of parsing it.
-  assert.equal(run('films/scene/_vawe-oblique.frame.html', '<div></div>').denied, false);
-  assert.equal(run('films/scene/_hinge-hook.html', '<div></div>').denied, false);
+  // wrong film on one of them, which is why the hook looks the owner up instead of parsing it. Both
+  // conventions are exercised against the built fixture (FRAG dot, FRAG2 dash), not a borrowed real
+  // film: a real film's storyboard can be re-planned or unapproved at any time, and the fixture is
+  // built for exactly this reason (see the comment above `SB`).
+  assert.equal(run(FRAG, '<div></div>').denied, false);
+  assert.equal(run(FRAG2, '<div></div>').denied, false);
 });
 
 test('a hook that exists to refuse must not permit by failing: malformed stdin denies, not allows', () => {
