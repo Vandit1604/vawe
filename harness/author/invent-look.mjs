@@ -34,6 +34,8 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { themeErrors } from '../../core/registry/theme-contract.js';
 import { bgBlock, mix, contrast, relLum, parseHex } from '../lib/theme-bg.mjs';
+import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { parseColor, colorAlpha } from '../../core/color/engine.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -428,7 +430,8 @@ for (const first of chosen) {
 // sharing a display face are two colourways of one look.
 const bannedLineages = new Set();
 for (const f of fs.readdirSync(path.join(ROOT, 'themes')).filter((n) => n.endsWith('.json'))) {
-  const t = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', f), 'utf8'));
+  const raw = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', f), 'utf8'));
+  let t; try { t = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw; } catch { continue; }
   for (const v of Object.values(t.type || {})) if (typeof v === 'string' && v.trim()) bannedLineages.add(lineage(v));
 }
 for (const b of ['Inter', 'Poppins', 'Playfair Display', 'Syne', 'Space Grotesk', 'Montserrat', 'Roboto', 'Open Sans', 'Lato', 'Raleway', 'Nunito', 'Oswald']) bannedLineages.add(lineage(b));

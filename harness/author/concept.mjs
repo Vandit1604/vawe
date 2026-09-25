@@ -44,6 +44,7 @@ import { writeReceipt } from '../lib/receipt.mjs';
 import { DIRECTIONS } from './directions.mjs';   // the table moved so the quiz can read it too
 import { beatStarts } from '../../quality/gates/beats-of.mjs';   // the repo's ONE beat model, not a second one
 import { SCENE_DIR } from '../../quality/gates/paths.mjs';
+import { expandThemeFile } from '../lib/theme-load.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -253,7 +254,7 @@ function libraryEvidence() {
       }
     } catch { /* a scene the beat model cannot read is not evidence either way */ }
     try {
-      const bg = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', `${data.theme}.json`), 'utf8'))?.palette?.bg;
+      const bg = expandThemeFile(JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', `${data.theme}.json`), 'utf8')))?.palette?.bg;
       if (typeof bg === 'string' && bg.startsWith('#')) (lum(bg) < 0.2 ? dark++ : light++);
     } catch { /* an inline or missing theme has no measurable dominance */ }
   }

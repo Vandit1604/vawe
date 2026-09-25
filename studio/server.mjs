@@ -31,7 +31,8 @@ import { studioPage } from './page.mjs';
 import { parseStoryboard, timeline, fieldIn, fieldAllIn, blocksOf, frontmatter, referenceDevices } from '../harness/author/storyboard-parse.mjs';
 import { stageOf } from '../quality/gates/stage.mjs';
 import { bgPreset, bgPaletteFrom, BG_NAMES } from '../core/backgrounds/index.js';
-import { isLightBg } from '../core/color/engine.js';
+import { isLightBg, parseColor, colorAlpha } from '../core/color/engine.js';
+import { expandTheme, isTokenFile } from '../core/theme/roles.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataArg = process.env.D || process.argv[2];
@@ -599,7 +600,10 @@ const studioRoutes = (req, res) => {
       // `archetype`/`weight`/`borrows` still travel here for the tags and the colour arc; the picture
       // itself now comes from /api/plan-frames, never composed from these fields on the client.
       let themeJson = null;
-      try { themeJson = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'themes', THEME_NAME + '.json'), 'utf8')); } catch { /* sketch falls back to studio's own greys */ }
+      try {
+        const raw = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'themes', THEME_NAME + '.json'), 'utf8'));
+        themeJson = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+      } catch { /* sketch falls back to studio's own greys */ }
       const palette = themeJson ? themeJson.palette : null;
       // the bg palette a `ground:` name resolves against, DERIVED the same way films/scene/scene.js and
       // harness/dev/candidates.mjs already derive it: the theme's own `bg` block wins, else it is built

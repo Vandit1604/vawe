@@ -11,10 +11,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as VFX from '../../blocks/vfx.mjs';
+import { expandThemeFile } from '../lib/theme-load.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const theme = process.argv[2] || 'vawe';
-const palette = JSON.parse(fs.readFileSync(path.join(root, 'themes', `${theme}.json`), 'utf8')).palette;
+const palette = expandThemeFile(JSON.parse(fs.readFileSync(path.join(root, 'themes', `${theme}.json`), 'utf8'))).palette;
 const lum = (hex) => {
   const m = /^#([0-9a-f]{6})$/i.exec(String(hex || ''));
   if (!m) return 1;

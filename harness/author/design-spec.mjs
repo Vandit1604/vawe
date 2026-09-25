@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
 import { buildKit, MIN_VIDEO_TEXT_PX } from '../lib/stagekit.mjs';
+import { expandThemeFile } from '../lib/theme-load.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv.slice(2).find((a) => !a.startsWith('--'));
@@ -22,7 +23,7 @@ if (fs.existsSync(designPath)) { console.log(fs.readFileSync(designPath, 'utf8')
 const scene = JSON.parse(fs.readFileSync(film, 'utf8'));
 const themeName = typeof scene.theme === 'string' ? scene.theme : (scene.theme && scene.theme.name) || 'default';
 const themeFile = typeof scene.theme === 'object' ? null : path.join(ROOT, 'themes', `${themeName}.json`);
-const theme = themeFile ? JSON.parse(fs.readFileSync(themeFile, 'utf8')) : scene.theme;
+const theme = themeFile ? expandThemeFile(JSON.parse(fs.readFileSync(themeFile, 'utf8'))) : scene.theme;
 if (!theme) { console.error(`design-spec: ${film} names no theme`); process.exit(1); }
 
 const { look } = buildKit(theme, resolveLook, isLightBg);

@@ -18,6 +18,7 @@ import { measureFrame, measureVideo } from '../media/content.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
 import { MARGIN } from '../../core/layout/safe.js';
+import { expandThemeFile } from '../lib/theme-load.mjs';
 import { adaptFinding } from '../lib/safeguards.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -108,7 +109,7 @@ function writeStartingFragment(fragPath, kind, themeName, invent) {
       + ` (validate: node core/registry/theme-contract.test.mjs), then re-run with THEME=${name}-invented.`);
     return false;
   }
-  const theme = JSON.parse(fs.readFileSync(themeFile, 'utf8'));
+  const theme = expandThemeFile(JSON.parse(fs.readFileSync(themeFile, 'utf8')));
   const { css, block } = buildKit(theme, resolveLook, isLightBg);
   const outCss = fragPath.replace(/\.html$/, '') + '.kit.css';
   fs.writeFileSync(outCss, css + '\n');

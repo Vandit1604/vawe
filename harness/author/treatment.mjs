@@ -21,6 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseStoryboard } from './storyboard-parse.mjs';
 import { readReceipt, writeReceipt } from '../lib/receipt.mjs';
+import { expandThemeFile } from '../lib/theme-load.mjs';
 
 const args = process.argv.slice(2);
 const SB = args.find((a) => !a.startsWith('--'));
@@ -44,7 +45,7 @@ const picked = chosen.exists ? chosen.receipt : null;
 const themeName = flag('--theme', picked?.preset || sb.theme || 'vawe');
 let theme = null;
 for (const p of [`themes/${themeName}.json`, `directions/${themeName}.json`]) {
-  try { theme = JSON.parse(fs.readFileSync(p, 'utf8')); break; } catch { /* try the next */ }
+  try { theme = expandThemeFile(JSON.parse(fs.readFileSync(p, 'utf8'))); break; } catch { /* try the next */ }
 }
 const C = theme?.colors || theme?.base || {};
 const F = theme?.fonts || theme?.type || {};
