@@ -210,7 +210,7 @@ function Index({ data }: { data: Arsenal }) {
         </div>
         <label className="ar-live-only">
           <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} />
-          Plays live <span className="ar-n">{data.live}</span>
+          <span className="ar-live ar-live-key" aria-hidden="true" />Plays live <span className="ar-n">{data.live}</span>
         </label>
       </div>
 
@@ -296,7 +296,7 @@ function Index({ data }: { data: Arsenal }) {
                           <Link className="ar-card" href={it.h}>
                             <Thumb it={it} axisLabel={axisLabel.get(it.a) ?? it.k} />
                             <span className="ar-meta">
-                              <code>{it.n}</code>
+                              <code>{it.n}{it.l && <span className="sr-only">, plays live</span>}</code>
                               {it.d && <span className="ar-blurb">{it.d}</span>}
                             </span>
                           </Link>

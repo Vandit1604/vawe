@@ -153,10 +153,14 @@
   display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--ar-gap);
 }
 .ar-card {
-  display: flex; flex-direction: column; gap: 9px; text-decoration: none; color: inherit;
-  border-radius: calc(var(--r) - 2px);
+  display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit;
+  background: var(--surface); border-radius: var(--r); box-shadow: var(--ring); overflow: hidden;
+  transition: box-shadow .18s var(--ease), background-color .18s var(--ease);
 }
 .ar-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* One object: the still sits in a recessed well at the top of the card, the name under it, both
+   inside one panel. Hover lifts the panel's ring and ground a step, never a glow. */
+.ar-card:hover { background: var(--surface-2); box-shadow: 0 0 0 1px var(--line-2); }
 
 /* CONTAIN FOR A BLOCK, COVER FOR AN EFFECT, and the reason is in the data rather than in taste.
  * Every block poster is already cropped to that block's own bounds, so their aspects genuinely
@@ -165,42 +169,34 @@
  * nothing is lost. The cell is a consistent stage; what sits inside it follows the source. */
 .ar-thumb {
   position: relative; display: grid; place-items: center; aspect-ratio: 16 / 10; overflow: hidden;
-  border: 1px solid var(--line); border-radius: calc(var(--r) - 2px);
-  background: var(--surface);
-  transition: border-color .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease);
+  margin: 6px 6px 0; border-radius: var(--r-in); background: var(--bg);
 }
 .ar-thumb img { display: block; width: 100%; height: 100%; }
 .ar-thumb img[data-fit="contain"] { object-fit: contain; padding: 12px; }
 .ar-thumb img[data-fit="cover"] { object-fit: cover; }
-/* The one elevation step on the page, and it exists only to say the card is liftable. */
-.ar-card:hover .ar-thumb {
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--ink) 22%, transparent);
-}
 
-/* Cobalt and a verb means you can act on it, so this dot is deliberately NOT cobalt: it is inert
-   data about the entry, not a control. It is the ink dot the site uses for a fact. */
+/* Live is one of the accent's two meanings. The same dot keys the "Plays live" filter, so the
+   colour is never the only cue. */
 .ar-live {
   position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--ink-2); box-shadow: 0 0 0 3px var(--surface);
+  background: var(--accent);
 }
+.ar-live-key { position: static; display: inline-block; margin-right: 2px; }
 
-/* NO STILL. A designed state, not a hole: a stripe that is visibly not a photograph, carrying the
-   one thing the cell can still tell you. An easing has no picture and never will; a blank grey box
-   would say the site is broken, which is a different and untrue claim. */
+/* NO STILL. A designed state, not a hole: a quiet well carrying the one thing the cell can still
+   tell you. An easing has no picture and never will. */
 .ar-none {
   gap: 6px; align-content: center; text-align: center; padding: 10px;
-  background: repeating-linear-gradient(135deg, var(--bg-2) 0 8px, var(--surface) 8px 16px);
+  background: var(--surface-2);
 }
 .ar-none-tag {
-  font: 500 10px/1 var(--font-mono), ui-monospace, monospace;
+  font: 500 11px/1 var(--font-mono), ui-monospace, monospace;
   letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2);
-  background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px;
+  background: var(--raised); border-radius: 999px; padding: 4px 9px;
 }
-.ar-none-why { font-size: 10.5px; line-height: 1; color: var(--muted); }
+.ar-none-why { font-size: 11px; line-height: 1.2; color: var(--muted); }
 
-.ar-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ar-meta { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 10px 12px 12px; }
 .ar-meta code {
   font: 500 13px/1.3 var(--font-mono), ui-monospace, monospace; color: var(--ink);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -242,7 +238,7 @@
 .ar-step svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 a.ar-step:hover, a.ar-pg:hover { color: var(--ink); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
 .ar-step:focus-visible, .ar-pg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.ar-pg[data-on] { color: var(--ink); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.ar-pg[data-on] { color: var(--ink); border-color: transparent; background: var(--raised); }
 span.ar-step { color: var(--muted); opacity: .45; }   /* the end of the run, shown so the row keeps its shape */
 
 /* ── responsive ──────────────────────────────────────────────────────────────
@@ -276,11 +272,12 @@ span.ar-step { color: var(--muted); opacity: .45; }   /* the end of the run, sho
      A smaller card buys a second and third; the name stays legible because it never shrinks. */
   .ar-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; }
   .ar-thumb img[data-fit="contain"] { padding: 7px; }
-  .ar-blurb { -webkit-line-clamp: 2; font-size: 11.5px; }
+  .ar-meta { padding: 8px 10px 10px; }
+  .ar-blurb { -webkit-line-clamp: 2; font-size: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ar-thumb, .ar-card:hover .ar-thumb { transform: none; transition: none; }
+  .ar-card { transition: none; }
 }
 
 /* ── chips ─────────────────────────────────────────────────────────────────
@@ -305,19 +302,20 @@ span.ar-step { color: var(--muted); opacity: .45; }   /* the end of the run, sho
 .ar-fams { margin-top: 56px; border-top: 1px solid var(--line); padding-top: 28px; }
 .ar-fams h2 { font-size: 19px; letter-spacing: -0.012em; margin: 0 0 4px; }
 .ar-fams-sub { color: var(--muted); margin: 0 0 18px; }
+/* A plain index, not a wall of boxes: rows grouped by space, a hover fill on the row you point at. */
 .ar-fams-list {
   list-style: none; margin: 0; padding: 0;
-  display: grid; gap: 8px;
+  display: grid; gap: 2px 24px;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 }
 .ar-fams-list a {
   display: flex; align-items: baseline; gap: 10px;
-  padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px;
-  color: var(--ink); text-decoration: none;
+  padding: 8px 10px; border-radius: 8px;
+  color: var(--ink-2); text-decoration: none;
 }
-.ar-fams-list a:hover { border-color: var(--line-2); background: var(--bg-2); }
+.ar-fams-list a:hover { color: var(--ink); background: var(--surface); }
 .ar-fams-name { flex: 1; }
 .ar-fams-n {
-  font-family: var(--mono, "JetBrains Mono", monospace);
+  font-family: var(--font-mono), monospace;
   font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums;
 }
