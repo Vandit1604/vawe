@@ -40,6 +40,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { PRESETS } from '../../core/backgrounds/presets.js';
 import { appendRun } from '../lib/runlog.mjs';
+import { summarize } from '../lib/hook-report.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
@@ -246,8 +247,12 @@ process.stdin.on('end', () => {
     });
   } catch { /* the receipt is a nudge too; never let a log failure touch the printed findings below */ }
 
-  console.error(`${path.basename(rel)} · ${layers.length} layers · ${pctP}% pictorial · ${pctK}% hand-keyed\n`
+  const full = `${path.basename(rel)} · ${layers.length} layers · ${pctP}% pictorial · ${pctK}% hand-keyed\n`
     + say.join('\n')
-    + `\n  Nothing here blocks. These are the five numbers CLAUDE.md argues from, measured on this file.`);
+    + `\n  Nothing here blocks. These are the five numbers CLAUDE.md argues from, measured on this file.`;
+
+  const out = summarize('scene-live', rel, full);
+  if (!out) process.exit(0);            // same finding as last time; already said, no need to repeat
+  console.error(out);
   process.exit(2);
 });

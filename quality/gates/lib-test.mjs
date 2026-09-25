@@ -6965,7 +6965,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   const hook = path.join(repoRoot, 'harness/live/vocabulary.mjs');
   const run = (file) => {
     try {
-      execFileSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: file } }), encoding: 'utf8' });
+      execFileSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: file } }), encoding: 'utf8',
+        env: { ...process.env, VAWE_HOOK_FULL: '1' } });   // assert against the full text, not the summary
       return { code: 0, err: '' };
     } catch (e) { return { code: e.status, err: String(e.stderr || '') }; }
   };
@@ -7243,7 +7244,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     {
       const hook = path.join(repoRoot, 'harness/live/scene-live.mjs');
       const fire = (scene) => {
-        const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: scene } }), encoding: 'utf8' });
+        const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: scene } }), encoding: 'utf8',
+          env: { ...process.env, VAWE_HOOK_FULL: '1' } });   // assert against the full text, not the summary
         return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
       };
       const tmp = path.join(repoRoot, 'films/scene/_rung-live-probe.json');
@@ -7276,7 +7278,8 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     {
       const hook = path.join(repoRoot, 'harness/live/craft-live.mjs');
       const fire = (f) => {
-        const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: f } }), encoding: 'utf8' });
+        const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: f } }), encoding: 'utf8',
+          env: { ...process.env, VAWE_HOOK_FULL: '1' } });   // assert against the full text, not the summary
         return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
       };
       const tmp = path.join(repoRoot, 'films/scene/_craft-live-probe.json');

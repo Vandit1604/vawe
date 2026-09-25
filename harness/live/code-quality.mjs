@@ -25,6 +25,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { summarize } from '../lib/hook-report.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const BASELINE = path.join(ROOT, 'quality/baselines/code-quality-baseline.json');
@@ -114,12 +115,16 @@ process.stdin.on('end', () => {
     for (const d of found.filter((f) => f.rule === rule)) lines.push(`    ${rel}:${d.line}  ${d.message}`);
   }
 
-  process.stderr.write(
+  const full =
     `This edit made ${rel} more tangled than it was.\n\n${lines.join('\n')}\n\n`
     + 'Split it so each function does one job. A function that needs a paragraph to describe what it\n'
     + 'does is usually two functions. Keep the comments, move each one with the code it explains.\n\n'
     + 'If the shape you wrote is genuinely right and the rule is wrong here, say so in your reply and\n'
     + 'run: make code-quality WRITE=1  (that accepts the new number as the line to hold).\n\n'
-    + 'Refused by harness/live/code-quality.mjs. Limits live in .oxlintrc.json.\n');
+    + 'Refused by harness/live/code-quality.mjs. Limits live in .oxlintrc.json.\n';
+
+  const say = summarize('code-quality', rel, full);
+  if (!say) process.exit(0);            // same finding as last time; already said, no need to repeat
+  process.stderr.write(say + '\n');
   process.exit(2);
 });

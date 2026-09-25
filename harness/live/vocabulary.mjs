@@ -21,6 +21,7 @@
 // file deliberately, never to quiet a complaint.
 import fs from 'node:fs';
 import path from 'node:path';
+import { summarize } from '../lib/hook-report.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const BASELINE = path.join(ROOT, 'quality/baselines/vocabulary-baseline.json');
@@ -63,7 +64,7 @@ process.stdin.on('end', () => {
   }
   if (!fresh.length) process.exit(0);
 
-  console.error(`${rel}: ${fresh.map((n) => `\`${n}\``).join(', ')} ${fresh.length > 1 ? 'look' : 'looks'} like a named vocabulary and ${fresh.length > 1 ? 'are' : 'is'} not a registry.
+  const full = `${rel}: ${fresh.map((n) => `\`${n}\``).join(', ')} ${fresh.length > 1 ? 'look' : 'looks'} like a named vocabulary and ${fresh.length > 1 ? 'are' : 'is'} not a registry.
 
 If an author writes one of those names in a scene, make it a registry instead. It costs one edit in this
 file and buys all of it: a throwing pick() that names the near word instead of rendering a default, its
@@ -78,6 +79,10 @@ refuses to let you leave unfindable.
   });
 
 If it is NOT something an author names (a props table, an interaction matrix, a constant set), it is
-correct as it is: add it to quality/baselines/vocabulary-baseline.json and carry on.`);
+correct as it is: add it to quality/baselines/vocabulary-baseline.json and carry on.`;
+
+  const say = summarize('vocabulary', rel, full);
+  if (!say) process.exit(0);            // same finding as last time; already said, no need to repeat
+  console.error(say);
   process.exit(2);
 });

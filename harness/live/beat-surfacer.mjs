@@ -32,6 +32,7 @@ import { RECIPES } from '../../recipes/index.mjs';
 // a beat nudged here and a film audited there never disagree about what counts as a match.
 import { GROUPS, usedNames, pasteLine, ambiguousNames, tokenGroupsOf, bestWindowMatch } from '../author/discovery.mjs';
 import { coverageIn, CONFIDENT } from '../author/arsenal.mjs';
+import { summarize } from '../lib/hook-report.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
@@ -194,7 +195,10 @@ process.stdin.on('end', () => {
   try { out = say(rel, file); } catch { process.exit(0); }   // mid-edit or unparsable, not a finding
   if (!out.length) process.exit(0);
 
-  console.error(`${path.basename(rel)}\n${out.join('\n')}\n`
-    + `  Nothing here blocks. \`make arsenal Q="sustained motion"\` finds the rest by hand.`);
+  const full = `${path.basename(rel)}\n${out.join('\n')}\n`
+    + `  Nothing here blocks. \`make arsenal Q="sustained motion"\` finds the rest by hand.`;
+  const shown = summarize('beat-surfacer', rel, full);
+  if (!shown) process.exit(0);          // same finding as last time; already said, no need to repeat
+  console.error(shown);
   process.exit(2);
 });
