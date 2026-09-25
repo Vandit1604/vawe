@@ -100,56 +100,56 @@ const spreadFrom = (dx, dy, { at = 0.15, dur = 0.75, ease = 'spring' } = {}) => 
 // in `var(--accent)`, and an accent line on a frosted panel measured 2.3:1 in `make audit` against a
 // 4.5:1 floor. Darkening the scrim under it does not save it, the accent is the light half of that
 // pair. The eyebrow's job is done by the stat tiles' labels instead. See `frameworkFindings`.
+// ONE HTML LAYER PER TILE, not `parts`: each tile already carries its own start offset off `i`, and
+// `parts`' flat stagger cannot express a per-item delay that is also a function of loop index here.
+function glassStatTile(s, i, { x, y, heroW, sideW, tileH, gap, start, dur }) {
+  const th = r2(tileH);
+  const html = `<div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start;`
+    + `gap:${SPACE.snug}px;padding:${SPACE.lg}px;box-sizing:border-box;width:${sideW}px;height:${th}px">`
+    + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${INK_SUB};letter-spacing:.10em">${s.label ?? ''}</span>`
+    + `<span style="font:700 ${TYPE.display}px var(--font-sans);color:${INK};letter-spacing:-.02em">${s.value ?? ''}${s.unit ?? ''}</span>`
+    // the theme's own success colour, lifted toward white: `var(--up)` straight measured 1.6:1
+    // on this panel, and a status colour nobody can read is decoration.
+    + (s.delta ? `<span style="font:700 ${TYPE.body}px var(--font-sans);color:color-mix(in srgb, var(--up) 45%, #fff)">${s.delta}</span>` : '')
+    + '</div>';
+  return {
+    type: 'html', x: x + heroW + gap, y: r2(y + i * (tileH + gap)), w: sideW, h: th, html,
+    ...frost({ radius: R.soft, tint: 0.11, blur: 16 }),
+    start: r2(start + 0.25 + i * 0.14), duration: r2(dur - 0.25 - i * 0.14),
+    anim: 'slide-right', enterDur: 0.42, out: 'defocus', exitDur: 0.4,
+  };
+}
+
+// EACH CHIP KEEPS ITS OWN `frost()`, so this stays N html layers inside one row group rather than one
+// fragment: glass blur is a LAYER prop (`glass:`), so a chip that reads as its own pane of glass needs
+// its own layer, and the group is what keeps the row's flex gap without hand-computed x offsets.
+function glassChipsRow(chips, { x, y, start, dur }) {
+  return {
+    type: 'group', x, y, layout: 'row', items: 'center', gap: SPACE.sm,
+    start: r2(start + 0.55), duration: r2(dur - 0.55), anim: 'rise', enterDur: 0.4,
+    out: 'defocus', exitDur: 0.35,
+    children: chips.map((c, i) => ({
+      type: 'html', html: `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${INK};white-space:nowrap">${c}</span>`,
+      pad: '11px 22px',
+      ...frost({ radius: R.pill, tint: 0.13, blur: 14, elevation: E.card }),
+      delay: r2(0.15 + i * 0.07), anim: 'pop', enterDur: 0.3,
+    })),
+  };
+}
+
 export function glassWidgets({ x, y, w = 1080, h = 560, title = 'Frosted surfaces',
   desc = 'Everything behind the panel keeps moving.', stats = [], chips = [], gap = SPACE.lg,
   split = 0.58, start = 0, dur = 5 } = {}) {
   const chipsH = chips.length ? 60 : 0;
   const bodyH = h - (chipsH ? chipsH + gap : 0);
   const heroW = Math.round((w - gap) * Math.min(0.85, Math.max(0.35, split)));
-  const sideW = w - gap - heroW;
-  const n = Math.max(1, stats.length);
+  const sideW = w - gap - heroW, n = Math.max(1, stats.length);
   const tileH = (bodyH - gap * (n - 1)) / n;
-
   const out = [scrimFor({ x, y, w: heroW, h: bodyH, radius: R.round, start, dur }),
     ...glassCard({ x, y, w: heroW, h: bodyH, title, desc, tint: 0.09,
-      radius: R.round, start, dur, anim: 'pop', enterDur: 0.55 })];
-
-  // ONE HTML LAYER PER TILE, not `parts`: each tile already carries its own start offset off `i`, and
-  // `parts`' flat stagger cannot express a per-item delay that is also a function of loop index here.
-  stats.forEach((s, i) => {
-    const th = r2(tileH);
-    const html = `<div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start;`
-      + `gap:${SPACE.snug}px;padding:${SPACE.lg}px;box-sizing:border-box;width:${sideW}px;height:${th}px">`
-      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${INK_SUB};letter-spacing:.10em">${s.label ?? ''}</span>`
-      + `<span style="font:700 ${TYPE.display}px var(--font-sans);color:${INK};letter-spacing:-.02em">${s.value ?? ''}${s.unit ?? ''}</span>`
-      // the theme's own success colour, lifted toward white: `var(--up)` straight measured 1.6:1
-      // on this panel, and a status colour nobody can read is decoration.
-      + (s.delta ? `<span style="font:700 ${TYPE.body}px var(--font-sans);color:color-mix(in srgb, var(--up) 45%, #fff)">${s.delta}</span>` : '')
-      + '</div>';
-    out.push({
-      type: 'html', x: x + heroW + gap, y: r2(y + i * (tileH + gap)), w: sideW, h: th, html,
-      ...frost({ radius: R.soft, tint: 0.11, blur: 16 }),
-      start: r2(start + 0.25 + i * 0.14), duration: r2(dur - 0.25 - i * 0.14),
-      anim: 'slide-right', enterDur: 0.42, out: 'defocus', exitDur: 0.4,
-    });
-  });
-
-  // EACH CHIP KEEPS ITS OWN `frost()`, so this stays N html layers inside one row group rather than one
-  // fragment: glass blur is a LAYER prop (`glass:`), so a chip that reads as its own pane of glass needs
-  // its own layer, and the group is what keeps the row's flex gap without hand-computed x offsets.
-  if (chips.length) {
-    out.push({
-      type: 'group', x, y: r2(y + bodyH + gap), layout: 'row', items: 'center', gap: SPACE.sm,
-      start: r2(start + 0.55), duration: r2(dur - 0.55), anim: 'rise', enterDur: 0.4,
-      out: 'defocus', exitDur: 0.35,
-      children: chips.map((c, i) => ({
-        type: 'html', html: `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${INK};white-space:nowrap">${c}</span>`,
-        pad: '11px 22px',
-        ...frost({ radius: R.pill, tint: 0.13, blur: 14, elevation: E.card }),
-        delay: r2(0.15 + i * 0.07), anim: 'pop', enterDur: 0.3,
-      })),
-    });
-  }
+      radius: R.round, start, dur, anim: 'pop', enterDur: 0.55 }),
+    ...stats.map((s, i) => glassStatTile(s, i, { x, y, heroW, sideW, tileH, gap, start, dur }))];
+  if (chips.length) out.push(glassChipsRow(chips, { x, y: r2(y + bodyH + gap), start, dur }));
   return out;
 }
 
@@ -282,57 +282,56 @@ export function glassControls({ x, y, w = 760, track = 'Deterministic render', e
 // which belongs to nobody. Tiles arrive on the diagonal, so the grid fills like a wave rather than a
 // list.
 // BACKDROP: `blobs` or `aurora`. A big soft field, because a grid of small panels samples it widely.
+function glassHomeWidget(widget, { x, y, w, widgetH, start, dur }) {
+  const html = `<div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start;`
+    + `gap:${SPACE.snug}px;padding:${SPACE.lg}px;box-sizing:border-box;width:${w}px;height:${widgetH}px">`
+    + sheenHtml(Math.round(w * 0.5))
+    + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${INK_SUB};letter-spacing:.10em">${widget.label || ''}</span>`
+    + `<span style="font:700 ${TYPE.hero}px var(--font-sans);color:${INK};letter-spacing:-.03em">${widget.value || ''}</span>`
+    + (widget.sub ? `<span style="font:500 ${TYPE.body}px var(--font-sans);color:${INK_SUB}">${widget.sub}</span>` : '')
+    + '</div>';
+  return {
+    type: 'html', x, y, w, h: widgetH, html,
+    ...frost({ radius: R.round, tint: 0.11, blur: 22 }),
+    start, duration: dur, anim: 'pop', enterDur: 0.5, out: 'defocus', exitDur: 0.4,
+  };
+}
+
+// ONE HTML LAYER PER TILE, not `parts`: the diagonal-wave delay is a function of each tile's own
+// row/col, which `parts`' flat stagger cannot express.
+function glassHomeTile(t, i, { x, gridY, cols, size, gap, labelH, glyph, label, start, dur }) {
+  const c = i % cols, r = Math.floor(i / cols);
+  const tx = x + c * (size + gap), ty = gridY + r * (size + gap + labelH);
+  const st = r2(start + 0.2 + (c + r) * 0.07);          // the diagonal wave
+  const icon = {
+    type: 'html', x: tx, y: r2(ty), w: size, h: size,
+    html: `<div style="width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center">`
+      + svgIcon(t.icon || 'cube', { size: glyph, color: INK, stroke: 1.6 }) + '</div>',
+    ...frost({ radius: R.round, tint: 0.13, blur: 18 }),
+    start: st, duration: r2(dur - (st - start)), anim: 'pop', enterDur: 0.4,
+    out: 'defocus', exitDur: 0.35,
+  };
+  if (!(label && t.label)) return [icon];
+  // TYPE.base, not TYPE.fine: a TOP-LEVEL text layer is floored at 18px by the validator, and
+  // these labels sit on the backdrop rather than inside a panel.
+  return [icon, text({ text: t.label, x: tx, y: r2(ty + size + 10), w: size, align: 'center',
+    size: TYPE.base, weight: 600, color: INK,
+    start: r2(st + 0.08), duration: r2(dur - (st - start) - 0.08), anim: 'fade', enterDur: 0.3,
+    out: 'fade', exitDur: 0.3 })];
+}
+
 export function glassHome({ x, y, tiles = [], cols = 4, size = 132, gap = SPACE.lg, label = true,
   widget = null, start = 0, dur = 5 } = {}) {
   const w = cols * size + (cols - 1) * gap;
   // the glyph is a PROPORTION of its tile, the way glassDock's already is. A fixed 56px happened to be
   // right at the catalog's size:132 and nowhere else: at size:200 the same glyph covers 28% of the tile
   // instead of 42% and the launcher reads as empty plates. 0.424 reproduces 56 at 132.
-  const glyph = Math.round(size * 0.424);
-  const labelH = label ? 34 : 0;
-  const widgetH = widget ? 160 : 0;
-  const out = [];
-
-  if (widget) {
-    const html = `<div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start;`
-      + `gap:${SPACE.snug}px;padding:${SPACE.lg}px;box-sizing:border-box;width:${w}px;height:${widgetH}px">`
-      + sheenHtml(Math.round(w * 0.5))
-      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${INK_SUB};letter-spacing:.10em">${widget.label || ''}</span>`
-      + `<span style="font:700 ${TYPE.hero}px var(--font-sans);color:${INK};letter-spacing:-.03em">${widget.value || ''}</span>`
-      + (widget.sub ? `<span style="font:500 ${TYPE.body}px var(--font-sans);color:${INK_SUB}">${widget.sub}</span>` : '')
-      + '</div>';
-    out.push({
-      type: 'html', x, y, w, h: widgetH, html,
-      ...frost({ radius: R.round, tint: 0.11, blur: 22 }),
-      start, duration: dur, anim: 'pop', enterDur: 0.5, out: 'defocus', exitDur: 0.4,
-    });
-  }
-
-  // ONE HTML LAYER PER TILE, not `parts`: the diagonal-wave delay is a function of each tile's own
-  // row/col, which `parts`' flat stagger cannot express.
+  const glyph = Math.round(size * 0.424), labelH = label ? 34 : 0, widgetH = widget ? 160 : 0;
   const gridY = y + (widget ? widgetH + gap : 0);
-  tiles.forEach((t, i) => {
-    const c = i % cols, r = Math.floor(i / cols);
-    const tx = x + c * (size + gap), ty = gridY + r * (size + gap + labelH);
-    const st = r2(start + 0.2 + (c + r) * 0.07);          // the diagonal wave
-    out.push({
-      type: 'html', x: tx, y: r2(ty), w: size, h: size,
-      html: `<div style="width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center">`
-        + svgIcon(t.icon || 'cube', { size: glyph, color: INK, stroke: 1.6 }) + '</div>',
-      ...frost({ radius: R.round, tint: 0.13, blur: 18 }),
-      start: st, duration: r2(dur - (st - start)), anim: 'pop', enterDur: 0.4,
-      out: 'defocus', exitDur: 0.35,
-    });
-    if (label && t.label) {
-      // TYPE.base, not TYPE.fine: a TOP-LEVEL text layer is floored at 18px by the validator, and
-      // these labels sit on the backdrop rather than inside a panel.
-      out.push(text({ text: t.label, x: tx, y: r2(ty + size + 10), w: size, align: 'center',
-        size: TYPE.base, weight: 600, color: INK,
-        start: r2(st + 0.08), duration: r2(dur - (st - start) - 0.08), anim: 'fade', enterDur: 0.3,
-        out: 'fade', exitDur: 0.3 }));
-    }
-  });
-  return out;
+  return [
+    ...(widget ? [glassHomeWidget(widget, { x, y, w, widgetH, start, dur })] : []),
+    ...tiles.flatMap((t, i) => glassHomeTile(t, i, { x, gridY, cols, size, gap, labelH, glyph, label, start, dur })),
+  ];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -348,52 +347,59 @@ export function glassHome({ x, y, tiles = [], cols = 4, size = 132, gap = SPACE.
 // touch quality/gates/**, so a native `group` of `box()` tiles is the form the invariant can still be
 // read off. The label chip and running dot already worked in html/native as appropriate; only the
 // dock strip itself stayed a group, for this one reason.
-export function glassDock({ x, y, items = [], magnify = -1, size = 76, peak = 1.62, gap = SPACE.sm,
-  start = 0, dur = 4.5 } = {}) {
+// dock magnification falloff: the hovered item at `peak`, its neighbours part of the way there.
+function glassDockGeometry(items, { x, size, peak, magnify, gap }) {
   const pad = SPACE.sm;
-  // dock magnification falloff: the hovered item at `peak`, its neighbours part of the way there.
   const scaleAt = (i) => (magnify < 0 ? 1 : 1 + (peak - 1) / (1 + Math.abs(i - magnify) * 1.9));
   const sizes = items.map((_, i) => Math.round(size * scaleAt(i)));
   const dockW = sizes.reduce((a, s) => a + s, 0) + gap * Math.max(0, items.length - 1) + 2 * pad;
   const dockH = Math.max(...sizes, size) + 2 * pad;
   const centreOf = (k) => x + pad + sizes.slice(0, k).reduce((a, s) => a + s + gap, 0) + sizes[k] / 2;
+  return { pad, sizes, dockW, dockH, centreOf };
+}
 
-  const out = [{
+// THE CORNER SCALES WITH THE TILE. Magnification is a scale of the whole icon, so a fixed `R.soft`
+// made the one tile this block exists to enlarge the least round of the row: 16px is 21% of a 76px
+// neighbour and 13% of the 123px peak, so the subject read squarer than its context. 0.21 reproduces
+// 16px at the default size and follows every other tile up.
+function glassDockTile(it, i, { sizes, magnify }) {
+  return box({
+    w: sizes[i], h: sizes[i], radius: Math.round(sizes[i] * 0.21),
+    bg: i === magnify ? HILITE : 'rgba(255,255,255,0.16)',
+    border: `1px solid ${i === magnify ? EDGE : EDGE_SOFT}`,
+    layout: 'row', justify: 'center', items: 'center',
+    ...stagger(i, { step: 0.05, delay: 0.12, anim: 'pop', enterDur: 0.3 }),
+    children: [{ type: 'html', w: Math.round(sizes[i] * 0.46), h: Math.round(sizes[i] * 0.46),
+      html: svgIcon(it.icon || 'cube', { size: Math.round(sizes[i] * 0.46), color: INK }) }],
+  });
+}
+
+function glassDockCallout(it, { y, dockH, centreOf, magnify, start, dur }) {
+  const dot = rect({ x: r2(centreOf(magnify) - 4), y: r2(y + dockH + 10), w: 8, h: 8, radius: R.pill,
+    bg: 'var(--accent)', start: r2(start + 0.55), duration: r2(dur - 0.55),
+    anim: 'pop', enterDur: 0.25, out: 'fade', exitDur: 0.25 });
+  if (!it.label) return [dot];
+  return [{
+    type: 'html', x: r2(centreOf(magnify) - 130), y: r2(y - 68), w: 260,
+    html: `<div style="text-align:center;padding:9px 18px;box-sizing:border-box;width:260px">`
+      + `<span style="font:700 ${TYPE.base}px var(--font-sans);color:${INK}">${it.label}</span></div>`,
+    ...frost({ radius: R.pill, tint: 0.16, blur: 16, elevation: E.card }),
+    start: r2(start + 0.45), duration: r2(dur - 0.45), anim: 'pop', enterDur: 0.3,
+    out: 'defocus', exitDur: 0.3,
+  }, dot];
+}
+
+export function glassDock({ x, y, items = [], magnify = -1, size = 76, peak = 1.62, gap = SPACE.sm,
+  start = 0, dur = 4.5 } = {}) {
+  const { pad, sizes, dockW, dockH, centreOf } = glassDockGeometry(items, { x, size, peak, magnify, gap });
+  const strip = {
     type: 'group', x, y, w: dockW, h: dockH, layout: 'row', items: 'flex-end', justify: 'center',
     gap, pad, ...frost({ radius: R.round, tint: 0.12, blur: 24 }),
     start, duration: dur, anim: 'rise', enterDur: 0.45, out: 'defocus', exitDur: 0.4,
-    children: items.map((it, i) => box({
-      // THE CORNER SCALES WITH THE TILE. Magnification is a scale of the whole icon, so a fixed
-      // `R.soft` made the one tile this block exists to enlarge the least round of the row: 16px is
-      // 21% of a 76px neighbour and 13% of the 123px peak, so the subject read squarer than its
-      // context. 0.21 reproduces 16px at the default size and follows every other tile up.
-      w: sizes[i], h: sizes[i], radius: Math.round(sizes[i] * 0.21),
-      bg: i === magnify ? HILITE : 'rgba(255,255,255,0.16)',
-      border: `1px solid ${i === magnify ? EDGE : EDGE_SOFT}`,
-      layout: 'row', justify: 'center', items: 'center',
-      ...stagger(i, { step: 0.05, delay: 0.12, anim: 'pop', enterDur: 0.3 }),
-      children: [{ type: 'html', w: Math.round(sizes[i] * 0.46), h: Math.round(sizes[i] * 0.46),
-        html: svgIcon(it.icon || 'cube', { size: Math.round(sizes[i] * 0.46), color: INK }) }],
-    })),
-  }];
-
-  if (magnify >= 0 && magnify < items.length && items[magnify]) {
-    const it = items[magnify];
-    if (it.label) {
-      out.push({
-        type: 'html', x: r2(centreOf(magnify) - 130), y: r2(y - 68), w: 260,
-        html: `<div style="text-align:center;padding:9px 18px;box-sizing:border-box;width:260px">`
-          + `<span style="font:700 ${TYPE.base}px var(--font-sans);color:${INK}">${it.label}</span></div>`,
-        ...frost({ radius: R.pill, tint: 0.16, blur: 16, elevation: E.card }),
-        start: r2(start + 0.45), duration: r2(dur - 0.45), anim: 'pop', enterDur: 0.3,
-        out: 'defocus', exitDur: 0.3,
-      });
-    }
-    out.push(rect({ x: r2(centreOf(magnify) - 4), y: r2(y + dockH + 10), w: 8, h: 8, radius: R.pill,
-      bg: 'var(--accent)', start: r2(start + 0.55), duration: r2(dur - 0.55),
-      anim: 'pop', enterDur: 0.25, out: 'fade', exitDur: 0.25 }));
-  }
-  return out;
+    children: items.map((it, i) => glassDockTile(it, i, { sizes, magnify })),
+  };
+  const hasMagnified = magnify >= 0 && magnify < items.length && items[magnify];
+  return [strip, ...(hasMagnified ? glassDockCallout(items[magnify], { y, dockH, centreOf, magnify, start, dur }) : [])];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
