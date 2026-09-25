@@ -1,10 +1,10 @@
 // blocks/dev.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, pill, onColor, onInk,
-  R, TYPE, SPACE, E, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
-  sweep, stagger, growUp, fillRight, stackWindows,
-  tint, TINT, DATA_CAP,
+  TOKENS, HAIR, r2, text, rect, onColor, onInk,
+  R, TYPE, SPACE, E, cardChrome,
+  stagger, fillRight,
+  tint, TINT,
 } from './kit.mjs';
 
 // THE CODE FAMILY IS THE INSTRUMENT REGISTER. `R.tight` is what the radius scale reserves for machine

@@ -236,5 +236,5 @@ for (const e of CATALOG) {
   // of silent substitution to remove: it is one throw, at module load, before anything renders.
   if (typeof fam !== 'function') throw new Error(`blocks/catalog.mjs: "${e.name}" names family "${e.family}", `
     + `which no factory exports. Known families: ${Object.keys(ownerOf).sort().join(', ')}`);
-  BLOCKS[e.name] = (opts = {}) => fam({ ...(e.props || {}), ...opts });
+  BLOCKS[e.name] = (opts = {}) => fam({ ...e.props, ...opts });
 }

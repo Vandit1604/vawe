@@ -15,7 +15,7 @@
 //
 // PURE BY CONTRACT, like every factory in blocks/: props → array of scene-layer JSON. No Date, no
 // Math.random, absolute coords on the 1920x1080 stage, `{x, y}` = the block's top-left.
-import { TOKENS as T, text, rect, box, stagger, R, SPACE, TYPE, E, r2 } from './kit.mjs';
+import { text, rect, box, stagger, R, SPACE, TYPE, E, r2 } from './kit.mjs';
 import { glassCard } from './sleek.mjs';
 import { svgIcon } from '../core/icons/icons.js';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
@@ -227,7 +227,6 @@ export function glassControls({ x, y, w = 760, track = 'Deterministic render', e
   const transW = w - meterW - gap;
   const cx = x + w / 2, cy = y + (scrubH + gap + rowH) / 2;   // the collapsed point everything leaves
   const p = Math.min(1, Math.max(0, progress));
-  const trackW = w - 2 * SPACE.lg;
 
   // the scrubber: one fragment, so the track / fill / playhead are one measured line rather than
   // three boxes an author has to keep in agreement.

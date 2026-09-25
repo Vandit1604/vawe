@@ -265,7 +265,7 @@ export function codeDiff({ x, y, w = 720, lines = [], label = '', theme = 'midni
 
   const vars = {}, varsDelay = {}, varsDur = {}, varsEase = {};
   let ci = 0;
-  const body = rows.map((r, i) => {
+  const body = rows.map((r) => {
     if (r.sign === ' ')
       return `<div style="height:${LINE_H}px;display:flex;align-items:center;font:500 ${FONT}px var(--font-mono);`
         + `white-space:pre;color:${P.label}"><span style="width:2ch;display:inline-block">${' '}</span>${esc(r.text)}</div>`;

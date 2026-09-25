@@ -271,7 +271,7 @@ export function usMapBubble({ x, y, w = 1200, h = 720, points = [], title = '', 
     ? `<path d="${d}" fill="${EMPTY}" stroke="${T.hair}" stroke-width="0.8" stroke-linejoin="round"/>` : ''; }).join('');
   const vals = points.map((p) => +p.value || 0);
   const max = Math.max(...vals, 1);
-  const dots = points.map((p, i) => {
+  const dots = points.map((p) => {
     const xy = proj(lonlatOf(p, 'usMapBubble'));
     if (!xy) return '';                                   // outside the Albers USA clip
     const r = minR + (maxR - minR) * Math.sqrt(Math.max(0, +p.value || 0) / max);

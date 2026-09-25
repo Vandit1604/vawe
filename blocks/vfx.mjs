@@ -12,7 +12,7 @@
 // the motion is genuinely a loop with no beginning (the caret blink). A calc() reading one of those is
 // re-evaluated on every seeked frame, which is what makes frame 412 independent of frame 411.
 import {
-  TOKENS, HAIR, r2, text, box, seriesAt,
+  TOKENS, HAIR, r2, seriesAt,
   R, TYPE, SPACE, E, cardChrome, tint, TINT, SHADOW_CARD,
   capCss, labelCss, numCss, needData, onInk,
 } from './kit.mjs';
