@@ -10,7 +10,7 @@
 //
 //   node tests/gates/judge-census.test.mjs
 import assert from 'node:assert/strict';
-import { census, loadReceipts } from '../../quality/gates/judge-census.mjs';
+import { census, loadReceipts } from '../../quality/gates/ledger.mjs';
 import { JUDGE_CODES } from '../../harness/lib/judge-codes.mjs';
 
 // --- census() over hand-built receipts, no filesystem involved --------------------------------------

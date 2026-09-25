@@ -410,11 +410,11 @@ Doctrine carries the taste; the gates backstop the source-decidable subset:
 
 ## Seam forensics: three defects the flash check can't see
 
-`quality/gates/seam-snap.mjs` reads the rendered mp4 for a whole-frame luminance flash at every
+`quality/gates/seams.mjs` reads the rendered mp4 for a whole-frame luminance flash at every
 boundary. Three real defects on `quality/runs/evals/briefs/demo.json` survived it because none of them touch
 the frame's overall brightness: a redraw local to one corner, a fade that keeps going past its own
 window, and a background that steps instead of blending while the layers on top of it dissolve.
-`node quality/gates/seam-forensics.mjs <scene.json>` reads the same rendered pixels, but inside the
+`node quality/gates/seams.mjs <scene.json>` reads the same rendered pixels, but inside the
 authored BOX of one layer, or the strip outside every layer's box, rather than the frame as a whole.
 
 ### Seam forensics ghost
@@ -451,7 +451,7 @@ placed in that margin reads its own motion here instead of the field's.
 
 Thresholds are read off real pixel measurements on `out/demo.mp4` (today's engine, before the three
 defects above were fixed), not guessed: a ghost's decay floor and ratio, a resurrection's edge-reading
-delta, and a split seam's step floor. `quality/gates/seam-forensics.mjs`'s own header constants
+delta, and a split seam's step floor. `quality/gates/seams.mjs`'s own header constants
 (`GHOST_FLOOR`, `GHOST_RATIO`, `RES_FLOOR`, `SPLIT_FLOOR`) are the one place they are written; re-measure
 them the same way (crop the box, `blend=difference` or `edgedetect=mode=colormix`, `scale=1:1`) before
 moving them, on a scene with and without the defect in question, the same way this file's numbers were

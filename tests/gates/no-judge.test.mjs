@@ -2,14 +2,15 @@
 // render it claims to have looked at. Writes a real receipt via harness/lib/receipt.mjs against a scene
 // JSON + a fake mp4, then rewrites the mp4's BYTES with the same NAME and same mtime untouched, and
 // asserts `isJudged` flips to false. mtime is left alone on purpose: a hash-based check must catch a
-// re-render a timestamp cannot (see the comment at the top of no-judge.mjs).
+// re-render a timestamp cannot (see the "WAS THIS FILM JUDGED" comment at the top of ledger.mjs, which
+// now carries this logic; it used to live in a since-merged no-judge.mjs).
 //   node tests/gates/no-judge.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { writeReceipt, receiptPath } from '../../harness/lib/receipt.mjs';
-import { isJudged, hashFile } from '../../quality/gates/no-judge.mjs';
+import { isJudged, hashFile } from '../../quality/gates/ledger.mjs';
 
 // receipt.mjs keys a receipt by basename alone (not the full path), so writeReceipt for a scoped test
 // file still lands in the SHARED quality/baselines/approved/judge/ directory real films use. A name no

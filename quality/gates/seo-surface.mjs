@@ -10,7 +10,7 @@
 // in Search Console or a broken shared-link preview. This is the read that would have caught it.
 //
 // FOUR ASSERTIONS, ALL HARD. Today's count is 0 for each (verified 2026-09-19), so none of these is a
-// ratchet: the ratchet idiom (quality/gates/output-contract.mjs, quality/gates/no-judge.mjs) exists to
+// ratchet: the ratchet idiom (quality/gates/output-contract.mjs, quality/gates/ledger.mjs unjudged) exists to
 // let an ALREADY-nonzero count fall gradually. There is nothing to grandfather in here; a fresh
 // violation is the whole failure mode.
 //

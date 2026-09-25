@@ -156,7 +156,7 @@ not: "the defaults this film refuses, in your own words"
   four and fails only on an INCREASE from the stamped baseline (harness/dev/
   storyboard-decide-ratchet.json, kept outside quality/baselines/ because this ratchet is adoption-only
   and never load-bearing on a push), exactly as `quality/gates/output-contract.mjs` and
-  `quality/gates/no-judge.mjs` already ratchet a count down rather than demanding it hit zero at once.
+  `quality/gates/ledger.mjs unjudged` already ratchet a count down rather than demanding it hit zero at once.
   Nothing bulk-fills the 232 existing beats: a declared value nobody actually decided is worse than an
   absent one, because it LOOKS like a decision.
 

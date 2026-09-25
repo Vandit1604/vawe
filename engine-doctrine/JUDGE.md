@@ -99,15 +99,15 @@ It writes `quality/baselines/approved/judge/<name>.json`: the scene's own conten
 bytes (`renderHash`, so a re-render invalidates it even if the scene JSON never changed), the verdict,
 and the date. A receipt is valid only when both hashes still match what is on disk right now.
 
-`make no-judge` (`quality/gates/no-judge.mjs`) counts rendered films (an `out/<name>.mp4` exists) with
-no valid receipt, against a ratchet at `quality/baselines/no-judge-ratchet.json` that may only fall.
-This CORPUS scan is deliberately NOT wired into CI: both `films/scene/*.json` content and `out/*.mp4`
-are gitignored, so a thin checkout would report a number about itself, not the library (the same
-reason `doc-refs` stays out of CI). Run it on demand, or from `.githooks/pre-push` once an author wants
-it enforced there. `--stamp` lowers the ceiling after judging a batch.
+`make no-judge` (`node quality/gates/ledger.mjs unjudged`) counts rendered films (an `out/<name>.mp4`
+exists) with no valid receipt, against a ratchet at `quality/baselines/no-judge-ratchet.json` that may
+only fall. This CORPUS scan is deliberately NOT wired into CI: both `films/scene/*.json` content and
+`out/*.mp4` are gitignored, so a thin checkout would report a number about itself, not the library (the
+same reason `doc-refs` stays out of CI). Run it on demand, or from `.githooks/pre-push` once an author
+wants it enforced there. `--stamp` lowers the ceiling after judging a batch.
 
-`no-judge.mjs` also has a SINGLE-FILM mode (`node quality/gates/no-judge.mjs <scene.json>`, no flags),
-and `make ship` calls exactly that as its last step. It was opt-in until 2026-09: `make ship` only ever
+`ledger.mjs` also has a SINGLE-FILM mode (`node quality/gates/ledger.mjs judged <scene.json>`, no
+flags), and `make ship` calls exactly that as its last step. It was opt-in until 2026-09: `make ship` only ever
 echoed a suggestion to run `make judge`, and the corpus ratchet measured the result: 121 rendered films
 with no receipt against 1 that had one. Opt-in lost the eye 121 times out of 122, so the decision
 reversed. `make ship` now refuses to finish without a fresh receipt for the film it just rendered, and

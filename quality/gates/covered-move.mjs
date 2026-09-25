@@ -32,7 +32,7 @@
 // not read (the fragment can be, and in this repo's own films is, transparent on purpose so a ground
 // rect shows through it). Guessing "may cover" from the type alone produced four false positives on
 // vawe-flow-2's own `gnd-*` backdrop rects. Deciding an html layer's real coverage is a rendered-pixel
-// question, seam-forensics.mjs's / probe-frame's job, not this JSON-only gate's: an html B is simply
+// question, seams.mjs's / probe-frame's job, not this JSON-only gate's: an html B is simply
 // never reported as a coverer here.
 //
 //   node quality/gates/covered-move.mjs <scene.json>   ·   make covered-move D=<file>

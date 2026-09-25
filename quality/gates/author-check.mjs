@@ -323,7 +323,7 @@ const LADDER = [
   ['direct', 'reports', 'direction: cut families, effect soup, continuity, and the motion tells'],
   ['floor', 'reports', 'ambition: whether this is a plain slideshow'],
   ['motion', 'blocks', 'whether anything in this film is choreographed rather than named'],
-  ['dissolve', 'reports', 'transitions: two text states cross-dissolved into mud'],
+  ['seams', 'blocks', 'every checked defect at a join: crossfade mud, flash, empty stage, ghost, resurrection, split seam'],
   ['covered-move', 'reports', 'a full-bleed layer above starts mid-move and hides it before it plays'],
   ['designspec', 'reports', 'the look lock: colours off the theme palette, fonts outside its roles'],
   ['design-drift', 'reports', 'silent with no design.md; otherwise every frame value against it (hard code)'],
@@ -567,10 +567,13 @@ styleGate('floor', 'direction floor (ambition)', 'quality/gates/direction-floor.
     { waivable: true, tier: 'blocks' });
 }
 
-// 4c. dissolve. The TRANSITION gate. Everything else here samples settled frames by construction, so a
-//     crossfade between two text states (a double exposure: both strings at half strength through the
-//     middle) was invisible to the whole ladder and shipped five times. See MISTAKES #171, #174.
-styleGate('dissolve', 'dissolve check (crossfade mud)', 'quality/gates/dissolve-check.mjs', strict ? ['--strict'] : [], { waivable: true });
+// 4c. seams. Every checked defect at a join, in one gate (quality/gates/seams.mjs, merged from
+//     seam-snap.mjs + seam-forensics.mjs + dissolve-check.mjs): a crossfade between two text states (a
+//     double exposure, invisible to the rest of the ladder, shipped five times: MISTAKES #171, #174),
+//     plus (post-render only, skipped here pre-render) a luminance flash, a drained stage, a ghost, a
+//     resurrection or a split seam. Every code is a real, previously-shipped defect, never a fitted
+//     threshold, so this blocks unconditionally, not gated behind TASTE=1.
+record('seams', runGate('seams', 'seams (crossfade mud, and post-render: flash, empty stage, ghost, resurrection, split seam)', 'quality/gates/seams.mjs', []), { waivable: true });
 // 4d. covered-move. Does a full-bleed layer above a moving one start mid-move and hide it? `track`
 //     decides stacking, array order breaks a same-track tie (films/scene/scene.js:597), and a move
 //     hidden before it plays reads as a hard cut nobody authored. Always report-only: this can't tell

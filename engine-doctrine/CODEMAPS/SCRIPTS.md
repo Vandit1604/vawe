@@ -45,6 +45,7 @@ REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a 
 | `motion-audit.mjs` | 752 | yes | quality/gates/motion-audit.mjs: check ANIMATION OVER TIME without rendering video. Renders every frame |
 | `direction-floor.mjs` | 687 | yes | quality/gates/direction-floor.mjs: THE AMBITION FLOOR. The inverse of effect-soup. |
 | `eye-trace.mjs` | 564 | no | quality/gates/eye-trace.mjs, WHERE IS THE VIEWER LOOKING WHEN A CUT LANDS, and where does the next |
+| `seams.mjs` | 552 | yes | quality/gates/seams.mjs: every checked defect AT A JOIN, merged from seam-snap.mjs + seam-forensics.mjs + dissolve-check.mjs. |
 | `schema-drift.mjs` | 447 | yes | schema-drift.mjs: keep the DATA CONTRACT honest. The engine (scene.html) reads layer props as |
 | `arsenal-check.mjs` | 441 | yes | quality/gates/arsenal-check.mjs: is every capability the engine offers actually IN the catalogue |
 | `doc-map.mjs` | 436 | yes | quality/gates/doc-map.mjs. The doc map: one source of truth, every index generated from it. |
@@ -64,10 +65,8 @@ REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a 
 | `frame-check.mjs` | 282 | yes | quality/gates/frame-check.mjs: THE PLAN, COMPARED WITH THE FRAMES BUILT FROM IT. |
 | `snap-scenes.mjs` | 282 | yes | quality/gates/snap-scenes.mjs: the WHOLE-LIBRARY determinism + regression net. scene-snap.mjs |
 | `rung.mjs` | 277 | yes | quality/gates/rung.mjs · which rules are only PROSE, and which ones something actually enforces? |
-| `seam-forensics.mjs` | 267 | yes | quality/gates/seam-forensics.mjs: the three defects a LUMINANCE flash never touches. |
 | `snap-signature.mjs` | 234 | no | quality/gates/snap-signature.mjs: the ONE definition of a snap signature, shared by both snap gates. |
 | `critique.mjs` | 230 | yes | quality/gates/critique.mjs: the VALUE GATE. Static critic over a scene JSON that fires on the failure |
-| `dissolve-check.mjs` | 226 | yes | quality/gates/dissolve-check.mjs: IS ANY TRANSITION A DOUBLE EXPOSURE? |
 | `stage.test.mjs` | 218 | no | node --test quality/gates/stage.test.mjs |
 | `paints-nothing.mjs` | 215 | yes | quality/gates/paints-nothing.mjs: did this layer actually paint anything, in its own box? |
 | `motion-split.mjs` | 210 | yes | quality/gates/motion-split.mjs: how much of a film's motion is the GROUND, and how much is the FILM. |
@@ -75,7 +74,6 @@ REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a 
 | `dead-branch.mjs` | 200 | yes | dead-branch.mjs: a branch that can never be taken, or two branches that do the same thing. |
 | `preflight.mjs` | 198 | yes | preflight.mjs: the decisions that belong BEFORE the JSON, as a step that happened. |
 | `docs-drift.mjs` | 193 | yes | quality/gates/docs-drift.mjs: a doc is a claim about the PAST as much as the future, and |
-| `seam-snap.mjs` | 192 | yes | quality/gates/seam-snap.mjs: SAMPLE THE SEAMS, NOT THE CENTERS. |
 | `blocks-audit.mjs` | 187 | yes | blocks-audit.mjs: do the block FACTORIES obey the rules the videos are held to? |
 | `discovery.mjs` | 185 | yes | quality/gates/discovery.mjs · can an author still FIND what this engine can do? |
 | `craft-coverage.mjs` | 179 | yes | quality/gates/craft-coverage.mjs, keep the docs honest: against the engine, and against each other. |

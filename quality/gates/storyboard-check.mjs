@@ -36,7 +36,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // exist today and NONE of them declare any of the four (the measurement this whole plan rests on). A
 // REQUIRED field would invalidate the corpus at once; this ratchet instead counts how many beats
 // declare NOTHING of the four, reports today's number, and fails only on an INCREASE, exactly as
-// `quality/gates/output-contract.mjs` and `quality/gates/no-judge.mjs` already ratchet a count down.
+// `quality/gates/output-contract.mjs` and `quality/gates/ledger.mjs unjudged` already ratchet a count down.
 //
 // THE BASELINE LIVES OUTSIDE quality/baselines/ ON PURPOSE (harness/dev/, the same precedent
 // harness/dev/prose-check-ratchet.json set): that directory is reserved for gates this repo has

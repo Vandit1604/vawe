@@ -6,7 +6,7 @@
 // carried by one continuous camera travel with no cut. Four codes fired on it anyway, all for the same
 // reason: each COUNTS a mechanism in the JSON (entries in `transitions[]`, background presets, `parts`
 // on a parent group) rather than MEASURING the result those mechanisms are supposed to produce. Against
-// that, `seam-snap.mjs` samples real luminance across the real rendered seam and passes the same film
+// that, `seams.mjs` samples real luminance across the real rendered seam and passes the same film
 // clean, because it looks at the pixels the mechanism was only ever a proxy for.
 //
 // So: does this gate read the scene JSON's DECLARED structure (mechanism), or the actual rendered
@@ -60,7 +60,6 @@ const CLASSIFY = {
   'critique.mjs': ['mechanism', 'per-layer red-flag scan (placeholder words, static lists) over declared content, no render'],
   'designspec-check.mjs': ['mechanism', 'compares a layer\'s declared colour/font against the theme JSON: JSON-to-JSON, no render'],
   'direction-floor.mjs': ['mechanism', 'counts transitions[], background presets and parts/each on a parent group; the exact shape the plan\'s four wrong-fire codes come from'],
-  'dissolve-check.mjs': ['mechanism', 'own comment: "this reads markup, not pixels"'],
   'draft-check.mjs': ['result', '"the checks that need real pixels and cannot be run on" the plan; requires out/<name>.mp4 to exist'],
   'edge-check.mjs': ['mechanism', 'computes declared scale/overscan geometry; no puppeteer, no ffprobe, no render read'],
   'eye-trace.mjs': ['mechanism', 'own heading: "WHY NOT PIXELS"; scores declared layer geometry, not a rendered frame'],
@@ -75,8 +74,7 @@ const CLASSIFY = {
   'plan-vs-render.mjs': ['mechanism', 'own comment: "make judge... belongs to... the pixels, and your eyes" (i.e. not this gate); derives events purely from declared spans/motion keys/boundary arrays'],
   'preflight.mjs': ['process', 'checks a receipt (harness/lib/receipt.mjs) recording whether the decision chain was RUN for this version; never reads the film\'s craft'],
   'read-check.mjs': ['mechanism', 'word-count vs on-screen duration, both read from the declared JSON'],
-  'seam-forensics.mjs': ['result', 'requireTool(\'ffprobe\') on the real rendered mp4'],
-  'seam-snap.mjs': ['result', 'own comment: "It reads the real rendered pixels (not renderFrame)... Requires out/<name>.mp4"'],
+  'seams.mjs': ['result', 'merged from seam-snap.mjs + seam-forensics.mjs + dissolve-check.mjs; five of its six checks requireTool(\'ffprobe\') on the real rendered mp4, the sixth (crossfade-mud) reads markup only'],
   'storyboard-check.mjs': ['mechanism', 'checks the storyboard.md table for missing beats/fields; the authored PLAN, not the render'],
   'study-check.mjs': ['process', 'checks a REFERENCE STUDY\'s completeness (grammar/<name>.json + refs/<name>/pages.*); the census wires it a film NAME where its contract wants a studied reference NAME, a contract mismatch, not a film judgment'],
   'study-verify.mjs': ['result', 'draft-renders the film itself and studies the resulting mp4 against the scene\'s own declared ground truth'],
@@ -186,7 +184,7 @@ function main() {
   lines.push('misfires on any film whose craft uses a different mechanism to reach the same result. A gate that MEASURES');
   lines.push('the result (real luminance across the real rendered seam, real changed pixels between real frames) does');
   lines.push('not. `vawe-flow-2.json` is the film that proved it: four MECHANISM codes fired on it wrongly, while');
-  lines.push('`seam-snap.mjs`, a RESULT gate, passed it clean.');
+  lines.push('`seams.mjs`, a RESULT gate, passed it clean.');
   lines.push('');
   lines.push('**refused** = the gate ran and found a real problem. **no-run** = a precondition was absent (no render, no');
   lines.push('receipt, no reference, a timeout) and the gate never got to measure anything; both used to be counted as');
