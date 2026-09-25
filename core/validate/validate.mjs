@@ -926,10 +926,15 @@ export function transitionErrors(cfg) {
 // authors one of the three raw keys is either pre-migration or a hand-written regression, not a second
 // legal spelling. Checked on the RAW file (this runs before lowering, both in boot.js and the CLI
 // below), so a scene this pass has already lowered never trips it: the lowered `cuts` it produced is
-// the engine's own output, not something the author wrote.
+// the engine's own output, not something the author wrote. `_lowered` is lowerScene's own mark of
+// that (core/transitions/lower.js): a Node consumer that pre-lowers before serving to the browser
+// (core/engine/boot.js's runtime validate call, reached by quality/gates/snap-scenes.mjs and
+// scene-snap.mjs) would otherwise feed this refusal its own output and block every scene using
+// transitions[].
 const JUNCTION_KEY_MECH = { cuts: 'cut', stings: 'sting', seams: 'seam' };
 export function authoredJunctionErrors(cfg) {
   const out = [];
+  if (cfg?._lowered) return out;
   for (const [key, mech] of Object.entries(JUNCTION_KEY_MECH)) {
     if (Array.isArray(cfg?.[key]) && cfg[key].length)
       out.push(`${key}[] is no longer an authored key, it is the INTERNAL lowered output of `

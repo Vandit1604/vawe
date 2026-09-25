@@ -143,6 +143,15 @@ export function lowerScene(data) {
     if (stings.length) data.stings = stings;
     if (seams.length) data.seams = seams;
     delete data.transitions;
+    // The cuts/stings/seams just written are THIS PASS's own output, not something an author typed.
+    // core/validate/validate.mjs `authoredJunctionErrors` refuses a hand-written cuts[]/stings[]/seams[],
+    // and without this mark it cannot tell its own lowered output from a hand-written one: any Node
+    // consumer that lowers before validating (core/engine/expand.js `loadScene`, read by every render
+    // harness that pre-expands for the browser: quality/gates/snap-scenes.mjs, scene-snap.mjs) fed its
+    // own output back into the refusal it exists to catch, and validate.mjs's runtime call in
+    // core/engine/boot.js blocked every scene using transitions[] this way. `_`-prefixed keys already
+    // ride through lowering untouched (see notesOf above), so this rides the same convention.
+    data._lowered = true;
   }
 
   // ENERGY reaches HAND-AUTHORED cuts/seams too, so the film-wide velocity is not limited to the
