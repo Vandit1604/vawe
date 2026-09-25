@@ -208,6 +208,63 @@ export const resolveCameraMove = (name) => {
   return Object.prototype.hasOwnProperty.call(CAMERA_WORDS, name) ? CAMERA_WORDS[name] : name;
 };
 
+// ---- COMPARATIVE: a word → a direction, stepping the DURATION ladder ----------------------------
+// A user often names a word relative to what is already there ("make it faster", "a touch slower")
+// rather than an absolute duration. There is nothing to alias: this is not a sixth DURATION entry, it
+// is a DIRECTION over the ladder DURATION already is. `Object.keys(DURATION)` is already ordered
+// instant..luxurious by its own seconds, so "one step" needs no new data.
+//
+// FEEL carries no such order and is deliberately left out: its words are curve SHAPES, not degrees of
+// one scale (`heavy` is not "more" of `snappy`; the closest thing to an order, ring/overshoot on
+// `pop`→`bouncy`→`elastic`, covers 3 of 11 words and would leave the other 8 with no honest step).
+// Comparative duration words are the case that fits the data; comparative feel words are not, so they
+// stay out rather than force an order the registry does not already carry.
+export const COMPARATIVE = { faster: -1, slower: 1 };
+
+const COMPARATIVE_BLURBS = {
+  faster: 'one step toward `instant` on the duration ladder: whatever is there now, a touch quicker.',
+  slower: 'one step toward `luxurious` on the duration ladder: whatever is there now, more deliberate.',
+};
+
+const COMPARATIVE_AKA = {
+  faster: ['quicker', 'snappier', 'speed up', 'speed it up', 'tighten the timing'],
+  slower: ['more deliberate', 'slow down', 'slow it down', 'ease off', 'give it more time'],
+};
+
+export const COMPARATIVE_REGISTRY = defineRegistry('comparative duration word', COMPARATIVE,
+  { slot: 'enterDur / exitDur / duration (relative)', blurbs: COMPARATIVE_BLURBS, aka: COMPARATIVE_AKA });
+
+const DURATION_LADDER = Object.keys(DURATION);
+
+/**
+ * resolveComparative(word, current): one step along the DURATION ladder from `current`.
+ *   word: `faster` or `slower` (the canonical spellings; `aka` on the registry is a SEARCH index for
+ *     `make arsenal` only, same as every other registry here, never a second spelling this accepts).
+ *     An unknown word throws, same contract as every other resolver in this file.
+ *   current: the value the step is relative to, a number of seconds, a DURATION word, or absent
+ *     (defaults to `medium`, the engine's own default entrance). Snapped to the ladder's NEAREST step
+ *     first, so a hand-typed 0.5s steps from `slow` (0.6s), the closest named rung, not from an
+ *     unratcheted 0.5.
+ * CLAMPS at either end rather than throwing: "faster" than `instant` stays `instant`. A silent clamp
+ * is normally the exact failure this file refuses (core/registry/registry.js), but there is nowhere
+ * else for the step to land, an end of a five-word ladder is the ladder's own edge, not an unknown
+ * value being guessed at. No consumer resolves this automatically yet (nothing in a scene or a harness
+ * tool names a layer's OWN prior value to step from); it is reachable today only by calling it directly
+ * or through `make arsenal Q="snappier"`.
+ */
+export function resolveComparative(word, current) {
+  const dir = COMPARATIVE_REGISTRY.pick(word);
+  const seconds = current == null ? DURATION.medium
+    : typeof current === 'number' ? current : resolveSeconds(current);
+  let idx = 0, bestDiff = Infinity;
+  DURATION_LADDER.forEach((w, i) => {
+    const diff = Math.abs(DURATION[w] - seconds);
+    if (diff < bestDiff) { bestDiff = diff; idx = i; }
+  });
+  const next = Math.min(DURATION_LADDER.length - 1, Math.max(0, idx + dir));
+  return DURATION[DURATION_LADDER[next]];
+}
+
 /**
  * verifyVocab({ easings, cameraMoves }): every word's target still exists.
  * Called by lib-test rather than at import time: this file must stay a leaf (core/motion.js imports
