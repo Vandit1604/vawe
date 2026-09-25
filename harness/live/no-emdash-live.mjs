@@ -1,20 +1,32 @@
 #!/usr/bin/env node
-// harness/live/no-emdash-live.mjs - catch an em dash at write time, not at push time.
+// harness/live/no-emdash-live.mjs - catch an em dash at write time, in the files pre-push does not scan.
 //
-// harness/dev/no-emdash.mjs is the backstop: it runs pre-push over the whole repo and blocks. That
-// caught two pushes today, both late, both after the agent had moved on to other work. This is its
-// write-time twin: PostToolUse on Edit|Write, same rule, same allowlist (EM and EXCLUDE are IMPORTED
-// from harness/dev/no-emdash.mjs, never copied, so the two can't drift). It only ever reports; the
-// push-time gate still owns the block.
+// harness/dev/no-emdash.mjs is the backstop: it runs pre-push and blocks. Its SCOPE is a list of
+// top-level directory names, matched as a git pathspec, so a nested directory that shares no top-level
+// name with the list is invisible to it: `renderer/cmd` and `renderer/internal` are Go source, not the
+// top-level `cmd`/`internal` the pathspec actually matches, so renderer/**.go is unscanned; same for
+// `grammar/`, `recipes/`, `assets/` (non-.md). This hook exists ONLY for that gap: a file the pre-push
+// scan will never reach. Everywhere pre-push already looks, this hook stays silent and lets push do its
+// job once, instead of saying the same thing twice.
 //
 // IT ONLY SCANS WHAT THE EDIT WROTE. For a Write, that is the whole file. For an Edit, that is
 // new_string: the file on disk already carries the edit by the time PostToolUse fires, so an em dash
 // already sitting untouched elsewhere in the file is not this edit's business and is not reported.
 import fs from 'node:fs';
 import path from 'node:path';
-import { EM, EXCLUDE } from '../dev/no-emdash.mjs';
+import { EM, EXCLUDE, SCOPE } from '../dev/no-emdash.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
+
+// True when harness/dev/no-emdash.mjs's own git pathspec would already reach this file, the same
+// prefix rule git uses for a bare directory-name pathspec: an exact match, or that name plus '/'.
+function coveredByPush(rel) {
+  return SCOPE.some((entry) => {
+    if (entry === '*.md') return rel.endsWith('.md');
+    if (entry === 'Makefile') return rel === 'Makefile' || rel.endsWith('/Makefile');
+    return rel === entry || rel.startsWith(`${entry}/`);
+  });
+}
 
 let raw = '';
 process.stdin.on('data', (d) => { raw += d; });
@@ -26,6 +38,7 @@ process.stdin.on('end', () => {
 
   const rel = path.relative(ROOT, file);
   if (rel.startsWith('..') || EXCLUDE.some((f) => f(rel))) process.exit(0);
+  if (coveredByPush(rel)) process.exit(0);   // pre-push already scans this file; don't say it twice
   if (!fs.existsSync(file)) process.exit(0);
 
   const full = fs.readFileSync(file, 'utf8');

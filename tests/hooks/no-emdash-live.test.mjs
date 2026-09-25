@@ -1,8 +1,9 @@
 // node tests/hooks/no-emdash-live.test.mjs
 //
 // harness/live/no-emdash-live.mjs, fed exactly as Claude Code's PostToolUse feeds a Write or Edit
-// (stdin JSON carrying tool_input, stderr on exit 2). Two cases: a real em dash in the written content
-// is reported with its line, and the same character inside an allowlisted vendored path is silent.
+// (stdin JSON carrying tool_input, stderr on exit 2). An em dash in a file the pre-push scan cannot
+// reach (renderer/, outside its SCOPE list) is reported; the same character in a file pre-push already
+// scans (harness/), or inside an allowlisted vendored path, is silent either way.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -28,8 +29,8 @@ const write = (rel, body) => {
 };
 const cleanup = (rel) => fs.rmSync(path.join(ROOT, rel), { force: true });
 
-test('a Write that lands an em dash is reported with its file and line', () => {
-  const rel = ['harness/live/test/.zz-emdash-write-probe', 'mjs'].join('.'); // joined: make doc-refs reads .mjs paths
+test('a Write that lands an em dash in a file pre-push cannot reach is reported with its file and line', () => {
+  const rel = ['renderer/live-test/.zz-emdash-write-probe', 'go'].join('.'); // joined: make doc-refs reads .go paths
   const body = `const a = 1;\nconst b = 'note${EM}here';\n`;
   write(rel, body);
   try {
@@ -41,7 +42,7 @@ test('a Write that lands an em dash is reported with its file and line', () => {
 });
 
 test('an Edit whose new_string has no em dash is silent, even if the file has one elsewhere', () => {
-  const rel = ['harness/live/test/.zz-emdash-edit-probe', 'mjs'].join('.'); // joined: make doc-refs reads .mjs paths
+  const rel = ['renderer/live-test/.zz-emdash-edit-probe', 'go'].join('.'); // joined: make doc-refs reads .go paths
   const before = `const stale = 'old${EM}note';\n`;
   write(rel, before);
   const newString = `const fresh = 'clean line';\n`;
@@ -49,6 +50,16 @@ test('an Edit whose new_string has no em dash is silent, even if the file has on
   write(rel, after);
   try {
     const { status, err } = run({ tool_input: { file_path: path.join(ROOT, rel), new_string: newString } });
+    assert.equal(status, 0, `expected silence, got:\n${err}`);
+  } finally { cleanup(rel); }
+});
+
+test('an em dash in a file the pre-push scan already covers is silent, so push says it once', () => {
+  const rel = ['harness/live/test/.zz-emdash-covered-probe', 'mjs'].join('.'); // joined: make doc-refs reads .mjs paths
+  const body = `const a = 'note${EM}here';\n`;
+  write(rel, body);
+  try {
+    const { status, err } = run({ tool_input: { file_path: path.join(ROOT, rel), content: body } });
     assert.equal(status, 0, `expected silence, got:\n${err}`);
   } finally { cleanup(rel); }
 });
