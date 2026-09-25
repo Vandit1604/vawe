@@ -18,6 +18,9 @@
 # specific reason: the commit that ADDS a capability is a framework commit, and framework commits never
 # run an authoring ladder. The three.js layer landed that way and stayed out of the catalogue for as
 # long as it existed, so the author who needed a globe went to npm instead (engine-doctrine/MISTAKES.md #335).
+# word-action is here for the same reason as arsenal-check: a registry entry with no `aka` words and no
+# numbered `blurb` is a capability the authoring model cannot reach through plain English, and the commit
+# that adds one is a framework commit that never runs an authoring ladder.
 # scenes-json is here rather than in a site build because the drift it catches is INVISIBLE: the site
 # serves its own copy of a scene, so a film fixed in films/scene/ keeps playing broken on the site
 # until someone notices by hand. Nobody did for forty days (engine-doctrine/MISTAKES.md #475). It reads 15 files.
@@ -107,8 +110,8 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
   fi
 done
 
-echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + provenance + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check + skill-check + rule-length) …"
-if ! make schema-check lib-test craft-coverage coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung provenance sfx-check audit-test glyphs-audit sim-audit docker-context judge-census inert-check skill-check rule-length; then
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + word-action + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + provenance + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check + skill-check + rule-length) …"
+if ! make schema-check lib-test craft-coverage coverage doc-refs skill-reach arsenal-check word-action discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung provenance sfx-check audit-test glyphs-audit sim-audit docker-context judge-census inert-check skill-check rule-length; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi

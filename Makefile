@@ -1476,6 +1476,13 @@ paints-nothing: ## [check] does each layer paint anything in its own box? pixel 
 arsenal-check: ## [engine] fail if the engine exports a capability engine-doctrine/EFFECTS.md never mentions
 	@node quality/gates/arsenal-check.mjs $(if $(JSON),--json,)
 
+# word-action: every registry entry needs >= 2 `aka` words (plain phrases that find it) and a `blurb`
+# naming its real default number (distance/duration/scale/ease). Ratcheted per registry, same shape as
+# rung.mjs: a registry's missing count may fall and may never rise, and a brand-new registry starts at
+# ratchet 0. --stamp lowers the ceiling after a batch of entries is filled in.
+word-action: ## [engine] fail if any registry's missing word-to-action vocabulary count rose
+	@node quality/gates/word-action.mjs $(if $(STAMP),--stamp,) $(if $(JSON),--json,)
+
 # discovery: can an author still FIND what the engine can do? Registry blurbs are refused at load, so
 # this reads the SEARCH CORPUS instead, which is the only place that sees every source at once: the
 # catalogue reaches it without passing a write site, and 33 entries hid there while core/registry/registry.js
