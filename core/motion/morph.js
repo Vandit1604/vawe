@@ -33,7 +33,7 @@ export function buildMorph(el, L, gsap) {
   const a = measure(A, el), b = measure(B, el);
 
   // greedy match: each B char takes the first unused A char of the same value → those letters MIGRATE.
-  const usedA = new Array(a.slots.length).fill(false);
+  const usedA = Array.from({ length: a.slots.length }, () => false);
   const matchOf = b.slots.map((bs) => {
     for (let i = 0; i < a.slots.length; i++) if (!usedA[i] && a.slots[i].ch === bs.ch) { usedA[i] = true; return i; }
     return -1;
