@@ -263,6 +263,55 @@ function motions(opts, groups) {
   return { body, group: (i) => table[i] || none };
 }
 
+function buildCss(opts, { cls, mo, mask, ridge, darkCells, litCells, throughCells, emitted, shadow }) {
+  const layer = (name, blend, list) => list.length
+    ? `.${cls} .${name}{position:absolute;inset:-4%;mix-blend-mode:${blend}`
+      + `${mo.body.transform ? `;transform:${mo.body.transform}` : ''}`
+      + `${mask ? `;mask-image:${mask};-webkit-mask-image:${mask}` : ''}}`
+    : '';
+
+  return [
+    `.${cls}{position:absolute;inset:0;overflow:hidden;isolation:isolate;background:${opts.colour.ground}`
+      // A dial at its no-op value emits nothing, so the markup says what the options said.
+      + `${opts.colour.vivid === 1 ? '' : `;filter:saturate(${n(opts.colour.vivid)})`}}`,
+    `.${cls} .f{position:absolute;inset:-4%;background:${paintField(opts)}}`,
+    // Ambient fill, and the reason a picture can have warm light and cool shadows at once.
+    //
+    // SCREEN lifts black to exactly this colour and leaves white exactly white, which is what a
+    // faint cold skylight does to a scene lit by one warm source. It sits ABOVE the colour field and
+    // BELOW the pattern on purpose: fill is light, so the blind occludes it like any other light,
+    // and the seams stay relatively dark instead of being flattened by a wash laid over the top.
+    //
+    // Black is the exact identity, so the default emits no layer at all.
+    opts.colour.shade === '#000000' ? ''
+      : `.${cls} .sh{position:absolute;inset:-4%;mix-blend-mode:screen;background:${opts.colour.shade}}`,
+    // The ridge takes the softness dial as a BLUR of the whole mass, not as a mask on each column.
+    // A mask fades one element towards its own free end; a horizon goes soft as a single silhouette,
+    // and 180 columns each fading on their own is a comb, not a haze.
+    ridge ? `.${cls} .r{position:absolute;inset:-4%;mix-blend-mode:multiply`
+      + `${opts.envelope.softness === 0 ? '' : `;filter:blur(${n(opts.envelope.softness * 6)}vmin)`}`
+      + `${mo.body.transform ? `;transform:${mo.body.transform}` : ''}}` : '',
+    layer('d', 'multiply', darkCells),
+    layer('l', emitted ? 'plus-lighter' : 'color-dodge', litCells),
+    // SCREEN, not plus-lighter, and the difference is the whole behaviour. plus-lighter ADDS, so it
+    // brightens the lit half of the picture by as much as the dark half and every highlight walks
+    // up: measured, it matched the reference's striping exactly and cost 3.4 points of block error
+    // doing it. Screen is x + y - xy, so it lifts black to the colour and leaves white alone, which
+    // is what light arriving on a surface that is already brighter than it actually looks like.
+    // It goes ABOVE the dodged faces, because light through the blind lands on the blind too.
+    layer('p', 'screen', throughCells),
+    // NO `will-change` HERE, deliberately. It used to be on every element, and a field can carry 400 of
+    // them: that is 400 compositor layers, more than Chrome will keep rastered, so it cycles which ones
+    // it paints and the picture never settles. Measured on `tide` at 120 rings: consecutive screenshots
+    // 90ms apart differed forever, the PNG oscillating between 200K and 270K, and with will-change off
+    // the same field was byte-identical from the eighth attempt on. Same family as the deferred raster
+    // in engine-doctrine/MISTAKES.md #267, which cost whole product screenshots. A promotion hint that the browser
+    // cannot honour is worse than none (engine-doctrine/MISTAKES.md #272).
+    `.${cls} i{position:absolute;display:block}`,
+    shadow ? `.${cls} .s{position:absolute;inset:0;pointer-events:none;background:${shadow}}` : '',
+  ].filter(Boolean).join('\n');
+}
+
 /**
  * Build a light field.
  *
@@ -354,52 +403,7 @@ export function lightfield(given) {
       dark: () => 'rgba(0,0,0,0)',
       lit: (a) => rgba(opts.colour.through, clamp(a)),
     }).cells.filter((c) => c.lit);
-  const layer = (name, blend, list) => list.length
-    ? `.${cls} .${name}{position:absolute;inset:-4%;mix-blend-mode:${blend}`
-      + `${mo.body.transform ? `;transform:${mo.body.transform}` : ''}`
-      + `${mask ? `;mask-image:${mask};-webkit-mask-image:${mask}` : ''}}`
-    : '';
-
-  const css = [
-    `.${cls}{position:absolute;inset:0;overflow:hidden;isolation:isolate;background:${opts.colour.ground}`
-      // A dial at its no-op value emits nothing, so the markup says what the options said.
-      + `${opts.colour.vivid === 1 ? '' : `;filter:saturate(${n(opts.colour.vivid)})`}}`,
-    `.${cls} .f{position:absolute;inset:-4%;background:${paintField(opts)}}`,
-    // Ambient fill, and the reason a picture can have warm light and cool shadows at once.
-    //
-    // SCREEN lifts black to exactly this colour and leaves white exactly white, which is what a
-    // faint cold skylight does to a scene lit by one warm source. It sits ABOVE the colour field and
-    // BELOW the pattern on purpose: fill is light, so the blind occludes it like any other light,
-    // and the seams stay relatively dark instead of being flattened by a wash laid over the top.
-    //
-    // Black is the exact identity, so the default emits no layer at all.
-    opts.colour.shade === '#000000' ? ''
-      : `.${cls} .sh{position:absolute;inset:-4%;mix-blend-mode:screen;background:${opts.colour.shade}}`,
-    // The ridge takes the softness dial as a BLUR of the whole mass, not as a mask on each column.
-    // A mask fades one element towards its own free end; a horizon goes soft as a single silhouette,
-    // and 180 columns each fading on their own is a comb, not a haze.
-    ridge ? `.${cls} .r{position:absolute;inset:-4%;mix-blend-mode:multiply`
-      + `${opts.envelope.softness === 0 ? '' : `;filter:blur(${n(opts.envelope.softness * 6)}vmin)`}`
-      + `${mo.body.transform ? `;transform:${mo.body.transform}` : ''}}` : '',
-    layer('d', 'multiply', darkCells),
-    layer('l', emitted ? 'plus-lighter' : 'color-dodge', litCells),
-    // SCREEN, not plus-lighter, and the difference is the whole behaviour. plus-lighter ADDS, so it
-    // brightens the lit half of the picture by as much as the dark half and every highlight walks
-    // up: measured, it matched the reference's striping exactly and cost 3.4 points of block error
-    // doing it. Screen is x + y - xy, so it lifts black to the colour and leaves white alone, which
-    // is what light arriving on a surface that is already brighter than it actually looks like.
-    // It goes ABOVE the dodged faces, because light through the blind lands on the blind too.
-    layer('p', 'screen', throughCells),
-    // NO `will-change` HERE, deliberately. It used to be on every element, and a field can carry 400 of
-    // them: that is 400 compositor layers, more than Chrome will keep rastered, so it cycles which ones
-    // it paints and the picture never settles. Measured on `tide` at 120 rings: consecutive screenshots
-    // 90ms apart differed forever, the PNG oscillating between 200K and 270K, and with will-change off
-    // the same field was byte-identical from the eighth attempt on. Same family as the deferred raster
-    // in engine-doctrine/MISTAKES.md #267, which cost whole product screenshots. A promotion hint that the browser
-    // cannot honour is worse than none (engine-doctrine/MISTAKES.md #272).
-    `.${cls} i{position:absolute;display:block}`,
-    shadow ? `.${cls} .s{position:absolute;inset:0;pointer-events:none;background:${shadow}}` : '',
-  ].filter(Boolean).join('\n');
+  const css = buildCss(opts, { cls, mo, mask, ridge, darkCells, litCells, throughCells, emitted, shadow });
 
   const box = (name, list) => (list.length ? `<div class="${name}">\n${list.map(cell).join('\n')}\n</div>` : '');
   const fill = opts.colour.shade === '#000000' ? '' : '<div class="sh"></div>';
