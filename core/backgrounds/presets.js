@@ -37,10 +37,9 @@ export const PRESETS = [
   {
     name: 'soft',
     blurb: 'gentle light radial with faint accent rings and discs drifting over it (moves)',
-    // `intensity`, not `alpha`: softwash (core/backgrounds/fx.js) has no `alpha` option, only
-    // `intensity` as its per-blob multiplier. `alpha` here was dead, baked in and never read.
+    // softwash reads `intensity` (default 1), never `alpha`; the films using `soft` were approved at 1.
     build: (P, grain) => ({ base: { kind: 'radial', from: P.softBase[0], to: P.softBase[1], cx: 0.5, cy: 0.44 }, fx: [
-      { type: 'softwash', color: P.accent, intensity: 0.15, seed: 6 }, grain ] }),
+      { type: 'softwash', color: P.accent, seed: 6 }, grain ] }),
   },
   {
     name: 'accent',
