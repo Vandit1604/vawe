@@ -30,7 +30,7 @@ export default function Showcase() {
         <section className="ls ls-top">
           <h1>Films, played from their scene files.</h1>
           <p className="ls-sub">
-            Your browser renders each film live from its JSON. Hover or tap a film to play it.
+            Your browser renders each film live from its JSON. Hover a film to play it, or click it to watch it large.
           </p>
           <FilmGrid />
         </section>

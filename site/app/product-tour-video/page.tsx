@@ -32,7 +32,7 @@ export default function ProductTourVideo() {
 
           <section className="ifilms">
             <h2>A chaptered tour, played live.</h2>
-            <p>Three chapters, one progress rail, one tracked issue. Your browser renders it from its scene file. Hover or tap to play it.</p>
+            <p>Three chapters, one progress rail, one tracked issue. Your browser renders it from its scene file. Hover to play it, or click to watch it large.</p>
             <FilmGrid ids={["product-feature-tour"]} />
           </section>
 
