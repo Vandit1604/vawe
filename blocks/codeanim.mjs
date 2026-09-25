@@ -81,7 +81,7 @@ const cardH = (n, label, extra = 0) => Math.round(topOf(label) + n * LINE_H + PA
 
 // A monospace row at a known line index. `left` is the content inset; nothing here is measured at
 // render, so the geometry in the JSON is the geometry on the frame.
-const rowStyle = (i, top, color, extra = '') =>
+const rowStyle = (i, { top, color, extra = '' }) =>
   `position:absolute;left:${PAD}px;top:${top + i * LINE_H}px;height:${LINE_H}px;display:flex;align-items:center;`
   + `font:500 ${FONT}px var(--font-mono);white-space:pre;color:${color};${extra}`;
 
@@ -116,19 +116,15 @@ const needContent = (what, v, name) => {
     + `Pass \`${what}\`, or copy the demo content from this block's row in blocks/catalog.mjs.`);
 };
 
-export function codeTyping({ x, y, w = 720, lines = [], label = '', theme = 'midnight', cps = 26,
-  start = 0, dur } = {}) {
-  needContent('lines', lines, 'codeTyping');
-  const P = palette(theme);
-  const top = topOf(label);
-  // Each line's start offset in the stream; +1 per newline, so the caret pauses one beat at a line end.
+// Each line's start offset in the stream; +1 per newline, so the caret pauses one beat at a line end.
+function codeLineOffsets(lines) {
   const offs = []; let acc = 0;
   lines.forEach((ln) => { offs.push(acc); acc += lineText(ln).length + 1; });
-  const total = Math.max(1, acc - 1);
-  const typeDur = r2(total / Math.max(1, cps));
-  const D = dur ?? r2(typeDur + 1.8);
+  return { offs, total: Math.max(1, acc - 1) };
+}
 
-  const body = lines.map((ln, i) => {
+function codeTypingBody(lines, { P, top, offs }) {
+  return lines.map((ln, i) => {
     const s = lineText(ln), len = s.length, off = offs[i];
     // visible characters on THIS line, as a number the whole row derives from
     const vis = `clamp(0, round(down, var(--type,0), 1) - ${off}, ${len})`;
@@ -136,14 +132,24 @@ export function codeTyping({ x, y, w = 720, lines = [], label = '', theme = 'mid
     const on = `clamp(0, (var(--type,0) - ${off} + 1) * 40, 1) * clamp(0, (${off + len} - var(--type,0) + 1) * 40, 1)`;
     // solid while typing, blinking off the raw clock once the whole snippet has landed
     const blink = `((1 - var(--done,0)) + var(--done,0) * (round(down, mod(var(--t,0), 0.9), 0.45) * 2))`;
-    return `<div style="${rowStyle(i, top, lineColor(ln, P, i))}">`
+    return `<div style="${rowStyle(i, { top, color: lineColor(ln, P, i) })}">`
       + `<span style="position:relative;display:inline-block">`
       + `<span style="display:inline-block;clip-path:inset(0 calc(100% - ${vis} * 1ch) 0 0)">${esc(s)}</span>`
       + `<span style="position:absolute;top:3px;left:calc(${vis} * 1ch);width:0.55ch;height:${FONT + 2}px;`
       + `background:${T.accent};opacity:calc((${on}) * ${blink})"></span>`
       + `</span></div>`;
   }).join('');
+}
 
+export function codeTyping({ x, y, w = 720, lines = [], label = '', theme = 'midnight', cps = 26,
+  start = 0, dur } = {}) {
+  needContent('lines', lines, 'codeTyping');
+  const P = palette(theme);
+  const top = topOf(label);
+  const { offs, total } = codeLineOffsets(lines);
+  const typeDur = r2(total / Math.max(1, cps));
+  const D = dur ?? r2(typeDur + 1.8);
+  const body = codeTypingBody(lines, { P, top, offs });
   const h = cardH(lines.length, label);
   return [htmlLayer({ x, y, w, h, start, duration: D,
     html: surface({ w, h, P, label, inner: body }),
@@ -177,7 +183,7 @@ export function codeHighlight({ x, y, w = 720, lines = [], line = 0, label = '',
   const body = lines.map((ln, i) => {
     const fade = i === target ? '1' : `calc(1 - var(--dim,0) * ${r2(1 - dim)})`;
     const weight = i === target ? 700 : 500;
-    return `<div style="${rowStyle(i, top, lineColor(ln, P, i), `opacity:${fade};font-weight:${weight}`)}">${esc(lineText(ln))}</div>`;
+    return `<div style="${rowStyle(i, { top, color: lineColor(ln, P, i), extra: `opacity:${fade};font-weight:${weight}` })}">${esc(lineText(ln))}</div>`;
   }).join('');
 
   const h = cardH(lines.length, label);
@@ -197,6 +203,38 @@ export function codeHighlight({ x, y, w = 720, lines = [], line = 0, label = '',
 // offset (a translate would be the same motion; `top` keeps it in the same idiom as the band above and
 // out of gsap's way, which owns `transform` on any element `parts` touches). `--spot` then dims the
 // context and lights the target's band, delayed until the travel is done.
+// A ROW OUTSIDE THE VIEWPORT IS INVISIBLE, AND THE MARKUP HAS TO SAY SO. Clipping it with the
+// container's `overflow` hides it from the eye and from nothing else: every gate that samples a
+// colour against the backdrop still reads it as painted, and reads it against the PAGE, because the
+// audit resolves no ancestor clip. So each row carries its own distance-to-the-viewport fade, two
+// clamped ramps on the same `--scroll` that moves it, which is both honest and a softer edge than
+// a hard cut. The numbers are unitless on purpose: px cannot be divided in CSS calc().
+function codeScrollBody(lines, { P, target, dim, view, offset }) {
+  const at = (i) => `(${i * LINE_H} - var(--scroll,0) * ${offset})`;
+  const inView = (i) => `clamp(0, ${at(i)} * 0.07 + 1, 1) * clamp(0, (${view - LINE_H} - ${at(i)}) * 0.07 + 1, 1)`;
+  return lines.map((ln, i) => {
+    const fade = i === target ? '1' : `calc(1 - var(--spot,0) * ${r2(1 - dim)})`;
+    return `<div style="position:absolute;left:0;top:${i * LINE_H}px;height:${LINE_H}px;display:flex;align-items:center;`
+      + `font:500 ${FONT}px var(--font-mono);white-space:pre;color:${lineColor(ln, P, i)};`
+      + `opacity:calc(${fade} * (${inView(i)}))">${esc(lineText(ln))}</div>`;
+  }).join('');
+}
+
+// The viewport: fixed height, its own overflow, and a soft edge top and bottom so the file reads as
+// continuing past the card rather than being cut by it. The offset is a TRANSFORM, not a `top`: it is
+// the compositor-friendly property the rest of this engine moves things with, and animating `top`
+// relayouts the whole row stack every frame.
+function codeScrollInner({ lines, P, top, w, view, offset, target, dim }) {
+  const bandInner = `<div style="position:absolute;left:0;right:0;top:${target * LINE_H}px;height:${LINE_H}px;`
+    + `border-radius:${R.chip}px;background:color-mix(in srgb, ${T.accent} 16%, transparent);`
+    + `box-shadow:inset 3px 0 0 ${T.accent};opacity:var(--spot,0)"></div>`;
+  const body = codeScrollBody(lines, { P, target, dim, view, offset });
+  return `<div style="position:absolute;left:${PAD}px;top:${top}px;width:${w - 2 * PAD}px;height:${view}px;overflow:hidden">`
+    + `<div style="position:absolute;left:0;right:0;top:0;transform:translateY(calc(var(--scroll,0) * ${-offset}px))">`
+    + bandInner + body
+    + `</div></div>`;
+}
+
 export function codeScroll({ x, y, w = 720, lines = [], line = 0, rows = 9, label = '',
   theme = 'midnight', dim = 0.3, start = 0, dur = 5 } = {}) {
   needContent('lines', lines, 'codeScroll');
@@ -207,36 +245,7 @@ export function codeScroll({ x, y, w = 720, lines = [], line = 0, rows = 9, labe
   const centre = Math.floor((rows - 1) / 2);
   // clamped so the file never scrolls past either of its own ends
   const offset = Math.max(0, Math.min(target - centre, Math.max(0, lines.length - rows))) * LINE_H;
-
-  // A ROW OUTSIDE THE VIEWPORT IS INVISIBLE, AND THE MARKUP HAS TO SAY SO. Clipping it with the
-  // container's `overflow` hides it from the eye and from nothing else: every gate that samples a
-  // colour against the backdrop still reads it as painted, and reads it against the PAGE, because the
-  // audit resolves no ancestor clip. So each row carries its own distance-to-the-viewport fade, two
-  // clamped ramps on the same `--scroll` that moves it, which is both honest and a softer edge than
-  // a hard cut. The numbers are unitless on purpose: px cannot be divided in CSS calc().
-  const at = (i) => `(${i * LINE_H} - var(--scroll,0) * ${offset})`;
-  const inView = (i) => `clamp(0, ${at(i)} * 0.07 + 1, 1) * clamp(0, (${view - LINE_H} - ${at(i)}) * 0.07 + 1, 1)`;
-  const body = lines.map((ln, i) => {
-    const fade = i === target ? '1' : `calc(1 - var(--spot,0) * ${r2(1 - dim)})`;
-    return `<div style="position:absolute;left:0;top:${i * LINE_H}px;height:${LINE_H}px;display:flex;align-items:center;`
-      + `font:500 ${FONT}px var(--font-mono);white-space:pre;color:${lineColor(ln, P, i)};`
-      + `opacity:calc(${fade} * (${inView(i)}))">${esc(lineText(ln))}</div>`;
-  }).join('');
-
-  const bandTop = (target * LINE_H);
-  const bandInner = `<div style="position:absolute;left:0;right:0;top:${bandTop}px;height:${LINE_H}px;`
-    + `border-radius:${R.chip}px;background:color-mix(in srgb, ${T.accent} 16%, transparent);`
-    + `box-shadow:inset 3px 0 0 ${T.accent};opacity:var(--spot,0)"></div>`;
-
-  // The viewport: fixed height, its own overflow, and a soft edge top and bottom so the file reads as
-  // continuing past the card rather than being cut by it.
-  // The offset is a TRANSFORM, not a `top`: it is the compositor-friendly property the rest of this
-  // engine moves things with, and animating `top` relayouts the whole row stack every frame.
-  const inner = `<div style="position:absolute;left:${PAD}px;top:${top}px;width:${w - 2 * PAD}px;height:${view}px;overflow:hidden">`
-    + `<div style="position:absolute;left:0;right:0;top:0;transform:translateY(calc(var(--scroll,0) * ${-offset}px))">`
-    + bandInner + body
-    + `</div></div>`;
-
+  const inner = codeScrollInner({ lines, P, top, w, view, offset, target, dim });
   const h = Math.round(top + view + PAD);
   return [htmlLayer({ x, y, w, h, start, duration: dur,
     html: surface({ w, h, P, label, inner }),
@@ -256,40 +265,56 @@ export function codeScroll({ x, y, w = 720, lines = [], line = 0, rows = 9, labe
 // the order is real time order and not a stagger applied to the whole set. Row height is
 // `calc(var(--cN) * LINE_H)` for an addition and `calc((1 - var(--cN)) * LINE_H)` for a removal, the
 // same channel read in two directions, which is what makes a collapse and an expansion one gesture.
+function codeDiffUnchangedLine(r, P) {
+  return `<div style="height:${LINE_H}px;display:flex;align-items:center;font:500 ${FONT}px var(--font-mono);`
+    + `white-space:pre;color:${P.label}"><span style="width:2ch;display:inline-block">${' '}</span>${esc(r.text)}</div>`;
+}
+
+function codeDiffChangedLine(r, ci, P) {
+  const add = r.sign === '+';
+  const p = `var(--c${ci},0)`;
+  const hgt = add ? `calc(${p} * ${LINE_H}px)` : `calc((1 - ${p}) * ${LINE_H}px)`;
+  const opa = add ? p : `calc(1 - ${p})`;
+  const col = add ? T.green : T.down;
+  return `<div style="height:${hgt};overflow:hidden;opacity:${opa};`
+    + `background:color-mix(in srgb, ${col} 16%, transparent);border-radius:${R.micro}px;`
+    + `box-shadow:inset 3px 0 0 ${col}">`
+    + `<div style="height:${LINE_H}px;display:flex;align-items:center;font:600 ${FONT}px var(--font-mono);`
+    + `white-space:pre;color:${ink(P, col)}"><span style="width:2ch;display:inline-block;padding-left:8px">${r.sign}</span>${esc(r.text)}</div>`
+    + `</div>`;
+}
+
+// Each changed row claims the next `--c<i>` channel, in order, so `body` and `codeDiffVars` agree on
+// naming without either passing the other a shared mutable counter.
+function codeDiffBody(rows, P) {
+  let ci = 0;
+  const body = rows.map((r) => {
+    if (r.sign === ' ') return codeDiffUnchangedLine(r, P);
+    const line = codeDiffChangedLine(r, ci, P);
+    ci += 1;
+    return line;
+  }).join('');
+  return { body, changedCount: ci };
+}
+
+function codeDiffVars(changedCount, step) {
+  const vars = {}, varsDelay = {}, varsDur = {}, varsEase = {};
+  for (let ci = 0; ci < changedCount; ci += 1) {
+    const name = `--c${ci}`;
+    vars[name] = [0, 1]; varsDelay[name] = r2(0.4 + ci * step); varsDur[name] = 0.5; varsEase[name] = P_EASE;
+  }
+  return { vars, varsDelay, varsDur, varsEase };
+}
+
 export function codeDiff({ x, y, w = 720, lines = [], label = '', theme = 'midnight',
   step = 0.34, start = 0, dur } = {}) {
   needContent('lines', lines, 'codeDiff');
   const P = palette(theme);
   const top = topOf(label);
   const rows = lines.map((ln) => (typeof ln === 'string' ? { sign: ' ', text: ln } : { sign: ln.sign || ' ', text: String(ln.text ?? '') }));
-
-  const vars = {}, varsDelay = {}, varsDur = {}, varsEase = {};
-  let ci = 0;
-  const body = rows.map((r) => {
-    if (r.sign === ' ')
-      return `<div style="height:${LINE_H}px;display:flex;align-items:center;font:500 ${FONT}px var(--font-mono);`
-        + `white-space:pre;color:${P.label}"><span style="width:2ch;display:inline-block">${' '}</span>${esc(r.text)}</div>`;
-    const name = `--c${ci}`;
-    vars[name] = [0, 1];
-    varsDelay[name] = r2(0.4 + ci * step);
-    varsDur[name] = 0.5;
-    varsEase[name] = P_EASE;
-    ci += 1;
-    const add = r.sign === '+';
-    const p = `var(${name},0)`;
-    const hgt = add ? `calc(${p} * ${LINE_H}px)` : `calc((1 - ${p}) * ${LINE_H}px)`;
-    const opa = add ? p : `calc(1 - ${p})`;
-    const col = add ? T.green : T.down;
-    const fg = ink(P, col);
-    return `<div style="height:${hgt};overflow:hidden;opacity:${opa};`
-      + `background:color-mix(in srgb, ${col} 16%, transparent);border-radius:${R.micro}px;`
-      + `box-shadow:inset 3px 0 0 ${col}">`
-      + `<div style="height:${LINE_H}px;display:flex;align-items:center;font:600 ${FONT}px var(--font-mono);`
-      + `white-space:pre;color:${fg}"><span style="width:2ch;display:inline-block;padding-left:8px">${r.sign}</span>${esc(r.text)}</div>`
-      + `</div>`;
-  }).join('');
-
-  const D = dur ?? r2(0.4 + Math.max(1, ci) * step + 2.0);
+  const { body, changedCount } = codeDiffBody(rows, P);
+  const { vars, varsDelay, varsDur, varsEase } = codeDiffVars(changedCount, step);
+  const D = dur ?? r2(0.4 + Math.max(1, changedCount) * step + 2.0);
   // The card is sized for every row at full height: rows collapse INTO this box, they never resize it.
   const h = cardH(rows.length, label);
   const inner = `<div style="position:absolute;left:${PAD}px;top:${top}px;width:${w - 2 * PAD}px">${body}</div>`;
@@ -309,28 +334,26 @@ export function codeDiff({ x, y, w = 720, lines = [], label = '', theme = 'midni
 // the old text is gone before the new text arrives and the shared tokens carry the eye across.
 //
 // Pairing is first-occurrence and deterministic: identical props always pair the same tokens.
-export function codeMorph({ x, y, w = 720, from = [], to = [], label = '', theme = 'midnight',
-  start = 0, dur = 4.5 } = {}) {
-  needContent('from', from, 'codeMorph');
-  needContent('to', to, 'codeMorph');
-  const P = palette(theme);
-  const top = topOf(label);
-  const tokenize = (ls) => ls.flatMap((ln, li) =>
-    [...String(lineText(ln)).matchAll(/\S+/g)].map((m) => ({ text: m[0], col: m.index, line: li })));
-  const A = tokenize(from), B = tokenize(to);
+const codeMorphTokenize = (ls) => ls.flatMap((ln, li) =>
+  [...String(lineText(ln)).matchAll(/\S+/g)].map((m) => ({ text: m[0], col: m.index, line: li })));
 
+// Pairing is first-occurrence and deterministic: identical props always pair the same tokens. A
+// token in `to` that matches an unclaimed token in `from` is shared (glides); the rest of `from` is
+// `gone`, the rest of `to` is `born`.
+function pairTokens(A, B) {
   const used = new Set(), pairs = [], born = [];
   B.forEach((b) => {
     const ai = A.findIndex((a, i) => !used.has(i) && a.text === b.text);
     if (ai >= 0) { used.add(ai); pairs.push([A[ai], b]); } else born.push(b);
   });
-  const gone = A.filter((_, i) => !used.has(i));
+  return { pairs, born, gone: A.filter((_, i) => !used.has(i)) };
+}
 
+function codeMorphSpans({ pairs, gone, born, P }) {
   const at = (t, extra, color) =>
     `position:absolute;left:${t.left};top:${t.top};font:500 ${FONT}px var(--font-mono);white-space:pre;`
     + `color:${color};${extra}`;
-
-  const spans = [
+  return [
     ...pairs.map(([a, b]) => {
       const dc = b.col - a.col, dy = (b.line - a.line) * LINE_H;
       const t = { left: `calc(${a.col}ch + var(--m,0) * ${dc}ch)`, top: `calc(${a.line * LINE_H}px + var(--m,0) * ${dy}px)` };
@@ -345,7 +368,16 @@ export function codeMorph({ x, y, w = 720, from = [], to = [], label = '', theme
       return `<span style="${at(t, `opacity:clamp(0, (var(--m,0) - 0.55) * 2.4, 1)`, ink(P, T.green))}">${esc(b.text)}</span>`;
     }),
   ].join('');
+}
 
+export function codeMorph({ x, y, w = 720, from = [], to = [], label = '', theme = 'midnight',
+  start = 0, dur = 4.5 } = {}) {
+  needContent('from', from, 'codeMorph');
+  needContent('to', to, 'codeMorph');
+  const P = palette(theme);
+  const top = topOf(label);
+  const { pairs, gone, born } = pairTokens(codeMorphTokenize(from), codeMorphTokenize(to));
+  const spans = codeMorphSpans({ pairs, gone, born, P });
   const nRows = Math.max(from.length, to.length);
   const h = cardH(nRows, label);
   const inner = `<div style="position:absolute;left:${PAD}px;top:${top + 5}px;width:${w - 2 * PAD}px;height:${nRows * LINE_H}px">${spans}</div>`;
