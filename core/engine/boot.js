@@ -279,17 +279,16 @@ async function preloadVideos(data) {
 // that reads `theme.palette.X`, never has to know the file on disk changed shape at all. A theme still
 // written in the retired shape (`isTokenFile` false) throws, naming `migrate-themes.mjs`, the same
 // fail-loud posture as everything else in this function.
+export async function fetchThemeFile(spec) {
+  if (isObj(spec)) return spec;
+  if (typeof spec !== 'string' || !spec) throw new Error('data.theme is required (a theme name or an inline theme object), no default look exists');
+  const res = await fetch(`/themes/${spec}.json`);
+  if (!res.ok) throw new Error(`theme "${spec}" not found (themes/${spec}.json), no default look exists`);
+  return res.json();
+}
+
 export async function resolveTheme(spec) {
-  let raw;
-  if (typeof spec === 'string' && spec) {
-    const res = await fetch(`/themes/${spec}.json`);
-    if (!res.ok) throw new Error(`theme "${spec}" not found (themes/${spec}.json), no default look exists`);
-    raw = await res.json();
-  } else if (isObj(spec)) {
-    raw = spec;
-  } else {
-    throw new Error('data.theme is required (a theme name or an inline theme object), no default look exists');
-  }
+  const raw = await fetchThemeFile(spec);
   return isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
 }
 
@@ -539,12 +538,13 @@ export async function boot(build) {
     // Theme resolved BEFORE resolveCoords now (it used to run one line after): nothing between the two
     // reads the theme, and a later phase's named size/placement needs `look` to lower through
     // resolveCoords the same way a pin does, not one line too late to reach it.
-    const theme = await resolveTheme(data.theme); // taste: palette/gradient/fonts/motion
+    const rawTheme = await fetchThemeFile(data.theme);
+    const theme = await resolveTheme(rawTheme); // taste: palette/gradient/fonts/motion
     // A video may reference any theme token directly ("{color.signal}"), resolved here, once, against
     // whichever theme this render actually uses (core/theme/refs.js). Runs right after the theme itself
     // resolves so everything downstream (resolveCoords, produceBaseline, renderFrame) only ever sees the
     // concrete value, the same "sugar resolves at load" rule block/beat/comp already follow.
-    const tokenValues = await resolveThemeTokenValues(data.theme);
+    const tokenValues = await resolveThemeTokenValues(rawTheme);
     Object.assign(data, resolveTokenRefs(data, tokenValues));
     const look = resolveLook(theme, { isLightBg }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md);
     // an authored theme.look wins key by key, computedLook fills the rest for the 37 themes with none.

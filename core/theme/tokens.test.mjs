@@ -94,3 +94,10 @@ import { parseColor, colorAlpha } from '../color/engine.js';
 }
 
 console.log('tokens.test.mjs: ok');
+
+// ---- a node with only one of $type/$value is reported, not dropped ----
+{
+  const { values, errors } = resolveTokens({ c: { broken: { $type: 'color' }, half: { $value: '#fff' } } }, {});
+  assert.equal(values.size, 0);
+  assert.deepEqual(errors, ['token "c.broken" needs both $type and $value', 'token "c.half" needs both $type and $value']);
+}
