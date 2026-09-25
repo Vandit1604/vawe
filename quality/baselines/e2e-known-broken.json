@@ -1,0 +1,32 @@
+{
+  "_comment": "make e2e (harness/dev/e2e.mjs) reads this. `scenes` are tracked films/scene/*.json that error in make snap-all TODAY, named with a reason, so the suite passes on this tree but fails the moment a NEW scene starts erroring. Shrink this list as a scene is repaired; do not add an entry for a scene you have not confirmed errors. `needsUnlockedFont` names scenes whose theme sets a paid, per-developer face (assets/fonts/local/, never fetched by `make fonts`), so their DOM signature is only reproducible on a machine that has that face; excused from the snap-all `changed` rule, nowhere else.",
+  "scenes": {
+    "ab-control-shotcode": "theme \"ab-control\" not found (themes/ab-control.json)",
+    "ab-skill-shotcode": "theme \"ab-skill\" not found (themes/ab-skill.json)",
+    "ab2-control-tenor": "theme \"ab2-control\" not found (themes/ab2-control.json)",
+    "ab2-skill-tenor": "theme \"ab2-skill\" not found (themes/ab2-skill.json)",
+    "ab3-nogate-tenor": "theme \"ab3-nogate\" not found (themes/ab3-nogate.json)",
+    "ab4-a-ledgerline": "theme \"ab4-a-ledgerline\" not found (themes/ab4-a-ledgerline.json)",
+    "ab4-b-ledgerline": "theme \"ab4-b-ledgerline\" not found (themes/ab4-b-ledgerline.json)",
+    "hi-vandit": "invalid data for \"scene\": bg is required",
+    "hinge": "theme \"hinge\" not found (themes/hinge.json)",
+    "motion-reel-v2": "ransom sprites: /assets/ransom/manifest.json is missing or unreadable",
+    "motion-reel": "ransom sprites: /assets/ransom/manifest.json is missing or unreadable",
+    "pin-recreation": "invalid data for \"scene\": bg is required",
+    "plinth-ad": "image never loaded: layers[0].src -> /assets/plinth/hero-figure...",
+    "pose-demo": "html fragment /films/scene/pose-demo.scene1.html -> HTTP 404",
+    "post-ledgerline": "theme \"ab4-a-ledgerline\" not found (themes/ab4-a-ledgerline.json)",
+    "ransom-intro": "html fragment /films/scene/_ransom-intro-page.html -> HTTP 404",
+    "rec1-nogate": "images never loaded: layers[14].src -> /assets/rec1/astronaut...",
+    "rec2-gates": "image never loaded: layers[13].src -> /assets/higgsfield/astronaut...",
+    "rec3-skill": "image never loaded: layers[17].src -> /assets/rec3/astronaut.jpg",
+    "vawe-flow-2": "images never loaded: layers[12].children[0].src -> /assets/vawe...",
+    "vawe-flow": "images never loaded: layers[1].src -> /.vawe-data/uploads/vawe...",
+    "vawe-oblique": "layer \"framecount\" (type \"count\"): the browser drops this css declaration",
+    "verbs": "invalid data for \"scene\": layers needs >= 1 item(s) (got 0)"
+  },
+  "needsUnlockedFont": {
+    "stripe": "theme stripe sets type.sans/num to Sohne, paid, assets/fonts/local/ only",
+    "example-swiss-grid": "theme stripe sets type.sans/num to Sohne, paid, assets/fonts/local/ only"
+  }
+}

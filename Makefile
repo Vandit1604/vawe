@@ -1430,6 +1430,14 @@ track: ## [dev] MOVED into `make arsenal SHAPE=...` (W11); still works, one rele
 mcp-smoke: ## [maintenance] end-to-end over the real MCP server: connects, reads the guide, refuses three leak vectors, drafts a scene.
 	node mcp/smoke.mjs --no-render
 
+# make e2e: THE E2E SUITE (AGENTS.md, "Testing: end to end first"). Runs probe, snap-all, snap-blocks,
+# mcp-smoke, the site's real-browser test and author-check, in that order, continuing past a failure so
+# one run reports on all six. Leaves quality/runs/e2e/<timestamp>/report.json + report.md, and
+# quality/runs/e2e/latest.json. Known-broken tracked scenes are excused by name (quality/baselines/
+# e2e-known-broken.json), never by widening what counts as a pass; see harness/dev/e2e.mjs.
+e2e: ## [check] THE E2E SUITE: probe + snap-all + snap-blocks + mcp-smoke + site test + author-check, one report
+	node harness/dev/e2e.mjs
+
 effects: ## [engine] regenerate engine-doctrine/EFFECTS.md. The whole arsenal in one place (from the registries)
 	node scripts/site/effects-catalog.mjs
 	node scripts/site/effects-json.mjs
