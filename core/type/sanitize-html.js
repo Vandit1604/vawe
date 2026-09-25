@@ -165,9 +165,44 @@ export function timeCssUsed(src) {
 // Custom properties (`--x`) are skipped because they accept ANY token by design; an invalid value in one
 // only becomes a drop where the variable is USED, and that use is a real declaration this does catch.
 let scratch = null;
+function getScratch() {
+  scratch ||= document.createElement('div');
+  return scratch;
+}
+
+// IN ISOLATION, one declaration at a time, asked of a scratch element: see the block comment above
+// for why that beats CSS.supports() or a regex, and why reading it back off the real element is not
+// the same check.
+function isDeclDropped(prop, val) {
+  const el = getScratch();
+  el.style.cssText = '';
+  try { el.style.setProperty(prop, val); } catch { /* a malformed name throws; that is a drop */ }
+  return el.style.getPropertyValue(prop) === '';
+}
+
+// Split on top-level semicolons: a url() or a data: URI may carry one inside parentheses.
+function splitTopLevelDecls(raw) {
+  const decls = []; let depth = 0, cur = '';
+  for (const ch of raw) {
+    if (ch === '(') depth++; else if (ch === ')') depth--;
+    if (ch === ';' && depth === 0) { decls.push(cur); cur = ''; } else cur += ch;
+  }
+  decls.push(cur);
+  return decls;
+}
+
+function droppedDeclsInAttr(raw, out) {
+  for (const d of splitTopLevelDecls(raw)) {
+    const i = d.indexOf(':');
+    if (i < 0) continue;
+    const prop = d.slice(0, i).trim(), val = d.slice(i + 1).trim();
+    if (!prop || !val || prop.startsWith('--')) continue;
+    if (isDeclDropped(prop, val)) out.push(`${prop}: ${val}`);
+  }
+}
+
 export function droppedDecls(src) {
   if (typeof document === 'undefined') return []; // not in a browser: nothing to ask
-  scratch ||= document.createElement('div');
   const out = [];
   // Style ATTRIBUTES only. A <style> block's rules are the stylesheet's business and are not parsed here.
   for (const m of stripComments(src).matchAll(/\sstyle\s*=\s*("([^"]*)"|'([^']*)')/gi)) {
@@ -177,39 +212,23 @@ export function droppedDecls(src) {
     // quoted `left: -calc(...)` while explaining THIS defect, which is as clean a demonstration as the
     // bug is likely to get. Stripped first, so the parse below only ever sees real declarations.
     const raw = String(m[2] ?? m[3] ?? '').replace(/\/\*[\s\S]*?\*\//g, ' ');
-    // Split on top-level semicolons: a url() or a data: URI may carry one inside parentheses.
-    const decls = []; let depth = 0, cur = '';
-    for (const ch of raw) {
-      if (ch === '(') depth++; else if (ch === ')') depth--;
-      if (ch === ';' && depth === 0) { decls.push(cur); cur = ''; } else cur += ch;
-    }
-    decls.push(cur);
-    for (const d of decls) {
-      const i = d.indexOf(':');
-      if (i < 0) continue;
-      const prop = d.slice(0, i).trim(), val = d.slice(i + 1).trim();
-      if (!prop || !val || prop.startsWith('--')) continue;
-      scratch.style.cssText = '';
-      try { scratch.style.setProperty(prop, val); } catch { /* a malformed name throws; that is a drop */ }
-      if (scratch.style.getPropertyValue(prop) === '') out.push(`${prop}: ${val}`);
-    }
+    droppedDeclsInAttr(raw, out);
   }
   return out;
+}
+
+function droppedPropsEntry(k, v, out) {
+  if (v == null || k.startsWith('--')) return;
+  // camelCase → kebab, the same conversion `el.style` does when you assign to it.
+  const prop = k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
+  if (isDeclDropped(prop, String(v))) out.push(`${k}: ${v}`);
 }
 
 // The same question for a style OBJECT (the `css` passthrough on a layer), where the author hands over
 // {prop: value} rather than markup. Same isolation rule, same reason.
 export function droppedProps(css) {
   if (typeof document === 'undefined' || !css || typeof css !== 'object') return [];
-  scratch ||= document.createElement('div');
   const out = [];
-  for (const [k, v] of Object.entries(css)) {
-    if (v == null || k.startsWith('--')) continue;
-    // camelCase → kebab, the same conversion `el.style` does when you assign to it.
-    const prop = k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
-    scratch.style.cssText = '';
-    try { scratch.style.setProperty(prop, String(v)); } catch { /* malformed name: a drop */ }
-    if (scratch.style.getPropertyValue(prop) === '') out.push(`${k}: ${v}`);
-  }
+  for (const [k, v] of Object.entries(css)) droppedPropsEntry(k, v, out);
   return out;
 }
