@@ -79,10 +79,10 @@ Five lines carry the whole request, any may be missing: SUBJECT, DATA, PAYOFF, A
 
 **Never hand-author from a blank JSON**: `make ideate` writes the film's prompt first (`engine-doctrine/CRAFT/IDEATE.md`), then `make scaffold` writes the storyboard sidecar and scene shell; compose motion from `recipes/` or `make arsenal Q="…"`.
 
-## Built-in rules (checked everywhere)  `[built: core/validate/validate.mjs:764]`
+## Built-in rules (checked everywhere)  `[built: core/validate/validate.mjs:74]`
 - No em-dashes (U+2014) in any on-screen text: the validator rejects them. Use a comma, period, or ·.
 - First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
-- `{"preset": "black"}` (`core/backgrounds/presets.js:117`) is solid `#000000`, no grain, unlike every other dark preset, which carries a tint or wash.
+- `{"preset": "black"}` (`core/backgrounds/presets.js:118`) is solid `#000000`, no grain, unlike every other dark preset, which carries a tint or wash.
 - Author a boundary through `transitions[]` only: `cuts`/`stings`/`seams` are its lowered internal form and the validator refuses them written directly (`harness/author/migrate-junctions.mjs` converts an old scene).
 
 ## Stage 4, design: craft rules the gates can't fully see  `[eye]`
