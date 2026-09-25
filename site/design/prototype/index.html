@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vawe studio canvas v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&family=Archivo:wdth,wght@62..125,100..900&family=Unbounded:wght@400..800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="films-data.js"></script>
+<style>
+  :root {
+    --stage: #16151a; --panel: #212025; --panel-2: #27262c; --raised: #2f2e35; --raised-2: #393840;
+    --ink: #ffffff; --ink-2: #d8d8da; --ink-3: #97969b; --muted: #7c7b81;
+    --r-out: 12px; --r-in: 8px; --r-pill: 6px; --gap: 12px;
+    --title: 'Unbounded', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --live: var(--ink); --ring: none;
+    --c-text: var(--raised-2); --c-media: var(--raised-2); --c-shape: var(--raised-2); --c-comp: var(--raised-2); --c-fx: var(--raised-2); --c-camera: var(--raised-2);
+  }
+  /* Heading faces under test. Titles stay Unbounded in all three. */
+  [data-h="a"] { --head: 'Archivo', system-ui, sans-serif; --head-str: 100%; --head-wt: 800; --head-track: -0.03em; --body: 'Archivo', system-ui, sans-serif; }
+  [data-h="b"] { --head: 'Archivo', system-ui, sans-serif; --head-str: 72%; --head-wt: 800; --head-track: -0.01em; --body: 'Archivo', system-ui, sans-serif; }
+  [data-h="c"] { --head: 'Anybody', system-ui, sans-serif; --head-str: 100%; --head-wt: 800; --head-track: -0.025em; --body: 'Anybody', system-ui, sans-serif; }
+  /* Colour modes, both built only from studio/ui/studio.css tokens. */
+  [data-c="studio"] {
+    --live: #0a87ff; --ring: 0 0 0 1px rgba(255,255,255,.06);
+    --c-text: #a67dff; --c-media: #52525a; --c-shape: #e0714f; --c-comp: #cf5b98; --c-fx: #d9c34f; --c-camera: #4fb3d9;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--stage); color: var(--ink); }
+  body { font-family: var(--body); -webkit-font-smoothing: antialiased; overflow: hidden; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+  .meta { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .title { font-family: var(--title); font-weight: 500; letter-spacing: -0.01em; }
+  .panel { background: var(--panel); border-radius: var(--r-out); min-width: 0; min-height: 0; box-shadow: var(--ring); }
+  .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px 10px; }
+
+  .app { height: 100vh; display: grid; gap: var(--gap); padding: 0 var(--gap) var(--gap);
+         grid-template: "top top top" 56px "rail stage info" 1fr "strip strip strip" auto / 250px minmax(0, 1fr) 400px; }
+  .top { grid-area: top; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .mark { font-family: var(--title); font-weight: 600; font-size: 20px; letter-spacing: -0.02em; }
+  .top nav { display: flex; gap: 4px; }
+  .top nav button { font-weight: 500; font-size: 14px; color: var(--ink-2); padding: 8px 12px; border-radius: var(--r-in); }
+  .top nav button:hover { background: var(--raised); }
+  .controls { display: flex; gap: 10px; }
+  .seg { display: flex; gap: 2px; background: var(--panel); border-radius: var(--r-in); padding: 3px; align-items: center; }
+  .seg .meta { padding: 0 6px 0 8px; font-size: 10px; }
+  .seg button { font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 6px 9px; border-radius: var(--r-pill); }
+  .seg button[aria-pressed="true"] { background: var(--raised); color: var(--ink); }
+
+  .rail { grid-area: rail; display: flex; flex-direction: column; }
+  .rail ol { list-style: none; margin: 0; padding: 0 8px 8px; overflow-y: auto; }
+  .rail li button { width: 100%; display: grid; grid-template-columns: 60px 1fr; gap: 10px; align-items: center; text-align: left; padding: 6px; border-radius: var(--r-in); position: relative; }
+  .rail li button:hover { background: var(--panel-2); }
+  .rail li button[aria-current="true"] { background: var(--raised); }
+  .rail li button[aria-current="true"]::before { content: ""; position: absolute; left: -8px; top: 12px; bottom: 12px; width: 3px; border-radius: 2px; background: var(--live); }
+  .rail img { width: 60px; aspect-ratio: 16/9; object-fit: cover; border-radius: 4px; display: block; }
+  .rail .title { font-size: 12.5px; line-height: 1.3; display: block; }
+  .rail .meta { font-size: 10.5px; margin-top: 3px; display: block; }
+
+  .stage { grid-area: stage; display: flex; flex-direction: column; }
+  .tabs { display: flex; gap: 2px; background: var(--stage); border-radius: var(--r-in); padding: 3px; }
+  .tabs button { font-weight: 500; font-size: 13px; color: var(--ink-3); padding: 5px 12px; border-radius: var(--r-pill); }
+  .tabs button[aria-pressed="true"] { background: var(--raised); color: var(--ink); }
+  .view { flex: 1; min-height: 0; display: grid; place-items: center; padding: 0 16px; }
+  .screen { position: relative; height: 100%; max-width: 100%; aspect-ratio: 16/9; border-radius: var(--r-in); overflow: hidden; background: #000; }
+  .screen video { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .scene { width: 100%; height: 100%; overflow: auto; padding: 16px 0; background: var(--stage); border-radius: var(--r-in);
+           font-family: var(--mono); font-size: 12.5px; line-height: 1.8; color: var(--muted); }
+  .scene div { padding: 0 18px; white-space: pre; border-left: 2px solid transparent; }
+  .scene .ln { color: var(--ink-3); }
+  .scene .live { color: var(--ink); border-left-color: var(--live); background: rgba(255,255,255,.03); }
+  .scene .sel { background: rgba(255,255,255,.08); }
+  .stage [hidden] { display: none !important; }
+  .transport { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 12px 16px 8px; }
+  .play { width: 32px; height: 32px; border-radius: 50%; background: var(--raised); display: grid; place-items: center; }
+  .play:hover { background: var(--raised-2); }
+  .now { display: flex; align-items: baseline; gap: 12px; }
+  .now .title { font-size: 14px; }
+
+  /* The film's own layers, one lane per layer type, under one playhead. */
+  .tl { padding: 0 16px 14px; }
+  .tl-body { position: relative; }
+  .lane { display: grid; grid-template-columns: 70px 1fr; align-items: center; height: 18px; margin-top: 3px; }
+  .lane .meta { font-size: 10px; }
+  .track { position: relative; height: 12px; background: var(--panel-2); border-radius: 3px; }
+  .bar { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: var(--c); opacity: .55; min-width: 3px; }
+  .bar:hover { opacity: 1; }
+  .bar.on { opacity: 1; }
+  .playhead { position: absolute; top: -4px; bottom: -2px; width: 2px; background: var(--live); left: 70px; pointer-events: none; }
+  .tl-note { display: flex; justify-content: space-between; margin-top: 8px; }
+
+  .info { grid-area: info; display: flex; flex-direction: column; }
+  .info .body { overflow-y: auto; padding: 4px 24px 24px; }
+  h1, h2 { font-family: var(--head); font-weight: var(--head-wt); font-stretch: var(--head-str); letter-spacing: var(--head-track); line-height: 1; margin: 10px 0 0; text-wrap: balance; }
+  h1 { font-size: 44px; }
+  h2 { font-size: 32px; }
+  .info h3 { font-family: var(--title); font-weight: 500; font-size: 14.5px; margin: 22px 0 0; }
+  .info p { font-size: 15.5px; line-height: 1.6; color: var(--ink-2); margin: 14px 0 0; text-wrap: pretty; }
+  .info h3 + p { margin-top: 6px; color: var(--ink-3); }
+  .actions { display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap; }
+  .btn { font-weight: 600; font-size: 14px; padding: 10px 14px; border-radius: var(--r-in); }
+  .btn-primary { background: var(--ink); color: var(--stage); }
+  .btn-quiet { background: var(--raised); }
+
+  .strip { grid-area: strip; padding: 10px 12px 12px; }
+  .ruler { display: flex; justify-content: space-between; padding: 0 2px 8px; }
+  .clips { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr 0.8fr; gap: 4px; background: var(--panel-2); border-radius: var(--r-in); padding: 4px; }
+  .clip { text-align: left; padding: 9px 12px; border-radius: var(--r-pill); background: var(--raised); min-width: 0; }
+  .clip:hover { background: var(--raised-2); }
+  .clip[aria-current="true"] { background: var(--ink); color: var(--stage); }
+  .clip[aria-current="true"] .meta { color: var(--stage); opacity: .6; }
+  .clip .title { font-size: 12.5px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .clip .meta { font-size: 10px; display: block; margin-top: 2px; }
+
+  @media (max-width: 1100px) {
+    body { overflow: auto; }
+    .app { height: auto; grid-template: "top" 56px "stage" auto "info" auto "strip" auto "rail" auto / minmax(0, 1fr); }
+    .screen { height: auto; width: 100%; }
+    .view { padding: 0 12px; }
+    .scene { height: 320px; }
+    .clips { grid-template-columns: repeat(3, 1fr); }
+    .controls, .top nav button:not(:last-child) { display: none; }
+  }
+  @media (max-width: 640px) { .clips { grid-template-columns: repeat(2, 1fr); } h1 { font-size: 36px; } }
+</style>
+</head>
+<body data-h="a" data-c="studio">
+<div class="app">
+  <header class="top">
+    <span class="mark">vawe</span>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Heading face (prototype)"><span class="meta">Headings</span>
+        <button data-set-h="a">A Archivo</button><button data-set-h="b">B Archivo Narrow</button><button data-set-h="c">C Anybody</button></div>
+      <div class="seg" role="group" aria-label="Colour (prototype)"><span class="meta">Colour</span>
+        <button data-set-c="neutral">Neutral</button><button data-set-c="studio">Studio</button></div>
+    </div>
+    <nav><button>Films</button><button>Docs</button><button>Source · soon</button></nav>
+  </header>
+
+  <aside class="panel rail">
+    <div class="panel-head"><span class="meta">Films</span><span class="meta" id="count"></span></div>
+    <ol id="films"></ol>
+  </aside>
+
+  <section class="panel stage">
+    <div class="panel-head">
+      <div class="tabs" role="group" aria-label="View">
+        <button data-view="preview" aria-pressed="true">Preview</button><button data-view="scene" aria-pressed="false">Scene JSON</button>
+      </div>
+      <span class="meta" id="spec"></span>
+    </div>
+    <div class="view">
+      <div class="screen" id="screen"><video id="video" muted loop playsinline autoplay></video></div>
+      <div class="scene" id="scene" hidden></div>
+    </div>
+    <div class="transport">
+      <button class="play" id="play" aria-label="Play or pause"><svg width="12" height="12" viewBox="0 0 12 12"><path id="glyph" d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg></button>
+      <span class="meta" id="layer-count"></span>
+      <div class="now"><span class="title" id="now-title"></span><span class="meta" id="now-time"></span></div>
+    </div>
+    <div class="tl">
+      <div class="tl-body" id="tl"></div>
+      <div class="tl-note"><span class="meta">Each bar is one layer · click one to read its line</span><span class="meta" id="live-count"></span></div>
+    </div>
+  </section>
+
+  <aside class="panel info">
+    <div class="panel-head"><span class="meta" id="info-kicker"></span><span class="meta" id="info-index"></span></div>
+    <div class="body" id="info"></div>
+  </aside>
+
+  <section class="panel strip">
+    <div class="ruler"><span class="meta">00:00</span><span class="meta">The page, as a timeline</span><span class="meta">End</span></div>
+    <div class="clips" id="clips"></div>
+  </section>
+</div>
+<script>
+  const BASE = '../../public/assets/films/';
+  const FILMS = [
+    ['vawe-launch', 'Vawe launch'], ['preface-launch', 'Preface launch'], ['argus-launch', 'Argus launch'],
+    ['threadcite-open', 'Threadcite open'], ['plinth-ad', 'Plinth ad'], ['saas-hero-launch', 'SaaS hero launch'],
+    ['product-feature-tour', 'Feature tour'],
+  ];
+  const LANES = [
+    ['Text', ['text', 'count'], '--c-text'],
+    ['Media', ['image', 'video'], '--c-media'],
+    ['Shape', ['rect', 'svg', 'glow'], '--c-shape'],
+    ['Comp', ['group', 'html', 'block', 'component', 'board'], '--c-comp'],
+    ['Pointer', ['cursor'], '--c-camera'],
+  ];
+  const SECTIONS = [
+    { title: 'Intro', kicker: 'A deterministic motion engine', html: `
+      <h1>Every frame of this film is a line of text.</h1>
+      <p>The film playing here renders from one JSON file. Each bar under it is one layer, and each layer is one line you can read.</p>
+      <p>Open the scene file while it plays: the lines light up as their layers come on screen.</p>
+      <div class="actions"><button class="btn btn-primary" data-open-scene>Open the scene file</button><button class="btn btn-quiet">Read the docs</button></div>` },
+    { title: 'How it works', kicker: 'Three steps', html: `
+      <h2>Write the scene. Render the frames. Ship the file.</h2>
+      <h3>01 · Write the scene</h3><p>Layers, camera, captions and transitions live in one JSON file. A person can write it, and so can an agent.</p>
+      <h3>02 · Render the frames</h3><p>Every frame is a pure function of its number. Render frame 412 alone and it matches frame 412 of the full film.</p>
+      <h3>03 · Ship the file</h3><p>A 60 fps master in 16:9, 9:16, 1:1, 4:5 or 4:3. A draft at 30 fps when you only need to look.</p>` },
+    { title: 'Scene file', kicker: 'The film as text', scene: true, html: `
+      <h2>The whole film fits in one file.</h2>
+      <p>This is the real scene file of the film that is playing. Each layer names its type, where it sits and when it is on screen.</p>
+      <p>Because the file is the film, a diff is a change you can read, and a review is a review of the motion itself.</p>` },
+    { title: 'Inside', kicker: 'What is inside', html: `
+      <h2>One canvas, and everything that moves on it.</h2>
+      <h3>24 layer types</h3><p>Text, video, image, shapes, charts, code, 3D and more, on one open canvas.</p>
+      <h3>Five canvases</h3><p>16:9, 9:16, 1:1, 4:5 and 4:3, safe areas included.</p>
+      <h3>Camera and transitions</h3><p>Push, pull, follow and dive; seams, stings and cuts, all keyed to one clock.</p>
+      <h3>Captions and sound</h3><p>Captions timed to the words, a mixer, and loudness set at the mux.</p>` },
+    { title: 'Why', kicker: 'Why we built it', html: `
+      <h2>Motion design should be as reviewable as code.</h2>
+      <p>Most motion tools keep the film inside a project file that only the tool can read. You cannot diff it, you cannot review it, and you cannot hand it to an agent and trust what comes back.</p>
+      <p>vawe keeps the film in plain text. The engine reads it, draws each frame from its number alone, and writes the file.</p>
+      <p>That is why agents write good films here. They write a scene, the gates check it, and a judge looks at the frames before anything ships.</p>` },
+    { title: 'FAQ', kicker: 'Questions', html: `
+      <h2>Before you ask.</h2>
+      <h3>Is it open source?</h3><p>Not yet. The site is live to watch and play with. The code is coming, and this is where it will land.</p>
+      <h3>Do I write JSON by hand?</h3><p>No. An agent can write the scene from a brief, and the studio lets you scrub it before a render.</p>
+      <h3>Can it match my brand?</h3><p>A theme holds your colours, fonts and motion feel, and every layer reads from it.</p>` },
+  ];
+  const $ = (id) => document.getElementById(id);
+  const video = $('video');
+  const runtime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  let film = null;
+
+  $('count').textContent = String(FILMS.length).padStart(2, '0');
+  $('films').innerHTML = FILMS.map(([slug, title], i) => `
+    <li><button data-film="${i}"><img src="${BASE}${slug}.jpg" alt=""><span><span class="title">${title}</span><span class="meta">${runtime(FILM_DATA[slug].duration)} · ${FILM_DATA[slug].layers.length} layers</span></span></button></li>`).join('');
+  $('clips').innerHTML = SECTIONS.map((s, i) => `
+    <button class="clip" data-section="${i}"><span class="meta">${String(i + 1).padStart(2, '0')}</span><span class="title">${s.title}</span></button>`).join('');
+
+  const renderFilm = (slug) => {
+    const d = FILM_DATA[slug];
+    const lanes = LANES.map(([name, types, color]) => ({ name, color, items: d.layers.map((l, i) => ({ ...l, i })).filter((l) => types.includes(l.type)) })).filter((l) => l.items.length);
+    $('tl').innerHTML = lanes.map((ln) => `
+      <div class="lane"><span class="meta">${ln.name}</span><div class="track">${ln.items.map((l) => `
+        <button class="bar" data-layer="${l.i}" title="${esc(l.label)}" style="--c: var(${ln.color}); left: ${(l.start / d.duration) * 100}%; width: ${(Math.min(l.dur, d.duration - l.start) / d.duration) * 100}%"></button>`).join('')}</div></div>`).join('')
+      + '<div class="playhead" id="playhead"></div>';
+    const head = ['{', `  "module": "scene",`, `  "aspect": "${d.aspect || '16:9'}",`, `  "theme": "${d.theme}",`, `  "duration": ${d.duration},`, `  "layers": [`];
+    $('scene').innerHTML = head.map((l) => `<div>${esc(l)}</div>`).join('')
+      + d.layers.map((l, i) => `<div class="ln" data-line="${i}">    ${esc(l.json)},</div>`).join('')
+      + ['  ]', '}'].map((l) => `<div>${esc(l)}</div>`).join('');
+  };
+  const selectFilm = (i) => {
+    const [slug, title] = FILMS[i];
+    film = { slug, data: FILM_DATA[slug] };
+    for (const b of document.querySelectorAll('[data-film]')) b.setAttribute('aria-current', String(Number(b.dataset.film) === i));
+    video.src = `${BASE}${slug}.mp4`;
+    video.play().catch(() => {});
+    $('now-title').textContent = title;
+    $('spec').textContent = `${film.data.aspect || '16:9'} · theme ${film.data.theme}`;
+    $('layer-count').textContent = `${film.data.layers.length} layers`;
+    renderFilm(slug);
+  };
+  const showView = (v) => {
+    for (const b of document.querySelectorAll('[data-view]')) b.setAttribute('aria-pressed', String(b.dataset.view === v));
+    $('screen').hidden = v !== 'preview';
+    $('scene').hidden = v !== 'scene';
+  };
+  const selectSection = (i) => {
+    const s = SECTIONS[i];
+    for (const b of document.querySelectorAll('[data-section]')) b.setAttribute('aria-current', String(Number(b.dataset.section) === i));
+    $('info-kicker').textContent = s.kicker;
+    $('info-index').textContent = `${String(i + 1).padStart(2, '0')} / ${String(SECTIONS.length).padStart(2, '0')}`;
+    $('info').innerHTML = s.html;
+    if (s.scene) showView('scene');
+  };
+  const selectLayer = (i) => {
+    showView('scene');
+    for (const el of document.querySelectorAll('.scene .sel')) el.classList.remove('sel');
+    const line = document.querySelector(`[data-line="${i}"]`);
+    line.classList.add('sel');
+    line.scrollIntoView({ block: 'center' });
+  };
+
+  const tick = () => {
+    if (film && video.duration) {
+      const t = video.currentTime, d = film.data.duration;
+      const track = document.querySelector('.track');
+      if (track) {
+        const x = track.offsetLeft + (t / d) * track.offsetWidth;
+        $('playhead').style.left = `${x}px`;
+      }
+      let live = 0;
+      for (const bar of document.querySelectorAll('.bar')) {
+        const l = film.data.layers[bar.dataset.layer];
+        const on = t >= l.start && t < l.start + l.dur;
+        bar.classList.toggle('on', on);
+        const line = document.querySelector(`[data-line="${bar.dataset.layer}"]`);
+        if (line) line.classList.toggle('live', on);
+        live += on;
+      }
+      $('live-count').textContent = `${live} on screen`;
+      $('now-time').textContent = `${runtime(t)} / ${runtime(d)}`;
+    }
+    requestAnimationFrame(tick);
+  };
+  video.addEventListener('play', () => $('glyph').setAttribute('d', 'M3 1.5h2v9H3zM7 1.5h2v9H7z'));
+  video.addEventListener('pause', () => $('glyph').setAttribute('d', 'M3 1.5v9l7.5-4.5z'));
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.film) selectFilm(Number(t.dataset.film));
+    else if (t.dataset.section) selectSection(Number(t.dataset.section));
+    else if (t.dataset.view) showView(t.dataset.view);
+    else if (t.dataset.layer) selectLayer(Number(t.dataset.layer));
+    else if (t.hasAttribute('data-open-scene')) selectSection(2);
+    else if (t.id === 'play') { if (video.paused) video.play(); else video.pause(); }
+    else if (t.dataset.setH) setOpt('h', t.dataset.setH);
+    else if (t.dataset.setC) setOpt('c', t.dataset.setC);
+  });
+  const setOpt = (k, v) => {
+    document.body.dataset[k] = v;
+    for (const b of document.querySelectorAll(`[data-set-${k}]`)) b.setAttribute('aria-pressed', String(b.dataset[k === 'h' ? 'setH' : 'setC'] === v));
+  };
+
+  const q = new URLSearchParams(location.hash.slice(1));
+  setOpt('h', q.get('h') || 'a');
+  setOpt('c', q.get('c') || 'studio');
+  selectFilm(0);
+  selectSection(0);
+  requestAnimationFrame(tick);
+</script>
+</body>
+</html>
