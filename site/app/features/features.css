@@ -1,48 +1,21 @@
-/* ===== /features · three mechanisms, stacked ====================================================
-   No card grid and no detail routes, so this page borrows almost everything: .phead, .h2, .lead,
-   .tag, .codeblock, .demo-media and .btn all come from globals.css. What is local is the section
-   shape, and it is a hairline separator rather than a full-bleed band because DESIGN.md draws
-   structure with hairlines and this page sits inside .wrap, where a band cannot reach the edge.
-
-   TWO COLUMNS, because one was wrong. Prose is capped at a measure and a measure is about 66
-   characters, so a single column left the right 60% of a 1160px page empty for the whole scroll,
-   and the artifact under it stretched to the full width: a 16:9 clip became 1160x650, which is a
-   very large box for a film whose own frames are mostly white. The argument now sits at its measure
-   on the left and the thing that proves it sits beside it, which uses the width and sizes the clip
-   at something a reader can take in at once. */
-.fsec{padding:52px 0 8px;border-top:1px solid var(--line);margin-top:8px;
+/* ===== /features · three decisions, one panel each ============================================
+   The argument sits at its measure on the left and the thing that proves it sits beside it. */
+.fsec{margin-top:12px;padding:clamp(22px,3vw,36px);
   display:grid;grid-template-columns:minmax(0,7fr) minmax(0,6fr);
-  gap:clamp(28px,4vw,56px);align-items:start}
-.fsec:first-of-type{border-top:0}
-.fsec h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.04;letter-spacing:-.028em;
+  gap:clamp(24px,4vw,48px);align-items:start}
+.ls-top > .fsec:first-of-type{margin-top:36px}
+.fsec h2{font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.05;letter-spacing:-.025em;
   font-weight:800;text-wrap:balance;max-width:18ch}
-/* The measure sits on the element carrying the type, not on a wrapper: `ch` resolves against the
-   element's own font size. */
-.fsec p{color:var(--ink-2);font-size:1.07rem;line-height:1.65;margin-top:16px;max-width:60ch}
-.fsec p code{font-family:var(--font-mono),monospace;font-size:.92em;background:var(--bg-2);
-  border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink)}
-/* The artifact column tops out level with the heading: both borrowed rules lead with a margin
-   sized for a single stacked column. */
-.fsec-art > .codeblock,.fsec-art > .demo-media{margin-top:6px}
-.fsec-art > .codeblock{max-width:none}
-/* An honest footnote about what the page cannot show. Muted, not accent: it is inert data, and it
-   sits under the clip it is about rather than under the prose. */
-.fnote{margin-top:14px;font-size:13.5px;line-height:1.6;color:var(--muted)}
+/* The measure sits on the element carrying the type: `ch` resolves against its own font size. */
+.fsec p{color:var(--ink-2);font-size:1.02rem;line-height:1.65;margin-top:14px;max-width:60ch}
+.fsec p code{font-family:var(--font-mono),monospace;font-size:.92em;background:var(--raised);
+  border-radius:var(--r-in);padding:1px 6px;color:var(--ink)}
+/* Inside a panel the proof is a recessed well, not a second raised card. */
+.fsec-art > .codeblock{margin:0;max-width:none;box-shadow:none}
+.fsec-art > .demo-media{margin:0;border:0;box-shadow:none;border-radius:var(--r-in)}
+/* What the page cannot show. Muted, not accent: it is inert. */
+.fnote{margin-top:12px;font-size:13.5px;line-height:1.6;color:var(--muted)}
 
-/* The closing block. /showcase declares the same three rules under .scend: two routes need it now,
-   which is the condition for promoting it to globals.css, and globals.css is out of bounds this
-   pass. Deliberate duplication, reported rather than hidden.
-   .hero-cta centres its buttons for the landing hero; this page is left-aligned throughout. */
-.fend{padding:56px 0 80px;border-top:1px solid var(--line);margin-top:44px}
-.fend .h2{max-width:20ch}
-.fend .lead{margin-top:14px}
-.fend .hero-cta{justify-content:flex-start;margin-top:26px}
-
-/* One column below the rail breakpoint, where 6fr is narrower than the clip deserves. */
 @media (max-width:900px){
-  .fsec{grid-template-columns:minmax(0,1fr);gap:0}
-  .fsec-art > .codeblock,.fsec-art > .demo-media{margin-top:26px}
-}
-@media (max-width:640px){
-  .fsec{padding-top:40px}
+  .fsec{grid-template-columns:minmax(0,1fr)}
 }
