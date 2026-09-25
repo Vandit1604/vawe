@@ -45,28 +45,34 @@ import path from 'node:path';
 // captured under: it can say WHETHER something moved, never WHAT, which stays local where the full
 // baseline lives.
 
-// `assets/fonts/local/` holds PAID, per-developer faces (Sohne, a hand-captured Tiempos): never
-// fetched by `make fonts`, never on a CI runner, never the same set from one laptop to the next. Counting
-// it here made the font-state hash unreproducible across machines by construction: two checkouts running
-// the exact same `make fonts` still disagreed, because the hash also depended on whichever paid fonts one
-// of them happened to have dropped in by hand. Only `assets/fonts/` is pinned (generators/media/fonts.mjs
-// + harness/media/fonts.lock.json, sha256 per face), so it is the only directory that can make two
-// machines agree. A scene whose theme actually needs a `local/` face is not made portable by this, it is
-// EXCLUDED instead: see quality/baselines/e2e-known-broken.json's `needsUnlockedFont` list.
-const FONT_DIRS = ['assets/fonts'];
+// THE HASH COUNTS ONLY LOCKED FACES, NOT A DIRECTORY LISTING. It used to read every file under
+// assets/fonts/ (plus assets/fonts/local/, removed for the same reason below), and a directory is not a
+// reproducible thing: this repo's own dev worktrees carry leftover faces from font-discovery experiments
+// that `make fonts` never fetches and `harness/media/fonts.lock.json` never names, so two checkouts that
+// both ran the exact same `make fonts` still produced two different hashes, one of them polluted by
+// whatever a past session happened to leave on disk. `fonts.lock.json` is the one list any machine can
+// reproduce byte-for-byte (generators/media/fonts.mjs pins a version and a sha256 per face), so it is
+// the one thing the hash is allowed to depend on: read the LOCKED file list, ignore everything else in
+// assets/fonts/, and skip `assets/fonts/local/` outright, the PAID, per-developer faces (Sohne, a
+// hand-captured Tiempos) `make fonts` never touches and no CI runner ever has. A scene whose theme
+// actually needs one of those is not made portable by this, it is EXCLUDED instead: see
+// quality/baselines/e2e-known-broken.json's `needsUnlockedFont` list.
+const FONT_DIR = 'assets/fonts';
+const FONTS_LOCK = 'harness/media/fonts.lock.json';
 
 /** A BASELINE IS ONLY VALID WITHIN ONE FONT STATE. See snap-scenes.mjs's original banner for why:
  * `assets/fonts/` is gitignored, so a fresh clone, a worktree with a partial font set, or a mid-session
  * `make fonts` all silently rewrite every text width the signature records. */
 export function fontState(repoRoot) {
+  let locked = {};
+  try { locked = JSON.parse(fs.readFileSync(path.join(repoRoot, FONTS_LOCK), 'utf8')).faces || {}; }
+  catch { /* no lock file: hashes to a stable empty state rather than throwing */ }
   const names = [];
-  for (const d of FONT_DIRS) {
-    try { for (const name of fs.readdirSync(path.join(repoRoot, d))) {
-      const st = fs.statSync(path.join(repoRoot, d, name));
-      if (st.isFile()) names.push(`${d}/${name}:${st.size}`);
-    } } catch { /* absent is a state too, and it hashes to a different one */ }
+  for (const name of Object.keys(locked).sort()) {
+    let st;
+    try { st = fs.statSync(path.join(repoRoot, FONT_DIR, name)); } catch { continue; } // not fetched yet
+    if (st.isFile()) names.push(`${FONT_DIR}/${name}:${st.size}`);
   }
-  names.sort();
   return { n: names.length, hash: crypto.createHash('sha256').update(names.join('\n')).digest('hex').slice(0, 12) };
 }
 
