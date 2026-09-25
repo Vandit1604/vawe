@@ -49,7 +49,7 @@ export const CURSOR_STYLES = defineRegistry('cursor style', {
   blurbs: {
     arrow: 'the default macOS pointer arrow, unchanged pixels from before this registry existed',
     hand: 'a pointing hand, for hovering a clickable button or link in a product demo',
-    ibeam: 'a text-selection I-beam, for hovering editable or selectable text',
+    ibeam: 'a text-selection I-beam: an 8px serif cap at top and bottom joined by a 17.6px vertical stroke, 2.1px wide, for hovering editable or selectable text',
     block: 'a filled terminal cell that blinks on a fixed cadence, a block text cursor',
   },
   catalog: {
