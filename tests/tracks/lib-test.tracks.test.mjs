@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-// quality/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion/motion.js.
-// No browser needed (the primitives are pure). Run: node quality/gates/lib-test.mjs  (make lib-test)
+// tests/tracks/lib-test.tracks.test.mjs: fast pure-JS asserts, split by domain out of the old quality/gates/lib-test.mjs.
+// No browser needed (the primitives are pure). Run: node tests/tracks/lib-test.tracks.test.mjs  (make test)
 import { spring, springSettle, easeOutCubic,
   random, noise, hashSeed, resolveEasing, EASINGS, DEFAULT_MOTION,
   shake, trackingFor,

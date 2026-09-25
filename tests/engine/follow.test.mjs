@@ -1,5 +1,5 @@
-// core/camera-moves/follow.test.mjs: the runnable self-check for `cameraMove: {move:"followLayer"}`.
-//   node core/camera-moves/follow.test.mjs
+// tests/engine/follow.test.mjs: the runnable self-check for `cameraMove: {move:"followLayer"}`.
+//   node tests/engine/follow.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { bakeCameraMove } from '../../core/engine/produce.js';

@@ -1,4 +1,4 @@
-// node harness/live/test/no-emdash-live.test.mjs
+// node tests/hooks/no-emdash-live.test.mjs
 //
 // harness/live/no-emdash-live.mjs, fed exactly as Claude Code's PostToolUse feeds a Write or Edit
 // (stdin JSON carrying tool_input, stderr on exit 2). Two cases: a real em dash in the written content

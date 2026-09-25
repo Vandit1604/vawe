@@ -166,7 +166,7 @@ with `themes/vawe.json`'s own numbers, so a calm brand and a loud one computed t
 scale and the identical cuts. A standalone gate that counted distinct values per derived key across
 every shipped theme caught that once; it was deleted 2026-09-10 after a fire-rate census
 (`harness/dev/gate-census.mjs`) found it had never fired again since. If the derivation regresses
-toward a constant, `core/registry/theme-contract.test.mjs` still asserts the sibling per-key spread
+toward a constant, `tests/registry/theme-contract.test.mjs` still asserts the sibling per-key spread
 check inline.
 
 - `scale`: `hook ~= 55 + 1.12 * motion.enter` (regressed off the 7 hand-authored looks; the 7 numbers

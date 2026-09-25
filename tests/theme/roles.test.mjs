@@ -1,6 +1,6 @@
-// core/theme/roles.test.mjs: required roles enforced, derivation deterministic, the retired
+// tests/theme/roles.test.mjs: required roles enforced, derivation deterministic, the retired
 // palette/type/gradient shape refused with a pointer to the migration script.
-// node core/theme/roles.test.mjs
+// node tests/theme/roles.test.mjs
 import assert from 'node:assert/strict';
 import { REQUIRED_ROLES, roleErrors, deriveLegacy, expandTheme, themeFileErrors, isTokenFile } from '../../core/theme/roles.js';
 import { parseColor } from '../../core/color/engine.js';

@@ -1,8 +1,8 @@
-// core/layers/falloff.test.mjs: fast pure-JS asserts for `falloffMask` (core/layers/util.js), the
+// tests/layers/falloff.test.mjs: fast pure-JS asserts for `falloffMask` (core/layers/util.js), the
 // AE gradient-ramp operator: a value going 1 at a point to 0 with distance, expressed as a CSS
 // mask-image radial-gradient. No DOM needed: the function under test is pure.
 //
-//   node --test core/layers/falloff.test.mjs
+//   node --test tests/layers/falloff.test.mjs
 import test from 'node:test';
 import assert from 'node:assert';
 import { falloffMask } from '../../core/layers/util.js';

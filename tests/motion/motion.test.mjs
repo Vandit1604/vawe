@@ -1,7 +1,7 @@
-// core/motion/motion.test.mjs: the runnable self-check for "the engine is still by default"
+// tests/motion/motion.test.mjs: the runnable self-check for "the engine is still by default"
 // (the owner's call, 2026-09: a default that induces motion nobody authored is a bug). Asserts the
 // three DEFAULT_MOTION values that changed, and that a theme with no `motion` key still resolves them.
-//   node core/motion/motion.test.mjs
+//   node tests/motion/motion.test.mjs
 import assert from 'node:assert/strict';
 import { DEFAULT_MOTION, motionDefaults, exitRatioFromMotion, anticipateFromMotion } from '../../core/motion/motion.js';
 

@@ -375,5 +375,5 @@ now discovers which layers and camera legs are worth scanning off `buildMotionIR
 Hermite curve off a key's neighbours, which a flattened segment alone cannot reconstruct), so the
 migration changed WHERE the gate looks, never HOW FAST it decides a track is moving there. Proved on
 every film in `films/scene/`: the gate's stdout is unchanged, save one stack-trace line number in a
-deliberately-invalid template file. `core/timeline/motion-ir.test.mjs` asserts the IR's own segment
+deliberately-invalid template file. `tests/timeline/motion-ir.test.mjs` asserts the IR's own segment
 math on a fixture and that its coverage never disagrees with a naive raw-JSON scan on the whole library.

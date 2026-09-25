@@ -1,4 +1,4 @@
-// core/engine/expand.test.mjs: expandScene(data, aspectKey) resolves a cameraMove bake and a flow-seam's
+// tests/engine/expand.test.mjs: expandScene(data, aspectKey) resolves a cameraMove bake and a flow-seam's
 // travel against the CANVAS THE RENDER ACTUALLY TARGETS, not always the scene's own declared aspect.
 // Before this test could pass, both baked at the scene's own aspect regardless of aspectKey, because
 // frameOf(data) and sceneDims(scene) were called with no key (engine-doctrine/CRAFT/ENGINE-CHANGES.md "one fact, one

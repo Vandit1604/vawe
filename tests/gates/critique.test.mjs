@@ -1,4 +1,4 @@
-// node --test quality/gates/critique.test.mjs
+// node --test tests/gates/critique.test.mjs
 //
 // fake-typing / typing-camera-still: the owner's complaint was "typing zoom in and caret don't work
 // properly" on a real film that faked typing with html `parts` word-fades and a static `|` glyph, while

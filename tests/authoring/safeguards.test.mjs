@@ -1,4 +1,4 @@
-// harness/lib/safeguards.test.mjs: the two adapt entries added by the craft-rules-into-harness pass.
+// tests/authoring/safeguards.test.mjs: the two adapt entries added by the craft-rules-into-harness pass.
 // Unit-level, against adaptFinding() directly, the same way craft-rules.test.mjs exercises its own
 // module without spinning up a full render: each entry's applies()/adapt() is a pure function of a
 // finding + ctx, so a full film build would only add render time, not coverage.

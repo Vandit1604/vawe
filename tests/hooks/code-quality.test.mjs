@@ -1,4 +1,4 @@
-// node harness/live/test/code-quality.test.mjs
+// node tests/hooks/code-quality.test.mjs
 //
 // harness/live/code-quality.mjs, fed exactly as Claude Code's PostToolUse feeds it (stdin JSON, stderr
 // on exit 2). The two cases the hook exists for: a no-op edit on a file that already carries debt

@@ -1,9 +1,9 @@
-// quality/gates/preview-fragment.test.mjs: asserts on the two pure halves of build fix 7 (before render,
+// tests/gates/preview-fragment.test.mjs: asserts on the two pure halves of build fix 7 (before render,
 // a preview must prove what the film will actually do): the SANITISER PARITY (`make preview` running a
 // fragment through the same `scopeStyles(sanitizeHtml(...))` the film's html layer uses, core/layers/html.js)
 // and the REAL LAYER BOX lookup + clipping check (harness/lib/film-layer-box.mjs, harness/author/screen.mjs
 // clipAgainstBox). No browser, no render: only the string/geometry halves that do not need one.
-//   node quality/gates/preview-fragment.test.mjs
+//   node tests/gates/preview-fragment.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

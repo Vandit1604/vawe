@@ -1,8 +1,8 @@
-// harness/author/llms-txt.test.mjs: the runnable self-check for llms-txt.mjs.
+// tests/authoring/llms-txt.test.mjs: the runnable self-check for llms-txt.mjs.
 // Regenerates films/llms.txt in memory and asserts it stays in sync with the live registries, so a
 // layer type added to core/layers/index.js and never mentioned here fails a run instead of drifting
 // silently, the exact failure this generator exists to end (see llms-txt.mjs's header).
-//   node harness/author/llms-txt.test.mjs   ·   make llms-txt-test
+//   node tests/authoring/llms-txt.test.mjs   ·   make llms-txt-test
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';

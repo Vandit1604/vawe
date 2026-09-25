@@ -1,4 +1,4 @@
-// harness/author/discovery.test.mjs: the runnable self-check for the discovery corpus/router shared by
+// tests/authoring/discovery.test.mjs: the runnable self-check for the discovery corpus/router shared by
 // `make stage`'s adoption block (quality/gates/stage.mjs), the beat-surfacer save-time nudge
 // (harness/live/beat-surfacer.mjs), and ideate.mjs's route brackets.
 //
@@ -8,7 +8,7 @@
 // handle, interpolation mode, scramble charset, theme look key) is never offered, because none of them
 // is in GROUPS at all; a dedicated-field kind (camera move, cut, move shape, part entrance, recipe)
 // prints its OWN field, never a `use:` line.
-//   node harness/author/discovery.test.mjs
+//   node tests/authoring/discovery.test.mjs
 import assert from 'node:assert/strict';
 import { GROUPS, dedicatedField, usedNames, pasteLine, ambiguousNames, tokenGroupsOf, bestWindowMatch }
   from '../../harness/author/discovery.mjs';

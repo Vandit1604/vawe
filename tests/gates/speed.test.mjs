@@ -1,6 +1,6 @@
-// quality/gates/speed.test.mjs: findVelocitySpikes is `make speed`'s velocity-spike finding, a
+// tests/gates/speed.test.mjs: findVelocitySpikes is `make speed`'s velocity-spike finding, a
 // REPORT with no auto-fix. Pure-JS: an `evalSpeed(t, dt)` stand-in is enough, no scene needed.
-//   node quality/gates/speed.test.mjs
+//   node tests/gates/speed.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { findVelocitySpikes, VELOCITY_SPIKE_PX_S } from '../../quality/gates/speed.mjs';

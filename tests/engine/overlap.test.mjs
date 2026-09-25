@@ -1,8 +1,8 @@
-// core/camera-moves/overlap.test.mjs: bakeCameraMove is the ONE funnel every cameraMove spec passes
+// tests/engine/overlap.test.mjs: bakeCameraMove is the ONE funnel every cameraMove spec passes
 // through, regardless of who wrote it (a hand-authored scene, harness/author/assemble.mjs's per-beat
 // `camera:` lines, or a camera-kind recipe like `window-dolly` appended at render-time expand). Those
 // writers never see each other's work, so the refusal and the ordering fix both have to live here.
-//   node core/camera-moves/overlap.test.mjs
+//   node tests/engine/overlap.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { bakeCameraMove } from '../../core/engine/produce.js';

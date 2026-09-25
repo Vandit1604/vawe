@@ -1,6 +1,6 @@
-// core/layers/util.test.mjs: the runnable self-check for checkDropped (core/layers/util.js), the
+// tests/layers/util.test.mjs: the runnable self-check for checkDropped (core/layers/util.js), the
 // refusal that stops an authored CSS value from being silently dropped by the browser's own parser.
-//   node --test core/layers/util.test.mjs
+//   node --test tests/layers/util.test.mjs
 //
 // WHY THIS RENDERS A REAL SCENE INSTEAD OF CALLING checkDropped DIRECTLY. droppedProps
 // (core/type/sanitize-html.js) asks a real `document` element whether a value survives assignment,

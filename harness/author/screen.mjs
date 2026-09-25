@@ -106,7 +106,7 @@ function writeStartingFragment(fragPath, kind, themeName, invent) {
     if (r.status !== 0 || !r.stdout) throw new Error(`INVENT=1 palette seed failed: ${r.stderr || 'no output'}`);
     console.log(r.stdout);
     console.log(`screen: compose ${path.relative(ROOT, invented)} from the seed above, in the theme contract shape`
-      + ` (validate: node core/registry/theme-contract.test.mjs), then re-run with THEME=${name}-invented.`);
+      + ` (validate: node tests/registry/theme-contract.test.mjs), then re-run with THEME=${name}-invented.`);
     return false;
   }
   const theme = expandThemeFile(JSON.parse(fs.readFileSync(themeFile, 'utf8')));

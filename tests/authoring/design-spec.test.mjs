@@ -1,6 +1,6 @@
-// harness/lib/design-spec.test.mjs: the film design sidecar reads, merges over the kit's own values,
+// tests/authoring/design-spec.test.mjs: the film design sidecar reads, merges over the kit's own values,
 // and can name the nearest declared token to a stray number or colour.
-//   node harness/lib/design-spec.test.mjs
+//   node tests/authoring/design-spec.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

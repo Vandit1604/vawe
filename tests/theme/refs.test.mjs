@@ -1,5 +1,5 @@
-// core/theme/refs.test.mjs: a scene reference to a real token resolves; a bad one is refused.
-// node core/theme/refs.test.mjs
+// tests/theme/refs.test.mjs: a scene reference to a real token resolves; a bad one is refused.
+// node tests/theme/refs.test.mjs
 import assert from 'node:assert/strict';
 import { resolveTokenRefs } from '../../core/theme/refs.js';
 

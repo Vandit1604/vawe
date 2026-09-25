@@ -1,6 +1,6 @@
-// box-style.test.mjs: the pure computed-style mapping preview-fragment.mjs's box dump relies on.
+// tests/authoring/box-style.test.mjs: the pure computed-style mapping preview-fragment.mjs's box dump relies on.
 // No browser: only the string parsing that does not need one.
-//   node harness/author/box-style.test.mjs
+//   node tests/authoring/box-style.test.mjs
 import assert from 'node:assert/strict';
 import { normalizeColor, shadowOrNull, firstFontFamily, cornerRadii } from '../../harness/author/box-style.mjs';
 

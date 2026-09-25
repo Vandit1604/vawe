@@ -1,5 +1,5 @@
-// quality/gates/backdrop-turn.test.mjs
-//   node --test quality/gates/backdrop-turn.test.mjs
+// tests/gates/backdrop-turn.test.mjs
+//   node --test tests/gates/backdrop-turn.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { turns } from '../../quality/gates/backdrop-turn.mjs';

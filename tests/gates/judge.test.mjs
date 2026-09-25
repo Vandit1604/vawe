@@ -1,9 +1,9 @@
-// quality/gates/judge.test.mjs: the verdict gets a shape. A judge finding used to be a free-text
+// tests/gates/judge.test.mjs: the verdict gets a shape. A judge finding used to be a free-text
 // `--fixes` string nothing parsed (see the header of judge.mjs and engine-doctrine/JUDGE.md); this
 // proves the `--fix <code>@<beat>` replacement actually lands as records, in the receipt AND through
 // the shared findings channel, that an unknown code is refused by name, and that the old `--fixes`
 // prose still works with a printed notice.
-//   node quality/gates/judge.test.mjs
+//   node tests/gates/judge.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

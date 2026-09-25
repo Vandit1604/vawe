@@ -1,6 +1,6 @@
-// quality/gates/jolt-check.test.mjs: does the jolt step actually see a jolt, and only a jolt.
+// tests/gates/jolt-check.test.mjs: does the jolt step actually see a jolt, and only a jolt.
 //
-//   node --test quality/gates/jolt-check.test.mjs
+//   node --test tests/gates/jolt-check.test.mjs
 //
 // Each fixture is spawned through the real CLI (jolt-check.mjs has no importable guard, same as most
 // per-scene gates here), reading its findings back off VAWE_FINDINGS_OUT the same way author-check does.

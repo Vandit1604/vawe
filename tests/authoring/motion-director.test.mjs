@@ -1,9 +1,9 @@
-// harness/author/motion-director.test.mjs: the runnable self-check for the profile lookup in
+// tests/authoring/motion-director.test.mjs: the runnable self-check for the profile lookup in
 // resolveFamily(). Bug: `PROFILES[d.profile] || null` silently treated a MISSPELLED profile name the
 // same as no profile at all, so a scene opting in to "profile":"appel" got no contradiction checking
 // and no error, engine-doctrine/MISTAKES.md's fallback-to-default pattern. Fixed to refuse an unknown profile by
 // name; absence (`d.profile` unset) still means "no profile", unchanged.
-//   node harness/author/motion-director.test.mjs
+//   node tests/authoring/motion-director.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

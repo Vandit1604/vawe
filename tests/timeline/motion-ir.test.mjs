@@ -1,7 +1,7 @@
-// core/timeline/motion-ir.test.mjs: fast pure-JS asserts for buildMotionIR, plus the no-change proof
+// tests/timeline/motion-ir.test.mjs: fast pure-JS asserts for buildMotionIR, plus the no-change proof
 // for jolt-check's migration to it (quality/gates/jolt-check.mjs). No DOM needed.
 //
-//   node --test core/timeline/motion-ir.test.mjs
+//   node --test tests/timeline/motion-ir.test.mjs
 import test from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';

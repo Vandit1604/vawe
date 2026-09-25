@@ -1,5 +1,5 @@
-// core/audio/tactile.test.mjs: the runnable self-check for the tactile-sound derivation.
-//   node core/audio/tactile.test.mjs
+// tests/engine/tactile.test.mjs: the runnable self-check for the tactile-sound derivation.
+//   node tests/engine/tactile.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { derive } from '../../core/audio/tactile.js';

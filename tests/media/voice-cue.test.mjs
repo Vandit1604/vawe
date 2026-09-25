@@ -1,5 +1,5 @@
-// generators/media/voice-cue.test.mjs: the runnable self-check for voice-cue baking.
-//   node generators/media/voice-cue.test.mjs
+// tests/media/voice-cue.test.mjs: the runnable self-check for voice-cue baking.
+//   node tests/media/voice-cue.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

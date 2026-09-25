@@ -1,4 +1,4 @@
-// node --test quality/gates/skill-reach.test.mjs
+// node --test tests/gates/skill-reach.test.mjs
 //
 // Two fixtures, a bare tree with no .git of its own so skills() falls back to the directory walk:
 // a skill AGENTS.md actually names (routed) beside one nothing but the generated index mentions

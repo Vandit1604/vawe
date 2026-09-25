@@ -1,8 +1,8 @@
-// core/fx/squash.test.mjs: the runnable self-check for "squash cannot see rotation" (this session's
+// tests/engine/squash.test.mjs: the runnable self-check for "squash cannot see rotation" (this session's
 // fix, engine-doctrine/MISTAKES.md). Pure-JS: squash's frame() reads only `el.offsetWidth/Height` and
 // `el.style.scale`, so a plain object stands in for the element, exactly as core/timeline/clips.test.mjs
 // stands one in for `el.dataset`.
-//   node core/fx/squash.test.mjs
+//   node tests/engine/squash.test.mjs
 import assert from 'node:assert/strict';
 import { frame } from '../../core/fx/squash.js';
 

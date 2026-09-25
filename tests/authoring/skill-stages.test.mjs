@@ -1,5 +1,5 @@
-// harness/lib/skill-stages.test.mjs: house-rule self-check, no framework.
-//   node harness/lib/skill-stages.test.mjs
+// tests/authoring/skill-stages.test.mjs: house-rule self-check, no framework.
+//   node tests/authoring/skill-stages.test.mjs
 import { skillStageIndex, skillsForStage } from '../../harness/lib/skill-stages.mjs';
 import { STAGE_ORDER } from '../../quality/gates/stage.mjs';
 

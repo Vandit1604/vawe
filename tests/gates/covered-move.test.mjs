@@ -1,8 +1,8 @@
-// quality/gates/covered-move.test.mjs: is the covered-move report firing on the real defect,
+// tests/gates/covered-move.test.mjs: is the covered-move report firing on the real defect,
 // and staying quiet on everything that only looks like it (including its own former false positives:
 // a mover already faded/translated off screen, and an html coverer whose opacity is unreadable).
 //
-//   node --test quality/gates/covered-move.test.mjs
+//   node --test tests/gates/covered-move.test.mjs
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

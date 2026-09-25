@@ -1,10 +1,10 @@
-// harness/author/assemble-use.test.mjs: the `use:` general door (harness/lib/contract.mjs), end to
+// tests/authoring/assemble-use.test.mjs: the `use:` general door (harness/lib/contract.mjs), end to
 // end through assemble.mjs. Its own file, not appended to assemble.test.mjs: that file's first fixture
 // already fails independent of this change (PRESERVED_FILM_FIELDS never names `cameraMove`, only
 // `camera`, a pre-existing mismatch measured on ac0d66df before this change touched anything), and an
 // assert.throws early in a script aborts every assertion after it. This file runs on its own so a
 // use: regression is never masked by an unrelated pre-existing failure.
-//   node harness/author/assemble-use.test.mjs
+//   node tests/authoring/assemble-use.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

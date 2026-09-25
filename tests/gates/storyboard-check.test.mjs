@@ -1,7 +1,7 @@
-// quality/gates/storyboard-check.test.mjs: the film-vs-plan divergence check. Builds a real three-beat
+// tests/gates/storyboard-check.test.mjs: the film-vs-plan divergence check. Builds a real three-beat
 // film with `assemble.mjs`, then asserts storyboard-check stays quiet on a clean build and NAMES the
 // divergence once the storyboard or the built JSON is edited out from under it.
-//   node quality/gates/storyboard-check.test.mjs
+//   node tests/gates/storyboard-check.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

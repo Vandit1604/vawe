@@ -1,8 +1,8 @@
-// harness/author/assemble.test.mjs: assemble owns what it GENERATES (html layers by `id: scene<N>`,
+// tests/authoring/assemble.test.mjs: assemble owns what it GENERATES (html layers by `id: scene<N>`,
 // the one continuous-object layer by `id: object`) and nothing else. A hand-authored layer or
 // film-level field it has no vocabulary for survives a re-assemble byte-identically, is REPORTED by
 // name, and is WARNED about once its time window no longer lands inside the film.
-//   node harness/author/assemble.test.mjs
+//   node tests/authoring/assemble.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

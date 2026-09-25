@@ -1,10 +1,10 @@
-// harness/author/theme-writers.test.mjs: every theme WRITER's output survives the token-file adapter.
+// tests/authoring/theme-writers.test.mjs: every theme WRITER's output survives the token-file adapter.
 // The engine refuses a theme in the retired palette/type/gradient shape (core/theme/roles.js
 // expandTheme), so every write site into themes/ now converts through migrate-themes.mjs's own
 // migrateOne, and this proves it, both live (theme-remix.mjs, deterministic and network-free) and by
 // shape (invent-look.mjs's buildTheme, which needs a storyboard file and live font vendoring to run for
 // real, so its exact output shape is reproduced here instead, cited to its source lines).
-//   node harness/author/theme-writers.test.mjs
+//   node tests/authoring/theme-writers.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';

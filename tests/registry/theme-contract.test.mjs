@@ -1,8 +1,8 @@
-// core/registry/theme-contract.test.mjs: the runnable self-check for `computedLook`/`resolveLook`
+// tests/registry/theme-contract.test.mjs: the runnable self-check for `computedLook`/`resolveLook`
 // (W8 phase 1, engine-doctrine/CRAFT/THEME-LOOK.md "The computed look, for the other 37"). Pure-JS: this file
 // stays node+browser importable on purpose (see the file header), so the test injects `isLightBg`
 // the same way `core/engine/boot.js` does, rather than importing `core/color/engine.js` itself here.
-//   node core/registry/theme-contract.test.mjs
+//   node tests/registry/theme-contract.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';

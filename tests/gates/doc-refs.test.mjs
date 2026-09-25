@@ -1,8 +1,8 @@
-// quality/gates/doc-refs.test.mjs: pins the hole this gate used to have, that a cited path existing on
+// tests/gates/doc-refs.test.mjs: pins the hole this gate used to have, that a cited path existing on
 // disk is not the same claim as a fresh clone having it. Two fixture docs, both untracked so `docs()`
 // still finds them (it scans `--cached --others --exclude-standard`): one cites a path git tracks, one
 // cites a path nothing tracks. Removed in after() whether the run passes or fails, same convention as
-// edge-reveal.test.mjs.
+// tests/gates/doc-refs.test.mjs.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

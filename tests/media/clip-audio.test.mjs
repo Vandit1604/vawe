@@ -1,5 +1,5 @@
-// harness/media/clip-audio.test.mjs: house-rule self-check, no framework.
-//   node harness/media/clip-audio.test.mjs
+// tests/media/clip-audio.test.mjs: house-rule self-check, no framework.
+//   node tests/media/clip-audio.test.mjs
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

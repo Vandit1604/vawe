@@ -39,7 +39,7 @@
 //
 // Nothing else changes. Every refusal below still fires at load: a family with no CATEGORY, a family
 // with no option table, two families exporting one factory name, a factory with no catalog row. The
-// only thing lost is auto-discovery of a NEW file, and `quality/gates/lib-test.mjs` asserts this map
+// only thing lost is auto-discovery of a NEW file, and `tests/registry/lib-test.registry.test.mjs` asserts this map
 // against the real directory listing, so a family added and not imported here fails a test rather
 // than disappearing quietly.
 import * as appFam from './app.mjs';

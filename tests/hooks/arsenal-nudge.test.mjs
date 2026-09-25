@@ -1,4 +1,4 @@
-// node harness/live/test/arsenal-nudge.test.mjs
+// node tests/hooks/arsenal-nudge.test.mjs
 //
 // harness/live/arsenal-nudge.mjs, fed exactly as Claude Code's PostToolUse feeds it (stdin JSON,
 // stderr on exit 2). Every test gets its own scratch ARSENAL_NUDGE_DATA_DIR so runs never share

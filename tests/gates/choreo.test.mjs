@@ -1,4 +1,4 @@
-// node --test quality/gates/choreo.test.mjs
+// node --test tests/gates/choreo.test.mjs
 //
 // camera-coverage-floor: recipes/expand.mjs appends recipe camera legs to hand cameraMove legs rather
 // than chaining them, so a film can bake a `camera[]` array whose legs cover only its opening seconds

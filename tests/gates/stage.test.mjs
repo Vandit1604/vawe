@@ -1,4 +1,4 @@
-// node --test quality/gates/stage.test.mjs
+// node --test tests/gates/stage.test.mjs
 //
 // Every one of the eight stages, derived by stageOf() from fixture films this file builds and removes
 // itself. THIS MATTERS: harness/live/test/stage-gate.test.mjs used to borrow a real film,
