@@ -245,8 +245,8 @@ for (const f of files) {
 // where an author can name exactly one, and the extra three were each bought off with a hand-written
 // sentence. 55 of the 120 waivers were that, and every future registry would have added three more.
 //
-// The registry already KNOWS its own parts, so nothing here needs a naming convention: `entries` and
-// `blurbs` are matched by IDENTITY, the registry object by identity, and the derived name list by value
+// The registry already KNOWS its own parts, so nothing here needs a naming convention: `entries`,
+// `blurbs` and `aka` are matched by IDENTITY, the registry object by identity, and the derived name list by value
 // (`Object.keys` hands back a fresh array every time, so identity cannot reach it). A vocabulary that is
 // not a registry is still reported, which is the half of this gate worth keeping: it is how a capability
 // with no owner gets found.
@@ -254,7 +254,7 @@ const REGS = registries();
 const sameNames = (v, names) => Array.isArray(v) && v.length === names.length
   && [...v].sort().join('\u0000') === [...names].sort().join('\u0000');
 const partOfRegistry = (v) => REGS.find((r) => v === r || v === r.entries || (r.blurbs && v === r.blurbs)
-  || (r.pitfalls && v === r.pitfalls) || sameNames(v, r.names));
+  || (r.pitfalls && v === r.pitfalls) || (r.aka && v === r.aka) || sameNames(v, r.names));
 
 const derived = new Map();   // `file::NAME` -> registry
 for (const [key, [, value]] of exported) {
