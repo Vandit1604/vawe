@@ -12,3 +12,4 @@ export const glsl = `                              /* film burn */
     float a = max(burned*bell, rim*bell*0.95);
     c = vec4(col, a);`;
 export const blurb = 'a film burn: the frame chars through and blows out, the way heat eats a print. Warm, analogue, and loud.';
+export const aka = ['film burn', 'burn transition', 'flare burn'];
