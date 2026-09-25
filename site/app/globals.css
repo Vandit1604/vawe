@@ -75,72 +75,25 @@ body{
 a{color:inherit;text-decoration:none}
 ::selection{background:var(--accent);color:var(--accent-ink)}
 .mono{font-family:var(--font-mono),monospace;font-variation-settings:normal}
-/* ===== WIDTH IS A TYPE ROLE, NOT AN EFFECT =================================================
-   Anybody carries a wdth axis (50-150). It earns its place as static contrast: display type
-   stands wide and planted, technical labels compress like a spec sheet. It is deliberately NOT
-   animated — the hero already contains a live engine, and type that reflows every frame would
-   compete with the render it frames (and thrash layout doing it). See DESIGN.md. */
+/* Archivo's wdth axis is a static type role, never animated: type that reflows every frame would
+   compete with the live render beside it. */
 :root{ --wd-display:100; --wd-body:100; }
 /* WCAG 2.4.1 — visible only on focus, but always the first tab stop. */
 .skip{position:absolute;left:-9999px;top:0;z-index:var(--z-skip);
   background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:14px;
   padding:11px 18px;border-radius:0 0 10px 0}
 .skip:focus{left:0}
-/* THE HOUSE RING, FOR LINKS. Every button, input, select and summary already carries
-   `2px solid var(--accent)` on :focus-visible; a bare <a> carried nothing and fell back to the
-   browser's own 1px #005FCC. On white that reads. On the cobalt bands it measures 1.1:1 against
-   #2563eb and is invisible, and that is where the hero pill nav and every footer link live, on
-   every route. Links, not `*`: a blanket rule would fight the four fields that deliberately
-   answer focus with a border plus a tinted ring (.bsearch, .bselect, .ar-find, .ed-cm). */
+/* THE HOUSE RING, FOR LINKS. A bare <a> otherwise falls back to the browser's own ring. Links, not
+   `*`: two fields answer focus with a border plus a tinted ring instead (.ar-find, .ed-cm). */
 a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
-/* Cobalt cannot ring itself. White is the only ink the band already trusts at 5.17:1. */
-.on-accent a:focus-visible{outline-color:#fff}
-/* The skip chip IS cobalt, and it sits flush to the shell edge, so its ring goes inside in white. */
+/* The skip chip IS the accent and sits flush to the shell edge, so its ring goes inside. */
 .skip:focus-visible{outline-color:#fff;outline-offset:-4px}
-/* ===== THE SHELL ===========================================================================
-   The page is a card floating on a field, not a document bleeding to the window edge. It frames
-   the site the way a contact sheet frames its frames — which is the whole North Star. */
-/* clip-path, NOT overflow:hidden. overflow:hidden makes this a scroll container, and
-   `animation-timeline: view()` resolves against the nearest scrollport — so every scroll-driven
-   animation inside the shell silently anchored to a box that never scrolls and never advanced.
-   It failed the worst way: content readable, animation dead, nothing to see in a screenshot.
-   clip-path rounds the corners identically without creating a scrollport. */
+/* ===== THE SHELL ========================================================================== */
 .shell{position:relative;background:var(--bg)}
-/* ===== THE BOOKEND =========================================================================
-   A band of the engine's own output, full-bleed, committed to cobalt. Structure borrowed from a
-   comp that used a stock sky here; the sky is the part any competitor can buy, so ours is a real
-   render instead. Blurred and dimmed so it stays ambient and the hero editor still wins the eye. */
-.bookend{position:relative;background:var(--accent);isolation:isolate;overflow:hidden}
-/* Two rules hold this band together, and both are load-bearing:
- *
- * 1. ABSTRACT TEXTURE, never a narrative cut. A brand film carries its own headline, and a
- *    backdrop with someone else's copy in it collides with ours. Blur enforces it regardless of
- *    which frame is on screen; the scale hides the blur's soft edges.
- * 2. multiply, NOT a scrim. Text over video is a MOVING contrast target — a translucent cobalt
- *    scrim over a bright frame composites to ~4:1 and silently fails AA on whichever frames
- *    happen to be light. multiply can only ever darken its backdrop, so the band is mathematically
- *    guaranteed to stay at or below cobalt, and white on it never drops under cobalt's 5.17:1.
- *    Contrast becomes a property of the blend mode instead of a thing to re-audit per frame.
- *    Never swap this for soft-light/overlay/screen: those can lighten, and the guarantee dies.
- */
-/* opacity is the shadow dial. The field still has luminance variation, and multiply turns any
-   dark region into what reads as a shadow on the band; at .28 the whole range lands within ~5%
-   of cobalt, so it is movement rather than shading. */
-.bookend video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:var(--z-under);
-  mix-blend-mode:multiply;opacity:.28;filter:blur(30px) saturate(1.35);transform:scale(1.16)}
-/* No darkening gradient at the band's foot. It read as a shadow slumped under the content and
-   bought nothing the blend mode above does not already guarantee. */
-
 /* Skip target. tabindex=-1 makes it programmatically focusable; without this rule the browser
    paints a focus ring around the whole hero when the skip link is used. */
 #content:focus{outline:none}
 #content:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
-/* Everything living on the cobalt band. White on #2563eb is 5.17:1 — legal for body, and the
-   scrim keeps it that way over any frame the film happens to be on.
-   These must out-specify .hero-head h1 / .hero-head .sub, which are defined later in this file. */
-.on-accent{color:#fff}
-.hero-head.on-accent h1,.on-accent h2,.on-accent > p{color:#fff}
-.hero-head.on-accent .sub{color:rgba(255,255,255,.94)}
 .wrap{position:relative;z-index:var(--z-base);max-width:var(--maxw);margin:0 auto;padding:0 26px}
 /* Several routes render the Footer inside their own .wrap; a nested wrap adds no second gutter. */
 .wrap .wrap{padding-inline:0;max-width:none}
@@ -177,15 +130,12 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .btn:active{transform:translateY(1px) scale(.99)}
 .btn-primary{background:var(--ink);color:var(--bg)}
 .btn-primary:hover{background:var(--ink-2)}
-.btn-white{background:var(--ink);color:var(--bg)}
-.btn-white:hover{transform:translateY(-2px);box-shadow:var(--shadow-3)}
 .btn-ghost{background:var(--raised);color:var(--ink);border-color:transparent}
 .btn-ghost:hover{background:var(--raised-2)}
-/* The action row under a page head. Shared by the landing hero, /showcase/type, /showcase/effects
-   and /features/<slug>, which is why it lives here and the rest of the landing hero does not. */
+/* An action row: the landing hero, the footer panel and the content pages' closing panels. */
 .hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 /* =========================================================
-   SECTIONS (white)
+   SECTIONS
    ========================================================= */
 .section{padding:70px 0}
 .section.alt{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -247,17 +197,12 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
    .aspects-foot the flex parent blockifies both anyway, so they stay side by side there. */
 .tag{display:flex;width:fit-content;margin-top:16px;font-family:var(--font-mono),monospace;font-size:12px;
   color:var(--muted);letter-spacing:.01em}
-/* each box carries its video's TRUE ratio — the shapes ARE the demo, so they must not be cropped.
-   flex-grow is set to each box's own ratio, so widths scale to the container and heights land equal. */
 /* ===== ANY ASPECT (full-measure) ==========================================================
    flex-basis proportional to each ratio + aspect-ratio ⇒ all three resolve to the SAME height,
    so width is the only variable and the point ("one scene, three crops") reads instantly.
    That maths was always right; the beat just never had the width to show it. */
-.aspects{padding:44px 0 8px;border-top:1px solid var(--line);margin-top:20px}
 /* The head lost its paragraph ("rendered 16:9, 9:16 and 1:1 from the same source, in one pass").
    The three ratio captions and the `--aspect` chip in the foot say it in the product's own words. */
-.aspects > h2{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.04;letter-spacing:-.028em;
-  font-weight:700;font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;margin:8px 0 26px}
 .aspects-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px}
 .trio{display:flex;gap:clamp(10px,1.4vw,18px);align-items:flex-end;justify-content:center;padding:0}
 .trio .ar{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;
@@ -278,58 +223,6 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* opaque for the same reason as .clip .lab: its backdrop is video */
 .trio .ar span{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;font-size:11px;color:#fff;
   background:rgba(15,22,32,.94);backdrop-filter:blur(6px);padding:3px 7px;border-radius:6px}
-/* ===== THE FILMS ==========================================================================
-   The page opens on a film, not on type. There is ONE headline and no lead paragraph: the page
-   used to carry a hero head plus a lead, then a second head plus a second lead, which pushed the
-   first film 466px down a 1440-wide screen. The kicker rides inside the h1 so it costs no row.
-
-   The 24px top padding is deliberate and small. This is the first block on the page, so its
-   padding is the gap under the masthead, not a gap between two sections. */
-.films{padding:24px 0 8px}
-/* Six items, six cells, and three sizes. A grid of six identical tiles gives the eye nowhere to
-   start and reads as a template; sixths let one film be the subject and the rest be the set.
-   1 hero at 6/6, 2 at 3/6, 3 at 2/6. No empty cell in any row. */
-/* The one fact the clips cannot state, said once. It sat on all six cards as the word `reflected`,
-   which is one idea repeated six times; here it costs a single line above the work. */
-.scsub{margin:-6px 0 22px;color:var(--ink-2);font-size:15px}
-/* A family's intro folds away. Closed it costs one small line; open it is the same paragraph it was.
-   The summary is a real control, so it keeps a focus ring and a pointer. */
-
-.filmgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:30px 26px}
-.film-hero{grid-column:span 6}
-.filmgrid > .film:nth-child(2),.filmgrid > .film:nth-child(3){grid-column:span 3}
-.filmgrid > .film:nth-child(4),.filmgrid > .film:nth-child(5),.filmgrid > .film:nth-child(6){grid-column:span 2}
-/* No card. The video already has a frame; a bordered box around it is a second frame doing no
-   work, and six of them in a grid is the "equal cards with a button under each" tell. */
-.film{margin:0}
-.fmedia{aspect-ratio:16/9;background:var(--bg-2);overflow:hidden;border:1px solid var(--line);
-  border-radius:14px;box-shadow:var(--shadow-1);
-  transition:transform .35s var(--ease),box-shadow .35s var(--ease),border-color .35s var(--ease)}
-.film:hover .fmedia{transform:translateY(-4px);box-shadow:var(--shadow-3);border-color:var(--accent-line)}
-.fmedia video{width:100%;height:100%;object-fit:contain;display:block}
-/* brand · runtime · source, on one line. Everything else the clip says better. */
-.film figcaption{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;padding:13px 2px 0}
-.fbrand{font-weight:700;font-size:1.05rem;letter-spacing:-.015em}
-.fdur{font-family:var(--font-mono),monospace;font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.02em}
-.film .srcopen{margin:0 0 0 auto;font-size:11px;padding:5px 11px}
-.film .srcopen .srclabel{display:none}
-.film-hero .srcopen .srclabel{display:inline}
-@media (max-width:860px){
-  .cap-lead{grid-template-columns:1fr;row-gap:12px}
-}
-/* A 1/3-column tile is too narrow for a 16:9 film to stay legible, so the small tier goes to
-   halves before the whole grid goes to one. */
-@media (max-width:900px){
-  .filmgrid > .film:nth-child(n){grid-column:span 3}
-}
-@media (max-width:640px){
-  .filmgrid{gap:22px}
-  .film-hero,.filmgrid > .film:nth-child(n){grid-column:span 6}
-  /* One column, so the caption wraps and `margin-left:auto` strands the chip against the right
-     edge under a left-aligned brand. On a phone the caption is a left-aligned stack. */
-  .film figcaption{row-gap:9px}
-  .film .srcopen{margin-left:0}
-}
 /* ===== THE AFFORDANCE RULE ================================================================
    A bordered mono chip on --bg-2 meant two opposite things on the same card: `.tag` was inert
    metadata and `.srctoggle` was the control right beneath it, drawn identically. You could not
@@ -379,47 +272,8 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* Reduced motion still has to answer "is it working?", so this fades rather than removing the
    signal: a loader that stops moving cannot be told from the frozen state it exists to deny. */
 @media (prefers-reduced-motion:reduce){@keyframes bfade{0%,100%{opacity:.3}50%{opacity:1}}}
-/* ===== BLOCKS FILTER ======================================================================
-   96 blocks in one flat grid meant scrolling and hoping. Search carries the load; the family
-   dropdown is the coarse cut. Both derive from the registry, so a new block cannot leave them
-   behind. Sticky: the toolbar is useless the moment it scrolls away from the grid it filters. */
-.bfilter{position:sticky;top:70px;z-index:var(--z-sticky);display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-  padding:14px 0;margin-bottom:6px;background:var(--bg);border-bottom:1px solid var(--line)}
-.bsearch{position:relative;display:flex;align-items:center;flex:1 1 260px;min-width:0}
-.bsearch-i{position:absolute;left:12px;width:15px;height:15px;color:var(--muted);pointer-events:none}
-.bsearch input{width:100%;font-family:var(--font-mono),monospace;font-size:13px;color:var(--ink);
-  background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 34px;
-  transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
-.bsearch input::placeholder{color:var(--muted)}
-/* Both of these answered focus with a border colour and `outline:none` on `:focus`, so a keyboard
-   user got LESS than a mouse user (the hover state was the same border). The house ring cannot sit
-   outside a field flush against a sticky bar, so it is the replacement DESIGN.md names: the border
-   change PLUS a 3px accent-tinted ring, and keyed to :focus-visible. */
-.bsearch input:focus-visible,.bselect select:focus-visible{
-  outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.bsearch input:focus{border-color:var(--accent)}
-.bsearch-x:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-/* the browser's own clear affordance is inconsistent across engines, so ship one */
-.bsearch input::-webkit-search-cancel-button{display:none}
-.bsearch-x{position:absolute;right:8px;width:22px;height:22px;border:0;border-radius:6px;cursor:pointer;
-  background:none;color:var(--muted);font-size:11px;line-height:1}
-.bsearch-x:hover{color:var(--accent);background:var(--accent-soft)}
-.bselect{position:relative;flex:0 0 auto}
-.bselect select{appearance:none;font-family:var(--font-mono),monospace;font-size:13px;color:var(--accent);
-  background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:9px 34px 9px 13px;cursor:pointer;
-  transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
-.bselect select:focus,.bselect select:hover{border-color:var(--accent)}
-.bselect-c{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:10px;
-  pointer-events:none}
-.bcount{font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted);margin-left:auto}
-.bempty{padding:60px 0;color:var(--ink-2);font-size:15px}
-.bempty b{color:var(--ink)}
-.blink{background:none;border:0;padding:0;font:inherit;color:var(--accent);font-weight:600;cursor:pointer;
-  text-decoration:underline;text-underline-offset:3px}
-/* An in-prose link inside a .fsec/.isec paragraph: cobalt (the one-voice rule) with no underline at
-   rest, so it reads as a pointer rather than a footnote, underlined on hover/focus per the site's
-   link-affordance pattern elsewhere (.blink, .foot a). Two routes need it (features, the intent
-   pages), which is DESIGN.md's own bar for a globals.css rule. */
+/* An in-prose link inside an .isec paragraph: the accent with no underline at rest, underlined on
+   hover and focus. */
 .ilink{color:var(--accent);font-weight:600;text-decoration:none;white-space:nowrap}
 .ilink:hover,.ilink:focus-visible{text-decoration:underline;text-underline-offset:3px}
 .demo-media{margin:36px 0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#000;box-shadow:var(--shadow-2)}
@@ -475,18 +329,15 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* =========================================================
    MICRO-ANIMATIONS
    ========================================================= */
-.rise{opacity:0;transform:translateY(18px);animation:rise .85s var(--ease) forwards}
-.rise.d1{animation-delay:.08s}.rise.d2{animation-delay:.16s}.rise.d3{animation-delay:.26s}
 .pop{opacity:0;transform:translateY(30px) scale(.985);animation:pop 1s var(--ease) .34s forwards}
 @keyframes rise{to{opacity:1;transform:none}}
 @keyframes pop{to{opacity:1;transform:none}}
 @media (max-width:900px){
-  .hero-stage{margin-bottom:-90px}.hero-foot{height:120px}
-  .strip{grid-template-columns:1fr}.clip.big{grid-column:auto}
+  .strip{grid-template-columns:1fr}
   .row{grid-template-columns:1fr;gap:22px}
 }
 @media (prefers-reduced-motion:reduce){
-  .rise,.pop{animation:none;opacity:1;transform:none}
+  .pop{animation:none;opacity:1;transform:none}
   html{scroll-behavior:auto}
   /* The clips STAY. components/Clip.tsx simply never plays them, so each one holds its poster —
      a real frame of the real render. The old rule hid the video outright, which took the poster
@@ -498,7 +349,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
      to zero makes the swap a jump cut, which is more motion to the eye, not less.
      /playground is deliberately absent: it gates its own fade behind `no-preference` and prints
      the same state in a sentence under the box. */
-  .hb-frame,.hb-poster,.blive,.tylive{transition-duration:.2s !important}
+  .blive,.tylive{transition-duration:.2s !important}
 }
 /* ===== THE SCENE PLAYER — /editor, /playground and /arsenal all mount it, so it lives here.
    The editor block that used to wrap these moved to app/editor/editor.css: one route, one sheet. */
@@ -525,12 +376,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
    keyboard user got Chrome's default while every other control on the page got the site's. */
 .sp-play:focus-visible,.sp-scrub:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .sp-time{font-family:var(--font-mono),monospace;font-size:11px;color:var(--muted);white-space:nowrap}
-/* The nav had no mobile treatment: at 390px it measured 484px wide and scrolled the whole page
-   sideways (adding the Editor link made a pre-existing bug visible). Let it wrap and tighten,
-   rather than hiding links behind a menu nobody opens. */
-/* Between 701 and 790px the one-row bar measured 782px inside a 760px viewport, and .shell's
-   clip cut the tail off the GitHub state on every route. The row sheds width here instead of
-   wrapping: wrapping needs the pill nav's own clearance, and the pill cannot wrap. */
+/* The nav tightens before it wraps, and wraps before it hides a link behind a menu. */
 @media (max-width:900px){
   .nav{gap:2px;font-size:13.5px}
   .nav a{padding:6px 9px}
@@ -553,126 +399,120 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
    twenty-odd dials that is a cramped scroller next to a preview that never gets the width it
    wants, so both halves lose. Now the stage takes the full column and the controls wrap under it
    as a grid of chips: more dials visible at once, and the picture as large as the page allows. */
-.pgpage { padding: 28px 0 32px; }
-.pghead { max-width: 44rem; margin-bottom: 18px; }
-.pghead h1 { font-size: clamp(1.8rem, 3.4vw, 2.4rem); letter-spacing: -.022em; margin-bottom: 8px; }
-.pghead p { color: var(--ink-2); font-size: .98rem; line-height: 1.6; max-width: 70ch; }
-.pggrid { display: block; }
-.pgstage { display: block; min-width: 0; }
+.pgpage{ padding: 28px 0 32px; }
+.pghead{ max-width: 44rem; margin-bottom: 18px; }
+.pghead h1{ font-size: clamp(1.8rem, 3.4vw, 2.4rem); letter-spacing: -.022em; margin-bottom: 8px; }
+.pghead p{ color: var(--ink-2); font-size: .98rem; line-height: 1.6; max-width: 70ch; }
+.pggrid{ display: block; }
+.pgstage{ display: block; min-width: 0; }
 /* The field sizes itself against this box: a generator is full-bleed, so the container is what gives
    it a height. A width with no height collapses an inset:0 child to nothing (engine-doctrine/MISTAKES.md #261). */
-.pgfield {
+.pgfield{
   position: relative; width: 100%; height: clamp(320px, 56vh, 640px); overflow: hidden;
   border: 1px solid var(--line); border-radius: 16px; background: #05070c;
   box-shadow: var(--shadow-2);
 }
 /* the scene stage inside the playground: the editor's proven .sp-stage, given this page's frame */
-.pgscene {
+.pgscene{
   border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-2);
   max-height: 56vh; margin-inline: auto; width: 100%;
   /* max-height clamps this box shorter than the 16/9 it declares, so a fitted scene is letterboxed.
      The bars take the field card's ground, not the page's, so the frame reads as one object. */
   background: #05070c;
 }
-.pgerr {
+.pgerr{
   margin-top: 12px; padding: 12px 14px; border-radius: 10px;
   background: var(--bad-bg); color: var(--bad); border: 1px solid rgba(255,122,122,.3);
   font-family: var(--font-mono), ui-monospace, monospace; font-size: 12px; line-height: 1.5;
 }
 /* the control wall */
-.pgpanel { margin-top: 16px; }
-.pgblurb { color: var(--muted); font-size: .88rem; line-height: 1.5; margin-bottom: 14px; max-width: 46rem; }
-.pggroup {
+.pgpanel{ margin-top: 16px; }
+.pgblurb{ color: var(--muted); font-size: .88rem; line-height: 1.5; margin-bottom: 14px; max-width: 46rem; }
+.pggroup{
   border: 0; padding: 0; margin: 0 0 10px;
   display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 8px;
 }
 /* the per-section roll sits in the legend, so it reads as belonging to that group */
-.pggroup legend {
+.pggroup legend{
   grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 0 2px;
   font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px; color: var(--muted);
   letter-spacing: .06em; text-transform: uppercase;
 }
 /* every dial is a chip: its name on the left, its control on the right, one line */
-.pgrow {
+.pgrow{
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 7px 11px; margin: 0; font-size: 13px; color: var(--ink-2);
   background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
 }
-.pgrow:hover { border-color: var(--line-2); }
-.pgrow-stack { align-items: flex-start; }
-.pgrow > span:first-child {
+.pgrow:hover{ border-color: var(--line-2); }
+.pgrow-stack{ align-items: flex-start; }
+.pgrow > span:first-child{
   flex: 0 0 auto; color: var(--ink-2);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.pgnum { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.pgnum input[type="range"] { width: 4.2rem; accent-color: var(--accent); height: 2px; }
-.pgnum input[type="number"], .pgrow select, .pgtext {
+.pgnum{ display: flex; align-items: center; gap: 8px; min-width: 0; }
+.pgnum input[type="range"]{ width: 4.2rem; accent-color: var(--accent); height: 2px; }
+.pgnum input[type="number"], .pgrow select, .pgtext{
   font: inherit; font-size: 12px; padding: 4px 7px; width: 5.4rem;
   border: 1px solid var(--line-2); border-radius: 7px; background: var(--bg); color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
-.pgrow select { width: 6.6rem; }
-.pgtext-sm { width: 5.4rem; font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px; }
-.pghex { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.pghex input[type="color"] {
+.pgrow select{ width: 6.6rem; }
+.pghex{ display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pghex input[type="color"]{
   width: 26px; height: 26px; padding: 0; border: 1px solid var(--line-2);
   border-radius: 6px; background: none; cursor: pointer;
 }
-.pghex code { font-size: 11px; color: var(--muted); }
-.pgadd {
+.pghex code{ font-size: 11px; color: var(--muted); }
+.pgadd{
   width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 13px;
   border: 1px solid var(--line-2); background: var(--bg); color: var(--ink-2);
 }
-.pgadd:hover { border-color: var(--accent); color: var(--accent); }
+.pgadd:hover{ border-color: var(--accent); color: var(--accent); }
 /* 20x20 visible, 24x24 to the pointer. The glyph is a re-roll marker sitting inside a dense row,
    so it stays small and grows a pseudo-element instead of pushing the row apart. */
-.pgroll::after { content: ""; position: absolute; inset: -2px; }
-.pgroll {
+.pgroll::after{ content: ""; position: absolute; inset: -2px; }
+.pgroll{
   position: relative;
   width: 20px; height: 20px; line-height: 1; padding: 0; cursor: pointer; font-size: 11px;
   border: 1px solid var(--line-2); border-radius: 5px; background: var(--bg); color: var(--muted);
 }
-.pgroll:hover { border-color: var(--accent); color: var(--accent); }
-.pgmore {
-  font: inherit; font-size: 12px; color: var(--accent); background: none; border: 0; cursor: pointer;
-  padding: 8px 0 4px; text-align: left; width: 100%;
-}
-.pgmore:hover { text-decoration: underline; }
-.pgbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
-.pgbar .btn { font-size: 14px; padding: 9px 15px; }
-.pgmeta { color: var(--muted); font-size: 12px; margin-left: auto; }
-.pgnote { color: var(--muted); padding: 28px 0; }
-.pgnote.pgbad { color: var(--bad); }
-.pgtodo { font-size: 12px; color: var(--muted); font-style: normal; }
-.pgskip { margin-left: 0; font-style: normal; opacity: .8; }
-.pgcopy { display: inline-flex; align-items: stretch; }
-.pgcopy .btn { border-radius: 12px 0 0 12px; }
-.pgcopy select {
+.pgroll:hover{ border-color: var(--accent); color: var(--accent); }
+.pgbar{ display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.pgbar .btn{ font-size: 14px; padding: 9px 15px; }
+.pgmeta{ color: var(--muted); font-size: 12px; margin-left: auto; }
+.pgnote{ color: var(--muted); padding: 28px 0; }
+.pgnote.pgbad{ color: var(--bad); }
+.pgtodo{ font-size: 12px; color: var(--muted); font-style: normal; }
+.pgskip{ margin-left: 0; font-style: normal; opacity: .8; }
+.pgcopy{ display: inline-flex; align-items: stretch; }
+.pgcopy .btn{ border-radius: 12px 0 0 12px; }
+.pgcopy select{
   font: inherit; font-size: 13px; width: 2.4rem; cursor: pointer; color: var(--muted);
   border: 1px solid var(--line-2); border-left: 0; border-radius: 0 12px 12px 0; background: var(--surface);
 }
-.pgpresets { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 14px; }
-.pgpresets button {
+.pgpresets{ display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 14px; }
+.pgpresets button{
   font: inherit; font-size: 12px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
   background: var(--bg-2); color: var(--ink-2); border: 1px solid var(--line-2);
 }
-.pgpresets button.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.pgjson { margin-top: 20px; }
-.pgjson summary { cursor: pointer; color: var(--muted); font-size: 13px; }
-.pgjson pre {
+.pgpresets button.on{ border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.pgjson{ margin-top: 20px; }
+.pgjson summary{ cursor: pointer; color: var(--muted); font-size: 13px; }
+.pgjson pre{
   margin-top: 10px; padding: 14px; border-radius: 10px; overflow-x: auto;
   background: var(--bg-2); border: 1px solid var(--line);
   font-family: var(--font-mono), ui-monospace, monospace; font-size: 12px; line-height: 1.55;
 }
-@media (prefers-reduced-motion: reduce) { .pgadd { transition: none; } }
+@media (prefers-reduced-motion: reduce){ .pgadd{ transition: none; } }
 /* Stacked, the panel sits UNDER the preview, so a tall preview pushes every control off the screen.
    Filling the row is right beside a panel and wrong above one: at 390x844 the clamp above resolved to
    544px and put the page back to 3.1 screens, worse than before the change. Height is a share of the
    viewport here, so the preview and the first controls arrive together. */
-@media (max-width: 900px) {
-  .pgfield { height: 38vh; }
-  .pgscene { max-height: none; }
-  .pggroup { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+@media (max-width: 900px){
+  .pgfield{ height: 38vh; }
+  .pgscene{ max-height: none; }
+  .pggroup{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
 /* ── the playground's own breadcrumb ──────────────────────────────────────────────────────────
    `.lgrid` / `.lcard` (the old card wall) and the poster scroll that replaced it are both gone:
@@ -680,20 +520,20 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
    instead of a page of live cards, so nothing here has to render more than a name until a person
    picks one. `.lback` and `.lheld` are what is left: the small "back to the rail" line above a
    picked generator, and the "N more held back" note under the rail. */
-.lback { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; font-size: 13px; }
-.lback a {
+.lback{ display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; font-size: 13px; }
+.lback a{
   font: inherit; font-size: 13px; color: var(--accent); text-decoration: none;
 }
-.lback a:hover { text-decoration: underline; }
-.lback strong { color: var(--ink); font-size: 15px; }
-.lback span { color: var(--muted); margin-left: auto; font-size: 12px; }
-.lheld { margin-top: 16px; color: var(--muted); font-size: 13px; max-width: 42rem; line-height: 1.6; }
+.lback a:hover{ text-decoration: underline; }
+.lback strong{ color: var(--ink); font-size: 15px; }
+.lback span{ color: var(--muted); margin-left: auto; font-size: 12px; }
+.lheld{ margin-top: 16px; color: var(--muted); font-size: 13px; max-width: 42rem; line-height: 1.6; }
 /* ===== /type — THE TYPOGRAPHIC VOCABULARY =====================================================
    The same two-media card /blocks uses (a still, and the real engine behind it on press), sized
    for a full 16:9 stage rather than a measured block rect: a type specimen has no crop, the frame
    IS the subject. The still is deliberately a MID-ENTRANCE frame, so a grid of them reads as many
    different states of arrival instead of the same settled word repeated. */
-.tyderived{list-style:none;margin:0;padding:16px 18px;background:var(--bg-2);
+.tyderived{max-width:66ch;list-style:none;margin:0;padding:16px 18px;background:var(--bg-2);
   border:1px solid var(--line);border-radius:var(--r)}
 .tyderived li{font-size:12px;color:var(--ink-2);padding:5px 0;border-bottom:1px dashed var(--line);
   word-break:break-word}
@@ -793,9 +633,6 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 @media (max-width:900px){
   .tybar{position:static}
 }
-@media (max-width:1000px){ .capgrid{grid-template-columns:repeat(2,1fr)} }
-@media (max-width:860px){ .cap-lead .cap-index{grid-column:1;grid-row:auto;margin-top:4px} }
-@media (max-width:640px){ .capgrid{grid-template-columns:1fr;gap:18px} }
 /* The sticky toolbar is one row on desktop and three on a phone, so a family anchored under it
    lands with its heading hidden. The offset is the bar, and the bar is taller here. */
 @media (max-width:760px){ .fxfam{scroll-margin-top:150px} }
