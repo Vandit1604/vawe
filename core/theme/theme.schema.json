@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vawe.dev/core/theme/theme.schema.json",
+  "title": "vawe theme (token store)",
+  "description": "A theme file: free-shape typed tokens plus a required `roles` map. Follows the W3C Design Tokens (DTCG) token shape. This schema checks the envelope; alias resolution, cycle detection, and colour normalisation are checked by core/theme/tokens.js and core/theme/roles.js (a generic JSON Schema cannot express a cross-reference or a cycle).",
+  "type": "object",
+  "required": ["name", "tokens", "roles"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": { "type": "string", "minLength": 1 },
+    "note": { "type": "string" },
+    "tokens": { "$ref": "#/$defs/group" },
+    "roles": {
+      "type": "object",
+      "required": ["ground", "ink", "accent", "font.sans", "font.mono"],
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        ]
+      }
+    },
+    "motion": { "type": "object" },
+    "bg": { "type": "object" },
+    "vars": { "type": "object" },
+    "bgDefault": {},
+    "look": { "type": "object" },
+    "invented": {}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "token": {
+      "type": "object",
+      "required": ["$type", "$value"],
+      "properties": {
+        "$type": {
+          "type": "string",
+          "enum": ["color", "gradient", "dimension", "number", "duration", "cubicBezier", "fontFamily", "shadow", "asset"]
+        },
+        "$value": {},
+        "$description": { "type": "string" }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [{ "$ref": "#/$defs/token" }, { "$ref": "#/$defs/group" }]
+      }
+    }
+  }
+}
