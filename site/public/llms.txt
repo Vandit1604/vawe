@@ -31,7 +31,7 @@
 - [layers](https://vawe.dev/docs/layers): Every layer type in the scene vocabulary, the fields each one accepts, and the fields they all share.
 - [mcp](https://vawe.dev/docs/mcp): Run vawe as an MCP server so a calling agent's own model writes the scene, and this repo renders it.
 - [motion](https://vawe.dev/docs/motion): The kinetic typography presets, cut presentations, and shader stings, plus how each brand moves in its own personality.
-- [prompting](https://vawe.dev/docs/prompting): You do not write the JSON by hand. You write a five line brief and let an agent compose the scene. Here is what to say, and what to leave alone.
+- [prompting](https://vawe.dev/docs/prompting): You do not write the JSON by hand. You write a brief and let an agent compose the scene. Here is what to say, and what to leave alone.
 - [quality-gates](https://vawe.dev/docs/quality-gates): The ladder of checks a video climbs before it ships, from schema validation to a vision gate that scores the rendered frames.
 - [quickstart](https://vawe.dev/docs/quickstart): Build the binary, render the sample video, and write your first scene from scratch.
 - [reading-your-film](https://vawe.dev/docs/reading-your-film): Every gate here reads structure. None of them can see whether a film is good. These six tools put the frames in front of you, and each one shows something the others hide.
