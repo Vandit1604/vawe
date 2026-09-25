@@ -21,13 +21,18 @@ export const CURVES = {
 };
 
 export const CURVE_BLURBS = {
-  arc: 'a shallow rise-and-fall, peak in the middle',
-  dip: 'a shallow sag-and-rise, trough in the middle',
-  wave: 'an S-curve, one full up-down cycle',
-  ramp: 'a straight diagonal, top-left to bottom-right',
+  arc: 'a shallow rise-and-fall: starts and ends at 94% of the box height, bows up through a control point 50% above the top edge at the midpoint',
+  dip: 'a shallow sag-and-rise: starts and ends at 12% of the box height, dips down through a control point at 150% of the height (below the box) at the midpoint',
+  wave: 'one full S-curve cycle: leaves the 50% height midline through control points near the top at 18-32% width, crosses back through the midpoint, then dips through 82% width near the bottom before landing at 50% height',
+  ramp: 'a straight diagonal line from 90% height at the left edge to 18% height at the right edge, top-left to bottom-right',
 };
 
-const CURVE_AKA = { ramp: ['diagonal line', 'straight diagonal path'] };
+const CURVE_AKA = {
+  arc: ['rise and fall', 'hill shape', 'arch', 'bump'],
+  dip: ['sag and rise', 'valley shape', 'trough', 'dip down'],
+  wave: ['s-curve', 's shape', 'sine wave', 'zigzag'],
+  ramp: ['diagonal line', 'straight diagonal path'],
+};
 
 export const CURVE_REGISTRY = defineRegistry('path curve', CURVES, { slot: 'move:<curve>:<band> | alongPath.curve', blurbs: CURVE_BLURBS, aka: CURVE_AKA,
   catalog: {
