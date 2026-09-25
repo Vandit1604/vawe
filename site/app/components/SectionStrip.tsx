@@ -27,7 +27,7 @@ export function SectionStrip({ sections }: { sections: { id: string; label: stri
   }, [sections]);
 
   return (
-    <nav className="panel strip" aria-label="Sections">
+    <nav className="strip" aria-label="Sections">
       <div className="strip-clips" ref={clips} style={{ gridTemplateColumns: `repeat(${sections.length}, minmax(0, 1fr))` }}>
         <span className="strip-head" ref={head} aria-hidden="true" />
         {sections.map((s, i) => (
