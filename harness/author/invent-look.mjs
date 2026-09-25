@@ -36,6 +36,18 @@ import { themeErrors } from '../../core/registry/theme-contract.js';
 import { bgBlock, mix, contrast, relLum, parseHex } from '../lib/theme-bg.mjs';
 import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
 import { parseColor, colorAlpha } from '../../core/color/engine.js';
+import { migrateOne } from './migrate-themes.mjs';
+
+// asTokenFile(theme, dest): the engine now refuses a theme written in the retired palette/type/gradient
+// shape (core/theme/roles.js expandTheme), so every WRITE site here converts through the same pure
+// converter migrate-themes.mjs already proved on the library, rather than growing a second one.
+// migrateOne always succeeds on a theme this generator just built (every key concrete, nothing to fail
+// a round trip on); a failure here is a bug in buildTheme, not something to paper over.
+function asTokenFile(theme, dest) {
+  const { next, ok, err } = migrateOne(theme);
+  if (!ok) die(`${dest}: could not convert to a token file: ${err}`);
+  return next;
+}
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -633,7 +645,7 @@ if (pick != null) {
   const theme = buildTheme(c, name);
   const errs = themeErrors(theme);
   if (errs.length) die(`the invented theme is incomplete: missing ${errs.join(', ')}. That is a bug in this generator.`);
-  fs.writeFileSync(dest, JSON.stringify(theme, null, 2) + '\n');
+  fs.writeFileSync(dest, JSON.stringify(asTokenFile(theme, dest), null, 2) + '\n');
   console.log(`✓ invented themes/${name}.json: stance "${c.stance.key}", ${c.stance.dominance}-first`);
   console.log(`  story: ${c.sentence}`);
   console.log(`  bg ${theme.palette.bg} · accent ${theme.palette.accent} (${c.contrast.accent}:1) · text (${c.contrast.text}:1)`);
@@ -652,7 +664,7 @@ for (const [i, c] of candidates.entries()) {
   const errs = themeErrors(theme);
   if (errs.length) die(`candidate ${i + 1} (${c.name}) is an incomplete theme, missing ${errs.join(', ')}. That is a bug in this generator.`);
   const tf = path.join(OUT, 'themes', `${c.name}.json`);
-  fs.writeFileSync(tf, JSON.stringify(theme, null, 2) + '\n');
+  fs.writeFileSync(tf, JSON.stringify(asTokenFile(theme, tf), null, 2) + '\n');
   const frag = path.join(OUT, `${c.name}.html`);
   fs.writeFileSync(frag, specimen(c, theme));
   const png = path.join(OUT, `${c.name}.png`);
