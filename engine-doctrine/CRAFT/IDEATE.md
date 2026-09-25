@@ -27,17 +27,19 @@ ground colour) comes from `grammar/<ref>.json`, never invented. If that file is 
 measured seams, `make ideate` refuses and prints the exact `make study` command to run first
 (including `STRIPS=`/`STRIPFPS=` for the dense sampling a real motion read needs).
 
-**From an idea**, with nothing studied yet:
+**From an idea**, with nothing studied yet, `make ideate` writes no prompt file at all: nothing about a
+new idea is measured, and this stopped writing a placeholder file of `<fill: ...>` act prose to fill in
+(AGENTS.md, "no templates" - the agent does the thinking, the framework is a toolkit, not a
+fill-in-the-blank generator). The only thing idea mode does is ask:
 
 ```bash
-make ideate NAME=<film> IDEA="a quick sting for a dev tool called Loom, dark ground, one word landing hard"
+make ideate ASK=1 NAME=<film> IDEA="a quick sting for a dev tool called Loom, dark ground, one word landing hard"
 ```
 
-Writes `films/scene/<film>.prompt.md`. The acts are left as `<fill: ...>` (nothing about a new idea
-is measured), and under every joint it prints the recipe menu, every promoted recipe's name, kind,
-blurb and first source, so structure is picked from a real measured recipe instead of invented. Add
-`REF=<ref>` to copy that reference's act count and joint axes as structure, with the content still
-left to fill: "a film like that reference," never a copy of its content.
+Prints the question payload (`ideate-ask.mjs`, see "Asking for detail" below): a plain 4-act default
+shape when no `--ref` is given, or the reference's own measured act count and joint axes when `REF=<ref>`
+is added too. The agent answers the questions, then writes the storyboard by hand
+(`engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`) from what it learned: no intermediate file to fill.
 
 ## What it cannot measure, and the `<look:>` convention
 
@@ -80,7 +82,7 @@ lines). Read it before editing.
 
 ## Asking for detail: `ASK=1` and `ANSWERS=`
 
-Once the acts are known (measured, from `--ref`, or placeholder, from `--name`/`--idea`), a second pass
+Once the acts are known (measured, from `--ref`, or a plain default shape, from `--name`/`--idea` alone), a second pass
 asks the detail a good plan needs before any frame is drawn: what fills each frame, where the product
 lives, how text arrives, which cursor, how an act hands off, what the ground does. Every option traces
 to a real registry (a recipe, a kinetic preset, a camera move, a `make screen` KIND) or to the

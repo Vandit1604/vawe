@@ -147,7 +147,7 @@ export function stageOf(arg) {
         : !structurallyOk ? 'the storyboard exists and does not pass its own gate yet.'
         : planJudge.exists && planJudge.stale ? `the plan judge's last verdict is stale: ${path.relative(ROOT, p.sb)} changed since it ran.`
         : 'the storyboard passes its own gate, but nothing has judged it as a PLAN yet: one through-line, beats that earn their seconds, a spectacle that is actually loudest, an eye path that holds, motion that varies. An exit code cannot answer any of those.',
-      next: !sbExists ? `write ${path.relative(ROOT, p.sb)} from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, engine-doctrine/CRAFT/IDEATE.md)`
+      next: !sbExists ? `write ${path.relative(ROOT, p.sb)} from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md   (have a reference? make ideate REF=<ref> first; an idea with no reference? make ideate ASK=1 NAME=${p.name} IDEA="..." for the question batches, engine-doctrine/CRAFT/IDEATE.md)`
         : !structurallyOk ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}`
         : `make plan-judge D=${p.base}.json   (findings only; the owner still signs off at approval)` },
     { id: 'design', done: sbExists && missingFrags.length === 0 && gatePasses('quality/gates/frame-check.mjs', p.scene),
