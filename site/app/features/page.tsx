@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Header } from "../components/Header";
 import { Clip } from "../components/Clip";
 import { Footer } from "../components/Footer";
@@ -51,21 +50,15 @@ export default function Features() {
   return (
     <div className="shell">
       <Header active="features" />
-      <div className="wrap">
-        <main id="content" tabIndex={-1}>
-          <section className="phead">
-            <span className="kicker">
-              <span className="dot" /> features
-            </span>
-            <h1>What the engine decides.</h1>
-            <p>
-              Three of them, and none is a setting you pass. Together they are what it takes to
-              automate video creation without the result going generic: the reason the output is
-              reproducible, shaped, and still worth watching.
-            </p>
-          </section>
+      <main className="wrap" id="content" tabIndex={-1}>
+        <div className="ls ls-top">
+          <h1>What the engine decides.</h1>
+          <p className="ls-sub">
+            Three decisions you do not pass as settings. They make the output reproducible, shaped,
+            and still worth watching.
+          </p>
 
-          <section className="fsec">
+          <section className="panel fsec">
             <div className="fsec-text">
             <h2>The clock refuses wall time.</h2>
             <p>
@@ -92,7 +85,7 @@ export default function Features() {
             </div>
           </section>
 
-          <section className="fsec">
+          <section className="panel fsec">
             <div className="fsec-text">
             <h2>A director picks every cut.</h2>
             <p>
@@ -123,7 +116,7 @@ export default function Features() {
             </div>
           </section>
 
-          <section className="fsec">
+          <section className="panel fsec">
             <div className="fsec-text">
             <h2>Correct is not good enough.</h2>
             <p>
@@ -148,27 +141,9 @@ export default function Features() {
             </div>
           </section>
 
-          <section className="fend">
-            <h2 className="h2">
-              Everything else is <span className="accent">yours</span>.
-            </h2>
-            <p className="lead">
-              The engine decides how a film holds together. What goes into it comes out of the
-              arsenal, and you compose that part yourself.
-            </p>
-            <div className="hero-cta">
-              <Link className="btn btn-primary" href="/editor">
-                Try the editor
-              </Link>
-              <Link className="btn btn-ghost" href="/arsenal">
-                Browse the arsenal
-              </Link>
-            </div>
-          </section>
-        </main>
-
-        <Footer note="one open canvas of primitives" active="/features" />
-      </div>
+        </div>
+      </main>
+      <Footer bookend note="one open canvas of primitives" active="/features" />
     </div>
   );
 }
