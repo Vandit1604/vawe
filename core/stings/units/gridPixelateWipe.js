@@ -11,3 +11,4 @@ export const glsl = `                             /* gridPixelateWipe, chunky pi
     float q = floor(hash(cell + 7.0) * 3.0 + 1.0) / 3.0;   /* 3 quantised brightness blocks (u_tint recolours) */
     c = vec4(vec3(q), on * bell);`;
 export const blurb = 'chunky pixel blocks sweeping a diagonal, each block a quantised tint. A wipe and a pixelate at once.';
+export const aka = ['pixelated wipe', 'grid pixelate', 'blocky diagonal wipe'];
