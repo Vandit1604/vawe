@@ -5,3 +5,4 @@ export const glsl = `                                     /* flash */
     float v = 1.0 - 0.55*length(uv-0.5);
     c = vec4(vec3(1.0), bell*bell*v);`;
 export const blurb = 'a single hard white flash across the whole frame. The bluntest cut cover there is, and the one to use when the two shots have nothing in common.';
+export const aka = ['flash to white', 'white flash cut', 'hard flash'];
