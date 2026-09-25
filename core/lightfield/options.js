@@ -521,40 +521,48 @@ function checkUnknown(given, allowed, at) {
   }
 }
 
+const VALUE_CHECKS = {
+  hex: (rule, value, at) => {
+    if (!isHex(value)) fail(`lightfield: ${at} must be a 6-digit hex colour like "#ee7c56". Got ${JSON.stringify(value)}.`);
+    return value;
+  },
+  hexlist: (rule, value, at) => {
+    if (!Array.isArray(value)) fail(`lightfield: ${at} must be an array of 6-digit hex colours. Got ${JSON.stringify(value)}.`);
+    if (value.length > rule.max) fail(`lightfield: ${at} takes at most ${rule.max} colours. Got ${value.length}.`);
+    value.forEach((v, i) => {
+      if (!isHex(v)) fail(`lightfield: ${at}[${i}] must be a 6-digit hex colour like "#ee7c56". Got ${JSON.stringify(v)}.`);
+    });
+    return [...value];
+  },
+  enum: (rule, value, at) => {
+    if (!rule.of.includes(value)) fail(`lightfield: ${at} must be one of ${list(rule.of)}. Got ${JSON.stringify(value)}.`);
+    return value;
+  },
+  int: (rule, value, at) => {
+    if (!Number.isInteger(value)) fail(`lightfield: ${at} must be a whole number. Got ${JSON.stringify(value)}.`);
+    if (value < rule.min || value > rule.max) fail(`lightfield: ${at} must be between ${rule.min} and ${rule.max}. Got ${value}.`);
+    return value;
+  },
+  unit: (rule, value, at) => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) fail(`lightfield: ${at} must be a number from 0 to 1. Got ${JSON.stringify(value)}.`);
+    if (value < 0 || value > 1) fail(`lightfield: ${at} must be between 0 and 1. Got ${value}.`);
+    return value;
+  },
+  signed: (rule, value, at) => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) fail(`lightfield: ${at} must be a number from -1 to 1, where the sign is the polarity. Got ${JSON.stringify(value)}.`);
+    if (value < -1 || value > 1) fail(`lightfield: ${at} must be between -1 and 1. Got ${value}.`);
+    return value;
+  },
+  num: (rule, value, at) => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) fail(`lightfield: ${at} must be a number. Got ${JSON.stringify(value)}.`);
+    if (value < rule.min || value > rule.max) fail(`lightfield: ${at} must be between ${rule.min} and ${rule.max}. Got ${value}.`);
+    return value;
+  },
+};
+
 function checkValue(rule, value, at) {
-  switch (rule.kind) {
-    case 'hex':
-      if (!isHex(value)) fail(`lightfield: ${at} must be a 6-digit hex colour like "#ee7c56". Got ${JSON.stringify(value)}.`);
-      return value;
-    case 'hexlist':
-      if (!Array.isArray(value)) fail(`lightfield: ${at} must be an array of 6-digit hex colours. Got ${JSON.stringify(value)}.`);
-      if (value.length > rule.max) fail(`lightfield: ${at} takes at most ${rule.max} colours. Got ${value.length}.`);
-      value.forEach((v, i) => {
-        if (!isHex(v)) fail(`lightfield: ${at}[${i}] must be a 6-digit hex colour like "#ee7c56". Got ${JSON.stringify(v)}.`);
-      });
-      return [...value];
-    case 'enum':
-      if (!rule.of.includes(value)) fail(`lightfield: ${at} must be one of ${list(rule.of)}. Got ${JSON.stringify(value)}.`);
-      return value;
-    case 'int':
-      if (!Number.isInteger(value)) fail(`lightfield: ${at} must be a whole number. Got ${JSON.stringify(value)}.`);
-      if (value < rule.min || value > rule.max) fail(`lightfield: ${at} must be between ${rule.min} and ${rule.max}. Got ${value}.`);
-      return value;
-    case 'unit':
-      if (typeof value !== 'number' || !Number.isFinite(value)) fail(`lightfield: ${at} must be a number from 0 to 1. Got ${JSON.stringify(value)}.`);
-      if (value < 0 || value > 1) fail(`lightfield: ${at} must be between 0 and 1. Got ${value}.`);
-      return value;
-    case 'signed':
-      if (typeof value !== 'number' || !Number.isFinite(value)) fail(`lightfield: ${at} must be a number from -1 to 1, where the sign is the polarity. Got ${JSON.stringify(value)}.`);
-      if (value < -1 || value > 1) fail(`lightfield: ${at} must be between -1 and 1. Got ${value}.`);
-      return value;
-    case 'num':
-      if (typeof value !== 'number' || !Number.isFinite(value)) fail(`lightfield: ${at} must be a number. Got ${JSON.stringify(value)}.`);
-      if (value < rule.min || value > rule.max) fail(`lightfield: ${at} must be between ${rule.min} and ${rule.max}. Got ${value}.`);
-      return value;
-    default:
-      return value;
-  }
+  const check = VALUE_CHECKS[rule.kind];
+  return check ? check(rule, value, at) : value;
 }
 
 // Check the given options against the table and return a fully filled, key-ordered copy.
