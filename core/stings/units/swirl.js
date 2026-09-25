@@ -6,4 +6,5 @@ export const glsl = `                             /* swirl, rotational light str
     float r = length(d);
     float a0 = atan(d.y, d.x) + (1.0 - smoothstep(0.0, 0.7, r)) * bell * 6.2831;
     c = vec4(vec3(1.0), pow(0.5 + 0.5*sin(a0 * 8.0), 4.0) * smoothstep(0.85, 0.0, r) * bell * 0.6);`;
-export const blurb = 'rotational light streaks thrown out from the centre.';
+export const blurb = '8 rotational light streaks thrown out from the centre, spinning up to a full turn.';
+export const aka = ['swirl transition', 'rotating light streaks', 'spin streaks'];
