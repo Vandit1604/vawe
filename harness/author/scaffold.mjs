@@ -28,6 +28,7 @@ import { loadScene } from '../../core/engine/expand.js';
 import { nearestExemplars, exemplarSignature } from '../lib/exemplars.mjs';
 import { TYPE_SPINES, typeNames, CONTINUOUS_ACTION_MAX_S } from './type-spines.mjs';
 import { darkVocabularySummary } from '../../quality/gates/coverage.mjs';
+import { frontmatter } from './storyboard-parse.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -37,7 +38,7 @@ function arg(name, dflt) {
 }
 
 const out = arg('out', null);
-if (!out) { console.error('usage: node harness/author/scaffold.mjs --out films/scene/<name>.json [--dur 13] [--theme default] [--beats 5] [--type launch|explainer|talking-head|sting|demo|recreation]'); process.exit(2); }
+if (!out) { console.error('usage: node harness/author/scaffold.mjs --out films/scene/<name>.json [--dur 13] [--theme default] [--beats 5] [--type launch|explainer|talking-head|sting|demo|recreation] [--spectacle "<the loudest moment>"] [--not "<what this film refuses>"]'); process.exit(2); }
 const dur = Number(arg('dur', 13));
 const theme = arg('theme', 'default');
 const beatsWanted = arg('beats', null) != null ? Number(arg('beats')) : null;
@@ -45,6 +46,29 @@ const typeArg = arg('type', null);
 if (typeArg && !TYPE_SPINES[typeArg]) {
   console.error(`scaffold.mjs: unknown --type "${typeArg}". Known: ${typeNames().join(', ')}`);
   process.exit(2);
+}
+// `--spectacle`/`--not`: a human already named the one exaggerated moment (or the exclusion) in the
+// request or brief, so it is carried through verbatim rather than replaced by the usual `<fill: ...>`
+// placeholder (AGENTS.md stage 1: the agent fills these two only when the request leaves them out).
+// `spectacle_by`/`not_by` is the same frontmatter mechanism as every other field here (storyboard-
+// parse.mjs's `field()`), so nothing downstream that already reads a frontmatter key needs to change to
+// read this one: it exists so a later step can tell a human's line from a placeholder the agent filled,
+// and never overwrite the former.
+// Re-running `make scaffold` on a film that already has a human-authored spectacle/not (say, to pick up
+// a new `--dur`) must not silently replace that line with the `<fill: ...>` placeholder: scaffold is
+// itself a step that writes the storyboard, so it is exactly the kind of step the human line has to
+// survive. If the existing sidecar already carries `<key>_by: human` and this run gives no override,
+// the existing text wins.
+const existingSbPath = path.resolve(ROOT, storyboardPathFor(out));
+const existingFm = fs.existsSync(existingSbPath) ? frontmatter(fs.readFileSync(existingSbPath, 'utf8')) : null;
+const carriedHuman = (key) => (existingFm && existingFm.field(`${key}_by`) === 'human') ? existingFm.field(key) : null;
+const spectacleArg = arg('spectacle', null) || carriedHuman('spectacle');
+const notArg = arg('not', null) || carriedHuman('not');
+const yamlField = (text) => `"${String(text).replace(/"/g, "'")}"`;
+function fillableLine(key, given, fillText) {
+  return given
+    ? `${key}: ${yamlField(given)}\n${key}_by: human`
+    : `${key}: "${fillText}"`;
 }
 const spine = typeArg ? TYPE_SPINES[typeArg] : null;
 // A type spine that explicitly declares `continuousObject: null` (talking-head, recreation) is saying
@@ -193,8 +217,8 @@ object_last: "${co.last}"
 format: 1920x1080
 theme: "themes/${theme}.json"
 duration: ${dur}s
-spectacle: "<fill: the ONE loudest moment, named: which beat, which device>"
-not: "<fill: the defaults this film refuses, e.g. no centered slide deck, no gradient hero, no Inter>"
+${fillableLine('spectacle', spectacleArg, '<fill: the ONE loudest moment, named: which beat, which device>')}
+${fillableLine('not', notArg, '<fill: the defaults this film refuses, e.g. no centered slide deck, no gradient hero, no Inter>')}
 craft:
 ${craftLines}
 ---
@@ -309,8 +333,8 @@ format: 1920x1080
 theme: "themes/${theme}.json"
 duration: ${dur}s
 threads: "<fill: what holds this film across every cut, e.g. a continuous object, a motif, a bookend>"
-spectacle: "<fill: the ONE loudest moment, named: beat ${specIdx + 1} (${names[specIdx]}) or wherever it really is>"
-not: "<fill: the defaults this film refuses, e.g. no centered slide deck, no gradient hero, no Inter>"
+${fillableLine('spectacle', spectacleArg, `<fill: the ONE loudest moment, named: beat ${specIdx + 1} (${names[specIdx]}) or wherever it really is>`)}
+${fillableLine('not', notArg, '<fill: the defaults this film refuses, e.g. no centered slide deck, no gradient hero, no Inter>')}
 craft:
 ${craftLines}
 ---

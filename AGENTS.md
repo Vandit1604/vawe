@@ -75,7 +75,9 @@ Know the feeling, not the engine name? [`VOCABULARY.md`](engine-doctrine/CRAFT/V
 
 Nothing renders until the plan is locked and the user signs off, shown as `make studio D=<file>.json` in `plan` state (real hand-written fragments, live, never grey boxes). Claude Code loads `vawe-video-planning`; others read `engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md`.
 
-Five lines carry the whole request, any may be missing: SUBJECT, DATA, PAYOFF, AUDIENCE, FEELING; everything else is yours to decide. Fill two more yourself, unasked: `SPECTACLE` (the one exaggerated moment, named) and `NOT` (what this film explicitly does not do, derived from recent films by `make preflight D=<file>` rather than memory; waivable per-beat with `_why`).
+Five lines carry the whole request, any may be missing: SUBJECT, DATA, PAYOFF, AUDIENCE, FEELING; everything else is yours to decide. Fill two more yourself, unasked, only when the human left them out: `SPECTACLE` (the one exaggerated moment, named) and `NOT` (what this film explicitly does not do, derived from recent films by `make preflight D=<file>` rather than memory; waivable per-beat with `_why`).
+
+A human-given SPECTACLE or NOT carries through untouched. Pass it to `make scaffold SPECTACLE="…" NOT="…"`: the storyboard records it as `spectacle_by: human`/`not_by: human`, and no later step may overwrite a line marked `human`.
 
 **Never hand-author from a blank JSON**: `make ideate` writes the film's prompt first (`engine-doctrine/CRAFT/IDEATE.md`), then `make scaffold` writes the storyboard sidecar and scene shell; compose motion from `recipes/` or `make arsenal Q="…"`.
 
