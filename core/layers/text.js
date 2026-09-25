@@ -37,7 +37,7 @@ const FONT_CACHE = new WeakMap();
 // The props are read off this signature (propsOf, core/props.js), for what build() reads DIRECTLY.
 // `fitH` stays off it (guarded, see GUARDED above); `split`/`type` stay `L.x` (shared vocabulary,
 // declared centrally, not this file's to declare).
-export function build(kit, el, L, { fit, w, h, size, weight, text, maxLines } = L) {
+export function build(kit, el, L, { fit, w, h, weight, text, maxLines } = L) {
   kit.styleText(el, L, midT(L));
   kit.chipBox(el, L); // text with bg = button/pill/chip in one layer (no sibling rect to desync)
   microType(kit, el, L); // pro-grade type refinements, on by default (opt out with raw:true)
@@ -328,6 +328,9 @@ function colorizeMarkup(full, n, words, lt, cps, opts) {
   root.innerHTML = revealHtml(full, n);
   let charIdx = 0;
   const walk = (node) => {
+    // childNodes is LIVE: replaceWith below swaps a child for the fragment's own children mid-loop,
+    // so the snapshot here is required, not a style choice.
+    // oxlint-disable-next-line unicorn/no-useless-spread
     for (const child of [...node.childNodes]) {
       if (child.nodeType === 3) {
         const text = child.textContent;
@@ -390,7 +393,7 @@ function revealHtml(html, n) {
   root.innerHTML = html;
   let count = 0;
   const walk = (node) => {
-    for (const child of [...node.childNodes]) {
+    for (const child of node.childNodes) {
       if (child.nodeType === 3) {
         const text = child.textContent;
         if (count >= n) child.textContent = '';

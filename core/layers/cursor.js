@@ -184,6 +184,61 @@ export function build(kit, el, L, { size, x, y, color, rippleColor, style, style
     el.appendChild(tag);
   }
 }
+// The glyph swap: memoised on the element (the ripple pattern below states why), so a cursor that
+// never changes style pays one DOM write for the life of the layer, not one a frame.
+function applyCursorGlyph(kit, el, curStyle, lt, { size, color }) {
+  if (el.__glyphEl === undefined) el.__glyphEl = el.querySelector('.hs-cur-glyph');
+  const glyphEl = el.__glyphEl;
+  if (glyphEl && el.__curStyle !== curStyle) {
+    el.__curStyle = curStyle;
+    const draw = CURSOR_STYLES.pick(curStyle);
+    // A POINTER shape (arrow/hand) defaults to a plain white system cursor (ibeam/block keep matching
+    // the theme's own ink, per this feature's original brief).
+    const glyphColor = color || (POINTER_STYLES.has(curStyle) ? '#ffffff' : (kit.theme?.palette?.ink || '#141414'));
+    glyphEl.innerHTML = draw(glyphColor, size ?? 34);
+  }
+  // `block`'s blink: opacity on a FIXED CADENCE DERIVED FROM t, never a timer, so seeking to any frame
+  // reproduces the identical on/off state.
+  if (glyphEl) glyphEl.style.opacity = curStyle === 'block' ? (Math.floor(lt / 0.5) % 2 === 0 ? '1' : '0') : '';
+  return glyphEl;
+}
+
+function cursorClickState(clicks, lt, kit) {
+  let s = 1, rip = -1;
+  for (const c of (clicks || [])) {
+    const d = lt - c;
+    if (d >= 0 && d < 0.45) { s = Math.min(s, 1 - 0.22 * Math.sin(kit.clamp01(d / 0.11) * 3.14159)); rip = d / 0.45; }
+  }
+  return { s, rip };
+}
+
+// snapTo: blend the path position toward the target's LIVE box centre (or edge), weight 0..1 across
+// the ease window, so a magnet pulls the pointer onto a card even while the card keeps moving.
+function applyCursorSnap(scene, el, snapTo, lt, pm) {
+  let dx = pm.dx, dy = pm.dy;
+  const snap = resolveSnap(snapTo, lt);
+  if (!snap) return { dx, dy };
+  const b = scene.boxOf(snap.id);
+  if (!b) throw new Error(`cursor snapTo names layer "${snap.id}", which this scene does not have. `
+    + `Known ids: ${scene.ids.join(', ') || '(this scene has none)'}.`);
+  const land = landingPoint(b, snap.edge);
+  const baseX = parseFloat(el.style.left) || 0, baseY = parseFloat(el.style.top) || 0;
+  dx += (land.x - baseX - dx) * snap.w;
+  dy += (land.y - baseY - dy) * snap.w;
+  return { dx, dy };
+}
+
+// The ripple ring is built once and never replaced; memoised on the element so a demo's pointer does
+// not walk its own subtree on every frame.
+function applyCursorRipple(el, rip) {
+  if (el.__ripple === undefined) el.__ripple = el.querySelector('.hs-cur-ripple');
+  const rp = el.__ripple;
+  if (!rp) return;
+  const on = rip >= 0 && rip < 1;
+  rp.style.opacity = on ? (0.8 * (1 - rip)).toFixed(2) : '0';
+  rp.style.transform = `scale(${on ? (0.2 + rip * 1.7).toFixed(2) : 0})`;
+}
+
 // The pattern sits AFTER every argument the dispatcher passes, and that position is load-bearing.
 // core/layers/index.js calls frame(kit, el, L, t, scene) with five arguments, so a pattern in the
 // fifth slot destructures `scene` and every prop reads undefined. lib-test asserts the arity.
@@ -192,51 +247,15 @@ export function frame(kit, el, L, t, scene, { path, clicks, style, styleAt, snap
   if (!(t >= start && t < end)) return;
   const lt = t - start;
 
-  // The glyph swap: memoised on the element (the ripple pattern below states why), so a cursor that
-  // never changes style pays one DOM write for the life of the layer, not one a frame.
   const curStyle = resolveStyleAt(styleAt, lt, style || 'arrow');
-  if (el.__glyphEl === undefined) el.__glyphEl = el.querySelector('.hs-cur-glyph');
-  const glyphEl = el.__glyphEl;
-  if (glyphEl && el.__curStyle !== curStyle) {
-    el.__curStyle = curStyle;
-    const draw = CURSOR_STYLES.pick(curStyle);
-    // A POINTER shape (arrow/hand) defaults to a plain white system cursor now (owner reference:
-    // "Universal Cursors" by 123done, white fill + dark outline on every one) rather than the theme's
-    // ink, because nobody authoring a demo should have to ask for the normal-looking pointer. ibeam
-    // and block are not pointer glyphs (a text caret, a terminal cell) and keep matching the theme's
-    // own ink, per this feature's original brief ("each SVG drawn in the theme colour by default").
-    const glyphColor = color || (POINTER_STYLES.has(curStyle) ? '#ffffff' : (kit.theme?.palette?.ink || '#141414'));
-    glyphEl.innerHTML = draw(glyphColor, size ?? 34);
-  }
-  // `block`'s blink: opacity on a FIXED CADENCE DERIVED FROM t, never a timer, so seeking to any frame
-  // (including out of order, which `make probe` does on purpose) reproduces the identical on/off state.
-  if (glyphEl) glyphEl.style.opacity = curStyle === 'block' ? (Math.floor(lt / 0.5) % 2 === 0 ? '1' : '0') : '';
+  applyCursorGlyph(kit, el, curStyle, lt, { size, color });
 
   const pm = (path && path.length) ? kit.motionAt(path, lt) : { dx: 0, dy: 0 };
-  let s = 1, rip = -1;
-  for (const c of (clicks || [])) { const d = lt - c; if (d >= 0 && d < 0.45) { s = Math.min(s, 1 - 0.22 * Math.sin(kit.clamp01(d / 0.11) * 3.14159)); rip = d / 0.45; } }
-
-  // snapTo: blend the path position toward the target's LIVE box centre (or edge), weight 0..1 across
-  // the ease window, so a magnet pulls the pointer onto a card even while the card keeps moving.
-  let dx = pm.dx, dy = pm.dy;
-  const snap = resolveSnap(snapTo, lt);
-  if (snap) {
-    const b = scene.boxOf(snap.id);
-    if (!b) throw new Error(`cursor snapTo names layer "${snap.id}", which this scene does not have. `
-      + `Known ids: ${scene.ids.join(', ') || '(this scene has none)'}.`);
-    const land = landingPoint(b, snap.edge);
-    const baseX = parseFloat(el.style.left) || 0, baseY = parseFloat(el.style.top) || 0;
-    dx += (land.x - baseX - dx) * snap.w;
-    dy += (land.y - baseY - dy) * snap.w;
-  }
+  const { s, rip } = cursorClickState(clicks, lt, kit);
+  const { dx, dy } = applyCursorSnap(scene, el, snapTo, lt, pm);
 
   el.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${s.toFixed(3)})`;
-  // The ripple ring is built once and never replaced; memoised on the element so a demo's pointer does
-  // not walk its own subtree on every frame. On the element rather than in build() for the reason
-  // core/layers/clip.js states at length: a group child can reach frame() without this build() running.
-  if (el.__ripple === undefined) el.__ripple = el.querySelector('.hs-cur-ripple');
-  const rp = el.__ripple;
-  if (rp) { const on = rip >= 0 && rip < 1; rp.style.opacity = on ? (0.8 * (1 - rip)).toFixed(2) : '0'; rp.style.transform = `scale(${on ? (0.2 + rip * 1.7).toFixed(2) : 0})`; }
+  applyCursorRipple(el, rip);
 }
 
 // Both signatures declare, because a prop read only on the frame path is just as real as one read at

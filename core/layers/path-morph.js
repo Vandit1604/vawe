@@ -45,7 +45,7 @@ export function bestRotation(a, b, step = 4) {
 // around its centroid, scaled by u. The "rotate AND morph into the logo" move.
 export function lerpPoints(a, b, u, spin = 0) {
   const n = Math.min(a.length, b.length);
-  const out = new Array(n);
+  const out = Array.from({ length: n });
   let cx = 0, cy = 0;
   for (let i = 0; i < n; i++) { out[i] = { x: a[i].x + (b[i].x - a[i].x) * u, y: a[i].y + (b[i].y - a[i].y) * u }; cx += out[i].x; cy += out[i].y; }
   if (spin) {
