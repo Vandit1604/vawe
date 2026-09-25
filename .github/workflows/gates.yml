@@ -123,3 +123,61 @@ jobs:
           name: gate-findings
           path: findings.json
           if-no-files-found: ignore
+
+  # e2e: `make e2e` (harness/dev/e2e.mjs, AGENTS.md "Testing: end to end first"). The six checks that
+  # already existed and nothing ran together: probe, snap-all, snap-blocks, mcp-smoke, the site's
+  # real-browser test, author-check. Same reason scene-check.yml opens a browser here: every one of the
+  # first three launches puppeteer's OWN Chromium (no executablePath given anywhere in quality/gates/),
+  # never the google-chrome ubuntu-latest ships, so the postinstall download is real work, cached below.
+  #
+  # THE FONT-STATE TRAP, AND WHY IT DOES NOT BITE HERE. A snap baseline is only valid inside one font
+  # state (quality/gates/snap-signature.mjs fontState()), and it used to hash BOTH assets/fonts/ (what
+  # `make fonts` fetches, pinned by harness/media/fonts.lock.json) and assets/fonts/local/ (paid,
+  # per-developer faces such as Söhne, never fetched here, never the same set twice). A runner therefore
+  # computed a font-state hash no laptop could ever match, and the committed digest read as stale-font on
+  # every single scene: a clean clone that "compared nothing" and never noticed, because a runner with no
+  # local/ faces still gets *a* hash, just never the right one. Fixed at the root: fontState() now hashes
+  # assets/fonts/ only. `make fonts` reproduces that directory byte-for-byte on any machine (pinned,
+  # hashed), so a runner's font-state hash now matches the committed digest's, and the two scenes that
+  # genuinely need an unlocked face (stripe, example-swiss-grid, both set type.sans to Söhne) are named
+  # in quality/baselines/e2e-known-broken.json's `needsUnlockedFont` instead of pretended away.
+  e2e:
+    name: e2e (probe + snap-all + snap-blocks + mcp-smoke + site test + author-check)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PUPPETEER_SKIP_DOWNLOAD: "" # this job DOES open a browser; do not inherit fast-gates' skip
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - run: npm ci
+      - run: npm ci
+        working-directory: site
+
+      - name: fetch the locked faces
+        run: make fonts
+
+      - run: make e2e
+
+      - name: report
+        if: always()
+        run: cat quality/runs/e2e/latest.json 2>/dev/null || echo "no report written"
+
+      - name: upload e2e report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: quality/runs/e2e
+          retention-days: 14
+          if-no-files-found: warn
