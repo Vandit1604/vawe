@@ -59,7 +59,7 @@ export async function loadBeatGrid(data, fetchJson) {
   try {
     return await fetchJson(p.startsWith('/') ? p : '/' + p, 'beat grid');
   } catch (e) {
-    throw new Error(`audio.beatSync names a beat grid that will not load: ${p}, ${FIX}. (${e.message})`);
+    throw new Error(`audio.beatSync names a beat grid that will not load: ${p}, ${FIX}. (${e.message})`, { cause: e });
   }
 }
 
@@ -119,40 +119,50 @@ export function beatPeriod(grid) {
  * A joint further than `maxShift` from any beat is LEFT ALONE, snapToBeat's own refusal, honoured
  * and reported, never widened. An author who means a time writes `"snap": false` on that joint.
  */
-export function snapJoints(data, grid, maxShift = DEFAULT_MAX_SHIFT) {
-  const moved = [], held = [], shifts = [];
-  const apply = (j, kind, centre) => {
-    if (j.snap === false) return;                       // the author meant this time
-    const to = snapToBeat(centre, grid, maxShift);
-    if (to === centre) { held.push(`${kind}@${centre}`); return; }
-    const delta = to - centre;
-    j.t = +(j.t + delta).toFixed(3);
-    shifts.push({ kind, at: centre, delta });
-    moved.push({ kind, from: centre, to, drift: +Math.abs(delta).toFixed(3) });
-  };
-  for (const c of data.cuts || []) if (c && typeof c.t === 'number') apply(c, 'cut', c.t);
-  for (const s of data.seams || []) {
-    if (!s || typeof s.t !== 'number') continue;
-    apply(s, 'seam', typeof s.dur === 'number' ? +(s.t + s.dur / 2).toFixed(3) : s.t);
+function snapMark(j, kind, centre, ctx) {
+  if (j.snap === false) return;                       // the author meant this time
+  const to = snapToBeat(centre, ctx.grid, ctx.maxShift);
+  if (to === centre) { ctx.held.push(`${kind}@${centre}`); return; }
+  const delta = to - centre;
+  j.t = +(j.t + delta).toFixed(3);
+  ctx.shifts.push({ kind, at: centre, delta });
+  ctx.moved.push({ kind, from: centre, to, drift: +Math.abs(delta).toFixed(3) });
+}
+
+function nearestShift(t, shifts, reach) {
+  let best = null;
+  for (const j of shifts) {
+    const d = Math.abs(t - j.at);
+    if (d <= reach && (!best || d < best.d)) best = { d, j };
   }
-  // The sting is the one mark that does not have its own opinion about the grid: it punctuates a
-  // joint, so it goes where that joint goes. HALF A BEAT is the reach, and it is read off the grid
-  // rather than invented -- inside half a beat of a joint there is no other pulse a sting could be
-  // sitting on, so it is punctuating that joint.
+  return best;
+}
+
+// The sting is the one mark that does not have its own opinion about the grid: it punctuates a
+// joint, so it goes where that joint goes. HALF A BEAT is the reach, and it is read off the grid
+// rather than invented -- inside half a beat of a joint there is no other pulse a sting could be
+// sitting on, so it is punctuating that joint.
+function snapStings(data, grid, ctx) {
   const reach = beatPeriod(grid) / 2;
   for (const s of data.stings || []) {
     if (!s || typeof s.t !== 'number' || s.snap === false) continue;
-    let best = null;
-    for (const j of shifts) {
-      const d = Math.abs(s.t - j.at);
-      if (d <= reach && (!best || d < best.d)) best = { d, j };
-    }
-    if (!best) { held.push(`sting@${s.t}`); continue; }
+    const best = nearestShift(s.t, ctx.shifts, reach);
+    if (!best) { ctx.held.push(`sting@${s.t}`); continue; }
     const from = s.t;
     s.t = +(s.t + best.j.delta).toFixed(3);
-    moved.push({ kind: 'sting', from, to: s.t, drift: +Math.abs(best.j.delta).toFixed(3), rides: best.j.kind });
+    ctx.moved.push({ kind: 'sting', from, to: s.t, drift: +Math.abs(best.j.delta).toFixed(3), rides: best.j.kind });
   }
-  return { moved, held };
+}
+
+export function snapJoints(data, grid, maxShift = DEFAULT_MAX_SHIFT) {
+  const ctx = { grid, maxShift, moved: [], held: [], shifts: [] };
+  for (const c of data.cuts || []) if (c && typeof c.t === 'number') snapMark(c, 'cut', c.t, ctx);
+  for (const s of data.seams || []) {
+    if (!s || typeof s.t !== 'number') continue;
+    snapMark(s, 'seam', typeof s.dur === 'number' ? +(s.t + s.dur / 2).toFixed(3) : s.t, ctx);
+  }
+  snapStings(data, grid, ctx);
+  return { moved: ctx.moved, held: ctx.held };
 }
 
 /**
