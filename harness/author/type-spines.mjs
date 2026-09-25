@@ -1,8 +1,9 @@
-// harness/author/type-spines.mjs: one beat spine per VIDEO TYPE, read by `scaffold.mjs --type <type>`.
+// harness/author/type-spines.mjs: one beat spine per VIDEO TYPE, read by `harness/lib/genre-pacing.mjs`
+// and by the matching `skills/vawe-type-*/SKILL.md` when an agent writes a storyboard by hand.
 //
-// WHY A SEPARATE TABLE. `scaffold.mjs`'s default MIDDLE rotation (cardCascade/wordBlast/chipGrid) is
-// one shape: a generic feature reel. A launch film, an explainer and a sting are not built the same
-// way (AGENTS.md W10, `.claude/plans/great-motion-design.plan.md`), so a single rotation cannot serve
+// WHY A SEPARATE TABLE. A generic feature-reel rotation (cardCascade/wordBlast/chipGrid on repeat) is
+// one shape. A launch film, an explainer and a sting are not built the same way (AGENTS.md W10,
+// `.claude/plans/great-motion-design.plan.md`), so a single rotation cannot serve
 // all of them without becoming the same generic film with a different name on it. Each entry below
 // fixes: which blueprints play which ROLE (open/build/payoff/close), the pace band in seconds per
 // beat, which `bg` presets the type turns through, which cut family it favours, and which audio cues

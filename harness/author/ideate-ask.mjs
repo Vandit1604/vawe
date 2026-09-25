@@ -207,7 +207,7 @@ export function ask({ acts, joints = [] }) {
 //
 // Each act's answers become a `frame:`/`cursor:` line (new) plus rewritten `enters:`/`leaves:`/`ground:`/
 // `camera:` lines carrying the exact paste syntax (`recipe: ...`, `camera: ...`) named in ANSWER_LINES
-// below, so the prompt stays valid for `--annotate` (ideate.mjs) and `make scaffold` afterwards. An
+// below, so the prompt stays valid for `--annotate` (ideate.mjs) and the storyboard written from it afterwards. An
 // existing line for the same label is REPLACED, never duplicated, the same rule ideate.mjs's own
 // `addContentLines` already keeps for `content:`.
 
@@ -299,8 +299,8 @@ export function applyAnswers(promptText, answers) {
     const extra = [];
     if (bits.length && !/^film: /m.test(text)) extra.push(`film: ${bits.join(' · ')}`);
     // ATTENTION, the film-level twin of each act's `eye:` answer: one sentence naming the path across
-    // the whole film, promoted verbatim to the storyboard's own `attention:` frontmatter field once
-    // `make scaffold` runs.
+    // the whole film, promoted verbatim to the storyboard's own `attention:` frontmatter field when
+    // the storyboard is written.
     if (answers.film.attention && !/^attention: /m.test(text)) {
       const opt = attentionOptions().find((o) => o.key === answers.film.attention);
       extra.push(`attention: ${opt ? opt.description : answers.film.attention}`);

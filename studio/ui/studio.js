@@ -7,9 +7,9 @@
 // instead of re-deriving that (make stage already owns it) or just printing a raw boot failure.
 let stageInfo=null;
 // A pre-assemble film (AGENTS.md stages brief..approval) has no `layers` yet on purpose
-// (harness/author/scaffold.mjs writes only a declared placeholder) so the engine's own validator
-// refusing to boot it is not a bug to report, it is the expected shape of an unbuilt film. One line,
-// reused by every pane that would otherwise show a raw engine error for this exact, ordinary case.
+// (no scene JSON exists before approval) so the engine's own validator refusing to boot it is not a
+// bug to report, it is the expected shape of an unbuilt film. One line, reused by every pane that
+// would otherwise show a raw engine error for this exact, ordinary case.
 function preAssembleNote(){
   if(!stageInfo||!stageInfo.ok) return null;
   const order=stageInfo.order||[], at=order.indexOf(stageInfo.stage), asm=order.indexOf('assemble');

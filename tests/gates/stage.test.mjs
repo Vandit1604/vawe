@@ -93,7 +93,7 @@ test('stage 2, plan: a brief exists (so stage 1 is done) and no storyboard does'
   write('stagetest-plan.brief.md', 'SUBJECT one line\n');
   const st = stageOf('stagetest-plan');
   assert.equal(st.stage, 'plan');
-  assert.match(st.next, /make scaffold/);
+  assert.match(st.next, /STORYBOARD-TEMPLATE/);
 });
 
 test('stage 2, plan: a storyboard exists and fails its own gate', () => {

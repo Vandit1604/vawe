@@ -25,7 +25,7 @@ This repo turns **one self-describing JSON → one rendered video** (60fps mp4 f
 | # | stage | what happens | the command |
 |---|---|---|---|
 | 1 | **brief** | ask what the product is, and the four other things a site would have given | `make quiz NAME= URL=` |
-| 2 | **plan** | the beat table, the through-line, the spectacle, the exclusions | `make ideate` → `make scaffold` → `make storyboard-check` → `make plan-judge` |
+| 2 | **plan** | the beat table, the through-line, the spectacle, the exclusions | `make ideate` → write the storyboard (`engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`) → `make storyboard-check` → `make plan-judge` |
 | 3 | **design** | the theme is settled and every frame the plan named is drawn | stage kit → `make design-spec` → the reference's grammar → the smallest useful `ui-skills` set → `make preview` → look at it |
 | 4 | **approval** | the drawn frames are shown and a person says yes | `make studio D=`, share `http://127.0.0.1:8799/studio` with the approval request, then the user runs `/vawe-approve` |
 | 5 | **assemble** | the frames become a scene | `make assemble D=` |
@@ -79,7 +79,7 @@ Five lines carry the whole request, any may be missing: SUBJECT, DATA, PAYOFF, A
 
 A human-given SPECTACLE or NOT carries through untouched. Pass it to `make scaffold SPECTACLE="…" NOT="…"`: the storyboard records it as `spectacle_by: human`/`not_by: human`, and no later step may overwrite a line marked `human`.
 
-**Never hand-author from a blank JSON**: `make ideate` writes the film's prompt first (`engine-doctrine/CRAFT/IDEATE.md`), then `make scaffold` writes the storyboard sidecar and scene shell; compose motion from `recipes/` or `make arsenal Q="…"`.
+**Never hand-author from a blank JSON**: `make ideate` writes the film's prompt first (`engine-doctrine/CRAFT/IDEATE.md`), then the agent writes the storyboard by hand from `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`; no scene JSON exists until `make assemble` runs post-approval. Compose motion from `recipes/` or `make arsenal Q="…"`.
 
 ## Built-in rules (checked everywhere)  `[built: core/validate/validate.mjs:74]`
 - No em-dashes (U+2014) in any on-screen text: the validator rejects them. Use a comma, period, or ·.

@@ -70,7 +70,7 @@ never moves at all.
    (https://m1.material.io/motion/choreography.html)
 2. **Boards, then an animatic.** The beats and their order are locked as still frames before anything
    moves, so a bad idea is cheap to throw away. In this engine that step is the storyboard
-   (`make scaffold` → `make storyboard-check`), not the JSON.
+   (write it from `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md` → `make storyboard-check`), not the JSON.
 3. **Blocking, pose to pose.** The hero motion is keyed first, at its start and end pose only: does the
    read work with nothing else moving. Only once that holds does a second layer get added.
 4. **Secondary, then ambient, last.** Support is added in decreasing order of loudness, never all at

@@ -56,15 +56,11 @@ The mark itself: an inline `svg` `d` path (never a rasterised logo file for a ve
 the real brand asset (`assets/icons/<name>.svg` or the captured site). A sting almost never needs any
 other asset; if it does, that is a sign the brief wants a different type.
 
-## `make scaffold TYPE=sting`
+## Writing the storyboard
 
-```bash
-make scaffold OUT=films/scene/<name>.json TYPE=sting DUR=6
-```
-
-Emits the CONTINUOUS-ACTION shape (`harness/author/type-spines.mjs`'s `continuousObject`): the mark,
+Always the CONTINUOUS-ACTION shape (`harness/author/type-spines.mjs`'s `continuousObject`): the mark,
 named as the one object, on a hand-keyed track from `track.mjs`'s measured `pan`/`blast` shapes, `black`
-bg, zero transitions. Replace the placeholder `html` box with your real `svg` mark; the track and the
+bg, zero transitions. Draw your real `svg` mark, not a placeholder box; the track and the
 zero-transitions waiver are already right for this type at any length inside its paceBand.
 
 ## What the judge weighs for this type

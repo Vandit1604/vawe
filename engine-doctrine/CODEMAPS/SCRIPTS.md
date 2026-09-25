@@ -137,7 +137,6 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `motion-director.mjs` | 770 | yes | harness/author/motion-director.mjs: the MOTION DIRECTOR. Picks the right cut/sting per beat-transition from |
 | `invent-look.mjs` | 706 | yes | invent-look.mjs: the THIRD move. Every other look tool here either REFLECTS a real brand |
 | `arsenal.mjs` | 685 | yes | arsenal.mjs: ask the arsenal for the thing you mean, in plain English. |
-| `scaffold.mjs` | 600 | yes | harness/author/scaffold.mjs: THE DEFAULT START. Blank JSON is the #1 authoring failure this repo |
 | `concept.mjs` | 544 | yes | harness/author/concept.mjs: N DIRECTIONS FOR ONE BRIEF, before any of them is built. |
 | `panels.mjs` | 538 | yes | harness/author/panels.mjs: the storyboard stop, as a picture. |
 | `assemble.mjs` | 467 | yes | assemble.mjs: `make assemble D=<film>`: ASSEMBLE. Writes the scene JSON from the storyboard's |
@@ -172,7 +171,7 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `beats.mjs` | 146 | yes | beats.mjs: verify a video BEAT BY BEAT before you trust it. Renders the first / mid / last frame of |
 | `route.mjs` | 142 | yes | harness/author/route.mjs: DELIVERABLE-AWARE ROUTING. A request maps to one of a few vawe |
 | `capture-scene.mjs` | 141 | yes | capture-scene.mjs: capture an ANIMATED site section as PARTS, so the engine can re-stage the |
-| `type-spines.mjs` | 141 | no | harness/author/type-spines.mjs: one beat spine per VIDEO TYPE, read by `scaffold.mjs --type <type>`. |
+| `type-spines.mjs` | 141 | no | harness/author/type-spines.mjs: one beat spine per VIDEO TYPE, read by `harness/lib/genre-pacing.mjs` |
 | `build-zerochrome.mjs` | 137 | no | harness/author/build-zerochrome.mjs: generate films/scene/zerochrome.json. |
 | `transition-preview.mjs` | 131 | yes | transition-preview.mjs: SEE a transition before you author it. Renders a canned two-beat scene |
 | `treatment.mjs` | 128 | yes | harness/author/treatment.mjs: WHY THIS FILM LOOKS LIKE THIS, written down while the answer is known. |

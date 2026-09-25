@@ -1,7 +1,7 @@
 // contract.mjs: THE PER-BEAT CONTRACT for a fan-out of per-scene HTML-fragment agents.
 //
-// It is NOT a second planning artefact. It reads the SAME storyboard `make scaffold` already writes
-// (harness/author/storyboard-parse.mjs), off two fields scaffold now also emits per beat:
+// It is NOT a second planning artefact. It reads the SAME storyboard the plan already writes
+// (harness/author/storyboard-parse.mjs), off two fields the storyboard template asks for per beat:
 //   object_in:  "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>][/radius:<px>]"   the object's POSE at beat START
 //   object_out: "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>][/radius:<px>]"   its POSE at beat END
 // `<placement>` is a name from the safe-area PLACEMENT registry (core/layout/safe.js), never a raw
@@ -77,7 +77,7 @@ export function parseEdge(raw) {
   // storyboard-parse.mjs's generic fieldIn() does not strip quotes (only frontmatter's field() does),
   // so a beat line written `- object_in: "bottom-left@120x40"` arrives with the quotes still attached.
   const s = String(raw).trim().replace(/^["']|["']$/g, '');
-  if (!s || /^<fill:/i.test(s) || /^REPLACE/i.test(s)) return null; // scaffold's own unfilled markers
+  if (!s || /^<fill:/i.test(s) || /^REPLACE/i.test(s)) return null; // the template's own unfilled markers
   const m = EDGE_RE.exec(s);
   if (!m) return { error: `"${s}" is not "<placement>@<w>x<h>" (e.g. "bottom-left@120x40", optionally "/rot:15", "/op:0.4", "/radius:11")` };
   const [, placement, w, h, poseRaw] = m;

@@ -129,11 +129,11 @@ function main() {
     if (blueprint) { console.log(''); console.log(blueprint); }
   }
   // The playbook for this deliverable: one skill per video TYPE (AGENTS.md W10), each carrying its
-  // own beat spine + worked example. `make scaffold` composes from that spine, not the generic rotation.
+  // own beat spine + worked example. The agent writes the storyboard from that spine, not a generic
+  // rotation, using engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md.
   if (matched.type) {
     console.log('');
     console.log(`Type skill: skills/vawe-type-${matched.type}/SKILL.md`);
-    console.log(`make scaffold OUT=films/scene/<name>.json TYPE=${matched.type}`);
   }
 }
 

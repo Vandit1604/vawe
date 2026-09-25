@@ -38,8 +38,8 @@ agents' fragments becomes impossible to ship silently rather than merely discour
 
 ## The per-scene contract
 
-The contract is not a second planning artefact. It is two fields the storyboard `make scaffold`
-already writes now carries on every beat: `object_in` and `object_out`, each
+The contract is not a second planning artefact. It is two fields the storyboard template
+(engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md) asks for on every beat: `object_in` and `object_out`, each
 `"<placement>@<w>x<h>"`, a name from the safe-area placement registry (`core/layout/safe.js`
 `PLACEMENT`) plus a size in px. `object_in` is the continuous object's state at the start of the
 beat; `object_out` is its state at the end. `make contract D=<film>` (`harness/lib/contract.mjs`)

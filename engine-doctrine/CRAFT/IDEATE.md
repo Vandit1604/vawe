@@ -10,7 +10,8 @@ Stage 1.5 in AGENTS.md's eight stages: between **brief** (what the film is about
 beat table). It writes ONE human-readable file, the film prompt: the film described act by act, in
 plain words, what is on screen, how it enters and leaves, the ground and its colour, the camera, the
 pace, and which recipe (`recipes/README.md`) each joint uses. The owner reads it, edits it by hand,
-and only then does `make scaffold` turn it into a storyboard. `harness/author/ideate.mjs` writes it;
+and only then does the agent write it up into a storyboard (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md).
+`harness/author/ideate.mjs` writes the prompt;
 `make ideate` is the front door.
 
 ## Two ways to run it

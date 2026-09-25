@@ -14,8 +14,8 @@ one type built around a VOICE, not a visual device: everything else follows the 
 
 **Talking-head does NOT take the continuous-action shape, even under ~15s.** `type-spines.mjs` declares
 `continuousObject: null` for this type on purpose: a face and its VO are held by the voice and the
-captions, not by one transforming prop, so `make scaffold TYPE=talking-head` keeps the beat spine below
-at every duration instead of switching at `CONTINUOUS_ACTION_MAX_S` the way every other type does. Read
+captions, not by one transforming prop, so write the beat spine below at every duration, never switching
+at `CONTINUOUS_ACTION_MAX_S` the way every other type does. Read
 `skills/vawe-continuous-action/SKILL.md`'s own "Before you use this skill" section: this is exactly the
 "a manifesto... this skill's law would lie about the content" case it names.
 
@@ -65,15 +65,12 @@ exists, use a clearly-labelled placeholder rect (state this in the scene `note`,
 film is honest about what is a stand-in. The VO itself: `make tts` for a synthesised draft, or a real
 recording; either way, get its word-timing sidecar before writing captions by hand.
 
-## `make scaffold TYPE=talking-head`
+## Writing the storyboard
 
-```bash
-make scaffold OUT=films/scene/<name>.json TYPE=talking-head DUR=12
-```
-
-Composes `blurResolveHook -> containerFill -> statReveal -> ctaEnd` (`harness/author/type-spines.mjs`),
-a deliberately short spine since the real content is the VO and captions the scaffold cannot author for
-you, on `ink/deep` bg presets with a quiet fade-only cut family.
+Beats, in order: `blurResolveHook -> containerFill -> statReveal -> ctaEnd`
+(`harness/author/type-spines.mjs`), a deliberately short spine since the real content is the VO and
+captions, which nothing but a real recording can author, on `ink/deep` bg presets with a quiet
+fade-only cut family.
 
 ## What the judge weighs for this type
 

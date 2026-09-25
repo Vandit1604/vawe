@@ -301,14 +301,6 @@ demo: ## [dev] scaffold a SPECIMEN demo scene (one subject, one shot) and iterat
 	@f=$$(node harness/dev/demo.mjs --print-path --q "$(Q)" $(if $(NAME),--name "$(NAME)") $(if $(FX),--fx "$(FX)") $(if $(SUBJECT),--subject "$(SUBJECT)")) \
 	  && $(MAKE) --no-print-directory dev D=$$f
 
-# make scaffold OUT=films/scene/<name>.json [DUR=13] [THEME=default] [BEATS=5]: THE DEFAULT START for
-# a real film, not a demo. Writes a scene composed entirely from {type:"beat"} blueprints (directed by
-# construction: it clears sparse-beats, plain-slideshow and no-transition/no-bg-motion on write) plus its
-# `.storyboard.md` sidecar (structurally clean against storyboard-check and craft-checklist). The
-# author's only job afterwards is to replace the `REPLACE:`/`<fill: ...>` markers. engine-doctrine/CRAFT/BLUEPRINTS.md.
-scaffold: ## [preflight] write a directed, gate-passing scene + storyboard skeleton to start a film from (OUT=, DUR=, THEME=, BEATS=, TYPE=launch|explainer|talking-head|sting|demo|recreation, SPECTACLE=, NOT=; the last two reach the script through the environment, never the shell line)
-	node harness/author/scaffold.mjs $(if $(OUT),--out $(OUT)) $(if $(DUR),--dur $(DUR)) $(if $(THEME),--theme $(THEME)) $(if $(BEATS),--beats $(BEATS)) $(if $(TYPE),--type $(TYPE))
-
 # make ideate REF=<ref>: the film in plain words, act by act, from a studied reference
 # (grammar/<ref>.json → grammar/<ref>.prompt.md; refuses with the exact `make study` command if the
 # study is missing). make ideate NAME=<film> IDEA="...": the same shape from an idea, acts left

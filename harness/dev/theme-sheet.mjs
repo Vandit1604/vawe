@@ -96,8 +96,7 @@ const scene = {
   aspect: '16:9',
   duration: dur,
   // `fade`/`dissolve`-family cuts need something underneath to cross-fade INTO: without this, a
-  // whole-frame fade cut throws "the frame would go empty" (harness/author/scaffold.mjs carries the
-  // same note).
+  // whole-frame fade cut throws "the frame would go empty".
   sceneUnits: true,
   audio: { silent: true, _why: 'theme-sheet: a look reference, not a film' },
   bg,
