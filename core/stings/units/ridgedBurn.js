@@ -12,3 +12,4 @@ export const glsl = `                             /* ridgedBurn, filament ember 
     vec3 col = mix(vec3(0.04, 0.01, 0.0), vec3(1.0, 0.55, 0.1), rim) + vec3(1.0, 0.9, 0.6)*fil;
     c = vec4(col, max(burned*bell, rim*bell*0.95));`;
 export const blurb = 'a filament ember front sweeping upward, like paper catching along a ragged edge.';
+export const aka = ['ember burn', 'paper burn', 'ridged fire edge'];
