@@ -49,6 +49,14 @@ import { defineRegistry } from '../registry/registry.js';
 // catalogue's line was "a ratio is its own definition", which is true of the arithmetic and false of
 // the question a person is actually asking, which is never about arithmetic: it is about where the
 // film is watched.
+const ASPECT_AKA = {
+  '16:9': ['landscape', 'widescreen', 'horizontal video'],
+  '9:16': ['vertical video', 'portrait', 'phone screen', 'vertical for reels'],
+  '1:1': ['square', 'square post'],
+  '4:5': ['portrait feed post', 'instagram portrait'],
+  '4:3': ['old tv shape', 'classic television ratio'],
+};
+
 export const ASPECT_REGISTRY = defineRegistry('output target', {
   '16:9': [1920, 1080],
   '9:16': [1080, 1920],
@@ -57,6 +65,7 @@ export const ASPECT_REGISTRY = defineRegistry('output target', {
   '4:3': [1440, 1080],
 }, {
   slot: 'aspect',
+  aka: ASPECT_AKA,
   blurbs: {
     '16:9': 'wide landscape, the desktop shape: a website hero, a YouTube upload, a deck slide, anything watched on a laptop',
     '9:16': 'tall and vertical, the whole phone screen edge to edge: TikTok, Reels, Shorts, a story',
@@ -179,7 +188,16 @@ const DESTINATION_BLURBS = {
 
 // A registry, so the section writes itself and safeArea below has one refusal rather than a hand-typed
 // list of names beside the table it already reads.
-export const DESTINATION_REGISTRY = defineRegistry('destination', DESTINATIONS, { slot: 'destination', blurbs: DESTINATION_BLURBS,
+const DESTINATION_AKA = {
+  web: ['website hero', 'no platform chrome'],
+  feed: ['instagram feed post', 'x feed post'],
+  tiktok: ['tiktok video', 'tiktok upload'],
+  reels: ['instagram reels', 'reels video'],
+  shorts: ['youtube shorts', 'shorts video'],
+  broadcast: ['tv broadcast', 'title safe for tv'],
+};
+
+export const DESTINATION_REGISTRY = defineRegistry('destination', DESTINATIONS, { slot: 'destination', aka: DESTINATION_AKA, blurbs: DESTINATION_BLURBS,
   catalog: {
     title: 'Destinations (platform safe area)',
     tag: 'canvas',
@@ -243,7 +261,28 @@ export const PLACEMENT = {
   'lower-band': ['stage-left', 'bottom'], // the stage's left edge, flush to the safe bottom: a closing rule
 };
 
-const PLACEMENT_AKA = { 'top-right': ['upper right corner', 'northeast corner'] };
+const PLACEMENT_AKA = {
+  center: ['dead center', 'middle of frame'],
+  top: ['top center', 'top edge middle'],
+  bottom: ['bottom center', 'bottom edge middle'],
+  left: ['left edge', 'middle left'],
+  right: ['right edge', 'middle right'],
+  'top-left': ['top left corner', 'upper left corner'],
+  'top-right': ['upper right corner', 'northeast corner'],
+  'bottom-left': ['bottom left corner', 'lower left corner'],
+  'bottom-right': ['bottom right corner', 'lower right corner'],
+  'thirds-tl': ['upper left power point', 'rule of thirds top left'],
+  'thirds-tr': ['upper right power point', 'rule of thirds top right'],
+  'thirds-bl': ['lower left power point', 'rule of thirds bottom left'],
+  'thirds-br': ['lower right power point', 'rule of thirds bottom right'],
+  'thirds-t': ['upper third line', 'top third'],
+  'thirds-b': ['lower third line', 'bottom third'],
+  'thirds-l': ['left third line', 'left third'],
+  'thirds-r': ['right third line', 'right third'],
+  stage: ['content column', 'stage left margin'],
+  'text-band': ['lower third band', 'headline band'],
+  'lower-band': ['bottom strip', 'closing rule position'],
+};
 
 export const PLACEMENT_REGISTRY = defineRegistry('placement', PLACEMENT, {
   slot: 'pin',
@@ -252,20 +291,20 @@ export const PLACEMENT_REGISTRY = defineRegistry('placement', PLACEMENT, {
     center: 'dead centre of the canvas, vertically at the optical centre rather than the exact middle',
     top: 'horizontally centred, pinned to the top edge of the safe area',
     bottom: 'horizontally centred, pinned to the bottom edge of the safe area',
-    left: 'pinned to the left safe edge, vertically centred',
-    right: 'pinned to the right safe edge, vertically centred',
-    'top-left': 'pinned into the top-left corner of the safe area',
-    'top-right': 'pinned into the top-right corner of the safe area',
-    'bottom-left': 'pinned into the bottom-left corner of the safe area',
-    'bottom-right': 'pinned into the bottom-right corner of the safe area',
-    'thirds-tl': 'lands on the upper-left rule-of-thirds power point',
-    'thirds-tr': 'lands on the upper-right rule-of-thirds power point',
-    'thirds-bl': 'lands on the lower-left rule-of-thirds power point',
-    'thirds-br': 'lands on the lower-right rule-of-thirds power point',
-    'thirds-t': 'centred horizontally, sat on the upper third line',
-    'thirds-b': 'centred horizontally, sat on the lower third line',
-    'thirds-l': 'vertically centred, sat on the left third line',
-    'thirds-r': 'vertically centred, sat on the right third line',
+    left: 'pinned to the left safe edge (6% of the short side in from the frame), vertically centred',
+    right: 'pinned to the right safe edge (6% of the short side in from the frame), vertically centred',
+    'top-left': 'pinned into the top-left corner, 6% of the short side in from both edges of the frame',
+    'top-right': 'pinned into the top-right corner, 6% of the short side in from both edges of the frame',
+    'bottom-left': 'pinned into the bottom-left corner, 6% of the short side in from both edges of the frame',
+    'bottom-right': 'pinned into the bottom-right corner, 6% of the short side in from both edges of the frame',
+    'thirds-tl': 'lands at 33% across and 33% down: the upper-left rule-of-thirds power point',
+    'thirds-tr': 'lands at 67% across and 33% down: the upper-right rule-of-thirds power point',
+    'thirds-bl': 'lands at 33% across and 67% down: the lower-left rule-of-thirds power point',
+    'thirds-br': 'lands at 67% across and 67% down: the lower-right rule-of-thirds power point',
+    'thirds-t': 'centred horizontally, sat on the upper third line at 33% down the frame',
+    'thirds-b': 'centred horizontally, sat on the lower third line at 67% down the frame',
+    'thirds-l': 'vertically centred, sat on the left third line at 33% across the frame',
+    'thirds-r': 'vertically centred, sat on the right third line at 67% across the frame',
     stage: 'the full-width content column between the left and right composition margins, at any aspect ratio: the repo\'s hand-typed x:160/w:1600 anchor, portable',
     'text-band': 'the horizontal strip roughly two-thirds down the frame where a headline or a sub-line usually sits',
     'lower-band': 'a thin strip near the bottom safe edge, left-anchored: where a closing rule or a small persistent label sits',
