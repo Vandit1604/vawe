@@ -41,8 +41,7 @@ export const SHADOW_KEYS = ['dist', 'blur', 'spread', 'color', 'opacity'];
 
 const num = (v) => typeof v === 'number' && Number.isFinite(v);
 
-function resolve(spec) {
-  const s = typeof spec === 'number' ? { dist: spec } : spec;
+function validateShape(s, spec) {
   if (!s || typeof s !== 'object' || Array.isArray(s))
     throw new Error(`shadow: expected a distance in px or an object like { "dist": 30, "blur": 48 }, `
       + `got ${JSON.stringify(spec)}. Keys: ${SHADOW_KEYS.join(', ')}.`);
@@ -50,6 +49,9 @@ function resolve(spec) {
     if (!SHADOW_KEYS.includes(k))
       throw new Error(`shadow: unknown key "${k}", known: ${SHADOW_KEYS.join(', ')}. `
         + `The DIRECTION is not a key: it comes from the scene's \`lighting\`.`);
+}
+
+function resolveDistBlurSpread(s) {
   const dist = s.dist == null ? 26 : s.dist;
   if (!num(dist) || dist < 0)
     throw new Error(`shadow: dist must be a distance in px, 0 or more, got ${JSON.stringify(s.dist)}. `
@@ -58,6 +60,10 @@ function resolve(spec) {
   if (!num(blur) || blur < 0) throw new Error(`shadow: blur must be px, 0 or more, got ${JSON.stringify(s.blur)}.`);
   const spread = s.spread == null ? 0 : s.spread;
   if (!num(spread)) throw new Error(`shadow: spread must be a number of px, got ${JSON.stringify(s.spread)}.`);
+  return { dist, blur, spread };
+}
+
+function resolveColorOpacity(s) {
   const color = s.color == null ? 'auto' : s.color;
   if (typeof color !== 'string' || !color)
     throw new Error(`shadow: color must be "auto", a palette role, or a CSS colour, got ${JSON.stringify(s.color)}.`);
@@ -65,6 +71,14 @@ function resolve(spec) {
   if (!num(opacity) || opacity < 0 || opacity > 1)
     throw new Error(`shadow: opacity must be 0..1, got ${JSON.stringify(s.opacity)}. `
       + `The scene's \`lighting.intensity\` scales it, so a dimmer light dims every shadow at once.`);
+  return { color, opacity };
+}
+
+function resolve(spec) {
+  const s = typeof spec === 'number' ? { dist: spec } : spec;
+  validateShape(s, spec);
+  const { dist, blur, spread } = resolveDistBlurSpread(s);
+  const { color, opacity } = resolveColorOpacity(s);
   return { dist, blur, spread, color, opacity };
 }
 

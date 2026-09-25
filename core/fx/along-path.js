@@ -31,37 +31,61 @@ const MARK = 'data-along-path';
 // The named curves live in core/motion/path-curves.js: one catalog, two consumers (a textPath here,
 // MotionPathPlugin flying a whole layer in the LAYER-scope `move:` "path" scope, harness/lib/contract.mjs).
 
-function resolve(spec) {
-  const s = typeof spec === 'string' ? { curve: spec } : spec;
+function validateShape(s, spec) {
   if (!s || typeof s !== 'object' || Array.isArray(s))
     throw new Error(`alongPath: expected a curve name or an object like { "curve": "arc", "w": 900 } `
       + `, got ${JSON.stringify(spec)}. Keys: ${KEYS.join(', ')}.`);
   for (const k of Object.keys(s))
     if (!KEYS.includes(k)) throw new Error(`alongPath: unknown key "${k}", known: ${KEYS.join(', ')}.`);
+}
+
+function resolveBox(s) {
   const w = s.w == null ? 900 : s.w, h = s.h == null ? 260 : s.h;
   if (!Number.isFinite(w) || w <= 0 || !Number.isFinite(h) || h <= 0)
     throw new Error(`alongPath: "w" and "h" are the box the curve is drawn in, in pixels; got ${w}x${h}`);
+  return { w, h };
+}
+
+function resolvePathD(s, w, h) {
   let d = s.d;
   if (d == null) {
     const curve = s.curve == null ? 'arc' : s.curve;
     if (!CURVES[curve])
       throw new Error(`alongPath: unknown curve "${curve}", known: ${NAMES.join(', ')}. `
         + `Pass \`d\` instead to set your own path, in a ${w}x${h} box.`);
-    d = CURVES[curve](w, h);
-  } else if (typeof d !== 'string' || !d.trim()) {
-    throw new Error(`alongPath: "d" is an SVG path string; got ${JSON.stringify(d)}`);
+    return CURVES[curve](w, h);
   }
-  // Both default to the middle, so the line simply SITS on the curve and travels only when asked. A
-  // default drift would move every headline an author only wanted bent.
+  if (typeof d !== 'string' || !d.trim())
+    throw new Error(`alongPath: "d" is an SVG path string; got ${JSON.stringify(d)}`);
+  return d;
+}
+
+// Both default to the middle, so the line simply SITS on the curve and travels only when asked. A
+// default drift would move every headline an author only wanted bent.
+function resolveTiming(s) {
   const from = s.from == null ? 50 : s.from, to = s.to == null ? from : s.to;
   const dur = s.dur == null ? 2 : s.dur, delay = s.delay == null ? 0 : s.delay;
   if (![from, to, dur, delay].every(Number.isFinite) || dur <= 0 || delay < 0)
     throw new Error(`alongPath: "from"/"to" are percentages along the path, "dur"/"delay" seconds; `
       + `got from=${from} to=${to} dur=${dur} delay=${delay}`);
+  return { from, to, dur, delay };
+}
+
+function resolveAnchor(s) {
   const anchor = s.anchor == null ? 'middle' : s.anchor;
   if (!['start', 'middle', 'end'].includes(anchor))
     throw new Error(`alongPath: "anchor" is "start", "middle" or "end", which end of the line sits at `
       + `the offset. Got ${JSON.stringify(anchor)}.`);
+  return anchor;
+}
+
+function resolve(spec) {
+  const s = typeof spec === 'string' ? { curve: spec } : spec;
+  validateShape(s, spec);
+  const { w, h } = resolveBox(s);
+  const d = resolvePathD(s, w, h);
+  const { from, to, dur, delay } = resolveTiming(s);
+  const anchor = resolveAnchor(s);
   return { d, w, h, from, to, dur, delay, ease: s.ease || 'easeInOutCubic', anchor };
 }
 
