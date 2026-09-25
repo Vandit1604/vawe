@@ -61,9 +61,16 @@ if (typeArg && !TYPE_SPINES[typeArg]) {
 // the existing text wins.
 const existingSbPath = path.resolve(ROOT, storyboardPathFor(out));
 const existingFm = fs.existsSync(existingSbPath) ? frontmatter(fs.readFileSync(existingSbPath, 'utf8')) : null;
-const carriedHuman = (key) => (existingFm && existingFm.field(`${key}_by`) === 'human') ? existingFm.field(key) : null;
-const spectacleArg = arg('spectacle', null) || carriedHuman('spectacle');
-const notArg = arg('not', null) || carriedHuman('not');
+// Any line that is not still the agent's placeholder is kept, including one edited straight into the
+// storyboard file, which never passed through --spectacle and so carries no `_by: human` mark.
+const isPlaceholder = (v) => !v || /^<fill\b|^REPLACE\b/.test(String(v).trim());
+const carriedHuman = (key) => {
+  const v = existingFm && existingFm.field(key);
+  return isPlaceholder(v) ? null : v;
+};
+// make passes SPECTACLE=/NOT= as environment variables, so the text never goes through a shell line.
+const spectacleArg = arg('spectacle', null) || process.env.SPECTACLE || carriedHuman('spectacle');
+const notArg = arg('not', null) || process.env.NOT || carriedHuman('not');
 const yamlField = (text) => `"${String(text).replace(/"/g, "'")}"`;
 function fillableLine(key, given, fillText) {
   return given
