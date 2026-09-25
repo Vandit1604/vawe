@@ -11,3 +11,4 @@ export const glsl = `                             /* domainWarp, liquid marble w
     else { hue = 0.5 + 0.5*cos(6.2831*(r*0.5 + hash(vec2(u_seed, 9.1)) + vec3(0.0, 0.33, 0.67))); }
     c = vec4(mix(vec3(0.98), hue, 0.35 + 0.5*rim), a*0.95);`;
 export const blurb = 'a liquid marble wash, noise folded through noise. Organic, slow, and unlike anything geometric here.';
+export const aka = ['liquid marble', 'domain warp wash', 'marble noise'];
