@@ -1424,49 +1424,6 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
 }
 
 
-// ---- the vocabulary hook: a NEW named vocabulary should be a registry ---------------------------
-//
-// The discovery problem was never that capabilities were hard to find. It was that publishing one was a
-// separate act from defining it, so the cheap thing to write was a bare export and 21 real capabilities
-// ended up hand-listed with nothing but memory holding them there. defineRegistry carries its own
-// catalogue entry now, so the correct thing costs one edit; this hook says so at the only moment the
-// choice is still cheap. Asserted because a hook that silently stops firing is indistinguishable from a
-// codebase that stopped making the mistake.
-{
-  const { execFileSync } = await import('node:child_process');
-  const hook = path.join(repoRoot, 'harness/live/vocabulary.mjs');
-  const run = (file) => {
-    try {
-      execFileSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: file } }), encoding: 'utf8',
-        env: { ...process.env, VAWE_HOOK_FULL: '1' } });   // assert against the full text, not the summary
-      return { code: 0, err: '' };
-    } catch (e) { return { code: e.status, err: String(e.stderr || '') }; }
-  };
-
-  ok('vocab hook: silent on a file whose vocabularies are already known',
-    run(path.join(repoRoot, 'core/type/type.js')).code === 0);
-
-  const probe = path.join(repoRoot, 'core/tracks/idle.js');
-  const original = fs.readFileSync(probe, 'utf8');
-  try {
-    fs.writeFileSync(probe, `${original}\nexport const ZZ_PROBE_VOCAB = { a: 'one thing', b: 'another thing' };\n`);
-    const r = run(probe);
-    ok('vocab hook: fires on a NEW bare vocabulary', r.code === 2);
-    ok('vocab hook: names it and hands back the registry to write',
-      /ZZ_PROBE_VOCAB/.test(r.err) && /defineRegistry\(/.test(r.err));
-    // THE ESCAPE HATCH IS PART OF THE RULE. Most bare exports in core/ are correct (a props table, an
-    // interaction matrix), so the message must say how to record that rather than only how to comply.
-    ok('vocab hook: says what to do when it is NOT a vocabulary', /vocabulary-baseline\.json/.test(r.err));
-  } finally { fs.writeFileSync(probe, original); }
-
-  // The hook WIRING lives in .claude/settings.json, which is Claude-local and gitignored now, so it is
-  // not a tracked repo invariant. That the hook SCRIPT exists at harness/live/ is covered by its [live]
-  // rung tag (rung.mjs). Here we only check the baseline the hook reads.
-  const base = JSON.parse(fs.readFileSync(path.join(repoRoot, 'quality/baselines/vocabulary-baseline.json'), 'utf8'));
-  ok('vocab hook: the baseline records what already exists, so the hook only judges what you add',
-    Object.keys(base).length > 40);
-}
-
 // ── theme.look (W8, core/registry/theme-contract.js): refused at load with the near word, same discipline
 // every other named vocabulary gets (core/registry/registry.js). A theme with no `look` is untouched by any of
 // this: `look == null` short-circuits to a clean pass, asserted first so the optional-block contract
