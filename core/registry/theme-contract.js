@@ -60,22 +60,25 @@ for (const e of ON_INK) {
 // WITH it, a palette value that is not a colour is refused where it is WRITTEN, instead of becoming
 // pure black in `parseColor(hex) || [0,0,0]` (core/backgrounds.js) and rendering an off-brand backdrop
 // with every gate green.
-export function themeErrors(theme, { parseColor, contrastRatio } = {}) {
-  if (!theme || typeof theme !== 'object') return ['data.theme is required (a name or an inline object), there is no default look'];
+// A NON-EMPTY STRING IS NOT A COLOUR. This checked only presence, so a typo'd hex ("#0ea5e", seven
+// digits) passed clean and then `parseColor(hex) || [0,0,0]` in core/backgrounds.js turned every mix
+// built from it into PURE BLACK. A background visibly off-brand, with every gate green. The value is
+// consumed as a colour, so it is validated as one here, where it is written.
+function paletteRequiredErrors(P, parseColor) {
   const errs = [];
-  const P = theme.palette || {}, T = theme.type || {};
-  // A NON-EMPTY STRING IS NOT A COLOUR. This checked only presence, so a typo'd hex ("#0ea5e", seven
-  // digits) passed clean and then `parseColor(hex) || [0,0,0]` in core/backgrounds.js turned every mix
-  // built from it into PURE BLACK. A background visibly off-brand, with every gate green. The value is
-  // consumed as a colour, so it is validated as one here, where it is written.
   for (const k of REQUIRED.palette) {
     if (P[k] == null || P[k] === '') { errs.push(`palette.${k}`); continue; }
     if (parseColor && parseColor(P[k]) == null) errs.push(`palette.${k} is not a colour (${JSON.stringify(P[k])})`);
   }
-  // EVERY `palette.on*` IS OPTIONAL: boot.js computes one per theme from that theme's own fill, and
-  // these are only the escape hatch for a brand that holds its own opinion. An opinion that cannot be
-  // read is not an opinion, it is the defect the token was added to remove, so an override is graded
-  // where it is WRITTEN rather than shipped as unreadable text on a coloured chip.
+  return errs;
+}
+
+// EVERY `palette.on*` IS OPTIONAL: boot.js computes one per theme from that theme's own fill, and
+// these are only the escape hatch for a brand that holds its own opinion. An opinion that cannot be
+// read is not an opinion, it is the defect the token was added to remove, so an override is graded
+// where it is WRITTEN rather than shipped as unreadable text on a coloured chip.
+function onInkErrors(P, parseColor, contrastRatio) {
+  const errs = [];
   for (const { on, fill, fallback } of ON_INK) {
     if (P[on] == null || P[on] === '') continue;
     const bg = Object.hasOwn(P, fill) ? P[fill] : fallback;   // `fill` is contract-checked at import (see ON_INK)
@@ -84,10 +87,30 @@ export function themeErrors(theme, { parseColor, contrastRatio } = {}) {
     if (contrastRatio && contrastRatio(P[on], bg) < ON_INK_MIN)
       errs.push(`palette.${on} (${P[on]}) reads ${contrastRatio(P[on], bg).toFixed(2)}:1 on palette.${fill} (${bg}). Needs ${ON_INK_MIN}:1. Drop it and the engine computes a readable one.`);
   }
-  for (const k of REQUIRED.type) if (typeof T[k] !== 'string' || !T[k]) errs.push(`type.${k}`);
-  if (!Array.isArray(theme.gradient) || theme.gradient.length < REQUIRED.gradientStops)
-    errs.push(`gradient (needs ${REQUIRED.gradientStops} stops)`);
   return errs;
+}
+
+function typeRequiredErrors(T) {
+  const errs = [];
+  for (const k of REQUIRED.type) if (typeof T[k] !== 'string' || !T[k]) errs.push(`type.${k}`);
+  return errs;
+}
+
+function gradientStopErrors(theme) {
+  if (!Array.isArray(theme.gradient) || theme.gradient.length < REQUIRED.gradientStops)
+    return [`gradient (needs ${REQUIRED.gradientStops} stops)`];
+  return [];
+}
+
+export function themeErrors(theme, { parseColor, contrastRatio } = {}) {
+  if (!theme || typeof theme !== 'object') return ['data.theme is required (a name or an inline object), there is no default look'];
+  const P = theme.palette || {}, T = theme.type || {};
+  return [
+    ...paletteRequiredErrors(P, parseColor),
+    ...onInkErrors(P, parseColor, contrastRatio),
+    ...typeRequiredErrors(T),
+    ...gradientStopErrors(theme),
+  ];
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -162,10 +185,7 @@ const isObj = (o) => o != null && typeof o === 'object' && !Array.isArray(o);
 // handed in is SKIPPED, never defaulted to "assume it's fine": `themes/*.json` (the write site, checked
 // by `make validate`) hands in every list; `core/engine/boot.js`'s browser-side theme check does too, since
 // backgrounds and transitions are already browser-safe imports there.
-export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) {
-  if (look == null) return [];
-  if (!isObj(look)) return ['look must be an object'];
-  const near = (word, known) => (nearMisses ? nearMisses(String(word), known) : []);
+function unknownLookKeyErrors(look, near) {
   const errs = [];
   for (const k of Object.keys(look)) {
     if (!LOOK_KEYS.includes(k)) {
@@ -173,51 +193,90 @@ export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) 
       errs.push(`look.${k} is not a known look key${s.length ? `, did you mean "${s[0]}"?` : ''}. Known: ${LOOK_KEYS.join(', ')}`);
     }
   }
-  if ('backdrop' in look) {
-    if (!Array.isArray(look.backdrop) || !look.backdrop.length) errs.push('look.backdrop must be a non-empty array of bg preset names');
-    else if (bgNames) for (const name of look.backdrop) {
-      if (!bgNames.includes(name)) {
-        const s = near(name, bgNames);
-        errs.push(`look.backdrop names "${name}", which is not a real bg preset${s.length ? `, did you mean "${s[0]}"?` : ''}. Known: ${bgNames.join(', ')}`);
-      }
+  return errs;
+}
+
+function backdropErrors(look, bgNames, near) {
+  if (!('backdrop' in look)) return [];
+  if (!Array.isArray(look.backdrop) || !look.backdrop.length) return ['look.backdrop must be a non-empty array of bg preset names'];
+  if (!bgNames) return [];
+  const errs = [];
+  for (const name of look.backdrop) {
+    if (!bgNames.includes(name)) {
+      const s = near(name, bgNames);
+      errs.push(`look.backdrop names "${name}", which is not a real bg preset${s.length ? `, did you mean "${s[0]}"?` : ''}. Known: ${bgNames.join(', ')}`);
     }
-  }
-  if ('scale' in look) {
-    if (!isObj(look.scale)) errs.push('look.scale must be an object');
-    else for (const k of LOOK_SCALE_KEYS) if (k in look.scale && typeof look.scale[k] !== 'number') errs.push(`look.scale.${k} must be a number`);
-  }
-  if ('layout' in look) {
-    if (!isObj(look.layout)) errs.push('look.layout must be an object');
-    else {
-      if ('anchor' in look.layout && !LOOK_LAYOUT_ANCHORS.includes(look.layout.anchor))
-        errs.push(`look.layout.anchor must be one of ${LOOK_LAYOUT_ANCHORS.join(', ')} (got ${JSON.stringify(look.layout.anchor)})`);
-      if ('margin' in look.layout && typeof look.layout.margin !== 'number') errs.push('look.layout.margin must be a number (px)');
-    }
-  }
-  if ('marks' in look) {
-    if (!isObj(look.marks)) errs.push('look.marks must be an object');
-    else {
-      if ('logo' in look.marks && typeof look.marks.logo !== 'string') errs.push('look.marks.logo must be a path string');
-      for (const k of ['endCardSize', 'headlineSize']) if (k in look.marks && typeof look.marks[k] !== 'number') errs.push(`look.marks.${k} must be a number (px)`);
-    }
-  }
-  if ('cuts' in look) {
-    if (!isObj(look.cuts)) errs.push('look.cuts must be an object');
-    else for (const slot of LOOK_CUT_SLOTS) {
-      if (!(slot in look.cuts)) continue;
-      const name = look.cuts[slot];
-      if (typeof name !== 'string' || !name) { errs.push(`look.cuts.${slot} must be a transition name (a non-empty string)`); continue; }
-      if (transitionNames && !transitionNames.includes(name)) {
-        const s = near(name, transitionNames);
-        errs.push(`look.cuts.${slot} names "${name}", which is not a real transition${s.length ? `, did you mean "${s[0]}"?` : ''}.`);
-      }
-    }
-  }
-  if ('field' in look) {
-    if (!isObj(look.field)) errs.push('look.field must be an object');
-    else for (const k of LOOK_FIELD_KEYS) if (k in look.field && typeof look.field[k] !== 'number') errs.push(`look.field.${k} must be a number`);
   }
   return errs;
+}
+
+function scaleErrors(look) {
+  if (!('scale' in look)) return [];
+  if (!isObj(look.scale)) return ['look.scale must be an object'];
+  const errs = [];
+  for (const k of LOOK_SCALE_KEYS) if (k in look.scale && typeof look.scale[k] !== 'number') errs.push(`look.scale.${k} must be a number`);
+  return errs;
+}
+
+function layoutErrors(look) {
+  if (!('layout' in look)) return [];
+  if (!isObj(look.layout)) return ['look.layout must be an object'];
+  const errs = [];
+  if ('anchor' in look.layout && !LOOK_LAYOUT_ANCHORS.includes(look.layout.anchor))
+    errs.push(`look.layout.anchor must be one of ${LOOK_LAYOUT_ANCHORS.join(', ')} (got ${JSON.stringify(look.layout.anchor)})`);
+  if ('margin' in look.layout && typeof look.layout.margin !== 'number') errs.push('look.layout.margin must be a number (px)');
+  return errs;
+}
+
+function marksErrors(look) {
+  if (!('marks' in look)) return [];
+  if (!isObj(look.marks)) return ['look.marks must be an object'];
+  const errs = [];
+  if ('logo' in look.marks && typeof look.marks.logo !== 'string') errs.push('look.marks.logo must be a path string');
+  for (const k of ['endCardSize', 'headlineSize']) if (k in look.marks && typeof look.marks[k] !== 'number') errs.push(`look.marks.${k} must be a number (px)`);
+  return errs;
+}
+
+function cutSlotError(slot, cuts, transitionNames, near) {
+  if (!(slot in cuts)) return null;
+  const name = cuts[slot];
+  if (typeof name !== 'string' || !name) return `look.cuts.${slot} must be a transition name (a non-empty string)`;
+  if (transitionNames && !transitionNames.includes(name)) {
+    const s = near(name, transitionNames);
+    return `look.cuts.${slot} names "${name}", which is not a real transition${s.length ? `, did you mean "${s[0]}"?` : ''}.`;
+  }
+  return null;
+}
+
+function cutsErrors(look, transitionNames, near) {
+  if (!('cuts' in look)) return [];
+  if (!isObj(look.cuts)) return ['look.cuts must be an object'];
+  return LOOK_CUT_SLOTS
+    .map((slot) => cutSlotError(slot, look.cuts, transitionNames, near))
+    .filter((e) => e != null);
+}
+
+function fieldErrors(look) {
+  if (!('field' in look)) return [];
+  if (!isObj(look.field)) return ['look.field must be an object'];
+  const errs = [];
+  for (const k of LOOK_FIELD_KEYS) if (k in look.field && typeof look.field[k] !== 'number') errs.push(`look.field.${k} must be a number`);
+  return errs;
+}
+
+export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) {
+  if (look == null) return [];
+  if (!isObj(look)) return ['look must be an object'];
+  const near = (word, known) => (nearMisses ? nearMisses(String(word), known) : []);
+  return [
+    ...unknownLookKeyErrors(look, near),
+    ...backdropErrors(look, bgNames, near),
+    ...scaleErrors(look),
+    ...layoutErrors(look),
+    ...marksErrors(look),
+    ...cutsErrors(look, transitionNames, near),
+    ...fieldErrors(look),
+  ];
 }
 
 // ---------------------------------------------------------------------------------------------------
