@@ -1,6 +1,6 @@
 {
   "name": "plinth",
-  "note": "PlinthAI brand kit — periwinkle gradient, electric-blue accent, Inter + Instrument Serif + Geist Mono, editorial motion (softer, slightly bouncy). Palette completed to the theme contract (core/theme-contract.js) from the pack's OWN gradient stops and accent — no colour here is invented; dark-first, so text is the near-white.",
+  "note": "PlinthAI brand kit: periwinkle gradient, electric-blue accent, Inter + Instrument Serif + Geist Mono, editorial motion (softer, slightly bouncy). Palette completed to the theme contract (core/theme-contract.js) from the pack's OWN gradient stops and accent; no colour here is invented; dark-first, so text is the near-white.",
   "motion": {
     "easing": "easeOutCubic",
     "bounce": 0.4,

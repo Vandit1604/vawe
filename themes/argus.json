@@ -1,6 +1,6 @@
 {
   "name": "argus",
-  "note": "argushq.cc — 'grow on X, on purpose'. White-first, cobalt accent (the pixel-eye mascot + primary CTA), Archivo light-display + JetBrains Mono. Near-monochrome; cobalt is the only colour.",
+  "note": "argushq.cc: 'grow on X, on purpose'. White-first, cobalt accent (the pixel-eye mascot + primary CTA), Archivo light-display + JetBrains Mono. Near-monochrome; cobalt is the only colour.",
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0.08,

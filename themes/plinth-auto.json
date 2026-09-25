@@ -1,6 +1,6 @@
 {
   "name": "plinth-auto",
-  "note": "Colours pack auto-extracted from https://plinthai.xyz by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Palette completed to the theme contract from values already in this pack (vars.--border/--muted/--accent-soft, bg.inkBase, bg.paperBase) — nothing invented. No serif on the brand, so serif maps to the sans explicitly.",
+  "note": "Colours pack auto-extracted from https://plinthai.xyz by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Palette completed to the theme contract from values already in this pack (vars.--border/--muted/--accent-soft, bg.inkBase, bg.paperBase). Nothing invented. No serif on the brand, so serif maps to the sans explicitly.",
   "bg": {
     "accent": "31,59,255",
     "tint": "110,110,104",
