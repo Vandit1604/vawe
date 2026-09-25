@@ -6,3 +6,4 @@ export const glsl = `                             /* pinwheel, angular sweep, 3 
     float ang = fract((atan(d.y, d.x)/6.28318 + 0.5) * 3.0);
     c = vec4(vec3(1.0), step(ang, pp * 1.05) * bell);`;
 export const blurb = 'an angular sweep with three arms rotating around the centre.';
+export const aka = ['pinwheel sweep', 'rotating arms', 'windmill sweep'];
