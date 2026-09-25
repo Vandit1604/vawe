@@ -13,3 +13,4 @@ export const glsl = `                             /* iridescence, thin-film inte
     float band = smoothstep(0.0, 0.45, pp) * smoothstep(1.0, 0.55, pp);  /* rises and leaves */
     c = vec4(sheen, band * bell * 0.55 * smoothstep(1.15, 0.15, length(d)));`;
 export const blurb = 'a thin-film interference sheen, the colour of oil on water shifting with angle.';
+export const aka = ['iridescent sheen', 'oil slick shimmer', 'thin film shimmer'];
