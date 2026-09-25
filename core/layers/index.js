@@ -135,7 +135,38 @@ const LAYER_DOCS = {
     brief: 'a fast radial flash from the box centre, additive-blended, gone in under a second' },
 };
 
+// The plain words a person would say instead of the type name (word-action `words` half; the `action`
+// half is each type's own blurb above, LAYER_BLURBS). Kept here, not per-module, because it is a
+// property of the CATALOGUE entry, not of the builder.
+const LAYER_AKA = {
+  text: ['words on screen', 'headline', 'caption text'],
+  count: ['counting number', 'ticking stat', 'number that goes up'],
+  image: ['a photo', 'a picture', 'a screenshot'],
+  video: ['real footage', 'a video clip', 'captured recording'],
+  group: ['a container', 'nested layers', 'a folder of layers'],
+  rect: ['a box', 'a solid panel', 'a rectangle'],
+  glow: ['a soft light', 'a halo', 'a glowing highlight'],
+  beam: ['a light bar', 'a travelling light', 'a light border'],
+  svg: ['vector art', 'an inline icon shape', 'scalable line art'],
+  cursor: ['a mouse pointer', 'a fake cursor', 'a click demo pointer'],
+  clip: ['a baked animation', 'a frame sequence', 'a pre-rendered clip'],
+  html: ['a hand-written fragment', 'real markup', 'a web snippet'],
+  component: ['a captured UI block', 'a reflected site section', 'a recreated page piece'],
+  board: ['a background card', 'a dimmed backdrop panel', 'a behind card'],
+  doc: ['a file card', 'a markdown card', 'a source-file preview'],
+  shader: ['a generative background', 'a WebGL field', 'an ambient full-frame look'],
+  lottie: ['a Lottie animation', 'an After Effects export', 'a JSON animation file'],
+  paint: ['a canvas 2D field', 'a drawn generative background', 'a resamplable canvas look'],
+  raymarch: ['a 3D distance field', 'a lit 3D surface', 'a raymarched shape'],
+  three: ['a real 3D scene', 'a three.js object', 'a posed 3D mesh'],
+  globe: ['a spinning globe', 'a dotted planet', 'a world map globe'],
+  particles: ['confetti', 'sparks', 'a dust burst'],
+  composition: ['a hand-timed sub-timeline', 'nested keyframed motion', 'a custom mini animation'],
+  adjust: ['a color grade layer', 'a filter over everything below', 'a full-frame adjustment'],
+};
+
 export const LAYER_REGISTRY = defineRegistry('layer type', REGISTRY, { slot: 'layers[].type', blurbs: LAYER_BLURBS,
+  aka: LAYER_AKA,
   docs: LAYER_DOCS,
   catalog: {
     title: 'Layer types',
