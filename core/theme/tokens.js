@@ -96,10 +96,23 @@ function resolveValue(type, raw, path, flat, values, resolving, errors, opts) {
 // resolveOne. `opts.parseColor` is required to normalise a `color`/`gradient` token; omitted, every
 // colour token fails to normalise and reports so (fail loud, not a silent pass-through of an unchecked
 // string, same rule themeErrors follows when it is handed no parser at all).
+// malformedTokens(tree): paths of nodes carrying only one of `$type`/`$value`. A `$` key marks an
+// attempted token, so such a node is an authoring error, never a group to recurse into silently.
+export function malformedTokens(tree, prefix = '', out = []) {
+  if (!isObj(tree)) return out;
+  for (const [key, node] of Object.entries(tree)) {
+    if (!isObj(node)) continue;
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (Object.hasOwn(node, '$type') !== Object.hasOwn(node, '$value')) out.push(path);
+    else if (!isTokenNode(node)) malformedTokens(node, path, out);
+  }
+  return out;
+}
+
 export function resolveTokens(tree, opts = {}) {
   const flat = flattenTokens(tree);
   const values = new Map();
-  const errors = [];
+  const errors = malformedTokens(tree).map((path) => `token "${path}" needs both $type and $value`);
   for (const path of flat.keys()) resolveOne(path, flat, values, new Set(), errors, opts);
   return { values, errors };
 }
