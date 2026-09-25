@@ -113,6 +113,14 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
     echo "✗ pre-push blocked: the site would not have built. Fix it, or --no-verify to override." >&2
     exit 1
   fi
+  # e2e-check runs `make e2e` (probe + snap-all + snap-blocks + mcp-smoke + site test + author-check)
+  # ONLY when this range touches something it can catch (core/, renderer/, blocks/, generators/,
+  # films/scene/ tracked files, site/public's engine copy, quality/gates/snap-*): same scoped-by-range
+  # shape as site-build-check above, same reason, an ordinary doc or skill push must stay fast.
+  if ! node quality/gates/e2e-check.mjs "$range"; then
+    echo "✗ pre-push blocked: make e2e failed. Fix it, or --no-verify to override." >&2
+    exit 1
+  fi
 done
 
 echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + word-action + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + provenance + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check + skill-check + rule-length) …"
