@@ -78,8 +78,18 @@ export const MOTION_CUES = ['pluck', 'droplet', 'chime', 'bloom', 'impact', 'who
 // (whoosh, reveal, click, pop) that are not CUES keys at all; core/validate.mjs:1288 records that and
 // treats the schema enum as a superset on purpose. Owning "every cue name a scene may write" in one
 // place is a real change and a separate one.
+const MOTION_CUE_AKA = {
+  impact: ['a hard landing sound', 'a hit sound', 'a thud'],
+  whoosh: ['a camera whoosh', 'an air rush sound', 'a swoosh'],
+  droplet: ['a drop sound', 'a light plink', 'a short pitched drop'],
+  chime: ['a small bright accent', 'a ding', 'a resolve sound'],
+  bloom: ['an opening sound', 'a swelling reveal sound'],
+  pluck: ['a small punctuation sound', 'a counter tick sound'],
+};
+
 export const MOTION_CUE_REGISTRY = defineRegistry('motion voice', Object.fromEntries(MOTION_CUES.map((n) => [n, n])), {
   slot: 'audio.cues[].name',
+  aka: MOTION_CUE_AKA,
   blurbs: {
     impact: 'something heavy ARRIVES and lands hard: a hit with an edge, a mass and a room, in that order. A frame-sized card reaching its mark, a panel slamming home',
     whoosh: 'air moving past. One camera gesture, one whoosh, never one per keyframe: the sound rises as the move starts and falls away as it passes',
