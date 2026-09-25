@@ -253,7 +253,8 @@ export function buildRoster(scenePath) {
     lines.push(
       '',
       'Standing rules: no em-dashes anywhere. Stage explicit paths. Do not block on a background render.',
-      'Do not delegate to sub-agents. Report what you wrote and what you deliberately left alone.',
+      'Do not delegate to sub-agents.',
+      'Your handoff to the main thread is what you did, what you found, any concerns, and any deviations from this brief, in 300 words or fewer, and nothing else.',
       '',
       `Worktree agent contract (engine-doctrine/CRAFT/SUBAGENTS.md), base sha ${ctx.baseSha}:`,
       ctx.contract || '  ! engine-doctrine/CRAFT/SUBAGENTS.md has no worktree-contract block. Fix the doc before briefing further.',
