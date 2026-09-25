@@ -95,7 +95,7 @@ function drawSparks(ctx, w, h, lt, seed, L, colors) {
 
 // ---- dust: slow ambient drift, loops forever (a modulo of `lt`, still f(lt), never integrated) ----
 function drawDust(ctx, w, h, lt, seed, L, colors) {
-  const count = L.count ?? 40, size = L.size ?? 2;
+  const count = L.count ?? 40, dotSize = L.size ?? 2;
   for (let i = 0; i < count; i++) {
     const b = `${seed}:${i}`;
     const period = 7 + random(`${b}:p`) * 6;
@@ -107,7 +107,7 @@ function drawDust(ctx, w, h, lt, seed, L, colors) {
     const twinkle = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(lt * (0.6 + random(`${b}:tw`)) + phase));
     ctx.globalAlpha = twinkle;
     ctx.fillStyle = colors[i % colors.length];
-    ctx.beginPath(); ctx.arc(x, y, size * (0.6 + random(`${b}:sz`) * 0.8), 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, dotSize * (0.6 + random(`${b}:sz`) * 0.8), 0, Math.PI * 2); ctx.fill();
   }
   ctx.globalAlpha = 1;
 }
