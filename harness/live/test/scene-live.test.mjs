@@ -19,6 +19,7 @@ function run(rel) {
   const r = spawnSync('node', [HOOK], {
     input: JSON.stringify({ tool_input: { file_path: abs } }),
     encoding: 'utf8',
+    env: { ...process.env, VAWE_HOOK_FULL: '1' },   // assert against the full text, not the summary
   });
   return { status: r.status, out: r.stderr };
 }

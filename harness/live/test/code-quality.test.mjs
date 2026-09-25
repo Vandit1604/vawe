@@ -27,6 +27,7 @@ const STALE = `export function tangled(a) {\n  let unused;\n  return a;\n}\n`;
 const run = () => {
   const r = spawnSync('node', [HOOK], {
     input: JSON.stringify({ tool_input: { file_path: ABS } }), encoding: 'utf8',
+    env: { ...process.env, VAWE_HOOK_FULL: '1' },   // assert against the full text, not the summary
   });
   return { status: r.status, err: r.stderr };
 };
