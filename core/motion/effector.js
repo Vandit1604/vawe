@@ -58,7 +58,14 @@ export const FALLOFF_BLURBS = {
   step: 'no falloff: an element reacts fully inside the moving point\'s radius and not at all outside. A hard-edged pass, hover-like',
 };
 
-export const FALLOFF_REGISTRY = defineRegistry('effector falloff', FALLOFFS, { slot: 'effector.falloff', blurbs: FALLOFF_BLURBS,
+const FALLOFF_AKA = {
+  linear: ['straight ramp', 'plain distance falloff', 'linear influence'],
+  smooth: ['smoothstep falloff', 'eased falloff', 'soft-edged falloff'],
+  sphere: ['dome falloff', 'spherical falloff', 'bubble falloff'],
+  step: ['hard-edge falloff', 'on-off falloff', 'binary falloff', 'no falloff'],
+};
+
+export const FALLOFF_REGISTRY = defineRegistry('effector falloff', FALLOFFS, { slot: 'effector.falloff', blurbs: FALLOFF_BLURBS, aka: FALLOFF_AKA,
   catalog: {
     title: 'Effector falloffs',
     tag: 'per-layer',
@@ -76,13 +83,21 @@ export const DRIVES = {
   scale: 'what an element\'s proximity to the moving point is SPENT on: added to 1, so `scale: 0.6` swells a fully affected clone to 1.6',
   rotate: 'proximity spent on rotation, in degrees. `rotate: 25` turns a fully affected clone by 25',
   x: 'pixels, a sideways offset that does not depend on where the point is',
-  y: 'pixels, the same on the other axis',
+  y: 'pixels, the same offset as x but on the vertical axis, independent of where the moving point sits',
   push: 'pixels ALONG the vector from the point to the clone. Positive shoves clones away, negative pulls them in. The only drive that reads the direction as well as the distance',
   opacity: 'added to 1. `opacity: -0.7` dims a fully affected clone to 0.3',
 };
+const DRIVE_AKA = {
+  scale: ['grow', 'scale up', 'swell'],
+  rotate: ['spin', 'turn', 'rotation drive'],
+  x: ['sideways offset', 'horizontal offset'],
+  y: ['vertical offset', 'up-down offset'],
+  push: ['push away', 'repel', 'shove outward', 'radial push'],
+  opacity: ['fade', 'dim', 'transparency drive'],
+};
 // `slot` carries `{}`: the name is a KEY in that map, its value the amount.
 // The entries ARE the descriptions, so they are the blurbs too: one map, one owner.
-export const DRIVE_REGISTRY = defineRegistry('effector drive', DRIVES, { slot: 'effector.drives{}', blurbs: DRIVES,
+export const DRIVE_REGISTRY = defineRegistry('effector drive', DRIVES, { slot: 'effector.drives{}', blurbs: DRIVES, aka: DRIVE_AKA,
   catalog: {
     title: 'Effector drives',
     tag: 'per-layer',
