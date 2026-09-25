@@ -67,9 +67,18 @@ suite, not like a SaaS site.
 | better-typography | ui-skills `jakubkrehel/better-typography` | tracking on small caps, tabular numbers, few sizes | nothing yet |
 | emil-design-eng, animate | ui-skills `emilkowalski/*` | the poster-to-video crossfade, the play state | scale and lift on hover, as decoration with no purpose |
 | minimalist, brutalist, overdrive, neo-industrial | ui-skills | named as poles only | all of them as builders |
+| landing-page | ui-skills `mengto/landing-page` | the landing order: film first, then how, the file, the effects, benefits, FAQ, one closing panel | its stock hero with a gradient and a logo wall |
+| better-layout | ui-skills `jakubkrehel/better-layout` | one centred 1040px column; panels for grouping instead of grey bands | a sticky side rail on content pages |
+| better-ui | ui-skills `jakubkrehel/better-ui` | fewer words per card; one action per panel | icon badges on every card |
+| distill | ui-skills `pbakaus/distill` | cutting kickers, eyebrows and repeated leads | nothing |
+| colorize | ui-skills `pbakaus/colorize` | lane colours by meaning: a colour marks a layer type and nothing else | colour as decoration on sections |
+| better-interface | ui-skills `jakubkrehel/better-interface` | the bar and footer: five links, one filled action, one footer panel | a pill nav floating on a colour band |
+| impeccable detect | `npx impeccable detect` | anti-slop pass on every route at 1440 and 390 | findings on the engine's own artwork (a generator's glow) and on deliberate clipping (the editor frame) |
+
+Not reviewed: better-accessibility and better-writing were not loaded, so contrast pairs were
+measured by hand and copy was edited by the Orwell rules only.
 
 ## Prototype
 
-The approved prototype is `canvas-v2` (studio canvas, Archivo headings, Studio colour). It was built
-in a scratch folder, not in the repo; the build pass ports it into `site/`, then `DESIGN.md` is
-re-extracted from the shipped CSS.
+The approved prototype was `canvas-v2` (studio canvas, Archivo headings, Studio colour), with the
+split hero chosen after it. It is now shipped in `site/`, and `DESIGN.md` is extracted from that CSS.

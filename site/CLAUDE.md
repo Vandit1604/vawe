@@ -1,5 +1,8 @@
 # site/ : read DESIGN.md before you change a pixel
 
+`IDENTITY.md` holds the brief the design answers to: who it is for, the studio look, and the skills
+that shaped it. Read it once; read `DESIGN.md` every time.
+
 **[`DESIGN.md`](DESIGN.md) is the contract for this directory.** It was extracted from the shipped
 CSS, not written as an aspiration, so it describes what the site IS. Read it first, every time, and
 if you change the system, change it there too.
@@ -13,9 +16,11 @@ for a marketing site answers none of that map's questions. This file is how you 
 1. **z-index is a closed set.** `--z-under · --z-base · --z-raise · --z-badge · --z-sticky · --z-nav
    · --z-skip`. Never write a number. If `--z-raise` is not enough you need your own stacking
    context, not a bigger number.
-2. **Colour is one voice.** Cobalt plus a verb means *you can act on it*. Inert data gets no box, no
-   accent, no verb. Never fade the accent for a secondary state: cobalt on its own tint at 75%
-   measures 3.08:1 against a required 4.5. Use `--ink-2` or `--muted`.
+2. **Colour has two voices, each with one meaning.** The studio blue (`--accent`) means *you can act
+   on it* or *this is live*. A lane colour (`--lane-*`) means *this layer type*, as in the studio
+   timeline, and always sits next to a label. Nothing else gets colour. Text on the blue is
+   `--lane-on` (#16151a, 5.12:1); white on it measures 3.55:1. Never tint the accent for a secondary
+   state: blue on its own tint measured 4.3:1 on the playground rail. Use `--ink` on `--raised`.
 3. **A rule reaches `globals.css` only when two routes need it.** One consumer keeps it in its own
    stylesheet. That rule is why a consolidation pass could delete 221 dead lines instead of 400.
 4. **Pick a breakpoint from {640, 760, 900}** unless you have a measured reason. The set has already
@@ -42,5 +47,5 @@ hand-edit those files; run the generator.
 - **No spacing, type or radius scale.** Seven font sizes ship inside a 3px band. The evidence tables
   are in `DESIGN.md`; defining the scales means changing about 200 declarations, so it wants its own
   pass rather than a drive-by.
-- **No system dark mode.** There is no `prefers-color-scheme` and no `data-theme`, so a dark-OS
-  visitor gets the light site. `DESIGN.md` → Themes records what the mechanism would need to cover.
+- **Dark only.** The site is the studio's dark ground by decision (`IDENTITY.md`), with
+  `color-scheme: dark`. There is no light mode to keep in sync.

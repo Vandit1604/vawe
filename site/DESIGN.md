@@ -1,177 +1,170 @@
 ---
-version: alpha
+version: beta
 name: Vawe
-description: The marketing site for a deterministic motion-graphics engine. White-first, one cobalt accent, hairlines instead of shadows.
+description: The site for an open source motion-graphics engine, on the vawe studio's own dark tokens. Films play live; colour marks an action or a layer type, nothing else.
 colors:
-  accent: "#2563eb"
-  accent-2: "#1d4ed8"
-  accent-ink: "#ffffff"
-  accent-soft: "#eef3ff"
-  accent-line: "#cfe0ff"
-  ok: "#2f7d55"
-  ok-bg: "#f2fbf6"
-  bad: "#a3282d"
-  bad-bg: "#fdf3f3"
-  bg: "#ffffff"
-  bg-2: "#f6f8fb"
-  field: "#e9ecf1"
-  surface: "#ffffff"
-  line: "#e7eaf0"
-  line-2: "#d7dce4"
-  ink: "#0f1620"
-  ink-2: "#454f5e"
-  muted: "#697182"
+  accent: "#0a87ff"
+  accent-2: "#3a9dff"
+  accent-ink: "#16151a"
+  accent-soft: "rgba(10,135,255,.16)"
+  accent-line: "rgba(10,135,255,.42)"
+  ok: "#0eaf80"
+  bad: "#ff7a7a"
+  bg: "#16151a"
+  surface: "#212025"
+  surface-2: "#27262c"
+  raised: "#2f2e35"
+  raised-2: "#393840"
+  line: "rgba(255,255,255,.07)"
+  line-2: "rgba(255,255,255,.13)"
+  ink: "#ffffff"
+  ink-2: "#d8d8da"
+  muted: "#97969b"
+  lane-text: "#a67dff"
+  lane-media: "#52525a"
+  lane-shape: "#e0714f"
+  lane-comp: "#cf5b98"
+  lane-cap: "#3ea3ff"
+  lane-sound: "#0eaf80"
+  lane-camera: "#4fb3d9"
+  lane-fx: "#d9c34f"
+  lane-on: "#16151a"
 typography:
   sans:
-    fontFamily: Anybody
+    fontFamily: Archivo
     fontSize: 16px
     lineHeight: 1.55
     fontWeight: 400
     letterSpacing: -0.004em
-  mono:
-    fontFamily: JetBrains Mono
   display:
-    fontFamily: Anybody
+    fontFamily: Archivo
     lineHeight: 1
     fontWeight: 800
-    letterSpacing: -0.022em
+    letterSpacing: -0.035em
   heading:
-    fontFamily: Anybody
-    lineHeight: 1.06
+    fontFamily: Archivo
+    lineHeight: 1.05
     fontWeight: 800
-    letterSpacing: -0.018em
-  lead:
-    fontFamily: Anybody
-    fontSize: 1.08rem
-    lineHeight: 1.6
-    fontWeight: 400
-  kicker:
+    letterSpacing: -0.025em
+  title:
+    fontFamily: Unbounded
+    fontWeight: 500
+  mono:
     fontFamily: JetBrains Mono
-    fontSize: 12.5px
-    letterSpacing: 0.02em
 rounded:
-  base: 14px
+  panel: 12px
+  inner: 4px
+  control: 8px
+  pill: 999px
 spacing:
   page-gutter: 26px
-  rail-gap: 22px
+  column: 1040px
+  page: 1160px
 ---
 
 ## Overview
 
-Vawe renders one self-describing JSON into one frame-perfect video. The site exists to prove that,
-so on almost every page the real engine is running: a live editor in the hero, a live block on a
-detail page, a live generator in the playground. The design is built to stay out of the way of a
-moving picture. It is white-first, it carries exactly one accent, and it draws structure with
-hairlines rather than shadows, because a page full of soft boxes competes with the renders it
-frames.
+Vawe turns one JSON file into one video, and the site proves it by running the engine in the
+visitor's browser: the landing hero, the film cards, the editor and the playground all render live
+from scene files. The design is the vawe studio's own look (`studio/ui/studio.css`), because the
+site and the tool should read as one product. The brief it answers to is `IDENTITY.md`.
+
+A dark ground, panels a step lighter, and almost no colour. Films are the colour on the page.
 
 ## Colors
 
-Cobalt is the only accent, and it is a working colour, not a decorative one: **cobalt and a verb
-means you can act on it.** Chrome does not signal interactivity here, colour does. That is what
-keeps the accent scarce, and it is why inert data gets no box, no accent and no verb. A new chip
-has to pick a side.
+Colour has two voices and each has one meaning.
 
-The one sanctioned exception is engine boot state. "The render failed" and "this is a link" cannot
-be the same colour, so `ok` and `bad` exist and are used nowhere except the editor status line.
+- **The accent, `#0a87ff`, means you can act on it, or it is live.** Links, the focus ring, the
+  playhead, the live line in a scene file. Text on the accent is the ground (`accent-ink`, 5.12:1);
+  white on it measures 3.55:1 and is never used.
+- **A lane colour means that layer type**, as in the studio timeline: text, media, shape, composite,
+  captions, sound, camera, effects. The owner of the mapping is `core/layers/kinds.js`; the site
+  reads its generated copy, `lib/layer-kinds.json`. A lane colour always sits next to a label, and as
+  TEXT it is legal only on the ground: media fails there (2.35:1) and composite fails on a panel.
 
-Do not fade an accent to suggest a secondary state. Cobalt on its own tint at 75% opacity measures
-3.08:1 against a required 4.5. Reach for `ink-2` or `muted`, both of which are contrast-checked on
-white.
+Nothing else gets colour. Buttons are ink on the ground (`btn-primary`) or ink on `raised`
+(`btn-ghost`); a selected row is `ink` on `raised`, never the accent on its own tint, which measured
+4.3:1. `ok` and `bad` exist only for the editor status line, where a healthy scene shows a green
+dot and quiet text, and a fault colours the whole line.
 
-There is no dark surface left to answer for. The site once carried `accent-on-dark`, cobalt lifted
-to survive an ink ground; `/playground` was its only consumer and moved to the light system, so the
-token went with the scope.
+Ink is measured on the ground: `ink` 18.2:1, `ink-2` 14.0:1, `muted` 6.2:1. The studio's own
+`#7c7b81` measures 4.3:1 and is never text here.
 
 ## Themes
 
-**There is one theme, and the site has no dark mode at all.** No `prefers-color-scheme`, no
-`data-theme`, and since `/playground` moved to the light system, no opted-in dark scope either. A
-visitor whose OS is set to dark gets the light site.
-
-That is a decision the next change should make on purpose rather than inherit, and the way in is
-already proven. The scope that used to exist was token-level, not component-level: it redefined
-surface, line, ink and accent in one place and every control on the route repainted with no rule of
-its own. Nothing on this site paints a colour on a component, so that mechanism still works.
-
-What a real dark mode owes, and what the old scope never paid: `shadow-3` kept a light-surface
-shadow, `ok` `ok-bg` `bad` `bad-bg` painted near-white on ink, and `accent-ink` was never
-redefined. Seven tokens, plus one decision about who owns the switch.
+The site is dark only, by decision (`IDENTITY.md`), and declares `color-scheme: dark`. The engine
+applies a scene's theme to a target element, never to `:root`, so a live scene cannot repaint the
+page around it (`core/engine/boot.js` `applyTheme(theme, target)`).
 
 ## Typography
 
-Two families, and each one has a job. Anybody carries prose and display; JetBrains Mono carries
-anything that is data: a block name, a count, a file path, a JSON key, a keyboard hint. Mono is a
-signal that the string is literal, so do not reach for it to make prose look technical.
+Three faces, three jobs (`app/layout.tsx`):
 
-Anybody carries a `wdth` axis, and width is used as a static type role rather than an effect:
-display type stands wide (`105`), body sits at normal (`100`). It is deliberately never animated.
-The hero already contains a live engine, and type that reflows every frame competes with the render
-it frames and thrashes layout doing it.
+- **Archivo** carries headings and prose. Headings are 800 with tight tracking; body is 400 at
+  16px / 1.55. Its `wdth` axis is loaded and held at 100; it is never animated, because type that
+  reflows every frame competes with the live render beside it.
+- **Unbounded** is for short titles only: a film name, a card title, the wordmark, an FAQ question.
+  It was judged not serious enough for headings.
+- **JetBrains Mono** is for anything literal: a count, a clock, a file path, a JSON key, a lane name.
+  The `.meta` class is its uppercase read-out form, 11px with tabular numbers.
 
-Display and heading are FLUID, so their size is a range and not a token: display is
-`clamp(2.9rem, 7.2vw, 6rem)`, heading is `clamp(1.7rem, 3.4vw, 2.5rem)`. Every other role is fixed.
-
-Set body copy against a measure. The site caps prose at 44ch to 66ch depending on the role, and
-`ch` resolves against the container's own font size, so put the cap on the element that carries the
-type, not on a wrapper.
+Headings are fluid: a page h1 is `clamp(2.2rem, 4.6vw, 3.5rem)`, a section h2
+`clamp(1.9rem, 3.4vw, 2.75rem)`, a panel h2 `clamp(1.5rem, 2.6vw, 2rem)`. Prose is capped at a
+measure of 52 to 66ch, set on the element that carries the type, because `ch` resolves against its
+own font size. No functional text is under 11px.
 
 ## Layout
 
-`.wrap` is the page: `1160px` max width, `26px` gutters. Everything else sits inside it.
+`.wrap` is the page: 1160px wide with 26px gutters. Inside it, content sits in one centred 1040px
+column (`.ls`, and `.ipage` on the content pages). Sections are separated by space, not by grey
+bands; grouping is done with panels.
 
-The catalog shape is shared. `/arsenal` indexes 743 items under dozens of headings and uses
-`.rail-layout` / `.rail-col` / `.rail`: a `172px` sticky rail, a
-`22px` gap, the work to its right, collapsing at `900px` into a horizontal strip of pills. A page
-brings its own link type and its own collapsed direction; the frame comes from the primitive.
+- `.ls` / `.ls-top`: a section, or a page's opening section with its h1.
+- `.phead`: the page head on the arsenal and content pages, one column, with an optional quiet
+  breadcrumb (`.kicker`).
+- `.isec`: one argument per panel, the text on the left and its proof on the right; a panel with no
+  proof is one column.
+- `.fgrid` / `.fc`: film cards (`FilmGrid.tsx`), six columns at desktop, two, then one.
+- `.rail-layout`: a 172px sticky rail with the work to its right, collapsing at 900px to a row of
+  pills. The rail marks its current item with `aria-current`.
 
-A rail entry marks itself with `aria-current`, set by an IntersectionObserver, and the highlight is
-read off that attribute. One signal serves the sighted reader and the screen reader.
-
-`.fold` is the other shared primitive: a `<details>` whose disclosure triangle is replaced by a
-`+`/`-` that reads at 12.5px. It owns the disclosure and never the air around it, because the two
-pages that carry one place it differently.
+Breakpoints are 640, 760 and 900. A few older ones ship (560, 700, 860, 1000) and should fold into
+that set when their page is next touched.
 
 ## Elevation & Depth
 
-Three shadow steps exist and they are spent sparingly. Depth says "this is liftable", never
-"this is a box". The block catalog is the register to copy: hairlines for structure, one elevation
-step, and only on hover.
-
-Prefer a border-colour change over a shadow when the element is not actually liftable.
+Depth is one step: a panel is `surface` with a 1px inner ring (`--ring`), no drop shadow. Inside a
+panel, a proof is a recessed well (`bg` or `surface-2`), never a second raised card. `--shadow-2`
+and `--shadow-3` are kept small (12px and 16px blur) and appear only on a few catalogue cards.
 
 ## Shapes
 
-`--r` is `14px` and it is the card radius. A pill is `999px`. Between those two the site has no
-scale: `4px` through `16px` all appear, chosen per component.
+Four radii: a panel is `--r` (12px), a well or chip inside it is `--r-in` (4px), a control is 8px,
+a pill is 999px. Some older routes still use 6px and 10px.
 
 ## Components
 
-The focus ring is `2px solid var(--accent)` with an `outline-offset` of 1 to 3 pixels, and it is
-what almost every control uses. Three shipped controls do not, and a rebuild should close them
-rather than copy them: the blocks filter input and its family select both drop the outline and
-answer focus with a border colour only, and they do it on `:focus` rather than `:focus-visible`, so
-a keyboard user gets less than a mouse user. The hero code pane drops the outline and answers with
-a background tint. Where a ring genuinely cannot sit, replace it as the catalog search field does:
-a border colour change PLUS a `3px` accent-tinted ring, keyed to `:focus-visible`.
-
-A control that only appears on hover has to be permanently visible where there is no hover. Use
-`@media (any-hover: none)`, which asks about the input device rather than the screen width.
-
-Reduced motion removes movement, never information. A spinner that stops spinning cannot be told
-from the frozen state it exists to deny, so it fades instead.
+- **Bar:** the wordmark, five links (Films, Editor, Playground, Arsenal, Docs), and GitHub as the one
+  filled action. The current page is a `<span aria-current="page">` on `raised`, never a link.
+- **Footer:** one panel with the generated link groups (`lib/site-pages.json`) and the Apache 2.0
+  line. Pages that end a journey add a closing panel above it (`<Footer bookend />`).
+- **Film card:** the film's own layer bars in lane colours at rest; hover, focus or tap boots the
+  engine for that card only, so one engine runs at a time.
+- **Focus:** `2px solid var(--accent)` on `:focus-visible`. A field that cannot carry an outside
+  ring uses a border change plus a 3px accent-tinted ring.
+- A control that appears on hover is visible where there is no hover (`@media (hover: none)`).
+- Reduced motion stops playback on load and removes movement, never information.
 
 ## Do's and Don'ts
 
-- Do put a rule in `globals.css` only when two routes need it. One consumer keeps its rule in its
-  own stylesheet, which is why `globals.css` does not know what a `.fxcard` is.
-- Do give a colour to a token, never to a component. The dark scope that used to ship worked
-  because every control painted from `--surface` and `--ink` rather than from a literal, so one
-  scope repainted a whole route. That is why a dark mode is still reachable here.
-- Don't use `mix-blend-mode: soft-light`, `overlay` or `screen` on the cobalt bookend band.
-  `multiply` can only darken, which is what mathematically guarantees white stays above cobalt's
-  5.17:1 on every frame of the video behind it. Those three can lighten, and the guarantee dies.
-- Don't draw an inert chip and a control the same way.
+- Do put a rule in `globals.css` only when two routes use it.
+- Do give colour to a token, never to a component.
+- Do read every figure from `lib/*.json`; `site-counts` fails a typed number.
+- Don't use a lane colour without its label, or as decoration.
+- Don't tint the accent for a secondary state; use `ink` on `raised`.
+- Don't put white text on the accent.
+- Don't nest a shadowed card inside a panel.
 - Don't animate the `wdth` axis.
 
 ## Provenance: what shaped each surface
@@ -188,8 +181,16 @@ argue with is followed until it is quietly abandoned.
 **The convention.** When you build or rework a surface, add its row. One line, written at the time,
 while you still know.
 
+The first rows record the 2026-09-25 studio rebuild. The rows after them were written for the
+white-and-cobalt site and describe surfaces the rebuild replaced; they stay as the record of what
+was tried.
+
 | Surface | Register | Shaped by | Notes |
 |---|---|---|---|
+| **studio rebuild, 2026-09-25:** tokens, type, every route | brand | `ui-ux-interview` (local), then ui-skills `jakubkrehel/better-colors`, `better-typography`, `mengto/landing-page`, `jakubkrehel/better-layout`, `better-ui`, `better-interface`, `pbakaus/distill`, `pbakaus/colorize`; `impeccable detect` on every route at 1440 and 390 | The full record is `IDENTITY.md` → Skills used and rejected. Rejected: stock gradient heroes and logo walls, pill navs on colour bands, icon badges on every card, colour as decoration, a sticky rail on content pages. Kept on purpose against `impeccable`: clipping in the editor frame and the playground field (deliberate), and a generator's glow (the engine's own artwork). Not reviewed: better-accessibility and better-writing were not loaded. |
+| `/`, split hero with a live film, timeline and scene file | brand | `mengto/landing-page`, `emilkowalski/emil-design-eng` | The hero plays a film through the in-browser engine, with its layer bars in lane colours and its scene file one tab away; all three read one scene JSON. Rejected: mp4 loops, which had drifted from their scenes. |
+| `/showcase`, `/launch-video`, `/product-tour-video` film cards | brand | `pbakaus/colorize` | Idle face is the film's own layer timeline; only a hovered card boots an engine. |
+| `site/app/components/ogCard.tsx`, `site/og/card.html` | brand | local tokens only | Studio ground and Archivo. Satori reads woff, so the font lock carries `Archivo-400/800.woff`. |
 | `/arsenal` | product | `ibelick/improve-ui` (ui-skills), rail pass only | Its PROOF GATE taken: a hierarchy finding needs rendered or user evidence, never a source read, so the rail was screenshotted before and after rather than argued about. That gate is what turned "the two levels look alike" into the actual cause: `.rail a` in globals.css is (0,1,1) and `.ar-ax-kind` was (0,1,0), so the leader's `--ink` never applied and it rendered in its children's grey. Its READ-ONLY boundary rejected, because a fix was asked for. The rest of the page predates this convention: hairlines for structure, one elevation step and only on hover, mono for anything literal, sources lost. Re-derive from the code, do not guess. |
 | `/editor` | product | **UNRECORDED** | Same. |
 | `/showcase`, `/`, `/features` | brand | **UNRECORDED** | Same. |
