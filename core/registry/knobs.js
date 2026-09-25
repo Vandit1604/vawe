@@ -294,9 +294,24 @@ for (const d of Object.keys(DEVICE_BLURBS))
   if (!SHADER_FX.includes(d))
     throw new Error(`spectacle device "${d}" is not a shader sting, core/knobs.js and core/stings.js have drifted.`);
 
+const DEVICE_AKA = {
+  flash: ['a white flash', 'a bright pop over everything'],
+  chromaticSplit: ['RGB split', 'color channel tear', 'glitchy color split'],
+  glitch: ['digital glitch', 'system breakage effect', 'stepped shear'],
+  streak: ['a light streak', 'a specular sweep'],
+  whipPan: ['a whip pan', 'a camera smear'],
+  ripple: ['a shockwave ring', 'a ripple from impact'],
+  sdfIris: ['an iris wipe', 'a shutter reveal'],
+  vortex: ['a spinning twist', 'a whirlpool distortion'],
+  lens: ['a lens bulge', 'a fisheye bend'],
+  dispersion: ['a prism split', 'light separating into color'],
+  iridescence: ['an oil-slick sheen', 'a rainbow sheen wash'],
+  cinematicZoom: ['a fast push with blur', 'a lunge zoom'],
+};
+
 export const SPECTACLE_DEVICES = defineRegistry('spectacle device',
   Object.fromEntries(Object.keys(DEVICE_BLURBS).map((k) => [k, k])),
-  { blurbs: DEVICE_BLURBS, slot: 'spectacle.device',
+  { blurbs: DEVICE_BLURBS, aka: DEVICE_AKA, slot: 'spectacle.device',
   catalog: {
     title: 'Spectacle devices',
     tag: 'scene',
