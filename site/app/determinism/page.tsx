@@ -36,11 +36,8 @@ export default function Determinism() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" tabIndex={-1}>
+        <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
-            <span className="kicker">
-              <span className="dot" /> determinism
-            </span>
             <h1>Same JSON in. Same bytes out.</h1>
             <p>
               A Vawe render is a pure function of the frame number. Ask for frame 412 twice, on two

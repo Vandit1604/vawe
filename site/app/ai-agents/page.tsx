@@ -32,11 +32,8 @@ export default function AiAgents() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" tabIndex={-1}>
+        <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
-            <span className="kicker">
-              <span className="dot" /> for agents
-            </span>
             <h1>Let an agent write the video.</h1>
             <p>
               Vawe runs as an MCP server: a caller&apos;s own model writes the scene JSON on its own

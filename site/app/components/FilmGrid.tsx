@@ -71,11 +71,12 @@ function FilmCard({ id, title, active, onActive }: { id: string; title: string; 
   );
 }
 
-export function FilmGrid() {
+export function FilmGrid({ ids }: { ids?: string[] }) {
   const [active, setActive] = useState<string | null>(null);
+  const films = ids ? FILMS.filter((f) => ids.includes(f.id)) : FILMS;
   return (
-    <div className="fgrid">
-      {FILMS.map((f) => (
+    <div className={`fgrid${films.length === 1 ? " one" : ""}`}>
+      {films.map((f) => (
         <FilmCard
           key={f.id}
           id={f.id}

@@ -31,11 +31,8 @@ export default function RemotionAlternatives() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" tabIndex={-1}>
+        <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
-            <span className="kicker">
-              <span className="dot" /> alternatives
-            </span>
             <h1>Remotion alternatives, actually categorized.</h1>
             <p>
               &quot;Remotion alternative&quot; returns two different products under one query:

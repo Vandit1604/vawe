@@ -1,5 +1,6 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { FilmGrid } from "../components/FilmGrid";
 import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
 
@@ -10,17 +11,9 @@ export const metadata = pageMetadata({
   path: "/launch-video",
 });
 
-/* /launch-video · fourth intent page, and the first of three use-case pages built from
- * engine-doctrine/CRAFT/ROUTING.md's route table rather than a feature or a question. Someone
- * searching "product launch video" or "SaaS launch video" is naming a JOB, not this engine's
- * vocabulary, so the page answers in that wording.
- *
- * IT USED TO PROVE EACH CLAIM WITH A NAMED FILM: argus-launch, threadcite-open, saas-hero-launch,
- * vawe-launch, each with its own clip and a citation into that film's storyboard or lock sheet.
- * None of those films could be re-rendered from source, so they came down site-wide, and the
- * per-film sections went with them rather than narrate a clip that is no longer there. This page
- * now states the doctrine only and points to /showcase for the honest word on what is rendered
- * today. New baseline films earn their sections back here once they exist.
+/* /launch-video · a use-case page built from engine-doctrine/CRAFT/ROUTING.md's route table. Someone
+ * searching "product launch video" names a JOB, not this engine's vocabulary, so the page answers in
+ * that wording, and proves the spine with launch films played live from their scene files.
  */
 
 export default function LaunchVideo() {
@@ -28,11 +21,8 @@ export default function LaunchVideo() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" tabIndex={-1}>
+        <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
-            <span className="kicker">
-              <span className="dot" /> launch video
-            </span>
             <h1>A product launch video, built from the real site.</h1>
             <p>
               A launch film in this engine is not written from a description of the product. It is
@@ -68,16 +58,10 @@ export default function LaunchVideo() {
             </div>
           </section>
 
-          <section className="isec">
-            <div className="isec-text" style={{ gridColumn: "1 / -1", maxWidth: "70ch" }}>
-              <h2>No rendered example here right now.</h2>
-              <p>
-                This page proved the spine above against named films: a real product, a fillable
-                template, and the engine&apos;s own launch film. None of the three could be
-                re-rendered from its source, so all of them came down rather than sit here stale.{" "}
-                <a href="/showcase">See /showcase</a> for what the engine has rendered today.
-              </p>
-            </div>
+          <section className="ifilms">
+            <h2>Launch films, played live.</h2>
+            <p>Each one is a scene file your browser renders as you watch. Hover or tap a film to play it, or open its JSON in the editor.</p>
+            <FilmGrid ids={["argus-launch", "saas-hero-launch"]} />
           </section>
 
           <section className="isec">

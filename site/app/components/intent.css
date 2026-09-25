@@ -1,62 +1,65 @@
-/* intent.css: shared by the three answer-a-real-question pages (/determinism, /json-to-video,
-   /ai-agents). Same shape as app/features/features.css's .fsec — two-column argument-plus-proof
-   rows on a hairline, .phead/.tag/.codeblock/.demo-media/.btn all still come from globals.css —
-   but three routes now want the row, which is DESIGN.md's own bar for promoting a rule out of a
-   single page's stylesheet. Class prefixed .isec (intent section) so it never collides with
-   .fsec if both ship on the same build. */
-.isec{padding:48px 0 8px;border-top:1px solid var(--line);margin-top:8px;
+/* intent.css: the argument-plus-proof panel shared by /features and the content pages
+   (/determinism, /json-to-video, /ai-agents, the use-case and comparison pages). */
+.ipage{max-width:1040px;margin:0 auto}
+
+/* One studio panel per argument: the text at its measure on the left, the proof beside it. */
+.isec{margin-top:12px;padding:clamp(22px,3vw,36px);background:var(--surface);border-radius:var(--r);box-shadow:var(--ring);
   display:grid;grid-template-columns:minmax(0,7fr) minmax(0,6fr);
-  gap:clamp(28px,4vw,56px);align-items:start}
-.isec:first-of-type{border-top:0}
-.isec h2{font-size:clamp(1.5rem,3.2vw,2.2rem);line-height:1.06;letter-spacing:-.026em;
+  gap:clamp(24px,4vw,48px);align-items:start}
+.isec:not(:has(> .isec-art)){grid-template-columns:minmax(0,1fr)}
+.isec:not(:has(> .isec-art)) p{max-width:70ch}
+.phead + .isec,.ls-top > .isec:first-of-type{margin-top:36px}
+.isec h2{font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.05;letter-spacing:-.025em;
   font-weight:800;text-wrap:balance;max-width:20ch}
-.isec p{color:var(--ink-2);font-size:1.05rem;line-height:1.65;margin-top:14px;max-width:60ch}
-.isec p code{font-family:var(--font-mono),monospace;font-size:.9em;background:var(--bg-2);
-  border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink)}
-.isec-art > .codeblock{margin-top:6px;max-width:none}
-.isec-art .cite{display:block;margin-top:10px;font-family:var(--font-mono),monospace;
-  font-size:12px;color:var(--muted)}
-.iend{padding:52px 0 80px;border-top:1px solid var(--line);margin-top:40px}
-.iend .h2{max-width:24ch}
-.iend .lead{margin-top:14px;max-width:64ch}
-.iend .hero-cta{justify-content:flex-start;margin-top:24px}
-/* The cross-links between the three intent pages: plain, mono, quiet, the tag register already
-   used for inert-but-useful metadata elsewhere on the site. */
-.irelated{margin-top:18px;display:flex;gap:18px;flex-wrap:wrap}
-.irelated a{font-family:var(--font-mono),monospace;font-size:12.5px;color:var(--accent);
-  text-decoration:none}
+/* The measure sits on the element carrying the type: `ch` resolves against its own font size. */
+.isec p{color:var(--ink-2);font-size:1.02rem;line-height:1.65;margin-top:14px;max-width:60ch}
+.isec p code{font-family:var(--font-mono),monospace;font-size:.92em;background:var(--raised);
+  border-radius:var(--r-in);padding:1px 6px;color:var(--ink)}
+/* Inside a panel the proof is a recessed well, not a second raised card. */
+.isec-art > .codeblock{margin:0;max-width:none;box-shadow:none}
+.isec-art > .demo-media{margin:0;border:0;box-shadow:none;border-radius:var(--r-in)}
+.isec .cite{display:block;margin-top:12px;font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted)}
+/* What the page cannot show. Muted, not accent: it is inert. */
+.fnote{margin-top:12px;font-size:13.5px;line-height:1.6;color:var(--muted)}
+
+/* Films played live inside a content page: a heading at the section size, then the cards. */
+.ifilms{margin-top:48px}
+.ifilms > h2{font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.05;letter-spacing:-.025em;font-weight:800}
+.ifilms > p{color:var(--muted);margin-top:10px;max-width:60ch}
+.ifilms .fgrid{margin-top:20px}
+.ifilms + .isec{margin-top:48px}
+
+/* The page's own next step, and the cross-links between the content pages. */
+.iend{margin-top:12px;padding:clamp(22px,3vw,36px);background:var(--surface);border-radius:var(--r);box-shadow:var(--ring)}
+.iend .h2{max-width:24ch;font-size:clamp(1.5rem,2.6vw,2rem);font-weight:800}
+.iend .lead{margin-top:12px;max-width:64ch;color:var(--ink-2)}
+.iend .hero-cta{justify-content:flex-start;margin-top:22px}
+.irelated{margin-top:20px;display:flex;gap:10px 22px;flex-wrap:wrap}
+.irelated a{font-size:14px;color:var(--accent);text-decoration:none}
 .irelated a:hover{text-decoration:underline;text-underline-offset:3px}
 @media (max-width:900px){
-  .isec{grid-template-columns:minmax(0,1fr);gap:0}
-  .isec-art{margin-top:22px}
+  .isec{grid-template-columns:minmax(0,1fr)}
 }
 
-/* .iproof: the JSON-and-its-video pair on /json-to-video, above the fold. The claim the rest of
-   the page argues in prose, shown instead: the file on the left is the file that made the clip on
-   the right. Code and video sit side by side on a wide viewport so both are visible without
-   scrolling; the video is 9:16 (films/scene/sample.json's own aspect) so it is shown at the shape
-   it actually renders, never cropped to fit a 16:9 slot it was not authored for. */
+/* .iproof: the JSON and the video it made, side by side on /json-to-video. The video keeps its
+   own 9:16, never cropped into a 16:9 slot. */
 .iproof-art{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
-.iproof-code{flex:1 1 320px;margin:6px 0 0;max-width:420px}
+.iproof-code{flex:1 1 260px;margin:0;min-width:0;max-width:420px}
 .iproof-code pre{font-size:11.5px;line-height:1.6}
-.iproof-video{flex:0 0 176px;margin-top:6px}
-.iproof-video video{width:176px;aspect-ratio:9/16;border-radius:14px;border:1px solid var(--line);
-  box-shadow:var(--shadow-2);display:block;object-fit:cover;background:#0f1620}
+.iproof-video{flex:0 0 176px}
+.iproof-video video{width:176px;aspect-ratio:9/16;border-radius:var(--r-in);display:block;object-fit:cover;background:var(--bg)}
 .iproof-video .cite{margin-top:10px;display:block;max-width:176px}
 @media (max-width:640px){
   .iproof-code{max-width:none}
 }
 
-/* .itable: the one dense comparison table two intent pages now need (/remotion-alternatives,
-   /when-determinism-matters). Hairlines only, per DESIGN.md's no-shadow rule; wrapped in
-   .itable-wrap so a wide row scrolls inside itself on mobile instead of the page. Header row
-   carries the only accent color on the surface, keeping cobalt scarce per DESIGN.md's "colour
-   is one voice." */
-.itable-wrap{margin-top:22px;overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+/* .itable: the comparison table. Hairlines only; a wide row scrolls inside its wrapper on a phone.
+   The header row is a label, so it takes the quiet mono register, not the accent. */
+.itable-wrap{margin-top:22px;overflow-x:auto;border-radius:var(--r-in)}
 .itable{width:100%;border-collapse:collapse;font-size:.94rem;min-width:640px}
 .itable th,.itable td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line)}
-.itable th{font-family:var(--font-mono),monospace;font-size:11.5px;letter-spacing:.04em;
-  text-transform:uppercase;color:var(--accent);background:var(--bg-2)}
+.itable th{font-family:var(--font-mono),monospace;font-size:12px;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
 .itable td{color:var(--ink-2)}
 .itable td:first-child{color:var(--ink);font-weight:700}
 .itable tr:last-child td{border-bottom:0}
