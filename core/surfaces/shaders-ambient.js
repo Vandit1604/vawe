@@ -1196,22 +1196,31 @@ void main(){
   gl_FragColor = vec4(col*alpha, alpha);
 }`;
 
-export function createAmbientLayer(w = 1920, h = 1080) {
-  const canvas = document.createElement('canvas');
-  canvas.width = w; canvas.height = h;
-  const gl = glContext(canvas, { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true }, 'ambient shader field');
+function compileAmbientProgram(gl) {
   const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error('ambient shader: ' + gl.getShaderInfoLog(s)); return s; };
   const prog = gl.createProgram();
   gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT));
   gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG));
   gl.linkProgram(prog); gl.useProgram(prog);
+  return prog;
+}
+
+function setupAmbientQuad(gl, prog) {
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(prog, 'a');
   gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const U = { res: gl.getUniformLocation(prog, 'u_res'), time: gl.getUniformLocation(prog, 'u_time'),
+}
+
+function setAmbientVec4(gl, loc, params) {
+  const V4 = params || [0, 0, 0, 0];
+  gl.uniform4f(loc, V4[0] || 0, V4[1] || 0, V4[2] || 0, V4[3] || 0);
+}
+
+function getAmbientUniforms(gl, prog) {
+  return { res: gl.getUniformLocation(prog, 'u_res'), time: gl.getUniformLocation(prog, 'u_time'),
     seed: gl.getUniformLocation(prog, 'u_seed'), fx: gl.getUniformLocation(prog, 'u_fx'),
     pal: gl.getUniformLocation(prog, 'u_pal'), palN: gl.getUniformLocation(prog, 'u_palN'),
     palAt: gl.getUniformLocation(prog, 'u_palAt'),
@@ -1222,6 +1231,15 @@ export function createAmbientLayer(w = 1920, h = 1080) {
     p4: gl.getUniformLocation(prog, 'u_p4'),
     p5: gl.getUniformLocation(prog, 'u_p5'),
     p6: gl.getUniformLocation(prog, 'u_p6') };
+}
+
+export function createAmbientLayer(w = 1920, h = 1080) {
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const gl = glContext(canvas, { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true }, 'ambient shader field');
+  const prog = compileAmbientProgram(gl);
+  setupAmbientQuad(gl, prog);
+  const U = getAmbientUniforms(gl, prog);
   gl.viewport(0, 0, w, h); gl.uniform2f(U.res, w, h);
   gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   return {
@@ -1234,18 +1252,12 @@ export function createAmbientLayer(w = 1920, h = 1080) {
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.uniform1f(U.time, time); gl.uniform1f(U.seed, seed); gl.uniform1i(U.fx, idx);
       gl.uniform1f(U.intensity, intensity);
-      const P4 = params || [0, 0, 0, 0];
-      gl.uniform4f(U.p, P4[0] || 0, P4[1] || 0, P4[2] || 0, P4[3] || 0);
-      const Q4 = params2 || [0, 0, 0, 0];
-      gl.uniform4f(U.p2, Q4[0] || 0, Q4[1] || 0, Q4[2] || 0, Q4[3] || 0);
-      const R4 = params3 || [0, 0, 0, 0];
-      gl.uniform4f(U.p3, R4[0] || 0, R4[1] || 0, R4[2] || 0, R4[3] || 0);
-      const S4 = params4 || [0, 0, 0, 0];
-      gl.uniform4f(U.p4, S4[0] || 0, S4[1] || 0, S4[2] || 0, S4[3] || 0);
-      const T4 = params5 || [0, 0, 0, 0];
-      gl.uniform4f(U.p5, T4[0] || 0, T4[1] || 0, T4[2] || 0, T4[3] || 0);
-      const V4 = params6 || [0, 0, 0, 0];
-      gl.uniform4f(U.p6, V4[0] || 0, V4[1] || 0, V4[2] || 0, V4[3] || 0);
+      setAmbientVec4(gl, U.p, params);
+      setAmbientVec4(gl, U.p2, params2);
+      setAmbientVec4(gl, U.p3, params3);
+      setAmbientVec4(gl, U.p4, params4);
+      setAmbientVec4(gl, U.p5, params5);
+      setAmbientVec4(gl, U.p6, params6);
       const flat = new Float32Array(24); const n = palette ? Math.min(8, palette.length) : 0;
       for (let i = 0; i < n; i++) { flat[i * 3] = palette[i][0]; flat[i * 3 + 1] = palette[i][1]; flat[i * 3 + 2] = palette[i][2]; }
       // A stop MAY carry its own position along the ramp as a fourth number. It rides on the stop
