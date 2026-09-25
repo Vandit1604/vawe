@@ -57,7 +57,7 @@ export function lineU(t, wins) {
 export const CAP_STYLES = {
   // marker band draws behind the active word; earlier words keep their full band (a read trail).
   // 28% accent: even a near-white accent over the dark plate leaves white text at >= 4.9:1.
-  highlight: withBlurb('marker highlight sweep', (u) => PRESETS.highlight(u, { color: 'color-mix(in srgb, var(--accent) 28%, transparent)' })),
+  highlight: withBlurb('a marker band sweeps left to right behind the active word, the accent mixed 28% into transparent so white text over it stays at 4.9:1 contrast or better', (u) => PRESETS.highlight(u, { color: 'color-mix(in srgb, var(--accent) 28%, transparent)' })),
 
   // pill fill sweeps left -> right. 42% accent into var(--bg) keeps the bg dominant, so the
   // theme's own text/bg pair (contract-guaranteed) degrades by well under half.
@@ -404,7 +404,27 @@ export const CAPTION_BLURBS = blurbsOf('caption style', CAP_STYLES);
 // against these names. The usage snippet was corrected once already (engine-doctrine/MISTAKES.md, the note in
 // effects-json.mjs) and the prose above it was left saying the wrong thing, because prose about code
 // goes stale in silence. Moving it to the definition site is what stops that happening twice.
-const CAPTION_AKA = { highlight: ['marker highlight', 'highlighter sweep', 'underline sweep'] };
+const CAPTION_AKA = {
+  highlight: ['marker highlight', 'highlighter sweep', 'underline sweep'],
+  pillKaraoke: ['pill fill karaoke', 'progress bar captions', 'fill bar subtitles'],
+  weightShift: ['bold the spoken word', 'weight ramp captions', 'font weight karaoke'],
+  clipWipe: ['wipe reveal captions', 'clip path karaoke', 'accent wipe subtitles'],
+  neonEdge: ['glowing captions', 'neon glow subtitles', 'halo karaoke'],
+  kineticSlam: ['punch in captions', 'impact word subtitles', 'oversize word slam'],
+  underlineDraw: ['underline karaoke', 'rule draws under word', 'quiet highlight subtitles'],
+  flipUp: ['3d flip captions', 'hinge up subtitles', 'card flip karaoke'],
+  ghostSplit: ['rgb split captions', 'chromatic aberration subtitles', 'double vision karaoke'],
+  waveRide: ['bobbing captions', 'word bounces as spoken', 'wave subtitles'],
+  scramble: ['decode subtitles', 'scramble captions', 'matrix style karaoke'],
+  wordFlash: ['one word at a time subtitles', 'big word captions', 'TikTok style captions'],
+  wordSlide: ['one word slides up subtitles', 'big word slide captions'],
+  typeOn: ['typewriter subtitles', 'typing captions', 'letter by letter subtitles'],
+  readerFocus: ['teleprompter captions', 'dimmed unread subtitles', 'read-ahead captions'],
+  inkFill: ['karaoke fill through letters', 'gradient fill subtitles', 'color fill karaoke'],
+  focusPull: ['blur to sharp captions', 'rack focus subtitles', 'out of focus subtitles'],
+  letterRise: ['letters rise into place subtitles', 'per character rise captions'],
+  weightWave: ['weight crest captions', 'variable font wave subtitles', 'bold wave karaoke'],
+};
 
 export const CAP_STYLE_REGISTRY = defineRegistry('caption style', CAP_STYLES, { slot: 'captionStyle', blurbs: CAPTION_BLURBS, aka: CAPTION_AKA,
   catalog: {
