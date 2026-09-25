@@ -9,10 +9,10 @@
 // WHY THIS EXISTS. The owner, by hand, gave the kind of detail a good plan needs before any frame is
 // drawn: what fills the frame, where the product lives, how text arrives, which cursor, how an act
 // hands off, what the ground does. `harness/author/ideate.mjs` never asked for any of it: REF mode
-// writes `<look:>` placeholders (nothing to ask, the frame is unmeasured) and IDEA mode writes bare
-// `<fill:>` lines. This module is the second half of the SAME contract `quiz.mjs` already proved for
-// the brief (stage 1): emit an AskUserQuestion payload built from real registries, refuse to invent
-// prose options, and apply the answers back into the artefact `make ideate` already writes.
+// writes `<look:>` placeholders (nothing to ask, the frame is unmeasured), and IDEA mode writes nothing
+// at all, it only ever asks. This module is the second half of the SAME contract `quiz.mjs` already
+// proved for the brief (stage 1): emit an AskUserQuestion payload built from real registries, refuse to
+// invent prose options, and apply the answers back into the artefact `make ideate` already writes.
 //
 // ONE RULE ABOVE ALL: an option is never hand-written prose. It traces to a registry (`RECIPES`,
 // `core/kinetic/presets.js`, `core/camera-moves`, `core/transitions/catalog.js`, `screen.mjs`'s
@@ -405,8 +405,8 @@ export function loadActs({ ref, name, idea }) {
     const acts = buildActs(grammar.shots, grammar.seams).map((a, i) => ({ ...a, content: grammar.shots[i].content }));
     return { acts, joints: buildJoints(grammar.seams) };
   }
-  // IDEA mode: acts are not measured, so a plain 4-act placeholder shape, matching ideate.mjs's own
-  // `buildIdeaPrompt` default (dur=12, actsCount=4) when no --ref structure is given.
+  // IDEA mode: acts are not measured, so a plain 4-act default shape (3s each) when no --ref structure
+  // is given.
   const n = 4;
   const acts = Array.from({ length: n }, (_, k) => ({ i: k + 1, t0: k * 3, t1: (k + 1) * 3 }));
   const joints = acts.slice(0, -1).map((a, k) => ({ t: a.t1, axis: 'x', outAct: k + 1, inAct: k + 2, gap: 0.1 }));

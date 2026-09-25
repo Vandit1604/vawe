@@ -4,11 +4,14 @@
 // which recipe (recipes/README.md) each joint uses. The owner reads it, edits it by hand, and the
 // harness builds the storyboard from it. This file never writes a storyboard or a scene JSON itself.
 //
-//   node harness/author/ideate.mjs --ref example-madera            (from a reference: grammar/<ref>.json)
-//   node harness/author/ideate.mjs --name <film> --idea "..."       (from an idea: acts left <fill:>)
-//   node harness/author/ideate.mjs --name <film> --idea "..." --ref example-madera   (idea, ref's structure)
+//   node harness/author/ideate.mjs --ref example-madera                     (from a reference: grammar/<ref>.json)
+//   node harness/author/ideate.mjs --ask --name <film> --idea "..." [--ref example-madera]   (question batches only)
 //   node harness/author/ideate.mjs --self-test
-//   make ideate REF=example-madera   ·   make ideate NAME=<film> IDEA="..." [REF=<ref>]
+//   make ideate REF=example-madera   ·   make ideate ASK=1 NAME=<film> IDEA="..." [REF=<ref>]
+//
+// A bare idea with no `--ref` has nothing measured to write, so this never writes a placeholder prompt
+// of `<fill: ...>` act prose for one (AGENTS.md, "no templates"): `--ask` (ideate-ask.mjs) is the only
+// thing idea mode does, and the agent writes the storyboard by hand from its answers.
 //
 // NUMBERS COME FROM THE STUDY, NEVER FROM MEMORY. `grammar/<ref>.json` (make study) carries the real
 // shot list and the real seams: t, gap, axis, direction, ground before/after. What the study cannot
@@ -67,13 +70,6 @@ export function recipeLineFor(joint, recipes = RECIPES) {
   const name = Object.keys(recipes).find((n) => recipes[n].kind === 'seam');
   if (!name) return null;
   return `${name} out=act${joint.outAct} in=act${joint.inAct} axis=${joint.axis}`;
-}
-
-/** recipeMenu(recipes) → one line per known recipe: name, kind, blurb, first source. Used in IDEA mode,
- * where no joint is measured yet, so the author picks structure from what real films actually do. */
-export function recipeMenu(recipes = RECIPES) {
-  return Object.entries(recipes).map(([name, r]) =>
-    `- ${name} (${r.kind}): ${r.blurb} [first source: ${r.sources[0].ref}@${r.sources[0].t}s]`);
 }
 
 const nearestAspect = (w, h) => {
@@ -360,16 +356,6 @@ function jointSection(joint) {
   return lines.join('\n');
 }
 
-function fillActSection(i, t0, t1) {
-  return [`## Act ${i} (${t0}s-${t1}s)`, 'on screen: <fill: what is on screen>', 'enters: <fill: how it enters>',
-    'leaves: <fill: how it leaves>', 'ground: <fill: colour>', 'camera: <fill: still, push, drift>',
-    'type: <fill: what carries the copy>', 'content: <fill: dense or quiet, what real material>'].join('\n');
-}
-
-function fillJointSection(t) {
-  return [`## Joint at ${t}s`, 'recipe: <fill: pick one from the menu below, or write the line by hand>'].join('\n');
-}
-
 /** buildRefPrompt(ref, grammar) → the prompt text for `make ideate REF=<ref>`. Exported so tests can
  * check the shape without shelling out to ffmpeg. */
 export function buildRefPrompt(ref, grammar, clip) {
@@ -402,34 +388,6 @@ export function buildRefPrompt(ref, grammar, clip) {
   return [...header, ...body, ...footer].join('\n').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
 }
 
-/** buildIdeaPrompt(name, idea, refGrammar?) → the prompt text for `make ideate NAME= IDEA=`. Without
- * `--ref`, a modest default structure (ACTS acts over DUR seconds); with it, the reference's own act
- * count and joint axes are copied as structure, content left to fill (never its content, which would
- * be lifting a real film's copy). */
-export function buildIdeaPrompt(name, idea, { dur = 12, actsCount = 4, refGrammar = null } = {}) {
-  const acts = refGrammar
-    ? buildActs(refGrammar.shots, refGrammar.seams)
-    : Array.from({ length: actsCount }, (_, k) => ({ i: k + 1, t0: +((k * dur) / actsCount).toFixed(2), t1: +(((k + 1) * dur) / actsCount).toFixed(2) }));
-  const joints = refGrammar ? buildJoints(refGrammar.seams) : acts.slice(0, -1).map((a, k) => ({ t: a.t1, axis: 'x', outAct: k + 1, inAct: k + 2 }));
-  const total = refGrammar ? refGrammar.measured.duration : dur;
-  const header = [
-    `# ${name} · film prompt`,
-    '',
-    idea ? `the idea: ${idea}` : '<fill: the idea, in one breath>',
-    '',
-    `duration: ${total}s (fill in)${refGrammar ? ` · structure copied from ${refGrammar.name}` : ''}`,
-    '',
-  ];
-  const body = [];
-  acts.forEach((act, k) => {
-    body.push(fillActSection(act.i, act.t0, act.t1), '');
-    if (k < joints.length) body.push(fillJointSection(joints[k].t), '', ...recipeMenu(), '');
-  });
-  const footer = ['## Change me', 'Every line is `<fill:>`. Pick a recipe from the menu printed under each joint',
-    'instead of inventing a transition; recipes/README.md explains the format and how to add one.'];
-  return [...header, ...body, ...footer].join('\n').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
-}
-
 // ── self-test (the pure parts: joints → acts, seam → recipe line) ─────────────────────────────────
 function selfTest() {
   const shots = [{ i: 1, t0: 0, len: 4.54, ground: 'light', luma: 209.1, accent: '#def9fe' },
@@ -444,11 +402,6 @@ function selfTest() {
   const joints = buildJoints(seams);
   assert.equal(joints[0].outAct, 1); assert.equal(joints[0].inAct, 2);
   assert.equal(recipeLineFor(joints[0]), 'flow-seam out=act1 in=act2 axis=x');
-
-  const fakeRecipes = { 'flow-seam': RECIPES['flow-seam'] };
-  const menu = recipeMenu(fakeRecipes);
-  assert.equal(menu.length, 1);
-  assert.match(menu[0], /^- flow-seam \(seam\): /);
 
   // routing: a seam line always resolves (every joint here is measured), composed cases layer on top,
   // and the two real gaps (a word-by-word exit, marks assembling into letterforms) say so by name.
@@ -520,7 +473,7 @@ function selfTest() {
   assert.deepEqual(refreshed.match(/^content:.*$/gm), withContent.match(/^content:.*$/gm),
     'a stale or placeholder content: line refreshes to the same line a bare act would get');
 
-  console.log('ideate.mjs self-test: ok (buildActs, buildJoints, recipeLineFor, recipeMenu, routing, annotateFilledPrompt, content)');
+  console.log('ideate.mjs self-test: ok (buildActs, buildJoints, recipeLineFor, routing, annotateFilledPrompt, content)');
 }
 
 /** runFromRef(ref, clipArg, { ask, answersPath }): the `--ref` branch of the CLI, pulled out of main()
@@ -596,29 +549,23 @@ function main() {
   }
 
   if (!ref && !name) {
-    console.error('usage: node harness/author/ideate.mjs --ref <ref>   |   --name <film> --idea "..." [--ref <ref>]   |   --annotate <ref>');
+    console.error('usage: node harness/author/ideate.mjs --ref <ref>   |   --ask --name <film> --idea "..." [--ref <ref>]   |   --annotate <ref>');
     process.exit(2);
   }
 
   if (ref && !name) { runFromRef(ref, clipArg, { ask: askFlag, answersPath }); return; }
 
-  // FROM AN IDEA.
-  if (!idea && !ref) { console.error('ideate: --name needs --idea "..." (and optionally --ref <ref> for structure).'); process.exit(2); }
-  let refGrammar = null;
-  if (ref) {
-    const grammarPath = path.join(ROOT, 'grammar', `${ref}.json`);
-    if (!fs.existsSync(grammarPath)) {
-      console.error(`ideate: --ref ${ref} has no study yet. Run: make study VIDEO=refs/_clips/${ref}.mp4 NAME=${ref} STRIPS=3 STRIPFPS=10`);
-      process.exit(1);
-    }
-    refGrammar = JSON.parse(fs.readFileSync(grammarPath, 'utf8'));
+  // NAME given, with no measured study of its own: this file writes a real prompt only from `--ref`
+  // (real data) or `--annotate` (an already hand-filled one). It never writes a placeholder file of
+  // `<fill: ...>` act prose for a bare idea (AGENTS.md, "no templates"); the agent writes the storyboard
+  // by hand instead. `--ask` still works here, real-data-backed once `--ref` is also given, a plain
+  // default act shape otherwise (ideate-ask.mjs `loadActs`).
+  if (!askFlag) {
+    console.error('ideate: --name with no --ref only supports --ask (the question batches, ideate-ask.mjs). '
+      + 'For a full prompt built from real measured data, use --ref <ref>.');
+    process.exit(2);
   }
-  if (askFlag) { console.log(JSON.stringify(ideateAsk(ideateLoadActs({ ref, name, idea })), null, 2)); return; }
-  const prompt = buildIdeaPrompt(name, idea, { refGrammar });
-  const out = path.join(ROOT, 'films/scene', `${name}.prompt.md`);
-  fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.writeFileSync(out, answersPath ? ideateApplyAnswers(prompt, JSON.parse(fs.readFileSync(answersPath, 'utf8'))) : prompt);
-  console.log(`ideate → ${path.relative(ROOT, out)}${answersPath ? ' (answers applied)' : ''}`);
+  console.log(JSON.stringify(ideateAsk(ideateLoadActs({ ref, name, idea })), null, 2));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main();
