@@ -11,3 +11,4 @@ export const glsl = `                             /* dispersion. A spectral pris
     float shard = pow(0.5 + 0.5*sin((proj + w*0.2)*40.0), 3.0);   /* fine prism shards inside the band */
     c = vec4(mix(spec, vec3(1.0), 0.25), inb * (0.5 + 0.5*shard) * bell);`;
 export const blurb = 'a spectral prism band sweeping the frame, splitting light into its colours as it passes.';
+export const aka = ['prism dispersion', 'spectral band', 'light split sweep'];
