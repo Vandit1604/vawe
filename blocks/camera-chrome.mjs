@@ -40,7 +40,7 @@ const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').
 
 // One rolling digit. `unit` is how many seconds it takes to advance, `base` where it wraps. The
 // value is computed in CSS, never in JS, so it is a function of the frame and not of render order.
-function digitStrip(unit, base, lineH, from) {
+function digitStrip(unit, base, { lineH, from }) {
   const col = Array.from({ length: base }, (_, i) =>
     `<span style="display:block;height:${lineH}px;line-height:${lineH}px">${i}</span>`).join('');
   const v = `mod(round(down, (var(--t,0) + ${r2(from)}) / ${unit}, 1), ${base})`;
@@ -60,27 +60,27 @@ function bracket({ cx, cy, arm, weight, color, inset = 0, transform = '', part =
     + `${transform ? `;transform:${transform}` : ''}"></div>`;
 }
 
-// camcorderHud. The viewfinder overlay: corner brackets, a blinking REC lamp, a running timecode, a
-// battery gauge, a zoom readout, and the lens vignette that sells all of it as glass.
-export function camcorderHud({ x = 0, y = 0, w = 1920, h = 1080, rec = true, zoom = '2.4', battery = 68,
-  label = 'SP', from = 0, start = 0, dur = 5 } = {}) {
-  const inset = SPACE.xxl;                 // 48: the brackets sit inside the safe area, like real chrome
-  const arm = 96;                          // the bracket's arm length
-  // The rails clear the brackets rather than guessing at a margin: previewed at 48+24 the battery
-  // readout sat ON the top-right bracket's vertical arm.
-  const rail = inset + arm + SPACE.md;
-  const lineH = TYPE.lead + 6;             // 30: the digit row height, and the strip's travel step
-
-  // The lamp: 1 Hz square wave. mod(t,1) runs 0→1, round(down, …, 0.5) snaps it to 0 or 0.5, ×2 makes
-  // it 0 or 1. On for the back half of every second, off for the front. No CSS animation anywhere.
-  const blink = 'calc(round(down, mod(var(--t,0), 1), 0.5) * 2)';
-
-  const pips = Array.from({ length: 4 }, (_, i) => {
+function batteryPips(battery) {
+  return Array.from({ length: 4 }, (_, i) => {
     const lit = battery > i * 25;
     return `<span style="display:inline-block;width:11px;height:16px;margin-right:${i === 3 ? SPACE.xs : 2}px;`
       + `background:${lit ? T.ink : 'transparent'};border:1px solid ${T.ink};border-radius:1px"></span>`;
   }).join('');
+}
 
+// camcorderHud. The viewfinder overlay: corner brackets, a blinking REC lamp, a running timecode, a
+// battery gauge, a zoom readout, and the lens vignette that sells all of it as glass.
+export function camcorderHud({ x = 0, y = 0, w = 1920, h = 1080, rec = true, zoom = '2.4', battery = 68,
+  label = 'SP', from = 0, start = 0, dur = 5 } = {}) {
+  // inset: 48, the brackets sit inside the safe area, like real chrome. arm: the bracket's arm length.
+  // rail clears the brackets rather than guessing at a margin: previewed at 48+24 the battery readout
+  // sat ON the top-right bracket's vertical arm. lineH: 30, the digit row height and the strip's
+  // travel step. blink: a 1 Hz square wave. mod(t,1) runs 0→1, round(down, …, 0.5) snaps it to 0 or
+  // 0.5, ×2 makes it 0 or 1. On for the back half of every second, off for the front, no CSS animation.
+  const inset = SPACE.xxl, arm = 96, rail = inset + arm + SPACE.md, lineH = TYPE.lead + 6,
+    blink = 'calc(round(down, mod(var(--t,0), 1), 0.5) * 2)';
+
+  const pips = batteryPips(battery);
   const chip = (inner) => `<div data-part style="display:flex;align-items:center;gap:${SPACE.snug}px">${inner}</div>`;
 
   const recMark = rec
@@ -88,9 +88,10 @@ export function camcorderHud({ x = 0, y = 0, w = 1920, h = 1080, rec = true, zoo
       + `<span style="color:${REC_RED};${FRINGE}">REC</span>`
     : `<span style="color:${T.ink}">▶</span><span>PLAY</span>`;
 
-  const timecode = digitStrip(600, 6, lineH, from) + digitStrip(60, 10, lineH, from)
+  const digit = { lineH, from };
+  const timecode = digitStrip(600, 6, digit) + digitStrip(60, 10, digit)
     + `<span style="display:inline-block;height:${lineH}px;line-height:${lineH}px;opacity:${blink}">:</span>`
-    + digitStrip(10, 6, lineH, from) + digitStrip(1, 10, lineH, from);
+    + digitStrip(10, 6, digit) + digitStrip(1, 10, digit);
 
   const html = `<div style="position:relative;width:${w}px;height:${h}px;overflow:hidden;${OSD}">`
     // the lens vignette: permanent, and the reason white chrome stays readable over any footage
@@ -126,11 +127,8 @@ export function camcorderHud({ x = 0, y = 0, w = 1920, h = 1080, rec = true, zoo
 export function scanGate({ x, y, w = 760, h = 460, label = 'LOCK', ticks = 7, start = 0, dur = 5 } = {}) {
   const scanDur = r2(Math.max(0.6, dur * 0.45));
   const lockAt = r2(scanDur + 0.25);
-  const arm = 70, weight = 3, spread = 34;      // spread: how far out the brackets sit before the snap
-  const band = 3;
-
-  const p = 'var(--scan,0)';
-  const k = 'var(--lock,0)';
+  // spread: how far out the brackets sit before the snap.
+  const arm = 70, weight = 3, spread = 34, band = 3, p = 'var(--scan,0)', k = 'var(--lock,0)';
   // The brackets sit FLUSH with the gate and contract INWARD onto the target. The first cut had them
   // start proud of the box and snap back, and `overflow:hidden` ate the half that was outside it.
   const pull = (sign) => `calc(${sign} * ${k} * ${spread}px)`;
