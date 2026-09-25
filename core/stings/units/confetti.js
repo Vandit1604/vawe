@@ -14,3 +14,4 @@ export const glsl = `                              /* confetti burst */
       c.rgb = mix(c.rgb, col, q); c.a = max(c.a, q * (1.0 - pp*pp));
     }`;
 export const blurb = 'a burst of coloured pieces thrown across frame. Celebration, and hard to use without looking cheap.';
+export const aka = ['confetti burst', 'celebration burst', 'party confetti'];
