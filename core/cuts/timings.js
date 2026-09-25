@@ -24,18 +24,30 @@ export const TIMINGS = {
 // The curve a cut travels on, in the author's terms. Kept beside the registry, which is where every
 // other vocabulary in this engine keeps its descriptions, so `make arsenal` finds them with the names.
 export const TIMING_BLURBS = {
-  linear: 'no easing at all. A machine, a wipe with no personality, a ticker',
-  smooth: 'eases at both ends: reads as travel rather than as arrival',
-  out: 'decelerates into place. The default feel for something appearing',
-  snappy: 'decisive, no overshoot. The cut lands and stops',
-  pop: 'overshoots past the mark and comes back. Playful, use once',
-  rush: 'accelerates away. The exit curve: it leaves faster than it left rest',
-  brake: 'decelerates in. The entrance curve: it arrives slower than it set off',
-  ramp: "the editor's slow-fast-slow speed ramp. The one to reach for on a whip or a camera throw",
-  spring: 'a damped-spring overshoot that settles, physical life for something landing: a badge, a chip, a number',
+  linear: 'no easing at all, straight 1:1 progress. A machine, a wipe with no personality, a ticker',
+  smooth: 'easeInOutCubic: eases at both ends, cubic in then cubic out. Reads as travel rather than as arrival',
+  out: 'easeOutCubic: decelerates into place with no overshoot, the default feel for something appearing on screen',
+  snappy: 'easeOutQuart: lands fast and settles crisply, quicker off the mark than cubic and it never overshoots its target',
+  pop: 'easeOutBack: overshoots past the mark by about 10% and comes back. Playful, use once',
+  rush: 'accel(t, 2.4): a power curve of exponent 2.4, starts slow and keeps speeding up. The exit curve, it leaves faster than it left rest',
+  brake: 'decel(t, 2.4): the mirror power curve, fast at the start and slows into the stop. The entrance curve, it arrives slower than it set off',
+  ramp: "speedRamp(t): velocity is low at both ends and peaks at the midpoint (sharp=2.4). The editor's slow-fast-slow speed ramp, for a whip or a camera throw",
+  spring: 'easeOutSpring: a damped-spring overshoot that settles, physical life for something landing: a badge, a chip, a number',
 };
 
-export const TIMING_REGISTRY = defineRegistry('cut timing', TIMINGS, { slot: 'cutTiming', blurbs: TIMING_BLURBS,
+const TIMING_AKA = {
+  linear: ['no easing', 'constant speed', 'robotic', 'mechanical timing'],
+  smooth: ['gentle both ends', 'ease in and out', 'soft travel'],
+  out: ['decelerate in', 'default arrival', 'settles in place'],
+  snappy: ['quick and decisive', 'fast no bounce', 'crisp landing'],
+  pop: ['overshoot and settle', 'bouncy pop', 'past the mark'],
+  rush: ['speeds up leaving', 'accelerating exit', 'takes off'],
+  brake: ['slows into place', 'decelerating entrance', 'eases to a stop'],
+  ramp: ['slow fast slow', 'editor speed ramp', 'whip pan curve'],
+  spring: ['spring physics', 'bounces into place', 'physical landing'],
+};
+
+export const TIMING_REGISTRY = defineRegistry('cut timing', TIMINGS, { slot: 'cutTiming', blurbs: TIMING_BLURBS, aka: TIMING_AKA,
   catalog: {
     title: 'Cut timings',
     tag: 'cuts[]/per-layer',
