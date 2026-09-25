@@ -115,3 +115,11 @@ How this differs from an automatic safeguard adaptation, and which codes it cove
 Five rules govern any change to `core/`, `internal/`, a gate, or the capture path, plus what this engine took from the agent harness: `engine-doctrine/CRAFT/ENGINE-CHANGES.md`. Two are decidable from a path and the hook says them at the keystroke; elsewhere, read the doc by hand.
 
 Touched motion, backgrounds, type or layout? Ship a before/after: `make evals-compare` (`engine-doctrine/EVALS.md`). Editing `scene.html`? Claude Code reads `vawe-scene-authoring` first, others read that skill under `skills/`; system map `engine-doctrine/CODEMAPS/ARCHITECTURE.md`; run `make probe` after.
+
+## Testing: end to end first  `[ref: make snap-all]`
+
+- Never write unit tests after you write code.
+- Highly prefer E2E tests as the sole testing mechanism. Use them to verify complex features work. At the end of E2E tests, produce a verifiable and repeatable artifact.
+- If you must test a system in isolation, first write down all the ways it could fail, then write the code.
+
+The E2E entry points and the artifact each leaves: `make snap-all` and `make snap-blocks` (a DOM signature per scene and per block, compared against the committed `quality/baselines/snap/digest.json`), `make probe` (renderFrame purity across render orders), `make mcp-smoke` (a scene drafted through the real MCP server), `cd site && npm test` (the real engine in a browser), `make author-check D=<scene>` (the whole authoring ladder on a real film). A gate's own fixtures in `make gate-test` are written with the gate, as its list of ways to fail, and stay: they prove the gate can still fire.
