@@ -6,3 +6,4 @@ export const glsl = `                             /* squares, grid cells fill in
     float delay = hash(cell) * 0.55;
     c = vec4(vec3(1.0), smoothstep(delay, delay + 0.12, pp) * bell);`;
 export const blurb = 'grid cells filling in on a stagger. Modular, and it suits a layout that is already a grid.';
+export const aka = ['grid reveal', 'square tiles', 'mosaic grid'];
