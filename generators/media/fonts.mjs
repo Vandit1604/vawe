@@ -50,9 +50,9 @@ const FONTS = [
   // packages already publish exactly these instances as .woff, so they are fetched here like every
   // other face, land in the gitignored assets/fonts/, and are vendored into the site by
   // scripts/site/site-engine.mjs. Nothing is converted and nothing is committed.
-  ['Anybody-800.woff',              '@fontsource/anybody',                     '5.3.0', 'anybody-latin-800-normal.woff',               'OFL 1.1'],
-  ['Anybody-400.woff',              '@fontsource/anybody',                     '5.3.0', 'anybody-latin-400-normal.woff',               'OFL 1.1'],
   ['JetBrainsMono-400.woff',        '@fontsource/jetbrains-mono',              '5.3.0', 'jetbrains-mono-latin-400-normal.woff',        'OFL 1.1'],
+  ['Archivo-800.woff',              '@fontsource/archivo',                     '5.3.0', 'archivo-latin-800-normal.woff',               'OFL 1.1'],
+  ['Archivo-400.woff',              '@fontsource/archivo',                     '5.3.0', 'archivo-latin-400-normal.woff',               'OFL 1.1'],
   ['PlusJakartaSans.woff2',         '@fontsource-variable/plus-jakarta-sans',   '5.3.0', 'plus-jakarta-sans-latin-wght-normal.woff2',   'OFL 1.1'],
   ['HankenGrotesk.woff2',           '@fontsource-variable/hanken-grotesk',      '5.3.0', 'hanken-grotesk-latin-wght-normal.woff2',      'OFL 1.1'],
   ['BricolageGrotesque.woff2',      '@fontsource-variable/bricolage-grotesque', '5.3.0', 'bricolage-grotesque-latin-wght-normal.woff2', 'OFL 1.1'],

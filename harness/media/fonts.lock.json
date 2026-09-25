@@ -29,26 +29,26 @@
       "bytes": 40404,
       "sha256": "18be452724bfdc236c074ca94a249a7f41a86752c7d04ab258ce9ed5651f6a7e"
     },
-    "Anybody-800.woff": {
-      "pkg": "@fontsource/anybody",
-      "version": "5.3.0",
-      "file": "anybody-latin-800-normal.woff",
-      "bytes": 16880,
-      "sha256": "4757e9052bcbc993e632c5bf13271e0217cc422ab176c15f13f2dcd9d1dfdb85"
-    },
-    "Anybody-400.woff": {
-      "pkg": "@fontsource/anybody",
-      "version": "5.3.0",
-      "file": "anybody-latin-400-normal.woff",
-      "bytes": 16876,
-      "sha256": "ea2ce6369fff584ae69677dcc00633ba8b50792cdb31d24d1a928f5510adba31"
-    },
     "JetBrainsMono-400.woff": {
       "pkg": "@fontsource/jetbrains-mono",
       "version": "5.3.0",
       "file": "jetbrains-mono-latin-400-normal.woff",
       "bytes": 27496,
       "sha256": "658b9ee07b0249cf910a8d6f3d812d46c962bae81d7379a0355b1db35c61586f"
+    },
+    "Archivo-800.woff": {
+      "pkg": "@fontsource/archivo",
+      "version": "5.3.0",
+      "file": "archivo-latin-800-normal.woff",
+      "bytes": 18904,
+      "sha256": "585c9cce853f7140238c31f858aa01f8e913cd1ac88f7675f3f8ed26227f93c5"
+    },
+    "Archivo-400.woff": {
+      "pkg": "@fontsource/archivo",
+      "version": "5.3.0",
+      "file": "archivo-latin-400-normal.woff",
+      "bytes": 18972,
+      "sha256": "9c0a51442fdc30e015f734d04fd957ae00e3f39cc07817050735da301c0d7eda"
     },
     "PlusJakartaSans.woff2": {
       "pkg": "@fontsource-variable/plus-jakarta-sans",

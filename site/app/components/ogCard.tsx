@@ -25,13 +25,13 @@ let fontsCache: { name: string; data: Buffer; weight: 400 | 800; style: "normal"
 export async function loadOgFonts() {
   if (fontsCache) return fontsCache;
   const [bold, regular, mono] = await Promise.all([
-    fs.readFile(path.join(FONT_DIR, "Anybody-800.woff")),
-    fs.readFile(path.join(FONT_DIR, "Anybody-400.woff")),
+    fs.readFile(path.join(FONT_DIR, "Archivo-800.woff")),
+    fs.readFile(path.join(FONT_DIR, "Archivo-400.woff")),
     fs.readFile(path.join(FONT_DIR, "JetBrainsMono-400.woff")),
   ]);
   fontsCache = [
-    { name: "Anybody", data: bold, weight: 800, style: "normal" },
-    { name: "Anybody", data: regular, weight: 400, style: "normal" },
+    { name: "Archivo", data: bold, weight: 800, style: "normal" },
+    { name: "Archivo", data: regular, weight: 400, style: "normal" },
     { name: "JetBrains Mono", data: mono, weight: 400, style: "normal" },
   ];
   return fontsCache;
@@ -39,13 +39,13 @@ export async function loadOgFonts() {
 
 // The site's own tokens (DESIGN.md), never a second palette for this one surface.
 const TOKENS = {
-  bg: "#ffffff",
-  ink: "#0f1620",
-  ink2: "#454f5e",
-  muted: "#697182",
-  line: "#e7eaf0",
-  accent: "#2563eb",
-  bg2: "#f6f8fb",
+  bg: "#16151a",
+  ink: "#ffffff",
+  ink2: "#d8d8da",
+  muted: "#97969b",
+  line: "#2f2e35",
+  accent: "#0a87ff",
+  bg2: "#212025",
 };
 
 // The same clip-path mark site/og/card.html draws for the homepage card, so the two image-generation
@@ -91,7 +91,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
         display: "flex",
         flexDirection: "column",
         background: TOKENS.bg,
-        fontFamily: "Anybody",
+        fontFamily: "Archivo",
         color: TOKENS.ink,
       }}
     >
@@ -120,7 +120,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
             style={{
               fontFamily: "JetBrains Mono",
               fontSize: 14,
-              color: TOKENS.accent,
+              color: TOKENS.muted,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
               display: "flex",
@@ -168,7 +168,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
                   height: 306,
                   objectFit: "cover",
                   borderRadius: PANEL_RADIUS,
-                  border: "1px solid rgba(0,0,0,0.1)",
+                  border: "1px solid rgba(255,255,255,0.08)",
                 }}
               />
             ) : (
@@ -180,7 +180,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
                   padding: 28,
                   background: TOKENS.bg2,
                   borderRadius: PANEL_RADIUS,
-                  border: "1px solid rgba(0,0,0,0.1)",
+                  border: "1px solid rgba(255,255,255,0.08)",
                   fontFamily: "JetBrains Mono",
                   fontSize: 15,
                   lineHeight: 1.7,

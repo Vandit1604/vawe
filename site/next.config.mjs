@@ -56,7 +56,8 @@ const nextConfig = {
       // page runs live, and every one of them ended on a docs link into a private repo. The index
       // survived because the three mechanisms left are said nowhere else; the per-slug route did
       // not. Wildcarded, because the slugs were content and a new one must not 404 either.
-      { source: "/features/:slug", destination: "/features", permanent: true },
+      // The route's own social card lives under /features too, so it is excluded from the catch-all.
+      { source: "/features/:slug((?!opengraph-image$).+)", destination: "/features", permanent: true },
     ];
   },
   async rewrites() {
