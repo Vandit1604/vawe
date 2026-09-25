@@ -9,3 +9,4 @@ export const glsl = `                             /* whipPan, horizontal smear s
     float body = smoothstep(0.35, 0.85, streaks);
     c = vec4(vec3(0.92, 0.95, 1.0)*(0.55 + 0.45*streaks), body * bell * 0.9);`;
 export const blurb = 'horizontal smear streaks racing across, as if the camera whipped sideways. Energy carried into a payoff.';
+export const aka = ['whip pan streaks', 'camera whip', 'motion smear pan'];
