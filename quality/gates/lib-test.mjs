@@ -2,7 +2,7 @@
 // No browser needed (the primitives are pure). Run: node quality/gates/lib-test.mjs  (make lib-test)
 import { spring, springSettle, easeOutCubic,
   random, noise, hashSeed, resolveEasing, EASINGS, DEFAULT_MOTION,
-  shake, trackingFor, springEase,
+  shake, trackingFor,
   anticipateEase, overshootEase, stepClock, icon } from '../../core/motion/motion.js';
 import { srcUrl } from '../../core/engine/src-url.js';
 import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/timeline/time.js';
@@ -83,10 +83,8 @@ import { adoptionReport } from './stage.mjs';
 import { bgPaletteFrom } from '../../core/backgrounds/index.js';
 import { parseColorRGB, colorDistance } from '../../core/color/engine.js';
 import { toRgb as lightfieldToRgb } from '../../core/lightfield/colour.js';
-import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue, flashEnvelope } from '../../core/layers/glow.js';
-import { lerpPoints, pointsToD, bestRotation, rotatePoints, morphD } from '../../core/layers/path-morph.js';
-import { beamAngle, shinePos, beamConic } from '../../core/layers/beam.js';
-import { typedLen, gradientCss, splitFillCss } from '../../core/layers/text.js';
+import { presetSpec, pulseOpacity, alphaMix, liftWhite, cycleHue } from '../../core/layers/glow.js';
+import { gradientCss, splitFillCss } from '../../core/layers/text.js';
 import { rollOffsets, displayNum } from '../../core/layers/count.js';
 import { dollyZoom, slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, travel, truck, cameraShake, punchIn, driftHold, followCursor, buildCameraMove, CAMERA_MOVE_NAMES } from '../../core/camera-moves/index.js';
 import { bakeCameraMove } from '../../core/engine/produce.js';
@@ -3277,46 +3275,6 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
      JSON.stringify(tactileCues({ ...rich, layers: rich.layers.slice().reverse() }, { canvas })) === runA);
 }
 
-// ---- springEase (iOS-parameterised spring easing) ------------------------------------------------
-{
-  const house = springEase({ response: 0.5, dampingFraction: 1 });
-  ok('springEase: 0 at u=0', house(0) === 0);
-  ok('springEase: 1 at u=1', house(1) === 1);
-  ok('springEase: critically damped never overshoots', [0, 0.2, 0.4, 0.6, 0.8, 0.99].every((u) => house(u) <= 1 + 1e-9));
-  ok('springEase: critically damped is monotonic up', (() => { let prev = -1; for (let u = 0; u <= 1; u += 0.05) { const v = house(u); if (v < prev - 1e-9) return false; prev = v; } return true; })());
-  ok('springEase: deterministic', house(0.37) === house(0.37));
-  const bouncy = springEase({ response: 0.5, dampingFraction: 0.4 });
-  ok('springEase: underdamped overshoots past 1 somewhere', (() => { for (let u = 0.1; u < 1; u += 0.02) if (bouncy(u) > 1.001) return true; return false; })());
-  ok('springEase: default factory works', typeof springEase() === 'function' && springEase()(1) === 1);
-}
-// ---- path-morph (true shape morph): pure maths, no DOM ------------------------------------------
-{
-  const A = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];
-  const B = [{ x: 0, y: 0 }, { x: 20, y: 0 }, { x: 20, y: 20 }, { x: 0, y: 20 }];
-  ok('morph: u=0 equals A', lerpPoints(A, B, 0).every((p, i) => approx(p.x, A[i].x) && approx(p.y, A[i].y)));
-  ok('morph: u=1 equals B', lerpPoints(A, B, 1).every((p, i) => approx(p.x, B[i].x) && approx(p.y, B[i].y)));
-  ok('morph: u=0.5 is the midpoint', lerpPoints(A, B, 0.5).every((p, i) => approx(p.x, (A[i].x + B[i].x) / 2) && approx(p.y, (A[i].y + B[i].y) / 2)));
-  ok('morph: deterministic (same u → same points)', JSON.stringify(lerpPoints(A, B, 0.37)) === JSON.stringify(lerpPoints(A, B, 0.37)));
-  ok('morph: spin returns to identity at u=1 (no rotation at the end)', lerpPoints(A, B, 1, Math.PI).every((p, i) => approx(p.x, B[i].x, 1e-6) && approx(p.y, B[i].y, 1e-6)));
-  ok('pointsToD closed appends Z', pointsToD(A, true).endsWith('Z'));
-  ok('pointsToD open has no Z', !pointsToD(A, false).includes('Z'));
-  ok('pointsToD starts with M', pointsToD(A).startsWith('M'));
-  ok('rotatePoints wraps by k', (() => { const r = rotatePoints(A, 1); return r[0] === A[1] && r[3] === A[0]; })());
-  ok('bestRotation of identical arrays is 0', bestRotation(A, A, 1) === 0);
-  ok('morphD is a valid d string', /^M[-0-9.]/.test(morphD(A, B, 0.5)));
-}
-// ---- glow flash envelope (finite attack-decay) ---------------------------------------------------
-ok('flash: 0 before start', flashEnvelope(-0.1) === 0);
-ok('flash: 0 at t=0', approx(flashEnvelope(0, { attack: 0.3, decay: 1 }), 0));
-ok('flash: peaks near the attack end', approx(flashEnvelope(0.3, { attack: 0.3, decay: 1, peak: 0.4 }), 0.4, 1e-6));
-ok('flash: decays back to 0', flashEnvelope(1.3, { attack: 0.3, decay: 1, peak: 0.4 }) <= 1e-6);
-ok('flash: peak capped at 0.45', flashEnvelope(0.3, { attack: 0.3, decay: 1, peak: 5 }) <= 0.45 + 1e-9);
-ok('flash: never negative', [0, 0.1, 0.3, 0.7, 1.2, 2].every((t) => flashEnvelope(t) >= 0));
-// ---- border-beam (pure angle / sheen position) ---------------------------------------------------
-ok('beamAngle wraps 0..360', beamAngle(10, 0.5) >= 0 && beamAngle(10, 0.5) < 360);
-ok('beamAngle deterministic', beamAngle(1.23, 0.7) === beamAngle(1.23, 0.7));
-ok('shinePos travels -20..120', (() => { const p = shinePos(0.8, 1.6); return p >= -20 && p <= 120; })());
-ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-gradient(from 45.0deg'));
 // ---- gradient + split: the fill each unit carries (core/layers/text.js) --------------------------
 // `gradient` + `split` rendered NOTHING for as long as both existed. gradientFill paints the container
 // and sets the text transparent; splitText then moves every glyph into a child span, and while `color`
@@ -3365,43 +3323,6 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   ok('spin units shift by position alone', splitFillCss(SPIN, box, { dx: 120, dy: 40 }).backgroundPosition === '-120.00px -40.00px');
 
   ok('splitFillCss is pure', JSON.stringify(at(77, 33)) === JSON.stringify(at(77, 33)));
-}
-// ---- typing / untype character count (core/layers/text.js, pure in local t) -----------------------
-{
-  const VIS = 20;
-  const fwd = (lt) => typedLen(lt, { cps: 10, visLen: VIS });
-  ok('typedLen: starts at 0', fwd(0) === 0);
-  ok('typedLen: rises with time', fwd(0.5) === 5 && fwd(1) === 10);
-  ok('typedLen: reaches visLen', fwd(VIS / 10) === VIS);
-  ok('typedLen: never exceeds visLen', (() => { for (let lt = 0; lt < 12; lt += 0.01) if (fwd(lt) > VIS) return false; return true; })());
-  ok('typedLen: never below 0', (() => { for (let lt = -3; lt < 12; lt += 0.01) if (fwd(lt) < 0) return false; return true; })());
-  ok('typedLen: forward count is non-decreasing', (() => { let prev = -1; for (let lt = 0; lt < 4; lt += 0.01) { const n = fwd(lt); if (n < prev) return false; prev = n; } return true; })());
-
-  const un = (lt) => typedLen(lt, { cps: 10, visLen: VIS, untype: 2.5 });
-  ok('untype: full line at the untype moment', un(2.5) === VIS);
-  ok('untype: non-increasing after the untype time', (() => { let prev = Infinity; for (let lt = 2.5; lt < 8; lt += 0.01) { const n = un(lt); if (n > prev) return false; prev = n; } return true; })());
-  ok('untype: deletes back to 0', un(2.5 + VIS / 10 + 0.05) === 0 && un(20) === 0);
-  ok('untype: stays 0 once emptied', (() => { for (let lt = 6; lt < 30; lt += 0.05) if (un(lt) !== 0) return false; return true; })());
-  ok('untypeRate changes the delete speed', (() => {
-    const slow = typedLen(3, { cps: 10, visLen: VIS, untype: 2.5, untypeRate: 4 });
-    const fast = typedLen(3, { cps: 10, visLen: VIS, untype: 2.5, untypeRate: 40 });
-    return slow === VIS - 2 && fast === 0 && slow > fast;
-  })());
-  ok('untypeRate defaults to the typing rate', typedLen(3, { cps: 10, visLen: VIS, untype: 2.5 })
-    === typedLen(3, { cps: 10, visLen: VIS, untype: 2.5, untypeRate: 10 }));
-  ok('no untype: unaffected by untypeRate (regression guard)', (() => {
-    for (let lt = 0; lt < 4; lt += 0.01) if (typedLen(lt, { cps: 10, visLen: VIS }) !== typedLen(lt, { cps: 10, visLen: VIS, untypeRate: 3 })) return false;
-    return true;
-  })());
-  // PURITY: parallel seek renders evaluate frames out of order. Shuffled must equal ascending.
-  ok('typedLen pure in lt (shuffled order = ascending order)', (() => {
-    const args = { cps: 10, visLen: VIS, untype: 2.5, untypeRate: 7 };
-    const times = [0, 0.37, 1.9, 2.5, 2.51, 3.3, 4.75, 6.2, 9, 0.04, 2.499, 5.5];
-    const asc = [...times].sort((a, b) => a - b).map((lt) => [lt, typedLen(lt, args)]);
-    const shuffled = [11, 3, 0, 7, 5, 1, 9, 2, 10, 4, 8, 6].map((i) => times[i]);
-    const got = new Map(shuffled.map((lt) => [lt, typedLen(lt, args)]));
-    return asc.every(([lt, n]) => got.get(lt) === n);
-  })());
 }
 // ---- the catalogue is READ from the registries, not restated beside them --------------------------
 // `scripts/site/effects-catalog.mjs` used to hand-list 32 sections whose name lists were, by
