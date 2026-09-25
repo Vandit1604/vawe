@@ -77,8 +77,9 @@ approved: "ci-fixture"
 fs.writeFileSync(film, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9', duration: 9, layers: [] }));
 fs.writeFileSync(sb, SB);
 const rulesState = path.join(ROOT, '.vawe-data/stage-say-rules-state.json');
+const sessionState = path.join(ROOT, '.vawe-data/stage-say-session-state.json');
 after(() => {
-  for (const f of [film, sb, rulesState]) { try { fs.unlinkSync(f); } catch { /* already gone */ } }
+  for (const f of [film, sb, rulesState, sessionState]) { try { fs.unlinkSync(f); } catch { /* already gone */ } }
 });
 
 test('the fixture film really is at stage design (a fragment is planned and does not exist yet)', () => {
@@ -110,6 +111,62 @@ test('a different stage for the same film speaks its briefs again', () => {
   const out = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')], { cwd: ROOT, encoding: 'utf8' });
   const briefLines = out.split('\n').filter((l) => l.trim().startsWith('rule '));
   assert.ok(briefLines.length > 0, 'the recorded stage was "plan", not the fixture\'s real "design": briefs speak again');
+});
+
+test('same session_id, unchanged stage: the stage block prints once, then stays silent', () => {
+  const sid = 'stage-say-session-test-unchanged';
+  try { fs.unlinkSync(sessionState); } catch { /* nothing to clear */ }
+  const first = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')],
+    { cwd: ROOT, encoding: 'utf8', input: JSON.stringify({ session_id: sid }) });
+  assert.match(first, /is at stage/, 'first prompt of a session always prints');
+  const second = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')],
+    { cwd: ROOT, encoding: 'utf8', input: JSON.stringify({ session_id: sid }) });
+  assert.doesNotMatch(second, /is at stage/, 'a repeat prompt in the same session and stage says nothing new');
+});
+
+test('a changed stage for the same session_id prints again', () => {
+  const sid = 'stage-say-session-test-changed';
+  try { fs.unlinkSync(sessionState); } catch { /* nothing to clear */ }
+  execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')],
+    { cwd: ROOT, encoding: 'utf8', input: JSON.stringify({ session_id: sid }) });
+  // Force a different remembered block for this session, standing in for a real stage change.
+  fs.writeFileSync(sessionState, JSON.stringify({ [sid]: 'a stale block from a different stage' }));
+  const out = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')],
+    { cwd: ROOT, encoding: 'utf8', input: JSON.stringify({ session_id: sid }) });
+  assert.match(out, /is at stage/, 'the remembered block differs from the current one, so it prints again');
+});
+
+test('VAWE_STAGE_SAY=always ignores the session state and prints every time', () => {
+  const sid = 'stage-say-session-test-always';
+  try { fs.unlinkSync(sessionState); } catch { /* nothing to clear */ }
+  const env = { ...process.env, VAWE_STAGE_SAY: 'always' };
+  execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')],
+    { cwd: ROOT, encoding: 'utf8', input: JSON.stringify({ session_id: sid }), env });
+  const out = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')],
+    { cwd: ROOT, encoding: 'utf8', input: JSON.stringify({ session_id: sid }), env });
+  assert.match(out, /is at stage/, 'VAWE_STAGE_SAY=always bypasses the per-session dedupe');
+});
+
+test('--reset forgets a session, so the next prompt prints again', () => {
+  const sid = 'stage-say-session-test-reset';
+  try { fs.unlinkSync(sessionState); } catch { /* nothing to clear */ }
+  execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')],
+    { cwd: ROOT, encoding: 'utf8', input: JSON.stringify({ session_id: sid }) });
+  const silent = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')],
+    { cwd: ROOT, encoding: 'utf8', input: JSON.stringify({ session_id: sid }) });
+  assert.doesNotMatch(silent, /is at stage/, 'same session, same stage: silent before the reset');
+  execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs'), '--reset'],
+    { cwd: ROOT, encoding: 'utf8', input: JSON.stringify({ session_id: sid }) });
+  const out = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')],
+    { cwd: ROOT, encoding: 'utf8', input: JSON.stringify({ session_id: sid }) });
+  assert.match(out, /is at stage/, '--reset (wired to PreCompact) forgets the session, so the block prints again');
+});
+
+test('no session_id on the payload: falls back to always-print rather than guessing', () => {
+  try { fs.unlinkSync(sessionState); } catch { /* nothing to clear */ }
+  const out = execFileSync(process.execPath, [path.join(ROOT, 'harness/live/stage-say.mjs')],
+    { cwd: ROOT, encoding: 'utf8', input: '' });
+  assert.match(out, /is at stage/, 'no key to dedupe on, so the reminder must never be silently dropped');
 });
 
 test('make next (quality/gates/next.mjs) is not rationed by the every-turn hook\'s state file', () => {
