@@ -131,16 +131,16 @@ jobs:
   # never the google-chrome ubuntu-latest ships, so the postinstall download is real work, cached below.
   #
   # THE FONT-STATE TRAP, AND WHY IT DOES NOT BITE HERE. A snap baseline is only valid inside one font
-  # state (quality/gates/snap-signature.mjs fontState()), and it used to hash BOTH assets/fonts/ (what
-  # `make fonts` fetches, pinned by harness/media/fonts.lock.json) and assets/fonts/local/ (paid,
-  # per-developer faces such as Söhne, never fetched here, never the same set twice). A runner therefore
-  # computed a font-state hash no laptop could ever match, and the committed digest read as stale-font on
-  # every single scene: a clean clone that "compared nothing" and never noticed, because a runner with no
-  # local/ faces still gets *a* hash, just never the right one. Fixed at the root: fontState() now hashes
-  # assets/fonts/ only. `make fonts` reproduces that directory byte-for-byte on any machine (pinned,
-  # hashed), so a runner's font-state hash now matches the committed digest's, and the two scenes that
-  # genuinely need an unlocked face (stripe, example-swiss-grid, both set type.sans to Söhne) are named
-  # in quality/baselines/e2e-known-broken.json's `needsUnlockedFont` instead of pretended away.
+  # state (quality/gates/snap-signature.mjs fontState()), and it used to hash every file it found under
+  # assets/fonts/ (plus assets/fonts/local/, paid per-developer faces no runner ever has). Neither
+  # directory is reproducible: a dev worktree collects leftover faces `make fonts` never fetched, so even
+  # two laptops running the identical `make fonts` disagreed. A runner therefore computed a font-state
+  # hash nothing could match, and the committed digest read as stale-font on every scene: a clean clone
+  # that "compared nothing" and never noticed, because it still got *a* hash, just never the right one.
+  # Fixed at the root: fontState() now hashes the LOCKED FACE LIST (harness/media/fonts.lock.json), never
+  # a directory listing, so `make fonts` reproduces the exact same hash on any machine. No tracked theme
+  # needs an unlocked face today; if one starts to, it is named in quality/baselines/e2e-known-broken.json
+  # like any other scene a clean clone cannot render, not pretended away.
   e2e:
     name: e2e (probe + snap-all + snap-blocks + mcp-smoke + site test + author-check)
     runs-on: ubuntu-latest

@@ -30,7 +30,6 @@ const RUNS_DIR = path.join(repoRoot, 'quality', 'runs', 'e2e');
 
 const known = JSON.parse(fs.readFileSync(path.join(repoRoot, 'quality', 'baselines', 'e2e-known-broken.json'), 'utf8'));
 const knownScenes = known.scenes || {};
-const knownFontVariant = known.needsUnlockedFont || {};
 
 const nowStamp = new Date().toISOString().replace(/[:.]/g, '-');
 const runDir = path.join(RUNS_DIR, nowStamp);
@@ -105,14 +104,14 @@ function runSnap(name, script, sceneKeyword) {
   const quarantinedNames = namesFor('quarantined').concat(namesFor('non-deterministic'));
   const nothingCompared = records.some((r) => r.code === 'nothing-compared');
 
+  // `changed` always fails, unconditionally: it is the one signal this whole suite exists to catch.
+  // An errored scene is excused only when it is on quality/baselines/e2e-known-broken.json, by name.
   const newErrored = erroredNames.filter((n) => !(n in knownScenes));
-  const excusedChanged = changedNames.filter((n) => n in knownFontVariant);
-  const blockingChanged = changedNames.filter((n) => !(n in knownFontVariant));
 
-  const pass = newErrored.length === 0 && blockingChanged.length === 0 && quarantinedNames.length === 0 && !nothingCompared;
+  const pass = newErrored.length === 0 && changedNames.length === 0 && quarantinedNames.length === 0 && !nothingCompared;
   return record(name, `node ${script}${sceneKeyword ? '' : ''}`, res, {
     pass, counts,
-    erroredNames, newErrored, changedNames, blockingChanged, excusedChanged, quarantinedNames, nothingCompared,
+    erroredNames, newErrored, changedNames, quarantinedNames, nothingCompared,
   });
 }
 
