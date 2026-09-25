@@ -48,6 +48,9 @@ const f = gateFindings({ line: (r) => r.summary });
 const WAIVED = new Map(Object.entries({
   REQUIRED_ROLES: 'the roles every theme file must resolve (core/theme/roles.js). It describes the theme FILE format, which themes/README.md documents; a scene never picks from it',
   TOKEN_TYPES: 'the $type values a theme token may carry (core/theme/tokens.js). A field of the theme file format, checked by the token resolver, not a name a scene chooses between',
+  KIND: 'which studio timeline lane each layer type sits in (core/layers/kinds.js). A lookup the studio and the site read, not a capability an author names.',
+  LANES: 'the order of the studio timeline lanes (core/layers/kinds.js). Display order, not a capability.',
+  ICON: 'the lane icon SVG strings (core/layers/kinds.js). Chrome for the studio and the site, not a capability.',
   UNITS: 'the transition LIBRARY behind the seam runner (core/transitions/units.js): one GLSL unit per seam fx. A scene names a seam by its fx name (fade/wipe/whipPan…), and SEAM_REGISTRY in core/timeline/seams.js catalogues every one of those with its blurb. UNITS is the backing data the registry derives from, not a fifth thing to choose',
   CORE_UNITS: 'the 14 original seam units, concatenated into UNITS (core/transitions/units.js). Backing data, catalogued through SEAM_REGISTRY like the rest',
   HOUSE_UNITS: 'the hand-written vawe house-set seam units (core/transitions/units-house.js), concatenated into UNITS and catalogued through SEAM_REGISTRY. Backing data, not a separate vocabulary',
