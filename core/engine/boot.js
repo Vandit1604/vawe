@@ -312,12 +312,14 @@ export async function resolveThemeTokenValues(spec) {
   return resolveTokens(raw.tokens || {}, { parseColor, colorAlpha }).values;
 }
 
-// applyTheme(theme): assert the contract, then write the palette/gradient/font vars onto :root.
+// applyTheme(theme, target): assert the contract, then write the palette/gradient/font vars onto
+// `target`, :root by default. A host page that is not a scene (the site's playground) passes its
+// own element so the theme cannot repaint the page it is embedded in.
 // The ONLY writer of look CSS: tokens.css carries fonts + geometry, never colors or type choices.
-export function applyTheme(theme) {
+export function applyTheme(theme, target = document.documentElement) {
   const missing = themeErrors(theme, { parseColor, contrastRatio });
   if (missing.length) throw new Error(`theme "${theme?.name || 'inline'}" incomplete, missing ${missing.join(', ')}`);
-  const root = document.documentElement.style;
+  const root = target.style;
   const set = (k, v) => { if (v != null) root.setProperty(k, v); };
   const P = theme.palette || {};
   set('--bg', P.bg); set('--bg-2', P.bg2); set('--surface', P.surface); set('--surface-2', P.surface2);

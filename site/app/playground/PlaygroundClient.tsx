@@ -308,7 +308,7 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
 
   const gen = which == null ? null : (engine?.GENERATORS[which] ?? null);
 
-  // Seed the engine's OWN resolved theme colours onto this page's `:root`, once, so a `color`-kind
+  // Seed the engine's OWN resolved theme colours onto a hidden scope element, once, so a `color`-kind
   // field defaulting to `var(--text)` or a `color-mix(...)` (blocks/schema.mjs) can show its REAL
   // current colour rather than the bare expression. `applyTheme` is the one place a theme's palette
   // becomes CSS custom properties (core/engine/boot.js), and every preview here already renders the
@@ -320,7 +320,7 @@ export function PlaygroundClient({ initial }: { initial?: string } = {}) {
     import(/* webpackIgnore: true */ BOOT_URL)
       .then(async (m) => {
         const theme = await m.resolveTheme("vawe");
-        if (alive) m.applyTheme(theme);
+        if (alive) m.applyTheme(theme, themeScope());
       })
       .catch((e) => console.error("playground: could not resolve theme tokens for colour fields", e));
     return () => { alive = false; };
@@ -870,13 +870,25 @@ function ScenePreview({ url, title }: { url: string; title: string }) {
 // discarding a DOM node on every keystroke of every dial is wasted work a single reused element avoids.
 let colourProbe: HTMLDivElement | null = null;
 let colourCanvas: HTMLCanvasElement | null = null;
+let themeHost: HTMLDivElement | null = null;
+
+/** The element the engine theme is applied to. The theme's palette shares names with the site's
+ *  own tokens (--bg, --surface, --ink), so applying it to :root repainted the whole page. */
+function themeScope(): HTMLDivElement {
+  if (!themeHost) {
+    themeHost = document.createElement("div");
+    themeHost.style.cssText = "position:fixed;left:-9999px;top:-9999px;width:0;height:0;pointer-events:none";
+    document.body.appendChild(themeHost);
+  }
+  return themeHost;
+}
 
 /** What a CSS colour EXPRESSION actually paints, right now, resolved by the browser rather than
  *  guessed by a second copy of the theme's palette table. Setting `color` on a real element and
  *  reading it back with `getComputedStyle` resolves `var(--text)` and `color-mix(in srgb, ...)`
  *  exactly as the engine's own scene document would, because both are the SAME CSS engine looking at
- *  the SAME custom properties: the theme-seeding effect above writes them onto this page's `:root`
- *  with the engine's own `applyTheme`, and a probe anywhere in this document inherits them.
+ *  the SAME custom properties: the theme-seeding effect above writes them onto `themeScope()` with
+ *  the engine's own `applyTheme`, and the probe lives inside that scope so it inherits them.
  *
  *  THE CANVAS STEP IS NOT DECORATION. `getComputedStyle` does not always answer in `rgb()`: a
  *  `color-mix()` with any transparency comes back as `color(srgb 0.14 0.39 0.92 / 0.14)`, whose
@@ -889,8 +901,7 @@ function resolveTokenColour(expr: string): string | null {
   try {
     if (!colourProbe) {
       colourProbe = document.createElement("div");
-      colourProbe.style.cssText = "position:fixed;left:-9999px;top:-9999px;width:0;height:0;pointer-events:none";
-      document.body.appendChild(colourProbe);
+      themeScope().appendChild(colourProbe);
     }
     colourProbe.style.color = "";
     colourProbe.style.color = expr;
