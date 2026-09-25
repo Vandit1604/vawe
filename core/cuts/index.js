@@ -47,8 +47,41 @@ export function cutStyle(name, seqState, { timing = 'smooth', dir = 'left', dist
   return P.enter(1, o); // steady state = identity (must not leave cut styles stuck)
 }
 
+// CUT_AKA: the plain phrases a person would say to reach for each cut, folded into search only,
+// never printed (core/registry/registry.js `aka`). Same words-half/action-half split as
+// core/registry/vocab.js DURATION_AKA/DURATION_BLURBS: this is the words, CUT_BLURBS is the action.
+const CUT_AKA = {
+  none: ['hard cut', 'straight cut', 'no transition'],
+  fade: ['cross fade', 'dissolve', 'fade to black'],
+  slide: ['push cut', 'slide over', 'travel cut'],
+  whip: ['whip pan', 'swish pan', 'blur throw'],
+  punch: ['scale punch', 'punch in', 'zoom burst'],
+  wipe: ['hard wipe', 'directional wipe', 'edge wipe'],
+  iris: ['iris in', 'circle reveal', 'spotlight reveal'],
+  clock: ['clock wipe', 'radial sweep', 'clock hand sweep'],
+  flip: ['card flip', 'page flip', 'hinge flip'],
+  rise: ['rise up', 'float up', 'rise and fade'],
+  blur: ['blur dissolve', 'defocus fade', 'soft blur cut'],
+  zoom: ['zoom through', 'push through', 'dolly cut'],
+  cube: ['cube turn', 'rotate cube', 'cube rotation'],
+  barn: ['barn doors', 'curtains open', 'centre split'],
+  softwipe: ['feathered wipe', 'soft edge wipe', 'gradient wipe'],
+  softiris: ['feathered iris', 'soft circle reveal', 'soft spotlight'],
+  squeeze: ['smear cut', 'stretch cut', 'speed smear'],
+  roll: ['tilt roll', 'corner tilt', 'roll in'],
+  letterbox: ['cinema bars', 'letterbox open', 'curtains top and bottom'],
+  drop: ['drop in', 'falls in', 'gravity drop'],
+  blinds: ['venetian blinds', 'slat wipe', 'blinds open'],
+  skewWhip: ['skewed whip', 'sheared whip', 'shear pan'],
+  spin: ['spin in', 'rotate and scale', 'seal spin'],
+  collapse: ['fold down', 'vertical collapse', 'squash to a line'],
+  riseBlur: ['blurred rise', 'defocused rise', 'slow blur rise'],
+  matchCut: ['graphic match', 'invisible cut', 'shape match cut'],
+  jitter: ['glitch shake', 'alarm jitter', 'quake cut'],
+};
+
 // Built at the END so both maps are fully defined. `slot` is how an author writes it in a scene.
-export const CUT_REGISTRY = defineRegistry('cut', PRESENTATIONS, { slot: 'cut', blurbs: CUT_BLURBS,
+export const CUT_REGISTRY = defineRegistry('cut', PRESENTATIONS, { slot: 'cut', blurbs: CUT_BLURBS, aka: CUT_AKA,
   catalog: {
     title: 'Scene cuts',
     tag: 'transition',
