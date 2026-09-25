@@ -153,7 +153,7 @@ export const PAINT_FX = {
         const y = y0
           + Math.sin(u * 6.2 + lt * sp * 1.1 + ph) * amp
           + Math.sin(u * 13.7 - lt * sp * 0.7 + ph * 1.7) * amp * 0.35;
-        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
       ctx.stroke();
     }
