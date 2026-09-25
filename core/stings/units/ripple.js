@@ -10,3 +10,4 @@ export const glsl = `                             /* ripple rings, expand across
     float env = smoothstep(0.0, 0.12, pp) * smoothstep(1.0, 0.62, pp);
     c = vec4(vec3(1.0), max(0.0, rings) * behind * env * 0.5);`;
 export const blurb = 'concentric rings expanding across the whole frame, like a struck water surface.';
+export const aka = ['ripple transition', 'water ripple', 'concentric rings'];
