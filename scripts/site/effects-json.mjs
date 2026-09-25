@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sections, d, USAGE_KIT } from './effects-catalog.mjs';
-import { FEEL, DURATION, CAMERA_WORDS } from '../../core/registry/vocab.js';
+import { FEEL, DURATION, CAMERA_WORDS, COMPARATIVE } from '../../core/registry/vocab.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CHECK = process.argv.includes('--check');
@@ -67,8 +67,12 @@ const USAGE = {
     : j({ type: 'svg', d: 'M60 8 L112 100 L8 100 Z', stroke: '#fff', strokeWidth: 6, x: 840, y: 420, w: 240, start: 0, duration: 6 })),
   'blend-modes': (n) => text({ mixBlend: n }),
   // One slot each, and which slot depends on which registry the word came from.
-  'plain-words-feel-duration-camera': (n) => (n in FEEL ? j({ ease: n })
+  // Comparative words are not a scene slot: there is nothing to paste. The snippet shows the real
+  // call instead, `resolveComparative(word, current)` (core/registry/vocab.js), never a fabricated
+  // scene prop no layer reads.
+  'plain-words-feel-duration-camera-comparative': (n) => (n in FEEL ? j({ ease: n })
     : n in DURATION ? j({ enterDur: n })
+    : n in COMPARATIVE ? `resolveComparative("${n}", current)  // one step along the Duration ladder`
     : j({ cameraMove: { move: n } })),
   'ransom-faces': (n) => text({ split: 'char', ransom: { faces: [n] } }),
   'output-targets': (n) => j({ module: 'scene', aspect: n }),
@@ -109,7 +113,7 @@ const UNPLAYABLE = {
 const NO_PREVIEW = {
   'vector-layer-logos-icons': 'a draw-on or a morph is only itself with real path data. Yours, not a placeholder triangle.',
   'blend-modes': 'a blend mode is a relationship with what is underneath, and the index has no underneath.',
-  'plain-words-feel-duration-camera': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',
+  'plain-words-feel-duration-camera-comparative': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',
   'ransom-faces': 'a typeface is judged by looking. The ransom clip on /showcase sets all eight.',
   'output-targets': 'an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.',
 };

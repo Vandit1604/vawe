@@ -1,6 +1,6 @@
 {
-  "total": 710,
-  "previewed": 335,
+  "total": 716,
+  "previewed": 339,
   "families": 60,
   "tags": [
     [
@@ -57,7 +57,7 @@
     ],
     [
       "per-frame",
-      41
+      45
     ],
     [
       "per-layer",
@@ -97,7 +97,7 @@
     ],
     [
       "timing",
-      76
+      78
     ],
     [
       "top-level",
@@ -1976,7 +1976,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 23,
+      "count": 27,
       "undescribed": 0,
       "entries": [
         {
@@ -1984,6 +1984,20 @@
           "stem": "ambient-shader-fields--aurora",
           "desc": "drifting colour aurora (moves)",
           "scene": "/assets/effects/ambient-shader-fields--aurora.json",
+          "noPreview": null
+        },
+        {
+          "name": "auroraCurtain",
+          "stem": "ambient-shader-fields--auroracurtain",
+          "desc": "six vertical curtain lines undulating top to bottom, each drifting sideways on its own noise offset, fading warm to cool along its length. ported from pbakaus/radiant",
+          "scene": "/assets/effects/ambient-shader-fields--auroracurtain.json",
+          "noPreview": null
+        },
+        {
+          "name": "auroraVeil",
+          "stem": "ambient-shader-fields--auroraveil",
+          "desc": "seven wide aurora ribbons undulating over a starfield, with a frosted ice ground plane reflecting them below the horizon. the richest field here after bands. ported from pbakaus/radiant",
+          "scene": "/assets/effects/ambient-shader-fields--auroraveil.json",
           "noPreview": null
         },
         {
@@ -1998,6 +2012,13 @@
           "stem": "ambient-shader-fields--barrel",
           "desc": "the LENS, not the picture · a corner vignette with a faint violet chromatic fringe riding the far edge only",
           "scene": "/assets/effects/ambient-shader-fields--barrel.json",
+          "noPreview": null
+        },
+        {
+          "name": "chromaticBloom",
+          "stem": "ambient-shader-fields--chromaticbloom",
+          "desc": "twelve luminous colour orbs (five vivid, seven dim) drifting and blending on black, each on its own noisy orbit, with a vignette and grain over the top. ported from pbakaus/radiant",
+          "scene": "/assets/effects/ambient-shader-fields--chromaticbloom.json",
           "noPreview": null
         },
         {
@@ -2075,6 +2096,13 @@
           "stem": "ambient-shader-fields--kaleidoscope",
           "desc": "a 6-fold mirrored mandala turning slowly and fading out toward the corners. A symmetric field of its own, never a mirror of your content",
           "scene": "/assets/effects/ambient-shader-fields--kaleidoscope.json",
+          "noPreview": null
+        },
+        {
+          "name": "laserLabyrinth",
+          "stem": "ambient-shader-fields--laserlabyrinth",
+          "desc": "six volumetric light cones sweeping down from just above the top edge through drifting fog, three dim and far, three bright and near with a rhythmic beat snap. ported from pbakaus/radiant",
+          "scene": "/assets/effects/ambient-shader-fields--laserlabyrinth.json",
           "noPreview": null
         },
         {
@@ -2218,7 +2246,7 @@
         {
           "name": "directionalBlur",
           "stem": "layer-as-texture-resample--directionalblur",
-          "desc": "a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS \"Directional Blur\" · a look an author SETS, not a byproduct of a layer's own travel speed (that one is automatic, see `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4)",
+          "desc": "a straight-line smear at a fixed `angle` (degrees, 0 = rightward), the same distance everywhere in the frame, unlike `zoomBlur` which radiates from the centre. This is the AFTER EFFECTS \"Directional Blur\" · a look an author SETS, not a byproduct of a layer's own travel speed (that one is automatic, see `engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md` #4). `count` trades sample quality for cost (2..32, default 16)",
           "scene": null,
           "noPreview": null
         },
@@ -2253,14 +2281,14 @@
         {
           "name": "spinBlur",
           "stem": "layer-as-texture-resample--spinblur",
-          "desc": "smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal",
+          "desc": "smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal. `cx`/`cy` move the pivot off screen-middle (0..1, default 0.5/0.5); `count` trades sample quality for cost (2..32, default 16)",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "zoomBlur",
           "stem": "layer-as-texture-resample--zoomblur",
-          "desc": "radial smear out from the centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp",
+          "desc": "radial smear out from a centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp. `cx`/`cy` move the centre off screen-middle (0..1, default 0.5/0.5); `count` trades sample quality for cost (2..32, default 16)",
           "scene": null,
           "noPreview": null
         }
@@ -5637,222 +5665,236 @@
       ]
     },
     {
-      "id": "plain-words-feel-duration-camera",
-      "title": "Plain words (feel · duration · camera)",
+      "id": "plain-words-feel-duration-camera-comparative",
+      "title": "Plain words (feel · duration · camera · comparative)",
       "tag": "timing",
-      "intro": "The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value · `ease:\"snappy\"`, `enterDur:\"fast\"`, `cameraMove:{move:\"pull back\"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which · `engine-doctrine/CRAFT/VOCABULARY.md` (`make vocab`).",
+      "intro": "The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value · `ease:\"snappy\"`, `enterDur:\"fast\"`, `cameraMove:{move:\"pull back\"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. The comparative words are the one exception · they name a DIRECTION, not a value, and step the DURATION ladder from whatever is already there via `resolveComparative(word, current)` (core/registry/vocab.js); nothing in a scene consumes it automatically yet. When to reach for which · `engine-doctrine/CRAFT/VOCABULARY.md` (`make vocab`).",
       "mode": "table",
       "note": null,
       "noPreview": "each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.",
-      "count": 30,
+      "count": 32,
       "undescribed": 0,
       "entries": [
         {
           "name": "bouncy",
-          "stem": "plain-words-feel-duration-camera--bouncy",
+          "stem": "plain-words-feel-duration-camera-comparative--bouncy",
           "desc": "feel → `ease: \"spring-bouncy\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "circle",
-          "stem": "plain-words-feel-duration-camera--circle",
+          "stem": "plain-words-feel-duration-camera-comparative--circle",
           "desc": "camera → `move: \"orbit\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "dive",
-          "stem": "plain-words-feel-duration-camera--dive",
+          "stem": "plain-words-feel-duration-camera-comparative--dive",
           "desc": "camera → `move: \"diveIn\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "drift hold",
-          "stem": "plain-words-feel-duration-camera--drift-hold",
+          "stem": "plain-words-feel-duration-camera-comparative--drift-hold",
           "desc": "camera → `move: \"driftHold\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "elastic",
-          "stem": "plain-words-feel-duration-camera--elastic",
+          "stem": "plain-words-feel-duration-camera-comparative--elastic",
           "desc": "feel → `ease: \"easeOutElastic\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "fast",
-          "stem": "plain-words-feel-duration-camera--fast",
+          "stem": "plain-words-feel-duration-camera-comparative--fast",
           "desc": "duration → `0.18` seconds",
           "scene": null,
           "noPreview": null
         },
         {
+          "name": "faster",
+          "stem": "plain-words-feel-duration-camera-comparative--faster",
+          "desc": "comparative → one step toward `instant` on the DURATION ladder",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "follow",
-          "stem": "plain-words-feel-duration-camera--follow",
+          "stem": "plain-words-feel-duration-camera-comparative--follow",
           "desc": "camera → `move: \"panFollow\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "gentle",
-          "stem": "plain-words-feel-duration-camera--gentle",
+          "stem": "plain-words-feel-duration-camera-comparative--gentle",
           "desc": "feel → `ease: \"easeInOutSine\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "heavy",
-          "stem": "plain-words-feel-duration-camera--heavy",
+          "stem": "plain-words-feel-duration-camera-comparative--heavy",
           "desc": "feel → `ease: \"easeInOutQuint\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "instant",
-          "stem": "plain-words-feel-duration-camera--instant",
+          "stem": "plain-words-feel-duration-camera-comparative--instant",
           "desc": "duration → `0.08` seconds",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "luxurious",
-          "stem": "plain-words-feel-duration-camera--luxurious",
+          "stem": "plain-words-feel-duration-camera-comparative--luxurious",
           "desc": "duration → `1.2` seconds",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "mechanical",
-          "stem": "plain-words-feel-duration-camera--mechanical",
+          "stem": "plain-words-feel-duration-camera-comparative--mechanical",
           "desc": "feel → `ease: \"linear\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "medium",
-          "stem": "plain-words-feel-duration-camera--medium",
+          "stem": "plain-words-feel-duration-camera-comparative--medium",
           "desc": "duration → `0.3` seconds",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "pan stations",
-          "stem": "plain-words-feel-duration-camera--pan-stations",
+          "stem": "plain-words-feel-duration-camera-comparative--pan-stations",
           "desc": "camera → `move: \"travel\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "pop",
-          "stem": "plain-words-feel-duration-camera--pop",
+          "stem": "plain-words-feel-duration-camera-comparative--pop",
           "desc": "feel → `ease: \"easeOutBack\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "pull back",
-          "stem": "plain-words-feel-duration-camera--pull-back",
+          "stem": "plain-words-feel-duration-camera-comparative--pull-back",
           "desc": "camera → `move: \"workspaceZoomOut\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "punch in",
-          "stem": "plain-words-feel-duration-camera--punch-in",
+          "stem": "plain-words-feel-duration-camera-comparative--punch-in",
           "desc": "camera → `move: \"punchIn\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "push in",
-          "stem": "plain-words-feel-duration-camera--push-in",
+          "stem": "plain-words-feel-duration-camera-comparative--push-in",
           "desc": "camera → `move: \"slowPush\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "shake",
-          "stem": "plain-words-feel-duration-camera--shake",
+          "stem": "plain-words-feel-duration-camera-comparative--shake",
           "desc": "camera → `move: \"cameraShake\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "sharp",
-          "stem": "plain-words-feel-duration-camera--sharp",
+          "stem": "plain-words-feel-duration-camera-comparative--sharp",
           "desc": "feel → `ease: \"easeOutExpo\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "slow",
-          "stem": "plain-words-feel-duration-camera--slow",
+          "stem": "plain-words-feel-duration-camera-comparative--slow",
           "desc": "duration → `0.6` seconds",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "slow push-in",
-          "stem": "plain-words-feel-duration-camera--slow-push-in",
+          "stem": "plain-words-feel-duration-camera-comparative--slow-push-in",
           "desc": "camera → `move: \"slowPush\"`",
           "scene": null,
           "noPreview": null
         },
         {
+          "name": "slower",
+          "stem": "plain-words-feel-duration-camera-comparative--slower",
+          "desc": "comparative → one step toward `luxurious` on the DURATION ladder",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "smooth",
-          "stem": "plain-words-feel-duration-camera--smooth",
+          "stem": "plain-words-feel-duration-camera-comparative--smooth",
           "desc": "feel → `ease: \"easeInOutCubic\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "snappy",
-          "stem": "plain-words-feel-duration-camera--snappy",
+          "stem": "plain-words-feel-duration-camera-comparative--snappy",
           "desc": "feel → `ease: \"easeOutQuart\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "soft",
-          "stem": "plain-words-feel-duration-camera--soft",
+          "stem": "plain-words-feel-duration-camera-comparative--soft",
           "desc": "feel → `ease: \"settle\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "stiff",
-          "stem": "plain-words-feel-duration-camera--stiff",
+          "stem": "plain-words-feel-duration-camera-comparative--stiff",
           "desc": "feel → `ease: \"spring-stiff\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "sweep",
-          "stem": "plain-words-feel-duration-camera--sweep",
+          "stem": "plain-words-feel-duration-camera-comparative--sweep",
           "desc": "camera → `move: \"truck\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "tour",
-          "stem": "plain-words-feel-duration-camera--tour",
+          "stem": "plain-words-feel-duration-camera-comparative--tour",
           "desc": "camera → `move: \"travel\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "ui focus zoom",
-          "stem": "plain-words-feel-duration-camera--ui-focus-zoom",
+          "stem": "plain-words-feel-duration-camera-comparative--ui-focus-zoom",
           "desc": "camera → `move: \"diveIn\"`",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "zoom out",
-          "stem": "plain-words-feel-duration-camera--zoom-out",
+          "stem": "plain-words-feel-duration-camera-comparative--zoom-out",
           "desc": "camera → `move: \"workspaceZoomOut\"`",
           "scene": null,
           "noPreview": null

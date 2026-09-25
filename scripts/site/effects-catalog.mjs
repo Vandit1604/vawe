@@ -18,7 +18,7 @@ import { catalogued } from '../../core/registry/registry.js';
 // sections. The catalogue is what CLAUDE.md sends an author to before they choose, and it once did not
 // contain the three.js layer at all: a whole scene-graph capability with four registered scenes, a
 // written determinism contract and a purity gate, invisible to the one document whose job is to list it.
-import { FEEL, DURATION, CAMERA_WORDS } from '../../core/registry/vocab.js';
+import { FEEL, DURATION, CAMERA_WORDS, COMPARATIVE } from '../../core/registry/vocab.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CHECK = process.argv.includes('--check');
@@ -107,6 +107,7 @@ const VOCAB_BLURBS = Object.fromEntries([
   ...Object.entries(FEEL).map(([w, t]) => [w, `feel → \`ease: "${t}"\``]),
   ...Object.entries(DURATION).map(([w, s]) => [w, `duration → \`${s}\` seconds`]),
   ...Object.entries(CAMERA_WORDS).map(([w, t]) => [w, `camera → \`move: "${t}"\``]),
+  ...Object.entries(COMPARATIVE).map(([w, dir]) => [w, `comparative → one step ${dir > 0 ? 'toward `luxurious`' : 'toward `instant`'} on the DURATION ladder`]),
 ]);
 
 // ── the sections that WRITE THEMSELVES ──────────────────────────────────────────────────────────
@@ -177,7 +178,7 @@ export const sections = [
   // about 80KB of engine, reached by 3 of 135 scenes and by 0 of 30 block files. Documentation alone
   // does not fix adoption (`parts` went 0 to 5 block files and its scenes stayed at 2), but a
   // catalogue that names the wrong key guarantees the opposite.
-  ['Plain words (feel · duration · camera)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. When to reach for which: `engine-doctrine/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS)]), 'timing', { blurbs: VOCAB_BLURBS }],
+  ['Plain words (feel · duration · camera · comparative)', 'The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value: `ease:"snappy"`, `enterDur:"fast"`, `cameraMove:{move:"pull back"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. The comparative words are the one exception: they name a DIRECTION, not a value, and step the DURATION ladder from whatever is already there via `resolveComparative(word, current)` (core/registry/vocab.js); nothing in a scene consumes it automatically yet. When to reach for which: `engine-doctrine/CRAFT/VOCABULARY.md` (`make vocab`).', names([...Object.keys(FEEL), ...Object.keys(DURATION), ...Object.keys(CAMERA_WORDS), ...Object.keys(COMPARATIVE)]), 'timing', { blurbs: VOCAB_BLURBS }],
 ];
 
 // Imported (by scripts/site/effects-json.mjs) this module is a DATA source for `sections`, so the
