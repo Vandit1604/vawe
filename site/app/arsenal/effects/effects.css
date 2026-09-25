@@ -38,11 +38,11 @@
   background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:1px 9px}
 .fxfam h2 .tag{margin:0;display:inline-flex}
 .fxtag-live{color:var(--accent)}
-.fxintro{margin:10px 0 14px;font-size:13.5px;line-height:1.65;color:var(--ink-2);max-width:88ch}
+.fxintro{margin:10px 0 14px;font-size:13.5px;line-height:1.65;color:var(--ink-2);max-width:66ch}
 .fxintro code{font-family:var(--font-mono),monospace;font-size:.9em;background:var(--bg-2);
   border:1px solid var(--line);border-radius:5px;padding:1px 5px}
-.fxskip{margin:0 0 12px;font-size:13px;line-height:1.6;color:var(--muted);max-width:80ch}
-.fxgap{margin:-6px 0 12px;font-size:12.5px;line-height:1.55;color:var(--muted);max-width:76ch}
+.fxskip{margin:0 0 12px;font-size:13px;line-height:1.6;color:var(--muted);max-width:66ch}
+.fxgap{margin:-6px 0 12px;font-size:12.5px;line-height:1.55;color:var(--muted);max-width:66ch}
 
 .fxdot{flex:0 0 auto;width:6px;height:6px;border-radius:50%;background:var(--accent)}
 
@@ -65,9 +65,9 @@
    A deliberate swatch, never a blank grey box or a broken-image glyph: the stripe reads as "this
    effect has no picture", not as "the site is broken". */
 .fxcard-noimg{display:flex;align-items:center;justify-content:center;width:100%;height:100%;
-  background:repeating-linear-gradient(135deg,var(--bg-2) 0 8px,var(--surface) 8px 16px)}
-.fxcard-noimg .mono{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
-  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 7px}
+  background:var(--surface-2)}
+.fxcard-noimg .mono{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 8px}
 .fxcard .fxdot{position:absolute;top:6px;right:6px;box-shadow:0 0 0 3px var(--surface)}
 .fxcard-body{padding:8px 9px 9px;display:flex;flex-direction:column;gap:3px;flex:1}
 .fxcard-name{font-size:11.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -101,7 +101,7 @@
   .fxgrid{grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px}
   .fxcard-body{padding:6px 7px 7px}
   .fxcard-name{font-size:11px}
-  .fxcard-desc{font-size:10px;-webkit-line-clamp:2}
+  .fxcard-desc{font-size:12px;-webkit-line-clamp:2}
 }
 
 /* ===== ONE EFFECT, ONE PAGE (/showcase/effects/[stem]) ========================================
@@ -145,7 +145,7 @@
 .fxknob{display:flex;flex-direction:column;gap:5px}
 .fxknob-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .fxknob-key{font-size:11.5px;color:var(--ink-2)}
-.fxknob-lock{font-family:var(--font-mono),monospace;font-size:9.5px;text-transform:uppercase;
+.fxknob-lock{font-family:var(--font-mono),monospace;font-size:11px;text-transform:uppercase;
   letter-spacing:.04em;color:var(--muted);border:1px solid var(--line);border-radius:999px;
   padding:1px 7px;cursor:help}
 .fxknob input,.fxknob select{font:inherit;font-size:13.5px;color:var(--ink);padding:7px 9px;
@@ -156,9 +156,9 @@
   border-radius:8px;background:var(--surface);opacity:.8}
 .fxknob-desc{font-size:11px;line-height:1.5;color:var(--muted)}
 
-.fxd-hint{font-size:12px;color:var(--muted);margin-top:-6px}
+.fxd-hint{font-size:12px;color:var(--muted);margin-top:-6px;max-width:66ch}
 
-.fxd-nope{font-size:13px;line-height:1.6;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line);
+.fxd-nope{max-width:66ch;font-size:13px;line-height:1.6;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line);
   border-radius:10px;padding:14px 16px}
 .fxd-nope b{color:var(--ink);display:block;margin-bottom:3px}
 .fxd-code{border:1px solid var(--line);border-radius:10px;overflow:hidden}
