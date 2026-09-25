@@ -61,9 +61,9 @@ export const PRESETS = {
     'the glyphs THICKEN into place along the font\'s own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still'),
   // rise + fade (default kinetic reveal)
   up: preset((u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${((1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
-    'words/chars rise into place, no blur: the plain lift'),
+    'words/chars rise 40px into place while fading in, no blur: the plain lift, and the engine\'s own default reveal'),
   down: preset((u, { dist = 40 } = {}) => ({ opacity: clamp01(u), transform: `translateY(${(-(1 - easeOutSettle(u)) * dist).toFixed(2)}px)` }),
-    'words/chars drop into place from above: the mirror of `up`'),
+    'words/chars drop 40px into place from above while fading in: the mirror of `up`'),
   // fade: opacity only, no transform at all. The neutral entrance nothing else undercuts, and because
   // it carries no motion it is also the neutral EXIT: play it with u reversed (a split unit's `exit`
   // does exactly that) and a word simply dissolves rather than travelling anywhere.
@@ -73,13 +73,13 @@ export const PRESETS = {
   // the zero-motion preset: a hard snap on, no transform. `at` chooses WHERE in the entrance it
   // snaps (default 0 = the moment it starts). Raise it for a delayed hard cut in a staggered line.
   type: preset((u, { at = 0 } = {}) => ({ opacity: u > at ? 1 : 0, transform: 'none' }),
-    'typewriter hard on/off, no transform: terminals, timers, code'),
+    'a hard on/off with no transform: opacity flips from 0 to 1 the instant u passes `at` (default 0). Terminals, timers, code'),
   // scale up from small
   scale: preset((u, { from = 0.4 } = {}) => ({ opacity: clamp01(u * 2), transform: `scale(${(from + (1 - from) * easeOutBack(u)).toFixed(3)})` }),
-    'punch in from small (overshoot)'),
+    'punches in from 0.4 scale to 1, an easeOutBack overshoot past the mark and back'),
   // blur + fade in
   blur: preset((u, { px = 16 } = {}) => ({ opacity: clamp01(u), filter: `blur(${((1 - easeOutCubic(u)) * px).toFixed(2)}px)` }),
-    'resolve out of blur: calm, premium'),
+    'resolves out of a 16px blur to 0 as it fades in: calm, premium'),
   // rise + blur + fade, per unit: measured off a studied text-animation reference at 10fps, where each
   // letter lifts a short way while it sharpens, about 0.05s apart, settled in about 0.4s. The blur and the
   // lift share one ease, so a unit is never sharp while still travelling.
@@ -91,10 +91,10 @@ export const PRESETS = {
   // so the two cancelled and the dial did nothing (engine-doctrine/MISTAKES.md #115). Input is a constant now, so
   // settle drives the settle time as named; the constant 1.0 keeps the default (settle 0.5) identical.
   bounce: preset((u, { bounce = 0.5, settle = 0.5, dist = 60 } = {}) => { const s = spring(u, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `translateY(${((1 - s) * dist).toFixed(2)}px)` }; },
-    'springy bounce in: playful brands only'),
+    'a spring bounces the unit up 60px with a visible overshoot (bounce 0.5, settle 0.5s): playful brands only'),
   // slide from a side
   slide: preset((u, { dir = 'left', dist = 80 } = {}) => { const k = 1 - easeOutSettle(u); const x = (dir === 'left' ? -1 : dir === 'right' ? 1 : 0) * k * dist; const y = (dir === 'up' ? -1 : dir === 'down' ? 1 : 0) * k * dist; return { opacity: clamp01(u), transform: `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)` }; },
-    'slides in from one side (`dir`): pair it with the opposite exit'),
+    'slides in 80px from one side (`dir`), default left: pair it with the opposite exit'),
   // persistent sinusoidal wave (u is used as raw phase, not a one-shot). No `loop:true` needed: this
   // preset and `shimmerWave` are force-looped by name at animateUnits (core/type.js), so the
   // instruction this comment used to carry was redundant and read as a requirement.
@@ -125,10 +125,10 @@ export const PRESETS = {
     'falls from above under gravity and lands with a small squash'),
   // elastic pop: springy scale with visible wobble
   elastic: preset((u, { bounce = 0.62, settle = 0.5 } = {}) => { const s = spring(clamp01(u) * 1.2, { bounce, settle }); return { opacity: clamp01(u * 3), transform: `scale(${(0.3 + 0.7 * s).toFixed(3)})` }; },
-    'elastic scale pop with visible wobble: playful brands only'),
+    'scales up from 0.3 with a springy overshoot (bounce 0.62, settle 0.5s), visible wobble: playful brands only'),
   // skew slide: italic shear that straightens as it lands (editorial/sporty)
   skew: preset((u, { dist = 70 } = {}) => { const k = 1 - easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 1.4), transform: `translateX(${(-k * dist).toFixed(2)}px) skewX(${(-k * 14).toFixed(1)}deg)` }; },
-    'italic shear that straightens as it lands: editorial, sporty'),
+    'slides in 70px with a 14deg italic shear that straightens as it lands: editorial, sporty'),
   // focus pull: heavy blur + slight over-scale resolving to crisp
   focus: preset((u, { px = 22 } = {}) => ({ opacity: clamp01(u * 1.3), transform: `scale(${(1 + (1 - easeOutCubic(clamp01(u))) * 0.06).toFixed(3)})`, filter: `blur(${((1 - easeOutCubic(clamp01(u))) * px).toFixed(2)}px)` }),
     'focus pull, heavy blur and over-scale resolving to crisp, dreamy, premium'),
@@ -138,19 +138,19 @@ export const PRESETS = {
     const uu = clamp01(u);
     return { opacity: uu > 0 ? 1 : 0, __decode: uu, transform: 'none' }; // resolved in animateUnits (needs textContent)
   },
-    'scramble→settle, techy'),
+    'characters scramble through the chosen charset at 48 refreshes a second by default and resolve left to right as u climbs to 1, techy reveal'),
   // tilt: small rotate-in + rise (sporty/editorial)
   tilt: preset((u, { deg = 8, dist = 26 } = {}) => { const e = easeOutSettle(clamp01(u)); return { opacity: clamp01(u * 1.4), transform: `translateY(${((1 - e) * dist).toFixed(2)}px) rotate(${((1 - e) * -deg).toFixed(2)}deg)` }; },
     'each unit rises and swings upright from a small angle, sporty and editorial. A flat rotation, not a 3D hinge: `flip` is the one that turns'),
   // stretch: horizontal smear that snaps true (impact words)
   stretch: preset((u, { from = 1.6 } = {}) => { const e = easeOutCubic(clamp01(u)); return { opacity: clamp01(u * 2), transform: `scaleX(${(from + (1 - from) * e).toFixed(3)})`, filter: `blur(${((1 - e) * 6).toFixed(2)}px)` }; },
-    'horizontal smear that snaps true: impact words'),
+    'stretches from 1.6x horizontal scale down to 1x with a 6px blur that clears as it snaps true: impact words'),
   // gradient sweep: background-clip text, gradient slides through (ONE hero word per film)
   gradient: preset((u, { c1 = '#8a8f98', c2 = '#ffffff' } = {}) => { const pos = (100 - clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(100deg, ${c1} 20%, ${c2} 50%, ${c1} 80%)`, backgroundSize: '250% 100%', backgroundPosition: `${pos}% 0`, webkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', transform: 'none' }; },
-    'gradient sweeps through letterforms'),
+    'a two-colour band (default #8a8f98 to #ffffff) at 250% width sweeps through the letterforms via background-clip text'),
   // highlight: marker band grows behind the unit (emphasis mid-sentence)
   highlight: preset((u, { color = 'rgba(255,220,90,0.35)' } = {}) => { const w = (clamp01(u) * 100).toFixed(1); return { opacity: 1, backgroundImage: `linear-gradient(${color}, ${color})`, backgroundRepeat: 'no-repeat', backgroundSize: `${w}% 78%`, backgroundPosition: '0 60%', transform: 'none' }; },
-    'marker highlight sweep'),
+    'a marker band, default rgba(255,220,90,0.35), grows left to right to 100% width behind the unit at 78% of its height'),
   // colorWave: a wave of the accent sweeps THROUGH a phrase word by word - each unit appears in the
   // accent colour and settles to the resting one. Split by word with a stagger (or staggered per-layer)
   // so the wave travels along the line.
@@ -220,7 +220,7 @@ export const PRESETS = {
     const p = resolveEasing(ease)(k);
     return { opacity: k > 0 ? 1 : 0, strokeDasharray: '1 1', strokeDashoffset: (back ? p - 1 : 1 - p).toFixed(4) };
   },
-    'stroke draw-on for SVG paths'),
+    'an SVG stroke draws itself on: the dash offset runs from 1 to 0 on a path normalised to length 1, easeOutCubic by default, `back:true` draws from the far end'),
   // chroma: chromatic-aberration entrance. R/G/B channels split apart (textShadow ghosts) and
   // converge as the unit settles to a CRISP glyph (residual 0 by default → no colour border at rest;
   // pass residual:>0 to leave a hair of fringe). The satisfying part is the misregistration resolving.
@@ -360,10 +360,21 @@ export const DECODE_CHAR_BLURBS = {
   binary: 'ones and zeros, the loudest cliche in the set, use it once and only where the subject IS binary',
 };
 
+// The words an author types who does not know the charset name, never printed, only searched.
+const DECODE_CHAR_AKA = {
+  mixed: ['default scramble', 'random characters', 'letters and numbers'],
+  upperCase: ['all caps scramble', 'capital letters only', 'uppercase only'],
+  lowerCase: ['lowercase scramble', 'small letters only'],
+  numbers: ['digits only', 'numeric scramble', 'counting up scramble'],
+  symbols: ['punctuation scramble', 'cipher characters', 'terminal symbols'],
+  blocks: ['block shading', 'ascii blocks', 'noise bar'],
+  binary: ['ones and zeros', 'binary code scramble', 'matrix style'],
+};
+
 // As STAGGER_FROM_REGISTRY (core/type.js): a registry so the arsenal search can find these, and no
 // `pick`, because any string of your own glyphs is a legal charset too.
 export const DECODE_CHARS_REGISTRY = defineRegistry('scramble charset', DECODE_CHARS,
-  { slot: 'presetOpts.chars', blurbs: DECODE_CHAR_BLURBS,
+  { slot: 'presetOpts.chars', blurbs: DECODE_CHAR_BLURBS, aka: DECODE_CHAR_AKA,
   catalog: {
     title: 'Scramble charsets (`chars`)',
     tag: 'text',
@@ -450,6 +461,29 @@ const PRESET_AKA = {
   draw: ['line drawing', 'path draw', 'svg stroke animation'],
   scale: ['zoom in text', 'grow text from small'],
   blur: ['soft focus resolve', 'defocus in'],
+  weight: ['weight ramp', 'variable font weight', 'font gets bolder', 'thicken in'],
+  up: ['rise in', 'float up', 'the default reveal', 'lift into place'],
+  down: ['drop in', 'fall down', 'slide down from above'],
+  blurUp: ['blur and rise', 'sharpen in', 'defocus lift', 'the default kinetic headline'],
+  bounce: ['springy bounce in', 'bouncy entrance', 'playful bounce'],
+  slide: ['slide in from the side', 'enter from left or right', 'push in sideways'],
+  wave: ['sine wave', 'bobbing text', 'idle wave', 'ambient wave'],
+  shimmerWave: ['shimmer', 'light sweep', '3d shimmer', 'traveling shine'],
+  flip: ['3d flip', 'card flip', 'flip in', 'somersault'],
+  fall: ['gravity drop', 'falls from above', 'drop with a bounce landing'],
+  elastic: ['elastic pop', 'springy scale', 'wobbly bounce'],
+  skew: ['italic shear', 'slanted slide in', 'skewed entrance'],
+  focus: ['focus pull', 'rack focus', 'blur to sharp', 'dreamy resolve'],
+  decode: ['scramble text', 'matrix decode', 'hacker text effect', 'techy scramble reveal'],
+  tilt: ['tilt in', 'swing upright', 'angled rise', 'small rotate in'],
+  stretch: ['horizontal smear', 'stretch and snap', 'squash and stretch'],
+  underline: ['underline draw', 'draw a line under', 'rule grows underneath'],
+  shadow: ['poster shadow', 'long shadow collapse', 'drop shadow lift'],
+  riseClip: ['rise from behind a mask', 'clip reveal', 'masked rise'],
+  swing: ['pendulum swing', 'hinge down', 'swing upright'],
+  unfold: ['unfold open', 'panel turn', 'card unfold', 'door opening'],
+  flap: ['split flap', 'airport board', 'flip board', 'departure board'],
+  assemble: ['scatter assemble', 'fly in and land', 'particles assemble', 'randomized entrance'],
 };
 export const PRESET_REGISTRY = defineRegistry('kinetic preset', PRESETS, { slot: 'preset', blurbs: PRESET_BLURBS, aka: PRESET_AKA,
   catalog: {
