@@ -79,38 +79,46 @@ export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0],
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 0.9 }) }];
 }
 
-// lineChart: a trend line (optional area fill) in a hairline card. data = [{label,value}].
-export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0], area = false, label = '', start = 0, dur = 4 } = {}) {
-  needData('data', data, 'lineChart');
-  const cw = Math.max(0, w - 2 * CHART_PAD), ch = Math.max(0, h - cardInsetY({ pad: CHART_PAD, label })), pad = 8;
-  const vals = data.map((d) => d.value); const max = Math.max(...vals, 1), min = Math.min(...vals, 0);
-  const n = Math.max(1, data.length - 1);
-  const PX = (i) => (pad + (i / n) * (cw - 2 * pad)).toFixed(1);
-  const PY = (v) => ((ch - pad) - ((v - min) / ((max - min) || 1)) * (ch - 2 * pad)).toFixed(1);
-  const pts = data.map((d, i) => `${PX(i)},${PY(d.value)}`).join(' ');
-  // ONE DOT, ON THE LAST READING. A dot on every vertex is chart-library furniture: it fights the line
-  // it is meant to sit on and says nothing, because every vertex is already a bend. The last point is
-  // the CURRENT value, which is the one a product surface marks. A filled dot in a card-coloured ring
-  // so it stays legible where the line doubles back under it.
+// ONE DOT, ON THE LAST READING. A dot on every vertex is chart-library furniture: it fights the line
+// it is meant to sit on and says nothing, because every vertex is already a bend. The last point is
+// the CURRENT value, which is the one a product surface marks. A filled dot in a card-coloured ring
+// so it stays legible where the line doubles back under it. The area is a VERTICAL FADE, not a flat
+// wash: strongest under the line and gone at the baseline. The gradient id is derived from the colour,
+// deterministic: no counter, no random, just the string. `len` is the exact polyline length, so the
+// draw-on dash is right for any data rather than a fudge factor.
+function lineChartSvg({ cw, ch, pad, pts, data, color, area, PX, PY }) {
   const lastI = data.length - 1;
   const dots = lastI < 0 ? '' : `<circle cx="${PX(lastI)}" cy="${PY(data[lastI].value)}" r="4.5" fill="${color}"`
     + ` stroke="${T.card}" stroke-width="3" style="opacity:var(--p, 1)"/>`;
-  // exact polyline length, so the draw-on dash is right for any data rather than a fudge factor
   const len = data.reduce((acc, d, i) => i === 0 ? 0
     : acc + Math.hypot(+PX(i) - +PX(i - 1), +PY(d.value) - +PY(data[i - 1].value)), 0) || 1;
-  // The area is a VERTICAL FADE, not a flat wash: strongest under the line and gone at the baseline,
-  // so it reads as the line's own shadow rather than as a second solid shape competing with it. The
-  // gradient id is derived from the colour, so two charts of the same colour share one definition and
-  // two of different colours cannot collide on a document-global id. Deterministic: no counter, no
-  // random, just the string.
   const gid = `va${[...color].reduce((acc, c) => (acc * 33 + c.charCodeAt(0)) >>> 0, 5381).toString(36)}`;
-  const svg = `<svg viewBox="0 0 ${cw} ${ch}" width="100%" height="${ch}" style="display:block;overflow:visible">`
+  return `<svg viewBox="0 0 ${cw} ${ch}" width="100%" height="${ch}" style="display:block;overflow:visible">`
     + (area ? `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">`
       + `<stop offset="0" stop-color="${color}" stop-opacity="0.28"/>`
       + `<stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>`
       + `<polygon points="${pad},${ch - pad} ${pts} ${cw - pad},${ch - pad}" fill="url(#${gid})"/>` : '')
     + `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="${STROKE.line}" stroke-linejoin="round" stroke-linecap="round"`
     + ` stroke-dasharray="${len.toFixed(1)}" stroke-dashoffset="calc(${len.toFixed(1)} * (1 - var(--p, 1)))"/>${dots}</svg>`;
+}
+
+// The (x,y) projectors and the joined point string, all derived from one value range so a caller
+// never risks a PX/PY pair built off mismatched min/max.
+function lineChartPoints({ data, cw, ch, pad }) {
+  const vals = data.map((d) => d.value); const max = Math.max(...vals, 1), min = Math.min(...vals, 0);
+  const n = Math.max(1, data.length - 1);
+  const PX = (i) => (pad + (i / n) * (cw - 2 * pad)).toFixed(1);
+  const PY = (v) => ((ch - pad) - ((v - min) / ((max - min) || 1)) * (ch - 2 * pad)).toFixed(1);
+  const pts = data.map((d, i) => `${PX(i)},${PY(d.value)}`).join(' ');
+  return { PX, PY, pts };
+}
+
+// lineChart: a trend line (optional area fill) in a hairline card. data = [{label,value}].
+export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0], area = false, label = '', start = 0, dur = 4 } = {}) {
+  needData('data', data, 'lineChart');
+  const cw = Math.max(0, w - 2 * CHART_PAD), ch = Math.max(0, h - cardInsetY({ pad: CHART_PAD, label })), pad = 8;
+  const { PX, PY, pts } = lineChartPoints({ data, cw, ch, pad });
+  const svg = lineChartSvg({ cw, ch, pad, pts, data, color, area, PX, PY });
   const html = htmlCard({ w, pad: CHART_PAD, label, body: () => svg });
   // the line DRAWS ON rather than the card sliding in. The motion a line chart is for. `len` is the
   // polyline's own length, so the dash sweep is exact rather than a guess that breaks with the data.
@@ -118,18 +126,26 @@ export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0]
 }
 
 // donutChart: a ring split into segments + a legend. segments = [{value,color,label}].
-export function donutChart({ x, y, w = 320, segments = [], label = '', start = 0, dur = 4 } = {}) {
-  needData('segments', segments, 'donutChart');
-  const total = segments.reduce((s, d) => s + d.value, 0) || 1;
-  // A THINNER RING ON A TRACK. At stroke-width 15 the ring was a toy donut with a hole; at STROKE.arc
-  // it is an instrument, and it sits on the same tint track the bars and meters use so an empty or
-  // rounding-short arc still has a ground to be read against.
+// The legend splits by role: the NAME is a word (sans, muted) and the SHARE is a figure (mono,
+// tabular, ink) pushed to the right edge, so the percentages line up as a column you can read down
+// instead of trailing each name at whatever x its length happens to end on.
+function donutLegend(segments, total) {
+  return segments.map((s, i) => `<div style="display:flex;align-items:center;gap:${SPACE.xs}px">`
+    + `<span style="width:9px;height:9px;border-radius:${R.micro}px;background:${s.color || seriesAt(i)};flex:0 0 auto"></span>`
+    + `<span style="${labelCss()};flex:1 1 auto">${s.label}</span>`
+    + `<span style="${numCss({ size: TYPE.body })}">${Math.round(s.value / total * 100)}%</span></div>`).join('');
+}
+
+// A THINNER RING ON A TRACK. At stroke-width 15 the ring was a toy donut with a hole; at STROKE.arc
+// it is an instrument, and it sits on the same tint track the bars and meters use so an empty or
+// rounding-short arc still has a ground to be read against.
+// The ring SWEEPS round once, revealing each segment in turn, instead of the card sliding in.
+// The trick that makes one driven variable do it: every segment is drawn as a FULL arc from 12
+// o'clock out to its own cumulative end, clipped to how far `--p` has travelled, then painted
+// BACK TO FRONT, so the shorter arcs land on top and each colour owns exactly its own wedge at
+// every value of --p. One variable, no per-segment timeline, pure in t.
+function donutRing(segments, total) {
   const rad = 40, C = 2 * Math.PI * rad, sw = STROKE.arc;
-  // The ring SWEEPS round once, revealing each segment in turn, instead of the card sliding in.
-  // The trick that makes one driven variable do it: every segment is drawn as a FULL arc from 12
-  // o'clock out to its own cumulative end, clipped to how far `--p` has travelled, then painted
-  // BACK TO FRONT, so the shorter arcs land on top and each colour owns exactly its own wedge at
-  // every value of --p. One variable, no per-segment timeline, pure in t.
   let cum = 0;
   const ends = segments.map((s) => (cum += (s.value / total) * C));
   const arcs = segments.map((s, i) =>
@@ -137,14 +153,14 @@ export function donutChart({ x, y, w = 320, segments = [], label = '', start = 0
     + ` style="stroke-dasharray:min(${ends[i].toFixed(2)}px, calc(${C.toFixed(2)}px * var(--p, 1))) ${C.toFixed(2)}px"`
     + ` transform="rotate(-90 50 50)"/>`).reverse().join('');
   const track = `<circle cx="50" cy="50" r="${rad}" fill="none" stroke="${tint(SERIES[0], TINT.track)}" stroke-width="${sw}"/>`;
-  const ring = (inner) => `<svg viewBox="0 0 100 100" width="${inner}" height="${inner}" style="display:block;margin:0 auto 14px">${track}${arcs}</svg>`;
-  // The legend splits by role: the NAME is a word (sans, muted) and the SHARE is a figure (mono,
-  // tabular, ink) pushed to the right edge, so the percentages line up as a column you can read down
-  // instead of trailing each name at whatever x its length happens to end on.
-  const legend = segments.map((s, i) => `<div style="display:flex;align-items:center;gap:${SPACE.xs}px">`
-    + `<span style="width:9px;height:9px;border-radius:${R.micro}px;background:${s.color || seriesAt(i)};flex:0 0 auto"></span>`
-    + `<span style="${labelCss()};flex:1 1 auto">${s.label}</span>`
-    + `<span style="${numCss({ size: TYPE.body })}">${Math.round(s.value / total * 100)}%</span></div>`).join('');
+  return (inner) => `<svg viewBox="0 0 100 100" width="${inner}" height="${inner}" style="display:block;margin:0 auto 14px">${track}${arcs}</svg>`;
+}
+
+export function donutChart({ x, y, w = 320, segments = [], label = '', start = 0, dur = 4 } = {}) {
+  needData('segments', segments, 'donutChart');
+  const total = segments.reduce((s, d) => s + d.value, 0) || 1;
+  const ring = donutRing(segments, total);
+  const legend = donutLegend(segments, total);
   const html = htmlCard({ w, pad: CHART_PAD, label,
     body: (inner) => ring(inner) + `<div style="display:flex;flex-direction:column;gap:${SPACE.snug}px">${legend}</div>` });
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 1.3 }) }];
