@@ -45,7 +45,7 @@ export const PARTS = {
     // (engine-doctrine/MISTAKES.md #581), for a different, GSAP-side reason: that bug was Chromium's own
     // arc-flattening estimate disagreeing with pathLength=1, not integer px rounding.
     drawOn: [(t) => {
-      try { t.removeAttribute('pathLength'); } catch (e) {}
+      try { t.removeAttribute('pathLength'); } catch {}
       const total = typeof t.getTotalLength === 'function' ? t.getTotalLength() : 0;
       t.__drawLen = total;
       t.style.strokeDasharray = `${total} ${total}`;
