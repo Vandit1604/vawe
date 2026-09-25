@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Anybody, JetBrains_Mono } from "next/font/google";
+import { Archivo, JetBrains_Mono, Unbounded } from "next/font/google";
 import "./globals.css";
 
-// Anybody carries a real wdth axis (50-150) alongside wght (100-900). The width axis is the point:
-// a motion engine's own type should be able to move. See DESIGN.md → The Width Is Motion Rule.
-const sans = Anybody({ subsets: ["latin"], variable: "--font-sans", display: "swap", axes: ["wdth"] });
+// Three faces, three jobs (site/IDENTITY.md): Archivo for headings and body, Unbounded only for
+// titles, JetBrains Mono for every number and label.
+const sans = Archivo({ subsets: ["latin"], variable: "--font-sans", display: "swap", axes: ["wdth"] });
+const title = Unbounded({ subsets: ["latin"], variable: "--font-unbounded", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 // METADATA IS THE HEADLINE FOR PEOPLE WHO NEVER REACH THE PAGE. It read "one JSON, one video" and
@@ -53,11 +54,11 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { themeColor: "#ffffff" };
+export const viewport: Viewport = { themeColor: "#16151a", colorScheme: "dark" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${title.variable} ${mono.variable}`}>
       <head>
         {/* THE ENGINE'S BLOCK LIBRARY RUNS IN THIS PAGE, and one of its 17 families says
             `from 'd3-geo'`. A browser cannot resolve a bare specifier, so without this map
