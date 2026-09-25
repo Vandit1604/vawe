@@ -34,7 +34,22 @@ export const THREE_FX = Object.keys(THREE_SCENES);
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a three scene" when someone writes it somewhere else. core/registry.js.
-export const THREE_REGISTRY = defineRegistry('three scene', Object.fromEntries(THREE_FX.map((n) => [n, n])), { slot: 'three', blurbs: THREE_SCENES,
+const THREE_AKA = {
+  deviceShowcase: ['a turning phone or laptop', 'device with a live screen', '3D product device'],
+  uiParallax: ['UI layers at depth', 'parallax screens', 'stacked flat panels in 3D'],
+  pointCloud: ['a cloud of points', 'particle point cloud', 'thousands of lit dots'],
+  extrudeText: ['3D extruded text', 'thick lettering that rotates', 'a font turned into a solid'],
+  globe: ['a spinning 3D globe', 'a rotating world with arcs', 'a dotted world map in 3D'],
+  shatter: ['breaking into pieces', 'a slab shattering', 'shards flying outward'],
+  magnetic: ['magnetic field lines', 'field lines between poles', 'charges sliding along arcs'],
+  liquidBackground: ['a churning liquid surface', 'a rippling 3D plane', 'a wavy specular background'],
+  codeExtrude: ['code rising out of depth', 'syntax-highlighted 3D slabs', 'code growing into blocks'],
+  codeDissolve: ['code resolving from noise', 'code fading in through static', 'a chromatic burn reveal of code'],
+  codeAssemble: ['code assembling from a point cloud', 'glyphs flying into place', 'text forming from scattered points'],
+  litPlane: ['a lit UI screenshot in 3D', 'a captured screen rising with a tilt', 'a shadowed product screen'],
+};
+
+export const THREE_REGISTRY = defineRegistry('three scene', Object.fromEntries(THREE_FX.map((n) => [n, n])), { slot: 'three', blurbs: THREE_SCENES, aka: THREE_AKA,
   catalog: {
     title: 'three.js scenes (real geometry)',
     tag: 'layer',
