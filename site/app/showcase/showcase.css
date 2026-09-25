@@ -1,18 +1,39 @@
-/* ===== /showcase · the closing block ============================================================
-   Everything else this page needs (.phead, .films, .filmgrid, .aspects, .trio, .h2, .btn) already
-   lives in globals.css because the landing page uses it too. What is local is the way the page
-   ends, and it is here rather than there for one reason: .hero-cta centres its buttons, which is
-   right under a centred hero and wrong under a left-aligned page. One declaration undoes it.
+/* ===== /showcase · film cards ================================================================ */
+.fgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:36px}
+.fgrid > .fc{grid-column:span 2}
+.fgrid > .fc:nth-child(-n+2){grid-column:span 3}
+.fc{margin:0;overflow:hidden}
+.fc-stage{position:relative;display:block;width:100%;aspect-ratio:16/9;padding:0;border:0;background:var(--bg);cursor:pointer;
+  --sp-scale:1;--sp-w:1920px;--sp-h:1080px}
+.fc-stage:focus-visible{outline:var(--outline);outline-offset:-2px}
+.fc-screen{position:absolute;inset:0;overflow:hidden}
+.fc-screen .sp-frame{pointer-events:none}
+/* The idle face: the film's own layers, one lane per type, so a card is recognisable before it plays. */
+.fc-score{position:absolute;inset:14% 6%;display:flex;flex-direction:column;justify-content:center;gap:8px;z-index:var(--z-raise)}
+.fc-score[hidden]{display:none}
+.fc-lane{position:relative;height:calc(var(--rows,1) * 10px)}
+.fc-bar{position:absolute;height:6px;border-radius:2px;min-width:3px;background:var(--lane);opacity:.75}
+.fc:hover .fc-bar{opacity:1}
+.fc-playhead{position:absolute;top:0;bottom:0;left:calc(var(--p,0) * 100%);width:2px;background:var(--accent);opacity:0;z-index:var(--z-raise)}
+.fc.on .fc-playhead{opacity:1}
+.fc-note{position:absolute;left:12px;bottom:10px;z-index:var(--z-raise)}
+.fc-idle::after{content:"hover to play"}
+@media (hover:none){ .fc-idle::after{content:"tap to play"} }
+.fc-cap{display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;padding:14px 16px}
+.fc-title{font-weight:700;font-size:16px}
+.fc-cap .meta{white-space:normal}
+.fc-open{margin-left:auto;font-size:14px;color:var(--accent);text-decoration:none}
+.fc-open:hover{text-decoration:underline}
 
-   /features declares the same three rules under .fend. Two routes now need this block, which is
-   exactly the condition CLAUDE.md sets for promoting a rule to globals.css; that file was rebuilt
-   this pass and is out of bounds, so the duplication is deliberate and reported rather than hidden. */
-.scend{padding:56px 0 80px;border-top:1px solid var(--line);margin-top:44px}
-.scend .h2{max-width:20ch}
-.scend .hero-cta{justify-content:flex-start;margin-top:22px}
+.sc-legend{display:flex;flex-wrap:wrap;gap:6px 18px;list-style:none;padding:0;margin:20px 0 0;font-size:14px;color:var(--ink-2)}
+.sc-legend li{display:inline-flex;align-items:center;gap:8px}
+.sc-legend li::before{content:"";width:14px;height:6px;border-radius:2px;background:var(--lane)}
 
-/* The films heading is .h2 (the site's section heading) rather than .films-h1, which is display-sized
-   and read as a second hero directly under the page h1. .scsub's negative top margin was tuned to
-   hug .films-h1's own bottom margin, so it needs undoing against this one. */
-.films{padding-top:44px}
-.films .scsub{margin-top:12px}
+.sc-ratios{margin-top:36px;padding:24px}
+.sc-ratios .trio .ar{border:0;background:var(--bg)}
+
+@media (max-width:900px){ .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))} .fgrid > .fc:nth-child(n){grid-column:auto} .fgrid > .fc:first-child{grid-column:1 / -1} }
+@media (max-width:640px){
+  .fgrid{grid-template-columns:minmax(0,1fr)}
+  .sc-ratios{padding:14px}
+}

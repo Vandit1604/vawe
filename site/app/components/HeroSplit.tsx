@@ -4,49 +4,10 @@ import { useSceneEngine } from "./useSceneEngine";
 import { useStageFit } from "./useStageFit";
 import { FILMS } from "./films";
 import KINDS from "../../lib/layer-kinds.json";
+import { LANE_NAME, clipsOf, clock, packRows, type Scene } from "./scene-clips";
 
 // THE LANDING HERO: a film playing live in the reader's browser, the timeline of its own layers under
 // it, and its scene file one tab away. All three read the same scene JSON, so they cannot disagree.
-
-type Layer = { type: string; start?: number; duration?: number; dur?: number; [k: string]: unknown };
-type Scene = { aspect?: string; duration: number; layers: Layer[] };
-type Clip = { i: number; kind: string; start: number; end: number; label: string; line: string };
-
-const LANE_NAME: Record<string, string> = { text: "Text", media: "Media", shape: "Shape", comp: "Comp", cap: "Captions", sound: "Sound" };
-// Fields too long to read in one line of the scene view; the line shows that they exist, not their body.
-const BULKY = new Set(["html", "motion", "children", "layers", "parts", "style", "css", "points", "data"]);
-const kindOf = (type: string) => (KINDS.kind as Record<string, string>)[type] ?? "comp";
-
-const labelOf = (l: Layer) => {
-  const src = typeof l.src === "string" ? l.src.split("/").pop() : undefined;
-  const raw = [l.text, l.label, l.id, src, l.block, l.type].find((v) => typeof v === "string" && v) as string;
-  return raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 48);
-};
-
-const lineOf = (l: Layer) =>
-  JSON.stringify(Object.fromEntries(Object.entries(l).map(([k, v]) => [k, BULKY.has(k) ? (Array.isArray(v) ? `[…${v.length}]` : "…") : v])));
-
-function clipsOf(scene: Scene): Clip[] {
-  return scene.layers.flatMap((l, i) => {
-    if (typeof l.start !== "number") return [];
-    const length = l.duration ?? l.dur ?? scene.duration - l.start;
-    return [{ i, kind: kindOf(l.type), start: l.start, end: Math.min(scene.duration, l.start + length), label: labelOf(l), line: lineOf(l) }];
-  });
-}
-
-// Overlapping layers stack into rows, as the studio timeline draws them, capped so a busy lane stays short.
-const MAX_ROWS = 3;
-function packRows(items: Clip[]): (Clip & { row: number })[] {
-  const ends: number[] = [];
-  return items.map((c) => {
-    let row = ends.findIndex((e) => e <= c.start);
-    if (row < 0) row = ends.length < MAX_ROWS ? ends.push(0) - 1 : ends.indexOf(Math.min(...ends));
-    ends[row] = c.end;
-    return { ...c, row };
-  });
-}
-
-const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 export function HeroSplit() {
   const [idx, setIdx] = useState(0);
@@ -119,7 +80,7 @@ export function HeroSplit() {
             <li key={f.id}>
               <button type="button" aria-current={i === idx ? "true" : undefined} onClick={() => { setIdx(i); setView("film"); }}>
                 <span className="hs-list-title">{f.title}</span>
-                {i === idx && meta ? <span className="hs-meta">{clock(meta.duration)}</span> : null}
+                {i === idx && meta ? <span className="meta">{clock(meta.duration)}</span> : null}
               </button>
             </li>
           ))}
@@ -132,7 +93,7 @@ export function HeroSplit() {
             <button type="button" aria-pressed={view === "film"} onClick={() => setView("film")}>Film</button>
             <button type="button" aria-pressed={view === "file"} onClick={() => setView("file")}>Scene file</button>
           </div>
-          <span className="hs-meta">{scene ? `${clips.length} layers · ${scene.aspect ?? "16:9"}` : "loading"}</span>
+          <span className="meta">{scene ? `${clips.length} layers · ${scene.aspect ?? "16:9"}` : "loading"}</span>
         </div>
 
         <div className="hs-view">
@@ -146,7 +107,7 @@ export function HeroSplit() {
             ))}
             <div>{"] }"}</div>
           </div>
-          {booting && view === "film" ? <span className="hs-booting hs-meta">starting the engine</span> : null}
+          {booting && view === "film" ? <span className="hs-booting meta">starting the engine</span> : null}
         </div>
 
         <div className="hs-now">
@@ -158,13 +119,13 @@ export function HeroSplit() {
             )}
           </button>
           <span className="hs-now-title">{film.title}</span>
-          <span className="hs-meta">{`${clock(t)} / ${clock(duration)}`}</span>
+          <span className="meta">{`${clock(t)} / ${clock(duration)}`}</span>
         </div>
 
         <div className="hs-tl" style={{ "--p": String(Math.min(1, t / duration)) } as React.CSSProperties}>
           {lanes.map((lane) => (
             <div className="hs-lane" key={lane.kind} style={{ "--rows": String(lane.rows) } as React.CSSProperties}>
-              <span className="hs-meta">{LANE_NAME[lane.kind]}</span>
+              <span className="meta">{LANE_NAME[lane.kind]}</span>
               <div className="hs-track">
                 {lane.items.map((c) => (
                   <button
