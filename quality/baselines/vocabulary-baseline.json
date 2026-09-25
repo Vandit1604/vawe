@@ -253,6 +253,12 @@
   "LOOK_CUT_SLOTS",
   "LOOK_FIELD_KEYS"
  ],
+ "core/theme/tokens.js": [
+  "TOKEN_TYPES"
+ ],
+ "core/theme/roles.js": [
+  "REQUIRED_ROLES"
+ ],
  "core/surfaces/three-fx.js": [
   "PROPS"
  ],
