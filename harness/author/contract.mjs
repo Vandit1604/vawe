@@ -10,7 +10,7 @@ import { chainErrors, edges, motionErrors, parseMotion } from '../lib/contract.m
 const film = process.argv[2];
 if (!film || !fs.existsSync(film)) { console.error('usage: node harness/author/contract.mjs <film.json>'); process.exit(1); }
 const sbPath = storyboardPathFor(film);
-if (!fs.existsSync(sbPath)) { console.error(`contract: no storyboard at ${sbPath} (run \`make scaffold\` first)`); process.exit(1); }
+if (!fs.existsSync(sbPath)) { console.error(`contract: no storyboard at ${sbPath} (write it from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md first)`); process.exit(1); }
 
 const sb = parseStoryboard(fs.readFileSync(sbPath, 'utf8'));
 const { beats } = timeline(sb);

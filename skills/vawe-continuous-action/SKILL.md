@@ -22,16 +22,16 @@ changing state.
 
 That is the grammar this skill plans in.
 
-**`make scaffold` now starts here by default, not the beat rotation.** `type-spines.mjs` exports
-`CONTINUOUS_ACTION_MAX_S` (15s, the same bound `storyboard-check.mjs`/`direction-floor.mjs` use).
-`make scaffold OUT=<file> TYPE=<type> DUR=<n>` under that length emits ONE object (`id:"spine"`), a
-hand-keyed track, zero `transitions`, and a storyboard with `object`/`object_t0`/`object_states`/
-`object_last` already filled from that type's own spine.
+**This is the default shape under ~15s, not the beat rotation.** `type-spines.mjs` exports
+`CONTINUOUS_ACTION_MAX_S` (15s, the same bound `storyboard-check.mjs`/`direction-floor.mjs` use). Under
+that length, write the storyboard around ONE object (`id:"spine"`), a hand-keyed track, zero
+`transitions`, and `object`/`object_t0`/`object_states`/`object_last` frontmatter filled from the type's
+own spine (`harness/author/type-spines.mjs`'s `continuousObject`, when the type declares one).
 
 Two types (`talking-head`, `recreation`) opt out at every length, for the same reason "Before you use
-this skill" below gives: their content is not held by one transforming prop. The scaffold is a
-skeleton to REPLACE, not a finished film; Steps 1-7 below still decide whether the object, the states
-and the transform it built are the RIGHT ones, which no scaffold can know for your brief.
+this skill" below gives: their content is not held by one transforming prop. Steps 1-7 below decide
+whether the object, the states and the transform are the RIGHT ones for your brief; no spine can know
+that for you.
 
 ## Before you use this skill: it is one device, not the law
 

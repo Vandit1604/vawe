@@ -12,9 +12,9 @@ counts, so it holds pace longer per idea than a launch film does.
 
 ## The spine changes shape with length
 
-**Under ~15s: ONE CONTINUOUS ACTION**, not the multi-beat spine below. `make scaffold TYPE=explainer
-DUR=<n>` switches automatically at `CONTINUOUS_ACTION_MAX_S` (`harness/author/type-spines.mjs`, 15s): a
-held FIGURE (the one number this film proves) counts up from zero and holds at its final value, no cut.
+**Under ~15s: ONE CONTINUOUS ACTION**, not the multi-beat spine below. `CONTINUOUS_ACTION_MAX_S`
+(`harness/author/type-spines.mjs`, 15s) is the switch. Below it, write the storyboard around a held
+FIGURE (the one number this film proves): it counts up from zero and holds at its final value, no cut.
 Read `skills/vawe-continuous-action/SKILL.md` first at this length. A single counted fact genuinely IS a
 continuous action; do not force the four-beat build below into 10s just because the type is explainer.
 
@@ -62,17 +62,13 @@ None required: an explainer is built from type, counts and named-thing chips, no
 graphic genuinely helps (a diagram, a real chart), prefer generating it from real data over a stock
 icon; see `engine-doctrine/CRAFT/SHOW-DONT-TELL.md` for what counts as explanation versus decoration.
 
-## `make scaffold TYPE=explainer`
+## Writing the storyboard
 
-```bash
-make scaffold OUT=films/scene/<name>.json TYPE=explainer DUR=12   # < 15s: continuous action (the held figure)
-make scaffold OUT=films/scene/<name>.json TYPE=explainer DUR=20   # >= 15s: the beat spine below
-```
-
-At DUR>=15 it composes `kineticHook -> containerFill -> listBuildRows -> chipGrid -> statReveal -> ctaEnd`
+Under 15s: the held-figure continuous action above. At or past 15s: beats, in order,
+`kineticHook -> containerFill -> listBuildRows -> chipGrid -> statReveal -> ctaEnd`
 (`harness/author/type-spines.mjs`), cycling `paper/soft/dotmatrix` bg presets and a
-dissolve-then-punch cut family. This is the one type whose beat-spine scaffold needs no captured asset
-at all, so it is also the fastest `--type` to validate clean out of the box at that length.
+dissolve-then-punch cut family. This is the one type whose beat spine needs no captured asset at all,
+so it is also the fastest to validate clean out of the box at that length.
 
 ## What the judge weighs for this type
 

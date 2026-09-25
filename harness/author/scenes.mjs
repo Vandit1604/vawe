@@ -24,7 +24,7 @@ if (!film || !fs.existsSync(film)) { console.error('usage: node harness/author/s
 
 const scene = JSON.parse(fs.readFileSync(film, 'utf8'));
 const sbPath = storyboardPathFor(film);
-if (!fs.existsSync(sbPath)) { console.error(`scenes: no storyboard at ${sbPath} (run \`make scaffold\` first, fill it, then \`make contract D=${film}\`)`); process.exit(1); }
+if (!fs.existsSync(sbPath)) { console.error(`scenes: no storyboard at ${sbPath} (write it from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md, fill it, then \`make contract D=${film}\`)`); process.exit(1); }
 const sb = parseStoryboard(fs.readFileSync(sbPath, 'utf8'));
 const { beats } = timeline(sb);
 

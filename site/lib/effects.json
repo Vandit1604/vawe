@@ -144,7 +144,7 @@
         {
           "name": "bolt",
           "stem": "drawn-icons--bolt",
-          "desc": "speed or power. Fast execution, an instant action, energy.",
+          "desc": "speed or power. Fast execution, an instant action, energy · the mark for anything that happens in under a second.",
           "scene": null,
           "noPreview": null
         },
@@ -317,7 +317,7 @@
         {
           "name": "aurora",
           "stem": "backgrounds--aurora",
-          "desc": "drifting colour aurora (moves)",
+          "desc": "three drifting colour blobs at 0.46 intensity over a dark radial, the northern-lights field (moves)",
           "scene": "/assets/effects/backgrounds--aurora.json",
           "noPreview": null
         },
@@ -338,14 +338,14 @@
         {
           "name": "brandglow",
           "stem": "backgrounds--brandglow",
-          "desc": "breathing accent glow",
+          "desc": "a breathing accent glow at 0.5 intensity plus rippling dots, over an ink radial base",
           "scene": "/assets/effects/backgrounds--brandglow.json",
           "noPreview": null
         },
         {
           "name": "constellation",
           "stem": "backgrounds--constellation",
-          "desc": "drifting connected nodes (moves), telemetry/data feel",
+          "desc": "drifting connected nodes (moves), telemetry/data feel · 78 particles connected within 150px",
           "scene": "/assets/effects/backgrounds--constellation.json",
           "noPreview": null
         },
@@ -366,7 +366,7 @@
         {
           "name": "dotmatrix",
           "stem": "backgrounds--dotmatrix",
-          "desc": "a light field ruled by evenly spaced dots whose size waves across it, the printed halftone look (moves)",
+          "desc": "a light field ruled by dots 52px apart, whose size waves from 1.6px to 4.5px across it, the printed halftone look (moves)",
           "scene": "/assets/effects/backgrounds--dotmatrix.json",
           "noPreview": null
         },
@@ -401,7 +401,7 @@
         {
           "name": "mesh",
           "stem": "backgrounds--mesh",
-          "desc": "soft gradient mesh (dark/saturated, check contrast)",
+          "desc": "soft gradient mesh, three colour blobs at 0.42 intensity over a dark radial (dark/saturated, check contrast, moves)",
           "scene": "/assets/effects/backgrounds--mesh.json",
           "noPreview": null
         },
@@ -429,21 +429,21 @@
         {
           "name": "paperDots",
           "stem": "backgrounds--paperdots",
-          "desc": "faint drifting dot grid (light)",
+          "desc": "a faint drifting dot grid on the light paper base, dots 54px apart waving between 0.14 and 0.34 alpha",
           "scene": "/assets/effects/backgrounds--paperdots.json",
           "noPreview": null
         },
         {
           "name": "paperShapes",
           "stem": "backgrounds--papershapes",
-          "desc": "faint drifting geometric shapes (light, subtle)",
+          "desc": "faint drifting geometric shapes on the light paper base, 64px apart waving between 0.05 and 0.13 alpha",
           "scene": "/assets/effects/backgrounds--papershapes.json",
           "noPreview": null
         },
         {
           "name": "plain",
           "stem": "backgrounds--plain",
-          "desc": "flat theme field",
+          "desc": "a flat theme colour field with a 0.02 grain wash (0.035 on dark)",
           "scene": "/assets/effects/backgrounds--plain.json",
           "noPreview": null
         },
@@ -477,35 +477,35 @@
         {
           "name": "arctic-blue",
           "stem": "gradient-recipes--arctic-blue",
-          "desc": "pale ice blue radial, a cold spotlit pool",
+          "desc": "pale ice blue radial, a cold spotlit pool centred at 50% across, 40% down",
           "scene": "/assets/effects/gradient-recipes--arctic-blue.json",
           "noPreview": null
         },
         {
           "name": "berry-crush",
           "stem": "gradient-recipes--berry-crush",
-          "desc": "crimson into tomato red, a hot fruit-punch ramp",
+          "desc": "crimson into tomato red, a hot fruit-punch ramp on a 70deg diagonal",
           "scene": "/assets/effects/gradient-recipes--berry-crush.json",
           "noPreview": null
         },
         {
           "name": "citrus-pop",
           "stem": "gradient-recipes--citrus-pop",
-          "desc": "orange into bright yellow, a loud fruit-stand ramp",
+          "desc": "orange into bright yellow, a loud fruit-stand ramp on a 60deg diagonal",
           "scene": "/assets/effects/gradient-recipes--citrus-pop.json",
           "noPreview": null
         },
         {
           "name": "cool-mint",
           "stem": "gradient-recipes--cool-mint",
-          "desc": "green into teal, a fresh spa ramp",
+          "desc": "green into teal, a fresh spa ramp on a 135deg diagonal",
           "scene": "/assets/effects/gradient-recipes--cool-mint.json",
           "noPreview": null
         },
         {
           "name": "coral-reef",
           "stem": "gradient-recipes--coral-reef",
-          "desc": "salmon into pale pink, a beachy diagonal ramp",
+          "desc": "salmon into pale pink, a beachy diagonal ramp on a 25deg diagonal",
           "scene": "/assets/effects/gradient-recipes--coral-reef.json",
           "noPreview": null
         },
@@ -519,21 +519,21 @@
         {
           "name": "deep-ocean",
           "stem": "gradient-recipes--deep-ocean",
-          "desc": "near-black into slate blue, a moody nautical field",
+          "desc": "near-black into slate blue, a moody nautical field on a 160deg diagonal",
           "scene": "/assets/effects/gradient-recipes--deep-ocean.json",
           "noPreview": null
         },
         {
           "name": "ember",
           "stem": "gradient-recipes--ember",
-          "desc": "crimson, tomato and amber drifting, a MOVING fire mesh",
+          "desc": "crimson, tomato and amber drifting slowly, a MOVING three-color fire mesh",
           "scene": "/assets/effects/gradient-recipes--ember.json",
           "noPreview": null
         },
         {
           "name": "emerald-pool",
           "stem": "gradient-recipes--emerald-pool",
-          "desc": "teal into jade radial, a jungle-pool glow",
+          "desc": "teal into jade radial, a jungle-pool glow centred at 40% across, 60% down",
           "scene": "/assets/effects/gradient-recipes--emerald-pool.json",
           "noPreview": null
         },
@@ -547,91 +547,91 @@
         {
           "name": "glacier",
           "stem": "gradient-recipes--glacier",
-          "desc": "sky blue into pale cyan radial, an icy pool",
+          "desc": "sky blue into pale cyan radial, an icy pool centred at 60% across, 30% down",
           "scene": "/assets/effects/gradient-recipes--glacier.json",
           "noPreview": null
         },
         {
           "name": "golden-hour",
           "stem": "gradient-recipes--golden-hour",
-          "desc": "amber into warm yellow, a late-afternoon ramp",
+          "desc": "amber into warm yellow, a late-afternoon ramp on a 30deg diagonal",
           "scene": "/assets/effects/gradient-recipes--golden-hour.json",
           "noPreview": null
         },
         {
           "name": "lavender-fog",
           "stem": "gradient-recipes--lavender-fog",
-          "desc": "pale periwinkle into indigo, a dreamy purple wash",
+          "desc": "pale periwinkle into indigo, a dreamy purple wash on a 200deg diagonal",
           "scene": "/assets/effects/gradient-recipes--lavender-fog.json",
           "noPreview": null
         },
         {
           "name": "midnight-violet",
           "stem": "gradient-recipes--midnight-violet",
-          "desc": "three-stop indigo to plum, a night-sky ramp",
+          "desc": "three-stop indigo to plum, a night-sky ramp on a 180deg diagonal",
           "scene": "/assets/effects/gradient-recipes--midnight-violet.json",
           "noPreview": null
         },
         {
           "name": "neon-dusk",
           "stem": "gradient-recipes--neon-dusk",
-          "desc": "hot pink into electric violet, a synthwave ramp",
+          "desc": "hot pink into electric violet, a synthwave ramp on a 50deg diagonal",
           "scene": "/assets/effects/gradient-recipes--neon-dusk.json",
           "noPreview": null
         },
         {
           "name": "peach-cream",
           "stem": "gradient-recipes--peach-cream",
-          "desc": "pale peach into blush, a soft dessert ramp",
+          "desc": "pale peach into blush, a soft dessert ramp on a 45deg diagonal",
           "scene": "/assets/effects/gradient-recipes--peach-cream.json",
           "noPreview": null
         },
         {
           "name": "plum-wine",
           "stem": "gradient-recipes--plum-wine",
-          "desc": "violet into dusty rose, a wine-toned diagonal ramp",
+          "desc": "violet into dusty rose, a wine-toned diagonal ramp on an 80deg diagonal",
           "scene": "/assets/effects/gradient-recipes--plum-wine.json",
           "noPreview": null
         },
         {
           "name": "rose-glow",
           "stem": "gradient-recipes--rose-glow",
-          "desc": "blush pink radial, a warm skin-tone pool",
+          "desc": "blush pink radial, a warm skin-tone pool centred dead middle at 50%, 50%",
           "scene": "/assets/effects/gradient-recipes--rose-glow.json",
           "noPreview": null
         },
         {
           "name": "slate-storm",
           "stem": "gradient-recipes--slate-storm",
-          "desc": "charcoal into graphite, a neutral overcast ramp",
+          "desc": "charcoal into graphite, a neutral overcast ramp on a 120deg diagonal",
           "scene": "/assets/effects/gradient-recipes--slate-storm.json",
           "noPreview": null
         },
         {
           "name": "solar-flare",
           "stem": "gradient-recipes--solar-flare",
-          "desc": "red-orange-magenta conic ring, a sunburst wheel",
+          "desc": "red-orange-magenta conic ring, a sunburst wheel spinning from a 0deg start angle",
           "scene": "/assets/effects/gradient-recipes--solar-flare.json",
           "noPreview": null
         },
         {
           "name": "spectrum-ring",
           "stem": "gradient-recipes--spectrum-ring",
-          "desc": "cyan-violet-pink conic wheel, a full-hue rainbow ring",
+          "desc": "cyan-violet-pink conic wheel, a full-hue rainbow ring spinning from a 0deg start angle",
           "scene": "/assets/effects/gradient-recipes--spectrum-ring.json",
           "noPreview": null
         },
         {
           "name": "steel-blue",
           "stem": "gradient-recipes--steel-blue",
-          "desc": "slate into charcoal-blue, a cool industrial ramp",
+          "desc": "slate into charcoal-blue, a cool industrial ramp on a 100deg diagonal",
           "scene": "/assets/effects/gradient-recipes--steel-blue.json",
           "noPreview": null
         },
         {
           "name": "sunset-strip",
           "stem": "gradient-recipes--sunset-strip",
-          "desc": "red, magenta and amber drifting, a MOVING sunset mesh",
+          "desc": "red, magenta and amber drifting slowly, a MOVING three-color sunset mesh",
           "scene": "/assets/effects/gradient-recipes--sunset-strip.json",
           "noPreview": null
         },
@@ -685,7 +685,7 @@
         {
           "name": "diveIn",
           "stem": "camera-moves--divein",
-          "desc": "zoom INTO a target point (it travels to centre)",
+          "desc": "zooms to scale 1.6 over 1.6s with easeOutQuart, centring the target point (tx,ty) as it grows",
           "scene": null,
           "noPreview": null
         },
@@ -727,7 +727,7 @@
         {
           "name": "multiPhase",
           "stem": "camera-moves--multiphase",
-          "desc": "chain legs into one journey (push, hold-drift, settle)",
+          "desc": "chains legs into one journey, each defaulting to a 1s linear hold except the last, which eases out with easeOutCubic",
           "scene": null,
           "noPreview": null
         },
@@ -741,7 +741,7 @@
         {
           "name": "panFollow",
           "stem": "camera-moves--panfollow",
-          "desc": "camera pans to track downward-growing content (terminal)",
+          "desc": "translates the camera by -300px on y over 5s, linear, to keep pace with downward-growing content",
           "scene": null,
           "noPreview": null
         },
@@ -755,7 +755,7 @@
         {
           "name": "slowPush",
           "stem": "camera-moves--slowpush",
-          "desc": "gentle continuous zoom in (the frame stays alive)",
+          "desc": "zooms from scale 1 to 1.12 (12% closer) over 6s with easeOutCubic, so the frame stays alive",
           "scene": null,
           "noPreview": null
         },
@@ -776,7 +776,7 @@
         {
           "name": "workspaceZoomOut",
           "stem": "camera-moves--workspacezoomout",
-          "desc": "pull back from a detail to reveal the whole",
+          "desc": "zooms out from scale 1.4 to 1 over 3s with easeOutCubic, pulling back from a detail to reveal the whole",
           "scene": null,
           "noPreview": null
         }
@@ -927,7 +927,7 @@
         {
           "name": "highlight",
           "stem": "caption-styles--highlight",
-          "desc": "marker highlight sweep",
+          "desc": "a marker band sweeps left to right behind the active word, the accent mixed 28% into transparent so white text over it stays at 4.9 · 1 contrast or better",
           "scene": "/assets/effects/caption-styles--highlight.json",
           "noPreview": null
         },
@@ -1072,63 +1072,63 @@
         {
           "name": "brake",
           "stem": "cut-timings--brake",
-          "desc": "decelerates in. The entrance curve · it arrives slower than it set off",
+          "desc": "decel(t, 2.4) · the mirror power curve, fast at the start and slows into the stop. The entrance curve, it arrives slower than it set off",
           "scene": "/assets/effects/cut-timings--brake.json",
           "noPreview": null
         },
         {
           "name": "linear",
           "stem": "cut-timings--linear",
-          "desc": "no easing at all. A machine, a wipe with no personality, a ticker",
+          "desc": "no easing at all, straight 1 · 1 progress. A machine, a wipe with no personality, a ticker",
           "scene": "/assets/effects/cut-timings--linear.json",
           "noPreview": null
         },
         {
           "name": "out",
           "stem": "cut-timings--out",
-          "desc": "decelerates into place. The default feel for something appearing",
+          "desc": "easeOutCubic · decelerates into place with no overshoot, the default feel for something appearing on screen",
           "scene": "/assets/effects/cut-timings--out.json",
           "noPreview": null
         },
         {
           "name": "pop",
           "stem": "cut-timings--pop",
-          "desc": "overshoots past the mark and comes back. Playful, use once",
+          "desc": "easeOutBack · overshoots past the mark by about 10% and comes back. Playful, use once",
           "scene": "/assets/effects/cut-timings--pop.json",
           "noPreview": null
         },
         {
           "name": "ramp",
           "stem": "cut-timings--ramp",
-          "desc": "the editor's slow-fast-slow speed ramp. The one to reach for on a whip or a camera throw",
+          "desc": "speedRamp(t) · velocity is low at both ends and peaks at the midpoint (sharp=2.4). The editor's slow-fast-slow speed ramp, for a whip or a camera throw",
           "scene": "/assets/effects/cut-timings--ramp.json",
           "noPreview": null
         },
         {
           "name": "rush",
           "stem": "cut-timings--rush",
-          "desc": "accelerates away. The exit curve · it leaves faster than it left rest",
+          "desc": "accel(t, 2.4) · a power curve of exponent 2.4, starts slow and keeps speeding up. The exit curve, it leaves faster than it left rest",
           "scene": "/assets/effects/cut-timings--rush.json",
           "noPreview": null
         },
         {
           "name": "smooth",
           "stem": "cut-timings--smooth",
-          "desc": "eases at both ends · reads as travel rather than as arrival",
+          "desc": "easeInOutCubic · eases at both ends, cubic in then cubic out. Reads as travel rather than as arrival",
           "scene": "/assets/effects/cut-timings--smooth.json",
           "noPreview": null
         },
         {
           "name": "snappy",
           "stem": "cut-timings--snappy",
-          "desc": "decisive, no overshoot. The cut lands and stops",
+          "desc": "easeOutQuart · lands fast and settles crisply, quicker off the mark than cubic and it never overshoots its target",
           "scene": "/assets/effects/cut-timings--snappy.json",
           "noPreview": null
         },
         {
           "name": "spring",
           "stem": "cut-timings--spring",
-          "desc": "a damped-spring overshoot that settles, physical life for something landing · a badge, a chip, a number",
+          "desc": "easeOutSpring · a damped-spring overshoot that settles, physical life for something landing · a badge, a chip, a number",
           "scene": "/assets/effects/cut-timings--spring.json",
           "noPreview": null
         }
@@ -1341,7 +1341,7 @@
         {
           "name": "still",
           "stem": "lightfield-motions--still",
-          "desc": "nothing moves · the output reads no clock at all",
+          "desc": "nothing moves · the output reads no clock at all, held on one fixed frame with zero drift",
           "scene": null,
           "noPreview": null
         }
@@ -1437,7 +1437,7 @@
         {
           "name": "right",
           "stem": "lightfield-shadow-directions--right",
-          "desc": "a linear fall away to the right",
+          "desc": "a linear fall away to the right · the frame drains toward the right edge and stays lit on the left",
           "scene": null,
           "noPreview": null
         },
@@ -1982,7 +1982,7 @@
         {
           "name": "aurora",
           "stem": "ambient-shader-fields--aurora",
-          "desc": "drifting colour aurora (moves)",
+          "desc": "a drifting colour aurora · bands of colour slowly moving and blending across the whole frame",
           "scene": "/assets/effects/ambient-shader-fields--aurora.json",
           "noPreview": null
         },
@@ -2184,35 +2184,35 @@
         {
           "name": "aurora",
           "stem": "generative-paint-fx-per-frame--aurora",
-          "desc": "slow curtains of coloured light. Calm, ambient, and the least busy field here.",
+          "desc": "slow curtains of coloured light, 5 blobs blended additively at 0.5 opacity. Calm, ambient, and the least busy field here.",
           "scene": "/assets/effects/generative-paint-fx-per-frame--aurora.json",
           "noPreview": null
         },
         {
           "name": "matrix",
           "stem": "generative-paint-fx-per-frame--matrix",
-          "desc": "columns of falling glyphs. Code, data streaming, a machine at work. Unmistakably a reference, so use it deliberately.",
+          "desc": "columns of falling glyphs, 20px cells with a 14-cell trail. Code, data streaming, a machine at work. Unmistakably a reference, so use it deliberately.",
           "scene": "/assets/effects/generative-paint-fx-per-frame--matrix.json",
           "noPreview": null
         },
         {
           "name": "meteor",
           "stem": "generative-paint-fx-per-frame--meteor",
-          "desc": "streaks crossing the frame on a diagonal. Motion and event on a background that would otherwise be still.",
+          "desc": "streaks crossing the frame on a diagonal, 14 meteors on a 28deg angle. Motion and event on a background that would otherwise be still.",
           "scene": "/assets/effects/generative-paint-fx-per-frame--meteor.json",
           "noPreview": null
         },
         {
           "name": "starfield",
           "stem": "generative-paint-fx-per-frame--starfield",
-          "desc": "stars drifting past as if the camera were moving through them. Depth and travel on an otherwise flat frame.",
+          "desc": "stars drifting past as if the camera were moving through them, 220 stars by default. Depth and travel on an otherwise flat frame.",
           "scene": "/assets/effects/generative-paint-fx-per-frame--starfield.json",
           "noPreview": null
         },
         {
           "name": "waves",
           "stem": "generative-paint-fx-per-frame--waves",
-          "desc": "rolling bands, a moving surface. Rhythm underneath content without competing for the eye.",
+          "desc": "rolling bands, a moving surface, 26 lines with a 26px amplitude. Rhythm underneath content without competing for the eye.",
           "scene": "/assets/effects/generative-paint-fx-per-frame--waves.json",
           "noPreview": null
         }
@@ -2308,42 +2308,42 @@
         {
           "name": "bloom",
           "stem": "adjustment-layers-grade-what-is-beneath--bloom",
-          "desc": "a real GLOW over everything beneath · the light spills past its edges and the subject stays sharp. The one kind that composites back rather than replacing",
+          "desc": "a real GLOW over everything beneath · blurs it 16px, lifts brightness 9% and screens the halo back over the sharp original so the subject stays crisp",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "blur",
           "stem": "adjustment-layers-grade-what-is-beneath--blur",
-          "desc": "soften everything beneath, in pixels. The rack-focus of a whole beat, not of one layer",
+          "desc": "soften everything beneath by 14px of blur. The rack-focus of a whole beat, not of one layer",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "brighten",
           "stem": "adjustment-layers-grade-what-is-beneath--brighten",
-          "desc": "lift everything beneath, as a percentage",
+          "desc": "lift everything beneath by 30%, its default `amount`, raising brightness",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "contrast",
           "stem": "adjustment-layers-grade-what-is-beneath--contrast",
-          "desc": "harden the tones beneath, as a percentage",
+          "desc": "harden the tones beneath by 25%, its default `amount`, widening light against dark",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "darken",
           "stem": "adjustment-layers-grade-what-is-beneath--darken",
-          "desc": "dim everything beneath, as a percentage",
+          "desc": "dim everything beneath by 45%, its default `amount`, cutting brightness",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "desaturate",
           "stem": "adjustment-layers-grade-what-is-beneath--desaturate",
-          "desc": "drain the colour beneath. 1 is fully grey",
+          "desc": "drain the colour beneath by 100%, its default `amount` of 1. 1 is fully grey",
           "scene": null,
           "noPreview": null
         }
@@ -2516,7 +2516,7 @@
         {
           "name": "ibeam",
           "stem": "cursor-styles--ibeam",
-          "desc": "a text-selection I-beam, for hovering editable or selectable text",
+          "desc": "a text-selection I-beam · an 8px serif cap at top and bottom joined by a 17.6px vertical stroke, 2.1px wide, for hovering editable or selectable text",
           "scene": null,
           "noPreview": null
         }
@@ -2612,7 +2612,7 @@
         {
           "name": "y",
           "stem": "effector-drives--y",
-          "desc": "pixels, the same on the other axis",
+          "desc": "pixels, the same offset as x but on the vertical axis, independent of where the moving point sits",
           "scene": null,
           "noPreview": null
         }
@@ -2680,21 +2680,21 @@
         {
           "name": "defocus",
           "stem": "enter-exit-anims--defocus",
-          "desc": "leave through blur (dense/faces)",
+          "desc": "blurs from 14px down to 0px while fading opacity in, leaves through focus rather than through space",
           "scene": "/assets/effects/enter-exit-anims--defocus.json",
           "noPreview": null
         },
         {
           "name": "fade",
           "stem": "enter-exit-anims--fade",
-          "desc": "opacity only",
+          "desc": "opacity ramps from 0 to 1 with no transform at all, the plainest entrance there is",
           "scene": "/assets/effects/enter-exit-anims--fade.json",
           "noPreview": null
         },
         {
           "name": "iris",
           "stem": "enter-exit-anims--iris",
-          "desc": "circular iris opens from the centre of the layer",
+          "desc": "circular iris opens from the centre of the layer, 0% to 100% radius",
           "scene": "/assets/effects/enter-exit-anims--iris.json",
           "noPreview": null
         },
@@ -2722,77 +2722,77 @@
         {
           "name": "rise",
           "stem": "enter-exit-anims--rise",
-          "desc": "translate up + fade in",
+          "desc": "translates 48px down to 0 while fading opacity 0 to 1, a slight overshoot past rest via easeOutSnap",
           "scene": "/assets/effects/enter-exit-anims--rise.json",
           "noPreview": null
         },
         {
           "name": "scale",
           "stem": "enter-exit-anims--scale",
-          "desc": "punch in from small (overshoot)",
+          "desc": "scales from 0.86 to 1 while fading in, a punch-in overshoot via easeOutBack",
           "scene": "/assets/effects/enter-exit-anims--scale.json",
           "noPreview": null
         },
         {
           "name": "slide-down",
           "stem": "enter-exit-anims--slide-down",
-          "desc": "enters from below; as an `out`, leaves downward",
+          "desc": "enters 60px from below; as an `out`, leaves 60px downward",
           "scene": "/assets/effects/enter-exit-anims--slide-down.json",
           "noPreview": null
         },
         {
           "name": "slide-left",
           "stem": "enter-exit-anims--slide-left",
-          "desc": "enters from the left edge; as an `out`, leaves toward it",
+          "desc": "enters 60px from the left edge; as an `out`, leaves 60px toward it",
           "scene": "/assets/effects/enter-exit-anims--slide-left.json",
           "noPreview": null
         },
         {
           "name": "slide-right",
           "stem": "enter-exit-anims--slide-right",
-          "desc": "enters from the right edge; as an `out`, leaves toward it",
+          "desc": "enters 60px from the right edge; as an `out`, leaves 60px toward it",
           "scene": "/assets/effects/enter-exit-anims--slide-right.json",
           "noPreview": null
         },
         {
           "name": "slide-up",
           "stem": "enter-exit-anims--slide-up",
-          "desc": "enters from above; as an `out`, leaves upward",
+          "desc": "enters 60px from above; as an `out`, leaves 60px upward",
           "scene": "/assets/effects/enter-exit-anims--slide-up.json",
           "noPreview": null
         },
         {
           "name": "up",
           "stem": "enter-exit-anims--up",
-          "desc": "translate up + fade in, the alias of `rise`",
+          "desc": "translates 48px down to 0 while fading opacity 0 to 1, a slight overshoot past rest via easeOutSnap. The alias of `rise`",
           "scene": "/assets/effects/enter-exit-anims--up.json",
           "noPreview": null
         },
         {
           "name": "wipe",
           "stem": "enter-exit-anims--wipe",
-          "desc": "clip reveal grows rightward. The default direction, same as `wipe-right`",
+          "desc": "clip reveal grows rightward, 0% to 100% width. The default direction, same as `wipe-right`",
           "scene": "/assets/effects/enter-exit-anims--wipe.json",
           "noPreview": null
         },
         {
           "name": "wipe-down",
           "stem": "enter-exit-anims--wipe-down",
-          "desc": "clip reveal grows downward from the top edge",
+          "desc": "clip reveal grows downward from the top edge, 0% to 100% height",
           "scene": "/assets/effects/enter-exit-anims--wipe-down.json",
           "noPreview": null
         },
         {
           "name": "wipe-left",
           "stem": "enter-exit-anims--wipe-left",
-          "desc": "clip reveal grows leftward from the right edge",
+          "desc": "clip reveal grows leftward from the right edge, 0% to 100% width",
           "scene": "/assets/effects/enter-exit-anims--wipe-left.json",
           "noPreview": null
         },
         {
           "name": "wipe-right",
           "stem": "enter-exit-anims--wipe-right",
-          "desc": "clip reveal grows rightward from the left edge",
+          "desc": "clip reveal grows rightward from the left edge, 0% to 100% width",
           "scene": "/assets/effects/enter-exit-anims--wipe-right.json",
           "noPreview": null
         },
@@ -2819,35 +2819,35 @@
         {
           "name": "blast",
           "stem": "move-shapes-measured-keyframe-tracks--blast",
-          "desc": "four-key punctuation · arrives oversize, settles, drifts, then grows OUT through the frame. A hard pop, never a fade",
+          "desc": "4-key punctuation over 1.5s · arrives at scale 1.5, settles to 1, drifts to 1.04, then grows OUT to scale 1.9 through the frame. A hard pop, never a fade",
           "scene": "/assets/effects/move-shapes-measured-keyframe-tracks--blast.json",
           "noPreview": null
         },
         {
           "name": "drift",
           "stem": "move-shapes-measured-keyframe-tracks--drift",
-          "desc": "a slow ambient hold on one axis that never returns to where it began, for a layer that should keep living through a beat",
+          "desc": "a slow 3s ambient hold that swings +/-12px on one axis and never returns to where it began, for a layer that should keep living through a beat",
           "scene": "/assets/effects/move-shapes-measured-keyframe-tracks--drift.json",
           "noPreview": null
         },
         {
           "name": "enter",
           "stem": "move-shapes-measured-keyframe-tracks--enter",
-          "desc": "a keyed entrance track on the layer itself rather than a preset name · rises in, overshoots slightly, settles",
+          "desc": "a keyed 0.9s entrance track that rises in from 40px, overshoots slightly past 0, then settles",
           "scene": "/assets/effects/move-shapes-measured-keyframe-tracks--enter.json",
           "noPreview": null
         },
         {
           "name": "exit",
           "stem": "move-shapes-measured-keyframe-tracks--exit",
-          "desc": "a keyed departure that accelerates off-frame, opacity trailing the move · the layer is gone because it LEFT, not because it dimmed",
+          "desc": "a keyed 0.55s departure that accelerates 260px off-frame, opacity trailing the move · the layer is gone because it LEFT, not because it dimmed",
           "scene": "/assets/effects/move-shapes-measured-keyframe-tracks--exit.json",
           "noPreview": null
         },
         {
           "name": "pan",
           "stem": "move-shapes-measured-keyframe-tracks--pan",
-          "desc": "an irregular multi-key horizontal (or vertical) pan, linear interior keys · surges then gives up, reads as a hand scrolling, not an animation of a page",
+          "desc": "an irregular 6-key horizontal (or vertical) pan over 1.25s by default, linear interior keys · surges then gives up, reads as a hand scrolling, not an animation of a page",
           "scene": "/assets/effects/move-shapes-measured-keyframe-tracks--pan.json",
           "noPreview": null
         }
@@ -2874,56 +2874,56 @@
         {
           "name": "fade",
           "stem": "part-entrances--fade",
-          "desc": "opacity alone, no displacement · the quiet default when a part should arrive without moving",
+          "desc": "opacity alone from 0 to 1, no displacement · the quiet default when a part should arrive without moving",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "fadeUp",
           "stem": "part-entrances--fadeup",
-          "desc": "a short rise with a fade, the quiet default for any part",
+          "desc": "rises 24px with a fade from opacity 0 to 1, the quiet default for any part",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "growUp",
           "stem": "part-entrances--growup",
-          "desc": "scales up from its own bottom edge, a bar growing to its reading",
+          "desc": "scales its Y from 0 to 1 anchored at its own bottom edge, a bar growing up to its reading",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "popIn",
           "stem": "part-entrances--popin",
-          "desc": "scales from nothing at its centre with a fade, dots, chips, markers",
+          "desc": "scales from 0 to 1 at its own centre with opacity 0 to 1, dots, chips, markers",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "riseIn",
           "stem": "part-entrances--risein",
-          "desc": "a longer rise with a fade, for parts that should feel like they arrive",
+          "desc": "rises 48px with a fade from opacity 0 to 1, for parts that should feel like they arrive",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "slide-left",
           "stem": "part-entrances--slide-left",
-          "desc": "enters from its left and, with `out`, keeps going right · one direction of travel, never a retreat",
+          "desc": "enters 40px from its left and, with `out`, keeps going 40px right · one direction of travel, never a retreat",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "slide-right",
           "stem": "part-entrances--slide-right",
-          "desc": "enters from its right and, with `out`, keeps going left · the mirror of slide-left",
+          "desc": "enters 40px from its right and, with `out`, keeps going 40px left · the mirror of slide-left",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "widen",
           "stem": "part-entrances--widen",
-          "desc": "scales out from its left edge. A row, a rule, anything that should fill rather than appear",
+          "desc": "scales its X from 0 to 1 anchored at its own left edge. A row, a rule, anything that should fill rather than appear",
           "scene": null,
           "noPreview": null
         }
@@ -2943,28 +2943,28 @@
         {
           "name": "arc",
           "stem": "path-curves-svg-d-generators--arc",
-          "desc": "a shallow rise-and-fall, peak in the middle",
+          "desc": "a shallow rise-and-fall · starts and ends at 94% of the box height, bows up through a control point 50% above the top edge at the midpoint",
           "scene": "/assets/effects/path-curves-svg-d-generators--arc.json",
           "noPreview": null
         },
         {
           "name": "dip",
           "stem": "path-curves-svg-d-generators--dip",
-          "desc": "a shallow sag-and-rise, trough in the middle",
+          "desc": "a shallow sag-and-rise · starts and ends at 12% of the box height, dips down through a control point at 150% of the height (below the box) at the midpoint",
           "scene": "/assets/effects/path-curves-svg-d-generators--dip.json",
           "noPreview": null
         },
         {
           "name": "ramp",
           "stem": "path-curves-svg-d-generators--ramp",
-          "desc": "a straight diagonal, top-left to bottom-right",
+          "desc": "a straight diagonal line from 90% height at the left edge to 18% height at the right edge, top-left to bottom-right",
           "scene": "/assets/effects/path-curves-svg-d-generators--ramp.json",
           "noPreview": null
         },
         {
           "name": "wave",
           "stem": "path-curves-svg-d-generators--wave",
-          "desc": "an S-curve, one full up-down cycle",
+          "desc": "one full S-curve cycle · leaves the 50% height midline through control points near the top at 18-32% width, crosses back through the midpoint, then dips through 82% width near the bottom before landing at 50% height",
           "scene": "/assets/effects/path-curves-svg-d-generators--wave.json",
           "noPreview": null
         }
@@ -3359,14 +3359,14 @@
         {
           "name": "bottom-left",
           "stem": "placement--bottom-left",
-          "desc": "pinned into the bottom-left corner of the safe area",
+          "desc": "pinned into the bottom-left corner, 6% of the short side in from both edges of the frame",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "bottom-right",
           "stem": "placement--bottom-right",
-          "desc": "pinned into the bottom-right corner of the safe area",
+          "desc": "pinned into the bottom-right corner, 6% of the short side in from both edges of the frame",
           "scene": null,
           "noPreview": null
         },
@@ -3380,7 +3380,7 @@
         {
           "name": "left",
           "stem": "placement--left",
-          "desc": "pinned to the left safe edge, vertically centred",
+          "desc": "pinned to the left safe edge (6% of the short side in from the frame), vertically centred",
           "scene": null,
           "noPreview": null
         },
@@ -3394,7 +3394,7 @@
         {
           "name": "right",
           "stem": "placement--right",
-          "desc": "pinned to the right safe edge, vertically centred",
+          "desc": "pinned to the right safe edge (6% of the short side in from the frame), vertically centred",
           "scene": null,
           "noPreview": null
         },
@@ -3415,56 +3415,56 @@
         {
           "name": "thirds-b",
           "stem": "placement--thirds-b",
-          "desc": "centred horizontally, sat on the lower third line",
+          "desc": "centred horizontally, sat on the lower third line at 67% down the frame",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "thirds-bl",
           "stem": "placement--thirds-bl",
-          "desc": "lands on the lower-left rule-of-thirds power point",
+          "desc": "lands at 33% across and 67% down · the lower-left rule-of-thirds power point",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "thirds-br",
           "stem": "placement--thirds-br",
-          "desc": "lands on the lower-right rule-of-thirds power point",
+          "desc": "lands at 67% across and 67% down · the lower-right rule-of-thirds power point",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "thirds-l",
           "stem": "placement--thirds-l",
-          "desc": "vertically centred, sat on the left third line",
+          "desc": "vertically centred, sat on the left third line at 33% across the frame",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "thirds-r",
           "stem": "placement--thirds-r",
-          "desc": "vertically centred, sat on the right third line",
+          "desc": "vertically centred, sat on the right third line at 67% across the frame",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "thirds-t",
           "stem": "placement--thirds-t",
-          "desc": "centred horizontally, sat on the upper third line",
+          "desc": "centred horizontally, sat on the upper third line at 33% down the frame",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "thirds-tl",
           "stem": "placement--thirds-tl",
-          "desc": "lands on the upper-left rule-of-thirds power point",
+          "desc": "lands at 33% across and 33% down · the upper-left rule-of-thirds power point",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "thirds-tr",
           "stem": "placement--thirds-tr",
-          "desc": "lands on the upper-right rule-of-thirds power point",
+          "desc": "lands at 67% across and 33% down · the upper-right rule-of-thirds power point",
           "scene": null,
           "noPreview": null
         },
@@ -3478,14 +3478,14 @@
         {
           "name": "top-left",
           "stem": "placement--top-left",
-          "desc": "pinned into the top-left corner of the safe area",
+          "desc": "pinned into the top-left corner, 6% of the short side in from both edges of the frame",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "top-right",
           "stem": "placement--top-right",
-          "desc": "pinned into the top-right corner of the safe area",
+          "desc": "pinned into the top-right corner, 6% of the short side in from both edges of the frame",
           "scene": null,
           "noPreview": null
         }
@@ -4026,7 +4026,7 @@
         {
           "name": "blur",
           "stem": "kinetic-text-presets--blur",
-          "desc": "resolve out of blur · calm, premium",
+          "desc": "resolves out of a 16px blur to 0 as it fades in · calm, premium",
           "scene": "/assets/effects/kinetic-text-presets--blur.json",
           "noPreview": null
         },
@@ -4040,7 +4040,7 @@
         {
           "name": "bounce",
           "stem": "kinetic-text-presets--bounce",
-          "desc": "springy bounce in · playful brands only",
+          "desc": "a spring bounces the unit up 60px with a visible overshoot (bounce 0.5, settle 0.5s) · playful brands only",
           "scene": "/assets/effects/kinetic-text-presets--bounce.json",
           "noPreview": null
         },
@@ -4061,28 +4061,28 @@
         {
           "name": "decode",
           "stem": "kinetic-text-presets--decode",
-          "desc": "scramble→settle, techy",
+          "desc": "characters scramble through the chosen charset at 48 refreshes a second by default and resolve left to right as u climbs to 1, techy reveal",
           "scene": "/assets/effects/kinetic-text-presets--decode.json",
           "noPreview": null
         },
         {
           "name": "down",
           "stem": "kinetic-text-presets--down",
-          "desc": "words/chars drop into place from above · the mirror of `up`",
+          "desc": "words/chars drop 40px into place from above while fading in · the mirror of `up`",
           "scene": "/assets/effects/kinetic-text-presets--down.json",
           "noPreview": null
         },
         {
           "name": "draw",
           "stem": "kinetic-text-presets--draw",
-          "desc": "stroke draw-on for SVG paths",
+          "desc": "an SVG stroke draws itself on · the dash offset runs from 1 to 0 on a path normalised to length 1, easeOutCubic by default, `back:true` draws from the far end",
           "scene": "/assets/effects/kinetic-text-presets--draw.json",
           "noPreview": null
         },
         {
           "name": "elastic",
           "stem": "kinetic-text-presets--elastic",
-          "desc": "elastic scale pop with visible wobble · playful brands only",
+          "desc": "scales up from 0.3 with a springy overshoot (bounce 0.62, settle 0.5s), visible wobble · playful brands only",
           "scene": "/assets/effects/kinetic-text-presets--elastic.json",
           "noPreview": null
         },
@@ -4124,14 +4124,14 @@
         {
           "name": "gradient",
           "stem": "kinetic-text-presets--gradient",
-          "desc": "gradient sweeps through letterforms",
+          "desc": "a two-colour band (default #8a8f98 to #ffffff) at 250% width sweeps through the letterforms via background-clip text",
           "scene": "/assets/effects/kinetic-text-presets--gradient.json",
           "noPreview": null
         },
         {
           "name": "highlight",
           "stem": "kinetic-text-presets--highlight",
-          "desc": "marker highlight sweep",
+          "desc": "a marker band, default rgba(255,220,90,0.35), grows left to right to 100% width behind the unit at 78% of its height",
           "scene": "/assets/effects/kinetic-text-presets--highlight.json",
           "noPreview": null
         },
@@ -4145,7 +4145,7 @@
         {
           "name": "scale",
           "stem": "kinetic-text-presets--scale",
-          "desc": "punch in from small (overshoot)",
+          "desc": "punches in from 0.4 scale to 1, an easeOutBack overshoot past the mark and back",
           "scene": "/assets/effects/kinetic-text-presets--scale.json",
           "noPreview": null
         },
@@ -4166,21 +4166,21 @@
         {
           "name": "skew",
           "stem": "kinetic-text-presets--skew",
-          "desc": "italic shear that straightens as it lands · editorial, sporty",
+          "desc": "slides in 70px with a 14deg italic shear that straightens as it lands · editorial, sporty",
           "scene": "/assets/effects/kinetic-text-presets--skew.json",
           "noPreview": null
         },
         {
           "name": "slide",
           "stem": "kinetic-text-presets--slide",
-          "desc": "slides in from one side (`dir`) · pair it with the opposite exit",
+          "desc": "slides in 80px from one side (`dir`), default left · pair it with the opposite exit",
           "scene": "/assets/effects/kinetic-text-presets--slide.json",
           "noPreview": null
         },
         {
           "name": "stretch",
           "stem": "kinetic-text-presets--stretch",
-          "desc": "horizontal smear that snaps true · impact words",
+          "desc": "stretches from 1.6x horizontal scale down to 1x with a 6px blur that clears as it snaps true · impact words",
           "scene": "/assets/effects/kinetic-text-presets--stretch.json",
           "noPreview": null
         },
@@ -4208,7 +4208,7 @@
         {
           "name": "type",
           "stem": "kinetic-text-presets--type",
-          "desc": "typewriter hard on/off, no transform · terminals, timers, code",
+          "desc": "a hard on/off with no transform · opacity flips from 0 to 1 the instant u passes `at` (default 0). Terminals, timers, code",
           "scene": "/assets/effects/kinetic-text-presets--type.json",
           "noPreview": null
         },
@@ -4229,7 +4229,7 @@
         {
           "name": "up",
           "stem": "kinetic-text-presets--up",
-          "desc": "words/chars rise into place, no blur · the plain lift",
+          "desc": "words/chars rise 40px into place while fading in, no blur · the plain lift, and the engine's own default reveal",
           "scene": "/assets/effects/kinetic-text-presets--up.json",
           "noPreview": null
         },
@@ -4449,21 +4449,21 @@
         {
           "name": "backdrop",
           "stem": "theme-look-keys--backdrop",
-          "desc": "ordered bg preset names the brand turns through, one window per beat · scaffold-only, seeds `make scaffold`'s `bg[]`, never read at render (bg is required, engine-doctrine/MISTAKES.md #159)",
+          "desc": "ordered bg preset names the brand turns through, one window per beat · planning-only, seeds a storyboard's `bg[]` plan, never read at render (bg is required, engine-doctrine/MISTAKES.md #159)",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "cuts",
           "stem": "theme-look-keys--cuts",
-          "desc": "the default and accent cut/transition names the brand favours",
+          "desc": "the default and accent cut/transition names the brand favours, one for almost every boundary and one reserved for its peak-energy beat",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "field",
           "stem": "theme-look-keys--field",
-          "desc": "grain and vignette defaults for the backdrop",
+          "desc": "grain and vignette numbers layered over the backdrop, both 0..1 strengths",
           "scene": null,
           "noPreview": null
         },
@@ -4477,7 +4477,7 @@
         {
           "name": "marks",
           "stem": "theme-look-keys--marks",
-          "desc": "the logo path plus its end-card and headline-adjacent sizes",
+          "desc": "the logo path plus its end-card and headline-adjacent sizes, both named pixel numbers",
           "scene": null,
           "noPreview": null
         },
@@ -4907,7 +4907,7 @@
         {
           "name": "blur",
           "stem": "scene-cuts--blur",
-          "desc": "resolve out of blur, calm, premium",
+          "desc": "resolves out of a 16px defocus, calm, premium",
           "scene": "/assets/effects/scene-cuts--blur.json",
           "noPreview": null
         },
@@ -4921,7 +4921,7 @@
         {
           "name": "collapse",
           "stem": "scene-cuts--collapse",
-          "desc": "vertical fold down to a line, terminal and data beats",
+          "desc": "vertical fold, scaleY from 0.05 up to 1, terminal and data beats",
           "scene": "/assets/effects/scene-cuts--collapse.json",
           "noPreview": null
         },
@@ -4942,14 +4942,14 @@
         {
           "name": "fade",
           "stem": "scene-cuts--fade",
-          "desc": "opacity only, masks, so a whole-frame cut needs sceneUnits",
+          "desc": "opacity only, 0 to 1 over the whole cut window, masks nothing, so a whole-frame cut needs sceneUnits",
           "scene": "/assets/effects/scene-cuts--fade.json",
           "noPreview": null
         },
         {
           "name": "flip",
           "stem": "scene-cuts--flip",
-          "desc": "perspective hinge flip about an edge, cards and panels",
+          "desc": "perspective hinge flip about an edge, rotates up to 55 degrees through a 1400px perspective, cards and panels",
           "scene": "/assets/effects/scene-cuts--flip.json",
           "noPreview": null
         },
@@ -4963,7 +4963,7 @@
         {
           "name": "jitter",
           "stem": "scene-cuts--jitter",
-          "desc": "decaying deterministic shake, alarm and glitch beats only",
+          "desc": "decaying deterministic shake, up to 14px of jitter, alarm and glitch beats only",
           "scene": "/assets/effects/scene-cuts--jitter.json",
           "noPreview": null
         },
@@ -4998,21 +4998,21 @@
         {
           "name": "rise",
           "stem": "scene-cuts--rise",
-          "desc": "translate up + fade in",
+          "desc": "translates up along the cut distance (default 90px) while fading in from 0 to 1",
           "scene": "/assets/effects/scene-cuts--rise.json",
           "noPreview": null
         },
         {
           "name": "riseBlur",
           "stem": "scene-cuts--riseblur",
-          "desc": "slow rise through heavy defocus, premium slow beats",
+          "desc": "slow rise through a 22px defocus, premium slow beats",
           "scene": "/assets/effects/scene-cuts--riseblur.json",
           "noPreview": null
         },
         {
           "name": "roll",
           "stem": "scene-cuts--roll",
-          "desc": "tilts in from a corner and settles level",
+          "desc": "tilts in from a corner (7 degrees) and settles level",
           "scene": "/assets/effects/scene-cuts--roll.json",
           "noPreview": null
         },
@@ -5047,7 +5047,7 @@
         {
           "name": "spin",
           "stem": "scene-cuts--spin",
-          "desc": "rotate in with a scale settle, logos, badges, seals",
+          "desc": "rotates in 90 degrees while scaling from 0.5 to 1, logos, badges, seals",
           "scene": "/assets/effects/scene-cuts--spin.json",
           "noPreview": null
         },
@@ -5061,7 +5061,7 @@
         {
           "name": "whip",
           "stem": "scene-cuts--whip",
-          "desc": "motion-blurred directional throw, momentum, between same-background beats only",
+          "desc": "motion-blurred directional throw, travels 3.2x the cut distance and blurs up to 14px, momentum, between same-background beats only",
           "scene": "/assets/effects/scene-cuts--whip.json",
           "noPreview": null
         },
@@ -5116,7 +5116,7 @@
         {
           "name": "cinematicZoom",
           "stem": "seams-2-scene-blends--cinematiczoom",
-          "desc": "dive-in zoom into a screen",
+          "desc": "the outgoing beat zooms in up to 1.25x intensity while the incoming beat zooms out from 1.25x, a dive-in push into a screen",
           "scene": "/assets/effects/seams-2-scene-blends--cinematiczoom.json",
           "noPreview": null
         },
@@ -5158,7 +5158,7 @@
         {
           "name": "flashWhite",
           "stem": "seams-2-scene-blends--flashwhite",
-          "desc": "white flash on an energy pivot",
+          "desc": "flashes to solid white at the midpoint (p=0.5) then reveals the arriving beat, an energy pivot",
           "scene": "/assets/effects/seams-2-scene-blends--flashwhite.json",
           "noPreview": null
         },
@@ -5193,7 +5193,7 @@
         {
           "name": "portal",
           "stem": "seams-2-scene-blends--portal",
-          "desc": "glowing portal reveal (once)",
+          "desc": "a glowing ring expands once to reveal the next beat, with up to 0.14x intensity of warp bend at its edge",
           "scene": "/assets/effects/seams-2-scene-blends--portal.json",
           "noPreview": null
         },
@@ -5256,7 +5256,7 @@
         {
           "name": "whipPan",
           "stem": "seams-2-scene-blends--whippan",
-          "desc": "momentum swipe between beats",
+          "desc": "a 6-sample motion-blurred smear thrown toward dir, offset up to 0.9x intensity, momentum carried between beats",
           "scene": "/assets/effects/seams-2-scene-blends--whippan.json",
           "noPreview": null
         },
@@ -5290,7 +5290,7 @@
         {
           "name": "blinds",
           "stem": "shader-stings--blinds",
-          "desc": "venetian bars opening together. Mechanical and rhythmic.",
+          "desc": "venetian bars opening together, 14 bars sweeping in lockstep. Mechanical and rhythmic.",
           "scene": "/assets/effects/shader-stings--blinds.json",
           "noPreview": null
         },
@@ -5493,7 +5493,7 @@
         {
           "name": "swirl",
           "stem": "shader-stings--swirl",
-          "desc": "rotational light streaks thrown out from the centre.",
+          "desc": "8 rotational light streaks thrown out from the centre, spinning up to a full turn.",
           "scene": "/assets/effects/shader-stings--swirl.json",
           "noPreview": null
         },

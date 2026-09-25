@@ -78,10 +78,9 @@ beats moving the *same way* is still monotone. The register changes the restrain
 variety requirement.
 
 **Where the split lives now: `harness/author/type-spines.mjs`.** Each type spine carries a `register`
-field (`'kinetic'` or `'quiet'`) so the register is SELECTED by the type at scaffold time, not
-remembered by the author on every film. `make scaffold --type launch` starts kinetic; `make scaffold
---type explainer` starts quiet. See §5 of `DIRECTION.md` and the per-type `SKILL.md` files for the
-consuming doctrine.
+field (`'kinetic'` or `'quiet'`) so the register is SELECTED by the type when the storyboard is written,
+not remembered by the author on every film. A launch storyboard starts kinetic; an explainer starts
+quiet. See §5 of `DIRECTION.md` and the per-type `SKILL.md` files for the consuming doctrine.
 
 ---
 

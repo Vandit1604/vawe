@@ -169,7 +169,7 @@ half: what fields are legal to write at one JSON path, read live off \`films/sce
 
 \`\`\`
 make pitch                          # ask the four questions: subject, data, payoff, audience/feeling
-make scaffold OUT=films/scene/x.json  # a directed skeleton (beats + continuous object), never a blank file
+                                     # write films/scene/x.storyboard.md from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md
 make dev D=films/scene/x.json     # THE iteration loop: build, draft-render, look. No gates.
 make ship D=films/scene/x.json    # the real ladder: author-check -> render -> audit -> seams
 make judge D=films/scene/x.json   # the one step that SEES: composition and fidelity, post-render

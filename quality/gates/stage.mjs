@@ -116,12 +116,10 @@ export function stageOf(arg) {
     ? blocksOf(sbSrc).map((b) => parseFragmentSpec(fieldIn(b, 'fragment')).path).filter(Boolean)
     : [];
   const missingFrags = [...new Set(fragments)].filter((f) => !fs.existsSync(path.join(ROOT, f)));
-  // `_scaffold: true` marks the ONE placeholder layer `make scaffold` writes so a fresh plan-stage
-  // scene has a layer to satisfy films/scene/schema.json's `minItems: 1` (harness/author/scaffold.mjs)
-  // without lying about the film being built. It is not the film, so it must not count as one: `make
-  // assemble` (AGENTS.md stage 5) replaces `layers` outright, but a film sitting at design/approval
-  // must still read as pre-assemble here, or every later stage check built on `layers > 0` fires early.
-  const layers = (scene && Array.isArray(scene.layers) ? scene.layers : []).filter((l) => !(l && l._scaffold)).length;
+  // No scene JSON exists before approval: the storyboard is the plan, and `make assemble` (AGENTS.md
+  // stage 5) writes `layers` for the first time. A `_scaffold: true` filter used to live here for a
+  // placeholder layer `make scaffold` wrote; that generator is gone and no film on disk carries the tag.
+  const layers = scene && Array.isArray(scene.layers) ? scene.layers.length : 0;
 
   // THE PLAN JUDGE MAY BE REQUIRED TO HAVE RUN, NEVER TO HAVE PASSED. `exists && !stale` is "the eye
   // looked at THIS version of the storyboard"; it says nothing about what it found, because findings
@@ -149,7 +147,7 @@ export function stageOf(arg) {
         : !structurallyOk ? 'the storyboard exists and does not pass its own gate yet.'
         : planJudge.exists && planJudge.stale ? `the plan judge's last verdict is stale: ${path.relative(ROOT, p.sb)} changed since it ran.`
         : 'the storyboard passes its own gate, but nothing has judged it as a PLAN yet: one through-line, beats that earn their seconds, a spectacle that is actually loudest, an eye path that holds, motion that varies. An exit code cannot answer any of those.',
-      next: !sbExists ? `make scaffold OUT=${p.base}.json THEME=<theme> DUR=<seconds>   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, engine-doctrine/CRAFT/IDEATE.md)`
+      next: !sbExists ? `write ${path.relative(ROOT, p.sb)} from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md   (have a reference or an idea and no prompt yet? make ideate REF=<ref> | NAME=${p.name} IDEA="..." first, engine-doctrine/CRAFT/IDEATE.md)`
         : !structurallyOk ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}`
         : `make plan-judge D=${p.base}.json   (findings only; the owner still signs off at approval)` },
     { id: 'design', done: sbExists && missingFrags.length === 0 && gatePasses('quality/gates/frame-check.mjs', p.scene),

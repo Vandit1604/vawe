@@ -185,9 +185,9 @@ Leaving motion at defaults is shared DNA across brands; don't.
 **Write `look` into the theme too** (`engine-doctrine/CRAFT/THEME-LOOK.md`): the bg preset rotation, the
 type scale, the layout anchor/margin, the mark's two sizes, the cut family, the audio cues. This
 is the same study, spent a second time: a theme with `motion` but no `look` still forces every
-FILM for that brand to re-decide its own backdrop and cut family from scratch. `make scaffold
-TYPE=<type> THEME=<name>` reads `look` and uses it; `make arsenal THEME=<name>` renders it
-as a picture so you can check it before authoring the film.
+FILM for that brand to re-decide its own backdrop and cut family from scratch. Read `look` when you
+write the storyboard from the type spine; `make arsenal THEME=<name>` renders it as a picture so you
+can check it before authoring the film.
 
 **Name 2–3 references** that fit THIS brand ("Vercel keynote restraint", "Sandwich Video
 warmth") and state what the design borrows and what it refuses. Different reference triangle,
@@ -195,10 +195,12 @@ different output: this breaks the author's own habits.
 
 ## Step 3: Storyboard on paper before JSON
 
-**First, run `make scaffold OUT=films/scene/<name>.json DUR=<n> THEME=<name>`.** It writes an
-empty-layers scene shell tiled with placeholder beats, plus its `.storyboard.md` sidecar with the
-frontmatter and per-beat fields storyboard-check and craft-checklist ask for, each field the plan below
-still has to decide marked `REPLACE:`/`<fill: ...>`. Fill those in, never hand-write JSON from blank.
+**No generator writes this for you.** Write the plan as prose first (what happens, beat by beat, in
+your own words), then a short checklist of the fields below, then the storyboard itself:
+`films/scene/<name>.storyboard.md`, from `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`'s frontmatter
+and per-beat fields. No scene JSON exists yet, the storyboard is the plan; `make assemble` writes
+`layers` only after approval (Step 4). `SPECTACLE` and `NOT` (AGENTS.md stage 1): a value the human
+already gave stays verbatim, you fill either only when the human left it unsaid.
 
 If the request already named the spectacle or the exclusions, pass `SPECTACLE="…"`/`NOT="…"` so
 scaffold writes them verbatim and marks them `human`; only fill the two yourself when the request left

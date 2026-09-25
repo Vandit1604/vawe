@@ -160,7 +160,7 @@ if (missed.length) {
 // available", never "what does excellent look like". `examples.json`'s goldSet holds the films this
 // repo is proudest of; `nearestExemplars` picks the 2-3 whose register is closest to what THIS film
 // says it is, so an agent studying it has something to imitate, not only rules to avoid. Retrieval
-// lives in harness/lib/exemplars.mjs so `make scaffold` composes from the SAME ranking (one owner).
+// lives in harness/lib/exemplars.mjs so any future caller composes from the SAME ranking (one owner).
 const feelForExemplars = [scene.note, scene.spectacle && scene.spectacle.of, sb && fs.readFileSync(sb, 'utf8')]
   .filter(Boolean).join(' ');
 const gold = nearestExemplars(feelForExemplars, 3);

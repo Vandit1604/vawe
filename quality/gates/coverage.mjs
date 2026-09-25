@@ -176,8 +176,8 @@ const unusedProps = [...schemaProps].filter((p) => !used.prop.has(p)).sort();
 
 /**
  * darkVocabularySummary() -> total dark (never-used) names across every group above, plus the total
- * named. For a one-line nudge elsewhere (`make scaffold`) that should not re-run this whole report or
- * print anything itself.
+ * named. For a one-line nudge elsewhere that should not re-run this whole report or print anything
+ * itself.
  */
 export function darkVocabularySummary() {
   const total = GROUPS.reduce((n, [, all]) => n + all.length, 0);
@@ -200,7 +200,7 @@ function adoptionCount() {
 const RATCHET = path.join(repoRoot, 'quality/baselines/coverage-ratchet.json');
 
 // Only print the report (and only exit through the WARN-tier gate) when run directly. Importing this
-// module for `darkVocabularySummary()` (make scaffold) must be silent and side-effect-free.
+// module for `darkVocabularySummary()` must be silent and side-effect-free.
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   console.log(`── coverage across ${scenes.length} AUTHORED scene(s) (a .storyboard.md sidecar exists)\n`);
   for (const [label, all, seen] of GROUPS) {

@@ -983,7 +983,7 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 
 | name | words | action |
 |---|---|---|
-| `backdrop` | brand background rotation, which bg presets to use | ordered bg preset names the brand turns through, one window per beat: scaffold-only, seeds `make scaffold`'s `bg[]`, never read at render (bg is required, engine-doctrine/MISTAKES.md #159) |
+| `backdrop` | brand background rotation, which bg presets to use | ordered bg preset names the brand turns through, one window per beat: planning-only, seeds a storyboard's `bg[]` plan, never read at render (bg is required, engine-doctrine/MISTAKES.md #159) |
 | `cuts` | default transition style, brand cut preference | the default and accent cut/transition names the brand favours, one for almost every boundary and one reserved for its peak-energy beat |
 | `field` | backdrop texture defaults, grain and vignette settings | grain and vignette numbers layered over the backdrop, both 0..1 strengths |
 | `layout` | anchor and margin, where content sits on the frame | the anchor band (left/center/right) and margin every beat composes against |

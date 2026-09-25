@@ -143,12 +143,12 @@ export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRI
   slot: 'theme.look',
   aka: LOOK_KEY_AKA,
   blurbs: {
-    // SCAFFOLD-ONLY, not read at render: `bg` is a REQUIRED authoring field (core/engine/produce.js:14-16),
+    // PLANNING-ONLY, not read at render: `bg` is a REQUIRED authoring field (core/engine/produce.js:14-16),
     // written precisely so the engine never picks the backdrop for an author again (engine-doctrine/MISTAKES.md
     // #159: "the engine PICKED the background, so nobody ever designed one"). `backdrop` here is only
-    // the theme's own suggested rotation, read by `make scaffold` to seed `bg[]`; a film's own `bg`
+    // the theme's own suggested rotation, for the storyboard's `bg[]` plan; a film's own `bg`
     // array is what actually renders, and the engine will not fall back to this list on your behalf.
-    backdrop: 'ordered bg preset names the brand turns through, one window per beat: scaffold-only, seeds `make scaffold`\'s `bg[]`, never read at render (bg is required, engine-doctrine/MISTAKES.md #159)',
+    backdrop: 'ordered bg preset names the brand turns through, one window per beat: planning-only, seeds a storyboard\'s `bg[]` plan, never read at render (bg is required, engine-doctrine/MISTAKES.md #159)',
     scale: 'how big text should be: named px sizes for the hook / headline / body / caption roles at '
       + '16:9, so a layer writes `"size": "headline"` instead of guessing a number',
     layout: 'the anchor band (left/center/right) and margin every beat composes against',
@@ -307,7 +307,7 @@ export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) 
 //     pick for an author (engine-doctrine/MISTAKES.md #159: the engine used to choose the background and nobody
 //     ever designed one again; `bg` is a required authoring field now, core/engine/produce.js's own
 //     header explains why). `theme.bgDefault` stays the one engine-owned bg default; `look.backdrop`
-//     is a `make scaffold` seed only, never read by the renderer (see its blurb above).
+//     is a storyboard-planning seed only, never read by the renderer (see its blurb above).
 //   - `marks` needs a real logo PATH. No theme-agnostic default exists (a made-up path 404s at
 //     render), so a theme with no marks stays without one until it declares its own.
 // (`cues` used to be a third: deleted from LOOK_KEYS entirely, see the comment beside LOOK_KEY_ENTRIES.)

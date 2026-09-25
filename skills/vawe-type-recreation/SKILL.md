@@ -19,11 +19,11 @@ built differently: `make study` measures the reference's actual shot lengths, gr
 threads, and THAT is the spine to recreate. If nothing has been studied yet, that is the first move,
 not a skippable step.
 
-**`make scaffold TYPE=recreation` never switches to the continuous-action shape, at any duration.**
+**This type never switches to the continuous-action shape by default, at any duration.**
 `type-spines.mjs` declares `continuousObject: null` for this type on purpose, the same reasoning as
-`register: null`: the studied source may or may not be a continuous action, and this scaffold cannot
-know which until you have studied it. Forcing one prop across a reference that was actually cut into
-chapters (or the reverse) lies about the content. Study first, then decide, same as the register.
+`register: null`: the studied source may or may not be a continuous action, and nothing can know which
+until you have studied it. Forcing one prop across a reference that was actually cut into chapters (or
+the reverse) lies about the content. Study first, then decide, same as the register.
 
 ## What this type needs that others do not
 
@@ -62,16 +62,11 @@ A film reference: `make study VIDEO=<file> NAME=<name>`. A site reference: `make
 NAME=<name>` + `make palette`. Never re-download or commit the reference's own frames; the grammar file
 is the only artefact this type keeps.
 
-## `make scaffold TYPE=recreation`
+## Writing the storyboard
 
-```bash
-make scaffold OUT=films/scene/<name>.json TYPE=recreation DUR=11
-```
-
-Composes a minimal `kineticHook -> statReveal -> ctaEnd` fallback spine (`harness/author/
-type-spines.mjs`): deliberately generic, since a real recreation's beat shapes come from the studied
-grammar, not from a table. Treat the scaffold as a starting skeleton to REPLACE with the studied shape,
-not as the recreation itself.
+`harness/author/type-spines.mjs`'s fallback spine, `kineticHook -> statReveal -> ctaEnd`, is
+deliberately generic: a real recreation's beat shapes come from the studied grammar, not from a table.
+Treat it as a starting skeleton to REPLACE with the studied shape, not as the recreation itself.
 
 ## What the judge weighs for this type
 

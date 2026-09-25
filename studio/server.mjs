@@ -36,9 +36,9 @@ import { expandTheme, isTokenFile } from '../core/theme/roles.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataArg = process.env.D || process.argv[2];
-// A film at `plan` (AGENTS.md stage 2) has a storyboard and no scene.json yet: `make scaffold` writes
-// both together, but the storyboard is what the Plan pane needs, so a film named by its future
-// scene.json path (not yet on disk) still opens on the plan instead of refusing outright. Every other
+// A film at `plan` (AGENTS.md stage 2) has a storyboard and no scene.json yet: no scene JSON is
+// written before approval, but the storyboard is what the Plan pane needs, so a film named by its
+// future scene.json path (not yet on disk) still opens on the plan instead of refusing outright. Every other
 // route already tolerates a missing/unparsable dataArg (`THEME_NAME`, `storyboardPath()`, and the
 // engine's own boot() all fail readable rather than throw raw), so this only widens the ONE hard gate.
 const hasStoryboard = !!dataArg && fs.existsSync(dataArg.replace(/\.json$/, '.storyboard.md'));
@@ -492,7 +492,7 @@ async function buildPlanFrames() {
   // differently (prose, then a copyable code chip), and a regex pulled out of prose is how that pairing
   // would drift the moment either side's wording changed.
   const allMissing = (missing, cmd) => (planFrames = { key, frames: beats.map(() => ({ missing, cmd })) });
-  if (!sceneExists) return allMissing('no scene.json yet.', `make scaffold D=${rel}`);
+  if (!sceneExists) return allMissing('no scene.json yet: expected before approval, the storyboard is the plan.');
   const d = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
   if (!(Array.isArray(d.layers) && d.layers.length)) return allMissing('no scene layers yet.', `make assemble D=${rel}`);
   const dur = Number(d.duration) || 0;
@@ -991,7 +991,7 @@ async function preflight() {
     // to catch (pin-recreation opening onto a raw `boot()` stack trace) slipped past an earlier draft
     // of this same check. A crash or a hang here is always a FAIL. `__engineError` is a fail too,
     // UNLESS the film is pre-assemble, where it is the expected, correct shape of an unbuilt film
-    // (harness/author/scaffold.mjs's own placeholder) and gets NAMED rather than counted as green.
+    // (no scene.json exists yet) and gets NAMED rather than counted as green.
     { name: 'scene', run: async () => {
       const { close, page } = await launchPage({ width: 640, height: 360 });
       try {

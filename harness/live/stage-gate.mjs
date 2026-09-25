@@ -102,7 +102,7 @@ process.stdin.on('end', () => {
       + 'fragment. AGENTS.md orders the deciders storyboard (1), subject (2), scene (3), and scene is the '
       + 'role that writes this file. The beat table is what decides how many fragments exist and names the '
       + 'selectors each must expose (engine-doctrine/MISTAKES.md #591).\nNext: write the storyboard first, '
-      + '`make scaffold OUT=films/scene/<film>.json THEME=<theme> DUR=<seconds>`.',
+      + 'from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md.',
       'no-storyboard', stemOf(rel));
   }
   const p = filePaths(film);
@@ -122,12 +122,9 @@ process.stdin.on('end', () => {
   //    contract this repo states in two places and kept losing.
   if (rel === `${FILMS_DIR}/${film}.json` && !st.approved) {
     let layers = 0;
-    // `_scaffold: true` marks `make scaffold`'s own single placeholder layer (harness/author/
-    // scaffold.mjs), written only so films/scene/schema.json's `minItems: 1` on `layers` passes before
-    // any real content exists. It is not the film this rule exists to keep out, so it does not count.
     try {
       const d = JSON.parse(text);
-      layers = Array.isArray(d.layers) ? d.layers.filter((l) => !(l && l._scaffold)).length : 0;
+      layers = Array.isArray(d.layers) ? d.layers.length : 0;
     } catch { layers = /"layers"\s*:\s*\[\s*\{/.test(text) ? 1 : 0; }
     if (layers > 0) {
       deny(`${film}'s plan is not approved, so the scene may not be filled in yet (stage: ${st.stage}). `

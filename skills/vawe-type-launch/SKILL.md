@@ -12,10 +12,10 @@ step-by-step orchestrated pipeline if you want the full gated flow instead of au
 
 ## The spine changes shape with length
 
-**Under ~15s: ONE CONTINUOUS ACTION, not the six-beat spine below.** `make scaffold TYPE=launch DUR=<n>`
-switches automatically at `CONTINUOUS_ACTION_MAX_S` (`harness/author/type-spines.mjs`, 15s): the primary
-action control (the button or field the viewer would press) is named once, carries a hand-keyed track
-across the whole film, and never cuts. Read `skills/vawe-continuous-action/SKILL.md` first at this
+**Under ~15s: ONE CONTINUOUS ACTION, not the six-beat spine below.** `CONTINUOUS_ACTION_MAX_S`
+(`harness/author/type-spines.mjs`, 15s) is the switch: below it, write the storyboard around the
+primary action control (the button or field the viewer would press), named once, carrying a hand-keyed
+track across the whole film, never cutting. Read `skills/vawe-continuous-action/SKILL.md` first at this
 length; the six-beat spine below is the wrong shape for it, not a shorter version of it.
 
 **At or past ~15s: the six-beat spine**, hook -> captured UI -> feature proof -> payoff -> brand lockup
@@ -67,16 +67,12 @@ cluster as an image; `make palette` eyedrops the real colours; `make assets` pul
 a bare `curl`, which writes a zero-byte file on a 404). Crawl every page and view mode, not just the
 homepage: the real product often lives one click deeper than the hero.
 
-## `make scaffold TYPE=launch`
+## Writing the storyboard
 
-```bash
-make scaffold OUT=films/scene/<name>.json TYPE=launch DUR=13
-```
-
-Composes `kineticHook -> screenDive -> cardCascade -> statReveal -> logoLockup -> ctaEnd`
+Beats, in order: `kineticHook -> screenDive -> cardCascade -> statReveal -> logoLockup -> ctaEnd`
 (`harness/author/type-spines.mjs`), cycling `soft/mesh/spotlight/accent` bg presets and a
-fade-then-cinematicZoom cut family. `screenDive`/`logoLockup` need real `image`/`mark` paths: the
-scaffold marks them `REPLACE:` since it cannot invent an asset for you.
+fade-then-cinematicZoom cut family. `screenDive`/`logoLockup` need real `image`/`mark` paths: mark them
+`REPLACE:` in the storyboard until the real capture exists, never invent one.
 
 ## What the judge weighs for this type
 

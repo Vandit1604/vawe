@@ -1,6 +1,6 @@
 ---
-when: a theme should carry more than colours and fonts, or a scaffold keeps re-deciding the same thing per film
-answers: "the `look` block's shape (backdrop/scale/layout/marks/cuts/field) · how it is validated · how the scaffold merges it over the type spine · how to see it as a picture"
+when: a theme should carry more than colours and fonts, or a film keeps re-deciding the same thing per film
+answers: "the `look` block's shape (backdrop/scale/layout/marks/cuts/field) · how it is validated · how a storyboard merges it over the type spine · how to see it as a picture"
 group: crosscutting
 ---
 
@@ -9,15 +9,15 @@ group: crosscutting
 ## AGENT SUMMARY
 
 - `theme.look` (optional; `core/registry/theme-contract.js`) fixes the things AGENTS.md names as re-decided per
-  film: `backdrop` (bg preset rotation, scaffold-only, see below), `scale` (hook/headline/body/caption
+  film: `backdrop` (bg preset rotation, planning-only, see below), `scale` (hook/headline/body/caption
   type sizes), `layout` (anchor + margin), `marks` (logo path + its two sizes), `cuts` (default/accent
   transition), `field` (grain/vignette).
 - Validated at load, same discipline as every other named vocabulary: an unknown `look` key, an
   unknown bg preset, or an unknown transition refuses with the near word (`core/validate/validate.mjs`
   `validateTheme`, checked for every `themes/*.json` pack by `make validate`).
-- `make scaffold TYPE=<type> THEME=<name>` reads `theme.look` and merges it OVER the type spine
-  (`harness/author/type-spines.mjs`): the brand's own fixed look wins, the type spine is only a
-  fallback for a theme with none.
+- Writing a storyboard from a type spine (`harness/author/type-spines.mjs`)? Read `theme.look` first
+  and let it win: the brand's own fixed look overrides the type spine, which is only a fallback for a
+  theme with none.
 - `make theme-sheet THEME=<name>` renders one contact sheet so a brand's look is a picture, not JSON.
 
 ## Why this exists
@@ -28,7 +28,7 @@ scale, the layout band, how the mark is used, which cut family, which audio cues
 same brand could use different backdrops, different cut families, different scales, because nothing
 fixed those choices at the brand level, only at the palette level.
 
-`look` is deliberately small: only the things a scaffold or an author was already re-deciding by hand,
+`look` is deliberately small: only the things an author was already re-deciding by hand,
 not a second copy of everything a scene can express. A scene that sets a field explicitly still wins
 over the theme (the theme is a DEFAULT, never a constraint an author cannot override).
 
@@ -47,7 +47,7 @@ over the theme (the theme is a DEFAULT, never a constraint an author cannot over
 
 | Key | Shape | Checked against |
 |---|---|---|
-| `backdrop` | non-empty array of bg preset names, **scaffold-only** (see below) | `core/backgrounds/index.js` `BG_NAMES` |
+| `backdrop` | non-empty array of bg preset names, **planning-only** (see below) | `core/backgrounds/index.js` `BG_NAMES` |
 | `scale` | `{hook, headline, body, caption}`, each a number | shape-checked only; the role NAMES are fixed (`LOOK_SCALE_KEYS`), not a registry an author picks a value from |
 | `layout` | `{anchor: left\|center\|right, margin: number}` | `anchor` against a fixed enum |
 | `marks` | `{logo: path, endCardSize: number, headlineSize: number}` | (structural only, `logo` is a path an author must keep valid) |
@@ -68,9 +68,9 @@ the theme carries no scale for) throws and names every role the theme's `look.sc
 the same refusal shape `resolveJunction` uses for `"cut@1"`. Every theme has a `scale` to resolve
 against, authored or computed (see below), so the four roles work on any theme.
 
-**`backdrop` is a scaffold-only authoring hint, and the engine deliberately does not read it.** `make
-scaffold TYPE=<type> THEME=<name>` seeds a new film's `bg[]` from it (see "How the scaffold uses it"
-below), but nothing at render time falls back to `theme.look.backdrop`: `bg` is a REQUIRED authoring
+**`backdrop` is a planning-only authoring hint, and the engine deliberately does not read it.** It seeds
+the storyboard's `bg[]` plan when the author writes it (see "How a storyboard uses it" below), but
+nothing at render time falls back to `theme.look.backdrop`: `bg` is a REQUIRED authoring
 field (`core/engine/produce.js:14-16`), written precisely so the engine can never again pick the
 backdrop for an author. `engine-doctrine/MISTAKES.md` #159 is that exact mistake by name: "the engine PICKED the
 background, so nobody ever designed one." Wiring `look.backdrop` as a render-time fallback would
@@ -100,7 +100,7 @@ rotation in order. A film with no joints stays one shot: there is nowhere for a 
 which is a true answer, not a fallback. A film that authors its own `bg` windows (any count, any
 `from`/`to`) is untouched, and a theme with a single-object `bgDefault` behaves exactly as before.
 
-This is NOT `look.backdrop` reopened under a new name. `look.backdrop` stays scaffold-only and is still
+This is NOT `look.backdrop` reopened under a new name. `look.backdrop` stays planning-only and is still
 never read at render; the rotation lives on the field already read at render (`bgDefault`), and only
 fires when the author already wrote the opt-in the engine has always honoured.
 
@@ -119,14 +119,14 @@ loads `core/validate/validate.mjs`, which loads `theme-contract.js`, at render t
 every `validateTheme` call, browser and CLI alike: neither list requires a node-only import the way the
 old `cues` check did.
 
-## How the scaffold uses it
+## How a storyboard uses it
 
-Blueprints are retired (recipes/README.md): `make scaffold TYPE=<type> THEME=<name>`
-(`harness/author/scaffold.mjs`) no longer writes a film's layers. It writes the storyboard sidecar and
-a scene shell (`layers: []`) at the shape an approved plan has before `make assemble`. `look` is not
-merged into that shell, because there are no layers yet to merge it onto; a theme's `backdrop`/`cuts`/
-`scale`/`layout` are still the fixed facts about the brand they always were, and the assembling author
-(or the recipe that composes a beat's motion) reads them at that later stage instead.
+Blueprints are retired (recipes/README.md). No scene JSON exists before approval: the storyboard is
+the plan, written from a type spine (`harness/author/type-spines.mjs`) and
+`engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`. `look` is not merged into any shell, because there are
+no layers yet to merge it onto; a theme's `backdrop`/`cuts`/`scale`/`layout` are still the fixed facts
+about the brand they always were, and the assembling author (`make assemble`, or the recipe that
+composes a beat's motion) reads them at that later stage instead.
 
 ## Seeing it: `make theme-sheet`
 
@@ -200,7 +200,7 @@ reason.
   a film turns through is a taste decision, and the engine choosing it for an author is
   `engine-doctrine/MISTAKES.md` #159 by name: `bg` is a required authoring field (`core/engine/produce.js:14-16`)
   precisely so this cannot happen again. `theme.bgDefault` remains the one engine-owned bg default;
-  `computedLook` does not become a second one, and `look.backdrop` stays a `make scaffold` seed only.
+  `computedLook` does not become a second one, and `look.backdrop` stays a storyboard-planning seed only.
 - **`marks` needs a real logo path.** No theme-agnostic default exists (a made-up path 404s at render),
   so a theme with no `marks` stays without one until it declares its own.
 
@@ -209,11 +209,11 @@ reason.
 each joint, so a fixed per-theme cue list was a second, disagreeing owner of the same fact rather than
 something worth computing a default for.)
 
-`harness/author/scaffold.mjs` reads `computedLook(themeObj)` as its own last-resort fallback (in place
-of the literal `{default:"fade",accent:"cinematicZoom"}` and `margin ?? 160` it used to hold as a second
-copy), so the scaffold and the engine cannot drift on the same numbers the way two copies of
-`harness/lib/theme-bg.mjs`'s `bgBlock` once did. The scaffold's own priority is unchanged: an authored
-`theme.look` still wins over the `--type` spine, which still wins over this house default.
+`core/engine/boot.js` reads `resolveLook`/`computedLook(themeObj)` as the render-time fallback (in place
+of a literal `{default:"fade",accent:"cinematicZoom"}` and `margin ?? 160` held as a second copy), so no
+consumer can drift from the engine on the same numbers the way two copies of `harness/lib/theme-bg.mjs`'s
+`bgBlock` once did. The same priority holds wherever `look` is read: an authored `theme.look` still wins
+over a type spine, which still wins over this house default.
 
 `core/engine/produce.js`'s `produceBaseline(data, theme, frame, look)` now takes the resolved look as
 its fourth argument, wired from `core/engine/boot.js` (theme resolved once, before `resolveCoords`, so
