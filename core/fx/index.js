@@ -70,7 +70,24 @@ export const FX_BLURBS = {
 // objects the dispatch below reads, so the search cannot advertise a vocabulary the engine does not
 // have. `pick` keeps its own refusal rather than calling this one, because the message an author gets
 // for a misspelled modifier has to say what the `modifiers` ARRAY is, which no shared hint can know.
-export const FX_REGISTRY = defineRegistry('modifier', REGISTRY, { blurbs: FX_BLURBS, slot: 'modifiers[]',
+const FX_AKA = {
+  alongPath: ['text on a curve', 'type on a path', 'curved text'],
+  ghost: ['motion trail', 'motion blur streak', 'afterimage trail'],
+  lag: ['follow through', 'drag behind', 'delayed follow motion'],
+  matte: ['luma matte', 'brightness mask', 'wipe reveal'],
+  squash: ['squash and stretch', 'cartoon bounce', 'stretch on velocity'],
+  kick: ['hit on the cut', 'jolt on the beat', 'impact on edit'],
+  mixBlend: ['blend mode modifier', 'composite mode', 'knock out of photo'],
+  occlude: ['hide behind another layer', 'occlusion', 'depth sort hiding'],
+  plane: ['parallax depth', 'stand at a distance', 'depth modifier'],
+  progress: ['film progress variable', 'timeline percent', 'progress ring driver'],
+  shadow: ['cast shadow', 'drop shadow with light', 'directional shadow'],
+  upright: ['auto orient', 'stay upright', 'counter rotate'],
+  tilt: ['3D tilt', 'turn out of plane', 'leaning card'],
+  wordSlot: ['word swap', 'rotating word', 'text slot machine'],
+};
+
+export const FX_REGISTRY = defineRegistry('modifier', REGISTRY, { blurbs: FX_BLURBS, aka: FX_AKA, slot: 'modifiers[]',
   catalog: {
     title: 'Per-layer modifiers',
     tag: 'per-layer',
