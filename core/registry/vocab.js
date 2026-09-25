@@ -194,11 +194,38 @@ const CAMERA_BLURBS = {
 // tied with `hang`, a motion-key influence preset that also mentions "snappy" in its own blurb.
 const FEEL_AKA = {
   snappy: ['springy', 'crisp', 'punchy'],
+  smooth: ['glide', 'gliding', 'ease in and out', 'flowing motion'],
+  soft: ['settle in', 'gentle landing', 'no overshoot', 'cushioned stop'],
+  sharp: ['abrupt stop', 'hard slowdown', 'instant departure'],
+  gentle: ['ambient drift', 'shallow ease', 'unhurried background motion'],
+  heavy: ['weighty', 'massive', 'slow to start and stop', 'ponderous'],
+  pop: ['overshoot and settle', 'bounce back into place', 'little kick'],
+  bouncy: ['spring bounce', 'springy landing', 'visible bounce'],
+  elastic: ['rubber band', 'wobble', 'repeated overshoot'],
+  stiff: ['tight spring', 'barely any give', 'crisp spring'],
+  mechanical: ['robotic', 'constant speed', 'no acceleration', 'machine-like'],
 };
 
 export const FEEL_REGISTRY = defineRegistry('feel word', FEEL, { slot: 'ease', blurbs: FEEL_BLURBS, aka: FEEL_AKA });
 export const DURATION_REGISTRY = defineRegistry('duration word', DURATION, { slot: 'enterDur', blurbs: DURATION_BLURBS, aka: DURATION_AKA });
-export const CAMERA_WORD_REGISTRY = defineRegistry('camera word', CAMERA_WORDS, { slot: 'cameraMove.move', blurbs: CAMERA_BLURBS });
+const CAMERA_WORD_AKA = {
+  'push in': ['move closer', 'zoom in slowly', 'tighten on the subject'],
+  'slow push-in': ['creep closer', 'gradual zoom in', 'slow zoom'],
+  'pull back': ['widen out', 'reveal the context', 'back away'],
+  'zoom out': ['widen the shot', 'show the whole scene', 'back off'],
+  dive: ['dive in', 'plunge toward', 'crash toward a target'],
+  follow: ['track the subject', 'pan to keep up', 'follow the action'],
+  sweep: ['sweep across', 'truck sideways', 'lateral move'],
+  tour: ['multi-stop flight', 'visit several spots', 'station to station'],
+  'pan stations': ['stop at each station', 'guided tour', 'sequential pan'],
+  circle: ['orbit the subject', 'swing around', 'rotate around'],
+  'ui focus zoom': ['zoom to a control', 'focus on a panel', 'highlight a UI element'],
+  'punch in': ['crash zoom', 'sudden zoom in', 'hard cut closer'],
+  shake: ['camera jolt', 'impact shake', 'screen shake'],
+  'drift hold': ['handheld hold', 'breathing camera', 'never fully still'],
+};
+
+export const CAMERA_WORD_REGISTRY = defineRegistry('camera word', CAMERA_WORDS, { slot: 'cameraMove.move', blurbs: CAMERA_BLURBS, aka: CAMERA_WORD_AKA });
 
 /**
  * resolveSeconds(v): a duration slot's value, whatever spelling it arrived in.
