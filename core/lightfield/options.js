@@ -55,8 +55,15 @@ const catalogFor = (title, slot, extra) => ({
   noPreview: 'a dial is a value, not an effect. Turn them together at /playground.',
 });
 
+const PATTERN_AKA = {
+  slats: ['venetian blind', 'vertical bars of light'],
+  rings: ['ripples on water', 'concentric light rings'],
+  shards: ['light rays from below', 'sunburst fan'],
+};
+
 export const PATTERN_REGISTRY = defineRegistry('lightfield pattern', dials(PATTERNS), {
   slot: 'pattern.kind',
+  aka: PATTERN_AKA,
   blurbs: {
     slats: 'a backlit blind: vertical bars of unequal width, each with a lit leading edge falling to a dark trailing edge, the eye travels across',
     rings: 'concentric bands round a point, like light on water, the eye travels outwards',
@@ -66,8 +73,21 @@ export const PATTERN_REGISTRY = defineRegistry('lightfield pattern', dials(PATTE
     'The STRUCTURE of a lightfield: what the elements are and which way the eye travels across them.'),
 });
 
+const ENVELOPE_SHAPE_AKA = {
+  full: ['no shape', 'runs the whole frame'],
+  ramp: ['diagonal climb', 'rising slope'],
+  arch: ['a bump', 'a rounded hump'],
+  valley: ['a dip', 'an upside-down hump'],
+  wave: ['a ripple', 'rises and falls twice'],
+  circle: ['a dome', 'a semicircle', 'a planet limb'],
+  crescent: ['a moon shape', 'a crescent moon'],
+  scallops: ['a scalloped edge', 'an arcade of arches'],
+  hills: ['rolling hills', 'rolling ground'],
+};
+
 export const ENVELOPE_SHAPE_REGISTRY = defineRegistry('envelope shape', dials(SHAPES), {
   slot: 'envelope.kind',
+  aka: ENVELOPE_SHAPE_AKA,
   blurbs: {
     full: 'the no-op envelope, 1 everywhere: every element runs the whole frame, which is what a blind does',
     ramp: 'a straight climb across the row, so the extents rise steadily from one side to the other',
@@ -83,8 +103,14 @@ export const ENVELOPE_SHAPE_REGISTRY = defineRegistry('envelope shape', dials(SH
     "How an element's extent varies with where it sits, as a curve across the row."),
 });
 
+const ENVELOPE_ANCHOR_AKA = {
+  bottom: ['grows from the bottom', 'rooted at the bottom edge'],
+  top: ['hangs from the top', 'rooted at the top edge'],
+};
+
 export const ENVELOPE_ANCHOR_REGISTRY = defineRegistry('envelope anchor', dials(ANCHORS), {
   slot: 'envelope.anchor',
+  aka: ENVELOPE_ANCHOR_AKA,
   blurbs: {
     bottom: 'the element grows UP from the bottom edge, so the free end, the one `taper` narrows, is at the top. The default',
     top: 'the element hangs DOWN from the top edge, so the free end, the one `taper` narrows, is at the bottom',
@@ -94,8 +120,17 @@ export const ENVELOPE_ANCHOR_REGISTRY = defineRegistry('envelope anchor', dials(
 });
 
 const SHADOW_DIRECTION_AKA = {
+  left: ['westward shadow', 'shadow falls left'],
   right: ['eastward shadow', 'shadow falls east'],
+  top: ['shadow falls up', 'northward shadow'],
+  bottom: ['shadow falls down', 'southward shadow'],
+  center: ['shadow in every direction', 'radial shadow'],
+  'top-and-bottom': ['lit band across the middle', 'low sun band'],
+  'left-and-right': ['lit vertical band', 'dark on both sides'],
+  'top-left': ['northwest shadow', 'shadow falls top left'],
   'top-right': ['upper right corner', 'northeast shadow'],
+  'bottom-left': ['southwest shadow', 'shadow falls bottom left'],
+  'bottom-right': ['southeast shadow', 'shadow falls bottom right'],
 };
 
 export const SHADOW_DIRECTION_REGISTRY = defineRegistry('shadow direction', dials(DIRECTIONS), {
@@ -103,7 +138,7 @@ export const SHADOW_DIRECTION_REGISTRY = defineRegistry('shadow direction', dial
   aka: SHADOW_DIRECTION_AKA,
   blurbs: {
     left: 'a linear fall away to the left. A bearing and no centre, so only the move along it reaches the fall',
-    right: 'a linear fall away to the right',
+    right: 'a linear fall away to the right: the frame drains toward the right edge and stays lit on the left',
     top: 'away is upward: the frame drains towards the top edge and stays lit at the bottom',
     bottom: 'away is downward: the frame drains towards the bottom edge and stays lit at the top. The default bearing',
     center: 'a radial: away in EVERY direction at once, so no edge can darken without the others darkening too',
@@ -118,10 +153,18 @@ export const SHADOW_DIRECTION_REGISTRY = defineRegistry('shadow direction', dial
     'Which way "away" is: the bearing the light falls off along. A keyword is a bearing and never a place, so `shadow.x`/`shadow.y` decide how far off centre the dark sits.'),
 });
 
+const FIELD_MOTION_AKA = {
+  still: ['frozen field', 'no motion at all'],
+  drift: ['slow float', 'moving as one body'],
+  breathe: ['pulsing field', 'slow swell'],
+  shimmer: ['glimmering seams', 'cells sliding against each other'],
+};
+
 export const FIELD_MOTION_REGISTRY = defineRegistry('field motion', dials(MOTIONS), {
   slot: 'motion.kind',
+  aka: FIELD_MOTION_AKA,
   blurbs: {
-    still: 'nothing moves: the output reads no clock at all',
+    still: 'nothing moves: the output reads no clock at all, held on one fixed frame with zero drift',
     drift: 'the field travels as one body, the cells holding station against each other',
     breathe: 'the whole field swells and settles on one slow cycle, the cells keeping their relation to each other',
     shimmer: 'the cells slide against each other, so the seams open and close',
