@@ -13,3 +13,4 @@ export const glsl = `                              /* rgb glitch, channel-split 
     float a = on * max(rc, max(gc, bc)) * bell * 0.9;
     c = vec4(col, a);`;
 export const blurb = 'rgb channel split into displaced bars. Digital failure, interference, a system under strain.';
+export const aka = ['digital glitch', 'rgb split', 'channel split glitch'];
