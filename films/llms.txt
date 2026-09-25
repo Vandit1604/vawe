@@ -31,7 +31,7 @@ move across the runtime, not sit static), and `layers` (at least one). This is t
       "type": "text",
       "text": "One data point beats a slide of ten",
       "x": 100, "y": 420, "w": 880, "size": 84, "weight": 800,
-      "split": "word", "preset": "up",
+      "split": "word", "preset": "blurUp",
       "start": 0.2, "duration": 2.4
     }
   ]
@@ -43,7 +43,7 @@ move across the runtime, not sit static), and `layers` (at least one). This is t
 Every layer's `type` is one of these 24 (pulled live from the layer registry, so this list
 cannot go stale). Everything else in the vocabulary below is a dial ON one of these.
 
-- `text`: theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too WHEN: the default for any on-screen word or line; reach for it before any other layer for copy.
+- `text`: theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink WHEN: the default for any on-screen word or line; reach for it before any other layer for copy.
 - `count`: a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9 WHEN: a claim IS a number; use this instead of typing the number into a `text` layer.
 - `image`: an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot WHEN: a real picture exists (a photo, a capture, a screenshot); prefer it over `html` or a drawn icon.
 - `video`: real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still WHEN: real footage exists and the beat needs it to move; still deterministic, never "played".
@@ -52,7 +52,7 @@ cannot go stale). Everything else in the vocabulary below is a dial ON one of th
 - `glow`: soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight) WHEN: a light source or a soft halo is the point of the layer, not a decoration on top of one.
 - `beam`: a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe WHEN: light travelling a border or sweeping a box; the traced-outline look no CSS animation can seek.
 - `svg`: a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) WHEN: a vector mark (a logo, an icon path) that should draw itself on or morph, not just fade in.
-- `cursor`: a macOS pointer that follows [{t,x,y}] keyframes and fires a ripple ring at each `clicks` time, the spine of a product demo WHEN: the beat IS a product demo; this is the one primitive built to drive a click-through.
+- `cursor`: a pointer that follows [{t,x,y}] keyframes (`path`) or eases magnetically onto another layer's live box (`snapTo`), fires a ripple at `clicks`, can change shape mid-move (`style`/`styleAt`: arrow/hand/ibeam/block), carry a name tag (`label`), and drag another layer along with it (`carry`) WHEN: the beat IS a product demo; this is the one primitive built to drive a click-through.
 - `clip`: a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders WHEN: footage came in as a frame sequence (PNG/WebP), not a video file, and must stay seek-exact.
 - `html`: raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock WHEN: the surface does not exist yet and CSS genuinely expresses it faster than composing primitives; see engine-doctrine/CRAFT/HTML-FRAGMENTS.md before hand-writing one.
 - `component`: a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` WHEN: a real product surface was captured (`make capture`); always prefer this over `html` when the surface actually exists.
@@ -72,16 +72,16 @@ Full props per type: `films/scene/schema.json`. What each type is FOR, in prose:
 
 ## The vocabulary: effect families
 
-Do not try to memorise all 788 named things the engine can do; reach for them by family, then
-search within the family. Each of these 54 families is a dial you put ON a layer, a cut,
+Do not try to memorise all 938 named things the engine can do; reach for them by family, then
+search within the family. Each of these 56 families is a dial you put ON a layer, a cut,
 the camera, or the scene:
 
 - **Drawn icons** (16, `asset`): `svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists.
-- **Motion voices (tactile sound)** (7, `audio`): The film SOUNDS its own motion.
+- **Motion voices (tactile sound)** (6, `audio`): The film SOUNDS its own motion.
 - **Backgrounds** (23, `background`): `bg:[{preset,from,to}]`.
 - **Gradient recipes** (24, `background`): named colour+kind(+angle) combos for the `gradient` background preset: `{"preset":"gradient","opts":{"recipe":"NAME"}}`.
 - **Camera dials** (1, `camera`): Top-level scene keys that change what the camera DOES rather than where it goes.
-- **Camera moves** (14, `camera`): `"cameraMove": { "move":"<name>", ...
+- **Camera moves** (15, `camera`): `"cameraMove": { "move":"<name>", ...
 - **Destinations (platform safe area)** (6, `canvas`): `"destination": "<name>"`.
 - **Output targets** (5, `canvas`): `aspect` picks the CANVAS.
 - **Caption styles** (19, `captions`): `captionStyle:"<name>"` alongside a `captions:[{t0,t1,text}]` array.
@@ -99,11 +99,12 @@ the camera, or the scene:
 - **Interpolation modes (not easings)** (1, `motion key`): On a `motion` key's `ease`, but NOT a curve.
 - **Keyframe handles (the graph editor)** (5, `motion key`): On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING the key, `easeIn` the segment ARRIVING at it, so one segment is drawn by two handles.
 - **Particles presets** (3, `particles layer`): `preset` on a `particles` layer picks the emitter: `{ "type":"particles", "preset":"confetti" }`.
-- **Ambient shader fields** (23, `per-frame`): `{ "type":"shader", "shader":"<name>" }`.
+- **Ambient shader fields** (27, `per-frame`): `{ "type":"shader", "shader":"<name>" }`.
 - **Generative paint FX (per-frame)** (5, `per-frame`): `{ "type":"paint", "paint":"<name>" }`.
-- **Layer-as-texture (resample)** (8, `per-frame`): `"resample":{ "fx":"<name>", "amount":[from,to] }`.
+- **Layer-as-texture (resample)** (9, `per-frame`): `"resample":{ "fx":"<name>", "amount":[from,to] }`.
 - **Adjustment layers (grade what is BENEATH)** (6, `per-layer`): `{ "type":"adjust", "kind":"<name>" }`.
 - **Blend modes** (17, `per-layer`): `mixBlend`: how a layer composites with what is already painted beneath it.
+- **Cursor styles** (4, `per-layer`): What shape a `cursor` layer draws (`"style": "hand"`), and how it can change mid-move (`styleAt`).
 - **Depths (parallax planes)** (4, `per-layer`): `{ "depth": "back" }` on any layer.
 - **Effector drives** (6, `per-layer`): What an effector's influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, where the number is the amount at full influence.
 - **Effector falloffs** (4, `per-layer`): A FALLOFF FROM A TRAVELLING POINT, driving the layer's own children.
@@ -119,10 +120,10 @@ the camera, or the scene:
 - **Canvas image passes (baked)** (8, `static`): `canvasFx`: a one-time baked image pass (cannot move).
 - **Composite looks (static)** (31, `static`): `filter:"<look>"`.
 - **Filter presets** (15, `static`): `filter:"<name>"`.
-- **Kinetic text presets** (31, `text`): `split`+`preset` on a text layer.
+- **Kinetic text presets** (33, `text`): `split`+`preset` on a text layer.
 - **Ransom faces** (8, `text`): `ransom` on a text layer: per-glyph face mixing, from this fixed set.
 - **Scramble charsets (`chars`)** (7, `text`): What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "presetOpts": { "chars":"numbers", "rate":48, "revealDelay":0.25 } }`.
-- **Stagger order (`from`)** (5, `text/parts`): The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`.
+- **Stagger order (`from`)** (6, `text/parts`): The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`.
 - **Theme look keys** (6, `theme`): A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md).
 - **Easings** (42, `timing`): `ease` on a motion key, a count, a camera leg.
 - **Time remaps (the layer's own clock)** (4, `timing`): `timeRemap` on a layer.
@@ -130,9 +131,10 @@ the camera, or the scene:
 - **Scene cuts** (27, `transition`): `cuts:[{t,style}]`.
 - **Seams (2-scene blends)** (26, `transition`): `seams:[{t,fx,dur}]`.
 - **Shader stings** (35, `transition`): `stings:[{t,fx}]`.
+- **Transition relationships** (9, `transition`): Name the RELATIONSHIP between two beats first, then pick from its candidates, per engine-doctrine/CRAFT/TRANSITIONS.md's decision procedure.
 
 **Discovery, not memorisation:** `make arsenal Q="a page scrolling under a static tilt"` searches all
-788 named things (layer types, every family above, recipes, blocks, sound cues) by plain-English
+938 named things (layer types, every family above, recipes, blocks, sound cues) by plain-English
 description and returns the exact key to write. `make schema AT="layers[].motion[]"` answers the other
 half: what fields are legal to write at one JSON path, read live off `films/scene/schema.json`.
 
@@ -161,7 +163,7 @@ make judge D=films/scene/x.json   # the one step that SEES: composition and fide
 
 ## Discovery
 
-- `make arsenal Q="<what you mean, in plain english>"` searches all 788 named things at once and
+- `make arsenal Q="<what you mean, in plain english>"` searches all 938 named things at once and
   prints the JSON key that means it.
 - `make schema AT="<json path>"` answers what is legal to write at that path, with every field's type.
 - `make list` shows the scene module's schema and a sample scene end to end.

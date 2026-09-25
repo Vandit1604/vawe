@@ -553,10 +553,12 @@ test('lib-test: tracks', async () => {
     ok('cameraMove.beats: a move that fits its declared beats stays silent', warned2 === '');
   } finally { console.warn = origWarn2; }
 
-  // PROOF NOTHING EXISTING CHANGES: every one of these real, committed films declares no `beats[]`, so
-  // item 3's every new branch (beat pass 0, `beat:` checks in the layer/transition/camera/bg passes) is
-  // a no-op for it. Expanding it before and after this file's changes must produce the identical scene.
-  const NO_BEATS_FIXTURES = ['films/scene/sample.json', 'films/scene/_auto-orient.json', 'films/scene/_cursor-camera.json'];
+  // PROOF NOTHING EXISTING CHANGES: every one of these fixtures (copies of real, committed films,
+  // never read from films/scene/ itself so this suite carries no film dependency) declares no
+  // `beats[]`, so item 3's every new branch (beat pass 0, `beat:` checks in the layer/transition/
+  // camera/bg passes) is a no-op for it. Expanding it before and after this file's changes must
+  // produce the identical scene.
+  const NO_BEATS_FIXTURES = ['tests/fixtures/films/sample.json', 'tests/fixtures/films/_auto-orient.json'];
   for (const rel of NO_BEATS_FIXTURES) {
     const p = path.join(process.cwd(), rel);
     if (!fs.existsSync(p)) continue;

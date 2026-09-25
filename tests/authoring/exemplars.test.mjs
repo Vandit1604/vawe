@@ -1,7 +1,10 @@
-// harness/lib/exemplars.test.mjs: the runnable self-check for exemplars.mjs. Retrieval and signature
-// both read real files under films/scene, so a change to the goldSet or to those films that breaks a
-// caller (preflight's "EXEMPLARS TO STUDY", scaffold's backdrop rhythm) fails here first.
-//   node harness/lib/exemplars.test.mjs
+// tests/authoring/exemplars.test.mjs: the runnable self-check for exemplars.mjs. Retrieval and
+// signature both read files under VAWE_FILMS_DIR, pointed here at a fixture gold set of 3 inline
+// scenes (tests/fixtures/films/), never films/scene/, which is real film content this suite must not
+// depend on. A change to the real goldSet's SHAPE (still read through the same functions) is what a
+// caller (preflight's "EXEMPLARS TO STUDY", scaffold's backdrop rhythm) actually depends on.
+//   node tests/authoring/exemplars.test.mjs
+process.env.VAWE_FILMS_DIR = 'tests/fixtures/films';
 import assert from 'node:assert/strict';
 import { goldFilms, nearestExemplars, exemplarSignature } from '../../harness/lib/exemplars.mjs';
 

@@ -156,9 +156,14 @@ test('lib-test: theme', async () => {
   ok('themes: default is white-first cobalt, not the old lime', def.palette.accent === '#2563eb' && def.palette.bg === '#ffffff');
   ok('themes: the neutral reference still exists for a fork to copy, and is NOT the brand',
     neutral && neutral.palette && neutral.palette.accent !== vawe.palette.accent);
-  // Every theme must resolve a background palette, whether it authors one or derives it.
+  // Every TRACKED theme must resolve a background palette, whether it authors one or derives it.
+  // `git ls-files`, not readdirSync: a few brand themes (stripe/linear/higgsfield) are gitignored,
+  // local-only, not-redistributed local machine state, and the suite must not depend on their being
+  // present or on their shape (engine-doctrine/MISTAKES.md pattern, quality/gates/docs-drift.mjs).
   const themeDir = new URL('../../themes/', import.meta.url);
-  const noPal = fsMod.readdirSync(themeDir).filter((f) => f.endsWith('.json')).filter((f) => {
+  const tracked = new Set(spawnSync('git', ['ls-files', 'themes/*.json'], { cwd: fileURLToPath(new URL('../..', import.meta.url)), encoding: 'utf8' })
+    .stdout.trim().split('\n').filter(Boolean).map((p) => p.replace(/^themes\//, '')));
+  const noPal = fsMod.readdirSync(themeDir).filter((f) => f.endsWith('.json') && tracked.has(f)).filter((f) => {
     const t = expandTheme(JSON.parse(fsMod.readFileSync(new URL(f, themeDir), 'utf8')), { parseColor, colorAlpha });
     return !t.bg && !bgPaletteFrom(t.palette);
   });

@@ -48,7 +48,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
   assert.deepEqual(resolveLook(theme, { isLightBg }), computedLook(theme, { isLightBg }), 'no theme.look: resolveLook is just computedLook');
 }
 
-// ---- every one of the 44 shipped themes yields a VALID look through lookErrors ----
+// ---- every one of the ~34 shipped themes yields a VALID look through lookErrors ----
 {
   const themeFiles = [];
   for (const f of fs.readdirSync(path.join(ROOT, 'themes'))) {
@@ -58,7 +58,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
   if (fs.existsSync(presetsDir)) for (const f of fs.readdirSync(presetsDir)) {
     if (f.endsWith('.json')) themeFiles.push(path.join(presetsDir, f));
   }
-  assert.ok(themeFiles.length >= 40, `expected around 44 theme files, found ${themeFiles.length}`);
+  assert.ok(themeFiles.length >= 30, `expected around 34 theme files, found ${themeFiles.length}`);
   for (const file of themeFiles) {
     const theme = JSON.parse(fs.readFileSync(file, 'utf8'));
     const resolved = resolveLook(theme, { isLightBg });

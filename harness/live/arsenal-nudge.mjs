@@ -147,8 +147,12 @@ function recentSearchOverlaps(words) {
  * nudge that already tells an author what to search for also hands them the doctrine directly, rather
  * than a second message an author has to go run `make arsenal` again to see. */
 function topNames(query) {
+  // 4s is a UX ceiling for the real keystroke hook; ARSENAL_NUDGE_TIMEOUT_MS overrides it for a
+  // resource-contended environment (many parallel test processes) where the subprocess itself is
+  // slow to schedule, not slow to answer.
+  const timeout = Number(process.env.ARSENAL_NUDGE_TIMEOUT_MS) || 4000;
   const r = spawnSync('node', [path.join(ROOT, 'harness/author/arsenal.mjs'), query, '--json', '--n', '3'],
-    { cwd: ROOT, encoding: 'utf8', timeout: 4000 });
+    { cwd: ROOT, encoding: 'utf8', timeout });
   if (r.status !== 0 || !r.stdout) return [];
   try {
     const parsed = JSON.parse(r.stdout);

@@ -85,19 +85,34 @@ test('a layer with no motion, idle, preset or parts contributes nothing to the I
 // velocity ARITHMETIC it runs is untouched, still sequence.js's velocityAt/cameraAt/cameraVelocityAt
 // on each layer's raw keyframes. A full before/after `diff` of the gate's stdout on the whole library,
 // run once by hand during this change, was empty save for one unrelated stack-trace line number.)
-test('motion-ir json coverage matches a naive raw-JSON scan, on every layer of every shipped film', () => {
-  const dir = path.join(ROOT, 'films/scene');
-  const films = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && !f.startsWith('_'));
-  assert.ok(films.length > 0, 'expected shipped films in films/scene');
-  for (const name of films) {
-    let data;
-    // gh-wrapped.template.json is a deliberate TEMPLATE with placeholder syntax that is not valid
-    // JSON (jolt-check.mjs itself throws identically on it, before and after this change: skip it
-    // here rather than re-asserting a fact about a file this test does not own).
-    try { data = JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8')); }
-    catch { continue; }
-    const layers = Array.isArray(data.layers) ? data.layers
-      : Array.isArray(data?.data?.layers) ? data.data.layers : [];
+// Representative inline scenes, not a scan of films/scene/ (real film content this suite must not
+// depend on): one per shape the raw-JSON check and buildMotionIR both have to agree on an id for -
+// an id'd top-level layer, an unid'd one (falls back to type#index), a group child (recursion), a
+// layer with a motion track too short to count (<2 keys), and one with no motion at all.
+const REPRESENTATIVE_SCENES = [
+  { name: 'id and unid top-level layers', layers: [
+    { id: 'hero', type: 'text', motion: [{ t: 0, x: 0 }, { t: 1, x: 100 }] },
+    { type: 'image', motion: [{ t: 0, y: 0 }, { t: 1, y: 50 }] },
+    { type: 'text', motion: [{ t: 0, x: 0 }] },   // too short: not a candidate
+    { type: 'text' },                              // no motion at all
+  ] },
+  { name: 'group children recurse the same way', layers: [
+    { id: 'card', type: 'group', children: [
+      { id: 'label', type: 'text', motion: [{ t: 0, x: 0 }, { t: 1, x: 10 }] },
+      { type: 'rect', motion: [{ t: 0, w: 10 }, { t: 1, w: 20 }] },
+    ] },
+  ] },
+  { name: 'nested group two levels deep', layers: [
+    { type: 'group', children: [
+      { type: 'group', children: [
+        { id: 'deep', type: 'text', motion: [{ t: 0, x: 0 }, { t: 1, x: 5 }] },
+      ] },
+    ] },
+  ] },
+];
+
+test('motion-ir json coverage matches a naive raw-JSON scan, on a representative layer shape per case', () => {
+  for (const { name, layers } of REPRESENTATIVE_SCENES) {
     // Mirrors buildMotionIR's own id scheme (L.id, else type#index-in-its-own-array), recursing into
     // group children the same way, so this is the SAME question the raw check used to answer, asked
     // of the same set of elements the IR now walks.
@@ -107,7 +122,7 @@ test('motion-ir json coverage matches a naive raw-JSON scan, on every layer of e
       if (Array.isArray(L?.children)) walk(L.children);
     });
     walk(layers);
-    const ir = buildMotionIR({ layers, camera: Array.isArray(data.camera) ? data.camera : [] });
+    const ir = buildMotionIR({ layers, camera: [] });
     const irIds = new Set(ir.filter((e) => e.source === 'json').map((e) => e.id));
     assert.deepEqual(irIds, rawIds, `${name}: IR json-motion ids differ from the raw-JSON check`);
   }

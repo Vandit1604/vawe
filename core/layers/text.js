@@ -8,8 +8,8 @@ import { clamp01, easeOutCubic } from '../motion/motion.js';
 // The `fit` family is guarded because a fit with no width has nothing to fit INTO, and the typing
 // family because a caret with no `typing` has no reveal to trail. A guard has no spelling in a
 // signature, so these stay hand-written and union with the auto-derived set below. `font`/`ls`/
-// `tracking`/`raw` stay hand-written too: they flow through kit.styleText/microType via `L` passed
-// wholesale, never destructured directly in this file, so propsOf cannot see them. Everything else
+// `tracking`/`raw`/`size` stay hand-written too: they flow through kit.styleText/microType/sizeOf via
+// `L` passed wholesale, never destructured directly in this file, so propsOf cannot see them. Everything else
 // the shared kit reads (colour, the chip box) is declared in core/layers/util.js, which reads it.
 const GUARDED = {
   fitH: { when: 'fit' },
@@ -413,7 +413,7 @@ function plainPrefix(html, n) { const d = document.createElement('div'); d.inner
 // build time. `GUARDED` is unioned in alongside them: a guard has no spelling in a signature (mergeProps,
 // core/props.js).
 export const PROPS = mergeProps(propsOf(build), propsOf(frame), GUARDED, {
-  font: {}, ls: {}, tracking: {}, raw: {},
+  font: {}, ls: {}, tracking: {}, raw: {}, size: {},
 });
 
 // The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.

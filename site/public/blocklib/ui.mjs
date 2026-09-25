@@ -1,8 +1,8 @@
 // blocks/ui.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
-  TOKENS, HAIR, r2, text, rect, box, onColor, onInk,
-  R, TYPE, SPACE, E, cardChrome, toneColor, avatarEl,
+  TOKENS, HAIR, r2, text, box, onColor, onInk,
+  R, TYPE, SPACE, E, cardChrome, toneColor,
   stackWindows, TONE_NAMES,
   tint, TINT, SHADOW_CARD, labelCss, numCss,
 } from './kit.mjs';
@@ -183,36 +183,27 @@ export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = tru
 // arithmetic, and no second timeline that can fall out of sync with the first.
 //
 // `tabs` items are a plain string, or `{ label, icon }` for the icon-over-label form.
-export function tabBar({ x, y, w = 520, tabs = [], active = 0, activeFrom = null, activeTo = null,
-  switchAt = 0.9, switchDur = 0.5, start = 0, dur = 4 } = {}) {
-  const n = Math.max(1, tabs.length);
-  const from = Math.min(n - 1, Math.max(0, activeFrom ?? active));
-  const to = Math.min(n - 1, Math.max(0, activeTo ?? activeFrom ?? active));
-  const PAD = 6, GAP = 6;
-  const tabW = r2((w - 2 * PAD - GAP * (n - 1)) / n), step = r2(tabW + GAP);
-  const items = tabs.map((t) => (typeof t === 'string' ? { label: t, icon: '' } : t || {}));
-  const withIcons = items.some((t) => t.icon);
-  const rowH = withIcons ? 64 : 40, innerW = r2(w - 2 * PAD);
-  // the pill's offset, as ONE expression used three times (pill, clip window, counter-translate).
-  // `var(--p, 1)` rests at 1 so a bar with no sweep sits on `to`, the settled state, which is what a
-  // still of a tab bar should show.
+// the pill's offset, as ONE expression used three times (pill, clip window, counter-translate).
+// `var(--p, 1)` rests at 1 so a bar with no sweep sits on `to`, the settled state, which is what a
+// still of a tab bar should show.
+// THE TWO COPIES MUST BE THE SAME WIDTH, so they differ in COLOUR ONLY. Weighting the active copy
+// heavier made it wider than the copy beneath it, and since the clip window's alignment depends on
+// the two rows being metrically identical, the lit label drifted out of its own pill as the pill
+// travelled. A bold half-word sticking out of a white box. Colour carries the state; the pill
+// carries the emphasis. (Real tab bars do exactly this, for exactly this reason.)
+// A tab's icon and its label are both WORDS-side, so both are sans and both come from `labelCss`
+// rather than a hand-written `font:` shorthand. That is what keeps this html block on the same
+// type scale as the native ones. The inactive icon was `--dim` (2.6:1 on higgsfield, a HARD audit
+// failure); it is `--text-2` now, which is the muted TEXT role and clears 4.5:1 on every theme.
+function tabBarHtml({ items, tabW, rowH, innerW, withIcons, w, PAD, GAP, from, to, step }) {
   const pos = `calc((${from} + ${r2(to - from)} * var(--p, 1)) * ${step}px)`;
-  // THE TWO COPIES MUST BE THE SAME WIDTH, so they differ in COLOUR ONLY. Weighting the active copy
-  // heavier made it wider than the copy beneath it, and since the clip window's alignment depends on
-  // the two rows being metrically identical, the lit label drifted out of its own pill as the pill
-  // travelled. A bold half-word sticking out of a white box. Colour carries the state; the pill
-  // carries the emphasis. (Real tab bars do exactly this, for exactly this reason.)
-  // A tab's icon and its label are both WORDS-side, so both are sans and both come from `labelCss`
-  // rather than a hand-written `font:` shorthand. That is what keeps this html block on the same
-  // type scale as the native ones. The inactive icon was `--dim` (2.6:1 on higgsfield, a HARD audit
-  // failure); it is `--text-2` now, which is the muted TEXT role and clears 4.5:1 on every theme.
   const cell = (t, activeStyle) => `<div style="width:${tabW}px;height:${rowH}px;flex:none;display:flex;`
     + `flex-direction:column;align-items:center;justify-content:center;gap:2px">`
     + (t.icon ? `<div style="${labelCss({ size: withIcons ? TYPE.lead : TYPE.base, weight: 400, color: activeStyle ? T.accent : T.sub })};line-height:1">${t.icon}</div>` : '')
     + `<div style="${labelCss({ size: withIcons ? TYPE.body : TYPE.base, weight: 600, color: activeStyle ? T.ink : T.sub })};white-space:nowrap">${t.label || ''}</div></div>`;
   const row = (activeStyle) => `<div style="display:flex;gap:${GAP}px;width:${innerW}px">`
     + items.map((t) => cell(t, activeStyle)).join('') + '</div>';
-  const html = `<div style="position:relative;box-sizing:border-box;width:${w}px;height:${rowH + 2 * PAD}px;`
+  return `<div style="position:relative;box-sizing:border-box;width:${w}px;height:${rowH + 2 * PAD}px;`
     + `background:${T.surface};border-radius:${R.tight}px">`
     // the lit pill, and the active-styled row clipped to it
     + `<div style="position:absolute;left:${PAD}px;top:${PAD}px;width:${tabW}px;height:${rowH}px;`
@@ -224,6 +215,19 @@ export function tabBar({ x, y, w = 520, tabs = [], active = 0, activeFrom = null
     + `overflow:hidden;border-radius:${R.chip}px;transform:translateX(${pos})">`
     + `<div style="position:absolute;left:0;top:0;transform:translateX(calc(-1 * ${pos}))">${row(true)}</div>`
     + '</div></div>';
+}
+
+export function tabBar({ x, y, w = 520, tabs = [], active = 0, activeFrom = null, activeTo = null,
+  switchAt = 0.9, switchDur = 0.5, start = 0, dur = 4 } = {}) {
+  const n = Math.max(1, tabs.length);
+  const from = Math.min(n - 1, Math.max(0, activeFrom ?? active));
+  const to = Math.min(n - 1, Math.max(0, activeTo ?? activeFrom ?? active));
+  const PAD = 6, GAP = 6;
+  const tabW = r2((w - 2 * PAD - GAP * (n - 1)) / n), step = r2(tabW + GAP);
+  const items = tabs.map((t) => (typeof t === 'string' ? { label: t, icon: '' } : t || {}));
+  const withIcons = items.some((t) => t.icon);
+  const rowH = withIcons ? 64 : 40, innerW = r2(w - 2 * PAD);
+  const html = tabBarHtml({ items, tabW, rowH, innerW, withIcons, w, PAD, GAP, from, to, step });
   return [{
     type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3,
     // only a bar that actually MOVES carries a sweep; a static one leaves `--p` at its resting 1.
@@ -313,22 +317,13 @@ export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {})
 // three states of a ring have to occupy the SAME 44px, which a flow layout cannot express, and the
 // connector's fill is a continuous fraction rather than an on/off. Both fall out of the one number.
 // Pure in n: every value here is a function of `--p` and nothing else.
-export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = null, activeTo = null,
-  buildAt = 0.3, buildDur = 0, start = 0, dur = 4 } = {}) {
-  const n = steps.length;
-  const from = Math.max(0, activeFrom ?? active);
-  const to = Math.max(0, activeTo ?? activeFrom ?? active);
-  const RING = 44, GAP = 14, RAIL = 2;
-  // `pos` is a bare parenthesised expression so it can nest inside calc()/clamp() without doubling up.
-  const pos = `(${from} + ${r2(to - from)} * var(--p, 1))`;
-  const lit = (i) => `clamp(0, calc((${pos} - ${i}) * 6 + 1), 1)`;   // ring i reached
-  const done = (i) => lit(i + 1);                                     // ...and passed
-  // A STEP NUMBER IS A FIGURE, so all three copies of it are set in the theme's tabular face via
-  // `numCss`. They were sans, which is the inversion this register exists to fix, and it showed:
-  // "1" and "4" sat at different optical widths inside a fixed 44px ring. The unreached digit was
-  // `--dim` (2.6:1 on higgsfield, a HARD audit failure) and is `--text-2` now.
+// A STEP NUMBER IS A FIGURE, so all three copies of it are set in the theme's tabular face via
+// `numCss`. They were sans, which is the inversion this register exists to fix, and it showed: "1"
+// and "4" sat at different optical widths inside a fixed 44px ring. The unreached digit was `--dim`
+// (2.6:1 on higgsfield, a HARD audit failure) and is `--text-2` now.
+function stepFlowRing(i, { RING, lit, done }) {
   const digit = (color) => `${numCss({ size: TYPE.base, color, weight: 700 })};letter-spacing:0`;
-  const ring = (i) => `<div style="position:relative;width:${RING}px;height:${RING}px;flex:none">`
+  return `<div style="position:relative;width:${RING}px;height:${RING}px;flex:none">`
     + `<div style="position:absolute;inset:0;border-radius:100%;background:${T.surface};display:flex;`
     // The unreached digit FADES OUT as the ring lights. It used to stay fully painted and simply be
     // covered by the accent disc drawn over it, invisible to the eye, but still a live element, and
@@ -340,24 +335,46 @@ export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = n
     + `${digit(onColor(T.accent))};opacity:calc(${lit(i)} - ${done(i)})">${i + 1}</div>`
     + `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;`
     + `${digit(onColor(T.accent))};opacity:${done(i)}">✓</div></div>`;
-  // the label is drawn twice, the reached copy fading in over the unreached one. Same string, so the
-  // two copies are the same width and nothing shifts as a step lights.
-  const label = (s, i) => `<div style="position:relative;margin-top:${SPACE.xs}px;white-space:nowrap">`
+}
+
+// the label is drawn twice, the reached copy fading in over the unreached one. Same string, so the
+// two copies are the same width and nothing shifts as a step lights.
+function stepFlowLabel(s, i, { lit }) {
+  return `<div style="position:relative;margin-top:${SPACE.xs}px;white-space:nowrap">`
     + `<div style="${labelCss({ size: TYPE.body, weight: 500 })}">${s}</div>`
     + `<div style="position:absolute;left:0;top:0;${labelCss({ size: TYPE.body, weight: 600, color: T.ink })};`
     + `opacity:${lit(i)}">${s}</div></div>`;
-  // THE UNFILLED RAIL IS A TINT OF THE FILL, not `--line`. Painting the part of a track still to be
-  // crossed with the theme's BORDER colour made it read as a divider between two rings instead of as
-  // the rest of the journey, and on a dark theme it vanished into the card. Same correction `gauge`
-  // and `progressRing` got, and the same reason.
-  const connector = (i) => `<div style="flex:1 1 auto;height:${RAIL}px;margin-top:${(RING - RAIL) / 2}px;`
+}
+
+// THE UNFILLED RAIL IS A TINT OF THE FILL, not `--line`. Painting the part of a track still to be
+// crossed with the theme's BORDER colour made it read as a divider between two rings instead of as
+// the rest of the journey, and on a dark theme it vanished into the card. Same correction `gauge`
+// and `progressRing` got, and the same reason.
+function stepFlowConnector(i, { RING, RAIL, pos }) {
+  return `<div style="flex:1 1 auto;height:${RAIL}px;margin-top:${(RING - RAIL) / 2}px;`
     + `border-radius:${RAIL / 2}px;background:${tint(T.accent, TINT.track)};position:relative;overflow:hidden">`
     + `<div style="position:absolute;inset:0;background:${T.accent};transform-origin:left center;`
     + `transform:scaleX(clamp(0, calc(${pos} - ${i}), 1))"></div></div>`;
+}
+
+function stepFlowHtml(steps, { w, RING, GAP, RAIL, pos }) {
+  const lit = (i) => `clamp(0, calc((${pos} - ${i}) * 6 + 1), 1)`;   // ring i reached
+  const done = (i) => lit(i + 1);                                     // ...and passed
+  const ctx = { RING, RAIL, pos, lit, done };
   const cells = steps.map((s, i) => `<div style="display:flex;flex-direction:column;align-items:center;flex:none">`
-    + ring(i) + label(s, i) + '</div>');
-  const track = cells.flatMap((c, i) => (i < n - 1 ? [c, connector(i)] : [c])).join('');
-  const html = `<div style="width:${w}px;display:flex;align-items:flex-start;gap:${GAP}px">${track}</div>`;
+    + stepFlowRing(i, ctx) + stepFlowLabel(s, i, ctx) + '</div>');
+  const track = cells.flatMap((c, i) => (i < steps.length - 1 ? [c, stepFlowConnector(i, ctx)] : [c])).join('');
+  return `<div style="width:${w}px;display:flex;align-items:flex-start;gap:${GAP}px">${track}</div>`;
+}
+
+export function stepFlow({ x, y, w = 720, steps = [], active = 0, activeFrom = null, activeTo = null,
+  buildAt = 0.3, buildDur = 0, start = 0, dur = 4 } = {}) {
+  const from = Math.max(0, activeFrom ?? active);
+  const to = Math.max(0, activeTo ?? activeFrom ?? active);
+  const RING = 44, GAP = 14, RAIL = 2;
+  // `pos` is a bare parenthesised expression so it can nest inside calc()/clamp() without doubling up.
+  const pos = `(${from} + ${r2(to - from)} * var(--p, 1))`;
+  const html = stepFlowHtml(steps, { w, RING, GAP, RAIL, pos });
   return [{
     type: 'html', x, y, w, html, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
     ...(from === to ? {} : { vars: { '--p': [0, 1] }, varsEase: 'easeOutCubic',
@@ -411,7 +428,7 @@ const OPTICAL_NUDGE = { paddingTop: `${SPACE.snug}px` };
 // `body`. Each block had invented its own words for the same two slots, so an author relearned the
 // block every time. Old names stay as aliases. A shared vocabulary is worth nothing if adopting it
 // breaks every caller (MISTAKES #67).
-export function toast({ x, y, w = 420, title, message = '', body = '', action = '', icon = '✓', accent = TOKENS.green,
+export function toast({ x, y, w = 420, title, message = '', body: _body = '', action = '', icon = '✓', accent = TOKENS.green,
   items = null, life = 2.2, step = 0.9, rowH = 58, gap = 12, start = 0, dur = 4 } = {}) {
   // see `notification`, same stack, same helper, same recursion into the single-card form.
   if (items && items.length) {

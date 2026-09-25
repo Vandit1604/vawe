@@ -1,4 +1,4 @@
-// quality/gates/ship-judge-gate.test.mjs: `make ship`'s last step, single-film mode of no-judge.mjs.
+// tests/gates/ship-judge-gate.test.mjs: `make ship`'s last step, single-film mode of no-judge.mjs.
 // Same fixture shape as no-judge.test.mjs (a real receipt via harness/lib/receipt.mjs against a scene
 // JSON + a fake mp4), proving the three things the refusal must get right: no receipt at all fails and
 // names `make judge D=<file>`, a fresh receipt passes, and a receipt that predates a re-render fails
@@ -7,9 +7,10 @@
 // The CLI path resolves the mp4 via renderOf(scenePath) = out/<basename>.mp4 (tile.mjs), cwd-relative,
 // so unlike no-judge.test.mjs (which only exercises isJudged() with an explicit mp4 and can live
 // entirely in a tmpdir) the CLI half of this test needs real repo-relative paths: an underscore-
-// prefixed scene under films/scene/ (the convention every other _-prefixed fixture there already
-// uses) and its render at the real out/ location. Both are removed on the way out.
-//   node quality/gates/ship-judge-gate.test.mjs
+// prefixed scene under tests/fixtures/films/ (never films/scene/, which is real, gitignored film
+// content this suite must not depend on) and its render at the real out/ location. Both are removed
+// on the way out.
+//   node tests/gates/ship-judge-gate.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,7 +23,7 @@ import { renderOf } from '../../quality/gates/tile.mjs';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, '../..');
 const name = '_ship-judge-gate-test-scene.json';
-const scenePath = path.join(ROOT, 'films/scene', name);
+const scenePath = path.join(ROOT, 'tests/fixtures/films', name);
 const mp4 = path.join(ROOT, renderOf(scenePath));
 const cleanup = () => {
   try { fs.unlinkSync(receiptPath('judge', scenePath)); } catch { /* fine */ }

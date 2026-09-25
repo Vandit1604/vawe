@@ -89,7 +89,9 @@ const paramsOf = (f) => {
     if (ch === ',' && d === 0) { names.push(cur); cur = ''; } else cur += ch;
   }
   names.push(cur);
-  return new Set(names.map((n) => n.split('=')[0].trim()).filter(Boolean));
+  // A renamed destructure (`start: _start = 0`) reads by the key BEFORE the colon, the name a caller
+  // actually writes; the local alias after it is never part of the accepted param list.
+  return new Set(names.map((n) => n.split('=')[0].split(':')[0].trim()).filter(Boolean));
 };
 
 /** cameraMoveParams(name) → the Set of param names this move's own signature reads, or null when the

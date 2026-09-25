@@ -156,7 +156,8 @@ process.stdin.on('end', () => {
   try { file = (JSON.parse(raw).tool_input || {}).file_path || ''; } catch { process.exit(0); }
   if (!file || !file.endsWith('.json')) process.exit(0);
   const rel = path.relative(ROOT, file);
-  if (!rel.startsWith('films/scene/')) process.exit(0);
+  const filmsDir = (process.env.VAWE_FILMS_DIR || 'films/scene') + '/';
+  if (!rel.startsWith(filmsDir)) process.exit(0);
   // Derivatives are GENERATED. Telling an author their .expanded.json is thin is telling them about a
   // file they did not write and cannot fix in place.
   if (/\.(expanded|animatic|beatsync|template)\.json$/.test(rel)) process.exit(0);

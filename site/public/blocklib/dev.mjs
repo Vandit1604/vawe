@@ -1,10 +1,10 @@
 // blocks/dev.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, pill, onColor, onInk,
-  R, TYPE, SPACE, E, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
-  sweep, stagger, growUp, fillRight, stackWindows,
-  tint, TINT, DATA_CAP,
+  TOKENS, HAIR, r2, text, rect, onColor, onInk,
+  R, TYPE, SPACE, E, cardChrome,
+  stagger, fillRight,
+  tint, TINT,
 } from './kit.mjs';
 
 // THE CODE FAMILY IS THE INSTRUMENT REGISTER. `R.tight` is what the radius scale reserves for machine
@@ -49,29 +49,38 @@ export const CODE_THEMES = {
 // codeBlock: a code card. `lines` are strings OR {text,color} for syntax colour. Optional `theme`
 // names a CODE_THEMES palette; it overrides dark/light, and lines that don't bring a colour get the
 // palette's syntax colours cycled by line index (deterministic: same lines → same paint).
-export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size = 24, theme,
-  start = 0, dur = 4, anim = 'fade', enterDur = 0.25 } = {}) {
+// dark mode's plate is the fixed T.stripeNavy (not a theme var), so its ink must be computed off
+// that same fixed literal via onColor, not a separately-guessed literal that can drift from it.
+// The card's own caption is a FILENAME or a language, so mono is right; `--dim` was not. On the
+// untinted light card it is `--text-2`, the muted TEXT role, which clears 4.5:1 on every theme
+// where `--dim` measures 2.6:1 on higgsfield and fails `make audit` HARD. A CODE_THEMES palette
+// brings its own measured label colour and keeps it.
+function codeBlockTheme(theme, dark) {
   const P = theme ? CODE_THEMES[theme] : null;
   if (theme && !P) throw new Error(`codeBlock: unknown theme "${theme}". One of ${Object.keys(CODE_THEMES).join(', ')}`);
   const isDark = P ? !P.light : dark;
-  // dark mode's plate is the fixed T.stripeNavy (not a theme var), so its ink must be computed off
-  // that same fixed literal via onColor, not a separately-guessed literal that can drift from it.
   const bg = P ? P.bg : (dark ? T.stripeNavy : T.card), fg = P ? P.fg : (dark ? onColor(T.stripeNavy) : T.ink);
-  // The card's own caption is a FILENAME or a language, so mono is right; `--dim` was not. On the
-  // untinted light card it is `--text-2`, the muted TEXT role, which clears 4.5:1 on every theme
-  // where `--dim` measures 2.6:1 on higgsfield and fails `make audit` HARD. A CODE_THEMES palette
-  // brings its own measured label colour and keeps it.
   const labelColor = P ? P.label : (dark ? T.stripeGrey : T.sub);
-  // THE CODE WRITES ITSELF IN, line after line, off the top of the block, the motion a code card is
-  // FOR: `parts` stagger, one `data-part` per line, matching the native `stagger()` timing this
-  // replaced. cycle index advances per line (not per uncoloured line) so each line's hue is stable
-  // under edits to its neighbours' explicit colours.
-  const rows = lines.map((ln, i) => {
+  return { P, isDark, bg, fg, labelColor };
+}
+
+// THE CODE WRITES ITSELF IN, line after line, off the top of the block, the motion a code card is
+// FOR: `parts` stagger, one `data-part` per line, matching the native `stagger()` timing this
+// replaced. cycle index advances per line (not per uncoloured line) so each line's hue is stable
+// under edits to its neighbours' explicit colours.
+function codeBlockRows(lines, { P, fg }, size) {
+  return lines.map((ln, i) => {
     const auto = P ? P.syntax[i % P.syntax.length] : fg;
     const t = typeof ln === 'string' ? ln : ln.text;
     const color = typeof ln === 'string' ? auto : (ln.color || auto);
     return `<div data-part style="font:400 ${size}px var(--font-mono);color:${color};white-space:pre">${t}</div>`;
   }).join('');
+}
+
+export function codeBlock({ x, y, w = 640, lines = [], label, dark = false, size = 24, theme,
+  start = 0, dur = 4, anim = 'fade', enterDur = 0.25 } = {}) {
+  const { P, isDark, bg, fg, labelColor } = codeBlockTheme(theme, dark);
+  const rows = codeBlockRows(lines, { P, fg }, size);
   const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.xs}px;padding:${SPACE.xl}px;`
     + `box-sizing:border-box;width:${w}px">`
     + (label ? `<div style="font:400 ${TYPE.body}px var(--font-mono);color:${labelColor}">${label}</div>` : '')
@@ -149,6 +158,43 @@ export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5,
   return out;
 }
 
+// A caller that names the running step is asking for a FROZEN pipeline (a still of one moment), so
+// the cascade does not run and every row is drawn in its state at that moment.
+function deployFrozenStep({ x, y, i, rowGap, label, active, stepCount, t }) {
+  const lead = Math.min(active, stepCount - 1);
+  return [
+    text({ text: i < active ? '✓' : i === active ? '•' : '·', x, y: y + i * rowGap, font: 'mono',
+      size: TYPE.lead, weight: 700, color: i <= active ? T.green : T.sub, start: t, duration: 6, anim: 'rise', enterDur: 0.3 }),
+    text({ text: label, x: x + 44, y: y + i * rowGap, size: TYPE.lead,
+      color: i === lead ? T.ink : T.sub, start: t, duration: 6 }),
+  ];
+}
+
+// THE CASCADE RUNS. Each step is three short-lived layers, queued `·`, running `•`, finished `✓`,
+// whose windows tile the block's life, so the glyph a frame shows is a pure function of t and the
+// pipeline visibly advances instead of rendering pre-completed. A glyph is one layer per STATE rather
+// than one layer that changes, because a layer's text is fixed at build time and the frame loop is
+// not allowed to step from a previous frame. A QUEUED step is `--text-2`, not `--dim`. A pipeline
+// that has not started yet still has to be readable (the whole point of showing the queue) and
+// `--dim` measures 2.6:1 on higgsfield, which `make audit` fails HARD.
+// The label dims until its step is reached, then it is the row the eye is on. A step name is a WORD
+// ("Building"), so both copies are sans. Mono was the standing inversion, and the two copies must
+// stay metrically identical or the row shifts as its step lights.
+function deployCascadeStep({ x, y, i, rowGap, label, start, t, done, end, STEP }) {
+  const glyph = (spec) => spec.life > 0.01 && text({ text: spec.txt, x, y: y + i * rowGap,
+    font: 'mono', size: TYPE.lead, weight: 700, color: spec.color, start: r2(spec.from), duration: r2(spec.life),
+    anim: spec.anim, enterDur: 0.18, exitDur: 0.12 });
+  return [
+    glyph({ txt: '·', color: T.sub, from: start, life: r2(t - start), anim: 'fade' }),
+    glyph({ txt: '•', color: T.green, from: t, life: STEP, anim: 'pop' }),
+    glyph({ txt: '✓', color: T.green, from: done, life: r2(end - done), anim: 'pop' }),
+    text({ text: label, x: x + 44, y: y + i * rowGap, size: TYPE.lead, color: T.sub,
+      start, duration: r2(t - start + 0.01), anim: 'fade', enterDur: 0.2, exitDur: 0 }),
+    text({ text: label, x: x + 44, y: y + i * rowGap, size: TYPE.lead, color: T.ink,
+      start: t, duration: r2(end - t), anim: 'fade', enterDur: 0.2 }),
+  ].filter(Boolean);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // deploySuccess. A CI pipeline that cascades queued→building→deploying→live, then a success card
 // with a green check, live URL, and "Ready in Xs". The canonical "a click had a consequence" payoff.
@@ -172,37 +218,10 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
     const t = r2(start + i * STEP);               // when step i STARTS running
     const done = r2(t + STEP);                    // when it completes and the next one takes over
     if (active != null) {
-      // A caller that names the running step is asking for a FROZEN pipeline (a still of one moment),
-      // so the cascade does not run and every row is drawn in its state at that moment.
-      const lead = Math.min(active, steps.length - 1);
-      out.push(text({ text: i < active ? '✓' : i === active ? '•' : '·', x, y: y + i * rowGap, font: 'mono',
-        size: TYPE.lead, weight: 700, color: i <= active ? T.green : T.sub, start: t, duration: 6, anim: 'rise', enterDur: 0.3 }));
-      out.push(text({ text: label, x: x + 44, y: y + i * rowGap, size: TYPE.lead,
-        color: i === lead ? T.ink : T.sub, start: t, duration: 6 }));
+      out.push(...deployFrozenStep({ x, y, i, rowGap, label, active, stepCount: steps.length, t }));
       return;
     }
-    // THE CASCADE RUNS. Each step is three short-lived layers, queued `·`, running `•`, finished `✓`,
-    // whose windows tile the block's life, so the glyph a frame shows is a pure function of t and
-    // the pipeline visibly advances instead of rendering pre-completed. A glyph is one layer per
-    // STATE rather than one layer that changes, because a layer's text is fixed at build time and
-    // the frame loop is not allowed to step from a previous frame.
-    const glyph = (txt, color, from, life, anim) => life > 0.01 && text({ text: txt, x, y: y + i * rowGap,
-      font: 'mono', size: TYPE.lead, weight: 700, color, start: r2(from), duration: r2(life), anim, enterDur: 0.18, exitDur: 0.12 });
-    out.push(...[
-      // A QUEUED step is `--text-2`, not `--dim`. A pipeline that has not started yet still has to be
-      // readable (that is the whole point of showing the queue) and `--dim` measures 2.6:1 on
-      // higgsfield, which `make audit` fails HARD.
-      glyph('·', T.sub, start, r2(t - start), 'fade'),
-      glyph('•', T.green, t, STEP, 'pop'),
-      glyph('✓', T.green, done, r2(end - done), 'pop'),
-    ].filter(Boolean));
-    // the label dims until its step is reached, then it is the row the eye is on.
-    // A step name is a WORD ("Building"), so both copies are sans. Mono was the standing inversion,
-    // and the two copies must stay metrically identical or the row shifts as its step lights.
-    out.push(text({ text: label, x: x + 44, y: y + i * rowGap, size: TYPE.lead, color: T.sub,
-      start, duration: r2(t - start + 0.01), anim: 'fade', enterDur: 0.2, exitDur: 0 }));
-    out.push(text({ text: label, x: x + 44, y: y + i * rowGap, size: TYPE.lead, color: T.ink,
-      start: t, duration: r2(end - t), anim: 'fade', enterDur: 0.2 }));
+    out.push(...deployCascadeStep({ x, y, i, rowGap, label, start, t, done, end, STEP }));
   });
   // success card. HTML-CONVERTED, the cascade above is NOT: the queued/running/done glyphs are a
   // state machine over time (a tiled sequence of short-lived layers, one per state, whose windows are

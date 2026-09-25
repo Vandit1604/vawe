@@ -33,6 +33,7 @@ const SCENE_CHECKS = ['pair-entrances-exits', 'logo-prominence', 'emoji-no-pictu
 const FRAGMENT_CHECKS = ['kit-intact', 'storyboard-order'];
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
+const FILMS_DIR = process.env.VAWE_FILMS_DIR || 'films/scene';
 
 // The same set harness/dev/library-stats.mjs:33 and scene-live use, minus `html`: this check asks
 // whether the film has a real PICTURE anywhere, and hand-written markup is the thing an author reaches
@@ -155,10 +156,10 @@ function fragment(rel, file) {
   // 1. THE ROSTER ORDER. The scene decider is third, after storyboard and subject. A fragment written
   //    before the beat table exists is a guess at the count and an invented set of motion handles.
   const film = rel.replace(/\/_?([^/]+?)(\.[^./]+)?\.html$/, '/$1');
-  const near = fs.existsSync(path.join(ROOT, 'films/scene'))
-    ? fs.readdirSync(path.join(ROOT, 'films/scene')).filter((f) => f.endsWith('.storyboard.md')) : [];
+  const near = fs.existsSync(path.join(ROOT, FILMS_DIR))
+    ? fs.readdirSync(path.join(ROOT, FILMS_DIR)).filter((f) => f.endsWith('.storyboard.md')) : [];
   if (!near.length) {
-    out.push(`  no storyboard anywhere in films/scene/. AGENTS.md orders the deciders storyboard (1),`,
+    out.push(`  no storyboard anywhere in ${FILMS_DIR}/. AGENTS.md orders the deciders storyboard (1),`,
       `  subject (2), scene (3), and scene is the role that writes THIS file. Written first, the fragment`,
       `  count is a guess and the motion handles are invented after the fact rather than read off the`,
       `  plan's own \`motion:\` line. engine-doctrine/MISTAKES.md #591.`);
@@ -208,7 +209,7 @@ process.stdin.on('end', () => {
   const rel = path.relative(ROOT, file);
   if (rel.startsWith('..')) process.exit(0);
 
-  const inScenes = rel.startsWith('films/scene/') && fs.existsSync(file);
+  const inScenes = rel.startsWith(FILMS_DIR + '/') && fs.existsSync(file);
   // scene()/fragment() report {say, fired, filmKey} so the run log can record the withheld half;
   // engine() has no film to log against (a capture-path or new-gate save is not scoped to one film), so
   // it keeps returning bare lines.

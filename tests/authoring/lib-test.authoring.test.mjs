@@ -167,7 +167,7 @@ test('lib-test: authoring', async () => {
 // the editor can be redone; silently reformatting 104 scenes cannot be undone from a diff.
 {
   for (const name of ['higgsfield-recreation', 'showcase', 'ledgerline-neon', 'demo-interactions']) {
-    const f = path.join(repoRoot, 'films/scene', `${name}.json`);
+    const f = path.join(repoRoot, 'tests/fixtures/films', `${name}.json`);
     if (!fs.existsSync(f)) continue;
     const src = fs.readFileSync(f, 'utf8');
     const d = JSON.parse(src);
@@ -193,7 +193,7 @@ test('lib-test: authoring', async () => {
       ok(`patch-motion one key = a small diff (${name}, ${churn} lines)`, churn <= 8);
     }
   }
-  const hf = path.join(repoRoot, 'films/scene/higgsfield-recreation.json');
+  const hf = path.join(repoRoot, 'tests/fixtures/films/higgsfield-recreation.json');
   if (fs.existsSync(hf)) {
     const src = fs.readFileSync(hf, 'utf8'), d = JSON.parse(src);
     const btn = d.layers.findIndex((l) => l.id === 'btn');
@@ -960,7 +960,7 @@ test('lib-test: authoring', async () => {
   let out = '', ranClean = true;
   try {
     out = execFileSync('node', [path.join(repoRoot, 'harness/author/arsenal.mjs'), '--for',
-      path.join(repoRoot, 'films/scene/sample.json')], { encoding: 'utf8' });
+      path.join(repoRoot, 'tests/fixtures/films/sample.json')], { encoding: 'utf8' });
   } catch { ranClean = false; }
   // sample.json is the reference scene every author reads first, so it is the one file guaranteed to
   // exist in a fresh clone. If it draws from no vocabulary at all the output is legitimately empty.
@@ -1197,7 +1197,9 @@ test('lib-test: authoring', async () => {
 // `easeInOutElastic`) outrank a real match on pure substring luck. A tiny synthetic storyboard, one
 // beat naming a real capability in prose and one declaring `camera:` structurally.
 {
-  const sbPath = path.join(repoRoot, 'films/scene/_lib-test-adoption.storyboard.md');
+  const sbPath = path.join(repoRoot, 'tests/fixtures/films/_lib-test-adoption.storyboard.md');
+  const prevFilmsDir = process.env.VAWE_FILMS_DIR;
+  process.env.VAWE_FILMS_DIR = 'tests/fixtures/films';
   fs.writeFileSync(sbPath, [
     '---',
     'duration: 6s',
@@ -1227,6 +1229,7 @@ test('lib-test: authoring', async () => {
     }
   } finally {
     fs.rmSync(sbPath, { force: true });
+    if (prevFilmsDir === undefined) delete process.env.VAWE_FILMS_DIR; else process.env.VAWE_FILMS_DIR = prevFilmsDir;
   }
 }
 

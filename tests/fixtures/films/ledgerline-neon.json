@@ -1,0 +1,608 @@
+{
+  "module": "scene",
+  "theme": "ledgerline-neon",
+  "aspect": "9:16",
+  "destination": "reels",
+  "duration": 12,
+  "fps": 30,
+  "grain": true,
+  "audio": {
+    "silent": true
+  },
+  "note": "Ledgerline as an emitted-light terminal rather than a printed accounting pad. Same object spine: one transaction row, line 47 of the export, carried through four states without ever dying. The look changes the physics, not the story. A selected line is marked by a bloom behind it and by its own rising emission, never by a rectangle, because on a near-black ground a filled box reads as a hole punched in the screen rather than as a highlight. Colour keeps the paper cut's meaning: ember is raw and owed, lime is parsed and filed, so the row literally changes colour as the software understands it. A low CRT overlay and a slow continuous camera drift carry the room.",
+  "bg": [
+    {
+      "preset": "gradientWash",
+      "from": 0,
+      "to": 12,
+      "seed": 23,
+      "opts": {
+        "intensity": 0.55,
+        "grid": true,
+        "gridColor": "184,255,60",
+        "gridAlpha": 0.055,
+        "gridSpacing": 108,
+        "blobs": [
+          {
+            "color": "184,255,60",
+            "x": 0.14,
+            "y": 0.86,
+            "rf": 0.44,
+            "ax": 0.1,
+            "ay": 0.086,
+            "px": 6.48,
+            "py": 7.92,
+            "ph": 0,
+            "a": 0.17
+          },
+          {
+            "color": "255,106,61",
+            "x": 0.82,
+            "y": 0.14,
+            "rf": 0.3,
+            "ax": 0.112,
+            "ay": 0.098,
+            "px": 5.4,
+            "py": 7.2,
+            "ph": 2,
+            "a": 0.12
+          },
+          {
+            "color": "184,255,60",
+            "x": 0.92,
+            "y": 0.58,
+            "rf": 0.22,
+            "ax": 0.095,
+            "ay": 0.084,
+            "px": 7.92,
+            "py": 5.76,
+            "ph": 4,
+            "a": 0.1
+          }
+        ]
+      }
+    }
+  ],
+  "camera": [
+    {
+      "t": 0,
+      "s": 1
+    },
+    {
+      "t": 8.6,
+      "s": 1.045,
+      "ease": "linear"
+    },
+    {
+      "t": 9.35,
+      "s": 1,
+      "ease": "easeOutCubic"
+    },
+    {
+      "t": 12,
+      "s": 1.032,
+      "ease": "linear"
+    }
+  ],
+  "layers": [
+    {
+      "id": "file",
+      "type": "text",
+      "text": "$ cat statement_export_2026-03.csv",
+      "x": 95,
+      "y": 236,
+      "w": 808,
+      "align": "left",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#8ba296",
+      "ls": "0.10em",
+      "start": 0,
+      "duration": 8.9,
+      "track": 3,
+      "anim": "fade",
+      "enterDur": 0.4,
+      "out": "fade",
+      "exitDur": 0.4
+    },
+    {
+      "id": "hookglow",
+      "type": "glow",
+      "preset": "bloom",
+      "color": "var(--accent)",
+      "x": 55,
+      "y": 250,
+      "w": 880,
+      "h": 300,
+      "intensity": 0.34,
+      "track": 1,
+      "start": 0,
+      "duration": 3,
+      "anim": "fade",
+      "enterDur": 0.5,
+      "out": "fade",
+      "exitDur": 0.5
+    },
+    {
+      "id": "hook",
+      "type": "text",
+      "text": "Your bank calls this a statement.",
+      "x": 95,
+      "y": 296,
+      "w": 808,
+      "align": "left",
+      "size": 78,
+      "weight": 700,
+      "color": "#e6f2ec",
+      "ls": "-0.025em",
+      "start": 0,
+      "duration": 2.75,
+      "track": 3,
+      "anim": "none",
+      "enterDur": 0,
+      "out": "defocus",
+      "exitDur": 0.4
+    },
+    {
+      "id": "wall",
+      "type": "html",
+      "x": 95,
+      "y": 520,
+      "w": 808,
+      "start": 0,
+      "duration": 8.6,
+      "track": 1,
+      "anim": "none",
+      "enterDur": 0,
+      "out": "fade",
+      "exitDur": 0.9,
+      "vars": {
+        "--r": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": 0,
+      "varsDur": 1.5,
+      "varsEase": "linear",
+      "motion": [
+        {
+          "t": 0,
+          "y": 84,
+          "opacity": 1
+        },
+        {
+          "t": 1.9,
+          "y": 0,
+          "opacity": 1,
+          "ease": "easeOutExpo"
+        },
+        {
+          "t": 2.9,
+          "y": 0,
+          "opacity": 1
+        },
+        {
+          "t": 3.7,
+          "y": 70,
+          "opacity": 0.3,
+          "scale": 0.985,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 5.7,
+          "y": 72,
+          "opacity": 0.3,
+          "scale": 0.985
+        },
+        {
+          "t": 6.5,
+          "y": 74,
+          "opacity": 0.24,
+          "scale": 0.985,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 8.6,
+          "y": 76,
+          "opacity": 0.24,
+          "scale": 0.985
+        }
+      ],
+      "html": "<div style=\"width:808px;height:858px;overflow:hidden;font-family:var(--font-mono);font-size:24px;letter-spacing:0.01em;white-space:nowrap\"><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.000) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.000) / 0.14),1))))\">2026-03-01,DD ACH TFR STRIPE PAYOUTS,+2140.00,USD,ACH,</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.036) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.036) / 0.14),1))))\">2026-03-02,POS DEBIT AMZN BUSINESS *4T1,-38.42,USD,POS</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.072) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.072) / 0.14),1))))\">2026-03-03,RECUR SLACK T02G9 MONTHLY,-96.00,USD,SUB,39</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.108) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.108) / 0.14),1))))\">2026-03-03,ATM WDL KILBURN HIGH RD,-60.00,USD,ATM,3904</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.144) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.144) / 0.14),1))))\">2026-03-05,POS SHELL 6612 KILBURN,-71.18,USD,POS,3905</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.180) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.180) / 0.14),1))))\">2026-03-06,POS PRET A MANGER 0091,-12.40,USD,POS,3906</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.216) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.216) / 0.14),1))))\">2026-03-08,FEE INTERNATIONAL TXN,-2.15,USD,FEE,3907</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.252) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.252) / 0.14),1))))\">2026-03-09,RECUR ADOBE INC 8871231,-659.88,USD,SUB,390</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.288) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.288) / 0.14),1))))\">2026-03-11,DD BRITISH GAS 44120983,-184.02,USD,DD,3909</div><div style=\"height:42px\"></div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.360) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.360) / 0.14),1))))\">2026-03-15,POS UBER *TRIP HG2K,-23.90,USD,POS,3911</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.396) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.396) / 0.14),1))))\">2026-03-16,POS SQ *TATTE BAKERY 88,-19.05,USD,POS,3912</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.432) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.432) / 0.14),1))))\">2026-03-17,DD WEWORK LONDON 7712,-1420.00,USD,DD,3913</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.468) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.468) / 0.14),1))))\">2026-03-18,POS TFL TRAVEL CH 0012,-8.40,USD,POS,3914</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.504) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.504) / 0.14),1))))\">2026-03-19,FEE STRIPE BILLING MAR,-88.31,USD,FEE,3915</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.540) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.540) / 0.14),1))))\">2026-03-21,POS TRAINLINE 4471 EUS,-64.55,USD,POS,3916</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.576) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.576) / 0.14),1))))\">2026-03-22,POS SQ *BLUE BOTTLE 4471,-6.75,USD,POS,3917</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.612) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.612) / 0.14),1))))\">2026-03-24,RECUR GITHUB TEAM 9921,-84.00,USD,SUB,3918</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.648) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.648) / 0.14),1))))\">2026-03-26,DD THAMES WATER 88213,-41.60,USD,DD,3919</div><div style=\"height:42px;line-height:42px;color:var(--dim);opacity:calc(0.22 + 0.78 * clamp(0,calc((var(--r,0) - 0.684) / 0.14),1));transform:translateY(calc(10px * (1 - clamp(0,calc((var(--r,0) - 0.684) / 0.14),1))))\">2026-03-28,POS PRET A MANGER 0091,-11.85,USD,POS,3920</div></div>"
+    },
+    {
+      "id": "rowglow",
+      "type": "glow",
+      "preset": "bloom",
+      "color": "var(--accent)",
+      "x": 35,
+      "y": 810,
+      "w": 928,
+      "h": 210,
+      "intensity": 0.52,
+      "pulse": 0.5,
+      "track": 2,
+      "start": 1.5,
+      "duration": 8,
+      "anim": "fade",
+      "enterDur": 0.8,
+      "out": "fade",
+      "exitDur": 0.7,
+      "motion": [
+        {
+          "t": 0,
+          "y": 0
+        },
+        {
+          "t": 7.1,
+          "y": 0
+        },
+        {
+          "t": 7.9,
+          "y": -570,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 8,
+          "y": -570
+        }
+      ]
+    },
+    {
+      "id": "row",
+      "type": "html",
+      "x": 95,
+      "y": 846,
+      "w": 808,
+      "start": 0,
+      "duration": 12,
+      "track": 4,
+      "anim": "none",
+      "enterDur": 0,
+      "exitDur": 0,
+      "vars": {
+        "--p": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": 2.9,
+      "varsDur": 5,
+      "varsEase": "linear",
+      "motion": [
+        {
+          "t": 0,
+          "y": 84
+        },
+        {
+          "t": 1.9,
+          "y": 0,
+          "ease": "easeOutExpo"
+        },
+        {
+          "t": 8.6,
+          "y": 0
+        },
+        {
+          "t": 9.4,
+          "y": -570,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 12,
+          "y": -570
+        }
+      ],
+      "html": "<div style=\"position:relative;width:808px;height:126px;font-family:var(--font-mono);--o:clamp(0,calc((var(--p,0) - 0) / 0.15),1);--g:clamp(0,calc((var(--p,0) - 0.26) / 0.16),1);--n:clamp(0,calc((var(--p,0) - 0.52) / 0.10),1);--m:clamp(0,calc((var(--p,0) - 0.74) / 0.14),1);color:var(--ink);text-shadow:0 0 calc(18px * var(--o)) rgba(184,255,60,calc(0.30 * var(--o)))\"><div style=\"position:absolute;left:-26px;top:calc(28px - 8px * var(--g));width:3px;height:calc(52px + 34px * var(--g));background:var(--em);opacity:var(--o);box-shadow:0 0 14px rgba(184,255,60,0.75)\"></div><div style=\"position:absolute;left:0;top:16px;width:808px;height:32px;font-size:26px;letter-spacing:0.14em;color:var(--muted);opacity:var(--g)\"><span style=\"position:absolute;left:0;top:0\">DATE</span><span style=\"position:absolute;left:245px;top:0\">MERCHANT</span><span style=\"position:absolute;right:12px;top:0\">AMOUNT</span></div><div style=\"position:absolute;left:228px;top:56px;width:1px;height:60px;background:var(--border);opacity:var(--g)\"></div><div style=\"position:absolute;left:616px;top:56px;width:1px;height:60px;background:var(--border);opacity:var(--g)\"></div><div style=\"position:absolute;left:0;top:60px;width:808px;height:52px;line-height:52px;font-size:calc(23px + 11px * var(--o));white-space:nowrap\"><span style=\"position:absolute;left:0;top:0\">2026-03-14</span><span style=\"position:absolute;left:10ch;top:0;color:var(--dim);opacity:calc(1 - var(--o))\">,</span><div style=\"position:absolute;left:245px;top:0;width:428px;height:52px;clip-path:inset(0 0 0 calc(var(--n) * 428px))\"><span style=\"position:absolute;left:0;top:0;color:var(--raw);white-space:nowrap\">SQ *BLUE BOTTLE 4471</span></div><div style=\"position:absolute;left:245px;top:0;width:428px;height:52px;clip-path:inset(0 calc(428px - var(--n) * 428px) 0 0)\"><span style=\"position:absolute;left:0;top:0;white-space:nowrap\">Blue Bottle Coffee</span></div><div style=\"position:absolute;left:calc(245px + var(--n) * 428px);top:2px;width:2px;height:48px;background:var(--em);box-shadow:0 0 12px rgba(184,255,60,0.9);opacity:calc(4 * var(--n) * (1 - var(--n)))\"></div><span style=\"position:absolute;left:31ch;top:0;color:var(--dim);opacity:calc(1 - var(--o))\">,</span><span style=\"position:absolute;left:calc(29ch + 2ch * var(--o));top:0;width:8ch;text-align:right;color:var(--raw);opacity:clamp(0,calc((0.5 - var(--m)) * 40),1)\">-6.75</span><span style=\"position:absolute;left:calc(29ch + 2ch * var(--o));top:0;width:8ch;text-align:right;font-weight:600;color:var(--em);opacity:clamp(0,calc((var(--m) - 0.5) * 40),1);text-shadow:0 0 calc(16px * var(--m)) rgba(184,255,60,0.55)\">-$6.75</span><span style=\"position:absolute;left:37ch;top:0;color:var(--dim);opacity:calc(1 - var(--o));font-size:calc(1em - 1em * var(--o))\">,USD</span></div></div>"
+    },
+    {
+      "id": "marker",
+      "type": "html",
+      "x": 95,
+      "y": 892,
+      "w": 808,
+      "start": 1.95,
+      "duration": 1.65,
+      "track": 2,
+      "anim": "none",
+      "enterDur": 0,
+      "out": "fade",
+      "exitDur": 0.35,
+      "vars": {
+        "--w": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": 0.05,
+      "varsDur": 0.5,
+      "varsEase": "easeOutExpo",
+      "html": "<div style=\"position:relative;width:808px;height:56px;font-family:var(--font-mono)\"><div style=\"position:absolute;left:-14px;top:0;height:56px;width:calc(814px * var(--w,0));background:var(--accent-soft);border:1px solid var(--border)\"></div><div style=\"position:absolute;right:6px;top:12px;font-size:26px;letter-spacing:0.16em;color:var(--em);opacity:var(--w,0)\">LINE 47 OF 412</div></div>"
+    },
+    {
+      "id": "claim",
+      "type": "text",
+      "text": "The commas were always columns.",
+      "x": 95,
+      "y": 452,
+      "w": 808,
+      "align": "left",
+      "size": 62,
+      "weight": 700,
+      "color": "#e6f2ec",
+      "ls": "-0.02em",
+      "split": "word",
+      "preset": "riseClip",
+      "each": 0.42,
+      "stagger": 0.06,
+      "start": 3.05,
+      "duration": 2.85,
+      "track": 3,
+      "out": "defocus",
+      "exitDur": 0.4
+    },
+    {
+      "id": "chip",
+      "type": "html",
+      "x": 340,
+      "y": 1000,
+      "w": 240,
+      "start": 6.1,
+      "duration": 5.9,
+      "track": 4,
+      "anim": "pop",
+      "enterDur": 0.42,
+      "exitDur": 0,
+      "motion": [
+        {
+          "t": 0,
+          "y": 0
+        },
+        {
+          "t": 2.5,
+          "y": 0
+        },
+        {
+          "t": 3.3,
+          "y": -570,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 5.9,
+          "y": -570
+        }
+      ],
+      "html": "<div style=\"display:inline-flex;align-items:center;gap:12px;height:46px;padding:0 22px;border-radius:23px;background:var(--accent-soft);border:1.5px solid var(--em);font-family:var(--font-mono);font-size:25px;letter-spacing:0.16em;color:var(--em);box-shadow:0 0 26px rgba(184,255,60,0.28)\"><span style=\"width:10px;height:10px;border-radius:50%;background:var(--em);box-shadow:0 0 10px rgba(184,255,60,0.9)\"></span>COFFEE</div>"
+    },
+    {
+      "id": "note",
+      "type": "text",
+      "text": "matched on the merchant, not the memo string",
+      "x": 95,
+      "y": 1078,
+      "w": 808,
+      "align": "left",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#8ba296",
+      "ls": "0.04em",
+      "start": 6.7,
+      "duration": 2.2,
+      "track": 3,
+      "anim": "rise",
+      "enterDur": 0.4,
+      "out": "fade",
+      "exitDur": 0.35
+    },
+    {
+      "id": "bridge",
+      "type": "text",
+      "text": "Now the other 411.",
+      "x": 95,
+      "y": 1150,
+      "w": 808,
+      "align": "left",
+      "size": 62,
+      "weight": 700,
+      "color": "#e6f2ec",
+      "ls": "-0.02em",
+      "split": "word",
+      "preset": "riseClip",
+      "each": 0.42,
+      "stagger": 0.07,
+      "start": 7.55,
+      "duration": 1.4,
+      "track": 3,
+      "out": "defocus",
+      "exitDur": 0.35
+    },
+    {
+      "id": "ledger-head",
+      "type": "text",
+      "text": "LEDGERLINE · MAR 2026",
+      "x": 95,
+      "y": 236,
+      "w": 808,
+      "align": "left",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#b8ff3c",
+      "ls": "0.14em",
+      "start": 9.15,
+      "duration": 2.85,
+      "track": 3,
+      "cut": "fade",
+      "cutTiming": "smooth",
+      "exitDur": 0
+    },
+    {
+      "id": "ledger",
+      "type": "html",
+      "x": 95,
+      "y": 478,
+      "w": 808,
+      "start": 9.15,
+      "duration": 2.85,
+      "track": 2,
+      "cut": "fade",
+      "cutTiming": "smooth",
+      "exitDur": 0,
+      "vars": {
+        "--r": [
+          0,
+          1
+        ]
+      },
+      "varsDelay": 0.12,
+      "varsDur": 1.35,
+      "varsEase": "linear",
+      "html": "<div style=\"width:808px;font-family:var(--font-mono);font-size:29px;color:var(--ink);white-space:nowrap\"><div style=\"position:relative;height:62px;line-height:62px;opacity:clamp(0,calc((var(--r,0) - 0.000) / 0.26),1);transform:translateX(calc(-18px * (1 - clamp(0,calc((var(--r,0) - 0.000) / 0.26),1))))\"><span style=\"position:absolute;left:0px;top:0;font-size:26px;color:var(--dim)\">2026-03-02</span><span style=\"position:absolute;left:176px;top:0\">Amazon Business</span><span style=\"position:absolute;left:462px;top:0;font-size:26px;letter-spacing:0.10em;color:var(--em);text-shadow:0 0 12px rgba(184,255,60,0.45)\">SUPPLIES</span><span style=\"position:absolute;left:608px;top:0;width:200px;text-align:right;color:var(--raw)\">-$38.42</span></div><div style=\"position:relative;height:62px;line-height:62px;opacity:clamp(0,calc((var(--r,0) - 0.072) / 0.26),1);transform:translateX(calc(-18px * (1 - clamp(0,calc((var(--r,0) - 0.072) / 0.26),1))))\"><span style=\"position:absolute;left:0px;top:0;font-size:26px;color:var(--dim)\">2026-03-03</span><span style=\"position:absolute;left:176px;top:0\">Slack</span><span style=\"position:absolute;left:462px;top:0;font-size:26px;letter-spacing:0.10em;color:var(--em);text-shadow:0 0 12px rgba(184,255,60,0.45)\">SOFTWARE</span><span style=\"position:absolute;left:608px;top:0;width:200px;text-align:right;color:var(--raw)\">-$96.00</span></div><div style=\"position:relative;height:62px;line-height:62px;opacity:clamp(0,calc((var(--r,0) - 0.144) / 0.26),1);transform:translateX(calc(-18px * (1 - clamp(0,calc((var(--r,0) - 0.144) / 0.26),1))))\"><span style=\"position:absolute;left:0px;top:0;font-size:26px;color:var(--dim)\">2026-03-05</span><span style=\"position:absolute;left:176px;top:0\">Shell Kilburn</span><span style=\"position:absolute;left:462px;top:0;font-size:26px;letter-spacing:0.10em;color:var(--em);text-shadow:0 0 12px rgba(184,255,60,0.45)\">FUEL</span><span style=\"position:absolute;left:608px;top:0;width:200px;text-align:right;color:var(--raw)\">-$71.18</span></div><div style=\"position:relative;height:62px;line-height:62px;opacity:clamp(0,calc((var(--r,0) - 0.216) / 0.26),1);transform:translateX(calc(-18px * (1 - clamp(0,calc((var(--r,0) - 0.216) / 0.26),1))))\"><span style=\"position:absolute;left:0px;top:0;font-size:26px;color:var(--dim)\">2026-03-06</span><span style=\"position:absolute;left:176px;top:0\">Pret A Manger</span><span style=\"position:absolute;left:462px;top:0;font-size:26px;letter-spacing:0.10em;color:var(--em);text-shadow:0 0 12px rgba(184,255,60,0.45)\">MEALS</span><span style=\"position:absolute;left:608px;top:0;width:200px;text-align:right;color:var(--raw)\">-$12.40</span></div><div style=\"position:relative;height:62px;line-height:62px;opacity:clamp(0,calc((var(--r,0) - 0.288) / 0.26),1);transform:translateX(calc(-18px * (1 - clamp(0,calc((var(--r,0) - 0.288) / 0.26),1))))\"><span style=\"position:absolute;left:0px;top:0;font-size:26px;color:var(--dim)\">2026-03-09</span><span style=\"position:absolute;left:176px;top:0\">Adobe</span><span style=\"position:absolute;left:462px;top:0;font-size:26px;letter-spacing:0.10em;color:var(--em);text-shadow:0 0 12px rgba(184,255,60,0.45)\">SOFTWARE</span><span style=\"position:absolute;left:608px;top:0;width:200px;text-align:right;color:var(--raw)\">-$659.88</span></div><div style=\"position:relative;height:62px;line-height:62px;opacity:clamp(0,calc((var(--r,0) - 0.360) / 0.26),1);transform:translateX(calc(-18px * (1 - clamp(0,calc((var(--r,0) - 0.360) / 0.26),1))))\"><span style=\"position:absolute;left:0px;top:0;font-size:26px;color:var(--dim)\">2026-03-11</span><span style=\"position:absolute;left:176px;top:0\">British Gas</span><span style=\"position:absolute;left:462px;top:0;font-size:26px;letter-spacing:0.10em;color:var(--em);text-shadow:0 0 12px rgba(184,255,60,0.45)\">UTILITIES</span><span style=\"position:absolute;left:608px;top:0;width:200px;text-align:right;color:var(--raw)\">-$184.02</span></div><div style=\"position:relative;height:62px;line-height:62px;opacity:clamp(0,calc((var(--r,0) - 0.432) / 0.26),1);transform:translateX(calc(-18px * (1 - clamp(0,calc((var(--r,0) - 0.432) / 0.26),1))))\"><span style=\"position:absolute;left:0px;top:0;font-size:26px;color:var(--dim)\">2026-03-15</span><span style=\"position:absolute;left:176px;top:0\">Uber</span><span style=\"position:absolute;left:462px;top:0;font-size:26px;letter-spacing:0.10em;color:var(--em);text-shadow:0 0 12px rgba(184,255,60,0.45)\">TRAVEL</span><span style=\"position:absolute;left:608px;top:0;width:200px;text-align:right;color:var(--raw)\">-$23.90</span></div><div style=\"position:relative;height:62px;line-height:62px;opacity:clamp(0,calc((var(--r,0) - 0.504) / 0.26),1);transform:translateX(calc(-18px * (1 - clamp(0,calc((var(--r,0) - 0.504) / 0.26),1))))\"><span style=\"position:absolute;left:0px;top:0;font-size:26px;color:var(--dim)\">2026-03-17</span><span style=\"position:absolute;left:176px;top:0\">WeWork London</span><span style=\"position:absolute;left:462px;top:0;font-size:26px;letter-spacing:0.10em;color:var(--em);text-shadow:0 0 12px rgba(184,255,60,0.45)\">RENT</span><span style=\"position:absolute;left:608px;top:0;width:200px;text-align:right;color:var(--raw)\">-$1,420.00</span></div><div style=\"height:1px;background:var(--border);margin:18px 0 0;opacity:var(--r,0)\"></div><div style=\"position:relative;height:58px;line-height:58px;font-size:29px;opacity:clamp(0,calc((var(--r,0) - 0.62) / 0.3),1)\"><span style=\"position:absolute;left:0;top:0;letter-spacing:0.12em;font-size:26px;color:var(--muted)\">MARCH OUTGOINGS</span><span style=\"position:absolute;left:608px;top:0;width:200px;text-align:right;font-weight:600;color:var(--raw);text-shadow:0 0 16px rgba(255,106,61,0.45)\">-$18,431.06</span></div></div>"
+    },
+    {
+      "id": "rows-count",
+      "type": "count",
+      "from": 0,
+      "to": 412,
+      "x": 95,
+      "y": 1072,
+      "w": 240,
+      "align": "left",
+      "font": "mono",
+      "size": 96,
+      "weight": 600,
+      "color": "#b8ff3c",
+      "ls": "-0.03em",
+      "countStart": 0.08,
+      "countDur": 1.25,
+      "ease": "easeOutExpo",
+      "start": 9.85,
+      "duration": 2.15,
+      "track": 3,
+      "anim": "rise",
+      "enterDur": 0.35,
+      "exitDur": 0
+    },
+    {
+      "id": "rows-label",
+      "type": "text",
+      "text": "ROWS CATEGORIZED",
+      "x": 355,
+      "y": 1122,
+      "w": 420,
+      "align": "left",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#8ba296",
+      "ls": "0.12em",
+      "start": 10.35,
+      "duration": 1.65,
+      "track": 3,
+      "anim": "fade",
+      "enterDur": 0.35,
+      "exitDur": 0
+    },
+    {
+      "id": "markglow",
+      "type": "glow",
+      "preset": "bloom",
+      "color": "var(--accent)",
+      "x": 40,
+      "y": 1230,
+      "w": 320,
+      "h": 200,
+      "intensity": 0.4,
+      "track": 1,
+      "start": 10.2,
+      "duration": 1.8,
+      "anim": "fade",
+      "enterDur": 0.5,
+      "exitDur": 0
+    },
+    {
+      "id": "mark",
+      "type": "svg",
+      "x": 95,
+      "y": 1258,
+      "w": 132,
+      "h": 132,
+      "viewBox": "0 0 100 100",
+      "d": "M13 8 L13 92 M13 27 L87 27 M13 50 L71 50 M13 73 L55 73",
+      "stroke": "#b8ff3c",
+      "draw": {
+        "dur": 0.85,
+        "weight": 10
+      },
+      "start": 10.2,
+      "duration": 1.8,
+      "track": 3,
+      "anim": "fade",
+      "enterDur": 0.25,
+      "exitDur": 0
+    },
+    {
+      "id": "wordmark",
+      "type": "text",
+      "text": "Ledgerline",
+      "x": 263,
+      "y": 1296,
+      "w": 560,
+      "align": "left",
+      "size": 68,
+      "weight": 700,
+      "color": "#e6f2ec",
+      "ls": "-0.03em",
+      "split": "char",
+      "preset": "up",
+      "each": 0.45,
+      "stagger": 0.028,
+      "start": 10.45,
+      "duration": 1.55,
+      "track": 3,
+      "exitDur": 0
+    },
+    {
+      "id": "tagline",
+      "type": "text",
+      "text": "Bank CSV in. Ledger out.",
+      "x": 95,
+      "y": 1408,
+      "w": 808,
+      "align": "left",
+      "size": 36,
+      "weight": 500,
+      "color": "#8ba296",
+      "ls": "-0.01em",
+      "start": 10.85,
+      "duration": 1.15,
+      "track": 3,
+      "anim": "rise",
+      "enterDur": 0.4,
+      "exitDur": 0
+    },
+    {
+      "id": "crt",
+      "type": "shader",
+      "shader": "crt",
+      "intensity": 0.3,
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1920,
+      "track": 9,
+      "start": 0,
+      "duration": 12,
+      "enterDur": 0.4,
+      "exitDur": 0.4
+    }
+  ],
+  "authoring": {
+    "allow": [
+      "overlap"
+    ]
+  }
+}

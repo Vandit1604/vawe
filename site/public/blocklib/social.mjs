@@ -257,23 +257,38 @@ export function followCard({ x, y, w = 360, handle = '', name = '', avatar = '',
 //
 // EVERY FIGURE IS A PROP AND EVERY DEFAULT IS EMPTY: `rating` 0 draws no stars, `ratings` 0 draws no
 // count, `cta` empty draws no button. This block cannot ship a number nobody stood behind.
-export function installCard({ x, y, w = 400, icon = '', name = '', sub = '', rating = 0, ratings = 0,
-  cta = '', start = 0, dur = 4 } = {}) {
+// a count is FORMATTED from a number, never accepted as prose: a caller that has 1200 ratings should
+// not have to decide how to write it, and the block should not be able to be handed a sentence.
+function ratingsCountText(ratings) {
+  if (ratings <= 0) return '';
+  if (ratings >= 1e6) return r2(ratings / 1e6) + 'M';
+  if (ratings >= 1e3) return r2(ratings / 1e3) + 'K';
+  return String(Math.round(ratings));
+}
+
+// THE STARS ARE THE ACCENT, the same reading hue as the icon tile and the CTA on this very card:
+// a rating is a READING, not a caution state, so `--warn` never belongs here.
+function installCardStars(rate) {
   const STARS = '★★★★★';
-  const rate = Math.min(5, Math.max(0, +rating || 0));
-  // a count is FORMATTED from a number, never accepted as prose: a caller that has 1200 ratings should
-  // not have to decide how to write it, and the block should not be able to be handed a sentence.
-  const countText = ratings > 0
-    ? (ratings >= 1e6 ? r2(ratings / 1e6) + 'M' : ratings >= 1e3 ? r2(ratings / 1e3) + 'K' : String(Math.round(ratings)))
-    : '';
-  // THE STARS ARE THE ACCENT, the same reading hue as the icon tile and the CTA on this very card:
-  // a rating is a READING, not a caution state, so `--warn` never belongs here.
-  const stars = rate > 0 ? `<div style="position:relative;font:500 ${TYPE.body}px var(--font-sans);letter-spacing:0.06em">`
+  if (rate <= 0) return '';
+  return `<div style="position:relative;font:500 ${TYPE.body}px var(--font-sans);letter-spacing:0.06em">`
     + `<span style="color:${tint(T.accent, TINT.track)}">${STARS}</span>`
     + `<div data-part="stars" style="position:absolute;left:0;top:0;overflow:hidden;width:${r2(rate / 5 * 100)}%">`
-    + `<span style="color:${onInk(T.accent)};white-space:nowrap">${STARS}</span></div></div>` : '';
-  const meta = (stars || countText) ? `<div style="display:flex;align-items:center;gap:${SPACE.xs}px">` + stars
-    + (countText ? `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">${countText}</span>` : '') + '</div>' : '';
+    + `<span style="color:${onInk(T.accent)};white-space:nowrap">${STARS}</span></div></div>`;
+}
+
+function installCardMeta(stars, countText) {
+  if (!stars && !countText) return '';
+  return `<div style="display:flex;align-items:center;gap:${SPACE.xs}px">` + stars
+    + (countText ? `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">${countText}</span>` : '') + '</div>';
+}
+
+export function installCard({ x, y, w = 400, icon = '', name = '', sub = '', rating = 0, ratings = 0,
+  cta = '', start = 0, dur = 4 } = {}) {
+  const rate = Math.min(5, Math.max(0, +rating || 0));
+  const countText = ratingsCountText(ratings);
+  const stars = installCardStars(rate);
+  const meta = installCardMeta(stars, countText);
   // The icon tile is ONE radius step under the card it sits in (R.tight inside R.soft), which is what
   // keeps a nested corner from reading as squarer than its container. The glyph is `onInk`, the same
   // 2.6:1 accent-on-a-tint-of-itself pairing `avatarHtml`'s own default carries.

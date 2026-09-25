@@ -19,7 +19,9 @@ import assert from 'node:assert';
 import { serveRepo, launchPage, waitForEngine } from '../../harness/lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENES = path.join(ROOT, 'films/scene');
+// Fixture lives under tests/fixtures/films/, never films/scene/ (real, gitignored film content this
+// suite must not depend on); scene.html itself, the engine shell, stays served from films/scene/.
+const SCENES = path.join(ROOT, 'tests/fixtures/films');
 const REL = 'stagetest-group-parts.json';
 
 const SCENE = {
@@ -42,7 +44,7 @@ test('a group child\'s `parts` entrance runs: hidden before its delay, visible a
   const { port, close: closeServer } = await serveRepo({ root: ROOT });
   const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
   try {
-    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/films/scene/${REL}&fps=30`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/tests/fixtures/films/${REL}&fps=30`, { waitUntil: 'load' });
     const err = await waitForEngine(page);
     assert.equal(err, null, `scene must build clean, got: ${err}`);
     const opacityAt = (n) => page.evaluate((fr) => {

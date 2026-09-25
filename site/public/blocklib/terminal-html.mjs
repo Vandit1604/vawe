@@ -35,32 +35,22 @@ const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').
 
 const rowHeight = (row) => row.bar ? BAR_H : row.diff ? row.diff.length * LINE_H : LINE_H;
 
-// terminalHtml: a terminal window that types a command, then answers with staggered output.
-// `output` rows: {text} plain, {text,tone} a coloured status line, {bar:{label,pct}} a fill that is a
-// genuine fraction of the clock, {diff:[{sign,text}]} +/- lines. `command` is a string or a token list.
-export function terminalHtml({ x, y, w = 760, title = 'zsh · deploy', command = '', cps = 22,
-  output = [], start = 0, dur = 6.5 } = {}) {
-  const tokens = normTokens(command);
-  const full = tokens.map((t) => t.text).join('');
-  const len = full.length || 1;
-  const typeDur = r2(len / cps);
-  const settle = 0.4;
-
-  // Layout is computed once, in JS, from the real row heights, the same discipline
-  // `cardInsetY`/`barWidth` enforce for the native charts: geometry never disagrees with its own
-  // content because nothing restates it by hand.
-  // Measured from the BODY wrapper's own top (which sits at TITLE_H+1 in the card), not the card's.
+// Layout is computed once, in JS, from the real row heights, the same discipline
+// `cardInsetY`/`barWidth` enforce for the native charts: geometry never disagrees with its own
+// content because nothing restates it by hand.
+// Measured from the BODY wrapper's own top (which sits at TITLE_H+1 in the card), not the card's.
+function terminalHtmlLayout(output) {
   const bodyTop = PAD;
-  const outputTop = bodyTop + LINE_H + GAP_PO;
-  let cursorY = outputTop, rowY = [];
+  let cursorY = bodyTop + LINE_H + GAP_PO, rowY = [];
   output.forEach((row) => { rowY.push(cursorY); cursorY += rowHeight(row) + ROW_GAP; });
   const bodyH = Math.round(cursorY - (output.length ? ROW_GAP : 0) + PAD);
-  const h = bodyH + TITLE_H + 1;
+  return { bodyTop, rowY, bodyH, h: bodyH + TITLE_H + 1 };
+}
 
-  // Per-row entrance timing: each row's own start, in a group child's `stagger()` idiom, but computed
-  // as a `vars` channel (a full HTML card is one layer, so there is no group child to hang `delay` on).
+// Per-row entrance timing: each row's own start, in a group child's `stagger()` idiom, but computed
+// as a `vars` channel (a full HTML card is one layer, so there is no group child to hang `delay` on).
+function terminalHtmlVars(output, { len, typeDur, settle }) {
   const rowStart = (i) => r2(typeDur + settle + i * 0.32);
-
   const vars = { '--type': [0, len], '--done': [0, 1] };
   const varsDelay = { '--type': 0, '--done': typeDur + 0.02 };
   const varsDur = { '--type': typeDur, '--done': 0.04 };
@@ -72,12 +62,15 @@ export function terminalHtml({ x, y, w = 760, title = 'zsh · deploy', command =
       vars[`--bar${i}`] = [0, to]; varsDelay[`--bar${i}`] = rowStart(i) + 0.1; varsDur[`--bar${i}`] = 1.1; varsEase[`--bar${i}`] = P_EASE;
     }
   });
+  return { vars, varsDelay, varsDur, varsEase };
+}
 
-  // ---- the command line: one clip-path reveal over real per-token colour, so typing never disturbs
-  // syntax highlighting the way a per-character DOM rebuild would. `round(down, var(--type), 1)`
-  // snaps to whole characters. No fractional glyph half-drawn mid-frame.
+// the command line: one clip-path reveal over real per-token colour, so typing never disturbs syntax
+// highlighting the way a per-character DOM rebuild would. `round(down, var(--type), 1)` snaps to
+// whole characters. No fractional glyph half-drawn mid-frame.
+function terminalHtmlPrompt(tokens) {
   const spans = tokens.map((t) => `<span style="color:${t.color}">${esc(t.text)}</span>`).join('');
-  const promptLine = `<div style="position:relative;height:${LINE_H}px;display:flex;align-items:center;font:600 ${FONT}px var(--font-mono);white-space:pre">`
+  return `<div style="position:relative;height:${LINE_H}px;display:flex;align-items:center;font:600 ${FONT}px var(--font-mono);white-space:pre">`
     + `<span style="color:${T.accent};margin-right:10px">$</span>`
     + `<span style="position:relative;display:inline-block">`
     + `<span style="clip-path:inset(0 calc(100% - round(down, var(--type,0), 1) * 1ch) 0 0)">${spans}</span>`
@@ -86,9 +79,10 @@ export function terminalHtml({ x, y, w = 760, title = 'zsh · deploy', command =
     + `<span style="position:absolute;top:2px;left:calc(round(down, var(--type,0), 1) * 1ch);width:0.55ch;height:${FONT + 2}px;`
     + `background:${T.accent};opacity:calc((1 - var(--done,0)) + var(--done,0) * (round(down, mod(var(--t,0), 0.9), 0.45) * 2))"></span>`
     + `</span></div>`;
+}
 
-  // ---- output rows
-  const outputHtml = output.map((row, i) => {
+function terminalHtmlOutputRows(output, { rowY, w }) {
+  return output.map((row, i) => {
     const o = `var(--o${i},0)`;
     const wrap = (inner, extraH) => `<div style="position:absolute;left:${PAD}px;top:${rowY[i]}px;width:${w - 2 * PAD}px;height:${extraH}px;`
       + `opacity:${o};transform:translateY(calc((1 - ${o}) * 7px))">${inner}</div>`;
@@ -112,13 +106,14 @@ export function terminalHtml({ x, y, w = 760, title = 'zsh · deploy', command =
     const color = row.tone ? toneColor(row.tone) : T.sub;
     return wrap(`<div style="height:${LINE_H}px;display:flex;align-items:center;font:500 17px var(--font-mono);color:${color}">${esc(row.text || '')}</div>`, LINE_H);
   }).join('');
+}
 
+// a real gradient body (lit from the top), an inset+outset box-shadow for depth, and a slow-drifting
+// scanline field over `--t`. Three things a layer's flat fill/border/elevation cannot reach at once,
+// which is the whole argument for spending this beat in html.
+function terminalHtmlChrome({ w, h, title, bodyTop, bodyH, promptLine, outputHtml }) {
   const dot = (tone) => `<div style="width:11px;height:11px;border-radius:100px;background:${toneColor(tone)}"></div>`;
-
-  // ---- chrome: a real gradient body (lit from the top), an inset+outset box-shadow for depth, and a
-  // slow-drifting scanline field over `--t`. Three things a layer's flat fill/border/elevation cannot
-  // reach at once, which is the whole argument for spending this beat in html.
-  const html = `<div style="position:relative;width:${w}px;height:${h}px;border-radius:${R.tight}px;`
+  return `<div style="position:relative;width:${w}px;height:${h}px;border-radius:${R.tight}px;`
     + `border:${HAIR};overflow:hidden;`
     + `background:linear-gradient(180deg, color-mix(in srgb, var(--text) 5%, var(--card)) 0%, var(--card) 46%);`
     + `box-shadow:0 26px 60px -24px color-mix(in srgb, var(--text) 40%, transparent), `
@@ -140,7 +135,20 @@ export function terminalHtml({ x, y, w = 760, title = 'zsh · deploy', command =
     + `<div style="position:absolute;left:${PAD}px;top:${bodyTop}px">${promptLine}</div>`
     + outputHtml
     + `</div></div>`;
+}
 
+// terminalHtml: a terminal window that types a command, then answers with staggered output.
+// `output` rows: {text} plain, {text,tone} a coloured status line, {bar:{label,pct}} a fill that is a
+// genuine fraction of the clock, {diff:[{sign,text}]} +/- lines. `command` is a string or a token list.
+export function terminalHtml({ x, y, w = 760, title = 'zsh · deploy', command = '', cps = 22,
+  output = [], start = 0, dur = 6.5 } = {}) {
+  const tokens = normTokens(command), full = tokens.map((t) => t.text).join(''),
+    len = full.length || 1, typeDur = r2(len / cps), settle = 0.4;
+  const { bodyTop, rowY, bodyH, h } = terminalHtmlLayout(output);
+  const { vars, varsDelay, varsDur, varsEase } = terminalHtmlVars(output, { len, typeDur, settle });
+  const promptLine = terminalHtmlPrompt(tokens);
+  const outputHtml = terminalHtmlOutputRows(output, { rowY, w });
+  const html = terminalHtmlChrome({ w, h, title, bodyTop, bodyH, promptLine, outputHtml });
   return [{ type: 'html', x, y, w, h, html, start, duration: dur, anim: 'fade', enterDur: 0.3, exitDur: 0.35,
     vars, varsDelay, varsDur, varsEase }];
 }

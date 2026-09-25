@@ -11,9 +11,9 @@
 // the one avatar implementation, lives in blocks/kit.mjs. It is PURE (props → plain objects) and it
 // exists because every one of those things had been copied per-block and had drifted per-copy.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, onColor,
-  R, E, SPACE, TYPE, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
-  sweep, stagger, growUp, fillRight, stackWindows, needData, blockFactory,
+  TOKENS, HAIR, r2, text, rect, box,
+  R, E, SPACE, TYPE, cardChrome,
+  stagger, needData, blockFactory,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that ships
@@ -164,11 +164,11 @@ export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = '
   const colW = (w - gap) / 2;
   if (leftScreen || rightScreen) {
     const TITLE_H = 46;
-    const cap = (t, cx, color, st) => text({ text: t, x: cx, y, w: colW, size: 26, weight: 700, color,
+    const cap = ({ t, cx, color, st }) => text({ text: t, x: cx, y, w: colW, size: 26, weight: 700, color,
       start: st, duration: r2(start + dur - st), anim: 'slide-down', enterDur: 0.35, exitDur: 0.3 });
     return [
-      cap(leftTitle, x, T.dim, start),
-      cap(rightTitle, r2(x + colW + gap), TOKENS.accent, r2(start + 0.18)),
+      cap({ t: leftTitle, cx: x, color: T.dim, st: start }),
+      cap({ t: rightTitle, cx: r2(x + colW + gap), color: TOKENS.accent, st: r2(start + 0.18) }),
       // no divider: this block does not know how tall its panes are, and a rule drawn to a guessed
       // height is a line that is wrong at every size but one. The two titles already separate them.
       ...splitScreen({ x, y: r2(y + TITLE_H), w, gap, left: leftScreen, right: rightScreen, start, dur }),
@@ -178,7 +178,7 @@ export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = '
   // to a mono eyebrow: below 24px a normal-weight dim heading has to clear 4.5:1 instead of 3:1, and
   // both column colours are chosen to be subordinate. Each column is one `html` fragment; its own rows
   // stage with `parts` so the two lists fill in rather than land as one slab per side.
-  const col = (title, items, accent, st) => {
+  const col = ({ title, items, accent, st }) => {
     const html = `<div style="display:flex;flex-direction:column;align-items:stretch;gap:${SPACE.sm}px;`
       + `width:${colW}px;box-sizing:border-box">`
       + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${accent}">${title}</span>`
@@ -190,8 +190,8 @@ export function comparison({ x, y, w = 900, leftTitle = 'Others', rightTitle = '
       parts: [{ anim: 'slide-left', each: 0.28, stagger: 0.12, delay: 0.3 }] };
   };
   return [
-    { ...col(leftTitle, left, T.dim, start), x, y },
-    { ...col(rightTitle, right, TOKENS.accent, start), x: r2(x + colW + gap), y },
+    { ...col({ title: leftTitle, items: left, accent: T.dim, st: start }), x, y },
+    { ...col({ title: rightTitle, items: right, accent: TOKENS.accent, st: start }), x: r2(x + colW + gap), y },
   ];
 }
 
@@ -274,9 +274,131 @@ export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = 
 // `riseClip`) are pure functions of unit progress. Nothing steps from a previous frame.
 const LT_FONT = { name: { size: 46, weight: 700, tracking: '-0.02em' }, role: { size: 21, weight: 500 } };
 
+// Twelve independent looks, one per key, each a pure function of the shared context lowerThird
+// builds once. A lookup table rather than a switch: every variant's own shape and its own comment
+// stay together, and dispatch below is one lookup instead of twelve branches.
+const LOWER_THIRD_VARIANTS = {
+  // A plate the colour of the page, hairline-bordered. The quiet one: use it when the frame is busy
+  // and the identifier must not compete with it.
+  cleanBar: ({ x, y, name, role, N, RF, wipeIn, stackL }) => [{ type: 'group', x, y, ...stackL, gap: 2,
+    pad: '16px 24px', bg: T.card, radius: 4, border: HAIR, ...wipeIn, children: [
+      text({ text: name, ...N, color: T.ink }),
+      role && text({ text: role, ...RF, color: T.dim }),
+    ].filter(Boolean) }],
+
+  // Name reversed out of a solid accent block, role in an ink block beneath. The default broadcast
+  // read: two hard rectangles, no radius, no apology.
+  boldBlock: ({ x, y, name, role, accent, N, RF, s2, wipeIn, HARD }) => [
+    { type: 'group', x, y, pad: '12px 16px', bg: accent, ...HARD, ...wipeIn,
+      children: [text({ text: name, ...N, color: T.onAccent })] },
+    role ? { type: 'group', x, y: r2(y + N.size + 24), pad: '8px 16px', bg: T.ink, ...HARD,
+      ...wipeIn, start: s2, children: [text({ text: role, ...RF, color: T.onAccent })] } : null,
+  ].filter(Boolean),
+
+  // BILD: the German tabloid front page. Caps, reversed out of accent, tracked TIGHT and set huge.
+  // The loudest variant in the set, and it is supposed to be.
+  bild: ({ x, y, name, role, accent, s2, wipeIn, HARD }) => [
+    { type: 'group', x, y, pad: '8px 16px', bg: accent, ...HARD, ...wipeIn, enterDur: 0.3, children: [
+      text({ text: String(name).toUpperCase(), size: 62, weight: 800, tracking: '-0.03em', color: T.onAccent }),
+    ] },
+    role ? { type: 'group', x: r2(x + 14), y: r2(y + 84), pad: '8px 16px', bg: T.ink, ...HARD, ...wipeIn,
+      start: s2, enterDur: 0.3, children: [
+        text({ text: String(role).toUpperCase(), size: 22, weight: 700, tracking: '0.04em', color: T.onAccent }),
+      ] } : null,
+  ].filter(Boolean),
+
+  // A dark elevated card. The only variant that works over bright photography without a scrim.
+  darkCard: ({ x, y, name, role, N, RF, riseIn, stackL }) => [{ type: 'group', x, y, ...stackL, gap: 4,
+    pad: '16px 24px', bg: 'rgba(16,18,24,0.92)', radius: 12, ...riseIn, children: [
+      text({ text: name, ...N, color: '#fff' }),
+      role && text({ text: role, ...RF, color: 'rgba(255,255,255,0.72)' }),
+    ].filter(Boolean) }],
+
+  // A thick accent rule, then the text. No plate at all: the rule alone carries the identity, so it
+  // needs a calm backdrop to land on. (A rule beside text is broadcast grammar, not a card stripe.)
+  sideRule: ({ x, y, name, role, accent, N, RF, riseIn, stackL }) => [{ type: 'group', x, y, layout: 'row',
+    items: 'center', gap: 16, ...riseIn, children: [
+      box({ w: 6, h: r2(N.size + (role ? RF.size + 14 : 0)), bg: accent }),
+      { type: 'group', ...stackL, gap: 2, children: [
+        text({ text: name, ...N, color: T.ink }),
+        role && text({ text: role, ...RF, color: T.dim }),
+      ].filter(Boolean) },
+    ] }],
+
+  // Kicker above, name below: the role becomes a small mono label that INTRODUCES the name rather
+  // than trailing it. Reverses the usual hierarchy without weakening it.
+  kickerName: ({ x, y, name, role, accent, riseIn, stackL }) => [{ type: 'group', x, y, ...stackL, gap: 6,
+    ...riseIn, children: [
+      // 18 matches the schema's floor for a top-level text layer. As a group child it would be
+      // allowed to go smaller, and a kicker is exactly the element that wants to: don't. Carry the
+      // emphasis with tracking and colour, which cost no legibility.
+      role && text({ text: String(role).toUpperCase(), font: 'mono', size: 18, weight: 600,
+        tracking: '0.12em', color: accent }),
+      text({ text: name, size: 54, weight: 700, tracking: '-0.025em', color: T.ink }),
+    ].filter(Boolean) }],
+
+  // The underline DRAWS under the name (kinetic `underline`, pure in unit progress). Bare text, so
+  // it inherits whatever the frame is doing behind it.
+  accentUnderline: ({ x, y, name, role, accent, N, RF, start, dur }) => [
+    text({ text: name, x, y, ...N, color: T.ink, split: 'word', preset: 'underline',
+      presetOpts: { color: accent }, each: 0.5, stagger: 0.06, start, duration: dur, exitDur: 0.3 }),
+    role && text({ text: role, x, y: r2(y + N.size + 16), ...RF, color: T.dim,
+      start: r2(start + 0.35), duration: r2(dur - 0.35), anim: 'fade', enterDur: 0.4, exitDur: 0.3 }),
+  ].filter(Boolean),
+
+  // The name rises out of a clipped baseline, one word at a time (kinetic `riseClip`), type moving
+  // the way it reads. The most "designed" entrance in the set; give it a slow beat.
+  maskReveal: ({ x, y, name, role, N, RF, start, dur }) => [
+    text({ text: name, x, y, ...N, color: T.ink, split: 'word', preset: 'riseClip',
+      each: 0.55, stagger: 0.08, start, duration: dur, exitDur: 0.3 }),
+    role && text({ text: role, x, y: r2(y + N.size + 16), ...RF, color: T.dim,
+      start: r2(start + 0.4), duration: r2(dur - 0.4), anim: 'fade', enterDur: 0.4, exitDur: 0.3 }),
+  ].filter(Boolean),
+
+  // Soft accent pill, fully rounded. The friendly one: product tours, not news.
+  softPill: ({ x, y, name, role, riseIn }) => [{ type: 'group', x, y, layout: 'row', items: 'center',
+    gap: 12, pad: '12px 24px', bg: T.accentSoft, radius: 100, ...riseIn, children: [
+      text({ text: name, size: 34, weight: 700, tracking: '-0.02em', color: T.accentInk }),
+      role && text({ text: role, size: 19, weight: 500, color: T.accentInk }),
+    ].filter(Boolean) }],
+
+  // Two blocks, offset and staggered in time so the eye reads name → role as one gesture, not two
+  // labels. The offset is what stops it being `boldBlock` with extra steps.
+  colourBlock: ({ x, y, name, role, accent, N, RF, s2, wipeIn, HARD }) => [
+    { type: 'group', x, y, pad: '12px 24px', bg: T.ink, ...HARD, ...wipeIn,
+      children: [text({ text: name, ...N, color: T.onAccent })] },
+    // Nine name-card sites here painted a literal '#fff' on an accent fill. --on-accent has
+    // existed since this morning and these never adopted it; on higgsfield's acid lime that
+    // is white-on-lime at 1.16:1. The token knows what reads on the theme's own accent.
+    role ? { type: 'group', x: r2(x + 40), y: r2(y + N.size + 26), pad: '8px 16px', bg: accent, ...HARD,
+      ...wipeIn, start: s2, children: [text({ text: role, ...RF, weight: 600, color: T.onAccent })] } : null,
+  ].filter(Boolean),
+
+  // A plate over a deliberately shorter accent bar. Reads as a mark rather than a plate.
+  stackBars: ({ x, y, name, role, accent, N, RF, s2, wipeIn, HARD }) => [
+    { type: 'group', x, y, pad: '12px 24px', bg: T.card, border: HAIR, ...HARD, ...wipeIn,
+      children: [text({ text: name, ...N, color: T.ink })] },
+    role ? { type: 'group', x, y: r2(y + N.size + 26), pad: '6px 24px', bg: accent, ...HARD, ...wipeIn,
+      start: s2, enterDur: 0.32, children: [text({ text: role, ...RF, weight: 600, color: T.onAccent })] } : null,
+  ].filter(Boolean),
+
+  // A ticker bar: accent chip, then the line. `role` is the chip (LIVE / BREAKING / 09:41), which is
+  // why this variant reads the props in the opposite order to every other one.
+  newsTicker: ({ x, y, name, role, accent, wipeIn }) => [{ type: 'group', x, y, layout: 'row',
+    items: 'stretch', gap: 0, bg: T.ink, radius: 4, ...wipeIn, children: [
+      { type: 'group', bg: accent, pad: '12px 16px', items: 'center',
+        children: [text({ text: String(role || 'LIVE').toUpperCase(), font: 'mono', size: 18,
+          weight: 700, tracking: '0.08em', color: T.onAccent })] },
+      { type: 'group', pad: '12px 24px', items: 'center',
+        children: [text({ text: name, size: 30, weight: 600, color: T.onAccent })] },
+    ] }],
+};
+
 export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = 'cleanBar',
   accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
-  const N = LT_FONT.name, R = LT_FONT.role;
+  const fn = LOWER_THIRD_VARIANTS[variant];
+  if (!fn) throw new Error(`lowerThird: unknown variant "${variant}", see blocks/catalog.mjs for the twelve`);
+  const N = LT_FONT.name, RF = LT_FONT.role;
   const s2 = r2(start + 0.12);                      // the role trails the name by ~2 frames: reading order
   const wipeIn = { start, duration: dur, anim: 'wipe', enterDur: 0.42, exitDur: 0.28 };
   const riseIn = { start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3 };
@@ -286,136 +408,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
   //                     sharing its left edge. A lower third is a left-aligned form; the edge IS the design.
   const HARD = { radius: 0 };
   const stackL = { layout: 'column', items: 'flex-start' };
-
-  switch (variant) {
-    // A plate the colour of the page, hairline-bordered. The quiet one: use it when the frame is busy
-    // and the identifier must not compete with it.
-    case 'cleanBar':
-      return [{ type: 'group', x, y, ...stackL, gap: 2, pad: '16px 24px', bg: T.card,
-        radius: 4, border: HAIR, ...wipeIn, children: [
-          text({ text: name, ...N, color: T.ink }),
-          role && text({ text: role, ...R, color: T.dim }),
-        ].filter(Boolean) }];
-
-    // Name reversed out of a solid accent block, role in an ink block beneath. The default broadcast
-    // read: two hard rectangles, no radius, no apology.
-    case 'boldBlock':
-      return [
-        { type: 'group', x, y, pad: '12px 16px', bg: accent, ...HARD, ...wipeIn,
-          children: [text({ text: name, ...N, color: T.onAccent })] },
-        role ? { type: 'group', x, y: r2(y + N.size + 24), pad: '8px 16px', bg: T.ink, ...HARD,
-          ...wipeIn, start: s2, children: [text({ text: role, ...R, color: T.onAccent })] } : null,
-      ].filter(Boolean);
-
-    // BILD: the German tabloid front page. Caps, reversed out of accent, tracked TIGHT and set huge.
-    // The loudest variant in the set, and it is supposed to be.
-    case 'bild':
-      return [
-        { type: 'group', x, y, pad: '8px 16px', bg: accent, ...HARD, ...wipeIn, enterDur: 0.3, children: [
-          text({ text: String(name).toUpperCase(), size: 62, weight: 800, tracking: '-0.03em', color: T.onAccent }),
-        ] },
-        role ? { type: 'group', x: r2(x + 14), y: r2(y + 84), pad: '8px 16px', bg: T.ink, ...HARD, ...wipeIn,
-          start: s2, enterDur: 0.3, children: [
-            text({ text: String(role).toUpperCase(), size: 22, weight: 700, tracking: '0.04em', color: T.onAccent }),
-          ] } : null,
-      ].filter(Boolean);
-
-    // A dark elevated card. The only variant that works over bright photography without a scrim.
-    case 'darkCard':
-      return [{ type: 'group', x, y, ...stackL, gap: 4, pad: '16px 24px', bg: 'rgba(16,18,24,0.92)',
-        radius: 12, ...riseIn, children: [
-          text({ text: name, ...N, color: '#fff' }),
-          role && text({ text: role, ...R, color: 'rgba(255,255,255,0.72)' }),
-        ].filter(Boolean) }];
-
-    // A thick accent rule, then the text. No plate at all: the rule alone carries the identity, so it
-    // needs a calm backdrop to land on. (A rule beside text is broadcast grammar, not a card stripe.)
-    case 'sideRule':
-      return [{ type: 'group', x, y, layout: 'row', items: 'center', gap: 16, ...riseIn, children: [
-        box({ w: 6, h: r2(N.size + (role ? R.size + 14 : 0)), bg: accent }),
-        { type: 'group', ...stackL, gap: 2, children: [
-          text({ text: name, ...N, color: T.ink }),
-          role && text({ text: role, ...R, color: T.dim }),
-        ].filter(Boolean) },
-      ] }];
-
-    // Kicker above, name below: the role becomes a small mono label that INTRODUCES the name rather
-    // than trailing it. Reverses the usual hierarchy without weakening it.
-    case 'kickerName':
-      return [{ type: 'group', x, y, ...stackL, gap: 6, ...riseIn, children: [
-        // 18 matches the schema's floor for a top-level text layer. As a group child it would be
-        // allowed to go smaller, and a kicker is exactly the element that wants to: don't. Carry the
-        // emphasis with tracking and colour, which cost no legibility.
-        role && text({ text: String(role).toUpperCase(), font: 'mono', size: 18, weight: 600,
-          tracking: '0.12em', color: accent }),
-        text({ text: name, size: 54, weight: 700, tracking: '-0.025em', color: T.ink }),
-      ].filter(Boolean) }];
-
-    // The underline DRAWS under the name (kinetic `underline`, pure in unit progress). Bare text, so
-    // it inherits whatever the frame is doing behind it.
-    case 'accentUnderline':
-      return [
-        text({ text: name, x, y, ...N, color: T.ink, split: 'word', preset: 'underline',
-          presetOpts: { color: accent }, each: 0.5, stagger: 0.06, start, duration: dur, exitDur: 0.3 }),
-        role && text({ text: role, x, y: r2(y + N.size + 16), ...R, color: T.dim,
-          start: r2(start + 0.35), duration: r2(dur - 0.35), anim: 'fade', enterDur: 0.4, exitDur: 0.3 }),
-      ].filter(Boolean);
-
-    // The name rises out of a clipped baseline, one word at a time (kinetic `riseClip`), type moving
-    // the way it reads. The most "designed" entrance in the set; give it a slow beat.
-    case 'maskReveal':
-      return [
-        text({ text: name, x, y, ...N, color: T.ink, split: 'word', preset: 'riseClip',
-          each: 0.55, stagger: 0.08, start, duration: dur, exitDur: 0.3 }),
-        role && text({ text: role, x, y: r2(y + N.size + 16), ...R, color: T.dim,
-          start: r2(start + 0.4), duration: r2(dur - 0.4), anim: 'fade', enterDur: 0.4, exitDur: 0.3 }),
-      ].filter(Boolean);
-
-    // Soft accent pill, fully rounded. The friendly one: product tours, not news.
-    case 'softPill':
-      return [{ type: 'group', x, y, layout: 'row', items: 'center', gap: 12, pad: '12px 24px',
-        bg: T.accentSoft, radius: 100, ...riseIn, children: [
-          text({ text: name, size: 34, weight: 700, tracking: '-0.02em', color: T.accentInk }),
-          role && text({ text: role, size: 19, weight: 500, color: T.accentInk }),
-        ].filter(Boolean) }];
-
-    // Two blocks, offset and staggered in time so the eye reads name → role as one gesture, not two
-    // labels. The offset is what stops it being `boldBlock` with extra steps.
-    case 'colourBlock':
-      return [
-        { type: 'group', x, y, pad: '12px 24px', bg: T.ink, ...HARD, ...wipeIn,
-          children: [text({ text: name, ...N, color: T.onAccent })] },
-        // Nine name-card sites here painted a literal '#fff' on an accent fill. --on-accent has
-        // existed since this morning and these never adopted it; on higgsfield's acid lime that
-        // is white-on-lime at 1.16:1. The token knows what reads on the theme's own accent.
-        role ? { type: 'group', x: r2(x + 40), y: r2(y + N.size + 26), pad: '8px 16px', bg: accent, ...HARD,
-          ...wipeIn, start: s2, children: [text({ text: role, ...R, weight: 600, color: T.onAccent })] } : null,
-      ].filter(Boolean);
-
-    // A plate over a deliberately shorter accent bar. Reads as a mark rather than a plate.
-    case 'stackBars':
-      return [
-        { type: 'group', x, y, pad: '12px 24px', bg: T.card, border: HAIR, ...HARD, ...wipeIn,
-          children: [text({ text: name, ...N, color: T.ink })] },
-        role ? { type: 'group', x, y: r2(y + N.size + 26), pad: '6px 24px', bg: accent, ...HARD, ...wipeIn,
-          start: s2, enterDur: 0.32, children: [text({ text: role, ...R, weight: 600, color: T.onAccent })] } : null,
-      ].filter(Boolean);
-
-    // A ticker bar: accent chip, then the line. `role` is the chip (LIVE / BREAKING / 09:41), which is
-    // why this variant reads the props in the opposite order to every other one.
-    case 'newsTicker':
-      return [{ type: 'group', x, y, layout: 'row', items: 'stretch', gap: 0, bg: T.ink, radius: 4,
-        ...wipeIn, children: [
-          { type: 'group', bg: accent, pad: '12px 16px', items: 'center',
-            children: [text({ text: String(role || 'LIVE').toUpperCase(), font: 'mono', size: 18,
-              weight: 700, tracking: '0.08em', color: T.onAccent })] },
-          { type: 'group', pad: '12px 24px', items: 'center',
-            children: [text({ text: name, size: 30, weight: 600, color: T.onAccent })] },
-        ] }];
-
-    default:
-      throw new Error(`lowerThird: unknown variant "${variant}", see blocks/catalog.mjs for the twelve`);
-  }
+  return fn({ x, y, name, role, accent, start, dur, N, RF, s2, wipeIn, riseIn, HARD, stackL });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -431,101 +424,113 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
 // because the query is a `typing` layer and its per-character key clicks are derived by the engine
 // from (start, cps, text). Keeping it top-level keeps that timing readable at the call site.
 const SEARCH_LINK = 'color-mix(in srgb, var(--accent) 82%, var(--text))';
+const SEARCH_BAR_H = 60, SEARCH_PAD = 22, SEARCH_ICON = 24;
+const searchTextX = (bx) => bx + SEARCH_PAD + SEARCH_ICON + 16;   // clears the magnifier
+const searchTextW = (bw) => bw - (SEARCH_PAD + SEARCH_ICON + 16) - (SEARCH_PAD + SEARCH_ICON + 12);
+
+// THE MARK. `logo` (a real SVG) is the preferred form and wins: a wordmark re-typed in whatever face
+// the theme happens to ship is a lookalike, not the brand, the authoring rules call this out directly
+// ("recreating a brand asset from memory is off-brand by definition"). `word` (per-letter colours)
+// and `brand` (plain text) remain for marks you do not have a file for. `logotype` applies the WCAG
+// 1.4.3 contrast exemption; centring is the engine's job, never arithmetic.
+function searchMark(cy, h, { x, w, brand, word, logo, logoW, logoH, markAlign, start, dur }) {
+  const common = { start, duration: dur, anim: 'lift', enterDur: 0.55, exitDur: 0.3, logotype: true };
+  if (logo) {
+    const iw = Math.round(h * (logoW / logoH));
+    return { type: 'image', src: logo, w: iw, h, y: cy,
+      x: markAlign === 'left' ? x : Math.round(x + (w - iw) / 2), ...common };
+  }
+  if (word && word.length) {
+    return { type: 'group', x, y: cy, w, layout: 'row', gap: 0, items: 'baseline', ...common,
+      justify: markAlign === 'left' ? 'flex-start' : 'center',
+      children: word.map((L) => text({ text: L.c, size: h, weight: 700, color: L.color, ls: '-0.04em' })) };
+  }
+  return text({ text: brand, x, y: cy, w, align: markAlign === 'left' ? 'left' : 'center',
+    size: h, weight: 700, color: T.ink, ls: '-0.04em', ...common });
+}
+
+// THE BAR. One pill, a magnifier inset at the leading edge, a mic at the trailing edge, the real
+// furniture of a search field. The icons are Lucide (ISC) with the stroke baked, because an SVG
+// loaded as an <img> has no currentColor to inherit and would render invisible.
+function searchBar({ bx, by, bw, st, d }) {
+  return [
+    rect({ x: bx, y: by, w: bw, h: SEARCH_BAR_H, radius: SEARCH_BAR_H / 2, bg: T.card, border: HAIR, elevation: 1,
+      start: st, duration: d, anim: 'rise', enterDur: 0.45, exitDur: 0.3 }),
+    { type: 'image', src: '/assets/icons/ui/search.svg', w: SEARCH_ICON, h: SEARCH_ICON,
+      x: bx + SEARCH_PAD, y: by + (SEARCH_BAR_H - SEARCH_ICON) / 2,
+      start: r2(st + 0.06), duration: r2(d - 0.06), anim: 'fade', enterDur: 0.4, exitDur: 0.25 },
+    { type: 'image', src: '/assets/icons/ui/mic.svg', w: SEARCH_ICON - 2, h: SEARCH_ICON - 2,
+      x: bx + bw - SEARCH_PAD - (SEARCH_ICON - 2), y: by + (SEARCH_BAR_H - SEARCH_ICON + 2) / 2,
+      start: r2(st + 0.1), duration: r2(d - 0.1), anim: 'fade', enterDur: 0.4, exitDur: 0.25 },
+  ];
+}
+
+function searchEngineHome({ x, y, w, query, cps, keyCue, keyGain, start, dur, markCtx }) {
+  const barY = y + 180;
+  const out = [searchMark(y, 92, markCtx),
+    ...searchBar({ bx: x, by: barY, bw: w, st: r2(start + 0.35), d: r2(dur - 0.35) })];
+  // the query types INTO the bar, clear of the magnifier. `typing` is chars/sec and the engine
+  // derives one key click per revealed character from (start, cps, text). keyCue/keyGain are the
+  // SOUND of this block, so they must reach the typing layer the engine derives key clicks from.
+  // They were accepted at the call site and dropped here, which is the silent-substitution class
+  // again: the JSON said 0.055 and the render stayed at the default.
+  out.push(text({ text: query, x: searchTextX(x), y: barY + 16, w: searchTextW(w), size: 26, color: T.ink,
+    typing: cps, ...(keyCue ? { keyCue } : {}), ...(keyGain != null ? { keyGain } : {}),
+    start: r2(start + 0.75), duration: r2(dur - 0.75), anim: 'fade', enterDur: 0.12, exitDur: 0.25 }));
+  return out;
+}
+
+function searchResultRows(results, { x, w, top, start, dur, RX }) {
+  return results.flatMap((res, i) => {
+    const ry = top + i * 128;
+    const st = r2(start + 0.3 + i * 0.1);       // staggered: motion order is reading order
+    const d = r2(start + dur - st);
+    return [
+      text({ text: res.url, x: RX, y: ry, w: w - (RX - x), size: 19, font: 'mono', color: T.dim,
+        start: st, duration: d, anim: 'slide-left', out: 'slide-right', enterDur: 0.4, exitDur: 0.25 }),
+      text({ text: res.title, x: RX, y: ry + 26, w: w - (RX - x), size: 32, weight: 500, color: SEARCH_LINK,
+        start: r2(st + 0.04), duration: r2(d - 0.04), anim: 'slide-left', out: 'slide-right', enterDur: 0.4, exitDur: 0.25 }),
+      res.snippet ? text({ text: res.snippet, x: RX, y: ry + 72, w: w - (RX - x), size: 19, color: T.sub,
+        start: r2(st + 0.08), duration: r2(d - 0.08), anim: 'fade', enterDur: 0.45, exitDur: 0.25 }) : null,
+    ].filter(Boolean);
+  });
+}
+
+// the pointer travels to the chosen result and clicks it. A click needs a consequence, so callers
+// cut on `cursorStart + 0.9`. The block places the click, the scene pays it off.
+function searchClickCursor(results, { x, w, top, clickIndex, cursorStart, start, dur, RX }) {
+  if (!(results.length && clickIndex != null)) return null;
+  const cs = cursorStart != null ? cursorStart : r2(start + dur - 1.5);
+  return { type: 'cursor', size: 36, start: cs, duration: r2(start + dur - cs),
+    path: [{ t: 0, x: x + w - 120, y: top + results.length * 128 },
+           { t: 0.75, x: RX + 60, y: top + clickIndex * 128 + 40 }],
+    clicks: [0.9] };
+}
+
+function searchEngineResults({ x, y, w, query, results, clickIndex, cursorStart, start, dur, markCtx }) {
+  // the mark shrinks to the top-left and the bar sits beside it, as it really does
+  const markW = Math.round(34 * (markCtx.logoW / markCtx.logoH));
+  const barX = x + (markCtx.logo || markCtx.word ? markW + 40 : 150);
+  const barW = Math.min(w - (barX - x), 720);
+  const out = [
+    { ...searchMark(y + 12, 34, markCtx), x, logotype: true },
+    ...searchBar({ bx: barX, by: y, bw: barW, st: start, d: dur }),
+    text({ text: query, x: searchTextX(barX), y: y + 15, w: searchTextW(barW), size: 22, color: T.ink,
+      start: r2(start + 0.08), duration: r2(dur - 0.08), anim: 'fade', enterDur: 0.3, exitDur: 0.25 }),
+  ];
+  const top = y + 124;
+  out.push(...searchResultRows(results, { x, w, top, start, dur, RX: barX }));
+  out.push(searchClickCursor(results, { x, y, w, top, clickIndex, cursorStart, start, dur, RX: barX }));
+  return out.filter(Boolean);
+}
 
 export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
   brand = 'Search', word = null, logo = null, logoW = 272, logoH = 92,
   query = '', results = [], markAlign = 'center',
   cps = 11, keyCue, keyGain, clickIndex = 0, cursorStart, start = 0, dur = 5 } = {}) {
-  const out = [];
-  const BAR_H = 60, PAD = 22, ICON = 24;
-
-  // THE MARK. `logo` (a real SVG) is the preferred form and wins: a wordmark re-typed in whatever face
-  // the theme happens to ship is a lookalike, not the brand, the authoring rules call this out
-  // directly ("recreating a brand asset from memory is off-brand by definition"). `word` (per-letter
-  // colours) and `brand` (plain text) remain for marks you do not have a file for.
-  // `logotype` applies the WCAG 1.4.3 contrast exemption; centring is the engine's job, never arithmetic.
-  const mark = (cy, h) => {
-    const common = { start, duration: dur, anim: 'lift', enterDur: 0.55, exitDur: 0.3, logotype: true };
-    if (logo) {
-      const iw = Math.round(h * (logoW / logoH));
-      return { type: 'image', src: logo, w: iw, h, y: cy,
-        x: markAlign === 'left' ? x : Math.round(x + (w - iw) / 2), ...common };
-    }
-    if (word && word.length) {
-      return { type: 'group', x, y: cy, w, layout: 'row', gap: 0, items: 'baseline', ...common,
-        justify: markAlign === 'left' ? 'flex-start' : 'center',
-        children: word.map((L) => text({ text: L.c, size: h, weight: 700, color: L.color, ls: '-0.04em' })) };
-    }
-    return text({ text: brand, x, y: cy, w, align: markAlign === 'left' ? 'left' : 'center',
-      size: h, weight: 700, color: T.ink, ls: '-0.04em', ...common });
-  };
-
-  // THE BAR. One pill, a magnifier inset at the leading edge, a mic at the trailing edge, the real
-  // furniture of a search field. The icons are Lucide (ISC) with the stroke baked, because an SVG
-  // loaded as an <img> has no currentColor to inherit and would render invisible.
-  const bar = (bx, by, bw, st, d, textSize) => {
-    const r = [];
-    r.push(rect({ x: bx, y: by, w: bw, h: BAR_H, radius: BAR_H / 2, bg: T.card, border: HAIR, elevation: 1,
-      start: st, duration: d, anim: 'rise', enterDur: 0.45, exitDur: 0.3 }));
-    r.push({ type: 'image', src: '/assets/icons/ui/search.svg', w: ICON, h: ICON,
-      x: bx + PAD, y: by + (BAR_H - ICON) / 2,
-      start: r2(st + 0.06), duration: r2(d - 0.06), anim: 'fade', enterDur: 0.4, exitDur: 0.25 });
-    r.push({ type: 'image', src: '/assets/icons/ui/mic.svg', w: ICON - 2, h: ICON - 2,
-      x: bx + bw - PAD - (ICON - 2), y: by + (BAR_H - ICON + 2) / 2,
-      start: r2(st + 0.1), duration: r2(d - 0.1), anim: 'fade', enterDur: 0.4, exitDur: 0.25 });
-    return r;
-  };
-  const TEXT_X = (bx) => bx + PAD + ICON + 16;   // clears the magnifier
-  const TEXT_W = (bw) => bw - (PAD + ICON + 16) - (PAD + ICON + 12);
-
-  if (variant === 'home') {
-    const barY = y + 180;
-    out.push(mark(y, 92));
-    out.push(...bar(x, barY, w, r2(start + 0.35), r2(dur - 0.35), 26));
-    // the query types INTO the bar, clear of the magnifier. `typing` is chars/sec and the engine
-    // derives one key click per revealed character from (start, cps, text).
-    // keyCue/keyGain are the SOUND of this block, so they must reach the typing layer the engine
-    // derives key clicks from. They were accepted at the call site and dropped here, which is the
-    // silent-substitution class again: the JSON said 0.055 and the render stayed at the default.
-    out.push(text({ text: query, x: TEXT_X(x), y: barY + 16, w: TEXT_W(w), size: 26, color: T.ink,
-      typing: cps, ...(keyCue ? { keyCue } : {}), ...(keyGain != null ? { keyGain } : {}),
-      start: r2(start + 0.75), duration: r2(dur - 0.75), anim: 'fade', enterDur: 0.12, exitDur: 0.25 }));
-    return out;
-  }
-
-  // ---- results: the mark shrinks to the top-left and the bar sits beside it, as it really does ----
-  const MARK_H = 34, GAP = 40;
-  const markW = Math.round(MARK_H * (logoW / logoH));
-  const barX = x + (logo || word ? markW + GAP : 150);
-  const barW = Math.min(w - (barX - x), 720);
-  out.push({ ...mark(y + 12, MARK_H), x, logotype: true });
-  out.push(...bar(barX, y, barW, start, dur, 22));
-  out.push(text({ text: query, x: TEXT_X(barX), y: y + 15, w: TEXT_W(barW), size: 22, color: T.ink,
-    start: r2(start + 0.08), duration: r2(dur - 0.08), anim: 'fade', enterDur: 0.3, exitDur: 0.25 }));
-
-  const ROW = 128, top = y + 124, RX = barX;
-  results.forEach((res, i) => {
-    const ry = top + i * ROW;
-    const st = r2(start + 0.3 + i * 0.1);       // staggered: motion order is reading order
-    const d = r2(start + dur - st);
-    out.push(text({ text: res.url, x: RX, y: ry, w: w - (RX - x), size: 19, font: 'mono', color: T.dim,
-      start: st, duration: d, anim: 'slide-left', out: 'slide-right', enterDur: 0.4, exitDur: 0.25 }));
-    out.push(text({ text: res.title, x: RX, y: ry + 26, w: w - (RX - x), size: 32, weight: 500, color: SEARCH_LINK,
-      start: r2(st + 0.04), duration: r2(d - 0.04), anim: 'slide-left', out: 'slide-right', enterDur: 0.4, exitDur: 0.25 }));
-    if (res.snippet) out.push(text({ text: res.snippet, x: RX, y: ry + 72, w: w - (RX - x), size: 19, color: T.sub,
-      start: r2(st + 0.08), duration: r2(d - 0.08), anim: 'fade', enterDur: 0.45, exitDur: 0.25 }));
-  });
-
-  // the pointer travels to the chosen result and clicks it. A click needs a consequence, so callers
-  // cut on `cursorStart + 0.9`. The block places the click, the scene pays it off.
-  if (results.length && clickIndex != null) {
-    const cs = cursorStart != null ? cursorStart : r2(start + dur - 1.5);
-    out.push({ type: 'cursor', size: 36, start: cs, duration: r2(start + dur - cs),
-      path: [{ t: 0, x: x + w - 120, y: top + results.length * ROW },
-             { t: 0.75, x: RX + 60, y: top + clickIndex * ROW + 40 }],
-      clicks: [0.9] });
-  }
-  return out;
+  const markCtx = { x, w, brand, word, logo, logoW, logoH, markAlign, start, dur };
+  if (variant === 'home') return searchEngineHome({ x, y, w, query, cps, keyCue, keyGain, start, dur, markCtx });
+  return searchEngineResults({ x, y, w, query, results, clickIndex, cursorStart, start, dur, markCtx });
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -544,7 +549,7 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
 // content and accept no `h` at all, and a prop a factory does not destructure is dropped in silence.
 // The exact failure this repo has logged repeatedly. `h` is used for the container's own geometry
 // (the divider, the inset), never handed to a pane that may not understand it.
-const pane = (side, at) => (side ? blockFactory(side && side.block, 'splitScreen')({ ...(side.props || {}), ...at }) : []);
+const pane = (side, at) => (side ? blockFactory(side && side.block, 'splitScreen')({ ...side.props, ...at }) : []);
 
 // splitScreen: two panes, one geometry. `orient:'row'` splits left|right, `'column'` splits top/bottom,
 // and `pip` insets the second pane into a corner of the first instead of sitting beside it.
@@ -552,31 +557,43 @@ const pane = (side, at) => (side ? blockFactory(side && side.block, 'splitScreen
 // `split` is the FRACTION of the long axis the first pane gets, so a 60/40 is `split: 0.6` and not two
 // widths a caller has to keep summing to the whole. `lead` staggers the second pane behind the first:
 // two panes landing on the same frame read as one slab arriving, which is the thing a split is not.
-export function splitScreen({ x = 0, y = 0, w = 1200, h = 560, orient = 'row', split = 0.5, gap = 24,
-  left = null, right = null, pip = false, pipScale = 0.36, pipInset = 20, pipCorner = 'bottom-right',
-  divider = false, lead = 0.18, start = 0, dur = 4 } = {}) {
+// PICTURE-IN-PICTURE: the second pane is a small inset over the first, and it arrives LAST because
+// it is the aside, not the subject.
+function splitScreenPip({ x, y, w, h, left, right, pipScale, pipInset, pipCorner, start, dur, second }) {
+  const iw = Math.round(w * pipScale);
+  const right2 = pipCorner.endsWith('right');
+  const px = right2 ? x + w - iw - pipInset : x + pipInset;
+  const py = pipCorner.startsWith('top') ? y + pipInset : y + h - Math.round(h * pipScale) - pipInset;
+  return [...pane(left, { x, y, w, start, dur }), ...pane(right, { x: px, y: py, w: iw, ...second })];
+}
+
+// the rule OPENS along the seam rather than fading in: a divider is a cut being made.
+function splitScreenDivider({ col, x, y, w, h, aW, aH, gap, start, dur }) {
+  return [rect({
+    x: col ? x : r2(x + aW + gap / 2 - 0.5), y: col ? r2(y + aH + gap / 2 - 0.5) : y,
+    w: col ? w : 1, h: col ? 1 : h, bg: T.hair,
+    start: r2(start + 0.08), duration: r2(dur - 0.08), anim: col ? 'wipe' : 'wipe-down', enterDur: 0.5, exitDur: 0.3,
+  })];
+}
+
+// The side-by-side (non-pip) geometry: two panes and an optional seam rule between them, sized off
+// `orient` and `split`.
+function splitScreenSideBySide({ x, y, w, h, orient, split, gap, left, right, divider, start, dur, second }) {
   const f = Math.min(0.9, Math.max(0.1, split));
-  const second = { start: r2(start + lead), dur: r2(dur - lead) };
-  if (pip) {
-    // PICTURE-IN-PICTURE: the second pane is a small inset over the first, and it arrives LAST because
-    // it is the aside, not the subject.
-    const iw = Math.round(w * pipScale);
-    const right2 = pipCorner.endsWith('right');
-    const px = right2 ? x + w - iw - pipInset : x + pipInset;
-    const py = pipCorner.startsWith('top') ? y + pipInset : y + h - Math.round(h * pipScale) - pipInset;
-    return [...pane(left, { x, y, w, start, dur }), ...pane(right, { x: px, y: py, w: iw, ...second })];
-  }
   const col = orient === 'column';
   const aW = col ? w : r2((w - gap) * f), bW = col ? w : r2(w - gap - aW);
   const aH = col ? r2((h - gap) * f) : h;
   const bX = col ? x : r2(x + aW + gap), bY = col ? r2(y + aH + gap) : y;
-  const rule = divider ? [rect({
-    x: col ? x : r2(x + aW + gap / 2 - 0.5), y: col ? r2(y + aH + gap / 2 - 0.5) : y,
-    w: col ? w : 1, h: col ? 1 : h, bg: T.hair,
-    // the rule OPENS along the seam rather than fading in: a divider is a cut being made.
-    start: r2(start + 0.08), duration: r2(dur - 0.08), anim: col ? 'wipe' : 'wipe-down', enterDur: 0.5, exitDur: 0.3,
-  })] : [];
+  const rule = divider ? splitScreenDivider({ col, x, y, w, h, aW, aH, gap, start, dur }) : [];
   return [...pane(left, { x, y, w: aW, start, dur }), ...rule, ...pane(right, { x: bX, y: bY, w: bW, ...second })];
+}
+
+export function splitScreen({ x = 0, y = 0, w = 1200, h = 560, orient = 'row', split = 0.5, gap = 24,
+  left = null, right = null, pip = false, pipScale = 0.36, pipInset = 20, pipCorner = 'bottom-right',
+  divider = false, lead = 0.18, start = 0, dur = 4 } = {}) {
+  const second = { start: r2(start + lead), dur: r2(dur - lead) };
+  if (pip) return splitScreenPip({ x, y, w, h, left, right, pipScale, pipInset, pipCorner, start, dur, second });
+  return splitScreenSideBySide({ x, y, w, h, orient, split, gap, left, right, divider, start, dur, second });
 }
 
 // screenSwap: screen A becomes screen B (becomes C…) in one place. The single most common motion in

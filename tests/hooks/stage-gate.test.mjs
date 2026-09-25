@@ -1,8 +1,9 @@
 // node --test harness/live/test/stage-gate.test.mjs
 //
-// The three denials, and the writes that must stay allowed. Real films from films/scene/ through the
-// real hook, exactly as Claude Code's PreToolUse feeds it. The allows matter as much as the denials: a
-// gate that blocks legitimate work gets switched off, and then it enforces nothing.
+// The three denials, and the writes that must stay allowed, through the real hook exactly as Claude
+// Code's PreToolUse feeds it, against a fixture film under tests/fixtures/films/ (never films/scene/,
+// which is real film content this suite must not depend on). The allows matter as much as the
+// denials: a gate that blocks legitimate work gets switched off, and then it enforces nothing.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';

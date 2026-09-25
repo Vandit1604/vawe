@@ -4,7 +4,7 @@
 // five aspects and at a phone destination, which is the property the plan asked this table to hold.
 //   node core/layout/safe.test.mjs
 import assert from 'node:assert/strict';
-import { ASPECTS, PLACEMENT, PLACEMENT_REGISTRY, safeArea } from '../../core/layout/safe.js';
+import { ASPECTS, PLACEMENT, PLACEMENT_REGISTRY, safeArea, COMPOSITION_MARGIN } from '../../core/layout/safe.js';
 
 // Reproduces just enough of core/engine/boot.js's resolveCoords to place ONE layer by name, without
 // pulling in boot.js itself (which needs a DOM). Mirrors kw()/num() exactly: this is a test of the
@@ -20,9 +20,15 @@ function place(pin, W, H, destination, size = 200) {
       : (v === 'left' || v === 'top') ? lo
       : (v === 'right' || v === 'bottom') ? hi - sz
       : v === 'text-band' ? lo + 0.63 * (hi - lo)
+      : v === 'stage-left' ? Math.max(lo, dim * COMPOSITION_MARGIN)
       : null;
   const [xk, yk, wFrac] = PLACEMENT[pin];
-  const w = wFrac != null ? Math.round(wFrac * (x1 - x0)) : size;
+  // `stage-left`'s width mirrors its own composition-margin inset off the canvas, clamped to the
+  // safe box's own bound (core/engine/boot.js applyLayerPin), not a fraction of the safe box like
+  // every other wFrac pin.
+  const w = wFrac == null ? size
+    : xk === 'stage-left' ? Math.round(Math.min(x1, W - W * COMPOSITION_MARGIN) - Math.max(x0, W * COMPOSITION_MARGIN))
+    : Math.round(wFrac * (x1 - x0));
   const h = size;
   const x = xk != null ? kw(xk, W, w, x0, x1) : x0;
   const y = yk != null ? kw(yk, H, h, y0, y1) : y0;

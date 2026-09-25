@@ -54,13 +54,15 @@ ${useLines.map((l) => `- use: ${l}\n`).join('')}- onscreen: "hi"
 - duration: 3s
 `;
 
-  // per-layer prop (filter), bg window (background preset), audio cue (motion voice), scene-level (energy)
+  // per-layer prop (filter), audio cue (motion voice), scene-level (energy). Background preset used to
+  // be a fourth use: scope, but it now has its own dedicated field (ground:, harness/lib/contract.mjs
+  // USE_DEDICATED_FIELD), so use: refuses it rather than offering a second spelling; see the
+  // dedicated-field assertion below for that refusal.
   fs.writeFileSync(film5, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9' }));
-  fs.writeFileSync(sb5, SB5(['neon', 'plain', 'pluck', 'calm']));
+  fs.writeFileSync(sb5, SB5(['neon', 'pluck', 'calm']));
   assemble(film5);
   const scene5 = JSON.parse(fs.readFileSync(film5, 'utf8'));
   assert.equal(scene5.layers.find((l) => l.id === 'scene1').filter, 'neon', 'a per-layer use: (look "neon") writes onto its own beat\'s layer');
-  assert.ok(scene5.bg.some((w) => w.preset === 'plain' && w.from === 0), 'a bg-scoped use: (background preset "plain") pushes a window at the beat\'s own start');
   assert.ok(scene5.audio.cues.some((c) => c.name === 'pluck' && c.t === 0), 'an audio-scoped use: (motion voice "pluck") pushes a cue at the beat\'s own start');
   assert.equal(scene5.energy, 'calm', 'a scene-level use: (energy "calm") is written once, at the top level');
 
@@ -74,12 +76,19 @@ ${useLines.map((l) => `- use: ${l}\n`).join('')}- onscreen: "hi"
 
   // a kind with its own dedicated field is refused, naming the field, never silently accepted as a second spelling
   fs.writeFileSync(film5, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9' }));
-  fs.writeFileSync(sb5, SB5(['push in']));
+  fs.writeFileSync(sb5, SB5(['plain']));
+  assert.throws(() => assemble(film5), (e) => {
+    const msg = e.stderr ? e.stderr.toString() : String(e);
+    return /already has a dedicated field/.test(msg) && /ground:/.test(msg);
+  }, 'a background preset word is refused with the dedicated ground: field named, not built as a second mechanism');
+
+  fs.writeFileSync(film5, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9' }));
+  fs.writeFileSync(sb5, SB5(['pull back']));
   assert.throws(() => assemble(film5), (e) => {
     const msg = e.stderr ? e.stderr.toString() : String(e);
     return /already has a dedicated field/.test(msg) && /camera:/.test(msg);
   }, 'a camera word is refused with the dedicated camera: field named, not built as a second mechanism');
 
   fs.rmSync(dir5, { recursive: true, force: true });
-  console.log('✓ assemble-use.test.mjs: use: writes a per-layer prop, a bg window, an audio cue and a scene-level field by scope, and refuses an ambiguous or dedicated-field name');
+  console.log('✓ assemble-use.test.mjs: use: writes a per-layer prop, an audio cue and a scene-level field by scope, and refuses an ambiguous name or a dedicated-field one (background preset, camera word)');
 }

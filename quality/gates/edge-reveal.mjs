@@ -156,7 +156,10 @@ export async function sampleEdgeReveal(scenePath, { rate = RATE_S } = {}) {
   const raw = fs.readFileSync(abs, 'utf8');
   const cfg = JSON.parse(raw);
   const rel = path.relative(REPO_ROOT, abs);
-  const m = rel.split(path.sep)[1];
+  // AGENTS.md: exactly one module, `scene`; the engine shell that boots it always sits at
+  // films/scene/scene.html, whatever directory the scene JSON itself is served from (a real film
+  // under films/scene/, or a test fixture elsewhere in the repo).
+  const m = 'scene';
   const [vw, vh] = sceneDims(cfg, '');
 
   const { close: closeServer, port } = await serveRepo({});
