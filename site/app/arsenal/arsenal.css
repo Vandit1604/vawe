@@ -16,19 +16,16 @@
 
 .ar { --ar-gap: 20px; }
 
-/* ── toolbar ───────────────────────────────────────────────────────────────
- * This IS the page header. The count sits inside the title because it is the single most useful
- * number on the page, not a statistic to be announced. */
+/* ── head and toolbar ──────────────────────────────────────────────────────
+ * The heading scrolls away; the search stays, because it is what a reader returns to. */
+.ar-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; padding-top: 32px; }
+.ar-head h1 { font-size: clamp(1.9rem, 3.6vw, 2.7rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.05; }
+.ar-head p { color: var(--muted); font-size: 1rem; max-width: 60ch; }
 .ar-bar {
   display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-  padding: 22px 0 18px; border-bottom: 1px solid var(--line);
+  padding: 16px 0; border-bottom: 1px solid var(--line);
   position: sticky; top: 0; z-index: var(--z-sticky);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(10px);
-}
-.ar-bar h1 {
-  margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink);
-  display: flex; align-items: baseline; gap: 10px;
+  background: var(--bg);
 }
 .ar-n {
   font: 500 13px/1 var(--font-mono), ui-monospace, monospace;
@@ -36,7 +33,7 @@
   color: var(--muted); padding: 4px 7px; border: 1px solid var(--line); border-radius: 6px;
 }
 
-.ar-find { position: relative; display: flex; align-items: center; margin-left: auto; min-width: 240px; flex: 0 1 340px; }
+.ar-find { position: relative; display: flex; align-items: center; min-width: 240px; flex: 0 1 420px; }
 .ar-find svg {
   position: absolute; left: 11px; width: 15px; height: 15px; pointer-events: none;
   fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round;
