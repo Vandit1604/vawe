@@ -121,52 +121,62 @@ export const featherFor = (fx, intensity, opts) => {
   return typeof d === 'function' ? d(intensity) : (d ?? 0);
 };
 
-// createSeamCompositor(parent, w, h): a full-frame canvas above the stings overlay (z 85, below the
-// caption bar at z 90) that either runs the two-scene shader or, without GL, cross-fades in 2D.
-export function createSeamCompositor(parent, w = 1920, h = 1080) {
+function makeSeamCanvas(parent, w, h) {
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
   canvas.setAttribute('data-motion', 'loop'); // transition chrome. Exempt from motion-audit reveal rules
   Object.assign(canvas.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', zIndex: 85, pointerEvents: 'none', display: 'none' });
   parent.appendChild(canvas);
+  return canvas;
+}
 
+// ONE PROGRAM PER UNIT, compiled independently so a single bad unit degrades to `fade` for THAT fx
+// only, never dropping every seam to the 2D fallback. Only `fade` itself failing to compile, a real
+// driver problem, falls the whole compositor back to 2D (signalled by returning null).
+function compileSeamPrograms(gl) {
+  const fadeUnit = UNITS.find((u) => u.name === 'fade') || UNITS[0];
+  let fadeProg;
+  try { fadeProg = buildProgram(gl, fadeUnit); }
+  catch { return null; }
+  const programs = UNITS.map((u) => {
+    if (u === fadeUnit) return fadeProg;
+    try { return buildProgram(gl, u); }
+    catch (e) { try { console.warn(`seam "${u.name}" failed to compile, using fade: ${e.message}`); } catch { /* best-effort */ } return fadeProg; }
+  });
+  return programs;
+}
+
+// Upload a baked raster canvas to a GL texture ONCE (cached on the element, the raster is static).
+function uploadSeamTex(gl, srcCanvas) {
+  if (!srcCanvas) return null;
+  if (srcCanvas.__seamTex) return srcCanvas.__seamTex;
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, srcCanvas); }
+  catch { gl.deleteTexture(tex); return null; }
+  srcCanvas.__seamTex = tex;
+  return tex;
+}
+
+// createSeamCompositor(parent, w, h): a full-frame canvas above the stings overlay (z 85, below the
+// caption bar at z 90) that either runs the two-scene shader or, without GL, cross-fades in 2D.
+export function createSeamCompositor(parent, w = 1920, h = 1080) {
+  const canvas = makeSeamCanvas(parent, w, h);
   const gl = glContext(canvas, { alpha: false, premultipliedAlpha: false, antialias: false, preserveDrawingBuffer: true }, 'seam', { soft: true });
 
   // ---- 2D fallback: plain opacity cross-fade (no GL, or a program failed to compile) ----
   if (!gl) return make2dFallback(canvas, w, h);
+  const programs = compileSeamPrograms(gl);
+  if (!programs) return make2dFallback(canvas, w, h, gl);
 
-  // ONE PROGRAM PER UNIT, compiled independently so a single bad unit degrades to `fade` for THAT fx
-  // only, never dropping every seam to the 2D fallback. (The library grows by adding units; a typo in
-  // one vendored shader must not blank the rest.) Only `fade` itself failing to compile, a real driver
-  // problem, falls the whole compositor back to 2D.
-  let programs, fadeProg = null;
-  const fadeUnit = UNITS.find((u) => u.name === 'fade') || UNITS[0];
-  try { fadeProg = buildProgram(gl, fadeUnit); }
-  catch (e) { return make2dFallback(canvas, w, h, gl); }
-  programs = UNITS.map((u) => {
-    if (u === fadeUnit) return fadeProg;
-    try { return buildProgram(gl, u); }
-    catch (e) { try { console.warn(`seam "${u.name}" failed to compile, using fade: ${e.message}`); } catch (_) {} return fadeProg; }
-  });
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-
-  // upload a baked raster canvas to a GL texture ONCE (cached on the element, the raster is static).
-  const uploadTex = (srcCanvas) => {
-    if (!srcCanvas) return null;
-    if (srcCanvas.__seamTex) return srcCanvas.__seamTex;
-    const tex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, srcCanvas); }
-    catch (e) { gl.deleteTexture(tex); return null; }
-    srcCanvas.__seamTex = tex;
-    return tex;
-  };
+  const uploadTex = (srcCanvas) => uploadSeamTex(gl, srcCanvas);
 
   gl.viewport(0, 0, w, h);
   let last = '';

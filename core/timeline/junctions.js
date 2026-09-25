@@ -303,52 +303,64 @@ function jointHasVelocity(layers, t, layerSpeedAt) {
  * cycle with velocity-cut.js's own dependencies; pass `layerSpeedAt` from that module), `prevFamily`
  * and `accentUsed` (rhythm + "spend the accent once", threaded by the caller across joints in order).
  */
-export function classifyJoint(t, layers, { cuts = {}, bg = null, layerSpeedAt = () => 0, prevT = null, prevFamily = null, accentUsed = false } = {}) {
+function jointFacts(t, layers, { bg, layerSpeedAt, prevT, prevFamily }) {
   const survivor = survivesJoint(layers, t);
   const outgoing = outgoingAt(layers, t).filter((L) => mediumOf(L));
   const incoming = incomingAt(layers, t).filter((L) => mediumOf(L));
   const oBoxes = outgoing.map(layerBox).filter(Boolean);
   const iBoxes = incoming.map(layerBox).filter(Boolean);
   const overlap = oBoxes.length > 0 && iBoxes.length > 0 && oBoxes.some((a) => iBoxes.some((b) => boxesOverlap(a, b)));
-  const mediumChange = mediumChangedAt(outgoing, incoming);
-  const tonal = bgChangesAt(bg, t);
-  const velocity = jointHasVelocity(layers, t, layerSpeedAt);
-  const rhythmFast = prevT != null && (t - prevT) < RAPID_JOINT_S && prevFamily != null;
+  return {
+    survivor, overlap,
+    mediumChange: mediumChangedAt(outgoing, incoming),
+    tonal: bgChangesAt(bg, t),
+    velocity: jointHasVelocity(layers, t, layerSpeedAt),
+    rhythmFast: prevT != null && (t - prevT) < RAPID_JOINT_S && prevFamily != null,
+  };
+}
 
-  // 'default'/'accent' are only in play when the caller resolved a real name for them (a raw cut
-  // style, not merely a name the theme wrote down: see core/engine/produce.js's own guard against
-  // `look.cuts.accent` naming a seam-only fx). Absent is a rule-out, exactly like an overlap or a
-  // survivor: the engine still never INVENTS a name to fill the gap.
-  let compatible = ['none', ...(['default', 'accent'].filter((f) => cuts && cuts[f]))];
-  const why = [];
-
-  // RULE-OUTS: structural facts, never a look. Each removes a name; none of them ever adds one.
-  if (survivor) {
+// RULE-OUTS: structural facts, never a look. Each removes a name from `compatible`; none of them
+// ever adds one.
+function ruleOutFamilies(facts, compatible, why, prevFamily) {
+  if (facts.survivor) {
     compatible = ['none'];
     why.push('a layer survives this joint (becomes/acrossBeats/a window straddling it): a soft or match cut is the only honest family, and the invisible cut is the softest one there is');
-  } else if (overlap) {
+  } else if (facts.overlap) {
     compatible = compatible.filter((f) => f !== 'default');
     why.push('the outgoing and incoming boxes overlap: a dissolve there reads muddy');
   }
-  if (!survivor && rhythmFast) {
+  if (!facts.survivor && facts.rhythmFast) {
     compatible = compatible.filter((f) => f === prevFamily || f === 'none');
     why.push(`this joint follows the last one inside ${RAPID_JOINT_S}s: staying in one family (${prevFamily})`);
   }
+  return compatible;
+}
 
-  // CHOOSE WITHIN WHAT REMAINS. Still only the theme's two names or the doctrine's hard-cut default.
-  let chosen;
-  if (compatible.length === 1) {
-    chosen = compatible[0];
-  } else if (tonal && compatible.includes('accent') && !accentUsed) {
-    chosen = 'accent';
+// CHOOSE WITHIN WHAT REMAINS. Still only the theme's two names or the doctrine's hard-cut default.
+function chooseFamily(facts, compatible, why, accentUsed) {
+  if (compatible.length === 1) return compatible[0];
+  if (facts.tonal && compatible.includes('accent') && !accentUsed) {
     why.push('the backdrop turns here: the one loud moment earns the accent, spent once');
-  } else if ((velocity || mediumChange) && compatible.includes('default')) {
-    chosen = 'default';
-    why.push(velocity ? 'a layer is still moving as this joint arrives: worth marking, not hiding'
-      : 'the medium changes across this joint (text/picture): worth marking');
-  } else {
-    chosen = compatible.includes('none') ? 'none' : compatible[0];
+    return 'accent';
   }
+  if ((facts.velocity || facts.mediumChange) && compatible.includes('default')) {
+    why.push(facts.velocity ? 'a layer is still moving as this joint arrives: worth marking, not hiding'
+      : 'the medium changes across this joint (text/picture): worth marking');
+    return 'default';
+  }
+  return compatible.includes('none') ? 'none' : compatible[0];
+}
+
+export function classifyJoint(t, layers, { cuts = {}, bg = null, layerSpeedAt = () => 0, prevT = null, prevFamily = null, accentUsed = false } = {}) {
+  const facts = jointFacts(t, layers, { bg, layerSpeedAt, prevT, prevFamily });
+
+  // 'default'/'accent' are only in play when the caller resolved a real name for them (a raw cut
+  // style, not merely a name the theme wrote down). Absent is a rule-out, exactly like an overlap or
+  // a survivor: the engine still never INVENTS a name to fill the gap.
+  const initial = ['none', ...(['default', 'accent'].filter((f) => cuts && cuts[f]))];
+  const why = [];
+  const compatible = ruleOutFamilies(facts, initial, why, prevFamily);
+  const chosen = chooseFamily(facts, compatible, why, accentUsed);
   if (!why.length) why.push('no relationship or feeling crosses this joint (engine-doctrine/CRAFT/TRANSITIONS.md): the doctrine default, a hard cut');
 
   return { compatible, chosen, reason: why.join('; ') };

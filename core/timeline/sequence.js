@@ -3,7 +3,7 @@
 // with zero DOM access. Keeps pure (config,t)→value math separate from the DOM/capture layer, not
 // entangled with it. scene.html imports these and does the
 // DOM writes; the math lives here and is asserted by harness/lib-test.mjs.
-import { clamp01, lerp, easeInOutCubic, resolveEasing, handleCurve,
+import { clamp01, lerp, resolveEasing, handleCurve,
   resolveHandle as resolveHandleSide } from '../motion/motion.js';
 
 // THE CAMERA IS A POSITION IN SPACE, and `s` is where it stands.

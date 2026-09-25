@@ -78,76 +78,58 @@ function resolveRef(str, byId, label) {
 // never meaningful: round to a micro-second, far below any frame, so published scenes read as written.
 const roundTime = (x) => Math.round(x * 1e6) / 1e6;
 
-/**
- * resolveRelativeTimes(data) -> data, mutated in place and returned. Numbers-only input passes through
- * byte-identical (nothing here is a string, every branch below is a no-op). A film with no `data.beats`
- * never sees the `beat:` grammar at all: `isBeatTarget` is false for every string, so it behaves exactly
- * as it did before item 3.
- */
-export function resolveRelativeTimes(data) {
-  if (!data || typeof data !== 'object') return data;
-  const byId = {};
-  const all = [];
-  eachLayerDeep(data.layers, (L) => { all.push(L); if (L.id) byId[L.id] = L; });
-  const nameOf = (L) => `${L.id ? `"${L.id}"` : `a ${L.type || 'text'} layer`}`;
+const isBeatTarget = (v) => typeof v === 'string' && v.trim().startsWith('beat:');
 
-  const hasBeats = Array.isArray(data.beats) && data.beats.length;
-  const beatById = {};
-  if (hasBeats) for (const b of data.beats) if (b && b.id) beatById[b.id] = b;
-  // RISK 2, SURPRISE SHIFTS: only a string that NAMES a beat moves when the beat moves; a plain number
-  // never does. This list is what makes a shift visible rather than silent: every `beat:` string this
-  // run actually resolved, printed once at the end.
-  const beatResolutions = [];
-
-  // resolveBeatRef(str, label) -> number, or null if the beat it names is not resolved YET (its own
-  // `start` is still a string, mid multi-pass below). Throws on an unknown beat id, the same shape
-  // resolveRef throws for an unknown layer id.
-  const resolveBeatRef = (str, label) => {
-    const m = BEAT_RX.exec(str.trim());
-    if (!m || !beatById[m[1]]) throw new Error(`${label} "${str}": unknown beat reference "${m ? m[1] : str}". `
-      + `A beat-relative time names another beat's \`id\` as "beat:<id>.start" or "beat:<id>.end". `
-      + `Known beats: ${Object.keys(beatById).join(', ') || '(none: this scene declares no beats[])'}.`);
-    const B = beatById[m[1]];
-    if (typeof B.start !== 'string') {
-      const v = roundTime((B.start ?? 0) + (m[2] === 'end' ? (B.duration ?? 0) : 0)
-        + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0));
-      beatResolutions.push(`${label} "${str}" -> ${v}s`);
-      return v;
-    }
-    return null; // B's own start is still unresolved; caller retries next pass
-  };
-  const isBeatTarget = (v) => typeof v === 'string' && v.trim().startsWith('beat:');
-
-  // PASS 0: beats[] own starts. A beat's start may itself be relative to another beat
-  // ("beat:b1.end + 0.2"); multi-pass for the same reason layer starts are, and RISK 3 (circular
-  // references) reuses the exact same "N passes then give up" mechanism, one shared shape for both
-  // beats and layers rather than two.
-  if (hasBeats) {
-    for (let pass = 0; pass < 8; pass++) {
-      let pending = 0;
-      for (const b of data.beats) {
-        if (typeof b.start !== 'string') continue;
-        if (!isBeatTarget(b.start)) throw new Error(`beat "${b.id}" start "${b.start}": a beat's start `
-          + `must be a number or "beat:<id>.start"/"beat:<id>.end" (plus an optional offset).`);
-        const v = resolveBeatRef(b.start, `beat "${b.id}" start`);
-        if (v == null) { pending++; continue; }
-        b.start = v;
-      }
-      if (!pending) break;
-      if (pass === 7) throw new Error('relative beat starts: circular reference');
-    }
-    for (const b of data.beats) if (typeof b.start === 'string')
-      throw new Error(`beat "${b.id}" start "${b.start}" did not resolve.`);
+// resolveBeatRef(str, label) -> number, or null if the beat it names is not resolved YET (its own
+// `start` is still a string, mid multi-pass below). Throws on an unknown beat id, the same shape
+// resolveRef throws for an unknown layer id.
+function resolveBeatRef(str, label, beatById, beatResolutions) {
+  const m = BEAT_RX.exec(str.trim());
+  if (!m || !beatById[m[1]]) throw new Error(`${label} "${str}": unknown beat reference "${m ? m[1] : str}". `
+    + `A beat-relative time names another beat's \`id\` as "beat:<id>.start" or "beat:<id>.end". `
+    + `Known beats: ${Object.keys(beatById).join(', ') || '(none: this scene declares no beats[])'}.`);
+  const B = beatById[m[1]];
+  if (typeof B.start !== 'string') {
+    const v = roundTime((B.start ?? 0) + (m[2] === 'end' ? (B.duration ?? 0) : 0)
+      + (m[3] ? parseFloat(m[3].replace(/\s+/g, '')) : 0));
+    beatResolutions.push(`${label} "${str}" -> ${v}s`);
+    return v;
   }
+  return null; // B's own start is still unresolved; caller retries next pass
+}
 
-  // PASS 1: layer starts. Multi-pass because a target may itself be a relative start; an
-  // unresolvable/circular reference fails loud, naming the layer. A `beat:` target resolves in one
-  // step (every beats[] entry is already a plain number by now, from PASS 0 above).
+// PASS 0: beats[] own starts. A beat's start may itself be relative to another beat
+// ("beat:b1.end + 0.2"); multi-pass for the same reason layer starts are, and RISK 3 (circular
+// references) reuses the exact same "N passes then give up" mechanism, one shared shape for both
+// beats and layers rather than two.
+function resolveBeatStarts(data, beatById, beatResolutions) {
+  if (!(Array.isArray(data.beats) && data.beats.length)) return;
+  for (let pass = 0; pass < 8; pass++) {
+    let pending = 0;
+    for (const b of data.beats) {
+      if (typeof b.start !== 'string') continue;
+      if (!isBeatTarget(b.start)) throw new Error(`beat "${b.id}" start "${b.start}": a beat's start `
+        + `must be a number or "beat:<id>.start"/"beat:<id>.end" (plus an optional offset).`);
+      const v = resolveBeatRef(b.start, `beat "${b.id}" start`, beatById, beatResolutions);
+      if (v == null) { pending++; continue; }
+      b.start = v;
+    }
+    if (!pending) break;
+    if (pass === 7) throw new Error('relative beat starts: circular reference');
+  }
+  for (const b of data.beats) if (typeof b.start === 'string')
+    throw new Error(`beat "${b.id}" start "${b.start}" did not resolve.`);
+}
+
+// PASS 1: layer starts. Multi-pass because a target may itself be a relative start; an
+// unresolvable/circular reference fails loud, naming the layer. A `beat:` target resolves in one
+// step (every beats[] entry is already a plain number by now, from PASS 0 above).
+function resolveLayerStarts(all, byId, beatById, beatResolutions, nameOf) {
   for (let pass = 0; pass < 8; pass++) {
     let pending = 0;
     for (const L of all) {
       if (typeof L.start !== 'string') continue;
-      if (isBeatTarget(L.start)) { L.start = resolveBeatRef(L.start, `layer start "${L.start}" on ${nameOf(L)}`); continue; }
+      if (isBeatTarget(L.start)) { L.start = resolveBeatRef(L.start, `layer start "${L.start}" on ${nameOf(L)}`, beatById, beatResolutions); continue; }
       const m = RX.exec(L.start.trim());
       if (!m || !byId[m[1]]) throw new Error(`layer start "${L.start}" on ${nameOf(L)}: unknown reference `
         + `"${m ? m[1] : L.start}". A relative start names another layer's \`id\`. Known ids: ${Object.keys(byId).join(', ') || '(none: no layer in this scene declares an id)'}.`);
@@ -163,34 +145,62 @@ export function resolveRelativeTimes(data) {
   }
   // NOTHING LEAVES HERE AS A STRING. Downstream is `String(L.start ?? 0)` into the dataset and a
   // `parseFloat` back out, and that pair turns an unresolved reference into a layer at t=0 rather than
-  // into an error. The pass either resolved it or says which layer it could not.
+  // into an error.
   for (const L of all) if (typeof L.start === 'string')
     throw new Error(`layer start "${L.start}" on ${nameOf(L)} did not resolve. It would render at t=0 with nothing to say so.`);
+}
 
-  // PASS 2: every other absolute field. None of these can themselves be a relative-time TARGET (nothing
-  // names a transition or a camera leg by reference), so one pass, now that every layer start and every
-  // beat is a number.
+// PASS 2: every other absolute field. None of these can themselves be a relative-time TARGET, so one
+// pass, now that every layer start and every beat is a number.
+function resolveOtherFields(data, byId, beatById, beatResolutions) {
+  const ref = (str, label) => (isBeatTarget(str) ? resolveBeatRef(str, label, beatById, beatResolutions) : resolveRef(str, byId, label));
   if (Array.isArray(data.transitions)) for (const T of data.transitions)
-    if (typeof T.at === 'string') T.at = isBeatTarget(T.at) ? resolveBeatRef(T.at, 'transition "at"') : resolveRef(T.at, byId, 'transition "at"');
+    if (typeof T.at === 'string') T.at = ref(T.at, 'transition "at"');
   if (data.cameraMove) {
     const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
-    for (const s of specs) if (s && typeof s.start === 'string')
-      s.start = isBeatTarget(s.start) ? resolveBeatRef(s.start, 'cameraMove "start"') : resolveRef(s.start, byId, 'cameraMove "start"');
+    for (const s of specs) if (s && typeof s.start === 'string') s.start = ref(s.start, 'cameraMove "start"');
   }
   if (data.audio && Array.isArray(data.audio.cues)) for (const c of data.audio.cues)
-    if (c && typeof c.t === 'string')
-      c.t = isBeatTarget(c.t) ? resolveBeatRef(c.t, 'audio cue "t"') : resolveRef(c.t, byId, 'audio cue "t"');
+    if (c && typeof c.t === 'string') c.t = ref(c.t, 'audio cue "t"');
+}
 
-  // BG WINDOWS: `beat:` ONLY. A bare id/`cut@1` string stays untouched, still owned entirely by
-  // core/timeline/junctions.js `bindWindowsToJunctions`; only the `beat:`-prefixed form is this
-  // resolver's to read, since that prefix is what makes it unambiguous (see the file banner).
-  const resolveBgWindow = (w, label) => {
+// BG WINDOWS: `beat:` ONLY. A bare id/`cut@1` string stays untouched, still owned entirely by
+// core/timeline/junctions.js `bindWindowsToJunctions`; only the `beat:`-prefixed form is this
+// resolver's to read, since that prefix is what makes it unambiguous.
+function resolveBgWindows(data, all, beatById, beatResolutions, nameOf) {
+  const resolveOne = (w, label) => {
     if (!w || typeof w !== 'object') return;
-    if (isBeatTarget(w.from)) w.from = resolveBeatRef(w.from, `${label} "from"`);
-    if (isBeatTarget(w.to)) w.to = resolveBeatRef(w.to, `${label} "to"`);
+    if (isBeatTarget(w.from)) w.from = resolveBeatRef(w.from, `${label} "from"`, beatById, beatResolutions);
+    if (isBeatTarget(w.to)) w.to = resolveBeatRef(w.to, `${label} "to"`, beatById, beatResolutions);
   };
-  if (Array.isArray(data.bg)) for (const w of data.bg) resolveBgWindow(w, 'bg window');
-  for (const L of all) if (Array.isArray(L.bg)) for (const w of L.bg) resolveBgWindow(w, `layer ${nameOf(L)} bg window`);
+  if (Array.isArray(data.bg)) for (const w of data.bg) resolveOne(w, 'bg window');
+  for (const L of all) if (Array.isArray(L.bg)) for (const w of L.bg) resolveOne(w, `layer ${nameOf(L)} bg window`);
+}
+
+/**
+ * resolveRelativeTimes(data) -> data, mutated in place and returned. Numbers-only input passes through
+ * byte-identical (nothing here is a string, every branch below is a no-op). A film with no `data.beats`
+ * never sees the `beat:` grammar at all: `isBeatTarget` is false for every string, so it behaves exactly
+ * as it did before item 3.
+ */
+export function resolveRelativeTimes(data) {
+  if (!data || typeof data !== 'object') return data;
+  const byId = {};
+  const all = [];
+  eachLayerDeep(data.layers, (L) => { all.push(L); if (L.id) byId[L.id] = L; });
+  const nameOf = (L) => `${L.id ? `"${L.id}"` : `a ${L.type || 'text'} layer`}`;
+
+  const beatById = {};
+  if (Array.isArray(data.beats)) for (const b of data.beats) if (b && b.id) beatById[b.id] = b;
+  // RISK 2, SURPRISE SHIFTS: only a string that NAMES a beat moves when the beat moves; a plain number
+  // never does. This list is what makes a shift visible rather than silent: every `beat:` string this
+  // run actually resolved, printed once at the end.
+  const beatResolutions = [];
+
+  resolveBeatStarts(data, beatById, beatResolutions);
+  resolveLayerStarts(all, byId, beatById, beatResolutions, nameOf);
+  resolveOtherFields(data, byId, beatById, beatResolutions);
+  resolveBgWindows(data, all, beatById, beatResolutions, nameOf);
 
   if (beatResolutions.length) console.log(`  beat-relative: ${beatResolutions.join(', ')}`);
   return data;

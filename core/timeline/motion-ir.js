@@ -44,57 +44,69 @@ function jsonSegments(kfs, absStart) {
   return out;
 }
 
+function pushJsonMotion(L, id, absStart, out) {
+  if (!(Array.isArray(L.motion) && L.motion.length > 1)) return;
+  for (const { prop, segments } of jsonSegments(L.motion, absStart))
+    out.push({ id, source: 'json', prop, segments });
+}
+
+function pushIdleMotion(L, id, absStart, out) {
+  if (!(L.idle && L.idle !== 'none')) return;
+  const t1 = absStart + (L.duration ?? 0);
+  out.push({ id, source: 'idle', prop: L.idle, segments: [{ t0: absStart, t1, from: null, to: null, ease: null }],
+    why: 'a periodic sin-based generator (core/engine/idle.js), not a linear from→to move; '
+      + 'amplitude and period live in the layer\'s own idle options' });
+}
+
+// KINETIC: a split layer's `preset` (core/kinetic/presets.js), staggered per unit by
+// core/tracks/units.js. Each unit's own window is a closed formula of its INDEX, but the index only
+// exists once the authored text is actually split into words/chars in the DOM, so the total unit
+// count is not known here.
+function pushKineticMotion(L, id, out) {
+  if (!(L.preset && (L.split || L.ransom))) return;
+  out.push({ id, source: 'kinetic', prop: L.preset, segments: null,
+    why: 'per-unit timing needs the split word/char count, known only once the DOM splits the authored text (core/tracks/units.js unitProgress)' });
+}
+
+function pushPartsMotion(L, id, out) {
+  if (!L.parts) return;
+  for (const p of (Array.isArray(L.parts) ? L.parts : [L.parts])) {
+    out.push({ id, source: 'parts', prop: p.anim || 'fadeUp', segments: null,
+      why: 'per-unit timing needs the real match count of `select` against the layer\'s own hand-authored markup, a DOM query (films/scene/scene.js applyGsapHooks)' });
+  }
+}
+
+function pushGsapMotion(L, id, out) {
+  for (const item of (Array.isArray(L.fx) ? L.fx : (L.fx ? [L.fx] : []))) {
+    const name = typeof item === 'string' ? item : item && item.name;
+    out.push({ id, source: 'gsap-fx', prop: name || null, segments: null,
+      why: 'a named GSAP effect\'s timing lives inside its own registered effect function (core/engine/gsap-effects.js), not in data this IR can read' });
+  }
+  if (L.motionPath) out.push({ id, source: 'gsap-motionPath', prop: 'motionPath', segments: null,
+    why: 'position along an SVG path is computed by GSAP\'s MotionPathPlugin at build, not a from→to this IR can state' });
+  if (L.physics) out.push({ id, source: 'gsap-physics', prop: 'physics', segments: null,
+    why: 'velocity/gravity/friction scatter is simulated by GSAP\'s Physics2DPlugin, not a keyed segment' });
+}
+
+function walkLayer(L, idx, out, parentAbsStart) {
+  if (!L || typeof L !== 'object') return;
+  const id = L.id || `${L.type || 'layer'}#${idx}`;
+  // A top-level layer's own `start` is already a film-second number post-expand. A GROUP CHILD
+  // carries no `start` of its own: its visibility window opens at the parent's start plus its own
+  // `delay` (core/layers/util.js childContentStart's sibling rule).
+  const absStart = parentAbsStart == null ? (L.start ?? 0) : parentAbsStart + (L.delay ?? 0);
+
+  pushJsonMotion(L, id, absStart, out);
+  pushIdleMotion(L, id, absStart, out);
+  pushKineticMotion(L, id, out);
+  pushPartsMotion(L, id, out);
+  pushGsapMotion(L, id, out);
+
+  if (Array.isArray(L.children) && L.children.length) walkLayers(L.children, out, absStart);
+}
+
 function walkLayers(layers, out, parentAbsStart) {
-  (layers || []).forEach((L, idx) => {
-    if (!L || typeof L !== 'object') return;
-    const id = L.id || `${L.type || 'layer'}#${idx}`;
-    // A top-level layer's own `start` is already a film-second number post-expand (item 2's relative-
-    // time resolver runs before this). A GROUP CHILD carries no `start` of its own: its visibility
-    // window opens at the parent's start plus its own `delay` (core/layers/util.js childContentStart's
-    // sibling rule), computed once here rather than re-derived per source below.
-    const absStart = parentAbsStart == null ? (L.start ?? 0) : parentAbsStart + (L.delay ?? 0);
-
-    if (Array.isArray(L.motion) && L.motion.length > 1) {
-      for (const { prop, segments } of jsonSegments(L.motion, absStart)) {
-        out.push({ id, source: 'json', prop, segments });
-      }
-    }
-
-    if (L.idle && L.idle !== 'none') {
-      const t1 = absStart + (L.duration ?? 0);
-      out.push({ id, source: 'idle', prop: L.idle, segments: [{ t0: absStart, t1, from: null, to: null, ease: null }],
-        why: 'a periodic sin-based generator (core/engine/idle.js), not a linear from→to move; '
-          + 'amplitude and period live in the layer\'s own idle options' });
-    }
-
-    // KINETIC: a split layer's `preset` (core/kinetic/presets.js), staggered per unit by
-    // core/tracks/units.js. Each unit's own window is a closed formula of its INDEX, but the index
-    // only exists once the authored text is actually split into words/chars in the DOM, so the total
-    // unit count (and therefore every unit past the first) is not known here.
-    if (L.preset && (L.split || L.ransom)) {
-      out.push({ id, source: 'kinetic', prop: L.preset, segments: null,
-        why: 'per-unit timing needs the split word/char count, known only once the DOM splits the authored text (core/tracks/units.js unitProgress)' });
-    }
-
-    if (L.parts) {
-      for (const p of (Array.isArray(L.parts) ? L.parts : [L.parts])) {
-        out.push({ id, source: 'parts', prop: p.anim || 'fadeUp', segments: null,
-          why: 'per-unit timing needs the real match count of `select` against the layer\'s own hand-authored markup, a DOM query (films/scene/scene.js applyGsapHooks)' });
-      }
-    }
-
-    for (const item of (Array.isArray(L.fx) ? L.fx : (L.fx ? [L.fx] : []))) {
-      const name = typeof item === 'string' ? item : item && item.name;
-      out.push({ id, source: 'gsap-fx', prop: name || null, segments: null,
-        why: 'a named GSAP effect\'s timing lives inside its own registered effect function (core/engine/gsap-effects.js), not in data this IR can read' });
-    }
-    if (L.motionPath) out.push({ id, source: 'gsap-motionPath', prop: 'motionPath', segments: null,
-      why: 'position along an SVG path is computed by GSAP\'s MotionPathPlugin at build, not a from→to this IR can state' });
-    if (L.physics) out.push({ id, source: 'gsap-physics', prop: 'physics', segments: null,
-      why: 'velocity/gravity/friction scatter is simulated by GSAP\'s Physics2DPlugin, not a keyed segment' });
-
-    if (Array.isArray(L.children) && L.children.length) walkLayers(L.children, out, absStart);
-  });
+  (layers || []).forEach((L, idx) => walkLayer(L, idx, out, parentAbsStart));
 }
 
 // CAMERA_POSE: the subset of cameraAt's fields worth reporting as motion (position, zoom, orientation).
