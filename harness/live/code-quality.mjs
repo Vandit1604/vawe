@@ -124,7 +124,6 @@ process.stdin.on('end', () => {
     + 'Refused by harness/live/code-quality.mjs. Limits live in .oxlintrc.json.\n';
 
   const say = summarize('code-quality', rel, full);
-  if (!say) process.exit(0);            // same finding as last time; already said, no need to repeat
   process.stderr.write(say + '\n');
   process.exit(2);
 });

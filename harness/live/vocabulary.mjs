@@ -82,7 +82,6 @@ If it is NOT something an author names (a props table, an interaction matrix, a 
 correct as it is: add it to quality/baselines/vocabulary-baseline.json and carry on.`;
 
   const say = summarize('vocabulary', rel, full);
-  if (!say) process.exit(0);            // same finding as last time; already said, no need to repeat
   console.error(say);
   process.exit(2);
 });
