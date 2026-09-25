@@ -52,7 +52,6 @@ import { staggerStep } from '../type/type.js';
 // no longer existed: `thud` at a layer arrival, `travel` at a camera move, `riser` at the spectacle.
 // A trimmed list is not a fix if the code that WRITES the names is somewhere else, and it was.
 // `thud` is now `impact` and `travel` is now `whoosh`; `riser` is a name again, rebuilt without noise.
-// All three voicings are in core/audio-kit.mjs under `swarm`.
 export const MOTION_CUES = ['pluck', 'droplet', 'chime', 'bloom', 'impact', 'whoosh'];
 
 // THE FIVE ARE CATALOGUED AND THE OTHER FIFTEEN ARE NOT, and that looks like two decisions in
@@ -379,7 +378,6 @@ export function capDensity(cues, { minGap = DENSITY.minGap, maxPerSec = DENSITY.
 // report the cost of the cap as a number rather than a claim.
 export function derive(scene = {}, opts = {}) {
   const canvas = opts.canvas || { w: 1920, h: 1080 };
-  const cfg = opts.config === true ? {} : (opts.config || {});
   const out = [];
   arrivalCues(scene.layers || [], canvas, out);
   layerMotionCues(scene.layers || [], canvas, out);
