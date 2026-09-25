@@ -22,3 +22,4 @@ export const glsl = `                             /* cinematicZoom, a dolly punc
     c = vec4(col, (rays*0.60 + bloom*0.50 + rim*0.28) * bell);
   }`;
 export const blurb = 'a dolly punch-in used as a cut cover: the camera lunges forward and the join hides inside the lunge.';
+export const aka = ['dolly punch in', 'cinematic zoom cut', 'zoom cut cover'];
