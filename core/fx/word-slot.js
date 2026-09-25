@@ -38,20 +38,26 @@ const WORD_SLOT_KEYS = ['words', 'every', 'swap', 'at', 'chip', 'loop', 'delay',
 
 const MARK = 'data-word-slot';
 
-function resolve(spec) {
-  const s = Array.isArray(spec) ? { words: spec } : spec;
+function validateShape(s, spec) {
   if (!s || typeof s !== 'object' || Array.isArray(s))
     throw new Error(`wordSlot: expected a list of words or an object like `
       + `{ "words": ["docs", "dashboards"] }. Got ${JSON.stringify(spec)}. Keys: ${WORD_SLOT_KEYS.join(', ')}.`);
   for (const k of Object.keys(s))
     if (!WORD_SLOT_KEYS.includes(k))
       throw new Error(`wordSlot: unknown key "${k}", known: ${WORD_SLOT_KEYS.join(', ')}.`);
+}
+
+// ONE candidate is a sentence with a fixed word in it, which needs no slot and no modifier. Silently
+// rendering it would look like a swap that never came round.
+function resolveWords(s) {
   const words = s.words;
-  // ONE candidate is a sentence with a fixed word in it, which needs no slot and no modifier. Silently
-  // rendering it would look like a swap that never came round.
   if (!Array.isArray(words) || words.length < 2 || words.some((w) => typeof w !== 'string' || !w.trim()))
     throw new Error(`wordSlot: "words" is two or more non-empty strings, the candidates the slot turns `
       + `through: got ${JSON.stringify(words)}. One word is not a swap.`);
+  return words;
+}
+
+function resolveTiming(s) {
   const every = s.every == null ? 1.1 : s.every;
   const swap = s.swap == null ? 0.26 : s.swap;
   const delay = s.delay == null ? 0 : s.delay;
@@ -66,9 +72,22 @@ function resolve(spec) {
       + `leaving before it has arrived and none of them is ever legible. Shorten the swap.`);
   if (!Number.isFinite(rise) || rise < 0)
     throw new Error(`wordSlot: "rise" is the travel as a share of the slot's line height; got ${JSON.stringify(rise)}`);
+  return { every, swap, delay, rise };
+}
+
+function resolveAt(s) {
   const at = s.at == null ? '{}' : s.at;
   if (typeof at !== 'string' || !at)
     throw new Error(`wordSlot: "at" is the placeholder to replace in the layer's own text; got ${JSON.stringify(at)}`);
+  return at;
+}
+
+function resolve(spec) {
+  const s = Array.isArray(spec) ? { words: spec } : spec;
+  validateShape(s, spec);
+  const words = resolveWords(s);
+  const { every, swap, delay, rise } = resolveTiming(s);
+  const at = resolveAt(s);
   return { words, every, swap, at, chip: s.chip ?? false, loop: !!s.loop, delay, rise };
 }
 
@@ -141,7 +160,7 @@ export function build(kit, el, L, spec) {
 // privately) and belongs on it the same way core/layers/text.js's caret does the moment something
 // needs to know which candidate word is showing.
 export function frame(kit, el, L, t, scene, spec) {
-  const { words, every, swap, at, loop, delay, rise } = resolve(spec);
+  const { words, every, swap, loop, delay, rise } = resolve(spec);
   const slot = el.querySelector(`[${MARK}]`);
   if (!slot) return;                       // build refused nothing, so this can only be a re-entrancy no-op
   const n = words.length;
