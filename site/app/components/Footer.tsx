@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Clip } from "./Clip";
 import { DOCS_URL, REPO_URL } from "./Header";
 import sitePages from "../../lib/site-pages.json";
 
@@ -53,59 +52,24 @@ function FooterNav({ active }: { active?: string }) {
   );
 }
 
-/* ONE FOOTER, ONE STYLE, EVERY PAGE.
- *
- * `bookend` closes the home page on the material it opened on: the contentless backdrop scene under
- * cobalt. Never a capability clip, those all carry copy, which blurs into drifting smudges behind
- * the CTA.
- *
- * Interior pages used to get a different footer entirely: a hairline rule, grey links, no band. Two
- * footers meant the site ended two different ways depending which page you were on, and the owner's
- * call is that it ends one way. So both variants are the same cobalt band carrying the same grouped
- * nav, and the bookend adds the CTA and the film ABOVE that shared base rather than replacing it.
- * The navigation a reader finds at the bottom of any page is now the same navigation.
- *
- * The accent is used at full bleed here, which `site/DESIGN.md`'s 60/30/10 reading would normally
- * spend more carefully. A footer band is the one place that is right: it is the page's last frame,
- * it is below the fold on every page, and it is the only element on the site that appears on all of
- * them, so making it the brand's colour is what makes the site read as one site. */
+/* ONE FOOTER ON EVERY PAGE: a studio panel holding the generated route groups, and a meta line.
+ * `bookend` adds the closing call to action above it, on the pages that end a journey. */
 export function Footer({ note = "one JSON, one video", bookend = false, active }: { note?: string; bookend?: boolean; active?: string }) {
-  if (!bookend) {
-    return (
-      <footer className="bookend foot-band foot-band-plain">
-        <div className="wrap foot-in on-accent">
-          <FooterNav active={active} />
-          <div className="foot-rule" />
-          <div className="foot-meta">
-            <span>© 2026 Vawe · free to experiment with while it is early</span>
-            <span className="mono">{note}</span>
+  return (
+    <footer className="wrap foot">
+      {bookend && (
+        <div className="panel foot-cta-panel">
+          <p className="foot-cta">Compose a scene. Render it. Ship it.</p>
+          <div className="foot-act">
+            <a className="btn btn-primary" href="/editor">Try the editor</a>
+            <a className="btn btn-ghost" href={REPO_URL}>Read the source</a>
           </div>
         </div>
-      </footer>
-    );
-  }
-
-  return (
-    <footer className="bookend foot-band">
-      <Clip className="bookend-film" src="/assets/backdrop.mp4" poster="/assets/backdrop.jpg" />
-      <div className="wrap foot-in on-accent">
-        <p className="foot-cta">Compose a scene. Render it. Ship it.</p>
-        <p className="foot-sub">One JSON in, one frame-perfect video out. No account, no key, nothing sent anywhere.</p>
-        <div className="foot-act">
-          <a className="btn btn-white" href="/editor">
-            Try the editor <span className="arw">→</span>
-          </a>
-          <a className="btn btn-onaccent" href="/features">
-            Explore features <span className="arw">→</span>
-          </a>
-        </div>
+      )}
+      <div className="panel foot-panel">
         <FooterNav active={active} />
-        <div className="foot-rule" />
-        {/* No licence badge here. Vawe is Apache 2.0, plain and permissive, so there is no tier
-            or limit to state. The LICENSE file is still in the repo for anyone who goes looking.
-            Invite the experiment instead. */}
         <div className="foot-meta">
-          <span>© 2026 Vawe · free to experiment with while it is early</span>
+          <span>© 2026 vawe · open source, <a href={`${REPO_URL}/blob/main/LICENSE`}>Apache 2.0</a></span>
           <span className="mono">{note}</span>
         </div>
       </div>
