@@ -7,3 +7,4 @@ export const glsl = `                              /* film grain, dense fine spe
     float sp = smoothstep(0.58, 1.0, g1) + 0.5*smoothstep(0.68, 1.0, g2);
     c = vec4(vec3(0.92), bell*0.55*sp);`;
 export const blurb = 'dense fine film grain rising over the frame. Texture rather than event: use it under something else.';
+export const aka = ['film grain', 'grain wash', 'noise texture'];
