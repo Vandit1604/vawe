@@ -54,9 +54,9 @@ import path from 'node:path';
 // reproduce byte-for-byte (generators/media/fonts.mjs pins a version and a sha256 per face), so it is
 // the one thing the hash is allowed to depend on: read the LOCKED file list, ignore everything else in
 // assets/fonts/, and skip `assets/fonts/local/` outright, the PAID, per-developer faces (Sohne, a
-// hand-captured Tiempos) `make fonts` never touches and no CI runner ever has. A scene whose theme
-// actually needs one of those is not made portable by this, it is EXCLUDED instead: see
-// quality/baselines/e2e-known-broken.json's `needsUnlockedFont` list.
+// hand-captured Tiempos) `make fonts` never touches and no CI runner ever has. No TRACKED theme sets one
+// today; a scene whose theme starts needing one is not made portable by this, it belongs in
+// quality/baselines/e2e-known-broken.json by name, same as any other scene a clean clone cannot render.
 const FONT_DIR = 'assets/fonts';
 const FONTS_LOCK = 'harness/media/fonts.lock.json';
 
