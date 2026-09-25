@@ -67,7 +67,8 @@ import { resolveTempo } from '../../core/engine/tempo.js';
 import { easeErrors, bgErrors, durationWordErrors, cssErrors, authoredJunctionErrors } from '../../core/validate/validate.mjs';
 import { raise as raiseJunction, deepEqual as junctionDeepEqual, migrateOne } from '../../harness/author/migrate-junctions.mjs';
 import { splitWaiver, waiverCovers, isWaivedBy, groupWaivers, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
-import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab } from '../../core/registry/vocab.js';
+import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab,
+  COMPARATIVE, resolveComparative } from '../../core/registry/vocab.js';
 import { BASE_ENTER } from '../../core/timeline/clips.js';
 import { CUT_REGISTRY } from '../../core/cuts/index.js';
 import { CUT_CUE } from '../../core/audio/cues.js';
@@ -321,6 +322,29 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
     const d = lowerScene({ transitions: [{ at: 2, fx: 'wipe', mech: 'seam', dir: 35 }] });
     return d.seams[0].dir === 35;
   })());
+  // COMPARATIVE: a direction over the DURATION ladder, not an absolute alias.
+  ok('vocab: every COMPARATIVE word resolves to a real duration',
+    Object.keys(COMPARATIVE).every((w) => Object.values(DURATION).includes(resolveComparative(w, 'medium'))));
+  ok('vocab: faster from medium is fast, slower from medium is slow',
+    resolveComparative('faster', 'medium') === DURATION.fast && resolveComparative('slower', 'medium') === DURATION.slow);
+  // aka is the SEARCH index only (`make arsenal Q="snappier"`), same contract as every other
+  // registry's aka: it is never a second spelling `pick()` itself accepts.
+  ok('vocab: a comparative aka is not itself a resolvable word', (() => {
+    try { resolveComparative('snappier', 'medium'); return false; } catch { return true; }
+  })());
+  // A step past either end of the ladder CLAMPS, it does not throw: there is nowhere shorter than
+  // `instant` or longer than `luxurious` for the step to land.
+  ok('vocab: faster past `instant` clamps at `instant`', resolveComparative('faster', 'instant') === DURATION.instant);
+  ok('vocab: slower past `luxurious` clamps at `luxurious`', resolveComparative('slower', 'luxurious') === DURATION.luxurious);
+  ok('vocab: resolveComparative defaults `current` to medium when absent',
+    resolveComparative('faster', null) === DURATION.fast && resolveComparative('faster', undefined) === DURATION.fast);
+  ok('vocab: resolveComparative snaps a bare number to its nearest ladder rung first',
+    resolveComparative('slower', 0.58) === DURATION.luxurious); // nearest to 0.58 is `slow` (0.6), one step past it
+  ok('vocab: an unknown comparative word throws and names the near misses', (() => {
+    try { resolveComparative('fastr', 'medium'); return false; }
+    catch (e) { return /comparative duration word/.test(e.message) && /"faster"/.test(e.message); }
+  })());
+
   // energy: the film-wide default speed curve (core/transitions/energy.js), applied by lowerScene.
   ok('energy: every ENERGY value is a real TIMINGS curve', Object.values(ENERGY).every((t) => t in TIMINGS));
   ok('energy: okEnergy passes a known word and null, throws on an unknown', (() => {
