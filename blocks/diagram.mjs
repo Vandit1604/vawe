@@ -83,46 +83,47 @@ function nodeEl(n) {
 // apart ACROSS the frame than they are DOWN it, so `auto` sent both arrowheads into the side of a node
 // in a flow that reads downward. `'v'`/`'h'` names the flow axis and wins whenever the two boxes are on
 // different ranks; same rank falls back to `auto`.
-export function routeEdge(a, b, { radius = 16, gap = 3, head = 11, axis = 'auto' } = {}) {
-  const acx = a.x + a.w / 2, acy = a.y + a.h / 2;
-  const bcx = b.x + b.w / 2, bcy = b.y + b.h / 2;
-  const dx = bcx - acx, dy = bcy - acy;
-  const vertical = axis === 'v' && Math.abs(dy) > 1 ? true
-    : axis === 'h' && Math.abs(dx) > 1 ? false
-    : Math.abs(dy) >= Math.abs(dx);
-  const sign = (v) => (v < 0 ? -1 : 1);
+const routeSign = (v) => (v < 0 ? -1 : 1);
 
-  let sx, sy, ex, ey, dir, d, lx, ly;
+// The rounded elbow between two points that share neither x nor y: a straight run to the midline,
+// a quarter-turn of `radius`, then the straight run into the target. Degenerates to one straight
+// line when the two points already line up on the cross axis.
+function routeEdgeCurve({ sx, sy, ex, ey, mid, k, radius, vertical }) {
   if (vertical) {
-    const k = sign(dy);
-    sx = acx; sy = k > 0 ? a.y + a.h : a.y;
-    ex = bcx; ey = k > 0 ? b.y - gap : b.y + b.h + gap;
-    dir = k > 0 ? 'down' : 'up';
-    const my = (sy + ey) / 2;
-    if (Math.abs(ex - sx) < 1) { d = `M${r2(sx)} ${r2(sy)} L${r2(sx)} ${r2(ey)}`; }
-    else {
-      const jx = sign(ex - sx);
-      const r = Math.max(0, Math.min(radius, Math.abs(ex - sx) / 2, Math.abs(my - sy), Math.abs(ey - my)));
-      d = `M${r2(sx)} ${r2(sy)} L${r2(sx)} ${r2(my - k * r)} Q${r2(sx)} ${r2(my)} ${r2(sx + jx * r)} ${r2(my)}`
-        + ` L${r2(ex - jx * r)} ${r2(my)} Q${r2(ex)} ${r2(my)} ${r2(ex)} ${r2(my + k * r)} L${r2(ex)} ${r2(ey)}`;
-    }
-    lx = (sx + ex) / 2; ly = my;
-  } else {
-    const k = sign(dx);
-    sx = k > 0 ? a.x + a.w : a.x; sy = acy;
-    ex = k > 0 ? b.x - gap : b.x + b.w + gap; ey = bcy;
-    dir = k > 0 ? 'right' : 'left';
-    const mx = (sx + ex) / 2;
-    if (Math.abs(ey - sy) < 1) { d = `M${r2(sx)} ${r2(sy)} L${r2(ex)} ${r2(sy)}`; }
-    else {
-      const jy = sign(ey - sy);
-      const r = Math.max(0, Math.min(radius, Math.abs(ey - sy) / 2, Math.abs(mx - sx), Math.abs(ex - mx)));
-      d = `M${r2(sx)} ${r2(sy)} L${r2(mx - k * r)} ${r2(sy)} Q${r2(mx)} ${r2(sy)} ${r2(mx)} ${r2(sy + jy * r)}`
-        + ` L${r2(mx)} ${r2(ey - jy * r)} Q${r2(mx)} ${r2(ey)} ${r2(mx + k * r)} ${r2(ey)} L${r2(ex)} ${r2(ey)}`;
-    }
-    lx = mx; ly = (sy + ey) / 2;
+    if (Math.abs(ex - sx) < 1) return `M${r2(sx)} ${r2(sy)} L${r2(sx)} ${r2(ey)}`;
+    const jx = routeSign(ex - sx);
+    const r = Math.max(0, Math.min(radius, Math.abs(ex - sx) / 2, Math.abs(mid - sy), Math.abs(ey - mid)));
+    return `M${r2(sx)} ${r2(sy)} L${r2(sx)} ${r2(mid - k * r)} Q${r2(sx)} ${r2(mid)} ${r2(sx + jx * r)} ${r2(mid)}`
+      + ` L${r2(ex - jx * r)} ${r2(mid)} Q${r2(ex)} ${r2(mid)} ${r2(ex)} ${r2(mid + k * r)} L${r2(ex)} ${r2(ey)}`;
   }
+  if (Math.abs(ey - sy) < 1) return `M${r2(sx)} ${r2(sy)} L${r2(ex)} ${r2(sy)}`;
+  const jy = routeSign(ey - sy);
+  const r = Math.max(0, Math.min(radius, Math.abs(ey - sy) / 2, Math.abs(mid - sx), Math.abs(ex - mid)));
+  return `M${r2(sx)} ${r2(sy)} L${r2(mid - k * r)} ${r2(sy)} Q${r2(mid)} ${r2(sy)} ${r2(mid)} ${r2(sy + jy * r)}`
+    + ` L${r2(mid)} ${r2(ey - jy * r)} Q${r2(mid)} ${r2(ey)} ${r2(mid + k * r)} ${r2(ey)} L${r2(ex)} ${r2(ey)}`;
+}
 
+function routeEdgeVertical(a, b, { acx, bcx, dy, gap, radius }) {
+  const k = routeSign(dy);
+  const sx = acx, sy = k > 0 ? a.y + a.h : a.y;
+  const ex = bcx, ey = k > 0 ? b.y - gap : b.y + b.h + gap;
+  const dir = k > 0 ? 'down' : 'up';
+  const my = (sy + ey) / 2;
+  const d = routeEdgeCurve({ sx, sy, ex, ey, mid: my, k, radius, vertical: true });
+  return { sx, sy, ex, ey, dir, d, lx: (sx + ex) / 2, ly: my };
+}
+
+function routeEdgeHorizontal(a, b, { acy, bcy, dx, gap, radius }) {
+  const k = routeSign(dx);
+  const sx = k > 0 ? a.x + a.w : a.x, sy = acy;
+  const ex = k > 0 ? b.x - gap : b.x + b.w + gap, ey = bcy;
+  const dir = k > 0 ? 'right' : 'left';
+  const mx = (sx + ex) / 2;
+  const d = routeEdgeCurve({ sx, sy, ex, ey, mid: mx, k, radius, vertical: false });
+  return { sx, sy, ex, ey, dir, d, lx: mx, ly: (sy + ey) / 2 };
+}
+
+function routeEdgeArrow({ ex, ey, dir, head }) {
   const wing = head * 0.62;
   const ARROW = {
     down: `M${r2(ex - wing)} ${r2(ey - head)} L${r2(ex)} ${r2(ey)} L${r2(ex + wing)} ${r2(ey - head)}`,
@@ -130,11 +131,23 @@ export function routeEdge(a, b, { radius = 16, gap = 3, head = 11, axis = 'auto'
     right: `M${r2(ex - head)} ${r2(ey - wing)} L${r2(ex)} ${r2(ey)} L${r2(ex - head)} ${r2(ey + wing)}`,
     left: `M${r2(ex + head)} ${r2(ey - wing)} L${r2(ex)} ${r2(ey)} L${r2(ex + head)} ${r2(ey + wing)}`,
   };
-  return { d, arrow: ARROW[dir], dir, label: { x: r2(lx), y: r2(ly) } };
+  return ARROW[dir];
+}
+
+export function routeEdge(a, b, { radius = 16, gap = 3, head = 11, axis = 'auto' } = {}) {
+  const acx = a.x + a.w / 2, acy = a.y + a.h / 2, bcx = b.x + b.w / 2, bcy = b.y + b.h / 2;
+  const dx = bcx - acx, dy = bcy - acy;
+  const vertical = axis === 'v' && Math.abs(dy) > 1 ? true
+    : axis === 'h' && Math.abs(dx) > 1 ? false
+    : Math.abs(dy) >= Math.abs(dx);
+  const { ex, ey, dir, d, lx, ly } = vertical
+    ? routeEdgeVertical(a, b, { acx, bcx, dy, gap, radius })
+    : routeEdgeHorizontal(a, b, { acy, bcy, dx, gap, radius });
+  return { d, arrow: routeEdgeArrow({ ex, ey, dir, head }), dir, label: { x: r2(lx), y: r2(ly) } };
 }
 
 // The edge, as markup. `hot` is the one highlighted path in a graph; everything else reads as plumbing.
-function edgeEls(a, b, e, opts, labelSize = TYPE.body) {
+function edgeEls({ a, b, e, opts, labelSize = TYPE.body }) {
   const rt = routeEdge(a, b, opts);
   const hot = !!e.hot;
   const col = hot ? T.accent : T.sub;
@@ -161,7 +174,7 @@ function diagramLayer({ x, y, w, h, nodes, edges, start, dur, step, radius, gap,
     const a = byId[e.from], b = byId[e.to];
     if (!a || !b) throw new Error(`blocks/diagram: edge "${e.from}"→"${e.to}" names a node that does not exist. `
       + `Known ids: ${nodes.map((n) => n.id).join(', ')}`);
-    return edgeEls(a, b, e, { radius, gap, axis }, labelSize);
+    return edgeEls({ a, b, e, opts: { radius, gap, axis }, labelSize });
   });
 
   // The chain, and the one number that has to be right: an arrowhead must land AFTER its own line
@@ -213,39 +226,44 @@ export const FLOW_DEFAULT = {
   ],
 };
 
-export function flowchart({ x = 0, y = 0, variant = '', nodes = FLOW_DEFAULT.nodes, edges = FLOW_DEFAULT.edges,
-  nodeW, nodeH, colGap, laneGap, size, subSize, labelSize, radius = 16, gap = 3, start = 0, dur = 6, step = 0.16, anim } = {}) {
-  const down = variant === 'vertical';
-  // Portrait is 1080 wide and a lane offset has to live inside it, so the vertical branch is not the
-  // landscape one rotated: its nodes are narrower and its lanes sit closer.
-  const NW = nodeW ?? (down ? 300 : 300);
-  const NH = nodeH ?? (down ? 148 : 100);
-  const CG = colGap ?? (down ? 84 : 118);
-  const LG = laneGap ?? (down ? 24 : 44);
-  const TS = size ?? (down ? TYPE.head : TYPE.lead);
-  const SS = subSize ?? (down ? TYPE.head : TYPE.body);
-  const LS = labelSize ?? (down ? TYPE.head : TYPE.body);
+// Portrait is 1080 wide and a lane offset has to live inside it, so the vertical branch is not the
+// landscape one rotated: its nodes are narrower and its lanes sit closer.
+function flowchartDials({ down, nodeW, nodeH, colGap, laneGap, size, subSize, labelSize }) {
+  return {
+    NW: nodeW ?? 300,
+    NH: nodeH ?? (down ? 148 : 100),
+    CG: colGap ?? (down ? 84 : 118),
+    LG: laneGap ?? (down ? 24 : 44),
+    TS: size ?? (down ? TYPE.head : TYPE.lead),
+    SS: subSize ?? (down ? TYPE.head : TYPE.body),
+    LS: labelSize ?? (down ? TYPE.head : TYPE.body),
+  };
+}
 
-  const cols = nodes.map((n) => n.col ?? 0);
-  const lanes = nodes.map((n) => n.lane ?? 0);
-  const c0 = Math.min(...cols), c1 = Math.max(...cols);
-  const l0 = Math.min(...lanes), l1 = Math.max(...lanes);
-
+// Every node's box and position, plus the figure's own span, off one rank axis (`col`) and one
+// offset axis (`lane`); `down` swaps which screen axis each one draws along.
+function flowchartLayout(nodes, { down, NW, NH, CG, LG, TS, SS }) {
+  const cols = nodes.map((n) => n.col ?? 0), lanes = nodes.map((n) => n.lane ?? 0);
+  const c0 = Math.min(...cols), c1 = Math.max(...cols), l0 = Math.min(...lanes), l1 = Math.max(...lanes);
   const along = (c) => (c - c0) * ((down ? NH : NW) + CG);
   const across = (l) => (l - l0) * ((down ? NW : NH) + LG);
-
   const placed = nodes.map((n) => ({
     ...n,
     w: n.w ?? NW, h: n.h ?? NH, size: n.size ?? TS, subSize: n.subSize ?? SS,
     x: r2(down ? across(n.lane ?? 0) : along(n.col ?? 0)),
     y: r2(down ? along(n.col ?? 0) : across(n.lane ?? 0)),
   }));
-
   const spanAlong = (c1 - c0 + 1) * (down ? NH : NW) + (c1 - c0) * CG;
   const spanAcross = (l1 - l0 + 1) * (down ? NW : NH) + (l1 - l0) * LG;
+  return { placed, w: down ? spanAcross : spanAlong, h: down ? spanAlong : spanAcross };
+}
 
-  return diagramLayer({ x, y, w: down ? spanAcross : spanAlong, h: down ? spanAlong : spanAcross,
-    nodes: placed, edges, start, dur, step, radius, gap, axis: down ? 'v' : 'h', labelSize: LS, anim });
+export function flowchart({ x = 0, y = 0, variant = '', nodes = FLOW_DEFAULT.nodes, edges = FLOW_DEFAULT.edges,
+  nodeW, nodeH, colGap, laneGap, size, subSize, labelSize, radius = 16, gap = 3, start = 0, dur = 6, step = 0.16, anim } = {}) {
+  const down = variant === 'vertical';
+  const { NW, NH, CG, LG, TS, SS, LS } = flowchartDials({ down, nodeW, nodeH, colGap, laneGap, size, subSize, labelSize });
+  const { placed, w, h } = flowchartLayout(nodes, { down, NW, NH, CG, LG, TS, SS });
+  return diagramLayer({ x, y, w, h, nodes: placed, edges, start, dur, step, radius, gap, axis: down ? 'v' : 'h', labelSize: LS, anim });
 }
 
 // ── nodeGraph ────────────────────────────────────────────────────────────────────────────────────
