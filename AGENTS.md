@@ -6,8 +6,7 @@ This repo turns **one self-describing JSON → one rendered video** (60fps mp4 f
 
 ## The repo, in seven domains  `[eye]`
 
-Twenty-one top-level folders, flat by choice; each carries its own README with the detail. This table
-groups them so a reader sees seven concerns, not twenty-one names.
+21 top-level folders, each with its own README for the detail. This table groups them into seven concerns.
 
 | domain | folders | what it covers |
 |---|---|---|
@@ -21,28 +20,28 @@ groups them so a reader sees seven concerns, not twenty-one names.
 
 ## THE EIGHT STAGES, IN ORDER  `[gated: harness/live/stage-gate.mjs]` `[live: harness/live/stage-say.mjs]`
 
-**Read this first.** `make stage D=<film>` reads the files on disk, so it can never disagree with the repo, and says which stage a film is in and the ONE next command.
+`make stage D=<film>` reads the files on disk, so it can never disagree with the repo, and reports which stage a film is in and the one next command.
 
 | # | stage | what happens | the command |
 |---|---|---|---|
 | 1 | **brief** | ask what the product is, and the four other things a site would have given | `make quiz NAME= URL=` |
 | 2 | **plan** | the beat table, the through-line, the spectacle, the exclusions | `make ideate` → `make scaffold` → `make storyboard-check` → `make plan-judge` |
 | 3 | **design** | the theme is settled and every frame the plan named is drawn | stage kit → `make design-spec` → the reference's grammar → the smallest useful `ui-skills` set → `make preview` → look at it |
-| 4 | **approval** | the drawn frames are SHOWN and a person says yes | `make studio D=`, share `http://127.0.0.1:8799/studio` with the approval request, then the USER runs `/vawe-approve` |
+| 4 | **approval** | the drawn frames are shown and a person says yes | `make studio D=`, share `http://127.0.0.1:8799/studio` with the approval request, then the user runs `/vawe-approve` |
 | 5 | **assemble** | the frames become a scene | `make assemble D=` |
 | 6 | **direct** | motion, then transitions, then sound, in that order | `make critics D= DECIDERS=1` |
 | 7 | **render** | | `make ship D=` |
-| 8 | **judge** | the only step that SEES | **vawe-audit** composes `make check`/`audio-check`/`audit`/`beats`/`reveal`/`judge`/`ledger` into one verdict; **vawe-review-loop** owns the FIX loop and the stopping rule (STOP-done · STOP-converged · STOP-hand-it-back); a PASS is never self-recorded |
+| 8 | **judge** | the only step that sees | **vawe-audit** composes `make check`/`audio-check`/`audit`/`beats`/`reveal`/`judge`/`ledger` into one verdict; **vawe-review-loop** owns the fix loop and the stopping rule (STOP-done · STOP-converged · STOP-hand-it-back); a PASS is never self-recorded |
 
-**Three transitions are refused, not requested** (agents have run this order backwards before: `make arsenal MISTAKES=1 Q="stage order"`): `harness/live/stage-gate.mjs` denies, at `PreToolUse`, a fragment no storyboard claims · `layers` into an unapproved film · writing `approved:` at all, the user's signature and never an agent's. The way out is the missing artefact, never a flag. `harness/live/stage-say.mjs` re-states the open stage every turn; `make next D=<film>` runs its step.
+Three transitions are hook-refused rather than requested: a fragment no storyboard claims, `layers` into an unapproved film, and writing `approved:` (the user's signature only, never an agent's). `harness/live/stage-gate.mjs` denies these at write time with its own reason; the fix is the missing artefact, never a flag. `stage-say.mjs` restates the open stage each turn; `make next D=<film>` runs its step.
 
-**No templates**: compose each video from `engine-doctrine/PRIMITIVES.md`, write a scene JSON, capture the real assets it needs, then render; do **not** edit `scene.html` or the Go renderer unless asked. Reflecting a brand? `make sections` + `make palette` builds colours + fonts + favicon (`engine-doctrine/DESIGN-DATABASE.md`), using ONLY the site's colours.
+**No templates**: compose each video from `engine-doctrine/PRIMITIVES.md`, write a scene JSON, capture the real assets it needs, then render; do not edit `scene.html` or the Go renderer unless asked. Reflecting a brand: `make sections` + `make palette` builds colours, fonts and favicon (`engine-doctrine/DESIGN-DATABASE.md`) from the site's own colours only.
 
 ## Skill router (stages 1, 2, 4)  `[eye]`
 
-Skills live in `skills/` as plain docs; Claude Code loads them on demand, others open the doc in the last column. Full index: `engine-doctrine/CRAFT/README.md`; ask which doc settles a question: `make docs Q="…"`.
+Skills live in `skills/` as plain docs; Claude Code loads them on demand, others open the doc named in the last column. Full index: `engine-doctrine/CRAFT/README.md`; ask a question directly: `make docs Q="…"`.
 
-`make stage`/`make next` also name the ONE skill the open stage wants, next to the command, on a line reading `skill: <name>`. That line is generated from each skill's own `stage:` frontmatter (`harness/lib/skill-stages.mjs`), never a second hand-kept table; a skill with no `stage:` is cross-cutting and just does not appear there.
+`make stage`/`make next` also print the one skill the open stage wants, on a line reading `skill: <name>`, generated from each skill's own `stage:` frontmatter (`harness/lib/skill-stages.mjs`) rather than a second hand-kept table.
 
 | You are about to… | Claude Code skill | Everyone: the doc |
 |---|---|---|
@@ -54,39 +53,27 @@ Skills live in `skills/` as plain docs; Claude Code loads them on demand, others
 | Reflect a website or a film | n/a | `make sections`/[`RECREATION.md`](engine-doctrine/CRAFT/RECREATION.md); `make study`/[`REFERENCE-STUDY.md`](engine-doctrine/CRAFT/REFERENCE-STUDY.md) |
 | Direction, captions, sound, theme defaults | n/a | [`DIRECTION.md`](engine-doctrine/CRAFT/DIRECTION.md) · [`CAPTIONS.md`](engine-doctrine/CRAFT/CAPTIONS.md) · [`THEME-LOOK.md`](engine-doctrine/CRAFT/THEME-LOOK.md) |
 
-**Gates, one command:** `make author-check D=<file>` (validate · beats · backdrop-turn · assets · inspect · plan-vs-render always on; style gates report only, `TASTE=1` blocks: `engine-doctrine/TASTE.md`). Then `make probe` → `audit` → `beats` → `ledger` → **`make judge`** (the gate that SEES, required post-render, `engine-doctrine/JUDGE.md`).
+**Gates, one command:** `make author-check D=<file>` (validate · beats · backdrop-turn · assets · inspect · plan-vs-render always on; style gates report only, `TASTE=1` blocks: `engine-doctrine/TASTE.md`). Then `make probe` → `audit` → `beats` → `ledger` → **`make judge`** (the gate that sees, required post-render, `engine-doctrine/JUDGE.md`).
 
 ## The full command list (stages 2, 5, 7, 8)  `[ref: make list]`
 
-`make list` prints every target grouped by phase, read off the Makefile: never stale (narrative index: `engine-doctrine/CRAFT/README.md`). Beyond the stage table above:
+`make list` prints every target, grouped by phase, each with its own one-line help and argument syntax: never stale (narrative index: `engine-doctrine/CRAFT/README.md`). Two you'll run constantly, beyond the stage table above: `make dev D=path/to/video.json` (the iteration loop: build, draft-render, open, no gates, no audit; `BEAT=`/`JOIN=`/`FROM=`&`TO=` slices it to one part) and `make check D=path/to/video.json` (every gate, every finding, zero consequence).
 
-```bash
-make dev    D=path/to/video.json  # THE ITERATION LOOP. Build, draft-render, open. No gates, no audit.
-make dev    D=path/to/video.json BEAT=<n|name>|JOIN=<n>|FROM=<s> TO=<s>  # only that slice, not the whole film
-make probe-frame D=path/to/video.json T=<s> ID=<id>[,<id>...]  # where layer ID is at time T, and what covers it
-make check  D=path/to/video.json  # every gate, every finding, ZERO consequence (runs preflight for you)
-make screen F=<file> THEME=<t>    # design a product screen: preview + impeccable + content + readiness
-make content-check D=<f> REF=<r>  # is this film's content as rich as the reference it studied, per act
-make study REF=<url>              # the film-side twin of `make sections`, a reference to hold a film to
-```
+Single-shot: `./bin/vawe path/to/video.json` (`--draft` = fast), JSON starting `"module": "scene"`, saved as `films/scene/<topic>.json`. Read `sample.json` and an existing video first, never copy a structure wholesale.
 
-Single-shot: `./bin/vawe path/to/video.json` (`--draft` = fast), JSON starting `"module": "scene"`, saved as `films/scene/<topic>.json`. Read `sample.json` and an existing video first, never copy a structure wholesale. **On demand:** `make arsenal Q="…"` searches every effect/block (`MISTAKES=1` the mistake log, `THEME=<name>` a theme's look, `AT=block.<family>` one block's dials with their ranges, defaults and notes); `make demo Q="…"` writes a ten-second film about one thing (`engine-doctrine/CRAFT/SPECIMEN.md`). Making something good: `engine-doctrine/TASTE.md`. Search before you build anything by hand: see "Changing the ENGINE, not a film?" below, the same rule covers a film device and an engine primitive.
+**On demand:** `make arsenal Q="…"` searches every effect/block (`MISTAKES=1` the mistake log, `THEME=<name>` a theme's look, `AT=block.<family>` one block's dials with their ranges, defaults and notes); `make demo Q="…"` writes a ten-second film about one thing (`engine-doctrine/CRAFT/SPECIMEN.md`). Making something good: `engine-doctrine/TASTE.md`. Search before building anything by hand: see "Changing the ENGINE, not a film?" below, the same rule covers a film device and an engine primitive.
 
 ## Direction: deciders write, critics report (stage 6)  `[ref: make critics]`
 
-**A CRITIC only reports; a DECIDER writes into the film and owns ONE exclusive write scope**, so two deciders can't collide. Full roster, order, write scopes: `engine-doctrine/CRAFT/SUBAGENTS.md`. `make critics D=<file> DECIDERS=1` prints the six deciders as briefs for that film; bare, the six standing critics. **Usually overkill** below a full authoring pass, a recreation, or anything you'll ship: one well-briefed agent beats a fan-out for anything sequential (`engine-doctrine/CRAFT/SUBAGENT-BUDGET.md`).
+**A CRITIC only reports; a DECIDER writes into the film and owns ONE exclusive write scope**, so two deciders can't collide. Full roster, order, write scopes: `engine-doctrine/CRAFT/SUBAGENTS.md`.
+
+`make critics D=<file> DECIDERS=1` prints the six deciders as briefs for that film; bare, the six standing critics. Usually overkill below a full authoring pass, a recreation, or anything you'll ship: one well-briefed agent beats a fan-out for anything sequential (`engine-doctrine/CRAFT/SUBAGENT-BUDGET.md`).
 
 ## Stage 1, brief: ask before you build  `[gated: quality/gates/author-check.mjs#no-storyboard]`
 
-**Do not open a JSON file first.** Nothing renders until the plan is LOCKED and the user signs off,
-presented as `make studio D=<file>.json`, `plan` state (real hand-written fragments, live, never grey
-boxes), and you wait. Claude Code loads `vawe-video-planning`; others read
-`engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md`.
+Nothing renders until the plan is locked and the user signs off, shown as `make studio D=<file>.json` in `plan` state (real hand-written fragments, live, never grey boxes). Claude Code loads `vawe-video-planning`; others read `engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md`.
 
-Five lines carry the whole request, any may be missing (SUBJECT, DATA, PAYOFF, AUDIENCE, FEELING);
-everything else is yours to decide. Plus two you fill yourself, unasked: `SPECTACLE` (the ONE
-exaggerated moment, named) and `NOT` (what this film explicitly does not do, derived from recent films
-by `make preflight D=<file>` rather than memory; waivable per-beat with `_why`).
+Five lines carry the whole request, any may be missing: SUBJECT, DATA, PAYOFF, AUDIENCE, FEELING; everything else is yours to decide. Fill two more yourself, unasked: `SPECTACLE` (the one exaggerated moment, named) and `NOT` (what this film explicitly does not do, derived from recent films by `make preflight D=<file>` rather than memory; waivable per-beat with `_why`).
 
 **Never hand-author from a blank JSON**: `make ideate` writes the film's prompt first (`engine-doctrine/CRAFT/IDEATE.md`), then `make scaffold` writes the storyboard sidecar and scene shell; compose motion from `recipes/` or `make arsenal Q="…"`.
 
@@ -101,43 +88,26 @@ by `make preflight D=<file>` rather than memory; waivable per-beat with `_why`).
 - **HTML first**, no CSS `animation`/`transition`/`opacity`/`filter`: use `parts` for a seeked entrance. [`HTML-FRAGMENTS.md`](engine-doctrine/CRAFT/HTML-FRAGMENTS.md).
 - **Name the effect before you build it**, don't approximate by eye. Claude Code loads `vawe-name-the-effect`; others read that skill under `skills/`.
 - **Show, don't only tell.** [`SHOW-DONT-TELL.md`](engine-doctrine/CRAFT/SHOW-DONT-TELL.md). **Empty space is a decision.** [`LAYOUT.md`](engine-doctrine/CRAFT/LAYOUT.md).
-- **Real assets first, emoji last**: `make capture`/`make assets` (never a bare `curl`); never embed copyrighted material. [`IMAGERY.md`](engine-doctrine/CRAFT/IMAGERY.md). **Enforced, not just stated**: `make storyboard-check` blocks a beat that names a screen or a photo with no real source, the same precondition `/vawe-approve` already runs.
+- **Real assets first, emoji last**: `make capture`/`make assets` (never a bare `curl`); never embed copyrighted material. [`IMAGERY.md`](engine-doctrine/CRAFT/IMAGERY.md). `make storyboard-check` blocks a beat that names a screen or a photo with no real source, the same precondition `/vawe-approve` already runs.
 - **Content is measured against the reference, per act**, never a fixed bar. [`CONTENT.md`](engine-doctrine/CRAFT/CONTENT.md).
-- **Launch videos:** crawl EVERY page, real logo size, pair entrances with exits directionally. [`HTML-FRAGMENTS.md`](engine-doctrine/CRAFT/HTML-FRAGMENTS.md).
+- **Launch videos:** crawl every page, real logo size, pair entrances with exits directionally. [`HTML-FRAGMENTS.md`](engine-doctrine/CRAFT/HTML-FRAGMENTS.md).
 
 ## Stage 7, render: waivers  `[gated: quality/gates/author-check.mjs]`
 
-`authoring.allow` + `_why` is the one mechanism. A waiver with no `_why` blocks:
+`authoring.allow` + `_why` is the one waiver mechanism: a rule broken for cause, or a chosen absence a static rule can't otherwise see (no continuous object, a still frame, no transition, an ending with nothing after it). A waiver with no `_why` blocks:
 
 ```json
 "authoring": { "allow": ["dead-air"], "_why": { "dead-air": "the held frame IS the beat" } }
 ```
 
-One field covers two different cases, never two mechanisms: a rule broken for cause, and a chosen
-absence a static rule cannot otherwise see (no continuous object, a still frame, no transition, an
-ending with nothing after it). Neither is an apology; `quality/gates/audio-check.mjs` already draws the
-same split for sound, where chosen quiet and an audio block nobody considered are not the same finding.
-The only door out of a fired rule is a reason written in the scene, whether that reason is "I broke
-this on purpose" or "I chose this absence on purpose."
-
-Measured across the library, half of real waiver use is the second case, an author declaring "I chose
-this", not "I broke this": `no-continuous-object`, `dead-air`, `plain-slideshow`, `static-bg`,
-`no-transition`, `ends-on-nothing` are the codes this shows up on most.
+How this differs from an automatic safeguard adaptation, and which codes it covers most: `engine-doctrine/SAFEGUARDS.md`.
 
 ## Changing the ENGINE, not a film?  `[live: harness/live/craft-live.mjs]`
 
 **Search before you build.** Run `make arsenal Q="…"` before hand-building anything, a scene device (a CSS caret, a progress bar) or a new engine primitive (a resample fx, a shader, a kinetic preset): the closest match already in the registry is cheaper than rebuilding it. `harness/live/arsenal-nudge.mjs` nudges this at save.
 
-**EVERY EFFECT COMPOSES; NONE IS A SPECIAL CASE.** A new look is a combination of things the engine
-already owns (a unit, a clock, an order, a property, an exit), never a private code path that owns its
-own timing, its own colour ramp or its own reveal. The test before writing: name which existing
-mechanism each half of the effect uses; if one half has no owner yet, add the owner, not the effect.
+**EVERY EFFECT COMPOSES; NONE IS A SPECIAL CASE.** A new look is a combination of things the engine already owns (a unit, a clock, an order, a property, an exit), never a private code path that owns its own timing, its own colour ramp or its own reveal. The test before writing: name which existing mechanism each half of the effect uses. If one half has no owner yet, add the owner, not the effect. Cost of skipping this, worked example: `engine-doctrine/RESEARCH/PRIVATE-PATHS-AUDIT.md`.
 
-Measured cost of ignoring this: `typing` was built as its own path, so it could use none of the 32
-kinetic presets, no transform, no filter and no exit, and its per-word colour ramp was a private copy of
-`colorWave`. The gaps that produced (per-character colour, a scattered exit) read as missing features
-and were one missing composition (`engine-doctrine/CRAFT/KEYED-MOTION.md`, `core/type/type.js` stagger
-orders, `core/tracks/units.js` exits).
+Five rules govern any change to `core/`, `internal/`, a gate, or the capture path, plus what this engine took from the agent harness: `engine-doctrine/CRAFT/ENGINE-CHANGES.md`. Two are decidable from a path and the hook says them at the keystroke; elsewhere, read the doc by hand.
 
-Five rules govern any change to `core/`, `internal/`, a gate, or the capture path, plus what this engine took from the agent harness: `engine-doctrine/CRAFT/ENGINE-CHANGES.md`. Two are decidable from a path and the hook says them at the keystroke; elsewhere, read the doc by hand. Touched motion, backgrounds, type or layout? Ship a before/after: `make evals-compare` (`engine-doctrine/EVALS.md`). Editing `scene.html`? Claude Code reads `vawe-scene-authoring` first, others read that skill under `skills/`; system map `engine-doctrine/CODEMAPS/ARCHITECTURE.md`; run `make probe` after.
-
+Touched motion, backgrounds, type or layout? Ship a before/after: `make evals-compare` (`engine-doctrine/EVALS.md`). Editing `scene.html`? Claude Code reads `vawe-scene-authoring` first, others read that skill under `skills/`; system map `engine-doctrine/CODEMAPS/ARCHITECTURE.md`; run `make probe` after.

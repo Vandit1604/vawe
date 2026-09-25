@@ -1,6 +1,6 @@
 ---
 name: vawe-name-the-effect
-description: "A reference image or clip shows a look that cannot immediately be constructed. Finds out what the effect is CALLED, reads its real recipe, builds it once, then puts it in the arsenal so the next author inherits the name instead of the guess. Use whenever a picture arrives with 'make this' and the first instinct is to approximate it by eye."
+description: "Identifies, names, and builds an effect from a reference image or clip that cannot be constructed by eye, then adds it to the arsenal so the next author inherits the name instead of a guess. Use whenever a reference arrives with 'make this' and the instinct is to approximate it."
 stage: design
 ---
 

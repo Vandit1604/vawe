@@ -1,6 +1,6 @@
 ---
 name: vawe-audit
-description: "Audit a FINISHED, rendered film against everything this repo checks, in one fixed order, and hand the owner a single composed verdict with evidence. Use after `make ship` (or any time someone asks 'does this film pass', 'is this ready', 'what does this film still need'). Routes make check/audit/audio-check/beats/reveal/judge/ledger; adds no gate logic of its own. Ends by presenting frames to the owner, never by recording a PASS."
+description: "Audits a finished, rendered film against every repo check in one fixed order and hands the owner one composed verdict with evidence. Use after `make ship`, or when asked whether a film passes, is ready, or still needs work. Routes make check/audit/audio-check/beats/reveal/judge/ledger; never records a PASS itself."
 stage: judge
 ---
 
