@@ -100,3 +100,59 @@ Every path then runs the same ladder: `make author-check` â†’ `beats`/`reveal` â
 - **No em-dashes in on-screen copy.** The validator rejects them; use a comma, a period, or a middot.
 - **Don't invent UI.** A screen, logo, or photo the plan names must trace to a real capture
   (`make capture`/`make assets`); a fragment with no real source is blocked before it ships.
+
+## What you are NOT deciding
+
+Palette, typography, layout, motion, camera, cuts, backdrop, sound, pacing, structure. All of it
+belongs to whoever composes the scene, and all of it is defensible from the brief. A film that gets
+these wrong got a thin brief, not a wrong colour.
+
+Two lines are the agent's to fill in, not yours, and they are written into the plan before authoring:
+
+| Line | What it does |
+|---|---|
+| `SPECTACLE` | the ONE exaggerated moment, named: which beat, which layer, which device |
+| `NOT` | what this film explicitly does not do (no narration, no stock photos, no gradient hero) |
+
+`SPECTACLE` is two-sided on purpose. Naming the loud moment is also a promise that every other beat
+stays restrained. A film where four beats shout has no loud moment, it has a volume setting.
+
+`NOT` is cheaper than it looks. Most generic output is not a wrong decision, it is an un-excluded
+default: nothing said "no gradient hero", so a gradient hero was free.
+
+## The loop
+
+Once the brief is agreed, the work is a loop, not a single shot.
+
+```bash
+make dev  D=films/scene/<film>.json    # build, draft render, open. No gates, no waiting.
+make check D=films/scene/<film>.json   # every gate, every finding, ZERO consequence
+make ship  D=films/scene/<film>.json   # the ladder with its teeth in
+```
+
+`make dev` is where nearly all the time goes. `make ship` is the one command that says a film is done:
+it runs the author checks, renders, audits the layout and inspects the transitions, in that order.
+
+<Callout>
+**Green gates do not mean the film is good.** They read structure. They cannot see murk, a weak focal
+point, or a beat that lands wrong. Read the contact sheets: `make beats` for what each beat holds,
+`make reveal` for how each one enters and exits, `make judge` for a scored sheet and a rubric.
+</Callout>
+
+## What to say when it is wrong
+
+Be concrete about the SYMPTOM and leave the cause alone. "Beat three reads as a slide, nothing moves
+but the text" is worth ten times "make it more dynamic". The agent can find the cause; it cannot guess
+what you saw.
+
+If you want a different direction rather than a fix, go back to `FEELING` and `NOT`. Those two lines
+move a film further than any note about a specific layer.
+
+## Where to go next
+
+<Cards>
+  <Card title="Quickstart" href="/docs/quickstart" description="Install, render the sample, and write your first scene by hand." />
+  <Card title="The scene file" href="/docs/the-scene" description="What the agent is actually writing, when you want to read it." />
+  <Card title="Quality gates" href="/docs/quality-gates" description="What `make ship` checks, and which findings block." />
+  <Card title="Brand reflection" href="/docs/brand-reflection" description="Pointing the agent at a real website and keeping its taste." />
+</Cards>
