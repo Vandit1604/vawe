@@ -391,7 +391,16 @@ export function createRaymarchLayer(w = 1080, h = 1080) {
 
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a raymarch" when someone writes it somewhere else. core/registry.js.
-export const RAYMARCH_REGISTRY = defineRegistry('raymarch', Object.fromEntries(RAYMARCH_FX.map((n) => [n, n])), { slot: 'raymarch', blurbs: RAYMARCH_SURFACES,
+const RAYMARCH_AKA = {
+  metaballs: ['glossy candy blob', 'merging spheres', 'soft blob of orbiting spheres'],
+  mandelbulb: ['3D fractal', 'a mandelbulb shape', 'breathing fractal'],
+  chromeGlass: ['mirror chrome shapes', 'reflective chrome torus', 'shiny metal object'],
+  caustics: ['water surface with light bands', 'ocean caustics', 'light through water'],
+  holoFoil: ['holographic foil', 'iridescent foil disc', 'rainbow foil sheen'],
+  glassRefract: ['glass block', 'refractive crystal', 'a diamond or ice cube look'],
+};
+
+export const RAYMARCH_REGISTRY = defineRegistry('raymarch', Object.fromEntries(RAYMARCH_FX.map((n) => [n, n])), { slot: 'raymarch', blurbs: RAYMARCH_SURFACES, aka: RAYMARCH_AKA,
   catalog: {
     title: 'Raymarched surfaces',
     tag: 'layer',
