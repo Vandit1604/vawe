@@ -66,7 +66,7 @@ const SB = ({ object = true, threads = false, beatObject = true, duration = '5s'
   '',
   `## Beat 2: Structure${t2 ? ` (${t2})` : ''}`,
   '- type: payoff_withheld',
-  ...(beatObject ? ['- object: the pill flattens into a row, then unfolds into a note card'] : []),
+  ...(beatObject ? ['- object: the pill flattens into a row, then unfolds into a finished note'] : []),
   // two named changes by default, so the long second beat is a build and not a hold
   // endsOnClaim: a final becomes that names no change at all, while `onscreen:` still puts copy up.
   // The closing sentence is the whole last act. Worded clear of animation vocabulary so this knob
@@ -75,7 +75,7 @@ const SB = ({ object = true, threads = false, beatObject = true, duration = '5s'
     : held ? '- becomes: the capsule becomes a note card'
       : '- becomes: the capsule becomes a flat row, then unfolds into a note card'] : []),
   '- onscreen: "Weekly sync"',
-  '- mechanism: match cut, height track on the card, typed bullets',
+  '- mechanism: match cut, height track on the row, typed bullets',
   '- why: the recording becomes the thing you keep',
   '',
 ].join('\n');
@@ -607,8 +607,11 @@ const CASES = [
     match: /is missing `becomes:`/, scene: SB({ becomes: false }) },
   { gate: 'storyboard', name: 'becomes-is-a-preset · the change written as the animation', expect: 'fail', ext: 'md',
     match: /becomes-is-a-preset, /, outputOnly: true, scene: SB({ presetBecomes: true }) },
-  { gate: 'storyboard', name: 'held-state-too-long · a 3s+ beat carrying one change', expect: 'fail', ext: 'md',
-    match: /held-state-too-long, /, outputOnly: true, scene: SB({ held: true }) },
+  // classifyType() (harness/lib/genre-pacing.mjs) reads the FILENAME for a genre band, and the
+  // smallest band on record (shorts, 4s) needs "explainer" in the name; the case name becomes the
+  // fixture filename (gate-mutation's own slug), so the genre word has to live right here.
+  { gate: 'storyboard', name: 'held-state-too-long · a 4s+ beat in an explainer carrying one change', expect: 'fail', ext: 'md',
+    match: /held one state for/, outputOnly: true, scene: SB({ held: true, t2: '1.6s-6.2s', duration: '6.2s' }) },
   { gate: 'storyboard', name: 'stub-why · a why that restates the beat category', expect: 'fail', ext: 'md',
     match: /stub-why, /, outputOnly: true, scene: SB({ stubWhy: true }) },
 
@@ -630,7 +633,7 @@ const CASES = [
   { gate: 'storyboard', name: 'timeline-hole · the beats run out before the film does', expect: 'fail', ext: 'md',
     match: /of the film is unplanned/, scene: SB({ t2: '1.6s-3.2s' }) },
   { gate: 'storyboard', name: 'partial-timeline · only some beats declare a range', expect: 'fail', ext: 'md',
-    match: /partial-timeline, /, outputOnly: true, scene: SB({ t2: '' }) },
+    match: /partial-timeline: /, outputOnly: true, scene: SB({ t2: '' }) },
   // ...and the mirror: a storyboard with NO ranges at all is the world before this rule existed, and
   // must stay silent. A gate that retro-fails every plan written before it is a gate nobody keeps.
   { gate: 'storyboard', name: 'a storyboard that declares no times at all is not judged on the clock', expect: 'pass', ext: 'md',
