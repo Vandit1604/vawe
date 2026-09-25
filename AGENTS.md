@@ -110,6 +110,8 @@ How this differs from an automatic safeguard adaptation, and which codes it cove
 
 **EVERY EFFECT COMPOSES; NONE IS A SPECIAL CASE.** A new look is a combination of things the engine already owns (a unit, a clock, an order, a property, an exit), never a private code path that owns its own timing, its own colour ramp or its own reveal. The test before writing: name which existing mechanism each half of the effect uses. If one half has no owner yet, add the owner, not the effect. Cost of skipping this, worked example: `engine-doctrine/RESEARCH/PRIVATE-PATHS-AUDIT.md`.
 
+**Every primitive ships with its words and its action.** The authoring model was never trained on motion, so it reaches a primitive only through the plain words a person says for it and a plain statement of what those words do on screen. On the `defineRegistry` call that owns it: at least 2 `aka` phrases, and a `blurb` with its real default number. `make word-action` enforces it at pre-push; the gaps still open sit on a ratchet that only goes down (`quality/baselines/word-action-ratchet.json`), and the full listing is `engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md`.
+
 Five rules govern any change to `core/`, `internal/`, a gate, or the capture path, plus what this engine took from the agent harness: `engine-doctrine/CRAFT/ENGINE-CHANGES.md`. Two are decidable from a path and the hook says them at the keystroke; elsewhere, read the doc by hand.
 
 Touched motion, backgrounds, type or layout? Ship a before/after: `make evals-compare` (`engine-doctrine/EVALS.md`). Editing `scene.html`? Claude Code reads `vawe-scene-authoring` first, others read that skill under `skills/`; system map `engine-doctrine/CODEMAPS/ARCHITECTURE.md`; run `make probe` after.
