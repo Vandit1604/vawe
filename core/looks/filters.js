@@ -85,7 +85,23 @@ export const FILTER_BLURBS = {
 // added to the table above is searchable the moment it has a blurb.
 // Same query as the `chroma` preset, same absence: the effect's textbook name is "chromatic aberration"
 // and the blurb calls it fringing, which is the right word for the sentence and the wrong one for a search.
-const FILTER_AKA = { chromaSplit: ['chromatic aberration', 'rgb split', 'colour fringing'] };
+const FILTER_AKA = {
+  chromaSplit: ['chromatic aberration', 'rgb split', 'colour fringing'],
+  sepia: ['sepia tone', 'old photo tint', 'warm and dated'],
+  duotone: ['two color grade', 'two tone', 'poster press look'],
+  tritone: ['three color grade', 'three tone', 'risograph grade'],
+  gradientMap: ['heat ramp', 'false color grade', 'luminance recolor'],
+  thermalBlur: ['thermal blur type', 'heat camera type', 'glowing type ramp'],
+  posterize: ['banding', 'color quantize', 'reduce color levels'],
+  chromaGlow: ['neon text glow', 'soft glyph glow', 'chromatic glow'],
+  displace: ['turbulence warp', 'pixel push', 'noise displacement'],
+  bloom: ['glow highlights', 'luminance bloom', 'light bleed'],
+  convolve: ['kernel filter', 'emboss or edge', 'sharpen kernel'],
+  morph: ['dilate or erode', 'fatten or thin', 'grow shrink pixels'],
+  relief: ['lit bump map', 'embossed light', 'surface lighting'],
+  vignette: ['darkened corners', 'lens falloff', 'edge darkening'],
+  goo: ['metaball merge', 'gooey blend', 'liquid shape fuse'],
+};
 export const FILTER_REGISTRY = defineRegistry('filter', FILTER_PRESETS, { slot: 'filter', blurbs: FILTER_BLURBS, aka: FILTER_AKA,
   catalog: {
     title: 'Filter presets',
