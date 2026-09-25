@@ -95,8 +95,20 @@ export const RESAMPLE_BLURBS = {
 // was rejected in two voices depending on which path reached it first, and neither could say that the
 // name is really a paint fx or an ambient shader. RESAMPLE_FX stays the array it was: its ORDER is the
 // `u_fx` index the fragment shader switches on, so it is a wire format, not just a name list.
+const RESAMPLE_AKA = {
+  zoomBlur: ['radial blur', 'zoom impact blur', 'speed zoom'],
+  spinBlur: ['rotation blur', 'spinning smear', 'pivot blur'],
+  fisheye: ['lens distortion', 'barrel distortion', 'pincushion distortion'],
+  bitCrush: ['color banding', 'reduce bit depth', 'palette degrade'],
+  macroblock: ['video glitch blocks', 'codec artefact', 'compression glitch'],
+  dissolve: ['burn away', 'erode into nothing', 'ember dissolve'],
+  refract: ['glass distortion', 'liquid glass bend', 'refraction warp'],
+  chromaShift: ['radial color split', 'rgb separation from centre', 'chromatic shift'],
+  directionalBlur: ['straight line smear', 'motion blur at an angle', 'linear blur'],
+};
+
 export const RESAMPLE_REGISTRY = defineRegistry('resample fx', Object.fromEntries(RESAMPLE_FX.map((n) => [n, n])),
-  { slot: 'resample.fx', blurbs: RESAMPLE_BLURBS,
+  { slot: 'resample.fx', blurbs: RESAMPLE_BLURBS, aka: RESAMPLE_AKA,
     catalog: {
       title: 'Layer-as-texture (resample)',
       tag: 'per-frame',
