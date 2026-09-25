@@ -8,3 +8,4 @@ export const glsl = `                              /* pixelate, chunky mosaic fi
     float shade = mix(0.32, 1.0, hash(cell + 3.1));
     c = vec4(vec3(shade), cover * bell * 0.82);`;
 export const blurb = 'a chunky mosaic that fills the frame and then clears. Reads as resolution being lost and regained.';
+export const aka = ['pixelate', 'mosaic transition', 'pixel mosaic'];
