@@ -553,21 +553,21 @@ const CASES = [
   { gate: 'directionfloor', name: 'a film held by match cuts is NOT a slideshow', expect: 'pass',
     notMatch: /no-continuous-object/,
     scene: scene([{ type: 'rect', id: 'dot', x: 900, y: 480, w: 120, h: 120, radius: 60, bg: '#c2f23b',
-                    start: 0, duration: 2.4, anim: 'none', out: 'none', exitDur: 0 },
+                    start: 0, duration: 2.4, anim: 'none', out: 'none', exitDur: 0, becomes: 'card' },
                   { type: 'rect', id: 'card', x: 700, y: 340, w: 520, h: 400, radius: 18, bg: '#1b1e26',
                     start: 2.4, duration: 2.6, anim: 'none', exitDur: 0 }],
       { duration: 5, sceneUnits: false, bg: [{ preset: 'gradient', from: 0, to: 5 }],
-        cuts: [{ t: 2.4, style: 'none' }], matches: [{ at: 'cut@0', from: 'dot', to: 'card' }] }) },
-  // ...and a handover declared somewhere the film does not turn buys nothing. Without this the fix
-  // would be decoration: write `matches` anywhere and the slideshow goes green.
+        cuts: [{ t: 2.4, style: 'none' }] }) },
+  // ...and a handover whose two halves do not meet at the cut buys nothing. Without this the fix
+  // would be decoration: declare `becomes` anywhere near the film and the slideshow goes green.
   { gate: 'directionfloor', name: 'a handover away from the joint is not a spine', expect: 'fail',
     match: /no-continuous-object/,
     scene: scene([{ type: 'rect', id: 'dot', x: 900, y: 480, w: 120, h: 120, radius: 60, bg: '#c2f23b',
-                    start: 0, duration: 2.4, anim: 'none', out: 'none', exitDur: 0 },
+                    start: 0, duration: 0.8, anim: 'none', out: 'none', exitDur: 0, becomes: 'card' },
                   { type: 'rect', id: 'card', x: 700, y: 340, w: 520, h: 400, radius: 18, bg: '#1b1e26',
                     start: 2.4, duration: 2.6, anim: 'none', exitDur: 0 }],
       { duration: 5, sceneUnits: false, bg: [{ preset: 'gradient', from: 0, to: 5 }],
-        cuts: [{ t: 2.4, style: 'none' }], matches: [{ at: 0.8, from: 'dot', to: 'card' }] }) },
+        cuts: [{ t: 2.4, style: 'none' }] }) },
 
   // ---- motion-director · linear-motion. WARN tier both ways, so both cases read the OUTPUT: the
   // exit code cannot see a warning, and the false positive this rule shipped for months was invisible
@@ -826,7 +826,7 @@ const srcCases = [
     mutate: (s) => s.split('\n').filter((l) => !l.includes("font-family: 'Manrope'")).join('\n'),
     cmd: ['node', ['quality/gates/font-audit.mjs', 'scene', 'films/scene/tpot-launch.json']], match: /FALLBACK|not rendering/ },
   { name: 'clipped-text · riseClip mask too short for descenders', file: 'core/type/type.js',
-    mutate: (s) => s.replace("        w.style.paddingBottom = '0.3em'; w.style.marginBottom = '-0.3em';\n", ''),
+    mutate: (s) => s.replace('export const INK_PAD_EM = 0.3;', 'export const INK_PAD_EM = 0;'),
     cmd: ['node', ['quality/audit.mjs', 'films/scene/tpot-launch.json']], match: /clipped-text/ },
   { name: 'snap · opacity easing reverted to linear', file: 'core/timeline/clips.js',
     mutate: (s) => s.replace('  easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);',
@@ -847,19 +847,19 @@ const srcCases = [
     after: () => snapRestore('quality/baselines/snap/scenes/showcase-count.json', 'quality/baselines/snap/scenes/.font-state.json') },
   // The other half of the same blindness: the background is painted into <canvas>, which no DOM
   // signature can see, so any change of bg preset, colour, speed or direction diffed as nothing.
-  // films/scene/sample.json runs the `aurora` preset; brightening it must now register.
-  { name: 'snap · the background preset changed and the canvas moved', file: 'core/backgrounds/index.js',
-    // The preset is READ OFF THE SNAPSHOTTED SCENE, never named here. This case pinned
-    // `intensity: 0.46` inside `case 'aurora'` and sample.json's backdrop later became `soft`, so the
-    // mutation kept applying (to a preset the snapshot does not paint) and snap answered IDENTICAL
-    // while the summary read it as "the gate stayed silent after its guard was removed". A stale anchor
-    // that still MATCHES is the worst kind: the `mutated === orig` guard cannot see it, so the case
-    // accused a healthy gate. Deriving the subject makes the fixture follow the scene.
+  // films/scene/sample.json runs whatever preset it runs; brightening it must now register.
+  { name: 'snap · the background preset changed and the canvas moved', file: 'core/backgrounds/presets.js',
+    // The preset is READ OFF THE SNAPSHOTTED SCENE, never named here. This case pinned a `case 'X':`
+    // arm in core/backgrounds/index.js, which held a switch statement when this was written; the
+    // presets are now a declarative array of `{ name, blurb, build }` entries in presets.js instead
+    // (index.js dispatches off `name`, it no longer branches per preset itself), so `case 'X':` cannot
+    // exist anywhere in the file this pins and every anchor built on it was unprovable no matter which
+    // preset sample.json ran. Re-anchored on the array entry's own shape.
     mutate: (s) => {
       const preset = JSON.parse(fs.readFileSync(path.join(repoRoot, 'films/scene/sample.json'), 'utf8')).bg[0].preset;
-      const at = s.indexOf(`case '${preset}':`);
-      if (at < 0) return s;                                   // no such case -> reported STALE, correctly
-      const end = s.indexOf("\n    case '", at + 1);
+      const at = s.indexOf(`name: '${preset}',`);
+      if (at < 0) return s;                                   // no such entry -> reported STALE, correctly
+      const end = s.indexOf('\n  {\n    name:', at + 1);
       const body = s.slice(at, end < 0 ? s.length : end);
       // whichever knob this preset's first fx exposes; the point is a visibly different canvas, not one
       // particular dial, so the fixture does not care which preset it lands on.
@@ -868,9 +868,27 @@ const srcCases = [
     cmd: ['node', ['quality/gates/scene-snap.mjs', 'scene']], match: /__bg\.canvas/, outputOnly: true,
     before: () => snapBaseline(['quality/gates/scene-snap.mjs', 'scene', '--save'], 'quality/baselines/snap/scene.json'),
     after: () => snapRestore('quality/baselines/snap/scene.json') },
+  // A private fixture, not a real film: tpot-launch.json's own captured components each fail this for
+  // a DIFFERENT, unrelated reason now (quality/audit.mjs `maskedByDesign`, which reads a real
+  // position:absolute badge/icon as deliberate cropping and waives it), so the case proved nothing no
+  // matter which one it read. This fixture owns a root with a real margin and nothing absolute, so
+  // only the rule under test can speak.
   { name: 'clipped-component · captured root margin re-offsets the content', file: 'core/layers/component.js',
     mutate: (s) => s.replace("  if (rootEl) rootEl.style.margin = '0';", ''),
-    cmd: ['node', ['quality/audit.mjs', 'films/scene/tpot-launch.json']], match: /clipped-component/ },
+    cmd: ['node', ['quality/audit.mjs', 'films/scene/_cc-fixture.json']], match: /clipped-component/,
+    before: () => {
+      fs.mkdirSync(path.join(repoRoot, 'quality/fixtures/components'), { recursive: true });
+      fs.writeFileSync(path.join(repoRoot, 'quality/fixtures/components/cc-fixture.json'), JSON.stringify({
+        url: 'fixture', selector: '.x', w: 400, h: 120, fonts: [],
+        html: '<div style="margin-top:24px;width:400px;height:120px;box-sizing:border-box;background:#3a3a3a;color:#fff">clip me</div>' }));
+      fs.writeFileSync(path.join(repoRoot, 'films/scene/_cc-fixture.json'), scene([
+        { type: 'component', src: '/quality/fixtures/components/cc-fixture.json',
+          x: 200, y: 200, w: 400, start: 0, duration: 2, anim: 'none' }]));
+    },
+    after: () => {
+      fs.rmSync(path.join(repoRoot, 'quality/fixtures/components/cc-fixture.json'), { force: true });
+      fs.rmSync(path.join(repoRoot, 'films/scene/_cc-fixture.json'), { force: true });
+    } },
   // Factories were extracted from blocks/index.mjs into family siblings; re-anchored on the sibling that
   // now holds each one (loadingBar→dev.mjs, browserFrame + the swatch fill→ui.mjs).
   { name: 'blocks-audit · a factory ships an invented statistic', file: 'blocks/dev.mjs',
@@ -881,16 +899,17 @@ const srcCases = [
   // unproved the rule. Every shipped block is token-driven now and blocks/ holds NO literal hex pair
   // for the contrast rule to judge, so re-anchoring on another block would only queue up the next
   // de-hardcoding to kill this again: there is no way to pin a literal in a library whose whole
-  // direction is away from literals. So the fixture BRINGS its own unreadable pair and the anchor is a
-  // SHAPE (the file's first `export function`) which cannot go stale while the file holds blocks.
-  // (A fixture FILE in blocks/ was tried first and is the wrong answer: index.mjs holds every
-  // blocks/*.mjs to a CATEGORY + schema-table contract, correctly, so a fixture file has to satisfy a
-  // growing contract that has nothing to do with contrast.)
+  // direction is away from literals. So the fixture BRINGS its own unreadable pair.
+  // It used to bring it as a NEW exported function (`_mutContrast`), and that stopped working once
+  // blocks/index.mjs started requiring every export to have a blocks/catalog.mjs row (a factory with
+  // no row is now a hard error, before blocks-audit's own contrast pass ever runs). Injecting the
+  // return as the FIRST STATEMENT of an EXISTING export keeps the file's export surface untouched
+  // (still satisfies the catalog) while still being a shape that cannot go stale as long as the file
+  // holds at least one block.
   { name: 'blocks-audit · unreadable text on a hardcoded fill', file: 'blocks/ui.mjs',
-    mutate: (s) => s.replace(/export function (\w+)\s*\(/,
-      "export function _mutContrast() {\n"
-      + "  return [{ type: 'group', bg: '#F6A417', children: [{ type: 'text', color: '#ffffff' }] }];\n}\n"
-      + 'export function $1('),   // white on amber: 2.05:1
+    mutate: (s) => s.replace(/export function (\w+)\s*\(([^)]*)\)\s*\{/,
+      "export function $1($2) {\n"
+      + "  return [{ type: 'group', bg: '#F6A417', children: [{ type: 'text', color: '#ffffff' }] }];\n"),   // white on amber: 2.05:1
     cmd: ['node', ['quality/gates/blocks-audit.mjs']], match: /contrast/ },
   { name: 'blocks-audit · a factory defaults to a real brand', file: 'blocks/ui.mjs',
     mutate: (s) => s.replace("url = 'example.com'", "url = 'stripe.com'"),
@@ -907,8 +926,11 @@ const srcCases = [
     mutate: (s) => s.replace('float w = sin(p.x * 2.2 + u_time * 0.9) * 0.13 + sin(p.z * 1.7 - u_time * 0.7) * 0.11;',
                              'float w = sin(p.x * 2.2) * 0.13 + sin(p.z * 1.7) * 0.11;'),
     cmd: ['node', ['quality/gates/lib-test.mjs']], match: /distance field that depends on time/ },
+  // ROADMAP.md's "still absent" bullets became a status TABLE (each row `| **name** | **NOT BUILT** |
+  // detail |`); re-anchored on the Glitch RGB captions row, still NOT BUILT, in its current shape.
   { name: 'docs-drift · a shipped effect listed as missing', file: 'engine-doctrine/ROADMAP.md',
-    mutate: (s) => s.replace('- Still absent: **Glitch RGB captions', '- Still absent: `zoomBlur`, **Glitch RGB captions'),
+    mutate: (s) => s.replace('**NOT BUILT** | None of the 19 `CAP_STYLES`',
+                              '**NOT BUILT** | `zoomBlur`, none of the 19 `CAP_STYLES`'),
     cmd: ['node', ['quality/gates/docs-drift.mjs']], match: /DOCS DRIFT/ },
   { name: 'canvas-purity · a paint layer that does not clear off-window', file: 'core/layers/canvas.js',
     // Anchored on the clear() CALL and nothing around it. This case has now gone stale twice for the
@@ -919,7 +941,9 @@ const srcCases = [
     // impurity, whatever else shares the branch. It is one branch for all four canvas types, so this
     // covers shader/raymarch/three too.
     mutate: (s) => s.replace("{ s.clear(); return; }", "{ return; }"),
-    cmd: ['node', ['quality/gates/canvas-purity.mjs', 'scene', 'films/scene/paint-demo.json']], match: /CANVAS PURITY FAILED/ },
+    // The gate's own finding code renamed (`CANVAS PURITY FAILED` -> `canvas-order-dependent`); the
+    // mutation still applies clean, only the text this case waited for had moved.
+    cmd: ['node', ['quality/gates/canvas-purity.mjs', 'scene', 'films/scene/paint-demo.json']], match: /canvas-order-dependent/ },
   // The fixture layer sets `pulseAmp`, which ONLY core/layers/glow.js reads, and the mutation deletes
   // its DECLARATION. The gate answers from the declarations now, so deleting the read itself would
   // prove nothing about the gate. It is the statement that has to be load-bearing, and this is the
@@ -989,7 +1013,9 @@ const srcCases = [
   // hash digits, so re-baking the artifact (which changes every digit) cannot make this fixture stale.
   { name: 'glyphs-audit · a 3D typeface stale against its woff2', file: 'assets/fonts/3d/Anybody.typeface.json',
     mutate: (s) => s.replace('"sourceSha256":"', '"sourceSha256":"0'),
-    cmd: ['node', ['quality/gates/glyphs-audit.mjs']], match: /STALE/ },
+    // The gate's own finding code and prose print lowercase (`[stale]`, "renders flawlessly in the
+    // WRONG font"); the mutation fires clean, this case was just waiting for text in the wrong case.
+    cmd: ['node', ['quality/gates/glyphs-audit.mjs']], match: /\[stale\]/ },
   // ---- Tier B: the offline sim bake. Three defects, three fixtures. A sequence on disk carries no
   // evidence of its own reproducibility, so all three of these ship SILENTLY: the video renders, the
   // frames play, and what plays is not what the sim says.
@@ -1025,9 +1051,12 @@ const srcCases = [
   // is checked separately and pinned separately. A modifier the schema does not list is dispatched by
   // the engine and refused by validate's unknown-prop pass: drift that makes the two disagree about
   // what a valid scene is.
+  // The gate's own finding text moved off the word "DRIFT" for a single dropped modifier key (it now
+  // reads "is on the owned table and does not exist in the schema"); `DRIFT` still names the whole-set
+  // comparison two cases below. Re-anchored on the current sentence.
   { name: 'schema-drift · the modifier registry and the schema disagree', file: 'films/scene/schema.json',
     mutate: (s) => s.replace('"mixBlend": {', '"mixBlnd": {'),
-    cmd: ['node', ['quality/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
+    cmd: ['node', ['quality/gates/schema-drift.mjs']], match: /does not exist in the schema/ },
   { name: 'schema-drift · a blend mode the engine does not accept', file: 'films/scene/schema.json',
     // One member, not a pair on one line: `schema-drift --write` reformats this file, and the pair
     // anchor died the first time the enum was re-emitted one entry per line.
@@ -1036,8 +1065,10 @@ const srcCases = [
   // Pinned per MODIFIER, not once for the slot. The key-set check compares two sorted lists, so a
   // fixture on `mixBlend` alone proves the comparison runs and proves nothing about whether the second
   // modifier is in either list, which is exactly how a registry entry ships with no schema entry.
+  // Anchored on the modifier's own indentation, which has since reflowed (14 spaces -> 7); read the
+  // real file rather than assume the old pretty-print survived a schema regen.
   { name: 'schema-drift · the shadow modifier is missing from the schema', file: 'films/scene/schema.json',
-    mutate: (s) => s.replace('"shadow": {\n              "type": "number|object"', '"shdow": {\n              "type": "number|object"'),
+    mutate: (s) => s.replace('"shadow": {\n       "type": "number|object"', '"shdow": {\n       "type": "number|object"'),
     cmd: ['node', ['quality/gates/schema-drift.mjs']], match: /modifiers\.item DRIFT/ },
   { name: 'schema-drift · the occlude modifier is missing from the schema', file: 'films/scene/schema.json',
     mutate: (s) => s.replace('"occlude": {', '"occlde": {'),
@@ -1089,9 +1120,11 @@ const srcCases = [
     cmd: ['node', ['quality/gates/lib-test.mjs']], match: /bg opts reach the fx/ },
   // Proves the accepted-key list is DERIVED, not hand-copied: rename the property `liquid` reads and the
   // vocabulary must follow it. A hand-kept list would still advertise `scale` and this would stay green.
-  { name: 'bg opts · the accepted keys track the fx implementation', file: 'core/backgrounds/index.js',
+  { name: 'bg opts · the accepted keys track the fx implementation', file: 'core/backgrounds/fx.js',
     // Anchored on the property NAME alone, not on the default beside it: pinning the literal made this
     // fixture go stale the moment `liquid`'s speed was retuned, and a stale fixture is an unproven gate.
+    // The fx implementations live in fx.js; index.js only re-exports and derives FX_PARAMS from them,
+    // so pointing the mutation at index.js meant it patched text that file never held.
     mutate: (s) => s.replace(', sc = o.scale ??', ', sc = o.scaleX ??'),
     cmd: ['node', ['quality/gates/lib-test.mjs']], match: /bg opts vocabulary is derived from the fx implementation/ },
 
