@@ -1,6 +1,6 @@
 {
   "name": "threadcite",
-  "note": "Colours pack auto-extracted from https://threadcite.live by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Motion: punchy/editorial (site is fast, confident, live-data). Palette completed to the theme contract (core/theme-contract.js) from values already in this pack (vars.--border, --muted, --accent-soft, bg.inkBase, bg.accent) — nothing invented.",
+  "note": "Colours pack auto-extracted from https://threadcite.live by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Motion: punchy/editorial (site is fast, confident, live-data). Palette completed to the theme contract (core/theme-contract.js) from values already in this pack (vars.--border, --muted, --accent-soft, bg.inkBase, bg.accent). Nothing invented.",
   "bg": {
     "accent": "225,80,15",
     "tint": "95,94,88",
