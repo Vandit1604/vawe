@@ -45,7 +45,15 @@ import path from 'node:path';
 // captured under: it can say WHETHER something moved, never WHAT, which stays local where the full
 // baseline lives.
 
-const FONT_DIRS = ['assets/fonts', 'assets/fonts/local'];
+// `assets/fonts/local/` holds PAID, per-developer faces (Sohne, a hand-captured Tiempos): never
+// fetched by `make fonts`, never on a CI runner, never the same set from one laptop to the next. Counting
+// it here made the font-state hash unreproducible across machines by construction: two checkouts running
+// the exact same `make fonts` still disagreed, because the hash also depended on whichever paid fonts one
+// of them happened to have dropped in by hand. Only `assets/fonts/` is pinned (generators/media/fonts.mjs
+// + harness/media/fonts.lock.json, sha256 per face), so it is the only directory that can make two
+// machines agree. A scene whose theme actually needs a `local/` face is not made portable by this, it is
+// EXCLUDED instead: see quality/baselines/e2e-known-broken.json's `needsUnlockedFont` list.
+const FONT_DIRS = ['assets/fonts'];
 
 /** A BASELINE IS ONLY VALID WITHIN ONE FONT STATE. See snap-scenes.mjs's original banner for why:
  * `assets/fonts/` is gitignored, so a fresh clone, a worktree with a partial font set, or a mid-session
