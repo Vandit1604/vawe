@@ -45,7 +45,16 @@ export const RANSOM_REGISTRY = defineRegistry('ransom face', FACES, {
   // `"faces": "Caveat"`, which the engine reads as a record and renders nothing from.
   slot: 'ransom.faces (a list of {family, weight} records on a text layer)',
   // The words an author types who does not know the face by name, never printed, only searched.
-  aka: { Caveat: ['handwriting font', 'handwritten font', 'cursive font', 'sticky note'] },
+  aka: {
+    Archivo: ['bold grotesque', 'newspaper headline font', 'heavy sans'],
+    Fraunces: ['display serif', 'wobbly serif', 'old-fashioned serif'],
+    Caveat: ['handwriting font', 'handwritten font', 'cursive font', 'sticky note'],
+    'Space Grotesk': ['geometric sans', 'techy font', 'computer font'],
+    'Instrument Serif': ['elegant serif', 'magazine headline font', 'slanted serif', 'italic serif'],
+    Anybody: ['extra wide font', 'poster font', 'sci-fi font'],
+    'JetBrains Mono': ['monospace font', 'code font', 'terminal font', 'typewriter font'],
+    'Hanken Grotesk': ['rounded sans', 'friendly font', 'soft sans'],
+  },
   blurbs: {
     Archivo: 'a workhorse grotesque cut heavy and wide: the neutral, newspaper-headline shout of the set',
     Fraunces: 'a high-contrast display serif with a soft wobble, old seed-catalogue flavour, slanted here',
