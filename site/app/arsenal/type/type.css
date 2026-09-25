@@ -6,6 +6,6 @@
 
 /* The engine's own note about the catalogue, in the page head. Lived in globals.css until the
    blocks registry it was written beside was deleted; this page is its only consumer. */
-.bnote{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px;color:var(--ink-2);
-  background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:10px;padding:9px 14px}
-.bnote b{color:var(--accent)}
+.bnote{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin-top:14px;font-size:13.5px;color:var(--ink-2);
+  background:var(--raised);border-radius:var(--r-in);padding:9px 14px}
+.bnote b{color:var(--ink)}

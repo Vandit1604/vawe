@@ -46,8 +46,8 @@
   --ring:0 0 0 1px rgba(255,255,255,.06);
   --outline:0 0 0 1px oklch(1 0 0 / .1);
   --shadow-1:var(--ring);
-  --shadow-2:0 0 0 1px rgba(255,255,255,.06),0 8px 24px -8px rgba(0,0,0,.5);
-  --shadow-3:0 0 0 1px rgba(255,255,255,.08),0 16px 40px -12px rgba(0,0,0,.7);
+  --shadow-2:0 0 0 1px rgba(255,255,255,.06),0 4px 12px -6px rgba(0,0,0,.5);
+  --shadow-3:0 0 0 1px rgba(255,255,255,.08),0 8px 16px -8px rgba(0,0,0,.6);
 
   /* ---- STACKING · seven layers, and nothing outside this list ----
      Every z-index on the site is one of these. The numbers are the ones already in use; the names
@@ -276,7 +276,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   .trio .a11{flex:0 1 55%}
 }
 /* opaque for the same reason as .clip .lab: its backdrop is video */
-.trio .ar span{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;font-size:10px;color:#fff;
+.trio .ar span{position:absolute;left:8px;bottom:7px;font-family:var(--font-mono),monospace;font-size:11px;color:#fff;
   background:rgba(15,22,32,.94);backdrop-filter:blur(6px);padding:3px 7px;border-radius:6px}
 /* ===== THE FILMS ==========================================================================
    The page opens on a film, not on type. There is ONE headline and no lead paragraph: the page
@@ -759,7 +759,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .tycard figcaption{padding:16px 17px 15px;display:flex;flex-direction:column;gap:9px;flex:1}
 .tyname{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .tyname .mono{font-size:15px;font-weight:600;color:var(--ink)}
-.tykind{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tykind{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .tyblurb{margin:0;font-size:14px;line-height:1.5;color:var(--ink-2)}
 .tyask{margin:0;font-size:13px;line-height:1.5;color:var(--ink-2);font-style:italic;
   border-left:2px solid var(--accent-line);padding-left:11px}
