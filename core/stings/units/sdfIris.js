@@ -12,3 +12,4 @@ export const glsl = `                             /* sdfIris, iris wipe through 
     float rim = smoothstep(0.05, 0.0, abs(rr - front));
     c = vec4(vec3(1.0), (smoothstep(front + 0.07, front, rr)*0.95 + rim*0.5) * bell);`;
 export const blurb = 'an iris wipe through a seeded shape, so the aperture is not simply a circle. Focus, with character.';
+export const aka = ['shaped iris', 'seeded iris wipe', 'custom aperture'];
