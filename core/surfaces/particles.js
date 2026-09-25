@@ -118,10 +118,16 @@ const PARTICLE_BLURBS = {
   dust: 'a slow ambient drift that loops forever, low-alpha specks with a gentle twinkle: atmosphere behind a subject',
 };
 
+const PARTICLE_AKA = {
+  confetti: ['celebration burst', 'party confetti', 'success burst'],
+  sparks: ['a quick flash of sparks', 'impact spark burst'],
+  dust: ['floating particles', 'ambient dust motes', 'twinkling dust'],
+};
+
 // A REGISTRY, not an if-chain: an unknown name throws and names the near word, the same argument
 // glow.js makes about its own preset slot (see that file's header).
 export const PARTICLES_REGISTRY = defineRegistry('particles preset', { confetti: drawConfetti, sparks: drawSparks, dust: drawDust },
-  { slot: 'preset', blurbs: PARTICLE_BLURBS,
+  { slot: 'preset', blurbs: PARTICLE_BLURBS, aka: PARTICLE_AKA,
     catalog: {
       title: 'Particles presets',
       tag: 'particles layer',
