@@ -166,14 +166,22 @@ export const PAINT_FX_NAMES = Object.keys(PAINT_FX);
 // Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
 // can say "that is a paint fx" when someone writes it somewhere else. core/registry.js.
 const PAINT_BLURBS = {
-  matrix: 'columns of falling glyphs. Code, data streaming, a machine at work. Unmistakably a reference, so use it deliberately.',
-  starfield: 'stars drifting past as if the camera were moving through them. Depth and travel on an otherwise flat frame.',
-  aurora: 'slow curtains of coloured light. Calm, ambient, and the least busy field here.',
-  meteor: 'streaks crossing the frame on a diagonal. Motion and event on a background that would otherwise be still.',
-  waves: 'rolling bands, a moving surface. Rhythm underneath content without competing for the eye.',
+  matrix: 'columns of falling glyphs, 20px cells with a 14-cell trail. Code, data streaming, a machine at work. Unmistakably a reference, so use it deliberately.',
+  starfield: 'stars drifting past as if the camera were moving through them, 220 stars by default. Depth and travel on an otherwise flat frame.',
+  aurora: 'slow curtains of coloured light, 5 blobs blended additively at 0.5 opacity. Calm, ambient, and the least busy field here.',
+  meteor: 'streaks crossing the frame on a diagonal, 14 meteors on a 28deg angle. Motion and event on a background that would otherwise be still.',
+  waves: 'rolling bands, a moving surface, 26 lines with a 26px amplitude. Rhythm underneath content without competing for the eye.',
 };
 
-export const PAINT_REGISTRY = defineRegistry('paint fx', PAINT_FX, { slot: 'paint', blurbs: PAINT_BLURBS,
+const PAINT_AKA = {
+  matrix: ['matrix rain', 'falling code', 'digital rain'],
+  starfield: ['stars', 'flying through space', 'warp speed'],
+  aurora: ['northern lights', 'aurora borealis', 'color blobs'],
+  meteor: ['shooting stars', 'streaks', 'comet trails'],
+  waves: ['wave field', 'rolling lines', 'contour lines'],
+};
+
+export const PAINT_REGISTRY = defineRegistry('paint fx', PAINT_FX, { slot: 'paint', blurbs: PAINT_BLURBS, aka: PAINT_AKA,
   catalog: {
     title: 'Generative paint FX (per-frame)',
     tag: 'per-frame',
