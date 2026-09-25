@@ -1,0 +1,1242 @@
+{
+  "module": "scene",
+  "theme": "vawe",
+  "aspect": "16:9",
+  "duration": 19.572,
+  "sceneUnits": true,
+  "tempo": 0.85,
+  "authoring": {
+    "allow": [
+      "static-bg",
+      "no-transition",
+      "sparse-beats",
+      "no-bg-motion",
+      "contrast"
+    ],
+    "_why": {
+      "static-bg": "the owner's own instruction for this pass: bg windows must match each frame's own plain kit-ground (cobalt for the terminal, white-first elsewhere), no dotmatrix or moving texture; the assemble step had wrongly rotated the ground through moving presets and this waives the flat-field rule deliberately, on purpose, per the fix brief",
+      "no-transition": "the approved arc is \"Nothing cuts. Every change leaves on the axis the next thing arrives on\", and the not: list says \"no hard cut anywhere\". The joins are flow-seams carried by one continuous camera travel, which seam-snap reads as 4 real transition boundaries and passes clean. The gate counts a transitions[] array this film deliberately does not have.",
+      "sparse-beats": "the same absence of cuts, counted a second way: with no boundaries the beat detector sees one 22s beat. The storyboard's table has eight beats and the camera never rests inside them. Shortening the film or adding cuts to raise this number would break the one thing the plan is built on.",
+      "no-bg-motion": "the same decision already waived as static-bg, reported under a second code. The grounds are flat per act ON PURPOSE so the terminal, the studio timeline and four playing films read; the movement in this film is the camera, which never stops, plus a ground that re-tints to each playing film's own colour.",
+      "contrast": "measured, not assumed. The 8 flagged elements are the timeline's own clip pills (req-type, tag1, send, bg1-3, final-tile, mark). quality/audit.mjs sampled a frame MID-WIPE: its own overlay at /tmp/audit/vawe-flow-2.16x9.png shows the left half of the panel still unrevealed, so a half-revealed pill composites to a dark fill and its dark text reads 1.1:1. At 11.0s, fully revealed, the same pills are dark text on bright purple/orange/pink and legible. The audit knows about layers that MOVE (it steps 0.1s either side and compares the box) but has no equivalent for layers being REVEALED, so a transition wipe reads as a contrast failure."
+    }
+  },
+  "audio": {
+    "tactile": true,
+    "cues": [
+      {
+        "t": 3.8935,
+        "name": "success",
+        "gain": 0.35
+      },
+      {
+        "t": 5.3129,
+        "name": "ready",
+        "gain": 0.3
+      },
+      {
+        "t": 17.2521,
+        "name": "chime",
+        "gain": 0.3
+      }
+    ],
+    "_why": "sound at DIRECT (SOUND.md): every typed line clicks per keystroke, tactile voices each layer's arrival and the mark's drawn strokes, and three cues confirm the install completing, the render firing and the mark settling. Cue times are AUTHORED times like any other: core/engine/tempo.js scales them by 1/tempo since MISTAKES #629, so they are written against this film's own clock and not hand-compensated. loudness -18: this plays on a page beside other content, not a phone feed.",
+    "loudness": -18
+  },
+  "cameraMove": [
+    {
+      "move": "travel",
+      "start": 0,
+      "stations": [
+        {},
+        {
+          "tx": 960,
+          "ty": 540,
+          "s": 1.05,
+          "dur": 1.05
+        },
+        {
+          "caret": "#type-install"
+        },
+        {
+          "tx": 960,
+          "ty": 330,
+          "s": 1.3,
+          "dur": 1.0435
+        },
+        {
+          "caret": "#type-vawe"
+        },
+        {
+          "tx": 800,
+          "ty": 590,
+          "s": 1.25,
+          "dur": 0.9194
+        },
+        {
+          "s": 1,
+          "dur": 0.4292,
+          "tx": 960,
+          "ty": 540
+        },
+        {
+          "s": 1.027,
+          "dur": 0.326
+        },
+        {
+          "s": 1.06,
+          "dur": 1.3,
+          "tx": 960,
+          "ty": 540
+        },
+        {
+          "s": 1.05,
+          "dur": 0.274
+        },
+        {
+          "s": 1.08,
+          "dur": 1.95
+        },
+        {
+          "s": 1,
+          "dur": 0.3
+        },
+        {
+          "s": 1,
+          "dur": 2.3,
+          "tx": 960,
+          "ty": 540
+        },
+        {
+          "s": 1,
+          "dur": 0.326,
+          "tx": 960,
+          "ty": 540
+        },
+        {
+          "s": 1,
+          "dur": 0.724,
+          "tx": 960,
+          "ty": 540
+        },
+        {
+          "s": 1,
+          "dur": 1.47,
+          "tx": 960,
+          "ty": 540
+        }
+      ]
+    }
+  ],
+  "bg": [
+    {
+      "from": 0,
+      "to": 7.1421,
+      "preset": "plain",
+      "value": "dark"
+    },
+    {
+      "from": 7.1421,
+      "to": 18.1741,
+      "preset": "paper"
+    }
+  ],
+  "transitions": [],
+  "recipes": [],
+  "layers": [
+    {
+      "id": "gnd-terminal-out",
+      "type": "rect",
+      "start": 6.0629,
+      "duration": 2.7192,
+      "track": 0,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "bg": "#2563eb",
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 1
+        },
+        {
+          "t": 1.6192,
+          "opacity": 1
+        },
+        {
+          "t": 2.7192,
+          "opacity": 0,
+          "ease": "easeInOutCubic"
+        }
+      ],
+      "radius": 0
+    },
+    {
+      "id": "gnd-timeline-in",
+      "type": "rect",
+      "start": 7.5821,
+      "duration": 2.9,
+      "track": 0,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "bg": "#16151a",
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 1.1,
+          "opacity": 1,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 2.9,
+          "opacity": 1
+        }
+      ],
+      "radius": 0
+    },
+    {
+      "id": "gnd-timeline-out",
+      "type": "rect",
+      "start": 10.4821,
+      "duration": 1.35,
+      "track": 0,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "bg": "#16151a",
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 1
+        },
+        {
+          "t": 1.35,
+          "opacity": 0,
+          "ease": "easeInOutCubic"
+        }
+      ],
+      "radius": 0
+    },
+    {
+      "id": "gnd-film-plinth",
+      "type": "rect",
+      "start": 11.0821,
+      "duration": 1.67,
+      "track": 0,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "bg": "#e8eaf9",
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.5,
+          "opacity": 1,
+          "ease": "easeOutQuint"
+        },
+        {
+          "t": 1.52,
+          "opacity": 1
+        },
+        {
+          "t": 1.67,
+          "opacity": 0,
+          "ease": "easeInOutCubic"
+        }
+      ],
+      "radius": 0
+    },
+    {
+      "id": "gnd-film-saas",
+      "type": "rect",
+      "start": 12.6021,
+      "duration": 1.32,
+      "track": 0,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "bg": "#dfe8fc",
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.15,
+          "opacity": 1,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 1.17,
+          "opacity": 1
+        },
+        {
+          "t": 1.32,
+          "opacity": 0,
+          "ease": "easeInOutCubic"
+        }
+      ],
+      "radius": 0
+    },
+    {
+      "id": "gnd-film-argus",
+      "type": "rect",
+      "start": 13.7721,
+      "duration": 1.32,
+      "track": 0,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "bg": "#e3eafe",
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.15,
+          "opacity": 1,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 1.17,
+          "opacity": 1
+        },
+        {
+          "t": 1.32,
+          "opacity": 0,
+          "ease": "easeInOutCubic"
+        }
+      ],
+      "radius": 0
+    },
+    {
+      "id": "gnd-mark-in",
+      "type": "rect",
+      "start": 16.5421,
+      "duration": 2.3329,
+      "track": 0,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "bg": "#ffffff",
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.75,
+          "opacity": 1,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 1.52,
+          "opacity": 1
+        }
+      ],
+      "radius": 0
+    },
+    {
+      "id": "terminal-plane",
+      "type": "group",
+      "layout": "free",
+      "start": 0.95,
+      "duration": 5.5129,
+      "track": 1,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "acrossBeats": true,
+      "motion": [
+        {
+          "t": 0,
+          "z": -260,
+          "rotX": 13,
+          "rotY": -15,
+          "blur": 12,
+          "opacity": 0
+        },
+        {
+          "t": 1.2,
+          "z": 0,
+          "rotX": 5,
+          "rotY": -5,
+          "blur": 0,
+          "opacity": 1,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 4.4129,
+          "opacity": 1
+        },
+        {
+          "t": 5.1129,
+          "opacity": 1,
+          "x": 0
+        },
+        {
+          "t": 5.4129,
+          "opacity": 0,
+          "ease": "easeInOutCubic",
+          "x": -2400
+        }
+      ],
+      "children": [
+        {
+          "id": "scene1",
+          "type": "html",
+          "src": "films/scene/vawe-flow-2.terminal.html",
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 1080,
+          "parts": [
+            {
+              "select": "[data-part=\"install-done\"]",
+              "anim": "popIn",
+              "each": 0.22,
+              "exitDur": 0.22,
+              "delay": 2.9435
+            },
+            {
+              "select": "[data-part=\"vawe-out\"]",
+              "anim": "fadeUp",
+              "each": 0.25,
+              "stagger": 0.12,
+              "delay": 4.3629
+            }
+          ],
+          "vars": {
+            "--install": [
+              0,
+              1
+            ],
+            "--success": [
+              0,
+              1
+            ]
+          },
+          "varsDur": {
+            "--install": 0.7,
+            "--success": 0.15
+          },
+          "varsDelay": {
+            "--install": 2.2435,
+            "--success": 4.6629
+          },
+          "varsEase": {
+            "--install": "easeInOutCubic",
+            "--success": "easeOutCubic"
+          }
+        },
+        {
+          "id": "type-install",
+          "type": "text",
+          "start": 1.2,
+          "delay": 1.2,
+          "x": 225,
+          "y": 230.8,
+          "w": 530,
+          "h": 61,
+          "font": "mono",
+          "size": 46,
+          "color": "#f2f5f9",
+          "text": "npm install -g vawe",
+          "typing": 19,
+          "caret": true
+        },
+        {
+          "id": "type-vawe",
+          "type": "text",
+          "start": 3.3435,
+          "delay": 3.3435,
+          "x": 225,
+          "y": 460.8,
+          "w": 670,
+          "h": 61,
+          "font": "mono",
+          "size": 46,
+          "color": "#f2f5f9",
+          "text": "vawe sample.json --draft",
+          "typing": 27,
+          "caret": true,
+          "caretHold": true,
+          "typingColors": {
+            "colors": [
+              "var(--accent)"
+            ],
+            "hold": 0.4
+          }
+        },
+        {
+          "id": "cursor-send",
+          "type": "cursor",
+          "delay": 4.0,
+          "x": 900,
+          "y": 492,
+          "size": 40,
+          "color": "color-mix(in srgb, var(--em) 45%, #ffffff)",
+          "style": "arrow",
+          "path": [
+            {
+              "t": 0,
+              "x": -90,
+              "y": 132
+            },
+            {
+              "t": 0.5,
+              "x": 0,
+              "y": 0,
+              "ease": "easeOutExpo"
+            }
+          ],
+          "clicks": [
+            0.6629
+          ]
+        }
+      ],
+      "motionBlur": true
+    },
+    {
+      "id": "scene5",
+      "type": "html",
+      "src": "films/scene/vawe-flow-2.timeline.html",
+      "start": 8.0821,
+      "duration": 3.2,
+      "track": 1,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "acrossBeats": true,
+      "parts": [
+        {
+          "select": "[data-part=\"track\"]",
+          "anim": "fadeUp",
+          "each": 0.28,
+          "stagger": 0.24,
+          "delay": 0.5
+        },
+        {
+          "select": "[data-part=\"clip\"]",
+          "anim": "popIn",
+          "each": 0.22,
+          "stagger": 0.13,
+          "out": true,
+          "exitDur": 0.22,
+          "delay": 0.7
+        }
+      ],
+      "motion": [
+        {
+          "t": 0,
+          "y": 1080,
+          "z": 0,
+          "rotX": 0,
+          "rotY": 0,
+          "blur": 0,
+          "opacity": 1,
+          "scale": 0.86
+        },
+        {
+          "t": 0.78,
+          "y": 0,
+          "ease": "easeOutCubic",
+          "scale": 0.86
+        },
+        {
+          "t": 2.4,
+          "x": 0,
+          "z": 0,
+          "rotY": 0,
+          "opacity": 1,
+          "scale": 0.86
+        },
+        {
+          "t": 2.7,
+          "x": 0,
+          "rotY": 0,
+          "opacity": 1,
+          "scale": 0.86
+        },
+        {
+          "t": 3.2,
+          "x": -2300,
+          "rotY": -32,
+          "opacity": 0,
+          "ease": "easeInCubic",
+          "scale": 0.86
+        }
+      ],
+      "motionBlur": true
+    },
+    {
+      "id": "films-eyebrow",
+      "type": "text",
+      "start": 11.0821,
+      "duration": 2.283,
+      "track": 2,
+      "x": 90,
+      "y": 68,
+      "w": 400,
+      "h": 48,
+      "font": "mono",
+      "weight": 500,
+      "size": 36,
+      "tracking": "0.14em",
+      "color": "#0f1620",
+      "text": "YOUR FILMS",
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0
+        },
+        {
+          "t": 0.3,
+          "opacity": 1,
+          "ease": "easeOutCubic"
+        },
+        {
+          "t": 1.7,
+          "opacity": 1
+        },
+        {
+          "t": 1.9999,
+          "opacity": 0,
+          "ease": "easeInCubic"
+        }
+      ]
+    },
+    {
+      "id": "films-stack",
+      "type": "group",
+      "layout": "free",
+      "start": 11.0821,
+      "duration": 5.81,
+      "track": 1,
+      "critical": false,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 0,
+          "y": 40
+        },
+        {
+          "t": 0.35,
+          "opacity": 1,
+          "y": 0,
+          "ease": "easeOutCubic"
+        }
+      ],
+      "children": [
+        {
+          "id": "film-vawe-launch",
+          "type": "group",
+          "layout": "free",
+          "x": 470,
+          "y": 128,
+          "w": 1180,
+          "h": 664,
+          "children": [
+            {
+              "id": "film-vawe-launch-video",
+              "type": "video",
+              "src": "/assets/vawe-flow-2/vawe-launch.mp4",
+              "x": 0,
+              "y": 0,
+              "w": 1180,
+              "h": 664,
+              "radius": 22,
+              "fit": "cover",
+              "in": 0.1,
+              "contentStart": 4.01
+            },
+            {
+              "id": "film-vawe-launch-scrim",
+              "type": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 1180,
+              "h": 664,
+              "radius": 22,
+              "bg": "linear-gradient(to top, rgba(10, 15, 25, 0.9) 0%, rgba(10, 15, 25, 0.9) 20%, rgba(10, 15, 25, 0) 52%)"
+            },
+            {
+              "id": "film-vawe-launch-label",
+              "type": "text",
+              "x": 32,
+              "y": 588,
+              "w": 1116,
+              "h": 44,
+              "text": "VAWE LAUNCH",
+              "font": "mono",
+              "weight": 500,
+              "size": 32,
+              "tracking": "0.14em",
+              "color": "#ffffff"
+            }
+          ],
+          "motion": [
+            {
+              "t": 0,
+              "x": 0,
+              "y": 0,
+              "scale": 0.87,
+              "rot": 5.5
+            },
+            {
+              "t": 1.4,
+              "x": 0,
+              "y": 0,
+              "scale": 0.87,
+              "rot": 5.5
+            },
+            {
+              "t": 1.75,
+              "x": 0,
+              "y": 0,
+              "scale": 0.87,
+              "rot": 5.5
+            },
+            {
+              "t": 2.55,
+              "x": 0,
+              "y": 0,
+              "scale": 0.87,
+              "rot": 5.5
+            },
+            {
+              "t": 2.95,
+              "x": -44,
+              "y": 36,
+              "scale": 0.93,
+              "rot": 3,
+              "ease": "easeOutCubic"
+            },
+            {
+              "t": 3.7,
+              "x": -44,
+              "y": 36,
+              "scale": 0.93,
+              "rot": 3
+            },
+            {
+              "t": 4.15,
+              "x": -100,
+              "y": 82,
+              "scale": 1,
+              "rot": 0,
+              "ease": "easeOutCubic"
+            },
+            {
+              "t": 5.03,
+              "x": -100,
+              "y": 82,
+              "scale": 1,
+              "rot": 0
+            },
+            {
+              "t": 5.81,
+              "x": 25,
+              "y": 97,
+              "scale": 1.44,
+              "rot": 0,
+              "ease": "easeInCubic"
+            }
+          ]
+        },
+        {
+          "id": "film-argus-launch",
+          "type": "group",
+          "layout": "free",
+          "x": 470,
+          "y": 128,
+          "w": 1180,
+          "h": 664,
+          "children": [
+            {
+              "id": "film-argus-launch-video",
+              "type": "video",
+              "src": "/assets/vawe-flow-2/argus-launch.mp4",
+              "x": 0,
+              "y": 0,
+              "w": 1180,
+              "h": 664,
+              "radius": 22,
+              "fit": "cover",
+              "in": 1,
+              "contentStart": 13.1921
+            },
+            {
+              "id": "film-argus-launch-scrim",
+              "type": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 1180,
+              "h": 664,
+              "radius": 22,
+              "bg": "linear-gradient(to top, rgba(10, 15, 25, 0.9) 0%, rgba(10, 15, 25, 0.9) 20%, rgba(10, 15, 25, 0) 52%)"
+            },
+            {
+              "id": "film-argus-launch-label",
+              "type": "text",
+              "x": 32,
+              "y": 588,
+              "w": 1116,
+              "h": 44,
+              "text": "ARGUS",
+              "font": "mono",
+              "weight": 500,
+              "size": 32,
+              "tracking": "0.14em",
+              "color": "#ffffff"
+            }
+          ],
+          "motion": [
+            {
+              "t": 0,
+              "x": 0,
+              "y": 0,
+              "scale": 0.87,
+              "rot": 5.5
+            },
+            {
+              "t": 1.4,
+              "x": 0,
+              "y": 0,
+              "scale": 0.87,
+              "rot": 5.5
+            },
+            {
+              "t": 1.75,
+              "x": -44,
+              "y": 36,
+              "scale": 0.93,
+              "rot": 3,
+              "ease": "easeOutCubic"
+            },
+            {
+              "t": 2.55,
+              "x": -44,
+              "y": 36,
+              "scale": 0.93,
+              "rot": 3
+            },
+            {
+              "t": 2.95,
+              "x": -100,
+              "y": 82,
+              "scale": 1,
+              "rot": 0,
+              "ease": "easeOutCubic"
+            },
+            {
+              "t": 3.7,
+              "x": -100,
+              "y": 82,
+              "scale": 1,
+              "rot": 0
+            },
+            {
+              "t": 4.15,
+              "x": -2000,
+              "y": -250,
+              "scale": 0.9,
+              "rot": -16,
+              "ease": "easeInCubic"
+            }
+          ]
+        },
+        {
+          "id": "film-saas-hero-launch",
+          "type": "group",
+          "layout": "free",
+          "x": 426,
+          "y": 164,
+          "w": 1180,
+          "h": 664,
+          "children": [
+            {
+              "id": "film-saas-hero-launch-video",
+              "type": "video",
+              "src": "/assets/vawe-flow-2/saas-hero-launch.mp4",
+              "x": 0,
+              "y": 0,
+              "w": 1180,
+              "h": 664,
+              "radius": 22,
+              "fit": "cover",
+              "in": 1
+            },
+            {
+              "id": "film-saas-hero-launch-scrim",
+              "type": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 1180,
+              "h": 664,
+              "radius": 22,
+              "bg": "linear-gradient(to top, rgba(10, 15, 25, 0.9) 0%, rgba(10, 15, 25, 0.9) 20%, rgba(10, 15, 25, 0) 52%)"
+            },
+            {
+              "id": "film-saas-hero-launch-label",
+              "type": "text",
+              "x": 32,
+              "y": 588,
+              "w": 1116,
+              "h": 44,
+              "text": "MERIDIAN",
+              "font": "mono",
+              "weight": 500,
+              "size": 32,
+              "tracking": "0.14em",
+              "color": "#ffffff"
+            }
+          ],
+          "motion": [
+            {
+              "t": 0,
+              "x": 0,
+              "y": 0,
+              "scale": 0.93,
+              "rot": 3
+            },
+            {
+              "t": 1.4,
+              "x": 0,
+              "y": 0,
+              "scale": 0.93,
+              "rot": 3
+            },
+            {
+              "t": 1.75,
+              "x": -56,
+              "y": 46,
+              "scale": 1,
+              "rot": 0,
+              "ease": "easeOutCubic"
+            },
+            {
+              "t": 2.55,
+              "x": -56,
+              "y": 46,
+              "scale": 1,
+              "rot": 0
+            },
+            {
+              "t": 2.95,
+              "x": 1900,
+              "y": -280,
+              "scale": 0.9,
+              "rot": 16,
+              "ease": "easeInCubic"
+            }
+          ]
+        },
+        {
+          "id": "film-plinth-ad",
+          "type": "group",
+          "layout": "free",
+          "x": 370,
+          "y": 210,
+          "w": 1180,
+          "h": 664,
+          "children": [
+            {
+              "id": "film-plinth-ad-video",
+              "type": "video",
+              "src": "/assets/vawe-flow-2/plinth-ad.mp4",
+              "x": 0,
+              "y": 0,
+              "w": 1180,
+              "h": 664,
+              "radius": 22,
+              "fit": "cover",
+              "in": 1
+            },
+            {
+              "id": "film-plinth-ad-scrim",
+              "type": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 1180,
+              "h": 664,
+              "radius": 22,
+              "bg": "linear-gradient(to top, rgba(10, 15, 25, 0.9) 0%, rgba(10, 15, 25, 0.9) 20%, rgba(10, 15, 25, 0) 52%)"
+            },
+            {
+              "id": "film-plinth-ad-label",
+              "type": "text",
+              "x": 32,
+              "y": 588,
+              "w": 1116,
+              "h": 44,
+              "text": "PLINTH",
+              "font": "mono",
+              "weight": 500,
+              "size": 32,
+              "tracking": "0.14em",
+              "color": "#ffffff"
+            }
+          ],
+          "motion": [
+            {
+              "t": 0,
+              "x": 0,
+              "y": 0,
+              "scale": 1,
+              "rot": 0
+            },
+            {
+              "t": 1.4,
+              "x": 0,
+              "y": 0,
+              "scale": 1,
+              "rot": 0
+            },
+            {
+              "t": 1.75,
+              "x": -1900,
+              "y": -320,
+              "scale": 0.9,
+              "rot": -16,
+              "ease": "easeInCubic"
+            }
+          ]
+        },
+        {
+          "id": "cursor-swipe",
+          "type": "cursor",
+          "delay": 1.05,
+          "x": 1010,
+          "y": 560,
+          "size": 40,
+          "color": "color-mix(in srgb, var(--em) 45%, #ffffff)",
+          "style": "hand",
+          "path": [
+            {
+              "t": 0,
+              "x": 260,
+              "y": 110
+            },
+            {
+              "t": 0.3,
+              "x": 0,
+              "y": 0,
+              "ease": "easeOutCubic"
+            },
+            {
+              "t": 0.62,
+              "x": -560,
+              "y": -70,
+              "ease": "easeInCubic"
+            },
+            {
+              "t": 0.95,
+              "x": -560,
+              "y": -70
+            },
+            {
+              "t": 1.55,
+              "x": 40,
+              "y": 40,
+              "ease": "easeOutCubic"
+            },
+            {
+              "t": 1.9,
+              "x": 600,
+              "y": -60,
+              "ease": "easeInCubic"
+            },
+            {
+              "t": 2.2,
+              "x": 600,
+              "y": -60
+            },
+            {
+              "t": 2.75,
+              "x": 0,
+              "y": 30,
+              "ease": "easeOutCubic"
+            },
+            {
+              "t": 3.1,
+              "x": -560,
+              "y": -70,
+              "ease": "easeInCubic"
+            },
+            {
+              "t": 3.4,
+              "x": -800,
+              "y": -140
+            }
+          ],
+          "clicks": [
+            0.62,
+            1.9,
+            3.1
+          ]
+        }
+      ],
+      "motionBlur": true
+    },
+    {
+      "id": "scene8",
+      "type": "html",
+      "src": "films/scene/vawe-flow-2.mark.html",
+      "start": 16.5421,
+      "duration": 3.0299,
+      "track": 1,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "parts": [
+        {
+          "select": "[data-part=\"mark-stroke\"]",
+          "anim": "drawOn",
+          "each": 0.65,
+          "exitDur": 0.65,
+          "delay": 0,
+          "stagger": 0.15
+        }
+      ],
+      "motion": [
+        {
+          "t": 0,
+          "opacity": 1,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "card-a",
+      "type": "group",
+      "layout": "free",
+      "start": 6.2321,
+      "duration": 2.34,
+      "track": 1,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "motion": [
+        {
+          "t": 1.79,
+          "y": 0
+        },
+        {
+          "t": 2.215,
+          "y": -1080,
+          "ease": "easeInCubic"
+        }
+      ],
+      "children": [
+        {
+          "id": "card-a-bg",
+          "type": "image",
+          "src": "/assets/vawe-flow-2/tile-grid.jpg",
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 1080,
+          "duration": 2.34,
+          "ken": {
+            "from": 1,
+            "to": 1.08
+          },
+          "exitDur": 0.2,
+          "delay": 0
+        },
+        {
+          "id": "card-a-text",
+          "type": "text",
+          "x": 120,
+          "y": 460,
+          "w": 1680,
+          "h": 220,
+          "font": "sans",
+          "weight": 800,
+          "size": 128,
+          "color": "#ffffff",
+          "text": "Every film here fits in one file.",
+          "duration": 2.19,
+          "split": "word",
+          "preset": "slide",
+          "each": 0.32,
+          "stagger": 0.07,
+          "exitDur": 0.18,
+          "delay": 0.1,
+          "dir": "right",
+          "dist": 48
+        }
+      ],
+      "motionBlur": true
+    },
+    {
+      "id": "card-b-bg",
+      "type": "image",
+      "src": "/assets/vawe-flow-2/grain-blue.png",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 1080,
+      "track": 1,
+      "start": 0,
+      "duration": 1.2,
+      "ken": {
+        "from": 1,
+        "to": 1.08
+      },
+      "enterDur": 0.3,
+      "exitDur": 0.2
+    },
+    {
+      "id": "card-b-text",
+      "type": "text",
+      "x": 120,
+      "y": 460,
+      "w": 1680,
+      "h": 220,
+      "font": "sans",
+      "weight": 800,
+      "size": 128,
+      "color": "#ffffff",
+      "text": "Nothing here looks like a template.",
+      "track": 1,
+      "start": 0.1,
+      "duration": 1,
+      "split": "word",
+      "preset": "blurUp",
+      "each": 0.4,
+      "stagger": 0.05,
+      "exitDur": 0.18
+    }
+  ],
+  "spectacle": {
+    "at": 11.09,
+    "of": "films-stack",
+    "device": "layer:gnd-film-plinth",
+    "why": "the value flips: the dark editor gives way to a white field carrying each film's own colour, and the stack of real films is what the whole video was built to arrive at"
+  }
+}

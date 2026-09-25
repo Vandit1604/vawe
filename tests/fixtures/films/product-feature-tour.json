@@ -1,0 +1,13 @@
+{
+  "module": "scene",
+  "theme": "default",
+  "aspect": "16:9",
+  "duration": 10,
+  "bg": [
+    { "preset": "plain", "from": 0, "to": 5 },
+    { "preset": "grain", "from": 5, "to": 10 }
+  ],
+  "layers": [
+    { "type": "text", "text": "chapter one", "x": 100, "y": 100, "w": 800, "size": 96, "start": 0, "duration": 5 }
+  ]
+}

@@ -1,10 +1,13 @@
-// harness/live/stage-say.test.mjs: the rule-brief lines this hook appends after the stage line, against
-// a fixture film under tests/fixtures/films/ (VAWE_FILMS_DIR points both stage-say.mjs and stageOf() at
-// it for this run, so it never shares state with a real film or another test's fixture). Cleaned up in
+// tests/hooks/stage-say.test.mjs: the rule-brief lines this hook appends after the stage line, against
+// a fixture film under tests/fixtures/films/stage-say/ (VAWE_FILMS_DIR points both stage-say.mjs and
+// stageOf() at it for this run). A PRIVATE subdirectory, not the shared tests/fixtures/films/ every
+// other suite writes fixtures into: stage-say.mjs picks its film by newest mtime across the whole
+// FILMS_DIR (there is no file_path in its input to key off), so sharing a directory with a concurrently
+// running suite writing its own fixtures makes this one pick up the WRONG film mid-run. Cleaned up in
 // `after`.
 // Set before stage.mjs (and the census.mjs it imports) resolves its SCENE_DIR at module load, so the
 // in-process stageOf() call below and every subprocess spawned here agree on the same fixture directory.
-process.env.VAWE_FILMS_DIR = 'tests/fixtures/films';
+process.env.VAWE_FILMS_DIR = 'tests/fixtures/films/stage-say';
 
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,6 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+fs.mkdirSync('tests/fixtures/films/stage-say', { recursive: true });
 const { stageOf } = await import('../../quality/gates/stage.mjs');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

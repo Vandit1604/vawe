@@ -119,7 +119,10 @@ export async function sampleScene(scenePath, { rate = 0.25, times, aspect, measu
   const raw = fs.readFileSync(abs, 'utf8');
   const cfg = JSON.parse(raw);
   const rel = path.relative(REPO_ROOT, abs);
-  const m = rel.split(path.sep)[1]; // films/<name>/<file>.json → <name>
+  // AGENTS.md: exactly one module, `scene`; the engine shell that boots it always sits at
+  // films/scene/scene.html, whatever directory the scene JSON itself is served from (a real film
+  // under films/scene/, or a test fixture elsewhere in the repo).
+  const m = 'scene';
   const [vw, vh] = sceneDims(cfg, aspect);
 
   const { close: closeServer, port } = await serveRepo({});

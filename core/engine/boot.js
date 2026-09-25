@@ -102,11 +102,14 @@ function applyLayerPin(L, PIN, W, safe) {
   if (px != null && L.x == null) L.x = px;
   if (py != null && L.y == null) L.y = py;
   // `stage`'s width nobody has to hand-type: a fraction of the safe box for a generic edge pin, or
-  // (for `stage-left`) the mirror image of its own composition-margin inset. Applied only when the
-  // layer declares none of its own.
+  // (for `stage-left`) the composition margin's own right edge, mirrored off the CANVAS but never
+  // past the safe box's own bound: a destination with an asymmetric chrome rail (tiktok's right rail
+  // eats more than the left) must clamp the right edge to `safe.x1`, or the column overruns the rail
+  // by exactly the asymmetry `Math.max(safe.x0, …)` alone cannot see. Applied only when the layer
+  // declares none of its own.
   if (wFrac != null && L.w == null) {
     L.w = px === 'stage-left'
-      ? Math.round(W - 2 * Math.max(safe.x0, W * COMPOSITION_MARGIN))
+      ? Math.round(Math.min(safe.x1, W - W * COMPOSITION_MARGIN) - Math.max(safe.x0, W * COMPOSITION_MARGIN))
       : Math.round(wFrac * (safe.x1 - safe.x0));
   }
 }

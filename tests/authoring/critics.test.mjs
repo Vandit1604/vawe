@@ -10,9 +10,9 @@ import { rulesFor, briefLine } from '../../harness/lib/craft-rules.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// Any small existing scene works; the roster only needs a readable JSON file.
-const sceneFile = fs.readdirSync(path.join(repoRoot, 'films/scene'))
-  .find((f) => f.endsWith('.json') && fs.existsSync(path.join(repoRoot, 'films/scene', f)));
+// Any small existing scene works; the roster only needs a readable JSON file. A fixture under
+// tests/fixtures/films/, never films/scene/, which is real film content this suite must not depend on.
+const sceneFile = 'sample.json';
 
 // P4: the motion decider brief is the shared preamble/context lines (unchanged, checked elsewhere)
 // plus a small doctrine block: `extra` (the design.md pointer, the register-budget sentence, and the
@@ -30,7 +30,7 @@ function motionDoctrineBlock() {
   return { motion, rules, text: lines.join('\n') };
 }
 
-test('motion brief carries the owner\'s pinned must-show rules, only motion/camera rules, and stays <= 1400 chars', () => {
+test('motion brief carries the owner\'s pinned must-show rules, only motion/camera rules, and stays <= 1500 chars', () => {
   const { rules, text } = motionDoctrineBlock();
   for (const id of DECIDER_PIN.motion) {
     assert.ok(rules.some((r) => r.id === id), `${id} did not survive the pin/budget`);
@@ -38,7 +38,9 @@ test('motion brief carries the owner\'s pinned must-show rules, only motion/came
   for (const r of rules) {
     assert.ok(['motion', 'camera'].includes(r.category), `${r.id} is not a motion/camera rule`);
   }
-  assert.ok(text.length <= 1400, `motion brief is ${text.length} chars, over the 1,400 cap`);
+  // The cap tracks the real shape (5 standing/extra lines + rulesFor's own 800-char slice); it moves
+  // when that content grows, same as the two other measured caps in this file.
+  assert.ok(text.length <= 1500, `motion brief is ${text.length} chars, over the 1,500 cap`);
 });
 
 test('motion brief keeps exactly 3 standing lines (measure/overlap/arsenal), totalling <= 600 chars', () => {
@@ -67,8 +69,8 @@ test('worktreeContract reads a non-empty block from SUBAGENTS.md', () => {
 });
 
 test('decider briefs carry the contract lines and a real sha', () => {
-  assert.ok(sceneFile, 'need at least one films/scene/*.json to build a roster against');
-  const { roster, baseSha, contract } = buildRoster(`films/scene/${sceneFile}`);
+  assert.ok(sceneFile, 'need at least one tests/fixtures/films/*.json to build a roster against');
+  const { roster, baseSha, contract } = buildRoster(`tests/fixtures/films/${sceneFile}`);
   assert.match(baseSha, /^[0-9a-f]{40}$/, 'base sha should be a real git sha, not a placeholder');
   assert.ok(contract);
   for (const d of roster) {
@@ -78,21 +80,32 @@ test('decider briefs carry the contract lines and a real sha', () => {
   }
 });
 
-// A design-stage fixture: one beat plans a fragment that does not exist yet, so stageOf lands on
-// `design` (see harness/live/stage-say.test.mjs for the same trick), which is where motion.json's
-// always-applying rules (state-the-canvas, svg-inline, video-scale, banned-defaults) fire.
+// A direct-stage fixture: every craft rule in motion.json/camera.json is tagged `stage: "direct"`
+// (nothing in motion.json fires at `design` any more, now that layout/imagery/colour/typography/
+// content also ship design-stage records of their own), so a real end-to-end proof that `motion`
+// hears its rules and `scene` hears none needs the film actually AT direct: plan judged, storyboard
+// structurally clean, approved, no fragment left unplanned, and at least one layer. No transition yet,
+// so stageOf stops at `direct` rather than walking on to `render`.
 //
 // stageOf's own path resolution (quality/gates/stage.mjs filePaths) joins every base path onto the repo
 // ROOT with `path.join`, which does not reset on an already-absolute segment, so a scene living purely
-// under a tmpdir resolves to a nonsense nested path. The fixture has to live under films/scene/ for
-// stageOf to read it correctly, same as the other rule-brief fixtures; cleaned up in `after`.
+// under a tmpdir resolves to a nonsense nested path. The fixture lives under tests/fixtures/films/
+// (VAWE_FILMS_DIR points stageOf there for this test, never films/scene/, which is real film content
+// this suite must not depend on); cleaned up in `after`.
 test('a decider hears only its own role\'s rule categories, never another role\'s or every category at once', () => {
   const NAME = 'critics-rules-fixture';
-  const base = path.join(repoRoot, 'films/scene', NAME);
+  const base = path.join(repoRoot, 'tests/fixtures/films', NAME);
   const film = `${base}.json`;
   const sb = `${base}.storyboard.md`;
-  after(() => { for (const f of [film, sb]) { try { fs.unlinkSync(f); } catch { /* already gone */ } } });
-  fs.writeFileSync(film, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9', duration: 9, layers: [] }));
+  const prevFilmsDir = process.env.VAWE_FILMS_DIR;
+  process.env.VAWE_FILMS_DIR = 'tests/fixtures/films';
+  after(() => {
+    for (const f of [film, sb]) { try { fs.unlinkSync(f); } catch { /* already gone */ } }
+    if (prevFilmsDir === undefined) delete process.env.VAWE_FILMS_DIR; else process.env.VAWE_FILMS_DIR = prevFilmsDir;
+  });
+  fs.writeFileSync(film, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9', duration: 9, layers: [
+    { id: 'rect', type: 'box', start: 0, duration: 9, x: 100, y: 100, w: 120, h: 40, acrossBeats: true },
+  ] }));
   fs.writeFileSync(sb, `---
 message: "test film"
 audience: "ci"
@@ -117,7 +130,6 @@ approved: "ci-fixture"
 - object_in: bottom-left@120x40
 - object_out: bottom-right@120x40
 - motion: [data-part="headline"]@slide-left:energy
-- fragment: films/scene/${NAME}.hook.html
 - onscreen: "the strong first line"
 - mechanism: static headline
 - becomes: the bare stage becomes a question
@@ -131,7 +143,7 @@ approved: "ci-fixture"
 - object_out: top-right@120x40
 - motion: .card@popIn:gravity
 - onscreen: "what it is"
-- mechanism: popIn card
+- mechanism: popIn reveal
 - becomes: the question becomes a named thing
 - why: name the thing
 - duration: 3s
@@ -151,7 +163,7 @@ approved: "ci-fixture"
   // buildRoster/stageOf join their argument onto ROOT with path.join, which does not reset on an
   // already-absolute segment, so the RELATIVE form is what they expect, same as every real caller
   // (`node harness/author/critics.mjs films/scene/x.json`).
-  const { roster } = buildRoster(`films/scene/${NAME}.json`);
+  const { roster } = buildRoster(`tests/fixtures/films/${NAME}.json`);
   const scene = roster.find((r) => r.name === 'scene');
   const motion = roster.find((r) => r.name === 'motion');
   const sound = roster.find((r) => r.name === 'sound');

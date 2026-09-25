@@ -24,18 +24,25 @@ function scratchDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'arsenal-nudge-test-'));
 }
 
+// The hook only watches VAWE_FILMS_DIR (default films/scene/); pointing it at a throwaway fixtures
+// dir here keeps concurrent test files from racing the same real film path.
+const FILMS_DIR = 'tests/fixtures/films';
+
 function run(input, dataDir) {
   const r = spawnSync('node', [HOOK], {
     input: JSON.stringify(input),
     encoding: 'utf8',
-    env: { ...process.env, ARSENAL_NUDGE_DATA_DIR: dataDir },
+    // The full suite runs many browser-heavy test files in parallel; the hook's own 4s subprocess
+    // ceiling is a keystroke UX budget, not a correctness bound, so it is widened here against
+    // resource contention this run does not otherwise cause.
+    env: { ...process.env, ARSENAL_NUDGE_DATA_DIR: dataDir, VAWE_FILMS_DIR: FILMS_DIR, ARSENAL_NUDGE_TIMEOUT_MS: '20000' },
   });
   return { status: r.status, out: r.stderr };
 }
 
-const probeHtml = () => join(ROOT, 'films/scene', ['_arsenal-nudge-probe', 'html'].join('.'));
-const probeBoard = () => join(ROOT, 'films/scene', ['_arsenal-nudge-probe', 'storyboard', 'md'].join('.'));
-const probeJson = () => join(ROOT, 'films/scene', ['_arsenal-nudge-probe', 'json'].join('.'));
+const probeHtml = () => join(ROOT, FILMS_DIR, ['_arsenal-nudge-probe', 'html'].join('.'));
+const probeBoard = () => join(ROOT, FILMS_DIR, ['_arsenal-nudge-probe', 'storyboard', 'md'].join('.'));
+const probeJson = () => join(ROOT, FILMS_DIR, ['_arsenal-nudge-probe', 'json'].join('.'));
 const probeCore = () => join(ROOT, 'core/resample', ['_arsenal-nudge-probe', 'js'].join('.'));
 
 // The real near-miss this widening closes: a new resample fx named with a device tell, added as a

@@ -1,0 +1,151 @@
+{
+  "module": "scene",
+  "theme": "default",
+  "aspect": "16:9",
+  "fps": 30,
+  "duration": 4,
+  "bg": [
+    {
+      "preset": "dark"
+    }
+  ],
+  "audio": {
+    "silent": true,
+    "_why": "a controlled A/B against its twin: the two files differ in the `upright` modifier and nothing else, so anything on the track would be a second variable"
+  },
+  "authoring": {
+    "allow": [
+      "dead-air",
+      "plain-slideshow",
+      "no-continuous-object",
+      "static-bg",
+      "no-storyboard",
+      "no-authored-motion"
+    ],
+    "_why": {
+      "dead-air": "the frame holds one rig on purpose: this measures whether the carried marks stay readable, so anything else moving would be a second variable",
+      "plain-slideshow": "one continuous shot, and there are no beats to vary",
+      "no-continuous-object": "the rotating group IS the continuous object; the rule reads across cuts and this film has none",
+      "static-bg": "a moving backdrop would compete with the one rotation being measured",
+      "no-storyboard": "a mechanism demo, not a film. The whole plan is 'six marks orbit a rotating group', and it is written down in engine-doctrine/CRAFT/AE-TECHNIQUES.md #12, which names this file as its worked example",
+      "no-authored-motion": "the group carries the only hand-keyed track in the film and every other layer is deliberately still"
+    }
+  },
+  "layers": [
+    {
+      "type": "group",
+      "id": "wheel",
+      "layout": "free",
+      "x": 510,
+      "y": 90,
+      "w": 900,
+      "h": 900,
+      "start": 0,
+      "duration": 4,
+      "anim": "none",
+      "out": "none",
+      "motion": [
+        {
+          "t": 0,
+          "rot": 0
+        },
+        {
+          "t": 4,
+          "rot": 360
+        }
+      ],
+      "children": [
+        {
+          "type": "image",
+          "src": "/assets/icons/google-wordmark.svg",
+          "w": 200,
+          "h": 64,
+          "x": 350,
+          "y": 118,
+          "anim": "none",
+          "out": "none",
+          "modifiers": [
+            {
+              "upright": "wheel"
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "/assets/icons/netflix.svg",
+          "w": 150,
+          "h": 64,
+          "x": 635,
+          "y": 268,
+          "anim": "none",
+          "out": "none",
+          "modifiers": [
+            {
+              "upright": "wheel"
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "/assets/icons/nvidia.svg",
+          "w": 170,
+          "h": 64,
+          "x": 625,
+          "y": 568,
+          "anim": "none",
+          "out": "none",
+          "modifiers": [
+            {
+              "upright": "wheel"
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "/assets/icons/github.svg",
+          "w": 130,
+          "h": 64,
+          "x": 385,
+          "y": 718,
+          "anim": "none",
+          "out": "none",
+          "modifiers": [
+            {
+              "upright": "wheel"
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "/assets/icons/coinbase.svg",
+          "w": 160,
+          "h": 64,
+          "x": 110,
+          "y": 568,
+          "anim": "none",
+          "out": "none",
+          "modifiers": [
+            {
+              "upright": "wheel"
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "/assets/icons/stripe.svg",
+          "w": 120,
+          "h": 64,
+          "x": 130,
+          "y": 268,
+          "anim": "none",
+          "out": "none",
+          "modifiers": [
+            {
+              "upright": "wheel"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

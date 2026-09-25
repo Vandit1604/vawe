@@ -11,8 +11,9 @@
 // and films/scene/vawe-oblique.json both shipped a bare `"color": "accent"`/`"text"` and rendered
 // silently wrong until this check existed).
 //
-// Fixtures are written under films/scene/ with a `stagetest-` prefix (the convention
-// quality/gates/stage.test.mjs already uses) and removed in `after()`, pass or fail.
+// Fixtures are written under tests/fixtures/films/ with a `stagetest-` prefix (never films/scene/,
+// which is real, gitignored film content this suite must not depend on) and removed in `after()`,
+// pass or fail.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,7 +22,7 @@ import assert from 'node:assert';
 import { serveRepo, launchPage, waitForEngine } from '../../harness/lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENES = path.join(ROOT, 'films/scene');
+const SCENES = path.join(ROOT, 'tests/fixtures/films');
 
 const written = [];
 function writeFixture(name, color) {
@@ -41,7 +42,7 @@ test('a bare theme-token colour ("accent" for var(--accent)) is refused, named, 
   const { server, port, close: closeServer } = await serveRepo({ root: ROOT });
   const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
   try {
-    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/films/scene/${rel}&fps=30`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/tests/fixtures/films/${rel}&fps=30`, { waitUntil: 'load' });
     const err = await waitForEngine(page);
     assert.ok(err, 'a bare colour token must not render silently: the engine should report an error');
     assert.match(err, /the browser drops this css declaration, color: accent/);
@@ -56,7 +57,7 @@ test('the same layer with the var() form renders clean', async () => {
   const { server, port, close: closeServer } = await serveRepo({ root: ROOT });
   const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
   try {
-    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/films/scene/${rel}&fps=30`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/tests/fixtures/films/${rel}&fps=30`, { waitUntil: 'load' });
     const err = await waitForEngine(page);
     assert.equal(err, null, `a valid var() colour must not be refused, got: ${err}`);
   } finally {

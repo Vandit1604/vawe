@@ -7,8 +7,9 @@
 // film's CURRENT state as a fixture, because a real film's state is the one thing this repo promises
 // will keep changing.
 //
-// Fixtures live under films/scene/ (stageOf resolves a bare name to that directory) with a
-// `stagetest-` prefix, and `after()` deletes every one of them whether a test passed or not.
+// Fixtures live under tests/fixtures/films/ (VAWE_FILMS_DIR points stageOf there for this run, never
+// films/scene/, which is real film content this suite must not depend on) with a `stagetest-` prefix,
+// and `after()` deletes every one of them whether a test passed or not.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -17,14 +18,29 @@ import test, { after } from 'node:test';
 import assert from 'node:assert';
 import { stageOf } from '../../quality/gates/stage.mjs';
 import { firstCommand } from '../../quality/gates/next.mjs';
+import { writeReceipt, receiptPath } from '../../harness/lib/receipt.mjs';
+
+// stageOf/lookBlock/firstCommand's own path resolution reads VAWE_FILMS_DIR (default films/scene/,
+// real film content this suite must not depend on); this file's fixtures live at tests/fixtures/films/
+// instead. Set before stage.mjs/next.mjs are imported below, since they may read it at module scope.
+process.env.VAWE_FILMS_DIR = 'tests/fixtures/films';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SCENES = path.join(ROOT, 'films/scene');
+const SCENES = path.join(ROOT, 'tests/fixtures/films');
 const abs = (rel) => path.join(SCENES, rel);
 
 const written = [];
 function write(rel, content) { fs.writeFileSync(abs(rel), content); written.push(abs(rel)); }
 after(() => { for (const f of written) { try { fs.unlinkSync(f); } catch { /* already gone */ } } });
+
+// `plan.done` (quality/gates/stage.mjs) now needs a fresh plan-judge receipt OR an `approved:` line,
+// not a passing storyboard-check alone (474981ba, "design before approval": every stage past `plan`
+// used to be reachable by structure alone). A fixture that means to sit past `plan` without also
+// exercising approval marks itself judged the same way `make plan-judge` really does.
+function markPlanJudged(sbRel) {
+  writeReceipt('plan-judge', abs(sbRel));
+  written.push(receiptPath('plan-judge', abs(sbRel)));
+}
 
 // A storyboard that passes storyboard-check AND frame-check with zero errors (warnings are fine), so a
 // stage past `plan` can be reached without spinning up the puppeteer half of frame-check: that half
@@ -48,7 +64,7 @@ function passingStoryboard(name, { approved = false, layers = false } = {}) {
     '',
     '## 1. hook (0.0-2.0)',
     '- type: html',
-    `- fragment: films/scene/${frag1}`,
+    `- fragment: tests/fixtures/films/${frag1}`,
     '- onscreen: "one line"',
     '- why: "opens on the claim, before the film has earned anything else"',
     '- becomes: "the claim becomes the proof"',
@@ -56,7 +72,7 @@ function passingStoryboard(name, { approved = false, layers = false } = {}) {
     '',
     '## 2. proof (2.0-4.0)',
     '- type: html',
-    `- fragment: films/scene/${frag2}`,
+    `- fragment: tests/fixtures/films/${frag2}`,
     '- onscreen: "one number"',
     '- why: "pays off the claim the first beat opened"',
     '- becomes: "the proof becomes the close"',
@@ -64,6 +80,7 @@ function passingStoryboard(name, { approved = false, layers = false } = {}) {
     '',
   ].join('\n'));
   write(`${name}.json`, JSON.stringify({ module: 'scene', layers: layers ? [{ type: 'text' }] : [] }, null, 1) + '\n');
+  markPlanJudged(`${name}.storyboard.md`);
 }
 
 test('stage 1, brief: no brief, no storyboard, nothing written at all', () => {
@@ -101,7 +118,7 @@ test('stage 3, design: the storyboard passes its gate and a beat names a fragmen
     '',
     '## 1. hook (0.0-2.0)',
     '- type: html',
-    '- fragment: films/scene/_stagetest-design.hook.html',
+    '- fragment: tests/fixtures/films/_stagetest-design.hook.html',
     '- onscreen: "one line"',
     '- why: "opens on the claim, before the film has earned anything else"',
     '- becomes: "the claim becomes the proof"',
@@ -109,7 +126,7 @@ test('stage 3, design: the storyboard passes its gate and a beat names a fragmen
     '',
     '## 2. proof (2.0-4.0)',
     '- type: html',
-    '- fragment: films/scene/_stagetest-design.proof.html',
+    '- fragment: tests/fixtures/films/_stagetest-design.proof.html',
     '- onscreen: "one number"',
     '- why: "pays off the claim the first beat opened"',
     '- becomes: "the proof becomes the close"',
@@ -117,6 +134,7 @@ test('stage 3, design: the storyboard passes its gate and a beat names a fragmen
     '',
   ].join('\n'));
   write('stagetest-design.json', JSON.stringify({ module: 'scene', layers: [] }, null, 1) + '\n');
+  markPlanJudged('stagetest-design.storyboard.md');
   // deliberately never writing the two fragment files
   const st = stageOf('stagetest-design');
   assert.equal(st.stage, 'design');

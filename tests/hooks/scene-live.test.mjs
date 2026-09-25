@@ -1,9 +1,11 @@
 // node harness/live/test/scene-live.test.mjs
 //
-// Feeds real films from films/scene/ through the real hook, exactly as Claude Code's PostToolUse
-// does (stdin JSON, stderr on exit 2). No cases are typed by hand here: every film named below is a
-// real gate-visible scene, and every suggestion the hook makes about it is checked against the film's
-// own JSON and the real filesystem, never against a fixture that could drift from either.
+// Feeds real films through the real hook, exactly as Claude Code's PostToolUse does (stdin JSON,
+// stderr on exit 2). No cases are typed by hand here: every film named below is a real, once-shipped
+// scene, frozen as a snapshot under tests/fixtures/films/ (never read live from films/scene/, which
+// is real film content this suite must not depend on, and two of the five were never even tracked
+// there), and every suggestion the hook makes about it is checked against that film's own JSON,
+// never against a hand-typed case that could drift from it.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -19,7 +21,7 @@ function run(rel) {
   const r = spawnSync('node', [HOOK], {
     input: JSON.stringify({ tool_input: { file_path: abs } }),
     encoding: 'utf8',
-    env: { ...process.env, VAWE_HOOK_FULL: '1' },   // assert against the full text, not the summary
+    env: { ...process.env, VAWE_HOOK_FULL: '1', VAWE_FILMS_DIR: 'tests/fixtures/films' },   // assert against the full text, not the summary
   });
   return { status: r.status, out: r.stderr };
 }
@@ -29,7 +31,7 @@ const check = (label, ok) => { console.log(`${ok ? 'ok  ' : 'FAIL'}  ${label}`);
 
 // --- higgsfield-recreation.json: one bg window, silent with no _why. Both should fire. ---
 {
-  const rel = 'films/scene/higgsfield-recreation.json';
+  const rel = 'tests/fixtures/films/higgsfield-recreation.json';
   const j = JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
   const usedPresets = new Set((Array.isArray(j.bg) ? j.bg : (j.bg ? [j.bg] : [])).map((b) => b && b.preset).filter(Boolean));
   const { status, out } = run(rel);
@@ -51,7 +53,7 @@ const check = (label, ok) => { console.log(`${ok ? 'ok  ' : 'FAIL'}  ${label}`);
 
 // --- linear-launch.json: low pictorial share, zero hand-keyed motion, one bg window. ---
 {
-  const rel = 'films/scene/linear-launch.json';
+  const rel = 'tests/fixtures/films/linear-launch.json';
   const { status, out } = run(rel);
   check('linear-launch: exits 2', status === 2);
   check('linear-launch: names the hand-keyed gap', /no hand-keyed motion track/.test(out));
@@ -70,7 +72,7 @@ const check = (label, ok) => { console.log(`${ok ? 'ok  ' : 'FAIL'}  ${label}`);
 // --- brew-launch-act1.json: the film CLAUDE.md holds up as the counter-example. Only the audio ---
 // finding should fire; pictorial/bg/motion are all above the library's own bar.
 {
-  const rel = 'films/scene/brew-launch-act1.json';
+  const rel = 'tests/fixtures/films/brew-launch-act1.json';
   const { status, out } = run(rel);
   check('brew-launch-act1: still exits 2 (audio._why gap)', status === 2);
   check('brew-launch-act1: stays silent on pictorial (46% is well above the median)', !/% pictorial \(/.test(out));
@@ -82,7 +84,7 @@ const check = (label, ok) => { console.log(`${ok ? 'ok  ' : 'FAIL'}  ${label}`);
 // close to a layer arrival (the exact shape that shipped 1118ms and 765ms early). The hook should
 // name each one and offer a real relative-time reference back to a real layer id in this film. ---
 {
-  const rel = 'films/scene/vawe-flow-2.json';
+  const rel = 'tests/fixtures/films/vawe-flow-2.json';
   const j = JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
   const ids = new Set();
   (function walk(ls) { for (const L of ls || []) { if (L && L.id) ids.add(L.id); walk(L.children); walk(L.layers); } })(j.layers);
@@ -97,7 +99,7 @@ const check = (label, ok) => { console.log(`${ok ? 'ok  ' : 'FAIL'}  ${label}`);
 
 // --- post-corva.json: already has every sidecar wired. A film doing fine gets silence. ---
 {
-  const rel = 'films/scene/post-corva.json';
+  const rel = 'tests/fixtures/films/post-corva.json';
   const { status } = run(rel);
   check('post-corva: silent (exit 0), the reward for a film doing fine', status === 0);
 }

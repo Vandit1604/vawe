@@ -12,7 +12,7 @@
 // the motion is genuinely a loop with no beginning (the caret blink). A calc() reading one of those is
 // re-evaluated on every seeked frame, which is what makes frame 412 independent of frame 411.
 import {
-  TOKENS, HAIR, r2, text, box, seriesAt,
+  TOKENS, HAIR, r2, seriesAt,
   R, TYPE, SPACE, E, cardChrome, tint, TINT, SHADOW_CARD,
   capCss, labelCss, numCss, needData, onInk,
 } from './kit.mjs';
@@ -52,30 +52,32 @@ const progress = ({ delay = 0.25, dur = 1.4, ease = 'easeInOutCubic', to = 1 } =
 // MOTION: `--p` 0→1 pulls the fringe in from `spread` to nothing and lifts the glow to full. The
 // caret's blink is the one thing off the raw clock (`var(--t)`), because a blink has no beginning: a
 // stepped round() gives a hard on/off square wave rather than a fade, which is what a caret does.
-export function textCursor({ x, y, w = 900, body = '', size = TYPE.hero, spread = 18, glow = 1,
-  cursor = 'block', blink = 0.9, start = 0, dur = 4 } = {}) {
-  needData('body', body, 'textCursor');
-  const CURSORS = ['block', 'bar', 'underline'];
-  if (!CURSORS.includes(cursor)) {
-    throw new Error(`block "textCursor": unknown cursor "${cursor}", one of: ${CURSORS.join(', ')}. `
-      + `block is a filled cell, bar is a thin vertical rule, underline sits under the last glyph.`);
-  }
-  // The fringe distance, in px, as a function of the settle. Written once: two declarations read it.
-  const d = `calc((1 - var(--p,0)) * ${r2(spread)}px)`;
-  const nd = `calc((1 - var(--p,0)) * ${r2(-spread)}px)`;
-  // A square wave off the raw clock: mod() folds time into one blink period, round(down) snaps it to
-  // 0 or 1. No easing, because a caret does not fade.
+const TEXT_CURSOR_KINDS = ['block', 'bar', 'underline'];
+
+// A square wave off the raw clock: mod() folds time into one blink period, round(down) snaps it to 0
+// or 1. No easing, because a caret does not fade. The glow is the caret's own light thrown outward:
+// two shadows, tight and wide, so it reads as a source rather than as a blurred rectangle.
+function textCursorCaret({ cursor, size, blink }) {
   const beat = `round(down, mod(var(--t,0), ${r2(blink)}) * ${r2(2 / blink)}, 1)`;
   const caretW = cursor === 'bar' ? Math.max(3, r2(size * 0.07)) : r2(size * 0.52);
   const caretH = cursor === 'underline' ? Math.max(3, r2(size * 0.07)) : r2(size * 1.02);
-  const caret = `<span style="display:inline-block;width:${caretW}px;height:${caretH}px;`
+  return `<span style="display:inline-block;width:${caretW}px;height:${caretH}px;`
     + `vertical-align:${cursor === 'underline' ? 'baseline' : 'text-bottom'};margin-left:${r2(size * 0.12)}px;`
     + `background:${T.accent};border-radius:${R.micro}px;`
-    // The glow is the caret's own light thrown outward. Two shadows, tight and wide, so it reads as a
-    // source rather than as a blurred rectangle.
     + `box-shadow:0 0 ${r2(size * 0.22)}px ${T.accent}, 0 0 ${r2(size * 0.7)}px var(--accent-glow, ${T.accent});`
     + `opacity:calc(${beat} * (0.35 + var(--p,0) * 0.65))"></span>`;
+}
 
+export function textCursor({ x, y, w = 900, body = '', size = TYPE.hero, spread = 18, glow = 1,
+  cursor = 'block', blink = 0.9, start = 0, dur = 4 } = {}) {
+  needData('body', body, 'textCursor');
+  if (!TEXT_CURSOR_KINDS.includes(cursor)) {
+    throw new Error(`block "textCursor": unknown cursor "${cursor}", one of: ${TEXT_CURSOR_KINDS.join(', ')}. `
+      + `block is a filled cell, bar is a thin vertical rule, underline sits under the last glyph.`);
+  }
+  // The fringe distance, in px, as a function of the settle. Written once: two declarations read it.
+  const d = `calc((1 - var(--p,0)) * ${r2(spread)}px)`, nd = `calc((1 - var(--p,0)) * ${r2(-spread)}px)`;
+  const caret = textCursorCaret({ cursor, size, blink });
   const line = `<span style="font:800 ${size}px var(--font-sans);color:var(--text);letter-spacing:-0.03em;`
     + `text-shadow:${nd} 0 0 rgba(255,0,64,0.72), ${d} 0 0 rgba(0,220,255,0.72), `
     + `0 0 calc(var(--p,0) * ${r2(size * 0.5 * glow)}px) var(--accent-glow, ${T.accent})">${esc(body)}</span>`;
@@ -243,44 +245,49 @@ export function morphText({ x, y, w = 900, words = [], size = TYPE.display, hold
 // conversion, mirrored here: one `html` card, `cardChrome` as layer props, the vote rail + title/body/
 // meta column as one markup string. The measured-contrast colour logic (`onInk`, the lit/quiet arrow
 // distinction) is untouched, only moved from JSON layers into inline styles.
-export function redditPost({ x, y, w = 620, sub = '', author = '', age = '', title = '', body = '',
-  votes = 0, comments = 0, voted = 'up', start = 0, dur = 4 } = {}) {
-  needData('title', title, 'redditPost');
-  const VOTES = { up: 1, down: -1, none: 0 };
-  if (!(voted in VOTES)) {
-    throw new Error(`block "redditPost": unknown voted "${voted}". One of: ${Object.keys(VOTES).join(', ')}. `
-      + `It lights one arrow to show the reader's own vote; "none" leaves both quiet.`);
-  }
-  const lit = VOTES[voted];
-  // THE LIT ARROW IS THE TONE PUSHED TOWARD `--text`, never the raw token. A bare `--accent` on the
-  // rail's own accent tint measured 2.7:1 on `linear` and `make audit` failed it HARD. `onInk` is the
-  // one owner of that mix; see kit.mjs for why it is not `onColor`.
-  // THE QUIET ARROW IS `--text-2`, NOT `--dim`, for the same reason: it does not clear 4.5:1 on a
-  // tinted ground (measured 4.4:1 on this very rail), where `--dim` fails HARD.
-  const quietInk = onInk(T.sub);
-  // The arrow is the SAME size as the score beside it: `make audit` fails text under 14.04px, so a
-  // glyph shrunk to look secondary is the part nobody can read.
-  const arrow = (glyph, on, tone) => `<span style="font:700 ${TYPE.base}px var(--font-sans);color:${on ? onInk(tone) : quietInk}">${glyph}</span>`;
-  const meta = (t) => `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">${t}</span>`;
-  const RAIL = 64;
-  const bodyW = w - RAIL - 3 * SPACE.md;
+const REDDIT_VOTES = { up: 1, down: -1, none: 0 };
 
-  // the vote rail: arrow, score, arrow, on its own tinted ground so it reads as a control and not as
-  // three loose glyphs beside the headline.
-  const rail = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;`
-    + `gap:${SPACE.tight}px;width:${RAIL}px;border-radius:${R.chip}px;background:${tint(T.accent, TINT.track)};`
+// the vote rail: arrow, score, arrow, on its own tinted ground so it reads as a control and not as
+// three loose glyphs beside the headline. THE LIT ARROW IS THE TONE PUSHED TOWARD `--text`, never the
+// raw token. A bare `--accent` on the rail's own accent tint measured 2.7:1 on `linear` and `make
+// audit` failed it HARD. `onInk` is the one owner of that mix; see kit.mjs for why it is not
+// `onColor`. THE QUIET ARROW IS `--text-2`, NOT `--dim`, for the same reason: it does not clear
+// 4.5:1 on a tinted ground (measured 4.4:1 on this very rail), where `--dim` fails HARD. The arrow is
+// the SAME size as the score beside it: `make audit` fails text under 14.04px, so a glyph shrunk to
+// look secondary is the part nobody can read.
+function redditVoteRail({ votes, lit, railW }) {
+  const quietInk = onInk(T.sub);
+  const arrow = (glyph, on, tone) => `<span style="font:700 ${TYPE.base}px var(--font-sans);color:${on ? onInk(tone) : quietInk}">${glyph}</span>`;
+  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;`
+    + `gap:${SPACE.tight}px;width:${railW}px;border-radius:${R.chip}px;background:${tint(T.accent, TINT.track)};`
     + `padding:${SPACE.xs}px 0">` + arrow('▲', lit === 1, T.accent)
     + `<span style="font:700 ${TYPE.body}px var(--font-num);color:${T.ink}">${votes}</span>`
     + arrow('▼', lit === -1, T.down) + '</div>';
+}
+
+function redditBodyCol({ sub, author, age, title, body, comments, bodyW }) {
+  const meta = (t) => `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">${t}</span>`;
   const metaRow = [sub && meta('r/' + sub), author && meta('·'), author && meta('u/' + author),
     age && meta('·'), age && meta(age)].filter(Boolean).join('');
-  const col = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.xs}px">`
+  return `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.xs}px">`
     + (metaRow ? `<div style="display:flex;align-items:center;gap:${SPACE.snug}px">${metaRow}</div>` : '')
     + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${T.ink};letter-spacing:-0.01em;width:${bodyW}px">${title}</span>`
     + (body ? `<span style="font:400 ${TYPE.body}px var(--font-sans);color:${T.sub};width:${bodyW}px">${body}</span>` : '')
     + `<div style="display:flex;align-items:center;gap:${SPACE.sm}px">`
     + `<span style="font:600 ${TYPE.body}px var(--font-mono);color:${T.sub}">${comments} comments</span>`
     + `<span style="font:600 ${TYPE.body}px var(--font-mono);color:${T.sub}">share</span></div></div>`;
+}
+
+export function redditPost({ x, y, w = 620, sub = '', author = '', age = '', title = '', body = '',
+  votes = 0, comments = 0, voted = 'up', start = 0, dur = 4 } = {}) {
+  needData('title', title, 'redditPost');
+  if (!(voted in REDDIT_VOTES)) {
+    throw new Error(`block "redditPost": unknown voted "${voted}". One of: ${Object.keys(REDDIT_VOTES).join(', ')}. `
+      + `It lights one arrow to show the reader's own vote; "none" leaves both quiet.`);
+  }
+  const railW = 64, bodyW = w - railW - 3 * SPACE.md;
+  const rail = redditVoteRail({ votes, lit: REDDIT_VOTES[voted], railW });
+  const col = redditBodyCol({ sub, author, age, title, body, comments, bodyW });
   const html = `<div style="display:flex;align-items:stretch;gap:${SPACE.md}px;padding:${SPACE.md}px;`
     + `box-sizing:border-box;width:${w}px">` + rail + col + '</div>';
 

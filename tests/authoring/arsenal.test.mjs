@@ -31,10 +31,10 @@ console.log('arsenal.test.mjs: OK (caret/typing queries surface all typed-caret 
 // query matching a known rule's own brief must come back as kind "rule" with that rule's id, so an
 // agent can `make arsenal Q="..."` a rule the same way it searches for an effect.
 {
-  const rule = all.find((e) => e.kind === 'rule' && e.name === 'motion.caption-safe-strip');
-  assert.ok(rule, 'expected a "rule" entry for motion.caption-safe-strip; craft rules never loaded into the corpus');
-  const { results } = rankQuery(all, 'captions inside its safe strip', { n: 20 });
-  const found = results.find((e) => e.kind === 'rule' && e.name === 'motion.caption-safe-strip');
+  const rule = all.find((e) => e.kind === 'rule' && e.name === 'captions.destination-changes-safe-strip');
+  assert.ok(rule, 'expected a "rule" entry for captions.destination-changes-safe-strip; craft rules never loaded into the corpus');
+  const { results } = rankQuery(all, 'same canvas different unusable regions', { kind: 'rule', n: 20 });
+  const found = results.find((e) => e.kind === 'rule' && e.name === 'captions.destination-changes-safe-strip');
   assert.ok(found, `query on a rule's own brief should surface it; got [${results.map((e) => e.name).join(', ')}]`);
   console.log('arsenal.test.mjs: OK (a query on a craft rule\'s brief returns kind "rule" with its id)');
 }

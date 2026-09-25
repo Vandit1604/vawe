@@ -1,0 +1,17 @@
+{
+  "module": "scene",
+  "theme": "default",
+  "aspect": "16:9",
+  "duration": 12,
+  "bg": [
+    { "preset": "plain", "from": 0, "to": 2 },
+    { "preset": "soft", "from": 2, "to": 4 },
+    { "preset": "grain", "from": 4, "to": 6 },
+    { "preset": "dots", "from": 6, "to": 8 },
+    { "preset": "aurora", "from": 8, "to": 10 },
+    { "preset": "spotlight", "from": 10, "to": 12 }
+  ],
+  "layers": [
+    { "type": "text", "text": "hook", "x": 100, "y": 100, "w": 800, "size": 96, "start": 0, "duration": 2 }
+  ]
+}

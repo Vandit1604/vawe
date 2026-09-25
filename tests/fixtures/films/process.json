@@ -1,0 +1,12 @@
+{
+  "module": "scene",
+  "theme": "default",
+  "aspect": "16:9",
+  "duration": 8,
+  "bg": [
+    { "preset": "plain", "from": 0, "to": 8 }
+  ],
+  "layers": [
+    { "type": "text", "text": "one measured instance", "x": 100, "y": 100, "w": 800, "size": 96, "start": 0, "duration": 8 }
+  ]
+}

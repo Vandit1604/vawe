@@ -366,11 +366,13 @@ test('lib-test: lints', async () => {
     {
       const hook = path.join(repoRoot, 'harness/live/scene-live.mjs');
       const fire = (scene) => {
+        // VAWE_FILMS_DIR points the hook at tests/fixtures/films/, never films/scene/: real film
+        // content this suite must not depend on.
         const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: scene } }), encoding: 'utf8',
-          env: { ...process.env, VAWE_HOOK_FULL: '1' } });   // assert against the full text, not the summary
+          env: { ...process.env, VAWE_HOOK_FULL: '1', VAWE_FILMS_DIR: 'tests/fixtures/films' } });   // assert against the full text, not the summary
         return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
       };
-      const tmp = path.join(repoRoot, 'films/scene/_rung-live-probe.json');
+      const tmp = path.join(repoRoot, 'tests/fixtures/films/_rung-live-probe.json');
       fs.writeFileSync(tmp, JSON.stringify({ module: 'scene', bg: { preset: 'black' },
         layers: [{ type: 'text', text: 'a' }, { type: 'text', text: 'b' }, { type: 'text', text: 'c' }] }));
       const thin = fire(tmp);
@@ -387,7 +389,7 @@ test('lib-test: lints', async () => {
       fs.unlinkSync(tmp);
       // A DERIVATIVE IS GENERATED. Telling an author their .expanded.json is thin names a file they did
       // not write and cannot fix in place.
-      const der = path.join(repoRoot, 'films/scene/_rung-live-probe.expanded.json');
+      const der = path.join(repoRoot, 'tests/fixtures/films/_rung-live-probe.expanded.json');
       fs.writeFileSync(der, JSON.stringify({ module: 'scene', bg: { preset: 'black' },
         layers: [{ type: 'text' }, { type: 'text' }, { type: 'text' }] }));
       ok('scene-live: a generated derivative is never spoken to', fire(der).code === 0);
@@ -400,11 +402,13 @@ test('lib-test: lints', async () => {
     {
       const hook = path.join(repoRoot, 'harness/live/craft-live.mjs');
       const fire = (f) => {
+        // VAWE_FILMS_DIR points the hook at tests/fixtures/films/, never films/scene/: real film
+        // content this suite must not depend on.
         const r = spawnSync('node', [hook], { input: JSON.stringify({ tool_input: { file_path: f } }), encoding: 'utf8',
-          env: { ...process.env, VAWE_HOOK_FULL: '1' } });   // assert against the full text, not the summary
+          env: { ...process.env, VAWE_HOOK_FULL: '1', VAWE_FILMS_DIR: 'tests/fixtures/films' } });   // assert against the full text, not the summary
         return { code: r.status, out: (r.stderr || '') + (r.stdout || '') };
       };
-      const tmp = path.join(repoRoot, 'films/scene/_craft-live-probe.json');
+      const tmp = path.join(repoRoot, 'tests/fixtures/films/_craft-live-probe.json');
       const write = (o) => fs.writeFileSync(tmp, JSON.stringify({ module: 'scene', bg: [{ preset: 'black' }], ...o }));
 
       // core/timeline/clips.js:77 owns the direction: slide-left enters from the left edge and, as an `out`,
@@ -440,7 +444,7 @@ test('lib-test: lints', async () => {
       fs.unlinkSync(tmp);
 
       // ONLY WHAT THE AUTHOR WROTE. A derivative is generated and cannot be fixed in place.
-      const der2 = path.join(repoRoot, 'films/scene/_craft-live-probe.expanded.json');
+      const der2 = path.join(repoRoot, 'tests/fixtures/films/_craft-live-probe.expanded.json');
       fs.writeFileSync(der2, JSON.stringify({ module: 'scene', layers: [{ type: 'text', text: '🚀' },
         { type: 'text', text: 'b' }, { type: 'text', text: 'c' }] }));
       ok('craft-live: a generated derivative is never spoken to', fire(der2).code === 0);

@@ -178,37 +178,42 @@ export function usMapHex({ x, y, w = 1180, data = [], title = '', sub = '', lege
 // ── shared choropleth body ───────────────────────────────────────────────────────────────────────
 // usMap and worldMap differ in exactly two things: which ring table and which projection. One body,
 // because a second copy of "project, fill, stagger, label" is a second copy that drifts.
+// THE HALO MUST BE THE OPPOSITE OF THE INK. A page-coloured halo behind page-coloured ink erases
+// the label, which is exactly what happened to CA's "39" over its own dark fill: white on white,
+// invisible, and every gate green. A dark fill already gives the light ink its contrast, so the
+// halo is only there for the light buckets.
+function choroplethLabel(f, c, { frac, s, unit }) {
+  const hot = frac > 0.55;
+  return `<text class="hit" x="${c[0].toFixed(1)}" y="${c[1].toFixed(1)}"`
+    + ` text-anchor="middle" dominant-baseline="central" font-family="var(--font-mono)" font-weight="700"`
+    + ` font-size="${TYPE.body}" fill="${hot ? T.onAccent : T.ink}"`
+    + (hot ? '' : ` paint-order="stroke" stroke="${T.paper}" stroke-width="3"`)
+    + `>${s.map.get(f.id)}${unit}</text>`;
+}
+
+// One feature's shape path and, if it clears the label threshold, its value mark. Returns null for
+// anything AlbersUsa drops outside the US.
+function choroplethFeature(f, { path, s, labels, labelMin, unit }) {
+  const d = trim(path(f));
+  if (!d) return null;
+  const frac = s.frac(f.id);
+  const cls = frac === null ? 'base' : 'hit';
+  const shape = `<path class="${cls}" d="${d}" fill="${frac === null ? EMPTY : rampAt(frac)}"`
+    + ` stroke="${T.hair}" stroke-width="0.8" stroke-linejoin="round"/>`;
+  if (!(labels && frac !== null && frac >= labelMin)) return { shape, mark: '' };
+  const c = path.centroid(f);
+  return { shape, mark: Number.isFinite(c[0]) ? choroplethLabel(f, c, { frac, s, unit }) : '' };
+}
+
 function choropleth({ items, projection, x, y, w, h, data, title, sub, legend, showLegend, unit,
   labels, labelMin, start, dur }) {
   const s = scale(data);
   const fc = collection(items);
   const proj = projection().fitSize([w, h], fc);
   const path = geoPath(proj);
-  const shapes = [];
-  const marks = [];
-  for (const f of fc.features) {
-    const d = trim(path(f));
-    if (!d) continue;                                 // AlbersUsa drops anything outside the US
-    const frac = s.frac(f.id);
-    const cls = frac === null ? 'base' : 'hit';
-    shapes.push(`<path class="${cls}" d="${d}" fill="${frac === null ? EMPTY : rampAt(frac)}"`
-      + ` stroke="${T.hair}" stroke-width="0.8" stroke-linejoin="round"/>`);
-    if (labels && frac !== null && frac >= labelMin) {
-      const c = path.centroid(f);
-      // THE HALO MUST BE THE OPPOSITE OF THE INK. A page-coloured halo behind page-coloured ink erases
-      // the label, which is exactly what happened to CA's "39" over its own dark fill: white on white,
-      // invisible, and every gate green. A dark fill already gives the light ink its contrast, so the
-      // halo is only there for the light buckets.
-      const hot = frac > 0.55;
-      if (Number.isFinite(c[0])) marks.push(`<text class="hit" x="${c[0].toFixed(1)}" y="${c[1].toFixed(1)}"`
-        + ` text-anchor="middle" dominant-baseline="central" font-family="var(--font-mono)" font-weight="700"`
-        + ` font-size="${TYPE.body}" fill="${hot ? T.onAccent : T.ink}"`
-        + (hot ? '' : ` paint-order="stroke" stroke="${T.paper}" stroke-width="3"`)
-        + `>${s.map.get(f.id)}${unit}</text>`);
-    }
-  }
+  const marked = fc.features.map((f) => choroplethFeature(f, { path, s, labels, labelMin, unit })).filter(Boolean);
   const svg = `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;overflow:visible">`
-    + shapes.join('') + marks.join('') + '</svg>';
+    + marked.map((m) => m.shape).join('') + marked.map((m) => m.mark).join('') + '</svg>';
   const html = `<div style="width:${w}px">${titleEl(title, sub, w)}${svg}`
     + (showLegend ? legendEl({ w, min: s.min, max: s.max, label: legend, unit }) : '') + '</div>';
   // Only the DATA regions arrive; the rest of the world is already there as context. Staggering 177
@@ -271,7 +276,7 @@ export function usMapBubble({ x, y, w = 1200, h = 720, points = [], title = '', 
     ? `<path d="${d}" fill="${EMPTY}" stroke="${T.hair}" stroke-width="0.8" stroke-linejoin="round"/>` : ''; }).join('');
   const vals = points.map((p) => +p.value || 0);
   const max = Math.max(...vals, 1);
-  const dots = points.map((p, i) => {
+  const dots = points.map((p) => {
     const xy = proj(lonlatOf(p, 'usMapBubble'));
     if (!xy) return '';                                   // outside the Albers USA clip
     const r = minR + (maxR - minR) * Math.sqrt(Math.max(0, +p.value || 0) / max);
@@ -305,24 +310,23 @@ export function usMapBubble({ x, y, w = 1200, h = 720, points = [], title = '', 
 // usMapFlow, origin→destination arcs that DRAW ON. The curve is a quadratic bowed perpendicular to the
 // chord: not a real great circle, but at continental scale the difference is under a pixel and a
 // projected great circle costs a geoInterpolate sample loop for nothing.
-export function usMapFlow({ x, y, w = 1200, h = 720, flows = [], title = '', sub = '',
-  bow = 0.22, color = T.accent, hub = '', labels = true, start = 0, dur = 5 } = {}) {
-  const fc = collection(US_STATES);
-  const proj = geoAlbersUsa().fitSize([w, h], fc);
-  const path = geoPath(proj);
-  const outline = fc.features.map((f) => { const d = trim(path(f)); return d
+function usMapFlowOutline(fc, path) {
+  return fc.features.map((f) => { const d = trim(path(f)); return d
     ? `<path d="${d}" fill="${EMPTY}" stroke="${T.hair}" stroke-width="0.8" stroke-linejoin="round"/>` : ''; }).join('');
-  const widths = flows.map((f) => +f.value || 1);
-  const maxV = Math.max(...widths, 1);
+}
+
+// The arcs AND the node map come out of one pass, because a node is only known once a flow that
+// touches it has been projected. Control point: the chord's midpoint pushed along the chord's normal,
+// always bowed the same way round, so parallel routes fan instead of crossing.
+function usMapFlowArcs(flows, { proj, hub, bow, color }) {
   const nodes = new Map();
   const addNode = (name, xy, isHub) => { if (name && !nodes.has(name)) nodes.set(name, { xy, isHub }); };
+  const maxV = Math.max(...flows.map((f) => +f.value || 1), 1);
   const arcs = flows.map((f) => {
     const a = proj(lonlatOf({ name: f.from, lon: f.fromLon, lat: f.fromLat }, 'usMapFlow'));
     const b = proj(lonlatOf({ name: f.to, lon: f.toLon, lat: f.toLat }, 'usMapFlow'));
     if (!a || !b) return '';
     addNode(f.from, a, f.from === hub); addNode(f.to, b, f.to === hub);
-    // Control point: the chord's midpoint pushed along the chord's normal. Always bowed the same way
-    // round, so parallel routes fan instead of crossing.
     const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
     const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1;
     const cx = mx + (-dy / len) * len * bow, cy = my + (dx / len) * len * bow;
@@ -330,7 +334,11 @@ export function usMapFlow({ x, y, w = 1200, h = 720, flows = [], title = '', sub
     return `<path class="arc" d="M${a[0].toFixed(1)} ${a[1].toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${b[0].toFixed(1)} ${b[1].toFixed(1)}"`
       + ` fill="none" stroke="${color}" stroke-width="${sw.toFixed(1)}" stroke-linecap="round" opacity="0.85"/>`;
   }).join('');
-  const dots = [...nodes.entries()].map(([name, n]) => {
+  return { arcs, nodes };
+}
+
+function usMapFlowDots(nodes, { labels, color }) {
+  return [...nodes.entries()].map(([name, n]) => {
     const r = n.isHub ? 9 : 5.5;
     return `<g class="node">`
       + `<circle cx="${n.xy[0].toFixed(1)}" cy="${n.xy[1].toFixed(1)}" r="${r}" fill="${n.isHub ? color : T.paper}"`
@@ -340,6 +348,16 @@ export function usMapFlow({ x, y, w = 1200, h = 720, flows = [], title = '', sub
         + ` fill="${n.isHub ? T.ink : T.sub}" paint-order="stroke" stroke="${T.paper}" stroke-width="4">${name}</text>` : '')
       + '</g>';
   }).join('');
+}
+
+export function usMapFlow({ x, y, w = 1200, h = 720, flows = [], title = '', sub = '',
+  bow = 0.22, color = T.accent, hub = '', labels = true, start = 0, dur = 5 } = {}) {
+  const fc = collection(US_STATES);
+  const proj = geoAlbersUsa().fitSize([w, h], fc);
+  const path = geoPath(proj);
+  const outline = usMapFlowOutline(fc, path);
+  const { arcs, nodes } = usMapFlowArcs(flows, { proj, hub, bow, color });
+  const dots = usMapFlowDots(nodes, { labels, color });
   const svg = `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="display:block;overflow:visible">`
     + outline + arcs + dots + '</svg>';
   const html = `<div style="width:${w}px">${titleEl(title, sub, w)}${svg}</div>`;

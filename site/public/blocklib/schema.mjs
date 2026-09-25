@@ -157,16 +157,13 @@ export function checkValue(rule, value, at) {
 // that rejected `x` would be unusable by the very containers that inject it.
 export const PASSTHROUGH = ['x', 'y', 'start', 'dur'];
 
-export function resolve(family, given = {}) {
-  const table = SCHEMA[family];
-  if (!table) fail(`block: no option table for family "${family}".`);
-  if (given === null || typeof given !== 'object' || Array.isArray(given)) {
-    fail(`block: ${family} options must be a plain object. Got ${JSON.stringify(given)}.`);
-  }
-  const allowed = [...Object.keys(table), ...PASSTHROUGH];
+function assertKnownKeys(family, given, allowed) {
   for (const key of Object.keys(given)) {
     if (!allowed.includes(key)) fail(`block: ${family} has no option "${key}". Valid keys: ${list(allowed)}.`);
   }
+}
+
+function fillFields(family, table, given) {
   const out = {};
   for (const k of PASSTHROUGH) if (k in given) out[k] = given[k];
   for (const [key, rule] of Object.entries(table)) {
@@ -176,6 +173,16 @@ export function resolve(family, given = {}) {
     if ('def' in rule) out[key] = rule.def;
   }
   return out;
+}
+
+export function resolve(family, given = {}) {
+  const table = SCHEMA[family];
+  if (!table) fail(`block: no option table for family "${family}".`);
+  if (given === null || typeof given !== 'object' || Array.isArray(given)) {
+    fail(`block: ${family} options must be a plain object. Got ${JSON.stringify(given)}.`);
+  }
+  assertKnownKeys(family, given, [...Object.keys(table), ...PASSTHROUGH]);
+  return fillFields(family, table, given);
 }
 
 export { BlockOptionError };

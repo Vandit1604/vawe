@@ -727,7 +727,7 @@ test('lib-test: gates', async () => {
   const { readRuns } = await import('../../harness/lib/runlog.mjs');
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'runlog-e2e-'));
   const fixture = path.join(tmpDir, '_runlog-e2e-fixture.json');
-  fs.copyFileSync(path.join(repoRoot, 'films/scene/sample.json'), fixture);
+  fs.copyFileSync(path.join(repoRoot, 'tests/fixtures/films/sample.json'), fixture);
   const r = spawnSync('node', [path.join(repoRoot, 'harness/lib/run-author-check.mjs'), fixture], {
     cwd: tmpDir, encoding: 'utf8', env: { ...process.env, RUNLOG_CMD: 'test', MODE: 'iterate' },
   });
@@ -844,18 +844,26 @@ test('lib-test: gates', async () => {
 // so this stays true on a fresh clone.
 {
   const { lookBlock } = await import('../../quality/gates/stage.mjs');
-  const look = lookBlock('sample');
-  ok('lookBlock names the pre-render page audit for a film with a scene', look
-    && typeof look.audit === 'string' && look.audit.includes('quality/audit.mjs') && look.audit.includes('sample.json'));
-  // THE REAL DEFECT: before this field existed, a design/direct worklist had no audit command at all,
-  // so it was reachable only through `make ship`, a POST-render step. A storyboard with no scene JSON
-  // yet (still at the design stage, nothing for the audit to load) must not claim one it cannot run.
-  const noSceneStoryboard = 'films/scene/_zz-lookblock-noscene.storyboard.md';
-  fs.copyFileSync('films/scene/sample.storyboard.md', noSceneStoryboard);
+  // lookBlock resolves a bare name through VAWE_FILMS_DIR, pointed here at tests/fixtures/films/
+  // (never films/scene/, which is real film content this suite must not depend on).
+  const prevFilmsDir = process.env.VAWE_FILMS_DIR;
+  process.env.VAWE_FILMS_DIR = 'tests/fixtures/films';
   try {
-    const noScene = lookBlock('_zz-lookblock-noscene');
-    ok('lookBlock names no audit command when there is no scene JSON yet', noScene && noScene.audit === null);
-  } finally { fs.rmSync(noSceneStoryboard, { force: true }); }
+    const look = lookBlock('sample');
+    ok('lookBlock names the pre-render page audit for a film with a scene', look
+      && typeof look.audit === 'string' && look.audit.includes('quality/audit.mjs') && look.audit.includes('sample.json'));
+    // THE REAL DEFECT: before this field existed, a design/direct worklist had no audit command at all,
+    // so it was reachable only through `make ship`, a POST-render step. A storyboard with no scene JSON
+    // yet (still at the design stage, nothing for the audit to load) must not claim one it cannot run.
+    const noSceneStoryboard = 'tests/fixtures/films/_zz-lookblock-noscene.storyboard.md';
+    fs.copyFileSync('tests/fixtures/films/sample.storyboard.md', noSceneStoryboard);
+    try {
+      const noScene = lookBlock('_zz-lookblock-noscene');
+      ok('lookBlock names no audit command when there is no scene JSON yet', noScene && noScene.audit === null);
+    } finally { fs.rmSync(noSceneStoryboard, { force: true }); }
+  } finally {
+    if (prevFilmsDir === undefined) delete process.env.VAWE_FILMS_DIR; else process.env.VAWE_FILMS_DIR = prevFilmsDir;
+  }
 }
 
 

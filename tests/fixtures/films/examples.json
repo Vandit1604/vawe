@@ -1,0 +1,10 @@
+{
+  "note": "Fixture gold set for tests/authoring/exemplars.test.mjs. Not the real films/scene/examples.json: three small inline scenes shaped just enough to exercise retrieval and signature reading, never real film content.",
+  "goldSet": {
+    "fullFilms": [
+      { "file": "saas-hero-launch.json", "teaches": "whole directed structure", "register": "a white-first SaaS launch, hook to CTA" },
+      { "file": "product-feature-tour.json", "teaches": "whole directed structure", "register": "a dark, chaptered product tour" },
+      { "file": "process.json", "teaches": "whole directed structure", "register": "an idea proven by one measured instance" }
+    ]
+  }
+}

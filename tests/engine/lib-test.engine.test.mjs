@@ -1434,7 +1434,7 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
   // that still says `tick` is a film nobody has re-listened to. This asserts the scenes themselves,
   // not the alias layer, so the aliases stay a courtesy rather than becoming load-bearing.
   ok('audio: every cue an author named in a scene is a cue that exists', (() => {
-    const dir = path.join(repoRoot, 'films/scene');
+    const dir = path.join(repoRoot, 'tests/fixtures/films');
     const bad = [];
     for (const f of fs.readdirSync(dir)) {
       if (!f.endsWith('.json')) continue;

@@ -1,0 +1,145 @@
+{
+  "module": "scene",
+  "orientation": "landscape",
+  "theme": "argus",
+  "duration": 7.5,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "paper",
+      "from": 0,
+      "to": 7.5
+    }
+  ],
+  "layers": [
+    {
+      "type": "rect",
+      "x": 520,
+      "y": 330,
+      "w": 880,
+      "h": 360,
+      "radius": 24,
+      "bg": "#ffffff",
+      "border": "1px solid #e6e6e4",
+      "shadow": true,
+      "start": 0.2,
+      "duration": 7.3,
+      "anim": "pop",
+      "exitDur": 0
+    },
+    {
+      "type": "text",
+      "text": "Ask anything",
+      "font": "mono",
+      "size": 26,
+      "weight": 400,
+      "color": "#757572",
+      "x": 566,
+      "y": 372,
+      "start": 0.5,
+      "duration": 7,
+      "anim": "fade",
+      "exitDur": 0
+    },
+    {
+      "type": "text",
+      "text": "create a landing page for my startup",
+      "font": "sans",
+      "size": 42,
+      "weight": 500,
+      "color": "#1f1f1a",
+      "x": 566,
+      "y": 430,
+      "w": 800,
+      "typing": 18,
+      "caret": true,
+      "start": 0.9,
+      "duration": 6.5,
+      "exitDur": 0
+    },
+    {
+      "type": "text",
+      "text": "Generate",
+      "font": "sans",
+      "size": 34,
+      "weight": 600,
+      "color": "#ffffff",
+      "bg": "#2563eb",
+      "radius": 12,
+      "pad": "16px 0",
+      "x": 1120,
+      "y": 588,
+      "w": 236,
+      "align": "center",
+      "start": 1.2,
+      "duration": 6,
+      "anim": "pop",
+      "exitDur": 0,
+      "critical": true,
+      "motion": [
+        {
+          "t": 0,
+          "scale": 1
+        },
+        {
+          "t": 3.25,
+          "scale": 1
+        },
+        {
+          "t": 3.4,
+          "scale": 0.93
+        },
+        {
+          "t": 3.62,
+          "scale": 1,
+          "ease": "easeOutBack"
+        }
+      ]
+    },
+    {
+      "type": "cursor",
+      "x": 1238,
+      "y": 612,
+      "size": 40,
+      "start": 2.5,
+      "duration": 5,
+      "clicks": [
+        1.95
+      ],
+      "path": [
+        {
+          "t": 0,
+          "x": -430,
+          "y": -250
+        },
+        {
+          "t": 1.7,
+          "x": 0,
+          "y": 0,
+          "ease": "easeInOutCubic"
+        },
+        {
+          "t": 5,
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "✓ Building your page...",
+      "font": "mono",
+      "size": 30,
+      "weight": 500,
+      "color": "#1a9e57",
+      "x": 566,
+      "y": 620,
+      "start": 4.9,
+      "duration": 2.6,
+      "anim": "rise",
+      "exitDur": 0
+    }
+  ]
+}
