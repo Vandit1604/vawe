@@ -66,15 +66,24 @@ const KINDS = {
 const AMOUNT = { bloom: 16, blur: 14, desaturate: 1, darken: 45, brighten: 30, contrast: 25 };
 
 export const ADJUST_BLURBS = {
-  bloom:      'a real GLOW over everything beneath: the light spills past its edges and the subject stays sharp. The one kind that composites back rather than replacing',
-  blur:       'soften everything beneath, in pixels. The rack-focus of a whole beat, not of one layer',
-  desaturate: 'drain the colour beneath. 1 is fully grey',
-  darken:     'dim everything beneath, as a percentage',
-  brighten:   'lift everything beneath, as a percentage',
-  contrast:   'harden the tones beneath, as a percentage',
+  bloom:      'a real GLOW over everything beneath: blurs it 16px, lifts brightness 9% and screens the halo back over the sharp original so the subject stays crisp',
+  blur:       'soften everything beneath by 14px of blur. The rack-focus of a whole beat, not of one layer',
+  desaturate: 'drain the colour beneath by 100%, its default `amount` of 1. 1 is fully grey',
+  darken:     'dim everything beneath by 45%, its default `amount`, cutting brightness',
+  brighten:   'lift everything beneath by 30%, its default `amount`, raising brightness',
+  contrast:   'harden the tones beneath by 25%, its default `amount`, widening light against dark',
 };
 
-export const ADJUST_REGISTRY = defineRegistry('adjustment', KINDS, { blurbs: ADJUST_BLURBS, slot: 'kind',
+const ADJUST_AKA = {
+  bloom: ['glow', 'halo', 'soft glow'],
+  blur: ['soften', 'rack focus', 'defocus'],
+  desaturate: ['grey out', 'drain color', 'black and white'],
+  darken: ['dim', 'shadow the frame', 'dim it down'],
+  brighten: ['lighten', 'lift the exposure', 'brighten up'],
+  contrast: ['punch up contrast', 'harden tones', 'more contrast'],
+};
+
+export const ADJUST_REGISTRY = defineRegistry('adjustment', KINDS, { blurbs: ADJUST_BLURBS, aka: ADJUST_AKA, slot: 'kind',
   catalog: {
     title: 'Adjustment layers (grade what is BENEATH)',
     tag: 'per-layer',
