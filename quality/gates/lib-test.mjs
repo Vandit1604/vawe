@@ -2555,7 +2555,7 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
 
 // ---- vars track: PER-CHANNEL timing (core/tracks/vars.js) ----
 {
-  const drive = (L, t) => { const out = {}; varsFrame(null, { style: { setProperty: (k, v) => { out[k] = +v; } } }, L, null, t, 0, 0); return out; };
+  const drive = (L, t) => { const out = {}; varsFrame({ kit: null, el: { style: { setProperty: (k, v) => { out[k] = +v; } } }, L, units: null, t, f: 0, start: 0 }); return out; };
   const two = { vars: { '--a': [0, 1], '--b': [0, 1] } };
   ok('vars: a scalar varsEase still drives every channel identically (back-compat)', (() => {
     const o = drive({ ...two, varsEase: 'linear', varsDur: 1 }, 0.5); return o['--a'] === 0.5 && o['--b'] === 0.5;
@@ -5102,7 +5102,7 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
   const camView = (t) => ({ ...camAtKf(pan, t), vel: cameraVelocityAt(pan, t, 1 / 30) });
   const blurOf = (L, k) => {
     const el = { style: {} };
-    motionFrame(k, el, L, null, 0.5, 15, 0, 1, { camera: camView(0.5) });
+    motionFrame({ kit: k, el: el, L: L, units: null, t: 0.5, f: 15, start: 0, end: 1, scene: { camera: camView(0.5) } });
     const m = /blur\(([\d.]+)px\)/.exec(el.style.filter || '');
     return m ? +m[1] : 0;
   };
@@ -5138,11 +5138,11 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
   // and on one that has already drawn a later frame must agree. This is the branch #507 was logged on.
   ok('camera blur is a pure function of the frame, not of the frames drawn before it', (() => {
     const el = { style: {} };
-    motionFrame(camKit, el, still, null, 0.9, 27, 0, 1, { camera: camView(0.9) });
-    motionFrame(camKit, el, still, null, 0.5, 15, 0, 1, { camera: camView(0.5) });
+    motionFrame({ kit: camKit, el: el, L: still, units: null, t: 0.9, f: 27, start: 0, end: 1, scene: { camera: camView(0.9) } });
+    motionFrame({ kit: camKit, el: el, L: still, units: null, t: 0.5, f: 15, start: 0, end: 1, scene: { camera: camView(0.5) } });
     const warm = el.style.filter;
     const e2 = { style: {} };
-    motionFrame(camKit, e2, still, null, 0.5, 15, 0, 1, { camera: camView(0.5) });
+    motionFrame({ kit: camKit, el: e2, L: still, units: null, t: 0.5, f: 15, start: 0, end: 1, scene: { camera: camView(0.5) } });
     return warm === e2.style.filter;
   })());
 
