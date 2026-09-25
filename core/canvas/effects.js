@@ -246,7 +246,7 @@ export function bakeCanvasFx(img, spec) {
   sctx.drawImage(img, 0, 0, W, H);
   const out = document.createElement('canvas'); out.width = W; out.height = H;
   const dctx = out.getContext('2d');
-  try { pass(sctx, dctx, W, H, o, (o.seed | 0) || 0); } catch (e) { return null; } // tainted/cross-origin → skip, don't crash
+  try { pass(sctx, dctx, W, H, o, (o.seed | 0) || 0); } catch { return null; } // tainted/cross-origin → skip, don't crash
   return out.toDataURL('image/png');
 }
 
