@@ -306,8 +306,8 @@ demo: ## [dev] scaffold a SPECIMEN demo scene (one subject, one shot) and iterat
 # construction: it clears sparse-beats, plain-slideshow and no-transition/no-bg-motion on write) plus its
 # `.storyboard.md` sidecar (structurally clean against storyboard-check and craft-checklist). The
 # author's only job afterwards is to replace the `REPLACE:`/`<fill: ...>` markers. engine-doctrine/CRAFT/BLUEPRINTS.md.
-scaffold: ## [preflight] write a directed, gate-passing scene + storyboard skeleton to start a film from (OUT=, DUR=, THEME=, BEATS=, TYPE=launch|explainer|talking-head|sting|demo|recreation, SPECTACLE=, NOT=)
-	node harness/author/scaffold.mjs $(if $(OUT),--out $(OUT)) $(if $(DUR),--dur $(DUR)) $(if $(THEME),--theme $(THEME)) $(if $(BEATS),--beats $(BEATS)) $(if $(TYPE),--type $(TYPE)) $(if $(SPECTACLE),--spectacle "$(SPECTACLE)") $(if $(NOT),--not "$(NOT)")
+scaffold: ## [preflight] write a directed, gate-passing scene + storyboard skeleton to start a film from (OUT=, DUR=, THEME=, BEATS=, TYPE=launch|explainer|talking-head|sting|demo|recreation, SPECTACLE=, NOT=; the last two reach the script through the environment, never the shell line)
+	node harness/author/scaffold.mjs $(if $(OUT),--out $(OUT)) $(if $(DUR),--dur $(DUR)) $(if $(THEME),--theme $(THEME)) $(if $(BEATS),--beats $(BEATS)) $(if $(TYPE),--type $(TYPE))
 
 # make ideate REF=<ref>: the film in plain words, act by act, from a studied reference
 # (grammar/<ref>.json → grammar/<ref>.prompt.md; refuses with the exact `make study` command if the
