@@ -94,7 +94,7 @@ a{color:inherit;text-decoration:none}
    answer focus with a border plus a tinted ring (.bsearch, .bselect, .ar-find, .ed-cm). */
 a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 /* Cobalt cannot ring itself. White is the only ink the band already trusts at 5.17:1. */
-.bar.pill a:focus-visible,.on-accent a:focus-visible,.foot-band a:focus-visible{outline-color:#fff}
+.on-accent a:focus-visible{outline-color:#fff}
 /* The skip chip IS cobalt, and it sits flush to the shell edge, so its ring goes inside in white. */
 .skip:focus-visible{outline-color:#fff;outline-offset:-4px}
 /* ===== THE SHELL ===========================================================================
@@ -131,83 +131,38 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* No darkening gradient at the band's foot. It read as a shadow slumped under the content and
    bought nothing the blend mode above does not already guarantee. */
 
-/* ===== THE PILL NAV ========================================================================
-   Floats on the bookend. Absolute so it leaves the flow entirely — that is what lets <main> wrap
-   the hero headline instead of starting below it. */
-/* Anchors to .hero-band (which is position:relative via .bookend), NOT to .shell — the nav is a
-   child of the band now, so its computed background really is cobalt and contrast checkers read
-   what a viewer sees instead of the white shell behind it.
-   .wrap sets position:relative and is defined later, so this must out-specify it, not tie. */
-.wrap.navhold{position:absolute;top:0;left:0;right:0;z-index:var(--z-nav);margin:0 auto}
 /* Skip target. tabindex=-1 makes it programmatically focusable; without this rule the browser
    paints a focus ring around the whole hero when the skip link is used. */
 #content:focus{outline:none}
 #content:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
-.bar.pill{padding:18px 0}
-/* The fill DARKENS. A translucent white pill lightens cobalt to rgb(72,124,238), and white on
-   that is 3.9:1 — a real AA failure, and one the band's own multiply rule exists to prevent.
-   Deep navy at .22 composites to rgb(31,84,202): white lands at 6.6:1 and the glass still reads.
-   The border may stay white; it carries no text. */
-.bar.pill .nav{background:rgba(11,31,84,.22);border:1px solid rgba(255,255,255,.26);
-  border-radius:999px;padding:5px;gap:2px;backdrop-filter:blur(10px)}
-.bar.pill .mark,.bar.pill .nav a,.bar.pill .nav [aria-current="page"]{color:#fff}
-.bar.pill .glyph{color:#fff}
-.bar.pill .nav a,.bar.pill .nav [aria-current="page"]{padding:9px 15px;border-radius:999px}
-.bar.pill .nav a:hover{background:rgba(11,31,84,.38)}
-.bar.pill .nav [aria-current="page"]{background:#fff;color:var(--accent)}
-.bar.pill .ghbtn{background:var(--ink);color:#fff;border-color:transparent;border-radius:999px}
-.bar.pill .ghbtn:hover{background:#000}
 /* Everything living on the cobalt band. White on #2563eb is 5.17:1 — legal for body, and the
    scrim keeps it that way over any frame the film happens to be on.
    These must out-specify .hero-head h1 / .hero-head .sub, which are defined later in this file. */
 .on-accent{color:#fff}
 .hero-head.on-accent h1,.on-accent h2,.on-accent > p{color:#fff}
 .hero-head.on-accent .sub{color:rgba(255,255,255,.94)}
-/* ===== FOOTER BAND ===== */
-.foot-band{padding:clamp(56px,7vw,96px) 0 clamp(28px,3vw,40px)}
-.foot-in{display:flex;flex-direction:column;gap:24px}
-.foot-cta{font-size:clamp(1.6rem,3.4vw,2.4rem);font-weight:700;letter-spacing:-.02em;line-height:1.06;
-  font-variation-settings:"wdth" var(--wd-display);text-wrap:balance;max-width:16ch}
-.foot-sub{font-size:1.02rem;line-height:1.55;max-width:46ch;margin-top:-10px}
-.foot-act{display:flex;gap:12px;flex-wrap:wrap;margin:2px 0 8px}
-/* the one button that lives on cobalt: hairline white, no fill, so it can't fight .btn-white */
-.btn-onaccent{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
-.btn-onaccent:hover{background:rgba(11,31,84,.34);border-color:#fff}
-.foot-links{display:flex;flex-wrap:wrap;gap:8px}
-.foot-links a{padding:8px 15px;border-radius:999px;font-size:14px;font-weight:500;color:#fff;
-  background:rgba(11,31,84,.22);border:1px solid rgba(255,255,255,.26);
-  transition:background .15s var(--ease)}
-.foot-links a:hover{background:rgba(11,31,84,.4)}
-.foot-rule{height:1px;background:rgba(255,255,255,.28)}
-/* full white, not .86: faded white over cobalt composites to rgb(224,233,252) => 4.25:1, under AA.
-   Hierarchy here comes from size, never from fading the ink. */
-.foot-meta{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
-  font-size:13px;color:#fff}
-.foot-meta a{text-decoration:underline;text-underline-offset:2px}
 .wrap{position:relative;z-index:var(--z-base);max-width:var(--maxw);margin:0 auto;padding:0 26px}
+/* Several routes render the Footer inside their own .wrap; a nested wrap adds no second gutter. */
+.wrap .wrap{padding-inline:0;max-width:none}
 .accent{color:var(--accent)}
 /* =========================================================
    NAV
    ========================================================= */
-.bar{display:flex;align-items:center;justify-content:space-between;padding:22px 0;position:relative;z-index:var(--z-sticky)}
-.mark{display:flex;align-items:center;gap:10px;font-weight:600;font-size:20px;letter-spacing:-.02em}
-.glyph{width:24px;height:13px}
-.nav{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500}
-/* No state on this site changes a nav link's opacity, so the third segment transitioned nothing. */
-.nav a,.nav [aria-current="page"]{padding:8px 12px;border-radius:9px}
-.nav a{color:inherit;transition:background .2s var(--ease),color .2s}
-/* The current page: a span, never a link (site rule, see Footer.tsx), so no hover/press styling. */
-.nav [aria-current="page"]{font-weight:600;cursor:default}
-.ghbtn{display:inline-flex;align-items:center;gap:7px;margin-left:8px;padding:8px 13px;border-radius:10px;
-  background:var(--surface);color:var(--ink);box-shadow:var(--shadow-1);border:1px solid var(--line);font-weight:600;
-  transition:transform .14s var(--ease),box-shadow .14s var(--ease)}
-.ghbtn:hover{transform:translateY(-1px);box-shadow:var(--shadow-2)}
-/* solid variant (interior) */
-.bar.solid{border-bottom:1px solid var(--line)}
-.bar.solid .glyph{color:var(--accent)}
-.bar.solid .nav a{color:var(--ink-2)}
-.bar.solid .nav a:hover{background:var(--accent-soft);color:var(--accent)}
-.bar.solid .nav [aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px;position:relative;z-index:var(--z-sticky)}
+.mark{display:flex;align-items:center;gap:9px;font-family:var(--font-title);font-weight:600;font-size:19px;letter-spacing:-.02em;color:var(--ink)}
+.glyph{width:24px;height:13px;color:var(--ink)}
+.nav{display:flex;align-items:center;gap:2px;font-size:14px;font-weight:500}
+.nav a,.nav [aria-current="page"]{padding:8px 12px;border-radius:8px}
+.nav a{color:var(--ink-2);transition:background-color .15s ease,color .15s ease}
+.nav a:hover{background:var(--raised);color:var(--ink)}
+/* The current page: a span, never a link (site rule, see Footer.tsx), so no hover or press. */
+.nav [aria-current="page"]{color:var(--ink);background:var(--raised);cursor:default}
+/* The one filled action in the bar. */
+.ghbtn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:8px;
+  background:var(--ink);color:var(--bg);font-weight:600;font-size:14px;
+  transition:background-color .15s ease,scale .12s cubic-bezier(.2,0,0,1)}
+.ghbtn:hover{background:var(--ink-2)}
+.ghbtn:active{scale:.96}
 /* =========================================================
    BUTTONS
    ========================================================= */
@@ -238,25 +193,25 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .h2{font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:700;letter-spacing:-.018em;line-height:1.06;text-wrap:balance;
   font-variation-settings:"wdth" var(--wd-display)}
 .lead{color:var(--ink-2);font-size:1.08rem;line-height:1.6;max-width:56ch}
-.foot{border-top:1px solid var(--line);padding:28px 0;display:flex;align-items:center;justify-content:space-between;
-  gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
-.foot a{color:var(--ink-2)} .foot a:hover{color:var(--accent)}
-.foot .mono{font-family:var(--font-mono),monospace}
-/* Site nav on every plain footer (18 of 19 pages). Every column is grouped by meaning (product /
-   topic / job / comparison / docs), never one flat pile, and `gap` alone expresses both the tight
-   rhythm inside a column and the generous one between columns: pbakaus/layout's "group by meaning,
-   use proximity before decoration" taken as-is, so no per-column border or card was added. */
-.foot-plain{padding-top:56px}
-.foot-nav{display:flex;flex-wrap:wrap;gap:36px 56px;padding-bottom:8px}
-.foot-col{display:flex;flex-direction:column;gap:10px;min-width:132px}
-.foot-h{font-family:var(--font-mono),monospace;font-size:12px;letter-spacing:.02em;color:var(--muted);
-  text-transform:uppercase}
-.foot-col a,.foot-col span[aria-current]{font-size:14px;line-height:1.3}
-.foot-col a{color:var(--ink-2)}
-.foot-col a:hover{color:var(--accent)}
-/* The current page's own entry: not a link (never link a page to itself), set apart by weight and
-   ink rather than by the cobalt accent, which this site reserves for things you can act on. */
-.foot-col span[aria-current]{color:var(--ink);font-weight:600}
+/* ===== FOOTER · studio panels on the ground, the generated route groups inside ===== */
+.panel{background:var(--surface);border-radius:var(--r);box-shadow:var(--ring)}
+.foot{display:grid;gap:12px;padding-top:96px;padding-bottom:24px}
+.foot-cta-panel{padding:32px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.foot-cta{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.04;text-wrap:balance;max-width:18ch}
+.foot-act{display:flex;gap:8px;flex-wrap:wrap}
+.foot-panel{padding:28px 28px 20px}
+.foot-nav{display:grid;gap:28px 40px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.foot-col{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.foot-h{font-family:var(--font-mono),monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.foot-col a,.foot-col [aria-current="page"]{display:inline-flex;align-items:center;min-height:32px;font-size:14px;line-height:1.3}
+.foot-col a{color:var(--ink-2);transition:color .15s ease}
+.foot-col a:hover{color:var(--ink)}
+/* The current page's own entry: not a link, set apart by ink and weight, never by the accent. */
+.foot-col [aria-current="page"]{color:var(--ink);font-weight:600}
+.foot-meta{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:28px;padding-top:18px;
+  border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.foot-meta a{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px}
+.foot-meta .mono{font-family:var(--font-mono),monospace;font-size:12px}
 /* =========================================================
    INTERIOR PAGE HEAD + editorial rows
    ========================================================= */
@@ -590,39 +545,15 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   .nav{gap:2px;font-size:13.5px}
   .nav a{padding:6px 9px}
   .ghbtn{padding:6px 10px}
-  /* The pill's own padding out-specifies the two rules above, so it has to be named. */
-  .bar.pill .nav a{padding:7px 11px}
-  .bar.pill .ghbtn{padding:6px 11px}
 }
-/* The pill carries the same six links in a bordered capsule, so it runs wider than the solid bar
-   and is still 22px over at 701px. It sheds the last of it here; below 700 it stops being one row
-   at all and the block further down takes over. */
-@media (max-width:760px){
-  .bar.pill .nav a{padding:7px 8px}
-  .bar.pill .ghbtn{padding:6px 9px}
-}
+/* Below 700 the nav takes its own full-width row under the mark and the GitHub action, and wraps
+   rather than scrolls, so no link hides past an edge with no cue. 44px thumb targets. */
 @media (max-width:700px){
-  .bar{flex-wrap:wrap;gap:10px;padding:16px 0}
-  .nav{flex-wrap:wrap;justify-content:flex-start;gap:2px;font-size:13.5px;width:100%}
-  .nav a{padding:6px 9px}
-  .ghbtn{margin-left:auto;padding:6px 10px}
-  .mark{font-size:18px}
-  /* The pill itself can't wrap — a two-row pill pushes its own contents out through its edge.
-     Row 1 keeps the mark and the GitHub action visible; row 2 is the pill, one row, scrolling.
-     The nav is absolute here, so whatever it floats over has to clear its height: the landing
-     does that in landing.css, next to the head it applies to. */
-  .bar.pill{gap:8px;padding:12px 0;flex-wrap:wrap}
-  .bar.pill .mark{order:1}
-  .bar.pill .ghbtn{order:2;margin-left:auto;flex:none;padding:6px 11px}
-  .bar.pill .nav{order:3;width:100%;flex-wrap:nowrap;overflow-x:auto;
-    scrollbar-width:none;-ms-overflow-style:none;font-size:13.5px}
-  .bar.pill .nav::-webkit-scrollbar{display:none}
-  .bar.pill .nav a{padding:7px 12px;white-space:nowrap;flex:none}
-  /* 44px thumb targets, measured on a 390px viewport: the nav rows came out 35px tall and the
-     footer chips 40px. The nav was under even the 24px floor of WCAG 2.5.8. Padding alone cannot
-     raise an inline link, so these become inline-flex first. Shared chrome, so it is fixed here
-     rather than on the one page that showed it. */
-  .nav a, .bar.pill .nav a, .foot-links a{display:inline-flex;align-items:center;min-height:44px}
+  .bar{flex-wrap:wrap;height:auto;gap:4px 10px;padding:12px 0}
+  .mark{order:1;font-size:18px}
+  .ghbtn{order:2;margin-left:auto}
+  .nav{order:3;width:100%;flex-wrap:wrap;font-size:14px}
+  .nav a,.nav [aria-current="page"]{display:inline-flex;align-items:center;min-height:44px;padding:0 10px}
 }
 /* ── the generator playground ──────────────────────────────────────────────────────────────────
    The stage is an INK well inside a white page, which is the pattern .demo-media already sets:
@@ -879,42 +810,4 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
    lands with its heading hidden. The offset is the bar, and the bar is taller here. */
 @media (max-width:760px){ .fxfam{scroll-margin-top:150px} }
 
-/* ===== FOOTER NAV, shared by both footer variants ==========================================
- * The site used to end two different ways: a cobalt band with pills on the home page, a hairline
- * rule with grey links everywhere else. It now ends one way, so this styles the grouped nav that
- * both variants render.
- *
- * Shaped by `jakubkrehel/better-ui` (ui-skills). TAKEN, and each is a specific value from it, not a
- * range: motion restraint, so the pill hover is 150ms rather than the 200ms it inherited, because a
- * footer link is a high-frequency target and "a custom animation there charges its attention cost on
- * every trigger"; scale(0.96) on press, "always 0.96, anything below 0.95 feels exaggerated"; and
- * transition only what changes, naming background and scale rather than `all`.
- * REJECTED: its "shadows for elevation, borders for structure" default. site/DESIGN.md says
- * hairlines instead of shadows and it owns that question, so the pills keep their 1px border.
- *
- * `foot-band-plain` carries no film, so it needs its own bottom padding: the bookend gets that from
- * the CTA block above it. */
-.foot-band-plain{padding-block:clamp(44px,5vw,64px)}
-.foot-nav{display:grid;gap:26px 40px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.foot-col{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
-/* FULL WHITE, NOT A FADED ONE, and this is the site's own rule catching me. The header shipped at
- * rgba(255,255,255,.62) and measured 2.95:1 on the cobalt band where 12px text needs 4.5. Raising
- * the alpha does not rescue it: white has to reach 92% to pass, which is no longer a muted colour.
- * site/CLAUDE.md rule 2 already says this about the accent ("cobalt on its own tint at 75% measures
- * 3.08:1 against a required 4.5") and the same physics apply to white on cobalt. So the hierarchy is
- * carried by SIZE, CASE and TRACKING, which cost no contrast, and never by opacity. */
-.foot-h{font-family:var(--font-mono),monospace;font-size:12px;letter-spacing:.06em;
-  text-transform:uppercase;color:#fff;margin-bottom:2px}
-/* Links and the current page share one shape, so the row does not jump when a page is the current
- * one: the current item keeps the pill's geometry and drops only its border and its hover. */
-.foot-col a,.foot-col [aria-current="page"]{display:inline-flex;align-items:center;min-height:36px;
-  padding:6px 13px;border-radius:999px;font-size:14px;font-weight:500;color:#fff;
-  border:1px solid transparent;text-decoration:none;
-  transition:background .15s var(--ease),scale .15s var(--ease)}
-.foot-col a{background:rgba(11,31,84,.22);border-color:rgba(255,255,255,.26)}
-.foot-col a:hover{background:rgba(11,31,84,.4)}
-.foot-col a:active{scale:.96}
-/* YOU ARE HERE, said by inverting the pill rather than dimming it. Dimmed white measured 2.75:1,
- * worse than the header. Inverted, the current page is the one filled pill in the footer: it reads
- * instantly, it cannot be clicked, and it is the highest-contrast thing in the band. */
-.foot-col [aria-current="page"]{background:#fff;color:var(--accent);cursor:default}
+
