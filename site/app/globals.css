@@ -529,7 +529,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   transform-origin:top left;transform:scale(var(--sp-scale)) translate(var(--sp-x,0px),var(--sp-y,0px))}
 .sp-bar{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg-2);border-top:1px solid var(--line)}
 .sp-play{width:30px;height:30px;flex:none;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);
-  font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .sp-play:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
 .sp-play:disabled{opacity:.4;cursor:default}
 /* The track reads at 16px and WCAG 2.5.8 wants 24. Padding grows the target without moving the
