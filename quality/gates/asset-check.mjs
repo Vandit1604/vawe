@@ -119,6 +119,15 @@ if (fs.existsSync(cssPath)) {
   }
 }
 const missingFonts = [...fonts].filter(([u]) => !resolvesToFile(u));
+// A face `make fonts` fetches (listed in fonts.lock.json) is missing because a step was skipped, and
+// --strict is right to block on it. A face that is NOT in that lock (Tiempos Headline, Modern Era: hand-
+// captured from a reference site, tokens.css says so directly) has no automated fetch at all, so blocking
+// on it would tell an author to run a command that can never produce the file. Those stay a WARN always.
+const lockPath = path.join(ROOT, 'harness/media/fonts.lock.json');
+const managedFonts = (() => {
+  try { return new Set(Object.keys(JSON.parse(fs.readFileSync(lockPath, 'utf8')).faces || {})); }
+  catch { return new Set(); }
+})();
 
 // FOOTAGE MUST BE SEEKABLE. `core/layers/video.js` never plays a clip; it seeks to a source time
 // computed from the frame number, which is what keeps renderFrame(n) pure. A seek is only as accurate
@@ -153,9 +162,13 @@ console.log(`\n  asset preflight · ${file}  (${refs.length} reference(s) · ${r
   + `${videoRefs.length ? ` · ${videoRefs.length - unprobed.length}/${videoRefs.length} clip(s) keyframe-probed` : ''})`);
 
 for (const [v, why] of unprobed) f.note('unprobed-video', `${v} not checked for sparse keyframes: ${why}`, { at: v });
-for (const [u, fam] of missingFonts) f.finding({ severity: sev(), code: 'missing-font',
-  summary: `${u} (${[...fam].join(', ')}) has no vendored file, every frame renders in a fallback face and nothing else will say so`,
-  at: u, fix: 'make fonts   (about twenty seconds; assets/fonts is gitignored, so a fresh worktree has none)' });
+for (const [u, fam] of missingFonts) {
+  const managed = managedFonts.has(path.basename(u));
+  f.finding({ severity: managed ? sev() : 'warn', code: 'missing-font',
+    summary: `${u} (${[...fam].join(', ')}) has no vendored file, every frame renders in a fallback face and nothing else will say so`,
+    at: u, fix: managed ? 'make fonts   (about twenty seconds; assets/fonts is gitignored, so a fresh worktree has none)'
+      : 'not managed by `make fonts`, a hand-captured face; vendor it by hand or drop the @font-face in core/tokens.css' });
+}
 for (const [w, v] of remotes) f.note('remote-asset', `${v}  [${w}]  not checked (remote)`, { at: w });
 for (const [w, v] of adapted) f.note('adapted-asset-src',
   `adapted asset-src: ${v} -> /${v.replace(/^\.\//, '')}  [${w}]  (file exists at repo root; relative src resolves under the page)`, { at: w });
