@@ -32,7 +32,7 @@
 | `agent` | an autonomous worker or assistant. The mark for something acting on its own. |
 | `arrowLeft` | back, previous, return. The pair to arrowRight, and it should point the way the film travels. |
 | `arrowRight` | forward, next, onward. Progression through a sequence, or a result following a cause. |
-| `bolt` | speed or power. Fast execution, an instant action, energy. |
+| `bolt` | speed or power. Fast execution, an instant action, energy: the mark for anything that happens in under a second. |
 | `braces` | code, JSON, a config file. The one to use when the subject is literally the syntax. |
 | `check` | done, passed, verified. The mark for a gate going green or a step completing. |
 | `clock` | time, duration, waiting, a deadline. Any beat whose subject is how long something takes. |
@@ -67,25 +67,25 @@ The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js
 |---|---|
 | `accent` | the brand accent as a radial with rippling dots and a slow spotlight (moves), the loud brand field |
 | `accentPlain` | the brand accent as a clean full-bleed field, grain only. FLAT, for plain sites whose hero is one colour |
-| `aurora` | drifting colour aurora (moves) |
+| `aurora` | three drifting colour blobs at 0.46 intensity over a dark radial, the northern-lights field (moves) |
 | `black` | literally #000000, no tint, no wash, no grain. FLAT, when the only light in the film is the subject itself |
 | `blobs` | the airier light wash: smaller, separated pools with white between them (moves). No grid: write `grid: true` on a softwash fx if you want the blueprint rules |
-| `brandglow` | breathing accent glow |
-| `constellation` | drifting connected nodes (moves), telemetry/data feel |
+| `brandglow` | a breathing accent glow at 0.5 intensity plus rippling dots, over an ink radial base |
+| `constellation` | drifting connected nodes (moves), telemetry/data feel: 78 particles connected within 150px |
 | `dark` | a plain dark radial, no dots. FLAT, the quiet backdrop for busy content |
 | `deep` | the deepest plain radial, no dots. FLAT, when the content must own the whole frame |
-| `dotmatrix` | a light field ruled by evenly spaced dots whose size waves across it, the printed halftone look (moves) |
+| `dotmatrix` | a light field ruled by dots 52px apart, whose size waves from 1.6px to 4.5px across it, the printed halftone look (moves) |
 | `gradient` | an agent-controlled colour gradient backdrop, linear/radial/conic from your own hex colours, angle and stops, or a named recipe (`opts.recipe`). FLAT unless `opts.kind` is "mesh", which moves it |
 | `gradientWash` | one big saturated pool bleeding off a corner into white, a mesh gradient (moves), light and premium |
 | `ink` | dark radial with slow accent-tinted dots pulsing in place (moves), for a clean flat dark use `plain` + value:"dark" |
 | `liquid` | folds of the brand hue against true black (moves). It OWNS the frame, so quiet type on it and nothing else |
-| `mesh` | soft gradient mesh (dark/saturated, check contrast) |
+| `mesh` | soft gradient mesh, three colour blobs at 0.42 intensity over a dark radial (dark/saturated, check contrast, moves) |
 | `metallic` | vertical light rods with a travelling SHIMMER (brushed metal / lit equaliser), dramatic dark bg, brand-coloured |
 | `metallicSheen` | the quieter metallic: fewer, slower rods with a sweep crossing them (moves), a dark field type can sit on |
 | `paper` | the paper gradient with grain only, FLAT, the white-first default when the motion lives in the content |
-| `paperDots` | faint drifting dot grid (light) |
-| `paperShapes` | faint drifting geometric shapes (light, subtle) |
-| `plain` | flat theme field |
+| `paperDots` | a faint drifting dot grid on the light paper base, dots 54px apart waving between 0.14 and 0.34 alpha |
+| `paperShapes` | faint drifting geometric shapes on the light paper base, 64px apart waving between 0.05 and 0.13 alpha |
+| `plain` | a flat theme colour field with a 0.02 grain wash (0.035 on dark) |
 | `soft` | gentle light radial with faint accent rings and discs drifting over it (moves) |
 | `spotlight` | a deep field with one soft pool of light wandering across it on a slow cycle, the eye follows the bright patch (moves) |
 
@@ -95,29 +95,29 @@ named colour+kind(+angle) combos for the `gradient` background preset: `{"preset
 
 | name | what / when |
 |---|---|
-| `arctic-blue` | pale ice blue radial, a cold spotlit pool |
-| `berry-crush` | crimson into tomato red, a hot fruit-punch ramp |
-| `citrus-pop` | orange into bright yellow, a loud fruit-stand ramp |
-| `cool-mint` | green into teal, a fresh spa ramp |
-| `coral-reef` | salmon into pale pink, a beachy diagonal ramp |
+| `arctic-blue` | pale ice blue radial, a cold spotlit pool centred at 50% across, 40% down |
+| `berry-crush` | crimson into tomato red, a hot fruit-punch ramp on a 70deg diagonal |
+| `citrus-pop` | orange into bright yellow, a loud fruit-stand ramp on a 60deg diagonal |
+| `cool-mint` | green into teal, a fresh spa ramp on a 135deg diagonal |
+| `coral-reef` | salmon into pale pink, a beachy diagonal ramp on a 25deg diagonal |
 | `cosmic-drift` | indigo, plum and hot pink drifting, a MOVING galaxy mesh |
-| `deep-ocean` | near-black into slate blue, a moody nautical field |
-| `ember` | crimson, tomato and amber drifting, a MOVING fire mesh |
-| `emerald-pool` | teal into jade radial, a jungle-pool glow |
+| `deep-ocean` | near-black into slate blue, a moody nautical field on a 160deg diagonal |
+| `ember` | crimson, tomato and amber drifting slowly, a MOVING three-color fire mesh |
+| `emerald-pool` | teal into jade radial, a jungle-pool glow centred at 40% across, 60% down |
 | `forest-mist` | teal, jade and pale sky drifting, a MOVING woodland mesh |
-| `glacier` | sky blue into pale cyan radial, an icy pool |
-| `golden-hour` | amber into warm yellow, a late-afternoon ramp |
-| `lavender-fog` | pale periwinkle into indigo, a dreamy purple wash |
-| `midnight-violet` | three-stop indigo to plum, a night-sky ramp |
-| `neon-dusk` | hot pink into electric violet, a synthwave ramp |
-| `peach-cream` | pale peach into blush, a soft dessert ramp |
-| `plum-wine` | violet into dusty rose, a wine-toned diagonal ramp |
-| `rose-glow` | blush pink radial, a warm skin-tone pool |
-| `slate-storm` | charcoal into graphite, a neutral overcast ramp |
-| `solar-flare` | red-orange-magenta conic ring, a sunburst wheel |
-| `spectrum-ring` | cyan-violet-pink conic wheel, a full-hue rainbow ring |
-| `steel-blue` | slate into charcoal-blue, a cool industrial ramp |
-| `sunset-strip` | red, magenta and amber drifting, a MOVING sunset mesh |
+| `glacier` | sky blue into pale cyan radial, an icy pool centred at 60% across, 30% down |
+| `golden-hour` | amber into warm yellow, a late-afternoon ramp on a 30deg diagonal |
+| `lavender-fog` | pale periwinkle into indigo, a dreamy purple wash on a 200deg diagonal |
+| `midnight-violet` | three-stop indigo to plum, a night-sky ramp on a 180deg diagonal |
+| `neon-dusk` | hot pink into electric violet, a synthwave ramp on a 50deg diagonal |
+| `peach-cream` | pale peach into blush, a soft dessert ramp on a 45deg diagonal |
+| `plum-wine` | violet into dusty rose, a wine-toned diagonal ramp on an 80deg diagonal |
+| `rose-glow` | blush pink radial, a warm skin-tone pool centred dead middle at 50%, 50% |
+| `slate-storm` | charcoal into graphite, a neutral overcast ramp on a 120deg diagonal |
+| `solar-flare` | red-orange-magenta conic ring, a sunburst wheel spinning from a 0deg start angle |
+| `spectrum-ring` | cyan-violet-pink conic wheel, a full-hue rainbow ring spinning from a 0deg start angle |
+| `steel-blue` | slate into charcoal-blue, a cool industrial ramp on a 100deg diagonal |
+| `sunset-strip` | red, magenta and amber drifting slowly, a MOVING three-color sunset mesh |
 | `warm-dusk` | orange into coral, a sunset ramp on a 40deg diagonal |
 
 ## Camera dials  `[camera]`
@@ -135,20 +135,20 @@ Top-level scene keys that change what the camera DOES rather than where it goes.
 | name | what / when |
 |---|---|
 | `cameraShake` | an IMPACT: a decaying ~16Hz shake pre-sampled at author time to one key per frame, then 0.1s of eased recovery so the frame LANDS instead of stopping |
-| `diveIn` | zoom INTO a target point (it travels to centre) |
+| `diveIn` | zooms to scale 1.6 over 1.6s with easeOutQuart, centring the target point (tx,ty) as it grows |
 | `dollyZoom` | THE VERTIGO SHOT: the lens ramps while the camera holds its distance, so the subject on the picture plane keeps its exact size and the world BEHIND it rushes in or falls away · the only move here that changes the relationship between planes rather than the framing, and it needs layers standing at a `plane` depth or there is nothing to counter-scale against |
 | `driftHold` | a held frame that is never dead: a sub-12px Lissajous micro-drift, x and y at different frequencies so it breathes instead of walking a diagonal |
 | `followCursor` | THE CAMERA FOLLOWS THE CURSOR: derived from the `path` and `clicks` on a `cursor` layer, so the pointer stays the single owner of where the camera goes. It pushes toward the spot the pointer is about to click, arrives just BEFORE the click, holds across it and releases. Clicks too close in time or space share one framing, so six clicks are never six crash zooms |
 | `followLayer` | CAMERA TRACKS A LAYER BY ID, at RENDER time, off the same live-box accessor `follow` (the layer track) reads. Holds still while the target sits inside a soft margin of frame centre, translating only the minimum to keep it in once it would cross the edge, rather than rigidly re-centring it every frame (which reads as the world sliding, not the camera tracking). Zoom is HELD (`to`), not framed. The one move here `bakeCameraMove` resolves onto `data.cameraFollow`, not `data.camera`, and it cannot be composed with another leg |
 | `hold` | the camera is LOCKED OFF: zero motion, on purpose. Not driftHold, which keeps breathing; this emits no keyframes at all, the explicit way to declare "no camera" instead of leaving `camera:` blank |
-| `multiPhase` | chain legs into one journey (push, hold-drift, settle) |
+| `multiPhase` | chains legs into one journey, each defaulting to a 1s linear hold except the last, which eases out with easeOutCubic |
 | `orbit` | a gentle 3D swing around the frame (ry through 0) |
-| `panFollow` | camera pans to track downward-growing content (terminal) |
+| `panFollow` | translates the camera by -300px on y over 5s, linear, to keep pace with downward-growing content |
 | `punchIn` | a crash zoom: the frame accelerates AT you (easeInExpo), recoils past its resting scale, then rings back elastic. the only move here that is not a `.out` |
-| `slowPush` | gentle continuous zoom in (the frame stays alive) |
+| `slowPush` | zooms from scale 1 to 1.12 (12% closer) over 6s with easeOutCubic, so the frame stays alive |
 | `travel` | station-to-station flight between points in STAGE coords. THE CAMERA AS THE TRANSITION (no cut) |
 | `truck` | plain lateral travel, linear, so it reads as tracking rather than a lurch |
-| `workspaceZoomOut` | pull back from a detail to reveal the whole |
+| `workspaceZoomOut` | zooms out from scale 1.4 to 1 over 3s with easeOutCubic, pulling back from a detail to reveal the whole |
 
 ## Destinations (platform safe area)  `[canvas]`
 
@@ -187,7 +187,7 @@ The tiktok figures are this repo's own portrait numbers carried over as fraction
 | `flipUp` | the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all |
 | `focusPull` | a rack focus: an upcoming word sits 2.8px out of focus and resolves sharp as it is spoken, a spoken one settling back to a soft 1px · the one style that says its state with focus rather than with ink, light or size |
 | `ghostSplit` | two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme |
-| `highlight` | marker highlight sweep |
+| `highlight` | a marker band sweeps left to right behind the active word, the accent mixed 28% into transparent so white text over it stays at 4.9:1 contrast or better |
 | `inkFill` | the karaoke fill runs through the GLYPHS rather than behind them, full ink trailing a narrow accent front · the word body is never the accent, so its contrast is that of the plate itself |
 | `kineticSlam` | the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still |
 | `letterRise` | the letters of the whole line rise the last 12px into their slots as they are spoken, one per CHARACTER · not a second typewriter: the line is present from the first frame, where typeOn assembles it out of nothing |
@@ -218,15 +218,15 @@ The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[
 
 | name | what / when |
 |---|---|
-| `brake` | decelerates in. The entrance curve: it arrives slower than it set off |
-| `linear` | no easing at all. A machine, a wipe with no personality, a ticker |
-| `out` | decelerates into place. The default feel for something appearing |
-| `pop` | overshoots past the mark and comes back. Playful, use once |
-| `ramp` | the editor's slow-fast-slow speed ramp. The one to reach for on a whip or a camera throw |
-| `rush` | accelerates away. The exit curve: it leaves faster than it left rest |
-| `smooth` | eases at both ends: reads as travel rather than as arrival |
-| `snappy` | decisive, no overshoot. The cut lands and stops |
-| `spring` | a damped-spring overshoot that settles, physical life for something landing: a badge, a chip, a number |
+| `brake` | decel(t, 2.4): the mirror power curve, fast at the start and slows into the stop. The entrance curve, it arrives slower than it set off |
+| `linear` | no easing at all, straight 1:1 progress. A machine, a wipe with no personality, a ticker |
+| `out` | easeOutCubic: decelerates into place with no overshoot, the default feel for something appearing on screen |
+| `pop` | easeOutBack: overshoots past the mark by about 10% and comes back. Playful, use once |
+| `ramp` | speedRamp(t): velocity is low at both ends and peaks at the midpoint (sharp=2.4). The editor's slow-fast-slow speed ramp, for a whip or a camera throw |
+| `rush` | accel(t, 2.4): a power curve of exponent 2.4, starts slow and keeps speeding up. The exit curve, it leaves faster than it left rest |
+| `smooth` | easeInOutCubic: eases at both ends, cubic in then cubic out. Reads as travel rather than as arrival |
+| `snappy` | easeOutQuart: lands fast and settles crisply, quicker off the mark than cubic and it never overshoots its target |
+| `spring` | easeOutSpring: a damped-spring overshoot that settles, physical life for something landing: a badge, a chip, a number |
 
 ## Generators (the playground)  `[generator]`
 
@@ -277,7 +277,7 @@ How the field lives against the frame clock. Driven off `var(--t)`, so it is see
 | `breathe` | the whole field swells and settles on one slow cycle, the cells keeping their relation to each other |
 | `drift` | the field travels as one body, the cells holding station against each other |
 | `shimmer` | the cells slide against each other, so the seams open and close |
-| `still` | nothing moves: the output reads no clock at all |
+| `still` | nothing moves: the output reads no clock at all, held on one fixed frame with zero drift |
 
 ## Lightfield patterns  `[generator]`
 
@@ -301,7 +301,7 @@ Which way "away" is: the bearing the light falls off along. A keyword is a beari
 | `center` | a radial: away in EVERY direction at once, so no edge can darken without the others darkening too |
 | `left` | a linear fall away to the left. A bearing and no centre, so only the move along it reaches the fall |
 | `left-and-right` | a lit vertical band with darkness at both sides and nothing taken off the top or bottom |
-| `right` | a linear fall away to the right |
+| `right` | a linear fall away to the right: the frame drains toward the right edge and stays lit on the left |
 | `top` | away is upward: the frame drains towards the top edge and stays lit at the bottom |
 | `top-and-bottom` | a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes |
 | `top-left` | a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this |
@@ -420,7 +420,7 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 
 | name | what / when |
 |---|---|
-| `aurora` | drifting colour aurora (moves) |
+| `aurora` | a drifting colour aurora: bands of colour slowly moving and blending across the whole frame |
 | `auroraCurtain` | six vertical curtain lines undulating top to bottom, each drifting sideways on its own noise offset, fading warm to cool along its length. ported from pbakaus/radiant |
 | `auroraVeil` | seven wide aurora ribbons undulating over a starfield, with a frosted ice ground plane reflecting them below the horizon. the richest field here after bands. ported from pbakaus/radiant |
 | `bands` | a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; engine-doctrine/LIGHTFIELD.md |
@@ -454,11 +454,11 @@ On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING th
 
 | name | what / when |
 |---|---|
-| `aurora` | slow curtains of coloured light. Calm, ambient, and the least busy field here. |
-| `matrix` | columns of falling glyphs. Code, data streaming, a machine at work. Unmistakably a reference, so use it deliberately. |
-| `meteor` | streaks crossing the frame on a diagonal. Motion and event on a background that would otherwise be still. |
-| `starfield` | stars drifting past as if the camera were moving through them. Depth and travel on an otherwise flat frame. |
-| `waves` | rolling bands, a moving surface. Rhythm underneath content without competing for the eye. |
+| `aurora` | slow curtains of coloured light, 5 blobs blended additively at 0.5 opacity. Calm, ambient, and the least busy field here. |
+| `matrix` | columns of falling glyphs, 20px cells with a 14-cell trail. Code, data streaming, a machine at work. Unmistakably a reference, so use it deliberately. |
+| `meteor` | streaks crossing the frame on a diagonal, 14 meteors on a 28deg angle. Motion and event on a background that would otherwise be still. |
+| `starfield` | stars drifting past as if the camera were moving through them, 220 stars by default. Depth and travel on an otherwise flat frame. |
+| `waves` | rolling bands, a moving surface, 26 lines with a 26px amplitude. Rhythm underneath content without competing for the eye. |
 
 ## Layer-as-texture (resample)  `[per-frame]`
 
@@ -486,12 +486,12 @@ Each resampled layer takes its own WebGL context and browsers cap those at rough
 
 | name | what / when |
 |---|---|
-| `bloom` | a real GLOW over everything beneath: the light spills past its edges and the subject stays sharp. The one kind that composites back rather than replacing |
-| `blur` | soften everything beneath, in pixels. The rack-focus of a whole beat, not of one layer |
-| `brighten` | lift everything beneath, as a percentage |
-| `contrast` | harden the tones beneath, as a percentage |
-| `darken` | dim everything beneath, as a percentage |
-| `desaturate` | drain the colour beneath. 1 is fully grey |
+| `bloom` | a real GLOW over everything beneath: blurs it 16px, lifts brightness 9% and screens the halo back over the sharp original so the subject stays crisp |
+| `blur` | soften everything beneath by 14px of blur. The rack-focus of a whole beat, not of one layer |
+| `brighten` | lift everything beneath by 30%, its default `amount`, raising brightness |
+| `contrast` | harden the tones beneath by 25%, its default `amount`, widening light against dark |
+| `darken` | dim everything beneath by 45%, its default `amount`, cutting brightness |
+| `desaturate` | drain the colour beneath by 100%, its default `amount` of 1. 1 is fully grey |
 
 ## Blend modes  `[per-layer]`
 
@@ -526,7 +526,7 @@ What shape a `cursor` layer draws (`"style": "hand"`), and how it can change mid
 | `arrow` | the default macOS pointer arrow, unchanged pixels from before this registry existed |
 | `block` | a filled terminal cell that blinks on a fixed cadence, a block text cursor |
 | `hand` | a pointing hand, for hovering a clickable button or link in a product demo |
-| `ibeam` | a text-selection I-beam, for hovering editable or selectable text |
+| `ibeam` | a text-selection I-beam: an 8px serif cap at top and bottom joined by a 17.6px vertical stroke, 2.1px wide, for hovering editable or selectable text |
 
 ## Depths (parallax planes)  `[per-layer]`
 
@@ -550,7 +550,7 @@ What an effector's influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, wh
 | `rotate` | proximity spent on rotation, in degrees. `rotate: 25` turns a fully affected clone by 25 |
 | `scale` | what an element's proximity to the moving point is SPENT on: added to 1, so `scale: 0.6` swells a fully affected clone to 1.6 |
 | `x` | pixels, a sideways offset that does not depend on where the point is |
-| `y` | pixels, the same on the other axis |
+| `y` | pixels, the same offset as x but on the vertical axis, independent of where the moving point sits |
 
 ## Effector falloffs  `[per-layer]`
 
@@ -570,23 +570,23 @@ A FALLOFF FROM A TRAVELLING POINT, driving the layer's own children. `effector: 
 | name | what / when |
 |---|---|
 | `clock` | radial sweep from 12 o'clock, clockwise |
-| `defocus` | leave through blur (dense/faces) |
-| `fade` | opacity only |
-| `iris` | circular iris opens from the centre of the layer |
+| `defocus` | blurs from 14px down to 0px while fading opacity in, leaves through focus rather than through space |
+| `fade` | opacity ramps from 0 to 1 with no transform at all, the plainest entrance there is |
+| `iris` | circular iris opens from the centre of the layer, 0% to 100% radius |
 | `lift` | travels further than `pop` and settles alive, faces, avatars, a staggered row of cards |
 | `none` | no move and no fade. The layer just appears at its window edges |
 | `pop` | springs past its size and settles back, a small confident arrival for a chip, a badge or an icon |
-| `rise` | translate up + fade in |
-| `scale` | punch in from small (overshoot) |
-| `slide-down` | enters from below; as an `out`, leaves downward |
-| `slide-left` | enters from the left edge; as an `out`, leaves toward it |
-| `slide-right` | enters from the right edge; as an `out`, leaves toward it |
-| `slide-up` | enters from above; as an `out`, leaves upward |
-| `up` | translate up + fade in, the alias of `rise` |
-| `wipe` | clip reveal grows rightward. The default direction, same as `wipe-right` |
-| `wipe-down` | clip reveal grows downward from the top edge |
-| `wipe-left` | clip reveal grows leftward from the right edge |
-| `wipe-right` | clip reveal grows rightward from the left edge |
+| `rise` | translates 48px down to 0 while fading opacity 0 to 1, a slight overshoot past rest via easeOutSnap |
+| `scale` | scales from 0.86 to 1 while fading in, a punch-in overshoot via easeOutBack |
+| `slide-down` | enters 60px from below; as an `out`, leaves 60px downward |
+| `slide-left` | enters 60px from the left edge; as an `out`, leaves 60px toward it |
+| `slide-right` | enters 60px from the right edge; as an `out`, leaves 60px toward it |
+| `slide-up` | enters 60px from above; as an `out`, leaves 60px upward |
+| `up` | translates 48px down to 0 while fading opacity 0 to 1, a slight overshoot past rest via easeOutSnap. The alias of `rise` |
+| `wipe` | clip reveal grows rightward, 0% to 100% width. The default direction, same as `wipe-right` |
+| `wipe-down` | clip reveal grows downward from the top edge, 0% to 100% height |
+| `wipe-left` | clip reveal grows leftward from the right edge, 0% to 100% width |
+| `wipe-right` | clip reveal grows rightward from the left edge, 0% to 100% width |
 | `wipe-up` | clip reveal grows upward from the bottom edge, so a column grows upward instead of appearing |
 
 ## Move shapes (measured keyframe tracks)  `[per-layer]`
@@ -595,11 +595,11 @@ A storyboard's `move: <shape>:<band>` (harness/lib/contract.mjs, scope LAYER: a 
 
 | name | what / when |
 |---|---|
-| `blast` | four-key punctuation: arrives oversize, settles, drifts, then grows OUT through the frame. A hard pop, never a fade |
-| `drift` | a slow ambient hold on one axis that never returns to where it began, for a layer that should keep living through a beat |
-| `enter` | a keyed entrance track on the layer itself rather than a preset name: rises in, overshoots slightly, settles |
-| `exit` | a keyed departure that accelerates off-frame, opacity trailing the move: the layer is gone because it LEFT, not because it dimmed |
-| `pan` | an irregular multi-key horizontal (or vertical) pan, linear interior keys: surges then gives up, reads as a hand scrolling, not an animation of a page |
+| `blast` | 4-key punctuation over 1.5s: arrives at scale 1.5, settles to 1, drifts to 1.04, then grows OUT to scale 1.9 through the frame. A hard pop, never a fade |
+| `drift` | a slow 3s ambient hold that swings +/-12px on one axis and never returns to where it began, for a layer that should keep living through a beat |
+| `enter` | a keyed 0.9s entrance track that rises in from 40px, overshoots slightly past 0, then settles |
+| `exit` | a keyed 0.55s departure that accelerates 260px off-frame, opacity trailing the move: the layer is gone because it LEFT, not because it dimmed |
+| `pan` | an irregular 6-key horizontal (or vertical) pan over 1.25s by default, linear interior keys: surges then gives up, reads as a hand scrolling, not an animation of a page |
 
 ## Part entrances  `[per-layer]`
 
@@ -608,14 +608,14 @@ THE BRIDGE between hand-written markup and the engine's clock. `parts: [{ select
 | name | what / when |
 |---|---|
 | `drawOn` | an SVG stroke draws itself along its own path, measured at build with getTotalLength() |
-| `fade` | opacity alone, no displacement · the quiet default when a part should arrive without moving |
-| `fadeUp` | a short rise with a fade, the quiet default for any part |
-| `growUp` | scales up from its own bottom edge, a bar growing to its reading |
-| `popIn` | scales from nothing at its centre with a fade, dots, chips, markers |
-| `riseIn` | a longer rise with a fade, for parts that should feel like they arrive |
-| `slide-left` | enters from its left and, with `out`, keeps going right · one direction of travel, never a retreat |
-| `slide-right` | enters from its right and, with `out`, keeps going left · the mirror of slide-left |
-| `widen` | scales out from its left edge. A row, a rule, anything that should fill rather than appear |
+| `fade` | opacity alone from 0 to 1, no displacement · the quiet default when a part should arrive without moving |
+| `fadeUp` | rises 24px with a fade from opacity 0 to 1, the quiet default for any part |
+| `growUp` | scales its Y from 0 to 1 anchored at its own bottom edge, a bar growing up to its reading |
+| `popIn` | scales from 0 to 1 at its own centre with opacity 0 to 1, dots, chips, markers |
+| `riseIn` | rises 48px with a fade from opacity 0 to 1, for parts that should feel like they arrive |
+| `slide-left` | enters 40px from its left and, with `out`, keeps going 40px right · one direction of travel, never a retreat |
+| `slide-right` | enters 40px from its right and, with `out`, keeps going 40px left · the mirror of slide-left |
+| `widen` | scales its X from 0 to 1 anchored at its own left edge. A row, a rule, anything that should fill rather than appear |
 
 ## Path curves (SVG "d" generators)  `[per-layer]`
 
@@ -623,10 +623,10 @@ A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: fli
 
 | name | what / when |
 |---|---|
-| `arc` | a shallow rise-and-fall, peak in the middle |
-| `dip` | a shallow sag-and-rise, trough in the middle |
-| `ramp` | a straight diagonal, top-left to bottom-right |
-| `wave` | an S-curve, one full up-down cycle |
+| `arc` | a shallow rise-and-fall: starts and ends at 94% of the box height, bows up through a control point 50% above the top edge at the midpoint |
+| `dip` | a shallow sag-and-rise: starts and ends at 12% of the box height, dips down through a control point at 150% of the height (below the box) at the midpoint |
+| `ramp` | a straight diagonal line from 90% height at the left edge to 18% height at the right edge, top-left to bottom-right |
+| `wave` | one full S-curve cycle: leaves the 50% height midline through control points near the top at 18-32% width, crosses back through the midpoint, then dips through 82% width near the bottom before landing at 50% height |
 
 ## Per-layer modifiers  `[per-layer]`
 
@@ -703,25 +703,25 @@ A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: fli
 | name | what / when |
 |---|---|
 | `bottom` | horizontally centred, pinned to the bottom edge of the safe area |
-| `bottom-left` | pinned into the bottom-left corner of the safe area |
-| `bottom-right` | pinned into the bottom-right corner of the safe area |
+| `bottom-left` | pinned into the bottom-left corner, 6% of the short side in from both edges of the frame |
+| `bottom-right` | pinned into the bottom-right corner, 6% of the short side in from both edges of the frame |
 | `center` | dead centre of the canvas, vertically at the optical centre rather than the exact middle |
-| `left` | pinned to the left safe edge, vertically centred |
+| `left` | pinned to the left safe edge (6% of the short side in from the frame), vertically centred |
 | `lower-band` | a thin strip near the bottom safe edge, left-anchored: where a closing rule or a small persistent label sits |
-| `right` | pinned to the right safe edge, vertically centred |
+| `right` | pinned to the right safe edge (6% of the short side in from the frame), vertically centred |
 | `stage` | the full-width content column between the left and right composition margins, at any aspect ratio: the repo's hand-typed x:160/w:1600 anchor, portable |
 | `text-band` | the horizontal strip roughly two-thirds down the frame where a headline or a sub-line usually sits |
-| `thirds-b` | centred horizontally, sat on the lower third line |
-| `thirds-bl` | lands on the lower-left rule-of-thirds power point |
-| `thirds-br` | lands on the lower-right rule-of-thirds power point |
-| `thirds-l` | vertically centred, sat on the left third line |
-| `thirds-r` | vertically centred, sat on the right third line |
-| `thirds-t` | centred horizontally, sat on the upper third line |
-| `thirds-tl` | lands on the upper-left rule-of-thirds power point |
-| `thirds-tr` | lands on the upper-right rule-of-thirds power point |
+| `thirds-b` | centred horizontally, sat on the lower third line at 67% down the frame |
+| `thirds-bl` | lands at 33% across and 67% down: the lower-left rule-of-thirds power point |
+| `thirds-br` | lands at 67% across and 67% down: the lower-right rule-of-thirds power point |
+| `thirds-l` | vertically centred, sat on the left third line at 33% across the frame |
+| `thirds-r` | vertically centred, sat on the right third line at 67% across the frame |
+| `thirds-t` | centred horizontally, sat on the upper third line at 33% down the frame |
+| `thirds-tl` | lands at 33% across and 33% down: the upper-left rule-of-thirds power point |
+| `thirds-tr` | lands at 67% across and 33% down: the upper-right rule-of-thirds power point |
 | `top` | horizontally centred, pinned to the top edge of the safe area |
-| `top-left` | pinned into the top-left corner of the safe area |
-| `top-right` | pinned into the top-right corner of the safe area |
+| `top-left` | pinned into the top-left corner, 6% of the short side in from both edges of the frame |
+| `top-right` | pinned into the top-right corner, 6% of the short side in from both edges of the frame |
 
 ## Spectacle devices  `[scene]`
 
@@ -824,36 +824,36 @@ A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: fli
 | name | what / when |
 |---|---|
 | `assemble` | each glyph flies in from its OWN scattered offset and rotation and settles into the word, arriving in a shuffled order · the AE "text animator + randomize-order range selector" reveal. Pair it with `split: "char"` |
-| `blur` | resolve out of blur: calm, premium |
+| `blur` | resolves out of a 16px blur to 0 as it fades in: calm, premium |
 | `blurUp` | letters lift and sharpen out of blur together: the default kinetic headline |
-| `bounce` | springy bounce in: playful brands only |
+| `bounce` | a spring bounces the unit up 60px with a visible overshoot (bounce 0.5, settle 0.5s): playful brands only |
 | `chroma` | R/G/B ghosts split apart and converge to a crisp glyph |
 | `colorWave` | the accent sweeps word by word along a line, each unit lighting then settling to the resting colour · `colors` gives EACH unit its OWN arrival colour instead of one shared accent, per-word colour before the line settles to one ink |
-| `decode` | scramble→settle, techy |
-| `down` | words/chars drop into place from above: the mirror of `up` |
-| `draw` | stroke draw-on for SVG paths |
-| `elastic` | elastic scale pop with visible wobble: playful brands only |
+| `decode` | characters scramble through the chosen charset at 48 refreshes a second by default and resolve left to right as u climbs to 1, techy reveal |
+| `down` | words/chars drop 40px into place from above while fading in: the mirror of `up` |
+| `draw` | an SVG stroke draws itself on: the dash offset runs from 1 to 0 on a path normalised to length 1, easeOutCubic by default, `back:true` draws from the far end |
+| `elastic` | scales up from 0.3 with a springy overshoot (bounce 0.62, settle 0.5s), visible wobble: playful brands only |
 | `fade` | plain opacity fade, no motion at all: the neutral entrance, and the neutral exit reversed |
 | `fall` | falls from above under gravity and lands with a small squash |
 | `flap` | the glyph steps FORWARD through the board's alphabet one flap at a time and lands on its letter, hinging as it turns. An airport board, ordered where `decode` is random |
 | `flip` | 3D flip-up per unit, letters somersault into place: `axis` picks the hinge |
 | `focus` | focus pull, heavy blur and over-scale resolving to crisp, dreamy, premium |
-| `gradient` | gradient sweeps through letterforms |
-| `highlight` | marker highlight sweep |
+| `gradient` | a two-colour band (default #8a8f98 to #ffffff) at 250% width sweeps through the letterforms via background-clip text |
+| `highlight` | a marker band, default rgba(255,220,90,0.35), grows left to right to 100% width behind the unit at 78% of its height |
 | `riseClip` | the word climbs out from behind a hard edge at its own baseline, hidden until it clears the line. The clean editorial reveal |
-| `scale` | punch in from small (overshoot) |
+| `scale` | punches in from 0.4 scale to 1, an easeOutBack overshoot past the mark and back |
 | `shadow` | a long poster shadow collapses as the word settles, poster statements |
 | `shimmerWave` | looping light wave (per-unit): a 3D crest travelling across the word; never settles |
-| `skew` | italic shear that straightens as it lands: editorial, sporty |
-| `slide` | slides in from one side (`dir`): pair it with the opposite exit |
-| `stretch` | horizontal smear that snaps true: impact words |
+| `skew` | slides in 70px with a 14deg italic shear that straightens as it lands: editorial, sporty |
+| `slide` | slides in 80px from one side (`dir`), default left: pair it with the opposite exit |
+| `stretch` | stretches from 1.6x horizontal scale down to 1x with a 6px blur that clears as it snaps true: impact words |
 | `strike` | a rule draws THROUGH the word and it dims behind the line, still legible. The "not X, Y" beat, where the rejection is the content |
 | `swing` | each unit hinges from its top edge and swings upright, playful, short words |
 | `tilt` | each unit rises and swings upright from a small angle, sporty and editorial. A flat rotation, not a 3D hinge: `flip` is the one that turns |
-| `type` | typewriter hard on/off, no transform: terminals, timers, code |
+| `type` | a hard on/off with no transform: opacity flips from 0 to 1 the instant u passes `at` (default 0). Terminals, timers, code |
 | `underline` | a rule grows left to right along the baseline as the word lands, the marker under a heading |
 | `unfold` | opens from edge-on about its left hinge, a panel turning to face you, premium |
-| `up` | words/chars rise into place, no blur: the plain lift |
+| `up` | words/chars rise 40px into place while fading in, no blur: the plain lift, and the engine's own default reveal |
 | `wave` | sinusoidal wave across units: a LOOP that never settles; ambient only |
 | `weight` | the glyphs THICKEN into place along the font's own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still |
 
@@ -906,10 +906,10 @@ A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default 
 | name | what / when |
 |---|---|
 | `backdrop` | ordered bg preset names the brand turns through, one window per beat: scaffold-only, seeds `make scaffold`'s `bg[]`, never read at render (bg is required, engine-doctrine/MISTAKES.md #159) |
-| `cuts` | the default and accent cut/transition names the brand favours |
-| `field` | grain and vignette defaults for the backdrop |
+| `cuts` | the default and accent cut/transition names the brand favours, one for almost every boundary and one reserved for its peak-energy beat |
+| `field` | grain and vignette numbers layered over the backdrop, both 0..1 strengths |
 | `layout` | the anchor band (left/center/right) and margin every beat composes against |
-| `marks` | the logo path plus its end-card and headline-adjacent sizes |
+| `marks` | the logo path plus its end-card and headline-adjacent sizes, both named pixel numbers |
 | `scale` | how big text should be: named px sizes for the hook / headline / body / caption roles at 16:9, so a layer writes `"size": "headline"` instead of guessing a number |
 
 ## Easings  `[timing]`
@@ -991,29 +991,29 @@ One word at the top of the scene sets the default speed curve for every cut and 
 |---|---|
 | `barn` | barn doors open from the centre outward, cinematic opener; masks, so a whole-frame cut needs sceneUnits |
 | `blinds` | venetian slat mask sweeps open, editorial reveal; masks, so a whole-frame cut needs sceneUnits |
-| `blur` | resolve out of blur, calm, premium |
+| `blur` | resolves out of a 16px defocus, calm, premium |
 | `clock` | clock-hand sweep reveal, masks, so a whole-frame cut needs sceneUnits |
-| `collapse` | vertical fold down to a line, terminal and data beats |
+| `collapse` | vertical fold, scaleY from 0.05 up to 1, terminal and data beats |
 | `cube` | perspective hinge with travel, the beats turning like faces of a cube |
 | `drop` | falls in from above under gravity, leaves by falling away |
-| `fade` | opacity only, masks, so a whole-frame cut needs sceneUnits |
-| `flip` | perspective hinge flip about an edge, cards and panels |
+| `fade` | opacity only, 0 to 1 over the whole cut window, masks nothing, so a whole-frame cut needs sceneUnits |
+| `flip` | perspective hinge flip about an edge, rotates up to 55 degrees through a 1400px perspective, cards and panels |
 | `iris` | circular reveal growing from a point (cx/cy), masks, so a whole-frame cut needs sceneUnits |
-| `jitter` | decaying deterministic shake, alarm and glitch beats only |
+| `jitter` | decaying deterministic shake, up to 14px of jitter, alarm and glitch beats only |
 | `letterbox` | cinema curtains open and close top and bottom, cinematic opener; masks, so a whole-frame cut needs sceneUnits |
 | `matchCut` | a GRAPHIC MATCH: both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks, so a whole-frame cut needs sceneUnits |
 | `none` | no transition at all, the beats simply replace each other. Masks nothing and moves nothing, so a whole-frame cut needs sceneUnits |
 | `punch` | scale burst, the leaving beat bursts past the camera, product focus |
-| `rise` | translate up + fade in |
-| `riseBlur` | slow rise through heavy defocus, premium slow beats |
-| `roll` | tilts in from a corner and settles level |
+| `rise` | translates up along the cut distance (default 90px) while fading in from 0 to 1 |
+| `riseBlur` | slow rise through a 22px defocus, premium slow beats |
+| `roll` | tilts in from a corner (7 degrees) and settles level |
 | `skewWhip` | sheared throw whose shear straightens as it lands, velocity you can read in the letterforms, same-background beats only |
 | `slide` | the frame travels one way, dir-aware. The plain workhorse, between same-background beats only |
 | `softiris` | feathered circular reveal from a point (cx/cy), masks, so a whole-frame cut needs sceneUnits |
 | `softwipe` | feathered wipe, a 20%-wide gradient band instead of a hard line; masks, so a whole-frame cut needs sceneUnits |
-| `spin` | rotate in with a scale settle, logos, badges, seals |
+| `spin` | rotates in 90 degrees while scaling from 0.5 to 1, logos, badges, seals |
 | `squeeze` | smear-stretch along the travel axis, a speed ramp you can see |
-| `whip` | motion-blurred directional throw, momentum, between same-background beats only |
+| `whip` | motion-blurred directional throw, travels 3.2x the cut distance and blurs up to 14px, momentum, between same-background beats only |
 | `wipe` | hard directional reveal, playful, "notice the cut"; masks, so a whole-frame cut needs sceneUnits |
 | `zoom` | push-through: the leaving beat shrinks away, the arriving one lands from too close, product focus |
 
@@ -1026,18 +1026,18 @@ One word at the top of the scene sets the default speed curve for every cut and 
 | `barnDoor` | two doors split from the centre outward along dir, opening onto the next beat. A confident, symmetric reveal |
 | `blindsWipe` | slatted blinds sweep across the frame along dir, revealing the next beat. A crisp graphic wipe |
 | `burnThrough` | the frame burns away along a noisy front with a hot ember edge, revealing the next beat through the fire. A dramatic organic pivot |
-| `cinematicZoom` | dive-in zoom into a screen |
+| `cinematicZoom` | the outgoing beat zooms in up to 1.25x intensity while the incoming beat zooms out from 1.25x, a dive-in push into a screen |
 | `clockWipe` | a hand sweeps around the frame like a clock, wiping the next beat in behind it with a soft glowing edge. A timed, mechanical reveal |
 | `crossWarp` | both beats drag toward the centre and swap through a soft noise front. A wipe with grit, for organic brands and dark scenes |
 | `dispersion` | prism channel-split across the seam along a seeded axis, peaking mid-way, optical, techy pivots |
 | `dissolve` | grainy film dissolve, each pixel flipping as a noise front passes it, time/place change |
 | `fade` | flat cross-dissolve of both beats. The universal fallback every seam degrades to with no WebGL or a blank raster |
-| `flashWhite` | white flash on an energy pivot |
+| `flashWhite` | flashes to solid white at the midpoint (p=0.5) then reveals the arriving beat, an energy pivot |
 | `irisRound` | a soft circle opens from the centre with a bright rim, irising the next beat into view. A classic spotlight reveal |
 | `lens` | one moving optical centre bends BOTH beats through a single lens, with a warm flare. Premium product glamour, dark scenes |
 | `lumaWipe` | the next beat bleeds through the darkest parts of the current one first, along a soft noisy threshold. A cinematic dissolve with grain |
 | `pixelDissolve` | the frame coarsens into big pixels at the midpoint then sharpens into the next beat. A retro digital dissolve |
-| `portal` | glowing portal reveal (once) |
+| `portal` | a glowing ring expands once to reveal the next beat, with up to 0.14x intensity of warp bend at its edge |
 | `push` | both beats shove together toward dir, the arriving one following the leaving one off screen, dir-aware basic |
 | `rippleWave` | concentric waves ripple out from the centre as the frame dissolves, like a drop hitting water. Soft, calming links |
 | `sdfIris` | the arriving beat revealed through an expanding seeded polygon iris (star, hex, diamond or triangle) with a bright rim. Playful reveal, the shape is the personality |
@@ -1046,7 +1046,7 @@ One word at the top of the scene sets the default speed curve for every cut and 
 | `spinZoom` | the outgoing beat spins and scales out while the incoming beat spins in. A kinetic whip between shots |
 | `swirlWarp` | a vortex twists the centre of the frame and unwinds into the next beat, strongest mid-cut. Organic, dreamy pivots |
 | `uncover` | the leaving beat slides off toward dir and reveals a held arriving beat under it, dir-aware basic |
-| `whipPan` | momentum swipe between beats |
+| `whipPan` | a 6-sample motion-blurred smear thrown toward dir, offset up to 0.9x intensity, momentum carried between beats |
 | `wipe` | a soft-edged line sweeps toward dir, the arriving beat revealed behind it, playful, "notice the cut" |
 | `zoomBlur` | both beats streak toward the centre in a radial blur and cross-dissolve. A punchy push between shots |
 
@@ -1056,7 +1056,7 @@ One word at the top of the scene sets the default speed curve for every cut and 
 
 | name | what / when |
 |---|---|
-| `blinds` | venetian bars opening together. Mechanical and rhythmic. |
+| `blinds` | venetian bars opening together, 14 bars sweeping in lockstep. Mechanical and rhythmic. |
 | `bokeh` | soft out-of-focus discs drifting across frame. Ambient and quiet: closer to a texture than a cut. |
 | `burn` | a film burn: the frame chars through and blows out, the way heat eats a print. Warm, analogue, and loud. |
 | `chromaticSplit` | an rgb-fringed shock ring with colour fringing at the edges. An impact with a lens defect. |
@@ -1085,7 +1085,7 @@ One word at the top of the scene sets the default speed curve for every cut and 
 | `sdfIris` | an iris wipe through a seeded shape, so the aperture is not simply a circle. Focus, with character. |
 | `squares` | grid cells filling in on a stagger. Modular, and it suits a layout that is already a grid. |
 | `streak` | sharp radial light rays from a hot core. Photographic rather than digital: a lens catching a source. |
-| `swirl` | rotational light streaks thrown out from the centre. |
+| `swirl` | 8 rotational light streaks thrown out from the centre, spinning up to a full turn. |
 | `thermal` | an iron-bow heat veil in coarse cells, colour mapped from luminance rather than painted on. |
 | `vortex` | an ink spiral pulling inward to a dark eye. A beat being swallowed rather than ended. |
 | `warp` | a barrel-warped refraction shock ring expanding outward. An impact felt through the lens. |
