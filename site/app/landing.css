@@ -150,13 +150,16 @@
   dd, .hm-cta span, .hm-cta a{ font-size:12px }
 }
 
-/* ===== SECTION STRIP (components/SectionStrip.tsx) ========================================= */
-.strip{position:fixed;left:50%;translate:-50% 0;bottom:12px;z-index:var(--z-sticky);padding:6px;width:min(760px,calc(100% - 24px))}
+/* ===== SECTION STRIP (components/SectionStrip.tsx) =========================================
+ * A sibling of <main>, docked to the bottom of the viewport with position:sticky rather than
+ * fixed: it takes up real space in the flow, so it can never cover the footer's last line and
+ * needs no padding-bottom compensation on .foot. */
+.strip{position:sticky;bottom:0;z-index:var(--z-sticky);max-width:var(--maxw);margin:0 auto;
+  padding:6px 26px;background:var(--bg);border-top:1px solid var(--line)}
 .strip-clips{position:relative;display:grid;gap:3px}
 .strip-clip{padding:8px 10px;border-radius:5px;background:var(--raised);font-family:var(--font-title);font-weight:500;font-size:12px;
   color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background-color .15s ease,color .15s ease}
 .strip-clip:hover{background:var(--raised-2)}
 .strip-clip[aria-current="true"]{background:var(--ink);color:var(--bg)}
 .strip-head{position:absolute;top:-3px;bottom:-3px;left:3px;width:2px;background:var(--accent);pointer-events:none;z-index:var(--z-raise)}
-.shell:has(.strip) .foot{padding-bottom:96px}
-@media (max-width:640px){ .strip-clip{font-size:11px;padding:8px 4px;text-align:center} }
+@media (max-width:640px){ .strip{padding:6px 16px} .strip-clip{font-size:11px;padding:8px 4px;text-align:center} }
