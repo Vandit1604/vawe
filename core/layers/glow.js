@@ -115,7 +115,17 @@ export const GLOW_BLURBS = {
   chromaCycle: 'a saturated neon bloom whose hue sweeps the spectrum over `cycle` seconds',
 };
 
-export const GLOW_REGISTRY = defineRegistry('glow preset', GLOW_PRESETS, { slot: 'preset', blurbs: GLOW_BLURBS,
+const GLOW_AKA = {
+  bloom: ['light source glow', 'overexposed light', 'bright point glow'],
+  halation: ['film halo', 'warm highlight ring', 'nostalgic glow'],
+  diffusion: ['soft veil', 'lifted blacks', 'screen wash light'],
+  rimLight: ['edge light', 'crescent light', 'off-centre glow'],
+  spotlight: ['light cone', 'directional beam', 'stage light'],
+  chromatic: ['rgb split glow', 'colour fringe halo', 'rainbow edge glow'],
+  chromaCycle: ['color cycling glow', 'hue shifting light', 'rainbow pulse glow'],
+};
+
+export const GLOW_REGISTRY = defineRegistry('glow preset', GLOW_PRESETS, { slot: 'preset', blurbs: GLOW_BLURBS, aka: GLOW_AKA,
   catalog: {
     title: 'Glow presets',
     tag: 'glow layer',
