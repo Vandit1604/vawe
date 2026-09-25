@@ -20,11 +20,12 @@ import { onScreenText, glyphText } from '../type/on-screen-text.js';
 import { IDLE } from '../engine/idle.js';
 import { STAGGER_FROM } from '../type/type.js';
 import { themeErrors, lookErrors } from '../registry/theme-contract.js';
+import { themeFileErrors } from '../theme/roles.js';
 import { TRANSITIONS, DIRECTIONAL_CUT, DIRECTIONAL_SEAM } from '../transitions/catalog.js';
 import { nearMisses } from '../registry/registry.js';
 // parseColor is handed to themeErrors so a palette value that is not a COLOUR is refused, not just an
 // absent one. theme-contract.js stays import-free on purpose (node + browser); see its note.
-import { parseColor, contrastRatio } from '../color/engine.js';
+import { parseColor, colorAlpha, contrastRatio } from '../color/engine.js';
 import { ASPECTS, PLACEMENT } from '../layout/safe.js';
 import { boundaryMechanism, lowerScene } from '../transitions/lower.js';
 // PRESENTATIONS (cut fx) and UNITS (seam fx) are the ground truth `dirWarnings` probes for whether a
@@ -1425,11 +1426,12 @@ export function validateTheme(spec) {
   if (spec == null) return ['data.theme is required (a theme name or an inline theme object), no default look exists'];
   if (typeof spec === 'string') return errors;
   if (!isObj(spec)) return [`theme must be a string name or an object (got ${typeOf(spec)})`];
-  errors.push(...themeErrors(spec, { parseColor, contrastRatio }).map((m) => `theme incomplete: ${m}`));
-  if ('palette' in spec && !isObj(spec.palette)) errors.push('theme.palette must be an object');
-  if ('type' in spec && !isObj(spec.type)) errors.push('theme.type must be an object');
+  // A theme is now a token file (`tokens` + a required `roles` map, core/theme/tokens.js,
+  // core/theme/roles.js). themeFileErrors names the retired palette/type/gradient shape by itself when
+  // it sees one, pointing at migrate-themes.mjs, so there is nothing left for this function to check
+  // about that shape directly.
+  errors.push(...themeFileErrors(spec, { parseColor, colorAlpha, contrastRatio }).map((m) => `theme incomplete: ${m}`));
   if ('vars' in spec && !isObj(spec.vars)) errors.push('theme.vars must be an object');
-  if ('gradient' in spec && !Array.isArray(spec.gradient)) errors.push('theme.gradient must be an array of colors');
   if ('motion' in spec) {
     if (!isObj(spec.motion)) errors.push('theme.motion must be an object');
     else for (const k of ['bounce', 'settle', 'enter', 'durationScale', 'stagger']) {
@@ -1621,7 +1623,7 @@ if (isMain) {
     if (typeof data.theme === 'string') {
       const tp = path.join(root, 'themes', data.theme + '.json');
       if (!fs.existsSync(tp)) errors.push(`theme "${data.theme}" not found (themes/${data.theme}.json)`);
-      else { try { errors.push(...themeErrors(readJSON(tp), { parseColor, contrastRatio }).map((m) => `theme "${data.theme}" incomplete: ${m}`)); }
+      else { try { errors.push(...themeFileErrors(readJSON(tp), { parseColor, colorAlpha, contrastRatio }).map((m) => `theme "${data.theme}" incomplete: ${m}`)); }
         catch (e) { errors.push(`theme "${data.theme}" unreadable: ${e.message}`); } }
     }
     // AUDIO. The Go mixer resolves music/vo/sfx at bake time and silently DROPS anything it cannot
@@ -1736,7 +1738,7 @@ if (isMain) {
     try {
       const t = readJSON(tf);
       errs = [
-        ...themeErrors(t, { parseColor, contrastRatio }),
+        ...themeFileErrors(t, { parseColor, colorAlpha, contrastRatio }),
         ...lookErrors(t.look, { bgNames: BG_NAMES, transitionNames, nearMisses }),
       ];
     } catch (e) { errs = [`unreadable: ${e.message}`]; }

@@ -3,6 +3,14 @@
 // scene consumes comes from the theme. A theme missing any required key fails LOUD (at
 // `make validate` and again at boot) instead of rendering a wrong-looking video.
 // Pure data + one pure function: importable from node (validate) and the browser (motion.js/boot.js) alike.
+//
+// A THEME ON DISK IS NOW A TOKEN FILE (core/theme/tokens.js, core/theme/roles.js: `tokens` + a required
+// `roles` map), not a hand-written palette/type/gradient object. `themeErrors` below is unchanged and
+// still grades the palette/type/gradient SHAPE, because that shape is still exactly what applyTheme and
+// every other consumer reads: `core/theme/roles.js` `expandTheme` is the ONE adapter that turns a token
+// file into it, so REQUIRED/ON_INK/themeErrors never had to move. What changed is upstream of this file:
+// a theme missing a REQUIRED role (`roles.ground`, not `palette.bg`) is refused by `core/theme/roles.js`
+// `roleErrors`/`themeFileErrors`, before this file's own checks ever run against the expanded object.
 
 export const REQUIRED = {
   palette: ['bg', 'bg2', 'surface', 'surface2', 'line', 'lineStrong',
