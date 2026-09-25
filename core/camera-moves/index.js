@@ -45,12 +45,12 @@ export { slowPush, diveIn, panFollow, workspaceZoomOut, orbit, multiPhase, trave
 // could not be chosen. The blurb rides the entry non-enumerably (core/registry/registry.js), so CAMERA_MOVES is
 // still exactly a name → function map for everything that walks it.
 export const CAMERA_MOVES = {
-  slowPush: withBlurb('gentle continuous zoom in (the frame stays alive)', slowPush),
-  diveIn: withBlurb('zoom INTO a target point (it travels to centre)', diveIn),
-  panFollow: withBlurb('camera pans to track downward-growing content (terminal)', panFollow),
-  workspaceZoomOut: withBlurb('pull back from a detail to reveal the whole', workspaceZoomOut),
+  slowPush: withBlurb('zooms from scale 1 to 1.12 (12% closer) over 6s with easeOutCubic, so the frame stays alive', slowPush),
+  diveIn: withBlurb('zooms to scale 1.6 over 1.6s with easeOutQuart, centring the target point (tx,ty) as it grows', diveIn),
+  panFollow: withBlurb('translates the camera by -300px on y over 5s, linear, to keep pace with downward-growing content', panFollow),
+  workspaceZoomOut: withBlurb('zooms out from scale 1.4 to 1 over 3s with easeOutCubic, pulling back from a detail to reveal the whole', workspaceZoomOut),
   orbit: withBlurb('a gentle 3D swing around the frame (ry through 0)', orbit),
-  multiPhase: withBlurb('chain legs into one journey (push, hold-drift, settle)', multiPhase),
+  multiPhase: withBlurb('chains legs into one journey, each defaulting to a 1s linear hold except the last, which eases out with easeOutCubic', multiPhase),
   travel: withBlurb('station-to-station flight between points in STAGE coords. THE CAMERA AS THE TRANSITION (no cut)', travel),
   truck: withBlurb('plain lateral travel, linear, so it reads as tracking rather than a lurch', truck),
   cameraShake: withBlurb('an IMPACT: a decaying ~16Hz shake pre-sampled at author time to one key per frame, then 0.1s of eased recovery so the frame LANDS instead of stopping', cameraShake),
@@ -150,7 +150,23 @@ export function buildCameraMove(spec, canvas = null) {
 // "handheld camera feel" found nothing across all 445 named things, and `driftHold` IS that shot: a
 // held frame breathing on a sub-12px Lissajous. `handheld` is the only word a director would use for it
 // and no honest rewrite of that blurb puts it there, which is what `aka` is for.
-const CAMERA_AKA = { driftHold: ['handheld', 'breathing camera', 'operator float', 'not locked off'] };
+const CAMERA_AKA = {
+  driftHold: ['handheld', 'breathing camera', 'operator float', 'not locked off'],
+  slowPush: ['zoom in slowly', 'push in', 'creep closer', 'subtle zoom in'],
+  diveIn: ['zoom into', 'dive toward', 'punch toward a target', 'zoom to a point'],
+  panFollow: ['pan down', 'follow the content', 'track downward', 'scroll with typing'],
+  workspaceZoomOut: ['pull back to reveal', 'zoom out to the whole', 'reveal the workspace', 'back out'],
+  orbit: ['orbit around', 'circle the subject', '3d swing', 'rotate around'],
+  multiPhase: ['multi-leg camera move', 'chained camera move', 'push then hold then settle'],
+  travel: ['station to station', 'fly between points', 'multi-stop camera flight', 'tour the scene'],
+  truck: ['truck sideways', 'lateral pan', 'track sideways', 'slide across'],
+  cameraShake: ['camera shake', 'impact shake', 'handheld jolt', 'screen shake'],
+  punchIn: ['crash zoom', 'punch zoom', 'hard zoom in', 'sudden zoom'],
+  dollyZoom: ['vertigo shot', 'dolly zoom', 'trombone effect', 'hitchcock zoom'],
+  followCursor: ['camera follows the cursor', 'track the mouse', 'follow the pointer', 'cursor-driven camera'],
+  hold: ['locked off', 'static camera', 'no camera movement', 'camera still'],
+  followLayer: ['track a layer', 'follow an element', 'camera tracks an element', 'keep a layer in frame'],
+};
 export const CAMERA_REGISTRY = defineRegistry('camera move', Object.fromEntries(CAMERA_MOVE_NAMES.map((n) => [n, n])), { slot: 'cameraMove.move', blurbs: CAMERA_MOVE_BLURBS, aka: CAMERA_AKA,
   catalog: {
     title: 'Camera moves',
@@ -177,6 +193,7 @@ export const CAMERA_DIAL_REGISTRY = defineRegistry('camera dial', { cameraBlur: 
       + 'with the camera stays sharp. Off by default; the film\'s `shutter` (degrees) says how much, and '
       + 'one layer opts out with `motionBlur: false`. A zoom and a roll are radial and are not modelled',
   },
+  aka: { cameraBlur: ['motion blur', 'camera motion blur', 'shutter blur', 'whip pan blur'] },
   catalog: {
     title: 'Camera dials',
     tag: 'camera',
