@@ -67,7 +67,13 @@ export const IDLE_BLURBS = {
 // `defineRegistry` got `blurbs: null` and every reader that asks the registry what a name means
 // got nothing, while the blurbs three lines below were rendered into docs and enforced by
 // lib-test. Written and unread is the same as unwritten.
-export const IDLE_REGISTRY = defineRegistry('idle', IDLE, { slot: 'idle', blurbs: IDLE_BLURBS,
+const IDLE_AKA = {
+  none: ['truly still', 'no ambient motion', 'locked off hold'],
+  breathe: ['breathing scale', 'gentle pulse', 'alive on hold'],
+  drift: ['ambient drift', 'never fully parked', 'slow float'],
+};
+
+export const IDLE_REGISTRY = defineRegistry('idle', IDLE, { slot: 'idle', blurbs: IDLE_BLURBS, aka: IDLE_AKA,
   catalog: {
     title: 'Idles (ambient hold motion)',
     tag: 'per-layer/scene',
