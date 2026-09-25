@@ -77,7 +77,7 @@ Nothing renders until the plan is locked and the user signs off, shown as `make 
 
 Five lines carry the whole request, any may be missing: SUBJECT, DATA, PAYOFF, AUDIENCE, FEELING; everything else is yours to decide. Fill two more yourself, unasked, only when the human left them out: `SPECTACLE` (the one exaggerated moment, named) and `NOT` (what this film explicitly does not do, derived from recent films by `make preflight D=<file>` rather than memory; waivable per-beat with `_why`).
 
-A human-given SPECTACLE or NOT carries through untouched. Pass it to `make scaffold SPECTACLE="…" NOT="…"`: the storyboard records it as `spectacle_by: human`/`not_by: human`, and no later step may overwrite a line marked `human`.
+A human-given SPECTACLE or NOT carries through untouched: write it into the storyboard verbatim with `spectacle_by: human`/`not_by: human`, and no later step may overwrite a line marked `human`.
 
 **Never hand-author from a blank JSON**: `make ideate` writes the film's prompt first (`engine-doctrine/CRAFT/IDEATE.md`), then the agent writes the storyboard by hand from `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`; no scene JSON exists until `make assemble` runs post-approval. Compose motion from `recipes/` or `make arsenal Q="…"`.
 
