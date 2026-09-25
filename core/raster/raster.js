@@ -36,34 +36,56 @@ async function fetchAsDataUri(url, mime) {
   return `data:${mime};base64,${btoa(bin)}`;
 }
 
+function ruleFontFace(rule, want) {
+  if (!(rule.type === 5 || rule.constructor?.name === 'CSSFontFaceRule')) return null;
+  const fam = (rule.style.fontFamily || '').replace(/^["']|["']$/g, '');
+  if (!fam || !want.has(fam.toLowerCase())) return null;
+  const src = rule.style.src || '';
+  const m = src.match(/url\((["']?)([^"')]+)\1\)/); // first url() wins (woff2 is declared first)
+  if (!m) return null;
+  return { fam, url: m[2] };
+}
+
+async function fetchFaceCss(fam, url, ruleStyle) {
+  const abs = new URL(url, location.href).href;
+  try {
+    if (!_fontCache.has(abs)) _fontCache.set(abs, await fetchAsDataUri(abs, 'font/woff2'));
+    const data = _fontCache.get(abs);
+    return `@font-face{font-family:'${fam}';font-weight:${ruleStyle.fontWeight || 'normal'};font-style:${ruleStyle.fontStyle || 'normal'};font-display:block;src:url(${data}) format('woff2');}`;
+  } catch {
+    return null; // a face that won't fetch just falls back inside the raster
+  }
+}
+
+async function faceCssForRule(rule, want, seen) {
+  const parsed = ruleFontFace(rule, want);
+  if (!parsed) return null;
+  if (parsed.url.startsWith('data:')) return rule.cssText;
+  const key = parsed.fam + '|' + rule.style.fontWeight + '|' + rule.style.fontStyle;
+  if (seen.has(key)) return null;
+  seen.add(key);
+  return fetchFaceCss(parsed.fam, parsed.url, rule.style);
+}
+
+async function facesFromSheet(sheet, want, seen) {
+  let rules;
+  try { rules = sheet.cssRules; } catch { return []; }
+  if (!rules) return [];
+  const out = [];
+  for (const rule of rules) {
+    const css = await faceCssForRule(rule, want, seen);
+    if (css) out.push(css);
+  }
+  return out;
+}
+
 // Collect @font-face rules from same-origin sheets, fetch each src file once, emit @font-face blocks
 // with data: URIs. Restricted to `families` (the faces the DOM actually uses) to keep the fetch small.
 async function inlineFonts(families) {
   const want = new Set([...families].map((f) => f.toLowerCase()));
-  const faces = [];
   const seen = new Set();
-  for (const sheet of document.styleSheets) {
-    let rules; try { rules = sheet.cssRules; } catch { continue; }
-    if (!rules) continue;
-    for (const rule of rules) {
-      if (!(rule.type === 5 || rule.constructor?.name === 'CSSFontFaceRule')) continue;
-      const fam = (rule.style.fontFamily || '').replace(/^["']|["']$/g, '');
-      if (!fam || !want.has(fam.toLowerCase())) continue;
-      const src = rule.style.src || '';
-      const m = src.match(/url\((["']?)([^"')]+)\1\)/); // first url() wins (woff2 is declared first)
-      if (!m) continue;
-      let url = m[2];
-      if (url.startsWith('data:')) { faces.push(rule.cssText); continue; }
-      const abs = new URL(url, location.href).href;
-      const key = fam + '|' + rule.style.fontWeight + '|' + rule.style.fontStyle;
-      if (seen.has(key)) continue; seen.add(key);
-      try {
-        if (!_fontCache.has(abs)) _fontCache.set(abs, await fetchAsDataUri(abs, 'font/woff2'));
-        const data = _fontCache.get(abs);
-        faces.push(`@font-face{font-family:'${fam}';font-weight:${rule.style.fontWeight || 'normal'};font-style:${rule.style.fontStyle || 'normal'};font-display:block;src:url(${data}) format('woff2');}`);
-      } catch (e) { /* a face that won't fetch just falls back inside the raster */ }
-    }
-  }
+  const faces = [];
+  for (const sheet of document.styleSheets) faces.push(...await facesFromSheet(sheet, want, seen));
   return faces.join('\n');
 }
 
@@ -82,26 +104,33 @@ function usedFamilies(el) {
   return fams;
 }
 
-export async function buildInlinedCss(el) {
-  const families = usedFamilies(el);
-  // base sheet: the scene's own <style> blocks AND every linked stylesheet, minus their @font-face
-  // (url()s that would not resolve in the isolated raster, the data: versions below replace them).
-  let base = '';
-  for (const st of document.querySelectorAll('style')) base += '\n' + st.textContent;
-  // Linked stylesheets are INVISIBLE to the <style> query above, so fetch each once and inline it.
-  // This closes the bug where the seam bake lost `.hs-layer{position:absolute}` (it lives in the
-  // LINKED scene.css, not an inline <style>): without it every baked layer fell back to `position:
-  // static`, collapsed to top-of-frame block flow, and seam content jumped upward until the window
-  // ended (engine-doctrine/MISTAKES.md). tokens.css was the one link hand-fetched here; this generalises it so
-  // no future linked sheet goes missing from a raster.
+async function fetchLinkedCss(href) {
+  if (!_linkedCss.has(href)) {
+    try { _linkedCss.set(href, await (await fetch(href)).text()); } catch { _linkedCss.set(href, ''); }
+  }
+  return _linkedCss.get(href);
+}
+
+// Linked stylesheets are INVISIBLE to a <style> query, so fetch each once and inline it. This closes
+// the bug where the seam bake lost `.hs-layer{position:absolute}` (it lives in the LINKED scene.css,
+// not an inline <style>): without it every baked layer fell back to `position: static`, collapsed to
+// top-of-frame block flow, and seam content jumped upward until the window ended
+// (engine-doctrine/MISTAKES.md).
+async function inlineLinkedStylesheets() {
+  let css = '';
   for (const link of document.querySelectorAll('link[rel="stylesheet"]')) {
     const href = link.href;
     if (!href || new URL(href, location.href).origin !== location.origin) continue;  // skip cross-origin (fonts): inlineFonts handles those
-    if (!_linkedCss.has(href)) {
-      try { _linkedCss.set(href, await (await fetch(href)).text()); } catch (e) { _linkedCss.set(href, ''); }
-    }
-    base += '\n' + _linkedCss.get(href);
+    css += '\n' + await fetchLinkedCss(href);
   }
+  return css;
+}
+
+export async function buildInlinedCss(el) {
+  const families = usedFamilies(el);
+  let base = '';
+  for (const st of document.querySelectorAll('style')) base += '\n' + st.textContent;
+  base += await inlineLinkedStylesheets();
   base = base.replace(/@font-face\s*\{[^}]*\}/g, '');
   const fonts = await inlineFonts(families);
   // :root custom properties (applyTheme wrote --bg/--accent/--font-* onto the documentElement inline
@@ -118,42 +147,39 @@ export async function buildInlinedCss(el) {
 // DECODED bitmap as a data: URI, exactly how inlineFonts closes the parallel gap for @font-face.
 // A genuinely tainted cross-origin source still throws on toDataURL and is left as-is (unchanged,
 // documented behaviour); everything else now bakes instead of leaving a flat background slab.
+function inlineOneImage(cloneEl, origEl) {
+  if (!origEl || !origEl.complete || !origEl.naturalWidth) return;
+  try {
+    const c = document.createElement('canvas');
+    c.width = origEl.naturalWidth; c.height = origEl.naturalHeight;
+    c.getContext('2d').drawImage(origEl, 0, 0);
+    cloneEl.src = c.toDataURL('image/png');
+  } catch { /* tainted cross-origin source: leave the original src, same as before */ }
+}
+
 function inlineImages(work, live) {
   const clones = work.querySelectorAll('img');
   const origs = live.querySelectorAll('img');
-  for (let i = 0; i < clones.length; i++) {
-    const im = origs[i];
-    if (!im || !im.complete || !im.naturalWidth) continue;
-    try {
-      const c = document.createElement('canvas');
-      c.width = im.naturalWidth; c.height = im.naturalHeight;
-      c.getContext('2d').drawImage(im, 0, 0);
-      clones[i].src = c.toDataURL('image/png');
-    } catch (e) { /* tainted cross-origin source: leave the original src, same as before */ }
-  }
+  for (let i = 0; i < clones.length; i++) inlineOneImage(clones[i], origs[i]);
 }
 
 // domToCanvas(el, w, h): serialise `el` into an SVG <foreignObject> with the inlined CSS, rasterise
 // it through an <img>, and return a canvas. Async (image decode), build-time only.
-export async function domToCanvas(el, w, h, css) {
-  const work = el.cloneNode(true);
-  inlineImages(work, el);
-  const xml = new XMLSerializer().serializeToString(work);
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
-    // CSS goes in a CDATA section: stylesheet text can legally contain characters (`<`, `&`) that are
-    // not valid raw XML, and the SVG is parsed as XML during rasterisation.
+// CSS goes in a CDATA section: stylesheet text can legally contain characters (`<`, `&`) that are
+// not valid raw XML, and the SVG is parsed as XML during rasterisation.
+function foreignObjectSvg(xml, css, size) {
+  const { w, h } = size;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
     `<defs><style type="text/css"><![CDATA[${css}]]></style></defs>` +
     `<foreignObject x="0" y="0" width="${w}" height="${h}">` +
     `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px;height:${h}px;position:relative;overflow:hidden;">${xml}</div>` +
     `</foreignObject></svg>`;
-  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  const img = new Image();
-  img.width = w; img.height = h;
-  // Time-bound the decode with a REAL timer (scene setTimeout is virtualized and would never fire
-  // during boot): a raster that never resolves must not deadlock the render, it becomes a bake miss.
-  const timer = window.__realTimeout || setTimeout;
-  await new Promise((res, rej) => {
+}
+
+// Time-bound the decode with a REAL timer (scene setTimeout is virtualized and would never fire
+// during boot): a raster that never resolves must not deadlock the render, it becomes a bake miss.
+function loadRasterImage(img, url, timer) {
+  return new Promise((res, rej) => {
     let done = false;
     const finish = (fn) => (arg) => { if (done) return; done = true; fn(arg); };
     const ok = finish(res), fail = finish(rej);
@@ -162,10 +188,35 @@ export async function domToCanvas(el, w, h, css) {
     img.onerror = () => fail(new Error('foreignObject raster failed'));
     img.src = url;
   });
-  if (img.decode) { try { await img.decode(); } catch (e) {} }
-  const c = document.createElement('canvas'); c.width = w; c.height = h;
+}
+
+function newSizedImage(w, h) {
+  const img = new Image();
+  img.width = w; img.height = h;
+  return img;
+}
+
+async function decodeIfPossible(img) {
+  if (img.decode) { try { await img.decode(); } catch {} }
+}
+
+function drawToCanvas(img, w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
   c.getContext('2d').drawImage(img, 0, 0, w, h);
   return c;
+}
+
+export async function domToCanvas(el, w, h, css) {
+  const work = el.cloneNode(true);
+  inlineImages(work, el);
+  const xml = new XMLSerializer().serializeToString(work);
+  const svg = foreignObjectSvg(xml, css, { w, h });
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  const img = newSizedImage(w, h);
+  await loadRasterImage(img, url, window.__realTimeout || setTimeout);
+  await decodeIfPossible(img);
+  return drawToCanvas(img, w, h);
 }
 
 // rasterStats(canvas): the two things a caller wants to know about a bake, sampled on a stride:
@@ -173,21 +224,25 @@ export async function domToCanvas(el, w, h, css) {
 // separate questions and conflating them was a bug waiting for its caller: a seam wants both (a flat
 // field means the beat did not rasterise), while a single resampled layer wants only the first, a
 // `rect` layer IS one flat colour, and grading that as a failed bake refused a perfectly good source.
+function sampleRaster(d, step, base) {
+  let opaque = 0, nonUniform = 0, n = 0;
+  for (let i = 0; i < d.length; i += step) {
+    n++;
+    if (d[i + 3] > 8) opaque++;
+    if (Math.abs(d[i] - base.r) > 6 || Math.abs(d[i + 1] - base.g) > 6 || Math.abs(d[i + 2] - base.b) > 6) nonUniform++;
+  }
+  return { opaque, nonUniform, n };
+}
+
 export function rasterStats(canvas) {
   try {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const { width: w, height: h } = canvas;
     const d = ctx.getImageData(0, 0, w, h).data;
-    let opaque = 0, nonUniform = 0; const r0 = d[0], g0 = d[1], b0 = d[2];
     const step = Math.max(4, (w * h / 4000 | 0)) * 4;
-    let n = 0;
-    for (let i = 0; i < d.length; i += step) {
-      n++;
-      if (d[i + 3] > 8) opaque++;
-      if (Math.abs(d[i] - r0) > 6 || Math.abs(d[i + 1] - g0) > 6 || Math.abs(d[i + 2] - b0) > 6) nonUniform++;
-    }
+    const { opaque, nonUniform, n } = sampleRaster(d, step, { r: d[0], g: d[1], b: d[2] });
     return { opaque: opaque / n, nonUniform: nonUniform / n };
-  } catch (e) { return null; }   // unreadable (tainted) → the caller assumes it painted
+  } catch { return null; }   // unreadable (tainted) → the caller assumes it painted
 }
 
 // isBlankRaster(canvas): a bake that produced essentially nothing (all one colour / transparent).
