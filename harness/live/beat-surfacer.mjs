@@ -186,8 +186,9 @@ process.stdin.on('end', () => {
   try { file = (JSON.parse(raw).tool_input || {}).file_path || ''; } catch { process.exit(0); }
   if (!file) process.exit(0);
   const rel = path.relative(ROOT, file);
+  const filmsDir = (process.env.VAWE_FILMS_DIR || 'films/scene') + '/';
   if (rel.startsWith('..')) process.exit(0);
-  if (!rel.startsWith('films/scene/') || !rel.endsWith('.storyboard.md')) process.exit(0);
+  if (!rel.startsWith(filmsDir) || !rel.endsWith('.storyboard.md')) process.exit(0);
   if (path.basename(rel).startsWith('_')) process.exit(0);   // scratch fixture, never a film
   if (!fs.existsSync(file)) process.exit(0);
 

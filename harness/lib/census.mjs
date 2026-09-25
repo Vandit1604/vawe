@@ -34,7 +34,7 @@ import cp from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-export const SCENE_DIR = 'films/scene';
+export const SCENE_DIR = process.env.VAWE_FILMS_DIR || 'films/scene';
 
 const git = (args, cwd) => cp.execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
 

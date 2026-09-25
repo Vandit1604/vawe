@@ -71,7 +71,7 @@ process.stdin.on('end', () => {
   try { sessionId = JSON.parse(raw).session_id || null; } catch { /* no payload: falls back to always-print below */ }
 
   const DAY = 24 * 60 * 60 * 1000;
-  const dir = path.join(ROOT, 'films/scene');
+  const dir = path.join(ROOT, process.env.VAWE_FILMS_DIR || 'films/scene');
   let best = null;
   for (const f of (fs.existsSync(dir) ? fs.readdirSync(dir) : [])) {
     if (!f.endsWith('.storyboard.md')) continue;

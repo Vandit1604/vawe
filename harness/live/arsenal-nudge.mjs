@@ -194,10 +194,11 @@ function handleBash(cmd) {
 
 function handleEdit(file, addedText) {
   const rel = path.relative(ROOT, file);
+  const filmsDir = (process.env.VAWE_FILMS_DIR || 'films/scene') + '/';
   if (rel.startsWith('..')) return;
-  const isJson = rel.startsWith('films/scene/') && rel.endsWith('.json');
-  const isHtml = rel.startsWith('films/scene/') && rel.endsWith('.html');
-  const isBoard = rel.startsWith('films/scene/') && rel.endsWith('.storyboard.md');
+  const isJson = rel.startsWith(filmsDir) && rel.endsWith('.json');
+  const isHtml = rel.startsWith(filmsDir) && rel.endsWith('.html');
+  const isBoard = rel.startsWith(filmsDir) && rel.endsWith('.storyboard.md');
   const isCore = rel.startsWith('core/') && rel.endsWith('.js');
   if (!isJson && !isHtml && !isBoard && !isCore) return;
   if (typeof addedText !== 'string' || !addedText) return;

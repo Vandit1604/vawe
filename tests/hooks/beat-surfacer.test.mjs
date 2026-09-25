@@ -16,12 +16,13 @@ import assert from 'node:assert';
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, '../..');
 const HOOK = join(here, '../../harness/live', 'beat-surfacer.mjs');
-const FIXTURE = 'films/scene/zz-beat-surfacer-probe.storyboard.md';
+const FILMS_DIR = 'tests/fixtures/films';
+const FIXTURE = `${FILMS_DIR}/zz-beat-surfacer-probe.storyboard.md`;
 
 const run = (rel) => {
   const r = spawnSync('node', [HOOK], {
     input: JSON.stringify({ tool_input: { file_path: path.join(ROOT, rel) } }), encoding: 'utf8',
-    env: { ...process.env, VAWE_HOOK_FULL: '1' },   // assert against the full text, not the summary
+    env: { ...process.env, VAWE_HOOK_FULL: '1', VAWE_FILMS_DIR: FILMS_DIR },   // assert against the full text, not the summary
   });
   return { status: r.status, out: r.stderr };
 };

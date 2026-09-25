@@ -46,7 +46,7 @@ export const STAGE_ORDER = ['brief', 'plan', 'design', 'approval', 'assemble', '
 /** Every path a film owns, resolved the same way author-check and studio resolve them. */
 export function filePaths(arg) {
   const raw = String(arg || '').replace(/\.(json|storyboard\.md)$/, '');
-  const base = raw.includes('/') ? raw : path.join('films/scene', raw);
+  const base = raw.includes('/') ? raw : path.join(process.env.VAWE_FILMS_DIR || 'films/scene', raw);
   const scene = path.join(ROOT, base + '.json');
   let named = null;
   try { const d = JSON.parse(fs.readFileSync(scene, 'utf8'));
