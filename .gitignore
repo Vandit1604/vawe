@@ -25,10 +25,11 @@ quality/runs/frames/
 # Removed on exit; a leftover one means a run was killed — check `git status` before trusting the tree.
 quality/fixtures/.gate-mutation.lock
 
-# transient DOM snapshot baselines (make snap)
+# transient DOM/layer-JSON snapshot baselines (make snap, make snap-blocks)
 quality/baselines/snap/*
-# …except the digest: one sha256 per scene plus the font state, ~10KB. It is what lets a fresh clone
-# and CI answer "did this scene move" when the 20MB of full signatures beside it cannot be committed.
+# …except the digest: one sha256 per scene (under `scenes`) and per block (under `blocks`) plus the
+# font state, ~10-15KB. It is what lets a fresh clone and CI answer "did this move" for both nets when
+# the tens of MB of full signatures beside it cannot be committed.
 !quality/baselines/snap/digest.json
 
 # review receipts: proof a beats/reveal sheet was rendered for a given scene content hash

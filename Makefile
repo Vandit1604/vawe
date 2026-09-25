@@ -618,6 +618,9 @@ snap-all: ## [check] The WHOLE-LIBRARY net: sweep every shipped scene, quarantin
 # bytes. This diffs the layer JSON each of the 179 catalog entries returns. No render, ~0.35s.
 # NOT part of `make author-check`: author-check grades ONE scene, and a block belongs to no scene.
 # Run it after touching anything under blocks/, the way snap-all is run after touching core/.
+# A fresh clone has no full baselines (quality/baselines/snap/ is gitignored) but is not blind: it
+# compares against the committed digest, quality/baselines/snap/digest.json, same as snap-all does for
+# scenes.
 snap-blocks: ## [check] the BLOCK library's regression net, and it is the half snap-all cannot reach: `block` sugar is
 	@node quality/gates/snap-blocks.mjs $(BLOCK) $(if $(SAVE),--save) $(if $(JSON),--json,)
 

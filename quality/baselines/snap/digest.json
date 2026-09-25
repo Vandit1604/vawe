@@ -456,5 +456,759 @@
    "sig": "7ff28bdefe28894d",
    "font": "5ac22a3620f3"
   }
+ },
+ "blocks": {
+  "avatarStack": {
+   "sig": "f8a085370dc25ebd",
+   "font": "ccdceeec8c87"
+  },
+  "avatarStack.large": {
+   "sig": "243a3af04cd24541",
+   "font": "ccdceeec8c87"
+  },
+  "badge": {
+   "sig": "a1db451fb7dd6703",
+   "font": "ccdceeec8c87"
+  },
+  "badge.beta": {
+   "sig": "30a046840a945f8a",
+   "font": "ccdceeec8c87"
+  },
+  "badge.info": {
+   "sig": "355ead9e05cc8a0e",
+   "font": "ccdceeec8c87"
+  },
+  "badge.version": {
+   "sig": "fa540e85629ddf29",
+   "font": "ccdceeec8c87"
+  },
+  "badge.warn": {
+   "sig": "9992dd789218e83f",
+   "font": "ccdceeec8c87"
+  },
+  "banner": {
+   "sig": "3c96760c43325b84",
+   "font": "ccdceeec8c87"
+  },
+  "banner.info": {
+   "sig": "9a18c90053cd3e16",
+   "font": "ccdceeec8c87"
+  },
+  "banner.warn": {
+   "sig": "ffef50ab52887c76",
+   "font": "ccdceeec8c87"
+  },
+  "barChart": {
+   "sig": "52c3889142a83fc7",
+   "font": "ccdceeec8c87"
+  },
+  "barChart.green": {
+   "sig": "431730039675cabf",
+   "font": "ccdceeec8c87"
+  },
+  "bento": {
+   "sig": "12b545aad05b7dd3",
+   "font": "ccdceeec8c87"
+  },
+  "borderBeamCard": {
+   "sig": "8af96aef4c187244",
+   "font": "ccdceeec8c87"
+  },
+  "browserFrame": {
+   "sig": "0a3cd41c755d4d0b",
+   "font": "ccdceeec8c87"
+  },
+  "callout": {
+   "sig": "37b1eac254f47791",
+   "font": "ccdceeec8c87"
+  },
+  "callout.info": {
+   "sig": "3917dd54074302f5",
+   "font": "ccdceeec8c87"
+  },
+  "callout.warn": {
+   "sig": "a50f7d4acbe5bbb0",
+   "font": "ccdceeec8c87"
+  },
+  "camcorderHud": {
+   "sig": "eab5d130c15b2d25",
+   "font": "ccdceeec8c87"
+  },
+  "captions": {
+   "sig": "8f5a8d881318c61b",
+   "font": "ccdceeec8c87"
+  },
+  "card": {
+   "sig": "9cdc3c45e917238c",
+   "font": "ccdceeec8c87"
+  },
+  "card.pricing": {
+   "sig": "8d319057a7c558c5",
+   "font": "ccdceeec8c87"
+  },
+  "card.pricing.free": {
+   "sig": "f867ef638c075dc1",
+   "font": "ccdceeec8c87"
+  },
+  "card.pricing.team": {
+   "sig": "37409def71a394fd",
+   "font": "ccdceeec8c87"
+  },
+  "card.profile": {
+   "sig": "0e645e50adf9f2e1",
+   "font": "ccdceeec8c87"
+  },
+  "card.stat": {
+   "sig": "eb6fa3de415d8416",
+   "font": "ccdceeec8c87"
+  },
+  "card.stat.down": {
+   "sig": "22aecd7e8e707526",
+   "font": "ccdceeec8c87"
+  },
+  "card.stat.plain": {
+   "sig": "390665caa989e754",
+   "font": "ccdceeec8c87"
+  },
+  "chatBubble": {
+   "sig": "0df64a8122e44d99",
+   "font": "ccdceeec8c87"
+  },
+  "chatBubble.support": {
+   "sig": "de24a01fb3bc9372",
+   "font": "ccdceeec8c87"
+  },
+  "checklist": {
+   "sig": "c487a72ee9594296",
+   "font": "ccdceeec8c87"
+  },
+  "checklist.done": {
+   "sig": "c12f5fd469199864",
+   "font": "ccdceeec8c87"
+  },
+  "checklist.todo": {
+   "sig": "bcb5fdd64a96a803",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock": {
+   "sig": "fb24957b4efddec8",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.aurora": {
+   "sig": "654b5443b6f1aec0",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.dusk": {
+   "sig": "bc6c7c4d18304364",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.ember": {
+   "sig": "047e3f2c9a42bbdc",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.forest": {
+   "sig": "d04bdea2d74b0e86",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.frost": {
+   "sig": "0fd20b15ef3ed87a",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.ink": {
+   "sig": "aaec99a3de932f28",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.light": {
+   "sig": "d9d91fe7661a7a06",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.linen": {
+   "sig": "7e50ced446e70a0e",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.midnight": {
+   "sig": "b627030e7574d225",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.neon": {
+   "sig": "fc49a01a3d4e90bf",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.ocean": {
+   "sig": "f880efb92ca93e21",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.paper": {
+   "sig": "0cddbedfeadbd200",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.py": {
+   "sig": "65456497d5a76d05",
+   "font": "ccdceeec8c87"
+  },
+  "codeBlock.slate": {
+   "sig": "f21b1136364a71d9",
+   "font": "ccdceeec8c87"
+  },
+  "codeDiff": {
+   "sig": "cc4b0faf4f7cb347",
+   "font": "ccdceeec8c87"
+  },
+  "codeFlight": {
+   "sig": "e1fd20edd3b4cf17",
+   "font": "ccdceeec8c87"
+  },
+  "codeHighlight": {
+   "sig": "48538eaa40f13fe4",
+   "font": "ccdceeec8c87"
+  },
+  "codeMorph": {
+   "sig": "ec0000412adbf534",
+   "font": "ccdceeec8c87"
+  },
+  "codeScroll": {
+   "sig": "ce323067fe88bed8",
+   "font": "ccdceeec8c87"
+  },
+  "codeTyping": {
+   "sig": "aa12817f5184089a",
+   "font": "ccdceeec8c87"
+  },
+  "colorCycle": {
+   "sig": "673704c0d4144eb1",
+   "font": "ccdceeec8c87"
+  },
+  "commitRow": {
+   "sig": "8cbc3d485912e2e6",
+   "font": "ccdceeec8c87"
+  },
+  "comparison": {
+   "sig": "ef8b438bae7aeb13",
+   "font": "ccdceeec8c87"
+  },
+  "comparison.beforeAfter": {
+   "sig": "e1d944f142ffc6f3",
+   "font": "ccdceeec8c87"
+  },
+  "comparison.screens": {
+   "sig": "e07f414ca1fe7351",
+   "font": "ccdceeec8c87"
+  },
+  "deploySuccess": {
+   "sig": "3e554b9735abbad2",
+   "font": "ccdceeec8c87"
+  },
+  "diff": {
+   "sig": "a2646cf4df41e5be",
+   "font": "ccdceeec8c87"
+  },
+  "diff.config": {
+   "sig": "266b874b569c6621",
+   "font": "ccdceeec8c87"
+  },
+  "donutChart": {
+   "sig": "66b6852c12929b39",
+   "font": "ccdceeec8c87"
+  },
+  "donutChart.two": {
+   "sig": "374ec62350ec528e",
+   "font": "ccdceeec8c87"
+  },
+  "emptyState": {
+   "sig": "947f59d5a027db5d",
+   "font": "ccdceeec8c87"
+  },
+  "feedRow": {
+   "sig": "c3e19b66d37f7cc6",
+   "font": "ccdceeec8c87"
+  },
+  "fileTree": {
+   "sig": "9302200be83e9141",
+   "font": "ccdceeec8c87"
+  },
+  "flowchart": {
+   "sig": "3730ba479902cc89",
+   "font": "ccdceeec8c87"
+  },
+  "flowchart.vertical": {
+   "sig": "a7c91a6cf7019221",
+   "font": "ccdceeec8c87"
+  },
+  "followCard": {
+   "sig": "5d53475a13fc0f18",
+   "font": "ccdceeec8c87"
+  },
+  "gauge": {
+   "sig": "3eadf735e701d8b4",
+   "font": "ccdceeec8c87"
+  },
+  "gauge.full": {
+   "sig": "9a15c7bad081bd34",
+   "font": "ccdceeec8c87"
+  },
+  "gauge.warn": {
+   "sig": "f80a64ffd2b39523",
+   "font": "ccdceeec8c87"
+  },
+  "glassCard": {
+   "sig": "4cdb4b9f560d3ba5",
+   "font": "ccdceeec8c87"
+  },
+  "glassControls": {
+   "sig": "bd3f6c1e20022f64",
+   "font": "ccdceeec8c87"
+  },
+  "glassDock": {
+   "sig": "7426cdaab1e29da1",
+   "font": "ccdceeec8c87"
+  },
+  "glassHome": {
+   "sig": "5ad34a51ab9d25dc",
+   "font": "ccdceeec8c87"
+  },
+  "glassMenu": {
+   "sig": "6d1ea22917fc2657",
+   "font": "ccdceeec8c87"
+  },
+  "glassNotification": {
+   "sig": "f6bfddb7eddc8208",
+   "font": "ccdceeec8c87"
+  },
+  "glassWidgets": {
+   "sig": "9fce73439b99b3c7",
+   "font": "ccdceeec8c87"
+  },
+  "grainOverlay": {
+   "sig": "9abe247c1d0a05b4",
+   "font": "ccdceeec8c87"
+  },
+  "installCard": {
+   "sig": "d93af918d529c3df",
+   "font": "ccdceeec8c87"
+  },
+  "kanban": {
+   "sig": "b6ca38370c6a6fba",
+   "font": "ccdceeec8c87"
+  },
+  "kanban.two": {
+   "sig": "465d56957a4ebd0b",
+   "font": "ccdceeec8c87"
+  },
+  "keyboard": {
+   "sig": "185ec1a3a4accfc2",
+   "font": "ccdceeec8c87"
+  },
+  "keyboard.numeric": {
+   "sig": "62c463bbac02b907",
+   "font": "ccdceeec8c87"
+  },
+  "kpiRow": {
+   "sig": "4ef094d3965d584d",
+   "font": "ccdceeec8c87"
+  },
+  "kpiRow.money": {
+   "sig": "5a4b1b154e5c92d1",
+   "font": "ccdceeec8c87"
+  },
+  "kpiRow.time": {
+   "sig": "a6605aff8a0164c0",
+   "font": "ccdceeec8c87"
+  },
+  "lineChart": {
+   "sig": "5a00c5620b32372e",
+   "font": "ccdceeec8c87"
+  },
+  "lineChart.area": {
+   "sig": "c00b60d02aa482fc",
+   "font": "ccdceeec8c87"
+  },
+  "lineChart.down": {
+   "sig": "feb9c1d8c651adfd",
+   "font": "ccdceeec8c87"
+  },
+  "listRow": {
+   "sig": "d68dd4c5fd937f5e",
+   "font": "ccdceeec8c87"
+  },
+  "loadingBar": {
+   "sig": "e01291bfe34a90d1",
+   "font": "ccdceeec8c87"
+  },
+  "logLines": {
+   "sig": "5632cc3b61f04b9a",
+   "font": "ccdceeec8c87"
+  },
+  "logLines.errors": {
+   "sig": "b3e44612f8ac1bf7",
+   "font": "ccdceeec8c87"
+  },
+  "logLines.light": {
+   "sig": "82fa5641e9c3d52b",
+   "font": "ccdceeec8c87"
+  },
+  "logoWall": {
+   "sig": "dfc61d4e97005f5a",
+   "font": "ccdceeec8c87"
+  },
+  "logoWall.four": {
+   "sig": "cbd76bd89fe78fbf",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.accentUnderline": {
+   "sig": "979f2d56f8bc59e5",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.bild": {
+   "sig": "52743cb718c65898",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.boldBlock": {
+   "sig": "43dbb7092cb6340f",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.cleanBar": {
+   "sig": "67eda5aaa4aa3ffd",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.colourBlock": {
+   "sig": "45a107d22885bd8e",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.darkCard": {
+   "sig": "8ea2338e6fa977cf",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.kickerName": {
+   "sig": "4a9bfc2e6b0c1d82",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.maskReveal": {
+   "sig": "88abf0ee8ac79cc2",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.newsTicker": {
+   "sig": "25835e310755cbd1",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.sideRule": {
+   "sig": "303a39dba21e08c2",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.softPill": {
+   "sig": "2cb65e628d4ae243",
+   "font": "ccdceeec8c87"
+  },
+  "lowerThird.stackBars": {
+   "sig": "9beaf4b31aed3d0e",
+   "font": "ccdceeec8c87"
+  },
+  "meshPanel": {
+   "sig": "88491b9234f99a9f",
+   "font": "ccdceeec8c87"
+  },
+  "morphText": {
+   "sig": "842ccd699a5f970a",
+   "font": "ccdceeec8c87"
+  },
+  "nodeGraph": {
+   "sig": "02f3c8dd52a1c6fa",
+   "font": "ccdceeec8c87"
+  },
+  "notification": {
+   "sig": "6aa605475d168d86",
+   "font": "ccdceeec8c87"
+  },
+  "notification.error": {
+   "sig": "1823286c3fe01917",
+   "font": "ccdceeec8c87"
+  },
+  "notification.stack": {
+   "sig": "5818743ac46fba78",
+   "font": "ccdceeec8c87"
+  },
+  "notification.warn": {
+   "sig": "b39a0022a3f04a50",
+   "font": "ccdceeec8c87"
+  },
+  "nowPlaying": {
+   "sig": "1f0f98d9e8a83d59",
+   "font": "ccdceeec8c87"
+  },
+  "onboardCard": {
+   "sig": "6fe3ad207fa65011",
+   "font": "ccdceeec8c87"
+  },
+  "parallaxUnzoom": {
+   "sig": "61f404c4ca96fb7f",
+   "font": "ccdceeec8c87"
+  },
+  "parallaxZoom": {
+   "sig": "a27259d3f6ffc497",
+   "font": "ccdceeec8c87"
+  },
+  "phoneFrame": {
+   "sig": "b29ec5e703ddc609",
+   "font": "ccdceeec8c87"
+  },
+  "pillRow": {
+   "sig": "55915301ee4a22f2",
+   "font": "ccdceeec8c87"
+  },
+  "pointer": {
+   "sig": "440ebbafefffb618",
+   "font": "ccdceeec8c87"
+  },
+  "pressButton": {
+   "sig": "45307203512850c2",
+   "font": "ccdceeec8c87"
+  },
+  "profileHeader": {
+   "sig": "05aa35bb8a5a3c5a",
+   "font": "ccdceeec8c87"
+  },
+  "progressRing": {
+   "sig": "9b500c58bf4d7060",
+   "font": "ccdceeec8c87"
+  },
+  "progressRing.done": {
+   "sig": "affc6a48d09bb262",
+   "font": "ccdceeec8c87"
+  },
+  "progressRing.low": {
+   "sig": "37447b2767a67eb1",
+   "font": "ccdceeec8c87"
+  },
+  "quote": {
+   "sig": "a7b9e06543e71a53",
+   "font": "ccdceeec8c87"
+  },
+  "quote.customer": {
+   "sig": "26f007322f47052d",
+   "font": "ccdceeec8c87"
+  },
+  "reactionBar": {
+   "sig": "77a6af3263393cfc",
+   "font": "ccdceeec8c87"
+  },
+  "reactionBar.love": {
+   "sig": "881d1ce45e4edfaf",
+   "font": "ccdceeec8c87"
+  },
+  "redditPost": {
+   "sig": "7a542e8137bc82af",
+   "font": "ccdceeec8c87"
+  },
+  "scanGate": {
+   "sig": "9de4c161300f7121",
+   "font": "ccdceeec8c87"
+  },
+  "screenSwap": {
+   "sig": "633a6d26d2b033bb",
+   "font": "ccdceeec8c87"
+  },
+  "screenSwap.slide": {
+   "sig": "83d78a4d51092fcb",
+   "font": "ccdceeec8c87"
+  },
+  "searchEngine.home": {
+   "sig": "f17be83ca4bc8b71",
+   "font": "ccdceeec8c87"
+  },
+  "searchEngine.results": {
+   "sig": "beddeb0f2974f1b6",
+   "font": "ccdceeec8c87"
+  },
+  "settingsRow": {
+   "sig": "106f6f8b47a7b92e",
+   "font": "ccdceeec8c87"
+  },
+  "socialProof": {
+   "sig": "913361c6efc23278",
+   "font": "ccdceeec8c87"
+  },
+  "spinner": {
+   "sig": "3b0051c7e3bd7ef3",
+   "font": "ccdceeec8c87"
+  },
+  "spinner.small": {
+   "sig": "b7ada989a071a41f",
+   "font": "ccdceeec8c87"
+  },
+  "splitFlapBoard": {
+   "sig": "cacf557ae1773fea",
+   "font": "ccdceeec8c87"
+  },
+  "splitFlapBoard.small": {
+   "sig": "b9610e5eff9e1982",
+   "font": "ccdceeec8c87"
+  },
+  "splitScreen": {
+   "sig": "99c45356b1da7507",
+   "font": "ccdceeec8c87"
+  },
+  "splitScreen.pip": {
+   "sig": "fc30f653431f355d",
+   "font": "ccdceeec8c87"
+  },
+  "spotlightCard": {
+   "sig": "8cee79eaa26283cb",
+   "font": "ccdceeec8c87"
+  },
+  "stackedBar": {
+   "sig": "7e296cf54bb8aa69",
+   "font": "ccdceeec8c87"
+  },
+  "stackedBar.three": {
+   "sig": "34707e1f153e0db5",
+   "font": "ccdceeec8c87"
+  },
+  "statBig": {
+   "sig": "25f2291cb990d5fe",
+   "font": "ccdceeec8c87"
+  },
+  "statBig.currency": {
+   "sig": "88f759151864113c",
+   "font": "ccdceeec8c87"
+  },
+  "statBig.time": {
+   "sig": "4c32f692e0f7ffd5",
+   "font": "ccdceeec8c87"
+  },
+  "stepFlow": {
+   "sig": "84004ec3b08edbf6",
+   "font": "ccdceeec8c87"
+  },
+  "stepFlow.build": {
+   "sig": "9c37ddf312f7a8b5",
+   "font": "ccdceeec8c87"
+  },
+  "stepFlow.done": {
+   "sig": "f198207abe976290",
+   "font": "ccdceeec8c87"
+  },
+  "stepFlow.start": {
+   "sig": "7eed40e066b72821",
+   "font": "ccdceeec8c87"
+  },
+  "stripeCard": {
+   "sig": "a4252357ef8ed46d",
+   "font": "ccdceeec8c87"
+  },
+  "tabBar": {
+   "sig": "354e4bc0fbd87b63",
+   "font": "ccdceeec8c87"
+  },
+  "tabBar.four": {
+   "sig": "ece516e7547120f9",
+   "font": "ccdceeec8c87"
+  },
+  "tabBar.icons": {
+   "sig": "d798f00d0239fdb0",
+   "font": "ccdceeec8c87"
+  },
+  "tabBar.switch": {
+   "sig": "073b2f95ee1666d6",
+   "font": "ccdceeec8c87"
+  },
+  "table": {
+   "sig": "6abeb09b799a1442",
+   "font": "ccdceeec8c87"
+  },
+  "table.pricing": {
+   "sig": "7cac17c37a2976cf",
+   "font": "ccdceeec8c87"
+  },
+  "tapRipple": {
+   "sig": "0c504fff6923c607",
+   "font": "ccdceeec8c87"
+  },
+  "terminal": {
+   "sig": "dc5b7856adacb11a",
+   "font": "ccdceeec8c87"
+  },
+  "terminal.build": {
+   "sig": "2e007231d534c914",
+   "font": "ccdceeec8c87"
+  },
+  "terminal.git": {
+   "sig": "fb2683e3de70caf3",
+   "font": "ccdceeec8c87"
+  },
+  "terminal.install": {
+   "sig": "6871d4bd391690b6",
+   "font": "ccdceeec8c87"
+  },
+  "terminalHtml": {
+   "sig": "85ec03ee333ec689",
+   "font": "ccdceeec8c87"
+  },
+  "terminalPro": {
+   "sig": "cff2df2f78eb8a48",
+   "font": "ccdceeec8c87"
+  },
+  "textCursor": {
+   "sig": "e7cc976270346745",
+   "font": "ccdceeec8c87"
+  },
+  "textCursor.bar": {
+   "sig": "c0681aa28c16a12a",
+   "font": "ccdceeec8c87"
+  },
+  "timeline": {
+   "sig": "f533839c16437ea6",
+   "font": "ccdceeec8c87"
+  },
+  "timeline.release": {
+   "sig": "8317f31a4ec3842c",
+   "font": "ccdceeec8c87"
+  },
+  "toast": {
+   "sig": "a1e79b32204087cb",
+   "font": "ccdceeec8c87"
+  },
+  "toast.error": {
+   "sig": "3edd19a18696a5cc",
+   "font": "ccdceeec8c87"
+  },
+  "toast.info": {
+   "sig": "e572b03a59e9f2aa",
+   "font": "ccdceeec8c87"
+  },
+  "toast.stack": {
+   "sig": "cb6ff27967db4086",
+   "font": "ccdceeec8c87"
+  },
+  "tweetCard": {
+   "sig": "666cd04573c7a1e3",
+   "font": "ccdceeec8c87"
+  },
+  "uiReveal3d": {
+   "sig": "c33444f669d06ba8",
+   "font": "ccdceeec8c87"
+  },
+  "usMap": {
+   "sig": "fb97525058413339",
+   "font": "ccdceeec8c87"
+  },
+  "usMapBubble": {
+   "sig": "ab2fa6cf4b92ee7d",
+   "font": "ccdceeec8c87"
+  },
+  "usMapFlow": {
+   "sig": "85e2256458aa6623",
+   "font": "ccdceeec8c87"
+  },
+  "usMapHex": {
+   "sig": "2551d171fdd6e8ff",
+   "font": "ccdceeec8c87"
+  },
+  "videoLowerThird": {
+   "sig": "527fdb8d4606de81",
+   "font": "ccdceeec8c87"
+  },
+  "worldMap": {
+   "sig": "6334d14e8b025d25",
+   "font": "ccdceeec8c87"
+  }
  }
 }

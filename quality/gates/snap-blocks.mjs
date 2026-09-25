@@ -22,6 +22,12 @@
 //   node quality/gates/snap-blocks.mjs --save   # write baselines → quality/baselines/snap/blocks/<name>.json
 //   node quality/gates/snap-blocks.mjs          # diff current vs baselines
 //   make snap-blocks [SAVE=1] [BLOCK=<name>]
+//
+// A FRESH CLONE HAS NO FULL BASELINES (quality/baselines/snap/ is gitignored) but is NOT blind any
+// more: `--save` also writes each entry's sha256 into quality/baselines/snap/digest.json under a
+// `blocks` key, the one file this repo un-ignores, and a run with no full baseline falls back to that
+// digest, so it still reports "changed" or "identical", just without the field-level diff. Same
+// mechanism snap-scenes.mjs uses for scenes, in the same file, see snap-signature.mjs.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,6 +35,10 @@ import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { population } from '../../harness/lib/census.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+// Same digest mechanism snap-scenes.mjs uses, and the same reason: quality/baselines/snap/ is
+// gitignored, so a fresh clone or CI never has the full per-block baselines below. sha/fontState/
+// digest read-merge-write live once in snap-signature.mjs, shared by both gates.
+import { sha, fontState, loadDigest, digestEntry, mergeDigest, writeDigest } from './snap-signature.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SNAP = path.join(repoRoot, 'quality', 'baselines', 'snap', 'blocks');
@@ -37,6 +47,17 @@ const args = process.argv.slice(2);
 const f = gateFindings();
 const SAVE = args.includes('--save');
 const ONLY = args.find((a) => !a.startsWith('--'));
+
+// THE DIGEST IS THE SAME FILE snap-scenes.mjs WRITES, quality/baselines/snap/digest.json, under its
+// own `blocks` key, not a second tracked file. A block's baseline is pure layer JSON, never rendered,
+// so it does not depend on which fonts are on disk the way a scene's DOM signature does; the font
+// stamp still rides along per entry because it is the same mechanism, one read/merge/write in
+// snap-signature.mjs, and carrying an inert field costs nothing while a second copy of the merge logic
+// would be exactly the drift this extraction exists to prevent.
+const DIGEST = path.join(repoRoot, 'quality', 'baselines', 'snap', 'digest.json');
+const digest = loadDigest(DIGEST);
+const digestNow = {};
+const NOW_FONT = fontState(repoRoot);
 
 // The props are the ones blocks-scenes.mjs stages each block with, so a baseline here describes the
 // same block the site's poster shows. They are FIXED, never sampled or timestamped: a wall-clock or a
@@ -88,7 +109,7 @@ function diffLeaves(base, now) {
   return out;
 }
 
-const identical = [], changed = [], nondeterministic = [], errored = [], saved = [], nobaseline = [];
+const identical = [], changed = [], nondeterministic = [], errored = [], saved = [], nobaseline = [], staleFontDigest = [];
 for (const entry of entries) {
   const fam = BLOCKS[entry.family];
   if (typeof fam !== 'function') { errored.push(`${entry.name}: no factory for family "${entry.family}"`); continue; }
@@ -110,8 +131,19 @@ for (const entry of entries) {
   let now;
   try { now = JSON.parse(JSON.stringify({ family: entry.family, props, layers })); }
   catch (e) { errored.push(`${entry.name}: layers are not JSON, ${e.message.slice(0, 60)}`); continue; }
+  const sigHash = sha(JSON.stringify(now));
+  digestNow[entry.name] = sigHash;
   if (SAVE) { fs.writeFileSync(file, JSON.stringify(now, null, 1) + '\n'); saved.push(entry.name); continue; }
-  if (!fs.existsSync(file)) { nobaseline.push(entry.name); continue; }
+  if (!fs.existsSync(file)) {
+    // NO LOCAL BASELINE, BUT THE DIGEST IS TRACKED. Same fallback snap-scenes.mjs uses: a fresh clone
+    // or CI still gets a WHETHER-it-moved verdict from the committed digest, never a WHAT.
+    const was = digestEntry(digest, 'blocks', entry.name);
+    if (!was) nobaseline.push(entry.name);
+    else if (was.font !== NOW_FONT.hash) staleFontDigest.push(entry.name);
+    else if (was.sig === sigHash) identical.push(entry.name);
+    else changed.push({ name: entry.name, diffs: [`signature ${was.sig} → ${sigHash} (digest only: no full baseline in this checkout, so WHAT moved is not available here. Run \`make snap-blocks SAVE=1\` on a tree with the module to see it.)`] });
+    continue;
+  }
   let base;
   try { base = JSON.parse(fs.readFileSync(file, 'utf8')); }
   catch (e) { errored.push(`${entry.name}: unreadable baseline, ${e.message.slice(0, 60)}`); continue; }
@@ -128,31 +160,41 @@ for (const e of errored) f.fail('block-error', e);
 if (!SAVE) {
   for (const c of changed) f.fail('block-changed', `${c.name}: ${c.diffs.length} change(s): ${c.diffs.slice(0, 10).join(' · ')}${c.diffs.length > 10 ? ` … +${c.diffs.length - 10} more` : ''}`, { at: c.name });
   for (const n of nobaseline) f.note('no-baseline', `${n}: no baseline to diff against, run \`make snap-blocks SAVE=1\``, { at: n });
-  if (!identical.length && !changed.length && nobaseline.length) f.fail('nothing-compared', `all ${nobaseline.length} block(s) lack a baseline, this gate checked NOTHING`);
+  for (const n of staleFontDigest) f.note('digest-font-mismatch', `${n}: digest entry recorded under a different font state than this run, cannot compare, run \`make fonts\` to match it or re-save from a checkout in that state`, { at: n });
+  if (!identical.length && !changed.length && (nobaseline.length || staleFontDigest.length)) f.fail('nothing-compared', `all ${nobaseline.length + staleFontDigest.length} block(s) lack a comparable baseline, this gate checked NOTHING`);
 }
 console.log(`\n==== SNAP-BLOCKS · ${entries.length} catalog entr${entries.length === 1 ? 'y' : 'ies'} from ${mods.n} block module(s) ====`);
 if (SAVE) {
-  console.log(`✓ ${saved.length} baseline(s) saved → quality/baselines/snap/blocks/`);
+  const newDigest = mergeDigest(digest, 'blocks', digestNow, NOW_FONT.hash);
+  writeDigest(DIGEST, newDigest);
+  console.log(`✓ ${saved.length} baseline(s) saved → quality/baselines/snap/blocks/  (font state ${NOW_FONT.hash}, ${NOW_FONT.n} face(s); digest now ${Object.keys(newDigest.blocks).length} block(s), ${Object.keys(digestNow).length} refreshed this run)`);
   if (nondeterministic.length) { console.log(`\n✗ ${nondeterministic.length} NON-DETERMINISTIC (NOT baselined):`); for (const q of nondeterministic) { console.log(`  ${q.name}`); for (const s of q.sample) console.log(`      ${s}`); } }
   if (errored.length) { console.log(`\n⚠ ${errored.length} errored (skipped):`); for (const e of errored) console.log(`  ✗ ${e}`); }
   process.exit(nondeterministic.length || errored.length ? 1 : 0);
 }
-console.log(`✓ identical: ${identical.length}   △ changed: ${changed.length}   ✗ non-deterministic: ${nondeterministic.length}   ⚠ errored: ${errored.length}   ○ no-baseline: ${nobaseline.length}`);
+console.log(`✓ identical: ${identical.length}   △ changed: ${changed.length}   ✗ non-deterministic: ${nondeterministic.length}   ⚠ errored: ${errored.length}   ○ no-baseline: ${nobaseline.length}   ~ stale-font: ${staleFontDigest.length}`);
 if (nobaseline.length) {
   console.log(`\n○ NO BASELINE (nothing to diff against, run \`make snap-blocks SAVE=1\`):`);
   for (const n of nobaseline) console.log(`  ${n}`);
+}
+if (staleFontDigest.length) {
+  console.log(`\n~ DIGEST UNDER A DIFFERENT FONT STATE (a digest entry exists but was recorded under a font state this run does not have):`);
+  for (const n of staleFontDigest) console.log(`  ${n}`);
 }
 if (nondeterministic.length) { console.log(`\n✗ NON-DETERMINISTIC:`); for (const q of nondeterministic) { console.log(`  ${q.name}`); for (const s of q.sample) console.log(`      ${s}`); } }
 for (const c of changed) { console.log(`\n△ ${c.name} (${c.diffs.length} change(s)):`); for (const d of c.diffs.slice(0, 10)) console.log(`    ${d}`); if (c.diffs.length > 10) console.log(`    … +${c.diffs.length - 10} more`); }
 if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) console.log(`  ${e}`); }
 // A GATE THAT COMPARED NOTHING MUST NOT EXIT GREEN. quality/baselines/snap/ is gitignored (.gitignore:32), so a
-// fresh clone has no baselines and every block lands in `nobaseline`. snap-scenes learned this the hard
-// way (engine-doctrine/MISTAKES.md #391, #440): a green tick over zero comparisons is the strongest-sounding
-// statement the repo makes and it would be checking nothing. A FEW no-baseline entries stay soft.
-// That is a newly added block waiting for SAVE=1, and failing there makes adding a block feel like
+// fresh clone has no baselines. Since the digest above (quality/baselines/snap/digest.json, tracked) now
+// covers this gate too, that clone lands in `identical`/`changed`, not `nobaseline`; `nobaseline` now
+// means the digest itself has never seen this block, which is a newly added one waiting for SAVE=1.
+// snap-scenes learned the underlying lesson the hard way (engine-doctrine/MISTAKES.md #391, #440): a
+// green tick over zero comparisons is the strongest-sounding statement the repo makes and it would be
+// checking nothing. A FEW no-baseline entries stay soft, failing there makes adding a block feel like
 // breaking the build.
-if (!identical.length && !changed.length && nobaseline.length) {
-  console.error(`\n✗ nothing to compare: all ${nobaseline.length} block(s) lack a baseline, so this gate checked NOTHING.`);
+if (!identical.length && !changed.length && (nobaseline.length || staleFontDigest.length)) {
+  const n = nobaseline.length + staleFontDigest.length;
+  console.error(`\n✗ nothing to compare: all ${n} block(s) lack a comparable baseline, so this gate checked NOTHING.`);
   console.error('  quality/baselines/snap/ is gitignored, so a fresh clone starts here. Run `make snap-blocks SAVE=1` to record');
   console.error('  the baselines for THIS tree first, then re-run to diff against them.');
   process.exit(1);
