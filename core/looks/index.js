@@ -108,7 +108,7 @@ export function resolveComposite(name, opts = {}, positional) {
         + `Known passes: ${Object.keys(PASSES).sort().join(', ')}. `
         + `A missing pass renders the look without one of its effects and says nothing, so it is refused.`);
     }
-    const out = pass({ ...o, ...(fixed || {}), ...routed }, s);
+    const out = pass({ ...o, ...fixed, ...routed }, s);
     if (out.fns) fns.push(...out.fns.filter(Boolean));
     if (out.overlays) overlays.push(...out.overlays);
   }
