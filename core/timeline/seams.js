@@ -288,8 +288,32 @@ export { isBlankRaster } from '../raster/raster.js';
 // can say "that is a seam fx" when someone writes it somewhere else. core/registry.js.
 // SEAM_AKA: the plain-English words a blurb cannot honestly carry. Never printed, search only.
 const SEAM_AKA = {
+  fade: ['cross dissolve', 'crossfade', 'fade transition'],
+  dissolve: ['film dissolve', 'grainy dissolve', 'noise dissolve'],
+  slide: ['slide cover', 'slide transition', 'push aside'],
+  push: ['push transition', 'shove cut', 'directional push'],
+  uncover: ['pull away reveal', 'uncover transition', 'slide off reveal'],
+  wipe: ['soft wipe', 'sweep reveal', 'line wipe'],
+  crossWarp: ['warp dissolve', 'noise warp cut', 'drag and swap'],
+  whipPan: ['whip pan transition', 'momentum swipe', 'motion blur pan'],
+  sdfIris: ['shaped iris reveal', 'polygon iris', 'star iris'],
+  dispersion: ['prism split transition', 'chromatic dispersion', 'colour split seam'],
+  lens: ['lens bend transition', 'optical warp seam', 'flare lens transition'],
+  flashWhite: ['flash to white seam', 'white flash cut', 'flash transition'],
+  cinematicZoom: ['push in zoom', 'dolly zoom transition', 'dive in zoom'],
   portal: ['wormhole', 'tunnel reveal', 'vortex transition'],
-  cinematicZoom: ['push in zoom', 'dolly zoom transition'],
+  barnDoor: ['barn doors seam', 'centre split reveal', 'doors open transition'],
+  clockWipe: ['clock hand sweep', 'radial clock reveal', 'timed wipe'],
+  irisRound: ['circle iris seam', 'spotlight reveal transition', 'round iris open'],
+  shatterGlitch: ['digital shatter', 'rgb tear glitch', 'glitch pivot'],
+  zoomBlur: ['radial blur push', 'zoom push transition', 'blur punch cut'],
+  swirlWarp: ['vortex twist transition', 'swirl warp seam', 'dreamy twist cut'],
+  rippleWave: ['water ripple transition', 'concentric wave dissolve', 'ripple seam'],
+  pixelDissolve: ['pixelate dissolve', 'mosaic transition', 'blocky dissolve'],
+  blindsWipe: ['venetian blinds seam', 'slatted wipe', 'blinds transition'],
+  burnThrough: ['film burn seam', 'ember burn transition', 'burn through cut'],
+  spinZoom: ['spin and scale transition', 'kinetic spin cut', 'rotate zoom seam'],
+  lumaWipe: ['luminance wipe', 'brightness wipe', 'luma reveal'],
 };
 
 export const SEAM_REGISTRY = defineRegistry('seam fx', Object.fromEntries(SEAM_FX.map((n) => [n, n])), { slot: 'seam', blurbs: SEAM_BLURBS, aka: SEAM_AKA,
