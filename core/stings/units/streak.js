@@ -11,3 +11,4 @@ export const glsl = `                              /* light streaks, sharp radia
     float fall = smoothstep(0.95, 0.04, r);                            /* reach the edges then fade */
     c = vec4(vec3(1.0), (rays*fall*0.5 + core*0.85) * bell);`;
 export const blurb = 'sharp radial light rays from a hot core. Photographic rather than digital: a lens catching a source.';
+export const aka = ['light streaks', 'lens streak', 'radial streak'];
