@@ -81,12 +81,22 @@ export const STAGGER_FROM_BLURBS = {
   typewriter: 'types one character at a time at a fixed TYPING RATE (`cps`, chars/sec) instead of a shared budget, so any split layer can reveal char by char at a chosen speed and still use a preset, a colour ramp, or a reversed exit',
 };
 
+// The words an author actually types for each order: the blurbs describe the wave, these name it.
+const STAGGER_FROM_AKA = {
+  first: ['left to right', 'in order', 'typing order', 'front to back'],
+  center: ['middle out', 'from the middle', 'outward both ways', 'centre out'],
+  last: ['right to left', 'reverse order', 'backwards', 'back to front'],
+  edges: ['both ends', 'closing like a door', 'inward', 'converge on the middle'],
+  random: ['shuffled', 'scattered', 'seeded random', 'out of order'],
+  typewriter: ['typing effect', 'one character at a time', 'chars per second', 'letters appear one by one'],
+};
+
 // A REGISTRY, not a bare list, so `make arsenal Q="start the stagger from the middle"` finds it: the
 // search reads *_REGISTRY exports and nothing else. `pick` is deliberately unused here, because a
 // numeric index is legal too and refusing one would be wrong; core/validate.mjs owns that refusal and
 // reads its names from here.
 export const STAGGER_FROM_REGISTRY = defineRegistry('stagger order', STAGGER_FROM_BLURBS,
-  { slot: 'stagger.from', blurbs: STAGGER_FROM_BLURBS,
+  { slot: 'stagger.from', blurbs: STAGGER_FROM_BLURBS, aka: STAGGER_FROM_AKA,
   catalog: {
     title: 'Stagger order (`from`)',
     tag: 'text/parts',
