@@ -19,8 +19,6 @@
 // `context: { preserveDrawingBuffer: true }` is not optional. The renderer screenshots a frame after
 // the draw task ends, and without it the buffer is already cleared: every frame captures blank, which
 // looks exactly like a layer that drew nothing.
-import { palette } from './palette.js';
-
 export const size = () => [1080, 1080];   // a subject you place, like raymarch, not a field
 export const stamp = 4;
 export const resamplable = false;
@@ -72,6 +70,30 @@ function along(a, b, p) {
   return [Math.atan2(y, x) / D, Math.atan2(z, Math.hypot(x, y)) / D];
 }
 
+// The ONLY per-frame state, and it is a pure function of the local time. A settle rather than a
+// spin: a constant rotation turns the subject out of frame, and the route is the subject. The route
+// draws on and the aircraft rides the SAME parameter, so the line and the marker cannot disagree.
+function updateGlobeFrame(globe, o, d, ll, lt, LL) {
+  const p0 = LL.phi ?? 4.8, p1 = LL.phiTo ?? p0, pd = LL.phiDur ?? 1;
+  const u = Math.max(0, Math.min(1, lt / Math.max(pd, 1e-6)));
+
+  const d0 = LL.drawStart ?? 0, dd = LL.drawDur ?? 6;
+  const g = Math.max(0, Math.min(1, (lt - d0) / Math.max(dd, 1e-6)));
+  const q = ease(g);
+  const tip = along(o, d, Math.max(q, 1e-4));
+  const marks = [{ location: ll(o), size: LL.markerSize ?? 0.05 }];
+  if (q > 0.995) marks.push({ location: ll(d), size: LL.markerSize ?? 0.05 });
+  // The aircraft: a small bright marker at the head of the line. Hidden before the route starts
+  // and once it lands, so it never sits on top of the destination it just reached.
+  else if (q > 0.001) marks.push({ location: ll(tip), size: (LL.markerSize ?? 0.05) * 0.72 });
+
+  globe.update({
+    phi: p0 + (p1 - p0) * ease(u), theta: LL.theta ?? 0.28,
+    markers: marks,
+    arcs: q > 0.001 ? [{ from: ll(o), to: ll(tip) }] : [],
+  });
+}
+
 export function create(kit, L, w, h) {
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
@@ -82,7 +104,6 @@ export function create(kit, L, w, h) {
     throw new Error('globe: cobe is not loaded, preloadCobe only runs when the scene declares a `globe` layer, so this layer was built outside the normal boot path');
   }
 
-  const pal = palette(L) || [];
   const hex = Array.isArray(L.colors) ? L.colors : [];
   // cobe takes [lat, lon]; every other coordinate in this engine is [lon, lat], and the scene JSON
   // stays consistent with itself rather than with the library.
@@ -109,29 +130,7 @@ export function create(kit, L, w, h) {
 
   return {
     canvas,
-    draw(lt, LL) {
-      // The ONLY per-frame state, and it is a pure function of the local time. A settle rather than a
-      // spin: a constant rotation turns the subject out of frame, and the route is the subject.
-      const p0 = LL.phi ?? 4.8, p1 = LL.phiTo ?? p0, pd = LL.phiDur ?? 1;
-      const u = Math.max(0, Math.min(1, lt / Math.max(pd, 1e-6)));
-
-      // The route draws on and the aircraft rides the SAME parameter.
-      const d0 = LL.drawStart ?? 0, dd = LL.drawDur ?? 6;
-      const g = Math.max(0, Math.min(1, (lt - d0) / Math.max(dd, 1e-6)));
-      const q = ease(g);
-      const tip = along(o, d, Math.max(q, 1e-4));
-      const marks = [{ location: ll(o), size: LL.markerSize ?? 0.05 }];
-      if (q > 0.995) marks.push({ location: ll(d), size: LL.markerSize ?? 0.05 });
-      // The aircraft: a small bright marker at the head of the line. Hidden before the route starts
-      // and once it lands, so it never sits on top of the destination it just reached.
-      else if (q > 0.001) marks.push({ location: ll(tip), size: (LL.markerSize ?? 0.05) * 0.72 });
-
-      globe.update({
-        phi: p0 + (p1 - p0) * ease(u), theta: LL.theta ?? 0.28,
-        markers: marks,
-        arcs: q > 0.001 ? [{ from: ll(o), to: ll(tip) }] : [],
-      });
-    },
+    draw(lt, LL) { updateGlobeFrame(globe, o, d, ll, lt, LL); },
     // OFF-WINDOW MUST CLEAR, and this surface was the one that could not. core/layers/canvas.js calls
     // `clear()` on every frame outside the layer's window, and globe was the only surface of the five
     // that never defined it, so ANY globe layer with a start time threw `s.clear is not a function` on

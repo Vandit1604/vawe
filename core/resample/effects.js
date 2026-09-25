@@ -266,21 +266,17 @@ void main(){
   gl_FragColor = col;
 }`;
 
-// One GL context per resampled layer. Costly enough that it is worth saying out loud: do not put a
-// resample on fifty layers. It is a hero-shot effect.
-export function createResampler(w, h) {
-  const canvas = document.createElement('canvas');
-  canvas.width = w; canvas.height = h;
-  const gl = glContext(canvas, { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true }, 'resample pass');
+function compileShader(gl, type, src) {
+  const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error('resample shader: ' + gl.getShaderInfoLog(s));
+  return s;
+}
 
-  const sh = (type, src) => {
-    const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error('resample shader: ' + gl.getShaderInfoLog(s));
-    return s;
-  };
+// Program, full-screen triangle buffer, and uniform locations: the fixed GL state every pass reuses.
+function buildProgram(gl) {
   const prog = gl.createProgram();
-  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT));
-  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG));
+  gl.attachShader(prog, compileShader(gl, gl.VERTEX_SHADER, VERT));
+  gl.attachShader(prog, compileShader(gl, gl.FRAGMENT_SHADER, FRAG));
   gl.linkProgram(prog); gl.useProgram(prog);
 
   const buf = gl.createBuffer();
@@ -297,15 +293,77 @@ export function createResampler(w, h) {
     center: gl.getUniformLocation(prog, 'u_center'), count: gl.getUniformLocation(prog, 'u_count'),
     dir: gl.getUniformLocation(prog, 'u_dir'),
   };
+  return { prog, U };
+}
 
+// CLAMP + LINEAR, and no mipmaps: the source is not guaranteed power-of-two.
+function createSourceTexture(gl) {
   const tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);
-  // CLAMP + LINEAR, and no mipmaps: the source is not guaranteed power-of-two.
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);         // DOM origin is top-left, GL's is bottom-left
+  return tex;
+}
+
+// A single sample+draw: bind `target` (null = the canvas' own default framebuffer), sample `srcTex`,
+// run `op`'s fx/amount/angle/cx/cy/count, draw the full-screen triangle. Shared by the single-op fast
+// path and the stack below, so there is exactly one place that sets these uniforms.
+function runPass(gl, ctx, dims, target, srcTex, op) {
+  const { prog, U } = ctx;
+  const { w, h } = dims;
+  const { fx, amount = 0.5, time = 0, seed = 0, angle = 0, cx = 0.5, cy = 0.5, count = 16 } = op;
+  const idx = RESAMPLE_FX.indexOf(fx);
+  if (idx < 0) RESAMPLE_REGISTRY.pick(fx);   // throws, naming this vocabulary and any other the word lives in
+  gl.bindFramebuffer(gl.FRAMEBUFFER, target);
+  gl.viewport(0, 0, w, h);
+  gl.useProgram(prog);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, srcTex);
+  // The blur family (zoomBlur/spinBlur/directionalBlur) all draw through the single `u_fx == 0`
+  // branch; which of the three they are is `u_dir`, not the fx index.
+  const dirMode = fx in BLUR_DIR ? BLUR_DIR[fx] : -1;
+  gl.uniform1i(U.fx, dirMode >= 0 ? 0 : idx);
+  gl.uniform1i(U.dir, dirMode);
+  gl.uniform1f(U.amt, amount);
+  gl.uniform1f(U.time, time);
+  gl.uniform1f(U.seed, seed);
+  gl.uniform1f(U.angle, angle);
+  gl.uniform2f(U.center, cx, cy);
+  gl.uniform1i(U.count, count);
+  gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+// PING-PONG target: an offscreen RGBA texture + framebuffer, sized to the resampler's own canvas.
+function createFBO(gl, dims) {
+  const { w, h } = dims;
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  const fbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+  const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+  if (status !== gl.FRAMEBUFFER_COMPLETE) throw new Error(`resample stack: offscreen framebuffer incomplete (0x${status.toString(16)})`);
+  return { fbo, tex: t };
+}
+
+// One GL context per resampled layer. Costly enough that it is worth saying out loud: do not put a
+// resample on fifty layers. It is a hero-shot effect.
+export function createResampler(w, h) {
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const gl = glContext(canvas, { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true }, 'resample pass');
+
+  const { prog, U } = buildProgram(gl);
+  const tex = createSourceTexture(gl);
 
   gl.viewport(0, 0, w, h);
   gl.uniform2f(U.res, w, h);
@@ -314,53 +372,16 @@ export function createResampler(w, h) {
 
   let uploaded = false;
 
-  // ONE PASS: bind `target` (null = the canvas' own default framebuffer), sample `srcTex`, run `op`'s
-  // fx/amount/angle/cx/cy/count, draw the full-screen triangle. Shared by the single-op fast path and
-  // the stack below, so there is exactly one place that sets these uniforms.
-  const pass = (target, srcTex, op) => {
-    const { fx, amount = 0.5, time = 0, seed = 0, angle = 0, cx = 0.5, cy = 0.5, count = 16 } = op;
-    const idx = RESAMPLE_FX.indexOf(fx);
-    if (idx < 0) RESAMPLE_REGISTRY.pick(fx);   // throws, naming this vocabulary and any other the word lives in
-    gl.bindFramebuffer(gl.FRAMEBUFFER, target);
-    gl.viewport(0, 0, w, h);
-    gl.useProgram(prog);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, srcTex);
-    // The blur family (zoomBlur/spinBlur/directionalBlur) all draw through the single `u_fx == 0`
-    // branch; which of the three they are is `u_dir`, not the fx index.
-    const dirMode = fx in BLUR_DIR ? BLUR_DIR[fx] : -1;
-    gl.uniform1i(U.fx, dirMode >= 0 ? 0 : idx);
-    gl.uniform1i(U.dir, dirMode);
-    gl.uniform1f(U.amt, amount);
-    gl.uniform1f(U.time, time);
-    gl.uniform1f(U.seed, seed);
-    gl.uniform1f(U.angle, angle);
-    gl.uniform2f(U.center, cx, cy);
-    gl.uniform1i(U.count, count);
-    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  };
+  const ctx = { prog, U };
+  const dims = { w, h };
+  const pass = (target, srcTex, op) => runPass(gl, ctx, dims, target, srcTex, op);
 
   // PING-PONG, built lazily: a single-op layer (the overwhelming common case) never allocates these,
   // so the collapse in Task 1 costs nothing extra for the films that do not stack. Two FBOs, not one
   // per stack depth: pass i writes the FBO pass i-1 is NOT currently bound to read from, so ping/pong
   // is enough for any depth, the same reason a double-buffered swap chain needs only two buffers.
   let ping = null, pong = null;
-  const makeFBO = () => {
-    const t = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, t);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    const fbo = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
-    const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-    if (status !== gl.FRAMEBUFFER_COMPLETE) throw new Error(`resample stack: offscreen framebuffer incomplete (0x${status.toString(16)})`);
-    return { fbo, tex: t };
-  };
+  const makeFBO = () => createFBO(gl, dims);
 
   const upload = (src, once) => {
     // An <img>'s .width is its LAYOUT width (set by our own CSS), not proof that pixels decoded.
