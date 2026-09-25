@@ -1,35 +1,115 @@
 ---
 title: Prompting
-description: You do not write the JSON by hand. You write a five line brief and let an agent compose the scene. Here is what to say, and what to leave alone.
+description: You do not write the JSON by hand. You write a brief and let an agent compose the scene. Here is what to say, and what to leave alone.
 icon: MessageSquare
 ---
 
-Most people never hand-write a scene file. They describe the film and an agent composes the JSON,
-then iterates on the render. `AGENTS.md` at the repo root is the brief the agent reads before it
-writes anything, so it already knows the house rules, the vocabulary, and the quality gates.
+Most videos are written by agents, not by hand. You describe the film in a brief, and an agent expands it into a full plan during stage 2 (planning). The agent composes the scene JSON, you iterate on renders, and `make ship` gates the result.
 
-## The checklist: five lines
+Vawe agents read `CLAUDE.md` and `AGENTS.md` at the repo root, so they already know the house rules, the vocabulary and the quality gates. Your job is to supply the vision, not the engine.
 
-Any line may be missing; the agent asks if a missing one would change the film (`make quiz`, or
-`vawe-video-planning`'s Step 1). One good and one weak version of each:
+## The anatomy: two layers
 
-| Line | Weak | Good |
+Users rarely write full prompts. An agent expands every request into the anatomy below during planning, the way prompt expansion works in other video engines. A human may supply any part and the agent preserves it.
+
+### Layer 1: the brief
+
+This is who, what, why. Supply what you know. The agent keeps it and fills blanks.
+
+```
+SUBJECT   what it is about, in one line
+DATA      where the facts come from (a URL, a file, an API, or "here they are")
+PAYOFF    the one thing to remember, and it lands LAST
+AUDIENCE  who watches, and where they see it
+FEELING   one reference, or one word ("cinematic", "loud", "like Linear's launch")
+```
+
+Two more lines are unasked (the agent writes them if you do not):
+
+| Line | What it does |
+|---|---|
+| `SPECTACLE` | the ONE exaggerated moment, named: which beat, which layer, which device |
+| `NOT` | what this film explicitly does not do (no narration, no stock photos, no gradient hero) |
+
+`SPECTACLE` is two-sided by purpose. Naming the loud moment is also a promise that every other beat stays restrained. A film where four beats shout has no loud moment, it has a volume setting.
+
+`NOT` is cheaper than it looks. Most generic output is not a wrong decision, it is an un-excluded default: nothing said "no gradient hero", so a gradient hero was free.
+
+### Layer 2: the direction
+
+This is what and how. The agent writes these during planning stage 2 from your brief, a reference (if you point at a website), and the engine's own recipes. The agent fills it into the plan and the storyboard.
+
+```
+SPEC          duration (seconds), aspect ratio (16:9, 9:16, 1:1, 4:5, 4:3), mood key ("energetic", "contemplative")
+BEATS         timestamped beat table: each beat names element, motion, layout, style, timing
+COPY          exact on-screen words in quotes; unquoted copy gets rewritten
+TECHNIQUE     vawe primitives or blocks by their real names (search "make arsenal Q=…" first)
+NEGATIVES     what this direction explicitly does not use (no parallax, no type dissolve)
+```
+
+This layer is derived from HyperFrames' direction anatomy (https://hyperframes.heygen.com/prompting): the agent applies the same structure to Vawe scenes.
+
+## Beat formula
+
+One sentence per beat. Name the thing moving, how it moves, where on screen, what colour or style, and when.
+
+**Example:** "Intro beat, 0-2s. The Vawe logo enters from top-left with a shimmer effect, lands center-top in white, holds 1s, exits down-right with a spin exit, fully out by 2s."
+
+The formula is `element` + `motion` + `layout` + `style` + `timing` in one sentence. Vawe names every primitive you can use; search before writing anything by hand. Run `make arsenal Q="logo enter"` to find what the engine already owns.
+
+## Specification dial
+
+How much direction you write depends on the stage and the budget. The agent reads the dial and fills the rest.
+
+| Dial | What you write | What the agent decides |
 |---|---|---|
-| SUBJECT | "a video about our app" | "our launch, the one-click deploy step" |
-| DATA | (missing) | a URL, a file, or "here are the numbers" |
-| PAYOFF | "it's great" | "the same input always renders the same bytes" |
-| AUDIENCE | "everyone" | "developers, X and LinkedIn, 16:9 and 9:16" |
-| FEELING | "modern" | "dry and technical, like a good changelog" |
+| **Sparse** | Brief only (SUBJECT, PAYOFF, FEELING). One page. | All direction. Full visual spec. Timing. Layout. Pacing. |
+| **Moderate** | Brief + BEATS (timestamped, element names). A beat per scene. | Palette, type, motion effects, camera, sound. Visual style from FEELING. |
+| **Full** | Both layers in detail. BEATS name motion, COPY is exact, TECHNIQUE names every primitive, NEGATIVES exclude what you do not want. A short scene doc. | Nothing. The agent assembles what you wrote. |
 
-<Callout type="warn">
-If you find yourself naming a colour, an easing, or a layer type, stop. That is the agent's job.
-Reaching for engine vocabulary means the brief above is thin, and the fix is a sharper PAYOFF or
-FEELING, not a hex code.
-</Callout>
+Low budget (one agent, short timeline): sparse to moderate. High fidelity (a full team, launch film, brand reflection): full, with a reference source.
 
-Two more lines the agent fills itself, not you: `SPECTACLE` (the one exaggerated moment, named) and
-`NOT` (what the film explicitly will not do). Both are locked into the plan before any JSON is
-written.
+## Examples
+
+**One-liner to full brief:** You say "A one-minute launch for Vawe, show the product working."
+
+The agent writes, during planning:
+```
+SUBJECT   Vawe: render video from scene JSON
+DATA      https://vawe.sh (crawl every page and the docs)
+PAYOFF    the same input always produces the same output
+AUDIENCE  developers, on landing page, 16:9, silent autoplay
+FEELING   clean and precise, like a well-written API docs page
+SPECTACLE the moment a JSON file renders, frame-by-frame, in real time
+NOT       no narration, no stock photos, no gradient backgrounds
+```
+
+**Full two-layer example for a launch film:**
+
+```
+SUBJECT   Acme ships Acme Tint, a color picker for design tools
+DATA      https://acme.design/tint (crawl every page)
+PAYOFF    one click from any app
+AUDIENCE  designers on X and Dribbble, 16:9 and 1:1
+FEELING   playful and precise, like Figma's own UI
+SPECTACLE the moment the color picker opens and the 10,000 color grid animates in
+NOT       no stock video, no loud music, no "AI" language, only real UI from the site
+
+SPEC      60 seconds, 16:9 and 1:1, energetic and clean
+BEATS     
+  0-3s:   Acme logo enters from left, settles center, text "Tint" fades in below. White on dark navy.
+  3-6s:   Three product screens tile in from the right edge, staggered. Each shows a part of the UI.
+  6-10s:  The color grid enters with a wave effect, 10,000 color dots cascade in from top-left.
+  10-14s: A cursor clicks the grid. One color isolates to center, expands to fill frame, other colors fade.
+  14-17s: The color value appears as hex code, RGB, HSL in three text blocks that slide in from edges.
+  17-20s: Acme logo and "One click from any app" message travel to the bottom. Everything else fades.
+COPY      Frame 0: "Acme Tint"
+          Frame 10: "10,000 colors in one place"
+          Frame 14: "One click from anywhere"
+          Frame 20: "Acme Tint. One click from any app."
+TECHNIQUE wave entrance (color dots), isolate + expand (focus), cascade motion (text), all in 60fps
+NEGATIVES no type morphing, no 3D camera moves, no background motion during text reads
+```
 
 ## Inputs that raise quality
 
@@ -56,43 +136,6 @@ naming the near misses, instead of silently defaulting.
 Full generated tables: `engine-doctrine/CRAFT/VOCABULARY.md` and, per primitive,
 `engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md` (both regenerate with `make vocab`).
 
-## Three worked prompts
-
-**Launch video**
-
-```
-SUBJECT   our launch, reflecting the real product UI
-DATA      https://example.com  (crawl it, not just the homepage)
-PAYOFF    it ships in one click
-AUDIENCE  X and LinkedIn, 16:9 and 9:16
-FEELING   like the site itself, no louder
-```
-Next: `make sections` + `make palette`, then `make ideate`, `make scaffold TYPE=launch`.
-
-**Explainer**
-
-```
-SUBJECT   why deterministic rendering matters for CI
-DATA      the render pipeline always produces the same bytes for the same input
-PAYOFF    same input, same output, every time
-AUDIENCE  developers, landing page, muted autoplay
-FEELING   dry and technical, like a good changelog
-```
-Next: `make ideate NAME=determinism`, `make scaffold TYPE=explainer`.
-
-**Short sting**
-
-```
-SUBJECT   a 6s logo reveal for Loom, dev tool
-PAYOFF    the mark lands hard, nothing else on screen
-AUDIENCE  a pre-roll bumper, any platform
-FEELING   one word landing hard, dark ground
-```
-Next: `make scaffold TYPE=sting DUR=6`.
-
-Every path then runs the same ladder: `make author-check` → `beats`/`reveal` → `make video` →
-`make judge` → `make ledger`.
-
 ## What to avoid
 
 - **Don't ask for a template.** There are none: every film composes from
@@ -103,50 +146,31 @@ Every path then runs the same ladder: `make author-check` → `beats`/`reveal` �
 
 ## What you are NOT deciding
 
-Palette, typography, layout, motion, camera, cuts, backdrop, sound, pacing, structure. All of it
-belongs to whoever composes the scene, and all of it is defensible from the brief. A film that gets
-these wrong got a thin brief, not a wrong colour.
+Palette, typography, layout, motion, camera, cuts, backdrop, sound, pacing, structure. All of it belongs to whoever composes the scene, and all of it is defensible from the brief.
 
-Two lines are the agent's to fill in, not yours, and they are written into the plan before authoring:
-
-| Line | What it does |
-|---|---|
-| `SPECTACLE` | the ONE exaggerated moment, named: which beat, which layer, which device |
-| `NOT` | what this film explicitly does not do (no narration, no stock photos, no gradient hero) |
-
-`SPECTACLE` is two-sided on purpose. Naming the loud moment is also a promise that every other beat
-stays restrained. A film where four beats shout has no loud moment, it has a volume setting.
-
-`NOT` is cheaper than it looks. Most generic output is not a wrong decision, it is an un-excluded
-default: nothing said "no gradient hero", so a gradient hero was free.
+Reaching for engine vocabulary (naming a colour, an easing, a layer type) is a sign the brief above is underspecified. The fix is a better PAYOFF or FEELING line, not a hex code.
 
 ## The loop
 
 Once the brief is agreed, the work is a loop, not a single shot.
 
 ```bash
-make dev  D=films/scene/<film>.json    # build, draft render, open. No gates, no waiting.
-make check D=films/scene/<film>.json   # every gate, every finding, ZERO consequence
+make dev  D=films/scene/<film>.json    # build, draft render, open. No gates, no audit.
+make check D=films/scene/<film>.json   # every gate, every finding, zero consequence
 make ship  D=films/scene/<film>.json   # the ladder with its teeth in
 ```
 
-`make dev` is where nearly all the time goes. `make ship` is the one command that says a film is done:
-it runs the author checks, renders, audits the layout and inspects the transitions, in that order.
+`make dev` is where nearly all the time goes. `make ship` is the one command that says a film is done: it runs the author checks, renders, audits the layout and inspects the transitions, in that order.
 
 <Callout>
-**Green gates do not mean the film is good.** They read structure. They cannot see murk, a weak focal
-point, or a beat that lands wrong. Read the contact sheets: `make beats` for what each beat holds,
-`make reveal` for how each one enters and exits, `make judge` for a scored sheet and a rubric.
+**Green gates do not mean the film is good.** They read structure. They cannot see murk, a weak focal point, or a beat that lands wrong. Read the contact sheets: `make beats` for what each beat holds, `make reveal` for how each one enters and exits, `make judge` for a scored sheet and a rubric.
 </Callout>
 
 ## What to say when it is wrong
 
-Be concrete about the SYMPTOM and leave the cause alone. "Beat three reads as a slide, nothing moves
-but the text" is worth ten times "make it more dynamic". The agent can find the cause; it cannot guess
-what you saw.
+Be concrete about the SYMPTOM and leave the cause alone. "Beat three reads as a slide, nothing moves but the text" is worth ten times "make it more dynamic". The agent can find the cause; it cannot guess what you saw.
 
-If you want a different direction rather than a fix, go back to `FEELING` and `NOT`. Those two lines
-move a film further than any note about a specific layer.
+If you want a different direction rather than a fix, go back to `FEELING` and `NOT`. Those two lines move a film further than any note about a specific layer.
 
 ## Where to go next
 
