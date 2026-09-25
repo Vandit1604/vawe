@@ -492,7 +492,11 @@ server.registerTool('vawe_status', {
     return text(`▶ ${rec.status}: not finished yet. Wait a bit and call vawe_status("${rec.id}") again.`);
   }
   if (rec.status === 'failed' || rec.status === 'export-failed') {
-    return text(`✗ ${rec.status}\n\n${rec.error || 'no detail recorded'}`);
+    const retry = rec.status === 'failed'
+      ? `vawe_draft with video_id "${rec.id}"`
+      : `vawe_export("${rec.id}")`;
+    return text(`✗ ${rec.status}\n\n${rec.error || 'no detail recorded'}\n\n`
+      + `Fix the scene for the error above, then call ${retry} to try again.`);
   }
   if (rec.status === 'exported') {
     const e = rec.export;
