@@ -227,7 +227,14 @@ export const DEPTH_BLURBS = Object.freeze({
 // `*_REGISTRY` the engine exports, which is the one place an author goes when they do not yet know the
 // name of the thing they want. A vocabulary that is not one is a vocabulary nobody can search for, and
 // being unfindable is the entire defect this file is fixing.
-export const DEPTH_REGISTRY = defineRegistry('depth', DEPTH_PLANES, { blurbs: DEPTH_BLURBS, slot: 'depth',
+const DEPTH_AKA = {
+  far: ['far plane', 'background depth', 'distant layer'],
+  back: ['behind the subject', 'parallax background', 'layer that passes slower'],
+  front: ['just in front', 'floats ahead', 'foreground chip'],
+  near: ['nearest the eye', 'foreground depth', 'closest layer'],
+};
+
+export const DEPTH_REGISTRY = defineRegistry('depth', DEPTH_PLANES, { blurbs: DEPTH_BLURBS, aka: DEPTH_AKA, slot: 'depth',
   catalog: {
     title: 'Depths (parallax planes)',
     tag: 'per-layer',
