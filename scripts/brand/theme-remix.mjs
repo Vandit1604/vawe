@@ -15,6 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { themeErrors } from '../../core/registry/theme-contract.js';
+import { migrateOne } from '../../harness/author/migrate-themes.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -100,7 +101,12 @@ if (errs.length) { console.error(`✗ remix produced an incomplete theme, missin
 const acc = contrast(palette.accent, palette.bg);
 const txt = contrast(palette.text, palette.bg);
 const dest = path.join(ROOT, 'themes', `${brandName}.json`);
-fs.writeFileSync(dest, JSON.stringify(theme, null, 2) + '\n');
+// The engine refuses the retired palette/type/gradient shape now (core/theme/roles.js expandTheme):
+// convert through the same pure converter migrate-themes.mjs proved on the whole library, rather than
+// a second one here.
+const { next: tokenTheme, ok: convertOk, err: convertErr } = migrateOne(theme);
+if (!convertOk) { console.error(`✗ theme-remix: could not convert to a token file: ${convertErr}`); process.exit(1); }
+fs.writeFileSync(dest, JSON.stringify(tokenTheme, null, 2) + '\n');
 console.log(`✓ theme-remix: wrote themes/${brandName}.json from "${presetName}" preset`);
 console.log(`  bg ${palette.bg} · accent ${palette.accent} (${acc.toFixed(1)}:1 on bg) · text (${txt.toFixed(1)}:1) · ${light ? 'light' : 'dark'}-first · fonts ${type.sans}/${type.mono}`);
 if (txt < 4.5) console.warn(`  ⚠ text contrast ${txt.toFixed(1)}:1 is below AA (4.5), pass a --text that reads on ${palette.bg}`);
