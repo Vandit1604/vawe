@@ -64,18 +64,28 @@ export const PARTS = {
   };
 
 export const PART_BLURBS = {
-  growUp: 'scales up from its own bottom edge, a bar growing to its reading',
-  widen: 'scales out from its left edge. A row, a rule, anything that should fill rather than appear',
-  popIn: 'scales from nothing at its centre with a fade, dots, chips, markers',
-  fadeUp: 'a short rise with a fade, the quiet default for any part',
-  riseIn: 'a longer rise with a fade, for parts that should feel like they arrive',
+  growUp: 'scales its Y from 0 to 1 anchored at its own bottom edge, a bar growing up to its reading',
+  widen: 'scales its X from 0 to 1 anchored at its own left edge. A row, a rule, anything that should fill rather than appear',
+  popIn: 'scales from 0 to 1 at its own centre with opacity 0 to 1, dots, chips, markers',
+  fadeUp: 'rises 24px with a fade from opacity 0 to 1, the quiet default for any part',
+  riseIn: 'rises 48px with a fade from opacity 0 to 1, for parts that should feel like they arrive',
   drawOn: 'an SVG stroke draws itself along its own path, measured at build with getTotalLength()',
-  fade: 'opacity alone, no displacement · the quiet default when a part should arrive without moving',
-  'slide-left': 'enters from its left and, with `out`, keeps going right · one direction of travel, never a retreat',
-  'slide-right': 'enters from its right and, with `out`, keeps going left · the mirror of slide-left',
+  fade: 'opacity alone from 0 to 1, no displacement · the quiet default when a part should arrive without moving',
+  'slide-left': 'enters 40px from its left and, with `out`, keeps going 40px right · one direction of travel, never a retreat',
+  'slide-right': 'enters 40px from its right and, with `out`, keeps going 40px left · the mirror of slide-left',
 };
 
-const PART_AKA = { 'slide-right': ['enter from the right', 'slide in from the right side'] };
+const PART_AKA = {
+  'slide-right': ['enter from the right', 'slide in from the right side'],
+  growUp: ['grow from the bottom', 'bar chart grow', 'scale up from base'],
+  widen: ['widen from the left', 'grow sideways', 'fill from the left edge'],
+  popIn: ['pop from centre', 'scale in from nothing', 'appear with a pop'],
+  fadeUp: ['fade and rise', 'short rise with fade', 'quiet default entrance'],
+  riseIn: ['rise in with a fade', 'longer rise entrance', 'arrive with a lift'],
+  drawOn: ['draw the line', 'self-draw stroke', 'trace the path', 'line draws itself'],
+  fade: ['fade in place', 'opacity only', 'no movement entrance'],
+  'slide-left': ['enter from the left', 'slide in from the left side'],
+};
 
 export const PART_REGISTRY = defineRegistry('part entrance', PARTS, { slot: 'parts[].anim', blurbs: PART_BLURBS, aka: PART_AKA,
   catalog: {
