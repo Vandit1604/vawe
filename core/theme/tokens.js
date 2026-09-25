@@ -48,6 +48,55 @@ function resolveOne(path, flat, values, resolving, errors, opts) {
   return resolved;
 }
 
+const NUMERIC_TOKEN_TYPES = new Set(['number', 'dimension', 'duration']);
+
+function resolveGradientValue(path, raw, resolveScalar, opts, errors) {
+  if (!Array.isArray(raw)) { errors.push(`token "${path}" ($type gradient) needs an array $value`); return undefined; }
+  return raw.map((stop) => {
+    const v = resolveScalar(stop);
+    const hex = normalizeColor(v, opts);
+    if (hex == null) errors.push(`token "${path}": gradient stop ${JSON.stringify(stop)} is not a colour`);
+    return hex ?? v;
+  });
+}
+
+function validateColorValue(v, path, opts, errors) {
+  const hex = normalizeColor(v, opts);
+  if (hex == null) errors.push(`token "${path}": ${JSON.stringify(v)} is not a colour`);
+  return hex ?? v;
+}
+
+function validateNumericValue(type, v, path, errors) {
+  if (typeof v !== 'number') errors.push(`token "${path}" ($type ${type}) must resolve to a number, got ${JSON.stringify(v)}`);
+  return v;
+}
+
+function validateCubicBezierValue(v, path, errors) {
+  if (!Array.isArray(v) || v.length !== 4 || !v.every(Number.isFinite)) errors.push(`token "${path}" ($type cubicBezier) must resolve to [x1,y1,x2,y2]`);
+  return v;
+}
+
+function validateNonEmptyStringValue(type, v, path, errors) {
+  if (typeof v !== 'string' || !v) errors.push(`token "${path}" ($type ${type}) must resolve to a non-empty string`);
+  return v;
+}
+
+function validateShadowValue(v, path, errors) {
+  if (typeof v !== 'string' || !v) errors.push(`token "${path}" ($type shadow) must resolve to a CSS shadow string`);
+  return v;
+}
+
+// resolveScalarValue: the type-directed check for a value ALREADY resolved through aliases (`resolveValue`
+// handles alias-following and the array-shaped `gradient` case; this only grades the primitive).
+function resolveScalarValue(type, v, path, opts, errors) {
+  if (type === 'color') return validateColorValue(v, path, opts, errors);
+  if (NUMERIC_TOKEN_TYPES.has(type)) return validateNumericValue(type, v, path, errors);
+  if (type === 'cubicBezier') return validateCubicBezierValue(v, path, errors);
+  if (type === 'fontFamily' || type === 'asset') return validateNonEmptyStringValue(type, v, path, errors);
+  if (type === 'shadow') return validateShadowValue(v, path, errors);
+  return v;
+}
+
 // resolveValue: type-directed resolution of one $value. A bare alias string resolves through the SAME
 // path as a literal; `gradient` is the one type whose $value is an array, each entry resolved the same
 // way a `color` value would be (a stop may itself be an alias or a literal).
@@ -57,39 +106,10 @@ function resolveValue(type, raw, path, flat, values, resolving, errors, opts) {
     if (alias != null) return resolveOne(alias, flat, values, resolving, errors, opts);
     return v;
   };
-  if (type === 'gradient') {
-    if (!Array.isArray(raw)) { errors.push(`token "${path}" ($type gradient) needs an array $value`); return undefined; }
-    return raw.map((stop) => {
-      const v = resolveScalar(stop);
-      const hex = normalizeColor(v, opts);
-      if (hex == null) errors.push(`token "${path}": gradient stop ${JSON.stringify(stop)} is not a colour`);
-      return hex ?? v;
-    });
-  }
+  if (type === 'gradient') return resolveGradientValue(path, raw, resolveScalar, opts, errors);
   const v = resolveScalar(raw);
   if (v === undefined) return undefined; // the alias already reported its own error
-  if (type === 'color') {
-    const hex = normalizeColor(v, opts);
-    if (hex == null) errors.push(`token "${path}": ${JSON.stringify(v)} is not a colour`);
-    return hex ?? v;
-  }
-  if (type === 'number' || type === 'dimension' || type === 'duration') {
-    if (typeof v !== 'number') errors.push(`token "${path}" ($type ${type}) must resolve to a number, got ${JSON.stringify(v)}`);
-    return v;
-  }
-  if (type === 'cubicBezier') {
-    if (!Array.isArray(v) || v.length !== 4 || !v.every(Number.isFinite)) errors.push(`token "${path}" ($type cubicBezier) must resolve to [x1,y1,x2,y2]`);
-    return v;
-  }
-  if (type === 'fontFamily' || type === 'asset') {
-    if (typeof v !== 'string' || !v) errors.push(`token "${path}" ($type ${type}) must resolve to a non-empty string`);
-    return v;
-  }
-  if (type === 'shadow') {
-    if (typeof v !== 'string' || !v) errors.push(`token "${path}" ($type shadow) must resolve to a CSS shadow string`);
-    return v;
-  }
-  return v;
+  return resolveScalarValue(type, v, path, opts, errors);
 }
 
 // resolveTokens(tree, opts) -> { values: Map<path, resolved>, errors: string[] }. Never throws: see
