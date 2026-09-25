@@ -661,17 +661,9 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .fc-stage:focus-visible{outline:var(--outline);outline-offset:-2px}
 .fc-screen{position:absolute;inset:0;overflow:hidden}
 .fc-screen .sp-frame{pointer-events:none}
-/* The idle face: the film's own layers, one lane per type, so a card is recognisable before it plays. */
-.fc-score{position:absolute;inset:14% 6%;display:flex;flex-direction:column;justify-content:center;gap:8px;z-index:var(--z-raise)}
-.fc-score[hidden]{display:none}
-.fc-lane{position:relative;height:calc(var(--rows,1) * 10px)}
-.fc-bar{position:absolute;height:6px;border-radius:2px;min-width:3px;background:var(--lane);opacity:.75}
-.fc:hover .fc-bar{opacity:1}
-.fc-playhead{position:absolute;top:0;bottom:0;left:calc(var(--p,0) * 100%);width:2px;background:var(--accent);opacity:0;z-index:var(--z-raise)}
-.fc.on .fc-playhead{opacity:1}
-.fc-note{position:absolute;left:12px;bottom:10px;z-index:var(--z-raise)}
-.fc-idle::after{content:"hover to play"}
-@media (hover:none){ .fc-idle::after{content:"tap to play"} }
+.fc-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:var(--z-raise)}
+.fc-poster[hidden]{display:none}
+.fc-note{position:absolute;left:10px;bottom:10px;z-index:var(--z-badge);padding:5px 8px;border-radius:var(--r-in);background:rgba(22,21,26,.88)}
 .fc-cap{display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;padding:14px 16px}
 .fc-title{font-weight:700;font-size:16px}
 .fc-cap .meta{white-space:normal}

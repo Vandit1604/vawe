@@ -4,8 +4,6 @@ import { Footer } from "../components/Footer";
 import { FilmGrid } from "../components/FilmGrid";
 import { SourceViewer } from "../components/SourceViewer";
 import { pageMetadata } from "../components/seo";
-import KINDS from "../../lib/layer-kinds.json";
-import { LANE_NAME } from "../components/scene-clips";
 import LINES from "../../lib/scene-lines.json";
 import "./showcase.css";
 
@@ -32,13 +30,8 @@ export default function Showcase() {
         <section className="ls ls-top">
           <h1>Films, played from their scene files.</h1>
           <p className="ls-sub">
-            Your browser renders each film live from its JSON. The bars are its layers, coloured by type. Hover or tap a film to play it.
+            Your browser renders each film live from its JSON. Hover or tap a film to play it.
           </p>
-          <ul className="sc-legend" aria-label="Layer types">
-            {KINDS.lanes.map((k) => (
-              <li key={k} className={`lane-${k}`}>{LANE_NAME[k]}</li>
-            ))}
-          </ul>
           <FilmGrid />
         </section>
 
