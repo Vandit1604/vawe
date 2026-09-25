@@ -68,7 +68,7 @@ const MATCH_FULL = 150, MATCH_R = 16;
 // (enter 0→1 = revealing, exit 0→1 = leaving); enter(1)/exit(0) must equal identity.
 export const PRESENTATIONS = {
   none: withBlurb('no transition at all, the beats simply replace each other. Masks nothing and moves nothing, so a whole-frame cut needs sceneUnits', { enter: () => style({}), exit: () => style({}) }),
-  fade: withBlurb('opacity only, masks, so a whole-frame cut needs sceneUnits', {
+  fade: withBlurb('opacity only, 0 to 1 over the whole cut window, masks nothing, so a whole-frame cut needs sceneUnits', {
     enter: (p) => style({ opacity: p.toFixed(3) }),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
@@ -77,7 +77,7 @@ export const PRESENTATIONS = {
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 0.7).toFixed(2)}px)` }),
   }),
   // whip-pan: fast directional throw with motion blur peaking at the cut
-  whip: withBlurb('motion-blurred directional throw, momentum, between same-background beats only', {
+  whip: withBlurb('motion-blurred directional throw, travels 3.2x the cut distance and blurs up to 14px, momentum, between same-background beats only', {
     enter: (p, o) => style({ opacity: clamp01(p * 2).toFixed(3), transform: `translate${axis(o.dir)}(${(sign(o.dir) * (1 - p) * o.dist * 3.2).toFixed(2)}px)`, filter: `blur(${((1 - p) * 14).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 3.2).toFixed(2)}px)`, filter: `blur(${(p * 14).toFixed(2)}px)` }),
   }),
@@ -98,16 +98,16 @@ export const PRESENTATIONS = {
     enter: (p) => style(clockWipe(p)),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
-  flip: withBlurb('perspective hinge flip about an edge, cards and panels', {
+  flip: withBlurb('perspective hinge flip about an edge, rotates up to 55 degrees through a 1400px perspective, cards and panels', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.5).toFixed(3), transform: `perspective(1400px) rotate${axis(o.dir)}(${(sign(o.dir) * (1 - p) * 55).toFixed(1)}deg)` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `perspective(1400px) rotate${axis(o.dir)}(${(-sign(o.dir) * p * 55).toFixed(1)}deg)` }),
   }),
-  rise: withBlurb('translate up + fade in', {
+  rise: withBlurb('translates up along the cut distance (default 90px) while fading in from 0 to 1', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.3).toFixed(3), transform: `translateY(${((1 - p) * o.dist).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `translateY(${(-p * o.dist * 0.6).toFixed(2)}px)` }),
   }),
   // blur dissolve: the classic premium fade, defocus swaps for opacity doing all the work
-  blur: withBlurb('resolve out of blur, calm, premium', {
+  blur: withBlurb('resolves out of a 16px defocus, calm, premium', {
     enter: (p) => style({ opacity: clamp01(p * 1.2).toFixed(3), filter: `blur(${((1 - p) * 16).toFixed(2)}px)` }),
     exit: (p) => style({ opacity: (1 - p).toFixed(3), filter: `blur(${(p * 16).toFixed(2)}px)` }),
   }),
@@ -142,7 +142,7 @@ export const PRESENTATIONS = {
     exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 1.6).toFixed(2)}px) scale${axis(o.dir)}(${lerp(1, 1.55, p).toFixed(4)})`, filter: `blur(${(p * 8).toFixed(2)}px)` }),
   }),
   // roll: rotates in from a corner tilt, settles level
-  roll: withBlurb('tilts in from a corner and settles level', {
+  roll: withBlurb('tilts in from a corner (7 degrees) and settles level', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.4).toFixed(3), transform: `rotate(${(sign(o.dir) * (1 - p) * 7).toFixed(2)}deg) translateY(${((1 - p) * o.dist * 0.8).toFixed(2)}px) scale(${lerp(0.96, 1, p).toFixed(4)})` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `rotate(${(-sign(o.dir) * p * 7).toFixed(2)}deg) translateY(${(-p * o.dist * 0.5).toFixed(2)}px)` }),
   }),
@@ -167,17 +167,17 @@ export const PRESENTATIONS = {
     exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 2.6).toFixed(2)}px) skew${axis(o.dir) === 'X' ? 'X' : 'Y'}(${(-sign(o.dir) * p * 12).toFixed(2)}deg)`, filter: `blur(${(p * 10).toFixed(2)}px)` }),
   }),
   // spin: rotate + scale settle (logos, badges, seals)
-  spin: withBlurb('rotate in with a scale settle, logos, badges, seals', {
+  spin: withBlurb('rotates in 90 degrees while scaling from 0.5 to 1, logos, badges, seals', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.6).toFixed(3), transform: `rotate(${(sign(o.dir) * (1 - p) * 90).toFixed(1)}deg) scale(${lerp(0.5, 1, p).toFixed(4)})` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `rotate(${(-sign(o.dir) * p * 60).toFixed(1)}deg) scale(${lerp(1, 0.7, p).toFixed(4)})` }),
   }),
   // collapse: vertical fold (terminal/data beats)
-  collapse: withBlurb('vertical fold down to a line, terminal and data beats', {
+  collapse: withBlurb('vertical fold, scaleY from 0.05 up to 1, terminal and data beats', {
     enter: (p) => style({ opacity: clamp01(p * 1.5).toFixed(3), transform: `scaleY(${lerp(0.05, 1, p).toFixed(4)})` }),
     exit: (p) => style({ opacity: (1 - p).toFixed(3), transform: `scaleY(${lerp(1, 0.05, p).toFixed(4)})` }),
   }),
   // rise-blur: slow premium arrival, rise through heavy defocus
-  riseBlur: withBlurb('slow rise through heavy defocus, premium slow beats', {
+  riseBlur: withBlurb('slow rise through a 22px defocus, premium slow beats', {
     enter: (p, o) => style({ opacity: clamp01(p * 1.2).toFixed(3), transform: `translateY(${((1 - p) * o.dist * 0.8).toFixed(2)}px)`, filter: `blur(${((1 - p) * 22).toFixed(2)}px)` }),
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `translateY(${(-p * o.dist * 0.5).toFixed(2)}px)`, filter: `blur(${(p * 22).toFixed(2)}px)` }),
   }),
@@ -222,7 +222,7 @@ export const PRESENTATIONS = {
     },
   }),
   // glitch jitter: quantized deterministic shake that decays as the scene lands
-  jitter: withBlurb('decaying deterministic shake, alarm and glitch beats only', {
+  jitter: withBlurb('decaying deterministic shake, up to 14px of jitter, alarm and glitch beats only', {
     enter: (p) => { const q = Math.floor(clamp01(p) * 10), amp = (1 - clamp01(p)) * 14; const jx = (frac(q * 12.9898 + 78.233) - 0.5) * 2 * amp, jy = (frac(q * 39.3468 + 11.135) - 0.5) * 2 * amp; return style({ opacity: clamp01(p * 2).toFixed(3), transform: `translate(${jx.toFixed(2)}px, ${jy.toFixed(2)}px)` }); },
     exit: (p) => { const q = Math.floor(clamp01(p) * 10), amp = clamp01(p) * 14; const jx = (frac(q * 26.651 + 43.77) - 0.5) * 2 * amp, jy = (frac(q * 51.313 + 7.19) - 0.5) * 2 * amp; return style({ opacity: (1 - p).toFixed(3), transform: `translate(${jx.toFixed(2)}px, ${jy.toFixed(2)}px)` }); },
   }),
