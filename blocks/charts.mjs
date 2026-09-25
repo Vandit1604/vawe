@@ -1,9 +1,9 @@
 // blocks/charts.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, pill, onColor,
-  R, TYPE, SPACE, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
-  sweep, stagger, growUp, fillRight, stackWindows,
+  TOKENS, SERIES, seriesAt, r2, text,
+  R, TYPE, SPACE, cardChrome, htmlCard, cardInsetY, barWidth,
+  sweep,
   tint, TINT, DATA_CAP, STROKE, capCss, labelCss, numCss, deltaChip, needData } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
@@ -103,7 +103,7 @@ export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0]
   // gradient id is derived from the colour, so two charts of the same colour share one definition and
   // two of different colours cannot collide on a document-global id. Deterministic: no counter, no
   // random, just the string.
-  const gid = `va${[...color].reduce((h, c) => (h * 33 + c.charCodeAt(0)) >>> 0, 5381).toString(36)}`;
+  const gid = `va${[...color].reduce((acc, c) => (acc * 33 + c.charCodeAt(0)) >>> 0, 5381).toString(36)}`;
   const svg = `<svg viewBox="0 0 ${cw} ${ch}" width="100%" height="${ch}" style="display:block;overflow:visible">`
     + (area ? `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">`
       + `<stop offset="0" stop-color="${color}" stop-opacity="0.28"/>`

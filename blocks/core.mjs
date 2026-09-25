@@ -11,9 +11,9 @@
 // the one avatar implementation, lives in blocks/kit.mjs. It is PURE (props → plain objects) and it
 // exists because every one of those things had been copied per-block and had drifted per-copy.
 import {
-  TOKENS, SERIES, seriesAt, HAIR, r2, text, rect, box, onColor,
-  R, E, SPACE, TYPE, cardChrome, htmlCard, cardInsetY, barWidth, toneColor, avatarEl,
-  sweep, stagger, growUp, fillRight, stackWindows, needData, blockFactory,
+  TOKENS, HAIR, r2, text, rect, box,
+  R, E, SPACE, TYPE, cardChrome,
+  stagger, needData, blockFactory,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that ships
@@ -276,7 +276,7 @@ const LT_FONT = { name: { size: 46, weight: 700, tracking: '-0.02em' }, role: { 
 
 export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = 'cleanBar',
   accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
-  const N = LT_FONT.name, R = LT_FONT.role;
+  const N = LT_FONT.name, RF = LT_FONT.role;
   const s2 = r2(start + 0.12);                      // the role trails the name by ~2 frames: reading order
   const wipeIn = { start, duration: dur, anim: 'wipe', enterDur: 0.42, exitDur: 0.28 };
   const riseIn = { start, duration: dur, anim: 'rise', enterDur: 0.45, exitDur: 0.3 };
@@ -294,7 +294,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
       return [{ type: 'group', x, y, ...stackL, gap: 2, pad: '16px 24px', bg: T.card,
         radius: 4, border: HAIR, ...wipeIn, children: [
           text({ text: name, ...N, color: T.ink }),
-          role && text({ text: role, ...R, color: T.dim }),
+          role && text({ text: role, ...RF, color: T.dim }),
         ].filter(Boolean) }];
 
     // Name reversed out of a solid accent block, role in an ink block beneath. The default broadcast
@@ -304,7 +304,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
         { type: 'group', x, y, pad: '12px 16px', bg: accent, ...HARD, ...wipeIn,
           children: [text({ text: name, ...N, color: T.onAccent })] },
         role ? { type: 'group', x, y: r2(y + N.size + 24), pad: '8px 16px', bg: T.ink, ...HARD,
-          ...wipeIn, start: s2, children: [text({ text: role, ...R, color: T.onAccent })] } : null,
+          ...wipeIn, start: s2, children: [text({ text: role, ...RF, color: T.onAccent })] } : null,
       ].filter(Boolean);
 
     // BILD: the German tabloid front page. Caps, reversed out of accent, tracked TIGHT and set huge.
@@ -325,17 +325,17 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
       return [{ type: 'group', x, y, ...stackL, gap: 4, pad: '16px 24px', bg: 'rgba(16,18,24,0.92)',
         radius: 12, ...riseIn, children: [
           text({ text: name, ...N, color: '#fff' }),
-          role && text({ text: role, ...R, color: 'rgba(255,255,255,0.72)' }),
+          role && text({ text: role, ...RF, color: 'rgba(255,255,255,0.72)' }),
         ].filter(Boolean) }];
 
     // A thick accent rule, then the text. No plate at all: the rule alone carries the identity, so it
     // needs a calm backdrop to land on. (A rule beside text is broadcast grammar, not a card stripe.)
     case 'sideRule':
       return [{ type: 'group', x, y, layout: 'row', items: 'center', gap: 16, ...riseIn, children: [
-        box({ w: 6, h: r2(N.size + (role ? R.size + 14 : 0)), bg: accent }),
+        box({ w: 6, h: r2(N.size + (role ? RF.size + 14 : 0)), bg: accent }),
         { type: 'group', ...stackL, gap: 2, children: [
           text({ text: name, ...N, color: T.ink }),
-          role && text({ text: role, ...R, color: T.dim }),
+          role && text({ text: role, ...RF, color: T.dim }),
         ].filter(Boolean) },
       ] }];
 
@@ -357,7 +357,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
       return [
         text({ text: name, x, y, ...N, color: T.ink, split: 'word', preset: 'underline',
           presetOpts: { color: accent }, each: 0.5, stagger: 0.06, start, duration: dur, exitDur: 0.3 }),
-        role && text({ text: role, x, y: r2(y + N.size + 16), ...R, color: T.dim,
+        role && text({ text: role, x, y: r2(y + N.size + 16), ...RF, color: T.dim,
           start: r2(start + 0.35), duration: r2(dur - 0.35), anim: 'fade', enterDur: 0.4, exitDur: 0.3 }),
       ].filter(Boolean);
 
@@ -367,7 +367,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
       return [
         text({ text: name, x, y, ...N, color: T.ink, split: 'word', preset: 'riseClip',
           each: 0.55, stagger: 0.08, start, duration: dur, exitDur: 0.3 }),
-        role && text({ text: role, x, y: r2(y + N.size + 16), ...R, color: T.dim,
+        role && text({ text: role, x, y: r2(y + N.size + 16), ...RF, color: T.dim,
           start: r2(start + 0.4), duration: r2(dur - 0.4), anim: 'fade', enterDur: 0.4, exitDur: 0.3 }),
       ].filter(Boolean);
 
@@ -389,7 +389,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
         // existed since this morning and these never adopted it; on higgsfield's acid lime that
         // is white-on-lime at 1.16:1. The token knows what reads on the theme's own accent.
         role ? { type: 'group', x: r2(x + 40), y: r2(y + N.size + 26), pad: '8px 16px', bg: accent, ...HARD,
-          ...wipeIn, start: s2, children: [text({ text: role, ...R, weight: 600, color: T.onAccent })] } : null,
+          ...wipeIn, start: s2, children: [text({ text: role, ...RF, weight: 600, color: T.onAccent })] } : null,
       ].filter(Boolean);
 
     // A plate over a deliberately shorter accent bar. Reads as a mark rather than a plate.
@@ -398,7 +398,7 @@ export function lowerThird({ x = 120, y = 820, name = '', role = '', variant = '
         { type: 'group', x, y, pad: '12px 24px', bg: T.card, border: HAIR, ...HARD, ...wipeIn,
           children: [text({ text: name, ...N, color: T.ink })] },
         role ? { type: 'group', x, y: r2(y + N.size + 26), pad: '6px 24px', bg: accent, ...HARD, ...wipeIn,
-          start: s2, enterDur: 0.32, children: [text({ text: role, ...R, weight: 600, color: T.onAccent })] } : null,
+          start: s2, enterDur: 0.32, children: [text({ text: role, ...RF, weight: 600, color: T.onAccent })] } : null,
       ].filter(Boolean);
 
     // A ticker bar: accent chip, then the line. `role` is the chip (LIVE / BREAKING / 09:41), which is
@@ -463,7 +463,7 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
   // THE BAR. One pill, a magnifier inset at the leading edge, a mic at the trailing edge, the real
   // furniture of a search field. The icons are Lucide (ISC) with the stroke baked, because an SVG
   // loaded as an <img> has no currentColor to inherit and would render invisible.
-  const bar = (bx, by, bw, st, d, textSize) => {
+  const bar = (bx, by, bw, st, d, _textSize) => {
     const r = [];
     r.push(rect({ x: bx, y: by, w: bw, h: BAR_H, radius: BAR_H / 2, bg: T.card, border: HAIR, elevation: 1,
       start: st, duration: d, anim: 'rise', enterDur: 0.45, exitDur: 0.3 }));
@@ -544,7 +544,7 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
 // content and accept no `h` at all, and a prop a factory does not destructure is dropped in silence.
 // The exact failure this repo has logged repeatedly. `h` is used for the container's own geometry
 // (the divider, the inset), never handed to a pane that may not understand it.
-const pane = (side, at) => (side ? blockFactory(side && side.block, 'splitScreen')({ ...(side.props || {}), ...at }) : []);
+const pane = (side, at) => (side ? blockFactory(side && side.block, 'splitScreen')({ ...side.props, ...at }) : []);
 
 // splitScreen: two panes, one geometry. `orient:'row'` splits left|right, `'column'` splits top/bottom,
 // and `pip` insets the second pane into a corner of the first instead of sitting beside it.

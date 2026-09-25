@@ -1,8 +1,8 @@
 // blocks/ui.mjs: extracted from blocks/index.mjs (see that file's contract). Pure factories
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
-  TOKENS, HAIR, r2, text, rect, box, onColor, onInk,
-  R, TYPE, SPACE, E, cardChrome, toneColor, avatarEl,
+  TOKENS, HAIR, r2, text, box, onColor, onInk,
+  R, TYPE, SPACE, E, cardChrome, toneColor,
   stackWindows, TONE_NAMES,
   tint, TINT, SHADOW_CARD, labelCss, numCss,
 } from './kit.mjs';
@@ -411,7 +411,7 @@ const OPTICAL_NUDGE = { paddingTop: `${SPACE.snug}px` };
 // `body`. Each block had invented its own words for the same two slots, so an author relearned the
 // block every time. Old names stay as aliases. A shared vocabulary is worth nothing if adopting it
 // breaks every caller (MISTAKES #67).
-export function toast({ x, y, w = 420, title, message = '', body = '', action = '', icon = '✓', accent = TOKENS.green,
+export function toast({ x, y, w = 420, title, message = '', body: _body = '', action = '', icon = '✓', accent = TOKENS.green,
   items = null, life = 2.2, step = 0.9, rowH = 58, gap = 12, start = 0, dur = 4 } = {}) {
   // see `notification`, same stack, same helper, same recursion into the single-card form.
   if (items && items.length) {
