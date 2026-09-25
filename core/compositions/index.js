@@ -223,7 +223,12 @@ export const COMPOSITION_BLURBS = {
 // scripts/site/effects-catalog.mjs beside these same two names, its usage snippet and its no-preview
 // reason living in a third file keyed by a slug of the heading. It also owns the refusal in
 // core/layers/composition.js, which hand-typed the same list of names.
-export const COMPOSITION_REGISTRY = defineRegistry('composition', COMPOSITIONS, { slot: 'comp', blurbs: COMPOSITION_BLURBS,
+const COMPOSITION_AKA = {
+  pipelineFlow: ['pipeline diagram', 'flow chart animation', 'cards and connectors'],
+  commaSplit: ['comma separated values animation', 'delimited line to table'],
+};
+
+export const COMPOSITION_REGISTRY = defineRegistry('composition', COMPOSITIONS, { slot: 'comp', blurbs: COMPOSITION_BLURBS, aka: COMPOSITION_AKA,
   catalog: {
     title: 'Compositions (bespoke per-beat timeline)',
     tag: 'composition',
