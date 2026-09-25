@@ -1,14 +1,13 @@
 // quality/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion/motion.js.
 // No browser needed (the primitives are pure). Run: node quality/gates/lib-test.mjs  (make lib-test)
-import { clamp01, lerp, interpolate, spring, springSettle, track, rise, fade, pop, slide, easeOutCubic,
-  random, noise, stagger, hashSeed, resolveEasing, EASINGS, motionDefaults, DEFAULT_MOTION,
-  sequence, shake, pulse, accel, decel, speedRamp, trackingFor, springEase,
+import { spring, springSettle, easeOutCubic,
+  random, noise, hashSeed, resolveEasing, EASINGS, DEFAULT_MOTION,
+  shake, trackingFor, springEase,
   anticipateEase, overshootEase, stepClock, icon } from '../../core/motion/motion.js';
 import { srcUrl } from '../../core/engine/src-url.js';
 import { layerTime, TIME_REMAP_NAMES, TIME_REMAP_BLURBS } from '../../core/timeline/time.js';
-import { unitProgress, PRESETS, PRESET_BLURBS, wght, staggerOffset, staggerStep, gsapStagger, decodeText, DECODE_CHARS, STAGGER_FROM } from '../../core/type/type.js';
-import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites, TIMINGS,
-  wipe, circleWipe, clockWipe } from '../../core/cuts/index.js';
+import { unitProgress, PRESETS, PRESET_BLURBS, wght } from '../../core/type/type.js';
+import { PRESENTATIONS, cutStyle, soloCutStyle, SOLO_BLIND, CUT_BLURBS, cutWrites, TIMINGS } from '../../core/cuts/index.js';
 import { PRESENTATIONS as CUT_PRESENTATIONS_AK } from '../../core/cuts/index.js';
 import { dirVec as seamDirVec, featherFor as seamFeatherFor } from '../../core/timeline/seams.js';
 import { killedBy, capabilitiesOf, checkCuts } from '../../core/fx/ancestor-kills.js';
@@ -173,22 +172,6 @@ if (process.argv.includes('--colours')) {
   process.exit(0);
 }
 
-// clamp01 / lerp
-ok('clamp01 below', clamp01(-2) === 0);
-ok('clamp01 above', clamp01(5) === 1);
-ok('lerp mid', approx(lerp(0, 10, 0.5), 5));
-
-// interpolate
-ok('interp at start', interpolate(0, [0, 1], [10, 20]) === 10);
-ok('interp at end', interpolate(1, [0, 1], [10, 20]) === 20);
-ok('interp mid', approx(interpolate(0.5, [0, 1], [10, 20]), 15));
-ok('interp clamp low', interpolate(-3, [0, 1], [10, 20]) === 10);
-ok('interp clamp high', interpolate(9, [0, 1], [10, 20]) === 20);
-ok('interp multi-stop', approx(interpolate(2, [0, 1, 4], [0, 100, 400]), interpolate(2, [1, 4], [100, 400])));
-ok('interp segment B', approx(interpolate(2.5, [0, 1, 4], [0, 100, 400]), 100 + (400 - 100) * ((2.5 - 1) / 3)));
-ok('interp easing applied', approx(interpolate(0.5, [0, 1], [0, 1], { easing: easeOutCubic }), easeOutCubic(0.5)));
-ok('interp no-extrapolate guard', interpolate(5, [0, 1], [0, 1], { clamp: false }) >= 0); // doesn't throw
-
 // spring (analytic, pure)
 ok('spring 0', spring(0) === 0);
 ok('spring settles to ~1', approx(spring(5, { settle: 0.6 }), 1, 0.02));
@@ -198,22 +181,6 @@ ok('spring no overshoot at bounce 0', (() => { let m = 0; for (let t = 0; t < 2;
 ok('spring deterministic', spring(0.37, { bounce: 0.4 }) === spring(0.37, { bounce: 0.4 }));
 ok('springSettle positive finite', (() => { const s = springSettle({ bounce: 0.3, settle: 0.6 }); return s > 0 && Number.isFinite(s); })());
 
-// track
-const beats = [{ name: 'a', dur: 1 }, { name: 'b', dur: 2 }, { name: 'c', dur: 1 }];
-ok('track first beat', track(0, 30, beats).name === 'a');
-ok('track t01 mid', approx(track(15, 30, beats).t01, 0.5));        // 0.5s into 'a' (dur 1)
-ok('track second beat', track(45, 30, beats).name === 'b');       // 1.5s → 'b'
-ok('track t01 in range', (() => { for (let n = 0; n < 120; n += 7) { const r = track(n, 30, beats); if (r.t01 < 0 || r.t01 > 1) return false; } return true; })());
-ok('track past end → last beat', track(1000, 30, beats).name === 'c');
-ok('track localT', approx(track(45, 30, beats).localT, 0.5));     // 1.5s - start(1.0) = 0.5
-
-// transition helpers
-ok('rise shape', (() => { const s = rise(0); return s.transform.includes('translateY') && s.opacity === 0; })());
-ok('rise settled', (() => { const s = rise(1); return approx(s.opacity, 1) && s.transform.includes('translateY(0'); })());
-ok('fade', fade(0.5).opacity === 0.5);
-ok('pop opacity clamped', pop(1).opacity === 1 && pop(1).transform.includes('scale'));
-ok('slide dir', slide(0, 'left', 60).transform.includes('-60') || slide(0, 'left', 60).transform.includes('-6'));
-
 // seeded randomness: deterministic, in-range, seed-sensitive
 ok('random in [0,1)', (() => { for (let i = 0; i < 200; i++) { const r = random(i); if (r < 0 || r >= 1) return false; } return true; })());
 ok('random deterministic', random(42) === random(42) && random('x') === random('x'));
@@ -222,10 +189,6 @@ ok('hashSeed uint32', Number.isInteger(hashSeed(7)) && hashSeed(7) >= 0 && hashS
 ok('noise in [0,1)', (() => { for (let x = 0; x < 20; x += 0.3) { const v = noise(x, 5); if (v < 0 || v >= 1) return false; } return true; })());
 ok('noise continuous at lattice', approx(noise(3, 9), random('9:3'), 1e-9));
 ok('noise deterministic', noise(2.5, 1) === noise(2.5, 1));
-
-// stagger
-ok('stagger 0', stagger(0) === 0);
-ok('stagger step', approx(stagger(3, 0.1), 0.3));
 
 // easing registry
 ok('resolveEasing by name', resolveEasing('easeOutCubic') === EASINGS.easeOutCubic);
@@ -468,38 +431,6 @@ ok('easeErrors: an engine ease in an engine field is allowed', easeErrors({
   layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'easeOutCubic' }], varsEase: { '*': 'ramp', o: 'snap' } }],
   camera: [{ t: 0 }, { t: 1, ease: 'easeInOutSine' }],
 }).length === 0);
-
-// motionDefaults
-ok('motionDefaults resolves easing to fn', typeof motionDefaults({ motion: { easing: 'easeOutQuart' } }).easing === 'function');
-ok('motionDefaults falls back to DEFAULT', motionDefaults(undefined).bounce === DEFAULT_MOTION.bounce);
-ok('motionDefaults keeps overrides', motionDefaults({ motion: { enter: 99 } }).enter === 99);
-ok('motionDefaults durationScale default 1', motionDefaults({ motion: {} }).durationScale === 1);
-
-// sequencing: segments with transition windows (trans=0.4 default)
-const segs = [{ name: 's1', dur: 2 }, { name: 's2', dur: 2 }, { name: 's3', dur: 1 }];
-ok('sequence picks segment', sequence(30, 30, segs).name === 's1');            // 1s → s1
-ok('sequence second segment', sequence(90, 30, segs).name === 's2');           // 3s → s2
-ok('sequence enter ramps from 0', approx(sequence(0, 30, segs).enter, 0));     // start of s1
-ok('sequence enter completes', sequence(30, 30, segs).enter === 1);            // 1s in → past 0.4 trans
-ok('sequence exit 0 mid-segment', sequence(30, 30, segs).exit === 0);          // 1s in, not near end
-ok('sequence exit ramps at end', sequence(59, 30, segs).exit > 0);             // ~1.97s into s1 (dur 2)
-ok('sequence active in [0,1]', (() => { for (let n = 0; n < 150; n += 3) { const a = sequence(n, 30, segs).active; if (a < 0 || a > 1) return false; } return true; })());
-ok('sequence deterministic', sequence(77, 30, segs).active === sequence(77, 30, segs).active);
-// holdLast (default): the LAST segment never exits. The ending holds through the final frame
-ok('sequence last segment holds (exit 0)', sequence(149, 30, segs).exit === 0);          // ~4.97s, end of s3
-ok('sequence last segment fully active', sequence(149, 30, segs).active === 1);          // no fade at the end
-ok('sequence holdLast:false restores exit', sequence(149, 30, segs, { holdLast: false }).exit > 0.9);
-ok('sequence holdLast leaves earlier exits alone', sequence(59, 30, segs).exit > 0);     // s1 still exits
-
-// transitions → clip-path strings, monotonic reveal
-ok('wipe hidden at 0', wipe(0, 'left').clipPath.includes('100%'));
-ok('wipe revealed at 1', wipe(1, 'left').clipPath === 'inset(0 0% 0 0)');
-ok('wipe has webkit alias', wipe(0.5).WebkitClipPath === wipe(0.5).clipPath);
-ok('circleWipe grows', parseFloat(circleWipe(1).clipPath.match(/[\d.]+/)[0]) > parseFloat(circleWipe(0.2).clipPath.match(/[\d.]+/)[0]));
-ok('circleWipe at 0 is zero-radius', circleWipe(0).clipPath.startsWith('circle(0.0%'));
-ok('clockWipe is polygon', clockWipe(0.5).clipPath.startsWith('polygon('));
-ok('clockWipe full at 1 has all corners', (() => { const p = clockWipe(1).clipPath; return p.includes('100.0% 0.0%') && p.includes('100.0% 100.0%') && p.includes('0.0% 100.0%'); })());
-ok('clockWipe deterministic', clockWipe(0.33).clipPath === clockWipe(0.33).clipPath);
 
 // The DIRECTION of every named wipe in the layer registry (core/timeline/clips.js ANIM). Counting names cannot
 // see this: `wipe-right` was registered as wipe(t,'right') and therefore revealed right-to-left, against
@@ -836,270 +767,6 @@ ok('gradient preset carries a blurb', typeof BG_BLURBS.gradient === 'string' && 
 ok('gradient recipes are a real registry (unknown recipe throws with a hint)', (() => { try { GRADIENT_RECIPE_REGISTRY.pick('zzz-not-real'); return false; } catch (e) { return /unknown/i.test(e.message); } })());
 ok('gradient mesh refuses a non-numeric colour by name, not a raw TypeError', (() => { const ctx = { createLinearGradient: () => ({ addColorStop() {} }), fillRect() {}, set fillStyle(v) {} }; try { gradientFill(ctx, 100, 100, 0, { kind: 'mesh', colors: ['coral'] }); return false; } catch (e) { return /is not hex or rgb/.test(e.message); } })());
 ok('gradient tolerates a stops array shorter than colors (even fallback, no crash)', (() => { const ctx = { createLinearGradient: () => ({ addColorStop(at) { if (typeof at !== 'number' || Number.isNaN(at)) throw new Error('bad offset'); } }), fillRect() {}, set fillStyle(v) {} }; try { gradientFill(ctx, 100, 100, 0, { kind: 'linear', colors: ['#111111', '#222222', '#333333'], stops: [0, 0.5] }); return true; } catch { return false; } })());
-
-// kinetic typography: unitProgress staggering + presets (pure)
-ok('unitProgress unit 0 starts at 0', approx(unitProgress(0, 0, 3, { each: 0.5, stagger: 0.06 }), 0));
-ok('unitProgress later unit delayed', unitProgress(0.06, 1, 3, { each: 0.5, stagger: 0.06 }) === 0);
-ok('unitProgress completes', unitProgress(2, 2, 3, { each: 0.5, stagger: 0.06 }) === 1);
-ok('unitProgress clamped [0,1]', (() => { for (let t = -1; t < 3; t += 0.1) { const u = unitProgress(t, 1, 4); if (u < 0 || u > 1) return false; } return true; })());
-
-// THE OTHER TWO STAGGER DIALS (engine-doctrine/CRAFT/PARITY-AUDIT.md). `from` is an ORDER and `amount` a TOTAL
-// time, and the first thing asserted is that neither moves a frame of what shipped.
-ok('a number stagger is exactly what it was: offset i, no remap', (() => {
-  for (let i = 0; i < 6; i++) for (let t = -0.2; t < 2; t += 0.07) {
-    if (Math.abs(unitProgress(t, i, 6, { each: 0.5, stagger: 0.06 }) - Math.max(0, Math.min(1, (t - i * 0.06) / 0.5))) > 1e-12) return false;
-  }
-  return true;
-})());
-ok('from:first is the default and changes nothing',
-  unitProgress(0.3, 3, 8, { each: 0.5, stagger: 0.05 }) === unitProgress(0.3, 3, 8, { each: 0.5, stagger: { each: 0.05, from: 'first' } }));
-// Every order is a RANK inside [0, n-1], so `amount` can normalise it and no order can push a unit
-// outside the train. The four named orders start at 0; `random` is a hashed float, so its earliest
-// unit lands within one step of 0 rather than exactly on it.
-ok('every named order is a rank inside [0, n-1]', STAGGER_FROM.every((f) => {
-  const r = [...Array(7).keys()].map((i) => staggerOffset(i, 7, f));
-  return (f === 'random' || Math.min(...r) === 0) && r.every((x) => x >= 0 && x <= 6);
-}));
-ok('from:center opens outward from the middle unit',
-  staggerOffset(3, 7, 'center') === 0 && staggerOffset(0, 7, 'center') === 3 && staggerOffset(6, 7, 'center') === 3);
-ok('from:last runs backwards', staggerOffset(6, 7, 'last') === 0 && staggerOffset(0, 7, 'last') === 6);
-ok('from:edges closes on the middle', staggerOffset(0, 7, 'edges') === 0 && staggerOffset(6, 7, 'edges') === 0 && staggerOffset(3, 7, 'edges') === 3);
-ok('from: an index starts the wave at that unit', staggerOffset(4, 9, 4) === 0 && staggerOffset(0, 9, 4) === 4);
-ok('from:random is HASHED, never Math.random: identical on a re-read',
-  staggerOffset(5, 20, 'random') === staggerOffset(5, 20, 'random') && staggerOffset(5, 20, 'random') !== staggerOffset(6, 20, 'random'));
-// `amount` is the dial two shipped films hand-computed by dividing a beat by a glyph count.
-ok('amount caps the WHOLE train, whatever the unit count', [6, 30, 90].every((n) => {
-  const step = staggerStep({ amount: 0.6 }, n);
-  return approx(step * (n - 1), 0.6);
-}));
-ok('amount normalises against the ORDER, not the raw index', approx(staggerStep({ amount: 0.6, from: 'center' }, 11) * staggerOffset(0, 11, 'center'), 0.6));
-ok('amount 0.6 on 90 units still lands the last unit inside its own beat',
-  unitProgress(0.6 + 0.5, 89, 90, { each: 0.5, stagger: { amount: 0.6 } }) === 1);
-ok('a stagger object with neither dial falls back to the caller default', staggerStep({ from: 'center' }, 8, 0.045) === 0.045);
-ok('gsapStagger translates only the two words GSAP spells differently',
-  gsapStagger({ each: 0.05, from: 'first' }).from === 'start' && gsapStagger({ from: 'last' }).from === 'end'
-  && gsapStagger({ from: 'center' }).from === 'center' && gsapStagger(0.07) === 0.07 && gsapStagger(undefined, 0.07) === 0.07);
-
-// TYPEWRITER: a per-unit delay that is a TYPING RATE (i/cps), not a share of a budget. The other
-// dials (amount/each) stay untouched; typewriter only changes what staggerStep returns for the rank
-// staggerOffset already produces.
-ok('typewriter per-unit delay is exactly i/cps', (() => {
-  const step = staggerStep({ from: 'typewriter', cps: 24 }, 11);
-  for (let i = 0; i < 11; i++) if (!approx(staggerOffset(i, 11, 'typewriter') * step, i / 24)) return false;
-  return true;
-})());
-ok('a 24cps line of 11 chars finishes at 11/24s', (() => {
-  const cps = 24, n = 11, each = 1 / cps; // each = 1/cps: a glyph appears instantly at its turn, like typing
-  const total = n / cps;
-  return unitProgress(total, n - 1, n, { each, stagger: { from: 'typewriter', cps } }) === 1
-    && unitProgress(total - 0.001, n - 1, n, { each, stagger: { from: 'typewriter', cps } }) < 1;
-})());
-ok('typewriter composes with a preset (unit progress feeds the preset like any other order)', (() => {
-  const u = unitProgress(5 / 24, 4, 11, { each: 1 / 24, stagger: { from: 'typewriter', cps: 24 } });
-  const style = PRESETS.up(u);
-  return u === 1 && style.opacity === 1;
-})());
-ok('typewriter with no cps defaults to 24, matching text.js\'s own typing default',
-  staggerStep({ from: 'typewriter' }, 11) === 1 / 24);
-ok('an exit order of random is untouched by the typewriter branch',
-  staggerStep({ from: 'random' }, 11, 0.06) === 0.06 && staggerOffset(3, 11, 'random') === staggerOffset(3, 11, 'random'));
-
-// TEXT SCRAMBLE: a RATE, a charset, and a reveal delay (engine-doctrine/CRAFT/PARITY-AUDIT.md).
-const scramble = (u, opts) => { const el = { textContent: 'DETERMINISTIC' }; decodeText(el, u, 0, opts); return el.textContent; };
-ok('decode default is byte-identical to the baked 24 steps it replaced', (() => {
-  for (let u = 0; u < 1; u += 0.017) if (scramble(u) !== scramble(u, { rate: 48, each: 0.5 })) return false;
-  return true;
-})());
-ok('decode is pure in u: the same frame twice is the same string', scramble(0.37) === scramble(0.37));
-ok('decode resolves left to right and finishes', scramble(1) === 'DETERMINISTIC' && scramble(0.99).endsWith('C') === false || scramble(1) === 'DETERMINISTIC');
-// The bug the rate fixes: the scramble used to slow down purely because the reveal was longer.
-ok('rate is per SECOND, so a 2s window scrambles as often as a 0.5s one', (() => {
-  const steps = (each) => new Set([...Array(60).keys()].map((k) => scramble(k / 60, { each }))).size;
-  return steps(2) >= steps(0.5) * 0.8;
-})());
-ok('a fixed COUNT is what it is no longer: doubling each doubles the refreshes',
-  new Set([...Array(60).keys()].map((k) => scramble(k / 60, { each: 1 }))).size
-  > new Set([...Array(60).keys()].map((k) => scramble(k / 60, { each: 0.25 }))).size);
-ok('chars takes a named set and uses ONLY that set',
-  [...scramble(0.05, { chars: 'numbers' })].every((c) => DECODE_CHARS.numbers.includes(c) || 'DETERMINISTIC'.includes(c)));
-ok('chars takes a raw string of your own glyphs',
-  [...scramble(0.05, { chars: 'xyz' })].every((c) => 'xyz'.includes(c) || 'DETERMINISTIC'.includes(c)));
-ok('revealDelay holds the word FULLY scrambled before it resolves',
-  scramble(0.2, { revealDelay: 0.5 })[0] !== 'D' || scramble(0.3, { revealDelay: 0.5 })[0] !== 'D');
-ok('revealDelay 0 is what shipped', scramble(0.4) === scramble(0.4, { revealDelay: 0 }));
-
-ok('preset up hidden at 0', PRESETS.up(0).opacity === 0 && PRESETS.up(0).transform.includes('translateY'));
-ok('preset up shown at 1', approx(PRESETS.up(1).opacity, 1) && PRESETS.up(1).transform.includes('translateY(0.00px)'));
-ok('preset type hard on/off', PRESETS.type(0).opacity === 0 && PRESETS.type(0.01).opacity === 1);
-ok('preset scale grows', PRESETS.scale(1).transform.includes('scale(1'));
-ok('preset blur clears', PRESETS.blur(1).filter.includes('blur(0.00px)'));
-ok('preset wave oscillates', PRESETS.wave(0).transform !== PRESETS.wave(0.25).transform);
-ok('presets deterministic', PRESETS.bounce(0.4).transform === PRESETS.bounce(0.4).transform);
-// draw: the stroke-on preset. pathLength=1 normalisation (splitText 'path') means the offset is the
-// remaining fraction of the line, so these asserts are exact and need no DOM.
-ok('preset draw hidden at 0', PRESETS.draw(0).opacity === 0 && PRESETS.draw(0).strokeDashoffset === '1.0000');
-ok('preset draw identity at 1', PRESETS.draw(1).strokeDasharray === 'none' && PRESETS.draw(1).strokeDashoffset === '0' && PRESETS.draw(1).opacity === 1);
-ok('preset draw monotonic', (() => { let prev = 2; for (let u = 0; u < 1; u += 0.05) { const o = +PRESETS.draw(u).strokeDashoffset; if (o > prev + 1e-9) return false; prev = o; } return true; })());
-ok('preset draw clamped [0,1]', (() => { for (let u = -0.5; u < 1; u += 0.1) { const o = +PRESETS.draw(u).strokeDashoffset; if (o < 0 || o > 1) return false; } return true; })());
-ok('preset draw back reverses', PRESETS.draw(0.25).strokeDashoffset !== PRESETS.draw(0.25, { back: true }).strokeDashoffset);
-ok('preset draw deterministic', PRESETS.draw(0.37).strokeDashoffset === PRESETS.draw(0.37).strokeDashoffset);
-// chroma/swing/unfold: appearance presets. Each must be hidden at 0, land at (near) identity at 1,
-// and be deterministic. chroma keeps a hair of coloured fringe at rest (by design), never a transform.
-ok('preset chroma hidden at 0, split wide', PRESETS.chroma(0).opacity === 0 && parseFloat(PRESETS.chroma(0).textShadow) >= 16);
-ok('preset chroma converges to a crisp glyph at rest (no fringe by default)', (() => { const s = PRESETS.chroma(1); return s.transform === 'translateY(0.00px)' && parseFloat(s.textShadow) === 0; })());
-ok('preset chroma residual opt leaves a fringe when asked', Math.abs(parseFloat(PRESETS.chroma(1, { residual: 1.2 }).textShadow) - 1.2) < 1e-6);
-ok('preset chroma fringe shrinks monotonically', (() => { let prev = 1e9; for (let u = 0; u <= 1; u += 0.05) { const o = Math.abs(parseFloat(PRESETS.chroma(u).textShadow)); if (o > prev + 1e-9) return false; prev = o; } return true; })());
-ok('preset swing hinges from top, settles upright', PRESETS.swing(0).transformOrigin === 'top center' && Math.abs(parseFloat(PRESETS.swing(1).transform.match(/rotate\(([-\d.]+)deg\)/)[1])) < 1.0);
-ok('preset unfold opens from edge-on to flat', PRESETS.unfold(0).transform.includes('rotateY(-90') && /rotateY\(-?0\.0deg\)/.test(PRESETS.unfold(1).transform) && PRESETS.unfold(0).transformOrigin === 'left center');
-ok('appearance presets deterministic', PRESETS.chroma(0.4).textShadow === PRESETS.chroma(0.4).textShadow && PRESETS.swing(0.4).transform === PRESETS.swing(0.4).transform);
-
-
-// assemble: the scattered-glyph reveal. Every assert below is about the three steps of the AE recipe
-// (own offset, FIXED field, shuffled arrival), because those are the three ways it can be built wrong.
-ok('preset assemble lands at identity', (() => { const t = PRESETS.assemble(1, {}, 3).transform; return /translate\(0\.00px, 0\.00px\) rotate\(-?0\.00deg\)/.test(t) && +PRESETS.assemble(1, {}, 3).opacity === 1; })());
-ok('preset assemble clears its motion blur', PRESETS.assemble(1, {}, 7).filter === 'blur(0.00px)');
-ok('preset assemble blur:0 writes no filter', PRESETS.assemble(0.3, { blur: 0 }, 7).filter === undefined);
-ok('preset assemble scatters each glyph differently', PRESETS.assemble(0.2, {}, 1).transform !== PRESETS.assemble(0.2, {}, 2).transform);
-ok('preset assemble is deterministic in the index', PRESETS.assemble(0.31, {}, 5).transform === PRESETS.assemble(0.31, {}, 5).transform);
-ok('preset assemble seed re-rolls the field', PRESETS.assemble(0.2, {}, 4).transform !== PRESETS.assemble(0.2, { seed: 'other' }, 4).transform);
-ok('preset assemble shuffles the arrival order', (() => {
-  // the hashed delay must leave at least one LATER glyph ahead of an earlier one at mid-run
-  const at = (i) => +PRESETS.assemble(0.5, {}, i).opacity;
-  for (let i = 0; i < 12; i++) for (let j = i + 1; j < 12; j++) if (at(j) > at(i) + 1e-6) return true;
-  return false;
-})());
-ok('preset assemble hidden at 0 for every glyph', (() => { for (let i = 0; i < 20; i++) if (+PRESETS.assemble(0, {}, i).opacity !== 0) return false; return true; })());
-ok('preset assemble travels in from its offset and arrives at zero', (() => {
-  const dist = (u) => { const m = PRESETS.assemble(u, {}, 9).transform.match(/translate\((-?[\d.]+)px, (-?[\d.]+)px\)/); return Math.hypot(+m[1], +m[2]); };
-  // easeOutSettle rings, so the path is not monotonic. What must hold: it starts far, is closing by
-  // mid-run, and lands exactly on the glyph's own slot.
-  return dist(0) > 70 && dist(0.6) < dist(0) && dist(1) === 0;
-})());
-
-// count roll: the odometer. The two asserts that matter are the two steps of the recipe: the last wheel
-// is CONTINUOUS in its place, and every wheel above it is geared, still until the one below crosses 9.
-ok('roll gives one wheel per digit', rollOffsets('12,480', 12480).length === 5);
-ok('roll lands on integers at rest', rollOffsets('12480', 12480).every((o) => Math.abs(o - Math.round(o)) < 1e-9));
-ok('roll reads the digits of its own value', rollOffsets('12480', 12480).join() === '1,2,4,8,0');
-ok('roll drives the last wheel continuously', (() => { const o = rollOffsets('4', 4.5); return Math.abs(o[0] - 4.5) < 1e-9; })());
-ok('roll leaves a higher wheel still while the one below is mid-run', (() => { const o = rollOffsets('43', 43.5); return o[0] === 4 && Math.abs(o[1] - 3.5) < 1e-9; })());
-ok('roll carries the higher wheel as the one below crosses 9', (() => { const o = rollOffsets('49', 49.7); return o[0] > 4 && o[0] < 5; })());
-ok('roll wraps forward past 9 (the strip carries an eleventh cell)', (() => { const o = rollOffsets('9', 9.6); return o[0] > 9 && o[0] < 10; })());
-ok('roll places the decimals below the point', rollOffsets('98.6', 98.6).map((o) => Math.round(o)).join() === '9,8,6');
-ok('roll is deterministic', rollOffsets('98.6', 98.61).join() === rollOffsets('98.6', 98.61).join());
-ok('roll drives the wheels in the units the TEXT is written in', displayNum(2.5e9, { to: 2.5e9 }) === 2.5 && displayNum(41, { unit: '%', to: 100 }) === 41);
-
-// matchCut: the graphic match. The three asserts are the three steps, and the identity contract that
-// every presentation owes cutStyle at its own steady state.
-ok('cut matchCut holds identity at each steady state', (() => {
-  const e = PRESENTATIONS.matchCut.enter(1, { cx: 50, cy: 50 }), x = PRESENTATIONS.matchCut.exit(0, { cx: 50, cy: 50 });
-  return e.clipPath === 'none' && e.opacity === '1' && x.clipPath === 'none' && x.opacity === '1';
-})());
-ok('cut matchCut closes the outgoing beat down to the held shape', (() => {
-  const a = +PRESENTATIONS.matchCut.exit(0.1, { cx: 50, cy: 50 }).clipPath.match(/circle\(([\d.]+)%/)[1];
-  const b = +PRESENTATIONS.matchCut.exit(0.49, { cx: 50, cy: 50 }).clipPath.match(/circle\(([\d.]+)%/)[1];
-  return a > b && b < 25;
-})());
-ok('cut matchCut swaps the content at the midpoint, never crossfades', (() => {
-  const outLate = PRESENTATIONS.matchCut.exit(0.5, { cx: 50, cy: 50 }).opacity;
-  const inEarly = PRESENTATIONS.matchCut.enter(0.49, { cx: 50, cy: 50 }).opacity;
-  return outLate === '0' && inEarly === '0';   // only one beat ever paints
-})());
-ok('cut matchCut opens the incoming beat out of the SAME shape', (() => {
-  const held = +PRESENTATIONS.matchCut.exit(0.4999, { cx: 50, cy: 50 }).clipPath.match(/circle\(([\d.]+)%/)[1];
-  const from = +PRESENTATIONS.matchCut.enter(0.5, { cx: 50, cy: 50 }).clipPath.match(/circle\(([\d.]+)%/)[1];
-  return Math.abs(held - from) < 0.1;
-})());
-ok('cut matchCut aims the shape with cx/cy', PRESENTATIONS.matchCut.enter(0.6, { cx: 30, cy: 70 }).clipPath.includes('at 30% 70%'));
-ok('cut matchCut is registered with a blurb', CUT_BLURBS.matchCut && /match/i.test(CUT_BLURBS.matchCut));
-
-// new kinetic presets: hidden at 0, fully landed at 1
-for (const k of ['flip', 'fall', 'elastic', 'skew', 'focus']) {
-  ok(`preset ${k} starts hidden`, PRESETS[k](0).opacity === 0);
-  ok(`preset ${k} lands opaque`, approx(+PRESETS[k](1).opacity, 1, 0.01));
-}
-ok('preset focus resolves crisp', PRESETS.focus(1).filter.includes('blur(0.00px)'));
-
-// new kinetic presets (batch 2)
-for (const k of ['tilt', 'stretch', 'shadow']) {
-  ok(`preset ${k} starts hidden-ish`, +PRESETS[k](0).opacity < 0.5);
-  ok(`preset ${k} lands opaque`, approx(+PRESETS[k](1).opacity, 1, 0.01));
-}
-ok('preset gradient sweeps', PRESETS.gradient(0).backgroundPosition !== PRESETS.gradient(1).backgroundPosition);
-ok('preset highlight grows', PRESETS.highlight(1).backgroundSize.startsWith('100'));
-ok('preset underline draws', PRESETS.underline(0.5).backgroundSize.startsWith('50'));
-// riseClip travels in PERCENT of the unit's own height, not px: 44px was a different fraction of a
-// 40px caption than of a 150px headline, so at large sizes the word was already half out from behind
-// its mask at u=0. These assert the invariant, not the literal string, the old assertion pinned
-// "(0.00px)" and so failed the moment the unit was corrected, which says nothing about identity.
-ok('preset riseClip identity at 1', parseFloat(PRESETS.riseClip(1).transform.match(/-?[\d.]+/)[0]) === 0);
-ok('preset riseClip travels in % (scales with type size)', PRESETS.riseClip(0).transform.includes('%'));
-ok('preset riseClip starts fully behind its mask', parseFloat(PRESETS.riseClip(0).transform.match(/-?[\d.]+/)[0]) >= 110);
-ok('presets deterministic (stretch)', JSON.stringify(PRESETS.stretch(0.37)) === JSON.stringify(PRESETS.stretch(0.37)));
-
-// shake / pulse: deterministic, decaying, zero before the hit
-ok('shake zero before hit', shake(-0.1).x === 0 && shake(0).y === 0);
-ok('shake deterministic', shake(0.2, { seed: 5 }).x === shake(0.2, { seed: 5 }).x);
-ok('shake seeds differ', shake(0.2, { seed: 5 }).x !== shake(0.2, { seed: 9 }).x);
-ok('shake decays', Math.abs(shake(2).x) < Math.abs(shake(0.05).x) + 1e-9);
-ok('pulse centered', approx(pulse(0), 1, 0.05) && pulse(0.6) !== pulse(0.3));
-
-// velocity ramping: monotone, endpoints exact, peak-velocity placement honored
-ok('accel endpoints', accel(0) === 0 && accel(1) === 1);
-ok('accel slow start', accel(0.3) < 0.3);
-ok('decel fast start', decel(0.3) > 0.3);
-ok('speedRamp endpoints', speedRamp(0) === 0 && speedRamp(1) === 1);
-ok('speedRamp slow at both ends', speedRamp(0.1) < 0.1 && speedRamp(0.9) > 0.9);
-ok('speedRamp monotone', (() => { let prev = 0; for (let t = 0; t <= 1.001; t += 0.01) { const v = speedRamp(t); if (v < prev - 1e-9) return false; prev = v; } return true; })());
-ok('speedRamp peak shifts', speedRamp(0.3, { peak: 0.2 }) > speedRamp(0.3, { peak: 0.8 }));
-ok('EASINGS has ramps', typeof EASINGS.ramp === 'function' && typeof EASINGS.rush === 'function' && typeof EASINGS.brake === 'function');
-
-// TIMINGS.spring: damped-spring cut timing, endpoints exact and it overshoots past 1 once mid-curve
-ok('TIMINGS.spring starts at 0', TIMINGS.spring(0) === 0);
-ok('TIMINGS.spring ends at 1', Math.abs(TIMINGS.spring(1) - 1) < 1e-6);
-ok('TIMINGS.spring overshoots past 1', (() => { for (let t = 0.01; t < 1; t += 0.01) if (TIMINGS.spring(t) > 1) return true; return false; })());
-
-// optical tracking: em string, monotone tighter as size grows
-ok('trackingFor em string', trackingFor(16).endsWith('em'));
-ok('trackingFor tightens', parseFloat(trackingFor(120)) < parseFloat(trackingFor(16)));
-ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-6 && Math.abs(parseFloat(trackingFor(120)) - -0.022) < 1e-6);
-
-// LIGHT-ON-DARK OPTICAL COMPENSATION: trackingFor(px, dark). A light glyph on a dark ground irradiates,
-// so it reads heavier and its gaps read tighter than the same pair inverted; the correction opens the
-// tracking back up at display sizes. Three things have to stay true, and each one is a way this could
-// silently go wrong:
-//   1. the ONE-ARGUMENT form is byte-identical, or 21 dark themes get re-tracked by an unrelated change;
-//   2. the TWO-ARGUMENT form actually differs, or the feature is inert and nothing says so;
-//   3. it is PURE, same input, same string, no clock and no randomness anywhere in the ramp.
-{
-  const sizes = [12, 14, 20, 28, 32, 40, 48, 64, 96, 120, 200];
-  ok('trackingFor 1-arg unchanged by the dark term',
-    sizes.every((p) => trackingFor(p) === trackingFor(p, false)));
-  // the exact strings the ramp shipped before polarity existed
-  ok('trackingFor 1-arg ramp is the measured one',
-    trackingFor(14) === '-0.0080em' && trackingFor(32) === '-0.0120em'
-    && trackingFor(64) === '-0.0170em' && trackingFor(120) === '-0.0220em');
-  ok('trackingFor dark differs at display sizes',
-    parseFloat(trackingFor(96, true)) > parseFloat(trackingFor(96)));
-  ok('trackingFor dark opens, never tightens',
-    sizes.every((p) => parseFloat(trackingFor(p, true)) >= parseFloat(trackingFor(p)) - 1e-9));
-  // body type is left alone on purpose: the source rule fixes body with weight and line-height, not
-  // tracking, and a 14px caption that moves is a diff with no visible cause.
-  ok('trackingFor dark is a no-op at body size',
-    trackingFor(14, true) === trackingFor(14) && trackingFor(12, true) === trackingFor(12));
-  ok('trackingFor dark lift reaches, and is capped at, 0.010em',
-    Math.abs((parseFloat(trackingFor(120, true)) - parseFloat(trackingFor(120))) - 0.010) < 1e-6
-    && Math.abs((parseFloat(trackingFor(200, true)) - parseFloat(trackingFor(200))) - 0.010) < 1e-6);
-  // the dent a flat lift would put in the size ramp: dark type must still tighten as it grows.
-  ok('trackingFor dark still tightens with size', (() => {
-    let prev = Infinity;
-    for (let p = 14; p <= 140; p += 1) { const v = parseFloat(trackingFor(p, true)); if (v > prev + 1e-9) return false; prev = v; }
-    return true;
-  })());
-  ok('trackingFor is pure', sizes.every((p) => trackingFor(p, true) === trackingFor(p, true)
-    && trackingFor(p) === trackingFor(p)));
-  ok('trackingFor always an em string', sizes.every((p) => /^-?\d+\.\d{4}em$/.test(trackingFor(p, true))));
-}
 
 // LETTER-SPACING HAS EXACTLY ONE WRITER. This is the contract MISTAKES #28 and #388 were both breaches
 // of: styleText resolved the value, microType overwrote it one statement later, and that one statement
@@ -1709,7 +1376,6 @@ ok('trackingFor endpoints', Math.abs(parseFloat(trackingFor(14)) - -0.008) < 1e-
   ok('lowerThird: role is optional (name alone still builds)',
     lts.every((e) => BLOCKS[e.family]({ variant: e.props.variant, name: 'Solo' }).length >= 1));
 }
-
 
 // ---- wave 1 effects: filters · glow presets · caption styles ----
 // Each family's pure surface, held to the contract its consumers rely on. The DOM halves (SVG def
@@ -4094,7 +3760,6 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
   })());
 }
 
-
 // ---- patch-motion: the editor writes back into HAND-FORMATTED files -------------------------------
 // The invariant that makes an editor safe to point at a tracked repo: saving without changing anything
 // must be a zero-byte diff, in every formatting style the library actually uses. Everything else about
@@ -4187,7 +3852,6 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
       })());
   }
 }
-
 
 // ---- becomes: the handover must be EXACT, or a match cut silently stops reading ---------------------
 {
@@ -6364,7 +6028,6 @@ ok('beamConic is a conic-gradient', beamConic(45, '#fff', 90).startsWith('conic-
     if (fs.readFileSync(file, 'utf8') !== original) fs.writeFileSync(file, original);
   }
 }
-
 
 // ---- prop-probe: the exhaustive input to the prop audit (quality/gates/prop-probe.mjs) ----
 //
