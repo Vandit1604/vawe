@@ -369,9 +369,9 @@ export function seekAll(t) {
     else if (typeof tl?.progress === 'function' && typeof tl.duration === 'function') tl.progress(tl.duration() ? clamp01(t / tl.duration()) : 0);
   }
   // GSAP global timeline, if present and paused
-  if (window.gsap?.globalTimeline) { try { window.gsap.globalTimeline.pause(); window.gsap.globalTimeline.time(t); } catch (e) {} }
+  if (window.gsap?.globalTimeline) { try { window.gsap.globalTimeline.pause(); window.gsap.globalTimeline.time(t); } catch { /* best-effort */ } }
   // paused WAAPI animations → deterministic currentTime
   if (typeof document.getAnimations === 'function') {
-    for (const a of document.getAnimations()) { try { a.pause(); a.currentTime = t * 1000; } catch (e) {} }
+    for (const a of document.getAnimations()) { try { a.pause(); a.currentTime = t * 1000; } catch { /* best-effort */ } }
   }
 }

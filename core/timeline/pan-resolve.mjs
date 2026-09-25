@@ -43,72 +43,65 @@ export function peelTime(own) {
   return peel;
 }
 
+// A merged track is read key-to-key, so every key the merge FABRICATES has to state the layer's whole
+// pose. An omitted property is not "unchanged", it is identity, and the next key snaps to it, which is
+// what makes `animates`/`poseAt` sampling necessary rather than reading own[0] (engine-doctrine/MISTAKES.md #195).
+function mergedSharedKey(k, own, ctx) {
+  const { shift, bx, by, ox, oy, animates, poseAt } = ctx;
+  const t = +(num(k.t, 0) + shift).toFixed(4);
+  const out = { ...k, t };
+  if (k.x != null) out.x = +(ox + (num(k.x, 0) - bx)).toFixed(3);
+  if (k.y != null) out.y = +(oy + (num(k.y, 0) - by)).toFixed(3);
+  const pose = poseAt(t);
+  if (pose) {
+    if (animates.has('scale')) out.scale = pose.scale;
+    if (animates.has('rot')) out.rot = pose.rot;
+    if (animates.has('opacity')) out.opacity = pose.opacity;
+    if (animates.has('blur')) out.blur = pose.blur;
+    if (k.y == null && animates.has('y')) out.y = pose.dy;   // the pan supplies x only; y stays the layer's
+  }
+  // The layer's own key at a shared time WINS, x and y included: the pan only supplies what the layer
+  // did not state.
+  const mine = own.find((o) => near(num(o.t, 0), t));
+  if (mine) for (const p of Object.keys(mine)) if (p !== 't') out[p] = mine[p];
+  return out;
+}
+
+// The layer's own key at a time the pan does not cover, wherever it falls, completed with the pan's
+// x/y at that instant so a key that states only `rot` does not silently read as x=0.
+function filledExtraKey(o, shared) {
+  if (!shared.length) return o;
+  const t = num(o.t, 0);
+  const filled = { ...o };
+  const pan = motionAt(shared, t);                   // holds the last shared value past the peel
+  if (o.x == null && shared.some((s) => s.x != null)) filled.x = +pan.dx.toFixed(3);
+  if (o.y == null && shared.some((s) => s.y != null)) filled.y = +pan.dy.toFixed(3);
+  return filled;
+}
+
 // Merge one layer's own track with its pan source's. Returns the resolved key list; does not mutate.
 export function mergePan(L, src) {
   const shift = num(src.start, 0) - num(L.start, 0);   // src-local t → this layer's local t
   const own = Array.isArray(L.motion) ? L.motion : [];
   const base = src.motion;
-  // A pan supplies x and y and nothing else. That claim used to sit here as a `PAN` constant that
-  // nothing read: x and y are named directly at all four sites below, so the constant enforced
-  // nothing and only looked as though it did.
   const bx = num(base[0].x, 0), by = num(base[0].y, 0);// deltas from the source's first key
   const ox = num(own[0]?.x, 0), oy = num(own[0]?.y, 0);// ...applied from THIS layer's own origin
 
-  // A merged track is read key-to-key, so every key the merge FABRICATES has to state the layer's whole
-  // pose. An omitted property is not "unchanged", it is identity, and the next key snaps to it. The
-  // fabricated keys are the pan's, and they must therefore carry what the layer's OWN track is doing at
-  // that instant. Sampling own[0] instead (it was the layer's first key, held constant) pinned the
-  // spinner's `rot:0` onto all six pan keys, so its rotation ran 0 → 214 → 0 → 286 → 0 against the
-  // author's keys and it shuddered for 27 frames. Constant is right only for a property that never
-  // animates, which is the one case the old code was tested on (engine-doctrine/MISTAKES.md #195).
   const animates = new Set();
   for (const k of own) for (const p of ['x', 'y', 'scale', 'rot', 'opacity', 'blur']) if (k[p] != null) animates.add(p);
   const poseAt = (t) => (own.length ? motionAt(own, t) : null);
-
   const peel = peelTime(own);
+  const ctx = { shift, bx, by, ox, oy, animates, poseAt };
 
   const shared = [];
   for (const k of base) {
     const t = +(num(k.t, 0) + shift).toFixed(4);
     if (t > peel + 1e-6) continue;                     // the layer has left the page by now
-    const out = { ...k, t };
-    if (k.x != null) out.x = +(ox + (num(k.x, 0) - bx)).toFixed(3);
-    if (k.y != null) out.y = +(oy + (num(k.y, 0) - by)).toFixed(3);
-    const pose = poseAt(t);
-    if (pose) {
-      if (animates.has('scale')) out.scale = pose.scale;
-      if (animates.has('rot')) out.rot = pose.rot;
-      if (animates.has('opacity')) out.opacity = pose.opacity;
-      if (animates.has('blur')) out.blur = pose.blur;
-      if (k.y == null && animates.has('y')) out.y = pose.dy;   // the pan supplies x only; y stays the layer's
-    }
-    // ...and the layer may declare its OWN key at a shared time: the spinner rotates while it travels,
-    // and the button states its own x/y at the moment it peels off the page. What the author writes
-    // WINS, x and y included. The pan only supplies what the layer did not state. Letting the pan win
-    // on position instead put the button back on the page at the exact key where it leaves.
-    const mine = own.find((o) => near(num(o.t, 0), t));
-    if (mine) for (const p of Object.keys(mine)) if (p !== 't') out[p] = mine[p];
-    shared.push(out);
+    shared.push(mergedSharedKey(k, own, ctx));
   }
-  // ...and any key of its own at a time the pan does not cover, WHEREVER it falls. Restricting these
-  // to times after the pan ended silently dropped the exemplar button's key at t=1.18, which sits
-  // between two shared keys and is where it peels away from the page. Keys are then sorted, because
-  // motionAt walks the track in order.
-  //
-  // These need the same completion as the fabricated ones, in the other direction: an own key that
-  // states only `rot` says nothing about x, and once it is spliced into the merged track that silence
-  // reads as x=0. The spinner's three rot keys each yanked it back to its origin and out again, the
-  // rotation was fixed and the travel still shuddered, because the two halves of the merge are the same
-  // bug seen from either end. So the pan's x/y at that instant is written in.
-  const extra = own.filter((o) => !shared.some((sh) => near(sh.t, num(o.t, 0)))).map((o) => {
-    if (!shared.length) return o;
-    const t = num(o.t, 0);
-    const filled = { ...o };
-    const pan = motionAt(shared, t);                   // holds the last shared value past the peel
-    if (o.x == null && shared.some((s) => s.x != null)) filled.x = +pan.dx.toFixed(3);
-    if (o.y == null && shared.some((s) => s.y != null)) filled.y = +pan.dy.toFixed(3);
-    return filled;
-  });
+  // Restricting extra keys to times after the pan ended silently dropped a key between two shared ones
+  // (engine-doctrine/MISTAKES.md #194); keys are then sorted, because motionAt walks the track in order.
+  const extra = own.filter((o) => !shared.some((sh) => near(sh.t, num(o.t, 0)))).map((o) => filledExtraKey(o, shared));
   return shared.concat(extra).sort((a, b) => num(a.t, 0) - num(b.t, 0));
 }
 

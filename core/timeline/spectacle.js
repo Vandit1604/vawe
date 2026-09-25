@@ -196,7 +196,7 @@ function resolveDevice(raw, at, layers, data) {
     SPECTACLE_DEVICES.pick(name);
   } catch (e) {
     throw new Error(`${e.message} Or name a mechanism this film ALREADY builds, with its kind: `
-      + `${Object.keys(OTHER_KINDS).map((k) => `"${k}:<name>"`).join(', ')}.`);
+      + `${Object.keys(OTHER_KINDS).map((k) => `"${k}:<name>"`).join(', ')}.`, { cause: e });
   }
 }
 
@@ -229,15 +229,7 @@ function quietenLayer(L) {
   }
 }
 
-/**
- * resolveSpectacle(data): mutates the scene JSON in place. No-op without a `spectacle` block.
- * Refuses rather than substitutes: an unknown device, an unknown layer id and a moment already
- * occupied by an authored sting each throw with the legal names listed.
- */
-export function resolveSpectacle(data) {
-  const sp = data && data.spectacle;
-  if (sp == null) return data;
-
+function validateSpectacleSpec(sp) {
   if (!isObj(sp))
     throw new Error(`spectacle must be an object like { "at": 6.2, "of": "logo", "device": "flash", "why": "the mark lands" }, got ${JSON.stringify(sp)}.`);
   for (const k of Object.keys(sp))
@@ -248,43 +240,59 @@ export function resolveSpectacle(data) {
   if (typeof sp.why !== 'string' || !sp.why.trim())
     throw new Error(`spectacle.why says what the moment is FOR, in one line. It is required: a peak nobody `
       + `can name is a volume setting, and this block quietens the whole rest of the film to buy it.`);
+}
 
-  // The subject. Checked against the tree, and the error LISTS what is there, an id typo is
-  // otherwise indistinguishable from a layer that was renamed three edits ago. Checked before the
-  // device so a non-shader device's own verification (which also reads `layers`) has it ready.
+// Checked against the tree, listing what is there: an id typo is otherwise indistinguishable from a
+// layer renamed three edits ago.
+function resolveSpectacleSubject(data, sp) {
   const layers = allLayers(data.layers);
   const ids = layers.map((L) => L.id).filter(Boolean);
   if (typeof sp.of !== 'string' || !ids.includes(sp.of))
     throw new Error(`spectacle.of names the layer the moment is about, and no layer has id ${JSON.stringify(sp.of)}, `
       + `this film's ids: ${ids.length ? ids.join(', ') : '(none, no layer declares an id)'}.`);
+  return layers;
+}
 
-  // The device: a shader sting (injected below) or a mechanism this film already built (verified now,
-  // never injected). `pick`/`find` have no fallback parameter, so a near-miss cannot resolve to
-  // something else, and a mechanism that is not really there throws rather than being taken on faith.
-  const resolved = resolveDevice(sp.device, sp.at, layers, data);
-
-  // ONE MOMENT, ONE OWNER. An authored sting sitting on the same instant would fire alongside the
-  // device and the peak would be two things at once, which is the exact opposite of nominating one.
-  // In place, like every other resolver here: the caller holds this array and a replacement would
-  // leave whoever captured it earlier reading the un-attenuated original.
-  const stings = Array.isArray(data.stings) ? data.stings : (data.stings = []);
+// ONE MOMENT, ONE OWNER. An authored sting on the same instant would fire alongside the device, the
+// exact opposite of nominating one peak.
+function checkSpectacleClash(stings, sp) {
   const clash = stings.find((s) => isObj(s) && fin(+s.t) && Math.abs(+s.t - sp.at) < 0.05);
   if (clash)
     throw new Error(`spectacle at ${sp.at}s collides with the sting "${clash.fx}" already declared at ${clash.t}s. `
       + `The spectacle OWNS its moment: drop that sting, or move one of the two.`);
+}
 
-  // ---- THE FLOOR: everything that competes, pulled down --------------------------------------
-  // The device's own layer (when it named one) is exempted alongside `of`: a kinetic preset or a
-  // ground layer named as the device is the peak itself, and pulling it down with everything else
-  // would quieten the one thing this block exists to protect.
+// Everything that competes, pulled down. The device's own layer is exempted alongside `of`: a kinetic
+// preset or a ground layer named as the device is the peak itself.
+function applySpectacleFloor(data, sp, resolved, layers, stings) {
   const exempt = new Set([sp.of, resolved.layerId].filter(Boolean));
   for (const s of stings) if (isObj(s)) s.intensity = attenuated(s.intensity, 1);
   for (const s of (Array.isArray(data.seams) ? data.seams : [])) if (isObj(s) && s !== resolved.seam) s.intensity = attenuated(s.intensity, 1);
   for (const L of layers) if (!exempt.has(L.id)) quietenLayer(L);
+}
 
-  // ---- THE PEAK ---------------------------------------------------------------------------------
-  // A shader: written as a sting at `at`, above everything left, exactly as this always worked.
-  // Anything else: already built, already verified above; nothing to write.
+/**
+ * resolveSpectacle(data): mutates the scene JSON in place. No-op without a `spectacle` block.
+ * Refuses rather than substitutes: an unknown device, an unknown layer id and a moment already
+ * occupied by an authored sting each throw with the legal names listed.
+ */
+export function resolveSpectacle(data) {
+  const sp = data && data.spectacle;
+  if (sp == null) return data;
+
+  validateSpectacleSpec(sp);
+  // Subject checked before the device so a non-shader device's own verification (which also reads
+  // `layers`) has it ready.
+  const layers = resolveSpectacleSubject(data, sp);
+  // `pick`/`find` have no fallback parameter, so a near-miss cannot resolve to something else.
+  const resolved = resolveDevice(sp.device, sp.at, layers, data);
+
+  const stings = Array.isArray(data.stings) ? data.stings : (data.stings = []);
+  checkSpectacleClash(stings, sp);
+  applySpectacleFloor(data, sp, resolved, layers, stings);
+
+  // A shader: written as a sting at `at`, above everything left. Anything else: already built,
+  // already verified above; nothing to write.
   if (resolved.shader) stings.push({ t: sp.at, fx: resolved.shader, dur: SPECTACLE_DUR, intensity: SPECTACLE_GAIN.peak });
   return data;
 }
