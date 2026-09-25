@@ -137,10 +137,10 @@
 }
 .pg-rail a span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pg-rail a em {
-  font: 500 10.5px/1 var(--font-mono), ui-monospace, monospace; font-style: normal;
+  font: 500 11px/1 var(--font-mono), ui-monospace, monospace; font-style: normal;
   letter-spacing: .02em; text-transform: uppercase; color: var(--muted);
 }
-.pg-rail a[aria-current] em { color: var(--accent); }
+.pg-rail a[aria-current] em { color: var(--ink-2); }
 
 /* 900, where the shared primitive itself collapses (globals.css), not a breakpoint invented for
    this page (DESIGN.md: pick a breakpoint from 640/760/900). /arsenal already proves the pattern
