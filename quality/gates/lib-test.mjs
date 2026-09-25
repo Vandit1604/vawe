@@ -8950,6 +8950,15 @@ const FLOOR = 1800;
   ok(`registry docs: every doc pointer's file/anchor/quote checks out${problems.length ? `: ${problems.join('; ')}` : ''}`, problems.length === 0);
 }
 
+// ---- layer lanes: the studio's literal copy of core/layers/kinds.js must not drift ----
+{
+  const { KIND } = await import('../../core/layers/kinds.js');
+  const src = fs.readFileSync(new URL('../../studio/ui/studio.js', import.meta.url), 'utf8');
+  const lit = /const KIND=(\{[^}]*\});/.exec(src)?.[1];
+  const studio = lit ? new Function(`return ${lit}`)() : null;
+  ok('layer lanes: studio/ui/studio.js KIND equals core/layers/kinds.js KIND', JSON.stringify(studio) === JSON.stringify(KIND));
+}
+
 console.log(`\nlib-test: ${pass} passed, ${fail} failed`);
 if (!fail && pass < FLOOR) {
   console.error(`\n✗ ${pass} assertions ran, below the floor of ${FLOOR}. Nothing FAILED, so something`);
