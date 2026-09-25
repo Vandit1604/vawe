@@ -15,7 +15,7 @@ import { hold as holdDur } from './units.js';
 // real seconds and the overlap check that already refuses two camera specs racing the same time sees a
 // declared `hold` exactly like any other move: a second camera reaching into a beat that declared
 // itself locked off is refused, not silently allowed.
-export function hold({ start = 0, dur = 0 } = {}) {
+export function hold({ start: _start = 0, dur = 0 } = {}) {
   holdDur('hold', 'dur', dur);
   return [];
 }
