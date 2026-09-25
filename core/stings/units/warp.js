@@ -9,3 +9,4 @@ export const glsl = `                             /* barrel warp, expanding refr
     float dark = smoothstep(0.16, 0.06, abs(r - edge)) * step(r, edge); /* compression darkens behind it */
     c = vec4(vec3(ring), (ring*0.8 + dark*0.35) * bell);`;
 export const blurb = 'a barrel-warped refraction shock ring expanding outward. An impact felt through the lens.';
+export const aka = ['shock ring', 'refraction warp', 'impact warp'];
