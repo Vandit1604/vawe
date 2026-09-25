@@ -39,7 +39,7 @@ export function parseColor(c) {
   let m = /^#([0-9a-f]{3,8})$/i.exec(s);
   if (m) {
     let h = m[1];
-    if (h.length === 3 || h.length === 4) h = [...h.slice(0, 3)].map((d) => d + d).join('');
+    if (h.length === 3 || h.length === 4) h = h.slice(0, 3).split('').map((d) => d + d).join('');
     else if (h.length === 8) h = h.slice(0, 6);
     if (h.length !== 6) return null; // 5 and 7 digits are a typo, not a colour
     return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
