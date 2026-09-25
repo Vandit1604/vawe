@@ -167,8 +167,8 @@ export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRI
 export const LOOK_KEYS = LOOK_KEY_REGISTRY.names;
 // The remaining four are fixed sub-object SHAPES (which keys `look.scale`/`look.layout`/`look.marks`/
 // `look.cuts`/`look.field` accept), not a vocabulary an author picks a capability from the way an
-// effect or a bg preset is picked, so they stay plain arrays (same treatment as REQUIRED.palette/type
-// above, already baselined in quality/baselines/vocabulary-baseline.json).
+// effect or a bg preset is picked, so they stay plain arrays and are waived in quality/gates/
+// arsenal-check.mjs's WAIVED map, same treatment as REQUIRED.palette/type above.
 export const LOOK_SCALE_KEYS = ['hook', 'headline', 'body', 'caption'];
 export const LOOK_LAYOUT_ANCHORS = ['left', 'center', 'right'];
 export const LOOK_MARK_KEYS = ['logo', 'endCardSize', 'headlineSize'];
