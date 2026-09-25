@@ -57,6 +57,19 @@ One sentence per beat. Name the thing moving, how it moves, where on screen, wha
 
 The formula is `element` + `motion` + `layout` + `style` + `timing` in one sentence. Vawe names every primitive you can use; search before writing anything by hand. Run `make arsenal Q="logo enter"` to find what the engine already owns.
 
+## Before you build
+
+Before the agent writes a storyboard, it checks the plan against six items. Each has a tell that names when it was skipped, useful for spotting a weak brief before it becomes a weak video.
+
+| Item | What a good plan holds | The tell it was skipped |
+|---|---|---|
+| 1. The angle | One sentence in the viewer's words: what they believe after. | It repeats the product name or lists features. |
+| 2. The one object | One thing that stays on screen and changes state across cuts. | Every beat brings an unrelated shot. |
+| 3. A real source for every claim | Screens, logos, numbers, colours from a capture, the brand site, the theme, or real data. | A hand-drawn dashboard, an invented stat, default colours. |
+| 4. The eye path | Per beat, where the eye goes first and the device that sends it there. | Two things move with equal weight, or no focus. |
+| 5. The rhythm | An energy line across the beats (build, breathe, peak); every beat carries its own motion idea; the peak (SPECTACLE) is the highest point, not the only one. | A flat line, every beat at one level, or a beat with no idea of its own. |
+| 6. Motion in plain words | Per beat the entrance, hold and exit; exits faster than entrances; neighbouring transitions change direction; holds and the background keep moving. | Bare fades everywhere, a frozen hold, a still background, same-direction transitions. |
+
 ## Specification dial
 
 How much direction you write depends on the stage and the budget. The agent reads the dial and fills the rest.

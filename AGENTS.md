@@ -2,6 +2,9 @@
 
 Canonical, tool-neutral doctrine for the vawe video engine: works the same for Claude Code, Cursor, Codex, or a human with no agent. A rule leaning on a Claude Code mechanism (a hook, the Skill tool, a vendored skill) carries a neutral by-hand note. `CLAUDE.md` only points here.
 
+Rules here keep a film readable; they never choose its design. If a rule forces a flat, generic
+choice, the rule is the bug: report it with a probe frame instead of working around it.
+
 This repo turns **one self-describing JSON → one rendered video** (60fps mp4 final, 30fps with `--draft`, `renderer/cmd/render/main.go:30`; five canvases, `core/layout/safe.js:35`: `16:9` `9:16` `1:1` `4:5` `4:3`, an unnamed ratio fit to the long edge at 1920). Exactly **one module: `scene`**, an open canvas of **24 layer types** (`ls core/layers/`) plus camera · transitions · captions; `html` is a picture.
 
 ## The repo, in seven domains  `[eye]`
@@ -25,8 +28,8 @@ This repo turns **one self-describing JSON → one rendered video** (60fps mp4 f
 | # | stage | what happens | the command |
 |---|---|---|---|
 | 1 | **brief** | ask what the product is, and the four other things a site would have given | `make quiz NAME= URL=` |
-| 2 | **plan** | the beat table, the through-line, the spectacle, the exclusions | `make ideate` → write the storyboard (`engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`) → `make storyboard-check` → `make plan-judge` |
-| 3 | **design** | the theme is settled and every frame the plan named is drawn | stage kit → `make design-spec` → the reference's grammar → the smallest useful `ui-skills` set → `make preview` → look at it |
+| 2 | **plan** | the plan as prose, the Before-you-build check, a probe render of one or two beats, then the beat table, the through-line, the spectacle, the exclusions | `make ideate` → the plan as prose → the Before-you-build check → draft the storyboard claiming 1-2 beats → `make preview` those beats as HTML fragments → finish the storyboard (`engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`) → `make storyboard-check` → `make plan-judge` |
+| 3 | **design** | every frame the plan named is drawn; design-spec, the reference's grammar and `ui-skills` refine what the probe already showed | stage kit → `make preview` the remaining frames → refine: `make design-spec` → the reference's grammar → the smallest useful `ui-skills` set → look at it |
 | 4 | **approval** | the drawn frames are shown and a person says yes | `make studio D=`, share `http://127.0.0.1:8799/studio` with the approval request, then the user runs `/vawe-approve` |
 | 5 | **assemble** | the frames become a scene | `make assemble D=` |
 | 6 | **direct** | motion, then transitions, then sound, in that order | `make critics D= DECIDERS=1` |
@@ -35,23 +38,24 @@ This repo turns **one self-describing JSON → one rendered video** (60fps mp4 f
 
 Three transitions are hook-refused rather than requested: a fragment no storyboard claims, `layers` into an unapproved film, and writing `approved:` (the user's signature only, never an agent's). `harness/live/stage-gate.mjs` denies these at write time with its own reason; the fix is the missing artefact, never a flag. `stage-say.mjs` restates the open stage each turn; `make next D=<film>` runs its step.
 
-**No templates**: compose each video from `engine-doctrine/PRIMITIVES.md`, write a scene JSON, capture the real assets it needs, then render; do not edit `scene.html` or the Go renderer unless asked. Reflecting a brand: `make sections` + `make palette` builds colours, fonts and favicon (`engine-doctrine/DESIGN-DATABASE.md`) from the site's own colours only.
+**No templates**: compose each video from `engine-doctrine/PRIMITIVES.md`, write a scene JSON, capture the real assets it needs, then render; do not edit `scene.html` or the Go renderer unless asked. "No templates" means no copied scene JSON: the storyboard shape is fixed on purpose. Reflecting a brand: `make sections` + `make palette` builds colours, fonts and favicon (`engine-doctrine/DESIGN-DATABASE.md`) from the site's own colours only.
 
 ## Skill router (stages 1, 2, 4)  `[eye]`
 
-Skills live in `skills/` as plain docs; Claude Code loads them on demand, others open the doc named in the last column. Full index: `engine-doctrine/CRAFT/README.md`; ask a question directly: `make docs Q="…"`.
+Skills live in `skills/` as plain docs; Claude Code loads them on demand, others open the doc named in the last column. Full index: `engine-doctrine/CRAFT/README.md`; ask a question directly: `make docs Q="…"`. One first stop per row: load or open the first name given; anything named after it is on demand, read only if the first stop sends you there.
 
 `make stage`/`make next` also print the one skill the open stage wants, on a line reading `skill: <name>`, generated from each skill's own `stage:` frontmatter (`harness/lib/skill-stages.mjs`) rather than a second hand-kept table.
 
 | You are about to… | Claude Code skill | Everyone: the doc |
 |---|---|---|
-| **Write any layer** (first move, every time) | **vawe-scene-authoring** | [`engine-doctrine/RULES/INDEX.md`](engine-doctrine/RULES/INDEX.md) |
+| **Write any layer** (first move, every time) | **vawe-scene-authoring**, which opens on [`engine-doctrine/RULES/INDEX.md`](engine-doctrine/RULES/INDEX.md) | [`engine-doctrine/RULES/INDEX.md`](engine-doctrine/RULES/INDEX.md) |
 | Plan a new video, or one from scratch | **vawe-video-planning** | [`AUTHORING-WALKTHROUGH.md`](engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md) |
 | **Direct** it, not just plan it: the ambition pass every type needs, not only a launch | **vawe-creative** | [`TASTE.md`](engine-doctrine/TASTE.md) |
 | Make a specific TYPE (launch, explainer, talking-head, sting, demo, recreation) | **vawe-type-`<type>`** | `engine-doctrine/CRAFT/ROUTING.md` maps a request to its type |
-| **Hand-write any HTML**, or fix "looks AI" | **taste-skill** → **impeccable** | [`HTML-FRAGMENTS.md`](engine-doctrine/CRAFT/HTML-FRAGMENTS.md) |
-| Reflect a website or a film | n/a | `make sections`/[`RECREATION.md`](engine-doctrine/CRAFT/RECREATION.md); `make study`/[`REFERENCE-STUDY.md`](engine-doctrine/CRAFT/REFERENCE-STUDY.md) |
-| Direction, captions, sound, theme defaults | n/a | [`DIRECTION.md`](engine-doctrine/CRAFT/DIRECTION.md) · [`CAPTIONS.md`](engine-doctrine/CRAFT/CAPTIONS.md) · [`THEME-LOOK.md`](engine-doctrine/CRAFT/THEME-LOOK.md) |
+| **Hand-write any HTML**, or fix "looks AI" | **taste-skill** (on demand from there: **impeccable**) | [`HTML-FRAGMENTS.md`](engine-doctrine/CRAFT/HTML-FRAGMENTS.md) |
+| Reflect a website | n/a | `make sections`/[`RECREATION.md`](engine-doctrine/CRAFT/RECREATION.md) |
+| Reflect a film | n/a | `make study`/[`REFERENCE-STUDY.md`](engine-doctrine/CRAFT/REFERENCE-STUDY.md) |
+| Direction, captions, sound, theme defaults | n/a | [`DIRECTION.md`](engine-doctrine/CRAFT/DIRECTION.md) (on demand: [`CAPTIONS.md`](engine-doctrine/CRAFT/CAPTIONS.md) · [`THEME-LOOK.md`](engine-doctrine/CRAFT/THEME-LOOK.md)) |
 
 **Gates, one command:** `make author-check D=<file>` (validate · beats · backdrop-turn · assets · inspect · plan-vs-render always on; style gates report only, `TASTE=1` blocks: `engine-doctrine/TASTE.md`). Then `make probe` → `audit` → `beats` → `ledger` → **`make judge`** (the gate that sees, required post-render, `engine-doctrine/JUDGE.md`).
 

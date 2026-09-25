@@ -43,24 +43,22 @@ NEXT video is faster and on-brand. (See `engine-doctrine/TASTE.md` → per-brand
 > `make author-check` ladder and the `make judge` step). Read it alongside this step; the four things
 > below are its Step 1.
 
-Steps 1–2 assume a brand site to study. When there is none (a topic video, a from-scratch idea, an
-effects piece), the failure mode is exact and predictable: you invent everything and default to
-generic: centred, effect-soup, no through-line. A site silently hands you FOUR things at once, and
-without one you must MANUFACTURE all four before a single layer is authored. This is a hard gate: if
-the lock sheet is missing any of the four, the plan is not locked.
+Steps 1–2 assume a brand site to study. With none (a topic video, a from-scratch idea, an effects
+piece), the failure is exact: invent everything, default to generic centred effect-soup with no
+through-line. A site hands you FOUR things at once; without one, MANUFACTURE all four before a single
+layer is authored. Hard gate: a lock sheet missing any of the four is not locked.
 
 1. **A taste anchor. ASK FOR IT FIRST** (theme source, R1 of
-   [`engine-doctrine/CRAFT/CONTENT.md`](../../engine-doctrine/CRAFT/CONTENT.md)): a brand site gives the
-   theme for free; a prompt with no site gives nothing, and the silent failure is plain grey. `make
-   quiz` asks "Theme source" exactly when no URL is known; read CONTENT.md's R1 for what "you choose"
-   requires (invent, never default to plain). Do NOT invent a palette and motion feel unasked.
-   - Beyond CONTENT.md's theme rule, this skill also needs a reference **`profile`**: pick ONE from
-     [`SELECTION.md`](../../engine-doctrine/CRAFT/SELECTION.md) Part 2 (`linear` · `apple` · `stripe` ·
-     `nike` · `a24` · `bloomberg` · `duolingo` · `vercel`) for the topic's register, and set the scene's
-     `profile` field to it: it fixes face role, pace, easing, cut family, sting/look policy, accent and
-     bounce coherently.
-   - For exact colour, `vawe_reflect` a named real site (e.g. "feels like Linear" → reflect
-     linear.app), then apply the profile's motion policy on top. A named target beats an adjective.
+   [`engine-doctrine/CRAFT/CONTENT.md`](../../engine-doctrine/CRAFT/CONTENT.md)): a site gives the theme
+   free; a no-site prompt gives nothing, and the silent failure is plain grey. `make quiz` asks "Theme
+   source" when no URL is known; read CONTENT.md's R1 for what "you choose" requires. Do NOT invent a
+   palette or motion feel unasked.
+   - Also pick a reference **`profile`**: ONE from [`SELECTION.md`](../../engine-doctrine/CRAFT/SELECTION.md)
+     Part 2 (`linear` · `apple` · `stripe` · `nike` · `a24` · `bloomberg` · `duolingo` · `vercel`) for the
+     topic's register; set the scene's `profile` field to it, fixing face role, pace, easing, cut family,
+     sting/look policy, accent and bounce together.
+   - For exact colour, `vawe_reflect` a named real site ("feels like Linear" → reflect linear.app), then
+     apply the profile's motion on top. A named target beats an adjective.
 
 2. **Real assets.** A video of bare rects and text reads as a placeholder. Before authoring, gather
    real material: `vawe_logo` for any named product/company mark, `vawe_photo` for a CC0 subject the
@@ -104,26 +102,19 @@ make quiz-apply ANSWERS=<file.json> NAME=<brand>    # → a STORYBOARD.md that p
 make quiz-look SB=<the storyboard> N=3             # → the directions DRAWN, pick one from pictures
 ```
 
-`make quiz` **refuses to run genericly** (exit 2) when a URL is known and `make sections` has not been
-run: Step 1's rule, as an exit code rather than a paragraph. Its options are built from the site's own
-headings and from the engine's registries, so it cannot offer something the engine cannot do.
+`make quiz` **refuses to run genericly** (exit 2) when a URL is known and `make sections` has not run.
+Its options are built from the site's own headings and the engine's registries, so it cannot offer
+something the engine cannot do.
 
-Three things it does that the bullets did not:
-
-- **Placement is ONE question.** Platform, orientation and duration together, because splitting them is
+- **Placement is ONE question**: platform, orientation and duration together, since splitting them is
   how a 60s vertical happens.
 - **It asks the negative, bounded by category.** "What would make you say that is not us" returns a
-  decision; "what do you hate" returns nothing. Anti-references narrow faster than aspirations, which
-  all collapse onto the same premium-calm answer.
+  decision; "what do you hate" returns nothing.
 - **It asks what holds the film** when the cut is under 15s. `storyboard-check` hard-ERRORS without
-  `threads:`, and that decision was in none of the five bullets. The one thing no site study can guess.
+  `threads:`, the one thing no site study can guess.
 
-**It never asks about motion or effects.** Of 23 published studio briefs, not one asks a client to
-describe motion in the abstract; it is elicited as clips, as a per-shot field, or against a rough cut.
-`make quiz-look` is that: two or three directions rendered as panels, and the question is which picture.
-
-Tone is still not asked. It is derived from the brand's own site (Step 2), and a volunteered tone
-overrides.
+**It never asks about motion or effects.** `make quiz-look` renders two or three directions as panels;
+the question is which picture. Tone is not asked either, it is derived from the site (Step 2).
 
 **If the script is unavailable**, the five questions it replaced are: goal · platform+orientation ·
 duration · what real material exists (never invent a number) · the exact CTA.
@@ -133,10 +124,9 @@ anchor, Step 0.5) is not built yet: storyboard it by hand.
 
 ## Step 2: Derive the design language FROM the site (no canned styles)
 
-There is no style menu, and NO auto-heuristic. The brand's own site is the art direction; the taste
-is in the actual pixels. **Load [`engine-doctrine/CRAFT/TYPOGRAPHY.md`](../../engine-doctrine/CRAFT/TYPOGRAPHY.md) +
-[`COLOR.md`](../../engine-doctrine/CRAFT/COLOR.md) before authoring the theme** (how to choose a face / build the
-palette to the contract keys). Do the study, literally:
+No style menu, no auto-heuristic: the brand's own site is the art direction, the taste is in the
+pixels. **Load [`engine-doctrine/CRAFT/TYPOGRAPHY.md`](../../engine-doctrine/CRAFT/TYPOGRAPHY.md) +
+[`COLOR.md`](../../engine-doctrine/CRAFT/COLOR.md) before authoring the theme.** Do the study:
 
 ```bash
 make brandspec URL=…                                    # READ the CSS: real faces + WEIGHTS, tokens, colours+contrast
@@ -145,18 +135,18 @@ make lookbook URL=… NAME=…                              # full-page + viewpo
 make palette IMG=assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero → dominance (LIGHT/DARK)
 ```
 
-**`make brandspec` is the source of truth for TYPE + declared COLOURS, read it, don't guess.** It gives the
-1-3 real faces mapped to primary/secondary/accent, **the weights actually used** (author the headline at the
-MEASURED weight, never a default 800), and the site's `--color-*` tokens (accurate where eyedrop reads a
-photo: a site's declared accent is the hex in its CSS, not the nearest colour in its hero image). Use `make palette` for DOMINANCE only.
-Author the font system per [`engine-doctrine/CRAFT/TYPOGRAPHY.md`](../../engine-doctrine/CRAFT/TYPOGRAPHY.md) §0b (1-3 roles) and
+**`make brandspec` is the source of truth for TYPE + declared COLOURS, read it, don't guess.** It gives
+the 1-3 real faces mapped to primary/secondary/accent, **the weights actually used** (author the headline
+at the MEASURED weight, never a default 800), and the site's `--color-*` tokens (a site's declared accent
+is the hex in its CSS, not the nearest colour in its hero image). Use `make palette` for DOMINANCE only.
+Author the font system per [`TYPOGRAPHY.md`](../../engine-doctrine/CRAFT/TYPOGRAPHY.md) §0b (1-3 roles) and
 validate every colour pair's contrast per [`COLOR.md`](../../engine-doctrine/CRAFT/COLOR.md) before locking.
 
 **DOMINANCE IS DECIDED BY LOOKING, NEVER BY A FIELD.** `make palette` reports LIGHT/DARK from the hero's
-real luminance + the dominant hexes; then READ the hero screenshot yourself and confirm. A white site
-gets a white-first video. (This is non-negotiable: a mislabeled dominance is how the worst videos happen.)
-Author `themes/<brand>.json` by hand from the eyedropped hexes, bg = the site's dominant, accent = its
-vivid colour, text = its body colour. No "colours pack" is generated for you; you author it from pixels.
+real luminance; then READ the screenshot yourself and confirm. A white site gets a white-first video
+(non-negotiable: a mislabeled dominance is how the worst videos happen). Author `themes/<brand>.json` by
+hand from the eyedropped hexes: bg = the site's dominant, accent = its vivid colour, text = its body
+colour. No "colours pack" is generated for you.
 
 Read the lookbook/section images and answer, in words, in your reply:
 - **Typography**: serif/sans/mono mix? weight extremes? tight or airy tracking?
@@ -166,41 +156,51 @@ Read the lookbook/section images and answer, in words, in your reply:
   grain, whatever the site does that nothing else does, the VIDEO should do too.
 - **Motion character**: does the site itself animate? snappy or calm?
 
-Every video decision must trace to one of those observations ("film-burn sting because the
-brand is warm analog orange", "whip cuts because the site is dense and fast"). If a choice
-can't be justified by the site, don't make it. Two brands end up different because their
-sites ARE different, not because a hash picked a different preset.
+Every decision must trace to one of those observations ("film-burn sting because the brand is warm
+analog orange"). If a choice can't be justified by the site, don't make it. Two brands end up different
+because their sites ARE different, not because a hash picked a different preset.
 
-**The extremes rule.** The study must surface **2–3 details that would be WRONG for any other
-brand** (ThreadCite: logos inline in headlines, gray-ink fear section, rank chips). "Bold sans,
-whitespace-first" describes half of SaaS, if the homepage yields nothing brand-unique, WIDEN
-the study (product screens, docs, changelog, the founder's X) until it does. Generic evidence
-in, generic video out.
+**The extremes rule.** The study must surface **2–3 details that would be WRONG for any other brand**
+(ThreadCite: logos inline in headlines, gray-ink fear section, rank chips). "Bold sans, whitespace-first"
+describes half of SaaS; if the homepage yields nothing brand-unique, WIDEN the study (product screens,
+docs, changelog, the founder's X) until it does.
 
-**Set the brand's motion personality.** Write `motion` into `themes/<name>.json` from the study:
-`{easing, bounce, settle, enter, durationScale, stagger}`, so the same primitives physically
-move differently per brand (punchy: short settle/tight stagger; calm: long settle/no bounce).
-Leaving motion at defaults is shared DNA across brands; don't.
+**Set the motion personality.** Write `motion` into `themes/<name>.json` from the study: `{easing,
+bounce, settle, enter, durationScale, stagger}`, so the same primitives move differently per brand
+(punchy: short settle/tight stagger; calm: long settle/no bounce). Leaving motion at defaults is shared
+DNA across brands; don't.
 
-**Write `look` into the theme too** (`engine-doctrine/CRAFT/THEME-LOOK.md`): the bg preset rotation, the
-type scale, the layout anchor/margin, the mark's two sizes, the cut family, the audio cues. This
-is the same study, spent a second time: a theme with `motion` but no `look` still forces every
-FILM for that brand to re-decide its own backdrop and cut family from scratch. Read `look` when you
-write the storyboard from the type spine; `make arsenal THEME=<name>` renders it as a picture so you
-can check it before authoring the film.
+**Write `look` into the theme too** (`engine-doctrine/CRAFT/THEME-LOOK.md`): bg preset rotation, type
+scale, layout anchor/margin, the mark's two sizes, cut family, audio cues. A theme with `motion` but no
+`look` still forces every film for that brand to re-decide its backdrop from scratch. `make arsenal
+THEME=<name>` renders it as a picture to check before authoring the film.
 
-**Name 2–3 references** that fit THIS brand ("Vercel keynote restraint", "Sandwich Video
-warmth") and state what the design borrows and what it refuses. Different reference triangle,
-different output: this breaks the author's own habits.
+**Name 2–3 references** that fit THIS brand ("Vercel keynote restraint", "Sandwich Video warmth") and
+state what the design borrows and refuses. A different reference triangle breaks the author's habits.
+
+## Before you build
+
+Six checks before the storyboard, each with the tell that names when it was skipped:
+
+| Item | What a good plan holds | The tell it was skipped |
+|---|---|---|
+| 1. The angle | One sentence in the viewer's words: what they believe after. | It repeats the product name or lists features. |
+| 2. The one object | One thing that stays on screen and changes state across cuts. | Every beat brings an unrelated shot. |
+| 3. A real source for every claim | Screens, logos, numbers, colours from a capture, the brand site, the theme, or real data. | A hand-drawn dashboard, an invented stat, default colours. |
+| 4. The eye path | Per beat, where the eye goes first and the device that sends it there. | Two things move with equal weight, or no focus. |
+| 5. The rhythm | An energy line across the beats (build, breathe, peak); every beat carries its own motion idea; the peak (SPECTACLE) is the highest point, not the only one. | A flat line, every beat at one level, or a beat with no idea of its own. |
+| 6. Motion in plain words | Per beat the entrance, hold and exit ([`VOCABULARY.md`](../../engine-doctrine/CRAFT/VOCABULARY.md)); exits faster than entrances; neighbouring transitions change direction; holds and the background keep moving. | Bare fades everywhere, a frozen hold, a still background, same-direction transitions. |
 
 ## Step 3: Storyboard on paper before JSON
 
 **No generator writes this for you.** Write the plan as prose first (what happens, beat by beat, in
-your own words), then a short checklist of the fields below, then the storyboard itself:
-`films/scene/<name>.storyboard.md`, from `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`'s frontmatter
-and per-beat fields. No scene JSON exists yet, the storyboard is the plan; `make assemble` writes
-`layers` only after approval (Step 4). `SPECTACLE` and `NOT` (AGENTS.md stage 1): a value the human
-already gave stays verbatim, you fill either only when the human left it unsaid.
+your own words), and check it against the table above. Then probe it before finishing: draft the
+storyboard far enough to claim one or two beats, `make preview` those as HTML fragments, and look. Only
+then write the rest of the storyboard: `films/scene/<name>.storyboard.md`, from
+`engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`'s frontmatter and per-beat fields. No scene JSON exists
+yet, the storyboard is the plan; `make assemble` writes `layers` only after approval (Step 4).
+`SPECTACLE` and `NOT` (AGENTS.md stage 1): a value the human already gave stays verbatim, you fill
+either only when the human left it unsaid.
 
 > **Film under ~15 seconds? Load [`vawe-continuous-action`](../vawe-continuous-action/SKILL.md)
 > instead of the beat table below.** A short film is ONE continuous action, not a sequence of
@@ -226,28 +226,22 @@ then fill brand content.
 
 ## Step 3b: Choreography rules (anti-monotony)
 
-**Read `engine-doctrine/MOTION-CRAFT.md` before storyboarding.** It is the stored rulebook: the 10
-rules (timing as a voice, ease-out in / accelerate out, hierarchy through offset, one hero motion per
-beat, layout-archetype rotation, and more), each with its enforcement map, genre pacing tables,
-DO/DON'T pairs and the effect-selection guide. Do not re-derive those rules here; the storyboard must
-still name each beat's layout archetype, so `motion-audit`/`direct` can check the rotation.
+**Read `engine-doctrine/MOTION-CRAFT.md` before storyboarding.** The stored rulebook: 10 rules (timing
+as a voice, ease-out in / accelerate out, hierarchy through offset, one hero motion per beat,
+layout-archetype rotation, more), each with its enforcement map, pacing tables and DO/DON'T pairs. Name
+each beat's layout archetype so `motion-audit`/`direct` can check the rotation.
 
 - **Choose every CUT by meaning, not habit** (`engine-doctrine/CRAFT/TRANSITIONS.md`). Name the
   RELATIONSHIP between the two beats (continuity · time · contrast · same-object · new act) and the
-  FEELING across it, then pick the transition that serves both. **A seam serving neither is a hard cut.**
-  - Most seams are invisible (hard/soft cut, overlapped); earn 2-3 accents by meaning: whip =
-    energy into a payoff, iris/sdfIris = focus, fade = act break, smash = contrast.
-  - Reserve the boldest cut for the hero/payoff; keep ONE cut family per film. The LOCK SHEET's
-    per-beat row names each cut's *relationship + transition + why*.
-- **Icons with names**: whenever a company/product/tool is named, show its mark (simple-icons)
-  or a Lucide UI icon (`assets/icons/ui/`, MIT, stroke color baked); text-only lists of
-  named things are a missed layer of craft.
-- **Background = the site's real surface, used sparingly**: the bg texture must EXIST on the real
-  site. A plain/flat site gets a plain field (`plain`/`paper`/`accentPlain`), never invented
-  dots/shapes; a patterned preset (`accent`/`dotmatrix`/`aurora`/`mesh`/`constellation`/`paperShapes`)
-  needs that texture on the site itself.
-  - Even then, a pattern is a SEASONING on one or two beats, never the wallpaper. Recurring mistakes
-    live in `engine-doctrine/MISTAKES.md`; ask `make arsenal MISTAKES=1 Q="…"` before authoring.
+  FEELING across it. **A seam serving neither is a hard cut.**
+  - Most seams are invisible; earn 2-3 accents by meaning: whip = energy into a payoff, iris/sdfIris =
+    focus, fade = act break, smash = contrast. Reserve the boldest cut for the hero/payoff, ONE cut
+    family per film. The LOCK SHEET's per-beat row names each cut's *relationship + transition + why*.
+- **Icons with names**: whenever a company/product/tool is named, show its mark (simple-icons) or a
+  Lucide UI icon (`assets/icons/ui/`); text-only lists of named things miss a layer of craft.
+- **Background = the site's real surface, used sparingly**: the bg texture must EXIST on the real site.
+  A plain/flat site gets a plain field, never invented dots/shapes; a pattern is a SEASONING on one or
+  two beats, never the wallpaper. Ask `make arsenal MISTAKES=1 Q="…"` before authoring.
 
 ## Step 3b.1: Every frame FIGHTS for its value (the value gate)
 
@@ -315,13 +309,11 @@ This step runs the `check` → `ship` → `judge` → `ledger` phases of the one
 `author-check`, `video`, `beats`, `reveal` and `ledger` below are the STEPS those phases run, not a
 separate ladder.
 
-`make validate` → `make video` → `make motion --data <file>` → `make audit M=<fmt>` (text AND
-image contrast) → **`make beats D=<file> VS=<brand>`** (FIDELITY GATE, stacks each beat beside its
-source section; if the video doesn't read as the SAME brand as the site, it fails: wrong dominance,
-off colours, untasteful imagery all show here. This is mandatory and is exactly the check that catches
-a white site rendered dark) → **`make ledger D=<file>`** (cross-video sameness vs every shipped design,
-SAME fails; fix by changing ≥2 of cut family / beat structure / layout archetype) → eyeball
-hook / payoff / CTA frames. Fix data, re-render. Never ship unverified.
+`make validate` → `make video` → `make motion --data <file>` → `make audit M=<fmt>` (text AND image
+contrast) → **`make beats D=<file> VS=<brand>`** (FIDELITY GATE, stacks each beat beside its source
+section; wrong dominance, off colours, untasteful imagery all show here, mandatory) → **`make ledger
+D=<file>`** (cross-video sameness vs every shipped design, SAME fails; fix by changing ≥2 of cut family /
+beat structure / layout archetype) → eyeball hook / payoff / CTA frames. Fix data, re-render.
 
 **Final taste check (the gate that SEES):** on the near-final cut, `make judge D=<file> VS=<brand>` →
 read `/tmp/judge/sheet.png` against `/tmp/judge/rubric.md` and score every frame (readability ·

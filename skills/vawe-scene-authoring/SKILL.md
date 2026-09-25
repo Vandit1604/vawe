@@ -13,7 +13,7 @@ Go renderer.** You write data JSON (most common) or the shared `films/scene/scen
 
 ## Rules, loaded before you write a layer
 
-Read [`engine-doctrine/RULES/INDEX.md`](../../engine-doctrine/RULES/INDEX.md) first: the contract every scene obeys
+This skill's own first stop is [`engine-doctrine/RULES/INDEX.md`](../../engine-doctrine/RULES/INDEX.md), read it now: the contract every scene obeys
 (deterministic, seek-safe, offsets not absolutes, state the canvas, one cut family, the backdrop
 turns, something continuous crosses every cut). Then load only the rule files the beat you are
 writing needs, from the table there: one numeric rule per file, a right-JSON recipe and a wrong-JSON
