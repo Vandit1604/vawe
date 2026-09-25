@@ -5453,6 +5453,7 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
   //               honest question for one answers the other, so asking is asserting a preference. The
   //               same reason the top-three rule exists.
   const PLAIN = [
+    ["make the reveal snappier", "faster"],
     ["a transition that shows time passing", "time"],
     ["should the film have sound", "sound.default-not-silence"],
     ["a terminal window", "terminal"],
