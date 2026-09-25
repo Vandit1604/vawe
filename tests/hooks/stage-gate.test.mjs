@@ -15,9 +15,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, '../..');
 const HOOK = join(here, '../../harness/live', 'stage-gate.mjs');
 
+const FILMS_DIR = 'tests/fixtures/films';
+
 function run(rel, content = '') {
   const r = spawnSync('node', [HOOK], { encoding: 'utf8',
-    input: JSON.stringify({ tool_input: { file_path: path.join(ROOT, rel), content } }) });
+    input: JSON.stringify({ tool_input: { file_path: path.join(ROOT, rel), content } }),
+    env: { ...process.env, VAWE_FILMS_DIR: FILMS_DIR } });
   assert.equal(r.status, 0, 'the hook always exits 0; it answers with JSON, it does not throw');
   if (!r.stdout.trim()) return { denied: false, reason: '' };
   const d = JSON.parse(r.stdout).hookSpecificOutput;
@@ -26,17 +29,16 @@ function run(rel, content = '') {
 
 // THE FIXTURE IS BUILT, NOT BORROWED. These cases need a film whose plan passes and which nobody has
 // signed, and that is a state a real film LEAVES the moment the user approves it: leaning on
-// vawe-oblique broke all three the day it was signed. So the fixture is written here, under
-// films/scene/ because the hook resolves a film's owner among the real films in that directory, and
-// removed again afterwards.
-const SB = 'films/scene/stage-gate-fixture.storyboard.md';
-const FILM = 'films/scene/stage-gate-fixture.json';
-const FRAG = 'films/scene/_stage-gate-fixture.hook.html';
+// vawe-oblique broke all three the day it was signed. So the fixture is written under
+// tests/fixtures/films/ (VAWE_FILMS_DIR points the hook there for this run) and removed again afterwards.
+const SB = `${FILMS_DIR}/stage-gate-fixture.storyboard.md`;
+const FILM = `${FILMS_DIR}/stage-gate-fixture.json`;
+const FRAG = `${FILMS_DIR}/_stage-gate-fixture.hook.html`;
 // A second fragment on the SAME fixture film, named with the other convention (film-part, dash) so
 // the naming-convention test does not have to borrow a real film off the roster: `hinge`, the fixture's
 // old borrowed dash-convention example, never had a tracked storyboard, so it denied on `no-storyboard`
 // the moment it stopped existing on the machine that wrote the test.
-const FRAG2 = 'films/scene/_stage-gate-fixture-alt.html';
+const FRAG2 = `${FILMS_DIR}/_stage-gate-fixture-alt.html`;
 const abs = (rel) => path.join(ROOT, rel);
 const FIXTURES = [SB, FILM, FRAG, FRAG2];
 
@@ -49,11 +51,11 @@ before(() => {
     '---',
     '',
     '## 1. hook (0.0-2.0)',
-    '- fragment: films/scene/_stage-gate-fixture.hook.html',
+    `- fragment: ${FRAG}`,
     '- onscreen: "one line"',
     '',
     '## 2. build (2.0-4.0)',
-    '- fragment: films/scene/_stage-gate-fixture-alt.html',
+    `- fragment: ${FRAG2}`,
     '- onscreen: "another line"',
     '',
   ].join('\n'));
@@ -87,7 +89,7 @@ test('layers may not be written into an unapproved film', () => {
 });
 
 test('a fragment no storyboard claims is denied, and one with a plan behind it is not', () => {
-  assert.ok(run('films/scene/_nothing-claims-this.hook.html', '<div></div>').denied);
+  assert.ok(run(`${FILMS_DIR}/_nothing-claims-this.hook.html`, '<div></div>').denied);
   assert.equal(run(FRAG, '<div></div>').denied, false);
 });
 

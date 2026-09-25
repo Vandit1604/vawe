@@ -1,17 +1,23 @@
 // harness/live/stage-say.test.mjs: the rule-brief lines this hook appends after the stage line, against
-// a real fixture film placed in films/scene/ (the only directory stage-say.mjs scans, by design: see
-// its own header comment on why state is never redirected to a param). Cleaned up in `after`.
+// a fixture film under tests/fixtures/films/ (VAWE_FILMS_DIR points both stage-say.mjs and stageOf() at
+// it for this run, so it never shares state with a real film or another test's fixture). Cleaned up in
+// `after`.
+// Set before stage.mjs (and the census.mjs it imports) resolves its SCENE_DIR at module load, so the
+// in-process stageOf() call below and every subprocess spawned here agree on the same fixture directory.
+process.env.VAWE_FILMS_DIR = 'tests/fixtures/films';
+
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { stageOf } from '../../quality/gates/stage.mjs';
+const { stageOf } = await import('../../quality/gates/stage.mjs');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const FILMS_DIR = process.env.VAWE_FILMS_DIR;
 const NAME = 'craft-rules-stage-say-fixture';
-const base = path.join(ROOT, 'films/scene', NAME);
+const base = path.join(ROOT, FILMS_DIR, NAME);
 const film = `${base}.json`;
 const sb = `${base}.storyboard.md`;
 
@@ -42,7 +48,7 @@ approved: "ci-fixture"
 - object_in: bottom-left@120x40
 - object_out: bottom-right@120x40
 - motion: [data-part="headline"]@slide-left:energy
-- fragment: films/scene/craft-rules-stage-say-fixture.hook.html
+- fragment: ${FILMS_DIR}/craft-rules-stage-say-fixture.hook.html
 - onscreen: "the strong first line"
 - mechanism: static headline
 - becomes: the bare stage becomes a question

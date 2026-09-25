@@ -45,9 +45,18 @@ console.log('arsenal.test.mjs: OK (caret/typing queries surface all typed-caret 
 // is in the corpus.
 {
   const { execFileSync } = await import('node:child_process');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
   const repoRoot = new URL('../..', import.meta.url).pathname;
+  // `--for` only needs a parseable scene to walk, so a throwaway minimal one stands in for a real film.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'arsenal-for-test-'));
+  const film = path.join(dir, 'v.json');
+  fs.writeFileSync(film, JSON.stringify({ module: 'scene', theme: 'default', aspect: '16:9', duration: 3,
+    layers: [{ type: 'text', text: 'x', size: 80, start: 0, duration: 3 }] }));
   execFileSync(process.execPath, ['harness/author/arsenal.mjs', 'caret'], { cwd: repoRoot, stdio: 'pipe' });
-  execFileSync(process.execPath, ['harness/author/arsenal.mjs', '--for', 'films/scene/sample.json'],
+  execFileSync(process.execPath, ['harness/author/arsenal.mjs', '--for', film],
     { cwd: repoRoot, stdio: 'pipe' });
+  fs.rmSync(dir, { recursive: true, force: true });
   console.log('arsenal.test.mjs: OK (CLI query and --for both exit 0, no deadlock)');
 }

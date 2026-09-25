@@ -22,6 +22,8 @@ import path from 'node:path';
 import { stageOf, filePaths, ROOT } from '../../quality/gates/stage.mjs';
 import { appendRun } from '../lib/runlog.mjs';
 
+const FILMS_DIR = process.env.VAWE_FILMS_DIR || 'films/scene';
+
 // A DENY leaves no other trace: stdout carries the reason back to the model and nothing else sees it.
 // So every deny is also logged to the run log, under the film the write was ATTEMPTED against (even
 // one that has no plan yet: `stemOf` derives a key from the filename alone, same as the "no storyboard
@@ -46,7 +48,7 @@ const stemOf = (rel) => path.basename(rel).replace(/^_/, '')
   .replace(/\.(storyboard\.md|kit\.css|json|html|css)$/, '');
 function filmOf(rel) {
   const stem = stemOf(rel);
-  const dir = path.join(ROOT, 'films/scene');
+  const dir = path.join(ROOT, FILMS_DIR);
   const films = new Set();
   for (const f of (fs.existsSync(dir) ? fs.readdirSync(dir) : [])) {
     if (f.endsWith('.storyboard.md')) films.add(f.slice(0, -'.storyboard.md'.length).replace(/^_/, ''));
@@ -77,7 +79,7 @@ process.stdin.on('end', () => {
   }
   if (!file) allow();
   const rel = path.relative(ROOT, file);
-  if (rel.startsWith('..') || !rel.startsWith('films/scene/')) allow();
+  if (rel.startsWith('..') || !rel.startsWith(FILMS_DIR + '/')) allow();
 
   // 1. APPROVAL IS A HUMAN ACT. An agent that can write its own sign-off has no gate at all, only a
   //    habit. The user's /vawe-approve writes this line; nothing else may.
@@ -118,7 +120,7 @@ process.stdin.on('end', () => {
 
   // 3. NO FILM BEFORE THE PLAN IS SIGNED. Writing layers is building; building before approval is the
   //    contract this repo states in two places and kept losing.
-  if (rel === `films/scene/${film}.json` && !st.approved) {
+  if (rel === `${FILMS_DIR}/${film}.json` && !st.approved) {
     let layers = 0;
     // `_scaffold: true` marks `make scaffold`'s own single placeholder layer (harness/author/
     // scaffold.mjs), written only so films/scene/schema.json's `minItems: 1` on `layers` passes before
