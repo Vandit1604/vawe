@@ -1,40 +1,12 @@
 {
   "name": "mercury",
   "note": "Mercury-inspired: near-black graphite canvas, strictly monochrome ivory-on-onyx with a single cobalt accent (#5266eb) used sparingly, intermediate type weight (never bold), flat borderless graphite cards. Darkness is the message. Motion: calm, restrained, zero bounce.",
-  "palette": {
-    "bg": "#0d0d11",
-    "bg2": "#131319",
-    "surface": "#1a1a22",
-    "surface2": "#131319",
-    "line": "rgba(255,255,255,0.07)",
-    "lineStrong": "rgba(255,255,255,0.13)",
-    "text": "#ece9e2",
-    "text2": "#a8a8b0",
-    "dim": "#6a6a72",
-    "accent": "#5266eb",
-    "accentDim": "rgba(82,102,235,0.16)",
-    "accentGlow": "rgba(82,102,235,0.40)",
-    "up": "#5266eb",
-    "down": "#5266eb",
-    "ink": "#16161d"
-  },
-  "gradient": [
-    "#141420",
-    "#0e0e14",
-    "#08080c"
-  ],
-  "type": {
-    "sans": "Geist",
-    "mono": "Geist Mono",
-    "num": "Geist Mono",
-    "serif": "Geist"
-  },
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0,
     "settle": 0.4,
     "enter": 24,
-    "durationScale": 1.0,
+    "durationScale": 1,
     "stagger": 0.05
   },
   "bg": {
@@ -90,5 +62,127 @@
     "--on-dark": "#ece9e2",
     "--border": "#232330",
     "--accent-soft": "rgba(82,102,235,0.16)"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#0d0d11"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#131319"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#1a1a22"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#131319"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.07)"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.13)"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#ece9e2"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#a8a8b0"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#6a6a72"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#5266eb"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(82,102,235,0.16)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(82,102,235,0.40)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#5266eb"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#5266eb"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#16161d"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Geist"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Geist"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#141420"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#0e0e14"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#08080c"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

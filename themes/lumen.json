@@ -1,34 +1,6 @@
 {
   "name": "lumen",
   "note": "Remixed from the \"glass\" preset onto brand base #0b1424 / accent #5ee0c8 by scripts/brand/theme-remix.mjs. Glass / depth: a cool dark ground, an ice-blue accent, frosted surfaces over a living gradient. Premium and modern, pairs with the glassCard / borderBeamCard blocks and an aurora bg.",
-  "palette": {
-    "bg": "#0b1424",
-    "bg2": "#17202f",
-    "surface": "#151d2d",
-    "surface2": "#1f2736",
-    "line": "#2d3543",
-    "lineStrong": "#464c59",
-    "text": "#eef6f4",
-    "text2": "#a5aeb1",
-    "dim": "#717a82",
-    "ink": "#eef6f4",
-    "accent": "#5ee0c8",
-    "accentDim": "rgba(94,224,200,0.1)",
-    "accentGlow": "rgba(94,224,200,0.3)",
-    "up": "#4fb584",
-    "down": "#e0655c"
-  },
-  "gradient": [
-    "#0b1424",
-    "#0e1c2b",
-    "#1a2231"
-  ],
-  "type": {
-    "sans": "Geist",
-    "serif": "Geist",
-    "mono": "JetBrains Mono",
-    "num": "JetBrains Mono"
-  },
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0.06,
@@ -81,5 +53,127 @@
       "#070d17"
     ]
   },
-  "bgDefault": "spotlight"
+  "bgDefault": "spotlight",
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#0b1424"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#17202f"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#151d2d"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#1f2736"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#2d3543"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#464c59"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#eef6f4"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#a5aeb1"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#717a82"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#eef6f4"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#5ee0c8"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(94,224,200,0.1)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(94,224,200,0.3)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#4fb584"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#e0655c"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Geist"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Geist"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#0b1424"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#0e1c2b"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#1a2231"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "ink": "{color.ink}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
+  }
 }

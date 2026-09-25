@@ -1,33 +1,6 @@
 {
   "name": "ledgerline-neon",
   "note": "Design read: a freelancer at 11pm with the room lights off, reconciling a month of transactions in a terminal because the bank's own UI is useless. The screen is the only light source in the room. That decides everything: the ground is near-black, and every mark on it is EMITTED rather than printed, so type carries a bloom instead of a shadow and a selected line is marked by luminance instead of by a box. Palette reaches past two reflexes: terminal-means-green-phosphor is the first, terminal-but-not-green-means-amber-CRT is the second. Neither. Acid lime is the parsed and filed state, ember is the raw and the amount owed, which keeps the semantic the paper cut of this film already used and only changes the physics. JetBrains Mono carries every figure and every raw CSV character because the film is about a monospace file becoming readable. Bricolage Grotesque carries the spoken lines. No gradient mesh: a terminal does not have weather.",
-  "palette": {
-    "bg": "#06080a",
-    "bg2": "#0b1013",
-    "surface": "#0d1418",
-    "surface2": "#111a1f",
-    "line": "rgba(184,255,60,0.14)",
-    "lineStrong": "rgba(184,255,60,0.30)",
-    "text": "#e6f2ec",
-    "text2": "#8ba296",
-    "dim": "#5f7268",
-    "ink": "#e6f2ec",
-    "accent": "#b8ff3c",
-    "accentDim": "rgba(184,255,60,0.13)",
-    "accentGlow": "rgba(184,255,60,0.40)",
-    "up": "#b8ff3c",
-    "down": "#ff6a3d",
-    "raw": "#ff6a3d",
-    "limeDim": "#7fae2a"
-  },
-  "gradient": ["#0b1013", "#06080a", "#040607"],
-  "type": {
-    "sans": "Bricolage Grotesque",
-    "num": "JetBrains Mono",
-    "mono": "JetBrains Mono",
-    "serif": "Instrument Serif",
-    "optical": true
-  },
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0.04,
@@ -41,16 +14,43 @@
     "tint": "95,114,104",
     "tint2": "184,255,60",
     "dotLight": "184,255,60",
-    "paperBase": ["#0b1013", "#040607"],
-    "softBase": ["#0d1418", "#06080a"],
-    "accentBase": ["#7fae2a", "#3d5a12"],
-    "inkBase": ["#06080a", "#040607"],
+    "paperBase": [
+      "#0b1013",
+      "#040607"
+    ],
+    "softBase": [
+      "#0d1418",
+      "#06080a"
+    ],
+    "accentBase": [
+      "#7fae2a",
+      "#3d5a12"
+    ],
+    "inkBase": [
+      "#06080a",
+      "#040607"
+    ],
     "border": "rgba(184,255,60,0.20)",
-    "dark": ["#0b1013", "#040607"],
-    "darkMesh": ["#0d1a14", "#040607"],
-    "deep": ["#080c0e", "#030405"],
-    "light": ["#0d1418", "#06080a"],
-    "ink": ["#06080a", "#040607"],
+    "dark": [
+      "#0b1013",
+      "#040607"
+    ],
+    "darkMesh": [
+      "#0d1a14",
+      "#040607"
+    ],
+    "deep": [
+      "#080c0e",
+      "#030405"
+    ],
+    "light": [
+      "#0d1418",
+      "#06080a"
+    ],
+    "ink": [
+      "#06080a",
+      "#040607"
+    ],
     "paper": "#06080a"
   },
   "vars": {
@@ -69,5 +69,138 @@
   "bgDefault": {
     "preset": "deep",
     "value": "dark"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#06080a"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#0b1013"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#0d1418"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#111a1f"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "rgba(184,255,60,0.14)"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "rgba(184,255,60,0.30)"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#e6f2ec"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#8ba296"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#5f7268"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#e6f2ec"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#b8ff3c"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(184,255,60,0.13)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(184,255,60,0.40)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#b8ff3c"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#ff6a3d"
+      },
+      "raw": {
+        "$type": "color",
+        "$value": "#ff6a3d"
+      },
+      "limeDim": {
+        "$type": "color",
+        "$value": "#7fae2a"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Bricolage Grotesque"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Instrument Serif"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#0b1013"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#06080a"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#040607"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "ink": "{color.ink}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "raw": "{color.raw}",
+    "limeDim": "{color.limeDim}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "font.optical": true,
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

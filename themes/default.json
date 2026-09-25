@@ -1,34 +1,6 @@
 {
   "name": "default",
   "note": "THE DEFAULT LOOK, and it is deliberately the vawe brand: white-first with one cobalt accent, mirroring the real site (site/app/globals.css). `default` is the name every author reaches for by habit, so it must not be a palette that belongs to nobody - it used to hold mono+lime, which is why films kept shipping in a colour no site of ours uses. The neutral starting point for a fork or a new brand kit now lives in themes/neutral.json. This file MIRRORS themes/vawe.json and lib-test fails if the two palettes drift apart.",
-  "palette": {
-    "bg": "#ffffff",
-    "bg2": "#f6f8fb",
-    "surface": "#ffffff",
-    "surface2": "#f6f8fb",
-    "line": "#e7eaf0",
-    "lineStrong": "#d7dce4",
-    "text": "#0f1620",
-    "text2": "#454f5e",
-    "dim": "#697182",
-    "accent": "#2563eb",
-    "accentDim": "rgba(37,99,235,0.10)",
-    "accentGlow": "rgba(37,99,235,0.30)",
-    "up": "#2f7d55",
-    "down": "#a3282d",
-    "ink": "#0f1620"
-  },
-  "gradient": [
-    "#ffffff",
-    "#f8fafc",
-    "#f1f4f9"
-  ],
-  "type": {
-    "sans": "Anybody",
-    "serif": "Anybody",
-    "mono": "JetBrains Mono",
-    "num": "JetBrains Mono"
-  },
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0.08,
@@ -95,5 +67,127 @@
   },
   "bgDefault": {
     "preset": "plain"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#f6f8fb"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#f6f8fb"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#e7eaf0"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#d7dce4"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#0f1620"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#454f5e"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#697182"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#2563eb"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(37,99,235,0.10)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(37,99,235,0.30)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#2f7d55"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#a3282d"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#0f1620"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Anybody"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Anybody"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#f8fafc"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#f1f4f9"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

@@ -1,34 +1,6 @@
 {
   "name": "brew",
   "note": "EYEDROPPED from the Brew launch film (twitter.mp4) July 2026, WARM-LIGHT-first: cream/white type cards (#fbf2e4) with a vivid orange accent (#ff742e, from the send button; deep #f1642e), warm near-black text, and pure-black punch beats. Brand beats sit on a radial orange glow. Bold Hanken Grotesk headlines, Geist Mono for {{code}}. Motion: punchy, measured hero entrance is a ~0.33s easeOutBack (pop) scale-in (make measure).",
-  "palette": {
-    "bg": "#fbf2e4",
-    "bg2": "#f7e9d6",
-    "surface": "#fffdf9",
-    "surface2": "#f7ecdd",
-    "line": "rgba(28,22,19,0.10)",
-    "lineStrong": "rgba(28,22,19,0.16)",
-    "text": "#1c1613",
-    "text2": "#6b5f57",
-    "dim": "#8a7d72",
-    "accent": "#ff742e",
-    "accentDim": "rgba(255,116,46,0.14)",
-    "accentGlow": "rgba(255,116,46,0.42)",
-    "up": "#1a9e57",
-    "down": "#e5484d",
-    "ink": "#1c1613"
-  },
-  "gradient": [
-    "#fdf6ec",
-    "#fbeede",
-    "#f7e2cf"
-  ],
-  "type": {
-    "sans": "Hanken Grotesk",
-    "mono": "Geist Mono",
-    "num": "Hanken Grotesk",
-    "serif": "Hanken Grotesk"
-  },
   "motion": {
     "easing": "easeOutBack",
     "bounce": 0.14,
@@ -93,9 +65,139 @@
     "--accent-soft": "rgba(255,116,46,0.14)"
   },
   "bgDefault": [
-    { "preset": "paper" },
-    { "preset": "dark" },
-    { "preset": "paper" },
-    { "preset": "accent" }
-  ]
+    {
+      "preset": "paper"
+    },
+    {
+      "preset": "dark"
+    },
+    {
+      "preset": "paper"
+    },
+    {
+      "preset": "accent"
+    }
+  ],
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#fbf2e4"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#f7e9d6"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#fffdf9"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#f7ecdd"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "rgba(28,22,19,0.10)"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "rgba(28,22,19,0.16)"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#1c1613"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#6b5f57"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#8a7d72"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#ff742e"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(255,116,46,0.14)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(255,116,46,0.42)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#1a9e57"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#e5484d"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#1c1613"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Hanken Grotesk"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Hanken Grotesk"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Hanken Grotesk"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#fdf6ec"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#fbeede"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#f7e2cf"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
+  }
 }

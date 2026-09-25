@@ -1,34 +1,6 @@
 {
   "name": "emberyear",
   "note": "INVENTED (not selected) by harness/author/invent-look.mjs from films/scene/_concepts/gh-wrapped.storyboard.md, seed 17, candidate 1 of 6. Stance \"ignition\": the year starts cold and catches fire, so the one warm colour IS the event. Ground is burnt ember (#170c0b), not neutral black: a year of work banked rather than a void. Texture is halation, the accent bleeds a little light into the ground and nothing else glows. Display face is a STENCIL, whose letters are interrupted by gaps, which is the subject said in type. The tool's own generated story line is preserved verbatim under `invented` and names the candidate's seed word, not this film.",
-  "palette": {
-    "bg": "#170c0b",
-    "bg2": "#1f1412",
-    "surface": "#241917",
-    "surface2": "#2c211f",
-    "line": "rgba(115,101,99,0.1)",
-    "lineStrong": "rgba(115,101,99,0.22)",
-    "text": "#f6ecea",
-    "text2": "#afa4a3",
-    "dim": "#7b716f",
-    "ink": "#f6ecea",
-    "accent": "#fb7940",
-    "accentDim": "rgba(251,121,64,0.16)",
-    "accentGlow": "rgba(251,121,64,0.45)",
-    "up": "#fb7940",
-    "down": "#cc3e66"
-  },
-  "gradient": [
-    "#170c0b",
-    "#25130e",
-    "#0d0706"
-  ],
-  "type": {
-    "sans": "Finlandica Text",
-    "serif": "Big Shoulders Stencil",
-    "mono": "Datatype",
-    "num": "Datatype"
-  },
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0.1,
@@ -160,5 +132,127 @@
       "min": 16
     },
     "generated": "2026-08-20"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#170c0b"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#1f1412"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#241917"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#2c211f"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "rgba(115,101,99,0.1)"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "rgba(115,101,99,0.22)"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#f6ecea"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#afa4a3"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#7b716f"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#f6ecea"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#fb7940"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(251,121,64,0.16)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(251,121,64,0.45)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#fb7940"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#cc3e66"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Finlandica Text"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Big Shoulders Stencil"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Datatype"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Datatype"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#170c0b"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#25130e"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#0d0706"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "ink": "{color.ink}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

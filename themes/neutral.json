@@ -1,40 +1,6 @@
 {
   "name": "neutral",
   "note": "The NEUTRAL reference palette (mono + lime). Not anybody's brand - it exists so a fork, or a new brand kit, has a complete theme to copy that carries no house colours. `default` is the vawe brand; copy THIS one when you want a blank slate. engine-doctrine/MISTAKES.md #366.",
-  "palette": {
-    "bg": "#0a0a0c",
-    "bg2": "#0d0e11",
-    "surface": "#16181d",
-    "surface2": "#101216",
-    "line": "rgba(244, 245, 242, 0.07)",
-    "lineStrong": "rgba(244, 245, 242, 0.12)",
-    "text": "#f4f5f2",
-    "text2": "#b9bcc2",
-    "dim": "#6e7178",
-    "up": "#3fd07a",
-    "up2": "#6ff0a4",
-    "down": "#ff5a6e",
-    "accent": "#c2f23b",
-    "accentDim": "rgba(194, 242, 59, 0.16)",
-    "accentGlow": "rgba(194, 242, 59, 0.4)",
-    "accent2": "#4de3ff",
-    "grid": "rgba(194, 242, 59, 0.2)",
-    "grid2": "rgba(77, 227, 255, 0.26)",
-    "glass": "rgba(21, 22, 26, 0.6)",
-    "highlight": "rgba(244, 245, 242, 0.6)",
-    "ink": "#191917"
-  },
-  "gradient": [
-    "#0d0e11",
-    "#0b0c0e",
-    "#0a0a0c"
-  ],
-  "type": {
-    "sans": "Inter",
-    "num": "Space Grotesk",
-    "serif": "Instrument Serif",
-    "mono": "Geist Mono"
-  },
   "motion": {
     "easing": "easeOutCubic",
     "bounce": 0.3,
@@ -42,5 +8,157 @@
     "enter": 48,
     "durationScale": 1,
     "stagger": 0.06
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#0a0a0c"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#0d0e11"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#16181d"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#101216"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "rgba(244, 245, 242, 0.07)"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "rgba(244, 245, 242, 0.12)"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#f4f5f2"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#b9bcc2"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#6e7178"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#3fd07a"
+      },
+      "up2": {
+        "$type": "color",
+        "$value": "#6ff0a4"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#ff5a6e"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#c2f23b"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(194, 242, 59, 0.16)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(194, 242, 59, 0.4)"
+      },
+      "accent2": {
+        "$type": "color",
+        "$value": "#4de3ff"
+      },
+      "grid": {
+        "$type": "color",
+        "$value": "rgba(194, 242, 59, 0.2)"
+      },
+      "grid2": {
+        "$type": "color",
+        "$value": "rgba(77, 227, 255, 0.26)"
+      },
+      "glass": {
+        "$type": "color",
+        "$value": "rgba(21, 22, 26, 0.6)"
+      },
+      "highlight": {
+        "$type": "color",
+        "$value": "rgba(244, 245, 242, 0.6)"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#191917"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Inter"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Instrument Serif"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Space Grotesk"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#0d0e11"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#0b0c0e"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#0a0a0c"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "up": "{color.up}",
+    "up2": "{color.up2}",
+    "down": "{color.down}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "accent2": "{color.accent2}",
+    "grid": "{color.grid}",
+    "grid2": "{color.grid2}",
+    "glass": "{color.glass}",
+    "highlight": "{color.highlight}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

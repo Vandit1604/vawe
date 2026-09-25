@@ -1,30 +1,6 @@
 {
   "name": "vawe-paper",
   "note": "Vawe launch film, paper register: 90% paper-white typographic stage, ONE terracotta accent used only as thin marks (left-edge bar, ticks, underlines), white hairline cards (no shadows, elevation = 1px line), Geist / Geist Mono. Motion is punchy but never overshoots (bounce 0, ease-out only, faster than the preface base).",
-  "palette": {
-    "bg": "#FCFCFC",
-    "bg2": "#F7F7F5",
-    "surface": "#FFFFFF",
-    "surface2": "#F7F7F5",
-    "line": "#E8E8E5",
-    "lineStrong": "#D6D6D2",
-    "text": "#0A0A0A",
-    "text2": "#5C5C58",
-    "dim": "#9A9A94",
-    "ink": "#0A0A0A",
-    "accent": "#C96442",
-    "accentDim": "rgba(201,100,66,0.12)",
-    "accentGlow": "rgba(201,100,66,0.30)",
-    "up": "#1A7F4B",
-    "down": "#C0362C"
-  },
-  "gradient": ["#FCFCFC", "#F7F7F5", "#F1F1EF"],
-  "type": {
-    "sans": "Geist",
-    "mono": "Geist Mono",
-    "num": "Geist Mono",
-    "serif": "Geist"
-  },
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0,
@@ -38,16 +14,43 @@
     "tint": "154,154,148",
     "tint2": "154,154,148",
     "dotLight": "170,170,164",
-    "paperBase": ["#FCFCFC", "#F1F1EF"],
-    "softBase": ["#F7F7F5", "#F1F1EF"],
-    "accentBase": ["#C96442", "#B4532F"],
-    "inkBase": ["#0F0F0E", "#050504"],
+    "paperBase": [
+      "#FCFCFC",
+      "#F1F1EF"
+    ],
+    "softBase": [
+      "#F7F7F5",
+      "#F1F1EF"
+    ],
+    "accentBase": [
+      "#C96442",
+      "#B4532F"
+    ],
+    "inkBase": [
+      "#0F0F0E",
+      "#050504"
+    ],
     "border": "#E8E8E5",
-    "dark": ["#0F0F0E", "#050504"],
-    "darkMesh": ["#14110F", "#050504"],
-    "deep": ["#0F0F0E", "#050504"],
-    "light": ["#FCFCFC", "#F1F1EF"],
-    "ink": ["#0F0F0E", "#050504"],
+    "dark": [
+      "#0F0F0E",
+      "#050504"
+    ],
+    "darkMesh": [
+      "#14110F",
+      "#050504"
+    ],
+    "deep": [
+      "#0F0F0E",
+      "#050504"
+    ],
+    "light": [
+      "#FCFCFC",
+      "#F1F1EF"
+    ],
+    "ink": [
+      "#0F0F0E",
+      "#050504"
+    ],
     "paper": "#FCFCFC"
   },
   "vars": {
@@ -60,5 +63,129 @@
     "--border": "#E8E8E5",
     "--accent-soft": "rgba(201,100,66,0.12)"
   },
-  "bgDefault": { "preset": "paper" }
+  "bgDefault": {
+    "preset": "paper"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#FCFCFC"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#F7F7F5"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#F7F7F5"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#E8E8E5"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#D6D6D2"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#0A0A0A"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#5C5C58"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#9A9A94"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#0A0A0A"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#C96442"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(201,100,66,0.12)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(201,100,66,0.30)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#1A7F4B"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#C0362C"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Geist"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Geist"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#FCFCFC"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#F7F7F5"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#F1F1EF"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "ink": "{color.ink}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
+  }
 }

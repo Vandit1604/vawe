@@ -1,30 +1,6 @@
 {
   "name": "plinth-auto",
-  "note": "Colours pack auto-extracted from https://plinthai.xyz by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Palette completed to the theme contract from values already in this pack (vars.--border/--muted/--accent-soft, bg.inkBase, bg.paperBase) \u2014 nothing invented. No serif on the brand, so serif maps to the sans explicitly.",
-  "palette": {
-    "bg": "#ffffff",
-    "text": "#181815",
-    "accent": "#1f3bff",
-    "accent2": "#6e6e68",
-    "bg2": "#f4f4f1",
-    "surface": "#ffffff",
-    "surface2": "#f4f4f1",
-    "line": "#e6e6e1",
-    "lineStrong": "#6e6e68",
-    "text2": "#343431",
-    "dim": "#6e6e68",
-    "ink": "#181815",
-    "accentDim": "#ebedff",
-    "accentGlow": "rgba(31,59,255,0.28)",
-    "up": "#1f3bff",
-    "down": "#6e6e68"
-  },
-  "type": {
-    "sans": "Inter",
-    "mono": "Geist Mono",
-    "serif": "Inter",
-    "num": "Inter"
-  },
+  "note": "Colours pack auto-extracted from https://plinthai.xyz by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Palette completed to the theme contract from values already in this pack (vars.--border/--muted/--accent-soft, bg.inkBase, bg.paperBase) — nothing invented. No serif on the brand, so serif maps to the sans explicitly.",
   "bg": {
     "accent": "31,59,255",
     "tint": "110,110,104",
@@ -79,9 +55,131 @@
     "--border": "#e6e6e1",
     "--accent-soft": "#ebedff"
   },
-  "gradient": [
-    "#ffffff",
-    "#f4f4f1",
-    "#ebedff"
-  ]
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#181815"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#1f3bff"
+      },
+      "accent2": {
+        "$type": "color",
+        "$value": "#6e6e68"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#f4f4f1"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#f4f4f1"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#e6e6e1"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#6e6e68"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#343431"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#6e6e68"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#181815"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "#ebedff"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(31,59,255,0.28)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#1f3bff"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#6e6e68"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Inter"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Inter"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Inter"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#f4f4f1"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#ebedff"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "text": "{color.text}",
+    "accent": "{color.accent}",
+    "accent2": "{color.accent2}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "ink": "{color.ink}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
+  }
 }

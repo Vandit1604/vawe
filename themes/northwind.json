@@ -1,34 +1,6 @@
 {
   "name": "northwind",
   "note": "Fictional B2B platform business for a competitive bakeoff. Dark indigo, one blue accent.",
-  "palette": {
-    "bg": "#0a0b10",
-    "bg2": "#0d0f16",
-    "surface": "#14161f",
-    "surface2": "#0f111a",
-    "line": "rgba(255,255,255,0.08)",
-    "lineStrong": "rgba(255,255,255,0.14)",
-    "text": "#f4f6fb",
-    "text2": "#b6bccb",
-    "dim": "#8b93a7",
-    "ink": "#14161f",
-    "accent": "#6d8bff",
-    "accentDim": "rgba(109,139,255,0.16)",
-    "accentGlow": "rgba(109,139,255,0.4)",
-    "up": "#2fb37a",
-    "down": "#e8543f"
-  },
-  "gradient": [
-    "#0d0f16",
-    "#0b0c12",
-    "#0a0b10"
-  ],
-  "type": {
-    "sans": "Inter",
-    "num": "Inter",
-    "serif": "Inter",
-    "mono": "JetBrains Mono"
-  },
   "motion": {
     "easing": "easeOutCubic",
     "bounce": 0.4,
@@ -38,5 +10,127 @@
     "stagger": 0.06,
     "exitRatio": 0.45,
     "_exitRatio": "a fast technical product tour. Asymmetric timing: an entrance is an introduction, an exit is over (engine-doctrine/CRAFT/MOTION-STANDARDS.md)."
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#0a0b10"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#0d0f16"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#14161f"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#0f111a"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.08)"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.14)"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#f4f6fb"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#b6bccb"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#8b93a7"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#14161f"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#6d8bff"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(109,139,255,0.16)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(109,139,255,0.4)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#2fb37a"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#e8543f"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Inter"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Inter"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Inter"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#0d0f16"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#0b0c12"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#0a0b10"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "ink": "{color.ink}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }

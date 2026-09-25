@@ -1,40 +1,6 @@
 {
   "name": "argus",
-  "note": "argushq.cc \u2014 'grow on X, on purpose'. White-first, cobalt accent (the pixel-eye mascot + primary CTA), Archivo light-display + JetBrains Mono. Near-monochrome; cobalt is the only colour.",
-  "palette": {
-    "bg": "#ffffff",
-    "bg2": "#f7f9ff",
-    "surface": "#f7f9ff",
-    "surface2": "#eef1f7",
-    "line": "#e4e7ef",
-    "lineStrong": "#c9cddb",
-    "text": "#16181d",
-    "text2": "#565a63",
-    "dim": "#6a6f78",
-    "ink": "#0a0b0e",
-    "accent": "#4772f5",
-    "accentDim": "#7995f1",
-    "accentGlow": "rgba(71,114,245,0.30)",
-    "accent2": "#8da7f9",
-    "up": "#1a9e57",
-    "down": "#e5484d",
-    "grid": "#eef1f7",
-    "grid2": "#e4e7ef",
-    "glass": "rgba(255,255,255,0.7)",
-    "highlight": "#4772f5",
-    "card": "#ffffff"
-  },
-  "gradient": [
-    "#ffffff",
-    "#f7f9ff",
-    "#eaf0ff"
-  ],
-  "type": {
-    "sans": "Archivo",
-    "serif": "Archivo",
-    "mono": "JetBrains Mono",
-    "num": "JetBrains Mono"
-  },
+  "note": "argushq.cc — 'grow on X, on purpose'. White-first, cobalt accent (the pixel-eye mascot + primary CTA), Archivo light-display + JetBrains Mono. Near-monochrome; cobalt is the only colour.",
   "motion": {
     "easing": "easeOutExpo",
     "bounce": 0.08,
@@ -92,5 +58,157 @@
   "bgDefault": {
     "preset": "plain",
     "value": "light"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#f7f9ff"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#f7f9ff"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#eef1f7"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#e4e7ef"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#c9cddb"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#16181d"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#565a63"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#6a6f78"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#0a0b0e"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#4772f5"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "#7995f1"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(71,114,245,0.30)"
+      },
+      "accent2": {
+        "$type": "color",
+        "$value": "#8da7f9"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#1a9e57"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#e5484d"
+      },
+      "grid": {
+        "$type": "color",
+        "$value": "#eef1f7"
+      },
+      "grid2": {
+        "$type": "color",
+        "$value": "#e4e7ef"
+      },
+      "glass": {
+        "$type": "color",
+        "$value": "rgba(255,255,255,0.7)"
+      },
+      "highlight": {
+        "$type": "color",
+        "$value": "#4772f5"
+      },
+      "card": {
+        "$type": "color",
+        "$value": "#ffffff"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Archivo"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Archivo"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#f7f9ff"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#eaf0ff"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "ink": "{color.ink}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "accent2": "{color.accent2}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "grid": "{color.grid}",
+    "grid2": "{color.grid2}",
+    "glass": "{color.glass}",
+    "highlight": "{color.highlight}",
+    "card": "{color.card}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
   }
 }
