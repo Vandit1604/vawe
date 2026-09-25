@@ -64,8 +64,20 @@ export const RELATIONSHIP_KEYS = Object.keys(RELATIONSHIPS);
 // a capability an author picks from (`transition_why: <relationship> · <feeling> · <invisible|expressive>`),
 // so it publishes its own section, usage form and no-preview reason from one edit, the same as any other
 // vocabulary. The blurb is each relationship's own `meaning` plus the candidates it resolves to.
+const RELATIONSHIP_AKA = {
+  continuity: ['no transition', 'one continuous thought', 'invisible cut'],
+  'same-object': ['shared element', 'morph between states', 'the same thing changing'],
+  'same-action': ['match on action', 'cut on a movement', 'carry the motion through'],
+  rhyme: ['visual rhyme', 'these two things are the same', 'compositional echo'],
+  time: ['passage of time', 'dissolve between images', 'time passing'],
+  'act-break': ['beginning or ending', 'open or close the film', 'section break'],
+  contrast: ['shock cut', 'jolt', 'wake from a dream'],
+  'new-place-energy': ['meanwhile cut', 'location change', 'energetic scene change'],
+  'spatial-travel': ['walk the space', 'camera travels the world', 'one continuous place'],
+};
+
 export const RELATIONSHIP_REGISTRY = defineRegistry('transition relationship', RELATIONSHIPS, {
-  slot: 'transition_why',
+  slot: 'transition_why', aka: RELATIONSHIP_AKA,
   blurbs: Object.fromEntries(RELATIONSHIP_KEYS.map((k) => [k, `${RELATIONSHIPS[k].meaning} Candidates: ${RELATIONSHIPS[k].candidates.join(', ')}.`])),
   catalog: {
     title: 'Transition relationships',
