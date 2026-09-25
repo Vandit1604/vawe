@@ -1,7 +1,17 @@
-// scripts/site/vocab-catalog.mjs: regenerate engine-doctrine/CRAFT/VOCABULARY.md from core/vocab.js.
+// scripts/site/vocab-catalog.mjs: regenerate engine-doctrine/CRAFT/VOCABULARY.md from core/vocab.js,
+// and engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md, the word-action listing for every primitive in
+// every `defineRegistry` registry (quality/gates/word-action.mjs is the ratchet that grades this; this
+// is the doc a person reads instead of the JSON).
 //
-//   node scripts/site/vocab-catalog.mjs            write the doc
-//   node scripts/site/vocab-catalog.mjs --check    fail if the doc is stale (make vocab-check)
+//   node scripts/site/vocab-catalog.mjs            write both docs
+//   node scripts/site/vocab-catalog.mjs --check    fail if either doc is stale (make vocab-check)
+//
+// A SEPARATE FILE, NOT A FOURTH SECTION ON VOCABULARY.md. VOCABULARY.md is 3 hand-curated families and
+// ~30 words, each with a written-by-a-person "when" column; the registries hold 700+ entries across 60
+// families with no hand prose at all. Appending those to VOCABULARY.md would drown the curated doc in
+// generated rows and change what "read VOCABULARY.md" means for the reader who wants the short list.
+// One generator, two outputs, is the same shape scripts/site/effects-catalog.mjs already uses for
+// engine-doctrine/EFFECTS.md and site/lib/effects.json: one source of truth, sized differently per reader.
 //
 // Same contract as scripts/site/effects-catalog.mjs: the NAMES and the VALUES come from the registry,
 // so the doc cannot claim a word the engine does not resolve or hide one it does. Only the one-line
@@ -139,11 +149,82 @@ out.push(`_${total} words across ${FAMILIES.length} families. Regenerate: \`make
 out.push('vocabularies these alias: `engine-doctrine/EFFECTS.md` (`make effects`)._');
 
 const md = out.join('\n') + '\n';
-const dest = path.join(root, 'engine-doctrine/CRAFT/VOCABULARY.md');
-if (CHECK) {
-  const cur = fs.existsSync(dest) ? fs.readFileSync(dest, 'utf8') : '';
-  if (cur.trim() !== md.trim()) { console.error('✗ engine-doctrine/CRAFT/VOCABULARY.md is stale, run `make vocab`.'); process.exit(1); }
-  console.log('✓ engine-doctrine/CRAFT/VOCABULARY.md is in sync with core/vocab.js'); process.exit(0);
+
+// writeOrCheck: same contract for both generated docs, so a stale file fails the same way whichever
+// generator produced it. Returns false on a stale --check, never exits, so both docs get checked
+// (and the exit status reflects both) instead of the first stale file hiding the second.
+let ok = true;
+function writeOrCheck(dest, content, label) {
+  if (CHECK) {
+    const cur = fs.existsSync(dest) ? fs.readFileSync(dest, 'utf8') : '';
+    if (cur.trim() !== content.trim()) { console.error(`✗ ${dest} is stale, run \`make vocab\`.`); ok = false; }
+    else console.log(`✓ ${dest} is in sync with ${label}`);
+    return;
+  }
+  fs.writeFileSync(dest, content);
+  console.log(`✓ wrote ${dest}`);
 }
-fs.writeFileSync(dest, md);
-console.log(`✓ wrote engine-doctrine/CRAFT/VOCABULARY.md: ${total} words across ${FAMILIES.length} families`);
+
+writeOrCheck(path.join(root, 'engine-doctrine/CRAFT/VOCABULARY.md'), md, 'core/registry/vocab.js');
+
+// ---- PRIMITIVES-VOCABULARY.md: every entry of every defineRegistry registry, its `aka` words and its
+// `blurb` action, grouped by registry. The doc quality/gates/word-action.mjs's ratchet is checking
+// against, and the thing a fill agent reads to see which registry to work and what "done" looks like.
+const { registries } = await import(path.join(root, 'core/registry/registry.js'));
+const coreFiles = [];
+(function walk(d) {
+  for (const e of fs.readdirSync(path.join(root, d), { withFileTypes: true })) {
+    const p = `${d}/${e.name}`;
+    if (e.isDirectory()) walk(p);
+    else if ((e.name.endsWith('.js') || e.name.endsWith('.mjs')) && !/\.test\.m?js$/.test(e.name)) coreFiles.push(p);
+  }
+}('core'));
+for (const file of coreFiles) { try { await import(path.join(root, file)); } catch { /* browser-only, same exclusion arsenal-check.mjs makes */ } }
+
+const REGS = registries().slice().sort((a, z) => a.kind.localeCompare(z.kind));
+const hasWords = (reg, name) => Array.isArray(reg.aka && reg.aka[name]) && reg.aka[name].length >= 2;
+const hasAction = (reg, name) => {
+  const b = (reg.blurbs && reg.blurbs[name]) || '';
+  return /\d/.test(b) || b.trim().split(/\s+/).filter(Boolean).length >= 10;
+};
+
+const pout = [];
+pout.push('---');
+pout.push('when: "you want to see every primitive the engine has, the plain words that find it, and the sentence that says what it does"');
+pout.push('answers: "the full word-action listing every defineRegistry registry carries, grouped by registry, graded the same way make word-action grades it"');
+pout.push('group: reference');
+pout.push('---');
+pout.push('');
+pout.push('# PRIMITIVES VOCABULARY: every registry entry, its words, its action');
+pout.push('');
+pout.push('> GENERATED by `scripts/site/vocab-catalog.mjs` (`make vocab`) from `registries()` in `core/registry/registry.js`. Do not edit.');
+pout.push('');
+pout.push('Every row is one primitive from one `defineRegistry` call. **words** are its `aka` (never printed');
+pout.push('elsewhere, folded into search only); **action** is its `blurb`. A row with either column blank');
+pout.push('fails `make word-action`: `words` needs 2+ phrases, `action` needs a stated number or a full');
+pout.push('sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact contract.');
+pout.push('');
+let ptotal = 0, pmeeting = 0;
+for (const reg of REGS) {
+  const names = Object.keys(reg.entries);
+  ptotal += names.length;
+  pout.push(`## ${reg.kind}  \`[${reg.slot}]\``);
+  pout.push('');
+  pout.push('| name | words | action |');
+  pout.push('|---|---|---|');
+  for (const name of names.slice().sort()) {
+    const words = (reg.aka && reg.aka[name] || []).join(', ');
+    const action = (reg.blurbs && reg.blurbs[name]) || '';
+    if (hasWords(reg, name) && hasAction(reg, name)) pmeeting++;
+    pout.push(`| \`${name}\` | ${words || '_missing_'} | ${action || '_missing_'} |`);
+  }
+  pout.push('');
+}
+pout.push('---');
+pout.push(`_${ptotal} primitives across ${REGS.length} registries, ${pmeeting} meeting the word-action contract today.`);
+pout.push('Regenerate: `make vocab`. Ratchet: `make word-action`._');
+
+writeOrCheck(path.join(root, 'engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md'), `${pout.join('\n')}\n`, 'registries()');
+
+if (CHECK) process.exit(ok ? 0 : 1);
+console.log(`✓ ${total} words across ${FAMILIES.length} families, ${ptotal} primitives across ${REGS.length} registries`);

@@ -50,6 +50,11 @@ const GENERATORS = [
   // (see scripts/site/site-pages.mjs). So the list is generated here and committed, and this gate is
   // what stops it drifting the day someone adds or renames a docs page.
   ['site pages', ['scripts/site/site-pages.mjs'], ['site/lib/site-pages.json']],
+  // The plain-word aliases (feel/duration/camera) and the full per-registry word-action listing, both
+  // read off core/registry/vocab.js and registries() so neither doc can claim a word the engine does
+  // not resolve. quality/gates/word-action.mjs is the ratchet PRIMITIVES-VOCABULARY.md's numbers feed.
+  ['vocabulary catalogue', ['scripts/site/vocab-catalog.mjs'],
+    ['engine-doctrine/CRAFT/VOCABULARY.md', 'engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md']],
   // Three pages claimed three different MCP tool counts on the same day (six, ten, four) against a
   // server registering eleven. site/CLAUDE.md's law is that site numbers are never typed; this is how
   // that one stops being typed.
