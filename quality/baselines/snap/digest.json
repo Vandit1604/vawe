@@ -1,33 +1,5 @@
 {
  "scenes": {
-  "ab-control-shotcode": {
-   "sig": "e54056920b50f6a6",
-   "font": "f3817797e998"
-  },
-  "ab-skill-shotcode": {
-   "sig": "984227fa6e3f8362",
-   "font": "f3817797e998"
-  },
-  "ab2-control-tenor": {
-   "sig": "de08be710223a647",
-   "font": "f3817797e998"
-  },
-  "ab2-skill-tenor": {
-   "sig": "b89dc2f0416e9166",
-   "font": "f3817797e998"
-  },
-  "ab3-nogate-tenor": {
-   "sig": "d521b3f52589565b",
-   "font": "f3817797e998"
-  },
-  "ab4-a-ledgerline": {
-   "sig": "dbc792e24d563b82",
-   "font": "f3817797e998"
-  },
-  "ab4-b-ledgerline": {
-   "sig": "a896287889aa51db",
-   "font": "f3817797e998"
-  },
   "app-showcase": {
    "sig": "ee31637d2771c636",
    "font": "db51b5ddc8c7"
@@ -116,10 +88,6 @@
    "sig": "44c2317c1044e4d0",
    "font": "db51b5ddc8c7"
   },
-  "gh-wrapped": {
-   "sig": "060c6e6727e979f5",
-   "font": "db51b5ddc8c7"
-  },
   "glass": {
    "sig": "08f7c325e88bf600",
    "font": "db51b5ddc8c7"
@@ -175,14 +143,6 @@
   "looks-reel": {
    "sig": "3a46387c21bbe24e",
    "font": "db51b5ddc8c7"
-  },
-  "motion-reel": {
-   "sig": "3ad01ce5ec6718f8",
-   "font": "f3817797e998"
-  },
-  "motion-reel-v2": {
-   "sig": "34793d7d74767d24",
-   "font": "f3817797e998"
   },
   "motion-showcase": {
    "sig": "0e91381f0b195c0b",
@@ -248,10 +208,6 @@
    "sig": "87a923b02740cd90",
    "font": "db51b5ddc8c7"
   },
-  "post-ledgerline": {
-   "sig": "0e8be3faf83c13de",
-   "font": "f3817797e998"
-  },
   "post-postmark": {
    "sig": "b9d74c9f48448c85",
    "font": "db51b5ddc8c7"
@@ -288,25 +244,9 @@
    "sig": "f22f07b121b80188",
    "font": "db51b5ddc8c7"
   },
-  "ransom-intro": {
-   "sig": "f1899337c9cfe632",
-   "font": "f3817797e998"
-  },
   "react-demo": {
    "sig": "a222ac1bf3fffae3",
    "font": "db51b5ddc8c7"
-  },
-  "rec1-nogate": {
-   "sig": "6edf372ccbeadb31",
-   "font": "f3817797e998"
-  },
-  "rec2-gates": {
-   "sig": "e8fce25bb959fbce",
-   "font": "f3817797e998"
-  },
-  "rec3-skill": {
-   "sig": "4b2366a4ba371aa5",
-   "font": "f3817797e998"
   },
   "refstudy": {
    "sig": "8848dc389f9578e0",
@@ -446,10 +386,6 @@
   },
   "typing-catalog": {
    "sig": "3d76bf8a934ae37a",
-   "font": "db51b5ddc8c7"
-  },
-  "vawe-explainer": {
-   "sig": "732ae90f477e2d65",
    "font": "db51b5ddc8c7"
   },
   "vawe-explainer-v2": {
