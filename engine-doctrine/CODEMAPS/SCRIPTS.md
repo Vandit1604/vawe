@@ -371,10 +371,8 @@ SPEAK WHILE YOU WORK. Claude Code hooks: they fire on a save or a prompt and eit
 
 | file | lines | make | what it says it does |
 |---|---|---|---|
-| `craft-live.mjs` | 212 | no | harness/live/craft-live.mjs - three rules of CLAUDE.md that were held up by nothing but the |
-| `scene-live.mjs` | 179 | no | harness/live/scene-live.mjs - the four numbers CLAUDE.md argues from, measured on the film you just |
+| `craft-live.mjs` | 108 | no | harness/live/craft-live.mjs - structural checks on a hand-written FRAGMENT, said at the moment the |
 | `stage-gate.mjs` | 113 | no | harness/live/stage-gate.mjs: a PreToolUse DENY on the three writes that skip a stage. |
-| `vocabulary.mjs` | 84 | no | harness/live/vocabulary.mjs - a NEW named vocabulary should be a registry, and you should be told |
 | `code-quality.mjs` | 77 | yes | harness/live/code-quality.mjs - tell the author about a tangled function while they are still in it. |
 | `no-blanket-git.mjs` | 59 | no | harness/live/no-blanket-git.mjs - refuse the four git commands that destroyed work in this repo. |
 | `stage-say.mjs` | 44 | no | harness/live/stage-say.mjs: a UserPromptSubmit hook that says, every turn, which stage the film in |
@@ -386,7 +384,6 @@ Tests for the hooks.
 | file | lines | make | what it says it does |
 |---|---|---|---|
 | `stage-gate.test.mjs` | 95 | no | node --test harness/live/test/stage-gate.test.mjs |
-| `scene-live.test.mjs` | 89 | no | node harness/live/test/scene-live.test.mjs |
 | `craft-live-fragment.test.mjs` | 59 | no | node harness/live/test/craft-live-fragment.test.mjs |
 | `no-blanket-git.test.mjs` | 27 | no | node harness/live/test/no-blanket-git.test.mjs |
 

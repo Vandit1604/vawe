@@ -1,7 +1,7 @@
 ---
 name: world-turns
 when: authoring the bg block of any scene
-holds: live (harness/live/scene-live.mjs warns on one bg window for the whole runtime); gated (quality/gates/backdrop-turn.mjs#backdrop-never-turns, wired into author-check.mjs's LADDER; BLOCKS)
+holds: gated (quality/gates/backdrop-turn.mjs#backdrop-never-turns, wired into author-check.mjs's LADDER; BLOCKS)
 answers: "why the backdrop must change tone per beat, and the 82% of the library that ships one window"
 group: look
 codes: [backdrop-never-turns]
