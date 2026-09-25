@@ -796,7 +796,16 @@ const GENERATOR_ENTRIES = Object.fromEntries(GENERATORS.map((g) => [g.name, g]))
 export const GENERATOR_BLURBS = blurbsOf('generator', GENERATOR_ENTRIES);
 
 // The words an author types who does not know the generator by name, never printed, only searched.
-const GENERATOR_AKA = { thermalBlur: ['heat vision', 'heat camera', 'infrared'] };
+const GENERATOR_AKA = {
+  thermalBlur: ['heat vision', 'heat camera', 'infrared'],
+  colonnade: ['tall columns of light', 'panels split by hairlines'],
+  bands: ['ramp panels', 'concentric arcs of light'],
+  spectrum: ['color ramp bands', 'rainbow gradient bands'],
+  crt: ['scanline overlay', 'old tv screen effect', 'phosphor bloom'],
+  effector: ['a live dial preview', 'a property driver card'],
+  keyframeHandle: ['a keyframe easing handle', 'bezier handle card'],
+  rangeSelector: ['a per-character range selector', 'a text range dial'],
+};
 
 // THE REGISTRY HOLDS WHAT SHIPS, NOT ALL_GENERATORS. A generator with `ready:false` is built and held
 // back on purpose (HELD_BACK below counts them for the playground), and a catalogue advertising an
