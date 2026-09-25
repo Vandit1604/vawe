@@ -35,7 +35,14 @@ export function okEnergy(e) {
     + 'film-wide default speed curve, and an explicit `timing` on a cut always wins.');
 }
 
-export const ENERGY_REGISTRY = defineRegistry('energy', ENERGY, { slot: 'energy', blurbs: ENERGY_BLURBS,
+const ENERGY_AKA = {
+  calm: ['unhurried film', 'editorial pace', 'premium slow cuts'],
+  brand: ['house speed ramp', 'default film energy', 'confident directed pace'],
+  hype: ['launch-reel energy', 'decisive cuts', 'product drop energy'],
+  tense: ['restless film', 'urgent cuts', 'countdown energy'],
+};
+
+export const ENERGY_REGISTRY = defineRegistry('energy', ENERGY, { slot: 'energy', blurbs: ENERGY_BLURBS, aka: ENERGY_AKA,
   catalog: {
     title: 'Film energy',
     tag: 'top-level',
