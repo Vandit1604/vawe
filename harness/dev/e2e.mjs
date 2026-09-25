@@ -30,6 +30,9 @@ const RUNS_DIR = path.join(repoRoot, 'quality', 'runs', 'e2e');
 
 const known = JSON.parse(fs.readFileSync(path.join(repoRoot, 'quality', 'baselines', 'e2e-known-broken.json'), 'utf8'));
 const knownScenes = known.scenes || {};
+const trackedScenes = new Set(spawnSync('git', ['ls-files', 'films/scene/*.json'], { cwd: repoRoot, encoding: 'utf8' })
+  .stdout.split('\n').filter(Boolean).map((f) => path.basename(f, '.json')));
+const isTrackedScene = (n) => trackedScenes.has(n);
 
 const nowStamp = new Date().toISOString().replace(/[:.]/g, '-');
 const runDir = path.join(RUNS_DIR, nowStamp);
@@ -106,12 +109,15 @@ function runSnap(name, script, sceneKeyword) {
 
   // `changed` always fails, unconditionally: it is the one signal this whole suite exists to catch.
   // An errored scene is excused only when it is on quality/baselines/e2e-known-broken.json, by name.
-  const newErrored = erroredNames.filter((n) => !(n in knownScenes));
+  // The net is the repo: a film only on this machine (untracked, often needing gitignored brand assets)
+  // is listed but cannot fail the suite, because a clean clone never has it.
+  const newErrored = erroredNames.filter((n) => !(n in knownScenes) && isTrackedScene(n));
+  const untrackedErrored = erroredNames.filter((n) => !isTrackedScene(n));
 
   const pass = newErrored.length === 0 && changedNames.length === 0 && quarantinedNames.length === 0 && !nothingCompared;
   return record(name, `node ${script}${sceneKeyword ? '' : ''}`, res, {
     pass, counts,
-    erroredNames, newErrored, changedNames, quarantinedNames, nothingCompared,
+    erroredNames, newErrored, untrackedErrored, changedNames, quarantinedNames, nothingCompared,
   });
 }
 
@@ -159,7 +165,9 @@ runSnap('snap-blocks', 'quality/gates/snap-blocks.mjs');
 // ---- 6. author-check: the whole authoring ladder on a real film ----------------------------------------
 {
   const out = findingsPath('author-check');
-  const target = 'films/scene/sample.json';
+  // A finished, tracked film. sample.json is a bare demo that never went through the decision chain,
+  // and the preflight receipt is local, so author-check refuses it on every clean clone.
+  const target = 'films/scene/preface-launch.json';
   const res = run('node', ['quality/gates/author-check.mjs', target], { env: { ...process.env, VAWE_FINDINGS_OUT: out } });
   fs.writeFileSync(path.join(runDir, 'author-check.log'), res.stdout + res.stderr);
   const records = readFindings(out) || [];
