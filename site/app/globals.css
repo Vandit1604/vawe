@@ -75,6 +75,7 @@ body{
 a{color:inherit;text-decoration:none}
 ::selection{background:var(--accent);color:var(--accent-ink)}
 .mono{font-family:var(--font-mono),monospace;font-variation-settings:normal}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 /* Archivo's wdth axis is a static type role, never animated: type that reflows every frame would
    compete with the live render beside it. */
 :root{ --wd-display:100; --wd-body:100; }
@@ -392,30 +393,29 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   .nav a,.nav [aria-current="page"]{display:inline-flex;align-items:center;min-height:44px;padding:0 10px}
 }
 /* ── the generator playground ──────────────────────────────────────────────────────────────────
-   The stage is an INK well inside a white page, which is the pattern .demo-media already sets:
-   generated fields are light on dark, and framing them in white chrome is what the site does.
-
-   Preview wide, controls beneath. The panel used to be a 20rem column beside the stage; with
-   twenty-odd dials that is a cramped scroller next to a preview that never gets the width it
-   wants, so both halves lose. Now the stage takes the full column and the controls wrap under it
-   as a grid of chips: more dials visible at once, and the picture as large as the page allows. */
+   The studio's shape: a canvas and an inspector. The preview stays pinned while the dials scroll
+   under it, so every change is seen as it is made; a preview that scrolled away made the page a
+   control wall with the result off screen. The dials sit in one panel per group, as inspector
+   rows divided by hairlines, not as a box per dial. */
 .pgpage{ padding: 28px 0 32px; }
 .pghead{ max-width: 44rem; margin-bottom: 18px; }
-.pghead h1{ font-size: clamp(1.8rem, 3.4vw, 2.4rem); letter-spacing: -.022em; margin-bottom: 8px; }
+.pghead h1{ font-size: clamp(1.9rem, 3.6vw, 2.7rem); font-weight: 800; letter-spacing: -.03em; margin-bottom: 8px; }
 .pghead p{ color: var(--ink-2); font-size: .98rem; line-height: 1.6; max-width: 70ch; }
 .pggrid{ display: block; }
 .pgstage{ display: block; min-width: 0; }
+@media (min-width: 901px){
+  .pgstage{ position: sticky; top: 0; z-index: var(--z-sticky); background: var(--bg); padding: 12px 0; }
+}
 /* The field sizes itself against this box: a generator is full-bleed, so the container is what gives
    it a height. A width with no height collapses an inset:0 child to nothing (engine-doctrine/MISTAKES.md #261). */
 .pgfield{
-  position: relative; width: 100%; height: clamp(320px, 56vh, 640px); overflow: hidden;
-  border: 1px solid var(--line); border-radius: 16px; background: #05070c;
-  box-shadow: var(--shadow-2);
+  position: relative; width: 100%; height: clamp(240px, 42vh, 480px); overflow: hidden;
+  border-radius: var(--r); background: #05070c; box-shadow: var(--ring);
 }
 /* the scene stage inside the playground: the editor's proven .sp-stage, given this page's frame */
 .pgscene{
-  border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-2);
-  max-height: 56vh; margin-inline: auto; width: 100%;
+  border-radius: var(--r); box-shadow: var(--ring);
+  max-height: 42vh; margin-inline: auto; width: 100%;
   /* max-height clamps this box shorter than the 16/9 it declares, so a fitted scene is letterboxed.
      The bars take the field card's ground, not the page's, so the frame reads as one object. */
   background: #05070c;
@@ -425,33 +425,34 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   background: var(--bad-bg); color: var(--bad); border: 1px solid rgba(255,122,122,.3);
   font-family: var(--font-mono), ui-monospace, monospace; font-size: 12px; line-height: 1.5;
 }
-/* the control wall */
-.pgpanel{ margin-top: 16px; }
-.pgblurb{ color: var(--muted); font-size: .88rem; line-height: 1.5; margin-bottom: 14px; max-width: 46rem; }
+/* the inspector */
+.pgpanel{ margin-top: 8px; }
+.pgblurb{ color: var(--muted); font-size: .92rem; line-height: 1.5; margin-bottom: 14px; max-width: 66ch; }
 .pggroup{
-  border: 0; padding: 0; margin: 0 0 10px;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 8px;
+  border: 0; margin: 0 0 12px; padding: 4px 16px 6px;
+  background: var(--surface); border-radius: var(--r); box-shadow: var(--ring);
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); column-gap: 28px;
 }
 /* the per-section roll sits in the legend, so it reads as belonging to that group */
 .pggroup legend{
-  grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 0 2px;
+  float: left; grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 10px 0 6px;
   font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px; color: var(--muted);
   letter-spacing: .06em; text-transform: uppercase;
 }
-/* every dial is a chip: its name on the left, its control on the right, one line */
+/* one dial per row: its name on the left, its control on the right, a hairline between rows */
 .pgrow{
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 7px 11px; margin: 0; font-size: 13px; color: var(--ink-2);
-  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 8px 0; margin: 0; font-size: 13px; color: var(--ink-2);
+  border-top: 1px solid var(--line);
 }
-.pgrow:hover{ border-color: var(--line-2); }
 .pgrow-stack{ align-items: flex-start; }
 .pgrow > span:first-child{
   flex: 0 0 auto; color: var(--ink-2);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pgnum{ display: flex; align-items: center; gap: 8px; min-width: 0; }
-.pgnum input[type="range"]{ width: 4.2rem; accent-color: var(--accent); height: 2px; }
+.pgnum input[type="range"]{ width: 5.6rem; accent-color: var(--accent); height: 2px; }
 .pgnum input[type="number"], .pgrow select, .pgtext{
   font: inherit; font-size: 12px; padding: 4px 7px; width: 5.4rem;
   border: 1px solid var(--line-2); border-radius: 7px; background: var(--bg); color: var(--ink);
@@ -468,7 +469,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 13px;
   border: 1px solid var(--line-2); background: var(--bg); color: var(--ink-2);
 }
-.pgadd:hover{ border-color: var(--accent); color: var(--accent); }
+.pgadd:hover{ border-color: var(--line-2); background: var(--raised); color: var(--ink); }
 /* 20x20 visible, 24x24 to the pointer. The glyph is a re-roll marker sitting inside a dense row,
    so it stays small and grows a pseudo-element instead of pushing the row apart. */
 .pgroll::after{ content: ""; position: absolute; inset: -2px; }
@@ -477,7 +478,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   width: 20px; height: 20px; line-height: 1; padding: 0; cursor: pointer; font-size: 11px;
   border: 1px solid var(--line-2); border-radius: 5px; background: var(--bg); color: var(--muted);
 }
-.pgroll:hover{ border-color: var(--accent); color: var(--accent); }
+.pgroll:hover{ background: var(--raised); color: var(--ink); }
 .pgbar{ display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
 .pgbar .btn{ font-size: 14px; padding: 9px 15px; }
 .pgmeta{ color: var(--muted); font-size: 12px; margin-left: auto; }
@@ -496,7 +497,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   font: inherit; font-size: 12px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
   background: var(--bg-2); color: var(--ink-2); border: 1px solid var(--line-2);
 }
-.pgpresets button.on{ border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.pgpresets button.on{ border-color: transparent; color: var(--ink); background: var(--raised); font-weight: 600; }
 .pgjson{ margin-top: 20px; }
 .pgjson summary{ cursor: pointer; color: var(--muted); font-size: 13px; }
 .pgjson pre{
@@ -512,7 +513,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 @media (max-width: 900px){
   .pgfield{ height: 38vh; }
   .pgscene{ max-height: none; }
-  .pggroup{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .pggroup{ grid-template-columns: minmax(0, 1fr); padding: 2px 12px 4px; }
 }
 /* ── the playground's own breadcrumb ──────────────────────────────────────────────────────────
    `.lgrid` / `.lcard` (the old card wall) and the poster scroll that replaced it are both gone:
