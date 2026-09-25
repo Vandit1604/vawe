@@ -462,24 +462,38 @@ export const isSettled = (L, t) => { const w = settleWindow(L); return !!w && t 
  * reads what resolveCoords produced and resolves nothing of its own, because a second copy of the
  * placement grammar is how the boxes in the header drifted apart.
  */
-export function outOfFrame(L, frame, t = null) {
-  if (!L || !frame) return null;
-  if (typeof L.x !== 'number' && typeof L.y !== 'number') return null;
+function settledAt(L, t) {
   const win = settleWindow(L);
   if (!win) return null;
   const at = t == null ? win.t0 : t;
-  if (at < win.t0 || at > win.t1) return null;     // mid-entrance / mid-exit is motion, not a verdict
+  return (at < win.t0 || at > win.t1) ? null : at;     // mid-entrance / mid-exit is motion, not a verdict
+}
+
+function resolvedBox(L) {
   const x = typeof L.x === 'number' ? L.x : 0, y = typeof L.y === 'number' ? L.y : 0;
   const w = typeof L.w === 'number' ? L.w : 0;
   // Same height fallback resolveCoords uses for `pin:"bottom"`: a text layer rarely declares `h`.
   const h = typeof L.h === 'number' ? L.h
     : ((L.type == null || L.type === 'text') && L.size ? L.size * 1.2 : 0);
-  const over = {
-    left: Math.max(0, Math.round(-x)), top: Math.max(0, Math.round(-y)),
-    right: Math.max(0, Math.round(x + w - frame.W)), bottom: Math.max(0, Math.round(y + h - frame.H)),
+  return { x, y, w, h };
+}
+
+function overflowOf(box, frame) {
+  return {
+    left: Math.max(0, Math.round(-box.x)), top: Math.max(0, Math.round(-box.y)),
+    right: Math.max(0, Math.round(box.x + box.w - frame.W)), bottom: Math.max(0, Math.round(box.y + box.h - frame.H)),
   };
+}
+
+export function outOfFrame(L, frame, t = null) {
+  if (!L || !frame) return null;
+  if (typeof L.x !== 'number' && typeof L.y !== 'number') return null;
+  const at = settledAt(L, t);
+  if (at == null) return null;
+  const box = resolvedBox(L);
+  const over = overflowOf(box, frame);
   if (!(over.left || over.right || over.top || over.bottom)) return null;
-  return { type: L.type || 'text', id: L.id || L.name || null, box: { x, y, w, h },
+  return { type: L.type || 'text', id: L.id || L.name || null, box,
     frame: { W: frame.W, H: frame.H }, over, at: +at.toFixed(3) };
 }
 
