@@ -34,7 +34,7 @@ export function isFullBleedPlane(box, canvas) {
 
 // ---- plain 4x4 matrices, row-major flat arrays of 16, exactly CSS's own semantics -----------------
 function mMul(a, b) {
-  const r = new Array(16);
+  const r = Array.from({ length: 16 });
   for (let row = 0; row < 4; row++)
     for (let col = 0; col < 4; col++) {
       let s = 0;

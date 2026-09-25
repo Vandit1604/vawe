@@ -33,7 +33,8 @@ function centreOf(node) {
   return [node.offsetLeft + node.offsetWidth / 2, node.offsetTop + node.offsetHeight / 2];
 }
 
-export function frame(kit, el, L, units, t, f, start, end) {
+export function frame(ctx) {
+  const { kit, el, L, t, start, end } = ctx;
   const E = L.effector;
   if (!E || t < start || t >= end) return;
   const targets = el.querySelectorAll(E.select || DEFAULT_SELECT);

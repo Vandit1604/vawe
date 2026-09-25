@@ -17,6 +17,7 @@ export const slot = 'resample';
 // mergeProps unions the two claims.
 export { PROPS } from '../resample/index.js';
 
-export function frame(kit, el, L, units, t, f, start, end) {
+export function frame(ctx) {
+  const { el, L, t, start, end } = ctx;
   if (L.resample) tickResample(el, L, t, t >= start && t < end);
 }

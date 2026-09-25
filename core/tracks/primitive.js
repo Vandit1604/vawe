@@ -18,6 +18,7 @@ export const slot = 'primitive';
 // rather than omitted, because "declares nothing" and "nobody wrote the declaration yet" have to differ.
 export const PROPS = {};
 
-export function frame(kit, el, L, units, t, f, start, end, scene) {
+export function frame(ctx) {
+  const { kit, el, L, t, scene } = ctx;
   kit.renderer.frame(el, L, t, scene);
 }

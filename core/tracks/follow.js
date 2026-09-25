@@ -35,33 +35,28 @@ export const PROPS = { follow: {}, id: { when: 'follow' }, x: { when: 'follow' }
 
 const EDGES = ['center', 'above', 'below', 'left', 'right'];
 
-export function frame(kit, el, L, units, t, f, start, end, scene) {
-  const spec = L.follow;
-  if (spec == null) return;
+function validateFollowSpec(spec, L) {
   if (typeof spec !== 'object' || Array.isArray(spec) || typeof spec.id !== 'string')
     throw new Error(`\`follow\` is an object like { "id": "card", "edge": "below", "gap": 24 }, `
       + `got ${JSON.stringify(spec)}.`);
-  // `from`/`to`, optional: the pin only applies inside this window of the ABSOLUTE film clock (the
-  // same `t` every other track reads), so a layer can be placed by hand before a drag starts and after
-  // it ends and pinned only for the drag itself. Outside the window this track is simply a no-op, and
-  // whatever the box/motion tracks already wrote for this frame stands. `core/engine/produce.js`
-  // `bakeCursorCarry` is the one writer of this pair today, converting a cursor's `carry` list into
-  // exactly this shape on the dragged layer.
   if (spec.from != null && typeof spec.from !== 'number')
     throw new Error(`follow.from must be a number (seconds), got ${JSON.stringify(spec.from)}.`);
   if (spec.to != null && typeof spec.to !== 'number')
     throw new Error(`follow.to must be a number (seconds), got ${JSON.stringify(spec.to)}.`);
-  if ((spec.from != null && t < spec.from) || (spec.to != null && t >= spec.to)) return;
   const edge = spec.edge ?? 'center';
   if (!EDGES.includes(edge))
     throw new Error(`follow edge "${edge}", known: ${EDGES.join(', ')}.`);
   if (!L.id)
     throw new Error(`layer following "${spec.id}" has no \`id\`. A follower is placed by its own size, `
       + `and only an identified layer has a measured box.`);
-  // CHAINING, refused where the arithmetic would otherwise lie. resolveBoxes composes every box for
-  // the frame BEFORE any track runs, so the target's box is its own geometry and carries nothing this
-  // track wrote. Following a follower therefore pins to where the middle layer would sit if it were
-  // not following anything, which is a wrong answer rather than a missing one.
+  return edge;
+}
+
+// CHAINING, refused where the arithmetic would otherwise lie. resolveBoxes composes every box for
+// the frame BEFORE any track runs, so the target's box is its own geometry and carries nothing this
+// track wrote. Following a follower therefore pins to where the middle layer would sit if it were
+// not following anything, which is a wrong answer rather than a missing one.
+function resolveFollowTarget(scene, spec, L) {
   const tgt = scene.specOf(spec.id);
   if (tgt && tgt.follow)
     throw new Error(`follow: "${L.id}" follows "${spec.id}", which is itself following `
@@ -75,23 +70,37 @@ export function frame(kit, el, L, units, t, f, start, end, scene) {
       + `child's measured offset is stale and a pin to it would be a wrong answer rather than none.`);
   const me = scene.boxOf(L.id);
   if (!me) throw new Error(`follow: layer "${L.id}" has no box of its own to place.`);
-  // The target's SCALED half-extents, because an edge is where the layer visibly ends. boxOf reports
-  // w/h unscaled with `scale` beside them on purpose (folding scale in would move the top-left corner
-  // and nothing on screen moves with it), so the scale is applied here and only to the extents.
+  return { b, me };
+}
+
+// The target's SCALED half-extents, because an edge is where the layer visibly ends. boxOf reports
+// w/h unscaled with `scale` beside them on purpose, so the scale is applied here and only to the
+// extents.
+function followEdgePosition(edge, b, me, gap) {
   const hw = (b.w * b.scale) / 2, hh = (b.h * b.scale) / 2;
-  const gap = spec.gap ?? 0;
   let cx = b.cx, cy = b.cy;
   if (edge === 'below') cy = b.cy + hh + gap + me.h / 2;
   else if (edge === 'above') cy = b.cy - hh - gap - me.h / 2;
   else if (edge === 'right') cx = b.cx + hw + gap + me.w / 2;
   else if (edge === 'left') cx = b.cx - hw - gap - me.w / 2;
-  // Centres, not corners: two boxes of different sizes sharing a top-left corner visibly jump, and
-  // sharing a centre does not. The same reason `becomes` matches centres.
+  return { cx, cy };
+}
+
+export function frame(ctx) {
+  const { el, L, t, scene } = ctx;
+  const spec = L.follow;
+  if (spec == null) return;
+  const edge = validateFollowSpec(spec, L);
+  // `from`/`to`: the pin applies only inside this window of the absolute film clock, so a layer can be
+  // placed by hand before a drag starts and pinned only for the drag itself.
+  if ((spec.from != null && t < spec.from) || (spec.to != null && t >= spec.to)) return;
+  const { b, me } = resolveFollowTarget(scene, spec, L);
+  const { cx, cy } = followEdgePosition(edge, b, me, spec.gap ?? 0);
+  // Centres, not corners: two boxes of different sizes sharing a top-left corner visibly jump.
   const tx = cx - me.w / 2 - (L.x ?? 60) + (spec.dx ?? 0);
   const ty = cy - me.h / 2 - (L.y ?? 240) + (spec.dy ?? 0);
-  // Composed onto whatever the enter/exit and the primitive left, never replacing it, and safe to
-  // prepend because driveClips rewrites `transform` from scratch every frame, the same invariant the
-  // motion track relies on to avoid appending to its own value from the previous frame.
+  // Composed onto whatever the enter/exit and the primitive left, safe to prepend because driveClips
+  // rewrites `transform` from scratch every frame.
   const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
   el.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)${base}`;
 }

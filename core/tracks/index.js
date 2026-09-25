@@ -126,17 +126,19 @@ export const ORDER = (() => {
     if (!name)
       throw new Error(`slot "${slot}" is in the pipeline and no track claims it. An unclaimed slot is a `
         + `name in the running order that means nothing; delete it or add the track it was written for.`);
+    // units.js keeps its frame() positional: core/tracks/units.test.mjs calls it directly that way.
+    if (name === 'units') {
+      const f = REGISTRY[name].frame;
+      return (ctx) => f(ctx.kit, ctx.el, ctx.L, ctx.units, ctx.t, ctx.f, ctx.start, ctx.end);
+    }
     return REGISTRY[name].frame;
   }));
 })();
 
 // runTracks: one layer, one frame. `start`/`end` are computed here rather than in each track because
 // nine of the twelve need them and re-deriving them nine times is the one cost this loop cannot spend.
-//
-// Arguments are POSITIONAL and no options object is built: this runs once per layer per frame, and an
-// object literal here is an allocation per layer per frame that the garbage collector pays for in the
-// middle of a render. `kit` is the scene's own long-lived bindings (renderer · theme · the theme's
-// motion personality · fps), built once by createTrackKit below.
+// One ctx object is built per layer per frame (not per track call), the allocation the loop below
+// pays instead of fifteen argument lists.
 // ---- THE LAYER'S CLOCK, warped ------------------------------------------------------------------
 //
 // `timeWarp`, `timeRemap` and `stepFps` all warp the layer's LOCAL time before any track reads it, and
@@ -149,8 +151,8 @@ export const ORDER = (() => {
 // motionAt would have warped the position and left the typing behind.
 export function runTracks(kit, el, L, units, t, f, scene) {
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
-  const lt = layerTime(L, t, start, end);
-  for (let i = 0; i < ORDER.length; i++) ORDER[i](kit, el, L, units, lt, f, start, end, scene);
+  const ctx = { kit, el, L, units, t: layerTime(L, t, start, end), f, start, end, scene };
+  for (let i = 0; i < ORDER.length; i++) ORDER[i](ctx);
 }
 
 // The scene-instance bindings a track cannot import for itself. Everything that IS importable

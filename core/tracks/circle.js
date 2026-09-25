@@ -9,7 +9,8 @@ export const slot = 'spin';
 
 export const PROPS = { circle: {} };
 
-export function frame(kit, el, L, units, t) {
+export function frame(ctx) {
+  const { el, L, t } = ctx;
   if (!L.circle) return;
   const per = (typeof L.circle === 'object' ? (L.circle.period ?? 8) : 8) || 8;
   el.style.transform = `rotate(${(((t / per) * 360) % 360).toFixed(2)}deg)`;

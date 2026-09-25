@@ -32,7 +32,8 @@ const idleOf = (kit, el, L) => {
   return el.__hsIdleSpec;
 };
 
-export function frame(kit, el, L, units, t, f, start, end) {
+export function frame(ctx) {
+  const { kit, el, L, t, start, end } = ctx;
   const spec = idleOf(kit, el, L);
   if (!spec) return;
 

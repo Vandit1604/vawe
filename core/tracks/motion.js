@@ -129,156 +129,96 @@ function focusBlur(L, cam) {
   return Math.min(40, Math.abs(planeZ(L) - cam.focus) / 100 * cam.aperture);
 }
 
-export function frame(kit, el, L, units, t, f, start, end, scene) {
+// The still-layer path: no motion track, or outside its window. Depth of field still applies (a lens
+// property, not a per-layer one), and so does camera blur (the layer stands still while the sensor
+// pans, so its velocity relative to the camera is the camera's own). The write stays unconditional
+// (`el.__hsBlur` marks an element this track has ever touched) so a stale blur from an earlier frame
+// never survives a seek backwards (engine-doctrine/MISTAKES.md #41, #507).
+function writeStillBlur(ctx, dof, cv) {
+  const { kit, el, L } = ctx;
+  const still = dof + (cv ? smear(kit, L, cv.vx, cv.vy) : 0);
+  if (still > 0.4 || el.__hsBlur) writeBlur(el, still);
+}
+
+// A layer that never keys depth must get the exact transform string it always got: testing the
+// resolved pose at rest cannot tell "never keyed" from "keyed and at rest", and a 3D transform
+// function written even at its identity value promotes the element into its own rendering context
+// (scene.js "THE CAMERA RIG"). So the branch is decided from the AUTHORED keyframes.
+function hasKeyedDepth(L) {
+  return L.motion.some((k) => k && (k.z != null || k.rotX != null || k.rotY != null));
+}
+
+// OVERSCAN: a full-bleed plane tilted or moved off the picture plane foreshortens under perspective,
+// so its projected corners can land inside the viewport and show the stage behind its edge. Grown to
+// cover, gated on the box already covering the stage at rest (core/tracks/overscan.js).
+function overscanFor(ctx, m) {
+  const { el, L, scene, t } = ctx;
   const cam = scene && scene.camera;
-  const live = t >= start && t < end;
-  // The camera's depth of field, and it applies to EVERY layer, not only the ones carrying a motion
-  // track: that is the whole difference between a lens and a per-layer blur. Computed before the early
-  // return so a still layer at the wrong distance still goes soft.
-  //
-  // Gated on the film DECLARING a focus, which keeps every existing scene byte-identical: with no `f`
-  // on any camera keyframe this function returns exactly where it always did, and never touches
-  // `filter` on a layer that has no motion track.
-  const dof = live && cam && cam.focus != null && cam.aperture > 0 ? focusBlur(L, cam) : 0;
-  // The camera's own travel, in the units this layer's track speaks. Null unless the film asked for
-  // camera blur AND this layer kept the automatic blur, so with the dial off every scene in the
-  // library renders the exact bytes it rendered before: `cv` is null, both branches below add 0.
-  const cv = live && kit.cameraBlur && cam && cam.vel && L.motionBlur !== false ? cam.vel : null;
-  if (!(L.motion && L.motion.length && live)) {
-    // THE WRITE IS AUTHORITATIVE ON THIS PATH TOO, and it was not. `if (dof > 0.4)` skipped the write
-    // whenever the layer went off screen or the lens came back into focus, so a blur written on an
-    // EARLIER frame stayed on the element: frame 83 carried `blur(1.49px)` from frame 77 on a tab that
-    // had drawn 77, and `none` on a tab that had not. That is #41 again on the branch #41 did not
-    // cover, and it is a purity bug before it is a visual one: a sharded render deals frames
-    // round-robin, so which frames a tab drew before this one is decided by the worker count
-    // (engine-doctrine/MISTAKES.md #507).
-    //
-    // `el.__hsBlur` is the stash writeBlur leaves behind, so it is exactly the set of elements this
-    // writer has ever touched. Clearing only those keeps a layer that never had a filter free of a
-    // `filter: none` nobody asked for, which would move every snapshot signature in the library.
-    //
-    // A LAYER WITH NO TRACK STILL SMEARS UNDER A PAN, and that is the point: it is standing still on
-    // the stage while the sensor moves past it, so its velocity relative to the camera is the whole of
-    // the camera's. This is the branch most of a film's cast takes, which is why camera blur had to
-    // land before the early return rather than inside the motion-track path below.
-    const still = dof + (cv ? smear(kit, L, cv.vx, cv.vy) : 0);
-    if (still > 0.4 || el.__hsBlur) writeBlur(el, still);
-    return;
+  if (!(cam && cam.rig && (m.rotX !== 0 || m.rotY !== 0 || m.z !== 0))) return 1;
+  const box = scene && scene.boxOf ? scene.boxOf(L.id) : null;
+  if (!isFullBleedPlane(box, scene && scene.canvas)) return 1;
+  const k = coverScale({
+    box, originPct: { ox: m.ox ?? 50, oy: m.oy ?? 50 }, scale: m.scale,
+    rotZ: m.rot, rotX: m.rotX, rotY: m.rotY, z: m.z, canvas: scene.canvas, persp: cam.lens,
+    cam: { x: cam.x, y: cam.y, z: dollyZ(cam.s, cam.lens), rx: cam.rx, ry: cam.ry, roll: cam.roll },
+  });
+  // Adaptation, not a silent change: one line per NEW peak (engine-doctrine/SAFEGUARDS.md).
+  if (k > 1 && k > (el.__hsOverscanMax || 0) + 1e-6) {
+    console.log(`adapted overscan: ${L.id || L.type || 'layer'} scaled up to ${k.toFixed(3)}x `
+      + `at ${t.toFixed(2)}s (full-bleed plane under perspective)`);
+    el.__hsOverscanMax = k;
   }
-  const fps = kit.fps;
-  const m = motionAt(L.motion, t - start, L.motionDelay);
+  return k;
+}
+
+function writeMotionTransform(ctx, m, has3D) {
+  const { el, L } = ctx;
   const base = el.style.transform && el.style.transform !== 'none' ? ' ' + el.style.transform : '';
-  // A LAYER THAT NEVER KEYS DEPTH GETS THE EXACT STRING IT ALWAYS GOT. `m.z`/`m.rotX`/`m.rotY` read back
-  // 0 for EVERY layer with a motion track (POSE gives them a constant identity, same as `dx`/`rot`), so
-  // testing the resolved pose could not tell "never keyed" from "keyed and currently at rest" and would
-  // put `translate3d`/`rotateX`/`rotateY` on every moving layer in the library. Those are 3D transform
-  // functions: writing one, even at its identity value, is documented above (scene.js "THE CAMERA RIG")
-  // to promote the element into its own 3D rendering context and change how it rasterises, which is
-  // exactly the byte-for-byte regression requirement 1 of this change exists to forbid. So the branch is
-  // decided from the AUTHORED keyframes, once per frame, the same shape scene.js already uses to decide
-  // whether a track keys `radius` at all.
-  const has3D = L.motion.some((k) => k && (k.z != null || k.rotX != null || k.rotY != null));
-  // COMPOSITION ORDER, matched to the camera rig's own (films/scene/scene.js drawCameraAndCut):
-  // `translate3d(...) rotateZ(...) rotateX(...) rotateY(...)`. CSS applies a function list right to
-  // left, so that string is rotateY first, rotateX second, rotateZ (`rotate`, already this layer's `rot`)
-  // third, and the position last. Reusing the camera's own Y-X-Z order rather than inventing an
-  // AE-textbook one is the point: the camera and a layer with depth now share ONE rig
-  // (scene.js: "every layer rotation now composes with the rig's own transform in ONE 3D space"), and a
-  // shared space with two different rotation orders is the fact-with-two-owners shape this file argues
-  // against everywhere else. `scale` stays where it always sat, between the 2D rotate and the position,
-  // because a flat film's transform must still read `translate(...) scale(...) rotate(...)` to the byte.
-  // ---- OVERSCAN: never reveal the edge of a full-bleed plane under perspective ----
-  //
-  // A full-canvas plane (a background `group`, an `html` layer sized to the stage) is a flat rectangle.
-  // The moment IT tilts (rotX/rotY) or stands off the picture plane (a keyed `z`), perspective
-  // foreshortens it, so its projected corners can land inside the viewport and the stage shows behind
-  // its edge. Real 3D compositors call the fix OVERSCAN: the plane is drawn larger than its frame so
-  // the foreshortened edge still lands off-screen. Gated on `has3D` (a rotation or depth this frame
-  // actually keys) and on the box already covering the stage AT REST: a card meant to show its own edge
-  // is untouched, only a plane trying to BE the background is grown to hide it (core/tracks/overscan.js).
-  let overscanK = 1;
-  if (has3D && L.overscan !== false && cam && cam.rig && (m.rotX !== 0 || m.rotY !== 0 || m.z !== 0)) {
-    const box = scene && scene.boxOf ? scene.boxOf(L.id) : null;
-    const canvas = scene && scene.canvas;
-    if (isFullBleedPlane(box, canvas)) {
-      overscanK = coverScale({
-        box, originPct: { ox: m.ox ?? 50, oy: m.oy ?? 50 }, scale: m.scale,
-        rotZ: m.rot, rotX: m.rotX, rotY: m.rotY, z: m.z, canvas, persp: cam.lens,
-        cam: { x: cam.x, y: cam.y, z: dollyZ(cam.s, cam.lens), rx: cam.rx, ry: cam.ry, roll: cam.roll },
-      });
-      // Adaptation, not a silent change: one line per NEW peak, the safeguards registry's own
-      // convention (engine-doctrine/SAFEGUARDS.md: "adapted <code>: <what changed> (<why>)").
-      if (overscanK > 1 && overscanK > (el.__hsOverscanMax || 0) + 1e-6) {
-        console.log(`adapted overscan: ${L.id || L.type || 'layer'} scaled up to ${overscanK.toFixed(3)}x `
-          + `at ${t.toFixed(2)}s (full-bleed plane under perspective)`);
-        el.__hsOverscanMax = overscanK;
-      }
-    }
-  }
+  const overscanK = has3D && L.overscan !== false ? overscanFor(ctx, m) : 1;
   const scaleOut = m.scale * overscanK;
+  // Composition order matches the camera rig's own (films/scene/scene.js drawCameraAndCut): Y-X-Z
+  // rotation order, `scale` between the 2D rotate and the position.
   el.style.transform = has3D
     ? `translate3d(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px, ${m.z.toFixed(2)}px) scale(${scaleOut.toFixed(4)}) `
       + `rotate(${m.rot.toFixed(2)}deg) rotateX(${m.rotX.toFixed(2)}deg) rotateY(${m.rotY.toFixed(2)}deg)${base}`
     : `translate(${m.dx.toFixed(2)}px, ${m.dy.toFixed(2)}px) scale(${m.scale.toFixed(4)}) rotate(${m.rot.toFixed(2)}deg)${base}`;
-  // A KEYED ANCHOR POINT. Written only when the track mentions it, so a layer's static `origin` is
-  // untouched by every film that does not: `ox`/`oy` come back null from the pose otherwise. It is set
-  // BEFORE the browser applies the transform above in the same frame, and both are plain style writes,
-  // so there is no ordering subtlety to get wrong.
   if (m.ox != null || m.oy != null) el.style.transformOrigin = `${(m.ox ?? 50).toFixed(2)}% ${(m.oy ?? 50).toFixed(2)}%`;
-  el.style.opacity = (baseOpacity(el) * m.opacity).toFixed(3);
-  // TWO blur materials, summed into one blur():
-  //  (a) focus-pull: the authored m.blur track (depth / rack-focus).
-  //  (b) motion blur, velocity-derived streak on fast moves. SEEK-SAFE: the track is sampled
-  //      at t AND t-1frame, both PURE functions of the frame, so blur(n) is order-independent.
-  //      Opt-in per layer: motionBlur:true (shutter 0.5) or a 0..1 strength. Needs a motion track.
-  //      Opt-in was the whole policy, and across this entire library exactly ONE layer ever set it,
-  //      so every fast move in every other film is a hard-edged slide. Blur is physics: a thing
-  //      crossing the frame in a few frames smears whether or not the author remembered. So it is
-  //      now AUTOMATIC above a speed the eye already reads as fast, and still fully controllable,
-  //      `motionBlur: false` opts out, a number overrides the shutter (KEYED-MOTION.md).
-  //  (c) the CAMERA's travel, added to (b) as a vector before either is measured (see `smear`).
-  // THE AUTHOR'S OWN FOCUS WINS. A keyed `motion.blur` is a rack focus somebody wrote on purpose, and
-  // adding the camera's depth of field on top would mean an author who asked for a sharp layer got a
-  // soft one because of a lens setting somewhere else in the file. Stated here rather than resolved by
-  // whichever ran last, which is how two owners of one property usually get settled and why it usually
-  // goes wrong.
+}
+
+// Two blur materials summed into one blur(): the authored focus-pull/rack-focus track (or the
+// camera's depth of field, whichever the author's own keyed blur does not already win over) and the
+// velocity-derived streak, camera travel added to it as a vector before either is measured (see
+// `smear`). The write stays unconditional and recomputes from this frame every time, order-independent
+// even on a persistent DOM (engine-doctrine/MISTAKES.md #351).
+function applyMotionBlur(ctx, dof, cv) {
+  const { kit, el, L, t, start } = ctx;
+  const m = motionAt(L.motion, t - start, L.motionDelay);
   let blurPx = m.blur > 0.01 ? m.blur : dof;
   if (L.motionBlur !== false) {
-    // ONE OWNER for the velocity read (core/sequence.js), shared with the ghost trail and squash.
-    // Read as a VECTOR, not a magnitude, so the camera's travel can be added to it before anything is
-    // measured: two speeds cannot be summed, two velocities can, and a layer keeping pace with the
-    // camera has to come out at zero rather than at twice the number.
-    const v = velocityAt(L.motion, t - start, 1 / fps);
+    const v = velocityAt(L.motion, t - start, 1 / kit.fps);
     blurPx += smear(kit, L, v.vx + (cv ? cv.vx : 0), v.vy + (cv ? cv.vy : 0));
   }
-  // authoritative: recompute the blur() from THIS frame every time (strip any prior, set new
-  // or drop it) so a cold render == a warm render → order-independent even on a persistent DOM.
-  //
-  // The WRITE stays unconditional. That is what "authoritative" means, and skipping it is how a blur
-  // from another frame survives a seek backwards (MISTAKES #41). Only the STRIP is conditional: every
-  // layer with a motion track pays this on every frame it is on screen, and the great majority of them
-  // never carry a blur at all. An authored `filter`, or nothing. `replace` on a string with no match
-  // returns the string, so the guarded form is the same value by construction, without the scan.
-  // `none` is the KEYWORD for "no filter", not a filter function, so it may never be concatenated with
-  // one: this line used to write the literal `none` on an unblurred frame, and the next frame that DID
-  // blur produced `none blur(2.97px)`. An invalid declaration the browser drops WHOLE, so the layer
-  // rendered with no filter at all. Silent, and invisible until the snap signature learned to record
-  // `filter` (engine-doctrine/MISTAKES.md #351): motion blur simply failed on any frame following an unblurred one,
-  // and which frames those were depended on RENDER ORDER, so it was a purity bug as well as a dropped
-  // effect. Treat the keyword as the empty base it means.
-  // STASH THE BASE, DO NOT PATTERN-MATCH IT. This used to strip every `blur(...)` out of the current
-  // filter before adding its own, on the assumption that any blur it found was its own from a previous
-  // frame. It cannot tell the two apart: an AUTHORED `filter: "blur(38px)"` is the same six characters,
-  // so a layer that declared a blur and also carried a motion track lost the blur completely, on every
-  // frame, silently. Building a title card was how it surfaced: the word rendered razor sharp with
-  // `filter: none` on the element and no error anywhere, and the same fragment written as an `html`
-  // layer looked correct, which pointed at the layer path rather than at CSS.
-  //
-  // Same shape as the idle track's base stash (core/tracks/idle.js) and for the same reason: the base
-  // is remembered beside the output it produced, so if the element still holds that exact output the
-  // stash is still the truth, and anything else on it is a fresh write from build or an earlier track.
-  // Reading it back rather than storing what was written, because CSSOM re-serialises on the way in.
   writeBlur(el, blurPx);
+  return m;
+}
+
+export function frame(ctx) {
+  const { kit, el, L, t, start, end, scene } = ctx;
+  const cam = scene && scene.camera;
+  const live = t >= start && t < end;
+  // Depth of field applies to every layer, computed before the early return so a still layer at the
+  // wrong distance still goes soft. Gated on the film declaring a focus, so a scene with none renders
+  // byte-identical.
+  const dof = live && cam && cam.focus != null && cam.aperture > 0 ? focusBlur(L, cam) : 0;
+  // Null unless the film asked for camera blur and this layer kept the automatic blur.
+  const cv = live && kit.cameraBlur && cam && cam.vel && L.motionBlur !== false ? cam.vel : null;
+  if (!(L.motion && L.motion.length && live)) return writeStillBlur(ctx, dof, cv);
+
+  const has3D = hasKeyedDepth(L);
+  const m0 = motionAt(L.motion, t - start, L.motionDelay);
+  writeMotionTransform(ctx, m0, has3D);
+  el.style.opacity = (baseOpacity(el) * m0.opacity).toFixed(3);
+  applyMotionBlur(ctx, dof, cv);
 }
 
 // ONE WRITER FOR `filter`, because there are now two callers (a layer with a motion track, and one that

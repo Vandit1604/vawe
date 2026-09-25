@@ -9,7 +9,8 @@ export const slot = 'glyphs';
 
 export const PROPS = { ransom: {}, ransomSeed: { when: 'ransom' }, text: { when: 'ransom' } };
 
-export function frame(kit, el, L, units, t, f, start, end) {
+export function frame(ctx) {
+  const { kit, L, units, t, start, end } = ctx;
   if (!(units && L.ransom && L.ransom.cycle && t >= start && t < end)) return;
   ransomTick(units, t - start, { seed: L.ransomSeed ?? L.text ?? '', accent: (kit.theme && kit.theme.accent) || undefined, ...L.ransom });
 }

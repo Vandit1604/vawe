@@ -14,7 +14,8 @@ export const PROPS = { borderTrail: {} };
 // layer does not change after that. `undefined` is the "not looked yet" sentinel and `null` a real
 // answer, so a layer that declares `borderTrail` and has no arc stops searching too.
 // core/layers/text.js is the pattern: measure at build, read the measurement in frame().
-export function frame(kit, el, L, units, t) {
+export function frame(ctx) {
+  const { el, L, t } = ctx;
   if (!L.borderTrail) return;
   if (el.__trail === undefined) el.__trail = el.querySelector('[data-trail]');
   const s = el.__trail;

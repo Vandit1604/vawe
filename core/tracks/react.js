@@ -18,7 +18,8 @@ export const slot = 'react';
 
 export const PROPS = { react: {} };
 
-export function frame(kit, el, L, units, t, f, start, end) {
+export function frame(ctx) {
+  const { el, L, t, f, start, end } = ctx;
   if (!(L.react && window.__spectrum && t >= start && t < end)) return;
   const rs = Array.isArray(L.react) ? L.react : [L.react];
   for (const r of rs) {
