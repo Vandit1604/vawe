@@ -60,7 +60,7 @@ export default function LaunchVideo() {
 
           <section className="ifilms">
             <h2>Launch films, played live.</h2>
-            <p>Each one is a scene file your browser renders as you watch. Hover or tap a film to play it, or open its JSON in the editor.</p>
+            <p>Each one is a scene file your browser renders as you watch. Hover a film to play it, click to watch it large, or open its JSON in the editor.</p>
             <FilmGrid ids={["argus-launch", "saas-hero-launch"]} />
           </section>
 

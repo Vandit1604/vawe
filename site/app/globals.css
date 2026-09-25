@@ -672,3 +672,18 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .fgrid.one > .fc:nth-child(n){grid-column:1 / -1}
 @media (max-width:900px){ .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))} .fgrid > .fc:nth-child(n){grid-column:auto} .fgrid > .fc:first-child{grid-column:1 / -1} }
 @media (max-width:640px){ .fgrid{grid-template-columns:minmax(0,1fr)} }
+
+/* The film opened large: a native <dialog> in the top layer, the page dimmed behind it. margin:auto
+   is the dialog's own centring, which the global reset removes. The width follows the height cap so
+   a 16:9 film is never letterboxed. */
+.ffocus{margin:auto;width:min(92vw,1280px,calc(78vh * 16 / 9));max-width:none;max-height:none;padding:0;border:0;background:transparent;color:var(--ink);overflow:visible}
+.ffocus::backdrop{background:rgba(10,10,12,.84)}
+.ffocus[open]{animation:ffocus-in .22s var(--ease)}
+.ffocus[open]::backdrop{animation:ffocus-fade .22s ease-out}
+@keyframes ffocus-in{from{opacity:0;transform:scale(.96)}}
+@keyframes ffocus-fade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){ .ffocus[open],.ffocus[open]::backdrop{animation:none} }
+.ffocus-stage{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:var(--r);overflow:hidden;box-shadow:var(--ring)}
+.ffocus-bar{display:flex;align-items:center;gap:12px 18px;flex-wrap:wrap;margin-top:12px}
+.ffocus-bar .fc-open{margin-left:auto}
+.ffocus-close{padding:8px 14px;font-size:14px}
