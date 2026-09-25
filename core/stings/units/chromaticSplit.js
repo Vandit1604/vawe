@@ -15,3 +15,4 @@ export const glsl = `                             /* chromaticSplit, rgb-fringed
     vec3 col = vec3(rr + vr*0.6, gg + vg*0.6, bb + vb*0.6);
     c = vec4(col, (max(max(rr, gg), bb) + max(max(vr, vg), vb)*0.45) * bell);`;
 export const blurb = 'an rgb-fringed shock ring with colour fringing at the edges. An impact with a lens defect.';
+export const aka = ['chromatic aberration', 'colour fringe ring', 'rgb fringe shock'];
