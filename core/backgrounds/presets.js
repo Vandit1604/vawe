@@ -14,7 +14,7 @@ export const PRESETS = [
   // ---- LIGHT-FIRST presets (for white/editorial brands: paper bg + accent on top) ----
   {
     name: 'plain',
-    blurb: 'flat theme field',
+    blurb: 'a flat theme colour field with a 0.02 grain wash (0.035 on dark)',
     build: (P, grain, dark) => ({ base: dark ? { kind: 'solid', color: P.inkBase[1] } : { kind: 'solid', color: P.paperBase[0] }, fx: [grain] }),
   },
   {
@@ -24,13 +24,13 @@ export const PRESETS = [
   },
   {
     name: 'paperDots',
-    blurb: 'faint drifting dot grid (light)',
+    blurb: 'a faint drifting dot grid on the light paper base, dots 54px apart waving between 0.14 and 0.34 alpha',
     build: (P, grain) => ({ base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
       { type: 'dots', mode: 'wave', color: P.dotLight, baseAlpha: 0.14, peakAlpha: 0.34, spacing: 54, r: 1.5, rPeak: 4, k: 0.03, period: 5, driftX: 11, driftY: 6 }, grain ] }),
   },
   {
     name: 'paperShapes',
-    blurb: 'faint drifting geometric shapes (light, subtle)',
+    blurb: 'faint drifting geometric shapes on the light paper base, 64px apart waving between 0.05 and 0.13 alpha',
     build: (P, grain) => ({ base: { kind: 'linear', from: P.paperBase[0], to: P.paperBase[1] }, fx: [
       { type: 'dots', mode: 'wave', color: P.accent, baseAlpha: 0.05, peakAlpha: 0.13, spacing: 64, r: 1.3, rPeak: 2.0 }, grain ] }),
   },
@@ -55,7 +55,7 @@ export const PRESETS = [
   },
   {
     name: 'dotmatrix',
-    blurb: 'a light field ruled by evenly spaced dots whose size waves across it, the printed halftone look (moves)',
+    blurb: 'a light field ruled by dots 52px apart, whose size waves from 1.6px to 4.5px across it, the printed halftone look (moves)',
     build: (P, grain) => ({ base: { kind: 'linear', from: P.light[0], to: P.light[1] }, fx: [
       { type: 'dots', mode: 'wave', color: P.dotLight, baseAlpha: 0.06, peakAlpha: 0.24, spacing: 52, r: 1.6, rPeak: 4.5, k: 0.03, period: 5, driftX: 12, driftY: 6 }, grain ] }),
   },
@@ -63,25 +63,25 @@ export const PRESETS = [
   // what catches a typo now (engine-doctrine/MISTAKES.md #361); this entry is only the named `aurora` preset.
   {
     name: 'aurora',
-    blurb: 'drifting colour aurora (moves)',
+    blurb: 'three drifting colour blobs at 0.46 intensity over a dark radial, the northern-lights field (moves)',
     build: (P, grain) => ({ base: { kind: 'radial', from: P.dark[0], to: P.dark[1], cx: 0.6, cy: 0.42 }, fx: [
       { type: 'aurora', intensity: 0.46, motionScale: 3.2, blobs: [ { color: P.accent, x: 0.34, y: 0.42, r: 720, ax: 130, ay: 98, px: 15, py: 19, ph: 0 }, { color: P.tint, x: 0.72, y: 0.55, r: 620, ax: 160, ay: 118, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.5, y: 0.28, r: 500, ax: 100, ay: 78, px: 12, py: 21, ph: 4 } ] }, grain ] }),
   },
   {
     name: 'mesh',
-    blurb: 'soft gradient mesh (dark/saturated, check contrast)',
+    blurb: 'soft gradient mesh, three colour blobs at 0.42 intensity over a dark radial (dark/saturated, check contrast, moves)',
     build: (P, grain) => ({ base: { kind: 'radial', from: P.darkMesh[0], to: P.darkMesh[1], cx: 0.4, cy: 0.5 }, fx: [
       { type: 'aurora', intensity: 0.42, motionScale: 3.2, blobs: [ { color: P.tint, x: 0.3, y: 0.4, r: 680, ax: 140, ay: 96, px: 14, py: 19, ph: 0 }, { color: P.accent, x: 0.72, y: 0.55, r: 600, ax: 160, ay: 116, px: 18, py: 13, ph: 2 }, { color: P.tint2, x: 0.55, y: 0.3, r: 500, ax: 110, ay: 76, px: 12, py: 21, ph: 4 } ] }, grain ] }),
   },
   {
     name: 'constellation',
-    blurb: 'drifting connected nodes (moves), telemetry/data feel',
+    blurb: 'drifting connected nodes (moves), telemetry/data feel: 78 particles connected within 150px',
     build: (P, grain) => ({ base: { kind: 'radial', from: P.deep[0], to: P.deep[1], cx: 0.5, cy: 0.46 }, fx: [
       { type: 'particles', count: 78, connect: true, speed: 9, color: P.tint2, connectDist: 150, seed: 7 }, grain ] }),
   },
   {
     name: 'brandglow',
-    blurb: 'breathing accent glow',
+    blurb: 'a breathing accent glow at 0.5 intensity plus rippling dots, over an ink radial base',
     build: (P, grain) => ({ base: { kind: 'radial', from: P.ink[0], to: P.ink[1], cx: 0.5, cy: 0.42 }, fx: [
       { type: 'aurora', intensity: 0.5, blobs: [ { color: P.accent, x: 0.5, y: 0.42, r: 820, ax: 70, ay: 46, px: 13, py: 17, ph: 1 }, { color: P.tint, x: 0.32, y: 0.6, r: 560, ax: 100, ay: 66, px: 16, py: 12, ph: 3 } ] },
       { type: 'dots', mode: 'ripple', color: P.tint2, baseAlpha: 0.06, peakAlpha: 0.32, spacing: 60, cx: 0.5, cy: 0.42, k: 0.024, period: 4, driftX: 6, driftY: -6 }, grain ] }),
