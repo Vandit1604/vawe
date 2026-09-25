@@ -22,8 +22,9 @@ import { population, LIBRARY, SCENE_DIR } from '../../harness/lib/census.mjs';
 // "is this colour on the spec", but "is this copy, and this effect dose, the thing we would choose".
 // They live in one gate under one name because an author should run one command, not two.
 import { RULES, runRules } from '../../harness/lib/designspec-rules.mjs';
-import { parseColorRGB } from '../../core/color/engine.js';
+import { parseColorRGB, parseColor as parseColorEngine, colorAlpha } from '../../core/color/engine.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
 
 /** A scene's text as UNITS. One per layer, one per named fragment. Never joined: a joined blob let a
  *  pattern match across eight layers and invent a finding (see runRules). Fragments are read off
@@ -105,8 +106,13 @@ let theme = {};
 if (typeof data.theme === 'string') {
   const themePath = path.join(ROOT, 'themes', data.theme + '.json');
   if (!fs.existsSync(themePath)) { console.error(`✗ unknown theme "${data.theme}" (looked for ${path.relative(ROOT, themePath)}). Available: ${fs.readdirSync(path.join(ROOT, 'themes')).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).join(', ')}`); process.exit(2); }
-  try { theme = JSON.parse(fs.readFileSync(themePath, 'utf8')); }
+  let raw;
+  try { raw = JSON.parse(fs.readFileSync(themePath, 'utf8')); }
   catch (e) { console.error(`✗ ${path.relative(ROOT, themePath)} is not valid JSON: ${e.message}`); process.exit(2); }
+  // a theme on disk is a token file now (core/theme/tokens.js, core/theme/roles.js): expand it to the
+  // palette/type/gradient shape this gate (and the rules it reads colours from) already know how to read.
+  try { theme = isTokenFile(raw) ? expandTheme(raw, { parseColor: parseColorEngine, colorAlpha }) : raw; }
+  catch (e) { console.error(`✗ ${path.relative(ROOT, themePath)} failed to resolve: ${e.message}`); process.exit(2); }
 } else {
   theme = data.theme || {};
 }

@@ -19,7 +19,8 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { resolveLook } from '../../core/registry/theme-contract.js';
-import { isLightBg, colorDistance } from '../../core/color/engine.js';
+import { isLightBg, colorDistance, parseColor, colorAlpha } from '../../core/color/engine.js';
+import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
 import { buildKit } from '../../harness/lib/stagekit.mjs';
 import { readDesignSpec, legalSet, nearestToken } from '../../harness/lib/design-spec.mjs';
 import { parseStoryboard, blocksOf, fieldIn } from '../../harness/author/storyboard-parse.mjs';
@@ -48,7 +49,10 @@ export function kitValuesFromTheme(theme) {
 }
 
 function resolveTheme(scene) {
-  if (typeof scene.theme === 'string') return JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', scene.theme + '.json'), 'utf8'));
+  if (typeof scene.theme === 'string') {
+    const raw = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', scene.theme + '.json'), 'utf8'));
+    return isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+  }
   return scene.theme || {};
 }
 

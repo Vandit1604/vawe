@@ -27,7 +27,8 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { BG_NAMES, BG_BLURBS, bgPreset, bgPaletteFrom, bgOptKeys, bgOverErrors } from '../../core/backgrounds/index.js';
-import { isLightBg } from '../../core/color/engine.js';
+import { isLightBg, parseColor, colorAlpha } from '../../core/color/engine.js';
+import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
 import { junctionTable, marksOf, bindWindowsToJunctions } from '../../core/timeline/junctions.js';
 import { bgErrors } from '../../core/validate/validate.mjs';
 import { checkCuts } from '../../core/fx/ancestor-kills.js';
@@ -190,7 +191,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   let theme = null;
   if (themeName) {
     const tp = path.join(repoRoot, 'themes', `${themeName}.json`);
-    if (fs.existsSync(tp)) { try { theme = JSON.parse(fs.readFileSync(tp, 'utf8')); } catch { /* palette falls back */ } }
+    if (fs.existsSync(tp)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(tp, 'utf8'));
+        theme = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+      } catch { /* palette falls back */ }
+    }
   }
   const PAL = (theme && theme.bg) || bgPaletteFrom(theme && theme.palette) || undefined;
 

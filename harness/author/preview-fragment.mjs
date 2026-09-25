@@ -15,6 +15,8 @@ import puppeteer from 'puppeteer';
 import { serveRepo } from '../lib/render-harness.mjs';
 import { extractKitBlock } from '../lib/stagekit.mjs';
 import { fragPage, FULLBLEED_RE, INSET_RE } from '../lib/frag-page.mjs';
+import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { parseColor, colorAlpha } from '../../core/color/engine.js';
 // THE SAME SANITISER AND SCOPE THE FILM APPLIES. `core/layers/html.js`'s build() runs every hand-
 // authored fragment through `scopeStyles(sanitizeHtml(markup))` before it becomes DOM; this used to
 // preview the raw bytes untouched, so a style or attribute the render silently drops (an escaping
@@ -78,7 +80,8 @@ if (!fs.existsSync(themeFile)) {
   console.error(`  available: ${fs.readdirSync(path.join(ROOT, 'themes')).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5)).join(', ')}`);
   process.exit(1);
 }
-const theme = JSON.parse(fs.readFileSync(themeFile, 'utf8'));
+const rawTheme = JSON.parse(fs.readFileSync(themeFile, 'utf8'));
+const theme = isTokenFile(rawTheme) ? expandTheme(rawTheme, { parseColor, colorAlpha }) : rawTheme;
 const bg = flag('--bg', null) || theme.palette.bg;
 
 // pull the fragment out of raw HTML or a captured JSON ({html} | {parts:[{html}]})

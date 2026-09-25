@@ -25,6 +25,7 @@ import { chainErrors, edges, parseMotion, motionErrors, parseFragmentSpec, fragm
 import { resolvePx } from '../lib/placement-resolve.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
+import { expandThemeFile } from '../lib/theme-load.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 import { boundaryMechanism } from '../../core/transitions/lower.js';
 
@@ -248,7 +249,7 @@ if (cameraContinuityErrs.length) {
 
 const themeName = typeof scene.theme === 'string' ? scene.theme : (scene.theme && scene.theme.name) || 'default';
 const themeFile = typeof scene.theme === 'object' ? null : path.join(ROOT, 'themes', `${themeName}.json`);
-const theme = themeFile ? JSON.parse(fs.readFileSync(themeFile, 'utf8')) : scene.theme;
+const theme = themeFile ? expandThemeFile(JSON.parse(fs.readFileSync(themeFile, 'utf8'))) : scene.theme;
 const look = resolveLook(theme, { isLightBg });
 const aspect = scene.aspect || '16:9';
 const destination = scene.destination;

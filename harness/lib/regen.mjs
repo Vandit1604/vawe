@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
 import { buildKit, extractKitBlock, kitCheck } from './stagekit.mjs';
+import { expandThemeFile } from './theme-load.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const run = (label, cmd, args) => {
@@ -61,7 +62,7 @@ function kitRepaste(film) {
   const themeName = typeof scene.theme === 'string' ? scene.theme : (scene.theme && scene.theme.name) || 'default';
   const themeFile = typeof scene.theme === 'object' ? null : path.join(ROOT, 'themes', `${themeName}.json`);
   let theme;
-  try { theme = themeFile ? JSON.parse(fs.readFileSync(themeFile, 'utf8')) : scene.theme; }
+  try { theme = themeFile ? expandThemeFile(JSON.parse(fs.readFileSync(themeFile, 'utf8'))) : scene.theme; }
   catch { theme = null; }
   if (!theme) { console.log(`  · skipped: ${film} names no resolvable theme`); return 0; }
   const { block } = buildKit(theme, resolveLook, isLightBg);

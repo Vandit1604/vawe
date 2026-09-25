@@ -13,6 +13,7 @@ import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
 import { buildKit, kitCheck } from '../lib/stagekit.mjs';
 import { readDesignSpec } from '../lib/design-spec.mjs';
+import { expandThemeFile } from '../lib/theme-load.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -23,7 +24,7 @@ if (!film || !fs.existsSync(film)) { console.error('usage: node harness/author/s
 const scene = JSON.parse(fs.readFileSync(film, 'utf8'));
 const themeName = typeof scene.theme === 'string' ? scene.theme : (scene.theme && scene.theme.name) || 'default';
 const themeFile = typeof scene.theme === 'object' ? null : path.join(ROOT, 'themes', `${themeName}.json`);
-const theme = themeFile ? JSON.parse(fs.readFileSync(themeFile, 'utf8')) : scene.theme;
+const theme = themeFile ? expandThemeFile(JSON.parse(fs.readFileSync(themeFile, 'utf8'))) : scene.theme;
 if (!theme) { console.error(`stagekit: ${film} names no theme`); process.exit(1); }
 
 const spec = readDesignSpec(path.resolve(ROOT, film));

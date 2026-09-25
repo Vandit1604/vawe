@@ -8,13 +8,14 @@
 //        make house-style NAME=<brand> [THEME=<theme>]
 import fs from 'node:fs';
 import path from 'node:path';
+import { expandThemeFile } from '../../harness/lib/theme-load.mjs';
 
 const brand = process.argv[2];
 if (!brand) { console.error('usage: node scripts/brand/house-style.mjs <brand> [theme]'); process.exit(2); }
 const themeName = process.argv[3] || brand;
 const themePath = path.join('themes', themeName + '.json');
 if (!fs.existsSync(themePath)) { console.error(`theme not found: ${themePath} (pass a theme name as arg 2)`); process.exit(1); }
-const t = JSON.parse(fs.readFileSync(themePath, 'utf8'));
+const t = expandThemeFile(JSON.parse(fs.readFileSync(themePath, 'utf8')));
 const P = t.type || {}, C = t.palette || {}, M = t.motion || {};
 
 // dominance by the hero background's luminance (the "decide by looking" rule, approximated).

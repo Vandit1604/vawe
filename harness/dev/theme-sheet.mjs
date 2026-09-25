@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { frameTile, tileGrid, tileBox, renderOf } from '../../quality/gates/tile.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
 import { isLightBg } from '../../core/color/engine.js';
+import { expandThemeFile } from '../lib/theme-load.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCRATCH = path.join(ROOT, 'films/scene/_batch/theme-sheets');
@@ -29,7 +30,7 @@ if (!theme) { console.error('usage: node harness/dev/theme-sheet.mjs --theme <na
 
 const themePath = path.join(ROOT, 'themes', `${theme}.json`);
 if (!fs.existsSync(themePath)) { console.error(`theme-sheet: no theme at ${path.relative(ROOT, themePath)}`); process.exit(2); }
-const themeSpec = JSON.parse(fs.readFileSync(themePath, 'utf8'));
+const themeSpec = expandThemeFile(JSON.parse(fs.readFileSync(themePath, 'utf8')));
 const look = resolveLook(themeSpec, { isLightBg });
 
 const windows = look.backdrop && look.backdrop.length ? look.backdrop : ['plain'];

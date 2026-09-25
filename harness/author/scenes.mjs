@@ -14,6 +14,7 @@ import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard, timeline } from './storyboard-parse.mjs';
 import { chainErrors, parseMotion, motionErrors, parseEdge } from '../lib/contract.mjs';
 import { resolveLook } from '../../core/registry/theme-contract.js';
+import { expandThemeFile } from '../lib/theme-load.mjs';
 import { isLightBg } from '../../core/color/engine.js';
 import { buildKit } from '../lib/stagekit.mjs';
 
@@ -42,7 +43,7 @@ if (mErrs.length) {
 
 const themeName = typeof scene.theme === 'string' ? scene.theme : (scene.theme && scene.theme.name) || 'default';
 const themeFile = typeof scene.theme === 'object' ? null : path.join(ROOT, 'themes', `${themeName}.json`);
-const theme = themeFile ? JSON.parse(fs.readFileSync(themeFile, 'utf8')) : scene.theme;
+const theme = themeFile ? expandThemeFile(JSON.parse(fs.readFileSync(themeFile, 'utf8'))) : scene.theme;
 const { block: kitBlock } = buildKit(theme, resolveLook, isLightBg);
 const kitPath = film.replace(/\.json$/, '') + '.kit.css';
 const base = path.basename(film, '.json');

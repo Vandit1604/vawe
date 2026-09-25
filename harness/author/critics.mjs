@@ -24,6 +24,7 @@ import { stageOf, filePaths } from '../../quality/gates/stage.mjs';
 import { computeFeatures } from '../../quality/gates/craft-checklist.mjs';
 import { rulesFor, briefLine } from '../lib/craft-rules.mjs';
 import { frontmatter } from './storyboard-parse.mjs';
+import { expandThemeFile } from '../lib/theme-load.mjs';
 import { PLAN_JUDGE_CODES, isPlanJudgeCode, rankPlanJudgeFindings } from '../lib/plan-judge-codes.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -322,7 +323,7 @@ export function buildPlanJudgeBrief(arg) {
   let themeTokens = null;
   if (themeRel) {
     try {
-      const t = JSON.parse(fs.readFileSync(path.resolve(repoRoot, themeRel), 'utf8'));
+      const t = expandThemeFile(JSON.parse(fs.readFileSync(path.resolve(repoRoot, themeRel), 'utf8')));
       themeTokens = { palette: t.palette, vars: t.vars };
     } catch { /* not every plan-stage film has a resolvable theme yet, not fatal to this brief */ }
   }
