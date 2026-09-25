@@ -90,82 +90,67 @@ export function bakeTextSizeRoles(data, look) {
   return data;
 }
 
+// A scene that already choreographs layers with `motion` tracks is ALREADY directed, and its tracks
+// often span beats and use absolute times, which fight the injected camera and beat-wrapper model.
+// So the DIRECTED injections (camera + sceneUnits) skip such a scene (MISTAKES: a camera×motion /
+// sceneUnits×motion interaction produced non-deterministic garbage). The author can still opt in.
+function isChoreographed(data) {
+  return (data.layers || []).some(function has(L) {
+    return L && typeof L === 'object' && (Array.isArray(L.motion) && L.motion.length > 1 || (L.children || []).some(has));
+  });
+}
+
+// INFERRED CUTS, ABSENT-ONLY and ADDITIVE (MISTAKES #157): a film that already declares a cut, a
+// seam, or motion tracks is untouched, and one with no boundary gets none. `look.cuts.default`
+// supplies the fx name so the injected cut carries the brand's own personality. A raw `cuts[].style`
+// drives a whole-frame CUT presentation only, so `look.cuts.accent` is offered only when it is
+// mechanically usable as one (never the seam-only `cinematicZoom` default, which would inject a cut
+// that throws at render).
+function injectCuts(data, look) {
+  const flat = flattenLayers(data.layers);
+  const boundaries = inferCuts(flat, data.duration);
+  if (!boundaries.length) return;
+  // chooseCutStyles (core/timeline/junctions.js) reads the relationship at each joint and RULES OUT
+  // what it makes dishonest, choosing only among what the theme already supplied (never inventing a
+  // name into it, MISTAKES #159).
+  const defaultName = (look && look.cuts && look.cuts.default) || 'fade';
+  const accentName = (look && look.cuts && look.cuts.accent) || 'cinematicZoom';
+  const cutsLook = { default: CUT_PRESENTATIONS[defaultName] ? defaultName : 'fade' };
+  if (CUT_PRESENTATIONS[accentName]) cutsLook.accent = accentName;
+  data.cuts = chooseCutStyles(boundaries, flat, { cuts: cutsLook, bg: data.bg, layerSpeedAt })
+    .map(({ t, style, reason }) => ({ t, style, _why: reason }));
+}
+
 export function produceBaseline(data, theme, frame, look) {
   if (!data || typeof data !== 'object') return data;
   if (data.module && data.module !== 'scene') return data;   // scene module only
   if (data.produced === false) return bakeCameraMove(data, frame);  // opts out of the INJECTED baseline, not of
   // the author's own `cameraMove` sugar: that must still become real keys or it renders as nothing.
   // NOTE: the baseline no longer INJECTS a background. `bg` is a REQUIRED authoring field
-  // (core/validate.mjs): the author must declare a preset or an explicit `plain`, so the backdrop is
-  // always a deliberate choice, never a silent default that can be brand-wrong (the paperShapes lesson).
+  // (core/validate.mjs): the author must declare a preset or an explicit `plain`.
 
-  // A scene that already choreographs layers with `motion` tracks is ALREADY directed, and its tracks often
-  // span beats and use absolute times, which fight the injected camera and the beat-wrapper model. So the
-  // DIRECTED injections (camera + sceneUnits) SKIP such a scene (a camera×motion / sceneUnits×motion
-  // interaction produced non-deterministic garbage on motion-reel-v2, MISTAKES). The author can still opt in.
-  const choreographed = (data.layers || []).some(function has(L) { return L && typeof L === 'object' && (Array.isArray(L.motion) && L.motion.length > 1 || (L.children || []).some(has)); });
+  const choreographed = isChoreographed(data);
 
-  // INFERRED CUTS. 101 of 181 films ship with no joint at all: no cut, no seam, no transition. That one
-  // fact suppresses four systems downstream that only fire when a film HAS a joint (sceneUnits below,
-  // bindWindowsToJunctions, audio-bridge cues, shotWindows). ABSENT-ONLY and ADDITIVE, the same two
-  // constraints MISTAKES #157 paid for: a film that already declares a cut, a seam, or motion tracks is
-  // untouched, and one where inferCuts finds no boundary (a contact sheet, everything arriving at once)
-  // gets none, which is the true answer for it. `look.cuts.default` supplies the fx name so the injected
-  // cut still carries the brand's own cut personality rather than a hardcoded 'fade'.
+  // `sceneUnits: false`, WRITTEN BY THE AUTHOR, skips injection outright: a fading cut with no
+  // scene-unit wrapper is refused at render, so an explicit `false` must survive untouched rather
+  // than sit under a freshly-injected fading cut (cadence-film.json is exactly this case).
   //
-  // `sceneUnits: false`, WRITTEN BY THE AUTHOR, skips injection outright. A `fade` (or any other
-  // fading/masking style) on a whole-frame cut with no scene-unit wrapper is refused at render
-  // (films/scene/scene.js: "transitions only by fading/masking, which a whole-frame cut cannot do"),
-  // because there is nothing under the fade to cross into. sceneUnits below only fills an ABSENT field,
-  // so an explicit `false` would survive untouched under a freshly-injected fading cut and turn what was
-  // a clean render into a boot-time refusal. cadence-film.json is exactly this case in the library today
-  // (sceneUnits:false, no joints): skipped, not force-converted to a moving style, because "false" is a
-  // decision an author made and this pass does not get to overrule it.
-  //
-  // ORDER IS LOAD-BEARING: injection must run BEFORE the sceneUnits block below, so that block sees the
-  // cuts just added and turns beat wrappers on for them in the SAME pass. Reorder the two and a freshly
-  // cut film would hit the identical fading-cut refusal on its first render.
+  // ORDER IS LOAD-BEARING: injection must run BEFORE the sceneUnits block below, so that block sees
+  // the cuts just added and turns beat wrappers on for them in the SAME pass.
   if (data.sceneUnits !== false
       && !(Array.isArray(data.cuts) && data.cuts.length) && !(Array.isArray(data.seams) && data.seams.length)
       && !choreographed) {
-    const flat = flattenLayers(data.layers);
-    const boundaries = inferCuts(flat, data.duration);
-    // CONTENT-AWARE, NOT CONTENT-BLIND. inferCuts only knows the GAP between beat starts; it says
-    // nothing about what sits on either side. chooseCutStyles (core/timeline/junctions.js) reads the
-    // relationship at each joint (a surviving layer, overlapping boxes, a medium/backdrop change, a
-    // layer still moving) and RULES OUT what that relationship makes dishonest, choosing only among
-    // what remains: the theme's own two named cuts (`look.cuts.default`/`accent`) or the doctrine's
-    // hard-cut default. The engine narrows a set the theme already supplied; it never invents a name
-    // into it, which is the whole distinction that keeps this from repeating MISTAKES #159 (the engine
-    // once picked the BACKGROUND itself, and nobody ever designed one again).
-    if (boundaries.length) {
-      // A raw `cuts[].style` drives a whole-frame CUT presentation only (core/cuts/presentations.js);
-      // `look.cuts.accent` is written for the richer `transitions[]` sugar and its DEFAULT value
-      // (`cinematicZoom`) is a seam-only name that PRESENTATIONS does not carry at all, so offering it
-      // here would inject a cut that throws at render on the very first film that earns the accent.
-      // This is the same structural rule-out as a surviving layer or an overlapping box: a name that
-      // is not mechanically usable as a raw cut is never in the compatible set, theme-picked or not.
-      const defaultName = (look && look.cuts && look.cuts.default) || 'fade';
-      const accentName = (look && look.cuts && look.cuts.accent) || 'cinematicZoom';
-      const cutsLook = { default: CUT_PRESENTATIONS[defaultName] ? defaultName : 'fade' };
-      if (CUT_PRESENTATIONS[accentName]) cutsLook.accent = accentName;
-      data.cuts = chooseCutStyles(boundaries, flat, { cuts: cutsLook, bg: data.bg, layerSpeedAt })
-        .map(({ t, style, reason }) => ({ t, style, _why: reason }));
-    }
+    injectCuts(data, look);
   }
 
   // SCENE-UNIT TRANSITIONS. A film WITH cuts that hasn't opted into unit transitions gets them, so the
-  //    beats swap as whole units (the produced default). Skip choreographed scenes.
+  // beats swap as whole units (the produced default). Skip choreographed scenes.
   if (Array.isArray(data.cuts) && data.cuts.length && data.sceneUnits == null && !choreographed) {
     data.sceneUnits = true;
   }
 
-  // NOTE: kinetic headlines are NOT injected here. Auto-splitting an existing text layer MUTATES its
-  // structure, which broke a layer carrying a `motion` track (non-determinism) and masked the audit's
-  // weak-headline contrast check (it measures the whole layer, not per-word units). Structure-changing
-  // baselines are unsafe to inject blindly; kinetic type is nudged by the direction floor (no-kinetic-type)
-  // and authored per-headline instead. The baseline stays ADDITIVE (sceneUnits + baking authored sugar),
-  // it never rewrites a layer the author already wrote.
+  // NOTE: kinetic headlines are NOT injected here (structure-changing baselines are unsafe to inject
+  // blindly); the baseline stays ADDITIVE, never rewriting a layer the author already wrote.
   applyAnticipateDefault(data, theme);
   bakeCameraMove(data, frame);
   return data;
@@ -242,6 +227,57 @@ export function applyAnticipateDefault(data, theme) {
 // EVERY REFUSAL NAMES THE LAYER AND SAYS WHAT TO DO INSTEAD, because "invalid" is worse than the silence
 // it replaces. The one it does not raise itself is the scene that also declares its own `camera`:
 // bakeCameraMove refuses that for every move at once, three lines below.
+function findCursorLayer(data, cursorId) {
+  const cursors = [];
+  let hit = null;
+  const walk = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (L.type === 'cursor') cursors.push(L);
+    if (!hit && L.id === cursorId) hit = L;
+    walk(L.children); walk(L.layers);
+  } };
+  walk(data.layers);
+  const menu = cursors.length ? cursors.map((L) => JSON.stringify(L.id ?? '(no id)')).join(', ') : 'none';
+  if (!hit)
+    throw new Error(`cameraMove "followCursor" names a layer "${cursorId}" that this scene does not have.`
+      + ` Its cursor layers are: ${menu}. Give the pointer an \`id\` and name that one.`);
+  if (hit.type !== 'cursor')
+    throw new Error(`cameraMove "followCursor" names "${cursorId}", which is a ${hit.type || 'text'} layer.`
+      + ` Only a \`cursor\` layer carries the \`path\` and \`clicks\` this move reads (this scene's cursors:`
+      + ` ${menu}). To push toward a fixed point on any other layer, use \`diveIn\` with its tx/ty.`);
+  return hit;
+}
+
+function validateCursorMoveSpec(spec, hit) {
+  if (!Array.isArray(hit.path) || !hit.path.length)
+    throw new Error(`cameraMove "followCursor" follows cursor "${spec.cursor}", which declares no \`path\`, so`
+      + ' there is nowhere to follow. Give the pointer `"path": [{t,x,y}, ...]`, or drop the sugar and'
+      + ' hand-key `diveIn` at the point you mean.');
+  if (!Array.isArray(hit.clicks) || !hit.clicks.length)
+    throw new Error(`cameraMove "followCursor" follows cursor "${spec.cursor}", which declares no \`clicks\`.`
+      + ' The move IS the arrival at a press, so with none there is no moment to arrive at. Add'
+      + ' `"clicks": [t]`, or use `travel`/`panFollow` to ride the pointer without one.');
+  if (spec.start != null)
+    throw new Error(`cameraMove "followCursor" takes its "start" from cursor "${spec.cursor}" (${hit.start ?? 0}s),`
+      + ' because the click times are on that layer\'s own clock. A second start here would slide the'
+      + ' camera off the presses it was derived from. Move the cursor layer instead.');
+}
+
+// The base the path is measured from. core/layers/cursor.js anchors a pathed pointer at (0,0) when the
+// author gives it no x/y. A RELATIVE COORDINATE IS REFUSED AND NOT GUESSED: this bake runs before
+// resolveCoords, so "center" or "40%" is still a string here and would aim the camera at NaN.
+function resolveCursorBase(spec, hit) {
+  const base = [hit.x ?? 0, hit.y ?? 0];
+  for (const [i, k] of [[0, 'x'], [1, 'y']]) {
+    if (!Number.isFinite(base[i]))
+      throw new Error(`cameraMove "followCursor" reads the base position of cursor "${spec.cursor}", and its`
+        + ` "${k}" is ${JSON.stringify(base[i])}. The camera bakes before relative coordinates resolve, so a`
+        + ' cursor it follows states its base in absolute stage px, or omits x/y entirely (which anchors the'
+        + ' path at 0,0, the same default the pointer itself uses).');
+  }
+  return base;
+}
+
 function bindCursorCamera(spec, data) {
   if (!spec || typeof spec !== 'object') return spec;
   const move = spec.move ? resolveCameraMove(spec.move) : null;
@@ -256,47 +292,9 @@ function bindCursorCamera(spec, data) {
     throw new Error('cameraMove "followCursor" needs `"cursor": "<layer id>"`, the id of the cursor layer'
       + ' whose path the camera follows. The move exists so the pointer stays the ONLY place that path is'
       + ' written, and without the id there is nothing to derive from.');
-  const cursors = [];
-  let hit = null;
-  const walk = (ls) => { for (const L of ls || []) {
-    if (!L || typeof L !== 'object') continue;
-    if (L.type === 'cursor') cursors.push(L);
-    if (!hit && L.id === spec.cursor) hit = L;
-    walk(L.children); walk(L.layers);
-  } };
-  walk(data.layers);
-  const menu = cursors.length ? cursors.map((L) => JSON.stringify(L.id ?? '(no id)')).join(', ') : 'none';
-  if (!hit)
-    throw new Error(`cameraMove "followCursor" names a layer "${spec.cursor}" that this scene does not have.`
-      + ` Its cursor layers are: ${menu}. Give the pointer an \`id\` and name that one.`);
-  if (hit.type !== 'cursor')
-    throw new Error(`cameraMove "followCursor" names "${spec.cursor}", which is a ${hit.type || 'text'} layer.`
-      + ` Only a \`cursor\` layer carries the \`path\` and \`clicks\` this move reads (this scene's cursors:`
-      + ` ${menu}). To push toward a fixed point on any other layer, use \`diveIn\` with its tx/ty.`);
-  if (!Array.isArray(hit.path) || !hit.path.length)
-    throw new Error(`cameraMove "followCursor" follows cursor "${spec.cursor}", which declares no \`path\`, so`
-      + ' there is nowhere to follow. Give the pointer `"path": [{t,x,y}, ...]`, or drop the sugar and'
-      + ' hand-key `diveIn` at the point you mean.');
-  if (!Array.isArray(hit.clicks) || !hit.clicks.length)
-    throw new Error(`cameraMove "followCursor" follows cursor "${spec.cursor}", which declares no \`clicks\`.`
-      + ' The move IS the arrival at a press, so with none there is no moment to arrive at. Add'
-      + ' `"clicks": [t]`, or use `travel`/`panFollow` to ride the pointer without one.');
-  if (spec.start != null)
-    throw new Error(`cameraMove "followCursor" takes its "start" from cursor "${spec.cursor}" (${hit.start ?? 0}s),`
-      + ' because the click times are on that layer\'s own clock. A second start here would slide the'
-      + ' camera off the presses it was derived from. Move the cursor layer instead.');
-  // The base the path is measured from. core/layers/cursor.js anchors a pathed pointer at (0,0) when the
-  // author gives it no x/y, so this reads that same default rather than holding a second opinion about it.
-  // A RELATIVE COORDINATE IS REFUSED AND NOT GUESSED: this bake runs before resolveCoords (core/boot.js),
-  // so "center" or "40%" is still a string here and would aim the camera at NaN without a word.
-  const base = [hit.x ?? 0, hit.y ?? 0];
-  for (const [i, k] of [[0, 'x'], [1, 'y']]) {
-    if (!Number.isFinite(base[i]))
-      throw new Error(`cameraMove "followCursor" reads the base position of cursor "${spec.cursor}", and its`
-        + ` "${k}" is ${JSON.stringify(base[i])}. The camera bakes before relative coordinates resolve, so a`
-        + ' cursor it follows states its base in absolute stage px, or omits x/y entirely (which anchors the'
-        + ' path at 0,0, the same default the pointer itself uses).');
-  }
+  const hit = findCursorLayer(data, spec.cursor);
+  validateCursorMoveSpec(spec, hit);
+  const base = resolveCursorBase(spec, hit);
   const { cursor: _named, ...rest } = spec;
   return { ...rest, path: hit.path, clicks: hit.clicks, base, start: hit.start ?? 0 };
 }
@@ -539,88 +537,59 @@ function resolveTargetSpecs(data, specs, dims) {
   }
 }
 
-export function bakeCameraMove(data, frame) {
-  if (!data || !data.cameraMove) return data;
-  const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
-  if (Array.isArray(data.camera) && data.camera.length)
-    throw new Error('scene declares BOTH `camera` keyframes and `cameraMove` sugar, one would silently'
-      + ' overwrite the other. Keep one: the sugar, or the keys it builds.');
-  // `follow` cannot become a keyframe array (see core/camera-moves/follow.js: the target's live box
-  // does not exist until resolveBoxes(t) runs, per frame). It resolves onto its OWN field,
-  // `data.cameraFollow`, which the keyframe pipeline (`cameraAt`, `assertKeyHandles`, …) never reads,
-  // and it cannot be one leg among others: there is no keyframe array to splice it into.
-  if (specs.some((s) => s && resolveCameraMove(s.move) === 'followLayer')) {
-    if (specs.length > 1)
-      throw new Error('cameraMove "followLayer" tracks a live layer box at RENDER time, not at build time '
-        + 'like every other move, so it is not a keyframe array a second leg can be spliced into. '
-        + 'Give the scene one `cameraMove: {move:"followLayer", id:"<layer>"}` with nothing else in the list.');
-    if (data.cameraFollow)
-      throw new Error('scene declares BOTH `cameraFollow` and `cameraMove: {move:"followLayer"}`, one would'
-        + ' silently overwrite the other. Keep one.');
-    data.cameraFollow = bindFollowCamera(specs[0], data);
-    delete data.cameraMove;
-    return data;
-  }
-  // sceneDims so a move that centres a point centres it in the REAL canvas (core/camera-moves.js can only
-  // default to landscape). Same call expand-blocks.mjs makes; the math stays in camera-moves.js.
-  const dims = (frame && frame.W > 0 && frame.H > 0) ? [frame.W, frame.H] : sceneDims(data);
-  // CAMERA BY ELEMENT, before anything else touches the spec: a diveIn's own `target`, or a travel
-  // station's, becomes a plain tx/ty/(to) here, so bindCursorCamera and buildCameraMove below still see
-  // only the coordinates they always have.
-  resolveTargetSpecs(data, specs, dims);
-  // A cursor binding resolves HERE, inside the one funnel, so `cursor` cannot be a field an author
-  // writes and nothing reads.
-  // `beats` (item 3, cross-seam camera) is THIS FUNNEL'S OWN field, read below to report a move that
-  // overruns the beats it names: it is never a param a move generator itself reads, so it is stripped
-  // before `buildCameraMove` sees the spec, the same way `target`/`cursor` are resolved and consumed
-  // above rather than passed through to a generator that would refuse an unknown key.
-  const built = specs.map((s) => { const { beats: _beats, ...rest } = s; return { spec: s, kf: buildCameraMove(bindCursorCamera(rest, data), dims) }; });
+// `follow` cannot become a keyframe array (the target's live box does not exist until resolveBoxes(t)
+// runs, per frame), so it resolves onto its own field, `data.cameraFollow`, rather than one leg among
+// others. Returns true when this spec set was a followLayer move (data already mutated / returned).
+function bakeFollowLayerCamera(data, specs) {
+  if (!specs.some((s) => s && resolveCameraMove(s.move) === 'followLayer')) return false;
+  if (specs.length > 1)
+    throw new Error('cameraMove "followLayer" tracks a live layer box at RENDER time, not at build time '
+      + 'like every other move, so it is not a keyframe array a second leg can be spliced into. '
+      + 'Give the scene one `cameraMove: {move:"followLayer", id:"<layer>"}` with nothing else in the list.');
+  if (data.cameraFollow)
+    throw new Error('scene declares BOTH `cameraFollow` and `cameraMove: {move:"followLayer"}`, one would'
+      + ' silently overwrite the other. Keep one.');
+  data.cameraFollow = bindFollowCamera(specs[0], data);
+  delete data.cameraMove;
+  return true;
+}
 
-  // THE ONE PLACE EVERY CAMERA SPEC MEETS, REGARDLESS OF WHO WROTE IT. `data.cameraMove` can be filled
-  // by hand, by harness/author/assemble.mjs (one entry per beat's `camera:` line), or by
-  // recipes/expand.mjs (a camera-kind recipe like `window-dolly`), and those three never see each
-  // other's work: assemble only knows about beats, the recipe expander only appends. This funnel is the
-  // only point that sees the FINAL array, so it is the only point that can referee it.
-  //
-  // A window is read off the spec's OWN built keyframes (min/max `t`), never assumed from `start`/`dur`
-  // alone: not every move keys a flat span (`travel` visits several stations with per-station dwells,
-  // `cameraShake` pre-samples one key per rendered frame), so the keyframes it actually produced are the
-  // only honest account of when it is live.
-  // `hold` (core/camera-moves/hold.js) is a real move that emits ZERO keyframes on purpose: there is no
-  // camera to fake a path for. Its window can't come from kf then, so it falls back to the spec's own
-  // start/dur, the same seconds assemble.mjs windowed it to. Every other move keys at least one frame,
-  // so this only ever engages for the one move that deliberately has none.
-  const windows = built.map(({ spec, kf }) => {
+// A window is read off the spec's OWN built keyframes (min/max `t`), never assumed from `start`/`dur`
+// alone: not every move keys a flat span. `hold` emits ZERO keyframes on purpose and falls back to
+// the spec's own start/dur, the seconds assemble.mjs windowed it to.
+function cameraWindowsOf(built) {
+  return built.map(({ spec, kf }) => {
     if (!kf.length) return { move: spec.move, from: spec.start ?? 0, to: (spec.start ?? 0) + (spec.dur ?? 0) };
     const ts = kf.map((k) => k.t);
     return { move: spec.move, from: Math.min(...ts), to: Math.max(...ts) };
   });
+}
 
-  // CROSS-SEAM CAMERA (item 3, owner Q2): a camera move that continues across a beat seam must say so
-  // explicitly, by listing the beats it spans (`cameraMove: {..., beats: ["b1","b2"]}`). Only meaningful
-  // once a scene carries `beats[]`; a scene without one behaves exactly as today (this block is a no-op).
-  // REPORT, NEVER BLOCK: a move whose baked window runs outside the beats it names is very likely a stale
-  // declaration (a beat got retimed, or the move was extended), but the render is not wrong because of
-  // it, so this prints instead of throwing, the same report-only shape as `beats[]` vs the storyboard.
-  if (Array.isArray(data.beats) && data.beats.length) {
-    const beatById = Object.fromEntries(data.beats.filter((b) => b && b.id).map((b) => [b.id, b]));
-    built.forEach(({ spec }, i) => {
-      if (!Array.isArray(spec.beats) || !spec.beats.length) return;
-      const named = spec.beats.map((id) => beatById[id]).filter(Boolean);
-      if (!named.length) return;
-      const spanFrom = Math.min(...named.map((b) => b.start ?? 0));
-      const spanTo = Math.max(...named.map((b) => (b.start ?? 0) + (b.duration ?? 0)));
-      const w = windows[i];
-      if (w.from < spanFrom - 1e-6 || w.to > spanTo + 1e-6) {
-        console.warn(`cameraMove "${w.move}" declares beats [${spec.beats.join(', ')}] `
-          + `(${spanFrom}s-${spanTo}s) but its resolved window is ${w.from}s-${w.to}s, which runs outside `
-          + `them. Add the beat it actually reaches to the \`beats\` list, or retime the move to fit.`);
-      }
-    });
-  }
-  // Strict overlap, not touch: two specs sharing an endpoint (one ends exactly where the next begins,
-  // e.g. assemble's per-beat windows at a real cut) is ordinary editing grammar, not a race, and MUST
-  // stay legal, or every beat-cut film with more than one `camera:` line would refuse itself.
+// CROSS-SEAM CAMERA: a move naming the beats it spans (`beats: ["b1","b2"]`) is reported, never
+// blocked, when its baked window runs outside them: likely a stale declaration (a beat retimed, or
+// the move extended), but the render is not wrong because of it.
+function reportCrossSeamCamera(data, built, windows) {
+  if (!(Array.isArray(data.beats) && data.beats.length)) return;
+  const beatById = Object.fromEntries(data.beats.filter((b) => b && b.id).map((b) => [b.id, b]));
+  built.forEach(({ spec }, i) => {
+    if (!Array.isArray(spec.beats) || !spec.beats.length) return;
+    const named = spec.beats.map((id) => beatById[id]).filter(Boolean);
+    if (!named.length) return;
+    const spanFrom = Math.min(...named.map((b) => b.start ?? 0));
+    const spanTo = Math.max(...named.map((b) => (b.start ?? 0) + (b.duration ?? 0)));
+    const w = windows[i];
+    if (w.from < spanFrom - 1e-6 || w.to > spanTo + 1e-6) {
+      console.warn(`cameraMove "${w.move}" declares beats [${spec.beats.join(', ')}] `
+        + `(${spanFrom}s-${spanTo}s) but its resolved window is ${w.from}s-${w.to}s, which runs outside `
+        + `them. Add the beat it actually reaches to the \`beats\` list, or retime the move to fit.`);
+    }
+  });
+}
+
+// Strict overlap, not touch: two specs sharing an endpoint is ordinary editing grammar and must stay
+// legal. `cameraAt` concatenates every spec's keyframes and reads them assuming ascending time, so an
+// overlap does not blend, it corrupts the read.
+function checkNoCameraOverlap(windows) {
   for (let i = 0; i < windows.length; i++) {
     for (let j = i + 1; j < windows.length; j++) {
       const a = windows[i], b = windows[j];
@@ -633,11 +602,30 @@ export function bakeCameraMove(data, frame) {
       }
     }
   }
-  // SORTED BY START, NOT TRUSTED IN ARRAY ORDER. `cameraAt` (core/timeline/sequence.js) walks the flat
-  // array assuming it is already ascending in time; a camera-kind recipe's leg is appended to whatever
-  // `cameraMove` already held (recipes/expand.mjs), which can land it BEFORE an earlier-written, later-
-  // starting spec in the array without landing before it in TIME. Sorting here, once, on the one array
-  // every source feeds, is cheaper than asking every writer to keep the array sorted by hand.
+}
+
+export function bakeCameraMove(data, frame) {
+  if (!data || !data.cameraMove) return data;
+  const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
+  if (Array.isArray(data.camera) && data.camera.length)
+    throw new Error('scene declares BOTH `camera` keyframes and `cameraMove` sugar, one would silently'
+      + ' overwrite the other. Keep one: the sugar, or the keys it builds.');
+  if (bakeFollowLayerCamera(data, specs)) return data;
+
+  // sceneDims so a move that centres a point centres it in the REAL canvas. CAMERA BY ELEMENT resolves
+  // before anything else touches the spec, so bindCursorCamera and buildCameraMove below still see
+  // only the coordinates they always have.
+  const dims = (frame && frame.W > 0 && frame.H > 0) ? [frame.W, frame.H] : sceneDims(data);
+  resolveTargetSpecs(data, specs, dims);
+  // `beats` (cross-seam camera) is this funnel's own field, stripped before buildCameraMove sees the
+  // spec, the same way `target`/`cursor` are resolved and consumed above.
+  const built = specs.map((s) => { const { beats: _beats, ...rest } = s; return { spec: s, kf: buildCameraMove(bindCursorCamera(rest, data), dims) }; });
+
+  const windows = cameraWindowsOf(built);
+  reportCrossSeamCamera(data, built, windows);
+  checkNoCameraOverlap(windows);
+  // SORTED BY START, NOT TRUSTED IN ARRAY ORDER: `cameraAt` walks the flat array assuming it is
+  // already ascending in time, and a recipe's leg can be appended out of time order.
   const order = built.map((_, i) => i).sort((i, j) => windows[i].from - windows[j].from);
   data.camera = order.flatMap((i) => built[i].kf);
   delete data.cameraMove;

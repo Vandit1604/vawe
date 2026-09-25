@@ -106,16 +106,7 @@ function assertInRange(tempo) {
  * (byte-identical expansion). Refuses a value outside [0.5, 2]: past that range a scene needs
  * re-timing by hand, not a global dial.
  */
-export function resolveTempo(data) {
-  if (!data || typeof data !== 'object' || data.tempo == null) return data;
-  const tempo = data.tempo;
-  delete data.tempo;
-  if (tempo === 1) return data;
-  assertInRange(tempo);
-
-  const inv = 1 / tempo;   // every authored TIME grows by this factor when tempo < 1
-  const mul = tempo;       // every authored RATE (cps) shrinks by this factor when tempo < 1
-
+function scaleAllTimedFields(data, inv, mul) {
   if (typeof data.duration === 'number') data.duration = snapTime(data.duration * inv);
   if (Array.isArray(data.beats)) for (const b of data.beats) scaleKeys(b, BEAT_TIME_KEYS, inv);
   for (const L of data.layers || []) scaleLayer(L, inv, mul);
@@ -128,5 +119,17 @@ export function resolveTempo(data) {
     const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
     for (const s of specs) scaleCameraSpec(s, inv);
   }
+}
+
+export function resolveTempo(data) {
+  if (!data || typeof data !== 'object' || data.tempo == null) return data;
+  const tempo = data.tempo;
+  delete data.tempo;
+  if (tempo === 1) return data;
+  assertInRange(tempo);
+
+  const inv = 1 / tempo;   // every authored TIME grows by this factor when tempo < 1
+  const mul = tempo;       // every authored RATE (cps) shrinks by this factor when tempo < 1
+  scaleAllTimedFields(data, inv, mul);
   return data;
 }

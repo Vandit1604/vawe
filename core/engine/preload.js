@@ -24,14 +24,14 @@ export function walkData(node, visit) {
 export async function fetchJson(url, what = 'file') {
   let res;
   try { res = await fetch(url); }
-  catch (e) { throw new Error(`${what}: ${url} could not be fetched (${e.message})`); }
+  catch (e) { throw new Error(`${what}: ${url} could not be fetched (${e.message})`, { cause: e }); }
   if (!res.ok) {
     throw new Error(`${what}: ${url} → HTTP ${res.status}, the render server did not serve it. `
       + `Either the file does not exist, or its path is outside the roots the server allows `
       + `(core/, themes/, films/, assets/, .vawe-data/scenes/, .vawe-data/uploads/).`);
   }
   try { return await res.json(); }
-  catch (e) { throw new Error(`${what}: ${url} is not valid JSON (${e.message})`); }
+  catch (e) { throw new Error(`${what}: ${url} is not valid JSON (${e.message})`, { cause: e }); }
 }
 
 const decodeImage = (src, crossOrigin) => new Promise((res, rej) => {
@@ -52,7 +52,7 @@ export async function preloadSpectrum(data) {
     const r = await fetch(data.audio.spectrum.startsWith('/') ? data.audio.spectrum : '/' + data.audio.spectrum);
     if (r.ok) window.__spectrum = await r.json();
     else console.warn(`spectrum: ${data.audio.spectrum} not found (${r.status}), react layers will hold still`);
-  } catch (e) { console.warn(`spectrum: ${data.audio.spectrum} unreadable, react layers will hold still`); }
+  } catch { console.warn(`spectrum: ${data.audio.spectrum} unreadable, react layers will hold still`); }
 }
 
 // cobe is LAZY and AWAITED, for the same two reasons three is: a `globe` layer builds synchronously
@@ -62,7 +62,7 @@ export async function preloadSpectrum(data) {
 export async function preloadCobe(data) {
   if (!JSON.stringify(data).includes('"globe"')) return;
   try { window.__cobe = (await import('/assets/vendor/cobe.module.js')).default; }
-  catch (e) { throw new Error('cobe failed to load from /assets/vendor/cobe.module.js: ' + e.message); }
+  catch (e) { throw new Error('cobe failed to load from /assets/vendor/cobe.module.js: ' + e.message, { cause: e }); }
 }
 
 // three.js is LAZY and AWAITED. Lazy because it is 635KB and most scenes never touch it; awaited
@@ -72,7 +72,7 @@ export async function preloadCobe(data) {
 export async function preloadThree(data) {
   if (!JSON.stringify(data).includes('"three"')) return;
   try { window.THREE = await import('/assets/vendor/three.module.min.js'); }
-  catch (e) { throw new Error('three.js failed to load from /assets/vendor/three.module.min.js: ' + e.message); }
+  catch (e) { throw new Error('three.js failed to load from /assets/vendor/three.module.min.js: ' + e.message, { cause: e }); }
   window.__typefaces = {};
   // DECODED TEXTURES, OWNED HERE. textureFrom used to build its own `new Image()` from the raw path after
   // preloadImages had decoded and discarded an identical one. A second load of the same URL still
@@ -101,7 +101,7 @@ export async function preloadThree(data) {
   walkData(data, (o) => { if (o && typeof o === 'object' && o.three === 'extrudeText' && typeof o.font === 'string') fonts.add(o.font); });
   for (const f of fonts) {
     try { window.__typefaces[f] = await fetchJson(`/assets/fonts/3d/${f}.typeface.json`, 'typeface'); }
-    catch (e) { /* left absent on purpose: three-fx.js throws with the `make glyphs` instruction */ }
+    catch { /* left absent on purpose: three-fx.js throws with the `make glyphs` instruction */ }
   }
 }
 
@@ -118,7 +118,7 @@ export async function preloadCanvasFx(data) {
     try {
       const url = bakeCanvasFx(await decodeImage(job.src, true), job.spec);
       if (url) window.__canvasFx[key] = url;
-    } catch (e) { /* missing/tainted source → image.js falls back to the raw <img> */ }
+    } catch { /* missing/tainted source → image.js falls back to the raw <img> */ }
   }
 }
 
@@ -130,7 +130,7 @@ export async function preloadComponents(data) {
   walkData(data, (o) => { if (typeof o === 'string' && /\/(components|scenes)\/[^/]+\.json$/.test(o)) paths.add(o); });
   // A component that fails to load leaves its `component` layer EMPTY. Warn (matches lottie/gsap) so a
   // moved/mistyped capture path is visible, not a silently blank box.
-  for (const p of paths) { try { const r = await fetch(p); if (r.ok) window.__components[p] = await r.json(); else console.warn(`component: ${p} → ${r.status}, layer renders EMPTY`); } catch (e) { console.warn(`component: ${p} unreadable, layer renders EMPTY`); } }
+  for (const p of paths) { try { const r = await fetch(p); if (r.ok) window.__components[p] = await r.json(); else console.warn(`component: ${p} → ${r.status}, layer renders EMPTY`); } catch { console.warn(`component: ${p} unreadable, layer renders EMPTY`); } }
 }
 
 // Preload the images INSIDE captured components and hand-authored fragments.
@@ -204,7 +204,7 @@ async function fetchHtmlText(src) {
   const url = srcUrl(src);
   let res;
   try { res = await fetch(url); }
-  catch (e) { throw new Error(`html fragment: ${url} could not be fetched (${e.message})`); }
+  catch (e) { throw new Error(`html fragment: ${url} could not be fetched (${e.message})`, { cause: e }); }
   if (!res.ok) {
     throw new Error(`html fragment: ${url} → HTTP ${res.status}, the render server did not serve it. `
       + `Either the file does not exist, or its path is outside the roots the server allows `
@@ -219,7 +219,7 @@ async function fetchHtmlText(src) {
 export async function preloadClips(data) {
   window.__clips = {};
   const paths = new Set();
-  walkData(data, (o) => { if (typeof o === 'string' && /\/manifest\.json$/.test(o)) paths.add(o); });
+  walkData(data, (o) => { if (typeof o === 'string' && o.endsWith('/manifest.json')) paths.add(o); });
   for (const p of paths) {
     try {
       const r = await fetch(p);
@@ -227,7 +227,7 @@ export async function preloadClips(data) {
       const man = await r.json();
       window.__clips[p] = man;
       await Promise.all((man.frames || []).map((src) => decodeImage(src).catch(() => {})));
-    } catch (e) { console.warn(`clip: ${p} unreadable, layer renders EMPTY`); }
+    } catch { console.warn(`clip: ${p} unreadable, layer renders EMPTY`); }
   }
 }
 
@@ -241,7 +241,7 @@ export async function preloadRansomSprites(data) {
   const base = '/assets/ransom/';
   let manifest;
   try { manifest = await fetchJson(base + 'manifest.json', 'ransom sprites'); }
-  catch (e) { throw new Error('ransom sprites: /assets/ransom/manifest.json is missing or unreadable, run `make ransom-sprites` after unzipping a cut-out letter pack into assets/ransom-src/'); }
+  catch (e) { throw new Error('ransom sprites: /assets/ransom/manifest.json is missing or unreadable, run `make ransom-sprites` after unzipping a cut-out letter pack into assets/ransom-src/', { cause: e }); }
   await Promise.all(Object.values(manifest).flat().map((v) => decodeImage(base + v.file).catch(() => {})));
   window.__ransomSprites = { base, manifest };
 }
@@ -297,11 +297,11 @@ export async function preloadGsap(data) {
   // state, which read as a 366-cell grid blinking five times a second (engine-doctrine/MISTAKES.md #370).
   // It hits every GSAP-driven field alike (fx · motionPath · physics · splitText · parts · comp);
   // `parts` only made it loud by putting 80 elements on one tween.
-  try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); window.gsap.globalTimeline.autoRemoveChildren = false; registerGsapEffects(window.gsap); } catch (e) {}
+  try { window.gsap.ticker.sleep(); window.gsap.globalTimeline.pause(); window.gsap.globalTimeline.autoRemoveChildren = false; registerGsapEffects(window.gsap); } catch { /* best-effort */ }
   for (const [field, p] of Object.entries(GSAP_PLUGINS)) {
     if (!new RegExp(`"${field}"\\s*:`).test(json)) continue;
     if (!window[p.global]) await loadScript('/assets/vendor/' + p.file);
-    if (window[p.global]) { try { window.gsap.registerPlugin(window[p.global]); } catch (e) {} }
+    if (window[p.global]) { try { window.gsap.registerPlugin(window[p.global]); } catch { /* best-effort */ } }
     else console.warn(`gsap: /assets/vendor/${p.file} failed to load, "${field}" layers render unanimated`);
   }
 }
@@ -322,6 +322,6 @@ export async function preloadLottie(data) {
   for (const p of srcs) {
     const url = /^(https?:)?\//.test(p) ? p : '/' + p;
     try { const r = await fetch(url); if (r.ok) window.__lottie[p] = await r.json(); else console.warn(`lottie: ${url} → ${r.status}, layer renders EMPTY`); }
-    catch (e) { console.warn(`lottie: ${url} unreadable, layer renders EMPTY`); }
+    catch { console.warn(`lottie: ${url} unreadable, layer renders EMPTY`); }
   }
 }
