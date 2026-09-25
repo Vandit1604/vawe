@@ -1273,6 +1273,13 @@ worktrees: ## [maintenance] Retire agent worktrees whose work has landed.
 worktree-status: ## [maintenance] what is running, on what, since when: every live worktree, flagged if stale or holding unlanded work
 	@node harness/dev/worktree-status.mjs
 
+.PHONY: token-cost
+# What did agent sessions on this repo actually cost, by billing type, model, tool and hook. Streams
+# every transcript under ~/.claude/projects/ (main threads and subagent transcripts) line by line, so
+# the multi-GB session files count same as the small ones. See harness/dev/token-cost.mjs.
+token-cost: ## [maintenance] agent session cost by billing type, model, tool and hook, streamed from local transcripts
+	@node harness/dev/token-cost.mjs $(if $(SINCE),--since $(SINCE)) $(if $(SESSION),--session $(SESSION)) $(if $(LIMIT),--limit $(LIMIT)) $(if $(filter 1,$(JSON)),--json) $(if $(filter 1,$(SELFTEST)),--self-test)
+
 # make review. One-command health snapshot: lib-test + layout audit + a master overlay sheet
 # (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
 review: ## [engine] One-command health snapshot: lib-test + layout audit + a master overlay sheet (/tmp/review.png).
