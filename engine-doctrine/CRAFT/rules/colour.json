@@ -96,7 +96,7 @@
     "applies": "always",
     "check": null,
     "adapt": null,
-    "brief": "look is deliberately small: only the things a scaffold or an author was already re-deciding by hand",
+    "brief": "look is deliberately small: only the things an author was already re-deciding by hand",
     "doc": "engine-doctrine/CRAFT/THEME-LOOK.md"
   }
 ]
