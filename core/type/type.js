@@ -13,55 +13,77 @@ import { wght, PRESETS, PRESET_BLURBS, PRESET_REGISTRY, DECODE_CHARS, DECODE_CHA
 // descenders are cut, and both clips grow together.
 export const INK_PAD_EM = 0.3;
 
-// mix two hex colours. Pure. (colorWave now uses color-mix so it can take theme TOKENS, not just hex.)
-const _hx = (h) => { const n = parseInt(String(h).replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
-const mixHex = (a, b, t) => { const pa = _hx(a), pb = _hx(b); return `rgb(${Math.round(pa[0] + (pb[0] - pa[0]) * t)},${Math.round(pa[1] + (pb[1] - pa[1]) * t)},${Math.round(pa[2] + (pb[2] - pa[2]) * t)})`; };
-
 // splitText(el, mode): wrap each char|word|line of el's text in a <span class="ku"> so units
 // animate independently. Returns the unit spans (in order). Idempotent-ish: call once at build.
 // Preserves spaces; 'word' keeps words unbreakable. Inline formatting (<em>/<b>/…) is PRESERVED:
 // element shells are kept in place and their text split inside them, so `.big em` styling reaches
 // the units. Plain-text inputs produce the exact same DOM as before.
-export function splitText(el, mode = 'word') {
-  // 'path': the units are SVG strokes, not glyphs, for the `draw` preset (a logo/icon/chart line
-  // drawing itself on). Stamping pathLength="1" here NORMALISES every path to a unit length, so the
-  // preset is a pure function of u with no getTotalLength() measurement and no layout read. Returns
-  // early: the DOM is not restructured at all, so nothing else about the element changes.
-  if (mode === 'path') {
-    const paths = [...el.querySelectorAll('path, line, polyline, circle, rect, ellipse')];
-    for (const p of paths) p.setAttribute('pathLength', '1');
-    return paths;
+// 'path': the units are SVG strokes, not glyphs, for the `draw` preset (a logo/icon/chart line
+// drawing itself on). Stamping pathLength="1" here NORMALISES every path to a unit length, so the
+// preset is a pure function of u with no getTotalLength() measurement and no layout read.
+function splitTextPaths(el) {
+  const paths = [...el.querySelectorAll('path, line, polyline, circle, rect, ellipse')];
+  for (const p of paths) p.setAttribute('pathLength', '1');
+  return paths;
+}
+
+function makeUnitSpan(t) {
+  const s = document.createElement('span');
+  s.className = 'ku'; s.style.display = 'inline-block'; s.style.whiteSpace = 'pre'; s.textContent = t;
+  return s;
+}
+
+function makeCharWrap(word, units) {
+  const wrap = document.createElement('span');
+  wrap.style.display = 'inline-block'; wrap.style.whiteSpace = 'nowrap';
+  for (const ch of word) { const s = makeUnitSpan(ch); wrap.appendChild(s); units.push(s); }
+  return wrap;
+}
+
+// wrap each WORD in a nowrap inline-block so the line breaks at spaces (never mid-word),
+// while individual chars still animate. Whitespace is kept as plain text between wrappers.
+function splitIntoChars(dest, text, units) {
+  for (const w of text.split(/(\s+)/)) {
+    if (w === '') continue;
+    if (/^\s+$/.test(w)) { dest.appendChild(document.createTextNode(w)); continue; }
+    dest.appendChild(makeCharWrap(w, units));
   }
-  const mk = (t) => { const s = document.createElement('span'); s.className = 'ku'; s.style.display = 'inline-block'; s.style.whiteSpace = 'pre'; s.textContent = t; return s; };
+}
+
+function splitIntoLines(dest, text, units) {
+  text.split('\n').forEach((ln, i) => {
+    if (i) dest.appendChild(document.createElement('br'));
+    const s = makeUnitSpan(ln);
+    dest.appendChild(s);
+    units.push(s);
+  });
+}
+
+function splitIntoWords(dest, text, units) {
+  const parts = text.split(/(\s+)/); // keep the whitespace tokens
+  for (const p of parts) { if (p === '') continue; const s = makeUnitSpan(p); dest.appendChild(s); if (p.trim()) units.push(s); }
+}
+
+function splitInto(dest, text, ctx) {
+  if (ctx.mode === 'char') return splitIntoChars(dest, text, ctx.units);
+  if (ctx.mode === 'line') return splitIntoLines(dest, text, ctx.units);
+  return splitIntoWords(dest, text, ctx.units);
+}
+
+function walkSplit(src, dest, ctx) {
+  for (const node of src.childNodes) {
+    if (node.nodeType === 3) splitInto(dest, node.nodeValue, ctx);
+    else if (node.nodeType === 1) { const shell = node.cloneNode(false); dest.appendChild(shell); walkSplit(node, shell, ctx); }
+  }
+}
+
+export function splitText(el, mode = 'word') {
+  // Returns early for 'path': the DOM is not restructured at all, so nothing else about the element changes.
+  if (mode === 'path') return splitTextPaths(el);
   const units = [];
-  const splitInto = (dest, text) => {
-    if (mode === 'char') {
-      // wrap each WORD in a nowrap inline-block so the line breaks at spaces (never mid-word),
-      // while individual chars still animate. Whitespace is kept as plain text between wrappers.
-      for (const w of text.split(/(\s+)/)) {
-        if (w === '') continue;
-        if (/^\s+$/.test(w)) { dest.appendChild(document.createTextNode(w)); continue; }
-        const wrap = document.createElement('span');
-        wrap.style.display = 'inline-block'; wrap.style.whiteSpace = 'nowrap';
-        for (const ch of w) { const s = mk(ch); wrap.appendChild(s); units.push(s); }
-        dest.appendChild(wrap);
-      }
-    } else if (mode === 'line') {
-      text.split('\n').forEach((ln, i) => { if (i) dest.appendChild(document.createElement('br')); const s = mk(ln); dest.appendChild(s); units.push(s); });
-    } else { // word
-      const parts = text.split(/(\s+)/); // keep the whitespace tokens
-      for (const p of parts) { if (p === '') continue; const s = mk(p); dest.appendChild(s); if (p.trim()) units.push(s); }
-    }
-  };
-  const walk = (src, dest) => {
-    for (const node of [...src.childNodes]) {
-      if (node.nodeType === 3) splitInto(dest, node.nodeValue);
-      else if (node.nodeType === 1) { const shell = node.cloneNode(false); dest.appendChild(shell); walk(node, shell); }
-    }
-  };
   const src = el.cloneNode(true);
   el.textContent = '';
-  walk(src, el);
+  walkSplit(src, el, { mode, units });
   return units;
 }
 
@@ -216,6 +238,43 @@ export function circleText(el, units, { radius = 220 } = {}) {
   });
 }
 
+function applyLoopingPreset(ctx) {
+  const { el, i, t, speed, phaseStep, fn, popts } = ctx;
+  Object.assign(el.style, fn(t * speed + i * phaseStep, popts));
+}
+
+// clip wrapper on demand (only for riseClip; keeps every other preset's DOM unchanged).
+// THE MASK MUST CONTAIN THE FONT'S FULL INK, NOT ITS LINE BOX. .hs-text sets line-height 1.04,
+// tighter than the descender depth of any real face, so `overflow: hidden` sliced 13px off
+// EVERY word at 76px, which is why g/y/p rendered with flat bottoms in shipped video. Pad the
+// mask downward and pull the identical amount back with a negative margin: the clip region
+// grows, the layout does not move a pixel. 0.3em clears the deepest descenders we ship.
+function ensureRiseClipWrapper(el) {
+  if (!el.parentElement || el.parentElement.__clip) return;
+  const w = document.createElement('span');
+  w.style.display = 'inline-block'; w.style.overflow = 'hidden'; w.style.verticalAlign = 'bottom'; w.__clip = true;
+  w.style.paddingBottom = `${INK_PAD_EM}em`; w.style.marginBottom = `${-INK_PAD_EM}em`;
+  el.parentElement.insertBefore(w, el); w.appendChild(el);
+}
+
+// POPTS REACHED EVERY PRESET BUT decode used to not: the early return handed decodeText three
+// arguments and dropped `popts` on the floor, so `presetOpts` on a decode layer was accepted,
+// forwarded nowhere and silently inert (engine-doctrine/MISTAKES.md #543). `each` rides along
+// because the scramble RATE is per second and only the caller knows how long the window is.
+function applyStaggeredPreset(ctx) {
+  const { el, i, units, t, each, stagger, smoothness, preset, popts, fn } = ctx;
+  const u = unitProgress(t, i, units.length, { each, stagger, smoothness });
+  if (preset === 'decode') { decodeText(el, u, i, { ...popts, each }); el.style.opacity = u > 0 ? '1' : '0'; return; }
+  // `flap` mutates the character too, but unlike decode it also has a hinge to apply, so the
+  // preset's own style still runs. Both live here for the same reason: a preset returns a style
+  // and neither of these two effects is one.
+  if (preset === 'flap') flapText(el, u, popts.steps ?? 12);
+  if (preset === 'riseClip') ensureRiseClipWrapper(el);
+  // the unit INDEX as a third argument: `assemble` hashes it for its per-glyph scatter.
+  // A third parameter rather than a key in popts, so no existing preset's signature moves.
+  Object.assign(el.style, fn(u, popts, i));
+}
+
 // animateUnits(units, t, opts): apply a preset to each split unit at time t. Presets except `wave`
 // are one-shot staggered reveals; `wave` uses (t * speed + i*phaseStep) as a looping phase.
 export function animateUnits(units, t, { preset = 'blurUp', each = 0.5, stagger = 0.06, smoothness = 1, loop = false, speed = 1, phaseStep = 0.5, ...popts } = {}) {
@@ -224,37 +283,11 @@ export function animateUnits(units, t, { preset = 'blurUp', each = 0.5, stagger 
   // not enumerate these names either, so nothing else caught it. Same reasoning as the unknown-modifier
   // throw in core/fx/index.js. engine-doctrine/MISTAKES.md #354.
   const fn = PRESET_REGISTRY.pick(preset);
+  const looping = loop || preset === 'wave' || preset === 'shimmerWave';
   units.forEach((el, i) => {
-    if (loop || preset === 'wave' || preset === 'shimmerWave') {
-      Object.assign(el.style, fn(t * speed + i * phaseStep, popts));
-    } else {
-      const u = unitProgress(t, i, units.length, { each, stagger, smoothness });
-      // POPTS REACHED EVERY PRESET BUT THIS ONE. The early return handed decodeText three arguments and
-      // dropped `popts` on the floor, so `presetOpts` on a decode layer was accepted, forwarded nowhere
-      // and silently inert, and the preset's own declared parameter was dead code. Input accepted and
-      // then ignored is this repo's worst bug class (engine-doctrine/MISTAKES.md #543). `each` rides along because
-      // the scramble RATE is per second and only the caller knows how long the window is.
-      if (preset === 'decode') { decodeText(el, u, i, { ...popts, each }); el.style.opacity = u > 0 ? '1' : '0'; return; }
-      // `flap` mutates the character too, but unlike decode it also has a hinge to apply, so the
-      // preset's own style still runs. Both live here for the same reason: a preset returns a style
-      // and neither of these two effects is one.
-      if (preset === 'flap') flapText(el, u, popts.steps ?? 12);
-      if (preset === 'riseClip' && el.parentElement && !el.parentElement.__clip) {
-        // clip wrapper on demand (only for riseClip; keeps every other preset's DOM unchanged)
-        const w = document.createElement('span');
-        w.style.display = 'inline-block'; w.style.overflow = 'hidden'; w.style.verticalAlign = 'bottom'; w.__clip = true;
-        // THE MASK MUST CONTAIN THE FONT'S FULL INK, NOT ITS LINE BOX. .hs-text sets line-height 1.04,
-        // tighter than the descender depth of any real face, so `overflow: hidden` sliced 13px off
-        // EVERY word at 76px, which is why g/y/p rendered with flat bottoms in shipped video. Pad the
-        // mask downward and pull the identical amount back with a negative margin: the clip region
-        // grows, the layout does not move a pixel. 0.3em clears the deepest descenders we ship.
-        w.style.paddingBottom = `${INK_PAD_EM}em`; w.style.marginBottom = `${-INK_PAD_EM}em`;
-        el.parentElement.insertBefore(w, el); w.appendChild(el);
-      }
-      // the unit INDEX as a third argument: `assemble` hashes it for its per-glyph scatter.
-      // A third parameter rather than a key in popts, so no existing preset's signature moves.
-      Object.assign(el.style, fn(u, popts, i));
-    }
+    const ctx = { el, i, units, t, each, stagger, smoothness, preset, speed, phaseStep, popts, fn };
+    if (looping) applyLoopingPreset(ctx);
+    else applyStaggeredPreset(ctx);
   });
 }
 
