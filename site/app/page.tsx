@@ -1,37 +1,44 @@
 import fs from "node:fs";
 import path from "node:path";
 import Link from "next/link";
-import { Header } from "./components/Header";
-import { HeroEditor } from "./components/HeroEditor";
-import { Clip } from "./components/Clip";
+import { Header, REPO_URL } from "./components/Header";
+import { HeroSplit } from "./components/HeroSplit";
+import { SectionStrip } from "./components/SectionStrip";
 import { Footer } from "./components/Footer";
 import { ProofHash, ProofAspect } from "./components/proofs";
 import EFFECTS from "../lib/effects-counts.json";
 import { organizationSchema, websiteSchema, softwareApplicationSchema, jsonLdScript } from "../lib/schema";
 import "./landing.css";
 
-/* THE LANDING PAGE.
- *
- * What it does NOT do, stated once so the defaults it excludes stay excluded: no gradient hero, no
- * logo wall, no three equal feature cards, no stat tiles, no testimonial, no scroll-hijacked pin,
- * no icon in a circle. Every one of those was available and none of them shows anything.
- *
- * What it does instead is run the engine three times in three registers. The hero is a live,
- * editable scene rendering in the reader's own browser, and it can be broken on purpose so the
- * refusal is a thing that happens rather than a thing we claim. The proofs are two drawings whose
- * geometry IS the claim. Nothing on this page asks to be believed.
- *
- * The section that used to sit between the hero and the films was three claims on a 250vh pinned
- * runway. It is gone. It spent three and a half screens delivering three sentences, it needed a
- * second layout for reduced motion and a third for no-JS, and pinning is the marketing default
- * this page is supposed to reach past. Two of its diagrams survived; the runway did not.
- *
- * THE FILMS SECTION IS OUT, on purpose, not by oversight. The seven films it used to show could not
- * be re-rendered from source and four carried broken paths after the films rename, so they were
- * removed site-wide rather than left to misrepresent the engine. This page does not show a fake or
- * placeholder film in their place; /showcase carries the honest empty state and the note on what a
- * baseline film needs before it can return here.
+/* THE LANDING PAGE (site/IDENTITY.md). A film playing live in the reader's browser, its layer
+ * timeline and its scene file first; then how it works, the real scene file, the effects that ship,
+ * what you get, and questions. Nothing here asks to be believed: the hero is the engine running,
+ * the proofs are drawings whose geometry is the claim, and the wall is read off the preview files.
  */
+
+// The scene file shown in "The film is the file", read from the same file the editor opens, so
+// the page can never show JSON that the engine would not run.
+const SCENE_TEXT = fs.readFileSync(path.join(process.cwd(), "public/scenes/hero-site.json"), "utf8").trim();
+
+const SECTIONS = [
+  { id: "intro", label: "Film" },
+  { id: "how", label: "How" },
+  { id: "file", label: "File" },
+  { id: "arsenal", label: "FX" },
+  { id: "perks", label: "Perks" },
+  { id: "faq", label: "FAQ" },
+];
+
+// Lucide icons (ISC), the family site/public/assets/icons/ui already uses.
+const ICONS = {
+  pr: <><circle cx="18" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><path d="M13 6h3a2 2 0 0 1 2 2v7" /><line x1="6" x2="6" y1="9" y2="21" /></>,
+  bot: <><path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></>,
+  ratio: <><rect width="12" height="20" x="6" y="2" rx="2" /><rect width="20" height="12" x="2" y="6" rx="2" /></>,
+  repeat: <><path d="m17 2 4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="m7 22-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></>,
+};
+const Icon = ({ name }: { name: keyof typeof ICONS }) => (
+  <span className="ls-icon"><svg viewBox="0 0 24 24" aria-hidden="true">{ICONS[name]}</svg></span>
+);
 
 /* THE ARSENAL WALL, read off what actually ships rather than typed.
  *
@@ -74,155 +81,97 @@ const WALL = (() => {
 export default function Home() {
   return (
     <div className="shell">
-      {/* Organization, WebSite, SoftwareApplication: what Vawe IS, before a reader or a crawler reads
-          a word of copy. Not an AI-visibility play: developers.google.com/search/docs/fundamentals/
-          ai-optimization-guide says plainly, "Structured data isn't required for generative AI search,
-          and there's no special schema.org markup you need to add." It earns ordinary Search features
-          instead (knowledge-panel and sitelinks-search-box entity data), which is worth having on its
-          own. Built in site/lib/schema.ts from real repo data, never typed here. */}
+      {/* Organization, WebSite, SoftwareApplication, built in site/lib/schema.ts from real repo data. */}
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(organizationSchema())} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(websiteSchema())} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(softwareApplicationSchema())} />
-      <main>
-        <div className="hero-wrap">
-          {/* The band is the engine's own output under a cobalt scrim: the loudest surface on the
-              site is literally the product. The Header sits INSIDE it, so its computed background
-              really is cobalt and a contrast checker reads what a viewer sees. #content follows the
-              nav, so the skip link still bypasses it. */}
-          <div className="bookend tap hero-band">
-            <Header />
-            {/* backdrop = films/scene/site-backdrop.json: an ambient shader field with ZERO text
-                layers. Never a capability clip: those all carry copy, which blurs into drifting
-                smudges behind the headline. */}
-            <Clip className="bookend-film" src="/assets/backdrop.mp4" poster="/assets/backdrop.jpg" />
-            <div className="wrap hero-head on-accent" id="content" tabIndex={-1}>
-              {/* Names the audience. It used to read "for teams with no motion designer", which is
-                  the h1's own second line, so the first two things on the page said one thing twice. */}
-              <span className="eyebrow">
-                <span className="dot" />
-                for product and marketing teams
-              </span>
-              {/* OUTCOME FIRST, MECHANISM SECOND, and it took two tries to get right. It read
-                  "One JSON, one video.", which is how the thing WORKS. Then "Ship the film with the
-                  feature.", which is WHEN it ships. Neither says what the reader GETS. This one names
-                  the thing (motion graphics, the real category) and the cost it removes (the designer,
-                  the agency, the round trips), and carries no mechanism at all.
-                  Every heading on this page had the first shape, so the site argued its architecture
-                  to someone who had not yet been told why to want it. The mechanism did not go away:
-                  "One JSON, one video" is now the first line of the sub, where it answers "how" for a
-                  reader the headline has already convinced. */}
-              <h1>
-                Motion graphics without{" "}
-                <br />
-                a motion designer.
-              </h1>
-              <p className="sub">
-                One JSON, one video. Write the scene as data, and re-render it the day the numbers
-                change.
-              </p>
-              <div className="hero-cta">
-                <Link className="btn btn-white" href="/editor">
-                  Make one now <span className="arw">→</span>
-                </Link>
+      <Header />
+      <main className="wrap" id="content" tabIndex={-1}>
+        <HeroSplit />
+
+        <section className="ls" id="how">
+          <h2>Write a scene. Get a film.</h2>
+          <div className="ls-grid ls-2">
+            <div className="panel ls-card ls-wide">
+              <div className="ls-vis"><div className="ls-code">{"{ "}<b>&quot;type&quot;</b>{': "text",\n  '}<b>&quot;text&quot;</b>{': "One JSON. One film.",\n  '}<b>&quot;start&quot;</b>{": 0.2, "}<b>&quot;duration&quot;</b>{": 2.4 }"}</div></div>
+              <div>
+                <h3>Write</h3>
+                <p>Layers, camera, captions and transitions, in one JSON file. You write it, or an agent does.</p>
               </div>
             </div>
+            <div className="panel ls-card">
+              <div className="ls-vis"><ProofHash /></div>
+              <h3>Render</h3>
+              <p>Each frame is drawn from its number alone, so frame 412 comes out the same in any order.</p>
+            </div>
+            <div className="panel ls-card">
+              <div className="ls-vis"><ProofAspect /></div>
+              <h3>Ship</h3>
+              <p>One scene resolves to every canvas: 16:9, 9:16, 1:1, 4:5 and 4:3.</p>
+            </div>
           </div>
+        </section>
 
-          {/* The editor overlaps up into the V, so the band reads as pouring into it. */}
-          <div className="hero-stage">
-            <HeroEditor />
-            {/* Phone: no code pane. You are not typing JSON on a phone, so it gets the same scene
-                rendered instead of the editor that renders it. */}
-            <figure className="hero-mobile">
-              <Clip src="/assets/hero.mp4" poster="/assets/hero.jpg" />
-              <figcaption className="hm-cta">
-                <span>rendered from one JSON</span>
-                <Link href="/editor">open the editor →</Link>
-              </figcaption>
-            </figure>
-          </div>
-        </div>
-
-        <div className="hero-foot" />
-
-        {/* ===== THE TWO PROOFS =====
-            The claim is not "deterministic". Everything claims that. The claim is that you cannot
-            opt out, and the paragraph names the mechanism so the sentence can be checked. The
-            reader has already watched the engine refuse, one screen up. */}
-        <section className="section">
-          <div className="wrap">
-            <div className="kicker">what you can promise a client</div>
-            <h2 className="h2">What you approve is what ships.</h2>
-            <p className="lead">
-              Nothing here asks you to be careful. <code>renderFrame(n)</code> is a pure function of
-              the frame number, so the same JSON always produces byte-identical pixels, no matter
-              which machine renders it or in what order the frames come out. That purity is coerced,
-              not merely asked for: the engine installs a virtual clock, so <code>Date.now</code>,{" "}
-              <code>requestAnimationFrame</code> and <code>Math.random</code> all become pure
-              functions of the frame being drawn, even inside a third-party library that never heard
-              of Vawe. Nothing about the picture depends on when or where the render ran.
-            </p>
-            <div className="pf">
-              <div>
-                <h3>Any render order.</h3>
-                <p>
-                  {/* site-counts-allow: "412 looks" is frame 412, not a count of looks */}
-                  Frame 412 looks the same whether it renders first or last. That is what lets one film
-                  split across parallel workers, and what lets you diff two renders of it.
-                </p>
-                <ProofHash />
-              </div>
-              <div>
-                <h3>Any canvas.</h3>
-                <p>
-                  Place things by grid and percentage and one file renders 16:9, 9:16, 1:1 and 4:5 in a
-                  single pass. Hand-place raw pixels and you have tuned it to one shape.
-                </p>
-                <ProofAspect />
+        <section className="ls" id="file">
+          <h2>The film is the file.</h2>
+          <p className="ls-sub">This is the real scene file of a film on this site. Open it in the editor and change a line.</p>
+          <div className="ls-grid ls-2">
+            <div className="panel ls-card">
+              <h3>Read it</h3>
+              <p>Each layer says what it is, where it sits and when it is on screen.</p>
+              <h3 style={{ marginTop: 22 }}>Review it</h3>
+              <p>A change to the motion is a diff you can read before it ships.</p>
+              <div className="hs-actions"><a className="btn btn-ghost" href="/editor?scene=hero-site">Open it in the editor</a></div>
+            </div>
+            <div className="panel ls-card">
+              <div className="ls-vis" style={{ placeItems: "start", maxHeight: 360, overflow: "auto", borderBottom: 0, margin: 0, padding: 0 }}>
+                <pre className="ls-code">{SCENE_TEXT}</pre>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ===== THE ARSENAL =====
-            Delete this and the page never says what you compose FROM, which is the difference
-            between this engine and a template tool. Names, not icons: a vocabulary only reads as
-            one when you can see how much of it there is. */}
-        <section className="section">
-          <div className="wrap">
-            <div className="gal-head">
-              <div>
-                {/* The kicker used to say the heading's sentence again, one line above it. It now
-                    names what the wall IS and the heading makes the claim. */}
-                <div className="kicker">what you compose from</div>
-                <h2 className="h2">Nothing here looks like a template.</h2>
-              </div>
-              <Link href="/arsenal">
-                Browse the arsenal <span className="arw">→</span>
-              </Link>
-            </div>
-            <p className="lead">
-              This is code to video, not data poured into a layout someone else already composed:
-              you compose a film from primitives the way you would write anything else.{" "}
-              {EFFECTS.total} effects ship today, {EFFECTS.previewed} of them with a rendered
-              preview. Below is one frame from each family that has one.
-            </p>
-            <div className="fxwall">
-              {WALL.map((fx) => (
-                <figure className="fx" key={fx.stem}>
-                  <img src={`/assets/effects/${fx.stem}.jpg`} alt={`${fx.name}, a still from its preview`} loading="lazy" width={320} height={180} />
-                  <figcaption>
-                    {fx.name}
-                    <span className="fxfam">{fx.family}</span>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
+        <section className="ls" id="arsenal">
+          <h2>Compose from primitives, not templates.</h2>
+          <p className="ls-sub">
+            {EFFECTS.total} effects ship today, {EFFECTS.previewed} of them with a rendered preview. One frame from each family that has one:
+          </p>
+          <div className="fxwall">
+            {WALL.map((fx) => (
+              <figure className="fx" key={fx.stem}>
+                <img src={`/assets/effects/${fx.stem}.jpg`} alt={`${fx.name}, a still from its preview`} loading="lazy" width={320} height={180} />
+                <figcaption>
+                  {fx.name}
+                  <span className="fxfam">{fx.family}</span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+          <div className="hs-actions"><Link className="btn btn-ghost" href="/arsenal">Browse the arsenal</Link></div>
+        </section>
+
+        <section className="ls" id="perks">
+          <h2>What you get.</h2>
+          <div className="ls-grid ls-2">
+            <div className="panel ls-card ls-benefit"><Icon name="pr" /><div><h3>Review like code</h3><p>Motion changes arrive as a readable diff, not a binary project file.</p></div></div>
+            <div className="panel ls-card ls-benefit"><Icon name="bot" /><div><h3>Hand it to an agent</h3><p>An agent writes the scene, gates check it, and a judge looks at the frames.</p></div></div>
+            <div className="panel ls-card ls-benefit"><Icon name="ratio" /><div><h3>Every canvas, one file</h3><p>16:9 through 9:16 from the same scene, with safe areas for each.</p></div></div>
+            <div className="panel ls-card ls-benefit"><Icon name="repeat" /><div><h3>Same frames, every run</h3><p>No clock and no randomness. Frame 412 is always frame 412.</p></div></div>
+          </div>
+        </section>
+
+        <section className="ls" id="faq">
+          <h2>Questions.</h2>
+          <div className="panel ls-faq">
+            <details open><summary>Is it open source?</summary><p>Yes, under Apache 2.0. The engine, the studio and this site are <a href={REPO_URL}>on GitHub</a>.</p></details>
+            <details><summary>Where does it run?</summary><p>The editor and playground run the engine in your browser. The studio and the renderer run on your machine.</p></details>
+            <details><summary>Does it work with my agent?</summary><p>Yes. vawe ships an MCP server, so an agent can draft, check and export a film.</p></details>
+            <details><summary>Can it match my brand?</summary><p>A theme holds your colours, fonts and motion, and a film refers to them by name.</p></details>
           </div>
         </section>
       </main>
-
       <Footer bookend />
+      <SectionStrip sections={SECTIONS} />
     </div>
   );
 }

@@ -52,6 +52,8 @@ const GENERATORS = [
   // server registering eleven. site/CLAUDE.md's law is that site numbers are never typed; this is how
   // that one stops being typed.
   ['mcp tools', ['scripts/site/mcp-tools.mjs'], ['site/lib/mcp-tools.json']],
+  // The studio timeline's layer-type lanes, which the site's hero timeline must colour the same way.
+  ['layer kinds', ['scripts/site/layer-kinds.mjs'], ['site/lib/layer-kinds.json']],
   // Reads site/lib/site-pages.json + site/lib/arsenal.json, so it must run after both are current.
   // Not a fix for AI-search visibility on its own (Google's guidance treats llms.txt as ineffective,
   // see scripts/site/llms-txt.mjs's header); registered here so it cannot go stale unnoticed either.

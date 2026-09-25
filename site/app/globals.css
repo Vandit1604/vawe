@@ -179,8 +179,8 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .btn-primary:hover{background:var(--ink-2)}
 .btn-white{background:var(--ink);color:var(--bg)}
 .btn-white:hover{transform:translateY(-2px);box-shadow:var(--shadow-3)}
-.btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--line-2)}
-.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.btn-ghost{background:var(--raised);color:var(--ink);border-color:transparent}
+.btn-ghost:hover{background:var(--raised-2)}
 /* The action row under a page head. Shared by the landing hero, /showcase/type, /showcase/effects
    and /features/<slug>, which is why it lives here and the rest of the landing hero does not. */
 .hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
