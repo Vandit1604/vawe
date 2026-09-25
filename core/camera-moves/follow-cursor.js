@@ -25,9 +25,7 @@ import { motionAt } from '../timeline/sequence.js';   // followCursor samples th
 //   SPACE  two presses closer together than `regroup` px share ONE framing. The camera holds and the
 //          pointer moves inside the frame, which is what a person watching a demo actually does.
 // Clicks that fail both merge into one continuous flight: hold, travel, hold, one release at the end.
-export function followCursor({ path, clicks, base = [0, 0], start = 0, to = 1.35, lead = 0.18,
-  dur = 0.9, dwell = 0.6, release = 0.8, regroup = 160, canvasW = 1920, canvasH = 1080,
-  ease = 'easeOutQuart', reframeEase = 'easeInOutCubic' } = {}) {
+function validateFollowCursorArgs({ path, clicks, base, to }) {
   if (!Array.isArray(path) || !path.length)
     throw new Error('followCursor needs the cursor layer\'s "path" ([{t,x,y}]); it is the only thing that'
       + ' says where the camera goes. Give the cursor a path, or hand-key `diveIn` at a fixed point.');
@@ -46,24 +44,15 @@ export function followCursor({ path, clicks, base = [0, 0], start = 0, to = 1.35
     if (!Number.isFinite(c) || c < 0)
       throw new Error(`followCursor: every "clicks" entry is a time in seconds from the cursor layer's own start; got ${JSON.stringify(c)}`);
   }
-  span('followCursor', 'dur', dur);
-  span('followCursor', 'release', release);
-  hold('followCursor', 'lead', lead);
-  hold('followCursor', 'dwell', dwell);
-  hold('followCursor', 'regroup', regroup);
   if (!(Number.isFinite(to) && to >= 1))
     throw new Error(`followCursor: "to" is the magnification held over the press and must be >= 1; got ${JSON.stringify(to)}`);
   if (!Array.isArray(base) || base.length !== 2 || !base.every(Number.isFinite))
     throw new Error(`followCursor: "base" is the cursor layer's own [x, y] in stage px; got ${JSON.stringify(base)}`);
+}
 
-  // The pointer's ABSOLUTE stage position at a layer-local time. `path` x/y are offsets from the layer's
-  // base (core/layers/cursor.js), and motionAt is the same evaluator the pointer itself is drawn with,
-  // so the camera cannot aim anywhere the cursor is not. One fact, one owner.
-  const pointAt = (lt) => { const m = motionAt(path, lt); return [base[0] + m.dx, base[1] + m.dy]; };
-  const poseAt = (pt) => ({ s: to, x: canvasW / 2 - pt[0], y: canvasH / 2 - pt[1] });
-
-  // The window inside which releasing would be undone before it finished. Derived, not authored.
-  const settle = dwell + release + dur + lead;
+// Groups clicks into shots: clicks close enough in time AND space share one framing, per the module
+// doc's TIME/SPACE rules above `followCursor`. `settle` and `regroup` are the derived/authored knobs.
+function groupClicksIntoShots(clicks, { start, lead, settle, regroup, pointAt }) {
   const shots = [];
   for (const c of [...clicks].sort((a, b) => a - b)) {
     const at = start + c, pt = pointAt(c), cur = shots[shots.length - 1];
@@ -73,14 +62,13 @@ export function followCursor({ path, clicks, base = [0, 0], start = 0, to = 1.35
       cur.end = at;
     } else shots.push({ stops: [{ arrive: at - lead, pt }], end: at });
   }
+  return shots;
+}
 
+// Turns the grouped shots into the ascending keyframe array. `holdKey`/`poseKey` enforce the ascending
+// invariant `span` in units.js depends on: see the KEYFRAME TIMES MUST ASCEND note above `followCursor`.
+function buildKeyframesFromShots(shots, { start, dur, lead, dwell, release, ease, reframeEase, poseAt }) {
   const kf = [];
-  // KEYFRAME TIMES MUST ASCEND, or cameraAt locks onto the last key and the whole move is deleted (the
-  // reason `span` exists in units.js). Two shapes reach the writer below and they are NOT the same
-  // shape, which the first cut of this got wrong: it dropped the PREDECESSOR whenever a key was not
-  // later, so with the shot spacing broken it quietly emitted a DESCENDING array instead of failing. A
-  // key carrying a new pose therefore refuses; only a HOLD, which by definition has nothing to hold when
-  // no time is left, is dropped.
   const holdKey = (k) => { if (!kf.length || k.t > kf[kf.length - 1].t) kf.push(k); };
   const poseKey = (k) => {
     if (kf.length && k.t <= kf[kf.length - 1].t)
@@ -123,4 +111,26 @@ export function followCursor({ path, clicks, base = [0, 0], start = 0, to = 1.35
     poseKey({ t: kf[kf.length - 1].t + release, s: 1, x: 0, y: 0, ease: reframeEase });
   }
   return kf;
+}
+
+export function followCursor({ path, clicks, base = [0, 0], start = 0, to = 1.35, lead = 0.18,
+  dur = 0.9, dwell = 0.6, release = 0.8, regroup = 160, canvasW = 1920, canvasH = 1080,
+  ease = 'easeOutQuart', reframeEase = 'easeInOutCubic' } = {}) {
+  validateFollowCursorArgs({ path, clicks, base, to });
+  span('followCursor', 'dur', dur);
+  span('followCursor', 'release', release);
+  hold('followCursor', 'lead', lead);
+  hold('followCursor', 'dwell', dwell);
+  hold('followCursor', 'regroup', regroup);
+
+  // The pointer's ABSOLUTE stage position at a layer-local time. `path` x/y are offsets from the layer's
+  // base (core/layers/cursor.js), and motionAt is the same evaluator the pointer itself is drawn with,
+  // so the camera cannot aim anywhere the cursor is not. One fact, one owner.
+  const pointAt = (lt) => { const m = motionAt(path, lt); return [base[0] + m.dx, base[1] + m.dy]; };
+  const poseAt = (pt) => ({ s: to, x: canvasW / 2 - pt[0], y: canvasH / 2 - pt[1] });
+
+  // The window inside which releasing would be undone before it finished. Derived, not authored.
+  const settle = dwell + release + dur + lead;
+  const shots = groupClicksIntoShots(clicks, { start, lead, settle, regroup, pointAt });
+  return buildKeyframesFromShots(shots, { start, dur, lead, dwell, release, ease, reframeEase, poseAt });
 }
