@@ -114,10 +114,14 @@ function runSnap(name, script, sceneKeyword) {
   const newErrored = erroredNames.filter((n) => !(n in knownScenes) && isTrackedScene(n));
   const untrackedErrored = erroredNames.filter((n) => !isTrackedScene(n));
 
-  const pass = newErrored.length === 0 && changedNames.length === 0 && quarantinedNames.length === 0 && !nothingCompared;
+  // A run that printed no summary, or compared nothing, verified nothing: snap-scenes refuses a blind
+  // sweep inside a git worktree, and that refusal must read as a failure here, never as a quiet pass.
+  const compared = counts.identical + counts.changed;
+  const pass = Boolean(m) && compared > 0 && newErrored.length === 0 && changedNames.length === 0
+    && quarantinedNames.length === 0 && !nothingCompared;
   return record(name, `node ${script}${sceneKeyword ? '' : ''}`, res, {
     pass, counts,
-    erroredNames, newErrored, untrackedErrored, changedNames, quarantinedNames, nothingCompared,
+    compared, erroredNames, newErrored, untrackedErrored, changedNames, quarantinedNames, nothingCompared,
   });
 }
 
