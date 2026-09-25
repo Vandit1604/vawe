@@ -2,7 +2,7 @@ import { Header } from "../components/Header";
 import { Clip } from "../components/Clip";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
-import "./features.css";
+import "../components/intent.css";
 
 export const metadata = pageMetadata({
   title: "Vawe · features",
@@ -58,8 +58,8 @@ export default function Features() {
             and still worth watching.
           </p>
 
-          <section className="panel fsec">
-            <div className="fsec-text">
+          <section className="isec">
+            <div className="isec-text">
             <h2>The clock refuses wall time.</h2>
             <p>
               A frame is seeked, not played. <code>Date</code>, <code>requestAnimationFrame</code>{" "}
@@ -77,7 +77,7 @@ export default function Features() {
             </p>
             <span className="tag">guarded by make probe</span>
             </div>
-            <div className="fsec-art">
+            <div className="isec-art">
               <div className="codeblock">
                 <div className="lbl">purity</div>
                 <pre className="code" dangerouslySetInnerHTML={{ __html: PURITY }} />
@@ -85,8 +85,8 @@ export default function Features() {
             </div>
           </section>
 
-          <section className="panel fsec">
-            <div className="fsec-text">
+          <section className="isec">
+            <div className="isec-text">
             <h2>A director picks every cut.</h2>
             <p>
               You do not choose a transition per beat. A motion director reads the brand&apos;s
@@ -103,7 +103,7 @@ export default function Features() {
             </p>
             <span className="tag">cuts → whoosh · stings → reveal</span>
             </div>
-            <div className="fsec-art">
+            <div className="isec-art">
               <div className="demo-media">
                 <Clip src="/assets/showcase/cuts.mp4" poster="/assets/showcase/cuts.jpg" />
               </div>
@@ -116,8 +116,8 @@ export default function Features() {
             </div>
           </section>
 
-          <section className="panel fsec">
-            <div className="fsec-text">
+          <section className="isec">
+            <div className="isec-text">
             <h2>Correct is not good enough.</h2>
             <p>
               Any static engine makes technically correct video. Making it worth watching is the
@@ -133,7 +133,7 @@ export default function Features() {
             </p>
             <span className="tag">validate → judge</span>
             </div>
-            <div className="fsec-art">
+            <div className="isec-art">
               <div className="codeblock">
                 <div className="lbl">the ladder</div>
                 <pre className="code" dangerouslySetInnerHTML={{ __html: LADDER }} />

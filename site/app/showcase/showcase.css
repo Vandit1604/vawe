@@ -1,30 +1,4 @@
-/* ===== /showcase · film cards ================================================================ */
-.fgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:36px}
-.fgrid > .fc{grid-column:span 2}
-.fgrid > .fc:nth-child(-n+2){grid-column:span 3}
-.fc{margin:0;overflow:hidden}
-.fc-stage{position:relative;display:block;width:100%;aspect-ratio:16/9;padding:0;border:0;background:var(--bg);cursor:pointer;
-  --sp-scale:1;--sp-w:1920px;--sp-h:1080px}
-.fc-stage:focus-visible{outline:var(--outline);outline-offset:-2px}
-.fc-screen{position:absolute;inset:0;overflow:hidden}
-.fc-screen .sp-frame{pointer-events:none}
-/* The idle face: the film's own layers, one lane per type, so a card is recognisable before it plays. */
-.fc-score{position:absolute;inset:14% 6%;display:flex;flex-direction:column;justify-content:center;gap:8px;z-index:var(--z-raise)}
-.fc-score[hidden]{display:none}
-.fc-lane{position:relative;height:calc(var(--rows,1) * 10px)}
-.fc-bar{position:absolute;height:6px;border-radius:2px;min-width:3px;background:var(--lane);opacity:.75}
-.fc:hover .fc-bar{opacity:1}
-.fc-playhead{position:absolute;top:0;bottom:0;left:calc(var(--p,0) * 100%);width:2px;background:var(--accent);opacity:0;z-index:var(--z-raise)}
-.fc.on .fc-playhead{opacity:1}
-.fc-note{position:absolute;left:12px;bottom:10px;z-index:var(--z-raise)}
-.fc-idle::after{content:"hover to play"}
-@media (hover:none){ .fc-idle::after{content:"tap to play"} }
-.fc-cap{display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;padding:14px 16px}
-.fc-title{font-weight:700;font-size:16px}
-.fc-cap .meta{white-space:normal}
-.fc-open{margin-left:auto;font-size:14px;color:var(--accent);text-decoration:none}
-.fc-open:hover{text-decoration:underline}
-
+/* ===== /showcase · the lane legend and the ratio trio ======================================== */
 .sc-legend{display:flex;flex-wrap:wrap;gap:6px 18px;list-style:none;padding:0;margin:20px 0 0;font-size:14px;color:var(--ink-2)}
 .sc-legend li{display:inline-flex;align-items:center;gap:8px}
 .sc-legend li::before{content:"";width:14px;height:6px;border-radius:2px;background:var(--lane)}
@@ -32,8 +6,4 @@
 .sc-ratios{margin-top:36px;padding:24px}
 .sc-ratios .trio .ar{border:0;background:var(--bg)}
 
-@media (max-width:900px){ .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))} .fgrid > .fc:nth-child(n){grid-column:auto} .fgrid > .fc:first-child{grid-column:1 / -1} }
-@media (max-width:640px){
-  .fgrid{grid-template-columns:minmax(0,1fr)}
-  .sc-ratios{padding:14px}
-}
+@media (max-width:640px){ .sc-ratios{padding:14px} }

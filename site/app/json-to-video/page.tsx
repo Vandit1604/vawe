@@ -73,11 +73,8 @@ export default function JsonToVideo() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" tabIndex={-1}>
+        <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
-            <span className="kicker">
-              <span className="dot" /> json to video
-            </span>
             <h1>One JSON file. One rendered video.</h1>
             <p>
               This is how you make a video with code here: write the scene as data, and a headless

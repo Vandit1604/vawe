@@ -1,5 +1,6 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { FilmGrid } from "../components/FilmGrid";
 import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
 
@@ -10,12 +11,8 @@ export const metadata = pageMetadata({
   path: "/product-tour-video",
 });
 
-/* /product-tour-video · second of the three use-case pages, and the one that exists because a
- * single film in the repo genuinely took a different shape from the others: not one six-beat
- * launch run, but three chapters. That film, product-feature-tour, could not be re-rendered from
- * its source and came down site-wide along with the rest of the stale set; the two sections that
- * narrated its clip went with it. What remains here is the doctrine, still true without a film to
- * show it: a product tour still routes as a launch video, chaptered instead of six fixed beats.
+/* /product-tour-video · the chaptered shape of a launch video, proved by product-feature-tour played
+ * live from its scene file.
  */
 
 export default function ProductTourVideo() {
@@ -23,11 +20,8 @@ export default function ProductTourVideo() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" tabIndex={-1}>
+        <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
-            <span className="kicker">
-              <span className="dot" /> product tour video
-            </span>
             <h1>A feature tour with more than one thing to show.</h1>
             <p>
               Some products have three features worth a beat each, not one. This shape carries a
@@ -36,15 +30,10 @@ export default function ProductTourVideo() {
             </p>
           </section>
 
-          <section className="isec">
-            <div className="isec-text" style={{ gridColumn: "1 / -1", maxWidth: "70ch" }}>
-              <h2>No rendered example here right now.</h2>
-              <p>
-                The film that proved this shape, <code>product-feature-tour</code>, could not be
-                re-rendered from its source and came down with the rest of the stale set.{" "}
-                <a href="/showcase">See /showcase</a> for what the engine has rendered today.
-              </p>
-            </div>
+          <section className="ifilms">
+            <h2>A chaptered tour, played live.</h2>
+            <p>Three chapters, one progress rail, one tracked issue. Your browser renders it from its scene file. Hover or tap to play it.</p>
+            <FilmGrid ids={["product-feature-tour"]} />
           </section>
 
           <section className="isec">

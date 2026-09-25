@@ -40,11 +40,8 @@ export default function HyperframesAlternatives() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" tabIndex={-1}>
+        <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
-            <span className="kicker">
-              <span className="dot" /> alternatives
-            </span>
             <h1>HyperFrames alternatives, one real comparison.</h1>
             <p>
               Most &quot;X alternatives&quot; queries return a grab-bag of unrelated tools. HyperFrames
