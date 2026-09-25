@@ -4,4 +4,5 @@
 export const glsl = `                             /* blinds, venetian bars open together (gl-transitions: windowblinds) */
     float local = fract(uv.y * 14.0), open = pp * 1.1;
     c = vec4(vec3(1.0), smoothstep(open + 0.05, open - 0.05, local) * bell);`;
-export const blurb = 'venetian bars opening together. Mechanical and rhythmic.';
+export const blurb = 'venetian bars opening together, 14 bars sweeping in lockstep. Mechanical and rhythmic.';
+export const aka = ['venetian blinds', 'blinds transition', 'window blinds'];
