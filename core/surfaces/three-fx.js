@@ -237,6 +237,201 @@ function boxLocal(w, h, d, out, at) {
   }
 }
 
+function buildShatterGrid(L) {
+  const grid = Math.max(2, Math.min(48, Math.round(Math.sqrt(Math.max(4, L.count ?? 144)))));
+  const W = 3.2, H = 2.0, cw = W / grid, ch = H / grid;
+  const r = rng(L.seed ?? 7);
+  const cells = grid * grid, verts = cells * 6;
+  const pos = new Float32Array(verts * 3);
+  const uv = new Float32Array(verts * 2);
+  const local = new Float32Array(verts * 3);      // each vertex relative to its own shard's centre
+  const mid = new Float32Array(cells * 3);
+  const dir = new Float32Array(cells * 3);
+  const axis = new Float32Array(cells * 3);
+  const rate = new Float32Array(cells);
+  const CORNER = [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]];
+  for (let gy = 0; gy < grid; gy++) for (let gx = 0; gx < grid; gx++) {
+    const c = gy * grid + gx;
+    const mx = -W / 2 + (gx + 0.5) * cw, my = -H / 2 + (gy + 0.5) * ch;
+    mid[c * 3] = mx; mid[c * 3 + 1] = my; mid[c * 3 + 2] = 0;
+    // OUTWARD, plus a seeded wobble. A purely radial burst reads as a mechanism; the jitter is what
+    // makes it read as a break.
+    const jx = (r() - 0.5) * 0.8, jy = (r() - 0.5) * 0.8;
+    const dx = mx / (W / 2) + jx, dy = my / (H / 2) + jy, dz = 0.35 + r() * 1.15;
+    const dl = Math.hypot(dx, dy, dz) || 1;
+    dir[c * 3] = dx / dl; dir[c * 3 + 1] = dy / dl; dir[c * 3 + 2] = dz / dl;
+    const ax = r() - 0.5, ay = r() - 0.5, az = r() - 0.5;
+    const al = Math.hypot(ax, ay, az) || 1;
+    axis[c * 3] = ax / al; axis[c * 3 + 1] = ay / al; axis[c * 3 + 2] = az / al;
+    rate[c] = 0.5 + r() * 1.9;
+    for (let k = 0; k < 6; k++) {
+      const v = c * 6 + k;
+      local[v * 3] = CORNER[k][0] * cw; local[v * 3 + 1] = CORNER[k][1] * ch; local[v * 3 + 2] = 0;
+      uv[v * 2] = (gx + CORNER[k][0] + 0.5) / grid;
+      uv[v * 2 + 1] = (gy + CORNER[k][1] + 0.5) / grid;
+    }
+  }
+  return { grid, cells, pos, uv, local, mid, dir, axis, rate };
+}
+
+function buildDissolveMaterial(colors) {
+  const pal = paletteOf(colors);
+  return new (T().ShaderMaterial)({
+    uniforms: { uP: { value: 0 }, uEdge: { value: hex(pal[0]) } },
+    side: T().DoubleSide,
+    vertexShader: `
+      attribute float aN; attribute float aX; attribute vec2 aUv2;
+      varying float vN; varying float vX; varying vec2 vUv2; varying vec3 vCol; varying vec3 vNrm;
+      void main() {
+        vN = aN; vX = aX; vUv2 = aUv2; vCol = color; vNrm = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: `
+      precision highp float;
+      uniform float uP; uniform vec3 uEdge;
+      varying float vN; varying float vX; varying vec2 vUv2; varying vec3 vCol; varying vec3 vNrm;
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+      void main() {
+        // The grain is CELLULAR, not per-pixel: floor() to a coarse grid so the edge crumbles in
+        // visible flakes instead of dithering into noise at video resolution.
+        float n = hash(floor(vUv2 * 9.0) + vN * 37.0);
+        float k = mix(n, vX, 0.55);
+        float e = uP * 1.3 - 0.12;
+        if (k < e) discard;
+        float burn = smoothstep(e + 0.09, e, k);
+        // one cheap lambert term so the slabs still read as solids rather than as flat stickers
+        float lam = 0.55 + 0.45 * max(dot(vNrm, normalize(vec3(0.4, 0.7, 0.6))), 0.0);
+        gl_FragColor = vec4(mix(vCol * lam, uEdge, burn), 1.0);
+      }`,
+    vertexColors: true,
+  });
+}
+
+function buildMagneticField(poles, D) {
+  // The field, summed over the charges. Normalised, so the step is arc length rather than strength:
+  // an un-normalised step stalls to nothing far from the poles and the line never reaches anywhere.
+  const CH = poles === 2 ? [[0, D, 0, 1], [0, -D, 0, -1]] : [[0, 0, 0, 1]];
+  const field = (x, y, z, o) => {
+    let fx = 0, fy = 0, fz = 0;
+    for (const [cx, cy, cz, q] of CH) {
+      const dx = x - cx, dy = y - cy, dz = z - cz;
+      const d2 = dx * dx + dy * dy + dz * dz + 1e-4;
+      const k = q / (d2 * Math.sqrt(d2));
+      fx += dx * k; fy += dy * k; fz += dz * k;
+    }
+    const l = Math.hypot(fx, fy, fz) || 1;
+    o[0] = fx / l; o[1] = fy / l; o[2] = fz / l;
+  };
+  return { CH, field };
+}
+
+function traceMagneticLines(lines, step, chf, r, pal, grp) {
+  const { STEP, H } = step;
+  const { CH, field } = chf;
+  const paths = [];
+  const f = [0, 0, 0];
+  for (let i = 0; i < lines; i++) {
+    // Seeded launch angles around the source. Evenly spaced rings would read as a wireframe ball.
+    const th = (i / lines) * Math.PI * 2 + (r() - 0.5) * 0.25;
+    const el = 0.18 + r() * 1.5;                          // how far off the axis it leaves
+    const s = 0.16;
+    const src = CH[0];
+    let x = src[0] + s * Math.sin(el) * Math.cos(th);
+    let y = src[1] + s * Math.cos(el);
+    let z = src[2] + s * Math.sin(el) * Math.sin(th);
+    const pts = new Float32Array((STEP + 1) * 3);
+    for (let k = 0; k <= STEP; k++) {
+      pts[k * 3] = x; pts[k * 3 + 1] = y; pts[k * 3 + 2] = z;
+      field(x, y, z, f);
+      // Past the far edge the line has said everything it has to say: hold it, so the buffer stays a
+      // fixed size and the geometry cannot depend on how many steps a particular seed survived.
+      if (Math.hypot(x, y, z) < 3.2) { x += f[0] * H; y += f[1] * H; z += f[2] * H; }
+    }
+    const g = new (T().BufferGeometry)();
+    g.setAttribute('position', new (T().BufferAttribute)(pts, 3));
+    grp.add(new (T().Line)(g, new (T().LineBasicMaterial)({
+      color: hex(pal[1]), transparent: true, opacity: 0.55 })));
+    paths.push(pts);
+  }
+  return paths;
+}
+
+function buildGlobeDots(L) {
+  const R = 1;
+  const at = (lon, lat, r = R) => {
+    const p = (90 - lat) * Math.PI / 180, th = (lon + 180) * Math.PI / 180;
+    return [-r * Math.sin(p) * Math.cos(th), r * Math.cos(p), r * Math.sin(p) * Math.sin(th)];
+  };
+
+  const n = LONLAT.length / 2;
+  const pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const [x, y, z] = at(LONLAT[i * 2], LONLAT[i * 2 + 1]);
+    pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
+  }
+  const dg = new (T().BufferGeometry)();
+  dg.setAttribute('position', new (T().BufferAttribute)(pos, 3));
+  const dcol = new Float32Array(n * 3);
+  dg.setAttribute('color', new (T().BufferAttribute)(dcol, 3));
+  const points = new (T().Points)(dg, new (T().PointsMaterial)({
+    vertexColors: true, size: L.pointSize ?? 0.011, sizeAttenuation: true,
+    transparent: true, opacity: 0.95 }));
+
+  const og = new (T().SphereGeometry)(R * 0.985, 64, 40);
+  const opos = og.attributes.position;
+  const ocol = new Float32Array(opos.count * 3);
+  og.setAttribute('color', new (T().BufferAttribute)(ocol, 3));
+  const ocean = new (T().Mesh)(og, new (T().MeshBasicMaterial)({ vertexColors: true }));
+
+  return { R, at, n, pos, dg, dcol, points, og, opos, ocol, ocean };
+}
+
+function buildGlobeRoute(L, colors, R, at) {
+  const from = L.origin ?? [-73.78, 40.64];           // JFK
+  const to = L.dest ?? [2.55, 49.01];                 // CDG
+  const a = new (T().Vector3)(...at(from[0], from[1]));
+  const b = new (T().Vector3)(...at(to[0], to[1]));
+  const arcH = L.arcHeight ?? 0.18;
+  const SEG = 220;
+  const arc = [];
+  for (let i = 0; i <= SEG; i++) {
+    const u = i / SEG;
+    const v = new (T().Vector3)().copy(a).lerp(b, u).normalize();
+    arc.push(v.multiplyScalar(R * (1 + arcH * Math.sin(Math.PI * u))));
+  }
+  const rg = new (T().BufferGeometry)().setFromPoints(arc);
+  const route = new (T().Line)(rg, new (T().LineBasicMaterial)({
+    color: hex(colors?.[2], '#8fdcff'), transparent: true }));
+
+  const plane = new (T().Mesh)(new (T().ConeGeometry)(0.018, 0.055, 12),
+    new (T().MeshBasicMaterial)({ color: hex(colors?.[3], '#ffffff') }));
+
+  return { rg, route, plane, arc, SEG };
+}
+
+function buildGlobe(L, colors) {
+  const grp = new (T().Group)();
+  const dots = buildGlobeDots(L);
+  grp.add(dots.points);
+  grp.add(dots.ocean);
+  const rte = buildGlobeRoute(L, colors, dots.R, dots.at);
+  grp.add(rte.route);
+  grp.add(rte.plane);
+
+  const cDay = hex(colors?.[0], '#8affd8'), cNight = hex(colors?.[4] ?? colors?.[0], '#1d4a5e');
+  const oDay = hex(colors?.[1], '#123c63'), oNight = hex(colors?.[5] ?? colors?.[1], '#050f1e');
+  const tmp = new (T().Vector3)();
+
+  const litness = (x, y, z, sx, sy, sz, k) => {
+    const d = x * sx + y * sy + z * sz;
+    return Math.max(0, Math.min(1, (d + k) / (2 * k)));
+  };
+
+  return { grp, n: dots.n, pos: dots.pos, dg: dots.dg, dcol: dots.dcol, og: dots.og, opos: dots.opos, ocol: dots.ocol,
+    rg: rte.rg, route: rte.route, arc: rte.arc, SEG: rte.SEG, plane: rte.plane,
+    cDay, cNight, oDay, oNight, tmp, litness };
+}
+
 // ---- scenes -------------------------------------------------------------------------------------
 // Each returns { obj, pose(t, L) }. Built ONCE; pose() is called per frame and may only SET absolute
 // values from t. A scene that accumulates is a bug, not a style choice.
@@ -332,82 +527,8 @@ const SCENES = {
   // Nothing here accumulates. The rotation, the route's draw-on and the aircraft's position are all
   // f(t), which is what lets frame 900 render on a different worker to frame 899.
   globe(L, colors) {
-    const R = 1;
-    const grp = new (T().Group)();
-    // lon/lat -> cartesian, once. The Y axis is the spin axis, so latitude is the polar angle.
-    const at = (lon, lat, r = R) => {
-      const p = (90 - lat) * Math.PI / 180, th = (lon + 180) * Math.PI / 180;
-      return [-r * Math.sin(p) * Math.cos(th), r * Math.cos(p), r * Math.sin(p) * Math.sin(th)];
-    };
-
-    const n = LONLAT.length / 2;
-    const pos = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) {
-      const [x, y, z] = at(LONLAT[i * 2], LONLAT[i * 2 + 1]);
-      pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
-    }
-    const dg = new (T().BufferGeometry)();
-    dg.setAttribute('position', new (T().BufferAttribute)(pos, 3));
-    // PER-DOT COLOUR, because the terminator is the point. A single material colour can only make a
-    // globe that is lit everywhere or nowhere, and day and night on a sphere is a hemisphere, not a
-    // gradient someone paints on. Each dot asks where the sun is and answers for itself.
-    const dcol = new Float32Array(n * 3);
-    dg.setAttribute('color', new (T().BufferAttribute)(dcol, 3));
-    grp.add(new (T().Points)(dg, new (T().PointsMaterial)({
-      vertexColors: true, size: L.pointSize ?? 0.011, sizeAttenuation: true,
-      transparent: true, opacity: 0.95 })));
-
-    // The ocean: a sphere just inside the dots so the far side is occluded. Without it every dot on the
-    // back of the world shows through and the globe reads as a wire ball rather than a planet.
-    const og = new (T().SphereGeometry)(R * 0.985, 64, 40);
-    const opos = og.attributes.position;
-    const ocol = new Float32Array(opos.count * 3);
-    og.setAttribute('color', new (T().BufferAttribute)(ocol, 3));
-    const ocean = new (T().Mesh)(og, new (T().MeshBasicMaterial)({ vertexColors: true }));
-    grp.add(ocean);
-
-    // THE ROUTE, as a real great circle: slerp between the two endpoints, lifted off the surface. A
-    // quadratic through a midpoint would be the flat map's approximation and is simply wrong on a
-    // sphere, where the shortest path between two points IS this curve.
-    // `origin`/`dest`, NOT `from`/`to`. Those are already shared props and already numbers: `count`
-    // reads them as the start and end of a tally. Reusing the name for a lon/lat pair would have been a
-    // second meaning on one label, which is the thing schema-drift exists to prevent and which the
-    // validator caught here on the first run.
-    const from = L.origin ?? [-73.78, 40.64];           // JFK
-    const to = L.dest ?? [2.55, 49.01];                 // CDG
-    const a = new (T().Vector3)(...at(from[0], from[1]));
-    const b = new (T().Vector3)(...at(to[0], to[1]));
-    const arcH = L.arcHeight ?? 0.18;
-    const SEG = 220;
-    const arc = [];
-    for (let i = 0; i <= SEG; i++) {
-      const u = i / SEG;
-      const v = new (T().Vector3)().copy(a).lerp(b, u).normalize();
-      arc.push(v.multiplyScalar(R * (1 + arcH * Math.sin(Math.PI * u))));
-    }
-    const rg = new (T().BufferGeometry)().setFromPoints(arc);
-    const route = new (T().Line)(rg, new (T().LineBasicMaterial)({
-      color: hex(colors?.[2], '#8fdcff'), transparent: true }));
-    grp.add(route);
-
-    // The aircraft. A cone rather than a sphere so its heading is visible, and it is ORIENTED by
-    // looking at the next point on the arc, never by integrating a turn rate.
-    const plane = new (T().Mesh)(new (T().ConeGeometry)(0.018, 0.055, 12),
-      new (T().MeshBasicMaterial)({ color: hex(colors?.[3], '#ffffff') }));
-    grp.add(plane);
-
-    // Colours resolved once. hex() allocates, and doing it per dot per frame would be 2438 allocations
-    // a frame for four values that never change.
-    const cDay = hex(colors?.[0], '#8affd8'), cNight = hex(colors?.[4] ?? colors?.[0], '#1d4a5e');
-    const oDay = hex(colors?.[1], '#123c63'), oNight = hex(colors?.[5] ?? colors?.[1], '#050f1e');
-    const tmp = new (T().Vector3)();
-
-    // How lit a point is: the cosine between its normal and the sun, softened across the terminator so
-    // the edge is a band of dawn rather than a hard line. `k` is that softness in cosine units.
-    const litness = (x, y, z, sx, sy, sz, k) => {
-      const d = x * sx + y * sy + z * sz;
-      return Math.max(0, Math.min(1, (d + k) / (2 * k)));
-    };
+    const { grp, n, pos, dg, dcol, og, opos, ocol, rg, route, arc, SEG, plane,
+      cDay, cNight, oDay, oNight, tmp, litness } = buildGlobe(L, colors);
 
     return { obj: grp, pose(t, LL) {
       // THE GLOBE SETTLES. A constant spin turns the subject out of frame: over twelve seconds at 0.16
@@ -465,39 +586,7 @@ const SCENES = {
   // is what makes the same JSON give the same shards on all 8 workers.
   shatter(L, colors) {
     const pal = paletteOf(colors);
-    const grid = Math.max(2, Math.min(48, Math.round(Math.sqrt(Math.max(4, L.count ?? 144)))));
-    const W = 3.2, H = 2.0, cw = W / grid, ch = H / grid;
-    const r = rng(L.seed ?? 7);
-    const cells = grid * grid, verts = cells * 6;
-    const pos = new Float32Array(verts * 3);
-    const uv = new Float32Array(verts * 2);
-    const local = new Float32Array(verts * 3);      // each vertex relative to its own shard's centre
-    const mid = new Float32Array(cells * 3);
-    const dir = new Float32Array(cells * 3);
-    const axis = new Float32Array(cells * 3);
-    const rate = new Float32Array(cells);
-    const CORNER = [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]];
-    for (let gy = 0; gy < grid; gy++) for (let gx = 0; gx < grid; gx++) {
-      const c = gy * grid + gx;
-      const mx = -W / 2 + (gx + 0.5) * cw, my = -H / 2 + (gy + 0.5) * ch;
-      mid[c * 3] = mx; mid[c * 3 + 1] = my; mid[c * 3 + 2] = 0;
-      // OUTWARD, plus a seeded wobble. A purely radial burst reads as a mechanism; the jitter is what
-      // makes it read as a break.
-      const jx = (r() - 0.5) * 0.8, jy = (r() - 0.5) * 0.8;
-      const dx = mx / (W / 2) + jx, dy = my / (H / 2) + jy, dz = 0.35 + r() * 1.15;
-      const dl = Math.hypot(dx, dy, dz) || 1;
-      dir[c * 3] = dx / dl; dir[c * 3 + 1] = dy / dl; dir[c * 3 + 2] = dz / dl;
-      const ax = r() - 0.5, ay = r() - 0.5, az = r() - 0.5;
-      const al = Math.hypot(ax, ay, az) || 1;
-      axis[c * 3] = ax / al; axis[c * 3 + 1] = ay / al; axis[c * 3 + 2] = az / al;
-      rate[c] = 0.5 + r() * 1.9;
-      for (let k = 0; k < 6; k++) {
-        const v = c * 6 + k;
-        local[v * 3] = CORNER[k][0] * cw; local[v * 3 + 1] = CORNER[k][1] * ch; local[v * 3 + 2] = 0;
-        uv[v * 2] = (gx + CORNER[k][0] + 0.5) / grid;
-        uv[v * 2 + 1] = (gy + CORNER[k][1] + 0.5) / grid;
-      }
-    }
+    const { cells, pos, uv, local, mid, dir, axis, rate } = buildShatterGrid(L);
     const geo = new (T().BufferGeometry)();
     geo.setAttribute('position', new (T().BufferAttribute)(pos, 3));
     geo.setAttribute('uv', new (T().BufferAttribute)(uv, 2));
@@ -555,45 +644,8 @@ const SCENES = {
     const STEP = 200, H = 0.022, D = 0.42;
     const r = rng(L.seed ?? 3);
     const grp = new (T().Group)();
-    // The field, summed over the charges. Normalised, so the step is arc length rather than strength:
-    // an un-normalised step stalls to nothing far from the poles and the line never reaches anywhere.
-    const CH = poles === 2 ? [[0, D, 0, 1], [0, -D, 0, -1]] : [[0, 0, 0, 1]];
-    const field = (x, y, z, o) => {
-      let fx = 0, fy = 0, fz = 0;
-      for (const [cx, cy, cz, q] of CH) {
-        const dx = x - cx, dy = y - cy, dz = z - cz;
-        const d2 = dx * dx + dy * dy + dz * dz + 1e-4;
-        const k = q / (d2 * Math.sqrt(d2));
-        fx += dx * k; fy += dy * k; fz += dz * k;
-      }
-      const l = Math.hypot(fx, fy, fz) || 1;
-      o[0] = fx / l; o[1] = fy / l; o[2] = fz / l;
-    };
-    const paths = [];
-    const f = [0, 0, 0];
-    for (let i = 0; i < lines; i++) {
-      // Seeded launch angles around the source. Evenly spaced rings would read as a wireframe ball.
-      const th = (i / lines) * Math.PI * 2 + (r() - 0.5) * 0.25;
-      const el = 0.18 + r() * 1.5;                          // how far off the axis it leaves
-      const s = 0.16;
-      const src = CH[0];
-      let x = src[0] + s * Math.sin(el) * Math.cos(th);
-      let y = src[1] + s * Math.cos(el);
-      let z = src[2] + s * Math.sin(el) * Math.sin(th);
-      const pts = new Float32Array((STEP + 1) * 3);
-      for (let k = 0; k <= STEP; k++) {
-        pts[k * 3] = x; pts[k * 3 + 1] = y; pts[k * 3 + 2] = z;
-        field(x, y, z, f);
-        // Past the far edge the line has said everything it has to say: hold it, so the buffer stays a
-        // fixed size and the geometry cannot depend on how many steps a particular seed survived.
-        if (Math.hypot(x, y, z) < 3.2) { x += f[0] * H; y += f[1] * H; z += f[2] * H; }
-      }
-      const g = new (T().BufferGeometry)();
-      g.setAttribute('position', new (T().BufferAttribute)(pts, 3));
-      grp.add(new (T().Line)(g, new (T().LineBasicMaterial)({
-        color: hex(pal[1]), transparent: true, opacity: 0.55 })));
-      paths.push(pts);
-    }
+    const { CH, field } = buildMagneticField(poles, D);
+    const paths = traceMagneticLines(lines, { STEP, H }, { CH, field }, r, pal, grp);
     // The poles themselves, so the lines have something to come from and go to.
     for (const [cx, cy, cz, q] of CH) {
       const b = new (T().Mesh)(new (T().SphereGeometry)(0.13, 24, 16),
@@ -804,36 +856,7 @@ const SCENES = {
     geo.setAttribute('aUv2', new (T().BufferAttribute)(aUv, 2));
     geo.attributes.position.needsUpdate = true;
     geo.computeVertexNormals();
-    const pal = paletteOf(colors);
-    const mat = new (T().ShaderMaterial)({
-      uniforms: { uP: { value: 0 }, uEdge: { value: hex(pal[0]) } },
-      side: T().DoubleSide,
-      vertexShader: `
-        attribute float aN; attribute float aX; attribute vec2 aUv2;
-        varying float vN; varying float vX; varying vec2 vUv2; varying vec3 vCol; varying vec3 vNrm;
-        void main() {
-          vN = aN; vX = aX; vUv2 = aUv2; vCol = color; vNrm = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }`,
-      fragmentShader: `
-        precision highp float;
-        uniform float uP; uniform vec3 uEdge;
-        varying float vN; varying float vX; varying vec2 vUv2; varying vec3 vCol; varying vec3 vNrm;
-        float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
-        void main() {
-          // The grain is CELLULAR, not per-pixel: floor() to a coarse grid so the edge crumbles in
-          // visible flakes instead of dithering into noise at video resolution.
-          float n = hash(floor(vUv2 * 9.0) + vN * 37.0);
-          float k = mix(n, vX, 0.55);
-          float e = uP * 1.3 - 0.12;
-          if (k < e) discard;
-          float burn = smoothstep(e + 0.09, e, k);
-          // one cheap lambert term so the slabs still read as solids rather than as flat stickers
-          float lam = 0.55 + 0.45 * max(dot(vNrm, normalize(vec3(0.4, 0.7, 0.6))), 0.0);
-          gl_FragColor = vec4(mix(vCol * lam, uEdge, burn), 1.0);
-        }`,
-      vertexColors: true,
-    });
+    const mat = buildDissolveMaterial(colors);
     const mesh = new (T().Mesh)(geo, mat);
     return { obj: mesh, pose(t, LL) {
       const at = LL.breakAt ?? 0.8, dur = Math.max(1e-6, LL.breakDur ?? 2.0);
@@ -1006,7 +1029,7 @@ function shadowBlob() {
 // `scene.background` is exactly what a photographer's paper backdrop is. Warm and neutral rather than
 // themed, because this scene is a materials/lighting experiment, not a brand film; `bodyColor` still
 // lets a caller tint the ground to match, if it ever needs to.
-function warmBackdrop(colors) {
+function warmBackdrop(_colors) {
   const c = typeof document !== 'undefined' ? document.createElement('canvas') : null;
   if (!c) return null;
   c.width = 64; c.height = 64;
@@ -1065,7 +1088,7 @@ export function createThreeLayer(w, h, L, colors) {
   const scene = new (T().Scene)();
   const camera = new (T().PerspectiveCamera)(L.fov ?? 35, w / h, 0.1, 100);
   camera.position.set(0, 0, L.dolly ?? 5.2);
-  const rig = studio(renderer, scene, colors);
+  studio(renderer, scene, colors);
 
   const make = SCENES[L.three];
   if (!make) throw new Error(`unknown three scene "${L.three}", one of: ${THREE_FX.join(', ')}`);
