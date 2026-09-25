@@ -62,6 +62,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // opposite sides by the same variable. An element under a `clip-path` is exempt. It reads markup, not
 // pixels, so it cannot see a dissolve authored between two separate LAYERS, and it says nothing about a
 // pair whose opacities move the SAME way (a group fade, not one state replacing another).
+// No craft literature on dissolve-legibility thresholds exists (these grade OUR OWN compositor's
+// crossfade output): engine-doctrine/RESEARCH/TIMING-SOURCES.md part 4/6.
 const VISIBLE = 0.15;   // opacity at which a glyph is legible enough to muddy the one behind it
 const MUDDY = 0.12;     // share of the driving variable's range both may share before it reads as mush
 const STEPS = 101;
@@ -453,6 +455,7 @@ function checkResurrection(ctx) {
 // SPLIT SEAM: the field steps while the layers on top of it dissolve.
 function checkSplitSeam(ctx) {
   const { boundaries, mp4, fps, total, W, H, snap, f, layers } = ctx;
+  // Read off a real defect, not guessed: engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-tuning
   const SPLIT_FLOOR = 2;
   const stripH = Math.max(20, Math.round(H * 0.037));
   const fieldBox = { x: 0, y: H - stripH, w: W, h: stripH };
