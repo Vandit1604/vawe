@@ -8,3 +8,4 @@ export const glsl = `                             /* wipe, directional band swee
     float edge = pp * 1.2 - 0.1;
     c = vec4(vec3(1.0), smoothstep(edge + 0.14, edge, proj) * bell);`;
 export const blurb = 'a directional band sweeping across the frame. The plainest geometric transition, and it always reads.';
+export const aka = ['directional wipe', 'band wipe', 'sweep wipe'];
