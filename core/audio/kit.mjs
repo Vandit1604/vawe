@@ -87,46 +87,57 @@ const env = (t, attack, decay, peak) => (t < attack ? (attack ? (t / attack) * p
  * difference between a whoosh and a siren: the ear hears frequency ratios, so a linear Hz
  * sweep crosses the low octaves too fast and the high ones too slowly.
  */
+// Re-tune in blocks of 32 samples (0.7ms at 44.1k). Per-sample costs 8 trig calls each and
+// buys nothing: no sweep in any recipe here moves audibly inside a millisecond.
+function noiseSample(filt, noiseGen, L, f0Filt, i, t) {
+  if (L.filterGlideTo != null && (i & 31) === 0) {
+    const g = clamp(t / Math.max(1e-4, L.filterGlideTime ?? 0.1), 0, 1);
+    filt.tune(f0Filt * Math.pow(L.filterGlideTo / f0Filt, g));
+  }
+  return filt(noiseGen());
+}
+
+// glide + detune are frequency-domain; integrate phase so a sweep stays continuous.
+// `?? ` not `|| `: a glideTime of 0 means SNAP to the target, and `|| 0.1` turned that into a
+// 100ms slide. Same falsy-zero class as the opacity bug (engine-doctrine/MISTAKES.md #193), and the very
+// next line already had it right for `peak`.
+function toneSample(L, phase, t) {
+  let f = L.frequency || 440;
+  if (L.glideTo != null) { const g = clamp(t / Math.max(1e-4, L.glideTime ?? 0.1), 0, 1); f = f + (L.glideTo - f) * g; }
+  if (L.detune) f *= Math.pow(2, L.detune / 1200);
+  const nextPhase = phase + TAU * f / SR;
+  return { value: osc(L.waveform || 'sine', 0, 0, nextPhase), phase: nextPhase };
+}
+
+function renderLayer(out, L, li, seed, n) {
+  const off = sec(L.offset || 0);
+  const noiseGen = rng((seed * 2654435761 + li * 40503) >>> 0);
+  const f0Filt = L.filterFrequency || 1000;
+  const filt = L.kind === 'noise' ? biquad(L.filterType || 'lowpass', f0Filt, L.filterQ ?? 0.7) : null;
+  const life = (L.attack || 0) + (L.decay || 0) * 5;
+  const nn = Math.min(n - off, sec(life));
+  let phase = 0;
+  for (let i = 0; i < nn; i++) {
+    const t = i / SR;
+    let v;
+    if (L.kind === 'noise') {
+      v = noiseSample(filt, noiseGen, L, f0Filt, i, t);
+    } else {
+      const s = toneSample(L, phase, t);
+      v = s.value;
+      phase = s.phase;
+    }
+    out[off + i] += v * env(t, L.attack ?? 0, L.decay ?? 0.1, L.peak ?? 0.1);
+  }
+}
+
 export function renderCue(spec, seed = 1) {
   const layers = spec.layers || [];
   const tail = (spec.shimmer ? spec.shimmer.delay * 6 : 0) + 0.08;
   const dur = Math.max(...layers.map((l) => (l.offset || 0) + (l.attack || 0) + (l.decay || 0) * 5), 0.05) + tail;
   const n = sec(dur), out = new Float32Array(n);
 
-  layers.forEach((L, li) => {
-    const off = sec(L.offset || 0);
-    const noiseGen = rng((seed * 2654435761 + li * 40503) >>> 0);
-    const f0Filt = L.filterFrequency || 1000;
-    const filt = L.kind === 'noise' ? biquad(L.filterType || 'lowpass', f0Filt, L.filterQ ?? 0.7) : null;
-    const life = (L.attack || 0) + (L.decay || 0) * 5;
-    const nn = Math.min(n - off, sec(life));
-    let phase = 0;
-    for (let i = 0; i < nn; i++) {
-      const t = i / SR;
-      let v;
-      if (L.kind === 'noise') {
-        // Re-tune in blocks of 32 samples (0.7ms at 44.1k). Per-sample costs 8 trig calls each and
-        // buys nothing: no sweep in any recipe here moves audibly inside a millisecond.
-        if (L.filterGlideTo != null && (i & 31) === 0) {
-          const g = clamp(t / Math.max(1e-4, L.filterGlideTime ?? 0.1), 0, 1);
-          filt.tune(f0Filt * Math.pow(L.filterGlideTo / f0Filt, g));
-        }
-        v = filt(noiseGen());
-      }
-      else {
-        // glide + detune are frequency-domain; integrate phase so a sweep stays continuous.
-        let f = L.frequency || 440;
-        // `?? ` not `|| `: a glideTime of 0 means SNAP to the target, and `|| 0.1` turned that into a
-        // 100ms slide. Same falsy-zero class as the opacity bug (engine-doctrine/MISTAKES.md #193), and the very
-        // next line already had it right for `peak`.
-        if (L.glideTo != null) { const g = clamp(t / Math.max(1e-4, L.glideTime ?? 0.1), 0, 1); f = f + (L.glideTo - f) * g; }
-        if (L.detune) f *= Math.pow(2, L.detune / 1200);
-        phase += TAU * f / SR;
-        v = osc(L.waveform || 'sine', 0, 0, phase);
-      }
-      out[off + i] += v * env(t, L.attack ?? 0, L.decay ?? 0.1, L.peak ?? 0.1);
-    }
-  });
+  layers.forEach((L, li) => renderLayer(out, L, li, seed, n));
 
   if (spec.shimmer) {
     const { delay = 0.1, feedback = 0.2, wet = 0.15, lowpass = 4000 } = spec.shimmer;
@@ -204,69 +215,6 @@ export function wavDuration(samples) { return samples.length / SR; }
 // The ten removed were the interface clicks and noise textures ported from a UI library, which a film
 // has no use for: nobody is clicking anything. What remains is the pitched set, which is what a film
 // actually scores with.
-// ---------------------------------------------------------------- swarm: a moving spectral band
-// WHAT A WHOOSH ACTUALLY IS, and the reason the engine could not make one. Every write-up of the
-// family agrees on the mechanism: a whoosh is a BAND OF ENERGY THAT MOVES THROUGH THE SPECTRUM while
-// its level swells and falls. The usual construction is white noise through a band-pass filter whose
-// centre frequency is automated across the sound, with a Doppler-style pitch fall at the pass point.
-//
-// `renderCue` cannot do that half of it. `biquad(type, f0, Q)` builds its coefficients ONCE, at layer
-// construction, so a noise layer's filter frequency is fixed for the layer's whole life. The two cues
-// that were deleted for sounding cheap, `travel` and `sweep`, were each two STATIC bands with an
-// offset between them, which is a two-step staircase and not a sweep. So round 1's finding ("every cue
-// kept had zero noise layers") is real about this engine's noise but is not a fact about noise: the
-// noise here never had the one thing that makes the family work.
-//
-// THE STEP THAT IS NOT OBVIOUS. A moving spectral band does not have to be a filter. Take twelve to
-// twenty partials, place them at IRREGULAR spacings across two octaves so no integer relationship
-// survives, and the ear stops hearing a chord and starts hearing a band: it is additive noise, the
-// same trick as a Risset glissando, and the density is what buys the fusion. Then glide every partial
-// to the same RATIO of its own frequency. Because renderCue's glide is linear in Hz, gliding each
-// f_k to f_k*R over one glideTime makes every partial share the multiplier (1 + (R-1)*t/T), so the
-// whole band translates rigidly in log-frequency and keeps its shape. That is a filter sweep, built
-// out of the one primitive the engine does own.
-//
-// THE SOURCE, and it settles the question rather than suggesting an answer. Selfridge, Moffat, Avital
-// and Reiss, "Creating Real-Time Aeroacoustic Sound Effects Using Physically Informed Models", JAES
-// 66(7/8) 594-607, 2018, models a swoosh as an AEOLIAN TONE: vortex shedding off a moving cylinder,
-// synthesised as five band-passed partials at ratios 1:2:3:4:5 (lift at 1, 3, 5 with gains 1.0, 0.6,
-// 0.1; drag at 2, 4 at about a tenth of lift), all sweeping together on f = 0.2*u/d. In their listening
-// test participants picked the SYNTHESISED sword over a recording of a real one more often than not.
-// So a swept resonant partial stack is not an approximation of a whoosh, it is the published model of
-// one, and the paper's own Q figures (about 90 for a thin fast object, about 10 for a thick slow one)
-// say the "tonal" and "noisy" halves were never two things: high-Q band-passed noise IS a jittery sine.
-//
-// WHERE THIS DIVERGES FROM THE PAPER, and why. The paper's five partials are HARMONIC, because it is
-// modelling one cylinder. A cut is not an object, so harmonic ratios here would read as a siren with a
-// pitch. The stack is spread irregularly instead, which trades the physics for the fusion: measured by
-// autocorrelation, `whoosh` scores 0.24 against 0.99 for `chime`, so the ear finds no note in it.
-// See also the Shepard/Risset glissando, which is the same construction with octave spacing and a
-// fixed bell of amplitudes in log-frequency (https://splice.com/blog/how-shepard-tone-works/).
-//
-//   f0        where the band starts, in Hz (its lowest partial)
-//   to        where that lowest partial ends. The ratio to/f0 is what the whole band travels.
-//   octaves   how wide the band is. Under ~1.5 it reads as a pitch, over ~2.5 it reads as air.
-//   n         partial count. Twelve is about the floor for fusion; below it you hear the parts.
-//   tilt      how much quieter each partial is than the one below it, so the band has a direction.
-//   stagger   how far apart in time the partials start. A few ms breaks the onset click; a few
-//             hundred ms turns the same stack into a swell, because the level accrues as they arrive.
-function swarm({ f0, to, octaves = 2, n = 14, attack, decay, peak, offset = 0, tilt = 0.55, wave = 'sine', stagger = 0.008 }) {
-  const R = to / f0;
-  return Array.from({ length: n }, (_, k) => {
-    // A low-discrepancy jitter (the golden-ratio sequence) rather than an even split. Evenly spaced
-    // partials in log frequency are a harmonic-ish comb and the ear finds a pitch in it; the irregular
-    // spacing is what keeps the stack reading as a band. Deterministic, so the cue is reproducible.
-    const u = (k + ((k * 0.6180339887) % 1)) / n;
-    const f = f0 * Math.pow(2, u * octaves);
-    return {
-      kind: 'tone', waveform: wave, frequency: f, glideTo: f * R, glideTime: decay * 0.9 + attack,
-      attack: attack * (1 + u * 0.5), decay: decay * (1 - u * 0.25),
-      peak: peak * Math.pow(1 - tilt, u * octaves) / Math.sqrt(n),
-      offset: offset + u * stagger,   // stagger, so the partials do not all start in phase
-    };
-  });
-}
-
 export const CUES = {
   // ---- ACCENTS: something small lands ------------------------------------------------------------
   // Punctuation. A small element, a counter digit. Quiet on purpose: this is the one that becomes a
