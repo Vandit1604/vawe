@@ -7,3 +7,4 @@ export const glsl = `                             /* scanline sweep, CRT band + 
     float lines = (0.5 + 0.5*sin(uv.y * u_res.y * 0.5)) * 0.10;        /* CRT scanlines */
     c = vec4(vec3(1.0), (band*0.85 + trail*0.28 + lines*bell) * bell);`;
 export const blurb = 'a CRT scanline band sweeping through, with a trailing glow. Terminal, monitor, surveillance.';
+export const aka = ['scanline sweep', 'crt scan', 'monitor scan'];
