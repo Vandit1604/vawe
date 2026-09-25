@@ -80,7 +80,7 @@ const CORE_UNITS = [
   col = mix(getFrom((uv - 0.5)*(1.0 - x) + 0.5), getTo((uv - 0.5)*x + 0.5), x);`) },
 
   { name: 'whipPan', family: 'warp', author: 'vawe', license: 'internal', source: 'vawe',
-    blurb: 'momentum swipe between beats',
+    blurb: 'a 6-sample motion-blurred smear thrown toward dir, offset up to 0.9x intensity, momentum carried between beats',
     glsl: vawe(`  vec2 d = normalize(u_dir + 1e-4) / aspect;
   float amt = 0.9 * u_intensity;
   // The smear spread is a CLAMPED read of intensity, so a subtle whip (low intensity, for travel
@@ -137,7 +137,7 @@ const CORE_UNITS = [
   col.rgb += vec3(1.0, 0.95, 0.85) * flare;`) },
 
   { name: 'flashWhite', family: 'flash', author: 'vawe', license: 'internal', source: 'vawe',
-    blurb: 'white flash on an energy pivot',
+    blurb: 'flashes to solid white at the midpoint (p=0.5) then reveals the arriving beat, an energy pivot',
     glsl: vawe(`  if (p < 0.5) {
     float k = smoothstep(0.0, 1.0, p * 2.0);
     col = mix(getFrom(uv), vec4(1.0), k);
@@ -147,7 +147,7 @@ const CORE_UNITS = [
   }`) },
 
   { name: 'cinematicZoom', family: 'zoom', author: 'vawe', license: 'internal', source: 'vawe',
-    blurb: 'dive-in zoom into a screen',
+    blurb: 'the outgoing beat zooms in up to 1.25x intensity while the incoming beat zooms out from 1.25x, a dive-in push into a screen',
     glsl: vawe(`  float e = p*p*(3.0 - 2.0*p);
   vec2 dd = uv - 0.5;
   float sFrom = 1.0 + 0.25 * e * u_intensity;
@@ -157,7 +157,7 @@ const CORE_UNITS = [
   col = mix(cf, ct, e);`) },
 
   { name: 'portal', family: 'shaped', author: 'vawe', license: 'internal', source: 'vawe',
-    blurb: 'glowing portal reveal (once)',
+    blurb: 'a glowing ring expands once to reveal the next beat, with up to 0.14x intensity of warp bend at its edge',
     glsl: vawe(`  vec2 dd = (uv - 0.5) * aspect;
   float r = length(dd);
   float ang = atan(dd.y, dd.x);
