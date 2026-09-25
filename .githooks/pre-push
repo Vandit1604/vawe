@@ -84,6 +84,12 @@
 # audit-test and inert-check carry no such dependency; they are here because pre-push is where a push-time
 # check that already passes belongs, same as the fourteen above them. All eight pass today. Pure file
 # reads plus, for sim-audit and glyphs-audit, one hash each; well under a second combined.
+#
+# skill-check and rule-length joined the same day inert-check found them: both in the Makefile, both
+# read only tracked docs (skills/*/SKILL.md, AGENTS.md, engine-doctrine/CRAFT), both pass today, both
+# under a tenth of a second. Neither is in gates.yml, matching the rest of this maintenance tier
+# (skill-reach, rung, provenance): pre-push and CI do not mirror past the fast job gates.yml itself
+# names, and these belong with their siblings.
 while read -r _local_ref local_sha _remote_ref remote_sha; do
   [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue   # a branch deletion
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
@@ -101,8 +107,8 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
   fi
 done
 
-echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + provenance + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check) …"
-if ! make schema-check lib-test craft-coverage coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung provenance sfx-check audit-test glyphs-audit sim-audit docker-context judge-census inert-check; then
+echo "▶ pre-push: framework gates (schema-check + lib-test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + provenance + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check + skill-check + rule-length) …"
+if ! make schema-check lib-test craft-coverage coverage doc-refs skill-reach arsenal-check discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung provenance sfx-check audit-test glyphs-audit sim-audit docker-context judge-census inert-check skill-check rule-length; then
   echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi
