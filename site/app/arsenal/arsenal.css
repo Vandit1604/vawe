@@ -90,7 +90,7 @@
   font: 500 11.5px/1 var(--font-mono), ui-monospace, monospace; font-style: normal;
   font-variant-numeric: tabular-nums; color: var(--muted);
 }
-.ar-ax[aria-current] em { color: var(--accent); }
+.ar-ax[aria-current] em { color: var(--ink-2); }
 .ar-ax:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* The kind row leads its own block, so it is the one thing in the rail set in the page's sans at
