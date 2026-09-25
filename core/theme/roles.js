@@ -6,7 +6,7 @@
 // that reads `theme.palette.X`) is unchanged by this whole migration. It still reads a plain object with
 // a `palette`/`type`/`gradient` shape. What changed is where that object comes from: `expandTheme` below
 // builds it from `tokens`+`roles` instead of an author having written it by hand, key for key.
-import { resolveTokens, resolveRoleValue, aliasPath } from './tokens.js';
+import { resolveTokens, resolveRoleValue } from './tokens.js';
 import { mix, withAlpha } from './color-oklch.js';
 import { themeErrors } from '../registry/theme-contract.js';
 
@@ -58,23 +58,33 @@ const DOWN_DEFAULT = '#a3282d';
 // via the caller, expandTheme, if they don't); every optional legacy key an author did not set in
 // `roles` is mixed in OKLab from ground/ink/accent, so a theme with an opinion about three colours still
 // produces a complete, readable 15-key palette.
-export function deriveLegacy(tokenFile, opts = {}) {
-  const errors = [];
-  const roles = (tokenFile && tokenFile.roles) || {};
-  const { values, errors: tokenErrors } = resolveTokens((tokenFile && tokenFile.tokens) || {}, opts);
-  errors.push(...tokenErrors);
-
+function resolveRequiredRoles(roles, values, errors, opts) {
   const req = (key, colorish = true) => {
     if (!Object.hasOwn(roles, key)) { errors.push(`roles.${key} is required`); return null; }
     const v = resolveRoleValue(roles[key], values, errors, opts, { colorish });
     return v ?? null;
   };
-  const ground = req('ground'), ink = req('ink'), accent = req('accent');
-  const fontSans = req('font.sans', false), fontMono = req('font.mono', false);
+  return {
+    ground: req('ground'),
+    ink: req('ink'),
+    accent: req('accent'),
+    fontSans: req('font.sans', false),
+    fontMono: req('font.mono', false),
+  };
+}
 
+// passthrough: any other roles.* entry that names a real legacy palette key (accent2, grid, grid2,
+// glass, highlight, up2, card, warn, on*) carries straight through, colour-normalised.
+function applyPalettePassthrough(roles, values, errors, opts, palette) {
+  for (const [key, raw] of Object.entries(roles)) {
+    if (KNOWN_PALETTE_ROLE_KEYS.has(key) || PALETTE_DERIVED.includes(key) || key.startsWith('font.') || key === 'gradient') continue;
+    palette[key] = resolveRoleValue(raw, values, errors, opts, { colorish: true });
+  }
+}
+
+function buildPalette(roles, values, errors, opts, { ground, ink, accent }) {
   const mixC = (a, b, t) => (a && b ? mix(a, b, t, opts) : null);
   const get = (key) => roleGet(roles, values, errors, opts, key);
-
   const palette = {
     bg: get('bg') ?? ground,
     bg2: get('bg2') ?? mixC(ground, ink, 0.05),
@@ -92,13 +102,12 @@ export function deriveLegacy(tokenFile, opts = {}) {
     up: get('up') ?? UP_DEFAULT,
     down: get('down') ?? DOWN_DEFAULT,
   };
-  // passthrough: any other roles.* entry that names a real legacy palette key (accent2, grid, grid2,
-  // glass, highlight, up2, card, warn, on*) carries straight through, colour-normalised.
-  for (const [key, raw] of Object.entries(roles)) {
-    if (KNOWN_PALETTE_ROLE_KEYS.has(key) || PALETTE_DERIVED.includes(key) || key.startsWith('font.') || key === 'gradient') continue;
-    palette[key] = resolveRoleValue(raw, values, errors, opts, { colorish: true });
-  }
+  applyPalettePassthrough(roles, values, errors, opts, palette);
+  return palette;
+}
 
+function buildType(roles, values, errors, opts, { fontSans, fontMono }) {
+  const get = (key) => roleGet(roles, values, errors, opts, key);
   const type = {
     sans: fontSans,
     serif: get('font.serif') ?? fontSans,
@@ -106,15 +115,29 @@ export function deriveLegacy(tokenFile, opts = {}) {
     num: get('font.num') ?? fontMono,
   };
   if (Object.hasOwn(roles, 'font.optical')) type.optical = resolveRoleValue(roles['font.optical'], values, errors, opts, { colorish: false });
+  return type;
+}
 
-  let gradient;
+function buildGradient(roles, values, errors, opts, { ground, ink }) {
   if (Object.hasOwn(roles, 'gradient')) {
     const raw = roles.gradient;
-    if (!Array.isArray(raw)) errors.push('roles.gradient must be an array of colours');
-    else gradient = raw.map((stop) => resolveRoleValue(stop, values, errors, opts, { colorish: true }));
-  } else {
-    gradient = [ground, mixC(ground, ink, 0.03), mixC(ground, ink, 0.06)];
+    if (!Array.isArray(raw)) { errors.push('roles.gradient must be an array of colours'); return undefined; }
+    return raw.map((stop) => resolveRoleValue(stop, values, errors, opts, { colorish: true }));
   }
+  const mixC = (a, b, t) => (a && b ? mix(a, b, t, opts) : null);
+  return [ground, mixC(ground, ink, 0.03), mixC(ground, ink, 0.06)];
+}
+
+export function deriveLegacy(tokenFile, opts = {}) {
+  const errors = [];
+  const roles = (tokenFile && tokenFile.roles) || {};
+  const { values, errors: tokenErrors } = resolveTokens((tokenFile && tokenFile.tokens) || {}, opts);
+  errors.push(...tokenErrors);
+
+  const required = resolveRequiredRoles(roles, values, errors, opts);
+  const palette = buildPalette(roles, values, errors, opts, required);
+  const type = buildType(roles, values, errors, opts, required);
+  const gradient = buildGradient(roles, values, errors, opts, required);
 
   return { palette, type, gradient, errors };
 }
