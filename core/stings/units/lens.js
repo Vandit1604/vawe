@@ -17,3 +17,4 @@ export const glsl = `                             /* lens, flare: hot core, ghos
     vec3 col = vec3(1.0)*core + vec3(0.6, 0.8, 1.0)*streakH + vec3(0.9, 0.7, 1.0)*ghosts;
     c = vec4(col, (core*0.9 + streakH*0.6 + ghosts*0.8) * bell);`;
 export const blurb = 'a full anamorphic flare: hot core, ghosts down the axis, a horizontal streak. Cinematic and very loud.';
+export const aka = ['anamorphic flare', 'lens flare', 'streak flare'];
