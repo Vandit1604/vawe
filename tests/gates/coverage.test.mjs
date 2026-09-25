@@ -1,4 +1,4 @@
-// quality/gates/coverage.test.mjs: the smallest check that fails if a whole registry silently stops
+// tests/gates/coverage.test.mjs: the smallest check that fails if a whole registry silently stops
 // being counted. `.claude/plans/unwired.plan.md` Phase 6 names the real failure this closes: four
 // directory-list gates dropped 1,622 lines earlier the same week, silently, because nothing asserted
 // the POPULATION a sweep walks stays the population it claims to walk. `darkVocabularySummary()` sums

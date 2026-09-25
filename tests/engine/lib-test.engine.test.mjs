@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-// quality/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion/motion.js.
-// No browser needed (the primitives are pure). Run: node quality/gates/lib-test.mjs  (make lib-test)
+// tests/engine/lib-test.engine.test.mjs: fast pure-JS asserts, split by domain out of the old quality/gates/lib-test.mjs.
+// No browser needed (the primitives are pure). Run: node tests/engine/lib-test.engine.test.mjs  (make test)
 import { spring, springSettle, easeOutCubic,
   random, noise, hashSeed, resolveEasing, EASINGS, DEFAULT_MOTION,
   shake, trackingFor,
@@ -449,7 +449,7 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
   // THE ONE COLOUR PARSER (core/color/engine.js). Four copies with four grammars became one, and this is
   // the falsifiable half of that claim: for each old copy, a colour it REJECTED and a colour it
   // ACCEPTED, run through the shared parser now. If the union ever narrows, or the anchor is
-  // dropped again, one of these flips. `node quality/gates/lib-test.mjs --colours` prints the table.
+  // dropped again, one of these flips. `node tests/motion/lib-test.motion.test.mjs --colours` prints the table.
   const J = (v) => JSON.stringify(parseColor(v));
   // filters.js rejected every hex that was not 3 or 6 digits, so an 8-digit brand colour read null
   // and the grade silently fell back to white.

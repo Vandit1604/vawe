@@ -1,4 +1,4 @@
-// quality/gates/no-silent-fallback-blocks.test.mjs: the runnable self-check for engine-doctrine/MISTAKES.md's
+// tests/gates/no-silent-fallback-blocks.test.mjs: the runnable self-check for engine-doctrine/MISTAKES.md's
 // fallback-to-default pattern, in the blocks/ component library. Lives here rather than
 // inside blocks/ itself because blocks/index.mjs treats every .mjs file in that directory as a block
 // family and refuses one with no CATEGORY/schema exports (quality/gates/lib-test.mjs's directory-drift
@@ -9,7 +9,7 @@
 // throwing, naming the field, the bad value, and what is legal (core/registry/registry.js's own rule,
 // applied by hand at these sites because they are not the closed-vocabulary kind that registry serves).
 //
-//   node quality/gates/no-silent-fallback-blocks.test.mjs
+//   node tests/gates/no-silent-fallback-blocks.test.mjs
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

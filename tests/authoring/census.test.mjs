@@ -1,4 +1,4 @@
-// harness/lib/census.test.mjs: the smallest check that fails if a catalogue tile or a held-still demo
+// tests/authoring/census.test.mjs: the smallest check that fails if a catalogue tile or a held-still demo
 // re-enters the MOTION population. LIBRARY correctly keeps them (they are real scene JSON); AUTHORED
 // must not, because neither one was ever authored as a film to grade for motion (census.mjs's own
 // comment above AUTHORED explains why: no `.storyboard.md` sidecar means nobody planned it as a film).

@@ -1,9 +1,9 @@
-// quality/gates/no-judge.test.mjs: the one property that matters most, a receipt must not survive the
+// tests/gates/no-judge.test.mjs: the one property that matters most, a receipt must not survive the
 // render it claims to have looked at. Writes a real receipt via harness/lib/receipt.mjs against a scene
 // JSON + a fake mp4, then rewrites the mp4's BYTES with the same NAME and same mtime untouched, and
 // asserts `isJudged` flips to false. mtime is left alone on purpose: a hash-based check must catch a
 // re-render a timestamp cannot (see the comment at the top of no-judge.mjs).
-//   node quality/gates/no-judge.test.mjs
+//   node tests/gates/no-judge.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

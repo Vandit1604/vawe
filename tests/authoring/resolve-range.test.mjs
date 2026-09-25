@@ -1,5 +1,5 @@
-// harness/lib/resolve-range.test.mjs: beat/join -> film-time range resolution, plus tempo scaling and
-// the refusal cases. node harness/lib/resolve-range.test.mjs
+// tests/authoring/resolve-range.test.mjs: beat/join -> film-time range resolution, plus tempo scaling and
+// the refusal cases. node tests/authoring/resolve-range.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

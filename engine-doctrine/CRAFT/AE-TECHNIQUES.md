@@ -292,7 +292,7 @@ the shift inside a motion the viewer reads as intentional.
 **ENGINE MAPPING** Absent as such. `filter: "morph"` (`core/looks/filters.js`) is dilate and erode on pixels,
 not a font swap, and `morphButton` is a blueprint beat. This is a new `core/type/type.js` preset, `fontMorph`,
 and it needs one thing the engine has: `trackingFor` is already exported from `core/motion/motion.js` (it is
-asserted in `quality/gates/lib-test.mjs`).
+asserted in `tests/motion/lib-test.motion.test.mjs`).
 
 **DEFAULT OR OPTION** Option. It is a spectacle device, and a film should have one of those, not four.
 

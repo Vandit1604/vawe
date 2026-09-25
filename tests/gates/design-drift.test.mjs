@@ -1,4 +1,4 @@
-// node --test quality/gates/design-drift.test.mjs
+// node --test tests/gates/design-drift.test.mjs
 //
 // A hermetic fixture pair per test (a film json + its storyboard + one fragment, under a tmp
 // "fixtures" folder), the same shape frame-check.test.mjs uses for the same D=<film> contract: this

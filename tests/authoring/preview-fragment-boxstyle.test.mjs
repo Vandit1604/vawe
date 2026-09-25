@@ -1,9 +1,9 @@
-// preview-fragment-boxstyle.test.mjs: integration check that preview-fragment.mjs's --boxes-out dump
+// tests/authoring/preview-fragment-boxstyle.test.mjs: integration check that preview-fragment.mjs's --boxes-out dump
 // carries the computed-style fields (fontFamily, fontWeight, letterSpacing, color, backgroundColor,
 // borderRadius, boxShadow) for a real fragment with known inline styles. Launches the actual preview
 // (same spawnSync path harness/author/screen.mjs uses), because this is the one thing a static parse
 // of the fragment's source cannot answer: it is the browser's own getComputedStyle.
-//   node harness/author/preview-fragment-boxstyle.test.mjs
+//   node tests/authoring/preview-fragment-boxstyle.test.mjs
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';

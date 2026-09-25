@@ -1,4 +1,4 @@
-// node --test quality/gates/knowledge-audit.test.mjs
+// node --test tests/gates/knowledge-audit.test.mjs
 //
 // The join logic in harness/lib/knowledge-audit.mjs on synthetic run-log data: a rule dropped
 // feature-not-matched, then proven (the same film later hits its check code), left unproven (the code

@@ -1,5 +1,5 @@
-// harness/lib/plan-judge-codes.test.mjs
-//   node --test harness/lib/plan-judge-codes.test.mjs
+// tests/authoring/plan-judge-codes.test.mjs
+//   node --test tests/authoring/plan-judge-codes.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PLAN_JUDGE_CODES, PLAN_JUDGE_PRIORITY, rankPlanJudgeFindings } from '../../harness/lib/plan-judge-codes.mjs';

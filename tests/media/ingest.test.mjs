@@ -1,5 +1,5 @@
-// harness/media/ingest.test.mjs: house-rule self-check, no framework.
-//   node harness/media/ingest.test.mjs
+// tests/media/ingest.test.mjs: house-rule self-check, no framework.
+//   node tests/media/ingest.test.mjs
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

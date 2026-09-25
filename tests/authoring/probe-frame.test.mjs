@@ -1,5 +1,5 @@
-// harness/dev/probe-frame.test.mjs: hermetic fixture for `make probe-frame`.
-// node harness/dev/probe-frame.test.mjs
+// tests/authoring/probe-frame.test.mjs: hermetic fixture for `make probe-frame`.
+// node tests/authoring/probe-frame.test.mjs
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

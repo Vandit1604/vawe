@@ -1,6 +1,6 @@
-// core/layers/text.test.mjs: the runnable self-check for `typingColors` (core/layers/text.js), the
+// tests/layers/text.test.mjs: the runnable self-check for `typingColors` (core/layers/text.js), the
 // per-word flash-then-settle colour on a `typing` text layer.
-//   node --test core/layers/text.test.mjs
+//   node --test tests/layers/text.test.mjs
 //
 // PLAIN TEXT NEEDS NO DOM: colorizeTyped's plain-text branch is a pure string splice (see the comment
 // on it in text.js), so it and typingColorFor are asserted here with plain node:assert, no browser.

@@ -1,5 +1,5 @@
-// harness/author/pitch.test.mjs: does the pitch receipt round-trip, and does it go stale?
-//   node harness/author/pitch.test.mjs
+// tests/authoring/pitch.test.mjs: does the pitch receipt round-trip, and does it go stale?
+//   node tests/authoring/pitch.test.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';

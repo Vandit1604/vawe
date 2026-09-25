@@ -1,10 +1,10 @@
-// core/timeline/relative-time.test.mjs: the runnable self-check for `audio.cues[].t` accepting the
+// tests/timeline/relative-time.test.mjs: the runnable self-check for `audio.cues[].t` accepting the
 // SAME relative-time grammar as `layers[].start`/`transitions[].at`/`cameraMove.start`, so a cue can
 // name the moment it belongs to ("installLine.end+0.2") instead of a number an author has to recompute
 // by hand every time that layer moves. A cue pinned to a stale hand-computed number is exactly the bug
 // this closes: `vawe-flow-2.json` fired two cues early because the value copied in was a part's
 // `delay` (relative to its parent), not the absolute second that delay resolves to.
-//   node core/timeline/relative-time.test.mjs
+//   node tests/timeline/relative-time.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveRelativeTimes } from '../../core/timeline/relative-time.js';

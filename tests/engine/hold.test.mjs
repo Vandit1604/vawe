@@ -1,7 +1,7 @@
-// core/camera-moves/hold.test.mjs: the runnable self-check for `camera: hold`, the explicit way to
+// tests/engine/hold.test.mjs: the runnable self-check for `camera: hold`, the explicit way to
 // declare the camera LOCKED OFF for a window (AGENTS.md build brief: written 84 times across 21
 // storyboards, refused every time, because the only way to say "no camera" was to say nothing at all).
-//   node core/camera-moves/hold.test.mjs
+//   node tests/engine/hold.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { hold } from '../../core/camera-moves/hold.js';

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-// quality/gates/lib-test.mjs: fast pure-JS asserts for the motion primitives in core/motion/motion.js.
-// No browser needed (the primitives are pure). Run: node quality/gates/lib-test.mjs  (make lib-test)
+// tests/motion/lib-test.motion.test.mjs: fast pure-JS asserts, split by domain out of the old quality/gates/lib-test.mjs.
+// No browser needed (the primitives are pure). Run: node tests/motion/lib-test.motion.test.mjs  (make test)
 import { spring, springSettle, easeOutCubic,
   random, noise, hashSeed, resolveEasing, EASINGS, DEFAULT_MOTION,
   shake, trackingFor,
@@ -149,7 +149,7 @@ ok('colorDistance: same rgba against itself is legal (0)', colorDistance('rgba(2
 ok('colorDistance: 1-2 unit RGB gap at equal alpha is still a hint', colorDistance('rgb(254,254,253)', 'rgb(255,255,255)') <= 6);
 ok('colorDistance: unparseable colour is Infinity, not a false match', colorDistance('not-a-colour', '#ffffff') === Infinity);
 
-// `node quality/gates/lib-test.mjs --colours` prints what the ONE parser now does with the colours
+// `node tests/motion/lib-test.motion.test.mjs --colours` prints what the ONE parser now does with the colours
 // the four old copies disagreed about. The asserts below are the gate; this is how you READ it.
 if (process.argv.includes('--colours')) {
   const rows = [

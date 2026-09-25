@@ -1,4 +1,4 @@
-// harness/author/critics.test.mjs: the DECIDERS=1 brief must carry the worktree agent contract
+// tests/authoring/critics.test.mjs: the DECIDERS=1 brief must carry the worktree agent contract
 // (engine-doctrine/CRAFT/SUBAGENTS.md) with a real base sha, not a copy that can drift from the doc.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';

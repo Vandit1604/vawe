@@ -1,6 +1,6 @@
-// core/backgrounds/theme-rotation.test.mjs: the runnable self-check for expandThemeRotation
+// tests/engine/theme-rotation.test.mjs: the runnable self-check for expandThemeRotation
 // (engine-doctrine/CRAFT/THEME-LOOK.md "bgDefault can now be a ROTATION"). Pure-JS.
-//   node core/backgrounds/theme-rotation.test.mjs
+//   node tests/engine/theme-rotation.test.mjs
 import assert from 'node:assert/strict';
 import { expandThemeRotation } from '../../core/backgrounds/theme-rotation.js';
 import { junctionTable, marksOf } from '../../core/timeline/junctions.js';

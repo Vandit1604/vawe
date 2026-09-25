@@ -1,5 +1,5 @@
-// core/tracks/units.test.mjs: known-answer check for the word-by-word EXIT (core/tracks/units.js).
-// Run: node core/tracks/units.test.mjs
+// tests/tracks/units.test.mjs: known-answer check for the word-by-word EXIT (core/tracks/units.js).
+// Run: node tests/tracks/units.test.mjs
 //
 // THE OWNER RULE UNDER TEST: an exit reads faster than the entrance it mirrors, never a same-speed
 // rewind. Left unconfigured, `exit.each`/`exit.stagger` must derive from the ENTRANCE's own resolved

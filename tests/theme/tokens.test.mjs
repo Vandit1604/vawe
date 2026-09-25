@@ -1,5 +1,5 @@
-// core/theme/tokens.test.mjs: alias chains, cycle refusal, unknown-path refusal, type mismatch
-// refusal, OKLCH normalisation. node core/theme/tokens.test.mjs
+// tests/theme/tokens.test.mjs: alias chains, cycle refusal, unknown-path refusal, type mismatch
+// refusal, OKLCH normalisation. node tests/theme/tokens.test.mjs
 import assert from 'node:assert/strict';
 import { resolveTokens, flattenTokens } from '../../core/theme/tokens.js';
 import { parseColor, colorAlpha } from '../../core/color/engine.js';

@@ -1,4 +1,4 @@
-// node --test quality/gates/read-check.test.mjs
+// node --test tests/gates/read-check.test.mjs
 //
 // engine-doctrine/RULES/readable-hold.md, P1 of .claude/plans/craft-knowledge/01-motion.plan.md: the
 // unreadable-hold finding reports the fix, it never changes timing, and it must name the beat (or the

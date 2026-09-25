@@ -1,4 +1,4 @@
-// node harness/live/test/no-blanket-git.test.mjs
+// node tests/hooks/no-blanket-git.test.mjs
 //
 // Feeds each case through the real hook as a child process, exactly as Claude Code does.
 //

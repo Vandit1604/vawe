@@ -1,7 +1,7 @@
-// core/timeline/clips.test.mjs: the runnable self-check for the "one clock per layer, no default
+// tests/timeline/clips.test.mjs: the runnable self-check for the "one clock per layer, no default
 // fade-out" fix (engine-doctrine/MISTAKES.md #574, #575). Pure-JS, no DOM: exitDurOf and clipStyleAt read only
 // `el.dataset`, so a plain object stands in for an element.
-//   node core/timeline/clips.test.mjs
+//   node tests/timeline/clips.test.mjs
 import assert from 'node:assert/strict';
 import { exitDurOf, clipStyleAt, BASE_EXIT } from '../../core/timeline/clips.js';
 import { cutStyle } from '../../core/cuts/index.js';

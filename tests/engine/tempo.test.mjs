@@ -1,5 +1,5 @@
-// core/engine/tempo.test.mjs: the runnable self-check for the `tempo` global pace dial.
-//   node core/engine/tempo.test.mjs
+// tests/engine/tempo.test.mjs: the runnable self-check for the `tempo` global pace dial.
+//   node tests/engine/tempo.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { expandScene } from '../../core/engine/expand.js';

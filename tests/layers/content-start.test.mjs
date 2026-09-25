@@ -1,8 +1,8 @@
-// core/layers/content-start.test.mjs: fast pure-JS asserts for `contentStart`, the group child's
+// tests/layers/content-start.test.mjs: fast pure-JS asserts for `contentStart`, the group child's
 // CONTENT clock (core/layers/util.js childContentStart, read by video.js sourceTime, text.js
 // typing/expose, count.js frame). No DOM needed: every function under test is pure.
 //
-//   node --test core/layers/content-start.test.mjs
+//   node --test tests/layers/content-start.test.mjs
 import test from 'node:test';
 import assert from 'node:assert';
 import { childContentStart } from '../../core/layers/util.js';

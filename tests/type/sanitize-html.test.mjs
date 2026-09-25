@@ -1,11 +1,11 @@
-// core/type/sanitize-html.test.mjs: pins the fix for a solid-black `<img>` inside an `html` layer.
+// tests/type/sanitize-html.test.mjs: pins the fix for a solid-black `<img>` inside an `html` layer.
 // Bug: ESCAPING_URL stripped the `src` attribute off ANY absolute path ("/…"), including one under a
 // root the render server itself serves (assets/, core/, themes/, films/, .vawe-data/scenes|uploads).
 // That left `<img src="/assets/x.jpg">` as a bare `<img>` with no src, painting nothing over whatever
 // sat behind it: a solid black frame in the real render, while `harness/author/preview-fragment.mjs`
 // (which never runs this sanitiser) showed the image fine. Fixed by exempting served-root absolute
 // paths from the strip; a real escape (another absolute path, `//host/…`, `scheme:…`) still goes.
-//   node core/type/sanitize-html.test.mjs
+//   node tests/type/sanitize-html.test.mjs
 import assert from 'node:assert/strict';
 import { sanitizeHtml } from '../../core/type/sanitize-html.js';
 

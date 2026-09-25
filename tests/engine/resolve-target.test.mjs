@@ -1,7 +1,7 @@
-// core/camera-moves/resolve-target.test.mjs: the pure box->pose arithmetic (resolveCameraTarget), plus
+// tests/engine/resolve-target.test.mjs: the pure box->pose arithmetic (resolveCameraTarget), plus
 // the two callers that use it: dive-in.js's headroom clamp (a plain targetW/targetH, no `target:"#id"`
 // needed to exercise it) and bakeCameraMove's "target: #id" resolution off the layer tree.
-//   node core/camera-moves/resolve-target.test.mjs
+//   node tests/engine/resolve-target.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveCameraTarget } from '../../core/camera-moves/resolve-target.js';

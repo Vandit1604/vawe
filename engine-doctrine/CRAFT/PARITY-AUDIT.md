@@ -622,7 +622,7 @@ missing entirely, and it is why `draw` was an outline effect here rather than a 
 
 `logoReveal` (retired with blueprints) passed both, so its draw branch ends as the mark exactly as
 its morph branch always did. That is what makes the fix reachable rather than merely present.
-`engine-doctrine/MISTAKES.md` #545. Eleven assertions in `quality/gates/lib-test.mjs`, proved by breaking the fill
+`engine-doctrine/MISTAKES.md` #545. Eleven assertions in `tests/engine/lib-test.engine.test.mjs`, proved by breaking the fill
 write and watching two of them fail.
 
 ### Deliberately left, and why

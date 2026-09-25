@@ -1,5 +1,5 @@
-// harness/media/export-edl.test.mjs: house-rule self-check, no framework.
-//   node harness/media/export-edl.test.mjs
+// tests/media/export-edl.test.mjs: house-rule self-check, no framework.
+//   node tests/media/export-edl.test.mjs
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

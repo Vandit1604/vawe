@@ -1,8 +1,8 @@
-// core/timeline/sequence.test.mjs: the runnable self-check for `radius` joining POSE (the missing
+// tests/timeline/sequence.test.mjs: the runnable self-check for `radius` joining POSE (the missing
 // row that let a layer travel and resize but never change SHAPE: rectangle -> pill -> circle).
 // Pure-JS, no DOM: motionAt/resolveKeyedProps read only plain keyframe objects and a plain layer
 // object stands in for an element's authored data.
-//   node core/timeline/sequence.test.mjs
+//   node tests/timeline/sequence.test.mjs
 import assert from 'node:assert/strict';
 import { motionAt, resolveKeyedProps, velocityAt, KEYFRAME_PROPS } from '../../core/timeline/sequence.js';
 

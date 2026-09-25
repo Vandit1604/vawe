@@ -1,4 +1,4 @@
-// node harness/live/test/beat-surfacer.test.mjs
+// node tests/hooks/beat-surfacer.test.mjs
 //
 // harness/live/beat-surfacer.mjs, fed exactly as Claude Code's PostToolUse feeds it (stdin JSON, stderr
 // on exit 2). The two failure modes this hook exists to avoid, from AGENTS.md's own acceptance bar:

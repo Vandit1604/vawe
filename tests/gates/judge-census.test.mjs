@@ -1,4 +1,4 @@
-// quality/gates/judge-census.test.mjs: prove the count against inputs worked out by hand.
+// tests/gates/judge-census.test.mjs: prove the count against inputs worked out by hand.
 //
 // There is currently ~one real receipt in the whole repo (engine-doctrine's own words about this plan),
 // so this is the only place the counting logic is actually exercised. Three fixture receipts, by hand:
@@ -8,7 +8,7 @@
 //   film C: legacy free-text `--fixes` string, no structured fixes at all -> counted as unparsedLegacy,
 //           contributes nothing to byDimension/byBeatPosition
 //
-//   node quality/gates/judge-census.test.mjs
+//   node tests/gates/judge-census.test.mjs
 import assert from 'node:assert/strict';
 import { census, loadReceipts } from '../../quality/gates/judge-census.mjs';
 import { JUDGE_CODES } from '../../harness/lib/judge-codes.mjs';

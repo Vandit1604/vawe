@@ -1,4 +1,4 @@
-// core/motion/parts.test.mjs: the runnable self-check for the `drawOn` part entrance.
+// tests/motion/parts.test.mjs: the runnable self-check for the `drawOn` part entrance.
 // Bug: `drawOn` tweened `strokeDashoffset` over a [0,1] normalised range (`pathLength="1"`), and GSAP
 // rounds a px-unit style value to the nearest whole pixel, so the whole seven-second draw in
 // post-trailhead.json rendered as a ONE-FRAME SNAP (measured directly on the DOM: exactly "1px" for
@@ -7,7 +7,7 @@
 // getTotalLength() (as core/layers/svg.js's applyDraw already does for its own draw reveal, #581) and
 // tweens/dashes in real units, which gives GSAP's px rounding hundreds of representable steps instead
 // of two. engine-doctrine/MISTAKES.md #582.
-//   node core/motion/parts.test.mjs
+//   node tests/motion/parts.test.mjs
 import assert from 'node:assert/strict';
 import { PARTS } from '../../core/motion/parts.js';
 

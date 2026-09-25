@@ -1,4 +1,4 @@
-// node harness/live/test/code-quality-head.test.mjs
+// node tests/hooks/code-quality-head.test.mjs
 //
 // harness/live/code-quality.mjs falls back to a file's content at git HEAD when
 // quality/baselines/code-quality-baseline.json has no entry for it. Reported today: files with real,

@@ -1,5 +1,5 @@
-// harness/lib/worktree-claims.test.mjs: the smallest check that fails if the overlap rule breaks.
-//   node harness/lib/worktree-claims.test.mjs
+// tests/authoring/worktree-claims.test.mjs: the smallest check that fails if the overlap rule breaks.
+//   node tests/authoring/worktree-claims.test.mjs
 import assert from 'node:assert/strict';
 import { scopesOverlap } from '../../harness/lib/worktree-claims.mjs';
 

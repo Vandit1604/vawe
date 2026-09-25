@@ -1,8 +1,8 @@
-// quality/gates/study-check.test.mjs: a checkout with no refs/<name>/ (gitignored, never fetched by
+// tests/gates/study-check.test.mjs: a checkout with no refs/<name>/ (gitignored, never fetched by
 // `make study` here) must not let study-check read that ABSENCE as "incomplete" and downgrade a
 // grammar someone already marked complete. One case: complete + missing pages stays complete on disk,
 // and the command reports cannot-verify rather than a verdict.
-//   node quality/gates/study-check.test.mjs
+//   node tests/gates/study-check.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';

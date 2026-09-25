@@ -1,9 +1,9 @@
-// core/audio/select.test.mjs: the runnable self-check for resolveAudio()'s two defaults.
+// tests/engine/select.test.mjs: the runnable self-check for resolveAudio()'s two defaults.
 // `music:"auto"` still resolves the same way it always did; the new behaviour is that a scene with NO
 // `music` key at all defaults to "auto" ONLY when it names a `profile` (engine-doctrine/MISTAKES.md #159: picking
 // a bed with nothing to go on is not a default, it is a guess). An author-placed block, and an
 // explicit opt-out, must survive untouched either way.
-//   node core/audio/select.test.mjs
+//   node tests/engine/select.test.mjs
 import assert from 'node:assert/strict';
 import { resolveAudio } from '../../core/audio/select.js';
 

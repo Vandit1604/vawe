@@ -1,4 +1,4 @@
-// core/layers/group-parts.test.mjs: the runnable self-check for `parts` on a GROUP CHILD.
+// tests/layers/group-parts.test.mjs: the runnable self-check for `parts` on a GROUP CHILD.
 //
 // Bug: applyGsapHooks (films/scene/scene.js) builds every GSAP-driven hook (parts, fx, motionPath,
 // physics, splitText, morph) as a paused tween, but it was called only from buildLayer, which runs

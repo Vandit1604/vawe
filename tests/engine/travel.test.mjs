@@ -1,8 +1,8 @@
-// core/camera-moves/travel.test.mjs: the interior stations of a `travel` default to velocity-CONTINUOUS
+// tests/engine/travel.test.mjs: the interior stations of a `travel` default to velocity-CONTINUOUS
 // (`ease: "through"`, core/timeline/sequence.js), not `linear`: two straight segments at different
 // speeds still kink at the shared station (engine-doctrine/MISTAKES.md, the "not smooth / jerky" report). This
 // checks the fix at the level it actually plays at: the sampled camera curve, not the raw keyframes.
-//   node core/camera-moves/travel.test.mjs
+//   node tests/engine/travel.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { travel } from '../../core/camera-moves/travel.js';

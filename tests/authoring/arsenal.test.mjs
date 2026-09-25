@@ -1,4 +1,4 @@
-// harness/author/arsenal.test.mjs: the runnable self-check that `make arsenal` can actually find the
+// tests/authoring/arsenal.test.mjs: the runnable self-check that `make arsenal` can actually find the
 // blocks that already type with a caret.
 //
 // WHY. Measured before this landed: `make arsenal Q="caret"` and `Q="typing caret"` both returned only
@@ -7,7 +7,7 @@
 // "types itself" and the search has no stemming to connect that wording to the word an author types.
 // The fix is the catalog's own `aka` field (blocks/catalog.mjs), read by the block adapter in
 // arsenal.mjs; this guards that the wiring stays connected, not the words in any one blurb.
-//   node harness/author/arsenal.test.mjs
+//   node tests/authoring/arsenal.test.mjs
 import assert from 'node:assert/strict';
 import { collect, rankQuery } from '../../harness/author/arsenal.mjs';
 

@@ -1,6 +1,6 @@
-// quality/gates/screen-readiness.test.mjs: asserts on `readiness()` (harness/author/screen.mjs), the
+// tests/gates/screen-readiness.test.mjs: asserts on `readiness()` (harness/author/screen.mjs), the
 // pure source-parsing half of `make screen`'s video-readiness list. No render, no browser.
-//   node quality/gates/screen-readiness.test.mjs
+//   node tests/gates/screen-readiness.test.mjs
 import assert from 'node:assert/strict';
 import { readiness, smallestRendered } from '../../harness/author/screen.mjs';
 

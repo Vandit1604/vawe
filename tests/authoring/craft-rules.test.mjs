@@ -1,4 +1,4 @@
-// harness/lib/craft-rules.test.mjs: the schema and rulesFor() selection, against both the real
+// tests/authoring/craft-rules.test.mjs: the schema and rulesFor() selection, against both the real
 // engine-doctrine/CRAFT/rules/motion.json (the migration must actually validate) and small throwaway fixtures
 // (each failure case, in isolation, rather than hoping the real files happen to exercise it).
 import { test } from 'node:test';

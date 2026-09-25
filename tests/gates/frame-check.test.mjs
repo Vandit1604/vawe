@@ -1,4 +1,4 @@
-// node --test quality/gates/frame-check.test.mjs
+// node --test tests/gates/frame-check.test.mjs
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
