@@ -31,7 +31,7 @@ export function settleOn(p) {
 
 /** Drain. Resolves when every registered piece of work has settled. Safe to call with nothing pending. */
 export function frameSettle() {
-  return pending.size ? Promise.all([...pending]).then(() => undefined) : Promise.resolve();
+  return pending.size ? Promise.all(pending).then(() => undefined) : Promise.resolve();
 }
 
 if (typeof window !== 'undefined') window.__frameSettle = frameSettle;

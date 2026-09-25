@@ -104,6 +104,9 @@ export function rollOffsets(text, num) {
   const isDigit = (c) => c >= '0' && c <= '9';
   const digits = [...text].filter(isDigit).length;
   const dot = text.indexOf('.');
+  // `text` is a string: slice() returns a string, which has no .filter, so the spread to a char
+  // array is required, not redundant.
+  // oxlint-disable-next-line unicorn/no-useless-spread
   const intDigits = dot < 0 ? digits : [...text.slice(0, dot)].filter(isDigit).length;
   const n = Math.abs(num);
   const out = [];

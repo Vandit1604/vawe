@@ -40,40 +40,46 @@ export function sourceTime(L, t, { in: from, rate, out } = L) {
 // before this prop existed) tells the harness/media/clip-audio.mjs pre-pass to pull this clip's OWN
 // sound into the mix: it never reaches the browser, because this element stays muted below and the
 // mixer (renderer/internal/audio) is the only thing that writes the encoded audio track.
-export function build(kit, el, L, { src, w, h, radius, fit, poster, in: inPoint, out, audio } = L) {
+function validateVideoProps(src, inPoint, out, audio) {
   if (!src) throw new Error('video layer: `src` is required (a path under assets/, e.g. assets/video/clip.mp4)');
   if (out != null && out <= (inPoint ?? 0))
     throw new Error(`video layer: out (${out}) must be greater than in (${inPoint ?? 0}), an empty cut cannot be rendered`);
   if (audio != null && audio !== true && (typeof audio !== 'object' || Array.isArray(audio)))
     throw new Error(`video layer: \`audio\` must be true or {gain, duck}, got ${JSON.stringify(audio)}`);
+}
+
+// ROOT-RELATIVE, ALWAYS. The page is served from /films/scene/, so a bare `assets/clip.mp4` resolves
+// to /films/scene/assets/clip.mp4 and 404s, and a <video> that cannot load its source fires no error
+// the frame pass can see (engine-doctrine/MISTAKES.md #383).
+function createVideoElement(src, poster) {
   const v = document.createElement('video');
   v.className = 'hs-video';
-  // ROOT-RELATIVE, ALWAYS. The page is served from /films/scene/, so a bare `assets/clip.mp4`
-  // resolves to /films/scene/assets/clip.mp4 and 404s, and a <video> that cannot load its source
-  // fires no error the frame pass can see, so the layer renders as an empty box and the film looks
-  // like the layer was never written. Both spellings mean the same file and the assets preflight
-  // already checks the repo-relative one, so the resolver belongs here rather than in the author's
-  // JSON. Silence is the worst failure (engine-doctrine/MISTAKES.md #383).
   v.src = srcUrl(src);
   if (poster) v.poster = poster;
   // muted + playsInline + no autoplay + no controls: this element is a decoder we scrub, not a player.
-  // The AUDIO of a clip is not taken from here; the mixer owns sound (core/audio*.js), because the film's
-  // track has to survive an encode that this element is not part of.
+  // The AUDIO of a clip is not taken from here; the mixer owns sound (core/audio*.js).
   v.muted = true; v.defaultMuted = true; v.playsInline = true; v.controls = false; v.preload = 'auto';
-  el.appendChild(v);
+  return v;
+}
+
+function applyVideoBox(el, v, { w, h, radius, fit }) {
   if (w) { el.style.width = w + 'px'; v.style.width = '100%'; }
   if (h) { el.style.height = h + 'px'; v.style.height = '100%'; }
   if (radius != null || w || h) {
     el.style.overflow = 'hidden';
     if (radius != null) el.style.borderRadius = radius + 'px';
   }
-  // cover only when there is a box to cover, the same guard image.js needs: with one axis declared,
-  // `height:100%` has nothing to resolve against and the element collapses to zero.
+  // cover only when there is a box to cover, the same guard image.js needs.
   if (w && h) v.style.objectFit = fit || 'cover';
+}
+
+export function build(kit, el, L, { src, w, h, radius, fit, poster, in: inPoint, out, audio } = L) {
+  validateVideoProps(src, inPoint, out, audio);
+  const v = createVideoElement(src, poster);
+  el.appendChild(v);
+  applyVideoBox(el, v, { w, h, radius, fit });
   // `border`/`shadow`/`elevation`/`glow` are the ONE shared box treatment every other layer already
-  // has (kit.chipBox, core/layers/util.js): a video never asked for it before because nothing had, so
-  // "no video border" read as a rule rather than a gap. It is a no-op guard-return when none of those
-  // props is set, so an existing film with none renders byte-identical.
+  // has: a no-op guard-return when none of those props is set.
   kit.chipBox(el, L);
   el.__video = v;
 }
