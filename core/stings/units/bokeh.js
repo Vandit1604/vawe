@@ -12,3 +12,4 @@ export const glsl = `                             /* bokeh discs drift */
       c.rgb = mix(c.rgb, vec3(1.0), disc*0.5); c.a = max(c.a, disc * bell * 0.22);
     }`;
 export const blurb = 'soft out-of-focus discs drifting across frame. Ambient and quiet: closer to a texture than a cut.';
+export const aka = ['bokeh drift', 'out of focus discs', 'defocus bokeh'];
