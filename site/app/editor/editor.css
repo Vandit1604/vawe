@@ -21,9 +21,8 @@
   flex-direction: column;
   margin: 20px 0 0;
   background: var(--surface);
-  border: 1px solid var(--line-2);
   border-radius: var(--r);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--ring);
   /* The frame clips its own corners, so no child needs to know it sits at one. */
   overflow: hidden;
 }
@@ -76,21 +75,21 @@
    slows down cannot be told from the frozen state it exists to deny. */
 @media (prefers-reduced-motion: reduce) { .ed-spin { animation: bfade 1.3s ease-in-out infinite } }
 
-/* Cobalt, because THE AFFORDANCE RULE says the accent is what marks a thing you can act on. The
-   24px floor (WCAG 2.5.8) is met by the padding, not by a bigger glyph. */
+/* Studio tool buttons: raised, quiet ink. The accent stays for the one live control, the playhead.
+   The 24px floor (WCAG 2.5.8) is met by the padding, not by a bigger glyph. */
 .ed-fold, .ed-copy, .ed-goto {
   font-family: var(--font-mono), monospace;
   font-size: 11px;
   min-height: 24px;
-  color: var(--accent);
-  background: var(--surface);
-  border: 1px solid var(--line-2);
-  border-radius: 6px;
+  color: var(--ink-2);
+  background: var(--raised);
+  border: 1px solid transparent;
+  border-radius: var(--r-in);
   padding: 4px 9px;
   cursor: pointer;
   transition: border-color .2s var(--ease);
 }
-.ed-fold:hover, .ed-copy:hover, .ed-goto:hover { border-color: var(--accent); }
+.ed-fold:hover, .ed-copy:hover, .ed-goto:hover { background: var(--raised-2); color: var(--ink); }
 .ed-fold:focus-visible, .ed-copy:focus-visible, .ed-goto:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
@@ -111,7 +110,7 @@
 /* The way OUT of the code pane. `indentWithTab` makes Tab insert indentation, which is a keyboard
    trap unless the escape is written down, so it is written down. Muted, not cobalt: it is a fact,
    not a control. */
-.ed-kbd { font-family: var(--font-mono), monospace; font-size: 10px; color: var(--muted); margin-left: auto; }
+.ed-kbd { font-family: var(--font-mono), monospace; font-size: 12px; color: var(--muted); margin-left: auto; }
 
 /* The CodeMirror host. Everything inside it is themed from the editor's own theme object (see
    CodeEditor.tsx) because CodeMirror injects scoped styles that a plain stylesheet fights; only the
@@ -168,20 +167,22 @@
 .ed-status {
   display: flex; align-items: center; gap: 8px;
   font-family: var(--font-mono), monospace;
-  font-size: 11px;
+  font-size: 12px;
   padding: 8px 12px;
   border-top: 1px solid var(--line);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .ed-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: currentColor }
-.ed-status.ok  { color: var(--ok);  background: var(--ok-bg) }
+/* A healthy frame is quiet: only the dot is green. A fault colours the whole line. */
+.ed-status.ok  { color: var(--ink-2) }
+.ed-status.ok .ed-dot { background: var(--ok) }
 .ed-status.bad { color: var(--bad); background: var(--bad-bg) }
 
 /* ── under the frame ───────────────────────────────────────────────────────────────────────────
    Two paragraphs of prose used to sit INSIDE the tool: one above the code pane and one below the
    stage, so the first thing between you and the editor was reading. They carry one fact each, so
    they are one line, and it is outside the frame. */
-.ed-legend { margin: 14px 0 80px; font-size: 13px; line-height: 1.6; color: var(--muted); max-width: 66ch }
+.ed-legend { margin: 14px 0 0; font-size: 13px; line-height: 1.6; color: var(--muted); max-width: 66ch }
 .ed-legend a { color: var(--accent); font-weight: 600 }
 .ed-legend a:hover { text-decoration: underline }
 .ed-legend code {
@@ -209,14 +210,11 @@
 .sp-step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
 
 /* ── the page around the frame ─────────────────────────────────────────────────────────────────
-   A tool page is not a landing page. The shared header sets its h1 at display size, which on a
-   1440x1000 laptop pushed the transport and the status line under the fold: the two controls that
-   prove the thing is live were the two you had to scroll to find. The heading role is the right
-   size for a page whose subject is the panel below it, and the top padding halves for the same
-   reason. Scoped to this route, so the pages whose header IS the content keep theirs. */
-.edpage .phead { padding-top: 26px }
-.edpage .phead h1 { font-size: clamp(1.9rem, 3.6vw, 2.7rem); margin-bottom: 4px }
-.edpage .phead p { font-size: 1rem }
+   A tool page is not a landing page: the heading is one row, so the transport and the status line
+   stay above the fold on a 1440x1000 laptop. */
+.ed-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; padding-top: 32px }
+.ed-head h1 { font-size: clamp(1.9rem, 3.6vw, 2.7rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.05 }
+.ed-head p { color: var(--muted); font-size: 1rem }
 
 /* ── sizes ─────────────────────────────────────────────────────────────────────────────────────
    Above 900 the frame is an application: a fixed height, panes scrolling inside it. Below it, the

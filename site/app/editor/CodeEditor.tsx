@@ -30,12 +30,12 @@ import { tags as t } from "@lezer/highlight";
  */
 
 const hl = HighlightStyle.define([
-  // the keys ARE the vocabulary — the only thing worth an accent
-  { tag: t.propertyName, color: "var(--accent)", fontWeight: "600" },
-  { tag: [t.bool, t.null], color: "var(--accent)" },
+  // the keys ARE the vocabulary, so they carry the brightest ink; the accent stays for the cursor
+  { tag: t.propertyName, color: "var(--ink)", fontWeight: "600" },
+  { tag: [t.bool, t.null], color: "var(--ink)" },
   // values sit on the grey ramp, weight carries the difference rather than hue
   { tag: t.string, color: "var(--ink-2)" },
-  { tag: t.number, color: "var(--ink)", fontWeight: "600" },
+  { tag: t.number, color: "var(--ink)" },
   // structure recedes: you read past braces, you do not read them
   { tag: [t.punctuation, t.separator, t.brace, t.squareBracket], color: "var(--muted)" },
   { tag: t.invalid, color: "var(--bad)" },
@@ -61,7 +61,7 @@ const theme = EditorView.theme({
   },
   ".cm-lineNumbers .cm-gutterElement": { padding: "0 6px 0 12px", minWidth: "26px" },
   ".cm-activeLine": { backgroundColor: "var(--accent-soft)" },
-  ".cm-activeLineGutter": { backgroundColor: "var(--accent-soft)", color: "var(--accent)" },
+  ".cm-activeLineGutter": { backgroundColor: "var(--accent-soft)", color: "var(--ink)" },
   ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--accent)", borderLeftWidth: "1.5px" },
   "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection": {
     backgroundColor: "var(--accent-soft)",
@@ -77,15 +77,15 @@ const theme = EditorView.theme({
      that identifies a control. It is also the same collision the site had elsewhere — a chevron
      drawn like the inert line number beside it. Cobalt says "this does something"; the line
      numbers stay muted because they do not. 5.17:1. */
-  ".cm-foldGutter .cm-gutterElement": { padding: "0 2px", cursor: "pointer", color: "var(--accent)" },
+  ".cm-foldGutter .cm-gutterElement": { padding: "0 2px", cursor: "pointer", color: "var(--ink-2)" },
   ".cm-foldGutter .cm-gutterElement:hover": { color: "var(--ink)" },
   // the collapsed stand-in. It says HOW MUCH is hidden, because "…" alone tells you nothing about
   // whether you just folded away two lines or two hundred.
   ".cm-foldPlaceholder": {
-    background: "var(--accent-soft)",
-    border: "1px solid var(--accent-line)",
+    background: "var(--raised)",
+    border: "1px solid transparent",
     borderRadius: "5px",
-    color: "var(--accent)",
+    color: "var(--ink-2)",
     fontFamily: "var(--font-mono), monospace",
     fontSize: "11px",
     padding: "0 7px",
