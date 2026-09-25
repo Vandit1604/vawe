@@ -202,10 +202,6 @@ and per-beat fields. No scene JSON exists yet, the storyboard is the plan; `make
 `layers` only after approval (Step 4). `SPECTACLE` and `NOT` (AGENTS.md stage 1): a value the human
 already gave stays verbatim, you fill either only when the human left it unsaid.
 
-If the request already named the spectacle or the exclusions, pass `SPECTACLE="…"`/`NOT="…"` so
-scaffold writes them verbatim and marks them `human`; only fill the two yourself when the request left
-them blank.
-
 > **Film under ~15 seconds? Load [`vawe-continuous-action`](../vawe-continuous-action/SKILL.md)
 > instead of the beat table below.** A short film is ONE continuous action, not a sequence of
 > beats: one object is on screen from the first frame and every cut is that object changing state
