@@ -5,3 +5,4 @@ export const glsl = `                             /* circle, disc expands from c
     vec2 d = uv - 0.5; d.x *= u_res.x/u_res.y;
     c = vec4(vec3(1.0), smoothstep(pp*0.95 + 0.08, pp*0.95, length(d)) * bell);`;
 export const blurb = 'a disc expanding from the centre. Focus opening outward from one point.';
+export const aka = ['circle reveal', 'iris expand', 'disc reveal'];
