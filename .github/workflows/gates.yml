@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   fast-gates:
-    name: schema-check + lib-test + craft-coverage + arsenal-check + discovery + generated-check
+    name: schema-check + test + craft-coverage + arsenal-check + discovery + generated-check
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           # Full history: harness/author/recency.mjs reads `git log --before=N.days` to compute registry
-          # newness. A shallow checkout has no history, so two newness lib-tests fail on CI while passing
+          # newness. A shallow checkout has no history, so two newness tests fail on CI while passing
           # on a full local clone. scene-check.yml does this for the same reason.
           fetch-depth: 0
 
@@ -53,7 +53,7 @@ jobs:
       # unused and feature-audit always exit 0 (a coaching report, never a blocker), lint-test is fixture
       # regressions on the committed sample.json. All four pass today.
       - name: framework gates
-        run: make schema-check lib-test craft-coverage arsenal-check discovery generated-check output-contract seo-surface site-counts unused feature-audit lint-test
+        run: make schema-check test craft-coverage arsenal-check discovery generated-check output-contract seo-surface site-counts unused feature-audit lint-test
 
       # docker-context stays in .githooks/pre-push too (a laptop with Docker still wants the local
       # number before pushing), but what it needs is a Docker daemon, a fact about the MACHINE, not
@@ -97,10 +97,10 @@ jobs:
             const total = Object.values(out).reduce((n, a) => n + (Array.isArray(a) ? a.length : 0), 0);
             console.log(`findings.json written, ${total} finding(s) across ${Object.keys(out).length} gate(s)`);
           '
-          # lib-test is a test runner (no --json): surface its REAL failures, minus the rung-fixture noise
-          # (the rung block deliberately injects bad tags to prove the gate catches them).
-          libfail=$(node quality/gates/lib-test.mjs 2>&1 \
-            | grep -E "✗|[0-9]+ failed" \
+          # the test suite is a test runner (no --json): surface its REAL failures, minus the
+          # rung-fixture noise (the rung block deliberately injects bad tags to prove the gate catches them).
+          libfail=$(node --test "tests/**/*.test.mjs" 2>&1 \
+            | grep -E "✗|not ok|[0-9]+ failed" \
             | grep -viE "no-such-gate|no-such-code|untagged: THE BACKGROUND|up from|held up by prose|does not emit|decoration|claim an owner|catalogued by hand" \
             || true)
           {
@@ -110,7 +110,7 @@ jobs:
             echo '```json'
             cat findings.json
             echo '```'
-            echo "### lib-test"
+            echo "### test suite"
             echo '```'
             echo "${libfail:-all assertions passed}"
             echo '```'

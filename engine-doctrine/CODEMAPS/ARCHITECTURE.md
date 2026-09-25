@@ -205,7 +205,7 @@ make assets D=… [WRITE=1] # fill missing icons (flag/logo/card)
 make look D=… / frame D=… N=…   # storyboard / one frame
 make validate [D=…]       # data + theme against schema.json (boot runs it too)
 make census               # every named population in films/scene, and the question each answers
-make lib-test             # motion-primitive + easing asserts (instant)
+make test                 # the whole test suite: tests/**/*.test.mjs + renderer's go test
 make lint-test            # regression asserts for validate's lint/fx/ease/block rules (instant)
 make audit [M=…]          # overlap/overflow/safe-zone/spacing  → /tmp/audit/<fmt>.png
 make probe [M=…] [D=…]    # render-order purity, one scene (protects sharded render)

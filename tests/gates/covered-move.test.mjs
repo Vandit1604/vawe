@@ -19,7 +19,7 @@ function run(scene) {
   const scenePath = path.join(dir, 'film.json');
   fs.writeFileSync(scenePath, JSON.stringify(scene, null, 2));
   const findingsOut = path.join(dir, 'findings.json');
-  const r = spawnSync('node', [path.join(here, 'covered-move.mjs'), scenePath],
+  const r = spawnSync('node', [path.join(here, '../../quality/gates/covered-move.mjs'), scenePath],
     { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VAWE_FINDINGS_OUT: findingsOut } });
   let records = [];
   try { records = JSON.parse(fs.readFileSync(findingsOut, 'utf8')); } catch { /* no findings written */ }

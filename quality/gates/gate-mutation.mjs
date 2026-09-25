@@ -921,11 +921,11 @@ const srcCases = [
     cmd: ['node', ['core/validate/validate.mjs', 'films/scene/sample.json']], match: /unknown prop "notARealProp"/ },
   { name: 'three · a scene reaching for wall-clock or unseeded randomness', file: 'core/surfaces/three-fx.js',
     mutate: (s) => s.replace('const ease = (p)', 'const jitter = Math.random();\nconst ease = (p)'),
-    cmd: ['node', ['quality/gates/lib-test.mjs']], match: /no wall-clock or unseeded randomness/ },
+    cmd: ['node', ['tests/engine/lib-test.engine.test.mjs']], match: /no wall-clock or unseeded randomness/ },
   { name: 'raymarch · a scene whose distance field ignores time', file: 'core/surfaces/raymarch-fx.js',
     mutate: (s) => s.replace('float w = sin(p.x * 2.2 + u_time * 0.9) * 0.13 + sin(p.z * 1.7 - u_time * 0.7) * 0.11;',
                              'float w = sin(p.x * 2.2) * 0.13 + sin(p.z * 1.7) * 0.11;'),
-    cmd: ['node', ['quality/gates/lib-test.mjs']], match: /distance field that depends on time/ },
+    cmd: ['node', ['tests/engine/lib-test.engine.test.mjs']], match: /distance field that depends on time/ },
   // ROADMAP.md's "still absent" bullets became a status TABLE (each row `| **name** | **NOT BUILT** |
   // detail |`); re-anchored on the Glitch RGB captions row, still NOT BUILT, in its current shape.
   { name: 'docs-drift · a shipped effect listed as missing', file: 'engine-doctrine/ROADMAP.md',
@@ -1104,20 +1104,20 @@ const srcCases = [
   // the identifiers, not on the channel list, so adding a channel does not go stale.
   { name: 'cuts · solo mode stops pinning the visibility channels open', file: 'core/cuts/index.js',
     mutate: (s) => s.replace('  for (const k of HIDE_CHANNELS) s[k] = IDENT[k];\n', ''),
-    cmd: ['node', ['quality/gates/lib-test.mjs']], match: /solo .* never hides the frame/ },
+    cmd: ['node', ['tests/engine/lib-test.engine.test.mjs']], match: /solo .* never hides the frame/ },
 
   { name: 'text · untype reverses the typing', file: 'core/layers/text.js',
     mutate: (s) => s.replace('  if (untype != null && lt >= untype) n = Math.min(n, visLen) - Math.floor((lt - untype) * (untypeRate ?? cps));\n', ''),
-    cmd: ['node', ['quality/gates/lib-test.mjs']], match: /untype: deletes back to 0/ },
+    cmd: ['node', ['tests/layers/lib-test.layers.test.mjs']], match: /untype: deletes back to 0/ },
 
   // The two silent-wrongness fixes of this pass. Both are invisible to any gate that counts names, so
-  // the contract lives in lib-test as a pure assertion and these prove lib-test can see it break.
+  // the contract lives in the test suite as a pure assertion and these prove it can see it break.
   { name: 'wipe-right · reveal direction flipped back to right-to-left', file: 'core/timeline/clips.js',
     mutate: (s) => s.replace("'wipe-right': (t) => wipe(t, 'left')", "'wipe-right': (t) => wipe(t, 'right')"),
-    cmd: ['node', ['quality/gates/lib-test.mjs']], match: /wipe-right grows rightward/ },
+    cmd: ['node', ['tests/registry/lib-test.registry.test.mjs']], match: /wipe-right grows rightward/ },
   { name: 'bg opts · pass-through removed, so a declared knob is silently dropped', file: 'core/backgrounds/index.js',
     mutate: (s) => s.replace("    for (const [k, v] of Object.entries(over)) if (!(k in META) && (FX_PARAMS[fx.type] || []).includes(k)) fx[k] = v;\n", ''),
-    cmd: ['node', ['quality/gates/lib-test.mjs']], match: /bg opts reach the fx/ },
+    cmd: ['node', ['tests/engine/lib-test.engine.test.mjs']], match: /bg opts reach the fx/ },
   // Proves the accepted-key list is DERIVED, not hand-copied: rename the property `liquid` reads and the
   // vocabulary must follow it. A hand-kept list would still advertise `scale` and this would stay green.
   { name: 'bg opts · the accepted keys track the fx implementation', file: 'core/backgrounds/fx.js',
@@ -1126,7 +1126,7 @@ const srcCases = [
     // The fx implementations live in fx.js; index.js only re-exports and derives FX_PARAMS from them,
     // so pointing the mutation at index.js meant it patched text that file never held.
     mutate: (s) => s.replace(', sc = o.scale ??', ', sc = o.scaleX ??'),
-    cmd: ['node', ['quality/gates/lib-test.mjs']], match: /bg opts vocabulary is derived from the fx implementation/ },
+    cmd: ['node', ['tests/engine/lib-test.engine.test.mjs']], match: /bg opts vocabulary is derived from the fx implementation/ },
 
   { name: 'validate · a hand-authored bg animated with CSS (which never runs)', file: 'films/scene/example-html-bg.json',
     mutate: (s) => s.replace('<style>.fan{', '<style>.x{animation:spin 2s linear infinite}.fan{'),

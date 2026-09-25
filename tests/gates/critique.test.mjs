@@ -19,7 +19,7 @@ function runCritique(scene) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'critique-test-'));
   const film = path.join(dir, 'v.json');
   fs.writeFileSync(film, JSON.stringify(scene));
-  const r = spawnSync(process.execPath, [path.join(here, 'critique.mjs'), film, '--json'], { encoding: 'utf8' });
+  const r = spawnSync(process.execPath, [path.join(here, '../../quality/gates/critique.mjs'), film, '--json'], { encoding: 'utf8' });
   fs.rmSync(dir, { recursive: true, force: true });
   const text = [r.stdout, r.stderr].find((s) => s && s.trim().startsWith('[')) || r.stdout;
   return { status: r.status, findings: JSON.parse(text), raw: r.stdout + r.stderr };

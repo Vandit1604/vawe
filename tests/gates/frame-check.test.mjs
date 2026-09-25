@@ -10,7 +10,7 @@ import assert from 'node:assert';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, '../..');
-const GATE = join(here, 'frame-check.mjs');
+const GATE = join(here, '../../quality/gates/frame-check.mjs');
 const run = (args) => spawnSync('node', [GATE, ...args], { cwd: ROOT, encoding: 'utf8' });
 
 // A hermetic fixture pair, written fresh per test rather than borrowed off a real film: the two checks

@@ -35,7 +35,7 @@ const RATCHET = path.join(ROOT, 'quality/baselines/output-contract-ratchet.json'
 // effects-catalog.mjs pattern); its one printed line reports what it wrote, not a finding about a
 // film, the same reason next.mjs and stage.mjs are exempt for navigation instead of a verdict.
 const EXEMPT = new Set([
-  'lib-test.mjs', 'output-contract.mjs', 'compare.mjs', 'gate-mutation.mjs',
+  'output-contract.mjs', 'compare.mjs', 'gate-mutation.mjs',
   'next.mjs', 'stage.mjs', 'rubric.mjs', 'legacy-unfold.mjs',
   'contrast-regression.mjs', 'measure-regression.mjs', 'review.mjs',
   'gate-classification.mjs',

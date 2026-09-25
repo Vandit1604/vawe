@@ -34,7 +34,7 @@ fs.mkdirSync(path.dirname(mp4), { recursive: true });
 fs.writeFileSync(scenePath, JSON.stringify({ module: 'scene', layers: [] }));
 fs.writeFileSync(mp4, 'first render bytes');
 
-const runCli = () => spawnSync(process.execPath, [path.join(here, 'no-judge.mjs'), scenePath], { cwd: ROOT });
+const runCli = () => spawnSync(process.execPath, [path.join(here, '../../quality/gates/no-judge.mjs'), scenePath], { cwd: ROOT });
 
 // no receipt at all: refused, names the reason and the exact command via the CLI
 {

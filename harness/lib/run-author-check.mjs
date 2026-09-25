@@ -63,8 +63,8 @@ export function parseBlockedCodes(stdout) {
   return blocked;
 }
 
-// Guarded so quality/gates/lib-test.mjs can `import { parseBlockedCodes }` for a pure unit test without
-// running the CLI body (which would spawn author-check with no film argument and exit(2)).
+// Guarded so tests/gates/lib-test.gates.test.mjs can `import { parseBlockedCodes }` for a pure unit test
+// without running the CLI body (which would spawn author-check with no film argument and exit(2)).
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
 if (isMain) {
 const film = process.argv[2];

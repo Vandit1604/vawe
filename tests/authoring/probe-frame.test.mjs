@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const fixture = path.join(here, 'probe-frame.fixture.json');
-const script = path.join(here, 'probe-frame.mjs');
+const fixture = path.join(here, '../fixtures/probe-frame.fixture.json');
+const script = path.join(here, '../../harness/dev/probe-frame.mjs');
 
 // tempo: 0.5 in the fixture → pageTime = viewerT * tempo. --t 4 (viewer seconds) should land the page
 // (authored) clock at 2s and frame 60 at the tool's fixed 30fps boot.

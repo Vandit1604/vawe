@@ -4,9 +4,9 @@
 // WHY THIS EXISTS. Coverage of the SEARCH is closed: every entry carries a blurb (checkBlurb refuses a
 // bare one at load) and the discovery ratchet is at 0. That guarantees a thing is IN the index. It does
 // not guarantee the index answers the words a person actually types. The labeled eval in
-// quality/gates/lib-test.mjs (PRESENT + PLAIN) is what measures that, and its blind spot is silent: a
-// whole FAMILY can have no author-phrased query at all, so nobody ever checks that "a drifting colour
-// background" reaches an `aurora`. This lists the families the eval never asks about.
+// tests/authoring/lib-test.authoring.test.mjs (PRESENT + PLAIN) is what measures that, and its blind
+// spot is silent: a whole FAMILY can have no author-phrased query at all, so nobody ever checks that "a
+// drifting colour background" reaches an `aurora`. This lists the families the eval never asks about.
 //
 // THE STANDING RULE this feeds (discovery.mjs check 5): every SEARCHABLE family must carry at least one
 // labeled query that resolves to it confidently, the same way every entry must carry a blurb. A family
@@ -14,9 +14,9 @@
 // a keyframe handle) is exempt, because there is no plain-English request for it to answer; those are
 // still covered per-entry by harness/dev/blurb-retrieval.mjs (their own words find them).
 //
-// The eval lives as inline arrays in lib-test.mjs. Importing that module would run the whole suite, so
-// the two labeled arrays are read out of its SOURCE. That is a parse, and a parse can rot, so
-// `evalWants` asserts it found a plausible number and the gate says so if it finds none.
+// The eval lives as inline arrays in tests/authoring/lib-test.authoring.test.mjs. Importing that module
+// would run the whole suite, so the two labeled arrays are read out of its SOURCE. That is a parse, and
+// a parse can rot, so `evalWants` asserts it found a plausible number and the gate says so if it finds none.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -44,9 +44,9 @@ export const MECHANISM_NAMED = new Set([
   'lightfield pattern', 'shadow direction',
 ]);
 
-/** The two labeled arrays in lib-test.mjs, read from source: the (query, want) pairs the eval asserts. */
+/** The two labeled arrays in lib-test.authoring.test.mjs, read from source: the (query, want) pairs the eval asserts. */
 export function evalWants() {
-  const src = fs.readFileSync(path.join(ROOT, 'quality/gates/lib-test.mjs'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'tests/authoring/lib-test.authoring.test.mjs'), 'utf8');
   const block = (marker) => { const i = src.indexOf(marker); if (i < 0) return ''; return src.slice(i, src.indexOf('];', i)); };
   const wants = new Set();
   for (const blk of [block('const PRESENT = ['), block('const PLAIN = ['), block('const FAMILY = [')]) {
@@ -100,13 +100,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   }
 
   console.log(`\n  FAMILY COVERAGE · ${families.length} families · ${wantCount} labeled queries read from lib-test\n`);
-  if (!wantCount) console.log('  ⚠ read ZERO queries from lib-test.mjs: the PRESENT/PLAIN parse has rotted.\n');
+  if (!wantCount) console.log('  ⚠ read ZERO queries from lib-test.authoring.test.mjs: the PRESENT/PLAIN parse has rotted.\n');
   console.log(`  covered by a golden query: ${covered.size}`);
   console.log(`  exempt (reached by mechanism, not description): ${[...exempt].filter((k) => families.includes(k)).length}`);
   if (uncovered.length) {
     console.log(`\n  ${uncovered.length} SEARCHABLE families with NO author-phrased query in the eval:`);
     for (const { family, size } of uncovered) console.log(`    ${family.padEnd(28)} ${size}`);
-    console.log('\n  Each needs one plain-English query in PRESENT/PLAIN (quality/gates/lib-test.mjs) that');
+    console.log('\n  Each needs one plain-English query in PRESENT/PLAIN (tests/authoring/lib-test.authoring.test.mjs) that');
     console.log('  resolves to it confidently. Fix a miss with `aka` at the write site, never by rewording.\n');
     process.exit(1);
   }

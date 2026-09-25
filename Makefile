@@ -7,7 +7,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack sfx-pack sfx-local gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet ingest
+.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion test lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack sfx-pack sfx-local gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet ingest
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -474,7 +474,7 @@ formats: build ## [maintenance] MOVED from `make list` (W11): the scene module +
 
 # make list / make help: every target, grouped by the ten-phase spine, with its one-line help. Reads
 # the Makefile itself (harness/lib/make-help.mjs), so it cannot drift from the real target list the
-# way a hand-kept catalog would. `make lib-test` fails if any target carries no phase.
+# way a hand-kept catalog would. `make test` fails if any target carries no phase.
 .PHONY: list help
 list: ## [maintenance] every target, grouped by phase, with its one-line help (the front page)
 	@node harness/lib/make-help.mjs
@@ -736,13 +736,15 @@ transition-preview: ## [dev] renders a canned two-beat scene (blue A → orange 
 measure: ## [study] MEASURE a transition's real motion and name it in OUR vocabulary: per-frame tracks the moving
 	node harness/author/measure-motion.mjs $(VIDEO) $(FROM) $(TO) $(EXPECT)
 
-# make lib-test: fast pure-JS asserts for the core/motion/motion.js motion primitives (no browser),
-# plus the W11 phase-coverage check: every Makefile target must carry a `## [phase]` tag, or `make
-# list` silently drops it and nobody notices (harness/lib/make-help.mjs --check).
-lib-test: ## [maintenance] motion-primitive asserts + every Makefile target carries a [phase] tag
-	node quality/gates/lib-test.mjs
-	@node scripts/site/motion-numbers-catalog.mjs --check
-	@node harness/lib/make-help.mjs --check
+# make test: the whole test suite. Every *.test.mjs under tests/, organised by domain (engine,
+# timeline, motion, layers, type, registry, theme, validate, hooks, authoring, gates, lints, ...),
+# run through node's own test runner, plus the Go renderer's own package tests.
+test: ## [maintenance] the whole test suite: tests/**/*.test.mjs (node --test) + renderer's go test
+	node --test "tests/**/*.test.mjs"
+	cd renderer && go test ./...
+
+# lib-test: kept as an alias, the pre-push hook and CI used to call it by this name.
+lib-test: test ## [maintenance] alias for `make test`
 
 # make mistakes-check: is a engine-doctrine/MISTAKES.md entry a near-verbatim duplicate of an earlier one?
 # A property only knowable across the whole library, so it is a gate, not a write-site fix (CLAUDE.md).

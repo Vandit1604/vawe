@@ -15,7 +15,7 @@ const run = (label, cmd, args) => {
 };
 
 const results = [];
-results.push(run('motion primitives (lib-test)', 'node', ['quality/gates/lib-test.mjs']));
+results.push(run('test suite (tests/**/*.test.mjs)', 'node', ['--test', 'tests/**/*.test.mjs']));
 results.push(run('layout audit (overlap/spacing)', 'node', ['quality/audit.mjs']));
 results.push(run('motion audit (animation over time)', 'node', ['quality/gates/motion-audit.mjs', '--stride', '2']));
 // Doc-only work runs no authoring gate, so a command or path that rotted out of the docs is invisible
