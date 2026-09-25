@@ -36,9 +36,9 @@ contrast-checked `themes/<brand>.json`. Don't hand-author a theme unless a mappi
 ## Step 3: Storyboard proposal (user-gated)
 Start from the real sections, not a blank page: `make storyboard-draft NAME=<brand> [MSG="…" DUR=30]`
 skeletons one beat per captured section (in site order, pre-wired with type + capture command + a suggested
-blueprint) → `assets/brands/<brand>/STORYBOARD.md`. Then **sharpen** it: fill the `<…>` fields, the
-`message` and each beat's **why**: using `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md` (Reproduce/Adapt · mechanism ·
-emotion · transition_in). No site? Copy the template and write beats by hand. Then
+blueprint) → `assets/brands/<brand>/STORYBOARD.md`. It never invents your words: write `message`/`spectacle`/`not`
+and each beat's **onscreen**/**why**/**becomes** yourself, using `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`
+(Reproduce/Adapt · mechanism · emotion · transition_in). No site? Copy the template and write beats by hand. Then
 `make storyboard-check SB=<file>`. Present it: open with **"This video tells <audience> that <message>"**,
 then the beat table. Weight cues into the back ~50% (the reveal model). Get sign-off. Once approved, export
 the value contract: `make intent SB=<file> D=films/scene/<topic>.json` writes `<topic>.intent.json` from

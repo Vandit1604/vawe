@@ -1,12 +1,14 @@
 // scripts/brand/storyboard-draft.mjs: turn a captured `sections.json` into a STORYBOARD.md SKELETON:
-// one beat per real section, in the site's order, pre-wired with a type + on-screen cues + a ready
-// `make capture` command + a suggested blueprint. It writes the STRUCTURE (the slow, mechanical part);
-// the author sharpens each `why:` and the `message:` before presenting for sign-off. This is the
+// one beat per real section, in the site's order, pre-wired with a type + on-screen cues (where the
+// section itself supplies them) + a ready `make capture` command + a suggested blueprint. It writes
+// only the MECHANICAL structure it can derive from the capture; it never invents `why:`, `becomes:`,
+// `message:` or the hook/CTA copy, those are the human's to write directly into the file. This is the
 // "auto-draft the storyboard from the capture" step. The human still owns the spine and the approval.
 //
 //   make storyboard-draft NAME=<brand> [MSG="one sentence"] [DUR=30] [FORMAT=landscape|portrait] [OUT=<path>]
-// Reads assets/brands/<brand>/sections/sections.json (from `make sections`). Output passes
-// storyboard-check structurally; it is a DRAFT, not an approved proposal.
+// Reads assets/brands/<brand>/sections/sections.json (from `make sections`). Output is a DRAFT: with no
+// MSG given, `make storyboard-check` will hard-error on the missing `message:` (and on every beat's
+// missing `onscreen`/`why`/`becomes`) rather than pass a skeleton off as a proposal.
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -21,13 +23,15 @@ if (!sections.length) { console.error(`✗ ${secPath} has no sections.`); proces
 
 const DUR = +(process.env.DUR || 30);
 const FORMAT = process.env.FORMAT || 'landscape';
-const MSG = process.env.MSG || `<fill: the ONE sentence ${NAME} should land, the spine, not a feature list>`;
-// Answer-driven frontmatter, each defaulting to exactly what this file wrote before. `make quiz-apply`
-// fills them from the brief; a bare `make storyboard-draft` is unchanged.
+// MSG/AUDIENCE are the human's sentence, not this writer's to guess: set from the brief (`make
+// quiz-apply`) or by hand afterward. Absent, the line is left OUT rather than filled with a placeholder;
+// storyboard-check then hard-errors on the missing `message:`, which is the honest outcome, not a
+// skeleton pretending to be a proposal.
+const MSG = process.env.MSG || '';
+const AUDIENCE = process.env.AUDIENCE || '';
 // THREADS matters most: storyboard-check hard-ERRORS on a film under 15s that names neither `threads:`
 // nor `object:`, and this writer emitted neither. Its own default DUR of 30 hid that, drop the duration
 // to a 12s timeline cut and the draft it produced could not pass the gate it claims to pass.
-const AUDIENCE = process.env.AUDIENCE || `<fill: who this is for, the visitor ${NAME} wants to convert>`;
 const ARC = process.env.ARC || 'hook → build → proof → payoff → CTA';
 const THREADS = process.env.THREADS || '';
 const FRAMEWORK = process.env.FRAMEWORK || '';
@@ -57,8 +61,8 @@ const beats = sections.map((s, i) => {
 
 const L = [];
 L.push('---');
-L.push(`message: ${MSG}`);
-L.push(`audience: ${AUDIENCE}`);
+if (MSG) L.push(`message: ${MSG}`);
+if (AUDIENCE) L.push(`audience: ${AUDIENCE}`);
 L.push(`arc: ${ARC}`);
 if (THREADS) L.push(`threads: ${THREADS}`);
 if (FRAMEWORK) L.push(`framework: ${FRAMEWORK}`);
@@ -69,8 +73,9 @@ L.push('---');
 L.push('');
 L.push(`# ${nice(NAME)}: storyboard DRAFT (auto-generated from sections.json)`);
 L.push('');
-L.push('> One beat per real section, in the site\'s order. This is a SKELETON: sharpen every `why:` and the');
-L.push('> `message:` above, then present it for sign-off before authoring the JSON. Motion: `make arsenal Q="…"`.');
+L.push('> One beat per real section, in the site\'s order. This is a SKELETON: it carries only the type, the');
+L.push('> capture command and (for a middle beat) the real section it names. Write `onscreen`/`why`/`becomes`');
+L.push('> for the hook, the CTA and every beat by hand, then present it for sign-off. Motion: `make arsenal Q="…"`.');
 L.push('');
 for (const b of beats) {
   // `title` is the site's own heading; `label` is its 28-char filename slug. Titling a beat from the slug
@@ -79,23 +84,20 @@ for (const b of beats) {
   L.push(`## Beat ${b.i}: ${b.title || nice(b.label)}  (${b.start}s–${(b.start + b.dur).toFixed(1)}s)`);
   L.push('');
   L.push(`- type: ${b.type}`);
-  L.push(`- onscreen: ${b.first ? '<fill: the ≤12-word hook, front-load the strong word>' : b.last ? `<fill: the exact CTA + ${NAME} logo + url>` : `the real "${b.title || nice(b.label)}" section. Capture it, re-type any headline with a \`type\` layer`}`);
-  L.push(`- why: <fill: what this beat PROVES or teaches that no other beat does, cut it and what is lost?>`);
+  // The hook and the CTA are the author's words, not a section this capture ever saw: no `onscreen:`
+  // line for `first`/`last` here, write it by hand. A middle beat names the real section it captures.
+  if (!b.first && !b.last) L.push(`- onscreen: the real "${b.title || nice(b.label)}" section. Capture it, re-type any headline with a \`type\` layer`);
   L.push(`- blueprint: ${b.blueprint}`);
-  // `becomes:` is a BLOCKER on any film under 15s and this writer emitted it never, so every short draft
-  // it produced failed the gate on every beat at once. It is the author's sentence to write, not this
-  // file's to guess, but the field has to be THERE, or the draft cannot be checked at all.
-  L.push(`- becomes: <fill: the change at this junction, as "the X becomes the Y">`);
   if (b.shot) L.push(`- shot: ${b.shot}`);
   if (!b.first && !b.last) L.push(`- capture: \`${b.cap}\``);
   L.push('');
 }
 L.push('---');
-L.push('_Draft. Fill the `<…>` fields, then `make storyboard-check SB=<this file>` and present for sign-off._');
+L.push('_Draft. Add `onscreen`/`why`/`becomes` (and `message`/`spectacle`/`not` above) by hand, then `make storyboard-check SB=<this file>` and present for sign-off._');
 const out = L.join('\n') + '\n';
 
 const dest = process.env.OUT || `assets/brands/${NAME}/STORYBOARD.md`;
 fs.mkdirSync(path.dirname(dest), { recursive: true });
 fs.writeFileSync(dest, out);
 console.log(`✓ wrote ${dest}: ${beats.length} beat(s) from ${sections.length} section(s).`);
-console.log(`  Next: fill the <…> fields (message + each why), then \`make storyboard-check SB=${dest}\` and get sign-off.`);
+console.log(`  Next: write \`message\`/\`spectacle\`/\`not\` above and \`onscreen\`/\`why\`/\`becomes\` per beat, then \`make storyboard-check SB=${dest}\` and get sign-off.`);
