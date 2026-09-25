@@ -4,109 +4,99 @@ description: You do not write the JSON by hand. You write a five line brief and 
 icon: MessageSquare
 ---
 
-Most people never hand-write a scene file. They describe the film and let an AI agent compose the JSON,
-then iterate on the render. Vawe is built for that: `CLAUDE.md` at the repo root is a long standing
-brief the agent reads before it writes anything, so the agent already knows the house rules, the
-vocabulary and the quality gates.
+Most people never hand-write a scene file. They describe the film and an agent composes the JSON,
+then iterates on the render. `AGENTS.md` at the repo root is the brief the agent reads before it
+writes anything, so it already knows the house rules, the vocabulary, and the quality gates.
 
-Your job is much smaller than you think.
+## The checklist: five lines
 
-## The five lines
+Any line may be missing; the agent asks if a missing one would change the film (`make quiz`, or
+`vawe-video-planning`'s Step 1). One good and one weak version of each:
 
-This is the whole prompt. Any of them may be missing, and the agent will ask if a missing one would
-change the film.
-
-```
-SUBJECT   what it is about, in one line
-DATA      where the facts come from (a URL, a file, an API, or "here they are")
-PAYOFF    the one thing to remember, and it lands LAST
-AUDIENCE  who watches, and where they see it
-FEELING   one reference, or one word ("cinematic", "loud", "like Linear's launch page")
-```
+| Line | Weak | Good |
+|---|---|---|
+| SUBJECT | "a video about our app" | "our launch, the one-click deploy step" |
+| DATA | (missing) | a URL, a file, or "here are the numbers" |
+| PAYOFF | "it's great" | "the same input always renders the same bytes" |
+| AUDIENCE | "everyone" | "developers, X and LinkedIn, 16:9 and 9:16" |
+| FEELING | "modern" | "dry and technical, like a good changelog" |
 
 <Callout type="warn">
-**If you find yourself naming a colour, an easing, a layer type or a preset, stop.** That is the
-agent's job, not yours. Reaching for engine vocabulary is a sign the brief above is underspecified,
-and the fix is a better PAYOFF or FEELING line, not a hex code.
+If you find yourself naming a colour, an easing, or a layer type, stop. That is the agent's job.
+Reaching for engine vocabulary means the brief above is thin, and the fix is a sharper PAYOFF or
+FEELING, not a hex code.
 </Callout>
 
-## What you are NOT deciding
+Two more lines the agent fills itself, not you: `SPECTACLE` (the one exaggerated moment, named) and
+`NOT` (what the film explicitly will not do). Both are locked into the plan before any JSON is
+written.
 
-Palette, typography, layout, motion, camera, cuts, backdrop, sound, pacing, structure. All of it
-belongs to whoever composes the scene, and all of it is defensible from the brief. A film that gets
-these wrong got a thin brief, not a wrong colour.
+## Inputs that raise quality
 
-Two lines are the agent's to fill in, not yours, and they are written into the plan before authoring:
+- **A real product URL, crawled, not invented.** `make sections` pulls the site's own colours, fonts,
+  and favicon; a launch video must crawl every page and use captured UI, never a guessed one.
+- **A reference film or site.** `make study REF=` measures it (shot timing, seam gaps, axis, ground
+  colour); `make ideate REF=` then builds the film's structure from those real numbers, not a guess.
+- **Real data.** Numbers, copy, and figures must be true and looked up, never invented for effect.
+- **The video type, if you know it.** Naming "launch video," "explainer," or "a short sting" saves a
+  routing step (`engine-doctrine/CRAFT/ROUTING.md`); otherwise the agent infers it from the brief.
 
-| Line | What it does |
-|---|---|
-| `SPECTACLE` | the ONE exaggerated moment, named: which beat, which layer, which device |
-| `NOT` | what this film explicitly does not do (no narration, no stock photos, no gradient hero) |
+## Words that work
 
-`SPECTACLE` is two-sided on purpose. Naming the loud moment is also a promise that every other beat
-stays restrained. A film where four beats shout has no loud moment, it has a volume setting.
+The engine resolves plain words to real values in the slot each belongs to. An unknown word errors,
+naming the near misses, instead of silently defaulting.
 
-`NOT` is cheaper than it looks. Most generic output is not a wrong decision, it is an un-excluded
-default: nothing said "no gradient hero", so a gradient hero was free.
+| Class | Example words | Resolves to |
+|---|---|---|
+| Feel | `snappy`, `soft`, `sharp`, `bouncy` | an easing curve |
+| Duration | `instant`, `fast`, `medium`, `slow` | a number of seconds |
+| Camera | `push in`, `pull back`, `dive`, `sweep` | a named camera move |
+| Comparative | `faster`, `slower` | one step from the current value |
 
-## Two shapes of prompt
+Full generated tables: `engine-doctrine/CRAFT/VOCABULARY.md` and, per primitive,
+`engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md` (both regenerate with `make vocab`).
 
-**Cold start.** You have an idea and nothing else.
+## Three worked prompts
 
-```
-SUBJECT   why deterministic rendering matters for CI
-PAYOFF    the same input always produces the same bytes
-AUDIENCE  developers, on a landing page, muted autoplay
-FEELING   dry and technical, like a good changelog
-```
-
-**Warm start.** You have a source: a website, a dataset, a script, a competitor's film.
+**Launch video**
 
 ```
 SUBJECT   our launch, reflecting the real product UI
-DATA      https://example.com  (crawl it, do not just read the homepage)
+DATA      https://example.com  (crawl it, not just the homepage)
 PAYOFF    it ships in one click
 AUDIENCE  X and LinkedIn, 16:9 and 9:16
 FEELING   like the site itself, no louder
 ```
+Next: `make sections` + `make palette`, then `make ideate`, `make scaffold TYPE=launch`.
 
-A warm start is usually better, because a real source carries taste the agent does not have to invent.
-When you point at a website, say **crawl it**, not "look at it": the interesting surface is rarely the
-homepage.
+**Explainer**
 
-## The loop
-
-Once the brief is agreed, the work is a loop, not a single shot.
-
-```bash
-make dev  D=films/scene/<film>.json    # build, draft render, open. No gates, no waiting.
-make check D=films/scene/<film>.json   # every gate, every finding, ZERO consequence
-make ship  D=films/scene/<film>.json   # the ladder with its teeth in
 ```
+SUBJECT   why deterministic rendering matters for CI
+DATA      the render pipeline always produces the same bytes for the same input
+PAYOFF    same input, same output, every time
+AUDIENCE  developers, landing page, muted autoplay
+FEELING   dry and technical, like a good changelog
+```
+Next: `make ideate NAME=determinism`, `make scaffold TYPE=explainer`.
 
-`make dev` is where nearly all the time goes. `make ship` is the one command that says a film is done:
-it runs the author checks, renders, audits the layout and inspects the transitions, in that order.
+**Short sting**
 
-<Callout>
-**Green gates do not mean the film is good.** They read structure. They cannot see murk, a weak focal
-point, or a beat that lands wrong. Read the contact sheets: `make beats` for what each beat holds,
-`make reveal` for how each one enters and exits, `make judge` for a scored sheet and a rubric.
-</Callout>
+```
+SUBJECT   a 6s logo reveal for Loom, dev tool
+PAYOFF    the mark lands hard, nothing else on screen
+AUDIENCE  a pre-roll bumper, any platform
+FEELING   one word landing hard, dark ground
+```
+Next: `make scaffold TYPE=sting DUR=6`.
 
-## What to say when it is wrong
+Every path then runs the same ladder: `make author-check` → `beats`/`reveal` → `make video` →
+`make judge` → `make ledger`.
 
-Be concrete about the SYMPTOM and leave the cause alone. "Beat three reads as a slide, nothing moves
-but the text" is worth ten times "make it more dynamic". The agent can find the cause; it cannot guess
-what you saw.
+## What to avoid
 
-If you want a different direction rather than a fix, go back to `FEELING` and `NOT`. Those two lines
-move a film further than any note about a specific layer.
-
-## Where to go next
-
-<Cards>
-  <Card title="Quickstart" href="/docs/quickstart" description="Install, render the sample, and write your first scene by hand." />
-  <Card title="The scene file" href="/docs/the-scene" description="What the agent is actually writing, when you want to read it." />
-  <Card title="Quality gates" href="/docs/quality-gates" description="What `make ship` checks, and which findings block." />
-  <Card title="Brand reflection" href="/docs/brand-reflection" description="Pointing the agent at a real website and keeping its taste." />
-</Cards>
+- **Don't ask for a template.** There are none: every film composes from
+  `engine-doctrine/PRIMITIVES.md`; a scaffold is a shell, not a reusable layout.
+- **No em-dashes in on-screen copy.** The validator rejects them; use a comma, a period, or a middot.
+- **Don't invent UI.** A screen, logo, or photo the plan names must trace to a real capture
+  (`make capture`/`make assets`); a fragment with no real source is blocked before it ships.
