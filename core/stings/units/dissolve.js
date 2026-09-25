@@ -6,3 +6,4 @@ export const glsl = `                              /* dissolve to white */
     float a = smoothstep(n-0.18, n+0.18, bell*1.15);
     c = vec4(vec3(1.0), a*0.95);`;
 export const blurb = 'the frame dissolves away to white. A clean act break when the next beat starts bright.';
+export const aka = ['dissolve to white', 'white dissolve', 'wash to white'];
