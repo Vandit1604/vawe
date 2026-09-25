@@ -175,11 +175,38 @@ function paintSprite(img, glyph, g, sprites) {
     `transform:translateY(${g.dy}em) rotate(${g.rot}deg) scale(${g.scale});transform-origin:center`;
 }
 
-// Apply the ransom treatment to split units (from splitText(el,'char')). Structure per glyph:
+function makeLiftWrapper(shadow) {
+  const lift = document.createElement('span');
+  lift.className = 'rns-lift';
+  lift.style.cssText = `display:inline-block;filter:${shadow}`;
+  return lift;
+}
+
+function makeGlyphTile(glyph, g, pack) {
+  const tile = document.createElement(pack ? 'img' : 'span');
+  tile.className = 'rns';
+  if (pack) { tile.dataset.ch = glyph; paintSprite(tile, glyph, g, pack); }
+  else { tile.textContent = glyph; paintTile(tile, g); }
+  return tile;
+}
+
+// Structure per glyph:
 //   .ku  (unit; the motion preset animates THIS)              ← translate/scale/opacity from the preset
 //    └ span.rns-lift  (static drop-shadow, so the tile looks peeled off the page)
 //        └ span.rns   (paper tile: face + bg + ink + rotation + torn clip-path)
-// Three levels so appearance and motion never fight over `transform`/`filter`. Pure in n.
+// Three levels so appearance and motion never fight over `transform`/`filter`.
+function buildRansomTile(el, i, ctx) {
+  const { seed, accent, faces, swatches, palette, pack, shadow } = ctx;
+  const glyph = el.textContent;
+  el.textContent = '';
+  el.style.overflow = 'visible';
+  const g = ransomGlyph(seed, i, { accent, faces, swatches, palette });
+  const lift = makeLiftWrapper(shadow);
+  lift.appendChild(makeGlyphTile(glyph, g, pack));
+  el.appendChild(lift);
+}
+
+// Apply the ransom treatment to split units (from splitText(el,'char')). Pure in n.
 export function ransomStyle(units, { seed = '', accent, faces = RANSOM_FACES, swatches, palette = 'paper', sprites = false } = {}) {
   // Fail loud if a ransom face is not registered. A silent fallback would make every letter the body
   // font, which is exactly the effect's opposite. Skipped only where there is no DOM (Node gates).
@@ -195,21 +222,8 @@ export function ransomStyle(units, { seed = '', accent, faces = RANSOM_FACES, sw
   const shadow = palette === 'color'
     ? 'drop-shadow(0 3px 3px rgba(15,15,20,.5)) drop-shadow(0 8px 10px rgba(15,15,25,.28))'
     : 'drop-shadow(0 2px 2px rgba(0,0,0,.45))';
-  units.forEach((el, i) => {
-    const glyph = el.textContent;
-    el.textContent = '';
-    el.style.overflow = 'visible';
-    const lift = document.createElement('span');
-    lift.className = 'rns-lift';
-    lift.style.cssText = `display:inline-block;filter:${shadow}`;
-    const g = ransomGlyph(seed, i, { accent, faces, swatches, palette });
-    const tile = document.createElement(pack ? 'img' : 'span');
-    tile.className = 'rns';
-    if (pack) { tile.dataset.ch = glyph; paintSprite(tile, glyph, g, pack); }
-    else { tile.textContent = glyph; paintTile(tile, g); }
-    lift.appendChild(tile);
-    el.appendChild(lift);
-  });
+  const ctx = { seed, accent, faces, swatches, palette, pack, shadow };
+  units.forEach((el, i) => buildRansomTile(el, i, ctx));
 }
 
 // Write one glyph spec onto its tile. Shared by the build-time stamp and the per-frame re-roll so the
