@@ -33,6 +33,72 @@
 //                          that carries a whole class of visual change sat outside the signature, so
 //                          the gate was green about something it was not looking at. MISTAKES #351.
 
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import path from 'node:path';
+
+// ---- digest: the small committed stand-in for the gitignored full baselines ----
+// Shared by snap-scenes.mjs and snap-blocks.mjs so a fresh clone or CI, which never has the full
+// per-scene/per-block baselines (quality/baselines/snap/{scenes,blocks}/ is gitignored, tens of MB),
+// still gets a verdict from the one tracked file, quality/baselines/snap/digest.json
+// (!quality/baselines/snap/digest.json in .gitignore). One sha256 per entry plus the font state it was
+// captured under: it can say WHETHER something moved, never WHAT, which stays local where the full
+// baseline lives.
+
+const FONT_DIRS = ['assets/fonts', 'assets/fonts/local'];
+
+/** A BASELINE IS ONLY VALID WITHIN ONE FONT STATE. See snap-scenes.mjs's original banner for why:
+ * `assets/fonts/` is gitignored, so a fresh clone, a worktree with a partial font set, or a mid-session
+ * `make fonts` all silently rewrite every text width the signature records. */
+export function fontState(repoRoot) {
+  const names = [];
+  for (const d of FONT_DIRS) {
+    try { for (const name of fs.readdirSync(path.join(repoRoot, d))) {
+      const st = fs.statSync(path.join(repoRoot, d, name));
+      if (st.isFile()) names.push(`${d}/${name}:${st.size}`);
+    } } catch { /* absent is a state too, and it hashes to a different one */ }
+  }
+  names.sort();
+  return { n: names.length, hash: crypto.createHash('sha256').update(names.join('\n')).digest('hex').slice(0, 12) };
+}
+
+export const sha = (v) => crypto.createHash('sha256').update(v).digest('hex').slice(0, 16);
+
+/** Read digest.json, or null when it does not exist yet (first save). */
+export function loadDigest(digestPath) {
+  try { return JSON.parse(fs.readFileSync(digestPath, 'utf8')); } catch { return null; }
+}
+
+/** One entry's {sig, font}, reading both the current {sig,font} shape and the old flat
+ * name->hash-under-one-top-level-`font` shape a digest predating per-entry stamps used. */
+export function digestEntry(digest, collectionKey, name) {
+  const raw = digest && digest[collectionKey] && digest[collectionKey][name];
+  if (raw == null) return null;
+  if (typeof raw === 'string') return { sig: raw, font: digest.font && digest.font.hash };
+  return raw;
+}
+
+/**
+ * MERGE, never replace, and only the named collection. A checkout only ever sees PART of a gitignored
+ * population (films/scene/*.json or a subset of blocks/), so writing `nowMap` alone would erase every
+ * entry this checkout cannot see; other collections in the same digest file (e.g. `scenes` while saving
+ * `blocks`) are carried through untouched. Each entry keeps its own font stamp, so an entry saved
+ * earlier under a different font state stays a valid, self-labelled record.
+ */
+export function mergeDigest(digest, collectionKey, nowMap, fontHash) {
+  const merged = {};
+  if (digest && digest[collectionKey]) for (const name of Object.keys(digest[collectionKey])) merged[name] = digestEntry(digest, collectionKey, name);
+  for (const name of Object.keys(nowMap)) merged[name] = { sig: nowMap[name], font: fontHash };
+  // Sorted, because an unsorted map re-orders itself on every save and the tracked file would show a
+  // diff on a run that changed nothing.
+  const sorted = Object.fromEntries(Object.keys(merged).sort().map((k) => [k, merged[k]]));
+  return { ...(digest || {}), [collectionKey]: sorted };
+}
+
+export function writeDigest(digestPath, digest) {
+  fs.writeFileSync(digestPath, JSON.stringify(digest, null, 1) + '\n');
+}
+
 /** Field key → human name, used for both the diff labels and the field list itself. */
 export const SIG_FIELDS = {
   x: 'x', y: 'y', w: 'w', h: 'h', tf: 'transform', op: 'opacity', fs: 'font', c: 'color', t: 'text',

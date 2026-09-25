@@ -21,7 +21,6 @@
 //   node quality/gates/snap-scenes.mjs          # diff current vs baselines
 //   make snap-all [SAVE=1]
 import fs from 'node:fs';
-import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
@@ -30,7 +29,7 @@ import { population } from '../../harness/lib/census.mjs';
 import { SCENE_DIR } from './paths.mjs';
 // ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
 // for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
-import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
+import { captureSig, diffSig, primeFrames, fontState, sha, loadDigest, digestEntry, mergeDigest, writeDigest } from './snap-signature.mjs';
 import { serveRepo, waitForEngine, bootPathFor } from '../../harness/lib/render-harness.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
@@ -52,18 +51,7 @@ const SAVE = args.includes('--save');
 // real regression captured after it reads as fonts, so the net stops being evidence in both
 // directions at once. The stamp is one file for the whole SET, because the font state is a property of
 // the set and not of any scene, and it deliberately does not touch the per-scene signature format.
-const FONT_DIRS = ['assets/fonts', 'assets/fonts/local'];
-const fontState = () => {
-  const names = [];
-  for (const d of FONT_DIRS) {
-    try { for (const f of fs.readdirSync(path.join(repoRoot, d))) {
-      const st = fs.statSync(path.join(repoRoot, d, f));
-      if (st.isFile()) names.push(`${d}/${f}:${st.size}`);
-    } } catch { /* absent is a state too, and it hashes to a different one */ }
-  }
-  names.sort();
-  return { n: names.length, hash: crypto.createHash('sha256').update(names.join('\n')).digest('hex').slice(0, 12) };
-};
+// (`fontState` itself lives in snap-signature.mjs, shared with snap-blocks.mjs.)
 const STAMP = path.join(SNAP, '.font-state.json');
 // THE ONE TRACKED ARTEFACT IN A GITIGNORED DIRECTORY, and the reason is what CI can and cannot do.
 // A full signature is ~170KB per scene and the whole set is 20MB, most of it describing films that are
@@ -81,23 +69,11 @@ const STAMP = path.join(SNAP, '.font-state.json');
 // evidence about the code. Under the unversioned URLs this file used to fetch, the same comparison
 // would have been noise wearing a regression's clothes.
 const DIGEST = path.join(repoRoot, 'quality', 'baselines', 'snap', 'digest.json');
-const sha = (v) => crypto.createHash('sha256').update(v).digest('hex').slice(0, 16);
-let digest = null;
-try { digest = JSON.parse(fs.readFileSync(DIGEST, 'utf8')); } catch { /* no digest yet */ }
+// Shared with snap-blocks.mjs: `scenes` and `blocks` are two keys of the SAME tracked digest.json, one
+// font-state mechanism, one merge/write path. See snap-signature.mjs for what each helper does.
+const digest = loadDigest(DIGEST);
 const digestNow = {};
-const NOW_FONT = fontState();
-// Each entry carries ITS OWN font stamp, not one global field for the whole digest. A checkout only
-// ever sees PART of the library (films/scene/*.json is gitignored, a fresh worktree can hold 58 of
-// 195 films), so a save from here must never overwrite entries for films it cannot see, and a save
-// under a font state the committed digest was not saved under must not silently relabel old entries
-// as if they were captured under the new one. Old digests wrote a flat name -> hash map under one
-// top-level `font`; read those the same way, under that one recorded state.
-const digestEntry = (name) => {
-  const raw = digest && digest.scenes && digest.scenes[name];
-  if (raw == null) return null;
-  if (typeof raw === 'string') return { sig: raw, font: digest.font && digest.font.hash };
-  return raw;
-};
+const NOW_FONT = fontState(repoRoot);
 const ONLY = args.find((a) => !a.startsWith('--')); // optional: sweep just one scene by name
 
 // Every shipped SCENE: films/scene/*.json with module:"scene", except the schema and _-prefixed
@@ -199,7 +175,7 @@ for (const scene of scenes) {
       // NO LOCAL BASELINE, BUT THE DIGEST IS TRACKED, so a fresh clone and every CI runner still get a
       // verdict instead of a shrug. It says WHETHER the scene moved and cannot say what moved; the
       // message says so rather than letting a reader assume the full net ran.
-      const was = digestEntry(name);
+      const was = digestEntry(digest, 'scenes', name);
       if (!was) nobaseline.push(name);
       else if (was.font !== NOW_FONT.hash) staleFontDigest.push(name);
       else if (was.sig === sigHash) identical.push(name);
@@ -257,18 +233,9 @@ if (!SAVE) {
 if (SAVE) {
   const fsNow = NOW_FONT;
   fs.writeFileSync(STAMP, JSON.stringify({ ...fsNow, root: repoRoot }, null, 2) + '\n');
-  // MERGE, never replace. A checkout only ever sees PART of the library (films/scene/*.json is
-  // gitignored, a fresh worktree can hold 58 of 195 films), so writing digestNow alone would erase
-  // every scene this checkout cannot see, the exact loss a partial-view save nearly shipped. Each
-  // entry keeps its own font stamp, so a scene saved earlier under a different font state stays a
-  // valid, self-labelled record rather than being silently relabelled under this run's state.
-  const merged = {};
-  if (digest && digest.scenes) for (const name of Object.keys(digest.scenes)) merged[name] = digestEntry(name);
-  for (const name of Object.keys(digestNow)) merged[name] = { sig: digestNow[name], font: fsNow.hash };
-  // Sorted, because an unsorted map re-orders itself on every save and the tracked file would show a
-  // diff on a run that changed nothing. Deterministic output is the same rule the renders obey.
-  fs.writeFileSync(DIGEST, JSON.stringify({ scenes: Object.fromEntries(Object.keys(merged).sort().map((k) => [k, merged[k]])) }, null, 1) + '\n');
-  console.log(`✓ ${saved.length} baselines saved → quality/baselines/snap/scenes/  (font state ${fsNow.hash}, ${fsNow.n} face(s); digest now ${Object.keys(merged).length} scene(s), ${Object.keys(digestNow).length} refreshed this run)`);
+  const newDigest = mergeDigest(digest, 'scenes', digestNow, fsNow.hash);
+  writeDigest(DIGEST, newDigest);
+  console.log(`✓ ${saved.length} baselines saved → quality/baselines/snap/scenes/  (font state ${fsNow.hash}, ${fsNow.n} face(s); digest now ${Object.keys(newDigest.scenes).length} scene(s), ${Object.keys(digestNow).length} refreshed this run)`);
   if (quarantined.length) { console.log(`\n⚠ ${quarantined.length} QUARANTINED (non-deterministic, NOT baselined):`); for (const q of quarantined) { console.log(`  ✗ ${q.name}`); for (const s of q.sample) console.log(`      order-diff: ${s}`); } }
   if (errored.length) { console.log(`\n⚠ ${errored.length} errored (skipped):`); for (const e of errored) console.log(`  ✗ ${e}`); }
   process.exit(quarantined.length || errored.length ? 1 : 0);
