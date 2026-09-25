@@ -154,11 +154,22 @@ const FEEL_BLURBS = {
 };
 
 const DURATION_BLURBS = {
-  instant: 'about a twelfth of a second. Barely perceptible as motion: a state flip that must not feel animated.',
-  fast: 'under a fifth of a second. A payoff snapping into place, a value ticking over.',
-  medium: 'about a third of a second. The everyday entrance, and the one to reach for when nothing argues otherwise.',
-  slow: 'a little over half a second. A thesis line taking its time, a deliberate reveal.',
-  luxurious: 'over a second. The pace of a hero moment, and monotonous if more than one beat uses it.',
+  instant: '0.08s, about a twelfth of a second. Barely perceptible as motion: a state flip that must not feel animated.',
+  fast: '0.18s, under a fifth of a second. A payoff snapping into place, a value ticking over.',
+  medium: '0.3s, BASE_ENTER, the engine\'s own default entrance. About a third of a second, reach past it on purpose.',
+  slow: '0.6s, a little over half a second. A thesis line taking its time, a deliberate reveal.',
+  luxurious: '1.2s, over a second. The pace of a hero moment, and monotonous if more than one beat uses it.',
+};
+
+// The plain words a person would say instead of a number, folded into search only, never printed
+// (core/registry/registry.js `aka`). Each one names the WORD-ACTION contract's `words` half; the
+// `action` half is DURATION_BLURBS above, which now carries the real seconds value on every entry.
+const DURATION_AKA = {
+  instant: ['snap', 'no visible motion', 'immediate'],
+  fast: ['quick', 'brief', 'snappy pace'],
+  medium: ['default speed', 'normal pace', 'moderate'],
+  slow: ['deliberate', 'unhurried', 'takes its time'],
+  luxurious: ['lingering', 'held', 'extended hold'],
 };
 
 const CAMERA_BLURBS = {
@@ -186,7 +197,7 @@ const FEEL_AKA = {
 };
 
 export const FEEL_REGISTRY = defineRegistry('feel word', FEEL, { slot: 'ease', blurbs: FEEL_BLURBS, aka: FEEL_AKA });
-export const DURATION_REGISTRY = defineRegistry('duration word', DURATION, { slot: 'enterDur', blurbs: DURATION_BLURBS });
+export const DURATION_REGISTRY = defineRegistry('duration word', DURATION, { slot: 'enterDur', blurbs: DURATION_BLURBS, aka: DURATION_AKA });
 export const CAMERA_WORD_REGISTRY = defineRegistry('camera word', CAMERA_WORDS, { slot: 'cameraMove.move', blurbs: CAMERA_BLURBS });
 
 /**
