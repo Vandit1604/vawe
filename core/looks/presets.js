@@ -39,7 +39,7 @@ export const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 // ---- overlay background builders (pure strings) --------------------------------------------------
 const scanGrad = (gapPx, a) =>
   `repeating-linear-gradient(0deg, rgba(0,0,0,${n2(a)}) 0px, rgba(0,0,0,${n2(a)}) 1px, transparent 1px, transparent ${gapPx}px)`;
-const gridGrad = (gap, color, a) =>
+const gridGrad = (gap, color, _a) =>
   `repeating-linear-gradient(0deg, ${color} 0 1px, transparent 1px ${gap}px), ` +
   `repeating-linear-gradient(90deg, ${color} 0 1px, transparent 1px ${gap}px)`;
 const CORNERS = { tr: '100% 0%', tl: '0% 0%', br: '100% 100%', bl: '0% 100%', c: '50% 50%' };

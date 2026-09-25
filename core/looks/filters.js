@@ -529,6 +529,141 @@ function buildPrimitive(f, { conv, morph, relief }) {
     : { in: 'lit', in2: 'SourceGraphic', operator: 'arithmetic', k1: 1, k2: 0, k3: 0, k4: 0 });
 }
 
+function buildRamp(f, stops) {
+  // luminance → per-channel ramp: type="table" linearly interpolates between the stops, which IS
+  // a gradient map (duotone/tritone are just 2- and 3-stop gradient maps).
+  const cm = document.createElementNS(SVG_NS, 'feColorMatrix');
+  cm.setAttribute('type', 'matrix');
+  cm.setAttribute('values', LUMA);
+  f.appendChild(cm);
+  const ct = document.createElementNS(SVG_NS, 'feComponentTransfer');
+  ['R', 'G', 'B'].forEach((chan, i) => ct.appendChild(transferFunc(chan, 'table', stops.map((s) => s[i] / 255))));
+  f.appendChild(ct);
+}
+
+function buildPosterize(f, levels) {
+  // posterize keeps the original hues: discrete tables quantise each channel in place (no luma).
+  const ct = document.createElementNS(SVG_NS, 'feComponentTransfer');
+  const table = Array.from({ length: levels }, (_, i) => i / (levels - 1));
+  for (const chan of ['R', 'G', 'B']) ct.appendChild(transferFunc(chan, 'discrete', table));
+  f.appendChild(ct);
+}
+
+function buildDisplace(f, { freq, scale }) {
+  // static feTurbulence → feDisplacementMap: warps the layer's own pixels by a fixed noise field
+  // (fixed seed → deterministic; no frame hook). Wide region so warped edges are not clipped.
+  for (const [k, v] of [['x', '-30%'], ['y', '-30%'], ['width', '160%'], ['height', '160%']]) f.setAttribute(k, v);
+  const turb = document.createElementNS(SVG_NS, 'feTurbulence');
+  turb.setAttribute('type', 'fractalNoise'); turb.setAttribute('baseFrequency', String(freq));
+  turb.setAttribute('numOctaves', '2'); turb.setAttribute('seed', '1'); turb.setAttribute('result', 'n');
+  const dm = document.createElementNS(SVG_NS, 'feDisplacementMap');
+  dm.setAttribute('in', 'SourceGraphic'); dm.setAttribute('in2', 'n'); dm.setAttribute('scale', String(scale));
+  dm.setAttribute('xChannelSelector', 'R'); dm.setAttribute('yChannelSelector', 'G');
+  f.appendChild(turb); f.appendChild(dm);
+}
+
+function tint(v, dflt) {
+  return { rgb: parseColor(v) || parseColor(dflt), a: +colorAlpha(v == null ? dflt : v).toFixed(3) };
+}
+
+// One entry per `preset.mode`. `resolve(opts, name)` turns the caller's raw opts into the mode's
+// clamped/defaulted params; `id` turns those params into the def's element id (load-bearing: two
+// calls that differ in any param and collide here would silently share one def); `build` writes the
+// SVG primitives for those params into the empty <filter> element.
+const MODES = {
+  ramp: {
+    resolve: (opts, name) => ({ stops: opts.colors && opts.colors.length >= 2 ? opts.colors : rampStops(name, opts.colors || []) }),
+    id: (name, r) => defId(name, r.stops, null),
+    build: (f, r) => buildRamp(f, r.stops),
+  },
+  thermal: {
+    resolve: (opts, name) => ({
+      stops: opts.colors && opts.colors.length >= 2 ? opts.colors : rampStops(name, opts.colors || []),
+      radius: +Math.max(1, opts.radius ?? 5).toFixed(2),
+    }),
+    id: (name, r) => `${defId(name, r.stops, null)}-r${r.radius}`.replace(/\./g, '_'),
+    build: (f, r) => buildThermal(f, r),
+  },
+  posterize: {
+    resolve: (opts) => ({ levels: Math.max(2, Math.round(opts.levels || 4)) }),
+    id: (name, r) => defId(name, null, r.levels),
+    build: (f, r) => buildPosterize(f, r.levels),
+  },
+  displace: {
+    resolve: (opts) => ({
+      freq: +(opts.freq > 0 ? opts.freq : 0.012).toFixed(4),
+      scale: +(opts.scale > 0 ? opts.scale : 16).toFixed(1),
+    }),
+    id: (name, r) => `f-displace-f${r.freq}-s${r.scale}`.replace(/\./g, '_'),
+    build: (f, r) => buildDisplace(f, r),
+  },
+  bloom: {
+    resolve: (opts) => ({
+      // no colour → the glow keeps the source's own colours (real neon); a colour → a uniform flood tint
+      rgb: opts.color ? glowRGB(opts.color) : null,
+      key: opts.key === 'value' ? 'value' : 'luma', // value = max(R,G,B): saturated colours glow fully
+      threshold: Math.min(0.95, Math.max(0, opts.threshold ?? 0.62)),
+      radius: +Math.max(0.5, opts.radius ?? 14).toFixed(2),
+      // a SEPARATE vertical sigma makes the bloom directional: wide in x and narrow in y is an
+      // anamorphic streak. null = isotropic, the shape every existing caller gets.
+      ry: opts.ry == null ? null : +Math.max(0.1, opts.ry).toFixed(2),
+      intensity: Math.max(0, opts.intensity ?? 1),
+    }),
+    id: (name, r) => `f-bloom-${r.rgb ? r.rgb.join('_') : 'src'}${r.key === 'value' ? '-val' : ''}-t${r.threshold}-r${r.radius}${r.ry == null ? '' : `-ry${r.ry}`}-i${r.intensity}`.replace(/\./g, '_'),
+    build: (f, r) => buildBloom(f, r),
+  },
+  chroma: {
+    resolve: (opts) => ({
+      px: +Math.max(0, Math.min(40, opts.px ?? 2)).toFixed(2),
+      warm: tint(opts.warm, 'rgba(255,60,60,0.75)'),
+      cool: tint(opts.cool, 'rgba(40,120,255,0.75)'),
+    }),
+    id: (name, r) => `f-chroma-p${r.px}-${r.warm.rgb.join('_')}a${r.warm.a}-${r.cool.rgb.join('_')}a${r.cool.a}`.replace(/\./g, '_'),
+    build: (f, r) => buildChromaSplit(f, r),
+  },
+  convolve: {
+    resolve: (opts) => ({
+      kernel: KERNELS[opts.kernel] ? opts.kernel : 'emboss',
+      amount: +Math.max(0.05, Math.min(3, opts.amount ?? 1)).toFixed(3),
+    }),
+    id: (name, r) => `f-conv-${r.kernel}-a${r.amount}`.replace(/\./g, '_'),
+    build: (f, r) => buildPrimitive(f, { conv: r }),
+  },
+  morph: {
+    resolve: (opts) => ({
+      op: opts.op === 'erode' ? 'erode' : 'dilate',
+      radius: +Math.max(0.1, Math.min(12, opts.radius ?? 1)).toFixed(2),
+    }),
+    id: (name, r) => `f-morph-${r.op}-r${r.radius}`.replace(/\./g, '_'),
+    build: (f, r) => buildPrimitive(f, { morph: r }),
+  },
+  goo: {
+    resolve: (opts) => ({
+      radius: +Math.max(0.5, Math.min(60, opts.radius ?? 12)).toFixed(2),
+      hardness: +Math.max(2, Math.min(80, opts.hardness ?? 19)).toFixed(2),
+    }),
+    id: (name, r) => `f-goo-r${r.radius}-h${r.hardness}`.replace(/\./g, '_'),
+    build: (f, r) => buildGoo(f, r),
+  },
+  relief: {
+    resolve: (opts) => ({
+      mode: opts.mode === 'specular' ? 'specular' : 'diffuse',
+      azimuth: Math.round(opts.azimuth ?? 225), elevation: Math.round(opts.elevation ?? 55),
+      surface: +(+(opts.surface ?? 2)).toFixed(2), exponent: +(opts.exponent ?? 20).toFixed(1),
+      constant: +(opts.constant ?? 1).toFixed(2), rgb: glowRGB(opts.color || '#ffffff'),
+    }),
+    id: (name, r) => `f-relief-${r.mode}-${r.azimuth}-${r.elevation}-s${r.surface}-e${r.exponent}-c${r.constant}-${r.rgb.join('_')}`.replace(/\./g, '_'),
+    build: (f, r) => buildPrimitive(f, { relief: r }),
+  },
+};
+
+// no preset ships a mode outside MODES; an unrecognised mode falls through to an unramped, un-leveled def.
+const DEFAULT_MODE = {
+  resolve: () => ({ levels: null }),
+  id: (name) => defId(name, null, null),
+  build: (f, r) => buildPosterize(f, r.levels),
+};
+
 // Idempotently inject the <filter> def for a named look; returns its id. `opts`:
 //   { colors: [[r,g,b],…] }  ramp stops for duotone/tritone/gradientMap (default: theme ink→accent)
 //   { levels: n }            posterize step count (default 4)
@@ -536,125 +671,16 @@ function buildPrimitive(f, { conv, morph, relief }) {
 export function ensureFilterDef(name, opts = {}) {
   const preset = FILTER_PRESETS[name];
   if (!preset || preset.kind !== 'svg') throw new Error(`ensureFilterDef: "${name}" is not an SVG-filter preset`);
-  const stops = (preset.mode === 'ramp' || preset.mode === 'thermal')
-    ? (opts.colors && opts.colors.length >= 2 ? opts.colors : rampStops(name, opts.colors || [])) : null;
-  const thermal = preset.mode === 'thermal' ? { stops, radius: +Math.max(1, opts.radius ?? 5).toFixed(2) } : null;
-  const levels = preset.mode === 'posterize' ? Math.max(2, Math.round(opts.levels || 4)) : null;
-  const disp = preset.mode === 'displace'
-    ? { freq: +(opts.freq > 0 ? opts.freq : 0.012).toFixed(4), scale: +(opts.scale > 0 ? opts.scale : 16).toFixed(1) } : null;
-  const bloom = preset.mode === 'bloom' ? {
-    // no colour → the glow keeps the source's own colours (real neon); a colour → a uniform flood tint
-    rgb: opts.color ? glowRGB(opts.color) : null,
-    key: opts.key === 'value' ? 'value' : 'luma', // value = max(R,G,B): saturated colours glow fully
-    threshold: Math.min(0.95, Math.max(0, opts.threshold ?? 0.62)),
-    radius: +Math.max(0.5, opts.radius ?? 14).toFixed(2),
-    // a SEPARATE vertical sigma makes the bloom directional: wide in x and narrow in y is an
-    // anamorphic streak. null = isotropic, the shape every existing caller gets.
-    ry: opts.ry == null ? null : +Math.max(0.1, opts.ry).toFixed(2),
-    intensity: Math.max(0, opts.intensity ?? 1),
-  } : null;
-  const tint = (v, dflt) => ({ rgb: parseColor(v) || parseColor(dflt), a: +colorAlpha(v == null ? dflt : v).toFixed(3) });
-  const chroma = preset.mode === 'chroma' ? {
-    px: +Math.max(0, Math.min(40, opts.px ?? 2)).toFixed(2),
-    warm: tint(opts.warm, 'rgba(255,60,60,0.75)'),
-    cool: tint(opts.cool, 'rgba(40,120,255,0.75)'),
-  } : null;
-  const conv = preset.mode === 'convolve' ? {
-    kernel: KERNELS[opts.kernel] ? opts.kernel : 'emboss',
-    amount: +Math.max(0.05, Math.min(3, opts.amount ?? 1)).toFixed(3),
-  } : null;
-  const morph = preset.mode === 'morph' ? {
-    op: opts.op === 'erode' ? 'erode' : 'dilate',
-    radius: +Math.max(0.1, Math.min(12, opts.radius ?? 1)).toFixed(2),
-  } : null;
-  const goo = preset.mode === 'goo' ? {
-    radius: +Math.max(0.5, Math.min(60, opts.radius ?? 12)).toFixed(2),
-    hardness: +Math.max(2, Math.min(80, opts.hardness ?? 19)).toFixed(2),
-  } : null;
-  const relief = preset.mode === 'relief' ? {
-    mode: opts.mode === 'specular' ? 'specular' : 'diffuse',
-    azimuth: Math.round(opts.azimuth ?? 225), elevation: Math.round(opts.elevation ?? 55),
-    surface: +(+(opts.surface ?? 2)).toFixed(2), exponent: +(opts.exponent ?? 20).toFixed(1),
-    constant: +(opts.constant ?? 1).toFixed(2), rgb: glowRGB(opts.color || '#ffffff'),
-  } : null;
-  // EVERY parameter above must reach the id. Two calls that differ in any of them and collide here
-  // would silently share one def, and the second caller would render the first caller's filter.
-  const id = chroma ? `f-chroma-p${chroma.px}-${chroma.warm.rgb.join('_')}a${chroma.warm.a}-${chroma.cool.rgb.join('_')}a${chroma.cool.a}`.replace(/\./g, '_')
-    : disp ? `f-displace-f${disp.freq}-s${disp.scale}`.replace(/\./g, '_')
-    : conv ? `f-conv-${conv.kernel}-a${conv.amount}`.replace(/\./g, '_')
-    : morph ? `f-morph-${morph.op}-r${morph.radius}`.replace(/\./g, '_')
-    : goo ? `f-goo-r${goo.radius}-h${goo.hardness}`.replace(/\./g, '_')
-    : relief ? `f-relief-${relief.mode}-${relief.azimuth}-${relief.elevation}-s${relief.surface}-e${relief.exponent}-c${relief.constant}-${relief.rgb.join('_')}`.replace(/\./g, '_')
-    : bloom ? `f-bloom-${bloom.rgb ? bloom.rgb.join('_') : 'src'}${bloom.key === 'value' ? '-val' : ''}-t${bloom.threshold}-r${bloom.radius}${bloom.ry == null ? '' : `-ry${bloom.ry}`}-i${bloom.intensity}`.replace(/\./g, '_')
-    : thermal ? `${defId(name, stops, null)}-r${thermal.radius}`.replace(/\./g, '_')
-    : defId(name, stops, levels);
+  const mode = MODES[preset.mode] || DEFAULT_MODE;
+  const resolved = mode.resolve(opts, name);
+  const id = mode.id(name, resolved);
   if (typeof document === 'undefined') return id; // pure-id path for node tests; injection needs a browser
   if (document.getElementById(id)) return id;
 
   const f = document.createElementNS(SVG_NS, 'filter');
   f.setAttribute('id', id);
   f.setAttribute('color-interpolation-filters', 'sRGB'); // tableValues are authored in sRGB space
-
-  if (conv || morph || relief) {
-    buildPrimitive(f, { conv, morph, relief });
-    defsHost().appendChild(f);
-    return id;
-  }
-
-  if (bloom) {
-    buildBloom(f, bloom);
-    defsHost().appendChild(f);
-    return id;
-  }
-
-  if (thermal) {
-    buildThermal(f, thermal);
-    defsHost().appendChild(f);
-    return id;
-  }
-
-  if (goo) {
-    buildGoo(f, goo);
-    defsHost().appendChild(f);
-    return id;
-  }
-
-  if (chroma) {
-    buildChromaSplit(f, chroma);
-    defsHost().appendChild(f);
-    return id;
-  }
-
-  if (preset.mode === 'displace') {
-    // static feTurbulence → feDisplacementMap: warps the layer's own pixels by a fixed noise field
-    // (fixed seed → deterministic; no frame hook). Wide region so warped edges are not clipped.
-    for (const [k, v] of [['x', '-30%'], ['y', '-30%'], ['width', '160%'], ['height', '160%']]) f.setAttribute(k, v);
-    const turb = document.createElementNS(SVG_NS, 'feTurbulence');
-    turb.setAttribute('type', 'fractalNoise'); turb.setAttribute('baseFrequency', String(disp.freq));
-    turb.setAttribute('numOctaves', '2'); turb.setAttribute('seed', '1'); turb.setAttribute('result', 'n');
-    const dm = document.createElementNS(SVG_NS, 'feDisplacementMap');
-    dm.setAttribute('in', 'SourceGraphic'); dm.setAttribute('in2', 'n'); dm.setAttribute('scale', String(disp.scale));
-    dm.setAttribute('xChannelSelector', 'R'); dm.setAttribute('yChannelSelector', 'G');
-    f.appendChild(turb); f.appendChild(dm);
-    defsHost().appendChild(f);
-    return id;
-  }
-
-  const ct = document.createElementNS(SVG_NS, 'feComponentTransfer');
-  if (preset.mode === 'ramp') {
-    // luminance → per-channel ramp: type="table" linearly interpolates between the stops, which IS
-    // a gradient map (duotone/tritone are just 2- and 3-stop gradient maps).
-    const cm = document.createElementNS(SVG_NS, 'feColorMatrix');
-    cm.setAttribute('type', 'matrix');
-    cm.setAttribute('values', LUMA);
-    f.appendChild(cm);
-    ['R', 'G', 'B'].forEach((chan, i) => ct.appendChild(transferFunc(chan, 'table', stops.map((s) => s[i] / 255))));
-  } else {
-    // posterize keeps the original hues: discrete tables quantise each channel in place (no luma).
-    const table = Array.from({ length: levels }, (_, i) => i / (levels - 1));
-    for (const chan of ['R', 'G', 'B']) ct.appendChild(transferFunc(chan, 'discrete', table));
-  }
-  f.appendChild(ct);
+  mode.build(f, resolved);
   defsHost().appendChild(f);
   return id;
 }
