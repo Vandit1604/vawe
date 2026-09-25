@@ -252,7 +252,6 @@ process.stdin.on('end', () => {
     + `\n  Nothing here blocks. These are the five numbers CLAUDE.md argues from, measured on this file.`;
 
   const out = summarize('scene-live', rel, full);
-  if (!out) process.exit(0);            // same finding as last time; already said, no need to repeat
   console.error(out);
   process.exit(2);
 });

@@ -5,8 +5,8 @@
 //
 // Three facts checked against a scratch data dir (never the real .vawe-data/): a large finding gets
 // written to the report file in full, the text injected into the transcript stays under a stated
-// character budget, and the same finding on a later save is silent (dedup by hash) while a changed
-// finding speaks again. Pure: no render, no network, no touch to the real .vawe-data/.
+// character budget, and the same finding on a later save shrinks to one line (dedup by hash) while a
+// changed finding speaks in full again. Pure: no render, no network, no touch to the real .vawe-data/.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -38,10 +38,11 @@ check('the report file carries every finding, not a truncated copy',
   fs.existsSync(reportPath) && fs.readFileSync(reportPath, 'utf8') === full);
 
 const repeat = summarize('probe-hook', 'core/probe.js', full);
-check('an unchanged finding on a later save is silent', repeat === null);
+check('an unchanged finding on a later save is one short line, never silence',
+  typeof repeat === 'string' && repeat.includes('unchanged') && !repeat.includes('\n') && repeat.length < 300);
 
 const changed = summarize('probe-hook', 'core/probe.js', full + '\n  one more line');
-check('a changed finding speaks again', changed !== null);
+check('a changed finding speaks in full again', changed.includes('one more line') || changed.includes('Full text'));
 
 process.env.VAWE_HOOK_FULL = '1';
 const unshortened = summarize('probe-hook', 'core/probe.js', full);

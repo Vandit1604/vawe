@@ -222,7 +222,6 @@ process.stdin.on('end', () => {
   const full = `${path.basename(rel)}\n${say.join('\n')}\n`
     + `  Nothing here blocks. These are CLAUDE.md's own rules, measured on this file.`;
   const out = summarize('craft-live', rel, full);
-  if (!out) process.exit(0);            // same finding as last time; already said, no need to repeat
   console.error(out);
 
   // The receipt: which checks in this file's family fired (shown above) and which ran clean on the
