@@ -1,27 +1,6 @@
-// probe-ancestor-kills.mjs: MEASURE the cross-product behind core/ancestor-kills.js.
-//
-// The class: an ANCESTOR's style silently disables a DESCENDANT's capability. CSS has no error for
-// this. The element keeps its declaration, the browser keeps rendering, and the capability just stops.
-//
-// The method, and it is the whole reason this file exists rather than a reading of the spec. Whatever
-// the capability must REACH is placed OUTSIDE the ancestor, below it in paint order. The frame is then
-// shot with the capability declared and with it removed, and the mean pixel difference between those
-// two shots is how much the declaration actually did. Compared against the same measurement with NO
-// ancestor style, that number says whether the ancestor took the capability away.
-//
-// Byte equality was the first metric here and it was too generous: a backdrop-filter over an EMPTY
-// backdrop root still darkens its own edge a little, so "the bytes differ" reported a dead glass layer
-// as alive. The strength ratio is what separates "did something" from "did its job".
-//
-// A control row with no ancestor style proves the probe can see the capability at all; if a control
-// ever reports KILLED the probe is broken, not the browser.
-//
-//   node harness/dev/probe-ancestor-kills.mjs
 import zlib from 'node:zlib';
 import puppeteer from 'puppeteer';
 
-// ---- the smallest PNG reader that serves the metric: 8-bit RGBA, non-interlaced, which is what
-// puppeteer emits. Anything else throws rather than being guessed at.
 function decodePng(buf) {
   let p = 8, w = 0, h = 0, bpp = 4; const idat = [];
   while (p < buf.length) {
@@ -48,14 +27,12 @@ function decodePng(buf) {
   }
   return { w, h, bpp, data: out };
 }
-// mean absolute RGB difference over the whole frame, 0..255
 const meanDiff = (A, B) => {
   let s = 0;
   for (let i = 0; i < A.data.length; i += A.bpp) s += Math.abs(A.data[i] - B.data[i]) + Math.abs(A.data[i + 1] - B.data[i + 1]) + Math.abs(A.data[i + 2] - B.data[i + 2]);
   return s / (A.data.length / A.bpp) / 3;
 };
 
-// Every ancestor style the engine writes, plus the near neighbours worth ruling out.
 const ANCESTORS = {
   'none (control)':           '',
   'filter: blur(2px)':        'filter:blur(2px)',
@@ -73,7 +50,6 @@ const ANCESTORS = {
   'mix-blend-mode: multiply': 'mix-blend-mode:multiply',
 };
 
-// BACKDROP probes: the field the capability must sample sits OUTSIDE #anc, painted before it.
 const backdropDoc = (anc, cap) => `<!doctype html><html><body style="margin:0">
 <svg width="0" height="0"><filter id="rf" x="-30%" y="-30%" width="160%" height="160%">
   <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="3" result="n"/>
@@ -86,8 +62,6 @@ const backdropDoc = (anc, cap) => `<!doctype html><html><body style="margin:0">
   </div>
 </div></body></html>`;
 
-// DEPTH probe: the eye is outside #anc, so a grouping property on #anc flattens the rig and the
-// layer's translateZ stops projecting. This is core/fx/plane.js and the camera rig.
 const depthDoc = (anc, cap) => `<!doctype html><html><body style="margin:0">
 <div style="width:400px;height:300px;position:relative;background:#fff;perspective:600px">
   <div id="anc" style="position:absolute;inset:0;transform-style:preserve-3d;${anc}">

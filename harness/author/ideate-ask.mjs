@@ -1,24 +1,3 @@
-// harness/author/ideate-ask.mjs: THE DETAIL BRIEF for `make ideate`, asked once the acts are known.
-//
-//   node harness/author/ideate-ask.mjs --ask --ref example-madera            (REF acts, from the study)
-//   node harness/author/ideate-ask.mjs --ask --name <film> --idea "..."       (IDEA acts, from ideate.mjs)
-//   node harness/author/ideate-ask.mjs --apply --prompt <file> --answers <file.json>
-//   node harness/author/ideate-ask.mjs --self-test
-//   make ideate REF=<ref> ASK=1   ·   make ideate ... ANSWERS=<file.json>
-//
-// WHY THIS EXISTS. The owner, by hand, gave the kind of detail a good plan needs before any frame is
-// drawn: what fills the frame, where the product lives, how text arrives, which cursor, how an act
-// hands off, what the ground does. `harness/author/ideate.mjs` never asked for any of it: REF mode
-// writes `<look:>` placeholders (nothing to ask, the frame is unmeasured), and IDEA mode writes nothing
-// at all, it only ever asks. This module is the second half of the SAME contract `quiz.mjs` already
-// proved for the brief (stage 1): emit an AskUserQuestion payload built from real registries, refuse to
-// invent prose options, and apply the answers back into the artefact `make ideate` already writes.
-//
-// ONE RULE ABOVE ALL: an option is never hand-written prose. It traces to a registry (`RECIPES`,
-// `core/kinetic/presets.js`, `core/camera-moves`, `core/transitions/catalog.js`, `screen.mjs`'s
-// `KINDS`) or to the grammar (`shots[].content`, a joint's measured axis). Where no registry answers a
-// question, the question is DROPPED, never answered with an invented option (`selfTest` below checks
-// this the same way quiz.mjs's self-test checks its own options).
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -34,9 +13,6 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 // ── film-level questions (batch 0) ─────────────────────────────────────────────────────────────────
 
-// WHERE THE PRODUCT LIVES. No registry names a "chrome" for any of these (no core/layers/*.js builds a
-// terminal, browser or phone frame): the closest named route is a `make screen` KIND, so each option
-// says that plainly rather than pretending a frame type exists. "none" needs no route at all.
 const KIND_BY_SURFACE = { editor: KINDS.includes('editor') ? 'editor' : null, dashboard: KINDS.includes('dashboard') ? 'dashboard' : null, card: KINDS.includes('card') ? 'card' : null };
 export function whereProductLives() {
   return [
@@ -47,7 +23,7 @@ export function whereProductLives() {
   ];
 }
 
-// HOW TEXT ARRIVES. Every option is a real recipe or kinetic preset name, never an invented style word.
+// Every option is a real recipe or kinetic preset name, never an invented style word.
 export function howTextArrives() {
   const wbw = RECIPES['word-by-word'];
   return [
@@ -60,8 +36,8 @@ export function howTextArrives() {
   ];
 }
 
-// GROUND, once per film: a strategy, not a colour. "chained from previous" is the flow-seam recipe's
-// own ground slot, so it is a rule applied at every joint, not a value re-asked per act.
+// GROUND is decided once per film, a strategy not a colour: "chained from previous" is the flow-seam
+// recipe's own ground slot, applied at every joint rather than re-asked per act.
 export function groundStrategy() {
   const seam = RECIPES['flow-seam'];
   return [
@@ -73,10 +49,6 @@ export function groundStrategy() {
   ];
 }
 
-// ATTENTION, film-wide. The owner's own framing: every device (per-word colour, a camera push, a
-// cursor, contrast, size, a blur-to-sharp focus pull) exists to point the eye somewhere, and the plan
-// has to say where across the WHOLE film, not just inside one beat. Each option traces to a real
-// mechanism the film can already declare, never an invented strategy.
 export function attentionOptions() {
   return [
     { key: 'cause-chain', label: 'One cause chases the next', description: 'Each beat is caused by the one before (`trigger:`, engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md): the eye follows the causal chain start to finish, the cursor causes the type, the type causes the send, the send causes the cut.' },
@@ -99,8 +71,8 @@ export function filmLevelBatch() {
 
 // ── per-act questions (one batch each) ─────────────────────────────────────────────────────────────
 
-// WHAT FILLS THE FRAME. The reference's own measured content line (shots[].content, when this is a
-// REF act) rides in the description so the option is judged against how full the reference actually is.
+// The reference's own measured content line (shots[].content, when this is a REF act) rides in the
+// description so the option is judged against how full the reference actually is.
 export function contentLine(act) {
   const c = act && act.content;
   if (!c) return null;
@@ -130,8 +102,6 @@ export function cursorOptions() {
   ];
 }
 
-// HOW THE ACT LEAVES AND HANDS OFF. A joint's own measured axis is the base route (flow-seam); the
-// other three are real alternates named from their own registries, never invented.
 function namedTransition() {
   const seamBasic = TRANSITIONS.filter((t) => t.mechanism === 'seam' && t.basic);
   const push = seamBasic.find((t) => t.name === 'push');
@@ -153,17 +123,14 @@ export function handoffOptions(joint) {
   ];
 }
 
-// CAMERA. Named moves whose blurbs are read straight off core/camera-moves/index.js.
+// Named moves whose blurbs are read straight off core/camera-moves/index.js.
 export function cameraOptions() {
   const pick = ['diveIn', 'panFollow', 'driftHold'];
   return pick.filter((k) => CAMERA_MOVE_BLURBS[k]).map((k) => ({ key: k, label: k, description: `core/camera-moves: ${CAMERA_MOVE_BLURBS[k]}.` }));
 }
 
-// EYE. Where does this act point attention, and which device does the pointing (the owner's own
-// framing: a camera push doubles as an eye-directing device, so it lives here rather than in a
-// separate question). Four options, the AskUserQuestion ceiling, so this REPLACES the old standalone
-// "what does the camera do" question rather than sitting beside it; a camera push is still reachable,
-// as this question's first option.
+// Four options, the AskUserQuestion ceiling, so this REPLACES the old standalone "what does the
+// camera do" question rather than sitting beside it.
 export function eyeOptions() {
   const wbw = RECIPES['word-by-word'];
   return [
@@ -203,13 +170,6 @@ export function ask({ acts, joints = [] }) {
   };
 }
 
-// ── apply: answers → prompt lines ────────────────────────────────────────────────────────────────
-//
-// Each act's answers become a `frame:`/`cursor:` line (new) plus rewritten `enters:`/`leaves:`/`ground:`/
-// `camera:` lines carrying the exact paste syntax (`recipe: ...`, `camera: ...`) named in ANSWER_LINES
-// below, so the prompt stays valid for `--annotate` (ideate.mjs) and the storyboard written from it afterwards. An
-// existing line for the same label is REPLACED, never duplicated, the same rule ideate.mjs's own
-// `addContentLines` already keeps for `content:`.
 
 const FRAME_LINE = { screen: (o) => `frame: a designed screen (make screen KIND=${o.kind || KINDS[0]})`,
   capture: () => 'frame: a real capture (make capture / make sections)', photo: () => 'frame: a real photo or film still',
@@ -222,19 +182,11 @@ const HANDOFF_LINE = { 'flow-seam': (j) => `recipe: flow-seam out=act${j.outAct}
   becomes: () => 'becomes: <fill: the X becomes the Y>', camera: () => 'camera: travels through (camera move: travel)' };
 const GROUND_LINE = { theme: () => "ground: the theme's own default", content: () => 'ground: colour taken from the content on screen',
   chained: () => 'ground: chained from the previous scene (flow-seam ground slot)' };
-// EYE: each answer names a device but leaves the start/land ends as `<fill:>`, the same convention
-// every other still-undecided slot in this prompt already uses: the storyboard-check gate (contract.mjs
-// parseEyeLine) refuses `<fill:` lines as unset rather than as a broken device, so a partially-answered
-// eye line is a fine thing to scaffold and fine to fill in by hand afterwards.
 const EYE_LINE = { camera: () => 'eye: <fill: where it starts> -> a camera push pulls it -> <fill: where it lands>',
   'word-color': () => 'eye: <fill: the first word> -> per-word colour flash walks the phrase -> <fill: the key word>',
   cursor: () => 'eye: <fill: where it starts> -> the cursor travels and causes it -> <fill: where it lands>',
   'contrast-size': () => 'eye: <fill: where it starts> -> contrast or size alone, unpulled -> <fill: where it lands>' };
 
-// An ENTRY is a label line plus every hard-wrapped continuation line under it, up to the next label,
-// a blank line, or a heading: the same grouping ideate.mjs's own `annotateFilledPrompt` uses for
-// `enters:`/`leaves:`/`camera:`, because a measured `leaves:` entry is routinely two physical lines
-// and replacing only the first would leave its continuation dangling below the new text.
 const ENTRY_LABELS = ['on screen:', 'enters:', 'leaves:', 'camera:', 'type:', 'ground:', 'content:',
   'frame:', 'cursor:', 'recipe:', 'becomes:', 'measured:', 'eye:'];
 const startsNewEntry = (line) => ENTRY_LABELS.some((lb) => line.startsWith(lb)) || /^##/.test(line) || line.trim() === '';
@@ -268,9 +220,6 @@ function setEntry(sectionText, label, newLine) {
  * an ACT-level line (`leaves:`, `becomes:`, or `camera:`), because there is no joint section to own it
  * once the author has chosen not to use the measured seam. */
 export function applyAnswers(promptText, answers) {
-  // Split on EVERY `## ` heading, Act and Joint alike, so an act's own section stops at its trailing
-  // `## Joint at ...s` rather than swallowing it: a naive split on `## Act \d+` alone leaves the joint
-  // block (and the next act's heading) inside "this" act's text, and an appended line lands after it.
   const sections = promptText.split(/(?=^## )/m);
   for (let idx = 0; idx < sections.length; idx++) {
     const m = /^## Act (\d+)/.exec(sections[idx]);
@@ -298,9 +247,6 @@ export function applyAnswers(promptText, answers) {
     if (answers.film.text) bits.push(`text arrives: ${howTextArrives().find((o) => o.key === answers.film.text)?.label || answers.film.text}`);
     const extra = [];
     if (bits.length && !/^film: /m.test(text)) extra.push(`film: ${bits.join(' · ')}`);
-    // ATTENTION, the film-level twin of each act's `eye:` answer: one sentence naming the path across
-    // the whole film, promoted verbatim to the storyboard's own `attention:` frontmatter field when
-    // the storyboard is written.
     if (answers.film.attention && !/^attention: /m.test(text)) {
       const opt = attentionOptions().find((o) => o.key === answers.film.attention);
       extra.push(`attention: ${opt ? opt.description : answers.film.attention}`);
@@ -315,14 +261,12 @@ function selfTest() {
   const errs = [];
   const ok = (c, m) => { if (!c) errs.push(m); };
 
-  // every option resolves in the registry it claims to come from.
   for (const o of cameraOptions()) ok(CAMERA_MOVE_BLURBS[o.key], `camera option "${o.key}" is not a camera move`);
   ok(RECIPES['flow-seam'], 'flow-seam recipe missing');
   ok(RECIPES['word-by-word'], 'word-by-word recipe missing');
   ok(PRESETS.up && PRESETS.decode && PRESETS.riseClip && PRESETS.type, 'a cited kinetic preset is missing');
   for (const k of KINDS) ok(typeof k === 'string', 'screen.mjs KINDS is not a plain string list');
 
-  // no batch exceeds 4 questions.
   const shots = [{ i: 1, t0: 0, len: 4, ground: 'light', luma: 200, accent: '#fff', content: { fill: 0.3, detail: 5, photo: 0.1 } },
     { i: 2, t0: 4, len: 2, ground: 'light', luma: 200, accent: null, content: { fill: 0.05, detail: 2, photo: 0 } }];
   const seams = [{ t: 4, gap: 0.1, axis: 'x', direction: 'right-to-left', groundBefore: '#eee', groundAfter: '#eee' }];
@@ -333,21 +277,17 @@ function selfTest() {
   for (const b of payload.batches) ok(b.questions.length <= 4, `batch "${b.label}" has ${b.questions.length} questions, over the AskUserQuestion limit of 4`);
   ok(payload.batches.length === acts.length + 1, 'one film batch plus one batch per act');
   for (const b of payload.batches) for (const q of b.questions) {
-    // "Hands off" on the last act (no next joint) has exactly one option ("the film ends here"): a real
-    // edge case, not a menu, so the floor is 1 there and 2 everywhere else.
     const floor = /film ends here/i.test(q.options[0]?.label || '') ? 1 : 2;
     ok(q.options.length >= floor && q.options.length <= 4, `question "${q.header}" has ${q.options.length} options, want ${floor} to 4`);
     ok(q.header.length <= 12, `header "${q.header}" is over 12 chars`);
     for (const o of q.options) ok(o.description && o.description.length > 20, `option "${o.label}" in "${q.header}" has no real description`);
   }
 
-  // the reference's measured content rides in the frame question's description.
   const withContent = frameOptions(acts[0]);
   ok(withContent.every((o) => /fills .* of this frame/.test(o.description)), 'act 1 (has content) should quote the measured fill in every frame option');
   const noContent = frameOptions({ i: 3 });
   ok(noContent.every((o) => /IDEA mode/.test(o.description)), 'an act with no content reading should say so, never invent one');
 
-  // apply: answers fold into the right act's lines, replacing rather than duplicating.
   const prompt = ['# t · film prompt', '', '## Act 1 (0s-4s)', 'on screen: x', 'frame: <fill: what fills the frame>', '',
     '## Act 2 (4s-6s)', 'on screen: y', ''].join('\n');
   const answers = { film: { where: 'terminal', text: 'caret', ground: 'chained' },
@@ -362,7 +302,6 @@ function selfTest() {
   const twice = applyAnswers(applied, answers);
   ok((twice.match(/^film: /gm) || []).length === 1, 'a second apply pass must not duplicate the film: line');
 
-  // the eye question replaces the old standalone camera question and stays a real device.
   ok(CAMERA_MOVE_BLURBS.diveIn, 'eyeOptions cites camera move diveIn which is missing');
   const withEye = { ...answers, film: { ...answers.film, attention: 'cause-chain' },
     acts: [{ ...answers.acts[0], eye: 'cursor' }, answers.acts[1]] };
@@ -374,8 +313,6 @@ function selfTest() {
   ok((eyeTwice.match(/^attention: /gm) || []).length === 1, 'a second apply pass must not duplicate the attention: line');
   ok((eyeTwice.match(/^eye:/gm) || []).length === 1, 'a second apply pass must not duplicate the eye: line');
 
-  // a `flow-seam` handoff answer rewrites the JOINT's own `recipe:` line, never the act's, and a
-  // multi-line `leaves:` entry is replaced whole, not left with a dangling continuation line.
   const withJoint = ['# t · film prompt', '', '## Act 1 (0s-2s)', 'on screen: x',
     'leaves: the card slides off left as', 'the ground fades (measured: x axis, gap 0.1s)', '',
     '## Joint at 2s', 'recipe: flow-seam out=act1 in=act2 axis=y', 'measured: gap 0.1s, axis y', '',
@@ -399,14 +336,9 @@ export function loadActs({ ref, name, idea }) {
     const grammarPath = path.join(ROOT, 'grammar', `${ref}.json`);
     if (!fs.existsSync(grammarPath)) return { error: 'no-study', message: `no study for "${ref}" (${path.relative(ROOT, grammarPath)}). Run \`make ideate REF=${ref}\` first, it prints the exact \`make study\` command.` };
     const grammar = JSON.parse(fs.readFileSync(grammarPath, 'utf8'));
-    // buildActs (ideate.mjs) carries only what a joint/camera route needs; `content` (shots[].content,
-    // the real fill/detail/photo reading) is grafted back on here rather than widening that shared
-    // shape for a reading only this module's frame question uses.
     const acts = buildActs(grammar.shots, grammar.seams).map((a, i) => ({ ...a, content: grammar.shots[i].content }));
     return { acts, joints: buildJoints(grammar.seams) };
   }
-  // IDEA mode: acts are not measured, so a plain 4-act default shape (3s each) when no --ref structure
-  // is given.
   const n = 4;
   const acts = Array.from({ length: n }, (_, k) => ({ i: k + 1, t0: k * 3, t1: (k + 1) * 3 }));
   const joints = acts.slice(0, -1).map((a, k) => ({ t: a.t1, axis: 'x', outAct: k + 1, inAct: k + 2, gap: 0.1 }));

@@ -1,11 +1,3 @@
-// harness/author/tune.js: the browser half of `make tune`. Fetches /api/layers, builds one control
-// per motion-key property and per vars channel, and on every input mutates window.__engine.data (the
-// SAME object renderFrame(n) reads each call, core/engine/boot.js:wireEngine) then reseeks the current
-// frame. No server round trip for a live tweak; the server is only asked to diff/write on demand.
-//
-// Native controls do the keyboard work for free: a focused <input type=number> already steps on
-// Up/Down, and a focused <input type=range> already steps on every arrow key, so there is no custom
-// keyboard handler here at all.
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
   const sc = $('#sc'), scrub = $('#scrub'), read = $('#read'), rail = $('#layers');
@@ -17,7 +9,6 @@
 
   function engine() { const w = sc.contentWindow; return w && w.__engineReady && w.__engine ? w.__engine : null; }
 
-  // scale the iframe to fit the stage, same technique as studio/ui/studio.js:fit()
   function fit() {
     const e = engine(); if (!e) return;
     const { width: W, height: H } = e.meta;
@@ -35,7 +26,6 @@
     scrub.value = String(n);
   }
 
-  // push every tuned layer's CURRENT (edited) motion/vars into the live engine data and reseek.
   function livePreview() {
     const e = engine(); if (!e || !e.data) return;
     for (const L of layers) {
@@ -60,6 +50,10 @@
     const s = document.createElement('select');
     s.appendChild(new Option('(unset)', ''));
     for (const name of eases) s.appendChild(new Option(name, name));
+    // A scene may already carry a name this list does not enumerate (a GSAP alias like
+    // "power2.inOut", accepted by resolveEasing but not one of the curated EASINGS keys): add it so
+    // the select shows the real value instead of silently falling back to "(unset)".
+    if (value && !eases.includes(value)) s.appendChild(new Option(value, value));
     s.value = value || '';
     s.addEventListener('change', () => { onSet(s.value || undefined); livePreview(); });
     return s;
@@ -75,8 +69,6 @@
     const div = document.createElement('div'); div.className = 'key';
     div.append(row('t', numInput(k.t ?? 0, STEP.t, (v) => { k.t = v ?? 0; })));
     div.append(row('ease', easeSelect(k.ease, (v) => { if (v) k.ease = v; else delete k.ease; })));
-    // only the properties THIS layer's track actually uses anywhere, so a text layer doesn't get an
-    // empty row for `radius` just because the schema allows it.
     const used = new Set(L.motion.flatMap((kk) => NUM_PROPS.filter((p) => kk[p] !== undefined)));
     for (const p of NUM_PROPS) if (used.has(p))
       div.append(row(p, numInput(k[p], STEP[p], (v) => { if (v === undefined) delete k[p]; else k[p] = v; })));

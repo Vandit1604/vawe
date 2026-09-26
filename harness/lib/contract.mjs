@@ -1,41 +1,3 @@
-// contract.mjs: THE PER-BEAT CONTRACT for a fan-out of per-scene HTML-fragment agents.
-//
-// It is NOT a second planning artefact. It reads the SAME storyboard the plan already writes
-// (harness/author/storyboard-parse.mjs), off two fields the storyboard template asks for per beat:
-//   object_in:  "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>][/radius:<px>]"   the object's POSE at beat START
-//   object_out: "<placement>@<w>x<h>[/rot:<deg>][/op:<0-1>][/radius:<px>]"   its POSE at beat END
-// `<placement>` is a name from the safe-area PLACEMENT registry (core/layout/safe.js), never a raw
-// pixel: an author writes "bottom-left@120x40", not "x:65,y:975", so the contract is aspect-portable
-// the same way `pin` already is. `<w>x<h>` is the object's size in px at that edge; `/rot:` and `/op:`
-// are optional trailing pose fields, degrees and an opacity multiplier, both omittable (default 0/1),
-// and `/radius:` is the corner in px, omittable with no default at all: unstated means the layer
-// keeps its authored corner. Those three together are what turns a rectangle into a pill and then a
-// circle, which is the one shape change a continuous object could not previously express.
-//
-// WHY A NAME AND NOT A PIXEL: three scene agents each write a fragment against ONE film, and the only
-// thing that keeps their three beautiful, independently-authored fragments from being three unrelated
-// pictures is that the object handing off between them lands in the SAME place. A placement name is
-// something a person reviewing the contract can actually check ("bottom-left, that's the same corner");
-// a pixel pair is not. `rot`/`op` stay raw numbers for the same reason `w`/`h` already are: a degree or
-// an opacity fraction is something a reviewer can sanity-check by eye, unlike a bezier or a matrix.
-//
-// A POSE, NOT ONLY A POSITION. `films/scene/higgsfield-recreation.json`, the film this repo holds up
-// as its best, has an object that holds a constant bbox AREA while it travels (measured ~800px² at both
-// x=170 and x=98, which is exactly what w/h already encode), spins into its fastest frame and rights
-// itself on landing (rot), and fades its label out as it goes (opacity). Before this, `w`/`h` were
-// parsed and then THROWN AWAY by assemble.mjs (only x/y made it into the built motion track), so this
-// contract could say a size and never keep the promise. `rot`/`op` are new; `w`/`h` were always here,
-// they just were not honoured. All four are properties `layers[].motion[]` can already key
-// (films/scene/schema.json: x, y, w, h, rot, opacity), so this is a REACH problem, not a capability
-// one: assemble.mjs now builds them (see there), no core/** change is needed or made.
-//
-// WHAT THIS STILL CANNOT SAY: a shape morph (rectangle -> pill -> circle) needs a keyable corner
-// `radius`, which `layers[].motion[]` does not have today; getting there is a core/** change, out of
-// scope for this file. `morph` (character/path melt), `becomes` (hand off to a DIFFERENT layer id) and
-// `lag` (follow-through overrun, Dan Ebberts) stay reachable the way they already are, hand-authored on
-// a layer directly, because each names a mechanism between DIFFERENT layers or shapes and folding all
-// three into a single per-beat edge would be a second, parallel way to say what a layer's own `becomes`/
-// `modifiers[].lag`/`follow` fields already say once, which is the drift CLAUDE.md calls a fork, not a fix.
 import { PLACEMENT } from '../../core/layout/safe.js';
 import { nearMisses } from '../../core/registry/registry.js';
 import { PART_NAMES } from '../../core/motion/parts.js';
@@ -49,33 +11,18 @@ import { pickRecipe, RECIPES } from '../../recipes/index.mjs';
 import { CAMERA_MOVE_NAMES, CAMERA_MOVE_BLURBS, cameraMoveParams, buildCameraMove } from '../../core/camera-moves/index.js';
 import { CAMERA_WORDS, resolveCameraMove } from '../../core/registry/vocab.js';
 import { TIMINGS } from '../../core/cuts/timings.js';
-// THE THREE REGISTRIES `ground:`/`kinetic:`/`elements:` (storyboard-parse.mjs, storyboard-check.mjs)
-// are grounded in: the engine's OWN name -> thing maps, never a second list. `BG_NAMES` and the kinetic
-// `PRESETS` keys are the exact vocabularies `use: <name>` already resolves against (defineRegistry
-// 'background preset' / 'kinetic preset'); `LAYER_TYPES` is the 24-type layer vocabulary. A beat that
-// declares one of these three kinds through `use:` is refused below (USE_DEDICATED_FIELD), pointing at
-// the dedicated field, so a ground or a kinetic preset has exactly one place to be written.
 import { BG_NAMES } from '../../core/backgrounds/index.js';
 import { PRESETS as KINETIC_PRESETS } from '../../core/kinetic/presets.js';
 import { LAYER_TYPES } from '../../core/layers/index.js';
-// score/toks: the SAME word-overlap ranker `make arsenal` uses (harness/author/arsenal.mjs), reused
-// rather than reimplemented so "nearest 3" here and "nearest 3" there can never rank a query
-// differently. Pure and sync (no registry discovery), safe to import from a gate.
 import { score, toks, collect as arsenalCollect, pasteOf } from '../author/arsenal.mjs';
 
 const EDGE_RE = /^\s*([a-z][a-z0-9-]*)\s*@\s*(\d+)\s*x\s*(\d+)\s*((?:\/[a-z]+\s*[:=]\s*-?[\d.]+\s*)*)$/i;
 const POSE_TOKEN_RE = /\/([a-z]+)\s*[:=]\s*(-?[\d.]+)/gi;
-// `radius` joins as a TOKEN rather than a third positional segment, because the token grammar already
-// generalises and a fourth number in `@120x40x11` reads as a typo. Its default is undefined, not 0:
-// an edge that says nothing about radius must leave the layer's authored corner alone, which is the
-// same identity `radius` carries in core/timeline/sequence.js's POSE table.
 const POSE_FIELDS = { rot: 'rot', op: 'opacity', r: 'radius', radius: 'radius' };
 
 /** parseEdge("bottom-left@120x40/rot:15/op:0.4") → {placement,w,h,rot,opacity} | null (null = no opinion) */
 export function parseEdge(raw) {
   if (raw == null) return null;
-  // storyboard-parse.mjs's generic fieldIn() does not strip quotes (only frontmatter's field() does),
-  // so a beat line written `- object_in: "bottom-left@120x40"` arrives with the quotes still attached.
   const s = String(raw).trim().replace(/^["']|["']$/g, '');
   if (!s || /^<fill:/i.test(s) || /^REPLACE/i.test(s)) return null; // the template's own unfilled markers
   const m = EDGE_RE.exec(s);
@@ -143,25 +90,8 @@ export function edges(beats) {
     .filter((e) => e.in && e.out && !e.in.error && !e.out.error);
 }
 
-// ── THE FRAGMENT LINE: which file backs a beat, and where it sits ──────────────────────────────────
-//
-// `fragment:` on a beat is OPTIONAL and answers two questions assemble.mjs otherwise answers by
-// convention alone: which HTML file backs this beat (default `<base>.scene<N>.html`) and where in the
-// canvas it sits (default full-bleed, x:0 y:0 w:canvasW h:canvasH). Two forms, either half omittable:
-//   fragment: _together.card.html @ center@900x520     file AND placement
-//   fragment: _together.card.html                       file only, still full-bleed
-//   fragment: @ center@900x520                          placement only, default file
-// The placement clause reuses parseEdge above: the SAME "<placement>@<w>x<h>" grammar object_in/
-// object_out already speak, never a second copy of the keyword math. Two CONSECUTIVE beats naming the
-// SAME file is how assemble.mjs keeps one shared component alive across a cut instead of tearing it
-// down and rebuilding it (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md).
 const FRAGMENT_SEP_RE = /^(?:(.+?)\s+)?@\s*(.+)$/;
 
-// `fragment: none` (optionally `, <reason>`) is the one spelling every reader of `fragment:` accepts
-// for "this beat has no fragment file": a beat built from native layers alone (an image + text pair,
-// a solid card), never a pretend filename standing in for "nothing to author here". One convention,
-// taught to the one parser, so stage/storyboard-check/frame-check never each invent their own guess
-// at what "no fragment" looks like (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md).
 const FRAGMENT_NONE_RE = /^none\b/i;
 
 /** parseFragmentSpec("_together.card.html @ center@900x520") → {path, edge, none}. path/edge are null
@@ -171,8 +101,6 @@ export function parseFragmentSpec(raw) {
   const s = String(raw).trim().replace(/^["']|["']$/g, '');
   if (!s) return { path: null, edge: null, none: false };
   if (FRAGMENT_NONE_RE.test(s)) return { path: null, edge: null, none: true };
-  // A trailing "(a note)" is a remark, not part of the path or the placement clause: strip it once,
-  // here, rather than in every caller that used to re-derive the same split.
   const stripNote = (v) => { const t = (v || '').split(/\s+\(/)[0].trim(); return t || null; };
   const m = FRAGMENT_SEP_RE.exec(s);
   if (!m) return { path: stripNote(s), edge: null, none: false };   // no "@": a plain file override
@@ -190,39 +118,6 @@ export function fragmentErrors(beats) {
   return errs;
 }
 
-// ── THE MOVE: one grammar, three scopes, read from the ENTRY, not the field name ────────────────────
-//
-// Three fields used to compete for one job, split by DURATION instead of by what the author was
-// actually deciding: `motion:` always built a `parts[]` entrance, `move:` always built a track on the
-// beat's own layer, and `rest:` (what should keep a hold alive) was parsed by storyboard-parse.mjs and
-// built by nobody. 19 storyboards write `rest:` and none of it ever reached a render.
-//
-// SCOPE is the real axis, and an entry already says which one it means without a field name's help:
-//   `<selector>@<kind>:<band>[/<outBand>]`   an `@` names a CSS selector INTO THE FRAGMENT: scope PART,
-//                                             a `parts[]` entrance on that one element (core/motion/parts.js)
-//   `hold:<idle>`                            scope HOLD, the beat's own layer keeps living through the
-//                                             hold: `idle: "<idle>"` (core/engine/idle.js), never a
-//                                             second idle mechanism
-//   `<shape>:<band>`                         anything else: scope LAYER, a hand-keyed track on the
-//                                             beat's own layer, spanning the whole beat
-// (band, above, is one of the four named speed bands in this repo's doctrine: energy · professional ·
-// gravity · cinematic, engine-doctrine/RULES/speed-bands.md.)
-//
-// ONE PARSER for all three, `parseMoveEntry` below, because the PART form is not new grammar: it is the
-// exact string `motion:` always accepted (`<selector>@<kind>:<band>`), so `motion:` and `move:` writing
-// a part-scope entry are the same sentence, not two. `parseMotionEntry`/`parseMotion` are now aliases of
-// `parseMoveEntry`/`parseMoveEntries` (a `motion:` entry always contains `@`, so it is always scope
-// PART), kept under their old names because `motion:` stays a legal field: see the compat note below
-// `moveErrors`.
-//
-// `rest:` IS NOT MIGRATED, on purpose. Its 100+ existing lines are free-text narration ("the arm never
-// stops, it's a metronome"; "the depth rule keeps falling"), almost all describing motion a fragment or
-// a `move:`/`motion:` entry ALREADY builds, not an ambient idle. Auto-converting prose into `hold:`
-// directives would be a guess wearing a migration's clothes, and a wrong guess here changes a render
-// ("no rendered film may change" is the one invariant this whole change is not allowed to cost). So
-// `rest:` keeps parsing exactly as before (storyboard-parse.mjs), stays documentary and unbuilt, and any
-// of its 19 storyboards can adopt the one line that now actually reaches the engine, `move: hold:<idle>`,
-// by hand, when an author decides that beat's hold should really breathe or drift.
 export const SPEED_BAND = { energy: 0.22, professional: 0.4, gravity: 0.65, cinematic: 1.2 };
 
 const PART_RE = /^\s*([^@]+?)\s*@\s*([a-z-]+)\s*:\s*([a-z]+)(?:\s*\/\s*([a-z]+))?\s*$/i;
@@ -264,10 +159,6 @@ export function parseMoveEntry(raw) {
   const m = LAYER_RE.exec(s);
   if (!m) return { error: `"${s}" is not "<selector>@<kind>:<band>", "hold:<idle>", or "<shape>:<band>" (e.g. "pan:cinematic"). Known shapes: ${Object.keys(SHAPES).join(', ')}. Known curves: ${Object.keys(PATH_CURVES).join(', ')}. Known idles: ${IDLE_NAMES.join(', ')}` };
   const [, shape, band] = m;
-  // A curve name (arc/dip/wave/ramp, the same catalog core/fx/along-path.js sets a caption's TYPE on)
-  // is the same "<word>:<band>" sentence as a move shape, resolved against a second registry: it flies
-  // the whole LAYER along the curve (MotionPathPlugin, films/scene/scene.js `L.motionPath`) instead
-  // of keying x/y/scale, so it is scope PATH, not LAYER, but it costs no new syntax to say.
   const isPath = !SHAPES[shape] && !!PATH_CURVES[shape];
   if (!SHAPES[shape] && !isPath) {
     const near = nearMisses(shape, [...Object.keys(SHAPES), ...Object.keys(PATH_CURVES)]);
@@ -288,9 +179,7 @@ export function parseMoveEntries(raw) {
   return s.split(';').map((e) => e.trim()).filter(Boolean).map(parseMoveEntry);
 }
 
-// COMPAT: `motion:` is still a legal field (40 shipped films write it), and it needs no wrapper because
-// every `motion:` entry names a selector, so it is always scope PART already: the alias is exact, not
-// approximate.
+// COMPAT: `motion:` is still a legal field (40 shipped films write it); a `motion:` entry always names a selector so it is always scope PART, and the alias is exact, not approximate.
 export const parseMotionEntry = parseMoveEntry;
 export const parseMotion = parseMoveEntries;
 
@@ -316,15 +205,6 @@ export function moveErrors(beats) {
   return errs;
 }
 
-// ── THE GROUND, THE KINETIC PRESET, THE ELEMENTS: decisions from a CLOSED, ENGINE-OWNED set ─────────
-//
-// `ground:`/`kinetic:`/`elements:` are optional, validated fields for the three visual decisions the
-// storyboard used to leave to prose and the author reinvented every time. Every legal value is a name
-// this engine already has (core/backgrounds/presets.js, core/kinetic/presets.js, core/layers/index.js):
-// this file never restates the list, it reads it, so a preset added to the engine is legal here for
-// free and one removed is refused here for free. An unknown value is refused NAMING the whole legal
-// set, the way harness/lib/judge-codes.mjs does, because a near-miss guess is not the same promise as
-// "here is everything you could have meant".
 const KINETIC_PRESET_NAMES = Object.keys(KINETIC_PRESETS);
 const SPLIT_MODES = ['word', 'char', 'line'];
 
@@ -402,14 +282,7 @@ export function elementsErrors(beats) {
   return errs;
 }
 
-// ── THE SEAM'S VALUE: what a transition does to ground VALUE (light/dark) across the join ───────────
-//
-// `transition_value:` sits beside `transition_in:`/`transition_why:` and answers a question neither
-// does: does this boundary carry the ground from dark to light, light to dark, or hold it. Nothing
-// declared this before the render existed; `quality/gates/ground-arc.mjs` could only measure a flip
-// AFTER the fact. The set is exactly what ground-arc.mjs itself classifies a frame into
-// (core/backgrounds LIGHT/DARK bands), so a declared value and a measured one are directly comparable
-// (`quality/gates/plan-vs-render.mjs`).
+// `transition_value:` declares whether a boundary carries the ground from dark to light, light to dark, or holds it; the set matches exactly what quality/gates/ground-arc.mjs measures a frame into (core/backgrounds LIGHT/DARK bands), so declared and measured values are directly comparable (quality/gates/plan-vs-render.mjs).
 export const TRANSITION_VALUES = ['dark->light', 'light->dark', 'held'];
 
 /** parseTransitionValueLine(raw) -> null | {value} | {error}. */
@@ -433,27 +306,7 @@ export function transitionValueErrors(beats) {
   return errs;
 }
 
-// ── THE CAMERA: `camera:` names a move, reached the same way `move:`/`transition_in:` are ────────────
-//
-// Measured (see AGENTS.md's build brief): the core has 14 named camera moves plus a 14-phrase "camera
-// word" registry (core/registry/vocab.js CAMERA_WORDS, "push in" -> slowPush), and across 42 authored
-// films, ZERO use a named move: 13 hand-key `camera[]` and the rest say nothing at all. `camera:` on a
-// beat was already parsed (storyboard-parse.mjs) and read by NOTHING: a storyboard could describe the
-// exact shot the engine already has a name for and the film would render with no camera at all.
-//
-// SYNTAX: `<move> [key=value ...]`, the same "name first, params after" shape `parseRecipeLine` already
-// uses. `<move>` is either a real cameraMove name (core/camera-moves/index.js CAMERA_MOVE_NAMES) or a
-// shot phrase from the SAME `camera word` registry `make arsenal` already searches (resolveCameraMove);
-// there is deliberately no second phrase table here. Params are read straight off the resolved move's
-// own function signature (cameraMoveParams, core/camera-moves/index.js), never a hand-kept list, so a
-// move that gains a param is valid here the day it lands there.
-//
-// DECISIVE vs PROSE, the same test `transition_in:` uses one field down: a single token (or an exact
-// camera-word phrase) is an ATTEMPT at the grammar and a wrong one is an ERROR naming the near misses.
-// Anything else -- a sentence, "the camera pushes in slowly on the card" -- is read as what `camera:`
-// has always been, documentary prose, and is reported as a WARNING (never silently dropped) naming the
-// 3 nearest named moves by the SAME ranker `make arsenal` uses (harness/author/arsenal.mjs score/toks),
-// so a warning that cannot resolve a decision at least narrows the search.
+// Measured (AGENTS.md's build brief): the core has 14 named camera moves plus a 14-phrase "camera word" registry, and across 42 authored films, ZERO use a named move.
 const CAMERA_PARAM_RE = /(\w+)\s*=\s*(-?[\w.]+)/g;
 const CAMERA_WORD_BY_LOWER = new Map(Object.keys(CAMERA_WORDS).map((w) => [w.toLowerCase(), w]));
 const DECISIVE_CAMERA_TOKEN_RE = /^[a-z][a-z0-9-]*$/i;
@@ -539,14 +392,6 @@ export function resolvedCamera(b) {
   return (p && !p.error && !p.prose) ? p : null;
 }
 
-// ── THE CAMERA HOLDS ITS END POSE (OWNER'S DECISION, skills/vawe-camera/SKILL.md): every camera move keeps
-// its last keyframe until a LATER move changes it (core/timeline/sequence.js cameraAt holds the final
-// key; core/engine/produce.js bakeCameraMove never closes a leg). The engine keeps rendering that; this
-// is a report-only warning so a beat planned for the normal/rest framing is not silently shot pushed in.
-//
-// A REAL END POSE, not a second arithmetic: resolved through buildCameraMove, the same builder
-// bakeCameraMove calls at render time, so a move's actual endpoint (including the `ease`/leg math each
-// core/camera-moves/*.js file owns) is read once and never re-derived here.
 const REST_S_EPS = 0.02, REST_PX_EPS = 1, REST_DEG_EPS = 1;
 
 /** isRestCameraPose({s,x,y,rx,ry,roll}) -> true when every channel sits at its identity value. */
@@ -568,11 +413,6 @@ export function cameraMoveEndPose(move, params, dims = [1920, 1080]) {
   } catch { return null; }
 }
 
-// `window-dolly` (recipes/recipes.json, kind "camera") is the one non-hand-authored path onto the
-// camera: a diveIn-shaped push toward a named layer's box. Its target position is not known at plan
-// time (it depends on the target layer's real box), but a dolly-in NEVER ends at rest by construction
-// (`zoomTo` defaults to 1.3, and the recipe's whole point is "tightening the frame"), so the scale
-// alone already answers the only question this file asks: is the camera away from rest.
 function windowDollyEndPose(rp) {
   const zoomTo = rp.params.zoomTo != null ? parseFloat(rp.params.zoomTo) : (rp.def.params?.zoomTo?.default ?? 1.3);
   return { s: Number.isFinite(zoomTo) ? zoomTo : 1.3, x: 0, y: 0, rx: 0, ry: 0, roll: 0 };
@@ -597,21 +437,11 @@ export function beatCameraEndPose(b, dims = [1920, 1080]) {
   return null;
 }
 
-// A beat "plans a normal camera" when the plan itself reads as the rest/full-frame composition, by any
-// ONE of four independent signals engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md already gives a beat to state this
-// in. Kept as named, separately-testable regexes rather than one clever combined rule, per CLAUDE.md's
-// "fewer, clearer rules" - each is a fact about the plan's own words, not an inference about intent.
 const NORMAL_SHOT_RE = /\b(wide|full|establishing|rest|normal)\b/i;
 const NORMAL_EYE_START_RE = /\b(whole|full)\s+(frame|window|screen|app|composition)\b/i;
-// `picture:`/`onscreen:` prose read for a full-frame composition, and ONLY when the beat names no
-// camera/shot of its own: with either present, those are the decisive signal and prose is not asked
-// to guess past them.
 const NORMAL_PICTURE_RE = /\bfull(?:[\s-])?(?:frame|screen)\b|\bfills?\s+the\s+frame\b|\bwhole\s+(?:app|window|screen|frame)\b/i;
-// FULL_FRAME_OBJECT_AREA: a "full frame" object_in, centred and covering most of a standard canvas,
-// regardless of which of the five aspect ratios (engine-doctrine/AGENTS.md) is in play - 1,400,000px^2
-// clears every one of them (smallest is 1080x1080 = 1,166,400) while still excluding a merely large
-// card or panel. MEDIUM-DERIVED (category 2), not invented: provably clears the smallest of the five
-// canvas sizes AGENTS.md declares. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
+// FULL_FRAME_OBJECT_AREA clears the smallest of the five aspect ratio canvases (1080x1080); engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6
+// 1,400,000px^2 clears every one of the five canvas sizes (smallest is 1080x1080 = 1,166,400) while still excluding a large card or panel; MEDIUM-DERIVED, not invented (engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6).
 const FULL_FRAME_OBJECT_AREA = 1_400_000;
 
 /** normalCameraEvidence(b) -> the matched evidence string, or null. Exported (not just the boolean
@@ -650,10 +480,6 @@ export function cameraStillHeldWarnings(beats, dims = [1920, 1080]) {
   const warns = [];
   let held = null; // {pose, label, beatIdx, isRecipe} | null once returned to rest
   beats.forEach((b, i) => {
-    // Judged against the pose the camera carries ENTERING this beat, i.e. whatever an EARLIER beat left
-    // it at: this beat's own camera: line (a push starting from rest and ending pushed, say, over an
-    // establishing shot) is this beat's own decision, not an inherited defect, so it must not be graded
-    // against its own not-yet-applied end pose.
     const evidence = normalCameraEvidence(b);
     if (evidence && held) {
       warns.push(`camera-still-held: beat ${i + 1} (${b.name}) plans ${evidence} but the camera is still `
@@ -666,20 +492,7 @@ export function cameraStillHeldWarnings(beats, dims = [1920, 1080]) {
   return warns;
 }
 
-// ── THE EYE: every device points somewhere, and the plan has to say where ──────────────────────────
-//
-// The owner's own framing: per-word colour is not decoration, it directs the eye onto the key word,
-// and the same is true of a camera push, a cursor, contrast, size, a blur-to-sharp focus pull. `eye:`
-// on a beat is the line that names the journey: "<where it starts> -> <what pulls it, naming the
-// device> -> <where it lands>", e.g. "eye: terminal title -> cursor travels and the caret blinks ->
-// the prompt bar". For a beat whose device is a word-by-word reveal, the start/land are the WORDS
-// themselves: "eye: \"make\" -> per-word cobalt flash walks the phrase -> \"launch film\"".
-//
-// THE DEVICE MUST BE REAL, the same test every other field on this file already applies to a bare
-// decisive token: it either names one of the words below (a device this repo actually has a mechanism
-// for) or overlaps a capability the beat ALREADY declares in camera:/move:/motion:/use:/recipe: (the
-// SAME word-overlap ranker `make arsenal` uses, score/toks, never a second ranker). A device invented
-// with no mechanism behind it is a promise the film cannot keep.
+// A device named in `eye:` must be real: it either names one of these words (a mechanism this repo actually has) or overlaps a capability the beat already declares in camera:/move:/motion:/use:/recipe:, ranked the same word-overlap way `make arsenal` scores.
 export const EYE_DEVICE_WORDS = ['cursor', 'caret', 'camera', 'push', 'dolly', 'travel', 'pan',
   'dive', 'zoom', 'colour', 'color', 'contrast', 'size', 'scale', 'blur', 'focus', 'motion',
   'stagger', 'reveal', 'cut', 'draw', 'wordmark', 'flash', 'word-by-word', 'ground', 'type', 'typing'];
@@ -722,18 +535,12 @@ export function eyeErrors(beats) {
   return errs;
 }
 
-// A beat "has motion" when it declares anything the eye could plausibly be pulled by: a real camera,
-// a layer-scope move, a parts entrance, or a recipe (window-dolly/flow-seam and friends are all
-// motion). A beat with none of those has nothing an `eye:` line would even describe.
+// A beat "has motion" when it declares anything the eye could plausibly be pulled by: a real camera, a layer-scope move, a parts entrance, or a recipe. A beat with none of those has nothing an `eye:` line would even describe.
 export function hasEyeCandidateMotion(b) {
   return !!(b.camera || b.move || b.motion || b.recipe || (b.uses && b.uses.length));
 }
 
-// Curated on purpose, narrower than EYE_DEVICE_WORDS above: these are the devices this repo can name
-// in a beat's OWN prose (mechanism:/recipe:/motion:/move:/uses) with little ambiguity. A generic word
-// like "motion" or "camera" appears in nearly every beat's mechanism and would make this check fire on
-// almost everything; these five do not, so a match here is a real, specific device declared and never
-// pointed anywhere.
+// Curated on purpose, narrower than EYE_DEVICE_WORDS: a generic word like "motion" or "camera" appears in nearly every beat's mechanism and would fire on almost everything, so only these five unambiguous names are checked here.
 export const EYE_NAMED_DEVICE_HINTS = [
   { re: /per-word|word-by-word|word.*colou?r|colou?r.*word/i, name: 'per-word colour' },
   { re: /\bcursor\b/i, name: 'cursor' },
@@ -758,10 +565,7 @@ export function eyeUntargetedDevices(b) {
   return declared.filter((name) => !EYE_NAMED_DEVICE_HINTS.find((h) => h.name === name).re.test(p.device));
 }
 
-// Multi-word phrases only, deliberately narrower than EYE_DEVICE_WORDS: a bare word like "travel" or
-// "push" is an ordinary verb as often as it is a device ("the cursor travels" names ONE device, the
-// cursor, not two), so counting single-word hits produced false "competing" findings on prose that was
-// naming one thing twice. A named PHRASE is unambiguous.
+// Multi-word phrases only, deliberately narrower than EYE_DEVICE_WORDS: a bare word like "travel" or "push" is an ordinary verb as often as it is a device, so only unambiguous named phrases count here.
 export const EYE_DEVICE_PHRASES = ['per-word colour', 'per-word color', 'word-by-word', 'camera push',
   'camera dolly', 'camera pan', 'camera dive', 'camera travel', 'blur-to-sharp', 'colour flash',
   'color flash', 'cursor click', 'drawn line'];
@@ -776,10 +580,7 @@ export function competingEyeDevices(device) {
   return (hits.length >= 2 && !EYE_ORDER_WORDS.test(dLower)) ? hits : null;
 }
 
-// A boundary description with no cut is a `flow-seam` recipe's job (recipes/README.md), and an author
-// has no reason to know one exists unless it is named. Shared with harness/live/beat-surfacer.mjs (the
-// same push, at storyboard-save time) so the "no cut here" test and the "which recipe to suggest" pick
-// have exactly one owner between the two call sites.
+// A boundary with no cut is a `flow-seam` recipe's job (recipes/README.md); shared with harness/live/beat-surfacer.mjs so the "no cut here" test and the "which recipe to suggest" pick have exactly one owner.
 export const BOUNDARY_NO_CUT_RE = /\b(exits?|leaves?|arrives?|no cut|crossfades?)\b/i;
 
 /** seamRecipeEntry() -> [name, def] for the first recipes/recipes.json entry whose kind is "seam", or null. */
@@ -787,15 +588,7 @@ export function seamRecipeEntry() {
   return Object.entries(RECIPES).find(([, r]) => r.kind === 'seam') || null;
 }
 
-// A boundary whose ARRIVING beat carries `recipe:` gets no default cut from assemble.mjs (the recipe
-// seam IS the boundary, measured off real films with zero `transitions[]` entries and every joint a
-// recipe: madera, vawe-flow). So a camera leg ending on one side of that boundary and a second leg
-// starting on the other are NOT separated by a real edit the way every other junction here is. Every
-// camera move in core/camera-moves/*.js resets x/y to an identity pose at its own `start` key (read
-// each file: slowPush/diveIn/orbit/panFollow/truck/workspaceZoomOut/punchIn/cameraShake/driftHold all
-// open `{x:0, y:0, ...}`; none accepts an arbitrary starting x/y), so two independent legs across a
-// seam with no cut to hide the reset would visibly SNAP mid-shot, the exact defect a real cut already
-// masks everywhere else in this film. Refused rather than silently built wrong.
+// Every camera move in core/camera-moves/*.js resets x/y to an identity pose at its own `start` key (none accepts an arbitrary starting x/y), so two legs across a boundary with no cut to hide the reset would visibly snap mid-shot.
 /** cameraContinuityErrors(beats) -> string[]: a camera: pairing across a boundary this film builds no cut for. */
 export function cameraContinuityErrors(beats) {
   const errs = [];
@@ -818,17 +611,7 @@ export function cameraContinuityErrors(beats) {
   return errs;
 }
 
-// ── STAGING: a documented cause becomes a mechanical stagger ────────────────────────────────────────
-//
-// `trigger:` on a beat (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md, graded by storyboard-check.mjs) already
-// answers WHAT MADE THIS BEAT HAPPEN. storyboard-check reports "N/M junctions caused" and then throws
-// that answer away: nobody stages, because staging means inventing an id and typing arithmetic.
-// isCausedTrigger is the ONE test for "this junction names a real cause", shared verbatim with
-// storyboard-check.mjs (previously two copies of the same two regexes) so the count that gate reports
-// and the stagger assemble.mjs builds can never drift apart.
-//
-// post hoc is not propter hoc: a trigger that only says WHEN ("then", "3.2s", "the beat ends") is a
-// sequence, and a slideshow already has one of those; it does not earn a stagger.
+// post hoc is not propter hoc: a trigger that only says WHEN ("then", "3.2s", "the beat ends") is a sequence marker, not a cause, and does not earn a stagger.
 export const TRIGGER_SEQUENCE = /^(then\b|next\b|and then\b|afterwards?\b|later\b|time passes|the (?:beat|shot|scene|cut|film) (?:begins|starts|ends|changes|moves on)|\d+(?:\.\d+)?\s*s\b)/i;
 export const TRIGGER_EMPTY = /^(none|nothing|n\/?a|tbd|[-\u2013\u2014.\u00b7]+)$/i;
 
@@ -840,11 +623,7 @@ export function isCausedTrigger(raw) {
   return !TRIGGER_SEQUENCE.test(s);
 }
 
-// STAGE_S: the causal stagger assemble.mjs offsets a caused beat's start by. Evidence, not a guess:
-// higgsfield-recreation.json (engine-doctrine/MISTAKES.md's own reference film) stages its three key events
-// roughly 30ms and 150ms apart (button lands 3.07s, world floods 3.10s, ring appears 3.25s). 0.05s
-// sits at the small end of that range on purpose: it is enough to read as "because", never enough to
-// visibly shorten a beat or read as its own edit. `engine-doctrine/CRAFT/PER-SCENE-FANOUT.md` names it.
+// Evidence, not a guess: higgsfield-recreation.json (engine-doctrine/MISTAKES.md's reference film) stages its three key events roughly 30ms and 150ms apart (3.07s, 3.10s, 3.25s); 0.05s sits at the small end of that range on purpose.
 export const STAGE_S = 0.05;
 
 /**
@@ -867,26 +646,8 @@ export function stagedSchedule(beats) {
   return { caused, shiftedStart, shiftedEnd };
 }
 
-// ── LAYER-SCOPE BUILD: sustained motion on a beat's own layer, not a one-shot entrance ──────────────
-//
 // engine-doctrine/MISTAKES.md #610: three swept axes (entrance density, overlap, travel/duration) all failed to
-// stop a film going still, because every one of them is still a one-shot ENTRANCE that lands and holds.
-// The one axis that worked, measured median motion 0.17-1.61 against a 0.66 reference, is a keyed x/y/
-// scale track on the LAYER that never stops moving for the length of the beat. A LAYER-scope `move:`
-// entry is that decision (`move: pan:cinematic`, `move: drift:gravity`), and a beat naming none builds
-// nothing here and assembles exactly as it did before (byte-identical, harness/author/assemble.test.mjs).
-//
-// WHY BAND SCALES MAGNITUDE AND NEVER DURATION. The requirement this field exists to meet is that the
-// track spans the WHOLE beat, so nothing goes still inside it; if a band shortened the track, the beat
-// would hold still for whatever was left over, which is the exact bug this field closes. So `dur` is
-// always the beat's own duration, never negotiable, and band instead scales how FAR/BIG the shape's own
-// measured motion is: `professional` reproduces the shape's own default untouched (the neutral point
-// `motion:` already treats every band relative to), `energy` shrinks it, `gravity`/`cinematic` grow it.
 
-// The props a "how far/big" scale actually means something for, paired with their identity (the value
-// that means "no movement"), so scaling never invents a magic number per shape: it grows or shrinks the
-// DISTANCE from identity that the shape itself already chose. `opacity`/`ease` are left alone on
-// purpose, a band changes how much a layer travels, never how much it fades.
 const MOVE_SCALABLE = { x: 0, y: 0, scale: 1, rot: 0 };
 const r3 = (v) => +Number(v).toFixed(3);
 
@@ -908,10 +669,6 @@ export function moveKeys({ shape, band }, dur) {
   return scaleMove(SHAPES[shape]({ dur }), factor);
 }
 
-// A curve's own box, at the neutral `professional` band. `MotionPathPlugin` reads only the `d` string
-// (no `align`, so it moves the layer's OWN x/y along it, never a DOM path element), so the "distance
-// from identity" a band scales is the curve's amplitude, exactly like MOVE_SCALABLE above: bigger box,
-// bigger swing, same shape.
 const PATH_BOX = { w: 500, h: 220 };
 
 /** pathMotion({curve,band}, dur) → the `layers[].motionPath` object a scope-'path' `move:` entry builds. */
@@ -921,35 +678,6 @@ export function pathMotion({ curve, band }, dur) {
   return { path: PATH_CURVES[curve](w, h), dur };
 }
 
-// ── THE CUT IN: `transition_in` names the boundary a beat arrives ON, parsed per-beat since
-// storyboard-parse.mjs but never built (assemble.mjs derives every boundary from the theme's own
-// default, `look.cuts.default`, uniformly). Beat i+1's `transition_in` is the author's own opinion
-// about the cut BETWEEN beat i and beat i+1. Beat 1's own `transition_in` describes how the film OPENS,
-// not a boundary (there is no beat before it), so it is read everywhere else (the studio label) but
-// builds nothing here.
-//
-// THE FIELD IS MOSTLY PROSE, NOT A NAME, and that is measured, not assumed: across every shipped
-// storyboard, `transition_in` reads "cut (blur)", "dissolve 0.5s", "cut", "content turnover (no root
-// cut; the film is one take)", almost never a bare fx word the catalog itself would recognise ("cut"
-// is not one: the catalog's hard cut is "none"). That is the exact shape `rest:` (above) was found in
-// and deliberately NOT auto-built from: guessing a decision out of prose is a guess wearing a
-// migration's clothes, and `films/scene/vawe-oblique.json` (this repo's own byte-identity contract)
-// already writes "cut" and "cinematicZoom" as documentary colour, never vetted against reaching a
-// render. Auto-building a bare word would silently change it, the one thing this whole file may not do.
-//
-// So the DECISIVE form is `fx:<name>` (mirrors `transitions[].fx`, the field it becomes), the same
-// "an entry already says which one it means" test `move:` uses for its three scopes and `trigger:`
-// (isCausedTrigger, above) uses to tell a real cause from a sequence marker: a shape no existing
-// storyboard has ever written cannot retroactively change one, so every already-committed film reads
-// exactly as it did. `transition_in: fx:cinematicZoom` is a decision; `transition_in: cinematicZoom` or
-// `cut` stays what it always was, prose for a human, read by nothing.
-//
-// EXTRA SYNTAX: `fx:<name> timing=<timing> dur=<s> dir=<dir>`, the same three fields
-// `transitions[]` itself already carries (core/transitions/lower.js). `timing` is a cut timing
-// (core/cuts/timings.js TIMINGS, the SAME word `make arsenal` resolves for a `cutTiming`); `dur` is
-// seconds; `dir` is left/right/up/down or a number of degrees (a numeric dir means anything only for
-// `mech:"seam"`, and `boundaryMechanism` still decides that below, unchanged). Any of the three may be
-// omitted; an author who writes none of them gets exactly the plain `fx:<name>` this always was.
 const TRANSITION_NAMES = [...new Set(TRANSITIONS.map((t) => t.name))];
 const TIMING_NAMES = Object.keys(TIMINGS);
 const TRANSITION_LINE_RE = /^fx\s*:\s*([A-Za-z][A-Za-z0-9-]*)\s*((?:\s+\w+\s*=\s*\S+)*)\s*$/i;
@@ -1064,15 +792,6 @@ export function resolvedTransitionIn(b) {
   return { fx, mech: boundaryMechanism(fx), ...rest };
 }
 
-// ── RECIPES: structure copied from real video (recipes/recipes.json, recipes/README.md) ────────────
-// A beat's `recipe:` line names one recipe and fills its slots/params, one grammar for both the plan
-// gate and assemble to read, so the two never drift the way two parsers of the same field always do:
-//   `<name> <key>=<value> ...`             e.g. "flow-seam out=window in=tagline axis=x"
-// A bracketed value is a list ("ground=[g1,g2]"); everything else is a bare token. Which field a key
-// lands in (slot vs param) is read off the recipe's own definition, never guessed: `out`/`in`/`ground`
-// are `flow-seam`'s slots, `axis`/`gap`/... are its params. `at` is never written here: it is the
-// beat's own start, already the film's clock, so restating it on the line would be a second copy of a
-// number the storyboard already carries once.
 const RECIPE_TOKEN_RE = /(\w+)=(\[[^\]]*\]|\S+)/g;
 
 /**
@@ -1093,9 +812,6 @@ export function parseRecipeLine(raw) {
     else if (def.params && Object.hasOwn(def.params, key)) params[key] = val;
     else unknown.push(key);
   }
-  // A slot's description marks itself optional with a trailing "?" (recipes/README.md's own example,
-  // "[layer id, layer id]?") or the word "optional" (recipes.json's own `ground` entry writes it out);
-  // `at` is never author-filled (see above).
   const OPTIONAL_SLOT = /\?\s*$|\boptional\b/i;
   const missingSlots = Object.keys(def.slots)
     .filter((k) => k !== 'at' && !OPTIONAL_SLOT.test(String(def.slots[k])) && !Object.hasOwn(slots, k));
@@ -1127,11 +843,6 @@ export function isSeamRecipe(b) {
   return !!(p && p.def && p.def.kind === 'seam');
 }
 
-// ── THE DECISION PROCEDURE, AS DATA (engine-doctrine/CRAFT/TRANSITIONS.md #the-decision-procedure-the-algorithm-
-// to-run-at-every-seam): a boundary's RELATIONSHIP and FEELING, and whether the seam should disappear or
-// speak, written down as `transition_why: <relationship> · <feeling> · <invisible|expressive>` on the
-// arriving beat, the same beat that already carries `transition_in`. Read here, next to it, because a
-// second parser for the same boundary would drift the way two readers of one field always do.
 const TRANSITION_WHY_RE = /^\s*([a-z][a-z-]*)\s*·\s*([^·]+?)\s*·\s*(invisible|expressive)\s*$/i;
 
 /** parseTransitionWhy(raw) → {relationship,feeling,mode} | {error} | null (nothing written). */
@@ -1232,18 +943,7 @@ export function transitionFindings(beats) {
   return { unreasoned, uncovered, mismatch };
 }
 
-// ── USE: the general door onto the arsenal's 790-entry corpus (harness/author/arsenal.mjs collect()),
-// the SAME index `make arsenal Q="…"` already searches. A beat may carry several `use:` lines
-// (storyboard-parse.mjs fieldAllIn collects them as a list, unlike every single-valued field above).
-// Syntax: "use: <name> [on=<layer id>] [key=value …]", or "use: <kind>:<name> …" when a bare name
-// exists in more than one kind (`preset` alone is kinetic/glow/particles; `kinetic preset:weight`
-// picks one).
-//
-// NO SECOND MECHANISM. A kind that already has a dedicated field (camera:, transition_in:, move:,
-// motion:, recipe:) reaches the engine there; `use:` refuses it and names the field, rather than
-// becoming a second spelling of the same decision. `idle` is refused the same way: its names are
-// already reachable as `move: hold:<idle>` (core/engine/idle.js IDLE_NAMES, the exact set
-// parseMoveEntry's HOLD_RE branch reads), so a `use:` door onto it would be a second HOLD mechanism.
+// `use:` is the general door onto the arsenal's 790-entry corpus (harness/author/arsenal.mjs collect()). NO SECOND MECHANISM: a kind that already has a dedicated field reaches the engine there, and `use:` refuses it rather than becoming a second spelling of the same decision.
 export const USE_DEDICATED_FIELD = {
   'camera move': 'camera:', 'camera word': 'camera:',
   cut: 'transition_in:', 'seam fx': 'transition_in:', 'sting fx': 'transition_in:', 'cut timing': 'transition_in:',
@@ -1251,21 +951,10 @@ export const USE_DEDICATED_FIELD = {
   idle: 'move: hold:<idle>',
   'part entrance': 'motion:',
   recipe: 'recipe:',
-  // THE DECISIONS TASK 1 GRADUATES OUT OF PROSE: the ground a beat sits on, the kinetic preset its
-  // type uses, the layer types it puts on screen. Each already had a name -> thing registry and a
-  // door onto it (`use:`); what it did not have was a field a reviewer could scan down a beat and
-  // check, the way `archetype:`/`weight:` already are. Refusing the door once the field exists keeps
-  // one owner per fact, exactly as `camera:`/`transition_in:` already do above.
   'background preset': 'ground:', 'kinetic preset': 'kinetic:', 'layer type': 'elements:',
 };
 
-// INTERNAL: engine machinery an author never names from a storyboard. Each is refused naming the doc
-// or field that actually sets it, decided by reading its slot text and catalog tag (never a per-family
-// guess): all thirteen are either an implementation detail no beat has a reason to pick (a generator, a
-// keyframe handle, an interpolation mode, a scramble charset), a value derived from something else on
-// the layer rather than chosen (a shadow direction, field motion, an envelope shape/anchor, a lightfield
-// pattern, an effector drive/falloff), owned by a different file entirely (a theme look key, themes/*.json),
-// or a slot that is not a plain value at all (`ransom.faces`, a LIST of {family, weight} records).
+// INTERNAL: engine machinery an author never names from a storyboard, each refused naming the doc or field that actually sets it (a generator, a keyframe handle, a derived value, or a slot owned by a different file entirely).
 export const USE_INTERNAL_KIND = {
   generator: 'a lightfield generator is chosen by the field\'s own config (core/generators/generators.js), never named per beat.',
   'envelope shape': 'an envelope shape is an internal keyframe-shaping detail (envelope.kind), not authored from a storyboard.',
@@ -1341,10 +1030,6 @@ export function resolveUse(p, corpus) {
     if (USE_INTERNAL_KIND[entry.kind]) return { entry, refusedInternal: USE_INTERNAL_KIND[entry.kind] };
     return { entry };
   }
-  // No exact/aka match anywhere. A single bare word (or hyphenated word) is a DECISIVE attempt at the
-  // grammar, the same test `camera:`/`transition_in:` use one field up: anything else is read as what
-  // `use:` free text has always been able to be, prose, and reported as a warning naming the 3 nearest
-  // entries, never silently dropped.
   const decisive = /^[a-z][a-z0-9-]*$/i.test(p.name);
   if (!decisive) return { prose: true, text: p.name };
   const near = nearMisses(p.name, corpus.map((e) => e.name));

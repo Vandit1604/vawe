@@ -1,25 +1,3 @@
-// harness/author/script.mjs: the WORDS, as a two-column AV script, checked before a picture exists.
-//
-// Stage 3 of the studio pipeline. A script is written and approved before storyboarding because words
-// are the cheapest thing to change: a line rewritten costs a minute, the same line rewritten after it
-// has been animated costs a day.
-//
-// This does NOT introduce a new file to keep in sync. The storyboard already carries `narration:` and
-// `onscreen:`, so this reads those and lays them out the way the trade does, AUDIO beside VISUAL,
-// because the layout is the point. Two columns side by side make one specific failure impossible to
-// miss, and it is the failure this repo's own doctrine names:
-//
-//   "visual and copy channels must carry a beat SIMULTANEOUSLY, not sequentially"
-//
-// If the narration says what the screen already says, the film has one channel and a redundant echo,
-// not two channels. On paper that reads as thoroughness. In two columns it reads as waste.
-//
-// TIMING HERE IS AN ESTIMATE ON PURPOSE. 150wpm, instant, no synthesis, this is the artefact you
-// iterate on while writing, and waiting on TTS for every draft would stop you writing. `make animatic`
-// owns the measured clock. This owns the words.
-//
-//   node harness/author/script.mjs <STORYBOARD.md> [--strict]
-//   make script SB=<storyboard.md>
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
@@ -40,9 +18,6 @@ const CARD_SEC = 2.2;    // a card needs this long on screen to be comfortably r
 const strip = onScreenText;
 const words = (s) => strip(s).toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
 
-// STOPWORDS OUT BEFORE COMPARING. "One file in, one video out" against "One file." overlaps on `one`
-// whatever you do, and counting that as duplication would flag every well-written pair in the library.
-// What matters is whether the CONTENT words repeat.
 const STOP = new Set(('a an the and or but of to in on at is are was were be been it its this that these those '
   + 'for with as by from your you we our us they them he she i not no so if then than can will just').split(' '));
 const content = (s) => words(s).filter((w) => !STOP.has(w) && w.length > 2);
@@ -56,7 +31,6 @@ const rows = sb.beats.map((b) => {
   const read = cards.length * CARD_SEC;
   const planned = b.duration ?? (b.end != null && b.start != null ? b.end - b.start : null);
 
-  // redundancy: what share of the narration's content words are already on the screen
   const cn = content(nar), co = new Set(content(onAll));
   const shared = cn.filter((w) => co.has(w));
   const echo = cn.length ? shared.length / cn.length : 0;
@@ -97,16 +71,6 @@ for (const r of rows) {
 // ── the checks ─────────────────────────────────────────────────────────────────────────────────────
 const fail = [], warn = [];
 
-// KINETIC TYPOGRAPHY IS NOT AN ECHO. `channels-echo` assumes the two channels do different jobs: the
-// narration explains, the card labels. In a kinetic-type film the card IS the read, deliberately, and
-// the whole craft is in how the spoken line lands on screen. Firing per beat flagged 4 of 5 beats of a
-// film whose form was the point.
-//
-// The distinction is frequency, and it is the same one a human makes. ONE beat whose narration repeats
-// its card is a beat that forgot to say something; EVERY beat doing it is a form. So: if most beats are
-// near-identical, this is kinetic type, and the question changes. It is no longer "do the two word
-// channels differ" (they are one channel on purpose) but "does the PICTURE carry anything the words do
-// not", which is the show-don't-tell question, asked where it still costs nothing to answer.
 const ECHOING = rows.filter((r) => r.nar && r.cards.length && r.echo >= 0.7);
 const KINETIC = rows.length >= 3 && ECHOING.length / rows.filter((r) => r.nar && r.cards.length).length >= 0.6;
 if (KINETIC) {
@@ -125,8 +89,6 @@ if (KINETIC) {
 }
 
 for (const r of rows) {
-  // THE ONE THIS FILE EXISTS FOR. A narration that restates the card is the dual-channel rule broken in
-  // the only place it can still be fixed cheaply.
   if (!KINETIC && r.nar && r.cards.length && r.echo >= 0.7 && content(r.nar).length >= 2) {
     fail.push(`[channels-echo] beat ${r.b.i + 1} "${r.b.name}": the narration restates the screen (${Math.round(r.echo * 100)}% of its content words are already on the card). Two channels carrying one message is one channel and an echo. Say what the picture cannot show, or drop the line.`);
   }

@@ -1,12 +1,3 @@
-// film-layer-box.mjs: given a hand-authored fragment, find the ASSEMBLED FILM (if any) that places it
-// as an `html` layer's `src`, and resolve that layer's real box in canvas pixels.
-//
-// WHY THIS IS ITS OWN FILE, not inline in preview-fragment.mjs: preview-fragment.mjs is a top-level
-// script (parses argv, launches puppeteer) with no `import.meta.url === argv[1]` guard, so importing it
-// to unit-test one function would run the whole script. Pure, importable, and testable on its own here.
-//
-// Reuses `resolveCoords`/`frameOf`, the SAME functions boot.js resolves every layer's x/y/w/h through
-// before a real render, rather than re-deriving pins/percentages/columns a second way (build fix 7).
 import fs from 'node:fs';
 import path from 'node:path';
 import { resolveCoords } from '../../core/engine/boot.js';

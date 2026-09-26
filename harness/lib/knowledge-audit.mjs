@@ -1,27 +1,4 @@
 #!/usr/bin/env node
-// harness/lib/knowledge-audit.mjs: did a rule withheld as `feature-not-matched` later get PROVEN
-// necessary?
-//
-// WHY THIS EXISTS. stage-say's receipt (harness/lib/runlog.mjs's `knowledge` field, added in
-// c1771ef7) records every craft-rule candidate that matched a film's stage/category but was not shown,
-// each tagged with why. `feature-not-matched` is the dangerous tag: it means the rule's `applies`
-// feature was false for this film, which is exactly the shape of the two confirmed bugs (8e0ed91d,
-// a058da29), a rule that teaches you to REACH for a capability, hidden because you don't have it yet.
-//
-// The claim "this drop was fine, the author didn't need it" is falsifiable, not a guess: if a LATER run
-// for the same film logs a finding whose code is the withheld rule's own `check` field (the join
-// engine-doctrine/CRAFT/rules/*.json records already carry), the film needed the rule and never saw
-// it. That is proof the routing failed, not a guess about wording.
-//
-// JOINABLE VS NOT. Only rules with a non-null `check` field can be joined to a finding code; the rest
-// (`check: null`, prose-only, nothing but an eye catches them) cannot be judged this way at all. This
-// tool counts and reports that gap rather than pretending every drop is checkable.
-//
-// A REPORT, NEVER A GATE. This never blocks a ship, never touches output-contract.mjs, and is not
-// wired into the ladder. It reads out/<film>.runs.jsonl (harness/lib/runlog.mjs), the same file
-// `make why`/`make timings` already read, and prints what it finds.
-//
-// Usage: node harness/lib/knowledge-audit.mjs   (scans every out/*.runs.jsonl)   ·   make knowledge-audit
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

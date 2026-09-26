@@ -62,6 +62,12 @@ RUN node generators/media/fonts.mjs
 # version or description actually changes. docker-check reads COPY lines and cannot see what a JS
 # import resolves to, which is why this arrived as a failed deploy rather than a failed gate.
 COPY package.json ./package.json
+# The root lockfile too, ONLY so gsap can be vendored: `npm ci --omit=dev` here installs the runtime
+# dependencies (gsap among them), whose postinstall (scripts/vendor-gsap.mjs) writes
+# assets/vendor/gsap.min.js. It is never committed (license, see assets/vendor/README.md), so a build
+# context without this step ships a site whose fx/morph/parts/comp layers render unanimated.
+COPY package-lock.json ./package-lock.json
+RUN npm ci --omit=dev && rm -rf node_modules
 COPY site/package.json site/package-lock.json ./site/
 WORKDIR /src/site
 RUN npm ci

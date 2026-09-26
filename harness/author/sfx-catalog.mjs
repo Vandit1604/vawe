@@ -1,11 +1,4 @@
 #!/usr/bin/env node
-// harness/author/sfx-catalog.mjs: generate engine-doctrine/CRAFT/SFX-CATALOG.md from core/audio/kit.mjs's own
-// CUES registry, so the catalog cannot drift from the engine. Run with `node harness/author/sfx-catalog.mjs`.
-//
-// Every cue in CUES must have a metadata entry below. A cue with no entry fails the run loudly
-// (nonzero exit, names the cue), the same "every entry carries a blurb, refused at load" discipline
-// core/registry.js already applies to the block library. That is what stops a new cue shipping
-// into CUES without a reason for an author to reach for it.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,9 +9,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
 const OUT = path.join(ROOT, 'engine-doctrine/CRAFT/SFX-CATALOG.md');
 
-// Curated one-line metadata per cue, grounded in the comments above each cue's spec in
-// core/audio/kit.mjs (the file cited beside every quoted phrase below). Do not invent facts here:
-// if audio-kit.mjs says nothing about a failure mode, write "none noted" rather than guess one.
 const FAMILIES = ['accent', 'confirm', 'transition', 'riser', 'impact', 'weight'];
 
 const META = {
@@ -174,9 +164,7 @@ the script, then run \`node harness/author/sfx-catalog.mjs\` to regenerate.
 `;
 }
 
-// The cues as `make arsenal` corpus rows, so a query like "a whoosh on a cut" finds them. META stays the
-// one owner of the metadata; this is a FUNCTION, not an exported map, so arsenal-check does not read it as
-// a second, uncatalogued vocabulary of the same cues.
+// cueCorpus() is a function, not an exported map, so arsenal-check doesn't read it as a second, uncatalogued vocabulary of the same cues (META stays the one owner).
 export function cueCorpus() {
   assertCoverage();
   return Object.entries(META).map(([name, m]) => ({
@@ -192,6 +180,4 @@ function main() {
   console.log(`sfx-catalog: wrote ${path.relative(ROOT, OUT)} (${Object.keys(CUES).length} cues)`);
 }
 
-// Guarded, so importing this module for its META/build (e.g. to surface cues in `make arsenal` later)
-// does not regenerate the doc as a side effect. Runs only when invoked as the CLI.
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
