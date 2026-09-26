@@ -1,0 +1,14 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 3,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "cuts": [{ "t": 1.0, "dur": 0.2, "style": "cut" }],
+ "layers": [
+  { "id": "wordmark", "type": "rect", "x": 200, "y": 400, "w": 400, "h": 200, "color": "#ff0000", "start": 0, "duration": 1.2 },
+  { "id": "endcard", "type": "rect", "x": 0, "y": 0, "w": 1920, "h": 1080, "color": "#ffffff", "start": 1.0, "duration": 2.0 }
+ ]
+}
