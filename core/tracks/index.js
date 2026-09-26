@@ -60,7 +60,7 @@ const REGISTRY = { cut: tCut, units: tUnits, ransom: tRansom, primitive: tPrimit
   follow: tFollow, motion: tMotion, idle: tIdle, modifiers: tModifiers };
 
 // Exported so a gate can DERIVE the pipeline instead of restating it, the contract LAYER_TYPES and
-// FX_TYPES already have. A hand-typed copy of this list is how `make coverage` reported 14/14 while a
+// FX_TYPES already have. A hand-typed copy of this list is how `make check GATE=coverage` reported 14/14 while a
 // 15th layer type existed (engine-doctrine/MISTAKES.md #21, #65).
 export const TRACK_TYPES = Object.keys(REGISTRY);
 

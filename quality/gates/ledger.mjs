@@ -20,7 +20,7 @@
 //   node quality/gates/ledger.mjs judged   films/x/brand-video.json   # single-film: was THIS render judged
 //   node quality/gates/ledger.mjs unjudged [--stamp] [--json]          # corpus ratchet: how many still aren't
 //   node quality/gates/ledger.mjs census   [--json]                    # count of judge fixes by dimension/beat
-//   make ledger D=… (check) · make ledger-add D=… · make no-judge · make judge-census
+//   make ledger D=… (check) · make ledger-add D=… · make no-judge · make check GATE=judge-census
 //
 // Rules enforced by `check`: cross-brand SAME (>0.75) exits 1; cross-brand CLOSE (>0.55) warns;
 // same-brand videos may share style but not an identical beat skeleton (SAME-SKELETON warns).

@@ -53,7 +53,11 @@ jobs:
       # unused and feature-audit always exit 0 (a coaching report, never a blocker), lint-test is fixture
       # regressions on the committed sample.json. All four pass today.
       - name: framework gates
-        run: make schema-check test craft-coverage arsenal-check discovery generated-check output-contract seo-surface site-counts unused feature-audit lint-test
+        run: |
+          make test
+          for g in schema-check craft-coverage arsenal-check discovery generated-check output-contract seo-surface site-counts unused feature-audit lint-test; do
+            make check GATE="$g"
+          done
 
       # docker-context stays in .githooks/pre-push too (a laptop with Docker still wants the local
       # number before pushing), but what it needs is a Docker daemon, a fact about the MACHINE, not
@@ -62,7 +66,7 @@ jobs:
       # push, even from a machine with no daemon (quality/gates/docker-context.mjs now reports "not
       # measured here" and exits 0 there instead of blocking).
       - name: docker build context budget
-        run: make docker-context
+        run: make check GATE=docker-context
 
       # Five more inert-check found the same day, all failing on their FIRST real run: report-tier, not a
       # wall. Wiring and fixing are different jobs; blocking the push on findings nobody has looked at
@@ -70,10 +74,13 @@ jobs:
       # no ratchet to fail against, only a fixed rule; silent-check the same, plus it reads films/scene,
       # partial in a CI clone; code-quality already HAS a ratchet (quality/baselines/code-quality-baseline.json)
       # and is 87 file/rule pairs worse than it today, a real regression this step surfaces without
-      # silently re-baselining it (that needs a human to run `make code-quality WRITE=1` and say so).
+      # silently re-baselining it (that needs a human to run `make check GATE=code-quality WRITE=1` and say so).
       - name: report-tier gates (found failing today, not yet blocking)
         if: always()
-        run: make blocks-audit dead-branch docs-drift silent-check code-quality || true
+        run: |
+          for g in blocks-audit dead-branch docs-drift silent-check code-quality; do
+            make check GATE="$g" || true
+          done
 
       # Structured, readable failures. This step is the pass/fail authority's SIDECAR, not the authority:
       # it runs `if: always()`, writes to the job Summary and an artifact, and never sets the job status

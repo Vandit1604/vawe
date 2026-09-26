@@ -17,7 +17,7 @@
 - Loaded by `core/engine/boot.js` as `window.THREE`, a GLOBAL, via `await import(...)` in the awaited
   readiness phase, and ONLY when the scene declares a `three` layer. Two reasons, both load-bearing:
   a static import would make `core/surfaces/three-fx.js` unloadable in Node, which takes the whole layer
-  registry down with it (`make schema-check` crashed exactly that way); and awaiting it means a
+  registry down with it (`make check GATE=schema-check` crashed exactly that way); and awaiting it means a
   `three` layer can build synchronously without racing the module load, which would otherwise render
   empty on whichever workers got there first. That is a purity break, not a glitch.
 - Used by `core/surfaces/three.js` DETERMINISTICALLY: every object is posed absolutely from local time,

@@ -156,7 +156,7 @@ const counts = ROWS.reduce((a, r) => { a[r.verdict] = (a[r.verdict] || 0) + 1; r
 const out = {
   _generated_by: 'one-off, harness/dev/build-reach.mjs (see git history); not re-run automatically',
   _plan: '.claude/plans/subtraction.plan.md, Phase 1 - split the 91/94 unused schema props, delete nothing',
-  _method: 'For each schema prop make coverage flags unused: (1) grep core/ and films/scene/scene.js for a real ' +
+  _method: 'For each schema prop make check GATE=coverage flags unused: (1) grep core/ and films/scene/scene.js for a real ' +
     'consumer, opened and read, never taken on grep alone; (2) `make arsenal Q="<prop>"` as the repo\'s own single ' +
     'discovery command, checked for a real hit vs fuzzy word-noise; (3) engine-doctrine/PRIMITIVES.md and ' +
     'skills/vawe-scene-authoring/SKILL.md grepped for the prop being taught; (4) harness/author/storyboard-parse.mjs ' +

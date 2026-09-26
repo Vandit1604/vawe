@@ -124,10 +124,19 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
 done
 
 echo "▶ pre-push: framework gates (schema-check + test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + word-action + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + provenance + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check + skill-check + rule-length) …"
-if ! make schema-check test craft-coverage coverage doc-refs skill-reach arsenal-check word-action discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung provenance sfx-check audit-test glyphs-audit sim-audit docker-context judge-census inert-check skill-check rule-length; then
-  echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
+if ! make test audit-test; then
+  echo "✗ pre-push blocked: framework check (test) failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi
+for g in schema-check craft-coverage coverage doc-refs skill-reach arsenal-check word-action discovery \
+         generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung \
+         provenance sfx-check glyphs-audit sim-audit docker-context judge-census inert-check skill-check \
+         rule-length; do
+  if ! make check GATE="$g"; then
+    echo "✗ pre-push blocked: framework check ($g) failed. Fix it, or push with --no-verify to override." >&2
+    exit 1
+  fi
+done
 echo "✓ pre-push: framework healthy"
 
 # ci-status is informational only, never a gate: it reports the LAST CI run (this push has no run yet)

@@ -46,7 +46,7 @@ node quality/gates/code-quality.mjs    # nothing got more tangled
 
 The last one is a **ratchet, not a threshold**. The repo has known complexity debt recorded in
 `quality/baselines/code-quality-baseline.json`; the gate fails only if your change makes a file worse than that
-line. Fixing something and running `make code-quality WRITE=1` lowers the line permanently.
+line. Fixing something and running `make check GATE=code-quality WRITE=1` lowers the line permanently.
 
 If you touch a **gate**, run it over the whole scene library before and after and diff the results. The
 only acceptable outcomes are "no scene changed" or "these N changed, and here is why each was a false

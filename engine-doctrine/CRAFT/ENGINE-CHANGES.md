@@ -249,10 +249,10 @@ Rules that make this real, not ceremonial:
   why each was a false positive". A single scene going PASS to FAIL is a regression, not a discovery,
   until you have proven otherwise: an unclamped bound in #211 turned one clean scene into 7 failures.
 
-## What this engine took from the agent harness  `[ref: make rung]`
+## What this engine took from the agent harness  `[ref: make check GATE=rung]`
 
 Several Claude Code mechanisms answer problems this repo also has, adopted one at a time. When you
-adopt another, add its row and give it a rung. `make rung` prints the current distribution; `node
+adopt another, add its row and give it a rung. `make check GATE=rung` prints the current distribution; `node
 quality/gates/rung.mjs --list` prints the worklist. Highest rung wins:
 
 ```
@@ -268,7 +268,7 @@ quality/gates/rung.mjs --list` prints the worklist. Highest rung wins:
 | PostToolUse hooks that speak mid-task | a hook reads what you just saved and answers | `harness/live/*.mjs` |
 | a PreToolUse deny, evaluated before permission mode | the authoring ORDER refuses a write that skips a stage | `harness/live/stage-gate.mjs` |
 | UserPromptSubmit context injection | the open stage and its next command, re-stated every turn | `harness/live/stage-say.mjs` |
-| deferred tools, fetched by search | `make arsenal Q="…"`, `make schema AT=…` | `harness/author/` |
+| deferred tools, fetched by search | `make arsenal Q="…"`, `make arsenal AT=…` | `harness/author/` |
 | skills loaded only when needed | `engine-doctrine/CRAFT/*.md`; a finding NAMES the doc that settles it | `engine-doctrine/TASTE.md` |
 | refusing an invalid call at the boundary | refusing at the WRITE SITE, so a bad state is unrepresentable | `core/registry/registry.js` |
 

@@ -14,7 +14,7 @@
 #   Dockerfile.cli  (the renderer): go.mod go.sum cmd internal cli core blocks
 #                   themes assets/vendor harness/author/expand-blocks.mjs films/scene NOTICE
 #
-# EDITING THIS FILE: add a COPY, add its `!` line here in the same commit. `make docker-check` builds
+# EDITING THIS FILE: add a COPY, add its `!` line here in the same commit. `make check GATE=docker-check` builds
 # the context and prints what is in it.
 
 **

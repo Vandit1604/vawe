@@ -33,7 +33,7 @@ import * as particles from './particles.js';
 const REGISTRY = { paint, shader, raymarch, three, globe, particles };
 
 // Exported so a gate can DERIVE this vocabulary instead of restating it, the contract LAYER_TYPES,
-// FX_TYPES and TRACK_TYPES already have. A hand-typed copy of such a list is how `make coverage`
+// FX_TYPES and TRACK_TYPES already have. A hand-typed copy of such a list is how `make check GATE=coverage`
 // reported 14/14 while a 15th layer type existed (engine-doctrine/MISTAKES.md #21, #65).
 export const SURFACE_TYPES = Object.keys(REGISTRY);
 

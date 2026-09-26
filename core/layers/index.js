@@ -39,7 +39,7 @@ const particles = canvasLayer('particles', 'a deterministic particle emitter: `p
 
 const REGISTRY = { text, count, image, video, group, rect, glow, beam, svg, cursor, clip, html, component, board, doc, shader, lottie, paint, raymarch, three, globe, particles, composition, adjust };
 
-// Exported so gates DERIVE the layer vocabulary instead of restating it. `make coverage` kept its own
+// Exported so gates DERIVE the layer vocabulary instead of restating it. `make check GATE=coverage` kept its own
 // hand-typed list and silently reported 14/14 while a 15th type existed, the same failure as the
 // schema advertising an anim that never existed (engine-doctrine/MISTAKES.md #21, #65).
 export const LAYER_TYPES = Object.keys(REGISTRY);

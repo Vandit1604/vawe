@@ -1,7 +1,7 @@
 // coverage.mjs, which parts of the engine has nothing ever exercised?
 //
 //   node quality/gates/coverage.mjs        report
-//   make coverage
+//   make check GATE=coverage
 //
 // Conformance proves a value WORKS. This asks a different question: is anyone USING it? Vocabulary
 // that no scene touches is where regressions live undetected, because nothing renders it and no
