@@ -29,6 +29,7 @@
     "props": [
       "x",
       "y",
+      "h",
       "w",
       "value",
       "max",
@@ -36,6 +37,10 @@
       "color",
       "start",
       "dur",
+      "bare",
+      "needle",
+      "ticks",
+      "glow",
       "look"
     ]
   },

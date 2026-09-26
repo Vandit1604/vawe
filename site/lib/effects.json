@@ -1,7 +1,7 @@
 {
-  "total": 755,
+  "total": 763,
   "previewed": 345,
-  "families": 65,
+  "families": 67,
   "tags": [
     [
       "asset",
@@ -36,6 +36,10 @@
       9
     ],
     [
+      "finish",
+      7
+    ],
+    [
       "generator",
       37
     ],
@@ -45,7 +49,7 @@
     ],
     [
       "layer",
-      43
+      44
     ],
     [
       "layout",
@@ -1143,6 +1147,68 @@
       ]
     },
     {
+      "id": "scene-finish-keys",
+      "title": "Scene finish keys",
+      "tag": "finish",
+      "intro": "data.finish is the ONE dial for the cinematic grade a premium launch film needs · large soft light, bloom, grade, chromatic aberration, vignette, grain, depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a scene-level pass, not a per-layer effect: render the film to see it",
+      "count": 7,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "aberration",
+          "stem": "scene-finish-keys--aberration",
+          "desc": "a chromatic split in px over the whole frame, the lens-fringing finish",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bloom",
+          "stem": "scene-finish-keys--bloom",
+          "desc": "blurs the frame 16px, lifts brightness 9% and screens the halo back over the sharp original",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "dof",
+          "stem": "scene-finish-keys--dof",
+          "desc": "a blur baked from the camera's own keyframed focus against each layer's plane z, no new authoring vocabulary needed",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "grade",
+          "stem": "scene-finish-keys--grade",
+          "desc": "a named colour grade (core/looks/filters.js) laid over the whole frame",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "grain",
+          "stem": "scene-finish-keys--grain",
+          "desc": "a strength override on the existing bg grain toggle, applied to every window that already carries one",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "light",
+          "stem": "scene-finish-keys--light",
+          "desc": "a large soft key light dropped in as an html layer (core/lightfield), the premium launch-film source",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "vignette",
+          "stem": "scene-finish-keys--vignette",
+          "desc": "a full-frame vignette rect, amount 0..1 plus an optional colour",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "generators-the-playground",
       "title": "Generators (the playground)",
       "tag": "generator",
@@ -1877,6 +1943,26 @@
           "stem": "three-js-scenes-real-geometry--uiparallax",
           "desc": "flat UI planes stacked at depth, the camera moving past them so the layers separate",
           "scene": "/assets/effects/three-js-scenes-real-geometry--uiparallax.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "universal-surface-decoration",
+      "title": "Universal surface decoration",
+      "tag": "layer",
+      "intro": "A `glass` prop any layer can carry (core/layers/util.js), independent of its type · a frosted backdrop-filter pane, or a true refraction when named `\"refract\"`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a per-layer decoration, not its own scene: render a layer carrying it to see it",
+      "count": 1,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "glass",
+          "stem": "universal-surface-decoration--glass",
+          "desc": "backdrop-filter blur and saturate on the layer itself, a frosted pane; `glass: \"refract\"` bends the picture through it instead of blurring, for real glass",
+          "scene": null,
           "noPreview": null
         }
       ]
