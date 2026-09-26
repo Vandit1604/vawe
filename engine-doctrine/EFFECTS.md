@@ -385,6 +385,22 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `shatter` | one solid slab holds, then breaks into a seeded grid of shards that tumble outward and toward camera |
 | `uiParallax` | flat UI planes stacked at depth, the camera moving past them so the layers separate |
 
+## Anchor points  `[layout]`
+
+`"anchorPoint": "<name>"` on a layer: which point of THIS LAYER'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME.
+
+| name | what / when |
+|---|---|
+| `bottom` | x/y lands at 50% across the box and 100% down it: the bottom edge, horizontally centred |
+| `bottom-left` | x/y lands at 0% across the box and 100% down it: the bottom-left corner |
+| `bottom-right` | x/y lands at 100% across the box and 100% down it: the bottom-right corner |
+| `center` | x/y lands at 50% across and 50% down the box, its exact centre, needs a numeric w and h (or, for text, a `size`) to compute |
+| `left` | x/y lands at 0% across the box and 50% down it: the left edge, vertically centred |
+| `right` | x/y lands at 100% across the box and 50% down it: the right edge, vertically centred |
+| `top` | x/y lands at 50% across the box and 0% down it: the top edge, horizontally centred |
+| `top-left` | the default (0% across, 0% down the box): x/y is the top-left corner, unchanged from before this field existed |
+| `top-right` | x/y lands at 100% across the box and 0% down it: the top-right corner |
+
 ## Interpolation modes (not easings)  `[motion key]`
 
 On a `motion` key's `ease`, but NOT a curve. An easing is a function of one segment's own progress, so it necessarily starts and ends that segment at zero velocity and an interior keyframe becomes a dead stop. A MODE decides how the value is computed at all and may read the keys either side. `{ "t":0.6, "x":400, "ease":"through" }`
@@ -1206,4 +1222,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_735 effects across 63 families. Regenerate: `make effects`._
+_744 effects across 64 families. Regenerate: `make effects`._

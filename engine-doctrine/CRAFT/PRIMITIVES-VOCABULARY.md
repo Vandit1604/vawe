@@ -56,6 +56,20 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `vhs` | VHS tape effect, retro tape distortion, analog tape look | tape: scanlines, magenta/cyan chroma snow, dropout streaks and a soft tracking band creeping up. an OVERLAY, place it ABOVE content |
 | `voronoi` | cellular noise, worley noise, cell pattern with lit borders | cellular (Worley) noise: seeded cells drifting on their own loops, each one flat-tinted, with a lit line along every shared border |
 
+## anchor point  `[anchorPoint]`
+
+| name | words | action |
+|---|---|---|
+| `bottom` | bottom-centre, bottom edge middle | x/y lands at 50% across the box and 100% down it: the bottom edge, horizontally centred |
+| `bottom-left` | bottom left corner, lower left corner | x/y lands at 0% across the box and 100% down it: the bottom-left corner |
+| `bottom-right` | bottom right corner, lower right corner | x/y lands at 100% across the box and 100% down it: the bottom-right corner |
+| `center` | dead centre of the box, centre point, middle of the box | x/y lands at 50% across and 50% down the box, its exact centre, needs a numeric w and h (or, for text, a `size`) to compute |
+| `left` | left-centre, middle left | x/y lands at 0% across the box and 50% down it: the left edge, vertically centred |
+| `right` | right-centre, middle right | x/y lands at 100% across the box and 50% down it: the right edge, vertically centred |
+| `top` | top-centre, top edge middle | x/y lands at 50% across the box and 0% down it: the top edge, horizontally centred |
+| `top-left` | left/top edge, the box's corner, unset (default) | the default (0% across, 0% down the box): x/y is the top-left corner, unchanged from before this field existed |
+| `top-right` | top right corner, upper right corner | x/y lands at 100% across the box and 0% down it: the top-right corner |
+
 ## anim  `[anim]`
 
 | name | words | action |
@@ -1065,5 +1079,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_731 primitives across 64 registries, 731 meeting the word-action contract today.
+_740 primitives across 65 registries, 740 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._
