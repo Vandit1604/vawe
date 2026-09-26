@@ -11,9 +11,11 @@ routes: finish, recreation
 
 - `theme.look` (optional; `core/registry/theme-contract.js`) fixes the things AGENTS.md names as re-decided per
   film: `backdrop` (bg preset rotation, planning-only, see below), `scale` (hook/headline/body/caption
-  type sizes), `layout` (anchor + margin), `marks` (logo path + its two sizes), `cuts` (default/accent
-  transition), `field` (grain/vignette), `bgDefault` (the theme's own bg spec for `bg:[{"use":"theme"}]`,
-  read at render), `bgPalette` (the 15-key colour ramp bg presets paint with, optional).
+  type sizes, also the default for a text/count layer that names no `size` at all, by position:
+  `core/engine/produce.js` `bakeTextSizeRoles`), `layout` (anchor + margin), `marks` (logo path + its
+  two sizes), `cuts` (default/accent transition), `field` (grain/vignette), `bgDefault` (the theme's own
+  bg spec for `bg:[{"use":"theme"}]`, read at render, and now the default when a scene names no `bg` at
+  all: `core/engine/produce.js` `applyBgDefault`), `bgPalette` (the 15-key colour ramp bg presets paint with, optional).
 - `bgDefault` and `bgPalette` used to be separate top-level `theme.bgDefault`/`theme.bg` fields. Both
   moved under `look` (not backward compatible): `core/theme/roles.js` refuses a theme that still
   carries the old top-level field, naming the look key that replaces it.

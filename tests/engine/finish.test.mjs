@@ -2,10 +2,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveFinishLayers, bakeDepthOfField } from '../../core/engine/finish.js';
 
-test('resolveFinishLayers: no finish key is a no-op', () => {
+test('resolveFinishLayers: no finish key at all gets the subtle default grade (vignette, no bloom), not a no-op', () => {
   const data = { layers: [{ type: 'text' }] };
   resolveFinishLayers(data, 1920, 1080);
-  assert.equal(data.layers.length, 1);
+  assert.equal(data.layers.length, 2, 'the authored text layer plus a default vignette');
+  assert.ok(!data.layers.some((L) => L.blend === 'screen'), 'no default bloom: it washed white cards out');
+  const vig = data.layers.find((L) => L.type === 'rect');
+  assert.ok(vig && vig.filter.startsWith('vignette:0.1'), 'a gentle default vignette is added, lighter than the hand-tuned 0.45 default');
+});
+
+test('resolveFinishLayers: finish:false opts out of the default grade entirely', () => {
+  const data = { layers: [{ type: 'text' }], finish: false };
+  resolveFinishLayers(data, 1920, 1080);
+  assert.equal(data.layers.length, 1, 'no synthetic layers are added');
 });
 
 test('resolveFinishLayers: bloom/vignette/aberration/grade each append one full-frame adjust/rect layer', () => {

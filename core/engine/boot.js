@@ -14,7 +14,7 @@ import { expandTheme, isTokenFile } from '../theme/roles.js';
 import { resolveTokens } from '../theme/tokens.js';
 import { resolveTokenRefs } from '../theme/refs.js';
 import { validateAll } from '../validate/validate.mjs';
-import { produceBaseline, bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, bakeTextSizeRoles } from './produce.js';
+import { produceBaseline, bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, bakeTextSizeRoles, applyBgDefault } from './produce.js';
 import { resolveFinishLayers, bakeDepthOfField } from './finish.js';
 
 // Every layer at every depth, for the survived-sugar check below. Local because it is two lines and
@@ -66,9 +66,15 @@ export const PROPS = {
 // `size` is the layer's declared extent on this axis, 0 when unset. `est` is the same thing with a
 // text-height fallback, used ONLY by the far edges (right/bottom): with size 0 they would place the
 // layer's near edge on the far safe line and hang the whole layer outside it.
+// OPTICAL_Y: the one number "the optical centre" means in this engine, ~46% down rather than the
+// geometric 50%, because a frame centred at the exact middle reads as sitting slightly low (the eye
+// weighs the lower half more). Shared by the `optical` keyword below and applyLoneTextCenter, so a
+// second copy of 0.46 never has the chance to drift from this one.
+const OPTICAL_Y = 0.46;
+
 function coordKeyword(v, dim, size, lo, hi, est) {
   return v === 'center' ? (dim - size) / 2
-    : v === 'optical' ? dim * 0.46 - size / 2
+    : v === 'optical' ? dim * OPTICAL_Y - size / 2
     : v === 'third1' ? dim / 3 - size / 2
     : v === 'third2' ? (2 * dim) / 3 - size / 2
     : (v === 'left' || v === 'top') ? lo
@@ -149,7 +155,32 @@ function applyAnchorPoint(L, hEst) {
   if (L.y != null && fy) L.y = Math.round(L.y - fy * (typeof L.h === 'number' ? L.h : hEst));
 }
 
+// LONE TEXT LAYER, CENTRED WITHOUT BEING ASKED: a scene with exactly one AUTHORED top-level layer,
+// itself a text/count layer naming no position at all, used to land its top-left corner at the page's
+// own flat fallback (films/scene/scene.js: `L.x ?? 60`, `L.y ?? 240`), a corner nobody chose (MISTAKES:
+// small type parked off-centre reads as a debug frame). It gets a real width (the safe box's own, so it
+// agrees with `pin:"stage"`) and `anchorPoint:"center"`, so its BOX, not just its corner, lands on the
+// frame's optical centre, the same point `pin:"center"` already resolves to (OPTICAL_Y above). An
+// author who names ANY of x/y/pin/col/anchorPoint keeps exactly what they wrote; this only fills the
+// hole a hurried one-layer scene left.
+// `_finish` layers (core/engine/finish.js) are already sitting in `data.layers` by the time this runs
+// (resolveFinishLayers runs before resolveCoords), so "lone" is judged against what the AUTHOR wrote,
+// never against the grade's own synthetic bloom/vignette layers.
+function applyLoneTextCenter(data, W, H, safe) {
+  const top = (data.layers || []).filter((L) => isObj(L) && !L._finish);
+  if (top.length !== 1) return;
+  const [L] = top;
+  if (L.type !== 'text' && L.type !== 'count') return;
+  if (L.x != null || L.y != null || L.pin || L.col != null || L.anchorPoint != null) return;
+  L.w = L.w ?? Math.round(safe.x1 - safe.x0);
+  L.align = L.align ?? 'center';
+  L.anchorPoint = 'center';
+  L.x = Math.round(W / 2);
+  L.y = Math.round(H * OPTICAL_Y);
+}
+
 function resolveLayerCoords(data, W, H, safe, inset, PIN) {
+  applyLoneTextCenter(data, W, H, safe);
   for (const L of flattenLayers(data.layers)) {
     applyLayerPin(L, PIN, W, safe);
     applyLayerCol(L, safe, inset);
@@ -689,6 +720,7 @@ export async function boot(build) {
     await loadRegisteredFontsBestEffort();
     if (!dataUrl) throw new Error('no ?data= in the scene URL, nothing names the JSON to render');
     const data = await fetchJson(dataUrl, 'scene data');
+    applyBgDefault(data); // a bare scene with no `bg` gets the theme's own animated backdrop, before validation sees the gap
     await validateSceneData(data);
     const { frame, width, height, safe, aspectKey } = resolveRenderFrame(data, params);
     const theme = await resolveThemeAndBake(data, frame, width, height, safe);
