@@ -327,6 +327,27 @@ export function readFindings(scene, beats = []) {
     }
   }
 
+  // ── the caption track's own reading speed ──
+  // `scene.captions` is a different track from the text layers walked above: films/scene/scene.js draws
+  // it straight off t0/t1, with no unit-lowering, no tempo remap. Netflix's 20 cps is a hold-time floor
+  // for a whole line; a caption is a short-lived subtitle event, and the industry names the same ceiling
+  // for that shape directly: https://www.closedcaptioncreator.com/blog/articles/subtitle-reading-speed.html
+  // (about 17-20 cps, 20 the ceiling for an adult audience).
+  for (const [i, c] of (Array.isArray(scene.captions) ? scene.captions : []).entries()) {
+    if (!c || typeof c !== 'object') continue;
+    const t0 = num(c.t0, null), t1 = num(c.t1, null);
+    if (t0 == null || t1 == null || t1 <= t0) continue; // captionErrors already refuses this shape
+    const txt = onScreenText(c.text).trim();
+    if (!txt) continue;
+    const cps = txt.replace(/\s+/g, ' ').length / (t1 - t0);
+    if (cps > CPS_WALL) {
+      say('caption-cps', t0, `captions[${i}] "${clip(txt)}" reads at ${cps.toFixed(1)} characters per `
+        + `second over ${f(t1 - t0)}, above the ${CPS_WALL} cps subtitle ceiling `
+        + `(https://www.closedcaptioncreator.com/blog/articles/subtitle-reading-speed.html). Hold it `
+        + `${f(txt.replace(/\s+/g, ' ').length / CPS_WALL - (t1 - t0))} longer, or cut the line.`);
+    }
+  }
+
   // deterministic: time, then code, then message.
   return out.sort((x, y) => x.at - y.at || (x.code < y.code ? -1 : x.code > y.code ? 1 : 0)
     || (x.msg < y.msg ? -1 : x.msg > y.msg ? 1 : 0));
