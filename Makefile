@@ -98,7 +98,7 @@ else
 	fi
 	@echo "" && echo "  next: make check D=$(D)  (every gate, zero consequence)  ·  make ship D=$(D)  (when it's ready)"
 	@node harness/author/arsenal.mjs --for $(D) 2>/dev/null || true
-	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
+	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)) || echo "  ! contact sheets failed; the render above is fine. Re-run: node harness/author/sheets.mjs $(D)")
 endif
 endif
 
@@ -248,7 +248,7 @@ ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit A
 	node quality/audit.mjs $(D) $(if $(ASPECT),--aspect $(ASPECT),)
 	@node quality/gates/seams.mjs $(D) $(if $(JSON),--json,)
 	@node quality/gates/audio-render-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
-	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
+	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)) || echo "  ! contact sheets failed; the render above is fine. Re-run: node harness/author/sheets.mjs $(D)")
 	@node quality/gates/ledger.mjs judged $(D)
 
 # make list / make help: every target, grouped by the ten-phase spine, with its one-line help. Reads
