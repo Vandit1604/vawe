@@ -43,6 +43,26 @@ export function tileGrid(tiles, { cols = 3, tw, th, gap = 2, out }) {
   return out;
 }
 
+// sampleFrames(video, span, outPrefix, size): ONE ffmpeg pass extracts span.n evenly-spaced frames of
+// span.t0..span.t0+span.len as separate files (fps filter, decoding forward from a fast seek). Different
+// job from frameTile: that one seeks accurately for a SINGLE judged frame (worth the cost of a fresh
+// decode each time); this one wants a dense sequence, where reseeking per frame is the thing that goes
+// quadratic on a draft render's sparse keyframes. A fast (pre -i) seek plus one continuous decode scales
+// with the span's length, not with the sample count.
+export function sampleFrames(video, span, outPrefix, size = {}) {
+  const { t0, len, n } = span;
+  const { tw, th } = size;
+  fs.mkdirSync(path.dirname(outPrefix), { recursive: true });
+  const dur = Math.max(0.05, len);
+  const fps = n / dur;
+  const vf = tw && th
+    ? `fps=${fps},scale=${tw}:${th}:force_original_aspect_ratio=decrease,pad=${tw}:${th}:(ow-iw)/2:(oh-ih)/2:white`
+    : `fps=${fps}`;
+  ff(['-y', '-ss', Number(t0).toFixed(3), '-t', dur.toFixed(3), '-i', video, '-vf', vf, '-frames:v', String(n), `${outPrefix}_%04d.png`]);
+  return Array.from({ length: n }, (_, i) => `${outPrefix}_${String(i + 1).padStart(4, '0')}.png`)
+    .filter((f) => fs.existsSync(f));
+}
+
 // blendDiff(a, b, out): ffmpeg's own difference blend between two same-size PNGs, black where they
 // agree, lit where they don't. Same "one owner" reasoning as tileGrid: a second hand-rolled
 // blend=all_mode=difference call is exactly the kind of duplicate this file exists to prevent.

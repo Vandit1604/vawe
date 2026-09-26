@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { requireTool, probeSize } from '../lib/frame-forensics.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { detectCuts } from './shot-detect.mjs';
-import { frameTile, tileGrid, blendDiff, ssimOf, gradeable } from '../../quality/gates/tile.mjs';
+import { sampleFrames, tileGrid, blendDiff, ssimOf, gradeable } from '../../quality/gates/tile.mjs';
 import { actsFromStoryboard, findStoryboard } from '../../quality/gates/content-check.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -70,24 +70,37 @@ const framesDir = scratch('match', slug, 'frames');
 fs.rmSync(framesDir, { recursive: true, force: true });
 fs.mkdirSync(framesDir, { recursive: true });
 
+const MAX_SAMPLES = 60;   // ponytail: bounds a beat's ffmpeg call count; a longer beat samples coarser, not slower.
+const THUMB_W = 240;      // strips/diffs are for a human to scan, not to measure; SSIM stays on the full-size tiles below.
+const THUMB_H = Math.max(2, Math.round((THUMB_W * H) / W));
+
 const results = [];
 for (const [i, b] of beats.entries()) {
-  const n = Math.max(1, Math.round((b.end - b.start) / STEP));
-  const times = Array.from({ length: n }, (_, k) => Math.min(b.start + k * STEP, Math.max(b.start, b.end - 0.01)));
+  const n = Math.min(MAX_SAMPLES, Math.max(1, Math.round((b.end - b.start) / STEP)));
+  const span = { t0: b.start, len: b.end - b.start, n };
+  // Full-size, "both scaled to the film's size": what SSIM measures against.
+  const refTiles = sampleFrames(REF, span, path.join(framesDir, `b${i}_ref`), { tw: W, th: H });
+  const renderTiles = sampleFrames(mp4, span, path.join(framesDir, `b${i}_out`), { tw: W, th: H });
+  const pairs = Math.min(refTiles.length, renderTiles.length);
+  if (!pairs) { results.push({ i: i + 1, label: b.label, start: b.start, end: b.end, samples: 0, ssim: null }); continue; }
 
-  const refTiles = times.map((t, k) => frameTile(REF, t, path.join(framesDir, `b${i}_ref_${k}.png`), { tw: W, th: H }));
-  const renderTiles = times.map((t, k) => frameTile(mp4, t, path.join(framesDir, `b${i}_out_${k}.png`), { tw: W, th: H }));
-  const diffTiles = times.map((_, k) => blendDiff(refTiles[k], renderTiles[k], path.join(framesDir, `b${i}_diff_${k}.png`)));
+  // Thumbnail-size, separately sampled: what the strip and the diff overlay show.
+  const refThumbs = sampleFrames(REF, span, path.join(framesDir, `b${i}_refThumb`), { tw: THUMB_W, th: THUMB_H });
+  const renderThumbs = sampleFrames(mp4, span, path.join(framesDir, `b${i}_outThumb`), { tw: THUMB_W, th: THUMB_H });
+  const thumbPairs = Math.min(pairs, refThumbs.length, renderThumbs.length);
+  const diffThumbs = Array.from({ length: thumbPairs },
+    (_, k) => blendDiff(refThumbs[k], renderThumbs[k], path.join(framesDir, `b${i}_diff_${k}.png`)));
 
   const stripPath = path.join(OUT_DIR, `beat${i + 1}.strip.png`);
-  tileGrid([...refTiles, ...renderTiles], { cols: n, tw: W, th: H, gap: 1, out: stripPath });
+  tileGrid([...refThumbs.slice(0, thumbPairs), ...renderThumbs.slice(0, thumbPairs)],
+    { cols: thumbPairs, tw: THUMB_W, th: THUMB_H, gap: 1, out: stripPath });
   const diffPath = path.join(OUT_DIR, `beat${i + 1}.diff.png`);
-  tileGrid(diffTiles, { cols: n, tw: W, th: H, gap: 1, out: diffPath });
+  tileGrid(diffThumbs, { cols: thumbPairs, tw: THUMB_W, th: THUMB_H, gap: 1, out: diffPath });
 
-  const ssims = times.map((_, k) => ssimOf(refTiles[k], renderTiles[k])).filter((v) => v != null);
+  const ssims = Array.from({ length: pairs }, (_, k) => ssimOf(refTiles[k], renderTiles[k])).filter((v) => v != null);
   const meanSsim = ssims.length ? ssims.reduce((a, v) => a + v, 0) / ssims.length : null;
 
-  results.push({ i: i + 1, label: b.label, start: b.start, end: b.end, samples: times.length,
+  results.push({ i: i + 1, label: b.label, start: b.start, end: b.end, samples: pairs,
     ssim: meanSsim, strip: stripPath, diff: diffPath });
 }
 fs.rmSync(framesDir, { recursive: true, force: true });
@@ -100,7 +113,7 @@ const lines = [
   '| beat | window | samples | mean SSIM | strip | diff |',
   '|---|---|---|---|---|---|',
   ...ranked.map((r) => `| ${r.i} (${r.label}) | ${r.start.toFixed(1)}-${r.end.toFixed(1)}s | ${r.samples} `
-    + `| ${r.ssim != null ? r.ssim.toFixed(4) : 'n/a'} | ${rel(r.strip)} | ${rel(r.diff)} |`),
+    + `| ${r.ssim != null ? r.ssim.toFixed(4) : 'n/a'} | ${r.strip ? rel(r.strip) : 'n/a'} | ${r.diff ? rel(r.diff) : 'n/a'} |`),
   '',
   '_ranked worst-to-best: the lowest SSIM is the beat whose motion diverges most from the reference._',
 ];
