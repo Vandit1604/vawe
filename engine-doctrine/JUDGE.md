@@ -71,6 +71,23 @@ this order:
    disagree by more than 2 points, so a real disagreement gets a third opinion instead of averaging
    itself away.
 
+**Evidence must be specific, not filler.** A non-empty `evidence` string is not the same as a real
+observation: `{"score": 2, "evidence": "readability looks fine"}` passed the old check and recorded
+nothing anyone could act on. `harness/lib/evidence-lint.mjs` refuses it before `--verdict-json`
+writes anything: name a concrete visual observation (an element or text, plus one of position, size,
+colour, motion or timing), never just echo the criterion's own name, agree in sign (a score of 1-2
+needs a named defect), and never repeat the identical string across two criteria in one verdict.
+
+Good, real observations:
+- `the CTA button sits 40px left of centre, off its grid column` (element + position)
+- `headline text fades in 0.3s late against the beat 2 @1.4s hold` (element + timing)
+- `the background is washed out grey where the house style calls for cobalt` (element + colour)
+
+Bad, filler that the linter refuses:
+- `readability looks fine` (no element, no property, just the verdict restated)
+- `hierarchy is good` (same failure under a different criterion's name)
+- `looks fine (composition)` (echoes the criterion label back as its own content)
+
 **One page for all of it**: `node harness/author/review-server.mjs D=<file> [REF=<ref.mp4>] [PORT=8802]`,
 served like `make tune`. It shows a frame grid per beat with a time slider, the reference side by side
 when `REF` is given, the verify block, and whatever structured judge JSON already exists for this cut,
