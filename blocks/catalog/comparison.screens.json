@@ -35,12 +35,10 @@
         }
       },
       "rightScreen": {
-        "block": "listRow",
+        "block": "notification",
         "props": {
-          "icon": "✓",
           "title": "Draft saved",
-          "sub": "Fieldwork",
-          "meta": "now"
+          "body": "Fieldwork · now"
         }
       }
     },
