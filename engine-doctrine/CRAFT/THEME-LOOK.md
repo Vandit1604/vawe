@@ -152,9 +152,9 @@ Three themes carry one: `themes/vawe.json` (the real brand, derived from `site/a
 `themes/linear.json`/`themes/stripe.json` do not; a theme with no `look` is not an error, it is a theme
 that has not been given one.
 
-## The computed look, for the other 28
+## The computed look, for the rest
 
-Only 3 of the 31 themes in `themes/` carry an authored `look`, so an engine default reading
+Only a few of the themes in `themes/` (`ls themes/*.json | wc -l` for the total, `grep -l '"look"' themes/*.json | wc -l` for how many carry one) have an authored `look`, so an engine default reading
 `theme.look` alone would do nothing for nearly all of them, `themes/default.json` included. `computedLook(theme, { isLightBg })` and `resolveLook(theme,
 opts)` (`core/registry/theme-contract.js`, beside `lookErrors`) close that gap: `resolveLook` returns
 `{...computedLook(theme), ...(theme.look||{})}`, so an authored key always wins over the computed one,
