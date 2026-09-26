@@ -1,0 +1,64 @@
+{
+  "module": "scene",
+  "note": "Fixture for the `three` object scene: an extruded SVG shield in glass, rotating 40 degrees over 2s via objectMotion (the SAME motionAt sampler/eases as any layer's `motion`), plus a glass sphere. Verified by make canvas-purity and tests/three/object.test.mjs.",
+  "aspect": "16:9",
+  "theme": "vawe-dark",
+  "duration": 2.2,
+  "destination": "web",
+  "audio": { "silent": true, "_why": "a determinism fixture, not a film" },
+  "bg": [{ "preset": "black", "from": 0, "to": 2.2 }],
+  "layers": [
+    {
+      "type": "three",
+      "three": "object",
+      "id": "shield",
+      "colors": ["#8fdcc8", "#0c3f3c", "#101418", "#0b0d10"],
+      "geometry": {
+        "kind": "svgExtrude",
+        "path": "M50 0 L95 15 L95 60 C95 90 75 110 50 120 C25 110 5 90 5 60 L5 15 Z",
+        "scale": 0.02,
+        "depth": 0.35,
+        "bevelSize": 0.11,
+        "bevelThickness": 0.11,
+        "bevelSegments": 10
+      },
+      "material": { "preset": "glass", "ior": 1.5, "roughness": 0.04 },
+      "objectMotion": [
+        { "t": 0, "rotY": 0 },
+        { "t": 2, "rotY": 40 }
+      ],
+      "dolly": 4.2,
+      "x": 180,
+      "y": 0,
+      "w": 720,
+      "h": 720,
+      "start": 0,
+      "duration": 2.2,
+      "anim": "fade",
+      "enterDur": 0,
+      "exitDur": 0
+    },
+    {
+      "type": "three",
+      "three": "object",
+      "id": "sphere",
+      "colors": ["#8fdcc8", "#0c3f3c", "#101418", "#0b0d10"],
+      "geometry": { "kind": "sphere", "radius": 0.9 },
+      "material": { "preset": "glass", "ior": 1.5, "thickness": 0.9 },
+      "objectMotion": [
+        { "t": 0, "rotY": 0 },
+        { "t": 2, "rotY": 90 }
+      ],
+      "dolly": 4.2,
+      "x": 1020,
+      "y": 0,
+      "w": 720,
+      "h": 720,
+      "start": 0,
+      "duration": 2.2,
+      "anim": "fade",
+      "enterDur": 0,
+      "exitDur": 0
+    }
+  ]
+}
