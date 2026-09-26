@@ -105,7 +105,7 @@
     {
       "name": "card.stat",
       "type": "vawe:block",
-      "description": "a boxed metric: a label, a number counting up, a chip saying how much it went up",
+      "description": "a boxed metric: a label, a number counting up, and a delta chip only when you pass one",
       "tags": [
         "statCard"
       ]

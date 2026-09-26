@@ -232,7 +232,7 @@ const CAMERA_WORD_AKA = {
   tour: ['multi-stop flight', 'visit several spots', 'station to station'],
   'pan stations': ['stop at each station', 'guided tour', 'sequential pan'],
   circle: ['orbit the subject', 'swing around', 'rotate around'],
-  'ui focus zoom': ['zoom to a control', 'focus on a panel', 'highlight a UI element'],
+  'ui focus zoom': ['zoom to a control', 'focus on a panel', 'highlight a UI element', 'camera push-in onto a UI region', 'push in on a button or panel'],
   'punch in': ['crash zoom', 'sudden zoom in', 'hard cut closer'],
   shake: ['camera jolt', 'impact shake', 'screen shake'],
   'drift hold': ['handheld hold', 'breathing camera', 'never fully still'],
