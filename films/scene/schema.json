@@ -129,6 +129,7 @@
    "timeWarp",
    "track",
    "tracking",
+   "trim",
    "type",
    "typing",
    "vars",
@@ -1716,6 +1717,10 @@
      "type": "object",
      "label": "text layer TextMorph: letters migrate `text`->word { to, dur, ease } (needs w+align:center, GSAP). svg layer shape-morph: one path melts into another { to, dur, spin, points, closed }."
     },
+    "trim": {
+     "type": "object",
+     "label": "AE Trim Paths on any SVG path/stroke element: { start, end, offset }, each a fraction 0..1 of the path's real length (getTotalLength()). `start`/`end` pick the revealed segment; `offset` slides that segment around the path, wrapping on a closed loop, without changing its length. Each of the three is independently KEYFRAMABLE by naming `trimStart`/`trimEnd`/`trimOffset` in this layer's own `motion` array, composing with x/y/rot and riding the same per-segment ease (core/tracks/trim.js). Targets `el.__svgPath` (the svg layer's own path) or the first path-like SVG geometry found inside the layer."
+    },
     "fx": {
      "type": "string|object|array",
      "label": "Named GSAP effect(s) from core/engine/gsap-effects.js: zoomBlur | {name,dur,ease} | [blurIn,float]. Entrances (zoomBlur/elasticIn/blurIn/spinIn/flipInX/bounceIn/clipUp/maskReveal/revealUp/expandIn/tiltIn/driftIn/glitchIn/foldIn), per-letter text (charFold/charTilt/charBlurCascade/charOvershoot, on split layers), loops (float/pulse/breathe/wobble). Pair with anim:none. There is no `fxOut`: the named GSAP exit family measured zero users and was deleted whole (engine-doctrine/MISTAKES.md #364); use `out` for an exit."
@@ -1798,6 +1803,10 @@
       "wordSlot": {
        "type": "array|object",
        "label": "One word of this layer's sentence swaps for the next while NOTHING after it reflows: { words: [\"docs\", \"dashboards\"], every: 1.1, swap: 0.26, chip: true, loop: false, at: \"{}\", delay: 0, rise: 0.42 }. The layer's own text carries the placeholder (\"Ship {} in seconds\"). Every candidate sits in the SAME grid cell, so the slot is auto-sized by layout to the WIDEST of them from the first frame, with no measurement and no font metric. `chip: true` gives it the accent plate with `--on-accent` ink, which is where the brand colour belongs. Refused with `split`, which would drive the same spans from a second clock, and refused with fewer than two words."
+      },
+      "repeat": {
+       "type": "object",
+       "label": "AE's Repeater: stamp this layer's OWN content { copies, offset: { x, y, rot, scale, opacity }, stagger, from }. `copies` (1..64) deep-clones the layer's built content into that many sibling cells. Each copy's transform ACCUMULATES from `offset` by its signed step `k` (translate x*k/y*k, rotate rot*k, scale compounding as scale^|k|, never scale*k); `offset.opacity` is AE's Start/End opacity, lerped across the ABSOLUTE copy index so the far end of the pattern fades regardless of `from`. `from` picks which copy is the unmoved origin: \"start\" (default, k=i), \"end\" (the last copy, k=i-(copies-1)), \"center\" (the middle copy, fans out both ways). `stagger` (seconds, default 0) delays each copy's own fade-in entrance, composing with whatever the LAYER's own `motion` is already doing, since every cell inherits the layer element's transform as its parent."
       }
      }
     },
@@ -2202,6 +2211,9 @@
        "type": "number",
        "label": "Z-order at this key. Depth over TIME: key it across a neighbour's track and the layer passes behind that neighbour and out again, which is how a ribbon orbits the thing it circles. Rounded to an integer when applied. Defaults to the layer's own `track`, or its index."
       },
+      "trimStart": { "type": "number", "label": "AE Trim Paths `start` (fraction 0..1 of the path) at this key. Both endpoints of a segment must state it, or neither does (see `ox`); falls back to the layer's static `trim.start` otherwise." },
+      "trimEnd": { "type": "number", "label": "AE Trim Paths `end` (fraction 0..1 of the path) at this key. Same both-endpoints rule as `trimStart`." },
+      "trimOffset": { "type": "number", "label": "AE Trim Paths `offset`: slides the revealed start/end segment around the path (wrapping on a closed loop) without changing its length. Same both-endpoints rule as `trimStart`." },
       "ease": {
        "type": "string",
        "label": "Easing name (incl. spring, spring-bouncy, spring-stiff). ONE curve for the whole segment INTO this key. To draw the curve yourself, per side, use `easeOut` on the key before and `easeIn` here."

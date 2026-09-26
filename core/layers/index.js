@@ -147,7 +147,7 @@ const LAYER_AKA = {
   rect: ['a box', 'a solid panel', 'a rectangle'],
   glow: ['a soft light', 'a halo', 'a glowing highlight'],
   beam: ['a light bar', 'a travelling light', 'a light border'],
-  svg: ['vector art', 'an inline icon shape', 'scalable line art'],
+  svg: ['vector art', 'an inline icon shape', 'scalable line art', 'trim paths', 'a spinning loader ring'],
   cursor: ['a mouse pointer', 'a fake cursor', 'a click demo pointer'],
   clip: ['a baked animation', 'a frame sequence', 'a pre-rendered clip'],
   html: ['a hand-written fragment', 'real markup', 'a web snippet'],

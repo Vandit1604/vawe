@@ -26,13 +26,14 @@ import * as plane from './plane.js';
 import * as wordSlot from './word-slot.js';
 import * as alongPath from './along-path.js';
 import * as ghost from './ghost.js';
+import * as repeat from './repeat.js';
 import * as squash from './squash.js';
 import * as matte from './matte.js';
 import * as lag from './lag.js';
 import * as upright from './upright.js';
 import { defineRegistry } from '../registry/registry.js';
 
-const REGISTRY = { alongPath, ghost, kick, lag, matte, mixBlend, occlude, plane, progress, shadow, squash, tilt, upright, wordSlot };
+const REGISTRY = { alongPath, ghost, kick, lag, matte, mixBlend, occlude, plane, progress, repeat, shadow, squash, tilt, upright, wordSlot };
 
 // Exported so gates DERIVE the modifier vocabulary instead of restating it, the contract LAYER_TYPES
 // already has. schema-drift compares the schema's copy of this list against it in both directions.
@@ -57,6 +58,7 @@ export const FX_BLURBS = {
   occlude: 'hide this layer where another one covers it, put something BEHIND something else without reordering the stack',
   plane: 'stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours, this is parallax',
   progress: 'hand the layer the FILM\'s progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with',
+  repeat: 'AE\'s Repeater: stamp the layer\'s own content 1 to 64 times, each copy stepped a little further (position, rotation, a compounding scale, an end opacity) than the last, and each copy\'s own arrival can stagger in seconds so a ring or a row builds itself one spoke at a time',
   shadow: 'a drop shadow that knows where the light is, so every layer does not point the same way',
   upright: 'AUTO-ORIENT: hold this layer UPRIGHT while the layer carrying it rotates, so an arrangement can turn without its contents turning with it. Parenting gives you the rotation for free and it is almost always wrong: photographs carried round a circle go upside down at the bottom exactly when the motion peaks',
   tilt: 'turn the layer out of the picture plane and hold it there. A card leaning away, a phone at an angle, panels receding',
@@ -81,6 +83,7 @@ const FX_AKA = {
   occlude: ['hide behind another layer', 'occlusion', 'depth sort hiding'],
   plane: ['parallax depth', 'stand at a distance', 'depth modifier'],
   progress: ['film progress variable', 'timeline percent', 'progress ring driver'],
+  repeat: ['AE repeater', 'a ring of copies', 'stamp N instances stepped apart'],
   shadow: ['cast shadow', 'drop shadow with light', 'directional shadow'],
   upright: ['auto orient', 'stay upright', 'counter rotate'],
   tilt: ['3D tilt', 'turn out of plane', 'leaning card'],
