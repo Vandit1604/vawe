@@ -72,8 +72,8 @@ Full props per type: `films/scene/schema.json`. What each type is FOR, in prose:
 
 ## The vocabulary: effect families
 
-Do not try to memorise all 920 named things the engine can do; reach for them by family, then
-search within the family. Each of these 56 families is a dial you put ON a layer, a cut,
+Do not try to memorise all 924 named things the engine can do; reach for them by family, then
+search within the family. Each of these 57 families is a dial you put ON a layer, a cut,
 the camera, or the scene:
 
 - **Drawn icons** (16, `asset`): `svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists.
@@ -123,6 +123,7 @@ the camera, or the scene:
 - **Kinetic text presets** (33, `text`): `split`+`preset` on a text layer.
 - **Ransom faces** (8, `text`): `ransom` on a text layer: per-glyph face mixing, from this fixed set.
 - **Scramble charsets (`chars`)** (7, `text`): What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "presetOpts": { "chars":"numbers", "rate":48, "revealDelay":0.25 } }`.
+- **Font-variation axes** (4, `text track`): A variable face moves inside the letters: an `axis` track ramps one axis per unit on the same stagger clock as `preset`.
 - **Stagger order (`from`)** (6, `text/parts`): The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`.
 - **Theme look keys** (6, `theme`): A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md).
 - **Easings** (46, `timing`): `ease` on a motion key, a count, a camera leg.
@@ -134,7 +135,7 @@ the camera, or the scene:
 - **Transition relationships** (9, `transition`): Name the RELATIONSHIP between two beats first, then pick from its candidates, per engine-doctrine/CRAFT/TRANSITIONS.md's decision procedure.
 
 **Discovery, not memorisation:** `make arsenal Q="a page scrolling under a static tilt"` searches all
-920 named things (layer types, every family above, recipes, blocks, sound cues) by plain-English
+924 named things (layer types, every family above, recipes, blocks, sound cues) by plain-English
 description and returns the exact key to write. `make arsenal AT="layers[].motion[]"` answers the other
 half: what fields are legal to write at one JSON path, read live off `films/scene/schema.json`.
 
@@ -163,7 +164,7 @@ make judge D=films/scene/x.json   # the one step that SEES: composition and fide
 
 ## Discovery
 
-- `make arsenal Q="<what you mean, in plain english>"` searches all 920 named things at once and
+- `make arsenal Q="<what you mean, in plain english>"` searches all 924 named things at once and
   prints the JSON key that means it.
 - `make arsenal AT="<json path>"` answers what is legal to write at that path, with every field's type.
 - `make list` shows the scene module's schema and a sample scene end to end.

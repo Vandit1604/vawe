@@ -886,6 +886,17 @@ What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "
 | `symbols` | punctuation and operators, a terminal or a cipher rather than a word |
 | `upperCase` | capitals only, the calmest scramble and the one that keeps a headline reading as type |
 
+## Font-variation axes  `[text track]`
+
+A variable face moves inside the letters: an `axis` track ramps one axis per unit on the same stagger clock as `preset`. `{ "type":"text", "split":"word", "axis": { "wght": [300, 900] } }`
+
+| name | what / when |
+|---|---|
+| `ital` | the italic axis, 0 or 1: some variable faces expose the roman/italic swap as an axis instead of a second font file |
+| `slnt` | the slant axis, an upright face leaning to an italic ANGLE in degrees (usually -15 to 0) rather than swapping to a separate italic file |
+| `wdth` | the width axis, condensed to expanded: none of the 31 faces this engine vendors keep it post-subsetting (core/tokens.css), so animating it is a validated no-op today |
+| `wght` | the weight axis, 100 to 900 on every variable face this engine vendors: thin to black in one continuous ramp instead of jumping between static cuts |
+
 ## Stagger order (`from`)  `[text/parts]`
 
 The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`. Works in BOTH slots that take a stagger, a split text layer and `parts[]`. `each` is the per-unit delay; `amount` is the TOTAL seconds the whole train may take and derives that delay from the unit count, so a 90-glyph headline and a 6-word one hold the same beat. A number index is legal too: the wave starts at that unit.
@@ -1172,4 +1183,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_722 effects across 60 families. Regenerate: `make effects`._
+_726 effects across 61 families. Regenerate: `make effects`._
