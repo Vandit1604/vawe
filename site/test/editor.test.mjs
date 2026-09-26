@@ -80,8 +80,11 @@ after(async () => {
 test("the page renders and the starter scene boots the real engine", async () => {
   const page = await open();
   await settled(page);
-  const meta = await page.evaluate(() => document.querySelector(".sp-frame").contentWindow.__engine?.meta);
-  assert.ok(meta, "window.__engine.meta never appeared — the engine did not boot");
+  const booted = await page
+    .waitForFunction(() => document.querySelector(".sp-frame")?.contentWindow?.__engine?.meta, { timeout: BOOT_MS })
+    .then(() => true, () => false);
+  assert.ok(booted, "window.__engine.meta never appeared — the engine did not boot");
+  const meta = await page.evaluate(() => document.querySelector(".sp-frame").contentWindow.__engine.meta);
   assert.equal(meta.fps, 30);
   assert.ok(meta.totalFrames > 0);
   assert.match(await status(page), /rendering live/);
@@ -126,8 +129,11 @@ test("a scene using build-time sugar boots directly, no separate expand step", a
   // site/app/editor/sugar.ts still refuses sugar a visitor TYPES, which has no publish step behind it.
   await page.select("#ed-scene", "saas-hero-launch");
   await settled(page);
-  const meta = await page.evaluate(() => document.querySelector(".sp-frame").contentWindow.__engine?.meta);
-  assert.ok(meta, "window.__engine.meta never appeared — the engine did not boot");
+  const booted = await page
+    .waitForFunction(() => document.querySelector(".sp-frame")?.contentWindow?.__engine?.meta, { timeout: BOOT_MS })
+    .then(() => true, () => false);
+  assert.ok(booted, "window.__engine.meta never appeared — the engine did not boot");
+  const meta = await page.evaluate(() => document.querySelector(".sp-frame").contentWindow.__engine.meta);
   assert.ok(meta.totalFrames > 0);
   assert.equal(await problem(page), null, "a build-time-sugar scene must not raise a problem any more");
   assert.match(await status(page), /rendering live/);
