@@ -364,6 +364,50 @@ function checkFlashAndEmpty(base) {
     f.fail('seam-empty', `empty stage at ${seam.t}s with no declared boundary nearby: "${seam.out}" -> "${seam.inn}", spread drops to ${seam.spread} vs ${seam.outsideSpread} (32x18 grid, colour-blind), empty ${seam.emptySec}s before content reads`,
       { at: `${seam.t}s (frame ${seam.frame})`, fix: emptyFix(seam), doc: 'engine-doctrine/MISTAKES.md#144' });
   }
+
+  // seam-blank: an ABSOLUTE near-uniform run near a declared boundary, not a dip relative to the
+  // frames around it. seam-empty/seam-flash above both compare the boundary to an "outside" reference
+  // walked out from it, so two visually flat beats back to back (a near-blank white hold ending on a
+  // cut into another plain scene) never trip them: "outside" reads just as flat as the boundary itself,
+  // and a dip or drop relative to something already near zero is not a dip. This warns on the RAW
+  // spread instead, whatever sits either side of it, over the same transition window (Netflix/BBC
+  // guidance treats under ~1s of near-blank content at a cut as invisible; the two films this closes
+  // both ran nearer 1s). Warn, waivable (authoring.allow: "seam-blank"): a still card or a deliberate
+  // hold IS sometimes the beat.
+  const ABS_BLANK = 0.03;
+  const BLANK_RUN_MIN = Math.max(2, Math.round(fps * 0.1));
+  const seamAllow = new Set(Array.isArray(data.authoring?.allow) ? data.authoring.allow : []);
+  const blankCovered = [...covered];
+  for (const nt of seamFrames) {
+    const found = longestBlankRun(mp4, nt, fps, total, ABS_BLANK);
+    if (!found || found.run < BLANK_RUN_MIN) continue;
+    if (blankCovered.some(([lo, hi]) => found.start >= lo && found.start <= hi)) continue;
+    blankCovered.push([found.start - fps, found.start + found.run + fps]);
+    const waived = seamAllow.has('seam-blank');
+    const durSec = (found.run / fps).toFixed(2);
+    const atSec = (found.start / fps).toFixed(2);
+    console.error(`  ${waived ? '○' : '~'} seam-blank at ${atSec}s (boundary ${(nt / fps).toFixed(2)}s): ${durSec}s near-uniform (spread ${found.spread}/255), unrelated to what is either side of it.`);
+    f.warn('seam-blank', `${durSec}s near-uniform hold at ${atSec}s, around the boundary at ${(nt / fps).toFixed(2)}s (spread ${found.spread}/255, colour-blind, absolute not relative)`,
+      { at: `frame ${found.start}`, waived, fix: 'overlap the outgoing and incoming content so the stage is never this flat for this long, or hold on purpose and waive it', doc: 'engine-doctrine/MISTAKES.md#144' });
+  }
+}
+
+// The single longest contiguous run, within ±1s of `nt`, of frames whose colour-blind spread stays
+// under `floor`. Shares gridStatsAt's own arithmetic (32x18 gray, max-min) so "near-uniform" never
+// drifts from what seam-empty already calls "empty" one floor up.
+function longestBlankRun(mp4, nt, fps, total, floor) {
+  const WIN = fps;
+  let bestRun = 0, bestStart = null, bestSpread = 1;
+  let run = 0, runStart = null, runWorst = 1;
+  const flush = () => { if (run > bestRun) { bestRun = run; bestStart = runStart; bestSpread = runWorst; } run = 0; runWorst = 1; };
+  for (let d = -WIN; d <= WIN; d++) {
+    const f = Math.max(0, Math.min(total - 1, nt + d));
+    const sp = gridStatsAt(mp4, f)?.spread;
+    if (sp != null && sp < floor) { if (!run) runStart = f; run++; if (sp < runWorst) runWorst = sp; }
+    else flush();
+  }
+  flush();
+  return bestRun ? { run: bestRun, start: bestStart, spread: Math.round(bestSpread * 255) } : null;
 }
 
 function collectBoundaries(data) {

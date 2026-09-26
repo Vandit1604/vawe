@@ -1,9 +1,3 @@
-// wav-read.mjs: ONE PCM WAV reader. Walks the chunk table rather than assuming a 44-byte header
-// (fmt/LIST sizes vary), and handles 16/24/32-bit PCM plus 32-bit float, because the repo holds both
-// synthesized 16-bit cues and recorded 24-bit ones.
-//
-// It lives here because three scripts had grown their own: beatmap.mjs, sfx-audit.mjs, and this
-// module's first draft. Three readers is how you end up with one that only understands 16-bit and
 // calls every other file "unreadable" (engine-doctrine/MISTAKES.md #56).
 import fs from 'node:fs';
 

@@ -8,12 +8,15 @@
     "verify": "node quality/gates/run.js",
     "look": "node harness/author/preview.mjs",
     "prepublishOnly": "node harness/dev/pack-check.mjs",
-    "pack-check": "node harness/dev/pack-check.mjs"
+    "pack-check": "node harness/dev/pack-check.mjs",
+    "postinstall": "node scripts/vendor-gsap.mjs"
   },
   "//": "Rendering is the Go service: `make render M=<format>` / `make all` (see Makefile).",
+  "//gsap-note": "Pinned exact (not ^): scripts/vendor-gsap.mjs copies node_modules/gsap/dist/gsap.min.js to assets/vendor/gsap.min.js on every install (postinstall above), because GSAP's Standard license does not clearly allow redistributing the built file, so it is never committed (assets/vendor/README.md, .gitignore).",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "d3-geo": "^3.1.1",
+    "gsap": "3.13.0",
     "zod": "^4.4.3"
   },
   "//d3-geo-note": "SHIPPED, not dev-only: blocks/index.mjs (in the package) eagerly imports every block factory, including blocks/geo.mjs, which bare-imports d3-geo (core/engine/expand.js:10). harness/author/expand-blocks.mjs, the Node-side expander cli/vawe.mjs shells out to for every render, therefore needs d3-geo present even for a scene with no geo block. Devdependency until 2026-09-22: broke the very first `npx vawe` render with ERR_MODULE_NOT_FOUND.",

@@ -198,11 +198,12 @@ ok('resolveEasing passthrough fn', (() => { const f = (t) => t; return resolveEa
 // ABSENT and WRONG are different questions, so they get different answers and one assertion each.
 ok('resolveEasing absent → easeOutCubic', resolveEasing(null) === easeOutCubic && resolveEasing('') === easeOutCubic);
 ok('resolveEasing unknown → throws', (() => { try { resolveEasing('nope'); return false; } catch { return true; } })());
-// A GSAP ease is a REAL name in the other vocabulary, which is the #355 wrong-slot mistake. The error
-// has to say so, or it reads as "that curve does not exist" when the curve exists one field away.
-ok('resolveEasing names the wrong slot for a GSAP ease', (() => {
-  try { resolveEasing('power2.inOut'); return false; } catch (e) { return /GSAP ease/.test(e.message) && /parts\[\]\.ease/.test(e.message); }
-})());
+// A GSAP ease name is now an ALIAS onto its equivalent engine curve (resolveGsapAlias), so an author
+// who knows GSAP's vocabulary can use it on an engine field too; `steps`/`rough`/`slow` have no
+// engine equivalent and still name the #355 wrong-slot mistake.
+ok('resolveEasing aliases a GSAP ease and still names the wrong slot for one it cannot',
+  resolveEasing('power2.inOut') === EASINGS.easeInOutCubic
+  && (() => { try { resolveEasing('steps(4)'); return false; } catch (e) { return /GSAP ease/.test(e.message); } })());
 // Every easing the LIBRARY names must resolve: the census that made throwing safe, kept as a gate.
 ok('resolveEasing accepts every name the library uses', ['linear', 'easeOutCubic', 'easeInOutCubic', 'ramp', 'spring', 'springEase', 'settle', 'snap', 'brake', 'rush'].every((n) => typeof resolveEasing(n) === 'function'));
 ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);

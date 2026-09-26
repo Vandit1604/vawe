@@ -1,15 +1,3 @@
-// fonts-discover.mjs: surface typefaces this repo has never used. A pure data query over the Google
-// Fonts catalogue, carrying no taste of its own. It exists because every other look tool here SELECTS
-// (a theme, a vendored face) or REFLECTS (a real site), so an author asked to invent a look reaches for
-// the same handful of faces every time. That is a training-data default, not a decision. Sampling by
-// popularity BAND and by recency, with the used and the obvious names removed, makes the default
-// unreachable and forces a real choice.
-//
-//   node harness/author/fonts-discover.mjs --seed 7 [--count 12] [--category serif] [--json]
-//   make fonts-discover SEED=7 COUNT=12 CATEGORY=display
-//
-// Distinct from `make fonts` (DOWNLOADS a fixed vendored set) and `make font-audit` (verifies the
-// vendored faces actually painted). Neither can name a face you have not already used; this one only does that.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,8 +11,6 @@ const has = (n) => argv.includes(n);
 
 const METADATA_URL = 'https://fonts.google.com/metadata/fonts';
 
-// The training-data defaults. These are the faces that arrive unbidden, so they are barred by name even
-// when no theme here has used them.
 const BANNED = [
   'Inter', 'Poppins', 'Playfair Display', 'Syne', 'Space Grotesk', 'Montserrat',
   'Roboto', 'Open Sans', 'Lato', 'Raleway', 'Nunito', 'Oswald',
@@ -32,9 +18,6 @@ const BANNED = [
 
 const die = (msg) => { console.error(`fonts-discover: ${msg}`); process.exit(1); };
 
-// ---------------------------------------------------------------- seeded RNG
-// mulberry32. Math.random() is banned engine-side because a render must be pure in n, and a habit of
-// reaching for it spreads. A seed is an argument here for the same reason: a look must be reproducible.
 function mulberry32(a) {
   return function () {
     a |= 0; a = (a + 0x6D2B79F5) | 0;
@@ -43,7 +26,6 @@ function mulberry32(a) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-// Each band draws from its own stream, so changing --count or one band's pool cannot reshuffle another.
 function bandSeed(seed, band) {
   let h = seed >>> 0;
   for (const ch of band) h = (Math.imul(h ^ ch.charCodeAt(0), 0x01000193) >>> 0);
@@ -59,9 +41,6 @@ function shuffled(list, seed) {
   return out;
 }
 
-// ---------------------------------------------------------------- exclusions
-// Parsed, never hardcoded: there are 35 theme files and they change. Any string under a theme's `type`
-// block is a family name the library has already committed to.
 function usedFamilies() {
   const dir = path.join(ROOT, 'themes');
   if (!fs.existsSync(dir)) die(`no themes directory at ${dir}`);
@@ -73,7 +52,6 @@ function usedFamilies() {
     try { theme = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw; }
     catch (e) { die(`themes/${f} failed to resolve: ${e.message}`); }
     for (const v of Object.values(theme.type || {})) {
-      // `type` also carries switches such as {optical:true}; only the strings are families.
       if (typeof v === 'string' && v.trim()) names.add(v.trim());
     }
   }
@@ -81,15 +59,12 @@ function usedFamilies() {
   return names;
 }
 
-// ---------------------------------------------------------------- catalogue
 async function fetchCatalogue() {
   let res;
   try { res = await fetch(METADATA_URL, { headers: { accept: 'application/json' } }); }
   catch (e) { die(`could not reach ${METADATA_URL}: ${e.message}`); }
   if (!res.ok) die(`${METADATA_URL} returned HTTP ${res.status} ${res.statusText}. No fallback list exists on purpose: a hardcoded set would reinstate the exact default this tool removes.`);
   const raw = await res.text();
-  // Google has historically prefixed this response with an anti-JSON-hijack guard, so start at the
-  // first brace rather than trusting the body to be clean.
   const start = raw.indexOf('{');
   if (start < 0) die(`${METADATA_URL} returned no JSON body (first 200 chars: ${JSON.stringify(raw.slice(0, 200))})`);
   let json;
@@ -123,7 +98,6 @@ function describe(f) {
   };
 }
 
-// ---------------------------------------------------------------- main
 const seedArg = flag('--seed', null);
 if (seedArg === null) die('--seed is required. The seed is the record of a look: same seed, same faces.');
 const seed = Number(seedArg);
@@ -137,8 +111,6 @@ const catalogue = await fetchCatalogue();
 const used = usedFamilies();
 const bannedSet = new Set(BANNED);
 
-// Noto covers 200+ scripts and would flood the long tail with faces nobody is choosing for a latin
-// title card; a family with no latin subset cannot render our copy at all.
 const latin = catalogue.filter((f) => !f.isNoto && (f.subsets || []).includes('latin'));
 
 let pool = latin;
@@ -155,9 +127,6 @@ const excludedBanned = pool.filter((f) => bannedSet.has(f.family) && !used.has(f
 const eligible = pool.filter((f) => !used.has(f.family) && !bannedSet.has(f.family));
 if (eligible.length < count) die(`only ${eligible.length} families survive the exclusions, fewer than the ${count} asked for`);
 
-// Bands. `popularity` is a rank, 1 being the most downloaded, so percentiles over the eligible set give
-// three popularity strata; `recent` cuts across all three by date, because a face added this year has
-// no rank worth trusting yet and is the least likely to be in anyone's training default.
 const byRank = eligible.slice().sort((a, b) => a.popularity - b.popularity);
 const cut = (lo, hi) => byRank.slice(Math.floor(byRank.length * lo), Math.floor(byRank.length * hi));
 const byDate = eligible.slice().sort((a, b) => String(b.dateAdded).localeCompare(String(a.dateAdded)));
@@ -168,7 +137,6 @@ const BANDS = [
   ['recent', byDate.slice(0, Math.max(count, Math.floor(byDate.length * 0.10)))],
 ];
 
-// Even split across the four bands, remainder to the earlier ones. A run of 12 is 3/3/3/3.
 const quota = BANDS.map((_, i) => Math.floor(count / BANDS.length) + (i < count % BANDS.length ? 1 : 0));
 const picked = [];
 const seen = new Set();
@@ -182,8 +150,6 @@ BANDS.forEach(([name, members], i) => {
     want--;
   }
 });
-// A narrow --category can leave a band short. Top up from the whole eligible set rather than returning
-// fewer faces than asked for.
 if (picked.length < count) {
   for (const f of shuffled(eligible, bandSeed(seed, 'topup'))) {
     if (picked.length >= count) break;

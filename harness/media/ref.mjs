@@ -1,21 +1,4 @@
-// harness/media/ref.mjs: fetch a reference film from a link, and study it.
-//
-//   node harness/media/ref.mjs <url> [name] [more urls…]
 //   make ref URL=https://…/pin/123/ NAME=some-name
-//
-// WHY THIS IS A SCRIPT. The technique is three lines of curl and it has now been re-derived from
-// scratch three times, once by me an hour after reading a doc that already documented it
-// (engine-doctrine/CRAFT/REF-together-chat.md: "yt-dlp is not installed here, so the pin page was fetched with
-// curl and the v1.pinimg.com mp4 pulled out of its metadata"). A procedure that lives only in prose is
-// a procedure everyone re-invents, which is the same evaporation `grammar/` exists to stop, one step
-// earlier in the pipeline.
-//
-// A PIN PAGE LIES ABOUT ITSELF, so the metadata is used for the FILE and never for the reading.
-// `og:description` on the first pin studied here described a different pin entirely, and `og:url`
-// pointed at a third. The mp4 is the only honest thing on the page.
-//
-// Nothing here enters the repo. `refs/` is gitignored; what gets committed is `grammar/<name>.json`,
-// which holds measurements and sentences and no pixels.
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -46,8 +29,6 @@ const known = () => {
 for (const url of urls) {
   console.log(`\n  ${url}`);
   const page = spawnSync('curl', ['-sL', '-A', UA, url], { encoding: 'utf8', maxBuffer: 1 << 28 }).stdout || '';
-  // The highest rendition the page names. Pinterest serves a ladder and the widths are in the filename,
-  // so preferring the largest number is preferring the best copy without parsing their JSON blob.
   const mp4s = [...new Set([...page.matchAll(/https:\/\/[\w.-]*pinimg\.com\/[^"'\\ ]+?\.mp4/g)].map((m) => m[0]))];
   if (!mp4s.length) {
     console.log(`  ✗ no mp4 on that page. It may be an image pin, or the markup changed.`);
@@ -60,8 +41,6 @@ for (const url of urls) {
   spawnSync('curl', ['-sL', '-o', dest, best], { encoding: 'utf8' });
   if (!fs.existsSync(dest) || fs.statSync(dest).size < 1024) { console.log(`  ✗ download produced nothing usable`); fs.rmSync(dest, { force: true }); continue; }
 
-  // Deduped BEFORE studying, because a study of a twin costs a minute and produces a second row for one
-  // film that then doubles it in every comparison the corpus makes.
   const h = sha(dest);
   const twin = [...known()].find(([hash, n]) => hash === h && n !== name);
   if (twin) {

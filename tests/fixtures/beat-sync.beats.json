@@ -1,0 +1,8 @@
+{
+ "track": "beat-sync",
+ "bpm": 120,
+ "confidence": 2.0,
+ "seconds": 2.0,
+ "beats": [0.0, 0.5, 1.0, 1.5],
+ "downbeats": [0.0, 1.0]
+}

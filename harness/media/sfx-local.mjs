@@ -1,18 +1,4 @@
-// sfx-local.mjs: map YOUR OWN downloaded sound files onto the engine's cue names.
-//
-//   node harness/media/sfx-local.mjs --dir <path>
-//   make sfx-local DIR=<path>
-//
-// This does not fetch anything. The owner's preferred sound source is soundeffect-lab.info: its
-// terms permit commercial use and need no credit, but explicitly PROHIBIT redistribution
 // ("re-distribution prohibited", https://soundeffect-lab.info/agreement/). Building a scraper or
-// bulk downloader for that site would bundle their files into a tool other people run, which is
-// redistribution wearing a script. So you download what you want from the site yourself, point this
-// at the folder, and it copies your files onto assets/sfx/<role>.wav (never the other way round).
-//
-// The mapping is data, not code: harness/media/sfx-local-map.json, one role per line, edit it and
-// fill in your filenames. A role left null keeps playing the synth cue from `make audio`, same
-// override-not-replacement rule as `make sfx-pack`.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';

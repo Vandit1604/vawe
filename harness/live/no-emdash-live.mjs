@@ -1,25 +1,10 @@
 #!/usr/bin/env node
-// harness/live/no-emdash-live.mjs - catch an em dash at write time, in the files pre-push does not scan.
-//
-// harness/dev/no-emdash.mjs is the backstop: it runs pre-push and blocks. Its SCOPE is a list of
-// top-level directory names, matched as a git pathspec, so a nested directory that shares no top-level
-// name with the list is invisible to it: `renderer/cmd` and `renderer/internal` are Go source, not the
-// top-level `cmd`/`internal` the pathspec actually matches, so renderer/**.go is unscanned; same for
-// `grammar/`, `recipes/`, `assets/` (non-.md). This hook exists ONLY for that gap: a file the pre-push
-// scan will never reach. Everywhere pre-push already looks, this hook stays silent and lets push do its
-// job once, instead of saying the same thing twice.
-//
-// IT ONLY SCANS WHAT THE EDIT WROTE. For a Write, that is the whole file. For an Edit, that is
-// new_string: the file on disk already carries the edit by the time PostToolUse fires, so an em dash
-// already sitting untouched elsewhere in the file is not this edit's business and is not reported.
 import fs from 'node:fs';
 import path from 'node:path';
 import { EM, EXCLUDE, SCOPE } from '../dev/no-emdash.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 
-// True when harness/dev/no-emdash.mjs's own git pathspec would already reach this file, the same
-// prefix rule git uses for a bare directory-name pathspec: an exact match, or that name plus '/'.
 function coveredByPush(rel) {
   return SCOPE.some((entry) => {
     if (entry === '*.md') return rel.endsWith('.md');
@@ -42,8 +27,6 @@ process.stdin.on('end', () => {
   if (!fs.existsSync(file)) process.exit(0);
 
   const full = fs.readFileSync(file, 'utf8');
-  // Write hands the whole new file; Edit hands only new_string. Locate that slice inside the file on
-  // disk so reported line numbers are real file lines, not offsets into a fragment.
   const written = typeof input.content === 'string' ? input.content : input.new_string;
   if (typeof written !== 'string') process.exit(0);
   const at = typeof input.content === 'string' ? 0 : full.indexOf(written);
