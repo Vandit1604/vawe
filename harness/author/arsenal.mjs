@@ -148,9 +148,9 @@ export async function collect() {
     // (blocks/index.mjs throws at load for a module that does not), and quality/gates/block-schema.mjs
     // holds each against its factory's real signature, so these dials cannot disagree with the engine.
     const schemas = (idx && idx.SCHEMAS) || {};
-    // A FAMILY WITH NO BARE ROW WOULD OTHERWISE BE ABSENT ENTIRELY, and five were: `pricingCard`,
-    // `statCard`, `profileCard`, `lowerThird` and `searchEngine` exist only as `card.pricing`,
-    // `lowerThird.bild` and so on. The dotted skip below is right about why it exists and wrong about
+    // A FAMILY WITH NO BARE ROW WOULD OTHERWISE BE ABSENT ENTIRELY: `statCard`, `lowerThird` and
+    // `searchEngine` exist only as `card.stat`, `lowerThird.bild` and so on. The dotted skip below is
+    // right about why it exists and wrong about
     // where it applies: a variant is excluded because it SPLITS ITS FAMILY'S WORDS, and where there is
     // no family entry there is nothing to split with. So the first variant of such a family is indexed,
     // under the name a scene actually writes. `make arsenal Q="a pricing plan card"` reported ABSENT
@@ -169,8 +169,8 @@ export async function collect() {
       // `block`, because the printer renders a slot as `"<slot>": "<name>"` and that is exactly the
       // line an author writes inside a block layer. A first attempt put the whole layer JSON in here
       // and the snippet came out as nested quotes inside nested quotes, unreadable and uncopyable.
-      // `family`, because the OPTIONS live on the family, not on the row: `card.pricing` is the
-      // pricingCard factory with preset props, so its dials are pricingCard's dials. Carried on the
+      // `family`, because the OPTIONS live on the family, not on the row: `card.stat` is the
+      // statCard factory with preset props, so its dials are statCard's dials. Carried on the
       // entry so harness/author/block-dials.mjs can answer without a second catalog read.
       out.push({ name: row.name, kind: 'block', slot: 'block', family: row.family,
         dials: rowsFrom(schemas[row.family]),
