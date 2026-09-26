@@ -116,12 +116,31 @@ const TRUTH = {
 // one at a time would be forty lies about having looked.
 const EXCLUDED = new Set(['engine-doctrine/MISTAKES.md']);
 
+// SKILLS AND READMES ARE THE SAME SHAPE OF SURFACE AND WERE STILL UNWALKED. A hand-typed count in
+// `skills/*/reference/*.md` reaches an agent the same way engine-doctrine does; a hand-typed count in
+// a README reaches whoever opens the folder first. `git ls-files` for the READMEs (they sit at every
+// depth, so a fixed folder list would miss the next one added) rather than a second `walk`.
+// --cached --others --exclude-standard, not plain ls-files: a file written this session and not yet
+// staged (a probe, a fresh README) must still be seen, the same reasoning docs-drift.mjs's gitFiles
+// helper uses for the same command.
+const readmes = (() => {
+  try {
+    return execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--',
+      '*/README.md', 'README.md'], { cwd: root, encoding: 'utf8' })
+      .split('\n').filter(Boolean);
+  } catch { return []; }
+})();
+
 const FILES = [
   'site/lib/features.ts',
   'site/public/vawe-rules.md',
   ...walk('site/app').filter((f) => /\.tsx?$/.test(f)),
   ...walk('docs-site/content/docs').filter((f) => f.endsWith('.mdx')),
   ...walk('engine-doctrine').filter((f) => f.endsWith('.md') && !EXCLUDED.has(f)),
+  // skills/impeccable is vendored third-party prose, not a claim about this repo's own registries
+  // (same exclusion docs-drift.mjs makes for the same reason).
+  ...walk('skills').filter((f) => /\/reference\/.*\.md$/.test(f) && !f.startsWith('skills/impeccable/')),
+  ...readmes,
   // THE TOOLS THEMSELVES ARE A SURFACE, and they were the last one nobody read. `make arsenal` derives
   // its own headline ("The ${all.length} named things were searched"), so it cannot go stale; every
   // other author-facing script types its number by hand. Three had: block-schema printed "154 of 155
