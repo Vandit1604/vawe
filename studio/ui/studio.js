@@ -6,8 +6,8 @@
 // sound pane that finds no engine can say WHICH stage the film is in and the one command that moves it,
 // instead of re-deriving that (make stage already owns it) or just printing a raw boot failure.
 let stageInfo=null;
-// A pre-assemble film (AGENTS.md stages brief..approval) has no `layers` yet on purpose
-// (no scene JSON exists before approval) so the engine's own validator refusing to boot it is not a
+// A pre-assemble film (AGENTS.md stages brief..design) has no `layers` yet on purpose
+// (no scene JSON exists before assemble) so the engine's own validator refusing to boot it is not a
 // bug to report, it is the expected shape of an unbuilt film. One line, reused by every pane that
 // would otherwise show a raw engine error for this exact, ordinary case.
 function preAssembleNote(){
@@ -230,7 +230,7 @@ function preAssembleNote(){
 
  // ---- PLAN's two sub-views: the composed frames (default), and the rendered contact sheets that
  // used to be their own "Look" nav entry. One place answers both "what is in this beat" and "what did
- // it look like once assembled", because approving a plan and checking it against the render are the
+ // it look like once assembled", because reviewing a plan and checking it against the render are the
  // same errand, not two.
  let planSub='frames';
  const planviewEl=$('planview'), lookpaneEl=$('lookpane');
@@ -286,7 +286,7 @@ function preAssembleNote(){
  // ---- THE COLOUR STRIP: one swatch per beat, storyboard order, seams marked between them ---------
  // "when storyboarding the frames do we see colors across frames and how transitions will handle the
  // colors" (the owner's own words). Today that arc is one paragraph of frontmatter prose nobody sees
- // until the film renders; this draws it here, in the state where approval happens.
+ // until the film renders; this draws it here, in the plan pane.
  //
  // EVERY SWATCH IS THE REAL RENDERED FRAME'S OWN COLOUR, never a value read off the storyboard's
  // `ground:` line: two authors reading the same "ground: dusk" line pictured different colours before
@@ -460,7 +460,7 @@ function preAssembleNote(){
  // here are the ones this repo already makes and least often reads: every beat in · mid · out, and
  // both sides of every transition pulled out of the rendered mp4. Neither needs new engine work. This
  // used to be its own "Look" state; it is now Plan's second sub-view (setPlanSub above), because
- // approving what a beat shows and checking what it rendered to are the same errand.
+ // reviewing what a beat shows and checking what it rendered to are the same errand.
  const sheetImg=$('sheet'), sheetBtn=$('sheetzoom'), sheetNote=$('sheetnote'), lookStat=$('lookstat');
  // THE SHEET'S REAL SIZE, SENT WITH IT. The server reads the PNG's IHDR and answers X-Dim; the page
  // writes it to the width/height ATTRIBUTES, so the box is the right shape before a byte is decoded.
@@ -1648,7 +1648,7 @@ function preAssembleNote(){
  // only a press the lanes captured scrubs: an eye click never captures, so holding it must not move the playhead
  lanes.addEventListener('pointermove',e=>{ if((e.buttons&1)&&lanes.hasPointerCapture(e.pointerId)) seek(e); });
  // The server already knows which stage this film is in (/api/stage, quality/gates/stage.mjs) and picks
- // the pane a plan/approval-stage film should open on: `document.body.dataset.state` is written into the
+ // the pane a plan-stage film should open on: `document.body.dataset.state` is written into the
  // shell at that point (page.mjs, studio/server.mjs paneForStage). A direct hit on /studio/<pane> sets
  // the same attribute to that pane. Never re-derive the stage here, just read what the server decided.
  drawCrumbs(); setState(document.body.dataset.state||'make');

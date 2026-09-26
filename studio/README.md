@@ -7,14 +7,14 @@ group: engine
 # studio/
 
 The live scrubbable preview for one scene: a static server, a plan/make/look/ship/sound shell, and a
-timeline, so a film can be inspected and approved before it is ever rendered.
+timeline, so a film can be inspected before it is ever rendered.
 
 ```
 make studio D=films/scene/<file>.json [PORT=8799]
 ```
 
-Open the printed URL, leave it running (Ctrl-C to stop). See `AGENTS.md` for the eight authoring
-stages; studio's `plan` state is stage 3, approval, and its `sound` state serves stage 6, direct.
+Open the printed URL, leave it running (Ctrl-C to stop). See `AGENTS.md` for the authoring
+stages; studio's `plan` state serves stage 2, plan, and its `sound` state serves stage 6, direct.
 
 ## The five states
 
