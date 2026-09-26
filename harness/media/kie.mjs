@@ -1,13 +1,3 @@
-// kie.mjs: kie.ai generation client (shared by tts/music/gen-image/gen-video/transcribe).
-// Async job model: createTask → poll recordInfo → parse resultJson.resultUrls → download.
-// Key from env KIE_API_KEY or a gitignored .kie.key file. Import as a lib OR run as a CLI.
-//
-//   node harness/media/kie.mjs tts   "Hello world" --out assets/gen/vo.mp3
-//   node harness/media/kie.mjs image "a neon city"  --out assets/gen/city.png --aspect 9:16
-//   node harness/media/kie.mjs music "lofi, calm"    --out assets/gen/bed.mp3 --instrumental
-//   node harness/media/kie.mjs video "a drone shot"  --out assets/gen/clip.mp4 --aspect 9:16
-//   node harness/media/kie.mjs stt   assets/gen/vo.mp3 --out captions.json
-//   add --dry to print the request(s) without calling the API (no key needed).
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -33,7 +23,6 @@ async function api(pathname, { method = 'GET', body } = {}) {
   return json.data ?? json;
 }
 
-// --- unified Jobs API (image, tts, stt, kling video, …) ---
 export async function createTask(model, input, { callBackUrl } = {}) {
   const data = await api('/api/v1/jobs/createTask', { method: 'POST', body: { model, input, ...(callBackUrl ? { callBackUrl } : {}) } });
   const taskId = data.taskId || data.task_id;
@@ -41,7 +30,6 @@ export async function createTask(model, input, { callBackUrl } = {}) {
   return taskId;
 }
 
-// poll recordInfo until terminal; returns the parsed result object (with resultUrls[]).
 export async function pollTask(taskId, { interval = 3000, timeout = 600000, onProgress } = {}) {
   const start = Date.now();
   for (;;) {
@@ -62,7 +50,6 @@ export async function pollTask(taskId, { interval = 3000, timeout = 600000, onPr
   }
 }
 
-// run a unified job end to end → array of result URLs.
 export async function runJob(model, input, opts = {}) {
   const taskId = await createTask(model, input, opts);
   if (opts.onTask) opts.onTask(taskId);
@@ -70,7 +57,6 @@ export async function runJob(model, input, opts = {}) {
   return urls;
 }
 
-// upload a local file → hosted URL (for STT audio / img2img inputs).
 export async function uploadFile(localPath) {
   const buf = fs.readFileSync(localPath);
   const b64 = buf.toString('base64');
@@ -84,11 +70,7 @@ export async function uploadFile(localPath) {
   return url;
 }
 
-// READ BACK the body, not just the status. A 200 is not a promise that the bytes are media: a CDN that
-// has expired the asset answers 200 with an HTML or JSON error page, and writing it to `dest` leaves a
 // file that EXISTS, passes every path check, and renders as a hole. That is engine-doctrine/MISTAKES.md #446 with
-// a different fetcher, `tryFetch` in harness/media/assets.mjs already requires a status AND a size AND
-// a magic number before it writes, and this is the same demand.
 const MAGIC = [ // enough of each container to tell media from an error page
   [[0xff, 0xd8, 0xff], 'jpeg'], [[0x89, 0x50, 0x4e, 0x47], 'png'], [[0x47, 0x49, 0x46], 'gif'],
   [[0x52, 0x49, 0x46, 0x46], 'riff/webp/wav'], [[0x49, 0x44, 0x33], 'mp3'], [[0xff, 0xfb], 'mp3'],
@@ -112,7 +94,6 @@ export async function download(url, dest) {
   return dest;
 }
 
-// ---------- high-level capabilities ----------
 const MODELS = {
   tts: 'elevenlabs/text-to-speech-multilingual-v2',
   stt: 'elevenlabs/speech-to-text',
@@ -143,13 +124,11 @@ export async function transcribeUrl(audioUrl, opts = {}) {
   return result; // { text, words:[{text,start,end}], ... }
 }
 
-// music uses the dedicated Suno API (submit + poll a different endpoint).
 export async function music(prompt, { model = 'V4_5', instrumental = true, style, title, ...opts } = {}) {
   const body = { prompt, model, customMode: !!(style || title), instrumental, ...(style ? { style } : {}), ...(title ? { title } : {}) };
   const data = await api('/api/v1/generate', { method: 'POST', body });
   const taskId = data.taskId || data.task_id;
   if (opts.onTask) opts.onTask(taskId);
-  // Suno poll endpoint (verify against docs.kie.ai/suno-api/get-music-details if this 404s)
   const start = Date.now();
   for (;;) {
     const d = await api(`/api/v1/generate/record-info?taskId=${encodeURIComponent(taskId)}`).catch((e) => ({ __err: e }));
@@ -162,7 +141,6 @@ export async function music(prompt, { model = 'V4_5', instrumental = true, style
   }
 }
 
-// ---------- CLI ----------
 const isMain = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
   const [cmd, ...rest] = process.argv.slice(2);
@@ -193,7 +171,6 @@ if (isMain) {
       console.log(JSON.stringify({ endpoint: '/api/v1/jobs/createTask', ...b }, null, 2));
       process.exit(0);
     }
-    // live
     let urls;
     if (cmd === 'tts') urls = await tts(arg, { voice: flags.voice, onTask: (t) => log('task', t), onProgress: (s, p) => log('…', s, p ?? '') });
     else if (cmd === 'image') urls = await image(arg, { aspect: flags.aspect, onTask: (t) => log('task', t), onProgress: (s) => log('…', s) });

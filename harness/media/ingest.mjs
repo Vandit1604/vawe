@@ -1,33 +1,3 @@
-// harness/media/ingest.mjs: turn a SOURCE video into something an agent can edit from.
-//
-// `cuts[]` (core/engine/expand.js) lets a scene chain real footage into a timeline: {src, in, out}
-// entries, lowered into video layers by the relative-time grammar. An agent still has to WATCH the
-// footage to find those in/out points, one timestamp at a time. This does that watching once: probe
-// the file, find its shot boundaries and its quiet spans, draw a contact sheet, and write a starting
-// cuts.json the agent edits rather than authors from nothing.
-//
-//   node harness/media/ingest.mjs <source.mp4> [name] [--threshold 0.3] [--min-shot 0.4]
-//     [--silence-db -30] [--silence-min 0.5] [--out-dir films/scene]
-//
-// NO SECOND SCENE DETECTOR. Shot boundaries reuse study.mjs's own measurements: detectCuts (built on
-// clusterCuts), detectSeams, detectPans, detectCrossfades and the merge that resolves them into one
-// boundary list (mergeJoints) -- the same four-kind detection `make study` does for a reference film,
-// pointed at a source clip instead. Those were module-scoped closures over study.mjs's own CLI flags
-// (and importing study.mjs for them used to also RUN its whole CLI as a side effect, since none of its
-// top-level script was guarded behind an "is this the main module" check); they now live in
-// harness/media/shot-detect.mjs, pure functions with the free variables (video path, scratch dir,
-// thresholds) turned into parameters, and study.mjs imports them back for its own CLI so there is
-// exactly one copy of each.
-//
-// Writes films/scene/<name>.cuts.json (the cut list) and films/scene/<name>.contact-sheet.png
-// (one cell per shot, labelled with its start time). If films/scene/<name>.transcript.json exists
-// (shape documented below), each shot's overlapping words are folded in as a `note`.
-//
-// The CLI body below runs only when this file is the entry point (`if (isMain)`), not on import: an
-// earlier version ran study.mjs's own script unguarded, which meant importing one pure function also
-// probed a file, decoded frames and wrote a contact sheet as a side effect of `import`. Everything
-// this file exports (parseSilenceOutput, buildContactSheet) is a pure or explicitly-invoked function,
-// so importing this module for a test never runs ffmpeg on its own.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -85,9 +55,6 @@ if (isMain) {
   const SRC = positional[0];
   const NAME = positional[1] || path.basename(SRC || '').replace(/\.[^.]+$/, '');
 
-  // Shot-detection defaults: THE SAME NUMBERS study.mjs defaults to, so a shot list drawn from a
-  // source clip and a shot list drawn from a reference film agree on what counts as a cut, a seam, a
-  // pan or a crossfade. Override any of them from the command line if this source needs it.
   const THRESHOLD = Number(flag('--threshold', 0.3));
   const MIN_SHOT = Number(flag('--min-shot', 0.4));
   const SEAM_THRESHOLD = Number(flag('--seam-threshold', 0.3));
@@ -145,8 +112,6 @@ if (isMain) {
   ], MIN_SHOT);
   fs.rmSync(scratchDir, { recursive: true, force: true });
 
-  // NO SILENT FALLBACK (study.mjs's own rule): nothing detected is ONE SHOT, stated as such, never
-  // an invented equal-slice sample dressed up as a cut.
   const bounds = joints.length ? [0, ...joints.map((j) => j.t)] : [0];
   const shots = bounds.map((t0, i) => ({
     i: i + 1, t0, t1: i + 1 < bounds.length ? bounds[i + 1] : duration,
@@ -168,10 +133,6 @@ if (isMain) {
     console.log(`  quiet ${sp.start.toFixed(2)}s → ${sp.end.toFixed(2)}s (${sp.duration.toFixed(2)}s)`);
   }
 
-  // ── transcript sidecar (optional input, never produced here) ───────────────────────────────
-  // films/scene/<name>.transcript.json: { source, segments: [{ t0, t1, text, words?: [{t0,t1,w}] }] }.
-  // Produced by whatever transcribes audio (a local whisper build, an API, a hand edit); ingest only
-  // READS it, so a film with none renders exactly as if this section did not exist.
   const transcriptFile = path.join(OUT_DIR, `${NAME}.transcript.json`);
   let segments = [];
   if (fs.existsSync(transcriptFile)) {
