@@ -333,9 +333,16 @@ kit: ## [study] sections + palette + favicon in one command → assets/brands/<b
 # reference). Writes out/match/<film>/: a dense strip per beat (reference row over render row), a
 # difference overlay, a mean SSIM, and a match.md ranking beats worst-to-best. STEP=<seconds> sets the
 # sample rate (default 0.1). engine-doctrine/CRAFT/RECREATION.md
-study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> instead scores a recreation against its reference, beat by beat.
+#
+# make study REF=<reference.mp4> SEE=1: let an agent SEE the reference cheaply, before studying it by
+# hand. Writes cuts/holds/beats/ease/OCR + a few 3x3 frame grids an agent reads with Read, and one
+# index.md naming them. quality/refs/<name>/see/ when REF sits in quality/refs/, scratch otherwise
+# (OUT=<dir> to force one); FRAMES=<n> sets the frame budget (default 12). harness/media/see.mjs
+study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> scores a recreation against its reference beat by beat; SEE=1 REF=<video> lets an agent see it cheaply, in grids.
 	@if [ -n "$(MATCH)" ]; then \
 	  node harness/media/match.mjs $(REF) $(D) $(if $(STEP),--step $(STEP)); \
+	elif [ -n "$(SEE)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) $(if $(FRAMES),--frames $(FRAMES)); \
 	else \
 	  node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS)); \
 	fi
