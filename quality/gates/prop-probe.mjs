@@ -134,6 +134,9 @@ const VALUES = {
   'video.in': 0,
   'video.out': 3,
   ease: 'linear',
+  // `d` needs a real, non-degenerate SVG path (at least two distinct points): core/validate/svg.mjs
+  // now refuses a zero-length `d`, and the generic string probe ('probe') is exactly that.
+  d: 'M0 0 L1 1',
   poles: 2,
   typing: true,
   hues: [265, 200, 320],
