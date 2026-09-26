@@ -1,0 +1,12 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 4,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  { "type": "text", "font": "display", "text": "off-role font", "x": 200, "y": 400, "size": 64, "start": 0, "duration": 3 }
+ ]
+}

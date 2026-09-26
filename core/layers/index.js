@@ -172,7 +172,11 @@ export const LAYER_REGISTRY = defineRegistry('layer type', REGISTRY, { slot: 'la
     title: 'Layer types',
     tag: 'layer',
     intro: 'The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document is a dial ON one of these. Full props per type: `films/scene/schema.json`, and `engine-doctrine/PRIMITIVES.md` for what each is FOR.',
-    usage: (n, { j }) => j({ type: n }),
+    // `text` is a search hit for "typing"/"typewriter" (its own blurb says so), and the bare
+    // `{"type":"text"}` this used to show for every type left the real fields invisible right where an
+    // author reads them: a friction log caught a `typeOn` (a captionStyle, a different vocabulary
+    // entirely) written onto a text layer, because nothing here named `typing`/`caret` as the answer.
+    usage: (n, { j }) => j(n === 'text' ? { type: n, typing: true, caret: true } : { type: n }),
     noPreview: 'a layer type is the noun, not the effect. Every preview on this page is already one of them.',
   },
 });

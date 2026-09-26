@@ -155,7 +155,7 @@ const server = http.createServer((req, res) => {
   res.writeHead(404); res.end('not found');
 });
 
-server.listen(PORT, async () => {
+server.listen(PORT, '127.0.0.1', async () => {
   console.log(`  review · ${slug} · ${beatData.length} beat(s) → http://127.0.0.1:${PORT}/`);
   if (!SCREENSHOT) return;
   const { default: puppeteer } = await import('puppeteer');

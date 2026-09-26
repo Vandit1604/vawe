@@ -1,0 +1,13 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 4,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  { "type": "text", "text": "shaky", "x": 200, "y": 400, "size": 64, "start": 0, "duration": 3,
+    "drive": { "wiggle": { "freq": 1.5, "amp": 2 } } }
+ ]
+}

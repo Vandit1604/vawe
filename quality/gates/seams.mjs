@@ -425,6 +425,17 @@ function overlapFraction(a, b) {
 }
 const boxesOverlap = (a, b) => !b.box || Math.max(overlapFraction(a, b.box), overlapFraction(b.box, a)) > 0.4;
 
+// A COVERING ARRIVAL IS NOT NECESSARILY OPAQUE. `arrivingOver` used to end the ghost question there:
+// something new overlaps the outgoing layer's box, so whatever bleeds through is assumed invisible.
+// That is true for ordinary content, but a FULL-FRAME arrival (an end card, or the frame a cut lands
+// on) is exactly the case where the covering layer can itself still be fading in, and an exit whose own
+// fade overlaps that fade-in leaves the outgoing layer ghosted UNDER the card for several frames, with
+// nothing here reading the pixels to say so. `checkGhostAtBoundary` below still trusts an ordinary
+// (non-full-frame) cover outright; a full-frame one is measured anyway and reported as advice, since a
+// legitimate hard cut under a truly opaque card is common and this is a coaching signal, not a defect.
+const FULL_FRAME_FRACTION = 0.85;
+const isFullFrame = (o, W, H) => o.box && o.box.w * o.box.h >= FULL_FRAME_FRACTION * W * H;
+
 // GHOST: an outgoing layer still visible, fading, past its own transition.
 function checkGhost(ctx) {
   const { boundaries, layers, mp4, total, fps, W, H, snap, f } = ctx;
@@ -438,18 +449,30 @@ function checkGhost(ctx) {
     const fSettled = Math.min(total - 2, jointFrame + durFrames + 40);
     if (f2 >= fSettled) return;
     const t1 = f1 / fps;
-    const arrivingOver = (l) => layers.some((o) => o.i !== l.i && o.start != null
+    const coveringArrivals = (l) => layers.filter((o) => o.i !== l.i && o.start != null
       && o.start <= t1 && t1 <= o.start + 0.6 && (o.end == null || t1 <= o.end) && boxesOverlap(l.box, o));
     const outgoing = layers.filter((l) => l.box && l.end != null && l.end >= b.t - b.dur - 0.5 && l.end <= b.t + b.dur + 0.05);
     for (const l of outgoing) {
-      if (arrivingOver(l)) continue;
+      const coverers = coveringArrivals(l);
+      const fullFrameCover = coverers.find((o) => isFullFrame(o, W, H));
+      if (coverers.length && !fullFrameCover) continue; // an ordinary cover: trusted outright, as before
       const d1 = diffBoxes(mp4, f1, fSettled, l.box, W, H);
       const d2 = diffBoxes(mp4, f2, fSettled, l.box, W, H);
       if (d1 == null || d2 == null) { f.warn('seam-unread', `ghost check at boundary ${b.t}s, layer "${l.label}": a frame would not decode`); continue; }
       if (d1 >= GHOST_FLOOR && d1 >= d2 * GHOST_RATIO) {
         const p1 = snap(f1, `ghost-${b.t}s-${l.i}`);
+        const pastF = f1 - jointFrame - durFrames;
+        if (fullFrameCover) {
+          f.warn('seam-ghost-under-cover',
+            `"${l.label}"${l.id ? ` (id "${l.id}")` : ''} is still visible ${pastF}f past ${b.t}s, under the `
+            + `full-frame "${fullFrameCover.label}"${fullFrameCover.id ? ` (id "${fullFrameCover.id}")` : ''} `
+            + `(Δ${d1.toFixed(1)} at +1f vs Δ${d2.toFixed(1)} at +10f, against the settled frame): the exit's `
+            + 'own fade may overlap the cover\'s fade-in.',
+            { at: `frame ${f1}`, fix: p1, doc: 'engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-ghost' });
+          continue;
+        }
         f.fail('seam-ghost',
-          `ghost at ${b.t}s: "${l.label}" still visible and fading ${(f1 - jointFrame - durFrames)}f past its own transition (Δ${d1.toFixed(1)} at +1f vs Δ${d2.toFixed(1)} at +10f, both against the settled frame)`,
+          `ghost at ${b.t}s: "${l.label}" still visible and fading ${pastF}f past its own transition (Δ${d1.toFixed(1)} at +1f vs Δ${d2.toFixed(1)} at +10f, both against the settled frame)`,
           { at: `frame ${f1}`, fix: p1, doc: 'engine-doctrine/CRAFT/TRANSITIONS.md#seam-forensics-ghost' });
       }
     }

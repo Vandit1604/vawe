@@ -98,6 +98,7 @@ const WAIVED = new Map(Object.entries({
   SURFACE_TOKEN_KEYS: 'the fixed shape of one `look.surface` bundle (radius/borderW/.../density). `look.surface` itself is catalogued as a value of the "Theme look keys" surface entry, and the surface LOOKS (glass/soft/...) are their own catalogued registry; this is the nine fields inside one bundle, not a fifth vocabulary',
   KIT_DEFAULTS: 'the literal fallback bundle every surface token already renders as with no look set (blocks/kit.mjs R.card/HAIR/SHADOW_CARD, named once). Not a pickable look: SURFACE_LOOK_NAMES is the catalogued vocabulary',
   CSS_VAR_NAMES: 'the internal token-name -> `--v-*` CSS custom property map, plumbing between core/theme/surface-looks.js and blocks/kit.mjs, never authored directly',
+  PROPS_DRIVEN: 'the three properties `drive.wiggle`/`drive.link` may target (core/tracks/drive.js): x, y, rot. An author never picks from this list by name, they write `drive.wiggle.prop:"rot"` and the constraint is enforced (and documented in the schema/validate error), not chosen off a catalogue page',
   // FOUND BY A COLLISION, not by a new export. `named()` is a bare word match over the catalogue
   // source, and the catalogue used to import `PRESETS` from core/type/type.js for the kinetic-preset
   // section, so core/lightfield/PRESETS was silently credited with a different file's import line.
