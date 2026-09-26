@@ -49,6 +49,7 @@ import { countEaseErrors } from './count-errors.mjs';
 import { cameraMoveErrors } from './camera.mjs';
 import { contentSlotErrors } from './content.mjs';
 import { svgLayerErrors } from './svg.mjs';
+import { driveErrors } from './drive.mjs';
 
 export { layoutErrors } from './layout.mjs';
 export { captionErrors } from './captions.mjs';
@@ -96,6 +97,7 @@ export function validateData(schema, data) {
   errors.push(...idleErrors(data || {}, IDLE)); // a scaling idle re-rasterises glyphs every frame
   errors.push(...cameraMoveErrors(data || {})); // a cameraMove param it does not read is a typo, caught before render
   errors.push(...contentSlotErrors(data || {})); // a {{key}} with no matching content entry, caught before render
+  errors.push(...driveErrors(data || {}));  // drive.wiggle needs a real `prop`, caught before render, not per frame
   errors.push(...svgLayerErrors(data || {}));    // a degenerate svg `d` (zero length) renders invisible
   return errors;
 }

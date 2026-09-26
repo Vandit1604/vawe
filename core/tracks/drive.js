@@ -24,7 +24,9 @@ import { defineRegistry, withBlurb, blurbsOf } from '../registry/registry.js';
 export const slot = 'drive';
 export const PROPS = { drive: {} };
 
-const PROPS_DRIVEN = ['x', 'y', 'rot'];
+// Exported so core/validate/drive.mjs can refuse a bad `prop` at author time, off this one list,
+// rather than keeping a second copy of it that could drift from what frame() actually drives.
+export const PROPS_DRIVEN = ['x', 'y', 'rot'];
 const CHANNEL = { x: 'dx', y: 'dy', rot: 'rot' };
 
 const name = (L) => `"${L.id || L.type || 'a layer'}"`;
