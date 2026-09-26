@@ -223,6 +223,15 @@ more letters on screen, the more total churn per second at the same cycle.
 Pair it with a slow entrance so the shot opens calm and stays calm: `preset:"blur"` with `each` 0.75 and
 `stagger` 0.06 gives a left-to-right defocus sweep that resolves over ~0.7s (see ransom-internal.json).
 
+**Organic stagger** (Rauno Freiberg, "Invisible Details of Interaction Design",
+every.to/p/invisible-details-of-interaction-design): a stagger reads as alive, not mechanical, when it
+varies degree as well as order, not a metronome step repeated unit to unit. `stagger.from` (see the
+"stagger order" table, `engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md`) only picks the ORDER units
+arrive in; `random` is the existing tool for an organic feel, a seeded shuffle that is not a straight
+line. There is no per-unit timing jitter yet, each unit's delay is still the closed formula
+`defaultStaggerStep`/`staggerStep` compute (`core/tracks/units.js`). Reach for `random` first; a jitter
+primitive is a real gap to fill later, not one to approximate by hand now.
+
 ## Distance and duration: measured here, not imported
 
 Carbon and Material both say a move's duration should follow the ground it covers, and neither one

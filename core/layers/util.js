@@ -11,6 +11,7 @@ import { isLook, applyComposite } from '../looks/index.js';
 import { isLightBg, parseColor } from '../color/engine.js';
 // The frame authority. One builder, so a kit that has to derive a frame derives the SAME one boot did.
 import { frameOf } from '../layout/safe.js';
+import { resolveGroupClock } from '../timeline/group-clock.js';
 
 // REFUSE A VALUE THE BROWSER WOULD DROP, at every named style write, not only the `css` catch-all
 // (applyCss below already does this for `L.css`; this is the same check, same mechanism, extended to
@@ -110,6 +111,9 @@ export const PROPS = {
   items: {}, align2: {}, direction: {}, wrap: {}, justify: {}, h: {},
   // a group child's own box and timing (addGroupChild / sizeChild)
   grow: {}, basis: {}, delay: {}, contentStart: {}, critical: {}, x: {}, y: {}, split: {}, origin: {},
+  // a GROUP's own local clock (resolveGroupWindow / core/timeline/group-clock.js): its children's
+  // tracks run on this cycle instead of the group's outer start/duration.
+  clock: {},
 };
 
 // crtSpec(o) -> { filter, background }. Pure, and exported so the arithmetic is testable without a
@@ -639,6 +643,27 @@ function styleTextOf({ inkAt, bgWinAt, ACCENT_BGS, trackingCss }, el, L, midT) {
   applyTextContent(el, L);
 }
 
+// resolveGroupWindow(groupL, outerStart, outerDuration, outerExitDur, inheritedClock): the window this
+// GROUP's own children compute their `delay`/`contentStart` offsets against, and the clock descriptor
+// (if any) baked onto every one of them for `runTracks` (core/tracks/index.js) to read at frame time.
+//
+// No `clock`: children read this group's OUTER window exactly as before this feature existed, byte
+// for byte (`groupClock` forwarded from `inheritedClock` so a DESCENDANT of an already-clocked
+// ancestor still gets remapped, even through a plain group with no clock of its own).
+//
+// A `clock`: children are offset against the LOCAL CYCLE (`start: 0, duration: gc.duration`) instead
+// of the outer window, and carry a fresh `groupClock` naming where that cycle sits in film time. This
+// REPLACES rather than composes with `inheritedClock`: the nearest enclosing clock owns a subtree, the
+// same "one owner" rule `timeWarp`/`timeRemap` already enforce for a single layer's clock (two active
+// clocks over one subtree is the state that mechanism refuses, not a case this file re-opens).
+export function resolveGroupWindow(groupL, outerStart, outerDuration, outerExitDur, inheritedClock) {
+  if (groupL.clock == null)
+    return { start: outerStart, duration: outerDuration, exitDur: outerExitDur, groupClock: inheritedClock || null };
+  const gc = resolveGroupClock(groupL.clock, groupL.id || groupL.type || 'group');
+  return { start: 0, duration: gc.duration, exitDur: outerExitDur,
+    groupClock: { outerStart, outerEnd: outerStart + outerDuration, gc } };
+}
+
 // A free group's children place themselves with position:absolute, which resolves against the
 // nearest POSITIONED ancestor. Set here rather than in layoutGroup because a top-level free group
 // is already absolute with left/top from scene.html, and relative would break it.
@@ -658,7 +683,8 @@ function buildGroupBranch(env, c, C, parentEl, timing) {
   parentEl.appendChild(c);
   // RECURSE WITH THIS GROUP'S OWN WINDOW, not the outermost layer's, so a grandchild's `delay` is
   // an offset from its own container, not the whole layer's top-left (MISTAKES #69-adjacent).
-  for (const gc of C.children || []) addGroupChild(env, c, gc, { start: timing.cStart, duration: timing.cDur, exitDur: timing.exitDur });
+  const root = resolveGroupWindow(C, timing.cStart, timing.cDur, timing.exitDur, timing.groupClock);
+  for (const gc of C.children || []) addGroupChild(env, c, gc, root);
 }
 
 // DELEGATE to the primitive. This file used to re-implement a SUBSET of each type's build inline,
@@ -677,16 +703,23 @@ function buildLeafBranch(env, c, C, rootL) {
 // them by `[data-start]` (core/clips.js), so a group child needs the same dataset a top-level layer
 // gets (MISTAKES #69: without it, `delay` was accepted and silently inert).
 function writeChildTiming(env, c, C, timing) {
-  const { cStart, cDur, exitDur, contentStart } = timing;
-  c.dataset.start = String(cStart);
-  c.dataset.duration = String(cDur);
+  const { cStart, cDur, exitDur, contentStart, groupClock } = timing;
+  // VISIBILITY (driveClips: enter/exit/z-order) spans the whole group, not one cycle: `cStart`/`cDur`
+  // are cycle-relative under a running clock, so a looping child would otherwise fade out the instant
+  // its first cycle ended. `groupClock.outerStart/outerEnd` is the group's own authored window, the
+  // one the child stays on screen for regardless of how many times its clock loops inside it.
+  const visStart = groupClock ? groupClock.outerStart : cStart;
+  const visDur = groupClock ? (groupClock.outerEnd - groupClock.outerStart) : cDur;
+  c.dataset.start = String(visStart);
+  c.dataset.duration = String(visDur);
   if (C.id) c.dataset.id = String(C.id);
   c.dataset.anim = C.anim || 'none';
   if (C.out) c.dataset.out = C.out;
   if (C.enterDur != null) c.dataset.enter = String(C.enterDur);
   if (exitDur != null) c.dataset.exitDur = String(exitDur);
   env.extra.push({ L: { ...C, start: cStart, duration: cDur,
-    ...(C.contentStart != null ? { contentStart } : {}) }, el: c, units: C.split ? env.splitText(c, C.split) : null });
+    ...(C.contentStart != null ? { contentStart } : {}),
+    ...(groupClock ? { groupClock } : {}) }, el: c, units: C.split ? env.splitText(c, C.split) : null });
 }
 
 function addGroupChild(env, parentEl, C, rootL) { // recursive: nested group OR a text/image/count leaf
@@ -694,10 +727,12 @@ function addGroupChild(env, parentEl, C, rootL) { // recursive: nested group OR 
   const isGroup = C.type === 'group';
   // A CHILD'S CLOCK IS ITS PARENT'S, OFFSET BY `delay`: containment scopes time here exactly as it
   // scopes geometry. Computed before the branch, because a group must know its own window before
-  // handing it to its children.
+  // handing it to its children. Under a running group `clock`, `rootL` is the LOCAL CYCLE window
+  // (resolveGroupWindow above), so `cStart`/`cDur` land inside one cycle rather than the outer span.
   const d = Math.max(0, +C.delay || 0);
   const cStart = (rootL.start ?? 0) + d, cDur = Math.max(0, (rootL.duration ?? 0) - d);
-  const timing = { cStart, cDur, exitDur: childExitDur(C, rootL), contentStart: childContentStart(C, rootL, d) };
+  const timing = { cStart, cDur, exitDur: childExitDur(C, rootL), contentStart: childContentStart(C, rootL, d),
+    groupClock: rootL.groupClock || null };
 
   if (isGroup) buildGroupBranch(env, c, C, parentEl, timing);
   else buildLeafBranch(env, c, C, rootL);
@@ -730,6 +765,7 @@ export function createKit(ctx) {
   const api = { ...ctx, frame, hexA, onDark, trackingCss, styleText, chipBox, applyFade, decorate, layoutGroup, sizeChild };
   const env = { api, extra, icon, splitText, styleText };
   api.addGroupChild = (parentEl, C, rootL) => addGroupChild(env, parentEl, C, rootL);
+  api.resolveGroupWindow = resolveGroupWindow;
   return api;
 }
 

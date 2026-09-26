@@ -3,7 +3,7 @@
   "name": "card.stat",
   "type": "vawe:block",
   "title": "card.stat",
-  "description": "a boxed metric: a label, a number counting up, a chip saying how much it went up",
+  "description": "a boxed metric: a label, a number counting up, and a delta chip only when you pass one",
   "tags": [
     "statCard"
   ],
@@ -24,9 +24,7 @@
       "dur": 4,
       "w": 340,
       "to": 1950,
-      "label": "frames rendered",
-      "delta": "+12%",
-      "deltaUp": true
+      "label": "frames rendered"
     },
     "props": [
       "x",

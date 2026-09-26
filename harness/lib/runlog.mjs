@@ -23,6 +23,10 @@ export function appendRun(film, record = {}) {
   const line = {
     at: new Date().toISOString(),
     cmd: record.cmd || 'unknown',
+    // The one signal the judge's self-recorded-PASS refusal reads (quality/gates/judge.mjs): which
+    // Claude Code session made this run. Auto-captured, never passed by a caller, so it cannot be
+    // spoofed by a call site forgetting to set it. Null outside Claude Code (a human's own shell).
+    session: process.env.CLAUDE_CODE_SESSION_ID || null,
     git,
     dirty,
     checks: record.checks || [],

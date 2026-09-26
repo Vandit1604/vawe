@@ -638,6 +638,8 @@
   "easings--springease": "{\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": 160\n    },\n    {\n      \"t\": 1.2,\n      \"x\": 460,\n      \"ease\": \"springEase\"\n    }\n  ]\n}",
   "easings--springstiff": "{\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": 160\n    },\n    {\n      \"t\": 1.2,\n      \"x\": 460,\n      \"ease\": \"springStiff\"\n    }\n  ]\n}",
   "easings--standard": "{\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": 160\n    },\n    {\n      \"t\": 1.2,\n      \"x\": 460,\n      \"ease\": \"standard\"\n    }\n  ]\n}",
+  "group-clock-loop-shapes--forever": "{\n  \"type\": \"group\",\n  \"clock\": {\n    \"duration\": 1,\n    \"loop\": \"forever\"\n  },\n  \"children\": []\n}",
+  "group-clock-loop-shapes--pingpong": "{\n  \"type\": \"group\",\n  \"clock\": {\n    \"duration\": 1,\n    \"loop\": \"pingpong\"\n  },\n  \"children\": []\n}",
   "time-remaps-the-layer-s-own-clock--freeze": "{\n  \"timeRemap\": \"freeze\",\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": -420\n    },\n    {\n      \"t\": 4,\n      \"x\": 420,\n      \"ease\": \"linear\"\n    }\n  ]\n}",
   "time-remaps-the-layer-s-own-clock--hold": "{\n  \"timeRemap\": \"hold\",\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": -420\n    },\n    {\n      \"t\": 4,\n      \"x\": 420,\n      \"ease\": \"linear\"\n    }\n  ]\n}",
   "time-remaps-the-layer-s-own-clock--rewind": "{\n  \"timeRemap\": \"rewind\",\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": -420\n    },\n    {\n      \"t\": 4,\n      \"x\": 420,\n      \"ease\": \"linear\"\n    }\n  ]\n}",

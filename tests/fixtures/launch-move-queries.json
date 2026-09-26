@@ -1,0 +1,6 @@
+[
+  { "q": "3D tilted product screenshot on a perspective plane that settles", "name": "litPlane" },
+  { "q": "a cursor that demos a feature: moves, clicks, ripple", "name": "pointer" },
+  { "q": "a shape or text mask wiping content in", "name": "maskReveal" },
+  { "q": "camera push in zoom onto a UI region", "name": "ui focus zoom" }
+]
