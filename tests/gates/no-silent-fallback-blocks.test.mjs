@@ -17,29 +17,25 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const blocks = (f) => path.join(ROOT, 'blocks', f);
 await import(`file://${blocks('index.mjs')}`);   // fills the block registry `pane` (below) resolves other blocks through
-const { settingsRow } = await import(`file://${blocks('app.mjs')}`);
 const { palette } = await import(`file://${blocks('codeanim.mjs')}`);
 const { screenSwap } = await import(`file://${blocks('core.mjs')}`);
 const { keyboard } = await import(`file://${blocks('interact.mjs')}`);
 const { toneColor } = await import(`file://${blocks('kit.mjs')}`);
-const { diff } = await import(`file://${blocks('dev.mjs')}`);
 
 const throwsUnknown = (fn, label) => assert.throws(fn, /unknown/i, `${label} should refuse an unknown name, not fall back to a default`);
 const screen = { block: 'callout', props: { text: 'x' } };
 
-throwsUnknown(() => settingsRow({ x: 0, y: 0, control: 'toggel' }), 'blocks/app.mjs settingsRow control');
+// `settingsRow` (blocks/app.mjs) and `diff` (blocks/dev.mjs) were cut: both were static HTML
+// fragments with no mechanism, so their own name-keyed refusal went with them.
 throwsUnknown(() => palette('midnite'), 'blocks/codeanim.mjs palette theme');
 throwsUnknown(() => screenSwap({ screens: [screen], transition: 'wype' }), 'blocks/core.mjs screenSwap transition');
 throwsUnknown(() => keyboard({ x: 0, y: 0, layout: 'qwety' }), 'blocks/interact.mjs keyboard layout');
 throwsUnknown(() => toneColor('sucess'), 'blocks/kit.mjs toneColor tone');
-throwsUnknown(() => diff({ lines: [{ sign: '~', text: 'x' }] }), 'blocks/dev.mjs diff sign');
 
 // The legal values still work (no false refusal introduced).
-assert.doesNotThrow(() => settingsRow({ x: 0, y: 0, control: 'chevron' }));
 assert.doesNotThrow(() => palette('midnight'));
 assert.doesNotThrow(() => screenSwap({ screens: [screen], transition: 'wipe' }));
 assert.doesNotThrow(() => keyboard({ x: 0, y: 0, layout: 'qwerty' }));
 assert.doesNotThrow(() => toneColor('ok'));
-assert.doesNotThrow(() => diff({ lines: [{ sign: '+', text: 'x' }] }));
 
-console.log('ok - no-silent-fallback-blocks: 6 name-keyed sites refuse an unknown name instead of silently defaulting');
+console.log('ok - no-silent-fallback-blocks: 4 name-keyed sites refuse an unknown name instead of silently defaulting');

@@ -12,7 +12,7 @@
 import {
   TOKENS, HAIR, r2, text, rect, box,
   R, E, SPACE, TYPE, cardChrome,
-  stagger, needData, blockFactory,
+  stagger, blockFactory,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that ships
@@ -26,33 +26,6 @@ const T = TOKENS;
 // (these are the boring, load-bearing surfaces a film composes around, not its loud moment); MOTION
 // restrained, either the layer's own envelope `anim` for a single-unit card or `parts` where a family
 // stages its own repeating children. engine-doctrine/CRAFT/HTML-FRAGMENTS.md.
-
-// card. One product surface: hairline + a single step of elevation, content, a footer row.
-// No tinted inner panel by default (`tint` matches the card fill): a panel inside a panel is two
-// surfaces saying one thing. `tint` still paints when a caller passes a real one.
-export function card({ x, y, w = 740, h = 336, tint = 'var(--card)', title, desc, pills = [],
-  cta = 'Explore', start = 0, dur = 4, anim = 'rise', enterDur = 0.5 } = {}) {
-  // Neutral chips, not accent pills. A tag is metadata; spending the brand colour on a row of them
-  // leaves nothing louder for the thing that matters. Same size/pad/radius as kit.mjs's `pill`.
-  const pillsHtml = pills.length ? `<div style="display:flex;flex-wrap:wrap;gap:${SPACE.xs}px;align-items:center">`
-    + pills.map((p) => `<span style="display:inline-flex;align-items:center;font:500 ${TYPE.body}px var(--font-sans);`
-      + `color:${T.sub};background:${T.surface};border-radius:${R.pill}px;padding:6px 16px">${p}</span>`).join('') + '</div>' : '';
-  const html = `<div style="display:flex;flex-direction:column;width:${w}px;height:${h}px;box-sizing:border-box">`
-    + `<div style="flex:1;min-height:0;background:${tint};border-radius:${R.chip}px;padding:${SPACE.lg}px;`
-    + `box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.sm}px">`
-    + `<span style="font:700 ${TYPE.head}px var(--font-sans);color:${T.ink};letter-spacing:-0.02em">${title}</span>`
-    + (desc ? `<span style="font:400 ${TYPE.base}px var(--font-sans);color:${T.sub}">${desc}</span>` : '')
-    + pillsHtml + '</div>'
-    // The footer sits BELOW a rule rather than floating under the content: it is a different kind of
-    // row (an action, not a fact), and the hairline is what says so.
-    + (cta ? `<div style="height:1px;background:${T.hair}"></div>`
-      + `<div style="display:flex;justify-content:space-between;align-items:center;padding:${SPACE.sm}px ${SPACE.lg}px">`
-      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${T.sub}">${cta}</span>`
-      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${T.accent}">→</span></div>` : '')
-    + '</div>';
-  return [{ type: 'html', x, y, w, h, html, ...cardChrome({ radius: R.card, elevation: E.card, anim }),
-    start, duration: dur, enterDur, exitDur: 0.35 }];
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // colorCycle. One word rendered in a sequence of hues so it visibly cycles colour (proof of "any
@@ -78,50 +51,6 @@ export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// stripeCard. A recognizably-"Stripe" payments card: amount + mini bar chart + blurple Pay button.
-// Uses Stripe's real product hexes. The "reads a site → rebuilds its look" payoff.
-// `amount` is a prop because it is the only figure on the card and it reaches every caller. It was
-// baked, so every video that used this block published the same invented number (MISTAKES #67).
-// LEFT NATIVE, not a candidate after all: quality/gates/lib-test.mjs asserts the bar chart's total
-// width off `card.children[2].children` directly ("the bar chart spans the card's content box"), and
-// this pass is not permitted to touch quality/gates/**. A native `group` of `box()` bars is the form
-// that invariant can still be read off.
-export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = {}) {
-  const bars = [38, 52, 44, 66, 58, 80, 72];
-  // THE CHART SPANS THE CARD. The bars were a fixed 26px, so the only part of this card that reads as
-  // Stripe stopped 62px short of the Pay button beneath it at the catalog's own w:340 (7 x 26 + 6 x 8
-  // = 230 of a 292px content box) and 102px short at the default w:380. A dashboard's volume chart is
-  // measured against the panel it sits in; one that ends two thirds of the way across is a sparkline
-  // someone left in a wide box. Derived from `w`, it fills at every width.
-  const barW = r2(Math.max(8, (w - 2 * 24 - 6 * 8) / 7));
-  return [{
-    type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: 24,
-    bg: T.card, radius: 12, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: [
-      text({ text: 'Net volume', size: 18, color: T.stripeGrey, font: 'mono' }),
-      text({ text: (amount || ''), size: 44, weight: 700, color: T.stripeNavy, ls: '-0.02em' }),
-      { type: 'group', layout: 'row', items: 'flex-end', gap: 8, h: 70, children:
-        bars.map((b) => box({ w: barW, h: b, radius: 4, bg: T.blurple })) },
-      { type: 'group', bg: T.blurple, radius: 4, pad: '12px 0', layout: 'row', justify: 'center',
-        children: [text({ text: (amount ? `Pay ${amount}` : 'Pay'), size: 18, weight: 600, color: '#fff' })] },
-    ],
-  }];
-}
-
-// quote: a pull quote with attribution. The one place big italic-ish restraint reads as premium.
-export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {}) {
-  // Without this the template literal below stringified `undefined` and printed the WORD
-  // "undefined" in quotation marks, at display size, in the finished film. An empty block is bad;
-  // one that renders a JavaScript artefact as its headline is worse.
-  needData('text', q, 'quote');
-  // The attribution is a label, so it is set like every other label in this file: mono, tracked, quiet.
-  const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.md}px;width:${w}px">`
-    + `<span style="font:600 ${TYPE.display}px var(--font-sans);color:${T.ink};letter-spacing:-0.02em">“${q}”</span>`
-    + (author ? `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub};letter-spacing:0.04em">${author}</span>` : '')
-    + '</div>';
-  return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
-}
-
 // kpiRow: a row of stat cells (value + label). Scale contrast without a card grid.
 // THE FIGURES COUNT UP, cell by cell across the row. An item that gives a numeric `to` becomes a
 // native `count` layer and runs (no html counter exists, so this path stays native by construction);
@@ -204,37 +133,6 @@ export function captions({ lines = [], x = 460, y = 980, size = 30, start = 0 } 
 // ═════════════════════════════════════════════════════════════════════════════
 // WAVE 1 families, charts + card variants. Charts that need curves/arcs use ONE `html`+SVG layer
 // (crisp, deterministic, animates as a unit); bar-family stays native boxes for per-bar life.
-
-// pricingCard: plan · price · feature ticks · CTA. highlight = the featured plan (accent border + CTA).
-// `price` defaults to nothing. A DEFAULT price is a figure published by every caller who forgets to
-// set one, which is the same defect as deploySuccess's baked "Ready in 1.2s".
-export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = '/mo', features = [], cta = 'Start free', highlight = false, start = 0, dur = 4 } = {}) {
-  // The tick was `--up`. Green there means nothing directional: a feature is INCLUDED, not up, and
-  // spending the success colour on a static list is the stoplight-palette bug in miniature.
-  const featuresHtml = features.map((f) => `<div style="display:flex;align-items:center;gap:${SPACE.xs}px">`
-    + `<span style="font:700 ${TYPE.body}px var(--font-sans);color:${T.accent}">✓</span>`
-    + `<span style="font:400 ${TYPE.body}px var(--font-sans);color:${T.sub}">${f}</span></div>`).join('');
-  // T.onAccent, not '#fff'. This CTA is filled with the accent, and on higgsfield's acid lime white
-  // measured 1.16:1, shipped, unreadable. The theme computes a readable ink for its own accent
-  // (core/boot.js); the block asks for it rather than assuming.
-  const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.md}px;padding:${SPACE.lg}px;`
-    + `box-sizing:border-box;width:${w}px">`
-    // The plan name reads as an eyebrow, not a heading: the price is the heading. Held at TYPE.base
-    // and 600 so it stays WCAG "large text" and the accent spelling keeps its 3:1 allowance.
-    + `<span style="font:600 ${TYPE.base}px var(--font-mono);color:${highlight ? T.accentInk : T.dim};`
-    + `letter-spacing:0.1em">${String(plan).toUpperCase()}</span>`
-    + `<div style="display:flex;align-items:flex-end;gap:${SPACE.tight}px">`
-    + `<span style="font:700 ${TYPE.display}px var(--font-sans);color:${T.ink};letter-spacing:-0.03em">${price}</span>`
-    + `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.dim}">${period}</span></div>`
-    + `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.xs}px">${featuresHtml}</div>`
-    + `<div style="background:${highlight ? T.accent : T.surface};border-radius:${R.chip}px;padding:${SPACE.sm}px 0;`
-    + `display:flex;justify-content:center">`
-    + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${highlight ? T.onAccent : T.ink}">${cta}</span></div>`
-    + '</div>';
-  return [{ type: 'html', x, y, w, html,
-    bg: T.card, radius: R.card, border: highlight ? `1.5px solid ${T.accent}` : HAIR, elevation: highlight ? E.card : E.flat,
-    start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
-}
 
 // ═════════════════════════════════════════════════════════════════════════════
 // WAVE 2 families, dev blocks + device/UI chrome.
@@ -618,21 +516,6 @@ export function screenSwap({ x = 0, y = 0, w = 320, screens = [], hold = 1.6, ov
 // x · y · start · dur are excluded from every table on purpose. They are placement and timing the
 // SCENE supplies, never content an author dials.
 export const CORE_SCHEMAS = {
-  card: {
-    w: { kind: 'int', min: 160, max: 1920, def: 740 },
-    h: { kind: 'int', min: 120, max: 1080, def: 336 },
-    // The content region's fill. Defaults to the CARD's own fill, so the card reads as one surface;
-    // pass a real tint to get a panel back.
-    tint: { kind: 'color', def: 'var(--card)' },
-    title: { kind: 'str', max: 60 },
-    desc: { kind: 'str', max: 160 },
-    pills: { kind: 'list', of: { kind: 'str', max: 24 }, def: [] },
-    // Empty draws no footer row at all.
-    cta: { kind: 'str', max: 24, def: 'Explore' },
-    anim: { kind: 'str', max: 24, def: 'rise' },
-    enterDur: { kind: 'num', min: 0, max: 4, def: 0.5 },
-  },
-
   colorCycle: {
     word: { kind: 'str', max: 40, def: 'colour' },
     size: { kind: 'int', min: 18, max: 400, def: 78 },
@@ -641,19 +524,6 @@ export const CORE_SCHEMAS = {
     // Seconds per hue. The block emits one layer per step across `dur`, so a very small `each` is a
     // very large layer count for one word.
     each: { kind: 'num', min: 0.05, max: 5, def: 0.5 },
-  },
-
-  stripeCard: {
-    w: { kind: 'int', min: 200, max: 1080, def: 380 },
-    // The only figure on the card, and empty by default: it was baked once and every caller
-    // published the same invented number.
-    amount: { kind: 'str', max: 20, def: '' },
-  },
-
-  quote: {
-    w: { kind: 'int', min: 200, max: 1920, def: 900 },
-    text: { kind: 'str', max: 240 },
-    author: { kind: 'str', max: 60 },
   },
 
   kpiRow: {
@@ -690,18 +560,6 @@ export const CORE_SCHEMAS = {
       dur: { kind: 'num', min: 0.2, max: 30 },
     } }, def: [] },
     size: { kind: 'int', min: 18, max: 120, def: 30 },
-  },
-
-  pricingCard: {
-    w: { kind: 'int', min: 200, max: 1080, def: 360 },
-    plan: { kind: 'str', max: 24, def: 'Pro' },
-    // Empty by default: a default price is a figure published by every caller who forgets to set one.
-    price: { kind: 'str', max: 16, def: '' },
-    period: { kind: 'str', max: 12, def: '/mo' },
-    features: { kind: 'list', of: { kind: 'str', max: 60 }, def: [] },
-    cta: { kind: 'str', max: 24, def: 'Start free' },
-    // The featured plan: accent border, accent CTA, one step more elevation.
-    highlight: { kind: 'bool', def: false },
   },
 
   lowerThird: {
