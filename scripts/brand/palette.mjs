@@ -11,17 +11,18 @@ import puppeteer from 'puppeteer';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const arg = process.argv[2];
-if (!arg || !fs.existsSync(arg)) { console.error('usage: node scripts/brand/palette.mjs <sections-dir | screenshot.png>'); process.exit(1); }
-const files = fs.statSync(arg).isDirectory()
-  ? fs.readdirSync(arg).filter((f) => /\.(png|jpe?g)$/i.test(f)).map((f) => path.join(arg, f))
-  : [arg];
-if (!files.length) { console.error('no images found'); process.exit(1); }
-const uris = files.map((f) => `data:image/${f.match(/jpe?g$/i) ? 'jpeg' : 'png'};base64,` + fs.readFileSync(f).toString('base64'));
+const hex = ({ r, g, b }) => '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('');
+const lum = ({ r, g, b }) => (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+const sat = ({ r, g, b }) => { const mx = Math.max(r, g, b), mn = Math.min(r, g, b); return mx === 0 ? 0 : (mx - mn) / mx; };
 
-const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--force-color-profile=srgb'] });
-const page = await browser.newPage();
-const result = await page.evaluate(async (uris) => {
+// eyedrop(files) → { light, avgLum, bg, text, accents, top, cols } (hex strings). The one pixel-histogram
+// pass, shared by the CLI below and `make kit` (scripts/brand/kit.mjs), so a themed manifest and a
+// human eyedrop read the same numbers.
+export async function eyedrop(files) {
+  const uris = files.map((f) => `data:image/${f.match(/jpe?g$/i) ? 'jpeg' : 'png'};base64,` + fs.readFileSync(f).toString('base64'));
+  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--force-color-profile=srgb'] });
+  const page = await browser.newPage();
+  const result = await page.evaluate(async (uris) => {
   const bins = new Map(); let lumSum = 0, n = 0;
   const q = (v) => Math.round(v / 24) * 24;
   for (const uri of uris) {
@@ -45,46 +46,64 @@ const result = await page.evaluate(async (uris) => {
   // MOST FREQUENT bins, which on any white-first site are sixteen neutrals. Ranking could not fix what
   // was never in the list. The extra bins cost nothing, they are counted either way.
   return { cols: cols.slice(0, 400), total: n, avgLum: lumSum / n };
-}, uris);
-await browser.close();
+  }, uris);
+  await browser.close();
 
-const hex = ({ r, g, b }) => '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('');
-const lum = ({ r, g, b }) => (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-const sat = ({ r, g, b }) => { const mx = Math.max(r, g, b), mn = Math.min(r, g, b); return mx === 0 ? 0 : (mx - mn) / mx; };
-const cols = result.cols;
-const light = result.avgLum > 0.5;
-// bg = the most-frequent LOW-saturation colour on the dominant side (real backdrop, not a photo blob)
-const bg = cols.filter((c) => sat(c) < 0.2 && (light ? lum(c) > 0.7 : lum(c) < 0.28))[0] || cols[0];
-// text = the EXTREME neutral, not the most-frequent: text is thin (few pixels) so it loses a
-// frequency vote to fills, but it IS the darkest (light page) / lightest (dark page) near-neutral
-// that's actually present. Pick that among colours above a tiny presence floor.
-const textCands = cols.filter((c) => sat(c) < 0.28 && c.c > result.total * 0.001);
-const text = (light ? textCands.sort((a, b) => lum(a) - lum(b)) : textCands.sort((a, b) => lum(b) - lum(a)))[0] || cols[cols.length - 1];
-// An accent is the colour a brand SPENDS sparingly, so ranking candidates by how much of the page they
-// cover finds the opposite of one. Ramp's lime lives on two buttons, well under 1% of the pixels, and
-// frequency-ranking handed back #111605 instead: near-black antialiasing noise that is technically
-// saturated and completely invisible. Two changes: an accent must be VISIBLE (not near-black, not
-// near-white, or it is a shadow or a highlight), and candidates rank by vividness weighted by presence
-// rather than by presence alone, so a small vivid colour beats a large dull one. Good design uses
-// accents sparingly, so the old ranking failed hardest on exactly the brands worth reflecting
-// (engine-doctrine/MISTAKES.md #207).
-const accents = cols
-  .filter((c) => sat(c) > 0.4 && lum(c) > 0.12 && lum(c) < 0.95 && c.c > result.total * 0.0002)
-  .sort((a, b) => (sat(b) * Math.sqrt(b.c)) - (sat(a) * Math.sqrt(a.c)))
-  .slice(0, 3);
+  const cols = result.cols;
+  const light = result.avgLum > 0.5;
+  // bg = the most-frequent LOW-saturation colour on the dominant side (real backdrop, not a photo blob)
+  const bg = cols.filter((c) => sat(c) < 0.2 && (light ? lum(c) > 0.7 : lum(c) < 0.28))[0] || cols[0];
+  // text = the EXTREME neutral, not the most-frequent: text is thin (few pixels) so it loses a
+  // frequency vote to fills, but it IS the darkest (light page) / lightest (dark page) near-neutral
+  // that's actually present. Pick that among colours above a tiny presence floor.
+  const textCands = cols.filter((c) => sat(c) < 0.28 && c.c > result.total * 0.001);
+  const text = (light ? textCands.sort((a, b) => lum(a) - lum(b)) : textCands.sort((a, b) => lum(b) - lum(a)))[0] || cols[cols.length - 1];
+  // An accent is the colour a brand SPENDS sparingly, so ranking candidates by how much of the page they
+  // cover finds the opposite of one. Ramp's lime lives on two buttons, well under 1% of the pixels, and
+  // frequency-ranking handed back #111605 instead: near-black antialiasing noise that is technically
+  // saturated and completely invisible. Two changes: an accent must be VISIBLE (not near-black, not
+  // near-white, or it is a shadow or a highlight), and candidates rank by vividness weighted by presence
+  // rather than by presence alone, so a small vivid colour beats a large dull one. Good design uses
+  // accents sparingly, so the old ranking failed hardest on exactly the brands worth reflecting
+  // (engine-doctrine/MISTAKES.md #207).
+  const accents = cols
+    .filter((c) => sat(c) > 0.4 && lum(c) > 0.12 && lum(c) < 0.95 && c.c > result.total * 0.0002)
+    .sort((a, b) => (sat(b) * Math.sqrt(b.c)) - (sat(a) * Math.sqrt(a.c)))
+    .slice(0, 3);
 
-console.log(`\nEYEDROP · ${files.length} image(s) · ${path.basename(arg)}`);
-console.log(`  DOMINANCE : ${light ? 'LIGHT / white-first' : 'DARK-first'}  (whole-page avg luminance ${result.avgLum.toFixed(2)})`);
-console.log(`  bg        : ${hex(bg)}`);
-console.log(`  text      : ${hex(text)}`);
-console.log(`  accents   : ${accents.map(hex).join('  ') || '(none saturated)'}`);
-console.log(`  top       : ${cols.slice(0, 12).map(hex).join(' ')}`);
-console.log(`  → author themes/<brand>.json from these, then CONFIRM with make beats VS=<brand>.\n`);
+  return { light, avgLum: result.avgLum, bg: hex(bg), text: hex(text), accents: accents.map(hex), top: cols.slice(0, 12).map(hex), cols };
+}
 
-const sw = cols.map((c) => `<div style="flex:1;background:${hex(c)}"></div>`).join('');
-const html = `<body style="margin:0"><div style="display:flex;height:120px;width:1280px">${sw}</div>
-  <div style="font:600 20px monospace;padding:14px 8px">${light ? 'LIGHT / white-first' : 'DARK-first'} · bg ${hex(bg)} · text ${hex(text)} · accents ${accents.map(hex).join(' ')}</div></body>`;
-const b2 = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
-const p2 = await b2.newPage(); await p2.setViewport({ width: 1296, height: 190 });
-await p2.setContent(html); await p2.screenshot({ path: '/tmp/palette.png' }); await b2.close();
-console.log('  swatch card → /tmp/palette.png\n');
+// writeSwatch(path, { light, bg, text, accents, cols }) → a swatch card PNG, the same one the CLI below
+// writes to /tmp/palette.png. Split out so `make kit` can drop it beside kit.json without a second render.
+export async function writeSwatch(outPath, { light, bg, text, accents, cols }) {
+  const sw = cols.map((c) => `<div style="flex:1;background:${hex(c)}"></div>`).join('');
+  const html = `<body style="margin:0"><div style="display:flex;height:120px;width:1280px">${sw}</div>
+  <div style="font:600 20px monospace;padding:14px 8px">${light ? 'LIGHT / white-first' : 'DARK-first'} · bg ${bg} · text ${text} · accents ${accents.join(' ')}</div></body>`;
+  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+  const page = await browser.newPage(); await page.setViewport({ width: 1296, height: 190 });
+  await page.setContent(html); await page.screenshot({ path: outPath }); await browser.close();
+}
+
+// ---------- CLI ----------
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname);
+if (isMain) {
+  const arg = process.argv[2];
+  if (!arg || !fs.existsSync(arg)) { console.error('usage: node scripts/brand/palette.mjs <sections-dir | screenshot.png>'); process.exit(1); }
+  const files = fs.statSync(arg).isDirectory()
+    ? fs.readdirSync(arg).filter((f) => /\.(png|jpe?g)$/i.test(f)).map((f) => path.join(arg, f))
+    : [arg];
+  if (!files.length) { console.error('no images found'); process.exit(1); }
+
+  const p = await eyedrop(files);
+  console.log(`\nEYEDROP · ${files.length} image(s) · ${path.basename(arg)}`);
+  console.log(`  DOMINANCE : ${p.light ? 'LIGHT / white-first' : 'DARK-first'}  (whole-page avg luminance ${p.avgLum.toFixed(2)})`);
+  console.log(`  bg        : ${p.bg}`);
+  console.log(`  text      : ${p.text}`);
+  console.log(`  accents   : ${p.accents.join('  ') || '(none saturated)'}`);
+  console.log(`  top       : ${p.top.join(' ')}`);
+  console.log(`  → author themes/<brand>.json from these, then CONFIRM with make beats VS=<brand>.\n`);
+
+  await writeSwatch('/tmp/palette.png', p);
+  console.log('  swatch card → /tmp/palette.png\n');
+}
