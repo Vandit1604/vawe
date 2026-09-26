@@ -106,10 +106,31 @@ const put = (from, to) => {
   copied++; bytes += fs.statSync(to).size;
 };
 
+// SWEEP, not just copy: a file dropped from one of these source trees (a block retired from
+// blocks/catalog/, say) used to linger in its vendored copy forever, because `put` only ever adds
+// or updates. site/public/blocklib is tracked (not gitignored, unlike core/themes/assets here), so
+// an un-swept orphan is a permanent, silent diff between the source of truth and its published copy.
+//
+// Scoped to TOP-LEVEL entries this mapping actually sources: site/public/blocklib is a shared
+// destination (harness/dev/preset-sheets.mjs writes blocklib/presets/, theme-sheet.mjs writes
+// blocklib/themes/, neither reads from blocks/), so a blanket sweep of the whole destination would
+// delete another generator's output the moment its name is absent from `blocks/`.
 for (const [src, dst] of COPY) {
   const from = path.join(root, src);
   if (!fs.existsSync(from)) { console.error(`✗ missing ${src}`); process.exit(1); }
-  for (const f of walk(from)) put(f, path.join(PUB, dst, path.relative(from, f)));
+  const to = path.join(PUB, dst);
+  const topLevel = new Set(fs.readdirSync(from));
+  const want = new Set();
+  for (const f of walk(from)) { const rel = path.relative(from, f); want.add(rel); put(f, path.join(to, rel)); }
+  if (fs.existsSync(to)) {
+    for (const f of walk(to)) {
+      const rel = path.relative(to, f);
+      if (!topLevel.has(rel.split(path.sep)[0])) continue;   // owned by a different generator, not this mapping
+      if (want.has(rel)) continue;
+      if (DRY) { drift++; console.log(`~ stale  ${path.relative(PUB, f)}`); }
+      else { fs.rmSync(f); copied++; }
+    }
+  }
 }
 for (const [src, dst] of FILES) put(path.join(root, src), path.join(PUB, dst));
 
