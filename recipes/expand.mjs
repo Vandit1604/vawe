@@ -380,6 +380,8 @@ function expandWarpLine(scene, line) {
       align: paramOf(name, recipe, 'align', line.params),
       autoRotate: paramOf(name, recipe, 'autoRotate', line.params),
       curviness: paramOf(name, recipe, 'curviness', line.params),
+      from: paramOf(name, recipe, 'from', line.params),
+      to: paramOf(name, recipe, 'to', line.params),
       dur: paramOf(name, recipe, 'dur', line.params),
       ease: paramOf(name, recipe, 'ease', line.params) };
   } else if (name === 'line-reveal') {
