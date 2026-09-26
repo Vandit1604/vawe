@@ -155,9 +155,15 @@ export function verify(filmArg, refArg) {
   const { line: assetLine, missing } = assetUse(scene, filmPath);
   lines.push(assetLine);
 
-  const clipped = runFindings('quality/audit.mjs', filmPath, `${baseOf(mp4)}.audit`)
-    .filter((f) => f.code === 'clipped-text' || f.code === 'clipped-component');
+  const auditFindings = runFindings('quality/audit.mjs', filmPath, `${baseOf(mp4)}.audit`);
+  const clipped = auditFindings.filter((f) => f.code === 'clipped-text' || f.code === 'clipped-component');
   lines.push(`text clipped at edges: ${clipped.length}`);
+
+  // quality/audit.mjs's `overlap` (text over text) and `overlap-mark` (text over a `logotype` mark at
+  // rest): a wave mark drawn over a wordmark's letters, or a tagline over the mark, passed this line
+  // as 0 before either finding existed. Both count here; `overlap` still hard-fails audit.mjs itself.
+  const overlapping = auditFindings.filter((f) => f.code === 'overlap' || f.code === 'overlap-mark');
+  lines.push(`overlapping text at rest: ${overlapping.length}`);
 
   const blankSeams = runFindings('quality/gates/seams.mjs', filmPath, `${baseOf(mp4)}.seams`)
     .filter((f) => f.code === 'seam-empty' || f.code === 'seam-blank');
