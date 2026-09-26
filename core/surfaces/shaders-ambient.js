@@ -1,31 +1,16 @@
 import { glContext } from '../engine/webgl.js';
 import { defineRegistry } from '../registry/registry.js';
-// core/shaders-ambient.js: smooth LOOPING ambient shaders for the `shader` layer primitive. Where
-// core/stings.js is transient cut-covers, these are continuous, slow, low-contrast colour fields you
-// place behind content. Pure in (time, seed) so renderFrame(n) stays deterministic.
+// Smooth LOOPING ambient shaders for the `shader` layer primitive: continuous, slow, low-contrast
+// colour fields placed behind content (core/stings.js is the transient cut-cover kind instead). Pure
+// in (time, seed) so renderFrame(n) stays deterministic.
 //
-// BEAUTY RECIPE (why these look premium, not like noise soup):
-//   • FEW colours (2-4 palette stops), never a rainbow.
-//   • VERY LOW frequency: a handful of big soft gaussian blobs, not high-octave fbm.
-//   • Blobs DRIFT slowly (sin/cos on small coefficients) and BLEND (mix by exp falloff) → mesh gradient.
-//   • Slight desaturation + intensity as a brightness dial. No hard edges anywhere.
+// Wave 3's analog/retro + distortion family are OVERLAY looks (place on top of content, intensity
+// ~0.6-0.9): this layer composites over siblings without sampling them, so "distortion" members are
+// self-generated veils (heat haze, water caustics, a lens vignette), not true screen-space warps.
 //
-// WAVE 3 adds an analog/retro + distortion-styled family. These are OVERLAY looks: place them ON TOP
-// of content (high track) at intensity ~0.6-0.9, not behind it. Because this layer composites over its
-// siblings without sampling them (a WebGL canvas cannot read the DOM beneath it), the "distortion"
-// members are honestly self-generated veils. A heat-haze shimmer, water caustics, a lens vignette,
-// a mirrored mandala, not true screen-space warps of the pixels below. All still pure in (time, seed).
-//   Persistent:  vhs (tracking/chroma/scanlines) · crt (phosphor mask + roll) · filmGrain (grain+dust)
-//                · lightLeak (looping warm blobs from an edge, palette-aware)
-//   Distortion:  barrel (lens vignette + edge chromatic aberration) · heatShimmer (rising warm haze)
-//                · ripple (gentle water caustics) · kaleidoscope (mirrored rotating mandala)
-//   Projector:   gateWeave (film dust, hairs, and the frame drifting in the gate)
-// EACH FIELD DESCRIBES ITSELF, and the ORDER IS THE WIRE FORMAT: the index of a name here is the
-// `u_fx` the fragment shader branches on, so this map is read positionally as well as by key and a
-// name may not be moved or inserted mid-list. It was a bare array, so 17 of the 18 rendered their
-// blurb as an em-dash in engine-doctrine/EFFECTS.md and on the site. A capability an author is never shown and
-// therefore never reaches for. Same shape as THREE_SCENES (core/three-scenes.js): the map is the
-// source, the array is derived, and the two cannot drift because one is computed from the other.
+// The map order IS the wire format: index of a name here is the `u_fx` the fragment shader branches
+// on, so a name may not move or be inserted mid-list. The array (AMBIENT_FX) is derived from this map
+// so the two cannot drift.
 export const AMBIENT_SHADERS = {
   flow: 'a soft mesh gradient: three big blobs drifting slowly over a vertical wash, the premium default',
   aurora: 'a drifting colour aurora: bands of colour slowly moving and blending across the whole frame',
@@ -50,9 +35,8 @@ export const AMBIENT_SHADERS = {
   bands: 'a ramp repeated over a scalar field (rotated panels, concentric arcs or nested rounded boxes) tinted by a gradient with a shaped light behind it. the most dialled effect here; engine-doctrine/LIGHTFIELD.md',
   godRays: 'shafts of light: sun through a canopy, beams through a window, crepuscular rays. the light sits just off the top edge, a drifting cloud of leaves breaks it into blades, and dust turns slowly inside the bright ones. the deepest field here, because the beams recede toward one point. it is BRIGHT through the middle, so drop `intensity` toward 0.4 before putting white type over it',
   curlSmoke: 'a rising plume of ink or smoke that rolls into vortices as it climbs, its filaments stretching and folding. slow, continuous, and never repeating; the one field here with real fluid motion rather than a drifting pattern',
-  // APPENDED, not inserted: see the note above u_fx that says the index of a name here is the wire
-  // format. A literal port of pbakaus/radiant's chromatic-bloom.html (MIT), not a rewrite into this
-  // file's own style; see the u_fx branch for the source line references and what changed and why.
+  // APPENDED, not inserted: see the note above about wire-format order. Ported from pbakaus/radiant
+  // (chromatic-bloom.html, MIT); the shader source keeps the port's line references and rationale.
   chromaticBloom: 'twelve luminous colour orbs (five vivid, seven dim) drifting and blending on black, each on its own noisy orbit, with a vignette and grain over the top. ported from pbakaus/radiant',
   auroraCurtain: 'six vertical curtain lines undulating top to bottom, each drifting sideways on its own noise offset, fading warm to cool along its length. ported from pbakaus/radiant',
   auroraVeil: 'seven wide aurora ribbons undulating over a starfield, with a frosted ice ground plane reflecting them below the horizon. the richest field here after bands. ported from pbakaus/radiant',
@@ -1260,18 +1244,12 @@ export function createAmbientLayer(w = 1920, h = 1080) {
       setAmbientVec4(gl, U.p6, params6);
       const flat = new Float32Array(24); const n = palette ? Math.min(8, palette.length) : 0;
       for (let i = 0; i < n; i++) { flat[i * 3] = palette[i][0]; flat[i * 3 + 1] = palette[i][1]; flat[i * 3 + 2] = palette[i][2]; }
-      // A stop MAY carry its own position along the ramp as a fourth number. It rides on the stop
-      // rather than arriving as a parallel array, because a parallel array is a second thing to keep
-      // in the same order and that is how a palette ends up wearing someone else's spacing.
-      //
-      // All of them or none of them. A half-positioned palette has no honest reading: the unset stops
-      // would have to be guessed at, and guessing is what puts a colour somewhere nobody asked for.
+      // A stop may carry its own position as a fourth number, not a parallel array (which could drift
+      // out of order). All stops or none: a half-positioned palette would need its gaps guessed at.
       const at = new Float32Array(8);
       const given = palette ? palette.filter((c) => c.length > 3).length : 0;
       if (given && given !== n) throw new Error(`palette stop positions: ${given} of ${n} stops carry one. Give every stop a position or none.`);
-      // -1 is the sentinel the shader reads as "even". Computing the even values here instead would
-      // change the arithmetic, and with it the picture, for every field that never asked.
-      if (!given) at[0] = -1;
+      if (!given) at[0] = -1;   // sentinel the shader reads as "even"
       else for (let i = 0; i < n; i++) at[i] = palette[i][3];
       for (let i = 1; i < n; i++) {
         if (!(at[i] >= at[i - 1])) throw new Error(`palette stop positions must not go backwards: stop ${i + 1} is at ${at[i]}, after ${at[i - 1]}.`);
@@ -1279,17 +1257,15 @@ export function createAmbientLayer(w = 1920, h = 1080) {
       gl.uniform3fv(U.pal, flat); gl.uniform1i(U.palN, n); gl.uniform1fv(U.palAt, at);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
-    // wipe the buffer when the layer is off-window, so the canvas holds a function of t and not of
-    // whichever frame a worker happened to draw last (core/layers/shader.js).
+    // Wipes the buffer off-window, so the canvas holds a function of t, not whichever frame a worker
+    // happened to draw last (core/layers/shader.js).
     clear() { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); },
     dispose() { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); },
   };
 }
 
-// Registered so a name in the WRONG SLOT is diagnosed rather than merely rejected: the engine
-// can say "that is a ambient shader" when someone writes it somewhere else. core/registry.js.
-// The blurbs ride along, so `make arsenal` describes a field instead of only naming it: AMBIENT_SHADERS
-// is already the one owner of those sentences and the registry was passing none of them.
+// Registered so a name in the wrong slot is diagnosed rather than merely rejected, and so `make
+// arsenal` describes a field (via AMBIENT_SHADERS) instead of only naming it.
 export const AMBIENT_REGISTRY = defineRegistry('ambient shader', Object.fromEntries(AMBIENT_FX.map((n) => [n, n])), { slot: 'shader', blurbs: AMBIENT_SHADERS, aka: AMBIENT_AKA,
   catalog: {
     title: 'Ambient shader fields',

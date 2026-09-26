@@ -206,7 +206,5 @@
  "quality/gates/lib-test.mjs::no-useless-escape": 2,
  "quality/gates/dead-branch.mjs::max-depth": 1,
  "harness/author/assemble.mjs::complexity": 1,
- "harness/author/assemble.mjs::max-lines-per-function": 1,
- "tests/authoring/lib-test.authoring.test.mjs::complexity": 1,
- "tests/authoring/lib-test.authoring.test.mjs::max-lines-per-function": 1
+ "harness/author/assemble.mjs::max-lines-per-function": 1
 }
