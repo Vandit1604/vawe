@@ -38,6 +38,13 @@ export const ON_INK = [
   { on: 'onUp', fill: 'up', cssVar: '--on-up' },
   { on: 'onDown', fill: 'down', cssVar: '--on-down' },
   { on: 'onWarn', fill: 'warn', cssVar: '--on-warn', fallback: WARN_DEFAULT },
+  // onLight/onDark: the ink to use on a literal white or black surface (a card of the OPPOSITE
+  // polarity from the theme's own ground), replacing the retired `theme.vars['--on-light'/'--on-dark']`
+  // free-form passthrough. No `fill` names a real palette key (there is no "light"/"dark" fill, only a
+  // literal ffffff/000000 ground), so both carry a `fallback` and skip the ON_INK-entry self-check above.
+  // A theme with its own opinion sets `palette.onLight`/`palette.onDark` and wins, same as the other four.
+  { on: 'onLight', fill: 'onLightGround', cssVar: '--on-light', fallback: '#ffffff' },
+  { on: 'onDark', fill: 'onDarkGround', cssVar: '--on-dark', fallback: '#000000' },
 ];
 
 // ON_INK IS OUR OWN DATA, and that is the one place a wrong name can live forever: no author will ever
@@ -130,7 +137,7 @@ import { defineRegistry } from './registry.js';
 // (films/scene/scene.js:1593-1602) already derives every cue from `CUT_CUE`/`SEAM_CUE`, keyed on the
 // transition actually used at each joint, so a fixed list cannot say which cue replaces which. A film
 // changes its cut family beat to beat; the cue has to follow the cut, not a brand-wide preference.
-const LOOK_KEY_ENTRIES = { backdrop: 'backdrop', scale: 'scale', layout: 'layout', marks: 'marks', cuts: 'cuts', field: 'field' };
+const LOOK_KEY_ENTRIES = { backdrop: 'backdrop', scale: 'scale', layout: 'layout', marks: 'marks', cuts: 'cuts', field: 'field', bgDefault: 'bgDefault', bgPalette: 'bgPalette' };
 const LOOK_KEY_AKA = {
   backdrop: ['brand background rotation', 'which bg presets to use'],
   scale: ['type scale', 'named text sizes'],
@@ -138,6 +145,8 @@ const LOOK_KEY_AKA = {
   marks: ['logo settings', 'brand mark sizes'],
   cuts: ['default transition style', 'brand cut preference'],
   field: ['backdrop texture defaults', 'grain and vignette settings'],
+  bgDefault: ['the theme own backdrop', 'bg use:"theme" default', 'brand bg rotation at render'],
+  bgPalette: ['bg preset colour ramp', 'the palette bg presets paint with'],
 };
 export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRIES, {
   slot: 'theme.look',
@@ -155,11 +164,23 @@ export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRI
     marks: 'the logo path plus its end-card and headline-adjacent sizes, both named pixel numbers',
     cuts: 'the default and accent cut/transition names the brand favours, one for almost every boundary and one reserved for its peak-energy beat',
     field: 'grain and vignette numbers layered over the backdrop, both 0..1 strengths',
+    // NOT planning-only, unlike backdrop above: this IS read at render, by a `bg` window that writes
+    // `{use:"theme"}` (films/scene/scene.js). Replaces the retired top-level `theme.bgDefault` field,
+    // moved here so a theme file has one place for what it fixes about a film, `look`, rather than a
+    // second top-level field with no other look key beside it.
+    bgDefault: 'a bg preset spec (or an array of 2+, a rotation) the theme paints when a beat opts in '
+      + 'with `bg:[{"use":"theme"}]`; the one look key actually read at render time',
+    // ALSO read at render (core/backgrounds/presets.js `build(P, ...)`), unlike `backdrop`: the
+    // 15-key colour ramp (accent/tint/paperBase/accentBase/...) a bg PRESET paints with. Optional: a
+    // theme with none gets `bgPaletteFrom(theme.palette)` derived instead (core/backgrounds/palette.js),
+    // the same floor every theme used before this key existed. A brand with its own bg-preset colours
+    // that the derivation does not reproduce (a hand-tuned pastel accentBase, say) sets this and wins.
+    bgPalette: 'the 15-key colour ramp bg presets paint with (accent/tint/paperBase/accentBase/darkMesh/...); optional, derived from the theme\'s own palette when absent',
   },
   catalog: {
     title: 'Theme look keys', tag: 'theme', intro: 'A theme (`themes/<name>.json`) may carry a `look` '
       + 'block: the whole-film default a brand fixes so a scaffold does not re-decide it per video '
-      + '(engine-doctrine/CRAFT/THEME-LOOK.md). These are the six keys it accepts.',
+      + '(engine-doctrine/CRAFT/THEME-LOOK.md). These are the eight keys it accepts.',
     usage: (n) => ({ theme: { look: { [n]: '…' } } }),
     noPreview: 'a theme key, not a per-video effect: see `make theme-sheet THEME=<name>` for the rendered picture of one theme\'s whole look',
   },
@@ -256,6 +277,44 @@ function cutsErrors(look, transitionNames, near) {
     .filter((e) => e != null);
 }
 
+// bgDefaultErrors: a single spec `{preset, value?}` or an array of 2+ (a rotation), each preset name
+// checked against `bgNames` the same way `backdropErrors` above checks `look.backdrop`. Unlike
+// `backdrop`, a bare preset NAME (a string, no object) is also accepted: `themes/glassatmos.json` and
+// `themes/lumen.json` carried exactly that shape before this field moved under `look`, and scene.js's
+// own consumer (`{...theme.look.bgDefault, from, to}`) only spreads an object, so a bare string is
+// normalised to `{preset: name}` there, not here (this function only grades what was written).
+function bgSpecErrors(spec, bgNames, near, where) {
+  if (typeof spec === 'string') return spec ? bgSpecErrors({ preset: spec }, bgNames, near, where) : [`${where} names no preset`];
+  if (!isObj(spec)) return [`${where} must be a preset name or a {preset, value?} object`];
+  if (spec.preset == null) return [`${where} names no preset`];
+  if (bgNames && !bgNames.includes(spec.preset)) {
+    const s = near(spec.preset, bgNames);
+    return [`${where} names "${spec.preset}", which is not a real bg preset${s.length ? `, did you mean "${s[0]}"?` : ''}. Known: ${bgNames.join(', ')}`];
+  }
+  return [];
+}
+
+function bgDefaultErrors(look, bgNames, near) {
+  if (!('bgDefault' in look)) return [];
+  const v = look.bgDefault;
+  if (Array.isArray(v)) {
+    if (v.length < 2) return ['look.bgDefault as an array needs at least 2 specs (a rotation); write a single spec instead'];
+    return v.flatMap((spec, i) => bgSpecErrors(spec, bgNames, near, `look.bgDefault[${i}]`));
+  }
+  return bgSpecErrors(v, bgNames, near, 'look.bgDefault');
+}
+
+// bgPaletteErrors: shape-only, same treatment as `marks`. The 15 keys it may carry are
+// core/backgrounds/palette.js's own vocabulary (accent/tint/tint2/dotLight/paperBase/softBase/
+// accentBase/inkBase/border/dark/darkMesh/deep/light/ink/paper), a colour-maths shape rather than a
+// named registry an author picks a value from, so it is waived in quality/gates/arsenal-check.mjs's
+// WAIVED map the same way REQUIRED.palette/type is.
+function bgPaletteErrors(look) {
+  if (!('bgPalette' in look)) return [];
+  if (!isObj(look.bgPalette)) return ['look.bgPalette must be an object'];
+  return [];
+}
+
 function fieldErrors(look) {
   if (!('field' in look)) return [];
   if (!isObj(look.field)) return ['look.field must be an object'];
@@ -276,6 +335,8 @@ export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) 
     ...marksErrors(look),
     ...cutsErrors(look, transitionNames, near),
     ...fieldErrors(look),
+    ...bgDefaultErrors(look, bgNames, near),
+    ...bgPaletteErrors(look),
   ];
 }
 
@@ -294,7 +355,7 @@ export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) 
 // dark-bg one nonzero.
 //
 // `layout` STAYS A CONSTANT, on purpose, and this is the sentence that says why: no field ANY theme
-// carries (palette, type, motion, bg, bgDefault) correlates with anchor or margin across the 7 themes
+// carries (palette, type, motion, look.bgDefault) correlates with anchor or margin across the 7 themes
 // that DID author one by hand (a24/apple/duolingo/vercel center, bloomberg/nike/vawe left, with no
 // split on dominance, contrast, bounce or a distinct display face that survives more than 4 of the 7
 // points). Margin is also structurally a CANVAS decision (how much a 16:9 frame needs on the sides)
@@ -306,8 +367,9 @@ export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) 
 //   - `backdrop` (which bg preset a film turns through) is a TASTE decision, never the engine's to
 //     pick for an author (engine-doctrine/MISTAKES.md #159: the engine used to choose the background and nobody
 //     ever designed one again; `bg` is a required authoring field now, core/engine/produce.js's own
-//     header explains why). `theme.bgDefault` stays the one engine-owned bg default; `look.backdrop`
-//     is a storyboard-planning seed only, never read by the renderer (see its blurb above).
+//     header explains why). `look.bgDefault` (a sibling look key, not this one) stays the one
+//     engine-owned bg default; `look.backdrop` is a storyboard-planning seed only, never read by the
+//     renderer (see its blurb above).
 //   - `marks` needs a real logo PATH. No theme-agnostic default exists (a made-up path 404s at
 //     render), so a theme with no marks stays without one until it declares its own.
 // (`cues` used to be a third: deleted from LOOK_KEYS entirely, see the comment beside LOOK_KEY_ENTRIES.)

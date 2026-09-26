@@ -10,63 +10,6 @@
     "stagger": 0.04,
     "exitRatio": 0.6
   },
-  "bg": {
-    "accent": "14,79,103",
-    "tint": "214,230,237",
-    "tint2": "192,218,228",
-    "dotLight": "129,133,136",
-    "paperBase": [
-      "#f0f4f7",
-      "#e4e9eb"
-    ],
-    "light": [
-      "#f0f4f7",
-      "#e4e9eb"
-    ],
-    "paper": "#f0f4f7",
-    "softBase": [
-      "#f0f4f7",
-      "#dfe4e6"
-    ],
-    "accentBase": [
-      "#d6e5eb",
-      "#e4e9eb"
-    ],
-    "border": "#818588",
-    "dark": [
-      "#0f1620",
-      "#0a0e15"
-    ],
-    "deep": [
-      "#0f1620",
-      "#080b10"
-    ],
-    "ink": [
-      "#0c121a",
-      "#06090d"
-    ],
-    "inkBase": [
-      "#0f1620",
-      "#0a0e15"
-    ],
-    "darkMesh": [
-      "#10202d",
-      "#0a0e15"
-    ]
-  },
-  "bgDefault": {
-    "preset": "paperDots"
-  },
-  "vars": {
-    "--ink": "#192125",
-    "--paper": "#f0f4f7",
-    "--muted": "#5e6568",
-    "--em": "#0e4f67",
-    "--on-light": "#192125",
-    "--on-dark": "#f0f4f7",
-    "--border": "#818588",
-    "--accent-soft": "rgba(14,79,103,0.16)"
-  },
   "invented": {
     "tool": "harness/author/invent-look.mjs",
     "storyboard": "films/scene/_concepts/gh-wrapped.storyboard.md",
@@ -244,5 +187,54 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "bgDefault": {
+      "preset": "paperDots"
+    },
+    "bgPalette": {
+      "accent": "14,79,103",
+      "tint": "214,230,237",
+      "tint2": "192,218,228",
+      "dotLight": "129,133,136",
+      "paperBase": [
+        "#f0f4f7",
+        "#e4e9eb"
+      ],
+      "light": [
+        "#f0f4f7",
+        "#e4e9eb"
+      ],
+      "paper": "#f0f4f7",
+      "softBase": [
+        "#f0f4f7",
+        "#dfe4e6"
+      ],
+      "accentBase": [
+        "#d6e5eb",
+        "#e4e9eb"
+      ],
+      "border": "#818588",
+      "dark": [
+        "#0f1620",
+        "#0a0e15"
+      ],
+      "deep": [
+        "#0f1620",
+        "#080b10"
+      ],
+      "ink": [
+        "#0c121a",
+        "#06090d"
+      ],
+      "inkBase": [
+        "#0f1620",
+        "#0a0e15"
+      ],
+      "darkMesh": [
+        "#10202d",
+        "#0a0e15"
+      ]
+    }
   }
 }

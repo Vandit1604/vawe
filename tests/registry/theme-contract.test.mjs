@@ -73,13 +73,23 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // This is the sibling assertion the
 // engine change instructions asked for: computedLook must not collapse back to one value per key.
 {
+  // "unauthored" means for computedLook's OWN four keys (scale/layout/cuts/field), not `look` as a
+  // whole: most themes now carry `look.bgDefault`/`look.bgPalette` (moved off the retired top-level
+  // `bgDefault`/`bg` fields), neither of which computedLook ever fills or reads, so a theme that set
+  // only those two still belongs in this set.
+  const COMPUTED_KEYS = ['scale', 'layout', 'cuts', 'field'];
   const unauthored = [];
+  let themeCount = 0;
   for (const f of fs.readdirSync(path.join(ROOT, 'themes'))) {
     if (!f.endsWith('.json')) continue;
+    themeCount++;
     const t = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', f), 'utf8'));
-    if (!t.look) unauthored.push(t);
+    if (!t.look || !COMPUTED_KEYS.some((k) => k in t.look)) unauthored.push(t);
   }
-  assert.ok(unauthored.length >= 30, `expected most of the library to have no authored look, found ${unauthored.length}`);
+  // Threshold is against THIS checkout's tracked theme count (a few real-brand recreations are
+  // gitignored and absent here, engine-doctrine/CRAFT/THEME-LOOK.md), not a fixed library size, so it
+  // reads as a ratio (most) rather than a count that drifts every time a theme is added or removed.
+  assert.ok(unauthored.length >= themeCount - 5, `expected most of the library to have no authored look, found ${unauthored.length} of ${themeCount}`);
   const hooks = new Set(unauthored.map((t) => computedLook(t, { isLightBg }).scale.hook));
   const defaults = new Set(unauthored.map((t) => computedLook(t, { isLightBg }).cuts.default));
   assert.ok(hooks.size > 5, `computedLook.scale.hook must vary across un-authored themes, got only ${hooks.size} distinct value(s): a constant default divides variety to one`);

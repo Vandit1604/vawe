@@ -1,6 +1,6 @@
 ---
 when: you are about to author and want to reach past the default slice into the full vocabulary
-answers: "how to use the whole palette (24 layer types, plus the effect arsenal `make effects` owns the count of, blueprints, cuts): the always-visible primer, the search, the gap report, and the name-three-reject-the-first discipline; and why the search stays token-overlap, not embeddings"
+answers: "how to use the whole palette (the layer types `ls core/layers/` lists, plus the effect arsenal `make effects` owns the count of, blueprints, cuts): the always-visible primer, the search, the gap report, and the name-three-reject-the-first discipline; and why the search stays token-overlap, not embeddings"
 group: crosscutting
 ---
 
@@ -8,7 +8,7 @@ group: crosscutting
 
 ## AGENT SUMMARY
 
-- The vocabulary is far larger than any one author reaches for: 24 layer types, the whole effect arsenal
+- The vocabulary is far larger than any one author reaches for: the layer types `ls core/layers/` lists, the whole effect arsenal
   (`make effects` regenerates `engine-doctrine/EFFECTS.md`, the live count and family total, so a hand-typed figure
   here cannot go stale), blueprints, cuts/seams/stings, camera, kinetic type. The failure is not missing
   capability, it is defaulting to a thin slice (rise+fade, text on a flat field). Reach wider on purpose.

@@ -13,19 +13,7 @@ export const rgbStr = (c) => parseHex(c).join(',');
 export const relLum = (c) => { const s = parseHex(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * s[0] + 0.7152 * s[1] + 0.114 * s[2]; };
 export const contrast = (a, b) => { const L1 = relLum(a), L2 = relLum(b); return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05); };
 
-/** bgBlock(palette, light) → the full theme.bg map. `light` is the theme's dominance. */
-export function bgBlock(palette, light) {
-  const lightGround = light ? [palette.bg, palette.bg2] : ['#ffffff', '#f4f5f8'];
-  const darkA = light ? '#0f1620' : palette.bg;
-  const darkGround = [darkA, darken(darkA, 0.35)];
-  return {
-    accent: rgbStr(palette.accent), tint: rgbStr(mix(palette.bg, palette.accent, 0.12)), tint2: rgbStr(mix(palette.bg, palette.accent, 0.22)),
-    dotLight: rgbStr(palette.line),
-    paperBase: lightGround, light: lightGround, paper: lightGround[0],
-    softBase: [lighten(lightGround[0], 0.0), darken(lightGround[1], 0.02)],
-    accentBase: [mix(lightGround[0], palette.accent, 0.08), lightGround[1]],
-    border: palette.line,
-    dark: darkGround, deep: [darkGround[0], darken(darkGround[0], 0.5)], ink: [darken(darkGround[0], 0.2), darken(darkGround[0], 0.6)],
-    inkBase: darkGround, darkMesh: [mix(darkGround[0], palette.accent, 0.1), darkGround[1]],
-  };
-}
+// `bgBlock(palette, light)`, which built the full `theme.bg` map by hand, is retired along with the
+// field it fed: `core/backgrounds/palette.js` `bgPaletteFrom(palette)` derives the same shape from a
+// theme's own tokens/roles, and `core/theme/roles.js` refuses a theme that still writes `bg` by hand
+// (RETIRED_FIELDS). A theme with an opinion the derivation does not reproduce sets `look.bgPalette`.

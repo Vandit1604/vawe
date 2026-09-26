@@ -9,63 +9,6 @@
     "durationScale": 1,
     "stagger": 0.045
   },
-  "bg": {
-    "accent": "0,147,235",
-    "tint": "200,208,218",
-    "tint2": "226,230,235",
-    "dotLight": "170,178,190",
-    "paperBase": [
-      "#ffffff",
-      "#f4f7fa"
-    ],
-    "softBase": [
-      "#fbfcfd",
-      "#f1f4f8"
-    ],
-    "accentBase": [
-      "#e6f2fb",
-      "#fbfcfd"
-    ],
-    "inkBase": [
-      "#101924",
-      "#0a1017"
-    ],
-    "border": "#e2e6eb",
-    "dark": [
-      "#101924",
-      "#0a1017"
-    ],
-    "darkMesh": [
-      "#16202e",
-      "#0a1017"
-    ],
-    "deep": [
-      "#101924",
-      "#070b10"
-    ],
-    "light": [
-      "#ffffff",
-      "#f4f7fa"
-    ],
-    "ink": [
-      "#101924",
-      "#0a1017"
-    ],
-    "paper": "#ffffff"
-  },
-  "vars": {
-    "--ink": "#101924",
-    "--paper": "#ffffff",
-    "--muted": "#5d6775",
-    "--em": "#0093eb",
-    "--on-light": "#101924",
-    "--on-dark": "#ffffff",
-    "--border": "#e2e6eb",
-    "--accent-soft": "#e6f2fb"
-  },
-  "bgDefault": {
-    "preset": "plain"
-  },
   "tokens": {
     "color": {
       "bg": {
@@ -187,5 +130,54 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "bgDefault": {
+      "preset": "plain"
+    },
+    "bgPalette": {
+      "accent": "0,147,235",
+      "tint": "200,208,218",
+      "tint2": "226,230,235",
+      "dotLight": "170,178,190",
+      "paperBase": [
+        "#ffffff",
+        "#f4f7fa"
+      ],
+      "softBase": [
+        "#fbfcfd",
+        "#f1f4f8"
+      ],
+      "accentBase": [
+        "#e6f2fb",
+        "#fbfcfd"
+      ],
+      "inkBase": [
+        "#101924",
+        "#0a1017"
+      ],
+      "border": "#e2e6eb",
+      "dark": [
+        "#101924",
+        "#0a1017"
+      ],
+      "darkMesh": [
+        "#16202e",
+        "#0a1017"
+      ],
+      "deep": [
+        "#101924",
+        "#070b10"
+      ],
+      "light": [
+        "#ffffff",
+        "#f4f7fa"
+      ],
+      "ink": [
+        "#101924",
+        "#0a1017"
+      ],
+      "paper": "#ffffff"
+    }
   }
 }

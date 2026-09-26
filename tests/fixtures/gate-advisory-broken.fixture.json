@@ -1,0 +1,21 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "vawe",
+ "aspect": "16:9",
+ "duration": 3,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  {
+   "id": "hook",
+   "type": "not-a-real-layer-type",
+   "text": "Gate advisory fixture, broken schema",
+   "x": 120,
+   "y": 700,
+   "w": 1700,
+   "start": 0,
+   "duration": 3
+  }
+ ]
+}

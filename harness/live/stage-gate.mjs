@@ -6,8 +6,22 @@ import { stageOf, ROOT } from '../../quality/gates/stage.mjs';
 import { appendRun } from '../lib/runlog.mjs';
 
 const FILMS_DIR = process.env.VAWE_FILMS_DIR || 'films/scene';
+// AUTHOR-SIDE GATES ADVISE, NEVER BLOCK: this hook used to `deny` unconditionally. Neither reason it
+// fires (no storyboard claims the file, or the film has no plan yet) is a schema failure or a
+// determinism bug, so by default it now allows the write and prints the same reason as advice.
+// STRICT=1 restores the old refusal. See engine-doctrine/SAFEGUARDS.md.
+const STRICT = process.env.STRICT === '1';
 
-const deny = (reason, rule, film) => {
+// `hard` stays true only for a malformed payload: the hook cannot read the tool call at all, which is
+// a harness failure, not a craft opinion about a film, so it fails closed regardless of STRICT.
+const deny = (reason, rule, film, hard = false) => {
+  if (!STRICT && !hard) {
+    process.stdout.write(JSON.stringify({
+      hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'allow', permissionDecisionReason: `advisory (STRICT=1 would block): ${reason}` },
+    }));
+    try { appendRun(film, { cmd: 'stage-gate', advisory: { rule, file: film, reason } }); } catch { /* never let the receipt affect the write */ }
+    process.exit(0);
+  }
   process.stdout.write(JSON.stringify({
     hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: reason },
   }));
@@ -44,7 +58,7 @@ process.stdin.on('end', () => {
     deny('stage-gate could not parse the PreToolUse payload it was given, so it cannot tell '
       + `whether this write needs a plan behind it. JSON.parse failed: ${e.message}. Retry the write; `
       + 'if this repeats, the tool call is sending stage-gate malformed stdin.',
-      'unparsable-input', 'unparsable-input');
+      'unparsable-input', 'unparsable-input', true);
   }
   if (!file) allow();
   const rel = path.relative(ROOT, file);

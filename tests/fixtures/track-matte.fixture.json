@@ -1,0 +1,66 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 6,
+ "produced": false,
+ "bg": [{ "preset": "black" }],
+ "layers": [
+  {
+   "id": "wipeRect",
+   "type": "rect",
+   "x": 0,
+   "y": 360,
+   "w": 300,
+   "h": 150,
+   "bg": "linear-gradient(#ffffff, #ffffff)",
+   "opacity": 0,
+   "duration": 6,
+   "anim": "none",
+   "motion": [
+    { "t": 0, "x": 200 },
+    { "t": 3, "x": 810 },
+    { "t": 6, "x": 1400 }
+   ]
+  },
+  {
+   "id": "revealText",
+   "type": "text",
+   "text": "REVEAL",
+   "x": 610,
+   "y": 360,
+   "w": 700,
+   "h": 260,
+   "size": 140,
+   "color": "#ffffff",
+   "duration": 6,
+   "anim": "none",
+   "modifiers": [{ "matte": { "layer": "wipeRect", "mode": "alpha" } }]
+  },
+  {
+   "id": "textMask",
+   "type": "image",
+   "src": "/tests/fixtures/assets/matte-glyph.svg",
+   "x": 960,
+   "y": 720,
+   "w": 700,
+   "h": 260,
+   "opacity": 0,
+   "duration": 6,
+   "anim": "none"
+  },
+  {
+   "id": "footage",
+   "type": "rect",
+   "x": 960,
+   "y": 720,
+   "w": 700,
+   "h": 260,
+   "bg": "linear-gradient(135deg, #ff5f6d, #6a11cb)",
+   "duration": 6,
+   "anim": "none",
+   "modifiers": [{ "matte": { "layer": "textMask", "mode": "luma" } }]
+  }
+ ]
+}

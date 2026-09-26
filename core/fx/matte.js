@@ -7,10 +7,16 @@
 //
 //   "modifiers": [{ "matte": "sweep" }]
 //   "modifiers": [{ "matte": { "from": "sweep", "mode": "alpha" } }]
+//   "modifiers": [{ "matte": { "layer": "sweep", "mode": "luma-inverted" } }]
 //
 // THE SOURCE LAYER IS FOLLOWED, and that is where the value is. The mask is placed and sized from the
 // source's LIVE BOX (scene.boxOf, resolved for the whole frame before any layer's frame() runs), so a
 // source with a motion track drags its own shape across this layer. The matte moves; the layer does not.
+//
+// THE MATTE LAYER ITSELF STAYS HIDDEN THE ORDINARY WAY: `opacity: 0` on the source layer. Nothing here
+// reads the source's rendered pixels (a browser cannot, see below), only its JSON `bg`/`src` and its
+// live box, so an invisible source mattes exactly like a visible one. No second "hidden" flag: `opacity`
+// already means "occupies its box, paints nothing", which is this job.
 //
 // WHAT COUNTS AS A SOURCE, and why this is narrower than After Effects. A CSS mask takes a CSS <image>,
 // and a browser cannot use one live element's pixels as another's alpha: `element()` is Firefox-only,
@@ -22,32 +28,44 @@
 // PURE: every number comes from the frozen scene view, and the source is read from the JSON, so the
 // mask at t does not depend on which layer the loop reached first.
 //
-// LUMINANCE IS THE DEFAULT because that is what "luma matte" means: white shows, black hides, grey is
-// partial. `mode: "alpha"` is the other half of the After Effects pair, for a source whose own
-// transparency is the shape.
+// LUMA IS THE DEFAULT because that is what "luma matte" means: white shows, black hides, grey is
+// partial (CSS calls this mode `luminance`; `luma` is accepted as the same word After Effects uses).
+// `mode: "alpha"` is the other half of the After Effects pair, for a source whose own transparency is
+// the shape. Either takes an `-inverted` suffix (AE's "Invert" checkbox on a track matte): black shows,
+// white hides. CSS has no inverted mask keyword, so an inverted mode adds a second, fully-opaque mask
+// layer and combines the two with `mask-composite: exclude` (XOR): a single mask XORed with "everywhere"
+// is exactly that mask's complement. One property, no canvas, no second code path per mode.
 
-export const MATTE_KEYS = ['from', 'mode'];
-const MODES = ['luminance', 'alpha'];
+export const MATTE_KEYS = ['from', 'layer', 'mode'];
+const BASE_MODES = { luminance: 'luminance', luma: 'luminance', alpha: 'alpha' };
 
 const name = (L) => `"${L.id || L.type || 'layer'}"`;
 
 export function resolve(spec, L) {
   const s = typeof spec === 'string' ? { from: spec } : spec;
   if (!s || typeof s !== 'object' || Array.isArray(s))
-    throw new Error(`matte on ${name(L)}: expected a layer id or an object like { "from": "sweep", `
-      + `"mode": "luminance" }, got ${JSON.stringify(spec)}. Keys: ${MATTE_KEYS.join(', ')}.`);
+    throw new Error(`matte on ${name(L)}: expected a layer id or an object like { "layer": "sweep", `
+      + `"mode": "luma" }, got ${JSON.stringify(spec)}. Keys: ${MATTE_KEYS.join(', ')}.`);
   for (const k of Object.keys(s))
     if (!MATTE_KEYS.includes(k))
       throw new Error(`matte on ${name(L)}: unknown key "${k}", known: ${MATTE_KEYS.join(', ')}.`);
-  if (typeof s.from !== 'string' || !s.from)
-    throw new Error(`matte on ${name(L)}: \`from\` names the LAYER whose paint is this layer's alpha, `
-      + `by id. Got ${JSON.stringify(s.from)}.`);
-  const mode = s.mode ?? 'luminance';
-  if (!MODES.includes(mode))
-    throw new Error(`matte on ${name(L)}: unknown mode "${mode}", known: ${MODES.join(', ')}. `
-      + `\`luminance\` is the luma matte (white shows, black hides); \`alpha\` uses the source's own `
-      + `transparency as the shape.`);
-  return { from: s.from, mode };
+  if (s.from != null && s.layer != null)
+    throw new Error(`matte on ${name(L)}: \`from\` and \`layer\` name the same thing, the source `
+      + `layer's id. Give one, not two.`);
+  const from = s.from ?? s.layer;
+  if (typeof from !== 'string' || !from)
+    throw new Error(`matte on ${name(L)}: \`layer\` names the LAYER whose paint is this layer's alpha, `
+      + `by id. Got ${JSON.stringify(from)}.`);
+  const modeSpec = s.mode ?? 'luma';
+  const invert = typeof modeSpec === 'string' && modeSpec.endsWith('-inverted');
+  const base = invert ? modeSpec.slice(0, -'-inverted'.length) : modeSpec;
+  const mode = BASE_MODES[base];
+  if (!mode)
+    throw new Error(`matte on ${name(L)}: unknown mode "${modeSpec}", known: luma, luma-inverted, `
+      + `alpha, alpha-inverted (also \`luminance\`/\`luminance-inverted\`, the CSS spelling of luma). `
+      + `\`luma\` is the luma matte (white shows, black hides); \`alpha\` uses the source's own `
+      + `transparency as the shape; \`-inverted\` flips which side shows, After Effects' Invert box.`);
+  return { from, mode, invert };
 }
 
 // The source layer's paint, as a CSS <image>. Two shapes, because a browser has exactly two: a file it
@@ -80,7 +98,7 @@ export function build(kit, el, L, spec) {
 }
 
 export function frame(kit, el, L, t, scene, spec) {
-  const { from, mode } = resolve(spec, L);
+  const { from, mode, invert } = resolve(spec, L);
   const src = scene.specOf(from);
   if (!src)
     throw new Error(`matte on ${name(L)}: no layer with id "${from}", known ids: ${scene.ids.join(', ')}.`);
@@ -105,13 +123,23 @@ export function frame(kit, el, L, t, scene, spec) {
   const live = kit && typeof kit.maskPaintOf === 'function'
     ? kit.maskPaintOf(src, t - (src.start ?? 0), { w, h, x, y }) : null;
   const img = live ? live.image : maskImage(src, L);
+  const size = live ? live.size : `${w.toFixed(2)}px ${h.toFixed(2)}px`;
+  const position = live ? live.position : `${x.toFixed(2)}px ${y.toFixed(2)}px`;
+  // INVERTED: a second mask layer, fully opaque everywhere on this element's own box, XORed with the
+  // first. A single mask XORed against "opaque everywhere" is that mask's exact complement, so this is
+  // the real CSS primitive for "invert a mask", not an approximation of one.
+  const fullMask = 'linear-gradient(#fff, #fff)';
   // Authoritative writes, every frame, every property: a mask left from another frame is exactly the
   // render-order dependence renderFrame(n) promises it is not (engine-doctrine/MISTAKES.md #41).
-  for (const p of ['maskImage', 'webkitMaskImage']) el.style[p] = img;
-  for (const p of ['maskSize', 'webkitMaskSize']) el.style[p] = live ? live.size : `${w.toFixed(2)}px ${h.toFixed(2)}px`;
-  for (const p of ['maskPosition', 'webkitMaskPosition']) el.style[p] = live ? live.position : `${x.toFixed(2)}px ${y.toFixed(2)}px`;
-  for (const p of ['maskRepeat', 'webkitMaskRepeat']) el.style[p] = 'no-repeat';
+  for (const p of ['maskImage', 'webkitMaskImage']) el.style[p] = invert ? `${img}, ${fullMask}` : img;
+  for (const p of ['maskSize', 'webkitMaskSize']) el.style[p] = invert ? `${size}, 100% 100%` : size;
+  for (const p of ['maskPosition', 'webkitMaskPosition']) el.style[p] = invert ? `${position}, 0 0` : position;
+  for (const p of ['maskRepeat', 'webkitMaskRepeat']) el.style[p] = invert ? 'no-repeat, no-repeat' : 'no-repeat';
+  el.style.maskComposite = invert ? 'exclude' : '';
+  el.style.webkitMaskComposite = invert ? 'xor' : '';
   // `mask-mode` has no -webkit- alias; the prefixed path takes the source's alpha, which is the other
-  // mode, so a luminance matte needs the unprefixed property and modern Chrome has it.
+  // mode, so a luminance matte needs the unprefixed property and modern Chrome has it. Unset for an
+  // inverted mask's second layer, CSS repeats this same value onto it, but that rect is opaque white,
+  // whose luminance and alpha are both 1 everywhere, so which mode it is read as changes nothing.
   el.style.maskMode = mode;
 }

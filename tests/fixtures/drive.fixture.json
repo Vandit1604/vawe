@@ -1,0 +1,71 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 6,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  {
+   "id": "leader",
+   "type": "rect",
+   "x": 560,
+   "y": 300,
+   "w": 200,
+   "h": 120,
+   "bg": "#3050ff",
+   "anim": "none",
+   "start": 0,
+   "duration": 6,
+   "motion": [
+    { "t": 0, "x": -300, "ease": "linear" },
+    { "t": 4, "x": 300, "ease": "linear" }
+   ]
+  },
+  {
+   "id": "follower",
+   "type": "rect",
+   "x": 560,
+   "y": 600,
+   "w": 200,
+   "h": 120,
+   "bg": "#ff8030",
+   "anim": "none",
+   "start": 0,
+   "duration": 6,
+   "drive": { "link": { "from": "leader.x", "delay": 0.1 } }
+  },
+  {
+   "id": "wiggler",
+   "type": "rect",
+   "x": 900,
+   "y": 300,
+   "w": 160,
+   "h": 160,
+   "bg": "#40c060",
+   "anim": "none",
+   "start": 0,
+   "duration": 6,
+   "drive": { "wiggle": { "prop": "rot", "freq": 1.5, "amp": 2, "seed": "wiggler-rot" } }
+  },
+  {
+   "id": "bouncer",
+   "type": "rect",
+   "x": 900,
+   "y": 700,
+   "w": 160,
+   "h": 90,
+   "bg": "#e04070",
+   "anim": "none",
+   "start": 0,
+   "duration": 6,
+   "motion": [
+    { "t": 0, "y": 0 },
+    { "t": 0.6, "y": -140, "ease": "easeOutCubic" },
+    { "t": 1.2, "y": 0, "ease": "easeOutBounce" }
+   ],
+   "drive": { "loop": { "mode": "cycle", "to": 1.2 } }
+  }
+ ]
+}

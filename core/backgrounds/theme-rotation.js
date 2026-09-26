@@ -11,9 +11,10 @@
 //
 // `theme.look.backdrop` is NOT this rotation, on purpose: engine-doctrine/CRAFT/THEME-LOOK.md and
 // core/registry/theme-contract.js both say three times over that `look.backdrop` is scaffold-only and
-// never read at render. `theme.bgDefault` is the one field already documented as "the one engine-owned
-// bg default" and already read at render (scene.js's `use:"theme"` branch); this file only teaches that
-// SAME field to hold an ARRAY (a rotation) as well as the single spec it always could.
+// never read at render. `theme.look.bgDefault` (a sibling look key, not `backdrop`) is the one field
+// already documented as "the one engine-owned bg default" and already read at render (scene.js's
+// `use:"theme"` branch); this file only teaches that SAME field to hold an ARRAY (a rotation) as well
+// as the single spec it always could.
 
 import { shotWindows } from '../timeline/junctions.js';
 
@@ -23,7 +24,7 @@ import { shotWindows } from '../timeline/junctions.js';
  * Expands ONLY when every one of these holds:
  *   - `bg` is exactly one window (no rotation was already authored by hand)
  *   - that window is `{use:"theme"}` with no `from`/`to` of its own (nothing to override)
- *   - `theme.bgDefault` is an array of 2+ specs (the brand declared a rotation, not one backdrop)
+ *   - `theme.look.bgDefault` is an array of 2+ specs (the brand declared a rotation, not one backdrop)
  *   - the film has 2+ shots (`shotWindows`, core/timeline/junctions.js): a jointless film has nowhere
  *     for a second window to live, so it stays one shot, which is a true answer, not a fallback
  *
@@ -34,7 +35,7 @@ export function expandThemeRotation(bg, theme, table, duration) {
   if (!Array.isArray(bg) || bg.length !== 1) return bg;
   const w = bg[0];
   if (!w || w.use !== 'theme' || w.from != null || w.to != null) return bg;
-  const rotation = theme && theme.bgDefault;
+  const rotation = theme && theme.look && theme.look.bgDefault;
   if (!Array.isArray(rotation) || rotation.length < 2) return bg;
   const shots = shotWindows(table, duration);
   if (shots.length < 2) return bg;

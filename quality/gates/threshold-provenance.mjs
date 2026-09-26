@@ -75,6 +75,9 @@ const FORMULA = new Set([
   'harness/lib/worktree-landed.mjs#CAP_COMMITS',     // scope cutoff for this module's own commit-by-commit
                                                       // check; a worktree past it is reported unverified,
                                                       // never judged landed or stranded by this number
+  'quality/gates/canvas-purity.mjs#THREE_TOLERANCE',  // per-channel byte slack for THIS gate's own pixel
+                                                      // comparison, accounting for known GPU float-order
+                                                      // variance in a `three` canvas; not a bar on the film
 ]);
 
 const NUMERIC_VALUE = /^[0-9_.eE+\-*/() ]+$/;
